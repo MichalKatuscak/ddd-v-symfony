@@ -6,7 +6,7 @@
             <h2>Úvod do Domain-Driven Design v Symfony 7</h2>
 
             <div class="table-of-contents mb-4">
-                <h5>Obsah semináře:</h5>
+                <h5>Obsah průvodce:</h5>
                 <ul>
                     <li><a href="{{ path('what_is_ddd') }}">Co je Domain-Driven Design?</a></li>
                     <li><a href="{{ path('horizontal_vs_vertical') }}">Horizontální vs. Vertikální DDD</a></li>
@@ -32,34 +32,48 @@
                 </p>
             </div>
 
-            <h3>Proč používat DDD v Symfony 7?</h3>
-            <p>
-                Symfony 7 je moderní PHP framework, který poskytuje mnoho nástrojů a komponent, které usnadňují implementaci DDD.
-                Kombinace DDD a Symfony 7 přináší následující výhody:
-            </p>
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Proč používat DDD v Symfony 7?</h3>
+                            <p>
+                                Symfony 7 je moderní PHP framework, který poskytuje mnoho nástrojů a komponent, které usnadňují implementaci DDD.
+                                Kombinace DDD a Symfony 7 přináší následující výhody:
+                            </p>
 
-            <ul>
-                <li><strong>Lepší organizace kódu</strong> - DDD pomáhá organizovat kód podle domény, což vede k lepší čitelnosti a udržitelnosti.</li>
-                <li><strong>Snadnější komunikace</strong> - DDD používá společný jazyk (Ubiquitous Language), který usnadňuje komunikaci mezi vývojáři a doménovými experty.</li>
-                <li><strong>Flexibilita</strong> - Horizontální přístup k DDD umožňuje snadnější změny a rozšíření aplikace.</li>
-                <li><strong>Testovatelnost</strong> - DDD podporuje testování, což vede k robustnějšímu kódu.</li>
-                <li><strong>Škálovatelnost</strong> - DDD a Symfony 7 společně poskytují architekturu, která je snadno škálovatelná.</li>
-            </ul>
+                            <ul>
+                                <li><strong>Lepší organizace kódu</strong> - DDD pomáhá organizovat kód podle domény, což vede k lepší čitelnosti a udržitelnosti.</li>
+                                <li><strong>Snadnější komunikace</strong> - DDD používá společný jazyk (Ubiquitous Language), který usnadňuje komunikaci mezi vývojáři a doménovými experty.</li>
+                                <li><strong>Flexibilita</strong> - Horizontální přístup k DDD umožňuje snadnější změny a rozšíření aplikace.</li>
+                                <li><strong>Testovatelnost</strong> - DDD podporuje testování, což vede k robustnějšímu kódu.</li>
+                                <li><strong>Škálovatelnost</strong> - DDD a Symfony 7 společně poskytují architekturu, která je snadno škálovatelná.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-            <h3>Co se naučíte</h3>
-            <p>
-                V tomto průvodci se naučíte:
-            </p>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3>Co se naučíte</h3>
+                            <p>
+                                V tomto průvodci se naučíte:
+                            </p>
 
-            <ul>
-                <li>Základní koncepty DDD a jak je implementovat v Symfony 7</li>
-                <li>Rozdíl mezi horizontálním a vertikálním přístupem k DDD</li>
-                <li>Jak implementovat CQRS v Symfony 7</li>
-                <li>Praktické příklady implementace DDD v Symfony 7</li>
-                <li>Nejlepší postupy a časté chyby při implementaci DDD</li>
-            </ul>
+                            <ul>
+                                <li>Základní koncepty DDD a jak je implementovat v Symfony 7</li>
+                                <li>Rozdíl mezi horizontálním a vertikálním přístupem k DDD</li>
+                                <li>Jak implementovat CQRS v Symfony 7</li>
+                                <li>Praktické příklady implementace DDD v Symfony 7</li>
+                                <li>Nejlepší postupy a časté chyby při implementaci DDD</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <div class="example-box">
+            <div class="example-box mt-5">
                 <h4>Ukázka kódu: Základní struktura DDD projektu v Symfony 7</h4>
                 <pre><code class="language-bash">src/
 ├── UserManagement/                 # Bounded Context
@@ -91,41 +105,80 @@
             └── Email.php</code></pre>
             </div>
 
-            <p>
-                Pojďme začít prozkoumáním toho, <a href="{{ path('what_is_ddd') }}">co je Domain-Driven Design</a> a jak může pomoci při vývoji aplikací v Symfony 7.
-            </p>
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Symfony 7 a DDD</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                Symfony 7 přináší mnoho nových funkcí, které usnadňují implementaci DDD:
+                            </p>
+                            <ul>
+                                <li>Vylepšený Messenger komponent pro CQRS</li>
+                                <li>Nový Scheduler komponent pro plánování úloh</li>
+                                <li>Vylepšená podpora atributů v PHP 8.2</li>
+                                <li>Webhook komponent pro definování vlastních webhooků</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Horizontální DDD</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>
+                                Horizontální (vertikální slice) přístup k DDD organizuje kód podle funkcí (feature slices) místo tradičních vrstev.
+                            </p>
+                            <p>
+                                Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce.
+                            </p>
+                            <a href="{{ path('horizontal_vs_vertical') }}" class="btn btn-success">Více o horizontálním DDD</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="lead">
+                    Pojďme začít prozkoumáním toho, <a href="{{ path('what_is_ddd') }}">co je Domain-Driven Design</a> a jak může pomoci při vývoji aplikací v Symfony 7.
+                </p>
+                <a href="{{ path('what_is_ddd') }}" class="btn btn-primary btn-lg mt-3">Začít s DDD</a>
+            </div>
         </div>
 
         <div class="col-md-4">
             <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Symfony 7 a DDD</h5>
+                <div class="card-header bg-accent text-white">
+                    <h5 class="mb-0">Rychlý přehled</h5>
                 </div>
                 <div class="card-body">
-                    <p>
-                        Symfony 7 přináší mnoho nových funkcí, které usnadňují implementaci DDD:
-                    </p>
                     <ul>
-                        <li>Vylepšený Messenger komponent pro CQRS</li>
-                        <li>Nový Scheduler komponent pro plánování úloh</li>
-                        <li>Vylepšená podpora atributů v PHP 8.2</li>
-                        <li>Webhook komponent pro definování vlastních webhooků</li>
+                        <li><strong>DDD</strong> - Přístup k vývoji softwaru zaměřený na doménu</li>
+                        <li><strong>Symfony 7</strong> - Moderní PHP framework</li>
+                        <li><strong>Horizontální DDD</strong> - Organizace kódu podle funkcí</li>
+                        <li><strong>CQRS</strong> - Oddělení operací čtení a zápisu</li>
+                        <li><strong>Bounded Context</strong> - Jasně definovaná hranice modelu</li>
                     </ul>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Horizontální DDD</h5>
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Proč číst tohoto průvodce?</h5>
                 </div>
                 <div class="card-body">
-                    <p>
-                        Horizontální (vertikální slice) přístup k DDD organizuje kód podle funkcí (feature slices) místo tradičních vrstev.
-                    </p>
-                    <p>
-                        Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce.
-                    </p>
-                    <a href="{{ path('horizontal_vs_vertical') }}" class="btn btn-success">Více o horizontálním DDD</a>
+                    <p>Tento průvodce je ideální pro:</p>
+                    <ul>
+                        <li>PHP vývojáře, kteří chtějí zlepšit architekturu svých aplikací</li>
+                        <li>Symfony vývojáře hledající moderní přístupy k organizaci kódu</li>
+                        <li>Týmy pracující na složitých doménách</li>
+                        <li>Architekty, kteří chtějí implementovat DDD v PHP projektech</li>
+                    </ul>
                 </div>
             </div>
         </div>

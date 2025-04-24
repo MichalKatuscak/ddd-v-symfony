@@ -79,4 +79,12 @@ class DddController extends AbstractController
             'title' => 'Zdroje a další četba',
         ]);
     }
+
+    #[Route('/security-policy', name: 'security_policy')]
+    public function securityPolicy(): Response
+    {
+        return $this->render('ddd/security_policy.html.twig', [
+            'title' => 'Bezpečnostní zásady',
+        ]);
+    }
 }

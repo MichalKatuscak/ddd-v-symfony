@@ -1,0 +1,133 @@
+# Použijte front controller jako index soubor a skryjte strukturu složek
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Přesměrovat na HTTPS (odkomentujte, pokud používáte HTTPS)
+    # RewriteCond %{HTTPS} !=on
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+    # Přesměrovat www na non-www (odkomentujte a upravte podle potřeby)
+    # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    # RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+    # Přesměrovat index.php na root
+    RewriteCond %{THE_REQUEST} /index\.php [NC]
+    RewriteRule ^index\.php(.*) /$1 [R=301,L]
+
+    # Pokud požadovaný soubor nebo adresář neexistuje, přesměrovat na index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        # Pokud mod_rewrite není dostupný, použijeme mod_alias
+        RedirectMatch 302 ^/$ /index.php/
+    </IfModule>
+</IfModule>
+
+# Optimalizace výkonu
+<IfModule mod_deflate.c>
+    # Komprese HTML, CSS, JavaScript, Text, XML a fonty
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+    AddOutputFilterByType DEFLATE application/x-font
+    AddOutputFilterByType DEFLATE application/x-font-opentype
+    AddOutputFilterByType DEFLATE application/x-font-otf
+    AddOutputFilterByType DEFLATE application/x-font-truetype
+    AddOutputFilterByType DEFLATE application/x-font-ttf
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE font/otf
+    AddOutputFilterByType DEFLATE font/ttf
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE image/x-icon
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+</IfModule>
+
+# Nastavení cache pro statické soubory
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresDefault "access plus 1 month"
+
+    # CSS
+    ExpiresByType text/css "access plus 1 year"
+
+    # JavaScript
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType application/x-javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+
+    # Media: obrázky, video, audio
+    ExpiresByType audio/ogg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/ogg "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+
+    # Fonty
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+    ExpiresByType application/x-font-ttf "access plus 1 year"
+    ExpiresByType application/x-font-opentype "access plus 1 year"
+    ExpiresByType application/x-font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+
+    # Dokumenty
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+</IfModule>
+
+# Přidat správné hlavičky pro různé typy souborů
+<IfModule mod_mime.c>
+    # Přidat správné typy MIME
+    AddType application/javascript .js
+    AddType application/vnd.ms-fontobject .eot
+    AddType application/x-font-ttf .ttf
+    AddType application/x-font-opentype .otf
+    AddType application/x-font-woff .woff
+    AddType application/font-woff2 .woff2
+    AddType image/svg+xml .svg
+    AddType image/webp .webp
+
+    # Správné kódování pro komprimované fonty
+    AddEncoding gzip .svgz
+</IfModule>
+
+# Zabezpečení
+<IfModule mod_headers.c>
+    # Zabezpečení proti XSS útokům
+    Header set X-XSS-Protection "1; mode=block"
+
+    # Zabránit MIME-sniffing
+    Header set X-Content-Type-Options "nosniff"
+
+    # Zabránit clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+
+    # Referrer policy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Content Security Policy (odkomentujte a upravte podle potřeby)
+    # Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';"
+</IfModule>
+
+# Zakázat přístup k souborům .htaccess a .htpasswd
+<IfModule mod_rewrite.c>
+    RewriteRule ^\.ht - [F,L]
+</IfModule>

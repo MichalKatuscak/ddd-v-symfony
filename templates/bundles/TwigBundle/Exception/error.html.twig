@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chyba | Architektura DDD v Symfony 7{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="error-page">
+                    <h1 class="error-code">{{ status_code }}</h1>
+                    <h2 class="error-title">Nastala chyba</h2>
+                    <p class="error-description">
+                        Omlouváme se, ale při zpracování vašeho požadavku došlo k chybě.
+                        {% if status_code == 403 %}
+                            Nemáte oprávnění k přístupu na tuto stránku.
+                        {% elseif status_code == 500 %}
+                            Na serveru došlo k interní chybě. Zkuste to prosím později.
+                        {% elseif status_code == 503 %}
+                            Služba je dočasně nedostupná. Zkuste to prosím později.
+                        {% else %}
+                            Zkuste to prosím znovu nebo se vraťte na úvodní stránku.
+                        {% endif %}
+                    </p>
+                    <div class="error-actions">
+                        <a href="{{ path('homepage') }}" class="btn btn-primary">
+                            Zpět na úvodní stránku
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

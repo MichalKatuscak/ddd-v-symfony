@@ -9,6 +9,9 @@ framework:
     #esi: true
     #fragments: true
 
+    # Nastavení pro chybové stránky
+    error_controller: error_controller
+
 when@test:
     framework:
         test: true

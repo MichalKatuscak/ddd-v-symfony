@@ -1,0 +1,8 @@
+# Bezpečnostní kontakty
+Contact: mailto:michal@katuscak.cz
+Expires: 2025-12-31T23:59:59+01:00
+Preferred-Languages: cs, en
+# Zásady pro nahlašování bezpečnostních problémů
+Policy: https://ddd-v-symfony.katuscak.cz/security-policy
+# Aktualizováno
+Canonical: https://ddd-v-symfony.katuscak.cz/.well-known/security.txt

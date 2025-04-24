@@ -1,0 +1,51 @@
+# Zabezpečení a směrování pro Symfony aplikaci
+
+# Jednoduché přesměrování všech požadavků do public adresáře
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Přesměrovat vše do public adresáře
+    RewriteRule ^$ public/index.php [L]
+    RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
+</IfModule>
+
+# Zakázat výpis adresářů
+Options -Indexes
+
+# Nastavit výchozí znakovou sadu
+AddDefaultCharset UTF-8
+
+# Zabezpečení proti XSS útokům
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Povolit CORS pouze pro určité domény (upravte podle potřeby)
+    # Header set Access-Control-Allow-Origin "https://vase-domena.cz"
+</IfModule>
+
+# Komprese obsahu pro rychlejší načítání
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Nastavení cache pro statické soubory
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType application/x-font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

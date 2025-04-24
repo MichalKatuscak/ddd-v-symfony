@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Interní chyba serveru | Architektura DDD v Symfony 7{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <div class="error-page">
+                    <h1 class="error-code">500</h1>
+                    <h2 class="error-title">Interní chyba serveru</h2>
+                    <p class="error-description">
+                        Omlouváme se, ale na serveru došlo k neočekávané chybě. Naši technici již byli informováni a pracují na nápravě. Zkuste to prosím později.
+                    </p>
+                    <div class="error-actions">
+                        <a href="{{ path('homepage') }}" class="btn btn-primary">
+                            Zpět na úvodní stránku
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

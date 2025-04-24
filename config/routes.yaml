@@ -3,3 +3,22 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# Explicitní routy pro chybové stránky
+error_404:
+    path: /404
+    controller: App\Controller\ErrorController
+
+error_403:
+    path: /403
+    controller: App\Controller\ErrorController
+
+error_500:
+    path: /500
+    controller: App\Controller\ErrorController
+
+error_generic:
+    path: /error/{code}
+    controller: App\Controller\ErrorController::preview
+    requirements:
+        code: '\d+'
