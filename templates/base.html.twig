@@ -153,9 +153,9 @@
         <span>↑</span>
     </button>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="{{ asset('js/modern-script.js') }}"></script>
-    <script src="{{ asset('js/code-script.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
+    <script src="{{ asset('js/modern-script.js') }}" defer></script>
+    <script src="{{ asset('js/code-script.js') }}" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             document.querySelectorAll('pre code').forEach((el) => {
