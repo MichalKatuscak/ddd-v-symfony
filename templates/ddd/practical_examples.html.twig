@@ -1,0 +1,802 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Praktické příklady</h2>
+
+    <div class="table-of-contents mb-4">
+        <h5>Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#e-commerce">Příklad: E-commerce aplikace</a></li>
+            <li><a href="#blog">Příklad: Blog</a></li>
+            <li><a href="#user-management">Příklad: Správa uživatelů</a></li>
+        </ul>
+    </div>
+
+    <h3 id="e-commerce">Příklad: E-commerce aplikace</h3>
+    <p>
+        V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí horizontálního DDD a CQRS v Symfony 7.
+        Zaměříme se na funkcionalitu košíku a objednávek.
+    </p>
+
+    <h4>Struktura projektu</h4>
+    <pre><code class="language-bash">src/
+├── Cart/                      # Feature: Košík
+│   ├── AddToCart/             # Sub-feature: Přidání do košíku
+│   │   ├── AddItemToCart.php  # Command
+│   │   ├── AddItemToCartHandler.php  # Command Handler
+│   │   └── CartController.php  # Controller
+│   ├── ViewCart/              # Sub-feature: Zobrazení košíku
+│   │   ├── GetCart.php        # Query
+│   │   ├── GetCartHandler.php  # Query Handler
+│   │   └── CartViewModel.php  # View Model
+│   └── Checkout/              # Sub-feature: Pokladna
+│       ├── CreateOrder.php    # Command
+│       ├── CreateOrderHandler.php  # Command Handler
+│       └── CheckoutController.php  # Controller
+└── Shared/                    # Sdílené komponenty
+    ├── Domain/                # Sdílená doménová logika
+    │   ├── Model/             # Doménové modely
+    │   │   ├── Cart.php
+    │   │   ├── CartItem.php
+    │   │   ├── Order.php
+    │   │   └── OrderItem.php
+    │   ├── ValueObject/       # Hodnotové objekty
+    │   │   ├── CartId.php
+    │   │   ├── OrderId.php
+    │   │   ├── ProductId.php
+    │   │   ├── Quantity.php
+    │   │   └── Money.php
+    │   ├── Event/             # Doménové události
+    │   │   ├── ItemAddedToCart.php
+    │   │   └── OrderCreated.php
+    │   └── Repository/        # Repozitáře (rozhraní)
+    │       ├── CartRepository.php
+    │       └── OrderRepository.php
+    └── Infrastructure/        # Sdílená infrastruktura
+        └── Repository/        # Implementace repozitářů
+            ├── DoctrineCartRepository.php
+            └── DoctrineOrderRepository.php</code></pre>
+
+    <h4>Doménový model: Košík</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Model;
+
+use App\Shared\Domain\Event\ItemAddedToCart;
+use App\Shared\Domain\ValueObject\CartId;
+use App\Shared\Domain\ValueObject\ProductId;
+use App\Shared\Domain\ValueObject\Quantity;
+use App\Shared\Domain\ValueObject\Money;
+
+class Cart
+{
+    private CartId $id;
+    private string $userId;
+    private array $items = [];
+    private \DateTimeImmutable $createdAt;
+    private \DateTimeImmutable $updatedAt;
+    private array $events = [];
+
+    public function __construct(CartId $id, string $userId)
+    {
+        $this->id = $id;
+        $this->userId = $userId;
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = $this->createdAt;
+    }
+
+    public function id(): CartId
+    {
+        return $this->id;
+    }
+
+    public function userId(): string
+    {
+        return $this->userId;
+    }
+
+    public function addItem(ProductId $productId, Quantity $quantity, Money $price): void
+    {
+        // Kontrola, zda produkt již v košíku existuje
+        foreach ($this->items as $item) {
+            if ($item->productId()->equals($productId)) {
+                $item->increaseQuantity($quantity);
+                $this->updatedAt = new \DateTimeImmutable();
+
+                $this->recordEvent(new ItemAddedToCart(
+                    $this->id,
+                    $productId,
+                    $quantity,
+                    $price
+                ));
+
+                return;
+            }
+        }
+
+        // Přidání nové položky do košíku
+        $this->items[] = new CartItem(
+            $this->id,
+            $productId,
+            $quantity,
+            $price
+        );
+
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new ItemAddedToCart(
+            $this->id,
+            $productId,
+            $quantity,
+            $price
+        ));
+    }
+
+    public function removeItem(ProductId $productId): void
+    {
+        $this->items = array_filter($this->items, function (CartItem $item) use ($productId) {
+            return !$item->productId()->equals($productId);
+        });
+
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function items(): array
+    {
+        return $this->items;
+    }
+
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
+    public function totalAmount(): Money
+    {
+        $total = new Money(0);
+
+        foreach ($this->items as $item) {
+            $total = $total->add($item->totalPrice());
+        }
+
+        return $total;
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function updatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+
+    <h4>Command: Přidání položky do košíku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Cart\AddToCart;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class AddItemToCart
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $cartId,
+
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $productId,
+
+        #[Assert\NotBlank]
+        #[Assert\GreaterThan(0)]
+        public readonly int $quantity,
+
+        #[Assert\NotBlank]
+        #[Assert\GreaterThan(0)]
+        public readonly float $price
+    ) {
+    }
+}</code></pre>
+
+    <h4>Command Handler: Zpracování přidání položky do košíku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Cart\AddToCart;
+
+use App\Shared\Domain\Repository\CartRepository;
+use App\Shared\Domain\ValueObject\CartId;
+use App\Shared\Domain\ValueObject\ProductId;
+use App\Shared\Domain\ValueObject\Quantity;
+use App\Shared\Domain\ValueObject\Money;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class AddItemToCartHandler
+{
+    public function __construct(
+        private CartRepository $cartRepository
+    ) {
+    }
+
+    public function __invoke(AddItemToCart $command): void
+    {
+        $cart = $this->cartRepository->findById(new CartId($command->cartId));
+
+        if (!$cart) {
+            throw new \DomainException('Cart not found');
+        }
+
+        $cart->addItem(
+            new ProductId($command->productId),
+            new Quantity($command->quantity),
+            new Money($command->price)
+        );
+
+        $this->cartRepository->save($cart);
+    }
+}</code></pre>
+
+    <h4>Controller: Přidání položky do košíku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Cart\AddToCart;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
+class CartController extends AbstractController
+{
+    public function __construct(
+        private MessageBusInterface $commandBus
+    ) {
+    }
+
+    #[Route('/cart/add', name: 'cart_add', methods: ['POST'])]
+    public function addToCart(Request $request): Response
+    {
+        $cartId = $request->getSession()->get('cart_id');
+
+        if (!$cartId) {
+            // Vytvoření nového košíku by mělo být implementováno v jiném handleru
+            throw new \RuntimeException('Cart not initialized');
+        }
+
+        $command = new AddItemToCart(
+            $cartId,
+            $request->request->get('product_id'),
+            (int) $request->request->get('quantity', 1),
+            (float) $request->request->get('price')
+        );
+
+        try {
+            $this->commandBus->dispatch($command);
+
+            $this->addFlash('success', 'Product added to cart');
+
+            return $this->redirectToRoute('cart_view');
+        } catch (\DomainException $e) {
+            $this->addFlash('error', $e->getMessage());
+
+            return $this->redirectToRoute('product_detail', [
+                'id' => $request->request->get('product_id')
+            ]);
+        }
+    }
+}</code></pre>
+
+    <h4>Query: Získání košíku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Cart\ViewCart;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class GetCart
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $cartId
+    ) {
+    }
+}</code></pre>
+
+    <h4>Query Handler: Zpracování získání košíku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Cart\ViewCart;
+
+use App\Shared\Domain\Repository\CartRepository;
+use App\Shared\Domain\ValueObject\CartId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class GetCartHandler
+{
+    public function __construct(
+        private CartRepository $cartRepository
+    ) {
+    }
+
+    public function __invoke(GetCart $query): ?CartViewModel
+    {
+        $cart = $this->cartRepository->findById(new CartId($query->cartId));
+
+        if (!$cart) {
+            return null;
+        }
+
+        $items = [];
+
+        foreach ($cart->items() as $item) {
+            $items[] = new CartItemViewModel(
+                $item->productId()->value(),
+                $item->quantity()->value(),
+                $item->price()->value(),
+                $item->totalPrice()->value()
+            );
+        }
+
+        return new CartViewModel(
+            $cart->id()->value(),
+            $items,
+            $cart->totalAmount()->value(),
+            $cart->updatedAt()
+        );
+    }
+}</code></pre>
+
+    <h3 id="blog">Příklad: Blog</h3>
+    <p>
+        V této části si ukážeme, jak implementovat jednoduchý blog pomocí horizontálního DDD a CQRS v Symfony 7.
+    </p>
+
+    <h4>Struktura projektu</h4>
+    <pre><code class="language-bash">src/
+├── Blog/                      # Feature: Blog
+│   ├── CreatePost/            # Sub-feature: Vytvoření příspěvku
+│   │   ├── CreatePost.php     # Command
+│   │   ├── CreatePostHandler.php  # Command Handler
+│   │   └── CreatePostController.php  # Controller
+│   ├── ListPosts/             # Sub-feature: Seznam příspěvků
+│   │   ├── GetPosts.php       # Query
+│   │   ├── GetPostsHandler.php  # Query Handler
+│   │   └── PostsController.php  # Controller
+│   └── ViewPost/              # Sub-feature: Zobrazení příspěvku
+│       ├── GetPost.php        # Query
+│       ├── GetPostHandler.php  # Query Handler
+│       └── PostController.php  # Controller
+└── Shared/                    # Sdílené komponenty
+    ├── Domain/                # Sdílená doménová logika
+    │   ├── Model/             # Doménové modely
+    │   │   ├── Post.php
+    │   │   └── Comment.php
+    │   ├── ValueObject/       # Hodnotové objekty
+    │   │   ├── PostId.php
+    │   │   └── CommentId.php
+    │   ├── Event/             # Doménové události
+    │   │   └── PostCreated.php
+    │   └── Repository/        # Repozitáře (rozhraní)
+    │       └── PostRepository.php
+    └── Infrastructure/        # Sdílená infrastruktura
+        └── Repository/        # Implementace repozitářů
+            └── DoctrinePostRepository.php</code></pre>
+
+    <h4>Doménový model: Příspěvek</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Model;
+
+use App\Shared\Domain\Event\PostCreated;
+use App\Shared\Domain\ValueObject\PostId;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'posts')]
+class Post
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $title;
+
+    #[ORM\Column(type: 'text')]
+    private string $content;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $author;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    private array $events = [];
+
+    public function __construct(PostId $id, string $title, string $content, string $author)
+    {
+        $this->id = $id->value();
+        $this->title = $title;
+        $this->content = $content;
+        $this->author = $author;
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new PostCreated($id, $title, $author));
+    }
+
+    public function id(): PostId
+    {
+        return new PostId($this->id);
+    }
+
+    public function title(): string
+    {
+        return $this->title;
+    }
+
+    public function content(): string
+    {
+        return $this->content;
+    }
+
+    public function author(): string
+    {
+        return $this->author;
+    }
+
+    public function updateTitle(string $title): void
+    {
+        $this->title = $title;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateContent(string $content): void
+    {
+        $this->content = $content;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function updatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+
+    <h4>Command: Vytvoření příspěvku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Blog\CreatePost;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class CreatePost
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 3, max: 255)]
+        public readonly string $title,
+
+        #[Assert\NotBlank]
+        public readonly string $content,
+
+        #[Assert\NotBlank]
+        public readonly string $author
+    ) {
+    }
+}</code></pre>
+
+    <h4>Command Handler: Zpracování vytvoření příspěvku</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Blog\CreatePost;
+
+use App\Shared\Domain\Model\Post;
+use App\Shared\Domain\Repository\PostRepository;
+use App\Shared\Domain\ValueObject\PostId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class CreatePostHandler
+{
+    public function __construct(
+        private PostRepository $postRepository
+    ) {
+    }
+
+    public function __invoke(CreatePost $command): string
+    {
+        $postId = new PostId();
+
+        $post = new Post(
+            $postId,
+            $command->title,
+            $command->content,
+            $command->author
+        );
+
+        $this->postRepository->save($post);
+
+        return $postId->value();
+    }
+}</code></pre>
+
+    <h3 id="user-management">Příklad: Správa uživatelů</h3>
+    <p>
+        V této části si ukážeme, jak implementovat správu uživatelů pomocí horizontálního DDD a CQRS v Symfony 7.
+    </p>
+
+    <h4>Struktura projektu</h4>
+    <pre><code class="language-bash">src/
+├── UserManagement/            # Feature: Správa uživatelů
+│   ├── Registration/          # Sub-feature: Registrace
+│   │   ├── RegisterUser.php   # Command
+│   │   ├── RegisterUserHandler.php  # Command Handler
+│   │   └── RegistrationController.php  # Controller
+│   ├── Authentication/        # Sub-feature: Autentizace
+│   │   └── SecurityController.php  # Controller
+│   └── Profile/               # Sub-feature: Profil
+│       ├── GetUserProfile.php  # Query
+│       ├── GetUserProfileHandler.php  # Query Handler
+│       └── ProfileController.php  # Controller
+└── Shared/                    # Sdílené komponenty
+    ├── Domain/                # Sdílená doménová logika
+    │   ├── Model/             # Doménové modely
+    │   │   └── User.php
+    │   ├── ValueObject/       # Hodnotové objekty
+    │   │   ├── UserId.php
+    │   │   └── Email.php
+    │   ├── Event/             # Doménové události
+    │   │   └── UserRegistered.php
+    │   └── Repository/        # Repozitáře (rozhraní)
+    │       └── UserRepository.php
+    └── Infrastructure/        # Sdílená infrastruktura
+        └── Repository/        # Implementace repozitářů
+            └── DoctrineUserRepository.php</code></pre>
+
+    <h4>Doménový model: Uživatel</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Model;
+
+use App\Shared\Domain\Event\UserRegistered;
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $name;
+
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    private string $email;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $password;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
+    private array $events = [];
+
+    public function __construct(UserId $id, string $name, Email $email)
+    {
+        $this->id = $id->value();
+        $this->name = $name;
+        $this->email = $email->value();
+        $this->roles = ['ROLE_USER'];
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new UserRegistered($id, $email));
+    }
+
+    public function id(): UserId
+    {
+        return new UserId($this->id);
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function email(): Email
+    {
+        return new Email($this->email);
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function changeName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function changeEmail(Email $email): void
+    {
+        $this->email = $email->value();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    // Implementace UserInterface
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Pokud ukládáte dočasné, citlivé údaje o uživateli, vymažte je zde
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    // Implementace PasswordAuthenticatedUserInterface
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+
+    <h4>Command: Registrace uživatele</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Registration;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class RegisterUser
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 2, max: 255)]
+        public readonly string $name,
+
+        #[Assert\NotBlank]
+        #[Assert\Email]
+        public readonly string $email,
+
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 8)]
+        public readonly string $password
+    ) {
+    }
+}</code></pre>
+
+    <h4>Command Handler: Zpracování registrace uživatele</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Registration;
+
+use App\Shared\Domain\Model\User;
+use App\Shared\Domain\Repository\UserRepository;
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
+#[AsMessageHandler]
+class RegisterUserHandler
+{
+    public function __construct(
+        private UserRepository $userRepository,
+        private UserPasswordHasherInterface $passwordHasher
+    ) {
+    }
+
+    public function __invoke(RegisterUser $command): void
+    {
+        $email = new Email($command->email);
+
+        if ($this->userRepository->findByEmail($email)) {
+            throw new \DomainException('User with this email already exists');
+        }
+
+        $user = new User(
+            new UserId(),
+            $command->name,
+            $email
+        );
+
+        // Set password
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $command->password);
+        $user->setPassword($hashedPassword);
+
+        $this->userRepository->save($user);
+    }
+}</code></pre>
+
+    <div class="warning-box">
+        <h4>Důležité poznámky</h4>
+        <p>
+            Při implementaci praktických příkladů je důležité:
+        </p>
+        <ul>
+            <li>Používat hodnotové objekty pro validaci a enkapsulaci doménových konceptů.</li>
+            <li>Používat doménové události pro komunikaci mezi různými částmi aplikace.</li>
+            <li>Oddělovat příkazy a dotazy podle CQRS principů.</li>
+            <li>Používat Symfony Messenger pro implementaci command a query busů.</li>
+            <li>Používat Doctrine ORM pro persistenci doménových objektů.</li>
+            <li>Používat validaci pro validaci příkazů a dotazů.</li>
+        </ul>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na <a href="{{ path('case_study') }}">případovou studii implementace DDD a CQRS v Symfony 7</a>.
+    </p>
+{% endblock %}

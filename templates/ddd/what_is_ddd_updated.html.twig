@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Co je Domain-Driven Design?</h2>
+    
+    <div class="table-of-contents mb-4">
+        <h5>Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#definition">Definice DDD</a></li>
+            <li><a href="#history">Historie a vývoj DDD</a></li>
+            <li><a href="#principles">Základní principy DDD</a></li>
+            <li><a href="#benefits">Výhody používání DDD</a></li>
+            <li><a href="#challenges">Výzvy a omezení DDD</a></li>
+        </ul>
+    </div>
+
+    <h3 id="definition">Definice DDD</h3>
+    <p>
+        Domain-Driven Design (DDD) je přístup k vývoji softwaru, který se zaměřuje na modelování domény a její implementaci v kódu.
+        Byl představen Ericem Evansem v jeho knize "Domain-Driven Design: Tackling Complexity in the Heart of Software" v roce 2003 <a href="https://www.domainlanguage.com/ddd/" target="_blank">[1]</a>.
+    </p>
+    
+    <div class="concept-box">
+        <h4>Klíčové aspekty DDD:</h4>
+        <ul>
+            <li><strong>Doména (Domain)</strong> - Oblast znalostí, problémů a aktivit, na kterou se aplikace zaměřuje <a href="https://martinfowler.com/bliki/DomainDrivenDesign.html" target="_blank">[2]</a>.</li>
+            <li><strong>Ubiquitous Language</strong> - Společný jazyk používaný vývojáři a doménovými experty <a href="https://martinfowler.com/bliki/UbiquitousLanguage.html" target="_blank">[3]</a>.</li>
+            <li><strong>Bounded Context</strong> - Jasně definovaná hranice, ve které je model platný <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank">[4]</a>.</li>
+            <li><strong>Model-Driven Design</strong> - Návrh softwaru založený na modelu domény <a href="https://www.infoq.com/articles/ddd-in-practice/" target="_blank">[5]</a>.</li>
+        </ul>
+    </div>
+
+    <h3 id="history">Historie a vývoj DDD</h3>
+    <p>
+        Domain-Driven Design byl představen Ericem Evansem v roce 2003. Od té doby se stal populárním přístupem k vývoji softwaru,
+        zejména pro složité aplikace s bohatou doménou. V průběhu let se DDD vyvíjel a byly představeny nové koncepty a techniky <a href="https://dddcommunity.org/book/evans_2003/" target="_blank">[6]</a>.
+    </p>
+    
+    <p>
+        V posledních letech se DDD často kombinuje s dalšími architektonickými vzory, jako je CQRS (Command Query Responsibility Segregation)
+        a Event Sourcing, což vede k ještě výkonnějším a flexibilnějším architekturám <a href="https://www.youtube.com/watch?v=JHGkaShoyNs" target="_blank">[7]</a> <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">[8]</a>.
+    </p>
+
+    <h3 id="principles">Základní principy DDD</h3>
+    <p>
+        Domain-Driven Design je založen na několika základních principech <a href="https://www.thoughtworks.com/insights/blog/domain-driven-design-services-oriented-architecture-synergy" target="_blank">[9]</a>:
+    </p>
+
+    <ol>
+        <li>
+            <strong>Zaměření na doménu</strong> - DDD se zaměřuje na doménu a doménovou logiku. Technické detaily jsou sekundární.
+        </li>
+        <li>
+            <strong>Ubiquitous Language</strong> - DDD používá společný jazyk mezi vývojáři a doménovými experty, který je používán v kódu, dokumentaci a komunikaci.
+        </li>
+        <li>
+            <strong>Bounded Context</strong> - DDD rozděluje složité domény do menších, jasně definovaných kontextů s explicitními hranicemi.
+        </li>
+        <li>
+            <strong>Model-Driven Design</strong> - DDD používá model jako základ pro návrh softwaru. Model je zjednodušenou reprezentací domény.
+        </li>
+        <li>
+            <strong>Strategic Design</strong> - DDD poskytuje nástroje pro strategický návrh, který pomáhá definovat hranice mezi různými částmi systému <a href="https://www.infoq.com/articles/ddd-contextmapping/" target="_blank">[10]</a>.
+        </li>
+        <li>
+            <strong>Tactical Design</strong> - DDD poskytuje vzory pro taktický návrh, které pomáhají implementovat doménový model v kódu <a href="https://vaadin.com/blog/ddd-part-3-tactical-design-with-domain-driven-design" target="_blank">[11]</a>.
+        </li>
+    </ol>
+
+    <h3 id="benefits">Výhody používání DDD</h3>
+    <p>
+        Domain-Driven Design přináší mnoho výhod <a href="https://www.thoughtworks.com/insights/blog/domain-driven-design-not-just-about-modeling" target="_blank">[12]</a>:
+    </p>
+
+    <ul>
+        <li><strong>Lepší komunikace</strong> - DDD usnadňuje komunikaci mezi vývojáři a doménovými experty díky společnému jazyku.</li>
+        <li><strong>Lepší pochopení domény</strong> - DDD pomáhá vývojářům lépe pochopit doménu, což vede k lepším řešením.</li>
+        <li><strong>Flexibilita</strong> - DDD vytváří flexibilní architekturu, která se může snadno přizpůsobit změnám v doméně.</li>
+        <li><strong>Modularita</strong> - DDD podporuje modularitu, což usnadňuje údržbu a rozšiřování aplikace.</li>
+        <li><strong>Testovatelnost</strong> - DDD vytváří kód, který je snadno testovatelný, což vede k robustnějšímu softwaru.</li>
+    </ul>
+
+    <div class="example-box">
+        <h4>Příklad: Ubiquitous Language v e-commerce doméně</h4>
+        <p>
+            V e-commerce doméně by Ubiquitous Language mohl zahrnovat pojmy jako:
+        </p>
+        <ul>
+            <li><strong>Košík (Cart)</strong> - Dočasná kolekce produktů, které si zákazník vybral k nákupu.</li>
+            <li><strong>Objednávka (Order)</strong> - Potvrzený nákup zákazníka, který obsahuje produkty, dodací adresu a platební informace.</li>
+            <li><strong>Katalog (Catalog)</strong> - Kolekce všech produktů dostupných k prodeji.</li>
+            <li><strong>Zákazník (Customer)</strong> - Osoba, která nakupuje produkty.</li>
+        </ul>
+        <p>
+            Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými experty.
+        </p>
+    </div>
+
+    <h3 id="challenges">Výzvy a omezení DDD</h3>
+    <p>
+        I když DDD přináší mnoho výhod, má také své výzvy a omezení <a href="https://www.infoq.com/articles/ddd-mistakes/" target="_blank">[13]</a>:
+    </p>
+
+    <ul>
+        <li><strong>Složitost</strong> - DDD může být složité pochopit a implementovat, zejména pro začátečníky.</li>
+        <li><strong>Časová náročnost</strong> - Implementace DDD může být časově náročná, zejména v počátečních fázích projektu.</li>
+        <li><strong>Nevhodnost pro jednoduché aplikace</strong> - DDD je navržen pro složité aplikace s bohatou doménou. Pro jednoduché aplikace může být zbytečně složitý.</li>
+        <li><strong>Potřeba doménových expertů</strong> - DDD vyžaduje přístup k doménovým expertům, což nemusí být vždy možné.</li>
+    </ul>
+
+    <div class="warning-box">
+        <h4>Kdy nepoužívat DDD</h4>
+        <p>
+            DDD nemusí být vhodný pro všechny projekty. Nepoužívejte DDD, pokud:
+        </p>
+        <ul>
+            <li>Vyvíjíte jednoduchou aplikaci s minimální doménovou logikou.</li>
+            <li>Nemáte přístup k doménovým expertům.</li>
+            <li>Váš tým nemá zkušenosti s DDD a nemá čas se ho naučit.</li>
+            <li>Máte velmi omezený čas a rozpočet.</li>
+        </ul>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na <a href="{{ path('horizontal_vs_vertical') }}">rozdíl mezi horizontálním a vertikálním přístupem k DDD</a>.
+    </p>
+{% endblock %}

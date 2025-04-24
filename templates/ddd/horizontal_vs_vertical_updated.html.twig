@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Horizontální vs. Vertikální DDD</h2>
+    
+    <div class="table-of-contents mb-4">
+        <h5>Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#traditional">Tradiční (vertikální) přístup k DDD</a></li>
+            <li><a href="#horizontal">Horizontální (vertikální slice) přístup k DDD</a></li>
+            <li><a href="#comparison">Porovnání přístupů</a></li>
+            <li><a href="#when-to-use">Kdy použít který přístup</a></li>
+            <li><a href="#symfony-implementation">Implementace v Symfony 7</a></li>
+        </ul>
+    </div>
+
+    <h3 id="traditional">Tradiční (vertikální) přístup k DDD</h3>
+    <p>
+        Tradiční přístup k DDD, často označovaný jako "vertikální" nebo "vrstvený", organizuje kód do vrstev podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
+        Typické vrstvy v tradičním DDD jsou:
+    </p>
+
+    <ul>
+        <li><strong>Prezentační vrstva (Presentation Layer)</strong> - Zodpovědná za interakci s uživatelem.</li>
+        <li><strong>Aplikační vrstva (Application Layer)</strong> - Koordinuje aplikační aktivity a deleguje práci doménové vrstvě.</li>
+        <li><strong>Doménová vrstva (Domain Layer)</strong> - Obsahuje doménový model a doménovou logiku.</li>
+        <li><strong>Infrastrukturní vrstva (Infrastructure Layer)</strong> - Poskytuje technické služby pro ostatní vrstvy.</li>
+    </ul>
+
+    <div class="example-box">
+        <h4>Příklad: Tradiční struktura DDD projektu</h4>
+        <pre><code class="language-bash">src/
+├── Presentation/                # Prezentační vrstva
+│   └── Controller/
+│       └── UserController.php
+├── Application/                 # Aplikační vrstva
+│   ├── Service/
+│   │   └── UserService.php
+│   └── DTO/
+│       └── UserDTO.php
+├── Domain/                      # Doménová vrstva
+│   ├── Model/
+│   │   └── User.php
+│   ├── Repository/
+│   │   └── UserRepository.php
+│   └── Service/
+│       └── DomainUserService.php
+└── Infrastructure/              # Infrastrukturní vrstva
+    ├── Repository/
+    │   └── DoctrineUserRepository.php
+    └── Persistence/
+        └── Doctrine/
+            └── Mapping/
+                └── User.orm.xml</code></pre>
+    </div>
+
+    <p>
+        V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
+        Tento přístup je často znázorňován jako "cibulová" nebo "hexagonální" architektura <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
+    </p>
+
+    <h3 id="horizontal">Horizontální (vertikální slice) přístup k DDD</h3>
+    <p>
+        Horizontální přístup k DDD, často označovaný jako "vertikální slice" architektura, organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
+        Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Horizontální struktura DDD projektu</h4>
+        <pre><code class="language-bash">src/
+├── UserManagement/             # Feature: Správa uživatelů
+│   ├── Registration/           # Sub-feature: Registrace uživatelů
+│   │   ├── RegisterUser.php    # Command
+│   │   ├── RegisterUserHandler.php  # Command Handler
+│   │   ├── UserRegistrationController.php  # Controller
+│   │   └── UserRegistrationForm.php  # Form
+│   └── Profile/                # Sub-feature: Profil uživatele
+│       ├── GetUserProfile.php  # Query
+│       ├── GetUserProfileHandler.php  # Query Handler
+│       ├── UserProfileController.php  # Controller
+│       └── UserProfileViewModel.php  # View Model
+├── OrderProcessing/            # Feature: Zpracování objednávek
+│   ├── Checkout/               # Sub-feature: Pokladna
+│   │   ├── CreateOrder.php     # Command
+│   │   ├── CreateOrderHandler.php  # Command Handler
+│   │   ├── CheckoutController.php  # Controller
+│   │   └── CheckoutForm.php    # Form
+│   └── OrderHistory/           # Sub-feature: Historie objednávek
+│       ├── GetOrderHistory.php  # Query
+│       ├── GetOrderHistoryHandler.php  # Query Handler
+│       ├── OrderHistoryController.php  # Controller
+│       └── OrderHistoryViewModel.php  # View Model
+└── Shared/                     # Sdílené komponenty
+    ├── Domain/                 # Sdílená doménová logika
+    │   ├── Model/
+    │   │   ├── User.php
+    │   │   └── Order.php
+    │   └── ValueObject/
+    │       ├── Email.php
+    │       └── Money.php
+    └── Infrastructure/         # Sdílená infrastruktura
+        └── Repository/
+            ├── DoctrineUserRepository.php
+            └── DoctrineOrderRepository.php</code></pre>
+    </div>
+
+    <p>
+        V horizontálním přístupu jsou funkce (features) organizovány vertikálně, což znamená, že každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
+        Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>.
+    </p>
+
+    <h3 id="comparison">Porovnání přístupů</h3>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Aspekt</th>
+                    <th>Tradiční (vertikální) DDD</th>
+                    <th>Horizontální (vertikální slice) DDD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Organizace kódu</strong></td>
+                    <td>Podle technických vrstev</td>
+                    <td>Podle funkcí (features)</td>
+                </tr>
+                <tr>
+                    <td><strong>Vazby</strong></td>
+                    <td>Silné vazby mezi vrstvami</td>
+                    <td>Silné vazby uvnitř funkce, slabé vazby mezi funkcemi</td>
+                </tr>
+                <tr>
+                    <td><strong>Změny</strong></td>
+                    <td>Změna často vyžaduje úpravy ve více vrstvách</td>
+                    <td>Změna je obvykle omezena na jednu funkci</td>
+                </tr>
+                <tr>
+                    <td><strong>Testovatelnost</strong></td>
+                    <td>Často vyžaduje mnoho mocků pro testování</td>
+                    <td>Snazší testování, méně mocků</td>
+                </tr>
+                <tr>
+                    <td><strong>Škálovatelnost</strong></td>
+                    <td>Může být obtížné škálovat při růstu aplikace</td>
+                    <td>Snazší škálování, funkce mohou být rozděleny do mikroslužeb</td>
+                </tr>
+                <tr>
+                    <td><strong>Složitost</strong></td>
+                    <td>Jednodušší pro pochopení na začátku</td>
+                    <td>Může být složitější pro pochopení na začátku</td>
+                </tr>
+                <tr>
+                    <td><strong>Vhodnost pro CQRS</strong></td>
+                    <td>Vyžaduje dodatečnou práci pro implementaci CQRS</td>
+                    <td>Přirozeně podporuje CQRS <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns" target="_blank">[5]</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 id="when-to-use">Kdy použít který přístup</h3>
+    
+    <div class="concept-box">
+        <h4>Kdy použít tradiční (vertikální) DDD:</h4>
+        <ul>
+            <li>Když je tým zvyklý na tradiční architekturu.</li>
+            <li>Pro menší aplikace s jasně definovanými vrstvami.</li>
+            <li>Když je důležitá jasná separace technických vrstev.</li>
+            <li>Pro aplikace s jednodušší doménovou logikou.</li>
+        </ul>
+    </div>
+
+    <div class="concept-box">
+        <h4>Kdy použít horizontální (vertikální slice) DDD:</h4>
+        <ul>
+            <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
+            <li>Když je důležitá modularita a nezávislost funkcí.</li>
+            <li>Pro aplikace, které budou v budoucnu rozděleny do mikroslužeb.</li>
+            <li>Když chcete implementovat CQRS.</li>
+            <li>Pro týmy, které jsou zvyklé na agilní vývoj a časté změny.</li>
+        </ul>
+    </div>
+
+    <h3 id="symfony-implementation">Implementace v Symfony 7</h3>
+    <p>
+        Symfony 7 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
+    </p>
+
+    <h4>Implementace tradičního (vertikálního) DDD v Symfony 7:</h4>
+    <p>
+        Pro implementaci tradičního DDD v Symfony 7 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
+    </p>
+
+    <pre><code class="language-bash">src/
+├── Controller/                 # Prezentační vrstva
+│   └── UserController.php
+├── Application/                # Aplikační vrstva
+│   ├── Service/
+│   │   └── UserService.php
+│   └── DTO/
+│       └── UserDTO.php
+├── Domain/                     # Doménová vrstva
+│   ├── Model/
+│   │   └── User.php
+│   ├── Repository/
+│   │   └── UserRepository.php
+│   └── Service/
+│       └── DomainUserService.php
+└── Infrastructure/             # Infrastrukturní vrstva
+    ├── Repository/
+    │   └── DoctrineUserRepository.php
+    └── Persistence/
+        └── Doctrine/
+            └── Mapping/
+                └── User.orm.xml</code></pre>
+
+    <h4>Implementace horizontálního (vertikální slice) DDD v Symfony 7:</h4>
+    <p>
+        Pro implementaci horizontálního DDD v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://symfonycasts.com/screencast/symfony-doctrine/project-structure" target="_blank">[8]</a>:
+    </p>
+
+    <pre><code class="language-bash">src/
+├── UserManagement/             # Feature: Správa uživatelů
+│   ├── Registration/           # Sub-feature: Registrace uživatelů
+│   │   ├── RegisterUser.php    # Command
+│   │   ├── RegisterUserHandler.php  # Command Handler
+│   │   ├── UserRegistrationController.php  # Controller
+│   │   └── UserRegistrationForm.php  # Form
+│   └── Profile/                # Sub-feature: Profil uživatele
+│       ├── GetUserProfile.php  # Query
+│       ├── GetUserProfileHandler.php  # Query Handler
+│       ├── UserProfileController.php  # Controller
+│       └── UserProfileViewModel.php  # View Model
+└── Shared/                     # Sdílené komponenty
+    ├── Domain/                 # Sdílená doménová logika
+    │   ├── Model/
+    │   │   └── User.php
+    │   └── ValueObject/
+    │       └── Email.php
+    └── Infrastructure/         # Sdílená infrastruktura
+        └── Repository/
+            └── DoctrineUserRepository.php</code></pre>
+
+    <p>
+        Symfony 7 poskytuje mnoho komponent, které jsou užitečné pro implementaci horizontálního DDD <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
+    </p>
+
+    <ul>
+        <li><strong>Messenger Component</strong> - Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
+        <li><strong>Validator Component</strong> - Pro validaci doménových objektů.</li>
+        <li><strong>Form Component</strong> - Pro zpracování vstupů od uživatele.</li>
+        <li><strong>Security Component</strong> - Pro autentizaci a autorizaci.</li>
+        <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
+    </ul>
+
+    <div class="warning-box">
+        <h4>Důležité poznámky</h4>
+        <p>
+            Při implementaci horizontálního DDD v Symfony 7 je důležité:
+        </p>
+        <ul>
+            <li>Minimalizovat vazby mezi jednotlivými funkcemi (features).</li>
+            <li>Používat CQRS pro oddělení čtení a zápisu <a href="https://symfony.com/doc/current/messenger/multiple_buses.html" target="_blank">[11]</a>.</li>
+            <li>Používat doménové události pro komunikaci mezi funkcemi.</li>
+            <li>Definovat jasné hranice mezi funkcemi.</li>
+        </ul>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na <a href="{{ path('basic_concepts') }}">základní koncepty DDD</a> a jak je implementovat v Symfony 7.
+    </p>
+{% endblock %}

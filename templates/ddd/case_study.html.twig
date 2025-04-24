@@ -1,0 +1,667 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Případová studie</h2>
+
+    <div class="table-of-contents mb-4">
+        <h5>Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#introduction">Úvod</a></li>
+            <li><a href="#requirements">Požadavky</a></li>
+            <li><a href="#architecture">Architektura</a></li>
+            <li><a href="#implementation">Implementace</a></li>
+            <li><a href="#lessons">Ponaučení</a></li>
+        </ul>
+    </div>
+
+    <h3 id="introduction">Úvod</h3>
+    <p>
+        V této případové studii se podíváme na implementaci systému pro správu projektů pomocí horizontálního DDD a CQRS v Symfony 7.
+        Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
+    </p>
+
+    <h3 id="requirements">Požadavky</h3>
+    <p>
+        Systém pro správu projektů má následující požadavky:
+    </p>
+
+    <ul>
+        <li>Uživatelé se mohou registrovat a přihlašovat.</li>
+        <li>Uživatelé mohou vytvářet projekty.</li>
+        <li>Uživatelé mohou přidávat úkoly do projektů.</li>
+        <li>Uživatelé mohou přiřazovat úkoly členům týmu.</li>
+        <li>Uživatelé mohou měnit stav úkolů (To Do, In Progress, Done).</li>
+        <li>Uživatelé mohou přidávat komentáře k úkolům.</li>
+        <li>Uživatelé mohou sledovat aktivitu na projektech a úkolech.</li>
+        <li>Systém musí být škálovatelný a udržitelný.</li>
+    </ul>
+
+    <h3 id="architecture">Architektura</h3>
+    <p>
+        Pro implementaci systému pro správu projektů jsme zvolili horizontální DDD a CQRS architekturu v Symfony 7.
+        Tato architektura nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
+    </p>
+
+    <h4>Bounded Contexts</h4>
+    <p>
+        Systém je rozdělen do následujících bounded contexts:
+    </p>
+
+    <ul>
+        <li><strong>UserManagement</strong> - Správa uživatelů, registrace, autentizace.</li>
+        <li><strong>ProjectManagement</strong> - Správa projektů, vytváření, aktualizace.</li>
+        <li><strong>TaskManagement</strong> - Správa úkolů, vytváření, aktualizace, přiřazování.</li>
+        <li><strong>CommentManagement</strong> - Správa komentářů, přidávání, aktualizace.</li>
+        <li><strong>ActivityTracking</strong> - Sledování aktivity, zaznamenávání událostí.</li>
+    </ul>
+
+    <h4>Struktura projektu</h4>
+    <pre><code class="language-bash">src/
+├── UserManagement/            # Bounded Context: Správa uživatelů
+│   ├── Registration/          # Feature: Registrace
+│   │   ├── RegisterUser.php   # Command
+│   │   ├── RegisterUserHandler.php  # Command Handler
+│   │   └── RegistrationController.php  # Controller
+│   └── Authentication/        # Feature: Autentizace
+│       └── SecurityController.php  # Controller
+├── ProjectManagement/         # Bounded Context: Správa projektů
+│   ├── CreateProject/         # Feature: Vytvoření projektu
+│   │   ├── CreateProject.php  # Command
+│   │   ├── CreateProjectHandler.php  # Command Handler
+│   │   └── ProjectController.php  # Controller
+│   └── ListProjects/          # Feature: Seznam projektů
+│       ├── GetProjects.php    # Query
+│       ├── GetProjectsHandler.php  # Query Handler
+│       └── ProjectsController.php  # Controller
+├── TaskManagement/            # Bounded Context: Správa úkolů
+│   ├── CreateTask/            # Feature: Vytvoření úkolu
+│   │   ├── CreateTask.php     # Command
+│   │   ├── CreateTaskHandler.php  # Command Handler
+│   │   └── TaskController.php  # Controller
+│   ├── AssignTask/            # Feature: Přiřazení úkolu
+│   │   ├── AssignTask.php     # Command
+│   │   ├── AssignTaskHandler.php  # Command Handler
+│   │   └── AssignController.php  # Controller
+│   └── ChangeTaskStatus/      # Feature: Změna stavu úkolu
+│       ├── ChangeTaskStatus.php  # Command
+│       ├── ChangeTaskStatusHandler.php  # Command Handler
+│       └── StatusController.php  # Controller
+├── CommentManagement/         # Bounded Context: Správa komentářů
+│   └── AddComment/            # Feature: Přidání komentáře
+│       ├── AddComment.php     # Command
+│       ├── AddCommentHandler.php  # Command Handler
+│       └── CommentController.php  # Controller
+├── ActivityTracking/          # Bounded Context: Sledování aktivity
+│   └── RecordActivity/        # Feature: Zaznamenání aktivity
+│       ├── RecordActivity.php  # Command
+│       └── RecordActivityHandler.php  # Command Handler
+└── Shared/                    # Sdílené komponenty
+    ├── Domain/                # Sdílená doménová logika
+    │   ├── Model/             # Doménové modely
+    │   │   ├── User.php
+    │   │   ├── Project.php
+    │   │   ├── Task.php
+    │   │   ├── Comment.php
+    │   │   └── Activity.php
+    │   ├── ValueObject/       # Hodnotové objekty
+    │   │   ├── UserId.php
+    │   │   ├── ProjectId.php
+    │   │   ├── TaskId.php
+    │   │   ├── CommentId.php
+    │   │   └── ActivityId.php
+    │   ├── Event/             # Doménové události
+    │   │   ├── UserRegistered.php
+    │   │   ├── ProjectCreated.php
+    │   │   ├── TaskCreated.php
+    │   │   ├── TaskAssigned.php
+    │   │   ├── TaskStatusChanged.php
+    │   │   └── CommentAdded.php
+    │   └── Repository/        # Repozitáře (rozhraní)
+    │       ├── UserRepository.php
+    │       ├── ProjectRepository.php
+    │       ├── TaskRepository.php
+    │       ├── CommentRepository.php
+    │       └── ActivityRepository.php
+    └── Infrastructure/        # Sdílená infrastruktura
+        └── Repository/        # Implementace repozitářů
+            ├── DoctrineUserRepository.php
+            ├── DoctrineProjectRepository.php
+            ├── DoctrineTaskRepository.php
+            ├── DoctrineCommentRepository.php
+            └── DoctrineActivityRepository.php</code></pre>
+
+    <h3 id="implementation">Implementace</h3>
+    <p>
+        Nyní se podíváme na implementaci některých klíčových částí systému.
+    </p>
+
+    <h4>Doménový model: Projekt</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Model;
+
+use App\Shared\Domain\Event\ProjectCreated;
+use App\Shared\Domain\ValueObject\ProjectId;
+use App\Shared\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'projects')]
+class Project
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $name;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description;
+
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $ownerId;
+
+    #[ORM\Column(type: 'json')]
+    private array $memberIds = [];
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    private array $events = [];
+
+    public function __construct(ProjectId $id, string $name, ?string $description, UserId $ownerId)
+    {
+        $this->id = $id->value();
+        $this->name = $name;
+        $this->description = $description;
+        $this->ownerId = $ownerId->value();
+        $this->memberIds = [$ownerId->value()];
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new ProjectCreated($id, $name, $ownerId));
+    }
+
+    public function id(): ProjectId
+    {
+        return new ProjectId($this->id);
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function description(): ?string
+    {
+        return $this->description;
+    }
+
+    public function ownerId(): UserId
+    {
+        return new UserId($this->ownerId);
+    }
+
+    public function memberIds(): array
+    {
+        return array_map(fn($id) => new UserId($id), $this->memberIds);
+    }
+
+    public function addMember(UserId $userId): void
+    {
+        if (!in_array($userId->value(), $this->memberIds)) {
+            $this->memberIds[] = $userId->value();
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function removeMember(UserId $userId): void
+    {
+        if ($userId->value() === $this->ownerId) {
+            throw new \DomainException('Cannot remove owner from project');
+        }
+
+        $this->memberIds = array_filter($this->memberIds, fn($id) => $id !== $userId->value());
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateName(string $name): void
+    {
+        $this->name = $name;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateDescription(?string $description): void
+    {
+        $this->description = $description;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function updatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+
+    <h4>Doménový model: Úkol</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Model;
+
+use App\Shared\Domain\Event\TaskCreated;
+use App\Shared\Domain\Event\TaskAssigned;
+use App\Shared\Domain\Event\TaskStatusChanged;
+use App\Shared\Domain\ValueObject\TaskId;
+use App\Shared\Domain\ValueObject\ProjectId;
+use App\Shared\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'tasks')]
+class Task
+{
+    public const STATUS_TODO = 'todo';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_DONE = 'done';
+
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $title;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description;
+
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $projectId;
+
+    #[ORM\Column(type: 'string', length: 36, nullable: true)]
+    private ?string $assigneeId = null;
+
+    #[ORM\Column(type: 'string', length: 20)]
+    private string $status;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    private array $events = [];
+
+    public function __construct(TaskId $id, string $title, ?string $description, ProjectId $projectId)
+    {
+        $this->id = $id->value();
+        $this->title = $title;
+        $this->description = $description;
+        $this->projectId = $projectId->value();
+        $this->status = self::STATUS_TODO;
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TaskCreated($id, $title, $projectId));
+    }
+
+    public function id(): TaskId
+    {
+        return new TaskId($this->id);
+    }
+
+    public function title(): string
+    {
+        return $this->title;
+    }
+
+    public function description(): ?string
+    {
+        return $this->description;
+    }
+
+    public function projectId(): ProjectId
+    {
+        return new ProjectId($this->projectId);
+    }
+
+    public function assigneeId(): ?UserId
+    {
+        return $this->assigneeId ? new UserId($this->assigneeId) : null;
+    }
+
+    public function status(): string
+    {
+        return $this->status;
+    }
+
+    public function assign(UserId $assigneeId): void
+    {
+        $this->assigneeId = $assigneeId->value();
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TaskAssigned($this->id(), $assigneeId));
+    }
+
+    public function unassign(): void
+    {
+        $this->assigneeId = null;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function changeStatus(string $status): void
+    {
+        if (!in_array($status, [self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])) {
+            throw new \InvalidArgumentException('Invalid status');
+        }
+
+        $oldStatus = $this->status;
+        $this->status = $status;
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TaskStatusChanged($this->id(), $oldStatus, $status));
+    }
+
+    public function updateTitle(string $title): void
+    {
+        $this->title = $title;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateDescription(?string $description): void
+    {
+        $this->description = $description;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function updatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+
+    <h4>Command: Vytvoření projektu</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\ProjectManagement\CreateProject;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class CreateProject
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 3, max: 255)]
+        public readonly string $name,
+
+        public readonly ?string $description,
+
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $ownerId
+    ) {
+    }
+}</code></pre>
+
+    <h4>Command Handler: Zpracování vytvoření projektu</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\ProjectManagement\CreateProject;
+
+use App\Shared\Domain\Model\Project;
+use App\Shared\Domain\Repository\ProjectRepository;
+use App\Shared\Domain\ValueObject\ProjectId;
+use App\Shared\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class CreateProjectHandler
+{
+    public function __construct(
+        private ProjectRepository $projectRepository
+    ) {
+    }
+
+    public function __invoke(CreateProject $command): string
+    {
+        $projectId = new ProjectId();
+
+        $project = new Project(
+            $projectId,
+            $command->name,
+            $command->description,
+            new UserId($command->ownerId)
+        );
+
+        $this->projectRepository->save($project);
+
+        return $projectId->value();
+    }
+}</code></pre>
+
+    <h4>Command: Přiřazení úkolu</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\TaskManagement\AssignTask;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class AssignTask
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $taskId,
+
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $assigneeId
+    ) {
+    }
+}</code></pre>
+
+    <h4>Command Handler: Zpracování přiřazení úkolu</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\TaskManagement\AssignTask;
+
+use App\Shared\Domain\Repository\TaskRepository;
+use App\Shared\Domain\Repository\ProjectRepository;
+use App\Shared\Domain\ValueObject\TaskId;
+use App\Shared\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class AssignTaskHandler
+{
+    public function __construct(
+        private TaskRepository $taskRepository,
+        private ProjectRepository $projectRepository
+    ) {
+    }
+
+    public function __invoke(AssignTask $command): void
+    {
+        $task = $this->taskRepository->findById(new TaskId($command->taskId));
+
+        if (!$task) {
+            throw new \DomainException('Task not found');
+        }
+
+        $project = $this->projectRepository->findById($task->projectId());
+
+        if (!$project) {
+            throw new \DomainException('Project not found');
+        }
+
+        $assigneeId = new UserId($command->assigneeId);
+
+        // Kontrola, zda je přiřazovaný uživatel členem projektu
+        $memberIds = $project->memberIds();
+        $isMember = false;
+
+        foreach ($memberIds as $memberId) {
+            if ($memberId->equals($assigneeId)) {
+                $isMember = true;
+                break;
+            }
+        }
+
+        if (!$isMember) {
+            throw new \DomainException('Assignee is not a member of the project');
+        }
+
+        $task->assign($assigneeId);
+
+        $this->taskRepository->save($task);
+    }
+}</code></pre>
+
+    <h4>Query: Získání projektů uživatele</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\ProjectManagement\ListProjects;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class GetProjects
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $userId
+    ) {
+    }
+}</code></pre>
+
+    <h4>Query Handler: Zpracování získání projektů uživatele</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\ProjectManagement\ListProjects;
+
+use App\Shared\Domain\Repository\ProjectRepository;
+use App\Shared\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class GetProjectsHandler
+{
+    public function __construct(
+        private ProjectRepository $projectRepository
+    ) {
+    }
+
+    public function __invoke(GetProjects $query): array
+    {
+        $projects = $this->projectRepository->findByMemberId(new UserId($query->userId));
+
+        $result = [];
+
+        foreach ($projects as $project) {
+            $result[] = new ProjectViewModel(
+                $project->id()->value(),
+                $project->name(),
+                $project->description(),
+                $project->ownerId()->value(),
+                count($project->memberIds()),
+                $project->createdAt()
+            );
+        }
+
+        return $result;
+    }
+}</code></pre>
+
+    <h3 id="lessons">Ponaučení</h3>
+    <p>
+        Implementace systému pro správu projektů pomocí horizontálního DDD a CQRS v Symfony 7 přinesla několik důležitých ponaučení:
+    </p>
+
+    <ol>
+        <li>
+            <strong>Horizontální DDD usnadňuje modularitu</strong> - Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti.
+            Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.
+        </li>
+        <li>
+            <strong>CQRS přináší jasné oddělení zodpovědností</strong> - Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu.
+            Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování.
+        </li>
+        <li>
+            <strong>Doménové události jsou klíčové pro komunikaci</strong> - Doménové události byly klíčové pro komunikaci mezi různými částmi aplikace.
+            Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými částmi aplikace.
+        </li>
+        <li>
+            <strong>Symfony Messenger usnadňuje implementaci CQRS</strong> - Symfony Messenger poskytuje výkonnou infrastrukturu pro implementaci CQRS.
+            Busy pro příkazy a dotazy byly snadno konfigurovatelné a použitelné.
+        </li>
+        <li>
+            <strong>Validace je důležitá</strong> - Validace příkazů a dotazů byla klíčová pro zajištění integrity dat.
+            Symfony Validator poskytuje výkonné nástroje pro validaci dat.
+        </li>
+        <li>
+            <strong>Testování je snazší</strong> - Horizontální DDD a CQRS usnadňují testování, protože příkazy a dotazy jsou jasně odděleny.
+            Každá funkce může být testována nezávisle na ostatních.
+        </li>
+        <li>
+            <strong>Škálovatelnost je lepší</strong> - Horizontální DDD a CQRS umožňují snadnější škálování aplikace.
+            Operace čtení a zápisu mohou být škálovány nezávisle, a funkce mohou být rozděleny do mikroslužeb.
+        </li>
+    </ol>
+
+    <div class="warning-box">
+        <h4>Důležité poznámky</h4>
+        <p>
+            Při implementaci horizontálního DDD a CQRS v Symfony 7 je důležité:
+        </p>
+        <ul>
+            <li>Definovat jasné hranice mezi bounded contexts.</li>
+            <li>Používat doménové události pro komunikaci mezi bounded contexts.</li>
+            <li>Používat hodnotové objekty pro validaci a enkapsulaci doménových konceptů.</li>
+            <li>Oddělovat příkazy a dotazy podle CQRS principů.</li>
+            <li>Používat Symfony Messenger pro implementaci command a query busů.</li>
+            <li>Používat validaci pro validaci příkazů a dotazů.</li>
+            <li>Testovat každou funkci nezávisle na ostatních.</li>
+        </ul>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na <a href="{{ path('resources') }}">zdroje a další četbu o DDD a CQRS v Symfony 7</a>.
+    </p>
+{% endblock %}

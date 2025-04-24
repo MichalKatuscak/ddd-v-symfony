@@ -1,0 +1,467 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Základní koncepty DDD</h2>
+
+    <div class="table-of-contents mb-4">
+        <h5>Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#entities">Entity (Entity)</a></li>
+            <li><a href="#value-objects">Hodnotové objekty (Value Objects)</a></li>
+            <li><a href="#aggregates">Agregáty (Aggregates)</a></li>
+            <li><a href="#repositories">Repozitáře (Repositories)</a></li>
+            <li><a href="#domain-services">Doménové služby (Domain Services)</a></li>
+            <li><a href="#domain-events">Doménové události (Domain Events)</a></li>
+            <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
+            <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
+        </ul>
+    </div>
+
+    <h3 id="entities">Entity (Entity)</h3>
+    <p>
+        Entity je objekt, který je definován svou identitou, nikoli svými atributy. Entity mají životní cyklus a mohou se v průběhu času měnit,
+        ale jejich identita zůstává stejná.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Entity v PHP</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Domain\Model;
+
+class User
+{
+    private UserId $id;
+    private string $name;
+    private Email $email;
+    private \DateTimeImmutable $createdAt;
+
+    public function __construct(UserId $id, string $name, Email $email)
+    {
+        $this->id = $id;
+        $this->name = $name;
+        $this->email = $email;
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function id(): UserId
+    {
+        return $this->id;
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function email(): Email
+    {
+        return $this->email;
+    }
+
+    public function changeName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function changeEmail(Email $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Uživatel může změnit své jméno nebo e-mail,
+        ale jeho identita zůstává stejná.
+    </p>
+
+    <h3 id="value-objects">Hodnotové objekty (Value Objects)</h3>
+    <p>
+        Hodnotové objekty jsou objekty, které jsou definovány svými atributy, nikoli svou identitou. Hodnotové objekty jsou neměnné (immutable)
+        a nemají žádnou identitu.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Hodnotový objekt v PHP</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Domain\ValueObject;
+
+class Email
+{
+    private string $value;
+
+    public function __construct(string $value)
+    {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Invalid email address');
+        }
+
+        $this->value = $value;
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(Email $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. E-mailová adresa je neměnná a nemá žádnou identitu.
+        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
+    </p>
+
+    <h3 id="aggregates">Agregáty (Aggregates)</h3>
+    <p>
+        Agregát je skupina souvisejících objektů, které jsou považovány za jednu jednotku z hlediska změn dat. Každý agregát má kořenovou entitu (aggregate root),
+        která je jediným vstupním bodem pro manipulaci s agregátem.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Agregát v PHP</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Domain\Model;
+
+class Order
+{
+    private OrderId $id;
+    private UserId $userId;
+    private array $items = [];
+    private OrderStatus $status;
+    private \DateTimeImmutable $createdAt;
+
+    public function __construct(OrderId $id, UserId $userId)
+    {
+        $this->id = $id;
+        $this->userId = $userId;
+        $this->status = OrderStatus::CREATED;
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function id(): OrderId
+    {
+        return $this->id;
+    }
+
+    public function userId(): UserId
+    {
+        return $this->userId;
+    }
+
+    public function addItem(ProductId $productId, int $quantity, Money $price): void
+    {
+        if ($this->status !== OrderStatus::CREATED) {
+            throw new \DomainException('Cannot add items to a non-created order');
+        }
+
+        $this->items[] = new OrderItem($this->id, $productId, $quantity, $price);
+    }
+
+    public function removeItem(ProductId $productId): void
+    {
+        if ($this->status !== OrderStatus::CREATED) {
+            throw new \DomainException('Cannot remove items from a non-created order');
+        }
+
+        $this->items = array_filter($this->items, function (OrderItem $item) use ($productId) {
+            return !$item->productId()->equals($productId);
+        });
+    }
+
+    public function confirm(): void
+    {
+        if ($this->status !== OrderStatus::CREATED) {
+            throw new \DomainException('Cannot confirm a non-created order');
+        }
+
+        if (empty($this->items)) {
+            throw new \DomainException('Cannot confirm an empty order');
+        }
+
+        $this->status = OrderStatus::CONFIRMED;
+    }
+
+    public function cancel(): void
+    {
+        if ($this->status !== OrderStatus::CREATED && $this->status !== OrderStatus::CONFIRMED) {
+            throw new \DomainException('Cannot cancel a non-created or non-confirmed order');
+        }
+
+        $this->status = OrderStatus::CANCELLED;
+    }
+
+    public function items(): array
+    {
+        return $this->items;
+    }
+
+    public function status(): OrderStatus
+    {
+        return $this->status;
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>Order</code> agregát, který obsahuje kolekci <code>OrderItem</code> objektů. <code>Order</code> je kořenovou entitou (aggregate root)
+        a poskytuje metody pro manipulaci s položkami objednávky.
+    </p>
+
+    <h3 id="repositories">Repozitáře (Repositories)</h3>
+    <p>
+        Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily persistence a poskytují
+        doménově orientované rozhraní pro přístup k datům.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Repozitář v PHP</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Domain\Repository;
+
+use App\Domain\Model\Order;
+use App\Domain\Model\OrderId;
+use App\Domain\Model\UserId;
+
+interface OrderRepository
+{
+    public function save(Order $order): void;
+
+    public function findById(OrderId $id): ?Order;
+
+    public function findByUserId(UserId $userId): array;
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>OrderRepository</code> rozhraní, které definuje metody pro ukládání a načítání objednávek.
+        Konkrétní implementace tohoto rozhraní by mohla používat Doctrine ORM nebo jiný mechanismus persistence.
+    </p>
+
+    <h3 id="domain-services">Doménové služby (Domain Services)</h3>
+    <p>
+        Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
+        Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Doménová služba v PHP</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Domain\Service;
+
+use App\Domain\Model\Order;
+use App\Domain\Model\Payment;
+use App\Domain\Model\PaymentId;
+use App\Domain\Repository\PaymentRepository;
+
+class PaymentService
+{
+    private PaymentRepository $paymentRepository;
+
+    public function __construct(PaymentRepository $paymentRepository)
+    {
+        $this->paymentRepository = $paymentRepository;
+    }
+
+    public function processPayment(Order $order, PaymentMethod $paymentMethod): Payment
+    {
+        if ($order->status() !== OrderStatus::CONFIRMED) {
+            throw new \DomainException('Cannot process payment for a non-confirmed order');
+        }
+
+        $payment = new Payment(
+            new PaymentId(),
+            $order->id(),
+            $this->calculateTotalAmount($order),
+            $paymentMethod
+        );
+
+        $this->paymentRepository->save($payment);
+
+        return $payment;
+    }
+
+    private function calculateTotalAmount(Order $order): Money
+    {
+        $total = new Money(0);
+
+        foreach ($order->items() as $item) {
+            $total = $total->add($item->price()->multiply($item->quantity()));
+        }
+
+        return $total;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>PaymentService</code> doménová služba, která poskytuje logiku pro zpracování plateb.
+        Tato logika nepatří přirozeně do žádné entity nebo hodnotového objektu.
+    </p>
+
+    <h3 id="domain-events">Doménové události (Domain Events)</h3>
+    <p>
+        Doménová událost je objekt, který reprezentuje něco, co se stalo v doméně a co by mohlo být zajímavé pro jiné části systému.
+        Doménové události jsou neměnné a obsahují informace o tom, co se stalo.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Doménová událost v PHP</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Domain\Event;
+
+use App\Domain\Model\OrderId;
+use App\Domain\Model\UserId;
+
+class OrderCreatedEvent
+{
+    private OrderId $orderId;
+    private UserId $userId;
+    private \DateTimeImmutable $occurredAt;
+
+    public function __construct(OrderId $orderId, UserId $userId)
+    {
+        $this->orderId = $orderId;
+        $this->userId = $userId;
+        $this->occurredAt = new \DateTimeImmutable();
+    }
+
+    public function orderId(): OrderId
+    {
+        return $this->orderId;
+    }
+
+    public function userId(): UserId
+    {
+        return $this->userId;
+    }
+
+    public function occurredAt(): \DateTimeImmutable
+    {
+        return $this->occurredAt;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>OrderCreatedEvent</code> doménová událost, která reprezentuje vytvoření nové objednávky.
+        Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy se to stalo.
+    </p>
+
+    <h3 id="bounded-contexts">Ohraničené kontexty (Bounded Contexts)</h3>
+    <p>
+        Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu existuje konzistentní model
+        a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Ohraničené kontexty v PHP</h4>
+        <pre><code class="language-bash">src/
+├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
+│   ├── Domain/
+│   │   ├── Model/
+│   │   │   ├── Order.php
+│   │   │   ├── OrderItem.php
+│   │   │   └── OrderStatus.php
+│   │   └── Repository/
+│   │       └── OrderRepository.php
+│   └── Application/
+│       ├── Command/
+│       │   ├── CreateOrder.php
+│       │   └── CreateOrderHandler.php
+│       └── Query/
+│           ├── GetOrder.php
+│           └── GetOrderHandler.php
+└── UserManagement/            # Ohraničený kontext: Správa uživatelů
+    ├── Domain/
+    │   ├── Model/
+    │   │   ├── User.php
+    │   │   └── UserStatus.php
+    │   └── Repository/
+    │       └── UserRepository.php
+    └── Application/
+        ├── Command/
+        │   ├── RegisterUser.php
+        │   └── RegisterUserHandler.php
+        └── Query/
+            ├── GetUser.php
+            └── GetUserHandler.php</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu jsou <code>OrderProcessing</code> a <code>UserManagement</code> dva ohraničené kontexty.
+        Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderProcessing</code> může být uživatel reprezentován pouze jako <code>UserId</code>,
+        zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
+    </p>
+
+    <h3 id="ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</h3>
+    <p>
+        Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v kódu, dokumentaci a komunikaci.
+        Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
+    </p>
+
+    <div class="concept-box">
+        <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
+        <p>
+            V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
+        </p>
+        <ul>
+            <li><strong>Košík (Cart)</strong> - Dočasná kolekce produktů, které si zákazník vybral k nákupu.</li>
+            <li><strong>Objednávka (Order)</strong> - Potvrzený nákup zákazníka, který obsahuje produkty, dodací adresu a platební informace.</li>
+            <li><strong>Katalog (Catalog)</strong> - Kolekce všech produktů dostupných k prodeji.</li>
+            <li><strong>Zákazník (Customer)</strong> - Osoba, která nakupuje produkty.</li>
+            <li><strong>Produkt (Product)</strong> - Položka, která je dostupná k prodeji.</li>
+            <li><strong>Kategorie (Category)</strong> - Skupina souvisejících produktů.</li>
+            <li><strong>Platba (Payment)</strong> - Transakce, kterou zákazník platí za objednávku.</li>
+            <li><strong>Dodání (Shipping)</strong> - Proces doručení objednávky zákazníkovi.</li>
+        </ul>
+    </div>
+
+    <p>
+        Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými experty.
+        Například, místo použití termínu "uživatel" by se používal termín "zákazník", pokud se jedná o osobu, která nakupuje produkty.
+    </p>
+
+    <div class="warning-box">
+        <h4>Důležité poznámky</h4>
+        <p>
+            Při implementaci DDD je důležité:
+        </p>
+        <ul>
+            <li>Používat všudypřítomný jazyk konzistentně v celém projektu.</li>
+            <li>Definovat jasné hranice mezi ohraničenými kontexty.</li>
+            <li>Používat agregáty pro zajištění konzistence dat.</li>
+            <li>Používat repozitáře pro přístup k agregátům.</li>
+            <li>Používat doménové události pro komunikaci mezi ohraničenými kontexty.</li>
+        </ul>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na <a href="{{ path('implementation_in_symfony') }}">implementaci DDD v Symfony 7</a>.
+    </p>
+{% endblock %}

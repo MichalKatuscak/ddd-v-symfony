@@ -1,0 +1,681 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Implementace DDD v Symfony 7</h2>
+
+    <div class="table-of-contents mb-4">
+        <h5>Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#project-structure">Struktura projektu</a></li>
+            <li><a href="#entities">Implementace entit</a></li>
+            <li><a href="#value-objects">Implementace hodnotových objektů</a></li>
+            <li><a href="#repositories">Implementace repozitářů</a></li>
+            <li><a href="#domain-services">Implementace doménových služeb</a></li>
+            <li><a href="#domain-events">Implementace doménových událostí</a></li>
+            <li><a href="#application-services">Implementace aplikačních služeb</a></li>
+            <li><a href="#controllers">Implementace kontrolerů</a></li>
+            <li><a href="#dependency-injection">Dependency Injection</a></li>
+        </ul>
+    </div>
+
+    <h3 id="project-structure">Struktura projektu</h3>
+    <p>
+        Při implementaci horizontálního DDD v Symfony 7 je důležité zvolit vhodnou strukturu projektu. Zde je příklad struktury projektu
+        pro horizontální DDD v Symfony 7:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Struktura projektu pro horizontální DDD v Symfony 7</h4>
+        <pre><code class="language-bash">src/
+├── UserManagement/             # Feature: Správa uživatelů
+│   ├── Registration/           # Sub-feature: Registrace uživatelů
+│   │   ├── Command/            # Commands
+│   │   │   ├── RegisterUser.php
+│   │   │   └── RegisterUserHandler.php
+│   │   ├── Controller/         # Controllers
+│   │   │   └── RegistrationController.php
+│   │   ├── Form/               # Forms
+│   │   │   └── RegistrationFormType.php
+│   │   └── View/               # Views
+│   │       └── registration.html.twig
+│   └── Profile/                # Sub-feature: Profil uživatele
+│       ├── Query/              # Queries
+│       │   ├── GetUserProfile.php
+│       │   └── GetUserProfileHandler.php
+│       ├── Controller/         # Controllers
+│       │   └── ProfileController.php
+│       ├── Form/               # Forms
+│       │   └── ProfileFormType.php
+│       └── View/               # Views
+│           └── profile.html.twig
+├── OrderProcessing/            # Feature: Zpracování objednávek
+│   ├── Checkout/               # Sub-feature: Pokladna
+│   │   ├── Command/            # Commands
+│   │   │   ├── CreateOrder.php
+│   │   │   └── CreateOrderHandler.php
+│   │   ├── Controller/         # Controllers
+│   │   │   └── CheckoutController.php
+│   │   ├── Form/               # Forms
+│   │   │   └── CheckoutFormType.php
+│   │   └── View/               # Views
+│   │       └── checkout.html.twig
+│   └── OrderHistory/           # Sub-feature: Historie objednávek
+│       ├── Query/              # Queries
+│       │   ├── GetOrderHistory.php
+│       │   └── GetOrderHistoryHandler.php
+│       ├── Controller/         # Controllers
+│       │   └── OrderHistoryController.php
+│       └── View/               # Views
+│           └── order_history.html.twig
+└── Shared/                     # Sdílené komponenty
+    ├── Domain/                 # Sdílená doménová logika
+    │   ├── Model/              # Doménové modely
+    │   │   ├── User.php
+    │   │   └── Order.php
+    │   ├── ValueObject/        # Hodnotové objekty
+    │   │   ├── Email.php
+    │   │   └── Money.php
+    │   ├── Event/              # Doménové události
+    │   │   ├── UserRegistered.php
+    │   │   └── OrderCreated.php
+    │   └── Repository/         # Repozitáře (rozhraní)
+    │       ├── UserRepository.php
+    │       └── OrderRepository.php
+    └── Infrastructure/         # Sdílená infrastruktura
+        ├── Repository/         # Implementace repozitářů
+        │   ├── DoctrineUserRepository.php
+        │   └── DoctrineOrderRepository.php
+        └── Persistence/        # Persistence
+            └── Doctrine/
+                └── Mapping/
+                    ├── User.orm.xml
+                    └── Order.orm.xml</code></pre>
+    </div>
+
+    <p>
+        Tato struktura projektu organizuje kód podle funkcí (features) a podfunkcí (sub-features). Každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
+        Sdílené komponenty jsou umístěny v adresáři <code>Shared</code>.
+    </p>
+
+    <h3 id="entities">Implementace entit</h3>
+    <p>
+        Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 7 můžete implementovat entity jako běžné PHP třídy:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace entity v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Model;
+
+use App\Shared\Domain\Event\UserRegistered;
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+class User
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
+    private string $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $name;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $email;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
+
+    private array $events = [];
+
+    public function __construct(UserId $id, string $name, Email $email)
+    {
+        $this->id = $id->value();
+        $this->name = $name;
+        $this->email = $email->value();
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new UserRegistered($id, $email));
+    }
+
+    public function id(): UserId
+    {
+        return new UserId($this->id);
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function email(): Email
+    {
+        return new Email($this->email);
+    }
+
+    public function changeName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function changeEmail(Email $email): void
+    {
+        $this->email = $email->value();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Entity mohou také generovat doménové události,
+        které jsou uloženy v poli <code>$events</code> a mohou být později uvolněny a zpracovány.
+    </p>
+
+    <h3 id="value-objects">Implementace hodnotových objektů</h3>
+    <p>
+        Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 7 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace hodnotového objektu v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\ValueObject;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Embeddable]
+class Email
+{
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $value;
+
+    public function __construct(string $value)
+    {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Invalid email address');
+        }
+
+        $this->value = $value;
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(Email $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné a nemají žádnou identitu.
+        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
+    </p>
+
+    <h3 id="repositories">Implementace repozitářů</h3>
+    <p>
+        Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 7 můžete implementovat repozitáře jako rozhraní a jejich implementace:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace repozitáře v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Repository;
+
+use App\Shared\Domain\Model\User;
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+
+interface UserRepository
+{
+    public function save(User $user): void;
+
+    public function findById(UserId $id): ?User;
+
+    public function findByEmail(Email $email): ?User;
+}</code></pre>
+
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Infrastructure\Repository;
+
+use App\Shared\Domain\Model\User;
+use App\Shared\Domain\Repository\UserRepository;
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+use Doctrine\ORM\EntityManagerInterface;
+
+class DoctrineUserRepository implements UserRepository
+{
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    public function save(User $user): void
+    {
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        foreach ($user->releaseEvents() as $event) {
+            $this->entityManager->getEventManager()->dispatchEvent(
+                'onDomainEvent',
+                new DomainEventArgs($event)
+            );
+        }
+    }
+
+    public function findById(UserId $id): ?User
+    {
+        return $this->entityManager->find(User::class, $id->value());
+    }
+
+    public function findByEmail(Email $email): ?User
+    {
+        return $this->entityManager->getRepository(User::class)
+            ->findOneBy(['email' => $email->value()]);
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>UserRepository</code> rozhraní, které definuje metody pro ukládání a načítání uživatelů.
+        <code>DoctrineUserRepository</code> je implementace tohoto rozhraní, která používá Doctrine ORM pro persistenci.
+    </p>
+
+    <h3 id="domain-services">Implementace doménových služeb</h3>
+    <p>
+        Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
+        V Symfony 7 můžete implementovat doménové služby jako běžné PHP třídy:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace doménové služby v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\OrderProcessing\Checkout\Service;
+
+use App\Shared\Domain\Model\Order;
+use App\Shared\Domain\Model\Payment;
+use App\Shared\Domain\Repository\PaymentRepository;
+use App\Shared\Domain\ValueObject\Money;
+use App\Shared\Domain\ValueObject\PaymentId;
+use App\Shared\Domain\ValueObject\PaymentMethod;
+
+class PaymentService
+{
+    private PaymentRepository $paymentRepository;
+
+    public function __construct(PaymentRepository $paymentRepository)
+    {
+        $this->paymentRepository = $paymentRepository;
+    }
+
+    public function processPayment(Order $order, PaymentMethod $paymentMethod): Payment
+    {
+        if ($order->status() !== OrderStatus::CONFIRMED) {
+            throw new \DomainException('Cannot process payment for a non-confirmed order');
+        }
+
+        $payment = new Payment(
+            new PaymentId(),
+            $order->id(),
+            $this->calculateTotalAmount($order),
+            $paymentMethod
+        );
+
+        $this->paymentRepository->save($payment);
+
+        return $payment;
+    }
+
+    private function calculateTotalAmount(Order $order): Money
+    {
+        $total = new Money(0);
+
+        foreach ($order->items() as $item) {
+            $total = $total->add($item->price()->multiply($item->quantity()));
+        }
+
+        return $total;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>PaymentService</code> doménová služba, která poskytuje logiku pro zpracování plateb.
+        Tato logika nepatří přirozeně do žádné entity nebo hodnotového objektu.
+    </p>
+
+    <h3 id="domain-events">Implementace doménových událostí</h3>
+    <p>
+        Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 7 můžete implementovat doménové události jako neměnné PHP třídy:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace doménové události v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\Shared\Domain\Event;
+
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+
+class UserRegistered
+{
+    private string $userId;
+    private string $email;
+    private \DateTimeImmutable $occurredAt;
+
+    public function __construct(UserId $userId, Email $email)
+    {
+        $this->userId = $userId->value();
+        $this->email = $email->value();
+        $this->occurredAt = new \DateTimeImmutable();
+    }
+
+    public function userId(): UserId
+    {
+        return new UserId($this->userId);
+    }
+
+    public function email(): Email
+    {
+        return new Email($this->email);
+    }
+
+    public function occurredAt(): \DateTimeImmutable
+    {
+        return $this->occurredAt;
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>UserRegistered</code> doménová událost, která reprezentuje registraci nového uživatele.
+        Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký má e-mail a kdy se to stalo.
+    </p>
+
+    <h3 id="application-services">Implementace aplikačních služeb</h3>
+    <p>
+        Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 7 můžete implementovat aplikační služby
+        jako command a query handlery:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace command handleru v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Registration\Command;
+
+class RegisterUser
+{
+    public function __construct(
+        public readonly string $name,
+        public readonly string $email,
+        public readonly string $password
+    ) {
+    }
+}</code></pre>
+
+        <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Registration\Command;
+
+use App\Shared\Domain\Model\User;
+use App\Shared\Domain\Repository\UserRepository;
+use App\Shared\Domain\ValueObject\Email;
+use App\Shared\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
+#[AsMessageHandler]
+class RegisterUserHandler
+{
+    public function __construct(
+        private UserRepository $userRepository,
+        private UserPasswordHasherInterface $passwordHasher
+    ) {
+    }
+
+    public function __invoke(RegisterUser $command): void
+    {
+        $email = new Email($command->email);
+
+        if ($this->userRepository->findByEmail($email)) {
+            throw new \DomainException('User with this email already exists');
+        }
+
+        $user = new User(
+            new UserId(),
+            $command->name,
+            $email
+        );
+
+        // Set password
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $command->password);
+        $user->setPassword($hashedPassword);
+
+        $this->userRepository->save($user);
+    }
+}</code></pre>
+    </div>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace query handleru v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Profile\Query;
+
+class GetUserProfile
+{
+    public function __construct(
+        public readonly string $userId
+    ) {
+    }
+}</code></pre>
+
+        <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Profile\Query;
+
+use App\Shared\Domain\Repository\UserRepository;
+use App\Shared\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class GetUserProfileHandler
+{
+    public function __construct(
+        private UserRepository $userRepository
+    ) {
+    }
+
+    public function __invoke(GetUserProfile $query): ?UserProfileViewModel
+    {
+        $user = $this->userRepository->findById(new UserId($query->userId));
+
+        if (!$user) {
+            return null;
+        }
+
+        return new UserProfileViewModel(
+            $user->id()->value(),
+            $user->name(),
+            $user->email()->value(),
+            $user->createdAt()
+        );
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V těchto příkladech jsou <code>RegisterUserHandler</code> a <code>GetUserProfileHandler</code> aplikační služby, které zpracovávají příkazy a dotazy.
+        Tyto služby koordinují aplikační aktivity a delegují práci doménové vrstvě.
+    </p>
+
+    <h3 id="controllers">Implementace kontrolerů</h3>
+    <p>
+        Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 7 můžete implementovat kontrolery
+        jako běžné Symfony kontrolery:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Implementace kontroleru v Symfony 7</h4>
+        <pre><code class="language-php">&lt;?php
+
+namespace App\UserManagement\Registration\Controller;
+
+use App\UserManagement\Registration\Command\RegisterUser;
+use App\UserManagement\Registration\Form\RegistrationFormType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
+class RegistrationController extends AbstractController
+{
+    #[Route('/register', name: 'app_register')]
+    public function register(Request $request, MessageBusInterface $commandBus): Response
+    {
+        $form = $this->createForm(RegistrationFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $command = new RegisterUser(
+                $data['name'],
+                $data['email'],
+                $data['password']
+            );
+
+            try {
+                $commandBus->dispatch($command);
+
+                $this->addFlash('success', 'Your account has been created. You can now log in.');
+
+                return $this->redirectToRoute('app_login');
+            } catch (\DomainException $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
+        }
+
+        return $this->render('@UserManagement/Registration/View/registration.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je <code>RegistrationController</code> kontroler, který zpracovává registraci uživatele.
+        Kontroler vytváří formulář, zpracovává požadavek a odesílá příkaz <code>RegisterUser</code> přes command bus.
+    </p>
+
+    <h3 id="dependency-injection">Dependency Injection</h3>
+    <p>
+        Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
+        Symfony 7 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
+    </p>
+
+    <div class="example-box">
+        <h4>Příklad: Konfigurace služeb v Symfony 7</h4>
+        <pre><code class="language-yaml"># config/services.yaml
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Registrace všech služeb v adresáři src/
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/*/Domain/Model/'
+            - '../src/*/Domain/ValueObject/'
+            - '../src/*/Domain/Event/'
+
+    # Explicitní konfigurace repozitářů
+    App\Shared\Domain\Repository\UserRepository:
+        class: App\Shared\Infrastructure\Repository\DoctrineUserRepository
+
+    App\Shared\Domain\Repository\OrderRepository:
+        class: App\Shared\Infrastructure\Repository\DoctrineOrderRepository
+
+    # Konfigurace Messenger komponentu
+    messenger.default_bus:
+        class: Symfony\Component\Messenger\MessageBus
+        arguments:
+            - !tagged messenger.bus.middleware
+
+    messenger.command_bus:
+        class: Symfony\Component\Messenger\MessageBus
+        arguments:
+            - !tagged messenger.command_bus.middleware
+
+    messenger.query_bus:
+        class: Symfony\Component\Messenger\MessageBus
+        arguments:
+            - !tagged messenger.query_bus.middleware</code></pre>
+    </div>
+
+    <p>
+        V tomto příkladu je konfigurace služeb v Symfony 7. Služby jsou automaticky registrovány a autowired.
+        Repozitáře jsou explicitně konfigurovány, aby bylo možné použít rozhraní místo konkrétních implementací.
+        Messenger komponenty jsou konfigurovány pro implementaci CQRS.
+    </p>
+
+    <div class="warning-box">
+        <h4>Důležité poznámky</h4>
+        <p>
+            Při implementaci DDD v Symfony 7 je důležité:
+        </p>
+        <ul>
+            <li>Používat Dependency Injection pro oddělení závislostí.</li>
+            <li>Používat Messenger komponent pro implementaci CQRS.</li>
+            <li>Používat Doctrine ORM pro persistenci doménových objektů.</li>
+            <li>Používat atributy pro konfiguraci služeb a routování.</li>
+            <li>Používat formuláře pro zpracování vstupů od uživatele.</li>
+            <li>Používat validaci pro validaci doménových objektů.</li>
+        </ul>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na <a href="{{ path('cqrs') }}">implementaci CQRS v Symfony 7</a>.
+    </p>
+{% endblock %}
