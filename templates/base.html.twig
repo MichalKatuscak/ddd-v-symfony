@@ -32,7 +32,7 @@
     <meta property="twitter:description" content="{% block twitter_description %}{{ block('og_description') }}{% endblock %}">
     <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/ddd-symfony-twitter.jpg') }}">
 
-    <title>{% block title %}{{ title ?? 'Architektura DDD v Symfony 7' }}{% endblock %}</title>
+    <title>{% block title %}{{ title ?? 'Architektura DDD v Symfony 7' }} | DDD Symfony{% endblock %}</title>
 
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -100,6 +100,42 @@
     </header>
 
     <main class="container py-5">
+        {% if app.request.attributes.get('_route') != 'homepage' %}
+        <!-- Breadcrumbs hidden for visitors but available for search engines -->
+        <div class="breadcrumb-container">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('homepage') }}">Hlavní stránka</a></li>
+                    {% block breadcrumbs %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+                    {% endblock %}
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Structured Data for Breadcrumbs -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Hlavní stránka",
+                    "item": "{{ app.request.schemeAndHttpHost }}{{ path('homepage') }}"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "{{ title }}",
+                    "item": "{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}"
+                }
+            ]
+        }
+        </script>
+        {% endif %}
+
         {% block body %}{% endblock %}
     </main>
 

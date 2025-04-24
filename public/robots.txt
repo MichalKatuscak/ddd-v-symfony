@@ -2,10 +2,21 @@
 # www.google.com/support/webmasters/bin/answer.py?hl=en&answer=156449
 
 User-agent: *
+
+# Zakázat přístup k administračním a autentizačním stránkám
 Disallow: /admin/
 Disallow: /login
 Disallow: /logout
 Disallow: /register
 
+# Zakázat přístup k chybovým stránkám
+Disallow: /404
+Disallow: /403
+Disallow: /500
+Disallow: /error/
+
 # Povolit přístup ke všem ostatním stránkám
 Allow: /
+
+# Sitemap
+Sitemap: https://ddd-v-symfony.katuscak.cz/sitemap.xml

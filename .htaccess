@@ -4,6 +4,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https:///%{HTTP_HOST}/$1 [R=301,L]
+
     # Přesměrovat vše do public adresáře
     RewriteRule ^$ public/index.php [L]
     RewriteRule ^((?!public/).*)$ public/$1 [L,NC]

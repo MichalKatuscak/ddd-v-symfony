@@ -1,5 +1,37 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Architektura DDD v Symfony 7 - Komplexní průvodce | DDD Symfony{% endblock %}
+
+{% block meta_description %}Komplexní průvodce Domain-Driven Design v Symfony 7. Naučte se implementovat DDD architekturu, CQRS a Event Sourcing ve svých Symfony projektech.{% endblock %}
+
+{% block meta_keywords %}Domain-Driven Design, DDD, Symfony 7, PHP, architektura, vývoj, CQRS, Event Sourcing, Bounded Context, Ubiquitous Language{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Architektura DDD v Symfony 7 - Komplexní průvodce",
+    "description": "Komplexní průvodce Domain-Driven Design v Symfony 7. Naučte se implementovat DDD architekturu ve svých Symfony projektech.",
+    "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/ddd-symfony-og.jpg') }}",
+    "author": {
+        "@type": "Person",
+        "name": "Michal Katuščák"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "DDD Symfony",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ app.request.schemeAndHttpHost }}{{ asset('images/logo.png') }}"
+        }
+    },
+    "datePublished": "2025-04-24",
+    "dateModified": "2025-04-24"
+}
+</script>
+{% endblock %}
+
 {% block body %}
     <div class="row">
         <div class="col-md-8">
@@ -116,10 +148,10 @@
                                 Symfony 7 přináší mnoho nových funkcí, které usnadňují implementaci DDD:
                             </p>
                             <ul>
-                                <li>Vylepšený Messenger komponent pro CQRS</li>
-                                <li>Nový Scheduler komponent pro plánování úloh</li>
+                                <li>Vylepšená Messenger komponenta pro CQRS</li>
+                                <li>Nová Scheduler komponenta pro plánování úloh</li>
                                 <li>Vylepšená podpora atributů v PHP 8.2</li>
-                                <li>Webhook komponent pro definování vlastních webhooků</li>
+                                <li>Webhook komponenta pro definování vlastních webhooků</li>
                             </ul>
                         </div>
                     </div>
@@ -143,7 +175,7 @@
                 </div>
             </div>
 
-            <div class="text-center mt-5">
+            <div class="text-center mt-5 mb-5">
                 <p class="lead">
                     Pojďme začít prozkoumáním toho, <a href="{{ path('what_is_ddd') }}">co je Domain-Driven Design</a> a jak může pomoci při vývoji aplikací v Symfony 7.
                 </p>

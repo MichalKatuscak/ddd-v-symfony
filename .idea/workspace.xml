@@ -5,42 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6294d58b-6d76-401e-9d4e-16056770990c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.htaccess" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/favicon-template.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/index.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/.htaccess" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/.well-known/security.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/css/.htaccess" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/css/bootstrap-grid.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/css/code-style.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/css/modern-style.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/favicon.ico" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/favicon.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/js/.htaccess" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/js/code-script.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/js/modern-script.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/robots.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/test.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Controller/ErrorController.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/.htaccess" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/bundles/TwigBundle/Exception/error.html.twig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/bundles/TwigBundle/Exception/error403.html.twig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/bundles/TwigBundle/Exception/error404.html.twig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/bundles/TwigBundle/Exception/error500.html.twig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/ddd/security_policy.html.twig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/sitemap.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.htaccess" beforeDir="false" afterPath="$PROJECT_DIR$/.htaccess" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/AugmentWebviewStateStore.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AugmentWebviewStateStore.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ddd.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ddd.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/packages/framework.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/packages/framework.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/routes.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/routes.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/services.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/services.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/DddController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/DddController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/modern-style.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/modern-style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public/robots.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/basic_concepts.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/basic_concepts.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/case_study.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/case_study.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/cqrs.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/cqrs.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/horizontal_vs_vertical.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/horizontal_vs_vertical.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/implementation_in_symfony.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/implementation_in_symfony.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/ddd/index.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/index.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/practical_examples.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/practical_examples.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/resources.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/resources.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/security_policy.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/security_policy.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/what_is_ddd.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/what_is_ddd.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/ddd/what_is_ddd_updated.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/ddd/what_is_ddd_updated.html.twig" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,7 +125,7 @@
     "WebServerToolWindowPanel.toolwindow.show.date": "false",
     "WebServerToolWindowPanel.toolwindow.show.permissions": "false",
     "WebServerToolWindowPanel.toolwindow.show.size": "false",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -170,7 +152,7 @@
       <workItem from="1745413409305" duration="66000" />
       <workItem from="1745413487211" duration="3593000" />
       <workItem from="1745429652782" duration="109000" />
-      <workItem from="1745429777055" duration="11757000" />
+      <workItem from="1745429777055" duration="14162000" />
     </task>
     <servers />
   </component>

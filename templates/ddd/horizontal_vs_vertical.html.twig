@@ -1,5 +1,11 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Horizontální vs. Vertikální DDD: Srovnání přístupů | DDD Symfony{% endblock %}
+
+{% block meta_description %}Porovnání horizontálního (vertikální slice) a tradičního vertikálního přístupu k Domain-Driven Design. Zjistěte, který přístup je vhodnější pro váš Symfony projekt a jaké jsou jejich výhody a nevýhody.{% endblock %}
+
+{% block meta_keywords %}horizontální DDD, vertikální DDD, vertikální slice, feature slices, vrstvená architektura, modularity, Symfony architektura, organizace kódu{% endblock %}
+
 {% block body %}
     <h2>Horizontální vs. Vertikální DDD</h2>
 
@@ -218,7 +224,7 @@
 
     <h4>Implementace horizontálního (vertikální slice) DDD v Symfony 7:</h4>
     <p>
-        Pro implementaci horizontálního DDD v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://symfonycasts.com/screencast/symfony-doctrine/project-structure" target="_blank">[8]</a>:
+        Pro implementaci horizontálního DDD v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
     </p>
 
     <pre><code class="language-bash">src/
@@ -248,10 +254,10 @@
     </p>
 
     <ul>
-        <li><strong>Messenger Component</strong> - Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
-        <li><strong>Validator Component</strong> - Pro validaci doménových objektů.</li>
-        <li><strong>Form Component</strong> - Pro zpracování vstupů od uživatele.</li>
-        <li><strong>Security Component</strong> - Pro autentizaci a autorizaci.</li>
+        <li><strong>Messenger komponenta</strong> - Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
+        <li><strong>Validator komponenta</strong> - Pro validaci doménových objektů.</li>
+        <li><strong>Form komponenta</strong> - Pro zpracování vstupů od uživatele.</li>
+        <li><strong>Security komponenta</strong> - Pro autentizaci a autorizaci.</li>
         <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
     </ul>
 

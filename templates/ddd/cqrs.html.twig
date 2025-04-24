@@ -1,5 +1,11 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}CQRS v Symfony 7 | DDD Symfony{% endblock %}
+
+{% block meta_description %}Kompletní průvodce implementací CQRS (Command Query Responsibility Segregation) v Symfony 7. Naučte se oddělit operace čtení a zápisu pro lepší škálovatelnost a výkon vaší aplikace.{% endblock %}
+
+{% block meta_keywords %}CQRS, Command Query Responsibility Segregation, Symfony Messenger, příkazy, dotazy, asynchronní zpracování, Event Sourcing, DDD, Symfony 7{% endblock %}
+
 {% block body %}
     <h2>CQRS v Symfony 7</h2>
 
@@ -277,7 +283,7 @@ class GetUserProfileHandler
 
     <h3 id="buses">Implementace Command a Query Buses</h3>
     <p>
-        Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery. V Symfony 7 můžete použít Messenger komponenty
+        Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery. V Symfony 7 můžete použít Messenger komponentu
         jako command a query busy:
     </p>
 
@@ -377,7 +383,7 @@ class ProfileController extends AbstractController
 
     <h3 id="async">Asynchronní zpracování</h3>
     <p>
-        Jednou z výhod CQRS je možnost asynchronního zpracování příkazů. V Symfony 7 můžete použít Messenger komponenty pro asynchronní zpracování:
+        Jednou z výhod CQRS je možnost asynchronního zpracování příkazů. V Symfony 7 můžete použít Messenger komponentu pro asynchronní zpracování:
     </p>
 
     <div class="example-box">
@@ -423,7 +429,7 @@ framework:
             Při implementaci CQRS v Symfony 7 je důležité:
         </p>
         <ul>
-            <li>Používat Messenger komponenty pro implementaci command a query busů.</li>
+            <li>Používat Messenger komponentu pro implementaci command a query busů.</li>
             <li>Oddělovat příkazy a dotazy do samostatných tříd.</li>
             <li>Používat handlery pro zpracování příkazů a dotazů.</li>
             <li>Používat validaci pro validaci příkazů a dotazů.</li>

@@ -1,25 +1,29 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ title }} | Architektura DDD v Symfony 7{% endblock %}
+{% block title %}Bezpečnostní zásady | DDD Symfony{% endblock %}
+
+{% block meta_description %}Bezpečnostní zásady webu o Domain-Driven Design v Symfony 7. Informace o tom, jak nahlásit bezpečnostní problémy a jak s nimi nakládáme.{% endblock %}
+
+{% block meta_keywords %}bezpečnostní zásady, security policy, bezpečnost, security.txt, nahlášení problémů, Symfony 7, DDD{% endblock %}
 
 {% block body %}
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-10">
                 <h1 class="mb-4">{{ title }}</h1>
-                
+
                 <div class="card mb-4">
                     <div class="card-body">
                         <h2>Bezpečnostní zásady</h2>
                         <p>
                             Vítejte na stránce bezpečnostních zásad našeho projektu. Tato stránka popisuje, jak nahlašovat bezpečnostní problémy a jak s nimi nakládáme.
                         </p>
-                        
+
                         <h3>Nahlášení bezpečnostních problémů</h3>
                         <p>
                             Pokud jste objevili bezpečnostní zranitelnost v našem projektu, prosíme vás o zodpovědné nahlášení. Bezpečnostní problémy můžete nahlásit na e-mailovou adresu <strong>michal@katuscak.cz</strong>.
                         </p>
-                        
+
                         <h3>Co zahrnout do hlášení</h3>
                         <ul>
                             <li>Popis zranitelnosti a její potenciální dopad</li>
@@ -27,7 +31,7 @@
                             <li>Verze systému, prohlížeče nebo jiné relevantní informace</li>
                             <li>Případné návrhy na opravu</li>
                         </ul>
-                        
+
                         <h3>Náš přístup</h3>
                         <p>
                             Po obdržení hlášení o bezpečnostním problému:
@@ -38,7 +42,7 @@
                             <li>Budeme s vámi komunikovat o postupu řešení</li>
                             <li>Po opravě problému vás budeme informovat</li>
                         </ol>
-                        
+
                         <h3>Zveřejnění</h3>
                         <p>
                             Žádáme vás, abyste nezveřejňovali bezpečnostní problémy, dokud nebudou řádně opraveny. Budeme spolupracovat na stanovení rozumného časového rámce pro zveřejnění.

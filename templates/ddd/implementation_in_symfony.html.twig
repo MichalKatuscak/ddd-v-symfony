@@ -1,5 +1,11 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Implementace Domain-Driven Design v Symfony 7 | DDD Symfony{% endblock %}
+
+{% block meta_description %}Praktický průvodce implementací Domain-Driven Design v Symfony 7. Naučte se, jak strukturovat projekt, implementovat entity, hodnotové objekty, repozitáře a další koncepty DDD v moderním PHP frameworku.{% endblock %}
+
+{% block meta_keywords %}DDD v Symfony, implementace DDD, Symfony 7, struktura projektu, entity v Symfony, hodnotové objekty v PHP, repozitáře Doctrine, doménové služby, PHP 8.2{% endblock %}
+
 {% block body %}
     <h2>Implementace DDD v Symfony 7</h2>
 
@@ -637,7 +643,7 @@ services:
     App\Shared\Domain\Repository\OrderRepository:
         class: App\Shared\Infrastructure\Repository\DoctrineOrderRepository
 
-    # Konfigurace Messenger komponentu
+    # Konfigurace Messenger komponenty
     messenger.default_bus:
         class: Symfony\Component\Messenger\MessageBus
         arguments:
@@ -657,7 +663,7 @@ services:
     <p>
         V tomto příkladu je konfigurace služeb v Symfony 7. Služby jsou automaticky registrovány a autowired.
         Repozitáře jsou explicitně konfigurovány, aby bylo možné použít rozhraní místo konkrétních implementací.
-        Messenger komponenty jsou konfigurovány pro implementaci CQRS.
+        Messenger komponenta je konfigurována pro implementaci CQRS.
     </p>
 
     <div class="warning-box">
@@ -667,7 +673,7 @@ services:
         </p>
         <ul>
             <li>Používat Dependency Injection pro oddělení závislostí.</li>
-            <li>Používat Messenger komponent pro implementaci CQRS.</li>
+            <li>Používat Messenger komponentu pro implementaci CQRS.</li>
             <li>Používat Doctrine ORM pro persistenci doménových objektů.</li>
             <li>Používat atributy pro konfiguraci služeb a routování.</li>
             <li>Používat formuláře pro zpracování vstupů od uživatele.</li>
