@@ -55,7 +55,7 @@ Pro spuštění tohoto projektu potřebujete:
 
 ## Instalace
 
-1. Naklonujte repozitář: `git clone https://github.com/vase-uzivatelske-jmeno/ddd-symfony.git`
+1. Naklonujte repozitář: `git clone https://github.com/MichalKatuscak/ddd-v-symfony.git`
 2. Nainstalujte závislosti: `composer install`
 3. Spusťte lokální server: `symfony server:start`
 
