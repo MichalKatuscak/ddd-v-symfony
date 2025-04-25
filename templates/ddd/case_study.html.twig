@@ -98,77 +98,147 @@
     </p>
     <pre><code class="language-bash">src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
-│   ├── Registration/          # Feature: Registrace
-│   │   ├── RegisterUser.php   # Command
-│   │   ├── RegisterUserHandler.php  # Command Handler
-│   │   └── RegistrationController.php  # Controller
-│   └── Authentication/        # Feature: Autentizace
-│       └── SecurityController.php  # Controller
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── User.php        # Entita uživatele
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── UserId.php      # Identifikátor uživatele
+│   │   │   └── Email.php       # Email uživatele
+│   │   ├── Event/             # Doménové události
+│   │   │   └── UserRegistered.php  # Událost registrace uživatele
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── UserRepository.php  # Rozhraní pro práci s uživateli
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineUserRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── RegisterUser.php  # Příkaz pro registraci uživatele
+│   │   │   └── RegisterUserHandler.php  # Handler příkazu
+│   │   └── Query/             # Dotazy
+│   │       ├── GetUser.php      # Dotaz pro získání uživatele
+│   │       └── GetUserHandler.php  # Handler dotazu
+│   └── Presentation/         # Prezentační vrstva
+│       ├── Controller/        # Kontrolery
+│       │   ├── RegistrationController.php  # Kontroler pro registraci
+│       │   └── SecurityController.php  # Kontroler pro autentizaci
+│       └── ViewModel/         # View modely
+│           └── UserViewModel.php  # View model uživatele
 ├── ProjectManagement/         # Bounded Context: Správa projektů
-│   ├── CreateProject/         # Feature: Vytvoření projektu
-│   │   ├── CreateProject.php  # Command
-│   │   ├── CreateProjectHandler.php  # Command Handler
-│   │   └── ProjectController.php  # Controller
-│   └── ListProjects/          # Feature: Seznam projektů
-│       ├── GetProjects.php    # Query
-│       ├── GetProjectsHandler.php  # Query Handler
-│       └── ProjectsController.php  # Controller
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   ├── Project.php     # Entita projektu (Aggregate Root)
+│   │   │   └── ProjectMember.php  # Entita člena projektu
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── ProjectId.php    # Identifikátor projektu
+│   │   │   └── ProjectStatus.php  # Status projektu
+│   │   ├── Event/             # Doménové události
+│   │   │   ├── ProjectCreated.php  # Událost vytvoření projektu
+│   │   │   └── MemberAdded.php  # Událost přidání člena
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── ProjectRepository.php  # Rozhraní pro práci s projekty
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineProjectRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── CreateProject.php  # Příkaz pro vytvoření projektu
+│   │   │   └── CreateProjectHandler.php  # Handler příkazu
+│   │   └── Query/             # Dotazy
+│   │       ├── GetProjects.php  # Dotaz pro získání projektů
+│   │       └── GetProjectsHandler.php  # Handler dotazu
+│   └── Presentation/         # Prezentační vrstva
+│       ├── Controller/        # Kontrolery
+│       │   ├── ProjectController.php  # Kontroler pro vytvoření projektu
+│       │   └── ProjectsController.php  # Kontroler pro seznam projektů
+│       └── ViewModel/         # View modely
+│           └── ProjectViewModel.php  # View model projektu
 ├── TaskManagement/            # Bounded Context: Správa úkolů
-│   ├── CreateTask/            # Feature: Vytvoření úkolu
-│   │   ├── CreateTask.php     # Command
-│   │   ├── CreateTaskHandler.php  # Command Handler
-│   │   └── TaskController.php  # Controller
-│   ├── AssignTask/            # Feature: Přiřazení úkolu
-│   │   ├── AssignTask.php     # Command
-│   │   ├── AssignTaskHandler.php  # Command Handler
-│   │   └── AssignController.php  # Controller
-│   └── ChangeTaskStatus/      # Feature: Změna stavu úkolu
-│       ├── ChangeTaskStatus.php  # Command
-│       ├── ChangeTaskStatusHandler.php  # Command Handler
-│       └── StatusController.php  # Controller
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── Task.php        # Entita úkolu (Aggregate Root)
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── TaskId.php      # Identifikátor úkolu
+│   │   │   └── TaskStatus.php  # Status úkolu
+│   │   ├── Event/             # Doménové události
+│   │   │   ├── TaskCreated.php  # Událost vytvoření úkolu
+│   │   │   ├── TaskAssigned.php  # Událost přiřazení úkolu
+│   │   │   └── TaskStatusChanged.php  # Událost změny stavu
+│   │   ├── Service/           # Doménové služby
+│   │   │   └── TaskAssignmentService.php  # Služba pro přiřazení úkolu
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── TaskRepository.php  # Rozhraní pro práci s úkoly
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineTaskRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── CreateTask.php   # Příkaz pro vytvoření úkolu
+│   │   │   ├── CreateTaskHandler.php  # Handler příkazu
+│   │   │   ├── AssignTask.php   # Příkaz pro přiřazení úkolu
+│   │   │   ├── AssignTaskHandler.php  # Handler příkazu
+│   │   │   ├── ChangeTaskStatus.php  # Příkaz pro změnu stavu
+│   │   │   └── ChangeTaskStatusHandler.php  # Handler příkazu
+│   │   └── Query/             # Dotazy
+│   │       ├── GetTask.php      # Dotaz pro získání úkolu
+│   │       └── GetTaskHandler.php  # Handler dotazu
+│   └── Presentation/         # Prezentační vrstva
+│       └── Controller/        # Kontrolery
+│           ├── TaskController.php  # Kontroler pro úkoly
+│           ├── AssignController.php  # Kontroler pro přiřazení
+│           └── StatusController.php  # Kontroler pro změnu stavu
 ├── CommentManagement/         # Bounded Context: Správa komentářů
-│   └── AddComment/            # Feature: Přidání komentáře
-│       ├── AddComment.php     # Command
-│       ├── AddCommentHandler.php  # Command Handler
-│       └── CommentController.php  # Controller
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── Comment.php     # Entita komentáře
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   └── CommentId.php   # Identifikátor komentáře
+│   │   ├── Event/             # Doménové události
+│   │   │   └── CommentAdded.php  # Událost přidání komentáře
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── CommentRepository.php  # Rozhraní pro práci s komentáři
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineCommentRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   └── Command/           # Příkazy
+│   │       ├── AddComment.php   # Příkaz pro přidání komentáře
+│   │       └── AddCommentHandler.php  # Handler příkazu
+│   └── Presentation/         # Prezentační vrstva
+│       └── Controller/        # Kontrolery
+│           └── CommentController.php  # Kontroler pro komentáře
 ├── ActivityTracking/          # Bounded Context: Sledování aktivity
-│   └── RecordActivity/        # Feature: Zaznamenání aktivity
-│       ├── RecordActivity.php  # Command
-│       └── RecordActivityHandler.php  # Command Handler
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── Activity.php    # Entita aktivity
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   └── ActivityId.php  # Identifikátor aktivity
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── ActivityRepository.php  # Rozhraní pro práci s aktivitami
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineActivityRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   └── Command/           # Příkazy
+│   │       ├── RecordActivity.php  # Příkaz pro zaznamenání aktivity
+│   │       └── RecordActivityHandler.php  # Handler příkazu
+│   └── Presentation/         # Prezentační vrstva
+│       └── Controller/        # Kontrolery
+│           └── ActivityController.php  # Kontroler pro aktivity
 └── Shared/                    # Sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
-    │   ├── Model/             # Doménové modely
-    │   │   ├── User.php
-    │   │   ├── Project.php
-    │   │   ├── Task.php
-    │   │   ├── Comment.php
-    │   │   └── Activity.php
-    │   ├── ValueObject/       # Hodnotové objekty
-    │   │   ├── UserId.php
-    │   │   ├── ProjectId.php
-    │   │   ├── TaskId.php
-    │   │   ├── CommentId.php
-    │   │   └── ActivityId.php
-    │   ├── Event/             # Doménové události
-    │   │   ├── UserRegistered.php
-    │   │   ├── ProjectCreated.php
-    │   │   ├── TaskCreated.php
-    │   │   ├── TaskAssigned.php
-    │   │   ├── TaskStatusChanged.php
-    │   │   └── CommentAdded.php
-    │   └── Repository/        # Repozitáře (rozhraní)
-    │       ├── UserRepository.php
-    │       ├── ProjectRepository.php
-    │       ├── TaskRepository.php
-    │       ├── CommentRepository.php
-    │       └── ActivityRepository.php
+    │   ├── Exception/         # Výjimky
+    │   │   └── DomainException.php  # Základní doménová výjimka
+    │   └── Bus/               # Rozhraní pro message bus
+    │       ├── CommandBus.php   # Rozhraní pro command bus
+    │       └── QueryBus.php     # Rozhraní pro query bus
     └── Infrastructure/        # Sdílená infrastruktura
-        └── Repository/        # Implementace repozitářů
-            ├── DoctrineUserRepository.php
-            ├── DoctrineProjectRepository.php
-            ├── DoctrineTaskRepository.php
-            ├── DoctrineCommentRepository.php
-            └── DoctrineActivityRepository.php</code></pre>
+        ├── Bus/               # Implementace message bus
+        │   ├── MessengerCommandBus.php  # Implementace command bus
+        │   └── MessengerQueryBus.php  # Implementace query bus
+        └── Persistence/        # Sdílená persistence
+            └── DoctrineTypes/    # Vlastní Doctrine typy
+                └── UuidType.php    # Typ pro UUID</code></pre>
 
     <h3 id="implementation">Implementace</h3>
     <p>
@@ -192,11 +262,11 @@
     <h4>Doménový model: Projekt (Aggregate Root)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Model;
+namespace App\ProjectManagement\Domain\Model;
 
-use App\Shared\Domain\Event\ProjectCreated;
-use App\Shared\Domain\ValueObject\ProjectId;
-use App\Shared\Domain\ValueObject\UserId;
+use App\ProjectManagement\Domain\Event\ProjectCreated;
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -321,14 +391,15 @@ class Project
     <h4>Doménový model: Úkol (Aggregate Root)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Model;
+namespace App\TaskManagement\Domain\Model;
 
-use App\Shared\Domain\Event\TaskCreated;
-use App\Shared\Domain\Event\TaskAssigned;
-use App\Shared\Domain\Event\TaskStatusChanged;
-use App\Shared\Domain\ValueObject\TaskId;
-use App\Shared\Domain\ValueObject\ProjectId;
-use App\Shared\Domain\ValueObject\UserId;
+use App\TaskManagement\Domain\Event\TaskCreated;
+use App\TaskManagement\Domain\Event\TaskAssigned;
+use App\TaskManagement\Domain\Event\TaskStatusChanged;
+use App\TaskManagement\Domain\ValueObject\TaskId;
+use App\TaskManagement\Domain\ValueObject\TaskStatus;
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -474,7 +545,7 @@ class Task
     <h4>Command: Vytvoření projektu (Command Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\ProjectManagement\CreateProject;
+namespace App\ProjectManagement\Application\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -497,12 +568,12 @@ class CreateProject
     <h4>Command Handler: Zpracování vytvoření projektu (Application Service)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\ProjectManagement\CreateProject;
+namespace App\ProjectManagement\Application\Command;
 
-use App\Shared\Domain\Model\Project;
-use App\Shared\Domain\Repository\ProjectRepository;
-use App\Shared\Domain\ValueObject\ProjectId;
-use App\Shared\Domain\ValueObject\UserId;
+use App\ProjectManagement\Domain\Model\Project;
+use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -533,7 +604,7 @@ class CreateProjectHandler
     <h4>Command: Přiřazení úkolu (Command Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\TaskManagement\AssignTask;
+namespace App\TaskManagement\Application\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -554,12 +625,13 @@ class AssignTask
     <h4>Command Handler: Zpracování přiřazení úkolu (Application Service)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\TaskManagement\AssignTask;
+namespace App\TaskManagement\Application\Command;
 
-use App\Shared\Domain\Repository\TaskRepository;
-use App\Shared\Domain\Repository\ProjectRepository;
-use App\Shared\Domain\ValueObject\TaskId;
-use App\Shared\Domain\ValueObject\UserId;
+use App\TaskManagement\Domain\Repository\TaskRepository;
+use App\TaskManagement\Domain\ValueObject\TaskId;
+use App\TaskManagement\Domain\Service\TaskAssignmentService;
+use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -567,7 +639,8 @@ class AssignTaskHandler
 {
     public function __construct(
         private TaskRepository $taskRepository,
-        private ProjectRepository $projectRepository
+        private ProjectRepository $projectRepository,
+        private TaskAssignmentService $taskAssignmentService
     ) {
     }
 
@@ -587,23 +660,10 @@ class AssignTaskHandler
 
         $assigneeId = new UserId($command->assigneeId);
 
-        // Kontrola, zda je přiřazovaný uživatel členem projektu
-        $memberIds = $project->memberIds();
-        $isMember = false;
+        // Použití doménové služby pro přiřazení úkolu
+        $this->taskAssignmentService->assignTask($task, $project, $assigneeId);
 
-        foreach ($memberIds as $memberId) {
-            if ($memberId->equals($assigneeId)) {
-                $isMember = true;
-                break;
-            }
-        }
-
-        if (!$isMember) {
-            throw new \DomainException('Assignee is not a member of the project');
-        }
-
-        $task->assign($assigneeId);
-
+        // Uložení úkolu
         $this->taskRepository->save($task);
     }
 }</code></pre>
@@ -611,7 +671,7 @@ class AssignTaskHandler
     <h4>Query: Získání projektů uživatele (Query Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\ProjectManagement\ListProjects;
+namespace App\ProjectManagement\Application\Query;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -628,10 +688,11 @@ class GetProjects
     <h4>Query Handler: Zpracování získání projektů uživatele (Read Model)</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\ProjectManagement\ListProjects;
+namespace App\ProjectManagement\Application\Query;
 
-use App\Shared\Domain\Repository\ProjectRepository;
-use App\Shared\Domain\ValueObject\UserId;
+use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use App\ProjectManagement\Presentation\ViewModel\ProjectViewModel;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -668,9 +729,9 @@ class GetProjectsHandler
 
 namespace App\TaskManagement\Domain\Service;
 
-use App\Shared\Domain\Model\Task;
-use App\Shared\Domain\Model\Project;
-use App\Shared\Domain\ValueObject\UserId;
+use App\TaskManagement\Domain\Model\Task;
+use App\ProjectManagement\Domain\Model\Project;
+use App\UserManagement\Domain\ValueObject\UserId;
 use App\Shared\Domain\Exception\DomainException;
 
 class TaskAssignmentService
@@ -697,8 +758,8 @@ class TaskAssignmentService
 
 namespace App\Integration\ExternalTaskSystem;
 
-use App\Shared\Domain\Model\Task;
-use App\Shared\Domain\ValueObject\TaskId;
+use App\TaskManagement\Domain\Model\Task;
+use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\Integration\ExternalTaskSystem\Client\ExternalTaskClient;
 use App\Integration\ExternalTaskSystem\Translator\TaskTranslator;
 

@@ -1,28 +1,28 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Horizontální vs. Vertikální DDD: Srovnání přístupů | DDD Symfony{% endblock %}
+{% block title %}Vertikální slice architektura vs. Tradiční DDD: Srovnání přístupů | DDD Symfony{% endblock %}
 
-{% block meta_description %}Porovnání horizontálního (vertikální slice) a tradičního vertikálního přístupu k Domain-Driven Design. Zjistěte, který přístup je vhodnější pro váš Symfony projekt a jaké jsou jejich výhody a nevýhody.{% endblock %}
+{% block meta_description %}Porovnání vertikální slice architektury a tradičního přístupu k Domain-Driven Design. Zjistěte, který přístup je vhodnější pro váš Symfony projekt a jaké jsou jejich výhody a nevýhody.{% endblock %}
 
-{% block meta_keywords %}horizontální DDD, vertikální DDD, vertikální slice, feature slices, vrstvená architektura, modularity, Symfony architektura, organizace kódu{% endblock %}
+{% block meta_keywords %}vertikální slice architektura, tradiční DDD, feature slices, vrstvená architektura, modularity, Symfony architektura, organizace kódu, Domain-Driven Design{% endblock %}
 
 {% block body %}
-    <h2>Horizontální vs. Vertikální DDD</h2>
+    <h2>Vertikální slice architektura vs. Tradiční DDD</h2>
 
     <div class="table-of-contents mb-4">
         <h5>Obsah kapitoly:</h5>
         <ul>
-            <li><a href="#traditional">Tradiční (vertikální) přístup k DDD</a></li>
-            <li><a href="#horizontal">Horizontální (vertikální slice) přístup k DDD</a></li>
+            <li><a href="#traditional">Tradiční přístup k DDD</a></li>
+            <li><a href="#horizontal">Vertikální slice architektura</a></li>
             <li><a href="#comparison">Porovnání přístupů</a></li>
             <li><a href="#when-to-use">Kdy použít který přístup</a></li>
             <li><a href="#symfony-implementation">Implementace v Symfony 7</a></li>
         </ul>
     </div>
 
-    <h3 id="traditional">Tradiční (vertikální) přístup k DDD</h3>
+    <h3 id="traditional">Tradiční přístup k DDD</h3>
     <p>
-        Tradiční přístup k DDD, často označovaný jako "vertikální" nebo "vrstvený", organizuje kód do vrstev podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
+        Tradiční přístup k DDD, často označovaný jako "vrstvený" (layered), organizuje kód do vrstev podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
         Typické vrstvy v tradičním DDD jsou:
     </p>
 
@@ -65,14 +65,14 @@
         Tento přístup je často znázorňován jako "cibulová" nebo "hexagonální" architektura <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
     </p>
 
-    <h3 id="horizontal">Horizontální (vertikální slice) přístup k DDD</h3>
+    <h3 id="horizontal">Vertikální slice architektura (Vertical Slice Architecture)</h3>
     <p>
-        Horizontální přístup k DDD, často označovaný jako "vertikální slice" architektura, organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
-        Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci.
+        Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
+        Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
     </p>
 
     <div class="example-box">
-        <h4>Příklad: Horizontální struktura DDD projektu</h4>
+        <h4>Příklad: Struktura projektu s vertikální slice architekturou</h4>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Feature: Správa uživatelů
 │   ├── Registration/           # Sub-feature: Registrace uživatelů
@@ -123,7 +123,7 @@
                 <tr>
                     <th>Aspekt</th>
                     <th>Tradiční (vertikální) DDD</th>
-                    <th>Horizontální (vertikální slice) DDD</th>
+                    <th>Vertikální slice architektura</th>
                 </tr>
             </thead>
             <tbody>
@@ -179,7 +179,7 @@
     </div>
 
     <div class="concept-box">
-        <h4>Kdy použít horizontální (vertikální slice) DDD:</h4>
+        <h4>Kdy použít vertikální slice architekturu:</h4>
         <ul>
             <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
             <li>Když je důležitá modularita a nezávislost funkcí.</li>
@@ -194,7 +194,7 @@
         Symfony 7 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
     </p>
 
-    <h4>Implementace tradičního (vertikálního) DDD v Symfony 7:</h4>
+    <h4>Implementace tradičního DDD v Symfony 7:</h4>
     <p>
         Pro implementaci tradičního DDD v Symfony 7 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
     </p>
@@ -222,9 +222,9 @@
             └── Mapping/
                 └── User.orm.xml</code></pre>
 
-    <h4>Implementace horizontálního (vertikální slice) DDD v Symfony 7:</h4>
+    <h4>Implementace vertikální slice architektury v Symfony 7:</h4>
     <p>
-        Pro implementaci horizontálního DDD v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
+        Pro implementaci vertikální slice architektury v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
     </p>
 
     <pre><code class="language-bash">src/
@@ -250,7 +250,7 @@
             └── DoctrineUserRepository.php</code></pre>
 
     <p>
-        Symfony 7 poskytuje mnoho komponent, které jsou užitečné pro implementaci horizontálního DDD <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
+        Symfony 7 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
     </p>
 
     <ul>

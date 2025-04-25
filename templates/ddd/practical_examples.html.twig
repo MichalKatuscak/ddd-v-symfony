@@ -26,53 +26,76 @@
 
     <h4>Struktura projektu</h4>
     <pre><code class="language-bash">src/
-├── Cart/                      # Feature: Košík
-│   ├── AddToCart/             # Sub-feature: Přidání do košíku
-│   │   ├── AddItemToCart.php  # Command
-│   │   ├── AddItemToCartHandler.php  # Command Handler
-│   │   └── CartController.php  # Controller
-│   ├── ViewCart/              # Sub-feature: Zobrazení košíku
-│   │   ├── GetCart.php        # Query
-│   │   ├── GetCartHandler.php  # Query Handler
-│   │   └── CartViewModel.php  # View Model
-│   └── Checkout/              # Sub-feature: Pokladna
-│       ├── CreateOrder.php    # Command
-│       ├── CreateOrderHandler.php  # Command Handler
-│       └── CheckoutController.php  # Controller
+├── Cart/                      # Bounded Context: Košík
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   ├── Cart.php        # Entita košíku (Aggregate Root)
+│   │   │   └── CartItem.php    # Entita položky košíku
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── CartId.php      # Identifikátor košíku
+│   │   │   ├── ProductId.php   # Identifikátor produktu
+│   │   │   ├── Quantity.php    # Množství
+│   │   │   └── Money.php       # Peněžní částka
+│   │   ├── Event/             # Doménové události
+│   │   │   └── ItemAddedToCart.php  # Událost přidání položky
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── CartRepository.php  # Rozhraní pro práci s košíkem
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineCartRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── AddItemToCart.php  # Příkaz pro přidání položky
+│   │   │   └── AddItemToCartHandler.php  # Handler příkazu
+│   │   └── Query/             # Dotazy
+│   │       ├── GetCart.php      # Dotaz pro získání košíku
+│   │       └── GetCartHandler.php  # Handler dotazu
+│   └── Presentation/         # Prezentační vrstva
+│       ├── Controller/        # Kontrolery
+│       │   ├── CartController.php  # Kontroler pro košík
+│       │   └── CheckoutController.php  # Kontroler pro pokladnu
+│       └── ViewModel/         # View modely
+│           └── CartViewModel.php  # View model košíku
+├── Order/                     # Bounded Context: Objednávky
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   ├── Order.php       # Entita objednávky (Aggregate Root)
+│   │   │   └── OrderItem.php   # Entita položky objednávky
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   └── OrderId.php     # Identifikátor objednávky
+│   │   ├── Event/             # Doménové události
+│   │   │   └── OrderCreated.php  # Událost vytvoření objednávky
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── OrderRepository.php  # Rozhraní pro práci s objednávkami
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineOrderRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   └── Command/           # Příkazy
+│   │       ├── CreateOrder.php  # Příkaz pro vytvoření objednávky
+│   │       └── CreateOrderHandler.php  # Handler příkazu
+│   └── Presentation/         # Prezentační vrstva
+│       └── Controller/        # Kontrolery
+│           └── OrderController.php  # Kontroler pro objednávky
 └── Shared/                    # Sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
-    │   ├── Model/             # Doménové modely
-    │   │   ├── Cart.php
-    │   │   ├── CartItem.php
-    │   │   ├── Order.php
-    │   │   └── OrderItem.php
-    │   ├── ValueObject/       # Hodnotové objekty
-    │   │   ├── CartId.php
-    │   │   ├── OrderId.php
-    │   │   ├── ProductId.php
-    │   │   ├── Quantity.php
-    │   │   └── Money.php
-    │   ├── Event/             # Doménové události
-    │   │   ├── ItemAddedToCart.php
-    │   │   └── OrderCreated.php
-    │   └── Repository/        # Repozitáře (rozhraní)
-    │       ├── CartRepository.php
-    │       └── OrderRepository.php
+    │   └── Exception/         # Výjimky
+    │       └── DomainException.php  # Základní doménová výjimka
     └── Infrastructure/        # Sdílená infrastruktura
-        └── Repository/        # Implementace repozitářů
-            ├── DoctrineCartRepository.php
-            └── DoctrineOrderRepository.php</code></pre>
+        └── Bus/               # Implementace message bus
+            ├── MessengerCommandBus.php  # Implementace command bus
+            └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
     <h4>Doménový model: Košík</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Model;
+namespace App\Cart\Domain\Model;
 
-use App\Shared\Domain\Event\ItemAddedToCart;
-use App\Shared\Domain\ValueObject\CartId;
-use App\Shared\Domain\ValueObject\ProductId;
-use App\Shared\Domain\ValueObject\Quantity;
-use App\Shared\Domain\ValueObject\Money;
+use App\Cart\Domain\Event\ItemAddedToCart;
+use App\Cart\Domain\ValueObject\CartId;
+use App\Cart\Domain\ValueObject\ProductId;
+use App\Cart\Domain\ValueObject\Quantity;
+use App\Cart\Domain\ValueObject\Money;
 
 class Cart
 {
@@ -195,7 +218,7 @@ class Cart
     <h4>Command: Přidání položky do košíku</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\AddToCart;
+namespace App\Cart\Application\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -224,13 +247,13 @@ class AddItemToCart
     <h4>Command Handler: Zpracování přidání položky do košíku</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\AddToCart;
+namespace App\Cart\Application\Command;
 
-use App\Shared\Domain\Repository\CartRepository;
-use App\Shared\Domain\ValueObject\CartId;
-use App\Shared\Domain\ValueObject\ProductId;
-use App\Shared\Domain\ValueObject\Quantity;
-use App\Shared\Domain\ValueObject\Money;
+use App\Cart\Domain\Repository\CartRepository;
+use App\Cart\Domain\ValueObject\CartId;
+use App\Cart\Domain\ValueObject\ProductId;
+use App\Cart\Domain\ValueObject\Quantity;
+use App\Cart\Domain\ValueObject\Money;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -262,8 +285,9 @@ class AddItemToCartHandler
     <h4>Controller: Přidání položky do košíku</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\AddToCart;
+namespace App\Cart\Presentation\Controller;
 
+use App\Cart\Application\Command\AddItemToCart;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -313,7 +337,7 @@ class CartController extends AbstractController
     <h4>Query: Získání košíku</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\ViewCart;
+namespace App\Cart\Application\Query;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -330,10 +354,11 @@ class GetCart
     <h4>Query Handler: Zpracování získání košíku</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\ViewCart;
+namespace App\Cart\Application\Query;
 
-use App\Shared\Domain\Repository\CartRepository;
-use App\Shared\Domain\ValueObject\CartId;
+use App\Cart\Domain\Repository\CartRepository;
+use App\Cart\Domain\ValueObject\CartId;
+use App\Cart\Presentation\ViewModel\CartViewModel;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -379,42 +404,54 @@ class GetCartHandler
 
     <h4>Struktura projektu</h4>
     <pre><code class="language-bash">src/
-├── Blog/                      # Feature: Blog
-│   ├── CreatePost/            # Sub-feature: Vytvoření příspěvku
-│   │   ├── CreatePost.php     # Command
-│   │   ├── CreatePostHandler.php  # Command Handler
-│   │   └── CreatePostController.php  # Controller
-│   ├── ListPosts/             # Sub-feature: Seznam příspěvků
-│   │   ├── GetPosts.php       # Query
-│   │   ├── GetPostsHandler.php  # Query Handler
-│   │   └── PostsController.php  # Controller
-│   └── ViewPost/              # Sub-feature: Zobrazení příspěvku
-│       ├── GetPost.php        # Query
-│       ├── GetPostHandler.php  # Query Handler
-│       └── PostController.php  # Controller
+├── Blog/                      # Bounded Context: Blog
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   ├── Post.php        # Entita příspěvku (Aggregate Root)
+│   │   │   └── Comment.php     # Entita komentáře
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── PostId.php      # Identifikátor příspěvku
+│   │   │   └── CommentId.php   # Identifikátor komentáře
+│   │   ├── Event/             # Doménové události
+│   │   │   └── PostCreated.php  # Událost vytvoření příspěvku
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── PostRepository.php  # Rozhraní pro práci s příspěvky
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrinePostRepository.php  # Doctrine implementace
+│   ├── Application/          # Aplikační vrstva
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── CreatePost.php   # Příkaz pro vytvoření příspěvku
+│   │   │   └── CreatePostHandler.php  # Handler příkazu
+│   │   └── Query/             # Dotazy
+│   │       ├── GetPost.php      # Dotaz pro získání příspěvku
+│   │       ├── GetPostHandler.php  # Handler dotazu
+│   │       ├── GetPosts.php     # Dotaz pro získání příspěvků
+│   │       └── GetPostsHandler.php  # Handler dotazu
+│   └── Presentation/         # Prezentační vrstva
+│       ├── Controller/        # Kontrolery
+│       │   ├── CreatePostController.php  # Kontroler pro vytvoření příspěvku
+│       │   ├── PostsController.php  # Kontroler pro seznam příspěvků
+│       │   └── PostController.php  # Kontroler pro zobrazení příspěvku
+│       └── ViewModel/         # View modely
+│           ├── PostViewModel.php  # View model příspěvku
+│           └── PostListViewModel.php  # View model seznamu příspěvků
 └── Shared/                    # Sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
-    │   ├── Model/             # Doménové modely
-    │   │   ├── Post.php
-    │   │   └── Comment.php
-    │   ├── ValueObject/       # Hodnotové objekty
-    │   │   ├── PostId.php
-    │   │   └── CommentId.php
-    │   ├── Event/             # Doménové události
-    │   │   └── PostCreated.php
-    │   └── Repository/        # Repozitáře (rozhraní)
-    │       └── PostRepository.php
+    │   └── Exception/         # Výjimky
+    │       └── DomainException.php  # Základní doménová výjimka
     └── Infrastructure/        # Sdílená infrastruktura
-        └── Repository/        # Implementace repozitářů
-            └── DoctrinePostRepository.php</code></pre>
+        └── Bus/               # Implementace message bus
+            ├── MessengerCommandBus.php  # Implementace command bus
+            └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
     <h4>Doménový model: Příspěvek</h4>
     <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Model;
+namespace App\Blog\Domain\Model;
 
-use App\Shared\Domain\Event\PostCreated;
-use App\Shared\Domain\ValueObject\PostId;
+use App\Blog\Domain\Event\PostCreated;
+use App\Blog\Domain\ValueObject\PostId;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
