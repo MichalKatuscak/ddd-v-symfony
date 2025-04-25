@@ -7,12 +7,12 @@
 {% block meta_keywords %}DDD koncepty, entity, hodnotové objekty, value objects, agregační kořeny, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace{% endblock %}
 
 {% block structured_data %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "Základní koncepty Domain-Driven Design",
-  "description": "{{ block('meta_description') }}",
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Základní koncepty Domain-Driven Design",
+          "description": "{{ block('meta_description') }}",
   "keywords": "{{ block('meta_keywords') }}",
   "author": {
     "@type": "Organization",
@@ -29,37 +29,38 @@
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
   }
 }
-</script>
+    </script>
 {% endblock %}
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-    <h2 itemprop="headline">Základní koncepty DDD</h2>
+        <h2 itemprop="headline">Základní koncepty DDD</h2>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <h5 id="toc-heading">Obsah kapitoly:</h5>
-        <ul>
-            <li><a href="#entities">Entity (Entity)</a></li>
-            <li><a href="#value-objects">Hodnotové objekty (Value Objects)</a></li>
-            <li><a href="#aggregates">Agregáty (Aggregates)</a></li>
-            <li><a href="#repositories">Repozitáře (Repositories)</a></li>
-            <li><a href="#domain-services">Doménové služby (Domain Services)</a></li>
-            <li><a href="#domain-events">Doménové události (Domain Events)</a></li>
-            <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
-            <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
-        </ul>
-    </div>
+        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+            <h5 id="toc-heading">Obsah kapitoly:</h5>
+            <ul>
+                <li><a href="#entities">Entity (Entity)</a></li>
+                <li><a href="#value-objects">Hodnotové objekty (Value Objects)</a></li>
+                <li><a href="#aggregates">Agregáty (Aggregates)</a></li>
+                <li><a href="#repositories">Repozitáře (Repositories)</a></li>
+                <li><a href="#domain-services">Doménové služby (Domain Services)</a></li>
+                <li><a href="#domain-events">Doménové události (Domain Events)</a></li>
+                <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
+                <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
+            </ul>
+        </div>
 
-    <section id="entities" aria-labelledby="entities-heading">
-    <h3 id="entities-heading">Entity (Entity)</h3>
-    <p>
-        Entity je objekt, který je definován svou identitou, nikoli svými atributy. Entity mají životní cyklus a mohou se v průběhu času měnit,
-        ale jejich identita zůstává stejná.
-    </p>
+        <section id="entities" aria-labelledby="entities-heading">
+            <h3 id="entities-heading">Entity (Entity)</h3>
+            <p>
+                Entity je objekt, který je definován svou identitou, nikoli svými atributy. Entity mají životní cyklus a
+                mohou se v průběhu času měnit,
+                ale jejich identita zůstává stejná.
+            </p>
 
-    <div class="example-box">
-        <h4>Příklad: Entity v PHP</h4>
-        <pre><code class="language-php">&lt;?php
+            <div class="example-box">
+                <h4>Příklad: Entity v PHP</h4>
+                <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Model;
 
@@ -108,24 +109,26 @@ class User
         return $this->createdAt;
     }
 }</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Uživatel může změnit své jméno nebo e-mail,
-        ale jeho identita zůstává stejná.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>).
+                Uživatel může změnit své jméno nebo e-mail,
+                ale jeho identita zůstává stejná.
+            </p>
+        </section>
 
-    <section id="value-objects" aria-labelledby="value-objects-heading">
-    <h3 id="value-objects-heading">Hodnotové objekty (Value Objects)</h3>
-    <p>
-        Hodnotové objekty jsou objekty, které jsou definovány svými atributy, nikoli svou identitou. Hodnotové objekty jsou neměnné (immutable)
-        a nemají žádnou identitu.
-    </p>
+        <section id="value-objects" aria-labelledby="value-objects-heading">
+            <h3 id="value-objects-heading">Hodnotové objekty (Value Objects)</h3>
+            <p>
+                Hodnotové objekty jsou objekty, které jsou definovány svými atributy, nikoli svou identitou. Hodnotové
+                objekty jsou neměnné (immutable)
+                a nemají žádnou identitu.
+            </p>
 
-    <div class="example-box">
-        <h4>Příklad: Hodnotový objekt v PHP</h4>
-        <pre><code class="language-php">&lt;?php
+            <div class="example-box">
+                <h4>Příklad: Hodnotový objekt v PHP</h4>
+                <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\ValueObject;
 
@@ -157,24 +160,26 @@ class Email
         return $this->value;
     }
 }</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. E-mailová adresa je neměnná a nemá žádnou identitu.
-        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. E-mailová
+                adresa je neměnná a nemá žádnou identitu.
+                Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
+            </p>
+        </section>
 
-    <section id="aggregates" aria-labelledby="aggregates-heading">
-    <h3 id="aggregates-heading">Agregáty (Aggregates)</h3>
-    <p>
-        Agregát je skupina souvisejících objektů, které jsou považovány za jednu jednotku z hlediska změn dat. Každý agregát má kořenovou entitu (aggregate root),
-        která je jediným vstupním bodem pro manipulaci s agregátem.
-    </p>
+        <section id="aggregates" aria-labelledby="aggregates-heading">
+            <h3 id="aggregates-heading">Agregáty (Aggregates)</h3>
+            <p>
+                Agregát je skupina souvisejících objektů, které jsou považovány za jednu jednotku z hlediska změn dat.
+                Každý agregát má kořenovou entitu (aggregate root),
+                která je jediným vstupním bodem pro manipulaci s agregátem.
+            </p>
 
-    <div class="example-box" role="note" aria-labelledby="aggregate-example-heading">
-        <h4 id="aggregate-example-heading">Příklad: Agregát v PHP</h4>
-        <pre><code class="language-php">&lt;?php
+            <div class="example-box" role="note" aria-labelledby="aggregate-example-heading">
+                <h4 id="aggregate-example-heading">Příklad: Agregát v PHP</h4>
+                <pre><code class="language-php">&lt;?php
 
 namespace App\OrderManagement\Domain\Model;
 
@@ -261,24 +266,26 @@ class Order
         return $this->createdAt;
     }
 }</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu je <code>Order</code> agregát, který obsahuje kolekci <code>OrderItem</code> objektů. <code>Order</code> je kořenovou entitou (aggregate root)
-        a poskytuje metody pro manipulaci s položkami objednávky.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu je <code>Order</code> agregát, který obsahuje kolekci <code>OrderItem</code> objektů.
+                <code>Order</code> je kořenovou entitou (aggregate root)
+                a poskytuje metody pro manipulaci s položkami objednávky.
+            </p>
+        </section>
 
-    <section id="repositories" aria-labelledby="repositories-heading">
-    <h3 id="repositories-heading">Repozitáře (Repositories)</h3>
-    <p>
-        Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily persistence a poskytují
-        doménově orientované rozhraní pro přístup k datům.
-    </p>
+        <section id="repositories" aria-labelledby="repositories-heading">
+            <h3 id="repositories-heading">Repozitáře (Repositories)</h3>
+            <p>
+                Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily
+                persistence a poskytují
+                doménově orientované rozhraní pro přístup k datům.
+            </p>
 
-    <div class="example-box" role="note" aria-labelledby="repository-example-heading">
-        <h4 id="repository-example-heading">Příklad: Repozitář v PHP</h4>
-        <pre><code class="language-php">&lt;?php
+            <div class="example-box" role="note" aria-labelledby="repository-example-heading">
+                <h4 id="repository-example-heading">Příklad: Repozitář v PHP</h4>
+                <pre><code class="language-php">&lt;?php
 
 namespace App\Domain\Repository;
 
@@ -294,24 +301,26 @@ interface OrderRepository
 
     public function findByUserId(UserId $userId): array;
 }</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu je <code>OrderRepository</code> rozhraní, které definuje metody pro ukládání a načítání objednávek.
-        Konkrétní implementace tohoto rozhraní by mohla používat Doctrine ORM nebo jiný mechanismus persistence.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu je <code>OrderRepository</code> rozhraní, které definuje metody pro ukládání a načítání
+                objednávek.
+                Konkrétní implementace tohoto rozhraní by mohla používat Doctrine ORM nebo jiný mechanismus persistence.
+            </p>
+        </section>
 
-    <section id="domain-services" aria-labelledby="domain-services-heading">
-    <h3 id="domain-services-heading">Doménové služby (Domain Services)</h3>
-    <p>
-        Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
-        Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
-    </p>
+        <section id="domain-services" aria-labelledby="domain-services-heading">
+            <h3 id="domain-services-heading">Doménové služby (Domain Services)</h3>
+            <p>
+                Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity
+                nebo hodnotového objektu.
+                Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
+            </p>
 
-    <div class="example-box" role="note" aria-labelledby="domain-service-example-heading">
-        <h4 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h4>
-        <pre><code class="language-php">&lt;?php
+            <div class="example-box" role="note" aria-labelledby="domain-service-example-heading">
+                <h4 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h4>
+                <pre><code class="language-php">&lt;?php
 
 namespace App\Domain\Service;
 
@@ -358,24 +367,26 @@ class PaymentService
         return $total;
     }
 }</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu je <code>PaymentService</code> doménová služba, která poskytuje logiku pro zpracování plateb.
-        Tato logika nepatří přirozeně do žádné entity nebo hodnotového objektu.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu je <code>PaymentService</code> doménová služba, která poskytuje logiku pro zpracování
+                plateb.
+                Tato logika nepatří přirozeně do žádné entity nebo hodnotového objektu.
+            </p>
+        </section>
 
-    <section id="domain-events" aria-labelledby="domain-events-heading">
-    <h3 id="domain-events-heading">Doménové události (Domain Events)</h3>
-    <p>
-        Doménová událost je objekt, který reprezentuje něco, co se stalo v doméně a co by mohlo být zajímavé pro jiné části systému.
-        Doménové události jsou neměnné a obsahují informace o tom, co se stalo.
-    </p>
+        <section id="domain-events" aria-labelledby="domain-events-heading">
+            <h3 id="domain-events-heading">Doménové události (Domain Events)</h3>
+            <p>
+                Doménová událost je objekt, který reprezentuje něco, co se stalo v doméně a co by mohlo být zajímavé pro
+                jiné části systému.
+                Doménové události jsou neměnné a obsahují informace o tom, co se stalo.
+            </p>
 
-    <div class="example-box">
-        <h4>Příklad: Doménová událost v PHP</h4>
-        <pre><code class="language-php">&lt;?php
+            <div class="example-box">
+                <h4>Příklad: Doménová událost v PHP</h4>
+                <pre><code class="language-php">&lt;?php
 
 namespace App\Domain\Event;
 
@@ -410,24 +421,34 @@ class OrderCreatedEvent
         return $this->occurredAt;
     }
 }</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu je <code>OrderCreatedEvent</code> doménová událost, která reprezentuje vytvoření nové objednávky.
-        Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy se to stalo.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu je <code>OrderCreatedEvent</code> doménová událost, která reprezentuje vytvoření nové
+                objednávky.
+                Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy se
+                to stalo.
+            </p>
+        </section>
 
-    <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
-    <h3 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h3>
-    <p>
-        Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu existuje konzistentní model
-        a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
-    </p>
+        <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
+            <h3 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h3>
+            <p>
+                Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu
+                existuje konzistentní model
+                a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
+            </p>
 
-    <div class="example-box">
-        <h4>Příklad: Ohraničené kontexty v PHP</h4>
-        <pre><code class="language-bash">src/
+
+            <div class="example-box">
+                <div class="diagram-container">
+                    {% include '/diagrams/5_bounded_contexts/diagram.svg' %}
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h4>Příklad: Ohraničené kontexty v PHP</h4>
+                <pre><code class="language-bash">src/
 ├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
 │   ├── Domain/
 │   │   ├── Model/
@@ -457,61 +478,77 @@ class OrderCreatedEvent
         └── Query/
             ├── GetUser.php
             └── GetUserHandler.php</code></pre>
-    </div>
+            </div>
 
-    <p>
-        V tomto příkladu jsou <code>OrderProcessing</code> a <code>UserManagement</code> dva ohraničené kontexty.
-        Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderProcessing</code> může být uživatel reprezentován pouze jako <code>UserId</code>,
-        zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
-    </p>
-    </section>
+            <p>
+                V tomto příkladu jsou <code>OrderProcessing</code> a <code>UserManagement</code> dva ohraničené
+                kontexty.
+                Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderProcessing</code> může být uživatel
+                reprezentován pouze jako <code>UserId</code>,
+                zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
+            </p>
+        </section>
 
-    <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
-    <h3 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h3>
-    <p>
-        Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v kódu, dokumentaci a komunikaci.
-        Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
-    </p>
+        <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
+            <h3 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h3>
 
-    <div class="concept-box">
-        <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
-        <p>
-            V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
-        </p>
-        <ul>
-            <li><strong>Košík (Cart)</strong> - Dočasná kolekce produktů, které si zákazník vybral k nákupu.</li>
-            <li><strong>Objednávka (Order)</strong> - Potvrzený nákup zákazníka, který obsahuje produkty, dodací adresu a platební informace.</li>
-            <li><strong>Katalog (Catalog)</strong> - Kolekce všech produktů dostupných k prodeji.</li>
-            <li><strong>Zákazník (Customer)</strong> - Osoba, která nakupuje produkty.</li>
-            <li><strong>Produkt (Product)</strong> - Položka, která je dostupná k prodeji.</li>
-            <li><strong>Kategorie (Category)</strong> - Skupina souvisejících produktů.</li>
-            <li><strong>Platba (Payment)</strong> - Transakce, kterou zákazník platí za objednávku.</li>
-            <li><strong>Dodání (Shipping)</strong> - Proces doručení objednávky zákazníkovi.</li>
-        </ul>
-    </div>
+            <p>
+                Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v
+                kódu, dokumentaci a komunikaci.
+                Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
+            </p>
 
-    <p>
-        Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými experty.
-        Například, místo použití termínu "uživatel" by se používal termín "zákazník", pokud se jedná o osobu, která nakupuje produkty.
-    </p>
+            <div class="example-box">
+                <div class="diagram-container">
+                    {% include '/diagrams/4_ubiquitous_language/diagram.svg' %}
+                </div>
+            </div>
 
-    <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
-        <h4 id="important-notes-heading">Důležité poznámky</h4>
-        <p>
-            Při implementaci DDD je důležité:
-        </p>
-        <ul>
-            <li>Používat všudypřítomný jazyk konzistentně v celém projektu.</li>
-            <li>Definovat jasné hranice mezi ohraničenými kontexty.</li>
-            <li>Používat agregáty pro zajištění konzistence dat.</li>
-            <li>Používat repozitáře pro přístup k agregátům.</li>
-            <li>Používat doménové události pro komunikaci mezi ohraničenými kontexty.</li>
-        </ul>
-    </div>
+            <div class="concept-box">
+                <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
+                <p>
+                    V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
+                </p>
+                <ul>
+                    <li><strong>Košík (Cart)</strong> - Dočasná kolekce produktů, které si zákazník vybral k nákupu.
+                    </li>
+                    <li><strong>Objednávka (Order)</strong> - Potvrzený nákup zákazníka, který obsahuje produkty, dodací
+                        adresu a platební informace.
+                    </li>
+                    <li><strong>Katalog (Catalog)</strong> - Kolekce všech produktů dostupných k prodeji.</li>
+                    <li><strong>Zákazník (Customer)</strong> - Osoba, která nakupuje produkty.</li>
+                    <li><strong>Produkt (Product)</strong> - Položka, která je dostupná k prodeji.</li>
+                    <li><strong>Kategorie (Category)</strong> - Skupina souvisejících produktů.</li>
+                    <li><strong>Platba (Payment)</strong> - Transakce, kterou zákazník platí za objednávku.</li>
+                    <li><strong>Dodání (Shipping)</strong> - Proces doručení objednávky zákazníkovi.</li>
+                </ul>
+            </div>
 
-    <p>
-        V další kapitole se podíváme na <a href="{{ path('implementation_in_symfony') }}">implementaci DDD v Symfony 7</a>.
-    </p>
-    </section>
+            <p>
+                Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými
+                experty.
+                Například, místo použití termínu "uživatel" by se používal termín "zákazník", pokud se jedná o osobu,
+                která nakupuje produkty.
+            </p>
+
+            <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
+                <h4 id="important-notes-heading">Důležité poznámky</h4>
+                <p>
+                    Při implementaci DDD je důležité:
+                </p>
+                <ul>
+                    <li>Používat všudypřítomný jazyk konzistentně v celém projektu.</li>
+                    <li>Definovat jasné hranice mezi ohraničenými kontexty.</li>
+                    <li>Používat agregáty pro zajištění konzistence dat.</li>
+                    <li>Používat repozitáře pro přístup k agregátům.</li>
+                    <li>Používat doménové události pro komunikaci mezi ohraničenými kontexty.</li>
+                </ul>
+            </div>
+
+            <p>
+                V další kapitole se podíváme na <a href="{{ path('implementation_in_symfony') }}">implementaci DDD v
+                    Symfony 7</a>.
+            </p>
+        </section>
     </article>
 {% endblock %}

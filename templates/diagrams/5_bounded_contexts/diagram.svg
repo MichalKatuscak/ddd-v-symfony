@@ -1,0 +1,360 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css"
+     data-diagram-type="DESCRIPTION" preserveAspectRatio="none"
+     style="aspect-ratio:2.1644;background:#FAFAFA;" version="1.1" viewBox="0 0 2043 940"
+     zoomAndPan="magnify">
+    <defs/>
+    <g>
+        <rect fill="#FAFAFA" height="940.625" style="stroke:none;stroke-width:1.5625;" width="2043.75" x="0"
+              y="0"/><!--cluster E-shop-->
+        <g class="cluster" data-entity="E-shop" data-source-line="62" data-uid="ent0002" id="cluster_E-shop">
+            <path d="M13.2813,9.8022 L110.0464,9.8022 A5.8594,5.8594 0 0 1 113.9526,13.7085 L124.8901,48.2788 L2028.9063,48.2788 A3.9063,3.9063 0 0 1 2032.8125,52.1851 L2032.8125,926.2085 A3.9063,3.9063 0 0 1 2028.9063,930.1147 L13.2813,930.1147 A3.9063,3.9063 0 0 1 9.375,926.2085 L9.375,13.7085 A3.9063,3.9063 0 0 1 13.2813,9.8022"
+                  fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/>
+            <line style="stroke:#005A9C;stroke-width:2.3438;" x1="9.375" x2="124.8901" y1="48.2788" y2="48.2788"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="95.2026" x="15.625" y="36.1328">E-shop
+            </text>
+        </g><!--cluster Katalog zbo??-->
+        <g class="cluster" data-entity="Katalog zbo&#382;&#237;" data-source-line="63" data-uid="ent0003"
+           id="cluster_Katalog zbo&#382;&#237;">
+            <path d="M1516.4063,80.1147 L1708.1177,80.1147 A5.8594,5.8594 0 0 1 1712.0239,84.021 L1722.9614,118.5913 L1991.4063,118.5913 A3.9063,3.9063 0 0 1 1995.3125,122.4976 L1995.3125,713.7085 A3.9063,3.9063 0 0 1 1991.4063,717.6147 L1516.4063,717.6147 A3.9063,3.9063 0 0 1 1512.5,713.7085 L1512.5,84.021 A3.9063,3.9063 0 0 1 1516.4063,80.1147"
+                  fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/>
+            <line style="stroke:#005A9C;stroke-width:2.3438;" x1="1512.5" x2="1722.9614" y1="118.5913" y2="118.5913"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="190.1489" x="1518.75" y="106.4453">Katalog zbo&#382;&#237;
+            </text>
+        </g><!--cluster Objedn?vky-->
+        <g class="cluster" data-entity="Objedn&#225;vky" data-source-line="70" data-uid="ent0008"
+           id="cluster_Objedn&#225;vky">
+            <path d="M596.0938,317.6147 L764.1113,317.6147 A5.8594,5.8594 0 0 1 768.0176,321.521 L778.9551,356.0913 L1471.0938,356.0913 A3.9063,3.9063 0 0 1 1475,359.9976 L1475,713.7085 A3.9063,3.9063 0 0 1 1471.0938,717.6147 L596.0938,717.6147 A3.9063,3.9063 0 0 1 592.1875,713.7085 L592.1875,321.521 A3.9063,3.9063 0 0 1 596.0938,317.6147"
+                  fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/>
+            <line style="stroke:#005A9C;stroke-width:2.3438;" x1="592.1875" x2="778.9551" y1="356.0913" y2="356.0913"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="166.4551" x="598.4375" y="343.9453">Objedn&#225;vky
+            </text>
+        </g><!--cluster Z?kazn?ci-->
+        <g class="cluster" data-entity="Z&#225;kazn&#237;ci" data-source-line="77" data-uid="ent0013"
+           id="cluster_Z&#225;kazn&#237;ci">
+            <path d="M175.7813,80.1147 L310.144,80.1147 A5.8594,5.8594 0 0 1 314.0503,84.021 L324.9878,118.5913 L550.7813,118.5913 A3.9063,3.9063 0 0 1 554.6875,122.4976 L554.6875,473.0835 A3.9063,3.9063 0 0 1 550.7813,476.9897 L175.7813,476.9897 A3.9063,3.9063 0 0 1 171.875,473.0835 L171.875,84.021 A3.9063,3.9063 0 0 1 175.7813,80.1147"
+                  fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/>
+            <line style="stroke:#005A9C;stroke-width:2.3438;" x1="171.875" x2="324.9878" y1="118.5913" y2="118.5913"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="132.8003" x="178.125" y="106.4453">Z&#225;kazn&#237;ci
+            </text>
+        </g><!--cluster Fakturace-->
+        <g class="cluster" data-entity="Fakturace" data-source-line="83" data-uid="ent0017" id="cluster_Fakturace">
+            <path d="M50.7813,558.2397 L193.6401,558.2397 A5.8594,5.8594 0 0 1 197.5464,562.146 L208.4839,596.7163 L550.7813,596.7163 A3.9063,3.9063 0 0 1 554.6875,600.6226 L554.6875,888.7085 A3.9063,3.9063 0 0 1 550.7813,892.6147 L50.7813,892.6147 A3.9063,3.9063 0 0 1 46.875,888.7085 L46.875,562.146 A3.9063,3.9063 0 0 1 50.7813,558.2397"
+                  fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/>
+            <line style="stroke:#005A9C;stroke-width:2.3438;" x1="46.875" x2="208.4839" y1="596.7163" y2="596.7163"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="141.2964" x="53.125" y="584.5703">Fakturace
+            </text>
+        </g><!--entity KZ-->
+        <g class="entity" data-entity="KZ" data-source-line="64" data-uid="ent0004" id="entity_KZ">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="157.4463" x="1538.2813" y="137.9272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375"
+                  x="1664.4775" y="145.7397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1661.3525"
+                  y="148.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1661.3525"
+                  y="155.1147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="94.9463"
+                  x="1561.7188" y="192.3828">Katalog
+            </text>
+        </g><!--entity P-->
+        <g class="entity" data-entity="P" data-source-line="65" data-uid="ent0005" id="entity_P">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="159.1431" x="1537.5" y="375.4272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375"
+                  x="1665.3931" y="383.2397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1662.2681"
+                  y="386.3647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1662.2681"
+                  y="392.6147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="96.6431"
+                  x="1560.9375" y="429.8828">Produkt
+            </text>
+        </g><!--entity K-->
+        <g class="entity" data-entity="K" data-source-line="66" data-uid="ent0006" id="entity_K">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="183.1665" x="1538.2813" y="616.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375"
+                  x="1690.1978" y="623.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1687.0728"
+                  y="626.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1687.0728"
+                  y="633.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="120.6665"
+                  x="1561.7188" y="670.5078">Kategorie
+            </text>
+        </g><!--entity V-->
+        <g class="entity" data-entity="V" data-source-line="67" data-uid="ent0007" id="entity_V">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="216.6626" x="1752.3438" y="375.4272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375"
+                  x="1937.7563" y="383.2397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1934.6313"
+                  y="386.3647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1934.6313"
+                  y="392.6147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="154.1626"
+                  x="1775.7813" y="429.8828">Vyhled&#225;v&#225;n&#237;
+            </text>
+        </g><!--entity O-->
+        <g class="entity" data-entity="O" data-source-line="71" data-uid="ent0009" id="entity_O">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="211.9995" x="617.1875" y="375.4272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="797.937"
+                  y="383.2397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="794.812"
+                  y="386.3647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="794.812"
+                  y="392.6147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="149.4995"
+                  x="640.625" y="429.8828">Objedn&#225;vka
+            </text>
+        </g><!--entity OP-->
+        <g class="entity" data-entity="OP" data-source-line="72" data-uid="ent0010" id="entity_OP">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="310.5713" x="1138.2813" y="616.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375"
+                  x="1417.6025" y="623.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1414.4775"
+                  y="626.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1414.4775"
+                  y="633.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="248.0713"
+                  x="1161.7188" y="670.5078">Polo&#382;ka objedn&#225;vky
+            </text>
+        </g><!--entity D-->
+        <g class="entity" data-entity="D" data-source-line="73" data-uid="ent0011" id="entity_D">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="168.6279" x="617.1875" y="616.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="754.5654"
+                  y="623.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="751.4404"
+                  y="626.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="751.4404"
+                  y="633.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="106.1279"
+                  x="640.625" y="670.5078">Doprava
+            </text>
+        </g><!--entity Z-->
+        <g class="entity" data-entity="Z" data-source-line="74" data-uid="ent0012" id="entity_Z">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="242.0776" x="841.4063" y="616.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375"
+                  x="1052.2339" y="623.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1049.1089"
+                  y="626.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="1049.1089"
+                  y="633.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="179.5776"
+                  x="864.8438" y="670.5078">Zp&#367;sob platby
+            </text>
+        </g><!--entity ZA-->
+        <g class="entity" data-entity="ZA" data-source-line="78" data-uid="ent0014" id="entity_ZA">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="175.1343" x="354.6875" y="137.9272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="498.5718"
+                  y="145.7397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="495.4468"
+                  y="148.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="495.4468"
+                  y="155.1147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="112.6343"
+                  x="378.125" y="192.3828">Z&#225;kazn&#237;k
+            </text>
+        </g><!--entity A-->
+        <g class="entity" data-entity="A" data-source-line="79" data-uid="ent0015" id="entity_A">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="149.4751" x="196.875" y="375.4272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="315.1001"
+                  y="383.2397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="311.9751"
+                  y="386.3647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="311.9751"
+                  y="392.6147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="86.9751"
+                  x="220.3125" y="429.8828">Adresa
+            </text>
+        </g><!--entity KO-->
+        <g class="entity" data-entity="KO" data-source-line="80" data-uid="ent0016" id="entity_KO">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="128.6377" x="401.5625" y="375.4272"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="498.9502"
+                  y="383.2397"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="495.8252"
+                  y="386.3647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="495.8252"
+                  y="392.6147"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="66.1377" x="425"
+                  y="429.8828">Ko&#353;&#237;k
+            </text>
+        </g><!--entity F-->
+        <g class="entity" data-entity="F" data-source-line="84" data-uid="ent0018" id="entity_F">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="157.9224" x="371.0938" y="616.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="497.7661"
+                  y="623.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="494.6411"
+                  y="626.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="494.6411"
+                  y="633.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="95.4224"
+                  x="394.5313" y="670.5078">Faktura
+            </text>
+        </g><!--entity FA-->
+        <g class="entity" data-entity="FA" data-source-line="85" data-uid="ent0019" id="entity_FA">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="287.5977" x="71.875" y="791.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="328.2227"
+                  y="798.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="325.0977"
+                  y="801.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="325.0977"
+                  y="808.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="225.0977"
+                  x="95.3125" y="845.5078">Faktura&#269;n&#237; adresa
+            </text>
+        </g><!--entity DPH-->
+        <g class="entity" data-entity="DPH" data-source-line="86" data-uid="ent0020" id="entity_DPH">
+            <rect fill="#FFFFFF" height="75.9766" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="115.625" x="414.0625" y="791.0522"/>
+            <rect fill="#FFFFFF" height="15.625" style="stroke:#005A9C;stroke-width:3.125;" width="23.4375" x="498.4375"
+                  y="798.8647"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="495.3125"
+                  y="801.9897"/>
+            <rect fill="#FFFFFF" height="3.125" style="stroke:#005A9C;stroke-width:3.125;" width="6.25" x="495.3125"
+                  y="808.2397"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="53.125"
+                  x="437.5" y="845.5078">DPH
+            </text>
+        </g><!--link KZ to O-->
+        <g class="link" data-entity-1="KZ" data-entity-2="O" data-source-line="91" data-uid="lnk21" id="link_KZ_O">
+            <path d="M1538.2031,191.9897 C1456.875,207.146 1326.6719,232.8647 1215.625,261.3647 C1081.4531,295.8022 938.2364,340.8966 839.0801,373.4123"
+                  fill="none" id="KZ-to-O" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="830.1719,376.3335,845.4817,377.8905,837.5954,373.8991,841.5868,366.0128,830.1719,376.3335"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="387.439"
+                  x="1217.1875" y="286.1328">Upstream / Downstream (OHS)
+            </text>
+        </g><!--link ZA to O-->
+        <g class="link" data-entity-1="ZA" data-entity-2="O" data-source-line="92" data-uid="lnk22" id="link_ZA_O">
+            <path d="M511.8594,214.6147 C534.8438,228.0679 559.9688,244.2241 581.25,261.3647 C624.125,295.896 666.5469,343.0054 693.7344,375.3335"
+                  fill="none" id="ZA-O" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="143.6646"
+                  x="615.625" y="286.1328">Partnership
+            </text>
+        </g><!--link ZA to O-->
+        <g class="link" data-entity-1="ZA" data-entity-2="O" data-source-line="112" data-uid="lnk35" id="link_ZA_O">
+            <path d="M484.3281,214.8804 C510.2813,237.5522 544.3438,267.021 575,292.6147 C608.7813,320.8179 640.197,346.1347 669.6345,369.5722"
+                  fill="none" id="ZA-to-O" style="stroke:#808080;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#808080"
+                     points="676.9688,375.4116,669.8602,361.763,670.8568,370.5454,662.0744,371.542,676.9688,375.4116"
+                     style="stroke:#808080;stroke-width:3.125;"/>
+        </g><!--link O to F-->
+        <g class="link" data-entity-1="O" data-entity-2="F" data-source-line="93" data-uid="lnk23" id="link_O_F">
+            <path d="M652.5,452.146 C622.9688,465.9897 587.9063,480.5054 554.6875,489.4897 C531.0781,495.8804 461.5938,483.7397 445.3125,501.9897 C418.1094,532.4741 423.1007,572.8233 433.2726,606.6983"
+                  fill="none" id="O-to-F" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="435.9688,615.6772,437.9105,600.4114,433.7219,608.1948,425.9385,604.0063,435.9688,615.6772"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="248.7549"
+                  x="446.875" y="526.7578">Customer / Supplier
+            </text>
+        </g><!--link O to F-->
+        <g class="link" data-entity-1="O" data-entity-2="F" data-source-line="113" data-uid="lnk36" id="link_O_F">
+            <path d="M721.7969,452.4897 C719.625,482.8491 714.6094,522.396 703.125,533.2397 C685.0781,550.271 615.2344,536.5679 592.1875,545.7397 C552.5781,561.5054 521.3049,585.1008 494.4924,609.2883"
+                  fill="none" id="O-to-F-1" style="stroke:#808080;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#808080"
+                     points="487.5313,615.5679,502.1593,610.7892,493.3322,610.3349,493.7865,601.5077,487.5313,615.5679"
+                     style="stroke:#808080;stroke-width:3.125;"/>
+        </g><!--link KZ to P-->
+        <g class="link" data-entity-1="KZ" data-entity-2="P" data-source-line="96" data-uid="lnk24" id="link_KZ_P">
+            <path d="M1617.1875,214.9116 C1617.1875,258.8022 1617.1875,321.9897 1617.1875,365.8022" fill="none"
+                  id="KZ-to-P" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="1617.1875,375.1772,1623.4375,361.1147,1617.1875,367.3647,1610.9375,361.1147,1617.1875,375.1772"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link P to K-->
+        <g class="link" data-entity-1="P" data-entity-2="K" data-source-line="97" data-uid="lnk25" id="link_P_K">
+            <path d="M1619.1406,452.3804 C1621.4844,497.0054 1624.9132,562.0652 1627.2569,606.5652" fill="none"
+                  id="P-to-K" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="1627.75,615.9272,1633.2517,601.5555,1627.3391,608.1256,1620.769,602.2129,1627.75,615.9272"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link KZ to V-->
+        <g class="link" data-entity-1="KZ" data-entity-2="V" data-source-line="98" data-uid="lnk26" id="link_KZ_V">
+            <path d="M1655.8125,214.9116 C1701.4531,258.8022 1770.1799,324.8667 1815.7424,368.6792" fill="none"
+                  id="KZ-to-V" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="1822.5,375.1772,1816.6956,360.925,1816.8686,369.7622,1808.0315,369.9352,1822.5,375.1772"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link O to OP-->
+        <g class="link" data-entity-1="O" data-entity-2="OP" data-source-line="100" data-uid="lnk27" id="link_O_OP">
+            <path d="M829.7031,444.6304 C908.8594,468.021 1018.7188,503.7554 1110.9375,545.7397 C1155.125,565.8491 1194.408,588.6858 1229.783,610.9358"
+                  fill="none" id="O-to-OP" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="1237.7188,615.9272,1229.1427,603.1496,1231.1056,611.7677,1222.4875,613.7307,1237.7188,615.9272"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link O to D-->
+        <g class="link" data-entity-1="O" data-entity-2="D" data-source-line="101" data-uid="lnk28" id="link_O_D">
+            <path d="M720.7188,452.4897 C718.9688,475.7085 716.5469,506.2397 714.0625,533.2397 C711.5156,560.8804 709.2623,582.7321 706.6998,606.3258"
+                  fill="none" id="O-to-D" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="705.6875,615.646,713.4193,602.3405,706.531,607.8792,700.9924,600.9909,705.6875,615.646"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link O to Z-->
+        <g class="link" data-entity-1="O" data-entity-2="Z" data-source-line="102" data-uid="lnk29" id="link_O_Z">
+            <path d="M760.7969,452.3804 C805.7031,497.0054 873.9582,564.8202 918.7551,609.3202" fill="none" id="O-to-Z"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="925.4063,615.9272,919.8343,601.5826,919.8636,610.4214,911.0249,610.4508,925.4063,615.9272"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link ZA to A-->
+        <g class="link" data-entity-1="ZA" data-entity-2="A" data-source-line="104" data-uid="lnk30" id="link_ZA_A">
+            <path d="M415.2031,214.9116 C383.3125,258.8022 336.09,323.7812 304.2462,367.5937" fill="none" id="ZA-to-A"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="298.7344,375.1772,312.0579,367.4765,303.3276,368.8576,301.9465,360.1274,298.7344,375.1772"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link ZA to KO-->
+        <g class="link" data-entity-1="ZA" data-entity-2="KO" data-source-line="105" data-uid="lnk31" id="link_ZA_KO">
+            <path d="M445.9063,214.9116 C450.2969,258.8022 456.6153,322.0361 460.9903,365.8486" fill="none"
+                  id="ZA-to-KO" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="461.9219,375.1772,466.7437,360.5633,461.1456,367.4034,454.3055,361.8054,461.9219,375.1772"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link F to FA-->
+        <g class="link" data-entity-1="F" data-entity-2="FA" data-source-line="107" data-uid="lnk32" id="link_F_FA">
+            <path d="M399.7188,692.771 C360.1719,721.771 312.9032,756.4293 273.3876,785.4137" fill="none" id="F-to-FA"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="265.8281,790.9585,280.8639,787.6809,272.1277,786.3378,273.4708,777.6016,265.8281,790.9585"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link F to DPH-->
+        <g class="link" data-entity-1="F" data-entity-2="DPH" data-source-line="108" data-uid="lnk33" id="link_F_DPH">
+            <path d="M454.6875,692.771 C458.3906,721.771 462.3168,752.6741 466.0043,781.6585" fill="none" id="F-to-DPH"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="467.1875,790.9585,471.6127,776.2196,466.2015,783.2085,459.2127,777.7972,467.1875,790.9585"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link P to OP-->
+        <g class="link" data-entity-1="P" data-entity-2="OP" data-source-line="111" data-uid="lnk34" id="link_P_OP">
+            <path d="M1566.6563,452.3804 C1505.8906,497.0054 1412.0875,565.878 1351.4937,610.378" fill="none"
+                  id="P-to-OP" style="stroke:#808080;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#808080"
+                     points="1343.9375,615.9272,1358.9713,612.6408,1350.2343,611.3029,1351.5723,602.5659,1343.9375,615.9272"
+                     style="stroke:#808080;stroke-width:3.125;"/>
+        </g><!--link A to FA-->
+        <g class="link" data-entity-1="A" data-entity-2="FA" data-source-line="114" data-uid="lnk37" id="link_A_FA">
+            <path d="M266.7813,452.5991 C256.0781,531.146 232.5957,703.3258 221.9238,781.529" fill="none" id="A-to-FA"
+                  style="stroke:#808080;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#808080"
+                     points="220.6563,790.8179,228.7503,777.7296,221.7126,783.0771,216.365,776.0394,220.6563,790.8179"
+                     style="stroke:#808080;stroke-width:3.125;"/>
+        </g><!--SRC=[jLLDRfj05DvpYYUoQBj8waHAf5Pg9He7HN8K8pdrWYYBCKnW2ipGON0ALOxG0tJf0qGvGRDnkLU76Kp0iPKgKcmPXk_zVDzxynXd4Q4fuYW1FoMmVpWmiXQP8IyAECkfVynYnc77jkflnoCBaSzk20tW6iKPDZec7r-ZF1Ose-8S9HZCyvmImSpDBXDIOjW_Ucgym3-45PE09fWAyEG5youDPJw6dmR0boTYrQUsCEvZtg23mQ7ruRX5BqBYHHHd6HmOjzsy7ajIHclELqZEiISG3U9NKOuuPpVzc3LZDxHhymIP4r6yG5HFG8Q_vvXwkZW7SK4yaY8gDbTpHgxn6Q7u6Ukwd9CZUo17iK-mHNDFNIgTKB2jyth0_wD8oiIM7AsoPtC88buq0ZB96t0uavsEvfZ-_KMNT-0J5CYanOQDiDOtVOjBdyKmLgqoJtQpaAMcajg28oHGp08ePwnwMDvfAy1bWry1oc3aQaoAzVD8ACnftN30EC7QKOFJ8eonlrpCbmjPax9CfULM_hhKuzatx5Ff5XKjxIE6LDouOPOrLGyH0lOOe-sDZY5BEPhhcA66tBIwpzWCqXY9cVPsDwXmbui8bLAdHreLBHRfC4l3biznfZaQPCIgnSfhDDwGtKQHo3doS9kxGLI8tOFq1A174hjX6JgdkZ3dL56eoPcM0eK59BWa4CcpLvwmXJ5oOVTIh6Raqy7LxcSOmqSmlwQPu5YEodiOiXlQFBmTdqxUcOPhhKVfeFgbf9Xd8KbDO_mqirqx7UUPO0dcClCaJzEOO6ugVQYS5P3FvTz5zNkbiBfN4cMiOpZgFbe1KwEcgFKwpMBOt5r3APGhQxMGlJPijP8zqekwEIsjweeyzeb02O4IU7Klj_EF5tQ4EB1tkIDVjk9gJv7Ar5r0adSURQDdjQr_]-->
+    </g>
+</svg>

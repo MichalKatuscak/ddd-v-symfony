@@ -1,0 +1,119 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Inter"
+skinparam defaultFontSize 16
+skinparam defaultTextAlignment center
+
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+skinparam sequence {
+  ParticipantBorderColor #005A9C
+  LifeLineBorderColor #005A9C
+  LifeLineBackgroundColor #E6F0FA
+  ParticipantBackgroundColor #FFFFFF
+}
+
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #005A9C
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+skinparam title {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+' Pro sekvenční diagramy
+skinparam sequenceArrowThickness 2
+skinparam sequenceArrowColor #005A9C
+
+package "Prezentační vrstva" {
+  RECTANGLE UI [
+    UI / API / Controller
+  ]
+}
+
+package "Aplikační vrstva" {
+  RECTANGLE Application [
+    Application Service
+  ]
+  RECTANGLE UseCase [
+    Use Cases
+  ]
+}
+
+package "Doménová vrstva" {
+  RECTANGLE DomainService [
+    Domain Service
+  ]
+  RECTANGLE Entity [
+    Entity
+  ]
+  RECTANGLE VO [
+    Value Object
+  ]
+  RECTANGLE AR [
+    Aggregate Root
+  ]
+  RECTANGLE Repository [
+    Repository Interface
+  ]
+}
+
+package "Infrastrukturní vrstva" {
+  RECTANGLE RepoImpl [
+    Repository Implementation
+  ]
+  RECTANGLE DB [
+    Database
+  ]
+  RECTANGLE External [
+    External Services
+  ]
+}
+
+UI --> Application
+Application --> UseCase
+UseCase --> DomainService
+UseCase --> AR
+DomainService --> Entity
+DomainService --> VO
+AR --> Entity
+AR --> VO
+AR --> Repository
+Repository --> RepoImpl
+RepoImpl --> DB
+RepoImpl --> External
+@enduml

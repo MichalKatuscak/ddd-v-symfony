@@ -151,6 +151,7 @@
         <span>↑</span>
     </button>
 
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
     <script src="{{ asset('js/modern-script.js') }}" defer></script>
     <script src="{{ asset('js/code-script.js') }}" defer></script>
@@ -159,6 +160,21 @@
             document.querySelectorAll('pre code').forEach((el) => {
                 hljs.highlightElement(el);
             });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const svgElements = document.querySelectorAll('.diagram-container svg');
+            if (svgElements) {
+                svgElements.forEach(function(svgElement) {
+                    svgPanZoom(svgElement, {
+                        zoomEnabled: true,
+                        controlIconsEnabled: true,
+                        fit: true,
+                        center: true,
+                        minZoom: 0.5,
+                        maxZoom: 20
+                    });
+                });
+            }
         });
     </script>
     {% block javascripts %}{% endblock %}

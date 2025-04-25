@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css"
+     data-diagram-type="DESCRIPTION"  preserveAspectRatio="none"
+     style="background:#FAFAFA;aspect-ratio:1.646" version="1.1" viewBox="0 0 870 531"
+     zoomAndPan="magnify">
+    <defs/>
+    <g>
+        <rect fill="#FAFAFA" height="531.25" style="stroke:none;stroke-width:1.5625;" width="870.3125" x="0"
+              y="0"/><!--cluster Dom?nov? expert-->
+        <g class="cluster" data-entity="Dom&#233;nov&#253; expert" data-source-line="61" data-uid="ent0002"
+           id="cluster_Dom&#233;nov&#253; expert">
+            <rect fill="#E1F5FE" height="145.3125" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="748.4375" x="10.9375" y="10.9375"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="217.334" x="276.4893" y="38.2813">Dom&#233;nov&#253; expert
+            </text>
+        </g><!--cluster V?vojov? t?m-->
+        <g class="cluster" data-entity="V&#253;vojov&#253; t&#253;m" data-source-line="66" data-uid="ent0005"
+           id="cluster_V&#253;vojov&#253; t&#253;m">
+            <rect fill="#E8F5E9" height="145.3125" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="676.5625" x="76.5625" y="376.5625"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="169.1284" x="330.2795" y="403.9063">V&#253;vojov&#253; t&#253;m
+            </text>
+        </g><!--cluster Ubiquitous Language-->
+        <g class="cluster" data-entity="Ubiquitous Language" data-source-line="71" data-uid="ent0008"
+           id="cluster_Ubiquitous Language">
+            <rect fill="#FFF3E0" height="145.3125" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="728.125" x="132.8125" y="193.75"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="259.6802" x="367.0349" y="221.0938">Ubiquitous Language
+            </text>
+        </g><!--entity DE-->
+        <g class="entity" data-entity="DE" data-source-line="62" data-uid="ent0003" id="entity_DE">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="330.4077" x="403.9063" y="70.3125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="299.1577"
+                  x="419.5313" y="110.1563">Byznys vize a po&#382;adavky
+            </text>
+        </g><!--entity DET-->
+        <g class="entity" data-entity="DET" data-source-line="63" data-uid="ent0004" id="entity_DET">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="312.5244" x="35.9375" y="70.3125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="281.2744"
+                  x="51.5625" y="110.1563">Dom&#233;nov&#225; terminologie
+            </text>
+        </g><!--entity DEV-->
+        <g class="entity" data-entity="DEV" data-source-line="67" data-uid="ent0006" id="entity_DEV">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="263.9526" x="464.8438" y="435.9375"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="232.7026"
+                  x="480.4688" y="475.7813">Implementace k&#243;du
+            </text>
+        </g><!--entity DEVT-->
+        <g class="entity" data-entity="DEVT" data-source-line="68" data-uid="ent0007" id="entity_DEVT">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="307.8125" x="102.3438" y="435.9375"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="276.5625"
+                  x="117.9688" y="475.7813">Technick&#225; terminologie
+            </text>
+        </g><!--entity UL-->
+        <g class="entity" data-entity="UL" data-source-line="72" data-uid="ent0009" id="entity_UL">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="186.8042" x="409.375" y="253.125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="155.5542"
+                  x="425" y="292.9688">Sd&#237;len&#253; jazyk
+            </text>
+        </g><!--entity ULDICT-->
+        <g class="entity" data-entity="ULDICT" data-source-line="73" data-uid="ent0010" id="entity_ULDICT">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="196.9971" x="157.8125" y="253.125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="165.7471"
+                  x="173.4375" y="292.9688">Slovn&#237;k pojm&#367;
+            </text>
+        </g><!--entity CC-->
+        <g class="entity" data-entity="CC" data-source-line="74" data-uid="ent0011" id="entity_CC">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="182.8125" x="652.3438" y="253.125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="151.5625"
+                  x="667.9688" y="292.9688">Context Map
+            </text>
+        </g><!--link DE to UL-->
+        <g class="link" data-entity-1="DE" data-entity-2="UL" data-source-line="77" data-uid="lnk12" id="link_DE_UL">
+            <path d="M558.0625,131.6094 C545.8594,165.0313 529.231,210.553 517.0279,243.9749" fill="none" id="DE-to-UL"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="513.8125,252.7813,524.5065,241.7153,516.492,245.4426,512.7647,237.4281,513.8125,252.7813"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link DET to ULDICT-->
+        <g class="link" data-entity-1="DET" data-entity-2="ULDICT" data-source-line="78" data-uid="lnk13"
+           id="link_DET_ULDICT">
+            <path d="M202.625,131.6094 C214.5313,165.0313 230.7602,210.528 242.6664,243.9499" fill="none"
+                  id="DET-to-ULDICT" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="245.8125,252.7813,246.9809,237.4368,243.1908,245.4218,235.2058,241.6316,245.8125,252.7813"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link UL to DEV-->
+        <g class="link" data-entity-1="UL" data-entity-2="DEV" data-source-line="79" data-uid="lnk14" id="link_UL_DEV">
+            <path d="M518.3906,314.4219 C535.8281,347.8438 559.8353,393.8601 577.2728,427.282" fill="none"
+                  id="UL-to-DEV" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="581.6094,435.5937,580.6457,420.2351,577.9956,428.6673,569.5634,426.0172,581.6094,435.5937"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link ULDICT to DEVT-->
+        <g class="link" data-entity-1="ULDICT" data-entity-2="DEVT" data-source-line="80" data-uid="lnk15"
+           id="link_ULDICT_DEVT">
+            <path d="M256.25,314.4219 C256.25,347.8438 256.25,392.7969 256.25,426.2187" fill="none" id="ULDICT-to-DEVT"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C" points="256.25,435.5937,262.5,421.5312,256.25,427.7812,250,421.5312,256.25,435.5937"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link CC to DEV-->
+        <g class="link" data-entity-1="CC" data-entity-2="DEV" data-source-line="81" data-uid="lnk16" id="link_CC_DEV">
+            <path d="M719.8281,314.4219 C692.5156,347.8438 654.0241,394.9109 626.7272,428.3328" fill="none"
+                  id="CC-to-DEV" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="620.7969,435.5937,634.533,428.6558,625.7388,429.5429,624.8517,420.7487,620.7969,435.5937"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--SRC=[jLJ1Rfj04Btp5IDow2cItSfHSwdaO5koHAj8mRvlOC1hO9Oi2mck-WdzY1vxY7h8sRtG_5SNJ5mWjb952bnsPzw-UJCxEsd8AM6InU0b78QZWP7kBTVC3GCfCl8i4Ga99xDnzRSGwOfvufPJ03wBKZHQBWzzbaLg9aXzOJ62EIU5qZoCkE8RXE7PSwU3TseSyO1Y90KkLXpjA2GyXAy6mCKphVLNUOJqK3RMmM0qFhVsLcV5tP0mJU6zyQtDwueu4LJ5V0DoYQvY54Hlefn9AMwxPthEzj6sprKyvwfuXQYEW1HlCYHtbzmbaugxF66a3cTZSnzjJlY2jozdUZORw4xi1ZYYkQCkqI0M7Alyhh__8qaIwWZ7NjcB78ghLxM09da7brBeIeSvqf_lLDw3nrcWIOi35p7kN_eHI3UAyQzBpOc8ovyayd8BU9UWL2QSuD0V-JlvBUH5iQ4YXRnwpmmIyVYRUImF2nDO2fDf5xod_G7wMSUSj820OuDrgaHRw6MvpSMw5g7ARLn9-EYFyBmlOHud4LRZWkaU3Ci7Bsi8brsSW-wAT54EHr_smo-k-Kt6bSXIiBKfqqsa9VY-_m47VGbNNdaV8McbQxOfmffoOVSmaSZrnOMwIEluyLU3cSmjfukpz7ZKGn0-iwJ6M7K3JAPmUlgf8jM5QfRrsOLTxwfiTvQdhMDOrjFwBm00]-->
+    </g>
+</svg>

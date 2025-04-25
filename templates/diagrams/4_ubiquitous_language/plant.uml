@@ -1,0 +1,83 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Inter"
+skinparam defaultFontSize 16
+skinparam defaultTextAlignment center
+
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+skinparam sequence {
+  ParticipantBorderColor #005A9C
+  LifeLineBorderColor #005A9C
+  LifeLineBackgroundColor #E6F0FA
+  ParticipantBackgroundColor #FFFFFF
+}
+
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #005A9C
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+skinparam title {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+' Pro sekvenční diagramy
+skinparam sequenceArrowThickness 2
+skinparam sequenceArrowColor #005A9C
+
+rectangle "Doménový expert" #e1f5fe {
+  rectangle "Byznys vize a požadavky" as DE
+  rectangle "Doménová terminologie" as DET
+}
+
+rectangle "Vývojový tým" #e8f5e9 {
+  rectangle "Implementace kódu" as DEV
+  rectangle "Technická terminologie" as DEVT
+}
+
+rectangle "Ubiquitous Language" #fff3e0 {
+  rectangle "Sdílený jazyk" as UL
+  rectangle "Slovník pojmů" as ULDICT
+  rectangle "Context Map" as CC
+}
+
+DE --> UL
+DET --> ULDICT
+UL --> DEV
+ULDICT --> DEVT
+CC --> DEV
+@enduml
