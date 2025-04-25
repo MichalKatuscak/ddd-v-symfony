@@ -15,22 +15,20 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
     <meta property="og:title" content="{% block og_title %}{{ title ?? 'Architektura DDD v Symfony 7' }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
-    <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/ddd-symfony-og.jpg') }}">
+    <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
     <meta property="twitter:title" content="{% block twitter_title %}{{ block('og_title') }}{% endblock %}">
     <meta property="twitter:description" content="{% block twitter_description %}{{ block('og_description') }}{% endblock %}">
-    <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/ddd-symfony-twitter.jpg') }}">
+    <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
 
     <title>{% block title %}{{ title ?? 'Architektura DDD v Symfony 7' }} | DDD Symfony{% endblock %}</title>
 
