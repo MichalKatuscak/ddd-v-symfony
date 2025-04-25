@@ -1,0 +1,369 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css"
+     data-diagram-type="CLASS" preserveAspectRatio="none"
+     style="background:#FAFAFA;aspect-ratio:1.204" version="1.1" viewBox="0 0 1293 1075"
+     zoomAndPan="magnify">
+    <defs/>
+    <g>
+        <rect fill="#FAFAFA" height="1075" style="stroke:none;stroke-width:1.5625;" width="1293.75" x="0"
+              y="0"/><!--class Entity-->
+        <g class="entity" data-entity="Entity" data-source-line="62" data-uid="ent0002" id="entity_Entity">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="270.4712" x="244.5313" y="888.2813"/>
+            <ellipse cx="336.6333" cy="913.2813" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M340.4663,922.1191 Q339.6118,922.5586 338.6597,922.7783 Q337.7319,923.0225 336.6821,923.0225 Q332.9956,923.0225 331.0425,920.5811 Q329.1138,918.1396 329.1138,913.5498 Q329.1138,908.96 331.0425,906.543 Q332.9956,904.1016 336.6821,904.1016 Q337.7319,904.1016 338.6841,904.3213 Q339.6362,904.541 340.4663,904.9805 L340.4663,908.9844 Q339.5386,908.1299 338.6597,907.7393 Q337.7808,907.3242 336.853,907.3242 Q334.8755,907.3242 333.8745,908.9111 Q332.8735,910.4736 332.8735,913.5498 Q332.8735,916.626 333.8745,918.2129 Q334.8755,919.7754 336.853,919.7754 Q337.7808,919.7754 338.6597,919.3848 Q339.5386,918.9697 340.4663,918.1152 L340.4663,922.1191 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="72.9858"
+                  x="368.6646" y="921.936">Entity
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="246.0938" x2="513.4399" y1="938.2813" y2="938.2813"/>
+            <ellipse cx="261.7188" cy="961.4258" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="95.3857"
+                  x="275.7813" y="967.7368">identity
+            </text>
+            <ellipse cx="261.7188" cy="990.5273" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="169.6899"
+                  x="275.7813" y="996.8384">mutableState
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="246.0938" x2="513.4399" y1="1008.9844"
+                  y2="1008.9844"/>
+            <ellipse cx="261.7188" cy="1032.1289" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="229.8462"
+                  x="275.7813" y="1038.4399">equals(other) bool
+            </text>
+        </g><!--class ValueObject-->
+        <g class="entity" data-entity="ValueObject" data-source-line="68" data-uid="ent0003" id="entity_ValueObject">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="270.4712" x="936.7188" y="888.2813"/>
+            <ellipse cx="990.9619" cy="913.2813" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M994.7949,922.1191 Q993.9404,922.5586 992.9883,922.7783 Q992.0605,923.0225 991.0107,923.0225 Q987.3242,923.0225 985.3711,920.5811 Q983.4424,918.1396 983.4424,913.5498 Q983.4424,908.96 985.3711,906.543 Q987.3242,904.1016 991.0107,904.1016 Q992.0605,904.1016 993.0127,904.3213 Q993.9648,904.541 994.7949,904.9805 L994.7949,908.9844 Q993.8672,908.1299 992.9883,907.7393 Q992.1094,907.3242 991.1816,907.3242 Q989.2041,907.3242 988.2031,908.9111 Q987.2021,910.4736 987.2021,913.5498 Q987.2021,916.626 988.2031,918.2129 Q989.2041,919.7754 991.1816,919.7754 Q992.1094,919.7754 992.9883,919.3848 Q993.8672,918.9697 994.7949,918.1152 L994.7949,922.1191 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="152.0142"
+                  x="1019.6826" y="921.936">ValueObject
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="938.2813" x2="1205.6274" y1="938.2813" y2="938.2813"/>
+            <ellipse cx="953.9063" cy="961.4258" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="200.9888"
+                  x="967.9688" y="967.7368">immutableState
+            </text>
+            <ellipse cx="953.9063" cy="990.5273" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="126.9531"
+                  x="967.9688" y="996.8384">noIdentity
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="938.2813" x2="1205.6274" y1="1008.9844"
+                  y2="1008.9844"/>
+            <ellipse cx="953.9063" cy="1032.1289" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="229.8462"
+                  x="967.9688" y="1038.4399">equals(other) bool
+            </text>
+        </g><!--class AggregateRoot-->
+        <g class="entity" data-entity="AggregateRoot" data-source-line="74" data-uid="ent0004"
+           id="entity_AggregateRoot">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="391.333" x="354.6875" y="585.9375"/>
+            <ellipse cx="449.3958" cy="610.9375" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M453.2288,619.7754 Q452.3743,620.2148 451.4221,620.4346 Q450.4944,620.6787 449.4446,620.6787 Q445.7581,620.6787 443.8049,618.2373 Q441.8762,615.7959 441.8762,611.2061 Q441.8762,606.6162 443.8049,604.1992 Q445.7581,601.7578 449.4446,601.7578 Q450.4944,601.7578 451.4465,601.9775 Q452.3987,602.1973 453.2288,602.6367 L453.2288,606.6406 Q452.301,605.7861 451.4221,605.3955 Q450.5432,604.9805 449.6155,604.9805 Q447.6379,604.9805 446.637,606.5674 Q445.636,608.1299 445.636,611.2061 Q445.636,614.2822 446.637,615.8691 Q447.6379,617.4316 449.6155,617.4316 Q450.5432,617.4316 451.4221,617.041 Q452.301,616.626 453.2288,615.7715 L453.2288,619.7754 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="188.6353"
+                  x="481.427" y="619.5923">AggregateRoot
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="356.25" x2="744.458" y1="635.9375" y2="635.9375"/>
+            <ellipse cx="371.875" cy="659.082" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="72.9858"
+                  x="385.9375" y="665.3931">Entity
+            </text>
+            <ellipse cx="371.875" cy="688.1836" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="350.708"
+                  x="385.9375" y="694.4946">rootOfConsistencyBoundary
+            </text>
+            <ellipse cx="371.875" cy="717.2852" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="314.6484"
+                  x="385.9375" y="723.5962">transactionalConsistency
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="356.25" x2="744.458" y1="735.7422" y2="735.7422"/>
+        </g><!--class Repository-->
+        <g class="entity" data-entity="Repository" data-source-line="80" data-uid="ent0005" id="entity_Repository">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="284.7046" x="10.9375" y="298.4375"/>
+            <ellipse cx="79.6661" cy="323.4375" fill="#B4A7E5" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M73.9532,317.749 L73.9532,314.5752 L84.8175,314.5752 L84.8175,317.749 L81.1798,317.749 L81.1798,329.6387 L84.8175,329.6387 L84.8175,332.8125 L73.9532,332.8125 L73.9532,329.6387 L77.5909,329.6387 L77.5909,317.749 L73.9532,317.749 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-style="italic" lengthAdjust="spacing"
+                  textLength="134.0576" x="111.6058" y="332.0923">Repository
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="12.5" x2="294.0796" y1="348.4375" y2="348.4375"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="12.5" x2="294.0796" y1="360.9375" y2="360.9375"/>
+            <ellipse cx="28.125" cy="384.082" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="89.7827"
+                  x="42.1875" y="390.3931">find(id)
+            </text>
+            <ellipse cx="28.125" cy="413.1836" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="207.1167"
+                  x="42.1875" y="419.4946">save(aggregate)
+            </text>
+            <ellipse cx="28.125" cy="442.2852" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="244.0796"
+                  x="42.1875" y="448.5962">remove(aggregate)
+            </text>
+        </g><!--class DomainService-->
+        <g class="entity" data-entity="DomainService" data-source-line="86" data-uid="ent0006"
+           id="entity_DomainService">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="398.8525" x="885.1563" y="585.9375"/>
+            <ellipse cx="983.2397" cy="610.9375" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M987.0728,619.7754 Q986.2183,620.2148 985.2661,620.4346 Q984.3384,620.6787 983.2886,620.6787 Q979.6021,620.6787 977.6489,618.2373 Q975.7202,615.7959 975.7202,611.2061 Q975.7202,606.6162 977.6489,604.1992 Q979.6021,601.7578 983.2886,601.7578 Q984.3384,601.7578 985.2905,601.9775 Q986.2427,602.1973 987.0728,602.6367 L987.0728,606.6406 Q986.145,605.7861 985.2661,605.3955 Q984.3872,604.9805 983.4595,604.9805 Q981.4819,604.9805 980.481,606.5674 Q979.48,608.1299 979.48,611.2061 Q979.48,614.2822 980.481,615.8691 Q981.4819,617.4316 983.4595,617.4316 Q984.3872,617.4316 985.2661,617.041 Q986.145,616.626 987.0728,615.7715 L987.0728,619.7754 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="189.4043"
+                  x="1015.271" y="619.5923">DomainService
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="886.7188" x2="1282.4463" y1="635.9375" y2="635.9375"/>
+            <ellipse cx="902.3438" cy="659.082" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="111.7065"
+                  x="916.4063" y="665.3931">stateless
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="886.7188" x2="1282.4463" y1="677.5391" y2="677.5391"/>
+            <ellipse cx="902.3438" cy="700.6836" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="194.2505"
+                  x="916.4063" y="706.9946">businessLogic()
+            </text>
+            <ellipse cx="902.3438" cy="729.7852" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="358.2275"
+                  x="916.4063" y="736.0962">operatesOnMultipleEntities()
+            </text>
+        </g><!--class Factory-->
+        <g class="entity" data-entity="Factory" data-source-line="92" data-uid="ent0007" id="entity_Factory">
+            <rect fill="#F1F1F1" height="133.2031" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="397.7417" x="350.7813" y="313.2813"/>
+            <ellipse cx="496.2036" cy="338.2813" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M500.0366,347.1191 Q499.1821,347.5586 498.23,347.7783 Q497.3022,348.0225 496.2524,348.0225 Q492.5659,348.0225 490.6128,345.5811 Q488.6841,343.1396 488.6841,338.5498 Q488.6841,333.96 490.6128,331.543 Q492.5659,329.1016 496.2524,329.1016 Q497.3022,329.1016 498.2544,329.3213 Q499.2065,329.541 500.0366,329.9805 L500.0366,333.9844 Q499.1089,333.1299 498.23,332.7393 Q497.3511,332.3242 496.4233,332.3242 Q494.4458,332.3242 493.4448,333.9111 Q492.4438,335.4736 492.4438,338.5498 Q492.4438,341.626 493.4448,343.2129 Q494.4458,344.7754 496.4233,344.7754 Q497.3511,344.7754 498.23,344.3848 Q499.1089,343.9697 500.0366,343.1152 L500.0366,347.1191 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="93.6157"
+                  x="528.2349" y="346.936">Factory
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="352.3438" x2="746.9604" y1="363.2813" y2="363.2813"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="352.3438" x2="746.9604" y1="375.7813" y2="375.7813"/>
+            <ellipse cx="367.9688" cy="398.9258" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="303.9551"
+                  x="382.0313" y="405.2368">createComplexObjects()
+            </text>
+            <ellipse cx="367.9688" cy="428.0273" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="357.1167"
+                  x="382.0313" y="434.3384">encapsulatesCreationLogic()
+            </text>
+        </g><!--class DomainEvent-->
+        <g class="entity" data-entity="DomainEvent" data-source-line="97" data-uid="ent0008" id="entity_DomainEvent">
+            <rect fill="#F1F1F1" height="191.4063" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="218.6279" x="570.3125" y="873.4375"/>
+            <ellipse cx="593.75" cy="898.4375" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M597.583,907.2754 Q596.7285,907.7148 595.7764,907.9346 Q594.8486,908.1787 593.7988,908.1787 Q590.1123,908.1787 588.1592,905.7373 Q586.2305,903.2959 586.2305,898.7061 Q586.2305,894.1162 588.1592,891.6992 Q590.1123,889.2578 593.7988,889.2578 Q594.8486,889.2578 595.8008,889.4775 Q596.7529,889.6973 597.583,890.1367 L597.583,894.1406 Q596.6553,893.2861 595.7764,892.8955 Q594.8975,892.4805 593.9697,892.4805 Q591.9922,892.4805 590.9912,894.0674 Q589.9902,895.6299 589.9902,898.7061 Q589.9902,901.7822 590.9912,903.3691 Q591.9922,904.9316 593.9697,904.9316 Q594.8975,904.9316 595.7764,904.541 Q596.6553,904.126 597.583,903.2715 L597.583,907.2754 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="168.6279"
+                  x="615.625" y="907.0923">DomainEvent
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="571.875" x2="787.3779" y1="923.4375" y2="923.4375"/>
+            <ellipse cx="587.5" cy="946.582" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="70.8984"
+                  x="601.5625" y="952.8931">name
+            </text>
+            <ellipse cx="587.5" cy="975.6836" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="134.8511"
+                  x="601.5625" y="981.9946">timestamp
+            </text>
+            <ellipse cx="587.5" cy="1004.7852" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="56.311"
+                  x="601.5625" y="1011.0962">data
+            </text>
+            <ellipse cx="587.5" cy="1033.8867" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="140.5884"
+                  x="601.5625" y="1040.1978">notification
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="571.875" x2="787.3779" y1="1052.3438" y2="1052.3438"/>
+        </g><!--class BoundedContext-->
+        <g class="entity" data-entity="BoundedContext" data-source-line="104" data-uid="ent0009"
+           id="entity_BoundedContext">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="295.2881" x="711.7188" y="10.9375"/>
+            <ellipse cx="751.2018" cy="35.9375" fill="#ADD1B2" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M755.0348,44.7754 Q754.1803,45.2148 753.2281,45.4346 Q752.3004,45.6787 751.2506,45.6787 Q747.5641,45.6787 745.611,43.2373 Q743.6823,40.7959 743.6823,36.2061 Q743.6823,31.6162 745.611,29.1992 Q747.5641,26.7578 751.2506,26.7578 Q752.3004,26.7578 753.2526,26.9775 Q754.2047,27.1973 755.0348,27.6367 L755.0348,31.6406 Q754.1071,30.7861 753.2281,30.3955 Q752.3492,29.9805 751.4215,29.9805 Q749.444,29.9805 748.443,31.5674 Q747.442,33.1299 747.442,36.2061 Q747.442,39.2822 748.443,40.8691 Q749.444,42.4316 751.4215,42.4316 Q752.3492,42.4316 753.2281,42.041 Q754.1071,41.626 755.0348,40.7715 L755.0348,44.7754 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="209.6313"
+                  x="776.6425" y="44.5923">BoundedContext
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="713.2813" x2="1005.4443" y1="60.9375" y2="60.9375"/>
+            <ellipse cx="728.9063" cy="84.082" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="252.9297"
+                  x="742.9688" y="90.3931">autonomousDomain
+            </text>
+            <ellipse cx="728.9063" cy="113.1836" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="231.3843"
+                  x="742.9688" y="119.4946">explicitBoundaries
+            </text>
+            <ellipse cx="728.9063" cy="142.2852" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="254.6631"
+                  x="742.9688" y="148.5962">ubiquitousLanguage
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="713.2813" x2="1005.4443" y1="160.7422" y2="160.7422"/>
+        </g><!--link AggregateRoot to Entity-->
+        <g class="link" data-entity-1="AggregateRoot" data-entity-2="Entity" data-source-line="110" data-uid="lnk10"
+           id="link_AggregateRoot_Entity">
+            <path codeLine="110"
+                  d="M410.625,748.6875 C396.3594,762.4219 383.875,777.9531 375,795.3125 C360.6719,823.3438 356.2472,829.437 359.1222,859.8901"
+                  fill="none" id="AggregateRoot-to-Entity" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="none" points="361.7656,887.8906,368.4557,859.009,349.7887,860.7713,361.7656,887.8906"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="22.3267"
+                  x="376.5625" y="820.0806">je
+            </text>
+        </g><!--reverse link AggregateRoot to Entity-->
+        <g class="link" data-entity-1="AggregateRoot" data-entity-2="Entity" data-source-line="111" data-uid="lnk11"
+           id="link_AggregateRoot_Entity">
+            <path codeLine="111" d="M495.3048,764.8431 C470.7735,807.9525 449.8437,844.7188 425.2813,887.875"
+                  fill="none" id="AggregateRoot-backto-Entity" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="none"
+                     points="504.5781,748.5469,494.5094,753.6039,495.3048,764.8431,505.3735,759.7861,504.5781,748.5469"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="113.5254"
+                  x="476.5625" y="820.0806">obsahuje
+            </text>
+        </g><!--reverse link AggregateRoot to ValueObject-->
+        <g class="link" data-entity-1="AggregateRoot" data-entity-2="ValueObject" data-source-line="112"
+           data-uid="lnk12" id="link_AggregateRoot_ValueObject">
+            <path codeLine="112"
+                  d="M702.0617,758.1196 C744.9835,783.2133 776.4688,801.4375 820.3125,826.5625 C857.9219,848.1094 898.8281,871.2344 936.5156,892.4219"
+                  fill="none" id="AggregateRoot-backto-ValueObject" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="none"
+                     points="685.875,748.6563,690.8139,758.7835,702.0617,758.1196,697.1228,747.9924,685.875,748.6563"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="113.5254"
+                  x="821.875" y="820.0806">obsahuje
+            </text>
+        </g><!--link Repository to AggregateRoot-->
+        <g class="link" data-entity-1="Repository" data-entity-2="AggregateRoot" data-source-line="113" data-uid="lnk13"
+           id="link_Repository_AggregateRoot">
+            <path codeLine="113" d="M264.7344,461.2188 C319.0625,500.1563 376.5977,541.3839 430.9258,580.3057"
+                  fill="none" id="Repository-to-AggregateRoot"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="438.5469,585.7656,430.7552,572.4951,432.196,581.2157,423.4754,582.6565,438.5469,585.7656"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="114.3555"
+                  x="365.625" y="532.5806">pracuje s
+            </text>
+        </g><!--link Factory to AggregateRoot-->
+        <g class="link" data-entity-1="Factory" data-entity-2="AggregateRoot" data-source-line="114" data-uid="lnk14"
+           id="link_Factory_AggregateRoot">
+            <path codeLine="114" d="M550,446.4844 C550,487.8125 550,532.1719 550,576.0781" fill="none"
+                  id="Factory-to-AggregateRoot" style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C" points="550,585.4531,556.25,571.3906,550,577.6406,543.75,571.3906,550,585.4531"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="86.731"
+                  x="551.5625" y="532.5806">vytv&#225;&#345;&#237;
+            </text>
+        </g><!--link DomainService to Entity-->
+        <g class="link" data-entity-1="DomainService" data-entity-2="Entity" data-source-line="115" data-uid="lnk15"
+           id="link_DomainService_Entity">
+            <path codeLine="115"
+                  d="M1031.5625,748.4844 C1007.8281,777.8906 977.2344,808.4375 942.1875,826.5625 C783.8125,908.4687 713,817.3594 543.75,873.4375 C531.4219,877.5156 527.5057,878.6513 515.3026,884.3075"
+                  fill="none" id="DomainService-to-Entity"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="506.7969,888.25,522.1838,888.0068,513.885,884.9646,516.9272,876.6658,506.7969,888.25"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="97.1924"
+                  x="985.9375" y="820.0806">pou&#382;&#237;v&#225;
+            </text>
+        </g><!--link DomainService to ValueObject-->
+        <g class="link" data-entity-1="DomainService" data-entity-2="ValueObject" data-source-line="116"
+           data-uid="lnk16" id="link_DomainService_ValueObject">
+            <path codeLine="116"
+                  d="M1099.2031,748.8594 C1101.4844,764.2344 1103.4844,780.2344 1104.6875,795.3125 C1107.125,825.875 1104.6149,849.908 1098.2087,878.9236"
+                  fill="none" id="DomainService-to-ValueObject"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="1096.1875,888.0781,1105.3223,875.6938,1097.8718,880.4494,1093.1163,872.9989,1096.1875,888.0781"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="97.1924"
+                  x="1106.25" y="820.0806">pou&#382;&#237;v&#225;
+            </text>
+        </g><!--link AggregateRoot to DomainEvent-->
+        <g class="link" data-entity-1="AggregateRoot" data-entity-2="DomainEvent" data-source-line="117"
+           data-uid="lnk17" id="link_AggregateRoot_DomainEvent">
+            <path codeLine="117" d="M584.5781,748.5469 C601.1719,786.7969 617.4276,824.3202 634.787,864.3671"
+                  fill="none" id="AggregateRoot-to-DomainEvent"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="638.5156,872.9688,638.6571,857.5806,635.4085,865.8007,627.1883,862.552,638.5156,872.9688"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="114.1235"
+                  x="615.625" y="820.0806">publikuje
+            </text>
+        </g><!--reverse link BoundedContext to AggregateRoot-->
+        <g class="link" data-entity-1="BoundedContext" data-entity-2="AggregateRoot" data-source-line="118"
+           data-uid="lnk18" id="link_BoundedContext_AggregateRoot">
+            <path codeLine="118"
+                  d="M853.5328,192.7195 C846.4234,270.7351 828.8281,371.5156 776.5625,460.9375 C748.6094,508.7656 705.7188,551.6563 664.75,585.6563"
+                  fill="none" id="BoundedContext-backto-AggregateRoot" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="none"
+                     points="855.2344,174.0469,848.1594,182.816,853.5328,192.7195,860.6078,183.9504,855.2344,174.0469"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="113.5254"
+                  x="835.9375" y="388.8306">obsahuje
+            </text>
+        </g><!--reverse link BoundedContext to Repository-->
+        <g class="link" data-entity-1="BoundedContext" data-entity-2="Repository" data-source-line="119"
+           data-uid="lnk19" id="link_BoundedContext_Repository">
+            <path codeLine="119"
+                  d="M693.898,153.3976 C585.6324,193.1319 453.1719,243.3906 323.4375,298.4375 C314.2656,302.3281 304.875,306.4219 295.4219,310.6094"
+                  fill="none" id="BoundedContext-backto-Repository" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="none"
+                     points="711.5,146.9375,700.5456,144.3002,693.898,153.3976,704.8524,156.0349,711.5,146.9375"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="113.5254"
+                  x="514.0625" y="245.0806">obsahuje
+            </text>
+        </g><!--reverse link BoundedContext to DomainService-->
+        <g class="link" data-entity-1="BoundedContext" data-entity-2="DomainService" data-source-line="120"
+           data-uid="lnk20" id="link_BoundedContext_DomainService">
+            <path codeLine="120"
+                  d="M927.7585,189.3988 C952.1491,225.9926 968.7656,255.1562 987.5,298.4375 C1028.5,393.125 1055.5781,509.2656 1070.4219,585.25"
+                  fill="none" id="BoundedContext-backto-DomainService" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="none"
+                     points="917.3594,173.7969,917.3583,185.0642,927.7585,189.3988,927.7596,178.1315,917.3594,173.7969"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="113.5254"
+                  x="1042.1875" y="388.8306">obsahuje
+            </text>
+        </g><!--SRC=[jLJRJjj047ttLwpeGrEXe509fFA05D94gfG20jJtjJrnbgntp5v2qiidz0Fws0_W5_gIyb-TjHrZcmGg968fyiwSENlcuZ4peJAkUShYJB3zWrvWAal8ercYqQbuW18rUpFg-wU6C5CUuwrG2PjmQI2ekMAOS2Vj29KzvIcmdLEdXCMTpP1ByHNO_k5ZvnKiR5-AHAMWB8le3tJz6eKni6y1OoUFnEO_xq4TWowjlTv1_yEWibvDHJHJO0nx7_oeyqQOPgZydQz0hY6oN2NoLPHphV6s6TDoraFhliYAkR3B5uXg231muq15HNBdN5iHYOmhkpcRiPZ0M2XunjkMCpmSzMWKcnTiqTnGbn689zigNmpuVoIfq6xXg9Gzos65VT484CbRTgwHAZsRW_hxKwtkM2nuGgJB3Otejvk-1TAy9GWYoGa-L7Oz5BiYXlpatrDdUIZXqd8B_anCj0CwQAUWtx4GKNgX1SSNBXsSXTSqzoLHsWvN-Ab6_XHPFqaq91HsWLZI3Qj0JRQpoG2L4SPIPiiJNrMkSwVLN1a_vgYuh64yj_2RPS9fR2yWGqEhIfT9JuIAEo9-vzyDdqE7hmNa9WqfDesLqe-OSg4kGSz5-JdiXiu8tuKn9YBg59o-199i_e0PQ3gQC_MPjf_89EIv2J2T6l68agZqHHeeOa0BIyAYAB8fc2atdXadFU70eoZnzSKjaSFvUjVjAbhNURL42gGjpVmXvfONRR9Y8gASwe4ZBpBGy58H5oKDTnOLfkXCSKCkQ959-bXjsHJAobjTA6uS5ToPCMr5Hr-dPswskTlzVboEuX6xXfONkztAYQ7XKxSHKXl36gxMxxszu-Pu7R5CyuXGp0Jhecy0pPTsllfz_sjr5pHxxh5hOHcw-p-hEm9k03MarP3D93oorYz2kb2AcS-YrGAVRajabV06w4CDdiOrXDUW_m00]-->
+    </g>
+</svg>
