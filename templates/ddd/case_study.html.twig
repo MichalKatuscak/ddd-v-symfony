@@ -22,8 +22,9 @@
 
     <h3 id="introduction">Úvod</h3>
     <p>
-        V této případové studii se podíváme na implementaci systému pro správu projektů pomocí horizontálního DDD a CQRS v Symfony 7.
+        V této případové studii se podíváme na implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 7.
         Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
+        Tato případová studie demonstruje praktické použití DDD principů v reálném projektu, s důrazem na správnou implementaci strategických a taktických vzorů.
     </p>
 
     <h3 id="requirements">Požadavky</h3>
@@ -44,24 +45,57 @@
 
     <h3 id="architecture">Architektura</h3>
     <p>
-        Pro implementaci systému pro správu projektů jsme zvolili horizontální DDD a CQRS architekturu v Symfony 7.
-        Tato architektura nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
+        Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 7.
+        Na strategické úrovni jsme identifikovali klíčové bounded contexts a jejich vzájemné vztahy. Na taktické úrovni jsme implementovali doménové modely, agregáty, hodnotové objekty a doménové služby.
+        Pro organizaci kódu jsme zvolili vertikální slice architekturu (horizontální DDD), která nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
     </p>
 
-    <h4>Bounded Contexts</h4>
+    <h4>Strategický design: Bounded Contexts a Context Map</h4>
     <p>
+        Prvním krokem při implementaci DDD bylo identifikovat bounded contexts (ohraničené kontexty) a vytvořit context map (mapu kontextů), která definuje vztahy mezi nimi.
         Systém je rozdělen do následujících bounded contexts:
     </p>
 
     <ul>
-        <li><strong>UserManagement</strong> - Správa uživatelů, registrace, autentizace.</li>
-        <li><strong>ProjectManagement</strong> - Správa projektů, vytváření, aktualizace.</li>
-        <li><strong>TaskManagement</strong> - Správa úkolů, vytváření, aktualizace, přiřazování.</li>
-        <li><strong>CommentManagement</strong> - Správa komentářů, přidávání, aktualizace.</li>
-        <li><strong>ActivityTracking</strong> - Sledování aktivity, zaznamenávání událostí.</li>
+        <li><strong>UserManagement</strong> - Správa uživatelů, registrace, autentizace. Tento kontext obsahuje vše, co souvisí s identitou a přístupovými právy uživatelů.</li>
+        <li><strong>ProjectManagement</strong> - Správa projektů, vytváření, aktualizace. Tento kontext se zaměřuje na životní cyklus projektů a jejich vlastnosti.</li>
+        <li><strong>TaskManagement</strong> - Správa úkolů, vytváření, aktualizace, přiřazování. Tento kontext řeší vše, co souvisí s úkoly v rámci projektů.</li>
+        <li><strong>CommentManagement</strong> - Správa komentářů, přidávání, aktualizace. Tento kontext se zabývá komunikací a zpětnou vazbou k úkolům.</li>
+        <li><strong>ActivityTracking</strong> - Sledování aktivity, zaznamenávání událostí. Tento kontext poskytuje přehled o aktivitách v systému.</li>
     </ul>
 
-    <h4>Struktura projektu</h4>
+    <p>
+        Mezi těmito kontexty jsme definovali následující vztahy:
+    </p>
+
+    <ul>
+        <li><strong>UserManagement ⟷ ProjectManagement</strong>: Vztah typu Partnership, kde oba kontexty spolupracují na správě členství uživatelů v projektech.</li>
+        <li><strong>ProjectManagement ⟷ TaskManagement</strong>: Vztah typu Customer-Supplier, kde ProjectManagement je zákazníkem a TaskManagement dodavatelem služeb pro správu úkolů v rámci projektů.</li>
+        <li><strong>TaskManagement ⟷ CommentManagement</strong>: Vztah typu Customer-Supplier, kde TaskManagement je zákazníkem a CommentManagement dodavatelem služeb pro komentáře k úkolům.</li>
+        <li><strong>ActivityTracking</strong>: Vztah typu Conformist ke všem ostatním kontextům, kde ActivityTracking přijímá události z ostatních kontextů a zaznamenává je.</li>
+    </ul>
+
+    <p>
+        Pro komunikaci mezi kontexty jsme implementovali Anti-Corruption Layer (ACL) tam, kde bylo potřeba překládat koncepty mezi různými kontexty, a použili jsme doménové události pro asynchronní komunikaci.
+    </p>
+
+    <h4>Taktický design a struktura projektu</h4>
+    <p>
+        Na taktické úrovni jsme implementovali následující DDD vzory:
+    </p>
+
+    <ul>
+        <li><strong>Entity</strong> - Objekty s identitou, které se v průběhu času mění (např. User, Project, Task).</li>
+        <li><strong>Value Objects</strong> - Neměnné objekty bez identity, které reprezentují koncepty v doméně (např. UserId, ProjectId, TaskStatus).</li>
+        <li><strong>Aggregates</strong> - Shluky objektů, které jsou považovány za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).</li>
+        <li><strong>Domain Events</strong> - Události, které nastávají v doméně a mají význam pro doménové experty (např. ProjectCreated, TaskAssigned).</li>
+        <li><strong>Repositories</strong> - Objekty, které zapouzdřují přístup k persistenci agregátů (např. ProjectRepository, TaskRepository).</li>
+        <li><strong>Domain Services</strong> - Služby, které implementují doménovou logiku, která nepatří do žádné entity nebo hodnotového objektu (např. TaskAssignmentService).</li>
+    </ul>
+
+    <p>
+        Struktura projektu odráží jak strategický, tak taktický design DDD. Níže je ukázka správné struktury projektu, kde každý bounded context má svou vlastní doménovou vrstvu, infrastrukturu a aplikační služby:
+    </p>
     <pre><code class="language-bash">src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
 │   ├── Registration/          # Feature: Registrace
@@ -138,10 +172,24 @@
 
     <h3 id="implementation">Implementace</h3>
     <p>
-        Nyní se podíváme na implementaci některých klíčových částí systému.
+        Nyní se podíváme na implementaci některých klíčových částí systému, s důrazem na správnou aplikaci DDD principů.
     </p>
 
-    <h4>Doménový model: Projekt</h4>
+    <h4>Ubiquitous Language</h4>
+    <p>
+        Před zahájením implementace jsme vytvořili Ubiquitous Language (všudypřítomný jazyk) ve spolupráci s doménovými experty. Tento jazyk je používán konzistentně v kódu, dokumentaci a komunikaci. Například:
+    </p>
+
+    <ul>
+        <li><strong>Project</strong> - Organizační jednotka, která sdružuje související úkoly a členy týmu.</li>
+        <li><strong>Task</strong> - Jednotka práce, která má být dokončena v rámci projektu.</li>
+        <li><strong>Assignee</strong> - Člen týmu, kterému je přiřazen úkol.</li>
+        <li><strong>Status</strong> - Stav úkolu (To Do, In Progress, Done).</li>
+        <li><strong>Comment</strong> - Textová zpětná vazba k úkolu.</li>
+        <li><strong>Activity</strong> - Záznam o akci provedené v systému.</li>
+    </ul>
+
+    <h4>Doménový model: Projekt (Aggregate Root)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Shared\Domain\Model;
@@ -270,7 +318,7 @@ class Project
     }
 }</code></pre>
 
-    <h4>Doménový model: Úkol</h4>
+    <h4>Doménový model: Úkol (Aggregate Root)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Shared\Domain\Model;
@@ -423,7 +471,7 @@ class Task
     }
 }</code></pre>
 
-    <h4>Command: Vytvoření projektu</h4>
+    <h4>Command: Vytvoření projektu (Command Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\CreateProject;
@@ -446,7 +494,7 @@ class CreateProject
     }
 }</code></pre>
 
-    <h4>Command Handler: Zpracování vytvoření projektu</h4>
+    <h4>Command Handler: Zpracování vytvoření projektu (Application Service)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\CreateProject;
@@ -482,7 +530,7 @@ class CreateProjectHandler
     }
 }</code></pre>
 
-    <h4>Command: Přiřazení úkolu</h4>
+    <h4>Command: Přiřazení úkolu (Command Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\AssignTask;
@@ -503,7 +551,7 @@ class AssignTask
     }
 }</code></pre>
 
-    <h4>Command Handler: Zpracování přiřazení úkolu</h4>
+    <h4>Command Handler: Zpracování přiřazení úkolu (Application Service)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\AssignTask;
@@ -560,7 +608,7 @@ class AssignTaskHandler
     }
 }</code></pre>
 
-    <h4>Query: Získání projektů uživatele</h4>
+    <h4>Query: Získání projektů uživatele (Query Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\ListProjects;
@@ -577,7 +625,7 @@ class GetProjects
     }
 }</code></pre>
 
-    <h4>Query Handler: Zpracování získání projektů uživatele</h4>
+    <h4>Query Handler: Zpracování získání projektů uživatele (Read Model)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\ListProjects;
@@ -615,55 +663,115 @@ class GetProjectsHandler
     }
 }</code></pre>
 
+    <h4>Doménová služba: Přiřazení úkolu</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\TaskManagement\Domain\Service;
+
+use App\Shared\Domain\Model\Task;
+use App\Shared\Domain\Model\Project;
+use App\Shared\Domain\ValueObject\UserId;
+use App\Shared\Domain\Exception\DomainException;
+
+class TaskAssignmentService
+{
+    public function assignTask(Task $task, Project $project, UserId $assigneeId): void
+    {
+        // Kontrola, zda je přiřazovaný uživatel členem projektu
+        if (!$project->isMember($assigneeId)) {
+            throw new DomainException('Assignee is not a member of the project');
+        }
+
+        // Kontrola, zda úkol patří do projektu
+        if (!$task->projectId()->equals($project->id())) {
+            throw new DomainException('Task does not belong to the project');
+        }
+
+        // Přiřazení úkolu
+        $task->assign($assigneeId);
+    }
+}</code></pre>
+
+    <h4>Anti-Corruption Layer: Integrace s externím systémem</h4>
+    <pre><code class="language-php">&lt;?php
+
+namespace App\Integration\ExternalTaskSystem;
+
+use App\Shared\Domain\Model\Task;
+use App\Shared\Domain\ValueObject\TaskId;
+use App\Integration\ExternalTaskSystem\Client\ExternalTaskClient;
+use App\Integration\ExternalTaskSystem\Translator\TaskTranslator;
+
+class ExternalTaskAdapter
+{
+    private ExternalTaskClient $client;
+    private TaskTranslator $translator;
+
+    public function __construct(ExternalTaskClient $client, TaskTranslator $translator)
+    {
+        $this->client = $client;
+        $this->translator = $translator;
+    }
+
+    public function exportTask(Task $task): void
+    {
+        $externalTask = $this->translator->toExternalTask($task);
+        $this->client->createOrUpdateTask($externalTask);
+    }
+
+    public function importTask(string $externalTaskId): Task
+    {
+        $externalTask = $this->client->getTask($externalTaskId);
+        return $this->translator->fromExternalTask($externalTask);
+    }
+}</code></pre>
+
     <h3 id="lessons">Ponaučení</h3>
     <p>
-        Implementace systému pro správu projektů pomocí horizontálního DDD a CQRS v Symfony 7 přinesla několik důležitých ponaučení:
+        Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 7 přinesla několik důležitých ponaučení:
     </p>
 
     <ol>
         <li>
-            <strong>Horizontální DDD usnadňuje modularitu</strong> - Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti.
-            Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.
+            <strong>Strategický design je klíčový</strong> - Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
         </li>
         <li>
-            <strong>CQRS přináší jasné oddělení zodpovědností</strong> - Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu.
-            Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování.
+            <strong>Ubiquitous Language je základem úspěchu</strong> - Vytvoření a používání společného jazyka s doménovými experty výrazně zlepšilo komunikaci a vedlo k přesnějšímu modelu. Konzistentní používání tohoto jazyka v kódu usnadnilo pochopení a údržbu.
         </li>
         <li>
-            <strong>Doménové události jsou klíčové pro komunikaci</strong> - Doménové události byly klíčové pro komunikaci mezi různými částmi aplikace.
-            Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými částmi aplikace.
+            <strong>Agregáty a hranice transakcí</strong> - Správné definování agregátů a jejich hranic bylo klíčové pro zajištění konzistence dat. Každý agregát byl zodpovědný za udržování své vnitřní konzistence a byl měněn v rámci jedné transakce.
         </li>
         <li>
-            <strong>Symfony Messenger usnadňuje implementaci CQRS</strong> - Symfony Messenger poskytuje výkonnou infrastrukturu pro implementaci CQRS.
-            Busy pro příkazy a dotazy byly snadno konfigurovatelné a použitelné.
+            <strong>Doménové události pro integraci</strong> - Doménové události byly klíčové pro komunikaci mezi různými bounded contexts. Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými kontexty bez vytváření přímých závislostí.
         </li>
         <li>
-            <strong>Validace je důležitá</strong> - Validace příkazů a dotazů byla klíčová pro zajištění integrity dat.
-            Symfony Validator poskytuje výkonné nástroje pro validaci dat.
+            <strong>CQRS pro oddělení zodpovědností</strong> - Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu. Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování. Symfony Messenger poskytl výkonnou infrastrukturu pro implementaci CQRS.
         </li>
         <li>
-            <strong>Testování je snazší</strong> - Horizontální DDD a CQRS usnadňují testování, protože příkazy a dotazy jsou jasně odděleny.
-            Každá funkce může být testována nezávisle na ostatních.
+            <strong>Vertikální slice architektura pro modularitu</strong> - Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti. Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.
         </li>
         <li>
-            <strong>Škálovatelnost je lepší</strong> - Horizontální DDD a CQRS umožňují snadnější škálování aplikace.
-            Operace čtení a zápisu mohou být škálovány nezávisle, a funkce mohou být rozděleny do mikroslužeb.
+            <strong>Testování doménového modelu</strong> - Důraz na testování doménového modelu vedl k robustnějšímu a spolehlivějšímu systému. Testy jednotek se zaměřovaly na chování agregátů a doménových služeb, zatímco integrační testy ověřovaly spolupráci mezi různými částmi systému.
         </li>
     </ol>
 
     <div class="warning-box">
-        <h4>Důležité poznámky</h4>
+        <h4>Důležité poznámky pro implementaci DDD</h4>
         <p>
-            Při implementaci horizontálního DDD a CQRS v Symfony 7 je důležité:
+            Při implementaci Domain-Driven Design a CQRS v Symfony 7 je důležité:
         </p>
         <ul>
-            <li>Definovat jasné hranice mezi bounded contexts.</li>
-            <li>Používat doménové události pro komunikaci mezi bounded contexts.</li>
+            <li>Začít strategickým designem - identifikovat bounded contexts a jejich vztahy před zahájením implementace.</li>
+            <li>Vytvořit a používat Ubiquitous Language ve spolupráci s doménovými experty.</li>
+            <li>Definovat jasné hranice mezi bounded contexts a implementovat vhodné integrační vzory (Shared Kernel, Customer-Supplier, Conformist, Anti-Corruption Layer).</li>
+            <li>Správně identifikovat agregáty a jejich hranice, aby byla zajištěna konzistence dat.</li>
             <li>Používat hodnotové objekty pro validaci a enkapsulaci doménových konceptů.</li>
+            <li>Implementovat doménové události pro komunikaci mezi bounded contexts.</li>
             <li>Oddělovat příkazy a dotazy podle CQRS principů.</li>
             <li>Používat Symfony Messenger pro implementaci command a query busů.</li>
-            <li>Používat validaci pro validaci příkazů a dotazů.</li>
-            <li>Testovat každou funkci nezávisle na ostatních.</li>
+            <li>Testovat doménový model nezávisle na infrastruktuře.</li>
+            <li>Používat hexagonální architekturu pro oddělení domény od infrastruktury.</li>
+            <li>Implementovat repozitáře jako rozhraní v doménové vrstvě a jejich konkrétní implementace v infrastrukturní vrstvě.</li>
         </ul>
     </div>
 
