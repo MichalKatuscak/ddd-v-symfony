@@ -20,12 +20,12 @@ JSON-LD je doporučený formát pro implementaci strukturovaných dat. Přidejte
   "description": "{{ block('meta_description') }}",
   "keywords": "{{ block('meta_keywords') }}",
   "author": {
-    "@type": "Organization",
-    "name": "DDD Symfony Team"
+            "@type": "Person",
+            "name": "Michal Katuščák"
   },
   "publisher": {
-    "@type": "Organization",
-    "name": "DDD Symfony"
+            "@type": "Person",
+            "name": "Michal Katuščák"
   },
   "datePublished": "2023-06-01",
   "dateModified": "{{ "now"|date("Y-m-d") }}",
@@ -114,12 +114,12 @@ Zde je příklad, jak implementovat mikrodata a ARIA atributy do existující š
   "description": "Objevte, co je Domain-Driven Design (DDD) a jaké jsou jeho základní principy.",
   "keywords": "Domain-Driven Design, DDD, Eric Evans, Ubiquitous Language, Bounded Context",
   "author": {
-    "@type": "Organization",
-    "name": "DDD Symfony Team"
+            "@type": "Person",
+            "name": "Michal Katuščák"
   },
   "publisher": {
-    "@type": "Organization",
-    "name": "DDD Symfony"
+            "@type": "Person",
+            "name": "Michal Katuščák"
   },
   "datePublished": "2023-06-01",
   "dateModified": "2023-11-15",
