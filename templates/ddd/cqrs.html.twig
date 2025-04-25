@@ -6,11 +6,38 @@
 
 {% block meta_keywords %}CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 7{% endblock %}
 
-{% block body %}
-    <h2>CQRS v Symfony 7</h2>
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "CQRS v Symfony 7",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+    "@type": "Organization",
+    "name": "DDD Symfony Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DDD Symfony"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
 
-    <div class="table-of-contents mb-4">
-        <h5>Obsah kapitoly:</h5>
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">CQRS v Symfony 7</h2>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <h5 id="toc-heading">Obsah kapitoly:</h5>
         <ul>
             <li><a href="#what-is-cqrs">Co je CQRS?</a></li>
             <li><a href="#benefits">Výhody CQRS</a></li>
@@ -24,7 +51,8 @@
         </ul>
     </div>
 
-    <h3 id="what-is-cqrs">Co je CQRS?</h3>
+    <section id="what-is-cqrs" aria-labelledby="what-is-cqrs-heading">
+    <h3 id="what-is-cqrs-heading">Co je CQRS?</h3>
     <p>
         CQRS (Command Query Responsibility Segregation) je architektonický vzor, který odděluje operace čtení (queries) od operací zápisu (commands).
         Tento vzor byl poprvé představen Gregem Youngem jako rozšíření vzoru Command-Query Separation (CQS) od Bertranda Meyera.
@@ -56,8 +84,10 @@
         <li><strong>Flexibilita</strong> - CQRS umožňuje použití různých databází pro čtení a zápis.</li>
         <li><strong>Testovatelnost</strong> - CQRS usnadňuje testování, protože příkazy a dotazy jsou jasně odděleny.</li>
     </ul>
+    </section>
 
-    <h3 id="challenges">Výzvy a omezení CQRS</h3>
+    <section id="challenges" aria-labelledby="challenges-heading">
+    <h3 id="challenges-heading">Výzvy a omezení CQRS</h3>
     <p>
         CQRS má také své výzvy a omezení:
     </p>
@@ -69,8 +99,8 @@
         <li><strong>Učební křivka</strong> - CQRS může mít strmou učební křivku pro vývojáře, kteří s ním nemají zkušenosti.</li>
     </ul>
 
-    <div class="warning-box">
-        <h4>Kdy nepoužívat CQRS</h4>
+    <div class="warning-box" role="alert" aria-labelledby="when-not-to-use-cqrs-heading">
+        <h4 id="when-not-to-use-cqrs-heading">Kdy nepoužívat CQRS</h4>
         <p>
             CQRS nemusí být vhodný pro všechny projekty. Nepoužívejte CQRS, pokud:
         </p>
@@ -82,7 +112,10 @@
         </ul>
     </div>
 
-    <h3 id="symfony-messenger">Symfony Messenger</h3>
+    </section>
+
+    <section id="symfony-messenger" aria-labelledby="symfony-messenger-heading">
+    <h3 id="symfony-messenger-heading">Symfony Messenger</h3>
     <p>
         Symfony Messenger je komponenta, která usnadňuje implementaci CQRS v Symfony 7. Messenger poskytuje infrastrukturu pro odesílání a zpracování zpráv,
         což je ideální pro implementaci příkazů a dotazů v CQRS.
@@ -124,13 +157,16 @@ framework:
         Příkazy jsou směrovány na asynchronní transport, zatímco dotazy jsou zpracovány synchronně.
     </p>
 
-    <h3 id="commands">Implementace Commands</h3>
+    </section>
+
+    <section id="commands" aria-labelledby="commands-heading">
+    <h3 id="commands-heading">Implementace Commands</h3>
     <p>
         Commands v CQRS jsou příkazy, které mění stav systému. V Symfony 7 můžete implementovat příkazy jako jednoduché PHP třídy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace příkazu v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="command-example-heading">
+        <h4 id="command-example-heading">Příklad: Implementace příkazu v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Application\Command;
@@ -160,14 +196,16 @@ class RegisterUser
         V tomto příkladu je <code>RegisterUser</code> příkaz, který obsahuje data potřebná pro registraci uživatele.
         Příkaz používá atributy pro validaci dat.
     </p>
+    </section>
 
-    <h3 id="queries">Implementace Queries</h3>
+    <section id="queries" aria-labelledby="queries-heading">
+    <h3 id="queries-heading">Implementace Queries</h3>
     <p>
         Queries v CQRS jsou dotazy, které vrací data. V Symfony 7 můžete implementovat dotazy jako jednoduché PHP třídy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace dotazu v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="query-example-heading">
+        <h4 id="query-example-heading">Příklad: Implementace dotazu v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Application\Query;
@@ -240,8 +278,8 @@ class RegisterUserHandler
 }</code></pre>
     </div>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace query handleru v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="query-handler-example-heading">
+        <h4 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Application\Query;
@@ -281,15 +319,17 @@ class GetUserProfileHandler
         V těchto příkladech jsou <code>RegisterUserHandler</code> a <code>GetUserProfileHandler</code> handlery, které zpracovávají příkazy a dotazy.
         Handlery jsou označeny atributem <code>AsMessageHandler</code>, což umožňuje Symfony Messenger je automaticky registrovat.
     </p>
+    </section>
 
-    <h3 id="buses">Implementace Command a Query Buses</h3>
+    <section id="buses" aria-labelledby="buses-heading">
+    <h3 id="buses-heading">Implementace Command a Query Buses</h3>
     <p>
         Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery. V Symfony 7 můžete použít Messenger komponentu
         jako command a query busy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Použití command a query busů v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="buses-example-heading">
+        <h4 id="buses-example-heading">Příklad: Použití command a query busů v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Controller;
@@ -381,14 +421,16 @@ class ProfileController extends AbstractController
         V těchto příkladech jsou <code>commandBus</code> a <code>queryBus</code> injektovány do kontrolerů a používány pro odesílání příkazů a dotazů.
         Busy směrují příkazy a dotazy na příslušné handlery.
     </p>
+    </section>
 
-    <h3 id="async">Asynchronní zpracování</h3>
+    <section id="async" aria-labelledby="async-heading">
+    <h3 id="async-heading">Asynchronní zpracování</h3>
     <p>
         Jednou z výhod CQRS je možnost asynchronního zpracování příkazů. V Symfony 7 můžete použít Messenger komponentu pro asynchronní zpracování:
     </p>
 
-    <div class="example-box">
-        <h4>Konfigurace asynchronního zpracování v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="async-example-heading">
+        <h4 id="async-example-heading">Konfigurace asynchronního zpracování v Symfony 7</h4>
         <pre><code class="language-yaml"># config/packages/messenger.yaml
 framework:
     messenger:
@@ -424,8 +466,8 @@ framework:
         Pro zpracování asynchronních zpráv je potřeba spustit Messenger worker, který bude zprávy konzumovat a zpracovávat.
     </p>
 
-    <div class="warning-box">
-        <h4>Důležité poznámky</h4>
+    <div class="warning-box" role="alert" aria-labelledby="important-notes-heading">
+        <h4 id="important-notes-heading">Důležité poznámky</h4>
         <p>
             Při implementaci CQRS v Symfony 7 je důležité:
         </p>
@@ -442,4 +484,6 @@ framework:
     <p>
         V další kapitole se podíváme na <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD a CQRS v Symfony 7</a>.
     </p>
+    </section>
+    </article>
 {% endblock %}

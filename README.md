@@ -18,13 +18,16 @@ Repozitář obsahuje následující články:
 
 ```
 templates/ddd/
-├── what_is_ddd.html.twig            # Co je Domain-Driven Design?
+├── what_is_ddd.html.twig            # Co je Domain-Driven Design? (s mikrodaty a ARIA atributy)
 ├── horizontal_vs_vertical.html.twig # Vertikální slice architektura vs. Tradiční DDD
 ├── basic_concepts.html.twig         # Základní koncepty DDD
 ├── implementation_in_symfony.html.twig # Implementace DDD v Symfony
 ├── cqrs.html.twig                   # CQRS v Symfony
 ├── case_study.html.twig             # Případová studie
 └── practical_examples.html.twig     # Praktické příklady
+
+docs/
+└── MICRODATA_ARIA_GUIDE.md          # Průvodce implementací mikrodat a ARIA atributů
 ```
 
 ## Jak přispívat
@@ -44,6 +47,8 @@ Vítáme všechny příspěvky, které pomohou zlepšit tyto vzdělávací mater
 - Přidávejte odkazy na zdroje a citace, kde je to vhodné
 - Testujte všechny ukázky kódu, aby bylo zajištěno, že fungují
 - Dodržujte principy DDD ve všech ukázkách kódu
+- Implementujte mikrodata (JSON-LD) pro lepší SEO podle pokynů v `docs/MICRODATA_ARIA_GUIDE.md`
+- Přidávejte ARIA atributy pro lepší přístupnost podle pokynů v `docs/MICRODATA_ARIA_GUIDE.md`
 
 ## Požadavky
 

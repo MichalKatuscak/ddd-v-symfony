@@ -6,11 +6,38 @@
 
 {% block meta_keywords %}DDD v Symfony, implementace DDD, Symfony 7, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.2{% endblock %}
 
-{% block body %}
-    <h2>Implementace DDD v Symfony 7</h2>
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Implementace Domain-Driven Design v Symfony 7",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+    "@type": "Organization",
+    "name": "DDD Symfony Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DDD Symfony"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
 
-    <div class="table-of-contents mb-4">
-        <h5>Obsah kapitoly:</h5>
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">Implementace DDD v Symfony 7</h2>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <h5 id="toc-heading">Obsah kapitoly:</h5>
         <ul>
             <li><a href="#project-structure">Struktura projektu</a></li>
             <li><a href="#entities">Implementace entit</a></li>
@@ -24,7 +51,8 @@
         </ul>
     </div>
 
-    <h3 id="project-structure">Struktura projektu</h3>
+    <section id="project-structure" aria-labelledby="project-structure-heading">
+    <h3 id="project-structure-heading">Struktura projektu</h3>
     <p>
         Při implementaci DDD s vertikální slice architekturou v Symfony 7 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 7:
     </p>
@@ -136,14 +164,16 @@
             <li><strong>Ignorování Ubiquitous Language</strong> - Používejte konzistentní jazyk v kódu, dokumentaci a komunikaci.</li>
         </ul>
     </div>
+    </section>
 
-    <h3 id="entities">Implementace entit</h3>
+    <section id="entities" aria-labelledby="entities-heading">
+    <h3 id="entities-heading">Implementace entit</h3>
     <p>
         Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 7 můžete implementovat entity jako běžné PHP třídy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace entity v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="entity-example-heading">
+        <h4 id="entity-example-heading">Příklad: Implementace entity v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Model;
@@ -231,14 +261,16 @@ class User
         V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Entity mohou také generovat doménové události,
         které jsou uloženy v poli <code>$events</code> a mohou být později uvolněny a zpracovány.
     </p>
+    </section>
 
-    <h3 id="value-objects">Implementace hodnotových objektů</h3>
+    <section id="value-objects" aria-labelledby="value-objects-heading">
+    <h3 id="value-objects-heading">Implementace hodnotových objektů</h3>
     <p>
         Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 7 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace hodnotového objektu v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="value-object-example-heading">
+        <h4 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\ValueObject;
@@ -281,14 +313,16 @@ class Email
         V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné a nemají žádnou identitu.
         Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
     </p>
+    </section>
 
-    <h3 id="repositories">Implementace repozitářů</h3>
+    <section id="repositories" aria-labelledby="repositories-heading">
+    <h3 id="repositories-heading">Implementace repozitářů</h3>
     <p>
         Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 7 můžete implementovat repozitáře jako rozhraní a jejich implementace:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace repozitáře v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="repository-example-heading">
+        <h4 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Repository;
@@ -355,15 +389,17 @@ class DoctrineUserRepository implements UserRepository
         V tomto příkladu je <code>UserRepository</code> rozhraní, které definuje metody pro ukládání a načítání uživatelů.
         <code>DoctrineUserRepository</code> je implementace tohoto rozhraní, která používá Doctrine ORM pro persistenci.
     </p>
+    </section>
 
-    <h3 id="domain-services">Implementace doménových služeb</h3>
+    <section id="domain-services" aria-labelledby="domain-services-heading">
+    <h3 id="domain-services-heading">Implementace doménových služeb</h3>
     <p>
         Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
         V Symfony 7 můžete implementovat doménové služby jako běžné PHP třídy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace doménové služby v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="domain-service-example-heading">
+        <h4 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\OrderManagement\Checkout\Service;
@@ -419,14 +455,16 @@ class PaymentService
         V tomto příkladu je <code>PaymentService</code> doménová služba, která poskytuje logiku pro zpracování plateb.
         Tato logika nepatří přirozeně do žádné entity nebo hodnotového objektu.
     </p>
+    </section>
 
-    <h3 id="domain-events">Implementace doménových událostí</h3>
+    <section id="domain-events" aria-labelledby="domain-events-heading">
+    <h3 id="domain-events-heading">Implementace doménových událostí</h3>
     <p>
         Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 7 můžete implementovat doménové události jako neměnné PHP třídy:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace doménové události v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="domain-event-example-heading">
+        <h4 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Event;
@@ -468,15 +506,17 @@ class UserRegistered
         V tomto příkladu je <code>UserRegistered</code> doménová událost, která reprezentuje registraci nového uživatele.
         Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký má e-mail a kdy se to stalo.
     </p>
+    </section>
 
-    <h3 id="application-services">Implementace aplikačních služeb</h3>
+    <section id="application-services" aria-labelledby="application-services-heading">
+    <h3 id="application-services-heading">Implementace aplikačních služeb</h3>
     <p>
         Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 7 můžete implementovat aplikační služby
         jako command a query handlery:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace command handleru v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="command-handler-example-heading">
+        <h4 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Command;
@@ -534,8 +574,8 @@ class RegisterUserHandler
 }</code></pre>
     </div>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace query handleru v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="query-handler-example-heading">
+        <h4 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Profile\Query;
@@ -587,14 +627,15 @@ class GetUserProfileHandler
         Tyto služby koordinují aplikační aktivity a delegují práci doménové vrstvě.
     </p>
 
-    <h3 id="controllers">Implementace kontrolerů</h3>
+    <section id="controllers" aria-labelledby="controllers-heading">
+    <h3 id="controllers-heading">Implementace kontrolerů</h3>
     <p>
         Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 7 můžete implementovat kontrolery
         jako běžné Symfony kontrolery:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Implementace kontroleru v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="controller-example-heading">
+        <h4 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Controller;
@@ -646,15 +687,17 @@ class RegistrationController extends AbstractController
         V tomto příkladu je <code>RegistrationController</code> kontroler, který zpracovává registraci uživatele.
         Kontroler vytváří formulář, zpracovává požadavek a odesílá příkaz <code>RegisterUser</code> přes command bus.
     </p>
+    </section>
 
-    <h3 id="dependency-injection">Dependency Injection</h3>
+    <section id="dependency-injection" aria-labelledby="dependency-injection-heading">
+    <h3 id="dependency-injection-heading">Dependency Injection</h3>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
         Symfony 7 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
     </p>
 
-    <div class="example-box">
-        <h4>Příklad: Konfigurace služeb v Symfony 7</h4>
+    <div class="example-box" role="note" aria-labelledby="dependency-injection-example-heading">
+        <h4 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 7</h4>
         <pre><code class="language-yaml"># config/services.yaml
 services:
     _defaults:
@@ -718,8 +761,8 @@ services:
         </ul>
     </div>
 
-    <div class="concept-box">
-        <h4>Co patří do sdílené složky (Shared)?</h4>
+    <div class="concept-box" role="note" aria-labelledby="shared-folder-heading">
+        <h4 id="shared-folder-heading">Co patří do sdílené složky (Shared)?</h4>
         <p>
             Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, které nemají specifický doménový význam:
         </p>
@@ -737,4 +780,6 @@ services:
     <p>
         V další kapitole se podíváme na <a href="{{ path('cqrs') }}">implementaci CQRS v Symfony 7</a>.
     </p>
+    </section>
+    </article>
 {% endblock %}

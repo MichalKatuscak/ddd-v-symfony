@@ -28,7 +28,7 @@ class DddController extends AbstractController
     public function horizontalVsVertical(): Response
     {
         return $this->render('ddd/horizontal_vs_vertical.html.twig', [
-            'title' => 'Horizontální vs. Vertikální DDD',
+            'title' => 'Vertikální slice architektura vs. Tradiční DDD',
         ]);
     }
 

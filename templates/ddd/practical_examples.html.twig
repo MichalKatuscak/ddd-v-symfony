@@ -6,11 +6,38 @@
 
 {% block meta_keywords %}DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty{% endblock %}
 
-{% block body %}
-    <h2>Praktické příklady</h2>
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Praktické příklady Domain-Driven Design v Symfony",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+    "@type": "Organization",
+    "name": "DDD Symfony Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DDD Symfony"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
 
-    <div class="table-of-contents mb-4">
-        <h5>Obsah kapitoly:</h5>
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">Praktické příklady</h2>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <h5 id="toc-heading">Obsah kapitoly:</h5>
         <ul>
             <li><a href="#e-commerce">Příklad: E-commerce aplikace</a></li>
             <li><a href="#blog">Příklad: Blog</a></li>
@@ -18,13 +45,14 @@
         </ul>
     </div>
 
-    <h3 id="e-commerce">Příklad: E-commerce aplikace</h3>
+    <section id="e-commerce" aria-labelledby="e-commerce-heading">
+    <h3 id="e-commerce-heading">Příklad: E-commerce aplikace</h3>
     <p>
-        V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí horizontálního DDD a CQRS v Symfony 7.
+        V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí vertikální slice architektury a CQRS v Symfony 7.
         Zaměříme se na funkcionalitu košíku a objednávek.
     </p>
 
-    <h4>Struktura projektu</h4>
+    <h4 id="e-commerce-structure-heading">Struktura projektu</h4>
     <pre><code class="language-bash">src/
 ├── Cart/                      # Bounded Context: Košík
 │   ├── Domain/                # Doménová vrstva
@@ -86,7 +114,7 @@
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
-    <h4>Doménový model: Košík</h4>
+    <h4 id="cart-model-heading">Doménový model: Košík</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Domain\Model;
@@ -215,7 +243,7 @@ class Cart
     }
 }</code></pre>
 
-    <h4>Command: Přidání položky do košíku</h4>
+    <h4 id="add-to-cart-command-heading">Command: Přidání položky do košíku</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Command;
@@ -244,7 +272,7 @@ class AddItemToCart
     }
 }</code></pre>
 
-    <h4>Command Handler: Zpracování přidání položky do košíku</h4>
+    <h4 id="add-to-cart-handler-heading">Command Handler: Zpracování přidání položky do košíku</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Command;
@@ -282,7 +310,7 @@ class AddItemToCartHandler
     }
 }</code></pre>
 
-    <h4>Controller: Přidání položky do košíku</h4>
+    <h4 id="add-to-cart-controller-heading">Controller: Přidání položky do košíku</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Presentation\Controller;
@@ -334,7 +362,7 @@ class CartController extends AbstractController
     }
 }</code></pre>
 
-    <h4>Query: Získání košíku</h4>
+    <h4 id="get-cart-query-heading">Query: Získání košíku</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Query;
@@ -351,7 +379,7 @@ class GetCart
     }
 }</code></pre>
 
-    <h4>Query Handler: Zpracování získání košíku</h4>
+    <h4 id="get-cart-handler-heading">Query Handler: Zpracování získání košíku</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Query;
@@ -397,12 +425,15 @@ class GetCartHandler
     }
 }</code></pre>
 
-    <h3 id="blog">Příklad: Blog</h3>
+    </section>
+
+    <section id="blog" aria-labelledby="blog-heading">
+    <h3 id="blog-heading">Příklad: Blog</h3>
     <p>
-        V této části si ukážeme, jak implementovat jednoduchý blog pomocí horizontálního DDD a CQRS v Symfony 7.
+        V této části si ukážeme, jak implementovat jednoduchý blog pomocí vertikální slice architektury a CQRS v Symfony 7.
     </p>
 
-    <h4>Struktura projektu</h4>
+    <h4 id="blog-structure-heading">Struktura projektu</h4>
     <pre><code class="language-bash">src/
 ├── Blog/                      # Bounded Context: Blog
 │   ├── Domain/                # Doménová vrstva
@@ -445,7 +476,7 @@ class GetCartHandler
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
-    <h4>Doménový model: Příspěvek</h4>
+    <h4 id="post-model-heading">Doménový model: Příspěvek</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Blog\Domain\Model;
@@ -824,8 +855,8 @@ class RegisterUserHandler
     }
 }</code></pre>
 
-    <div class="warning-box">
-        <h4>Důležité poznámky</h4>
+    <div class="warning-box" role="alert" aria-labelledby="important-notes-heading">
+        <h4 id="important-notes-heading">Důležité poznámky</h4>
         <p>
             Při implementaci praktických příkladů je důležité:
         </p>
@@ -842,4 +873,6 @@ class RegisterUserHandler
     <p>
         V další kapitole se podíváme na <a href="{{ path('case_study') }}">případovou studii implementace DDD a CQRS v Symfony 7</a>.
     </p>
+    </section>
+    </article>
 {% endblock %}

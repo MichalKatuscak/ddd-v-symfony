@@ -6,11 +6,38 @@
 
 {% block meta_keywords %}případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi{% endblock %}
 
-{% block body %}
-    <h2>Případová studie</h2>
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Případová studie: Implementace DDD v Symfony",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+    "@type": "Organization",
+    "name": "DDD Symfony Team"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DDD Symfony"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
 
-    <div class="table-of-contents mb-4">
-        <h5>Obsah kapitoly:</h5>
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">Případová studie</h2>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <h5 id="toc-heading">Obsah kapitoly:</h5>
         <ul>
             <li><a href="#introduction">Úvod</a></li>
             <li><a href="#requirements">Požadavky</a></li>
@@ -20,14 +47,17 @@
         </ul>
     </div>
 
-    <h3 id="introduction">Úvod</h3>
+    <section id="introduction" aria-labelledby="introduction-heading">
+    <h3 id="introduction-heading">Úvod</h3>
     <p>
         V této případové studii se podíváme na implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 7.
         Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
         Tato případová studie demonstruje praktické použití DDD principů v reálném projektu, s důrazem na správnou implementaci strategických a taktických vzorů.
     </p>
+    </section>
 
-    <h3 id="requirements">Požadavky</h3>
+    <section id="requirements" aria-labelledby="requirements-heading">
+    <h3 id="requirements-heading">Požadavky</h3>
     <p>
         Systém pro správu projektů má následující požadavky:
     </p>
@@ -42,12 +72,14 @@
         <li>Uživatelé mohou sledovat aktivitu na projektech a úkolech.</li>
         <li>Systém musí být škálovatelný a udržitelný.</li>
     </ul>
+    </section>
 
-    <h3 id="architecture">Architektura</h3>
+    <section id="architecture" aria-labelledby="architecture-heading">
+    <h3 id="architecture-heading">Architektura</h3>
     <p>
         Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 7.
         Na strategické úrovni jsme identifikovali klíčové bounded contexts a jejich vzájemné vztahy. Na taktické úrovni jsme implementovali doménové modely, agregáty, hodnotové objekty a doménové služby.
-        Pro organizaci kódu jsme zvolili vertikální slice architekturu (horizontální DDD), která nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
+        Pro organizaci kódu jsme zvolili vertikální slice architekturu, která nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
     </p>
 
     <h4>Strategický design: Bounded Contexts a Context Map</h4>
@@ -240,12 +272,15 @@
             └── DoctrineTypes/    # Vlastní Doctrine typy
                 └── UuidType.php    # Typ pro UUID</code></pre>
 
-    <h3 id="implementation">Implementace</h3>
+    </section>
+
+    <section id="implementation" aria-labelledby="implementation-heading">
+    <h3 id="implementation-heading">Implementace</h3>
     <p>
         Nyní se podíváme na implementaci některých klíčových částí systému, s důrazem na správnou aplikaci DDD principů.
     </p>
 
-    <h4>Ubiquitous Language</h4>
+    <h4 id="ubiquitous-language-heading">Ubiquitous Language</h4>
     <p>
         Před zahájením implementace jsme vytvořili Ubiquitous Language (všudypřítomný jazyk) ve spolupráci s doménovými experty. Tento jazyk je používán konzistentně v kódu, dokumentaci a komunikaci. Například:
     </p>
@@ -259,7 +294,7 @@
         <li><strong>Activity</strong> - Záznam o akci provedené v systému.</li>
     </ul>
 
-    <h4>Doménový model: Projekt (Aggregate Root)</h4>
+    <h4 id="project-model-heading">Doménový model: Projekt (Aggregate Root)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Domain\Model;
@@ -388,7 +423,7 @@ class Project
     }
 }</code></pre>
 
-    <h4>Doménový model: Úkol (Aggregate Root)</h4>
+    <h4 id="task-model-heading">Doménový model: Úkol (Aggregate Root)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Domain\Model;
@@ -542,7 +577,7 @@ class Task
     }
 }</code></pre>
 
-    <h4>Command: Vytvoření projektu (Command Pattern)</h4>
+    <h4 id="create-project-command-heading">Command: Vytvoření projektu (Command Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Command;
@@ -565,7 +600,7 @@ class CreateProject
     }
 }</code></pre>
 
-    <h4>Command Handler: Zpracování vytvoření projektu (Application Service)</h4>
+    <h4 id="create-project-handler-heading">Command Handler: Zpracování vytvoření projektu (Application Service)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Command;
@@ -601,7 +636,7 @@ class CreateProjectHandler
     }
 }</code></pre>
 
-    <h4>Command: Přiřazení úkolu (Command Pattern)</h4>
+    <h4 id="assign-task-command-heading">Command: Přiřazení úkolu (Command Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Application\Command;
@@ -622,7 +657,7 @@ class AssignTask
     }
 }</code></pre>
 
-    <h4>Command Handler: Zpracování přiřazení úkolu (Application Service)</h4>
+    <h4 id="assign-task-handler-heading">Command Handler: Zpracování přiřazení úkolu (Application Service)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Application\Command;
@@ -668,7 +703,7 @@ class AssignTaskHandler
     }
 }</code></pre>
 
-    <h4>Query: Získání projektů uživatele (Query Pattern)</h4>
+    <h4 id="get-projects-query-heading">Query: Získání projektů uživatele (Query Pattern)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Query;
@@ -685,7 +720,7 @@ class GetProjects
     }
 }</code></pre>
 
-    <h4>Query Handler: Zpracování získání projektů uživatele (Read Model)</h4>
+    <h4 id="get-projects-handler-heading">Query Handler: Zpracování získání projektů uživatele (Read Model)</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Query;
@@ -724,7 +759,7 @@ class GetProjectsHandler
     }
 }</code></pre>
 
-    <h4>Doménová služba: Přiřazení úkolu</h4>
+    <h4 id="task-assignment-service-heading">Doménová služba: Přiřazení úkolu</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Domain\Service;
@@ -753,7 +788,7 @@ class TaskAssignmentService
     }
 }</code></pre>
 
-    <h4>Anti-Corruption Layer: Integrace s externím systémem</h4>
+    <h4 id="anti-corruption-layer-heading">Anti-Corruption Layer: Integrace s externím systémem</h4>
     <pre><code class="language-php">&lt;?php
 
 namespace App\Integration\ExternalTaskSystem;
@@ -787,7 +822,10 @@ class ExternalTaskAdapter
     }
 }</code></pre>
 
-    <h3 id="lessons">Ponaučení</h3>
+    </section>
+
+    <section id="lessons" aria-labelledby="lessons-heading">
+    <h3 id="lessons-heading">Ponaučení</h3>
     <p>
         Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 7 přinesla několik důležitých ponaučení:
     </p>
@@ -816,8 +854,8 @@ class ExternalTaskAdapter
         </li>
     </ol>
 
-    <div class="warning-box">
-        <h4>Důležité poznámky pro implementaci DDD</h4>
+    <div class="warning-box" role="alert" aria-labelledby="important-notes-heading">
+        <h4 id="important-notes-heading">Důležité poznámky pro implementaci DDD</h4>
         <p>
             Při implementaci Domain-Driven Design a CQRS v Symfony 7 je důležité:
         </p>
@@ -839,4 +877,6 @@ class ExternalTaskAdapter
     <p>
         V další kapitole se podíváme na <a href="{{ path('resources') }}">zdroje a další četbu o DDD a CQRS v Symfony 7</a>.
     </p>
+    </section>
+    </article>
 {% endblock %}
