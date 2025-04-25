@@ -74,45 +74,62 @@
     <div class="example-box">
         <h4>Příklad: Struktura projektu s vertikální slice architekturou</h4>
         <pre><code class="language-bash">src/
-├── UserManagement/             # Feature: Správa uživatelů
-│   ├── Registration/           # Sub-feature: Registrace uživatelů
-│   │   ├── RegisterUser.php    # Command
-│   │   ├── RegisterUserHandler.php  # Command Handler
-│   │   ├── UserRegistrationController.php  # Controller
-│   │   └── UserRegistrationForm.php  # Form
-│   └── Profile/                # Sub-feature: Profil uživatele
-│       ├── GetUserProfile.php  # Query
-│       ├── GetUserProfileHandler.php  # Query Handler
-│       ├── UserProfileController.php  # Controller
-│       └── UserProfileViewModel.php  # View Model
-├── OrderProcessing/            # Feature: Zpracování objednávek
-│   ├── Checkout/               # Sub-feature: Pokladna
-│   │   ├── CreateOrder.php     # Command
-│   │   ├── CreateOrderHandler.php  # Command Handler
-│   │   ├── CheckoutController.php  # Controller
-│   │   └── CheckoutForm.php    # Form
-│   └── OrderHistory/           # Sub-feature: Historie objednávek
-│       ├── GetOrderHistory.php  # Query
-│       ├── GetOrderHistoryHandler.php  # Query Handler
-│       ├── OrderHistoryController.php  # Controller
-│       └── OrderHistoryViewModel.php  # View Model
-└── Shared/                     # Sdílené komponenty
-    ├── Domain/                 # Sdílená doménová logika
-    │   ├── Model/
-    │   │   ├── User.php
-    │   │   └── Order.php
-    │   └── ValueObject/
-    │       ├── Email.php
-    │       └── Money.php
-    └── Infrastructure/         # Sdílená infrastruktura
-        └── Repository/
-            ├── DoctrineUserRepository.php
-            └── DoctrineOrderRepository.php</code></pre>
+├── UserManagement/             # Bounded Context: Správa uživatelů
+│   ├── Registration/           # Feature: Registrace uživatelů
+│   │   ├── Domain/             # Doménová logika pro registraci
+│   │   ├── Application/       # Aplikační logika pro registraci
+│   │   │   ├── Command/
+│   │   │   │   ├── RegisterUser.php
+│   │   │   │   └── RegisterUserHandler.php
+│   │   │   └── Service/
+│   │   │       └── RegistrationService.php
+│   │   └── Presentation/      # Prezentační vrstva pro registraci
+│   │       ├── Controller/
+│   │       │   └── UserRegistrationController.php
+│   │       └── Form/
+│   │           └── UserRegistrationForm.php
+│   ├── Profile/                # Feature: Profil uživatele
+│   │   ├── Application/       # Aplikační logika pro profil
+│   │   │   ├── Query/
+│   │   │   │   ├── GetUserProfile.php
+│   │   │   │   └── GetUserProfileHandler.php
+│   │   └── Presentation/      # Prezentační vrstva pro profil
+│   │       ├── Controller/
+│   │       │   └── UserProfileController.php
+│   │       └── ViewModel/
+│   │           └── UserProfileViewModel.php
+│   ├── Domain/                # Sdílená doménová logika pro celý kontext
+│   │   ├── Model/
+│   │   │   └── User.php       # Entita (Aggregate Root)
+│   │   ├── ValueObject/
+│   │   │   ├── UserId.php
+│   │   │   └── Email.php
+│   │   └── Repository/
+│   │       └── UserRepository.php  # Rozhraní
+│   └── Infrastructure/       # Infrastruktura pro celý kontext
+│       └── Repository/
+│           └── DoctrineUserRepository.php
+├── OrderManagement/           # Bounded Context: Správa objednávek
+│   ├── Checkout/              # Feature: Pokladna
+│   │   ├── Application/
+│   │   │   ├── Command/
+│   │   │   │   ├── CreateOrder.php
+│   │   │   │   └── CreateOrderHandler.php
+│   │   └── Presentation/
+│   │       ├── Controller/
+│   │       │   └── CheckoutController.php
+│   │       └── Form/
+│   │           └── CheckoutForm.php
+│   └── ... (podobná struktura jako u UserManagement)
+└── Shared/                    # Sdílené komponenty pro celý systém
+    └── Domain/
+        └── Exception/
+            └── DomainException.php</code></pre>
     </div>
 
     <p>
-        V horizontálním přístupu jsou funkce (features) organizovány vertikálně, což znamená, že každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
-        Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>.
+        Ve vertikální slice architektuře jsou funkce (features) organizovány jako vertikální řezy (slices) přes všechny vrstvy, přičemž každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
+        Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
     </p>
 
     <h3 id="comparison">Porovnání přístupů</h3>
@@ -200,27 +217,50 @@
     </p>
 
     <pre><code class="language-bash">src/
-├── Controller/                 # Prezentační vrstva
-│   └── UserController.php
-├── Application/                # Aplikační vrstva
-│   ├── Service/
-│   │   └── UserService.php
-│   └── DTO/
-│       └── UserDTO.php
-├── Domain/                     # Doménová vrstva
-│   ├── Model/
-│   │   └── User.php
-│   ├── Repository/
-│   │   └── UserRepository.php
-│   └── Service/
-│       └── DomainUserService.php
-└── Infrastructure/             # Infrastrukturní vrstva
-    ├── Repository/
-    │   └── DoctrineUserRepository.php
-    └── Persistence/
-        └── Doctrine/
-            └── Mapping/
-                └── User.orm.xml</code></pre>
+├── UserManagement/             # Bounded Context: Správa uživatelů
+│   ├── Presentation/            # Prezentační vrstva
+│   │   ├── Controller/
+│   │   │   ├── UserController.php
+│   │   │   └── RegistrationController.php
+│   │   └── ViewModel/
+│   │       └── UserViewModel.php
+│   ├── Application/            # Aplikační vrstva
+│   │   ├── Command/
+│   │   │   ├── RegisterUser.php
+│   │   │   └── RegisterUserHandler.php
+│   │   ├── Query/
+│   │   │   ├── GetUser.php
+│   │   │   └── GetUserHandler.php
+│   │   └── Service/
+│   │       └── UserApplicationService.php
+│   ├── Domain/                 # Doménová vrstva
+│   │   ├── Model/
+│   │   │   └── User.php         # Entita (Aggregate Root)
+│   │   ├── ValueObject/
+│   │   │   ├── UserId.php
+│   │   │   └── Email.php
+│   │   ├── Event/
+│   │   │   └── UserRegistered.php
+│   │   ├── Repository/
+│   │   │   └── UserRepository.php  # Rozhraní
+│   │   └── Service/
+│   │       └── UserDomainService.php
+│   └── Infrastructure/         # Infrastrukturní vrstva
+│       ├── Repository/
+│       │   └── DoctrineUserRepository.php
+│       └── Persistence/
+│           └── Doctrine/
+│               └── Mapping/
+│                   └── User.orm.xml
+├── OrderManagement/           # Bounded Context: Správa objednávek
+│   ├── Presentation/            # Prezentační vrstva
+│   ├── Application/            # Aplikační vrstva
+│   ├── Domain/                 # Doménová vrstva
+│   └── Infrastructure/         # Infrastrukturní vrstva
+└── Shared/                    # Sdílené komponenty
+    └── Domain/                 # Sdílená doménová logika
+        └── Exception/
+            └── DomainException.php</code></pre>
 
     <h4>Implementace vertikální slice architektury v Symfony 7:</h4>
     <p>
@@ -228,26 +268,57 @@
     </p>
 
     <pre><code class="language-bash">src/
-├── UserManagement/             # Feature: Správa uživatelů
-│   ├── Registration/           # Sub-feature: Registrace uživatelů
-│   │   ├── RegisterUser.php    # Command
-│   │   ├── RegisterUserHandler.php  # Command Handler
-│   │   ├── UserRegistrationController.php  # Controller
-│   │   └── UserRegistrationForm.php  # Form
-│   └── Profile/                # Sub-feature: Profil uživatele
-│       ├── GetUserProfile.php  # Query
-│       ├── GetUserProfileHandler.php  # Query Handler
-│       ├── UserProfileController.php  # Controller
-│       └── UserProfileViewModel.php  # View Model
-└── Shared/                     # Sdílené komponenty
-    ├── Domain/                 # Sdílená doménová logika
-    │   ├── Model/
-    │   │   └── User.php
-    │   └── ValueObject/
-    │       └── Email.php
-    └── Infrastructure/         # Sdílená infrastruktura
-        └── Repository/
-            └── DoctrineUserRepository.php</code></pre>
+├── UserManagement/             # Bounded Context: Správa uživatelů
+│   ├── Registration/           # Feature: Registrace uživatelů
+│   │   ├── Domain/             # Doménová logika pro registraci
+│   │   │   ├── Event/
+│   │   │   │   └── UserRegistered.php
+│   │   │   └── Service/
+│   │   │       └── RegistrationDomainService.php
+│   │   ├── Application/       # Aplikační logika pro registraci
+│   │   │   ├── Command/
+│   │   │   │   ├── RegisterUser.php
+│   │   │   │   └── RegisterUserHandler.php
+│   │   │   └── Service/
+│   │   │       └── RegistrationService.php
+│   │   └── Presentation/      # Prezentační vrstva pro registraci
+│   │       ├── Controller/
+│   │       │   └── UserRegistrationController.php
+│   │       └── Form/
+│   │           └── UserRegistrationForm.php
+│   ├── Profile/                # Feature: Profil uživatele
+│   │   ├── Application/       # Aplikační logika pro profil
+│   │   │   ├── Query/
+│   │   │   │   ├── GetUserProfile.php
+│   │   │   │   └── GetUserProfileHandler.php
+│   │   │   └── Service/
+│   │   │       └── ProfileService.php
+│   │   └── Presentation/      # Prezentační vrstva pro profil
+│   │       ├── Controller/
+│   │       │   └── UserProfileController.php
+│   │       └── ViewModel/
+│   │           └── UserProfileViewModel.php
+│   ├── Domain/                # Sdílená doménová logika pro celý kontext
+│   │   ├── Model/
+│   │   │   └── User.php       # Entita (Aggregate Root)
+│   │   ├── ValueObject/
+│   │   │   ├── UserId.php
+│   │   │   └── Email.php
+│   │   └── Repository/
+│   │       └── UserRepository.php  # Rozhraní
+│   └── Infrastructure/       # Infrastruktura pro celý kontext
+│       └── Repository/
+│           └── DoctrineUserRepository.php
+├── OrderManagement/           # Bounded Context: Správa objednávek
+│   ├── Checkout/              # Feature: Pokladna
+│   │   ├── Domain/
+│   │   ├── Application/
+│   │   └── Presentation/
+│   └── ... (podobná struktura jako u UserManagement)
+└── Shared/                    # Sdílené komponenty pro celý systém
+    └── Domain/
+        └── Exception/
+            └── DomainException.php</code></pre>
 
     <p>
         Symfony 7 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
