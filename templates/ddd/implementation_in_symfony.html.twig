@@ -26,15 +26,27 @@
 
     <h3 id="project-structure">Struktura projektu</h3>
     <p>
-        Při implementaci horizontálního DDD v Symfony 7 je důležité zvolit vhodnou strukturu projektu. Zde je příklad struktury projektu
-        pro horizontální DDD v Symfony 7:
+        Při implementaci horizontálního DDD v Symfony 7 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro horizontální DDD v Symfony 7:
     </p>
 
     <div class="example-box">
-        <h4>Příklad: Struktura projektu pro horizontální DDD v Symfony 7</h4>
+        <h4>Příklad: Správná struktura projektu pro horizontální DDD v Symfony 7</h4>
         <pre><code class="language-bash">src/
-├── UserManagement/             # Feature: Správa uživatelů
-│   ├── Registration/           # Sub-feature: Registrace uživatelů
+├── UserManagement/             # Bounded Context: Správa uživatelů
+│   ├── Domain/                 # Doménová vrstva pro UserManagement
+│   │   ├── Model/              # Doménové modely
+│   │   │   └── User.php
+│   │   ├── ValueObject/        # Hodnotové objekty
+│   │   │   ├── UserId.php
+│   │   │   └── Email.php
+│   │   ├── Event/              # Doménové události
+│   │   │   └── UserRegistered.php
+│   │   └── Repository/         # Repozitáře (rozhraní)
+│   │       └── UserRepository.php
+│   ├── Infrastructure/         # Infrastruktura pro UserManagement
+│   │   └── Repository/         # Implementace repozitářů
+│   │       └── DoctrineUserRepository.php
+│   ├── Registration/           # Feature: Registrace uživatelů
 │   │   ├── Command/            # Commands
 │   │   │   ├── RegisterUser.php
 │   │   │   └── RegisterUserHandler.php
@@ -44,7 +56,7 @@
 │   │   │   └── RegistrationFormType.php
 │   │   └── View/               # Views
 │   │       └── registration.html.twig
-│   └── Profile/                # Sub-feature: Profil uživatele
+│   └── Profile/                # Feature: Profil uživatele
 │       ├── Query/              # Queries
 │       │   ├── GetUserProfile.php
 │       │   └── GetUserProfileHandler.php
@@ -54,54 +66,76 @@
 │       │   └── ProfileFormType.php
 │       └── View/               # Views
 │           └── profile.html.twig
-├── OrderProcessing/            # Feature: Zpracování objednávek
-│   ├── Checkout/               # Sub-feature: Pokladna
-│   │   ├── Command/            # Commands
+├── OrderManagement/           # Bounded Context: Správa objednávek
+│   ├── Domain/                # Doménová vrstva pro OrderManagement
+│   │   ├── Model/             # Doménové modely
+│   │   │   ├── Order.php
+│   │   │   └── OrderItem.php
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── OrderId.php
+│   │   │   └── Money.php
+│   │   ├── Event/             # Doménové události
+│   │   │   └── OrderCreated.php
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── OrderRepository.php
+│   ├── Infrastructure/        # Infrastruktura pro OrderManagement
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineOrderRepository.php
+│   ├── Checkout/              # Feature: Pokladna
+│   │   ├── Command/           # Commands
 │   │   │   ├── CreateOrder.php
 │   │   │   └── CreateOrderHandler.php
-│   │   ├── Controller/         # Controllers
+│   │   ├── Controller/        # Controllers
 │   │   │   └── CheckoutController.php
-│   │   ├── Form/               # Forms
+│   │   ├── Form/              # Forms
 │   │   │   └── CheckoutFormType.php
-│   │   └── View/               # Views
+│   │   └── View/              # Views
 │   │       └── checkout.html.twig
-│   └── OrderHistory/           # Sub-feature: Historie objednávek
-│       ├── Query/              # Queries
+│   └── OrderHistory/          # Feature: Historie objednávek
+│       ├── Query/             # Queries
 │       │   ├── GetOrderHistory.php
 │       │   └── GetOrderHistoryHandler.php
-│       ├── Controller/         # Controllers
+│       ├── Controller/        # Controllers
 │       │   └── OrderHistoryController.php
-│       └── View/               # Views
+│       └── View/              # Views
 │           └── order_history.html.twig
-└── Shared/                     # Sdílené komponenty
-    ├── Domain/                 # Sdílená doménová logika
-    │   ├── Model/              # Doménové modely
-    │   │   ├── User.php
-    │   │   └── Order.php
-    │   ├── ValueObject/        # Hodnotové objekty
-    │   │   ├── Email.php
-    │   │   └── Money.php
-    │   ├── Event/              # Doménové události
-    │   │   ├── UserRegistered.php
-    │   │   └── OrderCreated.php
-    │   └── Repository/         # Repozitáře (rozhraní)
-    │       ├── UserRepository.php
-    │       └── OrderRepository.php
-    └── Infrastructure/         # Sdílená infrastruktura
-        ├── Repository/         # Implementace repozitářů
-        │   ├── DoctrineUserRepository.php
-        │   └── DoctrineOrderRepository.php
-        └── Persistence/        # Persistence
+└── Shared/                    # Skutečně sdílené komponenty
+    ├── Domain/                # Sdílená doménová logika
+    │   └── ValueObject/       # Sdílené hodnotové objekty
+    │       └── Id.php         # Abstraktní ID
+    └── Infrastructure/        # Sdílená infrastruktura
+        └── Persistence/       # Sdílené komponenty pro persistenci
             └── Doctrine/
                 └── Mapping/
-                    ├── User.orm.xml
-                    └── Order.orm.xml</code></pre>
+                    └── MappingTrait.php</code></pre>
     </div>
 
     <p>
-        Tato struktura projektu organizuje kód podle funkcí (features) a podfunkcí (sub-features). Každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
-        Sdílené komponenty jsou umístěny v adresáři <code>Shared</code>.
+        Tato struktura projektu organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má svou vlastní doménovou vrstvu, která obsahuje modely, hodnotové objekty, události a repozitáře specifické pro danou doménu. Tím je zajištěna izolace domén a respektování principů DDD.
     </p>
+
+    <div class="concept-box">
+        <h4>Klíčové principy správné struktury DDD projektu:</h4>
+        <ul>
+            <li><strong>Izolace domén</strong> - Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.</li>
+            <li><strong>Ubiquitous Language</strong> - Každá doména může mít svůj vlastní jazyk, který je konzistentně používán v kódu.</li>
+            <li><strong>Jasné hranice</strong> - Jasně definované hranice mezi doménami pomáhají vývojářům lépe pochopit, kde končí jedna doména a začíná druhá.</li>
+            <li><strong>Minimalizace závislostí</strong> - Domény by měly být co nejvíce nezávislé, aby změna v jedné doméně neovlivnila jinou doménu.</li>
+        </ul>
+    </div>
+
+    <div class="warning-box">
+        <h4>Časté chyby při implementaci DDD</h4>
+        <p>
+            Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
+        </p>
+        <ul>
+            <li><strong>Umístění všech doménových modelů do sdílené složky</strong> - Každá doména by měla mít své vlastní modely.</li>
+            <li><strong>Sdílení doménových modelů mezi doménami</strong> - Pokud potřebujete sdílet data mezi doménami, použijte Anti-Corruption Layer nebo Domain Events.</li>
+            <li><strong>Příliš mnoho závislostí mezi doménami</strong> - Domény by měly být co nejvíce nezávislé.</li>
+            <li><strong>Ignorování Ubiquitous Language</strong> - Používejte konzistentní jazyk v kódu, dokumentaci a komunikaci.</li>
+        </ul>
+    </div>
 
     <h3 id="entities">Implementace entit</h3>
     <p>
@@ -112,11 +146,11 @@
         <h4>Příklad: Implementace entity v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Model;
+namespace App\UserManagement\Domain\Model;
 
-use App\Shared\Domain\Event\UserRegistered;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -207,7 +241,7 @@ class User
         <h4>Příklad: Implementace hodnotového objektu v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\ValueObject;
+namespace App\UserManagement\Domain\ValueObject;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -257,11 +291,11 @@ class Email
         <h4>Příklad: Implementace repozitáře v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Repository;
+namespace App\UserManagement\Domain\Repository;
 
-use App\Shared\Domain\Model\User;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 
 interface UserRepository
 {
@@ -274,12 +308,12 @@ interface UserRepository
 
         <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Infrastructure\Repository;
+namespace App\UserManagement\Infrastructure\Repository;
 
-use App\Shared\Domain\Model\User;
-use App\Shared\Domain\Repository\UserRepository;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
 class DoctrineUserRepository implements UserRepository
@@ -332,14 +366,14 @@ class DoctrineUserRepository implements UserRepository
         <h4>Příklad: Implementace doménové služby v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
-namespace App\OrderProcessing\Checkout\Service;
+namespace App\OrderManagement\Checkout\Service;
 
-use App\Shared\Domain\Model\Order;
-use App\Shared\Domain\Model\Payment;
-use App\Shared\Domain\Repository\PaymentRepository;
-use App\Shared\Domain\ValueObject\Money;
-use App\Shared\Domain\ValueObject\PaymentId;
-use App\Shared\Domain\ValueObject\PaymentMethod;
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\Model\Payment;
+use App\OrderManagement\Domain\Repository\PaymentRepository;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\PaymentId;
+use App\OrderManagement\Domain\ValueObject\PaymentMethod;
 
 class PaymentService
 {
@@ -395,10 +429,10 @@ class PaymentService
         <h4>Příklad: Implementace doménové události v Symfony 7</h4>
         <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Event;
+namespace App\UserManagement\Domain\Event;
 
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 
 class UserRegistered
 {
@@ -461,10 +495,10 @@ class RegisterUser
 
 namespace App\UserManagement\Registration\Command;
 
-use App\Shared\Domain\Model\User;
-use App\Shared\Domain\Repository\UserRepository;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -518,8 +552,8 @@ class GetUserProfile
 
 namespace App\UserManagement\Profile\Query;
 
-use App\Shared\Domain\Repository\UserRepository;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -636,12 +670,13 @@ services:
             - '../src/*/Domain/ValueObject/'
             - '../src/*/Domain/Event/'
 
-    # Explicitní konfigurace repozitářů
-    App\Shared\Domain\Repository\UserRepository:
-        class: App\Shared\Infrastructure\Repository\DoctrineUserRepository
+    # Explicitní konfigurace repozitářů pro UserManagement doménu
+    App\UserManagement\Domain\Repository\UserRepository:
+        class: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository
 
-    App\Shared\Domain\Repository\OrderRepository:
-        class: App\Shared\Infrastructure\Repository\DoctrineOrderRepository
+    # Explicitní konfigurace repozitářů pro OrderManagement doménu
+    App\OrderManagement\Domain\Repository\OrderRepository:
+        class: App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository
 
     # Konfigurace Messenger komponenty
     messenger.default_bus:
@@ -678,7 +713,25 @@ services:
             <li>Používat atributy pro konfiguraci služeb a routování.</li>
             <li>Používat formuláře pro zpracování vstupů od uživatele.</li>
             <li>Používat validaci pro validaci doménových objektů.</li>
+            <li>Respektovat hranice mezi doménami a neumisťovat doménové modely do sdílené složky.</li>
+            <li>Používat Anti-Corruption Layer pro komunikaci mezi doménami, pokud je to nutné.</li>
         </ul>
+    </div>
+
+    <div class="concept-box">
+        <h4>Co patří do sdílené složky (Shared)?</h4>
+        <p>
+            Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, které nemají specifický doménový význam:
+        </p>
+        <ul>
+            <li>Abstraktní třídy pro ID, Entity, ValueObject</li>
+            <li>Utility pro práci s datem a časem</li>
+            <li>Obecné výjimky</li>
+            <li>Infrastrukturní komponenty používané napříč doménami</li>
+        </ul>
+        <p>
+            Doménové modely, hodnotové objekty a repozitáře by měly být umístěny v příslušných doménách, nikoli ve sdílené složce.
+        </p>
     </div>
 
     <p>
