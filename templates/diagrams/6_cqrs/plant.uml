@@ -1,0 +1,195 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Nunito"
+skinparam defaultFontSize 16
+skinparam defaultTextAlignment center
+
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+skinparam sequence {
+  ParticipantBorderColor #005A9C
+  LifeLineBorderColor #005A9C
+  LifeLineBackgroundColor #E6F0FA
+  ParticipantBackgroundColor #FFFFFF
+}
+
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #005A9C
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+skinparam title {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+' Pro sekvenční diagramy
+skinparam sequenceArrowThickness 2
+skinparam sequenceArrowColor #005A9C
+
+
+' Nadpis
+title CQRS v Symfony 7
+
+' Definice obálek (package)
+package "Prezentační vrstva" {
+  class Controller {
+    +action()
+    +injectCommandBus(MessageBusInterface)
+    +injectQueryBus(MessageBusInterface)
+  }
+  
+  class ViewModel {
+    +data
+  }
+}
+
+package "Aplikační vrstva - Commands" {
+  class Command {
+    +properties
+    +__construct()
+  }
+  
+  class CommandHandler {
+    +__construct(dependencies)
+    +__invoke(Command): void
+  }
+  
+  class CommandBus {
+    +dispatch(Command)
+  }
+}
+
+package "Aplikační vrstva - Queries" {
+  class Query {
+    +properties
+    +__construct()
+  }
+  
+  class QueryHandler {
+    +__construct(dependencies)
+    +__invoke(Query): ?ViewModel
+  }
+  
+  class QueryBus {
+    +dispatch(Query)
+  }
+}
+
+package "Doménová vrstva" {
+  class Entity {
+    +methods()
+  }
+  
+  class Repository {
+    <<interface>>
+    +save(Entity)
+    +findById(id)
+  }
+  
+  class DomainEvent {
+    +properties
+  }
+}
+
+package "Infrastrukturní vrstva" {
+  class DoctrineRepository {
+    -EntityManagerInterface entityManager
+    +save(Entity)
+    +findById(id)
+  }
+  
+  class MessengerComponent {
+    +handle(message)
+    +route(message)
+  }
+  
+  class Transport {
+    +sync
+    +async
+  }
+}
+
+' Vztahy mezi třídami a komponentami
+Controller --> CommandBus : dispatch
+Controller --> QueryBus : dispatch
+Controller --> Command : creates
+Controller --> Query : creates
+CommandBus --> CommandHandler : routes to
+QueryBus --> QueryHandler : routes to
+CommandHandler --> Entity : modifies
+CommandHandler --> Repository : uses
+QueryHandler --> Repository : uses
+QueryHandler --> ViewModel : returns
+DoctrineRepository ..|> Repository : implements
+MessengerComponent --> Transport : uses
+CommandBus --|> MessengerComponent : extends
+QueryBus --|> MessengerComponent : extends
+Entity --> DomainEvent : creates
+
+' Poznámky pro vysvětlení
+note bottom of Command
+  RegisterUser
+  CreateOrder
+  UpdateProfile
+end note
+
+note bottom of Query
+  GetUserProfile
+  GetOrderHistory
+  FindProducts
+end note
+
+note right of CommandHandler
+  Asynchronní zpracování (možné)
+  Mění stav systému
+  Nevrací data
+end note
+
+note right of QueryHandler
+  Synchronní zpracování
+  Nemodifikuje data
+  Vrací ViewModel
+end note
+
+note bottom of Transport
+  sync://    - Synchronní transport
+  doctrine:// - Doctrine transport
+  redis://    - Redis transport
+  amqp://    - RabbitMQ transport
+end note
+
+
+@enduml
