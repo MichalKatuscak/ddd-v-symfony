@@ -1,0 +1,713 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css"
+     data-diagram-type="CLASS"  preserveAspectRatio="none"
+     style="background:#FFFFFF;aspect-ratio:2.996" version="1.1" viewBox="0 0 5104 1707"
+     zoomAndPan="magnify">
+    <defs/>
+    <g><!--cluster UserManagement-->
+        <g class="cluster" data-entity="UserManagement" data-source-line="72" data-uid="ent0002"
+           id="cluster_UserManagement">
+            <path d="M13.2813,9.8022 L263.3301,9.8022 A5.8594,5.8594 0 0 1 267.2363,13.7085 L278.1738,48.2788 L2594.5313,48.2788 A3.9063,3.9063 0 0 1 2598.4375,52.1851 L2598.4375,1041.0522 A3.9063,3.9063 0 0 1 2594.5313,1044.9585 L13.2813,1044.9585 A3.9063,3.9063 0 0 1 9.375,1041.0522 L9.375,13.7085 A3.9063,3.9063 0 0 1 13.2813,9.8022"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="9.375" x2="278.1738" y1="48.2788" y2="48.2788"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="248.4863" x="15.625" y="36.1328">UserManagement
+            </text>
+        </g><!--cluster Registration-->
+        <g class="cluster" data-entity="Registration" data-source-line="73" data-uid="ent0003"
+           id="cluster_Registration">
+            <path d="M50.7813,109.021 L226.5381,109.021 A5.8594,5.8594 0 0 1 230.4443,112.9272 L241.3818,147.4976 L944.5313,147.4976 A3.9063,3.9063 0 0 1 948.4375,151.4038 L948.4375,1003.5522 A3.9063,3.9063 0 0 1 944.5313,1007.4585 L50.7813,1007.4585 A3.9063,3.9063 0 0 1 46.875,1003.5522 L46.875,112.9272 A3.9063,3.9063 0 0 1 50.7813,109.021"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="46.875" x2="241.3818" y1="147.4976" y2="147.4976"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="174.1943" x="53.125" y="135.3516">Registration
+            </text>
+        </g><!--cluster Authentication-->
+        <g class="cluster" data-entity="Authentication" data-source-line="89" data-uid="ent0007"
+           id="cluster_Authentication">
+            <path d="M2155.4688,94.9585 L2366.3818,94.9585 A5.8594,5.8594 0 0 1 2370.2881,98.8647 L2381.2256,133.4351 L2557.0313,133.4351 A3.9063,3.9063 0 0 1 2560.9375,137.3413 L2560.9375,306.6772 A3.9063,3.9063 0 0 1 2557.0313,310.5835 L2155.4688,310.5835 A3.9063,3.9063 0 0 1 2151.5625,306.6772 L2151.5625,98.8647 A3.9063,3.9063 0 0 1 2155.4688,94.9585"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="2151.5625" x2="2381.2256" y1="133.4351"
+                  y2="133.4351"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="209.3506" x="2157.8125" y="121.2891">Authentication
+            </text>
+        </g><!--cluster Profile-->
+        <g class="cluster" data-entity="Profile" data-source-line="96" data-uid="ent0009" id="cluster_Profile">
+            <path d="M989.8438,80.1147 L1084.2041,80.1147 A5.8594,5.8594 0 0 1 1088.1104,84.021 L1099.0479,118.5913 L2110.1563,118.5913 A3.9063,3.9063 0 0 1 2114.0625,122.4976 L2114.0625,974.646 A3.9063,3.9063 0 0 1 2110.1563,978.5522 L989.8438,978.5522 A3.9063,3.9063 0 0 1 985.9375,974.646 L985.9375,84.021 A3.9063,3.9063 0 0 1 989.8438,80.1147"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="985.9375" x2="1099.0479" y1="118.5913" y2="118.5913"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="92.7979" x="992.1875" y="106.4453">Profile
+            </text>
+        </g><!--cluster Shared-->
+        <g class="cluster" data-entity="Shared" data-source-line="113" data-uid="ent0013" id="cluster_Shared">
+            <path d="M2639.8438,403.5522 L2741.2598,403.5522 A5.8594,5.8594 0 0 1 2745.166,407.4585 L2756.1035,442.0288 L5089.8438,442.0288 A3.9063,3.9063 0 0 1 5093.75,445.9351 L5093.75,1693.396 A3.9063,3.9063 0 0 1 5089.8438,1697.3022 L2639.8438,1697.3022 A3.9063,3.9063 0 0 1 2635.9375,1693.396 L2635.9375,407.4585 A3.9063,3.9063 0 0 1 2639.8438,403.5522"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="2635.9375" x2="2756.1035" y1="442.0288"
+                  y2="442.0288"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="99.8535" x="2642.1875" y="429.8828">Shared
+            </text>
+        </g><!--cluster SharedDomain-->
+        <g class="cluster" data-entity="SharedDomain" data-source-line="114" data-uid="ent0014"
+           id="cluster_SharedDomain">
+            <path d="M2677.3438,473.8647 L2786.1206,473.8647 A5.8594,5.8594 0 0 1 2790.0269,477.771 L2800.9644,512.3413 L3713.2813,512.3413 A3.9063,3.9063 0 0 1 3717.1875,516.2476 L3717.1875,1612.146 A3.9063,3.9063 0 0 1 3713.2813,1616.0522 L2677.3438,1616.0522 A3.9063,3.9063 0 0 1 2673.4375,1612.146 L2673.4375,477.771 A3.9063,3.9063 0 0 1 2677.3438,473.8647"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="2673.4375" x2="2800.9644" y1="512.3413"
+                  y2="512.3413"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="107.2144" x="2679.6875" y="500.1953">Domain
+            </text>
+        </g><!--cluster SharedModel-->
+        <g class="cluster" data-entity="SharedModel" data-source-line="115" data-uid="ent0015" id="cluster_SharedModel">
+            <path d="M2714.8438,544.1772 L2801.8799,544.1772 A5.8594,5.8594 0 0 1 2805.7861,548.0835 L2816.7236,582.6538 L3222.6563,582.6538 A3.9063,3.9063 0 0 1 3226.5625,586.5601 L3226.5625,1221.521 A3.9063,3.9063 0 0 1 3222.6563,1225.4272 L2714.8438,1225.4272 A3.9063,3.9063 0 0 1 2710.9375,1221.521 L2710.9375,548.0835 A3.9063,3.9063 0 0 1 2714.8438,544.1772"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="2710.9375" x2="2816.7236" y1="582.6538"
+                  y2="582.6538"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="85.4736" x="2717.1875" y="570.5078">Model
+            </text>
+        </g><!--cluster SharedValueObject-->
+        <g class="cluster" data-entity="SharedValueObject" data-source-line="138" data-uid="ent0017"
+           id="cluster_SharedValueObject">
+            <path d="M2714.8438,1420.7397 L2887.3901,1420.7397 A5.8594,5.8594 0 0 1 2891.2964,1424.646 L2902.2339,1459.2163 L3061.7188,1459.2163 A3.9063,3.9063 0 0 1 3065.625,1463.1226 L3065.625,1574.646 A3.9063,3.9063 0 0 1 3061.7188,1578.5522 L2714.8438,1578.5522 A3.9063,3.9063 0 0 1 2710.9375,1574.646 L2710.9375,1424.646 A3.9063,3.9063 0 0 1 2714.8438,1420.7397"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="2710.9375" x2="2902.2339" y1="1459.2163"
+                  y2="1459.2163"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="170.9839" x="2717.1875" y="1447.0703">ValueObject
+            </text>
+        </g><!--cluster SharedEvent-->
+        <g class="cluster" data-entity="SharedEvent" data-source-line="143" data-uid="ent0020" id="cluster_SharedEvent">
+            <path d="M3107.0313,1420.7397 L3188.6719,1420.7397 A5.8594,5.8594 0 0 1 3192.5781,1424.646 L3203.5156,1459.2163 L3392.9688,1459.2163 A3.9063,3.9063 0 0 1 3396.875,1463.1226 L3396.875,1574.646 A3.9063,3.9063 0 0 1 3392.9688,1578.5522 L3107.0313,1578.5522 A3.9063,3.9063 0 0 1 3103.125,1574.646 L3103.125,1424.646 A3.9063,3.9063 0 0 1 3107.0313,1420.7397"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="3103.125" x2="3203.5156" y1="1459.2163"
+                  y2="1459.2163"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="80.0781" x="3109.375" y="1447.0703">Event
+            </text>
+        </g><!--cluster SharedRepository-->
+        <g class="cluster" data-entity="SharedRepository" data-source-line="147" data-uid="ent0022"
+           id="cluster_SharedRepository">
+            <path d="M3267.9688,762.146 L3422.0093,762.146 A5.8594,5.8594 0 0 1 3425.9155,766.0522 L3436.853,800.6226 L3675.7813,800.6226 A3.9063,3.9063 0 0 1 3679.6875,804.5288 L3679.6875,1003.5522 A3.9063,3.9063 0 0 1 3675.7813,1007.4585 L3267.9688,1007.4585 A3.9063,3.9063 0 0 1 3264.0625,1003.5522 L3264.0625,766.0522 A3.9063,3.9063 0 0 1 3267.9688,762.146"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="3264.0625" x2="3436.853" y1="800.6226" y2="800.6226"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="152.478" x="3270.3125" y="788.4766">Repository
+            </text>
+        </g><!--cluster SharedInfrastructure-->
+        <g class="cluster" data-entity="SharedInfrastructure" data-source-line="156" data-uid="ent0024"
+           id="cluster_SharedInfrastructure">
+            <path d="M3758.5938,1306.6772 L3958.1421,1306.6772 A5.8594,5.8594 0 0 1 3962.0483,1310.5835 L3972.9858,1345.1538 L5052.3438,1345.1538 A3.9063,3.9063 0 0 1 5056.25,1349.0601 L5056.25,1655.896 A3.9063,3.9063 0 0 1 5052.3438,1659.8022 L3758.5938,1659.8022 A3.9063,3.9063 0 0 1 3754.6875,1655.896 L3754.6875,1310.5835 A3.9063,3.9063 0 0 1 3758.5938,1306.6772"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="3754.6875" x2="3972.9858" y1="1345.1538"
+                  y2="1345.1538"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="197.9858" x="3760.9375" y="1333.0078">Infrastructure
+            </text>
+        </g><!--cluster SharedInfraRepo-->
+        <g class="cluster" data-entity="SharedInfraRepo" data-source-line="157" data-uid="ent0025"
+           id="cluster_SharedInfraRepo">
+            <path d="M3796.0938,1376.9897 L3950.1343,1376.9897 A5.8594,5.8594 0 0 1 3954.0405,1380.896 L3964.978,1415.4663 L4203.9063,1415.4663 A3.9063,3.9063 0 0 1 4207.8125,1419.3726 L4207.8125,1618.396 A3.9063,3.9063 0 0 1 4203.9063,1622.3022 L3796.0938,1622.3022 A3.9063,3.9063 0 0 1 3792.1875,1618.396 L3792.1875,1380.896 A3.9063,3.9063 0 0 1 3796.0938,1376.9897"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="3792.1875" x2="3964.978" y1="1415.4663"
+                  y2="1415.4663"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="152.478" x="3798.4375" y="1403.3203">Repository
+            </text>
+        </g><!--cluster SharedBus-->
+        <g class="cluster" data-entity="SharedBus" data-source-line="165" data-uid="ent0027" id="cluster_SharedBus">
+            <path d="M4249.2188,1420.7397 L4302.5146,1420.7397 A5.8594,5.8594 0 0 1 4306.4209,1424.646 L4317.3584,1459.2163 L5014.8438,1459.2163 A3.9063,3.9063 0 0 1 5018.75,1463.1226 L5018.75,1574.646 A3.9063,3.9063 0 0 1 5014.8438,1578.5522 L4249.2188,1578.5522 A3.9063,3.9063 0 0 1 4245.3125,1574.646 L4245.3125,1424.646 A3.9063,3.9063 0 0 1 4249.2188,1420.7397"
+                  fill="#FAFAFA" style="stroke:#999999;stroke-width:2.3438;"/>
+            <line style="stroke:#999999;stroke-width:2.3438;" x1="4245.3125" x2="4317.3584" y1="1459.2163"
+                  y2="1459.2163"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="51.7334" x="4251.5625" y="1447.0703">Bus
+            </text>
+        </g><!--class RegisterUserCommand-->
+        <g class="entity" data-entity="RegisterUserCommand" data-source-line="74" data-uid="ent0004"
+           id="entity_RegisterUserCommand">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="247.8882" x="300.7813" y="819.9585"/>
+            <ellipse cx="340.8026" cy="844.9585" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M344.6356,853.7964 Q343.7811,854.2358 342.829,854.4556 Q341.9012,854.6997 340.8514,854.6997 Q337.1649,854.6997 335.2118,852.2583 Q333.2831,849.8169 333.2831,845.2271 Q333.2831,840.6372 335.2118,838.2202 Q337.1649,835.7788 340.8514,835.7788 Q341.9012,835.7788 342.8534,835.9985 Q343.8055,836.2183 344.6356,836.6577 L344.6356,840.6616 Q343.7079,839.8071 342.829,839.4165 Q341.9501,839.0015 341.0223,839.0015 Q339.0448,839.0015 338.0438,840.5884 Q337.0428,842.1509 337.0428,845.2271 Q337.0428,848.3032 338.0438,849.8901 Q339.0448,851.4526 341.0223,851.4526 Q341.9501,851.4526 342.829,851.062 Q343.7079,850.647 344.6356,849.7925 L344.6356,853.7964 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="161.0352"
+                  x="366.3629" y="853.6133">RegisterUser
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="302.3438" x2="547.1069" y1="869.9585" y2="869.9585"/>
+            <ellipse cx="317.9688" cy="893.103" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="159.0332"
+                  x="332.0313" y="899.4141">name: string
+            </text>
+            <ellipse cx="317.9688" cy="922.2046" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="157.0801"
+                  x="332.0313" y="928.5156">email: string
+            </text>
+            <ellipse cx="317.9688" cy="951.3062" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="207.2632"
+                  x="332.0313" y="957.6172">password: string
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="302.3438" x2="547.1069" y1="969.7632" y2="969.7632"/>
+        </g><!--class RegisterUserHandler-->
+        <g class="entity" data-entity="RegisterUserHandler" data-source-line="80" data-uid="ent0005"
+           id="entity_RegisterUserHandler">
+            <rect fill="#F1F1F1" height="104.1016" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="398.1812" x="72.6563" y="166.8335"/>
+            <ellipse cx="136.0126" cy="191.8335" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M139.8456,200.6714 Q138.9911,201.1108 138.0389,201.3306 Q137.1112,201.5747 136.0614,201.5747 Q132.3749,201.5747 130.4218,199.1333 Q128.493,196.6919 128.493,192.1021 Q128.493,187.5122 130.4218,185.0952 Q132.3749,182.6538 136.0614,182.6538 Q137.1112,182.6538 138.0634,182.8735 Q139.0155,183.0933 139.8456,183.5327 L139.8456,187.5366 Q138.9178,186.6821 138.0389,186.2915 Q137.16,185.8765 136.2323,185.8765 Q134.2548,185.8765 133.2538,187.4634 Q132.2528,189.0259 132.2528,192.1021 Q132.2528,195.1782 133.2538,196.7651 Q134.2548,198.3276 136.2323,198.3276 Q137.16,198.3276 138.0389,197.937 Q138.9178,197.522 139.8456,196.6675 L139.8456,200.6714 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="259.4727"
+                  x="166.7584" y="200.4883">RegisterUserHandler
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="74.2188" x2="469.2749" y1="216.8335" y2="216.8335"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="74.2188" x2="469.2749" y1="229.3335" y2="229.3335"/>
+            <ellipse cx="89.8438" cy="252.478" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="357.5562"
+                  x="103.9063" y="258.7891">__invoke(RegisterUser): void
+            </text>
+        </g><!--class RegistrationController-->
+        <g class="entity" data-entity="RegistrationController" data-source-line="84" data-uid="ent0006"
+           id="entity_RegistrationController">
+            <rect fill="#F1F1F1" height="104.1016" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="397.3267" x="526.5625" y="166.8335"/>
+            <ellipse cx="582.3657" cy="191.8335" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M586.1987,200.6714 Q585.3442,201.1108 584.3921,201.3306 Q583.4644,201.5747 582.4146,201.5747 Q578.728,201.5747 576.7749,199.1333 Q574.8462,196.6919 574.8462,192.1021 Q574.8462,187.5122 576.7749,185.0952 Q578.728,182.6538 582.4146,182.6538 Q583.4644,182.6538 584.4165,182.8735 Q585.3687,183.0933 586.1987,183.5327 L586.1987,187.5366 Q585.271,186.6821 584.3921,186.2915 Q583.5132,185.8765 582.5854,185.8765 Q580.6079,185.8765 579.6069,187.4634 Q578.606,189.0259 578.606,192.1021 Q578.606,195.1782 579.6069,196.7651 Q580.6079,198.3276 582.5854,198.3276 Q583.5132,198.3276 584.3921,197.937 Q585.271,197.522 586.1987,196.6675 L586.1987,200.6714 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="275.4028"
+                  x="611.4331" y="200.4883">RegistrationController
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="528.125" x2="922.3267" y1="216.8335" y2="216.8335"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="528.125" x2="922.3267" y1="229.3335" y2="229.3335"/>
+            <ellipse cx="543.75" cy="252.478" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="356.7017"
+                  x="557.8125" y="258.7891">register(Request): Response
+            </text>
+        </g><!--class SecurityController-->
+        <g class="entity" data-entity="SecurityController" data-source-line="90" data-uid="ent0008"
+           id="entity_SecurityController">
+            <rect fill="#F1F1F1" height="133.2031" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="361.2671" x="2175.7813" y="152.771"/>
+            <ellipse cx="2237.5061" cy="177.771" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M2241.3391,186.6089 Q2240.4846,187.0483 2239.5325,187.2681 Q2238.6047,187.5122 2237.5549,187.5122 Q2233.8684,187.5122 2231.9153,185.0708 Q2229.9866,182.6294 2229.9866,178.0396 Q2229.9866,173.4497 2231.9153,171.0327 Q2233.8684,168.5913 2237.5549,168.5913 Q2238.6047,168.5913 2239.5569,168.811 Q2240.509,169.0308 2241.3391,169.4702 L2241.3391,173.4741 Q2240.4114,172.6196 2239.5325,172.229 Q2238.6536,171.814 2237.7258,171.814 Q2235.7483,171.814 2234.7473,173.4009 Q2233.7463,174.9634 2233.7463,178.0396 Q2233.7463,181.1157 2234.7473,182.7026 Q2235.7483,184.2651 2237.7258,184.2651 Q2238.6536,184.2651 2239.5325,183.8745 Q2240.4114,183.4595 2241.3391,182.605 L2241.3391,186.6089 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="226.1841"
+                  x="2267.8894" y="186.4258">SecurityController
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2177.3438" x2="2535.4858" y1="202.771" y2="202.771"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2177.3438" x2="2535.4858" y1="215.271" y2="215.271"/>
+            <ellipse cx="2192.9688" cy="238.4155" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="320.6421"
+                  x="2207.0313" y="244.7266">login(Request): Response
+            </text>
+            <ellipse cx="2192.9688" cy="267.5171" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="236.1206"
+                  x="2207.0313" y="273.8281">logout(): Response
+            </text>
+        </g><!--class GetUserProfileQuery-->
+        <g class="entity" data-entity="GetUserProfileQuery" data-source-line="97" data-uid="ent0010"
+           id="entity_GetUserProfileQuery">
+            <rect fill="#F1F1F1" height="104.1016" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="230.2612" x="1394.5313" y="848.8647"/>
+            <ellipse cx="1417.9688" cy="873.8647" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M1421.8018,882.7026 Q1420.9473,883.1421 1419.9951,883.3618 Q1419.0674,883.606 1418.0176,883.606 Q1414.3311,883.606 1412.3779,881.1646 Q1410.4492,878.7231 1410.4492,874.1333 Q1410.4492,869.5435 1412.3779,867.1265 Q1414.3311,864.6851 1418.0176,864.6851 Q1419.0674,864.6851 1420.0195,864.9048 Q1420.9717,865.1245 1421.8018,865.564 L1421.8018,869.5679 Q1420.874,868.7134 1419.9951,868.3228 Q1419.1162,867.9077 1418.1885,867.9077 Q1416.2109,867.9077 1415.21,869.4946 Q1414.209,871.0571 1414.209,874.1333 Q1414.209,877.2095 1415.21,878.7964 Q1416.2109,880.3589 1418.1885,880.3589 Q1419.1162,880.3589 1419.9951,879.9683 Q1420.874,879.5532 1421.8018,878.6987 L1421.8018,882.7026 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="180.2612"
+                  x="1439.8438" y="882.5195">GetUserProfile
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="1396.0938" x2="1623.23" y1="898.8647" y2="898.8647"/>
+            <ellipse cx="1411.7188" cy="922.0093" fill="none" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="165.9058"
+                  x="1425.7813" y="928.3203">userId: string
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="1396.0938" x2="1623.23" y1="940.4663" y2="940.4663"/>
+        </g><!--class GetUserProfileHandler-->
+        <g class="entity" data-entity="GetUserProfileHandler" data-source-line="101" data-uid="ent0011"
+           id="entity_GetUserProfileHandler">
+            <rect fill="#F1F1F1" height="104.1016" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="635.144" x="1010.9375" y="166.8335"/>
+            <ellipse cx="1182.5195" cy="191.8335" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M1186.3525,200.6714 Q1185.498,201.1108 1184.5459,201.3306 Q1183.6182,201.5747 1182.5684,201.5747 Q1178.8818,201.5747 1176.9287,199.1333 Q1175,196.6919 1175,192.1021 Q1175,187.5122 1176.9287,185.0952 Q1178.8818,182.6538 1182.5684,182.6538 Q1183.6182,182.6538 1184.5703,182.8735 Q1185.5225,183.0933 1186.3525,183.5327 L1186.3525,187.5366 Q1185.4248,186.6821 1184.5459,186.2915 Q1183.667,185.8765 1182.7393,185.8765 Q1180.7617,185.8765 1179.7607,187.4634 Q1178.7598,189.0259 1178.7598,192.1021 Q1178.7598,195.1782 1179.7607,196.7651 Q1180.7617,198.3276 1182.7393,198.3276 Q1183.667,198.3276 1184.5459,197.937 Q1185.4248,197.522 1186.3525,196.6675 L1186.3525,200.6714 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="278.6987"
+                  x="1214.5508" y="200.4883">GetUserProfileHandler
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="1012.5" x2="1644.519" y1="216.8335" y2="216.8335"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="1012.5" x2="1644.519" y1="229.3335" y2="229.3335"/>
+            <ellipse cx="1028.125" cy="252.478" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="594.519"
+                  x="1042.1875" y="258.7891">__invoke(GetUserProfile): UserProfileViewModel
+            </text>
+        </g><!--class ProfileController-->
+        <g class="entity" data-entity="ProfileController" data-source-line="105" data-uid="ent0012"
+           id="entity_ProfileController">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="388.4521" x="1699.2188" y="137.9272"/>
+            <ellipse cx="1785.6812" cy="162.9272" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M1789.5142,171.7651 Q1788.6597,172.2046 1787.7075,172.4243 Q1786.7798,172.6685 1785.73,172.6685 Q1782.0435,172.6685 1780.0903,170.2271 Q1778.1616,167.7856 1778.1616,163.1958 Q1778.1616,158.606 1780.0903,156.189 Q1782.0435,153.7476 1785.73,153.7476 Q1786.7798,153.7476 1787.7319,153.9673 Q1788.6841,154.187 1789.5142,154.6265 L1789.5142,158.6304 Q1788.5864,157.7759 1787.7075,157.3853 Q1786.8286,156.9702 1785.9009,156.9702 Q1783.9233,156.9702 1782.9224,158.5571 Q1781.9214,160.1196 1781.9214,163.1958 Q1781.9214,166.272 1782.9224,167.8589 Q1783.9233,169.4214 1785.9009,169.4214 Q1786.8286,169.4214 1787.7075,169.0308 Q1788.5864,168.6157 1789.5142,167.7612 L1789.5142,171.7651 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="202.2461"
+                  x="1817.7124" y="171.582">ProfileController
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="1700.7813" x2="2086.1084" y1="187.9272"
+                  y2="187.9272"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="1700.7813" x2="2086.1084" y1="200.4272"
+                  y2="200.4272"/>
+            <ellipse cx="1716.4063" cy="223.5718" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="324.353"
+                  x="1730.4688" y="229.8828">show(Request): Response
+            </text>
+            <ellipse cx="1716.4063" cy="252.6733" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="307.7393"
+                  x="1730.4688" y="258.9844">edit(Request): Response
+            </text>
+            <ellipse cx="1716.4063" cy="281.7749" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="347.8271"
+                  x="1730.4688" y="288.0859">update(Request): Response
+            </text>
+        </g><!--class UserEntity-->
+        <g class="entity" data-entity="UserEntity" data-source-line="116" data-uid="ent0016" id="entity_UserEntity">
+            <rect fill="#F1F1F1" height="598.8281" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="464.5508" x="2736.7188" y="601.9897"/>
+            <ellipse cx="2933.8623" cy="626.9897" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M2937.6953,635.8276 Q2936.8408,636.2671 2935.8887,636.4868 Q2934.9609,636.731 2933.9111,636.731 Q2930.2246,636.731 2928.2715,634.2896 Q2926.3428,631.8481 2926.3428,627.2583 Q2926.3428,622.6685 2928.2715,620.2515 Q2930.2246,617.8101 2933.9111,617.8101 Q2934.9609,617.8101 2935.9131,618.0298 Q2936.8652,618.2495 2937.6953,618.689 L2937.6953,622.6929 Q2936.7676,621.8384 2935.8887,621.4478 Q2935.0098,621.0327 2934.082,621.0327 Q2932.1045,621.0327 2931.1035,622.6196 Q2930.1025,624.1821 2930.1025,627.2583 Q2930.1025,630.3345 2931.1035,631.9214 Q2932.1045,633.4839 2934.082,633.4839 Q2935.0098,633.4839 2935.8887,633.0933 Q2936.7676,632.6782 2937.6953,631.8237 L2937.6953,635.8276 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="56.9824"
+                  x="2965.8936" y="635.6445">User
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2738.2813" x2="3199.707" y1="651.9897" y2="651.9897"/>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="670.4468"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="110.9497"
+                  x="2767.9688" y="681.4453">id: string
+            </text>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="699.5483"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="159.0332"
+                  x="2767.9688" y="710.5469">name: string
+            </text>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="728.6499"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="157.0801"
+                  x="2767.9688" y="739.6484">email: string
+            </text>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="757.7515"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="207.2632"
+                  x="2767.9688" y="768.75">password: string
+            </text>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="786.853"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="143.2861"
+                  x="2767.9688" y="797.8516">roles: array
+            </text>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="815.9546"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="404.4189"
+                  x="2767.9688" y="826.9531">createdAt: \DateTimeImmutable
+            </text>
+            <rect fill="none" height="9.375" style="stroke:#C82930;stroke-width:1.5625;" width="9.375" x="2749.2188"
+                  y="845.0562"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="166.5894"
+                  x="2767.9688" y="856.0547">events: array
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2738.2813" x2="3199.707" y1="868.2007" y2="868.2007"/>
+            <ellipse cx="2753.9063" cy="891.3452" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="138.916"
+                  x="2767.9688" y="897.6563">id(): UserId
+            </text>
+            <ellipse cx="2753.9063" cy="920.4468" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="178.54"
+                  x="2767.9688" y="926.7578">name(): string
+            </text>
+            <ellipse cx="2753.9063" cy="949.5483" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="174.1821"
+                  x="2767.9688" y="955.8594">email(): Email
+            </text>
+            <ellipse cx="2753.9063" cy="978.6499" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="317.0898"
+                  x="2767.9688" y="984.9609">setPassword(string): void
+            </text>
+            <ellipse cx="2753.9063" cy="1007.7515" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="326.3062"
+                  x="2767.9688" y="1014.0625">changeName(string): void
+            </text>
+            <ellipse cx="2753.9063" cy="1036.853" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="319.5068"
+                  x="2767.9688" y="1043.1641">changeEmail(Email): void
+            </text>
+            <ellipse cx="2753.9063" cy="1065.9546" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="423.9258"
+                  x="2767.9688" y="1072.2656">createdAt(): \DateTimeImmutable
+            </text>
+            <ellipse cx="2753.9063" cy="1095.0562" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="210.9375"
+                  x="2767.9688" y="1101.3672">getRoles(): array
+            </text>
+            <ellipse cx="2753.9063" cy="1124.1577" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="300.415"
+                  x="2767.9688" y="1130.4688">eraseCredentials(): void
+            </text>
+            <ellipse cx="2753.9063" cy="1153.2593" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="318.2983"
+                  x="2767.9688" y="1159.5703">getUserIdentifier(): string
+            </text>
+            <ellipse cx="2753.9063" cy="1182.3608" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="267.0288"
+                  x="2767.9688" y="1188.6719">getPassword(): string
+            </text>
+        </g><!--class UserIdVO-->
+        <g class="entity" data-entity="UserIdVO" data-source-line="139" data-uid="ent0018" id="entity_UserIdVO">
+            <rect fill="#F1F1F1" height="75" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="130.2246" x="2910.1563" y="1478.5522"/>
+            <ellipse cx="2933.5938" cy="1503.5522" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M2937.4268,1512.3901 Q2936.5723,1512.8296 2935.6201,1513.0493 Q2934.6924,1513.2935 2933.6426,1513.2935 Q2929.9561,1513.2935 2928.0029,1510.8521 Q2926.0742,1508.4106 2926.0742,1503.8208 Q2926.0742,1499.231 2928.0029,1496.814 Q2929.9561,1494.3726 2933.6426,1494.3726 Q2934.6924,1494.3726 2935.6445,1494.5923 Q2936.5967,1494.812 2937.4268,1495.2515 L2937.4268,1499.2554 Q2936.499,1498.4009 2935.6201,1498.0103 Q2934.7412,1497.5952 2933.8135,1497.5952 Q2931.8359,1497.5952 2930.835,1499.1821 Q2929.834,1500.7446 2929.834,1503.8208 Q2929.834,1506.897 2930.835,1508.4839 Q2931.8359,1510.0464 2933.8135,1510.0464 Q2934.7412,1510.0464 2935.6201,1509.6558 Q2936.499,1509.2407 2937.4268,1508.3862 L2937.4268,1512.3901 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="80.2246"
+                  x="2955.4688" y="1512.207">UserId
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2911.7188" x2="3038.8184" y1="1528.5522"
+                  y2="1528.5522"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2911.7188" x2="3038.8184" y1="1541.0522"
+                  y2="1541.0522"/>
+        </g><!--class EmailVO-->
+        <g class="entity" data-entity="EmailVO" data-source-line="140" data-uid="ent0019" id="entity_EmailVO">
+            <rect fill="#F1F1F1" height="75" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="119.3604" x="2735.9375" y="1478.5522"/>
+            <ellipse cx="2759.375" cy="1503.5522" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M2763.208,1512.3901 Q2762.3535,1512.8296 2761.4014,1513.0493 Q2760.4736,1513.2935 2759.4238,1513.2935 Q2755.7373,1513.2935 2753.7842,1510.8521 Q2751.8555,1508.4106 2751.8555,1503.8208 Q2751.8555,1499.231 2753.7842,1496.814 Q2755.7373,1494.3726 2759.4238,1494.3726 Q2760.4736,1494.3726 2761.4258,1494.5923 Q2762.3779,1494.812 2763.208,1495.2515 L2763.208,1499.2554 Q2762.2803,1498.4009 2761.4014,1498.0103 Q2760.5225,1497.5952 2759.5947,1497.5952 Q2757.6172,1497.5952 2756.6162,1499.1821 Q2755.6152,1500.7446 2755.6152,1503.8208 Q2755.6152,1506.897 2756.6162,1508.4839 Q2757.6172,1510.0464 2759.5947,1510.0464 Q2760.5225,1510.0464 2761.4014,1509.6558 Q2762.2803,1509.2407 2763.208,1508.3862 L2763.208,1512.3901 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="69.3604"
+                  x="2781.25" y="1512.207">Email
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2737.5" x2="2853.7354" y1="1528.5522" y2="1528.5522"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="2737.5" x2="2853.7354" y1="1541.0522" y2="1541.0522"/>
+        </g><!--class UserRegisteredEvent-->
+        <g class="entity" data-entity="UserRegisteredEvent" data-source-line="144" data-uid="ent0021"
+           id="entity_UserRegisteredEvent">
+            <rect fill="#F1F1F1" height="75" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="242.2852" x="3128.9063" y="1478.5522"/>
+            <ellipse cx="3152.3438" cy="1503.5522" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M3156.1768,1512.3901 Q3155.3223,1512.8296 3154.3701,1513.0493 Q3153.4424,1513.2935 3152.3926,1513.2935 Q3148.7061,1513.2935 3146.7529,1510.8521 Q3144.8242,1508.4106 3144.8242,1503.8208 Q3144.8242,1499.231 3146.7529,1496.814 Q3148.7061,1494.3726 3152.3926,1494.3726 Q3153.4424,1494.3726 3154.3945,1494.5923 Q3155.3467,1494.812 3156.1768,1495.2515 L3156.1768,1499.2554 Q3155.249,1498.4009 3154.3701,1498.0103 Q3153.4912,1497.5952 3152.5635,1497.5952 Q3150.5859,1497.5952 3149.585,1499.1821 Q3148.584,1500.7446 3148.584,1503.8208 Q3148.584,1506.897 3149.585,1508.4839 Q3150.5859,1510.0464 3152.5635,1510.0464 Q3153.4912,1510.0464 3154.3701,1509.6558 Q3155.249,1509.2407 3156.1768,1508.3862 L3156.1768,1512.3901 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="192.2852"
+                  x="3174.2188" y="1512.207">UserRegistered
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="3130.4688" x2="3369.6289" y1="1528.5522"
+                  y2="1528.5522"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="3130.4688" x2="3369.6289" y1="1541.0522"
+                  y2="1541.0522"/>
+        </g><!--class UserRepositoryInterface-->
+        <g class="entity" data-entity="UserRepositoryInterface" data-source-line="148" data-uid="ent0023"
+           id="entity_UserRepositoryInterface">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="364.8804" x="3289.0625" y="819.9585"/>
+            <ellipse cx="3369.342" cy="844.9585" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M3373.175,853.7964 Q3372.3206,854.2358 3371.3684,854.4556 Q3370.4407,854.6997 3369.3909,854.6997 Q3365.7043,854.6997 3363.7512,852.2583 Q3361.8225,849.8169 3361.8225,845.2271 Q3361.8225,840.6372 3363.7512,838.2202 Q3365.7043,835.7788 3369.3909,835.7788 Q3370.4407,835.7788 3371.3928,835.9985 Q3372.345,836.2183 3373.175,836.6577 L3373.175,840.6616 Q3372.2473,839.8071 3371.3684,839.4165 Q3370.4895,839.0015 3369.5618,839.0015 Q3367.5842,839.0015 3366.5833,840.5884 Q3365.5823,842.1509 3365.5823,845.2271 Q3365.5823,848.3032 3366.5833,849.8901 Q3367.5842,851.4526 3369.5618,851.4526 Q3370.4895,851.4526 3371.3684,851.062 Q3372.2473,850.647 3373.175,849.7925 L3373.175,853.7964 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="191.04"
+                  x="3401.3733" y="853.6133">UserRepository
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="3290.625" x2="3652.3804" y1="869.9585" y2="869.9585"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="3290.625" x2="3652.3804" y1="882.4585" y2="882.4585"/>
+            <ellipse cx="3306.25" cy="905.603" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="289.0015"
+                  x="3320.3125" y="911.9141">findById(UserId): ?User
+            </text>
+            <ellipse cx="3306.25" cy="934.7046" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="324.2554"
+                  x="3320.3125" y="941.0156">findByEmail(Email): ?User
+            </text>
+            <ellipse cx="3306.25" cy="963.8062" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="204.2847"
+                  x="3320.3125" y="970.1172">save(User): void
+            </text>
+        </g><!--class DoctrineUserRepo-->
+        <g class="entity" data-entity="DoctrineUserRepo" data-source-line="158" data-uid="ent0026"
+           id="entity_DoctrineUserRepo">
+            <rect fill="#F1F1F1" height="162.3047" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="364.8804" x="3817.1875" y="1434.8022"/>
+            <ellipse cx="3848.4088" cy="1459.8022" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M3852.2418,1468.6401 Q3851.3873,1469.0796 3850.4352,1469.2993 Q3849.5074,1469.5435 3848.4576,1469.5435 Q3844.7711,1469.5435 3842.818,1467.1021 Q3840.8893,1464.6606 3840.8893,1460.0708 Q3840.8893,1455.481 3842.818,1453.064 Q3844.7711,1450.6226 3848.4576,1450.6226 Q3849.5074,1450.6226 3850.4596,1450.8423 Q3851.4117,1451.062 3852.2418,1451.5015 L3852.2418,1455.5054 Q3851.3141,1454.6509 3850.4352,1454.2603 Q3849.5563,1453.8452 3848.6285,1453.8452 Q3846.651,1453.8452 3845.65,1455.4321 Q3844.649,1456.9946 3844.649,1460.0708 Q3844.649,1463.147 3845.65,1464.7339 Q3846.651,1466.2964 3848.6285,1466.2964 Q3849.5563,1466.2964 3850.4352,1465.9058 Q3851.3141,1465.4907 3852.2418,1464.6362 L3852.2418,1468.6401 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="297.583"
+                  x="3872.0135" y="1468.457">DoctrineUserRepository
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="3818.75" x2="4180.5054" y1="1484.8022"
+                  y2="1484.8022"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="3818.75" x2="4180.5054" y1="1497.3022"
+                  y2="1497.3022"/>
+            <ellipse cx="3834.375" cy="1520.4468" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="289.0015"
+                  x="3848.4375" y="1526.7578">findById(UserId): ?User
+            </text>
+            <ellipse cx="3834.375" cy="1549.5483" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="324.2554"
+                  x="3848.4375" y="1555.8594">findByEmail(Email): ?User
+            </text>
+            <ellipse cx="3834.375" cy="1578.6499" fill="#84BE84" rx="4.6875" ry="4.6875"
+                     style="stroke:#038048;stroke-width:1.5625;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="204.2847"
+                  x="3848.4375" y="1584.9609">save(User): void
+            </text>
+        </g><!--class CommandBus-->
+        <g class="entity" data-entity="CommandBus" data-source-line="166" data-uid="ent0028" id="entity_CommandBus">
+            <rect fill="#F1F1F1" height="75" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="360.2661" x="4269.5313" y="1478.5522"/>
+            <ellipse cx="4292.9688" cy="1503.5522" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M4296.8018,1512.3901 Q4295.9473,1512.8296 4294.9951,1513.0493 Q4294.0674,1513.2935 4293.0176,1513.2935 Q4289.3311,1513.2935 4287.3779,1510.8521 Q4285.4492,1508.4106 4285.4492,1503.8208 Q4285.4492,1499.231 4287.3779,1496.814 Q4289.3311,1494.3726 4293.0176,1494.3726 Q4294.0674,1494.3726 4295.0195,1494.5923 Q4295.9717,1494.812 4296.8018,1495.2515 L4296.8018,1499.2554 Q4295.874,1498.4009 4294.9951,1498.0103 Q4294.1162,1497.5952 4293.1885,1497.5952 Q4291.2109,1497.5952 4290.21,1499.1821 Q4289.209,1500.7446 4289.209,1503.8208 Q4289.209,1506.897 4290.21,1508.4839 Q4291.2109,1510.0464 4293.1885,1510.0464 Q4294.1162,1510.0464 4294.9951,1509.6558 Q4295.874,1509.2407 4296.8018,1508.3862 L4296.8018,1512.3901 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="310.2661"
+                  x="4314.8438" y="1512.207">MessengerCommandBus
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="4271.0938" x2="4628.2349" y1="1528.5522"
+                  y2="1528.5522"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="4271.0938" x2="4628.2349" y1="1541.0522"
+                  y2="1541.0522"/>
+        </g><!--class QueryBus-->
+        <g class="entity" data-entity="QueryBus" data-source-line="167" data-uid="ent0029" id="entity_QueryBus">
+            <rect fill="#F1F1F1" height="75" rx="3.9063" ry="3.9063" style="stroke:#181818;stroke-width:0.7813;"
+                  width="307.7515" x="4685.1563" y="1478.5522"/>
+            <ellipse cx="4708.5938" cy="1503.5522" fill="#F0F0F0" rx="17.1875" ry="17.1875"
+                     style="stroke:#181818;stroke-width:1.5625;"/>
+            <path d="M4712.4268,1512.3901 Q4711.5723,1512.8296 4710.6201,1513.0493 Q4709.6924,1513.2935 4708.6426,1513.2935 Q4704.9561,1513.2935 4703.0029,1510.8521 Q4701.0742,1508.4106 4701.0742,1503.8208 Q4701.0742,1499.231 4703.0029,1496.814 Q4704.9561,1494.3726 4708.6426,1494.3726 Q4709.6924,1494.3726 4710.6445,1494.5923 Q4711.5967,1494.812 4712.4268,1495.2515 L4712.4268,1499.2554 Q4711.499,1498.4009 4710.6201,1498.0103 Q4709.7412,1497.5952 4708.8135,1497.5952 Q4706.8359,1497.5952 4705.835,1499.1821 Q4704.834,1500.7446 4704.834,1503.8208 Q4704.834,1506.897 4705.835,1508.4839 Q4706.8359,1510.0464 4708.8135,1510.0464 Q4709.7412,1510.0464 4710.6201,1509.6558 Q4711.499,1509.2407 4712.4268,1508.3862 L4712.4268,1512.3901 Z "
+                  fill="#000000"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="257.7515"
+                  x="4730.4688" y="1512.207">MessengerQueryBus
+            </text>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="4686.7188" x2="4991.3452" y1="1528.5522"
+                  y2="1528.5522"/>
+            <line style="stroke:#181818;stroke-width:0.7813;" x1="4686.7188" x2="4991.3452" y1="1541.0522"
+                  y2="1541.0522"/>
+        </g><!--link UserEntity to UserIdVO-->
+        <g class="link" data-entity-1="UserEntity" data-entity-2="UserIdVO" data-source-line="173" data-uid="lnk30"
+           id="link_UserEntity_UserIdVO">
+            <path codeLine="173" d="M2971.7969,1200.5679 C2972.9219,1310.8647 2973.9678,1413.1777 2974.5303,1468.8496"
+                  fill="none" id="UserEntity-to-UserIdVO"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="2974.625,1478.2241,2980.7326,1464.0992,2974.5461,1470.412,2968.2332,1464.2255,2974.625,1478.2241"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="57.2754"
+                  x="2973.4375" y="1275.1953">uses
+            </text>
+        </g><!--link UserEntity to EmailVO-->
+        <g class="link" data-entity-1="UserEntity" data-entity-2="EmailVO" data-source-line="174" data-uid="lnk31"
+           id="link_UserEntity_EmailVO">
+            <path codeLine="174" d="M2884.3125,1200.5679 C2853.0469,1310.8647 2823.9318,1413.5326 2808.1505,1469.2045"
+                  fill="none" id="UserEntity-to-EmailVO"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="2805.5938,1478.2241,2815.442,1466.3992,2807.7244,1470.7078,2803.4158,1462.9902,2805.5938,1478.2241"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="57.2754"
+                  x="2870.3125" y="1275.1953">uses
+            </text>
+        </g><!--link UserEntity to UserRegisteredEvent-->
+        <g class="link" data-entity-1="UserEntity" data-entity-2="UserRegisteredEvent" data-source-line="175"
+           data-uid="lnk32" id="link_UserEntity_UserRegisteredEvent">
+            <path codeLine="175" d="M3105.6719,1200.5679 C3156.375,1310.8647 3203.8184,1414.0343 3229.4122,1469.7061"
+                  fill="none" id="UserEntity-to-UserRegisteredEvent"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="3233.3281,1478.2241,3233.1329,1462.8365,3230.0648,1471.1258,3221.7756,1468.0578,3233.3281,1478.2241"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="118.75"
+                  x="3143.75" y="1275.1953">publishes
+            </text>
+        </g><!--reverse link UserRepositoryInterface to DoctrineUserRepo-->
+        <g class="link" data-entity-1="UserRepositoryInterface" data-entity-2="DoctrineUserRepo" data-source-line="177"
+           data-uid="lnk33" id="link_UserRepositoryInterface_DoctrineUserRepo">
+            <path codeLine="177"
+                  d="M3489.1409,1010.8331 C3504.9377,1093.4581 3534.375,1194.3804 3606.25,1281.6772 C3662.0312,1349.4272 3743.0156,1402.0679 3817.0625,1440.0054"
+                  fill="none" id="UserRepositoryInterface-backto-DoctrineUserRepo"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="none" points="3483.8594,983.2085,3479.9326,1012.5936,3498.3491,1009.0727,3483.8594,983.2085"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="147.9004"
+                  x="3607.8125" y="1275.1953">implements
+            </text>
+        </g><!--link RegisterUserHandler to UserRepositoryInterface-->
+        <g class="link" data-entity-1="RegisterUserHandler" data-entity-2="UserRepositoryInterface"
+           data-source-line="179" data-uid="lnk34" id="link_RegisterUserHandler_UserRepositoryInterface">
+            <path codeLine="179"
+                  d="M362.0313,271.771 C402.4219,291.8804 451.4688,312.6304 498.4375,323.0835 C646.4375,356.0054 3100.1094,307.4272 3226.5625,391.0522 C3374.7656,489.0679 3434.2523,694.0443 3457.4242,810.7474"
+                  fill="none" id="RegisterUserHandler-to-UserRepositoryInterface"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="3459.25,819.9429,3462.6416,804.9324,3457.7285,812.28,3450.381,807.3668,3459.25,819.9429"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="57.2754"
+                  x="3179.6875" y="372.0703">uses
+            </text>
+        </g><!--link RegisterUserHandler to UserEntity-->
+        <g class="link" data-entity-1="RegisterUserHandler" data-entity-2="UserEntity" data-source-line="180"
+           data-uid="lnk35" id="link_RegisterUserHandler_UserEntity">
+            <path codeLine="180"
+                  d="M362.0469,271.7241 C402.4375,291.8335 451.4688,312.5991 498.4375,323.0835 C673.6563,362.1929 1942.25,295.2085 2114.0625,347.3022 C2345.6875,417.521 2566.8095,564.9869 2729.1845,692.2838"
+                  fill="none" id="RegisterUserHandler-to-UserEntity"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="2736.5625,698.0679,2729.3516,684.473,2730.4142,693.2478,2721.6394,694.3104,2736.5625,698.0679"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="92.9321"
+                  x="2193.75" y="372.0703">creates
+            </text>
+        </g><!--link RegisterUserHandler to RegisterUserCommand-->
+        <g class="link" data-entity-1="RegisterUserHandler" data-entity-2="RegisterUserCommand" data-source-line="181"
+           data-uid="lnk36" id="link_RegisterUserHandler_RegisterUserCommand">
+            <path codeLine="181" d="M283.3906,271.771 C309.8438,389.0991 373.1241,669.6728 404.9522,810.7353"
+                  fill="none" id="RegisterUserHandler-to-RegisterUserCommand"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="407.0156,819.8804,410.0172,804.7871,405.2961,812.2595,397.8238,807.5383,407.0156,819.8804"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="98.23"
+                  x="307.8125" y="372.0703">handles
+            </text>
+        </g><!--link GetUserProfileHandler to UserRepositoryInterface-->
+        <g class="link" data-entity-1="GetUserProfileHandler" data-entity-2="UserRepositoryInterface"
+           data-source-line="183" data-uid="lnk37" id="link_GetUserProfileHandler_UserRepositoryInterface">
+            <path codeLine="183"
+                  d="M1467.0313,271.5835 C1528.8594,291.7241 1603.0938,312.5679 1671.875,323.0835 C1718.5625,330.2241 3335.8438,316.771 3371.875,347.3022 C3508.3125,462.9116 3501.691,687.2805 3486.3473,810.3586"
+                  fill="none" id="GetUserProfileHandler-to-UserRepositoryInterface"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="3485.1875,819.6616,3493.1292,806.4803,3486.154,811.9091,3480.7252,804.934,3485.1875,819.6616"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="57.2754"
+                  x="3393.75" y="372.0703">uses
+            </text>
+        </g><!--link GetUserProfileHandler to GetUserProfileQuery-->
+        <g class="link" data-entity-1="GetUserProfileHandler" data-entity-2="GetUserProfileQuery" data-source-line="184"
+           data-uid="lnk38" id="link_GetUserProfileHandler_GetUserProfileQuery">
+            <path codeLine="184" d="M1341.75,271.771 C1375.375,397.7397 1459.6284,713.3227 1493.3003,839.4321"
+                  fill="none" id="GetUserProfileHandler-to-GetUserProfileQuery"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="1495.7188,848.4897,1498.1295,833.2909,1493.7034,840.9417,1486.0526,836.5155,1495.7188,848.4897"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="98.23"
+                  x="1370.3125" y="372.0703">handles
+            </text>
+        </g><!--link RegistrationController to RegisterUserCommand-->
+        <g class="link" data-entity-1="RegistrationController" data-entity-2="RegisterUserCommand"
+           data-source-line="186" data-uid="lnk39" id="link_RegistrationController_RegisterUserCommand">
+            <path codeLine="186" d="M702.4531,271.771 C650.6094,389.0991 526.3671,670.2426 464.0389,811.3051"
+                  fill="none" id="RegistrationController-to-RegisterUserCommand"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="460.25,819.8804,471.6502,809.5435,463.4075,812.7343,460.2166,804.4916,460.25,819.8804"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="92.9321"
+                  x="670.3125" y="372.0703">creates
+            </text>
+        </g><!--link RegistrationController to CommandBus-->
+        <g class="link" data-entity-1="RegistrationController" data-entity-2="CommandBus" data-source-line="187"
+           data-uid="lnk40" id="link_RegistrationController_CommandBus">
+            <path codeLine="187"
+                  d="M829.0313,271.5679 C875.8125,291.7866 932.4375,312.6772 985.9375,323.0835 C1132.875,351.6772 3571.9375,287.1147 3679.6875,391.0522 C3953.1719,654.8491 3530.0156,967.4272 3796.875,1237.9272 C3887.6406,1329.9429 3956.1563,1265.4429 4084.375,1281.6772 C4139.0781,1288.5991 4157.4531,1271.7241 4207.8125,1294.1772 C4301,1335.7397 4376.7571,1419.9846 4417.179,1471.0159"
+                  fill="none" id="RegistrationController-to-CommandBus"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="4423,1478.3647,4419.1677,1463.4607,4418.1491,1472.2407,4409.3692,1471.2221,4423,1478.3647"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="134.8267"
+                  x="3798.4375" y="910.3516">dispatches
+            </text>
+        </g><!--link ProfileController to GetUserProfileQuery-->
+        <g class="link" data-entity-1="ProfileController" data-entity-2="GetUserProfileQuery" data-source-line="189"
+           data-uid="lnk41" id="link_ProfileController_GetUserProfileQuery">
+            <path codeLine="189" d="M1848.5313,300.6147 C1768.6563,441.6929 1609.385,723.0037 1542.9318,840.363"
+                  fill="none" id="ProfileController-to-GetUserProfileQuery"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="1538.3125,848.521,1550.6801,839.3636,1542.1619,841.7227,1539.8029,833.2045,1538.3125,848.521"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="92.9321"
+                  x="1821.875" y="372.0703">creates
+            </text>
+        </g><!--link ProfileController to CommandBus-->
+        <g class="link" data-entity-1="ProfileController" data-entity-2="CommandBus" data-source-line="190"
+           data-uid="lnk42" id="link_ProfileController_CommandBus">
+            <path codeLine="190"
+                  d="M2070.8281,300.5679 C2097.4219,309.7554 2124.8906,317.7241 2151.5625,323.0835 C2294.5625,351.8022 3318.4219,339.3647 3464.0625,347.3022 C3571.6406,353.1616 3867.9844,317.6772 3946.875,391.0522 C4226.1719,650.8335 3854.9219,934.4116 4085.9375,1237.9272 C4122.0625,1285.396 4158.0781,1261.2241 4207.8125,1294.1772 C4290.4844,1348.9741 4366.563,1424.5967 4410.7036,1471.5498"
+                  fill="none" id="ProfileController-to-CommandBus"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="4417.125,1478.3804,4412.0466,1463.8536,4411.7738,1472.6883,4402.9392,1472.4155,4417.125,1478.3804"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="134.8267"
+                  x="4087.5" y="910.3516">dispatches
+            </text>
+        </g><!--link ProfileController to QueryBus-->
+        <g class="link" data-entity-1="ProfileController" data-entity-2="QueryBus" data-source-line="191"
+           data-uid="lnk43" id="link_ProfileController_QueryBus">
+            <path codeLine="191"
+                  d="M2070.8125,300.646 C2097.4219,309.8179 2124.875,317.771 2151.5625,323.0835 C2378.1406,368.2085 4036.5781,264.2397 4229.6875,391.0522 C4644.6719,663.5835 4797.8899,1308.7386 4830.3899,1469.2855"
+                  fill="none" id="ProfileController-to-QueryBus"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="4832.25,1478.4741,4835.5856,1463.4511,4830.6999,1470.8169,4823.3341,1465.9312,4832.25,1478.4741"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="134.8267"
+                  x="4771.875" y="910.3516">dispatches
+            </text>
+        </g><!--link SecurityController to UserRepositoryInterface-->
+        <g class="link" data-entity-1="SecurityController" data-entity-2="UserRepositoryInterface"
+           data-source-line="193" data-uid="lnk44" id="link_SecurityController_UserRepositoryInterface">
+            <path codeLine="193"
+                  d="M2536.9844,221.521 C2935.9844,225.1304 3864.4531,244.5991 3959.375,347.3022 C3968.7969,357.5054 3968.9219,368.4741 3959.375,378.5522 C3941.7969,397.1147 3751.0937,377.0835 3729.6875,391.0522 C3579.4063,489.0835 3514.7364,694.0914 3488.5958,810.8101"
+                  fill="none" id="SecurityController-to-UserRepositoryInterface"
+                  style="stroke:#005A9C;stroke-width:3.125;stroke-dasharray:7.0,7.0;"/>
+            <polygon fill="#005A9C"
+                     points="3486.5469,819.9585,3495.7191,807.6019,3488.2543,812.3349,3483.5213,804.87,3486.5469,819.9585"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="57.2754"
+                  x="3967.1875" y="372.0703">uses
+            </text>
+        </g><!--SRC=[lLTTRkCs47xtATZqORq86cGBR80rYXQEusmD94wQf7agi62aiSn68bMIijVRvWXxb9wYFLY7r1yfKKwmmDP136dc6yutFnpIwf7nd4gQaJXdvCtRuv5g90yqUaoaA7Wy4wcGvDlpgVbp46fDOx5bF24hcYeOEQeOLhH8zRdWUaap80VBWZCj3iAGM_O9o9kJll8EFkffoXAU0TSamY-GhXikOY1_ZWWvxP6r7wCHCWPPIO-FtqxVpHhftPf5ZnoK8j-Fdjnr8v7bWXkVNs5n2P6cF4c_2dCgfTZwDXsbQ-hg8iqsJE- -W9H7GC4V1V2e3EwQIiqYbbEkmz5Si1LSC0xFQBjqvYVdnzYAleC1pXwx744q6SfysU0l298BFR16m-pPDJJJNzG2kCWhSYq5Plfn0_pVp_oVlqdCQ8ABxWA5c7QBFW3nlOn6t-0UnDoJc_diRhfyVp4dKKgLQkIpgylhg-LyUTVk5iFip6WPrb_fNLhicIVRDTCGsdEtQ0ZjBWb1lBoSs8yR5au947gNmwoNsjMn-UjtXBVYE_iPZUfkEVXLWRoa79_D83eWL15VPElOm6yWOKfBgfdW5kmAB9GuQQtW8CsI3hmKp4IMKHvNLeGS4eu3TO91IfoyZH0oojAUDCU2RJ4oJ_5al_UH-1aTfW4kbTpXyk43unln26CNzdf2DeB5ppehyp730q2ArFVNLJakPUK9NMBtAetURa1XN-09L7iq_sv1feLUOvLOr9R45_MBSWjH8N4UTkZrnGwrL2IC3_6g0ABGuvTGnXs-OYbOfzLpd-Hxq2RXBjON_LA0t3aC2rGjNj8E_Z9kGmGrePRmWHYpytRFO7k9XtUwXq85xHIW9tLSgxNOxai_n4plqnTvJ3NiRwmdPopShgc4kEmB- -YFWJE1cv8xwb9G4MvWDWyEohutKJa9QUQ3UPXZx-gsj8HyHrZS6G1669WMHXoQ5qOUd1Yb2jCDQc8k4NJdY2C9cBHugYVajpDykcCPBBAiqFGX1TSZ7bQwPt-8hCTLRonYHsnu6qM7HZNfZ6Pk7Xo50drTiH-NLkuWAZ7H6iyKC5VIPo1syR7z3a3ga0sDFK4VaWJqZKcR0NO31qaLpB3WPWpX1NhSTvIKMsXX8Ik6Go-KaSG9lAj_gbhNRxbxcXPmzV0xdh5EupdIeVPRn4q3BkBxgpx8PinYx5C5wVgVR-fZjFHituTyraSBjBvRaRKC-hY1N2ZypI5tZgDMEEpDC_D52_C3P4KZSFRT8S4BJtowMyJZCYrOWf_CKm_XzrGNe-W6njtZiorW5M0JteAli7-qB29TI712z1NTOHFCYZKncb1IpaHa6We2oUcg_l-i-C6T5ig92jz2yLpYBHXmXzStgzgeVTrZOy_Jsg9-yK-7L-J-awRhtSYPqaT7FpPxXapCAQowwcgx36W3JO_8l7X8cLeZV3JKfp_yTNJKhzE4i2nFxSqLRKDNlDPfVysAuZwpYlga6fN3uD1LTqBM5e7KmfUD5v0RDWnTa1oF0_VFOQv-X473jhKG7pELKntPglKlCyCCQpzXco4NONJTkHqwWSlj2rBz7m00]-->
+    </g>
+</svg>

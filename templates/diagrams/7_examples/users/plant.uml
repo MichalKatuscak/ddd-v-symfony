@@ -1,0 +1,196 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Nunito"
+skinparam defaultFontSize 16
+skinparam defaultTextAlignment center
+
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+skinparam sequence {
+  ParticipantBorderColor #005A9C
+  LifeLineBorderColor #005A9C
+  LifeLineBackgroundColor #E6F0FA
+  ParticipantBackgroundColor #FFFFFF
+}
+
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #005A9C
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+skinparam title {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+}
+
+' Pro sekvenční diagramy
+skinparam sequenceArrowThickness 2
+skinparam sequenceArrowColor #005A9C
+
+
+!define RECTANGLE class
+!define COMPONENT component
+
+' Definice stylu
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam componentBorderColor #666666
+skinparam stereotypeCBackgroundColor #f0f0f0
+skinparam packageBorderColor #999999
+
+package "UserManagement" as UserManagement {
+  package "Registration" as Registration {
+    RECTANGLE "RegisterUser" as RegisterUserCommand {
+      + name: string
+      + email: string
+      + password: string
+    }
+    
+    RECTANGLE "RegisterUserHandler" as RegisterUserHandler {
+      + __invoke(RegisterUser): void
+    }
+    
+    RECTANGLE "RegistrationController" as RegistrationController {
+      + register(Request): Response
+    }
+  }
+  
+  package "Authentication" as Authentication {
+    RECTANGLE "SecurityController" as SecurityController {
+      + login(Request): Response
+      + logout(): Response
+    }
+  }
+  
+  package "Profile" as Profile {
+    RECTANGLE "GetUserProfile" as GetUserProfileQuery {
+      + userId: string
+    }
+    
+    RECTANGLE "GetUserProfileHandler" as GetUserProfileHandler {
+      + __invoke(GetUserProfile): UserProfileViewModel
+    }
+    
+    RECTANGLE "ProfileController" as ProfileController {
+      + show(Request): Response
+      + edit(Request): Response
+      + update(Request): Response
+    }
+  }
+}
+
+package "Shared" as Shared {
+  package "Domain" as SharedDomain {
+    package "Model" as SharedModel {
+      RECTANGLE "User" as UserEntity {
+        - id: string
+        - name: string
+        - email: string
+        - password: string
+        - roles: array
+        - createdAt: \DateTimeImmutable
+        - events: array
+        + id(): UserId
+        + name(): string
+        + email(): Email
+        + setPassword(string): void
+        + changeName(string): void
+        + changeEmail(Email): void
+        + createdAt(): \DateTimeImmutable
+        + getRoles(): array
+        + eraseCredentials(): void
+        + getUserIdentifier(): string
+        + getPassword(): string
+      }
+    }
+
+    package "ValueObject" as SharedValueObject {
+      RECTANGLE "UserId" as UserIdVO
+      RECTANGLE "Email" as EmailVO
+    }
+
+    package "Event" as SharedEvent {
+      RECTANGLE "UserRegistered" as UserRegisteredEvent
+    }
+
+    package "Repository" as SharedRepository {
+      RECTANGLE "UserRepository" as UserRepositoryInterface {
+        + findById(UserId): ?User
+        + findByEmail(Email): ?User
+        + save(User): void
+      }
+    }
+  }
+
+  package "Infrastructure" as SharedInfrastructure {
+    package "Repository" as SharedInfraRepo {
+      RECTANGLE "DoctrineUserRepository" as DoctrineUserRepo {
+        + findById(UserId): ?User
+        + findByEmail(Email): ?User
+        + save(User): void
+      }
+    }
+
+    package "Bus" as SharedBus {
+      RECTANGLE "MessengerCommandBus" as CommandBus
+      RECTANGLE "MessengerQueryBus" as QueryBus
+    }
+  }
+}
+
+' Vztahy
+UserEntity ..> UserIdVO : uses
+UserEntity ..> EmailVO : uses
+UserEntity ..> UserRegisteredEvent : publishes
+
+UserRepositoryInterface <|.. DoctrineUserRepo : implements
+
+RegisterUserHandler ..> UserRepositoryInterface : uses
+RegisterUserHandler ..> UserEntity : creates
+RegisterUserHandler ..> RegisterUserCommand : handles
+
+GetUserProfileHandler ..> UserRepositoryInterface : uses
+GetUserProfileHandler ..> GetUserProfileQuery : handles
+
+RegistrationController ..> RegisterUserCommand : creates
+RegistrationController ..> CommandBus : dispatches
+
+ProfileController ..> GetUserProfileQuery : creates
+ProfileController ..> CommandBus : dispatches
+ProfileController ..> QueryBus : dispatches
+
+SecurityController ..> UserRepositoryInterface : uses
+
+@enduml
