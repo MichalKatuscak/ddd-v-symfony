@@ -100,4 +100,57 @@ document.addEventListener('DOMContentLoaded', function () {
         fadeTargets.forEach(function (el) { observer.observe(el); });
     }
 
+    // ── Prev/Next navigation ─────────────────────────────────────────────────
+    const CHAPTERS = [
+        { label: 'Úvod', url: '/' },
+        { label: 'Co je DDD', url: '/co-je-ddd' },
+        { label: 'Vertikální slice', url: '/horizontalni-vs-vertikalni' },
+        { label: 'Základní koncepty', url: '/zakladni-koncepty' },
+        { label: 'Implementace v Symfony', url: '/implementace-v-symfony' },
+        { label: 'CQRS', url: '/cqrs' },
+        { label: 'Příklady', url: '/prakticke-priklady' },
+        { label: 'Případová studie', url: '/pripadova-studie' },
+        { label: 'Zdroje', url: '/zdroje' },
+        { label: 'Bezpečnostní politika', url: '/security-policy' },
+        { label: 'Migrace z CRUD', url: '/migrace-z-crud' },
+        { label: 'Testování DDD', url: '/testovani-ddd' },
+        { label: 'Event Sourcing', url: '/event-sourcing' },
+        { label: 'Anti-vzory', url: '/anti-vzory' },
+    ];
+
+    const currentPath = window.location.pathname;
+    const currentIndex = CHAPTERS.findIndex(function (c) { return c.url === currentPath; });
+
+    if (currentIndex !== -1) {
+        const contentArea = document.querySelector('.content-area');
+        if (contentArea) {
+            const nav = document.createElement('nav');
+            nav.className = 'chapter-nav';
+            nav.setAttribute('aria-label', 'Navigace mezi kapitolami');
+
+            const prev = CHAPTERS[currentIndex - 1];
+            const next = CHAPTERS[currentIndex + 1];
+
+            if (prev) {
+                const prevLink = document.createElement('a');
+                prevLink.href = prev.url;
+                prevLink.className = 'chapter-nav-card chapter-nav-prev';
+                prevLink.innerHTML = '<span class="chapter-nav-dir">← Předchozí</span><span class="chapter-nav-label">' + prev.label + '</span>';
+                nav.appendChild(prevLink);
+            } else {
+                nav.appendChild(document.createElement('div')); // placeholder to keep next on the right
+            }
+
+            if (next) {
+                const nextLink = document.createElement('a');
+                nextLink.href = next.url;
+                nextLink.className = 'chapter-nav-card chapter-nav-next';
+                nextLink.innerHTML = '<span class="chapter-nav-dir">Další →</span><span class="chapter-nav-label">' + next.label + '</span>';
+                nav.appendChild(nextLink);
+            }
+
+            contentArea.appendChild(nav);
+        }
+    }
+
 });
