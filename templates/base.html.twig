@@ -7,7 +7,7 @@
     <meta name="keywords" content="{% block meta_keywords %}Domain-Driven Design, DDD, Symfony, PHP, architektura, vývoj, CQRS, Event Sourcing{% endblock %}">
     <meta name="author" content="Michal Katuščák">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#a5d8ff">
+    <meta name="theme-color" content="#0f0f1a">
     <meta name="generator" content="Symfony 8">
 
     <!-- Canonical URL -->
@@ -36,7 +36,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Merriweather:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ asset('css/bootstrap-grid.css') }}">
@@ -45,111 +45,124 @@
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="header-top">
-                    <div class="logo">
-                        <a href="{{ path('homepage') }}">
-                            DDD <span>Symfony</span>
-                        </a>
-                    </div>
-                    <div class="header-tagline">
-                        <h1>Architektura DDD v Symfony 8</h1>
-                        <p>Komplexní průvodce Domain-Driven Design v Symfony 8</p>
-                    </div>
-                </div>
-                <button class="menu-toggle" aria-expanded="false" aria-label="Toggle navigation">
-                    <span>☰</span>
-                </button>
-                <nav class="main-nav">
-                    <ul class="nav">
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'homepage' %}active{% endif %}" href="{{ path('homepage') }}">Úvod</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'what_is_ddd' %}active{% endif %}" href="{{ path('what_is_ddd') }}">Co je DDD</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'horizontal_vs_vertical' %}active{% endif %}" href="{{ path('horizontal_vs_vertical') }}">Vertikální slice</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'basic_concepts' %}active{% endif %}" href="{{ path('basic_concepts') }}">Základní koncepty</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'implementation_in_symfony' %}active{% endif %}" href="{{ path('implementation_in_symfony') }}">Implementace v Symfony</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'cqrs' %}active{% endif %}" href="{{ path('cqrs') }}">CQRS</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'practical_examples' %}active{% endif %}" href="{{ path('practical_examples') }}">Příklady</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'case_study' %}active{% endif %}" href="{{ path('case_study') }}">Případová studie</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if app.request.attributes.get('_route') == 'resources' %}active{% endif %}" href="{{ path('resources') }}">Zdroje</a>
-                        </li>
-                    </ul>
-                </nav>
+    <!-- Top Bar -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="topbar-logo">
+                <a href="{{ path('homepage') }}">DDD <strong>Symfony</strong></a>
             </div>
+            <button class="sidebar-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
+                <span class="hamburger-icon">&#9776;</span>
+            </button>
         </div>
     </header>
 
-    <main class="container py-5">
-        {% if app.request.attributes.get('_route') != 'homepage' %}
-        <!-- Breadcrumbs hidden for visitors but available for search engines -->
-        <div class="breadcrumb-container">
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ path('homepage') }}">Hlavní stránka</a></li>
-                    {% block breadcrumbs %}
-                    <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
-                    {% endblock %}
-                </ol>
+    <!-- Sidebar backdrop (mobile) -->
+    <div class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- Page Wrapper -->
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Navigace kapitol">
+            <nav>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'homepage' %}active{% endif %}" href="{{ path('homepage') }}">Úvod</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'what_is_ddd' %}active{% endif %}" href="{{ path('what_is_ddd') }}">Co je DDD</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'horizontal_vs_vertical' %}active{% endif %}" href="{{ path('horizontal_vs_vertical') }}">Vertikální slice</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'basic_concepts' %}active{% endif %}" href="{{ path('basic_concepts') }}">Základní koncepty</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'implementation_in_symfony' %}active{% endif %}" href="{{ path('implementation_in_symfony') }}">Implementace v Symfony</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'cqrs' %}active{% endif %}" href="{{ path('cqrs') }}">CQRS</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'practical_examples' %}active{% endif %}" href="{{ path('practical_examples') }}">Příklady</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'case_study' %}active{% endif %}" href="{{ path('case_study') }}">Případová studie</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'resources' %}active{% endif %}" href="{{ path('resources') }}">Zdroje</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'security_policy' %}active{% endif %}" href="{{ path('security_policy') }}">Bezpečnostní politika</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'migration_from_crud' %}active{% endif %}" href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'testing_ddd' %}active{% endif %}" href="{{ path('testing_ddd') }}">Testování DDD</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'event_sourcing' %}active{% endif %}" href="{{ path('event_sourcing') }}">Event Sourcing</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'anti_patterns' %}active{% endif %}" href="{{ path('anti_patterns') }}">Anti-vzory</a>
+                    </li>
+                </ul>
             </nav>
-        </div>
+        </aside>
 
-        <!-- Structured Data for Breadcrumbs -->
-        <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                {
-                    "@type": "ListItem",
-                    "position": 1,
-                    "name": "Hlavní stránka",
-                    "item": "{{ app.request.schemeAndHttpHost }}{{ path('homepage') }}"
-                },
-                {
-                    "@type": "ListItem",
-                    "position": 2,
-                    "name": "{{ title }}",
-                    "item": "{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}"
-                }
-            ]
-        }
-        </script>
-        {% endif %}
+        <!-- Main Content -->
+        <main class="content-area">
+            {% if app.request.attributes.get('_route') != 'homepage' %}
+            <div class="breadcrumb-container">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ path('homepage') }}">Hlavní stránka</a></li>
+                        {% block breadcrumbs %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+                        {% endblock %}
+                    </ol>
+                </nav>
+            </div>
 
-        {% block body %}{% endblock %}
-    </main>
+            <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Hlavní stránka",
+                        "item": "{{ app.request.schemeAndHttpHost }}{{ path('homepage') }}"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "{{ title }}",
+                        "item": "{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}"
+                    }
+                ]
+            }
+            </script>
+            {% endif %}
+
+            {% block body %}{% endblock %}
+
+        </main><!-- /.content-area -->
+    </div><!-- /.page-wrapper -->
 
     <footer class="footer">
-        <div class="container">
-            <div class="text-center">
-                <h5>DDD Symfony</h5>
-                <p>Komplexní průvodce Domain-Driven Design v Symfony 8</p>
-                <p>&copy; {{ "now"|date("Y") }} - Všechna práva vyhrazena</p>
-            </div>
+        <div class="footer-inner">
+            <strong>DDD Symfony</strong>
+            <p>Komplexní průvodce Domain-Driven Design v Symfony 8</p>
+            <p>&copy; {{ "now"|date("Y") }} Michal Katuščák – Všechna práva vyhrazena</p>
         </div>
     </footer>
 
-    <button class="scroll-to-top" aria-label="Scroll to top">
-        <span>↑</span>
-    </button>
+    <button class="scroll-to-top" aria-label="Zpět nahoru">↑</button>
 
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
