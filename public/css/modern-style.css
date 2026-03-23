@@ -506,3 +506,39 @@ h4:hover .anchor-link { opacity: 1; }
 }
 .scroll-to-top.show { opacity: 1; visibility: visible; }
 .scroll-to-top:hover { background: var(--color-primary-dim); }
+
+/* =====================
+   DIAGRAMS
+   ===================== */
+
+.diagram-container {
+    background: var(--bg-surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1rem;
+    margin: 1.5rem 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+.diagram-container svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+/* Invert the diagram content (first group) to show on dark background.
+   svg-pan-zoom injects controls separately — they are NOT in the first <g>. */
+.diagram-container svg > g:first-of-type {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+figcaption {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.875rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
