@@ -2,7 +2,7 @@
 
 {% block title %}Případová studie: Implementace DDD v Symfony | DDD Symfony{% endblock %}
 
-{% block meta_description %}Detailní případová studie implementace Domain-Driven Design v Symfony 7 na kompletním projektu. Sledujte celý proces od analýzy domény, identifikace bounded contexts, strategického a taktického designu až po implementaci s využitím DDD principů a CQRS.{% endblock %}
+{% block meta_description %}Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu. Sledujte celý proces od analýzy domény, identifikace bounded contexts, strategického a taktického designu až po implementaci s využitím DDD principů a CQRS.{% endblock %}
 
 {% block meta_keywords %}případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi{% endblock %}
 
@@ -23,7 +23,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "dateModified": "2026-03-23",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -50,7 +50,7 @@
     <section id="introduction" aria-labelledby="introduction-heading">
     <h3 id="introduction-heading">Úvod</h3>
     <p>
-        V této případové studii se podíváme na implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 7.
+        V této případové studii se podíváme na implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8.
         Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
         Tato případová studie demonstruje praktické použití DDD principů v reálném projektu, s důrazem na správnou implementaci strategických a taktických vzorů.
     </p>
@@ -77,7 +77,7 @@
     <section id="architecture" aria-labelledby="architecture-heading">
     <h3 id="architecture-heading">Architektura</h3>
     <p>
-        Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 7.
+        Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 8.
         Na strategické úrovni jsme identifikovali klíčové bounded contexts a jejich vzájemné vztahy. Na taktické úrovni jsme implementovali doménové modely, agregáty, hodnotové objekty a doménové služby.
         Pro organizaci kódu jsme zvolili vertikální slice architekturu, která nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
     </p>
@@ -104,7 +104,7 @@
         <li><strong>UserManagement ⟷ ProjectManagement</strong>: Vztah typu Partnership, kde oba kontexty spolupracují na správě členství uživatelů v projektech.</li>
         <li><strong>ProjectManagement ⟷ TaskManagement</strong>: Vztah typu Customer-Supplier, kde ProjectManagement je zákazníkem a TaskManagement dodavatelem služeb pro správu úkolů v rámci projektů.</li>
         <li><strong>TaskManagement ⟷ CommentManagement</strong>: Vztah typu Customer-Supplier, kde TaskManagement je zákazníkem a CommentManagement dodavatelem služeb pro komentáře k úkolům.</li>
-        <li><strong>ActivityTracking</strong>: Vztah typu Conformist ke všem ostatním kontextům, kde ActivityTracking přijímá události z ostatních kontextů a zaznamenává je.</li>
+        <li><strong>ActivityTracking</strong>: Ostatní kontexty publikují doménové události přes Open Host Service / Published Language; ActivityTracking je čistě downstream konzument — naslouchá těmto událostem a zaznamenává je, aniž by ovlivňoval vydávající kontexty.</li>
     </ul>
 
     <p>
@@ -665,16 +665,25 @@ namespace App\TaskManagement\Application\Command;
 use App\TaskManagement\Domain\Repository\TaskRepository;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\Service\TaskAssignmentService;
-use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use App\TaskManagement\Domain\Port\ProjectChecker;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+// Port definovaný v TaskManagement doméně — abstrahuje závislost na jiném bounded contextu.
+// Infrastrukturní implementace volá ProjectManagement interně (přes DB nebo API),
+// aniž by TaskManagement cokoliv věděl o interním modelu ProjectManagement.
+//
+// interface ProjectChecker {
+//     public function exists(ProjectId $projectId): bool;
+//     public function isMember(ProjectId $projectId, UserId $userId): bool;
+// }
 
 #[AsMessageHandler]
 class AssignTaskHandler
 {
     public function __construct(
         private TaskRepository $taskRepository,
-        private ProjectRepository $projectRepository,
+        private ProjectChecker $projectChecker,
         private TaskAssignmentService $taskAssignmentService
     ) {
     }
@@ -687,16 +696,19 @@ class AssignTaskHandler
             throw new \DomainException('Task not found');
         }
 
-        $project = $this->projectRepository->findById($task->projectId());
+        $assigneeId = new UserId($command->assigneeId);
 
-        if (!$project) {
+        // Ověření přes port — bez přímé závislosti na ProjectManagement
+        if (!$this->projectChecker->exists($task->projectId())) {
             throw new \DomainException('Project not found');
         }
 
-        $assigneeId = new UserId($command->assigneeId);
+        if (!$this->projectChecker->isMember($task->projectId(), $assigneeId)) {
+            throw new \DomainException('Assignee is not a member of the project');
+        }
 
         // Použití doménové služby pro přiřazení úkolu
-        $this->taskAssignmentService->assignTask($task, $project, $assigneeId);
+        $this->taskAssignmentService->assignTask($task, $assigneeId);
 
         // Uložení úkolu
         $this->taskRepository->save($task);
@@ -765,60 +777,15 @@ class GetProjectsHandler
 namespace App\TaskManagement\Domain\Service;
 
 use App\TaskManagement\Domain\Model\Task;
-use App\ProjectManagement\Domain\Model\Project;
 use App\UserManagement\Domain\ValueObject\UserId;
-use App\Shared\Domain\Exception\DomainException;
 
 class TaskAssignmentService
 {
-    public function assignTask(Task $task, Project $project, UserId $assigneeId): void
+    // Doménová služba pracuje výhradně s objekty vlastního bounded contextu.
+    // Ověření příslušnosti k projektu zajišťuje handler přes ProjectChecker port.
+    public function assignTask(Task $task, UserId $assigneeId): void
     {
-        // Kontrola, zda je přiřazovaný uživatel členem projektu
-        if (!$project->isMember($assigneeId)) {
-            throw new DomainException('Assignee is not a member of the project');
-        }
-
-        // Kontrola, zda úkol patří do projektu
-        if (!$task->projectId()->equals($project->id())) {
-            throw new DomainException('Task does not belong to the project');
-        }
-
-        // Přiřazení úkolu
         $task->assign($assigneeId);
-    }
-}</code></pre>
-
-    <h4 id="anti-corruption-layer-heading">Anti-Corruption Layer: Integrace s externím systémem</h4>
-    <pre><code class="language-php">&lt;?php
-
-namespace App\Integration\ExternalTaskSystem;
-
-use App\TaskManagement\Domain\Model\Task;
-use App\TaskManagement\Domain\ValueObject\TaskId;
-use App\Integration\ExternalTaskSystem\Client\ExternalTaskClient;
-use App\Integration\ExternalTaskSystem\Translator\TaskTranslator;
-
-class ExternalTaskAdapter
-{
-    private ExternalTaskClient $client;
-    private TaskTranslator $translator;
-
-    public function __construct(ExternalTaskClient $client, TaskTranslator $translator)
-    {
-        $this->client = $client;
-        $this->translator = $translator;
-    }
-
-    public function exportTask(Task $task): void
-    {
-        $externalTask = $this->translator->toExternalTask($task);
-        $this->client->createOrUpdateTask($externalTask);
-    }
-
-    public function importTask(string $externalTaskId): Task
-    {
-        $externalTask = $this->client->getTask($externalTaskId);
-        return $this->translator->fromExternalTask($externalTask);
     }
 }</code></pre>
 
@@ -827,7 +794,7 @@ class ExternalTaskAdapter
     <section id="lessons" aria-labelledby="lessons-heading">
     <h3 id="lessons-heading">Ponaučení</h3>
     <p>
-        Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 7 přinesla několik důležitých ponaučení:
+        Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla několik důležitých ponaučení:
     </p>
 
     <ol>
@@ -857,7 +824,7 @@ class ExternalTaskAdapter
     <div class="warning-box" role="alert" aria-labelledby="important-notes-heading">
         <h4 id="important-notes-heading">Důležité poznámky pro implementaci DDD</h4>
         <p>
-            Při implementaci Domain-Driven Design a CQRS v Symfony 7 je důležité:
+            Při implementaci Domain-Driven Design a CQRS v Symfony 8 je důležité:
         </p>
         <ul>
             <li>Začít strategickým designem - identifikovat bounded contexts a jejich vztahy před zahájením implementace.</li>
@@ -875,7 +842,7 @@ class ExternalTaskAdapter
     </div>
 
     <p>
-        V další kapitole se podíváme na <a href="{{ path('resources') }}">zdroje a další četbu o DDD a CQRS v Symfony 7</a>.
+        V další kapitole se podíváme na <a href="{{ path('resources') }}">zdroje a další četbu o DDD a CQRS v Symfony 8</a>.
     </p>
     </section>
     </article>

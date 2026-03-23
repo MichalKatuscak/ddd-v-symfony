@@ -10,7 +10,7 @@
             <li><a href="#horizontal">Horizontální (vertikální slice) přístup k DDD</a></li>
             <li><a href="#comparison">Porovnání přístupů</a></li>
             <li><a href="#when-to-use">Kdy použít který přístup</a></li>
-            <li><a href="#symfony-implementation">Implementace v Symfony 7</a></li>
+            <li><a href="#symfony-implementation">Implementace v Symfony 8</a></li>
         </ul>
     </div>
 
@@ -183,14 +183,14 @@
         </ul>
     </div>
 
-    <h3 id="symfony-implementation">Implementace v Symfony 7</h3>
+    <h3 id="symfony-implementation">Implementace v Symfony 8</h3>
     <p>
-        Symfony 7 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
+        Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
     </p>
 
-    <h4>Implementace tradičního (vertikálního) DDD v Symfony 7:</h4>
+    <h4>Implementace tradičního (vertikálního) DDD v Symfony 8:</h4>
     <p>
-        Pro implementaci tradičního DDD v Symfony 7 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
+        Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
     </p>
 
     <pre><code class="language-bash">src/
@@ -216,9 +216,9 @@
             └── Mapping/
                 └── User.orm.xml</code></pre>
 
-    <h4>Implementace horizontálního (vertikální slice) DDD v Symfony 7:</h4>
+    <h4>Implementace horizontálního (vertikální slice) DDD v Symfony 8:</h4>
     <p>
-        Pro implementaci horizontálního DDD v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://symfonycasts.com/screencast/symfony-doctrine/project-structure" target="_blank">[8]</a>:
+        Pro implementaci horizontálního DDD v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://symfonycasts.com/screencast/symfony-doctrine/project-structure" target="_blank">[8]</a>:
     </p>
 
     <pre><code class="language-bash">src/
@@ -244,7 +244,7 @@
             └── DoctrineUserRepository.php</code></pre>
 
     <p>
-        Symfony 7 poskytuje mnoho komponent, které jsou užitečné pro implementaci horizontálního DDD <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
+        Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci horizontálního DDD <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
     </p>
 
     <ul>
@@ -258,7 +258,7 @@
     <div class="warning-box">
         <h4>Důležité poznámky</h4>
         <p>
-            Při implementaci horizontálního DDD v Symfony 7 je důležité:
+            Při implementaci horizontálního DDD v Symfony 8 je důležité:
         </p>
         <ul>
             <li>Minimalizovat vazby mezi jednotlivými funkcemi (features).</li>
@@ -269,6 +269,6 @@
     </div>
 
     <p>
-        V další kapitole se podíváme na <a href="{{ path('basic_concepts') }}">základní koncepty DDD</a> a jak je implementovat v Symfony 7.
+        V další kapitole se podíváme na <a href="{{ path('basic_concepts') }}">základní koncepty DDD</a> a jak je implementovat v Symfony 8.
     </p>
 {% endblock %}

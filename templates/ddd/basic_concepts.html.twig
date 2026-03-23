@@ -23,7 +23,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "dateModified": "2026-03-23",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -39,16 +39,130 @@
         <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
             <h5 id="toc-heading">Obsah kapitoly:</h5>
             <ul>
+                <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
+                <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
                 <li><a href="#entities">Entity (Entity)</a></li>
                 <li><a href="#value-objects">Hodnotové objekty (Value Objects)</a></li>
                 <li><a href="#aggregates">Agregáty (Aggregates)</a></li>
                 <li><a href="#repositories">Repozitáře (Repositories)</a></li>
                 <li><a href="#domain-services">Doménové služby (Domain Services)</a></li>
                 <li><a href="#domain-events">Doménové události (Domain Events)</a></li>
-                <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
-                <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
             </ul>
         </div>
+
+        <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
+            <h3 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h3>
+            <p>
+                Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu
+                existuje konzistentní model
+                a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
+            </p>
+
+            <div class="example-box">
+                <div class="diagram-container">
+                    {% include '/diagrams/5_bounded_contexts/diagram.svg' %}
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h4>Příklad: Ohraničené kontexty v PHP</h4>
+                <pre><code class="language-bash">src/
+├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
+│   ├── Domain/
+│   │   ├── Model/
+│   │   │   ├── Order.php
+│   │   │   ├── OrderItem.php
+│   │   │   └── OrderStatus.php
+│   │   └── Repository/
+│   │       └── OrderRepository.php
+│   └── Application/
+│       ├── Command/
+│       │   ├── CreateOrder.php
+│       │   └── CreateOrderHandler.php
+│       └── Query/
+│           ├── GetOrder.php
+│           └── GetOrderHandler.php
+└── UserManagement/            # Ohraničený kontext: Správa uživatelů
+    ├── Domain/
+    │   ├── Model/
+    │   │   ├── User.php
+    │   │   └── UserStatus.php
+    │   └── Repository/
+    │       └── UserRepository.php
+    └── Application/
+        ├── Command/
+        │   ├── RegisterUser.php
+        │   └── RegisterUserHandler.php
+        └── Query/
+            ├── GetUser.php
+            └── GetUserHandler.php</code></pre>
+            </div>
+
+            <p>
+                V tomto příkladu jsou <code>OrderProcessing</code> a <code>UserManagement</code> dva ohraničené
+                kontexty.
+                Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderProcessing</code> může být uživatel
+                reprezentován pouze jako <code>UserId</code>,
+                zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
+            </p>
+        </section>
+
+        <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
+            <h3 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h3>
+
+            <p>
+                Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v
+                kódu, dokumentaci a komunikaci.
+                Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
+            </p>
+
+            <div class="example-box">
+                <div class="diagram-container">
+                    {% include '/diagrams/4_ubiquitous_language/diagram.svg' %}
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
+                <p>
+                    V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
+                </p>
+                <ul>
+                    <li><strong>Košík (Cart)</strong> - Dočasná kolekce produktů, které si zákazník vybral k nákupu.
+                    </li>
+                    <li><strong>Objednávka (Order)</strong> - Potvrzený nákup zákazníka, který obsahuje produkty, dodací
+                        adresu a platební informace.
+                    </li>
+                    <li><strong>Katalog (Catalog)</strong> - Kolekce všech produktů dostupných k prodeji.</li>
+                    <li><strong>Zákazník (Customer)</strong> - Osoba, která nakupuje produkty.</li>
+                    <li><strong>Produkt (Product)</strong> - Položka, která je dostupná k prodeji.</li>
+                    <li><strong>Kategorie (Category)</strong> - Skupina souvisejících produktů.</li>
+                    <li><strong>Platba (Payment)</strong> - Transakce, kterou zákazník platí za objednávku.</li>
+                    <li><strong>Dodání (Shipping)</strong> - Proces doručení objednávky zákazníkovi.</li>
+                </ul>
+            </div>
+
+            <p>
+                Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými
+                experty.
+                Například, místo použití termínu "uživatel" by se používal termín "zákazník", pokud se jedná o osobu,
+                která nakupuje produkty.
+            </p>
+
+            <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
+                <h4 id="important-notes-heading">Důležité poznámky</h4>
+                <p>
+                    Při implementaci DDD je důležité:
+                </p>
+                <ul>
+                    <li>Používat všudypřítomný jazyk konzistentně v celém projektu.</li>
+                    <li>Definovat jasné hranice mezi ohraničenými kontexty.</li>
+                    <li>Používat agregáty pro zajištění konzistence dat.</li>
+                    <li>Používat repozitáře pro přístup k agregátům.</li>
+                    <li>Používat doménové události pro komunikaci mezi ohraničenými kontexty.</li>
+                </ul>
+            </div>
+        </section>
 
         <section id="entities" aria-labelledby="entities-heading">
             <h3 id="entities-heading">Entity (Entity)</h3>
@@ -429,125 +543,10 @@ class OrderCreatedEvent
                 Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy se
                 to stalo.
             </p>
-        </section>
-
-        <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
-            <h3 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h3>
-            <p>
-                Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu
-                existuje konzistentní model
-                a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
-            </p>
-
-
-            <div class="example-box">
-                <div class="diagram-container">
-                    {% include '/diagrams/5_bounded_contexts/diagram.svg' %}
-                </div>
-            </div>
-
-            <div class="example-box">
-                <h4>Příklad: Ohraničené kontexty v PHP</h4>
-                <pre><code class="language-bash">src/
-├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
-│   ├── Domain/
-│   │   ├── Model/
-│   │   │   ├── Order.php
-│   │   │   ├── OrderItem.php
-│   │   │   └── OrderStatus.php
-│   │   └── Repository/
-│   │       └── OrderRepository.php
-│   └── Application/
-│       ├── Command/
-│       │   ├── CreateOrder.php
-│       │   └── CreateOrderHandler.php
-│       └── Query/
-│           ├── GetOrder.php
-│           └── GetOrderHandler.php
-└── UserManagement/            # Ohraničený kontext: Správa uživatelů
-    ├── Domain/
-    │   ├── Model/
-    │   │   ├── User.php
-    │   │   └── UserStatus.php
-    │   └── Repository/
-    │       └── UserRepository.php
-    └── Application/
-        ├── Command/
-        │   ├── RegisterUser.php
-        │   └── RegisterUserHandler.php
-        └── Query/
-            ├── GetUser.php
-            └── GetUserHandler.php</code></pre>
-            </div>
-
-            <p>
-                V tomto příkladu jsou <code>OrderProcessing</code> a <code>UserManagement</code> dva ohraničené
-                kontexty.
-                Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderProcessing</code> může být uživatel
-                reprezentován pouze jako <code>UserId</code>,
-                zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
-            </p>
-        </section>
-
-        <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
-            <h3 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h3>
-
-            <p>
-                Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v
-                kódu, dokumentaci a komunikaci.
-                Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
-            </p>
-
-            <div class="example-box">
-                <div class="diagram-container">
-                    {% include '/diagrams/4_ubiquitous_language/diagram.svg' %}
-                </div>
-            </div>
-
-            <div class="concept-box">
-                <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
-                <p>
-                    V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
-                </p>
-                <ul>
-                    <li><strong>Košík (Cart)</strong> - Dočasná kolekce produktů, které si zákazník vybral k nákupu.
-                    </li>
-                    <li><strong>Objednávka (Order)</strong> - Potvrzený nákup zákazníka, který obsahuje produkty, dodací
-                        adresu a platební informace.
-                    </li>
-                    <li><strong>Katalog (Catalog)</strong> - Kolekce všech produktů dostupných k prodeji.</li>
-                    <li><strong>Zákazník (Customer)</strong> - Osoba, která nakupuje produkty.</li>
-                    <li><strong>Produkt (Product)</strong> - Položka, která je dostupná k prodeji.</li>
-                    <li><strong>Kategorie (Category)</strong> - Skupina souvisejících produktů.</li>
-                    <li><strong>Platba (Payment)</strong> - Transakce, kterou zákazník platí za objednávku.</li>
-                    <li><strong>Dodání (Shipping)</strong> - Proces doručení objednávky zákazníkovi.</li>
-                </ul>
-            </div>
-
-            <p>
-                Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými
-                experty.
-                Například, místo použití termínu "uživatel" by se používal termín "zákazník", pokud se jedná o osobu,
-                která nakupuje produkty.
-            </p>
-
-            <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
-                <h4 id="important-notes-heading">Důležité poznámky</h4>
-                <p>
-                    Při implementaci DDD je důležité:
-                </p>
-                <ul>
-                    <li>Používat všudypřítomný jazyk konzistentně v celém projektu.</li>
-                    <li>Definovat jasné hranice mezi ohraničenými kontexty.</li>
-                    <li>Používat agregáty pro zajištění konzistence dat.</li>
-                    <li>Používat repozitáře pro přístup k agregátům.</li>
-                    <li>Používat doménové události pro komunikaci mezi ohraničenými kontexty.</li>
-                </ul>
-            </div>
 
             <p>
                 V další kapitole se podíváme na <a href="{{ path('implementation_in_symfony') }}">implementaci DDD v
-                    Symfony 7</a>.
+                    Symfony 8</a>.
             </p>
         </section>
     </article>

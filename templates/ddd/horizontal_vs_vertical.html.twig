@@ -23,7 +23,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "dateModified": "2026-03-23",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -43,7 +43,7 @@
             <li><a href="#horizontal">Vertikální slice architektura</a></li>
             <li><a href="#comparison">Porovnání přístupů</a></li>
             <li><a href="#when-to-use">Kdy použít který přístup</a></li>
-            <li><a href="#symfony-implementation">Implementace v Symfony 7</a></li>
+            <li><a href="#symfony-implementation">Implementace v Symfony 8</a></li>
         </ul>
     </div>
 
@@ -90,7 +90,7 @@
 
     <p>
         V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-        Tento přístup je často znázorňován jako "cibulová" nebo "hexagonální" architektura <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
+        Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje — ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
     </p>
     </section>
 
@@ -171,7 +171,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Aspekt</th>
-                    <th>Tradiční (vertikální) DDD</th>
+                    <th>Tradiční (vrstvený) DDD</th>
                     <th>Vertikální slice architektura</th>
                 </tr>
             </thead>
@@ -225,7 +225,7 @@
             <li>Když je tým zvyklý na tradiční architekturu.</li>
             <li>Pro menší aplikace s jasně definovanými vrstvami.</li>
             <li>Když je důležitá jasná separace technických vrstev.</li>
-            <li>Pro aplikace s jednodušší doménovou logikou.</li>
+            <li>Když tým preferuje explicitní oddělení technických vrstev před organizací podle funkcí.</li>
         </ul>
     </div>
 
@@ -242,14 +242,14 @@
     </section>
 
     <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
-    <h3 id="symfony-implementation-heading">Implementace v Symfony 7</h3>
+    <h3 id="symfony-implementation-heading">Implementace v Symfony 8</h3>
     <p>
-        Symfony 7 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
+        Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
     </p>
 
-    <h4 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 7:</h4>
+    <h4 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h4>
     <p>
-        Pro implementaci tradičního DDD v Symfony 7 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
+        Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
     </p>
 
     <pre><code class="language-bash">src/
@@ -298,9 +298,9 @@
         └── Exception/
             └── DomainException.php</code></pre>
 
-    <h4 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 7:</h4>
+    <h4 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h4>
     <p>
-        Pro implementaci vertikální slice architektury v Symfony 7 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
+        Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
     </p>
 
     <pre><code class="language-bash">src/
@@ -357,7 +357,7 @@
             └── DomainException.php</code></pre>
 
     <p>
-        Symfony 7 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
+        Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
     </p>
 
     <ul>
@@ -371,7 +371,7 @@
     <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
         <h4 id="important-notes-heading">Důležité poznámky</h4>
         <p>
-            Při implementaci vertikální slice architektury v Symfony 7 je důležité:
+            Při implementaci vertikální slice architektury v Symfony 8 je důležité:
         </p>
         <ul>
             <li>Minimalizovat vazby mezi jednotlivými funkcemi (features).</li>
@@ -382,7 +382,7 @@
     </div>
 
     <p>
-        V další kapitole se podíváme na <a href="{{ path('basic_concepts') }}">základní koncepty DDD</a> a jak je implementovat v Symfony 7.
+        V další kapitole se podíváme na <a href="{{ path('basic_concepts') }}">základní koncepty DDD</a> a jak je implementovat v Symfony 8.
     </p>
     </section>
     </article>

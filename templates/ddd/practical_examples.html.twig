@@ -2,7 +2,7 @@
 
 {% block title %}Praktické příklady Domain-Driven Design v Symfony | DDD Symfony{% endblock %}
 
-{% block meta_description %}Praktické příklady implementace Domain-Driven Design v Symfony 7 na reálných projektech. Prozkoumejte ukázky kódu pro e-commerce, blog a další typy aplikací s využitím bounded contexts, doménových modelů a vertikální slice architektury.{% endblock %}
+{% block meta_description %}Praktické příklady implementace Domain-Driven Design v Symfony 8 na reálných projektech. Prozkoumejte ukázky kódu pro e-commerce, blog a další typy aplikací s využitím bounded contexts, doménových modelů a vertikální slice architektury.{% endblock %}
 
 {% block meta_keywords %}DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty{% endblock %}
 
@@ -23,7 +23,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "dateModified": "2026-03-23",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -49,7 +49,7 @@
             <h3 id="e-commerce-heading">Příklad: E-commerce aplikace</h3>
             <p>
                 V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí vertikální slice architektury
-                a CQRS v Symfony 7.
+                a CQRS v Symfony 8.
                 Zaměříme se na funkcionalitu košíku a objednávek.
             </p>
 
@@ -438,7 +438,7 @@ class GetCartHandler
             <h3 id="blog-heading">Příklad: Blog</h3>
             <p>
                 V této části si ukážeme, jak implementovat jednoduchý blog pomocí vertikální slice architektury a CQRS v
-                Symfony 7.
+                Symfony 8.
             </p>
 
             <div class="example-box">
@@ -619,9 +619,9 @@ class CreatePost
 
 namespace App\Blog\CreatePost;
 
-use App\Shared\Domain\Model\Post;
-use App\Shared\Domain\Repository\PostRepository;
-use App\Shared\Domain\ValueObject\PostId;
+use App\Blog\Domain\Model\Post;
+use App\Blog\Domain\Repository\PostRepository;
+use App\Blog\Domain\ValueObject\PostId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -651,7 +651,7 @@ class CreatePostHandler
 
             <h3 id="user-management">Příklad: Správa uživatelů</h3>
             <p>
-                V této části si ukážeme, jak implementovat správu uživatelů pomocí DDD a CQRS v Symfony 7, kde společná doména budou uživatelé a DDD použijeme pro oddělení funkcí.
+                V této části si ukážeme, jak implementovat správu uživatelů pomocí DDD a CQRS v Symfony 8, kde společná doména budou uživatelé a DDD použijeme pro oddělení funkcí.
             </p>
 
             <div class="example-box">
@@ -662,7 +662,20 @@ class CreatePostHandler
 
             <h4>Struktura projektu</h4>
             <pre><code class="language-bash">src/
-├── UserManagement/            # Feature: Správa uživatelů
+├── UserManagement/            # Bounded Context: Správa uživatelů
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── User.php       # Entita uživatele (Aggregate Root)
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── UserId.php
+│   │   │   └── Email.php
+│   │   ├── Event/             # Doménové události
+│   │   │   └── UserRegistered.php
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── UserRepository.php
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/
+│   │       └── DoctrineUserRepository.php
 │   ├── Registration/          # Sub-feature: Registrace
 │   │   ├── RegisterUser.php   # Command
 │   │   ├── RegisterUserHandler.php  # Command Handler
@@ -673,29 +686,23 @@ class CreatePostHandler
 │       ├── GetUserProfile.php  # Query
 │       ├── GetUserProfileHandler.php  # Query Handler
 │       └── ProfileController.php  # Controller
-└── Shared/                    # Sdílené komponenty
+└── Shared/                    # Sdílené komponenty (pouze cross-cutting concerns)
     ├── Domain/                # Sdílená doménová logika
-    │   ├── Model/             # Doménové modely
-    │   │   └── User.php
-    │   ├── ValueObject/       # Hodnotové objekty
-    │   │   ├── UserId.php
-    │   │   └── Email.php
-    │   ├── Event/             # Doménové události
-    │   │   └── UserRegistered.php
-    │   └── Repository/        # Repozitáře (rozhraní)
-    │       └── UserRepository.php
+    │   └── Exception/         # Výjimky
+    │       └── DomainException.php  # Základní doménová výjimka
     └── Infrastructure/        # Sdílená infrastruktura
-        └── Repository/        # Implementace repozitářů
-            └── DoctrineUserRepository.php</code></pre>
+        └── Bus/               # Implementace message bus
+            ├── MessengerCommandBus.php  # Implementace command bus
+            └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
             <h4>Doménový model: Uživatel</h4>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Shared\Domain\Model;
+namespace App\UserManagement\Domain\Model;
 
-use App\Shared\Domain\Event\UserRegistered;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -810,7 +817,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             <h4>Command: Registrace uživatele</h4>
             <pre><code class="language-php">&lt;?php
 
-namespace App\UserManagement\Registration;
+namespace App\UserManagement\Registration\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -835,12 +842,12 @@ class RegisterUser
             <h4>Command Handler: Zpracování registrace uživatele</h4>
             <pre><code class="language-php">&lt;?php
 
-namespace App\UserManagement\Registration;
+namespace App\UserManagement\Registration\Command;
 
-use App\Shared\Domain\Model\User;
-use App\Shared\Domain\Repository\UserRepository;
-use App\Shared\Domain\ValueObject\Email;
-use App\Shared\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -892,7 +899,7 @@ class RegisterUserHandler
 
             <p>
                 V další kapitole se podíváme na <a href="{{ path('case_study') }}">případovou studii implementace DDD a
-                    CQRS v Symfony 7</a>.
+                    CQRS v Symfony 8</a>.
             </p>
         </section>
     </article>

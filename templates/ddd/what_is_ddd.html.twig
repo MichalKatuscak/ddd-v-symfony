@@ -23,7 +23,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "dateModified": "2026-03-23",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -90,20 +90,15 @@
         <section id="history" aria-labelledby="history-heading">
             <h3 id="history-heading">Historie a vývoj DDD</h3>
             <p>
-                Domain-Driven Design byl představen Ericem Evansem v roce 2003. Od té doby se stal populárním přístupem
-                k vývoji softwaru,
-                zejména pro složité aplikace s bohatou doménou. V průběhu let se DDD vyvíjel a byly představeny nové
-                koncepty a techniky <a href="https://dddcommunity.org/" target="_blank">[6]</a>.
+                Klíčové milníky ve vývoji DDD <a href="https://dddcommunity.org/" target="_blank">[6]</a>:
             </p>
-
-            <p>
-                V posledních letech se DDD často kombinuje s dalšími architektonickými vzory, jako je CQRS (Command
-                Query Responsibility Segregation)
-                a Event Sourcing, což vede k ještě výkonnějším a flexibilnějším architekturám <a
-                        href="https://www.youtube.com/watch?v=JHGkaShoyNs" target="_blank">[7]</a> <a
-                        href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/"
-                        target="_blank">[8]</a>.
-            </p>
+            <ul>
+                <li><strong>2003</strong> — Eric Evans vydává knihu <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický/taktický design.</li>
+                <li><strong>2013</strong> — Vaughn Vernon vydává <em>Implementing Domain-Driven Design</em>, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.</li>
+                <li><strong>2013</strong> — Alberto Brandolini představuje <em>Event Storming</em> — workshopovou techniku pro kolaborativní modelování domény s doménovými experty.</li>
+                <li><strong>2016</strong> — Vaughn Vernon vydává <em>Domain-Driven Design Distilled</em>, zkrácenou a přístupnější verzi pro rychlé pochopení klíčových konceptů.</li>
+                <li><strong>Po roce 2015</strong> — DDD si nachází přirozené uplatnění v architektuře mikroslužeb: Bounded Context se stává standardním vodítkem pro určení hranic jednotlivých služeb <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">[7]</a>.</li>
+            </ul>
         </section>
 
         <section id="principles" aria-labelledby="principles-heading">
@@ -195,7 +190,7 @@
                 <li>
                     <strong>Entity</strong> - Objekty, které mají identitu a kontinuitu v čase. Entity jsou definovány
                     svou identitou, nikoli svými atributy. Například, osoba je entita, protože má svou identitu (jméno,
-                    datum narození), i když se její atributy (výska, váha) mění.
+                    datum narození), i když se její atributy (výška, váha) mění.
                 </li>
                 <li>
                     <strong>Value Object</strong> - Hodnotové objekty jsou definovány svými atributy, nikoli identitou.
@@ -319,8 +314,7 @@
                 <li><strong>Zaměření na hodnotu</strong> - DDD se zaměřuje na poskytování hodnoty pro podnikání tím, že
                     se soustředí na klíčové části domény.
                 </li>
-                <li><strong>Lepší spolupráce</strong> - DDD podporuje spolupráci mezi různými zúčastněnými stranami
-                    (vývojáři, doménoví experti, manažeři) díky společnému jazyku a modelu.
+                <li><strong>Odolnost vůči změnám požadavků</strong> - Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v businessu se přirozeněji promítají do kódu.
                 </li>
                 <li><strong>Snížení technického dluhu</strong> - DDD pomáhá snižovat technický dluh tím, že podporuje
                     jasný a srozumitelný kód, který odráží doménu.
@@ -376,7 +370,7 @@
                 <li><strong>Výkonnost</strong> - Některé vzory DDD, jako jsou agregáty a repozitáře, mohou mít dopad na
                     výkonnost, pokud nejsou správně implementovány.
                 </li>
-                <li><strong>Učebí křivka</strong> - DDD má strmou učebí křivku a může trvat nějakou dobu, než tým získá
+                <li><strong>Učební křivka</strong> - DDD má strmou učební křivku a může trvat nějakou dobu, než tým získá
                     potřebné znalosti a zkušenosti.
                 </li>
             </ul>
@@ -437,9 +431,7 @@
                 <li><strong>Taktický design</strong> - Entity, Value Objects, Aggregates, Repositories, Domain Events,
                     Services
                 </li>
-                <li><strong>Implementační vzory</strong> - Factories, Anti-Corruption Layer, Specification, Event
-                    Sourcing
-                </li>
+                <li><strong>Implementační vzory</strong> - Factories, Anti-Corruption Layer, Specification</li>
             </ul>
 
             <p>

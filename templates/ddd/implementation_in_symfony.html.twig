@@ -1,17 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Implementace Domain-Driven Design v Symfony 7 | DDD Symfony{% endblock %}
+{% block title %}Implementace Domain-Driven Design v Symfony 8 | DDD Symfony{% endblock %}
 
-{% block meta_description %}Praktický průvodce implementací Domain-Driven Design v Symfony 7. Naučte se, jak strukturovat projekt s využitím bounded contexts, implementovat entity, hodnotové objekty, agregáty, repozitáře a další koncepty DDD v moderním PHP frameworku.{% endblock %}
+{% block meta_description %}Praktický průvodce implementací Domain-Driven Design v Symfony 8. Naučte se, jak strukturovat projekt s využitím bounded contexts, implementovat entity, hodnotové objekty, agregáty, repozitáře a další koncepty DDD v moderním PHP frameworku.{% endblock %}
 
-{% block meta_keywords %}DDD v Symfony, implementace DDD, Symfony 7, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.2{% endblock %}
+{% block meta_keywords %}DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "headline": "Implementace Domain-Driven Design v Symfony 7",
+  "headline": "Implementace Domain-Driven Design v Symfony 8",
   "description": "{{ block('meta_description') }}",
   "keywords": "{{ block('meta_keywords') }}",
   "author": {
@@ -23,7 +23,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "{{ "now"|date("Y-m-d") }}",
+  "dateModified": "2026-03-23",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -34,7 +34,7 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-    <h2 itemprop="headline">Implementace DDD v Symfony 7</h2>
+    <h2 itemprop="headline">Implementace DDD v Symfony 8</h2>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
         <h5 id="toc-heading">Obsah kapitoly:</h5>
@@ -54,11 +54,11 @@
     <section id="project-structure" aria-labelledby="project-structure-heading">
     <h3 id="project-structure-heading">Struktura projektu</h3>
     <p>
-        Při implementaci DDD s vertikální slice architekturou v Symfony 7 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 7:
+        Při implementaci DDD s vertikální slice architekturou v Symfony 8 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 8:
     </p>
 
     <div class="example-box">
-        <h4>Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 7</h4>
+        <h4>Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8</h4>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                 # Doménová vrstva pro UserManagement
@@ -175,11 +175,11 @@
     <section id="entities" aria-labelledby="entities-heading">
     <h3 id="entities-heading">Implementace entit</h3>
     <p>
-        Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 7 můžete implementovat entity jako běžné PHP třídy:
+        Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 můžete implementovat entity jako běžné PHP třídy:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="entity-example-heading">
-        <h4 id="entity-example-heading">Příklad: Implementace entity v Symfony 7</h4>
+        <h4 id="entity-example-heading">Příklad: Implementace entity v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Model;
@@ -272,11 +272,11 @@ class User
     <section id="value-objects" aria-labelledby="value-objects-heading">
     <h3 id="value-objects-heading">Implementace hodnotových objektů</h3>
     <p>
-        Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 7 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
+        Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="value-object-example-heading">
-        <h4 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 7</h4>
+        <h4 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\ValueObject;
@@ -324,11 +324,11 @@ class Email
     <section id="repositories" aria-labelledby="repositories-heading">
     <h3 id="repositories-heading">Implementace repozitářů</h3>
     <p>
-        Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 7 můžete implementovat repozitáře jako rozhraní a jejich implementace:
+        Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 můžete implementovat repozitáře jako rozhraní a jejich implementace:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="repository-example-heading">
-        <h4 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 7</h4>
+        <h4 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Repository;
@@ -355,14 +355,14 @@ use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class DoctrineUserRepository implements UserRepository
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private MessageBusInterface $eventBus
+    ) {
     }
 
     public function save(User $user): void
@@ -371,10 +371,7 @@ class DoctrineUserRepository implements UserRepository
         $this->entityManager->flush();
 
         foreach ($user->releaseEvents() as $event) {
-            $this->entityManager->getEventManager()->dispatchEvent(
-                'onDomainEvent',
-                new DomainEventArgs($event)
-            );
+            $this->eventBus->dispatch($event);
         }
     }
 
@@ -401,11 +398,11 @@ class DoctrineUserRepository implements UserRepository
     <h3 id="domain-services-heading">Implementace doménových služeb</h3>
     <p>
         Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
-        V Symfony 7 můžete implementovat doménové služby jako běžné PHP třídy:
+        V Symfony 8 můžete implementovat doménové služby jako běžné PHP třídy:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="domain-service-example-heading">
-        <h4 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 7</h4>
+        <h4 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\OrderManagement\Checkout\Service;
@@ -466,11 +463,11 @@ class PaymentService
     <section id="domain-events" aria-labelledby="domain-events-heading">
     <h3 id="domain-events-heading">Implementace doménových událostí</h3>
     <p>
-        Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 7 můžete implementovat doménové události jako neměnné PHP třídy:
+        Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 můžete implementovat doménové události jako neměnné PHP třídy:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="domain-event-example-heading">
-        <h4 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 7</h4>
+        <h4 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Event;
@@ -517,12 +514,12 @@ class UserRegistered
     <section id="application-services" aria-labelledby="application-services-heading">
     <h3 id="application-services-heading">Implementace aplikačních služeb</h3>
     <p>
-        Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 7 můžete implementovat aplikační služby
+        Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 můžete implementovat aplikační služby
         jako command a query handlery:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="command-handler-example-heading">
-        <h4 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 7</h4>
+        <h4 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Command;
@@ -581,7 +578,7 @@ class RegisterUserHandler
     </div>
 
     <div class="example-box" role="note" aria-labelledby="query-handler-example-heading">
-        <h4 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 7</h4>
+        <h4 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Profile\Query;
@@ -633,15 +630,17 @@ class GetUserProfileHandler
         Tyto služby koordinují aplikační aktivity a delegují práci doménové vrstvě.
     </p>
 
+    </section>
+
     <section id="controllers" aria-labelledby="controllers-heading">
     <h3 id="controllers-heading">Implementace kontrolerů</h3>
     <p>
-        Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 7 můžete implementovat kontrolery
+        Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 můžete implementovat kontrolery
         jako běžné Symfony kontrolery:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="controller-example-heading">
-        <h4 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 7</h4>
+        <h4 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Controller;
@@ -699,11 +698,11 @@ class RegistrationController extends AbstractController
     <h3 id="dependency-injection-heading">Dependency Injection</h3>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
-        Symfony 7 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
+        Symfony 8 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
     </p>
 
     <div class="example-box" role="note" aria-labelledby="dependency-injection-example-heading">
-        <h4 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 7</h4>
+        <h4 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 8</h4>
         <pre><code class="language-yaml"># config/services.yaml
 services:
     _defaults:
@@ -727,25 +726,21 @@ services:
     App\OrderManagement\Domain\Repository\OrderRepository:
         class: App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository
 
-    # Konfigurace Messenger komponenty
-    messenger.default_bus:
-        class: Symfony\Component\Messenger\MessageBus
-        arguments:
-            - !tagged messenger.bus.middleware
-
-    messenger.command_bus:
-        class: Symfony\Component\Messenger\MessageBus
-        arguments:
-            - !tagged messenger.command_bus.middleware
-
-    messenger.query_bus:
-        class: Symfony\Component\Messenger\MessageBus
-        arguments:
-            - !tagged messenger.query_bus.middleware</code></pre>
+    # Messenger busy se konfigurují v config/packages/messenger.yaml, nikoli zde:
+    # framework:
+    #     messenger:
+    #         buses:
+    #             command.bus:
+    #                 middleware:
+    #                     - validation
+    #                     - doctrine_transaction
+    #             query.bus:
+    #                 middleware:
+    #                     - validation</code></pre>
     </div>
 
     <p>
-        V tomto příkladu je konfigurace služeb v Symfony 7. Služby jsou automaticky registrovány a autowired.
+        V tomto příkladu je konfigurace služeb v Symfony 8. Služby jsou automaticky registrovány a autowired.
         Repozitáře jsou explicitně konfigurovány, aby bylo možné použít rozhraní místo konkrétních implementací.
         Messenger komponenta je konfigurována pro implementaci CQRS.
     </p>
@@ -753,7 +748,7 @@ services:
     <div class="warning-box">
         <h4>Důležité poznámky</h4>
         <p>
-            Při implementaci DDD v Symfony 7 je důležité:
+            Při implementaci DDD v Symfony 8 je důležité:
         </p>
         <ul>
             <li>Používat Dependency Injection pro oddělení závislostí.</li>
@@ -784,7 +779,7 @@ services:
     </div>
 
     <p>
-        V další kapitole se podíváme na <a href="{{ path('cqrs') }}">implementaci CQRS v Symfony 7</a>.
+        V další kapitole se podíváme na <a href="{{ path('cqrs') }}">implementaci CQRS v Symfony 8</a>.
     </p>
     </section>
     </article>

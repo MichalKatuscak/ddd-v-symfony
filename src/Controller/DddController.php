@@ -12,7 +12,7 @@ class DddController extends AbstractController
     public function index(): Response
     {
         return $this->render('ddd/index.html.twig', [
-            'title' => 'Architektura DDD v Symfony 7',
+            'title' => 'Architektura DDD v Symfony 8',
         ]);
     }
 
@@ -44,7 +44,7 @@ class DddController extends AbstractController
     public function implementationInSymfony(): Response
     {
         return $this->render('ddd/implementation_in_symfony.html.twig', [
-            'title' => 'Implementace DDD v Symfony 7',
+            'title' => 'Implementace DDD v Symfony 8',
         ]);
     }
 
@@ -52,7 +52,7 @@ class DddController extends AbstractController
     public function cqrs(): Response
     {
         return $this->render('ddd/cqrs.html.twig', [
-            'title' => 'CQRS v Symfony 7',
+            'title' => 'CQRS v Symfony 8',
         ]);
     }
 

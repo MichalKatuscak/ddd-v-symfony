@@ -6,8 +6,35 @@
 
 {% block meta_keywords %}DDD zdroje, knihy o DDD, články o DDD, videa o DDD, konference, komunita, Eric Evans, Vaughn Vernon, Symfony zdroje, PHP zdroje{% endblock %}
 
+{% block structured_data %}
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Zdroje a další četba o Domain-Driven Design",
+          "description": "{{ block('meta_description') }}",
+          "keywords": "{{ block('meta_keywords') }}",
+          "author": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+          },
+          "publisher": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+          },
+          "datePublished": "2025-04-24",
+          "dateModified": "2026-03-23",
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+          }
+        }
+    </script>
+{% endblock %}
+
 {% block body %}
-    <h2>Zdroje a další četba</h2>
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">Zdroje a další četba</h2>
 
     <div class="table-of-contents mb-4">
         <h5>Obsah kapitoly:</h5>
@@ -221,22 +248,16 @@
             <small>Autor: CodelyTV</small>
         </a>
 
-        <a href="https://github.com/jorge07/symfony-6-es-cqrs-boilerplate" target="_blank" class="list-group-item list-group-item-action">
-            <h5 class="mb-1">jorge07/symfony-6-es-cqrs-boilerplate</h5>
-            <p class="mb-1">Boilerplate pro Symfony 6 s implementací Event Sourcingu a CQRS.</p>
+        <a href="https://github.com/jorge07/symfony-7-es-cqrs-boilerplate" target="_blank" class="list-group-item list-group-item-action">
+            <h5 class="mb-1">jorge07/symfony-7-es-cqrs-boilerplate</h5>
+            <p class="mb-1">Boilerplate pro Symfony s implementací Event Sourcingu a CQRS.</p>
             <small>Autor: Jorge Arco</small>
         </a>
 
         <a href="https://github.com/dddinphp/ddd" target="_blank" class="list-group-item list-group-item-action">
             <h5 class="mb-1">dddinphp/ddd</h5>
-            <p class="mb-1">Příklady kódu z knihy "Domain-Driven Design in PHP" od Carlosa Buena, Keyston Akhmadulina a Vernona Vaughna.</p>
+            <p class="mb-1">Příklady kódu z knihy "Domain-Driven Design in PHP" od Carlosa Buenosvina, Keyvana Akbaryho a Jordiho Boggiana.</p>
             <small>Autor: DDD in PHP</small>
-        </a>
-
-        <a href="https://github.com/CodelyTV/php-ddd-example" target="_blank" class="list-group-item list-group-item-action">
-            <h5 class="mb-1">CodelyTV/php-ddd-example</h5>
-            <p class="mb-1">Další příklad implementace DDD a CQRS v PHP s využitím Symfony komponent.</p>
-            <small>Autor: CodelyTV Team</small>
         </a>
 
         <a href="https://github.com/Sylius/Sylius" target="_blank" class="list-group-item list-group-item-action">
@@ -338,7 +359,7 @@
 
     <h3 id="official-docs">Oficiální dokumentace</h3>
     <p>
-        Zde je seznam oficiální dokumentace, která je relevantní pro implementaci DDD a CQRS v Symfony 7:
+        Zde je seznam oficiální dokumentace, která je relevantní pro implementaci DDD a CQRS v Symfony 8:
     </p>
 
     <div class="list-group mb-4">
@@ -371,13 +392,14 @@
     <div class="concept-box">
         <h4>Závěr</h4>
         <p>
-            Domain-Driven Design a CQRS jsou mocné nástroje pro vývoj složitých aplikací. V kombinaci s moderním frameworkem Symfony 7 poskytují výkonný základ pro vytváření škálovatelných a udržitelných aplikací.
+            Domain-Driven Design a CQRS jsou mocné nástroje pro vývoj složitých aplikací. V kombinaci s moderním frameworkem Symfony 8 poskytují výkonný základ pro vytváření škálovatelných a udržitelných aplikací.
         </p>
         <p>
-            Doufáme, že tento průvodce vám poskytl užitečný přehled o implementaci DDD a CQRS v Symfony 7 a že vám pomůže při vývoji vašich vlastních aplikací.
+            Doufáme, že tento průvodce vám poskytl užitečný přehled o implementaci DDD a CQRS v Symfony 8 a že vám pomůže při vývoji vašich vlastních aplikací.
         </p>
         <p>
             Pokud máte jakékoli dotazy nebo připomínky, neváhejte nás kontaktovat.
         </p>
     </div>
+    </article>
 {% endblock %}
