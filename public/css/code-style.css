@@ -1,41 +1,111 @@
-/* Code Styling for DDD Symfony Guide */
+/* code-style.css — Dark Mode Code Blocks */
 
-/* Code blocks */
+/* ── Wrapper ──────────────────────────────────────────────────────────────── */
+.code-block-wrapper {
+    position: relative;
+    margin: 1.5rem 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+/* ── Header (language badge + copy button) ───────────────────────────────── */
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-elevated);
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+}
+
+.code-lang-badge {
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+}
+
+.code-filename {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    margin-left: 0.75rem;
+    flex: 1;
+}
+
+.copy-button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.copy-button:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+.copy-button.copied {
+    border-color: #51cf66;
+    color: #51cf66;
+}
+
+/* ── pre + code ───────────────────────────────────────────────────────────── */
 pre {
     position: relative;
-    background-color: #f8f9fa;
-    border-radius: var(--border-radius);
-    margin: 1.5rem 0;
+    background: var(--bg-surface);
+    border-radius: 0; /* border on wrapper */
+    margin: 0;
     overflow-x: auto;
-    border: 1px solid var(--border-color);
-    font-family: var(--font-family-monospace);
-    line-height: 1.5;
-    max-width: 100%;
+    border: none;
+    font-family: var(--font-mono);
+    line-height: 1.6;
     display: flex;
 }
 
-/* Line numbers container */
+.code-block-wrapper pre {
+    border-radius: 0;
+}
+
+/* Standalone pre (not in wrapper yet — before JS runs) */
+pre:not(.code-block-wrapper pre) {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+}
+
+/* Line numbers */
 .line-numbers-rows {
     display: flex;
     flex-direction: column;
     padding: 1rem 0.5rem;
     margin: 0;
-    border-right: 1px solid var(--border-color);
-    background-color: rgba(0, 0, 0, 0.02);
+    border-right: 1px solid var(--border);
+    background: transparent;
     user-select: none;
     text-align: right;
     color: var(--text-muted);
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     min-width: 2.5rem;
 }
 
 /* Code content */
 pre code {
     display: block;
-    color: var(--text-color);
+    color: var(--text-primary);
     font-size: 0.875rem;
     padding: 1rem;
-    background-color: transparent;
+    background: transparent;
     border-radius: 0;
     tab-size: 4;
     overflow: visible;
@@ -43,134 +113,30 @@ pre code {
     flex: 1;
 }
 
-/* Copy button */
-.copy-button {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity var(--transition-speed);
-    z-index: 10;
-}
-
-pre:hover .copy-button {
-    opacity: 1;
-}
-
-.copy-button:hover {
-    background-color: #3a506b;
-}
-
-/* Syntax highlighting */
-.hljs-keyword {
-    color: #9c27b0;
-    font-weight: 500;
-}
-
-.hljs-string {
-    color: #e91e63;
-}
-
-.hljs-comment {
-    color: #8bc34a;
-    font-style: italic;
-}
-
-.hljs-number {
-    color: #ff9800;
-}
-
-.hljs-operator {
-    color: #03a9f4;
-}
-
-.hljs-class {
-    color: #3f51b5;
-    font-weight: 500;
-}
-
-.hljs-function {
-    color: #2196f3;
-}
-
-.hljs-variable {
-    color: #607d8b;
-}
-
-.hljs-params {
-    color: #795548;
-}
-
-.hljs-attr {
-    color: #ff5722;
-}
-
-.hljs-built_in {
-    color: #009688;
-}
-
-/* Light pastel theme only */
-
-/* Mobile optimizations */
-@media (max-width: 576px) {
-    pre {
-        font-size: 0.75rem;
-    }
-
-    .line-numbers-rows {
-        min-width: 2rem;
-        padding: 1rem 0.25rem;
-        font-size: 0.75rem;
-    }
-
-    pre code {
-        padding: 1rem 0.5rem;
-    }
-
-    .copy-button {
-        opacity: 1;
-    }
-}
-
-/* Code snippets in text */
+/* Inline code (not in pre) */
 code:not(pre code) {
-    background-color: rgba(165, 216, 255, 0.2);
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
+    font-family: var(--font-mono);
     font-size: 0.875em;
-    color: #e83e8c;
+    color: var(--color-primary);
+    background: var(--bg-elevated);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
 }
 
-/* Light pastel theme for inline code */
-
-/* Augment code snippet styling */
-.augment-code-snippet {
-    position: relative;
-    margin: 1.5rem 0;
-}
-
-.augment-code-snippet pre {
-    margin: 0;
-}
+/* ── Augment code snippet (kept) ─────────────────────────────────────────── */
+.augment-code-snippet { position: relative; margin: 1.5rem 0; }
+.augment-code-snippet pre { margin: 0; }
 
 .augment-code-snippet-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #3a506b;
-    color: white;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
     padding: 0.5rem 1rem;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    font-family: var(--font-family-sans-serif);
+    border-radius: var(--radius) var(--radius) 0 0;
     font-size: 0.875rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-bottom: none;
 }
 
@@ -179,37 +145,34 @@ code:not(pre code) {
     border-top-right-radius: 0;
 }
 
-/* File path display */
 .file-path {
-    font-family: var(--font-family-monospace);
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 80%;
     font-weight: 600;
+    color: var(--text-muted);
 }
 
-/* View full file button */
 .view-full-file {
-    background-color: transparent;
-    border: 1px solid white;
-    color: white;
-    border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all var(--transition-speed);
+    transition: all var(--transition);
 }
+.view-full-file:hover { border-color: var(--color-primary); color: var(--color-primary); }
 
-.view-full-file:hover {
-    background-color: white;
-    color: #3a506b;
-}
-
-/* Responsive adjustments for code blocks */
-@media (max-width: 768px) {
-    .file-path {
-        max-width: 60%;
-    }
+/* ── Mobile ───────────────────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+    pre { font-size: 0.8rem; }
+    .line-numbers-rows { min-width: 1.75rem; padding: 0.75rem 0.25rem; font-size: 0.75rem; }
+    pre code { padding: 0.75rem 0.5rem; }
+    .copy-button { opacity: 1; }
+    .file-path { max-width: 60%; }
 }
