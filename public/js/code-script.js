@@ -1,137 +1,162 @@
-// Code Script for DDD Symfony Guide
+// code-script.js — Dark Mode Code Blocks
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Process all code blocks
-    document.querySelectorAll('pre code').forEach(function(codeBlock) {
-        // Add line numbers
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('pre code').forEach(function (codeBlock) {
         addLineNumbers(codeBlock);
-
-        // Add copy button
-        addCopyButton(codeBlock);
+        addCodeBlockHeader(codeBlock);
     });
 
-    // Process Augment code snippets
     processAugmentCodeSnippets();
 });
 
-// Function to add line numbers to code blocks
+// Detect language from highlight.js class (e.g. "language-php" → "PHP")
+function detectLanguage(codeBlock) {
+    const classes = Array.from(codeBlock.classList);
+    for (const cls of classes) {
+        if (cls.startsWith('language-')) {
+            return cls.replace('language-', '').toUpperCase();
+        }
+    }
+    // Fallback: check hljs data attribute
+    if (codeBlock.classList.contains('hljs')) {
+        const hljsLang = codeBlock.getAttribute('data-highlighted-language');
+        if (hljsLang) return hljsLang.toUpperCase();
+    }
+    return null;
+}
+
+// Wrap <pre> in .code-block-wrapper and inject header with language badge + copy button
+function addCodeBlockHeader(codeBlock) {
+    const pre = codeBlock.parentNode;
+    if (pre.tagName !== 'PRE') return;
+    if (pre.parentNode.classList.contains('code-block-wrapper')) return; // already wrapped
+
+    // Build wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block-wrapper';
+
+    // Build header
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+
+    const lang = detectLanguage(codeBlock);
+
+    // Left side: language badge + optional filename
+    const leftSide = document.createElement('div');
+    leftSide.style.display = 'flex';
+    leftSide.style.alignItems = 'center';
+    leftSide.style.gap = '0.5rem';
+    leftSide.style.minWidth = '0';
+
+    if (lang) {
+        const badge = document.createElement('span');
+        badge.className = 'code-lang-badge';
+        badge.textContent = lang;
+        leftSide.appendChild(badge);
+    }
+
+    // Optional filename from data-filename attribute on <pre>
+    const filename = pre.getAttribute('data-filename');
+    if (filename) {
+        const filenameSpan = document.createElement('span');
+        filenameSpan.className = 'code-filename';
+        filenameSpan.textContent = filename;
+        leftSide.appendChild(filenameSpan);
+    }
+
+    header.appendChild(leftSide);
+
+    // Copy button
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-button';
+    copyBtn.textContent = 'Kopírovat'; // matches existing Czech label
+    copyBtn.addEventListener('click', function () {
+        const code = codeBlock.getAttribute('data-original') || codeBlock.textContent;
+        navigator.clipboard.writeText(code).then(function () {
+            copyBtn.textContent = 'Zkopírováno!';
+            copyBtn.classList.add('copied');
+            setTimeout(function () {
+                copyBtn.textContent = 'Kopírovat';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        }).catch(function (err) {
+            console.error('Copy failed:', err);
+            copyBtn.textContent = 'Chyba!';
+            setTimeout(function () { copyBtn.textContent = 'Kopírovat'; }, 2000);
+        });
+    });
+    header.appendChild(copyBtn);
+
+    // Insert wrapper: replace <pre> with wrapper containing header + pre
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(header);
+    wrapper.appendChild(pre);
+}
+
+// Add line numbers — unchanged from original
 function addLineNumbers(codeBlock) {
-    // Preserve original content for copy functionality
     const originalContent = codeBlock.textContent;
     codeBlock.setAttribute('data-original', originalContent);
 
-    // Create line numbers container
     const lineNumbersContainer = document.createElement('div');
     lineNumbersContainer.className = 'line-numbers-rows';
 
-    // Count lines (excluding empty last line)
     const lines = originalContent.split('\n');
     const lineCount = lines[lines.length - 1].trim() === '' ? lines.length - 1 : lines.length;
 
-    // Add line numbers
     for (let i = 1; i <= lineCount; i++) {
         const lineNumber = document.createElement('span');
         lineNumber.textContent = i;
         lineNumbersContainer.appendChild(lineNumber);
     }
 
-    // Insert line numbers before code
     const pre = codeBlock.parentNode;
     pre.insertBefore(lineNumbersContainer, codeBlock);
 }
 
-// Function to add copy button to code blocks
-function addCopyButton(codeBlock) {
-    const pre = codeBlock.parentNode;
-
-    // Skip if already has a copy button
-    if (pre.querySelector('.copy-button')) {
-        return;
-    }
-
-    const copyButton = document.createElement('button');
-    copyButton.className = 'copy-button';
-    copyButton.textContent = 'Kopírovat';
-
-    copyButton.addEventListener('click', () => {
-        // Get original text content without line numbers
-        const code = codeBlock.getAttribute('data-original') || codeBlock.textContent;
-
-        // Copy to clipboard
-        navigator.clipboard.writeText(code).then(() => {
-            copyButton.textContent = 'Zkopírováno!';
-            setTimeout(() => {
-                copyButton.textContent = 'Kopírovat';
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
-            copyButton.textContent = 'Chyba!';
-            setTimeout(() => {
-                copyButton.textContent = 'Kopírovat';
-            }, 2000);
-        });
-    });
-
-    pre.appendChild(copyButton);
-}
-
-// Function to process Augment code snippets
+// processAugmentCodeSnippets — unchanged from original
 function processAugmentCodeSnippets() {
-    document.querySelectorAll('augment_code_snippet').forEach(function(snippet) {
-        // Get attributes
+    document.querySelectorAll('augment_code_snippet').forEach(function (snippet) {
         const filePath = snippet.getAttribute('path') || 'example.php';
-        const mode = snippet.getAttribute('mode') || 'EXCERPT';
 
-        // Create wrapper
         const wrapper = document.createElement('div');
         wrapper.className = 'augment-code-snippet';
 
-        // Create header
         const header = document.createElement('div');
         header.className = 'augment-code-snippet-header';
 
-        // Create file path display
         const filePathDisplay = document.createElement('span');
         filePathDisplay.className = 'file-path';
         filePathDisplay.textContent = filePath;
         header.appendChild(filePathDisplay);
 
-        // Create view full file button
         const viewButton = document.createElement('button');
         viewButton.className = 'view-full-file';
         viewButton.textContent = 'Zobrazit celý soubor';
-        viewButton.addEventListener('click', () => {
-            // This would typically open the full file in a modal or navigate to it
-            alert(`Zobrazení celého souboru: ${filePath}`);
+        viewButton.addEventListener('click', function () {
+            alert('Zobrazení celého souboru: ' + filePath);
         });
         header.appendChild(viewButton);
 
-        // Add header to wrapper
         wrapper.appendChild(header);
 
-        // Move the pre element inside the wrapper
         const pre = snippet.querySelector('pre');
         if (pre) {
             const clonedPre = pre.cloneNode(true);
             wrapper.appendChild(clonedPre);
-
-            // Process the code block inside
             const codeBlock = clonedPre.querySelector('code');
             if (codeBlock) {
                 addLineNumbers(codeBlock);
-                addCopyButton(codeBlock);
+                addCodeBlockHeader(codeBlock);
             }
         }
 
-        // Replace the original snippet with the new wrapper
         snippet.parentNode.replaceChild(wrapper, snippet);
     });
 }
 
-// Function to handle XML tags in code
 function processXmlTags() {
-    document.querySelectorAll('pre code').forEach(function(codeBlock) {
-        // Replace < with &lt; in XML tags
+    document.querySelectorAll('pre code').forEach(function (codeBlock) {
         let content = codeBlock.innerHTML;
         content = content.replace(/&lt;(\/?[a-zA-Z0-9_:-]+)&gt;/g, '<span class="xml-tag">&lt;$1&gt;</span>');
         codeBlock.innerHTML = content;
