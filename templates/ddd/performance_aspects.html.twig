@@ -60,7 +60,7 @@
         agregáty, nevhodným lazy loadingem nebo absencí read modelu — nikoli samotným DDD.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>DDD vs. výkon: mýty a realita</h4>
         <ul>
             <li><strong>Mýtus:</strong> DDD je vždy pomalejší než anémický model (anemic domain model). <strong>Realita:</strong> Správně navržené DDD s CQRS a optimalizovanými repozitáři je srovnatelně rychlé, protože read side nepotřebuje vůbec načítat doménové objekty.</li>
@@ -75,7 +75,7 @@
         či tisíce položek, nebo systémy s vysokou frekvencí čtení, kde je každý milisekund důležitý.
     </p>
 
-    <div class="warning-box" role="alert" aria-labelledby="profiling-zacatek-heading">
+    <div class="warning-card" role="alert" aria-labelledby="profiling-zacatek-heading">
         <h4 id="profiling-zacatek-heading">Zlaté pravidlo optimalizace</h4>
         <p>
             <strong>Nikdy neoptimalizujte naslepo.</strong> Každá optimalizace musí být podložena měřením.
@@ -94,7 +94,7 @@
         pro načtení asociovaných dat — celkem tedy N+1 SQL dotazů místo optimálních 1–2 dotazů.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Přesná definice N+1 problému</h4>
         <p>
             Pokud načteme N agregátů <code>Order</code> a každý agregát obsahuje kolekci <code>OrderItem</code>
@@ -104,7 +104,7 @@
         </p>
     </div>
 
-    <div class="example-box" role="note" aria-labelledby="n1-bad-heading">
+    <div class="example-card" role="note" aria-labelledby="n1-bad-heading">
         <h4 id="n1-bad-heading">Příklad: kód způsobující N+1 problém</h4>
         <pre><code class="language-php">&lt;?php
 // Tento kód způsobí N+1 problém!
@@ -134,7 +134,7 @@ foreach ($orders as $order) {
         bez načtení celé kolekce do paměti.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="extra-lazy-heading">
+    <div class="example-card" role="note" aria-labelledby="extra-lazy-heading">
         <h4 id="extra-lazy-heading">Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -182,7 +182,7 @@ class Order
         objektů v jediném SQL dotazu s LEFT JOIN nebo INNER JOIN.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="join-fetch-heading">
+    <div class="example-card" role="note" aria-labelledby="join-fetch-heading">
         <h4 id="join-fetch-heading">Příklad: JOIN FETCH v DQL a Query Builderu</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -257,7 +257,7 @@ class DoctrineOrderRepository implements OrderRepository
         objektový graf, i když potřebujeme jen malou část dat.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Příznak příliš velkého agregátu</h4>
         <ul>
             <li>Načtení agregátu trvá neúměrně dlouho, i když používáme jen jeho kořen.</li>
@@ -267,7 +267,7 @@ class DoctrineOrderRepository implements OrderRepository
         </ul>
     </div>
 
-    <div class="example-box" role="note" aria-labelledby="big-aggregate-heading">
+    <div class="example-card" role="note" aria-labelledby="big-aggregate-heading">
         <h4 id="big-aggregate-heading">Příklad: problematický Order agregát s 1000 OrderItems</h4>
         <pre><code class="language-php">&lt;?php
 // PROBLÉM: Každé načtení Order způsobí SELECT s 1000 řádky z order_item,
@@ -290,7 +290,7 @@ echo $order->getCustomer()->getFullName();</code></pre>
         agregát odkazující na <code>OrderId</code>.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="split-aggregate-heading">
+    <div class="example-card" role="note" aria-labelledby="split-aggregate-heading">
         <h4 id="split-aggregate-heading">Příklad: specializované repozitářní metody pro různé kontexty</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -350,7 +350,7 @@ class DoctrineOrderRepository
         potřebám uživatelského rozhraní nebo API klienta.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Zásady read modelu v CQRS</h4>
         <ul>
             <li>Query handlery <strong>nepoužívají doménové repozitáře</strong> — přistupují přímo k databázi přes DQL nebo nativní SQL.</li>
@@ -360,7 +360,7 @@ class DoctrineOrderRepository
         </ul>
     </div>
 
-    <div class="example-box" role="note" aria-labelledby="query-handler-dto-heading">
+    <div class="example-card" role="note" aria-labelledby="query-handler-dto-heading">
         <h4 id="query-handler-dto-heading">Příklad: QueryHandler vracející DTO přes DQL</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -431,7 +431,7 @@ final class GetOrderSummaryListHandler
         výsledků přes <code>ResultSetMapping</code>.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="native-query-heading">
+    <div class="example-card" role="note" aria-labelledby="native-query-heading">
         <h4 id="native-query-heading">Příklad: NativeQuery s ResultSetMapping pro reportovací dotaz</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -494,7 +494,7 @@ final class SalesReportQueryService
         a optimistické paralelní vytváření agregátů.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Výhody UUID pro DDD</h4>
         <ul>
             <li>Identita je generována v doméně — agregát je kompletní před persistencí.</li>
@@ -518,7 +518,7 @@ final class SalesReportQueryService
         jako u auto-increment integeru, ale se zachováním globální unikátnosti bez centrálního generátoru.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="uuid-symfony-heading">
+    <div class="example-card" role="note" aria-labelledby="uuid-symfony-heading">
         <h4 id="uuid-symfony-heading">Příklad: Použití symfony/uid (ULID a UUID v7)</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -588,7 +588,7 @@ final class UserId
 }</code></pre>
     </div>
 
-    <div class="example-box" role="note" aria-labelledby="doctrine-uuid-mapping-heading">
+    <div class="example-card" role="note" aria-labelledby="doctrine-uuid-mapping-heading">
         <h4 id="doctrine-uuid-mapping-heading">Doctrine mapování pro ULID a UUID</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -634,7 +634,7 @@ class Order
         bez opakovaného SQL dotazu.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Identity Map a Unit of Work — co to znamená pro DDD</h4>
         <ul>
             <li><strong>Konzistence v rámci requestu:</strong> Všechny části kódu vidí tentýž stav agregátu — žádné nekonzistentní kopie.</li>
@@ -652,7 +652,7 @@ class Order
         musí procházet stále větší množinu spravovaných objektů.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="batch-em-clear-heading">
+    <div class="example-card" role="note" aria-labelledby="batch-em-clear-heading">
         <h4 id="batch-em-clear-heading">Příklad: správné clearování Entity Manageru při batch operacích</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -703,7 +703,7 @@ final class ImportProductsHandler
 }</code></pre>
     </div>
 
-    <div class="warning-box" role="alert" aria-labelledby="em-clear-warning-heading">
+    <div class="warning-card" role="alert" aria-labelledby="em-clear-warning-heading">
         <h4 id="em-clear-warning-heading">Pozor na clear() a detached entity</h4>
         <p>
             Po zavolání <code>$this->em->clear()</code> jsou <strong>všechny</strong> spravované entity odpojeny
@@ -724,7 +724,7 @@ final class ImportProductsHandler
         nikoli pro doménová rozhodnutí.
     </p>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Co cachovat a co ne</h4>
         <ul>
             <li><strong>Vhodné pro cache:</strong> výsledky read modelu (DTO), výsledky reportovacích dotazů, výsledky volání externích API, výpočetně náročné projekce.</li>
@@ -742,7 +742,7 @@ final class ImportProductsHandler
         <li><strong>Result cache:</strong> cachuje výsledky SQL dotazu. Musí být explicitně nakonfigurován a invalidován při změnách dat. Vhodný pro read-heavy dotazy s řízenou dobou platnosti.</li>
     </ul>
 
-    <div class="example-box" role="note" aria-labelledby="cached-repo-heading">
+    <div class="example-card" role="note" aria-labelledby="cached-repo-heading">
         <h4 id="cached-repo-heading">Příklad: CachedUserRepository (Decorator pattern)</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -826,7 +826,7 @@ final class CachedUserRepository implements UserRepository
         Tím se cache invalidace stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="cache-event-heading">
+    <div class="example-card" role="note" aria-labelledby="cache-event-heading">
         <h4 id="cache-event-heading">Cache invalidace přes Symfony EventDispatcher</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -872,7 +872,7 @@ final class InvalidateUserCacheOnEmailChanged
         Je nutné zavolat <code>clear()</code>.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="bulk-import-heading">
+    <div class="example-card" role="note" aria-labelledby="bulk-import-heading">
         <h4 id="bulk-import-heading">Příklad: efektivní bulk import s Doctrine</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -958,7 +958,7 @@ final class BatchProductImportHandler
         čímž jsou paměťové nároky a doba zpracování jedné zprávy předvídatelné.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="messenger-bulk-heading">
+    <div class="example-card" role="note" aria-labelledby="messenger-bulk-heading">
         <h4 id="messenger-bulk-heading">Rozložení bulk importu přes Symfony Messenger</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -1014,7 +1014,7 @@ final class StartProductImportHandler
         lze Doctrine konfigurovat s vlastním SQL loggerem.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="doctrine-logging-heading">
+    <div class="example-card" role="note" aria-labelledby="doctrine-logging-heading">
         <h4 id="doctrine-logging-heading">Programatické zachycení SQL dotazů přes Doctrine Middleware</h4>
         <pre><code class="language-php">&lt;?php
 // V Doctrine DBAL 3+ se logging provádí přes Middleware (ne SQLLogger)
@@ -1068,7 +1068,7 @@ final class QueryCountingMiddleware implements Middleware
         (Blackfire Builds) jako součást CI/CD pipeline, čímž zabraňuje výkonnostním regresím.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="profiler-tip-heading">
+    <div class="example-card" role="note" aria-labelledby="profiler-tip-heading">
         <h4 id="profiler-tip-heading">Interpretace SQL dotazů v Symfony Profileru — praktický postup</h4>
         <ol>
             <li>Otevřete Symfony Profiler panel <strong>Doctrine</strong> a seřaďte dotazy podle doby trvání.</li>
@@ -1079,7 +1079,7 @@ final class QueryCountingMiddleware implements Middleware
         </ol>
     </div>
 
-    <div class="warning-box" role="alert" aria-labelledby="premature-opt-heading">
+    <div class="warning-card" role="alert" aria-labelledby="premature-opt-heading">
         <h4 id="premature-opt-heading">Varování: neprovádějte předčasnou optimalizaci</h4>
         <p>
             Optimalizujte <strong>pouze</strong> na základě naměřených dat. Každá optimalizace — přidání cache,
