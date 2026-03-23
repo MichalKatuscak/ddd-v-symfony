@@ -1,83 +1,81 @@
-// Modern Script for DDD Symfony Guide
+// modern-script.js — Dark Mode Redesign
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Mobile Navigation Toggle
-    const menuToggle = document.querySelector('.menu-toggle');
-    const mainNav = document.querySelector('.main-nav');
+document.addEventListener('DOMContentLoaded', function () {
 
-    if (menuToggle && mainNav) {
-        menuToggle.addEventListener('click', function() {
-            mainNav.classList.toggle('show');
-            menuToggle.setAttribute('aria-expanded',
-                menuToggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
-            );
+    // ── Sidebar toggle (mobile) ──────────────────────────────────────────────
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.querySelector('.sidebar-backdrop');
+
+    function openSidebar() {
+        sidebar.classList.add('open');
+        backdrop.classList.add('active');
+        sidebarToggle.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('active');
+        sidebarToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function () {
+            sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
         });
     }
 
-    // Scroll to Top Button
-    const scrollToTopBtn = document.querySelector('.scroll-to-top');
+    if (backdrop) {
+        backdrop.addEventListener('click', closeSidebar);
+    }
 
-    if (scrollToTopBtn) {
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                scrollToTopBtn.classList.add('show');
-            } else {
-                scrollToTopBtn.classList.remove('show');
-            }
+    // Close sidebar when a nav link is clicked (mobile)
+    document.querySelectorAll('.sidebar-nav-link').forEach(function (link) {
+        link.addEventListener('click', function () {
+            if (window.innerWidth <= 1024) closeSidebar();
         });
+    });
 
-        scrollToTopBtn.addEventListener('click', function() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+    // ── Scroll to top ────────────────────────────────────────────────────────
+    const scrollBtn = document.querySelector('.scroll-to-top');
+    if (scrollBtn) {
+        window.addEventListener('scroll', function () {
+            scrollBtn.classList.toggle('show', window.pageYOffset > 300);
+        });
+        scrollBtn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
-    // Add smooth scrolling to all links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    // ── Smooth anchor scrolling ──────────────────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-
             if (href !== '#' && href.startsWith('#')) {
-                e.preventDefault();
-
-                const targetElement = document.querySelector(this.getAttribute('href'));
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-
-                    // Update URL without page jump
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth' });
                     history.pushState(null, null, href);
                 }
             }
         });
     });
 
-    // Code highlighting enhancement
-    document.querySelectorAll('pre code').forEach((block) => {
-        // Add copy button
-        const pre = block.parentNode;
-        const copyButton = document.createElement('button');
-        copyButton.className = 'copy-button';
-        copyButton.textContent = 'Kopírovat';
-
-        copyButton.addEventListener('click', () => {
-            const code = block.innerText;
-            navigator.clipboard.writeText(code).then(() => {
-                copyButton.textContent = 'Zkopírováno!';
-                setTimeout(() => {
-                    copyButton.textContent = 'Kopírovat';
-                }, 2000);
-            });
-        });
-
-        pre.appendChild(copyButton);
+    // ── Heading anchor links ─────────────────────────────────────────────────
+    document.querySelectorAll('h2[id], h3[id], h4[id]').forEach(function (heading) {
+        const anchor = document.createElement('a');
+        anchor.className = 'anchor-link';
+        anchor.href = '#' + heading.id;
+        anchor.textContent = '§';
+        anchor.setAttribute('aria-label', 'Link na tuto sekci');
+        heading.appendChild(anchor);
     });
 
-    // Table responsiveness
-    document.querySelectorAll('table').forEach(table => {
+    // ── Table responsiveness ─────────────────────────────────────────────────
+    document.querySelectorAll('table').forEach(function (table) {
         if (!table.parentElement.classList.contains('table-responsive')) {
             const wrapper = document.createElement('div');
             wrapper.className = 'table-responsive';
@@ -86,31 +84,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add active class to current nav item
-    const currentPath = window.location.pathname;
-    document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('href') === currentPath) {
-            link.classList.add('active');
-        }
-    });
+    // ── Fade-in observer (updated class names) ───────────────────────────────
+    const fadeTargets = document.querySelectorAll(
+        '.card, .info-card, .warning-card, .example-card, .practice-card, .success-card'
+    );
+    if (fadeTargets.length > 0) {
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        fadeTargets.forEach(function (el) { observer.observe(el); });
+    }
 
-    // Placeholder for future enhancements
-
-    // Add fade-in animation to elements as they scroll into view
-    const fadeElements = document.querySelectorAll('.card, .concept-box, .warning-box, .example-box');
-
-    const fadeInObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('fade-in');
-                fadeInObserver.unobserve(entry.target);
-            }
-        });
-    }, {
-        threshold: 0.1
-    });
-
-    fadeElements.forEach(element => {
-        fadeInObserver.observe(element);
-    });
 });
