@@ -1,0 +1,1005 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Migrace z CRUD architektury na DDD v Symfony | DDD Symfony{% endblock %}
+
+{% block meta_description %}Komplexní průvodce migrací z CRUD architektury na Domain-Driven Design v Symfony. Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a postupné zavedení CQRS s praktickými PHP příklady.{% endblock %}
+
+{% block meta_keywords %}migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Migrace z CRUD architektury na DDD v Symfony",
+          "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "publisher": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "2026-03-23",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+    </script>
+{% endblock %}
+
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+        <h2 itemprop="headline">Migrace z CRUD architektury na DDD</h2>
+
+        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+            <h5 id="toc-heading">Obsah kapitoly:</h5>
+            <ul>
+                <li><a href="#kdy-migrovat">Kdy a proč migrovat z CRUD na DDD</a></li>
+                <li><a href="#strangler-fig">Strangler Fig Pattern – vzor postupné náhrady</a></li>
+                <li><a href="#analyza-domeny">Krok 1: Analýza existující domény</a></li>
+                <li><a href="#extrakce-domainove-vrstvy">Krok 2: Extrakce doménové vrstvy</a></li>
+                <li><a href="#zavedeni-repozitaru">Krok 3: Zavedení repozitářů</a></li>
+                <li><a href="#cqrs-postupne">Krok 4: Postupné zavedení CQRS</a></li>
+                <li><a href="#testovani-pri-migraci">Testování při migraci</a></li>
+                <li><a href="#rizika-a-doporuceni">Rizika a doporučení</a></li>
+            </ul>
+        </div>
+
+        <section id="kdy-migrovat" aria-labelledby="kdy-migrovat-heading">
+            <h3 id="kdy-migrovat-heading">Kdy a proč migrovat z CRUD na DDD</h3>
+            <p>
+                CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
+                Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
+                komplexní logiky – je CRUD zcela dostačující a přidávání vrstev DDD by bylo přebytečným inženýrstvím.
+                Problém nastává tehdy, kdy se aplikace postupem času stává komplexnější a byznys logika začíná pronikat
+                na nevhodná místa.
+            </p>
+
+            <div class="info-card" role="note" aria-labelledby="priznaky-heading">
+                <h4 id="priznaky-heading">Příznaky, že CRUD architektura nestačí</h4>
+                <ul>
+                    <li>
+                        <strong>God Services (Boží služby)</strong> – Třídy jako <code>UserService</code> nebo
+                        <code>OrderService</code> obsahují stovky řádků kódu a stávají se centrálním místem pro
+                        veškerou byznys logiku. Přidání jakékoli nové funkce vyžaduje zásah do stejné třídy a
+                        riziko regresí roste.
+                    </li>
+                    <li>
+                        <strong>Fat Controllers (Tlusté kontrolery)</strong> – Symfony kontrolery přestaly být
+                        tenkou vrstvou pro HTTP adaptaci a místo toho přímo implementují byznys pravidla:
+                        validaci, výpočty, přechody stavů. Kontroler by měl delegovat na doménový model, nikoli
+                        ho suplovat.
+                    </li>
+                    <li>
+                        <strong>Byznys logika v repozitářích</strong> – Doctrine repozitáře obsahují komplexní
+                        podmínky, které vyjadřují byznys pravidla (např. "objednávky, které je možné zrušit").
+                        Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
+                    </li>
+                    <li>
+                        <strong>Překrývání zodpovědností</strong> – Není jasné, zda konkrétní pravidlo patří do
+                        kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
+                    </li>
+                    <li>
+                        <strong>Nízká testovatelnost</strong> – Byznys logika je neoddělitelně svázána s HTTP
+                        vrstvou nebo databází. Napsání unit testu pro byznys pravidlo vyžaduje rozsáhlý mocking.
+                    </li>
+                    <li>
+                        <strong>Komunikační propast</strong> – Vývojáři a doménoví experti používají jiný slovník.
+                        Kód neodráží jazyk businessu; pojmy jako "aktivace účtu" nebo "storno objednávky" nejsou
+                        viditelné v názvech tříd a metod.
+                    </li>
+                </ul>
+            </div>
+
+            <h4>Kdy DDD přináší hodnotu a kdy je CRUD dostačující</h4>
+            <p>
+                Rozhodnutí o migraci by mělo být podloženo analýzou komplexity domény, nikoli módními trendy.
+                Martin Fowler ve své práci o architektonických vzorech upozorňuje, že aplikace Transaction Script
+                (a jeho specializace CRUD) jsou zcela legitimní pro aplikace s jednoduchými byznys pravidly
+                <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank">[1]</a>.
+            </p>
+
+            <div class="info-card" role="note" aria-labelledby="kdy-ddd-heading">
+                <h4 id="kdy-ddd-heading">Kdy DDD přináší hodnotu</h4>
+                <ul>
+                    <li>Doména obsahuje komplexní byznys pravidla, která se často mění.</li>
+                    <li>Existují přechody stavů entit (objednávka: vytvořena → potvrzena → odeslána → doručena).</li>
+                    <li>Tým komunikuje s doménovými experty a potřebuje sdílený jazyk.</li>
+                    <li>Aplikace je dlouhodobě rozvíjena a musí být udržovatelná v horizontu let.</li>
+                    <li>Existuje více Bounded Contexts s odlišnými pohledy na stejné entity.</li>
+                </ul>
+                <h4>Kdy zůstat u CRUD</h4>
+                <ul>
+                    <li>Aplikace je v podstatě CRUD nad databázovými tabulkami bez byznys logiky.</li>
+                    <li>Doménová pravidla jsou triviální a stabilní.</li>
+                    <li>Tým je malý a čas na migraci není dostupný.</li>
+                    <li>Aplikace je krátkodobá nebo se bude v blízké budoucnosti kompletně přepisovat.</li>
+                </ul>
+            </div>
+
+            <h4>Realistické zhodnocení nákladů migrace</h4>
+            <p>
+                Migrace z CRUD na DDD není jednorázová akce. Je to kontinuální proces, který může trvat měsíce
+                až roky v závislosti na velikosti kódové základny. Je důležité si uvědomit, že migrace sama o sobě
+                nepřináší okamžitou hodnotu pro zákazníka – hodnotu přinese až zlepšená schopnost rychleji a bezpečněji
+                přidávat nové funkcionality. Tým by měl management přesvědčit tím, že migraci provádí inkrementálně
+                souběžně s vývojem nových funkcionalit, nikoli jako izolovaný refaktoringový projekt.
+            </p>
+        </section>
+
+        <section id="strangler-fig" aria-labelledby="strangler-fig-heading">
+            <h3 id="strangler-fig-heading">Strangler Fig Pattern – vzor postupné náhrady</h3>
+            <p>
+                Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
+                <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank">[2]</a>,
+                která umožňuje postupnou náhradu starého systému novým bez nutnosti "big bang" přepisu. Název pochází
+                od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
+            </p>
+
+            <div class="info-card" role="note" aria-labelledby="strangler-princip-heading">
+                <h4 id="strangler-princip-heading">Princip fungování</h4>
+                <ol>
+                    <li>
+                        <strong>Nová funkcionalita</strong> je vždy implementována v DDD stylu – nové Bounded Contexts,
+                        doménové objekty, repozitáře.
+                    </li>
+                    <li>
+                        <strong>Stará funkcionalita</strong> zůstává v CRUD podobě a je postupně nahrazována při
+                        refaktoringu nebo při úpravách stávajících funkcí.
+                    </li>
+                    <li>
+                        <strong>Koexistence</strong> – obě části systému fungují paralelně a jsou propojeny přes
+                        Anti-Corruption Layer nebo sdílenou databázi.
+                    </li>
+                    <li>
+                        <strong>Postupná eliminace</strong> – s každou iterací se CRUD část zmenšuje a DDD část roste,
+                        dokud starý kód zcela nevymizí.
+                    </li>
+                </ol>
+            </div>
+
+            <div class="example-card" role="note" aria-labelledby="strangler-struktura-heading">
+                <h4 id="strangler-struktura-heading">Příklad: Koexistence CRUD a DDD ve struktuře projektu</h4>
+                <pre><code class="language-bash">src/
+├── Controller/                    # Stará CRUD vrstva (postupně se zmenšuje)
+│   ├── UserController.php         # Původní CRUD kontroler
+│   └── OrderController.php        # Původní CRUD kontroler
+│
+├── Service/                       # Stará service vrstva (God Services)
+│   ├── UserService.php            # Bude nahrazena DDD vrstvou
+│   └── OrderService.php           # Bude nahrazena DDD vrstvou
+│
+├── Entity/                        # Doctrine entity (sdílené nebo duplikované)
+│   ├── User.php
+│   └── Order.php
+│
+└── UserManagement/                # Nová DDD vrstva (postupně roste)
+    ├── Domain/
+    │   ├── Model/
+    │   │   ├── User.php           # Doménová entita (ne Doctrine entita)
+    │   │   └── Email.php          # Value Object
+    │   ├── Repository/
+    │   │   └── UserRepository.php # Doménové rozhraní
+    │   └── Event/
+    │       └── UserRegistered.php # Domain Event
+    ├── Application/
+    │   ├── Command/
+    │   │   ├── RegisterUser.php
+    │   │   └── RegisterUserHandler.php
+    │   └── Query/
+    │       ├── GetUserProfile.php
+    │       └── GetUserProfileHandler.php
+    └── Infrastructure/
+        └── Persistence/
+            └── DoctrineUserRepository.php  # Implementace repozitáře</code></pre>
+            </div>
+
+            <h4>Výhody oproti přímé refaktorizaci (Big Bang Rewrite)</h4>
+            <p>
+                Přímý přepis celého systému najednou (tzv. "big bang rewrite") je považován za jedno z největších rizik
+                v softwarovém vývoji. Joel Spolsky ve svém slavném článku "Things You Should Never Do"
+                <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/" target="_blank">[3]</a>
+                popisuje, proč firmy ztratily konkurenční výhodu tím, že kompletně přepsaly fungující systémy.
+                Strangler Fig Pattern oproti tomu:
+            </p>
+            <ul>
+                <li>Umožňuje kontinuální dodávku nové hodnoty zákazníkovi i během migrace.</li>
+                <li>Snižuje riziko – systém nikdy není kompletně "rozbitý".</li>
+                <li>Poskytuje možnost rollbacku: pokud nová implementace selhává, stará stále funguje.</li>
+                <li>Umožňuje týmu učit se DDD postupně, na reálném produkčním kódu.</li>
+                <li>Refaktoring lze zastavit kdykoli – systém zůstává v konzistentním, funkčním stavu.</li>
+            </ul>
+        </section>
+
+        <section id="analyza-domeny" aria-labelledby="analyza-domeny-heading">
+            <h3 id="analyza-domeny-heading">Krok 1: Analýza existující domény</h3>
+            <p>
+                Než začneme přesouvat kód, musíme pochopit doménu. Nejčastější chybou je přímý skok do refaktoringu
+                bez předchozí analýzy – výsledkem je pak DDD architektura, která přesně kopíruje strukturu starých
+                databázových tabulek, aniž by odrážela skutečný doménový model.
+            </p>
+
+            <h4>Identifikace Bounded Contexts z existujícího CRUD kódu</h4>
+            <p>
+                Bounded Contexts lze v existující CRUD aplikaci identifikovat sledováním přirozených hranic:
+            </p>
+            <ul>
+                <li>
+                    <strong>Skupiny entit a tabulek</strong>, které jsou silně provázané navzájem, ale slabě propojené
+                    s ostatními skupinami – to jsou kandidáti na jeden Bounded Context.
+                </li>
+                <li>
+                    <strong>God Services</strong> – velké service třídy jsou paradoxně dobrým vodítkem. Pokud
+                    <code>OrderService</code> obsahuje logiku objednávky, platby i doručení, jsou to tři různé
+                    Bounded Contexts skryté v jedné třídě.
+                </li>
+                <li>
+                    <strong>Opakující se slovo s různým významem</strong> – pokud "zákazník" v kontextu prodeje
+                    znamená něco jiného než "zákazník" v kontextu zákaznické podpory, jde o přirozené rozhraní
+                    dvou Bounded Contexts.
+                </li>
+            </ul>
+
+            <h4>Event Storming jako nástroj pro analýzu</h4>
+            <p>
+                Event Storming je workshopová technika navržená Albertem Brandolinim
+                <a href="https://www.eventstorming.com/" target="_blank">[4]</a>, která umožňuje kolaborativně
+                modelovat doménu prostřednictvím doménových událostí. V kontextu migrace z CRUD je velmi užitečná
+                pro:
+            </p>
+            <ul>
+                <li>Odkrytí implicitní byznys logiky skryté v kontrolerech a service třídách.</li>
+                <li>Identifikaci přechodů stavů entit (z pohledu businessu, nikoli databáze).</li>
+                <li>Nalezení přirozených hranic Bounded Contexts.</li>
+                <li>Zapojení doménových expertů do návrhu nové architektury.</li>
+            </ul>
+
+            <div class="example-card" role="note" aria-labelledby="crud-before-heading">
+                <h4 id="crud-before-heading">Příklad: Identifikace doménové logiky v CRUD kontroleru</h4>
+                <p>
+                    Následující příklad ilustruje typický CRUD kontroler, ve kterém je skryta netriviální doménová
+                    logika. Tato logika bude v dalších krocích extrahována do doménového modelu.
+                </p>
+                <pre><code class="language-php">&lt;?php
+
+// PŘED migrací: Typický CRUD kontroler s ukrytou doménovou logikou
+namespace App\Controller;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Doctrine\ORM\EntityManagerInterface;
+
+class UserController extends AbstractController
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    #[Route('/users/register', methods: ['POST'])]
+    public function register(Request $request): Response
+    {
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
+
+        // Doménová logika č. 1: validace emailu (patří do Value Object)
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->json(['error' => 'Neplatný e-mail'], 422);
+        }
+
+        // Doménová logika č. 2: kontrola unikátnosti (patří do doménové služby)
+        $existing = $this->em->getRepository(User::class)
+            ->findOneBy(['email' => $email]);
+        if ($existing) {
+            return $this->json(['error' => 'E-mail již existuje'], 409);
+        }
+
+        // Doménová logika č. 3: hashování hesla a bezpečnostní pravidla
+        if (strlen($password) &lt; 8) {
+            return $this->json(['error' => 'Heslo musí mít alespoň 8 znaků'], 422);
+        }
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+
+        $user = new User();
+        $user->setEmail($email);
+        $user->setPassword($hashedPassword);
+        $user->setCreatedAt(new \DateTimeImmutable());
+        // Doménová logika č. 4: výchozí stav uživatele
+        $user->setStatus('pending_verification');
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        // Doménová logika č. 5: odeslání uvítacího e-mailu
+        // ... (inline kód pro odeslání e-mailu)
+
+        return $this->json(['id' => $user->getId()], 201);
+    }
+}</code></pre>
+                <p>
+                    V tomto kontroleru lze identifikovat nejméně pět oblastí doménové logiky, které patří do
+                    doménového modelu: validace formátu e-mailu, unikátnost e-mailu, bezpečnostní pravidla hesla,
+                    výchozí stav uživatele a side-effect registrace (uvítací e-mail jako Domain Event).
+                </p>
+            </div>
+        </section>
+
+        <section id="extrakce-domainove-vrstvy" aria-labelledby="extrakce-domainove-vrstvy-heading">
+            <h3 id="extrakce-domainove-vrstvy-heading">Krok 2: Extrakce doménové vrstvy</h3>
+            <p>
+                Extrakce doménové vrstvy znamená přesunutí byznys pravidel z kontrolerů a service tříd do doménových
+                objektů. Cílem je, aby doménové objekty samy vynucovaly svá invarianty – pravidla, která musí být
+                vždy splněna, bez ohledu na to, kdo s objektem pracuje.
+            </p>
+
+            <h4>Přesunutí business pravidel do doménových objektů</h4>
+            <p>
+                Refaktoring probíhá ve dvou hlavních krocích: nejprve vytvoříme doménové Value Objects pro primitivní
+                typy nesoucí byznys pravidla, poté extrahujeme logiku do doménových entit a služeb.
+            </p>
+
+            <div class="example-card" role="note" aria-labelledby="before-after-heading">
+                <h4 id="before-after-heading">Příklad: Refaktorizace UserService – before/after</h4>
+                <pre><code class="language-php">&lt;?php
+
+// PŘED: God Service s přímou závislostí na Doctrine
+namespace App\Service;
+
+class UserService
+{
+    public function __construct(
+        private EntityManagerInterface $em,
+        private MailerInterface $mailer
+    ) {}
+
+    public function register(string $email, string $password): User
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Neplatný e-mail');
+        }
+        if (strlen($password) &lt; 8) {
+            throw new \InvalidArgumentException('Heslo příliš krátké');
+        }
+        $existing = $this->em->getRepository(User::class)
+            ->findOneBy(['email' => $email]);
+        if ($existing) {
+            throw new \RuntimeException('E-mail již existuje');
+        }
+
+        $user = new User();
+        $user->setEmail($email);
+        $user->setPassword(password_hash($password, PASSWORD_BCRYPT));
+        $user->setStatus('pending_verification');
+        $this->em->persist($user);
+        $this->em->flush();
+
+        $this->mailer->send(/* uvítací e-mail */);
+
+        return $user;
+    }
+}</code></pre>
+
+                <pre><code class="language-php">&lt;?php
+
+// PO: Doménová entita s vlastními invarianty
+namespace App\UserManagement\Domain\Model;
+
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\Event\UserRegistered;
+
+class User
+{
+    private UserId $id;
+    private Email $email;
+    private HashedPassword $password;
+    private UserStatus $status;
+    private \DateTimeImmutable $registeredAt;
+    private array $domainEvents = [];
+
+    private function __construct(
+        UserId $id,
+        Email $email,
+        HashedPassword $password
+    ) {
+        $this->id = $id;
+        $this->email = $email;
+        $this->password = $password;
+        $this->status = UserStatus::PendingVerification;
+        $this->registeredAt = new \DateTimeImmutable();
+
+        // Doménová událost – side-effect registrace je nyní explicitní
+        $this->domainEvents[] = new UserRegistered($id, $email);
+    }
+
+    // Named constructor vyjadřuje záměr lépe než new User()
+    public static function register(
+        UserId $id,
+        Email $email,
+        HashedPassword $password
+    ): self {
+        return new self($id, $email, $password);
+    }
+
+    public function activate(VerificationToken $token): void
+    {
+        if ($this->status !== UserStatus::PendingVerification) {
+            throw new \DomainException('Uživatel již byl aktivován nebo je zablokován.');
+        }
+        $token->validate(); // Token si validuje sám sebe
+        $this->status = UserStatus::Active;
+    }
+
+    public function releaseEvents(): array
+    {
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
+        return $events;
+    }
+
+    public function id(): UserId { return $this->id; }
+    public function email(): Email { return $this->email; }
+    public function status(): UserStatus { return $this->status; }
+}</code></pre>
+                <p>
+                    Doménová entita <code>User</code> nyní sama vynucuje svá pravidla: výchozí stav, přechod stavu
+                    při aktivaci, emituje Domain Event při registraci. Kontroler ani service nemůže tyto invarianty
+                    obejít.
+                </p>
+            </div>
+
+            <h4>Zavedení Value Objects místo primitive types</h4>
+            <p>
+                Primitive Obsession je code smell, při kterém jsou koncepty s byznys sémantikou reprezentovány
+                primitivními typy jako <code>string</code> nebo <code>int</code>. Value Object nahrazuje primitiv
+                objektem, který zapouzdřuje validaci a chování.
+            </p>
+
+            <div class="example-card" role="note" aria-labelledby="email-vo-heading">
+                <h4 id="email-vo-heading">Příklad: Refaktorizace string emailu na Email Value Object</h4>
+                <pre><code class="language-php">&lt;?php
+
+// PŘED: Email jako string – validace je rozptýlena v celé aplikaci
+class UserController {
+    public function register(Request $request): Response {
+        $email = $request->request->get('email'); // string, nic negarantuje
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { /* ... */ }
+        // ... validace se opakuje na každém místě použití
+    }
+}
+
+// PO: Email jako Value Object – validace je na jednom místě
+namespace App\UserManagement\Domain\ValueObject;
+
+final class Email
+{
+    private string $value;
+
+    public function __construct(string $value)
+    {
+        $normalized = mb_strtolower(trim($value));
+
+        if (!filter_var($normalized, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException(
+                sprintf('"%s" není platná e-mailová adresa.', $value)
+            );
+        }
+
+        // Zakázané domény (byznys pravidlo)
+        $domain = substr($normalized, strpos($normalized, '@') + 1);
+        if (in_array($domain, ['example.com', 'test.com'], true)) {
+            throw new \DomainException(
+                'Registrace z testovacích domén není povolena.'
+            );
+        }
+
+        $this->value = $normalized;
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function domain(): string
+    {
+        return substr($this->value, strpos($this->value, '@') + 1);
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}</code></pre>
+                <p>
+                    Díky Value Objectu <code>Email</code> je validace zapouzdřena na jednom místě. Kdykoli je
+                    vytvořena instance <code>Email</code>, máme garantovanou platnost hodnoty – bez ohledu na to,
+                    kde v aplikaci k vytvoření dochází. Toto je klíčový princip "Make Illegal States Unrepresentable".
+                </p>
+            </div>
+        </section>
+
+        <section id="zavedeni-repozitaru" aria-labelledby="zavedeni-repozitaru-heading">
+            <h3 id="zavedeni-repozitaru-heading">Krok 3: Zavedení repozitářů</h3>
+            <p>
+                V CRUD architektuře se pro přístup k datům typicky používá <code>EntityManagerInterface</code> nebo
+                Doctrine repozitáře přímo v kontrolerech a service třídách. DDD přináší doménové rozhraní repozitáře,
+                které abstrahuje persistenci od domény a umožňuje výměnu implementace (např. přechod z SQL na jiné
+                úložiště) bez změny doménového kódu.
+            </p>
+
+            <h4>Vytvoření doménového rozhraní repozitáře</h4>
+            <p>
+                Doménové rozhraní repozitáře je součástí doménové vrstvy – definuje, jaké operace jsou potřeba
+                z pohledu domény. Neobsahuje žádné zmínky o Doctrine, SQL nebo jiné infrastrukturní technologii.
+            </p>
+
+            <div class="example-card" role="note" aria-labelledby="repository-interface-heading">
+                <h4 id="repository-interface-heading">Příklad: Doménové rozhraní vs. Doctrine implementace</h4>
+                <pre><code class="language-php">&lt;?php
+
+// Doménové rozhraní – součást domény, žádná infrastrukturní závislost
+namespace App\UserManagement\Domain\Repository;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\Model\UserId;
+
+interface UserRepository
+{
+    public function save(User $user): void;
+
+    public function findById(UserId $id): ?User;
+
+    public function findByEmail(Email $email): ?User;
+
+    /** @return User[] */
+    public function findActiveUsers(): array;
+
+    public function nextIdentity(): UserId;
+}</code></pre>
+
+                <pre><code class="language-php">&lt;?php
+
+// Infrastrukturní implementace – obaluje Doctrine EntityManager
+namespace App\UserManagement\Infrastructure\Persistence;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\Model\UserId;
+use Doctrine\ORM\EntityManagerInterface;
+
+final class DoctrineUserRepository implements UserRepository
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    public function save(User $user): void
+    {
+        $this->em->persist($user);
+        // Flush je záměrně ponechán na aplikační vrstvě (Command Handler)
+        // aby byla možná transakční konzistence přes více agregátů
+    }
+
+    public function findById(UserId $id): ?User
+    {
+        return $this->em->find(User::class, $id->value());
+    }
+
+    public function findByEmail(Email $email): ?User
+    {
+        return $this->em->getRepository(User::class)
+            ->findOneBy(['email.value' => $email->value()]);
+    }
+
+    public function findActiveUsers(): array
+    {
+        return $this->em->createQueryBuilder()
+            ->select('u')
+            ->from(User::class, 'u')
+            ->where('u.status = :status')
+            ->setParameter('status', 'active')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function nextIdentity(): UserId
+    {
+        return UserId::generate();
+    }
+}</code></pre>
+                <p>
+                    Doménová vrstva závisí pouze na rozhraní <code>UserRepository</code>. Symfony DI container
+                    zajistí, že do doménových služeb bude injektována <code>DoctrineUserRepository</code>. Díky
+                    tomu lze implementaci repozitáře vyměnit v konfiguračním souboru bez změny doménového kódu.
+                </p>
+            </div>
+
+            <div class="info-card" role="note" aria-labelledby="di-config-heading">
+                <h4 id="di-config-heading">Konfigurace Dependency Injection v Symfony</h4>
+                <pre><code class="language-yaml"># config/services.yaml
+services:
+    App\UserManagement\Domain\Repository\UserRepository:
+        alias: App\UserManagement\Infrastructure\Persistence\DoctrineUserRepository</code></pre>
+                <p>
+                    Tato konfigurace zajistí, že Symfony automaticky injektuje Doctrine implementaci všude tam,
+                    kde je typovaná závislost na doménovém rozhraní <code>UserRepository</code>.
+                </p>
+            </div>
+        </section>
+
+        <section id="cqrs-postupne" aria-labelledby="cqrs-postupne-heading">
+            <h3 id="cqrs-postupne-heading">Krok 4: Postupné zavedení CQRS</h3>
+            <p>
+                Command Query Responsibility Segregation (CQRS) je přirozené rozšíření DDD, avšak jeho zavedení
+                by mělo přijít až poté, co je doménový model dobře etablován. Předčasné zavedení CQRS bez zralého
+                doménového modelu vede k přesunu komplexity z doménové vrstvy do handleru, kde je neviditelná a
+                hůře testovatelná.
+            </p>
+
+            <h4>Začít s Command stranou (write side)</h4>
+            <p>
+                Nejpřirozenějším místem pro zavedení CQRS je write side – operace, které mění stav systému.
+                Query side (čtení) lze zpočátku ponechat s přímými Doctrine dotazy a refaktorovat ji samostatně,
+                nebo ji ponechat jako optimalizované SQL dotazy i v DDD systému (read modely).
+            </p>
+
+            <div class="example-card" role="note" aria-labelledby="command-extraction-heading">
+                <h4 id="command-extraction-heading">Příklad: Extrakce RegisterUserCommand z UserController</h4>
+                <pre><code class="language-php">&lt;?php
+
+// PŘED: Logika přímo v kontroleru nebo service
+namespace App\Controller;
+
+class UserController extends AbstractController
+{
+    public function __construct(
+        private UserService $userService
+    ) {}
+
+    #[Route('/users/register', methods: ['POST'])]
+    public function register(Request $request): Response
+    {
+        // Kontroler musí vědět, jaké parametry service očekává
+        $this->userService->register(
+            $request->request->get('email'),
+            $request->request->get('password'),
+            $request->request->get('name')
+        );
+        return $this->json(['status' => 'ok'], 201);
+    }
+}</code></pre>
+
+                <pre><code class="language-php">&lt;?php
+
+// PO: Command objekt jako explicitní kontrakt
+namespace App\UserManagement\Application\Command;
+
+final readonly class RegisterUser
+{
+    public function __construct(
+        public string $email,
+        public string $password,
+        public string $name,
+    ) {}
+}
+
+// Handler zapouzdřuje aplikační logiku jednoho use case
+namespace App\UserManagement\Application\Command;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Model\UserId;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class RegisterUserHandler
+{
+    public function __construct(
+        private UserRepository $users,
+        private UserRegistrationPolicy $policy,
+    ) {}
+
+    public function __invoke(RegisterUser $command): void
+    {
+        $email = new Email($command->email);
+        $password = HashedPassword::fromPlaintext($command->password);
+
+        // Doménová politika ověřuje byznys pravidla přes repozitář
+        $this->policy->assertEmailIsUnique($email);
+
+        $user = User::register(
+            $this->users->nextIdentity(),
+            $email,
+            $password
+        );
+
+        $this->users->save($user);
+
+        // Domain Events jsou zpracovány Symfony Messengerem
+        foreach ($user->releaseEvents() as $event) {
+            // event dispatch je řešen infrastrukturní vrstvou
+        }
+    }
+}
+
+// Kontroler je nyní tenký – pouze HTTP adaptér
+namespace App\Controller;
+
+use App\UserManagement\Application\Command\RegisterUser;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+class UserController extends AbstractController
+{
+    public function __construct(
+        private MessageBusInterface $commandBus
+    ) {}
+
+    #[Route('/users/register', methods: ['POST'])]
+    public function register(Request $request): Response
+    {
+        $this->commandBus->dispatch(new RegisterUser(
+            email: $request->request->getString('email'),
+            password: $request->request->getString('password'),
+            name: $request->request->getString('name'),
+        ));
+        return $this->json(['status' => 'ok'], 201);
+    }
+}</code></pre>
+                <p>
+                    Command <code>RegisterUser</code> je prosté DTO (Data Transfer Object) bez závislostí. Handler
+                    <code>RegisterUserHandler</code> orchestruje doménový model. Kontroler je redukován na HTTP
+                    vrstvu, která pouze přeloží HTTP požadavek na Command. Tato separace odpovědností výrazně
+                    zlepšuje testovatelnost každé vrstvy zvlášť.
+                </p>
+            </div>
+        </section>
+
+        <section id="testovani-pri-migraci" aria-labelledby="testovani-pri-migraci-heading">
+            <h3 id="testovani-pri-migraci-heading">Testování při migraci</h3>
+            <p>
+                Testování je kritickým aspektem migrace. Bez dostatečného pokrytí testy hrozí, že refaktoring
+                zavede regrese, které jsou odhaleny až v produkci. Strategie testování při migraci z CRUD na DDD
+                kombinuje dvě techniky: charakterizační testy pro zachycení stávajícího chování a postupné
+                doplňování unit testů pro novou doménovou vrstvu.
+            </p>
+
+            <h4>Charakterizační testy (Characterization Tests)</h4>
+            <p>
+                Pojem "charakterizační testy" pochází z knihy Michaela Featherse "Working Effectively with Legacy
+                Code"
+                <a href="https://www.oreilly.com/library/view/working-effectively-with/0131177052/" target="_blank">[5]</a>.
+                Charakterizační test nepopisuje, jaké <em>by mělo být</em> správné chování systému, ale zachycuje
+                jaké chování systém <em>aktuálně má</em>. Slouží jako síť, která zachytí nechtěné změny chování
+                při refaktoringu.
+            </p>
+
+            <div class="example-card" role="note" aria-labelledby="char-test-heading">
+                <h4 id="char-test-heading">Příklad: Charakterizační test pro CRUD kontroler</h4>
+                <pre><code class="language-php">&lt;?php
+
+namespace App\Tests\Characterization;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+/**
+ * Charakterizační testy zachycují AKTUÁLNÍ chování systému.
+ * Jsou záměrně popsány jako "chová se tak, jak se chová",
+ * ne "mělo by se chovat tak a tak".
+ * Pokud refaktoring změní toto chování, test selže a upozorní tým.
+ */
+class UserRegistrationCharacterizationTest extends WebTestCase
+{
+    public function test_registration_returns_201_with_valid_data(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/users/register', [
+            'email' => 'test@example-valid.com',
+            'password' => 'SecurePassword123',
+            'name' => 'Jan Novák',
+        ]);
+
+        // Zachycujeme aktuální HTTP status kód
+        self::assertResponseStatusCodeSame(201);
+    }
+
+    public function test_registration_returns_422_for_invalid_email(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/users/register', [
+            'email' => 'not-an-email',
+            'password' => 'SecurePassword123',
+            'name' => 'Jan Novák',
+        ]);
+
+        // Zachycujeme aktuální chybový kód a strukturu odpovědi
+        self::assertResponseStatusCodeSame(422);
+        $data = json_decode($client->getResponse()->getContent(), true);
+        self::assertArrayHasKey('error', $data);
+    }
+
+    public function test_duplicate_email_returns_409(): void
+    {
+        $client = static::createClient();
+        // První registrace
+        $client->request('POST', '/users/register', [
+            'email' => 'duplicate@example-valid.com',
+            'password' => 'SecurePassword123',
+            'name' => 'Jan Novák',
+        ]);
+        // Druhá registrace se stejným e-mailem
+        $client->request('POST', '/users/register', [
+            'email' => 'duplicate@example-valid.com',
+            'password' => 'AnotherPassword456',
+            'name' => 'Jiný Uživatel',
+        ]);
+
+        self::assertResponseStatusCodeSame(409);
+    }
+}</code></pre>
+                <p>
+                    Charakterizační testy jsou psány <em>před</em> refaktoringem. Cílem je, aby všechny procházely
+                    po celou dobu migrace – selhání testu signalizuje, že refaktoring změnil pozorovatelné chování
+                    systému, ať záměrně nebo omylem.
+                </p>
+            </div>
+
+            <h4>Unit testy doménové vrstvy</h4>
+            <p>
+                Jednou z největších výhod DDD je, že doménové objekty jsou testovatelné v izolaci bez nutnosti
+                databáze, HTTP klienta nebo jiné infrastruktury. Unit testy doménové vrstvy jsou rychlé, deterministické
+                a přesně dokumentují byznys pravidla.
+            </p>
+
+            <div class="info-card" role="note" aria-labelledby="domain-unit-test-heading">
+                <h4 id="domain-unit-test-heading">Příklad: Unit test doménové entity</h4>
+                <pre><code class="language-php">&lt;?php
+
+namespace App\Tests\UserManagement\Domain;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Model\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use PHPUnit\Framework\TestCase;
+
+class UserTest extends TestCase
+{
+    public function test_newly_registered_user_is_pending_verification(): void
+    {
+        $user = User::register(
+            UserId::generate(),
+            new Email('jan@firma.cz'),
+            HashedPassword::fromPlaintext('SecurePass123')
+        );
+
+        self::assertTrue($user->status()->isPendingVerification());
+    }
+
+    public function test_registration_emits_user_registered_event(): void
+    {
+        $user = User::register(
+            UserId::generate(),
+            new Email('jan@firma.cz'),
+            HashedPassword::fromPlaintext('SecurePass123')
+        );
+
+        $events = $user->releaseEvents();
+        self::assertCount(1, $events);
+        self::assertInstanceOf(UserRegistered::class, $events[0]);
+    }
+
+    public function test_cannot_activate_already_active_user(): void
+    {
+        $user = User::register(/* ... */);
+        $token = VerificationToken::valid('abc123');
+        $user->activate($token);
+
+        $this->expectException(\DomainException::class);
+        $user->activate($token); // druhá aktivace musí selhat
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <section id="rizika-a-doporuceni" aria-labelledby="rizika-a-doporuceni-heading">
+            <h3 id="rizika-a-doporuceni-heading">Rizika a doporučení</h3>
+
+            <h4>Nejčastější chyby při migraci</h4>
+            <ul>
+                <li>
+                    <strong>Anémický doménový model</strong> – Nejčastější past. Vývojáři vytvoří třídy s názvem
+                    jako v DDD (<code>User</code>, <code>Order</code>), ale tyto třídy obsahují pouze gettery a
+                    settery bez byznys logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie
+                    s CRUD implementací.
+                </li>
+                <li>
+                    <strong>Přílišná granularita Bounded Contexts</strong> – Rozdělení domény na příliš mnoho
+                    malých kontextů vede k distribuované komplexitě. Každá integrace mezi kontexty přidává overhead.
+                    Začněte s většími kontexty a rozdělujte je až tehdy, když je důvod k tomu jasný.
+                </li>
+                <li>
+                    <strong>Doctrine entity jako doménové entity</strong> – Přímé přidávání DDD logiky do Doctrine
+                    entit je antipattern. Doctrine mapování (anotace, atributy) svazuje doménový objekt s
+                    infrastrukturní technologií. Oddělte doménové entity od persistence mapování.
+                </li>
+                <li>
+                    <strong>CQRS bez doménového modelu</strong> – Zavedení CommandBusu a QueryBusu bez
+                    refaktorovaného doménového modelu přidá vrstvy komplexity bez přínosu. CQRS je amplifikátor
+                    – zesílí jak výhody, tak problémy stávající architektury.
+                </li>
+                <li>
+                    <strong>Ignorování Anti-Corruption Layer</strong> – Při integraci nové DDD vrstvy se starým
+                    CRUD kódem je nutné vytvořit překladovou vrstvu. Bez ní pronikají koncepty starého modelu
+                    do nového a kontaminují ho.
+                </li>
+            </ul>
+
+            <h4>Tipy pro týmovou komunikaci</h4>
+            <ul>
+                <li>
+                    Vytvořte <strong>glosář pojmů</strong> (Ubiquitous Language) a udržujte ho aktuální. Vyvěste
+                    ho na wiki nebo přímo v repozitáři jako součást dokumentace.
+                </li>
+                <li>
+                    Pravidelně pořádejte <strong>krátké Event Storming sessiony</strong> (30–60 minut) pro nové
+                    funkcionality před jejich implementací.
+                </li>
+                <li>
+                    Nastavte <strong>code review pravidla</strong>: byznys logika nesmí být v kontrolerech,
+                    doménové objekty nesmějí záviset na infrastruktuře.
+                </li>
+                <li>
+                    Komunikujte s managementem v pojmech <strong>byznys hodnoty</strong>, nikoli technické
+                    architektury. Migrace na DDD = schopnost rychleji a bezpečněji přidávat nové funkce.
+                </li>
+            </ul>
+
+            <h4>Realistické odhady náročnosti</h4>
+            <p>
+                Zkušenosti z praxe ukazují, že migrace středně velké CRUD aplikace (50–100 tabulek, 3–5 let vývoje)
+                na DDD architekturu trvá při inkrementálním přístupu 12 až 24 měsíců. Tato čísla předpokládají,
+                že migrace probíhá souběžně s vývojem nových funkcionalit a nevěnuje se jí dedikovaný tým na
+                plný úvazek. Faktory, které dobu prodlužují: špatná testovatelnost stávajícího kódu (nutnost
+                psát charakterizační testy), nedostatečná znalost domény v týmu, absence doménových expertů.
+            </p>
+
+            <div class="warning-card" role="alert" aria-labelledby="big-bang-warning-heading">
+                <h4 id="big-bang-warning-heading">Varování před Big Bang Rewrites</h4>
+                <p>
+                    <strong>Nikdy nezačínejte migraci na DDD kompletním přepisem systému.</strong> Big Bang Rewrite
+                    je architektonicky nejrizikovější rozhodnutí, které může tým učinit. Typický scénář:
+                    tým začne "přepis na zelenou louku", po 6 měsících zjistí, že nový systém nesplňuje všechny
+                    edge cases původního systému (které nikdo nezdokumentoval), původní systém dostává mezitím
+                    nové funkcionality, nový systém za ním nestíhá. Výsledkem je buď zrušení projektu přepisu,
+                    nebo spuštění nedokončeného systému s fatálními chybami.
+                </p>
+                <p>
+                    Vždy preferujte <strong>inkrementální migraci pomocí Strangler Fig Patternu</strong>:
+                    zachovejte funkční systém v produkci, přidávejte DDD vrstvami a nahrazujte CRUD kód
+                    postupně při každém sprintu.
+                </p>
+            </div>
+
+            <p>
+                Pro hlubší pochopení DDD konceptů a jejich implementace v Symfony doporučujeme prostudovat
+                kapitolu <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony</a>
+                a <a href="{{ path('cqrs') }}">CQRS v Symfony</a>.
+            </p>
+        </section>
+    </article>
+{% endblock %}

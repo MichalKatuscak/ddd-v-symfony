@@ -1,0 +1,1150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Testování DDD kódu v Symfony | DDD Symfony{% endblock %}
+
+{% block meta_description %}Akademický průvodce testováním Domain-Driven Design kódu v Symfony. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac.{% endblock %}
+
+{% block meta_keywords %}testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, PHP-Arkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Testování DDD kódu v Symfony",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "publisher": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "2026-03-23",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">Testování DDD kódu v Symfony</h2>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <h5 id="toc-heading">Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#filozofie-testovani">Filozofie testování v DDD</a></li>
+            <li><a href="#unit-testy-domeny">Unit testy doménové vrstvy</a></li>
+            <li><a href="#testovani-domain-events">Testování doménových událostí</a></li>
+            <li><a href="#test-doubles">Test doubles a InMemory repozitáře</a></li>
+            <li><a href="#integracni-testy">Integrační testy s Doctrine</a></li>
+            <li><a href="#funkcni-testy">Funkční testy API a kontrolerů</a></li>
+            <li><a href="#architektonicke-testy">Architektonické testy</a></li>
+            <li><a href="#pokryti-a-best-practices">Code coverage a best practices</a></li>
+        </ul>
+    </div>
+
+    <section id="filozofie-testovani" aria-labelledby="filozofie-testovani-heading">
+    <h3 id="filozofie-testovani-heading">Filozofie testování v DDD</h3>
+    <p>
+        Domain-Driven Design a automatizované testování se vzájemně přirozeně doplňují. Čistá doménová vrstva, která neobsahuje závislosti na frameworku,
+        databázi ani jiné infrastruktuře, je ze své podstaty snadno testovatelná. Zatímco v tradičních vrstvených architekturách jsou unit testy
+        kompromitovány provázaností s frameworkem, v DDD je doménová logika izolována a lze ji testovat čistými PHP třídami bez jakéhokoli bootstrappingu.
+    </p>
+
+    <div class="info-card">
+        <h4>Proč je DDD přirozeně testovatelný:</h4>
+        <ul>
+            <li><strong>Žádné závislosti na frameworku</strong> — Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
+            <li><strong>Explicitní závislosti</strong> — Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
+            <li><strong>Bohaté doménové modely</strong> — Veškerá business logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
+            <li><strong>Invarianty jsou vynucovány při konstrukci</strong> — Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
+        </ul>
+    </div>
+
+    <h4>Testovací pyramida pro DDD</h4>
+    <p>
+        Testovací pyramida v DDD kontextu definuje tři vrstvy testů, přičemž každá vrstva pokrývá jinou část aplikace a vyznačuje se jiným poměrem rychlosti, izolace a pokrytí:
+    </p>
+
+    <div class="info-card">
+        <h4>Vrstvy testovací pyramidy:</h4>
+        <ul>
+            <li>
+                <strong>Unit testy — doménová vrstva (základ pyramidy, nejvíce testů)</strong><br>
+                Testují izolované doménové objekty: value objects, entity, agregáty a doménové služby.
+                Nepotřebují databázi ani framework. Jsou velmi rychlé (stovky testů za sekundu).
+                Cíl: ověřit business pravidla a invarianty.
+            </li>
+            <li>
+                <strong>Integrační testy — infrastrukturní vrstva (střed pyramidy)</strong><br>
+                Testují spolupráci doménového kódu s infrastrukturou: Doctrine repozitáře, e-mailové odesílatele, messagingové systémy.
+                Vyžadují databázi nebo jiné externí zdroje. Jsou pomalejší, ale nezbytné pro ověření mapování a persistence.
+                Cíl: ověřit, že infrastruktura správně implementuje doménová rozhraní.
+            </li>
+            <li>
+                <strong>Funkční testy — aplikační vrstva / API (špička pyramidy, nejméně testů)</strong><br>
+                Testují celé use cases přes HTTP vrstvu nebo přímo přes aplikační služby.
+                Simulují reálného uživatele aplikace. Jsou nejpomalejší a nejkřehčí.
+                Cíl: ověřit integraci všech vrstev v klíčových scénářích.
+            </li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h4>Testovací strategie — co testovat na každé vrstvě:</h4>
+        <ul>
+            <li><strong>Doménová vrstva:</strong> Validační logika value objects, invarianty entit, transakční konzistence agregátů, vydávání doménových událostí, doménové výjimky.</li>
+            <li><strong>Aplikační vrstva:</strong> Command handlery a query handlery — s použitím fake (InMemory) repozitářů, ověření, že správné metody repozitáře jsou volány s očekávanými argumenty.</li>
+            <li><strong>Infrastrukturní vrstva:</strong> Správné Doctrine mapování, dotazy repozitářů, transakce, volání externích API.</li>
+            <li><strong>Prezentační vrstva:</strong> Správné HTTP status kódy, formát odpovědi, autentizace a autorizace.</li>
+        </ul>
+    </div>
+    </section>
+
+    <section id="unit-testy-domeny" aria-labelledby="unit-testy-domeny-heading">
+    <h3 id="unit-testy-domeny-heading">Unit testy doménové vrstvy</h3>
+    <p>
+        Unit testy doménové vrstvy jsou nejcennější součástí testovací sady DDD aplikace. Testují čisté PHP objekty bez jakýchkoli závislostí
+        na frameworku. Pro jejich spuštění stačí nainstalovat PHPUnit a samotné doménové třídy — žádný bootstrap Symfony kernelu není potřeba.
+    </p>
+
+    <h4>Testování Value Objects</h4>
+    <p>
+        Value objekty jsou immutabilní a porovnávají se hodnotou, nikoli identitou. Testy value objektů ověřují:
+        immutabilitu (operace vrací novou instanci, nikoli modifikují stávající),
+        rovnost dvou instancí se stejnou hodnotou,
+        validaci — že neplatné vstupy vyvolají odpovídající výjimku.
+    </p>
+
+    <div class="example-card">
+        <h4>Příklad: Test pro Email value object (PHPUnit)</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Domain\ValueObject;
+
+use PHPUnit\Framework\TestCase;
+use UserManagement\Domain\ValueObject\Email;
+use UserManagement\Domain\Exception\InvalidEmailException;
+
+final class EmailTest extends TestCase
+{
+    public function testCreatesValidEmail(): void
+    {
+        $email = new Email('jan.novak@example.com');
+
+        $this->assertSame('jan.novak@example.com', $email->value());
+    }
+
+    public function testNormalizesToLowercase(): void
+    {
+        $email = new Email('Jan.Novak@EXAMPLE.COM');
+
+        $this->assertSame('jan.novak@example.com', $email->value());
+    }
+
+    public function testThrowsExceptionForInvalidFormat(): void
+    {
+        $this->expectException(InvalidEmailException::class);
+        $this->expectExceptionMessage('Neplatná e-mailová adresa: "not-an-email"');
+
+        new Email('not-an-email');
+    }
+
+    public function testThrowsExceptionForEmptyString(): void
+    {
+        $this->expectException(InvalidEmailException::class);
+
+        new Email('');
+    }
+
+    public function testEqualityBySameValue(): void
+    {
+        $email1 = new Email('jan@example.com');
+        $email2 = new Email('jan@example.com');
+
+        $this->assertTrue($email1->equals($email2));
+    }
+
+    public function testInequalityForDifferentValues(): void
+    {
+        $email1 = new Email('jan@example.com');
+        $email2 = new Email('petr@example.com');
+
+        $this->assertFalse($email1->equals($email2));
+    }
+
+    public function testImmutability(): void
+    {
+        $original = new Email('jan@example.com');
+        // withDomain() vrací novou instanci, nemění originál
+        $modified = $original->withDomain('other.com');
+
+        $this->assertSame('jan@example.com', $original->value());
+        $this->assertSame('jan@other.com', $modified->value());
+        $this->assertNotSame($original, $modified);
+    }
+}</code></pre>
+    </div>
+
+    <h4>Testování entit</h4>
+    <p>
+        Entity mají identitu a měnitelný stav. Testy entit ověřují business pravidla (invarianty), správné chování metod a vyhazování
+        doménových výjimek při porušení pravidel. Klíčové je testovat chování, ne strukturu — tedy co entita dělá, ne jak vypadají její fieldy.
+    </p>
+
+    <div class="example-card">
+        <h4>Příklad: Test pro User entitu</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Domain\Model;
+
+use PHPUnit\Framework\TestCase;
+use UserManagement\Domain\Model\User;
+use UserManagement\Domain\ValueObject\UserId;
+use UserManagement\Domain\ValueObject\Email;
+use UserManagement\Domain\ValueObject\HashedPassword;
+use UserManagement\Domain\Exception\UserAlreadyActiveException;
+
+final class UserTest extends TestCase
+{
+    private UserId $userId;
+    private Email $email;
+
+    protected function setUp(): void
+    {
+        $this->userId = UserId::generate();
+        $this->email  = new Email('jan@example.com');
+    }
+
+    public function testCreatesInactiveUserByDefault(): void
+    {
+        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+
+        $this->assertFalse($user->isActive());
+    }
+
+    public function testActivatesUser(): void
+    {
+        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user->activate();
+
+        $this->assertTrue($user->isActive());
+    }
+
+    public function testThrowsExceptionWhenActivatingAlreadyActiveUser(): void
+    {
+        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user->activate();
+
+        $this->expectException(UserAlreadyActiveException::class);
+
+        $user->activate();
+    }
+
+    public function testChangesEmailAddress(): void
+    {
+        $user     = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $newEmail = new Email('novy@example.com');
+
+        $user->changeEmail($newEmail);
+
+        $this->assertTrue($newEmail->equals($user->email()));
+    }
+
+    public function testEmailRemainsUnchangedWhenSameValueProvided(): void
+    {
+        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+
+        $user->changeEmail(new Email('jan@example.com'));
+
+        // Žádná událost by neměla být vydána, email je stále stejný
+        $this->assertCount(0, $user->releaseEvents());
+    }
+}</code></pre>
+    </div>
+
+    <h4>Testování agregátů</h4>
+    <p>
+        Agregáty jsou nejsložitějšími doménovými objekty — ochraňují konzistenci skupiny entit a vydávají doménové události.
+        Testy agregátů ověřují transakční invarianty (pravidla platná pro celý agregát) a správné vydávání doménových událostí
+        jako vedlejší efekt doménových operací.
+    </p>
+
+    <div class="example-card">
+        <h4>Příklad: Test pro Order agregát</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\OrderManagement\Domain\Model;
+
+use PHPUnit\Framework\TestCase;
+use OrderManagement\Domain\Model\Order;
+use OrderManagement\Domain\ValueObject\OrderId;
+use OrderManagement\Domain\ValueObject\CustomerId;
+use OrderManagement\Domain\ValueObject\Money;
+use OrderManagement\Domain\Event\OrderPlaced;
+use OrderManagement\Domain\Event\OrderItemAdded;
+use OrderManagement\Domain\Exception\EmptyOrderException;
+use OrderManagement\Domain\Exception\OrderAlreadyPlacedException;
+
+final class OrderTest extends TestCase
+{
+    public function testAddsItemToOrder(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+
+        $order->addItem('Kniha o DDD', new Money(49900, 'CZK'), 2);
+
+        $this->assertSame(1, $order->itemCount());          // 1 řádek objednávky
+        $this->assertEquals(new Money(99800, 'CZK'), $order->total()); // 49 900 × 2
+    }
+
+    public function testThrowsExceptionWhenPlacingEmptyOrder(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+
+        $this->expectException(EmptyOrderException::class);
+
+        $order->place();
+    }
+
+    public function testPlacesOrderSuccessfully(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt A', new Money(10000, 'CZK'), 1);
+
+        $order->place();
+
+        $this->assertTrue($order->isPlaced());
+    }
+
+    public function testThrowsExceptionWhenPlacingAlreadyPlacedOrder(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt A', new Money(10000, 'CZK'), 1);
+        $order->place();
+
+        $this->expectException(OrderAlreadyPlacedException::class);
+
+        $order->place();
+    }
+
+    public function testReleasesOrderPlacedEvent(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt A', new Money(10000, 'CZK'), 1);
+        $order->place();
+
+        $events = $order->releaseEvents();
+
+        $this->assertCount(2, $events); // OrderItemAdded + OrderPlaced
+        $this->assertInstanceOf(OrderItemAdded::class, $events[0]);
+        $this->assertInstanceOf(OrderPlaced::class, $events[1]);
+    }
+}</code></pre>
+    </div>
+    </section>
+
+    <section id="testovani-domain-events" aria-labelledby="testovani-domain-events-heading">
+    <h3 id="testovani-domain-events-heading">Testování doménových událostí</h3>
+    <p>
+        Doménové události jsou klíčovým mechanismem DDD pro komunikaci mezi agregáty a bounded contexty. Je nezbytné
+        testovat, že agregát vydá správné události se správnými daty jako reakci na doménové operace.
+        Přímé testování doménových událostí — bez spoléhání na vedlejší efekty event dispatcheru — je nejspolehlivější přístup.
+    </p>
+
+    <div class="info-card">
+        <h4>Pattern "Record and Verify Events":</h4>
+        <p>
+            Agregáty sbírají vydané události interně v privátním poli (viz <code>AggregateRoot</code> bázová třída nebo trait).
+            Metoda <code>releaseEvents()</code> vrátí všechny nashromážděné události a pole vymaže — tento přístup nevyžaduje
+            žádný event dispatcher ani bus v unit testech. Testovací kód pak jednoduše zavolá doménovou operaci a ověří
+            obsah vrácených událostí.
+        </p>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: Trait pro testování doménových událostí</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\Shared\Domain;
+
+use Shared\Domain\DomainEvent;
+
+/**
+ * Reusable trait pro ověřování doménových událostí v unit testech.
+ * Použití: `use DomainEventAssertions;` ve třídě TestCase.
+ */
+trait DomainEventAssertions
+{
+    /**
+     * Ověří, že kolekce událostí obsahuje právě jednu událost daného typu.
+     *
+     * @param array&lt;DomainEvent&gt; $events
+     */
+    protected function assertSingleEventOfType(string $expectedType, array $events): DomainEvent
+    {
+        $matching = array_filter($events, fn(DomainEvent $e) =&gt; $e instanceof $expectedType);
+
+        $this->assertCount(
+            1,
+            $matching,
+            sprintf('Očekávána právě jedna událost typu %s, nalezeno %d.', $expectedType, count($matching))
+        );
+
+        return array_values($matching)[0];
+    }
+
+    /**
+     * Ověří, že kolekce událostí neobsahuje žádnou událost daného typu.
+     *
+     * @param array&lt;DomainEvent&gt; $events
+     */
+    protected function assertNoEventOfType(string $unexpectedType, array $events): void
+    {
+        $matching = array_filter($events, fn(DomainEvent $e) =&gt; $e instanceof $unexpectedType);
+
+        $this->assertCount(
+            0,
+            $matching,
+            sprintf('Neočekávána žádná událost typu %s, ale nalezena.', $unexpectedType)
+        );
+    }
+
+    /**
+     * Ověří přesné pořadí vydaných událostí.
+     *
+     * @param array&lt;class-string&gt;  $expectedTypes
+     * @param array&lt;DomainEvent&gt; $events
+     */
+    protected function assertEventSequence(array $expectedTypes, array $events): void
+    {
+        $actualTypes = array_map(fn(DomainEvent $e) =&gt; $e::class, $events);
+
+        $this->assertSame(
+            $expectedTypes,
+            $actualTypes,
+            'Pořadí doménových událostí neodpovídá očekávání.'
+        );
+    }
+}
+
+// --- Příklad použití traitu v testu ---
+
+final class OrderEventsTest extends \PHPUnit\Framework\TestCase
+{
+    use DomainEventAssertions;
+
+    public function testOrderPlacedEventContainsCorrectData(): void
+    {
+        $customerId = CustomerId::generate();
+        $order      = Order::create(OrderId::generate(), $customerId);
+        $order->addItem('Produkt A', new Money(25000, 'CZK'), 3);
+        $order->place();
+
+        $events      = $order->releaseEvents();
+        $placedEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
+
+        // Ověření dat události
+        $this->assertTrue($customerId->equals($placedEvent->customerId()));
+        $this->assertEquals(new Money(75000, 'CZK'), $placedEvent->total());
+        $this->assertNotNull($placedEvent->occurredAt());
+    }
+
+    public function testNoOrderPlacedEventWhenOrderNotPlaced(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt B', new Money(10000, 'CZK'), 1);
+
+        $events = $order->releaseEvents();
+
+        $this->assertNoEventOfType(OrderPlaced::class, $events);
+    }
+}</code></pre>
+    </div>
+    </section>
+
+    <section id="test-doubles" aria-labelledby="test-doubles-heading">
+    <h3 id="test-doubles-heading">Test doubles a InMemory repozitáře</h3>
+    <p>
+        Test doubles jsou náhradní implementace závislostí používané v testech místo reálných objektů.
+        Správná volba typu test double závisí na tom, co testujeme a jaké chování chceme ověřit.
+    </p>
+
+    <div class="info-card">
+        <h4>Typy test doubles a jejich použití v DDD:</h4>
+        <ul>
+            <li>
+                <strong>Stub</strong> — Vrací předpřipravené odpovědi bez jakékoli logiky. Vhodný, když potřebujeme, aby závislost vrátila konkrétní hodnotu, ale nezajímá nás, zda a kolikrát byla volána. Příklad: <code>$stub->method('findById')->willReturn($user)</code>.
+            </li>
+            <li>
+                <strong>Mock</strong> — Stub s ověřením volání. Ověřuje, že byla zavolána konkrétní metoda s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: <code>$mock->expects($this->once())->method('save')</code>.
+            </li>
+            <li>
+                <strong>Fake</strong> — Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá reálnou databázovou závislost, ale chová se stejně jako skutečná implementace. <strong>Nejlepší přístup pro DDD repozitáře</strong> — umožňuje psát čitelné testy bez konfigurování mocků.
+            </li>
+            <li>
+                <strong>Spy</strong> — Podobný mocku, ale ověření probíhá až po akci (post-assertion style). Méně časté v PHP.
+            </li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h4>Proč preferovat Fake (InMemory) před Mockem pro repozitáře:</h4>
+        <ul>
+            <li>Testy jsou čitelnější — nepotřebují konfigurace <code>expects()->method()->with()->willReturn()</code>.</li>
+            <li>InMemory repozitář lze sdílet mezi command handlerem a query handlerem v jednom testu — ověříme reálný průchod datů.</li>
+            <li>Při změně signatury rozhraní IDE/statická analýza okamžitě upozorní, na rozdíl od string-based konfigurace mocků.</li>
+            <li>Mocky testují implementační detail (které metody jsou volány), Fake testuje chování (co se stane s daty).</li>
+        </ul>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: InMemoryUserRepository implementace</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Infrastructure\Repository;
+
+use UserManagement\Domain\Model\User;
+use UserManagement\Domain\ValueObject\UserId;
+use UserManagement\Domain\ValueObject\Email;
+use UserManagement\Domain\Repository\UserRepository;
+use UserManagement\Domain\Exception\UserNotFoundException;
+
+/**
+ * InMemory implementace UserRepository pro unit a integrační testy.
+ * Simuluje chování Doctrine repozitáře bez potřeby databáze.
+ */
+final class InMemoryUserRepository implements UserRepository
+{
+    /** @var array&lt;string, User&gt; */
+    private array $storage = [];
+
+    public function save(User $user): void
+    {
+        $this->storage[(string) $user->id()] = $user;
+    }
+
+    public function findById(UserId $id): User
+    {
+        $key = (string) $id;
+
+        if (!isset($this->storage[$key])) {
+            throw new UserNotFoundException(sprintf('Uživatel s ID "%s" nebyl nalezen.', $key));
+        }
+
+        return $this->storage[$key];
+    }
+
+    public function findByEmail(Email $email): ?User
+    {
+        foreach ($this->storage as $user) {
+            if ($user->email()->equals($email)) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    public function existsByEmail(Email $email): bool
+    {
+        return $this->findByEmail($email) !== null;
+    }
+
+    public function remove(User $user): void
+    {
+        unset($this->storage[(string) $user->id()]);
+    }
+
+    /** Pomocná metoda pro assertiony v testech. */
+    public function count(): int
+    {
+        return count($this->storage);
+    }
+
+    /** @return array&lt;User&gt; */
+    public function all(): array
+    {
+        return array_values($this->storage);
+    }
+}</code></pre>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: Test command handleru s InMemoryRepository</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Registration;
+
+use PHPUnit\Framework\TestCase;
+use UserManagement\Registration\Command\RegisterUser;
+use UserManagement\Registration\Command\RegisterUserHandler;
+use UserManagement\Domain\Exception\EmailAlreadyTakenException;
+use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
+
+final class RegisterUserHandlerTest extends TestCase
+{
+    private InMemoryUserRepository $userRepository;
+    private RegisterUserHandler $handler;
+
+    protected function setUp(): void
+    {
+        $this->userRepository = new InMemoryUserRepository();
+        $this->handler        = new RegisterUserHandler($this->userRepository);
+    }
+
+    public function testRegistersNewUser(): void
+    {
+        $command = new RegisterUser(
+            email: 'jan@example.com',
+            plainPassword: 'SilneHeslo123!'
+        );
+
+        ($this->handler)($command);
+
+        $this->assertSame(1, $this->userRepository->count());
+
+        $user = $this->userRepository->findByEmail(new \UserManagement\Domain\ValueObject\Email('jan@example.com'));
+        $this->assertNotNull($user);
+        $this->assertFalse($user->isActive()); // nový uživatel je neaktivní
+    }
+
+    public function testThrowsExceptionWhenEmailAlreadyTaken(): void
+    {
+        $command = new RegisterUser(email: 'jan@example.com', plainPassword: 'Heslo123!');
+        ($this->handler)($command); // první registrace
+
+        $this->expectException(EmailAlreadyTakenException::class);
+
+        ($this->handler)($command); // duplicitní registrace
+    }
+
+    public function testDoesNotPersistUserWhenEmailAlreadyTaken(): void
+    {
+        $command = new RegisterUser(email: 'jan@example.com', plainPassword: 'Heslo123!');
+        ($this->handler)($command);
+
+        try {
+            ($this->handler)($command);
+        } catch (EmailAlreadyTakenException) {
+            // očekáváno
+        }
+
+        $this->assertSame(1, $this->userRepository->count());
+    }
+}</code></pre>
+    </div>
+
+    <div class="warning-card" role="alert" aria-labelledby="mock-overuse-heading">
+        <h4 id="mock-overuse-heading">Varování: Přílišné používání mocků</h4>
+        <p>
+            Nadměrné použití mocků (mockování každé závislosti) vede k tzv. <em>over-specification</em> testů.
+            Takové testy ověřují implementační detaily, nikoli chování, a při každém refaktoringu přestanou procházet,
+            i když se chování systému nezměnilo. Preferujte InMemory Fake implementace pro repozitáře a používejte mocky
+            pouze tam, kde skutečně ověřujete vedlejší efekty (odeslání e-mailu, volání externího API).
+        </p>
+    </div>
+    </section>
+
+    <section id="integracni-testy" aria-labelledby="integracni-testy-heading">
+    <h3 id="integracni-testy-heading">Integrační testy s Doctrine</h3>
+    <p>
+        Integrační testy ověřují spolupráci doménového kódu s infrastrukturou — především správnost Doctrine mapování,
+        dotazů repozitářů a transakčního chování. Na rozdíl od unit testů potřebují skutečnou databázi (typicky SQLite
+        in-memory nebo testovací PostgreSQL/MySQL instanci).
+    </p>
+
+    <div class="info-card">
+        <h4>KernelTestCase vs WebTestCase:</h4>
+        <ul>
+            <li>
+                <strong>KernelTestCase</strong> — Bootstrapuje Symfony kernel bez HTTP vrstvy. Vhodný pro testování
+                Doctrine repozitářů, služeb z DI kontejneru a dalších komponent infrastruktury. Rychlejší než WebTestCase.
+            </li>
+            <li>
+                <strong>WebTestCase</strong> — Bootstrapuje kernel i simulovaný HTTP klient. Vhodný pro funkční testy
+                kontrolerů a API endpointů. Pomalejší, ale testuje celý zásobník.
+            </li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h4>Transakce a rollback po každém testu:</h4>
+        <p>
+            Nejjednodušší způsob, jak zajistit izolaci integrančních testů, je zabalit každý test do databázové transakce
+            a po jeho dokončení provést rollback. Symfony poskytuje <code>DoctrineTestHelper</code> a bundle
+            <code>dama/doctrine-test-bundle</code>, který toto chování implementuje automaticky pomocí dekorátoru
+            nad <code>Connection</code>. Bez toho by každý test zanechával data v databázi a testy by se navzájem ovlivňovaly.
+        </p>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: Integrační test DoctrineUserRepository</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Infrastructure\Repository;
+
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use UserManagement\Domain\Model\User;
+use UserManagement\Domain\ValueObject\UserId;
+use UserManagement\Domain\ValueObject\Email;
+use UserManagement\Domain\ValueObject\HashedPassword;
+use UserManagement\Domain\Exception\UserNotFoundException;
+use UserManagement\Infrastructure\Repository\DoctrineUserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+/**
+ * Integrační test pro DoctrineUserRepository.
+ * Vyžaduje běžící databázi (konfigurovanou přes DATABASE_URL v .env.test).
+ * Transakční rollback zajišťuje dama/doctrine-test-bundle.
+ */
+final class DoctrineUserRepositoryTest extends KernelTestCase
+{
+    private EntityManagerInterface $entityManager;
+    private DoctrineUserRepository $repository;
+
+    protected function setUp(): void
+    {
+        self::bootKernel();
+
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->repository    = static::getContainer()->get(DoctrineUserRepository::class);
+    }
+
+    public function testPersistsAndRetrievesUser(): void
+    {
+        $userId = UserId::generate();
+        $email  = new Email('integrace@example.com');
+        $user   = User::register($userId, $email, HashedPassword::fromPlainText('Heslo123!'));
+
+        $this->repository->save($user);
+        $this->entityManager->clear(); // vyčistíme identity map — nutné pro skutečné čtení z DB
+
+        $retrieved = $this->repository->findById($userId);
+
+        $this->assertTrue($userId->equals($retrieved->id()));
+        $this->assertTrue($email->equals($retrieved->email()));
+    }
+
+    public function testThrowsExceptionForNonExistentUser(): void
+    {
+        $this->expectException(UserNotFoundException::class);
+
+        $this->repository->findById(UserId::generate());
+    }
+
+    public function testFindsByEmailAddress(): void
+    {
+        $email = new Email('hledat@example.com');
+        $user  = User::register(UserId::generate(), $email, HashedPassword::fromPlainText('Heslo123!'));
+
+        $this->repository->save($user);
+        $this->entityManager->clear();
+
+        $found = $this->repository->findByEmail($email);
+
+        $this->assertNotNull($found);
+        $this->assertTrue($email->equals($found->email()));
+    }
+
+    public function testExistsByEmail(): void
+    {
+        $email = new Email('exists@example.com');
+        $user  = User::register(UserId::generate(), $email, HashedPassword::fromPlainText('Heslo123!'));
+
+        $this->assertFalse($this->repository->existsByEmail($email));
+
+        $this->repository->save($user);
+
+        $this->assertTrue($this->repository->existsByEmail($email));
+    }
+}</code></pre>
+    </div>
+
+    <div class="warning-card" role="alert" aria-labelledby="entity-manager-clear-heading">
+        <h4 id="entity-manager-clear-heading">Proč volat <code>$entityManager->clear()</code>?</h4>
+        <p>
+            Doctrine udržuje tzv. <em>Identity Map</em> — interní cache, která vrátí stejnou instanci objektu
+            pro stejné ID bez dalšího dotazu do databáze. Bez volání <code>clear()</code> by integrační test
+            mohl úspěšně projít, i kdyby data v databázi vůbec nebyla uložena — Doctrine by je vrátil
+            z paměti. Voláme tedy <code>clear()</code> mezi zápisem a čtením, aby byl test skutečně integrační.
+        </p>
+    </div>
+    </section>
+
+    <section id="funkcni-testy" aria-labelledby="funkcni-testy-heading">
+    <h3 id="funkcni-testy-heading">Funkční testy API a kontrolerů</h3>
+    <p>
+        Funkční testy ověřují chování celé aplikace přes HTTP vrstvu. Testují, že správný request na správnou URL
+        vrátí správnou odpověď — včetně HTTP status kódu, formátu těla odpovědi (JSON), hlaviček a chování
+        při chybových stavech. V DDD kontextu ověřují integraci prezentační vrstvy s aplikační vrstvou.
+    </p>
+
+    <div class="info-card">
+        <h4>WebTestCase v Symfony:</h4>
+        <p>
+            <code>Symfony\Bundle\FrameworkBundle\Test\WebTestCase</code> poskytuje metodu <code>createClient()</code>,
+            která vrátí HTTP klienta simulujícího prohlížeč. Klient lze použít k odeslání GET, POST, PUT, PATCH a DELETE
+            requestů. Response obsahuje status kód, tělo a hlavičky, které lze snadno assertovat.
+        </p>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: Funkční test registračního endpointu</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Registration\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+/**
+ * Funkční testy registračního REST API endpointu.
+ * Testují HTTP vrstvu + celý zásobník až po databázi.
+ */
+final class RegistrationControllerTest extends WebTestCase
+{
+    public function testRegistersUserSuccessfully(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' =&gt; 'application/json'],
+            content: json_encode([
+                'email'    =&gt; 'novy@example.com',
+                'password' =&gt; 'SilneHeslo123!',
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertResponseHeaderSame('Content-Type', 'application/json');
+
+        $responseData = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertArrayHasKey('userId', $responseData);
+        $this->assertSame('novy@example.com', $responseData['email']);
+    }
+
+    public function testReturns422ForInvalidEmail(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' =&gt; 'application/json'],
+            content: json_encode([
+                'email'    =&gt; 'not-valid-email',
+                'password' =&gt; 'Heslo123!',
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(422);
+
+        $responseData = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertArrayHasKey('errors', $responseData);
+        $this->assertStringContainsString('email', strtolower($responseData['errors'][0]['field']));
+    }
+
+    public function testReturns409WhenEmailAlreadyRegistered(): void
+    {
+        $client = static::createClient();
+
+        $payload = json_encode(['email' =&gt; 'existujici@example.com', 'password' =&gt; 'Heslo123!']);
+
+        $client->request('POST', '/api/users/register',
+            server: ['CONTENT_TYPE' =&gt; 'application/json'],
+            content: $payload
+        );
+        $this->assertResponseStatusCodeSame(201);
+
+        // druhý pokus se stejným emailem
+        $client->request('POST', '/api/users/register',
+            server: ['CONTENT_TYPE' =&gt; 'application/json'],
+            content: $payload
+        );
+        $this->assertResponseStatusCodeSame(409);
+    }
+
+    public function testReturns400ForMissingRequiredFields(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' =&gt; 'application/json'],
+            content: json_encode([])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+}</code></pre>
+    </div>
+
+    <div class="warning-card" role="alert" aria-labelledby="functional-test-scope-heading">
+        <h4 id="functional-test-scope-heading">Rozsah funkčních testů</h4>
+        <p>
+            Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze klíčové happy path a nejdůležitější chybové scénáře.
+            Vše ostatní (edge cases, validace, business pravidla) pokryjte rychlými unit testy doménové vrstvy.
+            Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů ke spouštění testů lokálně.
+        </p>
+    </div>
+    </section>
+
+    <section id="architektonicke-testy" aria-labelledby="architektonicke-testy-heading">
+    <h3 id="architektonicke-testy-heading">Architektonické testy</h3>
+    <p>
+        Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla — především
+        pravidla závislostí mezi vrstvami. V DDD je klíčovým pravidlem, že doménová vrstva nesmí záviset
+        na infrastrukturní ani aplikační vrstvě. Manuální code review nestačí; architektonické testy toto pravidlo
+        vynucují v CI/CD pipeline a zabrání regresi.
+    </p>
+
+    <h4>Deptrac</h4>
+    <p>
+        <strong>Deptrac</strong> je nástroj od QA-Motion (dříve Sensiolabs) pro statickou analýzu závislostí v PHP projektech.
+        Definujete vrstvy (layers) a povolená pravidla závislostí (ruleset). Deptrac analyzuje skutečné závislosti
+        v kódu a nahlásí porušení. Typicky se spouští v CI jako součást statické analýzy.
+    </p>
+
+    <div class="example-card">
+        <h4>Příklad: deptrac.yaml konfigurace pro DDD projekt</h4>
+        <pre><code class="language-yaml">deptrac:
+  paths:
+    - ./src
+
+  layers:
+    - name: Domain
+      collectors:
+        - type: directory
+          value: src/.*/Domain/.*
+
+    - name: Application
+      collectors:
+        - type: directory
+          value: src/.*/Application/.*
+
+    - name: Infrastructure
+      collectors:
+        - type: directory
+          value: src/.*/Infrastructure/.*
+
+    - name: Presentation
+      collectors:
+        - type: directory
+          value: src/.*/Controller/.*
+
+    - name: Shared
+      collectors:
+        - type: directory
+          value: src/Shared/.*
+
+  ruleset:
+    Domain:
+      # Doménová vrstva nesmí záviset na ničem jiném než na Shared
+      - Shared
+
+    Application:
+      # Aplikační vrstva závisí na doméně a sdílených komponentách
+      - Domain
+      - Shared
+
+    Infrastructure:
+      # Infrastruktura implementuje doménová rozhraní — závisí na doméně
+      - Domain
+      - Application
+      - Shared
+
+    Presentation:
+      # Kontrolery závisí na aplikační vrstvě (Commands, Queries)
+      - Application
+      - Shared
+
+    Shared:
+      # Sdílené komponenty nezávisí na ničem projektovém
+      []
+
+  skip_violations:
+    # Dočasné výjimky — měly by být minimalizovány
+    # UserManagement\Domain\Model\User:
+    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně — antipattern</code></pre>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: Spuštění Deptrac v CI</h4>
+        <pre><code class="language-bash"># Instalace (dev závislost)
+composer require --dev qossmic/deptrac-shim
+
+# Spuštění analýzy
+./vendor/bin/deptrac analyze --config-file=deptrac.yaml
+
+# Výstup v případě porušení:
+# [ERROR] Found 1 Violation
+# UserManagement\Domain\Model\User must not depend on
+# Doctrine\ORM\Mapping\Column (Infrastructure layer)</code></pre>
+    </div>
+
+    <h4>PHP-Arkitect jako alternativa</h4>
+    <p>
+        <strong>PHP-Arkitect</strong> (phparkitect/phparkitect) je alternativní nástroj pro architektonické testy napsaný v PHP.
+        Na rozdíl od Deptrac s YAML konfigurací používá PHP API pro definici pravidel, což umožňuje
+        typově bezpečnou konfiguraci s podporou IDE. Pravidla jsou definována jako PHPUnit test,
+        takže výsledky se integrují přímo do testovací sady.
+    </p>
+
+    <div class="example-card">
+        <h4>Příklad: PHP-Arkitect pravidla</h4>
+        <pre><code class="language-php">&lt;?php
+
+// phparkitect.php
+use Arkitect\ClassSet;
+use Arkitect\CLI\Config;
+use Arkitect\Expression\ForClasses\HaveNameMatching;
+use Arkitect\Expression\ForClasses\NotDependsOnTheseNamespaces;
+use Arkitect\Expression\ForClasses\ResideInOneOfTheseNamespaces;
+use Arkitect\Rules\Rule;
+
+return static function (Config $config): void {
+    $srcSet = ClassSet::fromDir(__DIR__ . '/src');
+
+    $config->add(
+        $srcSet,
+
+        // Doménová vrstva nesmí záviset na Symfony ani Doctrine
+        Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces('UserManagement\Domain'))
+            ->should(new NotDependsOnTheseNamespaces(
+                'Symfony',
+                'Doctrine',
+            ))
+            ->because('Doménová vrstva musí být nezávislá na frameworku a infrastruktuře.'),
+
+        // Všechny třídy v Command namespace musí mít suffix Command nebo Handler
+        Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces('UserManagement\Application\Command'))
+            ->should(new HaveNameMatching('*Command|*Handler'))
+            ->because('Command namespace smí obsahovat pouze Command a Handler třídy (konvence projektu).'),
+    );
+};</code></pre>
+    </div>
+    </section>
+
+    <section id="pokryti-a-best-practices" aria-labelledby="pokryti-a-best-practices-heading">
+    <h3 id="pokryti-a-best-practices-heading">Code coverage a best practices</h3>
+    <p>
+        Code coverage (pokrytí kódem) je metrika udávající, jaké procento kódu je spouštěno při běhu testů.
+        Vysoké pokrytí samo o sobě nezaručuje kvalitu testů — lze dosáhnout 100% pokrytí s testy, které
+        neověřují žádné chování. Přesto je pokrytí užitečným indikátorem nepokrytých oblastí.
+    </p>
+
+    <div class="info-card">
+        <h4>Doporučené pokrytí pro DDD vrstvy:</h4>
+        <ul>
+            <li><strong>Doménová vrstva (Domain)</strong> — 90–100 %. Tato vrstva obsahuje veškerou business logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
+            <li><strong>Aplikační vrstva (Application)</strong> — 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
+            <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> — 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
+            <li><strong>Prezentační vrstva (Presentation)</strong> — 50–70 %. Kontrolery pokryjte funkčními testy pro klíčové scénáře.</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h4>Naming conventions pro testy v DDD:</h4>
+        <ul>
+            <li>Testovací třída odpovídá testované třídě: <code>Email</code> → <code>EmailTest</code>, <code>RegisterUserHandler</code> → <code>RegisterUserHandlerTest</code>.</li>
+            <li>Testovací metody popisují chování anglicky nebo česky: <code>testThrowsExceptionForInvalidEmail()</code>, <code>testRegistersNewUser()</code>.</li>
+            <li>Struktura testovacích souborů zrcadlí strukturu produkčního kódu: <code>src/UserManagement/Domain/</code> → <code>tests/UserManagement/Domain/</code>.</li>
+            <li>Suffix <code>Test</code> pro PHPUnit testovací třídy je povinný (PHPUnit třídu bez suffixu nespustí).</li>
+        </ul>
+    </div>
+
+    <div class="info-card">
+        <h4>Arrange-Act-Assert (AAA) pattern:</h4>
+        <p>
+            Každý test by měl být strukturován do tří jasně oddělených fází:
+        </p>
+        <ol>
+            <li><strong>Arrange (připrav)</strong> — Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.</li>
+            <li><strong>Act (proveď)</strong> — Proveď jednu testovanou akci: zavolej metodu, odešli command.</li>
+            <li><strong>Assert (ověř)</strong> — Ověř výsledek: assertuj výstup, zkontroluj stav objektu, ověř vydané události.</li>
+        </ol>
+        <p>
+            Každý test by měl ověřovat právě jednu věc (jeden logický assertion). Více assertů v jednom testu je přijatelné,
+            pokud všechny společně ověřují jeden konzistentní scénář.
+        </p>
+    </div>
+
+    <div class="warning-card" role="alert" aria-labelledby="common-mistakes-heading">
+        <h4 id="common-mistakes-heading">Nejčastější chyby při testování DDD</h4>
+        <ul>
+            <li>
+                <strong>Testování getterů místo chování</strong> — Špatně: <code>$this->assertSame('jan@example.com', $user->getEmail())</code> po přímém nastavení fieldu.
+                Správně: zavolat doménovou operaci a ověřit výsledný stav.
+            </li>
+            <li>
+                <strong>Přímý přístup k privátním fieldům přes reflexi</strong> — Porušuje zapouzdření. Pokud potřebujete přistupovat k privátnímu stavu v testu, je to příznak špatného návrhu API třídy.
+            </li>
+            <li>
+                <strong>Bootstrapování celého Symfony kernelu v unit testech</strong> — Unit testy doménové vrstvy nesmí volat <code>self::bootKernel()</code>. To je výsadou integračních testů. Zbytečně zpomaluje sadu testů.
+            </li>
+            <li>
+                <strong>Sdílený stav mezi testy</strong> — Každý test musí být zcela nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
+            </li>
+            <li>
+                <strong>Mockování value objects</strong> — Value objekty jsou jednoduché datové třídy bez závislostí. Není důvod je mockovat — vždy vytvořte skutečnou instanci.
+            </li>
+            <li>
+                <strong>Ignorování doménových výjimek v testech</strong> — Každá doménová výjimka (<code>InvalidEmailException</code>, <code>OrderAlreadyPlacedException</code> apod.) musí mít test ověřující, že je skutečně vyhozena za správných podmínek.
+            </li>
+            <li>
+                <strong>Chybějící test pro releaseEvents() po operaci</strong> — Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
+            </li>
+        </ul>
+    </div>
+
+    <div class="example-card">
+        <h4>Příklad: Správná konfigurace PHPUnit pro DDD projekt (phpunit.xml)</h4>
+        <pre><code class="language-bash"># Spuštění unit testů doménové vrstvy (rychlé, bez kernelu)
+./vendor/bin/phpunit --testsuite=Domain
+
+# Spuštění integračních testů (vyžaduje databázi)
+./vendor/bin/phpunit --testsuite=Integration
+
+# Spuštění funkčních testů
+./vendor/bin/phpunit --testsuite=Functional
+
+# Generování HTML coverage reportu (vyžaduje Xdebug nebo PCOV)
+XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
+
+# Spuštění architektonických testů s Deptrac
+./vendor/bin/deptrac analyze</code></pre>
+    </div>
+    </section>
+
+    </article>
+{% endblock %}

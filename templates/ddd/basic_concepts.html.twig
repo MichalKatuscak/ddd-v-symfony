@@ -58,13 +58,13 @@
                 a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
             </p>
 
-            <div class="example-box">
+            <div class="example-card">
                 <div class="diagram-container">
                     {% include '/diagrams/5_bounded_contexts/diagram.svg' %}
                 </div>
             </div>
 
-            <div class="example-box">
+            <div class="example-card">
                 <h4>Příklad: Ohraničené kontexty v PHP</h4>
                 <pre><code class="language-bash">src/
 ├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
@@ -116,13 +116,13 @@
                 Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
             </p>
 
-            <div class="example-box">
+            <div class="example-card">
                 <div class="diagram-container">
                     {% include '/diagrams/4_ubiquitous_language/diagram.svg' %}
                 </div>
             </div>
 
-            <div class="concept-box">
+            <div class="info-card">
                 <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
                 <p>
                     V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
@@ -149,7 +149,7 @@
                 která nakupuje produkty.
             </p>
 
-            <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
+            <div class="warning-card" role="note" aria-labelledby="important-notes-heading">
                 <h4 id="important-notes-heading">Důležité poznámky</h4>
                 <p>
                     Při implementaci DDD je důležité:
@@ -172,7 +172,7 @@
                 ale jejich identita zůstává stejná.
             </p>
 
-            <div class="example-box">
+            <div class="example-card">
                 <h4>Příklad: Entity v PHP</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -240,7 +240,7 @@ class User
                 a nemají žádnou identitu.
             </p>
 
-            <div class="example-box">
+            <div class="example-card">
                 <h4>Příklad: Hodnotový objekt v PHP</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -291,7 +291,7 @@ class Email
                 která je jediným vstupním bodem pro manipulaci s agregátem.
             </p>
 
-            <div class="example-box" role="note" aria-labelledby="aggregate-example-heading">
+            <div class="example-card" role="note" aria-labelledby="aggregate-example-heading">
                 <h4 id="aggregate-example-heading">Příklad: Agregát v PHP</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -397,7 +397,7 @@ class Order
                 doménově orientované rozhraní pro přístup k datům.
             </p>
 
-            <div class="example-box" role="note" aria-labelledby="repository-example-heading">
+            <div class="example-card" role="note" aria-labelledby="repository-example-heading">
                 <h4 id="repository-example-heading">Příklad: Repozitář v PHP</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -432,7 +432,7 @@ interface OrderRepository
                 Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
             </p>
 
-            <div class="example-box" role="note" aria-labelledby="domain-service-example-heading">
+            <div class="example-card" role="note" aria-labelledby="domain-service-example-heading">
                 <h4 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -498,7 +498,7 @@ class PaymentService
                 Doménové události jsou neměnné a obsahují informace o tom, co se stalo.
             </p>
 
-            <div class="example-box">
+            <div class="example-card">
                 <h4>Příklad: Doménová událost v PHP</h4>
                 <pre><code class="language-php">&lt;?php
 

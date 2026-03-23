@@ -57,7 +57,7 @@
         Při implementaci DDD s vertikální slice architekturou v Symfony 8 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 8:
     </p>
 
-    <div class="example-box">
+    <div class="example-card">
         <h4>Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8</h4>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
@@ -142,13 +142,13 @@
         Tato struktura projektu organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má svou vlastní doménovou vrstvu, která obsahuje modely, hodnotové objekty, události a repozitáře specifické pro danou doménu. Tím je zajištěna izolace domén a respektování principů DDD.
     </p>
 
-    <div class="example-box">
+    <div class="example-card">
         <div class="diagram-container">
             {% include '/diagrams/3_implementation_in_symfony/diagram.svg' %}
         </div>
     </div>
 
-    <div class="concept-box">
+    <div class="info-card">
         <h4>Klíčové principy správné struktury DDD projektu:</h4>
         <ul>
             <li><strong>Izolace domén</strong> - Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.</li>
@@ -158,7 +158,7 @@
         </ul>
     </div>
 
-    <div class="warning-box">
+    <div class="warning-card">
         <h4>Časté chyby při implementaci DDD</h4>
         <p>
             Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
@@ -178,7 +178,7 @@
         Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 můžete implementovat entity jako běžné PHP třídy:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="entity-example-heading">
+    <div class="example-card" role="note" aria-labelledby="entity-example-heading">
         <h4 id="entity-example-heading">Příklad: Implementace entity v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -275,7 +275,7 @@ class User
         Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="value-object-example-heading">
+    <div class="example-card" role="note" aria-labelledby="value-object-example-heading">
         <h4 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -327,7 +327,7 @@ class Email
         Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 můžete implementovat repozitáře jako rozhraní a jejich implementace:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="repository-example-heading">
+    <div class="example-card" role="note" aria-labelledby="repository-example-heading">
         <h4 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -401,7 +401,7 @@ class DoctrineUserRepository implements UserRepository
         V Symfony 8 můžete implementovat doménové služby jako běžné PHP třídy:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="domain-service-example-heading">
+    <div class="example-card" role="note" aria-labelledby="domain-service-example-heading">
         <h4 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -466,7 +466,7 @@ class PaymentService
         Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 můžete implementovat doménové události jako neměnné PHP třídy:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="domain-event-example-heading">
+    <div class="example-card" role="note" aria-labelledby="domain-event-example-heading">
         <h4 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -518,7 +518,7 @@ class UserRegistered
         jako command a query handlery:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="command-handler-example-heading">
+    <div class="example-card" role="note" aria-labelledby="command-handler-example-heading">
         <h4 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -577,7 +577,7 @@ class RegisterUserHandler
 }</code></pre>
     </div>
 
-    <div class="example-box" role="note" aria-labelledby="query-handler-example-heading">
+    <div class="example-card" role="note" aria-labelledby="query-handler-example-heading">
         <h4 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -639,7 +639,7 @@ class GetUserProfileHandler
         jako běžné Symfony kontrolery:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="controller-example-heading">
+    <div class="example-card" role="note" aria-labelledby="controller-example-heading">
         <h4 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 8</h4>
         <pre><code class="language-php">&lt;?php
 
@@ -701,7 +701,7 @@ class RegistrationController extends AbstractController
         Symfony 8 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="dependency-injection-example-heading">
+    <div class="example-card" role="note" aria-labelledby="dependency-injection-example-heading">
         <h4 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 8</h4>
         <pre><code class="language-yaml"># config/services.yaml
 services:
@@ -745,7 +745,7 @@ services:
         Messenger komponenta je konfigurována pro implementaci CQRS.
     </p>
 
-    <div class="warning-box">
+    <div class="warning-card">
         <h4>Důležité poznámky</h4>
         <p>
             Při implementaci DDD v Symfony 8 je důležité:
@@ -762,7 +762,7 @@ services:
         </ul>
     </div>
 
-    <div class="concept-box" role="note" aria-labelledby="shared-folder-heading">
+    <div class="info-card" role="note" aria-labelledby="shared-folder-heading">
         <h4 id="shared-folder-heading">Co patří do sdílené složky (Shared)?</h4>
         <p>
             Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, které nemají specifický doménový význam:

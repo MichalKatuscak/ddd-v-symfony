@@ -1,0 +1,1170 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Glosář DDD terminologie | DDD Symfony{% endblock %}
+
+{% block meta_description %}Kompletní akademický glosář terminologie Domain-Driven Design. Přesné definice všech klíčových pojmů DDD — od strategických vzorů (Bounded Context, Ubiquitous Language, Context Map) přes taktické stavební bloky (Aggregate, Entity, Value Object, Domain Event) až po architektonické vzory (CQRS, Event Sourcing, Hexagonální architektura) a integrační vzory. Definice jsou v souladu s primární literaturou: Eric Evans (2003) a Vaughn Vernon (2013).{% endblock %}
+
+{% block meta_keywords %}glosář DDD, terminologie Domain-Driven Design, Bounded Context definice, Ubiquitous Language, Aggregate Root, Value Object, Domain Event, CQRS, Event Sourcing, Hexagonální architektura, Anti-Corruption Layer, Context Map, Repository vzor, Domain Service, Application Service, Saga, Eventual Consistency, Specification vzor, Invariant, Shared Kernel, Customer Supplier, Conformist, Open Host Service, Published Language, Vertical Slice Architecture, Anemic Domain Model, Primitive Obsession, Test Double, Fake Repository, Charakterizační test, Architektonický test, Eric Evans, Vaughn Vernon, DDD slovník{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": "Glosář DDD terminologie",
+            "description": "{{ block('meta_description') }}",
+            "keywords": "{{ block('meta_keywords') }}",
+            "author": {
+                "@type": "Person",
+                "name": "Michal Katuščák"
+            },
+            "publisher": {
+                "@type": "Person",
+                "name": "Michal Katuščák"
+            },
+            "datePublished": "2025-04-24",
+            "dateModified": "2026-03-23",
+            "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .glossary-list { margin: 0; padding: 0; }
+        .glossary-entry { border-left: 3px solid #a5d8ff; padding: 0.75rem 0 0.75rem 1rem; margin-bottom: 1.5rem; }
+        .glossary-entry dt { font-size: 1.05rem; margin-bottom: 0.25rem; }
+        .term-en { color: #666; font-weight: normal; font-size: 0.9rem; margin-left: 0.5rem; }
+        .term-source { font-size: 0.85rem; color: #888; margin-top: 0.5rem; margin-bottom: 0; }
+        .term-related { font-size: 0.85rem; margin-top: 0.25rem; margin-bottom: 0; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+        <h2 itemprop="headline">Glosář DDD terminologie</h2>
+
+        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+            <h5 id="toc-heading">Obsah glosáře:</h5>
+            <ul>
+                <li><a href="#strategicke-vzory">1. Strategické vzory DDD</a></li>
+                <li><a href="#takticke-vzory">2. Taktické vzory (stavební bloky DDD)</a></li>
+                <li><a href="#architektonicke-vzory">3. Architektonické vzory</a></li>
+                <li><a href="#integracni-vzory">4. Integrační vzory a komunikace</a></li>
+                <li><a href="#testovaci-pojmy">5. Pojmy z testování DDD</a></li>
+                <li><a href="#literatura">Literatura</a></li>
+            </ul>
+        </div>
+
+        {# ==================== SECTION 1 ==================== #}
+        <section id="strategicke-vzory" aria-labelledby="strategicke-vzory-heading">
+            <h3 id="strategicke-vzory-heading">1. Strategické vzory DDD</h3>
+
+            <div class="concept-box" role="note" aria-labelledby="strategicke-intro-heading">
+                <h4 id="strategicke-intro-heading">Co jsou strategické vzory?</h4>
+                <p>
+                    Strategické vzory DDD se zabývají vysokoúrovňovým rozdělením systému na soudržné celky a
+                    řízením vztahů mezi nimi. Tato vrstva návrhu odpovídá na otázku <em>„co a kde"</em> —
+                    kde leží hranice modelu, kdo za jakou část domény zodpovídá a jak spolu jednotlivé části
+                    komunikují. Strategický design je základem, na němž teprve spočívají taktické stavební bloky.
+                    Bez solidního strategického designu se taktický design stává náhodnou sbírkou vzorů bez kontextu.
+                </p>
+            </div>
+
+            <dl class="glossary-list">
+
+                <div class="glossary-entry" id="term-domena">
+                    <dt>
+                        <strong>Doména</strong>
+                        <span class="term-en">(Domain)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Sféra znalostí a činností, kolem níž se točí logika aplikace. Doména je <em>„proč"</em>
+                            softwaru — problémový prostor, který software modeluje a pomáhá řešit. Eric Evans
+                            definuje doménu jako: <em>„A sphere of knowledge, influence, or activity. The subject area
+                            to which the user applies a program."</em> Doména není totéž co aplikace samotná —
+                            doména existuje i bez softwaru; software je jen jedním z prostředků, jak v doméně
+                            pracovat. Pochopení domény je předpokladem smysluplného softwarového návrhu.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), str. 2–3</p>
+                        <p class="term-related">Viz také: <a href="#term-subdomena">Subdoména</a>, <a href="#term-ohraniceny-kontext">Ohraničený kontext</a>, <a href="#term-vsudypritomny-jazyk">Všudypřítomný jazyk</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-subdomena">
+                    <dt>
+                        <strong>Subdoména</strong>
+                        <span class="term-en">(Subdomain)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Část celkové domény, vymezená z pohledu problémového prostoru. Subdomény vznikají
+                            analýzou domény a rozdělením problémového prostoru na soudržné oblasti. Rozlišujeme
+                            tři typy: <strong>Klíčová subdoména</strong> (Core Domain) — zdroj konkurenční výhody;
+                            <strong>Podpůrná subdoména</strong> (Supporting Subdomain) — nutná pro fungování, ale
+                            ne zdrojem výhody; <strong>Generická subdoména</strong> (Generic Subdomain) — řešitelná
+                            hotovými produkty. Subdomény patří do <em>problémového prostoru</em>; Bounded Contexts
+                            jsou jejich protějškem v <em>prostoru řešení</em>. Jeden Bounded Context zpravidla
+                            implementuje jednu subdoménu, ale ne vždy v poměru 1:1.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 15; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 2</p>
+                        <p class="term-related">Viz také: <a href="#term-klicova-domena">Klíčová doména</a>, <a href="#term-podporna-subdomena">Podpůrná subdoména</a>, <a href="#term-genericka-subdomena">Generická subdoména</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-klicova-domena">
+                    <dt>
+                        <strong>Klíčová doména</strong>
+                        <span class="term-en">(Core Domain)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Subdoména, která přináší největší konkurenční výhodu a je srdcem celého podnikání.
+                            Klíčová doména je oblast, v níž se organizace odlišuje od konkurence a kde leží
+                            primární důvod existence softwaru. Měla by dostávat největší investice, nejlepší
+                            vývojáře a plnou aplikaci taktických vzorů DDD. Všechny ostatní subdomény jsou
+                            periferní — slouží klíčové doméně, ale nejsou jejím cílem. Identifikace klíčové
+                            domény je jedním z nejdůležitějších výsledků strategické analýzy.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 15, str. 396–397; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 2</p>
+                        <p class="term-related">Viz také: <a href="#term-subdomena">Subdoména</a>, <a href="#term-podporna-subdomena">Podpůrná subdoména</a>, <a href="#term-genericka-subdomena">Generická subdoména</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-podporna-subdomena">
+                    <dt>
+                        <strong>Podpůrná subdoména</strong>
+                        <span class="term-en">(Supporting Subdomain)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Subdoména nezbytná pro fungování klíčové domény, ale sama o sobě není zdrojem
+                            konkurenční výhody. Příklad: sledování objednávek v e-commerce systému, kde klíčovou
+                            doménou je doporučovací engine. Podpůrné subdomény se typicky vyvíjejí in-house, ale
+                            bez hluboké aplikace DDD — jejich složitost totiž nepřesahuje nutnou míru. Jsou
+                            nezbytné, nikoli strategické. Pokud by bylo možné podpůrnou subdoménu nahradit
+                            hotovým řešením, je vhodné to zvážit.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 2, str. 52–54</p>
+                        <p class="term-related">Viz také: <a href="#term-klicova-domena">Klíčová doména</a>, <a href="#term-genericka-subdomena">Generická subdoména</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-genericka-subdomena">
+                    <dt>
+                        <strong>Generická subdoména</strong>
+                        <span class="term-en">(Generic Subdomain)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Subdoména, jejíž potřeby lze pokrýt existujícím hotovým řešením (off-the-shelf
+                            software). Příklady: autentizace a autorizace (Keycloak, Auth0), fakturace (Stripe),
+                            odesílání e-mailů (Mailgun, SendGrid). Generické subdomény nenesou žádnou specificitu
+                            daného podnikání — stejný problém řeší tisíce organizací. Investice do vývoje vlastního
+                            řešení je proto zpravidla plýtvání zdroji. Nejlepší strategie: outsourcing nebo
+                            integrace existujícího produktu.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 2, str. 54–55</p>
+                        <p class="term-related">Viz také: <a href="#term-klicova-domena">Klíčová doména</a>, <a href="#term-podporna-subdomena">Podpůrná subdoména</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-vsudypritomny-jazyk">
+                    <dt>
+                        <strong>Všudypřítomný jazyk</strong>
+                        <span class="term-en">(Ubiquitous Language)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Sdílený, přesný jazyk mezi vývojáři a doménovými experty, který se konzistentně
+                            používá v kódu, konverzacích, dokumentaci, testech i diagramech. Slova tohoto jazyka
+                            jsou pojmy z domény — ne technické termíny, ne databázový slang. Všudypřítomný jazyk
+                            je ohraničen jedním Bounded Contextem: stejné slovo může v různých kontextech
+                            znamenat různé věci (například „Zákazník" v kontextu prodeje vs. v kontextu podpory).
+                            Jde o nejzákladnější Evansův koncept — bez Ubiquitous Language je DDD jen sbírkou
+                            vzorů bez lepidla.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 2, str. 24–33</p>
+                        <p class="term-related">Viz také: <a href="#term-ohraniceny-kontext">Ohraničený kontext</a>, <a href="#term-domena">Doména</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-ohraniceny-kontext">
+                    <dt>
+                        <strong>Ohraničený kontext</strong>
+                        <span class="term-en">(Bounded Context)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Explicitní hranice, uvnitř níž je konkrétní doménový model definován a platný.
+                            V rámci Bounded Contextu je Ubiquitous Language konzistentní a jednoznačná —
+                            každý pojem má jeden přesný význam. Různé Bounded Contexty mohou používat stejné
+                            slovo pro odlišné koncepty, aniž by si odporovaly. Bounded Context je
+                            fundamentální jednotkou návrhu i nasazení v DDD. Určuje hranice týmů, nasazení,
+                            databázových schémat i kontraktů API. Nelze ho zaměňovat s modulem nebo
+                            namespace — jde o organizační i technický konstrukt.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 335–336; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 2</p>
+                        <p class="term-related">Viz také: <a href="#term-vsudypritomny-jazyk">Všudypřítomný jazyk</a>, <a href="#term-mapa-kontextu">Mapa kontextů</a>, <a href="#term-subdomena">Subdoména</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-mapa-kontextu">
+                    <dt>
+                        <strong>Mapa kontextů</strong>
+                        <span class="term-en">(Context Map)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Dokument nebo diagram zobrazující všechny Bounded Contexty v systému a vztahy mezi
+                            nimi. Mapa kontextů není primárně technický artefakt — zobrazuje organizační
+                            a týmové vztahy, mocenské dynamiky (kdo závisí na kom), kontrakty integrace
+                            a použité integrační vzory (Shared Kernel, Customer–Supplier, ACL apod.).
+                            Vytvoření mapy kontextů je zpravidla první hmatatelný výstup strategické analýzy DDD.
+                            Odráží realitu — ne ideál; zachycuje stav, který existuje, ne ten, který si přejeme.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 343–344</p>
+                        <p class="term-related">Viz také: <a href="#term-ohraniceny-kontext">Ohraničený kontext</a>, <a href="#term-sdilene-jadro">Sdílené jádro</a>, <a href="#term-zakaznik-dodavatel">Zákazník–Dodavatel</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-sdilene-jadro">
+                    <dt>
+                        <strong>Sdílené jádro</strong>
+                        <span class="term-en">(Shared Kernel)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Vzor mapování kontextů: dva Bounded Contexty sdílejí podmnožinu doménového modelu —
+                            společné entity, hodnotové objekty nebo doménové události. Změny ve sdíleném jádru
+                            musí být odsouhlaseny oběma týmy a testovány v obou kontextech. Sdílené jádro
+                            vytváří těsnou provázanost — koordinační náklady jsou nezanedbatelné. Používejte
+                            ho jen tehdy, kdy je přínos sdílení prokazatelně vyšší než náklady koordinace.
+                            Nejčastěji vhodné pro kontexty spravované jedním týmem.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 354–355</p>
+                        <p class="term-related">Viz také: <a href="#term-mapa-kontextu">Mapa kontextů</a>, <a href="#term-zakaznik-dodavatel">Zákazník–Dodavatel</a>, <a href="#term-konformista">Konformista</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-zakaznik-dodavatel">
+                    <dt>
+                        <strong>Zákazník–Dodavatel</strong>
+                        <span class="term-en">(Customer–Supplier)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Vztah mapování kontextů, v němž downstream kontext (Zákazník) závisí na upstream
+                            kontextu (Dodavateli). Dodavatelský tým musí v rozumné míře zohledňovat potřeby
+                            zákazníka — existuje formální vztah a vyjednané rozhraní. Zákazník může zadávat
+                            požadavky na změny a Dodavatel je povinen je zvažovat. Tento vzor předpokládá,
+                            že oba týmy spolu aktivně komunikují a spolupracují. Pokud Dodavatel ignoruje
+                            potřeby Zákazníka, vztah degeneruje na Konformistu nebo vyžaduje Anti-korupční
+                            vrstvu.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 356–357</p>
+                        <p class="term-related">Viz také: <a href="#term-mapa-kontextu">Mapa kontextů</a>, <a href="#term-konformista">Konformista</a>, <a href="#term-anti-korupcni-vrstva">Anti-korupční vrstva</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-konformista">
+                    <dt>
+                        <strong>Konformista</strong>
+                        <span class="term-en">(Conformist)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Vzor mapování kontextů: downstream kontext přebírá model upstream kontextu v plném
+                            rozsahu, bez překladu. Používá se tehdy, kdy upstream tým nemá motivaci ani povinnost
+                            přizpůsobovat se potřebám downstream, ale downstream shledá upstream model
+                            dostatečně přijatelným. Konformista eliminuje potřebu překladové vrstvy, ale za cenu
+                            závislosti na cizím modelu. Je opakem Anti-korupční vrstvy. Vhodný například při
+                            integraci s autoritativní platformou (interní ERP, firemní identity provider),
+                            jejíž model je kvalitní.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 357–358</p>
+                        <p class="term-related">Viz také: <a href="#term-anti-korupcni-vrstva">Anti-korupční vrstva</a>, <a href="#term-zakaznik-dodavatel">Zákazník–Dodavatel</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-anti-korupcni-vrstva">
+                    <dt>
+                        <strong>Anti-korupční vrstva</strong>
+                        <span class="term-en">(Anti-Corruption Layer — ACL)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Překladová vrstva, která izoluje Bounded Context od modelů jiných kontextů nebo
+                            legacy systémů. ACL překládá pojmy externího modelu do interního Ubiquitous Language,
+                            čímž brání „korupci" doménového modelu cizími koncepty. Implementuje se typicky
+                            jako sada adaptérů, fasád nebo překladačů na hranici kontextu. Je nezbytná při
+                            integraci s špatně navrženými legacy systémy nebo s externími API, která mají
+                            odlišnou sémantiku. ACL je jeden z nejdůležitějších obranných mechanismů v DDD.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 364–367</p>
+                        <p class="term-related">Viz také: <a href="#term-konformista">Konformista</a>, <a href="#term-mapa-kontextu">Mapa kontextů</a>, <a href="#term-adapter">Adaptér</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-otevreny-hostitelsky-servis">
+                    <dt>
+                        <strong>Otevřený hostitelský servis</strong>
+                        <span class="term-en">(Open Host Service)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Vzor mapování kontextů: Bounded Context definuje formální protokol (API), prostřednictvím
+                            něhož mohou ostatní kontexty integrovat. Protokol je zveřejněn, dokumentován a aktivně
+                            udržován. Jiné kontexty se tomuto protokolu přizpůsobí, aniž by potřebovaly přímý
+                            přístup k internímu modelu. Open Host Service je vhodný pro kontexty, které slouží
+                            většímu počtu spotřebitelů — namísto individuálních překladů pro každého zákazníka
+                            se nabídne jeden dobře navržený protokol.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 362–363</p>
+                        <p class="term-related">Viz také: <a href="#term-zverejneny-jazyk">Zveřejněný jazyk</a>, <a href="#term-mapa-kontextu">Mapa kontextů</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-zverejneny-jazyk">
+                    <dt>
+                        <strong>Zveřejněný jazyk</strong>
+                        <span class="term-en">(Published Language)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Dobře dokumentovaný sdílený jazyk pro komunikaci mezi Bounded Contexty — často
+                            průmyslový standard (XML schéma, JSON-LD, HL7 ve zdravotnictví, FIX ve financích).
+                            Zveřejněný jazyk se typicky používá v kombinaci s Open Host Service: hostitelský
+                            kontext publikuje svůj protokol prostřednictvím standardizovaného jazyka, který
+                            mohou jiné kontexty číst bez nutnosti znát interní model. Odděluje
+                            komunikační formát od vnitřní reprezentace.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 362–363</p>
+                        <p class="term-related">Viz také: <a href="#term-otevreny-hostitelsky-servis">Otevřený hostitelský servis</a>, <a href="#term-mapa-kontextu">Mapa kontextů</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-separate-ways">
+                    <dt>
+                        <strong>Separate Ways</strong>
+                        <span class="term-en">(Separate Ways)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Rozhodnutí v mapování kontextů: dva Bounded Contexty nemají žádnou integraci.
+                            Každý tým řeší problém nezávisle. Toto je legitimní strategie tehdy, kdy
+                            náklady na integraci přesahují její přínos — například pokud sdílená funkcionalita
+                            není pro žádný kontext kritická, nebo pokud jsou komunikační bariéry mezi týmy
+                            příliš vysoké. Separate Ways je disciplinované rozhodnutí, ne selhání návrhu:
+                            uznáváme, že duplikace je v tomto případě levnější než koordinace.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 359–360</p>
+                        <p class="term-related">Viz také: <a href="#term-mapa-kontextu">Mapa kontextů</a></p>
+                    </dd>
+                </div>
+
+            </dl>
+        </section>
+
+        {# ==================== SECTION 2 ==================== #}
+        <section id="takticke-vzory" aria-labelledby="takticke-vzory-heading">
+            <h3 id="takticke-vzory-heading">2. Taktické vzory (stavební bloky DDD)</h3>
+
+            <div class="concept-box" role="note" aria-labelledby="takticke-intro-heading">
+                <h4 id="takticke-intro-heading">Co jsou taktické vzory?</h4>
+                <p>
+                    Taktické vzory DDD jsou konkrétní objektově-orientované stavební bloky, s jejichž pomocí
+                    se doménový model implementuje uvnitř jednoho Bounded Contextu. Taktický design odpovídá
+                    na otázku <em>„jak"</em> — jak modelovat entitu, jak vynucovat invarianty, jak uchovávat
+                    stav, jak vyjádřit doménové operace. Tyto vzory nejsou samoúčelné — mají smysl pouze tehdy,
+                    jsou-li zasazeny do správně definovaného strategického rámce.
+                </p>
+            </div>
+
+            <dl class="glossary-list">
+
+                <div class="glossary-entry" id="term-entita">
+                    <dt>
+                        <strong>Entita</strong>
+                        <span class="term-en">(Entity)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Doménový objekt s jedinečnou, přetrvávající identitou, která ho odlišuje i v případě,
+                            že se změní všechny jeho atributy. Příklad: uživatel identifikovaný hodnotou
+                            <code>UserId</code> — i když změní jméno, e-mail i adresu, zůstává stejnou entitou.
+                            Dvě entity se stejnými daty, ale odlišnými identifikátory, jsou různé entity.
+                            Rovnost entit je určena identitou, nikoli stavem. Na rozdíl od Hodnotového objektu
+                            musí entita mít explicitní identifikátor, ideálně jako silně typovaný Value Object.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5, str. 89–97</p>
+                        <p class="term-related">Viz také: <a href="#term-hodnotovy-objekt">Hodnotový objekt</a>, <a href="#term-agregat">Agregát</a>, <a href="#term-koren-agregatu">Kořen agregátu</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-hodnotovy-objekt">
+                    <dt>
+                        <strong>Hodnotový objekt</strong>
+                        <span class="term-en">(Value Object)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Doménový objekt bez identity — dva hodnotové objekty se stejnými atributy jsou
+                            rovnocenné a zaměnitelné. Hodnotové objekty jsou neměnné (immutable): jakákoli
+                            mutace vrací novou instanci, nikoliv modifikovanou stávající. Příklady:
+                            <code>Money</code>, <code>Email</code>, <code>Address</code>, <code>DateRange</code>,
+                            <code>ProductId</code>. Návrhový princip: preferujte hodnotové objekty před
+                            primitivními typy — vyjadřují doménový záměr, centralizují validaci a předcházejí
+                            sémantickým chybám (argument confusion). Většina doménových konceptů, které
+                            vývojáři modelují jako řetězec nebo číslo, jsou ve skutečnosti hodnotové objekty.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5, str. 97–103</p>
+                        <p class="term-related">Viz také: <a href="#term-entita">Entita</a>, <a href="#term-primitive-obsession">Primitive Obsession</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-agregat">
+                    <dt>
+                        <strong>Agregát</strong>
+                        <span class="term-en">(Aggregate)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Shluk doménových objektů (entit a hodnotových objektů) zacházený jako jediná
+                            jednotka pro změny dat. Agregát má právě jeden Kořen agregátu. Vynucuje invarianty
+                            uvnitř své hranice — žádná operace nesmí uvést agregát do neplatného stavu.
+                            Objekty mimo agregát na něj odkazují výhradně přes identifikátor kořene, nikdy
+                            přímou referencí na vnitřní entity. Agregát definuje transakční hranici:
+                            v jedné transakci se smí modifikovat maximálně jeden agregát. Správné
+                            dimenzování agregátů je jedním z nejtěžších aspektů DDD — příliš velké agregáty
+                            vedou k výkonostním problémům, příliš malé ke slabé doménové konzistenci.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 125–136; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 10</p>
+                        <p class="term-related">Viz také: <a href="#term-koren-agregatu">Kořen agregátu</a>, <a href="#term-invariant">Invariant</a>, <a href="#term-repozitar">Repozitář</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-koren-agregatu">
+                    <dt>
+                        <strong>Kořen agregátu</strong>
+                        <span class="term-en">(Aggregate Root)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Jediná entita uvnitř agregátu, která slouží jako vstupní bod pro veškeré
+                            vnější interakce. Veškeré invarianty agregátu jsou vynucovány prostřednictvím
+                            kořene — žádný vnější objekt nesmí modifikovat vnitřní objekty agregátu
+                            přímo, ale vždy jen skrze kořen. Vnější objekty drží reference výhradně
+                            na kořen agregátu (nebo jeho identifikátor), nikdy na jeho vnitřní entity.
+                            Kořen agregátu je také jediný objekt, který Repozitář přímo ukládá a načítá.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 125–128</p>
+                        <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-repozitar">Repozitář</a>, <a href="#term-invariant">Invariant</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-repozitar">
+                    <dt>
+                        <strong>Repozitář</strong>
+                        <span class="term-en">(Repository)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Kolekci podobná abstrakce pro ukládání a načítání agregátů. Repozitář ukrývá
+                            detaily persistence před doménou — z pohledu domény jde o kolekci objektů v paměti.
+                            Rozhraní (interface) repozitáře patří do doménové vrstvy; jeho implementace
+                            (např. Doctrine, Eloquent, in-memory) patří do infrastrukturní vrstvy.
+                            Pravidlo: jeden repozitář na jeden typ agregátu. Repozitáře vrací celé agregáty —
+                            nenabízejí dotazy na vnitřní entity. Pro čtecí potřeby (CQRS Query side) se
+                            používají jiné mechanismy (projekce, čtecí modely).
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 147–162</p>
+                        <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-fake">Fake</a>, <a href="#term-cqrs">CQRS</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-tovarna">
+                    <dt>
+                        <strong>Továrna</strong>
+                        <span class="term-en">(Factory)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Zapouzdřuje složitou konstrukční logiku agregátů nebo doménových objektů.
+                            Pokud je vytvoření objektu samo o sobě smysluplným doménovým aktem, továrna
+                            nebo pojmenovaný konstruktor vyjadřuje tento záměr. Továrna může být statická
+                            metoda na agregátu (pojmenovaný konstruktor), samostatná třída, nebo doménová
+                            služba. Odděluje zodpovědnost za vytvoření objektu od jeho použití. Neměla
+                            by obsahovat doménovou logiku — pouze koordinaci konstrukce.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 136–147</p>
+                        <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-domenova-sluzba">Doménová služba</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-domenova-sluzba">
+                    <dt>
+                        <strong>Doménová služba</strong>
+                        <span class="term-en">(Domain Service)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Bezstavová služba provádějící doménovou operaci, která přirozeně nepatří
+                            žádné konkrétní entitě ani hodnotovému objektu. Příklady: služba pro konverzi
+                            měn, kalkulace ceny s uplatněním slev ze dvou různých agregátů, koordinace
+                            transferu prostředků mezi účty. Doménová služba je součástí doménové vrstvy
+                            a mluví Ubiquitous Language. Nelze ji zaměňovat s Aplikační službou —
+                            Aplikační služba orchestruje use-case, Doménová služba vyjadřuje doménové
+                            pravidlo.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5, str. 104–110</p>
+                        <p class="term-related">Viz také: <a href="#term-aplikacni-sluzba">Aplikační služba</a>, <a href="#term-entita">Entita</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-aplikacni-sluzba">
+                    <dt>
+                        <strong>Aplikační služba</strong>
+                        <span class="term-en">(Application Service)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Orchestruje provedení use-casu: načítá agregáty z repozitářů, volá doménové
+                            metody, persistuje výsledky a publikuje doménové události. Neobsahuje
+                            žádnou doménovou logiku — ta patří do entit, hodnotových objektů a doménových
+                            služeb. Aplikační služba je tenká vrstva mezi prezentací a doménou. V architektuře
+                            CQRS odpovídají aplikačním službám Command Handlery (pro příkazy) a Query
+                            Handlery (pro dotazy). V hexagonální architektuře jsou aplikační služby volány
+                            přes driving porty.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 4, str. 70–73; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 14</p>
+                        <p class="term-related">Viz také: <a href="#term-domenova-sluzba">Doménová služba</a>, <a href="#term-cqrs">CQRS</a>, <a href="#term-vrstvena-architektura">Vrstvená architektura</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-domenova-udalost">
+                    <dt>
+                        <strong>Doménová událost</strong>
+                        <span class="term-en">(Domain Event)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Neměnný záznam o čemkoliv významném, co se v doméně stalo — vyjádřený minulým
+                            časem: <code>UserRegistered</code>, <code>OrderPlaced</code>, <code>PaymentFailed</code>.
+                            Doménové události jsou prostředkem volného propojení mezi agregáty i Bounded Contexty.
+                            Musí obsahovat všechna data potřebná k rekonstrukci změny stavu — nespoléhají
+                            na pozdější dotazování. V Event Sourcingu jsou doménové události primárním
+                            způsobem persistence stavu. Název události musí být součástí Ubiquitous Language.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 8 (pozdější vydání)</p>
+                        <p class="term-related">Viz také: <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-saga">Sága / Process Manager</a>, <a href="#term-korelacni-id">Korelační ID</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-specifikace">
+                    <dt>
+                        <strong>Specifikace</strong>
+                        <span class="term-en">(Specification)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Predikát zapouzdřující obchodní pravidlo, které určuje, zda objekt splňuje
+                            určité kritérium. Specifikace lze skládat pomocí logických operátorů AND, OR, NOT.
+                            Jsou užitečné pro validaci (splňuje objednávka podmínky k potvrzení?),
+                            výběr (vyber zákazníky splňující kritéria věrnostního programu) a konstrukční
+                            pravidla (smí být produkt přidán do košíku?). Centralizují pravidla, která
+                            by jinak byla rozptýlena po celé doméně.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 9, str. 224–236; Evans &amp; Fowler, <em>Specification</em> (whitepaper, 1997)</p>
+                        <p class="term-related">Viz také: <a href="#term-invariant">Invariant</a>, <a href="#term-domenova-sluzba">Doménová služba</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-invariant">
+                    <dt>
+                        <strong>Invariant</strong>
+                        <span class="term-en">(Invariant)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Obchodní pravidlo, které musí vždy platit v rámci hranice agregátu — nesmí být
+                            nikdy porušeno, bez ohledu na to, jakým způsobem je agregát modifikován.
+                            Kořen agregátu je zodpovědný za vynucování všech invariantů. Příklad:
+                            <em>„Objednávka musí mít alespoň jednu položku, aby mohla být potvrzena."</em>
+                            nebo <em>„Celková cena objednávky nesmí být záporná."</em> Invarianty jsou
+                            jádrem doménového modelu — definují, co je platný stav. Porušení invariantu
+                            musí vyhodit výjimku, nikdy tiše projít.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 128–131</p>
+                        <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-koren-agregatu">Kořen agregátu</a>, <a href="#term-specifikace">Specifikace</a></p>
+                    </dd>
+                </div>
+
+            </dl>
+        </section>
+
+        {# ==================== SECTION 3 ==================== #}
+        <section id="architektonicke-vzory" aria-labelledby="architektonicke-vzory-heading">
+            <h3 id="architektonicke-vzory-heading">3. Architektonické vzory</h3>
+
+            <div class="concept-box" role="note" aria-labelledby="architektonicke-intro-heading">
+                <h4 id="architektonicke-intro-heading">Co jsou architektonické vzory v kontextu DDD?</h4>
+                <p>
+                    Architektonické vzory definují, jak jsou jednotlivé vrstvy a komponenty systému organizovány,
+                    jak mezi sebou komunikují a kde leží zodpovědnosti. DDD je architektonicky agnostické —
+                    lze ho kombinovat s vrstvenou architekturou, hexagonální architekturou i vertikálními řezy.
+                    Volba architektonického vzoru ovlivňuje testovatelnost, udržovatelnost a schopnost doménového
+                    modelu zůstat čistý od infrastrukturních závislostí.
+                </p>
+            </div>
+
+            <dl class="glossary-list">
+
+                <div class="glossary-entry" id="term-vrstvena-architektura">
+                    <dt>
+                        <strong>Vrstvená architektura</strong>
+                        <span class="term-en">(Layered Architecture)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Klasická čtyřvrstvá architektura: Prezentační vrstva → Aplikační vrstva →
+                            Doménová vrstva → Infrastrukturní vrstva. Závislosti plynou striktně jedním
+                            směrem — vnější vrstvy závisí na vnitřních vrstvách. Doménová vrstva nemá
+                            žádné závislosti na ostatních vrstvách — je nejvnitřnější a nejstabilnější.
+                            Tato architektura je přirozeným výchozím bodem pro DDD a je explicitně
+                            popsána Evansem. Nevýhodou je, že organizuje kód podle technické role, nikoli
+                            podle byznysové funkce — což může ztěžovat pochopení, co systém dělá.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 4, str. 68–76</p>
+                        <p class="term-related">Viz také: <a href="#term-hexagonalni-architektura">Hexagonální architektura</a>, <a href="#term-vertikalni-slice">Vertikální slice architektura</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-hexagonalni-architektura">
+                    <dt>
+                        <strong>Hexagonální architektura</strong>
+                        <span class="term-en">(Hexagonal Architecture / Ports and Adapters)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Architektura navržená Alistairem Cockburnem: jádro aplikace (doména + aplikační
+                            vrstva) komunikuje s vnějším světem výhradně prostřednictvím Portů (rozhraní)
+                            a Adaptérů (implementací). Driving adaptéry (HTTP, CLI, konzole) volají aplikaci;
+                            driven adaptéry (databáze, messaging, e-mail) jsou aplikací volány. Klíčový přínos:
+                            doménový model je zcela izolován od infrastruktury — lze ho testovat bez databáze,
+                            HTTP frameworku ani externích systémů. Základní princip inverze závislostí (DIP)
+                            je zde aplikován systematicky.
+                        </p>
+                        <p class="term-source">Zdroj: Alistair Cockburn, <em>Hexagonal Architecture</em> (2005), alistair.cockburn.us; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4</p>
+                        <p class="term-related">Viz také: <a href="#term-port">Port</a>, <a href="#term-adapter">Adaptér</a>, <a href="#term-vrstvena-architektura">Vrstvená architektura</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-port">
+                    <dt>
+                        <strong>Port</strong>
+                        <span class="term-en">(Port)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            V Hexagonální architektuře: rozhraní definující, jak aplikace komunikuje s vnějším
+                            světem. Driving porty definují, jak vnější aktéři aplikaci volají (například
+                            rozhraní command handlerů). Driven porty definují, co aplikace potřebuje od
+                            infrastruktury (například <code>UserRepositoryInterface</code>,
+                            <code>EmailSenderInterface</code>). Porty patří do aplikačního jádra —
+                            jsou součástí doménové nebo aplikační vrstvy, nikoli infrastruktury.
+                        </p>
+                        <p class="term-source">Zdroj: Alistair Cockburn, <em>Hexagonal Architecture</em> (2005)</p>
+                        <p class="term-related">Viz také: <a href="#term-hexagonalni-architektura">Hexagonální architektura</a>, <a href="#term-adapter">Adaptér</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-adapter">
+                    <dt>
+                        <strong>Adaptér</strong>
+                        <span class="term-en">(Adapter)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            V Hexagonální architektuře: konkrétní implementace Portu. Adaptér překládá
+                            mezi protokolem vnějšího světa a rozhraním aplikačního jádra. Příklady:
+                            <code>DoctrineUserRepository</code> implementuje port <code>UserRepositoryInterface</code>;
+                            <code>SymfonyMailerEmailSender</code> implementuje port <code>EmailSenderInterface</code>;
+                            HTTP controller implementuje driving port tím, že volá command handler.
+                            Adaptéry patří do infrastrukturní vrstvy a jsou zaměnitelné bez dotyku
+                            doménového modelu.
+                        </p>
+                        <p class="term-source">Zdroj: Alistair Cockburn, <em>Hexagonal Architecture</em> (2005)</p>
+                        <p class="term-related">Viz také: <a href="#term-port">Port</a>, <a href="#term-hexagonalni-architektura">Hexagonální architektura</a>, <a href="#term-anti-korupcni-vrstva">Anti-korupční vrstva</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-vertikalni-slice">
+                    <dt>
+                        <strong>Vertikální slice architektura</strong>
+                        <span class="term-en">(Vertical Slice Architecture)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Organizuje kód podle funkce/use-casu, nikoli podle technické vrstvy. Každý slice
+                            (například <code>UserRegistration</code>) je vertikální řez celým stackem: controller,
+                            command, handler, doménová logika, repozitář — vše pohromadě. Snižuje coupling
+                            mezi funkcemi — změna v jedné funkci neovlivní ostatní. Liší se od klasického
+                            horizontálního vrstvení, kde jsou všechny controllery v jedném místě, všechny
+                            repozitáře v druhém atd. Vertikální slices přirozeně odpovídají use-casům
+                            a Bounded Contextům.
+                        </p>
+                        <p class="term-source">Zdroj: Jimmy Bogard, <em>Vertical Slice Architecture</em> (2018), jimmybogard.com</p>
+                        <p class="term-related">Viz také: <a href="#term-vrstvena-architektura">Vrstvená architektura</a>, <a href="#term-cqrs">CQRS</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-cqrs">
+                    <dt>
+                        <strong>CQRS</strong>
+                        <span class="term-en">(Command Query Responsibility Segregation)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Architektonický vzor oddělující operace čtení (Queries) od operací zápisu
+                            (Commands). Každá strana má vlastní model: zápisový model používá bohaté
+                            agregáty a vynucuje invarianty; čtecí model používá optimalizované DTO nebo
+                            projekce. Zaveden Gregem Youngem jako rozšíření principu CQS Bertranda Meyera
+                            na architektonickou úroveň. CQRS je v DDD přirozeným doplňkem: doménový model
+                            je příliš bohatý na to, aby byl efektivně přímou projekcí pro UI. Oddělení
+                            modelů umožňuje každou stranu optimalizovat nezávisle.
+                        </p>
+                        <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4</p>
+                        <p class="term-related">Viz také: <a href="#term-cqs">CQS</a>, <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-projekce">Projekce</a>, <a href="#term-aplikacni-sluzba">Aplikační služba</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-cqs">
+                    <dt>
+                        <strong>CQS</strong>
+                        <span class="term-en">(Command-Query Separation)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Princip Bertranda Meyera: metoda je buď Command (mění stav, vrací void), nebo Query
+                            (vrací data, nemá žádné vedlejší efekty) — nikdy obojí. Porušení CQS vede ke kódu,
+                            který je obtížně testovatelný a jehož chování je nepředvídatelné při vícenásobném
+                            volání. CQRS aplikuje tento princip na architektonické úrovni — celé modely jsou
+                            odděleny, nejen metody. CQS je podmínkou nutnou pro CQRS.
+                        </p>
+                        <p class="term-source">Zdroj: Bertrand Meyer, <em>Object-Oriented Software Construction</em> (1988), kap. 23</p>
+                        <p class="term-related">Viz také: <a href="#term-cqrs">CQRS</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-event-sourcing">
+                    <dt>
+                        <strong>Event Sourcing</strong>
+                        <span class="term-en">(Zdrojování událostí)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Persistence vzor, v němž je stav ukládán jako append-only sekvence doménových
+                            událostí, nikoli jako aktuální snímek. Aktuální stav agregátu se odvozuje
+                            přehráním celého streamu událostí od počátku (nebo od posledního Snapshotu).
+                            Přirozený audit log: každá změna je zaznamenaná, žádná není ztracena.
+                            Umožňuje temporální dotazy — rekonstrukci stavu v libovolném bodě minulosti.
+                            Přirozeně doplňuje CQRS: zápisový model generuje události; čtecí model je
+                            z nich vybudován projektory.
+                        </p>
+                        <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4</p>
+                        <p class="term-related">Viz také: <a href="#term-event-store">Event Store</a>, <a href="#term-projekce">Projekce</a>, <a href="#term-snapshot">Snímek / Snapshot</a>, <a href="#term-domenova-udalost">Doménová událost</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-event-store">
+                    <dt>
+                        <strong>Event Store</strong>
+                        <span class="term-en">(Event Store)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Append-only persistence úložiště pro doménové události v Event Sourcingu.
+                            Ukládá události per-stream agregátu se zárukou pořadí. Záznamy se nikdy
+                            nemutují ani nemažou — je to základní invariant Event Sourcingu. Event Store
+                            typicky nabízí: zápis nových událostí do streamu (s kontrolou verze pro
+                            optimistické zamykání), čtení streamu od libovolné pozice a subscribování
+                            na nové události. Příklady: EventStoreDB, Marten (PostgreSQL), vlastní
+                            implementace nad relační databází.
+                        </p>
+                        <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010)</p>
+                        <p class="term-related">Viz také: <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-projekce">Projekce</a>, <a href="#term-optimisticke-zamykani">Optimistické zamykání</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-projekce">
+                    <dt>
+                        <strong>Projekce</strong>
+                        <span class="term-en">(Projection)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Čtecí model vybudovaný ze streamu událostí. Projektor naslouchá doménovým
+                            událostem a aktualizuje denormalizovanou, čtecí-optimalizovanou datovou
+                            strukturu (tabulku, dokument, cache). Projekce lze kdykoliv zrušit a přebudovat
+                            přehráním všech událostí z Event Store — jsou odvozené, nikoli zdrojové pravdy.
+                            Jedna sada událostí může napájet více projektů s různou strukturou pro různé
+                            uživatelské scénáře.
+                        </p>
+                        <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4</p>
+                        <p class="term-related">Viz také: <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-cqrs">CQRS</a>, <a href="#term-event-store">Event Store</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-snapshot">
+                    <dt>
+                        <strong>Snímek / Snapshot</strong>
+                        <span class="term-en">(Snapshot)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            V Event Sourcingu: periodicky uložený stav agregátu, který slouží jako zkratka
+                            při přehrávání streamu událostí. Namísto přehrání všech událostí od počátku
+                            (což může být tisíce operací) se načte nejnovější Snapshot a přehrají se
+                            pouze události po něm. Snapshot je optimalizace výkonu — neovlivňuje správnost
+                            modelu. Snímky jsou nepovinné a nelze na ně spoléhat jako na zdrojovou pravdu.
+                        </p>
+                        <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010)</p>
+                        <p class="term-related">Viz také: <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-event-store">Event Store</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-saga">
+                    <dt>
+                        <strong>Sága / Process Manager</strong>
+                        <span class="term-en">(Saga / Process Manager)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Koordinuje dlouhodobě běžící byznysový proces, který zahrnuje více agregátů nebo
+                            Bounded Contextů. Sága naslouchá doménovým událostem, vydává příkazy (Commands)
+                            a udržuje stav procesu. Pro případ selhání definuje kompenzační transakce — akce,
+                            které vrátí systém do konzistentního stavu (obdoba rollbacku v distribuovaném
+                            prostředí). Příklad: proces dokončení objednávky zahrnující platbu, rezervaci skladu
+                            a odeslání notifikace. Termín „Saga" pochází z databázového výzkumu (Hector Garcia-Molina, 1987);
+                            „Process Manager" je alternativní název z CQRS komunity.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 10; Garcia-Molina &amp; Salem, <em>Sagas</em> (1987)</p>
+                        <p class="term-related">Viz také: <a href="#term-domenova-udalost">Doménová událost</a>, <a href="#term-eventual-consistency">Eventual Consistency</a>, <a href="#term-cqrs">CQRS</a></p>
+                    </dd>
+                </div>
+
+            </dl>
+        </section>
+
+        {# ==================== SECTION 4 ==================== #}
+        <section id="integracni-vzory" aria-labelledby="integracni-vzory-heading">
+            <h3 id="integracni-vzory-heading">4. Integrační vzory a komunikace</h3>
+
+            <div class="concept-box" role="note" aria-labelledby="integracni-intro-heading">
+                <h4 id="integracni-intro-heading">Co jsou integrační vzory?</h4>
+                <p>
+                    Integrační vzory a pojmy popisují, jak spolu různé části systému komunikují, jak se udržuje
+                    konzistence v distribuovaném prostředí a jak se předcházejí souběžnostním konfliktům.
+                    Zahrnují také důležité anti-vzory — běžné chyby v modelování domény, na které je třeba
+                    dávat pozor. Porozumění těmto pojmům je klíčové pro návrh systémů, které správně fungují
+                    i při souběžném přístupu nebo dočasné nedostupnosti komponent.
+                </p>
+            </div>
+
+            <dl class="glossary-list">
+
+                <div class="glossary-entry" id="term-eventual-consistency">
+                    <dt>
+                        <strong>Eventual Consistency</strong>
+                        <span class="term-en">(Výsledná konzistence)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Model konzistence, v němž jsou repliky dat zaručeně konvergovat ke stejné hodnotě,
+                            pokud nejsou prováděny žádné další aktualizace — avšak ne nutně okamžitě.
+                            V architektuře DDD + CQRS: po zpracování příkazu a publikování události může
+                            čtecí model dočasně zaostávat za zápisovým modelem. Toto zpoždění je akceptovatelné
+                            a musí být komunikováno s byznysem — stakeholdeři musí rozumět, že „čerstvost"
+                            dat má meze. Eventual consistency je nutný kompromis v distribuovaných systémech
+                            (CAP teorém) a v CQRS architekturách.
+                        </p>
+                        <p class="term-source">Zdroj: Werner Vogels, <em>Eventually Consistent</em> (ACM Queue, 2008); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4</p>
+                        <p class="term-related">Viz také: <a href="#term-optimisticke-zamykani">Optimistické zamykání</a>, <a href="#term-saga">Sága / Process Manager</a>, <a href="#term-cqrs">CQRS</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-optimisticke-zamykani">
+                    <dt>
+                        <strong>Optimistické zamykání</strong>
+                        <span class="term-en">(Optimistic Locking)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Mechanismus řízení souběžnosti: namísto uzamykání zdrojů se používá číslo verze
+                            (version number). Při aktualizaci se kontroluje, zda verze uložená v databázi
+                            odpovídá verzi načtené při čtení. Pokud mezitím jiný proces agregát změnil,
+                            vznikne konflikt souběžnosti a operace selže — klient musí načíst nový stav
+                            a operaci opakovat. V Event Sourcingu se verze odvozuje z pozice v event streamu.
+                            Optimistické zamykání je vhodné pro nízkou konfliktvnost; pesimistické zamykání
+                            (skutečné uzamykání) pro vysokou konfliktvnost.
+                        </p>
+                        <p class="term-source">Zdroj: Martin Fowler, <em>Patterns of Enterprise Application Architecture</em> (2002), str. 416–417</p>
+                        <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-eventual-consistency">Eventual Consistency</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-anemicky-model">
+                    <dt>
+                        <strong>Anémický model</strong>
+                        <span class="term-en">(Anemic Domain Model — anti-vzor)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Anti-vzor, v němž doménové třídy obsahují pouze data (gettery/settery) a byznysová
+                            logika je umístěna do servisních tříd. Porušuje zapouzdření objektově-orientovaného
+                            programování a odporuje principu bohatého doménového modelu (Rich Domain Model) v DDD.
+                            Výsledkem jsou třídy, které jsou pouze datovými strukturami — ne doménovými objekty.
+                            Byznysová logika je rozptýlena a obtížně lokalizovatelná. Martin Fowler ho označil
+                            za anti-vzor v roce 2003 (martinfowler.com/bliki/AnemicDomainModel.html). Ironicky
+                            jde o nejrozšířenější „DDD" implementaci v praxi.
+                        </p>
+                        <p class="term-source">Zdroj: Martin Fowler, <em>AnemicDomainModel</em> (2003); Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5</p>
+                        <p class="term-related">Viz také: <a href="#term-entita">Entita</a>, <a href="#term-domenova-sluzba">Doménová služba</a>, <a href="#term-primitive-obsession">Primitive Obsession</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-primitive-obsession">
+                    <dt>
+                        <strong>Primitive Obsession</strong>
+                        <span class="term-en">(Primitive Obsession — anti-vzor)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Anti-vzor spočívající v používání primitivních typů (<code>string</code>,
+                            <code>int</code>, <code>float</code>) pro doménové koncepty namísto hodnotových
+                            objektů. Vede k rozptýlené validaci (každý, kdo přijme <code>string</code>
+                            pro e-mail, musí validovat sám), sémantické ztrátě a argumentové záměně
+                            (funkce přijímající <code>int orderId</code> a <code>int userId</code> může
+                            přijmout argumenty v nesprávném pořadí bez chyby překladače). Lékem je zavedení
+                            hodnotových objektů: <code>OrderId</code>, <code>UserId</code>, <code>Email</code>,
+                            <code>Money</code> — typy nesoucí validaci a sémantiku.
+                        </p>
+                        <p class="term-source">Zdroj: Martin Fowler et al., <em>Refactoring</em> (1999), kap. 3 (code smell); Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5</p>
+                        <p class="term-related">Viz také: <a href="#term-hodnotovy-objekt">Hodnotový objekt</a>, <a href="#term-anemicky-model">Anémický model</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-korelacni-id">
+                    <dt>
+                        <strong>Korelační ID</strong>
+                        <span class="term-en">(Correlation ID)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Jedinečný identifikátor připojený k požadavku nebo příkazu, který se propaguje
+                            skrze všechny související události, příkazy a záznamy logů. Umožňuje distribuované
+                            trasování — propojení všech operací spuštěných jednou uživatelskou akcí. V systému
+                            s asynchronní komunikací nebo mikroslužbami je korelační ID nezbytné pro
+                            diagnostiku a ladění. Standardně se přenáší v HTTP hlavičkách (např.
+                            <code>X-Correlation-ID</code>) a vkládá do každého vydaného eventu.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Gregor Hohpe &amp; Bobby Woolf, <em>Enterprise Integration Patterns</em> (2003)</p>
+                        <p class="term-related">Viz také: <a href="#term-causation-id">Causation ID</a>, <a href="#term-domenova-udalost">Doménová událost</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-causation-id">
+                    <dt>
+                        <strong>Causation ID</strong>
+                        <span class="term-en">(Causation ID)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Podobný Korelačnímu ID: identifikuje konkrétní událost nebo příkaz, který zapříčinil
+                            vydání aktuální události. Zatímco Korelační ID propojuje celý kauzální řetěz od
+                            kořenové příčiny, Causation ID ukazuje přímého předchůdce v kauzálním grafu.
+                            Oba identifikátory dohromady umožňují plnou rekonstrukci kauzálního řetězu —
+                            který příkaz co způsobil, které události z něj vzešly a které další příkazy
+                            tyto události iniciovaly.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8</p>
+                        <p class="term-related">Viz také: <a href="#term-korelacni-id">Korelační ID</a>, <a href="#term-domenova-udalost">Doménová událost</a></p>
+                    </dd>
+                </div>
+
+            </dl>
+        </section>
+
+        {# ==================== SECTION 5 ==================== #}
+        <section id="testovaci-pojmy" aria-labelledby="testovaci-pojmy-heading">
+            <h3 id="testovaci-pojmy-heading">5. Pojmy z testování DDD</h3>
+
+            <div class="concept-box" role="note" aria-labelledby="testovaci-intro-heading">
+                <h4 id="testovaci-intro-heading">Testování v kontextu DDD</h4>
+                <p>
+                    Správně implementovaný DDD model je přirozeně testovatelný — izolace doménové logiky od
+                    infrastruktury umožňuje psát rychlé, deterministické unit testy bez databáze, HTTP ani
+                    externích systémů. Testovací pojmy v této sekci pokrývají nástroje a strategie relevantní
+                    pro ověřování doménových pravidel, architektonické správnosti a správného chování systému
+                    při migraci ze starého kódu.
+                </p>
+            </div>
+
+            <dl class="glossary-list">
+
+                <div class="glossary-entry" id="term-testovaci-dvojnik">
+                    <dt>
+                        <strong>Testovací dvojník</strong>
+                        <span class="term-en">(Test Double)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Obecný termín pro jakýkoliv objekt, který v testu nahrazuje reálnou závislost.
+                            Pochází z filmového světa — „stunt double" je herec, který zastupuje hvězdu
+                            v nebezpečných scénách. Taxonomie dle Gerarda Meszarose (<em>xUnit Test Patterns</em>,
+                            2007): Dummy, Stub, Fake, Mock, Spy. Každý typ má jiné vlastnosti a jiný účel.
+                            Používání správného typu testovacího dvojníku je klíčové pro testovatelný
+                            a udržovatelný testovací kód.
+                        </p>
+                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11</p>
+                        <p class="term-related">Viz také: <a href="#term-stub">Stub</a>, <a href="#term-mock">Mock</a>, <a href="#term-fake">Fake</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-stub">
+                    <dt>
+                        <strong>Stub</strong>
+                        <span class="term-en">(Stub)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Testovací dvojník, který vrací přednastavené odpovědi bez jakékoliv logiky.
+                            Stub neověřuje volání — jeho jedinou rolí je poskytnout testovanému kódu
+                            konkrétní hodnotu tam, kde by reálná závislost volala databázi, síť nebo
+                            jiný zewnętrzní zdroj. Používá se tehdy, kdy závislost musí vrátit specifickou
+                            hodnotu, aby test mohl pokračovat. Příklad: <code>StubExchangeRateProvider</code>
+                            vždy vrátí kurz 25 CZK/EUR. Nezajímá nás, zda byl volán — jen co vrátil.
+                        </p>
+                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (martinfowler.com, 2007)</p>
+                        <p class="term-related">Viz také: <a href="#term-testovaci-dvojnik">Testovací dvojník</a>, <a href="#term-mock">Mock</a>, <a href="#term-fake">Fake</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-mock">
+                    <dt>
+                        <strong>Mock</strong>
+                        <span class="term-en">(Mock)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Testovací dvojník, který ověřuje volání: očekává, že konkrétní metody byly
+                            zavolány s konkrétními argumenty. Mock je neúspěšný, pokud se volání neuskutečnilo
+                            nebo proběhlo jinak, než bylo nastaveno. Riziko přespecifikace — testy se stávají
+                            křehkými: testují implementační detaily, ne chování. V DDD jsou Mocky vhodné
+                            pro ověření vydávání doménových událostí nebo volání externích portů, nikoli
+                            pro interní volání v rámci agregátu.
+                        </p>
+                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (2007)</p>
+                        <p class="term-related">Viz také: <a href="#term-testovaci-dvojnik">Testovací dvojník</a>, <a href="#term-stub">Stub</a>, <a href="#term-fake">Fake</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-fake">
+                    <dt>
+                        <strong>Fake</strong>
+                        <span class="term-en">(Fake)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Fungující, avšak zjednodušená implementace rozhraní. Příklad:
+                            <code>InMemoryUserRepository</code> — plně funkční, ukládá data do pole
+                            v paměti, nevyžaduje databázi. Fake je preferovaný testovací dvojník pro
+                            repozitáře v DDD: na rozdíl od Mocku neváže testy na implementační detaily;
+                            na rozdíl od Stubů skutečně funguje a odhalí chyby v doménové logice, která
+                            závisí na výsledcích dotazů. Faky vyžadují více práce na implementaci, ale
+                            výrazně zvyšují hodnotu testů.
+                        </p>
+                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11</p>
+                        <p class="term-related">Viz také: <a href="#term-testovaci-dvojnik">Testovací dvojník</a>, <a href="#term-repozitar">Repozitář</a>, <a href="#term-stub">Stub</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-charakterizacni-test">
+                    <dt>
+                        <strong>Charakterizační test</strong>
+                        <span class="term-en">(Characterization Test)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Test napsaný za účelem zachycení existujícího chování legacy kódu před jeho
+                            refactoringem. Popisuje, co kód <em>dělá</em>, nikoli co by <em>měl dělat</em>.
+                            Slouží jako bezpečnostní síť během migrace z CRUD na DDD: zajišťuje, že refactoring
+                            nezmění pozorované chování systému. Termín zavedl Michael Feathers v knize
+                            <em>Working Effectively with Legacy Code</em> (2004). Charakterizační testy jsou
+                            dočasné — po dokončení migrace a napsání specifikačních testů je lze postupně
+                            nahradit.
+                        </p>
+                        <p class="term-source">Zdroj: Michael Feathers, <em>Working Effectively with Legacy Code</em> (2004), kap. 13</p>
+                        <p class="term-related">Viz také: <a href="#term-architektonicky-test">Architektonický test</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-architektonicky-test">
+                    <dt>
+                        <strong>Architektonický test</strong>
+                        <span class="term-en">(Architectural Test)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Automatizovaný test ověřující pravidla závislostí mezi vrstvami nebo moduly —
+                            například: „Doménová vrstva nesmí záviset na infrastrukturní vrstvě",
+                            nebo „Žádná třída v namespace <code>Domain\</code> nesmí importovat třídu
+                            z namespace <code>Infrastructure\</code>". Architektonické testy jsou spustitelnou
+                            dokumentací architektonických rozhodnutí. Zabraňují architektonické erozi —
+                            postupnému porušování pravidel, ke kterému dochází bez automatické kontroly.
+                            Nástroje pro PHP: Deptrac (qossmic/deptrac), PHP-Arkitekt (phparkitect/arkitect).
+                        </p>
+                        <p class="term-source">Zdroj: Václav Makeš a kol.; Deptrac dokumentace (qossmic.github.io/deptrac)</p>
+                        <p class="term-related">Viz také: <a href="#term-vrstvena-architektura">Vrstvená architektura</a>, <a href="#term-hexagonalni-architektura">Hexagonální architektura</a>, <a href="#term-charakterizacni-test">Charakterizační test</a></p>
+                    </dd>
+                </div>
+
+            </dl>
+        </section>
+
+        {# ==================== LITERATURA ==================== #}
+        <section id="literatura" aria-labelledby="literatura-heading">
+            <h3 id="literatura-heading">Primární literatura</h3>
+            <p>Definice v tomto glosáři vycházejí z následujících primárních zdrojů:</p>
+            <ul>
+                <li>
+                    Evans, Eric. <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>.
+                    Addison-Wesley, 2003. ISBN&nbsp;978-0-321-12521-7
+                </li>
+                <li>
+                    Vernon, Vaughn. <em>Implementing Domain-Driven Design</em>.
+                    Addison-Wesley, 2013. ISBN&nbsp;978-0-321-83457-7
+                </li>
+                <li>
+                    Vernon, Vaughn. <em>Domain-Driven Design Distilled</em>.
+                    Addison-Wesley, 2016. ISBN&nbsp;978-0-13-443442-1
+                </li>
+                <li>
+                    Fowler, Martin. <em>Patterns of Enterprise Application Architecture</em>.
+                    Addison-Wesley, 2002. ISBN&nbsp;978-0-321-12521-7
+                </li>
+                <li>
+                    Young, Greg. <em>CQRS Documents</em>. 2010.
+                    Dostupné z: <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank" rel="noopener noreferrer">cqrs.files.wordpress.com</a>
+                </li>
+            </ul>
+        </section>
+
+    </article>
+{% endblock %}

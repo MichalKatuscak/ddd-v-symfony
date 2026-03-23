@@ -41,13 +41,19 @@
                 <h5>Obsah průvodce:</h5>
                 <ul>
                     <li><a href="{{ path('what_is_ddd') }}">Co je Domain-Driven Design?</a></li>
-                    <li><a href="{{ path('horizontal_vs_vertical') }}">Vertikální slice</a></li>
+                    <li><a href="{{ path('horizontal_vs_vertical') }}">Vertikální slice architektura</a></li>
                     <li><a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a></li>
                     <li><a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony 8</a></li>
                     <li><a href="{{ path('cqrs') }}">CQRS v Symfony 8</a></li>
+                    <li><a href="{{ path('event_sourcing') }}">Event Sourcing</a></li>
                     <li><a href="{{ path('practical_examples') }}">Praktické příklady</a></li>
                     <li><a href="{{ path('case_study') }}">Případová studie</a></li>
+                    <li><a href="{{ path('testing_ddd') }}">Testování DDD kódu</a></li>
+                    <li><a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a></li>
+                    <li><a href="{{ path('anti_patterns') }}">Anti-vzory a typické chyby</a></li>
+                    <li><a href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a></li>
                     <li><a href="{{ path('resources') }}">Zdroje a další četba</a></li>
+                    <li><a href="{{ path('glossary') }}">Glosář DDD terminologie</a></li>
                 </ul>
             </div>
 
@@ -56,7 +62,7 @@
                 V kombinaci s moderním frameworkem Symfony 8 poskytuje výkonný nástroj pro vytváření složitých aplikací.
             </p>
 
-            <div class="concept-box">
+            <div class="info-card">
                 <h4>O čem je tento průvodce?</h4>
                 <p>
                     Tento průvodce se zaměřuje na implementaci Domain-Driven Design v Symfony 8, s důrazem na vertikální slice architekturu.
@@ -105,7 +111,7 @@
                 </div>
             </div>
 
-            <div class="example-box mt-5">
+            <div class="example-card mt-5">
                 <h4>Ukázka kódu: Základní struktura DDD projektu v Symfony 8</h4>
                 <pre><code class="language-bash">src/
 ├── UserManagement/                 # Bounded Context

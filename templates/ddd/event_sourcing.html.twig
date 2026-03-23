@@ -1,0 +1,1128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Event Sourcing v DDD a Symfony | DDD Symfony{% endblock %}
+
+{% block meta_description %}Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce a snapshotting — s praktickými ukázkami PHP kódu.{% endblock %}
+
+{% block meta_keywords %}Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Event Sourcing v DDD a Symfony",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+    "@type": "Person",
+    "name": "Michal Katuščák"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Michal Katuščák"
+  },
+  "datePublished": "2025-04-24",
+  "dateModified": "2026-03-23",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block body %}
+<article itemscope itemtype="https://schema.org/TechArticle">
+    <h2 itemprop="headline">Event Sourcing</h2>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <h5 id="toc-heading">Obsah kapitoly:</h5>
+        <ul>
+            <li><a href="#co-je-event-sourcing">Co je Event Sourcing?</a></li>
+            <li><a href="#vztah-k-cqrs">Vztah k CQRS</a></li>
+            <li><a href="#domenove-udalosti">Doménové události jako základ ES</a></li>
+            <li><a href="#event-store">Implementace Event Store</a></li>
+            <li><a href="#aggregate-s-es">Agregát s Event Sourcingem</a></li>
+            <li><a href="#projekce">Projekce (Projections)</a></li>
+            <li><a href="#snapshotting">Snapshotting</a></li>
+            <li><a href="#kdy-pouzit">Kdy použít Event Sourcing</a></li>
+        </ul>
+    </div>
+
+    <section id="co-je-event-sourcing" aria-labelledby="co-je-event-sourcing-heading">
+        <h3 id="co-je-event-sourcing-heading">Co je Event Sourcing?</h3>
+
+        <p>
+            Event Sourcing (ES) je architektonický vzor persistence, při němž se stav systému neukládá jako aktuální
+            snímek dat, nýbrž jako <strong>sekvence neměnných událostí</strong>, jež k danému stavu vedly. Každá změna
+            stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty; aktuální stav agregátu pak
+            vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
+        </p>
+        <p>
+            Klíčový princip lze vyjádřit větou: <strong>"current state is derived from the history of events"</strong>.
+            Namísto jediného řádku v databázové tabulce, který je přepisován při každé změně, existuje append-only log
+            všech událostí, které kdy na agregátu nastaly.
+        </p>
+
+        <h4>Porovnání s tradiční CRUD persistencí</h4>
+        <p>
+            V klasickém CRUD přístupu se v tabulce vždy uchovává pouze aktuální stav entity. Jakmile se hodnota změní,
+            předchozí hodnota je ztracena. Event Sourcing naproti tomu ukládá každou změnu jako novou položku do
+            event logu; žádná informace se nikdy nepřepisuje ani nemaže.
+        </p>
+
+        <div class="example-card" role="note" aria-labelledby="crud-vs-es-heading">
+            <h4 id="crud-vs-es-heading">CRUD vs. Event Sourcing — přehled</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vlastnost</th>
+                        <th>CRUD (tradiční)</th>
+                        <th>Event Sourcing</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Co se ukládá</td>
+                        <td>Aktuální stav entity</td>
+                        <td>Sekvence událostí (změn)</td>
+                    </tr>
+                    <tr>
+                        <td>Auditní log</td>
+                        <td>Vyžaduje extra implementaci</td>
+                        <td>Zabudován ve struktuře</td>
+                    </tr>
+                    <tr>
+                        <td>Obnova stavu</td>
+                        <td>Přímé čtení z tabulky</td>
+                        <td>Replay event streamu</td>
+                    </tr>
+                    <tr>
+                        <td>Temporální dotazy</td>
+                        <td>Obtížné / nemožné</td>
+                        <td>Přirozené (replay do libovolného bodu)</td>
+                    </tr>
+                    <tr>
+                        <td>Složitost implementace</td>
+                        <td>Nízká až střední</td>
+                        <td>Vysoká</td>
+                    </tr>
+                    <tr>
+                        <td>Výkon čtení</td>
+                        <td>Vysoký (přímý select)</td>
+                        <td>Vyžaduje projekce / snapshot</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-card" role="note" aria-labelledby="es-pojmy-heading">
+            <h4 id="es-pojmy-heading">Klíčové pojmy Event Sourcingu:</h4>
+            <ul>
+                <li>
+                    <strong>Event (Událost)</strong> — Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený
+                    v minulém čase (např. <code>OrderPlaced</code>, <code>PaymentReceived</code>). Obsahuje všechna data
+                    potřebná k rekonstrukci změny stavu.
+                </li>
+                <li>
+                    <strong>Event Store</strong> — Specializované append-only úložiště pro události. Události se
+                    do něj pouze přidávají; nikdy se neupravují ani nemažou. Každá událost patří do event streamu
+                    konkrétního agregátu.
+                </li>
+                <li>
+                    <strong>Aggregate (Agregát)</strong> — V kontextu ES je agregát rekonstruován přehráním všech
+                    událostí ze svého event streamu. Každá mutace stavu agregátu produkuje novou událost místo
+                    přímé modifikace atributů.
+                </li>
+                <li>
+                    <strong>Projection (Projekce)</strong> — Read model sestavený z událostí. Projekce transformují
+                    event stream do podoby vhodné pro konkrétní dotazy (query) — například denormalizovaná tabulka
+                    pro přehled objednávek.
+                </li>
+                <li>
+                    <strong>Snapshot</strong> — Periodicky ukládaný snímek aktuálního stavu agregátu, který slouží
+                    jako zkratka při replay. Umožňuje přehrát pouze události novější než poslední snapshot místo
+                    celého event streamu od počátku.
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="vztah-k-cqrs" aria-labelledby="vztah-k-cqrs-heading">
+        <h3 id="vztah-k-cqrs-heading">Vztah k CQRS</h3>
+
+        <p>
+            Event Sourcing a <a href="{{ path('cqrs') }}">CQRS</a> jsou dva samostatné vzory, které se však přirozeně
+            doplňují. <strong>Nejsou totéž</strong> — lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
+            jejich kombinace je velmi mocná a v praxi DDD aplikací běžná.
+        </p>
+        <p>
+            Důvodem přirozené synergie je, že Event Sourcing produkuje events jako první třídu persistence, a CQRS
+            potřebuje způsob, jak aktualizovat read modely při každé změně write strany. Events jsou ideálním
+            mechanismem pro tuto propagaci: write side uloží event do Event Store, read side jej přečte a aktualizuje
+            projekci.
+        </p>
+
+        <div class="info-card" role="note" aria-labelledby="es-cqrs-tok-heading">
+            <h4 id="es-cqrs-tok-heading">Datový tok v architektuře ES + CQRS:</h4>
+            <ol>
+                <li>Uživatel odešle <strong>Command</strong> (např. <code>PlaceOrderCommand</code>).</li>
+                <li>Command Handler načte agregát přehráním jeho event streamu z Event Store.</li>
+                <li>Agregát validuje command a produkuje jednu nebo více <strong>Domain Events</strong>.</li>
+                <li>Nové události jsou uloženy do <strong>Event Store</strong> (append).</li>
+                <li><strong>Event Bus</strong> (Symfony Messenger) distribuuje události odběratelům.</li>
+                <li><strong>Projectors</strong> přijmou události a aktualizují <strong>Read Models</strong>.</li>
+                <li>Uživatel následně dotazuje read model přes <strong>Query</strong> — čte z optimalizované projekce.</li>
+            </ol>
+        </div>
+
+        <div class="example-card" role="note" aria-labelledby="es-cqrs-rozdil-heading">
+            <h4 id="es-cqrs-rozdil-heading">Zásadní rozdíl mezi ES a CQRS</h4>
+            <p>
+                <strong>CQRS</strong> řeší <em>jak oddělit zápis od čtení</em> — je to organizační vzor zodpovědností.
+                <strong>Event Sourcing</strong> řeší <em>jak persistovat stav</em> — je to vzor persistence.
+                Při jejich kombinaci ES přirozeně zásobuje CQRS read side daty: každá change event je současně
+                vstupem pro aktualizaci projekcí.
+            </p>
+        </div>
+    </section>
+
+    <section id="domenove-udalosti" aria-labelledby="domenove-udalosti-heading">
+        <h3 id="domenove-udalosti-heading">Doménové události jako základ Event Sourcingu</h3>
+
+        <p>
+            V Event Sourcingu jsou doménové události (Domain Events) primárním datovým artefaktem. Na rozdíl od
+            doménových událostí používaných pouze k notifikaci (side effects) jsou v ES události <em>zdrojem pravdy</em>
+            o stavu systému. Musejí proto splňovat přísné požadavky:
+        </p>
+
+        <ul>
+            <li>
+                <strong>Immutabilita</strong> — Po vytvoření nelze událost měnit. Veškeré její properties jsou
+                read-only, nastavené v konstruktoru.
+            </li>
+            <li>
+                <strong>Serializovatelnost</strong> — Událost musí být serializovatelná do trvalého formátu (JSON,
+                MessagePack…) a deserializovatelná zpět, ideálně bez ztráty informace.
+            </li>
+            <li>
+                <strong>Verzování</strong> — Schéma události se v čase může vyvíjet. Je nutné udržovat kompatibilitu
+                starých událostí nebo implementovat upcasting (transformaci starých verzí na aktuální).
+            </li>
+            <li>
+                <strong>Pojmenování v minulém čase</strong> — Události vyjadřují fakta, která již nastala:
+                <code>UserRegistered</code>, <code>OrderPlaced</code>, <code>PaymentFailed</code>.
+            </li>
+            <li>
+                <strong>Dostatečná granularita dat</strong> — Událost musí obsahovat veškerá data potřebná k tomu,
+                aby z ní bylo možné rekonstruovat stav, aniž by byl nutný přístup k externím zdrojům.
+            </li>
+        </ul>
+
+        <div class="example-card" role="note" aria-labelledby="domain-event-php-heading">
+            <h4 id="domain-event-php-heading">PHP: Interface DomainEvent a konkrétní třída UserRegistered</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Shared\Event;
+
+use DateTimeImmutable;
+
+/**
+ * Společný interface pro všechny doménové události.
+ * Všechny implementace musí být immutabilní value objekty.
+ */
+interface DomainEvent
+{
+    /** Unikátní identifikátor události (UUID v4). */
+    public function eventId(): string;
+
+    /** Čas vzniku události — vždy UTC. */
+    public function occurredOn(): DateTimeImmutable;
+
+    /**
+     * Název události sloužící k jejímu uložení a vyhledání v Event Store.
+     * Konvence: FQCN nebo krátký slug ve tvaru "user.registered".
+     */
+    public function eventType(): string;
+
+    /**
+     * Serializace do pole pro uložení do Event Store.
+     * Musí obsahovat všechna data potřebná k rekonstrukci stavu.
+     *
+     * @return array&lt;string, mixed&gt;
+     */
+    public function toPayload(): array;
+}
+</code></pre>
+
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Identity\Event;
+
+use App\Domain\Shared\Event\DomainEvent;
+use DateTimeImmutable;
+use Ramsey\Uuid\Uuid;
+
+/**
+ * Událost emitovaná po úspěšné registraci uživatele.
+ * Immutabilní — všechny properties jsou readonly.
+ */
+final class UserRegistered implements DomainEvent
+{
+    private readonly string $eventId;
+    private readonly DateTimeImmutable $occurredOn;
+
+    public function __construct(
+        private readonly string $userId,
+        private readonly string $email,
+        private readonly string $hashedPassword,
+        private readonly string $fullName,
+    ) {
+        $this-&gt;eventId    = Uuid::uuid4()-&gt;toString();
+        $this-&gt;occurredOn = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
+    }
+
+    public function eventId(): string
+    {
+        return $this-&gt;eventId;
+    }
+
+    public function occurredOn(): DateTimeImmutable
+    {
+        return $this-&gt;occurredOn;
+    }
+
+    public function eventType(): string
+    {
+        return 'identity.user_registered';
+    }
+
+    /** @return array&lt;string, mixed&gt; */
+    public function toPayload(): array
+    {
+        return [
+            'userId'         =&gt; $this-&gt;userId,
+            'email'          =&gt; $this-&gt;email,
+            'hashedPassword' =&gt; $this-&gt;hashedPassword,
+            'fullName'       =&gt; $this-&gt;fullName,
+        ];
+    }
+
+    // --- Gettery (pro použití v aplikační vrstvě) ---
+
+    public function userId(): string  { return $this-&gt;userId; }
+    public function email(): string   { return $this-&gt;email; }
+    public function fullName(): string { return $this-&gt;fullName; }
+}
+</code></pre>
+        </div>
+
+        <p>
+            Konvence pojmenování událostí by měla být konzistentní v rámci celého projektu. Doporučený formát pro
+            <code>eventType()</code> je <code>&lt;bounded_context&gt;.&lt;past_tense_verb_noun&gt;</code>, například
+            <code>ordering.order_placed</code> nebo <code>payment.payment_received</code>. Tato konvence usnadňuje
+            routing událostí v Symfony Messenger a jejich filtrování v Event Store.
+        </p>
+    </section>
+
+    <section id="event-store" aria-labelledby="event-store-heading">
+        <h3 id="event-store-heading">Implementace Event Store</h3>
+
+        <p>
+            Event Store je srdcem Event Sourcingu. Jedná se o append-only databázové úložiště, do nějž se ukládají
+            všechny doménové události. Každý záznam reprezentuje jednu událost s jejím kontextem (ke kterému agregátu
+            patří, v jaké verzi streamu, kdy nastala atd.). Záznamy se <strong>nikdy nepřepisují ani nemažou</strong>.
+        </p>
+
+        <h4>Struktura tabulky Event Store</h4>
+
+        <div class="example-card" role="note" aria-labelledby="event-store-sql-heading">
+            <h4 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code></h4>
+            <pre><code class="language-sql">CREATE TABLE event_store (
+    id            BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    event_id      CHAR(36)         NOT NULL COMMENT 'UUID v4 události — globálně unikátní',
+    aggregate_id  CHAR(36)         NOT NULL COMMENT 'UUID agregátu (vlastníka streamu)',
+    aggregate_type VARCHAR(255)    NOT NULL COMMENT 'FQCN nebo slug agregátu, napr. ordering.order',
+    event_type    VARCHAR(255)     NOT NULL COMMENT 'Typ události, napr. ordering.order_placed',
+    payload       JSON             NOT NULL COMMENT 'Serializovaná data události',
+    metadata      JSON             NOT NULL DEFAULT ('{}') COMMENT 'Korelační ID, causation ID, user ID…',
+    version       INT UNSIGNED     NOT NULL COMMENT 'Pořadové číslo v rámci streamu agregátu (od 1)',
+    occurred_on   DATETIME(6)      NOT NULL COMMENT 'UTC čas vzniku události',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_event_id (event_id),
+    -- Optimistic locking: dvojice (aggregate_id, version) musí být unikátní
+    UNIQUE KEY uq_aggregate_version (aggregate_id, version),
+    KEY idx_aggregate_id (aggregate_id),
+    KEY idx_aggregate_type (aggregate_type),
+    KEY idx_event_type (event_type),
+    KEY idx_occurred_on (occurred_on)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci
+  COMMENT='Append-only store všech doménových událostí';
+</code></pre>
+        </div>
+
+        <p>
+            Sloupec <code>version</code> má zásadní roli při implementaci <strong>optimistic locking</strong>.
+            Před zápisem nové události command handler přečte poslední verzi streamu agregátu. Při insertu
+            databáze vyvolá výjimku z porušení unikátního indexu <code>uq_aggregate_version</code>, pokud
+            mezitím jiný proces zapsal událost se stejnou verzí. Tímto způsobem bez pesimistického zamykání
+            řádků předcházíme ztrátě souběžných zápisů.
+        </p>
+
+        <div class="example-card" role="note" aria-labelledby="event-store-php-heading">
+            <h4 id="event-store-php-heading">PHP: Interface EventStore a Doctrine implementace</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing;
+
+use App\Domain\Shared\Event\DomainEvent;
+
+interface EventStore
+{
+    /**
+     * Uloží nové události do event streamu agregátu.
+     *
+     * @param DomainEvent[] $events
+     * @param int           $expectedVersion Verze posledního uloženého eventu — slouží
+     *                                        pro optimistic locking. Použijte 0 pro nový agregát.
+     *
+     * @throws ConcurrencyException Pokud $expectedVersion neodpovídá skutečné verzi streamu.
+     */
+    public function append(
+        string $aggregateId,
+        string $aggregateType,
+        array $events,
+        int $expectedVersion,
+    ): void;
+
+    /**
+     * Načte celý event stream agregátu (nebo od dané verze pro snapshot support).
+     *
+     * @return EventEnvelope[]
+     */
+    public function loadStream(
+        string $aggregateId,
+        int $fromVersion = 1,
+    ): array;
+}
+</code></pre>
+
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing;
+
+use App\Domain\Shared\Event\DomainEvent;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+
+final class DoctrineEventStore implements EventStore
+{
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly EventSerializer $serializer,
+    ) {}
+
+    /**
+     * @param DomainEvent[] $events
+     */
+    public function append(
+        string $aggregateId,
+        string $aggregateType,
+        array $events,
+        int $expectedVersion,
+    ): void {
+        $version = $expectedVersion;
+
+        $this-&gt;connection-&gt;beginTransaction();
+
+        try {
+            foreach ($events as $event) {
+                $version++;
+
+                $this-&gt;connection-&gt;insert('event_store', [
+                    'event_id'       =&gt; $event-&gt;eventId(),
+                    'aggregate_id'   =&gt; $aggregateId,
+                    'aggregate_type' =&gt; $aggregateType,
+                    'event_type'     =&gt; $event-&gt;eventType(),
+                    'payload'        =&gt; json_encode($event-&gt;toPayload(), JSON_THROW_ON_ERROR),
+                    'metadata'       =&gt; '{}',
+                    'version'        =&gt; $version,
+                    'occurred_on'    =&gt; $event-&gt;occurredOn()-&gt;format('Y-m-d H:i:s.u'),
+                ]);
+            }
+
+            $this-&gt;connection-&gt;commit();
+        } catch (UniqueConstraintViolationException $e) {
+            $this-&gt;connection-&gt;rollBack();
+            throw new ConcurrencyException(
+                "Concurrency conflict for aggregate {$aggregateId} at version {$version}.",
+                previous: $e,
+            );
+        } catch (\Throwable $e) {
+            $this-&gt;connection-&gt;rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * @return EventEnvelope[]
+     */
+    public function loadStream(string $aggregateId, int $fromVersion = 1): array
+    {
+        $rows = $this-&gt;connection-&gt;fetchAllAssociative(
+            'SELECT event_type, payload, version, occurred_on
+               FROM event_store
+              WHERE aggregate_id = :aggregateId
+                AND version &gt;= :fromVersion
+           ORDER BY version ASC',
+            ['aggregateId' =&gt; $aggregateId, 'fromVersion' =&gt; $fromVersion],
+        );
+
+        return array_map(
+            fn(array $row) =&gt; $this-&gt;serializer-&gt;deserialize($row),
+            $rows,
+        );
+    }
+}
+</code></pre>
+        </div>
+    </section>
+
+    <section id="aggregate-s-es" aria-labelledby="aggregate-s-es-heading">
+        <h3 id="aggregate-s-es-heading">Agregát s Event Sourcingem</h3>
+
+        <p>
+            V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
+            mechanismus zásadně jiný: <strong>každá změna stavu musí projít přes doménovou událost</strong>. Metody
+            agregátu nevytváří efekt přímo — nahrávají událost, a teprve aplikace této události mění interní stav.
+        </p>
+        <p>
+            Výsledkem je, že agregát obsahuje dvě sady metod:
+        </p>
+        <ul>
+            <li>
+                <strong>Mutační metody</strong> (public business API) — validují invarianty, rozhodují, která událost
+                nastane, a volají interní metodu pro nahrání události (typicky <code>recordEvent()</code>).
+            </li>
+            <li>
+                <strong><code>apply*()</code> metody</strong> (private/protected) — přijmou konkrétní typ události
+                a aplikují změnu na interní stav. Tyto metody jsou volány jak při nahrávání nové události, tak
+                při replay z Event Store.
+            </li>
+        </ul>
+
+        <div class="example-card" role="note" aria-labelledby="es-aggregate-base-heading">
+            <h4 id="es-aggregate-base-heading">PHP: Base class EventSourcedAggregate</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Shared;
+
+use App\Domain\Shared\Event\DomainEvent;
+
+abstract class EventSourcedAggregate
+{
+    /** @var DomainEvent[] Události nahrané v aktuální transakci — čekají na uložení. */
+    private array $recordedEvents = [];
+
+    private int $version = 0;
+
+    /**
+     * Nahrajeme novou událost: aplikujeme ji na stav, zapamatujeme ji pro persistenci
+     * a inkrementujeme verzi streamu — nezbytné pro optimistic locking.
+     */
+    protected function recordEvent(DomainEvent $event): void
+    {
+        $this-&gt;applyEvent($event);
+        $this-&gt;recordedEvents[] = $event;
+        $this-&gt;version++;
+    }
+
+    /**
+     * Přehrajeme historické události z Event Store (bez přidávání do $recordedEvents).
+     *
+     * @param DomainEvent[] $events
+     */
+    public static function reconstituteFromEvents(array $events): static
+    {
+        $aggregate = new static();
+
+        foreach ($events as $event) {
+            $aggregate-&gt;applyEvent($event);
+            $aggregate-&gt;version++;
+        }
+
+        return $aggregate;
+    }
+
+    /**
+     * Dynamické dispatchování na apply*() metody podle třídy události.
+     * Konvence: apply + ShortClassName, napr. applyOrderCreated().
+     * apply*() metody v podtřídách MUSÍ být protected (ne private),
+     * jinak je PHP nemůže volat z kontextu této nadtřídy.
+     */
+    private function applyEvent(DomainEvent $event): void
+    {
+        $method = 'apply' . (new \ReflectionClass($event))-&gt;getShortName();
+
+        if (!method_exists($this, $method)) {
+            throw new \LogicException(
+                sprintf('Aggregate %s must implement %s().', static::class, $method)
+            );
+        }
+
+        $this-&gt;$method($event);
+    }
+
+    /** @return DomainEvent[] */
+    public function releaseEvents(): array
+    {
+        $events = $this-&gt;recordedEvents;
+        $this-&gt;recordedEvents = [];
+        return $events;
+    }
+
+    public function version(): int
+    {
+        return $this-&gt;version;
+    }
+}
+</code></pre>
+        </div>
+
+        <div class="example-card" role="note" aria-labelledby="es-order-aggregate-heading">
+            <h4 id="es-order-aggregate-heading">PHP: Order agregát s Event Sourcingem</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Ordering;
+
+use App\Domain\Ordering\Event\OrderConfirmed;
+use App\Domain\Ordering\Event\OrderCreated;
+use App\Domain\Ordering\Event\OrderItemAdded;
+use App\Domain\Ordering\Event\OrderShipped;
+use App\Domain\Shared\EventSourcedAggregate;
+
+final class Order extends EventSourcedAggregate
+{
+    private string $orderId;
+    private string $customerId;
+    private OrderStatus $status;
+
+    /** @var OrderItem[] */
+    private array $items = [];
+
+    private ?string $trackingNumber = null;
+
+    // Statická továrna — vytvoří objednávku ve stavu Draft
+    public static function create(string $orderId, string $customerId): self
+    {
+        $order = new self();
+        $order-&gt;recordEvent(new OrderCreated($orderId, $customerId));
+
+        return $order;
+    }
+
+    public function addItem(OrderItem $item): void
+    {
+        if ($this-&gt;status !== OrderStatus::Draft) {
+            throw new \DomainException('Items can only be added to draft orders.');
+        }
+
+        $this-&gt;recordEvent(new OrderItemAdded($this-&gt;orderId, $item));
+    }
+
+    public function confirm(): void
+    {
+        if ($this-&gt;status !== OrderStatus::Draft) {
+            throw new \DomainException('Only draft orders can be confirmed.');
+        }
+        if (empty($this-&gt;items)) {
+            throw new \DomainException('Cannot confirm an empty order.');
+        }
+
+        $this-&gt;recordEvent(new OrderConfirmed($this-&gt;orderId));
+    }
+
+    public function ship(string $trackingNumber): void
+    {
+        if ($this-&gt;status !== OrderStatus::Confirmed) {
+            throw new \DomainException('Only confirmed orders can be shipped.');
+        }
+
+        $this-&gt;recordEvent(new OrderShipped($this-&gt;orderId, $trackingNumber));
+    }
+
+    // --- apply* metody — MUSÍ být protected (ne private), aby je base class mohla volat dynamicky ---
+    // --- Obsahují POUZE změnu interního stavu, žádnou business logiku ---
+
+    protected function applyOrderCreated(OrderCreated $event): void
+    {
+        $this-&gt;orderId    = $event-&gt;orderId();
+        $this-&gt;customerId = $event-&gt;customerId();
+        $this-&gt;items      = [];
+        $this-&gt;status     = OrderStatus::Draft;
+    }
+
+    protected function applyOrderItemAdded(OrderItemAdded $event): void
+    {
+        $this-&gt;items[] = $event-&gt;item();
+    }
+
+    protected function applyOrderConfirmed(OrderConfirmed $event): void
+    {
+        $this-&gt;status = OrderStatus::Confirmed;
+    }
+
+    protected function applyOrderShipped(OrderShipped $event): void
+    {
+        $this-&gt;status         = OrderStatus::Shipped;
+        $this-&gt;trackingNumber = $event-&gt;trackingNumber();
+    }
+
+    // Gettery pro aplikační vrstvu
+    public function orderId(): string         { return $this-&gt;orderId; }
+    public function status(): OrderStatus     { return $this-&gt;status; }
+    public function trackingNumber(): ?string { return $this-&gt;trackingNumber; }
+}
+</code></pre>
+        </div>
+
+        <h4>Načítání agregátu z event streamu (replay)</h4>
+        <p>
+            Repozitář pro event-sourcovaný agregát neprovádí SELECT do tabulky entit. Místo toho načte
+            event stream z Event Store a předá jej statické tovární metodě <code>reconstituteFromEvents()</code>.
+            Výsledný agregát má přesně takový stav, jaký odpovídá historii jeho událostí.
+        </p>
+
+        <div class="example-card" role="note" aria-labelledby="es-repo-heading">
+            <h4 id="es-repo-heading">PHP: EventSourced repozitář pro Order agregát</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Ordering;
+
+use App\Domain\Ordering\Order;
+use App\Infrastructure\EventSourcing\EventStore;
+
+final class EventSourcedOrderRepository
+{
+    private const AGGREGATE_TYPE = 'ordering.order';
+
+    public function __construct(
+        private readonly EventStore $eventStore,
+        private readonly EventSerializer $serializer,
+    ) {}
+
+    public function load(string $orderId): Order
+    {
+        $envelopes = $this-&gt;eventStore-&gt;loadStream($orderId);
+
+        if (empty($envelopes)) {
+            throw new \DomainException("Order {$orderId} not found.");
+        }
+
+        $events = array_map(
+            fn($envelope) =&gt; $this-&gt;serializer-&gt;toEvent($envelope),
+            $envelopes,
+        );
+
+        return Order::reconstituteFromEvents($events);
+    }
+
+    public function save(Order $order): void
+    {
+        $newEvents = $order-&gt;releaseEvents();
+
+        if (empty($newEvents)) {
+            return;
+        }
+
+        // expectedVersion = aktuální verze PŘED novými událostmi
+        $expectedVersion = $order-&gt;version() - count($newEvents);
+
+        $this-&gt;eventStore-&gt;append(
+            $order-&gt;orderId(),
+            self::AGGREGATE_TYPE,
+            $newEvents,
+            $expectedVersion,
+        );
+    }
+}
+</code></pre>
+        </div>
+    </section>
+
+    <section id="projekce" aria-labelledby="projekce-heading">
+        <h3 id="projekce-heading">Projekce (Projections)</h3>
+
+        <p>
+            Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
+            efektivní ad-hoc dotazy (např. "všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč"),
+            je nutné ze stream událostí vybudovat optimalizované denormalizované datové struktury určené pro čtení.
+        </p>
+
+        <h4>Synchronní vs. asynchronní projekce</h4>
+        <ul>
+            <li>
+                <strong>Synchronní projekce</strong> — Projekce se aktualizuje přímo v rámci téže transakce jako
+                zápis události. Garantuje konzistenci dat v okamžiku odpovědi na command, ale zvyšuje latenci zápisu
+                a zavádí silnou coupling mezi write a read stranou.
+            </li>
+            <li>
+                <strong>Asynchronní projekce</strong> — Události jsou po uložení do Event Store zařazeny do fronty
+                (Symfony Messenger + transport jako RabbitMQ nebo Redis). Projector je konzument, který zpracovává
+                zprávy nezávisle. Read model je v krátkém časovém okně nekonzistentní (eventual consistency), ale
+                write side je rychlejší a decoupled.
+            </li>
+        </ul>
+
+        <div class="example-card" role="note" aria-labelledby="projekce-php-heading">
+            <h4 id="projekce-php-heading">PHP: OrderSummaryProjection a asynchronní Projector</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Ordering\Projection;
+
+use App\Domain\Ordering\Event\OrderItemAdded;
+use App\Domain\Ordering\Event\OrderPlaced;
+use App\Domain\Ordering\Event\OrderShipped;
+use Doctrine\DBAL\Connection;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+/**
+ * Projector budující tabulku order_summary z doménových událostí.
+ *
+ * Každá metoda handle*() odpovídá jednomu typu události.
+ * Decorator #[AsMessageHandler] registruje třídu jako Messenger handler.
+ */
+#[AsMessageHandler]
+final class OrderSummaryProjector
+{
+    public function __construct(
+        private readonly Connection $connection,
+    ) {}
+
+    public function __invoke(OrderPlaced $event): void
+    {
+        $this-&gt;connection-&gt;insert('order_summary', [
+            'order_id'      =&gt; $event-&gt;orderId(),
+            'customer_id'   =&gt; $event-&gt;customerId(),
+            'status'        =&gt; 'draft',
+            'item_count'    =&gt; count($event-&gt;items()),
+            'total_amount'  =&gt; $this-&gt;calculateTotal($event-&gt;items()),
+            'placed_at'     =&gt; $event-&gt;occurredOn()-&gt;format('Y-m-d H:i:s'),
+            'shipped_at'    =&gt; null,
+            'tracking_no'   =&gt; null,
+        ]);
+    }
+
+    public function handleOrderItemAdded(OrderItemAdded $event): void
+    {
+        $this-&gt;connection-&gt;executeStatement(
+            'UPDATE order_summary
+                SET item_count   = item_count + 1,
+                    total_amount = total_amount + :price
+              WHERE order_id = :orderId',
+            ['price' =&gt; $event-&gt;item()-&gt;unitPrice(), 'orderId' =&gt; $event-&gt;orderId()],
+        );
+    }
+
+    public function handleOrderShipped(OrderShipped $event): void
+    {
+        $this-&gt;connection-&gt;executeStatement(
+            'UPDATE order_summary
+                SET status      = :status,
+                    shipped_at  = :shippedAt,
+                    tracking_no = :trackingNo
+              WHERE order_id = :orderId',
+            [
+                'status'     =&gt; 'shipped',
+                'shippedAt'  =&gt; $event-&gt;occurredOn()-&gt;format('Y-m-d H:i:s'),
+                'trackingNo' =&gt; $event-&gt;trackingNumber(),
+                'orderId'    =&gt; $event-&gt;orderId(),
+            ],
+        );
+    }
+
+    /** @param OrderItem[] $items */
+    private function calculateTotal(array $items): int
+    {
+        return array_sum(array_map(
+            fn($item) =&gt; $item-&gt;unitPrice() * $item-&gt;quantity(),
+            $items,
+        ));
+    }
+}
+</code></pre>
+        </div>
+
+        <p>
+            Aby Symfony Messenger doručoval události projektorům asynchronně, je nutné nakonfigurovat transport
+            a routing v <code>config/packages/messenger.yaml</code>:
+        </p>
+
+        <div class="example-card" role="note" aria-labelledby="messenger-yaml-heading">
+            <h4 id="messenger-yaml-heading">YAML: Konfigurace Symfony Messenger pro asynchronní projekce</h4>
+            <pre><code class="language-yaml">framework:
+    messenger:
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    auto_setup: true
+
+        routing:
+            # Všechny doménové události routujeme na async transport
+            'App\Domain\Ordering\Event\OrderPlaced':    async
+            'App\Domain\Ordering\Event\OrderItemAdded': async
+            'App\Domain\Ordering\Event\OrderShipped':   async
+</code></pre>
+        </div>
+
+        <p>
+            Projekce lze také <strong>přebudovat</strong> (rebuild) přehráním celého Event Store od začátku —
+            tato schopnost je jednou z největších výhod Event Sourcingu. Při změně business požadavků stačí
+            vytvořit novou projekci a přehrát historii; u CRUD systémů jsou historická data nenávratně ztracena.
+        </p>
+    </section>
+
+    <section id="snapshotting" aria-labelledby="snapshotting-heading">
+        <h3 id="snapshotting-heading">Snapshotting</h3>
+
+        <p>
+            Se stárnutím systému rostou event streamy agregátů. Agregát s tisíci událostmi vyžaduje načtení a přehrání
+            tisíce řádků z databáze při každém command handleru — to je výkonnostní problém, který se v reálných
+            systémech projevuje velmi brzy.
+        </p>
+        <p>
+            Řešením je <strong>snapshotting</strong>: v pravidelných intervalech (každých N událostí, nebo
+            časově) se aktuální stav agregátu serializuje a uloží jako snapshot. Při příštím načtení repozitář
+            nejprve vyhledá poslední snapshot a z Event Store načte pouze události novější než tento snapshot.
+        </p>
+
+        <h4>Kdy vytvářet snapshots</h4>
+        <ul>
+            <li>Poté, co event stream agregátu překročí určitý počet událostí (typicky 50–200).</li>
+            <li>Periodicky (např. jednou denně) pro agregáty s vysokou frekvencí událostí.</li>
+            <li>Na vyžádání — jako optimalizační krok po migraci nebo importu dat.</li>
+        </ul>
+
+        <div class="example-card" role="note" aria-labelledby="snapshot-php-heading">
+            <h4 id="snapshot-php-heading">PHP: Snapshot třída a repozitář se snapshot podporou</h4>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing;
+
+use DateTimeImmutable;
+
+/**
+ * Snapshot uchovává serializovaný stav agregátu v konkrétní verzi event streamu.
+ */
+final class Snapshot
+{
+    public function __construct(
+        public readonly string $aggregateId,
+        public readonly string $aggregateType,
+        public readonly int $version,
+        public readonly array $state,       // serializovaný stav agregátu
+        public readonly DateTimeImmutable $takenAt,
+    ) {}
+}
+</code></pre>
+
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Ordering;
+
+use App\Domain\Ordering\Order;
+use App\Infrastructure\EventSourcing\EventStore;
+use App\Infrastructure\EventSourcing\Snapshot;
+use App\Infrastructure\EventSourcing\SnapshotStore;
+
+final class SnapshottingOrderRepository
+{
+    private const AGGREGATE_TYPE    = 'ordering.order';
+    private const SNAPSHOT_INTERVAL = 50; // snapshot každých 50 událostí
+
+    public function __construct(
+        private readonly EventStore    $eventStore,
+        private readonly SnapshotStore $snapshotStore,
+        private readonly EventSerializer $serializer,
+    ) {}
+
+    public function load(string $orderId): Order
+    {
+        // 1. Pokusíme se načíst snapshot
+        $snapshot = $this-&gt;snapshotStore-&gt;findLatest($orderId, self::AGGREGATE_TYPE);
+
+        if ($snapshot !== null) {
+            // 2a. Máme snapshot — přehrajeme pouze události novější než snapshot
+            $fromVersion = $snapshot-&gt;version + 1;
+            $aggregate   = Order::reconstituteFromSnapshot($snapshot-&gt;state);
+        } else {
+            // 2b. Nemáme snapshot — přehrajeme celý event stream od začátku
+            $fromVersion = 1;
+            $aggregate   = null;
+        }
+
+        $envelopes = $this-&gt;eventStore-&gt;loadStream($orderId, $fromVersion);
+
+        if (empty($envelopes) &amp;&amp; $aggregate === null) {
+            throw new \DomainException("Order {$orderId} not found.");
+        }
+
+        if (!empty($envelopes)) {
+            $events = array_map(
+                fn($e) =&gt; $this-&gt;serializer-&gt;toEvent($e),
+                $envelopes,
+            );
+
+            $aggregate = $aggregate !== null
+                ? $aggregate-&gt;applyHistoricEvents($events)
+                : Order::reconstituteFromEvents($events);
+        }
+
+        return $aggregate;
+    }
+
+    public function save(Order $order): void
+    {
+        $newEvents = $order-&gt;releaseEvents();
+
+        if (empty($newEvents)) {
+            return;
+        }
+
+        $expectedVersion = $order-&gt;version() - count($newEvents);
+
+        $this-&gt;eventStore-&gt;append(
+            $order-&gt;orderId(),
+            self::AGGREGATE_TYPE,
+            $newEvents,
+            $expectedVersion,
+        );
+
+        // Automatické snapshotování
+        if ($order-&gt;version() % self::SNAPSHOT_INTERVAL === 0) {
+            $this-&gt;snapshotStore-&gt;save(new Snapshot(
+                aggregateId:   $order-&gt;orderId(),
+                aggregateType: self::AGGREGATE_TYPE,
+                version:       $order-&gt;version(),
+                state:         $order-&gt;toSnapshot(),
+                takenAt:       new \DateTimeImmutable('now', new \DateTimeZone('UTC')),
+            ));
+        }
+    }
+}
+</code></pre>
+        </div>
+
+        <p>
+            Aby byl snapshotting funkční, musí agregát implementovat metody <code>toSnapshot(): array</code>
+            (serializace aktuálního stavu) a statickou <code>reconstituteFromSnapshot(array $state): static</code>
+            (deserializace). Na rozdíl od <code>reconstituteFromEvents()</code> tato metoda nevytváří apply*()
+            volání — přímo nastaví properties z uloženého snímku. Je proto nezbytné zajistit, aby se formát
+            snapshotu vyvíjel v souladu se změnami doménového modelu.
+        </p>
+    </section>
+
+    <section id="kdy-pouzit" aria-labelledby="kdy-pouzit-heading">
+        <h3 id="kdy-pouzit-heading">Kdy použít Event Sourcing</h3>
+
+        <p>
+            Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho adopcí je nutné pečlivě
+            zvážit, zda přínosy pro daný kontext převažují nad náklady na implementaci a provoz.
+        </p>
+
+        <h4>Vhodné use cases</h4>
+        <ul>
+            <li>
+                <strong>Auditní log jako byznysový požadavek</strong> — Finanční systémy, zdravotnické záznamy,
+                nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log
+                poskytuje přirozeně a bez nutnosti extra implementace.
+            </li>
+            <li>
+                <strong>Komplexní business logika s bohatými stavovými přechody</strong> — Agregáty procházejí
+                mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové
+                systémy, workflow enginy, bankovní transakce.
+            </li>
+            <li>
+                <strong>Temporální dotazy</strong> — Potřeba "přehrát" stav systému k libovolnému bodu v minulosti
+                (debugging, analýza, "what-if" scénáře). U ES stačí replay eventů do daného timestampu.
+            </li>
+            <li>
+                <strong>Event-driven integrace</strong> — Systém produkuje události, které konzumují jiné bounded
+                contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena — Event Store je
+                zdrojem pravdy pro integraci.
+            </li>
+            <li>
+                <strong>CQRS s vysokou čtecí zátěží</strong> — ES umožňuje vybudovat libovolný počet optimalizovaných
+                read modelů z jednoho event streamu, aniž by bylo nutné měnit write model.
+            </li>
+        </ul>
+
+        <h4>Nevhodné use cases</h4>
+        <ul>
+            <li>
+                <strong>Jednoduché CRUD aplikace</strong> — Pokud doménová logika spočívá v základních operacích
+                Create/Read/Update/Delete bez složitých stavových přechodů, ES přináší jen zbytečnou složitost.
+            </li>
+            <li>
+                <strong>Systémy orientované převážně na reporting</strong> — Pokud je primárním požadavkem efektivní
+                čtení a agregace dat (BI, analytics), jsou vhodnější klasická DW řešení nebo OLAP databáze.
+            </li>
+            <li>
+                <strong>Prototypy a MVP</strong> — Rychlá validace byznysového nápadu nepotřebuje složitou
+                infrastrukturu. ES lze přidat do zralého systému incrementálně, pokud se ukáže potřeba.
+            </li>
+            <li>
+                <strong>Týmy bez zkušeností s ES</strong> — Implementace Event Sourcingu bez předchozí zkušenosti
+                přináší vysoké riziko chyb v klíčové infrastruktuře (Event Store, serializace, versioning).
+                Doporučuje se začít s menším bounded contextem jako experimentem.
+            </li>
+        </ul>
+
+        <div class="warning-card" role="alert" aria-labelledby="es-warning-heading">
+            <h4 id="es-warning-heading">Varování: Event Sourcing výrazně zvyšuje složitost systému</h4>
+            <p>
+                Event Sourcing není "lepší CRUD". Přináší zásadní zvýšení komplexity na všech úrovních:
+                <strong>infrastruktura</strong> (Event Store, event bus, snapshot store),
+                <strong>doménový model</strong> (apply metody, immutabilita událostí, verzování schémat),
+                <strong>testování</strong> (given/when/then scénáře s event streamy) a
+                <strong>provoz</strong> (migrace schémat událostí, rebuildy projekcí, monitoring lag asynchronních
+                projektorů).
+            </p>
+            <p>
+                Nepoužívejte Event Sourcing paušálně pro celou aplikaci. Správný přístup v DDD je aplikovat ES
+                <strong>selektivně na bounded contexts</strong>, kde skutečně přináší hodnotu — typicky Core Domain
+                s komplexní byznys logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
+            </p>
+            <p>
+                Před zahájením implementace prostudujte vzory event upcasting, event versioning a idempotentní
+                projektory — jsou to stavební kameny, bez nichž se reálný ES systém neobejde.
+            </p>
+        </div>
+    </section>
+</article>
+{% endblock %}

@@ -61,7 +61,7 @@
         <li><strong>Infrastrukturní vrstva (Infrastructure Layer)</strong> - Poskytuje technické služby pro ostatní vrstvy.</li>
     </ul>
 
-    <div class="example-box">
+    <div class="example-card">
         <h4>Příklad: Tradiční struktura DDD projektu</h4>
         <pre><code class="language-bash">src/
 ├── Presentation/                # Prezentační vrstva
@@ -101,7 +101,7 @@
         Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
     </p>
 
-    <div class="example-box" role="note" aria-labelledby="vertical-slice-example-heading">
+    <div class="example-card" role="note" aria-labelledby="vertical-slice-example-heading">
         <h4 id="vertical-slice-example-heading">Příklad: Struktura projektu s vertikální slice architekturou</h4>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
@@ -219,7 +219,7 @@
     <section id="when-to-use" aria-labelledby="when-to-use-heading">
     <h3 id="when-to-use-heading">Kdy použít který přístup</h3>
 
-    <div class="concept-box" role="note" aria-labelledby="traditional-when-to-use-heading">
+    <div class="info-card" role="note" aria-labelledby="traditional-when-to-use-heading">
         <h4 id="traditional-when-to-use-heading">Kdy použít tradiční DDD:</h4>
         <ul>
             <li>Když je tým zvyklý na tradiční architekturu.</li>
@@ -229,7 +229,7 @@
         </ul>
     </div>
 
-    <div class="concept-box" role="note" aria-labelledby="vertical-slice-when-to-use-heading">
+    <div class="info-card" role="note" aria-labelledby="vertical-slice-when-to-use-heading">
         <h4 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h4>
         <ul>
             <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
@@ -368,7 +368,7 @@
         <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
     </ul>
 
-    <div class="warning-box" role="note" aria-labelledby="important-notes-heading">
+    <div class="warning-card" role="note" aria-labelledby="important-notes-heading">
         <h4 id="important-notes-heading">Důležité poznámky</h4>
         <p>
             Při implementaci vertikální slice architektury v Symfony 8 je důležité:
