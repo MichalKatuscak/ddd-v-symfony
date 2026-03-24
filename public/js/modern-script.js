@@ -104,18 +104,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const CHAPTERS = [
         { label: 'Úvod', url: '/' },
         { label: 'Co je DDD', url: '/co-je-ddd' },
-        { label: 'Vertikální slice', url: '/horizontalni-vs-vertikalni' },
         { label: 'Základní koncepty', url: '/zakladni-koncepty' },
+        { label: 'Vertikální slice', url: '/horizontalni-vs-vertikalni' },
         { label: 'Implementace v Symfony', url: '/implementace-v-symfony' },
         { label: 'CQRS', url: '/cqrs' },
+        { label: 'Event Sourcing', url: '/event-sourcing' },
         { label: 'Příklady', url: '/prakticke-priklady' },
         { label: 'Případová studie', url: '/pripadova-studie' },
-        { label: 'Zdroje', url: '/zdroje' },
-        { label: 'Bezpečnostní politika', url: '/security-policy' },
-        { label: 'Migrace z CRUD', url: '/migrace-z-crud' },
         { label: 'Testování DDD', url: '/testovani-ddd' },
-        { label: 'Event Sourcing', url: '/event-sourcing' },
+        { label: 'Migrace z CRUD', url: '/migrace-z-crud' },
         { label: 'Anti-vzory', url: '/anti-vzory' },
+        { label: 'Výkonnostní aspekty', url: '/vykonnostni-aspekty' },
+        { label: 'Zdroje', url: '/zdroje' },
+        { label: 'Glosář', url: '/glosar' },
     ];
 
     const currentPath = window.location.pathname;

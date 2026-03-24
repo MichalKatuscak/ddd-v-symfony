@@ -74,10 +74,10 @@
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'what_is_ddd' %}active{% endif %}" href="{{ path('what_is_ddd') }}">Co je DDD</a>
                     </li>
                     <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'horizontal_vs_vertical' %}active{% endif %}" href="{{ path('horizontal_vs_vertical') }}">Vertikální slice</a>
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'basic_concepts' %}active{% endif %}" href="{{ path('basic_concepts') }}">Základní koncepty</a>
                     </li>
                     <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'basic_concepts' %}active{% endif %}" href="{{ path('basic_concepts') }}">Základní koncepty</a>
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'horizontal_vs_vertical' %}active{% endif %}" href="{{ path('horizontal_vs_vertical') }}">Vertikální slice</a>
                     </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'implementation_in_symfony' %}active{% endif %}" href="{{ path('implementation_in_symfony') }}">Implementace v Symfony</a>
@@ -86,28 +86,31 @@
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'cqrs' %}active{% endif %}" href="{{ path('cqrs') }}">CQRS</a>
                     </li>
                     <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'event_sourcing' %}active{% endif %}" href="{{ path('event_sourcing') }}">Event Sourcing</a>
+                    </li>
+                    <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'practical_examples' %}active{% endif %}" href="{{ path('practical_examples') }}">Příklady</a>
                     </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'case_study' %}active{% endif %}" href="{{ path('case_study') }}">Případová studie</a>
                     </li>
                     <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'resources' %}active{% endif %}" href="{{ path('resources') }}">Zdroje</a>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'security_policy' %}active{% endif %}" href="{{ path('security_policy') }}">Bezpečnostní politika</a>
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'testing_ddd' %}active{% endif %}" href="{{ path('testing_ddd') }}">Testování DDD</a>
                     </li>
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'migration_from_crud' %}active{% endif %}" href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>
                     </li>
                     <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'testing_ddd' %}active{% endif %}" href="{{ path('testing_ddd') }}">Testování DDD</a>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'event_sourcing' %}active{% endif %}" href="{{ path('event_sourcing') }}">Event Sourcing</a>
-                    </li>
-                    <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'anti_patterns' %}active{% endif %}" href="{{ path('anti_patterns') }}">Anti-vzory</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'performance_aspects' %}active{% endif %}" href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'resources' %}active{% endif %}" href="{{ path('resources') }}">Zdroje</a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'glossary' %}active{% endif %}" href="{{ path('glossary') }}">Glosář</a>
                     </li>
                 </ul>
             </nav>

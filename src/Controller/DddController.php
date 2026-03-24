@@ -87,4 +87,52 @@ class DddController extends AbstractController
             'title' => 'Bezpečnostní zásady',
         ]);
     }
+
+    #[Route('/migrace-z-crud', name: 'migration_from_crud')]
+    public function migrationFromCrud(): Response
+    {
+        return $this->render('ddd/migration_from_crud.html.twig', [
+            'title' => 'Migrace z CRUD architektury na DDD',
+        ]);
+    }
+
+    #[Route('/testovani-ddd', name: 'testing_ddd')]
+    public function testingDdd(): Response
+    {
+        return $this->render('ddd/testing_ddd.html.twig', [
+            'title' => 'Testování DDD kódu v Symfony',
+        ]);
+    }
+
+    #[Route('/event-sourcing', name: 'event_sourcing')]
+    public function eventSourcing(): Response
+    {
+        return $this->render('ddd/event_sourcing.html.twig', [
+            'title' => 'Event Sourcing v DDD a Symfony',
+        ]);
+    }
+
+    #[Route('/anti-vzory', name: 'anti_patterns')]
+    public function antiPatterns(): Response
+    {
+        return $this->render('ddd/anti_patterns.html.twig', [
+            'title' => 'Anti-vzory a typické chyby v DDD',
+        ]);
+    }
+
+    #[Route('/vykonnostni-aspekty', name: 'performance_aspects')]
+    public function performanceAspects(): Response
+    {
+        return $this->render('ddd/performance_aspects.html.twig', [
+            'title' => 'Výkonnostní aspekty DDD v Symfony',
+        ]);
+    }
+
+    #[Route('/glosar', name: 'glossary')]
+    public function glossary(): Response
+    {
+        return $this->render('ddd/glossary.html.twig', [
+            'title' => 'Glosář DDD terminologie',
+        ]);
+    }
 }
