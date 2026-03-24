@@ -441,38 +441,29 @@ namespace App\Domain\Service;
 use App\Domain\Model\Order;
 use App\Domain\Model\Payment;
 use App\Domain\Model\PaymentId;
-use App\Domain\Repository\PaymentRepository;
+use App\Domain\ValueObject\Money;
+use App\Domain\ValueObject\OrderStatus;
+use App\Domain\ValueObject\PaymentMethod;
 
 class PaymentService
 {
-    private PaymentRepository $paymentRepository;
-
-    public function __construct(PaymentRepository $paymentRepository)
-    {
-        $this->paymentRepository = $paymentRepository;
-    }
-
     public function processPayment(Order $order, PaymentMethod $paymentMethod): Payment
     {
         if ($order->status() !== OrderStatus::CONFIRMED) {
             throw new \DomainException('Cannot process payment for a non-confirmed order');
         }
 
-        $payment = new Payment(
+        return new Payment(
             new PaymentId(),
             $order->id(),
             $this->calculateTotalAmount($order),
             $paymentMethod
         );
-
-        $this->paymentRepository->save($payment);
-
-        return $payment;
     }
 
     private function calculateTotalAmount(Order $order): Money
     {
-        $total = new Money(0);
+        $total = new Money(0, 'CZK');
 
         foreach ($order->items() as $item) {
             $total = $total->add($item->price()->multiply($item->quantity()));
@@ -484,9 +475,10 @@ class PaymentService
             </div>
 
             <p>
-                V tomto příkladu je <code>PaymentService</code> doménová služba, která poskytuje logiku pro zpracování
-                plateb.
-                Tato logika nepatří přirozeně do žádné entity nebo hodnotového objektu.
+                V tomto příkladu je <code>PaymentService</code> doménová služba, která zapouzdřuje doménovou logiku
+                zpracování plateb a vytváří objekt <code>Payment</code>. Doménová služba je bezstavová a
+                neobsahuje repozitáře — persistence vraceného objektu je zodpovědností volající vrstvy
+                (Application Service nebo Command Handler).
             </p>
         </section>
 

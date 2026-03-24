@@ -561,7 +561,7 @@
                             na pozdější dotazování. V Event Sourcingu jsou doménové události primárním
                             způsobem persistence stavu. Název události musí být součástí Ubiquitous Language.
                         </p>
-                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 8 (pozdější vydání)</p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Eric Evans, <em>Domain-Driven Design Reference</em> (2015)</p>
                         <p class="term-related">Viz také: <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-saga">Sága / Process Manager</a>, <a href="#term-korelacni-id">Korelační ID</a></p>
                     </dd>
                 </div>
@@ -632,10 +632,12 @@
                     </dt>
                     <dd>
                         <p>
-                            Klasická čtyřvrstvá architektura: Prezentační vrstva → Aplikační vrstva →
+                            Klasická čtyřvrstvá architektura (Evans 2003): Prezentační vrstva → Aplikační vrstva →
                             Doménová vrstva → Infrastrukturní vrstva. Závislosti plynou striktně jedním
-                            směrem — vnější vrstvy závisí na vnitřních vrstvách. Doménová vrstva nemá
-                            žádné závislosti na ostatních vrstvách — je nejvnitřnější a nejstabilnější.
+                            směrem — každá vrstva závisí pouze na vrstvě pod ní. V Evansově původním modelu
+                            doménová vrstva závisí na infrastrukturní vrstvě; v modernějších variantách
+                            (Hexagonální, Onion architektura) se tato závislost invertuje pomocí rozhraní
+                            tak, aby doménová vrstva nezávisela na žádné technické vrstvě.
                             Tato architektura je přirozeným výchozím bodem pro DDD a je explicitně
                             popsána Evansem. Nevýhodou je, že organizuje kód podle technické role, nikoli
                             podle byznysové funkce — což může ztěžovat pochopení, co systém dělá.
@@ -1157,7 +1159,7 @@
                 </li>
                 <li>
                     Fowler, Martin. <em>Patterns of Enterprise Application Architecture</em>.
-                    Addison-Wesley, 2002. ISBN&nbsp;978-0-321-12521-7
+                    Addison-Wesley, 2002. ISBN&nbsp;978-0-321-12742-6
                 </li>
                 <li>
                     Young, Greg. <em>CQRS Documents</em>. 2010.

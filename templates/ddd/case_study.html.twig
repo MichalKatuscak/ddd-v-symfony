@@ -321,6 +321,8 @@ class Project
     #[ORM\Column(type: 'string', length: 36)]
     private string $ownerId;
 
+    // Zjednodušení pro účely příkladu: v produkčním kódu modelujte
+    // členství jako samostatnou entitu (OneToMany → ProjectMembership).
     #[ORM\Column(type: 'json')]
     private array $memberIds = [];
 
@@ -441,10 +443,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'tasks')]
 class Task
 {
-    public const STATUS_TODO = 'todo';
-    public const STATUS_IN_PROGRESS = 'in_progress';
-    public const STATUS_DONE = 'done';
-
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36)]
     private string $id;
@@ -461,8 +459,8 @@ class Task
     #[ORM\Column(type: 'string', length: 36, nullable: true)]
     private ?string $assigneeId = null;
 
-    #[ORM\Column(type: 'string', length: 20)]
-    private string $status;
+    #[ORM\Column(type: 'string', length: 20, enumType: TaskStatus::class)]
+    private TaskStatus $status;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
@@ -478,7 +476,7 @@ class Task
         $this->title = $title;
         $this->description = $description;
         $this->projectId = $projectId->value();
-        $this->status = self::STATUS_TODO;
+        $this->status = TaskStatus::TODO;
         $this->createdAt = new \DateTimeImmutable();
 
         $this->recordEvent(new TaskCreated($id, $title, $projectId));
@@ -509,7 +507,7 @@ class Task
         return $this->assigneeId ? new UserId($this->assigneeId) : null;
     }
 
-    public function status(): string
+    public function status(): TaskStatus
     {
         return $this->status;
     }
@@ -528,12 +526,8 @@ class Task
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function changeStatus(string $status): void
+    public function changeStatus(TaskStatus $status): void
     {
-        if (!in_array($status, [self::STATUS_TODO, self::STATUS_IN_PROGRESS, self::STATUS_DONE])) {
-            throw new \InvalidArgumentException('Invalid status');
-        }
-
         $oldStatus = $this->status;
         $this->status = $status;
         $this->updatedAt = new \DateTimeImmutable();

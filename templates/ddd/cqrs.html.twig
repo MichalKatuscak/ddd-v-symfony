@@ -61,7 +61,7 @@
     <div class="info-card">
         <h4>Základní principy CQRS:</h4>
         <ul>
-            <li><strong>Commands</strong> - Příkazy, které mění stav systému, ale nevracejí žádná data.</li>
+            <li><strong>Commands</strong> - Příkazy, které mění stav systému. Ve striktním pojetí CQS nevracejí žádná data; v praxi CQRS mohou vracet identifikátor vytvořeného záznamu.</li>
             <li><strong>Queries</strong> - Dotazy, které vrací data, ale nemění stav systému.</li>
             <li><strong>Oddělené modely</strong> - Oddělené modely pro čtení a zápis, které mohou být optimalizovány pro své specifické úkoly.</li>
             <li><strong>Oddělené databáze</strong> - V pokročilých implementacích mohou být použity oddělené databáze pro čtení a zápis.</li>
@@ -456,7 +456,7 @@ framework:
         # Směrování zpráv — mapuje konkrétní třídy nebo rozhraní na transport
         routing:
             # Příkazy jsou zpracovány asynchronně
-            App\UserManagement\Application\Command\RegisterUser: async</code></pre>
+            App\UserManagement\Registration\Command\RegisterUser: async</code></pre>
     </div>
 
     <p>

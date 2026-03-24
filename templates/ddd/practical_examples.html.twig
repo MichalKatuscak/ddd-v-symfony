@@ -217,7 +217,7 @@ class Cart
 
     public function totalAmount(): Money
     {
-        $total = new Money(0);
+        $total = new Money(0, 'CZK');
 
         foreach ($this->items as $item) {
             $total = $total->add($item->totalPrice());
@@ -274,7 +274,7 @@ class AddItemToCart
 
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
-        public readonly float $price
+        public readonly int $priceInCents
     ) {
     }
 }</code></pre>
@@ -310,7 +310,7 @@ class AddItemToCartHandler
         $cart->addItem(
             new ProductId($command->productId),
             new Quantity($command->quantity),
-            new Money($command->price)
+            new Money($command->priceInCents, 'CZK')
         );
 
         $this->cartRepository->save($cart);
@@ -350,7 +350,7 @@ class CartController extends AbstractController
             $cartId,
             $request->request->get('product_id'),
             (int) $request->request->get('quantity', 1),
-            (float) $request->request->get('price')
+            (int) $request->request->get('price_in_cents')
         );
 
         try {

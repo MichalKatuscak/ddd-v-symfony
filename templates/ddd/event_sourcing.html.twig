@@ -809,16 +809,16 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 /**
  * Projector budující tabulku order_summary z doménových událostí.
  *
- * Každá metoda handle*() odpovídá jednomu typu události.
- * Decorator #[AsMessageHandler] registruje třídu jako Messenger handler.
+ * Každá metoda handle*() odpovídá jednomu typu události a je registrována
+ * jako samostatný Messenger handler atributem #[AsMessageHandler] na úrovni metody.
  */
-#[AsMessageHandler]
 final class OrderSummaryProjector
 {
     public function __construct(
         private readonly Connection $connection,
     ) {}
 
+    #[AsMessageHandler]
     public function __invoke(OrderPlaced $event): void
     {
         $this-&gt;connection-&gt;insert('order_summary', [
@@ -833,6 +833,7 @@ final class OrderSummaryProjector
         ]);
     }
 
+    #[AsMessageHandler]
     public function handleOrderItemAdded(OrderItemAdded $event): void
     {
         $this-&gt;connection-&gt;executeStatement(
@@ -844,6 +845,7 @@ final class OrderSummaryProjector
         );
     }
 
+    #[AsMessageHandler]
     public function handleOrderShipped(OrderShipped $event): void
     {
         $this-&gt;connection-&gt;executeStatement(
