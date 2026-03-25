@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Fade-in observer (updated class names) ───────────────────────────────
     const fadeTargets = document.querySelectorAll(
-        '.card, .info-card, .warning-card, .example-card, .practice-card, .success-card'
+        '.card, .note, .tip, .warning, .caution'
     );
     if (fadeTargets.length > 0) {
         const observer = new IntersectionObserver(function (entries) {

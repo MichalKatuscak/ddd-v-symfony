@@ -65,7 +65,7 @@
                 k dlouhodobým problémům s udržovatelností, testovatelností a výkonem systému.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="klasifikace-heading">
+            <div class="note" role="note" aria-labelledby="klasifikace-heading">
                 <h4 id="klasifikace-heading">Klasifikace typických chyb v DDD</h4>
                 <p>Chyby při implementaci DDD lze rozdělit do tří kategorií:</p>
                 <ul>
@@ -98,7 +98,7 @@
                 obsahují výhradně gettery a settery — a veškerá business logika je přesunuta do servisní vrstvy.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="anemicky-definice-heading">
+            <div class="note" role="note" aria-labelledby="anemicky-definice-heading">
                 <h4 id="anemicky-definice-heading">Proč je anémický model problém?</h4>
                 <ul>
                     <li>
@@ -122,7 +122,7 @@
                 </ul>
             </div>
 
-            <div class="warning-card" role="note" aria-labelledby="anemicky-spatny-heading">
+            <div class="warning" role="note" aria-labelledby="anemicky-spatny-heading">
                 <h4 id="anemicky-spatny-heading">Špatně: Anémická entita User a servisní vrstva s logikou</h4>
                 <p>
                     V tomto příkladu entita <code>User</code> neobsahuje žádnou business logiku — pouze gettery
@@ -130,7 +130,7 @@
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Anémická entita User (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: Entita je pouze datový kontejner
@@ -186,7 +186,7 @@ class UserService
 }</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="anemicky-spravny-heading">
+            <div class="note" role="note" aria-labelledby="anemicky-spravny-heading">
                 <h4 id="anemicky-spravny-heading">Správně: Entita User s bohatou doménovou logikou</h4>
                 <p>
                     Správný přístup přesouvá business logiku přímo do entity. Entita sama zajišťuje své invarianty
@@ -194,7 +194,7 @@ class UserService
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Bohatá entita User (správně)</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Entita obsahuje doménovou logiku
@@ -281,7 +281,7 @@ class User
                 ale vedou k závažným problémům.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="primitive-problemy-heading">
+            <div class="note" role="note" aria-labelledby="primitive-problemy-heading">
                 <h4 id="primitive-problemy-heading">Problémy způsobené Primitive Obsession</h4>
                 <ul>
                     <li>
@@ -305,7 +305,7 @@ class User
                 </ul>
             </div>
 
-            <div class="warning-card" role="note" aria-labelledby="primitive-spatny-heading">
+            <div class="warning" role="note" aria-labelledby="primitive-spatny-heading">
                 <h4 id="primitive-spatny-heading">Špatně: Primitiva místo Value Objects</h4>
                 <p>
                     Níže uvedený kód používá primitivní typy pro e-mail, peněžní částku a identifikátory.
@@ -313,7 +313,7 @@ class User
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Primitive Obsession (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: Primitiva místo hodnotových objektů
@@ -355,14 +355,14 @@ $userId = 17;
 processOrder($userId, $orderId); // Záměna parametrů — a PHP si nestěžuje!</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="primitive-spravny-heading">
+            <div class="note" role="note" aria-labelledby="primitive-spravny-heading">
                 <h4 id="primitive-spravny-heading">Správně: Value Objects nesoucí sémantiku a validaci</h4>
                 <p>
                     Hodnotové objekty zapouzdřují validaci, zabraňují záměně ID různých entit a nesou doménovou sémantiku.
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Value Objects (správně)</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Hodnotové objekty s validací a sémantikou
@@ -452,7 +452,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 a způsobuje řadu závažných problémů.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="agregat-problemy-heading">
+            <div class="note" role="note" aria-labelledby="agregat-problemy-heading">
                 <h4 id="agregat-problemy-heading">Problémy způsobené příliš velkým agregátem</h4>
                 <ul>
                     <li>
@@ -476,7 +476,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 </ul>
             </div>
 
-            <div class="warning-card" role="note" aria-labelledby="agregat-spatny-heading">
+            <div class="warning" role="note" aria-labelledby="agregat-spatny-heading">
                 <h4 id="agregat-spatny-heading">Špatně: God Aggregate obsahující příliš mnoho entit</h4>
                 <p>
                     Následující příklad ukazuje agregát <code>Customer</code>, který neúměrně sdružuje objednávky,
@@ -484,7 +484,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Příliš velký agregát (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: God Aggregate — příliš mnoho odpovědností
@@ -516,7 +516,7 @@ class Customer
 }</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="agregat-spravny-heading">
+            <div class="note" role="note" aria-labelledby="agregat-spravny-heading">
                 <h4 id="agregat-spravny-heading">Správně: Malé agregáty s jasnou transakční hranicí</h4>
                 <p>
                     Agregáty by měly být navrhovány kolem skutečné transakční potřeby. Zákazník a jeho objednávky
@@ -525,7 +525,7 @@ class Customer
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Správně rozdělené agregáty</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Malé agregáty s jednoznačnou odpovědností
@@ -619,7 +619,7 @@ class Wishlist
                 a nasazení jednotlivých kontextů.
             </p>
 
-            <div class="warning-card" role="note" aria-labelledby="sdilena-db-spatne-heading">
+            <div class="warning" role="note" aria-labelledby="sdilena-db-spatne-heading">
                 <h4 id="sdilena-db-spatne-heading">Špatně: Přímý přístup ke sdíleným tabulkám</h4>
                 <p>
                     Kontexty <em>OrderProcessing</em> a <em>Billing</em> přímo přistupují ke stejné tabulce
@@ -627,7 +627,7 @@ class Wishlist
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Sdílená databáze (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: OrderProcessing context přímo dotazuje tabulku users z UserManagement kontextu
@@ -672,7 +672,7 @@ class InvoiceGenerator
 }</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="sdilena-db-spravne-heading">
+            <div class="note" role="note" aria-labelledby="sdilena-db-spravne-heading">
                 <h4 id="sdilena-db-spravne-heading">Správně: Izolovaná data s Anti-Corruption Layer</h4>
                 <p>
                     Každý Bounded Context vlastní svá data. Komunikace mezi kontexty probíhá přes definované rozhraní
@@ -680,7 +680,7 @@ class InvoiceGenerator
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Izolované kontexty s ACL (správně)</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Každý kontext vlastní svá data a komunikuje přes definované rozhraní
@@ -755,7 +755,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
                 konzistentní a neměnná data.
             </p>
 
-            <div class="warning-card" role="note" aria-labelledby="udalosti-spatne-heading">
+            <div class="warning" role="note" aria-labelledby="udalosti-spatne-heading">
                 <h4 id="udalosti-spatne-heading">Špatně: Mutovatelná událost s veřejnými settery</h4>
                 <p>
                     Veřejné settery a chybějící <code>readonly</code> semantika umožňují modifikaci události
@@ -763,7 +763,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Mutovatelná událost (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: Mutovatelná doménová událost
@@ -797,7 +797,7 @@ class OrderPlacedEvent
 }</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="udalosti-spravne-heading">
+            <div class="note" role="note" aria-labelledby="udalosti-spravne-heading">
                 <h4 id="udalosti-spravne-heading">Správně: Immutable událost s readonly properties</h4>
                 <p>
                     Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a poté nelze žádnou
@@ -805,7 +805,7 @@ class OrderPlacedEvent
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Immutable doménová událost (správně)</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Immutable doménová událost s readonly properties (PHP 8.1+)
@@ -865,7 +865,7 @@ final class OrderCancelledEvent
                 dochází k narušení architekturních hranic a ke vzniku skryté, těžko testovatelné logiky.
             </p>
 
-            <div class="warning-card" role="note" aria-labelledby="infra-spatne-heading">
+            <div class="warning" role="note" aria-labelledby="infra-spatne-heading">
                 <h4 id="infra-spatne-heading">Špatně: Business logika v Doctrine repozitáři</h4>
                 <p>
                     Repozitář by měl pouze ukládat a načítat agregáty. Jakákoliv business logika (výpočty,
@@ -873,7 +873,7 @@ final class OrderCancelledEvent
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Business logika v repozitáři a kontroleru (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: Business logika v Doctrine repozitáři
@@ -927,7 +927,7 @@ class UserController extends AbstractController
 }</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="infra-spravne-heading">
+            <div class="note" role="note" aria-labelledby="infra-spravne-heading">
                 <h4 id="infra-spravne-heading">Správně: Tenká infrastruktura, bohatá doménová vrstva</h4>
                 <p>
                     Kontroler a repozitář jsou tenké orchestrátory. Business logika žije v doménové entitě
@@ -935,7 +935,7 @@ class UserController extends AbstractController
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Správné vrstvení — logika v doméně (správně)</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Business logika v doménové entitě (viz sekce o anémickém modelu)
@@ -1017,7 +1017,7 @@ class UserController extends AbstractController
                 počáteční složitost bez odpovídajícího benefitu.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="overeng-příznaky-heading">
+            <div class="note" role="note" aria-labelledby="overeng-příznaky-heading">
                 <h4 id="overeng-příznaky-heading">Příznaky over-engineeringu v DDD kontextu</h4>
                 <ul>
                     <li>
@@ -1042,7 +1042,7 @@ class UserController extends AbstractController
                 </ul>
             </div>
 
-            <div class="warning-card" role="note" aria-labelledby="overeng-warning-heading">
+            <div class="warning" role="note" aria-labelledby="overeng-warning-heading">
                 <h4 id="overeng-warning-heading">Start simple, add complexity when needed</h4>
                 <p>
                     Začněte s jednoduchým přístupem — aktivní záznamy, jednoduché service třídy nebo MVC bez DDD.
@@ -1057,7 +1057,7 @@ class UserController extends AbstractController
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Kdy použít DDD a kdy ne</h4>
                 <pre><code class="language-bash"># DDD je vhodné pro:
 ✔ E-commerce platforma s komplexními pravidly pro slevy, zásoby, dopravu
@@ -1084,7 +1084,7 @@ class UserController extends AbstractController
                 nedorozumění, chyby a ztrátu doménového vhledu v kódu.
             </p>
 
-            <div class="warning-card" role="note" aria-labelledby="ubiq-spatne-heading">
+            <div class="warning" role="note" aria-labelledby="ubiq-spatne-heading">
                 <h4 id="ubiq-spatne-heading">Špatně: Různé názvy pro stejný koncept</h4>
                 <p>
                     Doménový expert mluví o <em>Pojistníkovi</em>, databáze má tabulku <code>clients</code>,
@@ -1093,7 +1093,7 @@ class UserController extends AbstractController
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Nekonzistentní pojmenování (špatně)</h4>
                 <pre><code class="language-php">&lt;?php
 // ŠPATNĚ: Tatáž doménová entita má různé názvy na různých místech
@@ -1119,7 +1119,7 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
 // Výsledek: vývojář musí neustále překládat mezi vrstvami místo práce na business logikou</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="ubiq-spravne-heading">
+            <div class="note" role="note" aria-labelledby="ubiq-spravne-heading">
                 <h4 id="ubiq-spravne-heading">Správně: Konzistentní jazyk napříč všemi vrstvami</h4>
                 <p>
                     Ubiquitous Language vyžaduje investici: vývojáři musí naslouchat doménovým expertům,
@@ -1128,7 +1128,7 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
                 </p>
             </div>
 
-            <div class="example-card">
+            <div class="tip">
                 <h4>Příklad: Konzistentní Ubiquitous Language (správně)</h4>
                 <pre><code class="language-php">&lt;?php
 // SPRÁVNĚ: Jednotný jazyk pojišťovací domény napříč všemi vrstvami
@@ -1173,7 +1173,7 @@ class InsurancePolicy
 // Testy: "When a policy holder files a claim for an insured event..."</code></pre>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="ubiq-mapa-heading">
+            <div class="note" role="note" aria-labelledby="ubiq-mapa-heading">
                 <h4 id="ubiq-mapa-heading">Doménový slovník jako živý artefakt</h4>
                 <p>
                     Doporučenou praxí je udržovat živý glosář (tzv. <em>doménový slovník</em>), který mapuje

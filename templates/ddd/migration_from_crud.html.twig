@@ -60,7 +60,7 @@
                 na nevhodná místa.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="priznaky-heading">
+            <div class="note" role="note" aria-labelledby="priznaky-heading">
                 <h4 id="priznaky-heading">Příznaky, že CRUD architektura nestačí</h4>
                 <ul>
                     <li>
@@ -104,7 +104,7 @@
                 <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank">[1]</a>.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="kdy-ddd-heading">
+            <div class="note" role="note" aria-labelledby="kdy-ddd-heading">
                 <h4 id="kdy-ddd-heading">Kdy DDD přináší hodnotu</h4>
                 <ul>
                     <li>Doména obsahuje komplexní byznys pravidla, která se často mění.</li>
@@ -141,7 +141,7 @@
                 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="strangler-princip-heading">
+            <div class="note" role="note" aria-labelledby="strangler-princip-heading">
                 <h4 id="strangler-princip-heading">Princip fungování</h4>
                 <ol>
                     <li>
@@ -163,7 +163,7 @@
                 </ol>
             </div>
 
-            <div class="example-card" role="note" aria-labelledby="strangler-struktura-heading">
+            <div class="tip" role="note" aria-labelledby="strangler-struktura-heading">
                 <h4 id="strangler-struktura-heading">Příklad: Koexistence CRUD a DDD ve struktuře projektu</h4>
                 <pre><code class="language-bash">src/
 ├── Controller/                    # Stará CRUD vrstva (postupně se zmenšuje)
@@ -259,7 +259,7 @@
                 <li>Zapojení doménových expertů do návrhu nové architektury.</li>
             </ul>
 
-            <div class="example-card" role="note" aria-labelledby="crud-before-heading">
+            <div class="tip" role="note" aria-labelledby="crud-before-heading">
                 <h4 id="crud-before-heading">Příklad: Identifikace doménové logiky v CRUD kontroleru</h4>
                 <p>
                     Následující příklad ilustruje typický CRUD kontroler, ve kterém je skryta netriviální doménová
@@ -343,7 +343,7 @@ class UserController extends AbstractController
                 typy nesoucí byznys pravidla, poté extrahujeme logiku do doménových entit a služeb.
             </p>
 
-            <div class="example-card" role="note" aria-labelledby="before-after-heading">
+            <div class="tip" role="note" aria-labelledby="before-after-heading">
                 <h4 id="before-after-heading">Příklad: Refaktorizace UserService – before/after</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -460,7 +460,7 @@ class User
                 objektem, který zapouzdřuje validaci a chování.
             </p>
 
-            <div class="example-card" role="note" aria-labelledby="email-vo-heading">
+            <div class="tip" role="note" aria-labelledby="email-vo-heading">
                 <h4 id="email-vo-heading">Příklad: Refaktorizace string emailu na Email Value Object</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -544,7 +544,7 @@ final class Email
                 z pohledu domény. Neobsahuje žádné zmínky o Doctrine, SQL nebo jiné infrastrukturní technologii.
             </p>
 
-            <div class="example-card" role="note" aria-labelledby="repository-interface-heading">
+            <div class="tip" role="note" aria-labelledby="repository-interface-heading">
                 <h4 id="repository-interface-heading">Příklad: Doménové rozhraní vs. Doctrine implementace</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -627,7 +627,7 @@ final class DoctrineUserRepository implements UserRepository
                 </p>
             </div>
 
-            <div class="info-card" role="note" aria-labelledby="di-config-heading">
+            <div class="note" role="note" aria-labelledby="di-config-heading">
                 <h4 id="di-config-heading">Konfigurace Dependency Injection v Symfony</h4>
                 <pre><code class="language-yaml"># config/services.yaml
 services:
@@ -656,7 +656,7 @@ services:
                 nebo ji ponechat jako optimalizované SQL dotazy i v DDD systému (read modely).
             </p>
 
-            <div class="example-card" role="note" aria-labelledby="command-extraction-heading">
+            <div class="tip" role="note" aria-labelledby="command-extraction-heading">
                 <h4 id="command-extraction-heading">Příklad: Extrakce RegisterUserCommand z UserController</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -788,7 +788,7 @@ class UserController extends AbstractController
                 při refaktoringu.
             </p>
 
-            <div class="example-card" role="note" aria-labelledby="char-test-heading">
+            <div class="tip" role="note" aria-labelledby="char-test-heading">
                 <h4 id="char-test-heading">Příklad: Charakterizační test pro CRUD kontroler</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -865,7 +865,7 @@ class UserRegistrationCharacterizationTest extends WebTestCase
                 a přesně dokumentují byznys pravidla.
             </p>
 
-            <div class="info-card" role="note" aria-labelledby="domain-unit-test-heading">
+            <div class="note" role="note" aria-labelledby="domain-unit-test-heading">
                 <h4 id="domain-unit-test-heading">Příklad: Unit test doménové entity</h4>
                 <pre><code class="language-php">&lt;?php
 
@@ -978,7 +978,7 @@ class UserTest extends TestCase
                 psát charakterizační testy), nedostatečná znalost domény v týmu, absence doménových expertů.
             </p>
 
-            <div class="warning-card" role="alert" aria-labelledby="big-bang-warning-heading">
+            <div class="warning" role="alert" aria-labelledby="big-bang-warning-heading">
                 <h4 id="big-bang-warning-heading">Varování před Big Bang Rewrites</h4>
                 <p>
                     <strong>Nikdy nezačínejte migraci na DDD kompletním přepisem systému.</strong> Big Bang Rewrite

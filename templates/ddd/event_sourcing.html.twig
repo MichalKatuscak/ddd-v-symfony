@@ -72,7 +72,7 @@
             event logu; žádná informace se nikdy nepřepisuje ani nemaže.
         </p>
 
-        <div class="example-card" role="note" aria-labelledby="crud-vs-es-heading">
+        <div class="tip" role="note" aria-labelledby="crud-vs-es-heading">
             <h4 id="crud-vs-es-heading">CRUD vs. Event Sourcing — přehled</h4>
             <table>
                 <thead>
@@ -117,7 +117,7 @@
             </table>
         </div>
 
-        <div class="info-card" role="note" aria-labelledby="es-pojmy-heading">
+        <div class="note" role="note" aria-labelledby="es-pojmy-heading">
             <h4 id="es-pojmy-heading">Klíčové pojmy Event Sourcingu:</h4>
             <ul>
                 <li>
@@ -164,7 +164,7 @@
             projekci.
         </p>
 
-        <div class="info-card" role="note" aria-labelledby="es-cqrs-tok-heading">
+        <div class="note" role="note" aria-labelledby="es-cqrs-tok-heading">
             <h4 id="es-cqrs-tok-heading">Datový tok v architektuře ES + CQRS:</h4>
             <ol>
                 <li>Uživatel odešle <strong>Command</strong> (např. <code>PlaceOrderCommand</code>).</li>
@@ -177,7 +177,7 @@
             </ol>
         </div>
 
-        <div class="example-card" role="note" aria-labelledby="es-cqrs-rozdil-heading">
+        <div class="tip" role="note" aria-labelledby="es-cqrs-rozdil-heading">
             <h4 id="es-cqrs-rozdil-heading">Zásadní rozdíl mezi ES a CQRS</h4>
             <p>
                 <strong>CQRS</strong> řeší <em>jak oddělit zápis od čtení</em> — je to organizační vzor zodpovědností.
@@ -220,7 +220,7 @@
             </li>
         </ul>
 
-        <div class="example-card" role="note" aria-labelledby="domain-event-php-heading">
+        <div class="tip" role="note" aria-labelledby="domain-event-php-heading">
             <h4 id="domain-event-php-heading">PHP: Interface DomainEvent a konkrétní třída UserRegistered</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -341,7 +341,7 @@ final class UserRegistered implements DomainEvent
 
         <h4>Struktura tabulky Event Store</h4>
 
-        <div class="example-card" role="note" aria-labelledby="event-store-sql-heading">
+        <div class="tip" role="note" aria-labelledby="event-store-sql-heading">
             <h4 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code></h4>
             <pre><code class="language-sql">CREATE TABLE event_store (
     id            BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
@@ -377,7 +377,7 @@ final class UserRegistered implements DomainEvent
             řádků předcházíme ztrátě souběžných zápisů.
         </p>
 
-        <div class="example-card" role="note" aria-labelledby="event-store-php-heading">
+        <div class="tip" role="note" aria-labelledby="event-store-php-heading">
             <h4 id="event-store-php-heading">PHP: Interface EventStore a Doctrine implementace</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -523,7 +523,7 @@ final class DoctrineEventStore implements EventStore
             </li>
         </ul>
 
-        <div class="example-card" role="note" aria-labelledby="es-aggregate-base-heading">
+        <div class="tip" role="note" aria-labelledby="es-aggregate-base-heading">
             <h4 id="es-aggregate-base-heading">PHP: Base class EventSourcedAggregate</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -603,7 +603,7 @@ abstract class EventSourcedAggregate
 </code></pre>
         </div>
 
-        <div class="example-card" role="note" aria-labelledby="es-order-aggregate-heading">
+        <div class="tip" role="note" aria-labelledby="es-order-aggregate-heading">
             <h4 id="es-order-aggregate-heading">PHP: Order agregát s Event Sourcingem</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -709,7 +709,7 @@ final class Order extends EventSourcedAggregate
             Výsledný agregát má přesně takový stav, jaký odpovídá historii jeho událostí.
         </p>
 
-        <div class="example-card" role="note" aria-labelledby="es-repo-heading">
+        <div class="tip" role="note" aria-labelledby="es-repo-heading">
             <h4 id="es-repo-heading">PHP: EventSourced repozitář pro Order agregát</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -792,7 +792,7 @@ final class EventSourcedOrderRepository
             </li>
         </ul>
 
-        <div class="example-card" role="note" aria-labelledby="projekce-php-heading">
+        <div class="tip" role="note" aria-labelledby="projekce-php-heading">
             <h4 id="projekce-php-heading">PHP: OrderSummaryProjection a asynchronní Projector</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -880,7 +880,7 @@ final class OrderSummaryProjector
             a routing v <code>config/packages/messenger.yaml</code>:
         </p>
 
-        <div class="example-card" role="note" aria-labelledby="messenger-yaml-heading">
+        <div class="tip" role="note" aria-labelledby="messenger-yaml-heading">
             <h4 id="messenger-yaml-heading">YAML: Konfigurace Symfony Messenger pro asynchronní projekce</h4>
             <pre><code class="language-yaml">framework:
     messenger:
@@ -926,7 +926,7 @@ final class OrderSummaryProjector
             <li>Na vyžádání — jako optimalizační krok po migraci nebo importu dat.</li>
         </ul>
 
-        <div class="example-card" role="note" aria-labelledby="snapshot-php-heading">
+        <div class="tip" role="note" aria-labelledby="snapshot-php-heading">
             <h4 id="snapshot-php-heading">PHP: Snapshot třída a repozitář se snapshot podporou</h4>
             <pre><code class="language-php">&lt;?php
 
@@ -1105,7 +1105,7 @@ final class SnapshottingOrderRepository
             </li>
         </ul>
 
-        <div class="warning-card" role="alert" aria-labelledby="es-warning-heading">
+        <div class="warning" role="alert" aria-labelledby="es-warning-heading">
             <h4 id="es-warning-heading">Varování: Event Sourcing výrazně zvyšuje složitost systému</h4>
             <p>
                 Event Sourcing není "lepší CRUD". Přináší zásadní zvýšení komplexity na všech úrovních:
