@@ -416,6 +416,8 @@ h4:hover .anchor-link { opacity: 1; }
     align-items: center;
     justify-content: space-between;
     height: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
     padding: 0 1.5rem;
 }
 
@@ -751,7 +753,7 @@ figcaption {
    ===================== */
 
 .hero {
-    padding: 3rem 0 2rem;
+    padding: 0 0 2rem;
     border-bottom: 1px solid var(--border);
     margin-bottom: 2.5rem;
 }
