@@ -588,7 +588,7 @@ h4:hover .anchor-link { opacity: 1; }
         left: 0;
         top: 56px;
         bottom: 0;
-        height: auto;
+        height: calc(100vh - 56px);
         transform: translateX(-100%);
         transition: transform var(--transition);
         overscroll-behavior: contain;
