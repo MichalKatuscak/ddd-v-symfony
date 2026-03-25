@@ -140,6 +140,7 @@ li { margin-bottom: 0.35rem; }
     border: 1px solid var(--border);
     border-left: 4px solid var(--color-primary);
 }
+.table-of-contents h4,
 .table-of-contents h5 { margin-top: 0; margin-bottom: 0.75rem; color: var(--text-heading); }
 .table-of-contents ul { margin-bottom: 0; padding-left: 1.25rem; }
 .table-of-contents li { margin-bottom: 0.4rem; }
