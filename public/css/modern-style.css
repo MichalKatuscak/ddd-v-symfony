@@ -138,33 +138,45 @@ li { margin-bottom: 0.35rem; }
 .table-of-contents a:hover { color: var(--color-primary); text-decoration: none; }
 
 /* Callout cards */
-.info-card,
-.example-card,
-.warning-card,
-.practice-card,
-.success-card {
+.note,
+.tip,
+.warning,
+.caution {
     background: var(--bg-elevated);
     border-radius: var(--radius);
-    padding: 1.25rem 1.5rem;
+    padding: 1.25rem 1.5rem 1.25rem 3.5rem;
     margin: 1.75rem 0;
     border: 1px solid var(--border);
+    position: relative;
 }
-.info-card    { border-top: 3px solid var(--color-accent); }
-.example-card { border-top: 3px solid var(--color-primary); }
-.warning-card { border-top: 3px solid #f59f00; }
-.practice-card{ border-top: 3px solid #51cf66; }
-.success-card { border-top: 3px solid #51cf66; }
 
-.info-card h4,
-.example-card h4,
-.warning-card h4,
-.practice-card h4,
-.success-card h4,
-.info-card h3,
-.example-card h3,
-.warning-card h3,
-.practice-card h3,
-.success-card h3 {
+.note::before,
+.tip::before,
+.warning::before,
+.caution::before {
+    position: absolute;
+    left: 1.1rem;
+    top: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.note    { border-left: 4px solid var(--color-accent); }
+.note::before { content: "\2139"; color: var(--color-accent); }
+
+.tip     { border-left: 4px solid #22c55e; }
+.tip::before  { content: "\25BA"; color: #22c55e; }
+
+.warning { border-left: 4px solid #f59e0b; }
+.warning::before { content: "\26A0"; color: #f59e0b; }
+
+.caution { border-left: 4px solid #ef4444; }
+.caution::before { content: "\26D4"; color: #ef4444; }
+
+.note h3, .note h4,
+.tip h3, .tip h4,
+.warning h3, .warning h4,
+.caution h3, .caution h4 {
     margin-top: 0;
     font-size: 1rem;
     font-weight: 600;
