@@ -6,7 +6,8 @@
     margin: 1.5rem 0;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 /* ── Header (language badge + copy button) ───────────────────────────────── */

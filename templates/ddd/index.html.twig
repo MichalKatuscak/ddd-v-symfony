@@ -33,31 +33,27 @@
 
 {% block body %}
 <div class="trust-bar">
-    <span>PHP 8.4 &amp; Symfony 8</span>
-    <span>15 kapitol s ukázkami kódu</span>
+    <span>PHP 8.1+ &amp; Symfony 8</span>
+    <span>14 kapitol s ukázkami kódu</span>
     <span>CQRS · Event Sourcing · Taktický design</span>
-    <span>100% česky · zdarma</span>
+    <span>zdarma · česky</span>
 </div>
 
 <section class="hero" aria-labelledby="hero-heading">
     <div class="hero-text">
         <p class="hero-eyebrow">Komplexní průvodce · česky</p>
         <h1 id="hero-heading">Domain-Driven Design v <span>Symfony 8</span></h1>
-        <p class="hero-lead">Od základních konceptů přes CQRS a Event Sourcing až po reálné případové studie. Vše s ukázkami kódu v PHP 8.4 a Symfony 8.</p>
+        <p class="hero-lead">Od základních konceptů přes CQRS a Event Sourcing až po reálné případové studie. Vše s ukázkami kódu v PHP 8.1+ a Symfony 8.</p>
         <a href="{{ path('what_is_ddd') }}" class="btn btn-primary btn-lg">Začít s DDD →</a>
     </div>
     <div class="hero-stats">
         <div class="hero-stats-item">
-            <span class="hero-stats-num">15</span>
+            <span class="hero-stats-num">14</span>
             <span class="hero-stats-desc">kapitol</span>
         </div>
         <div class="hero-stats-item">
-            <span class="hero-stats-num">PHP 8.4</span>
+            <span class="hero-stats-num">PHP 8.1+</span>
             <span class="hero-stats-desc">ukázky kódu</span>
-        </div>
-        <div class="hero-stats-item">
-            <span class="hero-stats-num">100%</span>
-            <span class="hero-stats-desc">česky</span>
         </div>
         <div class="hero-stats-item">
             <span class="hero-stats-num">CQRS+ES</span>
@@ -75,6 +71,7 @@
             <ol>
                 <li><a href="{{ path('what_is_ddd') }}">Co je Domain-Driven Design?</a></li>
                 <li><a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a></li>
+                <li><a href="{{ path('horizontal_vs_vertical') }}">Vertikální slice architektura</a></li>
                 <li><a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony 8</a></li>
             </ol>
         </div>
@@ -113,6 +110,10 @@
             <h3 class="feature-card-title">Implementace v Symfony 8</h3>
             <p class="feature-card-desc">Praktická implementace DDD architektury ve Symfony projektu.</p>
         </a>
+        <a href="{{ path('case_study') }}" class="feature-card">
+            <h3 class="feature-card-title">Případová studie</h3>
+            <p class="feature-card-desc">Kompletní e-shop implementovaný v DDD architektuře krok za krokem.</p>
+        </a>
         <a href="{{ path('glossary') }}" class="feature-card">
             <h3 class="feature-card-title">Glosář DDD terminologie</h3>
             <p class="feature-card-desc">Přehled všech klíčových pojmů DDD s vysvětlením v češtině.</p>
@@ -122,6 +123,6 @@
 
 <section class="homepage-about" aria-labelledby="about-heading">
     <h2 id="about-heading">O tomto průvodci</h2>
-    <p>Průvodce je určen PHP vývojářům a Symfony vývojářům, kteří chtějí implementovat Domain-Driven Design v reálných projektech. Pokrývá strategický i taktický design, CQRS, Event Sourcing a testování DDD kódu — vše s příklady v PHP 8.4 a Symfony 8.</p>
+    <p>Průvodce je určen PHP vývojářům a Symfony vývojářům, kteří chtějí implementovat Domain-Driven Design v reálných projektech. Pokrývá strategický i taktický design, CQRS, Event Sourcing a testování DDD kódu — vše s příklady v PHP 8.1+ a Symfony 8.</p>
 </section>
 {% endblock %}
