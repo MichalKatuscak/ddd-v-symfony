@@ -34,10 +34,10 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-    <h2 itemprop="headline">Případová studie</h2>
+    <h1 itemprop="headline">Případová studie</h1>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <h5 id="toc-heading">Obsah kapitoly:</h5>
+        <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
             <li><a href="#introduction">Úvod</a></li>
             <li><a href="#requirements">Požadavky</a></li>
@@ -48,7 +48,7 @@
     </div>
 
     <section id="introduction" aria-labelledby="introduction-heading">
-    <h3 id="introduction-heading">Úvod</h3>
+    <h2 id="introduction-heading">Úvod</h2>
     <p>
         V této případové studii se podíváme na implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8.
         Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
@@ -57,7 +57,7 @@
     </section>
 
     <section id="requirements" aria-labelledby="requirements-heading">
-    <h3 id="requirements-heading">Požadavky</h3>
+    <h2 id="requirements-heading">Požadavky</h2>
     <p>
         Systém pro správu projektů má následující požadavky:
     </p>
@@ -75,14 +75,14 @@
     </section>
 
     <section id="architecture" aria-labelledby="architecture-heading">
-    <h3 id="architecture-heading">Architektura</h3>
+    <h2 id="architecture-heading">Architektura</h2>
     <p>
         Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 8.
         Na strategické úrovni jsme identifikovali klíčové bounded contexts a jejich vzájemné vztahy. Na taktické úrovni jsme implementovali doménové modely, agregáty, hodnotové objekty a doménové služby.
         Pro organizaci kódu jsme zvolili vertikální slice architekturu, která nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
     </p>
 
-    <h4>Strategický design: Bounded Contexts a Context Map</h4>
+    <h3>Strategický design: Bounded Contexts a Context Map</h3>
     <p>
         Prvním krokem při implementaci DDD bylo identifikovat bounded contexts (ohraničené kontexty) a vytvořit context map (mapu kontextů), která definuje vztahy mezi nimi.
         Systém je rozdělen do následujících bounded contexts:
@@ -111,7 +111,7 @@
         Pro komunikaci mezi kontexty jsme implementovali Anti-Corruption Layer (ACL) tam, kde bylo potřeba překládat koncepty mezi různými kontexty, a použili jsme doménové události pro asynchronní komunikaci.
     </p>
 
-    <h4>Taktický design a struktura projektu</h4>
+    <h3>Taktický design a struktura projektu</h3>
     <p>
         Na taktické úrovni jsme implementovali následující DDD vzory:
     </p>
@@ -275,12 +275,12 @@
     </section>
 
     <section id="implementation" aria-labelledby="implementation-heading">
-    <h3 id="implementation-heading">Implementace</h3>
+    <h2 id="implementation-heading">Implementace</h2>
     <p>
         Nyní se podíváme na implementaci některých klíčových částí systému, s důrazem na správnou aplikaci DDD principů.
     </p>
 
-    <h4 id="ubiquitous-language-heading">Ubiquitous Language</h4>
+    <h3 id="ubiquitous-language-heading">Ubiquitous Language</h3>
     <p>
         Před zahájením implementace jsme vytvořili Ubiquitous Language (všudypřítomný jazyk) ve spolupráci s doménovými experty. Tento jazyk je používán konzistentně v kódu, dokumentaci a komunikaci. Například:
     </p>
@@ -294,7 +294,7 @@
         <li><strong>Activity</strong> - Záznam o akci provedené v systému.</li>
     </ul>
 
-    <h4 id="project-model-heading">Doménový model: Projekt (Aggregate Root)</h4>
+    <h3 id="project-model-heading">Doménový model: Projekt (Aggregate Root)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Domain\Model;
@@ -425,7 +425,7 @@ class Project
     }
 }</code></pre>
 
-    <h4 id="task-model-heading">Doménový model: Úkol (Aggregate Root)</h4>
+    <h3 id="task-model-heading">Doménový model: Úkol (Aggregate Root)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Domain\Model;
@@ -571,7 +571,7 @@ class Task
     }
 }</code></pre>
 
-    <h4 id="create-project-command-heading">Command: Vytvoření projektu (Command Pattern)</h4>
+    <h3 id="create-project-command-heading">Command: Vytvoření projektu (Command Pattern)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Command;
@@ -594,7 +594,7 @@ class CreateProject
     }
 }</code></pre>
 
-    <h4 id="create-project-handler-heading">Command Handler: Zpracování vytvoření projektu (Application Service)</h4>
+    <h3 id="create-project-handler-heading">Command Handler: Zpracování vytvoření projektu (Application Service)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Command;
@@ -630,7 +630,7 @@ class CreateProjectHandler
     }
 }</code></pre>
 
-    <h4 id="assign-task-command-heading">Command: Přiřazení úkolu (Command Pattern)</h4>
+    <h3 id="assign-task-command-heading">Command: Přiřazení úkolu (Command Pattern)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Application\Command;
@@ -651,7 +651,7 @@ class AssignTask
     }
 }</code></pre>
 
-    <h4 id="assign-task-handler-heading">Command Handler: Zpracování přiřazení úkolu (Application Service)</h4>
+    <h3 id="assign-task-handler-heading">Command Handler: Zpracování přiřazení úkolu (Application Service)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Application\Command;
@@ -709,7 +709,7 @@ class AssignTaskHandler
     }
 }</code></pre>
 
-    <h4 id="get-projects-query-heading">Query: Získání projektů uživatele (Query Pattern)</h4>
+    <h3 id="get-projects-query-heading">Query: Získání projektů uživatele (Query Pattern)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Query;
@@ -726,7 +726,7 @@ class GetProjects
     }
 }</code></pre>
 
-    <h4 id="get-projects-handler-heading">Query Handler: Zpracování získání projektů uživatele (Read Model)</h4>
+    <h3 id="get-projects-handler-heading">Query Handler: Zpracování získání projektů uživatele (Read Model)</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\ProjectManagement\Application\Query;
@@ -765,7 +765,7 @@ class GetProjectsHandler
     }
 }</code></pre>
 
-    <h4 id="task-assignment-service-heading">Doménová služba: Přiřazení úkolu</h4>
+    <h3 id="task-assignment-service-heading">Doménová služba: Přiřazení úkolu</h3>
     <pre><code class="language-php">&lt;?php
 
 namespace App\TaskManagement\Domain\Service;
@@ -786,7 +786,7 @@ class TaskAssignmentService
     </section>
 
     <section id="lessons" aria-labelledby="lessons-heading">
-    <h3 id="lessons-heading">Ponaučení</h3>
+    <h2 id="lessons-heading">Ponaučení</h2>
     <p>
         Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla několik důležitých ponaučení:
     </p>
@@ -816,7 +816,7 @@ class TaskAssignmentService
     </ol>
 
     <div class="warning" role="alert" aria-labelledby="important-notes-heading">
-        <h4 id="important-notes-heading">Důležité poznámky pro implementaci DDD</h4>
+        <h3 id="important-notes-heading">Důležité poznámky pro implementaci DDD</h3>
         <p>
             Při implementaci Domain-Driven Design a CQRS v Symfony 8 je důležité:
         </p>

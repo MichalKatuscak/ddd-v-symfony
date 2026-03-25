@@ -34,10 +34,10 @@
 
 {% block body %}
 <article itemscope itemtype="https://schema.org/TechArticle">
-    <h2 itemprop="headline">Event Sourcing</h2>
+    <h1 itemprop="headline">Event Sourcing</h1>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <h5 id="toc-heading">Obsah kapitoly:</h5>
+        <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
             <li><a href="#co-je-event-sourcing">Co je Event Sourcing?</a></li>
             <li><a href="#vztah-k-cqrs">Vztah k CQRS</a></li>
@@ -51,7 +51,7 @@
     </div>
 
     <section id="co-je-event-sourcing" aria-labelledby="co-je-event-sourcing-heading">
-        <h3 id="co-je-event-sourcing-heading">Co je Event Sourcing?</h3>
+        <h2 id="co-je-event-sourcing-heading">Co je Event Sourcing?</h2>
 
         <p>
             Event Sourcing (ES) je architektonický vzor persistence, při němž se stav systému neukládá jako aktuální
@@ -65,7 +65,7 @@
             všech událostí, které kdy na agregátu nastaly.
         </p>
 
-        <h4>Porovnání s tradiční CRUD persistencí</h4>
+        <h3>Porovnání s tradiční CRUD persistencí</h3>
         <p>
             V klasickém CRUD přístupu se v tabulce vždy uchovává pouze aktuální stav entity. Jakmile se hodnota změní,
             předchozí hodnota je ztracena. Event Sourcing naproti tomu ukládá každou změnu jako novou položku do
@@ -73,7 +73,7 @@
         </p>
 
         <div class="tip" role="note" aria-labelledby="crud-vs-es-heading">
-            <h4 id="crud-vs-es-heading">CRUD vs. Event Sourcing — přehled</h4>
+            <h3 id="crud-vs-es-heading">CRUD vs. Event Sourcing — přehled</h3>
             <table>
                 <thead>
                     <tr>
@@ -118,7 +118,7 @@
         </div>
 
         <div class="note" role="note" aria-labelledby="es-pojmy-heading">
-            <h4 id="es-pojmy-heading">Klíčové pojmy Event Sourcingu:</h4>
+            <h3 id="es-pojmy-heading">Klíčové pojmy Event Sourcingu:</h3>
             <ul>
                 <li>
                     <strong>Event (Událost)</strong> — Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený
@@ -150,7 +150,7 @@
     </section>
 
     <section id="vztah-k-cqrs" aria-labelledby="vztah-k-cqrs-heading">
-        <h3 id="vztah-k-cqrs-heading">Vztah k CQRS</h3>
+        <h2 id="vztah-k-cqrs-heading">Vztah k CQRS</h2>
 
         <p>
             Event Sourcing a <a href="{{ path('cqrs') }}">CQRS</a> jsou dva samostatné vzory, které se však přirozeně
@@ -165,7 +165,7 @@
         </p>
 
         <div class="note" role="note" aria-labelledby="es-cqrs-tok-heading">
-            <h4 id="es-cqrs-tok-heading">Datový tok v architektuře ES + CQRS:</h4>
+            <h3 id="es-cqrs-tok-heading">Datový tok v architektuře ES + CQRS:</h3>
             <ol>
                 <li>Uživatel odešle <strong>Command</strong> (např. <code>PlaceOrderCommand</code>).</li>
                 <li>Command Handler načte agregát přehráním jeho event streamu z Event Store.</li>
@@ -178,7 +178,7 @@
         </div>
 
         <div class="tip" role="note" aria-labelledby="es-cqrs-rozdil-heading">
-            <h4 id="es-cqrs-rozdil-heading">Zásadní rozdíl mezi ES a CQRS</h4>
+            <h3 id="es-cqrs-rozdil-heading">Zásadní rozdíl mezi ES a CQRS</h3>
             <p>
                 <strong>CQRS</strong> řeší <em>jak oddělit zápis od čtení</em> — je to organizační vzor zodpovědností.
                 <strong>Event Sourcing</strong> řeší <em>jak persistovat stav</em> — je to vzor persistence.
@@ -189,7 +189,7 @@
     </section>
 
     <section id="domenove-udalosti" aria-labelledby="domenove-udalosti-heading">
-        <h3 id="domenove-udalosti-heading">Doménové události jako základ Event Sourcingu</h3>
+        <h2 id="domenove-udalosti-heading">Doménové události jako základ Event Sourcingu</h2>
 
         <p>
             V Event Sourcingu jsou doménové události (Domain Events) primárním datovým artefaktem. Na rozdíl od
@@ -221,7 +221,7 @@
         </ul>
 
         <div class="tip" role="note" aria-labelledby="domain-event-php-heading">
-            <h4 id="domain-event-php-heading">PHP: Interface DomainEvent a konkrétní třída UserRegistered</h4>
+            <h3 id="domain-event-php-heading">PHP: Interface DomainEvent a konkrétní třída UserRegistered</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -331,7 +331,7 @@ final class UserRegistered implements DomainEvent
     </section>
 
     <section id="event-store" aria-labelledby="event-store-heading">
-        <h3 id="event-store-heading">Implementace Event Store</h3>
+        <h2 id="event-store-heading">Implementace Event Store</h2>
 
         <p>
             Event Store je srdcem Event Sourcingu. Jedná se o append-only databázové úložiště, do nějž se ukládají
@@ -339,10 +339,10 @@ final class UserRegistered implements DomainEvent
             patří, v jaké verzi streamu, kdy nastala atd.). Záznamy se <strong>nikdy nepřepisují ani nemažou</strong>.
         </p>
 
-        <h4>Struktura tabulky Event Store</h4>
+        <h3>Struktura tabulky Event Store</h3>
 
         <div class="tip" role="note" aria-labelledby="event-store-sql-heading">
-            <h4 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code></h4>
+            <h3 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code></h3>
             <pre><code class="language-sql">CREATE TABLE event_store (
     id            BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
     event_id      CHAR(36)         NOT NULL COMMENT 'UUID v4 události — globálně unikátní',
@@ -378,7 +378,7 @@ final class UserRegistered implements DomainEvent
         </p>
 
         <div class="tip" role="note" aria-labelledby="event-store-php-heading">
-            <h4 id="event-store-php-heading">PHP: Interface EventStore a Doctrine implementace</h4>
+            <h3 id="event-store-php-heading">PHP: Interface EventStore a Doctrine implementace</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -501,7 +501,7 @@ final class DoctrineEventStore implements EventStore
     </section>
 
     <section id="aggregate-s-es" aria-labelledby="aggregate-s-es-heading">
-        <h3 id="aggregate-s-es-heading">Agregát s Event Sourcingem</h3>
+        <h2 id="aggregate-s-es-heading">Agregát s Event Sourcingem</h2>
 
         <p>
             V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
@@ -524,7 +524,7 @@ final class DoctrineEventStore implements EventStore
         </ul>
 
         <div class="tip" role="note" aria-labelledby="es-aggregate-base-heading">
-            <h4 id="es-aggregate-base-heading">PHP: Base class EventSourcedAggregate</h4>
+            <h3 id="es-aggregate-base-heading">PHP: Base class EventSourcedAggregate</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -604,7 +604,7 @@ abstract class EventSourcedAggregate
         </div>
 
         <div class="tip" role="note" aria-labelledby="es-order-aggregate-heading">
-            <h4 id="es-order-aggregate-heading">PHP: Order agregát s Event Sourcingem</h4>
+            <h3 id="es-order-aggregate-heading">PHP: Order agregát s Event Sourcingem</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -702,7 +702,7 @@ final class Order extends EventSourcedAggregate
 </code></pre>
         </div>
 
-        <h4>Načítání agregátu z event streamu (replay)</h4>
+        <h3>Načítání agregátu z event streamu (replay)</h3>
         <p>
             Repozitář pro event-sourcovaný agregát neprovádí SELECT do tabulky entit. Místo toho načte
             event stream z Event Store a předá jej statické tovární metodě <code>reconstituteFromEvents()</code>.
@@ -710,7 +710,7 @@ final class Order extends EventSourcedAggregate
         </p>
 
         <div class="tip" role="note" aria-labelledby="es-repo-heading">
-            <h4 id="es-repo-heading">PHP: EventSourced repozitář pro Order agregát</h4>
+            <h3 id="es-repo-heading">PHP: EventSourced repozitář pro Order agregát</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -769,7 +769,7 @@ final class EventSourcedOrderRepository
     </section>
 
     <section id="projekce" aria-labelledby="projekce-heading">
-        <h3 id="projekce-heading">Projekce (Projections)</h3>
+        <h2 id="projekce-heading">Projekce (Projections)</h2>
 
         <p>
             Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
@@ -777,7 +777,7 @@ final class EventSourcedOrderRepository
             je nutné ze stream událostí vybudovat optimalizované denormalizované datové struktury určené pro čtení.
         </p>
 
-        <h4>Synchronní vs. asynchronní projekce</h4>
+        <h3>Synchronní vs. asynchronní projekce</h3>
         <ul>
             <li>
                 <strong>Synchronní projekce</strong> — Projekce se aktualizuje přímo v rámci téže transakce jako
@@ -793,7 +793,7 @@ final class EventSourcedOrderRepository
         </ul>
 
         <div class="tip" role="note" aria-labelledby="projekce-php-heading">
-            <h4 id="projekce-php-heading">PHP: OrderSummaryProjection a asynchronní Projector</h4>
+            <h3 id="projekce-php-heading">PHP: OrderSummaryProjection a asynchronní Projector</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -881,7 +881,7 @@ final class OrderSummaryProjector
         </p>
 
         <div class="tip" role="note" aria-labelledby="messenger-yaml-heading">
-            <h4 id="messenger-yaml-heading">YAML: Konfigurace Symfony Messenger pro asynchronní projekce</h4>
+            <h3 id="messenger-yaml-heading">YAML: Konfigurace Symfony Messenger pro asynchronní projekce</h3>
             <pre><code class="language-yaml">framework:
     messenger:
         transports:
@@ -906,7 +906,7 @@ final class OrderSummaryProjector
     </section>
 
     <section id="snapshotting" aria-labelledby="snapshotting-heading">
-        <h3 id="snapshotting-heading">Snapshotting</h3>
+        <h2 id="snapshotting-heading">Snapshotting</h2>
 
         <p>
             Se stárnutím systému rostou event streamy agregátů. Agregát s tisíci událostmi vyžaduje načtení a přehrání
@@ -919,7 +919,7 @@ final class OrderSummaryProjector
             nejprve vyhledá poslední snapshot a z Event Store načte pouze události novější než tento snapshot.
         </p>
 
-        <h4>Kdy vytvářet snapshots</h4>
+        <h3>Kdy vytvářet snapshots</h3>
         <ul>
             <li>Poté, co event stream agregátu překročí určitý počet událostí (typicky 50–200).</li>
             <li>Periodicky (např. jednou denně) pro agregáty s vysokou frekvencí událostí.</li>
@@ -927,7 +927,7 @@ final class OrderSummaryProjector
         </ul>
 
         <div class="tip" role="note" aria-labelledby="snapshot-php-heading">
-            <h4 id="snapshot-php-heading">PHP: Snapshot třída a repozitář se snapshot podporou</h4>
+            <h3 id="snapshot-php-heading">PHP: Snapshot třída a repozitář se snapshot podporou</h3>
             <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -1050,14 +1050,14 @@ final class SnapshottingOrderRepository
     </section>
 
     <section id="kdy-pouzit" aria-labelledby="kdy-pouzit-heading">
-        <h3 id="kdy-pouzit-heading">Kdy použít Event Sourcing</h3>
+        <h2 id="kdy-pouzit-heading">Kdy použít Event Sourcing</h2>
 
         <p>
             Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho adopcí je nutné pečlivě
             zvážit, zda přínosy pro daný kontext převažují nad náklady na implementaci a provoz.
         </p>
 
-        <h4>Vhodné use cases</h4>
+        <h3>Vhodné use cases</h3>
         <ul>
             <li>
                 <strong>Auditní log jako byznysový požadavek</strong> — Finanční systémy, zdravotnické záznamy,
@@ -1084,7 +1084,7 @@ final class SnapshottingOrderRepository
             </li>
         </ul>
 
-        <h4>Nevhodné use cases</h4>
+        <h3>Nevhodné use cases</h3>
         <ul>
             <li>
                 <strong>Jednoduché CRUD aplikace</strong> — Pokud doménová logika spočívá v základních operacích
@@ -1106,7 +1106,7 @@ final class SnapshottingOrderRepository
         </ul>
 
         <div class="warning" role="alert" aria-labelledby="es-warning-heading">
-            <h4 id="es-warning-heading">Varování: Event Sourcing výrazně zvyšuje složitost systému</h4>
+            <h3 id="es-warning-heading">Varování: Event Sourcing výrazně zvyšuje složitost systému</h3>
             <p>
                 Event Sourcing není "lepší CRUD". Přináší zásadní zvýšení komplexity na všech úrovních:
                 <strong>infrastruktura</strong> (Event Store, event bus, snapshot store),

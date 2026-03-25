@@ -34,10 +34,10 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-        <h2 itemprop="headline">Migrace z CRUD architektury na DDD</h2>
+        <h1 itemprop="headline">Migrace z CRUD architektury na DDD</h1>
 
         <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <h5 id="toc-heading">Obsah kapitoly:</h5>
+            <p id="toc-heading">Obsah kapitoly:</p>
             <ul>
                 <li><a href="#kdy-migrovat">Kdy a proč migrovat z CRUD na DDD</a></li>
                 <li><a href="#strangler-fig">Strangler Fig Pattern – vzor postupné náhrady</a></li>
@@ -51,7 +51,7 @@
         </div>
 
         <section id="kdy-migrovat" aria-labelledby="kdy-migrovat-heading">
-            <h3 id="kdy-migrovat-heading">Kdy a proč migrovat z CRUD na DDD</h3>
+            <h2 id="kdy-migrovat-heading">Kdy a proč migrovat z CRUD na DDD</h2>
             <p>
                 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
                 Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
@@ -61,7 +61,7 @@
             </p>
 
             <div class="note" role="note" aria-labelledby="priznaky-heading">
-                <h4 id="priznaky-heading">Příznaky, že CRUD architektura nestačí</h4>
+                <h3 id="priznaky-heading">Příznaky, že CRUD architektura nestačí</h3>
                 <ul>
                     <li>
                         <strong>God Services (Boží služby)</strong> – Třídy jako <code>UserService</code> nebo
@@ -96,7 +96,7 @@
                 </ul>
             </div>
 
-            <h4>Kdy DDD přináší hodnotu a kdy je CRUD dostačující</h4>
+            <h3>Kdy DDD přináší hodnotu a kdy je CRUD dostačující</h3>
             <p>
                 Rozhodnutí o migraci by mělo být podloženo analýzou komplexity domény, nikoli módními trendy.
                 Martin Fowler ve své práci o architektonických vzorech upozorňuje, že aplikace Transaction Script
@@ -105,7 +105,7 @@
             </p>
 
             <div class="note" role="note" aria-labelledby="kdy-ddd-heading">
-                <h4 id="kdy-ddd-heading">Kdy DDD přináší hodnotu</h4>
+                <h3 id="kdy-ddd-heading">Kdy DDD přináší hodnotu</h3>
                 <ul>
                     <li>Doména obsahuje komplexní byznys pravidla, která se často mění.</li>
                     <li>Existují přechody stavů entit (objednávka: vytvořena → potvrzena → odeslána → doručena).</li>
@@ -113,7 +113,7 @@
                     <li>Aplikace je dlouhodobě rozvíjena a musí být udržovatelná v horizontu let.</li>
                     <li>Existuje více Bounded Contexts s odlišnými pohledy na stejné entity.</li>
                 </ul>
-                <h4>Kdy zůstat u CRUD</h4>
+                <h3>Kdy zůstat u CRUD</h3>
                 <ul>
                     <li>Aplikace je v podstatě CRUD nad databázovými tabulkami bez byznys logiky.</li>
                     <li>Doménová pravidla jsou triviální a stabilní.</li>
@@ -122,7 +122,7 @@
                 </ul>
             </div>
 
-            <h4>Realistické zhodnocení nákladů migrace</h4>
+            <h3>Realistické zhodnocení nákladů migrace</h3>
             <p>
                 Migrace z CRUD na DDD není jednorázová akce. Je to kontinuální proces, který může trvat měsíce
                 až roky v závislosti na velikosti kódové základny. Je důležité si uvědomit, že migrace sama o sobě
@@ -133,7 +133,7 @@
         </section>
 
         <section id="strangler-fig" aria-labelledby="strangler-fig-heading">
-            <h3 id="strangler-fig-heading">Strangler Fig Pattern – vzor postupné náhrady</h3>
+            <h2 id="strangler-fig-heading">Strangler Fig Pattern – vzor postupné náhrady</h2>
             <p>
                 Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
                 <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank">[2]</a>,
@@ -142,7 +142,7 @@
             </p>
 
             <div class="note" role="note" aria-labelledby="strangler-princip-heading">
-                <h4 id="strangler-princip-heading">Princip fungování</h4>
+                <h3 id="strangler-princip-heading">Princip fungování</h3>
                 <ol>
                     <li>
                         <strong>Nová funkcionalita</strong> je vždy implementována v DDD stylu – nové Bounded Contexts,
@@ -164,7 +164,7 @@
             </div>
 
             <div class="tip" role="note" aria-labelledby="strangler-struktura-heading">
-                <h4 id="strangler-struktura-heading">Příklad: Koexistence CRUD a DDD ve struktuře projektu</h4>
+                <h3 id="strangler-struktura-heading">Příklad: Koexistence CRUD a DDD ve struktuře projektu</h3>
                 <pre><code class="language-bash">src/
 ├── Controller/                    # Stará CRUD vrstva (postupně se zmenšuje)
 │   ├── UserController.php         # Původní CRUD kontroler
@@ -199,7 +199,7 @@
             └── DoctrineUserRepository.php  # Implementace repozitáře</code></pre>
             </div>
 
-            <h4>Výhody oproti přímé refaktorizaci (Big Bang Rewrite)</h4>
+            <h3>Výhody oproti přímé refaktorizaci (Big Bang Rewrite)</h3>
             <p>
                 Přímý přepis celého systému najednou (tzv. "big bang rewrite") je považován za jedno z největších rizik
                 v softwarovém vývoji. Joel Spolsky ve svém slavném článku "Things You Should Never Do"
@@ -217,14 +217,14 @@
         </section>
 
         <section id="analyza-domeny" aria-labelledby="analyza-domeny-heading">
-            <h3 id="analyza-domeny-heading">Krok 1: Analýza existující domény</h3>
+            <h2 id="analyza-domeny-heading">Krok 1: Analýza existující domény</h2>
             <p>
                 Než začneme přesouvat kód, musíme pochopit doménu. Nejčastější chybou je přímý skok do refaktoringu
                 bez předchozí analýzy – výsledkem je pak DDD architektura, která přesně kopíruje strukturu starých
                 databázových tabulek, aniž by odrážela skutečný doménový model.
             </p>
 
-            <h4>Identifikace Bounded Contexts z existujícího CRUD kódu</h4>
+            <h3>Identifikace Bounded Contexts z existujícího CRUD kódu</h3>
             <p>
                 Bounded Contexts lze v existující CRUD aplikaci identifikovat sledováním přirozených hranic:
             </p>
@@ -245,7 +245,7 @@
                 </li>
             </ul>
 
-            <h4>Event Storming jako nástroj pro analýzu</h4>
+            <h3>Event Storming jako nástroj pro analýzu</h3>
             <p>
                 Event Storming je workshopová technika navržená Albertem Brandolinim
                 <a href="https://www.eventstorming.com/" target="_blank">[4]</a>, která umožňuje kolaborativně
@@ -260,7 +260,7 @@
             </ul>
 
             <div class="tip" role="note" aria-labelledby="crud-before-heading">
-                <h4 id="crud-before-heading">Příklad: Identifikace doménové logiky v CRUD kontroleru</h4>
+                <h3 id="crud-before-heading">Příklad: Identifikace doménové logiky v CRUD kontroleru</h3>
                 <p>
                     Následující příklad ilustruje typický CRUD kontroler, ve kterém je skryta netriviální doménová
                     logika. Tato logika bude v dalších krocích extrahována do doménového modelu.
@@ -330,21 +330,21 @@ class UserController extends AbstractController
         </section>
 
         <section id="extrakce-domainove-vrstvy" aria-labelledby="extrakce-domainove-vrstvy-heading">
-            <h3 id="extrakce-domainove-vrstvy-heading">Krok 2: Extrakce doménové vrstvy</h3>
+            <h2 id="extrakce-domainove-vrstvy-heading">Krok 2: Extrakce doménové vrstvy</h2>
             <p>
                 Extrakce doménové vrstvy znamená přesunutí byznys pravidel z kontrolerů a service tříd do doménových
                 objektů. Cílem je, aby doménové objekty samy vynucovaly svá invarianty – pravidla, která musí být
                 vždy splněna, bez ohledu na to, kdo s objektem pracuje.
             </p>
 
-            <h4>Přesunutí business pravidel do doménových objektů</h4>
+            <h3>Přesunutí business pravidel do doménových objektů</h3>
             <p>
                 Refaktoring probíhá ve dvou hlavních krocích: nejprve vytvoříme doménové Value Objects pro primitivní
                 typy nesoucí byznys pravidla, poté extrahujeme logiku do doménových entit a služeb.
             </p>
 
             <div class="tip" role="note" aria-labelledby="before-after-heading">
-                <h4 id="before-after-heading">Příklad: Refaktorizace UserService – before/after</h4>
+                <h3 id="before-after-heading">Příklad: Refaktorizace UserService – before/after</h3>
                 <pre><code class="language-php">&lt;?php
 
 // PŘED: God Service s přímou závislostí na Doctrine
@@ -453,7 +453,7 @@ class User
                 </p>
             </div>
 
-            <h4>Zavedení Value Objects místo primitive types</h4>
+            <h3>Zavedení Value Objects místo primitive types</h3>
             <p>
                 Primitive Obsession je code smell, při kterém jsou koncepty s byznys sémantikou reprezentovány
                 primitivními typy jako <code>string</code> nebo <code>int</code>. Value Object nahrazuje primitiv
@@ -461,7 +461,7 @@ class User
             </p>
 
             <div class="tip" role="note" aria-labelledby="email-vo-heading">
-                <h4 id="email-vo-heading">Příklad: Refaktorizace string emailu na Email Value Object</h4>
+                <h3 id="email-vo-heading">Příklad: Refaktorizace string emailu na Email Value Object</h3>
                 <pre><code class="language-php">&lt;?php
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
@@ -530,7 +530,7 @@ final class Email
         </section>
 
         <section id="zavedeni-repozitaru" aria-labelledby="zavedeni-repozitaru-heading">
-            <h3 id="zavedeni-repozitaru-heading">Krok 3: Zavedení repozitářů</h3>
+            <h2 id="zavedeni-repozitaru-heading">Krok 3: Zavedení repozitářů</h2>
             <p>
                 V CRUD architektuře se pro přístup k datům typicky používá <code>EntityManagerInterface</code> nebo
                 Doctrine repozitáře přímo v kontrolerech a service třídách. DDD přináší doménové rozhraní repozitáře,
@@ -538,14 +538,14 @@ final class Email
                 úložiště) bez změny doménového kódu.
             </p>
 
-            <h4>Vytvoření doménového rozhraní repozitáře</h4>
+            <h3>Vytvoření doménového rozhraní repozitáře</h3>
             <p>
                 Doménové rozhraní repozitáře je součástí doménové vrstvy – definuje, jaké operace jsou potřeba
                 z pohledu domény. Neobsahuje žádné zmínky o Doctrine, SQL nebo jiné infrastrukturní technologii.
             </p>
 
             <div class="tip" role="note" aria-labelledby="repository-interface-heading">
-                <h4 id="repository-interface-heading">Příklad: Doménové rozhraní vs. Doctrine implementace</h4>
+                <h3 id="repository-interface-heading">Příklad: Doménové rozhraní vs. Doctrine implementace</h3>
                 <pre><code class="language-php">&lt;?php
 
 // Doménové rozhraní – součást domény, žádná infrastrukturní závislost
@@ -628,7 +628,7 @@ final class DoctrineUserRepository implements UserRepository
             </div>
 
             <div class="note" role="note" aria-labelledby="di-config-heading">
-                <h4 id="di-config-heading">Konfigurace Dependency Injection v Symfony</h4>
+                <h3 id="di-config-heading">Konfigurace Dependency Injection v Symfony</h3>
                 <pre><code class="language-yaml"># config/services.yaml
 services:
     App\UserManagement\Domain\Repository\UserRepository:
@@ -641,7 +641,7 @@ services:
         </section>
 
         <section id="cqrs-postupne" aria-labelledby="cqrs-postupne-heading">
-            <h3 id="cqrs-postupne-heading">Krok 4: Postupné zavedení CQRS</h3>
+            <h2 id="cqrs-postupne-heading">Krok 4: Postupné zavedení CQRS</h2>
             <p>
                 Command Query Responsibility Segregation (CQRS) je přirozené rozšíření DDD, avšak jeho zavedení
                 by mělo přijít až poté, co je doménový model dobře etablován. Předčasné zavedení CQRS bez zralého
@@ -649,7 +649,7 @@ services:
                 hůře testovatelná.
             </p>
 
-            <h4>Začít s Command stranou (write side)</h4>
+            <h3>Začít s Command stranou (write side)</h3>
             <p>
                 Nejpřirozenějším místem pro zavedení CQRS je write side – operace, které mění stav systému.
                 Query side (čtení) lze zpočátku ponechat s přímými Doctrine dotazy a refaktorovat ji samostatně,
@@ -657,7 +657,7 @@ services:
             </p>
 
             <div class="tip" role="note" aria-labelledby="command-extraction-heading">
-                <h4 id="command-extraction-heading">Příklad: Extrakce RegisterUserCommand z UserController</h4>
+                <h3 id="command-extraction-heading">Příklad: Extrakce RegisterUserCommand z UserController</h3>
                 <pre><code class="language-php">&lt;?php
 
 // PŘED: Logika přímo v kontroleru nebo service
@@ -770,7 +770,7 @@ class UserController extends AbstractController
         </section>
 
         <section id="testovani-pri-migraci" aria-labelledby="testovani-pri-migraci-heading">
-            <h3 id="testovani-pri-migraci-heading">Testování při migraci</h3>
+            <h2 id="testovani-pri-migraci-heading">Testování při migraci</h2>
             <p>
                 Testování je kritickým aspektem migrace. Bez dostatečného pokrytí testy hrozí, že refaktoring
                 zavede regrese, které jsou odhaleny až v produkci. Strategie testování při migraci z CRUD na DDD
@@ -778,7 +778,7 @@ class UserController extends AbstractController
                 doplňování unit testů pro novou doménovou vrstvu.
             </p>
 
-            <h4>Charakterizační testy (Characterization Tests)</h4>
+            <h3>Charakterizační testy (Characterization Tests)</h3>
             <p>
                 Pojem "charakterizační testy" pochází z knihy Michaela Featherse "Working Effectively with Legacy
                 Code"
@@ -789,7 +789,7 @@ class UserController extends AbstractController
             </p>
 
             <div class="tip" role="note" aria-labelledby="char-test-heading">
-                <h4 id="char-test-heading">Příklad: Charakterizační test pro CRUD kontroler</h4>
+                <h3 id="char-test-heading">Příklad: Charakterizační test pro CRUD kontroler</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\Tests\Characterization;
@@ -858,7 +858,7 @@ class UserRegistrationCharacterizationTest extends WebTestCase
                 </p>
             </div>
 
-            <h4>Unit testy doménové vrstvy</h4>
+            <h3>Unit testy doménové vrstvy</h3>
             <p>
                 Jednou z největších výhod DDD je, že doménové objekty jsou testovatelné v izolaci bez nutnosti
                 databáze, HTTP klienta nebo jiné infrastruktury. Unit testy doménové vrstvy jsou rychlé, deterministické
@@ -866,7 +866,7 @@ class UserRegistrationCharacterizationTest extends WebTestCase
             </p>
 
             <div class="note" role="note" aria-labelledby="domain-unit-test-heading">
-                <h4 id="domain-unit-test-heading">Příklad: Unit test doménové entity</h4>
+                <h3 id="domain-unit-test-heading">Příklad: Unit test doménové entity</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\Tests\UserManagement\Domain;
@@ -917,9 +917,9 @@ class UserTest extends TestCase
         </section>
 
         <section id="rizika-a-doporuceni" aria-labelledby="rizika-a-doporuceni-heading">
-            <h3 id="rizika-a-doporuceni-heading">Rizika a doporučení</h3>
+            <h2 id="rizika-a-doporuceni-heading">Rizika a doporučení</h2>
 
-            <h4>Nejčastější chyby při migraci</h4>
+            <h3>Nejčastější chyby při migraci</h3>
             <ul>
                 <li>
                     <strong>Anémický doménový model</strong> – Nejčastější past. Vývojáři vytvoří třídy s názvem
@@ -949,7 +949,7 @@ class UserTest extends TestCase
                 </li>
             </ul>
 
-            <h4>Tipy pro týmovou komunikaci</h4>
+            <h3>Tipy pro týmovou komunikaci</h3>
             <ul>
                 <li>
                     Vytvořte <strong>glosář pojmů</strong> (Ubiquitous Language) a udržujte ho aktuální. Vyvěste
@@ -969,7 +969,7 @@ class UserTest extends TestCase
                 </li>
             </ul>
 
-            <h4>Realistické odhady náročnosti</h4>
+            <h3>Realistické odhady náročnosti</h3>
             <p>
                 Zkušenosti z praxe ukazují, že migrace středně velké CRUD aplikace (50–100 tabulek, 3–5 let vývoje)
                 na DDD architekturu trvá při inkrementálním přístupu 12 až 24 měsíců. Tato čísla předpokládají,
@@ -979,7 +979,7 @@ class UserTest extends TestCase
             </p>
 
             <div class="warning" role="alert" aria-labelledby="big-bang-warning-heading">
-                <h4 id="big-bang-warning-heading">Varování před Big Bang Rewrites</h4>
+                <h3 id="big-bang-warning-heading">Varování před Big Bang Rewrites</h3>
                 <p>
                     <strong>Nikdy nezačínejte migraci na DDD kompletním přepisem systému.</strong> Big Bang Rewrite
                     je architektonicky nejrizikovější rozhodnutí, které může tým učinit. Typický scénář:

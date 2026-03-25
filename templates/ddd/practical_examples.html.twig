@@ -34,10 +34,10 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-        <h2 itemprop="headline">Praktické příklady</h2>
+        <h1 itemprop="headline">Praktické příklady</h1>
 
         <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <h5 id="toc-heading">Obsah kapitoly:</h5>
+            <p id="toc-heading">Obsah kapitoly:</p>
             <ul>
                 <li><a href="#e-commerce">Příklad: E-commerce aplikace</a></li>
                 <li><a href="#blog">Příklad: Blog</a></li>
@@ -46,7 +46,7 @@
         </div>
 
         <section id="e-commerce" aria-labelledby="e-commerce-heading">
-            <h3 id="e-commerce-heading">Příklad: E-commerce aplikace</h3>
+            <h2 id="e-commerce-heading">Příklad: E-commerce aplikace</h2>
             <p>
                 V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí vertikální slice architektury
                 a CQRS v Symfony 8.
@@ -59,7 +59,7 @@
                 </div>
             </div>
 
-            <h4 id="e-commerce-structure-heading">Struktura projektu</h4>
+            <h3 id="e-commerce-structure-heading">Struktura projektu</h3>
             <pre><code class="language-bash">src/
 ├── Cart/                      # Bounded Context: Košík
 │   ├── Domain/                # Doménová vrstva
@@ -121,7 +121,7 @@
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
-            <h4 id="cart-model-heading">Doménový model: Košík</h4>
+            <h3 id="cart-model-heading">Doménový model: Košík</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Domain\Model;
@@ -250,7 +250,7 @@ class Cart
     }
 }</code></pre>
 
-            <h4 id="add-to-cart-command-heading">Command: Přidání položky do košíku</h4>
+            <h3 id="add-to-cart-command-heading">Command: Přidání položky do košíku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Command;
@@ -279,7 +279,7 @@ class AddItemToCart
     }
 }</code></pre>
 
-            <h4 id="add-to-cart-handler-heading">Command Handler: Zpracování přidání položky do košíku</h4>
+            <h3 id="add-to-cart-handler-heading">Command Handler: Zpracování přidání položky do košíku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Command;
@@ -317,7 +317,7 @@ class AddItemToCartHandler
     }
 }</code></pre>
 
-            <h4 id="add-to-cart-controller-heading">Controller: Přidání položky do košíku</h4>
+            <h3 id="add-to-cart-controller-heading">Controller: Přidání položky do košíku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Presentation\Controller;
@@ -369,7 +369,7 @@ class CartController extends AbstractController
     }
 }</code></pre>
 
-            <h4 id="get-cart-query-heading">Query: Získání košíku</h4>
+            <h3 id="get-cart-query-heading">Query: Získání košíku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Query;
@@ -386,7 +386,7 @@ class GetCart
     }
 }</code></pre>
 
-            <h4 id="get-cart-handler-heading">Query Handler: Zpracování získání košíku</h4>
+            <h3 id="get-cart-handler-heading">Query Handler: Zpracování získání košíku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Cart\Application\Query;
@@ -435,7 +435,7 @@ class GetCartHandler
         </section>
 
         <section id="blog" aria-labelledby="blog-heading">
-            <h3 id="blog-heading">Příklad: Blog</h3>
+            <h2 id="blog-heading">Příklad: Blog</h2>
             <p>
                 V této části si ukážeme, jak implementovat jednoduchý blog pomocí vertikální slice architektury a CQRS v
                 Symfony 8.
@@ -447,7 +447,7 @@ class GetCartHandler
                 </div>
             </div>
 
-            <h4 id="blog-structure-heading">Struktura projektu</h4>
+            <h3 id="blog-structure-heading">Struktura projektu</h3>
             <pre><code class="language-bash">src/
 ├── Blog/                      # Bounded Context: Blog
 │   ├── Domain/                # Doménová vrstva
@@ -490,7 +490,7 @@ class GetCartHandler
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
-            <h4 id="post-model-heading">Doménový model: Příspěvek</h4>
+            <h3 id="post-model-heading">Doménový model: Příspěvek</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Blog\Domain\Model;
@@ -591,7 +591,7 @@ class Post
     }
 }</code></pre>
 
-            <h4>Command: Vytvoření příspěvku</h4>
+            <h3>Command: Vytvoření příspěvku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Blog\CreatePost;
@@ -614,7 +614,7 @@ class CreatePost
     }
 }</code></pre>
 
-            <h4>Command Handler: Zpracování vytvoření příspěvku</h4>
+            <h3>Command Handler: Zpracování vytvoření příspěvku</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\Blog\CreatePost;
@@ -649,7 +649,7 @@ class CreatePostHandler
     }
 }</code></pre>
 
-            <h3 id="user-management">Příklad: Správa uživatelů</h3>
+            <h2 id="user-management">Příklad: Správa uživatelů</h2>
             <p>
                 V této části si ukážeme, jak implementovat správu uživatelů pomocí DDD a CQRS v Symfony 8, kde společná doména budou uživatelé a DDD použijeme pro oddělení funkcí.
             </p>
@@ -660,7 +660,7 @@ class CreatePostHandler
                 </div>
             </div>
 
-            <h4>Struktura projektu</h4>
+            <h3>Struktura projektu</h3>
             <pre><code class="language-bash">src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva
@@ -695,7 +695,7 @@ class CreatePostHandler
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus</code></pre>
 
-            <h4>Doménový model: Uživatel</h4>
+            <h3>Doménový model: Uživatel</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Model;
@@ -814,7 +814,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 }</code></pre>
 
-            <h4>Command: Registrace uživatele</h4>
+            <h3>Command: Registrace uživatele</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Command;
@@ -839,7 +839,7 @@ class RegisterUser
     }
 }</code></pre>
 
-            <h4>Command Handler: Zpracování registrace uživatele</h4>
+            <h3>Command Handler: Zpracování registrace uživatele</h3>
             <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Command;
@@ -883,7 +883,7 @@ class RegisterUserHandler
 }</code></pre>
 
             <div class="warning" role="alert" aria-labelledby="important-notes-heading">
-                <h4 id="important-notes-heading">Důležité poznámky</h4>
+                <h3 id="important-notes-heading">Důležité poznámky</h3>
                 <p>
                     Při implementaci praktických příkladů je důležité:
                 </p>

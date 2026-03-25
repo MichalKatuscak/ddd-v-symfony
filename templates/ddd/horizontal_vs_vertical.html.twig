@@ -34,10 +34,10 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-    <h2 itemprop="headline">Vertikální slice architektura vs. Tradiční DDD</h2>
+    <h1 itemprop="headline">Vertikální slice architektura vs. Tradiční DDD</h1>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <h5 id="toc-heading">Obsah kapitoly:</h5>
+        <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
             <li><a href="#traditional">Tradiční přístup k DDD</a></li>
             <li><a href="#horizontal">Vertikální slice architektura</a></li>
@@ -48,7 +48,7 @@
     </div>
 
     <section id="traditional" aria-labelledby="traditional-heading">
-    <h3 id="traditional-heading">Tradiční přístup k DDD</h3>
+    <h2 id="traditional-heading">Tradiční přístup k DDD</h2>
     <p>
         Tradiční přístup k DDD, často označovaný jako "vrstvený" (layered), organizuje kód do vrstev podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
         Typické vrstvy v tradičním DDD jsou:
@@ -62,7 +62,7 @@
     </ul>
 
     <div class="tip">
-        <h4>Příklad: Tradiční struktura DDD projektu</h4>
+        <h3>Příklad: Tradiční struktura DDD projektu</h3>
         <pre><code class="language-bash">src/
 ├── Presentation/                # Prezentační vrstva
 │   └── Controller/
@@ -95,14 +95,14 @@
     </section>
 
     <section id="horizontal" aria-labelledby="horizontal-heading">
-    <h3 id="horizontal-heading">Vertikální slice architektura (Vertical Slice Architecture)</h3>
+    <h2 id="horizontal-heading">Vertikální slice architektura (Vertical Slice Architecture)</h2>
     <p>
         Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
         Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
     </p>
 
     <div class="tip" role="note" aria-labelledby="vertical-slice-example-heading">
-        <h4 id="vertical-slice-example-heading">Příklad: Struktura projektu s vertikální slice architekturou</h4>
+        <h3 id="vertical-slice-example-heading">Příklad: Struktura projektu s vertikální slice architekturou</h3>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Registration/           # Feature: Registrace uživatelů
@@ -164,7 +164,7 @@
     </section>
 
     <section id="comparison" aria-labelledby="comparison-heading">
-    <h3 id="comparison-heading">Porovnání přístupů</h3>
+    <h2 id="comparison-heading">Porovnání přístupů</h2>
 
     <div class="table-responsive">
         <table class="table table-bordered" aria-labelledby="comparison-heading">
@@ -217,10 +217,10 @@
     </section>
 
     <section id="when-to-use" aria-labelledby="when-to-use-heading">
-    <h3 id="when-to-use-heading">Kdy použít který přístup</h3>
+    <h2 id="when-to-use-heading">Kdy použít který přístup</h2>
 
     <div class="note" role="note" aria-labelledby="traditional-when-to-use-heading">
-        <h4 id="traditional-when-to-use-heading">Kdy použít tradiční DDD:</h4>
+        <h3 id="traditional-when-to-use-heading">Kdy použít tradiční DDD:</h3>
         <ul>
             <li>Když je tým zvyklý na tradiční architekturu.</li>
             <li>Pro menší aplikace s jasně definovanými vrstvami.</li>
@@ -230,7 +230,7 @@
     </div>
 
     <div class="note" role="note" aria-labelledby="vertical-slice-when-to-use-heading">
-        <h4 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h4>
+        <h3 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h3>
         <ul>
             <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
             <li>Když je důležitá modularita a nezávislost funkcí.</li>
@@ -242,12 +242,12 @@
     </section>
 
     <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
-    <h3 id="symfony-implementation-heading">Implementace v Symfony 8</h3>
+    <h2 id="symfony-implementation-heading">Implementace v Symfony 8</h2>
     <p>
         Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
     </p>
 
-    <h4 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h4>
+    <h3 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h3>
     <p>
         Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
     </p>
@@ -298,7 +298,7 @@
         └── Exception/
             └── DomainException.php</code></pre>
 
-    <h4 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h4>
+    <h3 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h3>
     <p>
         Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
     </p>
@@ -369,7 +369,7 @@
     </ul>
 
     <div class="warning" role="note" aria-labelledby="important-notes-heading">
-        <h4 id="important-notes-heading">Důležité poznámky</h4>
+        <h3 id="important-notes-heading">Důležité poznámky</h3>
         <p>
             Při implementaci vertikální slice architektury v Symfony 8 je důležité:
         </p>

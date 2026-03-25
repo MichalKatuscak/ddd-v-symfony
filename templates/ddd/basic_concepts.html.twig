@@ -34,10 +34,10 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-        <h2 itemprop="headline">Základní koncepty DDD</h2>
+        <h1 itemprop="headline">Základní koncepty DDD</h1>
 
         <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <h5 id="toc-heading">Obsah kapitoly:</h5>
+            <p id="toc-heading">Obsah kapitoly:</p>
             <ul>
                 <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
                 <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
@@ -51,7 +51,7 @@
         </div>
 
         <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
-            <h3 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h3>
+            <h2 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h2>
             <p>
                 Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu
                 existuje konzistentní model
@@ -65,7 +65,7 @@
             </div>
 
             <div class="tip">
-                <h4>Příklad: Ohraničené kontexty v PHP</h4>
+                <h3>Příklad: Ohraničené kontexty v PHP</h3>
                 <pre><code class="language-bash">src/
 ├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
 │   ├── Domain/
@@ -108,7 +108,7 @@
         </section>
 
         <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
-            <h3 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h3>
+            <h2 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h2>
 
             <p>
                 Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v
@@ -123,7 +123,7 @@
             </div>
 
             <div class="note">
-                <h4>Příklad: Všudypřítomný jazyk v e-commerce doméně</h4>
+                <h3>Příklad: Všudypřítomný jazyk v e-commerce doméně</h3>
                 <p>
                     V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
                 </p>
@@ -150,7 +150,7 @@
             </p>
 
             <div class="warning" role="note" aria-labelledby="important-notes-heading">
-                <h4 id="important-notes-heading">Důležité poznámky</h4>
+                <h3 id="important-notes-heading">Důležité poznámky</h3>
                 <p>
                     Při implementaci DDD je důležité:
                 </p>
@@ -165,7 +165,7 @@
         </section>
 
         <section id="entities" aria-labelledby="entities-heading">
-            <h3 id="entities-heading">Entity (Entity)</h3>
+            <h2 id="entities-heading">Entity (Entity)</h2>
             <p>
                 Entity je objekt, který je definován svou identitou, nikoli svými atributy. Entity mají životní cyklus a
                 mohou se v průběhu času měnit,
@@ -173,7 +173,7 @@
             </p>
 
             <div class="tip">
-                <h4>Příklad: Entity v PHP</h4>
+                <h3>Příklad: Entity v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Model;
@@ -233,7 +233,7 @@ class User
         </section>
 
         <section id="value-objects" aria-labelledby="value-objects-heading">
-            <h3 id="value-objects-heading">Hodnotové objekty (Value Objects)</h3>
+            <h2 id="value-objects-heading">Hodnotové objekty (Value Objects)</h2>
             <p>
                 Hodnotové objekty jsou objekty, které jsou definovány svými atributy, nikoli svou identitou. Hodnotové
                 objekty jsou neměnné (immutable)
@@ -241,7 +241,7 @@ class User
             </p>
 
             <div class="tip">
-                <h4>Příklad: Hodnotový objekt v PHP</h4>
+                <h3>Příklad: Hodnotový objekt v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\ValueObject;
@@ -284,7 +284,7 @@ class Email
         </section>
 
         <section id="aggregates" aria-labelledby="aggregates-heading">
-            <h3 id="aggregates-heading">Agregáty (Aggregates)</h3>
+            <h2 id="aggregates-heading">Agregáty (Aggregates)</h2>
             <p>
                 Agregát je skupina souvisejících objektů, které jsou považovány za jednu jednotku z hlediska změn dat.
                 Každý agregát má kořenovou entitu (aggregate root),
@@ -292,7 +292,7 @@ class Email
             </p>
 
             <div class="tip" role="note" aria-labelledby="aggregate-example-heading">
-                <h4 id="aggregate-example-heading">Příklad: Agregát v PHP</h4>
+                <h3 id="aggregate-example-heading">Příklad: Agregát v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\OrderManagement\Domain\Model;
@@ -390,7 +390,7 @@ class Order
         </section>
 
         <section id="repositories" aria-labelledby="repositories-heading">
-            <h3 id="repositories-heading">Repozitáře (Repositories)</h3>
+            <h2 id="repositories-heading">Repozitáře (Repositories)</h2>
             <p>
                 Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily
                 persistence a poskytují
@@ -398,7 +398,7 @@ class Order
             </p>
 
             <div class="tip" role="note" aria-labelledby="repository-example-heading">
-                <h4 id="repository-example-heading">Příklad: Repozitář v PHP</h4>
+                <h3 id="repository-example-heading">Příklad: Repozitář v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\Domain\Repository;
@@ -425,7 +425,7 @@ interface OrderRepository
         </section>
 
         <section id="domain-services" aria-labelledby="domain-services-heading">
-            <h3 id="domain-services-heading">Doménové služby (Domain Services)</h3>
+            <h2 id="domain-services-heading">Doménové služby (Domain Services)</h2>
             <p>
                 Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity
                 nebo hodnotového objektu.
@@ -433,7 +433,7 @@ interface OrderRepository
             </p>
 
             <div class="tip" role="note" aria-labelledby="domain-service-example-heading">
-                <h4 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h4>
+                <h3 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\Domain\Service;
@@ -483,7 +483,7 @@ class PaymentService
         </section>
 
         <section id="domain-events" aria-labelledby="domain-events-heading">
-            <h3 id="domain-events-heading">Doménové události (Domain Events)</h3>
+            <h2 id="domain-events-heading">Doménové události (Domain Events)</h2>
             <p>
                 Doménová událost je objekt, který reprezentuje něco, co se stalo v doméně a co by mohlo být zajímavé pro
                 jiné části systému.
@@ -491,7 +491,7 @@ class PaymentService
             </p>
 
             <div class="tip">
-                <h4>Příklad: Doménová událost v PHP</h4>
+                <h3>Příklad: Doménová událost v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
 namespace App\Domain\Event;

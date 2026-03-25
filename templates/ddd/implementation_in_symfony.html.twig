@@ -34,10 +34,10 @@
 
 {% block body %}
     <article itemscope itemtype="https://schema.org/TechArticle">
-    <h2 itemprop="headline">Implementace DDD v Symfony 8</h2>
+    <h1 itemprop="headline">Implementace DDD v Symfony 8</h1>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <h5 id="toc-heading">Obsah kapitoly:</h5>
+        <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
             <li><a href="#project-structure">Struktura projektu</a></li>
             <li><a href="#entities">Implementace entit</a></li>
@@ -52,13 +52,13 @@
     </div>
 
     <section id="project-structure" aria-labelledby="project-structure-heading">
-    <h3 id="project-structure-heading">Struktura projektu</h3>
+    <h2 id="project-structure-heading">Struktura projektu</h2>
     <p>
         Při implementaci DDD s vertikální slice architekturou v Symfony 8 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 8:
     </p>
 
     <div class="tip">
-        <h4>Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8</h4>
+        <h3>Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8</h3>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                 # Doménová vrstva pro UserManagement
@@ -149,7 +149,7 @@
     </div>
 
     <div class="note">
-        <h4>Klíčové principy správné struktury DDD projektu:</h4>
+        <h3>Klíčové principy správné struktury DDD projektu:</h3>
         <ul>
             <li><strong>Izolace domén</strong> - Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.</li>
             <li><strong>Ubiquitous Language</strong> - Každá doména může mít svůj vlastní jazyk, který je konzistentně používán v kódu.</li>
@@ -159,7 +159,7 @@
     </div>
 
     <div class="warning">
-        <h4>Časté chyby při implementaci DDD</h4>
+        <h3>Časté chyby při implementaci DDD</h3>
         <p>
             Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
         </p>
@@ -173,13 +173,13 @@
     </section>
 
     <section id="entities" aria-labelledby="entities-heading">
-    <h3 id="entities-heading">Implementace entit</h3>
+    <h2 id="entities-heading">Implementace entit</h2>
     <p>
         Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 můžete implementovat entity jako běžné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="entity-example-heading">
-        <h4 id="entity-example-heading">Příklad: Implementace entity v Symfony 8</h4>
+        <h3 id="entity-example-heading">Příklad: Implementace entity v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Model;
@@ -270,13 +270,13 @@ class User
     </section>
 
     <section id="value-objects" aria-labelledby="value-objects-heading">
-    <h3 id="value-objects-heading">Implementace hodnotových objektů</h3>
+    <h2 id="value-objects-heading">Implementace hodnotových objektů</h2>
     <p>
         Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="value-object-example-heading">
-        <h4 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 8</h4>
+        <h3 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\ValueObject;
@@ -322,13 +322,13 @@ class Email
     </section>
 
     <section id="repositories" aria-labelledby="repositories-heading">
-    <h3 id="repositories-heading">Implementace repozitářů</h3>
+    <h2 id="repositories-heading">Implementace repozitářů</h2>
     <p>
         Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 můžete implementovat repozitáře jako rozhraní a jejich implementace:
     </p>
 
     <div class="tip" role="note" aria-labelledby="repository-example-heading">
-        <h4 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 8</h4>
+        <h3 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Repository;
@@ -395,14 +395,14 @@ class DoctrineUserRepository implements UserRepository
     </section>
 
     <section id="domain-services" aria-labelledby="domain-services-heading">
-    <h3 id="domain-services-heading">Implementace doménových služeb</h3>
+    <h2 id="domain-services-heading">Implementace doménových služeb</h2>
     <p>
         Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
         V Symfony 8 můžete implementovat doménové služby jako běžné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="domain-service-example-heading">
-        <h4 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 8</h4>
+        <h3 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\OrderManagement\Domain\Service;
@@ -452,13 +452,13 @@ class PaymentService
     </section>
 
     <section id="domain-events" aria-labelledby="domain-events-heading">
-    <h3 id="domain-events-heading">Implementace doménových událostí</h3>
+    <h2 id="domain-events-heading">Implementace doménových událostí</h2>
     <p>
         Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 můžete implementovat doménové události jako neměnné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="domain-event-example-heading">
-        <h4 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 8</h4>
+        <h3 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Domain\Event;
@@ -503,14 +503,14 @@ class UserRegistered
     </section>
 
     <section id="application-services" aria-labelledby="application-services-heading">
-    <h3 id="application-services-heading">Implementace aplikačních služeb</h3>
+    <h2 id="application-services-heading">Implementace aplikačních služeb</h2>
     <p>
         Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 můžete implementovat aplikační služby
         jako command a query handlery:
     </p>
 
     <div class="tip" role="note" aria-labelledby="command-handler-example-heading">
-        <h4 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 8</h4>
+        <h3 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Command;
@@ -569,7 +569,7 @@ class RegisterUserHandler
     </div>
 
     <div class="tip" role="note" aria-labelledby="query-handler-example-heading">
-        <h4 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h4>
+        <h3 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Profile\Query;
@@ -624,14 +624,14 @@ class GetUserProfileHandler
     </section>
 
     <section id="controllers" aria-labelledby="controllers-heading">
-    <h3 id="controllers-heading">Implementace kontrolerů</h3>
+    <h2 id="controllers-heading">Implementace kontrolerů</h2>
     <p>
         Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 můžete implementovat kontrolery
         jako běžné Symfony kontrolery:
     </p>
 
     <div class="tip" role="note" aria-labelledby="controller-example-heading">
-        <h4 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 8</h4>
+        <h3 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
 namespace App\UserManagement\Registration\Controller;
@@ -686,14 +686,14 @@ class RegistrationController extends AbstractController
     </section>
 
     <section id="dependency-injection" aria-labelledby="dependency-injection-heading">
-    <h3 id="dependency-injection-heading">Dependency Injection</h3>
+    <h2 id="dependency-injection-heading">Dependency Injection</h2>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
         Symfony 8 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
     </p>
 
     <div class="tip" role="note" aria-labelledby="dependency-injection-example-heading">
-        <h4 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 8</h4>
+        <h3 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 8</h3>
         <pre><code class="language-yaml"># config/services.yaml
 services:
     _defaults:
@@ -737,7 +737,7 @@ services:
     </p>
 
     <div class="warning">
-        <h4>Důležité poznámky</h4>
+        <h3>Důležité poznámky</h3>
         <p>
             Při implementaci DDD v Symfony 8 je důležité:
         </p>
@@ -754,7 +754,7 @@ services:
     </div>
 
     <div class="note" role="note" aria-labelledby="shared-folder-heading">
-        <h4 id="shared-folder-heading">Co patří do sdílené složky (Shared)?</h4>
+        <h3 id="shared-folder-heading">Co patří do sdílené složky (Shared)?</h3>
         <p>
             Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, které nemají specifický doménový význam:
         </p>
