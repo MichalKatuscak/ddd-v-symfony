@@ -156,27 +156,13 @@ li { margin-bottom: 0.35rem; }
     padding: 1.25rem 1.5rem;
     margin: 1.75rem 0;
     border: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1.5rem 1fr;
-    column-gap: 0.75rem;
-}
-
-.note > *,
-.tip > *,
-.warning > *,
-.caution > * {
-    grid-column: 2;
 }
 
 .note::before,
 .tip::before,
 .warning::before,
 .caution::before {
-    grid-column: 1;
-    grid-row: 1;
-    font-size: 1.1rem;
-    line-height: 1.4;
-    padding-top: 0.1rem;
+    display: none;
 }
 
 .note    { border-left: 4px solid var(--color-accent); }
