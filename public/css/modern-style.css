@@ -839,6 +839,63 @@ figcaption {
     letter-spacing: 0.1em;
     color: var(--text-muted);
 }
+
+/* ── Reading Paths ── */
+.reading-paths-section { margin-bottom: 2.5rem; }
+
+.reading-paths {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+.reading-path-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+.reading-path-card--beginner { border-left-color: var(--color-primary); }
+.reading-path-card--advanced { border-left-color: #6655aa; }
+
+.reading-path-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+}
+.reading-path-card h3 {
+    font-size: 1.1rem;
+    border-bottom: none;
+    margin-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 1rem;
+}
+.reading-path-card ol {
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+}
+.reading-path-card ol li a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.reading-path-card ol li a:hover { color: var(--color-primary); }
+.reading-path-card--beginner ol { color: var(--color-primary); }
+.reading-path-card--advanced ol { color: #6655aa; }
+
+@media (max-width: 768px) {
+    .hero { flex-direction: column; }
+    .hero-stats { flex: none; width: 100%; }
+    .reading-paths { grid-template-columns: 1fr; }
+}
+
 .feature-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
