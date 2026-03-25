@@ -2,9 +2,9 @@
 
 {% block title %}Základní koncepty Domain-Driven Design | DDD Symfony{% endblock %}
 
-{% block meta_description %}Detailní průvodce základními koncepty Domain-Driven Design: entity, hodnotové objekty, agregační kořeny, doménové služby, repozitáře a další. Naučte se, jak tyto koncepty implementovat v Symfony.{% endblock %}
+{% block meta_description %}Detailní průvodce základními koncepty Domain-Driven Design: entity, hodnotové objekty, kořeny agregátů, doménové služby, repozitáře a další. Naučte se, jak tyto koncepty implementovat v Symfony.{% endblock %}
 
-{% block meta_keywords %}DDD koncepty, entity, hodnotové objekty, value objects, agregační kořeny, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace{% endblock %}
+{% block meta_keywords %}DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace{% endblock %}
 
 {% block structured_data %}
     <script type="application/ld+json">
@@ -41,7 +41,7 @@
             <ul>
                 <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
                 <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
-                <li><a href="#entities">Entity (Entity)</a></li>
+                <li><a href="#entities">Entity</a></li>
                 <li><a href="#value-objects">Hodnotové objekty (Value Objects)</a></li>
                 <li><a href="#aggregates">Agregáty (Aggregates)</a></li>
                 <li><a href="#repositories">Repozitáře (Repositories)</a></li>
@@ -53,9 +53,10 @@
         <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
             <h2 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h2>
             <p>
-                Ohraničený kontext je explicitní hranice, ve které je model platný. V rámci ohraničeného kontextu
-                existuje konzistentní model
-                a všudypřítomný jazyk. Různé ohraničené kontexty mohou mít různé modely a jazyky.
+                Ohraničený kontext je explicitní hranice, ve které je model platný
+                <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank">[1]</a>.
+                V rámci ohraničeného kontextu existuje konzistentní model a všudypřítomný jazyk.
+                Různé ohraničené kontexty mohou mít různé modely a jazyky.
             </p>
 
             <div class="tip">
@@ -67,12 +68,17 @@
             <div class="tip">
                 <h3>Příklad: Ohraničené kontexty v PHP</h3>
                 <pre><code class="language-bash">src/
-├── OrderProcessing/           # Ohraničený kontext: Zpracování objednávek
+├── OrderManagement/           # Ohraničený kontext: Správa objednávek
 │   ├── Domain/
 │   │   ├── Model/
 │   │   │   ├── Order.php
 │   │   │   ├── OrderItem.php
 │   │   │   └── OrderStatus.php
+│   │   ├── ValueObject/
+│   │   │   ├── OrderId.php
+│   │   │   └── Money.php
+│   │   ├── Event/
+│   │   │   └── OrderCreated.php
 │   │   └── Repository/
 │   │       └── OrderRepository.php
 │   └── Application/
@@ -87,6 +93,11 @@
     │   ├── Model/
     │   │   ├── User.php
     │   │   └── UserStatus.php
+    │   ├── ValueObject/
+    │   │   ├── UserId.php
+    │   │   └── Email.php
+    │   ├── Event/
+    │   │   └── UserRegistered.php
     │   └── Repository/
     │       └── UserRepository.php
     └── Application/
@@ -99,9 +110,9 @@
             </div>
 
             <p>
-                V tomto příkladu jsou <code>OrderProcessing</code> a <code>UserManagement</code> dva ohraničené
+                V tomto příkladu jsou <code>OrderManagement</code> a <code>UserManagement</code> dva ohraničené
                 kontexty.
-                Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderProcessing</code> může být uživatel
+                Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderManagement</code> může být uživatel
                 reprezentován pouze jako <code>UserId</code>,
                 zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
             </p>
@@ -111,8 +122,9 @@
             <h2 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h2>
 
             <p>
-                Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty. Tento jazyk je používán v
-                kódu, dokumentaci a komunikaci.
+                Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty
+                <a href="https://martinfowler.com/bliki/UbiquitousLanguage.html" target="_blank">[2]</a>.
+                Tento jazyk je používán v kódu, dokumentaci a komunikaci.
                 Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
             </p>
 
@@ -165,10 +177,11 @@
         </section>
 
         <section id="entities" aria-labelledby="entities-heading">
-            <h2 id="entities-heading">Entity (Entity)</h2>
+            <h2 id="entities-heading">Entity</h2>
             <p>
-                Entity je objekt, který je definován svou identitou, nikoli svými atributy. Entity mají životní cyklus a
-                mohou se v průběhu času měnit,
+                Entita je objekt, který je definován svou identitou, nikoli svými atributy
+                <a href="https://www.domainlanguage.com/ddd/" target="_blank">[3]</a>.
+                Entity mají životní cyklus a mohou se v průběhu času měnit,
                 ale jejich identita zůstává stejná.
             </p>
 
@@ -176,14 +189,19 @@
                 <h3>Příklad: Entity v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Domain\Model;
+
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
 
 class User
 {
-    private UserId $id;
+    private readonly UserId $id;
     private string $name;
     private Email $email;
-    private \DateTimeImmutable $createdAt;
+    private readonly \DateTimeImmutable $createdAt;
 
     public function __construct(UserId $id, string $name, Email $email)
     {
@@ -235,14 +253,16 @@ class User
         <section id="value-objects" aria-labelledby="value-objects-heading">
             <h2 id="value-objects-heading">Hodnotové objekty (Value Objects)</h2>
             <p>
-                Hodnotové objekty jsou objekty, které jsou definovány svými atributy, nikoli svou identitou. Hodnotové
-                objekty jsou neměnné (immutable)
-                a nemají žádnou identitu.
+                Hodnotové objekty jsou objekty definované svými atributy, nikoli identitou
+                <a href="https://www.domainlanguage.com/ddd/" target="_blank">[3]</a>.
+                Hodnotové objekty jsou neměnné (immutable) a porovnávají se hodnotou, nikoli referencí.
             </p>
 
             <div class="tip">
                 <h3>Příklad: Hodnotový objekt v PHP</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Domain\ValueObject;
 
@@ -286,24 +306,31 @@ class Email
         <section id="aggregates" aria-labelledby="aggregates-heading">
             <h2 id="aggregates-heading">Agregáty (Aggregates)</h2>
             <p>
-                Agregát je skupina souvisejících objektů, které jsou považovány za jednu jednotku z hlediska změn dat.
-                Každý agregát má kořenovou entitu (aggregate root),
-                která je jediným vstupním bodem pro manipulaci s agregátem.
+                Agregát je skupina souvisejících objektů, která tvoří jednu transakční hranici konzistence
+                <a href="https://www.domainlanguage.com/ddd/" target="_blank">[3]</a>.
+                Každý agregát má kořen agregátu (aggregate root),
+                který je jediným vstupním bodem pro veškeré vnější interakce s agregátem.
             </p>
 
             <div class="tip" role="note" aria-labelledby="aggregate-example-heading">
                 <h3 id="aggregate-example-heading">Příklad: Agregát v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\OrderManagement\Domain\Model;
+
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\ProductId;
 
 class Order
 {
-    private OrderId $id;
-    private UserId $userId;
+    private readonly OrderId $id;
+    private readonly UserId $userId;
     private array $items = [];
     private OrderStatus $status;
-    private \DateTimeImmutable $createdAt;
+    private readonly \DateTimeImmutable $createdAt;
 
     public function __construct(OrderId $id, UserId $userId)
     {
@@ -384,9 +411,37 @@ class Order
 
             <p>
                 V tomto příkladu je <code>Order</code> agregát, který obsahuje kolekci <code>OrderItem</code> objektů.
-                <code>Order</code> je kořenovou entitou (aggregate root)
+                <code>Order</code> je kořenem agregátu (aggregate root)
                 a poskytuje metody pro manipulaci s položkami objednávky.
             </p>
+
+            <div class="note" role="note" aria-labelledby="enum-poznamka-heading">
+                <h3 id="enum-poznamka-heading">PHP 8.1+ Enum pro stavové typy</h3>
+                <p>
+                    Od PHP 8.1 je pro jednoduché stavové typy (jako <code>OrderStatus</code>) idiomatické
+                    použít nativní <code>enum</code> místo tradičního hodnotového objektu:
+                </p>
+                <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Model;
+
+enum OrderStatus: string
+{
+    case CREATED   = 'created';
+    case CONFIRMED = 'confirmed';
+    case SHIPPED   = 'shipped';
+    case DELIVERED = 'delivered';
+    case CANCELLED = 'cancelled';
+}</code></pre>
+                <p>
+                    <strong>Kdy enum, kdy plný Value Object?</strong> Enum je vhodný pro konečnou množinu stavů
+                    bez další logiky. Plný Value Object (třída) je lepší volbou, pokud typ obsahuje validaci,
+                    výpočty nebo kompozici více hodnot (např. <code>Money</code>, <code>Email</code>,
+                    <code>DateRange</code>).
+                </p>
+            </div>
         </section>
 
         <section id="repositories" aria-labelledby="repositories-heading">
@@ -401,11 +456,12 @@ class Order
                 <h3 id="repository-example-heading">Příklad: Repozitář v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
-namespace App\Domain\Repository;
+declare(strict_types=1);
 
-use App\Domain\Model\Order;
-use App\Domain\Model\OrderId;
-use App\Domain\Model\UserId;
+namespace App\OrderManagement\Domain\Repository;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\OrderId;
 
 interface OrderRepository
 {
@@ -413,7 +469,7 @@ interface OrderRepository
 
     public function findById(OrderId $id): ?Order;
 
-    public function findByUserId(UserId $userId): array;
+    public function findByUserId(string $userId): array;
 }</code></pre>
             </div>
 
@@ -436,14 +492,15 @@ interface OrderRepository
                 <h3 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
-namespace App\Domain\Service;
+declare(strict_types=1);
 
-use App\Domain\Model\Order;
-use App\Domain\Model\Payment;
-use App\Domain\Model\PaymentId;
-use App\Domain\ValueObject\Money;
-use App\Domain\ValueObject\OrderStatus;
-use App\Domain\ValueObject\PaymentMethod;
+namespace App\OrderManagement\Domain\Service;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\Model\Payment;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\PaymentId;
+use App\OrderManagement\Domain\ValueObject\PaymentMethod;
 
 class PaymentService
 {
@@ -463,10 +520,10 @@ class PaymentService
 
     private function calculateTotalAmount(Order $order): Money
     {
-        $total = new Money(0, 'CZK');
+        $total = Money::zero('CZK');
 
         foreach ($order->items() as $item) {
-            $total = $total->add($item->price()->multiply($item->quantity()));
+            $total = $total->add($item->unitPrice()->multiply($item->quantity()));
         }
 
         return $total;
@@ -480,32 +537,52 @@ class PaymentService
                 neobsahuje repozitáře — persistence vraceného objektu je zodpovědností volající vrstvy
                 (Application Service nebo Command Handler).
             </p>
+
+            <div class="note" role="note" aria-labelledby="service-vs-aggregate-heading">
+                <h3 id="service-vs-aggregate-heading">Kdy doménová služba vs. metoda na agregátu?</h3>
+                <p>
+                    Výpočet celkové částky (<code>calculateTotalAmount</code>) by alternativně mohl být metodou
+                    přímo na agregátu <code>Order</code> (např. <code>$order->totalAmount()</code>), protože
+                    pracuje výhradně s daty agregátu. Doménová služba je vhodná tehdy, když logika:
+                </p>
+                <ul>
+                    <li>Přesahuje hranice jednoho agregátu (koordinuje více agregátů).</li>
+                    <li>Vyžaduje znalost, která nepatří do žádného konkrétního agregátu.</li>
+                    <li>Reprezentuje doménový proces, nikoli stav (např. zpracování platby).</li>
+                </ul>
+                <p>
+                    V tomto příkladu je <code>PaymentService</code> oprávněná jako služba, protože
+                    <em>vytváří nový agregát</em> (<code>Payment</code>) na základě dat jiného agregátu
+                    (<code>Order</code>) — tato koordinace nepatří do žádného z nich.
+                </p>
+            </div>
         </section>
 
         <section id="domain-events" aria-labelledby="domain-events-heading">
             <h2 id="domain-events-heading">Doménové události (Domain Events)</h2>
             <p>
-                Doménová událost je objekt, který reprezentuje něco, co se stalo v doméně a co by mohlo být zajímavé pro
-                jiné části systému.
-                Doménové události jsou neměnné a obsahují informace o tom, co se stalo.
+                Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
+                doménový význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
+                k popisu dané změny stavu — nespoléhají na pozdější dotazování.
             </p>
 
             <div class="tip">
                 <h3>Příklad: Doménová událost v PHP</h3>
                 <pre><code class="language-php">&lt;?php
 
-namespace App\Domain\Event;
+declare(strict_types=1);
 
-use App\Domain\Model\OrderId;
-use App\Domain\Model\UserId;
+namespace App\OrderManagement\Domain\Event;
 
-class OrderCreatedEvent
+use App\OrderManagement\Domain\ValueObject\OrderId;
+
+final class OrderCreatedEvent
 {
-    private OrderId $orderId;
-    private UserId $userId;
-    private \DateTimeImmutable $occurredAt;
+    private readonly OrderId $orderId;
+    private readonly string $userId;
+    private readonly \DateTimeImmutable $occurredAt;
 
-    public function __construct(OrderId $orderId, UserId $userId)
+    public function __construct(OrderId $orderId, string $userId)
     {
         $this->orderId = $orderId;
         $this->userId = $userId;
@@ -517,7 +594,7 @@ class OrderCreatedEvent
         return $this->orderId;
     }
 
-    public function userId(): UserId
+    public function userId(): string
     {
         return $this->userId;
     }
@@ -537,8 +614,9 @@ class OrderCreatedEvent
             </p>
 
             <p>
-                V další kapitole se podíváme na <a href="{{ path('implementation_in_symfony') }}">implementaci DDD v
-                    Symfony 8</a>.
+                V další kapitole se podíváme na <a href="{{ path('horizontal_vs_vertical') }}">srovnání vertikální
+                    slice architektury s tradičním přístupem k DDD</a> a poté na
+                <a href="{{ path('implementation_in_symfony') }}">konkrétní implementaci v Symfony 8</a>.
             </p>
         </section>
     </article>

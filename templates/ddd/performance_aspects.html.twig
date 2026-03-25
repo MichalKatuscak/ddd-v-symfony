@@ -82,6 +82,7 @@
             Předčasná optimalizace (premature optimization) vede k zbytečně složitému kódu, který řeší neexistující
             problémy. Nejprve profilujte, identifikujte skutečný bottleneck a teprve potom optimalizujte.
             Donald Knuth to vyjádřil nejlépe: <em>"Premature optimization is the root of all evil."</em>
+            <a href="https://dl.acm.org/doi/10.1145/356635.356640" target="_blank">[1]</a>
         </p>
     </div>
 </section>
@@ -136,7 +137,10 @@ foreach ($orders as $order) {
 
     <div class="tip" role="note" aria-labelledby="extra-lazy-heading">
         <h3 id="extra-lazy-heading">Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)</h3>
+        <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace — mapování by bylo řešeno externě (XML/YAML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\Order\Domain\Model;
 
@@ -150,7 +154,7 @@ class Order
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
-    private string $id;
+    private readonly string $id;
 
     /** @var Collection&lt;int, OrderItem&gt; */
     #[ORM\OneToMany(
@@ -186,13 +190,15 @@ class Order
         <h3 id="join-fetch-heading">Příklad: JOIN FETCH v DQL a Query Builderu</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Order\Infrastructure\Repository;
 
 use App\Order\Domain\Model\Order;
 use App\Order\Domain\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class DoctrineOrderRepository implements OrderRepository
+final class DoctrineOrderRepository implements OrderRepository
 {
     public function __construct(
         private EntityManagerInterface $em
@@ -262,7 +268,7 @@ class DoctrineOrderRepository implements OrderRepository
         <ul>
             <li>Načtení agregátu trvá neúměrně dlouho, i když používáme jen jeho kořen.</li>
             <li>Kolekce asociovaných entit obsahují stovky nebo tisíce záznamů.</li>
-            <li>Hibernate-style <em>lazy loading</em> způsobuje N+1 v jiných částech systému.</li>
+            <li>ORM lazy loading způsobuje N+1 v jiných částech systému.</li>
             <li>Různé use-case scénáře potřebují různé podmnožiny dat agregátu.</li>
         </ul>
     </div>
@@ -294,13 +300,15 @@ echo $order->getCustomer()->getFullName();</code></pre>
         <h3 id="split-aggregate-heading">Příklad: specializované repozitářní metody pro různé kontexty</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Order\Infrastructure\Repository;
 
 use App\Order\Domain\Model\Order;
 use App\Order\Domain\ValueObject\OrderId;
 use Doctrine\ORM\EntityManagerInterface;
 
-class DoctrineOrderRepository
+final class DoctrineOrderRepository
 {
     public function __construct(
         private EntityManagerInterface $em
@@ -363,6 +371,8 @@ class DoctrineOrderRepository
     <div class="tip" role="note" aria-labelledby="query-handler-dto-heading">
         <h3 id="query-handler-dto-heading">Příklad: QueryHandler vracející DTO přes DQL</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\Order\Application\Query;
 
@@ -435,6 +445,8 @@ final class GetOrderSummaryListHandler
         <h3 id="native-query-heading">Příklad: NativeQuery s ResultSetMapping pro reportovací dotaz</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Reporting\Infrastructure\Query;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -448,6 +460,7 @@ final class SalesReportQueryService
 
     /**
      * Vrací měsíční obrat po zákaznících — komplexní agregace přes nativní SQL.
+     * Syntaxe: PostgreSQL (TO_CHAR, ::text cast). Pro MySQL použijte DATE_FORMAT() a CAST().
      *
      * @return array&lt;int, array{customer_id: string, customer_name: string, month: string, revenue: string}&gt;
      */
@@ -522,6 +535,8 @@ final class SalesReportQueryService
         <h3 id="uuid-symfony-heading">Příklad: Použití symfony/uid (ULID a UUID v7)</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Shared\Domain\ValueObject;
 
 use Symfony\Component\Uid\Ulid;
@@ -590,7 +605,10 @@ final class UserId
 
     <div class="tip" role="note" aria-labelledby="doctrine-uuid-mapping-heading">
         <h3 id="doctrine-uuid-mapping-heading">Doctrine mapování pro ULID a UUID</h3>
+        <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace — mapování by bylo řešeno externě (XML/YAML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\Order\Domain\Model;
 
@@ -606,10 +624,10 @@ class Order
     #[ORM\Id]
     // Symfony Bridge registruje 'ulid' typ — ukládá jako BINARY(16) nebo UUID v PostgreSQL
     #[ORM\Column(type: UlidType::NAME, unique: true)]
-    private string $id;
+    private readonly string $id;
 
     #[ORM\Column(type: 'string', length: 50)]
-    private string $orderNumber;
+    private readonly string $orderNumber;
 
     public function __construct(OrderId $id, string $orderNumber)
     {
@@ -655,6 +673,8 @@ class Order
     <div class="tip" role="note" aria-labelledby="batch-em-clear-heading">
         <h3 id="batch-em-clear-heading">Příklad: správné clearování Entity Manageru při batch operacích</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\Import\Application\Command;
 
@@ -729,7 +749,7 @@ final class ImportProductsHandler
         <ul>
             <li><strong>Vhodné pro cache:</strong> výsledky read modelu (DTO), výsledky reportovacích dotazů, výsledky volání externích API, výpočetně náročné projekce.</li>
             <li><strong>Nevhodné pro cache:</strong> aktuální stav agregátů, které jsou právě modifikovány (způsobí dirty reads), výsledky, jejichž neaktuálnost by způsobila doménové nekonzistence.</li>
-            <li><strong>Nikdy:</strong> nezahrnujte výsledek doménové business logiky do cache klíče (např. nevypočítávejte slevu při sestavování cache klíče).</li>
+            <li><strong>Nikdy:</strong> nezahrnujte výsledek doménové logiky do cache klíče (např. nevypočítávejte slevu při sestavování cache klíče).</li>
         </ul>
     </div>
 
@@ -745,6 +765,8 @@ final class ImportProductsHandler
     <div class="tip" role="note" aria-labelledby="cached-repo-heading">
         <h3 id="cached-repo-heading">Příklad: CachedUserRepository (Decorator pattern)</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Infrastructure\Repository;
 
@@ -830,6 +852,8 @@ final class CachedUserRepository implements UserRepository
         <h3 id="cache-event-heading">Cache invalidace přes Symfony EventDispatcher</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Infrastructure\EventListener;
 
 use App\UserManagement\Domain\Event\UserEmailChanged;
@@ -875,6 +899,8 @@ final class InvalidateUserCacheOnEmailChanged
     <div class="tip" role="note" aria-labelledby="bulk-import-heading">
         <h3 id="bulk-import-heading">Příklad: efektivní bulk import s Doctrine</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\Order\Infrastructure\Command;
 
@@ -962,6 +988,8 @@ final class BatchProductImportHandler
         <h3 id="messenger-bulk-heading">Rozložení bulk importu přes Symfony Messenger</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Import\Application\Command;
 
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -1029,7 +1057,6 @@ namespace App\Shared\Infrastructure\Doctrine;
 
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Middleware;
-use Psr\Log\LoggerInterface;
 
 final class QueryCountingMiddleware implements Middleware
 {

@@ -46,6 +46,7 @@
             <li><a href="#aggregate-s-es">Agregát s Event Sourcingem</a></li>
             <li><a href="#projekce">Projekce (Projections)</a></li>
             <li><a href="#snapshotting">Snapshotting</a></li>
+            <li><a href="#verzovani-udalosti">Verzování událostí (Event Versioning)</a></li>
             <li><a href="#kdy-pouzit">Kdy použít Event Sourcing</a></li>
         </ul>
     </div>
@@ -55,8 +56,9 @@
 
         <p>
             Event Sourcing (ES) je architektonický vzor persistence, při němž se stav systému neukládá jako aktuální
-            snímek dat, nýbrž jako <strong>sekvence neměnných událostí</strong>, jež k danému stavu vedly. Každá změna
-            stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty; aktuální stav agregátu pak
+            snímek dat, nýbrž jako <strong>sekvence neměnných událostí</strong>, jež k danému stavu vedly
+            <a href="https://martinfowler.com/eaaDev/EventSourcing.html" target="_blank">[1]</a>.
+            Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty; aktuální stav agregátu pak
             vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
         </p>
         <p>
@@ -154,7 +156,9 @@
 
         <p>
             Event Sourcing a <a href="{{ path('cqrs') }}">CQRS</a> jsou dva samostatné vzory, které se však přirozeně
-            doplňují. <strong>Nejsou totéž</strong> — lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
+            doplňují
+            <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank">[2]</a>.
+            <strong>Nejsou totéž</strong> — lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
             jejich kombinace je velmi mocná a v praxi DDD aplikací běžná.
         </p>
         <p>
@@ -226,7 +230,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Shared\Event;
+namespace App\Shared\Domain\Event;
 
 use DateTimeImmutable;
 
@@ -262,9 +266,9 @@ interface DomainEvent
 
 declare(strict_types=1);
 
-namespace App\Domain\Identity\Event;
+namespace App\Identity\Domain\Event;
 
-use App\Domain\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
@@ -342,7 +346,7 @@ final class UserRegistered implements DomainEvent
         <h3>Struktura tabulky Event Store</h3>
 
         <div class="tip" role="note" aria-labelledby="event-store-sql-heading">
-            <h3 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code></h3>
+            <h3 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code> (MySQL/MariaDB)</h3>
             <pre><code class="language-sql">CREATE TABLE event_store (
     id            BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
     event_id      CHAR(36)         NOT NULL COMMENT 'UUID v4 události — globálně unikátní',
@@ -385,7 +389,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventSourcing;
 
-use App\Domain\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 
 interface EventStore
 {
@@ -423,7 +427,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventSourcing;
 
-use App\Domain\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
@@ -529,9 +533,9 @@ final class DoctrineEventStore implements EventStore
 
 declare(strict_types=1);
 
-namespace App\Domain\Shared;
+namespace App\Shared\Domain;
 
-use App\Domain\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 
 abstract class EventSourcedAggregate
 {
@@ -609,13 +613,13 @@ abstract class EventSourcedAggregate
 
 declare(strict_types=1);
 
-namespace App\Domain\Ordering;
+namespace App\Ordering\Domain;
 
-use App\Domain\Ordering\Event\OrderConfirmed;
-use App\Domain\Ordering\Event\OrderCreated;
-use App\Domain\Ordering\Event\OrderItemAdded;
-use App\Domain\Ordering\Event\OrderShipped;
-use App\Domain\Shared\EventSourcedAggregate;
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderCreated;
+use App\Ordering\Domain\Event\OrderItemAdded;
+use App\Ordering\Domain\Event\OrderShipped;
+use App\Shared\Domain\EventSourcedAggregate;
 
 final class Order extends EventSourcedAggregate
 {
@@ -717,7 +721,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering;
 
-use App\Domain\Ordering\Order;
+use App\Ordering\Domain\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 
 final class EventSourcedOrderRepository
@@ -800,9 +804,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering\Projection;
 
-use App\Domain\Ordering\Event\OrderItemAdded;
-use App\Domain\Ordering\Event\OrderPlaced;
-use App\Domain\Ordering\Event\OrderShipped;
+use App\Ordering\Domain\Event\OrderItemAdded;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderShipped;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -892,9 +896,9 @@ final class OrderSummaryProjector
 
         routing:
             # Všechny doménové události routujeme na async transport
-            'App\Domain\Ordering\Event\OrderPlaced':    async
-            'App\Domain\Ordering\Event\OrderItemAdded': async
-            'App\Domain\Ordering\Event\OrderShipped':   async
+            'App\Ordering\Domain\Event\OrderPlaced':    async
+            'App\Ordering\Domain\Event\OrderItemAdded': async
+            'App\Ordering\Domain\Event\OrderShipped':   async
 </code></pre>
         </div>
 
@@ -957,7 +961,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering;
 
-use App\Domain\Ordering\Order;
+use App\Ordering\Domain\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\Snapshot;
 use App\Infrastructure\EventSourcing\SnapshotStore;
@@ -1049,6 +1053,240 @@ final class SnapshottingOrderRepository
         </p>
     </section>
 
+    <section id="verzovani-udalosti" aria-labelledby="verzovani-udalosti-heading">
+        <h2 id="verzovani-udalosti-heading">Verzování událostí (Event Versioning)</h2>
+
+        <p>
+            V Event Sourcingu jsou události <strong>permanentní</strong> — jednou uložené do Event Store se nikdy
+            nemažou ani nepřepisují. Zároveň se ale doménový model v čase vyvíjí: přibývají nové atributy, mění se
+            struktura dat, původní pole se rozdělují nebo slučují. Vzniká tak zásadní problém:
+            <strong>jak přečíst starou událost novým kódem?</strong>
+        </p>
+        <p>
+            Řešením je <strong>event versioning</strong> — strategie, která zajistí zpětnou čitelnost starých událostí
+            i po změně jejich schématu. Nejrozšířenějším vzorem je <strong>upcasting</strong>: při deserializaci
+            se starší verze payloadu transformuje na aktuální formát, takže doménový model vždy pracuje pouze
+            s nejnovější verzí události.
+        </p>
+
+        <h3>Proč je verzování nezbytné</h3>
+        <ul>
+            <li>
+                <strong>Append-only princip</strong> — Události v Event Store nelze měnit. Pokud změníte
+                schéma události, stará data zůstávají v původním formátu navždy.
+            </li>
+            <li>
+                <strong>Replay a projekce</strong> — Při přebudování projekcí nebo replay agregátu se přehrávají
+                <em>všechny</em> historické události, včetně těch z prvních verzí systému.
+            </li>
+            <li>
+                <strong>Dlouhověkost systému</strong> — Event-sourcovaný systém může běžet roky. Za tu dobu
+                se business požadavky změní mnohokrát a schémata událostí se musejí vyvíjet spolu s nimi.
+            </li>
+        </ul>
+
+        <h3>Vzor Upcaster</h3>
+        <p>
+            Upcaster je objekt zodpovědný za transformaci payloadu události z jedné verze do následující.
+            Upcasters se řetězí: pokud existuje událost ve verzi 1 a aktuální verze je 3, proběhne
+            transformace v1 → v2 → v3. Upcasting se provádí <strong>při čtení</strong> (deserializaci),
+            nikoli při zápisu — původní data v Event Store zůstávají nedotčena.
+        </p>
+
+        <div class="tip" role="note" aria-labelledby="upcaster-interface-heading">
+            <h3 id="upcaster-interface-heading">PHP: Interface EventUpcaster</h3>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing\Versioning;
+
+/**
+ * Upcaster transformuje payload události ze starší verze na novější.
+ * Každý upcaster je zodpovědný za přesně jeden přechod verze (např. v1 → v2).
+ */
+interface EventUpcaster
+{
+    /**
+     * Typ události, na který se upcaster vztahuje (např. "identity.user_registered").
+     */
+    public function eventType(): string;
+
+    /**
+     * Zdrojová verze payloadu, kterou tento upcaster transformuje.
+     */
+    public function fromVersion(): int;
+
+    /**
+     * Cílová verze payloadu po transformaci.
+     */
+    public function toVersion(): int;
+
+    /**
+     * Transformuje payload ze zdrojové verze na cílovou.
+     *
+     * @param array&lt;string, mixed&gt; $payload Data události ve zdrojové verzi.
+     * @return array&lt;string, mixed&gt; Data události v cílové verzi.
+     */
+    public function upcast(array $payload): array;
+}
+</code></pre>
+        </div>
+
+        <h3>Konkrétní příklad: rozdělení pole <code>fullName</code></h3>
+        <p>
+            Představme si reálnou situaci: při spuštění systému událost <code>UserRegistered</code> obsahovala
+            pole <code>fullName</code> (celé jméno jako jeden řetězec). Později business požadoval rozlišit
+            křestní jméno a příjmení — vznikla verze 2 se dvěma poli <code>firstName</code>
+            a <code>lastName</code>. V Event Store ale stále existují tisíce událostí v1 s polem <code>fullName</code>.
+        </p>
+
+        <div class="tip" role="note" aria-labelledby="upcaster-impl-heading">
+            <h3 id="upcaster-impl-heading">PHP: Upcaster pro UserRegistered v1 → v2</h3>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Identity\Versioning;
+
+use App\Infrastructure\EventSourcing\Versioning\EventUpcaster;
+
+/**
+ * Transformuje UserRegistered v1 (fullName) na v2 (firstName + lastName).
+ *
+ * Strategie rozdělení: první slovo je firstName, zbytek lastName.
+ * Pokud jméno obsahuje pouze jedno slovo, lastName se nastaví na prázdný řetězec.
+ */
+final readonly class UserRegisteredV1ToV2Upcaster implements EventUpcaster
+{
+    public function eventType(): string
+    {
+        return 'identity.user_registered';
+    }
+
+    public function fromVersion(): int
+    {
+        return 1;
+    }
+
+    public function toVersion(): int
+    {
+        return 2;
+    }
+
+    /**
+     * @param array&lt;string, mixed&gt; $payload
+     * @return array&lt;string, mixed&gt;
+     */
+    public function upcast(array $payload): array
+    {
+        $fullName = $payload['fullName'] ?? '';
+        $parts    = explode(' ', trim($fullName), 2);
+
+        $payload['firstName'] = $parts[0];
+        $payload['lastName']  = $parts[1] ?? '';
+
+        // Odstraníme původní pole — v2 schéma jej již nepoužívá
+        unset($payload['fullName']);
+
+        return $payload;
+    }
+}
+</code></pre>
+        </div>
+
+        <div class="tip" role="note" aria-labelledby="upcaster-chain-heading">
+            <h3 id="upcaster-chain-heading">PHP: UpcasterChain — řetězení upcasterů při deserializaci</h3>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing\Versioning;
+
+/**
+ * Řetězí upcasters a transformuje payload z libovolné historické verze
+ * na aktuální verzi. Upcasters se aplikují postupně: v1 → v2 → v3 → …
+ */
+final readonly class UpcasterChain
+{
+    /** @var array&lt;string, array&lt;int, EventUpcaster&gt;&gt; Klíč = eventType, vnitřní klíč = fromVersion */
+    private array $upcasters;
+
+    /**
+     * @param EventUpcaster[] $upcasters
+     */
+    public function __construct(array $upcasters)
+    {
+        $map = [];
+
+        foreach ($upcasters as $upcaster) {
+            $map[$upcaster-&gt;eventType()][$upcaster-&gt;fromVersion()] = $upcaster;
+        }
+
+        $this-&gt;upcasters = $map;
+    }
+
+    /**
+     * Aplikuje všechny relevantní upcasters na payload.
+     *
+     * @param string              $eventType      Typ události (např. "identity.user_registered").
+     * @param int                 $schemaVersion  Verze payloadu uloženého v Event Store.
+     * @param array&lt;string, mixed&gt; $payload        Původní payload z Event Store.
+     * @return array&lt;string, mixed&gt; Transformovaný payload v aktuální verzi.
+     */
+    public function upcast(string $eventType, int $schemaVersion, array $payload): array
+    {
+        if (!isset($this-&gt;upcasters[$eventType])) {
+            return $payload;
+        }
+
+        $version = $schemaVersion;
+
+        while (isset($this-&gt;upcasters[$eventType][$version])) {
+            $upcaster = $this-&gt;upcasters[$eventType][$version];
+            $payload  = $upcaster-&gt;upcast($payload);
+            $version  = $upcaster-&gt;toVersion();
+        }
+
+        return $payload;
+    }
+}
+</code></pre>
+        </div>
+
+        <p>
+            V praxi se <code>UpcasterChain</code> integruje do <code>EventSerializer</code>: při deserializaci
+            se z uloženého záznamu přečte <code>event_type</code> a <code>schema_version</code>, payload projde
+            řetězem upcasterů a teprve výsledná transformovaná data se předají konstruktoru aktuální třídy události.
+        </p>
+
+        <div class="note" role="note" aria-labelledby="schema-strategie-heading">
+            <h3 id="schema-strategie-heading">Weak vs. strong schema strategie</h3>
+            <p>
+                Při verzování událostí existují dva základní přístupy, jak přistupovat ke schématu payloadu:
+            </p>
+            <ul>
+                <li>
+                    <strong>Weak schema (slabé schéma)</strong> — Payload je uložen jako volný JSON bez formální
+                    definice. Upcasters transformují data ad-hoc. Výhodou je flexibilita a rychlost vývoje;
+                    nevýhodou je, že chyby v transformaci se projeví až za běhu a je obtížné ověřit konzistenci
+                    napříč verzemi.
+                </li>
+                <li>
+                    <strong>Strong schema (silné schéma)</strong> — Každá verze události má explicitně definované
+                    schéma (např. pomocí JSON Schema nebo PHP třídy s validací). Upcaster pak transformuje mezi
+                    dvěma dobře definovanými strukturami. Výhodou je vyšší bezpečnost a možnost automatického
+                    testování kompatibility; nevýhodou je vyšší režie při každé změně schématu.
+                </li>
+            </ul>
+            <p>
+                Pro většinu projektů je rozumným kompromisem <strong>kombinace obou přístupů</strong>: silné schéma
+                pro kritické události v Core Doméně (finanční transakce, stavy objednávek) a slabé schéma
+                pro méně kritické události v podpůrných kontextech (notifikace, logy aktivit).
+            </p>
+        </div>
+    </section>
+
     <section id="kdy-pouzit" aria-labelledby="kdy-pouzit-heading">
         <h2 id="kdy-pouzit-heading">Kdy použít Event Sourcing</h2>
 
@@ -1060,12 +1298,12 @@ final class SnapshottingOrderRepository
         <h3>Vhodné use cases</h3>
         <ul>
             <li>
-                <strong>Auditní log jako byznysový požadavek</strong> — Finanční systémy, zdravotnické záznamy,
+                <strong>Auditní log jako business požadavek</strong> — Finanční systémy, zdravotnické záznamy,
                 nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log
                 poskytuje přirozeně a bez nutnosti extra implementace.
             </li>
             <li>
-                <strong>Komplexní business logika s bohatými stavovými přechody</strong> — Agregáty procházejí
+                <strong>Komplexní doménová logika s bohatými stavovými přechody</strong> — Agregáty procházejí
                 mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové
                 systémy, workflow enginy, bankovní transakce.
             </li>
@@ -1095,7 +1333,7 @@ final class SnapshottingOrderRepository
                 čtení a agregace dat (BI, analytics), jsou vhodnější klasická DW řešení nebo OLAP databáze.
             </li>
             <li>
-                <strong>Prototypy a MVP</strong> — Rychlá validace byznysového nápadu nepotřebuje složitou
+                <strong>Prototypy a MVP</strong> — Rychlá validace business nápadu nepotřebuje složitou
                 infrastrukturu. ES lze přidat do zralého systému incrementálně, pokud se ukáže potřeba.
             </li>
             <li>
@@ -1118,7 +1356,7 @@ final class SnapshottingOrderRepository
             <p>
                 Nepoužívejte Event Sourcing paušálně pro celou aplikaci. Správný přístup v DDD je aplikovat ES
                 <strong>selektivně na bounded contexts</strong>, kde skutečně přináší hodnotu — typicky Core Domain
-                s komplexní byznys logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
+                s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
             </p>
             <p>
                 Před zahájením implementace prostudujte vzory event upcasting, event versioning a idempotentní

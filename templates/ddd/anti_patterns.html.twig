@@ -44,7 +44,7 @@
                 <li><a href="#primitive-obsession">Anti-vzor: Primitive Obsession</a></li>
                 <li><a href="#prilis-velky-agregat">Anti-vzor: Příliš velký agregát (God Aggregate)</a></li>
                 <li><a href="#sdilena-databaze">Anti-vzor: Sdílená databáze napříč Bounded Contexts</a></li>
-                <li><a href="#anekatualizovatelne-udalosti">Anti-vzor: Mutovatelné doménové události</a></li>
+                <li><a href="#mutovatelne-udalosti">Anti-vzor: Mutovatelné doménové události</a></li>
                 <li><a href="#logika-v-infrastrukture">Anti-vzor: Doménová logika v infrastrukturní vrstvě</a></li>
                 <li><a href="#over-engineering">Anti-vzor: Over-engineering u jednoduchých aplikací</a></li>
                 <li><a href="#missing-ubiquitous-language">Anti-vzor: Ignorování Ubiquitous Language</a></li>
@@ -95,7 +95,7 @@
                 obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003
                 <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank">[1]</a>.
                 Jedná se o situaci, kdy doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery —
-                obsahují výhradně gettery a settery — a veškerá business logika je přesunuta do servisní vrstvy.
+                obsahují výhradně gettery a settery — a veškerá doménová logika je přesunuta do servisní vrstvy.
             </p>
 
             <div class="note" role="note" aria-labelledby="anemicky-definice-heading">
@@ -107,16 +107,18 @@
                         že data jsou v entitě, ale logika je jinde.
                     </li>
                     <li>
-                        <strong>Nerespektování DDD</strong> — DDD vyžaduje, aby doménový model byl bohatý na chování
-                        (Rich Domain Model). Anémický model je v přímém rozporu s tímto principem.
+                        <strong>Ztráta modelu jako abstrakce domény</strong> — pokud entity obsahují pouze data,
+                        model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým
+                        do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla,
+                        pouze strukturu dat — model tak ztrácí svůj komunikační a dokumentační přínos.
                     </li>
                     <li>
-                        <strong>Duplicita logiky</strong> — business pravidla rozptýlená do service tříd vedou
+                        <strong>Duplicita logiky</strong> — doménová pravidla rozptýlená do service tříd vedou
                         k jejich kopírování na více místech, protože není jasné kanonické místo pro logiku.
                     </li>
                     <li>
                         <strong>Obtížná testovatelnost</strong> — testování logiky v servisní vrstvě vyžaduje
-                        mockovanie závislostí, kdežto doménová logika v entitě je testovatelná izolovaně bez
+                        mockování závislostí, kdežto doménová logika v entitě je testovatelná izolovaně bez
                         jakýchkoliv závislostí.
                     </li>
                 </ul>
@@ -125,7 +127,7 @@
             <div class="warning" role="note" aria-labelledby="anemicky-spatny-heading">
                 <h3 id="anemicky-spatny-heading">Špatně: Anémická entita User a servisní vrstva s logikou</h3>
                 <p>
-                    V tomto příkladu entita <code>User</code> neobsahuje žádnou business logiku — pouze gettery
+                    V tomto příkladu entita <code>User</code> neobsahuje žádnou doménovou logiku — pouze gettery
                     a settery. Veškerá logika je přesunuta do <code>UserService</code>, což vede k anémickému modelu.
                 </p>
             </div>
@@ -133,9 +135,12 @@
             <div class="tip">
                 <h3>Příklad: Anémická entita User (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // ŠPATNĚ: Entita je pouze datový kontejner
 
-namespace App\Domain\Model;
+namespace App\UserManagement\Domain\Model;
 
 class User
 {
@@ -189,7 +194,7 @@ class UserService
             <div class="note" role="note" aria-labelledby="anemicky-spravny-heading">
                 <h3 id="anemicky-spravny-heading">Správně: Entita User s bohatou doménovou logikou</h3>
                 <p>
-                    Správný přístup přesouvá business logiku přímo do entity. Entita sama zajišťuje své invarianty
+                    Správný přístup přesouvá doménovou logiku přímo do entity. Entita sama zajišťuje své invarianty
                     a vystavuje doménově orientované metody místo holých setterů.
                 </p>
             </div>
@@ -197,17 +202,28 @@ class UserService
             <div class="tip">
                 <h3>Příklad: Bohatá entita User (správně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Entita obsahuje doménovou logiku
 
-namespace App\Domain\Model;
+namespace App\UserManagement\Domain\Model;
+
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserStatus;
+use App\UserManagement\Domain\ValueObject\VerificationToken;
+use App\UserManagement\Domain\Event\UserRegisteredEvent;
+use App\UserManagement\Domain\Event\UserActivatedEvent;
+use App\UserManagement\Domain\Event\UserDeactivatedEvent;
 
 class User
 {
-    private UserId $id;
-    private Email $email;
+    private readonly UserId $id;
+    private readonly Email $email;
     private UserStatus $status;
     private ?VerificationToken $verificationToken;
-    private \DateTimeImmutable $createdAt;
+    private readonly \DateTimeImmutable $createdAt;
     private array $domainEvents = [];
 
     private function __construct(
@@ -256,7 +272,7 @@ class User
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
 
-    public function pullDomainEvents(): array
+    public function releaseEvents(): array
     {
         $events = $this->domainEvents;
         $this->domainEvents = [];
@@ -295,7 +311,7 @@ class User
                     </li>
                     <li>
                         <strong>Záměna identifikátorů</strong> — používání <code>int</code> pro všechna ID vede
-                        k tomu, že kompilátor ani IDE nemohou odhalit záměnu <code>$orderId</code> a <code>$userId</code>
+                        k tomu, že typový systém PHP ani IDE nemohou odhalit záměnu <code>$orderId</code> a <code>$userId</code>
                         — obě jsou jen <code>int</code>.
                     </li>
                     <li>
@@ -309,13 +325,16 @@ class User
                 <h3 id="primitive-spatny-heading">Špatně: Primitiva místo Value Objects</h3>
                 <p>
                     Níže uvedený kód používá primitivní typy pro e-mail, peněžní částku a identifikátory.
-                    Kompilátor PHP neodhalí záměnu <code>$orderId</code> za <code>$userId</code>, protože obojí je <code>int</code>.
+                    Typový systém PHP neodhalí záměnu <code>$orderId</code> za <code>$userId</code>, protože obojí je <code>int</code>.
                 </p>
             </div>
 
             <div class="tip">
                 <h3>Příklad: Primitive Obsession (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // ŠPATNĚ: Primitiva místo hodnotových objektů
 
 class Order
@@ -349,7 +368,7 @@ class Order
     }
 }
 
-// Kompilátor neodhalí tuto chybu:
+// Typový systém PHP neodhalí tuto chybu:
 $orderId = 42;
 $userId = 17;
 processOrder($userId, $orderId); // Záměna parametrů — a PHP si nestěžuje!</code></pre>
@@ -365,13 +384,16 @@ processOrder($userId, $orderId); // Záměna parametrů — a PHP si nestěžuje
             <div class="tip">
                 <h3>Příklad: Value Objects (správně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Hodnotové objekty s validací a sémantikou
 
-namespace App\Domain\ValueObject;
+namespace App\OrderManagement\Domain\ValueObject;
 
 final class Email
 {
-    private string $value;
+    private readonly string $value;
 
     public function __construct(string $value)
     {
@@ -391,8 +413,8 @@ final class Email
 
 final class Money
 {
-    private int $amountInCents; // Celé číslo — žádné problémy s plovoucí desetinnou čárkou
-    private Currency $currency;
+    private readonly int $amountInCents; // Celé číslo — žádné problémy s plovoucí desetinnou čárkou
+    private readonly Currency $currency;
 
     public function __construct(int $amountInCents, Currency $currency)
     {
@@ -434,7 +456,7 @@ final class UserId
     public function value(): string { return $this->value; }
 }
 
-// Nyní kompilátor odhalí záměnu:
+// Nyní typový systém PHP odhalí záměnu:
 function processOrder(OrderId $orderId, UserId $userId): void { /* ... */ }
 
 $orderId = new OrderId('a1b2c3d4-...');
@@ -487,6 +509,9 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
             <div class="tip">
                 <h3>Příklad: Příliš velký agregát (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // ŠPATNĚ: God Aggregate — příliš mnoho odpovědností
 
 class Customer
@@ -528,12 +553,28 @@ class Customer
             <div class="tip">
                 <h3>Příklad: Správně rozdělené agregáty</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Malé agregáty s jednoznačnou odpovědností
+
+namespace App\OrderManagement\Domain\Model;
+
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\ProductId;
+use App\OrderManagement\Domain\ValueObject\Address;
+use App\OrderManagement\Domain\ValueObject\OrderStatus;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\Currency;
+use App\OrderManagement\Domain\ValueObject\Email;
+use App\OrderManagement\Domain\ValueObject\WishlistId;
+use App\OrderManagement\Domain\Event\OrderPlacedEvent;
 
 // Agregát 1: Customer — pouze identita a kontaktní údaje
 class Customer
 {
-    private CustomerId $id;
+    private readonly CustomerId $id;
     private string $name;
     private Email $email;
 
@@ -544,14 +585,14 @@ class Customer
 // Agregát 2: Order — transakční hranice pro jednu objednávku
 class Order
 {
-    private OrderId $id;
-    private CustomerId $customerId; // Pouze reference — ne celý Customer objekt!
+    private readonly OrderId $id;
+    private readonly CustomerId $customerId; // Pouze reference — ne celý Customer objekt!
     private Address $shippingAddress;
     private OrderStatus $status;
 
     /** @var OrderItem[] */
     private array $items = [];
-    private \DateTimeImmutable $placedAt;
+    private readonly \DateTimeImmutable $placedAt;
     private array $domainEvents = [];
 
     public function __construct(
@@ -596,8 +637,8 @@ class Order
 // Agregát 3: Wishlist — zcela oddělená doménová odpovědnost
 class Wishlist
 {
-    private WishlistId $id;
-    private CustomerId $customerId;
+    private readonly WishlistId $id;
+    private readonly CustomerId $customerId;
     /** @var WishlistItem[] */
     private array $items = [];
 }</code></pre>
@@ -605,7 +646,7 @@ class Wishlist
 
             <p>
                 Pravidlo pro navrhování agregátů zní: <em>agregát by měl být co nejmenší, aby zachoval invarianty
-                (business pravidla) platné v rámci jedné transakce</em>. Pokud změna jednoho objektu nevyžaduje
+                (doménová pravidla) platné v rámci jedné transakce</em>. Pokud změna jednoho objektu nevyžaduje
                 konzistentní změnu druhého ve stejné transakci, patří do různých agregátů.
             </p>
         </section>
@@ -622,7 +663,7 @@ class Wishlist
             <div class="warning" role="note" aria-labelledby="sdilena-db-spatne-heading">
                 <h3 id="sdilena-db-spatne-heading">Špatně: Přímý přístup ke sdíleným tabulkám</h3>
                 <p>
-                    Kontexty <em>OrderProcessing</em> a <em>Billing</em> přímo přistupují ke stejné tabulce
+                    Kontexty <em>OrderManagement</em> a <em>Billing</em> přímo přistupují ke stejné tabulce
                     <code>users</code>. Změna schématu tabulky v jednom kontextu okamžitě ovlivní druhý.
                 </p>
             </div>
@@ -630,10 +671,15 @@ class Wishlist
             <div class="tip">
                 <h3>Příklad: Sdílená databáze (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
-// ŠPATNĚ: OrderProcessing context přímo dotazuje tabulku users z UserManagement kontextu
 
-namespace App\OrderProcessing\Infrastructure\Repository;
+declare(strict_types=1);
 
+// ŠPATNĚ: OrderManagement context přímo dotazuje tabulku users z UserManagement kontextu
+
+namespace App\OrderManagement\Infrastructure\Repository;
+
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Connection;
 
 class DoctrineOrderRepository
@@ -660,7 +706,7 @@ class InvoiceGenerator
 {
     public function generate(OrderId $orderId): Invoice
     {
-        // Opět přímý přístup k tabulce orders z OrderProcessing kontextu!
+        // Opět přímý přístup k tabulce orders z OrderManagement kontextu!
         $data = $this->db->query(
             'SELECT o.total, u.billing_address, u.vat_number
              FROM orders o JOIN users u ON o.user_id = u.id
@@ -683,12 +729,19 @@ class InvoiceGenerator
             <div class="tip">
                 <h3>Příklad: Izolované kontexty s ACL (správně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Každý kontext vlastní svá data a komunikuje přes definované rozhraní
 
-// OrderProcessing kontext si ukládá pouze to, co potřebuje pro svou logiku.
+// OrderManagement kontext si ukládá pouze to, co potřebuje pro svou logiku.
 // Billing údaje zákazníka získává přes Anti-Corruption Layer.
 
 namespace App\Billing\Domain\Port;
+
+use App\Billing\Domain\ValueObject\Address;
+use App\Billing\Domain\ValueObject\CustomerId;
+use App\Billing\Domain\ValueObject\VatNumber;
 
 // Port (rozhraní) — Billing kontext definuje, co potřebuje vědět o zákazníkovi
 interface CustomerDataProvider
@@ -709,12 +762,16 @@ final class CustomerBillingData
 // Infrastrukturní adapter — implementace v Billing kontextu, volá UserManagement přes API
 namespace App\Billing\Infrastructure\Adapter;
 
+use App\Billing\Domain\Port\CustomerBillingData;
 use App\Billing\Domain\Port\CustomerDataProvider;
+use App\Billing\Domain\ValueObject\Address;
+use App\Billing\Domain\ValueObject\CustomerId;
+use App\Billing\Domain\ValueObject\VatNumber;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class HttpUserManagementAdapter implements CustomerDataProvider
 {
-    public function __construct(private HttpClientInterface $httpClient) {}
+    public function __construct(private readonly HttpClientInterface $httpClient) {}
 
     public function getBillingDataForCustomer(CustomerId $customerId): CustomerBillingData
     {
@@ -741,8 +798,8 @@ class HttpUserManagementAdapter implements CustomerDataProvider
             </p>
         </section>
 
-        <section id="anekatualizovatelne-udalosti" aria-labelledby="anekatualizovatelne-udalosti-heading">
-            <h2 id="anekatualizovatelne-udalosti-heading">Anti-vzor: Mutovatelné doménové události</h2>
+        <section id="mutovatelne-udalosti" aria-labelledby="mutovatelne-udalosti-heading">
+            <h2 id="mutovatelne-udalosti-heading">Anti-vzor: Mutovatelné doménové události</h2>
             <p>
                 Doménová událost reprezentuje fakt, který se stal v minulosti — a minulost nelze změnit.
                 Události musí být striktně <strong>immutable</strong> (neměnné). Mutovatelná událost je
@@ -766,6 +823,9 @@ class HttpUserManagementAdapter implements CustomerDataProvider
             <div class="tip">
                 <h3>Příklad: Mutovatelná událost (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // ŠPATNĚ: Mutovatelná doménová událost
 
 class OrderPlacedEvent
@@ -808,9 +868,16 @@ class OrderPlacedEvent
             <div class="tip">
                 <h3>Příklad: Immutable doménová událost (správně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Immutable doménová událost s readonly properties (PHP 8.1+)
 
-namespace App\OrderProcessing\Domain\Event;
+namespace App\OrderManagement\Domain\Event;
+
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\OrderId;
 
 final class OrderPlacedEvent
 {
@@ -837,9 +904,9 @@ final class OrderPlacedEvent
 // Alternativa pro starší PHP: final class s private properties a bez setterů
 final class OrderCancelledEvent
 {
-    private OrderId $orderId;
-    private string $reason;
-    private \DateTimeImmutable $occurredAt;
+    private readonly OrderId $orderId;
+    private readonly string $reason;
+    private readonly \DateTimeImmutable $occurredAt;
 
     public function __construct(OrderId $orderId, string $reason)
     {
@@ -860,25 +927,28 @@ final class OrderCancelledEvent
             <h2 id="logika-v-infrastrukture-heading">Anti-vzor: Doménová logika v infrastrukturní vrstvě</h2>
             <p>
                 DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře,
-                Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou business logiku
-                do doménové vrstvy. Pokud se business pravidla začnou objevovat v infrastrukturních třídách,
+                Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku
+                do doménové vrstvy. Pokud se doménová pravidla začnou objevovat v infrastrukturních třídách,
                 dochází k narušení architekturních hranic a ke vzniku skryté, těžko testovatelné logiky.
             </p>
 
             <div class="warning" role="note" aria-labelledby="infra-spatne-heading">
-                <h3 id="infra-spatne-heading">Špatně: Business logika v Doctrine repozitáři</h3>
+                <h3 id="infra-spatne-heading">Špatně: Doménová logika v Doctrine repozitáři</h3>
                 <p>
-                    Repozitář by měl pouze ukládat a načítat agregáty. Jakákoliv business logika (výpočty,
-                    aplikace business pravidel, stavové přechody) v repozitáři je anti-vzor.
+                    Repozitář by měl pouze ukládat a načítat agregáty. Jakákoliv doménová logika (výpočty,
+                    aplikace doménových pravidel, stavové přechody) v repozitáři je anti-vzor.
                 </p>
             </div>
 
             <div class="tip">
-                <h3>Příklad: Business logika v repozitáři a kontroleru (špatně)</h3>
+                <h3>Příklad: Doménová logika v repozitáři a kontroleru (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // ŠPATNĚ: Business logika v Doctrine repozitáři
 
-namespace App\Infrastructure\Repository;
+namespace App\UserManagement\Infrastructure\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
@@ -938,19 +1008,22 @@ class UserController extends AbstractController
             <div class="tip">
                 <h3>Příklad: Správné vrstvení — logika v doméně (správně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Business logika v doménové entitě (viz sekce o anémickém modelu)
 // Repozitář je pouze tenký adaptér pro persistenci
 
-namespace App\Infrastructure\Repository;
+namespace App\UserManagement\Infrastructure\Repository;
 
-use App\Domain\Model\User;
-use App\Domain\Model\UserId;
-use App\Domain\Repository\UserRepositoryInterface;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Repository\UserRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 class DoctrineUserRepository implements UserRepositoryInterface
 {
-    public function __construct(private EntityManagerInterface $em) {}
+    public function __construct(private readonly EntityManagerInterface $em) {}
 
     public function save(User $user): void
     {
@@ -965,13 +1038,18 @@ class DoctrineUserRepository implements UserRepositoryInterface
 }
 
 // SPRÁVNĚ: Aplikační vrstva (Command Handler) orkestruje, doména rozhoduje
-namespace App\Application\Command;
+namespace App\UserManagement\Application\Command;
+
+use App\UserManagement\Domain\Repository\UserRepositoryInterface;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\VerificationToken;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ActivateUserHandler
 {
     public function __construct(
-        private UserRepositoryInterface $users,
-        private EntityManagerInterface $em
+        private readonly UserRepositoryInterface $users,
+        private readonly EntityManagerInterface $em
     ) {}
 
     public function __invoke(ActivateUserCommand $command): void
@@ -1012,7 +1090,7 @@ class UserController extends AbstractController
             <h2 id="over-engineering-heading">Anti-vzor: Over-engineering u jednoduchých aplikací</h2>
             <p>
                 DDD není vhodné pro každý projekt. Eric Evans sám upozorňuje, že DDD přináší největší přidanou
-                hodnotu u <strong>komplexních domén se složitou business logikou</strong>. Pro jednoduché CRUD aplikace,
+                hodnotu u <strong>komplexních domén se složitou doménovou logikou</strong>. Pro jednoduché CRUD aplikace,
                 administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované — přináší obrovskou
                 počáteční složitost bez odpovídajícího benefitu.
             </p>
@@ -1051,7 +1129,7 @@ class UserController extends AbstractController
                     architektury.
                 </p>
                 <p>
-                    Vhodné indikátory pro zavedení DDD: <em>složitá business pravidla, která se neustále mění</em>;
+                    Vhodné indikátory pro zavedení DDD: <em>složitá doménová pravidla, která se neustále mění</em>;
                     <em>více doménových expertů s odlišnými pohledy na problém</em>; <em>systém, u nějž se předpokládá
                     dlouhodobý vývoj a vysoká míra změn v business logice</em>.
                 </p>
@@ -1096,6 +1174,9 @@ class UserController extends AbstractController
             <div class="tip">
                 <h3>Příklad: Nekonzistentní pojmenování (špatně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // ŠPATNĚ: Tatáž doménová entita má různé názvy na různých místech
 
 // Databázová tabulka: "clients"
@@ -1131,6 +1212,9 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
             <div class="tip">
                 <h3>Příklad: Konzistentní Ubiquitous Language (správně)</h3>
                 <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Jednotný jazyk pojišťovací domény napříč všemi vrstvami
 
 // Doménový expert: "Pojistník" → kód: PolicyHolder
@@ -1138,12 +1222,19 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
 // Doménový expert: "Pojistné plnění" → kód: Claim
 // Doménový expert: "Pojistná událost" → kód: InsuredEvent
 
-namespace App\InsuranceDomain\Domain\Model;
+namespace App\Insurance\Domain\Model;
+
+use App\Insurance\Domain\ValueObject\BirthNumber;
+use App\Insurance\Domain\ValueObject\ContactDetails;
+use App\Insurance\Domain\ValueObject\Money;
+use App\Insurance\Domain\ValueObject\PersonName;
+use App\Insurance\Domain\ValueObject\PolicyHolderId;
+use App\Insurance\Domain\ValueObject\RiskProfile;
 
 // Třídy pojmenovány přesně podle doménového slovníku:
 class PolicyHolder
 {
-    private PolicyHolderId $id;
+    private readonly PolicyHolderId $id;
     private PersonName $fullName;
     private BirthNumber $birthNumber; // Specifický pojišťovací identifikátor
     private ContactDetails $contactDetails;

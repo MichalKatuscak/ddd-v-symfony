@@ -55,7 +55,10 @@
     <h2 id="what-is-cqrs-heading">Co je CQRS?</h2>
     <p>
         CQRS (Command Query Responsibility Segregation) je architektonický vzor, který odděluje operace čtení (queries) od operací zápisu (commands).
-        Tento vzor byl poprvé představen Gregem Youngem jako rozšíření vzoru Command-Query Separation (CQS) od Bertranda Meyera.
+        Tento vzor byl poprvé systematicky popsán Gregem Youngem
+        <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank">[1]</a>
+        jako rozšíření vzoru Command-Query Separation (CQS) od Bertranda Meyera
+        <a href="https://martinfowler.com/bliki/CommandQuerySeparation.html" target="_blank">[2]</a>.
     </p>
 
     <div class="note">
@@ -71,8 +74,10 @@
     <p>
         CQRS je často používán v kombinaci s Event Sourcing, což je vzor, který ukládá změny stavu jako sekvenci událostí místo ukládání aktuálního stavu.
     </p>
+    </section>
 
-    <h2 id="benefits">Výhody CQRS</h2>
+    <section id="benefits" aria-labelledby="benefits-heading">
+    <h2 id="benefits-heading">Výhody CQRS</h2>
     <p>
         CQRS přináší mnoho výhod:
     </p>
@@ -160,8 +165,18 @@ framework:
     <p>
         V této konfiguraci jsou definovány dva transporty: <code>async</code> pro asynchronní zpracování a <code>sync</code> pro synchronní zpracování.
         Jsou také definovány dva message busy: <code>command.bus</code> (command bus) pro příkazy a <code>query.bus</code> (query bus) pro dotazy.
-        Příkazy jsou směrovány na asynchronní transport, zatímco dotazy jsou zpracovány synchronně.
     </p>
+
+    <div class="warning" role="alert" aria-labelledby="async-poznamka-heading">
+        <h3 id="async-poznamka-heading">Poznámka k asynchronnímu zpracování</h3>
+        <p>
+            Výše uvedená konfigurace je <strong>demonstrační</strong>. V praxi je nutné pečlivě zvážit, které příkazy
+            zpracovávat asynchronně. Registrace uživatele (<code>RegisterUser</code>) je typicky zpracovávána
+            <strong>synchronně</strong>, protože uživatel čeká na okamžitou odpověď (úspěch / chyba validace).
+            Asynchronní zpracování je vhodné pro operace, kde uživatel nemusí čekat na výsledek — například odesílání
+            e-mailů, generování reportů nebo aktualizace read modelů.
+        </p>
+    </div>
 
     </section>
 
@@ -175,11 +190,13 @@ framework:
         <h3 id="command-example-heading">Příklad: Implementace příkazu v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Registration\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class RegisterUser
+final class RegisterUser
 {
     public function __construct(
         #[Assert\NotBlank]
@@ -214,11 +231,13 @@ class RegisterUser
         <h3 id="query-example-heading">Příklad: Implementace dotazu v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Profile\Query;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class GetUserProfile
+final class GetUserProfile
 {
     public function __construct(
         #[Assert\NotBlank]
@@ -233,8 +252,10 @@ class GetUserProfile
         V tomto příkladu je <code>GetUserProfile</code> dotaz, který obsahuje ID uživatele, jehož profil chceme získat.
         Dotaz používá atributy pro validaci dat.
     </p>
+    </section>
 
-    <h2 id="handlers">Implementace Handlers</h2>
+    <section id="handlers" aria-labelledby="handlers-heading">
+    <h2 id="handlers-heading">Implementace Handlers</h2>
     <p>
         Handlers v CQRS jsou objekty, které zpracovávají příkazy a dotazy. V Symfony 8 můžete implementovat handlery jako PHP třídy s atributem <code>AsMessageHandler</code>:
     </p>
@@ -243,21 +264,23 @@ class GetUserProfile
         <h3>Příklad: Implementace command handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Registration\Command;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\Service\PasswordHasher;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsMessageHandler]
-class RegisterUserHandler
+final class RegisterUserHandler
 {
     public function __construct(
         private UserRepository $userRepository,
-        private UserPasswordHasherInterface $passwordHasher
+        private PasswordHasher $passwordHasher
     ) {
     }
 
@@ -269,15 +292,16 @@ class RegisterUserHandler
             throw new \DomainException('User with this email already exists');
         }
 
-        $user = new User(
-            new UserId(),
-            $command->name,
-            $email
+        $hashedPassword = $this->passwordHasher->hashPassword(
+            $command->password
         );
 
-        // Set password
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $command->password);
-        $user->setPassword($hashedPassword);
+        $user = User::register(
+            new UserId(),
+            $command->name,
+            $email,
+            $hashedPassword
+        );
 
         $this->userRepository->save($user);
     }
@@ -288,15 +312,17 @@ class RegisterUserHandler
         <h3 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Profile\Query;
 
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\UserId;
-use App\UserManagement\Presentation\ViewModel\UserProfileViewModel;
+use App\UserManagement\Profile\ViewModel\UserProfileViewModel;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class GetUserProfileHandler
+final class GetUserProfileHandler
 {
     public function __construct(
         private UserRepository $userRepository
@@ -338,6 +364,8 @@ class GetUserProfileHandler
         <h3 id="buses-example-heading">Příklad: Použití command a query busů v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Registration\Controller;
 
 use App\UserManagement\Registration\Command\RegisterUser;
@@ -348,7 +376,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-class RegistrationController extends AbstractController
+final class RegistrationController extends AbstractController
 {
     public function __construct(
         private MessageBusInterface $commandBus
@@ -389,6 +417,8 @@ class RegistrationController extends AbstractController
 
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Profile\Controller;
 
 use App\UserManagement\Profile\Query\GetUserProfile;
@@ -399,7 +429,7 @@ use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class ProfileController extends AbstractController
+final class ProfileController extends AbstractController
 {
     public function __construct(
         private MessageBusInterface $queryBus
@@ -455,13 +485,16 @@ framework:
 
         # Směrování zpráv — mapuje konkrétní třídy nebo rozhraní na transport
         routing:
-            # Příkazy jsou zpracovány asynchronně
-            App\UserManagement\Registration\Command\RegisterUser: async</code></pre>
+            # Příkazy vhodné pro asynchronní zpracování:
+            # odesílání notifikací, generování reportů, aktualizace read modelů
+            App\Notification\Application\Command\SendWelcomeEmail: async
+            App\Reporting\Application\Command\GenerateMonthlyReport: async</code></pre>
     </div>
 
     <p>
-        V této konfiguraci jsou příkazy směrovány na asynchronní transport, což znamená, že budou zpracovány asynchronně.
-        Konfigurace také definuje strategii opakování pro případ selhání.
+        V této konfiguraci jsou příkazy pro odesílání e-mailů a generování reportů směrovány na asynchronní transport.
+        Konfigurace také definuje strategii opakování pro případ selhání. Příkazy, které vyžadují okamžitou
+        zpětnou vazbu (registrace, vytvoření objednávky), zůstávají synchronní.
     </p>
 
     <div class="tip">
@@ -488,8 +521,34 @@ framework:
         </ul>
     </div>
 
+    <div class="note" role="note" aria-labelledby="saga-poznamka-heading">
+        <h3 id="saga-poznamka-heading">Pokročilé téma: Saga / Process Manager</h3>
+        <p>
+            V komplexních systémech s více Bounded Contexts je často potřeba koordinovat dlouhotrvající business
+            procesy, které zahrnují více kroků a více agregátů. K tomu slouží vzor <strong>Saga</strong>
+            (neboli <strong>Process Manager</strong>).
+        </p>
+        <p>
+            Saga naslouchá doménovým událostem a na základě nich odesílá příkazy do dalších kontextů.
+            Pokud některý krok selže, Saga provede kompenzační akce (místo rollbacku distribuované transakce).
+            Dva hlavní přístupy:
+        </p>
+        <ul>
+            <li><strong>Choreografie</strong> — kontexty komunikují pouze přes události, bez centrálního koordinátora.
+                Jednodušší, ale obtížnější sledovat tok procesu.</li>
+            <li><strong>Orchestrace</strong> — centrální Process Manager řídí tok procesu a odesílá příkazy.
+                Snáze pochopitelné, ale zavádí centrální závislost.</li>
+        </ul>
+        <p>
+            V Symfony 8 lze Sagu implementovat jako Messenger handler, který naslouchá událostem a odesílá
+            příkazy přes command bus. Stav Sagy lze persistovat v databázi.
+            Viz glosář: <a href="{{ path('glossary') }}#term-saga">Saga / Process Manager</a>.
+        </p>
+    </div>
+
     <p>
-        V další kapitole se podíváme na <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD a CQRS v Symfony 8</a>.
+        V další kapitole se podíváme na <a href="{{ path('event_sourcing') }}">Event Sourcing</a>,
+        vzor persistence, který se s CQRS přirozeně doplňuje.
     </p>
     </section>
     </article>

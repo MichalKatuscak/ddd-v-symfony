@@ -78,19 +78,21 @@
 │   ├── Infrastructure/        # Infrastrukturní vrstva
 │   │   └── Repository/        # Implementace repozitářů
 │   │       └── DoctrineCartRepository.php  # Doctrine implementace
-│   ├── Application/          # Aplikační vrstva
+│   ├── AddItem/               # Feature: Přidání položky do košíku
 │   │   ├── Command/           # Příkazy
 │   │   │   ├── AddItemToCart.php  # Příkaz pro přidání položky
 │   │   │   └── AddItemToCartHandler.php  # Handler příkazu
-│   │   └── Query/             # Dotazy
-│   │       ├── GetCart.php      # Dotaz pro získání košíku
-│   │       └── GetCartHandler.php  # Handler dotazu
-│   └── Presentation/         # Prezentační vrstva
-│       ├── Controller/        # Kontrolery
-│       │   ├── CartController.php  # Kontroler pro košík
-│       │   └── CheckoutController.php  # Kontroler pro pokladnu
-│       └── ViewModel/         # View modely
-│           └── CartViewModel.php  # View model košíku
+│   │   └── Controller/        # Kontrolery
+│   │       └── CartController.php  # Kontroler pro přidání do košíku
+│   ├── GetCart/               # Feature: Získání košíku
+│   │   ├── Query/             # Dotazy
+│   │   │   ├── GetCart.php      # Dotaz pro získání košíku
+│   │   │   └── GetCartHandler.php  # Handler dotazu
+│   │   └── ViewModel/         # View modely
+│   │       └── CartViewModel.php  # View model košíku
+│   └── Checkout/              # Feature: Pokladna
+│       └── Controller/        # Kontrolery
+│           └── CheckoutController.php  # Kontroler pro pokladnu
 ├── Order/                     # Bounded Context: Objednávky
 │   ├── Domain/                # Doménová vrstva
 │   │   ├── Model/             # Doménové modely
@@ -105,11 +107,10 @@
 │   ├── Infrastructure/        # Infrastrukturní vrstva
 │   │   └── Repository/        # Implementace repozitářů
 │   │       └── DoctrineOrderRepository.php  # Doctrine implementace
-│   ├── Application/          # Aplikační vrstva
-│   │   └── Command/           # Příkazy
-│   │       ├── CreateOrder.php  # Příkaz pro vytvoření objednávky
-│   │       └── CreateOrderHandler.php  # Handler příkazu
-│   └── Presentation/         # Prezentační vrstva
+│   └── CreateOrder/           # Feature: Vytvoření objednávky
+│       ├── Command/           # Příkazy
+│       │   ├── CreateOrder.php  # Příkaz pro vytvoření objednávky
+│       │   └── CreateOrderHandler.php  # Handler příkazu
 │       └── Controller/        # Kontrolery
 │           └── OrderController.php  # Kontroler pro objednávky
 └── Shared/                    # Sdílené komponenty
@@ -124,6 +125,8 @@
             <h3 id="cart-model-heading">Doménový model: Košík</h3>
             <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Cart\Domain\Model;
 
 use App\Cart\Domain\Event\ItemAddedToCart;
@@ -134,19 +137,24 @@ use App\Cart\Domain\ValueObject\Money;
 
 class Cart
 {
-    private CartId $id;
-    private string $userId;
+    private readonly CartId $id;
+    private readonly string $userId;
     private array $items = [];
-    private \DateTimeImmutable $createdAt;
+    private readonly \DateTimeImmutable $createdAt;
     private \DateTimeImmutable $updatedAt;
     private array $events = [];
 
-    public function __construct(CartId $id, string $userId)
+    private function __construct(CartId $id, string $userId)
     {
         $this->id = $id;
         $this->userId = $userId;
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = $this->createdAt;
+    }
+
+    public static function create(CartId $id, string $userId): self
+    {
+        return new self($id, $userId);
     }
 
     public function id(): CartId
@@ -253,7 +261,9 @@ class Cart
             <h3 id="add-to-cart-command-heading">Command: Přidání položky do košíku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\Application\Command;
+declare(strict_types=1);
+
+namespace App\Cart\AddItem\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -282,7 +292,9 @@ class AddItemToCart
             <h3 id="add-to-cart-handler-heading">Command Handler: Zpracování přidání položky do košíku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\Application\Command;
+declare(strict_types=1);
+
+namespace App\Cart\AddItem\Command;
 
 use App\Cart\Domain\Repository\CartRepository;
 use App\Cart\Domain\ValueObject\CartId;
@@ -295,7 +307,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 class AddItemToCartHandler
 {
     public function __construct(
-        private CartRepository $cartRepository
+        private readonly CartRepository $cartRepository
     ) {
     }
 
@@ -320,9 +332,11 @@ class AddItemToCartHandler
             <h3 id="add-to-cart-controller-heading">Controller: Přidání položky do košíku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\Presentation\Controller;
+declare(strict_types=1);
 
-use App\Cart\Application\Command\AddItemToCart;
+namespace App\Cart\AddItem\Controller;
+
+use App\Cart\AddItem\Command\AddItemToCart;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -332,7 +346,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class CartController extends AbstractController
 {
     public function __construct(
-        private MessageBusInterface $commandBus
+        private readonly MessageBusInterface $commandBus
     ) {
     }
 
@@ -372,7 +386,9 @@ class CartController extends AbstractController
             <h3 id="get-cart-query-heading">Query: Získání košíku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\Application\Query;
+declare(strict_types=1);
+
+namespace App\Cart\GetCart\Query;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -389,18 +405,21 @@ class GetCart
             <h3 id="get-cart-handler-heading">Query Handler: Zpracování získání košíku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Cart\Application\Query;
+declare(strict_types=1);
+
+namespace App\Cart\GetCart\Query;
 
 use App\Cart\Domain\Repository\CartRepository;
 use App\Cart\Domain\ValueObject\CartId;
-use App\Cart\Presentation\ViewModel\CartViewModel;
+use App\Cart\GetCart\ViewModel\CartItemViewModel;
+use App\Cart\GetCart\ViewModel\CartViewModel;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
 class GetCartHandler
 {
     public function __construct(
-        private CartRepository $cartRepository
+        private readonly CartRepository $cartRepository
     ) {
     }
 
@@ -464,22 +483,27 @@ class GetCartHandler
 │   ├── Infrastructure/        # Infrastrukturní vrstva
 │   │   └── Repository/        # Implementace repozitářů
 │   │       └── DoctrinePostRepository.php  # Doctrine implementace
-│   ├── Application/          # Aplikační vrstva
+│   ├── CreatePost/            # Feature: Vytvoření příspěvku
 │   │   ├── Command/           # Příkazy
 │   │   │   ├── CreatePost.php   # Příkaz pro vytvoření příspěvku
 │   │   │   └── CreatePostHandler.php  # Handler příkazu
-│   │   └── Query/             # Dotazy
-│   │       ├── GetPost.php      # Dotaz pro získání příspěvku
-│   │       ├── GetPostHandler.php  # Handler dotazu
-│   │       ├── GetPosts.php     # Dotaz pro získání příspěvků
-│   │       └── GetPostsHandler.php  # Handler dotazu
-│   └── Presentation/         # Prezentační vrstva
+│   │   └── Controller/        # Kontrolery
+│   │       └── CreatePostController.php  # Kontroler pro vytvoření příspěvku
+│   ├── GetPost/               # Feature: Zobrazení příspěvku
+│   │   ├── Query/             # Dotazy
+│   │   │   ├── GetPost.php      # Dotaz pro získání příspěvku
+│   │   │   └── GetPostHandler.php  # Handler dotazu
+│   │   ├── Controller/        # Kontrolery
+│   │   │   └── PostController.php  # Kontroler pro zobrazení příspěvku
+│   │   └── ViewModel/         # View modely
+│   │       └── PostViewModel.php  # View model příspěvku
+│   └── GetPosts/              # Feature: Seznam příspěvků
+│       ├── Query/             # Dotazy
+│       │   ├── GetPosts.php     # Dotaz pro získání příspěvků
+│       │   └── GetPostsHandler.php  # Handler dotazu
 │       ├── Controller/        # Kontrolery
-│       │   ├── CreatePostController.php  # Kontroler pro vytvoření příspěvku
-│       │   ├── PostsController.php  # Kontroler pro seznam příspěvků
-│       │   └── PostController.php  # Kontroler pro zobrazení příspěvku
+│       │   └── PostsController.php  # Kontroler pro seznam příspěvků
 │       └── ViewModel/         # View modely
-│           ├── PostViewModel.php  # View model příspěvku
 │           └── PostListViewModel.php  # View model seznamu příspěvků
 └── Shared/                    # Sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
@@ -493,40 +517,27 @@ class GetCartHandler
             <h3 id="post-model-heading">Doménový model: Příspěvek</h3>
             <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\Blog\Domain\Model;
 
 use App\Blog\Domain\Event\PostCreated;
 use App\Blog\Domain\ValueObject\PostId;
-use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'posts')]
 class Post
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 36)]
-    private string $id;
-
-    #[ORM\Column(type: 'string', length: 255)]
+    private readonly PostId $id;
     private string $title;
-
-    #[ORM\Column(type: 'text')]
     private string $content;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $author;
-
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
-
-    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private readonly string $author;
+    private readonly \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt = null;
 
     private array $events = [];
 
-    public function __construct(PostId $id, string $title, string $content, string $author)
+    private function __construct(PostId $id, string $title, string $content, string $author)
     {
-        $this->id = $id->value();
+        $this->id = $id;
         $this->title = $title;
         $this->content = $content;
         $this->author = $author;
@@ -535,9 +546,14 @@ class Post
         $this->recordEvent(new PostCreated($id, $title, $author));
     }
 
+    public static function create(PostId $id, string $title, string $content, string $author): self
+    {
+        return new self($id, $title, $content, $author);
+    }
+
     public function id(): PostId
     {
-        return new PostId($this->id);
+        return $this->id;
     }
 
     public function title(): string
@@ -594,7 +610,9 @@ class Post
             <h3>Command: Vytvoření příspěvku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Blog\CreatePost;
+declare(strict_types=1);
+
+namespace App\Blog\CreatePost\Command;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -617,7 +635,9 @@ class CreatePost
             <h3>Command Handler: Zpracování vytvoření příspěvku</h3>
             <pre><code class="language-php">&lt;?php
 
-namespace App\Blog\CreatePost;
+declare(strict_types=1);
+
+namespace App\Blog\CreatePost\Command;
 
 use App\Blog\Domain\Model\Post;
 use App\Blog\Domain\Repository\PostRepository;
@@ -628,7 +648,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 class CreatePostHandler
 {
     public function __construct(
-        private PostRepository $postRepository
+        private readonly PostRepository $postRepository
     ) {
     }
 
@@ -636,7 +656,7 @@ class CreatePostHandler
     {
         $postId = new PostId();
 
-        $post = new Post(
+        $post = Post::create(
             $postId,
             $command->title,
             $command->content,
@@ -698,54 +718,46 @@ class CreatePostHandler
             <h3>Doménový model: Uživatel</h3>
             <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Domain\Model;
 
 use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'users')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 36)]
-    private string $id;
-
-    #[ORM\Column(type: 'string', length: 255)]
+    private readonly UserId $id;
     private string $name;
-
-    #[ORM\Column(type: 'string', length: 255, unique: true)]
-    private string $email;
-
-    #[ORM\Column(type: 'string', length: 255)]
+    private Email $email;
     private string $password;
-
-    #[ORM\Column(type: 'json')]
     private array $roles = [];
-
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
+    private readonly \DateTimeImmutable $createdAt;
 
     private array $events = [];
 
-    public function __construct(UserId $id, string $name, Email $email)
+    private function __construct(UserId $id, string $name, Email $email)
     {
-        $this->id = $id->value();
+        $this->id = $id;
         $this->name = $name;
-        $this->email = $email->value();
+        $this->email = $email;
         $this->roles = ['ROLE_USER'];
         $this->createdAt = new \DateTimeImmutable();
 
         $this->recordEvent(new UserRegistered($id, $email));
     }
 
+    public static function register(UserId $id, string $name, Email $email): self
+    {
+        return new self($id, $name, $email);
+    }
+
     public function id(): UserId
     {
-        return new UserId($this->id);
+        return $this->id;
     }
 
     public function name(): string
@@ -755,7 +767,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function email(): Email
     {
-        return new Email($this->email);
+        return $this->email;
     }
 
     public function setPassword(string $password): void
@@ -770,7 +782,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function changeEmail(Email $email): void
     {
-        $this->email = $email->value();
+        $this->email = $email;
     }
 
     public function createdAt(): \DateTimeImmutable
@@ -791,7 +803,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->email;
+        return $this->email->value();
     }
 
     // Implementace PasswordAuthenticatedUserInterface
@@ -816,6 +828,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
             <h3>Command: Registrace uživatele</h3>
             <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Command;
 
@@ -842,6 +856,8 @@ class RegisterUser
             <h3>Command Handler: Zpracování registrace uživatele</h3>
             <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Registration\Command;
 
 use App\UserManagement\Domain\Model\User;
@@ -855,8 +871,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class RegisterUserHandler
 {
     public function __construct(
-        private UserRepository $userRepository,
-        private UserPasswordHasherInterface $passwordHasher
+        private readonly UserRepository $userRepository,
+        private readonly UserPasswordHasherInterface $passwordHasher
     ) {
     }
 
@@ -868,7 +884,7 @@ class RegisterUserHandler
             throw new \DomainException('User with this email already exists');
         }
 
-        $user = new User(
+        $user = User::register(
             new UserId(),
             $command->name,
             $email

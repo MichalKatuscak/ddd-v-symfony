@@ -56,7 +56,7 @@
                 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
                 Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
                 komplexní logiky – je CRUD zcela dostačující a přidávání vrstev DDD by bylo přebytečným inženýrstvím.
-                Problém nastává tehdy, kdy se aplikace postupem času stává komplexnější a byznys logika začíná pronikat
+                Problém nastává tehdy, kdy se aplikace postupem času stává komplexnější a doménová logika začíná pronikat
                 na nevhodná místa.
             </p>
 
@@ -66,18 +66,18 @@
                     <li>
                         <strong>God Services (Boží služby)</strong> – Třídy jako <code>UserService</code> nebo
                         <code>OrderService</code> obsahují stovky řádků kódu a stávají se centrálním místem pro
-                        veškerou byznys logiku. Přidání jakékoli nové funkce vyžaduje zásah do stejné třídy a
+                        veškerou doménovou logiku. Přidání jakékoli nové funkce vyžaduje zásah do stejné třídy a
                         riziko regresí roste.
                     </li>
                     <li>
                         <strong>Fat Controllers (Tlusté kontrolery)</strong> – Symfony kontrolery přestaly být
-                        tenkou vrstvou pro HTTP adaptaci a místo toho přímo implementují byznys pravidla:
+                        tenkou vrstvou pro HTTP adaptaci a místo toho přímo implementují doménová pravidla:
                         validaci, výpočty, přechody stavů. Kontroler by měl delegovat na doménový model, nikoli
                         ho suplovat.
                     </li>
                     <li>
-                        <strong>Byznys logika v repozitářích</strong> – Doctrine repozitáře obsahují komplexní
-                        podmínky, které vyjadřují byznys pravidla (např. "objednávky, které je možné zrušit").
+                        <strong>Business logika v repozitářích</strong> – Doctrine repozitáře obsahují komplexní
+                        podmínky, které vyjadřují doménová pravidla (např. "objednávky, které je možné zrušit").
                         Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
                     </li>
                     <li>
@@ -85,8 +85,8 @@
                         kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
                     </li>
                     <li>
-                        <strong>Nízká testovatelnost</strong> – Byznys logika je neoddělitelně svázána s HTTP
-                        vrstvou nebo databází. Napsání unit testu pro byznys pravidlo vyžaduje rozsáhlý mocking.
+                        <strong>Nízká testovatelnost</strong> – Business logika je neoddělitelně svázána s HTTP
+                        vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlý mocking.
                     </li>
                     <li>
                         <strong>Komunikační propast</strong> – Vývojáři a doménoví experti používají jiný slovník.
@@ -100,14 +100,14 @@
             <p>
                 Rozhodnutí o migraci by mělo být podloženo analýzou komplexity domény, nikoli módními trendy.
                 Martin Fowler ve své práci o architektonických vzorech upozorňuje, že aplikace Transaction Script
-                (a jeho specializace CRUD) jsou zcela legitimní pro aplikace s jednoduchými byznys pravidly
+                (a jeho specializace CRUD) jsou zcela legitimní pro aplikace s jednoduchými doménovými pravidly
                 <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank">[1]</a>.
             </p>
 
             <div class="note" role="note" aria-labelledby="kdy-ddd-heading">
                 <h3 id="kdy-ddd-heading">Kdy DDD přináší hodnotu</h3>
                 <ul>
-                    <li>Doména obsahuje komplexní byznys pravidla, která se často mění.</li>
+                    <li>Doména obsahuje komplexní doménová pravidla, která se často mění.</li>
                     <li>Existují přechody stavů entit (objednávka: vytvořena → potvrzena → odeslána → doručena).</li>
                     <li>Tým komunikuje s doménovými experty a potřebuje sdílený jazyk.</li>
                     <li>Aplikace je dlouhodobě rozvíjena a musí být udržovatelná v horizontu let.</li>
@@ -115,7 +115,7 @@
                 </ul>
                 <h3>Kdy zůstat u CRUD</h3>
                 <ul>
-                    <li>Aplikace je v podstatě CRUD nad databázovými tabulkami bez byznys logiky.</li>
+                    <li>Aplikace je v podstatě CRUD nad databázovými tabulkami bez doménové logiky.</li>
                     <li>Doménová pravidla jsou triviální a stabilní.</li>
                     <li>Tým je malý a čas na migraci není dostupný.</li>
                     <li>Aplikace je krátkodobá nebo se bude v blízké budoucnosti kompletně přepisovat.</li>
@@ -195,7 +195,7 @@
     │       ├── GetUserProfile.php
     │       └── GetUserProfileHandler.php
     └── Infrastructure/
-        └── Persistence/
+        └── Repository/
             └── DoctrineUserRepository.php  # Implementace repozitáře</code></pre>
             </div>
 
@@ -253,7 +253,7 @@
                 pro:
             </p>
             <ul>
-                <li>Odkrytí implicitní byznys logiky skryté v kontrolerech a service třídách.</li>
+                <li>Odkrytí implicitní doménové logiky skryté v kontrolerech a service třídách.</li>
                 <li>Identifikaci přechodů stavů entit (z pohledu businessu, nikoli databáze).</li>
                 <li>Nalezení přirozených hranic Bounded Contexts.</li>
                 <li>Zapojení doménových expertů do návrhu nové architektury.</li>
@@ -332,7 +332,7 @@ class UserController extends AbstractController
         <section id="extrakce-domainove-vrstvy" aria-labelledby="extrakce-domainove-vrstvy-heading">
             <h2 id="extrakce-domainove-vrstvy-heading">Krok 2: Extrakce doménové vrstvy</h2>
             <p>
-                Extrakce doménové vrstvy znamená přesunutí byznys pravidel z kontrolerů a service tříd do doménových
+                Extrakce doménové vrstvy znamená přesunutí doménových pravidel z kontrolerů a service tříd do doménových
                 objektů. Cílem je, aby doménové objekty samy vynucovaly svá invarianty – pravidla, která musí být
                 vždy splněna, bez ohledu na to, kdo s objektem pracuje.
             </p>
@@ -340,7 +340,7 @@ class UserController extends AbstractController
             <h3>Přesunutí business pravidel do doménových objektů</h3>
             <p>
                 Refaktoring probíhá ve dvou hlavních krocích: nejprve vytvoříme doménové Value Objects pro primitivní
-                typy nesoucí byznys pravidla, poté extrahujeme logiku do doménových entit a služeb.
+                typy nesoucí doménová pravidla, poté extrahujeme logiku do doménových entit a služeb.
             </p>
 
             <div class="tip" role="note" aria-labelledby="before-after-heading">
@@ -386,20 +386,23 @@ class UserService
 
                 <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 // PO: Doménová entita s vlastními invarianty
 namespace App\UserManagement\Domain\Model;
 
+use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\Event\UserRegistered;
 
 class User
 {
-    private UserId $id;
+    private readonly UserId $id;
     private Email $email;
     private HashedPassword $password;
     private UserStatus $status;
-    private \DateTimeImmutable $registeredAt;
+    private readonly \DateTimeImmutable $registeredAt;
     private array $domainEvents = [];
 
     private function __construct(
@@ -455,7 +458,7 @@ class User
 
             <h3>Zavedení Value Objects místo primitive types</h3>
             <p>
-                Primitive Obsession je code smell, při kterém jsou koncepty s byznys sémantikou reprezentovány
+                Primitive Obsession je code smell, při kterém jsou koncepty s business sémantikou reprezentovány
                 primitivními typy jako <code>string</code> nebo <code>int</code>. Value Object nahrazuje primitiv
                 objektem, který zapouzdřuje validaci a chování.
             </p>
@@ -473,12 +476,14 @@ class UserController {
     }
 }
 
+declare(strict_types=1);
+
 // PO: Email jako Value Object – validace je na jednom místě
 namespace App\UserManagement\Domain\ValueObject;
 
 final class Email
 {
-    private string $value;
+    private readonly string $value;
 
     public function __construct(string $value)
     {
@@ -490,7 +495,7 @@ final class Email
             );
         }
 
-        // Zakázané domény (byznys pravidlo)
+        // Zakázané domény (business pravidlo)
         $domain = substr($normalized, strpos($normalized, '@') + 1);
         if (in_array($domain, ['example.com', 'test.com'], true)) {
             throw new \DomainException(
@@ -548,12 +553,14 @@ final class Email
                 <h3 id="repository-interface-heading">Příklad: Doménové rozhraní vs. Doctrine implementace</h3>
                 <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 // Doménové rozhraní – součást domény, žádná infrastrukturní závislost
 namespace App\UserManagement\Domain\Repository;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\Model\UserId;
+use App\UserManagement\Domain\ValueObject\UserId;
 
 interface UserRepository
 {
@@ -571,13 +578,15 @@ interface UserRepository
 
                 <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 // Infrastrukturní implementace – obaluje Doctrine EntityManager
-namespace App\UserManagement\Infrastructure\Persistence;
+namespace App\UserManagement\Infrastructure\Repository;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\Model\UserId;
+use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineUserRepository implements UserRepository
@@ -632,7 +641,7 @@ final class DoctrineUserRepository implements UserRepository
                 <pre><code class="language-yaml"># config/services.yaml
 services:
     App\UserManagement\Domain\Repository\UserRepository:
-        alias: App\UserManagement\Infrastructure\Persistence\DoctrineUserRepository</code></pre>
+        alias: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository</code></pre>
                 <p>
                     Tato konfigurace zajistí, že Symfony automaticky injektuje Doctrine implementaci všude tam,
                     kde je typovaná závislost na doménovém rozhraní <code>UserRepository</code>.
@@ -700,7 +709,7 @@ final readonly class RegisterUser
 namespace App\UserManagement\Application\Command;
 
 use App\UserManagement\Domain\Model\User;
-use App\UserManagement\Domain\Model\UserId;
+use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
@@ -719,7 +728,7 @@ final class RegisterUserHandler
         $email = new Email($command->email);
         $password = HashedPassword::fromPlaintext($command->password);
 
-        // Doménová politika ověřuje byznys pravidla přes repozitář
+        // Doménová politika ověřuje business pravidla přes repozitář
         $this->policy->assertEmailIsUnique($email);
 
         $user = User::register(
@@ -792,7 +801,9 @@ class UserController extends AbstractController
                 <h3 id="char-test-heading">Příklad: Charakterizační test pro CRUD kontroler</h3>
                 <pre><code class="language-php">&lt;?php
 
-namespace App\Tests\Characterization;
+declare(strict_types=1);
+
+namespace Tests\Characterization;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -862,22 +873,25 @@ class UserRegistrationCharacterizationTest extends WebTestCase
             <p>
                 Jednou z největších výhod DDD je, že doménové objekty jsou testovatelné v izolaci bez nutnosti
                 databáze, HTTP klienta nebo jiné infrastruktury. Unit testy doménové vrstvy jsou rychlé, deterministické
-                a přesně dokumentují byznys pravidla.
+                a přesně dokumentují doménová pravidla.
             </p>
 
             <div class="note" role="note" aria-labelledby="domain-unit-test-heading">
                 <h3 id="domain-unit-test-heading">Příklad: Unit test doménové entity</h3>
                 <pre><code class="language-php">&lt;?php
 
-namespace App\Tests\UserManagement\Domain;
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Domain\Model;
 
 use App\UserManagement\Domain\Model\User;
-use App\UserManagement\Domain\Model\UserId;
+use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\Event\UserRegistered;
 use PHPUnit\Framework\TestCase;
 
-class UserTest extends TestCase
+final class UserTest extends TestCase
 {
     public function test_newly_registered_user_is_pending_verification(): void
     {
@@ -924,7 +938,7 @@ class UserTest extends TestCase
                 <li>
                     <strong>Anémický doménový model</strong> – Nejčastější past. Vývojáři vytvoří třídy s názvem
                     jako v DDD (<code>User</code>, <code>Order</code>), ale tyto třídy obsahují pouze gettery a
-                    settery bez byznys logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie
+                    settery bez doménové logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie
                     s CRUD implementací.
                 </li>
                 <li>
@@ -960,11 +974,11 @@ class UserTest extends TestCase
                     funkcionality před jejich implementací.
                 </li>
                 <li>
-                    Nastavte <strong>code review pravidla</strong>: byznys logika nesmí být v kontrolerech,
+                    Nastavte <strong>code review pravidla</strong>: doménová logika nesmí být v kontrolerech,
                     doménové objekty nesmějí záviset na infrastruktuře.
                 </li>
                 <li>
-                    Komunikujte s managementem v pojmech <strong>byznys hodnoty</strong>, nikoli technické
+                    Komunikujte s managementem v pojmech <strong>business hodnoty</strong>, nikoli technické
                     architektury. Migrace na DDD = schopnost rychleji a bezpečněji přidávat nové funkce.
                 </li>
             </ul>

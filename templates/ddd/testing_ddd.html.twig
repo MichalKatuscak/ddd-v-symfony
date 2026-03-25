@@ -63,14 +63,16 @@
         <ul>
             <li><strong>Žádné závislosti na frameworku</strong> — Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
             <li><strong>Explicitní závislosti</strong> — Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
-            <li><strong>Bohaté doménové modely</strong> — Veškerá business logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
+            <li><strong>Bohaté doménové modely</strong> — Veškerá doménová logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
             <li><strong>Invarianty jsou vynucovány při konstrukci</strong> — Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
         </ul>
     </div>
 
     <h3>Testovací pyramida pro DDD</h3>
     <p>
-        Testovací pyramida v DDD kontextu definuje tři vrstvy testů, přičemž každá vrstva pokrývá jinou část aplikace a vyznačuje se jiným poměrem rychlosti, izolace a pokrytí:
+        Testovací pyramida (koncept popularizovaný Mikem Cohnem v knize <em>Succeeding with Agile</em>, 2009
+        <a href="https://www.mountaingoatsoftware.com/blog/the-forgotten-layer-of-the-test-automation-pyramid" target="_blank">[1]</a>)
+        v DDD kontextu definuje tři vrstvy testů, přičemž každá vrstva pokrývá jinou část aplikace a vyznačuje se jiným poměrem rychlosti, izolace a pokrytí:
     </p>
 
     <div class="note">
@@ -80,7 +82,7 @@
                 <strong>Unit testy — doménová vrstva (základ pyramidy, nejvíce testů)</strong><br>
                 Testují izolované doménové objekty: value objects, entity, agregáty a doménové služby.
                 Nepotřebují databázi ani framework. Jsou velmi rychlé (stovky testů za sekundu).
-                Cíl: ověřit business pravidla a invarianty.
+                Cíl: ověřit doménová pravidla a invarianty.
             </li>
             <li>
                 <strong>Integrační testy — infrastrukturní vrstva (střed pyramidy)</strong><br>
@@ -132,8 +134,8 @@ declare(strict_types=1);
 namespace Tests\UserManagement\Domain\ValueObject;
 
 use PHPUnit\Framework\TestCase;
-use UserManagement\Domain\ValueObject\Email;
-use UserManagement\Domain\Exception\InvalidEmailException;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\Exception\InvalidEmailException;
 
 final class EmailTest extends TestCase
 {
@@ -197,7 +199,7 @@ final class EmailTest extends TestCase
 
     <h3>Testování entit</h3>
     <p>
-        Entity mají identitu a měnitelný stav. Testy entit ověřují business pravidla (invarianty), správné chování metod a vyhazování
+        Entity mají identitu a měnitelný stav. Testy entit ověřují doménová pravidla (invarianty), správné chování metod a vyhazování
         doménových výjimek při porušení pravidel. Klíčové je testovat chování, ne strukturu — tedy co entita dělá, ne jak vypadají její fieldy.
     </p>
 
@@ -210,11 +212,11 @@ declare(strict_types=1);
 namespace Tests\UserManagement\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use UserManagement\Domain\Model\User;
-use UserManagement\Domain\ValueObject\UserId;
-use UserManagement\Domain\ValueObject\Email;
-use UserManagement\Domain\ValueObject\HashedPassword;
-use UserManagement\Domain\Exception\UserAlreadyActiveException;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\Exception\UserAlreadyActiveException;
 
 final class UserTest extends TestCase
 {
@@ -290,14 +292,14 @@ declare(strict_types=1);
 namespace Tests\OrderManagement\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use OrderManagement\Domain\Model\Order;
-use OrderManagement\Domain\ValueObject\OrderId;
-use OrderManagement\Domain\ValueObject\CustomerId;
-use OrderManagement\Domain\ValueObject\Money;
-use OrderManagement\Domain\Event\OrderPlaced;
-use OrderManagement\Domain\Event\OrderItemAdded;
-use OrderManagement\Domain\Exception\EmptyOrderException;
-use OrderManagement\Domain\Exception\OrderAlreadyPlacedException;
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\Event\OrderPlaced;
+use App\OrderManagement\Domain\Event\OrderItemAdded;
+use App\OrderManagement\Domain\Exception\EmptyOrderException;
+use App\OrderManagement\Domain\Exception\OrderAlreadyPlacedException;
 
 final class OrderTest extends TestCase
 {
@@ -383,7 +385,7 @@ declare(strict_types=1);
 
 namespace Tests\Shared\Domain;
 
-use Shared\Domain\DomainEvent;
+use App\Shared\Domain\DomainEvent;
 
 /**
  * Reusable trait pro ověřování doménových událostí v unit testech.
@@ -444,6 +446,12 @@ trait DomainEventAssertions
 }
 
 // --- Příklad použití traitu v testu ---
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\Event\OrderPlaced;
 
 final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 {
@@ -521,11 +529,11 @@ declare(strict_types=1);
 
 namespace Tests\UserManagement\Infrastructure\Repository;
 
-use UserManagement\Domain\Model\User;
-use UserManagement\Domain\ValueObject\UserId;
-use UserManagement\Domain\ValueObject\Email;
-use UserManagement\Domain\Repository\UserRepository;
-use UserManagement\Domain\Exception\UserNotFoundException;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\Exception\UserNotFoundException;
 
 /**
  * InMemory implementace UserRepository pro unit a integrační testy.
@@ -593,12 +601,12 @@ final class InMemoryUserRepository implements UserRepository
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Registration;
+namespace Tests\UserManagement\Application\Command;
 
 use PHPUnit\Framework\TestCase;
-use UserManagement\Registration\Command\RegisterUser;
-use UserManagement\Registration\Command\RegisterUserHandler;
-use UserManagement\Domain\Exception\EmailAlreadyTakenException;
+use App\UserManagement\Application\Command\RegisterUser;
+use App\UserManagement\Application\Command\RegisterUserHandler;
+use App\UserManagement\Domain\Exception\EmailAlreadyTakenException;
 use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
 
 final class RegisterUserHandlerTest extends TestCase
@@ -623,7 +631,7 @@ final class RegisterUserHandlerTest extends TestCase
 
         $this->assertSame(1, $this->userRepository->count());
 
-        $user = $this->userRepository->findByEmail(new \UserManagement\Domain\ValueObject\Email('jan@example.com'));
+        $user = $this->userRepository->findByEmail(new \App\UserManagement\Domain\ValueObject\Email('jan@example.com'));
         $this->assertNotNull($user);
         $this->assertFalse($user->isActive()); // nový uživatel je neaktivní
     }
@@ -690,7 +698,7 @@ final class RegisterUserHandlerTest extends TestCase
     <div class="note">
         <h3>Transakce a rollback po každém testu:</h3>
         <p>
-            Nejjednodušší způsob, jak zajistit izolaci integrančních testů, je zabalit každý test do databázové transakce
+            Nejjednodušší způsob, jak zajistit izolaci integračních testů, je zabalit každý test do databázové transakce
             a po jeho dokončení provést rollback. Symfony poskytuje <code>DoctrineTestHelper</code> a bundle
             <code>dama/doctrine-test-bundle</code>, který toto chování implementuje automaticky pomocí dekorátoru
             nad <code>Connection</code>. Bez toho by každý test zanechával data v databázi a testy by se navzájem ovlivňovaly.
@@ -706,12 +714,12 @@ declare(strict_types=1);
 namespace Tests\UserManagement\Infrastructure\Repository;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use UserManagement\Domain\Model\User;
-use UserManagement\Domain\ValueObject\UserId;
-use UserManagement\Domain\ValueObject\Email;
-use UserManagement\Domain\ValueObject\HashedPassword;
-use UserManagement\Domain\Exception\UserNotFoundException;
-use UserManagement\Infrastructure\Repository\DoctrineUserRepository;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\Exception\UserNotFoundException;
+use App\UserManagement\Infrastructure\Repository\DoctrineUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
@@ -911,7 +919,7 @@ final class RegistrationControllerTest extends WebTestCase
         <h3 id="functional-test-scope-heading">Rozsah funkčních testů</h3>
         <p>
             Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze klíčové happy path a nejdůležitější chybové scénáře.
-            Vše ostatní (edge cases, validace, business pravidla) pokryjte rychlými unit testy doménové vrstvy.
+            Vše ostatní (edge cases, validace, doménová pravidla) pokryjte rychlými unit testy doménové vrstvy.
             Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů ke spouštění testů lokálně.
         </p>
     </div>
@@ -1038,7 +1046,7 @@ return static function (Config $config): void {
 
         // Doménová vrstva nesmí záviset na Symfony ani Doctrine
         Rule::allClasses()
-            ->that(new ResideInOneOfTheseNamespaces('UserManagement\Domain'))
+            ->that(new ResideInOneOfTheseNamespaces('App\UserManagement\Domain'))
             ->should(new NotDependsOnTheseNamespaces(
                 'Symfony',
                 'Doctrine',
@@ -1047,7 +1055,7 @@ return static function (Config $config): void {
 
         // Všechny třídy v Command namespace musí mít suffix Command nebo Handler
         Rule::allClasses()
-            ->that(new ResideInOneOfTheseNamespaces('UserManagement\Application\Command'))
+            ->that(new ResideInOneOfTheseNamespaces('App\UserManagement\Application\Command'))
             ->should(new HaveNameMatching('*Command|*Handler'))
             ->because('Command namespace smí obsahovat pouze Command a Handler třídy (konvence projektu).'),
     );
@@ -1066,7 +1074,7 @@ return static function (Config $config): void {
     <div class="note">
         <h3>Doporučené pokrytí pro DDD vrstvy:</h3>
         <ul>
-            <li><strong>Doménová vrstva (Domain)</strong> — 90–100 %. Tato vrstva obsahuje veškerou business logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
+            <li><strong>Doménová vrstva (Domain)</strong> — 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
             <li><strong>Aplikační vrstva (Application)</strong> — 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
             <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> — 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
             <li><strong>Prezentační vrstva (Presentation)</strong> — 50–70 %. Kontrolery pokryjte funkčními testy pro klíčové scénáře.</li>

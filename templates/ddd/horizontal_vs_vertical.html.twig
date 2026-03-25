@@ -40,7 +40,7 @@
         <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
             <li><a href="#traditional">Tradiční přístup k DDD</a></li>
-            <li><a href="#horizontal">Vertikální slice architektura</a></li>
+            <li><a href="#vertical-slice">Vertikální slice architektura</a></li>
             <li><a href="#comparison">Porovnání přístupů</a></li>
             <li><a href="#when-to-use">Kdy použít který přístup</a></li>
             <li><a href="#symfony-implementation">Implementace v Symfony 8</a></li>
@@ -94,8 +94,8 @@
     </p>
     </section>
 
-    <section id="horizontal" aria-labelledby="horizontal-heading">
-    <h2 id="horizontal-heading">Vertikální slice architektura (Vertical Slice Architecture)</h2>
+    <section id="vertical-slice" aria-labelledby="vertical-slice-heading">
+    <h2 id="vertical-slice-heading">Vertikální slice architektura (Vertical Slice Architecture)</h2>
     <p>
         Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
         Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
@@ -105,53 +105,53 @@
         <h3 id="vertical-slice-example-heading">Příklad: Struktura projektu s vertikální slice architekturou</h3>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
-│   ├── Registration/           # Feature: Registrace uživatelů
-│   │   ├── Domain/             # Doménová logika pro registraci
-│   │   ├── Application/       # Aplikační logika pro registraci
-│   │   │   ├── Command/
-│   │   │   │   ├── RegisterUser.php
-│   │   │   │   └── RegisterUserHandler.php
-│   │   │   └── Service/
-│   │   │       └── RegistrationService.php
-│   │   └── Presentation/      # Prezentační vrstva pro registraci
-│   │       ├── Controller/
-│   │       │   └── UserRegistrationController.php
-│   │       └── Form/
-│   │           └── UserRegistrationForm.php
-│   ├── Profile/                # Feature: Profil uživatele
-│   │   ├── Application/       # Aplikační logika pro profil
-│   │   │   ├── Query/
-│   │   │   │   ├── GetUserProfile.php
-│   │   │   │   └── GetUserProfileHandler.php
-│   │   └── Presentation/      # Prezentační vrstva pro profil
-│   │       ├── Controller/
-│   │       │   └── UserProfileController.php
-│   │       └── ViewModel/
-│   │           └── UserProfileViewModel.php
-│   ├── Domain/                # Sdílená doménová logika pro celý kontext
+│   ├── Domain/                # Doménová vrstva — sdílená pro celý kontext
 │   │   ├── Model/
 │   │   │   └── User.php       # Entita (Aggregate Root)
 │   │   ├── ValueObject/
 │   │   │   ├── UserId.php
 │   │   │   └── Email.php
+│   │   ├── Event/
+│   │   │   └── UserRegistered.php
 │   │   └── Repository/
 │   │       └── UserRepository.php  # Rozhraní
-│   └── Infrastructure/       # Infrastruktura pro celý kontext
-│       └── Repository/
-│           └── DoctrineUserRepository.php
+│   ├── Infrastructure/        # Infrastruktura pro celý kontext
+│   │   └── Repository/
+│   │       └── DoctrineUserRepository.php
+│   ├── Registration/          # Feature: Registrace uživatelů
+│   │   ├── Command/
+│   │   │   ├── RegisterUser.php
+│   │   │   └── RegisterUserHandler.php
+│   │   └── Controller/
+│   │       └── RegistrationController.php
+│   └── Profile/               # Feature: Profil uživatele
+│       ├── Query/
+│       │   ├── GetUserProfile.php
+│       │   └── GetUserProfileHandler.php
+│       ├── Controller/
+│       │   └── ProfileController.php
+│       └── ViewModel/
+│           └── UserProfileViewModel.php
 ├── OrderManagement/           # Bounded Context: Správa objednávek
-│   ├── Checkout/              # Feature: Pokladna
-│   │   ├── Application/
-│   │   │   ├── Command/
-│   │   │   │   ├── CreateOrder.php
-│   │   │   │   └── CreateOrderHandler.php
-│   │   └── Presentation/
-│   │       ├── Controller/
-│   │       │   └── CheckoutController.php
-│   │       └── Form/
-│   │           └── CheckoutForm.php
-│   └── ... (podobná struktura jako u UserManagement)
-└── Shared/                    # Sdílené komponenty pro celý systém
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/
+│   │   │   ├── Order.php      # Aggregate Root
+│   │   │   └── OrderItem.php
+│   │   ├── ValueObject/
+│   │   │   ├── OrderId.php
+│   │   │   └── Money.php
+│   │   └── Repository/
+│   │       └── OrderRepository.php
+│   ├── Infrastructure/
+│   │   └── Repository/
+│   │       └── DoctrineOrderRepository.php
+│   └── Checkout/              # Feature: Pokladna
+│       ├── Command/
+│       │   ├── CreateOrder.php
+│       │   └── CreateOrderHandler.php
+│       └── Controller/
+│           └── CheckoutController.php
+└── Shared/                    # Skutečně sdílené komponenty
     └── Domain/
         └── Exception/
             └── DomainException.php</code></pre>
@@ -161,6 +161,19 @@
         Ve vertikální slice architektuře jsou funkce (features) organizovány jako vertikální řezy (slices) přes všechny vrstvy, přičemž každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
         Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
     </p>
+
+    <div class="note" role="note" aria-labelledby="konvence-heading">
+        <h3 id="konvence-heading">Konvence struktury v tomto průvodci</h3>
+        <p>
+            V celém průvodci používáme konzistentní strukturu pro vertikální slice architekturu:
+        </p>
+        <ul>
+            <li><code>{BC}/Domain/</code> — doménová vrstva sdílená v rámci bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
+            <li><code>{BC}/Infrastructure/</code> — infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
+            <li><code>{BC}/{Feature}/</code> — feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
+            <li><code>Shared/</code> — pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
+        </ul>
+    </div>
     </section>
 
     <section id="comparison" aria-labelledby="comparison-heading">

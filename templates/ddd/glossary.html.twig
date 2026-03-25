@@ -573,15 +573,24 @@
                     </dt>
                     <dd>
                         <p>
-                            Predikát zapouzdřující obchodní pravidlo, které určuje, zda objekt splňuje
-                            určité kritérium. Specifikace lze skládat pomocí logických operátorů AND, OR, NOT.
-                            Jsou užitečné pro validaci (splňuje objednávka podmínky k potvrzení?),
-                            výběr (vyber zákazníky splňující kritéria věrnostního programu) a konstrukční
-                            pravidla (smí být produkt přidán do košíku?). Centralizují pravidla, která
-                            by jinak byla rozptýlena po celé doméně.
+                            Zapouzdřuje obchodní pravidlo do znovupoužitelného, skládatelného objektu —
+                            predikátu, který určuje, zda doménový objekt splňuje určité kritérium.
+                            Specifikace lze skládat pomocí logických operátorů AND, OR, NOT a vytvářet
+                            tak komplexní podmínky z jednoduchých stavebních bloků. Vzor popsal Eric Evans
+                            (2003, kapitola 9) a podrobněji rozpracovali Evans &amp; Fowler ve společném
+                            whitepaperu.
                         </p>
-                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 9, str. 224–236; Evans &amp; Fowler, <em>Specification</em> (whitepaper, 1997)</p>
-                        <p class="term-related">Viz také: <a href="#term-invariant">Invariant</a>, <a href="#term-domenova-sluzba">Doménová služba</a></p>
+                        <p>
+                            Specifikace má tři hlavní způsoby použití: <strong>validace</strong> — ověření,
+                            zda objekt splňuje obchodní pravidlo (splňuje objednávka podmínky k potvrzení?);
+                            <strong>selekce (dotazování)</strong> — výběr objektů z kolekce podle kritéria
+                            (vyber zákazníky splňující kritéria věrnostního programu); a <strong>konstrukce</strong> —
+                            specifikace požadavků na nově vytvářený objekt (smí být produkt přidán do košíku?).
+                            Centralizují pravidla, která by jinak byla rozptýlena po celé doméně, a umožňují
+                            jejich testování v izolaci.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 9, str. 224–237; Evans &amp; Fowler, <em>Specification</em> (whitepaper, 1997)</p>
+                        <p class="term-related">Viz také: <a href="#term-repozitar">Repozitář</a>, <a href="#term-agregat">Agregát</a>, <a href="#term-invariant">Invariant</a>, <a href="#term-domenova-sluzba">Doménová služba</a></p>
                     </dd>
                 </div>
 
@@ -602,6 +611,28 @@
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 128–131</p>
                         <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-koren-agregatu">Kořen agregátu</a>, <a href="#term-specifikace">Specifikace</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-domenova-vyjimka">
+                    <dt>
+                        <strong>Doménová výjimka</strong>
+                        <span class="term-en">(Domain Exception)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Vlastní třídy výjimek, které vyjadřují porušení doménových pravidel v terminologii
+                            Všudypřítomného jazyka. Namísto generických výjimek (<code>InvalidArgumentException</code>,
+                            <code>RuntimeException</code>) doménový model vyhazuje specifické výjimky pojmenované
+                            podle porušeného pravidla: <code>InsufficientFundsException</code>,
+                            <code>OrderAlreadyConfirmedException</code>, <code>InvalidEmailFormatException</code>.
+                            Doménové výjimky zvyšují čitelnost kódu, usnadňují diagnostiku chyb a umožňují
+                            klientskému kódu reagovat na konkrétní typy selhání. Jsou přirozeným mechanismem
+                            signalizace porušení invariantů agregátu — pokud agregát nemůže provést požadovanou
+                            operaci, protože by tím porušil své obchodní pravidlo, vyhodí doménovou výjimku.
+                        </p>
+                        <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013)</p>
+                        <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-invariant">Invariant</a>, <a href="#term-vsudypritomny-jazyk">Všudypřítomný jazyk</a></p>
                     </dd>
                 </div>
 
@@ -997,6 +1028,34 @@
                         </p>
                         <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8</p>
                         <p class="term-related">Viz také: <a href="#term-korelacni-id">Korelační ID</a>, <a href="#term-domenova-udalost">Doménová událost</a></p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="term-saga-integracni">
+                    <dt>
+                        <strong>Sága / Správce procesů</strong>
+                        <span class="term-en">(Saga / Process Manager)</span>
+                    </dt>
+                    <dd>
+                        <p>
+                            Koordinuje dlouhodobě běžící byznysový proces, který přesahuje hranice jednoho
+                            agregátu nebo Bounded Contextu. Sága udržuje konzistenci prostřednictvím
+                            kompenzačních akcí namísto distribuovaných transakcí — pokud krok procesu selže,
+                            sága provede kompenzační akce pro již dokončené kroky, čímž vrátí systém do
+                            konzistentního stavu. Příklad: proces dokončení objednávky zahrnující rezervaci
+                            zboží, zpracování platby a odeslání notifikace — selhání platby spustí kompenzační
+                            akci zrušení rezervace.
+                        </p>
+                        <p>
+                            Rozlišujeme dva přístupy: <strong>choreografie</strong> — ságy řízené výhradně
+                            doménovými událostmi bez centrálního koordinátora; každý účastník reaguje na události
+                            ostatních a publikuje vlastní. <strong>Orchestrace</strong> — centrální správce procesů
+                            (Process Manager) řídí průběh ságy, přijímá události, rozhoduje o dalším kroku
+                            a vydává příkazy. Choreografie je jednodušší pro krátké procesy; orchestrace je
+                            vhodnější pro komplexní procesy s mnoha kroky a podmínkami.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Garcia-Molina &amp; Salem, <em>Sagas</em> (1987)</p>
+                        <p class="term-related">Viz také: <a href="#term-domenova-udalost">Doménová událost</a>, <a href="#term-eventual-consistency">Eventual Consistency</a>, <a href="#term-ohraniceny-kontext">Ohraničený kontext</a></p>
                     </dd>
                 </div>
 

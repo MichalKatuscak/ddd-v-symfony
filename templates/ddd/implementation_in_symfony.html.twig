@@ -43,11 +43,13 @@
             <li><a href="#entities">Implementace entit</a></li>
             <li><a href="#value-objects">Implementace hodnotových objektů</a></li>
             <li><a href="#repositories">Implementace repozitářů</a></li>
+            <li><a href="#doctrine-xml-mapping">Separace Doctrine mapování pomocí XML</a></li>
+            <li><a href="#php-enums">PHP 8.1+ Enums pro stavové typy</a></li>
             <li><a href="#domain-services">Implementace doménových služeb</a></li>
             <li><a href="#domain-events">Implementace doménových událostí</a></li>
             <li><a href="#application-services">Implementace aplikačních služeb</a></li>
             <li><a href="#controllers">Implementace kontrolerů</a></li>
-            <li><a href="#dependency-injection">Dependency Injection</a></li>
+            <li><a href="#dependency-injection">Dependency Injection a autowiring</a></li>
         </ul>
     </div>
 
@@ -182,30 +184,22 @@
         <h3 id="entity-example-heading">Příklad: Implementace entity v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Domain\Model;
 
 use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
-use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
-#[ORM\Table(name: 'users')]
 class User
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 36)]
-    private string $id;
-
-    #[ORM\Column(type: 'string', length: 255)]
+    private readonly string $id;
     private string $name;
-
-    #[ORM\Column(type: 'string', length: 255)]
     private string $email;
+    private readonly \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $createdAt;
-
+    /** @var object[] */
     private array $events = [];
 
     public function __construct(UserId $id, string $name, Email $email)
@@ -253,6 +247,9 @@ class User
         $this->events[] = $event;
     }
 
+    /**
+     * @return object[]
+     */
     public function releaseEvents(): array
     {
         $events = $this->events;
@@ -264,7 +261,7 @@ class User
     </div>
 
     <p>
-        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Entity mohou také generovat doménové události,
+        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Všimněte si, že entita neobsahuje žádné Doctrine atributy — doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekce <a href="#doctrine-xml-mapping">Separace Doctrine mapování</a>). Neměnné vlastnosti (<code>$id</code>, <code>$createdAt</code>) jsou označeny jako <code>readonly</code>. Entity mohou také generovat doménové události,
         které jsou uloženy v poli <code>$events</code> a mohou být později uvolněny a zpracovány.
     </p>
     </section>
@@ -279,15 +276,13 @@ class User
         <h3 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Domain\ValueObject;
 
-use Doctrine\ORM\Mapping as ORM;
-
-#[ORM\Embeddable]
 class Email
 {
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $value;
+    private readonly string $value;
 
     public function __construct(string $value)
     {
@@ -303,7 +298,7 @@ class Email
         return $this->value;
     }
 
-    public function equals(Email $other): bool
+    public function equals(self $other): bool
     {
         return $this->value === $other->value;
     }
@@ -316,8 +311,8 @@ class Email
     </div>
 
     <p>
-        V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné a nemají žádnou identitu.
-        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
+        V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné (vlastnost <code>$value</code> je <code>readonly</code>) a nemají žádnou identitu.
+        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu. Stejně jako u entit, ani hodnotové objekty neobsahují Doctrine atributy — mapování je řešeno externě.
     </p>
     </section>
 
@@ -330,6 +325,8 @@ class Email
     <div class="tip" role="note" aria-labelledby="repository-example-heading">
         <h3 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Domain\Repository;
 
@@ -347,6 +344,8 @@ interface UserRepository
 }</code></pre>
 
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Infrastructure\Repository;
 
@@ -394,6 +393,242 @@ class DoctrineUserRepository implements UserRepository
     </p>
     </section>
 
+    <section id="doctrine-xml-mapping" aria-labelledby="doctrine-xml-mapping-heading">
+    <h2 id="doctrine-xml-mapping-heading">Separace Doctrine mapování pomocí XML</h2>
+    <p>
+        V předchozích příkladech jste si všimli, že doménové entity a hodnotové objekty neobsahují žádné Doctrine atributy (<code>#[ORM\Entity]</code>, <code>#[ORM\Column]</code> apod.).
+        To je záměrné — v čistém DDD přístupu by doménová vrstva neměla mít žádnou závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
+        mezi doménovým modelem a persistenční vrstvou, čímž porušují princip <strong>Dependency Inversion</strong>.
+    </p>
+
+    <div class="warning">
+        <h3>Proč Doctrine atributy nepatří do doménové vrstvy?</h3>
+        <ul>
+            <li><strong>Porušení Dependency Inversion Principle</strong> — doménová vrstva (vysokoúrovňový modul) závisí na Doctrine ORM (nízkoúrovňový modul). Správný směr závislosti je opačný.</li>
+            <li><strong>Znečištění doménového modelu</strong> — <code>use Doctrine\ORM\Mapping as ORM;</code> v doménové entitě znamená, že doména „ví" o databázi. Čistá doména by měla být POPO (Plain Old PHP Object).</li>
+            <li><strong>Obtížná záměnitelnost</strong> — pokud chcete změnit persistenční mechanismus (např. z MySQL na MongoDB nebo Event Store), musíte upravovat doménové entity.</li>
+            <li><strong>Komplikace testování</strong> — unit testy doménových entit nepotřebují Doctrine, ale atributy vytvářejí nepříjemnou závislost při autoloadingu.</li>
+        </ul>
+    </div>
+
+    <p>
+        Řešením je <strong>XML mapování</strong> (nebo alternativně YAML, i když XML je preferované kvůli validaci schématem). Mapovací soubory se umístí do konfiguračního adresáře
+        mimo doménovou vrstvu:
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="xml-mapping-structure-heading">
+        <h3 id="xml-mapping-structure-heading">Příklad: Struktura souborů pro XML mapování</h3>
+        <pre><code class="language-bash">config/
+└── doctrine/
+    ├── UserManagement/
+    │   └── User.orm.xml
+    └── OrderManagement/
+        ├── Order.orm.xml
+        └── OrderItem.orm.xml</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="xml-mapping-example-heading">
+        <h3 id="xml-mapping-example-heading">Příklad: XML mapování entity Order</h3>
+        <pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd"&gt;
+
+    &lt;entity name="App\OrderManagement\Domain\Model\Order" table="orders"&gt;
+        &lt;id name="id" type="string" length="36"&gt;
+            &lt;generator strategy="NONE"/&gt;
+        &lt;/id&gt;
+
+        &lt;field name="customerId" type="string" length="36" column="customer_id"/&gt;
+        &lt;field name="status" type="string" length="20" column="status"/&gt;
+        &lt;field name="createdAt" type="datetime_immutable" column="created_at"/&gt;
+
+        &lt;one-to-many field="items" target-entity="App\OrderManagement\Domain\Model\OrderItem" mapped-by="order"&gt;
+            &lt;cascade&gt;
+                &lt;cascade-persist/&gt;
+                &lt;cascade-remove/&gt;
+            &lt;/cascade&gt;
+        &lt;/one-to-many&gt;
+    &lt;/entity&gt;
+
+&lt;/doctrine-mapping&gt;</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="xml-mapping-config-heading">
+        <h3 id="xml-mapping-config-heading">Příklad: Konfigurace Doctrine pro XML mapování v Symfony</h3>
+        <pre><code class="language-yaml"># config/packages/doctrine.yaml
+doctrine:
+    orm:
+        mappings:
+            UserManagement:
+                type: xml
+                dir: '%kernel.project_dir%/config/doctrine/UserManagement'
+                prefix: App\UserManagement\Domain\Model
+                alias: UserManagement
+                is_bundle: false
+            OrderManagement:
+                type: xml
+                dir: '%kernel.project_dir%/config/doctrine/OrderManagement'
+                prefix: App\OrderManagement\Domain\Model
+                alias: OrderManagement
+                is_bundle: false</code></pre>
+    </div>
+
+    <div class="note">
+        <h3>Výhody XML mapování pro DDD</h3>
+        <ul>
+            <li><strong>Čistá doménová vrstva</strong> — entity jsou prosté PHP objekty (POPO) bez jakýchkoliv závislostí na frameworku či ORM.</li>
+            <li><strong>Validace schématem</strong> — XML soubory lze validovat proti XSD schématu Doctrine, čímž se snižuje riziko chyb v mapování.</li>
+            <li><strong>Oddělení odpovědností</strong> — mapování je infrastrukturní záležitost a patří do infrastrukturní vrstvy, nikoliv do domény.</li>
+            <li><strong>Snadná záměna persistence</strong> — při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.</li>
+        </ul>
+    </div>
+    </section>
+
+    <section id="php-enums" aria-labelledby="php-enums-heading">
+    <h2 id="php-enums-heading">PHP 8.1+ Enums pro stavové typy</h2>
+    <p>
+        Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums), které představují idiomatický způsob, jak v DDD implementovat stavové hodnotové objekty
+        s konečnou množinou hodnot — například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
+        nebo jako plnohodnotné hodnotové objekty, avšak nativní enums nabízejí typovou bezpečnost přímo na úrovni jazyka.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="enum-example-heading">
+        <h3 id="enum-example-heading">Příklad: Backed enum pro stav objednávky</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\ValueObject;
+
+enum OrderStatus: string
+{
+    case DRAFT = 'draft';
+    case CONFIRMED = 'confirmed';
+    case PAID = 'paid';
+    case SHIPPED = 'shipped';
+    case DELIVERED = 'delivered';
+    case CANCELLED = 'cancelled';
+
+    /**
+     * Vrátí stavy, do kterých je možné z aktuálního stavu přejít.
+     *
+     * @return self[]
+     */
+    public function allowedTransitions(): array
+    {
+        return match ($this) {
+            self::DRAFT => [self::CONFIRMED, self::CANCELLED],
+            self::CONFIRMED => [self::PAID, self::CANCELLED],
+            self::PAID => [self::SHIPPED, self::CANCELLED],
+            self::SHIPPED => [self::DELIVERED],
+            self::DELIVERED => [],
+            self::CANCELLED => [],
+        };
+    }
+
+    public function canTransitionTo(self $target): bool
+    {
+        return in_array($target, $this->allowedTransitions(), true);
+    }
+}</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="enum-usage-heading">
+        <h3 id="enum-usage-heading">Příklad: Použití enum v doménové entitě</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Model;
+
+use App\OrderManagement\Domain\Event\OrderCreated;
+use App\OrderManagement\Domain\Event\OrderStatusChanged;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\OrderStatus;
+
+class Order
+{
+    private readonly string $id;
+    private OrderStatus $status;
+    private readonly \DateTimeImmutable $createdAt;
+
+    /** @var object[] */
+    private array $events = [];
+
+    public function __construct(OrderId $id)
+    {
+        $this->id = $id->value();
+        $this->status = OrderStatus::DRAFT;
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new OrderCreated($id));
+    }
+
+    public function status(): OrderStatus
+    {
+        return $this->status;
+    }
+
+    public function transitionTo(OrderStatus $newStatus): void
+    {
+        if (!$this->status->canTransitionTo($newStatus)) {
+            throw new \DomainException(sprintf(
+                'Nelze přejít ze stavu "%s" do stavu "%s".',
+                $this->status->value,
+                $newStatus->value
+            ));
+        }
+
+        $oldStatus = $this->status;
+        $this->status = $newStatus;
+
+        $this->recordEvent(new OrderStatusChanged(
+            new OrderId($this->id),
+            $oldStatus,
+            $newStatus
+        ));
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->events[] = $event;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function releaseEvents(): array
+    {
+        $events = $this->events;
+        $this->events = [];
+
+        return $events;
+    }
+}</code></pre>
+    </div>
+
+    <div class="note">
+        <h3>Kdy použít enum a kdy plnohodnotný hodnotový objekt?</h3>
+        <ul>
+            <li><strong>Enum</strong> — pro jednoduché konečné stavy, kde hodnota je jedna z pevně daných variant: <code>OrderStatus</code>, <code>UserRole</code>, <code>TaskPriority</code>, <code>Currency</code>. Enums podporují metody, takže lze zapouzdřit i přechodovou logiku (viz <code>allowedTransitions()</code>).</li>
+            <li><strong>Plnohodnotný hodnotový objekt (Value Object)</strong> — pro komplexní typy, které vyžadují validaci, formátování nebo aritmetiku: <code>Money</code> (částka + měna + zaokrouhlování), <code>Email</code> (validace formátu), <code>Address</code> (více polí), <code>DateRange</code> (interval s logikou překrývání).</li>
+        </ul>
+        <p>
+            Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepotřebuje složitou vnitřní logiku, je enum správná volba. Pokud typ obsahuje libovolné hodnoty, validaci nebo výpočty, použijte hodnotový objekt.
+        </p>
+    </div>
+
+    <div class="warning">
+        <h3>Doctrine a PHP enums</h3>
+        <p>
+            Doctrine ORM 2.19+ a 3.x nativně podporují PHP enums. Při použití XML mapování stačí u pole uvést <code>type="string"</code> a <code>enumType="App\OrderManagement\Domain\ValueObject\OrderStatus"</code>.
+            Doctrine automaticky konvertuje hodnotu mezi PHP enum a databázovým sloupcem. Pro backed enums se ukládá backing value (<code>string</code> nebo <code>int</code>).
+        </p>
+    </div>
+    </section>
+
     <section id="domain-services" aria-labelledby="domain-services-heading">
     <h2 id="domain-services-heading">Implementace doménových služeb</h2>
     <p>
@@ -404,6 +639,8 @@ class DoctrineUserRepository implements UserRepository
     <div class="tip" role="note" aria-labelledby="domain-service-example-heading">
         <h3 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\OrderManagement\Domain\Service;
 
@@ -461,6 +698,8 @@ class PaymentService
         <h3 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Domain\Event;
 
 use App\UserManagement\Domain\ValueObject\Email;
@@ -468,9 +707,9 @@ use App\UserManagement\Domain\ValueObject\UserId;
 
 class UserRegistered
 {
-    private string $userId;
-    private string $email;
-    private \DateTimeImmutable $occurredAt;
+    private readonly string $userId;
+    private readonly string $email;
+    private readonly \DateTimeImmutable $occurredAt;
 
     public function __construct(UserId $userId, Email $email)
     {
@@ -513,6 +752,8 @@ class UserRegistered
         <h3 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Registration\Command;
 
 class RegisterUser
@@ -526,6 +767,8 @@ class RegisterUser
 }</code></pre>
 
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Command;
 
@@ -572,6 +815,8 @@ class RegisterUserHandler
         <h3 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
 
+declare(strict_types=1);
+
 namespace App\UserManagement\Profile\Query;
 
 class GetUserProfile
@@ -583,6 +828,8 @@ class GetUserProfile
 }</code></pre>
 
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Profile\Query;
 
@@ -633,6 +880,8 @@ class GetUserProfileHandler
     <div class="tip" role="note" aria-labelledby="controller-example-heading">
         <h3 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Controller;
 
@@ -686,7 +935,7 @@ class RegistrationController extends AbstractController
     </section>
 
     <section id="dependency-injection" aria-labelledby="dependency-injection-heading">
-    <h2 id="dependency-injection-heading">Dependency Injection</h2>
+    <h2 id="dependency-injection-heading">Dependency Injection a autowiring</h2>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
         Symfony 8 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
@@ -735,6 +984,67 @@ services:
         Repozitáře jsou explicitně konfigurovány, aby bylo možné použít rozhraní místo konkrétních implementací.
         Messenger komponenta je konfigurována pro implementaci CQRS.
     </p>
+
+    <h3 id="autowiring-bounded-contexts">Autowiring s oddělenými Bounded Contexts</h3>
+    <p>
+        Ve velkých projektech s více bounded kontexty je vhodné konfigurovat autowiring pro každý kontext samostatně.
+        Tím získáte přesnější kontrolu nad tím, které třídy jsou registrovány jako služby, a můžete pro každý kontext
+        definovat specifická pravidla. Tento přístup také lépe odráží izolaci kontextů — každý bounded context
+        má svou vlastní konfiguraci a je jasně ohraničen i na úrovni service containeru.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="autowiring-bc-example-heading">
+        <h3 id="autowiring-bc-example-heading">Příklad: Samostatný autowiring pro každý Bounded Context</h3>
+        <pre><code class="language-yaml"># config/services.yaml
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # ──────────────────────────────────────────────────
+    # Bounded Context: UserManagement
+    # ──────────────────────────────────────────────────
+    App\UserManagement\:
+        resource: '../src/UserManagement/'
+        exclude:
+            - '../src/UserManagement/Domain/Model/'
+            - '../src/UserManagement/Domain/ValueObject/'
+            - '../src/UserManagement/Domain/Event/'
+
+    App\UserManagement\Domain\Repository\UserRepository:
+        class: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository
+
+    # ──────────────────────────────────────────────────
+    # Bounded Context: OrderManagement
+    # ──────────────────────────────────────────────────
+    App\OrderManagement\:
+        resource: '../src/OrderManagement/'
+        exclude:
+            - '../src/OrderManagement/Domain/Model/'
+            - '../src/OrderManagement/Domain/ValueObject/'
+            - '../src/OrderManagement/Domain/Event/'
+
+    App\OrderManagement\Domain\Repository\OrderRepository:
+        class: App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository
+
+    # ──────────────────────────────────────────────────
+    # Shared: sdílené komponenty napříč kontexty
+    # ──────────────────────────────────────────────────
+    App\Shared\:
+        resource: '../src/Shared/'
+        exclude:
+            - '../src/Shared/Domain/ValueObject/'</code></pre>
+    </div>
+
+    <div class="note">
+        <h3>Výhody odděleného autowiringu pro Bounded Contexts</h3>
+        <ul>
+            <li><strong>Explicitní hranice</strong> — každý bounded context má svůj vlastní blok konfigurace, což jasně dokumentuje hranice kontextů i na úrovni infrastruktury.</li>
+            <li><strong>Granulární exclude pravidla</strong> — můžete pro každý kontext vyloučit jiné adresáře (např. jeden kontext může mít doménové služby, jiný ne).</li>
+            <li><strong>Snazší refaktoring</strong> — při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z <code>services.yaml</code>.</li>
+            <li><strong>Prevence nechtěných závislostí</strong> — pokud kontext A omylem importuje třídu z kontextu B, je snadné to odhalit v konfiguraci.</li>
+        </ul>
+    </div>
 
     <div class="warning">
         <h3>Důležité poznámky</h3>
