@@ -173,16 +173,9 @@ li { margin-bottom: 0.35rem; }
 .caution h2::before, .caution h3::before, .caution h4::before { content: "\26D4"; color: #ef4444; }
 
 .note    { border-left: 4px solid var(--color-accent); }
-.note::before { content: "\2139"; color: var(--color-accent); }
-
 .tip     { border-left: 4px solid #22c55e; }
-.tip::before  { content: "\25BA"; color: #22c55e; }
-
 .warning { border-left: 4px solid #f59e0b; }
-.warning::before { content: "\26A0"; color: #f59e0b; }
-
 .caution { border-left: 4px solid #ef4444; }
-.caution::before { content: "\26D4"; color: #ef4444; }
 
 .note h3, .note h4,
 .tip h3, .tip h4,
