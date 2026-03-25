@@ -131,6 +131,13 @@ li { margin-bottom: 0.35rem; }
    COMPONENTS
    ===================== */
 
+/* Table of contents — skrytý na desktopu (kde je .toc-sidebar), viditelný na mobilu */
+@media (min-width: 769px) {
+    .main-with-toc:has(.toc-sidebar:not(.no-toc)) .table-of-contents {
+        display: none;
+    }
+}
+
 /* Table of contents */
 .table-of-contents {
     background: var(--bg-surface);
