@@ -200,6 +200,15 @@ li { margin-bottom: 0.35rem; }
     margin-bottom: 0;
 }
 
+@media (max-width: 576px) {
+    .note, .tip, .warning, .caution {
+        padding: 1rem 0.75rem 1rem 2.5rem;
+    }
+    .note::before, .tip::before, .warning::before, .caution::before {
+        left: 0.75rem;
+    }
+}
+
 /* Heading anchor links */
 .anchor-link {
     display: inline-block;
