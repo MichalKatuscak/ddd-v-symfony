@@ -181,6 +181,14 @@ li { margin-bottom: 0.35rem; }
     color: var(--text-heading);
 }
 
+/* Remove redundant bottom margin when code block is last child in a callout */
+.note .code-block-wrapper:last-child,
+.tip .code-block-wrapper:last-child,
+.warning .code-block-wrapper:last-child,
+.caution .code-block-wrapper:last-child {
+    margin-bottom: 0;
+}
+
 /* Heading anchor links */
 .anchor-link {
     display: inline-block;
@@ -276,8 +284,8 @@ h4:hover .anchor-link { opacity: 1; }
 /* Breadcrumbs */
 .breadcrumb-container {
     font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
     border-bottom: 1px solid var(--border);
 }
 .breadcrumb {
@@ -547,7 +555,6 @@ h4:hover .anchor-link { opacity: 1; }
 .content-area {
     flex: 1;
     padding: 2.5rem 2rem;
-    max-width: calc(820px + 4rem); /* 820px content + padding */
     min-width: 0;
 }
 
