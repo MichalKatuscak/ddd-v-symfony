@@ -180,25 +180,21 @@
     <script src="{{ asset('js/modern-script.js') }}" defer></script>
     <script src="{{ asset('js/code-script.js') }}" defer></script>
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            document.querySelectorAll('pre code').forEach((el) => {
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('pre code').forEach(function (el) {
                 hljs.highlightElement(el);
             });
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            const svgElements = document.querySelectorAll('.diagram-container svg');
-            if (svgElements) {
-                svgElements.forEach(function(svgElement) {
-                    svgPanZoom(svgElement, {
-                        zoomEnabled: true,
-                        controlIconsEnabled: true,
-                        fit: true,
-                        center: true,
-                        minZoom: 0.5,
-                        maxZoom: 20
-                    });
+            var svgElements = document.querySelectorAll('.diagram-container svg');
+            svgElements.forEach(function (svgElement) {
+                svgPanZoom(svgElement, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: true,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.5,
+                    maxZoom: 20
                 });
-            }
+            });
         });
     </script>
     <script>

@@ -78,16 +78,14 @@ article > h3:first-child { margin-top: 0; }
 .card-header h4, .card-header h5, .card-header h6,
 .card-body > h1:first-child, .card-body > h2:first-child,
 .card-body > h3:first-child, .card-body > h4:first-child,
-.info-card > h1:first-child, .info-card > h2:first-child,
-.info-card > h3:first-child, .info-card > h4:first-child,
-.warning-card > h1:first-child, .warning-card > h2:first-child,
-.warning-card > h3:first-child, .warning-card > h4:first-child,
-.example-card > h1:first-child, .example-card > h2:first-child,
-.example-card > h3:first-child, .example-card > h4:first-child,
-.practice-card > h1:first-child, .practice-card > h2:first-child,
-.practice-card > h3:first-child, .practice-card > h4:first-child,
-.success-card > h1:first-child, .success-card > h2:first-child,
-.success-card > h3:first-child, .success-card > h4:first-child { margin-top: 0; }
+.note > h1:first-child, .note > h2:first-child,
+.note > h3:first-child, .note > h4:first-child,
+.warning > h1:first-child, .warning > h2:first-child,
+.warning > h3:first-child, .warning > h4:first-child,
+.tip > h1:first-child, .tip > h2:first-child,
+.tip > h3:first-child, .tip > h4:first-child,
+.caution > h1:first-child, .caution > h2:first-child,
+.caution > h3:first-child, .caution > h4:first-child { margin-top: 0; }
 
 p { margin-top: 0; margin-bottom: 1rem; }
 
