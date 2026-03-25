@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const anchor = document.createElement('a');
         anchor.className = 'anchor-link';
         anchor.href = '#' + heading.id;
-        anchor.textContent = '§';
+        anchor.textContent = '#';
         anchor.setAttribute('aria-label', 'Link na tuto sekci');
         heading.appendChild(anchor);
     });
