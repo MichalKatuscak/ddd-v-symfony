@@ -1,0 +1,119 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DDD v praxi — kde to bolí | DDD Symfony{% endblock %}
+
+{% block meta_description %}Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další.{% endblock %}
+
+{% block meta_keywords %}DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "DDD v praxi — kde to bolí",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "publisher": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "datePublished": "2026-03-26",
+  "dateModified": "2026-03-26",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h1 itemprop="headline">DDD v praxi — kde to bolí</h1>
+
+    <p>
+        Předchozí kapitoly pokryly teorii i pokročilé vzory: od
+        <a href="{{ path('basic_concepts') }}">základních stavebních bloků</a> přes
+        <a href="{{ path('cqrs') }}">CQRS</a> a
+        <a href="{{ path('event_sourcing') }}">Event Sourcing</a> až po
+        <a href="{{ path('sagas') }}">Ságy a Process Managery</a>.
+        Teorie je přehledná. Implementace ale přináší třecí plochy, na které standardní DDD literatura
+        většinou neupozorňuje — místa, kde se architektonické ideály střetávají s realitou frameworku,
+        databáze, asynchronní infrastruktury nebo týmové dynamiky.
+    </p>
+
+    <p>
+        Tato kapitola je <strong>katalog 20 reálných problémů</strong>, se kterými se setkávají týmy
+        implementující DDD v PHP a Symfony. Pro každý problém najdete: popis situace, analýzu příčiny
+        a doporučené řešení — tam kde je to výmluvné, s ukázkou kódu.
+    </p>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <p id="toc-heading">Obsah kapitoly:</p>
+        <ul>
+            <li><a href="#doctrine">A — Doctrine vs. doménový model</a>
+                <ul>
+                    <li><a href="#a1-transakce">A1. Transakce přes agregáty a Unit of Work</a></li>
+                    <li><a href="#a2-spinavy-em">A2. „Špinavý" EntityManager a nechtěné změny</a></li>
+                    <li><a href="#a3-value-objects">A3. Mapping složitých Value Objects</a></li>
+                    <li><a href="#a4-lazy-loading">A4. Lazy loading vs. bohaté agregáty</a></li>
+                    <li><a href="#a5-identity">A5. Identity generation — kdy a kde</a></li>
+                    <li><a href="#a6-polymorfismus">A6. Polymorfismus a discriminator map</a></li>
+                </ul>
+            </li>
+            <li><a href="#async">B — Asynchronní infrastruktura</a>
+                <ul>
+                    <li><a href="#b1-outbox">B1. Outbox pattern — zaručené doručení událostí</a></li>
+                    <li><a href="#b2-debugging">B2. Debugging ztracené zprávy v Messengeru</a></li>
+                    <li><a href="#b3-idempotence">B3. Idempotence handlerů</a></li>
+                    <li><a href="#b4-ordering">B4. Ordering zpráv</a></li>
+                </ul>
+            </li>
+            <li><a href="#modelovani">C — Modelování</a>
+                <ul>
+                    <li><a href="#c1-validace">C1. Kde žije validace</a></li>
+                    <li><a href="#c2-stavy">C2. Stavový automat bez anémického modelu</a></li>
+                    <li><a href="#c3-acl">C3. Anti-Corruption Layer k externím API</a></li>
+                    <li><a href="#c4-language">C4. Ubiquitous Language drift</a></li>
+                </ul>
+            </li>
+            <li><a href="#symfony">D — Symfony-specifické třenice</a>
+                <ul>
+                    <li><a href="#d1-form">D1. Symfony Form vs. Command</a></li>
+                    <li><a href="#d2-api-platform">D2. API Platform vs. doménové agregáty</a></li>
+                    <li><a href="#d3-voter">D3. Security Voter vs. doménová oprávnění</a></li>
+                </ul>
+            </li>
+            <li><a href="#tym">E — Organizace a tým</a>
+                <ul>
+                    <li><a href="#e1-management">E1. Business case pro refaktoring</a></li>
+                    <li><a href="#e2-strangler">E2. Postupné zavedení — strangler fig</a></li>
+                    <li><a href="#e3-silos">E3. Knowledge silos a bus factor</a></li>
+                </ul>
+            </li>
+            <li><a href="#shrnuti">Shrnutí</a></li>
+            <li><a href="#cviceni">Cvičení</a></li>
+        </ul>
+    </div>
+
+    {# ═══════════════════════════════════════════════════════════
+       BLOK A: Doctrine vs. doménový model
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="doctrine" aria-labelledby="doctrine-heading">
+    <h2 id="doctrine-heading">A — Doctrine vs. doménový model</h2>
+
+    <p>
+        Doctrine ORM je mocný nástroj, ale jeho interní model (Unit of Work, Identity Map, lazy loading)
+        byl navržen pro jednoduchý CRUD. Bohaté doménové modely s ním přicházejí do konfliktu na šesti
+        místech.
+    </p>
+
+    </article>
+{% endblock %}
+
+{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
