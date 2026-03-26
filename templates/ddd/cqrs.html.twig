@@ -1664,96 +1664,22 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     </p>
     <p>
         Saga naslouchá doménovým událostem a na základě nich odesílá příkazy do dalších kontextů.
-        Pokud některý krok selže, Saga provede <strong>kompenzační akce</strong> (místo rollbacku
-        distribuované transakce — ten v distribuovaném systému není možný). Dva hlavní přístupy:
+        Pokud některý krok selže, Saga provede <strong>kompenzační akce</strong> místo rollbacku
+        distribuované transakce. Dva hlavní přístupy:
     </p>
 
     <ul>
-        <li><strong>Choreografie</strong> — kontexty komunikují pouze přes události, bez centrálního koordinátora.
-            Jednodušší, ale obtížnější sledovat tok procesu a diagnostikovat selhání.</li>
-        <li><strong>Orchestrace</strong> — centrální Process Manager řídí tok procesu a odesílá příkazy.
-            Snáze pochopitelné a laditelné, ale zavádí centrální závislost.</li>
+        <li><strong>Choreografie</strong> — kontexty komunikují pouze přes události, bez centrálního koordinátora.</li>
+        <li><strong>Orchestrace</strong> — centrální Process Manager řídí tok procesu a odesílá příkazy.</li>
     </ul>
 
-    <div class="tip" role="note" aria-labelledby="saga-priklad-heading">
-        <h3 id="saga-priklad-heading">PHP: Zjednodušená Saga pro proces objednávky</h3>
-        <pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace App\Ordering\Application\Saga;
-
-use App\Ordering\Domain\Event\OrderPlaced;
-use App\Payment\Application\Command\ChargeCustomer;
-use App\Payment\Domain\Event\PaymentSucceeded;
-use App\Payment\Domain\Event\PaymentFailed;
-use App\Ordering\Application\Command\ConfirmOrder;
-use App\Ordering\Application\Command\CancelOrder;
-use App\Warehouse\Application\Command\ReserveStock;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Messenger\MessageBusInterface;
-
-/**
- * Saga koordinující proces objednávky napříč kontexty:
- * Ordering → Payment → Warehouse
- *
- * Tok: OrderPlaced → ChargeCustomer → PaymentSucceeded → ConfirmOrder + ReserveStock
- *                                   → PaymentFailed → CancelOrder (kompenzace)
- */
-#[AsMessageHandler]
-final class OrderProcessSaga
-{
-    public function __construct(
-        private readonly MessageBusInterface $commandBus,
-    ) {}
-
-    public function __invoke(OrderPlaced|PaymentSucceeded|PaymentFailed $event): void
-    {
-        match (true) {
-            $event instanceof OrderPlaced => $this->onOrderPlaced($event),
-            $event instanceof PaymentSucceeded => $this->onPaymentSucceeded($event),
-            $event instanceof PaymentFailed => $this->onPaymentFailed($event),
-        };
-    }
-
-    private function onOrderPlaced(OrderPlaced $event): void
-    {
-        // Krok 1: Iniciovat platbu
-        $this->commandBus->dispatch(new ChargeCustomer(
-            orderId: $event->orderId(),
-            customerId: $event->customerId(),
-            amount: $event->totalAmount(),
-        ));
-    }
-
-    private function onPaymentSucceeded(PaymentSucceeded $event): void
-    {
-        // Krok 2a: Platba úspěšná → potvrdit objednávku a rezervovat sklad
-        $this->commandBus->dispatch(new ConfirmOrder($event->orderId()));
-        $this->commandBus->dispatch(new ReserveStock($event->orderId()));
-    }
-
-    private function onPaymentFailed(PaymentFailed $event): void
-    {
-        // Krok 2b: Platba selhala → kompenzační akce: zrušit objednávku
-        $this->commandBus->dispatch(new CancelOrder(
-            orderId: $event->orderId(),
-            reason: 'Payment failed: ' . $event->failureReason(),
-        ));
-    }
-}</code></pre>
-    </div>
-
-    <div class="note" role="note" aria-labelledby="saga-stav-heading">
-        <h3 id="saga-stav-heading">Perzistence stavu Sagy</h3>
+    <div class="note" role="note" aria-labelledby="saga-kapitola-heading">
+        <h3 id="saga-kapitola-heading">Samostatná kapitola</h3>
         <p>
-            Výše uvedený příklad je zjednodušený — reálná Saga potřebuje <strong>persistentní stav</strong>.
-            Pokud worker spadne mezi zpracováním <code>OrderPlaced</code> a příjmem <code>PaymentSucceeded</code>,
-            musí Saga po restartu vědět, v jakém kroku se nachází. Stav Sagy (aktuální krok, ID korelovaných
-            entit, časové limity) se typicky ukládá do databázové tabulky.
-        </p>
-        <p>
-            Viz glosář: <a href="{{ path('glossary') }}#term-saga">Saga / Process Manager</a>.
+            Podrobný výklad ság — včetně implementace Process Manageru v Symfony Messenger,
+            perzistence stavu, timeout handlingu, kompenzačních strategií, paralelních kroků,
+            monitoringu a testování — najdete v kapitole
+            <a href="{{ path('sagas') }}">Ságy a Process Managery</a>.
         </p>
     </div>
 
@@ -1774,7 +1700,7 @@ final class OrderProcessSaga
         <li><strong>Eventual consistency</strong> je vlastnost, ne bug — řeší se vzory jako optimistická aktualizace UI, Post-Redirect-Get nebo synchronní projekce pro kritické cesty.</li>
         <li>Asynchronní zpracování vyžaduje <strong>monitoring dead letter queue</strong>, retry strategie a idempotentní handlery.</li>
         <li>Vlastní <strong>middleware</strong> (logování, autorizace) se přidává na command/query bus bez změny handlerů.</li>
-        <li><strong>Saga / Process Manager</strong> koordinuje dlouhotrvající procesy napříč Bounded Contexts pomocí kompenzačních akcí místo distribuovaných transakcí.</li>
+        <li><strong>Saga / Process Manager</strong> koordinuje dlouhotrvající procesy napříč Bounded Contexts — podrobně viz <a href="{{ path('sagas') }}">samostatná kapitola</a>.</li>
     </ul>
     </section>
 
@@ -1786,7 +1712,7 @@ final class OrderProcessSaga
             <li>Nakonfigurujte Symfony Messenger se dvěma busy (<code>command.bus</code>, <code>query.bus</code>) a vytvořte handler pro jeden z nich. Přidejte vlastní logovací middleware.</li>
             <li>Vytvořte denormalizovanou tabulku <code>cart_summary</code> a projektor, který ji aktualizuje na základě událostí <code>ItemAddedToCart</code> a <code>ItemRemovedFromCart</code>. Zajistěte idempotenci projektoru.</li>
             <li>Rozhodněte, které z následujících operací byste zpracovali asynchronně: registrace uživatele, odeslání potvrzovacího e-mailu, vytvoření faktury, validace adresy, aktualizace read modelu košíku. Zdůvodněte u každé.</li>
-            <li>Navrhněte Sagu pro proces „registrace uživatele", která po úspěšné registraci odešle uvítací e-mail a vytvoří výchozí nastavení profilu. Co se stane, když odeslání e-mailu selže? Jakou kompenzační akci navrhnete?</li>
+            <li>Prozkoumejte kapitolu <a href="{{ path('sagas') }}">Ságy a Process Managery</a> a navrhněte Sagu pro proces „registrace uživatele", která po úspěšné registraci odešle uvítací e-mail a vytvoří výchozí nastavení profilu.</li>
         </ol>
     </div>
     </section>
