@@ -1,0 +1,479 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ságy a Process Managery | DDD Symfony{% endblock %}
+
+{% block meta_description %}Kompletní průvodce ságami a process managery v DDD a Symfony 8. Naučte se implementovat kompenzační transakce, choreografii i orchestraci dlouhotrvajících procesů pomocí Symfony Messenger, řešit timeouty, paralelní kroky a monitorování distribuovaných procesů.{% endblock %}
+
+{% block meta_keywords %}saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Ságy a Process Managery",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "publisher": {
+            "@type": "Person",
+            "name": "Michal Katuščák"
+  },
+  "datePublished": "2026-03-26",
+  "dateModified": "2026-03-26",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block body %}
+    <article itemscope itemtype="https://schema.org/TechArticle">
+    <h1 itemprop="headline">Ságy a Process Managery</h1>
+
+    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <p id="toc-heading">Obsah kapitoly:</p>
+        <ul>
+            <li><a href="#proc-sagy">Proč potřebujeme ságy?</a></li>
+            <li><a href="#kompenzacni-transakce">Kompenzační transakce</a></li>
+            <li><a href="#choreografie">Choreografie</a></li>
+            <li><a href="#limity-choreografie">Limity choreografie</a></li>
+            <li><a href="#orchestrace">Orchestrace — Process Manager</a></li>
+            <li><a href="#perzistence-stavu">Perzistence stavu ságy</a></li>
+            <li><a href="#messenger-implementace">Implementace v Symfony Messenger</a></li>
+            <li><a href="#timeouty">Timeouty a deadliny</a></li>
+            <li><a href="#kompenzacni-strategie">Kompenzační strategie v praxi</a></li>
+            <li><a href="#paralelni-kroky">Paralelní kroky</a></li>
+            <li><a href="#monitoring">Monitoring a observabilita</a></li>
+            <li><a href="#testovani">Testování ság</a></li>
+            <li><a href="#shrnuti">Shrnutí a rozhodovací matice</a></li>
+            <li><a href="#cviceni">Cvičení</a></li>
+        </ul>
+    </div>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 1: Proč potřebujeme ságy?
+       ─────────────────────────────────────────────────────────── #}
+    <section id="proc-sagy" aria-labelledby="proc-sagy-heading">
+    <h2 id="proc-sagy-heading">Proč potřebujeme ságy?</h2>
+
+    <p>
+        Představte si typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
+        napříč odlišnými <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>:
+    </p>
+
+    <ol>
+        <li><strong>Ordering</strong> — vytvoření objednávky (agregát <code>Order</code>),</li>
+        <li><strong>Payment</strong> — stržení platby zákazníkovi (agregát <code>Payment</code>),</li>
+        <li><strong>Warehouse</strong> — rezervace zboží na skladě (agregát <code>StockReservation</code>),</li>
+        <li><strong>Shipping</strong> — vytvoření zásilky (agregát <code>Shipment</code>).</li>
+    </ol>
+
+    <p>
+        Každý z těchto kontextů má vlastní agregát, vlastní databázi (nebo alespoň vlastní tabulky
+        se striktně oddělenou odpovědností) a vlastní invarianty, které musí chránit. Agregáty
+        v různých Bounded Contexts nelze měnit v rámci jedné databázové transakce — to by porušilo
+        autonomii kontextů, jež je základním pilířem DDD. Jeden kontext nesmí sahat do databáze
+        jiného kontextu; komunikace probíhá výhradně prostřednictvím zpráv (událostí a příkazů).
+    </p>
+
+    <p>
+        Proč nemůžeme jednoduše zabalit všechny čtyři kroky do jediné databázové transakce?
+        Jednotlivé kontexty mohou běžet na různých serverech, používat různé databázové systémy
+        (PostgreSQL pro objednávky, Redis pro skladové rezervace, externí platební bránu pro platby)
+        a komunikovat asynchronně přes frontu zpráv. Koncept atomické transakce se zde rozpadá.
+    </p>
+
+    <div class="note" role="note" aria-labelledby="2pc-heading">
+        <h3 id="2pc-heading">Proč ne Two-Phase Commit (2PC)?</h3>
+        <p>
+            Distribuované databáze nabízejí protokol <strong>Two-Phase Commit</strong> (2PC), který
+            koordinuje commit napříč více databázemi. V první fázi (<em>prepare</em>) se všichni
+            účastníci ptají, zda mohou commitnout; ve druhé fázi (<em>commit</em>) koordinátor
+            rozhodne o globálním commitu nebo rollbacku. Tento přístup je však pro DDD systémy
+            nevhodný z několika důvodů:
+        </p>
+        <ul>
+            <li><strong>Výkonnostní overhead</strong> — všichni účastníci drží zámky po celou dobu
+                obou fází, což dramaticky snižuje propustnost systému.</li>
+            <li><strong>Tight coupling</strong> — všechny kontexty musí být dostupné současně;
+                výpadek jediného účastníka zablokuje celou transakci.</li>
+            <li><strong>Single point of failure</strong> — koordinátor 2PC je kritické místo;
+                jeho selhání mezi fázemi zanechá účastníky v nejistém stavu.</li>
+            <li><strong>Nekompatibilita s autonomií Bounded Contexts</strong> — 2PC vyžaduje, aby
+                všechny kontexty sdílely transakční protokol, čímž porušuje princip nezávislého
+                nasazení a vývoje jednotlivých kontextů.</li>
+        </ul>
+    </div>
+
+    <p>
+        Zamysleme se nad konkrétním scénářem selhání: systém úspěšně strhne platbu zákazníkovi
+        (krok 2), ale při rezervaci skladu zjistí, že zboží není dostupné (krok 3 selže).
+        Zákazník přišel o peníze, zboží nemá a systém je v <strong>nekonzistentním stavu</strong>.
+        Bez mechanismu, který by tento stav detekoval a napravil, zůstane zákazník bez peněz
+        i bez zboží — což je v produkčním systému nepřijatelné.
+    </p>
+
+    <p>
+        Řešení tohoto problému navrhli již v roce 1987 Hector Garcia-Molina a Kenneth Salem
+        ve svém přelomovém článku <em>Sagas</em>. Místo jedné velké distribuované transakce
+        navrhli rozdělit proces na sérii <strong>lokálních transakcí</strong>, z nichž každá
+        má definovanou <strong>kompenzační akci</strong>. Pokud některý krok selže, systém
+        provede kompenzační akce pro všechny předchozí úspěšné kroky — v opačném pořadí.
+        Tento vzor se v DDD komunitě ustálil pod názvy <strong>Saga</strong> a
+        <strong>Process Manager</strong>.
+    </p>
+
+    <p>
+        <em>Citace: Garcia-Molina, H. &amp; Salem, K., <strong>Sagas</strong>, ACM SIGMOD (1987);
+        Vernon, V., <strong>Implementing Domain-Driven Design</strong> (2013), kap. 8.</em>
+    </p>
+
+    <p>
+        V následujících sekcích si ukážeme dva základní přístupy ke koordinaci ság —
+        <a href="#choreografie">choreografii</a> a <a href="#orchestrace">orchestraci</a> —
+        a jejich praktickou implementaci v Symfony 8 s využitím
+        <a href="{{ path('cqrs') }}">Symfony Messenger</a>.
+    </p>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 2: Kompenzační transakce
+       ─────────────────────────────────────────────────────────── #}
+    <section id="kompenzacni-transakce" aria-labelledby="kompenzacni-transakce-heading">
+    <h2 id="kompenzacni-transakce-heading">Kompenzační transakce</h2>
+
+    <p>
+        Kompenzační transakce je <strong>sémantické vrácení efektu předchozího kroku</strong>.
+        Na rozdíl od technického rollbacku databázové transakce (který „vymaže" změny, jako by
+        se nikdy nestaly) je kompenzace plnohodnotná business operace, která má vlastní vedlejší
+        efekty — notifikace, auditní záznamy, aktualizace stavů. Kompenzace nevrací systém do
+        původního stavu bit po bitu; místo toho přivede systém do stavu, který je z business
+        pohledu ekvivalentní stavu před provedením kompenzovaného kroku.
+    </p>
+
+    <p>
+        Pro náš e-shop scénář vypadá mapa akcí a jejich kompenzací následovně:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Akce</th>
+                <th>Kompenzace</th>
+                <th>Poznámka</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>ChargeCustomer</code></td>
+                <td><code>RefundCustomer</code></td>
+                <td>Zahrnuje notifikaci zákazníka</td>
+            </tr>
+            <tr>
+                <td><code>ReserveStock</code></td>
+                <td><code>ReleaseStock</code></td>
+                <td>Uvolnění rezervace, nikoliv smazání</td>
+            </tr>
+            <tr>
+                <td><code>CreateShipment</code></td>
+                <td><code>CancelShipment</code></td>
+                <td>Pouze do okamžiku odeslání</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        Klíčový princip: kompenzace <strong>není přesný inverzní příkaz</strong>. Zatímco
+        <code>ChargeCustomer</code> strhne peníze, kompenzační <code>RefundCustomer</code> nejenže
+        vrátí peníze, ale navíc odešle zákazníkovi notifikaci o vrácení platby, zapíše záznam
+        do auditního logu a může aktualizovat interní metriky. Každá kompenzace je samostatný
+        příkaz s vlastní logikou, validací a vedlejšími efekty.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="compensatable-command-heading">
+        <h3 id="compensatable-command-heading">PHP: Rozhraní CompensatableCommand</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Application\Command;
+
+/**
+ * Command, který lze kompenzovat — definuje svůj &quot;undo&quot; příkaz.
+ */
+interface CompensatableCommand
+{
+    /**
+     * Vrátí příkaz, který sémanticky vrátí efekt tohoto příkazu.
+     */
+    public function compensation(): object;
+}</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="charge-customer-heading">
+        <h3 id="charge-customer-heading">PHP: ChargeCustomer s kompenzací</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Application\Command;
+
+use App\SharedKernel\Application\Command\CompensatableCommand;
+
+final readonly class ChargeCustomer implements CompensatableCommand
+{
+    public function __construct(
+        public string $orderId,
+        public string $customerId,
+        public int $amountCents,
+    ) {}
+
+    public function compensation(): RefundCustomer
+    {
+        return new RefundCustomer(
+            orderId: $this-&gt;orderId,
+            customerId: $this-&gt;customerId,
+            amountCents: $this-&gt;amountCents,
+            reason: 'Saga compensation',
+        );
+    }
+}</code></pre>
+    </div>
+
+    <div class="warning" role="alert" aria-labelledby="idempotence-warning-heading">
+        <h3 id="idempotence-warning-heading">Kompenzace musí být idempotentní</h3>
+        <p>
+            V distribuovaném systému se může stát, že kompenzační příkaz bude doručen více než
+            jednou — například kvůli retry mechanismu Symfony Messenger, výpadku workeru nebo
+            duplikaci zprávy ve frontě. Proto musí být každá kompenzace <strong>idempotentní</strong>:
+            opakované provedení téhož kompenzačního příkazu nesmí mít žádný další efekt.
+            Typicky se toho dosahuje kontrolou aktuálního stavu před provedením akce
+            (např. <code>RefundCustomer</code> nejprve ověří, zda platba již nebyla vrácena).
+        </p>
+    </div>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 3: Choreografie
+       ─────────────────────────────────────────────────────────── #}
+    <section id="choreografie" aria-labelledby="choreografie-heading">
+    <h2 id="choreografie-heading">Choreografie</h2>
+
+    <p>
+        Choreografie je přístup ke koordinaci ságy, při němž <strong>neexistuje centrální
+        koordinátor</strong>. Každý Bounded Context reaguje na události publikované jinými
+        kontexty a na jejich základě provádí svůj krok procesu. Žádná služba neví o celém
+        toku — každá zná pouze svou část a ví, na které události má reagovat.
+    </p>
+
+    <p>
+        V našem e-shop scénáři probíhá choreografická sága následovně: kontext Ordering
+        publikuje událost <code>OrderPlaced</code>. Kontext Payment na ni reaguje, strhne
+        platbu a publikuje <code>PaymentSucceeded</code>. Kontext Warehouse naslouchá
+        události <code>PaymentSucceeded</code>, rezervuje zboží a publikuje
+        <code>StockReserved</code>. Kontext Shipping reaguje na <code>StockReserved</code>
+        a vytvoří zásilku, čímž publikuje <code>ShipmentCreated</code>. Celý tok vzniká
+        emergentně z reakcí jednotlivých kontextů na události ostatních — bez centrálního
+        řízení.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="choreografie-handlers-heading">
+        <h3 id="choreografie-handlers-heading">PHP: Choreografie — tři nezávislé handlery</h3>
+
+        <p><strong>Handler 1 — InitiatePaymentOnOrderPlaced:</strong></p>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Application\Handler;
+
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Payment\Application\Command\ChargeCustomer;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler]
+final readonly class InitiatePaymentOnOrderPlaced
+{
+    public function __construct(
+        private MessageBusInterface $commandBus,
+    ) {}
+
+    public function __invoke(OrderPlaced $event): void
+    {
+        $this-&gt;commandBus-&gt;dispatch(new ChargeCustomer(
+            orderId: $event-&gt;orderId,
+            customerId: $event-&gt;customerId,
+            amountCents: $event-&gt;totalAmountCents,
+        ));
+    }
+}</code></pre>
+
+        <p><strong>Handler 2 — ReserveStockOnPaymentSucceeded:</strong></p>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Warehouse\Application\Handler;
+
+use App\Payment\Domain\Event\PaymentSucceeded;
+use App\Warehouse\Application\Command\ReserveStock;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler]
+final readonly class ReserveStockOnPaymentSucceeded
+{
+    public function __construct(
+        private MessageBusInterface $commandBus,
+    ) {}
+
+    public function __invoke(PaymentSucceeded $event): void
+    {
+        $this-&gt;commandBus-&gt;dispatch(new ReserveStock(
+            orderId: $event-&gt;orderId,
+        ));
+    }
+}</code></pre>
+
+        <p><strong>Handler 3 — CreateShipmentOnStockReserved:</strong></p>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Shipping\Application\Handler;
+
+use App\Warehouse\Domain\Event\StockReserved;
+use App\Shipping\Application\Command\CreateShipment;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler]
+final readonly class CreateShipmentOnStockReserved
+{
+    public function __construct(
+        private MessageBusInterface $commandBus,
+    ) {}
+
+    public function __invoke(StockReserved $event): void
+    {
+        $this-&gt;commandBus-&gt;dispatch(new CreateShipment(
+            orderId: $event-&gt;orderId,
+        ));
+    }
+}</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="choreografie-messenger-heading">
+        <h3 id="choreografie-messenger-heading">YAML: Konfigurace Messenger pro choreografii</h3>
+        <pre><code class="language-yaml"># config/packages/messenger.yaml
+framework:
+    messenger:
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+        routing:
+            'App\Ordering\Domain\Event\OrderPlaced': async
+            'App\Payment\Domain\Event\PaymentSucceeded': async
+            'App\Warehouse\Domain\Event\StockReserved': async</code></pre>
+    </div>
+
+    <p>
+        Hlavní výhodou choreografie je <strong>volné provázání</strong> (loose coupling) mezi
+        kontexty. Žádný kontext nemusí znát ostatní kontexty — reaguje pouze na události, které
+        mu přicházejí. Přidání nového kontextu (například Loyalty, který přidělí body za
+        objednávku) je triviální: stačí vytvořit nový handler naslouchající
+        <code>OrderPlaced</code>. Pro jednoduché procesy se dvěma až třemi kroky je choreografie
+        elegantní a snadno pochopitelné řešení.
+    </p>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 4: Limity choreografie
+       ─────────────────────────────────────────────────────────── #}
+    <section id="limity-choreografie" aria-labelledby="limity-choreografie-heading">
+    <h2 id="limity-choreografie-heading">Limity choreografie</h2>
+
+    <p>
+        Choreografie funguje dobře pro jednoduché procesy, ale s rostoucí komplexitou naráží
+        na zásadní limity. V praxi se tyto problémy projeví obvykle ve chvíli, kdy proces
+        zahrnuje pět a více kontextů nebo vyžaduje podmíněné větvení toku.
+    </p>
+
+    <h3 id="neviditelny-tok-heading">1. Neviditelný tok procesu</h3>
+    <p>
+        Při choreografii neexistuje žádné jedno místo, kde by byl celý business proces popsán.
+        Tok procesu je „rozprostřen" do desítek handlerů v různých kontextech. S pěti a více
+        kontexty se stává prakticky nemožné vizualizovat kompletní tok — nikdo nemá přehled
+        o tom, které kroky po sobě následují, kde se proces větví a jaké jsou alternativní
+        cesty při selhání. Vzniká fenomén, který se někdy označuje jako
+        <strong>„distribuované špagety"</strong> (<em>distributed spaghetti</em>) — analogie
+        ke špagetovému kódu, ale rozloženému do celého systému.
+    </p>
+
+    <h3 id="ocp-heading">2. Porušení Open-Closed Principle</h3>
+    <p>
+        Přidání nového kroku do procesu často vyžaduje úpravu existujícího kontextu. Například
+        pokud chceme mezi platbu a sklad vložit krok „ověření proti podvodům" (Fraud Detection),
+        musíme změnit handler ve Warehouse, aby místo události <code>PaymentSucceeded</code>
+        naslouchal na <code>FraudCheckPassed</code>. Tím porušujeme
+        <strong>Open-Closed Principle</strong> — stávající kód kontextu Warehouse je nutné
+        upravit, aby fungoval s novým krokem. Při orchestraci by stačilo přidat krok do
+        centrálního Process Manageru bez zásahu do existujících kontextů.
+    </p>
+
+    <h3 id="diagnostika-heading">3. Obtížná diagnostika selhání</h3>
+    <p>
+        Když se proces „zasekne", kde hledat příčinu? Každý kontext zná pouze svůj krok —
+        neví, jaký je celkový stav procesu. Operátor musí ručně procházet logy všech
+        kontextů, korelovat události podle <code>orderId</code> a rekonstruovat, kde přesně
+        proces selhal. Neexistuje centrální dashboard, který by zobrazil:
+        „Objednávka #42 — platba OK, sklad SELHÁNÍ, zásilka NESPUŠTĚNA."
+        V produkčním prostředí s tisíci objednávkami denně je tento přístup neúnosný.
+    </p>
+
+    <h3 id="timeout-heading">4. Chybějící timeout management</h3>
+    <p>
+        Kdo detekuje, že proces „visí"? Pokud kontext Payment strhne platbu, ale Warehouse
+        nikdy nezareaguje (handler spadl, zpráva se ztratila ve frontě), kdo zjistí, že
+        proces stojí? Každý kontext zná pouze svůj krok a nemá přehled o časových limitech
+        celého procesu. V choreografii neexistuje přirozené místo pro definici globálního
+        timeoutu — nikdo nehlídá, že celý proces od <code>OrderPlaced</code> po
+        <code>ShipmentCreated</code> musí trvat maximálně 30 minut.
+    </p>
+
+    <p>
+        Všechny tyto problémy poukazují na jednu věc: u komplexních procesů potřebujeme
+        <strong>centrální místo</strong>, které zná celý tok, řídí kroky, detekuje selhání
+        a spouští kompenzace. Tímto centrálním místem je <a href="#orchestrace">orchestrátor
+        — Process Manager</a>.
+    </p>
+
+    <div class="note" role="note" aria-labelledby="choreografie-stale-validni-heading">
+        <h3 id="choreografie-stale-validni-heading">Choreografie má své místo</h3>
+        <p>
+            Choreografie je stále legitimním řešením pro jednoduché procesy se dvěma až třemi
+            kroky, kde je tok lineární a selhání řeší jednoduchá kompenzace. Nepřehánějte
+            engineering — pokud váš proces zahrnuje pouze „vytvoření objednávky → stržení
+            platby → potvrzení", choreografie je jednodušší a efektivnější než plnohodnotný
+            Process Manager. Orchestraci zavádějte až ve chvíli, kdy narazíte na výše popsané
+            problémy.
+        </p>
+    </div>
+
+    </section>
+
+    </article>
+{% endblock %}
+
+{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
