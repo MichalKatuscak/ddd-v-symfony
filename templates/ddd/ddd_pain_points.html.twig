@@ -230,7 +230,7 @@ final class ConfirmTransferService
         <tbody>
             <tr>
                 <td>Read model v rámci téhož requestu</td>
-                <td><code>$em-&gt;detach($entity)</code> po načtení — EM přestane entitu sledovat (Doctrine ORM 2.x; v ORM 3.x použijte místo toho <code>HYDRATE_ARRAY</code> nebo nativní SQL)</td>
+                <td><code>$em-&gt;detach($entity)</code> po načtení — EM přestane entitu sledovat (dostupné v ORM 2.x i 3.x; pozn.: <code>merge()</code> bylo naopak v ORM 3.x odstraněno)</td>
             </tr>
             <tr>
                 <td>Komplexní read queries</td>
@@ -616,18 +616,16 @@ final class OutboxEvent
         <code>flush()</code> by navíc způsobilo nekonečnou rekurzi.
     </p>
 
-    <pre><code class="language-php">use Doctrine\ORM\Event\OnFlushEventArgs;
+    <pre><code class="language-php">use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Events;
 
-final class OutboxEventSubscriber implements EventSubscriberInterface
+#[AsDoctrineListener(event: Events::onFlush)]
+final class OutboxEventListener
 {
-    public function getSubscribedEvents(): array
-    {
-        return [Events::onFlush];
-    }
-
     public function onFlush(OnFlushEventArgs $args): void
     {
-        $em  = $args->getObjectManager();
+        $em  = $args->getEntityManager(); // getObjectManager() odstraněno v ORM 3.x
         $uow = $em->getUnitOfWork();
 
         // Projdeme nové i změněné entity a sebereme doménové události
@@ -703,6 +701,12 @@ use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
 use Symfony\Component\Uid\Uuid;
 
+// Vlastní Stamp — musí implementovat StampInterface
+final class CorrelationIdStamp implements \Symfony\Component\Messenger\Stamp\StampInterface
+{
+    public function __construct(public readonly string $correlationId) {}
+}
+
 final class CorrelationIdMiddleware implements MiddlewareInterface
 {
     public function __construct(private readonly LoggerInterface $logger) {}
@@ -769,6 +773,13 @@ use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
+use Symfony\Component\Messenger\Stamp\StampInterface;
+
+// Vlastní Stamp nesoucí idempotency klíč
+final class IdempotencyStamp implements StampInterface
+{
+    public function __construct(public readonly string $key) {}
+}
 
 final class IdempotencyMiddleware implements MiddlewareInterface
 {
@@ -816,24 +827,35 @@ final class IdempotencyMiddleware implements MiddlewareInterface
     <div class="warning" role="note">
         <p>
             <strong>TOCTOU race condition:</strong> Kód výše obsahuje závodní podmínku —
-            dvě paralelní instance workeru mohou obě vidět, že záznam neexistuje,
-            a obě zprávu zpracovat. Bezpečnější varianta využívá databázový unique constraint
-            na <code>idempotency_key</code> a zachycuje duplicitní INSERT:
+            dvě paralelní instance workeru mohou obě vidět, že záznam neexistuje
+            a obě zprávu zpracovat. Navíc pořadí SELECT + zpracování + INSERT znamená,
+            že pokud handler vyhodí výjimku, klíč se nezapíše a zpráva se zkusí znovu —
+            což je správné chování, ale odhaluje jiný problém: pokud INSERT provedeme
+            <em>před</em> zpracováním, selhání handleru zanechá klíč zapsaný
+            a zpráva nebude nikdy zopakována (ztracená zpráva).
         </p>
-        <pre><code class="language-php">try {
+        <p>
+            Bezpečné řešení: proveďte zpracování a INSERT do deduplikační tabulky
+            <strong>v téže databázové transakci</strong>. Při selhání handleru transakce
+            selže celá (klíč se nevloží) a Messenger zprávu zopakuje:
+        </p>
+        <pre><code class="language-php">$this->connection->beginTransaction();
+try {
+    // Unique constraint na idempotency_key zabrání duplicitě na DB úrovni
     $this->connection->insert('processed_messages', [
         'idempotency_key' => $stamp->key,
         'processed_at'    => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
     ]);
+    $result = $stack->next()->handle($envelope, $stack);
+    $this->connection->commit();
+    return $result;
 } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
-    return $envelope; // jiná instance již zpracovala — přeskočit
-}
-
-return $stack->next()->handle($envelope, $stack);</code></pre>
-        <p>
-            Tím se SELECT + INSERT nahradí atomickým INSERT — při konfliktu databáze zaručí,
-            že zprávu zpracuje právě jedna instance.
-        </p>
+    $this->connection->rollBack();
+    return $envelope; // duplicitní zpráva — přeskočit
+} catch (\Throwable $e) {
+    $this->connection->rollBack(); // handler selhal — klíč se nezapíše, Messenger zopakuje
+    throw $e;
+}</code></pre>
     </div>
 
     </section>
@@ -885,7 +907,7 @@ return $stack->next()->handle($envelope, $stack);</code></pre>
         <p>
             <strong>Pozor:</strong> Pro ordering problémy <em>nepoužívejte</em>
             <code>UnrecoverableMessageHandlingException</code> — ta zprávu
-            <strong>trvale zahodí</strong> a přesune do failed transport bez retryování.
+            <strong>přeskočí retry strategii</strong> a zprávu okamžitě přesune do failed transport.
             Správný přístup je hodit <strong>standardní výjimku</strong>; Messenger zprávu
             odloží do retry fronty s exponential backoff. Pokud po vyčerpání všech retries
             stále selhává, teprve pak skončí v failed transport — kde ji lze prozkoumat
@@ -1215,10 +1237,12 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\ApiPlatform;
 
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
 use App\Ordering\Application\Command\PlaceOrderCommand;
-use App\Ordering\Application\Command\PlaceOrderCommandBus;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 // API resource DTO — nikdy agregát
 #[ApiResource(operations: [new Post(processor: PlaceOrderProcessor::class)])]
@@ -1232,7 +1256,7 @@ final class OrderResource
 // StateProcessor — tenká vrstva
 final class PlaceOrderProcessor implements ProcessorInterface
 {
-    public function __construct(private readonly PlaceOrderCommandBus $bus) {}
+    public function __construct(private readonly MessageBusInterface $commandBus) {}
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): OrderResponse
     {
@@ -1242,7 +1266,7 @@ final class PlaceOrderProcessor implements ProcessorInterface
             items: $data->items,
         );
 
-        $orderId = $this->bus->dispatch($command);
+        $orderId = $this->commandBus->dispatch($command);
 
         return new OrderResponse($orderId->toString());
     }
@@ -1277,14 +1301,15 @@ final class PlaceOrderProcessor implements ProcessorInterface
 declare(strict_types=1);
 
 // Doménová metoda v agregátu — testovatelná bez frameworku
+// Aktuální čas je parametr (ne wall-clock) — metoda je deterministická a snadno testovatelná
 final class Order
 {
-    public function canBeCancelledBy(UserId $userId): bool
+    public function canBeCancelledBy(UserId $userId, \DateTimeImmutable $now): bool
     {
         if ($this->status === OrderStatus::Shipped || $this->status === OrderStatus::Delivered) {
             return false;
         }
-        $withinWindow = $this->placedAt > new \DateTimeImmutable('-24 hours');
+        $withinWindow = $this->placedAt > $now->modify('-24 hours');
 
         return $withinWindow && $this->customerId->equals($userId);
     }
@@ -1306,7 +1331,7 @@ final class OrderVoter extends Voter
         }
 
         /** @var Order $subject */
-        return $subject->canBeCancelledBy(UserId::fromString($user->getId()));
+        return $subject->canBeCancelledBy(UserId::fromString($user->getId()), new \DateTimeImmutable());
     }
 }
 </code></pre>
