@@ -473,6 +473,519 @@ framework:
 
     </section>
 
+    {# ───────────────────────────────────────────────────────────
+       Sekce 5: Orchestrace — Process Manager
+       ─────────────────────────────────────────────────────────── #}
+    <section id="orchestrace" aria-labelledby="orchestrace-heading">
+    <h2 id="orchestrace-heading">Orchestrace — Process Manager</h2>
+
+    <p>
+        Orchestrace je přístup, při kterém existuje <strong>centrální koordinátor</strong> —
+        tzv. <strong>Process Manager</strong> — který řídí celý business proces jako stavový
+        automat s definovanými stavy a přechody. V našem e-shop scénáři je tímto koordinátorem
+        třída <code>OrderProcessManager</code>, která přijímá události ze všech kontextů
+        (Payment, Warehouse, Shipping) a na jejich základě rozhoduje, jaký příkaz vydat jako
+        další krok. Na rozdíl od choreografie, kde je tok „rozprostřen" do desítek handlerů,
+        orchestrátor koncentruje celou logiku procesu do jediné třídy — jednoho místa, kde je
+        viditelný kompletní tok od <code>OrderPlaced</code> po <code>ConfirmOrder</code>.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="saga-status-heading">
+        <h3 id="saga-status-heading">PHP: Enum OrderSagaStatus</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Saga;
+
+enum OrderSagaStatus: string
+{
+    case AwaitingPayment = 'awaiting_payment';
+    case AwaitingStockReservation = 'awaiting_stock_reservation';
+    case AwaitingShipment = 'awaiting_shipment';
+    case Completed = 'completed';
+    case Compensating = 'compensating';
+    case Failed = 'failed';
+}</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="process-manager-heading">
+        <h3 id="process-manager-heading">PHP: OrderProcessManager — jádro orchestrace</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Saga;
+
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Payment\Domain\Event\PaymentSucceeded;
+use App\Payment\Domain\Event\PaymentFailed;
+use App\Warehouse\Domain\Event\StockReserved;
+use App\Warehouse\Domain\Event\StockReservationFailed;
+use App\Shipping\Domain\Event\ShipmentCreated;
+use App\Payment\Application\Command\ChargeCustomer;
+use App\Payment\Application\Command\RefundCustomer;
+use App\Warehouse\Application\Command\ReserveStock;
+use App\Shipping\Application\Command\CreateShipment;
+use App\Ordering\Application\Command\ConfirmOrder;
+use App\Ordering\Application\Command\CancelOrder;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+/**
+ * Process Manager koordinující objednávkový proces napříč kontexty:
+ * Ordering → Payment → Warehouse → Shipping → Ordering (potvrzení)
+ */
+#[AsMessageHandler]
+final class OrderProcessManager
+{
+    public function __construct(
+        private readonly MessageBusInterface $commandBus,
+        private readonly SagaStateRepository $sagaStateRepository,
+    ) {}
+
+    public function __invoke(
+        OrderPlaced|PaymentSucceeded|PaymentFailed|StockReserved|StockReservationFailed|ShipmentCreated $event,
+    ): void {
+        match (true) {
+            $event instanceof OrderPlaced =&gt; $this-&gt;onOrderPlaced($event),
+            $event instanceof PaymentSucceeded =&gt; $this-&gt;onPaymentSucceeded($event),
+            $event instanceof PaymentFailed =&gt; $this-&gt;onPaymentFailed($event),
+            $event instanceof StockReserved =&gt; $this-&gt;onStockReserved($event),
+            $event instanceof StockReservationFailed =&gt; $this-&gt;onStockReservationFailed($event),
+            $event instanceof ShipmentCreated =&gt; $this-&gt;onShipmentCreated($event),
+        };
+    }
+
+    private function onOrderPlaced(OrderPlaced $event): void
+    {
+        $state = SagaState::start(
+            sagaType: 'order_process',
+            correlationId: $event-&gt;orderId,
+            status: OrderSagaStatus::AwaitingPayment,
+            context: [
+                'customerId' =&gt; $event-&gt;customerId,
+                'amountCents' =&gt; $event-&gt;totalAmountCents,
+                'completedSteps' =&gt; [],
+            ],
+        );
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        $this-&gt;commandBus-&gt;dispatch(new ChargeCustomer(
+            orderId: $event-&gt;orderId,
+            customerId: $event-&gt;customerId,
+            amountCents: $event-&gt;totalAmountCents,
+        ));
+    }
+
+    private function onPaymentSucceeded(PaymentSucceeded $event): void
+    {
+        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+        $state-&gt;transitionTo(OrderSagaStatus::AwaitingStockReservation);
+        $state-&gt;updateContext('completedSteps', [
+            ...$state-&gt;context()['completedSteps'],
+            'payment_charged',
+        ]);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        $this-&gt;commandBus-&gt;dispatch(new ReserveStock(orderId: $event-&gt;orderId));
+    }
+
+    private function onPaymentFailed(PaymentFailed $event): void
+    {
+        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+        $state-&gt;transitionTo(OrderSagaStatus::Failed);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        $this-&gt;commandBus-&gt;dispatch(new CancelOrder(
+            orderId: $event-&gt;orderId,
+            reason: 'Platba selhala: ' . $event-&gt;failureReason,
+        ));
+    }
+
+    private function onStockReserved(StockReserved $event): void
+    {
+        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+        $state-&gt;transitionTo(OrderSagaStatus::AwaitingShipment);
+        $state-&gt;updateContext('completedSteps', [
+            ...$state-&gt;context()['completedSteps'],
+            'stock_reserved',
+        ]);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        $this-&gt;commandBus-&gt;dispatch(new CreateShipment(orderId: $event-&gt;orderId));
+    }
+
+    private function onStockReservationFailed(StockReservationFailed $event): void
+    {
+        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+        $state-&gt;transitionTo(OrderSagaStatus::Compensating);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        // Kompenzace: vrátit platbu
+        $this-&gt;commandBus-&gt;dispatch(new RefundCustomer(
+            orderId: $event-&gt;orderId,
+            customerId: $state-&gt;context()['customerId'],
+            amountCents: $state-&gt;context()['amountCents'],
+            reason: 'Zboží není skladem',
+        ));
+
+        $this-&gt;commandBus-&gt;dispatch(new CancelOrder(
+            orderId: $event-&gt;orderId,
+            reason: 'Zboží není skladem',
+        ));
+
+        $state-&gt;transitionTo(OrderSagaStatus::Failed);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+    }
+
+    private function onShipmentCreated(ShipmentCreated $event): void
+    {
+        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+        $state-&gt;transitionTo(OrderSagaStatus::Completed);
+        $state-&gt;updateContext('completedSteps', [
+            ...$state-&gt;context()['completedSteps'],
+            'shipment_created',
+        ]);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        $this-&gt;commandBus-&gt;dispatch(new ConfirmOrder(orderId: $event-&gt;orderId));
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        Orchestrace přináší oproti choreografii několik zásadních výhod: celý business proces je
+        popsán na <strong>jediném místě</strong>, takže vývojář okamžitě vidí kompletní tok
+        od objednávky po potvrzení. Debugování je výrazně jednodušší — stačí zkontrolovat stav
+        ságy v databázi a okamžitě je jasné, ve kterém kroku proces stojí. Rozšíření procesu
+        o nový krok (například přidání Fraud Detection mezi platbu a sklad) znamená přidání jedné
+        metody do Process Manageru a jednoho nového stavu do enumu — bez zásahu do existujících
+        kontextů.
+    </p>
+
+    <div class="note" role="note" aria-labelledby="step-method-heading">
+        <h3 id="step-method-heading">Každá metoda = jeden krok stavového automatu</h3>
+        <p>
+            Každá privátní metoda v <code>OrderProcessManager</code> reprezentuje jeden krok
+            stavového automatu. Přidání nového kroku do procesu znamená přidání jedné metody
+            a jedné události — stávající metody ani stávající kontexty se nemění. Tím je splněn
+            <strong>Open-Closed Principle</strong>: Process Manager je otevřený pro rozšíření
+            (nové kroky), ale uzavřený pro modifikaci (existující kroky zůstávají beze změny).
+        </p>
+    </div>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 6: Perzistence stavu ságy
+       ─────────────────────────────────────────────────────────── #}
+    <section id="perzistence-stavu" aria-labelledby="perzistence-stavu-heading">
+    <h2 id="perzistence-stavu-heading">Perzistence stavu ságy</h2>
+
+    <p>
+        Process Manager potřebuje <strong>perzistentní úložiště stavu</strong>, aby přežil
+        restart workeru, nové nasazení aplikace i horizontální škálování na více instancí.
+        Bez perzistence by pád workeru mezi kroky <code>OrderPlaced</code> a
+        <code>PaymentSucceeded</code> znamenal ztrátu informace o tom, kde se proces nachází —
+        sága by zůstala navždy „viset" bez možnosti dokončení nebo kompenzace. Stav ságy proto
+        ukládáme do databáze jako Doctrine entitu.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="saga-state-entity-heading">
+        <h3 id="saga-state-entity-heading">PHP: SagaState — Doctrine entita</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Saga;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'saga_state')]
+#[ORM\Index(fields: ['correlationId'], name: 'idx_saga_correlation')]
+#[ORM\Index(fields: ['status'], name: 'idx_saga_status')]
+class SagaState
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 64)]
+    private string $sagaType;
+
+    #[ORM\Column(length: 128)]
+    private string $correlationId;
+
+    #[ORM\Column(length: 32)]
+    private string $status;
+
+    /** @var array&lt;string, mixed&gt; */
+    #[ORM\Column(type: 'json')]
+    private array $context = [];
+
+    #[ORM\Column]
+    private \DateTimeImmutable $startedAt;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $updatedAt;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $completedAt = null;
+
+    private function __construct() {}
+
+    public static function start(
+        string $sagaType,
+        string $correlationId,
+        OrderSagaStatus $status,
+        array $context = [],
+    ): self {
+        $state = new self();
+        $state-&gt;sagaType = $sagaType;
+        $state-&gt;correlationId = $correlationId;
+        $state-&gt;status = $status-&gt;value;
+        $state-&gt;context = $context;
+        $state-&gt;startedAt = new \DateTimeImmutable();
+        $state-&gt;updatedAt = new \DateTimeImmutable();
+
+        return $state;
+    }
+
+    public function transitionTo(OrderSagaStatus $newStatus): void
+    {
+        $this-&gt;status = $newStatus-&gt;value;
+        $this-&gt;updatedAt = new \DateTimeImmutable();
+
+        if ($newStatus === OrderSagaStatus::Completed || $newStatus === OrderSagaStatus::Failed) {
+            $this-&gt;completedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function status(): OrderSagaStatus
+    {
+        return OrderSagaStatus::from($this-&gt;status);
+    }
+
+    /** @return array&lt;string, mixed&gt; */
+    public function context(): array
+    {
+        return $this-&gt;context;
+    }
+
+    public function updateContext(string $key, mixed $value): void
+    {
+        $this-&gt;context[$key] = $value;
+        $this-&gt;updatedAt = new \DateTimeImmutable();
+    }
+
+    public function correlationId(): string
+    {
+        return $this-&gt;correlationId;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this-&gt;completedAt !== null;
+    }
+
+    public function startedAt(): \DateTimeImmutable
+    {
+        return $this-&gt;startedAt;
+    }
+
+    public function updatedAt(): \DateTimeImmutable
+    {
+        return $this-&gt;updatedAt;
+    }
+}</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="saga-state-repository-heading">
+        <h3 id="saga-state-repository-heading">PHP: SagaStateRepository</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Saga;
+
+use Doctrine\ORM\EntityManagerInterface;
+
+final readonly class SagaStateRepository
+{
+    public function __construct(
+        private EntityManagerInterface $em,
+    ) {}
+
+    public function save(SagaState $state): void
+    {
+        $this-&gt;em-&gt;persist($state);
+        $this-&gt;em-&gt;flush();
+    }
+
+    public function findByCorrelationId(string $correlationId): SagaState
+    {
+        $state = $this-&gt;em-&gt;getRepository(SagaState::class)
+            -&gt;findOneBy(['correlationId' =&gt; $correlationId]);
+
+        if ($state === null) {
+            throw new \RuntimeException(
+                sprintf('Saga state not found for correlation ID &quot;%s&quot;', $correlationId),
+            );
+        }
+
+        return $state;
+    }
+
+    /** @return list&lt;SagaState&gt; */
+    public function findStale(\DateTimeImmutable $olderThan): array
+    {
+        return $this-&gt;em-&gt;createQueryBuilder()
+            -&gt;select('s')
+            -&gt;from(SagaState::class, 's')
+            -&gt;where('s.completedAt IS NULL')
+            -&gt;andWhere('s.updatedAt &lt; :threshold')
+            -&gt;setParameter('threshold', $olderThan)
+            -&gt;getQuery()
+            -&gt;getResult();
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        Díky perzistenci stavu je obnova po selhání přímočará: představte si, že worker spadne
+        mezi zpracováním <code>OrderPlaced</code> a příchodem <code>PaymentSucceeded</code>.
+        Po restartu workeru Messenger znovu doručí nedokončenou událost a Process Manager načte
+        stav ságy z databáze — okamžitě ví, že sága čeká na platbu
+        (<code>AwaitingPayment</code>), a pokračuje od správného kroku. Metoda
+        <code>findStale()</code> v repository navíc umožňuje periodicky detekovat „zaseklé" ságy,
+        které se déle než stanovený práh neposunuly kupředu, a spustit pro ně kompenzaci nebo
+        eskalaci.
+    </p>
+
+    <div class="note" role="note" aria-labelledby="optimistic-locking-heading">
+        <h3 id="optimistic-locking-heading">Optimistické zamykání v produkci</h3>
+        <p>
+            V produkčním prostředí s více workery zvažte přidání sloupce pro optimistické
+            zamykání (<code>#[ORM\Version]</code>). Bez něj by dva workery zpracovávající
+            události pro stejnou objednávku mohly současně načíst stejný stav ságy a přepsat
+            si navzájem změny. Optimistický zámek zajistí, že druhý worker dostane výjimku
+            <code>OptimisticLockException</code> a Messenger zprávu automaticky zopakuje.
+        </p>
+    </div>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 7: Implementace v Symfony Messenger
+       ─────────────────────────────────────────────────────────── #}
+    <section id="messenger-implementace" aria-labelledby="messenger-implementace-heading">
+    <h2 id="messenger-implementace-heading">Implementace v Symfony Messenger</h2>
+
+    <p>
+        Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu ságy. Nyní
+        propojíme obě části s <strong>Symfony Messenger</strong> — asynchronním message busem,
+        který zajistí spolehlivé doručování událostí a příkazů mezi kontexty. Klíčem je správná
+        konfigurace dvou busů (<code>command.bus</code> a <code>event.bus</code>), dvou
+        asynchronních transportů a explicitní routing každé zprávy.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="messenger-yaml-heading">
+        <h3 id="messenger-yaml-heading">YAML: Kompletní konfigurace Messenger</h3>
+        <pre><code class="language-yaml"># config/packages/messenger.yaml
+framework:
+    messenger:
+        default_bus: command.bus
+
+        buses:
+            command.bus:
+                middleware:
+                    - doctrine_transaction
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+
+        transports:
+            async_events:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+            async_commands:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+
+        routing:
+            'App\Ordering\Domain\Event\OrderPlaced': async_events
+            'App\Payment\Domain\Event\PaymentSucceeded': async_events
+            'App\Payment\Domain\Event\PaymentFailed': async_events
+            'App\Warehouse\Domain\Event\StockReserved': async_events
+            'App\Warehouse\Domain\Event\StockReservationFailed': async_events
+            'App\Shipping\Domain\Event\ShipmentCreated': async_events
+            'App\Payment\Application\Command\ChargeCustomer': async_commands
+            'App\Payment\Application\Command\RefundCustomer': async_commands
+            'App\Warehouse\Application\Command\ReserveStock': async_commands
+            'App\Warehouse\Application\Command\ReleaseStock': async_commands
+            'App\Shipping\Application\Command\CreateShipment': async_commands</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="order-placed-event-heading">
+        <h3 id="order-placed-event-heading">PHP: Doménová událost OrderPlaced</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain\Event;
+
+final readonly class OrderPlaced
+{
+    public function __construct(
+        public string $orderId,
+        public string $customerId,
+        public int $totalAmountCents,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {}
+}</code></pre>
+    </div>
+
+    <p>
+        Celý tok funguje následovně: agregát <code>Order</code> v kontextu Ordering publikuje
+        událost <code>OrderPlaced</code> na event bus. Messenger ji podle konfigurace routingu
+        odešle do transportu <code>async_events</code>. Worker naslouchající na tomto transportu
+        zprávu vyzvedne a předá ji <code>OrderProcessManager</code>, který ji zpracuje metodou
+        <code>onOrderPlaced()</code>. Ta uloží stav ságy a dispatchne příkaz
+        <code>ChargeCustomer</code> na command bus. Messenger tento příkaz routuje do transportu
+        <code>async_commands</code>, kde ho vyzvedne handler v kontextu Payment. Po úspěšném
+        zpracování Payment publikuje <code>PaymentSucceeded</code> — a cyklus se opakuje
+        pro další krok procesu.
+    </p>
+
+    <div class="note" role="note" aria-labelledby="worker-command-heading">
+        <h3 id="worker-command-heading">Spouštění workerů</h3>
+        <p>
+            V produkci spouštějte oddělené workery pro každý transport:
+            <code>php bin/console messenger:consume async_events async_commands --time-limit=3600</code>.
+            Parametr <code>--time-limit</code> zajistí, že worker se po hodině automaticky restartuje
+            (a uvolní paměť). Pro vysokou dostupnost spouštějte více instancí workeru —
+            Messenger zajistí, že každou zprávu zpracuje právě jeden worker.
+        </p>
+    </div>
+
+    <p>
+        Podrobnější informace o asynchronním zpracování zpráv, konfiguraci transportů a retry
+        strategiích najdete v kapitole <a href="{{ path('cqrs') }}#async">CQRS — asynchronní
+        zpracování</a>.
+    </p>
+
+    </section>
+
     </article>
 {% endblock %}
 
