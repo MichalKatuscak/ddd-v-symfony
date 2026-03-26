@@ -220,7 +220,8 @@ final class ConfirmTransferService
         <strong>Řešení — tři přístupy podle situace:</strong>
     </p>
 
-    <table>
+    <div class="table-responsive">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Situace</th>
@@ -242,6 +243,7 @@ final class ConfirmTransferService
             </tr>
         </tbody>
     </table>
+    </div>
 
     </section>
 
@@ -357,7 +359,8 @@ private ?Money $price = null;</code></pre>
         <strong>Řešení — podle složitosti situace:</strong>
     </p>
 
-    <table>
+    <div class="table-responsive">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Situace</th>
@@ -379,6 +382,7 @@ private ?Money $price = null;</code></pre>
             </tr>
         </tbody>
     </table>
+    </div>
 
     </section>
 
@@ -484,7 +488,8 @@ private string $id;</code></pre>
         <strong>Řešení — dvě alternativy:</strong>
     </p>
 
-    <table>
+    <div class="table-responsive">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Přístup</th>
@@ -510,6 +515,7 @@ private string $id;</code></pre>
             </tr>
         </tbody>
     </table>
+    </div>
 
     <p>
         Pro většinu DDD scénářů doporučujeme <strong>Value Object s type fieldem</strong>:
@@ -876,7 +882,8 @@ try {
         <strong>Řešení — tři přístupy podle kontextu:</strong>
     </p>
 
-    <table>
+    <div class="table-responsive">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Přístup</th>
@@ -902,6 +909,7 @@ try {
             </tr>
         </tbody>
     </table>
+    </div>
 
     <div class="note" role="note">
         <p>
@@ -941,7 +949,8 @@ try {
         nebo díry (pravidlo chybí na jednom místě).
     </p>
 
-    <table>
+    <div class="table-responsive">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Typ validace</th>
@@ -972,6 +981,7 @@ try {
             </tr>
         </tbody>
     </table>
+    </div>
 
     <p>
         <strong>Klíčové pravidlo:</strong> Doménový invariant vždy vynucujte v doméně —
@@ -1370,7 +1380,8 @@ final class OrderVoter extends Voter
         <strong>Jak argumentovat — měřitelné metriky:</strong>
     </p>
 
-    <table>
+    <div class="table-responsive">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Metrika</th>
@@ -1401,6 +1412,7 @@ final class OrderVoter extends Voter
             </tr>
         </tbody>
     </table>
+    </div>
 
     <p>
         <strong>Taktika:</strong> Nezačínejte argumentem „naše kód je špatný."
