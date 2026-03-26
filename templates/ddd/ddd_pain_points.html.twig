@@ -113,6 +113,419 @@
         místech.
     </p>
 
+    {# ─── A1: Transakce přes agregáty ─────────────────────────── #}
+    <section id="a1-transakce" aria-labelledby="a1-heading">
+    <h3 id="a1-heading">A1. Transakce přes agregáty a Doctrine Unit of Work</h3>
+
+    <p>
+        <strong>Problém:</strong> DDD říká, že jedna transakce smí měnit nejvýše jeden agregát.
+        Praxe ale přináší situace, kde potřebujete atomicky uložit změny ve dvou agregátech
+        zároveň — například přesunout objednávku do stavu <em>Transferred</em> a zároveň
+        potvrdit skladovou rezervaci. Doctrine sdílí jeden <code>EntityManager</code>
+        (a tím jeden Unit of Work) přes celou aplikaci; jeden <code>flush()</code> commituje
+        vše, co EM sleduje.
+    </p>
+
+    <p>
+        <strong>Příčina:</strong> Doctrine Unit of Work je <em>session-scoped</em> — drží
+        identity map všech načtených entit a při <code>flush()</code> uloží všechny změny
+        najednou v jediné databázové transakci. To je výkonné pro CRUD, ale pro DDD to znamená,
+        že neúmyslně načtená entita z jiného agregátu může být commitnuta společně s vaší
+        záměrnou změnou.
+    </p>
+
+    <p>
+        <strong>Řešení:</strong> Application Service funguje jako explicitní transakční hranice.
+        Pokud váš use case skutečně vyžaduje změnu dvou agregátů atomicky (a nemůžete použít
+        <a href="{{ path('sagas') }}">Outbox + Saga</a>), zavolejte explicitně
+        <code>beginTransaction()</code> / <code>commit()</code> v Application Service
+        a oba repozitáře volejte v rámci téže transakce. Toto je <strong>přijatelná výjimka
+        z pravidla jeden agregát = jedna transakce</strong> za předpokladu, že oba agregáty
+        leží ve stejném Bounded Context a stejné databázi.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="a1-code-heading">
+        <h4 id="a1-code-heading">PHP: Application Service jako transakční hranice</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Warehouse\Application\Service;
+
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Warehouse\Domain\Repository\ReservationRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+final class ConfirmTransferService
+{
+    public function __construct(
+        private readonly OrderRepository $orders,
+        private readonly ReservationRepository $reservations,
+        private readonly EntityManagerInterface $em,
+    ) {}
+
+    public function execute(ConfirmTransferCommand $command): void
+    {
+        $this->em->beginTransaction();
+        try {
+            $order       = $this->orders->get($command->orderId);
+            $reservation = $this->reservations->get($command->reservationId);
+
+            $order->markAsTransferred();
+            $reservation->confirmFor($order->id());
+
+            $this->orders->save($order);
+            $this->reservations->save($reservation);
+
+            $this->em->commit();
+        } catch (\Throwable $e) {
+            $this->em->rollback();
+            throw $e;
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="note" role="note">
+        <p>
+            Pokud oba agregáty nesdílejí databázi (nebo jsou v různých Bounded Contexts),
+            použijte místo transakce
+            <a href="{{ path('sagas') }}#b1-outbox">Outbox pattern</a> nebo Sagu.
+            Atomická cross-context transakce je architektonický zápach.
+        </p>
+    </div>
+
+    </section>
+
+    {# ─── A2: Špinavý EntityManager ─────────────────────────────── #}
+    <section id="a2-spinavy-em" aria-labelledby="a2-heading">
+    <h3 id="a2-heading">A2. „Špinavý" EntityManager a nechtěné změny</h3>
+
+    <p>
+        <strong>Problém:</strong> V read-heavy akcích (příprava dat pro API response, sestavení
+        read modelu) načtete entitu z databáze, provedete výpočet, ale <em>neuložíte nic</em>.
+        Přesto se při prvním <code>flush()</code> kdekoli v requestu (třeba v jiné části aplikace)
+        commitují změny do databáze — protože jste nenápadně modifikovali entitu, kterou
+        Doctrine stále sleduje.
+    </p>
+
+    <p>
+        <strong>Příčina:</strong> Doctrine Identity Map zapamatuje každý načtený objekt
+        a při <code>flush()</code> porovnává aktuální stav se snapshoty uloženými při
+        načtení (<em>change tracking</em>). Volání getterů, které interně modifikují stav
+        (lazy-init kolekce, computed fields), může způsobit detekci „změny".
+    </p>
+
+    <p>
+        <strong>Řešení — tři přístupy podle situace:</strong>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Situace</th>
+                <th>Řešení</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Read model v rámci téhož requestu</td>
+                <td><code>$em-&gt;detach($entity)</code> po načtení — EM přestane entitu sledovat</td>
+            </tr>
+            <tr>
+                <td>Komplexní read queries</td>
+                <td>Použijte <code>HYDRATE_ARRAY</code> nebo raw SQL přes <code>$em-&gt;getConnection()</code> — EM nehydratuje objekty</td>
+            </tr>
+            <tr>
+                <td>Celý controller je read-only</td>
+                <td>Injektujte separátní <code>EntityManager</code> nakonfigurovaný jako read-only (second EM v Symfony)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    </section>
+
+    {# ─── A3: Mapping Value Objects ──────────────────────────────── #}
+    <section id="a3-value-objects" aria-labelledby="a3-heading">
+    <h3 id="a3-heading">A3. Mapping složitých Value Objects</h3>
+
+    <p>
+        <strong>Problém:</strong> Doctrine <code>#[Embedded]</code> funguje dobře pro jednoduché
+        VO (jméno + příjmení → dva sloupce). Narazíte ale na jeho limity, jakmile potřebujete:
+        polymorfní VO (různé typy cen), nullable VO v kolekcích, VO s vlastní serializační logikou
+        (Money = integer + string), nebo VO, které se mapují na jiný datový typ než default
+        (enum, JSONB, custom SQL type).
+    </p>
+
+    <p>
+        <strong>Řešení — Custom Doctrine Type:</strong> Implementujte <code>Type</code>
+        z <code>Doctrine\DBAL\Types</code>. Typ definuje, jak se PHP objekt serializuje
+        do SQL hodnoty a zpět. Zaregistrujte typ v <code>config/packages/doctrine.yaml</code>.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="a3-code-heading">
+        <h4 id="a3-code-heading">PHP: Custom Type pro Money Value Object</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Infrastructure\Doctrine\Type;
+
+use App\SharedKernel\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\ValueObject\Currency;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Type;
+
+final class MoneyType extends Type
+{
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return 'VARCHAR(50)'; // formát: "12345_CZK"
+    }
+
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?Money
+    {
+        if ($value === null) {
+            return null;
+        }
+        [$amount, $currencyCode] = explode('_', (string) $value, 2);
+
+        return new Money((int) $amount, new Currency($currencyCode));
+    }
+
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+        /** @var Money $value */
+        return $value->amountInCents() . '_' . $value->currency()->code();
+    }
+
+    public function getName(): string
+    {
+        return 'money';
+    }
+}
+</code></pre>
+    </div>
+
+    <p>
+        Typ zaregistrujte v <code>config/packages/doctrine.yaml</code>:
+    </p>
+
+    <pre><code class="language-yaml">doctrine:
+    dbal:
+        types:
+            money: App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType</code></pre>
+
+    <p>
+        Poté ho použijte v entitě:
+    </p>
+
+    <pre><code class="language-php">#[ORM\Column(type: 'money', nullable: true)]
+private ?Money $price = null;</code></pre>
+
+    <div class="note" role="note">
+        <p>
+            Pro <strong>polymorfní VO</strong> (různé typy platby: karta, hotovost, voucher)
+            zvažte místo dědičnosti <strong>Value Object s diskriminátorem</strong>:
+            uložte typ jako enum do jednoho sloupce a detaily jako JSON do druhého.
+            Tím se vyhnete discriminator map, která je těžkopádná pro VO.
+        </p>
+    </div>
+
+    </section>
+
+    {# ─── A4: Lazy loading ──────────────────────────────────────── #}
+    <section id="a4-lazy-loading" aria-labelledby="a4-heading">
+    <h3 id="a4-heading">A4. Lazy loading vs. bohaté agregáty</h3>
+
+    <p>
+        <strong>Problém:</strong> Doctrine defaultně načítá asociace lazy — místo skutečného
+        objektu vloží do property proxy třídu, která se inicializuje až při prvním přístupu.
+        Bohaté agregáty (metody jako <code>totalPrice()</code>, <code>items()</code>)
+        mohou neúmyslně triggerovat lazy load <em>mimo otevřenou transakci</em> nebo
+        <em>po detach()</em>, což vyústí ve výjimku
+        <code>LazyInitializationException</code>.
+    </p>
+
+    <p>
+        <strong>Příčina:</strong> Lazy proxy je infrastrukturní koncept — doménový model
+        o ní neví a nesmí vědět. Bohužel, pokud Doctrine vloží proxy na místo
+        <code>OrderItems</code>, doménová metoda <code>$order-&gt;items()</code>
+        v sobě implicitně spoléhá na aktivní databázové připojení.
+    </p>
+
+    <p>
+        <strong>Řešení — podle složitosti situace:</strong>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Situace</th>
+                <th>Řešení</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Kolekce vždy potřebná s agregátem</td>
+                <td><code>fetch: 'EAGER'</code> na asociaci — načte v jednom JOIN</td>
+            </tr>
+            <tr>
+                <td>Kolekce potřebná jen někdy</td>
+                <td>Repozitář nabídne dvě metody: <code>get()</code> (lazy) a <code>getWithItems()</code> (EAGER JOIN)</td>
+            </tr>
+            <tr>
+                <td>Serializace / JSON response</td>
+                <td>Nikdy neserializujte agregát přímo — sestavte DTO z načtených dat uvnitř transakce</td>
+            </tr>
+        </tbody>
+    </table>
+
+    </section>
+
+    {# ─── A5: Identity generation ────────────────────────────────── #}
+    <section id="a5-identity" aria-labelledby="a5-heading">
+    <h3 id="a5-heading">A5. Identity generation — kdy a kde</h3>
+
+    <p>
+        <strong>Problém:</strong> Doctrine standardně generuje ID v databázi
+        (<code>SEQUENCE</code>, <code>AUTO_INCREMENT</code>). To znamená, že nově vytvořený
+        agregát nemá ID, dokud není persistován a flushed — porušuje to doménový invariant,
+        že každý agregát musí mít identitu od okamžiku vzniku.
+    </p>
+
+    <p>
+        <strong>Příčina:</strong> Databázové generování ID je výkonné, ale váže vznik identity
+        na infrastrukturu. Doménový model by neměl vědět o databázi; identita patří do domény.
+    </p>
+
+    <p>
+        <strong>Řešení:</strong> Generujte UUID v doméně, v konstruktoru agregátu.
+        Doctrine nakonfigurujte s <code>strategy: 'NONE'</code> — ID předáváte sami,
+        Doctrine ho jen uloží.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="a5-code-heading">
+        <h4 id="a5-code-heading">PHP: UUID v konstruktoru agregátu (PHP 8.4 + Symfony Uid)</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain\ValueObject;
+
+use Symfony\Component\Uid\Uuid;
+
+final class OrderId
+{
+    private function __construct(private readonly string $value) {}
+
+    public static function generate(): self
+    {
+        return new self((string) Uuid::v7()); // UUIDv7 — time-sortable
+    }
+
+    public static function fromString(string $value): self
+    {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException("Invalid OrderId: {$value}");
+        }
+        return new self($value);
+    }
+
+    public function toString(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+}
+
+// V agregátu:
+final class Order
+{
+    private OrderId $id;
+
+    public function __construct(CustomerId $customerId)
+    {
+        $this->id = OrderId::generate(); // identita vzniká v doméně
+        // ...
+    }
+}
+</code></pre>
+    </div>
+
+    <p>
+        Doctrine mapping pro UUID ID:
+    </p>
+
+    <pre><code class="language-php">#[ORM\Id]
+#[ORM\Column(type: 'string', length: 36)]
+#[ORM\GeneratedValue(strategy: 'NONE')] // Doctrine ID nepřiřazuje
+private string $id;</code></pre>
+
+    </section>
+
+    {# ─── A6: Polymorfismus a discriminator map ───────────────────── #}
+    <section id="a6-polymorfismus" aria-labelledby="a6-heading">
+    <h3 id="a6-heading">A6. Polymorfismus a discriminator map</h3>
+
+    <p>
+        <strong>Problém:</strong> Potřebujete modelovat hierarchii — například různé typy
+        doručení (<code>HomeDelivery</code>, <code>PickupPoint</code>, <code>LockerDelivery</code>).
+        Doctrine nabízí <code>InheritanceType::SINGLE_TABLE</code> nebo
+        <code>JOINED</code> s discriminator map. Jenže: přidání nového subtypu vyžaduje
+        úpravu anotace na <em>rodičovské</em> třídě, a discriminator map je zapsána v kódu
+        jako statický seznam — narušuje Open/Closed Principle.
+    </p>
+
+    <p>
+        <strong>Řešení — dvě alternativy:</strong>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Přístup</th>
+                <th>Kdy použít</th>
+                <th>Nevýhoda</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Value Object místo dědičnosti</strong></td>
+                <td>Varianty se liší jen daty, ne chováním</td>
+                <td>Složitý switch pro chování</td>
+            </tr>
+            <tr>
+                <td><strong>Flat table + Custom Type</strong></td>
+                <td>Varianty mají odlišné chování</td>
+                <td>JSON sloupec pro detaily ztrácí typovou bezpečnost</td>
+            </tr>
+            <tr>
+                <td><strong>Discriminator map (Doctrine default)</strong></td>
+                <td>Málo variant, stabilní hierarchie</td>
+                <td>Rigidní, narušuje OCP</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        Pro většinu DDD scénářů doporučujeme <strong>Value Object s type fieldem</strong>:
+        jeden enum sloupec pro typ, jeden JSON sloupec pro specifická data varianty.
+        Logika se přesouvá do doménových metod, které přijímají VO jako parametr —
+        ne do dědičnosti.
+    </p>
+
+    </section>
+
+    </section>{# konec bloku A #}
+
     </article>
 {% endblock %}
 
