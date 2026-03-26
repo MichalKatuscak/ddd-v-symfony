@@ -151,4 +151,12 @@ class DddController extends AbstractController
             'title' => 'Glosář DDD terminologie',
         ]);
     }
+
+    #[Route('/kdy-nepouzivat-ddd', name: 'when_not_to_use_ddd')]
+    public function whenNotToUseDdd(): Response
+    {
+        return $this->render('ddd/when_not_to_use_ddd.html.twig', [
+            'title' => 'Kdy DDD nepoužívat — upřímně',
+        ]);
+    }
 }
