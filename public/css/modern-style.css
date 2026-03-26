@@ -951,6 +951,24 @@ figcaption {
     padding-bottom: 0;
     margin-top: 0;
 }
+/* Examples banner — odkaz na živé ukázky */
+.examples-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--color-primary);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius);
+    padding: 0.75rem 1.25rem;
+    margin: 1rem 0 1.75rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+.examples-banner svg { color: var(--color-primary); flex-shrink: 0; }
+.examples-banner a { color: var(--color-primary); font-weight: 600; }
+.examples-banner a:hover { color: var(--color-primary-dim); text-decoration: none; }
+
 @media (max-width: 576px) {
     .feature-grid { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.75rem; }
