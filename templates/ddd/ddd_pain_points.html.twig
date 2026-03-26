@@ -526,6 +526,336 @@ private string $id;</code></pre>
 
     </section>{# konec bloku A #}
 
+    {# ═══════════════════════════════════════════════════════════
+       BLOK B: Asynchronní infrastruktura
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="async" aria-labelledby="async-heading">
+    <h2 id="async-heading">B — Asynchronní infrastruktura</h2>
+
+    <p>
+        Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci —
+        a s ní distribuované problémy: zprávy se ztrácejí, doručují dvakrát, přicházejí
+        v nesprávném pořadí. Tato sekce pokrývá čtyři nejčastější bolesti.
+    </p>
+
+    {# ─── B1: Outbox pattern ─────────────────────────────────────── #}
+    <section id="b1-outbox" aria-labelledby="b1-heading">
+    <h3 id="b1-heading">B1. Outbox pattern — zaručené doručení doménových událostí</h3>
+
+    <p>
+        <strong>Problém:</strong> Uložíte agregát (<code>flush()</code> proběhne úspěšně),
+        ale před tím, než stihnete odeslat doménovou událost do Messengeru, server spadne.
+        Událost se ztratí — databáze je konzistentní, ale žádný subscriber ji nikdy
+        nezpracuje. Platba proběhla, ale sklad nebyl upozorněn.
+    </p>
+
+    <p>
+        <strong>Příčina:</strong> <code>flush()</code> a <code>$bus-&gt;dispatch()</code>
+        jsou dvě separátní operace bez atomické záruky. Neexistuje způsob, jak je
+        zabalit do jedné transakce — databáze a message broker jsou různé systémy.
+    </p>
+
+    <p>
+        <strong>Řešení — Outbox pattern:</strong> Místo přímého odeslání do brokeru
+        uložte událost do <code>outbox</code> tabulky <em>ve stejné databázové transakci</em>
+        jako agregát. Separátní worker pak z tabulky čte a odešle zprávy do Messengeru.
+        Atomicita je garantována databázovou transakcí; at-least-once doručení zajišťuje worker.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="b1-code-heading">
+        <h4 id="b1-code-heading">PHP: OutboxEvent entita a OutboxPublisher service</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Infrastructure\Outbox;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'outbox_events')]
+final class OutboxEvent
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private int $id;
+
+    #[ORM\Column(length: 255)]
+    private string $eventType;
+
+    #[ORM\Column(type: 'json')]
+    private array $payload;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $publishedAt = null;
+
+    public function __construct(string $eventType, array $payload)
+    {
+        $this->eventType = $eventType;
+        $this->payload   = $payload;
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function markAsPublished(): void
+    {
+        $this->publishedAt = new \DateTimeImmutable();
+    }
+
+    public function isPublished(): bool { return $this->publishedAt !== null; }
+    public function eventType(): string  { return $this->eventType; }
+    public function payload(): array     { return $this->payload; }
+}
+</code></pre>
+    </div>
+
+    <p>
+        Doctrine Event Subscriber uloží událost do outboxu ve stejné transakci jako agregát:
+    </p>
+
+    <pre><code class="language-php">final class OutboxEventSubscriber implements EventSubscriberInterface
+{
+    public function postFlush(PostFlushEventArgs $args): void
+    {
+        // Po každém flush projdeme agregáty a uložíme jejich events do outboxu
+        foreach ($this->pendingEvents as $event) {
+            $outbox = new OutboxEvent(
+                get_class($event),
+                $this->serializer->normalize($event),
+            );
+            $args->getObjectManager()->persist($outbox);
+        }
+        $args->getObjectManager()->flush(); // druhý flush jen pro outbox záznamy
+        $this->pendingEvents = [];
+    }
+}</code></pre>
+
+    <div class="note" role="note">
+        <p>
+            Symfony Messenger v Symfony 7+ nabízí vlastní <strong>Doctrine Transport</strong>,
+            který ukládá zprávy do databáze a garantuje at-least-once doručení bez nutnosti
+            vlastního Outbox kódu. Zvažte jeho použití jako alternativu před implementací
+            vlastního Outbox patternu.
+        </p>
+    </div>
+
+    </section>
+
+    {# ─── B2: Debugging Messengeru ───────────────────────────────── #}
+    <section id="b2-debugging" aria-labelledby="b2-heading">
+    <h3 id="b2-heading">B2. Debugging ztracené zprávy v Messengeru</h3>
+
+    <p>
+        <strong>Problém:</strong> Zpráva odešla do async fronty. Worker běží.
+        Handler ale nikdy nezavolal. Jak zjistit, kde zpráva skončila?
+    </p>
+
+    <p>
+        <strong>Postup debuggingu:</strong>
+    </p>
+
+    <ol>
+        <li>
+            <strong>Zkontrolujte failed transport:</strong>
+            <pre><code class="language-bash">php bin/console messenger:failed:show</code></pre>
+            Pokud je zpráva zde, zobrazí se s chybou. Znovu ji zpracujte:
+            <pre><code class="language-bash">php bin/console messenger:failed:retry</code></pre>
+        </li>
+        <li>
+            <strong>Zapněte verbose logging:</strong> V <code>config/packages/monolog.yaml</code>
+            přidejte handler pro <code>messenger</code> channel na úroveň <code>debug</code>.
+            Každý dispatch, receive a zpracování se zaloguje.
+        </li>
+        <li>
+            <strong>Correlation ID middleware:</strong> Přidejte vlastní middleware, který
+            přiřadí každé zprávě UUID a loguje ho při dispatch i při receive. Pak hledáte
+            v logu podle ID.
+        </li>
+    </ol>
+
+    <div class="tip" role="note" aria-labelledby="b2-code-heading">
+        <h4 id="b2-code-heading">PHP: Middleware pro Correlation ID logging</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Infrastructure\Messenger;
+
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
+use Symfony\Component\Messenger\Middleware\StackInterface;
+use Symfony\Component\Uid\Uuid;
+
+final class CorrelationIdMiddleware implements MiddlewareInterface
+{
+    public function __construct(private readonly LoggerInterface $logger) {}
+
+    public function handle(Envelope $envelope, StackInterface $stack): Envelope
+    {
+        $stamp = $envelope->last(CorrelationIdStamp::class)
+            ?? new CorrelationIdStamp((string) Uuid::v7());
+
+        $this->logger->info('Messenger: processing message', [
+            'correlation_id'  => $stamp->correlationId,
+            'message_class'   => $envelope->getMessage()::class,
+        ]);
+
+        return $stack->next()->handle(
+            $envelope->with($stamp),
+            $stack,
+        );
+    }
+}
+</code></pre>
+    </div>
+
+    <p>
+        Zaregistrujte middleware v <code>config/packages/messenger.yaml</code>:
+    </p>
+
+    <pre><code class="language-yaml">framework:
+    messenger:
+        buses:
+            command.bus:
+                middleware:
+                    - App\SharedKernel\Infrastructure\Messenger\CorrelationIdMiddleware</code></pre>
+
+    </section>
+
+    {# ─── B3: Idempotence handlerů ──────────────────────────────── #}
+    <section id="b3-idempotence" aria-labelledby="b3-heading">
+    <h3 id="b3-heading">B3. Idempotence handlerů</h3>
+
+    <p>
+        <strong>Problém:</strong> Messenger garantuje <em>at-least-once</em> doručení —
+        nikoli exactly-once. Pokud worker zprávu zpracuje, ale před potvrzením (ack)
+        spadne, broker zprávu znovu doručí. Handler ji zpracuje podruhé. Výsledkem může
+        být dvojitá platba, duplicitní objednávka nebo zdvojený email.
+    </p>
+
+    <p>
+        <strong>Řešení — Idempotency Middleware s deduplikační tabulkou:</strong>
+        Každá zpráva nese <code>IdempotencyStamp</code> s unikátním klíčem
+        (vygenerovaným při prvním odeslání). Middleware před zpracováním zkontroluje
+        databázovou tabulku — pokud klíč existuje, zprávu přeskočí.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="b3-code-heading">
+        <h4 id="b3-code-heading">PHP: IdempotencyMiddleware</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Infrastructure\Messenger;
+
+use Doctrine\DBAL\Connection;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
+use Symfony\Component\Messenger\Middleware\StackInterface;
+
+final class IdempotencyMiddleware implements MiddlewareInterface
+{
+    public function __construct(private readonly Connection $connection) {}
+
+    public function handle(Envelope $envelope, StackInterface $stack): Envelope
+    {
+        $stamp = $envelope->last(IdempotencyStamp::class);
+
+        if ($stamp === null) {
+            return $stack->next()->handle($envelope, $stack); // zpráva bez klíče: vždy zpracuj
+        }
+
+        $alreadyProcessed = (bool) $this->connection->fetchOne(
+            'SELECT 1 FROM processed_messages WHERE idempotency_key = ?',
+            [$stamp->key],
+        );
+
+        if ($alreadyProcessed) {
+            return $envelope; // duplikát — přeskočit bez zpracování
+        }
+
+        $result = $stack->next()->handle($envelope, $stack);
+
+        $this->connection->insert('processed_messages', [
+            'idempotency_key' => $stamp->key,
+            'processed_at'    => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+        ]);
+
+        return $result;
+    }
+}
+</code></pre>
+    </div>
+
+    <div class="note" role="note">
+        <p>
+            Tabulka <code>processed_messages</code> poroste bez omezení. Přidejte
+            pravidelný cleanup (cron) nebo <code>TTL</code> index pro automatické mazání
+            starých záznamů. Obvyklá retence je 7–30 dní — doba, po které broker
+            přestane doručovat retries.
+        </p>
+    </div>
+
+    </section>
+
+    {# ─── B4: Ordering zpráv ─────────────────────────────────────── #}
+    <section id="b4-ordering" aria-labelledby="b4-heading">
+    <h3 id="b4-heading">B4. Ordering zpráv — zpráva B dorazí před A</h3>
+
+    <p>
+        <strong>Problém:</strong> Máte dva workery zpracovávající stejnou frontu paralelně.
+        Obě události <code>OrderPlaced</code> a <code>OrderShipped</code> jsou odeslány
+        za sebou, ale <code>OrderShipped</code> zpracuje jiný worker rychleji —
+        handler se pokusí označit objednávku jako odeslanou, ale objednávka ještě
+        neexistuje (nebo je ve špatném stavu).
+    </p>
+
+    <p>
+        <strong>Řešení — tři přístupy podle kontextu:</strong>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Přístup</th>
+                <th>Kdy použít</th>
+                <th>Trade-off</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Optimistický retry</strong></td>
+                <td>Závislost je krátkodobá (ms)</td>
+                <td>Handler hodí výjimku → Messenger retry s <code>DelayStamp</code></td>
+            </tr>
+            <tr>
+                <td><strong>Jeden worker na agregát</strong></td>
+                <td>Ordering je kritický</td>
+                <td>Nižší throughput, ale garantované pořadí per-aggregate</td>
+            </tr>
+            <tr>
+                <td><strong>Inbox buffer</strong></td>
+                <td>Komplexní závislosti</td>
+                <td>Handler uloží zprávu do "inbox" tabulky a zpracuje ji až po splnění podmínek</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        Nejjednodušší řešení: handler při nesprávném stavu agregátu hodí
+        <code>UnrecoverableMessageHandlingException</code> — Messenger to zaloguje
+        jako chybu a zprávu <em>neretryuje</em>. Nebo hodí standardní výjimku
+        a Messenger zprávu odloží (retry s exponential backoff).
+    </p>
+
+    </section>
+
+    </section>{# konec bloku B #}
+
     </article>
 {% endblock %}
 
