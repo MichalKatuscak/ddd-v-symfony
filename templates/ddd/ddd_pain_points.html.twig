@@ -230,7 +230,7 @@ final class ConfirmTransferService
         <tbody>
             <tr>
                 <td>Read model v rámci téhož requestu</td>
-                <td><code>$em-&gt;detach($entity)</code> po načtení — EM přestane entitu sledovat</td>
+                <td><code>$em-&gt;detach($entity)</code> po načtení — EM přestane entitu sledovat (Doctrine ORM 2.x; v ORM 3.x použijte místo toho <code>HYDRATE_ARRAY</code> nebo nativní SQL)</td>
             </tr>
             <tr>
                 <td>Komplexní read queries</td>
@@ -301,11 +301,6 @@ final class MoneyType extends Type
         /** @var Money $value */
         return $value->amountInCents() . '_' . $value->currency()->code();
     }
-
-    public function getName(): string
-    {
-        return 'money';
-    }
 }
 </code></pre>
     </div>
@@ -347,7 +342,8 @@ private ?Money $price = null;</code></pre>
         Bohaté agregáty (metody jako <code>totalPrice()</code>, <code>items()</code>)
         mohou neúmyslně triggerovat lazy load <em>mimo otevřenou transakci</em> nebo
         <em>po detach()</em>, což vyústí ve výjimku
-        <code>LazyInitializationException</code>.
+        <code>UninitializedLazyObjectException</code> (PHP 8.4 lazy objects) nebo
+        <code>ORMInvalidArgumentException</code> v starších verzích Doctrine ORM.
     </p>
 
     <p>
@@ -613,23 +609,40 @@ final class OutboxEvent
     </div>
 
     <p>
-        Doctrine Event Subscriber uloží událost do outboxu ve stejné transakci jako agregát:
+        Klíčový detail: outbox záznamy musí být persistovány <em>uvnitř</em> téže transakce
+        jako agregát. Listener musí reagovat na událost <code>onFlush</code> (ještě před
+        commitem) — nikoliv na <code>postFlush</code>, který se volá <em>po</em> commitu
+        transakce a tedy mimo ni. Použití <code>postFlush</code> s voláním dalšího
+        <code>flush()</code> by navíc způsobilo nekonečnou rekurzi.
     </p>
 
-    <pre><code class="language-php">final class OutboxEventSubscriber implements EventSubscriberInterface
+    <pre><code class="language-php">use Doctrine\ORM\Event\OnFlushEventArgs;
+
+final class OutboxEventSubscriber implements EventSubscriberInterface
 {
-    public function postFlush(PostFlushEventArgs $args): void
+    public function getSubscribedEvents(): array
     {
-        // Po každém flush projdeme agregáty a uložíme jejich events do outboxu
-        foreach ($this->pendingEvents as $event) {
-            $outbox = new OutboxEvent(
-                get_class($event),
-                $this->serializer->normalize($event),
-            );
-            $args->getObjectManager()->persist($outbox);
+        return [Events::onFlush];
+    }
+
+    public function onFlush(OnFlushEventArgs $args): void
+    {
+        $em  = $args->getObjectManager();
+        $uow = $em->getUnitOfWork();
+
+        // Projdeme nové i změněné entity a sebereme doménové události
+        foreach ([...$uow->getScheduledEntityInsertions(), ...$uow->getScheduledEntityUpdates()] as $entity) {
+            if (!$entity instanceof HasDomainEvents) {
+                continue;
+            }
+            foreach ($entity->releaseEvents() as $event) {
+                $outbox = new OutboxEvent(get_class($event), $this->serializer->normalize($event));
+                $em->persist($outbox);
+                // Outbox entitu musíme ručně přidat do Unit of Work — jsme uvnitř onFlush
+                $uow->computeChangeSet($em->getClassMetadata(OutboxEvent::class), $outbox);
+            }
         }
-        $args->getObjectManager()->flush(); // druhý flush jen pro outbox záznamy
-        $this->pendingEvents = [];
+        // Žádný další flush() — outbox záznamy jsou součástí probíhající transakce
     }
 }</code></pre>
 
@@ -800,6 +813,29 @@ final class IdempotencyMiddleware implements MiddlewareInterface
         </p>
     </div>
 
+    <div class="warning" role="note">
+        <p>
+            <strong>TOCTOU race condition:</strong> Kód výše obsahuje závodní podmínku —
+            dvě paralelní instance workeru mohou obě vidět, že záznam neexistuje,
+            a obě zprávu zpracovat. Bezpečnější varianta využívá databázový unique constraint
+            na <code>idempotency_key</code> a zachycuje duplicitní INSERT:
+        </p>
+        <pre><code class="language-php">try {
+    $this->connection->insert('processed_messages', [
+        'idempotency_key' => $stamp->key,
+        'processed_at'    => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+    ]);
+} catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
+    return $envelope; // jiná instance již zpracovala — přeskočit
+}
+
+return $stack->next()->handle($envelope, $stack);</code></pre>
+        <p>
+            Tím se SELECT + INSERT nahradí atomickým INSERT — při konfliktu databáze zaručí,
+            že zprávu zpracuje právě jedna instance.
+        </p>
+    </div>
+
     </section>
 
     {# ─── B4: Ordering zpráv ─────────────────────────────────────── #}
@@ -845,12 +881,17 @@ final class IdempotencyMiddleware implements MiddlewareInterface
         </tbody>
     </table>
 
-    <p>
-        Nejjednodušší řešení: handler při nesprávném stavu agregátu hodí
-        <code>UnrecoverableMessageHandlingException</code> — Messenger to zaloguje
-        jako chybu a zprávu <em>neretryuje</em>. Nebo hodí standardní výjimku
-        a Messenger zprávu odloží (retry s exponential backoff).
-    </p>
+    <div class="note" role="note">
+        <p>
+            <strong>Pozor:</strong> Pro ordering problémy <em>nepoužívejte</em>
+            <code>UnrecoverableMessageHandlingException</code> — ta zprávu
+            <strong>trvale zahodí</strong> a přesune do failed transport bez retryování.
+            Správný přístup je hodit <strong>standardní výjimku</strong>; Messenger zprávu
+            odloží do retry fronty s exponential backoff. Pokud po vyčerpání všech retries
+            stále selhává, teprve pak skončí v failed transport — kde ji lze prozkoumat
+            a znovu odeslat.
+        </p>
+    </div>
 
     </section>
 
