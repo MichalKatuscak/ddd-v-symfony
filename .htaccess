@@ -1,19 +1,29 @@
 # Zabezpečení a směrování pro Symfony aplikaci
 
-# Jednoduché přesměrování všech požadavků do public adresáře
+# Zakázat výpis adresářů
+Options -Indexes
+
+# Zakázat přístup k citlivým souborům a adresářům
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Blokovat přístup k .env souborům
+    RewriteRule ^\.env - [F,L]
+
+    # Blokovat přístup k citlivým adresářům
+    RewriteRule ^(config|src|var|vendor|templates|bin|tests|docs|_hidden|\.github)(/|$) - [F,L]
+
+    # Blokovat přístup k citlivým souborům v kořenu
+    RewriteRule ^(composer\.(json|lock)|symfony\.lock|CLAUDE\.md|\.gitignore)$ - [F,L]
+
+    # HTTPS přesměrování
     RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https:///%{HTTP_HOST}/$1 [R=301,L]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
     # Přesměrovat vše do public adresáře
     RewriteRule ^$ public/index.php [L]
     RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
 </IfModule>
-
-# Zakázat výpis adresářů
-Options -Indexes
 
 # Nastavit výchozí znakovou sadu
 AddDefaultCharset UTF-8
