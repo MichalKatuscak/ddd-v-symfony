@@ -1261,12 +1261,16 @@ final class PlaceOrderProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): OrderResponse
     {
         /** @var OrderResource $data */
+        // ID generujeme před dispatchem — dispatch() vrací Envelope, ne doménový objekt
+        $orderId = OrderId::generate();
+
         $command = new PlaceOrderCommand(
+            orderId: $orderId,
             customerId: CustomerId::fromString($data->customerId),
             items: $data->items,
         );
 
-        $orderId = $this->commandBus->dispatch($command);
+        $this->commandBus->dispatch($command);
 
         return new OrderResponse($orderId->toString());
     }
