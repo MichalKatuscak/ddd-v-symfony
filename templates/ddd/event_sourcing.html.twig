@@ -2,9 +2,9 @@
 
 {% block title %}Event Sourcing v DDD a Symfony | DDD Symfony{% endblock %}
 
-{% block meta_description %}Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce a snapshotting — s praktickými ukázkami PHP kódu.{% endblock %}
+{% block meta_description %}Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce, snapshotting a verzování událostí — včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.{% endblock %}
 
-{% block meta_keywords %}Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger{% endblock %}
+{% block meta_keywords %}Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -23,7 +23,7 @@
     "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-03-23",
+  "dateModified": "2026-03-26",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -45,6 +45,7 @@
             <li><a href="#event-store">Implementace Event Store</a></li>
             <li><a href="#aggregate-s-es">Agregát s Event Sourcingem</a></li>
             <li><a href="#projekce">Projekce (Projections)</a></li>
+            <li><a href="#prakticke-problemy-projekci">Praktické problémy projekcí</a></li>
             <li><a href="#snapshotting">Snapshotting</a></li>
             <li><a href="#verzovani-udalosti">Verzování událostí (Event Versioning)</a></li>
             <li><a href="#kdy-pouzit">Kdy použít Event Sourcing</a></li>
@@ -57,7 +58,7 @@
         <p>
             Event Sourcing (ES) je architektonický vzor persistence, při němž se stav systému neukládá jako aktuální
             snímek dat, nýbrž jako <strong>sekvence neměnných událostí</strong>, jež k danému stavu vedly
-            <a href="https://martinfowler.com/eaaDev/EventSourcing.html" target="_blank">[1]</a>.
+            <a href="https://martinfowler.com/eaaDev/EventSourcing.html" target="_blank" rel="noopener noreferrer">[1]</a>.
             Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty; aktuální stav agregátu pak
             vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
         </p>
@@ -133,7 +134,7 @@
                     konkrétního agregátu.
                 </li>
                 <li>
-                    <strong>Aggregate (Agregát)</strong> — V kontextu ES je agregát rekonstruován přehráním všech
+                    <strong>Aggregate (<a href="{{ path('basic_concepts') }}#aggregates">Agregát</a>)</strong> — V kontextu ES je agregát rekonstruován přehráním všech
                     událostí ze svého event streamu. Každá mutace stavu agregátu produkuje novou událost místo
                     přímé modifikace atributů.
                 </li>
@@ -157,15 +158,15 @@
         <p>
             Event Sourcing a <a href="{{ path('cqrs') }}">CQRS</a> jsou dva samostatné vzory, které se však přirozeně
             doplňují
-            <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank">[2]</a>.
+            <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank" rel="noopener noreferrer">[2]</a>.
             <strong>Nejsou totéž</strong> — lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
             jejich kombinace je velmi mocná a v praxi DDD aplikací běžná.
         </p>
         <p>
-            Důvodem přirozené synergie je, že Event Sourcing produkuje events jako první třídu persistence, a CQRS
-            potřebuje způsob, jak aktualizovat read modely při každé změně write strany. Events jsou ideálním
-            mechanismem pro tuto propagaci: write side uloží event do Event Store, read side jej přečte a aktualizuje
-            projekci.
+            Důvodem přirozené synergie je, že Event Sourcing produkuje události jako prvotřídní artefakt
+            persistence, a CQRS potřebuje způsob, jak aktualizovat read modely při každé změně write strany.
+            Události jsou ideálním mechanismem pro tuto propagaci: write side uloží událost do Event Store,
+            read side ji přečte a aktualizuje projekci.
         </p>
 
         <div class="note" role="note" aria-labelledby="es-cqrs-tok-heading">
@@ -186,7 +187,7 @@
             <p>
                 <strong>CQRS</strong> řeší <em>jak oddělit zápis od čtení</em> — je to organizační vzor zodpovědností.
                 <strong>Event Sourcing</strong> řeší <em>jak persistovat stav</em> — je to vzor persistence.
-                Při jejich kombinaci ES přirozeně zásobuje CQRS read side daty: každá change event je současně
+                Při jejich kombinaci ES přirozeně zásobuje CQRS read side daty: každá událost o změně je současně
                 vstupem pro aktualizaci projekcí.
             </p>
         </div>
@@ -253,6 +254,12 @@ interface DomainEvent
     public function eventType(): string;
 
     /**
+     * Verze schématu payloadu — klíčová pro upcasting starých událostí.
+     * Nové verze události inkrementují toto číslo.
+     */
+    public function schemaVersion(): int;
+
+    /**
      * Serializace do pole pro uložení do Event Store.
      * Musí obsahovat všechna data potřebná k rekonstrukci stavu.
      *
@@ -303,6 +310,11 @@ final class UserRegistered implements DomainEvent
     public function eventType(): string
     {
         return 'identity.user_registered';
+    }
+
+    public function schemaVersion(): int
+    {
+        return 1; // při změně schématu inkrementujeme a vytvoříme upcaster
     }
 
     /** @return array&lt;string, mixed&gt; */
@@ -372,6 +384,7 @@ final class UserRegistered implements DomainEvent
     event_type    VARCHAR(255)     NOT NULL COMMENT 'Typ události, napr. ordering.order_placed',
     payload       JSON             NOT NULL COMMENT 'Serializovaná data události',
     metadata      JSON             NOT NULL DEFAULT ('{}') COMMENT 'Korelační ID, causation ID, user ID…',
+    schema_version SMALLINT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Verze schématu payloadu — pro upcasting',
     version       INT UNSIGNED     NOT NULL COMMENT 'Pořadové číslo v rámci streamu agregátu (od 1)',
     occurred_on   DATETIME(6)      NOT NULL COMMENT 'UTC čas vzniku události',
 
@@ -435,6 +448,14 @@ interface EventStore
         string $aggregateId,
         int $fromVersion = 1,
     ): array;
+
+    /**
+     * Načte všechny události z celého Event Store (pro rebuild projekcí).
+     * Vrací generátor pro paměťově efektivní iteraci nad miliony záznamů.
+     *
+     * @return \Generator&lt;EventEnvelope&gt;
+     */
+    public function loadAll(int $batchSize = 500): \Generator;
 }
 </code></pre>
 
@@ -479,6 +500,7 @@ final class DoctrineEventStore implements EventStore
                     'event_type'     =&gt; $event-&gt;eventType(),
                     'payload'        =&gt; json_encode($event-&gt;toPayload(), JSON_THROW_ON_ERROR),
                     'metadata'       =&gt; '{}',
+                    'schema_version' =&gt; $event-&gt;schemaVersion(),
                     'version'        =&gt; $version,
                     'occurred_on'    =&gt; $event-&gt;occurredOn()-&gt;format('Y-m-d H:i:s.u'),
                 ]);
@@ -503,7 +525,7 @@ final class DoctrineEventStore implements EventStore
     public function loadStream(string $aggregateId, int $fromVersion = 1): array
     {
         $rows = $this-&gt;connection-&gt;fetchAllAssociative(
-            'SELECT event_type, payload, version, occurred_on
+            'SELECT event_type, payload, schema_version, version, occurred_on
                FROM event_store
               WHERE aggregate_id = :aggregateId
                 AND version &gt;= :fromVersion
@@ -515,6 +537,32 @@ final class DoctrineEventStore implements EventStore
             fn(array $row) =&gt; $this-&gt;serializer-&gt;deserialize($row),
             $rows,
         );
+    }
+
+    /**
+     * Iteruje přes celý Event Store v dávkách — paměťově efektivní pro rebuild projekcí.
+     *
+     * @return \Generator&lt;EventEnvelope&gt;
+     */
+    public function loadAll(int $batchSize = 500): \Generator
+    {
+        $lastId = 0;
+
+        do {
+            $rows = $this-&gt;connection-&gt;fetchAllAssociative(
+                'SELECT id, event_type, payload, schema_version, version, occurred_on
+                   FROM event_store
+                  WHERE id &gt; :lastId
+               ORDER BY id ASC
+                  LIMIT :limit',
+                ['lastId' =&gt; $lastId, 'limit' =&gt; $batchSize],
+            );
+
+            foreach ($rows as $row) {
+                $lastId = (int) $row['id'];
+                yield $this-&gt;serializer-&gt;deserialize($row);
+            }
+        } while (count($rows) === $batchSize);
     }
 }
 </code></pre>
@@ -543,6 +591,11 @@ final class DoctrineEventStore implements EventStore
                 při replay z Event Store.
             </li>
         </ul>
+        <p>
+            Tato struktura má přímý dopad na testování: event-sourcované agregáty se testují vzorem
+            <strong>given/when/then</strong> — given: historické události, when: volání metody, then: nově emitované
+            události. Podrobně viz kapitola <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
+        </p>
 
         <div class="tip" role="note" aria-labelledby="es-aggregate-base-heading">
             <h3 id="es-aggregate-base-heading">PHP: Base class EventSourcedAggregate</h3>
@@ -817,7 +870,7 @@ final class EventSourcedOrderRepository
             <li>
                 <strong>Synchronní projekce</strong> — Projekce se aktualizuje přímo v rámci téže transakce jako
                 zápis události. Garantuje konzistenci dat v okamžiku odpovědi na command, ale zvyšuje latenci zápisu
-                a zavádí silnou coupling mezi write a read stranou.
+                a zavádí těsnou vazbu mezi write a read stranou.
             </li>
             <li>
                 <strong>Asynchronní projekce</strong> — Události jsou po uložení do Event Store zařazeny do fronty
@@ -940,6 +993,320 @@ final class OrderSummaryProjector
             tato schopnost je jednou z největších výhod Event Sourcingu. Při změně business požadavků stačí
             vytvořit novou projekci a přehrát historii; u CRUD systémů jsou historická data nenávratně ztracena.
         </p>
+    </section>
+
+    <section id="prakticke-problemy-projekci" aria-labelledby="prakticke-problemy-projekci-heading">
+        <h2 id="prakticke-problemy-projekci-heading">Praktické problémy projekcí</h2>
+
+        <p>
+            Sekce výše ukázala, jak projekci vybudovat. V praxi se ale objevují problémy, které
+            z jednoduchých ukázek nejsou patrné. Tato sekce pokrývá nejčastější z nich — idempotenci,
+            chybové stavy, rebuild a eventual consistency z pohledu uživatelského rozhraní.
+        </p>
+
+        <h3>Idempotence projektorů</h3>
+        <p>
+            Asynchronní transport (RabbitMQ, Redis Streams, Amazon SQS) garantuje doručení zprávy
+            <strong>alespoň jednou</strong> (at-least-once delivery). Zpráva se proto může doručit opakovaně — po
+            timeoutu, restartu workeru nebo síťovém výpadku. Pokud projektor není idempotentní, opakované
+            zpracování způsobí poškozená data: duplicitní řádky, zdvojené částky, nekonzistentní počty.
+        </p>
+        <p>
+            Idempotenci lze zajistit dvěma způsoby: <strong>upsert</strong> (INSERT … ON DUPLICATE KEY UPDATE)
+            místo prostého INSERT, nebo <strong>tracking tabulka</strong> již zpracovaných událostí.
+        </p>
+
+        <div class="tip" role="note" aria-labelledby="idempotent-projector-heading">
+            <h3 id="idempotent-projector-heading">PHP: Idempotentní projektor s tracking tabulkou</h3>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Ordering\Projection;
+
+use App\Ordering\Domain\Event\OrderCreated;
+use Doctrine\DBAL\Connection;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+/**
+ * Idempotentní projektor: před zpracováním ověří, zda událost
+ * již nebyla zpracována, pomocí tabulky projection_checkpoint.
+ *
+ * Pozn.: Atribut #[AsMessageHandler] na třídě registruje __invoke() jako handler.
+ * Pro projektory zpracovávající více typů událostí použijte atribut
+ * na jednotlivých metodách — viz OrderSummaryProjector výše.
+ */
+#[AsMessageHandler]
+final class IdempotentOrderProjector
+{
+    public function __construct(
+        private readonly Connection $connection,
+    ) {}
+
+    public function __invoke(OrderCreated $event): void
+    {
+        // Atomická kontrola + záznam: INSERT IGNORE vrátí 0 affected rows
+        // pokud eventId již existuje → událost byla již zpracována.
+        $affected = $this-&gt;connection-&gt;executeStatement(
+            'INSERT IGNORE INTO projection_checkpoint (event_id, projection_name, processed_at)
+             VALUES (:eventId, :projection, NOW(6))',
+            ['eventId' =&gt; $event-&gt;eventId(), 'projection' =&gt; 'order_summary'],
+        );
+
+        if ($affected === 0) {
+            return; // Duplicitní doručení — přeskočíme
+        }
+
+        // Vlastní projekční logika
+        $this-&gt;connection-&gt;insert('order_summary', [
+            'order_id'     =&gt; $event-&gt;orderId(),
+            'customer_id'  =&gt; $event-&gt;customerId(),
+            'status'       =&gt; 'draft',
+            'item_count'   =&gt; 0,
+            'total_amount' =&gt; 0,
+            'placed_at'    =&gt; $event-&gt;occurredOn()-&gt;format('Y-m-d H:i:s'),
+        ]);
+    }
+}
+</code></pre>
+        </div>
+
+        <div class="tip" role="note" aria-labelledby="checkpoint-ddl-heading">
+            <h3 id="checkpoint-ddl-heading">SQL: Tabulka <code>projection_checkpoint</code> pro tracking zpracovaných událostí</h3>
+            <pre><code class="language-sql">CREATE TABLE projection_checkpoint (
+    event_id        CHAR(36)     NOT NULL COMMENT 'UUID události — odkaz na event_store.event_id',
+    projection_name VARCHAR(100) NOT NULL COMMENT 'Název projekce, napr. order_summary',
+    processed_at    DATETIME(6)  NOT NULL COMMENT 'Čas zpracování',
+
+    PRIMARY KEY (event_id, projection_name)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci
+  COMMENT='Tracking tabulka pro idempotentní projektory — zabraňuje duplicitnímu zpracování';
+</code></pre>
+        </div>
+
+        <div class="note" role="note" aria-labelledby="idempotence-tip-heading">
+            <h3 id="idempotence-tip-heading">Alternativa: upsert bez tracking tabulky</h3>
+            <p>
+                Pro projekce, kde je výsledkem jediný řádek na agregát (typicky summary tabulky), je jednodušší
+                použít <code>INSERT … ON DUPLICATE KEY UPDATE</code>. Tracking tabulka se vyplatí, když jedna
+                událost aktualizuje více tabulek nebo řádků a potřebujete garantovat, že se celá operace provede
+                právě jednou.
+            </p>
+        </div>
+
+        <h3>Chybové stavy a retry strategie</h3>
+        <p>
+            Projektor může selhat z mnoha důvodů: dočasná nedostupnost databáze, neplatný payload
+            u staré události bez upcasteru, nebo bug v projekční logice. Symfony Messenger nabízí
+            dvě klíčové mechaniky pro řešení:
+        </p>
+        <ul>
+            <li>
+                <strong>Retry transport</strong> — zpráva se po selhání automaticky vrátí do fronty
+                s exponenciálním backoffem (výchozí: 3 pokusy s násobičem 2).
+            </li>
+            <li>
+                <strong>Failed transport (dead letter queue)</strong> — po vyčerpání retry pokusů se
+                zpráva přesune do samostatné fronty, kde čeká na manuální zásah. Nedojde ke ztrátě
+                události ani k zablokování zbytku fronty.
+            </li>
+        </ul>
+
+        <div class="tip" role="note" aria-labelledby="messenger-retry-heading">
+            <h3 id="messenger-retry-heading">YAML: Kompletní konfigurace Messenger s retry a dead letter queue</h3>
+            <p>Následující konfigurace rozšiřuje <a href="#messenger-yaml-heading">základní nastavení</a> z předchozí
+                sekce o retry strategii a failed transport:</p>
+            <pre><code class="language-yaml">framework:
+    messenger:
+        # Failed transport — sem padají zprávy po vyčerpání retry pokusů
+        failure_transport: failed
+
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000        # 1 sekunda
+                    multiplier: 2      # exponenciální backoff: 1s, 2s, 4s
+                    max_delay: 60000   # max 60 sekund mezi pokusy
+
+            failed:
+                dsn: 'doctrine://default?queue_name=failed'
+
+        routing:
+            'App\Ordering\Domain\Event\OrderCreated':    async
+            'App\Ordering\Domain\Event\OrderItemAdded': async
+            'App\Ordering\Domain\Event\OrderConfirmed': async
+            'App\Ordering\Domain\Event\OrderShipped':   async
+</code></pre>
+        </div>
+
+        <p>
+            Pro diagnostiku a opětovné zpracování selhavších zpráv slouží příkazy Symfony Messenger:
+        </p>
+        <ul>
+            <li><code>bin/console messenger:failed:show</code> — zobrazí zprávy v dead letter queue</li>
+            <li><code>bin/console messenger:failed:retry</code> — pokusí se zprávy znovu zpracovat</li>
+            <li><code>bin/console messenger:failed:remove {id}</code> — odstraní neplatnou zprávu</li>
+        </ul>
+
+        <h3>Rebuild projekcí</h3>
+        <p>
+            Schopnost přebudovat projekci od začátku je jednou z největších výhod Event Sourcingu, ale
+            v praxi jde o netriviální operaci. Nestačí jen přehrát události — je nutné zajistit,
+            že se rebuild neprovádí souběžně s normálním provozem projektoru, že se stará data korektně
+            odstraní a že po rebuildu projekce odpovídá aktuálnímu stavu Event Store.
+        </p>
+
+        <div class="tip" role="note" aria-labelledby="rebuild-command-heading">
+            <h3 id="rebuild-command-heading">PHP: Symfony konzolový příkaz pro rebuild projekce</h3>
+            <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing\Console;
+
+use App\Infrastructure\EventSourcing\EventStore;
+use App\Infrastructure\EventSourcing\EventSerializer;
+use Doctrine\DBAL\Connection;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+#[AsCommand(
+    name: 'app:projection:rebuild',
+    description: 'Přebuduje projekci přehráním všech událostí z Event Store.',
+)]
+final class RebuildProjectionCommand extends Command
+{
+    /** @var array&lt;string, array{projector: callable, table: string}&gt; Registr projektorů dle názvu */
+    private array $projectors;
+
+    /**
+     * @param iterable&lt;string, callable&gt; $projectors Symfony tagged_iterator
+     * @param array&lt;string, string&gt;      $projectionTables Mapa: název projekce → název tabulky
+     */
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly EventStore $eventStore,
+        private readonly EventSerializer $serializer,
+        iterable $projectors,
+        array $projectionTables,
+    ) {
+        parent::__construct();
+        foreach ($projectors as $name =&gt; $projector) {
+            $this-&gt;projectors[$name] = [
+                'projector' =&gt; $projector,
+                'table'     =&gt; $projectionTables[$name] ?? throw new \InvalidArgumentException(
+                    "Projekce '{$name}' nemá definovanou tabulku v \$projectionTables.",
+                ),
+            ];
+        }
+    }
+
+    protected function configure(): void
+    {
+        $this-&gt;addArgument('projection', InputArgument::REQUIRED, 'Název projekce k přebudování');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $name = $input-&gt;getArgument('projection');
+
+        if (!isset($this-&gt;projectors[$name])) {
+            $io-&gt;error("Projekce '{$name}' neexistuje. Dostupné: " . implode(', ', array_keys($this-&gt;projectors)));
+            return Command::FAILURE;
+        }
+
+        $config = $this-&gt;projectors[$name];
+        $table  = $config['table'];
+
+        $io-&gt;warning("Rebuild smaže data projekce '{$name}' (tabulka '{$table}') a přehraje celý Event Store.");
+
+        // 1. Smazat stávající data projekce — název tabulky pochází z whitelistu,
+        //    nikoli z uživatelského vstupu, takže nehrozí SQL injection.
+        $this-&gt;connection-&gt;executeStatement("TRUNCATE TABLE {$table}");
+
+        // 2. Vymazat checkpoint záznamy pro tuto projekci
+        $this-&gt;connection-&gt;executeStatement(
+            'DELETE FROM projection_checkpoint WHERE projection_name = :name',
+            ['name' =&gt; $name],
+        );
+
+        // 3. Přehrát všechny události z Event Store
+        $projector = $config['projector'];
+        $count = 0;
+        $batchSize = 500;
+
+        foreach ($this-&gt;eventStore-&gt;loadAll($batchSize) as $envelope) {
+            $event = $this-&gt;serializer-&gt;toEvent($envelope);
+            $projector($event);
+            $count++;
+
+            if ($count % $batchSize === 0) {
+                $io-&gt;text("Zpracováno {$count} událostí…");
+            }
+        }
+
+        $io-&gt;success("Projekce '{$name}' přebudována. Celkem {$count} událostí.");
+        return Command::SUCCESS;
+    }
+}
+</code></pre>
+        </div>
+
+        <div class="warning" role="alert" aria-labelledby="rebuild-warning-heading">
+            <h3 id="rebuild-warning-heading">Pozor: rebuild v produkci</h3>
+            <p>
+                Před spuštěním rebuildu v produkci je nutné <strong>zastavit asynchronní workery</strong>
+                (<code>messenger:consume</code>), jinak worker a rebuild příkaz budou souběžně zapisovat
+                do stejné projekce. Po dokončení rebuildu workery opět spusťte. U projekcí s miliony
+                událostí zvažte dávkové zpracování s <code>--batch-size</code> a monitoring paměti.
+            </p>
+        </div>
+
+        <h3>Eventual consistency a uživatelské rozhraní</h3>
+        <p>
+            Při asynchronních projekcích existuje časové okno (typicky milisekundy až jednotky sekund),
+            kdy uživatel provede akci (např. potvrdí objednávku), ale read model ještě neobsahuje
+            aktualizovaná data. Uživatel tak po kliknutí na "Potvrdit" může vidět stále "Draft" stav.
+        </p>
+        <p>
+            Tento problém není bug — je to vlastnost eventual consistency. Existuje několik
+            osvědčených přístupů, jak s ním v UI pracovat:
+        </p>
+        <ul>
+            <li>
+                <strong>Optimistická aktualizace UI</strong> — Frontend po úspěšné odpovědi na command
+                okamžitě zobrazí očekávaný stav (např. "Potvrzeno"), aniž čeká na aktualizaci projekce.
+                Nejjednodušší a nejčastější řešení.
+            </li>
+            <li>
+                <strong>Potvrzovací stránka</strong> — Po provedení akce přesměrovat uživatele na stránku,
+                která nezávisí na projekci (např. "Objednávka č. X byla potvrzena"), místo okamžitého
+                návratu na výpis.
+            </li>
+            <li>
+                <strong>Polling / SSE</strong> — Frontend periodicky dotazuje API nebo naslouchá Server-Sent
+                Events, dokud projekce nedorazí do požadovaného stavu.
+            </li>
+        </ul>
+
+        <div class="note" role="note" aria-labelledby="ec-note-heading">
+            <h3 id="ec-note-heading">Synchronní projekce jako pragmatický kompromis</h3>
+            <p>
+                Pokud vaše aplikace nemá vysokou zátěž na write straně a latence zápisu je přijatelná,
+                je zcela legitimní začít se <strong>synchronními projekcemi</strong> a na asynchronní přejít
+                až ve chvíli, kdy se synchronní aktualizace stane úzkým hrdlem. Vyhýbáte se tak problémům
+                s eventual consistency v raných fázích projektu.
+            </p>
+        </div>
     </section>
 
     <section id="snapshotting" aria-labelledby="snapshotting-heading">
@@ -1087,6 +1454,19 @@ final class SnapshottingOrderRepository
             volání — přímo nastaví properties z uloženého snímku. Je proto nezbytné zajistit, aby se formát
             snapshotu vyvíjel v souladu se změnami doménového modelu.
         </p>
+
+        <div class="warning" role="alert" aria-labelledby="snapshot-invalidation-heading">
+            <h3 id="snapshot-invalidation-heading">Invalidace snapshotů při změně schématu</h3>
+            <p>
+                Při změně struktury agregátu (nové properties, přejmenování, změna typů) se staré snapshoty
+                stanou neplatné — deserializace vrátí nekompletní nebo chybný stav. Řešení:
+                buď přidejte k snapshotu číslo verze a implementujte migraci (analogicky k upcasterům),
+                nebo starší snapshoty jednoduše invalidujte (smažte) a nechte repozitář přehrát celý
+                event stream. U agregátů s krátkými streamy (desítky událostí) je invalidace dostatečná;
+                u dlouhých streamů (tisíce událostí) se vyplatí migrace.
+                Více o výkonnostních dopadech viz <a href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a>.
+            </p>
+        </div>
     </section>
 
     <section id="verzovani-udalosti" aria-labelledby="verzovani-udalosti-heading">
@@ -1370,7 +1750,8 @@ final readonly class UpcasterChain
             </li>
             <li>
                 <strong>Prototypy a MVP</strong> — Rychlá validace business nápadu nepotřebuje složitou
-                infrastrukturu. ES lze přidat do zralého systému incrementálně, pokud se ukáže potřeba.
+                infrastrukturu. ES lze přidat do zralého systému incrementálně, pokud se ukáže potřeba —
+                viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>.
             </li>
             <li>
                 <strong>Týmy bez zkušeností s ES</strong> — Implementace Event Sourcingu bez předchozí zkušenosti
@@ -1385,20 +1766,23 @@ final readonly class UpcasterChain
                 Event Sourcing není "lepší CRUD". Přináší zásadní zvýšení komplexity na všech úrovních:
                 <strong>infrastruktura</strong> (Event Store, event bus, snapshot store),
                 <strong>doménový model</strong> (apply metody, immutabilita událostí, verzování schémat),
-                <strong>testování</strong> (given/when/then scénáře s event streamy) a
+                <strong>testování</strong> (<a href="{{ path('testing_ddd') }}">given/when/then scénáře</a> s event streamy) a
                 <strong>provoz</strong> (migrace schémat událostí, rebuildy projekcí, monitoring lag asynchronních
-                projektorů).
+                projektorů). Podrobněji o výkonnostních dopadech pojednává kapitola
+                <a href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a>.
             </p>
             <p>
                 Nepoužívejte Event Sourcing paušálně pro celou aplikaci. Správný přístup v DDD je aplikovat ES
                 <strong>selektivně na bounded contexts</strong>, kde skutečně přináší hodnotu — typicky Core Domain
                 s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
-            </p>
-            <p>
-                Před zahájením implementace prostudujte vzory event upcasting, event versioning a idempotentní
-                projektory — jsou to stavební kameny, bez nichž se reálný ES systém neobejde.
+                Časté chyby při adopci ES shrnuje kapitola <a href="{{ path('anti_patterns') }}">Anti-vzory</a>.
             </p>
         </div>
+
+        <p>
+            V další kapitole se podíváme na <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD v Symfony</a>,
+            kde uvidíte vzory z tohoto článku zasazené do reálnějšího kontextu.
+        </p>
     </section>
 
     <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
@@ -1408,7 +1792,9 @@ final readonly class UpcasterChain
             <li><strong>Event Store</strong> je append-only úložiště s optimistic lockingem přes verzi streamu.</li>
             <li>Agregáty se rekonstruují <strong>přehráním</strong> (replay) událostí ze svého event streamu.</li>
             <li><strong>Projekce</strong> transformují event stream do read modelů optimalizovaných pro dotazy.</li>
+            <li>Asynchronní projektory musí být <strong>idempotentní</strong> a mít retry/dead letter queue strategii.</li>
             <li><strong>Snapshots</strong> řeší výkonnostní problém dlouhých event streamů.</li>
+            <li><strong>Verzování událostí</strong> s upcastery zajišťuje zpětnou kompatibilitu při vývoji schématu — sloupec <code>schema_version</code> v Event Store je klíčový.</li>
             <li>ES a CQRS jsou <strong>nezávislé vzory</strong>, ale jejich kombinace je v praxi velmi efektivní.</li>
             <li>Osobní údaje <strong>nepatří do event payloadu</strong> (GDPR) — použijte crypto-shredding nebo referenční přístup.</li>
         </ul>
@@ -1419,8 +1805,9 @@ final readonly class UpcasterChain
         <div class="tip">
             <ol>
                 <li>Navrhněte event stream pro agregát <code>BankAccount</code> s operacemi: otevření účtu, vklad, výběr, uzavření. Jaké události vzniknou?</li>
-                <li>Implementujte projekci <code>AccountBalanceProjection</code>, která z výše uvedených událostí vypočítá aktuální zůstatek.</li>
+                <li>Implementujte projekci <code>AccountBalanceProjection</code>, která z výše uvedených událostí vypočítá aktuální zůstatek. Zajistěte, aby projektor byl <strong>idempotentní</strong>.</li>
                 <li>Zamyslete se: kdy byste vytvořili snapshot pro <code>BankAccount</code>? Po kolika událostech a proč?</li>
+                <li>Představte si, že událost <code>AccountOpened</code> v1 měla pole <code>ownerName</code> (celé jméno). V2 jej rozdělila na <code>firstName</code> a <code>lastName</code>. Napište upcaster a zvažte: co se stane se snapshoty vytvořenými z v1 událostí?</li>
             </ol>
         </div>
     </section>
