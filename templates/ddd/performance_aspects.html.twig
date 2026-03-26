@@ -1074,10 +1074,15 @@ final class QueryCountingMiddleware implements Middleware
 
             public function connect(array $params): \Doctrine\DBAL\Driver\Connection
             {
-                $this->middleware->queryCount = 0;
+                $this->middleware->reset();
                 return parent::connect($params);
             }
         };
+    }
+
+    public function reset(): void
+    {
+        $this->queryCount = 0;
     }
 
     public function getQueryCount(): int
@@ -1124,6 +1129,27 @@ final class QueryCountingMiddleware implements Middleware
         <a href="{{ path('cqrs') }}">CQRS v Symfony 8</a> a
         <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD</a>.
     </p>
+</section>
+
+<section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+    <ul>
+        <li>DDD vzory mohou mít <strong>výkonnostní důsledky</strong>, které je nutné řešit cílenou optimalizací.</li>
+        <li><strong>N+1 problém</strong> je nejčastější výkonnostní problém — řeší se eager loadingem nebo specializovanými dotazy.</li>
+        <li><strong>CQRS read modely</strong> umožňují optimalizovat čtení nezávisle na zápisu.</li>
+        <li>Velikost agregátu přímo ovlivňuje <strong>výkon a konkurenci</strong> — menší agregáty jsou rychlejší.</li>
+        <li><strong>Snapshots</strong> řeší výkonnostní problém dlouhých event streamů v Event Sourcingu.</li>
+    </ul>
+</section>
+
+<section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+    <div class="tip">
+        <ol>
+            <li>Identifikujte ve svém projektu potenciální N+1 problém. Jak byste ho vyřešili?</li>
+            <li>Navrhněte read model (denormalizovanou tabulku) pro jeden z vašich nejčastějších dotazů.</li>
+        </ol>
+    </div>
 </section>
 </article>
 {% endblock %}

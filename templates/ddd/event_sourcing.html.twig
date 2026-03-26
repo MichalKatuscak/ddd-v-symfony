@@ -284,7 +284,6 @@ final class UserRegistered implements DomainEvent
     public function __construct(
         private readonly string $userId,
         private readonly string $email,
-        private readonly string $hashedPassword,
         private readonly string $fullName,
     ) {
         $this-&gt;eventId    = Uuid::uuid4()-&gt;toString();
@@ -312,7 +311,6 @@ final class UserRegistered implements DomainEvent
         return [
             'userId'         =&gt; $this-&gt;userId,
             'email'          =&gt; $this-&gt;email,
-            'hashedPassword' =&gt; $this-&gt;hashedPassword,
             'fullName'       =&gt; $this-&gt;fullName,
         ];
     }
@@ -324,6 +322,25 @@ final class UserRegistered implements DomainEvent
     public function fullName(): string { return $this-&gt;fullName; }
 }
 </code></pre>
+        </div>
+
+        <div class="warning" role="alert" aria-labelledby="gdpr-es-heading">
+            <h3 id="gdpr-es-heading">GDPR a osobní údaje v Event Store</h3>
+            <p>
+                Event Store je append-only — události nelze upravovat ani mazat. Při návrhu událostí
+                proto <strong>nikdy neukládejte citlivé údaje</strong> (hesla, tokeny, rodná čísla)
+                přímo do event payloadu. Tyto údaje patří do separátního úložiště s možností smazání.
+            </p>
+            <p>
+                Pro splnění práva na výmaz (GDPR čl. 17) existují dva hlavní přístupy:
+            </p>
+            <ul>
+                <li><strong>Crypto-shredding</strong> — osobní údaje v eventech jsou šifrovány klíčem
+                    specifickým pro daného uživatele. Při žádosti o výmaz se smaže klíč, čímž se data
+                    stanou nečitelnými.</li>
+                <li><strong>Referenční přístup</strong> — event obsahuje pouze ID uživatele, osobní
+                    údaje jsou uloženy v separátní tabulce s možností DELETE.</li>
+            </ul>
         </div>
 
         <p>
@@ -573,6 +590,19 @@ abstract class EventSourcedAggregate
     }
 
     /**
+     * Přehraje dodatečné události na existující instanci (pro snapshot support).
+     *
+     * @param DomainEvent[] $events
+     */
+    public function replayEvents(array $events): void
+    {
+        foreach ($events as $event) {
+            $this-&gt;applyEvent($event);
+            $this-&gt;version++;
+        }
+    }
+
+    /**
      * Dynamické dispatchování na apply*() metody podle třídy události.
      * Konvence: apply + ShortClassName, napr. applyOrderCreated().
      * apply*() metody v podtřídách MUSÍ být protected (ne private),
@@ -723,6 +753,7 @@ namespace App\Infrastructure\Ordering;
 
 use App\Ordering\Domain\Order;
 use App\Infrastructure\EventSourcing\EventStore;
+use App\Infrastructure\EventSourcing\EventSerializer;
 
 final class EventSourcedOrderRepository
 {
@@ -804,8 +835,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering\Projection;
 
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderCreated;
 use App\Ordering\Domain\Event\OrderItemAdded;
-use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderShipped;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -823,14 +855,14 @@ final class OrderSummaryProjector
     ) {}
 
     #[AsMessageHandler]
-    public function __invoke(OrderPlaced $event): void
+    public function __invoke(OrderCreated $event): void
     {
         $this-&gt;connection-&gt;insert('order_summary', [
             'order_id'      =&gt; $event-&gt;orderId(),
             'customer_id'   =&gt; $event-&gt;customerId(),
             'status'        =&gt; 'draft',
-            'item_count'    =&gt; count($event-&gt;items()),
-            'total_amount'  =&gt; $this-&gt;calculateTotal($event-&gt;items()),
+            'item_count'    =&gt; 0,
+            'total_amount'  =&gt; 0,
             'placed_at'     =&gt; $event-&gt;occurredOn()-&gt;format('Y-m-d H:i:s'),
             'shipped_at'    =&gt; null,
             'tracking_no'   =&gt; null,
@@ -850,6 +882,15 @@ final class OrderSummaryProjector
     }
 
     #[AsMessageHandler]
+    public function handleOrderConfirmed(OrderConfirmed $event): void
+    {
+        $this-&gt;connection-&gt;executeStatement(
+            'UPDATE order_summary SET status = :status WHERE order_id = :orderId',
+            ['status' =&gt; 'confirmed', 'orderId' =&gt; $event-&gt;orderId()],
+        );
+    }
+
+    #[AsMessageHandler]
     public function handleOrderShipped(OrderShipped $event): void
     {
         $this-&gt;connection-&gt;executeStatement(
@@ -865,15 +906,6 @@ final class OrderSummaryProjector
                 'orderId'    =&gt; $event-&gt;orderId(),
             ],
         );
-    }
-
-    /** @param OrderItem[] $items */
-    private function calculateTotal(array $items): int
-    {
-        return array_sum(array_map(
-            fn($item) =&gt; $item-&gt;unitPrice() * $item-&gt;quantity(),
-            $items,
-        ));
     }
 }
 </code></pre>
@@ -896,8 +928,9 @@ final class OrderSummaryProjector
 
         routing:
             # Všechny doménové události routujeme na async transport
-            'App\Ordering\Domain\Event\OrderPlaced':    async
+            'App\Ordering\Domain\Event\OrderCreated':    async
             'App\Ordering\Domain\Event\OrderItemAdded': async
+            'App\Ordering\Domain\Event\OrderConfirmed': async
             'App\Ordering\Domain\Event\OrderShipped':   async
 </code></pre>
         </div>
@@ -965,6 +998,7 @@ use App\Ordering\Domain\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\Snapshot;
 use App\Infrastructure\EventSourcing\SnapshotStore;
+use App\Infrastructure\EventSourcing\EventSerializer;
 
 final class SnapshottingOrderRepository
 {
@@ -1004,9 +1038,11 @@ final class SnapshottingOrderRepository
                 $envelopes,
             );
 
-            $aggregate = $aggregate !== null
-                ? $aggregate-&gt;applyHistoricEvents($events)
-                : Order::reconstituteFromEvents($events);
+            if ($aggregate !== null) {
+                $aggregate-&gt;replayEvents($events);
+            } else {
+                $aggregate = Order::reconstituteFromEvents($events);
+            }
         }
 
         return $aggregate;
@@ -1362,6 +1398,30 @@ final readonly class UpcasterChain
                 Před zahájením implementace prostudujte vzory event upcasting, event versioning a idempotentní
                 projektory — jsou to stavební kameny, bez nichž se reálný ES systém neobejde.
             </p>
+        </div>
+    </section>
+
+    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+        <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+        <ul>
+            <li><strong>Event Sourcing</strong> ukládá stav jako sekvenci neměnných událostí, ne jako aktuální snímek.</li>
+            <li><strong>Event Store</strong> je append-only úložiště s optimistic lockingem přes verzi streamu.</li>
+            <li>Agregáty se rekonstruují <strong>přehráním</strong> (replay) událostí ze svého event streamu.</li>
+            <li><strong>Projekce</strong> transformují event stream do read modelů optimalizovaných pro dotazy.</li>
+            <li><strong>Snapshots</strong> řeší výkonnostní problém dlouhých event streamů.</li>
+            <li>ES a CQRS jsou <strong>nezávislé vzory</strong>, ale jejich kombinace je v praxi velmi efektivní.</li>
+            <li>Osobní údaje <strong>nepatří do event payloadu</strong> (GDPR) — použijte crypto-shredding nebo referenční přístup.</li>
+        </ul>
+    </section>
+
+    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+        <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+        <div class="tip">
+            <ol>
+                <li>Navrhněte event stream pro agregát <code>BankAccount</code> s operacemi: otevření účtu, vklad, výběr, uzavření. Jaké události vzniknou?</li>
+                <li>Implementujte projekci <code>AccountBalanceProjection</code>, která z výše uvedených událostí vypočítá aktuální zůstatek.</li>
+                <li>Zamyslete se: kdy byste vytvořili snapshot pro <code>BankAccount</code>? Po kolika událostech a proč?</li>
+            </ol>
         </div>
     </section>
 </article>

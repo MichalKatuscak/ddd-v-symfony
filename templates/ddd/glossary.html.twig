@@ -887,8 +887,16 @@
                             a odeslání notifikace. Termín „Saga" pochází z databázového výzkumu (Hector Garcia-Molina, 1987);
                             „Process Manager" je alternativní název z CQRS komunity.
                         </p>
-                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 10; Garcia-Molina &amp; Salem, <em>Sagas</em> (1987)</p>
-                        <p class="term-related">Viz také: <a href="#term-domenova-udalost">Doménová událost</a>, <a href="#term-eventual-consistency">Eventual Consistency</a>, <a href="#term-cqrs">CQRS</a></p>
+                        <p>
+                            Rozlišujeme dva přístupy: <strong>choreografie</strong> — ságy řízené výhradně
+                            doménovými událostmi bez centrálního koordinátora; každý účastník reaguje na události
+                            ostatních a publikuje vlastní. <strong>Orchestrace</strong> — centrální správce procesů
+                            (Process Manager) řídí průběh ságy, přijímá události, rozhoduje o dalším kroku
+                            a vydává příkazy. Choreografie je jednodušší pro krátké procesy; orchestrace je
+                            vhodnější pro komplexní procesy s mnoha kroky a podmínkami.
+                        </p>
+                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8 &amp; 10; Garcia-Molina &amp; Salem, <em>Sagas</em> (1987)</p>
+                        <p class="term-related">Viz také: <a href="#term-domenova-udalost">Doménová událost</a>, <a href="#term-eventual-consistency">Eventual Consistency</a>, <a href="#term-cqrs">CQRS</a>, <a href="#term-ohraniceny-kontext">Ohraničený kontext</a></p>
                     </dd>
                 </div>
 
@@ -1031,33 +1039,6 @@
                     </dd>
                 </div>
 
-                <div class="glossary-entry" id="term-saga-integracni">
-                    <dt>
-                        <strong>Sága / Správce procesů</strong>
-                        <span class="term-en">(Saga / Process Manager)</span>
-                    </dt>
-                    <dd>
-                        <p>
-                            Koordinuje dlouhodobě běžící byznysový proces, který přesahuje hranice jednoho
-                            agregátu nebo Bounded Contextu. Sága udržuje konzistenci prostřednictvím
-                            kompenzačních akcí namísto distribuovaných transakcí — pokud krok procesu selže,
-                            sága provede kompenzační akce pro již dokončené kroky, čímž vrátí systém do
-                            konzistentního stavu. Příklad: proces dokončení objednávky zahrnující rezervaci
-                            zboží, zpracování platby a odeslání notifikace — selhání platby spustí kompenzační
-                            akci zrušení rezervace.
-                        </p>
-                        <p>
-                            Rozlišujeme dva přístupy: <strong>choreografie</strong> — ságy řízené výhradně
-                            doménovými událostmi bez centrálního koordinátora; každý účastník reaguje na události
-                            ostatních a publikuje vlastní. <strong>Orchestrace</strong> — centrální správce procesů
-                            (Process Manager) řídí průběh ságy, přijímá události, rozhoduje o dalším kroku
-                            a vydává příkazy. Choreografie je jednodušší pro krátké procesy; orchestrace je
-                            vhodnější pro komplexní procesy s mnoha kroky a podmínkami.
-                        </p>
-                        <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Garcia-Molina &amp; Salem, <em>Sagas</em> (1987)</p>
-                        <p class="term-related">Viz také: <a href="#term-domenova-udalost">Doménová událost</a>, <a href="#term-eventual-consistency">Eventual Consistency</a>, <a href="#term-ohraniceny-kontext">Ohraničený kontext</a></p>
-                    </dd>
-                </div>
 
             </dl>
         </section>
@@ -1108,7 +1089,7 @@
                             Testovací dvojník, který vrací přednastavené odpovědi bez jakékoliv logiky.
                             Stub neověřuje volání — jeho jedinou rolí je poskytnout testovanému kódu
                             konkrétní hodnotu tam, kde by reálná závislost volala databázi, síť nebo
-                            jiný zewnętrzní zdroj. Používá se tehdy, kdy závislost musí vrátit specifickou
+                            jiný externí zdroj. Používá se tehdy, kdy závislost musí vrátit specifickou
                             hodnotu, aby test mohl pokračovat. Příklad: <code>StubExchangeRateProvider</code>
                             vždy vrátí kurz 25 CZK/EUR. Nezajímá nás, zda byl volán — jen co vrátil.
                         </p>

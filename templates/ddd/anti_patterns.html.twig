@@ -205,6 +205,56 @@ class UserService
 
 declare(strict_types=1);
 
+namespace App\UserManagement\Domain\ValueObject;
+
+enum UserStatus: string
+{
+    case PENDING = 'pending';
+    case ACTIVE = 'active';
+    case INACTIVE = 'inactive';
+
+    public function isPending(): bool
+    {
+        return $this === self::PENDING;
+    }
+
+    public function isActive(): bool
+    {
+        return $this === self::ACTIVE;
+    }
+}
+
+final class VerificationToken
+{
+    private function __construct(
+        private readonly string $value,
+    ) {}
+
+    public static function generate(): self
+    {
+        return new self(bin2hex(random_bytes(32)));
+    }
+
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public function equals(self $other): bool
+    {
+        return hash_equals($this->value, $other->value);
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+}</code></pre>
+
+                <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
 // SPRÁVNĚ: Entita obsahuje doménovou logiku
 
 namespace App\UserManagement\Domain\Model;
@@ -411,6 +461,18 @@ final class Email
     public function __toString(): string { return $this->value; }
 }
 
+enum Currency: string
+{
+    case CZK = 'CZK';
+    case EUR = 'EUR';
+    case USD = 'USD';
+
+    public function equals(self $other): bool
+    {
+        return $this === $other;
+    }
+}
+
 final class Money
 {
     private readonly int $amountInCents; // Celé číslo — žádné problémy s plovoucí desetinnou čárkou
@@ -423,6 +485,11 @@ final class Money
         }
         $this->amountInCents = $amountInCents;
         $this->currency = $currency;
+    }
+
+    public static function zero(Currency $currency): self
+    {
+        return new self(0, $currency);
     }
 
     public function add(self $other): self
@@ -609,7 +676,7 @@ class Order
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
-        if (!$this->status->isDraft()) {
+        if ($this->status !== OrderStatus::DRAFT) {
             throw new \DomainException('Položky lze přidat pouze k objednávce ve stavu Draft.');
         }
         $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
@@ -629,7 +696,7 @@ class Order
         return array_reduce(
             $this->items,
             fn(Money $carry, OrderItem $item) => $carry->add($item->subtotal()),
-            Money::zero(Currency::CZK())
+            Money::zero(Currency::CZK)
         );
     }
 }
@@ -1042,14 +1109,17 @@ namespace App\UserManagement\Application\Command;
 
 use App\UserManagement\Domain\Repository\UserRepositoryInterface;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\Exception\UserNotFoundException;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ActivateUserHandler
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly MessageBusInterface $eventBus
     ) {}
 
     public function __invoke(ActivateUserCommand $command): void
@@ -1060,11 +1130,11 @@ class ActivateUserHandler
         }
 
         // Business logika je v entitě — handler pouze orkestruje
-        $user->activate(new VerificationToken($command->token));
+        $user->activate(VerificationToken::fromString($command->token));
 
         $this->em->flush(); // Flush patří do aplikační vrstvy
 
-        foreach ($user->pullDomainEvents() as $event) {
+        foreach ($user->releaseEvents() as $event) {
             $this->eventBus->dispatch($event);
         }
     }
@@ -1251,11 +1321,14 @@ class InsurancePolicy
     public function calculatePremium(RiskProfile $riskProfile): Money
     {
         // Název metody je přímo z doménového slovníku pojišťovny
+        return $this->basePremium->adjustFor($riskProfile);
     }
 
     public function isValidForEvent(InsuredEvent $event): bool
     {
         // Doménový expert okamžitě rozumí, co tato metoda dělá
+        return $this->validFrom <= $event->occurredAt()
+            && $this->validTo >= $event->occurredAt();
     }
 }
 
@@ -1292,6 +1365,29 @@ class InsurancePolicy
                 zejména Vaughn Vernonovu knihu <em>Implementing Domain-Driven Design</em>, která se anti-vzorům
                 věnuje podrobně na praktických příkladech.
             </p>
+        </section>
+
+        <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+            <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+            <ul>
+                <li><strong>Anémický doménový model</strong> — entity bez chování jsou jen datové kontejnery; logika patří do doménových objektů.</li>
+                <li><strong>Primitive Obsession</strong> — primitivní typy místo Value Objects vedou ke ztrátě validace a sémantiky.</li>
+                <li><strong>God Aggregate</strong> — příliš velké agregáty způsobují výkonnostní a konkurenční problémy.</li>
+                <li><strong>Sdílená databáze</strong> napříč Bounded Contexts narušuje izolaci kontextů.</li>
+                <li><strong>Mutovatelné události</strong> porušují základní princip Event Sourcingu.</li>
+                <li>Znát anti-vzory je <strong>stejně důležité</strong> jako znát vzory samotné.</li>
+            </ul>
+        </section>
+
+        <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+            <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+            <div class="tip">
+                <ol>
+                    <li>Vezměte existující kód z vašeho projektu a identifikujte, zda obsahuje anémický doménový model. Pokud ano, navrhněte refaktoring — přesuňte jednu business metodu z service třídy do entity.</li>
+                    <li>Najděte ve svém kódu místo, kde se používá <code>string</code> nebo <code>int</code> pro identifikátor entity. Navrhněte silně typovaný Value Object, který by ho nahradil.</li>
+                    <li>Zkontrolujte, zda váš největší agregát nepřekračuje doporučenou velikost. Jak byste ho případně rozdělili?</li>
+                </ol>
+            </div>
         </section>
     </article>
 {% endblock %}

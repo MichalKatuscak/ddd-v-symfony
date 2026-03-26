@@ -184,15 +184,15 @@ final class EmailTest extends TestCase
         $this->assertFalse($email1->equals($email2));
     }
 
-    public function testImmutability(): void
+    public function testImmutabilityViaNewInstance(): void
     {
         $original = new Email('jan@example.com');
-        // withDomain() vrací novou instanci, nemění originál
-        $modified = $original->withDomain('other.com');
+        // Hodnotové objekty jsou immutabilní — změna vyžaduje vytvoření nové instance
+        $different = new Email('petr@example.com');
 
         $this->assertSame('jan@example.com', $original->value());
-        $this->assertSame('jan@other.com', $modified->value());
-        $this->assertNotSame($original, $modified);
+        $this->assertSame('petr@example.com', $different->value());
+        $this->assertFalse($original->equals($different));
     }
 }</code></pre>
     </div>
@@ -385,7 +385,7 @@ declare(strict_types=1);
 
 namespace Tests\Shared\Domain;
 
-use App\Shared\Domain\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 
 /**
  * Reusable trait pro ověřování doménových událostí v unit testech.
@@ -447,6 +447,8 @@ trait DomainEventAssertions
 
 // --- Příklad použití traitu v testu ---
 
+namespace Tests\OrderManagement\Domain\Model;
+
 use App\OrderManagement\Domain\Model\Order;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\CustomerId;
@@ -470,7 +472,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         // Ověření dat události
         $this->assertTrue($customerId->equals($placedEvent->customerId()));
         $this->assertEquals(new Money(75000, 'CZK'), $placedEvent->total());
-        $this->assertNotNull($placedEvent->occurredAt());
+        $this->assertNotNull($placedEvent->occurredOn());
     }
 
     public function testNoOrderPlacedEventWhenOrderNotPlaced(): void
@@ -604,8 +606,8 @@ declare(strict_types=1);
 namespace Tests\UserManagement\Application\Command;
 
 use PHPUnit\Framework\TestCase;
-use App\UserManagement\Application\Command\RegisterUser;
-use App\UserManagement\Application\Command\RegisterUserHandler;
+use App\UserManagement\Registration\Command\RegisterUser;
+use App\UserManagement\Registration\Command\RegisterUserHandler;
 use App\UserManagement\Domain\Exception\EmailAlreadyTakenException;
 use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
 
@@ -623,8 +625,9 @@ final class RegisterUserHandlerTest extends TestCase
     public function testRegistersNewUser(): void
     {
         $command = new RegisterUser(
+            name: 'Jan Novák',
             email: 'jan@example.com',
-            plainPassword: 'SilneHeslo123!'
+            password: 'SilneHeslo123!'
         );
 
         ($this->handler)($command);
@@ -638,7 +641,7 @@ final class RegisterUserHandlerTest extends TestCase
 
     public function testThrowsExceptionWhenEmailAlreadyTaken(): void
     {
-        $command = new RegisterUser(email: 'jan@example.com', plainPassword: 'Heslo123!');
+        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
         ($this->handler)($command); // první registrace
 
         $this->expectException(EmailAlreadyTakenException::class);
@@ -648,7 +651,7 @@ final class RegisterUserHandlerTest extends TestCase
 
     public function testDoesNotPersistUserWhenEmailAlreadyTaken(): void
     {
-        $command = new RegisterUser(email: 'jan@example.com', plainPassword: 'Heslo123!');
+        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
         ($this->handler)($command);
 
         try {
@@ -1151,6 +1154,28 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
 
 # Spuštění architektonických testů s Deptrac
 ./vendor/bin/deptrac analyze</code></pre>
+    </div>
+    </section>
+
+    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+    <ul>
+        <li><strong>Testovací pyramida</strong> v DDD: unit testy domény (základ), integrační testy infrastruktury (střed), funkční testy API (špička).</li>
+        <li>Doménové objekty jsou <strong>přirozeně testovatelné</strong> — čisté PHP třídy bez závislostí na frameworku.</li>
+        <li><strong>InMemory repozitáře</strong> (Fake) jsou preferované před mocky pro testování command handlerů.</li>
+        <li>Testy doménových událostí ověřují, že agregát vydává <strong>správné události</strong> jako vedlejší efekt operací.</li>
+        <li><strong>Architektonické testy</strong> (Deptrac, PHP-Arkitect) automaticky hlídají závislosti mezi vrstvami.</li>
+    </ul>
+    </section>
+
+    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+    <div class="tip">
+        <ol>
+            <li>Napište unit test pro Value Object <code>Money</code>: otestujte sčítání, validaci záporné částky a rovnost.</li>
+            <li>Vytvořte InMemory implementaci <code>OrderRepository</code> a napište test pro <code>CreateOrderHandler</code>.</li>
+            <li>Nakonfigurujte Deptrac pravidlo, které zakáže doménové vrstvě importovat třídy z infrastrukturní vrstvy.</li>
+        </ol>
     </div>
     </section>
 

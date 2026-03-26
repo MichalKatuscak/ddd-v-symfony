@@ -268,15 +268,17 @@ namespace App\UserManagement\Domain\ValueObject;
 
 class Email
 {
-    private string $value;
+    private readonly string $value;
 
     public function __construct(string $value)
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        $normalized = mb_strtolower(trim($value));
+
+        if (!filter_var($normalized, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email address');
         }
 
-        $this->value = $value;
+        $this->value = $normalized;
     }
 
     public function value(): string
@@ -284,7 +286,7 @@ class Email
         return $this->value;
     }
 
-    public function equals(Email $other): bool
+    public function equals(self $other): bool
     {
         return $this->value === $other->value;
     }
@@ -320,9 +322,11 @@ declare(strict_types=1);
 
 namespace App\OrderManagement\Domain\Model;
 
+use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\ProductId;
+use App\OrderManagement\Domain\ValueObject\UserId;
 
 class Order
 {
@@ -392,6 +396,17 @@ class Order
         $this->status = OrderStatus::CANCELLED;
     }
 
+    public function totalAmount(): Money
+    {
+        $total = new Money(0, Currency::CZK);
+
+        foreach ($this->items as $item) {
+            $total = $total->add($item->unitPrice()->multiply($item->quantity()));
+        }
+
+        return $total;
+    }
+
     public function items(): array
     {
         return $this->items;
@@ -406,6 +421,43 @@ class Order
     {
         return $this->createdAt;
     }
+}</code></pre>
+            </div>
+
+            <div class="tip">
+                <h3>Příklad: OrderItem — entita uvnitř agregátu</h3>
+                <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Model;
+
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\ProductId;
+
+class OrderItem
+{
+    private readonly OrderId $orderId;
+    private readonly ProductId $productId;
+    private readonly int $quantity;
+    private readonly Money $unitPrice;
+
+    public function __construct(OrderId $orderId, ProductId $productId, int $quantity, Money $unitPrice)
+    {
+        if ($quantity &lt;= 0) {
+            throw new \DomainException('Množství musí být kladné.');
+        }
+
+        $this-&gt;orderId = $orderId;
+        $this-&gt;productId = $productId;
+        $this-&gt;quantity = $quantity;
+        $this-&gt;unitPrice = $unitPrice;
+    }
+
+    public function productId(): ProductId { return $this-&gt;productId; }
+    public function quantity(): int { return $this-&gt;quantity; }
+    public function unitPrice(): Money { return $this-&gt;unitPrice; }
 }</code></pre>
             </div>
 
@@ -462,6 +514,7 @@ namespace App\OrderManagement\Domain\Repository;
 
 use App\OrderManagement\Domain\Model\Order;
 use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\UserId;
 
 interface OrderRepository
 {
@@ -469,7 +522,7 @@ interface OrderRepository
 
     public function findById(OrderId $id): ?Order;
 
-    public function findByUserId(string $userId): array;
+    public function findByUserId(UserId $userId): array;
 }</code></pre>
             </div>
 
@@ -497,8 +550,8 @@ declare(strict_types=1);
 namespace App\OrderManagement\Domain\Service;
 
 use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\Model\OrderStatus;
 use App\OrderManagement\Domain\Model\Payment;
-use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\PaymentId;
 use App\OrderManagement\Domain\ValueObject\PaymentMethod;
 
@@ -513,20 +566,9 @@ class PaymentService
         return new Payment(
             new PaymentId(),
             $order->id(),
-            $this->calculateTotalAmount($order),
+            $order->totalAmount(),
             $paymentMethod
         );
-    }
-
-    private function calculateTotalAmount(Order $order): Money
-    {
-        $total = Money::zero('CZK');
-
-        foreach ($order->items() as $item) {
-            $total = $total->add($item->unitPrice()->multiply($item->quantity()));
-        }
-
-        return $total;
     }
 }</code></pre>
             </div>
@@ -536,14 +578,15 @@ class PaymentService
                 zpracování plateb a vytváří objekt <code>Payment</code>. Doménová služba je bezstavová a
                 neobsahuje repozitáře — persistence vraceného objektu je zodpovědností volající vrstvy
                 (Application Service nebo Command Handler).
+                Třídy <code>Payment</code>, <code>PaymentId</code> a <code>PaymentMethod</code> jsou součástí doménového modelu plateb — jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
             </p>
 
             <div class="note" role="note" aria-labelledby="service-vs-aggregate-heading">
                 <h3 id="service-vs-aggregate-heading">Kdy doménová služba vs. metoda na agregátu?</h3>
                 <p>
-                    Výpočet celkové částky (<code>calculateTotalAmount</code>) by alternativně mohl být metodou
-                    přímo na agregátu <code>Order</code> (např. <code>$order->totalAmount()</code>), protože
-                    pracuje výhradně s daty agregátu. Doménová služba je vhodná tehdy, když logika:
+                    Všimněte si, že výpočet celkové částky (<code>totalAmount()</code>) je metodou přímo
+                    na agregátu <code>Order</code>, protože pracuje výhradně s jeho daty. Doménová služba
+                    je vhodná tehdy, když logika:
                 </p>
                 <ul>
                     <li>Přesahuje hranice jednoho agregátu (koordinuje více agregátů).</li>
@@ -551,7 +594,7 @@ class PaymentService
                     <li>Reprezentuje doménový proces, nikoli stav (např. zpracování platby).</li>
                 </ul>
                 <p>
-                    V tomto příkladu je <code>PaymentService</code> oprávněná jako služba, protože
+                    <code>PaymentService</code> je oprávněná jako služba, protože
                     <em>vytváří nový agregát</em> (<code>Payment</code>) na základě dat jiného agregátu
                     (<code>Order</code>) — tato koordinace nepatří do žádného z nich.
                 </p>
@@ -575,14 +618,15 @@ declare(strict_types=1);
 namespace App\OrderManagement\Domain\Event;
 
 use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\UserId;
 
 final class OrderCreatedEvent
 {
     private readonly OrderId $orderId;
-    private readonly string $userId;
+    private readonly UserId $userId;
     private readonly \DateTimeImmutable $occurredAt;
 
-    public function __construct(OrderId $orderId, string $userId)
+    public function __construct(OrderId $orderId, UserId $userId)
     {
         $this->orderId = $orderId;
         $this->userId = $userId;
@@ -594,7 +638,7 @@ final class OrderCreatedEvent
         return $this->orderId;
     }
 
-    public function userId(): string
+    public function userId(): UserId
     {
         return $this->userId;
     }
@@ -618,6 +662,29 @@ final class OrderCreatedEvent
                     slice architektury s tradičním přístupem k DDD</a> a poté na
                 <a href="{{ path('implementation_in_symfony') }}">konkrétní implementaci v Symfony 8</a>.
             </p>
+        </section>
+
+        <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+            <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+            <ul>
+                <li><strong>Entity</strong> mají identitu a mění se v čase; <strong>Value Objects</strong> jsou definovány hodnotou a jsou neměnné.</li>
+                <li><strong>Agregáty</strong> tvoří transakční hranici konzistence — veškerý přístup k vnitřním objektům jde přes Aggregate Root.</li>
+                <li><strong>Repozitáře</strong> zapouzdřují persistenci a poskytují doménově orientované rozhraní.</li>
+                <li><strong>Doménové služby</strong> obsahují logiku, která přesahuje hranice jednoho agregátu.</li>
+                <li><strong>Doménové události</strong> jsou neměnné záznamy o tom, co se v doméně přihodilo.</li>
+                <li>PHP 8.1+ <strong>enums</strong> jsou vhodné pro konečné stavové typy; plné Value Objects pro typy s validací a výpočty.</li>
+            </ul>
+        </section>
+
+        <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+            <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+            <div class="tip">
+                <ol>
+                    <li>Vytvořte Value Object <code>PhoneNumber</code> s validací českého/slovenského formátu. Implementujte <code>equals()</code> a <code>__toString()</code>.</li>
+                    <li>Rozšiřte agregát <code>Order</code> o metodu <code>ship(string $trackingNumber): void</code>, která změní stav na SHIPPED a vyhodí výjimku, pokud objednávka není CONFIRMED.</li>
+                    <li>Navrhněte doménovou událost <code>OrderShipped</code>. Jaká data by měla obsahovat? Proč?</li>
+                </ol>
+            </div>
         </section>
     </article>
 {% endblock %}

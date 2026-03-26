@@ -270,6 +270,8 @@
 // PŘED migrací: Typický CRUD kontroler s ukrytou doménovou logikou
 namespace App\Controller;
 
+use App\Entity\User;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -476,6 +478,7 @@ class UserController {
     }
 }
 
+// --- Soubor: Email.php ---
 declare(strict_types=1);
 
 // PO: Email jako Value Object – validace je na jednom místě
@@ -693,6 +696,7 @@ class UserController extends AbstractController
 
                 <pre><code class="language-php">&lt;?php
 
+// --- Soubor: RegisterUser.php ---
 // PO: Command objekt jako explicitní kontrakt
 namespace App\UserManagement\Application\Command;
 
@@ -705,6 +709,7 @@ final readonly class RegisterUser
     ) {}
 }
 
+// --- Soubor: RegisterUserHandler.php ---
 // Handler zapouzdřuje aplikační logiku jednoho use case
 namespace App\UserManagement\Application\Command;
 
@@ -746,6 +751,7 @@ final class RegisterUserHandler
     }
 }
 
+// --- Soubor: UserController.php ---
 // Kontroler je nyní tenký – pouze HTTP adaptér
 namespace App\Controller;
 
@@ -1015,6 +1021,26 @@ final class UserTest extends TestCase
                 a <a href="{{ path('cqrs') }}">CQRS v Symfony</a>.
             </p>
         </section>
+
+    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+    <ul>
+        <li>Migrace z CRUD na DDD je <strong>postupný proces</strong> — ne jednorázový přepis.</li>
+        <li>Prvním krokem je <strong>identifikace doménové logiky</strong> skryté v kontrolerech a service třídách.</li>
+        <li><strong>Event Storming</strong> je efektivní technika pro pochopení domény a nalezení Bounded Contexts.</li>
+        <li>Anti-Corruption Layer chrání nový DDD kód před <strong>kontaminací legacy modelem</strong>.</li>
+    </ul>
+    </section>
+
+    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+    <div class="tip">
+        <ol>
+            <li>Vyberte jeden kontroler ve svém projektu a identifikujte v něm skrytou doménovou logiku. Navrhněte, kam by měla být přesunuta.</li>
+            <li>Vytvořte Value Object pro jeden primitivní typ, který se ve vašem projektu opakovaně používá (e-mail, ID, měna).</li>
+        </ol>
+    </div>
+    </section>
     </article>
 {% endblock %}
 

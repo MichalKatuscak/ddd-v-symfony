@@ -155,8 +155,10 @@ framework:
 
         # Směrování zpráv — mapuje konkrétní třídy nebo rozhraní na transport
         routing:
-            # Příkazy jsou zpracovány asynchronně
-            App\UserManagement\Registration\Command\RegisterUser: async
+            # Příkazy vhodné pro asynchronní zpracování:
+            # operace, kde uživatel nemusí čekat na výsledek
+            App\Notification\Application\Command\SendWelcomeEmail: async
+            App\Reporting\Application\Command\GenerateMonthlyReport: async
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
             # App\UserManagement\Profile\Query\GetUserProfile: sync</code></pre>
@@ -167,14 +169,16 @@ framework:
         Jsou také definovány dva message busy: <code>command.bus</code> (command bus) pro příkazy a <code>query.bus</code> (query bus) pro dotazy.
     </p>
 
-    <div class="warning" role="alert" aria-labelledby="async-poznamka-heading">
-        <h3 id="async-poznamka-heading">Poznámka k asynchronnímu zpracování</h3>
+    <div class="note" role="note" aria-labelledby="async-poznamka-heading">
+        <h3 id="async-poznamka-heading">Jak vybrat příkazy pro asynchronní zpracování</h3>
         <p>
-            Výše uvedená konfigurace je <strong>demonstrační</strong>. V praxi je nutné pečlivě zvážit, které příkazy
-            zpracovávat asynchronně. Registrace uživatele (<code>RegisterUser</code>) je typicky zpracovávána
-            <strong>synchronně</strong>, protože uživatel čeká na okamžitou odpověď (úspěch / chyba validace).
-            Asynchronní zpracování je vhodné pro operace, kde uživatel nemusí čekat na výsledek — například odesílání
-            e-mailů, generování reportů nebo aktualizace read modelů.
+            <strong>Asynchronně</strong> zpracovávejte operace, kde uživatel nemusí čekat na výsledek —
+            odesílání e-mailů, generování reportů, aktualizace read modelů, notifikace.
+        </p>
+        <p>
+            <strong>Synchronně</strong> zpracovávejte operace vyžadující okamžitou zpětnou vazbu —
+            registrace uživatele, vytvoření objednávky, přihlášení. Uživatel čeká na odpověď
+            (úspěch / chyba validace) a potřebuje ji okamžitě.
         </p>
     </div>
 
@@ -439,7 +443,7 @@ final class ProfileController extends AbstractController
     #[Route('/profile', name: 'app_profile')]
     public function profile(UserInterface $user): Response
     {
-        $query = new GetUserProfile($user->getId());
+        $query = new GetUserProfile($user->getUserIdentifier());
 
         $profile = $this->queryBus->dispatch($query)->last(HandledStamp::class)->getResult();
 
@@ -550,6 +554,28 @@ framework:
         V další kapitole se podíváme na <a href="{{ path('event_sourcing') }}">Event Sourcing</a>,
         vzor persistence, který se s CQRS přirozeně doplňuje.
     </p>
+    </section>
+
+    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+    <ul>
+        <li><strong>CQRS</strong> odděluje operace zápisu (Commands) od operací čtení (Queries).</li>
+        <li>V Symfony 8 je CQRS implementován pomocí <strong>Symfony Messenger</strong> se dvěma busy: command bus a query bus.</li>
+        <li><strong>Commands</strong> mění stav, <strong>Queries</strong> čtou data — nikdy naopak.</li>
+        <li>Asynchronní zpracování je vhodné pro operace, kde uživatel <strong>nemusí čekat</strong> na výsledek.</li>
+        <li><strong>Saga / Process Manager</strong> koordinuje dlouhotrvající procesy napříč Bounded Contexts.</li>
+    </ul>
+    </section>
+
+    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+    <div class="tip">
+        <ol>
+            <li>Navrhněte Command a Query pro operaci „přidání produktu do košíku". Jaká data bude Command obsahovat? Jaká data vrátí Query?</li>
+            <li>Nakonfigurujte Symfony Messenger se dvěma busy (<code>command.bus</code>, <code>query.bus</code>) a vytvořte handler pro jeden z nich.</li>
+            <li>Rozhodněte, které z následujících operací byste zpracovali asynchronně: registrace uživatele, odeslání potvrzovacího e-mailu, vytvoření faktury, validace adresy. Zdůvodněte.</li>
+        </ol>
+    </div>
     </section>
     </article>
 {% endblock %}

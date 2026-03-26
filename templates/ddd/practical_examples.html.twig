@@ -669,7 +669,10 @@ class CreatePostHandler
     }
 }</code></pre>
 
-            <h2 id="user-management">Příklad: Správa uživatelů</h2>
+        </section>
+
+        <section id="user-management" aria-labelledby="user-management-heading">
+            <h2 id="user-management-heading">Příklad: Správa uživatelů</h2>
             <p>
                 V této části si ukážeme, jak implementovat správu uživatelů pomocí DDD a CQRS v Symfony 8, kde společná doména budou uživatelé a DDD použijeme pro oddělení funkcí.
             </p>
@@ -918,6 +921,26 @@ class RegisterUserHandler
                     CQRS v Symfony 8</a>.
             </p>
         </section>
+
+    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+    <ul>
+        <li>DDD vzory lze aplikovat na různé domény: <strong>e-commerce</strong>, <strong>blog</strong>, <strong>správa uživatelů</strong>.</li>
+        <li>Každý Bounded Context má <strong>vlastní doménový model</strong> přizpůsobený svým specifickým potřebám.</li>
+        <li>Commands a Queries jsou vstupním bodem do aplikační vrstvy — <strong>kontrolery je pouze dispatchují</strong>.</li>
+        <li>Doménové události umožňují <strong>loosely coupled komunikaci</strong> mezi kontexty.</li>
+    </ul>
+    </section>
+
+    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+    <div class="tip">
+        <ol>
+            <li>Vyberte si jednu z ukázkových domén a rozšiřte ji o nový use case: např. „zrušení objednávky" v e-commerce nebo „archivace článku" v blogu.</li>
+            <li>Implementujte Command, Handler a odpovídající doménovou událost pro váš nový use case.</li>
+        </ol>
+    </div>
+    </section>
     </article>
 {% endblock %}
 

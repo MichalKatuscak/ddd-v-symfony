@@ -36,6 +36,20 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">Implementace DDD v Symfony 8</h1>
 
+        <div class="note" role="note" aria-labelledby="evoluce-prikladu-heading">
+            <h3 id="evoluce-prikladu-heading">Evoluce příkladů napříč kurzem</h3>
+            <p>
+                Kódové příklady v tomto kurzu záměrně přibývají na komplexitě. V kapitole
+                <a href="{{ path('basic_concepts') }}">Základní koncepty</a> jsou příklady zjednodušeny
+                na minimum, aby ilustrovaly čistý koncept. V této kapitole přidáváme reálné aspekty
+                implementace v Symfony: oddělení doménových objektů od Doctrine mappingu, ukládání
+                hodnotových objektů jako primitivních typů kvůli Doctrine hydration a generování
+                doménových událostí. V kapitole <a href="{{ path('anti_patterns') }}">Anti-vzory</a>
+                pak ukazujeme produkční kvalitu kódu s custom výjimkami, factory metodami a plnou
+                validací invariantů.
+            </p>
+        </div>
+
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
         <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
@@ -44,9 +58,12 @@
             <li><a href="#value-objects">Implementace hodnotových objektů</a></li>
             <li><a href="#repositories">Implementace repozitářů</a></li>
             <li><a href="#doctrine-xml-mapping">Separace Doctrine mapování pomocí XML</a></li>
+            <li><a href="#doctrine-custom-types">Doctrine custom types pro Value Objects</a></li>
             <li><a href="#php-enums">PHP 8.1+ Enums pro stavové typy</a></li>
             <li><a href="#domain-services">Implementace doménových služeb</a></li>
+            <li><a href="#specification-pattern">Specification Pattern</a></li>
             <li><a href="#domain-events">Implementace doménových událostí</a></li>
+            <li><a href="#error-handling">Strategie zpracování chyb</a></li>
             <li><a href="#application-services">Implementace aplikačních služeb</a></li>
             <li><a href="#controllers">Implementace kontrolerů</a></li>
             <li><a href="#dependency-injection">Dependency Injection a autowiring</a></li>
@@ -190,6 +207,7 @@ namespace App\UserManagement\Domain\Model;
 
 use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
 
 class User
@@ -197,19 +215,26 @@ class User
     private readonly string $id;
     private string $name;
     private string $email;
+    private readonly string $hashedPassword;
     private readonly \DateTimeImmutable $createdAt;
 
     /** @var object[] */
     private array $events = [];
 
-    public function __construct(UserId $id, string $name, Email $email)
+    private function __construct(UserId $id, string $name, Email $email, HashedPassword $password)
     {
         $this->id = $id->value();
         $this->name = $name;
         $this->email = $email->value();
+        $this->hashedPassword = $password->value();
         $this->createdAt = new \DateTimeImmutable();
 
         $this->recordEvent(new UserRegistered($id, $email));
+    }
+
+    public static function register(UserId $id, string $name, Email $email, HashedPassword $password): self
+    {
+        return new self($id, $name, $email, $password);
     }
 
     public function id(): UserId
@@ -264,6 +289,23 @@ class User
         V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Všimněte si, že entita neobsahuje žádné Doctrine atributy — doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekce <a href="#doctrine-xml-mapping">Separace Doctrine mapování</a>). Neměnné vlastnosti (<code>$id</code>, <code>$createdAt</code>) jsou označeny jako <code>readonly</code>. Entity mohou také generovat doménové události,
         které jsou uloženy v poli <code>$events</code> a mohou být později uvolněny a zpracovány.
     </p>
+
+    <div class="note" role="note" aria-labelledby="doctrine-hydration-heading">
+        <h3 id="doctrine-hydration-heading">Proč ukládáme hodnotové objekty jako primitivní typy?</h3>
+        <p>
+            Všimněte si, že entita interně ukládá <code>UserId</code> a <code>Email</code> jako
+            <code>string</code> (ne jako hodnotové objekty): <code>$this->id = $id->value()</code>.
+            Gettery pak vrací nové instance VO: <code>return new UserId($this->id)</code>.
+        </p>
+        <p>
+            Tento kompromis je nutný kvůli <strong>Doctrine hydration</strong> — Doctrine při načítání
+            entity z databáze nastavuje vlastnosti přímo, bez volání konstruktoru. Kdyby vlastnost
+            byla typu <code>UserId</code>, Doctrine by do ní vložil <code>string</code> z databáze,
+            což by způsobilo TypeError. Alternativou je <strong>Doctrine custom type</strong>
+            (viz sekce <a href="#doctrine-custom-types">Doctrine custom types</a>), který automaticky
+            konvertuje mezi primitivním typem a hodnotovým objektem.
+        </p>
+    </div>
     </section>
 
     <section id="value-objects" aria-labelledby="value-objects-heading">
@@ -286,11 +328,13 @@ class Email
 
     public function __construct(string $value)
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        $normalized = mb_strtolower(trim($value));
+
+        if (!filter_var($normalized, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Invalid email address');
         }
 
-        $this->value = $value;
+        $this->value = $normalized;
     }
 
     public function value(): string
@@ -391,6 +435,28 @@ class DoctrineUserRepository implements UserRepository
         V tomto příkladu je <code>UserRepository</code> rozhraní, které definuje metody pro ukládání a načítání uživatelů.
         <code>DoctrineUserRepository</code> je implementace tohoto rozhraní, která používá Doctrine ORM pro persistenci.
     </p>
+
+    <div class="warning" role="alert" aria-labelledby="event-dispatch-heading">
+        <h3 id="event-dispatch-heading">Dispatch událostí a transakční bezpečnost</h3>
+        <p>
+            Ve výše uvedeném příkladu jsou události dispatchovány <strong>po</strong> volání
+            <code>flush()</code>. Pokud dispatch selže (např. Messenger transport je nedostupný),
+            data jsou již persistována, ale události nebyly zpracovány — dochází k nekonzistenci.
+        </p>
+        <p>
+            V produkčních systémech existují dva robustnější přístupy:
+        </p>
+        <ul>
+            <li><strong>Outbox pattern</strong> — události se uloží do databázové tabulky <code>outbox</code>
+                v rámci téže transakce jako agregát. Separátní worker poté události přečte a dispatchuje.
+                Tím je zaručena atomicita.</li>
+            <li><strong>Doctrine lifecycle events</strong> — Doctrine <code>postFlush</code> se volá
+                po dokončení <code>flush()</code>, ale <strong>před commitem transakce</strong>, pokud
+                používáte explicitní transakce. Pro dispatch po úspěšném commitu použijte
+                <code>postTransactionCommit</code> event (Doctrine ORM 2.14+) nebo vlastní
+                middleware v Symfony Messenger.</li>
+        </ul>
+    </div>
     </section>
 
     <section id="doctrine-xml-mapping" aria-labelledby="doctrine-xml-mapping-heading">
@@ -486,6 +552,75 @@ doctrine:
     </div>
     </section>
 
+    <section id="doctrine-custom-types" aria-labelledby="doctrine-custom-types-heading">
+    <h2 id="doctrine-custom-types-heading">Doctrine custom types pro Value Objects</h2>
+    <p>
+        Alternativou k ukládání hodnotových objektů jako primitivních typů (viz
+        <a href="#entities">implementace entit</a>) je vytvoření <strong>Doctrine custom type</strong>,
+        který automaticky konvertuje mezi primitivním databázovým typem a doménovým hodnotovým objektem.
+        Entita pak může mít vlastnosti přímo typu <code>Email</code> nebo <code>UserId</code>.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="custom-type-example-heading">
+        <h3 id="custom-type-example-heading">Příklad: Doctrine custom type pro Email</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\Doctrine\Type;
+
+use App\UserManagement\Domain\ValueObject\Email;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\StringType;
+
+final class EmailType extends StringType
+{
+    public const NAME = 'email_vo';
+
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?Email
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return new Email((string) $value);
+    }
+
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return $value instanceof Email ? $value-&gt;value() : (string) $value;
+    }
+
+}
+</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="custom-type-registration-heading">
+        <h3 id="custom-type-registration-heading">Registrace custom type v Symfony</h3>
+        <pre><code class="language-yaml"># config/packages/doctrine.yaml
+doctrine:
+    dbal:
+        types:
+            email_vo:
+                class: App\UserManagement\Infrastructure\Doctrine\Type\EmailType</code></pre>
+
+        <pre><code class="language-xml">&lt;!-- config/doctrine/UserManagement/User.orm.xml --&gt;
+&lt;field name="email" type="email_vo" length="255" column="email"/&gt;</code></pre>
+    </div>
+
+    <div class="note">
+        <h3>Kdy použít custom type vs. primitivní ukládání?</h3>
+        <ul>
+            <li><strong>Custom type</strong> — čistší doménový model, entita pracuje přímo s VO. Vhodné pro value objects používané na mnoha místech.</li>
+            <li><strong>Primitivní ukládání</strong> — jednodušší, méně kódu. Vhodné pro projekty s méně value objects nebo při začátku s DDD.</li>
+        </ul>
+    </div>
+    </section>
+
     <section id="php-enums" aria-labelledby="php-enums-heading">
     <h2 id="php-enums-heading">PHP 8.1+ Enums pro stavové typy</h2>
     <p>
@@ -564,6 +699,11 @@ class Order
         $this->createdAt = new \DateTimeImmutable();
 
         $this->recordEvent(new OrderCreated($id));
+    }
+
+    public function id(): OrderId
+    {
+        return new OrderId($this->id);
     }
 
     public function status(): OrderStatus
@@ -653,7 +793,7 @@ use App\OrderManagement\Domain\ValueObject\PaymentMethod;
 
 class PaymentService
 {
-    public function processPayment(Order $order, PaymentMethod $paymentMethod): Payment
+    public function processPayment(Order $order, Money $amount, PaymentMethod $paymentMethod): Payment
     {
         if ($order->status() !== OrderStatus::CONFIRMED) {
             throw new \DomainException('Cannot process payment for a non-confirmed order');
@@ -662,20 +802,9 @@ class PaymentService
         return new Payment(
             new PaymentId(),
             $order->id(),
-            $this->calculateTotalAmount($order),
+            $amount,
             $paymentMethod
         );
-    }
-
-    private function calculateTotalAmount(Order $order): Money
-    {
-        $total = new Money(0, 'CZK');
-
-        foreach ($order->items() as $item) {
-            $total = $total->add($item->price()->multiply($item->quantity()));
-        }
-
-        return $total;
     }
 }</code></pre>
     </div>
@@ -686,6 +815,99 @@ class PaymentService
         neobsahuje repozitáře — persistence vraceného objektu je zodpovědností volající vrstvy
         (Application Service nebo Command Handler).
     </p>
+    </section>
+
+    <section id="specification-pattern" aria-labelledby="specification-pattern-heading">
+    <h2 id="specification-pattern-heading">Specification Pattern</h2>
+    <p>
+        Specification Pattern (Eric Evans, <em>DDD</em>, kap. 9) zapouzdřuje doménová pravidla a podmínky
+        do samostatných, znovu použitelných objektů. Specifikace odpovídá na otázku „splňuje tento objekt
+        dané kritérium?" a lze ji použít pro validaci, filtrování i vyhledávání.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="specification-example-heading">
+        <h3 id="specification-example-heading">Příklad: Specification Pattern v PHP</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Shared\Domain\Specification;
+
+/**
+ * Generický interface pro Specification Pattern.
+ * @template T
+ */
+interface Specification
+{
+    /** @param T $candidate */
+    public function isSatisfiedBy(mixed $candidate): bool;
+}
+</code></pre>
+
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Specification;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\OrderStatus;
+use App\Shared\Domain\Specification\Specification;
+
+/**
+ * Specifikace: objednávka je způsobilá k expedici.
+ * V produkčním kódu by specifikace ověřovala více podmínek
+ * (platba přijata, dodací adresa vyplněna, skladová dostupnost).
+ * @implements Specification&lt;Order&gt;
+ */
+final class OrderEligibleForShipping implements Specification
+{
+    public function isSatisfiedBy(mixed $candidate): bool
+    {
+        return $candidate-&gt;status() === OrderStatus::PAID;
+    }
+}
+</code></pre>
+
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Service;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\Specification\OrderEligibleForShipping;
+use App\OrderManagement\Domain\ValueObject\OrderStatus;
+
+// Použití specifikace v doménové službě:
+
+final class ShippingService
+{
+    public function __construct(
+        private readonly OrderEligibleForShipping $shippingSpec,
+    ) {}
+
+    public function shipOrder(Order $order): void
+    {
+        if (!$this-&gt;shippingSpec-&gt;isSatisfiedBy($order)) {
+            throw new \DomainException('Objednávka nesplňuje podmínky pro expedici.');
+        }
+
+        $order-&gt;transitionTo(OrderStatus::SHIPPED);
+    }
+}
+</code></pre>
+    </div>
+
+    <div class="note">
+        <h3>Kdy použít Specification Pattern?</h3>
+        <ul>
+            <li><strong>Validace</strong> — ověření, zda doménový objekt splňuje business pravidlo.</li>
+            <li><strong>Selekce</strong> — filtrování kolekcí objektů podle kritéria.</li>
+            <li><strong>Vytváření na zakázku</strong> — zajištění, že nově vytvořený objekt splňuje invarianty.</li>
+            <li><strong>Kombinace pravidel</strong> — specifikace lze skládat pomocí <code>AndSpecification</code>, <code>OrSpecification</code>, <code>NotSpecification</code>.</li>
+        </ul>
+    </div>
     </section>
 
     <section id="domain-events" aria-labelledby="domain-events-heading">
@@ -739,6 +961,97 @@ class UserRegistered
         V tomto příkladu je <code>UserRegistered</code> doménová událost, která reprezentuje registraci nového uživatele.
         Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký má e-mail a kdy se to stalo.
     </p>
+
+    <div class="note" role="note" aria-labelledby="dispatcher-vs-messenger-heading">
+        <h3 id="dispatcher-vs-messenger-heading">Symfony EventDispatcher vs. Messenger pro doménové události</h3>
+        <p>
+            Symfony nabízí dva mechanismy pro práci s událostmi. Je důležité vybrat správný:
+        </p>
+        <ul>
+            <li>
+                <strong>EventDispatcher</strong> (<code>EventDispatcherInterface</code>) — synchronní,
+                in-process. Všechny listenery se provedou okamžitě v rámci téhož PHP požadavku.
+                Vhodné pro: side effects v rámci téže transakce (aktualizace cache, logování).
+            </li>
+            <li>
+                <strong>Messenger</strong> (<code>MessageBusInterface</code>) — může být synchronní
+                i asynchronní. Podporuje transporty (RabbitMQ, Redis, Doctrine), retry strategii
+                a sériovou serializaci. Vhodné pro: komunikaci mezi Bounded Contexts, asynchronní
+                projekce, notifikace.
+            </li>
+        </ul>
+        <p>
+            <strong>Doporučení:</strong> Pro doménové události v DDD preferujte <strong>Messenger</strong>,
+            protože umožňuje pozdější přechod na asynchronní zpracování bez změny kódu producenta.
+            EventDispatcher používejte pro Symfony-specifické události (kernel events, form events).
+        </p>
+    </div>
+    </section>
+
+    <section id="error-handling" aria-labelledby="error-handling-heading">
+    <h2 id="error-handling-heading">Strategie zpracování chyb v DDD</h2>
+    <p>
+        V DDD je důležité rozlišovat typy výjimek podle vrstvy, ve které vznikají. Každá vrstva
+        má jiné odpovědnosti a jiný typ chyb:
+    </p>
+
+    <div class="note" role="note" aria-labelledby="exception-types-heading">
+        <h3 id="exception-types-heading">Typy výjimek podle vrstvy</h3>
+        <ul>
+            <li>
+                <strong>Doménové výjimky</strong> — porušení business pravidel a invariantů.
+                Vyhazuje je doménový model (entity, agregáty, value objects).
+                Příklady: <code>OrderCannotBeConfirmedException</code>,
+                <code>InsufficientFundsException</code>, <code>InvalidEmailException</code>.
+            </li>
+            <li>
+                <strong>Aplikační výjimky</strong> — chyby na úrovni use case.
+                Vyhazují je command/query handlery.
+                Příklady: <code>UserNotFoundException</code>,
+                <code>DuplicateEmailException</code>.
+            </li>
+            <li>
+                <strong>Infrastrukturní výjimky</strong> — technické chyby (databáze, síť, souborový systém).
+                Vznikají v infrastrukturní vrstvě a jsou zachytávány aplikační vrstvou.
+                Příklady: <code>ConnectionException</code>, <code>TimeoutException</code>.
+            </li>
+        </ul>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="custom-exception-heading">
+        <h3 id="custom-exception-heading">Příklad: Vlastní doménová výjimka</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Exception;
+
+/**
+ * Výjimka vyhazovaná při porušení pravidel přechodu stavu objednávky.
+ */
+final class InvalidOrderStateTransitionException extends \DomainException
+{
+    public static function cannotTransition(string $from, string $to): self
+    {
+        return new self(sprintf(
+            'Nelze přejít ze stavu "%s" do stavu "%s".',
+            $from,
+            $to,
+        ));
+    }
+}
+</code></pre>
+    </div>
+
+    <div class="warning">
+        <h3>Doporučení pro výjimky v DDD</h3>
+        <ul>
+            <li>Doménové výjimky by měly <strong>dědit z <code>\DomainException</code></strong> — tím signalizují, že jde o porušení business pravidla, ne o technickou chybu.</li>
+            <li>Používejte <strong>statické factory metody</strong> (<code>cannotTransition()</code>) pro čitelné a konzistentní vytváření výjimek.</li>
+            <li><strong>Nepropagujte infrastrukturní výjimky</strong> do doménové vrstvy — repozitáře by je měly zachytit a přeložit na doménové výjimky.</li>
+            <li>Kontrolery by měly zachytávat doménové výjimky a <strong>překládat je na HTTP odpovědi</strong> (400, 404, 409).</li>
+        </ul>
+    </div>
     </section>
 
     <section id="application-services" aria-labelledby="application-services-heading">
@@ -775,38 +1088,34 @@ namespace App\UserManagement\Registration\Command;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsMessageHandler]
 class RegisterUserHandler
 {
     public function __construct(
         private UserRepository $userRepository,
-        private UserPasswordHasherInterface $passwordHasher
     ) {
     }
 
     public function __invoke(RegisterUser $command): void
     {
-        $email = new Email($command->email);
+        $email = new Email($command-&gt;email);
 
-        if ($this->userRepository->findByEmail($email)) {
+        if ($this-&gt;userRepository-&gt;findByEmail($email)) {
             throw new \DomainException('User with this email already exists');
         }
 
-        $user = new User(
+        $user = User::register(
             new UserId(),
-            $command->name,
-            $email
+            $command-&gt;name,
+            $email,
+            HashedPassword::fromPlainText($command-&gt;password)
         );
 
-        // Set password
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $command->password);
-        $user->setPassword($hashedPassword);
-
-        $this->userRepository->save($user);
+        $this-&gt;userRepository-&gt;save($user);
     }
 }</code></pre>
     </div>
@@ -867,6 +1176,31 @@ class GetUserProfileHandler
         V těchto příkladech jsou <code>RegisterUserHandler</code> a <code>GetUserProfileHandler</code> aplikační služby, které zpracovávají příkazy a dotazy.
         Tyto služby koordinují aplikační aktivity a delegují práci doménové vrstvě.
     </p>
+
+    <div class="note" role="note" aria-labelledby="validace-kde-heading">
+        <h3 id="validace-kde-heading">Kde validovat: Symfony Validator vs. doménová validace</h3>
+        <p>
+            V DDD existují dva druhy validace, každý na jiné vrstvě:
+        </p>
+        <ul>
+            <li>
+                <strong>Symfony Validator (aplikační vrstva)</strong> — validace vstupních dat
+                na úrovni Commands a Queries: formát e-mailu, délka jména, povinná pole.
+                Používejte atributy <code>#[Assert\Email]</code>, <code>#[Assert\NotBlank]</code>
+                přímo na command třídách. Tato validace chrání doménovou vrstvu před neplatnými vstupy.
+            </li>
+            <li>
+                <strong>Doménová validace (doménová vrstva)</strong> — business pravidla vynucovaná
+                uvnitř entit, agregátů a value objects: „uživatel s tímto e-mailem již existuje",
+                „objednávku nelze potvrdit bez položek". Tato validace je součástí doménového modelu
+                a nesmí na ní záviset Symfony Validator.
+            </li>
+        </ul>
+        <p>
+            <strong>Pravidlo:</strong> Symfony Validator řeší <em>syntaktickou</em> validaci (formát),
+            doménová vrstva řeší <em>sémantickou</em> validaci (business pravidla).
+        </p>
+    </div>
 
     </section>
 
@@ -1082,6 +1416,31 @@ services:
     <p>
         V další kapitole se podíváme na <a href="{{ path('cqrs') }}">implementaci CQRS v Symfony 8</a>.
     </p>
+    </section>
+
+    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
+    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
+    <ul>
+        <li>DDD projekt v Symfony 8 se strukturuje podle <strong>Bounded Contexts</strong> s vertikálními feature slices.</li>
+        <li>Doménové entity jsou <strong>čisté PHP objekty</strong> (POPO) bez Doctrine atributů — mapování je řešeno externě (XML).</li>
+        <li><strong>Doctrine custom types</strong> umožňují automatickou konverzi mezi primitivy a hodnotovými objekty.</li>
+        <li><strong>Specification Pattern</strong> zapouzdřuje business pravidla do znovu použitelných objektů.</li>
+        <li>Doménové výjimky, aplikační výjimky a infrastrukturní výjimky mají <strong>různé odpovědnosti</strong>.</li>
+        <li><strong>Symfony Messenger</strong> je preferovaný mechanismus pro doménové události (umožňuje async).</li>
+        <li><strong>Symfony Validator</strong> řeší syntaktickou validaci, doménová vrstva řeší sémantickou validaci.</li>
+    </ul>
+    </section>
+
+    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
+    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
+    <div class="tip">
+        <ol>
+            <li>Vytvořte nový Bounded Context <code>ProductCatalog</code> s entitou <code>Product</code>, value objectem <code>ProductName</code> a repozitářem. Dodržte adresářovou strukturu z této kapitoly.</li>
+            <li>Implementujte Doctrine custom type pro <code>Money</code> Value Object (amount v haléřích + měna).</li>
+            <li>Napište specifikaci <code>ProductInStock</code>, která ověří, zda produkt má skladovou zásobu > 0.</li>
+            <li>Nakonfigurujte <code>services.yaml</code> s odděleným autowiringem pro váš nový Bounded Context.</li>
+        </ol>
+    </div>
     </section>
     </article>
 {% endblock %}
