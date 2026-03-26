@@ -1,4 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" font-family="Nunito, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" contentStyleType="text/css"
+     preserveAspectRatio="none"
+     style="aspect-ratio:1.731" version="1.1" viewBox="0 0 900 520"
+     zoomAndPan="magnify" font-family="Nunito, sans-serif" font-size="13">
   <defs>
     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#8b85ff"/>
