@@ -312,6 +312,14 @@ final class RegisterUserHandler
 }</code></pre>
     </div>
 
+    <div class="note">
+        <p>
+            <strong>Pozn.:</strong> Tato varianta používá <code>PasswordHasher</code> jako závislost handleru.
+            Alternativní přístup s <code>HashedPassword</code> hodnotovým objektem je ukázán v kapitole
+            <a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony</a>.
+        </p>
+    </div>
+
     <div class="tip" role="note" aria-labelledby="query-handler-example-heading">
         <h3 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h3>
         <pre><code class="language-php">&lt;?php

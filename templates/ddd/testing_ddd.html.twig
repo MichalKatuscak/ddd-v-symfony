@@ -231,14 +231,14 @@ final class UserTest extends TestCase
 
     public function testCreatesInactiveUserByDefault(): void
     {
-        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
 
         $this->assertFalse($user->isActive());
     }
 
     public function testActivatesUser(): void
     {
-        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
         $user->activate();
 
         $this->assertTrue($user->isActive());
@@ -246,7 +246,7 @@ final class UserTest extends TestCase
 
     public function testThrowsExceptionWhenActivatingAlreadyActiveUser(): void
     {
-        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
         $user->activate();
 
         $this->expectException(UserAlreadyActiveException::class);
@@ -256,7 +256,7 @@ final class UserTest extends TestCase
 
     public function testChangesEmailAddress(): void
     {
-        $user     = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user     = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
         $newEmail = new Email('novy@example.com');
 
         $user->changeEmail($newEmail);
@@ -266,7 +266,7 @@ final class UserTest extends TestCase
 
     public function testEmailRemainsUnchangedWhenSameValueProvided(): void
     {
-        $user = User::register($this->userId, $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
 
         $user->changeEmail(new Email('jan@example.com'));
 
@@ -274,6 +274,14 @@ final class UserTest extends TestCase
         $this->assertCount(0, $user->releaseEvents());
     }
 }</code></pre>
+    </div>
+
+    <div class="note">
+        <p>
+            <strong>Pozn.:</strong> V tomto zjednodušeném příkladu metoda <code>activate()</code> nepřijímá token.
+            Plnou implementaci s <code>VerificationToken</code> naleznete v kapitole
+            <a href="{{ path('anti_patterns') }}">Anti-vzory</a>.
+        </p>
     </div>
 
     <h3>Testování agregátů</h3>
@@ -296,6 +304,7 @@ use App\OrderManagement\Domain\Model\Order;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\Event\OrderPlaced;
 use App\OrderManagement\Domain\Event\OrderItemAdded;
 use App\OrderManagement\Domain\Exception\EmptyOrderException;
@@ -307,10 +316,10 @@ final class OrderTest extends TestCase
     {
         $order = Order::create(OrderId::generate(), CustomerId::generate());
 
-        $order->addItem('Kniha o DDD', new Money(49900, 'CZK'), 2);
+        $order->addItem('Kniha o DDD', new Money(49900, Currency::CZK), 2);
 
         $this->assertSame(1, $order->itemCount());          // 1 řádek objednávky
-        $this->assertEquals(new Money(99800, 'CZK'), $order->total()); // 49 900 × 2
+        $this->assertEquals(new Money(99800, Currency::CZK), $order->total()); // 49 900 × 2
     }
 
     public function testThrowsExceptionWhenPlacingEmptyOrder(): void
@@ -325,7 +334,7 @@ final class OrderTest extends TestCase
     public function testPlacesOrderSuccessfully(): void
     {
         $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt A', new Money(10000, 'CZK'), 1);
+        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
 
         $order->place();
 
@@ -335,7 +344,7 @@ final class OrderTest extends TestCase
     public function testThrowsExceptionWhenPlacingAlreadyPlacedOrder(): void
     {
         $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt A', new Money(10000, 'CZK'), 1);
+        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
         $order->place();
 
         $this->expectException(OrderAlreadyPlacedException::class);
@@ -346,7 +355,7 @@ final class OrderTest extends TestCase
     public function testReleasesOrderPlacedEvent(): void
     {
         $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt A', new Money(10000, 'CZK'), 1);
+        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
         $order->place();
 
         $events = $order->releaseEvents();
@@ -453,6 +462,7 @@ use App\OrderManagement\Domain\Model\Order;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\Event\OrderPlaced;
 
 final class OrderEventsTest extends \PHPUnit\Framework\TestCase
@@ -463,7 +473,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
     {
         $customerId = CustomerId::generate();
         $order      = Order::create(OrderId::generate(), $customerId);
-        $order->addItem('Produkt A', new Money(25000, 'CZK'), 3);
+        $order->addItem('Produkt A', new Money(25000, Currency::CZK), 3);
         $order->place();
 
         $events      = $order->releaseEvents();
@@ -471,14 +481,14 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 
         // Ověření dat události
         $this->assertTrue($customerId->equals($placedEvent->customerId()));
-        $this->assertEquals(new Money(75000, 'CZK'), $placedEvent->total());
+        $this->assertEquals(new Money(75000, Currency::CZK), $placedEvent->total());
         $this->assertNotNull($placedEvent->occurredOn());
     }
 
     public function testNoOrderPlacedEventWhenOrderNotPlaced(): void
     {
         $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt B', new Money(10000, 'CZK'), 1);
+        $order->addItem('Produkt B', new Money(10000, Currency::CZK), 1);
 
         $events = $order->releaseEvents();
 
@@ -535,7 +545,6 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\Repository\UserRepository;
-use App\UserManagement\Domain\Exception\UserNotFoundException;
 
 /**
  * InMemory implementace UserRepository pro unit a integrační testy.
@@ -551,15 +560,9 @@ final class InMemoryUserRepository implements UserRepository
         $this->storage[(string) $user->id()] = $user;
     }
 
-    public function findById(UserId $id): User
+    public function findById(UserId $id): ?User
     {
-        $key = (string) $id;
-
-        if (!isset($this->storage[$key])) {
-            throw new UserNotFoundException(sprintf('Uživatel s ID "%s" nebyl nalezen.', $key));
-        }
-
-        return $this->storage[$key];
+        return $this->storage[(string) $id] ?? null;
     }
 
     public function findByEmail(Email $email): ?User
@@ -747,7 +750,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {
         $userId = UserId::generate();
         $email  = new Email('integrace@example.com');
-        $user   = User::register($userId, $email, HashedPassword::fromPlainText('Heslo123!'));
+        $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
 
         $this->repository->save($user);
         $this->entityManager->clear(); // vyčistíme identity map — nutné pro skutečné čtení z DB
@@ -768,7 +771,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     public function testFindsByEmailAddress(): void
     {
         $email = new Email('hledat@example.com');
-        $user  = User::register(UserId::generate(), $email, HashedPassword::fromPlainText('Heslo123!'));
+        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
 
         $this->repository->save($user);
         $this->entityManager->clear();
@@ -782,7 +785,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     public function testExistsByEmail(): void
     {
         $email = new Email('exists@example.com');
-        $user  = User::register(UserId::generate(), $email, HashedPassword::fromPlainText('Heslo123!'));
+        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
 
         $this->assertFalse($this->repository->existsByEmail($email));
 
