@@ -98,6 +98,9 @@
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'ddd_pain_points' %}active{% endif %}" href="{{ path('ddd_pain_points') }}">DDD v praxi — kde to bolí</a>
                     </li>
                     <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'when_not_to_use_ddd' %}active{% endif %}" href="{{ path('when_not_to_use_ddd') }}">Kdy DDD nepoužívat</a>
+                    </li>
+                    <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'case_study' %}active{% endif %}" href="{{ path('case_study') }}">Případová studie</a>
                     </li>
                     <li class="sidebar-nav-item">
