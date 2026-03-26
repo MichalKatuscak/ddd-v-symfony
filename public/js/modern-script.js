@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: 'CQRS', url: '/cqrs' },
         { label: 'Event Sourcing', url: '/event-sourcing' },
         { label: 'Ságy a Process Managery', url: '/sagy-a-process-managery' },
+        { label: 'DDD v praxi — kde to bolí', url: '/ddd-v-praxi-kde-to-boli' },
         { label: 'Příklady', url: '/prakticke-priklady' },
         { label: 'Případová studie', url: '/pripadova-studie' },
         { label: 'Testování DDD', url: '/testovani-ddd' },
