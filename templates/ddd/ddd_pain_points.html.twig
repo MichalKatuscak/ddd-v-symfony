@@ -1275,6 +1275,245 @@ final class OrderVoter extends Voter
 
     </section>{# konec bloku D #}
 
+    {# ═══════════════════════════════════════════════════════════
+       BLOK E: Organizace a tým
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="tym" aria-labelledby="tym-heading">
+    <h2 id="tym-heading">E — Organizace a tým</h2>
+
+    <p>
+        DDD selže ne proto, že by byl technicky špatný — ale proto, že tým ho nepochopil,
+        management ho nepodpořil nebo znalosti zůstaly u jednoho člověka.
+    </p>
+
+    {# ─── E1: Business case ──────────────────────────────────────── #}
+    <section id="e1-management" aria-labelledby="e1-heading">
+    <h3 id="e1-heading">E1. Business case pro DDD refaktoring</h3>
+
+    <p>
+        <strong>Problém:</strong> Management vidí náklady refaktoringu (čas, riziko),
+        ale ne benefity. „Přepsat to do DDD" zní jako technická čistota bez business hodnoty.
+        Vývojáři neumí výhody přeložit do jazyka, který rozhodující osoby slyší.
+    </p>
+
+    <p>
+        <strong>Jak argumentovat — měřitelné metriky:</strong>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Metrika</th>
+                <th>Jak měřit</th>
+                <th>Co říká managementu</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Time-to-feature</strong></td>
+                <td>Průměrná doba od zadání po produkci (JIRA, Linear)</td>
+                <td>Refaktoring → kratší cyklus = rychlejší obchodní reakce</td>
+            </tr>
+            <tr>
+                <td><strong>Bug rate per modul</strong></td>
+                <td>Počet bugů na 1000 řádků kódu (SonarQube)</td>
+                <td>Moduly po DDD refaktoringu mají nižší bug rate</td>
+            </tr>
+            <tr>
+                <td><strong>Onboarding time</strong></td>
+                <td>Čas, než nový vývojář dělá první commit do modulu</td>
+                <td>Explicitní doménový model = kratší onboarding</td>
+            </tr>
+            <tr>
+                <td><strong>Regression rate</strong></td>
+                <td>% ticketů označených jako regression</td>
+                <td>Dobře ohraničené agregáty = méně neúmyslných side effectů</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <strong>Taktika:</strong> Nezačínejte argumentem „naše kód je špatný."
+        Začněte konkrétní business bolestí: „Přidání nového způsobu platby trvá 3 týdny
+        a vždy způsobí regression v objednávkovém modulu. Tady je proč a jak to opravit."
+    </p>
+
+    </section>
+
+    {# ─── E2: Strangler fig ──────────────────────────────────────── #}
+    <section id="e2-strangler" aria-labelledby="e2-heading">
+    <h3 id="e2-heading">E2. Postupné zavedení — strangler fig pattern</h3>
+
+    <p>
+        <strong>Problém:</strong> Big-bang rewrite — přepsání celé aplikace do DDD najednou —
+        téměř vždy selže: trvá déle než odhadnuto, tým ztrácí motivaci, business se nedočká
+        nových funkcí. A přitom původní aplikace musí dál žít.
+    </p>
+
+    <p>
+        <strong>Řešení — strangler fig pattern:</strong> Identifikujte jeden modul
+        s nejvyšší změnovou frekvencí (highest-churn), nejčastějšími bugy nebo největší
+        business hodnotou. Implementujte právě ten modul v DDD. Zbytek aplikace zůstane
+        beze změny.
+    </p>
+
+    <p>
+        <strong>Postup v Symfony projektu:</strong>
+    </p>
+
+    <ol>
+        <li>
+            <strong>Identifikujte modul:</strong> <code>git log --stat | grep "files changed" | sort -rn | head -20</code>
+            — soubory s nejvíce změnami za posledních 6 měsíců jsou nejlepší kandidáti.
+        </li>
+        <li>
+            <strong>Vytvořte fasádu</strong> přes legacy kód: nový DDD kód volá legacy
+            přes interface (ACL vzor). Legacy kód o novém DDD ví co nejméně.
+        </li>
+        <li>
+            <strong>Feature flag:</strong> Pro každý nový modul zapněte DDD implementaci
+            pomocí feature flagu. Při problémech okamžitě rollback na legacy.
+        </li>
+        <li>
+            <strong>Opakujte</strong> pro další modul, dokud legacy nevyschne.
+        </li>
+    </ol>
+
+    <div class="note" role="note">
+        <p>
+            Strangler fig neznamená, že legacy kód a DDD kód sdílejí databázové tabulky.
+            Nový modul má vlastní tabulky; data z legacy se migrují postupně,
+            případně se synchronizují přes events nebo cron job.
+        </p>
+    </div>
+
+    </section>
+
+    {# ─── E3: Knowledge silos ────────────────────────────────────── #}
+    <section id="e3-silos" aria-labelledby="e3-heading">
+    <h3 id="e3-heading">E3. Knowledge silos a bus factor</h3>
+
+    <p>
+        <strong>Problém:</strong> Doménový model je komplexní — a po roce vývoje
+        mu rozumí dobře jen jeden člověk. Pokud tento člověk onemocní, odejde nebo
+        je přetížen, tým stojí. Onboarding nového vývojáře trvá měsíce.
+        Bus factor = 1 je pro business kritické riziko.
+    </p>
+
+    <p>
+        <strong>Opatření — čtyři praktiky:</strong>
+    </p>
+
+    <ol>
+        <li>
+            <strong>Living documentation přes testy:</strong> Pojmenování testů ve stylu
+            <code>it_cannot_ship_order_that_is_not_paid()</code> tvoří čitelný katalog
+            doménových pravidel. Kdo čte testy, pochopí doménový model bez vývojáře.
+        </li>
+        <li>
+            <strong>Architecture Decision Records (ADR):</strong> Každé netriviální
+            rozhodnutí (proč Saga místo 2PC, proč Value Object místo entity, proč
+            tento Bounded Context takto ohraničený) zapište do <code>docs/adr/</code>.
+            Budoucí vývojář pochopí kontext bez „senior kolegy".
+        </li>
+        <li>
+            <strong>Event Storming jako týmová aktivita:</strong> Modelování domény
+            musí probíhat v celém týmu, ne v hlavě jednoho architekta. Pravidelné
+            (čtvrtletní) Event Storming sessions sdílejí znalosti a odhalují nekonzistence.
+        </li>
+        <li>
+            <strong>Doménový glosář v repozitáři:</strong> Živý dokument,
+            kde každý vývojář může hledat, co <code>FulfillmentContext</code> znamená,
+            jaké jsou jeho agregáty a na jaké Bounded Contexts navazuje.
+        </li>
+    </ol>
+
+    </section>
+
+    </section>{# konec bloku E #}
+
+    {# ═══════════════════════════════════════════════════════════
+       Shrnutí
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="shrnuti" aria-labelledby="shrnuti-heading">
+    <h2 id="shrnuti-heading">Co jsme se naučili</h2>
+
+    <ul>
+        <li>
+            <strong>Doctrine</strong> — Unit of Work je session-scoped; Application Service
+            je správná transakční hranice. Složité Value Objects mapujte přes Custom Type.
+            UUID generujte v doméně, nikoli v databázi.
+        </li>
+        <li>
+            <strong>Asynchronní infrastruktura</strong> — Outbox pattern garantuje
+            at-least-once doručení událostí. Každý handler musí být idempotentní.
+            Correlation ID je nezbytné pro debugging distribuovaných systémů.
+        </li>
+        <li>
+            <strong>Modelování</strong> — Doménový invariant patří do konstruktoru
+            nebo metody agregátu, nikdy jen do Symfony Validatoru. Anti-Corruption Layer
+            chrání doménu před změnami externích API.
+        </li>
+        <li>
+            <strong>Symfony</strong> — Form mapuje na DTO, Application Service sestaví Command.
+            API Platform pracuje s API Resource DTO, nikoli s agregáty. Security Voter
+            je tenký adaptér nad doménovou metodou.
+        </li>
+        <li>
+            <strong>Tým a organizace</strong> — Strangler fig je bezpečnější než big-bang
+            rewrite. Business case argumentuje měřitelnými metrikami, ne technickou čistotou.
+            Bus factor snižují živá dokumentace, ADR a Event Storming.
+        </li>
+    </ul>
+
+    </section>
+
+    {# ═══════════════════════════════════════════════════════════
+       Cvičení
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="cviceni" aria-labelledby="cviceni-heading">
+    <h2 id="cviceni-heading">Zkuste sami</h2>
+
+    <div class="tip" role="note">
+        <ol>
+            <li>
+                Implementujte <code>MoneyType</code> pro Doctrine a použijte ho na agregátu
+                <code>Order</code> s polem <code>totalPrice</code>. Ověřte, že po
+                <code>flush()</code> a novém načtení vrací <code>Money</code> objekt, ne string.
+            </li>
+            <li>
+                Přidejte <code>IdempotencyMiddleware</code> do command busu.
+                Napište integrační test, který odešle stejný command dvakrát se stejným
+                <code>IdempotencyStamp::key</code> a ověří, že handler byl zavolán pouze jednou.
+            </li>
+            <li>
+                Navrhněte <code>PaymentGateway</code> interface pro váš aktuální projekt.
+                Implementujte <code>FakePaymentGateway</code> pro testy a
+                <code>StripePaymentGateway</code> pro produkci. Zaregistrujte je přes
+                Symfony DI a přepínejte pomocí environment variable.
+            </li>
+            <li>
+                Identifikujte v existujícím projektu modul s nejvyšší změnovou frekvencí
+                (<code>git log --stat</code>). Navrhněte, jak by vypadal strangler fig
+                přechod tohoto modulu na DDD: jaká fasáda by byla potřeba,
+                jak by se synchronizovala data?
+            </li>
+            <li>
+                Přepište existující Security Voter tak, aby business logika žila
+                v doménové metodě agregátu. Napište unit test doménové metody
+                bez Symfony Security kontextu.
+            </li>
+        </ol>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na
+        <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD v Symfony</a>,
+        kde uvidíte vzory z celé příručky zasazené do reálnějšího kontextu.
+    </p>
+
+    </section>
+
     </article>
 {% endblock %}
 
