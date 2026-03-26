@@ -1,0 +1,133 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Nunito"
+skinparam defaultFontSize 16
+skinparam defaultTextAlignment center
+
+skinparam node {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam sequence {
+  ParticipantBorderColor #005A9C
+  LifeLineBorderColor #005A9C
+  LifeLineBackgroundColor #E6F0FA
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontSize 16
+  ArrowColor #005A9C
+  DividerBackgroundColor #E6F0FA
+  DividerBorderColor #005A9C
+  GroupBackgroundColor #F5F5F5
+  GroupBorderColor #005A9C
+  DelayFontSize 14
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceArrowColor #005A9C
+
+title Eventual Consistency — datový tok v CQRS
+
+actor "Uživatel" as U
+participant "Controller" as C
+participant "Command Bus" as CB
+participant "Command\nHandler" as CH
+database "Write DB" as WDB
+participant "Event Bus\n(Messenger)" as EB
+participant "Projektor" as P
+database "Read DB\n(denorm. tabulka)" as RDB
+participant "Query Bus" as QB
+participant "Query\nHandler" as QH
+
+== 1. Zápis (Command) ==
+
+U -> C : POST /orders
+activate C
+C -> CB : dispatch(PlaceOrder)
+activate CB
+CB -> CH : __invoke(PlaceOrder)
+activate CH
+CH -> WDB : INSERT (transakce)
+activate WDB
+WDB --> CH : OK
+deactivate WDB
+CH -> EB : dispatch(OrderPlaced)
+note right of EB
+  Událost zařazena
+  do async fronty
+end note
+CH --> CB : void
+deactivate CH
+CB --> C : Envelope
+deactivate CB
+C --> U : 302 Redirect + flash
+deactivate C
+
+== 2. Asynchronní propagace ==
+
+... **Časový odstup** (ms – s) ...
+
+EB -> P : OrderPlaced
+activate P
+P -> RDB : UPSERT order_dashboard
+activate RDB
+RDB --> P : OK
+deactivate RDB
+deactivate P
+note over EB, RDB
+  Eventual consistency okno:
+  mezi zápisem do Write DB
+  a aktualizací Read DB
+end note
+
+== 3. Čtení (Query) ==
+
+U -> C : GET /orders
+activate C
+C -> QB : dispatch(ListOrders)
+activate QB
+QB -> QH : __invoke(ListOrders)
+activate QH
+QH -> RDB : SELECT z denorm. tabulky
+activate RDB
+RDB --> QH : výsledky
+deactivate RDB
+QH --> QB : ViewModel[]
+deactivate QH
+QB --> C : Envelope
+deactivate QB
+C --> U : HTML response
+deactivate C
+
+note over U
+  Pokud čtení proběhne **před**
+  dokončením projekce, uživatel
+  vidí starší stav — to je
+  eventual consistency.
+end note
+
+@enduml
