@@ -1,0 +1,45 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv
+
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+        env:
+          APP_ENV: prod
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /www/subdom/ddd-v-symfony/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            _hidden/**
+            screenshots/**
+            docs/**
+            tests/**
+            .env.local
+            .env.*.local
+            CLAUDE.md
