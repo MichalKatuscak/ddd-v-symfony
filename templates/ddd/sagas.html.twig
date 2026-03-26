@@ -1324,6 +1324,409 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
 
     </section>
 
+    {# ───────────────────────────────────────────────────────────
+       Sekce 11: Monitoring a observabilita
+       ─────────────────────────────────────────────────────────── #}
+    <section id="monitoring" aria-labelledby="monitoring-heading">
+    <h2 id="monitoring-heading">Monitoring a observabilita</h2>
+
+    <p>
+        Produkční ságy potřebují <strong>observabilitu</strong> — musíte vědět, které ságy právě
+        běží, které se zasekly a které selhaly. Bez monitoringu je ladění distribuovaných procesů
+        noční můrou: zprávy se ztratí ve frontě, stav ságy zamrzne a nikdo si toho nevšimne, dokud
+        si zákazník nestěžuje. V této sekci se podíváme na dva klíčové nástroje: korelační ID pro
+        trasování a detekci zaseklých ság.
+    </p>
+
+    <h3 id="korelacni-id-heading">Korelační ID</h3>
+
+    <p>
+        Každá zpráva v rámci jedné ságy nese stejné <strong>korelační ID</strong> — typicky
+        <code>orderId</code>. Díky němu můžete v logu vyfiltrovat všechny zprávy patřící
+        ke konkrétní objednávce a sledovat celý průběh procesu od začátku do konce.
+        Více o korelačních identifikátorech najdete v
+        <a href="{{ path('glossary') }}#term-korelacni-id">glosáři</a>.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="saga-logging-middleware-heading">
+        <h3 id="saga-logging-middleware-heading">SagaLoggingMiddleware</h3>
+        <p>
+            Middleware pro Symfony Messenger, který loguje každou zprávu procházející ságou.
+            Zaregistrujte ho v <code>messenger.yaml</code> a všechny zprávy se automaticky
+            zaznamenají s korelačním ID:
+        </p>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Infrastructure\Middleware;
+
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
+use Symfony\Component\Messenger\Middleware\StackInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
+
+final readonly class SagaLoggingMiddleware implements MiddlewareInterface
+{
+    public function __construct(
+        private LoggerInterface $logger,
+    ) {}
+
+    public function handle(Envelope $envelope, StackInterface $stack): Envelope
+    {
+        $message = $envelope-&gt;getMessage();
+        $messageName = (new \ReflectionClass($message))-&gt;getShortName();
+
+        $this-&gt;logger-&gt;info('Saga: zpracovávám zprávu', [
+            'message' =&gt; $messageName,
+            'correlationId' =&gt; $message-&gt;orderId ?? 'unknown',
+        ]);
+
+        $envelope = $stack-&gt;next()-&gt;handle($envelope, $stack);
+
+        $handledStamp = $envelope-&gt;last(HandledStamp::class);
+        $this-&gt;logger-&gt;info('Saga: zpráva zpracována', [
+            'message' =&gt; $messageName,
+            'handler' =&gt; $handledStamp?-&gt;getHandlerName(),
+        ]);
+
+        return $envelope;
+    }
+}</code></pre>
+    </div>
+
+    <h3 id="detekce-zaseklych-heading">Detekce zaseklých ság</h3>
+
+    <p>
+        I při nejlepším návrhu se stane, že zpráva se ztratí, worker spadne nebo externí služba
+        přestane odpovídat. Proto potřebujete <strong>cron/scheduled command</strong>, který
+        pravidelně kontroluje, zda některá sága nezůstala příliš dlouho v mezistavech:
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="check-stale-sagas-heading">
+        <h3 id="check-stale-sagas-heading">Symfony Console příkaz pro detekci zaseklých ság</h3>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Infrastructure\Command;
+
+use App\Ordering\Application\Saga\SagaStateRepository;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+#[AsCommand(name: 'app:saga:check-stale', description: 'Najde ságy zaseklé déle než 30 minut')]
+final class CheckStaleSagasCommand extends Command
+{
+    public function __construct(
+        private readonly SagaStateRepository $sagaStateRepository,
+    ) {
+        parent::__construct();
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $threshold = new \DateTimeImmutable('-30 minutes');
+        $staleSagas = $this-&gt;sagaStateRepository-&gt;findStale($threshold);
+
+        if (count($staleSagas) === 0) {
+            $io-&gt;success('Žádné zaseklé ságy.');
+            return Command::SUCCESS;
+        }
+
+        $io-&gt;warning(sprintf('Nalezeno %d zaseklých ság:', count($staleSagas)));
+
+        foreach ($staleSagas as $saga) {
+            $io-&gt;writeln(sprintf(
+                '  [%s] %s — stav: %s, poslední aktivita: %s',
+                $saga-&gt;correlationId(),
+                'order_process',
+                $saga-&gt;status()-&gt;value,
+                $saga-&gt;updatedAt()-&gt;format('Y-m-d H:i:s'),
+            ));
+        }
+
+        return Command::FAILURE;
+    }
+}</code></pre>
+    </div>
+
+    <div class="note" role="note" aria-labelledby="alerting-heading">
+        <h3 id="alerting-heading">Integrace s alertingem</h3>
+        <p>
+            V produkčním prostředí napojte detekci zaseklých ság na váš alertingový systém —
+            <strong>Prometheus</strong> pro metriky (počet aktivních ság, průměrná doba dokončení),
+            <strong>Grafana</strong> pro dashboardy a <strong>PagerDuty</strong> nebo podobný
+            nástroj pro eskalaci kritických situací. Příkaz <code>app:saga:check-stale</code>
+            může běžet jako Kubernetes CronJob nebo Symfony Scheduler task.
+        </p>
+    </div>
+
+    <p>
+        Podrobnosti o implementaci middleware v Symfony Messenger najdete v kapitole
+        <a href="{{ path('cqrs') }}#middleware">CQRS — sekce middleware</a>.
+    </p>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 12: Testování ság
+       ─────────────────────────────────────────────────────────── #}
+    <section id="testovani" aria-labelledby="testovani-heading">
+    <h2 id="testovani-heading">Testování ság</h2>
+
+    <p>
+        Ságy koordinují složité vícekrokové procesy napříč Bounded Contexts — testování je proto
+        <strong>kriticky důležité</strong>. Pokud sága obsahuje chybu v přechodové logice nebo
+        kompenzacích, důsledky se projeví až v produkci a mohou být velmi nákladné (stržená platba
+        bez doručeného zboží, duplikované zásilky apod.). Testujeme na třech úrovních.
+    </p>
+
+    <h3 id="unit-testy-heading">Unit testy stavového automatu</h3>
+
+    <p>
+        Nejdůležitější úroveň: testujeme samotný Process Manager izolovaně od infrastruktury.
+        Místo skutečného message busu použijeme spy implementaci, která zaznamenává dispatchované
+        příkazy, a místo databáze in-memory repozitář:
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="saga-unit-test-heading">
+        <h3 id="saga-unit-test-heading">PHPUnit test ságy</h3>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Ordering\Application\Saga;
+
+use App\Ordering\Application\Saga\OrderProcessManager;
+use App\Ordering\Application\Saga\OrderSagaStatus;
+use App\Ordering\Application\Saga\SagaState;
+use App\Ordering\Application\Saga\SagaStateRepository;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Payment\Application\Command\ChargeCustomer;
+use App\Payment\Domain\Event\PaymentFailed;
+use App\Payment\Domain\Event\PaymentSucceeded;
+use App\Warehouse\Application\Command\ReserveStock;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+final class OrderProcessManagerTest extends TestCase
+{
+    private MessageBusInterface $commandBus;
+    private SagaStateRepository $repository;
+    private OrderProcessManager $saga;
+    /** @var list&lt;object&gt; */
+    private array $dispatchedCommands = [];
+
+    protected function setUp(): void
+    {
+        $this-&gt;dispatchedCommands = [];
+
+        $this-&gt;commandBus = new class($this-&gt;dispatchedCommands) implements MessageBusInterface {
+            /** @param list&lt;object&gt; $commands */
+            public function __construct(private array &amp;$commands) {}
+
+            public function dispatch(object $message, array $stamps = []): Envelope
+            {
+                $this-&gt;commands[] = $message;
+                return new Envelope($message);
+            }
+        };
+
+        $this-&gt;repository = new InMemorySagaStateRepository();
+        $this-&gt;saga = new OrderProcessManager($this-&gt;commandBus, $this-&gt;repository);
+    }
+
+    public function testOrderPlacedInitiatesPayment(): void
+    {
+        ($this-&gt;saga)(new OrderPlaced(
+            orderId: 'order-1',
+            customerId: 'cust-1',
+            totalAmountCents: 10000,
+        ));
+
+        self::assertCount(1, $this-&gt;dispatchedCommands);
+        self::assertInstanceOf(ChargeCustomer::class, $this-&gt;dispatchedCommands[0]);
+        self::assertSame('order-1', $this-&gt;dispatchedCommands[0]-&gt;orderId);
+
+        $state = $this-&gt;repository-&gt;findByCorrelationId('order-1');
+        self::assertSame(OrderSagaStatus::AwaitingPayment, $state-&gt;status());
+    }
+
+    public function testPaymentSucceededReservesStock(): void
+    {
+        ($this-&gt;saga)(new OrderPlaced('order-1', 'cust-1', 10000));
+        $this-&gt;dispatchedCommands = [];
+
+        ($this-&gt;saga)(new PaymentSucceeded(orderId: 'order-1'));
+
+        self::assertCount(1, $this-&gt;dispatchedCommands);
+        self::assertInstanceOf(ReserveStock::class, $this-&gt;dispatchedCommands[0]);
+
+        $state = $this-&gt;repository-&gt;findByCorrelationId('order-1');
+        self::assertSame(OrderSagaStatus::AwaitingStockReservation, $state-&gt;status());
+    }
+
+    public function testPaymentFailedCancelsOrder(): void
+    {
+        ($this-&gt;saga)(new OrderPlaced('order-1', 'cust-1', 10000));
+        $this-&gt;dispatchedCommands = [];
+
+        ($this-&gt;saga)(new PaymentFailed(
+            orderId: 'order-1',
+            failureReason: 'Insufficient funds',
+        ));
+
+        $state = $this-&gt;repository-&gt;findByCorrelationId('order-1');
+        self::assertSame(OrderSagaStatus::Failed, $state-&gt;status());
+    }
+}</code></pre>
+    </div>
+
+    <div class="note" role="note" aria-labelledby="in-memory-repo-heading">
+        <h3 id="in-memory-repo-heading">InMemorySagaStateRepository</h3>
+        <p>
+            Testovací in-memory implementace repozitáře, kterou používáme místo Doctrine:
+        </p>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Ordering\Application\Saga;
+
+use App\Ordering\Application\Saga\SagaState;
+use App\Ordering\Application\Saga\SagaStateRepository;
+
+final class InMemorySagaStateRepository extends SagaStateRepository
+{
+    /** @var array&lt;string, SagaState&gt; */
+    private array $states = [];
+
+    public function __construct() {}
+
+    public function save(SagaState $state): void
+    {
+        $this-&gt;states[$state-&gt;correlationId()] = $state;
+    }
+
+    public function findByCorrelationId(string $correlationId): SagaState
+    {
+        return $this-&gt;states[$correlationId]
+            ?? throw new \RuntimeException(
+                sprintf('Saga state not found for "%s"', $correlationId),
+            );
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        Další vzory pro testování doménové logiky, agregátů a event handlerů najdete v kapitole
+        <a href="{{ path('testing_ddd') }}">Testování DDD aplikací</a>.
+    </p>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 13: Shrnutí
+       ─────────────────────────────────────────────────────────── #}
+    <section id="shrnuti" aria-labelledby="shrnuti-heading">
+    <h2 id="shrnuti-heading">Co jsme se naučili</h2>
+
+    <ul>
+        <li>
+            Distribuované transakce (<abbr title="Two-Phase Commit">2PC</abbr>) nejsou v DDD vhodné
+            — ságy nabízejí alternativu pomocí <strong>kompenzačních transakcí</strong>.
+        </li>
+        <li>
+            Kompenzační transakce sémanticky vrací efekt předchozího kroku — nejsou technickým
+            rollbackem, ale <strong>novými doménovými akcemi</strong>.
+        </li>
+        <li>
+            <strong>Choreografie</strong> je jednoduchá pro 2–3 kroky, ale při rostoucím počtu
+            kontextů vede k „distributed spaghetti".
+        </li>
+        <li>
+            <strong>Orchestrace</strong> (Process Manager) centralizuje řízení procesu do stavového
+            automatu — snadnější ladění, rozšiřování i monitoring.
+        </li>
+        <li>
+            Stav ságy musí být <strong>persistentní</strong> — worker crash nesmí ztratit informaci
+            o tom, v jakém kroku se proces nachází.
+        </li>
+        <li>
+            Symfony Messenger s async transportem a <code>DelayStamp</code> poskytuje infrastrukturu
+            pro implementaci ság.
+        </li>
+        <li>
+            <strong>Timeout handling</strong> je klíčový — každý krok potřebuje časový limit
+            a definovanou reakci na jeho vypršení.
+        </li>
+        <li>
+            Kompenzace se provádí v <strong>opačném pořadí</strong> dokončených kroků a každá
+            kompenzační akce musí být idempotentní.
+        </li>
+        <li>
+            Paralelní kroky zvyšují propustnost, ale vyžadují <strong>synchronizační bariéru</strong>
+            a nezávislou kompenzaci pro každou větev.
+        </li>
+        <li>
+            Monitoring ság (<strong>korelační ID</strong>, detekce zaseklých procesů) je pro
+            produkční provoz nezbytný.
+        </li>
+    </ul>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 14: Cvičení
+       ─────────────────────────────────────────────────────────── #}
+    <section id="cviceni" aria-labelledby="cviceni-heading">
+    <h2 id="cviceni-heading">Zkuste sami</h2>
+
+    <div class="tip" role="note">
+        <ol>
+            <li>
+                Rozšiřte <code>OrderProcessManager</code> o krok notifikace: po
+                <code>ShipmentCreated</code> odešlete zákazníkovi e-mail s trackovacím číslem.
+                Co se stane, když odeslání e-mailu selže? Měla by tato chyba spustit kompenzaci
+                celého procesu?
+            </li>
+            <li>
+                Implementujte timeout pro krok <code>AwaitingStockReservation</code> s limitem
+                30 sekund. Použijte <code>DelayStamp</code> a <code>CheckSagaTimeout</code>.
+                Jakou kompenzaci provedete?
+            </li>
+            <li>
+                Přidejte do procesu paralelní krok: po úspěšné platbě se souběžně rezervuje sklad
+                a generuje faktura. Implementujte synchronizační bariéru pomocí
+                <code>SagaState.context</code>.
+            </li>
+            <li>
+                Napište test kompenzační cesty: objednávka &rarr; platba úspěšná &rarr; rezervace
+                skladu selhala. Ověřte, že saga provede refund a zruší objednávku.
+            </li>
+            <li>
+                Navrhněte choreografickou alternativu pro zjednodušený dvou-krokový proces
+                (objednávka &rarr; platba). Porovnejte složitost s orchestrací a rozhodněte,
+                kdy je choreografie dostačující.
+            </li>
+        </ol>
+    </div>
+
+    <p>
+        V další kapitole se podíváme na
+        <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD v Symfony</a>,
+        kde uvidíte vzory z tohoto článku zasazené do reálnějšího kontextu.
+    </p>
+
+    </section>
+
     </article>
 {% endblock %}
 
