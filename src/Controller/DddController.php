@@ -112,6 +112,14 @@ class DddController extends AbstractController
         ]);
     }
 
+    #[Route('/sagy-a-process-managery', name: 'sagas')]
+    public function sagas(): Response
+    {
+        return $this->render('ddd/sagas.html.twig', [
+            'title' => 'Ságy a Process Managery',
+        ]);
+    }
+
     #[Route('/anti-vzory', name: 'anti_patterns')]
     public function antiPatterns(): Response
     {

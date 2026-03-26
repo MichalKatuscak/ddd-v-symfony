@@ -89,6 +89,9 @@
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'event_sourcing' %}active{% endif %}" href="{{ path('event_sourcing') }}">Event Sourcing</a>
                     </li>
                     <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'sagas' %}active{% endif %}" href="{{ path('sagas') }}">Ságy</a>
+                    </li>
+                    <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'practical_examples' %}active{% endif %}" href="{{ path('practical_examples') }}">Příklady</a>
                     </li>
                     <li class="sidebar-nav-item">
