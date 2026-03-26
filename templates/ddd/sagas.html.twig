@@ -986,6 +986,344 @@ final readonly class OrderPlaced
 
     </section>
 
+    {# ───────────────────────────────────────────────────────────
+       Sekce 8: Timeouty a deadliny
+       ─────────────────────────────────────────────────────────── #}
+    <section id="timeouty" aria-labelledby="timeouty-heading">
+    <h2 id="timeouty-heading">Timeouty a deadliny</h2>
+
+    <p>
+        Co se stane, když událost <code>PaymentSucceeded</code> nikdy nedorazí? Síťový výpadek,
+        nedostupnost platební brány, ztráta zprávy ve frontě — v distribuovaném systému musíte
+        vždy počítat s tím, že odpověď nepřijde. Bez explicitního timeout mechanismu sága zůstane
+        navždy ve stavu <code>AwaitingPayment</code> a objednávka se nikdy nedokončí ani nezruší.
+        Proto potřebujeme <strong>timeout check</strong> — odložený příkaz, který po uplynutí
+        stanovené doby zkontroluje, zda se sága posunula dál, a pokud ne, spustí kompenzaci.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="check-saga-timeout-heading">
+        <h3 id="check-saga-timeout-heading">PHP: CheckSagaTimeout command</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Command;
+
+final readonly class CheckSagaTimeout
+{
+    public function __construct(
+        public string $orderId,
+        public string $expectedStatus,
+    ) {}
+}</code></pre>
+    </div>
+
+    <div class="tip" role="note" aria-labelledby="check-saga-timeout-handler-heading">
+        <h3 id="check-saga-timeout-handler-heading">PHP: CheckSagaTimeoutHandler</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Handler;
+
+use App\Ordering\Application\Command\CheckSagaTimeout;
+use App\Ordering\Application\Command\CancelOrder;
+use App\Ordering\Application\Saga\OrderSagaStatus;
+use App\Ordering\Application\Saga\SagaStateRepository;
+use App\Payment\Application\Command\RefundCustomer;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler]
+final readonly class CheckSagaTimeoutHandler
+{
+    public function __construct(
+        private SagaStateRepository $sagaStateRepository,
+        private MessageBusInterface $commandBus,
+    ) {}
+
+    public function __invoke(CheckSagaTimeout $command): void
+    {
+        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($command-&gt;orderId);
+
+        // Saga se od posledního kroku posunula — timeout neplatí
+        if ($state-&gt;status()-&gt;value !== $command-&gt;expectedStatus) {
+            return;
+        }
+
+        // Saga stále čeká → iniciovat kompenzaci
+        $state-&gt;transitionTo(OrderSagaStatus::Compensating);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        match ($state-&gt;status()) {
+            OrderSagaStatus::AwaitingPayment =&gt; $this-&gt;commandBus-&gt;dispatch(
+                new CancelOrder(orderId: $command-&gt;orderId, reason: 'Payment timeout'),
+            ),
+            OrderSagaStatus::AwaitingStockReservation =&gt; $this-&gt;compensatePayment($state),
+            default =&gt; null,
+        };
+    }
+
+    private function compensatePayment(/* SagaState */ $state): void
+    {
+        $this-&gt;commandBus-&gt;dispatch(new RefundCustomer(
+            orderId: $state-&gt;correlationId(),
+            customerId: $state-&gt;context()['customerId'],
+            amountCents: $state-&gt;context()['amountCents'],
+            reason: 'Timeout: stock reservation not received',
+        ));
+
+        $this-&gt;commandBus-&gt;dispatch(new CancelOrder(
+            orderId: $state-&gt;correlationId(),
+            reason: 'Timeout waiting for stock reservation',
+        ));
+    }
+}</code></pre>
+    </div>
+
+    <p>
+        Timeout check naplánujeme přímo v Process Manageru při zpracování události
+        <code>OrderPlaced</code>. Messenger nabízí <code>DelayStamp</code>, který zprávu
+        podrží v transportu po zadanou dobu a teprve poté ji doručí workeru:
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="delay-stamp-heading">
+        <h3 id="delay-stamp-heading">PHP: Naplánování timeout checku v OrderProcessManager</h3>
+        <pre><code class="language-php">use Symfony\Component\Messenger\Stamp\DelayStamp;
+
+private function onOrderPlaced(OrderPlaced $event): void
+{
+    // ... (vytvoření SagaState a dispatch ChargeCustomer — viz sekce 5)
+
+    // Naplánovat timeout check za 5 minut
+    $this-&gt;commandBus-&gt;dispatch(
+        new CheckSagaTimeout(
+            orderId: $event-&gt;orderId,
+            expectedStatus: OrderSagaStatus::AwaitingPayment-&gt;value,
+        ),
+        [new DelayStamp(5 * 60 * 1000)], // 5 minut v milisekundách
+    );
+}</code></pre>
+    </div>
+
+    <div class="note" role="note" aria-labelledby="configurable-timeouts-heading">
+        <h3 id="configurable-timeouts-heading">Konfigurovatelné timeouty</h3>
+        <p>
+            Každý krok ságy může vyžadovat jiný timeout. Platební brána typicky potřebuje
+            <strong>5 minut</strong> (zákazník zadává údaje karty), rezervace skladu by měla
+            proběhnout do <strong>30 sekund</strong> (interní synchronní operace) a potvrzení
+            zásilky může trvat i <strong>24 hodin</strong> (závisí na externím dopravci).
+            Timeouty proto definujte konfigurovatelně — ideálně jako parametry v
+            <code>services.yaml</code>, aby je bylo možné upravit bez změny kódu.
+        </p>
+    </div>
+
+    <div class="warning" role="alert" aria-labelledby="delay-stamp-warning-heading">
+        <h3 id="delay-stamp-warning-heading">Požadavky na transport</h3>
+        <p>
+            <code>DelayStamp</code> vyžaduje asynchronní transport, který podporuje odložené
+            doručování zpráv. <strong>Doctrine transport</strong> tuto funkcionalitu podporuje
+            nativně (používá sloupec <code>available_at</code>). Pokud používáte
+            <strong>RabbitMQ</strong>, potřebujete plugin
+            <code>rabbitmq-delayed-message-exchange</code>. Synchronní transport
+            (<code>sync://</code>) <code>DelayStamp</code> ignoruje a zprávu doručí okamžitě.
+        </p>
+    </div>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 9: Kompenzační strategie v praxi
+       ─────────────────────────────────────────────────────────── #}
+    <section id="kompenzacni-strategie" aria-labelledby="kompenzacni-strategie-heading">
+    <h2 id="kompenzacni-strategie-heading">Kompenzační strategie v praxi</h2>
+
+    <p>
+        Když krok ságy selže, máme dvě základní strategie, jak situaci řešit. Volba závisí
+        na povaze chyby — je přechodná (síťový výpadek, dočasná nedostupnost služby), nebo
+        trvalá (nedostatek prostředků na účtu, zboží vyprodáno)?
+    </p>
+
+    <h3 id="forward-recovery">Forward recovery (retry)</h3>
+
+    <p>
+        Při <strong>přechodných chybách</strong> je nejjednodušší strategií opakování — pokus
+        o provedení stejného kroku znovu. Symfony Messenger nabízí vestavěnou retry strategii
+        s exponenciálním backoffem, kterou jsme konfigurovali v
+        <a href="#messenger-implementace">sekci 7</a>. Worker automaticky opakuje selhané
+        zprávy podle nastavení <code>max_retries</code>, <code>delay</code> a
+        <code>multiplier</code>. Tento přístup je vhodný, když věříme, že problém je dočasný
+        a opakování může uspět.
+    </p>
+
+    <h3 id="backward-recovery">Backward recovery (kompenzace)</h3>
+
+    <p>
+        Při <strong>trvalých chybách</strong> (business failures) musíme spustit kompenzaci —
+        vrátit systém do konzistentního stavu provedením kompenzačních akcí v
+        <strong>opačném pořadí</strong> dokončených kroků. Klíčový princip:
+        kompenzace je <strong>sémantická</strong>, nikoli technická. Neděláme
+        <code>DELETE FROM payments</code> — místo toho dispatchujeme nový doménový příkaz
+        <code>RefundCustomer</code>, který vytvoří novou transakci (refund). Každá kompenzační
+        akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="compensate-method-heading">
+        <h3 id="compensate-method-heading">PHP: Kompenzační logika v opačném pořadí kroků</h3>
+        <pre><code class="language-php">/**
+ * Kompenzace: spouštěna při selhání libovolného kroku.
+ * Provádí kompenzační akce v opačném pořadí dokončených kroků.
+ */
+private function compensate(SagaState $state): void
+{
+    $completedSteps = $state-&gt;context()['completedSteps'] ?? [];
+
+    foreach (array_reverse($completedSteps) as $step) {
+        match ($step) {
+            'shipment_created' =&gt; $this-&gt;commandBus-&gt;dispatch(
+                new \App\Shipping\Application\Command\CancelShipment(
+                    orderId: $state-&gt;correlationId(),
+                ),
+            ),
+            'stock_reserved' =&gt; $this-&gt;commandBus-&gt;dispatch(
+                new ReleaseStock(orderId: $state-&gt;correlationId()),
+            ),
+            'payment_charged' =&gt; $this-&gt;commandBus-&gt;dispatch(
+                new RefundCustomer(
+                    orderId: $state-&gt;correlationId(),
+                    customerId: $state-&gt;context()['customerId'],
+                    amountCents: $state-&gt;context()['amountCents'],
+                    reason: 'Order saga compensation',
+                ),
+            ),
+            default =&gt; null,
+        };
+    }
+
+    $state-&gt;transitionTo(OrderSagaStatus::Failed);
+    $this-&gt;sagaStateRepository-&gt;save($state);
+}</code></pre>
+    </div>
+
+    <div class="note" role="note" aria-labelledby="idempotent-compensation-heading">
+        <h3 id="idempotent-compensation-heading">Idempotence kompenzačních handlerů</h3>
+        <p>
+            Každý kompenzační handler <strong>musí být idempotentní</strong>. Zpráva může být
+            doručena vícekrát (at-least-once delivery), a proto handler musí bezpečně zvládnout
+            opakované volání. Například <code>RefundCustomerHandler</code> by měl před vytvořením
+            refundu ověřit, zda refund pro danou objednávku již neexistuje.
+        </p>
+    </div>
+
+    <p>
+        Podrobnější informace o Dead Letter Queue, retry strategiích a zpracování chyb v Messenger
+        najdete v kapitole <a href="{{ path('cqrs') }}#error-handling">CQRS — zpracování chyb</a>.
+    </p>
+
+    </section>
+
+    {# ───────────────────────────────────────────────────────────
+       Sekce 10: Paralelní kroky
+       ─────────────────────────────────────────────────────────── #}
+    <section id="paralelni-kroky" aria-labelledby="paralelni-kroky-heading">
+    <h2 id="paralelni-kroky-heading">Paralelní kroky</h2>
+
+    <p>
+        Dosud jsme uvažovali sériové provádění kroků — jeden po druhém. V praxi však některé
+        kroky na sobě nezávisí a mohou běžet <strong>současně</strong>. Například po úspěšné
+        platbě chceme zároveň <strong>rezervovat zboží na skladě</strong> a
+        <strong>vygenerovat fakturu</strong>. Obě operace jsou nezávislé — výsledek jedné
+        neovlivňuje druhou. Paralelním zpracováním zkrátíme celkovou dobu trvání ságy.
+    </p>
+
+    <p>
+        Princip je jednoduchý: sága dispatchuje oba příkazy současně a přejde do stavu
+        <code>AwaitingStockAndInvoice</code>. V kontextu si uchovává dva příznaky
+        (<code>stockReserved</code> a <code>invoiceCreated</code>). Teprve když oba dorazí
+        jako splněné, sága pokračuje dalším krokem — vytvořením zásilky. Tomuto vzoru se říká
+        <strong>synchronizační bariéra</strong> (synchronization barrier).
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="parallel-steps-heading">
+        <h3 id="parallel-steps-heading">PHP: Paralelní zpracování kroků se synchronizační bariérou</h3>
+        <pre><code class="language-php">private function onPaymentSucceeded(PaymentSucceeded $event): void
+{
+    $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+    $state-&gt;transitionTo(OrderSagaStatus::AwaitingStockAndInvoice);
+    $state-&gt;updateContext('stockReserved', false);
+    $state-&gt;updateContext('invoiceCreated', false);
+    $this-&gt;sagaStateRepository-&gt;save($state);
+
+    $this-&gt;commandBus-&gt;dispatch(new ReserveStock(orderId: $event-&gt;orderId));
+    $this-&gt;commandBus-&gt;dispatch(new CreateInvoice(orderId: $event-&gt;orderId));
+}
+
+private function onStockReserved(StockReserved $event): void
+{
+    $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+    $state-&gt;updateContext('stockReserved', true);
+    $state-&gt;updateContext('completedSteps', [
+        ...$state-&gt;context()['completedSteps'] ?? [],
+        'stock_reserved',
+    ]);
+    $this-&gt;sagaStateRepository-&gt;save($state);
+
+    $this-&gt;proceedIfParallelStepsCompleted($state);
+}
+
+private function onInvoiceCreated(InvoiceCreated $event): void
+{
+    $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
+    $state-&gt;updateContext('invoiceCreated', true);
+    $state-&gt;updateContext('completedSteps', [
+        ...$state-&gt;context()['completedSteps'] ?? [],
+        'invoice_created',
+    ]);
+    $this-&gt;sagaStateRepository-&gt;save($state);
+
+    $this-&gt;proceedIfParallelStepsCompleted($state);
+}
+
+private function proceedIfParallelStepsCompleted(SagaState $state): void
+{
+    if ($state-&gt;context()['stockReserved'] &amp;&amp; $state-&gt;context()['invoiceCreated']) {
+        $state-&gt;transitionTo(OrderSagaStatus::AwaitingShipment);
+        $this-&gt;sagaStateRepository-&gt;save($state);
+
+        $this-&gt;commandBus-&gt;dispatch(new CreateShipment(
+            orderId: $state-&gt;correlationId(),
+        ));
+    }
+}</code></pre>
+    </div>
+
+    <div class="warning" role="alert" aria-labelledby="parallel-compensation-heading">
+        <h3 id="parallel-compensation-heading">Kompenzace paralelních kroků</h3>
+        <p>
+            Paralelní kroky zvyšují složitost kompenzace. Pokud rezervace skladu uspěje, ale
+            generování faktury selže, musíte sklad uvolnit — přestože samotná rezervace proběhla
+            správně. Kompenzační logika z <a href="#kompenzacni-strategie">předchozí sekce</a>
+            toto řeší automaticky díky poli <code>completedSteps</code>: kompenzuje se pouze to,
+            co skutečně proběhlo.
+        </p>
+    </div>
+
+    <div class="note" role="note" aria-labelledby="optimistic-locking-parallel-heading">
+        <h3 id="optimistic-locking-parallel-heading">Optimistické zamykání</h3>
+        <p>
+            Při paralelních krocích mohou dvě události (<code>StockReserved</code> a
+            <code>InvoiceCreated</code>) dorazit téměř současně a oba handlery se pokusí
+            aktualizovat stejný <code>SagaState</code> záznam. Bez ochrany hrozí ztráta dat
+            (lost update). Řešením je <strong>optimistické zamykání</strong> — entita
+            <code>SagaState</code> obsahuje sloupec <code>version</code> (viz
+            <a href="#perzistence-stavu">sekce 6</a>) a při uložení Doctrine ověří, že verze
+            nebyla mezitím změněna. Pokud ano, vyhodí
+            <code>OptimisticLockException</code> a Messenger zprávu automaticky zopakuje.
+        </p>
+    </div>
+
+    </section>
+
     </article>
 {% endblock %}
 
