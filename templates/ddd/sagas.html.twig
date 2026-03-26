@@ -51,7 +51,7 @@
             <li><a href="#paralelni-kroky">Paralelní kroky</a></li>
             <li><a href="#monitoring">Monitoring a observabilita</a></li>
             <li><a href="#testovani">Testování ság</a></li>
-            <li><a href="#shrnuti">Shrnutí a rozhodovací matice</a></li>
+            <li><a href="#shrnuti">Co jsme se naučili</a></li>
             <li><a href="#cviceni">Cvičení</a></li>
         </ul>
     </div>
@@ -813,7 +813,7 @@ namespace App\Ordering\Application\Saga;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class SagaStateRepository
+readonly class SagaStateRepository
 {
     public function __construct(
         private EntityManagerInterface $em,
@@ -1051,11 +1051,13 @@ final readonly class CheckSagaTimeoutHandler
             return;
         }
 
-        // Saga stále čeká → iniciovat kompenzaci
+        // Zapamatovat původní stav před přechodem
+        $originalStatus = OrderSagaStatus::from($command-&gt;expectedStatus);
+
         $state-&gt;transitionTo(OrderSagaStatus::Compensating);
         $this-&gt;sagaStateRepository-&gt;save($state);
 
-        match ($state-&gt;status()) {
+        match ($originalStatus) {
             OrderSagaStatus::AwaitingPayment =&gt; $this-&gt;commandBus-&gt;dispatch(
                 new CancelOrder(orderId: $command-&gt;orderId, reason: 'Payment timeout'),
             ),
