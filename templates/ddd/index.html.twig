@@ -34,7 +34,7 @@
 {% block body %}
 <div class="trust-bar">
     <span>PHP 8.4+ &amp; Symfony 8</span>
-    <span>15 kapitol s ukázkami kódu</span>
+    <span>16 kapitol s ukázkami kódu</span>
     <span>CQRS · Event Sourcing · Taktický design</span>
     <span>zdarma · česky</span>
 </div>
@@ -48,7 +48,7 @@
     </div>
     <div class="hero-stats">
         <div class="hero-stats-item">
-            <span class="hero-stats-num">15</span>
+            <span class="hero-stats-num">16</span>
             <span class="hero-stats-desc">kapitol</span>
         </div>
         <div class="hero-stats-item">
@@ -106,6 +106,10 @@
         <a href="{{ path('event_sourcing') }}" class="feature-card">
             <h3 class="feature-card-title">Event Sourcing</h3>
             <p class="feature-card-desc">Uchování stavu aplikace jako sekvence doménových událostí.</p>
+        </a>
+        <a href="{{ path('ddd_pain_points') }}" class="feature-card">
+            <h3 class="feature-card-title">DDD v praxi — kde to bolí</h3>
+            <p class="feature-card-desc">20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig a přesvědčení managementu.</p>
         </a>
         <a href="{{ path('implementation_in_symfony') }}" class="feature-card">
             <h3 class="feature-card-title">Implementace v Symfony 8</h3>
