@@ -856,6 +856,237 @@ final class IdempotencyMiddleware implements MiddlewareInterface
 
     </section>{# konec bloku B #}
 
+    {# ═══════════════════════════════════════════════════════════
+       BLOK C: Modelování
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="modelovani" aria-labelledby="modelovani-heading">
+    <h2 id="modelovani-heading">C — Modelování</h2>
+
+    <p>
+        Správné doménové modelování je obtížnější než implementace — vyžaduje disciplínu
+        v rozhodnutích, která se zdají triviální, dokud nezpůsobí problém.
+    </p>
+
+    {# ─── C1: Kde žije validace ──────────────────────────────────── #}
+    <section id="c1-validace" aria-labelledby="c1-heading">
+    <h3 id="c1-heading">C1. Kde žije validace</h3>
+
+    <p>
+        <strong>Problém:</strong> Validace je rozeseta na třech místech: Symfony Validator
+        (anotace na DTO), Application Service (business podmínky) a doménový konstruktor
+        (invarianty). Výsledkem je buď duplicita (stejná pravidla na dvou místech),
+        nebo díry (pravidlo chybí na jednom místě).
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Typ validace</th>
+                <th>Kde patří</th>
+                <th>Příklad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Formátová validace</strong></td>
+                <td>API / formulářová vrstva (Symfony Validator)</td>
+                <td>Email musí být validní formát, číslo musí být kladné</td>
+            </tr>
+            <tr>
+                <td><strong>Doménový invariant</strong></td>
+                <td>Konstruktor / metoda agregátu nebo VO</td>
+                <td>Množství nesmí být nulové, cena nesmí být záporná</td>
+            </tr>
+            <tr>
+                <td><strong>Business pravidlo</strong></td>
+                <td>Domain Service nebo Application Service</td>
+                <td>Zákazník nesmí mít více než 5 otevřených objednávek</td>
+            </tr>
+            <tr>
+                <td><strong>Databázová unikátnost</strong></td>
+                <td>Databázový unique constraint + Application Service check</td>
+                <td>Email zákazníka musí být unikátní v systému</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <strong>Klíčové pravidlo:</strong> Doménový invariant vždy vynucujte v doméně —
+        nikdy nespoléhejte na validaci ve vyšší vrstvě, protože doménový objekt může být
+        sestaven i z jiného místa (CLI command, test, import). Symfony Validator je
+        <em>první linie obrany</em> pro uživatelský vstup, nikoli náhrada doménové validace.
+    </p>
+
+    </section>
+
+    {# ─── C2: Stavový automat ────────────────────────────────────── #}
+    <section id="c2-stavy" aria-labelledby="c2-heading">
+    <h3 id="c2-heading">C2. Stavový automat bez anémického modelu</h3>
+
+    <p>
+        <strong>Problém:</strong> Objednávka prochází stavy: <em>Draft → Placed → Paid →
+        Shipped → Delivered → Cancelled</em>. Anémický přístup: <code>$order-&gt;setStatus('shipped')</code>
+        — stav se změní bez guard conditions, bez side effectů, bez kontroly, zda přechod
+        dává smysl.
+    </p>
+
+    <p>
+        <strong>Řešení:</strong> Explicitní metody pro každý přechod. Metoda ověřuje,
+        zda je přechod validní (guard condition), provede změnu stavu a zaregistruje
+        doménovou událost.
+    </p>
+
+    <pre><code class="language-php">final class Order
+{
+    private OrderStatus $status = OrderStatus::Draft;
+
+    public function place(): void
+    {
+        if ($this->status !== OrderStatus::Draft) {
+            throw new \DomainException("Objednávku lze odeslat pouze ve stavu Draft.");
+        }
+        $this->status = OrderStatus::Placed;
+        $this->record(new OrderPlaced($this->id));
+    }
+
+    public function ship(TrackingNumber $trackingNumber): void
+    {
+        if ($this->status !== OrderStatus::Paid) {
+            throw new \DomainException("Objednávku lze expedovat pouze po zaplacení.");
+        }
+        $this->status         = OrderStatus::Shipped;
+        $this->trackingNumber = $trackingNumber;
+        $this->record(new OrderShipped($this->id, $trackingNumber));
+    }
+}</code></pre>
+
+    <div class="note" role="note">
+        <p>
+            <strong>Symfony Workflow</strong> může spravovat přechody stavů — ale jako
+            <em>infrastrukturní helper</em>, nikoli jako součást doménového modelu.
+            Doménový objekt nesmí záviset na <code>WorkflowInterface</code>. Voter / Controller
+            může použít Workflow pro UI logiku; doménová metoda ověřuje invariant sama.
+        </p>
+    </div>
+
+    </section>
+
+    {# ─── C3: Anti-Corruption Layer ──────────────────────────────── #}
+    <section id="c3-acl" aria-labelledby="c3-heading">
+    <h3 id="c3-heading">C3. Anti-Corruption Layer k externím API</h3>
+
+    <p>
+        <strong>Problém:</strong> Stripe vrací <code>\Stripe\Charge</code>, Ares vrací
+        XML nebo pole, Fakturoid vrací vlastní DTO. Pokud tato data z externích systémů
+        prosakují přímo do doménového kódu, změna externího API = změna doménového modelu.
+    </p>
+
+    <p>
+        <strong>Řešení — Port &amp; Adapter (Hexagonální architektura):</strong>
+        Doménový model definuje <strong>Port</strong> (interface) popisující, co potřebuje
+        od externího systému — v doménových pojmech. Infrastrukturní vrstva implementuje
+        <strong>Adapter</strong>, který přeloží externí API do doménového rozhraní.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="c3-code-heading">
+        <h4 id="c3-code-heading">PHP: Port v doméně + Adapter v infrastruktuře</h4>
+        <pre><code class="language-php">&lt;?php
+
+// Port — v doméně (App\Payment\Domain\Port)
+interface PaymentGateway
+{
+    /** @throws PaymentFailedException */
+    public function charge(Money $amount, PaymentToken $token): PaymentId;
+
+    /** @throws RefundFailedException */
+    public function refund(PaymentId $id, Money $amount): void;
+}
+
+// Adapter — v infrastruktuře (App\Payment\Infrastructure\Stripe)
+final class StripePaymentGateway implements PaymentGateway
+{
+    public function __construct(private readonly \Stripe\StripeClient $stripe) {}
+
+    public function charge(Money $amount, PaymentToken $token): PaymentId
+    {
+        try {
+            $charge = $this->stripe->charges->create([
+                'amount'   => $amount->amountInCents(),
+                'currency' => strtolower($amount->currency()->code()),
+                'source'   => $token->value(),
+            ]);
+            return PaymentId::fromString($charge->id);
+        } catch (\Stripe\Exception\CardException $e) {
+            throw new PaymentFailedException($e->getMessage(), previous: $e);
+        }
+    }
+
+    public function refund(PaymentId $id, Money $amount): void
+    {
+        $this->stripe->refunds->create([
+            'charge' => $id->toString(),
+            'amount' => $amount->amountInCents(),
+        ]);
+    }
+}
+</code></pre>
+    </div>
+
+    <p>
+        Doménový kód pracuje pouze s <code>PaymentGateway</code> rozhraním — nic neví
+        o Stripe. Výměna platební brány (Stripe → Adyen) vyžaduje pouze nový Adapter,
+        doménový kód se nemění.
+    </p>
+
+    </section>
+
+    {# ─── C4: Ubiquitous Language drift ──────────────────────────── #}
+    <section id="c4-language" aria-labelledby="c4-heading">
+    <h3 id="c4-heading">C4. Ubiquitous Language drift</h3>
+
+    <p>
+        <strong>Problém:</strong> Po šesti měsících vývoje kód mluví jiným jazykem než
+        doménový expert. V kódu je <code>Invoice</code>, zákazník říká „faktura",
+        účetní systém zná „Bill". Třída <code>Order</code> pokrývá pojmy, které
+        business rozděluje na „nabídku", „objednávku" a „smlouvu". Vývojáři si
+        přestávají být jisti, co třída modeluje.
+    </p>
+
+    <p>
+        <strong>Příčina:</strong> Ubiquitous Language není statický artefakt — vyvíjí se
+        s pochopením domény. Bez aktivní správy kód zaostává za aktuálním chápáním.
+    </p>
+
+    <p>
+        <strong>Opatření — čtyři praktiky:</strong>
+    </p>
+
+    <ol>
+        <li>
+            <strong>Doménový glosář v repozitáři</strong> (<code>docs/glossary.md</code>) —
+            živý dokument, kde každý pojem má definici, synonyma a odkaz na třídu v kódu.
+            Aktualizuje se při každém přejmenování.
+        </li>
+        <li>
+            <strong>Architecture Decision Records (ADR)</strong> — při každém záměrném
+            přejmenování konceptu zapište ADR s důvodem. Budoucí vývojář pochopí, proč
+            <code>Contract</code> nahradil <code>Order</code>.
+        </li>
+        <li>
+            <strong>Event Storming jako pravidelná aktivita</strong> — ne jednorázový workshop
+            na začátku projektu, ale čtvrtletní revize s doménovými experty.
+        </li>
+        <li>
+            <strong>Living documentation přes testy</strong> — BDD-style popis v testech
+            (<code>it_places_an_order_when_items_are_in_stock()</code>) tvoří čitelnou dokumentaci
+            aktuálního chování.
+        </li>
+    </ol>
+
+    </section>
+
+    </section>{# konec bloku C #}
+
     </article>
 {% endblock %}
 
