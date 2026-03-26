@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: 'Implementace v Symfony', url: '/implementace-v-symfony' },
         { label: 'CQRS', url: '/cqrs' },
         { label: 'Event Sourcing', url: '/event-sourcing' },
+        { label: 'Ságy a Process Managery', url: '/sagy-a-process-managery' },
         { label: 'Příklady', url: '/prakticke-priklady' },
         { label: 'Případová studie', url: '/pripadova-studie' },
         { label: 'Testování DDD', url: '/testovani-ddd' },
