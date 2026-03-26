@@ -120,6 +120,14 @@ class DddController extends AbstractController
         ]);
     }
 
+    #[Route('/ddd-v-praxi-kde-to-boli', name: 'ddd_pain_points')]
+    public function dddPainPoints(): Response
+    {
+        return $this->render('ddd/ddd_pain_points.html.twig', [
+            'title' => 'DDD v praxi — kde to bolí',
+        ]);
+    }
+
     #[Route('/anti-vzory', name: 'anti_patterns')]
     public function antiPatterns(): Response
     {
