@@ -1087,6 +1087,194 @@ final class StripePaymentGateway implements PaymentGateway
 
     </section>{# konec bloku C #}
 
+    {# ═══════════════════════════════════════════════════════════
+       BLOK D: Symfony-specifické třenice
+       ═══════════════════════════════════════════════════════════ #}
+    <section id="symfony" aria-labelledby="symfony-heading">
+    <h2 id="symfony-heading">D — Symfony-specifické třenice</h2>
+
+    <p>
+        Symfony je mocný framework, ale některé jeho konvence jsou navrženy pro CRUD aplikace.
+        Tato sekce popisuje tři místa, kde framework-first přístup koliduje s DDD.
+    </p>
+
+    {# ─── D1: Form vs Command ────────────────────────────────────── #}
+    <section id="d1-form" aria-labelledby="d1-heading">
+    <h3 id="d1-heading">D1. Symfony Form vs. Command</h3>
+
+    <p>
+        <strong>Problém:</strong> <code>FormType</code> ve Symfony chce mutable objekt,
+        který hydratuje daty z requestu. Application Command by naopak měl být immutable
+        DTO sestaven z validovaných dat. Tyto dva světy se obtížně kombinují bez toho,
+        aby <code>FormInterface</code> pronikl do aplikační vrstvy.
+    </p>
+
+    <p>
+        <strong>Řešení:</strong> Form mapuje na <strong>plain mutable DTO</strong>
+        (formulářový objekt), Application Service pak sestaví immutable Command.
+        Žádná ze dvou vrstev neví o existenci té druhé.
+    </p>
+
+    <pre><code class="language-php">// 1. Formulářový objekt — mutable, framework-friendly
+final class PlaceOrderFormData
+{
+    public string $customerId = '';
+    public array  $items      = [];
+}
+
+// 2. FormType pracuje s formulářovým objektem
+$form = $this->createForm(PlaceOrderType::class, new PlaceOrderFormData());
+$form->handleRequest($request);
+
+if ($form->isSubmitted() && $form->isValid()) {
+    /** @var PlaceOrderFormData $data */
+    $data = $form->getData();
+
+    // 3. Controller sestaví Command — immutable, doménově typovaný
+    $command = new PlaceOrderCommand(
+        customerId: CustomerId::fromString($data->customerId),
+        items: array_map(
+            fn($i) => new OrderItemDto($i['productId'], (int) $i['quantity']),
+            $data->items,
+        ),
+    );
+
+    $this->commandBus->dispatch($command);
+}</code></pre>
+
+    <p>
+        <code>PlaceOrderCommand</code> je readonly PHP class — doménový kód s ní pracuje
+        bez jakékoli závislosti na Symfony Form komponentě.
+    </p>
+
+    </section>
+
+    {# ─── D2: API Platform vs. agregáty ─────────────────────────── #}
+    <section id="d2-api-platform" aria-labelledby="d2-heading">
+    <h3 id="d2-heading">D2. API Platform vs. doménové agregáty</h3>
+
+    <p>
+        <strong>Problém:</strong> API Platform ve výchozím nastavení očekává přímý přístup
+        k Doctrine entitám — čte a zapisuje je pomocí vestavěných Provider a Processor.
+        Agregáty ale nechceme serializovat přímo (interní stav by pronikl do API)
+        ani nechat API Platform je modifikovat bez Application Service.
+    </p>
+
+    <p>
+        <strong>Řešení:</strong> Vystavte API Platform <strong>API Resource DTO</strong>
+        (ne agregát) a implementujte vlastní <code>StateProvider</code>
+        a <code>StateProcessor</code>, které fungují jako adaptéry k Application Services.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="d2-code-heading">
+        <h4 id="d2-code-heading">PHP: StateProcessor jako adapter k Application Service</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Infrastructure\ApiPlatform;
+
+use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\ProcessorInterface;
+use App\Ordering\Application\Command\PlaceOrderCommand;
+use App\Ordering\Application\Command\PlaceOrderCommandBus;
+
+// API resource DTO — nikdy agregát
+#[ApiResource(operations: [new Post(processor: PlaceOrderProcessor::class)])]
+final class OrderResource
+{
+    public string $customerId;
+    public array  $items;
+    // Pouze to, co API má vidět
+}
+
+// StateProcessor — tenká vrstva
+final class PlaceOrderProcessor implements ProcessorInterface
+{
+    public function __construct(private readonly PlaceOrderCommandBus $bus) {}
+
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): OrderResponse
+    {
+        /** @var OrderResource $data */
+        $command = new PlaceOrderCommand(
+            customerId: CustomerId::fromString($data->customerId),
+            items: $data->items,
+        );
+
+        $orderId = $this->bus->dispatch($command);
+
+        return new OrderResponse($orderId->toString());
+    }
+}
+</code></pre>
+    </div>
+
+    </section>
+
+    {# ─── D3: Security Voter vs. doménová oprávnění ──────────────── #}
+    <section id="d3-voter" aria-labelledby="d3-heading">
+    <h3 id="d3-heading">D3. Security Voter vs. doménová oprávnění</h3>
+
+    <p>
+        <strong>Problém:</strong> Business pravidla přístupu jsou součástí domény —
+        například „objednávku může zrušit zákazník nebo admin, ale pouze do 24 hodin
+        od vytvoření a pouze pokud ještě nebyla expedována." Symfony Security Voter
+        žije v infrastrukturní vrstvě a závisí na frameworku. Pokud logiku napíšete
+        přímo ve Voteru, stane se netestovatelnou bez Symfony kontejneru.
+    </p>
+
+    <p>
+        <strong>Řešení:</strong> Voter funguje jako <strong>tenký adaptér</strong>,
+        který deleguje rozhodnutí na doménovou metodu agregátu. Doménová metoda je
+        čistá funkce — testovatelná bez frameworku.
+    </p>
+
+    <div class="tip" role="note" aria-labelledby="d3-code-heading">
+        <h4 id="d3-code-heading">PHP: Voter jako tenký adaptér + doménová metoda</h4>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+// Doménová metoda v agregátu — testovatelná bez frameworku
+final class Order
+{
+    public function canBeCancelledBy(UserId $userId): bool
+    {
+        if ($this->status === OrderStatus::Shipped || $this->status === OrderStatus::Delivered) {
+            return false;
+        }
+        $withinWindow = $this->placedAt > new \DateTimeImmutable('-24 hours');
+
+        return $withinWindow && $this->customerId->equals($userId);
+    }
+}
+
+// Voter — pouze adaptér, žádná business logika
+final class OrderVoter extends Voter
+{
+    protected function supports(string $attribute, mixed $subject): bool
+    {
+        return $attribute === 'ORDER_CANCEL' && $subject instanceof Order;
+    }
+
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    {
+        $user = $token->getUser();
+        if (!$user instanceof SecurityUser) {
+            return false;
+        }
+
+        /** @var Order $subject */
+        return $subject->canBeCancelledBy(UserId::fromString($user->getId()));
+    }
+}
+</code></pre>
+    </div>
+
+    </section>
+
+    </section>{# konec bloku D #}
+
     </article>
 {% endblock %}
 
