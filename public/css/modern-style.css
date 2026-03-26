@@ -48,6 +48,9 @@ html::-webkit-scrollbar-thumb {
     border-radius: 3px;
 }
 html::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+html {
+    scroll-padding-top: calc(56px + 1rem); /* fixed topbar height + breathing room for anchor links */
+}
 
 body {
     font-family: var(--font-sans);
@@ -56,6 +59,11 @@ body {
     line-height: 1.85;
     margin: 0;
     padding: 0;
+}
+
+/* Anchor target offset for all elements with id */
+[id] {
+    scroll-margin-top: calc(56px + 1rem);
 }
 
 /* Typography */
@@ -67,7 +75,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
     font-weight: 700;
     letter-spacing: 0.01em;
-    scroll-margin-top: calc(56px + 1rem); /* fixed topbar height + breathing room */
 }
 
 h1 { font-size: 2.2rem; border-bottom: 2px solid var(--color-primary); padding-bottom: 0.5rem; }
