@@ -1,0 +1,277 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Kdy DDD nepoužívat — upřímně | DDD Symfony{% endblock %}
+
+{% block meta_description %}7 konkrétních situací, kdy DDD nepoužívat — s alternativami. Upřímný průvodce pro PHP vývojáře, kteří nechtějí zavádět zbytečnou komplexitu.{% endblock %}
+
+{% block meta_keywords %}kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Kdy DDD nepoužívat — upřímně",
+  "description": "{{ block('meta_description') }}",
+  "keywords": "{{ block('meta_keywords') }}",
+  "author": {
+    "@type": "Person",
+    "name": "Michal Katuščák"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Michal Katuščák"
+  },
+  "datePublished": "2026-03-26",
+  "dateModified": "2026-03-26",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block body %}
+<article itemscope itemtype="https://schema.org/TechArticle">
+    <h1 itemprop="headline">Kdy DDD nepoužívat — upřímně</h1>
+
+    <p>
+        DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
+        zpomaluje vývoj a frustruje tým — aniž by přinesla cokoliv hodnotného.
+        Tato kapitola říká přímo, kdy DDD vynechat, a co místo toho použít.
+    </p>
+
+    <p>
+        Každý průvodce, který DDD jen propaguje, ti lže. Tohle je jiný průvodce.
+    </p>
+
+    <nav class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
+        <p id="toc-heading">Obsah kapitoly:</p>
+        <ul>
+            <li><a href="#crud-admin">1. CRUD admin a jednoduchý backoffice</a></li>
+            <li><a href="#startup">2. Startup — doména se mění každý sprint</a></li>
+            <li><a href="#small-team">3. Malý tým bez doménových expertů</a></li>
+            <li><a href="#data-pipeline">4. Data pipeline, ETL a reportovací systémy</a></li>
+            <li><a href="#short-lived">5. Projekt s životností kratší než rok</a></li>
+            <li><a href="#no-knowledge">6. Tým DDD nezná a čas na učení není</a></li>
+            <li><a href="#unclear-domain">7. Doména je nejasná, experti nejsou k dispozici</a></li>
+            <li><a href="#when-ddd-fits">Kdy DDD naopak smysl má</a></li>
+        </ul>
+    </nav>
+
+    <section id="crud-admin" aria-labelledby="crud-admin-heading">
+        <h2 id="crud-admin-heading">1. CRUD admin a jednoduchý backoffice</h2>
+
+        <p>
+            Máš aplikaci, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuje 1:1 na tabulku.
+            Žádná doménová logika — jen persistence.
+        </p>
+
+        <p>
+            DDD tady přidá agregáty, repozitáře, doménové události a value objekty pro věci,
+            které jsou přirozeně jenom řádky v databázi. Výsledek: 5× více kódu, žádná přidaná hodnota.
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li><strong>EasyAdmin</strong> — pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
+                <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> — pro jednoduchý CRUD bez business logiky.</li>
+            </ul>
+            Doménový model zavádíš tehdy, když máš doménu. CRUD admin doménu nemá.
+        </div>
+    </section>
+
+    <section id="startup" aria-labelledby="startup-heading">
+        <h2 id="startup-heading">2. Startup — doména se mění každý sprint</h2>
+
+        <p>
+            Hledáte product-market fit. Co dnes je objednávka, zítra je subscription. Co dnes je
+            zákazník, zítra je partner. Ubiquitous Language nemůžeš vybudovat, když doménový model
+            ještě neexistuje.
+        </p>
+
+        <p>
+            DDD předpokládá, že doménu rozumíš dost dobře na to, abys ji modeloval. Ve fázi hledání
+            to neplatí. Každý refaktoring agregátů a bounded contextů tě zpomaluje — a jedeš sprint
+            kvůli kódu, ne kvůli zákazníkům.
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li><strong>Flat MVC s Doctrine Entities</strong> — rychlé iterace, změny jsou levné.</li>
+                <li>Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvaž zavedení DDD vzorů selektivně.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="small-team" aria-labelledby="small-team-heading">
+        <h2 id="small-team-heading">3. Malý tým bez doménových expertů</h2>
+
+        <p>
+            DDD stojí na spolupráci vývojářů s lidmi, kteří doméně rozumí — zákazníci, produktoví manažeři,
+            analytici. Bez nich modeluješ doménu sám, z hlavy, bez zpětné vazby.
+        </p>
+
+        <p>
+            Výsledkem je model, který odráží to, jak vývojář chápe doménu — ne jak funguje doména ve skutečnosti.
+            To je přesně opak toho, k čemu DDD slouží.
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) — dobře strukturovaný kód bez přílišné abstrakce.</li>
+                <li>DDD zaveď až ve chvíli, kdy máš přístup k doménovým expertům a čas na Event Storming.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="data-pipeline" aria-labelledby="data-pipeline-heading">
+        <h2 id="data-pipeline-heading">4. Data pipeline, ETL a reportovací systémy</h2>
+
+        <p>
+            Načítáš data z externích zdrojů, transformuješ je a ukládáš nebo reportuješ.
+            Žádné business rules, žádné invarianty, žádná doménová logika.
+            Je to přesun a transformace dat — ne modelování domény.
+        </p>
+
+        <p>
+            Agregáty chrání invarianty. Pokud žádné invarianty nemáš, agregáty nemáš k čemu potřebovat.
+            Přidáváš komplexitu bez důvodu.
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li><strong>Service layer s plain PHP objekty</strong> — jednoduché třídy pro transformaci, bez agregátů.</li>
+                <li><strong>Symfony Messenger</strong> pro asynchronní zpracování pipeline kroků — bez DDD overhead.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="short-lived" aria-labelledby="short-lived-heading">
+        <h2 id="short-lived-heading">5. Projekt s životností kratší než rok</h2>
+
+        <p>
+            Interní nástroj, landing page, jednorázová migrace, prototyp pro demo zákazníkovi.
+            Kód napíšeš, použiješ a zahodíš.
+        </p>
+
+        <p>
+            DDD investice se vrátí na projektech, které žijí roky a rostou. Na krátkodobých projektech
+            zaplatíš cenu DDD (čas, komplexita, learning curve) bez toho, aniž bys někdy sklidil
+            výhody (udržovatelnost, evolvability).
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li><strong>Prostý Symfony controller + Doctrine</strong> — nejkratší cesta od požadavku k funkčnímu kódu.</li>
+                <li>Pokud projekt nečekaně vyroste, refaktorovat z jednoduchého kódu na DDD je snazší než vysvětlovat, proč jednoduchý projekt má 40 tříd.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="no-knowledge" aria-labelledby="no-knowledge-heading">
+        <h2 id="no-knowledge-heading">6. Tým DDD nezná a čas na učení není</h2>
+
+        <p>
+            DDD vyžaduje, aby tým rozuměl konceptům — aggregates, bounded contexts, domain events,
+            repositories. Špatně pochopené DDD je horší než žádné DDD: produkuje pseudo-DDD kód,
+            který má přidanou komplexitu bez architektonických výhod.
+        </p>
+
+        <p>
+            „Naučíme se za pochodu" na produkčním projektu s deadlinem je recept na technický dluh,
+            který bude bolet roky.
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li>Klasická architektura, kterou tým zná dobře — srozumitelný kód je vždy lepší než „správná" architektura, které nikdo nerozumí.</li>
+                <li>DDD zaveď na vedlejším projektu nebo v části systému jako experiment. Pak přenášej zkušenosti postupně.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="unclear-domain" aria-labelledby="unclear-domain-heading">
+        <h2 id="unclear-domain-heading">7. Doména je nejasná, experti nejsou k dispozici</h2>
+
+        <p>
+            Zákazník neví, co chce. Požadavky jsou vágní. Doménový expert buď neexistuje, nebo
+            nemá čas spolupracovat. Modeluješ ve tmě.
+        </p>
+
+        <p>
+            DDD bez znalosti domény je jen přejmenování tříd. „Order", „Customer", „Product" —
+            vypadá to jako DDD, ale model neodráží skutečnou doménu. Za rok, až doménu pochopíš,
+            přepíšeš stejně všechno.
+        </p>
+
+        <div class="note" role="note">
+            <strong>Použij místo toho:</strong>
+            <ul>
+                <li><strong>Event Storming napřed</strong> — než napíšeš první řádek kódu, zmapuj doménu se stakeholdery. Bez toho neví DDD co modelovat.</li>
+                <li>Pokud Event Storming není možný, začni s jednoduchým kódem a DDD zaveď retrospektivně, až doménu pochopíš.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="when-ddd-fits" aria-labelledby="when-ddd-fits-heading">
+        <h2 id="when-ddd-fits-heading">Kdy DDD naopak smysl má</h2>
+
+        <p>
+            DDD není špatná architektura. Je to architektura pro specifický kontext. Smysl má, když platí
+            <strong>většina</strong> z těchto podmínek:
+        </p>
+
+        <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Podmínka</th>
+                    <th>Proč záleží</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Komplexní doménová logika (ne jen CRUD)</td>
+                    <td>DDD chrání invarianty a modeluje pravidla — bez pravidel nemá co chránit</td>
+                </tr>
+                <tr>
+                    <td>Projekt bude žít a růst roky</td>
+                    <td>Investice do architektury se vrátí jen při dostatečném horizontu</td>
+                </tr>
+                <tr>
+                    <td>Přístup k doménovým expertům</td>
+                    <td>Ubiquitous Language a model se tvoří ve spolupráci — ne ze vzduchuprázdna</td>
+                </tr>
+                <tr>
+                    <td>Tým rozumí DDD nebo má čas se učit</td>
+                    <td>Špatně implementované DDD je horší než žádné DDD</td>
+                </tr>
+                <tr>
+                    <td>Více bounded contexts nebo mikroslužby</td>
+                    <td>DDD dává přirozené hranice pro dekompozici systému</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <p>
+            Pokud tvůj projekt splňuje tyto podmínky, DDD se vyplatí. Pokud ne — použij jednodušší
+            přístup a ušetři si bolest.
+        </p>
+
+        <p>
+            Detailní implementaci DDD v Symfony najdeš v <a href="{{ path('implementation_in_symfony') }}">implementační kapitole</a>.
+            Reálné problémy při zavádění DDD popisuje kapitola <a href="{{ path('ddd_pain_points') }}">DDD v praxi — kde to bolí</a>.
+        </p>
+    </section>
+
+</article>
+{% endblock %}
