@@ -1,0 +1,34 @@
+@startuml saga_state_machine
+!theme plain
+skinparam backgroundColor transparent
+skinparam defaultFontName "Nunito"
+skinparam state {
+    BackgroundColor #1a1a2e
+    BorderColor #6c63ff
+    FontColor #e0e0e0
+    ArrowColor #a0a0c0
+}
+
+title Stavový automat OrderProcessManager
+
+[*] --> AwaitingPayment : OrderPlaced
+
+AwaitingPayment --> AwaitingStockReservation : PaymentSucceeded
+AwaitingPayment --> Failed : PaymentFailed
+
+AwaitingStockReservation --> AwaitingShipment : StockReserved
+AwaitingStockReservation --> Compensating : StockReservationFailed
+
+AwaitingShipment --> Completed : ShipmentCreated
+
+Compensating --> Failed : kompenzace dokončena
+
+Completed --> [*]
+Failed --> [*]
+
+note right of Compensating
+  RefundCustomer
+  CancelOrder
+end note
+
+@enduml

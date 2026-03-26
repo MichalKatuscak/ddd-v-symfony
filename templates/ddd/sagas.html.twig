@@ -36,6 +36,15 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">Ságy a Process Managery</h1>
 
+    <p>
+        V předchozí kapitole jsme se zabývali
+        <a href="{{ path('event_sourcing') }}">Event Sourcingem</a> — vzorem persistence,
+        který ukládá stav jako sekvenci neměnných událostí. Ságy na tento koncept přirozeně
+        navazují: zatímco Event Sourcing řeší persistenci uvnitř jednoho agregátu, ságy
+        koordinují procesy <strong>napříč více agregáty a Bounded Contexts</strong>, které
+        spolu komunikují právě prostřednictvím doménových událostí.
+    </p>
+
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
         <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
@@ -490,6 +499,15 @@ framework:
         viditelný kompletní tok od <code>OrderPlaced</code> po <code>ConfirmOrder</code>.
     </p>
 
+    <p>
+        Následující diagram zobrazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
+        přechody, červené selhání a oranžová cesta vede přes kompenzaci:
+    </p>
+
+    <div class="diagram-container" role="img" aria-label="Stavový automat OrderProcessManager — 6 stavů, přechody řízené doménovými událostmi">
+        {% include 'diagrams/8_sagas/saga_state_machine.svg' %}
+    </div>
+
     <div class="tip" role="note" aria-labelledby="saga-status-heading">
         <h3 id="saga-status-heading">PHP: Enum OrderSagaStatus</h3>
         <pre><code class="language-php">&lt;?php
@@ -541,7 +559,7 @@ final class OrderProcessManager
 {
     public function __construct(
         private readonly MessageBusInterface $commandBus,
-        private readonly SagaStateRepository $sagaStateRepository,
+        private readonly SagaStateRepositoryInterface $sagaStateRepository,
     ) {}
 
     public function __invoke(
@@ -803,8 +821,31 @@ class SagaState
 }</code></pre>
     </div>
 
+    <div class="tip" role="note" aria-labelledby="saga-state-repo-interface-heading">
+        <h3 id="saga-state-repo-interface-heading">PHP: Rozhraní SagaStateRepositoryInterface</h3>
+        <pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Saga;
+
+/**
+ * Rozhraní repozitáře stavu ságy — umožňuje snadnou záměnu
+ * implementace (Doctrine v produkci, in-memory v testech).
+ */
+interface SagaStateRepositoryInterface
+{
+    public function save(SagaState $state): void;
+
+    public function findByCorrelationId(string $correlationId): SagaState;
+
+    /** @return list&lt;SagaState&gt; */
+    public function findStale(\DateTimeImmutable $olderThan): array;
+}</code></pre>
+    </div>
+
     <div class="tip" role="note" aria-labelledby="saga-state-repository-heading">
-        <h3 id="saga-state-repository-heading">PHP: SagaStateRepository</h3>
+        <h3 id="saga-state-repository-heading">PHP: Doctrine implementace SagaStateRepository</h3>
         <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -813,7 +854,7 @@ namespace App\Ordering\Application\Saga;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-readonly class SagaStateRepository
+final readonly class SagaStateRepository implements SagaStateRepositoryInterface
 {
     public function __construct(
         private EntityManagerInterface $em,
@@ -887,9 +928,12 @@ readonly class SagaStateRepository
     <p>
         Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu ságy. Nyní
         propojíme obě části s <strong>Symfony Messenger</strong> — asynchronním message busem,
-        který zajistí spolehlivé doručování událostí a příkazů mezi kontexty. Klíčem je správná
-        konfigurace dvou busů (<code>command.bus</code> a <code>event.bus</code>), dvou
-        asynchronních transportů a explicitní routing každé zprávy.
+        který zajistí spolehlivé doručování událostí a příkazů mezi kontexty.
+        Základní konfigurace Messenger busů je popsána v kapitole
+        <a href="{{ path('cqrs') }}#symfony-messenger">CQRS — Symfony Messenger</a>; zde se
+        zaměříme na specifika pro ságy: <strong>oddělené transporty</strong> pro události
+        a příkazy a <strong>retry strategie</strong> kritické pro spolehlivost dlouhotrvajících
+        procesů.
     </p>
 
     <div class="tip" role="note" aria-labelledby="messenger-yaml-heading">
@@ -978,6 +1022,26 @@ final readonly class OrderPlaced
         </p>
     </div>
 
+    <div class="warning" role="alert" aria-labelledby="outbox-pattern-heading">
+        <h3 id="outbox-pattern-heading">Pozor na ztrátu zpráv: Outbox pattern</h3>
+        <p>
+            Výše uvedená konfigurace předpokládá, že doménová událost se spolehlivě dostane do
+            message brokeru. V praxi to však není samozřejmé: agregát uloží změny do databáze
+            (Doctrine flush), ale dispatch události do fronty může selhat — síťový výpadek,
+            pád workeru mezi flush a dispatch, restart aplikace. Výsledkem je „ztracená" událost
+            a sága, která se nikdy nespustí.
+        </p>
+        <p>
+            Řešením je <strong>Outbox pattern</strong>: událost se zapíše do speciální tabulky
+            <code>outbox</code> v rámci stejné databázové transakce jako doménová změna. Samostatný
+            proces (relay/poller) pak události z outbox tabulky přenáší do message brokeru a po
+            úspěšném odeslání je označí jako zpracované. Tím je zaručeno, že žádná událost se
+            neztratí — a to i při selhání mezi kroky. Podrobněji viz kapitola
+            <a href="{{ path('event_sourcing') }}">Event Sourcing</a>, kde je Outbox pattern
+            popsán v kontextu event store.
+        </p>
+    </div>
+
     <p>
         Podrobnější informace o asynchronním zpracování zpráv, konfiguraci transportů a retry
         strategiích najdete v kapitole <a href="{{ path('cqrs') }}#async">CQRS — asynchronní
@@ -1038,7 +1102,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class CheckSagaTimeoutHandler
 {
     public function __construct(
-        private SagaStateRepository $sagaStateRepository,
+        private SagaStateRepositoryInterface $sagaStateRepository,
         private MessageBusInterface $commandBus,
     ) {}
 
@@ -1425,7 +1489,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class CheckStaleSagasCommand extends Command
 {
     public function __construct(
-        private readonly SagaStateRepository $sagaStateRepository,
+        private readonly SagaStateRepositoryInterface $sagaStateRepository,
     ) {
         parent::__construct();
     }
@@ -1603,14 +1667,12 @@ declare(strict_types=1);
 namespace App\Tests\Ordering\Application\Saga;
 
 use App\Ordering\Application\Saga\SagaState;
-use App\Ordering\Application\Saga\SagaStateRepository;
+use App\Ordering\Application\Saga\SagaStateRepositoryInterface;
 
-final class InMemorySagaStateRepository extends SagaStateRepository
+final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
 {
     /** @var array&lt;string, SagaState&gt; */
     private array $states = [];
-
-    public function __construct() {}
 
     public function save(SagaState $state): void
     {
