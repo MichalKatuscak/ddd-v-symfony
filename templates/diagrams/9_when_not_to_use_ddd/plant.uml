@@ -1,0 +1,53 @@
+@startuml
+!theme plain
+skinparam backgroundColor transparent
+skinparam defaultFontName "Nunito"
+skinparam defaultFontSize 14
+skinparam ArrowColor #6366f1
+skinparam ActivityBackgroundColor #1e1b4b
+skinparam ActivityBorderColor #6366f1
+skinparam ActivityFontColor #e0e7ff
+skinparam ActivityDiamondBackgroundColor #312e81
+skinparam ActivityDiamondBorderColor #818cf8
+skinparam ActivityDiamondFontColor #e0e7ff
+skinparam ActivityEndColor #059669
+
+title Rozhodovaci strom: Mam pouzit DDD?
+
+start
+:Novy projekt / architektonicke rozhodnuti;
+
+if (Komplexni domenova logika?\n(ne jen CRUD)) then (ne)
+  #7c3aed:DDD nepotrebujes\n-> EasyAdmin / Flat MVC;
+  stop
+else (ano)
+endif
+
+if (Projekt bude zit > 1 rok?) then (ne)
+  #7c3aed:DDD se nevyplati\n-> Symfony Controller + Doctrine;
+  stop
+else (ano)
+endif
+
+if (Pristup k domenovym\nexpertum?) then (ne)
+  #7c3aed:DDD bez expertu = hadani\n-> Vrstvena architektura;
+  stop
+else (ano)
+endif
+
+if (Tym zna DDD\nnebo ma cas se ucit?) then (ne)
+  #7c3aed:Pseudo-DDD je horsi\nnez zadne DDD\n-> Architektura, kterou tym zna;
+  stop
+else (ano)
+endif
+
+if (Domena je stabilni?\n(ne pivot kazdy sprint)) then (ne)
+  #7c3aed:Pockej na stabilizaci\n-> Flat MVC, DDD pozdeji;
+  stop
+else (ano)
+endif
+
+#059669:DDD dava smysl\n-> Strategicky i takticky design;
+stop
+
+@enduml
