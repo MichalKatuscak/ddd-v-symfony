@@ -89,7 +89,7 @@
     <h2 id="proc-sagy-heading">Proč potřebujeme ságy?</h2>
 
     <p>
-        Představte si typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
+        Jako ilustrativní příklad slouží typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
         napříč odlišnými <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>:
     </p>
 
@@ -138,7 +138,7 @@
     </div>
 
     <p>
-        Zamysleme se nad konkrétním scénářem selhání: systém úspěšně strhne platbu zákazníkovi
+        Pro ilustraci uvažujme o scénáři selhání: systém úspěšně strhne platbu zákazníkovi
         (krok 2), ale při rezervaci skladu zjistí, že zboží není dostupné (krok 3 selže).
         Zákazník přišel o peníze, zboží nemá a systém je v <strong>nekonzistentním stavu</strong>.
         Bez mechanismu, který by tento stav detekoval a napravil, zůstane zákazník bez peněz

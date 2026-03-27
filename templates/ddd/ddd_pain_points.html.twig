@@ -47,8 +47,8 @@
         <a href="{{ path('cqrs') }}">CQRS</a> a
         <a href="{{ path('event_sourcing') }}">Event Sourcing</a> až po
         <a href="{{ path('sagas') }}">Ságy a Process Managery</a>.
-        Teorie je přehledná. Implementace ale přináší třecí plochy, na které standardní DDD literatura
-        většinou neupozorňuje - místa, kde se architektonické ideály střetávají s realitou frameworku,
+        V praxi se implementace DDD střetává s řadou problémů, na které standardní DDD literatura
+        většinou neupozorňuje - míst, kde se architektonické principy střetávají s realitou frameworku,
         databáze, asynchronní infrastruktury nebo týmové dynamiky.
     </p>
 
@@ -1422,7 +1422,7 @@ final class OrderVoter extends Voter
     <p>
         <strong>Taktika:</strong> Nezačínejte argumentem „naše kód je špatný."
         Začněte konkrétní business bolestí: „Přidání nového způsobu platby trvá 3 týdny
-        a vždy způsobí regression v objednávkovém modulu. Tady je proč a jak to opravit."
+        a vždy způsobí regression v objednávkovém modulu. Níže je uvedena příčina a způsob řešení."
     </p>
 
     </section>

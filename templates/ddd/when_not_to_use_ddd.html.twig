@@ -49,8 +49,9 @@
 
     <p>
         Předchozí kapitola ukázala <a href="{{ path('ddd_pain_points') }}">kde DDD v praxi bolí</a>,
-        i když je nasazeno správně. Tady jdeme dál - do situací, kde DDD nasazovat vůbec nemáte.
-        Každý průvodce, který DDD jen propaguje, ti lže. Tohle je jiný průvodce.
+        i když je nasazeno správně. Tato kapitola rozšiřuje analýzu o situace, kde DDD nasazovat vůbec
+        není vhodné. Na rozdíl od materiálů, které DDD prezentují výhradně jako přínosný přístup,
+        přináší tato kapitola vyvážené hodnocení jeho omezení a nevhodných kontextů použití.
     </p>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
@@ -89,7 +90,7 @@
         </div>
 
         <p>
-            Každá z těchto pěti bran odpovídá jedné nebo více sekcím níže. Pojďme na ně podrobně.
+            Každá z těchto pěti bran odpovídá jedné nebo více sekcím níže, které jsou podrobně popsány v dalším textu.
         </p>
     </section>
 
@@ -179,7 +180,7 @@ class ArticleCrudController extends AbstractCrudController
                 <li><strong>EasyAdmin</strong> - pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
                 <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> - pro jednoduchý CRUD bez business logiky.</li>
             </ul>
-            Doménový model zavádíš tehdy, když máš doménu. CRUD admin doménu nemá.
+            Doménový model zavádíte tehdy, když máte doménu. CRUD admin doménu nemá.
             Martin Fowler tento anti-pattern pojmenoval
             <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Anemic Domain Model</a>
             - model, který vypadá jako DDD, ale neobsahuje žádné chování.
@@ -199,9 +200,9 @@ class ArticleCrudController extends AbstractCrudController
         </p>
 
         <p>
-            DDD předpokládá, že doménu rozumíš dost dobře na to, abys ji modeloval. Ve fázi hledání
+            DDD předpokládá, že doméně rozumíte dost dobře na to, abyste ji modelovali. Ve fázi hledání
             to neplatí. Každý refaktoring agregátů a <a href="{{ path('basic_concepts') }}">bounded contextů</a>
-            tě zpomaluje - a jedeš sprint kvůli kódu, ne kvůli zákazníkům.
+            vás zpomaluje a vývojové iterace se soustředí na kódovou architekturu namísto na hodnotu pro zákazníka.
         </p>
 
         <p>
@@ -252,8 +253,8 @@ class Order {
             <strong>Použij místo toho:</strong>
             <ul>
                 <li><strong>Flat MVC s Doctrine Entities</strong> - rychlé iterace, změny jsou levné.</li>
-                <li>Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvaž zavedení DDD vzorů selektivně - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
-                <li>Strategické DDD (Event Storming, Context Mapping) ale klidně začni hned - pomůže ti rychleji pochopit doménu.</li>
+                <li>Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
+                <li>Strategické nástroje DDD (Event Storming, Context Mapping) je vhodné zavést od začátku - pomáhají rychleji porozumět doméně.</li>
             </ul>
         </div>
     </section>
@@ -266,7 +267,7 @@ class Order {
 
         <p>
             DDD stojí na spolupráci vývojářů s lidmi, kteří doméně rozumí - zákazníci, produktoví manažeři,
-            analytici. Bez nich modeluješ doménu sám, z hlavy, bez zpětné vazby.
+            analytici. Bez nich modelujete doménu sami, z hlavy, bez zpětné vazby.
         </p>
 
         <p>
@@ -276,16 +277,16 @@ class Order {
         </p>
 
         <p>
-            <strong>Zásadní rozdíl oproti bodu 7:</strong> Tady doménové experty nemáš v týmu (malý tým = vývojáři
+            <strong>Zásadní rozdíl oproti bodu 7:</strong> Zde doménové experty nemáte v týmu (malý tým = vývojáři
             dělají všechno). V bodě 7 experti existují, ale doména samotná je nejasná - nikdo neví, co modelovat.
-            Řešení je odlišné: tady potřebuješ lidi, tam potřebuješ znalosti.
+            Řešení je odlišné: tady potřebujete lidi, tam potřebujete znalosti.
         </p>
 
         <div class="note" role="note">
             <strong>Použij místo toho:</strong>
             <ul>
                 <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) - dobře strukturovaný kód bez přílišné abstrakce.</li>
-                <li>DDD zaveď až ve chvíli, kdy máš přístup k doménovým expertům a čas na <a href="{{ path('basic_concepts') }}">Event Storming</a>.</li>
+                <li>DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na <a href="{{ path('basic_concepts') }}">Event Storming</a>.</li>
             </ul>
         </div>
     </section>
@@ -303,7 +304,7 @@ class Order {
         </p>
 
         <p>
-            Agregáty chrání invarianty. Pokud žádné invarianty nemáš, agregáty nemáš k čemu potřebovat.
+            Agregáty chrání invarianty. Pokud žádné invarianty nemáte, agregáty nemáte k čemu potřebovat.
             Přidáváš komplexitu bez důvodu. Jak píše Evans: agregát je
             <em>cluster of associated objects that we treat as a unit for the purpose of data changes</em>
             - klíčové slovo je „data changes" s business pravidly, ne „data transfer".
@@ -326,7 +327,7 @@ class Order {
 
         <p>
             Interní nástroj, landing page, jednorázová migrace, prototyp pro demo zákazníkovi.
-            Kód napíšeš, použiješ a zahodíš.
+            Kód napíšete, použijete a zahodíte.
         </p>
 
         <p>
@@ -349,7 +350,7 @@ class Order {
             <strong>Použij místo toho:</strong>
             <ul>
                 <li><strong>Prostý Symfony controller + Doctrine</strong> - nejkratší cesta od požadavku k funkčnímu kódu.</li>
-                <li>Pokud projekt nečekaně vyroste, refaktorovat z jednoduchého kódu na DDD je snazší než vysvětlovat, proč jednoduchý projekt má 40 tříd. Postup najdeš v <a href="{{ path('migration_from_crud') }}">Migraci z CRUD</a>.</li>
+                <li>Pokud projekt nečekaně vyroste, refaktorovat z jednoduchého kódu na DDD je snazší než vysvětlovat, proč jednoduchý projekt má 40 tříd. Postup najdete v <a href="{{ path('migration_from_crud') }}">Migraci z CRUD</a>.</li>
             </ul>
         </div>
     </section>
@@ -441,23 +442,23 @@ final class Order
         </p>
 
         <p>
-            <strong>Zásadní rozdíl oproti bodu 3:</strong> V bodě 3 chybí lidé - máš malý tým bez přístupu
-            k expertům, ale doména může být jasná (pojišťovnictví, e-commerce...). Tady je problém v tom,
+            <strong>Zásadní rozdíl oproti bodu 3:</strong> V bodě 3 chybí lidé - máte malý tým bez přístupu
+            k expertům, ale doména může být jasná (pojišťovnictví, e-commerce...). Zde je problém v tom,
             že <strong>nikdo doménu nechápe</strong> - ani potenciální experti. Požadavky se teprve formují,
             pojmy nejsou ustálené, business pravidla se mění s každou schůzkou.
         </p>
 
         <p>
             DDD bez znalosti domény je jen přejmenování tříd. „Order", „Customer", „Product" -
-            vypadá to jako DDD, ale model neodráží skutečnou doménu. Za rok, až doménu pochopíš,
-            přepíšeš stejně všechno.
+            vypadá to jako DDD, ale model neodráží skutečnou doménu. Za rok, až doménu pochopíte,
+            přepíšete stejně všechno.
         </p>
 
         <div class="note" role="note">
             <strong>Použij místo toho:</strong>
             <ul>
-                <li><strong>Event Storming napřed</strong> - než napíšeš první řádek kódu, zmapuj doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
-                <li>Pokud Event Storming není možný, začni s jednoduchým kódem a DDD zaveď retrospektivně, až doménu pochopíš - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
+                <li><strong>Event Storming napřed</strong> - než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
+                <li>Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
             </ul>
         </div>
     </section>
@@ -513,14 +514,14 @@ final class Order
         </div>
 
         <p>
-            Pokud tvůj projekt splňuje tyto podmínky, DDD se vyplatí. Pokud ne - použij jednodušší
+            Pokud váš projekt splňuje tyto podmínky, DDD se vyplatí. Pokud ne - použijte jednodušší
             přístup a ušetři si bolest.
         </p>
 
         <p>
-            Detailní implementaci DDD v Symfony najdeš v <a href="{{ path('implementation_in_symfony') }}">implementační kapitole</a>.
+            Detailní implementaci DDD v Symfony najdete v <a href="{{ path('implementation_in_symfony') }}">implementační kapitole</a>.
             Reálné problémy při zavádění DDD popisuje kapitola <a href="{{ path('ddd_pain_points') }}">DDD v praxi - kde to bolí</a>.
-            Pokud ses rozhodl DDD zavést postupně v existujícím projektu, začni <a href="{{ path('migration_from_crud') }}">migrací z CRUD</a>.
+            Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte <a href="{{ path('migration_from_crud') }}">migrací z CRUD</a>.
         </p>
     </section>
 
