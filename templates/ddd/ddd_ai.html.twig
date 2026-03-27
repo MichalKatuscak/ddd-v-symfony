@@ -170,17 +170,18 @@
                 </tbody>
             </table>
             <p class="table-note">
-                <em>Zdroj: UnderstandingData.com, práce Nicka Tunea (O'Reilly Radar 2025). Data jsou
-                orientační — pocházejí z malého počtu projektů, nikoli z rozsáhlé randomizované studie.</em>
+                <em>Zdroj: UnderstandingData.com (James Phoenix, 2026). Data jsou orientační odhady
+                autora blogpostu — nepocházejí z kontrolované studie, nemají definovanou metodologii
+                ani vzorek. Uvádíme je jako ilustraci pozorovaného trendu, nikoliv jako vědecký důkaz.</em>
             </p>
         </div>
 
         <p>
             Nick Tune je jedním z nejvíce aktivních praktiků na průsečíku DDD a AI. V článku pro O'Reilly
-            Radar 2025 popisuje, jak použil Claude Code s knihovnou ts-morph k reverse engineeringu
-            softwarové architektury — automatické extrakci závislostí, hranic a invariantů z existující
-            codebase. Výsledkem jsou living docs: dokumenty, které žijí blízko kódu, jsou aktualizovány
-            při každé změně a slouží jako vstup pro AI agenty v dalším kole vývoje. Tune vidí DDD
+            Radar (2026) popisuje, jak použil Claude Code k reverse engineeringu softwarové architektury —
+            automatickému mapování end-to-end toků, závislostí a hranic v existující codebase.
+            V návazném článku pak ukazuje, jak lze pomocí knihovny ts-morph deterministicky extrahovat
+            architektonické vzory, které slouží jako vstup pro AI agenty. Tune vidí DDD
             bounded contexts jako přirozený rámec pro tento přístup — každý context má svůj kontext
             (ve smyslu CLAUDE.md nebo Cursor rules), svou terminologii a své invarianty. AI agent
             pracující uvnitř jednoho bounded contextu potřebuje znát méně — a tím dělá méně chyb.
@@ -198,8 +199,9 @@
 
         <p>
             Protiváhu tvoří data z GitClear z roku 2024, analyzovaná Visual Studio Magazine. Podle
-            tohoto výzkumu má AI generovaný kód o 41 % vyšší churn rate — kód je přepsán nebo smazán
-            v kratší době než kód psaný ručně. GitClear hovoří o kódu, který je „lokálně koherentní,
+            tohoto výzkumu se code churn — podíl řádků přepsaných nebo smazaných do dvou týdnů od
+            vytvoření — u AI generovaného kódu v roce 2024 přibližně zdvojnásobil oproti pre-AI
+            stavu z roku 2021. GitClear hovoří o kódu, který je „lokálně koherentní,
             ale architektonicky nekonzistentní": každý soubor nebo funkce může být syntakticky správná
             a pro svůj bezprostřední účel funkční, ale větší architektonické vzory — jako jsou hranice
             mezi moduly, zachování invariantů nebo konzistentní pojmenovávání napříč codebase — jsou
@@ -217,8 +219,8 @@
 
         <p>
             Kent Beck — autor TDD, autor Extreme Programming — se od začátku roku 2024 intenzivně
-            věnuje otázce, jak AI mění způsob programování. Jeho odpověď je provokativní: TDD se
-            v éře AI nestává zastaralým, ale stává se superschopností. Beck rozlišuje mezi dvěma módy:
+            věnuje otázce, jak AI mění způsob programování. Podle shrnutí v The Pragmatic Engineer
+            je TDD při práci s AI agenty obzvlášť cenné. Beck rozlišuje mezi dvěma módy:
             <em>augmented coding</em> — kdy vývojář používá AI jako asistenta a zachovává zodpovědnost
             za rozhodnutí — a <em>vibe coding</em> — kdy vývojář přijímá vše, co AI vygeneruje,
             bez porozumění a bez verifikace.
@@ -331,7 +333,7 @@
             Referenční implementace Microsoftu — eShopOnContainers — ilustruje toto rozlišení
             na praktickém příkladu. Modul <code>Ordering</code> používá plné taktické DDD:
             agregáty, doménové události, CQRS. Modul <code>Catalog</code> je prostý CRUD
-            s Doctrine Entities. Toto rozlišení není historická nehoda — je to záměrné rozhodnutí
+            s Entity Framework. Toto rozlišení není historická nehoda — je to záměrné rozhodnutí
             přiřadit komplexitu tam, kde leží doménová komplexita. S příchodem AI toto rozhodnutí
             nabývá nové dimenze: kde leží hranice mezi tím, co AI může autonomně rozhodovat,
             a kde musí platit explicitní doménová pravidla?
@@ -389,21 +391,20 @@
         </p>
 
         <p>
-            Akademický výzkum tuto praxi začíná zkoumat systematicky. Práce z konference
-            AWS KDD 2024 zkoumá, jak strukturované doménové znalosti zlepšují výkon LLM
-            na specializovaných úlohách. Preprint na arXiv z roku 2025 analyzuje, jak
-            různé přístupy k „context engineering" — přesně to, co DDD praktici provádějí
-            při psaní bounded context dokumentů — ovlivňují konzistenci a přesnost generovaného
-            kódu. Výsledky jsou předběžné, ale konzistentně ukazují, že strukturovaný,
-            explicitní kontext vede k lepším výsledkům než nestrukturovaný nebo implicitní.
+            Akademický výzkum tuto praxi začíná zkoumat systematicky. Preprint na arXiv
+            z roku 2026 (Wiegand et al.) zkoumá, jak generativní AI může částečně automatizovat
+            tvorbu doménových metamodelů v DDD — konkrétně generování doménově specifických
+            JSON objektů. Výsledky jsou předběžné, ale naznačují, že strukturovaný, explicitní
+            kontext vede k lepším výsledkům než nestrukturovaný nebo implicitní.
         </p>
 
         <p>
-            ThoughtWorks Technology Radar vol. 33 (2025) zařadil „AI-augmented architecture
-            discovery" do kategorie Trial — technika stojí za praktické zkoušení v produkčních
-            projektech, ale není ještě dostatečně prozkoušena pro plošné přijetí. ThoughtWorks
-            konkrétně zmiňuje kombinaci EventStorming, Context Mapping a AI asistentů jako
-            oblast s vysokým potenciálem pro architektonické rozhodování.
+            ThoughtWorks Technology Radar vol. 33 (listopad 2025) sice přímo nezmiňuje DDD
+            v kontextu AI, ale obsahuje několik relevantních blipů: „Using GenAI to understand
+            legacy codebases" v kategorii Adopt, „Context engineering" v kategorii Assess
+            a „Anchoring coding agents to a reference application" rovněž v Assess. Tyto
+            techniky sdílejí společný princip: čím přesnější kontext AI dostane, tím lepší
+            jsou její výstupy — princip, který je DDD bounded contextům vlastní.
         </p>
 
         <p>
@@ -441,13 +442,12 @@
         </p>
 
         <p>
-            Alberto Brandolini — autor EventStorming — se k AI vyjadřuje opatrně a záměrně.
-            Přes svou školící firmu Avanscoperta experimentuje s kombinací EventStorming
-            workshopů a AI asistentů: AI jako „scribe" (přepisuje výstupy workshopu do strukturované
-            podoby), AI jako „challenger" (navrhuje alternativní rozdělení domény), AI jako
-            „knowledge extractor" (hledá vzory v existující codebase). Brandolini vidí EventStorming
-            jako fundamentálně lidskou aktivitu — sdílené pochopení domény se buduje v konverzaci,
-            nikoli v promptu — ale AI může zlevnit části procesu, které jsou rutinní.
+            Alberto Brandolini — autor EventStorming — se k propojení AI a doménového modelování
+            veřejně vyjadřuje zdrženlivě. Vzdělávací firma Avanscoperta, kterou spoluzaložil,
+            nabízí workshopy zaměřené na AI-augmentované vývojové workflow (např. „The Agentic
+            Developer Workshop"), ale ty nejsou přímo zaměřené na kombinaci DDD a AI.
+            EventStorming zůstává v Brandoliniho pojetí fundamentálně lidskou aktivitou —
+            sdílené pochopení domény se buduje v konverzaci, nikoliv v promptu.
         </p>
 
         <p>
@@ -541,13 +541,12 @@
                     pečlivě verifikovat. Precizní jazyk redukuje entropii AI výstupu.
                 </li>
                 <li>
-                    <strong>Beck:</strong> TDD je superschopnost pro AI agenty — testy definují
-                    doménová pravidla, která AI nemůže zfalšovat.
+                    <strong>Beck:</strong> Augmented coding udržuje kvalitu kódu i s AI — testy
+                    definují doménová pravidla, která AI nemůže obejít.
                 </li>
                 <li>
-                    <strong>Tune:</strong> Bounded contexts snižují porušení architektonických hranic
-                    z 35 % na méně než 5 %. Living docs pro AI agenty jsou praktický výsledek DDD
-                    modelování.
+                    <strong>Tune:</strong> Living docs exportované z bounded contexts slouží jako
+                    kontext pro AI agenty — praktický výsledek DDD modelování.
                 </li>
                 <li>
                     <strong>DHH:</strong> Pro CRUD aplikace je DDD přesold. Konvence může být
@@ -639,8 +638,8 @@
                     <a href="https://www.thoughtworks.com/about-us/news/2025/thoughtworks-tech-radar-33-rapid-ai" target="_blank" rel="noopener noreferrer">
                         ThoughtWorks Tech Radar 33 — Rapid AI
                     </a>.
-                    Zařazení AI-augmented architecture discovery do kategorie Trial; doporučení kombinovat
-                    EventStorming a AI nástroje.
+                    Obsahuje blipy „Context engineering" (Assess), „Using GenAI to understand legacy
+                    codebases" (Adopt) a další AI-relevantní techniky.
                 </li>
             </ul>
 
@@ -655,20 +654,19 @@
                     zdroj dat v tabulce výše.
                 </li>
                 <li>
-                    <strong>arXiv 2025:</strong>
+                    <strong>Wiegand et al. — arXiv 2026:</strong>
                     <a href="https://arxiv.org/html/2601.20909" target="_blank" rel="noopener noreferrer">
-                        Context Engineering for LLM-Based Code Generation (arXiv, 2025)
+                        Leveraging Generative AI for Enhancing Domain-Driven Software Design
                     </a>.
-                    Preprint analyzující různé přístupy ke strukturování kontextu pro LLM v softwarovém
-                    inženýrství.
+                    Preprint zkoumající automatizaci tvorby doménových metamodelů pomocí generativní AI.
                 </li>
                 <li>
                     <strong>GitClear / Visual Studio Magazine:</strong>
                     <a href="https://visualstudiomagazine.com/articles/2024/01/25/copilot-research.aspx" target="_blank" rel="noopener noreferrer">
                         Coding on Copilot: 2023 Data Suggests Downward Pressure on Code Quality
                     </a>.
-                    Výzkum GitClear o 41% vyšším churn rate AI generovaného kódu; analýza architektonické
-                    nekonzistence lokálně koherentního kódu.
+                    Výzkum GitClear o zdvojnásobení code churn u AI generovaného kódu; analýza
+                    architektonické nekonzistence lokálně koherentního kódu.
                 </li>
             </ul>
         </div>
