@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1114px" preserveAspectRatio="none" style="width:240px;height:1114px;" version="1.1" viewBox="0 0 240 1114" width="240px" zoomAndPan="magnify"><defs><filter height="300%" id="f96q4pallvbsq" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[770389ab9df153645bc6ef28055eb2b5]
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1114px" preserveAspectRatio="none" style="width:240px;height:1114px;" version="1.1" viewBox="0 0 240 1114" width="240px" zoomAndPan="magnify"><defs><filter height="300%" id="f96q4pallvbsq" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[770389ab9df153645bc6ef28055eb2b5]
 entity A--><polygon fill="#FEFECE" filter="url(#f96q4pallvbsq)" points="20.5,18,30.5,8,203.5,8,203.5,76.8906,193.5,86.8906,20.5,86.8906,20.5,18" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="193.5" x2="202.5" y1="18" y2="9"/><line style="stroke: #000000; stroke-width: 1.5;" x1="20.5" x2="193.5" y1="18" y2="18"/><line style="stroke: #000000; stroke-width: 1.5;" x1="193.5" x2="193.5" y1="18" y2="86.8906"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="70" x="35.5" y="40.9951">Eric Evans</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="81" x="35.5" y="57.292">(Zakladatel)</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="143" x="35.5" y="73.5889">Silne pro-DDD-pro-AI</text><!--MD5=[b2d39259b6aeabc16b394deeb0238426]
 entity B--><polygon fill="#FEFECE" filter="url(#f96q4pallvbsq)" points="38.5,157,48.5,147,185.5,147,185.5,199.5938,175.5,209.5938,38.5,209.5938,38.5,157" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="175.5" x2="184.5" y1="157" y2="148"/><line style="stroke: #000000; stroke-width: 1.5;" x1="38.5" x2="175.5" y1="157" y2="157"/><line style="stroke: #000000; stroke-width: 1.5;" x1="175.5" x2="175.5" y1="157" y2="209.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="107" x="53.5" y="179.9951">Vaughn Vernon</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="106" x="53.5" y="196.292">Pro-DDD-pro-AI</text><!--MD5=[16fab723be418f7eaf2ea4bd895a8e51]
 entity C--><polygon fill="#FEFECE" filter="url(#f96q4pallvbsq)" points="20.5,280,30.5,270,203.5,270,203.5,338.8906,193.5,348.8906,20.5,348.8906,20.5,280" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #000000; stroke-width: 1.5;" x1="193.5" x2="202.5" y1="280" y2="271"/><line style="stroke: #000000; stroke-width: 1.5;" x1="20.5" x2="193.5" y1="280" y2="280"/><line style="stroke: #000000; stroke-width: 1.5;" x1="193.5" x2="193.5" y1="280" y2="348.8906"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="69" x="35.5" y="302.9951">Nick Tune</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="56" x="35.5" y="319.292">(Praktik)</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="143" x="35.5" y="335.5889">Silne pro-DDD-pro-AI</text><!--MD5=[118f42602524ad482f02b27ef22fc383]
@@ -15,37 +15,4 @@ link D to E--><path d="M112,472.03 C112,488.66 112,509.32 112,526.7 " fill="none
 link E to F--><path d="M112,595.03 C112,611.66 112,632.32 112,649.7 " fill="none" id="E-&gt;F" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="112,654.98,116,645.98,112,649.98,108,645.98,112,654.98" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[4f6d7b35ae0bf2a4ce9e8c5091641647]
 link F to G--><path d="M112,718.03 C112,734.66 112,755.32 112,772.7 " fill="none" id="F-&gt;G" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="112,777.98,116,768.98,112,772.98,108,768.98,112,777.98" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[ce77ec9f82fbfc6e257d1b6e5dac829e]
 link G to H--><path d="M112,841.03 C112,857.66 112,878.32 112,895.7 " fill="none" id="G-&gt;H" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="112,900.98,116,891.98,112,895.98,108,891.98,112,900.98" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[7d7dacdd86ed224e8851a13334be42fd]
-link H to I--><path d="M112,964.07 C112,980.42 112,1000.82 112,1018.81 " fill="none" id="H-&gt;I" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="112,1023.82,116,1014.82,112,1018.82,108,1014.82,112,1023.82" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[49d54d8ecbc4e9916dfab3cdfe1728a4]
-@startuml
-
-node "Eric Evans\n(Zakladatel)\nSilne pro-DDD-pro-AI" as A
-node "Vaughn Vernon\nPro-DDD-pro-AI" as B
-node "Nick Tune\n(Praktik)\nSilne pro-DDD-pro-AI" as C
-node "Kent Beck\nPro strukturovany design" as D
-node "Martin Fowler\nNuancovane pro-DDD" as E
-node "Microsoft\nImplicitne pro-DDD" as F
-node "Alberto Brandolini\nOpatrne zapojuje AI" as G
-node "Sam Newman\nBez primcho vyjadren" as H
-node "DHH\n(Protivaha)\nJednoduchost staci" as I
-
-A - -> B
-B - -> C
-C - -> D
-D - -> E
-E - -> F
-F - -> G
-G - -> H
-H - -> I
-
-@enduml
-
-PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
-(GPL source distribution)
-Java Runtime: OpenJDK Runtime Environment
-JVM: OpenJDK 64-Bit Server VM
-Java Version: 21.0.10+7-Debian-1deb13u1
-Operating System: Linux
-Default Encoding: UTF-8
-Language: cs
-Country: CZ
---></g></svg>
+link H to I--><path d="M112,964.07 C112,980.42 112,1000.82 112,1018.81 " fill="none" id="H-&gt;I" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="112,1023.82,116,1014.82,112,1018.82,108,1014.82,112,1023.82" style="stroke: #A80036; stroke-width: 1.0;"/>--></g></svg>
