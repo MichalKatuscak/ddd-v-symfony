@@ -181,10 +181,10 @@ li { margin-bottom: 0.35rem; }
     font-size: 0.95em;
 }
 
-.note h2::before, .note h3::before, .note h4::before { content: "\2139"; color: var(--color-accent); }
-.tip h2::before, .tip h3::before, .tip h4::before { content: "\25BA"; color: #22c55e; }
-.warning h2::before, .warning h3::before, .warning h4::before { content: "\26A0"; color: #f59e0b; }
-.caution h2::before, .caution h3::before, .caution h4::before { content: "\26D4"; color: #ef4444; }
+.note h2::before, .note h3::before, .note h4::before { content: "\2139" / ""; color: var(--color-accent); }
+.tip h2::before, .tip h3::before, .tip h4::before { content: "\25BA" / ""; color: #22c55e; }
+.warning h2::before, .warning h3::before, .warning h4::before { content: "\26A0" / ""; color: #f59e0b; }
+.caution h2::before, .caution h3::before, .caution h4::before { content: "\26D4" / ""; color: #ef4444; }
 
 .note    { border-left: 4px solid var(--color-accent); }
 .tip     { border-left: 4px solid #22c55e; }
