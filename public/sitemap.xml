@@ -54,4 +54,10 @@
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/o-autorovi</loc>
+        <lastmod>2025-04-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
 </urlset>
