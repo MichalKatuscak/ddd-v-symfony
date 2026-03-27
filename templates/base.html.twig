@@ -124,6 +124,9 @@
                     <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'glossary' %}active{% endif %}" href="{{ path('glossary') }}">Glosář</a>
                     </li>
+                    <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'about' %}active{% endif %}" href="{{ path('about') }}">O autorovi</a>
+                    </li>
                 </ul>
             </nav>
         </aside>
