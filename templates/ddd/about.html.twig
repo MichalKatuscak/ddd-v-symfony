@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}O autorovi — Michal Katuščák | DDD Symfony{% endblock %}
+
+{% block meta_description %}Michal Katuščák — PHP/React vývojář s 13+ lety komerčního vývoje. Autor průvodce DDD v Symfony 8.{% endblock %}
+
+{% block meta_keywords %}Michal Katuščák, PHP vývojář, Symfony, DDD průvodce, autor{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "mainEntity": {
+        "@type": "Person",
+        "name": "Michal Katuščák",
+        "url": "https://www.katuscak.cz/",
+        "jobTitle": "PHP/React vývojář",
+        "description": "PHP/React vývojář s 13+ lety komerčního vývoje. Autor průvodce DDD v Symfony 8.",
+        "image": "{{ app.request.schemeAndHttpHost }}/img/author.webp",
+        "sameAs": [
+            "https://blog.katuscak.cz/",
+            "https://www.linkedin.com/in/michal-katu%C5%A1%C4%8D%C3%A1k-04a249184/"
+        ]
+    },
+    "url": "{{ app.request.schemeAndHttpHost }}/o-autorovi"
+}
+</script>
+{% endblock %}
+
+{% block body %}
+<article class="about-page" itemscope itemtype="https://schema.org/ProfilePage">
+    <h1>O autorovi</h1>
+
+    <div class="author-bio author-bio--large">
+        <img
+            src="{{ asset('img/author.webp') }}"
+            alt="Michal Katuščák — PHP/React vývojář"
+            class="author-bio__photo author-bio__photo--large"
+            width="160"
+            height="160"
+            loading="lazy"
+        >
+        <div class="author-bio__content">
+            <p class="author-bio__name" itemprop="name">Michal Katuščák</p>
+            <p class="author-bio__role">PHP/React vývojář · České Budějovice</p>
+            <div class="author-bio__links">
+                <a href="https://www.katuscak.cz/" target="_blank" rel="noopener">katuscak.cz</a>
+                <a href="https://blog.katuscak.cz/" target="_blank" rel="noopener">blog.katuscak.cz</a>
+                <a href="https://www.linkedin.com/in/michal-katu%C5%A1%C4%8D%C3%A1k-04a249184/" target="_blank" rel="noopener">LinkedIn</a>
+            </div>
+        </div>
+    </div>
+
+    <h2>Komerční zkušenosti</h2>
+    <p>13+ let vývoje webových aplikací. 6 let jako zaměstnanec (interní systémy, CRM, e-shopy), od 2019 na volné noze. Klienti: Footshop, BRZ, NeosVR, Alpha Supplies a další.</p>
+
+    <h2>Proč tento průvodce</h2>
+    <p>DDD literaturu (Evans, Vernon) jsem studoval souběžně s reálnými projekty v Symfony. Průvodce vznikl jako strukturovaný výstup tohoto procesu — pro vývojáře, kteří chtějí DDD pochopit do hloubky, ne jen zkopírovat vzory.</p>
+</article>
+{% endblock %}

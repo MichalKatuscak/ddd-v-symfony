@@ -167,4 +167,12 @@ class DddController extends AbstractController
             'title' => 'DDD a umělá inteligence — co říkají autority',
         ]);
     }
+
+    #[Route('/o-autorovi', name: 'about')]
+    public function about(): Response
+    {
+        return $this->render('ddd/about.html.twig', [
+            'title' => 'O autorovi',
+        ]);
+    }
 }
