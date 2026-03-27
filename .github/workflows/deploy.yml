@@ -25,6 +25,9 @@ jobs:
         env:
           APP_ENV: prod
 
+      - name: Set asset version from git commit
+        run: echo "APP_VERSION=$(git rev-parse --short HEAD)" >> .env.local
+
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -40,6 +43,5 @@ jobs:
             screenshots/**
             docs/**
             tests/**
-            .env.local
             .env.*.local
             CLAUDE.md
