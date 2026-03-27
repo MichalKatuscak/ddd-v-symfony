@@ -1,14 +1,14 @@
 @startuml
 
-node "Eric Evans\n(Zakladatel)\nSilne pro-DDD-pro-AI" as A
+node "Eric Evans\n(Zakladatel)\nSilně pro-DDD-pro-AI" as A
 node "Vaughn Vernon\nPro-DDD-pro-AI" as B
-node "Nick Tune\n(Praktik)\nSilne pro-DDD-pro-AI" as C
-node "Kent Beck\nPro strukturovany design" as D
-node "Martin Fowler\nNuancovane pro-DDD" as E
-node "Microsoft\nImplicitne pro-DDD" as F
-node "Alberto Brandolini\nOpatrne zapojuje AI" as G
-node "Sam Newman\nBez primcho vyjadren" as H
-node "DHH\n(Protivaha)\nJednoduchost staci" as I
+node "Nick Tune\n(Praktik)\nSilně pro-DDD-pro-AI" as C
+node "Kent Beck\nPro strukturovaný design" as D
+node "Martin Fowler\nNuancovaně pro-DDD" as E
+node "Microsoft\nImplicitně pro-DDD" as F
+node "Alberto Brandolini\nOpatrně zapojuje AI" as G
+node "Sam Newman\nBez přímého vyjádření" as H
+node "DHH\n(Protivaha)\nJednoduchost stačí" as I
 
 A --> B
 B --> C
