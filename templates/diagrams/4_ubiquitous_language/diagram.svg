@@ -1,109 +1,119 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="560.9375px" preserveAspectRatio="none" style="width:909px;height:560px;background:#FAFAFA;" version="1.1" viewBox="0 0 909 560" width="909.375px" zoomAndPan="magnify"><defs/><g><!--MD5=[44ee79af72028688ed75d56f39e8ae6b]
-cluster Doménový expert--><rect fill="#E1F5FE" height="143.75" style="stroke: #005A9C; stroke-width: 3.125;" width="760.9375" x="34.375" y="37.5"/><text fill="#000000" font-family="Inter" font-size="25" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="291.4063" y="63.8306">Doménový expert</text><!--MD5=[b81fc3935eadd1e41cd288427cc65889]
-cluster Vývojový tým--><rect fill="#E8F5E9" height="143.75" style="stroke: #005A9C; stroke-width: 3.125;" width="684.375" x="106.25" y="400"/><text fill="#000000" font-family="Inter" font-size="25" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="184.375" x="356.25" y="426.3306">Vývojový tým</text><!--MD5=[ddcfef12ac8953af08d8c49cb70dd7b3]
-cluster Ubiquitous Language--><rect fill="#FFF3E0" height="143.75" style="stroke: #005A9C; stroke-width: 3.125;" width="731.25" x="160.9375" y="218.75"/><text fill="#000000" font-family="Inter" font-size="25" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="287.5" x="382.8125" y="245.0806">Ubiquitous Language</text><!--MD5=[9588a41f81df83122e454b7a1572a85d]
-entity DE--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="335.9375" x="433.5938" y="95.3125"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="449.2188" y="134.1431">Byznys vize a požadavky</text><!--MD5=[7eece39430ed537baa71915fa7d39f78]
-entity DET--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="318.75" x="59.375" y="95.3125"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="287.5" x="75" y="134.1431">Doménová terminologie</text><!--MD5=[f664b171d46fe37ddaaa8e800b616d7d]
-entity DEV--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="270.3125" x="494.5313" y="457.8125"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="239.0625" x="510.1563" y="496.6431">Implementace kódu</text><!--MD5=[df6ae29ee6c7128adaaba2ea1e2193cf]
-entity DEVT--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="307.8125" x="132.0313" y="457.8125"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="276.5625" x="147.6563" y="496.6431">Technická terminologie</text><!--MD5=[c9884a940ca17747de6480392133742b]
-entity UL--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="184.375" x="440.625" y="276.5625"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="456.25" y="315.3931">Sdílený jazyk</text><!--MD5=[9e8ff27f29c2e67f56dd480455f3d049]
-entity ULDICT--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="198.4375" x="186.7188" y="276.5625"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="202.3438" y="315.3931">Slovník pojmů</text><!--MD5=[36dc586d67e0f1d076b0ce70c9875d3e]
-entity CC--><rect fill="#FFFFFF" height="60.3516" style="stroke: #005A9C; stroke-width: 3.125;" width="185.9375" x="680.4688" y="276.5625"/><text fill="#000000" font-family="Inter" font-size="25" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="696.0938" y="315.3931">Context Map</text><!--MD5=[9a3b1cd2cb6f10e85d4c5fcb946a5caf]
-link DE to UL--><path d="M590.3594,156.3594 C578.5313,187.0312 559.8281,235.4687 546.9844,268.7656 " fill="none" id="DE-&gt;UL" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="544,276.4688,554.8882,265.5939,546.809,269.1787,543.2242,261.0995,544,276.4688" style="stroke: #005A9C; stroke-width: 3.125;"/><!--MD5=[5952f55308faf23b0b5907283d42884f]
-link DET to ULDICT--><path d="M229.6875,156.3594 C241.2656,187.0312 259.5313,235.4687 272.0938,268.7656 " fill="none" id="DET-&gt;ULDICT" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="275,276.4688,275.8578,261.1038,272.2299,269.1638,264.1699,265.5359,275,276.4688" style="stroke: #005A9C; stroke-width: 3.125;"/><!--MD5=[1111ae18a99789253a046d388fcae56e]
-link UL to DEV--><path d="M548.5938,337.6094 C565.3438,368.4063 591.8438,417.125 609.9531,450.4375 " fill="none" id="UL-&gt;DEV" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="613.9063,457.7188,612.6768,442.3791,610.1731,450.8559,601.6962,448.3522,613.9063,457.7188" style="stroke: #005A9C; stroke-width: 3.125;"/><!--MD5=[34cc62cb8838bcb4c2ac38ed8e30eeac]
-link ULDICT to DEVT--><path d="M285.9375,337.6094 C285.9375,368.1406 285.9375,416.3125 285.9375,449.5938 " fill="none" id="ULDICT-&gt;DEVT" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="285.9375,457.7188,292.1875,443.6563,285.9375,449.9063,279.6875,443.6563,285.9375,457.7188" style="stroke: #005A9C; stroke-width: 3.125;"/><!--MD5=[83590d05b993fbaa419ac69047aa83ae]
-link CC to DEV--><path d="M750.0156,337.6094 C724.9688,368.6563 685.1875,417.9531 658.2969,451.2656 " fill="none" id="CC-&gt;DEV" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="653.0938,457.7188,666.7967,450.7154,658.0068,451.6444,657.0778,442.8546,653.0938,457.7188" style="stroke: #005A9C; stroke-width: 3.125;"/><!--MD5=[590841d77339945b8ab393c93f869b78]
-@startuml
-skinparam dpi 150
-skinparam backgroundColor #FAFAFA
-skinparam shadowing false
-
-skinparam defaultFontName "Inter"
-skinparam defaultFontSize 16
-skinparam defaultTextAlignment center
-
-skinparam node {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-  BorderThickness 2
-}
-
-skinparam component {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-  BorderThickness 2
-}
-
-skinparam rectangle {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-  BorderThickness 2
-}
-
-skinparam arrowColor #005A9C
-skinparam arrowThickness 2
-
-skinparam activity {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-}
-
-skinparam sequence {
-  ParticipantBorderColor #005A9C
-  LifeLineBorderColor #005A9C
-  LifeLineBackgroundColor #E6F0FA
-  ParticipantBackgroundColor #FFFFFF
-}
-
-skinparam package {
-  BackgroundColor #FAFAFA
-  BorderColor #005A9C
-}
-
-skinparam note {
-  BackgroundColor #E6F0FA
-  BorderColor #005A9C
-}
-
-skinparam title {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-}
-
-skinparam sequenceArrowThickness 2
-skinparam sequenceArrowColor #005A9C
-
-rectangle "Doménový expert" #e1f5fe {
-  rectangle "Byznys vize a požadavky" as DE
-  rectangle "Doménová terminologie" as DET
-}
-
-rectangle "Vývojový tým" #e8f5e9 {
-  rectangle "Implementace kódu" as DEV
-  rectangle "Technická terminologie" as DEVT
-}
-
-rectangle "Ubiquitous Language" #fff3e0 {
-  rectangle "Sdílený jazyk" as UL
-  rectangle "Slovník pojmů" as ULDICT
-  rectangle "Context Map" as CC
-}
-
-DE - -> UL
-DET - -> ULDICT
-UL - -> DEV
-ULDICT - -> DEVT
-CC - -> DEV
-@enduml
-
-PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
-(GPL source distribution)
-Java Runtime: OpenJDK Runtime Environment
-JVM: OpenJDK 64-Bit Server VM
-Java Version: 21.0.10+7-Debian-1deb13u1
-Operating System: Linux
-Default Encoding: UTF-8
-Language: cs
-Country: CZ
---></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css"
+     data-diagram-type="DESCRIPTION"  preserveAspectRatio="none"
+     style="background:#FAFAFA;aspect-ratio:1.646" version="1.1" viewBox="0 0 870 531"
+     zoomAndPan="magnify">
+    <defs/>
+    <g>
+        <rect fill="#FAFAFA" height="531.25" style="stroke:none;stroke-width:1.5625;" width="870.3125" x="0"
+              y="0"/><!--cluster Dom?nov? expert-->
+        <g class="cluster" data-entity="Dom&#233;nov&#253; expert" data-source-line="61" data-uid="ent0002"
+           id="cluster_Dom&#233;nov&#253; expert">
+            <rect fill="#E1F5FE" height="145.3125" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="748.4375" x="10.9375" y="10.9375"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="217.334" x="276.4893" y="38.2813">Dom&#233;nov&#253; expert
+            </text>
+        </g><!--cluster V?vojov? t?m-->
+        <g class="cluster" data-entity="V&#253;vojov&#253; t&#253;m" data-source-line="66" data-uid="ent0005"
+           id="cluster_V&#253;vojov&#253; t&#253;m">
+            <rect fill="#E8F5E9" height="145.3125" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="676.5625" x="76.5625" y="376.5625"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="169.1284" x="330.2795" y="403.9063">V&#253;vojov&#253; t&#253;m
+            </text>
+        </g><!--cluster Ubiquitous Language-->
+        <g class="cluster" data-entity="Ubiquitous Language" data-source-line="71" data-uid="ent0008"
+           id="cluster_Ubiquitous Language">
+            <rect fill="#FFF3E0" height="145.3125" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="728.125" x="132.8125" y="193.75"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing"
+                  textLength="259.6802" x="367.0349" y="221.0938">Ubiquitous Language
+            </text>
+        </g><!--entity DE-->
+        <g class="entity" data-entity="DE" data-source-line="62" data-uid="ent0003" id="entity_DE">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="330.4077" x="403.9063" y="70.3125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="299.1577"
+                  x="419.5313" y="110.1563">Byznys vize a po&#382;adavky
+            </text>
+        </g><!--entity DET-->
+        <g class="entity" data-entity="DET" data-source-line="63" data-uid="ent0004" id="entity_DET">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="312.5244" x="35.9375" y="70.3125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="281.2744"
+                  x="51.5625" y="110.1563">Dom&#233;nov&#225; terminologie
+            </text>
+        </g><!--entity DEV-->
+        <g class="entity" data-entity="DEV" data-source-line="67" data-uid="ent0006" id="entity_DEV">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="263.9526" x="464.8438" y="435.9375"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="232.7026"
+                  x="480.4688" y="475.7813">Implementace k&#243;du
+            </text>
+        </g><!--entity DEVT-->
+        <g class="entity" data-entity="DEVT" data-source-line="68" data-uid="ent0007" id="entity_DEVT">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="307.8125" x="102.3438" y="435.9375"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="276.5625"
+                  x="117.9688" y="475.7813">Technick&#225; terminologie
+            </text>
+        </g><!--entity UL-->
+        <g class="entity" data-entity="UL" data-source-line="72" data-uid="ent0009" id="entity_UL">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="186.8042" x="409.375" y="253.125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="155.5542"
+                  x="425" y="292.9688">Sd&#237;len&#253; jazyk
+            </text>
+        </g><!--entity ULDICT-->
+        <g class="entity" data-entity="ULDICT" data-source-line="73" data-uid="ent0010" id="entity_ULDICT">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="196.9971" x="157.8125" y="253.125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="165.7471"
+                  x="173.4375" y="292.9688">Slovn&#237;k pojm&#367;
+            </text>
+        </g><!--entity CC-->
+        <g class="entity" data-entity="CC" data-source-line="74" data-uid="ent0011" id="entity_CC">
+            <rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;"
+                  width="182.8125" x="652.3438" y="253.125"/>
+            <text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="151.5625"
+                  x="667.9688" y="292.9688">Context Map
+            </text>
+        </g><!--link DE to UL-->
+        <g class="link" data-entity-1="DE" data-entity-2="UL" data-source-line="77" data-uid="lnk12" id="link_DE_UL">
+            <path d="M558.0625,131.6094 C545.8594,165.0313 529.231,210.553 517.0279,243.9749" fill="none" id="DE-to-UL"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="513.8125,252.7813,524.5065,241.7153,516.492,245.4426,512.7647,237.4281,513.8125,252.7813"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link DET to ULDICT-->
+        <g class="link" data-entity-1="DET" data-entity-2="ULDICT" data-source-line="78" data-uid="lnk13"
+           id="link_DET_ULDICT">
+            <path d="M202.625,131.6094 C214.5313,165.0313 230.7602,210.528 242.6664,243.9499" fill="none"
+                  id="DET-to-ULDICT" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="245.8125,252.7813,246.9809,237.4368,243.1908,245.4218,235.2058,241.6316,245.8125,252.7813"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link UL to DEV-->
+        <g class="link" data-entity-1="UL" data-entity-2="DEV" data-source-line="79" data-uid="lnk14" id="link_UL_DEV">
+            <path d="M518.3906,314.4219 C535.8281,347.8438 559.8353,393.8601 577.2728,427.282" fill="none"
+                  id="UL-to-DEV" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="581.6094,435.5937,580.6457,420.2351,577.9956,428.6673,569.5634,426.0172,581.6094,435.5937"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link ULDICT to DEVT-->
+        <g class="link" data-entity-1="ULDICT" data-entity-2="DEVT" data-source-line="80" data-uid="lnk15"
+           id="link_ULDICT_DEVT">
+            <path d="M256.25,314.4219 C256.25,347.8438 256.25,392.7969 256.25,426.2187" fill="none" id="ULDICT-to-DEVT"
+                  style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C" points="256.25,435.5937,262.5,421.5312,256.25,427.7812,250,421.5312,256.25,435.5937"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--link CC to DEV-->
+        <g class="link" data-entity-1="CC" data-entity-2="DEV" data-source-line="81" data-uid="lnk16" id="link_CC_DEV">
+            <path d="M719.8281,314.4219 C692.5156,347.8438 654.0241,394.9109 626.7272,428.3328" fill="none"
+                  id="CC-to-DEV" style="stroke:#005A9C;stroke-width:3.125;"/>
+            <polygon fill="#005A9C"
+                     points="620.7969,435.5937,634.533,428.6558,625.7388,429.5429,624.8517,420.7487,620.7969,435.5937"
+                     style="stroke:#005A9C;stroke-width:3.125;"/>
+        </g><!--SRC=[jLJ1Rfj04Btp5IDow2cItSfHSwdaO5koHAj8mRvlOC1hO9Oi2mck-WdzY1vxY7h8sRtG_5SNJ5mWjb952bnsPzw-UJCxEsd8AM6InU0b78QZWP7kBTVC3GCfCl8i4Ga99xDnzRSGwOfvufPJ03wBKZHQBWzzbaLg9aXzOJ62EIU5qZoCkE8RXE7PSwU3TseSyO1Y90KkLXpjA2GyXAy6mCKphVLNUOJqK3RMmM0qFhVsLcV5tP0mJU6zyQtDwueu4LJ5V0DoYQvY54Hlefn9AMwxPthEzj6sprKyvwfuXQYEW1HlCYHtbzmbaugxF66a3cTZSnzjJlY2jozdUZORw4xi1ZYYkQCkqI0M7Alyhh__8qaIwWZ7NjcB78ghLxM09da7brBeIeSvqf_lLDw3nrcWIOi35p7kN_eHI3UAyQzBpOc8ovyayd8BU9UWL2QSuD0V-JlvBUH5iQ4YXRnwpmmIyVYRUImF2nDO2fDf5xod_G7wMSUSj820OuDrgaHRw6MvpSMw5g7ARLn9-EYFyBmlOHud4LRZWkaU3Ci7Bsi8brsSW-wAT54EHr_smo-k-Kt6bSXIiBKfqqsa9VY-_m47VGbNNdaV8McbQxOfmffoOVSmaSZrnOMwIEluyLU3cSmjfukpz7ZKGn0-iwJ6M7K3JAPmUlgf8jM5QfRrsOLTxwfiTvQdhMDOrjFwBm00]-->
+    </g>
+</svg>
