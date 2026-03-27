@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: 'Migrace z CRUD', url: '/migrace-z-crud' },
         { label: 'Anti-vzory', url: '/anti-vzory' },
         { label: 'Výkonnostní aspekty', url: '/vykonnostni-aspekty' },
+        { label: 'DDD a AI', url: '/ddd-a-umela-inteligence' },
         { label: 'Zdroje', url: '/zdroje' },
         { label: 'Glosář', url: '/glosar' },
     ];

@@ -116,6 +116,9 @@
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'performance_aspects' %}active{% endif %}" href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a>
                     </li>
                     <li class="sidebar-nav-item">
+                        <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'ddd_ai' %}active{% endif %}" href="{{ path('ddd_ai') }}">DDD a AI</a>
+                    </li>
+                    <li class="sidebar-nav-item">
                         <a class="sidebar-nav-link {% if app.request.attributes.get('_route') == 'resources' %}active{% endif %}" href="{{ path('resources') }}">Zdroje</a>
                     </li>
                     <li class="sidebar-nav-item">
