@@ -50,7 +50,7 @@ skinparam note {
 skinparam sequenceArrowThickness 2
 skinparam sequenceArrowColor #005A9C
 
-title Eventual Consistency — datový tok v CQRS
+title Eventual Consistency - datový tok v CQRS
 
 actor "Uživatel" as U
 participant "Controller" as C
@@ -126,7 +126,7 @@ deactivate C
 note over U
   Pokud čtení proběhne **před**
   dokončením projekce, uživatel
-  vidí starší stav — to je
+  vidí starší stav - to je
   eventual consistency.
 end note
 

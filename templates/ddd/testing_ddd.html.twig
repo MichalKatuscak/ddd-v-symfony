@@ -73,10 +73,10 @@
     <div class="note">
         <h3>Proč je DDD přirozeně testovatelný:</h3>
         <ul>
-            <li><strong>Žádné závislosti na frameworku</strong> — Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
-            <li><strong>Explicitní závislosti</strong> — Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
-            <li><strong>Bohaté doménové modely</strong> — Veškerá doménová logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
-            <li><strong>Invarianty jsou vynucovány při konstrukci</strong> — Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
+            <li><strong>Žádné závislosti na frameworku</strong> - Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
+            <li><strong>Explicitní závislosti</strong> - Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
+            <li><strong>Bohaté doménové modely</strong> - Veškerá doménová logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
+            <li><strong>Invarianty jsou vynucovány při konstrukci</strong> - Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
         </ul>
     </div>
 
@@ -91,19 +91,19 @@
         <h3>Vrstvy testovací pyramidy:</h3>
         <ul>
             <li>
-                <strong>Unit testy — doménová vrstva (základ pyramidy, nejvíce testů)</strong><br>
+                <strong>Unit testy - doménová vrstva (základ pyramidy, nejvíce testů)</strong><br>
                 Testují izolované doménové objekty: value objects, entity, agregáty a doménové služby.
                 Nepotřebují databázi ani framework. Jsou velmi rychlé (stovky testů za sekundu).
                 Cíl: ověřit doménová pravidla a invarianty.
             </li>
             <li>
-                <strong>Integrační testy — infrastrukturní vrstva (střed pyramidy)</strong><br>
+                <strong>Integrační testy - infrastrukturní vrstva (střed pyramidy)</strong><br>
                 Testují spolupráci doménového kódu s infrastrukturou: Doctrine repozitáře, e-mailové odesílatele, messagingové systémy.
                 Vyžadují databázi nebo jiné externí zdroje. Jsou pomalejší, ale nezbytné pro ověření mapování a persistence.
                 Cíl: ověřit, že infrastruktura správně implementuje doménová rozhraní.
             </li>
             <li>
-                <strong>Funkční testy — aplikační vrstva / API (špička pyramidy, nejméně testů)</strong><br>
+                <strong>Funkční testy - aplikační vrstva / API (špička pyramidy, nejméně testů)</strong><br>
                 Testují celé use cases přes HTTP vrstvu nebo přímo přes aplikační služby.
                 Simulují reálného uživatele aplikace. Jsou nejpomalejší a nejkřehčí.
                 Cíl: ověřit integraci všech vrstev v klíčových scénářích.
@@ -112,10 +112,10 @@
     </div>
 
     <div class="note">
-        <h3>Testovací strategie — co testovat na každé vrstvě:</h3>
+        <h3>Testovací strategie - co testovat na každé vrstvě:</h3>
         <ul>
             <li><strong>Doménová vrstva:</strong> Validační logika value objects, invarianty entit, transakční konzistence agregátů, vydávání doménových událostí, doménové výjimky.</li>
-            <li><strong>Aplikační vrstva:</strong> Command handlery a query handlery — s použitím fake (InMemory) repozitářů, ověření, že správné metody repozitáře jsou volány s očekávanými argumenty.</li>
+            <li><strong>Aplikační vrstva:</strong> Command handlery a query handlery - s použitím fake (InMemory) repozitářů, ověření, že správné metody repozitáře jsou volány s očekávanými argumenty.</li>
             <li><strong>Infrastrukturní vrstva:</strong> Správné Doctrine mapování, dotazy repozitářů, transakce, volání externích API.</li>
             <li><strong>Prezentační vrstva:</strong> Správné HTTP status kódy, formát odpovědi, autentizace a autorizace.</li>
         </ul>
@@ -126,7 +126,7 @@
     <h2 id="unit-testy-domeny-heading">Unit testy doménové vrstvy</h2>
     <p>
         Unit testy doménové vrstvy jsou nejcennější součástí testovací sady DDD aplikace. Testují čisté PHP objekty bez jakýchkoli závislostí
-        na frameworku. Pro jejich spuštění stačí nainstalovat PHPUnit a samotné doménové třídy — žádný bootstrap Symfony kernelu není potřeba.
+        na frameworku. Pro jejich spuštění stačí nainstalovat PHPUnit a samotné doménové třídy - žádný bootstrap Symfony kernelu není potřeba.
     </p>
 
     <h3>Testování Value Objects</h3>
@@ -134,7 +134,7 @@
         Value objekty jsou immutabilní a porovnávají se hodnotou, nikoli identitou. Testy value objektů ověřují:
         immutabilitu (operace vrací novou instanci, nikoli modifikují stávající),
         rovnost dvou instancí se stejnou hodnotou,
-        validaci — že neplatné vstupy vyvolají odpovídající výjimku.
+        validaci - že neplatné vstupy vyvolají odpovídající výjimku.
     </p>
 
     <div class="tip">
@@ -199,7 +199,7 @@ final class EmailTest extends TestCase
     public function testImmutabilityViaNewInstance(): void
     {
         $original = new Email('jan@example.com');
-        // Hodnotové objekty jsou immutabilní — změna vyžaduje vytvoření nové instance
+        // Hodnotové objekty jsou immutabilní - změna vyžaduje vytvoření nové instance
         $different = new Email('petr@example.com');
 
         $this->assertSame('jan@example.com', $original->value());
@@ -212,7 +212,7 @@ final class EmailTest extends TestCase
     <h3>Testování entit</h3>
     <p>
         Entity mají identitu a měnitelný stav. Testy entit ověřují doménová pravidla (invarianty), správné chování metod a vyhazování
-        doménových výjimek při porušení pravidel. Klíčové je testovat chování, ne strukturu — tedy co entita dělá, ne jak vypadají její fieldy.
+        doménových výjimek při porušení pravidel. Klíčové je testovat chování, ne strukturu - tedy co entita dělá, ne jak vypadají její fieldy.
     </p>
 
     <div class="tip">
@@ -298,7 +298,7 @@ final class UserTest extends TestCase
 
     <h3>Testování agregátů</h3>
     <p>
-        Agregáty jsou nejsložitějšími doménovými objekty — ochraňují konzistenci skupiny entit a vydávají doménové události.
+        Agregáty jsou nejsložitějšími doménovými objekty - ochraňují konzistenci skupiny entit a vydávají doménové události.
         Testy agregátů ověřují transakční invarianty (pravidla platná pro celý agregát) a správné vydávání doménových událostí
         jako vedlejší efekt doménových operací.
     </p>
@@ -385,14 +385,14 @@ final class OrderTest extends TestCase
     <p>
         Doménové události jsou klíčovým mechanismem DDD pro komunikaci mezi agregáty a bounded contexty. Je nezbytné
         testovat, že agregát vydá správné události se správnými daty jako reakci na doménové operace.
-        Přímé testování doménových událostí — bez spoléhání na vedlejší efekty event dispatcheru — je nejspolehlivější přístup.
+        Přímé testování doménových událostí - bez spoléhání na vedlejší efekty event dispatcheru - je nejspolehlivější přístup.
     </p>
 
     <div class="note">
         <h3>Pattern "Record and Verify Events":</h3>
         <p>
             Agregáty sbírají vydané události interně v privátním poli (viz <code>AggregateRoot</code> bázová třída nebo trait).
-            Metoda <code>releaseEvents()</code> vrátí všechny nashromážděné události a pole vymaže — tento přístup nevyžaduje
+            Metoda <code>releaseEvents()</code> vrátí všechny nashromážděné události a pole vymaže - tento přístup nevyžaduje
             žádný event dispatcher ani bus v unit testech. Testovací kód pak jednoduše zavolá doménovou operaci a ověří
             obsah vrácených událostí.
         </p>
@@ -521,16 +521,16 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         <h3>Typy test doubles a jejich použití v DDD:</h3>
         <ul>
             <li>
-                <strong>Stub</strong> — Vrací předpřipravené odpovědi bez jakékoli logiky. Vhodný, když potřebujeme, aby závislost vrátila konkrétní hodnotu, ale nezajímá nás, zda a kolikrát byla volána. Příklad: <code>$stub->method('findById')->willReturn($user)</code>.
+                <strong>Stub</strong> - Vrací předpřipravené odpovědi bez jakékoli logiky. Vhodný, když potřebujeme, aby závislost vrátila konkrétní hodnotu, ale nezajímá nás, zda a kolikrát byla volána. Příklad: <code>$stub->method('findById')->willReturn($user)</code>.
             </li>
             <li>
-                <strong>Mock</strong> — Stub s ověřením volání. Ověřuje, že byla zavolána konkrétní metoda s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: <code>$mock->expects($this->once())->method('save')</code>.
+                <strong>Mock</strong> - Stub s ověřením volání. Ověřuje, že byla zavolána konkrétní metoda s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: <code>$mock->expects($this->once())->method('save')</code>.
             </li>
             <li>
-                <strong>Fake</strong> — Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá reálnou databázovou závislost, ale chová se stejně jako skutečná implementace. <strong>Nejlepší přístup pro DDD repozitáře</strong> — umožňuje psát čitelné testy bez konfigurování mocků.
+                <strong>Fake</strong> - Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá reálnou databázovou závislost, ale chová se stejně jako skutečná implementace. <strong>Nejlepší přístup pro DDD repozitáře</strong> - umožňuje psát čitelné testy bez konfigurování mocků.
             </li>
             <li>
-                <strong>Spy</strong> — Podobný mocku, ale ověření probíhá až po akci (post-assertion style). Méně časté v PHP.
+                <strong>Spy</strong> - Podobný mocku, ale ověření probíhá až po akci (post-assertion style). Méně časté v PHP.
             </li>
         </ul>
     </div>
@@ -538,8 +538,8 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
     <div class="note">
         <h3>Proč preferovat Fake (InMemory) před Mockem pro repozitáře:</h3>
         <ul>
-            <li>Testy jsou čitelnější — nepotřebují konfigurace <code>expects()->method()->with()->willReturn()</code>.</li>
-            <li>InMemory repozitář lze sdílet mezi command handlerem a query handlerem v jednom testu — ověříme reálný průchod datů.</li>
+            <li>Testy jsou čitelnější - nepotřebují konfigurace <code>expects()->method()->with()->willReturn()</code>.</li>
+            <li>InMemory repozitář lze sdílet mezi command handlerem a query handlerem v jednom testu - ověříme reálný průchod datů.</li>
             <li>Při změně signatury rozhraní IDE/statická analýza okamžitě upozorní, na rozdíl od string-based konfigurace mocků.</li>
             <li>Mocky testují implementační detail (které metody jsou volány), Fake testuje chování (co se stane s daty).</li>
         </ul>
@@ -694,7 +694,7 @@ final class RegisterUserHandlerTest extends TestCase
     <section id="integracni-testy" aria-labelledby="integracni-testy-heading">
     <h2 id="integracni-testy-heading">Integrační testy s Doctrine</h2>
     <p>
-        Integrační testy ověřují spolupráci doménového kódu s infrastrukturou — především správnost Doctrine mapování,
+        Integrační testy ověřují spolupráci doménového kódu s infrastrukturou - především správnost Doctrine mapování,
         dotazů repozitářů a transakčního chování. Na rozdíl od unit testů potřebují skutečnou databázi (typicky SQLite
         in-memory nebo testovací PostgreSQL/MySQL instanci).
     </p>
@@ -703,11 +703,11 @@ final class RegisterUserHandlerTest extends TestCase
         <h3>KernelTestCase vs WebTestCase:</h3>
         <ul>
             <li>
-                <strong>KernelTestCase</strong> — Bootstrapuje Symfony kernel bez HTTP vrstvy. Vhodný pro testování
+                <strong>KernelTestCase</strong> - Bootstrapuje Symfony kernel bez HTTP vrstvy. Vhodný pro testování
                 Doctrine repozitářů, služeb z DI kontejneru a dalších komponent infrastruktury. Rychlejší než WebTestCase.
             </li>
             <li>
-                <strong>WebTestCase</strong> — Bootstrapuje kernel i simulovaný HTTP klient. Vhodný pro funkční testy
+                <strong>WebTestCase</strong> - Bootstrapuje kernel i simulovaný HTTP klient. Vhodný pro funkční testy
                 kontrolerů a API endpointů. Pomalejší, ale testuje celý zásobník.
             </li>
         </ul>
@@ -765,7 +765,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
 
         $this->repository->save($user);
-        $this->entityManager->clear(); // vyčistíme identity map — nutné pro skutečné čtení z DB
+        $this->entityManager->clear(); // vyčistíme identity map - nutné pro skutečné čtení z DB
 
         $retrieved = $this->repository->findById($userId);
 
@@ -811,9 +811,9 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     <div class="warning" role="alert" aria-labelledby="entity-manager-clear-heading">
         <h3 id="entity-manager-clear-heading">Proč volat <code>$entityManager->clear()</code>?</h3>
         <p>
-            Doctrine udržuje tzv. <em>Identity Map</em> — interní cache, která vrátí stejnou instanci objektu
+            Doctrine udržuje tzv. <em>Identity Map</em> - interní cache, která vrátí stejnou instanci objektu
             pro stejné ID bez dalšího dotazu do databáze. Bez volání <code>clear()</code> by integrační test
-            mohl úspěšně projít, i kdyby data v databázi vůbec nebyla uložena — Doctrine by je vrátil
+            mohl úspěšně projít, i kdyby data v databázi vůbec nebyla uložena - Doctrine by je vrátil
             z paměti. Voláme tedy <code>clear()</code> mezi zápisem a čtením, aby byl test skutečně integrační.
         </p>
     </div>
@@ -823,7 +823,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     <h2 id="funkcni-testy-heading">Funkční testy API a kontrolerů</h2>
     <p>
         Funkční testy ověřují chování celé aplikace přes HTTP vrstvu. Testují, že správný request na správnou URL
-        vrátí správnou odpověď — včetně HTTP status kódu, formátu těla odpovědi (JSON), hlaviček a chování
+        vrátí správnou odpověď - včetně HTTP status kódu, formátu těla odpovědi (JSON), hlaviček a chování
         při chybových stavech. V DDD kontextu ověřují integraci prezentační vrstvy s aplikační vrstvou.
     </p>
 
@@ -946,7 +946,7 @@ final class RegistrationControllerTest extends WebTestCase
     <section id="architektonicke-testy" aria-labelledby="architektonicke-testy-heading">
     <h2 id="architektonicke-testy-heading">Architektonické testy</h2>
     <p>
-        Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla — především
+        Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla - především
         pravidla závislostí mezi vrstvami. V DDD je klíčovým pravidlem, že doménová vrstva nesmí záviset
         na infrastrukturní ani aplikační vrstvě. Manuální code review nestačí; architektonické testy toto pravidlo
         vynucují v CI/CD pipeline a zabrání regresi.
@@ -1002,7 +1002,7 @@ final class RegistrationControllerTest extends WebTestCase
       - Shared
 
     Infrastructure:
-      # Infrastruktura implementuje doménová rozhraní — závisí na doméně
+      # Infrastruktura implementuje doménová rozhraní - závisí na doméně
       - Domain
       - Application
       - Shared
@@ -1017,9 +1017,9 @@ final class RegistrationControllerTest extends WebTestCase
       []
 
   skip_violations:
-    # Dočasné výjimky — měly by být minimalizovány
+    # Dočasné výjimky - měly by být minimalizovány
     # UserManagement\Domain\Model\User:
-    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně — antipattern</code></pre>
+    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně - antipattern</code></pre>
     </div>
 
     <div class="tip">
@@ -1085,17 +1085,17 @@ return static function (Config $config): void {
     <h2 id="pokryti-a-best-practices-heading">Code coverage a best practices</h2>
     <p>
         Code coverage (pokrytí kódem) je metrika udávající, jaké procento kódu je spouštěno při běhu testů.
-        Vysoké pokrytí samo o sobě nezaručuje kvalitu testů — lze dosáhnout 100% pokrytí s testy, které
+        Vysoké pokrytí samo o sobě nezaručuje kvalitu testů - lze dosáhnout 100% pokrytí s testy, které
         neověřují žádné chování. Přesto je pokrytí užitečným indikátorem nepokrytých oblastí.
     </p>
 
     <div class="note">
         <h3>Doporučené pokrytí pro DDD vrstvy:</h3>
         <ul>
-            <li><strong>Doménová vrstva (Domain)</strong> — 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
-            <li><strong>Aplikační vrstva (Application)</strong> — 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
-            <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> — 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
-            <li><strong>Prezentační vrstva (Presentation)</strong> — 50–70 %. Kontrolery pokryjte funkčními testy pro klíčové scénáře.</li>
+            <li><strong>Doménová vrstva (Domain)</strong> - 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
+            <li><strong>Aplikační vrstva (Application)</strong> - 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
+            <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> - 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
+            <li><strong>Prezentační vrstva (Presentation)</strong> - 50–70 %. Kontrolery pokryjte funkčními testy pro klíčové scénáře.</li>
         </ul>
     </div>
 
@@ -1115,9 +1115,9 @@ return static function (Config $config): void {
             Každý test by měl být strukturován do tří jasně oddělených fází:
         </p>
         <ol>
-            <li><strong>Arrange (připrav)</strong> — Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.</li>
-            <li><strong>Act (proveď)</strong> — Proveď jednu testovanou akci: zavolej metodu, odešli command.</li>
-            <li><strong>Assert (ověř)</strong> — Ověř výsledek: assertuj výstup, zkontroluj stav objektu, ověř vydané události.</li>
+            <li><strong>Arrange (připrav)</strong> - Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.</li>
+            <li><strong>Act (proveď)</strong> - Proveď jednu testovanou akci: zavolej metodu, odešli command.</li>
+            <li><strong>Assert (ověř)</strong> - Ověř výsledek: assertuj výstup, zkontroluj stav objektu, ověř vydané události.</li>
         </ol>
         <p>
             Každý test by měl ověřovat právě jednu věc (jeden logický assertion). Více assertů v jednom testu je přijatelné,
@@ -1129,26 +1129,26 @@ return static function (Config $config): void {
         <h3 id="common-mistakes-heading">Nejčastější chyby při testování DDD</h3>
         <ul>
             <li>
-                <strong>Testování getterů místo chování</strong> — Špatně: <code>$this->assertSame('jan@example.com', $user->getEmail())</code> po přímém nastavení fieldu.
+                <strong>Testování getterů místo chování</strong> - Špatně: <code>$this->assertSame('jan@example.com', $user->getEmail())</code> po přímém nastavení fieldu.
                 Správně: zavolat doménovou operaci a ověřit výsledný stav.
             </li>
             <li>
-                <strong>Přímý přístup k privátním fieldům přes reflexi</strong> — Porušuje zapouzdření. Pokud potřebujete přistupovat k privátnímu stavu v testu, je to příznak špatného návrhu API třídy.
+                <strong>Přímý přístup k privátním fieldům přes reflexi</strong> - Porušuje zapouzdření. Pokud potřebujete přistupovat k privátnímu stavu v testu, je to příznak špatného návrhu API třídy.
             </li>
             <li>
-                <strong>Bootstrapování celého Symfony kernelu v unit testech</strong> — Unit testy doménové vrstvy nesmí volat <code>self::bootKernel()</code>. To je výsadou integračních testů. Zbytečně zpomaluje sadu testů.
+                <strong>Bootstrapování celého Symfony kernelu v unit testech</strong> - Unit testy doménové vrstvy nesmí volat <code>self::bootKernel()</code>. To je výsadou integračních testů. Zbytečně zpomaluje sadu testů.
             </li>
             <li>
-                <strong>Sdílený stav mezi testy</strong> — Každý test musí být zcela nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
+                <strong>Sdílený stav mezi testy</strong> - Každý test musí být zcela nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
             </li>
             <li>
-                <strong>Mockování value objects</strong> — Value objekty jsou jednoduché datové třídy bez závislostí. Není důvod je mockovat — vždy vytvořte skutečnou instanci.
+                <strong>Mockování value objects</strong> - Value objekty jsou jednoduché datové třídy bez závislostí. Není důvod je mockovat - vždy vytvořte skutečnou instanci.
             </li>
             <li>
-                <strong>Ignorování doménových výjimek v testech</strong> — Každá doménová výjimka (<code>InvalidEmailException</code>, <code>OrderAlreadyPlacedException</code> apod.) musí mít test ověřující, že je skutečně vyhozena za správných podmínek.
+                <strong>Ignorování doménových výjimek v testech</strong> - Každá doménová výjimka (<code>InvalidEmailException</code>, <code>OrderAlreadyPlacedException</code> apod.) musí mít test ověřující, že je skutečně vyhozena za správných podmínek.
             </li>
             <li>
-                <strong>Chybějící test pro releaseEvents() po operaci</strong> — Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
+                <strong>Chybějící test pro releaseEvents() po operaci</strong> - Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
             </li>
         </ul>
     </div>
@@ -1176,7 +1176,7 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
     <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
     <ul>
         <li><strong>Testovací pyramida</strong> v DDD: unit testy domény (základ), integrační testy infrastruktury (střed), funkční testy API (špička).</li>
-        <li>Doménové objekty jsou <strong>přirozeně testovatelné</strong> — čisté PHP třídy bez závislostí na frameworku.</li>
+        <li>Doménové objekty jsou <strong>přirozeně testovatelné</strong> - čisté PHP třídy bez závislostí na frameworku.</li>
         <li><strong>InMemory repozitáře</strong> (Fake) jsou preferované před mocky pro testování command handlerů.</li>
         <li>Testy doménových událostí ověřují, že agregát vydává <strong>správné události</strong> jako vedlejší efekt operací.</li>
         <li><strong>Architektonické testy</strong> (Deptrac, PHP-Arkitect) automaticky hlídají závislosti mezi vrstvami.</li>

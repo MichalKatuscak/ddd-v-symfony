@@ -105,11 +105,11 @@
                 Klíčové milníky ve vývoji DDD <a href="https://dddcommunity.org/" target="_blank">[6]</a>:
             </p>
             <ul>
-                <li><strong>2003</strong> — Eric Evans vydává knihu <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický/taktický design.</li>
-                <li><strong>2013</strong> — Vaughn Vernon vydává <em>Implementing Domain-Driven Design</em>, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.</li>
-                <li><strong>2013</strong> — Alberto Brandolini představuje <em>Event Storming</em> — workshopovou techniku pro kolaborativní modelování domény s doménovými experty.</li>
-                <li><strong>2016</strong> — Vaughn Vernon vydává <em>Domain-Driven Design Distilled</em>, zkrácenou a přístupnější verzi pro rychlé pochopení klíčových konceptů.</li>
-                <li><strong>Po roce 2015</strong> — DDD si nachází přirozené uplatnění v architektuře mikroslužeb: Bounded Context se stává standardním vodítkem pro určení hranic jednotlivých služeb <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">[7]</a>.</li>
+                <li><strong>2003</strong> - Eric Evans vydává knihu <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický/taktický design.</li>
+                <li><strong>2013</strong> - Vaughn Vernon vydává <em>Implementing Domain-Driven Design</em>, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.</li>
+                <li><strong>2013</strong> - Alberto Brandolini představuje <em>Event Storming</em> - workshopovou techniku pro kolaborativní modelování domény s doménovými experty.</li>
+                <li><strong>2016</strong> - Vaughn Vernon vydává <em>Domain-Driven Design Distilled</em>, zkrácenou a přístupnější verzi pro rychlé pochopení klíčových konceptů.</li>
+                <li><strong>Po roce 2015</strong> - DDD si nachází přirozené uplatnění v architektuře mikroslužeb: Bounded Context se stává standardním vodítkem pro určení hranic jednotlivých služeb <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">[7]</a>.</li>
             </ul>
         </section>
 
@@ -308,12 +308,12 @@
             </p>
 
             <ul>
-                <li><strong>Lepší komunikace</strong> — Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci.</li>
-                <li><strong>Flexibilita a odolnost vůči změnám</strong> — Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v business požadavcích se přirozeněji promítají do kódu.</li>
-                <li><strong>Modularita</strong> — Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.</li>
-                <li><strong>Testovatelnost</strong> — Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz <a href="{{ path('testing_ddd') }}">kapitola o testování</a>).</li>
-                <li><strong>Snížení technického dluhu</strong> — Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.</li>
-                <li><strong>Zaměření na hodnotu</strong> — DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší business hodnotu.</li>
+                <li><strong>Lepší komunikace</strong> - Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci.</li>
+                <li><strong>Flexibilita a odolnost vůči změnám</strong> - Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v business požadavcích se přirozeněji promítají do kódu.</li>
+                <li><strong>Modularita</strong> - Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.</li>
+                <li><strong>Testovatelnost</strong> - Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz <a href="{{ path('testing_ddd') }}">kapitola o testování</a>).</li>
+                <li><strong>Snížení technického dluhu</strong> - Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.</li>
+                <li><strong>Zaměření na hodnotu</strong> - DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší business hodnotu.</li>
             </ul>
 
             <p>
@@ -364,22 +364,22 @@
 
             <ul>
                 <li>
-                    <strong>DDD vs. Transaction Script</strong> — Transaction Script (Martin Fowler, <em>PoEAA</em>) organizuje
+                    <strong>DDD vs. Transaction Script</strong> - Transaction Script (Martin Fowler, <em>PoEAA</em>) organizuje
                     logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla
-                    a ukládá výsledek. <strong>Rozdíl:</strong> Transaction Script nemá doménový model — logika je v procedurách,
+                    a ukládá výsledek. <strong>Rozdíl:</strong> Transaction Script nemá doménový model - logika je v procedurách,
                     ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí však dochází k duplicitě
                     pravidel a těžko udržovatelnému kódu. DDD je vhodnější, jakmile doménová pravidla začnou být sdílena
                     napříč více use cases.
                 </li>
                 <li>
-                    <strong>DDD vs. CRUD</strong> — CRUD (Create, Read, Update, Delete) je datově orientovaný přístup:
+                    <strong>DDD vs. CRUD</strong> - CRUD (Create, Read, Update, Delete) je datově orientovaný přístup:
                     aplikace je v podstatě editor databázových tabulek. <strong>Rozdíl:</strong> CRUD nerozlišuje mezi
-                    doménovým chováním a datovými operacemi — každá akce je variací na čtení/zápis řádku. DDD naproti tomu
+                    doménovým chováním a datovými operacemi - každá akce je variací na čtení/zápis řádku. DDD naproti tomu
                     modeluje chování domény (objednávku nelze jen „updatovat", ale „potvrdit", „zrušit" nebo „odeslat").
                     Pro jednoduché správy dat je CRUD zcela dostačující.
                 </li>
                 <li>
-                    <strong>DDD vs. Hexagonální architektura</strong> — Hexagonální architektura (Ports and Adapters,
+                    <strong>DDD vs. Hexagonální architektura</strong> - Hexagonální architektura (Ports and Adapters,
                     Alistair Cockburn) řeší <em>jak strukturovat závislosti</em>: doménové jádro komunikuje s vnějším
                     světem přes porty (rozhraní) a adaptéry (implementace). <strong>Rozdíl:</strong> DDD řeší <em>jak
                     modelovat doménu</em> (Entity, Value Objects, Aggregates), hexagonální architektura řeší <em>jak
@@ -387,10 +387,10 @@
                     doménové jádro, hexagonální architektura poskytuje strukturu pro jeho izolaci.
                 </li>
                 <li>
-                    <strong>DDD vs. Mikroservisy</strong> — Mikroservisy jsou architektonický styl zaměřený na <em>jak
+                    <strong>DDD vs. Mikroservisy</strong> - Mikroservisy jsou architektonický styl zaměřený na <em>jak
                     nasazovat a škálovat</em> části systému nezávisle. <strong>Rozdíl:</strong> DDD řeší logické hranice
                     domény (Bounded Contexts), mikroservisy řeší fyzické hranice nasazení. Bounded Context z DDD je
-                    přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky — jeden Bounded Context
+                    přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky - jeden Bounded Context
                     může být implementován jako více mikroservis a naopak. DDD lze plně využít i v monolitické architektuře.
                 </li>
             </ul>
@@ -417,11 +417,11 @@
             </p>
 
             <ul>
-                <li><strong>Strategický design</strong> — Bounded Contexts, Context Map, Ubiquitous Language</li>
-                <li><strong>Taktický design</strong> — Entity, Value Objects, Aggregates, Repositories, Domain Events,
+                <li><strong>Strategický design</strong> - Bounded Contexts, Context Map, Ubiquitous Language</li>
+                <li><strong>Taktický design</strong> - Entity, Value Objects, Aggregates, Repositories, Domain Events,
                     Services, Factories
                 </li>
-                <li><strong>Implementační vzory</strong> — Anti-Corruption Layer,
+                <li><strong>Implementační vzory</strong> - Anti-Corruption Layer,
                     <a href="{{ path('glossary') }}#term-specifikace">Specification</a>,
                     <a href="{{ path('glossary') }}#term-saga">Saga / Process Manager</a>
                 </li>
@@ -441,7 +441,7 @@
             </p>
 
             <ul>
-                <li><a href="https://www.domainlanguage.com/ddd/" target="_blank">Domain Language — oficiální stránky
+                <li><a href="https://www.domainlanguage.com/ddd/" target="_blank">Domain Language - oficiální stránky
                         Erica Evanse a DDD komunity</a></li>
                 <li><a href="https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215"
                        target="_blank">Domain-Driven Design: Tackling Complexity in the Heart of Software - Eric
@@ -455,7 +455,7 @@
 
             <p>
                 V další kapitole se podíváme na <a href="{{ path('basic_concepts') }}">základní koncepty DDD</a>
-                    — entity, hodnotové objekty, agregáty a další stavební bloky.
+                    - entity, hodnotové objekty, agregáty a další stavební bloky.
             </p>
         </section>
 
@@ -465,7 +465,7 @@
                 <li>DDD je přístup zaměřený na <strong>modelování domény</strong>, ne na technická řešení.</li>
                 <li><strong>Strategický design</strong> (Bounded Contexts, Context Map) řeší makro-architekturu systému.</li>
                 <li><strong>Taktický design</strong> (Entity, Value Objects, Aggregates) řeší mikro-implementaci doménového modelu.</li>
-                <li>DDD je vhodný pro <strong>komplexní domény</strong> — pro jednoduché CRUD aplikace je zbytečně složitý.</li>
+                <li>DDD je vhodný pro <strong>komplexní domény</strong> - pro jednoduché CRUD aplikace je zbytečně složitý.</li>
                 <li>DDD a hexagonální architektura jsou <strong>komplementární</strong>, ne konkurenční přístupy.</li>
             </ul>
         </section>

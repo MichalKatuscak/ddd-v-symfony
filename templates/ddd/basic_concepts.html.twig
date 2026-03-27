@@ -437,7 +437,7 @@ class Order
             </div>
 
             <div class="tip">
-                <h3>Příklad: OrderItem — entita uvnitř agregátu</h3>
+                <h3>Příklad: OrderItem - entita uvnitř agregátu</h3>
                 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -588,9 +588,9 @@ class PaymentService
             <p>
                 V tomto příkladu je <code>PaymentService</code> doménová služba, která zapouzdřuje doménovou logiku
                 zpracování plateb a vytváří objekt <code>Payment</code>. Doménová služba je bezstavová a
-                neobsahuje repozitáře — persistence vraceného objektu je zodpovědností volající vrstvy
+                neobsahuje repozitáře - persistence vraceného objektu je zodpovědností volající vrstvy
                 (Application Service nebo Command Handler).
-                Třídy <code>Payment</code>, <code>PaymentId</code> a <code>PaymentMethod</code> jsou součástí doménového modelu plateb — jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
+                Třídy <code>Payment</code>, <code>PaymentId</code> a <code>PaymentMethod</code> jsou součástí doménového modelu plateb - jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
             </p>
 
             <div class="note" role="note" aria-labelledby="service-vs-aggregate-heading">
@@ -608,7 +608,7 @@ class PaymentService
                 <p>
                     <code>PaymentService</code> je oprávněná jako služba, protože
                     <em>vytváří nový agregát</em> (<code>Payment</code>) na základě dat jiného agregátu
-                    (<code>Order</code>) — tato koordinace nepatří do žádného z nich.
+                    (<code>Order</code>) - tato koordinace nepatří do žádného z nich.
                 </p>
             </div>
         </section>
@@ -618,7 +618,7 @@ class PaymentService
             <p>
                 Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
                 doménový význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
-                k popisu dané změny stavu — nespoléhají na pozdější dotazování.
+                k popisu dané změny stavu - nespoléhají na pozdější dotazování.
             </p>
 
             <div class="tip">
@@ -680,7 +680,7 @@ final class OrderCreatedEvent
             <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
             <ul>
                 <li><strong>Entity</strong> mají identitu a mění se v čase; <strong>Value Objects</strong> jsou definovány hodnotou a jsou neměnné.</li>
-                <li><strong>Agregáty</strong> tvoří transakční hranici konzistence — veškerý přístup k vnitřním objektům jde přes Aggregate Root.</li>
+                <li><strong>Agregáty</strong> tvoří transakční hranici konzistence - veškerý přístup k vnitřním objektům jde přes Aggregate Root.</li>
                 <li><strong>Repozitáře</strong> zapouzdřují persistenci a poskytují doménově orientované rozhraní.</li>
                 <li><strong>Doménové služby</strong> obsahují logiku, která přesahuje hranice jednoho agregátu.</li>
                 <li><strong>Doménové události</strong> jsou neměnné záznamy o tom, co se v doméně přihodilo.</li>

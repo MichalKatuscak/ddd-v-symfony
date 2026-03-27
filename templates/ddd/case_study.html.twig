@@ -104,7 +104,7 @@
         <li><strong>UserManagement ⟷ ProjectManagement</strong>: Vztah typu Partnership, kde oba kontexty spolupracují na správě členství uživatelů v projektech.</li>
         <li><strong>ProjectManagement ⟷ TaskManagement</strong>: Vztah typu Customer-Supplier, kde ProjectManagement je zákazníkem a TaskManagement dodavatelem služeb pro správu úkolů v rámci projektů.</li>
         <li><strong>TaskManagement ⟷ CommentManagement</strong>: Vztah typu Customer-Supplier, kde TaskManagement je zákazníkem a CommentManagement dodavatelem služeb pro komentáře k úkolům.</li>
-        <li><strong>ActivityTracking</strong>: Ostatní kontexty publikují doménové události přes Open Host Service / Published Language; ActivityTracking je čistě downstream konzument — naslouchá těmto událostem a zaznamenává je, aniž by ovlivňoval vydávající kontexty.</li>
+        <li><strong>ActivityTracking</strong>: Ostatní kontexty publikují doménové události přes Open Host Service / Published Language; ActivityTracking je čistě downstream konzument - naslouchá těmto událostem a zaznamenává je, aniž by ovlivňoval vydávající kontexty.</li>
     </ul>
 
     <p>
@@ -305,7 +305,7 @@
 
     <h3 id="project-model-heading">Doménový model: Projekt (kořen agregátu)</h3>
     <p>
-        Doménový model neobsahuje Doctrine ORM anotace — ty patří do infrastrukturní vrstvy
+        Doménový model neobsahuje Doctrine ORM anotace - ty patří do infrastrukturní vrstvy
         (XML/YAML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
         na doménových hodnotových objektech a událostech.
     </p>
@@ -317,7 +317,7 @@ namespace App\ProjectManagement\Domain\Model;
 
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
-// UserId je sdílený identifikátor — v produkčním systému by byl v Shared Kernel
+// UserId je sdílený identifikátor - v produkčním systému by byl v Shared Kernel
 use App\UserManagement\Domain\ValueObject\UserId;
 
 class Project
@@ -456,7 +456,7 @@ use App\TaskManagement\Domain\Event\TaskAssigned;
 use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
-// ProjectId a UserId jsou sdílené identifikátory — v produkčním systému by byly v Shared Kernel
+// ProjectId a UserId jsou sdílené identifikátory - v produkčním systému by byly v Shared Kernel
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
 
@@ -679,7 +679,7 @@ use App\TaskManagement\Domain\Port\ProjectChecker;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-// Port definovaný v TaskManagement doméně — abstrahuje závislost na jiném bounded contextu.
+// Port definovaný v TaskManagement doméně - abstrahuje závislost na jiném bounded contextu.
 // Infrastrukturní implementace volá ProjectManagement interně (přes DB nebo API),
 // aniž by TaskManagement cokoliv věděl o interním modelu ProjectManagement.
 //
@@ -708,7 +708,7 @@ class AssignTaskHandler
 
         $assigneeId = new UserId($command->assigneeId);
 
-        // Ověření přes port — bez přímé závislosti na ProjectManagement
+        // Ověření přes port - bez přímé závislosti na ProjectManagement
         if (!$this->projectChecker->exists($task->projectId())) {
             throw new \DomainException('Project not found');
         }

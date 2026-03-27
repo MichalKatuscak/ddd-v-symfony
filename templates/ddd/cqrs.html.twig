@@ -52,7 +52,7 @@
         <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
             <li><a href="#what-is-cqrs">Co je CQRS?</a></li>
-            <li><a href="#cqs-vs-cqrs">CQS vs. CQRS — kde je hranice?</a></li>
+            <li><a href="#cqs-vs-cqrs">CQS vs. CQRS - kde je hranice?</a></li>
             <li><a href="#benefits">Výhody CQRS</a></li>
             <li><a href="#challenges">Výzvy a omezení CQRS</a></li>
             <li><a href="#symfony-messenger">Symfony Messenger jako základ CQRS</a></li>
@@ -84,7 +84,7 @@
     <p>
         Klíčová myšlenka je prostá: <strong>model, který slouží k zápisu dat, nemusí být tentýž model,
         který slouží k jejich čtení</strong>. V tradičních aplikacích používáme jednu entitu (např. Doctrine ORM entity)
-        pro obojí — vytváříme objednávku i zobrazujeme seznam objednávek přes tentýž objekt <code>Order</code>.
+        pro obojí - vytváříme objednávku i zobrazujeme seznam objednávek přes tentýž objekt <code>Order</code>.
         CQRS tuto zodpovědnost explicitně rozděluje do dvou oddělených modelů, z nichž každý může být
         optimalizován pro svůj specifický úkol.
     </p>
@@ -92,24 +92,24 @@
     <div class="note" role="note" aria-labelledby="zakladni-principy-heading">
         <h3 id="zakladni-principy-heading">Základní principy CQRS:</h3>
         <ul>
-            <li><strong>Commands</strong> — Příkazy, které mění stav systému. Ve striktním pojetí CQS nevracejí žádná data; v praxi CQRS mohou vracet identifikátor vytvořeného záznamu.</li>
-            <li><strong>Queries</strong> — Dotazy, které vrací data, ale nemění stav systému.</li>
-            <li><strong>Oddělené modely</strong> — Write model (bohatý doménový model s business logikou) a Read model (jednoduchá denormalizovaná datová struktura optimalizovaná pro dotazy).</li>
-            <li><strong>Oddělené databáze</strong> — V pokročilých implementacích mohou být použity oddělené databáze pro čtení a zápis, čímž lze nezávisle škálovat zátěž.</li>
+            <li><strong>Commands</strong> - Příkazy, které mění stav systému. Ve striktním pojetí CQS nevracejí žádná data; v praxi CQRS mohou vracet identifikátor vytvořeného záznamu.</li>
+            <li><strong>Queries</strong> - Dotazy, které vrací data, ale nemění stav systému.</li>
+            <li><strong>Oddělené modely</strong> - Write model (bohatý doménový model s business logikou) a Read model (jednoduchá denormalizovaná datová struktura optimalizovaná pro dotazy).</li>
+            <li><strong>Oddělené databáze</strong> - V pokročilých implementacích mohou být použity oddělené databáze pro čtení a zápis, čímž lze nezávisle škálovat zátěž.</li>
         </ul>
     </div>
 
     <p>
         CQRS je často používán v kombinaci s <a href="{{ path('event_sourcing') }}">Event Sourcing</a>,
         což je vzor, který ukládá změny stavu jako sekvenci událostí místo ukládání aktuálního stavu.
-        Tyto dva vzory jsou však <strong>nezávislé</strong> — lze plnohodnotně implementovat CQRS
+        Tyto dva vzory jsou však <strong>nezávislé</strong> - lze plnohodnotně implementovat CQRS
         s klasickou Doctrine ORM persistencí na write straně a denormalizovanými tabulkami na read straně,
         aniž by se sahalo po Event Sourcingu.
     </p>
     </section>
 
     <section id="cqs-vs-cqrs" aria-labelledby="cqs-vs-cqrs-heading">
-    <h2 id="cqs-vs-cqrs-heading">CQS vs. CQRS — kde je hranice?</h2>
+    <h2 id="cqs-vs-cqrs-heading">CQS vs. CQRS - kde je hranice?</h2>
 
     <p>
         Bertrand Meyer formuloval princip <strong>Command-Query Separation (CQS)</strong> jako pravidlo
@@ -119,12 +119,12 @@
     <p>
         Greg Young posunul tuto myšlenku na <strong>architektonickou úroveň</strong>: CQRS není pravidlo
         pro jednotlivé metody, ale rozhodnutí o struktuře celé aplikace. Místo jednoho doménového modelu
-        vznikají dva oddělené modely — každý s vlastní sadou tříd, vlastním úložištěm a vlastním
+        vznikají dva oddělené modely - každý s vlastní sadou tříd, vlastním úložištěm a vlastním
         optimalizačním profilem.
     </p>
 
     <div class="tip" role="note" aria-labelledby="cqs-vs-cqrs-tabulka-heading">
-        <h3 id="cqs-vs-cqrs-tabulka-heading">CQS vs. CQRS — přehled</h3>
+        <h3 id="cqs-vs-cqrs-tabulka-heading">CQS vs. CQRS - přehled</h3>
         <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
@@ -157,8 +157,8 @@
                 </tr>
                 <tr>
                     <td>Složitost</td>
-                    <td>Nízká — jde o konvenci</td>
-                    <td>Střední až vysoká — jde o architekturu</td>
+                    <td>Nízká - jde o konvenci</td>
+                    <td>Střední až vysoká - jde o architekturu</td>
                 </tr>
                 <tr>
                     <td>Příklad</td>
@@ -182,10 +182,10 @@
             CQRS není binární volba. Existuje spektrum úrovní adopce, od nejjednodušší po nejpokročilejší:
         </p>
         <ol>
-            <li><strong>Oddělené handlery</strong> — Command handlers a query handlers jako samostatné třídy, ale sdílí tutéž databázi a ORM entity. Nejjednodušší forma CQRS, vhodná pro většinu aplikací.</li>
-            <li><strong>Oddělené modely</strong> — Write model používá doménové entity (Doctrine ORM), read model používá vlastní DTO/ViewModely plněné přímým SQL nebo Doctrine DBAL. Sdílená databáze, ale oddělené PHP třídy.</li>
-            <li><strong>Oddělená úložiště</strong> — Write databáze (PostgreSQL) a read databáze (Elasticsearch, Redis, denormalizované tabulky). Změny se propagují asynchronně přes události.</li>
-            <li><strong>CQRS + Event Sourcing</strong> — Write side ukládá události do <a href="{{ path('event_sourcing') }}">Event Store</a>, read side buduje projekce z event streamu. Nejvyšší složitost, ale i nejvyšší flexibilita.</li>
+            <li><strong>Oddělené handlery</strong> - Command handlers a query handlers jako samostatné třídy, ale sdílí tutéž databázi a ORM entity. Nejjednodušší forma CQRS, vhodná pro většinu aplikací.</li>
+            <li><strong>Oddělené modely</strong> - Write model používá doménové entity (Doctrine ORM), read model používá vlastní DTO/ViewModely plněné přímým SQL nebo Doctrine DBAL. Sdílená databáze, ale oddělené PHP třídy.</li>
+            <li><strong>Oddělená úložiště</strong> - Write databáze (PostgreSQL) a read databáze (Elasticsearch, Redis, denormalizované tabulky). Změny se propagují asynchronně přes události.</li>
+            <li><strong>CQRS + Event Sourcing</strong> - Write side ukládá události do <a href="{{ path('event_sourcing') }}">Event Store</a>, read side buduje projekce z event streamu. Nejvyšší složitost, ale i nejvyšší flexibilita.</li>
         </ol>
         <p>
             Doporučený přístup: začněte na úrovni 1 nebo 2. Na úroveň 3 a 4 přejděte teprve tehdy,
@@ -197,7 +197,7 @@
             Důležité: CQRS se v rámci DDD typicky aplikuje <strong>per Bounded Context</strong>,
             nikoli globálně na celou aplikaci. Core doména s komplexní logikou může těžit z plného CQRS
             (úroveň 3–4), zatímco podpůrné kontexty (notifikace, administrace) si vystačí s jednoduchým
-            CRUD — viz <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>.
+            CRUD - viz <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>.
         </p>
     </div>
     </section>
@@ -211,29 +211,29 @@
 
     <ul>
         <li>
-            <strong>Oddělení zodpovědností</strong> — Write model se soustředí výhradně na business logiku,
+            <strong>Oddělení zodpovědností</strong> - Write model se soustředí výhradně na business logiku,
             validaci invariantů a konzistenci dat. Read model se soustředí na efektivní prezentaci dat
-            uživateli. Každý model obsahuje přesně to, co potřebuje — nic navíc.
+            uživateli. Každý model obsahuje přesně to, co potřebuje - nic navíc.
         </li>
         <li>
-            <strong>Nezávislá optimalizace</strong> — Write model může používat normalizované relační schéma
+            <strong>Nezávislá optimalizace</strong> - Write model může používat normalizované relační schéma
             a Doctrine ORM entity s bohatou doménovou logikou. Read model může být denormalizovaná tabulka,
-            Elasticsearch index, nebo Redis cache — cokoli, co nejlépe vyhovuje konkrétním dotazům.
+            Elasticsearch index, nebo Redis cache - cokoli, co nejlépe vyhovuje konkrétním dotazům.
         </li>
         <li>
-            <strong>Škálovatelnost</strong> — Ve většině aplikací výrazně převažuje čtení nad zápisem
+            <strong>Škálovatelnost</strong> - Ve většině aplikací výrazně převažuje čtení nad zápisem
             (poměr 10:1 až 100:1). CQRS umožňuje nezávisle škálovat read stranu (repliky, cache, CDN)
             bez dopadu na write stranu.
         </li>
         <li>
-            <strong>Testovatelnost</strong> — Command handlers se testují jako čistě doménová logika
+            <strong>Testovatelnost</strong> - Command handlers se testují jako čistě doménová logika
             (given state → when command → then events/state). Query handlers se testují na správnost
             vrácených dat. Žádné propletení obou zodpovědností v jedné testovací sadě.
             Viz kapitola <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
         </li>
         <li>
-            <strong>Flexibilita evoluce</strong> — Read model lze kdykoli přebudovat (rebuild projekcí),
-            přidat nový read model pro nový use case, nebo změnit strukturu dotazu — bez jakéhokoli
+            <strong>Flexibilita evoluce</strong> - Read model lze kdykoli přebudovat (rebuild projekcí),
+            přidat nový read model pro nový use case, nebo změnit strukturu dotazu - bez jakéhokoli
             dopadu na write model a business logiku.
         </li>
     </ul>
@@ -248,23 +248,23 @@
 
     <ul>
         <li>
-            <strong>Zvýšená složitost kódu</strong> — Místo jednoho modelu existují dva (nebo více).
+            <strong>Zvýšená složitost kódu</strong> - Místo jednoho modelu existují dva (nebo více).
             Každý command a query vyžaduje vlastní třídu, handler, a často i vlastní datovou strukturu.
             Pro jednoduchou CRUD operaci to může znamenat 4–6 tříd místo jedné.
         </li>
         <li>
-            <strong>Eventual consistency</strong> — Při asynchronní propagaci změn z write strany na read stranu
+            <strong>Eventual consistency</strong> - Při asynchronní propagaci změn z write strany na read stranu
             existuje časové okno, kdy read model neodráží poslední zápis. Uživatel může po odeslání
             formuláře vidět „starou" verzi dat. Řešení tohoto problému vyžaduje promyšlený přístup
-            v UI — viz <a href="#eventual-consistency">sekce Eventual Consistency</a>.
+            v UI - viz <a href="#eventual-consistency">sekce Eventual Consistency</a>.
         </li>
         <li>
-            <strong>Synchronizace modelů</strong> — Při oddělených úložištích je nutné zajistit,
+            <strong>Synchronizace modelů</strong> - Při oddělených úložištích je nutné zajistit,
             že read model bude vždy aktualizován po každé změně write modelu. Selhání propagace
             (výpadek fronty, chyba projektoru) vede k divergenci modelů.
         </li>
         <li>
-            <strong>Učební křivka</strong> — CQRS vyžaduje změnu myšlení oproti tradičnímu přístupu,
+            <strong>Učební křivka</strong> - CQRS vyžaduje změnu myšlení oproti tradičnímu přístupu,
             kde jeden model pokrývá všechny operace. Vývojáři musejí porozumět konceptům jako message bus,
             eventual consistency, idempotence handlerů a read model projekce.
         </li>
@@ -276,19 +276,19 @@
             CQRS nemusí být vhodný pro všechny projekty. Nepoužívejte CQRS, pokud:
         </p>
         <ul>
-            <li>Vyvíjíte jednoduchou aplikaci s minimální doménovou logikou — klasický CRUD
+            <li>Vyvíjíte jednoduchou aplikaci s minimální doménovou logikou - klasický CRUD
                 s Doctrine ORM bude jednodušší a rychlejší na vývoj.</li>
-            <li>Požadavky na čtení a zápis jsou téměř identické — CQRS přináší hodnotu teprve tehdy,
+            <li>Požadavky na čtení a zápis jsou téměř identické - CQRS přináší hodnotu teprve tehdy,
                 když se datové struktury pro zápis a čtení výrazně liší.</li>
-            <li>Nemáte potřebu škálovat operace čtení a zápisu nezávisle — pokud celá aplikace
+            <li>Nemáte potřebu škálovat operace čtení a zápisu nezávisle - pokud celá aplikace
                 běží na jednom serveru a zvládá zátěž, oddělená infrastruktura je zbytečná režie.</li>
-            <li>Váš tým nemá zkušenosti s asynchronním zpracováním — eventual consistency problémy
+            <li>Váš tým nemá zkušenosti s asynchronním zpracováním - eventual consistency problémy
                 mohou být frustrující bez předchozí zkušenosti s distribuovanými systémy.</li>
         </ul>
         <p>
             Dobrým kompromisem je začít s CQRS na úrovni 1 (oddělené handlery, sdílená databáze)
             a rozšiřovat postupně. Viz také
-            <a href="{{ path('anti_patterns') }}#over-engineering">Anti-vzory — Over-engineering u jednoduchých aplikací</a>.
+            <a href="{{ path('anti_patterns') }}#over-engineering">Anti-vzory - Over-engineering u jednoduchých aplikací</a>.
         </p>
     </div>
 
@@ -298,7 +298,7 @@
     <h2 id="symfony-messenger-heading">Symfony Messenger jako základ CQRS</h2>
     <p>
         Symfony Messenger je komponenta, která poskytuje infrastrukturu pro odesílání a zpracování zpráv.
-        Pro CQRS je klíčová schopnost definovat <strong>více message busů</strong> — jeden pro příkazy
+        Pro CQRS je klíčová schopnost definovat <strong>více message busů</strong> - jeden pro příkazy
         (command bus) a jeden pro dotazy (query bus). Každý bus může mít vlastní sadu middleware,
         vlastní transport a vlastní strategii zpracování.
     </p>
@@ -314,7 +314,7 @@
         <pre><code class="language-yaml"># config/packages/messenger.yaml
 framework:
     messenger:
-        # Výchozí bus — použitý, když není specifikovaný jiný
+        # Výchozí bus - použitý, když není specifikovaný jiný
         default_bus: command.bus
 
         # Konfigurace transportů
@@ -334,7 +334,7 @@ framework:
                 middleware:
                     - validation
 
-        # Směrování zpráv — mapuje konkrétní třídy nebo rozhraní na transport
+        # Směrování zpráv - mapuje konkrétní třídy nebo rozhraní na transport
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # operace, kde uživatel nemusí čekat na výsledek
@@ -357,11 +357,11 @@ framework:
             Oddělení command busu a query busu není jen formální gesto. Má konkrétní praktické důsledky:
         </p>
         <ul>
-            <li><strong>Různý middleware</strong> — Command bus potřebuje <code>doctrine_transaction</code>
-                (každý command je atomická operace). Query bus transakci nepotřebuje — jen čte data.</li>
-            <li><strong>Různé transporty</strong> — Commands mohou být směrovány na async transport
-                (frontu). Queries jsou vždy synchronní — uživatel čeká na odpověď.</li>
-            <li><strong>Type safety</strong> — Pokud controller injektuje <code>$commandBus</code>,
+            <li><strong>Různý middleware</strong> - Command bus potřebuje <code>doctrine_transaction</code>
+                (každý command je atomická operace). Query bus transakci nepotřebuje - jen čte data.</li>
+            <li><strong>Různé transporty</strong> - Commands mohou být směrovány na async transport
+                (frontu). Queries jsou vždy synchronní - uživatel čeká na odpověď.</li>
+            <li><strong>Type safety</strong> - Pokud controller injektuje <code>$commandBus</code>,
                 je jasné, že dispatchuje příkaz. Pokud injektuje <code>$queryBus</code>,
                 je jasné, že čte data. To zlepšuje čitelnost kódu a brání náhodným záměnám.</li>
         </ul>
@@ -370,11 +370,11 @@ framework:
     <div class="note" role="note" aria-labelledby="async-poznamka-heading">
         <h3 id="async-poznamka-heading">Jak vybrat příkazy pro asynchronní zpracování</h3>
         <p>
-            <strong>Asynchronně</strong> zpracovávejte operace, kde uživatel nemusí čekat na výsledek —
+            <strong>Asynchronně</strong> zpracovávejte operace, kde uživatel nemusí čekat na výsledek -
             odesílání e-mailů, generování reportů, aktualizace read modelů, notifikace.
         </p>
         <p>
-            <strong>Synchronně</strong> zpracovávejte operace vyžadující okamžitou zpětnou vazbu —
+            <strong>Synchronně</strong> zpracovávejte operace vyžadující okamžitou zpětnou vazbu -
             registrace uživatele, vytvoření objednávky, přihlášení. Uživatel čeká na odpověď
             (úspěch / chyba validace) a potřebuje ji okamžitě.
         </p>
@@ -386,17 +386,17 @@ framework:
     <h2 id="commands-heading">Implementace Commands</h2>
     <p>
         Commands v CQRS jsou příkazy, které mění stav systému. V Symfony 8 se implementují jako jednoduché
-        PHP třídy — immutabilní datové objekty (DTO), které nesou veškerá data potřebná pro vykonání operace.
+        PHP třídy - immutabilní datové objekty (DTO), které nesou veškerá data potřebná pro vykonání operace.
         Command sám o sobě neobsahuje žádnou business logiku; je to pouhý přepravní kontejner dat.
     </p>
     <p>
         Dobře navržený command má několik vlastností:
     </p>
     <ul>
-        <li>Je <strong>immutabilní</strong> (<code>readonly</code> properties) — po vytvoření se nemění.</li>
-        <li>Obsahuje <strong>validační atributy</strong> — díky middleware <code>validation</code> na command busu se command validuje ještě před předáním handleru.</li>
-        <li>Pojmenování vyjadřuje <strong>záměr</strong> — <code>RegisterUser</code>, <code>PlaceOrder</code>, <code>CancelSubscription</code>. Ne <code>SaveUser</code> nebo <code>UpdateOrder</code>.</li>
-        <li>Neobsahuje reference na <strong>doménové objekty</strong> — pracuje s primitivními typy (string, int, float), které jsou serializovatelné pro asynchronní transport.</li>
+        <li>Je <strong>immutabilní</strong> (<code>readonly</code> properties) - po vytvoření se nemění.</li>
+        <li>Obsahuje <strong>validační atributy</strong> - díky middleware <code>validation</code> na command busu se command validuje ještě před předáním handleru.</li>
+        <li>Pojmenování vyjadřuje <strong>záměr</strong> - <code>RegisterUser</code>, <code>PlaceOrder</code>, <code>CancelSubscription</code>. Ne <code>SaveUser</code> nebo <code>UpdateOrder</code>.</li>
+        <li>Neobsahuje reference na <strong>doménové objekty</strong> - pracuje s primitivními typy (string, int, float), které jsou serializovatelné pro asynchronní transport.</li>
     </ul>
 
     <div class="tip" role="note" aria-labelledby="command-example-heading">
@@ -411,7 +411,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Příkaz pro registraci nového uživatele.
- * Immutabilní DTO — neslouží k business logice, pouze přenáší data.
+ * Immutabilní DTO - neslouží k business logice, pouze přenáší data.
  */
 final class RegisterUser
 {
@@ -434,7 +434,7 @@ final class RegisterUser
 
     <p>
         V tomto příkladu je <code>RegisterUser</code> příkaz, který obsahuje data potřebná pro registraci uživatele.
-        Příkaz používá PHP atributy pro validaci dat — ta proběhne automaticky díky <code>validation</code> middleware
+        Příkaz používá PHP atributy pro validaci dat - ta proběhne automaticky díky <code>validation</code> middleware
         na command busu, ještě než se command dostane k handleru.
     </p>
 
@@ -445,10 +445,10 @@ final class RegisterUser
             scénáře, kdy je užitečné vrátit alespoň identifikátor nově vytvořeného záznamu. Dva běžné přístupy:
         </p>
         <ul>
-            <li><strong>ID generovat na klientovi</strong> — Command obsahuje <code>$userId</code> jako UUID
+            <li><strong>ID generovat na klientovi</strong> - Command obsahuje <code>$userId</code> jako UUID
                 vygenerované před dispatchem. Handler toto ID použije. Klient zná ID okamžitě, command nemusí
                 nic vracet. Toto je preferovaný přístup.</li>
-            <li><strong>ID vracet z handleru</strong> — Handler vrátí ID přes <code>HandledStamp</code>.
+            <li><strong>ID vracet z handleru</strong> - Handler vrátí ID přes <code>HandledStamp</code>.
                 Jednodušší na implementaci, ale porušuje striktní CQS a komplikuje asynchronní zpracování.</li>
         </ul>
     </div>
@@ -459,7 +459,7 @@ final class RegisterUser
     <p>
         Queries v CQRS jsou dotazy, které vrací data bez změny stavu systému. Podobně jako commands
         se implementují jako immutabilní DTO třídy, ale na rozdíl od commands <strong>vždy vracejí
-        hodnotu</strong> — handler vrací data přes <code>HandledStamp</code>.
+        hodnotu</strong> - handler vrací data přes <code>HandledStamp</code>.
     </p>
 
     <div class="tip" role="note" aria-labelledby="query-example-heading">
@@ -485,7 +485,7 @@ final class GetUserProfile
 
     <p>
         V tomto příkladu je <code>GetUserProfile</code> dotaz, který obsahuje ID uživatele, jehož profil chceme získat.
-        Dotaz používá atributy pro validaci dat — nevalidní UUID bude odmítnuto ještě před zpracováním.
+        Dotaz používá atributy pro validaci dat - nevalidní UUID bude odmítnuto ještě před zpracováním.
     </p>
 
     <div class="note" role="note" aria-labelledby="query-slozitejsi-heading">
@@ -537,19 +537,19 @@ final class ListOrders
     </p>
     <ul>
         <li>
-            <strong>Command handler</strong> — Načte agregát z repozitáře, zavolá na něm business metodu
+            <strong>Command handler</strong> - Načte agregát z repozitáře, zavolá na něm business metodu
             (která validuje invarianty) a uloží změny. Může emitovat doménové události.
             Pracuje s <strong>doménovým modelem</strong> (entity, value objects, repozitáře).
         </li>
         <li>
-            <strong>Query handler</strong> — Čte data z optimalizovaného zdroje (denormalizovaná tabulka,
+            <strong>Query handler</strong> - Čte data z optimalizovaného zdroje (denormalizovaná tabulka,
             Elasticsearch, cache) a vrací je jako ViewModel. <strong>Nepracuje s doménovým modelem</strong>
-            — obchází ho záměrně, protože doménový model není optimalizovaný pro čtení.
+            - obchází ho záměrně, protože doménový model není optimalizovaný pro čtení.
         </li>
     </ul>
 
     <div class="tip" role="note" aria-labelledby="command-handler-heading">
-        <h3 id="command-handler-heading">PHP: Command handler — RegisterUserHandler</h3>
+        <h3 id="command-handler-heading">PHP: Command handler - RegisterUserHandler</h3>
         <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -605,7 +605,7 @@ final class RegisterUserHandler
     </div>
 
     <div class="tip" role="note" aria-labelledby="query-handler-example-heading">
-        <h3 id="query-handler-example-heading">PHP: Query handler — GetUserProfileHandler</h3>
+        <h3 id="query-handler-example-heading">PHP: Query handler - GetUserProfileHandler</h3>
         <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -634,7 +634,7 @@ final class GetUserProfileHandler
     <p>
         Všimněte si klíčového rozdílu: command handler pracuje s doménovým modelem (<code>UserRepository</code>,
         <code>User</code> entita, value objects), zatímco query handler pracuje s <strong>read repozitářem</strong>
-        (<code>UserProfileReadRepository</code>), který vrací přímo ViewModel — jednoduchou datovou strukturu
+        (<code>UserProfileReadRepository</code>), který vrací přímo ViewModel - jednoduchou datovou strukturu
         optimalizovanou pro prezentaci. Query handler neprochází přes doménový model.
     </p>
     </section>
@@ -644,7 +644,7 @@ final class GetUserProfileHandler
 
     <p>
         ViewModel (nebo Read Model) je datová struktura navržená výhradně pro potřeby konkrétního dotazu
-        nebo obrazovky. Na rozdíl od doménové entity neobsahuje žádnou business logiku — je to čistě
+        nebo obrazovky. Na rozdíl od doménové entity neobsahuje žádnou business logiku - je to čistě
         prezentační objekt. Zatímco doménová entita <code>User</code> chrání invarianty a zapouzdřuje
         chování, ViewModel <code>UserProfileViewModel</code> obsahuje přesně ta data, která potřebuje
         šablona nebo API endpoint.
@@ -660,7 +660,7 @@ namespace App\UserManagement\Profile\ViewModel;
 
 /**
  * Read model pro zobrazení uživatelského profilu.
- * Obsahuje pouze data potřebná pro prezentaci — žádná business logika.
+ * Obsahuje pouze data potřebná pro prezentaci - žádná business logika.
  */
 final readonly class UserProfileViewModel
 {
@@ -677,9 +677,9 @@ final readonly class UserProfileViewModel
     </div>
 
     <p>
-        ViewModel často obsahuje <strong>data z více agregátů</strong> — v příkladu výše kombinuje
+        ViewModel často obsahuje <strong>data z více agregátů</strong> - v příkladu výše kombinuje
         údaje o uživateli s počtem objednávek a členskou úrovní. Zápis přes doménový model by vyžadoval
-        načtení uživatele, jeho objednávek a propočet úrovně — neefektivní a porušující hranice
+        načtení uživatele, jeho objednávek a propočet úrovně - neefektivní a porušující hranice
         <a href="{{ path('basic_concepts') }}#aggregates">agregátů</a>. Read model tato data drží
         připravená v denormalizované podobě.
     </p>
@@ -735,7 +735,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     <div class="note" role="note" aria-labelledby="read-model-poznamka-heading">
         <h3 id="read-model-poznamka-heading">Proč ne Doctrine ORM pro read stranu?</h3>
         <p>
-            Doctrine ORM je navržen pro práci s doménovým modelem — mapuje entity, řeší vztahy,
+            Doctrine ORM je navržen pro práci s doménovým modelem - mapuje entity, řeší vztahy,
             lazy loading, identity map a unit of work. Pro read stranu CQRS je to zbytečná režie.
             Read model potřebuje pouze <strong>efektivně načíst data a namapovat je na ViewModel</strong>.
             Doctrine DBAL (přímý SQL přes Connection) nebo nativní PDO je pro tento účel rychlejší,
@@ -749,7 +749,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     <h2 id="buses-heading">Implementace Command a Query Buses</h2>
     <p>
         Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery.
-        V Symfony 8 se pro injektování správného busu používá named autowiring — názvy parametrů
+        V Symfony 8 se pro injektování správného busu používá named autowiring - názvy parametrů
         v konstruktoru musejí odpovídat konfiguraci v <code>messenger.yaml</code>:
     </p>
 
@@ -852,13 +852,13 @@ final class ProfileController extends AbstractController
     </div>
 
     <p>
-        V těchto příkladech je <code>commandBus</code> a <code>queryBus</code> injektováno pomocí named autowiring —
+        V těchto příkladech je <code>commandBus</code> a <code>queryBus</code> injektováno pomocí named autowiring -
         Symfony automaticky přiřadí bus podle názvu parametru v konstruktoru (musí odpovídat klíči v konfiguraci
         <code>buses</code> v <code>messenger.yaml</code>, kde <code>command.bus</code> se namapuje na <code>$commandBus</code>).
     </p>
 
     <p>
-        Dosud jsme se soustředili na základní infrastrukturu CQRS — příkazy, dotazy, handlery a busy.
+        Dosud jsme se soustředili na základní infrastrukturu CQRS - příkazy, dotazy, handlery a busy.
         V následujících sekcích se zaměříme na pokročilejší aspekty: jak optimalizovat read stranu
         pro konkrétní dotazy, jak pracovat s eventual consistency a jak řešit provozní problémy
         v asynchronním prostředí.
@@ -871,7 +871,7 @@ final class ProfileController extends AbstractController
     <p>
         Jednou z hlavních výhod CQRS je možnost <strong>nezávisle optimalizovat read stranu</strong>
         pro konkrétní dotazy. Zatímco write model je normalizovaný (aby chránil konzistenci dat),
-        read model může být maximálně denormalizovaný — přesně ve tvaru, který potřebuje UI.
+        read model může být maximálně denormalizovaný - přesně ve tvaru, který potřebuje UI.
     </p>
 
     <h3>Strategie optimalizace read modelů</h3>
@@ -1022,20 +1022,20 @@ final class OrderDashboardProjector
         <h3 id="idempotence-heading">Idempotence projektorů</h3>
         <p>
             Při asynchronním zpracování může být událost doručena <strong>více než jednou</strong>
-            (at-least-once delivery). Projektor proto musí být <strong>idempotentní</strong> — opakované
+            (at-least-once delivery). Projektor proto musí být <strong>idempotentní</strong> - opakované
             zpracování téže události nesmí vést k nesprávným datům. V příkladu výše je idempotence
             zajištěna konstrukcí <code>ON DUPLICATE KEY UPDATE</code>, která při opakovaném insertu
             provede pouze update. Alternativní přístupy:
         </p>
         <ul>
-            <li><strong>Position tracking</strong> — projektor si ukládá pozici posledního zpracovaného
+            <li><strong>Position tracking</strong> - projektor si ukládá pozici posledního zpracovaného
                 eventu (event ID nebo sequence number) a ignoruje události se stejnou nebo nižší pozicí.</li>
-            <li><strong>Upsert/Merge</strong> — <code>INSERT ... ON CONFLICT DO UPDATE</code> (PostgreSQL)
+            <li><strong>Upsert/Merge</strong> - <code>INSERT ... ON CONFLICT DO UPDATE</code> (PostgreSQL)
                 nebo <code>REPLACE INTO</code> (MySQL). Jednoduchý, ale méně flexibilní.</li>
         </ul>
         <p>
             Podrobněji o idempotenci projektorů a dalších praktických problémech pojednává kapitola
-            <a href="{{ path('event_sourcing') }}#prakticke-problemy-projekci">Event Sourcing — Praktické problémy projekcí</a>.
+            <a href="{{ path('event_sourcing') }}#prakticke-problemy-projekci">Event Sourcing - Praktické problémy projekcí</a>.
         </p>
     </div>
 
@@ -1070,9 +1070,9 @@ final class OrderDashboardProjector
         nový záznam.
     </p>
     <p>
-        Tento problém není bug — je to <strong>vlastnost distribuované architektury</strong>.
-        Následující diagram zachycuje celý datový tok — od zápisu přes asynchronní propagaci
-        až po čtení — a zvýrazňuje okno, ve kterém k eventual consistency dochází:
+        Tento problém není bug - je to <strong>vlastnost distribuované architektury</strong>.
+        Následující diagram zachycuje celý datový tok - od zápisu přes asynchronní propagaci
+        až po čtení - a zvýrazňuje okno, ve kterém k eventual consistency dochází:
     </p>
 
     <div class="tip">
@@ -1107,7 +1107,7 @@ final class OrderDashboardProjector
                 <tr>
                     <td>Post-Redirect-Get s flash</td>
                     <td>Po command se provede redirect a zobrazí se potvrzující zpráva</td>
-                    <td>Standardní Symfony flash messages — uživatel vidí potvrzení a read model má čas se aktualizovat</td>
+                    <td>Standardní Symfony flash messages - uživatel vidí potvrzení a read model má čas se aktualizovat</td>
                 </tr>
                 <tr>
                     <td>Polling / Long polling</td>
@@ -1130,7 +1130,7 @@ final class OrderDashboardProjector
     </div>
 
     <div class="tip" role="note" aria-labelledby="ec-priklad-heading">
-        <h3 id="ec-priklad-heading">PHP: Optimistická aktualizace — controller vrací data z command handleru</h3>
+        <h3 id="ec-priklad-heading">PHP: Optimistická aktualizace - controller vrací data z command handleru</h3>
         <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -1162,7 +1162,7 @@ final class PlaceOrderController extends AbstractController
             return $this->redirectToRoute('cart');
         }
 
-        // ID generováno na straně klienta — command nemusí vracet hodnotu
+        // ID generováno na straně klienta - command nemusí vracet hodnotu
         $orderId = Uuid::uuid4()->toString();
         $data = $form->getData();
 
@@ -1174,7 +1174,7 @@ final class PlaceOrderController extends AbstractController
 
         $this->commandBus->dispatch($command);
 
-        // Redirect na detail objednávky — read model se může
+        // Redirect na detail objednávky - read model se může
         // ještě aktualizovat, ale uživatel vidí potvrzení
         $this->addFlash('success', 'Objednávka byla úspěšně vytvořena.');
 
@@ -1189,11 +1189,11 @@ final class PlaceOrderController extends AbstractController
             Existují scénáře, kde i krátkodobá nekonzistence dat je nepřijatelná:
         </p>
         <ul>
-            <li><strong>Finanční zůstatky</strong> — Uživatel nesmí vidět neaktuální stav účtu
+            <li><strong>Finanční zůstatky</strong> - Uživatel nesmí vidět neaktuální stav účtu
                 a provést operaci na základě zastaralých dat.</li>
-            <li><strong>Unikátní omezení</strong> — Kontrola duplicitního e-mailu při registraci musí
+            <li><strong>Unikátní omezení</strong> - Kontrola duplicitního e-mailu při registraci musí
                 být konzistentní v okamžiku zápisu, ne „až se read model aktualizuje".</li>
-            <li><strong>Limity a kvóty</strong> — Pokud uživatel nesmí překročit limit 10 objednávek denně,
+            <li><strong>Limity a kvóty</strong> - Pokud uživatel nesmí překročit limit 10 objednávek denně,
                 kontrola musí být přesná v okamžiku commandu.</li>
         </ul>
         <p>
@@ -1235,27 +1235,27 @@ framework:
                 options:
                     queue_name: high_priority
 
-        # Směrování zpráv — mapuje konkrétní třídy nebo rozhraní na transport
+        # Směrování zpráv - mapuje konkrétní třídy nebo rozhraní na transport
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # odesílání notifikací, generování reportů, aktualizace read modelů
             App\Notification\Application\Command\SendWelcomeEmail: async
             App\Reporting\Application\Command\GenerateMonthlyReport: async
 
-            # Vysoká priorita — aktualizace read modelů pro kritické obrazovky
+            # Vysoká priorita - aktualizace read modelů pro kritické obrazovky
             App\Ordering\Domain\Event\OrderPlaced: async_priority_high</code></pre>
     </div>
 
     <p>
         V této konfiguraci jsou příkazy pro odesílání e-mailů a generování reportů směrovány na asynchronní
         transport s retry strategií (3 pokusy s exponenciálním backoffem). Pro kritické události je definován
-        samostatný transport <code>async_priority_high</code> s vlastní frontou — Messenger worker
+        samostatný transport <code>async_priority_high</code> s vlastní frontou - Messenger worker
         pro tuto frontu může běžet s vyšší prioritou nebo na dedikovaném serveru.
     </p>
 
     <div class="tip" role="note" aria-labelledby="worker-heading">
         <h3 id="worker-heading">Spuštění Messenger workerů</h3>
-        <pre><code class="language-bash"># Konzumace zpráv z obou front — high_priority má přednost
+        <pre><code class="language-bash"># Konzumace zpráv z obou front - high_priority má přednost
 $ php bin/console messenger:consume async_priority_high async
 
 # V produkci: Supervisor nebo systemd pro automatický restart
@@ -1276,12 +1276,12 @@ stdout_logfile=/var/log/messenger-worker.log</code></pre>
             Messenger workery jsou dlouhodobě běžící procesy. V produkci je nutné zajistit:
         </p>
         <ul>
-            <li><strong>Automatický restart</strong> — Worker může spadnout (memory leak, neočekávaná výjimka).
+            <li><strong>Automatický restart</strong> - Worker může spadnout (memory leak, neočekávaná výjimka).
                 Supervisor nebo systemd zajistí automatický restart.</li>
-            <li><strong>Time limit a memory limit</strong> — <code>--time-limit=3600</code> ukončí worker
+            <li><strong>Time limit a memory limit</strong> - <code>--time-limit=3600</code> ukončí worker
                 po hodině, <code>--memory-limit=128M</code> po dosažení limitu paměti. Supervisor pak
                 worker restartuje s čistým stavem.</li>
-            <li><strong>Graceful shutdown</strong> — Při deployi je třeba workerům poslat signál
+            <li><strong>Graceful shutdown</strong> - Při deployi je třeba workerům poslat signál
                 <code>SIGTERM</code>. Worker dokončí aktuálně zpracovávanou zprávu a poté se ukončí.
                 Příkaz <code>messenger:stop-workers</code> toho docílí přes cache signal.</li>
         </ul>
@@ -1294,7 +1294,7 @@ stdout_logfile=/var/log/messenger-worker.log</code></pre>
     <p>
         V asynchronním prostředí je zpracování chyb zásadně odlišné od synchronního zpracování.
         Při synchronním dispatchi výjimka probublá přímo do controlleru a uživatel vidí chybovou
-        hlášku. Při asynchronním dispatchi je zpráva ve frontě — pokud handler selže, uživatel
+        hlášku. Při asynchronním dispatchi je zpráva ve frontě - pokud handler selže, uživatel
         o tom neví a zpráva musí být zpracována znovu.
     </p>
 
@@ -1305,16 +1305,16 @@ stdout_logfile=/var/log/messenger-worker.log</code></pre>
         se handler znovu zavolá:
     </p>
     <ul>
-        <li><code>max_retries: 3</code> — Maximální počet opakování.</li>
-        <li><code>delay: 1000</code> — Zpoždění prvního opakování (v ms).</li>
-        <li><code>multiplier: 2</code> — Exponenciální backoff: 1s → 2s → 4s.</li>
-        <li><code>max_delay: 60000</code> — Maximální zpoždění (60 sekund).</li>
+        <li><code>max_retries: 3</code> - Maximální počet opakování.</li>
+        <li><code>delay: 1000</code> - Zpoždění prvního opakování (v ms).</li>
+        <li><code>multiplier: 2</code> - Exponenciální backoff: 1s → 2s → 4s.</li>
+        <li><code>max_delay: 60000</code> - Maximální zpoždění (60 sekund).</li>
     </ul>
 
     <h3>Failed transport (Dead Letter Queue)</h3>
     <p>
         Po vyčerpání všech pokusů o retry je zpráva přesunuta na <strong>failed transport</strong>
-        (dead letter queue). Zprávy na failed transportu čekají na manuální zpracování —
+        (dead letter queue). Zprávy na failed transportu čekají na manuální zpracování -
         vývojář je může prozkoumat, opravit příčinu chyby a znovu odeslat.
     </p>
 
@@ -1348,7 +1348,7 @@ $ php bin/console messenger:failed:remove 42</code></pre>
     <div class="warning" role="alert" aria-labelledby="failed-monitoring-heading">
         <h3 id="failed-monitoring-heading">Monitoring selhavších zpráv</h3>
         <p>
-            Dead letter queue není „koš" — je to <strong>fronta vyžadující pozornost</strong>.
+            Dead letter queue není „koš" - je to <strong>fronta vyžadující pozornost</strong>.
             V produkčním systému musíte monitorovat počet zpráv na failed transportu
             a nastavit alerting (např. přes Prometheus metriky nebo jednoduchý cron job
             kontrolující <code>messenger:failed:show --format=json</code>). Neošetřené selhávající
@@ -1414,7 +1414,7 @@ final class CommandLoggingMiddleware implements MiddlewareInterface
 
             return $envelope;
         } catch (\Throwable $e) {
-            $this->logger->error('Command failed: {command} — {error}', [
+            $this->logger->error('Command failed: {command} - {error}', [
                 'command'  => $commandName,
                 'error'    => $e->getMessage(),
                 'duration' => round((microtime(true) - $startTime) * 1000, 2),
@@ -1666,8 +1666,8 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     </div>
 
     <p>
-        Kompletnější přehled testovacích strategií pro DDD kód — včetně testování agregátů,
-        value objects a doménových služeb — najdete v kapitole
+        Kompletnější přehled testovacích strategií pro DDD kód - včetně testování agregátů,
+        value objects a doménových služeb - najdete v kapitole
         <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
     </p>
     </section>
@@ -1687,16 +1687,16 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     </p>
 
     <ul>
-        <li><strong>Choreografie</strong> — kontexty komunikují pouze přes události, bez centrálního koordinátora.</li>
-        <li><strong>Orchestrace</strong> — centrální Process Manager řídí tok procesu a odesílá příkazy.</li>
+        <li><strong>Choreografie</strong> - kontexty komunikují pouze přes události, bez centrálního koordinátora.</li>
+        <li><strong>Orchestrace</strong> - centrální Process Manager řídí tok procesu a odesílá příkazy.</li>
     </ul>
 
     <div class="note" role="note" aria-labelledby="saga-kapitola-heading">
         <h3 id="saga-kapitola-heading">Samostatná kapitola</h3>
         <p>
-            Podrobný výklad ság — včetně implementace Process Manageru v Symfony Messenger,
+            Podrobný výklad ság - včetně implementace Process Manageru v Symfony Messenger,
             perzistence stavu, timeout handlingu, kompenzačních strategií, paralelních kroků,
-            monitoringu a testování — najdete v kapitole
+            monitoringu a testování - najdete v kapitole
             <a href="{{ path('sagas') }}">Ságy a Process Managery</a>.
         </p>
     </div>
@@ -1710,15 +1710,15 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
     <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
     <ul>
-        <li><strong>CQRS</strong> odděluje operace zápisu (Commands) od operací čtení (Queries) na architektonické úrovni — na rozdíl od CQS, které je pravidlem na úrovni metod.</li>
-        <li>Existují <strong>čtyři úrovně adopce</strong> CQRS — od oddělených handlerů se sdílenou DB až po plný CQRS s Event Sourcing. Začněte jednoduše.</li>
+        <li><strong>CQRS</strong> odděluje operace zápisu (Commands) od operací čtení (Queries) na architektonické úrovni - na rozdíl od CQS, které je pravidlem na úrovni metod.</li>
+        <li>Existují <strong>čtyři úrovně adopce</strong> CQRS - od oddělených handlerů se sdílenou DB až po plný CQRS s Event Sourcing. Začněte jednoduše.</li>
         <li>V Symfony 8 je CQRS implementován pomocí <strong>Symfony Messenger</strong> se dvěma busy: command bus (s <code>doctrine_transaction</code>) a query bus.</li>
         <li><strong>Write model</strong> používá doménové entity s business logikou, <strong>Read model</strong> používá denormalizované ViewModely optimalizované pro dotazy.</li>
-        <li>Read modely lze optimalizovat přes denormalizované tabulky, Elasticsearch, Redis cache nebo materialized views — <strong>nezávisle na write modelu</strong>.</li>
-        <li><strong>Eventual consistency</strong> je vlastnost, ne bug — řeší se vzory jako optimistická aktualizace UI, Post-Redirect-Get nebo synchronní projekce pro kritické cesty.</li>
+        <li>Read modely lze optimalizovat přes denormalizované tabulky, Elasticsearch, Redis cache nebo materialized views - <strong>nezávisle na write modelu</strong>.</li>
+        <li><strong>Eventual consistency</strong> je vlastnost, ne bug - řeší se vzory jako optimistická aktualizace UI, Post-Redirect-Get nebo synchronní projekce pro kritické cesty.</li>
         <li>Asynchronní zpracování vyžaduje <strong>monitoring dead letter queue</strong>, retry strategie a idempotentní handlery.</li>
         <li>Vlastní <strong>middleware</strong> (logování, autorizace) se přidává na command/query bus bez změny handlerů.</li>
-        <li><strong>Saga / Process Manager</strong> koordinuje dlouhotrvající procesy napříč Bounded Contexts — podrobně viz <a href="{{ path('sagas') }}">samostatná kapitola</a>.</li>
+        <li><strong>Saga / Process Manager</strong> koordinuje dlouhotrvající procesy napříč Bounded Contexts - podrobně viz <a href="{{ path('sagas') }}">samostatná kapitola</a>.</li>
     </ul>
     </section>
 
@@ -1726,7 +1726,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     <h2 id="zkuste-sami-heading">Zkuste sami</h2>
     <div class="tip">
         <ol>
-            <li>Navrhněte Command a Query pro operaci „přidání produktu do košíku". Jaká data bude Command obsahovat? Jaká data vrátí Query? Kde vygenerujete ID košíku — na klientovi, nebo v handleru?</li>
+            <li>Navrhněte Command a Query pro operaci „přidání produktu do košíku". Jaká data bude Command obsahovat? Jaká data vrátí Query? Kde vygenerujete ID košíku - na klientovi, nebo v handleru?</li>
             <li>Nakonfigurujte Symfony Messenger se dvěma busy (<code>command.bus</code>, <code>query.bus</code>) a vytvořte handler pro jeden z nich. Přidejte vlastní logovací middleware.</li>
             <li>Vytvořte denormalizovanou tabulku <code>cart_summary</code> a projektor, který ji aktualizuje na základě událostí <code>ItemAddedToCart</code> a <code>ItemRemovedFromCart</code>. Zajistěte idempotenci projektoru.</li>
             <li>Rozhodněte, které z následujících operací byste zpracovali asynchronně: registrace uživatele, odeslání potvrzovacího e-mailu, vytvoření faktury, validace adresy, aktualizace read modelu košíku. Zdůvodněte u každé.</li>

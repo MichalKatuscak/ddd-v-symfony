@@ -56,7 +56,7 @@
             <p>
                 Domain-Driven Design je mocný přístup k návrhu softwaru, ale jeho komplexnost s sebou přináší
                 mnohá úskalí. Zkušenosti z praxe ukazují, že týmy, které s DDD začínají, opakovaně narážejí
-                na stejné chyby — a to i přesto, že dobře rozumí teorii. Znát anti-vzory je proto stejně důležité
+                na stejné chyby - a to i přesto, že dobře rozumí teorii. Znát anti-vzory je proto stejně důležité
                 jako znát vzory samotné.
             </p>
             <p>
@@ -70,17 +70,17 @@
                 <p>Chyby při implementaci DDD lze rozdělit do tří kategorií:</p>
                 <ul>
                     <li>
-                        <strong>Strategické chyby</strong> — špatně definované Bounded Contexts, ignorování
+                        <strong>Strategické chyby</strong> - špatně definované Bounded Contexts, ignorování
                         Ubiquitous Language, sdílená databáze napříč kontexty. Tyto chyby mají nejzávažnější
                         dopad, protože ovlivňují celkovou architekturu systému.
                     </li>
                     <li>
-                        <strong>Taktické chyby</strong> — anémický doménový model, příliš velké agregáty,
+                        <strong>Taktické chyby</strong> - anémický doménový model, příliš velké agregáty,
                         Primitive Obsession. Tyto chyby se projevují na úrovni doménového modelu a narušují
                         objektově orientované principy.
                     </li>
                     <li>
-                        <strong>Implementační chyby</strong> — doménová logika v infrastrukturní vrstvě,
+                        <strong>Implementační chyby</strong> - doménová logika v infrastrukturní vrstvě,
                         mutovatelné události, over-engineering. Tyto chyby vznikají při konkrétní implementaci
                         a jsou obvykle nejsnáze opravitelné.
                     </li>
@@ -94,30 +94,30 @@
                 Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji
                 obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003
                 <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank">[1]</a>.
-                Jedná se o situaci, kdy doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery —
-                obsahují výhradně gettery a settery — a veškerá doménová logika je přesunuta do servisní vrstvy.
+                Jedná se o situaci, kdy doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery -
+                obsahují výhradně gettery a settery - a veškerá doménová logika je přesunuta do servisní vrstvy.
             </p>
 
             <div class="note" role="note" aria-labelledby="anemicky-definice-heading">
                 <h3 id="anemicky-definice-heading">Proč je anémický model problém?</h3>
                 <ul>
                     <li>
-                        <strong>Porušení zapouzdření (encapsulation)</strong> — základní princip OOP říká, že data
+                        <strong>Porušení zapouzdření (encapsulation)</strong> - základní princip OOP říká, že data
                         a chování, které na nich operuje, by měly být společně. Anémický model toto porušuje tím,
                         že data jsou v entitě, ale logika je jinde.
                     </li>
                     <li>
-                        <strong>Ztráta modelu jako abstrakce domény</strong> — pokud entity obsahují pouze data,
+                        <strong>Ztráta modelu jako abstrakce domény</strong> - pokud entity obsahují pouze data,
                         model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým
                         do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla,
-                        pouze strukturu dat — model tak ztrácí svůj komunikační a dokumentační přínos.
+                        pouze strukturu dat - model tak ztrácí svůj komunikační a dokumentační přínos.
                     </li>
                     <li>
-                        <strong>Duplicita logiky</strong> — doménová pravidla rozptýlená do service tříd vedou
+                        <strong>Duplicita logiky</strong> - doménová pravidla rozptýlená do service tříd vedou
                         k jejich kopírování na více místech, protože není jasné kanonické místo pro logiku.
                     </li>
                     <li>
-                        <strong>Obtížná testovatelnost</strong> — testování logiky v servisní vrstvě vyžaduje
+                        <strong>Obtížná testovatelnost</strong> - testování logiky v servisní vrstvě vyžaduje
                         mockování závislostí, kdežto doménová logika v entitě je testovatelná izolovaně bez
                         jakýchkoliv závislostí.
                     </li>
@@ -127,7 +127,7 @@
             <div class="warning" role="note" aria-labelledby="anemicky-spatny-heading">
                 <h3 id="anemicky-spatny-heading">Špatně: Anémická entita User a servisní vrstva s logikou</h3>
                 <p>
-                    V tomto příkladu entita <code>User</code> neobsahuje žádnou doménovou logiku — pouze gettery
+                    V tomto příkladu entita <code>User</code> neobsahuje žádnou doménovou logiku - pouze gettery
                     a settery. Veškerá logika je přesunuta do <code>UserService</code>, což vede k anémickému modelu.
                 </p>
             </div>
@@ -334,7 +334,7 @@ class User
             <p>
                 Klíčovým rozdílem je, že správná entita vystavuje doménově orientované metody (<code>activate()</code>,
                 <code>deactivate()</code>, <code>register()</code>) namísto generických setterů. Entita sama garantuje
-                své invarianty — nikdo zvenčí nemůže entitu dostat do nekonzistentního stavu.
+                své invarianty - nikdo zvenčí nemůže entitu dostat do nekonzistentního stavu.
             </p>
         </section>
 
@@ -351,21 +351,21 @@ class User
                 <h3 id="primitive-problemy-heading">Problémy způsobené Primitive Obsession</h3>
                 <ul>
                     <li>
-                        <strong>Ztráta validace</strong> — primitivní <code>string</code> může obsahovat jakoukoliv hodnotu,
+                        <strong>Ztráta validace</strong> - primitivní <code>string</code> může obsahovat jakoukoliv hodnotu,
                         zatímco hodnotový objekt <code>Email</code> garantuje, že vždy obsahuje platnou e-mailovou adresu.
                     </li>
                     <li>
-                        <strong>Chybějící sémantika</strong> — typ <code>string</code> neříká nic o tom, co hodnota
+                        <strong>Chybějící sémantika</strong> - typ <code>string</code> neříká nic o tom, co hodnota
                         reprezentuje. <code>Email</code>, <code>PhoneNumber</code> nebo <code>PostalCode</code> jsou
                         sémanticky bohaté.
                     </li>
                     <li>
-                        <strong>Záměna identifikátorů</strong> — používání <code>int</code> pro všechna ID vede
+                        <strong>Záměna identifikátorů</strong> - používání <code>int</code> pro všechna ID vede
                         k tomu, že typový systém PHP ani IDE nemohou odhalit záměnu <code>$orderId</code> a <code>$userId</code>
-                        — obě jsou jen <code>int</code>.
+                        - obě jsou jen <code>int</code>.
                     </li>
                     <li>
-                        <strong>Rozptýlená validační logika</strong> — bez hodnotových objektů se validace opakuje
+                        <strong>Rozptýlená validační logika</strong> - bez hodnotových objektů se validace opakuje
                         na každém místě, kde se s hodnotou pracuje.
                     </li>
                 </ul>
@@ -390,9 +390,9 @@ declare(strict_types=1);
 class Order
 {
     private int $id;
-    private int $userId;      // int, stejný typ jako $id — záměna je možná!
+    private int $userId;      // int, stejný typ jako $id - záměna je možná!
     private string $email;    // libovolný string, bez validace
-    private float $amount;    // float pro peníze — nebezpečné kvůli zaokrouhlování
+    private float $amount;    // float pro peníze - nebezpečné kvůli zaokrouhlování
     private string $currency; // string "CZK", "EUR"... bez omezení
 
     public function __construct(
@@ -421,7 +421,7 @@ class Order
 // Typový systém PHP neodhalí tuto chybu:
 $orderId = 42;
 $userId = 17;
-processOrder($userId, $orderId); // Záměna parametrů — a PHP si nestěžuje!</code></pre>
+processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!</code></pre>
             </div>
 
             <div class="note" role="note" aria-labelledby="primitive-spravny-heading">
@@ -475,7 +475,7 @@ enum Currency: string
 
 final class Money
 {
-    private readonly int $amountInCents; // Celé číslo — žádné problémy s plovoucí desetinnou čárkou
+    private readonly int $amountInCents; // Celé číslo - žádné problémy s plovoucí desetinnou čárkou
     private readonly Currency $currency;
 
     public function __construct(int $amountInCents, Currency $currency)
@@ -504,7 +504,7 @@ final class Money
     public function currency(): Currency { return $this->currency; }
 }
 
-// Silně typované identifikátory — záměna je odhalena typovým systémem
+// Silně typované identifikátory - záměna je odhalena typovým systémem
 final class OrderId
 {
     public function __construct(private readonly string $value)
@@ -535,7 +535,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
         <section id="prilis-velky-agregat" aria-labelledby="prilis-velky-agregat-heading">
             <h2 id="prilis-velky-agregat-heading">Anti-vzor: Příliš velký agregát (God Aggregate)</h2>
             <p>
-                Agregát by měl být navrhován kolem transakční konzistence — to jest kolem nejmenší skupiny objektů,
+                Agregát by měl být navrhován kolem transakční konzistence - to jest kolem nejmenší skupiny objektů,
                 která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako "God Aggregate")
                 sdružuje příliš mnoho entit a logiky do jednoho celku, čímž porušuje princip jedné odpovědnosti
                 a způsobuje řadu závažných problémů.
@@ -545,21 +545,21 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 <h3 id="agregat-problemy-heading">Problémy způsobené příliš velkým agregátem</h3>
                 <ul>
                     <li>
-                        <strong>Výkonnostní problémy</strong> — načtení celého agregátu z databáze je pomalé,
+                        <strong>Výkonnostní problémy</strong> - načtení celého agregátu z databáze je pomalé,
                         pokud obsahuje stovky nebo tisíce podřízených entit (např. všechny položky objednávky
                         zákazníka za celý rok).
                     </li>
                     <li>
-                        <strong>Problémy s konkurencí (concurrency)</strong> — agregát je zamčen jako celek
+                        <strong>Problémy s konkurencí (concurrency)</strong> - agregát je zamčen jako celek
                         při každé změně. Velký agregát znamená větší pravděpodobnost konfliktů při souběžném
                         přístupu.
                     </li>
                     <li>
-                        <strong>Těsné provázání (tight coupling)</strong> — příliš mnoho entit uvnitř jednoho
+                        <strong>Těsné provázání (tight coupling)</strong> - příliš mnoho entit uvnitř jednoho
                         agregátu ztěžuje nezávislý vývoj a testování.
                     </li>
                     <li>
-                        <strong>Narušení Bounded Context hranic</strong> — god agregát bývá příznakem špatně
+                        <strong>Narušení Bounded Context hranic</strong> - god agregát bývá příznakem špatně
                         definovaných hranic kontextů.
                     </li>
                 </ul>
@@ -569,7 +569,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 <h3 id="agregat-spatny-heading">Špatně: God Aggregate obsahující příliš mnoho entit</h3>
                 <p>
                     Následující příklad ukazuje agregát <code>Customer</code>, který neúměrně sdružuje objednávky,
-                    adresy, platební karty i recenze — to vše jako přímé součásti jednoho agregátu.
+                    adresy, platební karty i recenze - to vše jako přímé součásti jednoho agregátu.
                 </p>
             </div>
 
@@ -579,7 +579,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 
 declare(strict_types=1);
 
-// ŠPATNĚ: God Aggregate — příliš mnoho odpovědností
+// ŠPATNĚ: God Aggregate - příliš mnoho odpovědností
 
 class Customer
 {
@@ -602,7 +602,7 @@ class Customer
     /** @var WishlistItem[] */
     private array $wishlistItems = []; // Přání zákazníka
 
-    // Při načtení zákazníka z DB musíme načíst vše — tisíce záznamů!
+    // Při načtení zákazníka z DB musíme načíst vše - tisíce záznamů!
     // Při update zákazníka zamkneme celou tuto strukturu.
     // Přidání nové objednávky vyžaduje celý agregát v paměti.
 }</code></pre>
@@ -612,7 +612,7 @@ class Customer
                 <h3 id="agregat-spravny-heading">Správně: Malé agregáty s jasnou transakční hranicí</h3>
                 <p>
                     Agregáty by měly být navrhovány kolem skutečné transakční potřeby. Zákazník a jeho objednávky
-                    jsou samostatné agregáty — objednávku lze vytvořit, aniž by bylo nutné načíst celou historii
+                    jsou samostatné agregáty - objednávku lze vytvořit, aniž by bylo nutné načíst celou historii
                     zákazníka.
                 </p>
             </div>
@@ -638,7 +638,7 @@ use App\OrderManagement\Domain\ValueObject\Email;
 use App\OrderManagement\Domain\ValueObject\WishlistId;
 use App\OrderManagement\Domain\Event\OrderPlacedEvent;
 
-// Agregát 1: Customer — pouze identita a kontaktní údaje
+// Agregát 1: Customer - pouze identita a kontaktní údaje
 class Customer
 {
     private readonly CustomerId $id;
@@ -649,11 +649,11 @@ class Customer
     // Adresa pro doručení je součástí objednávky, ne zákazníka.
 }
 
-// Agregát 2: Order — transakční hranice pro jednu objednávku
+// Agregát 2: Order - transakční hranice pro jednu objednávku
 class Order
 {
     private readonly OrderId $id;
-    private readonly CustomerId $customerId; // Pouze reference — ne celý Customer objekt!
+    private readonly CustomerId $customerId; // Pouze reference - ne celý Customer objekt!
     private Address $shippingAddress;
     private OrderStatus $status;
 
@@ -701,7 +701,7 @@ class Order
     }
 }
 
-// Agregát 3: Wishlist — zcela oddělená doménová odpovědnost
+// Agregát 3: Wishlist - zcela oddělená doménová odpovědnost
 class Wishlist
 {
     private readonly WishlistId $id;
@@ -810,13 +810,13 @@ use App\Billing\Domain\ValueObject\Address;
 use App\Billing\Domain\ValueObject\CustomerId;
 use App\Billing\Domain\ValueObject\VatNumber;
 
-// Port (rozhraní) — Billing kontext definuje, co potřebuje vědět o zákazníkovi
+// Port (rozhraní) - Billing kontext definuje, co potřebuje vědět o zákazníkovi
 interface CustomerDataProvider
 {
     public function getBillingDataForCustomer(CustomerId $customerId): CustomerBillingData;
 }
 
-// CustomerBillingData je DTO specifické pro Billing kontext — ne User entita!
+// CustomerBillingData je DTO specifické pro Billing kontext - ne User entita!
 final class CustomerBillingData
 {
     public function __construct(
@@ -826,7 +826,7 @@ final class CustomerBillingData
     ) {}
 }
 
-// Infrastrukturní adapter — implementace v Billing kontextu, volá UserManagement přes API
+// Infrastrukturní adapter - implementace v Billing kontextu, volá UserManagement přes API
 namespace App\Billing\Infrastructure\Adapter;
 
 use App\Billing\Domain\Port\CustomerBillingData;
@@ -868,7 +868,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
         <section id="mutovatelne-udalosti" aria-labelledby="mutovatelne-udalosti-heading">
             <h2 id="mutovatelne-udalosti-heading">Anti-vzor: Mutovatelné doménové události</h2>
             <p>
-                Doménová událost reprezentuje fakt, který se stal v minulosti — a minulost nelze změnit.
+                Doménová událost reprezentuje fakt, který se stal v minulosti - a minulost nelze změnit.
                 Události musí být striktně <strong>immutable</strong> (neměnné). Mutovatelná událost je
                 konceptuální rozpor: pokud lze událost po vytvoření změnit, ztrácí svou sémantickou hodnotu
                 jako historický záznam.
@@ -902,7 +902,7 @@ class OrderPlacedEvent
     private float $totalAmount;
     private \DateTime $occurredAt; // Mutovatelný DateTime!
 
-    // Veřejné settery — událost lze po vytvoření libovolně měnit
+    // Veřejné settery - událost lze po vytvoření libovolně měnit
     public function setOrderId(string $orderId): void
     {
         $this->orderId = $orderId;
@@ -958,7 +958,7 @@ final class OrderPlacedEvent
     ) {
         $this->occurredAt = new \DateTimeImmutable();
         // Všechny hodnoty jsou nastaveny jednou v konstruktoru.
-        // Neexistují žádné settery — událost je neměnná.
+        // Neexistují žádné settery - událost je neměnná.
     }
 
     // Jediné metody jsou readonly accessory (nebo přímý přístup k readonly properties)
@@ -980,7 +980,7 @@ final class OrderCancelledEvent
         $this->orderId = $orderId;
         $this->reason = $reason;
         $this->occurredAt = new \DateTimeImmutable();
-        // Žádné settery — zapouzdření zajišťuje immutabilitu
+        // Žádné settery - zapouzdření zajišťuje immutabilitu
     }
 
     public function orderId(): OrderId { return $this->orderId; }
@@ -1025,7 +1025,7 @@ class DoctrineUserRepository extends EntityRepository
     {
         $user = $this->find($userId);
 
-        // Business logika přímo v repozitáři — ŠPATNĚ!
+        // Business logika přímo v repozitáři - ŠPATNĚ!
         if ($user->getStatus() !== 'pending') {
             throw new \RuntimeException('User is not pending.');
         }
@@ -1036,7 +1036,7 @@ class DoctrineUserRepository extends EntityRepository
         $user->setToken(null);
         $user->setActivatedAt(new \DateTime());
 
-        // Repozitář volá flush — to by měla řídit aplikační vrstva
+        // Repozitář volá flush - to by měla řídit aplikační vrstva
         $this->getEntityManager()->flush();
     }
 }
@@ -1054,7 +1054,7 @@ class UserController extends AbstractController
             return $this->json(['error' => 'Invalid token format'], 400);
         }
         if ($user->getCreatedAt() < new \DateTime('-24 hours')) {
-            // Expirace tokenu — business pravidlo patří do domény, ne do kontroleru!
+            // Expirace tokenu - business pravidlo patří do domény, ne do kontroleru!
             $user->setStatus('expired');
             $this->entityManager->flush();
             return $this->json(['error' => 'Token expired'], 400);
@@ -1073,7 +1073,7 @@ class UserController extends AbstractController
             </div>
 
             <div class="tip">
-                <h3>Příklad: Správné vrstvení — logika v doméně (správně)</h3>
+                <h3>Příklad: Správné vrstvení - logika v doméně (správně)</h3>
                 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -1129,7 +1129,7 @@ class ActivateUserHandler
             throw new UserNotFoundException($command->userId);
         }
 
-        // Business logika je v entitě — handler pouze orkestruje
+        // Business logika je v entitě - handler pouze orkestruje
         $user->activate(VerificationToken::fromString($command->token));
 
         $this->em->flush(); // Flush patří do aplikační vrstvy
@@ -1161,7 +1161,7 @@ class UserController extends AbstractController
             <p>
                 DDD není vhodné pro každý projekt. Eric Evans sám upozorňuje, že DDD přináší největší přidanou
                 hodnotu u <strong>komplexních domén se složitou doménovou logikou</strong>. Pro jednoduché CRUD aplikace,
-                administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované — přináší obrovskou
+                administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované - přináší obrovskou
                 počáteční složitost bez odpovídajícího benefitu.
             </p>
 
@@ -1193,7 +1193,7 @@ class UserController extends AbstractController
             <div class="warning" role="note" aria-labelledby="overeng-warning-heading">
                 <h3 id="overeng-warning-heading">Start simple, add complexity when needed</h3>
                 <p>
-                    Začněte s jednoduchým přístupem — aktivní záznamy, jednoduché service třídy nebo MVC bez DDD.
+                    Začněte s jednoduchým přístupem - aktivní záznamy, jednoduché service třídy nebo MVC bez DDD.
                     DDD prvky přidávejte inkrementálně, jakmile se doménová složitost začne projevovat. Refaktoring
                     od jednoduchého k DDD je mnohem snazší než odstraňování zbytečné složitosti z přenavržené
                     architektury.
@@ -1214,7 +1214,7 @@ class UserController extends AbstractController
 ✔ Pojišťovací systém s komplexními výpočty pojistného
 
 # DDD je překombinované pro:
-✗ Blog nebo CMS (kategorie, příspěvky, komentáře — čistý CRUD)
+✗ Blog nebo CMS (kategorie, příspěvky, komentáře - čistý CRUD)
 ✗ Jednoduchý e-shop s desítkami produktů a základními objednávkami
 ✗ Interní admin panel pro správu číselníků
 ✗ Prototyp nebo MVP s nejistou business logikou
@@ -1225,7 +1225,7 @@ class UserController extends AbstractController
         <section id="missing-ubiquitous-language" aria-labelledby="missing-ubiquitous-language-heading">
             <h2 id="missing-ubiquitous-language-heading">Anti-vzor: Ignorování Ubiquitous Language</h2>
             <p>
-                Jedním ze základních pilířů DDD je Ubiquitous Language — společný jazyk sdílený vývojáři,
+                Jedním ze základních pilířů DDD je Ubiquitous Language - společný jazyk sdílený vývojáři,
                 doménovými experty a všemi zainteresovanými stranami. Tento jazyk musí být konzistentně
                 používán v kódu, dokumentaci, testech i v komunikaci. Ignorování tohoto principu vede
                 k situaci, kdy se tatáž doménová entita nazývá různě na různých místech, což způsobuje
@@ -1261,7 +1261,7 @@ class Account { /* ... */ }      // Třetí název v jiném modulu
 // Doctrine entita:
 #[ORM\Entity]
 #[ORM\Table(name: 'clients')]
-class User { /* ... */ }  // Třída "User", tabulka "clients" — zmatek
+class User { /* ... */ }  // Třída "User", tabulka "clients" - zmatek
 
 // Metody v kódu:
 function getCustomerById(int $id): User { /* ... */ }   // Vrací User, bere customer
@@ -1311,7 +1311,7 @@ class PolicyHolder
 
     public function fileClaimFor(InsuredEvent $event): Claim
     {
-        // Metoda pojmenována jazykem domény — doménový expert rozumí!
+        // Metoda pojmenována jazykem domény - doménový expert rozumí!
         return Claim::open($this->id, $event);
     }
 }
@@ -1352,7 +1352,7 @@ class InsurancePolicy
                     <li><strong>Pojistné (částka)</strong> → Value Object <code>Premium</code></li>
                 </ul>
                 <p>
-                    Ubiquitous Language není jen o pojmenování tříd — zahrnuje také pojmenování metod, proměnných,
+                    Ubiquitous Language není jen o pojmenování tříd - zahrnuje také pojmenování metod, proměnných,
                     databázových sloupců, API endpointů, chybových zpráv a testovacích scénářů. Čím konzistentnější
                     jazyk, tím přímočařejší mapování mezi požadavky doménového experta a implementací.
                 </p>
@@ -1370,9 +1370,9 @@ class InsurancePolicy
         <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
             <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
             <ul>
-                <li><strong>Anémický doménový model</strong> — entity bez chování jsou jen datové kontejnery; logika patří do doménových objektů.</li>
-                <li><strong>Primitive Obsession</strong> — primitivní typy místo Value Objects vedou ke ztrátě validace a sémantiky.</li>
-                <li><strong>God Aggregate</strong> — příliš velké agregáty způsobují výkonnostní a konkurenční problémy.</li>
+                <li><strong>Anémický doménový model</strong> - entity bez chování jsou jen datové kontejnery; logika patří do doménových objektů.</li>
+                <li><strong>Primitive Obsession</strong> - primitivní typy místo Value Objects vedou ke ztrátě validace a sémantiky.</li>
+                <li><strong>God Aggregate</strong> - příliš velké agregáty způsobují výkonnostní a konkurenční problémy.</li>
                 <li><strong>Sdílená databáze</strong> napříč Bounded Contexts narušuje izolaci kontextů.</li>
                 <li><strong>Mutovatelné události</strong> porušují základní princip Event Sourcingu.</li>
                 <li>Znát anti-vzory je <strong>stejně důležité</strong> jako znát vzory samotné.</li>
@@ -1383,7 +1383,7 @@ class InsurancePolicy
             <h2 id="zkuste-sami-heading">Zkuste sami</h2>
             <div class="tip">
                 <ol>
-                    <li>Vezměte existující kód z vašeho projektu a identifikujte, zda obsahuje anémický doménový model. Pokud ano, navrhněte refaktoring — přesuňte jednu business metodu z service třídy do entity.</li>
+                    <li>Vezměte existující kód z vašeho projektu a identifikujte, zda obsahuje anémický doménový model. Pokud ano, navrhněte refaktoring - přesuňte jednu business metodu z service třídy do entity.</li>
                     <li>Najděte ve svém kódu místo, kde se používá <code>string</code> nebo <code>int</code> pro identifikátor entity. Navrhněte silně typovaný Value Object, který by ho nahradil.</li>
                     <li>Zkontrolujte, zda váš největší agregát nepřekračuje doporučenou velikost. Jak byste ho případně rozdělili?</li>
                 </ol>

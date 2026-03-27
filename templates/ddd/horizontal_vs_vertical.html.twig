@@ -90,7 +90,7 @@
 
     <p>
         V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-        Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje — ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
+        Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje - ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
     </p>
     </section>
 
@@ -105,7 +105,7 @@
         <h3 id="vertical-slice-example-heading">Příklad: Struktura projektu s vertikální slice architekturou</h3>
         <pre><code class="language-bash">src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
-│   ├── Domain/                # Doménová vrstva — sdílená pro celý kontext
+│   ├── Domain/                # Doménová vrstva - sdílená pro celý kontext
 │   │   ├── Model/
 │   │   │   └── User.php       # Entita (Aggregate Root)
 │   │   ├── ValueObject/
@@ -168,10 +168,10 @@
             V celém průvodci používáme konzistentní strukturu pro vertikální slice architekturu:
         </p>
         <ul>
-            <li><code>{BC}/Domain/</code> — doménová vrstva sdílená v rámci bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
-            <li><code>{BC}/Infrastructure/</code> — infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
-            <li><code>{BC}/{Feature}/</code> — feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
-            <li><code>Shared/</code> — pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
+            <li><code>{BC}/Domain/</code> - doménová vrstva sdílená v rámci bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
+            <li><code>{BC}/Infrastructure/</code> - infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
+            <li><code>{BC}/{Feature}/</code> - feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
+            <li><code>Shared/</code> - pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
         </ul>
     </div>
     </section>
@@ -404,7 +404,7 @@
             <ul>
                 <li><strong>Tradiční (horizontální) DDD</strong> organizuje kód podle vrstev (Domain, Application, Infrastructure).</li>
                 <li><strong>Vertikální slice architektura</strong> organizuje kód podle features uvnitř Bounded Contexts.</li>
-                <li>Oba přístupy jsou legitimní — volba závisí na velikosti týmu, složitosti domény a preferencích.</li>
+                <li>Oba přístupy jsou legitimní - volba závisí na velikosti týmu, složitosti domény a preferencích.</li>
                 <li>V tomto kurzu používáme <strong>hybridní přístup</strong>: vertikální slices pro features, sdílená doménová vrstva uvnitř BC.</li>
             </ul>
         </section>

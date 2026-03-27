@@ -298,7 +298,7 @@ class User
     </div>
 
     <p>
-        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Všimněte si, že entita neobsahuje žádné Doctrine atributy — doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekce <a href="#doctrine-xml-mapping">Separace Doctrine mapování</a>). Neměnné vlastnosti (<code>$id</code>, <code>$createdAt</code>) jsou označeny jako <code>readonly</code>. Entity mohou také generovat doménové události,
+        V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Všimněte si, že entita neobsahuje žádné Doctrine atributy - doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekce <a href="#doctrine-xml-mapping">Separace Doctrine mapování</a>). Neměnné vlastnosti (<code>$id</code>, <code>$createdAt</code>) jsou označeny jako <code>readonly</code>. Entity mohou také generovat doménové události,
         které jsou uloženy v poli <code>$events</code> a mohou být později uvolněny a zpracovány.
     </p>
 
@@ -310,7 +310,7 @@ class User
             Gettery pak vrací nové instance VO: <code>return new UserId($this->id)</code>.
         </p>
         <p>
-            Tento kompromis je nutný kvůli <strong>Doctrine hydration</strong> — Doctrine při načítání
+            Tento kompromis je nutný kvůli <strong>Doctrine hydration</strong> - Doctrine při načítání
             entity z databáze nastavuje vlastnosti přímo, bez volání konstruktoru. Kdyby vlastnost
             byla typu <code>UserId</code>, Doctrine by do ní vložil <code>string</code> z databáze,
             což by způsobilo TypeError. Alternativou je <strong>Doctrine custom type</strong>
@@ -368,7 +368,7 @@ class Email
 
     <p>
         V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné (vlastnost <code>$value</code> je <code>readonly</code>) a nemají žádnou identitu.
-        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu. Stejně jako u entit, ani hodnotové objekty neobsahují Doctrine atributy — mapování je řešeno externě.
+        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu. Stejně jako u entit, ani hodnotové objekty neobsahují Doctrine atributy - mapování je řešeno externě.
     </p>
     </section>
 
@@ -453,16 +453,16 @@ class DoctrineUserRepository implements UserRepository
         <p>
             Ve výše uvedeném příkladu jsou události dispatchovány <strong>po</strong> volání
             <code>flush()</code>. Pokud dispatch selže (např. Messenger transport je nedostupný),
-            data jsou již persistována, ale události nebyly zpracovány — dochází k nekonzistenci.
+            data jsou již persistována, ale události nebyly zpracovány - dochází k nekonzistenci.
         </p>
         <p>
             V produkčních systémech existují dva robustnější přístupy:
         </p>
         <ul>
-            <li><strong>Outbox pattern</strong> — události se uloží do databázové tabulky <code>outbox</code>
+            <li><strong>Outbox pattern</strong> - události se uloží do databázové tabulky <code>outbox</code>
                 v rámci téže transakce jako agregát. Separátní worker poté události přečte a dispatchuje.
                 Tím je zaručena atomicita.</li>
-            <li><strong>Doctrine lifecycle events</strong> — Doctrine <code>postFlush</code> se volá
+            <li><strong>Doctrine lifecycle events</strong> - Doctrine <code>postFlush</code> se volá
                 po dokončení <code>flush()</code>, ale <strong>před commitem transakce</strong>, pokud
                 používáte explicitní transakce. Pro dispatch po úspěšném commitu použijte
                 <code>postTransactionCommit</code> event (Doctrine ORM 2.14+) nebo vlastní
@@ -475,17 +475,17 @@ class DoctrineUserRepository implements UserRepository
     <h2 id="doctrine-xml-mapping-heading">Separace Doctrine mapování pomocí XML</h2>
     <p>
         V předchozích příkladech jste si všimli, že doménové entity a hodnotové objekty neobsahují žádné Doctrine atributy (<code>#[ORM\Entity]</code>, <code>#[ORM\Column]</code> apod.).
-        To je záměrné — v čistém DDD přístupu by doménová vrstva neměla mít žádnou závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
+        To je záměrné - v čistém DDD přístupu by doménová vrstva neměla mít žádnou závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
         mezi doménovým modelem a persistenční vrstvou, čímž porušují princip <strong>Dependency Inversion</strong>.
     </p>
 
     <div class="warning">
         <h3>Proč Doctrine atributy nepatří do doménové vrstvy?</h3>
         <ul>
-            <li><strong>Porušení Dependency Inversion Principle</strong> — doménová vrstva (vysokoúrovňový modul) závisí na Doctrine ORM (nízkoúrovňový modul). Správný směr závislosti je opačný.</li>
-            <li><strong>Znečištění doménového modelu</strong> — <code>use Doctrine\ORM\Mapping as ORM;</code> v doménové entitě znamená, že doména „ví" o databázi. Čistá doména by měla být POPO (Plain Old PHP Object).</li>
-            <li><strong>Obtížná záměnitelnost</strong> — pokud chcete změnit persistenční mechanismus (např. z MySQL na MongoDB nebo Event Store), musíte upravovat doménové entity.</li>
-            <li><strong>Komplikace testování</strong> — unit testy doménových entit nepotřebují Doctrine, ale atributy vytvářejí nepříjemnou závislost při autoloadingu.</li>
+            <li><strong>Porušení Dependency Inversion Principle</strong> - doménová vrstva (vysokoúrovňový modul) závisí na Doctrine ORM (nízkoúrovňový modul). Správný směr závislosti je opačný.</li>
+            <li><strong>Znečištění doménového modelu</strong> - <code>use Doctrine\ORM\Mapping as ORM;</code> v doménové entitě znamená, že doména „ví" o databázi. Čistá doména by měla být POPO (Plain Old PHP Object).</li>
+            <li><strong>Obtížná záměnitelnost</strong> - pokud chcete změnit persistenční mechanismus (např. z MySQL na MongoDB nebo Event Store), musíte upravovat doménové entity.</li>
+            <li><strong>Komplikace testování</strong> - unit testy doménových entit nepotřebují Doctrine, ale atributy vytvářejí nepříjemnou závislost při autoloadingu.</li>
         </ul>
     </div>
 
@@ -556,10 +556,10 @@ doctrine:
     <div class="note">
         <h3>Výhody XML mapování pro DDD</h3>
         <ul>
-            <li><strong>Čistá doménová vrstva</strong> — entity jsou prosté PHP objekty (POPO) bez jakýchkoliv závislostí na frameworku či ORM.</li>
-            <li><strong>Validace schématem</strong> — XML soubory lze validovat proti XSD schématu Doctrine, čímž se snižuje riziko chyb v mapování.</li>
-            <li><strong>Oddělení odpovědností</strong> — mapování je infrastrukturní záležitost a patří do infrastrukturní vrstvy, nikoliv do domény.</li>
-            <li><strong>Snadná záměna persistence</strong> — při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.</li>
+            <li><strong>Čistá doménová vrstva</strong> - entity jsou prosté PHP objekty (POPO) bez jakýchkoliv závislostí na frameworku či ORM.</li>
+            <li><strong>Validace schématem</strong> - XML soubory lze validovat proti XSD schématu Doctrine, čímž se snižuje riziko chyb v mapování.</li>
+            <li><strong>Oddělení odpovědností</strong> - mapování je infrastrukturní záležitost a patří do infrastrukturní vrstvy, nikoliv do domény.</li>
+            <li><strong>Snadná záměna persistence</strong> - při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.</li>
         </ul>
     </div>
     </section>
@@ -627,8 +627,8 @@ doctrine:
     <div class="note">
         <h3>Kdy použít custom type vs. primitivní ukládání?</h3>
         <ul>
-            <li><strong>Custom type</strong> — čistší doménový model, entita pracuje přímo s VO. Vhodné pro value objects používané na mnoha místech.</li>
-            <li><strong>Primitivní ukládání</strong> — jednodušší, méně kódu. Vhodné pro projekty s méně value objects nebo při začátku s DDD.</li>
+            <li><strong>Custom type</strong> - čistší doménový model, entita pracuje přímo s VO. Vhodné pro value objects používané na mnoha místech.</li>
+            <li><strong>Primitivní ukládání</strong> - jednodušší, méně kódu. Vhodné pro projekty s méně value objects nebo při začátku s DDD.</li>
         </ul>
     </div>
     </section>
@@ -637,7 +637,7 @@ doctrine:
     <h2 id="php-enums-heading">PHP 8.1+ Enums pro stavové typy</h2>
     <p>
         Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums), které představují idiomatický způsob, jak v DDD implementovat stavové hodnotové objekty
-        s konečnou množinou hodnot — například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
+        s konečnou množinou hodnot - například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
         nebo jako plnohodnotné hodnotové objekty, avšak nativní enums nabízejí typovou bezpečnost přímo na úrovni jazyka.
     </p>
 
@@ -764,8 +764,8 @@ class Order
     <div class="note">
         <h3>Kdy použít enum a kdy plnohodnotný hodnotový objekt?</h3>
         <ul>
-            <li><strong>Enum</strong> — pro jednoduché konečné stavy, kde hodnota je jedna z pevně daných variant: <code>OrderStatus</code>, <code>UserRole</code>, <code>TaskPriority</code>, <code>Currency</code>. Enums podporují metody, takže lze zapouzdřit i přechodovou logiku (viz <code>allowedTransitions()</code>).</li>
-            <li><strong>Plnohodnotný hodnotový objekt (Value Object)</strong> — pro komplexní typy, které vyžadují validaci, formátování nebo aritmetiku: <code>Money</code> (částka + měna + zaokrouhlování), <code>Email</code> (validace formátu), <code>Address</code> (více polí), <code>DateRange</code> (interval s logikou překrývání).</li>
+            <li><strong>Enum</strong> - pro jednoduché konečné stavy, kde hodnota je jedna z pevně daných variant: <code>OrderStatus</code>, <code>UserRole</code>, <code>TaskPriority</code>, <code>Currency</code>. Enums podporují metody, takže lze zapouzdřit i přechodovou logiku (viz <code>allowedTransitions()</code>).</li>
+            <li><strong>Plnohodnotný hodnotový objekt (Value Object)</strong> - pro komplexní typy, které vyžadují validaci, formátování nebo aritmetiku: <code>Money</code> (částka + měna + zaokrouhlování), <code>Email</code> (validace formátu), <code>Address</code> (více polí), <code>DateRange</code> (interval s logikou překrývání).</li>
         </ul>
         <p>
             Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepotřebuje složitou vnitřní logiku, je enum správná volba. Pokud typ obsahuje libovolné hodnoty, validaci nebo výpočty, použijte hodnotový objekt.
@@ -824,7 +824,7 @@ class PaymentService
     <p>
         V tomto příkladu je <code>PaymentService</code> doménová služba, která zapouzdřuje doménovou logiku
         zpracování plateb a vytváří objekt <code>Payment</code>. Doménová služba je bezstavová a
-        neobsahuje repozitáře — persistence vraceného objektu je zodpovědností volající vrstvy
+        neobsahuje repozitáře - persistence vraceného objektu je zodpovědností volající vrstvy
         (Application Service nebo Command Handler).
     </p>
     </section>
@@ -914,10 +914,10 @@ final class ShippingService
     <div class="note">
         <h3>Kdy použít Specification Pattern?</h3>
         <ul>
-            <li><strong>Validace</strong> — ověření, zda doménový objekt splňuje business pravidlo.</li>
-            <li><strong>Selekce</strong> — filtrování kolekcí objektů podle kritéria.</li>
-            <li><strong>Vytváření na zakázku</strong> — zajištění, že nově vytvořený objekt splňuje invarianty.</li>
-            <li><strong>Kombinace pravidel</strong> — specifikace lze skládat pomocí <code>AndSpecification</code>, <code>OrSpecification</code>, <code>NotSpecification</code>.</li>
+            <li><strong>Validace</strong> - ověření, zda doménový objekt splňuje business pravidlo.</li>
+            <li><strong>Selekce</strong> - filtrování kolekcí objektů podle kritéria.</li>
+            <li><strong>Vytváření na zakázku</strong> - zajištění, že nově vytvořený objekt splňuje invarianty.</li>
+            <li><strong>Kombinace pravidel</strong> - specifikace lze skládat pomocí <code>AndSpecification</code>, <code>OrSpecification</code>, <code>NotSpecification</code>.</li>
         </ul>
     </div>
     </section>
@@ -981,12 +981,12 @@ class UserRegistered
         </p>
         <ul>
             <li>
-                <strong>EventDispatcher</strong> (<code>EventDispatcherInterface</code>) — synchronní,
+                <strong>EventDispatcher</strong> (<code>EventDispatcherInterface</code>) - synchronní,
                 in-process. Všechny listenery se provedou okamžitě v rámci téhož PHP požadavku.
                 Vhodné pro: side effects v rámci téže transakce (aktualizace cache, logování).
             </li>
             <li>
-                <strong>Messenger</strong> (<code>MessageBusInterface</code>) — může být synchronní
+                <strong>Messenger</strong> (<code>MessageBusInterface</code>) - může být synchronní
                 i asynchronní. Podporuje transporty (RabbitMQ, Redis, Doctrine), retry strategii
                 a sériovou serializaci. Vhodné pro: komunikaci mezi Bounded Contexts, asynchronní
                 projekce, notifikace.
@@ -1011,19 +1011,19 @@ class UserRegistered
         <h3 id="exception-types-heading">Typy výjimek podle vrstvy</h3>
         <ul>
             <li>
-                <strong>Doménové výjimky</strong> — porušení business pravidel a invariantů.
+                <strong>Doménové výjimky</strong> - porušení business pravidel a invariantů.
                 Vyhazuje je doménový model (entity, agregáty, value objects).
                 Příklady: <code>OrderCannotBeConfirmedException</code>,
                 <code>InsufficientFundsException</code>, <code>InvalidEmailException</code>.
             </li>
             <li>
-                <strong>Aplikační výjimky</strong> — chyby na úrovni use case.
+                <strong>Aplikační výjimky</strong> - chyby na úrovni use case.
                 Vyhazují je command/query handlery.
                 Příklady: <code>UserNotFoundException</code>,
                 <code>DuplicateEmailException</code>.
             </li>
             <li>
-                <strong>Infrastrukturní výjimky</strong> — technické chyby (databáze, síť, souborový systém).
+                <strong>Infrastrukturní výjimky</strong> - technické chyby (databáze, síť, souborový systém).
                 Vznikají v infrastrukturní vrstvě a jsou zachytávány aplikační vrstvou.
                 Příklady: <code>ConnectionException</code>, <code>TimeoutException</code>.
             </li>
@@ -1058,9 +1058,9 @@ final class InvalidOrderStateTransitionException extends \DomainException
     <div class="warning">
         <h3>Doporučení pro výjimky v DDD</h3>
         <ul>
-            <li>Doménové výjimky by měly <strong>dědit z <code>\DomainException</code></strong> — tím signalizují, že jde o porušení business pravidla, ne o technickou chybu.</li>
+            <li>Doménové výjimky by měly <strong>dědit z <code>\DomainException</code></strong> - tím signalizují, že jde o porušení business pravidla, ne o technickou chybu.</li>
             <li>Používejte <strong>statické factory metody</strong> (<code>cannotTransition()</code>) pro čitelné a konzistentní vytváření výjimek.</li>
-            <li><strong>Nepropagujte infrastrukturní výjimky</strong> do doménové vrstvy — repozitáře by je měly zachytit a přeložit na doménové výjimky.</li>
+            <li><strong>Nepropagujte infrastrukturní výjimky</strong> do doménové vrstvy - repozitáře by je měly zachytit a přeložit na doménové výjimky.</li>
             <li>Kontrolery by měly zachytávat doménové výjimky a <strong>překládat je na HTTP odpovědi</strong> (400, 404, 409).</li>
         </ul>
     </div>
@@ -1196,13 +1196,13 @@ class GetUserProfileHandler
         </p>
         <ul>
             <li>
-                <strong>Symfony Validator (aplikační vrstva)</strong> — validace vstupních dat
+                <strong>Symfony Validator (aplikační vrstva)</strong> - validace vstupních dat
                 na úrovni Commands a Queries: formát e-mailu, délka jména, povinná pole.
                 Používejte atributy <code>#[Assert\Email]</code>, <code>#[Assert\NotBlank]</code>
                 přímo na command třídách. Tato validace chrání doménovou vrstvu před neplatnými vstupy.
             </li>
             <li>
-                <strong>Doménová validace (doménová vrstva)</strong> — business pravidla vynucovaná
+                <strong>Doménová validace (doménová vrstva)</strong> - business pravidla vynucovaná
                 uvnitř entit, agregátů a value objects: „uživatel s tímto e-mailem již existuje",
                 „objednávku nelze potvrdit bez položek". Tato validace je součástí doménového modelu
                 a nesmí na ní záviset Symfony Validator.
@@ -1335,7 +1335,7 @@ services:
     <p>
         Ve velkých projektech s více bounded kontexty je vhodné konfigurovat autowiring pro každý kontext samostatně.
         Tím získáte přesnější kontrolu nad tím, které třídy jsou registrovány jako služby, a můžete pro každý kontext
-        definovat specifická pravidla. Tento přístup také lépe odráží izolaci kontextů — každý bounded context
+        definovat specifická pravidla. Tento přístup také lépe odráží izolaci kontextů - každý bounded context
         má svou vlastní konfiguraci a je jasně ohraničen i na úrovni service containeru.
     </p>
 
@@ -1385,10 +1385,10 @@ services:
     <div class="note">
         <h3>Výhody odděleného autowiringu pro Bounded Contexts</h3>
         <ul>
-            <li><strong>Explicitní hranice</strong> — každý bounded context má svůj vlastní blok konfigurace, což jasně dokumentuje hranice kontextů i na úrovni infrastruktury.</li>
-            <li><strong>Granulární exclude pravidla</strong> — můžete pro každý kontext vyloučit jiné adresáře (např. jeden kontext může mít doménové služby, jiný ne).</li>
-            <li><strong>Snazší refaktoring</strong> — při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z <code>services.yaml</code>.</li>
-            <li><strong>Prevence nechtěných závislostí</strong> — pokud kontext A omylem importuje třídu z kontextu B, je snadné to odhalit v konfiguraci.</li>
+            <li><strong>Explicitní hranice</strong> - každý bounded context má svůj vlastní blok konfigurace, což jasně dokumentuje hranice kontextů i na úrovni infrastruktury.</li>
+            <li><strong>Granulární exclude pravidla</strong> - můžete pro každý kontext vyloučit jiné adresáře (např. jeden kontext může mít doménové služby, jiný ne).</li>
+            <li><strong>Snazší refaktoring</strong> - při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z <code>services.yaml</code>.</li>
+            <li><strong>Prevence nechtěných závislostí</strong> - pokud kontext A omylem importuje třídu z kontextu B, je snadné to odhalit v konfiguraci.</li>
         </ul>
     </div>
 
@@ -1434,7 +1434,7 @@ services:
     <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
     <ul>
         <li>DDD projekt v Symfony 8 se strukturuje podle <strong>Bounded Contexts</strong> s vertikálními feature slices.</li>
-        <li>Doménové entity jsou <strong>čisté PHP objekty</strong> (POPO) bez Doctrine atributů — mapování je řešeno externě (XML).</li>
+        <li>Doménové entity jsou <strong>čisté PHP objekty</strong> (POPO) bez Doctrine atributů - mapování je řešeno externě (XML).</li>
         <li><strong>Doctrine custom types</strong> umožňují automatickou konverzi mezi primitivy a hodnotovými objekty.</li>
         <li><strong>Specification Pattern</strong> zapouzdřuje business pravidla do znovu použitelných objektů.</li>
         <li>Doménové výjimky, aplikační výjimky a infrastrukturní výjimky mají <strong>různé odpovědnosti</strong>.</li>
