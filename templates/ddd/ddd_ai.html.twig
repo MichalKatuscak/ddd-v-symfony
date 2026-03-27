@@ -110,11 +110,11 @@
         <p>
             Protiváhu k tomuto nadšení tvoří David Heinemeier Hansson (DHH). Na konferenci Rails World 2025
             a v rozhovorech pro The New Stack DHH argumentoval, že Ruby je dostatečně čitelné na to,
-            aby LLM chápal kód bez speciální terminologie — a že AI's preferred format je Markdown,
-            ne doménový jazyk definovaný formálními pravidly. DHH poukazuje na to, že Rails 8.1 přidal
+            aby LLM chápal kód bez speciální terminologie — a že preferovaný formát AI je Markdown,
+            nikoli doménový jazyk definovaný formálními pravidly. DHH poukazuje na to, že Rails 8.1 přidal
             nativní Markdown rendering právě proto, že to je formát, ve kterém AI přirozeně komunikuje.
             Z jeho pohledu je ubiquitous language elegantní myšlenka pro komplexní enterprise systémy,
-            ale pro majority webových aplikací je konvence nad konfigurací — prostá angličtina nebo čeština
+            ale pro většinu webových aplikací je konvence nad konfigurací — prostá angličtina nebo čeština
             v komentářích a názvech — dostatečně výmluvná.
         </p>
 
@@ -136,7 +136,7 @@
 
         <p>
             Existují data. Ne rozsáhlé akademické studie s tisíci vzorků, ale praktické měření z reálných
-            projektů, která začínají ukazovat konzistentní obraz. Přehled dostupných zdrojů — od blogpostů
+            projektů, která začínají ukazovat konzistentní obraz. Přehled dostupných zdrojů — od příspěvků
             praktiků přes konferenční záznamy po preprint na arXiv — naznačuje, že hranice bounded contextu
             mají měřitelný dopad na kvalitu kódu generovaného LLM.
         </p>
@@ -354,7 +354,7 @@
         <p>
             DHH otevřeně říká, že většina vývojářské práce je „CRUD monkeying" — psaní
             aplikací, které přijímají data, ukládají je a zobrazují. Pro tuto kategorii
-            aplikací je DDD přesold — a AI, která generuje CRUD kód z jednoduchého popisu,
+            aplikací je DDD přeceňované — a AI, která generuje CRUD kód z jednoduchého popisu,
             je přirozeným řešením bez potřeby doménového modelu. Klíčová otázka, na kterou
             DHH odpovídá jinak než Evans, je: jak velký podíl softwarového průmyslu tvoří
             skutečně komplexní domény versus CRUD monkeying? A mění AI tuto hranici tím,
@@ -411,7 +411,7 @@
             Protiváha je důležitá: tyto nástroje fungují i bez DDD. Jednoduchý kód s jasnými
             konvencemi — convention over configuration v Rails stylu — může být pro AI stejně
             čitelný jako explicitně modelovaný bounded context. Pokud projekt dodržuje konzistentní
-            naming, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
+            pojmenování, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
             i bez formálního DDD modelu. Proslulý blogpost „DHH Is Wrong" a série na toto téma
             ilustrují, že konvence může být stejně výkonná jako explicitní modelování —
             otázka je, co se stane, když projekt vyroste za hranice, kde konvence stačí.
@@ -493,8 +493,54 @@
     <section id="zaver" aria-labelledby="zaver-heading">
         <h2 id="zaver-heading">Závěr</h2>
 
-        <div class="diagram-container mb-4" role="img" aria-label="Diagram spektra pozic autorit na vztah DDD a AI">
-            {% include 'diagrams/10_ddd_ai/spectrum.svg' %}
+        <div class="tip" role="note" aria-labelledby="spectrum-heading">
+            <h4 id="spectrum-heading">Spektrum pozic: od synergie DDD a AI po důraz na jednoduchost</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Autor</th>
+                        <th scope="col">Pozice</th>
+                        <th scope="col">Klíčový argument</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Eric Evans</strong></td>
+                        <td>Silně pro DDD + AI</td>
+                        <td>Fine-tuned LLM na ubiquitous language; NLP úlohy jako subdomény</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nick Tune</strong></td>
+                        <td>Silně pro DDD + AI</td>
+                        <td>Bounded contexts jako přirozený rámec pro AI agenty</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vaughn Vernon</strong></td>
+                        <td>Pro DDD + AI</td>
+                        <td>LLM jako návrhovač oprav, verifikovaný doménovými pravidly</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kent Beck</strong></td>
+                        <td>Pro strukturovaný design</td>
+                        <td>TDD jako kontrolní mechanismus pro AI; augmented coding</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Martin Fowler</strong></td>
+                        <td>Nuancovaně pro DDD</td>
+                        <td>AI jako „dodgy collaborator"; potřeba nových metrik</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Alberto Brandolini</strong></td>
+                        <td>Opatrný</td>
+                        <td>EventStorming zůstává lidskou aktivitou</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DHH</strong></td>
+                        <td>Protiváha</td>
+                        <td>Jednoduchost a konvence stačí pro většinu aplikací</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <p>
