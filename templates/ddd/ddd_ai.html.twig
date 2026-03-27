@@ -81,13 +81,18 @@
         </p>
 
         <blockquote>
-            <p>"Several fine-tuned models, each intended for a different purpose — that is a strong separation of concerns."</p>
-            <footer>— Eric Evans, Explore DDD 2024</footer>
+            <p>"Because some parts of a complex system never fit into structured parts
+            of domain models, we throw those over to humans to handle. Maybe we'll have
+            some hard-coded, some human-handled, and a third, LLM-supported category."</p>
+            <footer>— Eric Evans, Explore DDD 2024 (via InfoQ)</footer>
         </blockquote>
 
         <p>
-            Evans v téže přednášce předpověděl, že NLP úlohy — klasifikace záměrů, extrakce entit,
-            shrnutí dokumentů — se stanou plnohodnotnými subdoménami v DDD modelu. Stejně jako dnes
+            Evans dále navrhl, že několik fine-tuned modelů, každý určený pro jiný účel,
+            představuje silné oddělení zodpovědností — a že vytrénovaný jazykový model
+            lze chápat jako bounded context. V téže přednášce předpověděl, že NLP úlohy —
+            klasifikace záměrů, extrakce entit, shrnutí dokumentů — se stanou
+            plnohodnotnými subdoménami v DDD modelu. Stejně jako dnes
             máme samostatné bounded contexty pro platby, notifikace nebo inventory, budeme mít bounded
             context pro „rozumění textu" nebo „extrakci strukturovaných dat". Tato předpověď rezonuje
             s tím, jak velké firmy dnes budují AI platformy — jako interní služby se svými API hranicemi,
@@ -220,8 +225,10 @@
         </p>
 
         <blockquote>
-            <p>"Today's AI assistants lack taste — they don't eat the seed corn."</p>
-            <footer>— Kent Beck, Substack / The Pragmatic Engineer, 2024</footer>
+            <p>"In vibe coding you don't care about the code, just the behavior of the system.
+            In augmented coding you care about the code, its complexity, the tests,
+            &amp; their coverage."</p>
+            <footer>— Kent Beck, Augmented Coding: Beyond the Vibes (Substack, 2024)</footer>
         </blockquote>
 
         <p>
@@ -331,18 +338,19 @@
         </p>
 
         <p>
-            DHH nabízí radikální protiváhu. Na Rails World 2025 prohlásil:
+            DHH nabízí radikální protiváhu:
         </p>
 
         <blockquote>
-            <p>"We've stopped solving whole problems. Instead, we slice everything into tiny pieces,
-            optimize each piece in isolation, and when we put it all back together,
-            we've actually gone backwards."</p>
-            <footer>— DHH, Rails World 2025</footer>
+            <p>"A lot of people, I think, are very uncomfortable with the fact that they are
+            essentially crud monkeys. They just make systems that create, read, update,
+            or delete rows in a database and they have to compensate for that existential
+            dread by over-complicating things."</p>
+            <footer>— DHH, Lex Fridman Podcast</footer>
         </blockquote>
 
         <p>
-            DHH otevřeně říká, že jeho kariéra je z velké části „CRUD monkeying" — psaní
+            DHH otevřeně říká, že většina vývojářské práce je „CRUD monkeying" — psaní
             aplikací, které přijímají data, ukládají je a zobrazují. Pro tuto kategorii
             aplikací je DDD přesold — a AI, která generuje CRUD kód z jednoduchého popisu,
             je přirozeným řešením bez potřeby doménového modelu. Klíčová otázka, na kterou
@@ -599,6 +607,13 @@
                         DHH on AI, Vibe Coding, and the Future of Programming
                     </a>.
                     DHH o nebezpečí ztráty kompetence, konvenci nad modelováním a roli AI v Rails ekosystému.
+                </li>
+                <li>
+                    <strong>DHH — Lex Fridman Podcast:</strong>
+                    <a href="https://lexfridman.com/dhh-david-heinemeier-hansson-transcript/" target="_blank" rel="noopener noreferrer">
+                        DHH: Programming, AI, Startups, and Open Source
+                    </a>.
+                    Rozhovor, ve kterém DHH popisuje vývojáře jako „CRUD monkeys" a varuje před over-engineering.
                 </li>
             </ul>
 
