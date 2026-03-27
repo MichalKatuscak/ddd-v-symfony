@@ -159,4 +159,12 @@ class DddController extends AbstractController
             'title' => 'Kdy DDD nepoužívat — upřímně',
         ]);
     }
+
+    #[Route('/ddd-a-umela-inteligence', name: 'ddd_ai')]
+    public function dddAi(): Response
+    {
+        return $this->render('ddd/ddd_ai.html.twig', [
+            'title' => 'DDD a umělá inteligence — co říkají autority',
+        ]);
+    }
 }
