@@ -96,7 +96,7 @@
     <ul>
         <li><strong>UserManagement</strong> - Správa uživatelů, registrace, autentizace. Tento kontext obsahuje vše, co souvisí s identitou a přístupovými právy uživatelů.</li>
         <li><strong>ProjectManagement</strong> - Správa projektů, vytváření, aktualizace. Tento kontext se zaměřuje na životní cyklus projektů a jejich vlastnosti.</li>
-        <li><strong>TaskManagement</strong> - Správa úkolů, vytváření, aktualizace, přiřazování. Tento kontext řeší vše, co souvisí s úkoly v rámci projektů.</li>
+        <li><strong>TaskManagement</strong> - Správa úkolů, vytváření, aktualizace, přiřazování. Tento kontext řeší vše, co souvisí s úkoly v projektech.</li>
         <li><strong>CommentManagement</strong> - Správa komentářů, přidávání, aktualizace. Tento kontext se zabývá komunikací a zpětnou vazbou k úkolům.</li>
         <li><strong>ActivityTracking</strong> - Sledování aktivity, zaznamenávání událostí. Tento kontext poskytuje přehled o aktivitách v systému.</li>
     </ul>
@@ -301,7 +301,7 @@
 
     <ul>
         <li><strong>Project</strong> - Organizační jednotka, která sdružuje související úkoly a členy týmu.</li>
-        <li><strong>Task</strong> - Jednotka práce, která má být dokončena v rámci projektu.</li>
+        <li><strong>Task</strong> - Jednotka práce, která má být dokončena v projektu.</li>
         <li><strong>Assignee</strong> - Člen týmu, kterému je přiřazen úkol.</li>
         <li><strong>Status</strong> - Stav úkolu (To Do, In Progress, Done).</li>
         <li><strong>Comment</strong> - Textová zpětná vazba k úkolu.</li>
@@ -820,7 +820,7 @@ class TaskAssignmentService
 
     <ol>
         <li>
-            <strong>Strategický design je klíčový</strong> - Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
+            <strong>Strategický design rozhoduje o výsledku</strong> - Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
         </li>
         <li>
             <strong>Ubiquitous Language je základem úspěchu</strong> - Vytvoření a používání společného jazyka s doménovými experty výrazně zlepšilo komunikaci a vedlo k přesnějšímu modelu. Konzistentní používání tohoto jazyka v kódu usnadnilo pochopení a údržbu.
@@ -842,25 +842,6 @@ class TaskAssignmentService
         </li>
     </ol>
 
-    <div class="warning" role="alert" aria-labelledby="important-notes-heading">
-        <h3 id="important-notes-heading">Důležité poznámky pro implementaci DDD</h3>
-        <p>
-            Při implementaci Domain-Driven Design a CQRS v Symfony 8 je důležité:
-        </p>
-        <ul>
-            <li>Začít strategickým designem - identifikovat bounded contexts a jejich vztahy před zahájením implementace.</li>
-            <li>Vytvořit a používat Ubiquitous Language ve spolupráci s doménovými experty.</li>
-            <li>Definovat jasné hranice mezi bounded contexts a implementovat vhodné integrační vzory (Shared Kernel, Customer-Supplier, Conformist, Anti-Corruption Layer).</li>
-            <li>Správně identifikovat agregáty a jejich hranice, aby byla zajištěna konzistence dat.</li>
-            <li>Používat hodnotové objekty pro validaci a enkapsulaci doménových konceptů.</li>
-            <li>Implementovat doménové události pro komunikaci mezi bounded contexts.</li>
-            <li>Oddělovat příkazy a dotazy podle CQRS principů.</li>
-            <li>Používat Symfony Messenger pro implementaci command a query busů.</li>
-            <li>Testovat doménový model nezávisle na infrastruktuře.</li>
-            <li>Používat hexagonální architekturu pro oddělení domény od infrastruktury.</li>
-            <li>Implementovat repozitáře jako rozhraní v doménové vrstvě a jejich konkrétní implementace v infrastrukturní vrstvě.</li>
-        </ul>
-    </div>
 
     <p>
         V další kapitole se podíváme na <a href="{{ path('testing_ddd') }}">testování DDD kódu v Symfony</a>.
