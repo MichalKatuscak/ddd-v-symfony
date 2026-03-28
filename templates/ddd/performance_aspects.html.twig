@@ -157,7 +157,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Order
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\Column(type: 'string', length: 36, unique: true)]
     private readonly string $id;
 
     /** @var Collection&lt;int, OrderItem&gt; */
@@ -1068,7 +1068,9 @@ final class QueryCountingMiddleware implements Middleware
 
     public function wrap(Driver $driver): Driver
     {
-        return new class($driver, $this) extends \Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware {
+        $middleware = $this;
+
+        return new class($driver, $middleware) extends \Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware {
             public function __construct(
                 Driver $wrappedDriver,
                 private QueryCountingMiddleware $middleware
@@ -1078,20 +1080,57 @@ final class QueryCountingMiddleware implements Middleware
 
             public function connect(array $params): \Doctrine\DBAL\Driver\Connection
             {
-                $this->middleware->reset();
-                return parent::connect($params);
+                return new class(parent::connect($params), $this-&gt;middleware)
+                    implements \Doctrine\DBAL\Driver\Connection
+                {
+                    public function __construct(
+                        private \Doctrine\DBAL\Driver\Connection $inner,
+                        private QueryCountingMiddleware $middleware
+                    ) {}
+
+                    public function prepare(string $sql): \Doctrine\DBAL\Driver\Statement
+                    {
+                        $this-&gt;middleware-&gt;increment();
+                        return $this-&gt;inner-&gt;prepare($sql);
+                    }
+
+                    public function query(string $sql): \Doctrine\DBAL\Driver\Result
+                    {
+                        $this-&gt;middleware-&gt;increment();
+                        return $this-&gt;inner-&gt;query($sql);
+                    }
+
+                    public function exec(string $sql): int|string
+                    {
+                        $this-&gt;middleware-&gt;increment();
+                        return $this-&gt;inner-&gt;exec($sql);
+                    }
+
+                    // Zbývající metody delegují na $this-&gt;inner
+                    public function lastInsertId(): int|string { return $this-&gt;inner-&gt;lastInsertId(); }
+                    public function beginTransaction(): void { $this-&gt;inner-&gt;beginTransaction(); }
+                    public function commit(): void { $this-&gt;inner-&gt;commit(); }
+                    public function rollBack(): void { $this-&gt;inner-&gt;rollBack(); }
+                    public function getNativeConnection(): mixed { return $this-&gt;inner-&gt;getNativeConnection(); }
+                    public function getServerVersion(): string { return $this-&gt;inner-&gt;getServerVersion(); }
+                };
             }
         };
     }
 
+    public function increment(): void
+    {
+        $this-&gt;queryCount++;
+    }
+
     public function reset(): void
     {
-        $this->queryCount = 0;
+        $this-&gt;queryCount = 0;
     }
 
     public function getQueryCount(): int
     {
-        return $this->queryCount;
+        return $this-&gt;queryCount;
     }
 }</code></pre>
     </div>

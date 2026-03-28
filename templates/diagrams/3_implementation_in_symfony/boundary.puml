@@ -1,0 +1,79 @@
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Nunito"
+skinparam defaultFontSize 14
+skinparam defaultTextAlignment center
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #005A9C
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+title Kde končí DDD a kde začíná Symfony
+
+package "DDD – čistý PHP, žádné závislosti na frameworku" as DDD #E8F5E9 {
+  rectangle "**Entity**\nUser, Order" as entity #C8E6C9
+  rectangle "**Value Object**\nEmail, Money, OrderId" as vo #C8E6C9
+  rectangle "**Aggregate Root**\ninvarianty, doménová pravidla" as agg #C8E6C9
+  rectangle "**Domain Event**\nUserRegistered, OrderPlaced" as event #C8E6C9
+  rectangle "**Repository interface**\nUserRepositoryInterface" as repo_if #C8E6C9
+  rectangle "**Domain Service**\nPaymentService" as dsvc #C8E6C9
+  rectangle "**Specification**\nActiveUserSpecification" as spec #C8E6C9
+}
+
+package "Symfony – frameworková infrastruktura" as SYM #FFF3E0 {
+  rectangle "**Doctrine Repository**\nDoctrineUserRepository\nimplementuje UserRepositoryInterface" as repo_impl #FFE0B2
+  rectangle "**Doctrine ORM Mapping**\nXML / atributy" as mapping #FFE0B2
+  rectangle "**Messenger**\nCommandBus, QueryBus\nHandleři" as messenger #FFE0B2
+  rectangle "**Controller**\nHTTP vstupní bod\nForm, Request, Response" as ctrl #FFE0B2
+  rectangle "**EventDispatcher**\ndispatch doménových událostí" as evdisp #FFE0B2
+  rectangle "**services.yaml**\nautowiring, interface binding" as di #FFE0B2
+}
+
+' Vztahy uvnitř DDD
+agg -down-> entity : obsahuje
+agg -down-> vo : používá
+agg -right-> event : vytváří
+dsvc -up-> repo_if : závisí na (interface)
+dsvc -up-> agg : operuje nad
+spec -up-> agg : filtruje
+
+' Hranice: Symfony implementuje DDD kontrakty
+repo_impl -up-|> repo_if : implementuje
+mapping -up-> entity : mapuje na DB
+messenger -up-> dsvc : volá přes handler
+ctrl -right-> messenger : dispatch command/query
+evdisp -up-> event : propaguje
+di -up-> repo_if : binds interface\n→ implementace
+
+note bottom of DDD
+  **Testovatelné bez frameworku**
+  Unit testy nepotřebují Symfony kernel,
+  Doctrine ani databázi.
+end note
+
+note bottom of SYM
+  **Vyměnitelné**
+  Doctrine lze nahradit jiným ORM,
+  Messenger jiným bus systémem –
+  doménová vrstva se nezmění.
+end note
+
+@enduml

@@ -49,8 +49,68 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/event-sourcing</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/sagy-a-process-managery</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd</loc>
+        <lastmod>2026-03-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/testovani-ddd</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/migrace-z-crud</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/anti-vzory</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/vykonnostni-aspekty</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/ddd-a-umela-inteligence</loc>
+        <lastmod>2026-03-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
         <loc>https://ddd-v-symfony.katuscak.cz/zdroje</loc>
-        <lastmod>2025-04-24</lastmod>
+        <lastmod>2026-03-28</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://ddd-v-symfony.katuscak.cz/glosar</loc>
+        <lastmod>2026-03-23</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>

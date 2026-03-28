@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none" style="background:#FAFAFA;aspect-ratio:3.112" version="1.1" viewBox="0 0 3140 1009"><defs/><g><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="401.5625" x="1375" y="20.3049">Kde končí DDD a kde začíná Symfony</text><!--MD5=[0a4f868f894bfdcba817db7f9f85aa6b]
+cluster DDD--><polygon fill="#E8F5E9" points="728.9063,75.4639,1336.7188,75.4639,1347.6563,110.3027,1992.9688,110.3027,1992.9688,472.3389,728.9063,472.3389,728.9063,75.4639" style="stroke: #005A9C; stroke-width: 2.34375;"/><line style="stroke: #005A9C; stroke-width: 2.34375;" x1="728.9063" x2="1347.6563" y1="110.3027" y2="110.3027"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="598.4375" x="735.1563" y="98.8937">DDD - čistý PHP, žádné závislosti na frameworku</text><!--MD5=[037bde4dfa688ba7978581e2779ab6c0]
+cluster SYM--><polygon fill="#FFF3E0" points="194.5313,575.4639,691.4063,575.4639,702.3438,610.3027,2914.8438,610.3027,2914.8438,787.9639,194.5313,787.9639,194.5313,575.4639" style="stroke: #005A9C; stroke-width: 2.34375;"/><line style="stroke: #005A9C; stroke-width: 2.34375;" x1="194.5313" x2="702.3438" y1="610.3027" y2="610.3027"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="487.5" x="200.7813" y="598.8937">Symfony - frameworková infrastruktura</text><!--MD5=[fbcd1a1664252f7f7ddf883fed3c1e0a]
+entity entity--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="154.6875" x="767.1875" y="352.0264"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="68.75" x="810.1563" y="387.9562">Entity</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="123.4375" x="782.8125" y="413.4201">User, Order</text><!--MD5=[bcff48f07936c9f2a6ea225d76d1dfcd]
+entity vo--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="264.0625" x="1590.625" y="352.0264"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="156.25" x="1644.5313" y="387.9562">Value Object</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="232.8125" x="1606.25" y="413.4201">Email, Money, OrderId</text><!--MD5=[b0fd78db2cca6e3dc4cfcb6fdc4395ed]
+entity agg--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="345.3125" x="765.625" y="142.6514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="193.75" x="841.4063" y="178.5812">Aggregate Root</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="314.0625" x="781.25" y="204.0451">invarianty, doménová pravidla</text><!--MD5=[3158f9966ed01317d9e0f28e57cb2143]
+entity event--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="345.3125" x="1234.375" y="142.6514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="1323.4375" y="178.5812">Domain Event</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="314.0625" x="1250" y="204.0451">UserRegistered, OrderPlaced</text><!--MD5=[adbf66eb055218095d1101372019d7b7]
+entity repo_if--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="290.625" x="1635.1563" y="142.6514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="251.5625" x="1654.6875" y="178.5812">Repository interface</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="259.375" x="1650.7813" y="204.0451">UserRepositoryInterface</text><!--MD5=[778a683abf5da27e01d22b4242d6f006]
+entity dsvc--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="221.875" x="1313.2813" y="352.0264"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="190.625" x="1328.9063" y="387.9562">Domain Service</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="171.875" x="1338.2813" y="413.4201">PaymentService</text><!--MD5=[e1cc7f8be10205d51d3ab67704036bde]
+entity spec--><rect fill="#C8E6C9" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="281.25" x="977.3438" y="352.0264"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="157.8125" x="1039.0625" y="387.9562">Specification</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="250" x="992.9688" y="413.4201">ActiveUserSpecification</text><!--MD5=[e67e044f507d7dfb900bd8a59b666cd8]
+entity repo_impl--><rect fill="#FFE0B2" height="107.6416" style="stroke: #005A9C; stroke-width: 3.125;" width="443.75" x="2044.5313" y="642.6514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="245.3125" x="2143.75" y="678.5812">Doctrine Repository</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="257.8125" x="2137.5" y="704.0451">DoctrineUserRepository</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="412.5" x="2060.1563" y="729.509">implementuje UserRepositoryInterface</text><!--MD5=[afe45a2ff804174a830a79062b61aa55]
+entity mapping--><rect fill="#FFE0B2" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="309.375" x="261.7188" y="655.1514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="278.125" x="277.3438" y="691.0812">Doctrine ORM Mapping</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="344.5313" y="716.5451">XML / atributy</text><!--MD5=[d5fce3942b2018efe1c1317a47a5b2cf]
+entity messenger--><rect fill="#FFE0B2" height="107.6416" style="stroke: #005A9C; stroke-width: 3.125;" width="303.125" x="1272.6563" y="642.6514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="137.5" x="1355.4688" y="678.5812">Messenger</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="271.875" x="1288.2813" y="704.0451">CommandBus, QueryBus</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="87.5" x="1380.4688" y="729.509">Handleři</text><!--MD5=[9b5d37bdb7be2cac1b39a82444f5f5a6]
+entity ctrl--><rect fill="#FFE0B2" height="107.6416" style="stroke: #005A9C; stroke-width: 3.125;" width="314.0625" x="626.5625" y="642.6514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="123.4375" x="721.875" y="678.5812">Controller</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="190.625" x="688.2813" y="704.0451">HTTP vstupní bod</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="282.8125" x="642.1875" y="729.509">Form, Request, Response</text><!--MD5=[5dc53c203bb65d2c693f42cdbaa68732]
+entity evdisp--><rect fill="#FFE0B2" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="359.375" x="1630.4688" y="655.1514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="1709.375" y="691.0812">EventDispatcher</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="328.125" x="1646.0938" y="716.5451">dispatch doménových událostí</text><!--MD5=[5b1a34fb7ccf0e6c98f9e955f705d4f2]
+entity di--><rect fill="#FFE0B2" height="82.1777" style="stroke: #005A9C; stroke-width: 3.125;" width="334.375" x="2542.9688" y="655.1514"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="168.75" x="2625.7813" y="691.0812">services.yaml</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="303.125" x="2558.5938" y="716.5451">autowiring, interface binding</text><path d="M2682.0313,347.3389 L2682.0313,439.3555 L3122.6563,439.3555 L3122.6563,362.9639 L3107.0313,347.3389 L2682.0313,347.3389 " fill="#E6F0FA" style="stroke: #005A9C; stroke-width: 1.5625;"/><path d="M3107.0313,347.3389 L3107.0313,362.9639 L3122.6563,362.9639 L3107.0313,347.3389 " fill="#E6F0FA" style="stroke: #005A9C; stroke-width: 1.5625;"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="371.875" x="2691.4063" y="375.4562">Testovatelné bez frameworku</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="407.8125" x="2691.4063" y="400.9201">Unit testy nepotřebují Symfony kernel,</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="232.8125" x="2691.4063" y="426.384">Doctrine ani databázi.</text><path d="M9.375,873.9014 L9.375,991.3818 L404.6875,991.3818 L404.6875,889.5264 L389.0625,873.9014 L9.375,873.9014 " fill="#E6F0FA" style="stroke: #005A9C; stroke-width: 1.5625;"/><path d="M389.0625,873.9014 L389.0625,889.5264 L404.6875,889.5264 L389.0625,873.9014 " fill="#E6F0FA" style="stroke: #005A9C; stroke-width: 1.5625;"/><text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="18.75" y="902.0187">Vyměnitelné</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="348.4375" x="18.75" y="927.4826">Doctrine lze nahradit jiným ORM,</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="362.5" x="18.75" y="952.9465">Messenger jiným bus systémem -</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="321.875" x="18.75" y="978.4103">doménová vrstva se nezmění.</text><!--MD5=[4fc3defc2e74fa92d0c9f126eacb12ed]
+link agg to entity--><path d="M917.4219,225.4795 C909.9688,240.1045 901.6562,256.8701 894.5313,272.3389 C883.7031,295.8389 872.5156,322.3389 863.4688,344.417 " fill="none" id="agg-&gt;entity" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="860.5,351.7139,871.5938,341.0488,863.4476,344.4788,860.0177,336.3326,860.5,351.7139" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="100" x="896.0938" y="294.2062">obsahuje</text><!--MD5=[0434f9efcb883984720b47cfa6b367f1]
+link agg to vo--><path d="M1111.25,219.1826 C1182.8281,234.0264 1266.4688,252.5732 1341.4063,272.3389 C1427.6563,295.0889 1523.4375,325.1357 1597.4375,349.417 " fill="none" id="agg-&gt;vo" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1604.9687,351.9014,1593.5483,341.5868,1597.5439,349.471,1589.6597,353.4666,1604.9687,351.9014" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="82.8125" x="1438.2813" y="294.2062">používá</text><!--MD5=[9b02a06ddd0b58731cbe7ec665c54804]
+link agg to event--><path d="M1111.5,184.0576 C1148.875,184.0576 1188.4688,184.0576 1226.1406,184.0576 " fill="none" id="agg-&gt;event" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1234.1406,184.0576,1220.0781,177.8076,1226.3281,184.0576,1220.0781,190.3076,1234.1406,184.0576" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="65.625" x="1139.8438" y="173.1125">vytváří</text><!--MD5=[e9ac24067ea1bf0875f21056e25db1c9]
+reverse link repo_if to dsvc--><path d="M1703.8594,229.9795 C1641.25,266.2139 1553.5469,316.9951 1493.1406,351.9639 " fill="none" id="repo_if&lt;-dsvc" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1711.3594,225.6357,1696.0602,227.2945,1704.6038,229.5598,1702.3386,238.1034,1711.3594,225.6357" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="206.25" x="1624.2188" y="294.2062">závisí na (interface)</text><!--MD5=[6412417afb1d4eaec78195a3ba7f1fa5]
+reverse link agg to dsvc--><path d="M1040.2031,228.8701 C1125.7344,265.1826 1246.9688,316.6357 1330.2188,351.9639 " fill="none" id="agg&lt;-dsvc" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1032.5469,225.6357,1043.04,236.8924,1039.7358,228.6944,1047.9338,225.3902,1032.5469,225.6357" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="129.6875" x="1197.6563" y="294.2062">operuje nad</text><!--MD5=[1c32b83664e14306d444c3af4543b17c]
+reverse link agg to spec--><path d="M978.6719,231.9795 C1010.0312,267.9795 1053.0781,317.3857 1082.9844,351.7139 " fill="none" id="agg&lt;-spec" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="973.3594,225.8701,977.8844,240.5786,978.4913,231.7607,987.3093,232.3676,973.3594,225.8701" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="64.0625" x="1035.1563" y="294.2062">filtruje</text><!--MD5=[ea0a8b8ada92585e7a1bed44caf08451]
+reverse link repo_if to repo_impl--><path d="M1884.5312,241.4014 C1931.2813,269.4482 1985.2813,306.2139 2027.3438,347.3389 C2120.3125,438.2451 2199.2813,570.2139 2238.9844,642.6201 " fill="none" id="repo_if&lt;-repo_impl" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="none" points="1878.75,250.6982,1857.25,225.5107,1889.75,231.792,1878.75,250.6982" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="146.875" x="2149.2188" y="401.2375">implementuje</text><!--MD5=[1f803ebae2ae315a6d42e23c2d34af28]
+reverse link entity to mapping--><path d="M770.0313,439.417 C720.7188,469.5107 655.0781,510.8389 599.2188,550.4639 C552.0313,583.9326 500.5156,625.1045 464.2344,654.9326 " fill="none" id="entity&lt;-mapping" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="777.1875,435.0576,761.9257,437.0306,770.5141,439.1197,768.425,447.7081,777.1875,435.0576" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="151.5625" x="660.1563" y="531.7062">mapuje na DB</text><!--MD5=[a149906d2741e228c401b0798d921e96]
+reverse link dsvc to messenger--><path d="M1424.2188,443.917 C1424.2188,498.542 1424.2188,586.6045 1424.2188,642.6045 " fill="none" id="dsvc&lt;-messenger" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1424.2188,435.4482,1417.9688,449.5107,1424.2188,443.2607,1430.4688,449.5107,1424.2188,435.4482" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="184.375" x="1425.7813" y="531.7062">volá přes handler</text><!--MD5=[8e9cceff571a2b79ecf00cd7eda3d31b]
+link ctrl to messenger--><path d="M940.7187,696.5576 C1039.0781,696.5576 1165.4688,696.5576 1264.3438,696.5576 " fill="none" id="ctrl-&gt;messenger" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1272.625,696.5576,1258.5625,690.3076,1264.8125,696.5576,1258.5625,702.8076,1272.625,696.5576" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="275" x="969.1406" y="685.6125">dispatch command/query</text><!--MD5=[cd597dcadb8418a73a9231f14d92e2e0]
+reverse link event to evdisp--><path d="M1587.75,221.3857 C1708.125,245.2139 1844.3594,272.2139 1844.5313,272.3389 C1961.0313,361.167 1875.6406,567.292 1831.8438,654.6826 " fill="none" id="event&lt;-evdisp" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1579.8438,219.8232,1592.4273,228.6816,1587.5079,221.3383,1594.8513,216.4189,1579.8438,219.8232" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="109.375" x="1903.9063" y="401.2375">propaguje</text><!--MD5=[ef090418d9027dce98615f5fac78ce2e]
+reverse link repo_if to di--><path d="M1930.2969,227.6982 C2074.7969,268.8701 2276.4688,328.1201 2310.1563,347.3389 C2395.9688,396.3076 2399.875,432.2607 2474.2188,497.3389 C2537.9531,553.1201 2613.2031,615.6045 2661.2813,655.0889 " fill="none" id="repo_if&lt;-di" style="stroke: #005A9C; stroke-width: 3.125;"/><polygon fill="#005A9C" points="1922.5938,225.5107,1934.4059,235.3743,1930.1073,227.6511,1937.8305,223.3525,1922.5938,225.5107" style="stroke: #005A9C; stroke-width: 3.125;"/><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="159.375" x="2485.1563" y="388.7375">binds interface</text><text fill="#000000" font-family="Nunito" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="178.125" x="2475.7813" y="414.2014">→ implementace</text><!--MD5=[906cc42703913303b6ed9129481b38f0]
+link DDD to GMN38--><path d="M1993.5136,187.3188 C1993.7696,187.3526 1994.0291,187.3868 1994.2921,187.4215 C1994.8182,187.4909 1995.3584,187.5623 1995.9125,187.6356 C2004.7787,188.8088 2017.2166,190.481 2032.5835,192.6133 C2063.3174,196.8779 2105.7676,202.9834 2154.793,210.6201 C2252.8438,225.8936 2377.1953,247.292 2486.7188,272.3389 C2579.3125,293.5107 2681.875,322.9482 2761.9531,347.3076 " fill="none" id="DDD-GMN38" style="stroke: #005A9C; stroke-width: 3.125; stroke-dasharray: 7.0,7.0;"/><!--MD5=[c401dc4b336e0c2742edaf1c11f21f7f]
+link SYM to GMN41--><path d="M207.0313,788.1299 C207.0313,788.7174 207.0313,789.3059 207.0313,789.8952 C207.0313,799.3248 207.0313,808.9803 207.0313,818.5989 C207.0313,837.8359 207.0313,856.9248 207.0313,873.7607 " fill="none" id="SYM-GMN41" style="stroke: #005A9C; stroke-width: 3.125; stroke-dasharray: 7.0,7.0;"/><!--MD5=[9bebd670654f5c6f5887bb84f422e58b]
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #FAFAFA
+skinparam shadowing false
+
+skinparam defaultFontName "Nunito"
+skinparam defaultFontSize 14
+skinparam defaultTextAlignment center
+
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #005A9C
+  BorderThickness 2
+}
+
+skinparam arrowColor #005A9C
+skinparam arrowThickness 2
+
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #005A9C
+}
+
+skinparam note {
+  BackgroundColor #E6F0FA
+  BorderColor #005A9C
+}
+
+title Kde končí DDD a kde začíná Symfony
+
+package "DDD - čistý PHP, žádné závislosti na frameworku" as DDD #E8F5E9 {
+  rectangle "**Entity**\nUser, Order" as entity #C8E6C9
+  rectangle "**Value Object**\nEmail, Money, OrderId" as vo #C8E6C9
+  rectangle "**Aggregate Root**\ninvarianty, doménová pravidla" as agg #C8E6C9
+  rectangle "**Domain Event**\nUserRegistered, OrderPlaced" as event #C8E6C9
+  rectangle "**Repository interface**\nUserRepositoryInterface" as repo_if #C8E6C9
+  rectangle "**Domain Service**\nPaymentService" as dsvc #C8E6C9
+  rectangle "**Specification**\nActiveUserSpecification" as spec #C8E6C9
+}
+
+package "Symfony - frameworková infrastruktura" as SYM #FFF3E0 {
+  rectangle "**Doctrine Repository**\nDoctrineUserRepository\nimplementuje UserRepositoryInterface" as repo_impl #FFE0B2
+  rectangle "**Doctrine ORM Mapping**\nXML / atributy" as mapping #FFE0B2
+  rectangle "**Messenger**\nCommandBus, QueryBus\nHandleři" as messenger #FFE0B2
+  rectangle "**Controller**\nHTTP vstupní bod\nForm, Request, Response" as ctrl #FFE0B2
+  rectangle "**EventDispatcher**\ndispatch doménových událostí" as evdisp #FFE0B2
+  rectangle "**services.yaml**\nautowiring, interface binding" as di #FFE0B2
+}
+
+agg -down-> entity : obsahuje
+agg -down-> vo : používá
+agg -right-> event : vytváří
+dsvc -up-> repo_if : závisí na (interface)
+dsvc -up-> agg : operuje nad
+spec -up-> agg : filtruje
+
+repo_impl -up-|> repo_if : implementuje
+mapping -up-> entity : mapuje na DB
+messenger -up-> dsvc : volá přes handler
+ctrl -right-> messenger : dispatch command/query
+evdisp -up-> event : propaguje
+di -up-> repo_if : binds interface\n→ implementace
+
+note bottom of DDD
+  **Testovatelné bez frameworku**
+  Unit testy nepotřebují Symfony kernel,
+  Doctrine ani databázi.
+end note
+
+note bottom of SYM
+  **Vyměnitelné**
+  Doctrine lze nahradit jiným ORM,
+  Messenger jiným bus systémem -
+  doménová vrstva se nezmění.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

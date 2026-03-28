@@ -67,9 +67,33 @@
             </p>
         </div>
 
+    <section id="ddd-vs-symfony-boundary" aria-labelledby="ddd-vs-symfony-boundary-heading">
+        <h2 id="ddd-vs-symfony-boundary-heading">Kde končí DDD a kde začíná Symfony</h2>
+
+        <p>
+            Následující diagram ukazuje hranici mezi čistým DDD kódem (zelená oblast) a Symfony infrastrukturou
+            (oranžová oblast). Vše v zelené oblasti je čistý PHP bez závislosti na frameworku -
+            testovatelné v izolaci, přenositelné mezi projekty. Symfony vrstva implementuje kontrakty
+            definované doménou (repository interface, event dispatch) a zajišťuje HTTP, persistenci a messaging.
+        </p>
+
+        <div class="tip">
+            <div class="diagram-container">
+                {% include '/diagrams/3_implementation_in_symfony/boundary.svg' %}
+            </div>
+        </div>
+
+        <p>
+            Směr závislostí je zásadní: Symfony závisí na DDD (implementuje jeho rozhraní), nikdy naopak.
+            Doménová vrstva neimportuje žádný Symfony namespace. Díky tomu lze Doctrine nahradit
+            jiným ORM nebo Messenger jiným bus systémem, aniž by se dotklo doménové logiky.
+        </p>
+    </section>
+
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
         <p id="toc-heading">Obsah kapitoly:</p>
         <ul>
+            <li><a href="#ddd-vs-symfony-boundary">Kde končí DDD a kde začíná Symfony</a></li>
             <li><a href="#project-structure">Struktura projektu</a></li>
             <li><a href="#entities">Implementace entit</a></li>
             <li><a href="#value-objects">Implementace hodnotových objektů</a></li>
