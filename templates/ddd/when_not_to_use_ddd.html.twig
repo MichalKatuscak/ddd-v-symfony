@@ -49,9 +49,9 @@
 
     <p>
         Předchozí kapitola ukázala <a href="{{ path('ddd_pain_points') }}">kde DDD v praxi bolí</a>,
-        i když je nasazeno správně. Tato kapitola rozšiřuje analýzu o situace, kde DDD nasazovat vůbec
-        není vhodné. Na rozdíl od materiálů, které DDD prezentují výhradně jako přínosný přístup,
-        přináší tato kapitola vyvážené hodnocení jeho omezení a nevhodných kontextů použití.
+        i když je nasazeno správně. Tato kapitola se věnuje situacím, kde DDD nasazovat nemá smysl.
+        Je to pohled, který DDD literatura — soustředěná přirozeně na to, kdy vzor použít —
+        zpravidla nerozvádí dostatečně.
     </p>
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
@@ -101,8 +101,8 @@
         <h2 id="crud-admin-heading">1. CRUD admin a jednoduchý backoffice</h2>
 
         <p>
-            Máš aplikaci, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuje 1:1 na tabulku.
-            Žádná doménová logika - jen persistence.
+            Typickým příkladem je aplikace, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuje 1:1 na tabulku.
+            Žádná doménová logika — jen persistence.
         </p>
 
         <p>
@@ -175,7 +175,7 @@ class ArticleCrudController extends AbstractCrudController
         </div>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>EasyAdmin</strong> - pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
                 <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> - pro jednoduchý CRUD bez business logiky.</li>
@@ -195,7 +195,7 @@ class ArticleCrudController extends AbstractCrudController
 
         <p>
             Hledáte product-market fit. Co dnes je objednávka, zítra je subscription. Co dnes je
-            zákazník, zítra je partner. Ubiquitous Language nemůžeš vybudovat, když doménový model
+            zákazník, zítra je partner. Ubiquitous Language nelze vybudovat, pokud doménový model
             ještě neexistuje.
         </p>
 
@@ -250,7 +250,7 @@ class Order {
         </div>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Flat MVC s Doctrine Entities</strong> - rychlé iterace, změny jsou levné.</li>
                 <li>Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
@@ -283,7 +283,7 @@ class Order {
         </p>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) - dobře strukturovaný kód bez přílišné abstrakce.</li>
                 <li>DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na <a href="{{ path('basic_concepts') }}">Event Storming</a>.</li>
@@ -298,20 +298,20 @@ class Order {
         <h2 id="data-pipeline-heading">4. Data pipeline, ETL a reportovací systémy</h2>
 
         <p>
-            Načítáš data z externích zdrojů, transformuješ je a ukládáš nebo reportuješ.
+            Systém načítá data z externích zdrojů, transformuje je a ukládá nebo reportuje.
             Žádné business rules, žádné invarianty, žádná doménová logika.
-            Je to přesun a transformace dat - ne modelování domény.
+            Jde o přesun a transformaci dat — ne o modelování domény.
         </p>
 
         <p>
             Agregáty chrání invarianty. Pokud žádné invarianty nemáte, agregáty nemáte k čemu potřebovat.
-            Přidáváš komplexitu bez důvodu. Jak píše Evans: agregát je
+            Výsledkem je přidaná komplexita bez věcného důvodu. Jak píše Evans: agregát je
             <em>cluster of associated objects that we treat as a unit for the purpose of data changes</em>
             - klíčové slovo je „data changes" s business pravidly, ne „data transfer".
         </p>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Service layer s plain PHP objekty</strong> - jednoduché třídy pro transformaci, bez agregátů.</li>
                 <li><strong>Symfony Messenger</strong> pro asynchronní zpracování pipeline kroků - bez DDD overhead. Viz <a href="{{ path('cqrs') }}">kapitola o CQRS</a> pro inspiraci, jak Messenger používat efektivně.</li>
@@ -332,7 +332,7 @@ class Order {
 
         <p>
             DDD investice se vrátí na projektech, které žijí roky a rostou. Na krátkodobých projektech
-            zaplatíš cenu DDD (čas, komplexita, learning curve) bez toho, aniž bys někdy sklidil
+            tým zaplatí cenu DDD (čas, komplexita, learning curve) aniž by kdy sklidil
             výhody (udržovatelnost, evolvability).
         </p>
 
@@ -347,7 +347,7 @@ class Order {
         </p>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Prostý Symfony controller + Doctrine</strong> - nejkratší cesta od požadavku k funkčnímu kódu.</li>
                 <li>Pokud projekt nečekaně vyroste, refaktorovat z jednoduchého kódu na DDD je snazší než vysvětlovat, proč jednoduchý projekt má 40 tříd. Postup najdete v <a href="{{ path('migration_from_crud') }}">Migraci z CRUD</a>.</li>
@@ -421,10 +421,10 @@ final class Order
         </div>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li>Klasická architektura, kterou tým zná dobře - srozumitelný kód je vždy lepší než „správná" architektura, které nikdo nerozumí.</li>
-                <li>DDD zaveď na vedlejším projektu nebo v části systému jako experiment. Pak přenášej zkušenosti postupně.</li>
+                <li>DDD zaveďte na vedlejším projektu nebo v části systému jako experiment, pak přenášejte zkušenosti postupně.</li>
                 <li>Jako odrazový můstek doporučujeme Vernon: <em>Domain-Driven Design Distilled</em> - nejrychlejší cesta k pochopení DDD konceptů.</li>
             </ul>
         </div>
@@ -438,7 +438,7 @@ final class Order
 
         <p>
             Zákazník neví, co chce. Požadavky jsou vágní. Doménový expert buď neexistuje, nebo
-            nemá čas spolupracovat. Modeluješ ve tmě.
+            nemá čas spolupracovat. Výsledkem je modelování bez pevného základu.
         </p>
 
         <p>
@@ -455,7 +455,7 @@ final class Order
         </p>
 
         <div class="note" role="note">
-            <strong>Použij místo toho:</strong>
+            <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Event Storming napřed</strong> - než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
                 <li>Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
