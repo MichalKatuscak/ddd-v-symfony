@@ -386,19 +386,6 @@
         <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
     </ul>
 
-    <div class="warning" role="note" aria-labelledby="important-notes-heading">
-        <h3 id="important-notes-heading">Důležité poznámky</h3>
-        <p>
-            Při implementaci vertikální slice architektury v Symfony 8 je důležité:
-        </p>
-        <ul>
-            <li>Minimalizovat vazby mezi jednotlivými funkcemi (features).</li>
-            <li>Používat CQRS pro oddělení čtení a zápisu <a href="https://symfony.com/doc/current/messenger/multiple_buses.html" target="_blank">[11]</a>.</li>
-            <li>Používat doménové události pro komunikaci mezi funkcemi.</li>
-            <li>Definovat jasné hranice mezi funkcemi.</li>
-        </ul>
-    </div>
-
     <p>
         V další kapitole se podíváme na <a href="{{ path('implementation_in_symfony') }}">implementaci DDD v Symfony 8</a>.
     </p>
