@@ -826,10 +826,10 @@ class TaskAssignmentService
             <strong>Ubiquitous Language je základem úspěchu</strong> - Vytvoření a používání společného jazyka s doménovými experty výrazně zlepšilo komunikaci a vedlo k přesnějšímu modelu. Konzistentní používání tohoto jazyka v kódu usnadnilo pochopení a údržbu.
         </li>
         <li>
-            <strong>Agregáty a hranice transakcí</strong> - Správné definování agregátů a jejich hranic bylo klíčové pro zajištění konzistence dat. Každý agregát byl zodpovědný za udržování své vnitřní konzistence a byl měněn v rámci jedné transakce.
+            <strong>Agregáty a hranice transakcí</strong> - Správné definování agregátů a jejich hranic umožnilo konzistentní správu dat. Každý agregát byl zodpovědný za udržování své vnitřní konzistence a byl měněn v rámci jedné transakce.
         </li>
         <li>
-            <strong>Doménové události pro integraci</strong> - Doménové události byly klíčové pro komunikaci mezi různými bounded contexts. Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými kontexty bez vytváření přímých závislostí.
+            <strong>Doménové události pro integraci</strong> - Doménové události zajistily komunikaci mezi různými bounded contexts. Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými kontexty bez vytváření přímých závislostí.
         </li>
         <li>
             <strong>CQRS pro oddělení zodpovědností</strong> - Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu. Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování. Symfony Messenger poskytl výkonnou infrastrukturu pro implementaci CQRS.
