@@ -982,7 +982,7 @@ class UserRegistered
     <div class="note" role="note" aria-labelledby="dispatcher-vs-messenger-heading">
         <h3 id="dispatcher-vs-messenger-heading">Symfony EventDispatcher vs. Messenger pro doménové události</h3>
         <p>
-            Symfony nabízí dva mechanismy pro práci s událostmi. Je důležité vybrat správný:
+            Symfony nabízí dva mechanismy pro práci s událostmi — každý pro jiný účel:
         </p>
         <ul>
             <li>
@@ -1008,7 +1008,7 @@ class UserRegistered
     <section id="error-handling" aria-labelledby="error-handling-heading">
     <h2 id="error-handling-heading">Strategie zpracování chyb v DDD</h2>
     <p>
-        V DDD je důležité rozlišovat typy výjimek podle vrstvy, ve které vznikají. Každá vrstva
+        V DDD se výjimky liší podle vrstvy, ve které vznikají. Každá vrstva
         má jiné odpovědnosti a jiný typ chyb:
     </p>
 
@@ -1394,23 +1394,6 @@ services:
             <li><strong>Granulární exclude pravidla</strong> - můžete pro každý kontext vyloučit jiné adresáře (např. jeden kontext může mít doménové služby, jiný ne).</li>
             <li><strong>Snazší refaktoring</strong> - při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z <code>services.yaml</code>.</li>
             <li><strong>Prevence nechtěných závislostí</strong> - pokud kontext A omylem importuje třídu z kontextu B, je snadné to odhalit v konfiguraci.</li>
-        </ul>
-    </div>
-
-    <div class="warning">
-        <h3>Důležité poznámky</h3>
-        <p>
-            Při implementaci DDD v Symfony 8 je důležité:
-        </p>
-        <ul>
-            <li>Používat Dependency Injection pro oddělení závislostí.</li>
-            <li>Používat Messenger komponentu pro implementaci CQRS.</li>
-            <li>Používat Doctrine ORM pro persistenci doménových objektů.</li>
-            <li>Používat atributy pro konfiguraci služeb a routování.</li>
-            <li>Používat formuláře pro zpracování vstupů od uživatele.</li>
-            <li>Používat validaci pro validaci doménových objektů.</li>
-            <li>Respektovat hranice mezi doménami a neumisťovat doménové modely do sdílené složky.</li>
-            <li>Používat Anti-Corruption Layer pro komunikaci mezi doménami, pokud je to nutné.</li>
         </ul>
     </div>
 
