@@ -211,7 +211,7 @@
     <section id="entities" aria-labelledby="entities-heading">
     <h2 id="entities-heading">Implementace entit</h2>
     <p>
-        Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 můžete implementovat entity jako běžné PHP třídy:
+        Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 se implementují entity jako běžné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="entity-example-heading">
@@ -328,7 +328,7 @@ class User
     <section id="value-objects" aria-labelledby="value-objects-heading">
     <h2 id="value-objects-heading">Implementace hodnotových objektů</h2>
     <p>
-        Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 můžete implementovat hodnotové objekty jako neměnné PHP třídy:
+        Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 se implementují hodnotové objekty jako neměnné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="value-object-example-heading">
@@ -380,7 +380,7 @@ class Email
     <section id="repositories" aria-labelledby="repositories-heading">
     <h2 id="repositories-heading">Implementace repozitářů</h2>
     <p>
-        Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 můžete implementovat repozitáře jako rozhraní a jejich implementace:
+        Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 se implementují repozitáře jako rozhraní a jejich implementace:
     </p>
 
     <div class="tip" role="note" aria-labelledby="repository-example-heading">
@@ -790,7 +790,7 @@ class Order
     <h2 id="domain-services-heading">Implementace doménových služeb</h2>
     <p>
         Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
-        V Symfony 8 můžete implementovat doménové služby jako běžné PHP třídy:
+        V Symfony 8 se implementují doménové služby jako běžné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="domain-service-example-heading">
@@ -930,7 +930,7 @@ final class ShippingService
     <section id="domain-events" aria-labelledby="domain-events-heading">
     <h2 id="domain-events-heading">Implementace doménových událostí</h2>
     <p>
-        Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 můžete implementovat doménové události jako neměnné PHP třídy:
+        Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 se implementují doménové události jako neměnné PHP třídy:
     </p>
 
     <div class="tip" role="note" aria-labelledby="domain-event-example-heading">
@@ -1074,7 +1074,7 @@ final class InvalidOrderStateTransitionException extends \DomainException
     <section id="application-services" aria-labelledby="application-services-heading">
     <h2 id="application-services-heading">Implementace aplikačních služeb</h2>
     <p>
-        Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 můžete implementovat aplikační služby
+        Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 se implementují aplikační služby
         jako command a query handlery:
     </p>
 
@@ -1224,7 +1224,7 @@ class GetUserProfileHandler
     <section id="controllers" aria-labelledby="controllers-heading">
     <h2 id="controllers-heading">Implementace kontrolerů</h2>
     <p>
-        Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 můžete implementovat kontrolery
+        Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 se implementují kontrolery
         jako běžné Symfony kontrolery:
     </p>
 
@@ -1289,7 +1289,7 @@ class RegistrationController extends AbstractController
     <h2 id="dependency-injection-heading">Dependency Injection a autowiring</h2>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
-        Symfony 8 poskytuje výkonný Dependency Injection Container, který můžete použít pro konfiguraci služeb:
+        Symfony 8 poskytuje výkonný Dependency Injection Container, který slouží pro konfiguraci služeb:
     </p>
 
     <div class="tip" role="note" aria-labelledby="dependency-injection-example-heading">
