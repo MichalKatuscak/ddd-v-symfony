@@ -302,7 +302,7 @@
     <h2 id="symfony-messenger-heading">Symfony Messenger jako základ CQRS</h2>
     <p>
         Symfony Messenger je komponenta, která poskytuje infrastrukturu pro odesílání a zpracování zpráv.
-        Pro CQRS je klíčová schopnost definovat <strong>více message busů</strong> - jeden pro příkazy
+        Pro CQRS je podstatná schopnost definovat <strong>více message busů</strong> - jeden pro příkazy
         (command bus) a jeden pro dotazy (query bus). Každý bus může mít vlastní sadu middleware,
         vlastní transport a vlastní strategii zpracování.
     </p>
@@ -636,7 +636,7 @@ final class GetUserProfileHandler
     </div>
 
     <p>
-        Všimněte si klíčového rozdílu: command handler pracuje s doménovým modelem (<code>UserRepository</code>,
+        Všimněte si podstatného rozdílu: command handler pracuje s doménovým modelem (<code>UserRepository</code>,
         <code>User</code> entita, value objects), zatímco query handler pracuje s <strong>read repozitářem</strong>
         (<code>UserProfileReadRepository</code>), který vrací přímo ViewModel - jednoduchou datovou strukturu
         optimalizovanou pro prezentaci. Query handler neprochází přes doménový model.

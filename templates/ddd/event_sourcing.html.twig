@@ -1119,7 +1119,7 @@ final class IdempotentOrderProjector
         <p>
             Projektor může selhat z mnoha důvodů: dočasná nedostupnost databáze, neplatný payload
             u staré události bez upcasteru, nebo bug v projekční logice. Symfony Messenger nabízí
-            dvě klíčové mechaniky pro řešení:
+            dvě hlavní mechaniky pro řešení:
         </p>
         <ul>
             <li>
@@ -1774,7 +1774,7 @@ final readonly class UpcasterChain
             </li>
             <li>
                 <strong>Týmy bez zkušeností s ES</strong> - Implementace Event Sourcingu bez předchozí zkušenosti
-                přináší vysoké riziko chyb v klíčové infrastruktuře (Event Store, serializace, versioning).
+                přináší vysoké riziko chyb v kritické infrastruktuře (Event Store, serializace, versioning).
                 Doporučuje se začít s menším bounded contextem jako experimentem.
             </li>
         </ul>

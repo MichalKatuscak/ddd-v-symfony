@@ -111,7 +111,7 @@
                 <strong>Funkční testy - aplikační vrstva / API (špička pyramidy, nejméně testů)</strong><br>
                 Testují celé use cases přes HTTP vrstvu nebo přímo přes aplikační služby.
                 Simulují reálného uživatele aplikace. Jsou nejpomalejší a nejkřehčí.
-                Cíl: ověřit integraci všech vrstev v klíčových scénářích.
+                Cíl: ověřit integraci všech vrstev v hlavních scénářích.
             </li>
         </ul>
     </div>
@@ -941,7 +941,7 @@ final class RegistrationControllerTest extends WebTestCase
     <div class="warning" role="alert" aria-labelledby="functional-test-scope-heading">
         <h3 id="functional-test-scope-heading">Rozsah funkčních testů</h3>
         <p>
-            Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze klíčové happy path a nejdůležitější chybové scénáře.
+            Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze hlavní happy path a nejdůležitější chybové scénáře.
             Vše ostatní (edge cases, validace, doménová pravidla) pokryjte rychlými unit testy doménové vrstvy.
             Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů ke spouštění testů lokálně.
         </p>
@@ -1100,7 +1100,7 @@ return static function (Config $config): void {
             <li><strong>Doménová vrstva (Domain)</strong> - 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
             <li><strong>Aplikační vrstva (Application)</strong> - 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
             <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> - 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
-            <li><strong>Prezentační vrstva (Presentation)</strong> - 50–70 %. Kontrolery pokryjte funkčními testy pro klíčové scénáře.</li>
+            <li><strong>Prezentační vrstva (Presentation)</strong> - 50–70 %. Kontrolery pokryjte funkčními testy pro hlavní scénáře.</li>
         </ul>
     </div>
 
