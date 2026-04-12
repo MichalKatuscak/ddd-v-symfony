@@ -915,6 +915,13 @@ class RegisterUserHandler
     }
 }</code></pre>
 
+    <p>
+        Všechny tři příklady ukazují stejný vzor: kontroler pouze dispatchuje command nebo query,
+        aplikační vrstva koordinuje operaci a doménový model vynucuje business pravidla.
+        Konkrétní strukturu a konfiguraci takového projektu popisuje kapitola
+        <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony 8</a>.
+    </p>
+
         </section>
     </article>
 {% endblock %}

@@ -1175,6 +1175,12 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
 # Spuštění architektonických testů s Deptrac
 ./vendor/bin/deptrac analyze</code></pre>
     </div>
+
+    <p>
+        Testovací pyramida v DDD staví na tom, že doménová vrstva je čistý PHP bez závislostí na frameworku –
+        proto je unit testování rychlé a přímočaré. Integrační a funkční testy doplňují pokrytí tam,
+        kde vstupuje infrastruktura.
+    </p>
     </section>
 
     </article>
