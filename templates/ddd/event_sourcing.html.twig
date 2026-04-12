@@ -1798,39 +1798,6 @@ final readonly class UpcasterChain
             </p>
         </div>
 
-        <p>
-            V další kapitole se podíváme na <a href="{{ path('sagas') }}">ságy a process managery</a> -
-            vzor koordinace dlouhotrvajících procesů napříč Bounded Contexts, který se s Event Sourcing
-            přirozeně doplňuje. Poté pokračujte na
-            <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD v Symfony</a>.
-        </p>
-    </section>
-
-    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-        <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-        <ul>
-            <li><strong>Event Sourcing</strong> ukládá stav jako sekvenci neměnných událostí, ne jako aktuální snímek.</li>
-            <li><strong>Event Store</strong> je append-only úložiště s optimistic lockingem přes verzi streamu.</li>
-            <li>Agregáty se rekonstruují <strong>přehráním</strong> (replay) událostí ze svého event streamu.</li>
-            <li><strong>Projekce</strong> transformují event stream do read modelů optimalizovaných pro dotazy.</li>
-            <li>Asynchronní projektory musí být <strong>idempotentní</strong> a mít retry/dead letter queue strategii.</li>
-            <li><strong>Snapshots</strong> řeší výkonnostní problém dlouhých event streamů.</li>
-            <li><strong>Verzování událostí</strong> s upcastery zajišťuje zpětnou kompatibilitu při vývoji schématu - sloupec <code>schema_version</code> v Event Store je klíčový.</li>
-            <li>ES a CQRS jsou <strong>nezávislé vzory</strong>, ale jejich kombinace je v praxi velmi efektivní.</li>
-            <li>Osobní údaje <strong>nepatří do event payloadu</strong> (GDPR) - použijte crypto-shredding nebo referenční přístup.</li>
-        </ul>
-    </section>
-
-    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-        <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-        <div class="tip">
-            <ol>
-                <li>Navrhněte event stream pro agregát <code>BankAccount</code> s operacemi: otevření účtu, vklad, výběr, uzavření. Jaké události vzniknou?</li>
-                <li>Implementujte projekci <code>AccountBalanceProjection</code>, která z výše uvedených událostí vypočítá aktuální zůstatek. Zajistěte, aby projektor byl <strong>idempotentní</strong>.</li>
-                <li>Zamyslete se: kdy byste vytvořili snapshot pro <code>BankAccount</code>? Po kolika událostech a proč?</li>
-                <li>Představte si, že událost <code>AccountOpened</code> v1 měla pole <code>ownerName</code> (celé jméno). V2 jej rozdělila na <code>firstName</code> a <code>lastName</code>. Napište upcaster a zvažte: co se stane se snapshoty vytvořenými z v1 událostí?</li>
-            </ol>
-        </div>
     </section>
 </article>
 {% endblock %}

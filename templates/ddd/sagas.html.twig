@@ -77,8 +77,6 @@
             <li><a href="#paralelni-kroky">Paralelní kroky</a></li>
             <li><a href="#monitoring">Monitoring a observabilita</a></li>
             <li><a href="#testovani">Testování ság</a></li>
-            <li><a href="#shrnuti">Co jsme se naučili</a></li>
-            <li><a href="#cviceni">Cvičení</a></li>
         </ul>
     </div>
 
@@ -1711,101 +1709,6 @@ final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
     <p>
         Další vzory pro testování doménové logiky, agregátů a event handlerů najdete v kapitole
         <a href="{{ path('testing_ddd') }}">Testování DDD aplikací</a>.
-    </p>
-
-    </section>
-
-    {# ───────────────────────────────────────────────────────────
-       Sekce 13: Shrnutí
-       ─────────────────────────────────────────────────────────── #}
-    <section id="shrnuti" aria-labelledby="shrnuti-heading">
-    <h2 id="shrnuti-heading">Co jsme se naučili</h2>
-
-    <ul>
-        <li>
-            Distribuované transakce (<abbr title="Two-Phase Commit">2PC</abbr>) nejsou v DDD vhodné
-            - ságy nabízejí alternativu pomocí <strong>kompenzačních transakcí</strong>.
-        </li>
-        <li>
-            Kompenzační transakce sémanticky vrací efekt předchozího kroku - nejsou technickým
-            rollbackem, ale <strong>novými doménovými akcemi</strong>.
-        </li>
-        <li>
-            <strong>Choreografie</strong> je jednoduchá pro 2–3 kroky, ale při rostoucím počtu
-            kontextů vede k „distributed spaghetti".
-        </li>
-        <li>
-            <strong>Orchestrace</strong> (Process Manager) centralizuje řízení procesu do stavového
-            automatu - snadnější ladění, rozšiřování i monitoring.
-        </li>
-        <li>
-            Stav ságy musí být <strong>persistentní</strong> - worker crash nesmí ztratit informaci
-            o tom, v jakém kroku se proces nachází.
-        </li>
-        <li>
-            Symfony Messenger s async transportem a <code>DelayStamp</code> poskytuje infrastrukturu
-            pro implementaci ság.
-        </li>
-        <li>
-            <strong>Timeout handling</strong> – každý krok potřebuje časový limit
-            a definovanou reakci na jeho vypršení.
-        </li>
-        <li>
-            Kompenzace se provádí v <strong>opačném pořadí</strong> dokončených kroků a každá
-            kompenzační akce musí být idempotentní.
-        </li>
-        <li>
-            Paralelní kroky zvyšují propustnost, ale vyžadují <strong>synchronizační bariéru</strong>
-            a nezávislou kompenzaci pro každou větev.
-        </li>
-        <li>
-            Monitoring ság (<strong>korelační ID</strong>, detekce zaseklých procesů) je pro
-            produkční provoz nezbytný.
-        </li>
-    </ul>
-
-    </section>
-
-    {# ───────────────────────────────────────────────────────────
-       Sekce 14: Cvičení
-       ─────────────────────────────────────────────────────────── #}
-    <section id="cviceni" aria-labelledby="cviceni-heading">
-    <h2 id="cviceni-heading">Zkuste sami</h2>
-
-    <div class="tip" role="note">
-        <ol>
-            <li>
-                Rozšiřte <code>OrderProcessManager</code> o krok notifikace: po
-                <code>ShipmentCreated</code> odešlete zákazníkovi e-mail s trackovacím číslem.
-                Co se stane, když odeslání e-mailu selže? Měla by tato chyba spustit kompenzaci
-                celého procesu?
-            </li>
-            <li>
-                Implementujte timeout pro krok <code>AwaitingStockReservation</code> s limitem
-                30 sekund. Použijte <code>DelayStamp</code> a <code>CheckSagaTimeout</code>.
-                Jakou kompenzaci provedete?
-            </li>
-            <li>
-                Přidejte do procesu paralelní krok: po úspěšné platbě se souběžně rezervuje sklad
-                a generuje faktura. Implementujte synchronizační bariéru pomocí
-                <code>SagaState.context</code>.
-            </li>
-            <li>
-                Napište test kompenzační cesty: objednávka &rarr; platba úspěšná &rarr; rezervace
-                skladu selhala. Ověřte, že saga provede refund a zruší objednávku.
-            </li>
-            <li>
-                Navrhněte choreografickou alternativu pro zjednodušený dvou-krokový proces
-                (objednávka &rarr; platba). Porovnejte složitost s orchestrací a rozhodněte,
-                kdy je choreografie dostačující.
-            </li>
-        </ol>
-    </div>
-
-    <p>
-        V další kapitole se podíváme na
-        <a href="{{ path('ddd_pain_points') }}">reálná bolestivá místa DDD v PHP a Symfony</a>
-        - katalog 20 problémů, na které narazíte při implementaci, s doporučenými řešeními.
     </p>
 
     </section>

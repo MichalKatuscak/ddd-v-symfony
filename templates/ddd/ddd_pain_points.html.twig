@@ -101,8 +101,6 @@
                     <li><a href="#e3-silos">E3. Knowledge silos a bus factor</a></li>
                 </ul>
             </li>
-            <li><a href="#shrnuti">Shrnutí</a></li>
-            <li><a href="#cviceni">Cvičení</a></li>
         </ul>
     </div>
 
@@ -1518,88 +1516,6 @@ final class OrderVoter extends Voter
     </section>
 
     </section>{# konec bloku E #}
-
-    {# ═══════════════════════════════════════════════════════════
-       Shrnutí
-       ═══════════════════════════════════════════════════════════ #}
-    <section id="shrnuti" aria-labelledby="shrnuti-heading">
-    <h2 id="shrnuti-heading">Co jsme se naučili</h2>
-
-    <ul>
-        <li>
-            <strong>Doctrine</strong> - Unit of Work je session-scoped; Application Service
-            je správná transakční hranice. Složité Value Objects mapujte přes Custom Type.
-            UUID generujte v doméně, nikoli v databázi.
-        </li>
-        <li>
-            <strong>Asynchronní infrastruktura</strong> - Outbox pattern garantuje
-            at-least-once doručení událostí. Každý handler musí být idempotentní.
-            Correlation ID je nezbytné pro debugging distribuovaných systémů.
-        </li>
-        <li>
-            <strong>Modelování</strong> - Doménový invariant patří do konstruktoru
-            nebo metody agregátu, nikdy jen do Symfony Validatoru. Anti-Corruption Layer
-            chrání doménu před změnami externích API.
-        </li>
-        <li>
-            <strong>Symfony</strong> - Form mapuje na DTO, Application Service sestaví Command.
-            API Platform pracuje s API Resource DTO, nikoli s agregáty. Security Voter
-            je tenký adaptér nad doménovou metodou.
-        </li>
-        <li>
-            <strong>Tým a organizace</strong> - Strangler fig je bezpečnější než big-bang
-            rewrite. Business case argumentuje měřitelnými metrikami, ne technickou čistotou.
-            Bus factor snižují živá dokumentace, ADR a Event Storming.
-        </li>
-    </ul>
-
-    </section>
-
-    {# ═══════════════════════════════════════════════════════════
-       Cvičení
-       ═══════════════════════════════════════════════════════════ #}
-    <section id="cviceni" aria-labelledby="cviceni-heading">
-    <h2 id="cviceni-heading">Zkuste sami</h2>
-
-    <div class="tip" role="note">
-        <ol>
-            <li>
-                Implementujte <code>MoneyType</code> pro Doctrine a použijte ho na agregátu
-                <code>Order</code> s polem <code>totalPrice</code>. Ověřte, že po
-                <code>flush()</code> a novém načtení vrací <code>Money</code> objekt, ne string.
-            </li>
-            <li>
-                Přidejte <code>IdempotencyMiddleware</code> do command busu.
-                Napište integrační test, který odešle stejný command dvakrát se stejným
-                <code>IdempotencyStamp::key</code> a ověří, že handler byl zavolán pouze jednou.
-            </li>
-            <li>
-                Navrhněte <code>PaymentGateway</code> interface pro váš aktuální projekt.
-                Implementujte <code>FakePaymentGateway</code> pro testy a
-                <code>StripePaymentGateway</code> pro produkci. Zaregistrujte je přes
-                Symfony DI a přepínejte pomocí environment variable.
-            </li>
-            <li>
-                Identifikujte v existujícím projektu modul s nejvyšší změnovou frekvencí
-                (<code>git log --stat</code>). Navrhněte, jak by vypadal strangler fig
-                přechod tohoto modulu na DDD: jaká fasáda by byla potřeba,
-                jak by se synchronizovala data?
-            </li>
-            <li>
-                Přepište existující Security Voter tak, aby business logika žila
-                v doménové metodě agregátu. Napište unit test doménové metody
-                bez Symfony Security kontextu.
-            </li>
-        </ol>
-    </div>
-
-    <p>
-        V další kapitole se podíváme na
-        <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD v Symfony</a>,
-        kde uvidíte vzory z celé příručky zasazené do reálnějšího kontextu.
-    </p>
-
-    </section>
 
     </article>
 {% endblock %}
