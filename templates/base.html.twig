@@ -11,7 +11,7 @@
     <meta name="generator" content="Symfony 8">
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
+    <link rel="canonical" href="{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">

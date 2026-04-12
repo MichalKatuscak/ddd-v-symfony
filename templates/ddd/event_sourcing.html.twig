@@ -73,9 +73,10 @@
         <h2 id="co-je-event-sourcing-heading">Co je Event Sourcing?</h2>
 
         <p>
-            Event Sourcing (ES) je architektonický vzor persistence, při němž se stav systému neukládá jako aktuální
-            snímek dat, nýbrž jako <strong>sekvence neměnných událostí</strong>, jež k danému stavu vedly
-            <a href="https://martinfowler.com/eaaDev/EventSourcing.html" target="_blank" rel="noopener noreferrer">[1]</a>.
+            Tradiční CRUD persistence má zásadní slepou skvrnu: při každé změně přepíše předchozí stav a veškerá
+            historie se nenávratně ztrácí. Event Sourcing (ES) tento problém řeší tím, že stav systému neukládá
+            jako aktuální snímek dat, nýbrž jako <strong>sekvenci neměnných událostí</strong>, jež k danému stavu
+            vedly <a href="https://martinfowler.com/eaaDev/EventSourcing.html" target="_blank" rel="noopener noreferrer">[1]</a>.
             Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty; aktuální stav agregátu pak
             vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
         </p>
