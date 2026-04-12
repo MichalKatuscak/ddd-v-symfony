@@ -660,34 +660,6 @@ final class OrderCreatedEvent
                 to stalo.
             </p>
 
-            <p>
-                V další kapitole se podíváme na <a href="{{ path('horizontal_vs_vertical') }}">srovnání vertikální
-                    slice architektury s tradičním přístupem k DDD</a> a poté na
-                <a href="{{ path('implementation_in_symfony') }}">konkrétní implementaci v Symfony 8</a>.
-            </p>
-        </section>
-
-        <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-            <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-            <ul>
-                <li><strong>Entity</strong> mají identitu a mění se v čase; <strong>Value Objects</strong> jsou definovány hodnotou a jsou neměnné.</li>
-                <li><strong>Agregáty</strong> tvoří transakční hranici konzistence - veškerý přístup k vnitřním objektům jde přes Aggregate Root.</li>
-                <li><strong>Repozitáře</strong> zapouzdřují persistenci a poskytují doménově orientované rozhraní.</li>
-                <li><strong>Doménové služby</strong> obsahují logiku, která přesahuje hranice jednoho agregátu.</li>
-                <li><strong>Doménové události</strong> jsou neměnné záznamy o tom, co se v doméně přihodilo.</li>
-                <li>PHP 8.1+ <strong>enums</strong> jsou vhodné pro konečné stavové typy; plné Value Objects pro typy s validací a výpočty.</li>
-            </ul>
-        </section>
-
-        <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-            <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-            <div class="tip">
-                <ol>
-                    <li>Vytvořte Value Object <code>PhoneNumber</code> s validací českého/slovenského formátu. Implementujte <code>equals()</code> a <code>__toString()</code>.</li>
-                    <li>Rozšiřte agregát <code>Order</code> o metodu <code>ship(string $trackingNumber): void</code>, která změní stav na SHIPPED a vyhodí výjimku, pokud objednávka není CONFIRMED.</li>
-                    <li>Navrhněte doménovou událost <code>OrderShipped</code>. Jaká data by měla obsahovat? Proč?</li>
-                </ol>
-            </div>
         </section>
     </article>
 {% endblock %}
