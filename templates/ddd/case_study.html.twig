@@ -842,29 +842,6 @@ class TaskAssignmentService
         </li>
     </ol>
 
-    <p>
-        V další kapitole se podíváme na <a href="{{ path('testing_ddd') }}">testování DDD kódu v Symfony</a>.
-    </p>
-    </section>
-
-    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-    <ul>
-        <li>Reálný DDD projekt začíná <strong>identifikací Bounded Contexts</strong> a definicí Ubiquitous Language.</li>
-        <li><strong>Případová studie</strong> ukazuje, jak se teoretické koncepty DDD promítají do konkrétní implementace.</li>
-        <li>Komunikace mezi kontexty probíhá přes <strong>doménové události</strong>, ne přímé volání.</li>
-        <li>Doctrine mapping je <strong>oddělený od domény</strong> pomocí XML konfigurace.</li>
-    </ul>
-    </section>
-
-    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-    <div class="tip">
-        <ol>
-            <li>Navrhněte Context Map pro tuto případovou studii. Jaké vztahy (Customer–Supplier, ACL, Shared Kernel) existují mezi kontexty?</li>
-            <li>Přidejte nový Bounded Context <code>NotificationManagement</code>, který naslouchá událostem z ostatních kontextů a odesílá e-maily.</li>
-        </ol>
-    </div>
     </section>
     </article>
 {% endblock %}

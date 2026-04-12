@@ -1177,28 +1177,6 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
     </div>
     </section>
 
-    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-    <ul>
-        <li><strong>Testovací pyramida</strong> v DDD: unit testy domény (základ), integrační testy infrastruktury (střed), funkční testy API (špička).</li>
-        <li>Doménové objekty jsou <strong>přirozeně testovatelné</strong> - čisté PHP třídy bez závislostí na frameworku.</li>
-        <li><strong>InMemory repozitáře</strong> (Fake) jsou preferované před mocky pro testování command handlerů.</li>
-        <li>Testy doménových událostí ověřují, že agregát vydává <strong>správné události</strong> jako vedlejší efekt operací.</li>
-        <li><strong>Architektonické testy</strong> (Deptrac, PHP-Arkitect) automaticky hlídají závislosti mezi vrstvami.</li>
-    </ul>
-    </section>
-
-    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-    <div class="tip">
-        <ol>
-            <li>Napište unit test pro Value Object <code>Money</code>: otestujte sčítání, validaci záporné částky a rovnost.</li>
-            <li>Vytvořte InMemory implementaci <code>OrderRepository</code> a napište test pro <code>CreateOrderHandler</code>.</li>
-            <li>Nakonfigurujte Deptrac pravidlo, které zakáže doménové vrstvě importovat třídy z infrastrukturní vrstvy.</li>
-        </ol>
-    </div>
-    </section>
-
     </article>
 {% endblock %}
 
