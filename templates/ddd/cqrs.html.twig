@@ -1680,30 +1680,17 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     <h2 id="saga-heading">Saga / Process Manager</h2>
 
     <p>
-        V komplexních systémech s více <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>
-        je často potřeba koordinovat dlouhotrvající business procesy, které zahrnují více kroků a více agregátů.
-        K tomu slouží vzor <strong>Saga</strong> (neboli <strong>Process Manager</strong>).
+        Při použití CQRS s více <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>
+        vzniká potřeba koordinovat dlouhotrvající procesy napříč kontexty.
+        Vzor <strong>Saga</strong> (neboli <strong>Process Manager</strong>) naslouchá doménovým událostem
+        a na základě nich odesílá příkazy, čímž propojuje command a event stranu CQRS do ucelených
+        business procesů.
     </p>
     <p>
-        Saga naslouchá doménovým událostem a na základě nich odesílá příkazy do dalších kontextů.
-        Pokud některý krok selže, Saga provede <strong>kompenzační akce</strong> místo rollbacku
-        distribuované transakce. Dva hlavní přístupy:
+        Podrobný výklad ság - včetně implementace v Symfony Messenger,
+        kompenzačních strategií a testování - najdete v kapitole
+        <a href="{{ path('sagas') }}">Ságy a Process Managery</a>.
     </p>
-
-    <ul>
-        <li><strong>Choreografie</strong> - kontexty komunikují pouze přes události, bez centrálního koordinátora.</li>
-        <li><strong>Orchestrace</strong> - centrální Process Manager řídí tok procesu a odesílá příkazy.</li>
-    </ul>
-
-    <div class="note" role="note" aria-labelledby="saga-kapitola-heading">
-        <h3 id="saga-kapitola-heading">Samostatná kapitola</h3>
-        <p>
-            Podrobný výklad ság - včetně implementace Process Manageru v Symfony Messenger,
-            perzistence stavu, timeout handlingu, kompenzačních strategií, paralelních kroků,
-            monitoringu a testování - najdete v kapitole
-            <a href="{{ path('sagas') }}">Ságy a Process Managery</a>.
-        </p>
-    </div>
 
     </section>
     </article>
