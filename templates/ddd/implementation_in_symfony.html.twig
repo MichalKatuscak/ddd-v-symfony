@@ -328,7 +328,7 @@ class User
 
     <p>
         V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Všimněte si, že entita neobsahuje žádné Doctrine atributy - doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekce <a href="#doctrine-xml-mapping">Separace Doctrine mapování</a>). Neměnné vlastnosti (<code>$id</code>, <code>$createdAt</code>) jsou označeny jako <code>readonly</code>. Entity mohou také generovat doménové události,
-        které jsou uloženy v poli <code>$events</code> a mohou být později uvolněny a zpracovány.
+        které jsou uloženy v poli <code>$domainEvents</code> a mohou být později uvolněny a zpracovány.
     </p>
 
     <div class="note" role="note" aria-labelledby="doctrine-hydration-heading">
