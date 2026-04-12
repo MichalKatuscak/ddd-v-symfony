@@ -1705,38 +1705,6 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         </p>
     </div>
 
-    <p>
-        V další kapitole se podíváme na <a href="{{ path('event_sourcing') }}">Event Sourcing</a>,
-        vzor persistence, který se s CQRS přirozeně doplňuje.
-    </p>
-    </section>
-
-    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-    <ul>
-        <li><strong>CQRS</strong> odděluje operace zápisu (Commands) od operací čtení (Queries) na architektonické úrovni - na rozdíl od CQS, které je pravidlem na úrovni metod.</li>
-        <li>Existují <strong>čtyři úrovně adopce</strong> CQRS - od oddělených handlerů se sdílenou DB až po plný CQRS s Event Sourcing. Začněte jednoduše.</li>
-        <li>V Symfony 8 je CQRS implementován pomocí <strong>Symfony Messenger</strong> se dvěma busy: command bus (s <code>doctrine_transaction</code>) a query bus.</li>
-        <li><strong>Write model</strong> používá doménové entity s business logikou, <strong>Read model</strong> používá denormalizované ViewModely optimalizované pro dotazy.</li>
-        <li>Read modely lze optimalizovat přes denormalizované tabulky, Elasticsearch, Redis cache nebo materialized views - <strong>nezávisle na write modelu</strong>.</li>
-        <li><strong>Eventual consistency</strong> je vlastnost, ne bug - řeší se vzory jako optimistická aktualizace UI, Post-Redirect-Get nebo synchronní projekce pro kritické cesty.</li>
-        <li>Asynchronní zpracování vyžaduje <strong>monitoring dead letter queue</strong>, retry strategie a idempotentní handlery.</li>
-        <li>Vlastní <strong>middleware</strong> (logování, autorizace) se přidává na command/query bus bez změny handlerů.</li>
-        <li><strong>Saga / Process Manager</strong> koordinuje dlouhotrvající procesy napříč Bounded Contexts - podrobně viz <a href="{{ path('sagas') }}">samostatná kapitola</a>.</li>
-    </ul>
-    </section>
-
-    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-    <div class="tip">
-        <ol>
-            <li>Navrhněte Command a Query pro operaci „přidání produktu do košíku". Jaká data bude Command obsahovat? Jaká data vrátí Query? Kde vygenerujete ID košíku - na klientovi, nebo v handleru?</li>
-            <li>Nakonfigurujte Symfony Messenger se dvěma busy (<code>command.bus</code>, <code>query.bus</code>) a vytvořte handler pro jeden z nich. Přidejte vlastní logovací middleware.</li>
-            <li>Vytvořte denormalizovanou tabulku <code>cart_summary</code> a projektor, který ji aktualizuje na základě událostí <code>ItemAddedToCart</code> a <code>ItemRemovedFromCart</code>. Zajistěte idempotenci projektoru.</li>
-            <li>Rozhodněte, které z následujících operací byste zpracovali asynchronně: registrace uživatele, odeslání potvrzovacího e-mailu, vytvoření faktury, validace adresy, aktualizace read modelu košíku. Zdůvodněte u každé.</li>
-            <li>Prozkoumejte kapitolu <a href="{{ path('sagas') }}">Ságy a Process Managery</a> a navrhněte Sagu pro proces „registrace uživatele", která po úspěšné registraci odešle uvítací e-mail a vytvoří výchozí nastavení profilu.</li>
-        </ol>
-    </div>
     </section>
     </article>
 {% endblock %}

@@ -1437,34 +1437,6 @@ services:
         </p>
     </div>
 
-    <p>
-        V další kapitole se podíváme na <a href="{{ path('cqrs') }}">implementaci CQRS v Symfony 8</a>.
-    </p>
-    </section>
-
-    <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-    <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-    <ul>
-        <li>DDD projekt v Symfony 8 se strukturuje podle <strong>Bounded Contexts</strong> s vertikálními feature slices.</li>
-        <li>Doménové entity jsou <strong>čisté PHP objekty</strong> (POPO) bez Doctrine atributů - mapování je řešeno externě (XML).</li>
-        <li><strong>Doctrine custom types</strong> umožňují automatickou konverzi mezi primitivy a hodnotovými objekty.</li>
-        <li><strong>Specification Pattern</strong> zapouzdřuje business pravidla do znovu použitelných objektů.</li>
-        <li>Doménové výjimky, aplikační výjimky a infrastrukturní výjimky mají <strong>různé odpovědnosti</strong>.</li>
-        <li><strong>Symfony Messenger</strong> je preferovaný mechanismus pro doménové události (umožňuje async).</li>
-        <li><strong>Symfony Validator</strong> řeší syntaktickou validaci, doménová vrstva řeší sémantickou validaci.</li>
-    </ul>
-    </section>
-
-    <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-    <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-    <div class="tip">
-        <ol>
-            <li>Vytvořte nový Bounded Context <code>ProductCatalog</code> s entitou <code>Product</code>, value objectem <code>ProductName</code> a repozitářem. Dodržte adresářovou strukturu z této kapitoly.</li>
-            <li>Implementujte Doctrine custom type pro <code>Money</code> Value Object (amount v haléřích + měna).</li>
-            <li>Napište specifikaci <code>ProductInStock</code>, která ověří, zda produkt má skladovou zásobu > 0.</li>
-            <li>Nakonfigurujte <code>services.yaml</code> s odděleným autowiringem pro váš nový Bounded Context.</li>
-        </ol>
-    </div>
     </section>
     </article>
 {% endblock %}
