@@ -101,7 +101,7 @@
     <p>
         Každý z těchto kontextů má vlastní agregát, vlastní databázi (nebo alespoň vlastní tabulky
         se striktně oddělenou odpovědností) a vlastní invarianty, které musí chránit. Agregáty
-        v různých Bounded Contexts nelze měnit v rámci jedné databázové transakce - to by porušilo
+        v různých Bounded Contexts nelze měnit v jedné databázové transakci - to by porušilo
         autonomii kontextů, jež je základním pilířem DDD. Jeden kontext nesmí sahat do databáze
         jiného kontextu; komunikace probíhá výhradně prostřednictvím zpráv (událostí a příkazů).
     </p>
@@ -1050,7 +1050,7 @@ final readonly class OrderPlaced
         </p>
         <p>
             Řešením je <strong>Outbox pattern</strong>: událost se zapíše do speciální tabulky
-            <code>outbox</code> v rámci stejné databázové transakce jako doménová změna. Samostatný
+            <code>outbox</code> v téže databázové transakci jako doménová změna. Samostatný
             proces (relay/poller) pak události z outbox tabulky přenáší do message brokeru a po
             úspěšném odeslání je označí jako zpracované. Tím je zaručeno, že žádná událost se
             neztratí - a to i při selhání mezi kroky. Podrobněji viz kapitola
@@ -1424,7 +1424,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
     <h3 id="korelacni-id-heading">Korelační ID</h3>
 
     <p>
-        Každá zpráva v rámci jedné ságy nese stejné <strong>korelační ID</strong> - typicky
+        Každá zpráva v jedné sáze nese stejné <strong>korelační ID</strong> - typicky
         <code>orderId</code>. Díky němu můžete v logu vyfiltrovat všechny zprávy patřící
         ke konkrétní objednávce a sledovat celý průběh procesu od začátku do konce.
         Více o korelačních identifikátorech najdete v

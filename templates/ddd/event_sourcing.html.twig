@@ -404,7 +404,7 @@ final class UserRegistered implements DomainEvent
     payload       JSON             NOT NULL COMMENT 'Serializovaná data události',
     metadata      JSON             NOT NULL DEFAULT ('{}') COMMENT 'Korelační ID, causation ID, user ID…',
     schema_version SMALLINT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Verze schématu payloadu - pro upcasting',
-    version       INT UNSIGNED     NOT NULL COMMENT 'Pořadové číslo v rámci streamu agregátu (od 1)',
+    version       INT UNSIGNED     NOT NULL COMMENT 'Pořadové číslo ve streamu agregátu (od 1)',
     occurred_on   DATETIME(6)      NOT NULL COMMENT 'UTC čas vzniku události',
 
     PRIMARY KEY (id),
@@ -887,7 +887,7 @@ final class EventSourcedOrderRepository
         <h3>Synchronní vs. asynchronní projekce</h3>
         <ul>
             <li>
-                <strong>Synchronní projekce</strong> - Projekce se aktualizuje přímo v rámci téže transakce jako
+                <strong>Synchronní projekce</strong> - Projekce se aktualizuje přímo v téže transakci jako
                 zápis události. Garantuje konzistenci dat v okamžiku odpovědi na command, ale zvyšuje latenci zápisu
                 a zavádí těsnou vazbu mezi write a read stranou.
             </li>
