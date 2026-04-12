@@ -288,7 +288,7 @@ final class UserTest extends TestCase
         $user->changeEmail(new Email('jan@example.com'));
 
         // Žádná událost by neměla být vydána, email je stále stejný
-        $this->assertCount(0, $user->releaseEvents());
+        $this->assertCount(0, $user->releaseDomainEvents());
     }
 }</code></pre>
     </div>
@@ -375,7 +375,7 @@ final class OrderTest extends TestCase
         $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
         $order->place();
 
-        $events = $order->releaseEvents();
+        $events = $order->releaseDomainEvents();
 
         $this->assertCount(2, $events); // OrderItemAdded + OrderPlaced
         $this->assertInstanceOf(OrderItemAdded::class, $events[0]);
@@ -397,7 +397,7 @@ final class OrderTest extends TestCase
         <h3>Pattern "Record and Verify Events":</h3>
         <p>
             Agregáty sbírají vydané události interně v privátním poli (viz <code>AggregateRoot</code> bázová třída nebo trait).
-            Metoda <code>releaseEvents()</code> vrátí všechny nashromážděné události a pole vymaže - tento přístup nevyžaduje
+            Metoda <code>releaseDomainEvents()</code> vrátí všechny nashromážděné události a pole vymaže - tento přístup nevyžaduje
             žádný event dispatcher ani bus v unit testech. Testovací kód pak jednoduše zavolá doménovou operaci a ověří
             obsah vrácených událostí.
         </p>
@@ -493,7 +493,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $order->addItem('Produkt A', new Money(25000, Currency::CZK), 3);
         $order->place();
 
-        $events      = $order->releaseEvents();
+        $events      = $order->releaseDomainEvents();
         $placedEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
 
         // Ověření dat události
@@ -507,7 +507,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $order = Order::create(OrderId::generate(), CustomerId::generate());
         $order->addItem('Produkt B', new Money(10000, Currency::CZK), 1);
 
-        $events = $order->releaseEvents();
+        $events = $order->releaseDomainEvents();
 
         $this->assertNoEventOfType(OrderPlaced::class, $events);
     }
@@ -1153,7 +1153,7 @@ return static function (Config $config): void {
                 <strong>Ignorování doménových výjimek v testech</strong> - Každá doménová výjimka (<code>InvalidEmailException</code>, <code>OrderAlreadyPlacedException</code> apod.) musí mít test ověřující, že je skutečně vyhozena za správných podmínek.
             </li>
             <li>
-                <strong>Chybějící test pro releaseEvents() po operaci</strong> - Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
+                <strong>Chybějící test pro releaseDomainEvents() po operaci</strong> - Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
             </li>
         </ul>
     </div>

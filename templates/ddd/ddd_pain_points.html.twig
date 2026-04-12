@@ -642,7 +642,7 @@ final class OutboxEventListener
             if (!$entity instanceof HasDomainEvents) {
                 continue;
             }
-            foreach ($entity->releaseEvents() as $event) {
+            foreach ($entity->releaseDomainEvents() as $event) {
                 $outbox = new OutboxEvent(get_class($event), $this->serializer->normalize($event));
                 $em->persist($outbox);
                 // Outbox entitu musíme ručně přidat do Unit of Work - jsme uvnitř onFlush

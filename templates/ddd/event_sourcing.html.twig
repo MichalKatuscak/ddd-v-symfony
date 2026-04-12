@@ -695,7 +695,7 @@ abstract class EventSourcedAggregate
     }
 
     /** @return DomainEvent[] */
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
         $events = $this-&gt;recordedEvents;
         $this-&gt;recordedEvents = [];
@@ -855,7 +855,7 @@ final class EventSourcedOrderRepository
 
     public function save(Order $order): void
     {
-        $newEvents = $order-&gt;releaseEvents();
+        $newEvents = $order-&gt;releaseDomainEvents();
 
         if (empty($newEvents)) {
             return;
@@ -1437,7 +1437,7 @@ final class SnapshottingOrderRepository
 
     public function save(Order $order): void
     {
-        $newEvents = $order-&gt;releaseEvents();
+        $newEvents = $order-&gt;releaseDomainEvents();
 
         if (empty($newEvents)) {
             return;

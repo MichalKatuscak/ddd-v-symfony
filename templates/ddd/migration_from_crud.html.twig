@@ -457,7 +457,7 @@ class User
         $this->status = UserStatus::ACTIVE;
     }
 
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
         $events = $this->domainEvents;
         $this->domainEvents = [];
@@ -762,7 +762,7 @@ final class RegisterUserHandler
         $this->users->save($user);
 
         // Domain Events jsou zpracovány Symfony Messengerem
-        foreach ($user->releaseEvents() as $event) {
+        foreach ($user->releaseDomainEvents() as $event) {
             // event dispatch je řešen infrastrukturní vrstvou
         }
     }
@@ -935,7 +935,7 @@ final class UserTest extends TestCase
             HashedPassword::fromPlaintext('SecurePass123')
         );
 
-        $events = $user->releaseEvents();
+        $events = $user->releaseDomainEvents();
         self::assertCount(1, $events);
         self::assertInstanceOf(UserRegistered::class, $events[0]);
     }

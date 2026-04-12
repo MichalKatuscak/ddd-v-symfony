@@ -434,7 +434,7 @@ class Project
         $this->domainEvents[] = $event;
     }
 
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
         $events = $this->domainEvents;
         $this->domainEvents = [];
@@ -575,7 +575,7 @@ class Task
         $this->domainEvents[] = $event;
     }
 
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
         $events = $this->domainEvents;
         $this->domainEvents = [];
