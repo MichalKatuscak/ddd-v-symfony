@@ -156,7 +156,7 @@ class Cart
     private array $items = [];
     private readonly \DateTimeImmutable $createdAt;
     private \DateTimeImmutable $updatedAt;
-    private array $events = [];
+    private array $domainEvents = [];
 
     private function __construct(CartId $id, string $userId)
     {
@@ -260,13 +260,13 @@ class Cart
 
     private function recordEvent(object $event): void
     {
-        $this->events[] = $event;
+        $this->domainEvents[] = $event;
     }
 
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
-        $events = $this->events;
-        $this->events = [];
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
 
         return $events;
     }
@@ -547,7 +547,7 @@ class Post
     private readonly \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt = null;
 
-    private array $events = [];
+    private array $domainEvents = [];
 
     private function __construct(PostId $id, string $title, string $content, string $author)
     {
@@ -609,13 +609,13 @@ class Post
 
     private function recordEvent(object $event): void
     {
-        $this->events[] = $event;
+        $this->domainEvents[] = $event;
     }
 
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
-        $events = $this->events;
-        $this->events = [];
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
 
         return $events;
     }
@@ -754,7 +754,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
     private readonly \DateTimeImmutable $createdAt;
 
-    private array $events = [];
+    private array $domainEvents = [];
 
     private function __construct(UserId $id, string $name, Email $email)
     {
@@ -831,13 +831,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     private function recordEvent(object $event): void
     {
-        $this->events[] = $event;
+        $this->domainEvents[] = $event;
     }
 
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
-        $events = $this->events;
-        $this->events = [];
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
 
         return $events;
     }

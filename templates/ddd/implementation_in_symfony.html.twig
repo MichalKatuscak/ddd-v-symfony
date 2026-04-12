@@ -260,7 +260,7 @@ class User
     private readonly \DateTimeImmutable $createdAt;
 
     /** @var object[] */
-    private array $events = [];
+    private array $domainEvents = [];
 
     private function __construct(UserId $id, string $name, Email $email, HashedPassword $password)
     {
@@ -310,16 +310,16 @@ class User
 
     private function recordEvent(object $event): void
     {
-        $this->events[] = $event;
+        $this->domainEvents[] = $event;
     }
 
     /**
      * @return object[]
      */
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
-        $events = $this->events;
-        $this->events = [];
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
 
         return $events;
     }
@@ -454,7 +454,7 @@ class DoctrineUserRepository implements UserRepository
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        foreach ($user->releaseEvents() as $event) {
+        foreach ($user->releaseDomainEvents() as $event) {
             $this->eventBus->dispatch($event);
         }
     }
@@ -724,14 +724,14 @@ use App\OrderManagement\Domain\Event\OrderStatusChanged;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\OrderStatus;
 
-class Order
+final class Order
 {
     private readonly string $id;
     private OrderStatus $status;
     private readonly \DateTimeImmutable $createdAt;
 
     /** @var object[] */
-    private array $events = [];
+    private array $domainEvents = [];
 
     public function __construct(OrderId $id)
     {
@@ -774,16 +774,16 @@ class Order
 
     private function recordEvent(object $event): void
     {
-        $this->events[] = $event;
+        $this->domainEvents[] = $event;
     }
 
     /**
      * @return object[]
      */
-    public function releaseEvents(): array
+    public function releaseDomainEvents(): array
     {
-        $events = $this->events;
-        $this->events = [];
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
 
         return $events;
     }

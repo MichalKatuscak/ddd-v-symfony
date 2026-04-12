@@ -432,7 +432,7 @@ class User
         $this->id = $id;
         $this->email = $email;
         $this->password = $password;
-        $this->status = UserStatus::PendingVerification;
+        $this->status = UserStatus::PENDING_VERIFICATION;
         $this->registeredAt = new \DateTimeImmutable();
 
         // Doménová událost – side-effect registrace je nyní explicitní
@@ -450,11 +450,11 @@ class User
 
     public function activate(VerificationToken $token): void
     {
-        if ($this->status !== UserStatus::PendingVerification) {
+        if ($this->status !== UserStatus::PENDING_VERIFICATION) {
             throw new \DomainException('Uživatel již byl aktivován nebo je zablokován.');
         }
         $token->validate(); // Token si validuje sám sebe
-        $this->status = UserStatus::Active;
+        $this->status = UserStatus::ACTIVE;
     }
 
     public function releaseEvents(): array

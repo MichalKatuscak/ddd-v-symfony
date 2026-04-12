@@ -655,7 +655,7 @@ class Customer
 }
 
 // Agregát 2: Order - transakční hranice pro jednu objednávku
-class Order
+final class Order
 {
     private readonly OrderId $id;
     private readonly CustomerId $customerId; // Pouze reference - ne celý Customer objekt!

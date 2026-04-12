@@ -154,7 +154,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-class Order
+final class Order
 {
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36, unique: true)]
@@ -623,7 +623,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-class Order
+final class Order
 {
     #[ORM\Id]
     // Symfony Bridge registruje 'ulid' typ - ukládá jako BINARY(16) nebo UUID v PostgreSQL

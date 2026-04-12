@@ -129,12 +129,12 @@ final class ArticleTitle {                          // Value Object
 
 final class Article {                               // Aggregate Root
     private ArticleTitle $title;
-    private array $events = [];
+    private array $domainEvents = [];
 
     public static function create(ArticleTitle $title): self { /* ... */ }
     public function rename(ArticleTitle $newTitle): void {
         $this->title = $newTitle;
-        $this->events[] = new ArticleRenamed($this->id, $newTitle);
+        $this->domainEvents[] = new ArticleRenamed($this->id, $newTitle);
     }
 }
 
@@ -400,7 +400,7 @@ final class Order
     private OrderId $id;
     private OrderStatus $status;
     /** @var DomainEvent[] */
-    private array $events = [];
+    private array $domainEvents = [];
 
     public function cancel(Clock $clock): void
     {
@@ -412,7 +412,7 @@ final class Order
         }
 
         $this->status = OrderStatus::CANCELLED;
-        $this->events[] = new OrderCancelled($this->id, $clock->now());
+        $this->domainEvents[] = new OrderCancelled($this->id, $clock->now());
     }
     // Žádné settery - stav se mění jen přes explicitní business operace
 }</code></pre>
