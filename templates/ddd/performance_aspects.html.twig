@@ -262,7 +262,7 @@ final class DoctrineOrderRepository implements OrderRepository
     <h2 id="agregat-hranice-heading">Agregát a výkon: správné určení hranic</h2>
     <p>
         Jedním ze základních principů DDD je, že agregát tvoří konzistenční hranici - veškeré invarianty
-        doménového modelu jsou zaručeny v rámci jednoho agregátu. Problém nastává, pokud jsou hranice
+        doménového modelu jsou zaručeny v jednom agregátu. Problém nastává, pokud jsou hranice
         agregátu definovány příliš široce: agregát pak při každém načtení tahá z databáze rozsáhlý
         objektový graf, i když potřebujeme jen malou část dat.
     </p>
@@ -651,7 +651,7 @@ class Order
     <h2 id="identity-map-heading">Doctrine Identity Map a Unit of Work</h2>
     <p>
         Doctrine ORM implementuje vzor Identity Map (Martin Fowler, <em>Patterns of Enterprise Application Architecture</em>):
-        každý spravovaný objekt (managed entity) je v rámci jednoho <code>EntityManager</code>u uložen v paměti pod svým
+        každý spravovaný objekt (managed entity) je v jednom <code>EntityManager</code>u uložen v paměti pod svým
         identifikátorem. Pokud načtete tentýž agregát dvakrát, Doctrine vrátí tentýž PHP objekt z paměti
         bez opakovaného SQL dotazu.
     </p>
@@ -659,7 +659,7 @@ class Order
     <div class="note">
         <h3>Identity Map a Unit of Work - co to znamená pro DDD</h3>
         <ul>
-            <li><strong>Konzistence v rámci requestu:</strong> Všechny části kódu vidí tentýž stav agregátu - žádné nekonzistentní kopie.</li>
+            <li><strong>Konzistence v requestu:</strong> Všechny části kódu vidí tentýž stav agregátu - žádné nekonzistentní kopie.</li>
             <li><strong>Jedno místo změn:</strong> Změny agregátu jsou sledovány Unit of Work a při <code>flush()</code> jsou synchronizovány do databáze. Není třeba explicitně volat <code>save()</code> pro každou změnu.</li>
             <li><strong>Automatická detekce změn (dirty checking):</strong> Doctrine porovnává aktuální stav entit s jejich původním stavem (snapshot) a generuje UPDATE pouze pro skutečně změněné atributy.</li>
         </ul>

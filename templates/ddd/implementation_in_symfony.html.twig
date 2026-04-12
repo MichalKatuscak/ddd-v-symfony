@@ -489,7 +489,7 @@ class DoctrineUserRepository implements UserRepository
         </p>
         <ul>
             <li><strong>Outbox pattern</strong> - události se uloží do databázové tabulky <code>outbox</code>
-                v rámci téže transakce jako agregát. Separátní worker poté události přečte a dispatchuje.
+                v téže transakci jako agregát. Separátní worker poté události přečte a dispatchuje.
                 Tím je zaručena atomicita.</li>
             <li><strong>Doctrine lifecycle events</strong> - Doctrine <code>postFlush</code> se volá
                 po dokončení <code>flush()</code>, ale <strong>před commitem transakce</strong>, pokud
@@ -1011,8 +1011,8 @@ class UserRegistered
         <ul>
             <li>
                 <strong>EventDispatcher</strong> (<code>EventDispatcherInterface</code>) - synchronní,
-                in-process. Všechny listenery se provedou okamžitě v rámci téhož PHP požadavku.
-                Vhodné pro: side effects v rámci téže transakce (aktualizace cache, logování).
+                in-process. Všechny listenery se provedou okamžitě v témž PHP požadavku.
+                Vhodné pro: side effects v téže transakci (aktualizace cache, logování).
             </li>
             <li>
                 <strong>Messenger</strong> (<code>MessageBusInterface</code>) - může být synchronní

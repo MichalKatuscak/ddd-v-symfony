@@ -173,7 +173,7 @@
             V celém průvodci používáme konzistentní strukturu pro vertikální slice architekturu:
         </p>
         <ul>
-            <li><code>{BC}/Domain/</code> - doménová vrstva sdílená v rámci bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
+            <li><code>{BC}/Domain/</code> - doménová vrstva sdílená uvnitř bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
             <li><code>{BC}/Infrastructure/</code> - infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
             <li><code>{BC}/{Feature}/</code> - feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
             <li><code>Shared/</code> - pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>

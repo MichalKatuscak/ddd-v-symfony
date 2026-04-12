@@ -216,7 +216,7 @@
     <ul>
         <li>
             <strong>Oddělení zodpovědností</strong> - Write model se soustředí výhradně na business logiku,
-            validaci invariantů a konzistenci dat. Read model se soustředí na efektivní prezentaci dat
+            validaci invariantů a konzistenci dat. Read model se soustředí na rychlou prezentaci dat
             uživateli. Každý model obsahuje přesně to, co potřebuje - nic navíc.
         </li>
         <li>
@@ -683,7 +683,7 @@ final readonly class UserProfileViewModel
     <p>
         ViewModel často obsahuje <strong>data z více agregátů</strong> - v příkladu výše kombinuje
         údaje o uživateli s počtem objednávek a členskou úrovní. Zápis přes doménový model by vyžadoval
-        načtení uživatele, jeho objednávek a propočet úrovně - neefektivní a porušující hranice
+        načtení uživatele, jeho objednávek a propočet úrovně - pomalé a porušující hranice
         <a href="{{ path('basic_concepts') }}#aggregates">agregátů</a>. Read model tato data drží
         připravená v denormalizované podobě.
     </p>
@@ -741,7 +741,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
         <p>
             Doctrine ORM je navržen pro práci s doménovým modelem - mapuje entity, řeší vztahy,
             lazy loading, identity map a unit of work. Pro read stranu CQRS je to zbytečná režie.
-            Read model potřebuje pouze <strong>efektivně načíst data a namapovat je na ViewModel</strong>.
+            Read model potřebuje pouze <strong>rychle načíst data a namapovat je na ViewModel</strong>.
             Doctrine DBAL (přímý SQL přes Connection) nebo nativní PDO je pro tento účel rychlejší,
             jednodušší a bez rizika N+1 problémů. O výkonnostních dopadech pojednává
             kapitola <a href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a>.

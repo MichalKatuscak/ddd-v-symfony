@@ -880,7 +880,7 @@ final class EventSourcedOrderRepository
 
         <p>
             Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
-            efektivní ad-hoc dotazy (např. "všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč"),
+            ad-hoc dotazy (např. "všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč"),
             je nutné ze stream událostí vybudovat optimalizované denormalizované datové struktury určené pro čtení.
         </p>
 
@@ -1764,7 +1764,7 @@ final readonly class UpcasterChain
                 Create/Read/Update/Delete bez složitých stavových přechodů, ES přináší jen zbytečnou složitost.
             </li>
             <li>
-                <strong>Systémy orientované převážně na reporting</strong> - Pokud je primárním požadavkem efektivní
+                <strong>Systémy orientované převážně na reporting</strong> - Pokud je primárním požadavkem rychlé
                 čtení a agregace dat (BI, analytics), jsou vhodnější klasická DW řešení nebo OLAP databáze.
             </li>
             <li>
