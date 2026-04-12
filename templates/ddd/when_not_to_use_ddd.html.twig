@@ -66,8 +66,6 @@
             <li><a href="#no-knowledge">6. Tým DDD nezná a čas na učení není</a></li>
             <li><a href="#unclear-domain">7. Doména je nejasná, experti nejsou k dispozici</a></li>
             <li><a href="#when-ddd-fits">Kdy DDD naopak smysl má</a></li>
-            <li><a href="#shrnuti">Co jsme se naučili</a></li>
-            <li><a href="#cviceni">Zkuste sami</a></li>
             <li><a href="#zdroje">Zdroje a další čtení</a></li>
         </ul>
     </div>
@@ -522,56 +520,6 @@ final class Order
             Detailní implementaci DDD v Symfony najdete v <a href="{{ path('implementation_in_symfony') }}">implementační kapitole</a>.
             Reálné problémy při zavádění DDD popisuje kapitola <a href="{{ path('ddd_pain_points') }}">DDD v praxi - kde to bolí</a>.
             Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte <a href="{{ path('migration_from_crud') }}">migrací z CRUD</a>.
-        </p>
-    </section>
-
-    {# ═══════════════════════════════════════════════════════════
-       Shrnutí
-       ═══════════════════════════════════════════════════════════ #}
-    <section id="shrnuti" aria-labelledby="shrnuti-heading">
-        <h2 id="shrnuti-heading">Co jsme se naučili</h2>
-
-        <ul>
-            <li><strong>DDD není univerzální řešení</strong> - je to architektura pro komplexní doménovou logiku, ne pro každý projekt. CRUD admin, ETL pipeline nebo landing page DDD nepotřebují.</li>
-            <li><strong>Předčasné DDD je horší než žádné DDD</strong> - pseudo-DDD přidává komplexitu bez architektonických výhod. Pokud tým DDD nerozumí nebo doména není stabilní, výsledek bude technický dluh.</li>
-            <li><strong>Strategické a taktické DDD jsou různé věci</strong> - Event Storming a Context Mapping lze používat i bez agregátů a repozitářů. Strategické DDD pomáhá pochopit doménu, taktické DDD ji modeluje v kódu.</li>
-            <li><strong>Rozhodovací strom</strong> - pět zásadních otázek (komplexita, životnost, experti, znalosti týmu, stabilita domény) pomůže rychle určit, zda DDD dává smysl.</li>
-            <li><strong>Cesta zpět k DDD existuje</strong> - jednoduché řešení, ze kterého později přejdete na DDD, je vždy lepší než předčasné DDD, které tým zpomalí a frustruje.</li>
-        </ul>
-    </section>
-
-    {# ═══════════════════════════════════════════════════════════
-       Cvičení
-       ═══════════════════════════════════════════════════════════ #}
-    <section id="cviceni" aria-labelledby="cviceni-heading">
-        <h2 id="cviceni-heading">Zkuste sami</h2>
-
-        <div class="tip">
-            <ol>
-                <li>
-                    <strong>Rozhodovací audit:</strong> Vezměte si svůj aktuální nebo poslední projekt.
-                    Projděte 5 otázek z rozhodovacího stromu. Odpověděli jste na všech 5 „ano"?
-                    Pokud ne - které otázky by měly změnit vaše architektonické rozhodnutí?
-                </li>
-                <li>
-                    <strong>Refactoring assessment:</strong> Najděte v kódové bázi místo, kde je DDD
-                    použito pro prostý CRUD (žádné invarianty, žádná doménová logika - jen persistence).
-                    Spočítejte, kolik tříd by odpadlo, kdybyste místo toho použili EasyAdmin nebo
-                    prostý controller + Doctrine entity.
-                </li>
-                <li>
-                    <strong>Pseudo-DDD detektor:</strong> Projděte jeden „agregát" ve svém projektu.
-                    Má settery? Obsahuje skutečné business pravidla, nebo jen přepisuje data?
-                    Dispatchuje doménové události, které někdo poslouchá? Pokud odpovíte 3× „ne",
-                    pravděpodobně máte pseudo-DDD.
-                </li>
-            </ol>
-        </div>
-
-        <p>
-            V další kapitole se podíváme na
-            <a href="{{ path('case_study') }}">reálnou případovou studii</a>,
-            kde uvidíte DDD vzory nasazené v praxi od začátku do konce.
         </p>
     </section>
 

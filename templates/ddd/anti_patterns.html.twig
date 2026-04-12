@@ -1372,28 +1372,6 @@ class InsurancePolicy
             </p>
         </section>
 
-        <section id="shrnuti-kapitoly" aria-labelledby="shrnuti-kapitoly-heading">
-            <h2 id="shrnuti-kapitoly-heading">Co jsme se naučili</h2>
-            <ul>
-                <li><strong>Anémický doménový model</strong> - entity bez chování jsou jen datové kontejnery; logika patří do doménových objektů.</li>
-                <li><strong>Primitive Obsession</strong> - primitivní typy místo Value Objects vedou ke ztrátě validace a sémantiky.</li>
-                <li><strong>God Aggregate</strong> - příliš velké agregáty způsobují výkonnostní a konkurenční problémy.</li>
-                <li><strong>Sdílená databáze</strong> napříč Bounded Contexts narušuje izolaci kontextů.</li>
-                <li><strong>Mutovatelné události</strong> porušují základní princip Event Sourcingu.</li>
-                <li>Znát anti-vzory je <strong>stejně důležité</strong> jako znát vzory samotné.</li>
-            </ul>
-        </section>
-
-        <section id="zkuste-sami" aria-labelledby="zkuste-sami-heading">
-            <h2 id="zkuste-sami-heading">Zkuste sami</h2>
-            <div class="tip">
-                <ol>
-                    <li>Vezměte existující kód z vašeho projektu a identifikujte, zda obsahuje anémický doménový model. Pokud ano, navrhněte refaktoring - přesuňte jednu business metodu z service třídy do entity.</li>
-                    <li>Najděte ve svém kódu místo, kde se používá <code>string</code> nebo <code>int</code> pro identifikátor entity. Navrhněte silně typovaný Value Object, který by ho nahradil.</li>
-                    <li>Zkontrolujte, zda váš největší agregát nepřekračuje doporučenou velikost. Jak byste ho případně rozdělili?</li>
-                </ol>
-            </div>
-        </section>
     </article>
 {% endblock %}
 
