@@ -423,7 +423,7 @@ final class UserRegistered implements DomainEvent
         </div>
 
         <p>
-            Sloupec <code>version</code> má zásadní roli při implementaci <strong>optimistic locking</strong>.
+            Sloupec <code>version</code> má hlavní roli při implementaci <strong>optimistic locking</strong>.
             Před zápisem nové události command handler přečte poslední verzi streamu agregátu. Při insertu
             databáze vyvolá výjimku z porušení unikátního indexu <code>uq_aggregate_version</code>, pokud
             mezitím jiný proces zapsal událost se stejnou verzí. Tímto způsobem bez pesimistického zamykání
@@ -593,7 +593,7 @@ final class DoctrineEventStore implements EventStore
 
         <p>
             V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
-            mechanismus zásadně jiný: <strong>každá změna stavu musí projít přes doménovou událost</strong>. Metody
+            mechanismus zcela jiný: <strong>každá změna stavu musí projít přes doménovou událost</strong>. Metody
             agregátu nevytváří efekt přímo - nahrávají událost, a teprve aplikace této události mění interní stav.
         </p>
         <p>
@@ -1494,7 +1494,7 @@ final class SnapshottingOrderRepository
         <p>
             V Event Sourcingu jsou události <strong>permanentní</strong> - jednou uložené do Event Store se nikdy
             nemažou ani nepřepisují. Zároveň se ale doménový model v čase vyvíjí: přibývají nové atributy, mění se
-            struktura dat, původní pole se rozdělují nebo slučují. Vzniká tak zásadní problém:
+            struktura dat, původní pole se rozdělují nebo slučují. Vzniká tak praktický problém:
             <strong>jak přečíst starou událost novým kódem?</strong>
         </p>
         <p>
@@ -1782,7 +1782,7 @@ final readonly class UpcasterChain
         <div class="warning" role="alert" aria-labelledby="es-warning-heading">
             <h3 id="es-warning-heading">Varování: Event Sourcing výrazně zvyšuje složitost systému</h3>
             <p>
-                Event Sourcing není "lepší CRUD". Přináší zásadní zvýšení komplexity na všech úrovních:
+                Event Sourcing není "lepší CRUD". Přináší výrazné zvýšení komplexity na všech úrovních:
                 <strong>infrastruktura</strong> (Event Store, event bus, snapshot store),
                 <strong>doménový model</strong> (apply metody, immutabilita událostí, verzování schémat),
                 <strong>testování</strong> (<a href="{{ path('testing_ddd') }}">given/when/then scénáře</a> s event streamy) a

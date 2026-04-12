@@ -537,7 +537,7 @@ final class ListOrders
         Symfony Messenger automaticky spojí handler s jeho command/query podle type-hintu parametru.
     </p>
     <p>
-        Command handler a query handler mají zásadně odlišnou zodpovědnost:
+        Command handler a query handler mají odlišnou zodpovědnost:
     </p>
     <ul>
         <li>
@@ -1296,7 +1296,7 @@ stdout_logfile=/var/log/messenger-worker.log</code></pre>
     <h2 id="error-handling-heading">Zpracování chyb a Dead Letter Queue</h2>
 
     <p>
-        V asynchronním prostředí je zpracování chyb zásadně odlišné od synchronního zpracování.
+        V asynchronním prostředí je zpracování chyb podstatně odlišné od synchronního zpracování.
         Při synchronním dispatchi výjimka probublá přímo do controlleru a uživatel vidí chybovou
         hlášku. Při asynchronním dispatchi je zpráva ve frontě - pokud handler selže, uživatel
         o tom neví a zpráva musí být zpracována znovu.
