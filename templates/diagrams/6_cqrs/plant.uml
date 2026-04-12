@@ -61,7 +61,7 @@ skinparam sequenceArrowColor #005A9C
 
 
 ' Nadpis
-title CQRS v Symfony 7
+title CQRS v Symfony 8
 
 ' Definice obálek (package)
 package "Prezentační vrstva" {

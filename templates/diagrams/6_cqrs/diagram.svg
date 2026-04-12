@@ -2,14 +2,14 @@
      data-diagram-type="CLASS" preserveAspectRatio="none"
      style="background:#FAFAFA;aspect-ratio:2.346" version="1.1" viewBox="0 0 3535 1510" 
      zoomAndPan="magnify">
-    <title>CQRS v Symfony 7</title>
+    <title>CQRS v Symfony 8</title>
     <defs/>
     <g>
         <rect fill="#FAFAFA" height="1510.9375" style="stroke:none;stroke-width:1.5625;" width="3535.9375" x="0" y="0"/>
         <rect fill="#FFFFFF" height="41.0889" style="stroke:#005A9C;stroke-width:1.5625;" width="242.3859" x="1636.0458"
               y="7.8125"/>
         <text fill="#000000" font-family="Nunito" font-size="21.875" font-weight="bold" lengthAdjust="spacing"
-              textLength="226.7609" x="1643.8583" y="35.9299">CQRS v Symfony 7
+              textLength="226.7609" x="1643.8583" y="35.9299">CQRS v Symfony 8
         </text><!--cluster Prezenta?n? vrstva-->
         <g class="cluster" data-entity="Prezenta&#269;n&#237; vrstva" data-source-line="66" data-uid="ent0002"
            id="cluster_Prezenta&#269;n&#237; vrstva">

@@ -24,7 +24,13 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/horizontalni-vs-vertikalni', name: 'horizontal_vs_vertical')]
+    #[Route('/horizontalni-vs-vertikalni', name: 'horizontal_vs_vertical_redirect')]
+    public function horizontalVsVerticalRedirect(): Response
+    {
+        return $this->redirectToRoute('horizontal_vs_vertical', [], 301);
+    }
+
+    #[Route('/vertikalni-slice', name: 'horizontal_vs_vertical')]
     public function horizontalVsVertical(): Response
     {
         return $this->render('ddd/horizontal_vs_vertical.html.twig', [

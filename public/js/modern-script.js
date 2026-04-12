@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { label: 'Úvod', url: '/' },
         { label: 'Co je DDD', url: '/co-je-ddd' },
         { label: 'Základní koncepty', url: '/zakladni-koncepty' },
-        { label: 'Vertikální slice', url: '/horizontalni-vs-vertikalni' },
+        { label: 'Vertikální slice', url: '/vertikalni-slice' },
         { label: 'Implementace v Symfony', url: '/implementace-v-symfony' },
         { label: 'CQRS', url: '/cqrs' },
         { label: 'Event Sourcing', url: '/event-sourcing' },
