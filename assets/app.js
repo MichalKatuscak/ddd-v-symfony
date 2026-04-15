@@ -32,6 +32,7 @@ import svgPanZoom from 'svg-pan-zoom';
 // App scripts
 import './scripts/modern-script.js';
 import './scripts/code-script.js';
+import './scripts/toc-sidebar.js';
 
 // Init on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function () {

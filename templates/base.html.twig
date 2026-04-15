@@ -32,16 +32,9 @@
 
     <title>{% block title %}{{ title ?? 'Architektura DDD v Symfony 8' }} | DDD Symfony{% endblock %}</title>
 
-    <!-- Preconnect to external resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Merriweather:wght@400;700;900&family=JetBrains+Mono:wght@400;500&subset=latin-ext&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" integrity="sha384-oaMLBGEzBOJx3UHwac0cVndtX5fxGQIfnAeFZ35RTgqPcYlbprH9o9PUV/F8Le07" crossorigin="anonymous">
-
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="{{ asset('css/modern-style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/code-style.css') }}">
-    {% block stylesheets %}{% endblock %}
+    {% block stylesheets %}
+        {{ vite_entry_link_tags('app') }}
+    {% endblock %}
 </head>
 <body>
     <a href="#content" class="skip-link">Přejít na obsah</a>
@@ -157,76 +150,9 @@
 
     <button class="scroll-to-top" aria-label="Zpět nahoru">↑</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js" integrity="sha384-yc/c2Lk1s2V2ir1rxvjo8YyVD9PlOlYTqpNr3Wm1WIuAA30GlDYNx6U5104OiavY" crossorigin="anonymous" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" integrity="sha384-4l+9bhb7rakZ18megzl0/DWczL8ojbDl1jIEzBVffeMho9A6xB/lkqt1K0PC8Jin" crossorigin="anonymous" defer></script>
-    <script src="{{ asset('js/modern-script.js') }}" defer></script>
-    <script src="{{ asset('js/code-script.js') }}" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('pre code').forEach(function (el) {
-                hljs.highlightElement(el);
-            });
-            var svgElements = document.querySelectorAll('.diagram-container svg');
-            svgElements.forEach(function (svgElement) {
-                svgPanZoom(svgElement, {
-                    zoomEnabled: true,
-                    controlIconsEnabled: true,
-                    fit: true,
-                    center: true,
-                    minZoom: 0.5,
-                    maxZoom: 20
-                });
-            });
-        });
-    </script>
-    <script>
-    (function () {
-        'use strict';
-        document.addEventListener('DOMContentLoaded', function () {
-            var tocSidebar = document.querySelector('.toc-sidebar');
-            if (!tocSidebar) return;
-            var article = document.querySelector('.content-area article');
-            if (!article) { tocSidebar.classList.add('no-toc'); return; }
-            var headings = Array.prototype.slice.call(article.querySelectorAll('h2[id], h3[id]'));
-            if (headings.length === 0) { tocSidebar.classList.add('no-toc'); return; }
-            var ul = document.createElement('ul');
-            ul.className = 'toc-list';
-            headings.forEach(function (heading) {
-                var li = document.createElement('li');
-                if (heading.tagName === 'H3') li.classList.add('toc-h3');
-                var a = document.createElement('a');
-                a.href = '#' + heading.id;
-                var text = '';
-                heading.childNodes.forEach(function (node) {
-                    if (node.nodeType === 3) text += node.textContent;
-                });
-                a.textContent = text.trim();
-                li.appendChild(a);
-                ul.appendChild(li);
-            });
-            var titleEl = tocSidebar.querySelector('.toc-title');
-            if (titleEl) { titleEl.after(ul); } else { tocSidebar.appendChild(ul); }
-            var links = Array.prototype.slice.call(ul.querySelectorAll('a'));
-            var activeLink = null;
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (!entry.isIntersecting) return;
-                    var id = entry.target.id;
-                    var link = null;
-                    for (var i = 0; i < links.length; i++) {
-                        if (links[i].getAttribute('href') === '#' + id) { link = links[i]; break; }
-                    }
-                    if (!link) return;
-                    if (activeLink) activeLink.classList.remove('active');
-                    activeLink = link;
-                    activeLink.classList.add('active');
-                });
-            }, { rootMargin: '-56px 0px -70% 0px', threshold: 0 });
-            headings.forEach(function (h) { observer.observe(h); });
-        });
-    }());
-    </script>
-    {% block javascripts %}{% endblock %}
+    {% block javascripts %}
+        {{ vite_entry_script_tags('app') }}
+    {% endblock %}
 
     <!-- Structured Data (Schema.org) -->
     <script type="application/ld+json">
