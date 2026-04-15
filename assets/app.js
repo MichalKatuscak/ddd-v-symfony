@@ -1,3 +1,6 @@
+// Fonts (self-hosted)
+import './styles/fonts.css';
+
 // Styles
 import './styles/modern-style.css';
 import './styles/code-style.css';
