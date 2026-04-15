@@ -21,30 +21,31 @@
     <meta property="og:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
     <meta property="og:title" content="{% block og_title %}{{ title ?? 'Architektura DDD v Symfony 8' }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
-    <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
+    <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.webp') }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
     <meta property="twitter:title" content="{% block twitter_title %}{{ block('og_title') }}{% endblock %}">
     <meta property="twitter:description" content="{% block twitter_description %}{{ block('og_description') }}{% endblock %}">
-    <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
+    <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.webp') }}">
 
     <title>{% block title %}{{ title ?? 'Architektura DDD v Symfony 8' }} | DDD Symfony{% endblock %}</title>
 
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Merriweather:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Merriweather:wght@400;700;900&family=JetBrains+Mono:wght@400;500&subset=latin-ext&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css" integrity="sha384-oaMLBGEzBOJx3UHwac0cVndtX5fxGQIfnAeFZ35RTgqPcYlbprH9o9PUV/F8Le07" crossorigin="anonymous">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="{{ asset('css/bootstrap-grid.css') }}">
     <link rel="stylesheet" href="{{ asset('css/modern-style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/code-style.css') }}">
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
+    <a href="#content" class="skip-link">Přejít na obsah</a>
+
     <!-- Top Bar -->
     <header class="topbar">
         <div class="topbar-inner">
@@ -134,7 +135,7 @@
         <div class="main-with-toc">
 
         <!-- Main Content -->
-        <main class="content-area">
+        <main class="content-area" id="content">
             {% block body %}{% endblock %}
 
         </main><!-- /.content-area -->
@@ -156,8 +157,8 @@
 
     <button class="scroll-to-top" aria-label="Zpět nahoru">↑</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js" integrity="sha384-yc/c2Lk1s2V2ir1rxvjo8YyVD9PlOlYTqpNr3Wm1WIuAA30GlDYNx6U5104OiavY" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js" integrity="sha384-4l+9bhb7rakZ18megzl0/DWczL8ojbDl1jIEzBVffeMho9A6xB/lkqt1K0PC8Jin" crossorigin="anonymous" defer></script>
     <script src="{{ asset('js/modern-script.js') }}" defer></script>
     <script src="{{ asset('js/code-script.js') }}" defer></script>
     <script>

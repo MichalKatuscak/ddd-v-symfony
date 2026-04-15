@@ -134,7 +134,7 @@ function processAugmentCodeSnippets() {
         viewButton.className = 'view-full-file';
         viewButton.textContent = 'Zobrazit celý soubor';
         viewButton.addEventListener('click', function () {
-            alert('Zobrazení celého souboru: ' + filePath);
+            console.log('Zobrazení celého souboru: ' + filePath);
         });
         header.appendChild(viewButton);
 

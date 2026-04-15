@@ -100,31 +100,16 @@ document.addEventListener('DOMContentLoaded', function () {
         fadeTargets.forEach(function (el) { observer.observe(el); });
     }
 
-    // ── Prev/Next navigation ─────────────────────────────────────────────────
-    const CHAPTERS = [
-        { label: 'Úvod', url: '/' },
-        { label: 'Co je DDD', url: '/co-je-ddd' },
-        { label: 'Základní koncepty', url: '/zakladni-koncepty' },
-        { label: 'Vertikální slice', url: '/vertikalni-slice' },
-        { label: 'Implementace v Symfony', url: '/implementace-v-symfony' },
-        { label: 'CQRS', url: '/cqrs' },
-        { label: 'Event Sourcing', url: '/event-sourcing' },
-        { label: 'Ságy', url: '/sagy-a-process-managery' },
-        { label: 'Příklady', url: '/prakticke-priklady' },
-        { label: 'DDD v praxi — kde to bolí', url: '/ddd-v-praxi-kde-to-boli' },
-        { label: 'Kdy DDD nepoužívat', url: '/kdy-nepouzivat-ddd' },
-        { label: 'Případová studie', url: '/pripadova-studie' },
-        { label: 'Testování DDD', url: '/testovani-ddd' },
-        { label: 'Migrace z CRUD', url: '/migrace-z-crud' },
-        { label: 'Anti-vzory', url: '/anti-vzory' },
-        { label: 'Výkonnostní aspekty', url: '/vykonnostni-aspekty' },
-        { label: 'DDD a AI', url: '/ddd-a-umela-inteligence' },
-        { label: 'Zdroje', url: '/zdroje' },
-        { label: 'Glosář', url: '/glosar' },
-    ];
+    // ── Prev/Next navigation (driven by sidebar DOM — no hardcoded list) ────
+    var sidebarLinks = document.querySelectorAll('.sidebar-nav-link');
+    var CHAPTERS = [];
+    sidebarLinks.forEach(function (link) {
+        var url = new URL(link.href, window.location.origin);
+        CHAPTERS.push({ label: link.textContent.trim(), url: url.pathname });
+    });
 
-    const currentPath = window.location.pathname;
-    const currentIndex = CHAPTERS.findIndex(function (c) { return c.url === currentPath; });
+    var currentPath = window.location.pathname;
+    var currentIndex = CHAPTERS.findIndex(function (c) { return c.url === currentPath; });
 
     if (currentIndex !== -1) {
         const contentArea = document.querySelector('.content-area');
