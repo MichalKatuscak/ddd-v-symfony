@@ -38,6 +38,18 @@
 {% endblock %}
 
 {% block body %}
+    <nav class="breadcrumb" aria-label="Drobečková navigace">
+        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
+                <meta itemprop="position" content="1" />
+            </li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <span itemprop="name">DDD a AI</span>
+                <meta itemprop="position" content="2" />
+            </li>
+        </ol>
+    </nav>
 <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">DDD a umělá inteligence - co říkají autority</h1>
 
@@ -147,7 +159,7 @@
         </p>
 
         <div class="tip" role="note" aria-labelledby="data-table-heading">
-            <h4 id="data-table-heading">Přehled dostupných dat: bounded contexts a AI generovaný kód</h4>
+            <h3 id="data-table-heading">Přehled dostupných dat: bounded contexts a AI generovaný kód</h3>
             <table>
                 <thead>
                     <tr>
@@ -499,7 +511,7 @@
         <h2 id="zaver-heading">Závěr</h2>
 
         <div class="tip" role="note" aria-labelledby="spectrum-heading">
-            <h4 id="spectrum-heading">Spektrum pozic: od synergie DDD a AI po důraz na jednoduchost</h4>
+            <h3 id="spectrum-heading">Spektrum pozic: od synergie DDD a AI po důraz na jednoduchost</h3>
             <table>
                 <thead>
                     <tr>

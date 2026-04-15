@@ -29,6 +29,18 @@
 {% endblock %}
 
 {% block body %}
+    <nav class="breadcrumb" aria-label="Drobečková navigace">
+        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
+                <meta itemprop="position" content="1" />
+            </li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <span itemprop="name">O autorovi</span>
+                <meta itemprop="position" content="2" />
+            </li>
+        </ol>
+    </nav>
 <article class="about-page">
     <h1>O autorovi</h1>
 

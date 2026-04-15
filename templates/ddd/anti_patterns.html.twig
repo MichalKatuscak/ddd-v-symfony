@@ -38,6 +38,18 @@
 {% endblock %}
 
 {% block body %}
+    <nav class="breadcrumb" aria-label="Drobečková navigace">
+        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
+                <meta itemprop="position" content="1" />
+            </li>
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <span itemprop="name">Anti-vzory</span>
+                <meta itemprop="position" content="2" />
+            </li>
+        </ol>
+    </nav>
     <article itemscope itemtype="https://schema.org/TechArticle">
         <h1 itemprop="headline">Anti-vzory a typické chyby v DDD</h1>
 
