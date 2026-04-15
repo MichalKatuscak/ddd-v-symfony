@@ -111,20 +111,27 @@
 
 # Zabezpečení
 <IfModule mod_headers.c>
-    # Zabezpečení proti XSS útokům
-    Header set X-XSS-Protection "1; mode=block"
-
-    # Zabránit MIME-sniffing
+    # MIME-sniffing
     Header set X-Content-Type-Options "nosniff"
 
-    # Zabránit clickjacking
+    # Clickjacking
     Header set X-Frame-Options "SAMEORIGIN"
 
     # Referrer policy
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 
+    # HTTPS enforcement (max-age 1 rok, includeSubDomains)
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+
     # Content Security Policy
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'self';"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+
+    # Permissions Policy — zakázat nepotřebné API
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+
+    # Cross-Origin isolation
+    Header set Cross-Origin-Opener-Policy "same-origin"
+    Header set Cross-Origin-Resource-Policy "same-origin"
 </IfModule>
 
 # Zakázat přístup k souborům .htaccess a .htpasswd
