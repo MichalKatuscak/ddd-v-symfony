@@ -20,10 +20,19 @@ jobs:
           php-version: '8.4'
           extensions: ctype, iconv
 
-      - name: Install dependencies
+      - name: Install PHP dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction
         env:
           APP_ENV: prod
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install npm dependencies and build assets
+        run: npm ci && npx vite build
 
       - name: Set asset version from git commit
         run: echo "APP_VERSION=$(git rev-parse --short HEAD)" > .env.prod
@@ -43,6 +52,11 @@ jobs:
             screenshots/**
             docs/**
             tests/**
+            assets/**
+            node_modules/**
+            vite.config.js
+            package.json
+            package-lock.json
             .env.local
             .env.*.local
             CLAUDE.md
