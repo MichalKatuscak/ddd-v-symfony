@@ -1,0 +1,5 @@
+pentatrion_vite:
+    default_build: ~
+    builds:
+        default_build:
+            build_directory: build

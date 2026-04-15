@@ -1,0 +1,31 @@
+{
+  "name": "ddd-v-symfony",
+  "version": "1.0.0",
+  "description": "Tento repozitář obsahuje vzdělávací materiály o Domain-Driven Design (DDD) a jeho implementaci v Symfony frameworku. Materiály jsou určeny pro výuku na vysoké škole a poskytují komplexní přehled o principech a praktikách DDD.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichalKatuscak/ddd-v-symfony.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MichalKatuscak/ddd-v-symfony/issues"
+  },
+  "homepage": "https://github.com/MichalKatuscak/ddd-v-symfony#readme",
+  "devDependencies": {
+    "vite": "^8.0.8",
+    "vite-plugin-symfony": "^8.2.4"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1",
+    "svg-pan-zoom": "^3.6.2"
+  }
+}

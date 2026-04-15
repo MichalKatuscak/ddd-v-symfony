@@ -12,3 +12,5 @@
 /config/reference.php
 screenshots/
 .worktrees/
+/node_modules/
+/public/build/
