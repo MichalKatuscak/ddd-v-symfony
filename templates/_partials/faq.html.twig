@@ -1,0 +1,35 @@
+{#
+  FAQ sekce — viditelný HTML + FAQPage JSON-LD schema ze stejného datového zdroje.
+
+  Parametry:
+    items    – pole objektů { question: string, answer: string }
+               answer může obsahovat inline HTML (<a>, <em>, <strong>, <code>)
+    heading  – (volitelné) nadpis sekce, default "Časté otázky"
+#}
+{% set faq_heading = heading|default('Časté otázky') %}
+
+<section class="faq" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">{{ faq_heading }}</h2>
+
+    {% for item in items %}
+        <article class="faq-item">
+            <h3>{{ item.question }}</h3>
+            <p>{{ item.answer|raw }}</p>
+        </article>
+    {% endfor %}
+
+    <script type="application/ld+json">
+{{ {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': items|map(item => {
+        '@type': 'Question',
+        'name': item.question,
+        'acceptedAnswer': {
+            '@type': 'Answer',
+            'text': item.answer
+        }
+    })
+}|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES'))|raw }}
+    </script>
+</section>
