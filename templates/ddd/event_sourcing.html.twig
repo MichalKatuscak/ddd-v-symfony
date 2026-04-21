@@ -1819,6 +1819,35 @@ final readonly class UpcasterChain
         </div>
 
     </section>
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Co je Event Sourcing?',
+                answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events": nic se v event logu nikdy nepřepisuje ani nemaže. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
+            },
+            {
+                question: 'Jaký je vztah mezi Event Sourcingem a CQRS?',
+                answer: 'Event Sourcing a CQRS jsou dva nezávislé vzory, které se často kombinují. Každý z nich lze zavést samostatně: CQRS funguje i s klasickou ORM persistencí, ES lze implementovat i bez rozdělení na write a read modely. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů) – což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
+            },
+            {
+                question: 'Co je Event Store a k čemu slouží?',
+                answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (EventStoreDB, Marten) nebo nadstavbu nad relační databází. Více v <a href="#event-store">sekci Implementace Event Store</a>.'
+            },
+            {
+                question: 'Co jsou projekce v Event Sourcingu?',
+                answer: 'Projekce je proces, který naslouchá událostem z event store a buduje z nich read modely – denormalizované datové struktury určené pro rychlé dotazy. Projekce bývá jednoúčelová: každý read model má obvykle vlastní projekci, která ho od začátku nebo od posledního zpracovaného offsetu udržuje aktuální. Projekce lze kdykoli přebudovat (rebuild) přehráním událostí od počátku, čímž se bezpečně opravují chyby v read modelech. Viz <a href="#projekce">sekci Projekce</a>.'
+            },
+            {
+                question: 'K čemu slouží snapshotting v Event Sourcingu?',
+                answer: 'Snapshotting je technika, při které se periodicky ukládá serializovaný stav agregátu, aby se při jeho rekonstrukci nemuselo přehrávat celé event history od začátku. Při načtení se vezme poslední snapshot a aplikují se pouze události, které nastaly po něm. Snapshoty řeší výkonnostní problém dlouhých streamů, typicky u agregátů s řádově tisíci událostí – pro krátké streamy jsou zbytečné a přidávají operační komplexitu. Viz <a href="#snapshotting">sekci Snapshotting</a>.'
+            },
+            {
+                question: 'Kdy se vyplatí Event Sourcing nasadit?',
+                answer: 'Event Sourcing přináší hodnotu v doménách, kde je historie změn sama o sobě byznysově cenná – typicky finanční systémy, sklady, auditované procesy nebo regulovaná odvětví. Uplatní se také tam, kde je potřeba zpětně rekonstruovat stav v libovolném bodě minulosti nebo odvozovat nové pohledy z již známých událostí. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace, kde přidaná komplexita nemá odpovídající přínos. Event Sourcing se zpravidla nasazuje selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Viz <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
+            }
+        ]
+    } %}
 </article>
 {% endblock %}
 
