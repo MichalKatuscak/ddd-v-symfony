@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
     <script type="application/ld+json">
@@ -33,7 +33,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
         <h1 itemprop="headline">Anti-vzory a typické chyby v DDD</h1>
 
-        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
         <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
             <p id="toc-heading">Obsah kapitoly:</p>
@@ -1390,6 +1390,31 @@ class InsurancePolicy
                 věnuje podrobně na praktických příkladech.
             </p>
         </section>
+
+        {% include '_partials/faq.html.twig' with {
+            items: [
+                {
+                    question: 'Co je anémický doménový model a jak ho poznat?',
+                    answer: 'Anémický model vypadá na první pohled jako DDD – obsahuje třídy s názvy agregátů, entit a hodnotových objektů – ale veškerá logika je přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Business logika končí ve „Service" třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Viz <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
+                },
+                {
+                    question: 'Proč je Primitive Obsession problém?',
+                    answer: 'Primitive Obsession znamená používání primitivních typů (<code>string</code>, <code>int</code>, <code>float</code>) tam, kde patří doménový pojem. Místo typu <code>Email</code> se předává <code>string</code>, místo <code>Money</code> dvojice <code>float</code>. Důsledkem je, že validace a pravidla se opakují v každém místě volání, nebo se zapomínají. Hodnotový objekt s jedním místem validace tyto duplicity odstraňuje a typ dává kontext, co daná hodnota reprezentuje. Viz <a href="#primitive-obsession">sekci Primitive Obsession</a>.'
+                },
+                {
+                    question: 'Jak poznat, že je agregát příliš velký?',
+                    answer: 'Typické příznaky God Aggregate jsou: agregát obsahuje desítky vnitřních entit, jeho načtení zabere stovky SQL dotazů, nebo souběžné operace nad různými částmi narážejí na optimistické zamykání. Pokud dvě metody agregátu řeší zcela nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Viz <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
+                },
+                {
+                    question: 'Proč je sdílená databáze mezi Bounded Contexts problém?',
+                    answer: 'Sdílená databáze formálně drží data pohromadě, ale fakticky ruší hranice mezi Bounded Contexts: změna schématu v jednom kontextu může rozbít druhý, pojmy se mísí a model jednoho týmu začíná záviset na modelu druhého. Správné řešení je, aby každý Bounded Context vlastnil svá data a komunikace probíhala přes definované rozhraní (API, události), nikoli přes sdílenou tabulku. Viz <a href="#sdilena-databaze">sekci Sdílená databáze napříč Bounded Contexts</a>.'
+                },
+                {
+                    question: 'Musí být doménová událost neměnná?',
+                    answer: 'Ano. Doménová událost popisuje něco, co se již stalo – <code>OrderPlaced</code>, <code>PaymentReceived</code> – a minulost nelze měnit. Událost bez setterů, s neměnnými atributy a časovým razítkem vytvořeným při konstrukci je bezpečné sdílet mezi handlery, persistovat v event store a použít pro zpětnou rekonstrukci stavu. Mutovatelná událost vede k race condition, nedeterministickému zpracování a nekonzistentnímu auditu. Viz <a href="#mutovatelne-udalosti">sekci Mutovatelné doménové události</a>.'
+                }
+            ]
+        } %}
 
     </article>
 {% endblock %}
