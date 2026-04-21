@@ -457,6 +457,27 @@
             </p>
         </section>
 
+        {% include '_partials/faq.html.twig' with {
+            items: [
+                {
+                    question: 'Co je Domain-Driven Design?',
+                    answer: 'Domain-Driven Design (DDD) je přístup k vývoji softwaru, který staví modelování domény do středu celého návrhu. Systematicky jej popsal Eric Evans v knize z roku 2003. Cílem je, aby software co nejpřesněji odrážel způsob, jakým v dané oblasti uvažují doménoví experti, a aby tento soulad vydržel i při růstu aplikace. Podrobnosti v <a href="#definition">sekci Definice DDD</a>.'
+                },
+                {
+                    question: 'Co je Ubiquitous Language v DDD?',
+                    answer: 'Ubiquitous Language (všudypřítomný jazyk) je společný slovník používaný vývojáři i doménovými experty při návrhu, diskuzi i implementaci systému. Stejné pojmy se objevují v byznys dokumentaci, v rozhovorech nad modelem i přímo v kódu. Tím se eliminují nedorozumění a snižuje se riziko, že kód bude modelovat něco jiného, než doména skutečně potřebuje. Více v <a href="#strategic-design">sekci o strategickém designu</a>.'
+                },
+                {
+                    question: 'Co je Bounded Context a k čemu slouží?',
+                    answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer" ve fakturaci a „Customer" v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části a bývají přirozenými hranicemi pro mikroservisy. Viz <a href="#strategic-design">strategický design</a>.'
+                },
+                {
+                    question: 'Kdy se DDD nevyplatí použít?',
+                    answer: 'DDD nepřináší hodnotu v projektech, kde je doménová logika triviální – například u jednoduchých CRUD aplikací, které jen spravují záznamy v databázi. Nevhodné je také tam, kde tým nemá přístup k doménovým expertům nebo neměl příležitost si DDD osvojit. Plnohodnotně se DDD vyplatí v projektech s bohatou doménou, dlouhou životností a potřebou sdílené reprezentace pravidel, které ospravedlňují investici do modelování. Podrobný rozbor v <a href="' ~ path('when_not_to_use_ddd') ~ '">samostatné kapitole Kdy DDD nepoužívat</a>.'
+                }
+            ]
+        } %}
+
         <section id="further-reading" aria-labelledby="further-reading-heading">
             <h2 id="further-reading-heading">Další četba</h2>
             <p>
