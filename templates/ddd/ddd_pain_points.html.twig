@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2026-03-26{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -33,7 +33,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2026-03-26",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">DDD v praxi - kde to bolí</h1>
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2026-03-26', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_meta.html.twig' with { 'published': '2026-03-26', 'modified': '2026-04-22' } %}
 
     <p>
         Předchozí kapitoly pokryly teorii i pokročilé vzory: od
@@ -1535,6 +1535,31 @@ final class OrderVoter extends Voter
     </section>
 
     </section>{# konec bloku E #}
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Proč tradiční Doctrine mapování komplikuje čistý doménový model?',
+                answer: 'Doctrine očekává klasické PHP třídy s veřejnými nebo reflektovanými atributy, zatímco DDD agregát vyžaduje neměnnost, privátní settery a invarianty vynucené v konstruktoru. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého" EntityManageru při dlouhých transakcích a omezení typů pro hodnotové objekty. Řešením je XML mapování držené mimo doménovou třídu a selektivní použití embeddables. Viz <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
+            },
+            {
+                question: 'Jak řešit Outbox Pattern pro spolehlivé doručení doménových událostí?',
+                answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Viz <a href="#b1-outbox">sekci Outbox Pattern</a>.'
+            },
+            {
+                question: 'Jak vysvětlit přínos DDD managementu, když první iterace zpomaluje?',
+                answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových feature po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který doručí první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Viz <a href="#e1-management">sekci Management</a>.'
+            },
+            {
+                question: 'Jak udržet Ubiquitous Language, aby časem neutrpěl drift?',
+                answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice", zákazník říká „faktura". Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová feature zavádí pojem, který doménový expert nezná – v ten moment je třeba buď ustoupit, nebo jazyk společně upravit. Viz <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
+            },
+            {
+                question: 'Jak přežít paralelní existenci staré CRUD části a nové DDD vrstvy?',
+                answer: 'Strangler Fig pattern umožňuje oba stavy držet v jedné aplikaci: staré CRUD moduly zůstávají v provozu, nové feature vznikají v DDD stylu a propojení řeší Anti-Corruption Layer. Výzvou je sdílená databáze, autentizace a uživatelský stav. Pragmatické řešení: postupně migrovat podle Bounded Contextu, ne podle modulu, a explicitně přijmout, že projekt bude mít smíšený stav po 12–24 měsíců. Viz <a href="#e2-strangler">sekci Strangler pattern</a>.'
+            }
+        ]
+    } %}
 
     </article>
 {% endblock %}
