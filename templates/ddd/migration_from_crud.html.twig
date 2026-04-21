@@ -1057,6 +1057,31 @@ final class UserTest extends TestCase
                 a <a href="{{ path('cqrs') }}">CQRS v Symfony</a>.
             </p>
         </section>
+
+        {% include '_partials/faq.html.twig' with {
+            items: [
+                {
+                    question: 'Kdy má smysl migrovat z CRUD na DDD?',
+                    answer: 'Migrace na DDD má smysl, jakmile se v aplikaci začnou objevovat příznaky rostoucí doménové komplexity, kterou CRUD architektura nezvládá: God Services s mnoha stovkami řádků, tlusté kontrolery implementující doménová pravidla, business logika zamíchaná v Doctrine repozitářích. Pokud aplikace zůstává prostým mapováním formulářů na tabulky, migrace nepřinese odpovídající hodnotu. Obecně platí, že DDD má smysl tam, kde projekt bude žít roky, doménová pravidla jsou netriviální a tým má přístup k doménovým expertům. Viz <a href="#kdy-migrovat">sekci Kdy a proč migrovat</a>.'
+                },
+                {
+                    question: 'Co je Strangler Fig Pattern?',
+                    answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste" starý systém a nahradí ho po částech. Nová funkcionalita je od začátku implementována v DDD stylu, zatímco stará CRUD část zůstává v provozu a ubývá s každou iterací. Obě části existují paralelně a propojují se přes Anti-Corruption Layer nebo sdílenou databázi. Název vychází z tropické rostliny, která roste kolem hostitelského stromu a postupně ho pohltí. Viz <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
+                },
+                {
+                    question: 'Jak začít s analýzou existující domény?',
+                    answer: 'Začíná se Event Stormingem nebo podobnou kolaborativní technikou s doménovými experty, při které se zmapují hlavní události (doménové milníky), commands (akce, které je vyvolávají) a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language pro každý z nich. Na existujícím kódu se současně hledají hranice modelu, které v něm implicitně existují – typicky podle modulů, tabulek nebo funkčních celků, které jsou málo propojené. Cílem první iterace není úplný model, ale první hrubá mapa, do které bude možné postupně doplňovat detaily. Viz <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
+                },
+                {
+                    question: 'Jak extrahovat doménovou vrstvu z existujícího CRUD kódu?',
+                    answer: 'Migrace začíná u jednoho vybraného Bounded Contextu, pro který se vytvoří nová doménová vrstva s entitami, value objecty a agregáty, odděleně od Doctrine entit. Business logika, která byla dosud v service třídách a kontrolerech, se přemísťuje do metod agregátu, zatímco původní CRUD kód zůstává jako adaptér pro API a persistenci. Přechod probíhá postupně: nejprve se zavede Anti-Corruption Layer, pak se refaktorují jednotlivé use casy. Charakterizační testy proti původnímu chování minimalizují riziko regresí. Viz <a href="#extrakce-domainove-vrstvy">sekci Extrakce doménové vrstvy</a>.'
+                },
+                {
+                    question: 'Jaká jsou hlavní rizika migrace z CRUD na DDD a jak je zmírnit?',
+                    answer: 'Nejčastější pastí je anémický doménový model – nové třídy mají názvy jako v DDD, ale obsahují pouze gettery a settery, zatímco logika zůstává v servisech. Dále hrozí přílišná granularita Bounded Contexts (zbytečný overhead komunikace), přímé ukládání doménové logiky do Doctrine entit a zavádění CQRS bez přepracovaného doménového modelu, což jen zesiluje stávající problémy. Největší riziko představuje Big Bang Rewrite – kompletní přepis systému – který se zřídkakdy dotáhne do konce. Migrace by proto vždy měla probíhat inkrementálně pomocí Strangler Fig Patternu, s realistickým odhadem 12–24 měsíců pro středně velkou aplikaci. Viz <a href="#rizika-a-doporuceni">sekci Rizika a doporučení</a>.'
+                }
+            ]
+        } %}
     </article>
 {% endblock %}
 
