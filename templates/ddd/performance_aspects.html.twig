@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -33,7 +33,7 @@
     "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
 <article itemscope itemtype="https://schema.org/TechArticle">
 <h1 itemprop="headline">Výkonnostní aspekty DDD v Symfony</h1>
 
-{% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+{% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
 <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
     <p id="toc-heading">Obsah kapitoly:</p>
@@ -1192,6 +1192,31 @@ final class QueryCountingMiddleware implements Middleware
         <a href="{{ path('practical_examples') }}">praktické příklady implementace DDD</a>.
     </p>
 </section>
+
+{% include '_partials/faq.html.twig' with {
+    items: [
+        {
+            question: 'Zpomaluje DDD aplikaci oproti CRUD?',
+            answer: 'Samotné DDD výkon nesnižuje – doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte se víc dat, než je třeba), chybí optimalizovaný read model v CQRS nebo se nesprávně používá Doctrine lazy loading, což vede k N+1 dotazům. Při správném návrhu je DDD aplikace srovnatelná s CRUD a lépe optimalizovatelná díky explicitním hranicím. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
+        },
+        {
+            question: 'Jak v DDD řešit N+1 problém s agregáty?',
+            answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch="EAGER"</code> u mapování, <code>fetchJoin()</code> v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Viz <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
+        },
+        {
+            question: 'Má velikost agregátu vliv na výkon?',
+            answer: 'Ano, zásadně. Příliš velký agregát vede k načítání desítek vnitřních entit při každé operaci a k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty – to zvyšuje paralelismus i rychlost operací. Viz <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
+        },
+        {
+            question: 'Jak optimalizovat read model v CQRS?',
+            answer: 'Read model se navrhuje přímo pro daný dotaz – denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou: dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem, nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Viz <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
+        },
+        {
+            question: 'Je lepší UUID, nebo integer primární klíč z pohledu výkonu?',
+            answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což je v DDD ideální – agregát dostane ID před persistencí. Výkonový rozdíl je v řádu jednotek procent a v praxi je pohlcen vyšší přehledností doménového kódu. Pro DDD se UUID doporučuje. Viz <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
+        }
+    ]
+} %}
 
 </article>
 {% endblock %}
