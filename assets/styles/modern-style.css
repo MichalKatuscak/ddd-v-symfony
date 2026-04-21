@@ -451,6 +451,27 @@ h4:hover .anchor-link { opacity: 1; }
     color: var(--text-primary);
 }
 
+/* Article meta (published / updated) */
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: -0.25rem 0 1.5rem 0;
+}
+.article-meta__label {
+    font-weight: 500;
+    margin-right: 0.25rem;
+}
+.article-meta__item time {
+    color: var(--text-primary);
+}
+.article-meta__sep {
+    color: var(--text-muted);
+}
+
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .fade-in { animation: fadeIn 0.3s ease-out; }

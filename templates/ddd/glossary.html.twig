@@ -6,6 +6,11 @@
 
 {% block meta_keywords %}glosář DDD, terminologie Domain-Driven Design, Bounded Context definice, Ubiquitous Language, Aggregate Root, Value Object, Domain Event, CQRS, Event Sourcing, Hexagonální architektura, Anti-Corruption Layer, Context Map, Repository vzor, Domain Service, Application Service, Saga, Eventual Consistency, Specification vzor, Invariant, Shared Kernel, Customer Supplier, Conformist, Open Host Service, Published Language, Vertical Slice Architecture, Anemic Domain Model, Primitive Obsession, Test Double, Fake Repository, Charakterizační test, Architektonický test, Eric Evans, Vaughn Vernon, DDD slovník{% endblock %}
 
+{% block og_type %}article{% endblock %}
+
+{% block article_published_time %}2025-04-24{% endblock %}
+{% block article_modified_time %}2026-04-12{% endblock %}
+
 {% block structured_data %}
     <script type="application/ld+json">
         {
@@ -64,6 +69,8 @@
     </nav>
     <article itemscope itemtype="https://schema.org/TechArticle">
         <h1 itemprop="headline">Glosář DDD terminologie</h1>
+
+        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
 
         <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
             <p id="toc-heading">Obsah glosáře:</p>

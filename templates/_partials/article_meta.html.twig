@@ -1,0 +1,17 @@
+{#
+  Viditelný meta řádek článku: datum publikace + datum aktualizace.
+  Parametry:
+    published – ISO datum (např. "2025-04-24")
+    modified  – ISO datum (např. "2026-04-12")
+#}
+<p class="article-meta" aria-label="Informace o článku">
+    <span class="article-meta__item">
+        <span class="article-meta__label">Publikováno:</span>
+        <time datetime="{{ published }}" itemprop="datePublished">{{ published|date('j. n. Y') }}</time>
+    </span>
+    <span class="article-meta__sep" aria-hidden="true">·</span>
+    <span class="article-meta__item">
+        <span class="article-meta__label">Aktualizováno:</span>
+        <time datetime="{{ modified }}" itemprop="dateModified">{{ modified|date('j. n. Y') }}</time>
+    </span>
+</p>

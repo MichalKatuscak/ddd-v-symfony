@@ -17,11 +17,19 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
     <meta property="og:title" content="{% block og_title %}{{ title ?? 'Architektura DDD v Symfony 8' }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
     <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
+    <meta property="og:locale" content="cs_CZ">
+    {%- set _pub %}{% block article_published_time %}{% endblock %}{% endset -%}
+    {%- set _mod %}{% block article_modified_time %}{% endblock %}{% endset -%}
+    {%- set _pub = _pub|trim -%}
+    {%- set _mod = _mod|trim -%}
+    {% if _pub %}<meta property="article:published_time" content="{{ _pub }}">{% endif %}
+    {% if _mod %}<meta property="article:modified_time" content="{{ _mod }}">{% endif %}
+    {% if _pub or _mod %}<meta property="article:author" content="Michal Katuščák">{% endif %}
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
@@ -164,11 +172,21 @@
         "description": "Podrobný průvodce Domain-Driven Design v Symfony 8",
         "author": {
             "@type": "Person",
-            "name": "Michal Katuščák"
+            "name": "Michal Katuščák",
+            "url": "https://www.katuscak.cz/",
+            "sameAs": [
+                "https://blog.katuscak.cz/",
+                "https://www.linkedin.com/in/michal-katu%C5%A1%C4%8D%C3%A1k-04a249184/"
+            ]
         },
         "publisher": {
             "@type": "Person",
-            "name": "Michal Katuščák"
+            "name": "Michal Katuščák",
+            "url": "https://www.katuscak.cz/",
+            "sameAs": [
+                "https://blog.katuscak.cz/",
+                "https://www.linkedin.com/in/michal-katu%C5%A1%C4%8D%C3%A1k-04a249184/"
+            ]
         },
         "inLanguage": "cs-CZ"
     }

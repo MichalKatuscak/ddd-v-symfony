@@ -6,6 +6,11 @@
 
 {% block meta_keywords %}Domain-Driven Design, DDD, Eric Evans, Ubiquitous Language, Bounded Context, doménový model, doménová logika, strategický design, taktický design{% endblock %}
 
+{% block og_type %}article{% endblock %}
+
+{% block article_published_time %}2025-04-24{% endblock %}
+{% block article_modified_time %}2026-04-12{% endblock %}
+
 {% block structured_data %}
     <script type="application/ld+json">
         {
@@ -52,6 +57,8 @@
     </nav>
     <article itemscope itemtype="https://schema.org/TechArticle">
         <h1 itemprop="headline">Co je Domain-Driven Design?</h1>
+
+        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
 
         <div class="examples-banner" role="note">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
