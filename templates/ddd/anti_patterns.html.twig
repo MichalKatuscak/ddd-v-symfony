@@ -1395,19 +1395,19 @@ class InsurancePolicy
             items: [
                 {
                     question: 'Co je anémický doménový model a jak ho poznat?',
-                    answer: 'Anémický model vypadá na první pohled jako DDD – obsahuje třídy s názvy agregátů, entit a hodnotových objektů – ale veškerá logika je přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Business logika končí ve „Service" třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Viz <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
+                    answer: 'Anémický model vypadá na první pohled jako DDD – obsahuje třídy s názvy agregátů, entit a hodnotových objektů – ale veškerá logika je přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Business logika končí ve „Service" třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Detailní rozbor v <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
                 },
                 {
                     question: 'Proč je Primitive Obsession problém?',
-                    answer: 'Primitive Obsession znamená používání primitivních typů (<code>string</code>, <code>int</code>, <code>float</code>) tam, kde patří doménový pojem. Místo typu <code>Email</code> se předává <code>string</code>, místo <code>Money</code> dvojice <code>float</code>. Důsledkem je, že validace a pravidla se opakují v každém místě volání, nebo se zapomínají. Hodnotový objekt s jedním místem validace tyto duplicity odstraňuje a typ dává kontext, co daná hodnota reprezentuje. Viz <a href="#primitive-obsession">sekci Primitive Obsession</a>.'
+                    answer: 'Primitive Obsession znamená používání primitivních typů (<code>string</code>, <code>int</code>, <code>float</code>) tam, kde patří doménový pojem. Místo typu <code>Email</code> se předává <code>string</code>, místo <code>Money</code> dvojice <code>float</code>. Důsledkem je, že validace a pravidla se opakují v každém místě volání, nebo se zapomínají. Hodnotový objekt s jedním místem validace tyto duplicity odstraňuje a typ dává kontext, co daná hodnota reprezentuje. Rozbor a příklady v <a href="#primitive-obsession">sekci Primitive Obsession</a>.'
                 },
                 {
                     question: 'Jak poznat, že je agregát příliš velký?',
-                    answer: 'Typické příznaky God Aggregate jsou: agregát obsahuje desítky vnitřních entit, jeho načtení zabere stovky SQL dotazů, nebo souběžné operace nad různými částmi narážejí na optimistické zamykání. Pokud dvě metody agregátu řeší zcela nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Viz <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
+                    answer: 'Typické příznaky God Aggregate jsou: agregát obsahuje desítky vnitřních entit, jeho načtení zabere stovky SQL dotazů, nebo souběžné operace nad různými částmi narážejí na optimistické zamykání. Pokud dvě metody agregátu řeší zcela nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Praktický příklad refaktoringu v <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
                 },
                 {
                     question: 'Proč je sdílená databáze mezi Bounded Contexts problém?',
-                    answer: 'Sdílená databáze formálně drží data pohromadě, ale fakticky ruší hranice mezi Bounded Contexts: změna schématu v jednom kontextu může rozbít druhý, pojmy se mísí a model jednoho týmu začíná záviset na modelu druhého. Správné řešení je, aby každý Bounded Context vlastnil svá data a komunikace probíhala přes definované rozhraní (API, události), nikoli přes sdílenou tabulku. Viz <a href="#sdilena-databaze">sekci Sdílená databáze napříč Bounded Contexts</a>.'
+                    answer: 'Sdílená databáze formálně drží data pohromadě, ale fakticky ruší hranice mezi Bounded Contexts: změna schématu v jednom kontextu může rozbít druhý, pojmy se mísí a model jednoho týmu začíná záviset na modelu druhého. Správné řešení je, aby každý Bounded Context vlastnil svá data a komunikace probíhala přes definované rozhraní (API, události), nikoli přes sdílenou tabulku. Podrobný rozbor v <a href="#sdilena-databaze">sekci Sdílená databáze napříč Bounded Contexts</a>.'
                 },
                 {
                     question: 'Musí být doménová událost neměnná?',

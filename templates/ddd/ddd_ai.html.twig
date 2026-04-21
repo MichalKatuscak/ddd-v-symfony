@@ -635,15 +635,15 @@
         items: [
             {
                 question: 'Proč AI nástroje generují lepší kód v projektech s Ubiquitous Language?',
-                answer: 'Ubiquitous Language poskytuje LLM jednoznačný slovník, který se objevuje napříč dokumentací, testy i kódem. Model při generování dostává konzistentní pojmy z kontextu a produkuje výstup, který zapadá do existujícího modelu bez překladu. Bez Ubiquitous Language AI často zavádí vlastní pojmenování, které se rozchází s doménou, a tým pak tráví čas jeho přepisováním. Evans popisuje tuto synergii jako možnost fine-tuningu LLM přímo na slovníku bounded contextu. Viz <a href="#ubiquitous-language">sekci Ubiquitous language jako rozhraní pro LLM</a>.'
+                answer: 'Ubiquitous Language poskytuje LLM jednoznačný slovník, který se objevuje napříč dokumentací, testy i kódem. Model při generování dostává konzistentní pojmy z kontextu a produkuje výstup, který zapadá do existujícího modelu bez překladu. Bez Ubiquitous Language AI často zavádí vlastní pojmenování, které se rozchází s doménou, a tým pak tráví čas jeho přepisováním. Evans popisuje tuto synergii jako možnost fine-tuningu LLM přímo na slovníku bounded contextu. Podrobný rozbor v <a href="#ubiquitous-language">sekci Ubiquitous language jako rozhraní pro LLM</a>.'
             },
             {
                 question: 'Jak Bounded Contexts ovlivňují kvalitu kódu generovaného AI?',
-                answer: 'Bounded Context vymezuje srozumitelný rozsah, ve kterém se AI pohybuje – místo „celé aplikace" pracuje s jedním modelem, jednou sadou pravidel a jedním slovníkem. Menší, dobře ohraničený kontext znamená méně protichůdných informací v promptu a menší prostor pro halucinace. Bounded Contexts také přirozeně navazují na struktury jako Cursor rules nebo CLAUDE.md, které AI nástrojům dávají konkrétní pracovní perimetr. Viz <a href="#bounded-contexts">sekci Bounded contexts a kvalita generovaného kódu</a>.'
+                answer: 'Bounded Context vymezuje srozumitelný rozsah, ve kterém se AI pohybuje – místo „celé aplikace" pracuje s jedním modelem, jednou sadou pravidel a jedním slovníkem. Menší, dobře ohraničený kontext znamená méně protichůdných informací v promptu a menší prostor pro halucinace. Bounded Contexts také přirozeně navazují na struktury jako Cursor rules nebo CLAUDE.md, které AI nástrojům dávají konkrétní pracovní perimetr. Rozbor v <a href="#bounded-contexts">sekci Bounded contexts a kvalita generovaného kódu</a>.'
             },
             {
                 question: 'Jakou roli hrají testy při práci s AI?',
-                answer: 'Testy fungují jako kontrolní mechanismus, který zachytává rozdíl mezi tím, co AI vygenerovala, a tím, co doména skutečně požaduje. Kent Beck hovoří o konceptu augmented coding: AI píše kód, testy potvrzují chování, a teprve když oba stojí spolu, jde změna do kódové báze. Bez testů se riziko nevyřešených chyb z AI výstupu kumuluje, protože LLM kód působí syntakticky správně, i když logicky selhává. Viz <a href="#testovani">sekci Testování jako kontrolní mechanismus pro AI</a>.'
+                answer: 'Testy fungují jako kontrolní mechanismus, který zachytává rozdíl mezi tím, co AI vygenerovala, a tím, co doména skutečně požaduje. Kent Beck hovoří o konceptu augmented coding: AI píše kód, testy potvrzují chování, a teprve když oba stojí spolu, jde změna do kódové báze. Bez testů se riziko nevyřešených chyb z AI výstupu kumuluje, protože LLM kód působí syntakticky správně, i když logicky selhává. Praktický rozbor v <a href="#testovani">sekci Testování jako kontrolní mechanismus pro AI</a>.'
             },
             {
                 question: 'Kde jsou limity AI v doménově komplexním kódu?',

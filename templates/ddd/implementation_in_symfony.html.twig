@@ -1466,19 +1466,19 @@ services:
             },
             {
                 question: 'Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?',
-                answer: 'Doctrine podporuje mapování entit pomocí XML nebo YAML souborů držených mimo PHP třídy. Doménová třída tak nenese žádné atributy frameworku a zůstává čistým POPO (Plain Old PHP Object). Mapovací soubor popisuje, jak se agregát ukládá a rekonstruuje, zatímco model může samostatně žít i při výměně ORM. Viz <a href="#doctrine-xml-mapping">sekci Separace Doctrine mapování pomocí XML</a>.'
+                answer: 'Doctrine podporuje mapování entit pomocí XML nebo YAML souborů držených mimo PHP třídy. Doménová třída tak nenese žádné atributy frameworku a zůstává čistým POPO (Plain Old PHP Object). Mapovací soubor popisuje, jak se agregát ukládá a rekonstruuje, zatímco model může samostatně žít i při výměně ORM. Praktický příklad v <a href="#doctrine-xml-mapping">sekci Separace Doctrine mapování pomocí XML</a>.'
             },
             {
                 question: 'Jak odlišit Aplikační službu od Doménové služby?',
-                answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Viz <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
+                answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Podrobný rozbor v <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
             },
             {
                 question: 'Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?',
-                answer: 'V PHP a Symfony ekosystému jsou výjimky dominantní cestou: při porušení invariantu agregát vyhodí konkrétní doménovou výjimku (například <code>InsufficientFundsException</code>), kterou aplikační vrstva přeloží na HTTP odpověď nebo zprávu uživateli. Result/Either typ je v PHP možný, ale přidává složitost bez odpovídajícího přínosu. Kontrolery zachytávají jen doménové podtypy, nikdy obecnou <code>Exception</code>. Viz <a href="#error-handling">sekci Strategie zpracování chyb</a>.'
+                answer: 'V PHP a Symfony ekosystému jsou výjimky dominantní cestou: při porušení invariantu agregát vyhodí konkrétní doménovou výjimku (například <code>InsufficientFundsException</code>), kterou aplikační vrstva přeloží na HTTP odpověď nebo zprávu uživateli. Result/Either typ je v PHP možný, ale přidává složitost bez odpovídajícího přínosu. Kontrolery zachytávají jen doménové podtypy, nikdy obecnou <code>Exception</code>. Rozbor variant v <a href="#error-handling">sekci Strategie zpracování chyb</a>.'
             },
             {
                 question: 'Kdy použít Doctrine Custom Type pro Value Object?',
-                answer: 'Doctrine Custom Type se hodí tam, kde je hodnotový objekt ukládán jako jednoduchá hodnota v jednom sloupci – peněžní částka, e-mail, URL, vlastní identifikátor. Custom Type přeloží hodnotový objekt při zápisu do primitivu a při čtení ho zpět rekonstruuje, takže doménový kód pracuje vždy s typovým objektem. Pro hodnotové objekty složené z více sloupců je vhodnější <code>embeddable</code> mapování. Viz <a href="#doctrine-custom-types">sekci Doctrine custom types pro Value Objects</a>.'
+                answer: 'Doctrine Custom Type se hodí tam, kde je hodnotový objekt ukládán jako jednoduchá hodnota v jednom sloupci – peněžní částka, e-mail, URL, vlastní identifikátor. Custom Type přeloží hodnotový objekt při zápisu do primitivu a při čtení ho zpět rekonstruuje, takže doménový kód pracuje vždy s typovým objektem. Pro hodnotové objekty složené z více sloupců je vhodnější <code>embeddable</code> mapování. Detailní rozbor v <a href="#doctrine-custom-types">sekci Doctrine custom types pro Value Objects</a>.'
             }
         ]
     } %}

@@ -1066,19 +1066,19 @@ final class UserTest extends TestCase
                 },
                 {
                     question: 'Co je Strangler Fig Pattern?',
-                    answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste" starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Viz <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
+                    answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste" starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Podrobný rozbor v <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
                 },
                 {
                     question: 'Jak začít s analýzou existující domény?',
-                    answer: 'Začíná se Event Stormingem nebo obdobnou kolaborativní technikou s doménovými experty – zmapují se hlavní události, commands a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language. Paralelně se v existujícím kódu hledají implicitní hranice modelu: moduly, tabulky nebo funkční celky, které jsou málo propojené. Cílem první iterace je hrubá mapa, ne úplný model. Viz <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
+                    answer: 'Začíná se Event Stormingem nebo obdobnou kolaborativní technikou s doménovými experty – zmapují se hlavní události, commands a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language. Paralelně se v existujícím kódu hledají implicitní hranice modelu: moduly, tabulky nebo funkční celky, které jsou málo propojené. Cílem první iterace je hrubá mapa, ne úplný model. Praktický postup v <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
                 },
                 {
                     question: 'Jak extrahovat doménovou vrstvu z existujícího CRUD kódu?',
-                    answer: 'Migrace začíná u jednoho vybraného Bounded Contextu, pro který vzniká nová doménová vrstva oddělená od Doctrine entit. Business logika ze service tříd a kontrolerů se přesouvá do metod agregátu, zatímco původní CRUD kód zůstává jako adaptér pro API a persistenci. Nejprve se zavede Anti-Corruption Layer, pak se refaktorují jednotlivé use casy. Charakterizační testy proti původnímu chování minimalizují regrese. Viz <a href="#extrakce-domainove-vrstvy">sekci Extrakce doménové vrstvy</a>.'
+                    answer: 'Migrace začíná u jednoho vybraného Bounded Contextu, pro který vzniká nová doménová vrstva oddělená od Doctrine entit. Business logika ze service tříd a kontrolerů se přesouvá do metod agregátu, zatímco původní CRUD kód zůstává jako adaptér pro API a persistenci. Nejprve se zavede Anti-Corruption Layer, pak se refaktorují jednotlivé use casy. Charakterizační testy proti původnímu chování minimalizují regrese. Detailní rozbor v <a href="#extrakce-domainove-vrstvy">sekci Extrakce doménové vrstvy</a>.'
                 },
                 {
                     question: 'Jaká jsou hlavní rizika migrace z CRUD na DDD a jak je zmírnit?',
-                    answer: 'Nejčastější pastí je anémický model: nové třídy mají DDD názvy, ale logika zůstává v servisech. Dále hrozí nadměrná granularita Bounded Contexts, přímé ukládání doménové logiky do Doctrine entit a zavádění CQRS bez přepracovaného modelu. Největším rizikem je Big Bang Rewrite, který se zřídka dotáhne do konce. Migrace má probíhat inkrementálně přes Strangler Fig, u středně velké aplikace s realistickým odhadem 12–24 měsíců. Viz <a href="#rizika-a-doporuceni">sekci Rizika a doporučení</a>.'
+                    answer: 'Nejčastější pastí je anémický model: nové třídy mají DDD názvy, ale logika zůstává v servisech. Dále hrozí nadměrná granularita Bounded Contexts, přímé ukládání doménové logiky do Doctrine entit a zavádění CQRS bez přepracovaného modelu. Největším rizikem je Big Bang Rewrite, který se zřídka dotáhne do konce. Migrace má probíhat inkrementálně přes Strangler Fig, u středně velké aplikace s realistickým odhadem 12–24 měsíců. Rozbor rizik a zmírňujících opatření v <a href="#rizika-a-doporuceni">sekci Rizika a doporučení</a>.'
                 }
             ]
         } %}

@@ -1725,11 +1725,11 @@ final class OrderDashboardProjectorTest extends KernelTestCase
             },
             {
                 question: 'Kdy se vyplatí CQRS nasadit?',
-                answer: 'CQRS přináší hodnotu v aplikacích, kde se požadavky na zápis a čtení výrazně liší – například doménově bohatý write model s mnoha invarianty proti výrazně převažujícím dotazům, které potřebují denormalizovaná data. Uplatní se také tam, kde má čtení nezávislý škálovací profil (repliky, cache, full-text vyhledávání) nebo kde je hodnota v odděleném auditu změn. U jednoduchých CRUD operací zvyšuje počet tříd bez odpovídajícího přínosu. Viz <a href="#benefits">Výhody CQRS</a> a <a href="#challenges">Výzvy a omezení</a>.'
+                answer: 'CQRS přináší hodnotu v aplikacích, kde se požadavky na zápis a čtení výrazně liší – například doménově bohatý write model s mnoha invarianty proti výrazně převažujícím dotazům, které potřebují denormalizovaná data. Uplatní se také tam, kde má čtení nezávislý škálovací profil (repliky, cache, full-text vyhledávání) nebo kde je hodnota v odděleném auditu změn. U jednoduchých CRUD operací zvyšuje počet tříd bez odpovídajícího přínosu. Podrobný rozbor ve <a href="#benefits">Výhodách CQRS</a> a <a href="#challenges">Výzvách a omezeních</a>.'
             },
             {
                 question: 'Musím použít Event Sourcing, když používám CQRS?',
-                answer: 'Ne. CQRS a Event Sourcing jsou nezávislé vzory, které se často kombinují, ale každý z nich lze zavést samostatně. CQRS lze plnohodnotně implementovat s klasickou Doctrine ORM persistencí na write straně a denormalizovanými SQL tabulkami na read straně. Event Sourcing lze naopak zavést i bez CQRS – byť kombinace obou je v praxi běžná, protože si vzájemně prospívají. Viz <a href="#what-is-cqrs">sekce Co je CQRS</a>.'
+                answer: 'Ne. CQRS a Event Sourcing jsou nezávislé vzory, které se často kombinují, ale každý z nich lze zavést samostatně. CQRS lze plnohodnotně implementovat s klasickou Doctrine ORM persistencí na write straně a denormalizovanými SQL tabulkami na read straně. Event Sourcing lze naopak zavést i bez CQRS – byť kombinace obou je v praxi běžná, protože si vzájemně prospívají. Rozbor vztahu obou vzorů v <a href="#what-is-cqrs">sekci Co je CQRS</a>.'
             },
             {
                 question: 'Jak se CQRS implementuje v Symfony?',

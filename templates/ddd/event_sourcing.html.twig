@@ -1832,19 +1832,19 @@ final readonly class UpcasterChain
             },
             {
                 question: 'Co je Event Store a k čemu slouží?',
-                answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (EventStoreDB, Marten) nebo nadstavbu nad relační databází. Více v <a href="#event-store">sekci Implementace Event Store</a>.'
+                answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (EventStoreDB, Marten) nebo nadstavbu nad relační databází. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
             },
             {
                 question: 'Co jsou projekce v Event Sourcingu?',
-                answer: 'Projekce je proces, který naslouchá událostem z event store a buduje z nich read modely – denormalizované datové struktury určené pro rychlé dotazy. Projekce bývá jednoúčelová: každý read model má obvykle vlastní projekci, která ho od začátku nebo od posledního zpracovaného offsetu udržuje aktuální. Projekce lze kdykoli přebudovat (rebuild) přehráním událostí od počátku, čímž se bezpečně opravují chyby v read modelech. Viz <a href="#projekce">sekci Projekce</a>.'
+                answer: 'Projekce je proces, který naslouchá událostem z event store a buduje z nich read modely – denormalizované datové struktury určené pro rychlé dotazy. Projekce bývá jednoúčelová: každý read model má obvykle vlastní projekci, která ho od začátku nebo od posledního zpracovaného offsetu udržuje aktuální. Projekce lze kdykoli přebudovat (rebuild) přehráním událostí od počátku, čímž se bezpečně opravují chyby v read modelech. Praktický příklad v <a href="#projekce">sekci Projekce</a>.'
             },
             {
                 question: 'K čemu slouží snapshotting v Event Sourcingu?',
-                answer: 'Snapshotting je technika, při které se periodicky ukládá serializovaný stav agregátu, aby se při jeho rekonstrukci nemuselo přehrávat celé event history od začátku. Při načtení se vezme poslední snapshot a aplikují se pouze události, které nastaly po něm. Snapshoty řeší výkonnostní problém dlouhých streamů, typicky u agregátů s řádově tisíci událostí – pro krátké streamy jsou zbytečné a přidávají operační komplexitu. Viz <a href="#snapshotting">sekci Snapshotting</a>.'
+                answer: 'Snapshotting je technika, při které se periodicky ukládá serializovaný stav agregátu, aby se při jeho rekonstrukci nemuselo přehrávat celé event history od začátku. Při načtení se vezme poslední snapshot a aplikují se pouze události, které nastaly po něm. Snapshoty řeší výkonnostní problém dlouhých streamů, typicky u agregátů s řádově tisíci událostí – pro krátké streamy jsou zbytečné a přidávají operační komplexitu. Podrobný rozbor v <a href="#snapshotting">sekci Snapshotting</a>.'
             },
             {
                 question: 'Kdy se vyplatí Event Sourcing nasadit?',
-                answer: 'Event Sourcing se vyplatí tam, kde je historie změn sama o sobě byznysově cenná – finanční systémy, sklady, auditované procesy, regulovaná odvětví – nebo kde je třeba rekonstruovat stav v libovolném bodě minulosti. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace. Nasazuje se zpravidla selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Viz <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
+                answer: 'Event Sourcing se vyplatí tam, kde je historie změn sama o sobě byznysově cenná – finanční systémy, sklady, auditované procesy, regulovaná odvětví – nebo kde je třeba rekonstruovat stav v libovolném bodě minulosti. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace. Nasazuje se zpravidla selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Rozhodovací kritéria v <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
             }
         ]
     } %}

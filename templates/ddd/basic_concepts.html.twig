@@ -692,7 +692,7 @@ final class OrderCreatedEvent
             items: [
                 {
                     question: 'Jaký je rozdíl mezi Entitou a Value Objectem?',
-                    answer: 'Entita má jednoznačnou identitu (ID), která ji odlišuje od ostatních instancí i tehdy, když mají stejné atributy – například dva uživatelé se stejným jménem a e-mailem jsou stále dvě různé entity. Value Object identitu nemá a porovnává se podle hodnot všech svých atributů – typické příklady jsou <code>Money</code>, <code>Address</code>, <code>Email</code>. Entitu lze v čase měnit, Value Object je zpravidla neměnný. Viz <a href="#entities">sekci o Entitách</a> a <a href="#value-objects">sekci o Value Objects</a>.'
+                    answer: 'Entita má jednoznačnou identitu (ID), která ji odlišuje od ostatních instancí i tehdy, když mají stejné atributy – například dva uživatelé se stejným jménem a e-mailem jsou stále dvě různé entity. Value Object identitu nemá a porovnává se podle hodnot všech svých atributů – typické příklady jsou <code>Money</code>, <code>Address</code>, <code>Email</code>. Entitu lze v čase měnit, Value Object je zpravidla neměnný. Srovnání obou konceptů v <a href="#entities">sekci o Entitách</a> a <a href="#value-objects">sekci o Value Objects</a>.'
                 },
                 {
                     question: 'K čemu slouží Hodnotový objekt (Value Object)?',
@@ -700,7 +700,7 @@ final class OrderCreatedEvent
                 },
                 {
                     question: 'Co je Agregát a proč je jeho hranice důležitá?',
-                    answer: 'Agregát je shluk doménových objektů, které k sobě logicky patří a mění se jako jeden celek – přístup k jeho vnitřním částem vede pouze přes kořenovou entitu (Aggregate Root). Hranice agregátu je zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Viz <a href="#aggregates">sekci o Agregátech</a>.'
+                    answer: 'Agregát je shluk doménových objektů, které k sobě logicky patří a mění se jako jeden celek – přístup k jeho vnitřním částem vede pouze přes kořenovou entitu (Aggregate Root). Hranice agregátu je zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Podrobný rozbor v <a href="#aggregates">sekci o Agregátech</a>.'
                 },
                 {
                     question: 'Jakou roli má Repozitář v DDD?',
@@ -708,11 +708,11 @@ final class OrderCreatedEvent
                 },
                 {
                     question: 'Kdy použít Doménovou službu místo metody na Entitě?',
-                    answer: 'Doménová služba se použije, když doménová operace přirozeně nepatří žádné konkrétní Entitě ani Value Objectu – typicky zahrnuje více agregátů, komunikaci s externím systémem nebo výpočet nad kolekcí objektů. Pokud lze chování přirozeně umístit do metody Entity, má vždy přednost. Doménová služba není datový transfer objekt ani aplikační koordinátor – drží doménovou logiku bez stavu. Viz <a href="#domain-services">sekci o Doménových službách</a>.'
+                    answer: 'Doménová služba se použije, když doménová operace přirozeně nepatří žádné konkrétní Entitě ani Value Objectu – typicky zahrnuje více agregátů, komunikaci s externím systémem nebo výpočet nad kolekcí objektů. Pokud lze chování přirozeně umístit do metody Entity, má vždy přednost. Doménová služba není datový transfer objekt ani aplikační koordinátor – drží doménovou logiku bez stavu. Rozbor a typické případy užití v <a href="#domain-services">sekci o Doménových službách</a>.'
                 },
                 {
                     question: 'Co je Doménová událost a k čemu slouží?',
-                    answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena" nebo „platba byla přijata". Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Viz <a href="#domain-events">sekci o Doménových událostech</a>.'
+                    answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena" nebo „platba byla přijata". Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
                 }
             ]
         } %}

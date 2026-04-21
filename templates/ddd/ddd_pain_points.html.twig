@@ -1540,19 +1540,19 @@ final class OrderVoter extends Voter
         items: [
             {
                 question: 'Proč tradiční Doctrine mapování komplikuje čistý doménový model?',
-                answer: 'Doctrine očekává klasické PHP třídy s veřejnými nebo reflektovanými atributy, zatímco DDD agregát vyžaduje neměnnost, privátní settery a invarianty vynucené v konstruktoru. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého" EntityManageru při dlouhých transakcích a omezení typů pro hodnotové objekty. Řešením je XML mapování držené mimo doménovou třídu a selektivní použití embeddables. Viz <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
+                answer: 'Doctrine očekává klasické PHP třídy s veřejnými nebo reflektovanými atributy, zatímco DDD agregát vyžaduje neměnnost, privátní settery a invarianty vynucené v konstruktoru. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého" EntityManageru při dlouhých transakcích a omezení typů pro hodnotové objekty. Řešením je XML mapování držené mimo doménovou třídu a selektivní použití embeddables. Podrobný rozbor v <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
             },
             {
                 question: 'Jak řešit Outbox Pattern pro spolehlivé doručení doménových událostí?',
-                answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Viz <a href="#b1-outbox">sekci Outbox Pattern</a>.'
+                answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Praktický příklad v <a href="#b1-outbox">sekci Outbox Pattern</a>.'
             },
             {
                 question: 'Jak vysvětlit přínos DDD managementu, když první iterace zpomaluje?',
-                answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových feature po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který doručí první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Viz <a href="#e1-management">sekci Management</a>.'
+                answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových feature po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který doručí první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Management</a>.'
             },
             {
                 question: 'Jak udržet Ubiquitous Language, aby časem neutrpěl drift?',
-                answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice", zákazník říká „faktura". Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová feature zavádí pojem, který doménový expert nezná – v ten moment je třeba buď ustoupit, nebo jazyk společně upravit. Viz <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
+                answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice", zákazník říká „faktura". Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová feature zavádí pojem, který doménový expert nezná – v ten moment je třeba buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
             },
             {
                 question: 'Jak přežít paralelní existenci staré CRUD části a nové DDD vrstvy?',

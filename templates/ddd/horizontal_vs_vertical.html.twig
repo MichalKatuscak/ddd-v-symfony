@@ -419,19 +419,19 @@
             },
             {
                 question: 'Jaký je rozdíl mezi tradiční vrstvovou architekturou a Vertical Slice?',
-                answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice jednodušeji škáluje počet feature bez narůstajících vazeb. Viz <a href="#comparison">sekci Porovnání přístupů</a>.'
+                answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice jednodušeji škáluje počet feature bez narůstajících vazeb. Srovnání obou přístupů v <a href="#comparison">sekci Porovnání přístupů</a>.'
             },
             {
                 question: 'Kdy zvolit Vertical Slice a kdy tradiční DDD vrstvy?',
-                answer: 'Vertical Slice je vhodný pro aplikace s mnoha nezávislými use casy a rychlým vývojovým tempem, kde je přínosem izolace každé feature. Tradiční vrstvové DDD se osvědčuje tam, kde má doménový model silné sdílené invarianty, které je třeba jednotně vymáhat napříč celou aplikací. V praxi se přístupy kombinují: Vertical Slice pro aplikační vrstvu, sdílený doménový model uvnitř Bounded Contextu. Viz <a href="#when-to-use">sekci Kdy použít který přístup</a>.'
+                answer: 'Vertical Slice je vhodný pro aplikace s mnoha nezávislými use casy a rychlým vývojovým tempem, kde je přínosem izolace každé feature. Tradiční vrstvové DDD se osvědčuje tam, kde má doménový model silné sdílené invarianty, které je třeba jednotně vymáhat napříč celou aplikací. V praxi se přístupy kombinují: Vertical Slice pro aplikační vrstvu, sdílený doménový model uvnitř Bounded Contextu. Rozhodovací kritéria v <a href="#when-to-use">sekci Kdy použít který přístup</a>.'
             },
             {
                 question: 'Lze Vertical Slice kombinovat s DDD?',
-                answer: 'Ano, kombinace je běžná a produktivní. DDD definuje, jak modelovat doménu (agregáty, hodnotové objekty, Bounded Contexts), Vertical Slice říká, jak organizovat kód use casu okolo tohoto modelu. Každý slice typicky obsahuje command nebo query DTO, handler, volání doménového modelu a read model pro odpověď. Doménový model zůstává sdílený uvnitř Bounded Contextu. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+                answer: 'Ano, kombinace je běžná a produktivní. DDD definuje, jak modelovat doménu (agregáty, hodnotové objekty, Bounded Contexts), Vertical Slice říká, jak organizovat kód use casu okolo tohoto modelu. Každý slice typicky obsahuje command nebo query DTO, handler, volání doménového modelu a read model pro odpověď. Doménový model zůstává sdílený uvnitř Bounded Contextu. Podrobný rozbor kombinace v <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
             },
             {
                 question: 'Jak se Vertical Slice implementuje v Symfony?',
-                answer: 'Základem je struktura <code>src/[BoundedContext]/[Feature]/</code>, kde každá feature obsahuje vlastní Command, Handler, případně Query, Controller a View. Symfony Messenger funguje jako sběrnice, přes kterou kontroler dispatchuje command handleru uvnitř slicu. Sdílená doménová vrstva (agregáty, hodnotové objekty) zůstává na úrovni Bounded Contextu. Každý slice je tak samostatný modul s minimem závislostí na ostatních. Viz <a href="#symfony-implementation">sekci Implementace v Symfony 8</a>.'
+                answer: 'Základem je struktura <code>src/[BoundedContext]/[Feature]/</code>, kde každá feature obsahuje vlastní Command, Handler, případně Query, Controller a View. Symfony Messenger funguje jako sběrnice, přes kterou kontroler dispatchuje command handleru uvnitř slicu. Sdílená doménová vrstva (agregáty, hodnotové objekty) zůstává na úrovni Bounded Contextu. Každý slice je tak samostatný modul s minimem závislostí na ostatních. Praktický příklad v <a href="#symfony-implementation">sekci Implementace v Symfony 8</a>.'
             }
         ]
     } %}

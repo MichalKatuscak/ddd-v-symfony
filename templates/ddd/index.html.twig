@@ -142,8 +142,8 @@
 {% include '_partials/faq.html.twig' with {
     items: [
         {
-            question: 'Co je Domain-Driven Design?',
-            answer: 'Domain-Driven Design (DDD) je přístup k vývoji softwaru, který staví modelování domény do středu celého návrhu. Cílem je, aby kód přesně odrážel způsob, jakým v dané oblasti uvažují doménoví experti, a aby tento soulad vydržel i při růstu aplikace. Systematicky jej popsal Eric Evans v roce 2003. Podrobněji v kapitole <a href="' ~ path('what_is_ddd') ~ '">Co je DDD</a>.'
+            question: 'Kolik času a lidí zavedení DDD v projektu vyžaduje?',
+            answer: 'Pilotní Bounded Context zpravidla doručí první výsledky za 3–6 měsíců, plná migrace středně velké aplikace má realistický horizont 12–24 měsíců. Velikost týmu není rozhodující – podstatnější je přístup k doménovému expertovi a čas vývojářů na osvojení strategických a taktických vzorů. Strangler Fig Pattern umožňuje nasazovat DDD po částech vedle původní CRUD architektury bez nutnosti zastavit vývoj nových feature. Podrobnosti v kapitole <a href="' ~ path('migration_from_crud') ~ '">Migrace z CRUD na DDD</a>.'
         },
         {
             question: 'Kdy DDD použít a kdy ne?',
