@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -33,7 +33,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">Vertikální slice architektura vs. Tradiční DDD</h1>
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
     <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
         <p id="toc-heading">Obsah kapitoly:</p>
@@ -410,6 +410,32 @@
     </ul>
 
     </section>
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Co je Vertical Slice Architecture?',
+                answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec" obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+            },
+            {
+                question: 'Jaký je rozdíl mezi tradiční vrstvovou architekturou a Vertical Slice?',
+                answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice jednodušeji škáluje počet feature bez narůstajících vazeb. Viz <a href="#comparison">sekci Porovnání přístupů</a>.'
+            },
+            {
+                question: 'Kdy zvolit Vertical Slice a kdy tradiční DDD vrstvy?',
+                answer: 'Vertical Slice je vhodný pro aplikace s mnoha nezávislými use casy a rychlým vývojovým tempem, kde je přínosem izolace každé feature. Tradiční vrstvové DDD se osvědčuje tam, kde má doménový model silné sdílené invarianty, které je třeba jednotně vymáhat napříč celou aplikací. V praxi se přístupy kombinují: Vertical Slice pro aplikační vrstvu, sdílený doménový model uvnitř Bounded Contextu. Viz <a href="#when-to-use">sekci Kdy použít který přístup</a>.'
+            },
+            {
+                question: 'Lze Vertical Slice kombinovat s DDD?',
+                answer: 'Ano, kombinace je běžná a produktivní. DDD definuje, jak modelovat doménu (agregáty, hodnotové objekty, Bounded Contexts), Vertical Slice říká, jak organizovat kód use casu okolo tohoto modelu. Každý slice typicky obsahuje command nebo query DTO, handler, volání doménového modelu a read model pro odpověď. Doménový model zůstává sdílený uvnitř Bounded Contextu. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+            },
+            {
+                question: 'Jak se Vertical Slice implementuje v Symfony?',
+                answer: 'Základem je struktura <code>src/[BoundedContext]/[Feature]/</code>, kde každá feature obsahuje vlastní Command, Handler, případně Query, Controller a View. Symfony Messenger funguje jako sběrnice, přes kterou kontroler dispatchuje command handleru uvnitř slicu. Sdílená doménová vrstva (agregáty, hodnotové objekty) zůstává na úrovni Bounded Contextu. Každý slice je tak samostatný modul s minimem závislostí na ostatních. Viz <a href="#symfony-implementation">sekci Implementace v Symfony 8</a>.'
+            }
+        ]
+    } %}
+
     </article>
 {% endblock %}
 
