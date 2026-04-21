@@ -1712,6 +1712,31 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     </p>
 
     </section>
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Co je CQRS?',
+                answer: 'CQRS (Command Query Responsibility Segregation) je architektonický vzor, který rozděluje aplikaci na dva oddělené modely: write model pro změny stavu a read model pro dotazy. Write model se soustředí na doménovou logiku a validaci invariantů, read model na rychlou prezentaci dat uživateli. Každý model lze nezávisle optimalizovat i škálovat. Zformuloval jej Greg Young jako rozšíření staršího principu CQS od Bertranda Meyera. Viz <a href="#what-is-cqrs">úvodní sekce</a>.'
+            },
+            {
+                question: 'Jaký je rozdíl mezi CQS a CQRS?',
+                answer: 'CQS (Command Query Separation) je návrhové pravidlo na úrovni metod – každá metoda by měla buď měnit stav, nebo vracet hodnotu, ne obojí. CQRS (Command Query Responsibility Segregation) povyšuje tuto myšlenku na architektonickou úroveň: místo jednoho doménového modelu vznikají dva oddělené modely, každý s vlastními třídami, úložištěm i optimalizačním profilem. CQS je tedy princip ve třídě, CQRS rozhodnutí o struktuře celé aplikace. Více v <a href="#cqs-vs-cqrs">sekci CQS vs. CQRS</a>.'
+            },
+            {
+                question: 'Kdy se vyplatí CQRS nasadit?',
+                answer: 'CQRS přináší hodnotu v aplikacích, kde se požadavky na zápis a čtení výrazně liší – například doménově bohatý write model s mnoha invarianty proti výrazně převažujícím dotazům, které potřebují denormalizovaná data. Uplatní se také tam, kde má čtení nezávislý škálovací profil (repliky, cache, full-text vyhledávání) nebo kde je hodnota v odděleném auditu změn. U jednoduchých CRUD operací zvyšuje počet tříd bez odpovídajícího přínosu. Viz <a href="#benefits">Výhody CQRS</a> a <a href="#challenges">Výzvy a omezení</a>.'
+            },
+            {
+                question: 'Musím použít Event Sourcing, když používám CQRS?',
+                answer: 'Ne. CQRS a Event Sourcing jsou nezávislé vzory, které se často kombinují, ale každý z nich lze zavést samostatně. CQRS lze plnohodnotně implementovat s klasickou Doctrine ORM persistencí na write straně a denormalizovanými SQL tabulkami na read straně. Event Sourcing lze naopak zavést i bez CQRS – byť kombinace obou je v praxi běžná, protože si vzájemně prospívají. Viz <a href="#what-is-cqrs">sekce Co je CQRS</a>.'
+            },
+            {
+                question: 'Jak se CQRS implementuje v Symfony?',
+                answer: 'Základním stavebním kamenem je komponenta Symfony Messenger, která funguje jako sběrnice pro příkazy a dotazy. Pro CQRS se obvykle definují dvě oddělené sběrnice (<code>command.bus</code> a <code>query.bus</code>), každá s vlastní sadou handler tříd a middleware. Příkazy mění stav a nevracejí data; dotazy vracejí ViewModely (read modely) a stav nemění. Asynchronní zpracování lze zapnout přes transport, což umožňuje dlouhé operace vytáhnout z request-response cyklu. Více v <a href="#symfony-messenger">sekci Symfony Messenger jako základ CQRS</a>.'
+            }
+        ]
+    } %}
     </article>
 {% endblock %}
 
