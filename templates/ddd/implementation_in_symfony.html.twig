@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -33,7 +33,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">Implementace DDD v Symfony 8</h1>
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
         <div class="examples-banner" role="note">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
@@ -1457,6 +1457,31 @@ services:
     </div>
 
     </section>
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Kam v Symfony projektu patří doménová vrstva a proč ji držet odděleně?',
+                answer: 'Doménová vrstva se umisťuje do samostatného adresáře – typicky <code>src/Domain/</code> s podsložkami pro jednotlivé Bounded Contexty – odděleně od kontrolerů, Doctrine mapování a infrastruktury. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
+            },
+            {
+                question: 'Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?',
+                answer: 'Doctrine podporuje mapování entit pomocí XML nebo YAML souborů držených mimo PHP třídy. Doménová třída tak nenese žádné atributy frameworku a zůstává čistým POPO (Plain Old PHP Object). Mapovací soubor popisuje, jak se agregát ukládá a rekonstruuje, zatímco model může samostatně žít i při výměně ORM. Viz <a href="#doctrine-xml-mapping">sekci Separace Doctrine mapování pomocí XML</a>.'
+            },
+            {
+                question: 'Jak odlišit Aplikační službu od Doménové služby?',
+                answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Viz <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
+            },
+            {
+                question: 'Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?',
+                answer: 'V PHP a Symfony ekosystému jsou výjimky dominantní cestou: při porušení invariantu agregát vyhodí konkrétní doménovou výjimku (například <code>InsufficientFundsException</code>), kterou aplikační vrstva přeloží na HTTP odpověď nebo zprávu uživateli. Result/Either typ je v PHP možný, ale přidává složitost bez odpovídajícího přínosu. Kontrolery zachytávají jen doménové podtypy, nikdy obecnou <code>Exception</code>. Viz <a href="#error-handling">sekci Strategie zpracování chyb</a>.'
+            },
+            {
+                question: 'Kdy použít Doctrine Custom Type pro Value Object?',
+                answer: 'Doctrine Custom Type se hodí tam, kde je hodnotový objekt ukládán jako jednoduchá hodnota v jednom sloupci – peněžní částka, e-mail, URL, vlastní identifikátor. Custom Type přeloží hodnotový objekt při zápisu do primitivu a při čtení ho zpět rekonstruuje, takže doménový kód pracuje vždy s typovým objektem. Pro hodnotové objekty složené z více sloupců je vhodnější <code>embeddable</code> mapování. Viz <a href="#doctrine-custom-types">sekci Doctrine custom types pro Value Objects</a>.'
+            }
+        ]
+    } %}
     </article>
 {% endblock %}
 
