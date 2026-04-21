@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -33,7 +33,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">Testování DDD kódu v Symfony</h1>
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
     <div class="examples-banner" role="note">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
@@ -1201,6 +1201,31 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
         kde vstupuje infrastruktura.
     </p>
     </section>
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Jak testovat agregát – unit test s mock repozitářem, nebo integrační test?',
+                answer: 'Agregát se testuje primárně unit testem – je to čistý PHP bez závislostí na frameworku nebo databázi. Test instancuje agregát, volá jeho metody a ověřuje výsledný stav i vyvolané doménové události. Mock repozitáře se přitom nepotřebuje, protože samotný agregát repozitář nevolá. Integrační test doplňuje pokrytí až na úrovni, kde vstupuje persistence – tedy při ukládání a načítání agregátu. Viz <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
+            },
+            {
+                question: 'K čemu slouží InMemory repozitář a kdy ho preferovat před mockem?',
+                answer: 'InMemory repozitář je plnohodnotná implementace rozhraní repozitáře, která drží agregáty v poli v paměti. Oproti mocku dokáže simulovat reálné chování (najít, uložit, počítat), takže testy aplikačních služeb procházejí celý use case věrohodněji. Mock se hodí tam, kde je třeba ověřit konkrétní interakci – kolikrát byla metoda volána a s jakými argumenty. InMemory repozitář naopak slouží pro ověření výsledku, ne volání. Viz <a href="#test-doubles">sekci Test doubles a InMemory repozitáře</a>.'
+            },
+            {
+                question: 'Jak ověřit, že agregát publikuje správné doménové události?',
+                answer: 'Po vykonání metody se z agregátu vyčte seznam zaznamenaných událostí (typicky přes <code>pullDomainEvents()</code>) a testem se ověří jejich typ, pořadí i obsah. Kontroluje se, že agregát vyvolal přesně ty události, které má, a nevyvolal žádné navíc. Pro funkční test lze stejné události zachytávat přes Messenger event bus a ověřit reakce dalších částí systému. Viz <a href="#testovani-domain-events">sekci Testování doménových událostí</a>.'
+            },
+            {
+                question: 'Mají se testovat privátní invarianty agregátu, nebo jen veřejné rozhraní?',
+                answer: 'Testuje se pouze veřejné rozhraní – chování agregátu přes metody, které se reálně volají z aplikační vrstvy. Privátní invarianty jsou detailem implementace a jejich přímé testování sváže test s konkrétní strukturou kódu, což brání refaktoringu. Správně navržený test ověřuje, že po sérii veřejných volání je agregát ve validním stavu, vyvolal očekávané události a při porušení pravidla vyhodil konkrétní doménovou výjimku. Viz <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
+            },
+            {
+                question: 'Co jsou architektonické testy a co kontrolují?',
+                answer: 'Architektonické testy automaticky ověřují, že kód dodržuje zvolená pravidla struktury – například že doménová vrstva nezávisí na Doctrine, že agregáty nevolají repozitáře přímo, nebo že kontrolery nekomunikují s infrastrukturou. V Symfony se typicky používá nástroj Deptrac, který pravidla popisuje deklarativně v YAML a spouští se jako další testovací sada. Porušení pravidla se projeví jako spadlý test, nikoli až při code review. Viz <a href="#architektonicke-testy">sekci Architektonické testy</a>.'
+            }
+        ]
+    } %}
 
     </article>
 {% endblock %}
