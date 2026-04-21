@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -33,7 +33,7 @@
     "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
 <article itemscope itemtype="https://schema.org/TechArticle">
     <h1 itemprop="headline">Event Sourcing</h1>
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
     <div class="examples-banner" role="note">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
@@ -1844,7 +1844,7 @@ final readonly class UpcasterChain
             },
             {
                 question: 'Kdy se vyplatí Event Sourcing nasadit?',
-                answer: 'Event Sourcing přináší hodnotu v doménách, kde je historie změn sama o sobě byznysově cenná – typicky finanční systémy, sklady, auditované procesy nebo regulovaná odvětví. Uplatní se také tam, kde je potřeba zpětně rekonstruovat stav v libovolném bodě minulosti nebo odvozovat nové pohledy z již známých událostí. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace, kde přidaná komplexita nemá odpovídající přínos. Event Sourcing se zpravidla nasazuje selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Viz <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
+                answer: 'Event Sourcing se vyplatí tam, kde je historie změn sama o sobě byznysově cenná – finanční systémy, sklady, auditované procesy, regulovaná odvětví – nebo kde je třeba rekonstruovat stav v libovolném bodě minulosti. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace. Nasazuje se zpravidla selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Viz <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
             }
         ]
     } %}

@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-12{% endblock %}
+{% block article_modified_time %}2026-04-22{% endblock %}
 
 {% block structured_data %}
     <script type="application/ld+json">
@@ -33,7 +33,7 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "2026-04-22",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -58,7 +58,7 @@
     <article itemscope itemtype="https://schema.org/TechArticle">
         <h1 itemprop="headline">Co je Domain-Driven Design?</h1>
 
-        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
 
         <div class="examples-banner" role="note">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
@@ -473,7 +473,7 @@
                 },
                 {
                     question: 'Kdy se DDD nevyplatí použít?',
-                    answer: 'DDD nepřináší hodnotu v projektech, kde je doménová logika triviální – například u jednoduchých CRUD aplikací, které jen spravují záznamy v databázi. Nevhodné je také tam, kde tým nemá přístup k doménovým expertům nebo neměl příležitost si DDD osvojit. Plnohodnotně se DDD vyplatí v projektech s bohatou doménou, dlouhou životností a potřebou sdílené reprezentace pravidel, které ospravedlňují investici do modelování. Podrobný rozbor v <a href="' ~ path('when_not_to_use_ddd') ~ '">samostatné kapitole Kdy DDD nepoužívat</a>.'
+                    answer: 'Stručně: DDD nepřináší odpovídající hodnotu u projektů s triviální doménovou logikou, v týmech bez přístupu k doménovým expertům a při krátkém horizontu produktu. Detailní rozbor podmínek, příznaků a alternativ obsahuje samostatná kapitola <a href="' ~ path('when_not_to_use_ddd') ~ '">Kdy DDD nepoužívat</a>.'
                 }
             ]
         } %}
