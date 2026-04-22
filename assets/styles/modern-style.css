@@ -261,7 +261,7 @@ li { margin-bottom: 0.35rem; }
 
 .faq-answer {
     padding: 0 0 1rem 0;
-    color: var(--text-body);
+    color: var(--text-primary);
 }
 
 .faq-answer p:last-child { margin-bottom: 0; }
