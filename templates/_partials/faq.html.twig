@@ -1,5 +1,5 @@
 {#
-  FAQ sekce — viditelný HTML + FAQPage JSON-LD schema ze stejného datového zdroje.
+  FAQ sekce — viditelný HTML accordion + FAQPage JSON-LD schema ze stejného datového zdroje.
 
   Parametry:
     items    – pole objektů { question: string, answer: string }
@@ -12,10 +12,12 @@
     <h2 id="faq-heading">{{ faq_heading }}</h2>
 
     {% for item in items %}
-        <article class="faq-item">
-            <h3>{{ item.question }}</h3>
-            <p>{{ item.answer|raw }}</p>
-        </article>
+        <details class="faq-item">
+            <summary>{{ item.question }}</summary>
+            <div class="faq-answer">
+                <p>{{ item.answer|raw }}</p>
+            </div>
+        </details>
     {% endfor %}
 
     <script type="application/ld+json">
