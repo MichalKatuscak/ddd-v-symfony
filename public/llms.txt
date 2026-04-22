@@ -2,18 +2,18 @@
 
 > Podrobný průvodce Domain-Driven Design v Symfony 8. Obsahuje strategický i taktický design, CQRS, Event Sourcing, Ságy, praktické příklady v PHP 8.4+ a reálné zkušenosti z produkce.
 
-Autor: Michal Katuščák — PHP/React vývojář, 13+ let komerčního vývoje. Průvodce je v češtině a je zdarma.
+Autor: Michal Katuščák – PHP/React vývojář, 13+ let komerčního vývoje. Průvodce je v češtině a je zdarma.
 
 Obsah je rozdělen do tří proudů: základy DDD (pro začátečníky), pokročilé vzory (CQRS, Event Sourcing, Ságy) a zkušenosti z praxe (kde DDD bolí, kdy ho nepoužívat, migrace z CRUD, AI nástroje).
 
-## Začátečníci — základy DDD
+## Začátečníci – základy DDD
 
 - [Co je Domain-Driven Design?](https://ddd-v-symfony.katuscak.cz/co-je-ddd): Definice DDD, historie, Ubiquitous Language, Bounded Context, strategický vs. taktický design.
 - [Základní koncepty DDD](https://ddd-v-symfony.katuscak.cz/zakladni-koncepty): Entity, Value Objects, Agregáty, Repozitáře, Doménové události, Služby, Factory.
 - [Vertikální slice architektura](https://ddd-v-symfony.katuscak.cz/vertikalni-slice): Srovnání horizontální a vertikální organizace kódu, kdy zvolit kterou.
 - [Implementace DDD v Symfony 8](https://ddd-v-symfony.katuscak.cz/implementace-v-symfony): Jak mapovat DDD koncepty na Symfony komponenty, adresářová struktura, Doctrine.
 
-## Pokročilé — CQRS, Event Sourcing, Ságy
+## Pokročilé – CQRS, Event Sourcing, Ságy
 
 - [CQRS v Symfony 8](https://ddd-v-symfony.katuscak.cz/cqrs): Command Query Responsibility Segregation s Messenger komponentou, Command Bus, Query Bus.
 - [Event Sourcing](https://ddd-v-symfony.katuscak.cz/event-sourcing): Uchování stavu jako sekvence událostí, event store, snapshoty, replay.
@@ -21,7 +21,7 @@ Obsah je rozdělen do tří proudů: základy DDD (pro začátečníky), pokroč
 
 ## Praxe a zkušenosti
 
-- [DDD v praxi — kde to bolí](https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli): 20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig pattern, přesvědčování managementu.
+- [DDD v praxi – kde to bolí](https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli): 20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig pattern, přesvědčování managementu.
 - [Kdy DDD nepoužívat](https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd): 7 situací, kdy DDD přinese víc škody než užitku (CRUD admin, startup s měnící se doménou, malé týmy, ETL, krátkodobé projekty).
 - [Praktické příklady](https://ddd-v-symfony.katuscak.cz/prakticke-priklady): Ukázky DDD kódu v PHP 8.4+ a Symfony 8.
 - [Případová studie](https://ddd-v-symfony.katuscak.cz/pripadova-studie): Kompletní e-shop postavený na DDD architektuře krok za krokem.
@@ -44,5 +44,5 @@ Obsah je rozdělen do tří proudů: základy DDD (pro začátečníky), pokroč
 
 ## O webu
 
-- [O autorovi](https://ddd-v-symfony.katuscak.cz/o-autorovi): Michal Katuščák — PHP/React vývojář, odkazy na další projekty (katuscak.cz, blog.katuscak.cz, LinkedIn).
+- [O autorovi](https://ddd-v-symfony.katuscak.cz/o-autorovi): Michal Katuščák – PHP/React vývojář, odkazy na další projekty (katuscak.cz, blog.katuscak.cz, LinkedIn).
 - [Úvodní strana](https://ddd-v-symfony.katuscak.cz/): Rozcestník a přehled všech kapitol.

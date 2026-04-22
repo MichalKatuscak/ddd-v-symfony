@@ -217,7 +217,7 @@
             <a href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>.
         </p>
         <p>
-            Důležité: CQRS se v rámci DDD typicky aplikuje <strong>per Bounded Context</strong>,
+            Důležité: CQRS se v DDD typicky aplikuje <strong>per Bounded Context</strong>,
             nikoli globálně na celou aplikaci. Core doména s komplexní logikou může těžit z plného CQRS
             (úroveň 3–4), zatímco podpůrné kontexty (notifikace, administrace) si vystačí s jednoduchým
             CRUD - viz <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>.
