@@ -12,5 +12,7 @@
 /config/reference.php
 screenshots/
 .worktrees/
+.playwright-mcp/
 /node_modules/
 /public/build/
+/*.png
