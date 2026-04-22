@@ -942,6 +942,31 @@ class RegisterUserHandler
     </p>
 
         </section>
+
+        {% include '_partials/faq.html.twig' with {
+            items: [
+                {
+                    question: 'Proč všechny tři příklady kombinují vertikální slice a CQRS?',
+                    answer: 'Vertikální slice určuje, jak kód organizovat (podle feature), CQRS určuje, jak oddělit čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8. Rozbor principu v <a href="#e-commerce">sekci E-commerce aplikace</a>.'
+                },
+                {
+                    question: 'Jaký je rozdíl mezi Command a Query handlerem v těchto ukázkách?',
+                    answer: 'Command handler mění stav agregátu a zpravidla nevrací nic (výjimkou je identifikátor nově vytvořeného objektu – viz <code>CreatePostHandler</code>). Query handler čte data a vrací view model optimalizovaný pro konkrétní obrazovku, nikoli doménový agregát – viz <code>GetCartHandler</code> vracející <code>CartViewModel</code>. Oddělení umožňuje každou stranu škálovat a testovat nezávisle. Ukázka obou v <a href="#e-commerce">sekci E-commerce aplikace</a>.'
+                },
+                {
+                    question: 'Proč agregát Cart pracuje s hodnotovými objekty Money a Quantity místo primitivních typů?',
+                    answer: 'Hodnotové objekty nesou doménovou sémantiku a vynucují validaci při vzniku – <code>Quantity</code> nemůže být záporná, <code>Money</code> vždy nese měnu. Signatura metody <code>addItem(ProductId, Quantity, Money)</code> je samopopisná a typový systém brání záměně argumentů. Primitivní typy takovou kontrolu neposkytují a typické chyby (prohozené argumenty, neplatné hodnoty) se projeví až za běhu. Ukázka použití v <a href="#cart-model-heading">sekci Doménový model: Košík</a>.'
+                },
+                {
+                    question: 'Jak kontroler v Symfony 8 předává příkaz handleru?',
+                    answer: 'Kontroler sestaví DTO příkazu (např. <code>AddItemToCart</code>) a předá jej do <code>MessageBusInterface::dispatch()</code>. Messenger podle atributu <code>#[AsMessageHandler]</code> najde příslušný handler a zavolá jej. Kontroler tedy nezná konkrétní handler, pouze sběrnici – což usnadňuje testování, výměnu implementací a asynchronní zpracování. Konfigurace sběrnice je popsána v kapitole <a href="' ~ path('implementation_in_symfony') ~ '">Implementace DDD v Symfony 8</a>.'
+                },
+                {
+                    question: 'Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?',
+                    answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější business pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Strukturu adresářů je vhodné použít jako výchozí šablonu a postupně ji rozšiřovat podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="' ~ path('implementation_in_symfony') ~ '">Implementace DDD v Symfony 8</a>.'
+                }
+            ]
+        } %}
     </article>
 {% endblock %}
 

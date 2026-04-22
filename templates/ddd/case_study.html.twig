@@ -862,6 +862,31 @@ class TaskAssignmentService
     </ol>
 
     </section>
+
+    {% include '_partials/faq.html.twig' with {
+        items: [
+            {
+                question: 'Jakou doménu případová studie popisuje?',
+                answer: 'Systém pro správu projektů a úkolů – uživatelé vytvářejí projekty, přidávají úkoly, přiřazují je členům týmu, mění jejich stav a komentují je. Doména je dostatečně bohatá, aby obsáhla strategické (context map) i taktické (agregát, doménová služba) vzory DDD, a přitom uchopitelná v rámci jedné kapitoly. Konkrétní požadavky v <a href="#requirements">sekci Požadavky</a>.'
+            },
+            {
+                question: 'Proč je systém rozdělen do pěti bounded contexts místo jednoho modelu?',
+                answer: 'Každý kontext má jinou sémantiku: UserManagement řeší identitu, ProjectManagement životní cyklus projektu, TaskManagement stavové přechody úkolů, CommentManagement komunikaci a ActivityTracking audit. Rozdělení odráží reálné doménové hranice a umožňuje vyvíjet každý kontext samostatně, s vlastním jazykem a vlastními invarianty. Sdílení jediného modelu by vedlo ke god aggregate a ke kompromisům napříč sémanticky odlišnými oblastmi. Rozbor v <a href="#architecture">sekci Architektura</a>.'
+            },
+            {
+                question: 'Jak spolu bounded contexty komunikují?',
+                answer: 'Primárním prostředkem integrace jsou doménové události: po dokončení operace agregát publikuje událost (např. <code>TaskCreated</code>), na kterou reagují jiné kontexty asynchronně přes Messenger. Synchronní dotazy mezi kontexty se řeší přes porty (rozhraní) s implementací v infrastruktuře cílového kontextu – volající kontext nezávisí na detailech implementace. Konkrétní ukázka v <a href="#implementation">sekci Implementace</a>.'
+            },
+            {
+                question: 'Jaký přínos měla vertikální slice architektura?',
+                answer: 'Každá feature (CreateProject, AssignTask, AddComment) vznikla jako samostatný balíček s vlastním commandem, handlerem, kontrolerem a view modelem. Změny ve feature nezasahovaly do ostatních slicí, což zkrátilo cyklus vývoj–test–nasazení a usnadnilo onboarding. Problém tradičního horizontálního členění – šíření změn napříč vrstvami – se v projektu prakticky nevyskytoval. Detailní srovnání v kapitole <a href="' ~ path('horizontal_vs_vertical') ~ '">Vertikální slice architektura</a>.'
+            },
+            {
+                question: 'Jaká jsou tři nejdůležitější ponaučení z projektu?',
+                answer: 'Zaprvé, investice do strategického designu a kontextové mapy na začátku projektu se mnohonásobně vyplatila – pozdější změny architektury by byly dražší. Zadruhé, důsledné budování ubiquitous language s doménovými experty zabránilo většině nedorozumění v komunikaci. Zatřetí, malé agregáty s jasnou transakční hranicí udržely model konzistentní bez potřeby distribuovaných transakcí. Úplný seznam v <a href="#lessons">sekci Ponaučení</a>.'
+            }
+        ]
+    } %}
     </article>
 {% endblock %}
 
