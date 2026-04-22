@@ -192,6 +192,31 @@
     }
     </script>
 
+    {%- set _breadcrumb %}{% block breadcrumb_name %}{% endblock %}{% endset -%}
+    {%- set _breadcrumb = _breadcrumb|trim -%}
+    {% if _breadcrumb %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Úvod",
+                "item": "{{ url('homepage') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ _breadcrumb }}",
+                "item": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+            }
+        ]
+    }
+    </script>
+    {% endif %}
+
     {% block structured_data %}{% endblock %}
 </body>
 </html>
