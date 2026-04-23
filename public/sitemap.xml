@@ -2,121 +2,121 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/co-je-ddd</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/vertikalni-slice</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/zakladni-koncepty</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/implementace-v-symfony</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/cqrs</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/prakticke-priklady</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/pripadova-studie</loc>
-        <lastmod>2026-04-15</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/event-sourcing</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/sagy-a-process-managery</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd</loc>
-        <lastmod>2026-03-27</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/testovani-ddd</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/migrace-z-crud</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/anti-vzory</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/vykonnostni-aspekty</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/ddd-a-umela-inteligence</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/zdroje</loc>
-        <lastmod>2026-03-28</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/glosar</loc>
-        <lastmod>2026-03-23</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>
     <url>
         <loc>https://ddd-v-symfony.katuscak.cz/o-autorovi</loc>
-        <lastmod>2026-03-27</lastmod>
+        <lastmod>2026-04-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
