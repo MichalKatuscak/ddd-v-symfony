@@ -98,6 +98,11 @@
   cursor: pointer;
 }
 .toc-list li:hover { color: var(--fg); }
+.toc-list a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 .toc-list a { color: inherit; text-decoration: none; display: contents; }
 .toc-num {
   font-family: var(--font-mono);
@@ -261,6 +266,13 @@
   letter-spacing: var(--tracking-mono);
 }
 .code-copy:hover { color: var(--fg); border-color: var(--fg-faint); background: var(--bg-2); }
+.code-copy:focus-visible {
+  color: var(--fg);
+  border-color: var(--fg-faint);
+  background: var(--bg-2);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .code-copied { color: var(--state-ok); }
 
 .code-body {
@@ -319,7 +331,7 @@
   font-weight: 500;
 }
 .diagram-title { color: var(--fg-muted); letter-spacing: var(--tracking-mono); }
-.diagram-svg, .diagram > img, .diagram > svg {
+.diagram > img, .diagram > svg {
   display: block; width: 100%; height: auto;
   background: var(--bg-1);
   padding: var(--s-4);

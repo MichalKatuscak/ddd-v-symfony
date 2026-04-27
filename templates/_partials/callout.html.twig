@@ -1,4 +1,6 @@
 {# args: type ('pattern'|'anti'|'note'|'warn'), label, body (HTML allowed) #}
+{% set _valid_types = ['pattern', 'anti', 'note', 'warn'] %}
+{% set type = type in _valid_types ? type : 'note' %}
 {% set glyphs = {'pattern': '◢', 'anti': '✕', 'note': '§', 'warn': '!'} %}
 {% set default_labels = {'pattern': 'Vzor', 'anti': 'Anti-vzor', 'note': 'Poznámka', 'warn': 'Pozor'} %}
 {% set _label = label|default(default_labels[type]) %}

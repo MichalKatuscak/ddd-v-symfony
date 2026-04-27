@@ -6,7 +6,6 @@ window.__enhanceCodeBlock = function (codeEl) {
   if (codeEl.dataset.enhanced === 'true') return;
   codeEl.dataset.enhanced = 'true';
 
-  const figure = codeEl.closest('figure.code');
   const pre = codeEl.parentElement;
   const hlAttr = pre ? pre.dataset.highlight : '';
   const highlights = (hlAttr || '').split(',').map(function (s) { return parseInt(s.trim(), 10); }).filter(Boolean);
