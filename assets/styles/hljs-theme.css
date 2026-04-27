@@ -1,0 +1,64 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   highlight.js theme — mapuje hljs token classes na design tokens
+   Pivot ze specu (Prism → highlight.js, totožný vizuální výsledek)
+   ────────────────────────────────────────────────────────────────────────── */
+
+.hljs {
+  background: transparent;
+  color: var(--fg);
+}
+
+/* Keywords: declare, namespace, class, function, return, if, throw, ... */
+.hljs-keyword,
+.hljs-built_in,
+.hljs-literal { color: var(--syn-keyword); }
+
+/* Strings */
+.hljs-string,
+.hljs-symbol,
+.hljs-regexp,
+.hljs-doctag { color: var(--syn-string); }
+
+/* Numbers */
+.hljs-number,
+.hljs-meta,
+.hljs-link { color: var(--syn-number); }
+
+/* Types: class names, capitalized identifiers */
+.hljs-class .hljs-title,
+.hljs-title.class_,
+.hljs-type,
+.hljs-namespace { color: var(--syn-type); }
+
+/* Properties: object keys, attribute names */
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-property,
+.hljs-template-variable { color: var(--syn-property); }
+
+/* Comments */
+.hljs-comment,
+.hljs-quote { color: var(--syn-comment); font-style: italic; }
+
+/* Function names */
+.hljs-title,
+.hljs-title.function_,
+.hljs-function .hljs-title { color: var(--syn-fn); }
+
+/* Tags / annotations / decorators (PHP attributes) */
+.hljs-tag,
+.hljs-name,
+.hljs-meta .hljs-keyword,
+.hljs-section { color: var(--syn-tag); }
+
+/* Operators / punctuation — keep default fg */
+.hljs-operator,
+.hljs-punctuation { color: var(--fg); }
+
+/* Deletion / addition (diff highlighting, jen v ukázkách) */
+.hljs-deletion { background: rgba(220, 60, 60, 0.10); color: var(--state-err); }
+.hljs-addition { background: rgba(80, 180, 100, 0.10); color: var(--state-ok); }
+
+/* Selection styling uvnitř kódu */
+.hljs ::selection { background: var(--accent-dim); }
