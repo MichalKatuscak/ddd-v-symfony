@@ -329,8 +329,8 @@
 
     {% set _diagram_inline %}{% include '/diagrams/6_cqrs/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: 'X.Y',
-                title: 'Diagram',
+                fig: '05.1-A',
+                title: 'Symfony Messenger jako CQRS bus',
                 inline: _diagram_inline
             } %}
 
@@ -1276,8 +1276,8 @@ final class OrderDashboardProjector
 
     {% set _diagram_inline %}{% include '/diagrams/6_cqrs/eventual_consistency.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: 'X.Y',
-                title: 'Diagram',
+                fig: '05.2-A',
+                title: 'Eventual consistency v CQRS toku',
                 inline: _diagram_inline
             } %}
 
