@@ -103,6 +103,8 @@
   text-decoration: none;
 }
 .land-skip-tar { color: var(--accent); border-bottom: 1px dashed var(--accent); }
+.land-skip:hover { color: var(--fg-muted); }
+.land-skip:hover .land-skip-tar { color: oklch(0.82 0.13 65); border-bottom-color: oklch(0.82 0.13 65); }
 
 .land-paths { border-top: 1px solid var(--stroke); padding-top: var(--s-4); }
 .land-path-label {
@@ -172,7 +174,6 @@
   align-items: baseline;
   padding: 14px 0;
   border-bottom: 1px solid var(--stroke);
-  cursor: pointer;
   transition: background 120ms ease;
   position: relative;
   text-decoration: none;
