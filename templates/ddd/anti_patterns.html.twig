@@ -225,7 +225,7 @@ class UserService
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Anémická entita User (špatně)',
                 body: _callout_body
             } %}
@@ -506,7 +506,7 @@ processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!{
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Primitive Obsession (špatně)',
                 body: _callout_body
             } %}
@@ -732,7 +732,7 @@ class Customer
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Příliš velký agregát (špatně)',
                 body: _callout_body
             } %}
@@ -945,7 +945,7 @@ class InvoiceGenerator
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Sdílená databáze (špatně)',
                 body: _callout_body
             } %}
@@ -1120,7 +1120,7 @@ class OrderPlacedEvent
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Mutovatelná událost (špatně)',
                 body: _callout_body
             } %}
@@ -1296,7 +1296,7 @@ class UserController extends AbstractController
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Doménová logika v repozitáři a kontroleru (špatně)',
                 body: _callout_body
             } %}
@@ -1562,7 +1562,7 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
             } %}
             {% endset %}
             {% include '_partials/callout.html.twig' with {
-                type: 'pattern',
+                type: 'anti',
                 label: 'Příklad: Nekonzistentní pojmenování (špatně)',
                 body: _callout_body
             } %}
