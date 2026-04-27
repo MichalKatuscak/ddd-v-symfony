@@ -45,54 +45,43 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Výkonnostní aspekty</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-<article itemscope itemtype="https://schema.org/TechArticle">
-<h1 itemprop="headline">Výkonnostní aspekty DDD v Symfony</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '08',
+        category: 'Vzory',
+        title: 'Výkonnostní aspekty DDD v Symfony',
+        deck: 'Kompletní průvodce výkonnostními aspekty Domain-Driven Design v Symfony s Doctrine ORM. Naučte se řešit N+1 problém, optimalizovat agregáty, implementovat read model přes CQRS, správně používat UUID a cachovat doménové objekty.',
+        reading_time: 20,
+        difficulty: 4,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-{% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-<div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-    <p id="toc-heading">Obsah kapitoly:</p>
-    <ul>
-        <li><a href="#uvodem">Výkon v kontextu DDD</a></li>
-        <li><a href="#n-plus-1-problem">N+1 problém a lazy loading v Doctrine</a></li>
-        <li><a href="#agregat-hranice">Agregát a výkon: správné určení hranic</a></li>
-        <li><a href="#read-model-optimalizace">Optimalizace read modelu (CQRS)</a></li>
-        <li><a href="#uuid-vs-integer">UUID vs. integer primární klíče</a></li>
-        <li><a href="#doctrine-identity-map">Doctrine Identity Map a Unit of Work</a></li>
-        <li><a href="#cachovani">Caching v DDD architektuře</a></li>
-        <li><a href="#bulk-operace">Bulk operace a hromadné zpracování</a></li>
-        <li><a href="#profiling">Profiling DDD aplikací</a></li>
-    </ul>
-</div>
-
+    <div class="art-body" data-chapter-number="08">
 <section id="uvodem" aria-labelledby="uvodem-heading">
-    <h2 id="uvodem-heading">Výkon v kontextu DDD</h2>
+    <h2 id="uvodem-heading" class="h-section"><span class="h-num">08.01</span> Výkon v kontextu DDD</h2>
     <p>
         DDD proslulo pověstí pomalé architektury. Tato pověst vzniká z konkrétní příčiny: výkonnostní problémy
         přicházejí z nesprávné implementace – příliš velkých agregátů, nevhodného lazy loadingu, absence read modelu
         – ne z DDD samotného. Bohatý doménový model a rychlá aplikace nejsou v rozporu.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>DDD vs. výkon: mýty a realita</h3>
         <ul>
             <li><strong>Mýtus:</strong> DDD je vždy pomalejší než anémický model (anemic domain model). <strong>Realita:</strong> Správně navržené DDD s CQRS a optimalizovanými repozitáři je srovnatelně rychlé, protože read side nepotřebuje vůbec načítat doménové objekty.</li>
             <li><strong>Mýtus:</strong> Agregáty způsobují zbytečné JOIN operace. <strong>Realita:</strong> Problém nastává při špatně definovaných hranicích agregátů - příliš velký agregát načítá zbytečná data.</li>
             <li><strong>Mýtus:</strong> Doctrine ORM je pomalý pro DDD. <strong>Realita:</strong> Doctrine nabízí bohatou sadu nástrojů (DQL, native queries, extra lazy loading, query cache, result cache), které při správném použití odstraňují výkonnostní bottlenecky.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'DDD vs. výkon: mýty a realita',
+                body: _callout_body
+            } %}
 
     <p>
         Výkon se stává kritickým především v těchto scénářích: aplikace pracující s <strong>komplexními doménami</strong>
@@ -100,7 +89,8 @@
         či tisíce položek, nebo systémy s vysokou frekvencí čtení, kde je každý milisekund důležitý.
     </p>
 
-    <div class="warning" role="alert" aria-labelledby="profiling-zacatek-heading">
+    {% set _callout_body %}
+
         <h3 id="profiling-zacatek-heading">Zlaté pravidlo optimalizace</h3>
         <p>
             <strong>Nikdy neoptimalizujte naslepo.</strong> Každá optimalizace musí být podložena měřením.
@@ -109,18 +99,24 @@
             Donald Knuth to vyjádřil nejlépe: <em>"Premature optimization is the root of all evil."</em>
             <a href="https://dl.acm.org/doi/10.1145/356635.356640" target="_blank">[1]</a>
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Zlaté pravidlo optimalizace',
+                body: _callout_body
+            } %}
 </section>
 
 <section id="n-plus-1-problem" aria-labelledby="n-plus-1-heading">
-    <h2 id="n-plus-1-heading">N+1 problém a lazy loading v Doctrine</h2>
+    <h2 id="n-plus-1-heading" class="h-section"><span class="h-num">08.02</span> N+1 problém a lazy loading v Doctrine</h2>
     <p>
         N+1 problém je jedním z nejčastějších výkonnostních antipatternů při práci s ORM. Nastává tehdy, když
         aplikace provede 1 dotaz pro načtení seznamu entit a poté pro každou entitu provede další dotaz
         pro načtení asociovaných dat - celkem tedy N+1 SQL dotazů místo optimálních 1–2 dotazů.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Přesná definice N+1 problému</h3>
         <p>
             Pokud načteme N agregátů <code>Order</code> a každý agregát obsahuje kolekci <code>OrderItem</code>
@@ -128,11 +124,17 @@
             Iterace přes všechny objednávky a přístup k jejich položkám způsobí N samostatných SELECT dotazů
             nad tabulkou <code>order_item</code> - jeden pro každou objednávku.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Přesná definice N+1 problému',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="n1-bad-heading">
+    {% set _callout_body %}
+
         <h3 id="n1-bad-heading">Příklad: kód způsobující N+1 problém</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 // Tento kód způsobí N+1 problém!
 // 1 dotaz: SELECT * FROM `order`
 $orders = $this->orderRepository->findAll();
@@ -142,8 +144,19 @@ foreach ($orders as $order) {
     foreach ($order->getItems() as $item) {
         echo $item->getProductName() . ': ' . $item->getQuantity();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: kód způsobující N+1 problém',
+                body: _callout_body
+            } %}
 
     <p>
         Doctrine ve výchozím nastavení používá pro kolekce (OneToMany, ManyToMany) strategii
@@ -160,10 +173,11 @@ foreach ($orders as $order) {
         bez načtení celé kolekce do paměti.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="extra-lazy-heading">
+    {% set _callout_body %}
+
         <h3 id="extra-lazy-heading">Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)</h3>
         <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace - mapování by bylo řešeno externě (XML/YAML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -181,7 +195,7 @@ final class Order
     #[ORM\Column(type: 'string', length: 36, unique: true)]
     private readonly string $id;
 
-    /** @var Collection&lt;int, OrderItem&gt; */
+    /** @var Collection<int, OrderItem> */
     #[ORM\OneToMany(
         targetEntity: OrderItem::class,
         mappedBy: 'order',
@@ -201,8 +215,19 @@ final class Order
         // S EXTRA_LAZY provede SELECT COUNT(*) - bez načtení všech položek
         return $this->items->count();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order/Domain/Model/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)',
+                body: _callout_body
+            } %}
 
     <h3>Řešení 2: JOIN FETCH v DQL pro eager loading</h3>
     <p>
@@ -211,9 +236,10 @@ final class Order
         objektů v jediném SQL dotazu s LEFT JOIN nebo INNER JOIN.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="join-fetch-heading">
+    {% set _callout_body %}
+
         <h3 id="join-fetch-heading">Příklad: JOIN FETCH v DQL a Query Builderu</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -262,14 +288,25 @@ final class DoctrineOrderRepository implements OrderRepository
             ->from(Order::class, 'o')
             ->leftJoin('o.items', 'i')
             ->leftJoin('i.product', 'p')
-            ->where('o.createdAt &gt; :since')
+            ->where('o.createdAt > :since')
             ->setParameter('since', new \DateTimeImmutable('-30 days'))
             ->orderBy('o.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order/Infrastructure/Repository/DoctrineOrderRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: JOIN FETCH v DQL a Query Builderu',
+                body: _callout_body
+            } %}
 
     <p>
         Pozor: při použití <code>JOIN FETCH</code> s paginací (<code>setMaxResults()</code>, <code>setFirstResult()</code>)
@@ -280,7 +317,7 @@ final class DoctrineOrderRepository implements OrderRepository
 </section>
 
 <section id="agregat-hranice" aria-labelledby="agregat-hranice-heading">
-    <h2 id="agregat-hranice-heading">Agregát a výkon: správné určení hranic</h2>
+    <h2 id="agregat-hranice-heading" class="h-section"><span class="h-num">08.03</span> Agregát a výkon: správné určení hranic</h2>
     <p>
         Jedním ze základních principů DDD je, že agregát tvoří konzistenční hranici - veškeré invarianty
         doménového modelu jsou zaručeny v jednom agregátu. Problém nastává, pokud jsou hranice
@@ -288,7 +325,8 @@ final class DoctrineOrderRepository implements OrderRepository
         objektový graf, i když potřebujeme jen malou část dat.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Příznak příliš velkého agregátu</h3>
         <ul>
             <li>Načtení agregátu trvá neúměrně dlouho, i když používáme jen jeho kořen.</li>
@@ -296,11 +334,17 @@ final class DoctrineOrderRepository implements OrderRepository
             <li>ORM lazy loading způsobuje N+1 v jiných částech systému.</li>
             <li>Různé use-case scénáře potřebují různé podmnožiny dat agregátu.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Příznak příliš velkého agregátu',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="big-aggregate-heading">
+    {% set _callout_body %}
+
         <h3 id="big-aggregate-heading">Příklad: problematický Order agregát s 1000 OrderItems</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 // PROBLÉM: Každé načtení Order způsobí SELECT s 1000 řádky z order_item,
 // i když chceme jen zobrazit hlavičku objednávky (číslo, datum, zákazník).
 
@@ -309,8 +353,19 @@ $order = $this->orderRepository->findById($orderId);
 // Pouze toto potřebujeme - ale agregát načetl 1000 položek zbytečně
 echo $order->getOrderNumber();
 echo $order->getCreatedAt()->format('d.m.Y');
-echo $order->getCustomer()->getFullName();</code></pre>
-    </div>
+echo $order->getCustomer()->getFullName();{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: problematický Order agregát s 1000 OrderItems',
+                body: _callout_body
+            } %}
 
     <h3>Řešení: rozdělení agregátu a specializované repozitářní metody</h3>
     <p>
@@ -321,9 +376,10 @@ echo $order->getCustomer()->getFullName();</code></pre>
         agregát odkazující na <code>OrderId</code>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="split-aggregate-heading">
+    {% set _callout_body %}
+
         <h3 id="split-aggregate-heading">Příklad: specializované repozitářní metody pro různé kontexty</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -363,8 +419,19 @@ final class DoctrineOrderRepository
             ->setParameter('id', $id->value())
             ->getOneOrNullResult();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order/Infrastructure/Repository/DoctrineOrderRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: specializované repozitářní metody pro různé kontexty',
+                body: _callout_body
+            } %}
 
     <p>
         Klíčovým pravidlem DDD je, že <strong>agregát musí být navržen podle doménových invariantů,
@@ -375,7 +442,7 @@ final class DoctrineOrderRepository
 </section>
 
 <section id="read-model-optimalizace" aria-labelledby="read-model-heading">
-    <h2 id="read-model-heading">Optimalizace read modelu (CQRS)</h2>
+    <h2 id="read-model-heading" class="h-section"><span class="h-num">08.04</span> Optimalizace read modelu (CQRS)</h2>
     <p>
         Jedním z nejsilnějších nástrojů pro řešení výkonnostních problémů v DDD je striktní oddělení
         write side (doménové operace přes agregáty) od read side (dotazy vracející data pro prezentaci).
@@ -383,7 +450,8 @@ final class DoctrineOrderRepository
         potřebám uživatelského rozhraní nebo API klienta.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Zásady read modelu v CQRS</h3>
         <ul>
             <li>Query handlery <strong>nepoužívají doménové repozitáře</strong> - přistupují přímo k databázi přes DQL nebo nativní SQL.</li>
@@ -391,11 +459,17 @@ final class DoctrineOrderRepository
             <li>Read model může být <strong>denormalizovaný</strong> - data jsou již předpřipravena pro konkrétní view.</li>
             <li>Read side lze <strong>nezávisle cachovat</strong> bez ohrožení doménové konzistence.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Zásady read modelu v CQRS',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="query-handler-dto-heading">
+    {% set _callout_body %}
+
         <h3 id="query-handler-dto-heading">Příklad: QueryHandler vracející DTO přes DQL</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -456,8 +530,19 @@ final class GetOrderSummaryListHandler
 
         return $dtos;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order/Application/Query/OrderSummaryDTO.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: QueryHandler vracející DTO přes DQL',
+                body: _callout_body
+            } %}
 
     <h3>Doctrine NativeQuery pro komplexní reportovací dotazy</h3>
     <p>
@@ -466,9 +551,10 @@ final class GetOrderSummaryListHandler
         výsledků přes <code>ResultSetMapping</code>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="native-query-heading">
+    {% set _callout_body %}
+
         <h3 id="native-query-heading">Příklad: NativeQuery s ResultSetMapping pro reportovací dotaz</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -487,7 +573,7 @@ final class SalesReportQueryService
      * Vrací měsíční obrat po zákaznících - komplexní agregace přes nativní SQL.
      * Syntaxe: PostgreSQL (TO_CHAR, ::text cast). Pro MySQL použijte DATE_FORMAT() a CAST().
      *
-     * @return array&lt;int, array{customer_id: string, customer_name: string, month: string, revenue: string}&gt;
+     * @return array<int, array{customer_id: string, customer_name: string, month: string, revenue: string}>
      */
     public function getMonthlySalesByCustomer(\DateTimeImmutable $from, \DateTimeImmutable $to): array
     {
@@ -519,12 +605,23 @@ final class SalesReportQueryService
             ->setParameter('to',   $to->format('Y-m-d'))
             ->getScalarResult();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Reporting/Infrastructure/Query/SalesReportQueryService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: NativeQuery s ResultSetMapping pro reportovací dotaz',
+                body: _callout_body
+            } %}
 </section>
 
 <section id="uuid-vs-integer" aria-labelledby="uuid-heading">
-    <h2 id="uuid-heading">UUID vs. integer primární klíče</h2>
+    <h2 id="uuid-heading" class="h-section"><span class="h-num">08.05</span> UUID vs. integer primární klíče</h2>
     <p>
         V DDD je doporučenou praxí, aby agregát znal svoji identitu již před uložením do databáze.
         To umožňuje generovat <code>AggregateId</code> v doménovém kódu bez závislosti na databázové
@@ -532,7 +629,8 @@ final class SalesReportQueryService
         a optimistické paralelní vytváření agregátů.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Výhody UUID pro DDD</h3>
         <ul>
             <li>Identita je generována v doméně - agregát je kompletní před persistencí.</li>
@@ -546,7 +644,12 @@ final class SalesReportQueryService
             <li><strong>Větší velikost:</strong> UUID zabírá 16 bajtů (binárně) nebo 36 znaků (textově) oproti 4–8 bajtům pro integer - větší index, více I/O operací.</li>
             <li><strong>Problém s cizími klíči:</strong> Každý FK odkazující na UUID agregát nese 16 bajtů místo 4.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Výhody UUID pro DDD',
+                body: _callout_body
+            } %}
 
     <h3>ULID jako kompromis</h3>
     <p>
@@ -556,9 +659,10 @@ final class SalesReportQueryService
         jako u auto-increment integeru, ale se zachováním globální unikátnosti bez centrálního generátoru.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="uuid-symfony-heading">
+    {% set _callout_body %}
+
         <h3 id="uuid-symfony-heading">Příklad: Použití symfony/uid (ULID a UUID v7)</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -625,13 +729,25 @@ final class UserId
     {
         return $this->value;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Shared/Domain/ValueObject/OrderId.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Použití symfony/uid (ULID a UUID v7)',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="doctrine-uuid-mapping-heading">
+    {% set _callout_body %}
+
         <h3 id="doctrine-uuid-mapping-heading">Doctrine mapování pro ULID a UUID</h3>
         <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace - mapování by bylo řešeno externě (XML/YAML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -664,12 +780,23 @@ final class Order
     {
         return OrderId::fromString($this->id);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order/Domain/Model/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Doctrine mapování pro ULID a UUID',
+                body: _callout_body
+            } %}
 </section>
 
 <section id="doctrine-identity-map" aria-labelledby="identity-map-heading">
-    <h2 id="identity-map-heading">Doctrine Identity Map a Unit of Work</h2>
+    <h2 id="identity-map-heading" class="h-section"><span class="h-num">08.06</span> Doctrine Identity Map a Unit of Work</h2>
     <p>
         Doctrine ORM implementuje vzor Identity Map (Martin Fowler, <em>Patterns of Enterprise Application Architecture</em>):
         každý spravovaný objekt (managed entity) je v jednom <code>EntityManager</code>u uložen v paměti pod svým
@@ -677,14 +804,20 @@ final class Order
         bez opakovaného SQL dotazu.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Identity Map a Unit of Work - co to znamená pro DDD</h3>
         <ul>
             <li><strong>Konzistence v requestu:</strong> Všechny části kódu vidí tentýž stav agregátu - žádné nekonzistentní kopie.</li>
             <li><strong>Jedno místo změn:</strong> Změny agregátu jsou sledovány Unit of Work a při <code>flush()</code> jsou synchronizovány do databáze. Není třeba explicitně volat <code>save()</code> pro každou změnu.</li>
             <li><strong>Automatická detekce změn (dirty checking):</strong> Doctrine porovnává aktuální stav entit s jejich původním stavem (snapshot) a generuje UPDATE pouze pro skutečně změněné atributy.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Identity Map a Unit of Work - co to znamená pro DDD',
+                body: _callout_body
+            } %}
 
     <h3>Problém s batch zpracováním</h3>
     <p>
@@ -695,9 +828,10 @@ final class Order
         musí procházet stále větší množinu spravovaných objektů.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="batch-em-clear-heading">
+    {% set _callout_body %}
+
         <h3 id="batch-em-clear-heading">Příklad: správné clearování Entity Manageru při batch operacích</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -745,10 +879,22 @@ final class ImportProductsHandler
         $this->em->flush();
         $this->em->clear();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Import/Application/Command/ImportProductsHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: správné clearování Entity Manageru při batch operacích',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="em-clear-warning-heading">
+    {% set _callout_body %}
+
         <h3 id="em-clear-warning-heading">Pozor na clear() a detached entity</h3>
         <p>
             Po zavolání <code>$this->em->clear()</code> jsou <strong>všechny</strong> spravované entity odpojeny
@@ -756,11 +902,16 @@ final class ImportProductsHandler
             <code>LazyInitializationException</code>. Ujistěte se, že po <code>clear()</code> nepracujete
             s referencemi na dříve spravované objekty.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Pozor na clear() a detached entity',
+                body: _callout_body
+            } %}
 </section>
 
 <section id="cachovani" aria-labelledby="cachovani-heading">
-    <h2 id="cachovani-heading">Caching v DDD architektuře</h2>
+    <h2 id="cachovani-heading" class="h-section"><span class="h-num">08.07</span> Caching v DDD architektuře</h2>
     <p>
         Caching je mocný nástroj, ale v DDD architektuře vyžaduje pečlivý design. Základní otázka je:
         <strong>co cachovat</strong>? Obecné pravidlo zní: cachujeme výsledky operací, které jsou
@@ -769,14 +920,20 @@ final class ImportProductsHandler
         nikoli pro doménová rozhodnutí.
     </p>
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Co cachovat a co ne</h3>
         <ul>
             <li><strong>Vhodné pro cache:</strong> výsledky read modelu (DTO), výsledky reportovacích dotazů, výsledky volání externích API, výpočetně náročné projekce.</li>
             <li><strong>Nevhodné pro cache:</strong> aktuální stav agregátů, které jsou právě modifikovány (způsobí dirty reads), výsledky, jejichž neaktuálnost by způsobila doménové nekonzistence.</li>
             <li><strong>Nikdy:</strong> nezahrnujte výsledek doménové logiky do cache klíče (např. nevypočítávejte slevu při sestavování cache klíče).</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Co cachovat a co ne',
+                body: _callout_body
+            } %}
 
     <h3>Query cache a result cache v Doctrine</h3>
     <p>
@@ -787,9 +944,10 @@ final class ImportProductsHandler
         <li><strong>Result cache:</strong> cachuje výsledky SQL dotazu. Musí být explicitně nakonfigurován a invalidován při změnách dat. Vhodný pro read-heavy dotazy s řízenou dobou platnosti.</li>
     </ul>
 
-    <div class="tip" role="note" aria-labelledby="cached-repo-heading">
+    {% set _callout_body %}
+
         <h3 id="cached-repo-heading">Příklad: CachedUserRepository (Decorator pattern)</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -863,8 +1021,19 @@ final class CachedUserRepository implements UserRepository
         $this->cache->deleteItem('user_' . $user->id()->value());
         $this->cache->deleteItem('user_email_' . md5($user->email()->value()));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/Repository/CachedUserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: CachedUserRepository (Decorator pattern)',
+                body: _callout_body
+            } %}
 
     <h3>Cache invalidace při doménových událostech</h3>
     <p>
@@ -873,9 +1042,10 @@ final class CachedUserRepository implements UserRepository
         Tím se cache invalidace stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="cache-event-heading">
+    {% set _callout_body %}
+
         <h3 id="cache-event-heading">Cache invalidace přes Symfony EventDispatcher</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -898,12 +1068,23 @@ final class InvalidateUserCacheOnEmailChanged
         $this->cache->deleteItem('user_email_' . md5($event->oldEmail->value()));
         $this->cache->deleteItem('user_email_' . md5($event->newEmail->value()));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/EventListener/InvalidateUserCacheOnEmailChanged.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Cache invalidace přes Symfony EventDispatcher',
+                body: _callout_body
+            } %}
 </section>
 
 <section id="bulk-operace" aria-labelledby="bulk-operace-heading">
-    <h2 id="bulk-operace-heading">Bulk operace a hromadné zpracování</h2>
+    <h2 id="bulk-operace-heading" class="h-section"><span class="h-num">08.08</span> Bulk operace a hromadné zpracování</h2>
     <p>
         Standardní DDD workflow - načti agregát, aplikuj doménovou logiku, zavolej <code>flush()</code>
         - funguje výborně pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
@@ -921,9 +1102,10 @@ final class InvalidateUserCacheOnEmailChanged
         Je nutné zavolat <code>clear()</code>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="bulk-import-heading">
+    {% set _callout_body %}
+
         <h3 id="bulk-import-heading">Příklad: efektivní bulk import s Doctrine</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -949,7 +1131,7 @@ final class BulkUpdateOrderStatusHandler
             'UPDATE App\Order\Domain\Model\Order o
              SET o.status = :newStatus
              WHERE o.status = :oldStatus
-               AND o.createdAt &lt; :before'
+               AND o.createdAt < :before'
         )
             ->setParameter('newStatus', $command->newStatus)
             ->setParameter('oldStatus', $command->oldStatus)
@@ -998,8 +1180,19 @@ final class BatchProductImportHandler
         $this->em->flush();
         $this->em->clear();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order/Infrastructure/Command/BulkUpdateOrderStatusHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: efektivní bulk import s Doctrine',
+                body: _callout_body
+            } %}
 
     <h3>Symfony Messenger pro asynchronní hromadné zpracování</h3>
     <p>
@@ -1009,9 +1202,10 @@ final class BatchProductImportHandler
         čímž jsou paměťové nároky a doba zpracování jedné zprávy předvídatelné.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="messenger-bulk-heading">
+    {% set _callout_body %}
+
         <h3 id="messenger-bulk-heading">Rozložení bulk importu přes Symfony Messenger</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1037,12 +1231,23 @@ final class StartProductImportHandler
         // Messenger Worker zpracuje každou zprávu nezávisle
         // - žádný memory leak, paralelizovatelné přes více workerů
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Import/Application/Command/StartProductImportHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Rozložení bulk importu přes Symfony Messenger',
+                body: _callout_body
+            } %}
 </section>
 
 <section id="profiling" aria-labelledby="profiling-heading">
-    <h2 id="profiling-heading">Profiling DDD aplikací</h2>
+    <h2 id="profiling-heading" class="h-section"><span class="h-num">08.09</span> Profiling DDD aplikací</h2>
     <p>
         Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
         ekosystému existuje škála nástrojů od jednoduchého development profileru až po pokročilé
@@ -1067,9 +1272,10 @@ final class StartProductImportHandler
         lze Doctrine konfigurovat s vlastním SQL loggerem.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="doctrine-logging-heading">
+    {% set _callout_body %}
+
         <h3 id="doctrine-logging-heading">Programatické zachycení SQL dotazů přes Doctrine Middleware</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 // V Doctrine DBAL 3+ se logging provádí přes Middleware (ne SQLLogger)
 // config/packages/doctrine.yaml
 
@@ -1101,7 +1307,7 @@ final class QueryCountingMiddleware implements Middleware
 
             public function connect(array $params): \Doctrine\DBAL\Driver\Connection
             {
-                return new class(parent::connect($params), $this-&gt;middleware)
+                return new class(parent::connect($params), $this->middleware)
                     implements \Doctrine\DBAL\Driver\Connection
                 {
                     public function __construct(
@@ -1111,29 +1317,29 @@ final class QueryCountingMiddleware implements Middleware
 
                     public function prepare(string $sql): \Doctrine\DBAL\Driver\Statement
                     {
-                        $this-&gt;middleware-&gt;increment();
-                        return $this-&gt;inner-&gt;prepare($sql);
+                        $this->middleware->increment();
+                        return $this->inner->prepare($sql);
                     }
 
                     public function query(string $sql): \Doctrine\DBAL\Driver\Result
                     {
-                        $this-&gt;middleware-&gt;increment();
-                        return $this-&gt;inner-&gt;query($sql);
+                        $this->middleware->increment();
+                        return $this->inner->query($sql);
                     }
 
                     public function exec(string $sql): int|string
                     {
-                        $this-&gt;middleware-&gt;increment();
-                        return $this-&gt;inner-&gt;exec($sql);
+                        $this->middleware->increment();
+                        return $this->inner->exec($sql);
                     }
 
-                    // Zbývající metody delegují na $this-&gt;inner
-                    public function lastInsertId(): int|string { return $this-&gt;inner-&gt;lastInsertId(); }
-                    public function beginTransaction(): void { $this-&gt;inner-&gt;beginTransaction(); }
-                    public function commit(): void { $this-&gt;inner-&gt;commit(); }
-                    public function rollBack(): void { $this-&gt;inner-&gt;rollBack(); }
-                    public function getNativeConnection(): mixed { return $this-&gt;inner-&gt;getNativeConnection(); }
-                    public function getServerVersion(): string { return $this-&gt;inner-&gt;getServerVersion(); }
+                    // Zbývající metody delegují na $this->inner
+                    public function lastInsertId(): int|string { return $this->inner->lastInsertId(); }
+                    public function beginTransaction(): void { $this->inner->beginTransaction(); }
+                    public function commit(): void { $this->inner->commit(); }
+                    public function rollBack(): void { $this->inner->rollBack(); }
+                    public function getNativeConnection(): mixed { return $this->inner->getNativeConnection(); }
+                    public function getServerVersion(): string { return $this->inner->getServerVersion(); }
                 };
             }
         };
@@ -1141,20 +1347,31 @@ final class QueryCountingMiddleware implements Middleware
 
     public function increment(): void
     {
-        $this-&gt;queryCount++;
+        $this->queryCount++;
     }
 
     public function reset(): void
     {
-        $this-&gt;queryCount = 0;
+        $this->queryCount = 0;
     }
 
     public function getQueryCount(): int
     {
-        return $this-&gt;queryCount;
+        return $this->queryCount;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Shared/Infrastructure/Doctrine/QueryCountingMiddleware.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Programatické zachycení SQL dotazů přes Doctrine Middleware',
+                body: _callout_body
+            } %}
 
     <h3>Blackfire.io pro produkční profiling</h3>
     <p>
@@ -1164,7 +1381,8 @@ final class QueryCountingMiddleware implements Middleware
         (Blackfire Builds) jako součást CI/CD pipeline, čímž zabraňuje výkonnostním regresím.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="profiler-tip-heading">
+    {% set _callout_body %}
+
         <h3 id="profiler-tip-heading">Interpretace SQL dotazů v Symfony Profileru - praktický postup</h3>
         <ol>
             <li>Otevřete Symfony Profiler panel <strong>Doctrine</strong> a seřaďte dotazy podle doby trvání.</li>
@@ -1173,9 +1391,15 @@ final class QueryCountingMiddleware implements Middleware
             <li>Zkontrolujte, zda se opakují strukturálně stejné dotazy lišící se pouze parametrem - typický příznak N+1 problému.</li>
             <li>Pro N+1 přidejte <code>JOIN FETCH</code> do příslušného repozitáře nebo přepište dotaz na read model (DTO).</li>
         </ol>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Interpretace SQL dotazů v Symfony Profileru - praktický postup',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="premature-opt-heading">
+    {% set _callout_body %}
+
         <h3 id="premature-opt-heading">Varování: neprovádějte předčasnou optimalizaci</h3>
         <p>
             Optimalizujte <strong>pouze</strong> na základě naměřených dat. Každá optimalizace - přidání cache,
@@ -1184,7 +1408,12 @@ final class QueryCountingMiddleware implements Middleware
             v čitelné, doménově srozumitelné podobě. Výkonnostní optimalizace bez měření je prací naslepo
             a pravidelně vede k regresi v jiných částech systému.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Varování: neprovádějte předčasnou optimalizaci',
+                body: _callout_body
+            } %}
 
     <p>
         Výkonnostní aspekty DDD jsou nedílnou součástí správné implementace. Klíčovým nástrojem je
@@ -1219,8 +1448,7 @@ final class QueryCountingMiddleware implements Middleware
         }
     ]
 } %}
-
+    </div>
 </article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
