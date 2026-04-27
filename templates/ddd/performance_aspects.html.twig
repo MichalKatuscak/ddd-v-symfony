@@ -79,7 +79,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'DDD vs. výkon: mýty a realita',
                 body: _callout_body
             } %}
 
@@ -102,7 +101,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Zlaté pravidlo optimalizace',
                 body: _callout_body
             } %}
 </section>
@@ -127,7 +125,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Přesná definice N+1 problému',
                 body: _callout_body
             } %}
 
@@ -154,7 +151,6 @@ foreach ($orders as $order) {
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: kód způsobující N+1 problém',
                 body: _callout_body
             } %}
 
@@ -225,7 +221,6 @@ final class Order
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)',
                 body: _callout_body
             } %}
 
@@ -304,7 +299,6 @@ final class DoctrineOrderRepository implements OrderRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: JOIN FETCH v DQL a Query Builderu',
                 body: _callout_body
             } %}
 
@@ -337,7 +331,6 @@ final class DoctrineOrderRepository implements OrderRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Příznak příliš velkého agregátu',
                 body: _callout_body
             } %}
 
@@ -363,7 +356,6 @@ echo $order->getCustomer()->getFullName();{% endverbatim %}{% endset %}
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: problematický Order agregát s 1000 OrderItems',
                 body: _callout_body
             } %}
 
@@ -429,7 +421,6 @@ final class DoctrineOrderRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: specializované repozitářní metody pro různé kontexty',
                 body: _callout_body
             } %}
 
@@ -462,7 +453,6 @@ final class DoctrineOrderRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Zásady read modelu v CQRS',
                 body: _callout_body
             } %}
 
@@ -540,7 +530,6 @@ final class GetOrderSummaryListHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: QueryHandler vracející DTO přes DQL',
                 body: _callout_body
             } %}
 
@@ -615,7 +604,6 @@ final class SalesReportQueryService
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: NativeQuery s ResultSetMapping pro reportovací dotaz',
                 body: _callout_body
             } %}
 </section>
@@ -647,7 +635,6 @@ final class SalesReportQueryService
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Výhody UUID pro DDD',
                 body: _callout_body
             } %}
 
@@ -739,7 +726,6 @@ final class UserId
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Použití symfony/uid (ULID a UUID v7)',
                 body: _callout_body
             } %}
 
@@ -790,7 +776,6 @@ final class Order
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Doctrine mapování pro ULID a UUID',
                 body: _callout_body
             } %}
 </section>
@@ -815,7 +800,6 @@ final class Order
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Identity Map a Unit of Work - co to znamená pro DDD',
                 body: _callout_body
             } %}
 
@@ -889,7 +873,6 @@ final class ImportProductsHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: správné clearování Entity Manageru při batch operacích',
                 body: _callout_body
             } %}
 
@@ -905,7 +888,6 @@ final class ImportProductsHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Pozor na clear() a detached entity',
                 body: _callout_body
             } %}
 </section>
@@ -931,7 +913,6 @@ final class ImportProductsHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Co cachovat a co ne',
                 body: _callout_body
             } %}
 
@@ -1031,7 +1012,6 @@ final class CachedUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: CachedUserRepository (Decorator pattern)',
                 body: _callout_body
             } %}
 
@@ -1078,7 +1058,6 @@ final class InvalidateUserCacheOnEmailChanged
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Cache invalidace přes Symfony EventDispatcher',
                 body: _callout_body
             } %}
 </section>
@@ -1190,7 +1169,6 @@ final class BatchProductImportHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: efektivní bulk import s Doctrine',
                 body: _callout_body
             } %}
 
@@ -1241,7 +1219,6 @@ final class StartProductImportHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Rozložení bulk importu přes Symfony Messenger',
                 body: _callout_body
             } %}
 </section>
@@ -1369,7 +1346,6 @@ final class QueryCountingMiddleware implements Middleware
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Programatické zachycení SQL dotazů přes Doctrine Middleware',
                 body: _callout_body
             } %}
 
@@ -1394,7 +1370,6 @@ final class QueryCountingMiddleware implements Middleware
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Interpretace SQL dotazů v Symfony Profileru - praktický postup',
                 body: _callout_body
             } %}
 
@@ -1411,7 +1386,6 @@ final class QueryCountingMiddleware implements Middleware
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Varování: neprovádějte předčasnou optimalizaci',
                 body: _callout_body
             } %}
 

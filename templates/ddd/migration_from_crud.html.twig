@@ -120,7 +120,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Příznaky, že CRUD architektura nestačí',
                 body: _callout_body
             } %}
 
@@ -152,7 +151,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Kdy DDD přináší hodnotu',
                 body: _callout_body
             } %}
 
@@ -199,7 +197,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Princip fungování',
                 body: _callout_body
             } %}
 
@@ -247,7 +244,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Koexistence CRUD a DDD ve struktuře projektu',
                 body: _callout_body
             } %}
 
@@ -390,7 +386,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Identifikace doménové logiky v CRUD kontroleru',
                 body: _callout_body
             } %}
         </section>
@@ -536,7 +531,6 @@ class User
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Refaktorizace UserService – before/after',
                 body: _callout_body
             } %}
 
@@ -626,7 +620,6 @@ final class Email
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Refaktorizace string emailu na Email Value Object',
                 body: _callout_body
             } %}
         </section>
@@ -747,7 +740,6 @@ final class DoctrineUserRepository implements UserRepository
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Doménové rozhraní vs. Doctrine implementace',
                 body: _callout_body
             } %}
 
@@ -771,7 +763,6 @@ services:
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Konfigurace Dependency Injection v Symfony',
                 body: _callout_body
             } %}
         </section>
@@ -921,7 +912,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Extrakce RegisterUserCommand z UserController',
                 body: _callout_body
             } %}
         </section>
@@ -1025,7 +1015,6 @@ class UserRegistrationCharacterizationTest extends WebTestCase
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Charakterizační test pro CRUD kontroler',
                 body: _callout_body
             } %}
 
@@ -1097,7 +1086,6 @@ final class UserTest extends TestCase
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Unit test doménové entity',
                 body: _callout_body
             } %}
         </section>
@@ -1183,7 +1171,6 @@ final class UserTest extends TestCase
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Varování před Big Bang Rewrites',
                 body: _callout_body
             } %}
 

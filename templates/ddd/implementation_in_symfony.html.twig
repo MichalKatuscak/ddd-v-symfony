@@ -88,7 +88,6 @@
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Evoluce příkladů napříč průvodcem',
                 body: _callout_body
             } %}
 
@@ -211,7 +210,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -238,7 +236,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Klíčové principy správné struktury DDD projektu:',
                 body: _callout_body
             } %}
 
@@ -257,7 +254,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Časté chyby při implementaci DDD',
                 body: _callout_body
             } %}
     </section>
@@ -364,7 +360,6 @@ class User
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace entity v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -392,7 +387,6 @@ class User
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč ukládáme hodnotové objekty jako primitivní typy?',
                 body: _callout_body
             } %}
     </section>
@@ -451,7 +445,6 @@ class Email
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace hodnotového objektu v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -546,7 +539,6 @@ class DoctrineUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace repozitáře v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -579,7 +571,6 @@ class DoctrineUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Dispatch událostí a transakční bezpečnost',
                 body: _callout_body
             } %}
     </section>
@@ -604,7 +595,6 @@ class DoctrineUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Proč Doctrine atributy nepatří do doménové vrstvy?',
                 body: _callout_body
             } %}
 
@@ -632,7 +622,6 @@ class DoctrineUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Struktura souborů pro XML mapování',
                 body: _callout_body
             } %}
 
@@ -672,7 +661,6 @@ class DoctrineUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: XML mapování entity Order',
                 body: _callout_body
             } %}
 
@@ -704,7 +692,6 @@ doctrine:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Konfigurace Doctrine pro XML mapování v Symfony',
                 body: _callout_body
             } %}
 
@@ -720,7 +707,6 @@ doctrine:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Výhody XML mapování pro DDD',
                 body: _callout_body
             } %}
     </section>
@@ -779,7 +765,6 @@ final class EmailType extends StringType
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Doctrine custom type pro Email',
                 body: _callout_body
             } %}
 
@@ -810,7 +795,6 @@ doctrine:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Registrace custom type v Symfony',
                 body: _callout_body
             } %}
 
@@ -824,7 +808,6 @@ doctrine:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Kdy použít custom type vs. primitivní ukládání?',
                 body: _callout_body
             } %}
     </section>
@@ -886,7 +869,6 @@ enum OrderStatus: string
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Backed enum pro stav objednávky',
                 body: _callout_body
             } %}
 
@@ -977,7 +959,6 @@ final class Order
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Použití enum v doménové entitě',
                 body: _callout_body
             } %}
 
@@ -994,7 +975,6 @@ final class Order
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Kdy použít enum a kdy plnohodnotný hodnotový objekt?',
                 body: _callout_body
             } %}
 
@@ -1008,7 +988,6 @@ final class Order
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Doctrine a PHP enums',
                 body: _callout_body
             } %}
     </section>
@@ -1061,7 +1040,6 @@ class PaymentService
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace doménové služby v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1172,7 +1150,6 @@ final class ShippingService
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Specification Pattern v PHP',
                 body: _callout_body
             } %}
 
@@ -1188,7 +1165,6 @@ final class ShippingService
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Kdy použít Specification Pattern?',
                 body: _callout_body
             } %}
     </section>
@@ -1248,7 +1224,6 @@ class UserRegistered
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace doménové události v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1284,7 +1259,6 @@ class UserRegistered
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Symfony EventDispatcher vs. Messenger pro doménové události',
                 body: _callout_body
             } %}
     </section>
@@ -1321,7 +1295,6 @@ class UserRegistered
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Typy výjimek podle vrstvy',
                 body: _callout_body
             } %}
 
@@ -1357,7 +1330,6 @@ final class InvalidOrderStateTransitionException extends \DomainException
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Vlastní doménová výjimka',
                 body: _callout_body
             } %}
 
@@ -1373,7 +1345,6 @@ final class InvalidOrderStateTransitionException extends \DomainException
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Doporučení pro výjimky v DDD',
                 body: _callout_body
             } %}
     </section>
@@ -1458,7 +1429,6 @@ class RegisterUserHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace command handleru v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1528,7 +1498,6 @@ class GetUserProfileHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace query handleru v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1564,7 +1533,6 @@ class GetUserProfileHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Kde validovat: Symfony Validator vs. doménová validace',
                 body: _callout_body
             } %}
 
@@ -1636,7 +1604,6 @@ class RegistrationController extends AbstractController
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Implementace kontroleru v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1699,7 +1666,6 @@ services:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Konfigurace služeb v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1768,7 +1734,6 @@ services:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Samostatný autowiring pro každý Bounded Context',
                 body: _callout_body
             } %}
 
@@ -1784,7 +1749,6 @@ services:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Výhody odděleného autowiringu pro Bounded Contexts',
                 body: _callout_body
             } %}
 
@@ -1806,7 +1770,6 @@ services:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Co patří do sdílené složky (Shared)?',
                 body: _callout_body
             } %}
 

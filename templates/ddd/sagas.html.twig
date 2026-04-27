@@ -138,7 +138,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč ne Two-Phase Commit (2PC)?',
                 body: _callout_body
             } %}
 
@@ -258,7 +257,6 @@ interface CompensatableCommand
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Rozhraní CompensatableCommand',
                 body: _callout_body
             } %}
 
@@ -300,7 +298,6 @@ final readonly class ChargeCustomer implements CompensatableCommand
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: ChargeCustomer s kompenzací',
                 body: _callout_body
             } %}
 
@@ -318,7 +315,6 @@ final readonly class ChargeCustomer implements CompensatableCommand
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Kompenzace musí být idempotentní',
                 body: _callout_body
             } %}
 
@@ -455,7 +451,6 @@ final readonly class CreateShipmentOnStockReserved
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Choreografie - tři nezávislé handlery',
                 body: _callout_body
             } %}
 
@@ -482,7 +477,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'YAML: Konfigurace Messenger pro choreografii',
                 body: _callout_body
             } %}
 
@@ -572,7 +566,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Choreografie má své místo',
                 body: _callout_body
             } %}
 
@@ -636,7 +629,6 @@ enum OrderSagaStatus: string
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Enum OrderSagaStatus',
                 body: _callout_body
             } %}
 
@@ -793,7 +785,6 @@ final class OrderProcessManager
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: OrderProcessManager - jádro orchestrace',
                 body: _callout_body
             } %}
 
@@ -820,7 +811,6 @@ final class OrderProcessManager
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Každá metoda = jeden krok stavového automatu',
                 body: _callout_body
             } %}
 
@@ -960,7 +950,6 @@ class SagaState
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: SagaState - Doctrine entita',
                 body: _callout_body
             } %}
 
@@ -995,7 +984,6 @@ interface SagaStateRepositoryInterface
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Rozhraní SagaStateRepositoryInterface',
                 body: _callout_body
             } %}
 
@@ -1058,7 +1046,6 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Doctrine implementace SagaStateRepository',
                 body: _callout_body
             } %}
 
@@ -1086,7 +1073,6 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Optimistické zamykání v produkci',
                 body: _callout_body
             } %}
 
@@ -1161,7 +1147,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'YAML: Kompletní konfigurace Messenger',
                 body: _callout_body
             } %}
 
@@ -1192,7 +1177,6 @@ final readonly class OrderPlaced
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Doménová událost OrderPlaced',
                 body: _callout_body
             } %}
 
@@ -1221,7 +1205,6 @@ final readonly class OrderPlaced
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Spouštění workerů',
                 body: _callout_body
             } %}
 
@@ -1247,7 +1230,6 @@ final readonly class OrderPlaced
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Pozor na ztrátu zpráv: Outbox pattern',
                 body: _callout_body
             } %}
 
@@ -1299,7 +1281,6 @@ final readonly class CheckSagaTimeout
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: CheckSagaTimeout command',
                 body: _callout_body
             } %}
 
@@ -1376,7 +1357,6 @@ final readonly class CheckSagaTimeoutHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: CheckSagaTimeoutHandler',
                 body: _callout_body
             } %}
 
@@ -1413,7 +1393,6 @@ private function onOrderPlaced(OrderPlaced $event): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Naplánování timeout checku v OrderProcessManager',
                 body: _callout_body
             } %}
 
@@ -1431,7 +1410,6 @@ private function onOrderPlaced(OrderPlaced $event): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Konfigurovatelné timeouty',
                 body: _callout_body
             } %}
 
@@ -1449,7 +1427,6 @@ private function onOrderPlaced(OrderPlaced $event): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Požadavky na transport',
                 body: _callout_body
             } %}
 
@@ -1536,7 +1513,6 @@ private function compensate(SagaState $state): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Kompenzační logika v opačném pořadí kroků',
                 body: _callout_body
             } %}
 
@@ -1552,7 +1528,6 @@ private function compensate(SagaState $state): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Idempotence kompenzačních handlerů',
                 body: _callout_body
             } %}
 
@@ -1646,7 +1621,6 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Paralelní zpracování kroků se synchronizační bariérou',
                 body: _callout_body
             } %}
 
@@ -1663,7 +1637,6 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Kompenzace paralelních kroků',
                 body: _callout_body
             } %}
 
@@ -1683,7 +1656,6 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Optimistické zamykání',
                 body: _callout_body
             } %}
 
@@ -1769,7 +1741,6 @@ final readonly class SagaLoggingMiddleware implements MiddlewareInterface
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'SagaLoggingMiddleware',
                 body: _callout_body
             } %}
 
@@ -1841,7 +1812,6 @@ final class CheckStaleSagasCommand extends Command
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Symfony Console příkaz pro detekci zaseklých ság',
                 body: _callout_body
             } %}
 
@@ -1858,7 +1828,6 @@ final class CheckStaleSagasCommand extends Command
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Integrace s alertingem',
                 body: _callout_body
             } %}
 
@@ -1992,7 +1961,6 @@ final class OrderProcessManagerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHPUnit test ságy',
                 body: _callout_body
             } %}
 
@@ -2038,7 +2006,6 @@ final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'InMemorySagaStateRepository',
                 body: _callout_body
             } %}
 

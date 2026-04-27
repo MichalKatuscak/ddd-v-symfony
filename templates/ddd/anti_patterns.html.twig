@@ -98,7 +98,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Klasifikace typických chyb v DDD',
                 body: _callout_body
             } %}
         </section>
@@ -141,7 +140,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč je anémický model problém?',
                 body: _callout_body
             } %}
 
@@ -155,7 +153,6 @@
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: Anémická entita User a servisní vrstva s logikou',
                 body: _callout_body
             } %}
 
@@ -226,7 +223,6 @@ class UserService
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Anémická entita User (špatně)',
                 body: _callout_body
             } %}
 
@@ -240,7 +236,6 @@ class UserService
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Entita User s bohatou doménovou logikou',
                 body: _callout_body
             } %}
 
@@ -390,7 +385,6 @@ class User
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Bohatá entita User (správně)',
                 body: _callout_body
             } %}
 
@@ -436,7 +430,6 @@ class User
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Problémy způsobené Primitive Obsession',
                 body: _callout_body
             } %}
 
@@ -450,7 +443,6 @@ class User
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: Primitiva místo Value Objects',
                 body: _callout_body
             } %}
 
@@ -507,7 +499,6 @@ processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!{
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Primitive Obsession (špatně)',
                 body: _callout_body
             } %}
 
@@ -520,7 +511,6 @@ processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!{
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Value Objects nesoucí sémantiku a validaci',
                 body: _callout_body
             } %}
 
@@ -632,7 +622,6 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Value Objects (správně)',
                 body: _callout_body
             } %}
         </section>
@@ -672,7 +661,6 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Problémy způsobené příliš velkým agregátem',
                 body: _callout_body
             } %}
 
@@ -686,7 +674,6 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: God Aggregate obsahující příliš mnoho entit',
                 body: _callout_body
             } %}
 
@@ -733,7 +720,6 @@ class Customer
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Příliš velký agregát (špatně)',
                 body: _callout_body
             } %}
 
@@ -748,7 +734,6 @@ class Customer
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Malé agregáty s jasnou transakční hranicí',
                 body: _callout_body
             } %}
 
@@ -854,7 +839,6 @@ class Wishlist
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Správně rozdělené agregáty',
                 body: _callout_body
             } %}
 
@@ -884,7 +868,6 @@ class Wishlist
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: Přímý přístup ke sdíleným tabulkám',
                 body: _callout_body
             } %}
 
@@ -946,7 +929,6 @@ class InvoiceGenerator
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Sdílená databáze (špatně)',
                 body: _callout_body
             } %}
 
@@ -960,7 +942,6 @@ class InvoiceGenerator
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Izolovaná data s Anti-Corruption Layer',
                 body: _callout_body
             } %}
 
@@ -1036,7 +1017,6 @@ class HttpUserManagementAdapter implements CustomerDataProvider
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Izolované kontexty s ACL (správně)',
                 body: _callout_body
             } %}
 
@@ -1072,7 +1052,6 @@ class HttpUserManagementAdapter implements CustomerDataProvider
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: Mutovatelná událost s veřejnými settery',
                 body: _callout_body
             } %}
 
@@ -1121,7 +1100,6 @@ class OrderPlacedEvent
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Mutovatelná událost (špatně)',
                 body: _callout_body
             } %}
 
@@ -1135,7 +1113,6 @@ class OrderPlacedEvent
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Immutable událost s readonly properties',
                 body: _callout_body
             } %}
 
@@ -1204,7 +1181,6 @@ final class OrderCancelledEvent
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Immutable doménová událost (správně)',
                 body: _callout_body
             } %}
         </section>
@@ -1228,7 +1204,6 @@ final class OrderCancelledEvent
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: Doménová logika v Doctrine repozitáři',
                 body: _callout_body
             } %}
 
@@ -1297,7 +1272,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Doménová logika v repozitáři a kontroleru (špatně)',
                 body: _callout_body
             } %}
 
@@ -1311,7 +1285,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Tenká infrastruktura, bohatá doménová vrstva',
                 body: _callout_body
             } %}
 
@@ -1406,7 +1379,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Správné vrstvení - logika v doméně (správně)',
                 body: _callout_body
             } %}
         </section>
@@ -1447,7 +1419,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Příznaky over-engineeringu v DDD kontextu',
                 body: _callout_body
             } %}
 
@@ -1468,7 +1439,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Start simple, add complexity when needed',
                 body: _callout_body
             } %}
 
@@ -1496,7 +1466,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Kdy použít DDD a kdy ne',
                 body: _callout_body
             } %}
         </section>
@@ -1522,7 +1491,6 @@ class UserController extends AbstractController
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Špatně: Různé názvy pro stejný koncept',
                 body: _callout_body
             } %}
 
@@ -1563,7 +1531,6 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'anti',
-                label: 'Příklad: Nekonzistentní pojmenování (špatně)',
                 body: _callout_body
             } %}
 
@@ -1578,7 +1545,6 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Správně: Konzistentní jazyk napříč všemi vrstvami',
                 body: _callout_body
             } %}
 
@@ -1648,7 +1614,6 @@ class InsurancePolicy
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Konzistentní Ubiquitous Language (správně)',
                 body: _callout_body
             } %}
 
@@ -1675,7 +1640,6 @@ class InsurancePolicy
             {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Doménový slovník jako živý artefakt',
                 body: _callout_body
             } %}
 

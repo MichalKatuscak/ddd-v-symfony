@@ -92,7 +92,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč je DDD přirozeně testovatelný:',
                 body: _callout_body
             } %}
 
@@ -129,7 +128,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Vrstvy testovací pyramidy:',
                 body: _callout_body
             } %}
 
@@ -145,7 +143,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Testovací strategie - co testovat na každé vrstvě:',
                 body: _callout_body
             } %}
     </section>
@@ -245,7 +242,6 @@ final class EmailTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Test pro Email value object (PHPUnit)',
                 body: _callout_body
             } %}
 
@@ -336,7 +332,6 @@ final class UserTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Test pro User entitu',
                 body: _callout_body
             } %}
 
@@ -445,7 +440,6 @@ final class OrderTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Test pro Order agregát',
                 body: _callout_body
             } %}
     </section>
@@ -470,7 +464,6 @@ final class OrderTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Pattern "Record and Verify Events":',
                 body: _callout_body
             } %}
 
@@ -593,7 +586,6 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Trait pro testování doménových událostí',
                 body: _callout_body
             } %}
     </section>
@@ -625,7 +617,6 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Typy test doubles a jejich použití v DDD:',
                 body: _callout_body
             } %}
 
@@ -641,7 +632,6 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč preferovat Fake (InMemory) před Mockem pro repozitáře:',
                 body: _callout_body
             } %}
 
@@ -720,7 +710,6 @@ final class InMemoryUserRepository implements UserRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: InMemoryUserRepository implementace',
                 body: _callout_body
             } %}
 
@@ -800,7 +789,6 @@ final class RegisterUserHandlerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Test command handleru s InMemoryRepository',
                 body: _callout_body
             } %}
 
@@ -816,7 +804,6 @@ final class RegisterUserHandlerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Varování: Přílišné používání mocků',
                 body: _callout_body
             } %}
     </section>
@@ -845,7 +832,6 @@ final class RegisterUserHandlerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'KernelTestCase vs WebTestCase:',
                 body: _callout_body
             } %}
 
@@ -861,7 +847,6 @@ final class RegisterUserHandlerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Transakce a rollback po každém testu:',
                 body: _callout_body
             } %}
 
@@ -958,7 +943,6 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Integrační test DoctrineUserRepository',
                 body: _callout_body
             } %}
 
@@ -974,7 +958,6 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Proč volat $entityManager->clear()?',
                 body: _callout_body
             } %}
     </section>
@@ -998,7 +981,6 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'WebTestCase v Symfony:',
                 body: _callout_body
             } %}
 
@@ -1107,7 +1089,6 @@ final class RegistrationControllerTest extends WebTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Funkční test registračního endpointu',
                 body: _callout_body
             } %}
 
@@ -1122,7 +1103,6 @@ final class RegistrationControllerTest extends WebTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Rozsah funkčních testů',
                 body: _callout_body
             } %}
     </section>
@@ -1214,7 +1194,6 @@ final class RegistrationControllerTest extends WebTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: deptrac.yaml konfigurace pro DDD projekt',
                 body: _callout_body
             } %}
 
@@ -1240,7 +1219,6 @@ composer require --dev qossmic/deptrac-shim
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Spuštění Deptrac v CI',
                 body: _callout_body
             } %}
 
@@ -1296,7 +1274,6 @@ return static function (Config $config): void {
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: PHP-Arkitect pravidla',
                 body: _callout_body
             } %}
     </section>
@@ -1321,7 +1298,6 @@ return static function (Config $config): void {
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Doporučené pokrytí pro DDD vrstvy:',
                 body: _callout_body
             } %}
 
@@ -1337,7 +1313,6 @@ return static function (Config $config): void {
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Naming conventions pro testy v DDD:',
                 body: _callout_body
             } %}
 
@@ -1359,7 +1334,6 @@ return static function (Config $config): void {
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Arrange-Act-Assert (AAA) pattern:',
                 body: _callout_body
             } %}
 
@@ -1393,7 +1367,6 @@ return static function (Config $config): void {
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Nejčastější chyby při testování DDD',
                 body: _callout_body
             } %}
 
@@ -1423,7 +1396,6 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Příklad: Správná konfigurace PHPUnit pro DDD projekt (phpunit.xml)',
                 body: _callout_body
             } %}
 

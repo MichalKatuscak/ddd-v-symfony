@@ -145,7 +145,6 @@
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'CRUD vs. Event Sourcing - přehled',
                 body: _callout_body
             } %}
 
@@ -182,7 +181,6 @@
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Klíčové pojmy Event Sourcingu:',
                 body: _callout_body
             } %}
     </section>
@@ -219,7 +217,6 @@
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Datový tok v architektuře ES + CQRS:',
                 body: _callout_body
             } %}
 
@@ -235,7 +232,6 @@
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Zásadní rozdíl mezi ES a CQRS',
                 body: _callout_body
             } %}
     </section>
@@ -395,7 +391,6 @@ final class UserRegistered implements DomainEvent
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Interface DomainEvent a konkrétní třída UserRegistered',
                 body: _callout_body
             } %}
 
@@ -420,7 +415,6 @@ final class UserRegistered implements DomainEvent
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'GDPR a osobní údaje v Event Store',
                 body: _callout_body
             } %}
 
@@ -479,7 +473,6 @@ final class UserRegistered implements DomainEvent
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'SQL: Migrace tabulky event_store (MySQL/MariaDB)',
                 body: _callout_body
             } %}
 
@@ -660,7 +653,6 @@ final class DoctrineEventStore implements EventStore
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Interface EventStore a Doctrine implementace',
                 body: _callout_body
             } %}
     </section>
@@ -793,7 +785,6 @@ abstract class EventSourcedAggregate
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Base class EventSourcedAggregate',
                 body: _callout_body
             } %}
 
@@ -903,7 +894,6 @@ final class Order extends EventSourcedAggregate
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Order agregát s Event Sourcingem',
                 body: _callout_body
             } %}
 
@@ -980,7 +970,6 @@ final class EventSourcedOrderRepository
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: EventSourced repozitář pro Order agregát',
                 body: _callout_body
             } %}
     </section>
@@ -1100,7 +1089,6 @@ final class OrderSummaryProjector
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: OrderSummaryProjection a asynchronní Projector',
                 body: _callout_body
             } %}
 
@@ -1135,7 +1123,6 @@ final class OrderSummaryProjector
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'YAML: Konfigurace Symfony Messenger pro asynchronní projekce',
                 body: _callout_body
             } %}
 
@@ -1229,7 +1216,6 @@ final class IdempotentOrderProjector
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Idempotentní projektor s tracking tabulkou',
                 body: _callout_body
             } %}
 
@@ -1255,7 +1241,6 @@ final class IdempotentOrderProjector
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'SQL: Tabulka projection_checkpoint pro tracking zpracovaných událostí',
                 body: _callout_body
             } %}
 
@@ -1271,7 +1256,6 @@ final class IdempotentOrderProjector
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Alternativa: upsert bez tracking tabulky',
                 body: _callout_body
             } %}
 
@@ -1329,7 +1313,6 @@ final class IdempotentOrderProjector
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'YAML: Kompletní konfigurace Messenger s retry a dead letter queue',
                 body: _callout_body
             } %}
 
@@ -1458,7 +1441,6 @@ final class RebuildProjectionCommand extends Command
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Symfony konzolový příkaz pro rebuild projekce',
                 body: _callout_body
             } %}
 
@@ -1474,7 +1456,6 @@ final class RebuildProjectionCommand extends Command
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Pozor: rebuild v produkci',
                 body: _callout_body
             } %}
 
@@ -1517,7 +1498,6 @@ final class RebuildProjectionCommand extends Command
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Synchronní projekce jako pragmatický kompromis',
                 body: _callout_body
             } %}
     </section>
@@ -1672,7 +1652,6 @@ final class SnapshottingOrderRepository
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Snapshot třída a repozitář se snapshot podporou',
                 body: _callout_body
             } %}
 
@@ -1699,7 +1678,6 @@ final class SnapshottingOrderRepository
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Invalidace snapshotů při změně schématu',
                 body: _callout_body
             } %}
     </section>
@@ -1791,7 +1769,6 @@ interface EventUpcaster
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Interface EventUpcaster',
                 body: _callout_body
             } %}
 
@@ -1864,7 +1841,6 @@ final readonly class UserRegisteredV1ToV2Upcaster implements EventUpcaster
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Upcaster pro UserRegistered v1 → v2',
                 body: _callout_body
             } %}
 
@@ -1934,7 +1910,6 @@ final readonly class UpcasterChain
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: UpcasterChain - řetězení upcasterů při deserializaci',
                 body: _callout_body
             } %}
 
@@ -1972,7 +1947,6 @@ final readonly class UpcasterChain
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Weak vs. strong schema strategie',
                 body: _callout_body
             } %}
     </section>
@@ -2055,7 +2029,6 @@ final readonly class UpcasterChain
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Varování: Event Sourcing výrazně zvyšuje složitost systému',
                 body: _callout_body
             } %}
 

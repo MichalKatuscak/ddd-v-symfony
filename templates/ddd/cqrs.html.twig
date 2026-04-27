@@ -101,7 +101,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Základní principy CQRS:',
                 body: _callout_body
             } %}
 
@@ -178,7 +177,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'CQS vs. CQRS - přehled',
                 body: _callout_body
             } %}
 
@@ -215,7 +213,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Úrovně adopce CQRS',
                 body: _callout_body
             } %}
     </section>
@@ -312,7 +309,6 @@
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Kdy nepoužívat CQRS',
                 body: _callout_body
             } %}
 
@@ -378,7 +374,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Konfigurace Symfony Messenger pro CQRS',
                 body: _callout_body
             } %}
 
@@ -406,7 +401,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč dva oddělené busy?',
                 body: _callout_body
             } %}
 
@@ -425,7 +419,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Jak vybrat příkazy pro asynchronní zpracování',
                 body: _callout_body
             } %}
 
@@ -489,7 +482,6 @@ final class RegisterUser
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Implementace příkazu v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -516,7 +508,6 @@ final class RegisterUser
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Mají commands vracet hodnotu?',
                 body: _callout_body
             } %}
     </section>
@@ -558,7 +549,6 @@ final class GetUserProfile
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Implementace dotazu v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -611,7 +601,6 @@ final class ListOrders
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Queries s filtrováním a stránkováním',
                 body: _callout_body
             } %}
     </section>
@@ -695,7 +684,6 @@ final class RegisterUserHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Command handler - RegisterUserHandler',
                 body: _callout_body
             } %}
 
@@ -748,7 +736,6 @@ final class GetUserProfileHandler
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Query handler - GetUserProfileHandler',
                 body: _callout_body
             } %}
 
@@ -805,7 +792,6 @@ final readonly class UserProfileViewModel
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: UserProfileViewModel',
                 body: _callout_body
             } %}
 
@@ -873,7 +859,6 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Read repozitář s přímým SQL (Doctrine DBAL)',
                 body: _callout_body
             } %}
 
@@ -891,7 +876,6 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Proč ne Doctrine ORM pro read stranu?',
                 body: _callout_body
             } %}
     </section>
@@ -968,7 +952,6 @@ final class RegistrationController extends AbstractController
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Použití command busu v controlleru',
                 body: _callout_body
             } %}
 
@@ -1022,7 +1005,6 @@ final class ProfileController extends AbstractController
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Použití query busu v controlleru',
                 body: _callout_body
             } %}
 
@@ -1101,7 +1083,6 @@ final class ProfileController extends AbstractController
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Přehled strategií',
                 body: _callout_body
             } %}
 
@@ -1207,7 +1188,6 @@ final class OrderDashboardProjector
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Projektor aktualizující denormalizovanou tabulku',
                 body: _callout_body
             } %}
 
@@ -1234,7 +1214,6 @@ final class OrderDashboardProjector
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Idempotence projektorů',
                 body: _callout_body
             } %}
 
@@ -1331,7 +1310,6 @@ final class OrderDashboardProjector
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Přehled strategií pro práci s eventual consistency',
                 body: _callout_body
             } %}
 
@@ -1397,7 +1375,6 @@ final class PlaceOrderController extends AbstractController
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Optimistická aktualizace - controller vrací data z command handleru',
                 body: _callout_body
             } %}
 
@@ -1423,7 +1400,6 @@ final class PlaceOrderController extends AbstractController
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Kdy eventual consistency NENÍ přijatelná',
                 body: _callout_body
             } %}
     </section>
@@ -1478,7 +1454,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Konfigurace asynchronního zpracování v Symfony 8',
                 body: _callout_body
             } %}
 
@@ -1514,7 +1489,6 @@ stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Spuštění Messenger workerů',
                 body: _callout_body
             } %}
 
@@ -1537,7 +1511,6 @@ stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'note',
-                label: 'Produkční provoz workerů',
                 body: _callout_body
             } %}
     </section>
@@ -1613,7 +1586,6 @@ $ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Konfigurace failed transportu a diagnostické příkazy',
                 body: _callout_body
             } %}
 
@@ -1631,7 +1603,6 @@ $ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'warn',
-                label: 'Monitoring selhavších zpráv',
                 body: _callout_body
             } %}
     </section>
@@ -1712,7 +1683,6 @@ final class CommandLoggingMiddleware implements MiddlewareInterface
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Logovací middleware pro command bus',
                 body: _callout_body
             } %}
 
@@ -1737,7 +1707,6 @@ framework:
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'Registrace vlastního middleware',
                 body: _callout_body
             } %}
 
@@ -1833,7 +1802,6 @@ final class RegisterUserHandlerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Test command handleru',
                 body: _callout_body
             } %}
 
@@ -1904,7 +1872,6 @@ final class GetUserProfileHandlerTest extends TestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Test query handleru',
                 body: _callout_body
             } %}
 
@@ -1999,7 +1966,6 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
-                label: 'PHP: Integrační test projektoru',
                 body: _callout_body
             } %}
 
