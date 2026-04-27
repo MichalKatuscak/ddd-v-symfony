@@ -1,0 +1,23 @@
+{#
+  args:
+    fig         — např. '04.4-A'
+    title       — např. 'Tok jednoho příkazu'
+    src         — relativní cesta v public/ k SVG/PNG (např. 'images/diagrams/4_implementation/command_flow.svg')
+    inline      — alternativně inline SVG/HTML jako string (volitelné, vyšší priorita než src)
+    caption     — HTML caption pod diagramem (volitelné)
+    alt         — alt text pro img (volitelné, default = title)
+#}
+<figure class="diagram">
+    <header class="diagram-head">
+        {% if fig is defined and fig %}<span class="diagram-num">FIG. {{ fig }}</span>{% endif %}
+        {% if title is defined and title %}<span class="diagram-title">{{ title }}</span>{% endif %}
+    </header>
+    {% if inline is defined and inline %}
+        {{ inline|raw }}
+    {% elseif src is defined and src %}
+        <img src="{{ asset(src) }}" alt="{{ alt|default(title|default('Diagram')) }}" loading="lazy">
+    {% endif %}
+    {% if caption is defined and caption %}
+        <figcaption class="diagram-caption">{{ caption|raw }}</figcaption>
+    {% endif %}
+</figure>
