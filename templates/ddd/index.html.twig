@@ -1,189 +1,167 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Domain-Driven Design v Symfony 8 – Průvodce | DDD Symfony{% endblock %}
+{% block title %}DDD v Symfony 8 — Doménově řízený návrh, přeložený do Symfony{% endblock %}
+{% block meta_description %}Šestnáctikapitolová příručka pro seniorní vývojáře a architekty. Od ohraničených kontextů přes CQRS a Event Sourcing až po reálné případové studie — v PHP 8.4+ a Symfony 8.{% endblock %}
 
-{% block meta_description %}Podrobný průvodce Domain-Driven Design v Symfony 8. Naučte se implementovat DDD architekturu, CQRS a Event Sourcing ve svých Symfony projektech.{% endblock %}
+{% set chapters = [
+    { n: '01', route: 'what_is_ddd',              t: 'Co je Domain-Driven Design',      d: 'Filozofie, Ubiquitous Language, Bounded Context',           time: 12, lvl: 1, tag: 'Základy' },
+    { n: '02', route: 'basic_concepts',           t: 'Základní koncepty DDD',           d: 'Entity · Value Objects · Agregáty · Repozitáře · Events',   time: 22, lvl: 2, tag: 'Základy' },
+    { n: '03', route: 'horizontal_vs_vertical',   t: 'Vertikální slice architektura',   d: 'Slicing podle feature, ne podle vrstvy',                     time: 14, lvl: 2, tag: 'Základy' },
+    { n: '04', route: 'implementation_in_symfony',t: 'Implementace v Symfony 8',        d: 'Struktura projektu, Messenger, DI, Doctrine',                time: 26, lvl: 3, tag: 'Základy' },
+    { n: '05', route: 'cqrs',                     t: 'CQRS',                            d: 'Oddělení čtení a zápisu přes Messenger komponentu',          time: 20, lvl: 3, tag: 'Vzory' },
+    { n: '06', route: 'event_sourcing',           t: 'Event Sourcing',                  d: 'Stav aplikace jako sekvence doménových událostí',            time: 28, lvl: 4, tag: 'Vzory' },
+    { n: '07', route: 'sagas',                    t: 'Ságy a Process Managery',         d: 'Long-running procesy, kompenzace, eventually consistent',   time: 24, lvl: 4, tag: 'Vzory' },
+    { n: '08', route: 'performance_aspects',      t: 'Výkonnostní aspekty',             d: 'Snapshoty, projekce, cache, read-model optimalizace',        time: 20, lvl: 4, tag: 'Vzory' },
+    { n: '09', route: 'practical_examples',       t: 'Praktické příklady',              d: 'E-shop, fakturace, inventory — minimal end-to-end',          time: 32, lvl: 3, tag: 'Praxe' },
+    { n: '10', route: 'testing_ddd',              t: 'Testování DDD',                   d: 'Unit · Integration · BDD · contract testy agregátů',         time: 18, lvl: 3, tag: 'Praxe' },
+    { n: '11', route: 'migration_from_crud',      t: 'Migrace z CRUD',                  d: 'Strangler Fig Pattern — postupný přechod bez stopu',         time: 22, lvl: 3, tag: 'Praxe' },
+    { n: '12', route: 'ddd_pain_points',          t: 'DDD v praxi — kde to bolí',       d: '20 reálných problémů: Doctrine, ACL, strangler fig…',        time: 30, lvl: 4, tag: 'Praxe' },
+    { n: '13', route: 'anti_patterns',            t: 'Anti-vzory a typické chyby',      d: 'Anemic model, smart UI, leaky abstractions',                 time: 16, lvl: 2, tag: 'Praxe' },
+    { n: '14', route: 'when_not_to_use_ddd',      t: 'Kdy DDD nepoužívat',              d: '7 situací, kdy DDD přinese víc škody než užitku',            time: 12, lvl: 2, tag: 'Praxe' },
+    { n: '15', route: 'case_study',               t: 'Případová studie',                d: 'E-shop v DDD architektuře, krok za krokem',                  time: 45, lvl: 4, tag: 'Praxe' },
+    { n: '16', route: 'ddd_ai',                   t: 'DDD a umělá inteligence',         d: 'Eric Evans · Fowler · Beck · DHH o vztahu DDD a AI',         time: 10, lvl: 1, tag: 'Reference' }
+] %}
 
-{% block meta_keywords %}Domain-Driven Design, DDD, Symfony 8, PHP, architektura, vývoj, CQRS, Event Sourcing, Bounded Context, Ubiquitous Language{% endblock %}
+{% set extras = [
+    { route: 'glossary', t: 'Glosář',  d: 'Definice klíčových DDD termínů', tag: 'Reference' },
+    { route: 'resources', t: 'Zdroje', d: 'Knihy, blogy, videa, kurzy, repos', tag: 'Reference' }
+] %}
 
-{% block structured_data %}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Architektura DDD v Symfony 8 - Podrobný průvodce",
-    "description": "Podrobný průvodce Domain-Driven Design v Symfony 8. Naučte se implementovat DDD architekturu ve svých Symfony projektech.",
-    "url": "{{ app.request.schemeAndHttpHost }}/",
-    "author": {
-        "@type": "Person",
-        "name": "Michal Katuščák",
-        "url": "https://www.katuscak.cz/",
-        "sameAs": [
-            "https://blog.katuscak.cz/",
-            "https://www.linkedin.com/in/michal-katu%C5%A1%C4%8D%C3%A1k-04a249184/"
-        ]
-    },
-    "publisher": {
-        "@type": "Person",
-        "name": "Michal Katuščák"
-    },
-    "inLanguage": "cs-CZ",
-    "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "{{ app.request.schemeAndHttpHost }}/"
-    }
-}
-</script>
-{% endblock %}
+{% set total_time = 0 %}
+{% for c in chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set hours = (total_time / 60)|round(0, 'floor') %}
+{% set minutes = total_time - hours * 60 %}
 
 {% block body %}
-<div class="trust-bar">
-    <span>PHP 8.4+ &amp; Symfony 8</span>
-    <span>16 kapitol s ukázkami kódu</span>
-    <span>CQRS · Event Sourcing · Taktický design</span>
-    <span>zdarma · česky</span>
-</div>
+<div class="land">
+    <section class="land-hero">
+        <div class="land-left">
+            <div class="land-eyebrow">
+                <span class="land-eyebrow-num">VOL. I</span>
+                <span class="land-eyebrow-rule"></span>
+                <span class="land-eyebrow-meta">{{ "now"|date("Y") }} EDITION · ČESKY · ZDARMA</span>
+            </div>
 
-<section class="hero" aria-labelledby="hero-heading">
-    <div class="hero-text">
-        <p class="hero-eyebrow">Podrobný průvodce · česky</p>
-        <h1 id="hero-heading">Domain-Driven Design v <span>Symfony 8</span></h1>
-        <p class="hero-lead">Od základních konceptů přes CQRS a Event Sourcing až po reálné případové studie. Vše s ukázkami kódu v PHP 8.4+ a Symfony 8.</p>
-        <a href="{{ path('what_is_ddd') }}" class="btn btn-primary btn-lg">Začít s DDD →</a>
-    </div>
-    <div class="hero-stats">
-        <div class="hero-stats-item">
-            <span class="hero-stats-num">16</span>
-            <span class="hero-stats-desc">kapitol</span>
-        </div>
-        <div class="hero-stats-item">
-            <span class="hero-stats-num">PHP 8.4+</span>
-            <span class="hero-stats-desc">ukázky kódu</span>
-        </div>
-        <div class="hero-stats-item">
-            <span class="hero-stats-num">CQRS+ES</span>
-            <span class="hero-stats-desc">pokryto</span>
-        </div>
-    </div>
-</section>
+            <h1 class="land-title">
+                Doménově řízený návrh,<br>
+                <span class="land-em">přeložený do Symfony.</span>
+            </h1>
 
-<section class="reading-paths-section" aria-labelledby="reading-paths-heading">
-    <h2 id="reading-paths-heading">Jak číst průvodce</h2>
-    <div class="reading-paths">
-        <div class="reading-path-card reading-path-card--beginner">
-            <p class="reading-path-label">Pro začátečníky</p>
-            <h3>Začínám s DDD</h3>
-            <ol>
-                <li><a href="{{ path('what_is_ddd') }}">Co je Domain-Driven Design?</a></li>
-                <li><a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a></li>
-                <li><a href="{{ path('horizontal_vs_vertical') }}">Vertikální slice architektura</a></li>
-                <li><a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony 8</a></li>
-            </ol>
-        </div>
-        <div class="reading-path-card reading-path-card--advanced">
-            <p class="reading-path-label">Pro pokročilé</p>
-            <h3>Znám základy</h3>
-            <ol>
-                <li><a href="{{ path('cqrs') }}">CQRS v Symfony 8</a></li>
-                <li><a href="{{ path('event_sourcing') }}">Event Sourcing</a></li>
-                <li><a href="{{ path('sagas') }}">Ságy a Process Managery</a></li>
-                <li><a href="{{ path('anti_patterns') }}">Anti-vzory a typické chyby</a></li>
-            </ol>
-        </div>
-    </div>
-</section>
+            <p class="land-deck">
+                Šestnáctikapitolová příručka pro seniorní vývojáře a architekty.
+                Od ohraničených kontextů přes <em>CQRS</em> a <em>Event Sourcing</em>
+                až po reálné případové studie — v PHP 8.4+ a Symfony 8.
+            </p>
 
-<section aria-labelledby="features-heading">
-    <h2 id="features-heading">Témata průvodce</h2>
-    <div class="feature-grid">
-        <a href="{{ path('what_is_ddd') }}" class="feature-card">
-            <h3 class="feature-card-title">Co je Domain-Driven Design?</h3>
-            <p class="feature-card-desc">Základní filozofie DDD, Ubiquitous Language a Bounded Context.</p>
-        </a>
-        <a href="{{ path('basic_concepts') }}" class="feature-card">
-            <h3 class="feature-card-title">Základní koncepty DDD</h3>
-            <p class="feature-card-desc">Entity, Value Objects, Agregáty, Repozitáře a Doménové události.</p>
-        </a>
-        <a href="{{ path('cqrs') }}" class="feature-card">
-            <h3 class="feature-card-title">CQRS v Symfony 8</h3>
-            <p class="feature-card-desc">Oddělení operací čtení a zápisu pomocí Messenger komponenty.</p>
-        </a>
-        <a href="{{ path('event_sourcing') }}" class="feature-card">
-            <h3 class="feature-card-title">Event Sourcing</h3>
-            <p class="feature-card-desc">Uchování stavu aplikace jako sekvence doménových událostí.</p>
-        </a>
-        <a href="{{ path('ddd_pain_points') }}" class="feature-card">
-            <h3 class="feature-card-title">DDD v praxi – kde to bolí</h3>
-            <p class="feature-card-desc">20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig a přesvědčení managementu.</p>
-        </a>
-        <a href="{{ path('when_not_to_use_ddd') }}" class="feature-card">
-            <h3 class="feature-card-title">Kdy DDD nepoužívat</h3>
-            <p class="feature-card-desc">7 konkrétních situací, kdy DDD přinese víc škody než užitku - s alternativami pro každý případ.</p>
-        </a>
-        <a href="{{ path('ddd_ai') }}" class="feature-card">
-            <h3 class="feature-card-title">DDD a umělá inteligence</h3>
-            <p class="feature-card-desc">Co říkají Eric Evans, Martin Fowler, Kent Beck a DHH o vztahu DDD a AI nástrojů.</p>
-        </a>
-        <a href="{{ path('implementation_in_symfony') }}" class="feature-card">
-            <h3 class="feature-card-title">Implementace v Symfony 8</h3>
-            <p class="feature-card-desc">Praktická implementace DDD architektury ve Symfony projektu.</p>
-        </a>
-        <a href="{{ path('case_study') }}" class="feature-card">
-            <h3 class="feature-card-title">Případová studie</h3>
-            <p class="feature-card-desc">Kompletní e-shop implementovaný v DDD architektuře krok za krokem.</p>
-        </a>
-        <a href="{{ path('glossary') }}" class="feature-card">
-            <h3 class="feature-card-title">Glosář DDD terminologie</h3>
-            <p class="feature-card-desc">Přehled všech hlavních pojmů DDD s vysvětlením v češtině.</p>
-        </a>
-    </div>
-</section>
+            <div class="land-author">
+                <div class="land-author-mark" aria-hidden="true"></div>
+                <div>
+                    <div class="land-author-name">Michal Katuščák</div>
+                    <div class="land-author-role">PHP / Symfony · 13+ let komerčního vývoje</div>
+                </div>
+            </div>
 
-{% include '_partials/faq.html.twig' with {
-    items: [
-        {
-            question: 'Kolik času a lidí zavedení DDD v projektu vyžaduje?',
-            answer: 'Pilotní Bounded Context zpravidla doručí první výsledky za 3–6 měsíců, plná migrace středně velké aplikace má realistický horizont 12–24 měsíců. Velikost týmu není rozhodující – podstatnější je přístup k doménovému expertovi a čas vývojářů na osvojení strategických a taktických vzorů. Strangler Fig Pattern umožňuje nasazovat DDD po částech vedle původní CRUD architektury bez nutnosti zastavit vývoj nových feature. Podrobnosti v kapitole <a href="' ~ path('migration_from_crud') ~ '">Migrace z CRUD na DDD</a>.'
-        },
-        {
-            question: 'Kdy DDD použít a kdy ne?',
-            answer: 'DDD se vyplatí v projektech s bohatou doménou, dlouhým horizontem a přístupem k doménovým expertům – typicky v bankovnictví, pojišťovnictví, logistice nebo regulovaných odvětvích. Nevhodné je pro prosté CRUD aplikace, prototypy a situace, kdy tým nemá čas si DDD osvojit. Detailní rozbor v kapitole <a href="' ~ path('when_not_to_use_ddd') ~ '">Kdy DDD nepoužívat</a>.'
-        },
-        {
-            question: 'Potřebuji pro DDD doménového experta?',
-            answer: 'Ano, přístup k doménovému expertovi je jedním z předpokladů úspěchu. Bez něj tým nemá zdroj pro Ubiquitous Language a model se rychle rozchází s realitou. Expertem nemusí být externí konzultant – bývá to produktový manažer, zkušený uživatel nebo regulovaný subjekt. Bez tohoto přístupu se DDD zpravidla redukuje na prázdné taktické vzory bez doménové hodnoty. Viz <a href="' ~ path('when_not_to_use_ddd') ~ '">Kdy DDD nepoužívat</a>.'
-        },
-        {
-            question: 'Jak začít s DDD v Symfony projektu?',
-            answer: 'Přirozená posloupnost je: nastudovat základní pojmy, vytipovat Bounded Context, definovat Ubiquitous Language, navrhnout agregáty s jasnými invarianty a zavést repozitáře a aplikační služby nad Symfony Messengerem. U existujícího projektu pomáhá Event Storming pro analýzu domény. Startovacím bodem je kapitola <a href="' ~ path('implementation_in_symfony') ~ '">Implementace DDD v Symfony</a>.'
-        },
-        {
-            question: 'V čem se DDD liší od klasického CRUD?',
-            answer: 'CRUD architektura mapuje formuláře na databázové tabulky – logika obvykle žije v kontrolerech a „Service" třídách, model je pasivní. DDD naopak soustředí logiku do doménových objektů (agregátů), které vynucují invarianty a komunikují přes definované rozhraní. CRUD je levnější na start, DDD se vyplatí s rostoucí komplexitou domény. Srovnání v kapitole <a href="' ~ path('migration_from_crud') ~ '">Migrace z CRUD na DDD</a>.'
-        }
-    ]
-} %}
+            <div class="land-cta">
+                <a class="btn btn-primary" href="{{ path('what_is_ddd') }}">
+                    Otevřít první kapitolu <span class="btn-arrow">→</span>
+                </a>
+                <a class="land-skip" href="{{ path('cqrs') }}">
+                    nebo skočit rovnou na <span class="land-skip-tar">CQRS · 05</span>
+                </a>
+            </div>
 
-<section class="homepage-about" aria-labelledby="about-heading">
-    <h2 id="about-heading">O autorovi</h2>
-    <div class="author-bio">
-        <img
-            src="{{ asset('img/author.webp') }}"
-            alt="Michal Katuščák – PHP/React vývojář"
-            class="author-bio__photo"
-            width="80"
-            height="80"
-            loading="lazy"
-        >
-        <div class="author-bio__content">
-            <p class="author-bio__name">Michal Katuščák</p>
-            <p class="author-bio__role">PHP/React vývojář · 13+ let komerčního vývoje</p>
-            <p class="author-bio__text">Průvodce jsem napsal jako výsledek hloubkového studia DDD a Symfony ekosystému. Vychází z 13+ let komerčního vývoje webových aplikací v PHP a Symfony.</p>
-            <div class="author-bio__links">
-                <a href="{{ path('about') }}">O autorovi &rarr;</a>
-                <a href="https://www.katuscak.cz/" target="_blank" rel="noopener noreferrer">katuscak.cz &#8599;</a>
+            <div class="land-paths">
+                <div class="land-path-label">Doporučené čtení</div>
+                <div class="land-path-list">
+                    <a class="land-path" href="{{ path('what_is_ddd') }}">
+                        <span class="land-path-tag">Začátečník</span>
+                        <span class="land-path-route">01 → 02 → 04 → 09</span>
+                        <span class="land-path-time">≈ 92 min</span>
+                    </a>
+                    <a class="land-path" href="{{ path('cqrs') }}">
+                        <span class="land-path-tag">Pokročilý</span>
+                        <span class="land-path-route">05 → 06 → 07 → 10</span>
+                        <span class="land-path-time">≈ 90 min</span>
+                    </a>
+                    <a class="land-path" href="{{ path('when_not_to_use_ddd') }}">
+                        <span class="land-path-tag">Architekt</span>
+                        <span class="land-path-route">14 → 11 → 12 → 08</span>
+                        <span class="land-path-time">≈ 84 min</span>
+                    </a>
+                </div>
             </div>
         </div>
+
+        <div class="land-right">
+            <header class="land-toc-head">
+                <span class="land-toc-num">CONTENTS</span>
+                <span class="land-toc-rule"></span>
+                <span class="land-toc-meta">{{ chapters|length }} kapitol · ~{{ hours }} h {{ minutes }} min čtení</span>
+            </header>
+            <ol class="land-toc">
+                {% for c in chapters %}
+                <li>
+                    <a class="land-toc-item" href="{{ path(c.route) }}">
+                        <span class="land-toc-n">{{ c.n }}</span>
+                        <div class="land-toc-text">
+                            <span class="land-toc-title">{{ c.t }}</span>
+                            <span class="land-toc-desc">{{ c.d }}</span>
+                        </div>
+                        <div class="land-toc-side">
+                            <span class="land-toc-tag">{{ c.tag }}</span>
+                            <span class="land-toc-time">{{ c.time }}′</span>
+                            <span class="land-toc-bar">
+                                {% for i in 1..4 %}<i class="{{ i <= c.lvl ? 'on' : '' }}"></i>{% endfor %}
+                            </span>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+                {% for e in extras %}
+                <li>
+                    <a class="land-toc-item" href="{{ path(e.route) }}">
+                        <span class="land-toc-n">—</span>
+                        <div class="land-toc-text">
+                            <span class="land-toc-title">{{ e.t }}</span>
+                            <span class="land-toc-desc">{{ e.d }}</span>
+                        </div>
+                        <div class="land-toc-side">
+                            <span class="land-toc-tag">{{ e.tag }}</span>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
+    </section>
+
+    <section class="land-featured">
+        <a class="land-featured-card" href="{{ path('case_study') }}" aria-label="Otevřít případovou studii">
+            <div>
+                <div class="land-featured-eyebrow">FEATURED · KAPITOLA 15</div>
+                <h2 class="land-featured-title">Případová studie: e-shop end-to-end</h2>
+                <p class="land-featured-deck">
+                    Kompletní e-shop v DDD architektuře krok za krokem — od ohraničených kontextů
+                    a agregátů přes CQRS čtení/zápisu po projekce a event-driven workflow.
+                    Syntéza všeho, co předchozí kapitoly probírají odděleně.
+                </p>
+            </div>
+            <span class="btn btn-ghost" aria-hidden="true">Otevřít <span class="btn-arrow">→</span></span>
+        </a>
+    </section>
+
+    <div class="land-marq">
+        <div class="land-marq-row">
+            <span>PHP 8.4+</span><span class="land-marq-dot">·</span>
+            <span>Symfony 8</span><span class="land-marq-dot">·</span>
+            <span>Doctrine ORM</span><span class="land-marq-dot">·</span>
+            <span>Messenger</span><span class="land-marq-dot">·</span>
+            <span>EventStore</span><span class="land-marq-dot">·</span>
+            <span>{{ chapters|length }} kapitol</span><span class="land-marq-dot">·</span>
+            <span>česky</span><span class="land-marq-dot">·</span>
+            <span>zdarma</span><span class="land-marq-dot">·</span>
+            <span>open source</span>
+        </div>
     </div>
-</section>
+</div>
 {% endblock %}
