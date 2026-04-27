@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Implementace v Symfony</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">Implementace DDD v Symfony 8</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '04',
+        category: 'Základy',
+        title: 'Implementace DDD v Symfony 8',
+        deck: 'Praktický průvodce implementací Domain-Driven Design v Symfony 8. Naučte se, jak strukturovat projekt s využitím bounded contexts, implementovat entity, hodnotové objekty, agregáty, repozitáře a další koncepty DDD v moderním PHP frameworku.',
+        reading_time: 26,
+        difficulty: 3,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-        <div class="examples-banner" role="note">
+    <div class="art-body" data-chapter-number="04">
+<div class="examples-banner" role="note">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
                 <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
             </svg>
@@ -74,7 +72,8 @@
             </span>
         </div>
 
-        <div class="note" role="note" aria-labelledby="evoluce-prikladu-heading">
+        {% set _callout_body %}
+
             <h3 id="evoluce-prikladu-heading">Evoluce příkladů napříč průvodcem</h3>
             <p>
                 Kódové příklady v tomto průvodci záměrně přibývají na komplexitě. V kapitole
@@ -86,10 +85,15 @@
                 pak ukazujeme produkční kvalitu kódu s custom výjimkami, factory metodami a plnou
                 validací invariantů.
             </p>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Evoluce příkladů napříč průvodcem',
+                body: _callout_body
+            } %}
 
     <section id="ddd-vs-symfony-boundary" aria-labelledby="ddd-vs-symfony-boundary-heading">
-        <h2 id="ddd-vs-symfony-boundary-heading">Kde končí DDD a kde začíná Symfony</h2>
+        <h2 id="ddd-vs-symfony-boundary-heading" class="h-section"><span class="h-num">04.01</span> Kde končí DDD a kde začíná Symfony</h2>
 
         <p>
             Následující diagram ukazuje hranici mezi čistým DDD kódem (zelená oblast) a Symfony infrastrukturou
@@ -98,11 +102,12 @@
             definované doménou (repository interface, event dispatch) a zajišťuje HTTP, persistenci a messaging.
         </p>
 
-        <div class="tip">
-            <div class="diagram-container">
-                {% include '/diagrams/3_implementation_in_symfony/boundary.svg' %}
-            </div>
-        </div>
+        {% set _diagram_inline %}{% include '/diagrams/3_implementation_in_symfony/boundary.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
         <p>
             Směr závislostí je určující: Symfony závisí na DDD (implementuje jeho rozhraní), nikdy naopak.
@@ -111,36 +116,16 @@
         </p>
     </section>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#ddd-vs-symfony-boundary">Kde končí DDD a kde začíná Symfony</a></li>
-            <li><a href="#project-structure">Struktura projektu</a></li>
-            <li><a href="#entities">Implementace entit</a></li>
-            <li><a href="#value-objects">Implementace hodnotových objektů</a></li>
-            <li><a href="#repositories">Implementace repozitářů</a></li>
-            <li><a href="#doctrine-xml-mapping">Separace Doctrine mapování pomocí XML</a></li>
-            <li><a href="#doctrine-custom-types">Doctrine custom types pro Value Objects</a></li>
-            <li><a href="#php-enums">PHP 8.1+ Enums pro stavové typy</a></li>
-            <li><a href="#domain-services">Implementace doménových služeb</a></li>
-            <li><a href="#specification-pattern">Specification Pattern</a></li>
-            <li><a href="#domain-events">Implementace doménových událostí</a></li>
-            <li><a href="#error-handling">Strategie zpracování chyb</a></li>
-            <li><a href="#application-services">Implementace aplikačních služeb</a></li>
-            <li><a href="#controllers">Implementace kontrolerů</a></li>
-            <li><a href="#dependency-injection">Dependency Injection a autowiring</a></li>
-        </ul>
-    </div>
-
-    <section id="project-structure" aria-labelledby="project-structure-heading">
-    <h2 id="project-structure-heading">Struktura projektu</h2>
+<section id="project-structure" aria-labelledby="project-structure-heading">
+    <h2 id="project-structure-heading" class="h-section"><span class="h-num">04.02</span> Struktura projektu</h2>
     <p>
         Při implementaci DDD s vertikální slice architekturou v Symfony 8 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 8:
     </p>
 
-    <div class="tip">
+    {% set _callout_body %}
+
         <h3>Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8</h3>
-        <pre><code class="language-bash">src/
+        {% set _code %}{% verbatim %}src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                 # Doménová vrstva pro UserManagement
 │   │   ├── Model/              # Doménové modely
@@ -216,20 +201,33 @@
         └── Persistence/       # Sdílené komponenty pro persistenci
             └── Doctrine/
                 └── Mapping/
-                    └── MappingTrait.php</code></pre>
-    </div>
+                    └── MappingTrait.php{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         Tato struktura projektu organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má svou vlastní doménovou vrstvu, která obsahuje modely, hodnotové objekty, události a repozitáře specifické pro danou doménu. Tím je zajištěna izolace domén a respektování principů DDD.
     </p>
 
-    <div class="tip">
-        <div class="diagram-container">
-            {% include '/diagrams/3_implementation_in_symfony/diagram.svg' %}
-        </div>
-    </div>
+    {% set _diagram_inline %}{% include '/diagrams/3_implementation_in_symfony/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Klíčové principy správné struktury DDD projektu:</h3>
         <ul>
             <li><strong>Izolace domén</strong> - Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.</li>
@@ -237,9 +235,15 @@
             <li><strong>Jasné hranice</strong> - Jasně definované hranice mezi doménami pomáhají vývojářům lépe pochopit, kde končí jedna doména a začíná druhá.</li>
             <li><strong>Minimalizace závislostí</strong> - Domény by měly být co nejvíce nezávislé, aby změna v jedné doméně neovlivnila jinou doménu.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Klíčové principy správné struktury DDD projektu:',
+                body: _callout_body
+            } %}
 
-    <div class="warning">
+    {% set _callout_body %}
+
         <h3>Časté chyby při implementaci DDD</h3>
         <p>
             Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
@@ -250,18 +254,24 @@
             <li><strong>Příliš mnoho závislostí mezi doménami</strong> - Domény by měly být co nejvíce nezávislé.</li>
             <li><strong>Ignorování Ubiquitous Language</strong> - Používejte konzistentní jazyk v kódu, dokumentaci a komunikaci.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Časté chyby při implementaci DDD',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="entities" aria-labelledby="entities-heading">
-    <h2 id="entities-heading">Implementace entit</h2>
+    <h2 id="entities-heading" class="h-section"><span class="h-num">04.03</span> Implementace entit</h2>
     <p>
         Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 se implementují entity jako běžné PHP třídy:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="entity-example-heading">
+    {% set _callout_body %}
+
         <h3 id="entity-example-heading">Příklad: Implementace entity v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -344,15 +354,27 @@ class User
 
         return $events;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Model/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace entity v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>). Všimněte si, že entita neobsahuje žádné Doctrine atributy - doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekce <a href="#doctrine-xml-mapping">Separace Doctrine mapování</a>). Neměnné vlastnosti (<code>$id</code>, <code>$createdAt</code>) jsou označeny jako <code>readonly</code>. Entity mohou také generovat doménové události,
         které jsou uloženy v poli <code>$domainEvents</code> a mohou být později uvolněny a zpracovány.
     </p>
 
-    <div class="note" role="note" aria-labelledby="doctrine-hydration-heading">
+    {% set _callout_body %}
+
         <h3 id="doctrine-hydration-heading">Proč ukládáme hodnotové objekty jako primitivní typy?</h3>
         <p>
             Všimněte si, že entita interně ukládá <code>UserId</code> a <code>Email</code> jako
@@ -367,18 +389,24 @@ class User
             (viz sekce <a href="#doctrine-custom-types">Doctrine custom types</a>), který automaticky
             konvertuje mezi primitivním typem a hodnotovým objektem.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Proč ukládáme hodnotové objekty jako primitivní typy?',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="value-objects" aria-labelledby="value-objects-heading">
-    <h2 id="value-objects-heading">Implementace hodnotových objektů</h2>
+    <h2 id="value-objects-heading" class="h-section"><span class="h-num">04.04</span> Implementace hodnotových objektů</h2>
     <p>
         Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 se implementují hodnotové objekty jako neměnné PHP třídy:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="value-object-example-heading">
+    {% set _callout_body %}
+
         <h3 id="value-object-example-heading">Příklad: Implementace hodnotového objektu v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -413,8 +441,19 @@ class Email
     {
         return $this->value;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/ValueObject/Email.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace hodnotového objektu v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné (vlastnost <code>$value</code> je <code>readonly</code>) a nemají žádnou identitu.
@@ -423,14 +462,15 @@ class Email
     </section>
 
     <section id="repositories" aria-labelledby="repositories-heading">
-    <h2 id="repositories-heading">Implementace repozitářů</h2>
+    <h2 id="repositories-heading" class="h-section"><span class="h-num">04.05</span> Implementace repozitářů</h2>
     <p>
         Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 se implementují repozitáře jako rozhraní a jejich implementace:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="repository-example-heading">
+    {% set _callout_body %}
+
         <h3 id="repository-example-heading">Příklad: Implementace repozitáře v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -447,9 +487,15 @@ interface UserRepository
     public function findById(UserId $id): ?User;
 
     public function findByEmail(Email $email): ?User;
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Repository/UserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -490,15 +536,27 @@ class DoctrineUserRepository implements UserRepository
         return $this->entityManager->getRepository(User::class)
             ->findOneBy(['email' => $email->value()]);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace repozitáře v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>UserRepository</code> rozhraní, které definuje metody pro ukládání a načítání uživatelů.
         <code>DoctrineUserRepository</code> je implementace tohoto rozhraní, která používá Doctrine ORM pro persistenci.
     </p>
 
-    <div class="warning" role="alert" aria-labelledby="event-dispatch-heading">
+    {% set _callout_body %}
+
         <h3 id="event-dispatch-heading">Dispatch událostí a transakční bezpečnost</h3>
         <p>
             Ve výše uvedeném příkladu jsou události dispatchovány <strong>po</strong> volání
@@ -518,18 +576,24 @@ class DoctrineUserRepository implements UserRepository
                 <code>postTransactionCommit</code> event (Doctrine ORM 2.14+) nebo vlastní
                 middleware v Symfony Messenger.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Dispatch událostí a transakční bezpečnost',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="doctrine-xml-mapping" aria-labelledby="doctrine-xml-mapping-heading">
-    <h2 id="doctrine-xml-mapping-heading">Separace Doctrine mapování pomocí XML</h2>
+    <h2 id="doctrine-xml-mapping-heading" class="h-section"><span class="h-num">04.06</span> Separace Doctrine mapování pomocí XML</h2>
     <p>
         V předchozích příkladech jste si všimli, že doménové entity a hodnotové objekty neobsahují žádné Doctrine atributy (<code>#[ORM\Entity]</code>, <code>#[ORM\Column]</code> apod.).
         To je záměrné - v čistém DDD přístupu by doménová vrstva neměla mít žádnou závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
         mezi doménovým modelem a persistenční vrstvou, čímž porušují princip <strong>Dependency Inversion</strong>.
     </p>
 
-    <div class="warning">
+    {% set _callout_body %}
+
         <h3>Proč Doctrine atributy nepatří do doménové vrstvy?</h3>
         <ul>
             <li><strong>Porušení Dependency Inversion Principle</strong> - doménová vrstva (vysokoúrovňový modul) závisí na Doctrine ORM (nízkoúrovňový modul). Správný směr závislosti je opačný.</li>
@@ -537,55 +601,85 @@ class DoctrineUserRepository implements UserRepository
             <li><strong>Obtížná záměnitelnost</strong> - pokud chcete změnit persistenční mechanismus (např. z MySQL na MongoDB nebo Event Store), musíte upravovat doménové entity.</li>
             <li><strong>Komplikace testování</strong> - unit testy doménových entit nepotřebují Doctrine, ale atributy vytvářejí nepříjemnou závislost při autoloadingu.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Proč Doctrine atributy nepatří do doménové vrstvy?',
+                body: _callout_body
+            } %}
 
     <p>
         Řešením je <strong>XML mapování</strong> (nebo alternativně YAML, i když XML je preferované kvůli validaci schématem). Mapovací soubory se umístí do konfiguračního adresáře
         mimo doménovou vrstvu:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="xml-mapping-structure-heading">
+    {% set _callout_body %}
+
         <h3 id="xml-mapping-structure-heading">Příklad: Struktura souborů pro XML mapování</h3>
-        <pre><code class="language-bash">config/
+        {% set _code %}{% verbatim %}config/
 └── doctrine/
     ├── UserManagement/
     │   └── User.orm.xml
     └── OrderManagement/
         ├── Order.orm.xml
-        └── OrderItem.orm.xml</code></pre>
-    </div>
+        └── OrderItem.orm.xml{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Struktura souborů pro XML mapování',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="xml-mapping-example-heading">
+    {% set _callout_body %}
+
         <h3 id="xml-mapping-example-heading">Příklad: XML mapování entity Order</h3>
-        <pre><code class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+        {% set _code %}{% verbatim %}<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd"&gt;
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    &lt;entity name="App\OrderManagement\Domain\Model\Order" table="orders"&gt;
-        &lt;id name="id" type="string" length="36"&gt;
-            &lt;generator strategy="NONE"/&gt;
-        &lt;/id&gt;
+    <entity name="App\OrderManagement\Domain\Model\Order" table="orders">
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
 
-        &lt;field name="customerId" type="string" length="36" column="customer_id"/&gt;
-        &lt;field name="status" type="string" length="20" column="status"/&gt;
-        &lt;field name="createdAt" type="datetime_immutable" column="created_at"/&gt;
+        <field name="customerId" type="string" length="36" column="customer_id"/>
+        <field name="status" type="string" length="20" column="status"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
 
-        &lt;one-to-many field="items" target-entity="App\OrderManagement\Domain\Model\OrderItem" mapped-by="order"&gt;
-            &lt;cascade&gt;
-                &lt;cascade-persist/&gt;
-                &lt;cascade-remove/&gt;
-            &lt;/cascade&gt;
-        &lt;/one-to-many&gt;
-    &lt;/entity&gt;
+        <one-to-many field="items" target-entity="App\OrderManagement\Domain\Model\OrderItem" mapped-by="order">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+        </one-to-many>
+    </entity>
 
-&lt;/doctrine-mapping&gt;</code></pre>
-    </div>
+</doctrine-mapping>{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.xml',
+                language: 'xml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: XML mapování entity Order',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="xml-mapping-config-heading">
+    {% set _callout_body %}
+
         <h3 id="xml-mapping-config-heading">Příklad: Konfigurace Doctrine pro XML mapování v Symfony</h3>
-        <pre><code class="language-yaml"># config/packages/doctrine.yaml
+        {% set _code %}{% verbatim %}# config/packages/doctrine.yaml
 doctrine:
     orm:
         mappings:
@@ -600,10 +694,22 @@ doctrine:
                 dir: '%kernel.project_dir%/config/doctrine/OrderManagement'
                 prefix: App\OrderManagement\Domain\Model
                 alias: OrderManagement
-                is_bundle: false</code></pre>
-    </div>
+                is_bundle: false{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/doctrine.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Konfigurace Doctrine pro XML mapování v Symfony',
+                body: _callout_body
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Výhody XML mapování pro DDD</h3>
         <ul>
             <li><strong>Čistá doménová vrstva</strong> - entity jsou prosté PHP objekty (POPO) bez jakýchkoliv závislostí na frameworku či ORM.</li>
@@ -611,11 +717,16 @@ doctrine:
             <li><strong>Oddělení odpovědností</strong> - mapování je infrastrukturní záležitost a patří do infrastrukturní vrstvy, nikoliv do domény.</li>
             <li><strong>Snadná záměna persistence</strong> - při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Výhody XML mapování pro DDD',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="doctrine-custom-types" aria-labelledby="doctrine-custom-types-heading">
-    <h2 id="doctrine-custom-types-heading">Doctrine custom types pro Value Objects</h2>
+    <h2 id="doctrine-custom-types-heading" class="h-section"><span class="h-num">04.07</span> Doctrine custom types pro Value Objects</h2>
     <p>
         Alternativou k ukládání hodnotových objektů jako primitivních typů (viz
         <a href="#entities">implementace entit</a>) je vytvoření <strong>Doctrine custom type</strong>,
@@ -623,9 +734,10 @@ doctrine:
         Entita pak může mít vlastnosti přímo typu <code>Email</code> nebo <code>UserId</code>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="custom-type-example-heading">
+    {% set _callout_body %}
+
         <h3 id="custom-type-example-heading">Příklad: Doctrine custom type pro Email</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -654,46 +766,81 @@ final class EmailType extends StringType
             return null;
         }
 
-        return $value instanceof Email ? $value-&gt;value() : (string) $value;
+        return $value instanceof Email ? $value->value() : (string) $value;
     }
 
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/Doctrine/Type/EmailType.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Doctrine custom type pro Email',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="custom-type-registration-heading">
+    {% set _callout_body %}
+
         <h3 id="custom-type-registration-heading">Registrace custom type v Symfony</h3>
-        <pre><code class="language-yaml"># config/packages/doctrine.yaml
+        {% set _code %}{% verbatim %}# config/packages/doctrine.yaml
 doctrine:
     dbal:
         types:
             email_vo:
-                class: App\UserManagement\Infrastructure\Doctrine\Type\EmailType</code></pre>
+                class: App\UserManagement\Infrastructure\Doctrine\Type\EmailType{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/doctrine.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-xml">&lt;!-- config/doctrine/UserManagement/User.orm.xml --&gt;
-&lt;field name="email" type="email_vo" length="255" column="email"/&gt;</code></pre>
-    </div>
+        {% set _code %}{% verbatim %}<!-- config/doctrine/UserManagement/User.orm.xml -->
+<field name="email" type="email_vo" length="255" column="email"/>{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.xml',
+                language: 'xml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Registrace custom type v Symfony',
+                body: _callout_body
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Kdy použít custom type vs. primitivní ukládání?</h3>
         <ul>
             <li><strong>Custom type</strong> - čistší doménový model, entita pracuje přímo s VO. Vhodné pro value objects používané na mnoha místech.</li>
             <li><strong>Primitivní ukládání</strong> - jednodušší, méně kódu. Vhodné pro projekty s méně value objects nebo při začátku s DDD.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Kdy použít custom type vs. primitivní ukládání?',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="php-enums" aria-labelledby="php-enums-heading">
-    <h2 id="php-enums-heading">PHP 8.1+ Enums pro stavové typy</h2>
+    <h2 id="php-enums-heading" class="h-section"><span class="h-num">04.08</span> PHP 8.1+ Enums pro stavové typy</h2>
     <p>
         Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums), které představují idiomatický způsob, jak v DDD implementovat stavové hodnotové objekty
         s konečnou množinou hodnot - například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
         nebo jako plnohodnotné hodnotové objekty, avšak nativní enums nabízejí typovou bezpečnost přímo na úrovni jazyka.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="enum-example-heading">
+    {% set _callout_body %}
+
         <h3 id="enum-example-heading">Příklad: Backed enum pro stav objednávky</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -729,12 +876,24 @@ enum OrderStatus: string
     {
         return in_array($target, $this->allowedTransitions(), true);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/ValueObject/OrderStatus.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Backed enum pro stav objednávky',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="enum-usage-heading">
+    {% set _callout_body %}
+
         <h3 id="enum-usage-heading">Příklad: Použití enum v doménové entitě</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -808,10 +967,22 @@ final class Order
 
         return $events;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Model/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Použití enum v doménové entitě',
+                body: _callout_body
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Kdy použít enum a kdy plnohodnotný hodnotový objekt?</h3>
         <ul>
             <li><strong>Enum</strong> - pro jednoduché konečné stavy, kde hodnota je jedna z pevně daných variant: <code>OrderStatus</code>, <code>UserRole</code>, <code>TaskPriority</code>, <code>Currency</code>. Enums podporují metody, takže lze zapouzdřit i přechodovou logiku (viz <code>allowedTransitions()</code>).</li>
@@ -820,27 +991,39 @@ final class Order
         <p>
             Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepotřebuje složitou vnitřní logiku, je enum správná volba. Pokud typ obsahuje libovolné hodnoty, validaci nebo výpočty, použijte hodnotový objekt.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Kdy použít enum a kdy plnohodnotný hodnotový objekt?',
+                body: _callout_body
+            } %}
 
-    <div class="warning">
+    {% set _callout_body %}
+
         <h3>Doctrine a PHP enums</h3>
         <p>
             Doctrine ORM 2.19+ a 3.x nativně podporují PHP enums. Při použití XML mapování stačí u pole uvést <code>type="string"</code> a <code>enumType="App\OrderManagement\Domain\ValueObject\OrderStatus"</code>.
             Doctrine automaticky konvertuje hodnotu mezi PHP enum a databázovým sloupcem. Pro backed enums se ukládá backing value (<code>string</code> nebo <code>int</code>).
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Doctrine a PHP enums',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="domain-services" aria-labelledby="domain-services-heading">
-    <h2 id="domain-services-heading">Implementace doménových služeb</h2>
+    <h2 id="domain-services-heading" class="h-section"><span class="h-num">04.09</span> Implementace doménových služeb</h2>
     <p>
         Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
         V Symfony 8 se implementují doménové služby jako běžné PHP třídy:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="domain-service-example-heading">
+    {% set _callout_body %}
+
         <h3 id="domain-service-example-heading">Příklad: Implementace doménové služby v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -868,8 +1051,19 @@ class PaymentService
             $paymentMethod
         );
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Service/PaymentService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace doménové služby v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>PaymentService</code> doménová služba, která zapouzdřuje doménovou logiku
@@ -880,16 +1074,17 @@ class PaymentService
     </section>
 
     <section id="specification-pattern" aria-labelledby="specification-pattern-heading">
-    <h2 id="specification-pattern-heading">Specification Pattern</h2>
+    <h2 id="specification-pattern-heading" class="h-section"><span class="h-num">04.10</span> Specification Pattern</h2>
     <p>
         Specification Pattern (Eric Evans, <em>DDD</em>, kap. 9) zapouzdřuje doménová pravidla a podmínky
         do samostatných, znovu použitelných objektů. Specifikace odpovídá na otázku „splňuje tento objekt
         dané kritérium?" a lze ji použít pro validaci, filtrování i vyhledávání.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="specification-example-heading">
+    {% set _callout_body %}
+
         <h3 id="specification-example-heading">Příklad: Specification Pattern v PHP</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -903,10 +1098,15 @@ interface Specification
 {
     /** @param T $candidate */
     public function isSatisfiedBy(mixed $candidate): bool;
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Shared/Domain/Specification/Specification.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -920,18 +1120,23 @@ use App\Shared\Domain\Specification\Specification;
  * Specifikace: objednávka je způsobilá k expedici.
  * V produkčním kódu by specifikace ověřovala více podmínek
  * (platba přijata, dodací adresa vyplněna, skladová dostupnost).
- * @implements Specification&lt;Order&gt;
+ * @implements Specification<Order>
  */
 final class OrderEligibleForShipping implements Specification
 {
     public function isSatisfiedBy(mixed $candidate): bool
     {
-        return $candidate-&gt;status() === OrderStatus::PAID;
+        return $candidate->status() === OrderStatus::PAID;
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Specification/OrderEligibleForShipping.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -951,17 +1156,28 @@ final class ShippingService
 
     public function shipOrder(Order $order): void
     {
-        if (!$this-&gt;shippingSpec-&gt;isSatisfiedBy($order)) {
+        if (!$this->shippingSpec->isSatisfiedBy($order)) {
             throw new \DomainException('Objednávka nesplňuje podmínky pro expedici.');
         }
 
-        $order-&gt;transitionTo(OrderStatus::SHIPPED);
+        $order->transitionTo(OrderStatus::SHIPPED);
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Service/ShippingService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Specification Pattern v PHP',
+                body: _callout_body
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Kdy použít Specification Pattern?</h3>
         <ul>
             <li><strong>Validace</strong> - ověření, zda doménový objekt splňuje business pravidlo.</li>
@@ -969,18 +1185,24 @@ final class ShippingService
             <li><strong>Vytváření na zakázku</strong> - zajištění, že nově vytvořený objekt splňuje invarianty.</li>
             <li><strong>Kombinace pravidel</strong> - specifikace lze skládat pomocí <code>AndSpecification</code>, <code>OrSpecification</code>, <code>NotSpecification</code>.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Kdy použít Specification Pattern?',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="domain-events" aria-labelledby="domain-events-heading">
-    <h2 id="domain-events-heading">Implementace doménových událostí</h2>
+    <h2 id="domain-events-heading" class="h-section"><span class="h-num">04.11</span> Implementace doménových událostí</h2>
     <p>
         Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 se implementují doménové události jako neměnné PHP třídy:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="domain-event-example-heading">
+    {% set _callout_body %}
+
         <h3 id="domain-event-example-heading">Příklad: Implementace doménové události v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1016,15 +1238,27 @@ class UserRegistered
     {
         return $this->occurredAt;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Event/UserRegistered.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace doménové události v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>UserRegistered</code> doménová událost, která reprezentuje registraci nového uživatele.
         Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký má e-mail a kdy se to stalo.
     </p>
 
-    <div class="note" role="note" aria-labelledby="dispatcher-vs-messenger-heading">
+    {% set _callout_body %}
+
         <h3 id="dispatcher-vs-messenger-heading">Symfony EventDispatcher vs. Messenger pro doménové události</h3>
         <p>
             Symfony nabízí dva mechanismy pro práci s událostmi – každý pro jiný účel:
@@ -1047,17 +1281,23 @@ class UserRegistered
             protože umožňuje pozdější přechod na asynchronní zpracování bez změny kódu producenta.
             EventDispatcher používejte pro Symfony-specifické události (kernel events, form events).
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Symfony EventDispatcher vs. Messenger pro doménové události',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="error-handling" aria-labelledby="error-handling-heading">
-    <h2 id="error-handling-heading">Strategie zpracování chyb v DDD</h2>
+    <h2 id="error-handling-heading" class="h-section"><span class="h-num">04.12</span> Strategie zpracování chyb v DDD</h2>
     <p>
         V DDD se výjimky liší podle vrstvy, ve které vznikají. Každá vrstva
         má jiné odpovědnosti a jiný typ chyb:
     </p>
 
-    <div class="note" role="note" aria-labelledby="exception-types-heading">
+    {% set _callout_body %}
+
         <h3 id="exception-types-heading">Typy výjimek podle vrstvy</h3>
         <ul>
             <li>
@@ -1078,11 +1318,17 @@ class UserRegistered
                 Příklady: <code>ConnectionException</code>, <code>TimeoutException</code>.
             </li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Typy výjimek podle vrstvy',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="custom-exception-heading">
+    {% set _callout_body %}
+
         <h3 id="custom-exception-heading">Příklad: Vlastní doménová výjimka</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1101,11 +1347,22 @@ final class InvalidOrderStateTransitionException extends \DomainException
             $to,
         ));
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Exception/InvalidOrderStateTransitionException.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Vlastní doménová výjimka',
+                body: _callout_body
+            } %}
 
-    <div class="warning">
+    {% set _callout_body %}
+
         <h3>Doporučení pro výjimky v DDD</h3>
         <ul>
             <li>Doménové výjimky by měly <strong>dědit z <code>\DomainException</code></strong> - tím signalizují, že jde o porušení business pravidla, ne o technickou chybu.</li>
@@ -1113,19 +1370,25 @@ final class InvalidOrderStateTransitionException extends \DomainException
             <li><strong>Nepropagujte infrastrukturní výjimky</strong> do doménové vrstvy - repozitáře by je měly zachytit a přeložit na doménové výjimky.</li>
             <li>Kontrolery by měly zachytávat doménové výjimky a <strong>překládat je na HTTP odpovědi</strong> (400, 404, 409).</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Doporučení pro výjimky v DDD',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="application-services" aria-labelledby="application-services-heading">
-    <h2 id="application-services-heading">Implementace aplikačních služeb</h2>
+    <h2 id="application-services-heading" class="h-section"><span class="h-num">04.13</span> Implementace aplikačních služeb</h2>
     <p>
         Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 se implementují aplikační služby
         jako command a query handlery:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="command-handler-example-heading">
+    {% set _callout_body %}
+
         <h3 id="command-handler-example-heading">Příklad: Implementace command handleru v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1139,9 +1402,15 @@ class RegisterUser
         public readonly string $password
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Command/RegisterUser.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1164,27 +1433,39 @@ class RegisterUserHandler
 
     public function __invoke(RegisterUser $command): void
     {
-        $email = new Email($command-&gt;email);
+        $email = new Email($command->email);
 
-        if ($this-&gt;userRepository-&gt;findByEmail($email)) {
+        if ($this->userRepository->findByEmail($email)) {
             throw new \DomainException('User with this email already exists');
         }
 
         $user = User::register(
             new UserId(),
-            $command-&gt;name,
+            $command->name,
             $email,
-            HashedPassword::fromPlainText($command-&gt;password)
+            HashedPassword::fromPlainText($command->password)
         );
 
-        $this-&gt;userRepository-&gt;save($user);
+        $this->userRepository->save($user);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Command/RegisterUserHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace command handleru v Symfony 8',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="query-handler-example-heading">
+    {% set _callout_body %}
+
         <h3 id="query-handler-example-heading">Příklad: Implementace query handleru v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1196,9 +1477,15 @@ class GetUserProfile
         public readonly string $userId
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Profile/Query/GetUserProfile.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1231,15 +1518,27 @@ class GetUserProfileHandler
             $user->createdAt()
         );
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Profile/Query/GetUserProfileHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace query handleru v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V těchto příkladech jsou <code>RegisterUserHandler</code> a <code>GetUserProfileHandler</code> aplikační služby, které zpracovávají příkazy a dotazy.
         Tyto služby koordinují aplikační aktivity a delegují práci doménové vrstvě.
     </p>
 
-    <div class="note" role="note" aria-labelledby="validace-kde-heading">
+    {% set _callout_body %}
+
         <h3 id="validace-kde-heading">Kde validovat: Symfony Validator vs. doménová validace</h3>
         <p>
             V DDD existují dva druhy validace, každý na jiné vrstvě:
@@ -1262,20 +1561,26 @@ class GetUserProfileHandler
             <strong>Pravidlo:</strong> Symfony Validator řeší <em>syntaktickou</em> validaci (formát),
             doménová vrstva řeší <em>sémantickou</em> validaci (business pravidla).
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Kde validovat: Symfony Validator vs. doménová validace',
+                body: _callout_body
+            } %}
 
     </section>
 
     <section id="controllers" aria-labelledby="controllers-heading">
-    <h2 id="controllers-heading">Implementace kontrolerů</h2>
+    <h2 id="controllers-heading" class="h-section"><span class="h-num">04.14</span> Implementace kontrolerů</h2>
     <p>
         Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 se implementují kontrolery
         jako běžné Symfony kontrolery:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="controller-example-heading">
+    {% set _callout_body %}
+
         <h3 id="controller-example-heading">Příklad: Implementace kontroleru v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1321,8 +1626,19 @@ class RegistrationController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Controller/RegistrationController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Implementace kontroleru v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>RegistrationController</code> kontroler, který zpracovává registraci uživatele.
@@ -1331,15 +1647,16 @@ class RegistrationController extends AbstractController
     </section>
 
     <section id="dependency-injection" aria-labelledby="dependency-injection-heading">
-    <h2 id="dependency-injection-heading">Dependency Injection a autowiring</h2>
+    <h2 id="dependency-injection-heading" class="h-section"><span class="h-num">04.15</span> Dependency Injection a autowiring</h2>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
         Symfony 8 poskytuje výkonný Dependency Injection Container, který slouží pro konfiguraci služeb:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="dependency-injection-example-heading">
+    {% set _callout_body %}
+
         <h3 id="dependency-injection-example-heading">Příklad: Konfigurace služeb v Symfony 8</h3>
-        <pre><code class="language-yaml"># config/services.yaml
+        {% set _code %}{% verbatim %}# config/services.yaml
 services:
     _defaults:
         autowire: true
@@ -1372,8 +1689,19 @@ services:
     #                     - doctrine_transaction
     #             query.bus:
     #                 middleware:
-    #                     - validation</code></pre>
-    </div>
+    #                     - validation{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Konfigurace služeb v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je konfigurace služeb v Symfony 8. Služby jsou automaticky registrovány a autowired.
@@ -1389,9 +1717,10 @@ services:
         má svou vlastní konfiguraci a je jasně ohraničen i na úrovni service containeru.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="autowiring-bc-example-heading">
+    {% set _callout_body %}
+
         <h3 id="autowiring-bc-example-heading">Příklad: Samostatný autowiring pro každý Bounded Context</h3>
-        <pre><code class="language-yaml"># config/services.yaml
+        {% set _code %}{% verbatim %}# config/services.yaml
 services:
     _defaults:
         autowire: true
@@ -1429,10 +1758,22 @@ services:
     App\Shared\:
         resource: '../src/Shared/'
         exclude:
-            - '../src/Shared/Domain/ValueObject/'</code></pre>
-    </div>
+            - '../src/Shared/Domain/ValueObject/'{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/doctrine.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Samostatný autowiring pro každý Bounded Context',
+                body: _callout_body
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <h3>Výhody odděleného autowiringu pro Bounded Contexts</h3>
         <ul>
             <li><strong>Explicitní hranice</strong> - každý bounded context má svůj vlastní blok konfigurace, což jasně dokumentuje hranice kontextů i na úrovni infrastruktury.</li>
@@ -1440,9 +1781,15 @@ services:
             <li><strong>Snazší refaktoring</strong> - při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z <code>services.yaml</code>.</li>
             <li><strong>Prevence nechtěných závislostí</strong> - pokud kontext A omylem importuje třídu z kontextu B, je snadné to odhalit v konfiguraci.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Výhody odděleného autowiringu pro Bounded Contexts',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="shared-folder-heading">
+    {% set _callout_body %}
+
         <h3 id="shared-folder-heading">Co patří do sdílené složky (Shared)?</h3>
         <p>
             Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, které nemají specifický doménový význam:
@@ -1456,7 +1803,12 @@ services:
         <p>
             Doménové modely, hodnotové objekty a repozitáře by měly být umístěny v příslušných doménách, nikoli ve sdílené složce.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Co patří do sdílené složky (Shared)?',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1484,7 +1836,7 @@ services:
             }
         ]
     } %}
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
