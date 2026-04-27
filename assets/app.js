@@ -9,7 +9,7 @@ import './styles/base.css';
 import './styles/hljs-theme.css';
 import './styles/chrome.css';
 import './styles/article.css';
-import './styles/landing.css';
+// import './styles/landing.css'; // odkomentovat v Phase 4 (Task 4.1)
 
 // highlight.js — registrace pouze potřebných jazyků
 import hljs from 'highlight.js/lib/core';
