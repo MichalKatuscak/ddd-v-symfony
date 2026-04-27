@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">CQRS</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">CQRS v Symfony 8</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '05',
+        category: 'Vzory',
+        title: 'CQRS v Symfony 8',
+        deck: 'Kompletní průvodce implementací CQRS (Command Query Responsibility Segregation) v Symfony 8 s využitím DDD principů. Naučte se oddělit operace čtení a zápisu, optimalizovat read modely, řešit eventual consistency a budovat škálovatelné aplikace.',
+        reading_time: 20,
+        difficulty: 3,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <div class="examples-banner" role="note">
+    <div class="art-body" data-chapter-number="05">
+<div class="examples-banner" role="note">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
             <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
         </svg>
@@ -74,31 +72,8 @@
         </span>
     </div>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#what-is-cqrs">Co je CQRS?</a></li>
-            <li><a href="#cqs-vs-cqrs">CQS vs. CQRS - kde je hranice?</a></li>
-            <li><a href="#benefits">Výhody CQRS</a></li>
-            <li><a href="#challenges">Výzvy a omezení CQRS</a></li>
-            <li><a href="#symfony-messenger">Symfony Messenger jako základ CQRS</a></li>
-            <li><a href="#commands">Implementace Commands</a></li>
-            <li><a href="#queries">Implementace Queries</a></li>
-            <li><a href="#handlers">Implementace Handlers</a></li>
-            <li><a href="#view-models">ViewModely a Read Modely</a></li>
-            <li><a href="#buses">Implementace Command a Query Buses</a></li>
-            <li><a href="#read-model-optimalizace">Optimalizace Read Modelů</a></li>
-            <li><a href="#eventual-consistency">Eventual Consistency v praxi</a></li>
-            <li><a href="#async">Asynchronní zpracování</a></li>
-            <li><a href="#error-handling">Zpracování chyb a Dead Letter Queue</a></li>
-            <li><a href="#middleware">Middleware v CQRS</a></li>
-            <li><a href="#testovani-cqrs">Testování CQRS</a></li>
-            <li><a href="#saga">Saga / Process Manager</a></li>
-        </ul>
-    </div>
-
-    <section id="what-is-cqrs" aria-labelledby="what-is-cqrs-heading">
-    <h2 id="what-is-cqrs-heading">Co je CQRS?</h2>
+<section id="what-is-cqrs" aria-labelledby="what-is-cqrs-heading">
+    <h2 id="what-is-cqrs-heading" class="h-section"><span class="h-num">05.01</span> Co je CQRS?</h2>
     <p>
         CQRS vychází z jednoho přímočarého pozorování: <strong>model, který slouží k zápisu dat, nemusí být tentýž model,
         který slouží k jejich čtení</strong>. CQRS (Command Query Responsibility Segregation) tento princip
@@ -114,7 +89,8 @@
         optimalizován pro svůj specifický úkol.
     </p>
 
-    <div class="note" role="note" aria-labelledby="zakladni-principy-heading">
+    {% set _callout_body %}
+
         <h3 id="zakladni-principy-heading">Základní principy CQRS:</h3>
         <ul>
             <li><strong>Commands</strong> - Příkazy, které mění stav systému. Ve striktním pojetí CQS nevracejí žádná data; v praxi CQRS mohou vracet identifikátor vytvořeného záznamu.</li>
@@ -122,7 +98,12 @@
             <li><strong>Oddělené modely</strong> - Write model (bohatý doménový model s business logikou) a Read model (jednoduchá denormalizovaná datová struktura optimalizovaná pro dotazy).</li>
             <li><strong>Oddělené databáze</strong> - V pokročilých implementacích mohou být použity oddělené databáze pro čtení a zápis, čímž lze nezávisle škálovat zátěž.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Základní principy CQRS:',
+                body: _callout_body
+            } %}
 
     <p>
         CQRS je často používán v kombinaci s <a href="{{ path('event_sourcing') }}">Event Sourcing</a>,
@@ -134,7 +115,7 @@
     </section>
 
     <section id="cqs-vs-cqrs" aria-labelledby="cqs-vs-cqrs-heading">
-    <h2 id="cqs-vs-cqrs-heading">CQS vs. CQRS - kde je hranice?</h2>
+    <h2 id="cqs-vs-cqrs-heading" class="h-section"><span class="h-num">05.02</span> CQS vs. CQRS - kde je hranice?</h2>
 
     <p>
         Bertrand Meyer formuloval princip <strong>Command-Query Separation (CQS)</strong> jako pravidlo
@@ -148,7 +129,8 @@
         optimalizačním profilem.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="cqs-vs-cqrs-tabulka-heading">
+    {% set _callout_body %}
+
         <h3 id="cqs-vs-cqrs-tabulka-heading">CQS vs. CQRS - přehled</h3>
         <div class="table-responsive">
         <table class="table table-bordered">
@@ -193,7 +175,12 @@
             </tbody>
         </table>
         </div>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'CQS vs. CQRS - přehled',
+                body: _callout_body
+            } %}
 
     <p>
         V praxi se CQS přirozeně stává výchozím bodem pro CQRS. Pokud dodržujete CQS na úrovni metod,
@@ -201,7 +188,8 @@
         které stav čtou (query methods). CQRS toto pozorování formalizuje rozdělením do dvou explicitních modelů.
     </p>
 
-    <div class="note" role="note" aria-labelledby="cqrs-urovne-heading">
+    {% set _callout_body %}
+
         <h3 id="cqrs-urovne-heading">Úrovně adopce CQRS</h3>
         <p>
             CQRS není binární volba. Existuje spektrum úrovní adopce, od nejjednodušší po nejpokročilejší:
@@ -224,11 +212,16 @@
             (úroveň 3–4), zatímco podpůrné kontexty (notifikace, administrace) si vystačí s jednoduchým
             CRUD - viz <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Úrovně adopce CQRS',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="benefits" aria-labelledby="benefits-heading">
-    <h2 id="benefits-heading">Výhody CQRS</h2>
+    <h2 id="benefits-heading" class="h-section"><span class="h-num">05.03</span> Výhody CQRS</h2>
     <p>
         CQRS přináší řadu architektonických výhod, které se projevují zejména u aplikací
         s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
@@ -265,7 +258,7 @@
     </section>
 
     <section id="challenges" aria-labelledby="challenges-heading">
-    <h2 id="challenges-heading">Výzvy a omezení CQRS</h2>
+    <h2 id="challenges-heading" class="h-section"><span class="h-num">05.04</span> Výzvy a omezení CQRS</h2>
     <p>
         CQRS není stříbrná kulka. Jako každý architektonický vzor přináší kompromisy,
         které je nutné pečlivě zvážit ještě před adopcí:
@@ -295,7 +288,8 @@
         </li>
     </ul>
 
-    <div class="warning" role="alert" aria-labelledby="when-not-to-use-cqrs-heading">
+    {% set _callout_body %}
+
         <h3 id="when-not-to-use-cqrs-heading">Kdy nepoužívat CQRS</h3>
         <p>
             CQRS nemusí být vhodný pro všechny projekty. Nepoužívejte CQRS, pokud:
@@ -315,12 +309,17 @@
             a rozšiřovat postupně. Viz také
             <a href="{{ path('anti_patterns') }}#over-engineering">Anti-vzory - Over-engineering u jednoduchých aplikací</a>.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Kdy nepoužívat CQRS',
+                body: _callout_body
+            } %}
 
     </section>
 
     <section id="symfony-messenger" aria-labelledby="symfony-messenger-heading">
-    <h2 id="symfony-messenger-heading">Symfony Messenger jako základ CQRS</h2>
+    <h2 id="symfony-messenger-heading" class="h-section"><span class="h-num">05.05</span> Symfony Messenger jako základ CQRS</h2>
     <p>
         Symfony Messenger je komponenta, která poskytuje infrastrukturu pro odesílání a zpracování zpráv.
         Pro CQRS je podstatná schopnost definovat <strong>více message busů</strong> - jeden pro příkazy
@@ -328,15 +327,17 @@
         vlastní transport a vlastní strategii zpracování.
     </p>
 
-    <div class="tip">
-        <div class="diagram-container">
-            {% include '/diagrams/6_cqrs/diagram.svg' %}
-        </div>
-    </div>
+    {% set _diagram_inline %}{% include '/diagrams/6_cqrs/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="messenger-config-heading">
+    {% set _callout_body %}
+
         <h3 id="messenger-config-heading">Konfigurace Symfony Messenger pro CQRS</h3>
-        <pre><code class="language-yaml"># config/packages/messenger.yaml
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
 framework:
     messenger:
         # Výchozí bus - použitý, když není specifikovaný jiný
@@ -367,8 +368,19 @@ framework:
             App\Reporting\Application\Command\GenerateMonthlyReport: async
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
-            # App\UserManagement\Profile\Query\GetUserProfile: sync</code></pre>
-    </div>
+            # App\UserManagement\Profile\Query\GetUserProfile: sync{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Konfigurace Symfony Messenger pro CQRS',
+                body: _callout_body
+            } %}
 
     <p>
         V této konfiguraci jsou definovány dva transporty: <code>async</code> pro asynchronní zpracování a <code>sync</code> pro synchronní zpracování.
@@ -376,7 +388,8 @@ framework:
         middleware (automatická transakce kolem handleru) a <code>query.bus</code> (query bus) pro dotazy pouze s validací.
     </p>
 
-    <div class="note" role="note" aria-labelledby="proc-dva-busy-heading">
+    {% set _callout_body %}
+
         <h3 id="proc-dva-busy-heading">Proč dva oddělené busy?</h3>
         <p>
             Oddělení command busu a query busu není jen formální gesto. Má konkrétní praktické důsledky:
@@ -390,9 +403,15 @@ framework:
                 je jasné, že dispatchuje příkaz. Pokud injektuje <code>$queryBus</code>,
                 je jasné, že čte data. To zlepšuje čitelnost kódu a brání náhodným záměnám.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Proč dva oddělené busy?',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="async-poznamka-heading">
+    {% set _callout_body %}
+
         <h3 id="async-poznamka-heading">Jak vybrat příkazy pro asynchronní zpracování</h3>
         <p>
             <strong>Asynchronně</strong> zpracovávejte operace, kde uživatel nemusí čekat na výsledek -
@@ -403,12 +422,17 @@ framework:
             registrace uživatele, vytvoření objednávky, přihlášení. Uživatel čeká na odpověď
             (úspěch / chyba validace) a potřebuje ji okamžitě.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Jak vybrat příkazy pro asynchronní zpracování',
+                body: _callout_body
+            } %}
 
     </section>
 
     <section id="commands" aria-labelledby="commands-heading">
-    <h2 id="commands-heading">Implementace Commands</h2>
+    <h2 id="commands-heading" class="h-section"><span class="h-num">05.06</span> Implementace Commands</h2>
     <p>
         Commands v CQRS jsou příkazy, které mění stav systému. V Symfony 8 se implementují jako jednoduché
         PHP třídy - immutabilní datové objekty (DTO), které nesou veškerá data potřebná pro vykonání operace.
@@ -424,9 +448,10 @@ framework:
         <li>Neobsahuje reference na <strong>doménové objekty</strong> - pracuje s primitivními typy (string, int, float), které jsou serializovatelné pro asynchronní transport.</li>
     </ul>
 
-    <div class="tip" role="note" aria-labelledby="command-example-heading">
+    {% set _callout_body %}
+
         <h3 id="command-example-heading">PHP: Implementace příkazu v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -454,8 +479,19 @@ final class RegisterUser
         public readonly string $password
     ) {
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Command/RegisterUser.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Implementace příkazu v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>RegisterUser</code> příkaz, který obsahuje data potřebná pro registraci uživatele.
@@ -463,7 +499,8 @@ final class RegisterUser
         na command busu, ještě než se command dostane k handleru.
     </p>
 
-    <div class="warning" role="alert" aria-labelledby="command-navratova-hodnota-heading">
+    {% set _callout_body %}
+
         <h3 id="command-navratova-hodnota-heading">Mají commands vracet hodnotu?</h3>
         <p>
             Ve striktním CQS pojetí commands nevracejí žádná data. V praxi CQRS však existují legitimní
@@ -476,20 +513,26 @@ final class RegisterUser
             <li><strong>ID vracet z handleru</strong> - Handler vrátí ID přes <code>HandledStamp</code>.
                 Jednodušší na implementaci, ale porušuje striktní CQS a komplikuje asynchronní zpracování.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Mají commands vracet hodnotu?',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="queries" aria-labelledby="queries-heading">
-    <h2 id="queries-heading">Implementace Queries</h2>
+    <h2 id="queries-heading" class="h-section"><span class="h-num">05.07</span> Implementace Queries</h2>
     <p>
         Queries v CQRS jsou dotazy, které vrací data bez změny stavu systému. Podobně jako commands
         se implementují jako immutabilní DTO třídy, ale na rozdíl od commands <strong>vždy vracejí
         hodnotu</strong> - handler vrací data přes <code>HandledStamp</code>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="query-example-heading">
+    {% set _callout_body %}
+
         <h3 id="query-example-heading">PHP: Implementace dotazu v Symfony 8</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -505,21 +548,33 @@ final class GetUserProfile
         public readonly string $userId
     ) {
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Profile/Query/GetUserProfile.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Implementace dotazu v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V tomto příkladu je <code>GetUserProfile</code> dotaz, který obsahuje ID uživatele, jehož profil chceme získat.
         Dotaz používá atributy pro validaci dat - nevalidní UUID bude odmítnuto ještě před zpracováním.
     </p>
 
-    <div class="note" role="note" aria-labelledby="query-slozitejsi-heading">
+    {% set _callout_body %}
+
         <h3 id="query-slozitejsi-heading">Queries s filtrováním a stránkováním</h3>
         <p>
             Reálné aplikace potřebují dotazy složitější než pouhé „dej mi záznam podle ID". Queries
             mohou obsahovat filtrovací kritéria, řazení a stránkování:
         </p>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -546,12 +601,23 @@ final class ListOrders
         public readonly string $sortDirection = 'DESC',
     ) {
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Query/ListOrders.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Queries s filtrováním a stránkováním',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="handlers" aria-labelledby="handlers-heading">
-    <h2 id="handlers-heading">Implementace Handlers</h2>
+    <h2 id="handlers-heading" class="h-section"><span class="h-num">05.08</span> Implementace Handlers</h2>
     <p>
         Handlers v CQRS jsou objekty, které zpracovávají příkazy a dotazy. V Symfony 8 se implementují
         jako PHP třídy s atributem <code>AsMessageHandler</code> a metodou <code>__invoke()</code>.
@@ -573,9 +639,10 @@ final class ListOrders
         </li>
     </ul>
 
-    <div class="tip" role="note" aria-labelledby="command-handler-heading">
+    {% set _callout_body %}
+
         <h3 id="command-handler-heading">PHP: Command handler - RegisterUserHandler</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -618,20 +685,38 @@ final class RegisterUserHandler
 
         $this->userRepository->save($user);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Command/RegisterUserHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Command handler - RegisterUserHandler',
+                body: _callout_body
+            } %}
 
-    <div class="note">
+    {% set _callout_body %}
+
         <p>
             <strong>Pozn.:</strong> Tato varianta používá <code>PasswordHasher</code> jako závislost handleru.
             Alternativní přístup s <code>HashedPassword</code> hodnotovým objektem je ukázán v kapitole
             <a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony</a>.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="query-handler-example-heading">
+    {% set _callout_body %}
+
         <h3 id="query-handler-example-heading">PHP: Query handler - GetUserProfileHandler</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -653,8 +738,19 @@ final class GetUserProfileHandler
     {
         return $this->readRepository->findById($query->userId);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Profile/Query/GetUserProfileHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Query handler - GetUserProfileHandler',
+                body: _callout_body
+            } %}
 
     <p>
         Všimněte si podstatného rozdílu: command handler pracuje s doménovým modelem (<code>UserRepository</code>,
@@ -665,7 +761,7 @@ final class GetUserProfileHandler
     </section>
 
     <section id="view-models" aria-labelledby="view-models-heading">
-    <h2 id="view-models-heading">ViewModely a Read Modely</h2>
+    <h2 id="view-models-heading" class="h-section"><span class="h-num">05.09</span> ViewModely a Read Modely</h2>
 
     <p>
         ViewModel (nebo Read Model) je datová struktura navržená výhradně pro potřeby konkrétního dotazu
@@ -675,9 +771,10 @@ final class GetUserProfileHandler
         šablona nebo API endpoint.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="viewmodel-example-heading">
+    {% set _callout_body %}
+
         <h3 id="viewmodel-example-heading">PHP: UserProfileViewModel</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -698,8 +795,19 @@ final readonly class UserProfileViewModel
         public string $membershipTier,
     ) {
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Profile/ViewModel/UserProfileViewModel.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: UserProfileViewModel',
+                body: _callout_body
+            } %}
 
     <p>
         ViewModel často obsahuje <strong>data z více agregátů</strong> - v příkladu výše kombinuje
@@ -709,9 +817,10 @@ final readonly class UserProfileViewModel
         připravená v denormalizované podobě.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="read-repository-example-heading">
+    {% set _callout_body %}
+
         <h3 id="read-repository-example-heading">PHP: Read repozitář s přímým SQL (Doctrine DBAL)</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -754,10 +863,22 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
             membershipTier: $row['membership_tier'],
         );
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/ReadModel/DbalUserProfileReadRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Read repozitář s přímým SQL (Doctrine DBAL)',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="read-model-poznamka-heading">
+    {% set _callout_body %}
+
         <h3 id="read-model-poznamka-heading">Proč ne Doctrine ORM pro read stranu?</h3>
         <p>
             Doctrine ORM je navržen pro práci s doménovým modelem - mapuje entity, řeší vztahy,
@@ -767,20 +888,26 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
             jednodušší a bez rizika N+1 problémů. O výkonnostních dopadech pojednává
             kapitola <a href="{{ path('performance_aspects') }}">Výkonnostní aspekty</a>.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Proč ne Doctrine ORM pro read stranu?',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="buses" aria-labelledby="buses-heading">
-    <h2 id="buses-heading">Implementace Command a Query Buses</h2>
+    <h2 id="buses-heading" class="h-section"><span class="h-num">05.10</span> Implementace Command a Query Buses</h2>
     <p>
         Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery.
         V Symfony 8 se pro injektování správného busu používá named autowiring - názvy parametrů
         v konstruktoru musejí odpovídat konfiguraci v <code>messenger.yaml</code>:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="buses-example-heading">
+    {% set _callout_body %}
+
         <h3 id="buses-example-heading">PHP: Použití command busu v controlleru</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -831,12 +958,24 @@ final class RegistrationController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Controller/RegistrationController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Použití command busu v controlleru',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="query-bus-example-heading">
+    {% set _callout_body %}
+
         <h3 id="query-bus-example-heading">PHP: Použití query busu v controlleru</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -873,8 +1012,19 @@ final class ProfileController extends AbstractController
             'profile' => $profile,
         ]);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Profile/Controller/ProfileController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Použití query busu v controlleru',
+                body: _callout_body
+            } %}
 
     <p>
         V těchto příkladech je <code>commandBus</code> a <code>queryBus</code> injektováno pomocí named autowiring -
@@ -891,7 +1041,7 @@ final class ProfileController extends AbstractController
     </section>
 
     <section id="read-model-optimalizace" aria-labelledby="read-model-optimalizace-heading">
-    <h2 id="read-model-optimalizace-heading">Optimalizace Read Modelů</h2>
+    <h2 id="read-model-optimalizace-heading" class="h-section"><span class="h-num">05.11</span> Optimalizace Read Modelů</h2>
 
     <p>
         Jednou z hlavních výhod CQRS je možnost <strong>nezávisle optimalizovat read stranu</strong>
@@ -901,7 +1051,8 @@ final class ProfileController extends AbstractController
 
     <h3>Strategie optimalizace read modelů</h3>
 
-    <div class="note" role="note" aria-labelledby="read-strategie-heading">
+    {% set _callout_body %}
+
         <h3 id="read-strategie-heading">Přehled strategií</h3>
         <div class="table-responsive">
         <table class="table table-bordered">
@@ -947,7 +1098,12 @@ final class ProfileController extends AbstractController
             </tbody>
         </table>
         </div>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Přehled strategií',
+                body: _callout_body
+            } %}
 
     <h3>Denormalizované tabulky jako read model</h3>
     <p>
@@ -956,9 +1112,10 @@ final class ProfileController extends AbstractController
         Tabulka se aktualizuje asynchronně přes doménové události.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="denorm-projekce-heading">
+    {% set _callout_body %}
+
         <h3 id="denorm-projekce-heading">PHP: Projektor aktualizující denormalizovanou tabulku</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1040,10 +1197,22 @@ final class OrderDashboardProjector
             ],
         );
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Infrastructure/Projection/OrderDashboardProjector.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Projektor aktualizující denormalizovanou tabulku',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="idempotence-heading">
+    {% set _callout_body %}
+
         <h3 id="idempotence-heading">Idempotence projektorů</h3>
         <p>
             Při asynchronním zpracování může být událost doručena <strong>více než jednou</strong>
@@ -1062,7 +1231,12 @@ final class OrderDashboardProjector
             Podrobněji o idempotenci projektorů a dalších praktických problémech pojednává kapitola
             <a href="{{ path('event_sourcing') }}#prakticke-problemy-projekci">Event Sourcing - Praktické problémy projekcí</a>.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Idempotence projektorů',
+                body: _callout_body
+            } %}
 
     <h3>Rebuild projekcí</h3>
     <p>
@@ -1085,7 +1259,7 @@ final class OrderDashboardProjector
     </section>
 
     <section id="eventual-consistency" aria-labelledby="eventual-consistency-heading">
-    <h2 id="eventual-consistency-heading">Eventual Consistency v praxi</h2>
+    <h2 id="eventual-consistency-heading" class="h-section"><span class="h-num">05.12</span> Eventual Consistency v praxi</h2>
 
     <p>
         Eventual consistency je nejčastějším zdrojem nejistoty při adopci CQRS. Při asynchronní
@@ -1100,11 +1274,12 @@ final class OrderDashboardProjector
         až po čtení - a zvýrazňuje okno, ve kterém k eventual consistency dochází:
     </p>
 
-    <div class="tip">
-        <div class="diagram-container">
-            {% include '/diagrams/6_cqrs/eventual_consistency.svg' %}
-        </div>
-    </div>
+    {% set _diagram_inline %}{% include '/diagrams/6_cqrs/eventual_consistency.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
     <p>
         Existuje několik osvědčených vzorů, jak eventual consistency v UI řešit:
@@ -1112,7 +1287,8 @@ final class OrderDashboardProjector
 
     <h3>Strategie řešení v UI</h3>
 
-    <div class="tip" role="note" aria-labelledby="ec-strategie-heading">
+    {% set _callout_body %}
+
         <h3 id="ec-strategie-heading">Přehled strategií pro práci s eventual consistency</h3>
         <div class="table-responsive">
         <table class="table table-bordered">
@@ -1152,11 +1328,17 @@ final class OrderDashboardProjector
             </tbody>
         </table>
         </div>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Přehled strategií pro práci s eventual consistency',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="ec-priklad-heading">
+    {% set _callout_body %}
+
         <h3 id="ec-priklad-heading">PHP: Optimistická aktualizace - controller vrací data z command handleru</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1205,10 +1387,22 @@ final class PlaceOrderController extends AbstractController
 
         return $this->redirectToRoute('order_detail', ['id' => $orderId]);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Controller/PlaceOrderController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Optimistická aktualizace - controller vrací data z command handleru',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="ec-warning-heading">
+    {% set _callout_body %}
+
         <h3 id="ec-warning-heading">Kdy eventual consistency NENÍ přijatelná</h3>
         <p>
             Existují scénáře, kde i krátkodobá nekonzistence dat je nepřijatelná:
@@ -1226,11 +1420,16 @@ final class PlaceOrderController extends AbstractController
             přes doménový model a databázová omezení), ne přes read model. Read model eventual consistency
             má vliv pouze na <em>zobrazení</em> dat, nikoli na <em>business rozhodnutí</em>.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Kdy eventual consistency NENÍ přijatelná',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="async" aria-labelledby="async-heading">
-    <h2 id="async-heading">Asynchronní zpracování</h2>
+    <h2 id="async-heading" class="h-section"><span class="h-num">05.13</span> Asynchronní zpracování</h2>
     <p>
         Jednou z výhod CQRS je možnost asynchronního zpracování příkazů. V Symfony 8 se asynchronní
         zpracování konfiguruje přes transporty v Messenger komponentě. Příkaz označený pro asynchronní
@@ -1238,9 +1437,10 @@ final class PlaceOrderController extends AbstractController
         vyzvedne a předá handleru.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="async-example-heading">
+    {% set _callout_body %}
+
         <h3 id="async-example-heading">Konfigurace asynchronního zpracování v Symfony 8</h3>
-        <pre><code class="language-yaml"># config/packages/messenger.yaml
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
 framework:
     messenger:
         # Konfigurace transportů
@@ -1268,8 +1468,19 @@ framework:
             App\Reporting\Application\Command\GenerateMonthlyReport: async
 
             # Vysoká priorita - aktualizace read modelů pro kritické obrazovky
-            App\Ordering\Domain\Event\OrderPlaced: async_priority_high</code></pre>
-    </div>
+            App\Ordering\Domain\Event\OrderPlaced: async_priority_high{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Konfigurace asynchronního zpracování v Symfony 8',
+                body: _callout_body
+            } %}
 
     <p>
         V této konfiguraci jsou příkazy pro odesílání e-mailů a generování reportů směrovány na asynchronní
@@ -1278,9 +1489,10 @@ framework:
         pro tuto frontu může běžet s vyšší prioritou nebo na dedikovaném serveru.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="worker-heading">
+    {% set _callout_body %}
+
         <h3 id="worker-heading">Spuštění Messenger workerů</h3>
-        <pre><code class="language-bash"># Konzumace zpráv z obou front - high_priority má přednost
+        {% set _code %}{% verbatim %}# Konzumace zpráv z obou front - high_priority má přednost
 $ php bin/console messenger:consume async_priority_high async
 
 # V produkci: Supervisor nebo systemd pro automatický restart
@@ -1292,10 +1504,22 @@ autostart=true
 autorestart=true
 startsecs=0
 redirect_stderr=true
-stdout_logfile=/var/log/messenger-worker.log</code></pre>
-    </div>
+stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Spuštění Messenger workerů',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="worker-produkce-heading">
+    {% set _callout_body %}
+
         <h3 id="worker-produkce-heading">Produkční provoz workerů</h3>
         <p>
             Messenger workery jsou dlouhodobě běžící procesy. V produkci je nutné zajistit:
@@ -1310,11 +1534,16 @@ stdout_logfile=/var/log/messenger-worker.log</code></pre>
                 <code>SIGTERM</code>. Worker dokončí aktuálně zpracovávanou zprávu a poté se ukončí.
                 Příkaz <code>messenger:stop-workers</code> toho docílí přes cache signal.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Produkční provoz workerů',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="error-handling" aria-labelledby="error-handling-heading">
-    <h2 id="error-handling-heading">Zpracování chyb a Dead Letter Queue</h2>
+    <h2 id="error-handling-heading" class="h-section"><span class="h-num">05.14</span> Zpracování chyb a Dead Letter Queue</h2>
 
     <p>
         V asynchronním prostředí je zpracování chyb podstatně odlišné od synchronního zpracování.
@@ -1343,18 +1572,25 @@ stdout_logfile=/var/log/messenger-worker.log</code></pre>
         vývojář je může prozkoumat, opravit příčinu chyby a znovu odeslat.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="failed-transport-heading">
+    {% set _callout_body %}
+
         <h3 id="failed-transport-heading">Konfigurace failed transportu a diagnostické příkazy</h3>
-        <pre><code class="language-yaml"># config/packages/messenger.yaml
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
 framework:
     messenger:
         failure_transport: failed
 
         transports:
             failed:
-                dsn: 'doctrine://default?queue_name=failed'</code></pre>
+                dsn: 'doctrine://default?queue_name=failed'{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
 
-        <pre><code class="language-bash"># Zobrazení selhavších zpráv
+        {% set _code %}{% verbatim %}# Zobrazení selhavších zpráv
 $ php bin/console messenger:failed:show
 
 # Detail konkrétní selhavší zprávy (včetně výjimky)
@@ -1367,10 +1603,22 @@ $ php bin/console messenger:failed:retry 42
 $ php bin/console messenger:failed:retry
 
 # Trvalé odstranění selhavší zprávy (po analýze)
-$ php bin/console messenger:failed:remove 42</code></pre>
-    </div>
+$ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Konfigurace failed transportu a diagnostické příkazy',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="failed-monitoring-heading">
+    {% set _callout_body %}
+
         <h3 id="failed-monitoring-heading">Monitoring selhavších zpráv</h3>
         <p>
             Dead letter queue není „koš" - je to <strong>fronta vyžadující pozornost</strong>.
@@ -1380,11 +1628,16 @@ $ php bin/console messenger:failed:remove 42</code></pre>
             zprávy mohou znamenat, že read model diverguje od write modelu, události se ztrácejí,
             nebo notifikace nejsou doručovány.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Monitoring selhavších zpráv',
+                body: _callout_body
+            } %}
     </section>
 
     <section id="middleware" aria-labelledby="middleware-heading">
-    <h2 id="middleware-heading">Middleware v CQRS</h2>
+    <h2 id="middleware-heading" class="h-section"><span class="h-num">05.15</span> Middleware v CQRS</h2>
 
     <p>
         Symfony Messenger middleware je řetěz (chain) komponent, které zpracovávají zprávu
@@ -1396,9 +1649,10 @@ $ php bin/console messenger:failed:remove 42</code></pre>
         již viděli v konfiguraci. Pro pokročilejší scénáře si můžete vytvořit vlastní middleware:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="middleware-priklad-heading">
+    {% set _callout_body %}
+
         <h3 id="middleware-priklad-heading">PHP: Logovací middleware pro command bus</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1448,12 +1702,24 @@ final class CommandLoggingMiddleware implements MiddlewareInterface
             throw $e;
         }
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Infrastructure/Messenger/Middleware/CommandLoggingMiddleware.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Logovací middleware pro command bus',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="middleware-registrace-heading">
+    {% set _callout_body %}
+
         <h3 id="middleware-registrace-heading">Registrace vlastního middleware</h3>
-        <pre><code class="language-yaml"># config/packages/messenger.yaml
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
 framework:
     messenger:
         buses:
@@ -1461,8 +1727,19 @@ framework:
                 middleware:
                     - App\Infrastructure\Messenger\Middleware\CommandLoggingMiddleware
                     - validation
-                    - doctrine_transaction</code></pre>
-    </div>
+                    - doctrine_transaction{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Registrace vlastního middleware',
+                body: _callout_body
+            } %}
 
     <p>
         Pořadí middleware je důležité: v příkladu výše se logování provede jako první (zachytí
@@ -1472,7 +1749,7 @@ framework:
     </section>
 
     <section id="testovani-cqrs" aria-labelledby="testovani-cqrs-heading">
-    <h2 id="testovani-cqrs-heading">Testování CQRS</h2>
+    <h2 id="testovani-cqrs-heading" class="h-section"><span class="h-num">05.16</span> Testování CQRS</h2>
 
     <p>
         CQRS přirozeně vede k <strong>snadno testovatelné architektuře</strong>. Command handlers,
@@ -1486,9 +1763,10 @@ framework:
         správně validuje invarianty, volá doménový model a ukládá změny:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="test-command-handler-heading">
+    {% set _callout_body %}
+
         <h3 id="test-command-handler-heading">PHP: Test command handleru</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1545,8 +1823,19 @@ final class RegisterUserHandlerTest extends TestCase
             password: 'securepassword123',
         ));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Tests/UserManagement/Registration/Command/RegisterUserHandlerTest.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Test command handleru',
+                body: _callout_body
+            } %}
 
     <h3>Testování query handlerů</h3>
     <p>
@@ -1554,9 +1843,10 @@ final class RegisterUserHandlerTest extends TestCase
         Pro integrační testy s reálnou databází můžete ověřit i správnost SQL dotazů:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="test-query-handler-heading">
+    {% set _callout_body %}
+
         <h3 id="test-query-handler-heading">PHP: Test query handleru</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1604,8 +1894,19 @@ final class GetUserProfileHandlerTest extends TestCase
 
         $this->assertNull($result);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Tests/UserManagement/Profile/Query/GetUserProfileHandlerTest.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Test query handleru',
+                body: _callout_body
+            } %}
 
     <h3>Testování projektorů</h3>
     <p>
@@ -1613,9 +1914,10 @@ final class GetUserProfileHandlerTest extends TestCase
         že po zpracování sekvence událostí read model obsahuje očekávaná data:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="test-projektor-heading">
+    {% set _callout_body %}
+
         <h3 id="test-projektor-heading">PHP: Integrační test projektoru</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1687,8 +1989,19 @@ final class OrderDashboardProjectorTest extends KernelTestCase
 
         $this->assertSame(1, (int) $count);
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Tests/Ordering/Infrastructure/Projection/OrderDashboardProjectorTest.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Integrační test projektoru',
+                body: _callout_body
+            } %}
 
     <p>
         Kompletnější přehled testovacích strategií pro DDD kód - včetně testování agregátů,
@@ -1698,7 +2011,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     </section>
 
     <section id="saga" aria-labelledby="saga-heading">
-    <h2 id="saga-heading">Saga / Process Manager</h2>
+    <h2 id="saga-heading" class="h-section"><span class="h-num">05.17</span> Saga / Process Manager</h2>
 
     <p>
         Při použití CQRS s více <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>
@@ -1739,7 +2052,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
             }
         ]
     } %}
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
