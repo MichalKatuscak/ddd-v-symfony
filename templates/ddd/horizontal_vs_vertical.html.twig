@@ -45,55 +45,40 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Vertikální slice</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">Vertikální slice architektura vs. Tradiční DDD</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '03',
+        category: 'Základy',
+        title: 'Vertikální slice architektura vs. Tradiční DDD',
+        deck: 'Porovnání vertikální slice architektury a tradičního přístupu k Domain-Driven Design. Zjistěte, který přístup je vhodnější pro váš Symfony projekt a jaké jsou jejich výhody a nevýhody.',
+        reading_time: 14,
+        difficulty: 2,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#traditional">Tradiční přístup k DDD</a></li>
-            <li><a href="#vertical-slice">Vertikální slice architektura</a></li>
-            <li><a href="#comparison">Porovnání přístupů</a></li>
-            <li><a href="#when-to-use">Kdy použít který přístup</a></li>
-            <li><a href="#symfony-implementation">Implementace v Symfony 8</a></li>
-        </ul>
-    </div>
+    <div class="art-body" data-chapter-number="03">
+        <section id="traditional" aria-labelledby="traditional-heading">
+            <h2 id="traditional-heading" class="h-section"><span class="h-num">03.01</span> Tradiční přístup k DDD</h2>
+            <p>
+                S rostoucí složitostí projektu se struktura adresářů a modulů stává jedním z rozhodujících faktorů
+                udržitelnosti kódu. Špatně zvolená organizace vede k tomu, že související logika je rozptýlena
+                napříč celou aplikací a každá změna vyžaduje úpravy na mnoha místech. Tradiční přístup k DDD,
+                často označovaný jako "vrstvený" (layered), tento problém řeší rozdělením kódu do vrstev
+                podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
+                Typické vrstvy v tradičním DDD jsou:
+            </p>
 
-    <section id="traditional" aria-labelledby="traditional-heading">
-    <h2 id="traditional-heading">Tradiční přístup k DDD</h2>
-    <p>
-        S rostoucí složitostí projektu se struktura adresářů a modulů stává jedním z rozhodujících faktorů
-        udržitelnosti kódu. Špatně zvolená organizace vede k tomu, že související logika je rozptýlena
-        napříč celou aplikací a každá změna vyžaduje úpravy na mnoha místech. Tradiční přístup k DDD,
-        často označovaný jako "vrstvený" (layered), tento problém řeší rozdělením kódu do vrstev
-        podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
-        Typické vrstvy v tradičním DDD jsou:
-    </p>
+            <ul>
+                <li><strong>Prezentační vrstva (Presentation Layer)</strong> - Zodpovědná za interakci s uživatelem.</li>
+                <li><strong>Aplikační vrstva (Application Layer)</strong> - Koordinuje aplikační aktivity a deleguje práci doménové vrstvě.</li>
+                <li><strong>Doménová vrstva (Domain Layer)</strong> - Obsahuje doménový model a doménovou logiku.</li>
+                <li><strong>Infrastrukturní vrstva (Infrastructure Layer)</strong> - Poskytuje technické služby pro ostatní vrstvy.</li>
+            </ul>
 
-    <ul>
-        <li><strong>Prezentační vrstva (Presentation Layer)</strong> - Zodpovědná za interakci s uživatelem.</li>
-        <li><strong>Aplikační vrstva (Application Layer)</strong> - Koordinuje aplikační aktivity a deleguje práci doménové vrstvě.</li>
-        <li><strong>Doménová vrstva (Domain Layer)</strong> - Obsahuje doménový model a doménovou logiku.</li>
-        <li><strong>Infrastrukturní vrstva (Infrastructure Layer)</strong> - Poskytuje technické služby pro ostatní vrstvy.</li>
-    </ul>
-
-    <div class="tip">
-        <h3>Příklad: Tradiční struktura DDD projektu</h3>
-        <pre><code class="language-bash">src/
+            {% set _code %}src/
 ├── Presentation/                # Prezentační vrstva
 │   └── Controller/
 │       └── UserController.php
@@ -115,25 +100,28 @@
     └── Persistence/
         └── Doctrine/
             └── Mapping/
-                └── User.orm.xml</code></pre>
-    </div>
+                └── User.orm.xml{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ (tradiční DDD struktura)',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
-    <p>
-        V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-        Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje - ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
-    </p>
-    </section>
+            <p>
+                V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
+                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje - ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
+            </p>
+        </section>
 
-    <section id="vertical-slice" aria-labelledby="vertical-slice-heading">
-    <h2 id="vertical-slice-heading">Vertikální slice architektura (Vertical Slice Architecture)</h2>
-    <p>
-        Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
-        Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
-    </p>
+        <section id="vertical-slice" aria-labelledby="vertical-slice-heading">
+            <h2 id="vertical-slice-heading" class="h-section"><span class="h-num">03.02</span> Vertikální slice architektura (Vertical Slice Architecture)</h2>
+            <p>
+                Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
+                Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
+            </p>
 
-    <div class="tip" role="note" aria-labelledby="vertical-slice-example-heading">
-        <h3 id="vertical-slice-example-heading">Příklad: Struktura projektu s vertikální slice architekturou</h3>
-        <pre><code class="language-bash">src/
+            {% set _code %}src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva - sdílená pro celý kontext
 │   │   ├── Model/
@@ -184,118 +172,138 @@
 └── Shared/                    # Skutečně sdílené komponenty
     └── Domain/
         └── Exception/
-            └── DomainException.php</code></pre>
-    </div>
+            └── DomainException.php{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ (vertical slice struktura)',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
-    <p>
-        Ve vertikální slice architektuře jsou funkce (features) organizovány jako vertikální řezy (slices) přes všechny vrstvy, přičemž každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
-        Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
-    </p>
+            <p>
+                Ve vertikální slice architektuře jsou funkce (features) organizovány jako vertikální řezy (slices) přes všechny vrstvy, přičemž každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
+                Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
+            </p>
 
-    <div class="note" role="note" aria-labelledby="konvence-heading">
-        <h3 id="konvence-heading">Konvence struktury v tomto průvodci</h3>
-        <p>
-            V celém průvodci používáme konzistentní strukturu pro vertikální slice architekturu:
-        </p>
-        <ul>
-            <li><code>{BC}/Domain/</code> - doménová vrstva sdílená uvnitř bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
-            <li><code>{BC}/Infrastructure/</code> - infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
-            <li><code>{BC}/{Feature}/</code> - feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
-            <li><code>Shared/</code> - pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
-        </ul>
-    </div>
-    </section>
+            {% set _callout_body %}
+                <h3 id="konvence-heading">Konvence struktury v tomto průvodci</h3>
+                <p>
+                    V celém průvodci používáme konzistentní strukturu pro vertikální slice architekturu:
+                </p>
+                <ul>
+                    <li><code>{BC}/Domain/</code> - doménová vrstva sdílená uvnitř bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
+                    <li><code>{BC}/Infrastructure/</code> - infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
+                    <li><code>{BC}/{Feature}/</code> - feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
+                    <li><code>Shared/</code> - pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
+                </ul>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Konvence',
+                body: _callout_body
+            } %}
+        </section>
 
-    <section id="comparison" aria-labelledby="comparison-heading">
-    <h2 id="comparison-heading">Porovnání přístupů</h2>
+        <section id="comparison" aria-labelledby="comparison-heading">
+            <h2 id="comparison-heading" class="h-section"><span class="h-num">03.03</span> Porovnání přístupů</h2>
 
-    <div class="table-responsive">
-        <table class="table table-bordered" aria-labelledby="comparison-heading">
-            <thead class="table-light">
-                <tr>
-                    <th>Aspekt</th>
-                    <th>Tradiční (vrstvený) DDD</th>
-                    <th>Vertikální slice architektura</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Organizace kódu</strong></td>
-                    <td>Podle technických vrstev</td>
-                    <td>Podle funkcí (features)</td>
-                </tr>
-                <tr>
-                    <td><strong>Vazby</strong></td>
-                    <td>Silné vazby mezi vrstvami</td>
-                    <td>Silné vazby uvnitř funkce, slabé vazby mezi funkcemi</td>
-                </tr>
-                <tr>
-                    <td><strong>Změny</strong></td>
-                    <td>Změna často vyžaduje úpravy ve více vrstvách</td>
-                    <td>Změna je obvykle omezena na jednu funkci</td>
-                </tr>
-                <tr>
-                    <td><strong>Testovatelnost</strong></td>
-                    <td>Často vyžaduje mnoho mocků pro testování</td>
-                    <td>Snazší testování, méně mocků</td>
-                </tr>
-                <tr>
-                    <td><strong>Škálovatelnost</strong></td>
-                    <td>Může být obtížné škálovat při růstu aplikace</td>
-                    <td>Snazší škálování, funkce mohou být rozděleny do mikroslužeb</td>
-                </tr>
-                <tr>
-                    <td><strong>Složitost</strong></td>
-                    <td>Jednodušší pro pochopení na začátku</td>
-                    <td>Může být složitější pro pochopení na začátku</td>
-                </tr>
-                <tr>
-                    <td><strong>Vhodnost pro CQRS</strong></td>
-                    <td>Vyžaduje dodatečnou práci pro implementaci CQRS</td>
-                    <td>Přirozeně podporuje CQRS <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns" target="_blank">[5]</a></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    </section>
+            <div class="table-responsive">
+                <table class="table table-bordered" aria-labelledby="comparison-heading">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Aspekt</th>
+                            <th>Tradiční (vrstvený) DDD</th>
+                            <th>Vertikální slice architektura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Organizace kódu</strong></td>
+                            <td>Podle technických vrstev</td>
+                            <td>Podle funkcí (features)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vazby</strong></td>
+                            <td>Silné vazby mezi vrstvami</td>
+                            <td>Silné vazby uvnitř funkce, slabé vazby mezi funkcemi</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Změny</strong></td>
+                            <td>Změna často vyžaduje úpravy ve více vrstvách</td>
+                            <td>Změna je obvykle omezena na jednu funkci</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Testovatelnost</strong></td>
+                            <td>Často vyžaduje mnoho mocků pro testování</td>
+                            <td>Snazší testování, méně mocků</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Škálovatelnost</strong></td>
+                            <td>Může být obtížné škálovat při růstu aplikace</td>
+                            <td>Snazší škálování, funkce mohou být rozděleny do mikroslužeb</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Složitost</strong></td>
+                            <td>Jednodušší pro pochopení na začátku</td>
+                            <td>Může být složitější pro pochopení na začátku</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vhodnost pro CQRS</strong></td>
+                            <td>Vyžaduje dodatečnou práci pro implementaci CQRS</td>
+                            <td>Přirozeně podporuje CQRS <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns" target="_blank">[5]</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-    <section id="when-to-use" aria-labelledby="when-to-use-heading">
-    <h2 id="when-to-use-heading">Kdy použít který přístup</h2>
+        <section id="when-to-use" aria-labelledby="when-to-use-heading">
+            <h2 id="when-to-use-heading" class="h-section"><span class="h-num">03.04</span> Kdy použít který přístup</h2>
 
-    <div class="note" role="note" aria-labelledby="traditional-when-to-use-heading">
-        <h3 id="traditional-when-to-use-heading">Kdy použít tradiční DDD:</h3>
-        <ul>
-            <li>Když je tým zvyklý na tradiční architekturu.</li>
-            <li>Pro menší aplikace s jasně definovanými vrstvami.</li>
-            <li>Když je důležitá jasná separace technických vrstev.</li>
-            <li>Když tým preferuje explicitní oddělení technických vrstev před organizací podle funkcí.</li>
-        </ul>
-    </div>
+            {% set _callout_body %}
+                <h3 id="traditional-when-to-use-heading">Kdy použít tradiční DDD:</h3>
+                <ul>
+                    <li>Když je tým zvyklý na tradiční architekturu.</li>
+                    <li>Pro menší aplikace s jasně definovanými vrstvami.</li>
+                    <li>Když je důležitá jasná separace technických vrstev.</li>
+                    <li>Když tým preferuje explicitní oddělení technických vrstev před organizací podle funkcí.</li>
+                </ul>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Tradiční DDD',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="vertical-slice-when-to-use-heading">
-        <h3 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h3>
-        <ul>
-            <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
-            <li>Když je důležitá modularita a nezávislost funkcí.</li>
-            <li>Pro aplikace, které budou v budoucnu rozděleny do mikroslužeb.</li>
-            <li>Když chcete implementovat CQRS.</li>
-            <li>Pro týmy, které jsou zvyklé na agilní vývoj a časté změny.</li>
-        </ul>
-    </div>
-    </section>
+            {% set _callout_body %}
+                <h3 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h3>
+                <ul>
+                    <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
+                    <li>Když je důležitá modularita a nezávislost funkcí.</li>
+                    <li>Pro aplikace, které budou v budoucnu rozděleny do mikroslužeb.</li>
+                    <li>Když chcete implementovat CQRS.</li>
+                    <li>Pro týmy, které jsou zvyklé na agilní vývoj a časté změny.</li>
+                </ul>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Vertical slice',
+                body: _callout_body
+            } %}
+        </section>
 
-    <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
-    <h2 id="symfony-implementation-heading">Implementace v Symfony 8</h2>
-    <p>
-        Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
-    </p>
+        <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
+            <h2 id="symfony-implementation-heading" class="h-section"><span class="h-num">03.05</span> Implementace v Symfony 8</h2>
+            <p>
+                Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
+            </p>
 
-    <h3 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h3>
-    <p>
-        Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
-    </p>
+            <h3 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h3>
+            <p>
+                Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
+            </p>
 
-    <pre><code class="language-bash">src/
+            {% set _code %}src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Presentation/            # Prezentační vrstva
 │   │   ├── Controller/
@@ -339,14 +347,20 @@
 └── Shared/                    # Sdílené komponenty
     └── Domain/                 # Sdílená doménová logika
         └── Exception/
-            └── DomainException.php</code></pre>
+            └── DomainException.php{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ (Symfony 8 — tradiční)',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
-    <h3 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h3>
-    <p>
-        Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
-    </p>
+            <h3 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h3>
+            <p>
+                Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
+            </p>
 
-    <pre><code class="language-bash">src/
+            {% set _code %}src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Registration/           # Feature: Registrace uživatelů
 │   │   ├── Domain/             # Doménová logika pro registraci
@@ -397,48 +411,52 @@
 └── Shared/                    # Sdílené komponenty pro celý systém
     └── Domain/
         └── Exception/
-            └── DomainException.php</code></pre>
+            └── DomainException.php{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ (Symfony 8 — vertical slice)',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
-    <p>
-        Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
-    </p>
+            <p>
+                Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
+            </p>
 
-    <ul>
-        <li><strong>Messenger komponenta</strong> - Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
-        <li><strong>Validator komponenta</strong> - Pro validaci doménových objektů.</li>
-        <li><strong>Form komponenta</strong> - Pro zpracování vstupů od uživatele.</li>
-        <li><strong>Security komponenta</strong> - Pro autentizaci a autorizaci.</li>
-        <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
-    </ul>
+            <ul>
+                <li><strong>Messenger komponenta</strong> - Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
+                <li><strong>Validator komponenta</strong> - Pro validaci doménových objektů.</li>
+                <li><strong>Form komponenta</strong> - Pro zpracování vstupů od uživatele.</li>
+                <li><strong>Security komponenta</strong> - Pro autentizaci a autorizaci.</li>
+                <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
+            </ul>
 
-    </section>
+        </section>
 
-    {% include '_partials/faq.html.twig' with {
-        items: [
-            {
-                question: 'Co je Vertical Slice Architecture?',
-                answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec" obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
-            },
-            {
-                question: 'Jaký je rozdíl mezi tradiční vrstvovou architekturou a Vertical Slice?',
-                answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice jednodušeji škáluje počet feature bez narůstajících vazeb. Srovnání obou přístupů v <a href="#comparison">sekci Porovnání přístupů</a>.'
-            },
-            {
-                question: 'Kdy zvolit Vertical Slice a kdy tradiční DDD vrstvy?',
-                answer: 'Vertical Slice je vhodný pro aplikace s mnoha nezávislými use casy a rychlým vývojovým tempem, kde je přínosem izolace každé feature. Tradiční vrstvové DDD se osvědčuje tam, kde má doménový model silné sdílené invarianty, které je třeba jednotně vymáhat napříč celou aplikací. V praxi se přístupy kombinují: Vertical Slice pro aplikační vrstvu, sdílený doménový model uvnitř Bounded Contextu. Rozhodovací kritéria v <a href="#when-to-use">sekci Kdy použít který přístup</a>.'
-            },
-            {
-                question: 'Lze Vertical Slice kombinovat s DDD?',
-                answer: 'Ano, kombinace je běžná a produktivní. DDD definuje, jak modelovat doménu (agregáty, hodnotové objekty, Bounded Contexts), Vertical Slice říká, jak organizovat kód use casu okolo tohoto modelu. Každý slice typicky obsahuje command nebo query DTO, handler, volání doménového modelu a read model pro odpověď. Doménový model zůstává sdílený uvnitř Bounded Contextu. Podrobný rozbor kombinace v <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
-            },
-            {
-                question: 'Jak se Vertical Slice implementuje v Symfony?',
-                answer: 'Základem je struktura <code>src/[BoundedContext]/[Feature]/</code>, kde každá feature obsahuje vlastní Command, Handler, případně Query, Controller a View. Symfony Messenger funguje jako sběrnice, přes kterou kontroler dispatchuje command handleru uvnitř slicu. Sdílená doménová vrstva (agregáty, hodnotové objekty) zůstává na úrovni Bounded Contextu. Každý slice je tak samostatný modul s minimem závislostí na ostatních. Praktický příklad v <a href="#symfony-implementation">sekci Implementace v Symfony 8</a>.'
-            }
-        ]
-    } %}
-
-    </article>
+        {% include '_partials/faq.html.twig' with {
+            items: [
+                {
+                    question: 'Co je Vertical Slice Architecture?',
+                    answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec" obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+                },
+                {
+                    question: 'Jaký je rozdíl mezi tradiční vrstvovou architekturou a Vertical Slice?',
+                    answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice jednodušeji škáluje počet feature bez narůstajících vazeb. Srovnání obou přístupů v <a href="#comparison">sekci Porovnání přístupů</a>.'
+                },
+                {
+                    question: 'Kdy zvolit Vertical Slice a kdy tradiční DDD vrstvy?',
+                    answer: 'Vertical Slice je vhodný pro aplikace s mnoha nezávislými use casy a rychlým vývojovým tempem, kde je přínosem izolace každé feature. Tradiční vrstvové DDD se osvědčuje tam, kde má doménový model silné sdílené invarianty, které je třeba jednotně vymáhat napříč celou aplikací. V praxi se přístupy kombinují: Vertical Slice pro aplikační vrstvu, sdílený doménový model uvnitř Bounded Contextu. Rozhodovací kritéria v <a href="#when-to-use">sekci Kdy použít který přístup</a>.'
+                },
+                {
+                    question: 'Lze Vertical Slice kombinovat s DDD?',
+                    answer: 'Ano, kombinace je běžná a produktivní. DDD definuje, jak modelovat doménu (agregáty, hodnotové objekty, Bounded Contexts), Vertical Slice říká, jak organizovat kód use casu okolo tohoto modelu. Každý slice typicky obsahuje command nebo query DTO, handler, volání doménového modelu a read model pro odpověď. Doménový model zůstává sdílený uvnitř Bounded Contextu. Podrobný rozbor kombinace v <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+                },
+                {
+                    question: 'Jak se Vertical Slice implementuje v Symfony?',
+                    answer: 'Základem je struktura <code>src/[BoundedContext]/[Feature]/</code>, kde každá feature obsahuje vlastní Command, Handler, případně Query, Controller a View. Symfony Messenger funguje jako sběrnice, přes kterou kontroler dispatchuje command handleru uvnitř slicu. Sdílená doménová vrstva (agregáty, hodnotové objekty) zůstává na úrovni Bounded Contextu. Každý slice je tak samostatný modul s minimem závislostí na ostatních. Praktický příklad v <a href="#symfony-implementation">sekci Implementace v Symfony 8</a>.'
+                }
+            ]
+        } %}
+    </div>
+</article>
 {% endblock %}
-
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
