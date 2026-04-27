@@ -45,23 +45,21 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Základní koncepty</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-        <h1 itemprop="headline">Základní koncepty DDD</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '02',
+        category: 'Základy',
+        title: 'Základní koncepty DDD',
+        deck: 'Domain-Driven Design nabízí sadu stavebních bloků, které pomáhají převést znalosti o doméně do strukturovaného softwarového modelu. Každý z těchto konceptů řeší konkrétní problém – od vymezení hranic mezi částmi systému přes zachycení identity objektů až po komunikaci mezi komponentami.',
+        reading_time: 22,
+        difficulty: 2,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
+    <div class="art-body" data-chapter-number="02">
         <div class="examples-banner" role="note">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
                 <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
@@ -74,29 +72,8 @@
             </span>
         </div>
 
-        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <p id="toc-heading">Obsah kapitoly:</p>
-            <ul>
-                <li><a href="#bounded-contexts">Ohraničené kontexty (Bounded Contexts)</a></li>
-                <li><a href="#ubiquitous-language">Všudypřítomný jazyk (Ubiquitous Language)</a></li>
-                <li><a href="#entities">Entity</a></li>
-                <li><a href="#value-objects">Hodnotové objekty (Value Objects)</a></li>
-                <li><a href="#aggregates">Agregáty (Aggregates)</a></li>
-                <li><a href="#repositories">Repozitáře (Repositories)</a></li>
-                <li><a href="#domain-services">Doménové služby (Domain Services)</a></li>
-                <li><a href="#domain-events">Doménové události (Domain Events)</a></li>
-            </ul>
-        </div>
-
-        <p>
-            Domain-Driven Design nabízí sadu stavebních bloků, které pomáhají převést znalosti o doméně do strukturovaného
-            softwarového modelu. Každý z těchto konceptů řeší konkrétní problém – od vymezení hranic mezi částmi systému
-            přes zachycení identity objektů až po komunikaci mezi komponentami. Následující přehled představuje
-            ty nejdůležitější z nich.
-        </p>
-
         <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
-            <h2 id="bounded-contexts-heading">Ohraničené kontexty (Bounded Contexts)</h2>
+            <h2 id="bounded-contexts-heading" class="h-section"><span class="h-num">02.01</span> Ohraničené kontexty (Bounded Contexts)</h2>
             <p>
                 Ohraničený kontext je explicitní hranice, ve které je model platný
                 <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank">[1]</a>.
@@ -104,15 +81,14 @@
                 Různé ohraničené kontexty mají různé modely a jazyky – to je záměr, ne nedostatek.
             </p>
 
-            <div class="tip">
-                <div class="diagram-container">
-                    {% include '/diagrams/5_bounded_contexts/diagram.svg' %}
-                </div>
-            </div>
+            {% set _diagram_inline %}{% include '/diagrams/5_bounded_contexts/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: '02.1-A',
+                title: 'Ohraničené kontexty',
+                inline: _diagram_inline
+            } %}
 
-            <div class="tip">
-                <h3>Příklad: Ohraničené kontexty v PHP</h3>
-                <pre><code class="language-bash">src/
+            {% set _code %}src/
 ├── OrderManagement/           # Ohraničený kontext: Správa objednávek
 │   ├── Domain/
 │   │   ├── Model/
@@ -151,8 +127,13 @@
         │   └── RegisterUserHandler.php
         └── Query/
             ├── GetUser.php
-            └── GetUserHandler.php</code></pre>
-            </div>
+            └── GetUserHandler.php{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ (struktura)',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu jsou <code>OrderManagement</code> a <code>UserManagement</code> dva ohraničené
@@ -164,7 +145,7 @@
         </section>
 
         <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
-            <h2 id="ubiquitous-language-heading">Všudypřítomný jazyk (Ubiquitous Language)</h2>
+            <h2 id="ubiquitous-language-heading" class="h-section"><span class="h-num">02.02</span> Všudypřítomný jazyk (Ubiquitous Language)</h2>
 
             <p>
                 Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty
@@ -173,13 +154,14 @@
                 Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
             </p>
 
-            <div class="tip">
-                <div class="diagram-container">
-                    {% include '/diagrams/4_ubiquitous_language/diagram.svg' %}
-                </div>
-            </div>
+            {% set _diagram_inline %}{% include '/diagrams/4_ubiquitous_language/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: '02.2-A',
+                title: 'Všudypřítomný jazyk',
+                inline: _diagram_inline
+            } %}
 
-            <div class="note">
+            {% set _callout_body %}
                 <h3>Příklad: Všudypřítomný jazyk v e-commerce doméně</h3>
                 <p>
                     V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
@@ -197,7 +179,12 @@
                     <li><strong>Platba (Payment)</strong> - Transakce, kterou zákazník platí za objednávku.</li>
                     <li><strong>Dodání (Shipping)</strong> - Proces doručení objednávky zákazníkovi.</li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Příklad',
+                body: _callout_body
+            } %}
 
             <p>
                 Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými
@@ -208,7 +195,7 @@
         </section>
 
         <section id="entities" aria-labelledby="entities-heading">
-            <h2 id="entities-heading">Entity</h2>
+            <h2 id="entities-heading" class="h-section"><span class="h-num">02.03</span> Entity</h2>
             <p>
                 Entita je objekt, který je definován svou identitou, nikoli svými atributy
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank">[3]</a>.
@@ -216,9 +203,7 @@
                 ale jejich identita zůstává stejná.
             </p>
 
-            <div class="tip">
-                <h3>Příklad: Entity v PHP</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -271,8 +256,13 @@ class User
     {
         return $this->createdAt;
     }
-}</code></pre>
-            </div>
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Model/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>).
@@ -282,16 +272,14 @@ class User
         </section>
 
         <section id="value-objects" aria-labelledby="value-objects-heading">
-            <h2 id="value-objects-heading">Hodnotové objekty (Value Objects)</h2>
+            <h2 id="value-objects-heading" class="h-section"><span class="h-num">02.04</span> Hodnotové objekty (Value Objects)</h2>
             <p>
                 Hodnotové objekty jsou objekty definované svými atributy, nikoli identitou
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank">[3]</a>.
                 Hodnotové objekty jsou neměnné (immutable) a porovnávají se hodnotou, nikoli referencí.
             </p>
 
-            <div class="tip">
-                <h3>Příklad: Hodnotový objekt v PHP</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -326,8 +314,13 @@ class Email
     {
         return $this->value;
     }
-}</code></pre>
-            </div>
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/ValueObject/Email.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. E-mailová
@@ -337,7 +330,7 @@ class Email
         </section>
 
         <section id="aggregates" aria-labelledby="aggregates-heading">
-            <h2 id="aggregates-heading">Agregáty (Aggregates)</h2>
+            <h2 id="aggregates-heading" class="h-section"><span class="h-num">02.05</span> Agregáty (Aggregates)</h2>
             <p>
                 Agregát je skupina souvisejících objektů, která tvoří jednu transakční hranici konzistence
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank">[3]</a>.
@@ -345,9 +338,7 @@ class Email
                 který je jediným vstupním bodem pro veškeré vnější interakce s agregátem.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="aggregate-example-heading">
-                <h3 id="aggregate-example-heading">Příklad: Agregát v PHP</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -452,12 +443,15 @@ final class Order
     {
         return $this->createdAt;
     }
-}</code></pre>
-            </div>
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Model/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-            <div class="tip">
-                <h3>Příklad: OrderItem - entita uvnitř agregátu</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -476,21 +470,26 @@ class OrderItem
 
     public function __construct(OrderId $orderId, ProductId $productId, int $quantity, Money $unitPrice)
     {
-        if ($quantity &lt;= 0) {
+        if ($quantity <= 0) {
             throw new \DomainException('Množství musí být kladné.');
         }
 
-        $this-&gt;orderId = $orderId;
-        $this-&gt;productId = $productId;
-        $this-&gt;quantity = $quantity;
-        $this-&gt;unitPrice = $unitPrice;
+        $this->orderId = $orderId;
+        $this->productId = $productId;
+        $this->quantity = $quantity;
+        $this->unitPrice = $unitPrice;
     }
 
-    public function productId(): ProductId { return $this-&gt;productId; }
-    public function quantity(): int { return $this-&gt;quantity; }
-    public function unitPrice(): Money { return $this-&gt;unitPrice; }
-}</code></pre>
-            </div>
+    public function productId(): ProductId { return $this->productId; }
+    public function quantity(): int { return $this->quantity; }
+    public function unitPrice(): Money { return $this->unitPrice; }
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Model/OrderItem.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu je <code>Order</code> agregát, který obsahuje kolekci <code>OrderItem</code> objektů.
@@ -498,13 +497,7 @@ class OrderItem
                 a poskytuje metody pro manipulaci s položkami objednávky.
             </p>
 
-            <div class="note" role="note" aria-labelledby="enum-poznamka-heading">
-                <h3 id="enum-poznamka-heading">PHP 8.1+ Enum pro stavové typy</h3>
-                <p>
-                    Od PHP 8.1 je pro jednoduché stavové typy (jako <code>OrderStatus</code>) idiomatické
-                    použít nativní <code>enum</code> místo tradičního hodnotového objektu:
-                </p>
-                <pre><code class="language-php">&lt;?php
+            {% set _enum_code %}<?php
 
 declare(strict_types=1);
 
@@ -517,27 +510,43 @@ enum OrderStatus: string
     case SHIPPED   = 'shipped';
     case DELIVERED = 'delivered';
     case CANCELLED = 'cancelled';
-}</code></pre>
+}{% endset %}
+            {% set _enum_block %}{% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Model/OrderStatus.php',
+                language: 'php',
+                code: _enum_code,
+                highlights: []
+            } %}{% endset %}
+            {% set _callout_body %}
+                <h3 id="enum-poznamka-heading">PHP 8.1+ Enum pro stavové typy</h3>
+                <p>
+                    Od PHP 8.1 je pro jednoduché stavové typy (jako <code>OrderStatus</code>) idiomatické
+                    použít nativní <code>enum</code> místo tradičního hodnotového objektu:
+                </p>
+                {{ _enum_block }}
                 <p>
                     <strong>Kdy enum, kdy plný Value Object?</strong> Enum je vhodný pro konečnou množinu stavů
                     bez další logiky. Plný Value Object (třída) je lepší volbou, pokud typ obsahuje validaci,
                     výpočty nebo kompozici více hodnot (např. <code>Money</code>, <code>Email</code>,
                     <code>DateRange</code>).
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="repositories" aria-labelledby="repositories-heading">
-            <h2 id="repositories-heading">Repozitáře (Repositories)</h2>
+            <h2 id="repositories-heading" class="h-section"><span class="h-num">02.06</span> Repozitáře (Repositories)</h2>
             <p>
                 Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily
                 persistence a poskytují
                 doménově orientované rozhraní pro přístup k datům.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="repository-example-heading">
-                <h3 id="repository-example-heading">Příklad: Repozitář v PHP</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -554,8 +563,13 @@ interface OrderRepository
     public function findById(OrderId $id): ?Order;
 
     public function findByUserId(UserId $userId): array;
-}</code></pre>
-            </div>
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Repository/OrderRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu je <code>OrderRepository</code> rozhraní, které definuje metody pro ukládání a načítání
@@ -565,16 +579,14 @@ interface OrderRepository
         </section>
 
         <section id="domain-services" aria-labelledby="domain-services-heading">
-            <h2 id="domain-services-heading">Doménové služby (Domain Services)</h2>
+            <h2 id="domain-services-heading" class="h-section"><span class="h-num">02.07</span> Doménové služby (Domain Services)</h2>
             <p>
                 Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity
                 nebo hodnotového objektu.
                 Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="domain-service-example-heading">
-                <h3 id="domain-service-example-heading">Příklad: Doménová služba v PHP</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -601,8 +613,13 @@ class PaymentService
             $paymentMethod
         );
     }
-}</code></pre>
-            </div>
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Service/PaymentService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu je <code>PaymentService</code> doménová služba, která zapouzdřuje doménovou logiku
@@ -612,7 +629,7 @@ class PaymentService
                 Třídy <code>Payment</code>, <code>PaymentId</code> a <code>PaymentMethod</code> jsou součástí doménového modelu plateb - jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
             </p>
 
-            <div class="note" role="note" aria-labelledby="service-vs-aggregate-heading">
+            {% set _callout_body %}
                 <h3 id="service-vs-aggregate-heading">Kdy doménová služba vs. metoda na agregátu?</h3>
                 <p>
                     Všimněte si, že výpočet celkové částky (<code>totalAmount()</code>) je metodou přímo
@@ -629,20 +646,23 @@ class PaymentService
                     <em>vytváří nový agregát</em> (<code>Payment</code>) na základě dat jiného agregátu
                     (<code>Order</code>) - tato koordinace nepatří do žádného z nich.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="domain-events" aria-labelledby="domain-events-heading">
-            <h2 id="domain-events-heading">Doménové události (Domain Events)</h2>
+            <h2 id="domain-events-heading" class="h-section"><span class="h-num">02.08</span> Doménové události (Domain Events)</h2>
             <p>
                 Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
                 doménový význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
                 k popisu dané změny stavu - nespoléhají na pozdější dotazování.
             </p>
 
-            <div class="tip">
-                <h3>Příklad: Doménová událost v PHP</h3>
-                <pre><code class="language-php">&lt;?php
+            {% set _code %}<?php
 
 declare(strict_types=1);
 
@@ -678,8 +698,13 @@ final class OrderCreatedEvent
     {
         return $this->occurredAt;
     }
-}</code></pre>
-            </div>
+}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Event/OrderCreatedEvent.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <p>
                 V tomto příkladu je <code>OrderCreatedEvent</code> doménová událost, která reprezentuje vytvoření nové
@@ -718,7 +743,6 @@ final class OrderCreatedEvent
                 }
             ]
         } %}
-    </article>
+    </div>
+</article>
 {% endblock %}
-
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
