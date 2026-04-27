@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Ságy a Process Managery</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">Ságy a Process Managery</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '07',
+        category: 'Vzory',
+        title: 'Ságy a Process Managery',
+        deck: 'Kompletní průvodce ságami a process managery v DDD a Symfony 8. Naučte se implementovat kompenzační transakce, choreografii i orchestraci dlouhotrvajících procesů pomocí Symfony Messenger, řešit timeouty, paralelní kroky a monitorování distribuovaných procesů.',
+        reading_time: 24,
+        difficulty: 4,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2026-03-26', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <div class="examples-banner" role="note">
+    <div class="art-body" data-chapter-number="07">
+<div class="examples-banner" role="note">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
             <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
         </svg>
@@ -83,29 +81,11 @@
         spolu komunikují právě prostřednictvím doménových událostí.
     </p>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#proc-sagy">Proč potřebujeme ságy?</a></li>
-            <li><a href="#kompenzacni-transakce">Kompenzační transakce</a></li>
-            <li><a href="#choreografie">Choreografie</a></li>
-            <li><a href="#limity-choreografie">Limity choreografie</a></li>
-            <li><a href="#orchestrace">Orchestrace - Process Manager</a></li>
-            <li><a href="#perzistence-stavu">Perzistence stavu ságy</a></li>
-            <li><a href="#messenger-implementace">Implementace v Symfony Messenger</a></li>
-            <li><a href="#timeouty">Timeouty a deadliny</a></li>
-            <li><a href="#kompenzacni-strategie">Kompenzační strategie v praxi</a></li>
-            <li><a href="#paralelni-kroky">Paralelní kroky</a></li>
-            <li><a href="#monitoring">Monitoring a observabilita</a></li>
-            <li><a href="#testovani">Testování ság</a></li>
-        </ul>
-    </div>
-
-    {# ───────────────────────────────────────────────────────────
+{# ───────────────────────────────────────────────────────────
        Sekce 1: Proč potřebujeme ságy?
        ─────────────────────────────────────────────────────────── #}
     <section id="proc-sagy" aria-labelledby="proc-sagy-heading">
-    <h2 id="proc-sagy-heading">Proč potřebujeme ságy?</h2>
+    <h2 id="proc-sagy-heading" class="h-section"><span class="h-num">07.01</span> Proč potřebujeme ságy?</h2>
 
     <p>
         Jako ilustrativní příklad slouží typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
@@ -134,7 +114,8 @@
         a komunikovat asynchronně přes frontu zpráv. Koncept atomické transakce se zde rozpadá.
     </p>
 
-    <div class="note" role="note" aria-labelledby="2pc-heading">
+    {% set _callout_body %}
+
         <h3 id="2pc-heading">Proč ne Two-Phase Commit (2PC)?</h3>
         <p>
             Distribuované databáze nabízejí protokol <strong>Two-Phase Commit</strong> (2PC), který
@@ -154,7 +135,12 @@
                 všechny kontexty sdílely transakční protokol, čímž porušuje princip nezávislého
                 nasazení a vývoje jednotlivých kontextů.</li>
         </ul>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Proč ne Two-Phase Commit (2PC)?',
+                body: _callout_body
+            } %}
 
     <p>
         Pro ilustraci uvažujme o scénáři selhání: systém úspěšně strhne platbu zákazníkovi
@@ -192,7 +178,7 @@
        Sekce 2: Kompenzační transakce
        ─────────────────────────────────────────────────────────── #}
     <section id="kompenzacni-transakce" aria-labelledby="kompenzacni-transakce-heading">
-    <h2 id="kompenzacni-transakce-heading">Kompenzační transakce</h2>
+    <h2 id="kompenzacni-transakce-heading" class="h-section"><span class="h-num">07.02</span> Kompenzační transakce</h2>
 
     <p>
         Kompenzační transakce je <strong>sémantické vrácení efektu předchozího kroku</strong>.
@@ -244,16 +230,17 @@
         příkaz s vlastní logikou, validací a vedlejšími efekty.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="compensatable-command-heading">
+    {% set _callout_body %}
+
         <h3 id="compensatable-command-heading">PHP: Rozhraní CompensatableCommand</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
 namespace App\SharedKernel\Application\Command;
 
 /**
- * Command, který lze kompenzovat - definuje svůj &quot;undo&quot; příkaz.
+ * Command, který lze kompenzovat - definuje svůj "undo" příkaz.
  */
 interface CompensatableCommand
 {
@@ -261,12 +248,24 @@ interface CompensatableCommand
      * Vrátí příkaz, který sémanticky vrátí efekt tohoto příkazu.
      */
     public function compensation(): object;
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/SharedKernel/Application/Command/CompensatableCommand.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Rozhraní CompensatableCommand',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="charge-customer-heading">
+    {% set _callout_body %}
+
         <h3 id="charge-customer-heading">PHP: ChargeCustomer s kompenzací</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -285,16 +284,28 @@ final readonly class ChargeCustomer implements CompensatableCommand
     public function compensation(): RefundCustomer
     {
         return new RefundCustomer(
-            orderId: $this-&gt;orderId,
-            customerId: $this-&gt;customerId,
-            amountCents: $this-&gt;amountCents,
+            orderId: $this->orderId,
+            customerId: $this->customerId,
+            amountCents: $this->amountCents,
             reason: 'Saga compensation',
         );
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Payment/Application/Command/ChargeCustomer.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: ChargeCustomer s kompenzací',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="idempotence-warning-heading">
+    {% set _callout_body %}
+
         <h3 id="idempotence-warning-heading">Kompenzace musí být idempotentní</h3>
         <p>
             V distribuovaném systému se může stát, že kompenzační příkaz bude doručen více než
@@ -304,7 +315,12 @@ final readonly class ChargeCustomer implements CompensatableCommand
             Typicky se toho dosahuje kontrolou aktuálního stavu před provedením akce
             (např. <code>RefundCustomer</code> nejprve ověří, zda platba již nebyla vrácena).
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Kompenzace musí být idempotentní',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -312,7 +328,7 @@ final readonly class ChargeCustomer implements CompensatableCommand
        Sekce 3: Choreografie
        ─────────────────────────────────────────────────────────── #}
     <section id="choreografie" aria-labelledby="choreografie-heading">
-    <h2 id="choreografie-heading">Choreografie</h2>
+    <h2 id="choreografie-heading" class="h-section"><span class="h-num">07.03</span> Choreografie</h2>
 
     <p>
         Choreografie je přístup ke koordinaci ságy, při němž <strong>neexistuje centrální
@@ -332,11 +348,12 @@ final readonly class ChargeCustomer implements CompensatableCommand
         řízení.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="choreografie-handlers-heading">
+    {% set _callout_body %}
+
         <h3 id="choreografie-handlers-heading">PHP: Choreografie - tři nezávislé handlery</h3>
 
         <p><strong>Handler 1 - InitiatePaymentOnOrderPlaced:</strong></p>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -356,16 +373,22 @@ final readonly class InitiatePaymentOnOrderPlaced
 
     public function __invoke(OrderPlaced $event): void
     {
-        $this-&gt;commandBus-&gt;dispatch(new ChargeCustomer(
-            orderId: $event-&gt;orderId,
-            customerId: $event-&gt;customerId,
-            amountCents: $event-&gt;totalAmountCents,
+        $this->commandBus->dispatch(new ChargeCustomer(
+            orderId: $event->orderId,
+            customerId: $event->customerId,
+            amountCents: $event->totalAmountCents,
         ));
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Payment/Application/Handler/InitiatePaymentOnOrderPlaced.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
         <p><strong>Handler 2 - ReserveStockOnPaymentSucceeded:</strong></p>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -385,14 +408,20 @@ final readonly class ReserveStockOnPaymentSucceeded
 
     public function __invoke(PaymentSucceeded $event): void
     {
-        $this-&gt;commandBus-&gt;dispatch(new ReserveStock(
-            orderId: $event-&gt;orderId,
+        $this->commandBus->dispatch(new ReserveStock(
+            orderId: $event->orderId,
         ));
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Warehouse/Application/Handler/ReserveStockOnPaymentSucceeded.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
         <p><strong>Handler 3 - CreateShipmentOnStockReserved:</strong></p>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -412,16 +441,28 @@ final readonly class CreateShipmentOnStockReserved
 
     public function __invoke(StockReserved $event): void
     {
-        $this-&gt;commandBus-&gt;dispatch(new CreateShipment(
-            orderId: $event-&gt;orderId,
+        $this->commandBus->dispatch(new CreateShipment(
+            orderId: $event->orderId,
         ));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Shipping/Application/Handler/CreateShipmentOnStockReserved.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Choreografie - tři nezávislé handlery',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="choreografie-messenger-heading">
+    {% set _callout_body %}
+
         <h3 id="choreografie-messenger-heading">YAML: Konfigurace Messenger pro choreografii</h3>
-        <pre><code class="language-yaml"># config/packages/messenger.yaml
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
 framework:
     messenger:
         transports:
@@ -431,8 +472,19 @@ framework:
         routing:
             'App\Ordering\Domain\Event\OrderPlaced': async
             'App\Payment\Domain\Event\PaymentSucceeded': async
-            'App\Warehouse\Domain\Event\StockReserved': async</code></pre>
-    </div>
+            'App\Warehouse\Domain\Event\StockReserved': async{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'YAML: Konfigurace Messenger pro choreografii',
+                body: _callout_body
+            } %}
 
     <p>
         Hlavní výhodou choreografie je <strong>volné provázání</strong> (loose coupling) mezi
@@ -449,7 +501,7 @@ framework:
        Sekce 4: Limity choreografie
        ─────────────────────────────────────────────────────────── #}
     <section id="limity-choreografie" aria-labelledby="limity-choreografie-heading">
-    <h2 id="limity-choreografie-heading">Limity choreografie</h2>
+    <h2 id="limity-choreografie-heading" class="h-section"><span class="h-num">07.04</span> Limity choreografie</h2>
 
     <p>
         Choreografie funguje dobře pro jednoduché procesy, ale s rostoucí komplexitou naráží
@@ -506,7 +558,8 @@ framework:
         - Process Manager</a>.
     </p>
 
-    <div class="note" role="note" aria-labelledby="choreografie-stale-validni-heading">
+    {% set _callout_body %}
+
         <h3 id="choreografie-stale-validni-heading">Choreografie má své místo</h3>
         <p>
             Choreografie je stále legitimním řešením pro jednoduché procesy se dvěma až třemi
@@ -516,7 +569,12 @@ framework:
             Process Manager. Orchestraci zavádějte až ve chvíli, kdy narazíte na výše popsané
             problémy.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Choreografie má své místo',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -524,7 +582,7 @@ framework:
        Sekce 5: Orchestrace - Process Manager
        ─────────────────────────────────────────────────────────── #}
     <section id="orchestrace" aria-labelledby="orchestrace-heading">
-    <h2 id="orchestrace-heading">Orchestrace - Process Manager</h2>
+    <h2 id="orchestrace-heading" class="h-section"><span class="h-num">07.05</span> Orchestrace - Process Manager</h2>
 
     <p>
         Orchestrace je přístup, při kterém existuje <strong>centrální koordinátor</strong> -
@@ -546,9 +604,10 @@ framework:
         {% include 'diagrams/8_sagas/saga_state_machine.svg' %}
     </div>
 
-    <div class="tip" role="note" aria-labelledby="saga-status-heading">
+    {% set _callout_body %}
+
         <h3 id="saga-status-heading">PHP: Enum OrderSagaStatus</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -562,12 +621,24 @@ enum OrderSagaStatus: string
     case Completed = 'completed';
     case Compensating = 'compensating';
     case Failed = 'failed';
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Saga/OrderSagaStatus.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Enum OrderSagaStatus',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="process-manager-heading">
+    {% set _callout_body %}
+
         <h3 id="process-manager-heading">PHP: OrderProcessManager - jádro orchestrace</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -604,12 +675,12 @@ final class OrderProcessManager
         OrderPlaced|PaymentSucceeded|PaymentFailed|StockReserved|StockReservationFailed|ShipmentCreated $event,
     ): void {
         match (true) {
-            $event instanceof OrderPlaced =&gt; $this-&gt;onOrderPlaced($event),
-            $event instanceof PaymentSucceeded =&gt; $this-&gt;onPaymentSucceeded($event),
-            $event instanceof PaymentFailed =&gt; $this-&gt;onPaymentFailed($event),
-            $event instanceof StockReserved =&gt; $this-&gt;onStockReserved($event),
-            $event instanceof StockReservationFailed =&gt; $this-&gt;onStockReservationFailed($event),
-            $event instanceof ShipmentCreated =&gt; $this-&gt;onShipmentCreated($event),
+            $event instanceof OrderPlaced => $this->onOrderPlaced($event),
+            $event instanceof PaymentSucceeded => $this->onPaymentSucceeded($event),
+            $event instanceof PaymentFailed => $this->onPaymentFailed($event),
+            $event instanceof StockReserved => $this->onStockReserved($event),
+            $event instanceof StockReservationFailed => $this->onStockReservationFailed($event),
+            $event instanceof ShipmentCreated => $this->onShipmentCreated($event),
         };
     }
 
@@ -617,98 +688,109 @@ final class OrderProcessManager
     {
         $state = SagaState::start(
             sagaType: 'order_process',
-            correlationId: $event-&gt;orderId,
+            correlationId: $event->orderId,
             status: OrderSagaStatus::AwaitingPayment,
             context: [
-                'customerId' =&gt; $event-&gt;customerId,
-                'amountCents' =&gt; $event-&gt;totalAmountCents,
-                'completedSteps' =&gt; [],
+                'customerId' => $event->customerId,
+                'amountCents' => $event->totalAmountCents,
+                'completedSteps' => [],
             ],
         );
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $this->sagaStateRepository->save($state);
 
-        $this-&gt;commandBus-&gt;dispatch(new ChargeCustomer(
-            orderId: $event-&gt;orderId,
-            customerId: $event-&gt;customerId,
-            amountCents: $event-&gt;totalAmountCents,
+        $this->commandBus->dispatch(new ChargeCustomer(
+            orderId: $event->orderId,
+            customerId: $event->customerId,
+            amountCents: $event->totalAmountCents,
         ));
     }
 
     private function onPaymentSucceeded(PaymentSucceeded $event): void
     {
-        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-        $state-&gt;transitionTo(OrderSagaStatus::AwaitingStockReservation);
-        $state-&gt;updateContext('completedSteps', [
-            ...$state-&gt;context()['completedSteps'],
+        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state->transitionTo(OrderSagaStatus::AwaitingStockReservation);
+        $state->updateContext('completedSteps', [
+            ...$state->context()['completedSteps'],
             'payment_charged',
         ]);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $this->sagaStateRepository->save($state);
 
-        $this-&gt;commandBus-&gt;dispatch(new ReserveStock(orderId: $event-&gt;orderId));
+        $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
     }
 
     private function onPaymentFailed(PaymentFailed $event): void
     {
-        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-        $state-&gt;transitionTo(OrderSagaStatus::Failed);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state->transitionTo(OrderSagaStatus::Failed);
+        $this->sagaStateRepository->save($state);
 
-        $this-&gt;commandBus-&gt;dispatch(new CancelOrder(
-            orderId: $event-&gt;orderId,
-            reason: 'Platba selhala: ' . $event-&gt;failureReason,
+        $this->commandBus->dispatch(new CancelOrder(
+            orderId: $event->orderId,
+            reason: 'Platba selhala: ' . $event->failureReason,
         ));
     }
 
     private function onStockReserved(StockReserved $event): void
     {
-        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-        $state-&gt;transitionTo(OrderSagaStatus::AwaitingShipment);
-        $state-&gt;updateContext('completedSteps', [
-            ...$state-&gt;context()['completedSteps'],
+        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state->transitionTo(OrderSagaStatus::AwaitingShipment);
+        $state->updateContext('completedSteps', [
+            ...$state->context()['completedSteps'],
             'stock_reserved',
         ]);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $this->sagaStateRepository->save($state);
 
-        $this-&gt;commandBus-&gt;dispatch(new CreateShipment(orderId: $event-&gt;orderId));
+        $this->commandBus->dispatch(new CreateShipment(orderId: $event->orderId));
     }
 
     private function onStockReservationFailed(StockReservationFailed $event): void
     {
-        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-        $state-&gt;transitionTo(OrderSagaStatus::Compensating);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state->transitionTo(OrderSagaStatus::Compensating);
+        $this->sagaStateRepository->save($state);
 
         // Kompenzace: vrátit platbu
-        $this-&gt;commandBus-&gt;dispatch(new RefundCustomer(
-            orderId: $event-&gt;orderId,
-            customerId: $state-&gt;context()['customerId'],
-            amountCents: $state-&gt;context()['amountCents'],
+        $this->commandBus->dispatch(new RefundCustomer(
+            orderId: $event->orderId,
+            customerId: $state->context()['customerId'],
+            amountCents: $state->context()['amountCents'],
             reason: 'Zboží není skladem',
         ));
 
-        $this-&gt;commandBus-&gt;dispatch(new CancelOrder(
-            orderId: $event-&gt;orderId,
+        $this->commandBus->dispatch(new CancelOrder(
+            orderId: $event->orderId,
             reason: 'Zboží není skladem',
         ));
 
-        $state-&gt;transitionTo(OrderSagaStatus::Failed);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $state->transitionTo(OrderSagaStatus::Failed);
+        $this->sagaStateRepository->save($state);
     }
 
     private function onShipmentCreated(ShipmentCreated $event): void
     {
-        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-        $state-&gt;transitionTo(OrderSagaStatus::Completed);
-        $state-&gt;updateContext('completedSteps', [
-            ...$state-&gt;context()['completedSteps'],
+        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state->transitionTo(OrderSagaStatus::Completed);
+        $state->updateContext('completedSteps', [
+            ...$state->context()['completedSteps'],
             'shipment_created',
         ]);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $this->sagaStateRepository->save($state);
 
-        $this-&gt;commandBus-&gt;dispatch(new ConfirmOrder(orderId: $event-&gt;orderId));
+        $this->commandBus->dispatch(new ConfirmOrder(orderId: $event->orderId));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Saga/OrderProcessManager.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: OrderProcessManager - jádro orchestrace',
+                body: _callout_body
+            } %}
 
     <p>
         Orchestrace přináší oproti choreografii několik praktických výhod: celý business proces je
@@ -720,7 +802,8 @@ final class OrderProcessManager
         kontextů.
     </p>
 
-    <div class="note" role="note" aria-labelledby="step-method-heading">
+    {% set _callout_body %}
+
         <h3 id="step-method-heading">Každá metoda = jeden krok stavového automatu</h3>
         <p>
             Každá privátní metoda v <code>OrderProcessManager</code> reprezentuje jeden krok
@@ -729,7 +812,12 @@ final class OrderProcessManager
             <strong>Open-Closed Principle</strong>: Process Manager je otevřený pro rozšíření
             (nové kroky), ale uzavřený pro modifikaci (existující kroky zůstávají beze změny).
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Každá metoda = jeden krok stavového automatu',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -737,7 +825,7 @@ final class OrderProcessManager
        Sekce 6: Perzistence stavu ságy
        ─────────────────────────────────────────────────────────── #}
     <section id="perzistence-stavu" aria-labelledby="perzistence-stavu-heading">
-    <h2 id="perzistence-stavu-heading">Perzistence stavu ságy</h2>
+    <h2 id="perzistence-stavu-heading" class="h-section"><span class="h-num">07.06</span> Perzistence stavu ságy</h2>
 
     <p>
         Process Manager potřebuje <strong>perzistentní úložiště stavu</strong>, aby přežil
@@ -748,9 +836,10 @@ final class OrderProcessManager
         ukládáme do databáze jako Doctrine entitu.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="saga-state-entity-heading">
+    {% set _callout_body %}
+
         <h3 id="saga-state-entity-heading">PHP: SagaState - Doctrine entita</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -778,7 +867,7 @@ class SagaState
     #[ORM\Column(length: 32)]
     private string $status;
 
-    /** @var array&lt;string, mixed&gt; */
+    /** @var array<string, mixed> */
     #[ORM\Column(type: 'json')]
     private array $context = [];
 
@@ -800,68 +889,80 @@ class SagaState
         array $context = [],
     ): self {
         $state = new self();
-        $state-&gt;sagaType = $sagaType;
-        $state-&gt;correlationId = $correlationId;
-        $state-&gt;status = $status-&gt;value;
-        $state-&gt;context = $context;
-        $state-&gt;startedAt = new \DateTimeImmutable();
-        $state-&gt;updatedAt = new \DateTimeImmutable();
+        $state->sagaType = $sagaType;
+        $state->correlationId = $correlationId;
+        $state->status = $status->value;
+        $state->context = $context;
+        $state->startedAt = new \DateTimeImmutable();
+        $state->updatedAt = new \DateTimeImmutable();
 
         return $state;
     }
 
     public function transitionTo(OrderSagaStatus $newStatus): void
     {
-        $this-&gt;status = $newStatus-&gt;value;
-        $this-&gt;updatedAt = new \DateTimeImmutable();
+        $this->status = $newStatus->value;
+        $this->updatedAt = new \DateTimeImmutable();
 
         if ($newStatus === OrderSagaStatus::Completed || $newStatus === OrderSagaStatus::Failed) {
-            $this-&gt;completedAt = new \DateTimeImmutable();
+            $this->completedAt = new \DateTimeImmutable();
         }
     }
 
     public function status(): OrderSagaStatus
     {
-        return OrderSagaStatus::from($this-&gt;status);
+        return OrderSagaStatus::from($this->status);
     }
 
-    /** @return array&lt;string, mixed&gt; */
+    /** @return array<string, mixed> */
     public function context(): array
     {
-        return $this-&gt;context;
+        return $this->context;
     }
 
     public function updateContext(string $key, mixed $value): void
     {
-        $this-&gt;context[$key] = $value;
-        $this-&gt;updatedAt = new \DateTimeImmutable();
+        $this->context[$key] = $value;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function correlationId(): string
     {
-        return $this-&gt;correlationId;
+        return $this->correlationId;
     }
 
     public function isCompleted(): bool
     {
-        return $this-&gt;completedAt !== null;
+        return $this->completedAt !== null;
     }
 
     public function startedAt(): \DateTimeImmutable
     {
-        return $this-&gt;startedAt;
+        return $this->startedAt;
     }
 
     public function updatedAt(): \DateTimeImmutable
     {
-        return $this-&gt;updatedAt;
+        return $this->updatedAt;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Saga/SagaState.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: SagaState - Doctrine entita',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="saga-state-repo-interface-heading">
+    {% set _callout_body %}
+
         <h3 id="saga-state-repo-interface-heading">PHP: Rozhraní SagaStateRepositoryInterface</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -877,14 +978,26 @@ interface SagaStateRepositoryInterface
 
     public function findByCorrelationId(string $correlationId): SagaState;
 
-    /** @return list&lt;SagaState&gt; */
+    /** @return list<SagaState> */
     public function findStale(\DateTimeImmutable $olderThan): array;
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Saga/SagaStateRepositoryInterface.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Rozhraní SagaStateRepositoryInterface',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="saga-state-repository-heading">
+    {% set _callout_body %}
+
         <h3 id="saga-state-repository-heading">PHP: Doctrine implementace SagaStateRepository</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -900,38 +1013,49 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
 
     public function save(SagaState $state): void
     {
-        $this-&gt;em-&gt;persist($state);
-        $this-&gt;em-&gt;flush();
+        $this->em->persist($state);
+        $this->em->flush();
     }
 
     public function findByCorrelationId(string $correlationId): SagaState
     {
-        $state = $this-&gt;em-&gt;getRepository(SagaState::class)
-            -&gt;findOneBy(['correlationId' =&gt; $correlationId]);
+        $state = $this->em->getRepository(SagaState::class)
+            ->findOneBy(['correlationId' => $correlationId]);
 
         if ($state === null) {
             throw new \RuntimeException(
-                sprintf('Saga state not found for correlation ID &quot;%s&quot;', $correlationId),
+                sprintf('Saga state not found for correlation ID "%s"', $correlationId),
             );
         }
 
         return $state;
     }
 
-    /** @return list&lt;SagaState&gt; */
+    /** @return list<SagaState> */
     public function findStale(\DateTimeImmutable $olderThan): array
     {
-        return $this-&gt;em-&gt;createQueryBuilder()
-            -&gt;select('s')
-            -&gt;from(SagaState::class, 's')
-            -&gt;where('s.completedAt IS NULL')
-            -&gt;andWhere('s.updatedAt &lt; :threshold')
-            -&gt;setParameter('threshold', $olderThan)
-            -&gt;getQuery()
-            -&gt;getResult();
+        return $this->em->createQueryBuilder()
+            ->select('s')
+            ->from(SagaState::class, 's')
+            ->where('s.completedAt IS NULL')
+            ->andWhere('s.updatedAt < :threshold')
+            ->setParameter('threshold', $olderThan)
+            ->getQuery()
+            ->getResult();
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Saga/SagaStateRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Doctrine implementace SagaStateRepository',
+                body: _callout_body
+            } %}
 
     <p>
         Díky perzistenci stavu je obnova po selhání přímočará: představte si, že worker spadne
@@ -944,7 +1068,8 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
         eskalaci.
     </p>
 
-    <div class="note" role="note" aria-labelledby="optimistic-locking-heading">
+    {% set _callout_body %}
+
         <h3 id="optimistic-locking-heading">Optimistické zamykání v produkci</h3>
         <p>
             V produkčním prostředí s více workery zvažte přidání sloupce pro optimistické
@@ -953,7 +1078,12 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
             si navzájem změny. Optimistický zámek zajistí, že druhý worker dostane výjimku
             <code>OptimisticLockException</code> a Messenger zprávu automaticky zopakuje.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Optimistické zamykání v produkci',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -961,7 +1091,7 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
        Sekce 7: Implementace v Symfony Messenger
        ─────────────────────────────────────────────────────────── #}
     <section id="messenger-implementace" aria-labelledby="messenger-implementace-heading">
-    <h2 id="messenger-implementace-heading">Implementace v Symfony Messenger</h2>
+    <h2 id="messenger-implementace-heading" class="h-section"><span class="h-num">07.07</span> Implementace v Symfony Messenger</h2>
 
     <p>
         Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu ságy. Nyní
@@ -974,9 +1104,10 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
         procesů.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="messenger-yaml-heading">
+    {% set _callout_body %}
+
         <h3 id="messenger-yaml-heading">YAML: Kompletní konfigurace Messenger</h3>
-        <pre><code class="language-yaml"># config/packages/messenger.yaml
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
 framework:
     messenger:
         default_bus: command.bus
@@ -1015,12 +1146,24 @@ framework:
             'App\Payment\Application\Command\RefundCustomer': async_commands
             'App\Warehouse\Application\Command\ReserveStock': async_commands
             'App\Warehouse\Application\Command\ReleaseStock': async_commands
-            'App\Shipping\Application\Command\CreateShipment': async_commands</code></pre>
-    </div>
+            'App\Shipping\Application\Command\CreateShipment': async_commands{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'YAML: Kompletní konfigurace Messenger',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="order-placed-event-heading">
+    {% set _callout_body %}
+
         <h3 id="order-placed-event-heading">PHP: Doménová událost OrderPlaced</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1034,8 +1177,19 @@ final readonly class OrderPlaced
         public int $totalAmountCents,
         public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {}
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Domain/Event/OrderPlaced.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Doménová událost OrderPlaced',
+                body: _callout_body
+            } %}
 
     <p>
         Celý tok funguje následovně: agregát <code>Order</code> v kontextu Ordering publikuje
@@ -1049,7 +1203,8 @@ final readonly class OrderPlaced
         pro další krok procesu.
     </p>
 
-    <div class="note" role="note" aria-labelledby="worker-command-heading">
+    {% set _callout_body %}
+
         <h3 id="worker-command-heading">Spouštění workerů</h3>
         <p>
             V produkci spouštějte oddělené workery pro každý transport:
@@ -1058,9 +1213,15 @@ final readonly class OrderPlaced
             (a uvolní paměť). Pro vysokou dostupnost spouštějte více instancí workeru -
             Messenger zajistí, že každou zprávu zpracuje právě jeden worker.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Spouštění workerů',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="outbox-pattern-heading">
+    {% set _callout_body %}
+
         <h3 id="outbox-pattern-heading">Pozor na ztrátu zpráv: Outbox pattern</h3>
         <p>
             Výše uvedená konfigurace předpokládá, že doménová událost se spolehlivě dostane do
@@ -1078,7 +1239,12 @@ final readonly class OrderPlaced
             <a href="{{ path('event_sourcing') }}">Event Sourcing</a>, kde je Outbox pattern
             popsán v kontextu event store.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Pozor na ztrátu zpráv: Outbox pattern',
+                body: _callout_body
+            } %}
 
     <p>
         Podrobnější informace o asynchronním zpracování zpráv, konfiguraci transportů a retry
@@ -1092,7 +1258,7 @@ final readonly class OrderPlaced
        Sekce 8: Timeouty a deadliny
        ─────────────────────────────────────────────────────────── #}
     <section id="timeouty" aria-labelledby="timeouty-heading">
-    <h2 id="timeouty-heading">Timeouty a deadliny</h2>
+    <h2 id="timeouty-heading" class="h-section"><span class="h-num">07.08</span> Timeouty a deadliny</h2>
 
     <p>
         Co se stane, když událost <code>PaymentSucceeded</code> nikdy nedorazí? Síťový výpadek,
@@ -1103,9 +1269,10 @@ final readonly class OrderPlaced
         stanovené doby zkontroluje, zda se sága posunula dál, a pokud ne, spustí kompenzaci.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="check-saga-timeout-heading">
+    {% set _callout_body %}
+
         <h3 id="check-saga-timeout-heading">PHP: CheckSagaTimeout command</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1117,12 +1284,24 @@ final readonly class CheckSagaTimeout
         public string $orderId,
         public string $expectedStatus,
     ) {}
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Command/CheckSagaTimeout.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: CheckSagaTimeout command',
+                body: _callout_body
+            } %}
 
-    <div class="tip" role="note" aria-labelledby="check-saga-timeout-handler-heading">
+    {% set _callout_body %}
+
         <h3 id="check-saga-timeout-handler-heading">PHP: CheckSagaTimeoutHandler</h3>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1146,44 +1325,55 @@ final readonly class CheckSagaTimeoutHandler
 
     public function __invoke(CheckSagaTimeout $command): void
     {
-        $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($command-&gt;orderId);
+        $state = $this->sagaStateRepository->findByCorrelationId($command->orderId);
 
         // Saga se od posledního kroku posunula - timeout neplatí
-        if ($state-&gt;status()-&gt;value !== $command-&gt;expectedStatus) {
+        if ($state->status()->value !== $command->expectedStatus) {
             return;
         }
 
         // Zapamatovat původní stav před přechodem
-        $originalStatus = OrderSagaStatus::from($command-&gt;expectedStatus);
+        $originalStatus = OrderSagaStatus::from($command->expectedStatus);
 
-        $state-&gt;transitionTo(OrderSagaStatus::Compensating);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+        $state->transitionTo(OrderSagaStatus::Compensating);
+        $this->sagaStateRepository->save($state);
 
         match ($originalStatus) {
-            OrderSagaStatus::AwaitingPayment =&gt; $this-&gt;commandBus-&gt;dispatch(
-                new CancelOrder(orderId: $command-&gt;orderId, reason: 'Payment timeout'),
+            OrderSagaStatus::AwaitingPayment => $this->commandBus->dispatch(
+                new CancelOrder(orderId: $command->orderId, reason: 'Payment timeout'),
             ),
-            OrderSagaStatus::AwaitingStockReservation =&gt; $this-&gt;compensatePayment($state),
-            default =&gt; null,
+            OrderSagaStatus::AwaitingStockReservation => $this->compensatePayment($state),
+            default => null,
         };
     }
 
     private function compensatePayment(/* SagaState */ $state): void
     {
-        $this-&gt;commandBus-&gt;dispatch(new RefundCustomer(
-            orderId: $state-&gt;correlationId(),
-            customerId: $state-&gt;context()['customerId'],
-            amountCents: $state-&gt;context()['amountCents'],
+        $this->commandBus->dispatch(new RefundCustomer(
+            orderId: $state->correlationId(),
+            customerId: $state->context()['customerId'],
+            amountCents: $state->context()['amountCents'],
             reason: 'Timeout: stock reservation not received',
         ));
 
-        $this-&gt;commandBus-&gt;dispatch(new CancelOrder(
-            orderId: $state-&gt;correlationId(),
+        $this->commandBus->dispatch(new CancelOrder(
+            orderId: $state->correlationId(),
             reason: 'Timeout waiting for stock reservation',
         ));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/Handler/CheckSagaTimeoutHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: CheckSagaTimeoutHandler',
+                body: _callout_body
+            } %}
 
     <p>
         Timeout check naplánujeme přímo v Process Manageru při zpracování události
@@ -1191,26 +1381,39 @@ final readonly class CheckSagaTimeoutHandler
         podrží v transportu po zadanou dobu a teprve poté ji doručí workeru:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="delay-stamp-heading">
+    {% set _callout_body %}
+
         <h3 id="delay-stamp-heading">PHP: Naplánování timeout checku v OrderProcessManager</h3>
-        <pre><code class="language-php">use Symfony\Component\Messenger\Stamp\DelayStamp;
+        {% set _code %}{% verbatim %}use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 private function onOrderPlaced(OrderPlaced $event): void
 {
     // ... (vytvoření SagaState a dispatch ChargeCustomer - viz sekce 5)
 
     // Naplánovat timeout check za 5 minut
-    $this-&gt;commandBus-&gt;dispatch(
+    $this->commandBus->dispatch(
         new CheckSagaTimeout(
-            orderId: $event-&gt;orderId,
-            expectedStatus: OrderSagaStatus::AwaitingPayment-&gt;value,
+            orderId: $event->orderId,
+            expectedStatus: OrderSagaStatus::AwaitingPayment->value,
         ),
         [new DelayStamp(5 * 60 * 1000)], // 5 minut v milisekundách
     );
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Naplánování timeout checku v OrderProcessManager',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="configurable-timeouts-heading">
+    {% set _callout_body %}
+
         <h3 id="configurable-timeouts-heading">Konfigurovatelné timeouty</h3>
         <p>
             Každý krok ságy může vyžadovat jiný timeout. Platební brána typicky potřebuje
@@ -1220,9 +1423,15 @@ private function onOrderPlaced(OrderPlaced $event): void
             Timeouty proto definujte konfigurovatelně - ideálně jako parametry v
             <code>services.yaml</code>, aby je bylo možné upravit bez změny kódu.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Konfigurovatelné timeouty',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="delay-stamp-warning-heading">
+    {% set _callout_body %}
+
         <h3 id="delay-stamp-warning-heading">Požadavky na transport</h3>
         <p>
             <code>DelayStamp</code> vyžaduje asynchronní transport, který podporuje odložené
@@ -1232,7 +1441,12 @@ private function onOrderPlaced(OrderPlaced $event): void
             <code>rabbitmq-delayed-message-exchange</code>. Synchronní transport
             (<code>sync://</code>) <code>DelayStamp</code> ignoruje a zprávu doručí okamžitě.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Požadavky na transport',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1240,7 +1454,7 @@ private function onOrderPlaced(OrderPlaced $event): void
        Sekce 9: Kompenzační strategie v praxi
        ─────────────────────────────────────────────────────────── #}
     <section id="kompenzacni-strategie" aria-labelledby="kompenzacni-strategie-heading">
-    <h2 id="kompenzacni-strategie-heading">Kompenzační strategie v praxi</h2>
+    <h2 id="kompenzacni-strategie-heading" class="h-section"><span class="h-num">07.09</span> Kompenzační strategie v praxi</h2>
 
     <p>
         Když krok ságy selže, máme dvě základní strategie, jak situaci řešit. Volba závisí
@@ -1272,44 +1486,57 @@ private function onOrderPlaced(OrderPlaced $event): void
         akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="compensate-method-heading">
+    {% set _callout_body %}
+
         <h3 id="compensate-method-heading">PHP: Kompenzační logika v opačném pořadí kroků</h3>
-        <pre><code class="language-php">/**
+        {% set _code %}{% verbatim %}/**
  * Kompenzace: spouštěna při selhání libovolného kroku.
  * Provádí kompenzační akce v opačném pořadí dokončených kroků.
  */
 private function compensate(SagaState $state): void
 {
-    $completedSteps = $state-&gt;context()['completedSteps'] ?? [];
+    $completedSteps = $state->context()['completedSteps'] ?? [];
 
     foreach (array_reverse($completedSteps) as $step) {
         match ($step) {
-            'shipment_created' =&gt; $this-&gt;commandBus-&gt;dispatch(
+            'shipment_created' => $this->commandBus->dispatch(
                 new \App\Shipping\Application\Command\CancelShipment(
-                    orderId: $state-&gt;correlationId(),
+                    orderId: $state->correlationId(),
                 ),
             ),
-            'stock_reserved' =&gt; $this-&gt;commandBus-&gt;dispatch(
-                new ReleaseStock(orderId: $state-&gt;correlationId()),
+            'stock_reserved' => $this->commandBus->dispatch(
+                new ReleaseStock(orderId: $state->correlationId()),
             ),
-            'payment_charged' =&gt; $this-&gt;commandBus-&gt;dispatch(
+            'payment_charged' => $this->commandBus->dispatch(
                 new RefundCustomer(
-                    orderId: $state-&gt;correlationId(),
-                    customerId: $state-&gt;context()['customerId'],
-                    amountCents: $state-&gt;context()['amountCents'],
+                    orderId: $state->correlationId(),
+                    customerId: $state->context()['customerId'],
+                    amountCents: $state->context()['amountCents'],
                     reason: 'Order saga compensation',
                 ),
             ),
-            default =&gt; null,
+            default => null,
         };
     }
 
-    $state-&gt;transitionTo(OrderSagaStatus::Failed);
-    $this-&gt;sagaStateRepository-&gt;save($state);
-}</code></pre>
-    </div>
+    $state->transitionTo(OrderSagaStatus::Failed);
+    $this->sagaStateRepository->save($state);
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Kompenzační logika v opačném pořadí kroků',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="idempotent-compensation-heading">
+    {% set _callout_body %}
+
         <h3 id="idempotent-compensation-heading">Idempotence kompenzačních handlerů</h3>
         <p>
             Každý kompenzační handler <strong>musí být idempotentní</strong>. Zpráva může být
@@ -1317,7 +1544,12 @@ private function compensate(SagaState $state): void
             opakované volání. Například <code>RefundCustomerHandler</code> by měl před vytvořením
             refundu ověřit, zda refund pro danou objednávku již neexistuje.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Idempotence kompenzačních handlerů',
+                body: _callout_body
+            } %}
 
     <p>
         Podrobnější informace o Dead Letter Queue, retry strategiích a zpracování chyb v Messenger
@@ -1330,7 +1562,7 @@ private function compensate(SagaState $state): void
        Sekce 10: Paralelní kroky
        ─────────────────────────────────────────────────────────── #}
     <section id="paralelni-kroky" aria-labelledby="paralelni-kroky-heading">
-    <h2 id="paralelni-kroky-heading">Paralelní kroky</h2>
+    <h2 id="paralelni-kroky-heading" class="h-section"><span class="h-num">07.10</span> Paralelní kroky</h2>
 
     <p>
         Dosud jsme uvažovali sériové provádění kroků - jeden po druhém. V praxi však některé
@@ -1348,60 +1580,73 @@ private function compensate(SagaState $state): void
         <strong>synchronizační bariéra</strong> (synchronization barrier).
     </p>
 
-    <div class="tip" role="note" aria-labelledby="parallel-steps-heading">
-        <h3 id="parallel-steps-heading">PHP: Paralelní zpracování kroků se synchronizační bariérou</h3>
-        <pre><code class="language-php">private function onPaymentSucceeded(PaymentSucceeded $event): void
-{
-    $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-    $state-&gt;transitionTo(OrderSagaStatus::AwaitingStockAndInvoice);
-    $state-&gt;updateContext('stockReserved', false);
-    $state-&gt;updateContext('invoiceCreated', false);
-    $this-&gt;sagaStateRepository-&gt;save($state);
+    {% set _callout_body %}
 
-    $this-&gt;commandBus-&gt;dispatch(new ReserveStock(orderId: $event-&gt;orderId));
-    $this-&gt;commandBus-&gt;dispatch(new CreateInvoice(orderId: $event-&gt;orderId));
+        <h3 id="parallel-steps-heading">PHP: Paralelní zpracování kroků se synchronizační bariérou</h3>
+        {% set _code %}{% verbatim %}private function onPaymentSucceeded(PaymentSucceeded $event): void
+{
+    $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+    $state->transitionTo(OrderSagaStatus::AwaitingStockAndInvoice);
+    $state->updateContext('stockReserved', false);
+    $state->updateContext('invoiceCreated', false);
+    $this->sagaStateRepository->save($state);
+
+    $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
+    $this->commandBus->dispatch(new CreateInvoice(orderId: $event->orderId));
 }
 
 private function onStockReserved(StockReserved $event): void
 {
-    $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-    $state-&gt;updateContext('stockReserved', true);
-    $state-&gt;updateContext('completedSteps', [
-        ...$state-&gt;context()['completedSteps'] ?? [],
+    $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+    $state->updateContext('stockReserved', true);
+    $state->updateContext('completedSteps', [
+        ...$state->context()['completedSteps'] ?? [],
         'stock_reserved',
     ]);
-    $this-&gt;sagaStateRepository-&gt;save($state);
+    $this->sagaStateRepository->save($state);
 
-    $this-&gt;proceedIfParallelStepsCompleted($state);
+    $this->proceedIfParallelStepsCompleted($state);
 }
 
 private function onInvoiceCreated(InvoiceCreated $event): void
 {
-    $state = $this-&gt;sagaStateRepository-&gt;findByCorrelationId($event-&gt;orderId);
-    $state-&gt;updateContext('invoiceCreated', true);
-    $state-&gt;updateContext('completedSteps', [
-        ...$state-&gt;context()['completedSteps'] ?? [],
+    $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+    $state->updateContext('invoiceCreated', true);
+    $state->updateContext('completedSteps', [
+        ...$state->context()['completedSteps'] ?? [],
         'invoice_created',
     ]);
-    $this-&gt;sagaStateRepository-&gt;save($state);
+    $this->sagaStateRepository->save($state);
 
-    $this-&gt;proceedIfParallelStepsCompleted($state);
+    $this->proceedIfParallelStepsCompleted($state);
 }
 
 private function proceedIfParallelStepsCompleted(SagaState $state): void
 {
-    if ($state-&gt;context()['stockReserved'] &amp;&amp; $state-&gt;context()['invoiceCreated']) {
-        $state-&gt;transitionTo(OrderSagaStatus::AwaitingShipment);
-        $this-&gt;sagaStateRepository-&gt;save($state);
+    if ($state->context()['stockReserved'] && $state->context()['invoiceCreated']) {
+        $state->transitionTo(OrderSagaStatus::AwaitingShipment);
+        $this->sagaStateRepository->save($state);
 
-        $this-&gt;commandBus-&gt;dispatch(new CreateShipment(
-            orderId: $state-&gt;correlationId(),
+        $this->commandBus->dispatch(new CreateShipment(
+            orderId: $state->correlationId(),
         ));
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHP: Paralelní zpracování kroků se synchronizační bariérou',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="alert" aria-labelledby="parallel-compensation-heading">
+    {% set _callout_body %}
+
         <h3 id="parallel-compensation-heading">Kompenzace paralelních kroků</h3>
         <p>
             Paralelní kroky zvyšují složitost kompenzace. Pokud rezervace skladu uspěje, ale
@@ -1410,9 +1655,15 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
             toto řeší automaticky díky poli <code>completedSteps</code>: kompenzuje se pouze to,
             co skutečně proběhlo.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Kompenzace paralelních kroků',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="optimistic-locking-parallel-heading">
+    {% set _callout_body %}
+
         <h3 id="optimistic-locking-parallel-heading">Optimistické zamykání</h3>
         <p>
             Při paralelních krocích mohou dvě události (<code>StockReserved</code> a
@@ -1424,7 +1675,12 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
             nebyla mezitím změněna. Pokud ano, vyhodí
             <code>OptimisticLockException</code> a Messenger zprávu automaticky zopakuje.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Optimistické zamykání',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1432,7 +1688,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
        Sekce 11: Monitoring a observabilita
        ─────────────────────────────────────────────────────────── #}
     <section id="monitoring" aria-labelledby="monitoring-heading">
-    <h2 id="monitoring-heading">Monitoring a observabilita</h2>
+    <h2 id="monitoring-heading" class="h-section"><span class="h-num">07.11</span> Monitoring a observabilita</h2>
 
     <p>
         Produkční ságy potřebují <strong>observabilitu</strong> - musíte vědět, které ságy právě
@@ -1452,14 +1708,15 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
         <a href="{{ path('glossary') }}#term-korelacni-id">glosáři</a>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="saga-logging-middleware-heading">
+    {% set _callout_body %}
+
         <h3 id="saga-logging-middleware-heading">SagaLoggingMiddleware</h3>
         <p>
             Middleware pro Symfony Messenger, který loguje každou zprávu procházející ságou.
             Zaregistrujte ho v <code>messenger.yaml</code> a všechny zprávy se automaticky
             zaznamenají s korelačním ID:
         </p>
-<pre><code class="language-php">&lt;?php
+{% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1479,26 +1736,37 @@ final readonly class SagaLoggingMiddleware implements MiddlewareInterface
 
     public function handle(Envelope $envelope, StackInterface $stack): Envelope
     {
-        $message = $envelope-&gt;getMessage();
-        $messageName = (new \ReflectionClass($message))-&gt;getShortName();
+        $message = $envelope->getMessage();
+        $messageName = (new \ReflectionClass($message))->getShortName();
 
-        $this-&gt;logger-&gt;info('Saga: zpracovávám zprávu', [
-            'message' =&gt; $messageName,
-            'correlationId' =&gt; $message-&gt;orderId ?? 'unknown',
+        $this->logger->info('Saga: zpracovávám zprávu', [
+            'message' => $messageName,
+            'correlationId' => $message->orderId ?? 'unknown',
         ]);
 
-        $envelope = $stack-&gt;next()-&gt;handle($envelope, $stack);
+        $envelope = $stack->next()->handle($envelope, $stack);
 
-        $handledStamp = $envelope-&gt;last(HandledStamp::class);
-        $this-&gt;logger-&gt;info('Saga: zpráva zpracována', [
-            'message' =&gt; $messageName,
-            'handler' =&gt; $handledStamp?-&gt;getHandlerName(),
+        $handledStamp = $envelope->last(HandledStamp::class);
+        $this->logger->info('Saga: zpráva zpracována', [
+            'message' => $messageName,
+            'handler' => $handledStamp?->getHandlerName(),
         ]);
 
         return $envelope;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/SharedKernel/Infrastructure/Middleware/SagaLoggingMiddleware.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'SagaLoggingMiddleware',
+                body: _callout_body
+            } %}
 
     <h3 id="detekce-zaseklych-heading">Detekce zaseklých ság</h3>
 
@@ -1508,9 +1776,10 @@ final readonly class SagaLoggingMiddleware implements MiddlewareInterface
         pravidelně kontroluje, zda některá sága nezůstala příliš dlouho v mezistavech:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="check-stale-sagas-heading">
+    {% set _callout_body %}
+
         <h3 id="check-stale-sagas-heading">Symfony Console příkaz pro detekci zaseklých ság</h3>
-<pre><code class="language-php">&lt;?php
+{% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1536,31 +1805,43 @@ final class CheckStaleSagasCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $threshold = new \DateTimeImmutable('-30 minutes');
-        $staleSagas = $this-&gt;sagaStateRepository-&gt;findStale($threshold);
+        $staleSagas = $this->sagaStateRepository->findStale($threshold);
 
         if (count($staleSagas) === 0) {
-            $io-&gt;success('Žádné zaseklé ságy.');
+            $io->success('Žádné zaseklé ságy.');
             return Command::SUCCESS;
         }
 
-        $io-&gt;warning(sprintf('Nalezeno %d zaseklých ság:', count($staleSagas)));
+        $io->warning(sprintf('Nalezeno %d zaseklých ság:', count($staleSagas)));
 
         foreach ($staleSagas as $saga) {
-            $io-&gt;writeln(sprintf(
+            $io->writeln(sprintf(
                 '  [%s] %s - stav: %s, poslední aktivita: %s',
-                $saga-&gt;correlationId(),
+                $saga->correlationId(),
                 'order_process',
-                $saga-&gt;status()-&gt;value,
-                $saga-&gt;updatedAt()-&gt;format('Y-m-d H:i:s'),
+                $saga->status()->value,
+                $saga->updatedAt()->format('Y-m-d H:i:s'),
             ));
         }
 
         return Command::FAILURE;
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Infrastructure/Command/CheckStaleSagasCommand.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Symfony Console příkaz pro detekci zaseklých ság',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="alerting-heading">
+    {% set _callout_body %}
+
         <h3 id="alerting-heading">Integrace s alertingem</h3>
         <p>
             V produkčním prostředí napojte detekci zaseklých ság na váš alertingový systém -
@@ -1569,7 +1850,12 @@ final class CheckStaleSagasCommand extends Command
             nástroj pro eskalaci kritických situací. Příkaz <code>app:saga:check-stale</code>
             může běžet jako Kubernetes CronJob nebo Symfony Scheduler task.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Integrace s alertingem',
+                body: _callout_body
+            } %}
 
     <p>
         Podrobnosti o implementaci middleware v Symfony Messenger najdete v kapitole
@@ -1582,7 +1868,7 @@ final class CheckStaleSagasCommand extends Command
        Sekce 12: Testování ság
        ─────────────────────────────────────────────────────────── #}
     <section id="testovani" aria-labelledby="testovani-heading">
-    <h2 id="testovani-heading">Testování ság</h2>
+    <h2 id="testovani-heading" class="h-section"><span class="h-num">07.12</span> Testování ság</h2>
 
     <p>
         Ságy koordinují složité vícekrokové procesy napříč Bounded Contexts - testování je proto
@@ -1599,9 +1885,10 @@ final class CheckStaleSagasCommand extends Command
         příkazy, a místo databáze in-memory repozitář:
     </p>
 
-    <div class="tip" role="note" aria-labelledby="saga-unit-test-heading">
+    {% set _callout_body %}
+
         <h3 id="saga-unit-test-heading">PHPUnit test ságy</h3>
-<pre><code class="language-php">&lt;?php
+{% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1625,80 +1912,92 @@ final class OrderProcessManagerTest extends TestCase
     private MessageBusInterface $commandBus;
     private SagaStateRepository $repository;
     private OrderProcessManager $saga;
-    /** @var list&lt;object&gt; */
+    /** @var list<object> */
     private array $dispatchedCommands = [];
 
     protected function setUp(): void
     {
-        $this-&gt;dispatchedCommands = [];
+        $this->dispatchedCommands = [];
 
-        $this-&gt;commandBus = new class($this-&gt;dispatchedCommands) implements MessageBusInterface {
-            /** @param list&lt;object&gt; $commands */
-            public function __construct(private array &amp;$commands) {}
+        $this->commandBus = new class($this->dispatchedCommands) implements MessageBusInterface {
+            /** @param list<object> $commands */
+            public function __construct(private array &$commands) {}
 
             public function dispatch(object $message, array $stamps = []): Envelope
             {
-                $this-&gt;commands[] = $message;
+                $this->commands[] = $message;
                 return new Envelope($message);
             }
         };
 
-        $this-&gt;repository = new InMemorySagaStateRepository();
-        $this-&gt;saga = new OrderProcessManager($this-&gt;commandBus, $this-&gt;repository);
+        $this->repository = new InMemorySagaStateRepository();
+        $this->saga = new OrderProcessManager($this->commandBus, $this->repository);
     }
 
     public function testOrderPlacedInitiatesPayment(): void
     {
-        ($this-&gt;saga)(new OrderPlaced(
+        ($this->saga)(new OrderPlaced(
             orderId: 'order-1',
             customerId: 'cust-1',
             totalAmountCents: 10000,
         ));
 
-        self::assertCount(1, $this-&gt;dispatchedCommands);
-        self::assertInstanceOf(ChargeCustomer::class, $this-&gt;dispatchedCommands[0]);
-        self::assertSame('order-1', $this-&gt;dispatchedCommands[0]-&gt;orderId);
+        self::assertCount(1, $this->dispatchedCommands);
+        self::assertInstanceOf(ChargeCustomer::class, $this->dispatchedCommands[0]);
+        self::assertSame('order-1', $this->dispatchedCommands[0]->orderId);
 
-        $state = $this-&gt;repository-&gt;findByCorrelationId('order-1');
-        self::assertSame(OrderSagaStatus::AwaitingPayment, $state-&gt;status());
+        $state = $this->repository->findByCorrelationId('order-1');
+        self::assertSame(OrderSagaStatus::AwaitingPayment, $state->status());
     }
 
     public function testPaymentSucceededReservesStock(): void
     {
-        ($this-&gt;saga)(new OrderPlaced('order-1', 'cust-1', 10000));
-        $this-&gt;dispatchedCommands = [];
+        ($this->saga)(new OrderPlaced('order-1', 'cust-1', 10000));
+        $this->dispatchedCommands = [];
 
-        ($this-&gt;saga)(new PaymentSucceeded(orderId: 'order-1'));
+        ($this->saga)(new PaymentSucceeded(orderId: 'order-1'));
 
-        self::assertCount(1, $this-&gt;dispatchedCommands);
-        self::assertInstanceOf(ReserveStock::class, $this-&gt;dispatchedCommands[0]);
+        self::assertCount(1, $this->dispatchedCommands);
+        self::assertInstanceOf(ReserveStock::class, $this->dispatchedCommands[0]);
 
-        $state = $this-&gt;repository-&gt;findByCorrelationId('order-1');
-        self::assertSame(OrderSagaStatus::AwaitingStockReservation, $state-&gt;status());
+        $state = $this->repository->findByCorrelationId('order-1');
+        self::assertSame(OrderSagaStatus::AwaitingStockReservation, $state->status());
     }
 
     public function testPaymentFailedCancelsOrder(): void
     {
-        ($this-&gt;saga)(new OrderPlaced('order-1', 'cust-1', 10000));
-        $this-&gt;dispatchedCommands = [];
+        ($this->saga)(new OrderPlaced('order-1', 'cust-1', 10000));
+        $this->dispatchedCommands = [];
 
-        ($this-&gt;saga)(new PaymentFailed(
+        ($this->saga)(new PaymentFailed(
             orderId: 'order-1',
             failureReason: 'Insufficient funds',
         ));
 
-        $state = $this-&gt;repository-&gt;findByCorrelationId('order-1');
-        self::assertSame(OrderSagaStatus::Failed, $state-&gt;status());
+        $state = $this->repository->findByCorrelationId('order-1');
+        self::assertSame(OrderSagaStatus::Failed, $state->status());
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Tests/Ordering/Application/Saga/OrderProcessManagerTest.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'PHPUnit test ságy',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note" aria-labelledby="in-memory-repo-heading">
+    {% set _callout_body %}
+
         <h3 id="in-memory-repo-heading">InMemorySagaStateRepository</h3>
         <p>
             Testovací in-memory implementace repozitáře, kterou používáme místo Doctrine:
         </p>
-<pre><code class="language-php">&lt;?php
+{% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1709,23 +2008,34 @@ use App\Ordering\Application\Saga\SagaStateRepositoryInterface;
 
 final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
 {
-    /** @var array&lt;string, SagaState&gt; */
+    /** @var array<string, SagaState> */
     private array $states = [];
 
     public function save(SagaState $state): void
     {
-        $this-&gt;states[$state-&gt;correlationId()] = $state;
+        $this->states[$state->correlationId()] = $state;
     }
 
     public function findByCorrelationId(string $correlationId): SagaState
     {
-        return $this-&gt;states[$correlationId]
+        return $this->states[$correlationId]
             ?? throw new \RuntimeException(
                 sprintf('Saga state not found for "%s"', $correlationId),
             );
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Tests/Ordering/Application/Saga/InMemorySagaStateRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'InMemorySagaStateRepository',
+                body: _callout_body
+            } %}
 
     <p>
         Další vzory pro testování doménové logiky, agregátů a event handlerů najdete v kapitole
@@ -1758,8 +2068,7 @@ final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
             }
         ]
     } %}
-
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
