@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Kdy DDD nepoužívat</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-<article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">Kdy DDD nepoužívat - upřímně</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '14',
+        category: 'Praxe',
+        title: 'Kdy DDD nepoužívat - upřímně',
+        deck: '7 konkrétních situací, kdy DDD nepoužívat - s alternativami, ukázkami kódu a rozhodovacím stromem. Upřímný průvodce pro PHP vývojáře, kteří nechtějí zavádět zbytečnou komplexitu.',
+        reading_time: 12,
+        difficulty: 2,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2026-03-26', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <p>
+    <div class="art-body" data-chapter-number="14">
+<p>
         DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
         zpomaluje vývoj a frustruje tým - aniž by přinesla cokoliv hodnotného.
         Tato kapitola říká přímo, kdy DDD vynechat, a co místo toho použít.
@@ -75,38 +73,23 @@
         zpravidla nerozvádí dostatečně.
     </p>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#rozhodovaci-strom">Rozhodovací strom: Mám použít DDD?</a></li>
-            <li><a href="#crud-admin">1. CRUD admin a jednoduchý backoffice</a></li>
-            <li><a href="#startup">2. Startup - doména se mění každý sprint</a></li>
-            <li><a href="#small-team">3. Malý tým bez doménových expertů</a></li>
-            <li><a href="#data-pipeline">4. Data pipeline, ETL a reportovací systémy</a></li>
-            <li><a href="#short-lived">5. Projekt s životností kratší než rok</a></li>
-            <li><a href="#no-knowledge">6. Tým DDD nezná a čas na učení není</a></li>
-            <li><a href="#unclear-domain">7. Doména je nejasná, experti nejsou k dispozici</a></li>
-            <li><a href="#when-ddd-fits">Kdy DDD naopak smysl má</a></li>
-            <li><a href="#zdroje">Zdroje a další čtení</a></li>
-        </ul>
-    </div>
-
-    {# ═══════════════════════════════════════════════════════════
+{# ═══════════════════════════════════════════════════════════
        Rozhodovací strom
        ═══════════════════════════════════════════════════════════ #}
     <section id="rozhodovaci-strom" aria-labelledby="rozhodovaci-strom-heading">
-        <h2 id="rozhodovaci-strom-heading">Rozhodovací strom: Mám použít DDD?</h2>
+        <h2 id="rozhodovaci-strom-heading" class="h-section"><span class="h-num">14.01</span> Rozhodovací strom: Mám použít DDD?</h2>
 
         <p>
             Než se ponoříte do jednotlivých situací, projděte si pět otázek. Pokud na kteroukoli odpovíte
             „ne", DDD pravděpodobně není ta správná volba - nebo ještě ne.
         </p>
 
-        <div class="tip">
-            <div class="diagram-container">
-                {% include '/diagrams/9_when_not_to_use_ddd/diagram.svg' %}
-            </div>
-        </div>
+        {% set _diagram_inline %}{% include '/diagrams/9_when_not_to_use_ddd/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
         <p>
             Každá z těchto pěti bran odpovídá jedné nebo více sekcím níže, které jsou podrobně popsány v dalším textu.
@@ -117,7 +100,7 @@
        1. CRUD admin
        ═══════════════════════════════════════════════════════════ #}
     <section id="crud-admin" aria-labelledby="crud-admin-heading">
-        <h2 id="crud-admin-heading">1. CRUD admin a jednoduchý backoffice</h2>
+        <h2 id="crud-admin-heading" class="h-section"><span class="h-num">14.02</span> 1. CRUD admin a jednoduchý backoffice</h2>
 
         <p>
             Typickým příkladem je aplikace, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuje 1:1 na tabulku.
@@ -135,9 +118,10 @@
             jsou to operace nad daty bez business pravidel.
         </p>
 
-        <div class="tip" role="note" aria-labelledby="crud-compare-heading">
+        {% set _callout_body %}
+
             <h4 id="crud-compare-heading">Srovnání: DDD vs. jednoduchý přístup pro CRUD admin</h4>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 // ❌ Over-engineered DDD přístup pro prostý CRUD
 // -- 6 tříd pro jednu operaci --
 
@@ -164,8 +148,14 @@ final class DoctrineArticleRepository { /* ... */ } // Repository implementation
 final class RenameArticleCommand { /* ... */ }      // Command
 final class RenameArticleHandler {                  // Command Handler
     public function __invoke(RenameArticleCommand $cmd): void { /* ... */ }
-}</code></pre>
-            <pre><code class="language-php">&lt;?php
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ArticleTitle.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% set _code %}{% verbatim %}<?php
 // ✅ Jednoduchý přístup - EasyAdmin CRUD controller
 // -- 1 třída, hotovo --
 
@@ -190,10 +180,22 @@ class ArticleCrudController extends AbstractCrudController
             TextField::new('title', 'Název článku'),
         ];
     }
-}</code></pre>
-        </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Controller/Admin/ArticleCrudController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>EasyAdmin</strong> - pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
@@ -203,14 +205,19 @@ class ArticleCrudController extends AbstractCrudController
             Martin Fowler tento anti-pattern pojmenoval
             <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Anemic Domain Model</a>
             - model, který vypadá jako DDD, ale neobsahuje žádné chování.
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        2. Startup
        ═══════════════════════════════════════════════════════════ #}
     <section id="startup" aria-labelledby="startup-heading">
-        <h2 id="startup-heading">2. Startup - doména se mění každý sprint</h2>
+        <h2 id="startup-heading" class="h-section"><span class="h-num">14.03</span> 2. Startup - doména se mění každý sprint</h2>
 
         <p>
             Hledáte product-market fit. Co dnes je objednávka, zítra je subscription. Co dnes je
@@ -232,9 +239,10 @@ class ArticleCrudController extends AbstractCrudController
             který se příští týden změní od základů.
         </p>
 
-        <div class="tip" role="note" aria-labelledby="startup-compare-heading">
+        {% set _callout_body %}
+
             <h4 id="startup-compare-heading">Startup realita: pivot za 2 týdny</h4>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 // ❌ Taktické DDD pro nestabilní doménu - za 2 týdny přepíšete všechno
 // Bounded Context "Orders" s agregáty, events, repositories...
 
@@ -249,8 +257,14 @@ final class Order {                                 // Aggregate Root
 }
 
 // + OrderPlaced event, OrderRepository interface, PlaceOrderHandler...
-// Celý tento kód bude za 2 týdny v koši.</code></pre>
-            <pre><code class="language-php">&lt;?php
+// Celý tento kód bude za 2 týdny v koši.{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% set _code %}{% verbatim %}<?php
 // ✅ Flat MVC - pivot je levný
 // Entity se změní, controller se upraví, hotovo.
 
@@ -265,24 +279,41 @@ class Order {
 
     #[ORM\Column(length: 50)]
     private string $status = 'new'; // příští sprint: subscriptionStatus - 1 rename
-}</code></pre>
-        </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Flat MVC s Doctrine Entities</strong> - rychlé iterace, změny jsou levné.</li>
                 <li>Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
                 <li>Strategické nástroje DDD (Event Storming, Context Mapping) je vhodné zavést od začátku - pomáhají rychleji porozumět doméně.</li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        3. Malý tým
        ═══════════════════════════════════════════════════════════ #}
     <section id="small-team" aria-labelledby="small-team-heading">
-        <h2 id="small-team-heading">3. Malý tým bez doménových expertů</h2>
+        <h2 id="small-team-heading" class="h-section"><span class="h-num">14.04</span> 3. Malý tým bez doménových expertů</h2>
 
         <p>
             DDD stojí na spolupráci vývojářů s lidmi, kteří doméně rozumí - zákazníci, produktoví manažeři,
@@ -301,20 +332,26 @@ class Order {
             Řešení je odlišné: zde potřebujete lidi, tam potřebujete znalosti.
         </p>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) - dobře strukturovaný kód bez přílišné abstrakce.</li>
                 <li>DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na <a href="{{ path('basic_concepts') }}">Event Storming</a>.</li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        4. Data pipeline
        ═══════════════════════════════════════════════════════════ #}
     <section id="data-pipeline" aria-labelledby="data-pipeline-heading">
-        <h2 id="data-pipeline-heading">4. Data pipeline, ETL a reportovací systémy</h2>
+        <h2 id="data-pipeline-heading" class="h-section"><span class="h-num">14.05</span> 4. Data pipeline, ETL a reportovací systémy</h2>
 
         <p>
             Systém načítá data z externích zdrojů, transformuje je a ukládá nebo reportuje.
@@ -329,20 +366,26 @@ class Order {
             - klíčové slovo je „data changes" s business pravidly, ne „data transfer".
         </p>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Service layer s plain PHP objekty</strong> - jednoduché třídy pro transformaci, bez agregátů.</li>
                 <li><strong>Symfony Messenger</strong> pro asynchronní zpracování pipeline kroků - bez DDD overhead. Viz <a href="{{ path('cqrs') }}">kapitola o CQRS</a> pro inspiraci, jak Messenger používat v praxi.</li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        5. Krátkodobý projekt
        ═══════════════════════════════════════════════════════════ #}
     <section id="short-lived" aria-labelledby="short-lived-heading">
-        <h2 id="short-lived-heading">5. Projekt s životností kratší než rok</h2>
+        <h2 id="short-lived-heading" class="h-section"><span class="h-num">14.06</span> 5. Projekt s životností kratší než rok</h2>
 
         <p>
             Interní nástroj, landing page, jednorázová migrace, prototyp pro demo zákazníkovi.
@@ -365,20 +408,26 @@ class Order {
             „strategickou hodnotu" projektu - pokud je nízká, DDD se nevyplatí.
         </p>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Prostý Symfony controller + Doctrine</strong> - nejkratší cesta od požadavku k funkčnímu kódu.</li>
                 <li>Pokud projekt nečekaně vyroste, refaktorovat z jednoduchého kódu na DDD je snazší než vysvětlovat, proč jednoduchý projekt má 40 tříd. Postup najdete v <a href="{{ path('migration_from_crud') }}">Migraci z CRUD</a>.</li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        6. Tým DDD nezná
        ═══════════════════════════════════════════════════════════ #}
     <section id="no-knowledge" aria-labelledby="no-knowledge-heading">
-        <h2 id="no-knowledge-heading">6. Tým DDD nezná a čas na učení není</h2>
+        <h2 id="no-knowledge-heading" class="h-section"><span class="h-num">14.07</span> 6. Tým DDD nezná a čas na učení není</h2>
 
         <p>
             DDD vyžaduje, aby tým rozuměl konceptům -
@@ -392,9 +441,10 @@ class Order {
             který bude bolet roky.
         </p>
 
-        <div class="tip" role="note" aria-labelledby="pseudo-ddd-heading">
+        {% set _callout_body %}
+
             <h4 id="pseudo-ddd-heading">Pseudo-DDD: vypadá jako DDD, ale není</h4>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 // ❌ Pseudo-DDD - tým „zavedl DDD" bez pochopení
 // Výsledek: Doctrine entity přejmenovaná na „Aggregate", setter zůstal
 
@@ -412,8 +462,14 @@ final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agre
     // „Repository" je jen přejmenovaný EntityRepository
     // „Command" je jen přejmenovaný DTO bez handleru
     // „Domain Event" se dispatchuje, ale nikdo ho neposlouchá
-}</code></pre>
-            <pre><code class="language-php">&lt;?php
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderAggregate.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% set _code %}{% verbatim %}<?php
 // ✅ Správné DDD - agregát chrání invarianty
 
 final class Order
@@ -436,24 +492,41 @@ final class Order
         $this->domainEvents[] = new OrderCancelled($this->id, $clock->now());
     }
     // Žádné settery - stav se mění jen přes explicitní business operace
-}</code></pre>
-        </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li>Klasická architektura, kterou tým zná dobře - srozumitelný kód je vždy lepší než „správná" architektura, které nikdo nerozumí.</li>
                 <li>DDD zaveďte na vedlejším projektu nebo v části systému jako experiment, pak přenášejte zkušenosti postupně.</li>
                 <li>Jako odrazový můstek doporučujeme Vernon: <em>Domain-Driven Design Distilled</em> - nejrychlejší cesta k pochopení DDD konceptů.</li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        7. Nejasná doména
        ═══════════════════════════════════════════════════════════ #}
     <section id="unclear-domain" aria-labelledby="unclear-domain-heading">
-        <h2 id="unclear-domain-heading">7. Doména je nejasná, experti nejsou k dispozici</h2>
+        <h2 id="unclear-domain-heading" class="h-section"><span class="h-num">14.08</span> 7. Doména je nejasná, experti nejsou k dispozici</h2>
 
         <p>
             Zákazník neví, co chce. Požadavky jsou vágní. Doménový expert buď neexistuje, nebo
@@ -473,20 +546,26 @@ final class Order
             přepíšete stejně všechno.
         </p>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Event Storming napřed</strong> - než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
                 <li>Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte - viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {# ═══════════════════════════════════════════════════════════
        Kdy DDD smysl má
        ═══════════════════════════════════════════════════════════ #}
     <section id="when-ddd-fits" aria-labelledby="when-ddd-fits-heading">
-        <h2 id="when-ddd-fits-heading">Kdy DDD naopak smysl má</h2>
+        <h2 id="when-ddd-fits-heading" class="h-section"><span class="h-num">14.09</span> Kdy DDD naopak smysl má</h2>
 
         <p>
             DDD není špatná architektura. Je to architektura pro specifický kontext. Smysl má, když platí
@@ -569,9 +648,10 @@ final class Order
        Zdroje
        ═══════════════════════════════════════════════════════════ #}
     <section id="zdroje" aria-labelledby="zdroje-heading">
-        <h2 id="zdroje-heading">Zdroje a další čtení</h2>
+        <h2 id="zdroje-heading" class="h-section"><span class="h-num">14.10</span> Zdroje a další čtení</h2>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Knihy:</strong>
             <ul>
                 <li>
@@ -607,12 +687,14 @@ final class Order
                     (2003) - proč „DDD bez chování" je anti-pattern.
                 </li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
-
+    </div>
 </article>
 {% endblock %}
 
-{% block toc %}
-<p class="toc-title">Na této stránce</p>
-{% endblock %}
