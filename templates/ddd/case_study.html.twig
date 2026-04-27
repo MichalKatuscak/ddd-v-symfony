@@ -45,36 +45,23 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Případová studie</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">Případová studie</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '15',
+        category: 'Praxe',
+        title: 'Případová studie',
+        deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu. Sledujte celý proces od analýzy domény, identifikace bounded contexts, strategického a taktického designu až po implementaci s využitím DDD principů a CQRS.',
+        reading_time: 45,
+        difficulty: 4,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#introduction">Úvod</a></li>
-            <li><a href="#requirements">Požadavky</a></li>
-            <li><a href="#architecture">Architektura</a></li>
-            <li><a href="#implementation">Implementace</a></li>
-            <li><a href="#lessons">Ponaučení</a></li>
-        </ul>
-    </div>
-
-    <section id="introduction" aria-labelledby="introduction-heading">
-    <h2 id="introduction-heading">Úvod</h2>
+    <div class="art-body" data-chapter-number="15">
+<section id="introduction" aria-labelledby="introduction-heading">
+    <h2 id="introduction-heading" class="h-section"><span class="h-num">15.01</span> Úvod</h2>
     <p>
         Případová studie popisuje implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8.
         Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
@@ -83,7 +70,7 @@
     </section>
 
     <section id="requirements" aria-labelledby="requirements-heading">
-    <h2 id="requirements-heading">Požadavky</h2>
+    <h2 id="requirements-heading" class="h-section"><span class="h-num">15.02</span> Požadavky</h2>
     <p>
         Systém pro správu projektů má následující požadavky:
     </p>
@@ -101,7 +88,7 @@
     </section>
 
     <section id="architecture" aria-labelledby="architecture-heading">
-    <h2 id="architecture-heading">Architektura</h2>
+    <h2 id="architecture-heading" class="h-section"><span class="h-num">15.03</span> Architektura</h2>
     <p>
         Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 8.
         Na strategické úrovni jsme identifikovali hlavní bounded contexts a jejich vzájemné vztahy. Na taktické úrovni jsme implementovali doménové modely, agregáty, hodnotové objekty a doménové služby.
@@ -154,7 +141,7 @@
     <p>
         Struktura projektu odráží jak strategický, tak taktický design DDD. Níže je ukázka správné struktury projektu, kde každý bounded context má svou vlastní doménovou vrstvu, infrastrukturu a aplikační služby:
     </p>
-    <pre><code class="language-bash">src/
+    {% set _code %}{% verbatim %}src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva
 │   │   ├── Model/             # Doménové modely
@@ -305,12 +292,18 @@
         │   └── MessengerQueryBus.php  # Implementace query bus
         └── Persistence/        # Sdílená persistence
             └── DoctrineTypes/    # Vlastní Doctrine typy
-                └── UuidType.php    # Typ pro UUID</code></pre>
+                └── UuidType.php    # Typ pro UUID{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
     </section>
 
     <section id="implementation" aria-labelledby="implementation-heading">
-    <h2 id="implementation-heading">Implementace</h2>
+    <h2 id="implementation-heading" class="h-section"><span class="h-num">15.04</span> Implementace</h2>
     <p>
         Následující sekce ukazuje implementaci hlavních částí systému s aplikací DDD principů.
     </p>
@@ -335,7 +328,7 @@
         (XML/YAML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
         na doménových hodnotových objektech a událostech.
     </p>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -462,16 +455,28 @@ class Project
 
         return $events;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/Domain/Model/Project.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             V tomto příkladu sdílíme <code>UserId</code> napříč kontexty. V produkčním systému by identifikátor byl buď v Shared Kernel, nebo by každý kontext měl vlastní kopii identifikátoru jako primitivní typ (string UUID).
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     <h3 id="task-model-heading">Doménový model: Úkol (kořen agregátu)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -603,10 +608,16 @@ class Task
 
         return $events;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/TaskManagement/Domain/Model/Task.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="create-project-command-heading">Command: Vytvoření projektu (Command Pattern)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -628,10 +639,16 @@ class CreateProject
         public readonly string $ownerId
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/CreateProject/Command/CreateProject.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="create-project-handler-heading">Command Handler: Zpracování vytvoření projektu (Application Service)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -666,10 +683,16 @@ class CreateProjectHandler
 
         return $projectId->value();
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/CreateProject/Command/CreateProjectHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="assign-task-command-heading">Command: Přiřazení úkolu (Command Pattern)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -689,10 +712,16 @@ class AssignTask
         public readonly string $assigneeId
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/TaskManagement/AssignTask/Command/AssignTask.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="assign-task-handler-heading">Command Handler: Zpracování přiřazení úkolu (Application Service)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -749,10 +778,16 @@ class AssignTaskHandler
         // Uložení úkolu
         $this->taskRepository->save($task);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/TaskManagement/AssignTask/Command/AssignTaskHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="get-projects-query-heading">Query: Získání projektů uživatele (Query Pattern)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -768,10 +803,16 @@ class GetProjects
         public readonly string $userId
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/GetProjects/Query/GetProjects.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="get-projects-handler-heading">Query Handler: Zpracování získání projektů uživatele (Read Model)</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -809,10 +850,16 @@ class GetProjectsHandler
 
         return $result;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <h3 id="task-assignment-service-heading">Doménová služba: Přiřazení úkolu</h3>
-    <pre><code class="language-php">&lt;?php
+    {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -829,12 +876,18 @@ class TaskAssignmentService
     {
         $task->assign($assigneeId);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/TaskManagement/Domain/Service/TaskAssignmentService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     </section>
 
     <section id="lessons" aria-labelledby="lessons-heading">
-    <h2 id="lessons-heading">Ponaučení</h2>
+    <h2 id="lessons-heading" class="h-section"><span class="h-num">15.05</span> Ponaučení</h2>
     <p>
         Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla několik důležitých ponaučení:
     </p>
@@ -889,7 +942,7 @@ class TaskAssignmentService
             }
         ]
     } %}
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
