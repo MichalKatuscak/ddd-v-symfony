@@ -45,40 +45,23 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Anti-vzory</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-        <h1 itemprop="headline">Anti-vzory a typické chyby v DDD</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '13',
+        category: 'Praxe',
+        title: 'Anti-vzory a typické chyby v DDD',
+        deck: 'Přehled nejčastějších anti-vzorů a typických chyb při implementaci Domain-Driven Design: anémický doménový model, Primitive Obsession, příliš velký agregát, sdílená databáze napříč Bounded Contexts, mutovatelné události a over-engineering.',
+        reading_time: 16,
+        difficulty: 2,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <p id="toc-heading">Obsah kapitoly:</p>
-            <ul>
-                <li><a href="#uvodem">Úvodem: Proč je důležité znát anti-vzory</a></li>
-                <li><a href="#anemicky-domenovy-model">Anti-vzor: Anémický doménový model</a></li>
-                <li><a href="#primitive-obsession">Anti-vzor: Primitive Obsession</a></li>
-                <li><a href="#prilis-velky-agregat">Anti-vzor: Příliš velký agregát (God Aggregate)</a></li>
-                <li><a href="#sdilena-databaze">Anti-vzor: Sdílená databáze napříč Bounded Contexts</a></li>
-                <li><a href="#mutovatelne-udalosti">Anti-vzor: Mutovatelné doménové události</a></li>
-                <li><a href="#logika-v-infrastrukture">Anti-vzor: Doménová logika v infrastrukturní vrstvě</a></li>
-                <li><a href="#over-engineering">Anti-vzor: Over-engineering u jednoduchých aplikací</a></li>
-                <li><a href="#missing-ubiquitous-language">Anti-vzor: Ignorování Ubiquitous Language</a></li>
-            </ul>
-        </div>
-
-        <section id="uvodem" aria-labelledby="uvodem-heading">
-            <h2 id="uvodem-heading">Úvodem: Proč je důležité znát anti-vzory</h2>
+    <div class="art-body" data-chapter-number="13">
+<section id="uvodem" aria-labelledby="uvodem-heading">
+            <h2 id="uvodem-heading" class="h-section"><span class="h-num">13.01</span> Úvodem: Proč je důležité znát anti-vzory</h2>
             <p>
                 Domain-Driven Design je mocný přístup k návrhu softwaru, ale jeho komplexnost s sebou přináší
                 mnohá úskalí. Zkušenosti z praxe ukazují, že týmy, které s DDD začínají, opakovaně narážejí
@@ -91,7 +74,8 @@
                 a výkonem.
             </p>
 
-            <div class="note" role="note" aria-labelledby="klasifikace-heading">
+            {% set _callout_body %}
+
                 <h3 id="klasifikace-heading">Klasifikace typických chyb v DDD</h3>
                 <p>Chyby při implementaci DDD lze rozdělit do tří kategorií:</p>
                 <ul>
@@ -111,11 +95,16 @@
                         a jsou obvykle nejsnáze opravitelné.
                     </li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Klasifikace typických chyb v DDD',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="anemicky-domenovy-model" aria-labelledby="anemicky-domenovy-model-heading">
-            <h2 id="anemicky-domenovy-model-heading">Anti-vzor: Anémický doménový model (Anemic Domain Model)</h2>
+            <h2 id="anemicky-domenovy-model-heading" class="h-section"><span class="h-num">13.02</span> Anti-vzor: Anémický doménový model (Anemic Domain Model)</h2>
             <p>
                 Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji
                 obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003
@@ -124,7 +113,8 @@
                 obsahují výhradně gettery a settery - a veškerá doménová logika je přesunuta do servisní vrstvy.
             </p>
 
-            <div class="note" role="note" aria-labelledby="anemicky-definice-heading">
+            {% set _callout_body %}
+
                 <h3 id="anemicky-definice-heading">Proč je anémický model problém?</h3>
                 <ul>
                     <li>
@@ -148,19 +138,31 @@
                         jakýchkoliv závislostí.
                     </li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Proč je anémický model problém?',
+                body: _callout_body
+            } %}
 
-            <div class="warning" role="note" aria-labelledby="anemicky-spatny-heading">
+            {% set _callout_body %}
+
                 <h3 id="anemicky-spatny-heading">Špatně: Anémická entita User a servisní vrstva s logikou</h3>
                 <p>
                     V tomto příkladu entita <code>User</code> neobsahuje žádnou doménovou logiku - pouze gettery
                     a settery. Veškerá logika je přesunuta do <code>UserService</code>, což vede k anémickému modelu.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: Anémická entita User a servisní vrstva s logikou',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Anémická entita User (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -214,20 +216,38 @@ class UserService
         }
         $user->setStatus('inactive');
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Model/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Anémická entita User (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="anemicky-spravny-heading">
+            {% set _callout_body %}
+
                 <h3 id="anemicky-spravny-heading">Správně: Entita User s bohatou doménovou logikou</h3>
                 <p>
                     Správný přístup přesouvá doménovou logiku přímo do entity. Entita sama zajišťuje své invarianty
                     a vystavuje doménově orientované metody místo holých setterů.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Entita User s bohatou doménovou logikou',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Bohatá entita User (správně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -275,9 +295,15 @@ final class VerificationToken
     {
         return $this->value;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/ValueObject/UserStatus.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -354,8 +380,19 @@ class User
         $this->domainEvents = [];
         return $events;
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Model/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Bohatá entita User (správně)',
+                body: _callout_body
+            } %}
 
             <p>
                 Klíčovým rozdílem je, že správná entita vystavuje doménově orientované metody (<code>activate()</code>,
@@ -365,7 +402,7 @@ class User
         </section>
 
         <section id="primitive-obsession" aria-labelledby="primitive-obsession-heading">
-            <h2 id="primitive-obsession-heading">Anti-vzor: Primitive Obsession (posedlost primitivy)</h2>
+            <h2 id="primitive-obsession-heading" class="h-section"><span class="h-num">13.03</span> Anti-vzor: Primitive Obsession (posedlost primitivy)</h2>
             <p>
                 Primitive Obsession je anti-vzor, při němž vývojáři používají primitivní datové typy (<code>string</code>,
                 <code>int</code>, <code>float</code>) tam, kde by měly být použity hodnotové objekty (Value Objects).
@@ -373,7 +410,8 @@ class User
                 ale vedou k závažným problémům.
             </p>
 
-            <div class="note" role="note" aria-labelledby="primitive-problemy-heading">
+            {% set _callout_body %}
+
                 <h3 id="primitive-problemy-heading">Problémy způsobené Primitive Obsession</h3>
                 <ul>
                     <li>
@@ -395,19 +433,31 @@ class User
                         na každém místě, kde se s hodnotou pracuje.
                     </li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Problémy způsobené Primitive Obsession',
+                body: _callout_body
+            } %}
 
-            <div class="warning" role="note" aria-labelledby="primitive-spatny-heading">
+            {% set _callout_body %}
+
                 <h3 id="primitive-spatny-heading">Špatně: Primitiva místo Value Objects</h3>
                 <p>
                     Níže uvedený kód používá primitivní typy pro e-mail, peněžní částku a identifikátory.
                     Typový systém PHP neodhalí záměnu <code>$orderId</code> za <code>$userId</code>, protože obojí je <code>int</code>.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: Primitiva místo Value Objects',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Primitive Obsession (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -447,19 +497,37 @@ class Order
 // Typový systém PHP neodhalí tuto chybu:
 $orderId = 42;
 $userId = 17;
-processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!</code></pre>
-            </div>
+processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Primitive Obsession (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="primitive-spravny-heading">
+            {% set _callout_body %}
+
                 <h3 id="primitive-spravny-heading">Správně: Value Objects nesoucí sémantiku a validaci</h3>
                 <p>
                     Hodnotové objekty zapouzdřují validaci, zabraňují záměně ID různých entit a nesou doménovou sémantiku.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Value Objects nesoucí sémantiku a validaci',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Value Objects (správně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -554,12 +622,23 @@ function processOrder(OrderId $orderId, UserId $userId): void { /* ... */ }
 
 $orderId = new OrderId('a1b2c3d4-...');
 $userId  = new UserId('e5f6g7h8-...');
-processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type OrderId</code></pre>
-            </div>
+processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type OrderId{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/ValueObject/Email.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Value Objects (správně)',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="prilis-velky-agregat" aria-labelledby="prilis-velky-agregat-heading">
-            <h2 id="prilis-velky-agregat-heading">Anti-vzor: Příliš velký agregát (God Aggregate)</h2>
+            <h2 id="prilis-velky-agregat-heading" class="h-section"><span class="h-num">13.04</span> Anti-vzor: Příliš velký agregát (God Aggregate)</h2>
             <p>
                 Agregát by měl být navrhován kolem transakční konzistence - to jest kolem nejmenší skupiny objektů,
                 která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako "God Aggregate")
@@ -567,7 +646,8 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 a způsobuje řadu závažných problémů.
             </p>
 
-            <div class="note" role="note" aria-labelledby="agregat-problemy-heading">
+            {% set _callout_body %}
+
                 <h3 id="agregat-problemy-heading">Problémy způsobené příliš velkým agregátem</h3>
                 <ul>
                     <li>
@@ -589,19 +669,31 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                         definovaných hranic kontextů.
                     </li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Problémy způsobené příliš velkým agregátem',
+                body: _callout_body
+            } %}
 
-            <div class="warning" role="note" aria-labelledby="agregat-spatny-heading">
+            {% set _callout_body %}
+
                 <h3 id="agregat-spatny-heading">Špatně: God Aggregate obsahující příliš mnoho entit</h3>
                 <p>
                     Následující příklad ukazuje agregát <code>Customer</code>, který neúměrně sdružuje objednávky,
                     adresy, platební karty i recenze - to vše jako přímé součásti jednoho agregátu.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: God Aggregate obsahující příliš mnoho entit',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Příliš velký agregát (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -631,21 +723,39 @@ class Customer
     // Při načtení zákazníka z DB musíme načíst vše - tisíce záznamů!
     // Při update zákazníka zamkneme celou tuto strukturu.
     // Přidání nové objednávky vyžaduje celý agregát v paměti.
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Customer.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Příliš velký agregát (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="agregat-spravny-heading">
+            {% set _callout_body %}
+
                 <h3 id="agregat-spravny-heading">Správně: Malé agregáty s jasnou transakční hranicí</h3>
                 <p>
                     Agregáty by měly být navrhovány kolem skutečné transakční potřeby. Zákazník a jeho objednávky
                     jsou samostatné agregáty - objednávku lze vytvořit, aniž by bylo nutné načíst celou historii
                     zákazníka.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Malé agregáty s jasnou transakční hranicí',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Správně rozdělené agregáty</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -734,8 +844,19 @@ class Wishlist
     private readonly CustomerId $customerId;
     /** @var WishlistItem[] */
     private array $items = [];
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Model/Customer.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Správně rozdělené agregáty',
+                body: _callout_body
+            } %}
 
             <p>
                 Pravidlo pro navrhování agregátů zní: <em>agregát by měl být co nejmenší, aby zachoval invarianty
@@ -745,7 +866,7 @@ class Wishlist
         </section>
 
         <section id="sdilena-databaze" aria-labelledby="sdilena-databaze-heading">
-            <h2 id="sdilena-databaze-heading">Anti-vzor: Sdílená databáze napříč Bounded Contexts</h2>
+            <h2 id="sdilena-databaze-heading" class="h-section"><span class="h-num">13.05</span> Anti-vzor: Sdílená databáze napříč Bounded Contexts</h2>
             <p>
                 Jeden z nejzávažnějších strategických anti-vzorů nastává, když různé Bounded Contexts sdílejí
                 stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. I když se to na počátku
@@ -753,17 +874,24 @@ class Wishlist
                 a nasazení jednotlivých kontextů.
             </p>
 
-            <div class="warning" role="note" aria-labelledby="sdilena-db-spatne-heading">
+            {% set _callout_body %}
+
                 <h3 id="sdilena-db-spatne-heading">Špatně: Přímý přístup ke sdíleným tabulkám</h3>
                 <p>
                     Kontexty <em>OrderManagement</em> a <em>Billing</em> přímo přistupují ke stejné tabulce
                     <code>users</code>. Změna schématu tabulky v jednom kontextu okamžitě ovlivní druhý.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: Přímý přístup ke sdíleným tabulkám',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Sdílená databáze (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -808,20 +936,38 @@ class InvoiceGenerator
         );
         // ...
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Infrastructure/Repository/DoctrineOrderRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Sdílená databáze (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="sdilena-db-spravne-heading">
+            {% set _callout_body %}
+
                 <h3 id="sdilena-db-spravne-heading">Správně: Izolovaná data s Anti-Corruption Layer</h3>
                 <p>
                     Každý Bounded Context vlastní svá data. Komunikace mezi kontexty probíhá přes definované rozhraní
                     (Anti-Corruption Layer, doménové události nebo explicitní API), nikoliv přes přímý přístup do databáze.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Izolovaná data s Anti-Corruption Layer',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Izolované kontexty s ACL (správně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -880,8 +1026,19 @@ class HttpUserManagementAdapter implements CustomerDataProvider
             vatNumber: isset($data['vat_number']) ? new VatNumber($data['vat_number']) : null,
         );
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Billing/Domain/Port/CustomerDataProvider.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Izolované kontexty s ACL (správně)',
+                body: _callout_body
+            } %}
 
             <p>
                 Alternativou k synchronnímu HTTP volání je asynchronní komunikace přes doménové události.
@@ -892,7 +1049,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
         </section>
 
         <section id="mutovatelne-udalosti" aria-labelledby="mutovatelne-udalosti-heading">
-            <h2 id="mutovatelne-udalosti-heading">Anti-vzor: Mutovatelné doménové události</h2>
+            <h2 id="mutovatelne-udalosti-heading" class="h-section"><span class="h-num">13.06</span> Anti-vzor: Mutovatelné doménové události</h2>
             <p>
                 Doménová událost reprezentuje fakt, který se stal v minulosti - a minulost nelze změnit.
                 Události musí být striktně <strong>immutable</strong> (neměnné). Mutovatelná událost je
@@ -905,17 +1062,24 @@ class HttpUserManagementAdapter implements CustomerDataProvider
                 konzistentní a neměnná data.
             </p>
 
-            <div class="warning" role="note" aria-labelledby="udalosti-spatne-heading">
+            {% set _callout_body %}
+
                 <h3 id="udalosti-spatne-heading">Špatně: Mutovatelná událost s veřejnými settery</h3>
                 <p>
                     Veřejné settery a chybějící <code>readonly</code> semantika umožňují modifikaci události
                     po jejím vzniku, čímž narušují integritu historického záznamu.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: Mutovatelná událost s veřejnými settery',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Mutovatelná událost (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -947,20 +1111,38 @@ class OrderPlacedEvent
     public function getOrderId(): string { return $this->orderId; }
     public function getTotalAmount(): float { return $this->totalAmount; }
     public function getOccurredAt(): \DateTime { return $this->occurredAt; }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderPlacedEvent.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Mutovatelná událost (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="udalosti-spravne-heading">
+            {% set _callout_body %}
+
                 <h3 id="udalosti-spravne-heading">Správně: Immutable událost s readonly properties</h3>
                 <p>
                     Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a poté nelze žádnou
                     její vlastnost změnit. PHP 8.1+ <code>readonly</code> properties jsou ideálním nástrojem.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Immutable událost s readonly properties',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Immutable doménová událost (správně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1012,12 +1194,23 @@ final class OrderCancelledEvent
     public function orderId(): OrderId { return $this->orderId; }
     public function reason(): string { return $this->reason; }
     public function occurredAt(): \DateTimeImmutable { return $this->occurredAt; }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OrderManagement/Domain/Event/OrderPlacedEvent.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Immutable doménová událost (správně)',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="logika-v-infrastrukture" aria-labelledby="logika-v-infrastrukture-heading">
-            <h2 id="logika-v-infrastrukture-heading">Anti-vzor: Doménová logika v infrastrukturní vrstvě</h2>
+            <h2 id="logika-v-infrastrukture-heading" class="h-section"><span class="h-num">13.07</span> Anti-vzor: Doménová logika v infrastrukturní vrstvě</h2>
             <p>
                 DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře,
                 Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku
@@ -1025,17 +1218,24 @@ final class OrderCancelledEvent
                 dochází k narušení architekturních hranic a ke vzniku skryté, těžko testovatelné logiky.
             </p>
 
-            <div class="warning" role="note" aria-labelledby="infra-spatne-heading">
+            {% set _callout_body %}
+
                 <h3 id="infra-spatne-heading">Špatně: Doménová logika v Doctrine repozitáři</h3>
                 <p>
                     Repozitář by měl pouze ukládat a načítat agregáty. Jakákoliv doménová logika (výpočty,
                     aplikace doménových pravidel, stavové přechody) v repozitáři je anti-vzor.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: Doménová logika v Doctrine repozitáři',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Doménová logika v repozitáři a kontroleru (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1087,20 +1287,38 @@ class UserController extends AbstractController
         }
         // ...
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Doménová logika v repozitáři a kontroleru (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="infra-spravne-heading">
+            {% set _callout_body %}
+
                 <h3 id="infra-spravne-heading">Správně: Tenká infrastruktura, bohatá doménová vrstva</h3>
                 <p>
                     Kontroler a repozitář jsou tenké orchestrátory. Business logika žije v doménové entitě
                     nebo doménové službě.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Tenká infrastruktura, bohatá doménová vrstva',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Správné vrstvení - logika v doméně (správně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1178,12 +1396,23 @@ class UserController extends AbstractController
 
         return $this->json(['status' => 'activated']);
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Správné vrstvení - logika v doméně (správně)',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="over-engineering" aria-labelledby="over-engineering-heading">
-            <h2 id="over-engineering-heading">Anti-vzor: Over-engineering u jednoduchých aplikací</h2>
+            <h2 id="over-engineering-heading" class="h-section"><span class="h-num">13.08</span> Anti-vzor: Over-engineering u jednoduchých aplikací</h2>
             <p>
                 DDD není vhodné pro každý projekt. Eric Evans sám upozorňuje, že DDD přináší největší přidanou
                 hodnotu u <strong>komplexních domén se složitou doménovou logikou</strong>. Pro jednoduché CRUD aplikace,
@@ -1191,7 +1420,8 @@ class UserController extends AbstractController
                 počáteční složitost bez odpovídajícího benefitu.
             </p>
 
-            <div class="note" role="note" aria-labelledby="overeng-příznaky-heading">
+            {% set _callout_body %}
+
                 <h3 id="overeng-příznaky-heading">Příznaky over-engineeringu v DDD kontextu</h3>
                 <ul>
                     <li>
@@ -1214,9 +1444,15 @@ class UserController extends AbstractController
                         i když jde o triviální změnu.
                     </li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Příznaky over-engineeringu v DDD kontextu',
+                body: _callout_body
+            } %}
 
-            <div class="warning" role="note" aria-labelledby="overeng-warning-heading">
+            {% set _callout_body %}
+
                 <h3 id="overeng-warning-heading">Start simple, add complexity when needed</h3>
                 <p>
                     Začněte s jednoduchým přístupem - aktivní záznamy, jednoduché service třídy nebo MVC bez DDD.
@@ -1229,11 +1465,17 @@ class UserController extends AbstractController
                     <em>více doménových expertů s odlišnými pohledy na problém</em>; <em>systém, u nějž se předpokládá
                     dlouhodobý vývoj a vysoká míra změn v business logice</em>.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Start simple, add complexity when needed',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Kdy použít DDD a kdy ne</h3>
-                <pre><code class="language-bash"># DDD je vhodné pro:
+                {% set _code %}{% verbatim %}# DDD je vhodné pro:
 ✔ E-commerce platforma s komplexními pravidly pro slevy, zásoby, dopravu
 ✔ Bankovní systém s regulatorními požadavky a složitou finanční logikou
 ✔ ERP systém se vzájemně propojenými doménovými procesy
@@ -1244,12 +1486,23 @@ class UserController extends AbstractController
 ✗ Jednoduchý e-shop s desítkami produktů a základními objednávkami
 ✗ Interní admin panel pro správu číselníků
 ✗ Prototyp nebo MVP s nejistou business logikou
-✗ Microservice s jednou jasnou a stabilní odpovědností</code></pre>
-            </div>
+✗ Microservice s jednou jasnou a stabilní odpovědností{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Kdy použít DDD a kdy ne',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="missing-ubiquitous-language" aria-labelledby="missing-ubiquitous-language-heading">
-            <h2 id="missing-ubiquitous-language-heading">Anti-vzor: Ignorování Ubiquitous Language</h2>
+            <h2 id="missing-ubiquitous-language-heading" class="h-section"><span class="h-num">13.09</span> Anti-vzor: Ignorování Ubiquitous Language</h2>
             <p>
                 Jedním ze základních pilířů DDD je Ubiquitous Language - společný jazyk sdílený vývojáři,
                 doménovými experty a všemi zainteresovanými stranami. Tento jazyk musí být konzistentně
@@ -1258,18 +1511,25 @@ class UserController extends AbstractController
                 nedorozumění, chyby a ztrátu doménového vhledu v kódu.
             </p>
 
-            <div class="warning" role="note" aria-labelledby="ubiq-spatne-heading">
+            {% set _callout_body %}
+
                 <h3 id="ubiq-spatne-heading">Špatně: Různé názvy pro stejný koncept</h3>
                 <p>
                     Doménový expert mluví o <em>Pojistníkovi</em>, databáze má tabulku <code>clients</code>,
                     backendový kód používá <code>User</code>, frontend říká <em>Account</em>
                     a API endpoint je <code>/customers</code>. Každá vrstva mluví jiným jazykem.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Špatně: Různé názvy pro stejný koncept',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Nekonzistentní pojmenování (špatně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1293,21 +1553,39 @@ class User { /* ... */ }  // Třída "User", tabulka "clients" - zmatek
 function getCustomerById(int $id): User { /* ... */ }   // Vrací User, bere customer
 function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací Customer
 
-// Výsledek: vývojář musí neustále překládat mezi vrstvami místo práce na business logikou</code></pre>
-            </div>
+// Výsledek: vývojář musí neustále překládat mezi vrstvami místo práce na business logikou{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Nekonzistentní pojmenování (špatně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="ubiq-spravne-heading">
+            {% set _callout_body %}
+
                 <h3 id="ubiq-spravne-heading">Správně: Konzistentní jazyk napříč všemi vrstvami</h3>
                 <p>
                     Ubiquitous Language vyžaduje investici: vývojáři musí naslouchat doménovým expertům,
                     porozumět jejich terminologii a tu pak konzistentně přenést do kódu. Výsledkem je kód,
                     který doménový expert může číst a rozumět mu.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Správně: Konzistentní jazyk napříč všemi vrstvami',
+                body: _callout_body
+            } %}
 
-            <div class="tip">
+            {% set _callout_body %}
+
                 <h3>Příklad: Konzistentní Ubiquitous Language (správně)</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1360,10 +1638,22 @@ class InsurancePolicy
 
 // Databázová tabulka: policy_holders (ne "users" ani "clients")
 // API endpoint: POST /api/policy-holders/{id}/claims
-// Testy: "When a policy holder files a claim for an insured event..."</code></pre>
-            </div>
+// Testy: "When a policy holder files a claim for an insured event..."{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Insurance/Domain/Model/PolicyHolder.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Konzistentní Ubiquitous Language (správně)',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="ubiq-mapa-heading">
+            {% set _callout_body %}
+
                 <h3 id="ubiq-mapa-heading">Doménový slovník jako živý artefakt</h3>
                 <p>
                     Doporučenou praxí je udržovat živý glosář (tzv. <em>doménový slovník</em>), který mapuje
@@ -1382,7 +1672,12 @@ class InsurancePolicy
                     databázových sloupců, API endpointů, chybových zpráv a testovacích scénářů. Čím konzistentnější
                     jazyk, tím přímočařejší mapování mezi požadavky doménového experta a implementací.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Doménový slovník jako živý artefakt',
+                body: _callout_body
+            } %}
 
             <p>
                 Tato kapitola pokryla nejčastější anti-vzory a typické chyby při implementaci DDD. Dobrá znalost
@@ -1417,8 +1712,7 @@ class InsurancePolicy
                 }
             ]
         } %}
-
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
