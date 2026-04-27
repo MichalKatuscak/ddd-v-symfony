@@ -600,9 +600,14 @@ framework:
         přechody, červené selhání a oranžová cesta vede přes kompenzaci:
     </p>
 
-    <div class="diagram-container" role="img" aria-label="Stavový automat OrderProcessManager - 6 stavů, přechody řízené doménovými událostmi">
-        {% include 'diagrams/8_sagas/saga_state_machine.svg' %}
-    </div>
+    {% set _diag %}{% include 'diagrams/8_sagas/saga_state_machine.svg' %}{% endset %}
+    {% include '_partials/diagram.html.twig' with {
+        fig: '07.1-A',
+        title: 'Stavový automat OrderProcessManager',
+        inline: _diag,
+        alt: 'Stavový automat OrderProcessManager — 6 stavů, přechody řízené doménovými událostmi',
+        caption: 'Zelené šipky značí úspěšné přechody, červené selhání, oranžová cesta vede přes kompenzaci.'
+    } %}
 
     {% set _callout_body %}
 
