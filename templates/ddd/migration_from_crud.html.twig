@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Migrace z CRUD</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-        <h1 itemprop="headline">Migrace z CRUD architektury na DDD</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '11',
+        category: 'Praxe',
+        title: 'Migrace z CRUD architektury na DDD',
+        deck: 'Podrobný průvodce migrací z CRUD architektury na Domain-Driven Design v Symfony. Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a postupné zavedení CQRS s praktickými PHP příklady.',
+        reading_time: 22,
+        difficulty: 3,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-        <div class="examples-banner" role="note">
+    <div class="art-body" data-chapter-number="11">
+<div class="examples-banner" role="note">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
                 <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
             </svg>
@@ -74,22 +72,8 @@
             </span>
         </div>
 
-        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <p id="toc-heading">Obsah kapitoly:</p>
-            <ul>
-                <li><a href="#kdy-migrovat">Kdy a proč migrovat z CRUD na DDD</a></li>
-                <li><a href="#strangler-fig">Strangler Fig Pattern – vzor postupné náhrady</a></li>
-                <li><a href="#analyza-domeny">Krok 1: Analýza existující domény</a></li>
-                <li><a href="#extrakce-domainove-vrstvy">Krok 2: Extrakce doménové vrstvy</a></li>
-                <li><a href="#zavedeni-repozitaru">Krok 3: Zavedení repozitářů</a></li>
-                <li><a href="#cqrs-postupne">Krok 4: Postupné zavedení CQRS</a></li>
-                <li><a href="#testovani-pri-migraci">Testování při migraci</a></li>
-                <li><a href="#rizika-a-doporuceni">Rizika a doporučení</a></li>
-            </ul>
-        </div>
-
-        <section id="kdy-migrovat" aria-labelledby="kdy-migrovat-heading">
-            <h2 id="kdy-migrovat-heading">Kdy a proč migrovat z CRUD na DDD</h2>
+<section id="kdy-migrovat" aria-labelledby="kdy-migrovat-heading">
+            <h2 id="kdy-migrovat-heading" class="h-section"><span class="h-num">11.01</span> Kdy a proč migrovat z CRUD na DDD</h2>
             <p>
                 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
                 Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
@@ -98,7 +82,8 @@
                 na nevhodná místa.
             </p>
 
-            <div class="note" role="note" aria-labelledby="priznaky-heading">
+            {% set _callout_body %}
+
                 <h3 id="priznaky-heading">Příznaky, že CRUD architektura nestačí</h3>
                 <ul>
                     <li>
@@ -132,7 +117,12 @@
                         viditelné v názvech tříd a metod.
                     </li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Příznaky, že CRUD architektura nestačí',
+                body: _callout_body
+            } %}
 
             <h3>Kdy DDD přináší hodnotu a kdy je CRUD dostačující</h3>
             <p>
@@ -142,7 +132,8 @@
                 <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank">[1]</a>.
             </p>
 
-            <div class="note" role="note" aria-labelledby="kdy-ddd-heading">
+            {% set _callout_body %}
+
                 <h3 id="kdy-ddd-heading">Kdy DDD přináší hodnotu</h3>
                 <ul>
                     <li>Doména obsahuje komplexní doménová pravidla, která se často mění.</li>
@@ -158,7 +149,12 @@
                     <li>Tým je malý a čas na migraci není dostupný.</li>
                     <li>Aplikace je krátkodobá nebo se bude v blízké budoucnosti kompletně přepisovat.</li>
                 </ul>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Kdy DDD přináší hodnotu',
+                body: _callout_body
+            } %}
 
             <h3>Realistické zhodnocení nákladů migrace</h3>
             <p>
@@ -171,7 +167,7 @@
         </section>
 
         <section id="strangler-fig" aria-labelledby="strangler-fig-heading">
-            <h2 id="strangler-fig-heading">Strangler Fig Pattern – vzor postupné náhrady</h2>
+            <h2 id="strangler-fig-heading" class="h-section"><span class="h-num">11.02</span> Strangler Fig Pattern – vzor postupné náhrady</h2>
             <p>
                 Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
                 <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank">[2]</a>,
@@ -179,7 +175,8 @@
                 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
             </p>
 
-            <div class="note" role="note" aria-labelledby="strangler-princip-heading">
+            {% set _callout_body %}
+
                 <h3 id="strangler-princip-heading">Princip fungování</h3>
                 <ol>
                     <li>
@@ -199,11 +196,17 @@
                         dokud starý kód zcela nevymizí.
                     </li>
                 </ol>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Princip fungování',
+                body: _callout_body
+            } %}
 
-            <div class="tip" role="note" aria-labelledby="strangler-struktura-heading">
+            {% set _callout_body %}
+
                 <h3 id="strangler-struktura-heading">Příklad: Koexistence CRUD a DDD ve struktuře projektu</h3>
-                <pre><code class="language-bash">src/
+                {% set _code %}{% verbatim %}src/
 ├── Controller/                    # Stará CRUD vrstva (postupně se zmenšuje)
 │   ├── UserController.php         # Původní CRUD kontroler
 │   └── OrderController.php        # Původní CRUD kontroler
@@ -234,8 +237,19 @@
     │       └── GetUserProfileHandler.php
     └── Infrastructure/
         └── Repository/
-            └── DoctrineUserRepository.php  # Implementace repozitáře</code></pre>
-            </div>
+            └── DoctrineUserRepository.php  # Implementace repozitáře{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Koexistence CRUD a DDD ve struktuře projektu',
+                body: _callout_body
+            } %}
 
             <h3>Výhody oproti přímé refaktorizaci (Big Bang Rewrite)</h3>
             <p>
@@ -255,7 +269,7 @@
         </section>
 
         <section id="analyza-domeny" aria-labelledby="analyza-domeny-heading">
-            <h2 id="analyza-domeny-heading">Krok 1: Analýza existující domény</h2>
+            <h2 id="analyza-domeny-heading" class="h-section"><span class="h-num">11.03</span> Krok 1: Analýza existující domény</h2>
             <p>
                 Než začneme přesouvat kód, musíme pochopit doménu. Nejčastější chybou je přímý skok do refaktoringu
                 bez předchozí analýzy – výsledkem je pak DDD architektura, která přesně kopíruje strukturu starých
@@ -297,13 +311,14 @@
                 <li>Zapojení doménových expertů do návrhu nové architektury.</li>
             </ul>
 
-            <div class="tip" role="note" aria-labelledby="crud-before-heading">
+            {% set _callout_body %}
+
                 <h3 id="crud-before-heading">Příklad: Identifikace doménové logiky v CRUD kontroleru</h3>
                 <p>
                     Následující příklad ilustruje typický CRUD kontroler, ve kterém je skryta netriviální doménová
                     logika. Tato logika bude v dalších krocích extrahována do doménového modelu.
                 </p>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 // PŘED migrací: Typický CRUD kontroler s ukrytou doménovou logikou
 namespace App\Controller;
@@ -340,7 +355,7 @@ class UserController extends AbstractController
         }
 
         // Doménová logika č. 3: hashování hesla a bezpečnostní pravidla
-        if (strlen($password) &lt; 8) {
+        if (strlen($password) < 8) {
             return $this->json(['error' => 'Heslo musí mít alespoň 8 znaků'], 422);
         }
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
@@ -360,17 +375,28 @@ class UserController extends AbstractController
 
         return $this->json(['id' => $user->getId()], 201);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Controller/UserController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     V tomto kontroleru lze identifikovat nejméně pět oblastí doménové logiky, které patří do
                     doménového modelu: validace formátu e-mailu, unikátnost e-mailu, bezpečnostní pravidla hesla,
                     výchozí stav uživatele a side-effect registrace (uvítací e-mail jako Domain Event).
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Identifikace doménové logiky v CRUD kontroleru',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="extrakce-domainove-vrstvy" aria-labelledby="extrakce-domainove-vrstvy-heading">
-            <h2 id="extrakce-domainove-vrstvy-heading">Krok 2: Extrakce doménové vrstvy</h2>
+            <h2 id="extrakce-domainove-vrstvy-heading" class="h-section"><span class="h-num">11.04</span> Krok 2: Extrakce doménové vrstvy</h2>
             <p>
                 Extrakce doménové vrstvy znamená přesunutí doménových pravidel z kontrolerů a service tříd do doménových
                 objektů. Cílem je, aby doménové objekty samy vynucovaly svá invarianty – pravidla, která musí být
@@ -383,9 +409,10 @@ class UserController extends AbstractController
                 typy nesoucí doménová pravidla, poté extrahujeme logiku do doménových entit a služeb.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="before-after-heading">
+            {% set _callout_body %}
+
                 <h3 id="before-after-heading">Příklad: Refaktorizace UserService – before/after</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 // PŘED: God Service s přímou závislostí na Doctrine
 namespace App\Service;
@@ -402,7 +429,7 @@ class UserService
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Neplatný e-mail');
         }
-        if (strlen($password) &lt; 8) {
+        if (strlen($password) < 8) {
             throw new \InvalidArgumentException('Heslo příliš krátké');
         }
         $existing = $this->em->getRepository(User::class)
@@ -422,9 +449,15 @@ class UserService
 
         return $user;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Service/UserService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -488,13 +521,24 @@ class User
     public function id(): UserId { return $this->id; }
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Model/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     Doménová entita <code>User</code> nyní sama vynucuje svá pravidla: výchozí stav, přechod stavu
                     při aktivaci, emituje Domain Event při registraci. Kontroler ani service nemůže tyto invarianty
                     obejít.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Refaktorizace UserService – before/after',
+                body: _callout_body
+            } %}
 
             <h3>Zavedení Value Objects místo primitive types</h3>
             <p>
@@ -503,9 +547,10 @@ class User
                 objektem, který zapouzdřuje validaci a chování.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="email-vo-heading">
+            {% set _callout_body %}
+
                 <h3 id="email-vo-heading">Příklad: Refaktorizace string emailu na Email Value Object</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
 class UserController {
@@ -566,17 +611,28 @@ final class Email
     {
         return $this->value;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/ValueObject/UserController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     Díky Value Objectu <code>Email</code> je validace zapouzdřena na jednom místě. Kdykoli je
                     vytvořena instance <code>Email</code>, máme garantovanou platnost hodnoty – bez ohledu na to,
                     kde v aplikaci k vytvoření dochází. Toto je základní princip "Make Illegal States Unrepresentable".
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Refaktorizace string emailu na Email Value Object',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="zavedeni-repozitaru" aria-labelledby="zavedeni-repozitaru-heading">
-            <h2 id="zavedeni-repozitaru-heading">Krok 3: Zavedení repozitářů</h2>
+            <h2 id="zavedeni-repozitaru-heading" class="h-section"><span class="h-num">11.05</span> Krok 3: Zavedení repozitářů</h2>
             <p>
                 V CRUD architektuře se pro přístup k datům typicky používá <code>EntityManagerInterface</code> nebo
                 Doctrine repozitáře přímo v kontrolerech a service třídách. DDD přináší doménové rozhraní repozitáře,
@@ -590,9 +646,10 @@ final class Email
                 z pohledu domény. Neobsahuje žádné zmínky o Doctrine, SQL nebo jiné infrastrukturní technologii.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="repository-interface-heading">
+            {% set _callout_body %}
+
                 <h3 id="repository-interface-heading">Příklad: Doménové rozhraní vs. Doctrine implementace</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -615,9 +672,15 @@ interface UserRepository
     public function findActiveUsers(): array;
 
     public function nextIdentity(): UserId;
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Repository/UserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -669,29 +732,52 @@ final class DoctrineUserRepository implements UserRepository
     {
         return UserId::generate();
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     Doménová vrstva závisí pouze na rozhraní <code>UserRepository</code>. Symfony DI container
                     zajistí, že do doménových služeb bude injektována <code>DoctrineUserRepository</code>. Díky
                     tomu lze implementaci repozitáře vyměnit v konfiguračním souboru bez změny doménového kódu.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Doménové rozhraní vs. Doctrine implementace',
+                body: _callout_body
+            } %}
 
-            <div class="note" role="note" aria-labelledby="di-config-heading">
+            {% set _callout_body %}
+
                 <h3 id="di-config-heading">Konfigurace Dependency Injection v Symfony</h3>
-                <pre><code class="language-yaml"># config/services.yaml
+                {% set _code %}{% verbatim %}# config/services.yaml
 services:
     App\UserManagement\Domain\Repository\UserRepository:
-        alias: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository</code></pre>
+        alias: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/doctrine.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     Tato konfigurace zajistí, že Symfony automaticky injektuje Doctrine implementaci všude tam,
                     kde je typovaná závislost na doménovém rozhraní <code>UserRepository</code>.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Konfigurace Dependency Injection v Symfony',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="cqrs-postupne" aria-labelledby="cqrs-postupne-heading">
-            <h2 id="cqrs-postupne-heading">Krok 4: Postupné zavedení CQRS</h2>
+            <h2 id="cqrs-postupne-heading" class="h-section"><span class="h-num">11.06</span> Krok 4: Postupné zavedení CQRS</h2>
             <p>
                 Command Query Responsibility Segregation (CQRS) je přirozené rozšíření DDD, avšak jeho zavedení
                 by mělo přijít až poté, co je doménový model dobře etablován. Předčasné zavedení CQRS bez zralého
@@ -706,9 +792,10 @@ services:
                 nebo ji ponechat jako optimalizované SQL dotazy i v DDD systému (read modely).
             </p>
 
-            <div class="tip" role="note" aria-labelledby="command-extraction-heading">
+            {% set _callout_body %}
+
                 <h3 id="command-extraction-heading">Příklad: Extrakce RegisterUserCommand z UserController</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 // PŘED: Logika přímo v kontroleru nebo service
 namespace App\Controller;
@@ -730,9 +817,15 @@ class UserController extends AbstractController
         );
         return $this->json(['status' => 'ok'], 201);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Controller/UserController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 // --- Soubor: RegisterUser.php ---
 // PO: Command objekt jako explicitní kontrakt
@@ -812,18 +905,29 @@ class UserController extends AbstractController
         ));
         return $this->json(['status' => 'ok'], 201);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Application/Command/RegisterUser.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     Command <code>RegisterUser</code> je prosté DTO (Data Transfer Object) bez závislostí. Handler
                     <code>RegisterUserHandler</code> orchestruje doménový model. Kontroler je redukován na HTTP
                     vrstvu, která pouze přeloží HTTP požadavek na Command. Tato separace odpovědností výrazně
                     zlepšuje testovatelnost každé vrstvy zvlášť.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Extrakce RegisterUserCommand z UserController',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="testovani-pri-migraci" aria-labelledby="testovani-pri-migraci-heading">
-            <h2 id="testovani-pri-migraci-heading">Testování při migraci</h2>
+            <h2 id="testovani-pri-migraci-heading" class="h-section"><span class="h-num">11.07</span> Testování při migraci</h2>
             <p>
                 Testování je kritickým aspektem migrace. Bez dostatečného pokrytí testy hrozí, že refaktoring
                 zavede regrese, které jsou odhaleny až v produkci. Strategie testování při migraci z CRUD na DDD
@@ -841,9 +945,10 @@ class UserController extends AbstractController
                 při refaktoringu.
             </p>
 
-            <div class="tip" role="note" aria-labelledby="char-test-heading">
+            {% set _callout_body %}
+
                 <h3 id="char-test-heading">Příklad: Charakterizační test pro CRUD kontroler</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -905,13 +1010,24 @@ class UserRegistrationCharacterizationTest extends WebTestCase
 
         self::assertResponseStatusCodeSame(409);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Tests/Characterization/UserRegistrationCharacterizationTest.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
                 <p>
                     Charakterizační testy jsou psány <em>před</em> refaktoringem. Cílem je, aby všechny procházely
                     po celou dobu migrace – selhání testu signalizuje, že refaktoring změnil pozorovatelné chování
                     systému, ať záměrně nebo omylem.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Charakterizační test pro CRUD kontroler',
+                body: _callout_body
+            } %}
 
             <h3>Unit testy doménové vrstvy</h3>
             <p>
@@ -920,9 +1036,10 @@ class UserRegistrationCharacterizationTest extends WebTestCase
                 a přesně dokumentují doménová pravidla.
             </p>
 
-            <div class="note" role="note" aria-labelledby="domain-unit-test-heading">
+            {% set _callout_body %}
+
                 <h3 id="domain-unit-test-heading">Příklad: Unit test doménové entity</h3>
-                <pre><code class="language-php">&lt;?php
+                {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -970,12 +1087,23 @@ final class UserTest extends TestCase
         $this->expectException(\DomainException::class);
         $user->activate($token); // druhá aktivace musí selhat
     }
-}</code></pre>
-            </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Tests/UserManagement/Domain/Model/UserTest.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Příklad: Unit test doménové entity',
+                body: _callout_body
+            } %}
         </section>
 
         <section id="rizika-a-doporuceni" aria-labelledby="rizika-a-doporuceni-heading">
-            <h2 id="rizika-a-doporuceni-heading">Rizika a doporučení</h2>
+            <h2 id="rizika-a-doporuceni-heading" class="h-section"><span class="h-num">11.08</span> Rizika a doporučení</h2>
 
             <h3>Nejčastější chyby při migraci</h3>
             <ul>
@@ -1036,7 +1164,8 @@ final class UserTest extends TestCase
                 psát charakterizační testy), nedostatečná znalost domény v týmu, absence doménových expertů.
             </p>
 
-            <div class="warning" role="alert" aria-labelledby="big-bang-warning-heading">
+            {% set _callout_body %}
+
                 <h3 id="big-bang-warning-heading">Varování před Big Bang Rewrites</h3>
                 <p>
                     <strong>Nikdy nezačínejte migraci na DDD kompletním přepisem systému.</strong> Big Bang Rewrite
@@ -1051,7 +1180,12 @@ final class UserTest extends TestCase
                     zachovejte funkční systém v produkci, přidávejte DDD vrstvami a nahrazujte CRUD kód
                     postupně při každém sprintu.
                 </p>
-            </div>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Varování před Big Bang Rewrites',
+                body: _callout_body
+            } %}
 
             <p>
                 Pro hlubší pochopení DDD konceptů a jejich implementace v Symfony doporučujeme prostudovat
@@ -1084,7 +1218,7 @@ final class UserTest extends TestCase
                 }
             ]
         } %}
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
