@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">DDD a AI</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-<article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">DDD a umělá inteligence - co říkají autority</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '16',
+        category: 'Reference',
+        title: 'DDD a umělá inteligence - co říkají autority',
+        deck: 'Objektivní přehled názorů předních autorit softwarového inženýrství na vztah Domain-Driven Designu a umělé inteligence. Eric Evans, Martin Fowler, Kent Beck, DHH a další - jejich pozice, argumenty a data.',
+        reading_time: 10,
+        difficulty: 1,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2026-03-27', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <p>
+    <div class="art-body" data-chapter-number="16">
+<p>
         Umělá inteligence mění způsob, jakým navrhujeme, píšeme a provozujeme software. To přirozeně
         vyvolává otázku: jsou některé architektonické přístupy pro éru AI vhodnější než jiné? Nabízí
         Domain-Driven Design výhody, které s příchodem LLM nabývají na váze - nebo naopak přidává
@@ -77,25 +75,11 @@
         se ještě teprve učíme.
     </p>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#ubiquitous-language">Ubiquitous language jako rozhraní pro LLM</a></li>
-            <li><a href="#bounded-contexts">Bounded contexts a kvalita generovaného kódu</a></li>
-            <li><a href="#testovani">Testování jako kontrolní mechanismus pro AI</a></li>
-            <li><a href="#komplexita-vs-crud">AI v doménové komplexitě vs. CRUD</a></li>
-            <li><a href="#nastroje">Architektonické nástroje a kontext pro AI</a></li>
-            <li><a href="#otevrene-otazky">Otevřené otázky a limity</a></li>
-            <li><a href="#zaver">Závěr</a></li>
-            <li><a href="#zdroje">Zdroje a další čtení</a></li>
-        </ul>
-    </div>
-
-    {# ═══════════════════════════════════════════════════════════
+{# ═══════════════════════════════════════════════════════════
        Sekce 1: Ubiquitous language jako rozhraní pro LLM
        ═══════════════════════════════════════════════════════════ #}
     <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
-        <h2 id="ubiquitous-language-heading">Ubiquitous language jako rozhraní pro LLM</h2>
+        <h2 id="ubiquitous-language-heading" class="h-section"><span class="h-num">16.01</span> Ubiquitous language jako rozhraní pro LLM</h2>
 
         <p>
             Jedním z nejkonkrétnějších výroků o vztahu DDD a AI pochází přímo od Erica Evanse. Na konferenci
@@ -158,7 +142,7 @@
        Sekce 2: Bounded contexts a kvalita generovaného kódu
        ═══════════════════════════════════════════════════════════ #}
     <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
-        <h2 id="bounded-contexts-heading">Bounded contexts a kvalita generovaného kódu</h2>
+        <h2 id="bounded-contexts-heading" class="h-section"><span class="h-num">16.02</span> Bounded contexts a kvalita generovaného kódu</h2>
 
         <p>
             Existují data. Ne rozsáhlé akademické studie s tisíci vzorků, ale praktické měření z reálných
@@ -167,7 +151,8 @@
             mají měřitelný dopad na kvalitu kódu generovaného LLM.
         </p>
 
-        <div class="tip" role="note" aria-labelledby="data-table-heading">
+        {% set _callout_body %}
+
             <h3 id="data-table-heading">Přehled dostupných dat: bounded contexts a AI generovaný kód</h3>
             <table>
                 <thead>
@@ -200,7 +185,12 @@
                 autora blogpostu - nepocházejí z kontrolované studie, nemají definovanou metodologii
                 ani vzorek. Uvádíme je jako ilustraci pozorovaného trendu, nikoliv jako vědecký důkaz.</em>
             </p>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Přehled dostupných dat: bounded contexts a AI generovaný kód',
+                body: _callout_body
+            } %}
 
         <p>
             Nick Tune je jedním z nejvíce aktivních praktiků na průsečíku DDD a AI. V článku pro O'Reilly
@@ -241,7 +231,7 @@
        Sekce 3: Testování jako kontrolní mechanismus pro AI
        ═══════════════════════════════════════════════════════════ #}
     <section id="testovani" aria-labelledby="testovani-heading">
-        <h2 id="testovani-heading">Testování jako kontrolní mechanismus pro AI</h2>
+        <h2 id="testovani-heading" class="h-section"><span class="h-num">16.03</span> Testování jako kontrolní mechanismus pro AI</h2>
 
         <p>
             Kent Beck - autor TDD, autor Extreme Programming - se od začátku roku 2024 intenzivně
@@ -323,7 +313,7 @@
        Sekce 4: AI v doménové komplexitě vs. CRUD
        ═══════════════════════════════════════════════════════════ #}
     <section id="komplexita-vs-crud" aria-labelledby="komplexita-vs-crud-heading">
-        <h2 id="komplexita-vs-crud-heading">AI v doménové komplexitě vs. CRUD</h2>
+        <h2 id="komplexita-vs-crud-heading" class="h-section"><span class="h-num">16.04</span> AI v doménové komplexitě vs. CRUD</h2>
 
         <p>
             Evans ve své Explore DDD 2024 přednášce navrhl novou taxonomii softwarových rozhodnutí -
@@ -393,7 +383,7 @@
        Sekce 5: Architektonické nástroje a kontext pro AI
        ═══════════════════════════════════════════════════════════ #}
     <section id="nastroje" aria-labelledby="nastroje-heading">
-        <h2 id="nastroje-heading">Architektonické nástroje a kontext pro AI</h2>
+        <h2 id="nastroje-heading" class="h-section"><span class="h-num">16.05</span> Architektonické nástroje a kontext pro AI</h2>
 
         <p>
             Jedním z nejzajímavějších trendů posledních dvou let je konvergence AI nástrojů
@@ -448,7 +438,7 @@
        Sekce 6: Otevřené otázky a limity
        ═══════════════════════════════════════════════════════════ #}
     <section id="otevrene-otazky" aria-labelledby="otevrene-otazky-heading">
-        <h2 id="otevrene-otazky-heading">Otevřené otázky a limity</h2>
+        <h2 id="otevrene-otazky-heading" class="h-section"><span class="h-num">16.06</span> Otevřené otázky a limity</h2>
 
         <p>
             Martin Fowler opakovaně zdůrazňuje, že oblast AI a softwarové architektury je v roce 2026
@@ -517,9 +507,10 @@
        Závěr
        ═══════════════════════════════════════════════════════════ #}
     <section id="zaver" aria-labelledby="zaver-heading">
-        <h2 id="zaver-heading">Závěr</h2>
+        <h2 id="zaver-heading" class="h-section"><span class="h-num">16.07</span> Závěr</h2>
 
-        <div class="tip" role="note" aria-labelledby="spectrum-heading">
+        {% set _callout_body %}
+
             <h3 id="spectrum-heading">Spektrum pozic: od synergie DDD a AI po důraz na jednoduchost</h3>
             <table>
                 <thead>
@@ -567,7 +558,12 @@
                     </tr>
                 </tbody>
             </table>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Spektrum pozic: od synergie DDD a AI po důraz na jednoduchost',
+                body: _callout_body
+            } %}
 
         <p>
             Syntéza pozic autorit vede k opatrnému, ale celkem konzistentnímu závěru: většina
@@ -600,7 +596,8 @@
             architektonické rozhodnutí.
         </p>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Klíčové závěry:</strong>
             <ul>
                 <li>
@@ -630,7 +627,12 @@
                     domény se buduje v konverzaci.
                 </li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
 
     {% include '_partials/faq.html.twig' with {
@@ -658,9 +660,10 @@
        Zdroje
        ═══════════════════════════════════════════════════════════ #}
     <section id="zdroje" aria-labelledby="zdroje-heading">
-        <h2 id="zdroje-heading">Zdroje a další čtení</h2>
+        <h2 id="zdroje-heading" class="h-section"><span class="h-num">16.08</span> Zdroje a další čtení</h2>
 
-        <div class="note" role="note">
+        {% set _callout_body %}
+
             <strong>Primární zdroje:</strong>
             <ul>
                 <li>
@@ -762,12 +765,14 @@
                     architektonické nekonzistence lokálně koherentního kódu.
                 </li>
             </ul>
-        </div>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
     </section>
-
+    </div>
 </article>
 {% endblock %}
 
-{% block toc %}
-<p class="toc-title">Na této stránce</p>
-{% endblock %}
