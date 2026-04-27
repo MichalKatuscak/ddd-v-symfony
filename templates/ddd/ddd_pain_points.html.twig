@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">DDD v praxi – kde to bolí</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">DDD v praxi – kde to bolí</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '12',
+        category: 'Praxe',
+        title: 'DDD v praxi – kde to bolí',
+        deck: 'Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další.',
+        reading_time: 30,
+        difficulty: 4,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2026-03-26', 'modified': '2026-04-22' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <p>
+    <div class="art-body" data-chapter-number="12">
+<p>
         Předchozí kapitoly pokryly teorii i pokročilé vzory: od
         <a href="{{ path('basic_concepts') }}">základních stavebních bloků</a> přes
         <a href="{{ path('cqrs') }}">CQRS</a> a
@@ -79,57 +77,11 @@
         a doporučené řešení - tam kde je to výmluvné, s ukázkou kódu.
     </p>
 
-    <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#doctrine">A - Doctrine vs. doménový model</a>
-                <ul>
-                    <li><a href="#a1-transakce">A1. Transakce přes agregáty a Unit of Work</a></li>
-                    <li><a href="#a2-spinavy-em">A2. „Špinavý" EntityManager a nechtěné změny</a></li>
-                    <li><a href="#a3-value-objects">A3. Mapping složitých Value Objects</a></li>
-                    <li><a href="#a4-lazy-loading">A4. Lazy loading vs. bohaté agregáty</a></li>
-                    <li><a href="#a5-identity">A5. Identity generation - kdy a kde</a></li>
-                    <li><a href="#a6-polymorfismus">A6. Polymorfismus a discriminator map</a></li>
-                </ul>
-            </li>
-            <li><a href="#async">B - Asynchronní infrastruktura</a>
-                <ul>
-                    <li><a href="#b1-outbox">B1. Outbox pattern - zaručené doručení událostí</a></li>
-                    <li><a href="#b2-debugging">B2. Debugging ztracené zprávy v Messengeru</a></li>
-                    <li><a href="#b3-idempotence">B3. Idempotence handlerů</a></li>
-                    <li><a href="#b4-ordering">B4. Ordering zpráv</a></li>
-                </ul>
-            </li>
-            <li><a href="#modelovani">C - Modelování</a>
-                <ul>
-                    <li><a href="#c1-validace">C1. Kde žije validace</a></li>
-                    <li><a href="#c2-stavy">C2. Stavový automat bez anémického modelu</a></li>
-                    <li><a href="#c3-acl">C3. Anti-Corruption Layer k externím API</a></li>
-                    <li><a href="#c4-language">C4. Ubiquitous Language drift</a></li>
-                </ul>
-            </li>
-            <li><a href="#symfony">D - Symfony-specifické třenice</a>
-                <ul>
-                    <li><a href="#d1-form">D1. Symfony Form vs. Command</a></li>
-                    <li><a href="#d2-api-platform">D2. API Platform vs. doménové agregáty</a></li>
-                    <li><a href="#d3-voter">D3. Security Voter vs. doménová oprávnění</a></li>
-                </ul>
-            </li>
-            <li><a href="#tym">E - Organizace a tým</a>
-                <ul>
-                    <li><a href="#e1-management">E1. Business case pro refaktoring</a></li>
-                    <li><a href="#e2-strangler">E2. Postupné zavedení - strangler fig</a></li>
-                    <li><a href="#e3-silos">E3. Knowledge silos a bus factor</a></li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-
-    {# ═══════════════════════════════════════════════════════════
+{# ═══════════════════════════════════════════════════════════
        BLOK A: Doctrine vs. doménový model
        ═══════════════════════════════════════════════════════════ #}
     <section id="doctrine" aria-labelledby="doctrine-heading">
-    <h2 id="doctrine-heading">A - Doctrine vs. doménový model</h2>
+    <h2 id="doctrine-heading" class="h-section"><span class="h-num">12.01</span> A - Doctrine vs. doménový model</h2>
 
     <p>
         Doctrine ORM je mocný nástroj, ale jeho interní model (Unit of Work, Identity Map, lazy loading)
@@ -168,9 +120,10 @@
         leží ve stejném Bounded Context a stejné databázi.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="a1-code-heading">
+    {% set _callout_body %}
+
         <h4 id="a1-code-heading">PHP: Application Service jako transakční hranice</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -207,17 +160,34 @@ final class ConfirmTransferService
             throw $e;
         }
     }
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Warehouse/Application/Service/ConfirmTransferService.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             Pokud oba agregáty nesdílejí databázi (nebo jsou v různých Bounded Contexts),
             použijte místo transakce
             <a href="{{ path('sagas') }}#b1-outbox">Outbox pattern</a> nebo Sagu.
             Atomická cross-context transakce je architektonický zápach.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -289,9 +259,10 @@ final class ConfirmTransferService
         do SQL hodnoty a zpět. Zaregistrujte typ v <code>config/packages/doctrine.yaml</code>.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="a3-code-heading">
+    {% set _callout_body %}
+
         <h4 id="a3-code-heading">PHP: Custom Type pro Money Value Object</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -327,34 +298,62 @@ final class MoneyType extends Type
         /** @var Money $value */
         return $value->amountInCents() . '_' . $value->currency()->code();
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/SharedKernel/Infrastructure/Doctrine/Type/MoneyType.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     <p>
         Typ zaregistrujte v <code>config/packages/doctrine.yaml</code>:
     </p>
 
-    <pre><code class="language-yaml">doctrine:
+    {% set _code %}{% verbatim %}doctrine:
     dbal:
         types:
-            money: App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType</code></pre>
+            money: App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/doctrine.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
 
     <p>
         Poté ho použijte v entitě:
     </p>
 
-    <pre><code class="language-php">#[ORM\Column(type: 'money', nullable: true)]
-private ?Money $price = null;</code></pre>
+    {% set _code %}{% verbatim %}#[ORM\Column(type: 'money', nullable: true)]
+private ?Money $price = null;{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             Pro <strong>polymorfní VO</strong> (různé typy platby: karta, hotovost, voucher)
             zvažte místo dědičnosti <strong>Value Object s diskriminátorem</strong>:
             uložte typ jako enum do jednoho sloupce a detaily jako JSON do druhého.
             Tím se vyhnete discriminator map, která je těžkopádná pro VO.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -432,9 +431,10 @@ private ?Money $price = null;</code></pre>
         Doctrine ho jen uloží.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="a5-code-heading">
+    {% set _callout_body %}
+
         <h4 id="a5-code-heading">PHP: UUID v konstruktoru agregátu (PHP 8.4 + Symfony Uid)</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -480,18 +480,34 @@ final class Order
         $this->id = OrderId::generate(); // identita vzniká v doméně
         // ...
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Domain/ValueObject/OrderId.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     <p>
         Doctrine mapping pro UUID ID:
     </p>
 
-    <pre><code class="language-php">#[ORM\Id]
+    {% set _code %}{% verbatim %}#[ORM\Id]
 #[ORM\Column(type: 'string', length: 36)]
 #[ORM\GeneratedValue(strategy: 'NONE')] // Doctrine ID nepřiřazuje
-private string $id;</code></pre>
+private string $id;{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     </section>
 
@@ -556,7 +572,7 @@ private string $id;</code></pre>
        BLOK B: Asynchronní infrastruktura
        ═══════════════════════════════════════════════════════════ #}
     <section id="async" aria-labelledby="async-heading">
-    <h2 id="async-heading">B - Asynchronní infrastruktura</h2>
+    <h2 id="async-heading" class="h-section"><span class="h-num">12.02</span> B - Asynchronní infrastruktura</h2>
 
     <p>
         Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci -
@@ -588,9 +604,10 @@ private string $id;</code></pre>
         Atomicita je garantována databázovou transakcí; at-least-once doručení zajišťuje worker.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="b1-code-heading">
+    {% set _callout_body %}
+
         <h4 id="b1-code-heading">PHP: OutboxEvent entita a OutboxPublisher service</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -634,9 +651,19 @@ final class OutboxEvent
     public function isPublished(): bool { return $this->publishedAt !== null; }
     public function eventType(): string  { return $this->eventType; }
     public function payload(): array     { return $this->payload; }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/SharedKernel/Infrastructure/Outbox/OutboxEvent.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     <p>
         Klíčový detail: outbox záznamy musí být persistovány <em>uvnitř</em> téže transakce
@@ -646,7 +673,7 @@ final class OutboxEvent
         <code>flush()</code> by navíc způsobilo nekonečnou rekurzi.
     </p>
 
-    <pre><code class="language-php">use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+    {% set _code %}{% verbatim %}use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 
@@ -672,16 +699,28 @@ final class OutboxEventListener
         }
         // Žádný další flush() - outbox záznamy jsou součástí probíhající transakce
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/OutboxEventListener.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             Symfony Messenger v Symfony 8+ nabízí vlastní <strong>Doctrine Transport</strong>,
             který ukládá zprávy do databáze a garantuje at-least-once doručení bez nutnosti
             vlastního Outbox kódu. Zvažte jeho použití jako alternativu před implementací
             vlastního Outbox patternu.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -701,9 +740,21 @@ final class OutboxEventListener
     <ol>
         <li>
             <strong>Zkontrolujte failed transport:</strong>
-            <pre><code class="language-bash">php bin/console messenger:failed:show</code></pre>
+            {% set _code %}{% verbatim %}php bin/console messenger:failed:show{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
             Pokud je zpráva zde, zobrazí se s chybou. Znovu ji zpracujte:
-            <pre><code class="language-bash">php bin/console messenger:failed:retry</code></pre>
+            {% set _code %}{% verbatim %}php bin/console messenger:failed:retry{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
         </li>
         <li>
             <strong>Zapněte verbose logging:</strong> V <code>config/packages/monolog.yaml</code>
@@ -717,9 +768,10 @@ final class OutboxEventListener
         </li>
     </ol>
 
-    <div class="tip" role="note" aria-labelledby="b2-code-heading">
+    {% set _callout_body %}
+
         <h4 id="b2-code-heading">PHP: Middleware pro Correlation ID logging</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -756,20 +808,36 @@ final class CorrelationIdMiddleware implements MiddlewareInterface
             $stack,
         );
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/SharedKernel/Infrastructure/Messenger/CorrelationIdStamp.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     <p>
         Zaregistrujte middleware v <code>config/packages/messenger.yaml</code>:
     </p>
 
-    <pre><code class="language-yaml">framework:
+    {% set _code %}{% verbatim %}framework:
     messenger:
         buses:
             command.bus:
                 middleware:
-                    - App\SharedKernel\Infrastructure\Messenger\CorrelationIdMiddleware</code></pre>
+                    - App\SharedKernel\Infrastructure\Messenger\CorrelationIdMiddleware{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml',
+                language: 'yaml',
+                code: _code,
+                highlights: []
+            } %}
 
     </section>
 
@@ -791,9 +859,10 @@ final class CorrelationIdMiddleware implements MiddlewareInterface
         databázovou tabulku - pokud klíč existuje, zprávu přeskočí.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="b3-code-heading">
+    {% set _callout_body %}
+
         <h4 id="b3-code-heading">PHP: IdempotencyMiddleware</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -841,20 +910,37 @@ final class IdempotencyMiddleware implements MiddlewareInterface
 
         return $result;
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/SharedKernel/Infrastructure/Messenger/IdempotencyStamp.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             Tabulka <code>processed_messages</code> poroste bez omezení. Přidejte
             pravidelný cleanup (cron) nebo <code>TTL</code> index pro automatické mazání
             starých záznamů. Obvyklá retence je 7–30 dní - doba, po které broker
             přestane doručovat retries.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
-    <div class="warning" role="note">
+    {% set _callout_body %}
+
         <p>
             <strong>TOCTOU race condition:</strong> Kód výše obsahuje závodní podmínku -
             dvě paralelní instance workeru mohou obě vidět, že záznam neexistuje
@@ -869,7 +955,7 @@ final class IdempotencyMiddleware implements MiddlewareInterface
             <strong>v téže databázové transakci</strong>. Při selhání handleru transakce
             selže celá (klíč se nevloží) a Messenger zprávu zopakuje:
         </p>
-        <pre><code class="language-php">$this->connection->beginTransaction();
+        {% set _code %}{% verbatim %}$this->connection->beginTransaction();
 try {
     // Unique constraint na idempotency_key zabrání duplicitě na DB úrovni
     $this->connection->insert('processed_messages', [
@@ -885,8 +971,19 @@ try {
 } catch (\Throwable $e) {
     $this->connection->rollBack(); // handler selhal - klíč se nezapíše, Messenger zopakuje
     throw $e;
-}</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'warn',
+                label: 'Pozor',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -935,7 +1032,8 @@ try {
     </table>
     </div>
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             <strong>Pozor:</strong> Pro ordering problémy <em>nepoužívejte</em>
             <code>UnrecoverableMessageHandlingException</code> - ta zprávu
@@ -945,7 +1043,12 @@ try {
             stále selhává, teprve pak skončí v failed transport - kde ji lze prozkoumat
             a znovu odeslat.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -955,7 +1058,7 @@ try {
        BLOK C: Modelování
        ═══════════════════════════════════════════════════════════ #}
     <section id="modelovani" aria-labelledby="modelovani-heading">
-    <h2 id="modelovani-heading">C - Modelování</h2>
+    <h2 id="modelovani-heading" class="h-section"><span class="h-num">12.03</span> C - Modelování</h2>
 
     <p>
         Správné doménové modelování je obtížnější než implementace - vyžaduje disciplínu
@@ -1033,7 +1136,7 @@ try {
         doménovou událost.
     </p>
 
-    <pre><code class="language-php">final class Order
+    {% set _code %}{% verbatim %}final class Order
 {
     private OrderStatus $status = OrderStatus::Draft;
 
@@ -1055,16 +1158,28 @@ try {
         $this->trackingNumber = $trackingNumber;
         $this->record(new OrderShipped($this->id, $trackingNumber));
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             <strong>Symfony Workflow</strong> může spravovat přechody stavů - ale jako
             <em>infrastrukturní helper</em>, nikoli jako součást doménového modelu.
             Doménový objekt nesmí záviset na <code>WorkflowInterface</code>. Voter / Controller
             může použít Workflow pro UI logiku; doménová metoda ověřuje invariant sama.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1085,9 +1200,10 @@ try {
         <strong>Adapter</strong>, který přeloží externí API do doménového rozhraní.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="c3-code-heading">
+    {% set _callout_body %}
+
         <h4 id="c3-code-heading">PHP: Port v doméně + Adapter v infrastruktuře</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 // Port - v doméně (App\Payment\Domain\Port)
 interface PaymentGateway
@@ -1125,9 +1241,19 @@ final class StripePaymentGateway implements PaymentGateway
             'amount' => $amount->amountInCents(),
         ]);
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/PaymentGateway.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     <p>
         Doménový kód pracuje pouze s <code>PaymentGateway</code> rozhraním - nic neví
@@ -1188,7 +1314,7 @@ final class StripePaymentGateway implements PaymentGateway
        BLOK D: Symfony-specifické třenice
        ═══════════════════════════════════════════════════════════ #}
     <section id="symfony" aria-labelledby="symfony-heading">
-    <h2 id="symfony-heading">D - Symfony-specifické třenice</h2>
+    <h2 id="symfony-heading" class="h-section"><span class="h-num">12.04</span> D - Symfony-specifické třenice</h2>
 
     <p>
         Symfony je mocný framework, ale některé jeho konvence jsou navrženy pro CRUD aplikace.
@@ -1212,7 +1338,7 @@ final class StripePaymentGateway implements PaymentGateway
         Žádná ze dvou vrstev neví o existenci té druhé.
     </p>
 
-    <pre><code class="language-php">// 1. Formulářový objekt - mutable, framework-friendly
+    {% set _code %}{% verbatim %}// 1. Formulářový objekt - mutable, framework-friendly
 final class PlaceOrderFormData
 {
     public string $customerId = '';
@@ -1237,7 +1363,13 @@ if ($form->isSubmitted() && $form->isValid()) {
     );
 
     $this->commandBus->dispatch($command);
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/PlaceOrderFormData.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <p>
         <code>PlaceOrderCommand</code> je readonly PHP class - doménový kód s ní pracuje
@@ -1263,9 +1395,10 @@ if ($form->isSubmitted() && $form->isValid()) {
         a <code>StateProcessor</code>, které fungují jako adaptéry k Application Services.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="d2-code-heading">
+    {% set _callout_body %}
+
         <h4 id="d2-code-heading">PHP: StateProcessor jako adapter k Application Service</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1308,9 +1441,19 @@ final class PlaceOrderProcessor implements ProcessorInterface
 
         return new OrderResponse($orderId->toString());
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Infrastructure/ApiPlatform/OrderResource.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1332,9 +1475,10 @@ final class PlaceOrderProcessor implements ProcessorInterface
         čistá funkce - testovatelná bez frameworku.
     </p>
 
-    <div class="tip" role="note" aria-labelledby="d3-code-heading">
+    {% set _callout_body %}
+
         <h4 id="d3-code-heading">PHP: Voter jako tenký adaptér + doménová metoda</h4>
-        <pre><code class="language-php">&lt;?php
+        {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1371,9 +1515,19 @@ final class OrderVoter extends Voter
         /** @var Order $subject */
         return $subject->canBeCancelledBy(UserId::fromString($user->getId()), new \DateTimeImmutable());
     }
-}
-</code></pre>
-    </div>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Order.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                label: 'Vzor',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1383,7 +1537,7 @@ final class OrderVoter extends Voter
        BLOK E: Organizace a tým
        ═══════════════════════════════════════════════════════════ #}
     <section id="tym" aria-labelledby="tym-heading">
-    <h2 id="tym-heading">E - Organizace a tým</h2>
+    <h2 id="tym-heading" class="h-section"><span class="h-num">12.05</span> E - Organizace a tým</h2>
 
     <p>
         DDD selže ne proto, že by byl technicky špatný - ale proto, že tým ho nepochopil,
@@ -1485,13 +1639,19 @@ final class OrderVoter extends Voter
         </li>
     </ol>
 
-    <div class="note" role="note">
+    {% set _callout_body %}
+
         <p>
             Strangler fig neznamená, že legacy kód a DDD kód sdílejí databázové tabulky.
             Nový modul má vlastní tabulky; data z legacy se migrují postupně,
             případně se synchronizují přes events nebo cron job.
         </p>
-    </div>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
 
     </section>
 
@@ -1562,8 +1722,7 @@ final class OrderVoter extends Voter
             }
         ]
     } %}
-
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
