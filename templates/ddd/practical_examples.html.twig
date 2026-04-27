@@ -45,24 +45,22 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Praktické příklady</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-        <h1 itemprop="headline">Praktické příklady</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '09',
+        category: 'Praxe',
+        title: 'Praktické příklady',
+        deck: 'Praktické příklady implementace Domain-Driven Design v Symfony 8 na reálných projektech. Prozkoumejte ukázky kódu pro e-commerce, blog a další typy aplikací s využitím bounded contexts, doménových modelů a vertikální slice architektury.',
+        reading_time: 32,
+        difficulty: 3,
+        last_updated: '2026-04-27'|date,
+        author: 'M. Katuščák'
+    } %}
 
-        {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-        <p>
+    <div class="art-body" data-chapter-number="09">
+<p>
             V předchozích kapitolách jsme prošli teorii i implementační detaily -
             od <a href="{{ path('cqrs') }}">CQRS</a> přes
             <a href="{{ path('event_sourcing') }}">Event Sourcing</a> až po
@@ -71,31 +69,23 @@
             fungují v praxi.
         </p>
 
-        <div class="table-of-contents mb-4" role="navigation" aria-labelledby="toc-heading">
-            <p id="toc-heading">Obsah kapitoly:</p>
-            <ul>
-                <li><a href="#e-commerce">Příklad: E-commerce aplikace</a></li>
-                <li><a href="#blog">Příklad: Blog</a></li>
-                <li><a href="#user-management">Příklad: Správa uživatelů</a></li>
-            </ul>
-        </div>
-
-        <section id="e-commerce" aria-labelledby="e-commerce-heading">
-            <h2 id="e-commerce-heading">Příklad: E-commerce aplikace</h2>
+<section id="e-commerce" aria-labelledby="e-commerce-heading">
+            <h2 id="e-commerce-heading" class="h-section"><span class="h-num">09.01</span> Příklad: E-commerce aplikace</h2>
             <p>
                 V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí vertikální slice architektury
                 a CQRS v Symfony 8.
                 Zaměříme se na funkcionalitu košíku a objednávek.
             </p>
 
-            <div class="tip">
-                <div class="diagram-container">
-                    {% include '/diagrams/7_examples/eshop/diagram.svg' %}
-                </div>
-            </div>
+            {% set _diagram_inline %}{% include '/diagrams/7_examples/eshop/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
             <h3 id="e-commerce-structure-heading">Struktura projektu</h3>
-            <pre><code class="language-bash">src/
+            {% set _code %}{% verbatim %}src/
 ├── Cart/                      # Bounded Context: Košík
 │   ├── Domain/                # Doménová vrstva
 │   │   ├── Model/             # Doménové modely
@@ -155,10 +145,16 @@
     └── Infrastructure/        # Sdílená infrastruktura
         └── Bus/               # Implementace message bus
             ├── MessengerCommandBus.php  # Implementace command bus
-            └── MessengerQueryBus.php  # Implementace query bus</code></pre>
+            └── MessengerQueryBus.php  # Implementace query bus{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="cart-model-heading">Doménový model: Košík</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -291,10 +287,16 @@ class Cart
 
         return $events;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Cart/Domain/Model/Cart.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="add-to-cart-command-heading">Command: Přidání položky do košíku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -322,10 +324,16 @@ class AddItemToCart
         public readonly int $priceInCents
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Cart/AddItem/Command/AddItemToCart.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="add-to-cart-handler-heading">Command Handler: Zpracování přidání položky do košíku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -362,10 +370,16 @@ class AddItemToCartHandler
 
         $this->cartRepository->save($cart);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Cart/AddItem/Command/AddItemToCartHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="add-to-cart-controller-heading">Controller: Přidání položky do košíku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -416,10 +430,16 @@ class CartController extends AbstractController
             ]);
         }
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Cart/AddItem/Controller/CartController.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="get-cart-query-heading">Query: Získání košíku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -435,10 +455,16 @@ class GetCart
         public readonly string $cartId
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Cart/GetCart/Query/GetCart.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="get-cart-handler-heading">Query Handler: Zpracování získání košíku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -484,25 +510,32 @@ class GetCartHandler
             $cart->updatedAt()
         );
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Cart/GetCart/Query/GetCartHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
         </section>
 
         <section id="blog" aria-labelledby="blog-heading">
-            <h2 id="blog-heading">Příklad: Blog</h2>
+            <h2 id="blog-heading" class="h-section"><span class="h-num">09.02</span> Příklad: Blog</h2>
             <p>
                 V této části si ukážeme, jak implementovat jednoduchý blog pomocí vertikální slice architektury a CQRS v
                 Symfony 8.
             </p>
 
-            <div class="tip">
-                <div class="diagram-container">
-                    {% include '/diagrams/7_examples/blog/diagram.svg' %}
-                </div>
-            </div>
+            {% set _diagram_inline %}{% include '/diagrams/7_examples/blog/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
             <h3 id="blog-structure-heading">Struktura projektu</h3>
-            <pre><code class="language-bash">src/
+            {% set _code %}{% verbatim %}src/
 ├── Blog/                      # Bounded Context: Blog
 │   ├── Domain/                # Doménová vrstva
 │   │   ├── Model/             # Doménové modely
@@ -547,10 +580,16 @@ class GetCartHandler
     └── Infrastructure/        # Sdílená infrastruktura
         └── Bus/               # Implementace message bus
             ├── MessengerCommandBus.php  # Implementace command bus
-            └── MessengerQueryBus.php  # Implementace query bus</code></pre>
+            └── MessengerQueryBus.php  # Implementace query bus{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3 id="post-model-heading">Doménový model: Příspěvek</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -640,10 +679,16 @@ class Post
 
         return $events;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Blog/Domain/Model/Post.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3>Command: Vytvoření příspěvku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -665,10 +710,16 @@ class CreatePost
         public readonly string $author
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Blog/CreatePost/Command/CreatePost.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3>Command Handler: Zpracování vytvoření příspěvku</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -702,24 +753,31 @@ class CreatePostHandler
 
         return $postId->value();
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Blog/CreatePost/Command/CreatePostHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
         </section>
 
         <section id="user-management" aria-labelledby="user-management-heading">
-            <h2 id="user-management-heading">Příklad: Správa uživatelů</h2>
+            <h2 id="user-management-heading" class="h-section"><span class="h-num">09.03</span> Příklad: Správa uživatelů</h2>
             <p>
                 V této části si ukážeme, jak implementovat správu uživatelů pomocí DDD a CQRS v Symfony 8, kde společná doména budou uživatelé a DDD použijeme pro oddělení funkcí.
             </p>
 
-            <div class="tip">
-                <div class="diagram-container">
-                    {% include '/diagrams/7_examples/users/diagram.svg' %}
-                </div>
-            </div>
+            {% set _diagram_inline %}{% include '/diagrams/7_examples/users/diagram.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: 'X.Y',
+                title: 'Diagram',
+                inline: _diagram_inline
+            } %}
 
             <h3>Struktura projektu</h3>
-            <pre><code class="language-bash">src/
+            {% set _code %}{% verbatim %}src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva
 │   │   ├── Model/             # Doménové modely
@@ -751,10 +809,16 @@ class CreatePostHandler
     └── Infrastructure/        # Sdílená infrastruktura
         └── Bus/               # Implementace message bus
             ├── MessengerCommandBus.php  # Implementace command bus
-            └── MessengerQueryBus.php  # Implementace query bus</code></pre>
+            └── MessengerQueryBus.php  # Implementace query bus{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'snippet.sh',
+                language: 'bash',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3>Doménový model: Uživatel</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -862,10 +926,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $events;
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Domain/Model/User.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3>Command: Registrace uživatele</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -889,10 +959,16 @@ class RegisterUser
         public readonly string $password
     ) {
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Command/RegisterUser.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
             <h3>Command Handler: Zpracování registrace uživatele</h3>
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -934,7 +1010,13 @@ class RegisterUserHandler
 
         $this->userRepository->save($user);
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/UserManagement/Registration/Command/RegisterUserHandler.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
 
     <p>
         Všechny tři příklady ukazují stejný vzor: kontroler pouze dispatchuje command nebo query,
@@ -969,7 +1051,7 @@ class RegisterUserHandler
                 }
             ]
         } %}
-    </article>
+    </div>
+</article>
 {% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
