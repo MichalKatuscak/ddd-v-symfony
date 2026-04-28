@@ -160,7 +160,8 @@
 .toc-m-label { letter-spacing: var(--tracking-wide); }
 .toc-m-count {
   margin-left: auto;
-  color: var(--fg-faint);
+  /* fg-dim místo fg-faint — kontrast 5.16 : 1 (AA) místo 1.93 : 1 (fail). */
+  color: var(--fg-dim);
   text-transform: none;
   letter-spacing: 0;
   font-size: 11px;
