@@ -69,7 +69,7 @@
                 udržitelnosti kódu. Špatně zvolená organizace vede k tomu, že související logika je rozptýlena
                 napříč celou aplikací a každá změna vyžaduje úpravy na mnoha místech. Tradiční přístup k DDD,
                 často označovaný jako "vrstvený" (layered), tento problém řeší rozdělením kódu do vrstev
-                podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank">[1]</a>.
+                podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank" rel="noopener">[1]</a>.
                 Typické vrstvy v tradičním DDD jsou:
             </p>
 
@@ -112,14 +112,14 @@
 
             <p>
                 V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
+                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener">[2]</a>.
             </p>
         </section>
 
         <section id="vertical-slice" aria-labelledby="vertical-slice-heading">
             <h2 id="vertical-slice-heading" class="h-section"><span class="h-num">03.02</span> Vertikální slice architektura (Vertical Slice Architecture)</h2>
             <p>
-                Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank">[3]</a>.
+                Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" rel="noopener">[3]</a>.
                 Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
             </p>
 
@@ -184,7 +184,7 @@
 
             <p>
                 Ve vertikální slice architektuře jsou funkce (features) organizovány jako vertikální řezy (slices) přes všechny vrstvy, přičemž každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
-                Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
+                Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" rel="noopener">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
             </p>
 
             {% set _callout_body %}
@@ -251,7 +251,7 @@
                         <tr>
                             <td><strong>Vhodnost pro CQRS</strong></td>
                             <td>Vyžaduje dodatečnou práci pro implementaci CQRS</td>
-                            <td>Přirozeně podporuje CQRS <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns" target="_blank">[5]</a></td>
+                            <td>Přirozeně podporuje CQRS <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns" target="_blank" rel="noopener">[5]</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -278,7 +278,7 @@
             {% set _callout_body %}
                 <h3 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h3>
                 <ul>
-                    <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank">[6]</a>.</li>
+                    <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank" rel="noopener">[6]</a>.</li>
                     <li>Když je důležitá modularita a nezávislost funkcí.</li>
                     <li>Pro aplikace, které budou v budoucnu rozděleny do mikroslužeb.</li>
                     <li>Když chcete implementovat CQRS.</li>
@@ -294,7 +294,7 @@
         <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
             <h2 id="symfony-implementation-heading" class="h-section"><span class="h-num">03.05</span> Implementace v Symfony 8</h2>
             <p>
-                Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank">[7]</a>.
+                Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank" rel="noopener">[7]</a>.
             </p>
 
             <h3 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h3>
@@ -356,7 +356,7 @@
 
             <h3 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h3>
             <p>
-                Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank">[8]</a>:
+                Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank" rel="noopener">[8]</a>:
             </p>
 
             {% set _code %}src/
@@ -419,11 +419,11 @@
             } %}
 
             <p>
-                Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank">[9]</a>:
+                Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank" rel="noopener">[9]</a>:
             </p>
 
             <ul>
-                <li><strong>Messenger komponenta</strong> – Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
+                <li><strong>Messenger komponenta</strong> – Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank" rel="noopener">[10]</a>.</li>
                 <li><strong>Validator komponenta</strong> – Pro validaci doménových objektů.</li>
                 <li><strong>Form komponenta</strong> – Pro zpracování vstupů od uživatele.</li>
                 <li><strong>Security komponenta</strong> – Pro autentizaci a autorizaci.</li>

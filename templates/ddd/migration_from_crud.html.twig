@@ -120,7 +120,7 @@
                 Rozhodnutí o migraci by mělo být podloženo analýzou komplexity domény, nikoli módními trendy.
                 Martin Fowler ve své práci o architektonických vzorech upozorňuje, že aplikace Transaction Script
                 (a jeho specializace CRUD) jsou zcela legitimní pro aplikace s jednoduchými doménovými pravidly
-                <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank">[1]</a>.
+                <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank" rel="noopener">[1]</a>.
             </p>
 
             {% set _callout_body %}
@@ -160,7 +160,7 @@
             <h2 id="strangler-fig-heading" class="h-section"><span class="h-num">11.02</span> Strangler Fig Pattern – vzor postupné náhrady</h2>
             <p>
                 Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
-                <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank">[2]</a>,
+                <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank" rel="noopener">[2]</a>,
                 která umožňuje postupnou náhradu starého systému novým bez nutnosti "big bang" přepisu. Název pochází
                 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
             </p>
@@ -243,7 +243,7 @@
             <p>
                 Přímý přepis celého systému najednou (tzv. "big bang rewrite") je považován za jedno z největších rizik
                 v softwarovém vývoji. Joel Spolsky ve svém slavném článku "Things You Should Never Do"
-                <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/" target="_blank">[3]</a>
+                <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/" target="_blank" rel="noopener">[3]</a>
                 popisuje, proč firmy ztratily konkurenční výhodu tím, že kompletně přepsaly fungující systémy.
                 Strangler Fig Pattern oproti tomu:
             </p>
@@ -288,7 +288,7 @@
             <h3>Event Storming jako nástroj pro analýzu</h3>
             <p>
                 Event Storming je workshopová technika navržená Albertem Brandolinim
-                <a href="https://www.eventstorming.com/" target="_blank">[4]</a>, která umožňuje kolaborativně
+                <a href="https://www.eventstorming.com/" target="_blank" rel="noopener">[4]</a>, která umožňuje kolaborativně
                 modelovat doménu prostřednictvím doménových událostí. V kontextu migrace z CRUD je velmi užitečná
                 pro:
             </p>
@@ -921,7 +921,7 @@ class UserController extends AbstractController
             <p>
                 Pojem "charakterizační testy" pochází z knihy Michaela Featherse "Working Effectively with Legacy
                 Code"
-                <a href="https://www.oreilly.com/library/view/working-effectively-with/0131177052/" target="_blank">[5]</a>.
+                <a href="https://www.oreilly.com/library/view/working-effectively-with/0131177052/" target="_blank" rel="noopener">[5]</a>.
                 Charakterizační test nepopisuje, jaké <em>by mělo být</em> správné chování systému, ale zachycuje
                 jaké chování systém <em>aktuálně má</em>. Slouží jako síť, která zachytí nechtěné změny chování
                 při refaktoringu.
