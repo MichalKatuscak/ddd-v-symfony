@@ -210,7 +210,7 @@
   transition: transform var(--motion-fast) ease, color var(--motion-fast) ease;
 }
 
-@media (max-width: 880px) {
+@media (max-width: 900px) {
   .hub-a-shell { padding: var(--s-5) var(--s-4) var(--s-7); }
   .hub-a-head {
     grid-template-columns: 1fr;

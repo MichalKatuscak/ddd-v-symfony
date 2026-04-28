@@ -3,7 +3,7 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 .article {
-  max-width: 1180px;
+  max-width: var(--page-article);
   margin: 0 auto;
   padding: var(--s-7) var(--s-5) var(--s-9);
   display: grid;

@@ -92,7 +92,23 @@
   --measure-wide:  88ch;
   --canvas-max:    1280px;
 
+  /* Sémantické šířky stránek (vědomě různé pro různé typy):
+     - --page-article: užší (1180 px), aby vázanost na čtecí sloupec držela rytmus
+     - --canvas-max:   standardní hub/footer shell (1280 px)
+     - --page-hero:    landing hero a featured (širší rámec mimo čtecí sloupec) */
+  --page-article:  1180px;
+  --page-hero:     1480px;
+
   /* ── Motion ─────────────────────────────────────────────────────────── */
   --motion-fast:   120ms;
   --motion-medium: 200ms;
+
+  /* ── Breakpointy (centrálně, používané v @media query) ─────────────────
+     Sjednoceno napříč chrome/article/hub/landing:
+     - 540 px: phone — single-column layout, drawer fully expanded
+     - 720 px: small tablet — footer cols 2 → 1
+     - 900 px: tablet/desktop transition — sticky TOC dis., hub-grid 2 → 1, drawer up
+     - 1080 px: wide tablet/laptop — footer cols 4 → 2
+     CSS @media nelze tokenizovat (CSS Vars nejsou v media queries platné),
+     hodnoty žijí inline v jednotlivých souborech, ale jsou sjednocené. */
 }

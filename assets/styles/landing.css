@@ -9,7 +9,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: var(--s-9);
   padding: var(--s-9) var(--s-7) var(--s-8);
-  max-width: 1480px;
+  max-width: var(--page-hero);
   margin: 0 auto;
   border-bottom: 1px solid var(--stroke);
 }
@@ -227,7 +227,7 @@
 
 /* Featured case study */
 .land-featured {
-  max-width: 1480px;
+  max-width: var(--page-hero);
   margin: 0 auto;
   padding: var(--s-7);
   border-bottom: 1px solid var(--stroke);
