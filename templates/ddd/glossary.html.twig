@@ -67,7 +67,7 @@
                 <h3 id="strategicke-intro-heading">Co jsou strategické vzory?</h3>
                 <p>
                     Strategické vzory DDD se zabývají vysokoúrovňovým rozdělením systému na soudržné celky a
-                    řízením vztahů mezi nimi. Tato vrstva návrhu odpovídá na otázku <em>„co a kde“</em> -
+                    řízením vztahů mezi nimi. Tato vrstva návrhu odpovídá na otázku <em>„co a kde“</em> –
                     kde leží hranice modelu, kdo za jakou část domény zodpovídá a jak spolu jednotlivé části
                     komunikují. Strategický design je základem, na němž teprve spočívají taktické stavební bloky.
                     Bez solidního strategického designu se taktický design stává náhodnou sbírkou vzorů bez kontextu.
@@ -86,7 +86,7 @@
                             Sféra znalostí a činností, kolem níž se točí logika aplikace. Doména je <em>„proč“</em>
                             softwaru – problémový prostor, který software modeluje a pomáhá řešit. Eric Evans
                             definuje doménu jako: <em>„A sphere of knowledge, influence, or activity. The subject area
-                            to which the user applies a program.“</em> Doména není totéž co aplikace samotná -
+                            to which the user applies a program.“</em> Doména není totéž co aplikace samotná –
                             doména existuje i bez softwaru; software je jen jedním z prostředků, jak v doméně
                             pracovat. Pochopení domény je předpokladem smysluplného softwarového návrhu.
                         </p>
@@ -201,7 +201,7 @@
                     <dd>
                         <p>
                             Explicitní hranice, uvnitř níž je konkrétní doménový model definován a platný.
-                            Uvnitř Bounded Contextu je Ubiquitous Language konzistentní a jednoznačná -
+                            Uvnitř Bounded Contextu je Ubiquitous Language konzistentní a jednoznačná –
                             každý pojem má jeden přesný význam. Různé Bounded Contexty mohou používat stejné
                             slovo pro odlišné koncepty, aniž by si odporovaly. Bounded Context je
                             fundamentální jednotkou návrhu i nasazení v DDD. Určuje hranice týmů, nasazení,
@@ -239,7 +239,7 @@
                     </dt>
                     <dd>
                         <p>
-                            Vzor mapování kontextů: dva Bounded Contexty sdílejí podmnožinu doménového modelu -
+                            Vzor mapování kontextů: dva Bounded Contexty sdílejí podmnožinu doménového modelu –
                             společné entity, hodnotové objekty nebo doménové události. Změny ve sdíleném jádru
                             musí být odsouhlaseny oběma týmy a testovány v obou kontextech. Sdílené jádro
                             vytváří těsnou provázanost – koordinační náklady jsou nezanedbatelné. Používejte
@@ -478,7 +478,7 @@
                             detaily persistence před doménou – z pohledu domény jde o kolekci objektů v paměti.
                             Rozhraní (interface) repozitáře patří do doménové vrstvy; jeho implementace
                             (např. Doctrine, Eloquent, in-memory) patří do infrastrukturní vrstvy.
-                            Pravidlo: jeden repozitář na jeden typ agregátu. Repozitáře vrací celé agregáty -
+                            Pravidlo: jeden repozitář na jeden typ agregátu. Repozitáře vrací celé agregáty –
                             nenabízejí dotazy na vnitřní entity. Pro čtecí potřeby (CQRS Query side) se
                             používají jiné mechanismy (projekce, čtecí modely).
                         </p>
@@ -517,7 +517,7 @@
                             žádné konkrétní entitě ani hodnotovému objektu. Příklady: služba pro konverzi
                             měn, kalkulace ceny s uplatněním slev ze dvou různých agregátů, koordinace
                             transferu prostředků mezi účty. Doménová služba je součástí doménové vrstvy
-                            a mluví Ubiquitous Language. Nelze ji zaměňovat s Aplikační službou -
+                            a mluví Ubiquitous Language. Nelze ji zaměňovat s Aplikační službou –
                             Aplikační služba orchestruje use-case, Doménová služba vyjadřuje doménové
                             pravidlo.
                         </p>
@@ -572,7 +572,7 @@
                     </dt>
                     <dd>
                         <p>
-                            Zapouzdřuje obchodní pravidlo do znovupoužitelného, skládatelného objektu -
+                            Zapouzdřuje obchodní pravidlo do znovupoužitelného, skládatelného objektu –
                             predikátu, který určuje, zda doménový objekt splňuje určité kritérium.
                             Specifikace lze skládat pomocí logických operátorů AND, OR, NOT a vytvářet
                             tak komplexní podmínky z jednoduchých stavebních bloků. Vzor popsal Eric Evans
@@ -646,7 +646,7 @@
                 <h3 id="architektonicke-intro-heading">Co jsou architektonické vzory v kontextu DDD?</h3>
                 <p>
                     Architektonické vzory definují, jak jsou jednotlivé vrstvy a komponenty systému organizovány,
-                    jak mezi sebou komunikují a kde leží zodpovědnosti. DDD je architektonicky agnostické -
+                    jak mezi sebou komunikují a kde leží zodpovědnosti. DDD je architektonicky agnostické –
                     lze ho kombinovat s vrstvenou architekturou, hexagonální architekturou i vertikálními řezy.
                     Volba architektonického vzoru ovlivňuje testovatelnost, udržovatelnost a schopnost doménového
                     modelu zůstat čistý od infrastrukturních závislostí.
@@ -708,7 +708,7 @@
                             světem. Driving porty definují, jak vnější aktéři aplikaci volají (například
                             rozhraní command handlerů). Driven porty definují, co aplikace potřebuje od
                             infrastruktury (například <code>UserRepositoryInterface</code>,
-                            <code>EmailSenderInterface</code>). Porty patří do aplikačního jádra -
+                            <code>EmailSenderInterface</code>). Porty patří do aplikačního jádra –
                             jsou součástí doménové nebo aplikační vrstvy, nikoli infrastruktury.
                         </p>
                         <p class="term-source">Zdroj: Alistair Cockburn, <em>Hexagonal Architecture</em> (2005)</p>
@@ -1094,7 +1094,7 @@
                             Podobný Korelačnímu ID: identifikuje konkrétní událost nebo příkaz, který zapříčinil
                             vydání aktuální události. Zatímco Korelační ID propojuje celý kauzální řetěz od
                             kořenové příčiny, Causation ID ukazuje přímého předchůdce v kauzálním grafu.
-                            Oba identifikátory dohromady umožňují plnou rekonstrukci kauzálního řetězu -
+                            Oba identifikátory dohromady umožňují plnou rekonstrukci kauzálního řetězu –
                             který příkaz co způsobil, které události z něj vzešly a které další příkazy
                             tyto události iniciovaly.
                         </p>
@@ -1228,11 +1228,11 @@
                     </dt>
                     <dd>
                         <p>
-                            Automatizovaný test ověřující pravidla závislostí mezi vrstvami nebo moduly -
+                            Automatizovaný test ověřující pravidla závislostí mezi vrstvami nebo moduly –
                             například: „Doménová vrstva nesmí záviset na infrastrukturní vrstvě“,
                             nebo „Žádná třída v namespace <code>Domain\</code> nesmí importovat třídu
                             z namespace <code>Infrastructure\</code>“. Architektonické testy jsou spustitelnou
-                            dokumentací architektonických rozhodnutí. Zabraňují architektonické erozi -
+                            dokumentací architektonických rozhodnutí. Zabraňují architektonické erozi –
                             postupnému porušování pravidel, ke kterému dochází bez automatické kontroly.
                             Nástroje pro PHP: Deptrac (qossmic/deptrac), PHP-Arkitekt (phparkitect/arkitect).
                         </p>

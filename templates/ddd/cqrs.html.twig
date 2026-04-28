@@ -400,11 +400,11 @@ framework:
 
         <h3 id="async-poznamka-heading">Jak vybrat příkazy pro asynchronní zpracování</h3>
         <p>
-            <strong>Asynchronně</strong> zpracovávejte operace, kde uživatel nemusí čekat na výsledek -
+            <strong>Asynchronně</strong> zpracovávejte operace, kde uživatel nemusí čekat na výsledek –
             odesílání e-mailů, generování reportů, aktualizace read modelů, notifikace.
         </p>
         <p>
-            <strong>Synchronně</strong> zpracovávejte operace vyžadující okamžitou zpětnou vazbu -
+            <strong>Synchronně</strong> zpracovávejte operace vyžadující okamžitou zpětnou vazbu –
             registrace uživatele, vytvoření objednávky, přihlášení. Uživatel čeká na odpověď
             (úspěch / chyba validace) a potřebuje ji okamžitě.
         </p>
@@ -1001,7 +1001,7 @@ final class ProfileController extends AbstractController
             } %}
 
     <p>
-        V těchto příkladech je <code>commandBus</code> a <code>queryBus</code> injektováno pomocí named autowiring -
+        V těchto příkladech je <code>commandBus</code> a <code>queryBus</code> injektováno pomocí named autowiring –
         Symfony automaticky přiřadí bus podle názvu parametru v konstruktoru (musí odpovídat klíči v konfiguraci
         <code>buses</code> v <code>messenger.yaml</code>, kde <code>command.bus</code> se namapuje na <code>$commandBus</code>).
     </p>
@@ -1533,7 +1533,7 @@ stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
     <h3>Failed transport (Dead Letter Queue)</h3>
     <p>
         Po vyčerpání všech pokusů o retry je zpráva přesunuta na <strong>failed transport</strong>
-        (dead letter queue). Zprávy na failed transportu čekají na manuální zpracování -
+        (dead letter queue). Zprávy na failed transportu čekají na manuální zpracování –
         vývojář je může prozkoumat, opravit příčinu chyby a znovu odeslat.
     </p>
 

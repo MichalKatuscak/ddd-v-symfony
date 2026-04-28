@@ -563,7 +563,7 @@ private string $id;{% endverbatim %}{% endset %}
     <p>
         Pro většinu DDD scénářů se osvědčuje <strong>Value Object s type fieldem</strong>:
         jeden enum sloupec pro typ, jeden JSON sloupec pro specifická data varianty.
-        Logika se přesouvá do doménových metod, které přijímají VO jako parametr -
+        Logika se přesouvá do doménových metod, které přijímají VO jako parametr –
         ne do dědičnosti.
     </p>
 
@@ -578,7 +578,7 @@ private string $id;{% endverbatim %}{% endset %}
     <h2 id="async-heading" class="h-section"><span class="h-num">12.02</span> B – Asynchronní infrastruktura</h2>
 
     <p>
-        Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci -
+        Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci –
         a s ní distribuované problémy: zprávy se ztrácejí, doručují dvakrát, přicházejí
         v nesprávném pořadí. Tato sekce pokrývá čtyři nejčastější bolesti.
     </p>
@@ -849,7 +849,7 @@ final class CorrelationIdMiddleware implements MiddlewareInterface
     <h3 id="b3-heading">B3. Idempotence handlerů</h3>
 
     <p>
-        <strong>Problém:</strong> Messenger garantuje <em>at-least-once</em> doručení -
+        <strong>Problém:</strong> Messenger garantuje <em>at-least-once</em> doručení –
         nikoli exactly-once. Pokud worker zprávu zpracuje, ale před potvrzením (ack)
         spadne, broker zprávu znovu doručí. Handler ji zpracuje podruhé. Výsledkem může
         být dvojitá platba, duplicitní objednávka nebo zdvojený email.
@@ -945,10 +945,10 @@ final class IdempotencyMiddleware implements MiddlewareInterface
     {% set _callout_body %}
 
         <p>
-            <strong>TOCTOU race condition:</strong> Kód výše obsahuje závodní podmínku -
+            <strong>TOCTOU race condition:</strong> Kód výše obsahuje závodní podmínku –
             dvě paralelní instance workeru mohou obě vidět, že záznam neexistuje
             a obě zprávu zpracovat. Navíc pořadí SELECT + zpracování + INSERT znamená,
-            že pokud handler vyhodí výjimku, klíč se nezapíše a zpráva se zkusí znovu -
+            že pokud handler vyhodí výjimku, klíč se nezapíše a zpráva se zkusí znovu –
             což je správné chování, ale odhaluje jiný problém: pokud INSERT provedeme
             <em>před</em> zpracováním, selhání handleru zanechá klíč zapsaný
             a zpráva nebude nikdy zopakována (ztracená zpráva).
@@ -997,7 +997,7 @@ try {
     <p>
         <strong>Problém:</strong> Máte dva workery zpracovávající stejnou frontu paralelně.
         Obě události <code>OrderPlaced</code> a <code>OrderShipped</code> jsou odeslány
-        za sebou, ale <code>OrderShipped</code> zpracuje jiný worker rychleji -
+        za sebou, ale <code>OrderShipped</code> zpracuje jiný worker rychleji –
         handler se pokusí označit objednávku jako odeslanou, ale objednávka ještě
         neexistuje (nebo je ve špatném stavu).
     </p>
@@ -1114,7 +1114,7 @@ try {
     </div>
 
     <p>
-        <strong>Klíčové pravidlo:</strong> Doménový invariant vždy vynucujte v doméně -
+        <strong>Klíčové pravidlo:</strong> Doménový invariant vždy vynucujte v doméně –
         nikdy nespoléhejte na validaci ve vyšší vrstvě, protože doménový objekt může být
         sestaven i z jiného místa (CLI command, test, import). Symfony Validator je
         <em>první linie obrany</em> pro uživatelský vstup, nikoli náhrada doménové validace.
@@ -1289,7 +1289,7 @@ final class StripePaymentGateway implements PaymentGateway
 
     <ol>
         <li>
-            <strong>Doménový glosář v repozitáři</strong> (<code>docs/glossary.md</code>) -
+            <strong>Doménový glosář v repozitáři</strong> (<code>docs/glossary.md</code>) –
             živý dokument, kde každý pojem má definici, synonyma a odkaz na třídu v kódu.
             Aktualizuje se při každém přejmenování.
         </li>
@@ -1465,7 +1465,7 @@ final class PlaceOrderProcessor implements ProcessorInterface
     <h3 id="d3-heading">D3. Security Voter vs. doménová oprávnění</h3>
 
     <p>
-        <strong>Problém:</strong> Business pravidla přístupu jsou součástí domény -
+        <strong>Problém:</strong> Business pravidla přístupu jsou součástí domény –
         například „objednávku může zrušit zákazník nebo admin, ale pouze do 24 hodin
         od vytvoření a pouze pokud ještě nebyla expedována.“ Symfony Security Voter
         žije v infrastrukturní vrstvě a závisí na frameworku. Pokud logiku napíšete
@@ -1608,7 +1608,7 @@ final class OrderVoter extends Voter
     <h3 id="e2-heading">E2. Postupné zavedení – strangler fig pattern</h3>
 
     <p>
-        <strong>Problém:</strong> Big-bang rewrite – přepsání celé aplikace do DDD najednou -
+        <strong>Problém:</strong> Big-bang rewrite – přepsání celé aplikace do DDD najednou –
         téměř vždy selže: trvá déle než odhadnuto, tým ztrácí motivaci, business se nedočká
         nových funkcí. A přitom původní aplikace musí dál žít.
     </p>

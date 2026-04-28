@@ -157,8 +157,8 @@
     </p>
 
     <p>
-        V následujících sekcích si ukážeme dva základní přístupy ke koordinaci ság -
-        <a href="#choreografie">choreografii</a> a <a href="#orchestrace">orchestraci</a> -
+        V následujících sekcích si ukážeme dva základní přístupy ke koordinaci ság –
+        <a href="#choreografie">choreografii</a> a <a href="#orchestrace">orchestraci</a> –
         a jejich praktickou implementaci v Symfony 8 s využitím
         <a href="{{ path('cqrs') }}">Symfony Messenger</a>.
     </p>
@@ -519,7 +519,7 @@ framework:
 
     <h3 id="diagnostika-heading">3. Obtížná diagnostika selhání</h3>
     <p>
-        Když se proces „zasekne“, kde hledat příčinu? Každý kontext zná pouze svůj krok -
+        Když se proces „zasekne“, kde hledat příčinu? Každý kontext zná pouze svůj krok –
         neví, jaký je celkový stav procesu. Operátor musí ručně procházet logy všech
         kontextů, korelovat události podle <code>orderId</code> a rekonstruovat, kde přesně
         proces selhal. Neexistuje centrální dashboard, který by zobrazil:
@@ -818,7 +818,7 @@ final class OrderProcessManager
         Process Manager potřebuje <strong>perzistentní úložiště stavu</strong>, aby přežil
         restart workeru, nové nasazení aplikace i horizontální škálování na více instancí.
         Bez perzistence by pád workeru mezi kroky <code>OrderPlaced</code> a
-        <code>PaymentSucceeded</code> znamenal ztrátu informace o tom, kde se proces nachází -
+        <code>PaymentSucceeded</code> znamenal ztrátu informace o tom, kde se proces nachází –
         sága by zůstala navždy „viset“ bez možnosti dokončení nebo kompenzace. Stav ságy proto
         ukládáme do databáze jako Doctrine entitu.
     </p>
@@ -1191,7 +1191,7 @@ final readonly class OrderPlaced
             V produkci spouštějte oddělené workery pro každý transport:
             <code>php bin/console messenger:consume async_events async_commands --time-limit=3600</code>.
             Parametr <code>--time-limit</code> zajistí, že worker se po hodině automaticky restartuje
-            (a uvolní paměť). Pro vysokou dostupnost spouštějte více instancí workeru -
+            (a uvolní paměť). Pro vysokou dostupnost spouštějte více instancí workeru –
             Messenger zajistí, že každou zprávu zpracuje právě jeden worker.
         </p>
     {% endset %}
@@ -1452,7 +1452,7 @@ private function onOrderPlaced(OrderPlaced $event): void
     <h3 id="backward-recovery">Backward recovery (kompenzace)</h3>
 
     <p>
-        Při <strong>trvalých chybách</strong> (business failures) musíme spustit kompenzaci -
+        Při <strong>trvalých chybách</strong> (business failures) musíme spustit kompenzaci –
         vrátit systém do konzistentního stavu provedením kompenzačních akcí v
         <strong>opačném pořadí</strong> dokončených kroků. Klíčový princip:
         kompenzace je <strong>sémantická</strong>, nikoli technická. Neděláme
@@ -1812,7 +1812,7 @@ final class CheckStaleSagasCommand extends Command
 
         <h3 id="alerting-heading">Integrace s alertingem</h3>
         <p>
-            V produkčním prostředí napojte detekci zaseklých ság na váš alertingový systém -
+            V produkčním prostředí napojte detekci zaseklých ság na váš alertingový systém –
             <strong>Prometheus</strong> pro metriky (počet aktivních ság, průměrná doba dokončení),
             <strong>Grafana</strong> pro dashboardy a <strong>PagerDuty</strong> nebo podobný
             nástroj pro eskalaci kritických situací. Příkaz <code>app:saga:check-stale</code>

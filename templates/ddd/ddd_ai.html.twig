@@ -102,7 +102,7 @@
         <p>
             Evans dále navrhl, že několik fine-tuned modelů, každý určený pro jiný účel,
             představuje silné oddělení zodpovědností – a že vytrénovaný jazykový model
-            lze chápat jako bounded context. V téže přednášce předpověděl, že NLP úlohy -
+            lze chápat jako bounded context. V téže přednášce předpověděl, že NLP úlohy –
             klasifikace záměrů, extrakce entit, shrnutí dokumentů – se stanou
             plnohodnotnými subdoménami v DDD modelu. Stejně jako dnes
             máme samostatné bounded contexty pro platby, notifikace nebo inventory, budeme mít bounded
@@ -135,7 +135,7 @@
             Ubiquitous language v DDD je precizní podmnožina přirozeného jazyka – terminologie domény
             zbavená nejednoznačností a obohacená o doménová pravidla. To z ní dělá přirozený most mezi
             doménovými experty a LLM: pojmy, které jsou jasné lidem, jsou jasné i modelu. Otázka zní,
-            zda náklady na vybudování a udržení ubiquitous language jsou proporcionální k výhodám -
+            zda náklady na vybudování a udržení ubiquitous language jsou proporcionální k výhodám –
             a odpověď se liší projekt od projektu.
         </p>
     </section>
@@ -195,7 +195,7 @@
 
         <p>
             Nick Tune je jedním z nejvíce aktivních praktiků na průsečíku DDD a AI. V článku pro O'Reilly
-            Radar (2026) popisuje, jak použil Claude Code k reverse engineeringu softwarové architektury -
+            Radar (2026) popisuje, jak použil Claude Code k reverse engineeringu softwarové architektury –
             automatickému mapování end-to-end toků, závislostí a hranic v existující codebase.
             V návazném článku pak ukazuje, jak lze pomocí knihovny ts-morph deterministicky extrahovat
             architektonické vzory, které slouží jako vstup pro AI agenty. Tune vidí DDD
@@ -252,7 +252,7 @@
 
         <p>
             Beckův argument je, že testy jsou jediným mechanismem, který AI nemůže zfalšovat. Pokud
-            AI generuje kód a existuje sada testů, která specifikuje chování z pohledu domény -
+            AI generuje kód a existuje sada testů, která specifikuje chování z pohledu domény –
             nikoli implementační detaily, ale doménová pravidla – pak je selhání testu objektivním
             signálem, že AI se odchýlila od záměru. TDD tak ve spolupráci s AI plní roli, která
             v tradičním vývoji náleží code review: průběžná verifikace toho, zda kód dělá to,
@@ -294,7 +294,7 @@
 
         <p>
             DHH varuje před nebezpečím, kdy vývojář přestane rozumět kódu, který provozuje – stane
-            se project managerem AI místo inženýrem. Tento argument není anti-AI – DHH AI používá -
+            se project managerem AI místo inženýrem. Tento argument není anti-AI – DHH AI používá –
             ale je to varování, že nekritické přijetí AI výstupu degraduje schopnost rozpoznat,
             kdy AI dělá chybu. Bez doménového porozumění nejsou testy dostatečné: vývojář, který
             nechápe doménu, nepíše správné testy, a AI pak plní testy generováním falešně pozitivního
@@ -317,7 +317,7 @@
         <h2 id="komplexita-vs-crud-heading" class="h-section"><span class="h-num">16.04</span> AI v doménové komplexitě vs. CRUD</h2>
 
         <p>
-            Evans ve své Explore DDD 2024 přednášce navrhl novou taxonomii softwarových rozhodnutí -
+            Evans ve své Explore DDD 2024 přednášce navrhl novou taxonomii softwarových rozhodnutí –
             tři kategorie, které rozšiřují tradiční DDD rozlišení o AI vrstvu. První kategorie jsou
             <strong>hard-coded decisions</strong>: pravidla, která jsou absolutní, nemění se a jejichž
             porušení má závažné důsledky – například to, že záporný stav účtu musí projít explicitním
@@ -430,7 +430,7 @@
             čitelný jako explicitně modelovaný bounded context. Pokud projekt dodržuje konzistentní
             pojmenování, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
             i bez formálního DDD modelu. Proslulý blogpost „DHH Is Wrong“ a série na toto téma
-            ilustrují, že konvence může být stejně výkonná jako explicitní modelování -
+            ilustrují, že konvence může být stejně výkonná jako explicitní modelování –
             otázka je, co se stane, když projekt vyroste za hranice, kde konvence stačí.
         </p>
     </section>
@@ -446,7 +446,7 @@
             teprve na začátku. Nedeterminismus LLM – stejný prompt, jiný výstup – zatím nemá
             uspokojivou metriku. Jak měříme architektonickou konzistenci generovaného kódu?
             Jak verifikujeme, že AI respektuje hranice bounded contextu, když každé volání
-            API může vrátit jiný výsledek? Fowler hovoří o tom, že „stále se učíme“ -
+            API může vrátit jiný výsledek? Fowler hovoří o tom, že „stále se učíme“ –
             a to je poctivý popis stavu oboru.
         </p>
 
@@ -463,7 +463,7 @@
             veřejně vyjadřuje zdrženlivě. Vzdělávací firma Avanscoperta, kterou spoluzaložil,
             nabízí workshopy zaměřené na AI-augmentované vývojové workflow (např. „The Agentic
             Developer Workshop“), ale ty nejsou přímo zaměřené na kombinaci DDD a AI.
-            EventStorming zůstává v Brandoliniho pojetí fundamentálně lidskou aktivitou -
+            EventStorming zůstává v Brandoliniho pojetí fundamentálně lidskou aktivitou –
             sdílené pochopení domény se buduje v konverzaci, nikoliv v promptu.
         </p>
 
@@ -568,7 +568,7 @@
         <p>
             Syntéza pozic autorit vede k opatrnému, ale celkem konzistentnímu závěru: většina
             předních myslitelů v oblasti softwarového inženýrství vidí potenciální synergii
-            mezi DDD principy a praktickým využitím AI. Evans a Tune jsou nejkonkrétnější -
+            mezi DDD principy a praktickým využitím AI. Evans a Tune jsou nejkonkrétnější –
             sdílejí praktické vzory a data. Fowler a Beck jsou opatrně optimistické a zdůrazňují
             potřebu nových nástrojů a metrik. Brandolini zachovává lidský prvek v centru.
         </p>
