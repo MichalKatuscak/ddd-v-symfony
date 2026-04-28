@@ -47,7 +47,7 @@ class DiagramViewer {
       if (action === 'zoom-in')    this.zoomBy(STEP);
       else if (action === 'zoom-out') this.zoomBy(1 / STEP);
       else if (action === 'fit')      this.fit();
-      // 'fullscreen' přijde v tasku 5
+      else if (action === 'fullscreen') this.openFullscreen();
     });
   }
 
@@ -157,6 +157,77 @@ class DiagramViewer {
     this.tx = 0;
     this.ty = 0;
     this._applyTransform();
+  }
+
+  openFullscreen() {
+    if (this.modal) return; // už otevřeno
+
+    const modal = document.createElement('div');
+    modal.className = 'diagram-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Diagram — celá obrazovka');
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'diagram-modal-close';
+    closeBtn.setAttribute('aria-label', 'Zavřít');
+    closeBtn.textContent = '×';
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'diagram-modal-toolbar';
+    toolbar.setAttribute('role', 'toolbar');
+    toolbar.setAttribute('aria-label', 'Ovládání diagramu');
+    toolbar.innerHTML = `
+      <button type="button" class="mv-btn" data-action="zoom-in"  aria-label="Přiblížit">+</button>
+      <button type="button" class="mv-btn" data-action="zoom-out" aria-label="Oddálit">−</button>
+      <button type="button" class="mv-btn" data-action="fit"      aria-label="Přizpůsobit">⤢</button>
+    `;
+
+    const stage = document.createElement('div');
+    stage.className = 'diagram-modal-stage';
+    stage.appendChild(this.content.cloneNode(true));
+
+    modal.appendChild(closeBtn);
+    modal.appendChild(toolbar);
+    modal.appendChild(stage);
+
+    // Lock body scroll
+    this._prevBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    document.body.appendChild(modal);
+    // Force reflow než aplikujeme --open class (transition fade-in):
+    modal.offsetHeight;
+    modal.classList.add('diagram-modal--open');
+
+    // Close handlers
+    closeBtn.addEventListener('click', () => this.closeFullscreen());
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) this.closeFullscreen();
+    });
+    this._escHandler = (e) => {
+      if (e.key === 'Escape') this.closeFullscreen();
+    };
+    document.addEventListener('keydown', this._escHandler);
+
+    this.modal = modal;
+    this.modalStage = stage;
+    this.modalCloseBtn = closeBtn;
+    this.modalToolbar = toolbar;
+    // Modal viewer přijde v tasku 6 — zatím statický klon.
+  }
+
+  closeFullscreen() {
+    if (!this.modal) return;
+    document.removeEventListener('keydown', this._escHandler);
+    document.body.style.overflow = this._prevBodyOverflow || '';
+    this.modal.remove();
+    this.modal = null;
+    this.modalStage = null;
+    this.modalCloseBtn = null;
+    this.modalToolbar = null;
+    this.btnFs.focus(); // focus restoration
   }
 }
 

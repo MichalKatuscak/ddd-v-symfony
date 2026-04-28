@@ -868,6 +868,76 @@ section > h4:first-child { margin-top: 0; }
   }
 }
 
+/* ── Diagram modal (fullscreen) ────────────────────────────────────────── */
+.diagram-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.diagram-modal--open {
+  opacity: 1;
+}
+.diagram-modal-stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+.diagram-modal-stage.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.diagram-modal-stage > svg,
+.diagram-modal-stage > img {
+  display: block;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.diagram-modal-toolbar {
+  position: absolute;
+  top: var(--s-3);
+  right: calc(var(--s-3) + 3rem); /* místo pro × tlačítko */
+  display: flex;
+  gap: var(--s-1);
+  z-index: 1;
+}
+.diagram-modal-close {
+  position: absolute;
+  top: var(--s-3);
+  right: var(--s-3);
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--t-md);
+  line-height: 1;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--stroke);
+  border-radius: var(--r-1);
+  cursor: pointer;
+}
+.diagram-modal-close:hover,
+.diagram-modal-close:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.diagram-modal-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagram-modal {
+    transition: none;
+  }
+}
+
 /* ── Chapter nav (prev / next) ─────────────────────────────────────────── */
 .art-nav {
   display: grid;
