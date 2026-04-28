@@ -52,7 +52,7 @@
         </div>
         {% endif %}
         {% if _has_pub or _has_mod %}
-        <div class="art-meta-row">
+        <div class="art-meta-row art-meta-row-dates">
             <span class="art-meta-k">
                 {%- if _has_pub and _has_mod -%}
                     Publikováno · Aktualizováno
@@ -64,7 +64,7 @@
             </span>
             <span class="art-meta-v">
                 {%- if _has_pub %}<time datetime="{{ published|trim }}">{{ published|trim|date("j. n. Y") }}</time>{% endif -%}
-                {%- if _has_pub and _has_mod %} · {% endif -%}
+                {%- if _has_pub and _has_mod %} <span class="art-meta-sep">·</span> {% endif -%}
                 {%- if _has_mod %}<time datetime="{{ last_updated|trim }}">{{ last_updated|trim|date("j. n. Y") }}</time>{% endif -%}
             </span>
         </div>
