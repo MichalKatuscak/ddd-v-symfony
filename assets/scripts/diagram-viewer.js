@@ -10,14 +10,15 @@ const STEP             = 1.25;
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
-class DiagramViewer {
-  constructor(figureEl, opts = {}) {
-    this.figure = figureEl;
-    this.stage = figureEl.querySelector('.diagram-stage');
-    this.content = this.stage && this.stage.firstElementChild;
-    this.toolbar = figureEl.querySelector('.diagram-toolbar');
-    if (!this.stage || !this.content || !this.toolbar) return;
-
+// Per-stage zoom/pan controller. Operuje nad libovolnou trojicí:
+//   stage    — kontejner s overflow:hidden, drží pointer events
+//   content  — vnitřní <svg>/<img>, na který se aplikuje transform
+//   toolbar  — element s tlačítky [data-action="zoom-in|zoom-out|fit"]
+class StageController {
+  constructor(stage, content, toolbar, opts = {}) {
+    this.stage = stage;
+    this.content = content;
+    this.toolbar = toolbar;
     this.minScale = opts.minScale ?? INLINE_MIN_SCALE;
     this.maxScale = opts.maxScale ?? INLINE_MAX_SCALE;
 
@@ -25,18 +26,13 @@ class DiagramViewer {
     this.tx = 0;
     this.ty = 0;
 
-    this.figure.classList.add('diagram-js');
-    this._cacheButtons();
-    this._bindToolbar();
+    this.btnZoomIn  = toolbar ? toolbar.querySelector('[data-action="zoom-in"]')  : null;
+    this.btnZoomOut = toolbar ? toolbar.querySelector('[data-action="zoom-out"]') : null;
+    this.btnFit     = toolbar ? toolbar.querySelector('[data-action="fit"]')      : null;
+
+    if (toolbar) this._bindToolbar();
     this._bindPan();
     this._updateButtonStates();
-  }
-
-  _cacheButtons() {
-    this.btnZoomIn  = this.toolbar.querySelector('[data-action="zoom-in"]');
-    this.btnZoomOut = this.toolbar.querySelector('[data-action="zoom-out"]');
-    this.btnFit     = this.toolbar.querySelector('[data-action="fit"]');
-    this.btnFs      = this.toolbar.querySelector('[data-action="fullscreen"]');
   }
 
   _bindToolbar() {
@@ -44,24 +40,11 @@ class DiagramViewer {
       const btn = e.target.closest('[data-action]');
       if (!btn || btn.disabled) return;
       const action = btn.dataset.action;
-      if (action === 'zoom-in')    this.zoomBy(STEP);
+      if (action === 'zoom-in')       this.zoomBy(STEP);
       else if (action === 'zoom-out') this.zoomBy(1 / STEP);
       else if (action === 'fit')      this.fit();
-      else if (action === 'fullscreen') this.openFullscreen();
+      // 'fullscreen' řeší DiagramViewer extra
     });
-  }
-
-  _applyTransform() {
-    this.content.style.transform =
-      `translate(${this.tx}px, ${this.ty}px) scale(${this.scale})`;
-    this._updateButtonStates();
-  }
-
-  _updateButtonStates() {
-    if (this.btnZoomIn)  this.btnZoomIn.disabled  = this.scale >= this.maxScale - 1e-6;
-    if (this.btnZoomOut) this.btnZoomOut.disabled = this.scale <= this.minScale + 1e-6;
-    if (this.btnFit)     this.btnFit.disabled =
-      this.scale === 1 && this.tx === 0 && this.ty === 0;
   }
 
   _bindPan() {
@@ -69,7 +52,8 @@ class DiagramViewer {
     let activePointerId = null;
 
     this.stage.addEventListener('pointerdown', (e) => {
-      if (this.scale <= 1) return;
+      // Pan jen když je obsah větší než viewport (jinak není kam panovat)
+      if (!this._isPannable()) return;
       activePointerId = e.pointerId;
       this.stage.setPointerCapture(e.pointerId);
       this.stage.classList.add('is-dragging');
@@ -97,42 +81,57 @@ class DiagramViewer {
     this.stage.addEventListener('pointercancel', onEnd);
   }
 
-  _clamp() {
+  _isPannable() {
     const stageRect = this.stage.getBoundingClientRect();
-    // Reálné rozměry obsahu při scale=1 (před transformem):
-    // <img> má naturalWidth, <svg> má viewBox.baseVal.width.
+    const { baseW, baseH } = this._baseDims(stageRect);
+    return baseW * this.scale > stageRect.width
+        || baseH * this.scale > stageRect.height;
+  }
+
+  _baseDims(stageRect) {
     let baseW, baseH;
     if (this.content.tagName.toLowerCase() === 'img') {
-      baseW = this.content.naturalWidth || stageRect.width;
+      baseW = this.content.naturalWidth  || stageRect.width;
       baseH = this.content.naturalHeight || stageRect.height;
     } else {
       const vb = this.content.viewBox && this.content.viewBox.baseVal;
       baseW = (vb && vb.width)  || stageRect.width;
       baseH = (vb && vb.height) || stageRect.height;
     }
-    // Skutečné rozměry po scale (transform-origin: 0 0):
+    return { baseW, baseH };
+  }
+
+  _applyTransform() {
+    this.content.style.transform =
+      `translate(${this.tx}px, ${this.ty}px) scale(${this.scale})`;
+    this._updateButtonStates();
+  }
+
+  _updateButtonStates() {
+    if (this.btnZoomIn)  this.btnZoomIn.disabled  = this.scale >= this.maxScale - 1e-6;
+    if (this.btnZoomOut) this.btnZoomOut.disabled = this.scale <= this.minScale + 1e-6;
+    if (this.btnFit)     this.btnFit.disabled =
+      Math.abs(this.scale - 1) < 1e-6 && this.tx === 0 && this.ty === 0;
+  }
+
+  _clamp() {
+    const stageRect = this.stage.getBoundingClientRect();
+    const { baseW, baseH } = this._baseDims(stageRect);
     const contentW = baseW * this.scale;
     const contentH = baseH * this.scale;
 
-    // Rozsah pro tx: pokud je obsah větší než stage, povoľ posun tak, aby
-    // hrany obsahu nemohly opustit hrany stage. Pokud menší, drž na 0.
     if (contentW <= stageRect.width) {
       this.tx = 0;
     } else {
-      const minTx = stageRect.width - contentW;
-      const maxTx = 0;
-      this.tx = clamp(this.tx, minTx, maxTx);
+      this.tx = clamp(this.tx, stageRect.width - contentW, 0);
     }
     if (contentH <= stageRect.height) {
       this.ty = 0;
     } else {
-      const minTy = stageRect.height - contentH;
-      const maxTy = 0;
-      this.ty = clamp(this.ty, minTy, maxTy);
+      this.ty = clamp(this.ty, stageRect.height - contentH, 0);
     }
   }
 
-  // Zoom o `factor`, kolem středu viewportu stage.
   zoomBy(factor) {
     const newScale = clamp(this.scale * factor, this.minScale, this.maxScale);
     if (newScale === this.scale) return;
@@ -140,9 +139,7 @@ class DiagramViewer {
     this._zoomAt(rect.width / 2, rect.height / 2, newScale);
   }
 
-  // Zoom kolem konkrétního bodu (cx, cy) v souřadnicích stage.
   _zoomAt(cx, cy, newScale) {
-    // Bod v souřadnicích diagramu, který je teď pod (cx, cy):
     const dx = (cx - this.tx) / this.scale;
     const dy = (cy - this.ty) / this.scale;
     this.scale = newScale;
@@ -159,8 +156,42 @@ class DiagramViewer {
     this._applyTransform();
   }
 
+  // Fit-na-viewport — vypočte scale tak, aby se obsah vešel do stage celý.
+  fitToViewport() {
+    const stageRect = this.stage.getBoundingClientRect();
+    const { baseW, baseH } = this._baseDims(stageRect);
+    if (!baseW || !baseH) { this.fit(); return; }
+    const fitScale = Math.min(stageRect.width / baseW, stageRect.height / baseH);
+    this.scale = clamp(fitScale, this.minScale, this.maxScale);
+    // Vycentrovat obsah ve stage:
+    this.tx = (stageRect.width - baseW * this.scale) / 2;
+    this.ty = (stageRect.height - baseH * this.scale) / 2;
+    this._applyTransform();
+  }
+}
+
+class DiagramViewer {
+  constructor(figureEl) {
+    this.figure = figureEl;
+    const stage = figureEl.querySelector('.diagram-stage');
+    const content = stage && stage.firstElementChild;
+    const toolbar = figureEl.querySelector('.diagram-toolbar');
+    if (!stage || !content || !toolbar) return;
+
+    this.figure.classList.add('diagram-js');
+
+    this.controller = new StageController(stage, content, toolbar, {
+      minScale: INLINE_MIN_SCALE,
+      maxScale: INLINE_MAX_SCALE,
+    });
+    this.btnFs = toolbar.querySelector('[data-action="fullscreen"]');
+    if (this.btnFs) this.btnFs.addEventListener('click', () => this.openFullscreen());
+
+    this.contentTpl = content; // pro klonování při fullscreen
+  }
+
   openFullscreen() {
-    if (this.modal) return; // už otevřeno
+    if (this.modal) return;
 
     const modal = document.createElement('div');
     modal.className = 'diagram-modal';
@@ -186,20 +217,29 @@ class DiagramViewer {
 
     const stage = document.createElement('div');
     stage.className = 'diagram-modal-stage';
-    stage.appendChild(this.content.cloneNode(true));
+    const clone = this.contentTpl.cloneNode(true);
+    // Vyresetuj inline transform z inline pohledu (klonujeme i ten):
+    clone.style.transform = '';
+    stage.appendChild(clone);
 
     modal.appendChild(closeBtn);
     modal.appendChild(toolbar);
     modal.appendChild(stage);
 
-    // Lock body scroll
     this._prevBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     document.body.appendChild(modal);
-    // Force reflow než aplikujeme --open class (transition fade-in):
     modal.offsetHeight;
     modal.classList.add('diagram-modal--open');
+
+    // Modal-specific controller — vlastní stav, vlastní min/max
+    this.modalCtrl = new StageController(stage, clone, toolbar, {
+      minScale: MODAL_MIN_SCALE,
+      maxScale: MODAL_MAX_SCALE,
+    });
+    // Po umístění do DOM má stage nenulové rozměry — fit:
+    this.modalCtrl.fitToViewport();
 
     // Close handlers
     closeBtn.addEventListener('click', () => this.closeFullscreen());
@@ -215,7 +255,6 @@ class DiagramViewer {
     this.modalStage = stage;
     this.modalCloseBtn = closeBtn;
     this.modalToolbar = toolbar;
-    // Modal viewer přijde v tasku 6 — zatím statický klon.
   }
 
   closeFullscreen() {
@@ -227,7 +266,8 @@ class DiagramViewer {
     this.modalStage = null;
     this.modalCloseBtn = null;
     this.modalToolbar = null;
-    this.btnFs.focus(); // focus restoration
+    this.modalCtrl = null;
+    if (this.btnFs) this.btnFs.focus();
   }
 }
 
