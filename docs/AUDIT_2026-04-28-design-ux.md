@@ -423,3 +423,49 @@ V `base.html.twig` přidán preload pro 3 nejvyužívanější subsety: `inter-l
 ### Stav po čtvrtém kole
 
 26 commitů celkem od `21256b5` po `d314810`. R4 přidal 3 perf/SEO opravy. Font preload, noopener security, title length compliance. Web teď opravdu polished.
+
+---
+
+## Páté kolo auditu — mobilní spacing a duplicitní linie (2026-04-28 večer)
+
+Vyžádán uživatelem zaměřený audit na vizuální spacing a hledání zbytečných horizontálních lineí, hlavně na mobilu.
+
+### R5-1 .art-head border-top duplicita (commit `b49fa5f`)
+
+**Nález:** `.art-head { border-top: 1px solid var(--stroke); padding-top: var(--s-6); }` vytvářela horizontální linku přímo pod chrome topnav (které už má vlastní border-bottom). Na desktopu (24–48 px gap) vypadalo jako dvě tenké rules s prázdnou mezerou — vizuální duplicita. Hub a landing tuto linku nemají, takže to byla nekonzistence napříč typy stránek.
+
+**Fix:** Border-top a padding-top z `.art-head` odstraněny. Topnav border-bottom zajišťuje stejnou roli (oddělit chrome od obsahu) a margin chování vyřeší zbytek. Crumb teď začíná čistě pod topnav s breath room z `.article` padding-top.
+
+### R5-2 PUBLIKOVÁNO · AKTUALIZOVÁNO datum-řádek lámaný na 4 řádky (commit `b49fa5f`)
+
+**Nález:** Na 390 px mobilu spadl meta cell s daty na ~150 px šířky a obsah `24. 4. 2025 · 28. 4. 2026` se lámal přes 4 řádky:
+```
+24. 4.   ·   28. 4.
+2025         2026
+```
+
+**Fix:** Přidána třída `.art-meta-row-dates` na řádku, media query `@media (max-width: 540px)`:
+- `grid-column: 1 / -1` — přes celou šířku gridu
+- `.art-meta-v` má `flex-direction: row`, `gap`, `flex-wrap: wrap`
+- Separátor `·` wrappnut do `<span class="art-meta-sep">` s `color: var(--fg-faint)`
+
+Datumy teď drží na jedné řádce i na 320 px viewportu.
+
+### R5-3 .art-nav border-top redundantní s FAQ (commit `fb2d2a3`)
+
+**Nález:** Chapter_nav (← Předchozí / Další →) na konci článku měla `border-top: 1px solid` + `padding-top: var(--s-6)`. FAQ nahoře už měla `.faq-item:last-of-type { border-bottom: 1px solid }`, takže mezi FAQ ukončením a chapter_nav začátkem byly dvě tenké horizontální linie s ~50 px gap mezi nimi. Karty samy mají border + border-radius (vizuálně self-contained).
+
+**Fix:** `border-top` a `padding-top` z `.art-nav` odstraněny. Margin (margin-top: var(--s-8) = 64 px) drží spacing nad blokem; karty se teď jeví jako distinct elementy bez extra rule mezi nimi.
+
+### Verifikované vizuální prvky bez nálezu
+
+- Glossary entries (.glossary-entry): každá je samostatná bordered karta, separátor uvnitř (term-source border-top) je intencionalní strukturní prvek.
+- Resource list (.res-item): jednoduchý border-bottom mezi položkami, jeden line per separator.
+- Code-block chrome (.code, .code-head, .code-dot, .code-copy): nested border-tops jsou tight-stacked u top edge (figure obvod + header bottom + chip borders), ale to je intencionální komponenta s několika layery.
+- Hub a landing struktura: hub-a-head, hub-a-sect-head a hub-a-card mají každý jednu border-bottom, separace sekcí jasná.
+- Footer (.foot-a-spec rows): dashed bottom borders mezi spec páry, drobnost.
+- Topnav: pouze jediná border-bottom.
+
+### Stav po pátém kole
+
+29 commitů celkem od `21256b5` po `fb2d2a3`. Pátý průchod (R5) odstranil 3 zbytečné horizontální linie (art-head top-border, art-nav top-border, redundance s FAQ uzavírací linkou) a opravil zalomení dat na úzkých viewportech. Web má teď konzistentní vertikální rytmus napříč hub/landing/article/error stránkami a všechny linie jsou intencionální (uzavření sekcí, separátory položek, chrome komponent).
