@@ -4,7 +4,7 @@
 
 const INLINE_MIN_SCALE = 0.5;
 const INLINE_MAX_SCALE = 4;
-const MODAL_MIN_SCALE  = 0.25;
+const MODAL_MIN_SCALE  = 0.05; // floor: even 3156-wide diagram on 320px phone fits at ~0.10
 const MODAL_MAX_SCALE  = 8;
 const STEP             = 1.25;
 
@@ -48,34 +48,82 @@ class StageController {
   }
 
   _bindPan() {
-    let startX = 0, startY = 0, startTx = 0, startTy = 0;
-    let activePointerId = null;
+    const pointers = new Map(); // pointerId -> {x, y}
+    let dragPointerId = null;
+    let dragStartX = 0, dragStartY = 0, dragStartTx = 0, dragStartTy = 0;
+    let pinchStartDist = 0;
+    let pinchStartScale = 1;
+
+    const distance = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
 
     this.stage.addEventListener('pointerdown', (e) => {
-      // Pan jen když je obsah větší než viewport (jinak není kam panovat)
-      if (!this._isPannable()) return;
-      activePointerId = e.pointerId;
-      this.stage.setPointerCapture(e.pointerId);
-      this.stage.classList.add('is-dragging');
-      startX = e.clientX;
-      startY = e.clientY;
-      startTx = this.tx;
-      startTy = this.ty;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pointers.size === 2) {
+        // Start pinch — cancel any in-progress drag
+        if (dragPointerId !== null) {
+          this.stage.releasePointerCapture(dragPointerId);
+          dragPointerId = null;
+          this.stage.classList.remove('is-dragging');
+        }
+        const [p1, p2] = Array.from(pointers.values());
+        pinchStartDist = distance(p1, p2);
+        pinchStartScale = this.scale;
+        return;
+      }
+
+      if (pointers.size === 1 && this._isPannable()) {
+        dragPointerId = e.pointerId;
+        this.stage.setPointerCapture(e.pointerId);
+        this.stage.classList.add('is-dragging');
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        dragStartTx = this.tx;
+        dragStartTy = this.ty;
+      }
     });
 
     this.stage.addEventListener('pointermove', (e) => {
-      if (e.pointerId !== activePointerId) return;
-      this.tx = startTx + (e.clientX - startX);
-      this.ty = startTy + (e.clientY - startY);
+      if (pointers.has(e.pointerId)) {
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      }
+
+      // Pinch (two fingers)
+      if (pointers.size >= 2) {
+        const [p1, p2] = Array.from(pointers.values()).slice(0, 2);
+        const newDist = distance(p1, p2);
+        if (pinchStartDist === 0) return;
+        const factor = newDist / pinchStartDist;
+        const newScale = clamp(pinchStartScale * factor, this.minScale, this.maxScale);
+        if (newScale === this.scale) return;
+        const stageRect = this.stage.getBoundingClientRect();
+        const cx = (p1.x + p2.x) / 2 - stageRect.left;
+        const cy = (p1.y + p2.y) / 2 - stageRect.top;
+        this._zoomAt(cx, cy, newScale);
+        return;
+      }
+
+      // Drag (one finger / mouse)
+      if (e.pointerId !== dragPointerId) return;
+      this.tx = dragStartTx + (e.clientX - dragStartX);
+      this.ty = dragStartTy + (e.clientY - dragStartY);
       this._clamp();
       this._applyTransform();
     });
 
     const onEnd = (e) => {
-      if (e.pointerId !== activePointerId) return;
-      this.stage.releasePointerCapture(e.pointerId);
-      activePointerId = null;
-      this.stage.classList.remove('is-dragging');
+      pointers.delete(e.pointerId);
+
+      if (e.pointerId === dragPointerId) {
+        this.stage.releasePointerCapture(e.pointerId);
+        dragPointerId = null;
+        this.stage.classList.remove('is-dragging');
+      }
+      // After lifting one of two pinch fingers, drop pinch state.
+      // We do NOT auto-transition to drag — wait for fresh pointerdown.
+      if (pointers.size < 2) {
+        pinchStartDist = 0;
+      }
     };
     this.stage.addEventListener('pointerup', onEnd);
     this.stage.addEventListener('pointercancel', onEnd);
