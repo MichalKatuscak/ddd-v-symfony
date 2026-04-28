@@ -831,7 +831,6 @@ section > h4:first-child { margin-top: 0; }
   padding: var(--s-4);
   box-sizing: border-box;
   transform-origin: 0 0;
-  will-change: transform;
   transition: transform 0.15s ease;
 }
 .diagram-js .diagram-stage {
@@ -898,7 +897,6 @@ section > h4:first-child { margin-top: 0; }
 .diagram-modal-stage > img {
   display: block;
   transform-origin: 0 0;
-  will-change: transform;
 }
 .diagram-modal-toolbar {
   position: absolute;

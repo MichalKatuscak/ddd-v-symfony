@@ -286,8 +286,13 @@ class DiagramViewer {
       minScale: MODAL_MIN_SCALE,
       maxScale: MODAL_MAX_SCALE,
     });
-    // Po umístění do DOM má stage nenulové rozměry — fit:
-    this.modalCtrl.fitToViewport();
+    // Defer fit to next animation frame — mobile Chrome/Safari sometimes
+    // doesn't synchronously layout fixed+flex children, so getBoundingClientRect
+    // returns near-zero before the next paint. rAF ensures the stage has its
+    // final size when we compute the fit.
+    requestAnimationFrame(() => {
+      if (this.modalCtrl) this.modalCtrl.fitToViewport();
+    });
 
     // Wheel zoom kolem pozice kurzoru (jen v modalu, ne v inline)
     this._wheelHandler = (e) => {
