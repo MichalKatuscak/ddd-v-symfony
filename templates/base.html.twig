@@ -67,10 +67,10 @@
                 </a>
             </div>
             <div class="topnav-center">
-                <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}">Základy</a>
-                <a class="navlink {% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}">Vzory</a>
-                <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}">Praxe</a>
-                <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}">Reference</a>
+                <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Základy</a>
+                <a class="navlink {% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}"{% if _route == 'hub_patterns' %} aria-current="page"{% elseif _route in _patterns_routes %} aria-current="true"{% endif %}>Vzory</a>
+                <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a>
+                <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a>
             </div>
             <div class="topnav-right">
                 <button class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
@@ -87,11 +87,11 @@
     <div class="nav-drawer-backdrop" aria-hidden="true"></div>
     <aside class="nav-drawer" aria-label="Mobilní navigace">
         <ul class="nav-drawer-list">
-            <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}">Základy</a></li>
-            <li><a class="{% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}">Vzory</a></li>
-            <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}">Praxe</a></li>
-            <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}">Reference</a></li>
-            <li><a href="{{ path('about') }}">O autorovi</a></li>
+            <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Základy</a></li>
+            <li><a class="{% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}"{% if _route == 'hub_patterns' %} aria-current="page"{% elseif _route in _patterns_routes %} aria-current="true"{% endif %}>Vzory</a></li>
+            <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a></li>
+            <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a></li>
+            <li><a href="{{ path('about') }}"{% if _route == 'about' %} aria-current="page"{% endif %}>O autorovi</a></li>
         </ul>
     </aside>
 

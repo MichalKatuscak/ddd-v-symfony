@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Mark drawer as a modal dialog for assistive tech
   drawer.setAttribute('role', 'dialog');
   drawer.setAttribute('aria-modal', 'true');
+  // Initially closed — inert removes drawer ze focus order a aria tree
+  drawer.inert = true;
 
   const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function setOpen(open) {
     toggle.setAttribute('aria-expanded', String(open));
     drawer.dataset.open = String(open);
+    drawer.inert = !open;
     if (backdrop) backdrop.dataset.open = String(open);
     document.body.style.overflow = open ? 'hidden' : '';
 
@@ -70,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
   drawer.querySelectorAll('a').forEach(function (link) {
     link.addEventListener('click', function () {
       drawer.dataset.open = 'false';
+      drawer.inert = true;
       if (backdrop) backdrop.dataset.open = 'false';
       toggle.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
