@@ -1,31 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}DDD v Symfony 8 — Doménově řízený návrh, přeložený do Symfony{% endblock %}
-{% block meta_description %}Šestnáctikapitolová příručka pro seniorní vývojáře a architekty. Od ohraničených kontextů přes CQRS a Event Sourcing až po reálné případové studie — v PHP 8.4+ a Symfony 8.{% endblock %}
+{% block title %}Domain-Driven Design v Symfony 8 – průvodce architekturou{% endblock %}
+{% block meta_description %}Šestnáctikapitolová příručka pro seniorní vývojáře. Od ohraničených kontextů přes CQRS a Event Sourcing po případové studie – v PHP 8.4+ a Symfony 8.{% endblock %}
 
-{% set chapters = [
-    { n: '01', route: 'what_is_ddd',              t: 'Co je Domain-Driven Design',      d: 'Filozofie, Ubiquitous Language, Bounded Context',           time: 12, lvl: 1, tag: 'Základy' },
-    { n: '02', route: 'basic_concepts',           t: 'Základní koncepty DDD',           d: 'Entity · Value Objects · Agregáty · Repozitáře · Events',   time: 22, lvl: 2, tag: 'Základy' },
-    { n: '03', route: 'horizontal_vs_vertical',   t: 'Vertikální slice architektura',   d: 'Slicing podle feature, ne podle vrstvy',                     time: 14, lvl: 2, tag: 'Základy' },
-    { n: '04', route: 'implementation_in_symfony',t: 'Implementace v Symfony 8',        d: 'Struktura projektu, Messenger, DI, Doctrine',                time: 26, lvl: 3, tag: 'Základy' },
-    { n: '05', route: 'cqrs',                     t: 'CQRS',                            d: 'Oddělení čtení a zápisu přes Messenger komponentu',          time: 20, lvl: 3, tag: 'Vzory' },
-    { n: '06', route: 'event_sourcing',           t: 'Event Sourcing',                  d: 'Stav aplikace jako sekvence doménových událostí',            time: 28, lvl: 4, tag: 'Vzory' },
-    { n: '07', route: 'sagas',                    t: 'Ságy a Process Managery',         d: 'Long-running procesy, kompenzace, eventually consistent',   time: 24, lvl: 4, tag: 'Vzory' },
-    { n: '08', route: 'performance_aspects',      t: 'Výkonnostní aspekty',             d: 'Snapshoty, projekce, cache, read-model optimalizace',        time: 20, lvl: 4, tag: 'Vzory' },
-    { n: '09', route: 'practical_examples',       t: 'Praktické příklady',              d: 'E-shop, fakturace, inventory — minimal end-to-end',          time: 32, lvl: 3, tag: 'Praxe' },
-    { n: '10', route: 'testing_ddd',              t: 'Testování DDD',                   d: 'Unit · Integration · BDD · contract testy agregátů',         time: 18, lvl: 3, tag: 'Praxe' },
-    { n: '11', route: 'migration_from_crud',      t: 'Migrace z CRUD',                  d: 'Strangler Fig Pattern — postupný přechod bez stopu',         time: 22, lvl: 3, tag: 'Praxe' },
-    { n: '12', route: 'ddd_pain_points',          t: 'DDD v praxi — kde to bolí',       d: '20 reálných problémů: Doctrine, ACL, strangler fig…',        time: 30, lvl: 4, tag: 'Praxe' },
-    { n: '13', route: 'anti_patterns',            t: 'Anti-vzory a typické chyby',      d: 'Anemic model, smart UI, leaky abstractions',                 time: 16, lvl: 2, tag: 'Praxe' },
-    { n: '14', route: 'when_not_to_use_ddd',      t: 'Kdy DDD nepoužívat',              d: '7 situací, kdy DDD přinese víc škody než užitku',            time: 12, lvl: 2, tag: 'Praxe' },
-    { n: '15', route: 'case_study',               t: 'Případová studie',                d: 'E-shop v DDD architektuře, krok za krokem',                  time: 45, lvl: 4, tag: 'Praxe' },
-    { n: '16', route: 'ddd_ai',                   t: 'DDD a umělá inteligence',         d: 'Eric Evans · Fowler · Beck · DHH o vztahu DDD a AI',         time: 10, lvl: 1, tag: 'Reference' }
-] %}
-
-{% set extras = [
-    { route: 'glossary', t: 'Glosář',  d: 'Definice klíčových DDD termínů', tag: 'Reference' },
-    { route: 'resources', t: 'Zdroje', d: 'Knihy, blogy, videa, kurzy, repos', tag: 'Reference' }
-] %}
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "@id": "{{ app.request.schemeAndHttpHost }}/",
+    "name": "Domain-Driven Design v Symfony 8",
+    "alternateName": "Architektura DDD v Symfony 8",
+    "url": "{{ app.request.schemeAndHttpHost }}/",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "numberOfPages": {{ chapters|length }},
+    "bookFormat": "https://schema.org/EBook",
+    "isAccessibleForFree": true,
+    "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
+    "author": {
+        "@type": "Person",
+        "name": "Michal Katuščák",
+        "url": "https://www.katuscak.cz/"
+    },
+    "publisher": {
+        "@type": "Person",
+        "name": "Michal Katuščák",
+        "url": "https://www.katuscak.cz/"
+    },
+    "hasPart": [
+        {%- for c in chapters -%}
+        {
+            "@type": "Chapter",
+            "position": {{ loop.index }},
+            "name": "{{ c.t|escape('js') }}",
+            "url": "{{ app.request.schemeAndHttpHost }}{{ path(c.route) }}",
+            "description": "{{ c.d|escape('js') }}"
+        }{% if not loop.last %},{% endif %}
+        {%- endfor -%}
+    ]
+}
+</script>
+{% endblock %}
 
 {% set total_time = 0 %}
 {% for c in chapters %}{% set total_time = total_time + c.time %}{% endfor %}
@@ -43,14 +59,14 @@
             </div>
 
             <h1 class="land-title">
-                Doménově řízený návrh,<br>
-                <span class="land-em">přeložený do Symfony.</span>
+                Domain-Driven Design<br>
+                <span class="land-em">v Symfony 8.</span>
             </h1>
 
             <p class="land-deck">
                 Šestnáctikapitolová příručka pro seniorní vývojáře a architekty.
                 Od ohraničených kontextů přes <em>CQRS</em> a <em>Event Sourcing</em>
-                až po reálné případové studie — v PHP 8.4+ a Symfony 8.
+                až po reálné případové studie – v PHP 8.4+ a Symfony 8.
             </p>
 
             <div class="land-author">
@@ -120,7 +136,7 @@
                 {% for e in extras %}
                 <li>
                     <a class="land-toc-item" href="{{ path(e.route) }}">
-                        <span class="land-toc-n">—</span>
+                        <span class="land-toc-n">–</span>
                         <div class="land-toc-text">
                             <span class="land-toc-title">{{ e.t }}</span>
                             <span class="land-toc-desc">{{ e.d }}</span>
@@ -141,7 +157,7 @@
                 <div class="land-featured-eyebrow">FEATURED · KAPITOLA 15</div>
                 <h2 class="land-featured-title">Případová studie: e-shop end-to-end</h2>
                 <p class="land-featured-deck">
-                    Kompletní e-shop v DDD architektuře krok za krokem — od ohraničených kontextů
+                    Kompletní e-shop v DDD architektuře krok za krokem – od ohraničených kontextů
                     a agregátů přes CQRS čtení/zápisu po projekce a event-driven workflow.
                     Syntéza všeho, co předchozí kapitoly probírají odděleně.
                 </p>

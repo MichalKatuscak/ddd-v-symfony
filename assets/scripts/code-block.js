@@ -10,16 +10,57 @@ window.__enhanceCodeBlock = function (codeEl) {
   const hlAttr = pre ? pre.dataset.highlight : '';
   const highlights = (hlAttr || '').split(',').map(function (s) { return parseInt(s.trim(), 10); }).filter(Boolean);
 
-  // Highlight už proběhl (hljs.highlightElement v app.js). Vezmeme innerHTML a rozsekáme po \n.
+  // Rozdělení HTML na řádky tak, aby se zachovala vyváženost tagů.
+  // hljs občas obaluje konstrukce (např. class) přes víc řádků – při naivním split('\n')
+  // by se otevřené spany táhly přes řádky a poškodily DOM strukturu .ln wrapperů.
+  // Tady tagy uzavřeme na konci každého řádku a znovu otevřeme na začátku dalšího.
   const html = codeEl.innerHTML;
-  const lines = html.split('\n');
-  // Pokud poslední řádek je prázdný (kvůli trailing newline), zahodíme ho
-  if (lines.length > 1 && lines[lines.length - 1].replace(/\s/g, '') === '') lines.pop();
+  const tokenRegex = /(<[^>]+>)|(\n)|([^<\n]+)/g;
+  const lines = [['']]; // pole řádků; každý řádek = pole HTML kusů
+  const openStack = []; // pole otevřených tagů (jejich plná opening string)
+  const lineOpenStacks = [[]]; // openStack na začátku každého řádku
+  let m;
+  while ((m = tokenRegex.exec(html)) !== null) {
+    if (m[1]) {
+      // tag
+      const tag = m[1];
+      lines[lines.length - 1].push(tag);
+      if (tag.startsWith('</')) {
+        openStack.pop();
+      } else if (!tag.endsWith('/>') && !/^<(br|hr|img|input|wbr)\b/i.test(tag)) {
+        openStack.push(tag);
+      }
+    } else if (m[2]) {
+      // newline — uzavři všechny otevřené tagy na konci aktuálního řádku
+      for (let i = openStack.length - 1; i >= 0; i--) {
+        lines[lines.length - 1].push('</span>');
+      }
+      lines.push([]);
+      lineOpenStacks.push(openStack.slice());
+      // znovuotevři tagy na začátku nového řádku
+      for (const open of openStack) {
+        lines[lines.length - 1].push(open);
+      }
+    } else if (m[3]) {
+      lines[lines.length - 1].push(m[3]);
+    }
+  }
 
-  const wrapped = lines.map(function (line, i) {
+  // Pokud poslední řádek je prázdný (trailing newline), zahodíme ho
+  while (lines.length > 1) {
+    const last = lines[lines.length - 1].join('').replace(/<[^>]+>/g, '').replace(/\s/g, '');
+    if (last === '') {
+      lines.pop();
+    } else {
+      break;
+    }
+  }
+
+  const wrapped = lines.map(function (parts, i) {
     const num = i + 1;
     const isHl = highlights.includes(num) ? ' ln-hl' : '';
-    const safeLine = line === '' ? '&nbsp;' : line;
+    const lineHTML = parts.join('');
+    const safeLine = lineHTML.replace(/<[^>]+>/g, '').trim() === '' ? '&nbsp;' : lineHTML;
     return (
       '<span class="ln' + isHl + '">' +
       '<span class="ln-num">' + num + '</span>' +

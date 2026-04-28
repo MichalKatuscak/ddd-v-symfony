@@ -26,56 +26,67 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Bezpečnostní zásady</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <h1 class="mb-4">{{ title }}</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        category: 'Provoz webu',
+        title: title,
+        deck: 'Pravidla pro nahlašování bezpečnostních problémů na tomto webu a způsob, jakým s hlášeními nakládám.',
+        author: 'M. Katuščák'
+    } %}
 
-    <div class="card mb-4">
-        <div class="card-body">
+    {% include '_partials/article_toc.html.twig' %}
+
+    <div class="art-body">
+        <p>
+            Web <strong>ddd-v-symfony.cz</strong> je statická obsahová stránka – bez uživatelských účtů,
+            formulářů s citlivými daty a zákaznických dat. Přesto je smysluplné mít zveřejněný způsob,
+            jak nahlásit bezpečnostní problém: chyby v kódu šablon, problematickou závislost,
+            či konfiguraci serveru.
+        </p>
+
+        {% set _contact %}
             <p>
-                Vítejte na stránce bezpečnostních zásad našeho projektu. Tato stránka popisuje, jak nahlašovat bezpečnostní problémy a jak s nimi nakládáme.
+                Bezpečnostní zranitelnosti hlaste prosím e-mailem na
+                <a href="mailto:michal@katuscak.cz"><strong>michal@katuscak.cz</strong></a>.
+                Veřejné zveřejnění (issue, blogpost) prosím odložte do té doby, než bude problém opraven.
             </p>
+        {% endset %}
+        {% include '_partials/callout.html.twig' with {
+            type: 'note',
+            label: 'Kontakt',
+            body: _contact
+        } %}
 
-            <h2>Nahlášení bezpečnostních problémů</h2>
-            <p>
-                Pokud jste objevili bezpečnostní zranitelnost v našem projektu, prosíme vás o zodpovědné nahlášení. Bezpečnostní problémy můžete nahlásit na e-mailovou adresu <strong>michal@katuscak.cz</strong>.
-            </p>
-
-            <h2>Co zahrnout do hlášení</h2>
+        <section id="report" aria-labelledby="report-heading">
+            <h2 id="report-heading" class="h-section"><span class="h-num">A</span> Co zahrnout do hlášení</h2>
+            <p>Aby bylo možné problém ověřit a opravit, hodí se v hlášení uvést:</p>
             <ul>
-                <li>Popis zranitelnosti a její potenciální dopad</li>
-                <li>Kroky k reprodukci problému</li>
-                <li>Verze systému, prohlížeče nebo jiné relevantní informace</li>
-                <li>Případné návrhy na opravu</li>
+                <li>popis zranitelnosti a její potenciální dopad,</li>
+                <li>kroky k reprodukci (URL, sekvence akcí, payload),</li>
+                <li>verzi prohlížeče nebo prostředí, ve kterém se problém projevil,</li>
+                <li>případné návrhy na opravu, pokud máte.</li>
             </ul>
+        </section>
 
-            <h2>Náš přístup</h2>
-            <p>
-                Po obdržení hlášení o bezpečnostním problému:
-            </p>
+        <section id="process" aria-labelledby="process-heading">
+            <h2 id="process-heading" class="h-section"><span class="h-num">B</span> Jak se s hlášením pracuje</h2>
+            <p>Po obdržení hlášení postup je následující:</p>
             <ol>
-                <li>Potvrdíme přijetí hlášení co nejdříve</li>
-                <li>Ověříme a vyhodnotíme nahlášený problém</li>
-                <li>Budeme s vámi komunikovat o postupu řešení</li>
-                <li>Po opravě problému vás budeme informovat</li>
+                <li><strong>Potvrzení přijetí</strong> – co nejdříve, typicky do 72 hodin.</li>
+                <li><strong>Ověření a vyhodnocení</strong> – reprodukce problému a posouzení dopadu.</li>
+                <li><strong>Komunikace o postupu</strong> – průběžná zpráva o tom, jak se opravuje a kdy.</li>
+                <li><strong>Oprava a uzavření</strong> – informace o nasazené opravě a (po dohodě) zveřejnění.</li>
             </ol>
+        </section>
 
-            <h2>Zveřejnění</h2>
+        <section id="disclosure" aria-labelledby="disclosure-heading">
+            <h2 id="disclosure-heading" class="h-section"><span class="h-num">C</span> Zveřejnění problému</h2>
             <p>
-                Žádáme vás, abyste nezveřejňovali bezpečnostní problémy, dokud nebudou řádně opraveny. Budeme spolupracovat na stanovení rozumného časového rámce pro zveřejnění.
+                Standardně se uplatňuje <em>responsible disclosure</em> – bezpečnostní problém se zveřejňuje
+                až po opravě, na rozumném časovém horizontu, který společně dohodneme. Smyslem je dát
+                návštěvníkům webu čas dostat se k opravené verzi dříve, než se problém propere veřejně.
             </p>
-        </div>
+        </section>
     </div>
+</article>
 {% endblock %}
-
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}

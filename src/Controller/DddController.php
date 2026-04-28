@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Catalog\Chapters;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,6 +14,45 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/index.html.twig', [
             'title' => 'Architektura DDD v Symfony 8',
+            'chapters' => Chapters::all(),
+            'extras' => Chapters::extras(),
+        ]);
+    }
+
+    #[Route('/zaklady', name: 'hub_basics')]
+    public function hubBasics(): Response
+    {
+        return $this->render('ddd/hub_basics.html.twig', [
+            'title' => 'Základy DDD — rozcestník',
+            'hub_chapters' => Chapters::byGroup('basics'),
+        ]);
+    }
+
+    #[Route('/vzory', name: 'hub_patterns')]
+    public function hubPatterns(): Response
+    {
+        return $this->render('ddd/hub_patterns.html.twig', [
+            'title' => 'Taktické vzory DDD — rozcestník',
+            'hub_chapters' => Chapters::byGroup('patterns'),
+        ]);
+    }
+
+    #[Route('/praxe', name: 'hub_practice')]
+    public function hubPractice(): Response
+    {
+        return $this->render('ddd/hub_practice.html.twig', [
+            'title' => 'DDD v praxi — rozcestník',
+            'hub_chapters' => Chapters::byGroup('practice'),
+        ]);
+    }
+
+    #[Route('/reference', name: 'hub_reference')]
+    public function hubReference(): Response
+    {
+        return $this->render('ddd/hub_reference.html.twig', [
+            'title' => 'Reference DDD — rozcestník',
+            'hub_chapters' => Chapters::byGroup('reference'),
+            'extras' => Chapters::extras(),
         ]);
     }
 

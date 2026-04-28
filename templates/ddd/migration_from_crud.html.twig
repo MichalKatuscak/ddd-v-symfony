@@ -2,7 +2,7 @@
 
 {% block title %}Migrace z CRUD architektury na DDD v Symfony | DDD Symfony{% endblock %}
 
-{% block meta_description %}Podrobný průvodce migrací z CRUD architektury na Domain-Driven Design v Symfony. Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a postupné zavedení CQRS s praktickými PHP příklady.{% endblock %}
+{% block meta_description %}Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a CQRS bez velkého big-bangu.{% endblock %}
 
 {% block meta_keywords %}migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace{% endblock %}
 
@@ -19,8 +19,8 @@
           "@context": "https://schema.org",
           "@type": "TechArticle",
           "headline": "Migrace z CRUD architektury na DDD v Symfony",
-          "description": "{{ block('meta_description') }}",
-  "keywords": "{{ block('meta_keywords') }}",
+          "description": "{{ block('meta_description')|escape('js') }}",
+  "keywords": "{{ block('meta_keywords')|escape('js') }}",
   "author": {
             "@type": "Person",
             "name": "Michal Katuščák",
@@ -35,7 +35,8 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-22",
+  "dateModified": "{{ block('article_modified_time')|trim }}",
+  "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -60,17 +61,7 @@
     {% include '_partials/article_toc.html.twig' %}
 
     <div class="art-body" data-chapter-number="11">
-<div class="examples-banner" role="note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
-                <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
-            </svg>
-            <span>
-                Ke kapitole patří <strong>živá ukázka kódu</strong>:
-                <a href="https://github.com/MichalKatuscak/ddd-symfony-examples/tree/main/src/Chapter09_Migration"  target="_blank" rel="noopener">
-                    Zobrazit na GitHubu →
-                </a>
-            </span>
-        </div>
+{% include '_partials/github_examples.html.twig' with { path: 'Chapter09_Migration' } %}
 
 <section id="kdy-migrovat" aria-labelledby="kdy-migrovat-heading">
             <h2 id="kdy-migrovat-heading" class="h-section"><span class="h-num">11.01</span> Kdy a proč migrovat z CRUD na DDD</h2>
@@ -1175,7 +1166,7 @@ final class UserTest extends TestCase
             } %}
 
             <p>
-                Pro hlubší pochopení DDD konceptů a jejich implementace v Symfony doporučujeme prostudovat
+                Pro hlubší pochopení DDD konceptů a jejich implementace v Symfony je vhodné prostudovat
                 kapitolu <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony</a>
                 a <a href="{{ path('cqrs') }}">CQRS v Symfony</a>.
             </p>
@@ -1189,7 +1180,7 @@ final class UserTest extends TestCase
                 },
                 {
                     question: 'Co je Strangler Fig Pattern?',
-                    answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste" starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Podrobný rozbor v <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
+                    answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste“ starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Podrobný rozbor v <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
                 },
                 {
                     question: 'Jak začít s analýzou existující domény?',

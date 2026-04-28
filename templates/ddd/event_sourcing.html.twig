@@ -2,14 +2,14 @@
 
 {% block title %}Event Sourcing v DDD a Symfony | DDD Symfony{% endblock %}
 
-{% block meta_description %}Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce, snapshotting a verzování událostí - včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.{% endblock %}
+{% block meta_description %}Event Sourcing v DDD a Symfony 8: Event Store, projekce, snapshoty, upcasting, Outbox pattern a praktická řešení idempotence i rebuild projekcí.{% endblock %}
 
-{% block meta_keywords %}Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild{% endblock %}
+{% block meta_keywords %}Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Outbox pattern, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild, dual-write problem{% endblock %}
 
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-04-22{% endblock %}
+{% block article_modified_time %}2026-04-27{% endblock %}
 
 {% block breadcrumb_name %}Event Sourcing{% endblock %}
 
@@ -19,8 +19,8 @@
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "Event Sourcing v DDD a Symfony",
-  "description": "{{ block('meta_description') }}",
-  "keywords": "{{ block('meta_keywords') }}",
+  "description": "{{ block('meta_description')|escape('js') }}",
+  "keywords": "{{ block('meta_keywords')|escape('js') }}",
   "author": {
     "@type": "Person",
     "name": "Michal Katuščák",
@@ -35,7 +35,8 @@
     "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-22",
+  "dateModified": "{{ block('article_modified_time')|trim }}",
+  "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -50,27 +51,17 @@
         chapter_number: '06',
         category: 'Vzory',
         title: 'Event Sourcing',
-        deck: 'Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce, snapshotting a verzování událostí - včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.',
-        reading_time: 28,
+        deck: 'Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce, Outbox pattern, snapshotting a verzování událostí – včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.',
+        reading_time: 30,
         difficulty: 4,
-        last_updated: '2026-04-22'|date,
+        last_updated: '2026-04-27'|date,
         author: 'M. Katuščák'
     } %}
 
     {% include '_partials/article_toc.html.twig' %}
 
     <div class="art-body" data-chapter-number="06">
-<div class="examples-banner" role="note">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
-            <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
-        </svg>
-        <span>
-            Ke kapitole patří <strong>živá ukázka kódu</strong>:
-            <a href="https://github.com/MichalKatuscak/ddd-symfony-examples/tree/main/src/Chapter06_EventSourcing"  target="_blank" rel="noopener">
-                Zobrazit na GitHubu →
-            </a>
-        </span>
-    </div>
+{% include '_partials/github_examples.html.twig' with { path: 'Chapter06_EventSourcing' } %}
 
 <section id="co-je-event-sourcing" aria-labelledby="co-je-event-sourcing-heading">
         <h2 id="co-je-event-sourcing-heading" class="h-section"><span class="h-num">06.01</span> Co je Event Sourcing?</h2>
@@ -98,7 +89,7 @@
 
         {% set _callout_body %}
 
-            <h3 id="crud-vs-es-heading">CRUD vs. Event Sourcing - přehled</h3>
+            <h3 id="crud-vs-es-heading">CRUD vs. Event Sourcing – přehled</h3>
             <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
@@ -136,8 +127,8 @@
                     </tr>
                     <tr>
                         <td>Výkon čtení</td>
-                        <td>Vysoký (přímý select)</td>
-                        <td>Vyžaduje projekce / snapshot</td>
+                        <td>Závisí na schématu (rychlé pro jednoduché tabulky, pomalé pro mnoho JOINů)</td>
+                        <td>Závisí na strategii (rychlé přes denormalizované projekce, pomalé bez snapshotů)</td>
                     </tr>
                 </tbody>
             </table>
@@ -271,46 +262,7 @@
         {% set _callout_body %}
 
             <h3 id="domain-event-php-heading">PHP: Interface DomainEvent a konkrétní třída UserRegistered</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Shared\Domain\Event;
-
-use DateTimeImmutable;
-
-/**
- * Společný interface pro všechny doménové události.
- * Všechny implementace musí být immutabilní value objekty.
- */
-interface DomainEvent
-{
-    /** Unikátní identifikátor události (UUID v4). */
-    public function eventId(): string;
-
-    /** Čas vzniku události - vždy UTC. */
-    public function occurredOn(): DateTimeImmutable;
-
-    /**
-     * Název události sloužící k jejímu uložení a vyhledání v Event Store.
-     * Konvence: FQCN nebo krátký slug ve tvaru "user.registered".
-     */
-    public function eventType(): string;
-
-    /**
-     * Verze schématu payloadu - klíčová pro upcasting starých událostí.
-     * Nové verze události inkrementují toto číslo.
-     */
-    public function schemaVersion(): int;
-
-    /**
-     * Serializace do pole pro uložení do Event Store.
-     * Musí obsahovat všechna data potřebná k rekonstrukci stavu.
-     *
-     * @return array<string, mixed>
-     */
-    public function toPayload(): array;
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER0 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Shared/Domain/Event/DomainEvent.php',
                 language: 'php',
@@ -318,70 +270,7 @@ interface DomainEvent
                 highlights: []
             } %}
 
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Identity\Domain\Event;
-
-use App\Shared\Domain\Event\DomainEvent;
-use DateTimeImmutable;
-use Ramsey\Uuid\Uuid;
-
-/**
- * Událost emitovaná po úspěšné registraci uživatele.
- * Immutabilní - všechny properties jsou readonly.
- */
-final class UserRegistered implements DomainEvent
-{
-    private readonly string $eventId;
-    private readonly DateTimeImmutable $occurredOn;
-
-    public function __construct(
-        private readonly string $userId,
-        private readonly string $email,
-        private readonly string $fullName,
-    ) {
-        $this->eventId    = Uuid::uuid4()->toString();
-        $this->occurredOn = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
-    }
-
-    public function eventId(): string
-    {
-        return $this->eventId;
-    }
-
-    public function occurredOn(): DateTimeImmutable
-    {
-        return $this->occurredOn;
-    }
-
-    public function eventType(): string
-    {
-        return 'identity.user_registered';
-    }
-
-    public function schemaVersion(): int
-    {
-        return 1; // při změně schématu inkrementujeme a vytvoříme upcaster
-    }
-
-    /** @return array<string, mixed> */
-    public function toPayload(): array
-    {
-        return [
-            'userId'         => $this->userId,
-            'email'          => $this->email,
-            'fullName'       => $this->fullName,
-        ];
-    }
-
-    // --- Gettery (pro použití v aplikační vrstvě) ---
-
-    public function userId(): string  { return $this->userId; }
-    public function email(): string   { return $this->email; }
-    public function fullName(): string { return $this->fullName; }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER1 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Identity/Domain/Event/UserRegistered.php',
                 language: 'php',
@@ -398,7 +287,7 @@ final class UserRegistered implements DomainEvent
 
             <h3 id="gdpr-es-heading">GDPR a osobní údaje v Event Store</h3>
             <p>
-                Event Store je append-only - události nelze upravovat ani mazat. Při návrhu událostí
+                Event Store je append-only – události nelze upravovat ani mazat. Při návrhu událostí
                 proto <strong>nikdy neukládejte citlivé údaje</strong> (hesla, tokeny, rodná čísla)
                 přímo do event payloadu. Tyto údaje patří do separátního úložiště s možností smazání.
             </p>
@@ -440,30 +329,7 @@ final class UserRegistered implements DomainEvent
         {% set _callout_body %}
 
             <h3 id="event-store-sql-heading">SQL: Migrace tabulky <code>event_store</code> (MySQL/MariaDB)</h3>
-            {% set _code %}{% verbatim %}CREATE TABLE event_store (
-    id            BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    event_id      CHAR(36)         NOT NULL COMMENT 'UUID v4 události - globálně unikátní',
-    aggregate_id  CHAR(36)         NOT NULL COMMENT 'UUID agregátu (vlastníka streamu)',
-    aggregate_type VARCHAR(255)    NOT NULL COMMENT 'FQCN nebo slug agregátu, napr. ordering.order',
-    event_type    VARCHAR(255)     NOT NULL COMMENT 'Typ události, napr. ordering.order_placed',
-    payload       JSON             NOT NULL COMMENT 'Serializovaná data události',
-    metadata      JSON             NOT NULL DEFAULT ('{}') COMMENT 'Korelační ID, causation ID, user ID…',
-    schema_version SMALLINT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Verze schématu payloadu - pro upcasting',
-    version       INT UNSIGNED     NOT NULL COMMENT 'Pořadové číslo ve streamu agregátu (od 1)',
-    occurred_on   DATETIME(6)      NOT NULL COMMENT 'UTC čas vzniku události',
-
-    PRIMARY KEY (id),
-    UNIQUE KEY uq_event_id (event_id),
-    -- Optimistic locking: dvojice (aggregate_id, version) musí být unikátní
-    UNIQUE KEY uq_aggregate_version (aggregate_id, version),
-    KEY idx_aggregate_id (aggregate_id),
-    KEY idx_aggregate_type (aggregate_type),
-    KEY idx_event_type (event_type),
-    KEY idx_occurred_on (occurred_on)
-) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='Append-only store všech doménových událostí';{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER2 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'migrations/snippet.sql',
                 language: 'sql',
@@ -487,50 +353,7 @@ final class UserRegistered implements DomainEvent
         {% set _callout_body %}
 
             <h3 id="event-store-php-heading">PHP: Interface EventStore a Doctrine implementace</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\EventSourcing;
-
-use App\Shared\Domain\Event\DomainEvent;
-
-interface EventStore
-{
-    /**
-     * Uloží nové události do event streamu agregátu.
-     *
-     * @param DomainEvent[] $events
-     * @param int           $expectedVersion Verze posledního uloženého eventu - slouží
-     *                                        pro optimistic locking. Použijte 0 pro nový agregát.
-     *
-     * @throws ConcurrencyException Pokud $expectedVersion neodpovídá skutečné verzi streamu.
-     */
-    public function append(
-        string $aggregateId,
-        string $aggregateType,
-        array $events,
-        int $expectedVersion,
-    ): void;
-
-    /**
-     * Načte celý event stream agregátu (nebo od dané verze pro snapshot support).
-     *
-     * @return EventEnvelope[]
-     */
-    public function loadStream(
-        string $aggregateId,
-        int $fromVersion = 1,
-    ): array;
-
-    /**
-     * Načte všechny události z celého Event Store (pro rebuild projekcí).
-     * Vrací generátor pro paměťově efektivní iteraci nad miliony záznamů.
-     *
-     * @return \Generator<EventEnvelope>
-     */
-    public function loadAll(int $batchSize = 500): \Generator;
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER3 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/EventSourcing/EventStore.php',
                 language: 'php',
@@ -538,112 +361,7 @@ interface EventStore
                 highlights: []
             } %}
 
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\EventSourcing;
-
-use App\Shared\Domain\Event\DomainEvent;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-
-final class DoctrineEventStore implements EventStore
-{
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly EventSerializer $serializer,
-    ) {}
-
-    /**
-     * @param DomainEvent[] $events
-     */
-    public function append(
-        string $aggregateId,
-        string $aggregateType,
-        array $events,
-        int $expectedVersion,
-    ): void {
-        $version = $expectedVersion;
-
-        $this->connection->beginTransaction();
-
-        try {
-            foreach ($events as $event) {
-                $version++;
-
-                $this->connection->insert('event_store', [
-                    'event_id'       => $event->eventId(),
-                    'aggregate_id'   => $aggregateId,
-                    'aggregate_type' => $aggregateType,
-                    'event_type'     => $event->eventType(),
-                    'payload'        => json_encode($event->toPayload(), JSON_THROW_ON_ERROR),
-                    'metadata'       => '{}',
-                    'schema_version' => $event->schemaVersion(),
-                    'version'        => $version,
-                    'occurred_on'    => $event->occurredOn()->format('Y-m-d H:i:s.u'),
-                ]);
-            }
-
-            $this->connection->commit();
-        } catch (UniqueConstraintViolationException $e) {
-            $this->connection->rollBack();
-            throw new ConcurrencyException(
-                "Concurrency conflict for aggregate {$aggregateId} at version {$version}.",
-                previous: $e,
-            );
-        } catch (\Throwable $e) {
-            $this->connection->rollBack();
-            throw $e;
-        }
-    }
-
-    /**
-     * @return EventEnvelope[]
-     */
-    public function loadStream(string $aggregateId, int $fromVersion = 1): array
-    {
-        $rows = $this->connection->fetchAllAssociative(
-            'SELECT event_type, payload, schema_version, version, occurred_on
-               FROM event_store
-              WHERE aggregate_id = :aggregateId
-                AND version >= :fromVersion
-           ORDER BY version ASC',
-            ['aggregateId' => $aggregateId, 'fromVersion' => $fromVersion],
-        );
-
-        return array_map(
-            fn(array $row) => $this->serializer->deserialize($row),
-            $rows,
-        );
-    }
-
-    /**
-     * Iteruje přes celý Event Store v dávkách - paměťově efektivní pro rebuild projekcí.
-     *
-     * @return \Generator<EventEnvelope>
-     */
-    public function loadAll(int $batchSize = 500): \Generator
-    {
-        $lastId = 0;
-
-        do {
-            $rows = $this->connection->fetchAllAssociative(
-                'SELECT id, event_type, payload, schema_version, version, occurred_on
-                   FROM event_store
-                  WHERE id > :lastId
-               ORDER BY id ASC
-                  LIMIT :limit',
-                ['lastId' => $lastId, 'limit' => $batchSize],
-            );
-
-            foreach ($rows as $row) {
-                $lastId = (int) $row['id'];
-                yield $this->serializer->deserialize($row);
-            }
-        } while (count($rows) === $batchSize);
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER4 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/EventSourcing/DoctrineEventStore.php',
                 language: 'php',
@@ -663,7 +381,7 @@ final class DoctrineEventStore implements EventStore
         <p>
             V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
             mechanismus zcela jiný: <strong>každá změna stavu musí projít přes doménovou událost</strong>. Metody
-            agregátu nevytváří efekt přímo - nahrávají událost, a teprve aplikace této události mění interní stav.
+            agregátu nevytváří efekt přímo – nahrávají událost, a teprve aplikace této události mění interní stav.
         </p>
         <p>
             Výsledkem je, že agregát obsahuje dvě sady metod:
@@ -688,94 +406,7 @@ final class DoctrineEventStore implements EventStore
         {% set _callout_body %}
 
             <h3 id="es-aggregate-base-heading">PHP: Base class EventSourcedAggregate</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Shared\Domain;
-
-use App\Shared\Domain\Event\DomainEvent;
-
-abstract class EventSourcedAggregate
-{
-    /** @var DomainEvent[] Události nahrané v aktuální transakci - čekají na uložení. */
-    private array $recordedEvents = [];
-
-    private int $version = 0;
-
-    /**
-     * Nahrajeme novou událost: aplikujeme ji na stav, zapamatujeme ji pro persistenci
-     * a inkrementujeme verzi streamu - nezbytné pro optimistic locking.
-     */
-    protected function recordEvent(DomainEvent $event): void
-    {
-        $this->applyEvent($event);
-        $this->recordedEvents[] = $event;
-        $this->version++;
-    }
-
-    /**
-     * Přehrajeme historické události z Event Store (bez přidávání do $recordedEvents).
-     *
-     * @param DomainEvent[] $events
-     */
-    public static function reconstituteFromEvents(array $events): static
-    {
-        $aggregate = new static();
-
-        foreach ($events as $event) {
-            $aggregate->applyEvent($event);
-            $aggregate->version++;
-        }
-
-        return $aggregate;
-    }
-
-    /**
-     * Přehraje dodatečné události na existující instanci (pro snapshot support).
-     *
-     * @param DomainEvent[] $events
-     */
-    public function replayEvents(array $events): void
-    {
-        foreach ($events as $event) {
-            $this->applyEvent($event);
-            $this->version++;
-        }
-    }
-
-    /**
-     * Dynamické dispatchování na apply*() metody podle třídy události.
-     * Konvence: apply + ShortClassName, napr. applyOrderCreated().
-     * apply*() metody v podtřídách MUSÍ být protected (ne private),
-     * jinak je PHP nemůže volat z kontextu této nadtřídy.
-     */
-    private function applyEvent(DomainEvent $event): void
-    {
-        $method = 'apply' . (new \ReflectionClass($event))->getShortName();
-
-        if (!method_exists($this, $method)) {
-            throw new \LogicException(
-                sprintf('Aggregate %s must implement %s().', static::class, $method)
-            );
-        }
-
-        $this->$method($event);
-    }
-
-    /** @return DomainEvent[] */
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->recordedEvents;
-        $this->recordedEvents = [];
-        return $events;
-    }
-
-    public function version(): int
-    {
-        return $this->version;
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER5 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Shared/Domain/EventSourcedAggregate.php',
                 language: 'php',
@@ -791,100 +422,7 @@ abstract class EventSourcedAggregate
         {% set _callout_body %}
 
             <h3 id="es-order-aggregate-heading">PHP: Order agregát s Event Sourcingem</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Ordering\Domain;
-
-use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderCreated;
-use App\Ordering\Domain\Event\OrderItemAdded;
-use App\Ordering\Domain\Event\OrderShipped;
-use App\Shared\Domain\EventSourcedAggregate;
-
-final class Order extends EventSourcedAggregate
-{
-    private string $orderId;
-    private string $customerId;
-    private OrderStatus $status;
-
-    /** @var OrderItem[] */
-    private array $items = [];
-
-    private ?string $trackingNumber = null;
-
-    // Statická továrna - vytvoří objednávku ve stavu Draft
-    public static function create(string $orderId, string $customerId): self
-    {
-        $order = new self();
-        $order->recordEvent(new OrderCreated($orderId, $customerId));
-
-        return $order;
-    }
-
-    public function addItem(OrderItem $item): void
-    {
-        if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException('Items can only be added to draft orders.');
-        }
-
-        $this->recordEvent(new OrderItemAdded($this->orderId, $item));
-    }
-
-    public function confirm(): void
-    {
-        if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException('Only draft orders can be confirmed.');
-        }
-        if (empty($this->items)) {
-            throw new \DomainException('Cannot confirm an empty order.');
-        }
-
-        $this->recordEvent(new OrderConfirmed($this->orderId));
-    }
-
-    public function ship(string $trackingNumber): void
-    {
-        if ($this->status !== OrderStatus::Confirmed) {
-            throw new \DomainException('Only confirmed orders can be shipped.');
-        }
-
-        $this->recordEvent(new OrderShipped($this->orderId, $trackingNumber));
-    }
-
-    // --- apply* metody - MUSÍ být protected (ne private), aby je base class mohla volat dynamicky ---
-    // --- Obsahují POUZE změnu interního stavu, žádnou business logiku ---
-
-    protected function applyOrderCreated(OrderCreated $event): void
-    {
-        $this->orderId    = $event->orderId();
-        $this->customerId = $event->customerId();
-        $this->items      = [];
-        $this->status     = OrderStatus::Draft;
-    }
-
-    protected function applyOrderItemAdded(OrderItemAdded $event): void
-    {
-        $this->items[] = $event->item();
-    }
-
-    protected function applyOrderConfirmed(OrderConfirmed $event): void
-    {
-        $this->status = OrderStatus::Confirmed;
-    }
-
-    protected function applyOrderShipped(OrderShipped $event): void
-    {
-        $this->status         = OrderStatus::Shipped;
-        $this->trackingNumber = $event->trackingNumber();
-    }
-
-    // Gettery pro aplikační vrstvu
-    public function orderId(): string         { return $this->orderId; }
-    public function status(): OrderStatus     { return $this->status; }
-    public function trackingNumber(): ?string { return $this->trackingNumber; }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER6 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Ordering/Domain/Order.php',
                 language: 'php',
@@ -907,60 +445,7 @@ final class Order extends EventSourcedAggregate
         {% set _callout_body %}
 
             <h3 id="es-repo-heading">PHP: EventSourced repozitář pro Order agregát</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\Ordering;
-
-use App\Ordering\Domain\Order;
-use App\Infrastructure\EventSourcing\EventStore;
-use App\Infrastructure\EventSourcing\EventSerializer;
-
-final class EventSourcedOrderRepository
-{
-    private const AGGREGATE_TYPE = 'ordering.order';
-
-    public function __construct(
-        private readonly EventStore $eventStore,
-        private readonly EventSerializer $serializer,
-    ) {}
-
-    public function load(string $orderId): Order
-    {
-        $envelopes = $this->eventStore->loadStream($orderId);
-
-        if (empty($envelopes)) {
-            throw new \DomainException("Order {$orderId} not found.");
-        }
-
-        $events = array_map(
-            fn($envelope) => $this->serializer->toEvent($envelope),
-            $envelopes,
-        );
-
-        return Order::reconstituteFromEvents($events);
-    }
-
-    public function save(Order $order): void
-    {
-        $newEvents = $order->releaseDomainEvents();
-
-        if (empty($newEvents)) {
-            return;
-        }
-
-        // expectedVersion = aktuální verze PŘED novými událostmi
-        $expectedVersion = $order->version() - count($newEvents);
-
-        $this->eventStore->append(
-            $order->orderId(),
-            self::AGGREGATE_TYPE,
-            $newEvents,
-            $expectedVersion,
-        );
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER7 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/Ordering/EventSourcedOrderRepository.php',
                 language: 'php',
@@ -1001,85 +486,7 @@ final class EventSourcedOrderRepository
         {% set _callout_body %}
 
             <h3 id="projekce-php-heading">PHP: OrderSummaryProjection a asynchronní Projector</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\Ordering\Projection;
-
-use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderCreated;
-use App\Ordering\Domain\Event\OrderItemAdded;
-use App\Ordering\Domain\Event\OrderShipped;
-use Doctrine\DBAL\Connection;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-
-/**
- * Projector budující tabulku order_summary z doménových událostí.
- *
- * Každá metoda handle*() odpovídá jednomu typu události a je registrována
- * jako samostatný Messenger handler atributem #[AsMessageHandler] na úrovni metody.
- */
-final class OrderSummaryProjector
-{
-    public function __construct(
-        private readonly Connection $connection,
-    ) {}
-
-    #[AsMessageHandler]
-    public function __invoke(OrderCreated $event): void
-    {
-        $this->connection->insert('order_summary', [
-            'order_id'      => $event->orderId(),
-            'customer_id'   => $event->customerId(),
-            'status'        => 'draft',
-            'item_count'    => 0,
-            'total_amount'  => 0,
-            'placed_at'     => $event->occurredOn()->format('Y-m-d H:i:s'),
-            'shipped_at'    => null,
-            'tracking_no'   => null,
-        ]);
-    }
-
-    #[AsMessageHandler]
-    public function handleOrderItemAdded(OrderItemAdded $event): void
-    {
-        $this->connection->executeStatement(
-            'UPDATE order_summary
-                SET item_count   = item_count + 1,
-                    total_amount = total_amount + :price
-              WHERE order_id = :orderId',
-            ['price' => $event->item()->unitPrice(), 'orderId' => $event->orderId()],
-        );
-    }
-
-    #[AsMessageHandler]
-    public function handleOrderConfirmed(OrderConfirmed $event): void
-    {
-        $this->connection->executeStatement(
-            'UPDATE order_summary SET status = :status WHERE order_id = :orderId',
-            ['status' => 'confirmed', 'orderId' => $event->orderId()],
-        );
-    }
-
-    #[AsMessageHandler]
-    public function handleOrderShipped(OrderShipped $event): void
-    {
-        $this->connection->executeStatement(
-            'UPDATE order_summary
-                SET status      = :status,
-                    shipped_at  = :shippedAt,
-                    tracking_no = :trackingNo
-              WHERE order_id = :orderId',
-            [
-                'status'     => 'shipped',
-                'shippedAt'  => $event->occurredOn()->format('Y-m-d H:i:s'),
-                'trackingNo' => $event->trackingNumber(),
-                'orderId'    => $event->orderId(),
-            ],
-        );
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER8 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/Ordering/Projection/OrderSummaryProjector.php',
                 language: 'php',
@@ -1100,20 +507,7 @@ final class OrderSummaryProjector
         {% set _callout_body %}
 
             <h3 id="messenger-yaml-heading">YAML: Konfigurace Symfony Messenger pro asynchronní projekce</h3>
-            {% set _code %}{% verbatim %}framework:
-    messenger:
-        transports:
-            async:
-                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                options:
-                    auto_setup: true
-
-        routing:
-            # Všechny doménové události routujeme na async transport
-            'App\Ordering\Domain\Event\OrderCreated':    async
-            'App\Ordering\Domain\Event\OrderItemAdded': async
-            'App\Ordering\Domain\Event\OrderConfirmed': async
-            'App\Ordering\Domain\Event\OrderShipped':   async{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER9 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/packages/messenger.yaml',
                 language: 'yaml',
@@ -1133,19 +527,149 @@ final class OrderSummaryProjector
         </p>
     </section>
 
-    <section id="prakticke-problemy-projekci" aria-labelledby="prakticke-problemy-projekci-heading">
-        <h2 id="prakticke-problemy-projekci-heading" class="h-section"><span class="h-num">06.07</span> Praktické problémy projekcí</h2>
+    <section id="outbox" aria-labelledby="outbox-heading">
+        <h2 id="outbox-heading" class="h-section"><span class="h-num">06.07</span> Outbox a transakční doručování událostí</h2>
 
         <p>
-            Sekce výše ukázala, jak projekci vybudovat. V praxi se ale objevují problémy, které
-            z jednoduchých ukázek nejsou patrné. Tato sekce pokrývá nejčastější z nich - idempotenci,
-            chybové stavy, rebuild a eventual consistency z pohledu uživatelského rozhraní.
+            Předchozí sekce ukazovala projektory jako Messenger handlery, které dostávají doménové
+            události z asynchronní fronty. Implicitně jsme předpokládali, že se událost po zápisu
+            do Event Store spolehlivě dostane do message brokeru. V produkci to bez další infrastruktury
+            neplatí: zápis do databáze a publikace zprávy do brokeru jsou dvě nezávislé operace, které
+            nelze obalit jedinou transakcí. Klasický rozporný moment v architektuře, jenž se v literatuře
+            označuje jako <em>dual-write problem</em>, řeší právě <strong>Outbox pattern</strong>
+            <a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener noreferrer">[1]</a>.
+        </p>
+
+        <h3 id="dual-write-heading">Dual-write problém</h3>
+        <p>
+            Představte si pořadí kroků v <code>save()</code> metodě repozitáře, který nejprve commitne
+            transakci do Event Store a hned poté volá <code>$bus-&gt;dispatch($event)</code>:
+        </p>
+        <ul>
+            <li>Pokud server spadne <em>mezi</em> commitem a dispatchem, událost je v databázi, ale
+                nikdy se nedostane k projektorům či externím konzumentům. Read modely se rozejdou se
+                stavem write strany.</li>
+            <li>Pokud naopak provedete dispatch <em>před</em> commitem a transakce se rollbackuje,
+                konzumenti zpracují událost, která se nikdy nestala. Vznikají duplicity, které se
+                obtížně dohledávají.</li>
+            <li>Při restartu workeru, dočasné nedostupnosti brokeru nebo síťovém partition se chyba
+                projeví latentně až po hodinách provozu.</li>
+        </ul>
+
+        <p>
+            Outbox pattern převede problém na úroveň, na které ho databáze umí vyřešit: událost se
+            zapíše do téže transakce jako doménová změna, a samostatný proces (relay) ji následně
+            přečte a publikuje do brokeru. Atomicitu garantuje databáze; doručení do brokeru garantuje
+            relay s mechanismem at-least-once.
+        </p>
+
+        <h3 id="es-outbox-heading">Event Store jako outbox</h3>
+        <p>
+            V Event Sourcingu má outbox přirozený domov: tabulka <code>event_store</code> už sama
+            o sobě splňuje všechny vlastnosti outbox tabulky. Je append-only, má auto-increment
+            <code>id</code> pro globální uspořádání zápisů a každý záznam je zapsán ve stejné transakci
+            jako odpovídající doménová změna. Není proto nutné zavádět druhou tabulku; stačí přidat
+            <strong>relay worker</strong>, který sleduje nové řádky a posílá je do Messengeru.
+        </p>
+        <p>
+            Worker si pamatuje pozici posledního publikovaného řádku v jednoduché checkpoint tabulce.
+            Při restartu pokračuje od uloženého <code>id</code>, takže ani opakovaný start nevynechá
+            ani neduplikuje událost na úrovni publikace (duplicitu na straně konzumentů řeší idempotence
+            popsaná v následující sekci).
+        </p>
+
+        {% set _callout_body %}
+
+            <h3 id="outbox-relay-php-heading">PHP: Outbox relay worker pro Event Store</h3>
+            {% set _code %} PLACEHOLDER10 {% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Infrastructure/EventSourcing/Outbox/EventStoreOutboxRelay.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                body: _callout_body
+            } %}
+
+        <p>
+            Spuštění relay v produkci řešte buď cron jobem volajícím <code>publishPending()</code>
+            v krátkém intervalu (např. po sekundě), nebo dlouho běžícím procesem v supervisoru, který
+            mezi iteracemi spí podobný interval. Lock <code>FOR UPDATE</code> na řádku
+            <code>outbox_position</code> garantuje, že více souběžných instancí relay nebude publikovat
+            stejné události paralelně.
+        </p>
+
+        {% set _callout_body %}
+
+            <h3 id="outbox-position-ddl-heading">SQL: Tabulka <code>outbox_position</code> pro tracking publikovaných událostí</h3>
+            {% set _code %} PLACEHOLDER11 {% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'migrations/snippet.sql',
+                language: 'sql',
+                code: _code,
+                highlights: []
+            } %}
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                body: _callout_body
+            } %}
+
+        <h3 id="outbox-zaruky-heading">Záruky doručení a jejich důsledky</h3>
+        <p>
+            Outbox dává <strong>at-least-once</strong> doručení v rámci jednoho kanálu se zachovaným
+            globálním pořadím podle <code>event_store.id</code>. Konkrétně:
+        </p>
+        <ul>
+            <li><strong>At-least-once:</strong> pokud relay spadne mezi dispatchem a updatem checkpointu,
+                stejná událost se po restartu publikuje znovu. Konzumenti musí být idempotentní – přesně
+                tak, jak ukazuje následující sekce u projektorů.</li>
+            <li><strong>Globální pořadí:</strong> události jsou publikovány vzestupně podle <code>id</code>,
+                takže projektor uvidí <code>OrderCreated</code> před <code>OrderShipped</code>. Pořadí
+                napříč streamy různých agregátů ale není zajištěno – pokud ho projekce potřebuje, musí
+                ho odvodit z <code>occurred_on</code> nebo korelačního ID.</li>
+            <li><strong>Latence:</strong> mezi commitem události a jejím doručením k projektoru
+                vzniká okno odpovídající polling intervalu relay. V praxi 100 ms až 1 s; pro nižší
+                latenci přepněte na výstupní transport, který umí push (např. PostgreSQL <code>LISTEN/NOTIFY</code>
+                nebo Debezium).</li>
+        </ul>
+
+        {% set _callout_body %}
+
+            <p>
+                Outbox pattern je užitečný i mimo Event Sourcing. V čistě Doctrine ORM aplikaci lze
+                outbox řešit jako separátní tabulku, do níž zapisujete událost přímo z Doctrine
+                <code>onFlush</code> listeneru – tedy v téže transakci jako agregát. Praktickou
+                implementaci s kompletním kódem najdete v
+                <a href="{{ path('ddd_pain_points') }}#b1-outbox">DDD v praxi – B1: Outbox pattern</a>.
+                Před vlastní implementací zvažte také <strong>Doctrine Transport</strong> v Symfony Messenger,
+                který ukládá zprávy do databáze a poskytuje at-least-once doručení bez vlastního relay kódu.
+            </p>
+        {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Související',
+                body: _callout_body
+            } %}
+    </section>
+
+    <section id="prakticke-problemy-projekci" aria-labelledby="prakticke-problemy-projekci-heading">
+        <h2 id="prakticke-problemy-projekci-heading" class="h-section"><span class="h-num">06.08</span> Praktické problémy projekcí</h2>
+
+        <p>
+            Předchozí sekce ukázaly, jak projekci vybudovat a jak události spolehlivě doručit. V praxi
+            se ale objevují problémy, které z jednoduchých ukázek nejsou patrné. Tato sekce pokrývá
+            nejčastější z nich – idempotenci, chybové stavy, rebuild a eventual consistency z pohledu
+            uživatelského rozhraní.
         </p>
 
         <h3>Idempotence projektorů</h3>
         <p>
             Asynchronní transport (RabbitMQ, Redis Streams, Amazon SQS) garantuje doručení zprávy
-            <strong>alespoň jednou</strong> (at-least-once delivery). Zpráva se proto může doručit opakovaně - po
+            <strong>alespoň jednou</strong> (at-least-once delivery). Zpráva se proto může doručit opakovaně – po
             timeoutu, restartu workeru nebo síťovém výpadku. Pokud projektor není idempotentní, opakované
             zpracování způsobí poškozená data: duplicitní řádky, zdvojené částky, nekonzistentní počty.
         </p>
@@ -1157,56 +681,7 @@ final class OrderSummaryProjector
         {% set _callout_body %}
 
             <h3 id="idempotent-projector-heading">PHP: Idempotentní projektor s tracking tabulkou</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\Ordering\Projection;
-
-use App\Ordering\Domain\Event\OrderCreated;
-use Doctrine\DBAL\Connection;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-
-/**
- * Idempotentní projektor: před zpracováním ověří, zda událost
- * již nebyla zpracována, pomocí tabulky projection_checkpoint.
- *
- * Pozn.: Atribut #[AsMessageHandler] na třídě registruje __invoke() jako handler.
- * Pro projektory zpracovávající více typů událostí použijte atribut
- * na jednotlivých metodách - viz OrderSummaryProjector výše.
- */
-#[AsMessageHandler]
-final class IdempotentOrderProjector
-{
-    public function __construct(
-        private readonly Connection $connection,
-    ) {}
-
-    public function __invoke(OrderCreated $event): void
-    {
-        // Atomická kontrola + záznam: INSERT IGNORE vrátí 0 affected rows
-        // pokud eventId již existuje → událost byla již zpracována.
-        $affected = $this->connection->executeStatement(
-            'INSERT IGNORE INTO projection_checkpoint (event_id, projection_name, processed_at)
-             VALUES (:eventId, :projection, NOW(6))',
-            ['eventId' => $event->eventId(), 'projection' => 'order_summary'],
-        );
-
-        if ($affected === 0) {
-            return; // Duplicitní doručení - přeskočíme
-        }
-
-        // Vlastní projekční logika
-        $this->connection->insert('order_summary', [
-            'order_id'     => $event->orderId(),
-            'customer_id'  => $event->customerId(),
-            'status'       => 'draft',
-            'item_count'   => 0,
-            'total_amount' => 0,
-            'placed_at'    => $event->occurredOn()->format('Y-m-d H:i:s'),
-        ]);
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER12 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/Ordering/Projection/IdempotentOrderProjector.php',
                 language: 'php',
@@ -1222,16 +697,7 @@ final class IdempotentOrderProjector
         {% set _callout_body %}
 
             <h3 id="checkpoint-ddl-heading">SQL: Tabulka <code>projection_checkpoint</code> pro tracking zpracovaných událostí</h3>
-            {% set _code %}{% verbatim %}CREATE TABLE projection_checkpoint (
-    event_id        CHAR(36)     NOT NULL COMMENT 'UUID události - odkaz na event_store.event_id',
-    projection_name VARCHAR(100) NOT NULL COMMENT 'Název projekce, napr. order_summary',
-    processed_at    DATETIME(6)  NOT NULL COMMENT 'Čas zpracování',
-
-    PRIMARY KEY (event_id, projection_name)
-) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='Tracking tabulka pro idempotentní projektory - zabraňuje duplicitnímu zpracování';{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER13 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'migrations/snippet.sql',
                 language: 'sql',
@@ -1282,28 +748,7 @@ final class IdempotentOrderProjector
             <h3 id="messenger-retry-heading">YAML: Kompletní konfigurace Messenger s retry a dead letter queue</h3>
             <p>Následující konfigurace rozšiřuje <a href="#messenger-yaml-heading">základní nastavení</a> z předchozí
                 sekce o retry strategii a failed transport:</p>
-            {% set _code %}{% verbatim %}framework:
-    messenger:
-        # Failed transport - sem padají zprávy po vyčerpání retry pokusů
-        failure_transport: failed
-
-        transports:
-            async:
-                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                retry_strategy:
-                    max_retries: 3
-                    delay: 1000        # 1 sekunda
-                    multiplier: 2      # exponenciální backoff: 1s, 2s, 4s
-                    max_delay: 60000   # max 60 sekund mezi pokusy
-
-            failed:
-                dsn: 'doctrine://default?queue_name=failed'
-
-        routing:
-            'App\Ordering\Domain\Event\OrderCreated':    async
-            'App\Ordering\Domain\Event\OrderItemAdded': async
-            'App\Ordering\Domain\Event\OrderConfirmed': async
-            'App\Ordering\Domain\Event\OrderShipped':   async{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER14 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/packages/messenger.yaml',
                 language: 'yaml',
@@ -1328,7 +773,7 @@ final class IdempotentOrderProjector
         <h3>Rebuild projekcí</h3>
         <p>
             Schopnost přebudovat projekci od začátku je jednou z největších výhod Event Sourcingu, ale
-            v praxi jde o netriviální operaci. Nestačí jen přehrát události - je nutné zajistit,
+            v praxi jde o netriviální operaci. Nestačí jen přehrát události – je nutné zajistit,
             že se rebuild neprovádí souběžně s normálním provozem projektoru, že se stará data korektně
             odstraní a že po rebuildu projekce odpovídá aktuálnímu stavu Event Store.
         </p>
@@ -1336,102 +781,7 @@ final class IdempotentOrderProjector
         {% set _callout_body %}
 
             <h3 id="rebuild-command-heading">PHP: Symfony konzolový příkaz pro rebuild projekce</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\EventSourcing\Console;
-
-use App\Infrastructure\EventSourcing\EventStore;
-use App\Infrastructure\EventSourcing\EventSerializer;
-use Doctrine\DBAL\Connection;
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-
-#[AsCommand(
-    name: 'app:projection:rebuild',
-    description: 'Přebuduje projekci přehráním všech událostí z Event Store.',
-)]
-final class RebuildProjectionCommand extends Command
-{
-    /** @var array<string, array{projector: callable, table: string}> Registr projektorů dle názvu */
-    private array $projectors;
-
-    /**
-     * @param iterable<string, callable> $projectors Symfony tagged_iterator
-     * @param array<string, string>      $projectionTables Mapa: název projekce → název tabulky
-     */
-    public function __construct(
-        private readonly Connection $connection,
-        private readonly EventStore $eventStore,
-        private readonly EventSerializer $serializer,
-        iterable $projectors,
-        array $projectionTables,
-    ) {
-        parent::__construct();
-        foreach ($projectors as $name => $projector) {
-            $this->projectors[$name] = [
-                'projector' => $projector,
-                'table'     => $projectionTables[$name] ?? throw new \InvalidArgumentException(
-                    "Projekce '{$name}' nemá definovanou tabulku v \$projectionTables.",
-                ),
-            ];
-        }
-    }
-
-    protected function configure(): void
-    {
-        $this->addArgument('projection', InputArgument::REQUIRED, 'Název projekce k přebudování');
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
-        $name = $input->getArgument('projection');
-
-        if (!isset($this->projectors[$name])) {
-            $io->error("Projekce '{$name}' neexistuje. Dostupné: " . implode(', ', array_keys($this->projectors)));
-            return Command::FAILURE;
-        }
-
-        $config = $this->projectors[$name];
-        $table  = $config['table'];
-
-        $io->warning("Rebuild smaže data projekce '{$name}' (tabulka '{$table}') a přehraje celý Event Store.");
-
-        // 1. Smazat stávající data projekce - název tabulky pochází z whitelistu,
-        //    nikoli z uživatelského vstupu, takže nehrozí SQL injection.
-        $this->connection->executeStatement("TRUNCATE TABLE {$table}");
-
-        // 2. Vymazat checkpoint záznamy pro tuto projekci
-        $this->connection->executeStatement(
-            'DELETE FROM projection_checkpoint WHERE projection_name = :name',
-            ['name' => $name],
-        );
-
-        // 3. Přehrát všechny události z Event Store
-        $projector = $config['projector'];
-        $count = 0;
-        $batchSize = 500;
-
-        foreach ($this->eventStore->loadAll($batchSize) as $envelope) {
-            $event = $this->serializer->toEvent($envelope);
-            $projector($event);
-            $count++;
-
-            if ($count % $batchSize === 0) {
-                $io->text("Zpracováno {$count} událostí…");
-            }
-        }
-
-        $io->success("Projekce '{$name}' přebudována. Celkem {$count} událostí.");
-        return Command::SUCCESS;
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER15 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/EventSourcing/Console/RebuildProjectionCommand.php',
                 language: 'php',
@@ -1466,7 +816,7 @@ final class RebuildProjectionCommand extends Command
             aktualizovaná data. Uživatel tak po kliknutí na "Potvrdit" může vidět stále "Draft" stav.
         </p>
         <p>
-            Tento problém není bug - je to vlastnost eventual consistency. Existuje několik
+            Tento problém není bug – je to vlastnost eventual consistency. Existuje několik
             osvědčených přístupů, jak s ním v UI pracovat:
         </p>
         <ul>
@@ -1503,11 +853,11 @@ final class RebuildProjectionCommand extends Command
     </section>
 
     <section id="snapshotting" aria-labelledby="snapshotting-heading">
-        <h2 id="snapshotting-heading" class="h-section"><span class="h-num">06.08</span> Snapshotting</h2>
+        <h2 id="snapshotting-heading" class="h-section"><span class="h-num">06.09</span> Snapshotting</h2>
 
         <p>
             Se stárnutím systému rostou event streamy agregátů. Agregát s tisíci událostmi vyžaduje načtení a přehrání
-            tisíce řádků z databáze při každém command handleru - to je výkonnostní problém, který se v reálných
+            tisíce řádků z databáze při každém command handleru – to je výkonnostní problém, který se v reálných
             systémech projevuje velmi brzy.
         </p>
         <p>
@@ -1520,33 +870,13 @@ final class RebuildProjectionCommand extends Command
         <ul>
             <li>Poté, co event stream agregátu překročí určitý počet událostí (typicky 50–200).</li>
             <li>Periodicky (např. jednou denně) pro agregáty s vysokou frekvencí událostí.</li>
-            <li>Na vyžádání - jako optimalizační krok po migraci nebo importu dat.</li>
+            <li>Na vyžádání – jako optimalizační krok po migraci nebo importu dat.</li>
         </ul>
 
         {% set _callout_body %}
 
             <h3 id="snapshot-php-heading">PHP: Snapshot třída a repozitář se snapshot podporou</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\EventSourcing;
-
-use DateTimeImmutable;
-
-/**
- * Snapshot uchovává serializovaný stav agregátu v konkrétní verzi event streamu.
- */
-final class Snapshot
-{
-    public function __construct(
-        public readonly string $aggregateId,
-        public readonly string $aggregateType,
-        public readonly int $version,
-        public readonly array $state,       // serializovaný stav agregátu
-        public readonly DateTimeImmutable $takenAt,
-    ) {}
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER16 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/EventSourcing/Snapshot.php',
                 language: 'php',
@@ -1554,95 +884,7 @@ final class Snapshot
                 highlights: []
             } %}
 
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\Ordering;
-
-use App\Ordering\Domain\Order;
-use App\Infrastructure\EventSourcing\EventStore;
-use App\Infrastructure\EventSourcing\Snapshot;
-use App\Infrastructure\EventSourcing\SnapshotStore;
-use App\Infrastructure\EventSourcing\EventSerializer;
-
-final class SnapshottingOrderRepository
-{
-    private const AGGREGATE_TYPE    = 'ordering.order';
-    private const SNAPSHOT_INTERVAL = 50; // snapshot každých 50 událostí
-
-    public function __construct(
-        private readonly EventStore    $eventStore,
-        private readonly SnapshotStore $snapshotStore,
-        private readonly EventSerializer $serializer,
-    ) {}
-
-    public function load(string $orderId): Order
-    {
-        // 1. Pokusíme se načíst snapshot
-        $snapshot = $this->snapshotStore->findLatest($orderId, self::AGGREGATE_TYPE);
-
-        if ($snapshot !== null) {
-            // 2a. Máme snapshot - přehrajeme pouze události novější než snapshot
-            $fromVersion = $snapshot->version + 1;
-            $aggregate   = Order::reconstituteFromSnapshot($snapshot->state);
-        } else {
-            // 2b. Nemáme snapshot - přehrajeme celý event stream od začátku
-            $fromVersion = 1;
-            $aggregate   = null;
-        }
-
-        $envelopes = $this->eventStore->loadStream($orderId, $fromVersion);
-
-        if (empty($envelopes) && $aggregate === null) {
-            throw new \DomainException("Order {$orderId} not found.");
-        }
-
-        if (!empty($envelopes)) {
-            $events = array_map(
-                fn($e) => $this->serializer->toEvent($e),
-                $envelopes,
-            );
-
-            if ($aggregate !== null) {
-                $aggregate->replayEvents($events);
-            } else {
-                $aggregate = Order::reconstituteFromEvents($events);
-            }
-        }
-
-        return $aggregate;
-    }
-
-    public function save(Order $order): void
-    {
-        $newEvents = $order->releaseDomainEvents();
-
-        if (empty($newEvents)) {
-            return;
-        }
-
-        $expectedVersion = $order->version() - count($newEvents);
-
-        $this->eventStore->append(
-            $order->orderId(),
-            self::AGGREGATE_TYPE,
-            $newEvents,
-            $expectedVersion,
-        );
-
-        // Automatické snapshotování
-        if ($order->version() % self::SNAPSHOT_INTERVAL === 0) {
-            $this->snapshotStore->save(new Snapshot(
-                aggregateId:   $order->orderId(),
-                aggregateType: self::AGGREGATE_TYPE,
-                version:       $order->version(),
-                state:         $order->toSnapshot(),
-                takenAt:       new \DateTimeImmutable('now', new \DateTimeZone('UTC')),
-            ));
-        }
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER17 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/Ordering/SnapshottingOrderRepository.php',
                 language: 'php',
@@ -1659,7 +901,7 @@ final class SnapshottingOrderRepository
             Aby byl snapshotting funkční, musí agregát implementovat metody <code>toSnapshot(): array</code>
             (serializace aktuálního stavu) a statickou <code>reconstituteFromSnapshot(array $state): static</code>
             (deserializace). Na rozdíl od <code>reconstituteFromEvents()</code> tato metoda nevytváří apply*()
-            volání - přímo nastaví properties z uloženého snímku. Je proto nezbytné zajistit, aby se formát
+            volání – přímo nastaví properties z uloženého snímku. Je proto nezbytné zajistit, aby se formát
             snapshotu vyvíjel v souladu se změnami doménového modelu.
         </p>
 
@@ -1668,7 +910,7 @@ final class SnapshottingOrderRepository
             <h3 id="snapshot-invalidation-heading">Invalidace snapshotů při změně schématu</h3>
             <p>
                 Při změně struktury agregátu (nové properties, přejmenování, změna typů) se staré snapshoty
-                stanou neplatné - deserializace vrátí nekompletní nebo chybný stav. Řešení:
+                stanou neplatné – deserializace vrátí nekompletní nebo chybný stav. Řešení:
                 buď přidejte k snapshotu číslo verze a implementujte migraci (analogicky k upcasterům),
                 nebo starší snapshoty jednoduše invalidujte (smažte) a nechte repozitář přehrát celý
                 event stream. U agregátů s krátkými streamy (desítky událostí) je invalidace dostatečná;
@@ -1683,7 +925,7 @@ final class SnapshottingOrderRepository
     </section>
 
     <section id="verzovani-udalosti" aria-labelledby="verzovani-udalosti-heading">
-        <h2 id="verzovani-udalosti-heading" class="h-section"><span class="h-num">06.09</span> Verzování událostí (Event Versioning)</h2>
+        <h2 id="verzovani-udalosti-heading" class="h-section"><span class="h-num">06.10</span> Verzování událostí (Event Versioning)</h2>
 
         <p>
             V Event Sourcingu jsou události <strong>permanentní</strong> - jednou uložené do Event Store se nikdy
@@ -1719,47 +961,13 @@ final class SnapshottingOrderRepository
             Upcaster je objekt zodpovědný za transformaci payloadu události z jedné verze do následující.
             Upcasters se řetězí: pokud existuje událost ve verzi 1 a aktuální verze je 3, proběhne
             transformace v1 → v2 → v3. Upcasting se provádí <strong>při čtení</strong> (deserializaci),
-            nikoli při zápisu - původní data v Event Store zůstávají nedotčena.
+            nikoli při zápisu – původní data v Event Store zůstávají nedotčena.
         </p>
 
         {% set _callout_body %}
 
             <h3 id="upcaster-interface-heading">PHP: Interface EventUpcaster</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\EventSourcing\Versioning;
-
-/**
- * Upcaster transformuje payload události ze starší verze na novější.
- * Každý upcaster je zodpovědný za přesně jeden přechod verze (např. v1 → v2).
- */
-interface EventUpcaster
-{
-    /**
-     * Typ události, na který se upcaster vztahuje (např. "identity.user_registered").
-     */
-    public function eventType(): string;
-
-    /**
-     * Zdrojová verze payloadu, kterou tento upcaster transformuje.
-     */
-    public function fromVersion(): int;
-
-    /**
-     * Cílová verze payloadu po transformaci.
-     */
-    public function toVersion(): int;
-
-    /**
-     * Transformuje payload ze zdrojové verze na cílovou.
-     *
-     * @param array<string, mixed> $payload Data události ve zdrojové verzi.
-     * @return array<string, mixed> Data události v cílové verzi.
-     */
-    public function upcast(array $payload): array;
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER18 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/EventSourcing/Versioning/EventUpcaster.php',
                 language: 'php',
@@ -1776,62 +984,14 @@ interface EventUpcaster
         <p>
             Představme si reálnou situaci: při spuštění systému událost <code>UserRegistered</code> obsahovala
             pole <code>fullName</code> (celé jméno jako jeden řetězec). Později business požadoval rozlišit
-            křestní jméno a příjmení - vznikla verze 2 se dvěma poli <code>firstName</code>
+            křestní jméno a příjmení – vznikla verze 2 se dvěma poli <code>firstName</code>
             a <code>lastName</code>. V Event Store ale stále existují tisíce událostí v1 s polem <code>fullName</code>.
         </p>
 
         {% set _callout_body %}
 
             <h3 id="upcaster-impl-heading">PHP: Upcaster pro UserRegistered v1 → v2</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\Identity\Versioning;
-
-use App\Infrastructure\EventSourcing\Versioning\EventUpcaster;
-
-/**
- * Transformuje UserRegistered v1 (fullName) na v2 (firstName + lastName).
- *
- * Strategie rozdělení: první slovo je firstName, zbytek lastName.
- * Pokud jméno obsahuje pouze jedno slovo, lastName se nastaví na prázdný řetězec.
- */
-final readonly class UserRegisteredV1ToV2Upcaster implements EventUpcaster
-{
-    public function eventType(): string
-    {
-        return 'identity.user_registered';
-    }
-
-    public function fromVersion(): int
-    {
-        return 1;
-    }
-
-    public function toVersion(): int
-    {
-        return 2;
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function upcast(array $payload): array
-    {
-        $fullName = $payload['fullName'] ?? '';
-        $parts    = explode(' ', trim($fullName), 2);
-
-        $payload['firstName'] = $parts[0];
-        $payload['lastName']  = $parts[1] ?? '';
-
-        // Odstraníme původní pole - v2 schéma jej již nepoužívá
-        unset($payload['fullName']);
-
-        return $payload;
-    }
-}{% endverbatim %}{% endset %}
+            {% set _code %} PLACEHOLDER19 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/Identity/Versioning/UserRegisteredV1ToV2Upcaster.php',
                 language: 'php',
@@ -1846,61 +1006,8 @@ final readonly class UserRegisteredV1ToV2Upcaster implements EventUpcaster
 
         {% set _callout_body %}
 
-            <h3 id="upcaster-chain-heading">PHP: UpcasterChain - řetězení upcasterů při deserializaci</h3>
-            {% set _code %}{% verbatim %}<?php
-
-declare(strict_types=1);
-
-namespace App\Infrastructure\EventSourcing\Versioning;
-
-/**
- * Řetězí upcasters a transformuje payload z libovolné historické verze
- * na aktuální verzi. Upcasters se aplikují postupně: v1 → v2 → v3 → …
- */
-final readonly class UpcasterChain
-{
-    /** @var array<string, array<int, EventUpcaster>> Klíč = eventType, vnitřní klíč = fromVersion */
-    private array $upcasters;
-
-    /**
-     * @param EventUpcaster[] $upcasters
-     */
-    public function __construct(array $upcasters)
-    {
-        $map = [];
-
-        foreach ($upcasters as $upcaster) {
-            $map[$upcaster->eventType()][$upcaster->fromVersion()] = $upcaster;
-        }
-
-        $this->upcasters = $map;
-    }
-
-    /**
-     * Aplikuje všechny relevantní upcasters na payload.
-     *
-     * @param string              $eventType      Typ události (např. "identity.user_registered").
-     * @param int                 $schemaVersion  Verze payloadu uloženého v Event Store.
-     * @param array<string, mixed> $payload        Původní payload z Event Store.
-     * @return array<string, mixed> Transformovaný payload v aktuální verzi.
-     */
-    public function upcast(string $eventType, int $schemaVersion, array $payload): array
-    {
-        if (!isset($this->upcasters[$eventType])) {
-            return $payload;
-        }
-
-        $version = $schemaVersion;
-
-        while (isset($this->upcasters[$eventType][$version])) {
-            $upcaster = $this->upcasters[$eventType][$version];
-            $payload  = $upcaster->upcast($payload);
-            $version  = $upcaster->toVersion();
-        }
-
-        return $payload;
-    }
-}{% endverbatim %}{% endset %}
+            <h3 id="upcaster-chain-heading">PHP: UpcasterChain – řetězení upcasterů při deserializaci</h3>
+            {% set _code %} PLACEHOLDER20 {% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/EventSourcing/Versioning/UpcasterChain.php',
                 language: 'php',
@@ -1952,7 +1059,7 @@ final readonly class UpcasterChain
     </section>
 
     <section id="kdy-pouzit" aria-labelledby="kdy-pouzit-heading">
-        <h2 id="kdy-pouzit-heading" class="h-section"><span class="h-num">06.10</span> Kdy použít Event Sourcing</h2>
+        <h2 id="kdy-pouzit-heading" class="h-section"><span class="h-num">06.11</span> Kdy použít Event Sourcing</h2>
 
         <p>
             Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho adopcí je nutné pečlivě
@@ -1977,7 +1084,7 @@ final readonly class UpcasterChain
             </li>
             <li>
                 <strong>Event-driven integrace</strong> - Systém produkuje události, které konzumují jiné bounded
-                contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena - Event Store je
+                contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena – Event Store je
                 zdrojem pravdy pro integraci.
             </li>
             <li>
@@ -2022,7 +1129,7 @@ final readonly class UpcasterChain
             </p>
             <p>
                 Nepoužívejte Event Sourcing paušálně pro celou aplikaci. Správný přístup v DDD je aplikovat ES
-                <strong>selektivně na bounded contexts</strong>, kde skutečně přináší hodnotu - typicky Core Domain
+                <strong>selektivně na bounded contexts</strong>, kde skutečně přináší hodnotu – typicky Core Domain
                 s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
                 Časté chyby při adopci ES shrnuje kapitola <a href="{{ path('anti_patterns') }}">Anti-vzory</a>.
             </p>
@@ -2038,7 +1145,7 @@ final readonly class UpcasterChain
         items: [
             {
                 question: 'Co je Event Sourcing?',
-                answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events": nic se v event logu nikdy nepřepisuje ani nemaže. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
+                answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: nic se v event logu nikdy nepřepisuje ani nemaže. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
             },
             {
                 question: 'Jaký je vztah mezi Event Sourcingem a CQRS?',

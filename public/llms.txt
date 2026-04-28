@@ -4,45 +4,47 @@
 
 Autor: Michal Katuščák – PHP/React vývojář, 13+ let komerčního vývoje. Průvodce je v češtině a je zdarma.
 
-Obsah je rozdělen do tří proudů: základy DDD (pro začátečníky), pokročilé vzory (CQRS, Event Sourcing, Ságy) a zkušenosti z praxe (kde DDD bolí, kdy ho nepoužívat, migrace z CRUD, AI nástroje).
+Obsah je rozdělen do čtyř sekcí přesně mapovaných na navigaci webu: základy DDD (kapitoly 01–04), pokročilé vzory CQRS, Event Sourcing, Ságy a výkon (05–08), praxe a zkušenosti – kde DDD bolí, jak migrovat, jak testovat, kdy nepoužívat (09–15), a referenční materiály včetně AI a glosáře (kapitola 16, glosář, zdroje).
 
-## Začátečníci – základy DDD
+## Rozcestníky sekcí
+
+- [Základy](https://ddd-v-symfony.katuscak.cz/zaklady): Filozofie, jazyk, ohraničení, slicing a první implementace v Symfony 8 (kapitoly 01–04).
+- [Vzory](https://ddd-v-symfony.katuscak.cz/vzory): Taktické vzory v Symfony 8 – CQRS, Event Sourcing, Ságy a výkonnostní aspekty (kapitoly 05–08).
+- [Praxe](https://ddd-v-symfony.katuscak.cz/praxe): Co bolí, jak migrovat, co testovat, anti-vzory a případová studie (kapitoly 09–15).
+- [Reference](https://ddd-v-symfony.katuscak.cz/reference): Glosář, zdroje a vztah DDD a AI (kapitola 16, glosář, zdroje).
+
+## Základy DDD
 
 - [Co je Domain-Driven Design?](https://ddd-v-symfony.katuscak.cz/co-je-ddd): Definice DDD, historie, Ubiquitous Language, Bounded Context, strategický vs. taktický design.
 - [Základní koncepty DDD](https://ddd-v-symfony.katuscak.cz/zakladni-koncepty): Entity, Value Objects, Agregáty, Repozitáře, Doménové události, Služby, Factory.
 - [Vertikální slice architektura](https://ddd-v-symfony.katuscak.cz/vertikalni-slice): Srovnání horizontální a vertikální organizace kódu, kdy zvolit kterou.
 - [Implementace DDD v Symfony 8](https://ddd-v-symfony.katuscak.cz/implementace-v-symfony): Jak mapovat DDD koncepty na Symfony komponenty, adresářová struktura, Doctrine.
 
-## Pokročilé – CQRS, Event Sourcing, Ságy
+## Vzory – CQRS, Event Sourcing, Ságy, výkon
 
 - [CQRS v Symfony 8](https://ddd-v-symfony.katuscak.cz/cqrs): Command Query Responsibility Segregation s Messenger komponentou, Command Bus, Query Bus.
 - [Event Sourcing](https://ddd-v-symfony.katuscak.cz/event-sourcing): Uchování stavu jako sekvence událostí, event store, snapshoty, replay.
 - [Ságy a Process Managery](https://ddd-v-symfony.katuscak.cz/sagy-a-process-managery): Dlouhotrvající transakce napříč bounded contexty, orchestrace vs. choreografie.
-
-## Praxe a zkušenosti
-
-- [DDD v praxi – kde to bolí](https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli): 20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig pattern, přesvědčování managementu.
-- [Kdy DDD nepoužívat](https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd): 7 situací, kdy DDD přinese víc škody než užitku (CRUD admin, startup s měnící se doménou, malé týmy, ETL, krátkodobé projekty).
-- [Praktické příklady](https://ddd-v-symfony.katuscak.cz/prakticke-priklady): Ukázky DDD kódu v PHP 8.4+ a Symfony 8.
-- [Případová studie](https://ddd-v-symfony.katuscak.cz/pripadova-studie): Kompletní e-shop postavený na DDD architektuře krok za krokem.
-
-## Kvalita kódu a provoz
-
-- [Testování DDD kódu v Symfony](https://ddd-v-symfony.katuscak.cz/testovani-ddd): Testování agregátů, doménových služeb a repozitářů bez mockování infrastruktury.
-- [Migrace z CRUD architektury na DDD](https://ddd-v-symfony.katuscak.cz/migrace-z-crud): Postupný přechod z CRUD na DDD pomocí strangler fig patternu.
-- [Anti-vzory a typické chyby v DDD](https://ddd-v-symfony.katuscak.cz/anti-vzory): Anemický model, god aggregate, repository as DAO, a další častá pochybení.
 - [Výkonnostní aspekty DDD v Symfony](https://ddd-v-symfony.katuscak.cz/vykonnostni-aspekty): N+1 problém, lazy loading, bohaté agregáty vs. výkon, zlaté pravidlo optimalizace.
 
-## AI a DDD
+## Praxe – co bolí, jak migrovat, co testovat
+
+- [Praktické příklady](https://ddd-v-symfony.katuscak.cz/prakticke-priklady): Ukázky DDD kódu v PHP 8.4+ a Symfony 8.
+- [Testování DDD kódu v Symfony](https://ddd-v-symfony.katuscak.cz/testovani-ddd): Testování agregátů, doménových služeb a repozitářů bez mockování infrastruktury.
+- [Migrace z CRUD architektury na DDD](https://ddd-v-symfony.katuscak.cz/migrace-z-crud): Postupný přechod z CRUD na DDD pomocí strangler fig patternu.
+- [DDD v praxi – kde to bolí](https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli): 20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig pattern, přesvědčování managementu.
+- [Anti-vzory a typické chyby v DDD](https://ddd-v-symfony.katuscak.cz/anti-vzory): Anemický model, god aggregate, repository as DAO, a další častá pochybení.
+- [Kdy DDD nepoužívat](https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd): 7 situací, kdy DDD přinese víc škody než užitku (CRUD admin, startup s měnící se doménou, malé týmy, ETL, krátkodobé projekty).
+- [Případová studie](https://ddd-v-symfony.katuscak.cz/pripadova-studie): Kompletní e-shop postavený na DDD architektuře krok za krokem.
+
+## Reference – AI, glosář, zdroje
 
 - [DDD a umělá inteligence](https://ddd-v-symfony.katuscak.cz/ddd-a-umela-inteligence): Co říkají Eric Evans, Martin Fowler, Kent Beck a DHH o vztahu DDD a AI nástrojů. Ubiquitous language jako rozhraní pro LLM, bounded contexts a kvalita generovaného kódu.
-
-## Referenční materiály
-
-- [Zdroje a další četba](https://ddd-v-symfony.katuscak.cz/zdroje): Knihy, články a videa o DDD v angličtině i češtině.
 - [Glosář DDD terminologie](https://ddd-v-symfony.katuscak.cz/glosar): Přehled hlavních pojmů DDD s vysvětlením v češtině.
+- [Zdroje a další četba](https://ddd-v-symfony.katuscak.cz/zdroje): Knihy, články a videa o DDD v angličtině i češtině.
 
 ## O webu
 
 - [O autorovi](https://ddd-v-symfony.katuscak.cz/o-autorovi): Michal Katuščák – PHP/React vývojář, odkazy na další projekty (katuscak.cz, blog.katuscak.cz, LinkedIn).
+- [Bezpečnostní zásady](https://ddd-v-symfony.katuscak.cz/security-policy): Postup pro nahlášení bezpečnostního problému (responsible disclosure).
 - [Úvodní strana](https://ddd-v-symfony.katuscak.cz/): Rozcestník a přehled všech kapitol.

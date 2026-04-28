@@ -29,7 +29,7 @@
 .land-eyebrow-meta { color: var(--fg-dim); }
 
 .land-title {
-  font-size: 84px;
+  font-size: clamp(40px, 11vw, 84px);
   line-height: 1.02;
   letter-spacing: -0.026em;
   font-weight: 600;
@@ -305,8 +305,16 @@
     border-top: 1px solid var(--stroke);
     padding-top: var(--s-5);
   }
-  .land-title { font-size: 56px; }
   .land-toc-item { grid-template-columns: 44px 1fr; }
   .land-toc-side { display: none; }
   .land-featured-card { grid-template-columns: 1fr; padding: var(--s-5); }
+}
+
+@media (max-width: 540px) {
+  .land-path {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: var(--s-3) 0;
+  }
+  .land-path-time { color: var(--fg-dim); }
 }

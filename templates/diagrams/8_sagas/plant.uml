@@ -1,13 +1,5 @@
 @startuml saga_state_machine
-!theme plain
-skinparam backgroundColor transparent
-skinparam defaultFontName "Nunito"
-skinparam state {
-    BackgroundColor #1a1a2e
-    BorderColor #6c63ff
-    FontColor #e0e0e0
-    ArrowColor #a0a0c0
-}
+!include ../theme.iuml
 
 title Stavový automat OrderProcessManager
 

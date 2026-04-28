@@ -1,0 +1,73 @@
+{# Hub A – „Index z technické knihy“ #}
+{# Required vars: hub_eyebrow, hub_h_main, hub_h_em, hub_deck, hub_meta (list of {k,v}), hub_part, hub_part_title, hub_part_sub, hub_chapters #}
+{# Optional: hub_extras (list of {route, t, d}) #}
+<div class="hub-a">
+    <div class="hub-a-shell">
+        <header class="hub-a-head">
+            <div>
+                <div class="hub-a-eyebrow">{{ hub_eyebrow }}</div>
+                <h1 class="hub-a-h">{{ hub_h_main }} <em>{{ hub_h_em }}</em></h1>
+                <p class="hub-a-deck">{{ hub_deck|raw }}</p>
+            </div>
+            <dl class="hub-a-meta">
+                {% for m in hub_meta %}
+                    <div class="hub-a-meta-row">
+                        <dt class="hub-a-meta-k">{{ m.k }}</dt>
+                        <dd class="hub-a-meta-v">{{ m.v }}</dd>
+                    </div>
+                {% endfor %}
+            </dl>
+        </header>
+
+        <section class="hub-a-section">
+            <header class="hub-a-sect-head">
+                <span class="hub-a-sect-num">{{ hub_part }}</span>
+                <h2 class="hub-a-sect-title">{{ hub_part_title }}</h2>
+                <span class="hub-a-sect-sub">{{ hub_part_sub }} · {{ hub_chapters|length }} kap.</span>
+            </header>
+            <div class="hub-a-grid">
+                {% for c in hub_chapters %}
+                    <a class="hub-a-card" href="{{ path(c.route) }}">
+                        <span class="hub-a-card-n">{{ c.n }}</span>
+                        <div class="hub-a-card-body">
+                            <div class="hub-a-card-t">{{ c.t }}</div>
+                            <div class="hub-a-card-d">{{ c.d }}</div>
+                        </div>
+                        <div class="hub-a-card-meta">
+                            <span class="hub-a-card-time">{{ c.time }} min</span>
+                            <span class="hub-a-card-bar" aria-hidden="true">
+                                {% for i in 1..4 %}<i class="{{ i <= c.lvl ? 'on' : '' }}"></i>{% endfor %}
+                            </span>
+                        </div>
+                        <span class="hub-a-card-arr" aria-hidden="true">→</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if hub_extras is defined and hub_extras|length > 0 %}
+            <section class="hub-a-section">
+                <header class="hub-a-sect-head">
+                    <span class="hub-a-sect-num">DODATKY</span>
+                    <h2 class="hub-a-sect-title">Encyklopedie a zdroje</h2>
+                    <span class="hub-a-sect-sub">slovník · čtení · {{ hub_extras|length }} pol.</span>
+                </header>
+                <div class="hub-a-grid">
+                    {% for e in hub_extras %}
+                        <a class="hub-a-card" href="{{ path(e.route) }}">
+                            <span class="hub-a-card-n">–</span>
+                            <div class="hub-a-card-body">
+                                <div class="hub-a-card-t">{{ e.t }}</div>
+                                <div class="hub-a-card-d">{{ e.d }}</div>
+                            </div>
+                            <div class="hub-a-card-meta">
+                                <span class="hub-a-card-time">reference</span>
+                            </div>
+                            <span class="hub-a-card-arr" aria-hidden="true">→</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+</div>

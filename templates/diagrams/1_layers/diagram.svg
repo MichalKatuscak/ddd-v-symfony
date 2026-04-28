@@ -1,1 +1,278 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" data-diagram-type="CLASS" preserveAspectRatio="none" style="aspect-ratio:0.6893;background:#FAFAFA" version="1.1" viewBox="0 0 812 1178" zoomAndPan="magnify"><defs/><g><rect fill="#FAFAFA" height="1178.125" style="stroke:none;stroke-width:1.5625;" width="812.5" x="0" y="0"/><!--cluster Prezenta?n? vrstva--><g class="cluster" data-entity="Prezenta&#269;n&#237; vrstva" data-source-line="61" data-uid="ent0002" id="cluster_Prezenta&#269;n&#237; vrstva"><path d="M369.5313,9.9365 L601.6113,9.9365 A5.8594,5.8594 0 0 1 605.5176,13.8428 L616.4551,49.5605 L671.0938,49.5605 A3.9063,3.9063 0 0 1 675,53.4668 L675,151.3428 A3.9063,3.9063 0 0 1 671.0938,155.249 L369.5313,155.249 A3.9063,3.9063 0 0 1 365.625,151.3428 L365.625,13.8428 A3.9063,3.9063 0 0 1 369.5313,9.9365" fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/><line style="stroke:#005A9C;stroke-width:2.3438;" x1="365.625" x2="616.4551" y1="49.5605" y2="49.5605"/><text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing" textLength="230.5176" x="371.875" y="37.2803">Prezenta&#269;n&#237; vrstva</text></g><!--cluster Aplika?n? vrstva--><g class="cluster" data-entity="Aplika&#269;n&#237; vrstva" data-source-line="67" data-uid="ent0004" id="cluster_Aplika&#269;n&#237; vrstva"><path d="M369.5313,192.749 L568.8843,192.749 A5.8594,5.8594 0 0 1 572.7905,196.6553 L583.728,232.373 L671.0938,232.373 A3.9063,3.9063 0 0 1 675,236.2793 L675,488.8428 A3.9063,3.9063 0 0 1 671.0938,492.749 L369.5313,492.749 A3.9063,3.9063 0 0 1 365.625,488.8428 L365.625,196.6553 A3.9063,3.9063 0 0 1 369.5313,192.749" fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/><line style="stroke:#005A9C;stroke-width:2.3438;" x1="365.625" x2="583.728" y1="232.373" y2="232.373"/><text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing" textLength="197.7905" x="371.875" y="220.0928">Aplika&#269;n&#237; vrstva</text></g><!--cluster Dom?nov? vrstva--><g class="cluster" data-entity="Dom&#233;nov&#225; vrstva" data-source-line="76" data-uid="ent0007" id="cluster_Dom&#233;nov&#225; vrstva"><path d="M94.5313,530.249 L311.3403,530.249 A5.8594,5.8594 0 0 1 315.2466,534.1553 L326.1841,569.873 L797.6563,569.873 A3.9063,3.9063 0 0 1 801.5625,573.7793 L801.5625,826.3428 A3.9063,3.9063 0 0 1 797.6563,830.249 L94.5313,830.249 A3.9063,3.9063 0 0 1 90.625,826.3428 L90.625,534.1553 A3.9063,3.9063 0 0 1 94.5313,530.249" fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/><line style="stroke:#005A9C;stroke-width:2.3438;" x1="90.625" x2="326.1841" y1="569.873" y2="569.873"/><text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing" textLength="215.2466" x="96.875" y="557.5928">Dom&#233;nov&#225; vrstva</text></g><!--cluster Infrastrukturn? vrstva--><g class="cluster" data-entity="Infrastrukturn&#237; vrstva" data-source-line="94" data-uid="ent0013" id="cluster_Infrastrukturn&#237; vrstva"><path d="M13.2813,867.749 L276.4648,867.749 A5.8594,5.8594 0 0 1 280.3711,871.6553 L291.3086,907.373 L489.8438,907.373 A3.9063,3.9063 0 0 1 493.75,911.2793 L493.75,1163.8428 A3.9063,3.9063 0 0 1 489.8438,1167.749 L13.2813,1167.749 A3.9063,3.9063 0 0 1 9.375,1163.8428 L9.375,871.6553 A3.9063,3.9063 0 0 1 13.2813,867.749" fill="#FAFAFA" style="stroke:#005A9C;stroke-width:2.3438;"/><line style="stroke:#005A9C;stroke-width:2.3438;" x1="9.375" x2="291.3086" y1="907.373" y2="907.373"/><text fill="#000000" font-family="Nunito" font-size="25" font-weight="bold" lengthAdjust="spacing" textLength="261.6211" x="15.625" y="895.0928">Infrastrukturn&#237; vrstva</text></g><!--entity UI--><g class="entity" data-entity="UI" data-source-line="63" data-uid="ent0003" id="entity_UI"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="259.3384" x="390.625" y="69.3115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="228.0884" x="406.25" y="109.1553">UI / API / Controller</text></g><!--entity Application--><g class="entity" data-entity="Application" data-source-line="69" data-uid="ent0005" id="entity_Application"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="259.5581" x="390.625" y="252.124"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="228.3081" x="406.25" y="291.9678">Application Service</text></g><!--entity UseCase--><g class="entity" data-entity="UseCase" data-source-line="72" data-uid="ent0006" id="entity_UseCase"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="157.9224" x="441.4063" y="406.8115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="126.6724" x="457.0313" y="446.6553">Use Cases</text></g><!--entity DomainService--><g class="entity" data-entity="DomainService" data-source-line="78" data-uid="ent0008" id="entity_DomainService"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="217.0654" x="558.5938" y="589.624"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="185.8154" x="574.2188" y="629.4678">Domain Service</text></g><!--entity Entity--><g class="entity" data-entity="Entity" data-source-line="81" data-uid="ent0009" id="entity_Entity"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="97.5098" x="679.6875" y="744.3115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="66.2598" x="695.3125" y="784.1553">Entity</text></g><!--entity VO--><g class="entity" data-entity="VO" data-source-line="84" data-uid="ent0010" id="entity_VO"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="182.4951" x="441.4063" y="744.3115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="151.2451" x="457.0313" y="784.1553">Value Object</text></g><!--entity AR--><g class="entity" data-entity="AR" data-source-line="87" data-uid="ent0011" id="entity_AR"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="216.5527" x="286.7188" y="589.624"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="185.3027" x="302.3438" y="629.4678">Aggregate Root</text></g><!--entity Repository--><g class="entity" data-entity="Repository" data-source-line="90" data-uid="ent0012" id="entity_Repository"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="270.9229" x="116.4063" y="744.3115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="239.6729" x="132.0313" y="784.1553">Repository Nunitoface</text></g><!--entity RepoImpl--><g class="entity" data-entity="RepoImpl" data-source-line="96" data-uid="ent0014" id="entity_RepoImpl"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="347.1313" x="78.125" y="927.124"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="315.8813" x="93.75" y="966.9678">Repository Implementation</text></g><!--entity DB--><g class="entity" data-entity="DB" data-source-line="99" data-uid="ent0015" id="entity_DB"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="142.6636" x="35.1563" y="1081.8115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="111.4136" x="50.7813" y="1121.6553">Database</text></g><!--entity External--><g class="entity" data-entity="External" data-source-line="102" data-uid="ent0016" id="entity_External"><rect fill="#FFFFFF" height="61.499" rx="3.9063" ry="3.9063" style="stroke:#005A9C;stroke-width:3.125;" width="236.1694" x="232.0313" y="1081.8115"/><text fill="#000000" font-family="Nunito" font-size="25" lengthAdjust="spacing" textLength="204.9194" x="247.6563" y="1121.6553">External Services</text></g><!--link UI to Application--><g class="link" data-entity-1="UI" data-entity-2="Application" data-source-line="106" data-uid="lnk17" id="link_UI_Application"><path codeLine="106" d="M520.3125,130.6084 C520.3125,164.0303 520.3125,208.9834 520.3125,242.4053" fill="none" id="UI-to-Application" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="520.3125,251.7803,526.5625,237.7178,520.3125,243.9678,514.0625,237.7178,520.3125,251.7803" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link Application to UseCase--><g class="link" data-entity-1="Application" data-entity-2="UseCase" data-source-line="107" data-uid="lnk18" id="link_Application_UseCase"><path codeLine="107" d="M520.3125,313.374 C520.3125,340.2178 520.3125,370.4053 520.3125,397.2021" fill="none" id="Application-to-UseCase" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="520.3125,406.5771,526.5625,392.5146,520.3125,398.7646,514.0625,392.5146,520.3125,406.5771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link UseCase to DomainService--><g class="link" data-entity-1="UseCase" data-entity-2="DomainService" data-source-line="108" data-uid="lnk19" id="link_UseCase_DomainService"><path codeLine="108" d="M544.2344,468.1084 C571.5469,501.5303 610.0384,548.5974 637.3353,582.0193" fill="none" id="UseCase-to-DomainService" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="643.2656,589.2803,639.2108,574.4352,638.3237,583.2294,629.5295,582.3423,643.2656,589.2803" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link UseCase to AR--><g class="link" data-entity-1="UseCase" data-entity-2="AR" data-source-line="109" data-uid="lnk20" id="link_UseCase_AR"><path codeLine="109" d="M499.9531,468.1084 C476.7031,501.5303 444.2576,548.1607 421.0232,581.5826" fill="none" id="UseCase-to-AR" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="415.6719,589.2803,428.8306,581.3013,420.1313,582.8655,418.567,574.1662,415.6719,589.2803" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link DomainService to Entity--><g class="link" data-entity-1="DomainService" data-entity-2="Entity" data-source-line="110" data-uid="lnk21" id="link_DomainService_Entity"><path codeLine="110" d="M678.9375,650.874 C689.7344,677.7178 702.1257,708.5828 712.907,735.3797" fill="none" id="DomainService-to-Entity" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="716.4063,744.0771,716.9557,728.6981,713.4902,736.8293,705.359,733.3638,716.4063,744.0771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link DomainService to VO--><g class="link" data-entity-1="DomainService" data-entity-2="VO" data-source-line="111" data-uid="lnk22" id="link_DomainService_VO"><path codeLine="111" d="M641.2813,650.874 C617.4844,677.7178 588.6268,710.2663 564.8612,737.0632" fill="none" id="DomainService-to-VO" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="558.6406,744.0771,572.6474,737.7032,563.8244,738.2322,563.2955,729.4092,558.6406,744.0771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link AR to Entity--><g class="link" data-entity-1="AR" data-entity-2="Entity" data-source-line="112" data-uid="lnk23" id="link_AR_Entity"><path codeLine="112" d="M459.0938,650.7021 C523.4531,680.0146 612.8902,720.7381 671.1402,747.2693" fill="none" id="AR-to-Entity" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="679.6719,751.1553,669.465,739.6385,672.5621,747.917,664.2837,751.0141,679.6719,751.1553" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link AR to VO--><g class="link" data-entity-1="AR" data-entity-2="VO" data-source-line="113" data-uid="lnk24" id="link_AR_VO"><path codeLine="113" d="M421.8281,650.874 C446.1719,677.7178 475.763,710.3371 500.0755,737.134" fill="none" id="AR-to-VO" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="506.375,744.0771,501.5546,729.4628,501.1255,738.2912,492.297,737.862,506.375,744.0771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link AR to Repository--><g class="link" data-entity-1="AR" data-entity-2="Repository" data-source-line="114" data-uid="lnk25" id="link_AR_Repository"><path codeLine="114" d="M367.5938,650.874 C342.1406,677.7178 311.0794,710.4809 285.6419,737.2778" fill="none" id="AR-to-Repository" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="279.1875,744.0771,293.402,738.1811,284.5662,738.411,284.3362,729.5752,279.1875,744.0771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link Repository to RepoImpl--><g class="link" data-entity-1="Repository" data-entity-2="RepoImpl" data-source-line="115" data-uid="lnk26" id="link_Repository_RepoImpl"><path codeLine="115" d="M251.5625,805.6084 C251.5625,839.0303 251.5625,883.9834 251.5625,917.4053" fill="none" id="Repository-to-RepoImpl" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="251.5625,926.7803,257.8125,912.7178,251.5625,918.9678,245.3125,912.7178,251.5625,926.7803" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link RepoImpl to DB--><g class="link" data-entity-1="RepoImpl" data-entity-2="DB" data-source-line="116" data-uid="lnk27" id="link_RepoImpl_DB"><path codeLine="116" d="M223.5469,988.374 C197.8125,1015.2178 166.3802,1048.0145 140.6771,1074.8114" fill="none" id="RepoImpl-to-DB" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="134.1875,1081.5771,148.4324,1075.7549,139.5955,1075.939,139.4114,1067.1021,134.1875,1081.5771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--link RepoImpl to External--><g class="link" data-entity-1="RepoImpl" data-entity-2="External" data-source-line="117" data-uid="lnk28" id="link_RepoImpl_External"><path codeLine="117" d="M270.5469,988.374 C287.9688,1015.2178 308.565,1046.9183 325.9713,1073.7152" fill="none" id="RepoImpl-to-External" style="stroke:#005A9C;stroke-width:3.125;"/><polygon fill="#005A9C" points="331.0781,1081.5771,328.6592,1066.3796,326.8224,1075.0255,318.1765,1073.1887,331.0781,1081.5771" style="stroke:#005A9C;stroke-width:3.125;"/></g><!--SRC=[jLHBRjim4Dth58Ixw2geKo01kYaWEtPXm8WDnyscw68iZHLMqb0bAUTJz0WzH9TTz1JkmKhg5ygocY90BC3GVFJcpRmXLSmf0maf2pFEJi-6dcey6mZYI8gSmh58X6Ilfhvzd0nr0w6uvHInBIGAFISKuXRoH4y5wKj8aGrcf54EZcTSyGTaf-VTu1hlj9_mY58apGAq66uL4Y6oRnvZemxNucSZGeOeA-zmUEQ_6pVUzGqFOaAbs5llkuiRY3GJP6k-0BZ4G0D5oOim1od5RVkRWw3xgHiBDDznVVyCKYq22h_cI47Pt1AavW7FWFJnRkPyYtDE-4JqaCxaV3eqczWkqCEvnIupIH3rJRxSx_zeaeJkmMYOFOcXkNxM2XYGrsmfXPbql4FwyuFslrd88JAWzqU4y0z5xqbfL_7gIGsM4X_CIO2oq4uglOD1mNir6Q_zom_p2ViuOv-CWzcNDynVsl-nETXI98aviOnzjhGRI3zBUFnFG3ypAG5eBgX2TZrNA7Sym0AtHKFX61JMNCoRDLMd_eL8zxz8xFO_UygR1E1KbQdWIbzlxGbfUthAtDBev5mlglWr93conUQBkGewMVwgRZcA94PWLcqbH3TlXPbGN0jPLtKSnMsxXOgds_kCjXAKbdciSzalWCMQfLbo1DfuqTx7XHOTLXUZUbwWOMF6tvtKdU56K4CtPZNPHYwpIoSdxrtXFNS9RAmItAk5jxwMTgs8l_BQmbfd9LKtSBtmZ19EIcKz-X-7uZdpgIDsJbupneBPg6tNdVy5]--></g></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1162.5px" preserveAspectRatio="none" style="width:810px;height:1162px;background:#11141A;" version="1.1" viewBox="0 0 810 1162" width="810.9375px" zoomAndPan="magnify"><defs/><g><!--MD5=[fe628af75e47f09186d8d405551aac5b]
+cluster Prezentační vrstva--><polygon fill="#11141A" points="375,37.5,615.625,37.5,626.5625,72.3389,656.25,72.3389,656.25,173.4375,375,173.4375,375,37.5" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="375" x2="626.5625" y1="72.3389" y2="72.3389"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="231.25" x="381.25" y="60.9299">Prezentační vrstva</text><!--MD5=[741512e2b41e4283f14101d335ee8cdc]
+cluster Aplikační vrstva--><polygon fill="#11141A" points="375,210.9375,578.125,210.9375,589.0625,245.7764,656.25,245.7764,656.25,496.875,375,496.875,375,210.9375" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="375" x2="589.0625" y1="245.7764" y2="245.7764"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="193.75" x="381.25" y="234.3674">Aplikační vrstva</text><!--MD5=[86163ccadf161557d87844c8bc8b359f]
+cluster Doménová vrstva--><polygon fill="#11141A" points="112.5,534.375,335.9375,534.375,346.875,569.2139,776.5625,569.2139,776.5625,820.3125,112.5,820.3125,112.5,534.375" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="112.5" x2="346.875" y1="569.2139" y2="569.2139"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="214.0625" x="118.75" y="557.8049">Doménová vrstva</text><!--MD5=[9d13e039760e18191afd1241178859f2]
+cluster Infrastrukturní vrstva--><polygon fill="#11141A" points="34.375,857.8125,306.25,857.8125,317.1875,892.6514,489.0625,892.6514,489.0625,1143.75,34.375,1143.75,34.375,857.8125" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="34.375" x2="317.1875" y1="892.6514" y2="892.6514"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="262.5" x="40.625" y="881.2424">Infrastrukturní vrstva</text><!--MD5=[c42ed81cef7fdd2e33758127945b9a5b]
+entity UI--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="229.6875" x="400.7813" y="92.1875"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="198.4375" x="416.4063" y="128.1174">UI / API / Controller</text><!--MD5=[e5b7da8fa23ec8cac7d321a34f6e9ee1]
+entity Application--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="232.8125" x="399.2188" y="265.625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="414.8438" y="301.5549">Application Service</text><!--MD5=[43a80c25022e6a83524a2294ae21a74f]
+entity UseCase--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="146.875" x="442.1875" y="415.625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="457.8125" y="451.5549">Use Cases</text><!--MD5=[55b2553e315335e8489a9e4849955fcc]
+entity DomainService--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="198.4375" x="552.3438" y="589.0625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="567.9688" y="624.9924">Domain Service</text><!--MD5=[60a74dc527861188fd2c7b7ec1e13a1c]
+entity Entity--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="90.625" x="660.9375" y="739.0625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="59.375" x="676.5625" y="774.9924">Entity</text><!--MD5=[1f36a17b05b3aa713976330fad1f2444]
+entity VO--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="167.1875" x="438.2813" y="739.0625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="135.9375" x="453.9063" y="774.9924">Value Object</text><!--MD5=[7aac6b42d5c0e793926c8ae48ed21f8d]
+entity AR--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="201.5625" x="296.0938" y="589.0625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="170.3125" x="311.7188" y="624.9924">Aggregate Root</text><!--MD5=[4e260e4024c27e03c495c33059d2b5ff]
+entity Repository--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="246.875" x="137.5" y="739.0625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="215.625" x="153.125" y="774.9924">Repository Interface</text><!--MD5=[0776e51488018581361fec5a5dc53033]
+entity RepoImpl--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="320.3125" x="100.7813" y="912.5"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="289.0625" x="116.4063" y="948.4299">Repository Implementation</text><!--MD5=[f9ba5bf973e7832d2ce5ed59077b93f7]
+entity DB--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="134.375" x="59.375" y="1062.5"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="103.125" x="75" y="1098.4299">Database</text><!--MD5=[d3e37b8938f4d3c9366bd33ad4e44823]
+entity External--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="214.0625" x="249.2188" y="1062.5"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="182.8125" x="264.8438" y="1098.4299">External Services</text><!--MD5=[22ff04e7477cb519d318b14b4d8a03e8]
+link UI to Application--><path d="M515.625,148.4844 C515.625,177.8125 515.625,225.0781 515.625,257.3438 " fill="none" id="UI-&gt;Application" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="515.625,265.2031,521.875,251.1406,515.625,257.3906,509.375,251.1406,515.625,265.2031" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[670f2d9086ad0120a3a7a834ffc8c799]
+link Application to UseCase--><path d="M515.625,322.25 C515.625,346.0625 515.625,380.9531 515.625,406.9687 " fill="none" id="Application-&gt;UseCase" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="515.625,415.4219,521.875,401.3594,515.625,407.6094,509.375,401.3594,515.625,415.4219" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[d97becd20b31e9b9da3633d213604a44]
+link UseCase to DomainService--><path d="M536.8594,471.9219 C560.6719,501.75 599.2813,550.125 625.0469,582.4063 " fill="none" id="UseCase-&gt;DomainService" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="630.0156,588.6406,626.1246,573.7518,625.1407,582.5357,616.3568,581.5518,630.0156,588.6406" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[d9628774d5de51def185b32706439194]
+link UseCase to AR--><path d="M497.0625,471.9219 C476.3594,501.625 442.8281,549.7344 420.3125,582 " fill="none" id="UseCase-&gt;AR" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="415.6875,588.6406,428.8553,580.6765,420.1542,582.2309,418.5998,573.5299,415.6875,588.6406" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[ae4d078d490f089e0ae19b7d0100986f]
+link DomainService to Entity--><path d="M661.5938,645.6875 C670.5313,669.7031 683.6719,705 693.3906,731.0781 " fill="none" id="DomainService-&gt;Entity" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="696.2813,738.8594,697.2367,723.5002,693.5577,731.537,685.5209,727.8579,696.2813,738.8594" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[196fe5e3a5502e15055be57cc94e4216]
+link DomainService to VO--><path d="M627.7813,645.6875 C606.2031,670.125 574.3281,706.2188 551.1875,732.4219 " fill="none" id="DomainService-&gt;VO" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="545.5156,738.8594,559.5054,732.4482,550.6838,733.0006,550.1313,724.1791,545.5156,738.8594" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[d8dfc721114719bb7097ea5f242d400a]
+link AR to Entity--><path d="M452.9063,645.3438 C509.8906,672.4063 597.5469,714.0156 653.375,740.5313 " fill="none" id="AR-&gt;Entity" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="660.7031,744,650.6794,732.3235,653.6454,740.6498,645.3191,743.6158,660.7031,744" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[8e20736416da89dd914b2627724a0ed9]
+link AR to VO--><path d="M419.7969,645.6875 C440.5938,670.125 471.3125,706.2188 493.6094,732.4219 " fill="none" id="AR-&gt;VO" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="499.0938,738.8594,494.7515,724.0959,494.0353,732.9056,485.2255,732.1894,499.0938,738.8594" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[d4cf88b25ca533e9324777277bf6b8f7]
+link AR to Repository--><path d="M371.9375,645.6875 C349.1406,670.3281 315.3594,706.8281 291.0625,733.0781 " fill="none" id="AR-&gt;Repository" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="285.7188,738.8594,299.8594,732.7883,291.0271,733.1273,290.6881,724.295,285.7188,738.8594" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[53b5a92e1190ea10f49a893dfd5ecb9d]
+link Repository to RepoImpl--><path d="M260.9375,795.3594 C260.9375,824.6875 260.9375,871.9531 260.9375,904.2188 " fill="none" id="Repository-&gt;RepoImpl" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="260.9375,912.0781,267.1875,898.0156,260.9375,904.2656,254.6875,898.0156,260.9375,912.0781" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[c82d7175e3ba791cf4e5cb8bfc928a40]
+link RepoImpl to DB--><path d="M236.2969,969.125 C213.75,993.7656 180.3594,1030.2656 156.3281,1056.5156 " fill="none" id="RepoImpl-&gt;DB" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="151.0469,1062.2969,165.15,1056.1391,156.3199,1056.5323,155.9267,1047.7022,151.0469,1062.2969" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[37006c97aa9dc70a63799a98b03f712d]
+link RepoImpl to External--><path d="M278.4219,969.125 C294.1406,993.3438 317.2969,1029.0469 334.2656,1055.1875 " fill="none" id="RepoImpl-&gt;External" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="338.875,1062.2969,336.455,1047.0995,334.6188,1055.7455,325.9728,1053.9094,338.875,1062.2969" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[2a56d64530b158a27a985fd6f003fe8d]
+@startuml diagram
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+package "Prezentační vrstva" {
+  RECTANGLE UI [
+    UI / API / Controller
+  ]
+}
+
+package "Aplikační vrstva" {
+  RECTANGLE Application [
+    Application Service
+  ]
+  RECTANGLE UseCase [
+    Use Cases
+  ]
+}
+
+package "Doménová vrstva" {
+  RECTANGLE DomainService [
+    Domain Service
+  ]
+  RECTANGLE Entity [
+    Entity
+  ]
+  RECTANGLE VO [
+    Value Object
+  ]
+  RECTANGLE AR [
+    Aggregate Root
+  ]
+  RECTANGLE Repository [
+    Repository Interface
+  ]
+}
+
+package "Infrastrukturní vrstva" {
+  RECTANGLE RepoImpl [
+    Repository Implementation
+  ]
+  RECTANGLE DB [
+    Database
+  ]
+  RECTANGLE External [
+    External Services
+  ]
+}
+
+UI - -> Application
+Application - -> UseCase
+UseCase - -> DomainService
+UseCase - -> AR
+DomainService - -> Entity
+DomainService - -> VO
+AR - -> Entity
+AR - -> VO
+AR - -> Repository
+Repository - -> RepoImpl
+RepoImpl - -> DB
+RepoImpl - -> External
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

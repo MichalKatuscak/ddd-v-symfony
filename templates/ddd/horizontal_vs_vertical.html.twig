@@ -2,7 +2,7 @@
 
 {% block title %}Vertikální slice architektura vs. Tradiční DDD: Srovnání přístupů | DDD Symfony{% endblock %}
 
-{% block meta_description %}Porovnání vertikální slice architektury a tradičního přístupu k Domain-Driven Design. Zjistěte, který přístup je vhodnější pro váš Symfony projekt a jaké jsou jejich výhody a nevýhody.{% endblock %}
+{% block meta_description %}Vertikální slice architektura vs. horizontální vrstvení v DDD: kdy slicovat podle feature, kdy podle vrstvy, a jak to vypadá v Symfony 8 projektu.{% endblock %}
 
 {% block meta_keywords %}vertikální slice architektura, tradiční DDD, feature slices, vrstvená architektura, modularity, Symfony architektura, organizace kódu, Domain-Driven Design{% endblock %}
 
@@ -19,8 +19,8 @@
   "@context": "https://schema.org",
   "@type": "TechArticle",
   "headline": "Vertikální slice architektura vs. Tradiční DDD: Srovnání přístupů",
-  "description": "{{ block('meta_description') }}",
-  "keywords": "{{ block('meta_keywords') }}",
+  "description": "{{ block('meta_description')|escape('js') }}",
+  "keywords": "{{ block('meta_keywords')|escape('js') }}",
   "author": {
             "@type": "Person",
             "name": "Michal Katuščák",
@@ -35,7 +35,8 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-22",
+  "dateModified": "{{ block('article_modified_time')|trim }}",
+  "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -110,7 +111,7 @@
 
             <p>
                 V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje - ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
+                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank">[2]</a>.
             </p>
         </section>
 
@@ -346,7 +347,7 @@
         └── Exception/
             └── DomainException.php{% endset %}
             {% include '_partials/code_block.html.twig' with {
-                filename: 'src/ (Symfony 8 — tradiční)',
+                filename: 'src/ (Symfony 8 – tradiční)',
                 language: 'bash',
                 code: _code,
                 highlights: []
@@ -410,7 +411,7 @@
         └── Exception/
             └── DomainException.php{% endset %}
             {% include '_partials/code_block.html.twig' with {
-                filename: 'src/ (Symfony 8 — vertical slice)',
+                filename: 'src/ (Symfony 8 – vertical slice)',
                 language: 'bash',
                 code: _code,
                 highlights: []
@@ -434,7 +435,7 @@
             items: [
                 {
                     question: 'Co je Vertical Slice Architecture?',
-                    answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec" obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+                    answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec“ obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
                 },
                 {
                     question: 'Jaký je rozdíl mezi tradiční vrstvovou architekturou a Vertical Slice?',

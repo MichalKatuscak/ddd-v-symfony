@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}DDD v praxi – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Sedm kapitol o tom, co se reálně děje, když se DDD potká s legacy kódem, deadlinem a týmem. Praktické příklady, testování, migrace, anti-vzory, případová studie.{% endblock %}
+{% block breadcrumb_name %}Praxe{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "DDD v praxi – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · PRAXE',
+        hub_h_main: 'Praxe,',
+        hub_h_em: 'kde to bolí a kde to opravdu funguje.',
+        hub_deck: 'Tato sekce je o překladu z teorie do reality. <strong>Praktické příklady</strong> a <strong>testování</strong> ukazují, jak vypadá zdravý běh. <strong>Migrace z CRUD</strong>, <strong>kde to bolí</strong>, <strong>anti-vzory</strong> a <strong>kdy DDD nepoužívat</strong> jsou poznámky, které autor knihy nestihl říct během code review. <strong>Případová studie</strong> spojuje vše do jednoho běžícího e-shopu.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Případová studie', v: 'kapitola 15 · 45 min' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART III',
+        hub_part_title: 'Co bolí · jak migrovat · co testovat',
+        hub_part_sub: 'realita za diagramy',
+        hub_chapters: hub_chapters
+    } only %}
+{% endblock %}

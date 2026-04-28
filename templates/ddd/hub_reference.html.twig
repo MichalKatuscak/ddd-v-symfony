@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reference DDD – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Slovník, zdroje a poznámky k Domain-Driven Design. Glosář pojmů, doporučená literatura (Evans, Vernon, Fowler), vztah DDD a moderních AI vývojových nástrojů.{% endblock %}
+{% block breadcrumb_name %}Reference{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "Reference DDD – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · REFERENCE',
+        hub_h_main: 'Reference,',
+        hub_h_em: 'slovník a poznámky stranou hlavního textu.',
+        hub_deck: 'Sem patří vše, co se v hlavním textu nevejde, ale bez čeho je hlavní text nepochopitelný. <strong>Glosář</strong> definuje termíny, které se v knize používají bez výjimky. <strong>Zdroje</strong> ukazují primární literaturu, z níž průvodce čerpá. A <strong>kapitola o DDD a AI</strong> shrnuje, co o vztahu těchto dvou věcí říkají Eric Evans, Martin Fowler, Kent Beck a David Heinemeier Hansson.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Dodatky', v: extras|length ~ ' (glosář, zdroje)' },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART IV',
+        hub_part_title: 'Anti-vzory · AI · glosář · zdroje',
+        hub_part_sub: 'slovník a souvislosti',
+        hub_chapters: hub_chapters,
+        hub_extras: extras
+    } only %}
+{% endblock %}

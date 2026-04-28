@@ -4,6 +4,19 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
 html, body {
   margin: 0;
   background: var(--bg-0);
@@ -68,6 +81,8 @@ img, svg { max-width: 100%; height: auto; display: block; }
   flex-direction: column;
 }
 .page-wrap > main { flex: 1; }
+main:focus { outline: none; }
+main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* Buttons (sdílené) */
 .btn {

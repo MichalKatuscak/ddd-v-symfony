@@ -1,4 +1,5 @@
-@startuml
+@startuml spectrum
+!include ../theme.iuml
 
 node "Eric Evans\n(Zakladatel)\nSilně pro-DDD-pro-AI" as A
 node "Vaughn Vernon\nPro-DDD-pro-AI" as B

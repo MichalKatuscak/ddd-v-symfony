@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Základy DDD – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Čtyři kapitoly, kterými začíná každý kontakt s Domain-Driven Design v Symfony 8. Filozofie, jazyk, ohraničení, slicing a první implementace.{% endblock %}
+{% block breadcrumb_name %}Základy{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "Základy DDD – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · ZÁKLADY',
+        hub_h_main: 'Základy DDD,',
+        hub_h_em: 'než napíšete první řádek kódu.',
+        hub_deck: 'Tato sekce je <strong>vstupní brána</strong> celé příručky. Začíná se filozofií a sdíleným jazykem, pokračuje hranicemi domény a slicingem, končí konkrétní strukturou Symfony 8 projektu. Pokud nečtete od začátku, sem se vraťte vždy, když má diskuse o kódu sklouzávat do názorů místo do pojmů.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Předpoklady', v: 'PHP 8.4 · Symfony 8' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART I',
+        hub_part_title: 'Filozofie · jazyk · ohraničení',
+        hub_part_sub: 'pojmy a struktura projektu',
+        hub_chapters: hub_chapters
+    } only %}
+{% endblock %}

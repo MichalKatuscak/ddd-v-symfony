@@ -1,9 +1,9 @@
 {#
   args:
-    filename     — např. 'src/Order/Domain/Order.php'
-    language     — 'php' | 'yaml' | 'twig' | 'bash' | 'json' | 'sql' | ...
-    code         — surový kód jako string (bude escapovaný); předává se přez include with code: ... nebo přez set + capture
-    highlights   — pole čísel řádků (1-based) pro zvýraznění; volitelné
+    filename     – např. 'src/Order/Domain/Order.php'
+    language     – 'php' | 'yaml' | 'twig' | 'bash' | 'json' | 'sql' | ...
+    code         – surový kód jako string (bude escapovaný); předává se přez include with code: ... nebo přez set + capture
+    highlights   – pole čísel řádků (1-based) pro zvýraznění; volitelné
 
   Použití:
     {% set _code %}<?php
@@ -28,7 +28,7 @@
                 <rect x="2.5" y="2.5" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1"/>
                 <rect x="4.5" y="4.5" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1"/>
             </svg>
-            <span class="code-copy-label">Kopírovat</span>
+            <span class="code-copy-label" aria-live="polite">Kopírovat</span>
         </button>
     </header>
     <pre class="code-body" data-highlight="{{ _hl }}"><code class="language-{{ language }}">{{- code|trim('\n') -}}</code></pre>

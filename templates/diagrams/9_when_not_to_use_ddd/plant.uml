@@ -1,16 +1,5 @@
-@startuml
-!theme plain
-skinparam backgroundColor transparent
-skinparam defaultFontName "Nunito"
-skinparam defaultFontSize 14
-skinparam ArrowColor #6366f1
-skinparam ActivityBackgroundColor #1e1b4b
-skinparam ActivityBorderColor #6366f1
-skinparam ActivityFontColor #e0e7ff
-skinparam ActivityDiamondBackgroundColor #312e81
-skinparam ActivityDiamondBorderColor #818cf8
-skinparam ActivityDiamondFontColor #e0e7ff
-skinparam ActivityEndColor #059669
+@startuml diagram
+!include ../theme.iuml
 
 title Rozhodovací strom: Mám použít DDD?
 
@@ -18,36 +7,36 @@ start
 :Nový projekt / architektonické rozhodnutí;
 
 if (Komplexní doménová logika?\n(ne jen CRUD)) then (ne)
-  #7c3aed:DDD nepotřebuješ\n-> EasyAdmin / Flat MVC;
+  #1B202A:DDD nepotřebuješ\n-> EasyAdmin / Flat MVC;
   stop
 else (ano)
 endif
 
 if (Projekt bude žít > 1 rok?) then (ne)
-  #7c3aed:DDD se nevyplatí\n-> Symfony Controller + Doctrine;
+  #1B202A:DDD se nevyplatí\n-> Symfony Controller + Doctrine;
   stop
 else (ano)
 endif
 
 if (Přístup k doménovým\nexpertům?) then (ne)
-  #7c3aed:DDD bez expertů = hádání\n-> Vrstvená architektura;
+  #1B202A:DDD bez expertů = hádání\n-> Vrstvená architektura;
   stop
 else (ano)
 endif
 
 if (Tým zná DDD\nnebo má čas se učit?) then (ne)
-  #7c3aed:Pseudo-DDD je horší\nnež žádné DDD\n-> Architektura, kterou tým zná;
+  #1B202A:Pseudo-DDD je horší\nnež žádné DDD\n-> Architektura, kterou tým zná;
   stop
 else (ano)
 endif
 
 if (Doména je stabilní?\n(ne pivot každý sprint)) then (ne)
-  #7c3aed:Počkej na stabilizaci\n-> Flat MVC, DDD později;
+  #1B202A:Počkej na stabilizaci\n-> Flat MVC, DDD později;
   stop
 else (ano)
 endif
 
-#059669:DDD dává smysl\n-> Strategický i taktický design;
+#F0A456:DDD dává smysl\n-> Strategický i taktický design;
 stop
 
 @enduml

@@ -12,9 +12,10 @@
 
     <link rel="canonical" href="{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}" />
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
 
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-    <meta property="og:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
+    <meta property="og:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}">
     <meta property="og:title" content="{% block og_title %}{{ title ?? 'Architektura DDD v Symfony 8' }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
     <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
@@ -28,7 +29,7 @@
     {% if _pub or _mod %}<meta property="article:author" content="Michal Katuščák">{% endif %}
 
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.requestUri }}">
+    <meta property="twitter:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}">
     <meta property="twitter:title" content="{% block twitter_title %}{{ block('og_title') }}{% endblock %}">
     <meta property="twitter:description" content="{% block twitter_description %}{{ block('og_description') }}{% endblock %}">
     <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
@@ -41,10 +42,10 @@
 </head>
 <body>
     {%- set _route = app.request.attributes.get('_route') -%}
-    {%- set _basics_routes = ['what_is_ddd', 'basic_concepts', 'horizontal_vs_vertical', 'implementation_in_symfony'] -%}
-    {%- set _patterns_routes = ['cqrs', 'event_sourcing', 'sagas', 'performance_aspects'] -%}
-    {%- set _practice_routes = ['practical_examples', 'testing_ddd', 'migration_from_crud', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd', 'case_study'] -%}
-    {%- set _reference_routes = ['ddd_ai', 'glossary', 'resources'] -%}
+    {%- set _basics_routes = ['hub_basics', 'what_is_ddd', 'basic_concepts', 'horizontal_vs_vertical', 'implementation_in_symfony'] -%}
+    {%- set _patterns_routes = ['hub_patterns', 'cqrs', 'event_sourcing', 'sagas', 'performance_aspects'] -%}
+    {%- set _practice_routes = ['hub_practice', 'practical_examples', 'testing_ddd', 'migration_from_crud', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd', 'case_study'] -%}
+    {%- set _reference_routes = ['hub_reference', 'ddd_ai', 'glossary', 'resources'] -%}
 
     <a href="#content" class="skip-link">Přejít na obsah</a>
 
@@ -66,17 +67,12 @@
                 </a>
             </div>
             <div class="topnav-center">
-                <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('what_is_ddd') }}">Základy</a>
-                <a class="navlink {% if _route in _patterns_routes %}active{% endif %}" href="{{ path('cqrs') }}">Vzory</a>
-                <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('practical_examples') }}">Praxe</a>
-                <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('glossary') }}">Reference</a>
+                <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}">Základy</a>
+                <a class="navlink {% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}">Vzory</a>
+                <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}">Praxe</a>
+                <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}">Reference</a>
             </div>
             <div class="topnav-right">
-                <div class="searchbar" aria-label="Vyhledávání (placeholder)">
-                    <span class="search-icon" aria-hidden="true">⌕</span>
-                    <span class="search-placeholder">Hledat v knize…</span>
-                    <kbd class="kbd">⌘K</kbd>
-                </div>
                 <button class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <line x1="4" y1="7" x2="20" y2="7"/>
@@ -91,42 +87,93 @@
     <div class="nav-drawer-backdrop" aria-hidden="true"></div>
     <aside class="nav-drawer" aria-label="Mobilní navigace">
         <ul class="nav-drawer-list">
-            <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('what_is_ddd') }}">Základy</a></li>
-            <li><a class="{% if _route in _patterns_routes %}active{% endif %}" href="{{ path('cqrs') }}">Vzory</a></li>
-            <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('practical_examples') }}">Praxe</a></li>
-            <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('glossary') }}">Reference</a></li>
+            <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}">Základy</a></li>
+            <li><a class="{% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}">Vzory</a></li>
+            <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}">Praxe</a></li>
+            <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}">Reference</a></li>
             <li><a href="{{ path('about') }}">O autorovi</a></li>
         </ul>
     </aside>
 
-    <main id="content">
+    <main id="content" tabindex="-1">
         {% block body %}{% endblock %}
     </main>
 
-    <footer class="footer">
-        <div class="footer-inner">
-            <div>
-                <div class="footer-brand-title">DDD · Symfony 8</div>
-                <p class="footer-brand-desc">Podrobný průvodce Domain-Driven Design v Symfony 8 pro seniorní vývojáře a architekty.</p>
+    {%- set _foot_basics    = ddd_chapters_by_group('basics') -%}
+    {%- set _foot_patterns  = ddd_chapters_by_group('patterns') -%}
+    {%- set _foot_practice  = ddd_chapters_by_group('practice') -%}
+    {%- set _foot_reference = ddd_chapters_by_group('reference') -%}
+    {%- set _foot_extras    = ddd_extras() -%}
+    {%- set _foot_practice_top = _foot_practice|slice(0, 4) -%}
+    {%- set _foot_total = ddd_chapters()|length -%}
+    <footer class="foot-a" aria-label="Patička webu">
+        <div class="foot-a-inner">
+            <div class="foot-a-head">
+                <div>
+                    <div class="foot-a-imprint">COLOPHON · {{ "now"|date("Y") }} EDITION</div>
+                    <h2 class="foot-a-h">
+                        Domain-Driven Design<br>
+                        <em>v Symfony 8.</em>
+                    </h2>
+                    <div class="foot-a-sub">{{ _foot_total }} kapitol · průvodce pro seniorní vývojáře a architekty</div>
+                </div>
+                <dl class="foot-a-spec">
+                    <div><dt>Vydáno</dt><dd>{{ "now"|date("F Y") }} · v1.0</dd></div>
+                    <div><dt>Stack</dt><dd>PHP 8.4 · Symfony 8 · Doctrine 4</dd></div>
+                    <div><dt>Sazba</dt><dd>Inter · JetBrains Mono</dd></div>
+                    <div><dt>Licence</dt><dd>obsah CC BY-NC 4.0 · ukázky kódu MIT</dd></div>
+                    <div><dt>Autor</dt><dd><a href="{{ path('about') }}">Michal Katuščák</a> · <a href="https://www.katuscak.cz/" rel="author">katuscak.cz ↗</a></dd></div>
+                </dl>
             </div>
-            <div>
-                <div class="footer-col-label">Navigace</div>
-                <ul class="footer-list">
-                    <li><a href="{{ path('homepage') }}">Úvod</a></li>
-                    <li><a href="{{ path('what_is_ddd') }}">Základy</a></li>
-                    <li><a href="{{ path('cqrs') }}">Vzory</a></li>
-                    <li><a href="{{ path('practical_examples') }}">Praxe</a></li>
-                    <li><a href="{{ path('glossary') }}">Reference</a></li>
-                    <li><a href="{{ path('about') }}">O autorovi</a></li>
-                    <li><a href="{{ path('security_policy') }}">Bezpečnostní zásady</a></li>
-                </ul>
+
+            <div class="foot-a-cols">
+                <div class="foot-a-col">
+                    <h4><a href="{{ path('hub_basics') }}">Základy</a></h4>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_basics %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="foot-a-col">
+                    <h4><a href="{{ path('hub_patterns') }}">Vzory</a></h4>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_patterns %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="foot-a-col">
+                    <h4><a href="{{ path('hub_practice') }}">Praxe</a></h4>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_practice_top %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                    </ul>
+                    <a class="foot-a-more" href="{{ path('hub_practice') }}">Více · {{ _foot_practice|length }} kapitol →</a>
+                </div>
+                <div class="foot-a-col">
+                    <h4><a href="{{ path('hub_reference') }}">Reference</a></h4>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_reference %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                        {% for e in _foot_extras %}
+                            <li><a href="{{ path(e.route) }}"><span class="foot-a-num">–</span><span>{{ e.t }}</span></a></li>
+                        {% endfor %}
+                        <li><a href="{{ path('about') }}"><span class="foot-a-num">–</span><span>O autorovi</span></a></li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <div class="footer-col-label">Meta</div>
-                <div class="footer-meta">
-                    <span class="footer-meta-item"><span class="footer-meta-key">Aktualizováno</span> {{ "now"|date("j. n. Y") }}</span>
-                    <span class="footer-meta-item"><span class="footer-meta-key">Autor</span> Michal Katuščák</span>
-                    <span class="footer-meta-item"><span class="footer-meta-key">© {{ "now"|date("Y") }}</span> Všechna práva vyhrazena</span>
+
+            <div class="foot-a-base">
+                <div class="foot-a-mark">
+                    <span class="foot-a-mark-glyph" aria-hidden="true"></span>
+                    <span>DDD · Symfony 8</span>
+                </div>
+                <div class="foot-a-rights">
+                    <span>© {{ "now"|date("Y") }} Michal Katuščák</span>
+                    <a href="{{ path('security_policy') }}">Bezpečnost</a>
                 </div>
             </div>
         </div>

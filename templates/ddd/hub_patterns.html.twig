@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Taktické vzory DDD – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Čtyři kapitoly o místech, kde se DDD potkává s frameworkem. CQRS, Event Sourcing, ságy a výkonnostní aspekty v Symfony 8.{% endblock %}
+{% block breadcrumb_name %}Vzory{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "Taktické vzory DDD – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · TAKTICKÉ VZORY',
+        hub_h_main: 'Taktické vzory,',
+        hub_h_em: 'kde se DDD potkává s frameworkem.',
+        hub_deck: 'Místo, kde se domény stěhují do kódu. <strong>CQRS</strong> dělí čtení a zápis přes Messenger. <strong>Event Sourcing</strong> ukládá stav jako sekvenci doménových událostí. <strong>Ságy</strong> řídí dlouhotrvající procesy s kompenzacemi. A <strong>výkon</strong> rozhoduje, jestli to celé v praxi přežije.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Stack', v: 'Symfony Messenger · Doctrine 4' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART II',
+        hub_part_title: 'CQRS · Event Sourcing · Sagy · výkon',
+        hub_part_sub: 'taktické vzory v Symfony 8',
+        hub_chapters: hub_chapters
+    } only %}
+{% endblock %}

@@ -2,7 +2,7 @@
 
 {% block title %}Co je Domain-Driven Design? Podrobné vysvětlení DDD | DDD Symfony{% endblock %}
 
-{% block meta_description %}Objevte, co je Domain-Driven Design (DDD) a jaké jsou jeho základní principy. Naučte se, jak DDD pomáhá řešit komplexní domény a zlepšuje komunikaci mezi vývojáři a doménovými experty.{% endblock %}
+{% block meta_description %}Domain-Driven Design srozumitelně: filozofie Erica Evanse, Ubiquitous Language, Bounded Context a rozdíl mezi strategickým a taktickým designem.{% endblock %}
 
 {% block meta_keywords %}Domain-Driven Design, DDD, Eric Evans, Ubiquitous Language, Bounded Context, doménový model, doménová logika, strategický design, taktický design{% endblock %}
 
@@ -19,8 +19,8 @@
           "@context": "https://schema.org",
           "@type": "TechArticle",
           "headline": "Co je Domain-Driven Design? Podrobné vysvětlení DDD",
-          "description": "{{ block('meta_description') }}",
-  "keywords": "{{ block('meta_keywords') }}",
+          "description": "{{ block('meta_description')|escape('js') }}",
+  "keywords": "{{ block('meta_keywords')|escape('js') }}",
   "author": {
             "@type": "Person",
             "name": "Michal Katuščák",
@@ -35,7 +35,8 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-22",
+  "dateModified": "{{ block('article_modified_time')|trim }}",
+  "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -60,17 +61,7 @@
     {% include '_partials/article_toc.html.twig' %}
 
     <div class="art-body" data-chapter-number="01">
-        <div class="examples-banner" role="note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
-                <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
-            </svg>
-            <span>
-                Ke kapitole patří <strong>živá ukázka kódu</strong>:
-                <a href="https://github.com/MichalKatuscak/ddd-symfony-examples/tree/main/src/Chapter01_WhatIsDDD"  target="_blank" rel="noopener">
-                    Zobrazit na GitHubu →
-                </a>
-            </span>
-        </div>
+        {% include '_partials/github_examples.html.twig' with { path: 'Chapter01_WhatIsDDD' } %}
 
         <section id="definition" aria-labelledby="definition-heading">
             <h2 id="definition-heading" class="h-section"><span class="h-num">01.01</span> Definice DDD</h2>
@@ -383,7 +374,7 @@
                 <li>
                     <strong>DDD vs. Transaction Script</strong> - Transaction Script (Martin Fowler, <em>PoEAA</em>) organizuje
                     logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla
-                    a ukládá výsledek. <strong>Rozdíl:</strong> Transaction Script nemá doménový model - logika je v procedurách,
+                    a ukládá výsledek. <strong>Rozdíl:</strong> Transaction Script nemá doménový model – logika je v procedurách,
                     ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí však dochází k duplicitě
                     pravidel a těžko udržovatelnému kódu. DDD je vhodnější, jakmile doménová pravidla začnou být sdílena
                     napříč více use cases.
@@ -391,8 +382,8 @@
                 <li>
                     <strong>DDD vs. CRUD</strong> - CRUD (Create, Read, Update, Delete) je datově orientovaný přístup:
                     aplikace je v podstatě editor databázových tabulek. <strong>Rozdíl:</strong> CRUD nerozlišuje mezi
-                    doménovým chováním a datovými operacemi - každá akce je variací na čtení/zápis řádku. DDD naproti tomu
-                    modeluje chování domény (objednávku nelze jen „updatovat", ale „potvrdit", „zrušit" nebo „odeslat").
+                    doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu
+                    modeluje chování domény (objednávku nelze jen „updatovat“, ale „potvrdit“, „zrušit“ nebo „odeslat“).
                     Pro jednoduché správy dat je CRUD zcela dostačující.
                 </li>
                 <li>
@@ -407,7 +398,7 @@
                     <strong>DDD vs. Mikroservisy</strong> - Mikroservisy jsou architektonický styl zaměřený na <em>jak
                     nasazovat a škálovat</em> části systému nezávisle. <strong>Rozdíl:</strong> DDD řeší logické hranice
                     domény (Bounded Contexts), mikroservisy řeší fyzické hranice nasazení. Bounded Context z DDD je
-                    přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky - jeden Bounded Context
+                    přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky – jeden Bounded Context
                     může být implementován jako více mikroservis a naopak. DDD lze plně využít i v monolitické architektuře.
                 </li>
             </ul>
@@ -465,7 +456,7 @@
                 },
                 {
                     question: 'Co je Bounded Context a k čemu slouží?',
-                    answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer" ve fakturaci a „Customer" v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části a bývají přirozenými hranicemi pro mikroservisy. Viz <a href="#strategic-design">strategický design</a>.'
+                    answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer“ ve fakturaci a „Customer“ v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části a bývají přirozenými hranicemi pro mikroservisy. Viz <a href="#strategic-design">strategický design</a>.'
                 },
                 {
                     question: 'Kdy se DDD nevyplatí použít?',
@@ -477,19 +468,19 @@
         <section id="further-reading" aria-labelledby="further-reading-heading">
             <h2 id="further-reading-heading" class="h-section"><span class="h-num">01.11</span> Další četba</h2>
             <p>
-                Pro další studium Domain-Driven Design doporučujeme následující zdroje:
+                Pro další studium Domain-Driven Design jsou vhodné následující zdroje:
             </p>
 
             <ul>
-                <li><a href="https://www.domainlanguage.com/ddd/" target="_blank">Domain Language - oficiální stránky
+                <li><a href="https://www.domainlanguage.com/ddd/" target="_blank">Domain Language – oficiální stránky
                         Erica Evanse a DDD komunity</a></li>
                 <li><a href="https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215"
-                       target="_blank">Domain-Driven Design: Tackling Complexity in the Heart of Software - Eric
+                       target="_blank">Domain-Driven Design: Tackling Complexity in the Heart of Software – Eric
                         Evans</a></li>
                 <li><a href="https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577"
-                       target="_blank">Implementing Domain-Driven Design - Vaughn Vernon</a></li>
+                       target="_blank">Implementing Domain-Driven Design – Vaughn Vernon</a></li>
                 <li><a href="https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420"
-                       target="_blank">Domain-Driven Design Distilled - Vaughn Vernon</a></li>
+                       target="_blank">Domain-Driven Design Distilled – Vaughn Vernon</a></li>
                 <li><a href="https://dddcommunity.org/" target="_blank">DDD Community</a></li>
             </ul>
 

@@ -19,8 +19,8 @@
           "@context": "https://schema.org",
           "@type": "TechArticle",
           "headline": "Zdroje a další četba o Domain-Driven Design",
-          "description": "{{ block('meta_description') }}",
-          "keywords": "{{ block('meta_keywords') }}",
+          "description": "{{ block('meta_description')|escape('js') }}",
+          "keywords": "{{ block('meta_keywords')|escape('js') }}",
           "author": {
             "@type": "Person",
             "name": "Michal Katuščák",
@@ -35,7 +35,8 @@
             "name": "Michal Katuščák"
           },
           "datePublished": "2025-04-24",
-          "dateModified": "2026-04-12",
+          "dateModified": "{{ block('article_modified_time')|trim }}",
+          "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
           "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -45,362 +46,429 @@
 {% endblock %}
 
 {% block body %}
-    <nav class="breadcrumb" aria-label="Drobečková navigace">
-        <ol class="breadcrumb-list" itemscope itemtype="https://schema.org/BreadcrumbList">
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ path('homepage') }}"><span itemprop="name">Úvod</span></a>
-                <meta itemprop="position" content="1" />
-            </li>
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <span itemprop="name">Zdroje a další četba</span>
-                <meta itemprop="position" content="2" />
-            </li>
-        </ol>
-    </nav>
-    <article itemscope itemtype="https://schema.org/TechArticle">
-    <h1 itemprop="headline">Zdroje a další četba</h1>
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        category: 'Reference',
+        title: 'Zdroje a další četba',
+        deck: 'Vybraná literatura, články, videa, repozitáře a kurzy o Domain-Driven Design a CQRS – primární i sekundární zdroje, na které se průvodce odkazuje.',
+        last_updated: '2026-04-12'|date,
+        author: 'M. Katuščák'
+    } %}
 
-    {% include '_partials/article_meta.html.twig' with { 'published': '2025-04-24', 'modified': '2026-04-12' } %}
+    {% include '_partials/article_toc.html.twig' %}
 
-    <div class="table-of-contents mb-4">
-        <p id="toc-heading">Obsah kapitoly:</p>
-        <ul>
-            <li><a href="#books">Knihy</a></li>
-            <li><a href="#articles">Články</a></li>
-            <li><a href="#videos">Videa</a></li>
-            <li><a href="#repositories">GitHub repozitáře</a></li>
-            <li><a href="#courses">Kurzy</a></li>
-            <li><a href="#communities">Komunity</a></li>
-            <li><a href="#official-docs">Oficiální dokumentace</a></li>
-        </ul>
-    </div>
-
-    <h2 id="books">Knihy</h2>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Domain-Driven Design: Tackling Complexity in the Heart of Software</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Autor:</strong> Eric Evans</p>
-                    <p><strong>Rok vydání:</strong> 2003</p>
-                    <p><strong>Popis:</strong> Základní kniha o Domain-Driven Design od Erica Evanse, která představuje koncepty jako Ubiquitous Language, Bounded Contexts, Entities, Value Objects a další.</p>
-                    <a href="https://www.domainlanguage.com/ddd/reference/" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Implementing Domain-Driven Design</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Autor:</strong> Vaughn Vernon</p>
-                    <p><strong>Rok vydání:</strong> 2013</p>
-                    <p><strong>Popis:</strong> Praktická příručka pro implementaci Domain-Driven Design, která poskytuje konkrétní příklady a techniky.</p>
-                    <a href="https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Domain-Driven Design Distilled</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Autor:</strong> Vaughn Vernon</p>
-                    <p><strong>Rok vydání:</strong> 2016</p>
-                    <p><strong>Popis:</strong> Stručný úvod do Domain-Driven Design, který se zaměřuje na nejdůležitější koncepty a techniky.</p>
-                    <a href="https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">CQRS Documents by Greg Young</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Autor:</strong> Greg Young</p>
-                    <p><strong>Rok vydání:</strong> 2010</p>
-                    <p><strong>Popis:</strong> Kolekce dokumentů o CQRS od Grega Younga, který je považován za otce CQRS.</p>
-                    <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Learning Domain-Driven Design</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Autor:</strong> Vlad Khononov</p>
-                    <p><strong>Rok vydání:</strong> 2021</p>
-                    <p><strong>Popis:</strong> Moderní průvodce Domain-Driven Designem, který se zaměřuje na praktické aspekty a implementaci v různých programovacích jazycích.</p>
-                    <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h2 id="articles">Články</h2>
-
-    <div class="list-group mb-4">
-        <a href="https://medium.com/@skowron.dev/elevate-your-symfony-projects-implementing-ddd-cqrs-and-hexagonal-architecture-606c81cfd287" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Elevate Your Symfony Projects: Implementing DDD, CQRS, and Hexagonal Architecture</h3>
-            <p class="mb-1">Článek o implementaci DDD, CQRS a Hexagonální architektury v Symfony.</p>
-            <small>Autor: Jakub Skowron</small>
-        </a>
-
-        <a href="https://symfony.com/doc/current/messenger.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Messenger komponenta</h3>
-            <p class="mb-1">Oficiální dokumentace Symfony Messenger komponenty – základ pro implementaci CQRS (command a query bus) v Symfony.</p>
-            <small>Autor: Symfony Team</small>
-        </a>
-
-        <a href="https://martinfowler.com/bliki/CQRS.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">CQRS</h3>
-            <p class="mb-1">Článek o CQRS od Martina Fowlera, který poskytuje jasný přehled o tomto vzoru.</p>
-            <small>Autor: Martin Fowler</small>
-        </a>
-
-        <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Bounded Context</h3>
-            <p class="mb-1">Článek o Bounded Context od Martina Fowlera, který vysvětluje tento důležitý koncept DDD.</p>
-            <small>Autor: Martin Fowler</small>
-        </a>
-
-        <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Vertical Slice Architecture</h3>
-            <p class="mb-1">Článek o Vertical Slice Architecture od Jimmyho Bogarda, který vysvětluje tento přístup k organizaci kódu.</p>
-            <small>Autor: Jimmy Bogard</small>
-        </a>
-
-        <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Explicit Architecture: DDD, Hexagonal, Onion, Clean, CQRS, … How I put it all together</h3>
-            <p class="mb-1">Podrobný článek o různých architektonických přístupech a jejich kombinaci.</p>
-            <small>Autor: Herberto Graca</small>
-        </a>
-    </div>
-
-    <h2 id="videos">Videa</h2>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Domain-Driven Design Europe</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Popis:</strong> Kanál s přednáškami z konference Domain-Driven Design Europe, která se koná každý rok v Amsterdamu.</p>
-                    <a href="https://www.youtube.com/channel/UC3PGn-hQdbtRiqxZK9XBGqQ" target="_blank" class="btn btn-primary">Přejít na kanál</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Greg Young - CQRS and Event Sourcing</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Popis:</strong> Přednáška Grega Younga o CQRS a Event Sourcingu, která poskytuje podrobný přehled o těchto vzorech.</p>
-                    <a href="https://www.youtube.com/watch?v=JHGkaShoyNs" target="_blank" class="btn btn-primary">Přejít na video</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Symfony Cast - Messenger komponenta</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Popis:</strong> Série videí o Symfony Messenger komponentě – pokrývá praktickou implementaci od základů po pokročilé scénáře.</p>
-                    <a href="https://symfonycasts.com/screencast/messenger" target="_blank" class="btn btn-primary">Přejít na sérii</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Eric Evans - Tackling Complexity in the Heart of Software</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Popis:</strong> Přednáška Erica Evanse o Domain-Driven Design, která poskytuje přehled o základních konceptech.</p>
-                    <a href="https://www.youtube.com/watch?v=dnUFEg68ESM" target="_blank" class="btn btn-primary">Přejít na video</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Vertical Slice Architecture - Jimmy Bogard</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Popis:</strong> Přednáška Jimmyho Bogarda o Vertical Slice Architecture, která vysvětluje tento přístup k organizaci kódu.</p>
-                    <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" class="btn btn-primary">Přejít na video</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h2 id="repositories">GitHub repozitáře</h2>
-
-    <div class="list-group mb-4">
-        <a href="https://github.com/CodelyTV/php-ddd-example" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">CodelyTV/php-ddd-example</h3>
-            <p class="mb-1">Příklad implementace Hexagonální architektury, DDD a CQRS v PHP pomocí Symfony.</p>
-            <small>Autor: CodelyTV</small>
-        </a>
-
-        <a href="https://github.com/jorge07/symfony-7-es-cqrs-boilerplate" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">jorge07/symfony-7-es-cqrs-boilerplate</h3>
-            <p class="mb-1">Boilerplate pro Symfony s implementací Event Sourcingu a CQRS.</p>
-            <small>Autor: Jorge Arco</small>
-        </a>
-
-        <a href="https://github.com/dddinphp/ddd" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">dddinphp/ddd</h3>
-            <p class="mb-1">Příklady kódu z knihy "Domain-Driven Design in PHP" od Carlosa Buenosvina, Christiana Soronellase a Keyvana Akbaryho.</p>
-            <small>Autor: DDD in PHP</small>
-        </a>
-
-        <a href="https://github.com/Sylius/Sylius" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Sylius/Sylius</h3>
-            <p class="mb-1">E-commerce platforma postavená na Symfony, která používá principy DDD.</p>
-            <small>Autor: Sylius Team</small>
-        </a>
-    </div>
-
-    <h2 id="courses">Kurzy</h2>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Domain-Driven Design Fundamentals</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Platforma:</strong> Pluralsight</p>
-                    <p><strong>Autoři:</strong> Steve Smith, Julie Lerman</p>
-                    <p><strong>Popis:</strong> Úvod do DDD s příklady v C#. Pokrývá strategický i taktický design od základů.</p>
-                    <a href="https://www.pluralsight.com/courses/domain-driven-design-fundamentals" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">CQRS in Practice</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Platforma:</strong> Pluralsight</p>
-                    <p><strong>Autor:</strong> Vladimir Khorikov</p>
-                    <p><strong>Popis:</strong> Implementace CQRS vzoru krok za krokem, včetně oddělení read a write modelů.</p>
-                    <a href="https://www.pluralsight.com/courses/cqrs-in-practice" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">DDD in PHP</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Platforma:</strong> CodelyTV</p>
-                    <p><strong>Autoři:</strong> CodelyTV Team</p>
-                    <p><strong>Popis:</strong> DDD vzory aplikované v PHP s Hexagonální architekturou a CQRS.</p>
-                    <a href="https://codely.com/blog/ddd" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">Symfony Messenger komponenta</h3>
-                </div>
-                <div class="card-body">
-                    <p><strong>Platforma:</strong> SymfonyCasts</p>
-                    <p><strong>Autoři:</strong> SymfonyCasts Team</p>
-                    <p><strong>Popis:</strong> Symfony Messenger od základů po pokročilé scénáře: async transport, middleware, CQRS.</p>
-                    <a href="https://symfonycasts.com/screencast/messenger" target="_blank" class="btn btn-primary">Více informací</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h2 id="communities">Komunity</h2>
-
-    <div class="list-group mb-4">
-        <a href="https://dddcommunity.org/" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">DDD Community</h3>
-            <p class="mb-1">Oficiální DDD komunita založená Ericem Evansem. Články, reference a odkazy na konference.</p>
-        </a>
-
-        <a href="https://www.meetup.com/topics/domain-driven-design/" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Domain-Driven Design Meetup Groups</h3>
-            <p class="mb-1">Seznam Meetup skupin zaměřených na Domain-Driven Design po celém světě.</p>
-        </a>
-
-        <a href="https://www.meetup.com/ddd-czechia/" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Domain-Driven Design Czechia</h3>
-            <p class="mb-1">Meetup skupina zaměřená na Domain-Driven Design v České republice.</p>
-        </a>
-
-        <a href="https://symfony.com/community" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Community</h3>
-            <p class="mb-1">Oficiální Symfony komunita. Slack kanál, konference SymfonyCon a lokální meetupy.</p>
-        </a>
-    </div>
-
-    <h2 id="official-docs">Oficiální dokumentace</h2>
-
-    <div class="list-group mb-4">
-        <a href="https://symfony.com/doc/current/index.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Documentation</h3>
-            <p class="mb-1">Oficiální dokumentace Symfony frameworku.</p>
-        </a>
-
-        <a href="https://symfony.com/doc/current/messenger.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Messenger komponenta</h3>
-            <p class="mb-1">Dokumentace Symfony Messenger komponenty – bez ní se implementace CQRS v Symfony neobejde.</p>
-        </a>
-
-        <a href="https://symfony.com/doc/current/doctrine.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Doctrine ORM</h3>
-            <p class="mb-1">Dokumentace Doctrine ORM v Symfony, který je používán pro persistenci doménových objektů.</p>
-        </a>
-
-        <a href="https://symfony.com/doc/current/validation.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Validator komponenta</h3>
-            <p class="mb-1">Dokumentace Symfony Validator komponenty, která je používána pro validaci doménových objektů.</p>
-        </a>
-
-        <a href="https://symfony.com/doc/current/event_dispatcher.html" target="_blank" class="list-group-item list-group-item-action">
-            <h3 class="mb-1">Symfony Event Dispatcher komponenta</h3>
-            <p class="mb-1">Dokumentace Symfony Event Dispatcher komponenty, která je používána pro implementaci doménových událostí.</p>
-        </a>
-    </div>
-
-    <div class="note">
+    <div class="art-body">
         <p>
-            Tento seznam není vyčerpávající. Pokud narazíte na zdroj, který zde chybí a stojí za pozornost,
-            dejte vědět přes <a href="{{ path('about') }}">kontaktní údaje autora</a>.
+            Seznam je <strong>kurátorský, ne vyčerpávající</strong>. Zařazené zdroje mají buď
+            referenční hodnotu (Evans, Vernon, Fowler), nebo přidávají něco, co jinde nenajdete.
+            U každé položky je krátká nota o důvodu zařazení.
         </p>
-    </div>
-    </article>
-{% endblock %}
 
-{% block toc %}<p class="toc-title">Na této stránce</p>{% endblock %}
+        <section id="books" aria-labelledby="books-heading">
+            <h2 id="books-heading" class="h-section"><span class="h-num">A</span> Knihy</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://www.domainlanguage.com/ddd/reference/" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">Eric Evans · 2003 · Addison-Wesley</div>
+                            <div class="res-title">Domain-Driven Design: Tackling Complexity in the Heart of Software</div>
+                            <p class="res-desc">Zakladatelská kniha. Definuje pojmy <em>Ubiquitous Language</em>, <em>Bounded Context</em>, <em>Aggregate</em> a celý slovník strategického i taktického designu. Stále nejdůležitější primární zdroj.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">Vaughn Vernon · 2013 · Addison-Wesley</div>
+                            <div class="res-title">Implementing Domain-Driven Design</div>
+                            <p class="res-desc">Praktický druhý díl k Evansovi. Konkrétní implementační vzory, příklady aggregátů, integrace mezi kontexty a propojení s CQRS i Event Sourcingem.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">Vaughn Vernon · 2016 · Addison-Wesley</div>
+                            <div class="res-title">Domain-Driven Design Distilled</div>
+                            <p class="res-desc">Stručná destilace klíčových konceptů. Vhodný úvod, pokud váháte, jestli investovat čas do plné Implementing DDD.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">Greg Young · 2010 · PDF (zdarma)</div>
+                            <div class="res-title">CQRS Documents</div>
+                            <p class="res-desc">Sbírka původních textů od autora pojmu CQRS. Stručné a hutné – definuje, co CQRS je a co není, vč. vztahu k Event Sourcingu.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">
+                        <span class="res-num">05</span>
+                        <div class="res-body">
+                            <div class="res-meta">Vlad Khononov · 2021 · O'Reilly</div>
+                            <div class="res-title">Learning Domain-Driven Design</div>
+                            <p class="res-desc">Modernější druhý pohled. Klade větší důraz na strategický design a na rozhodování, kde DDD vůbec dává smysl. Dobrý doplněk k Evansovi.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        <section id="articles" aria-labelledby="articles-heading">
+            <h2 id="articles-heading" class="h-section"><span class="h-num">B</span> Články</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://martinfowler.com/bliki/CQRS.html" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">Martin Fowler · martinfowler.com</div>
+                            <div class="res-title">CQRS</div>
+                            <p class="res-desc">Krátké a přesné vymezení vzoru. Mimo jiné jasně říká, kdy se <em>nehodí</em>.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">Martin Fowler · martinfowler.com</div>
+                            <div class="res-title">Bounded Context</div>
+                            <p class="res-desc">Definice pojmu z pera autora, který ho zpopularizoval mimo DDD komunitu. Užitečná čítanka při vysvětlování konceptu netechnickému publiku.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">Jimmy Bogard · jimmybogard.com</div>
+                            <div class="res-title">Vertical Slice Architecture</div>
+                            <p class="res-desc">Argument pro vertikální slicing místo horizontálních vrstev. Důležité, pokud uvažujete o organizaci kódu uvnitř Bounded Contextu.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">Herberto Graca · herbertograca.com</div>
+                            <div class="res-title">Explicit Architecture: DDD, Hexagonal, Onion, Clean, CQRS</div>
+                            <p class="res-desc">Pokus o syntézu několika architektonických škol do jedné konzistentní mapy. Užitečné pro zorientování se v terminologickém zmatku.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://medium.com/@skowron.dev/elevate-your-symfony-projects-implementing-ddd-cqrs-and-hexagonal-architecture-606c81cfd287" target="_blank" rel="noopener">
+                        <span class="res-num">05</span>
+                        <div class="res-body">
+                            <div class="res-meta">Jakub Skowron · Medium</div>
+                            <div class="res-title">Implementing DDD, CQRS and Hexagonal Architecture in Symfony</div>
+                            <p class="res-desc">Konkrétní průchod skládáním DDD, CQRS a hexagonální architektury v Symfony – dobré srovnání proti řešením v této příručce.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        <section id="videos" aria-labelledby="videos-heading">
+            <h2 id="videos-heading" class="h-section"><span class="h-num">C</span> Videa a přednášky</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://www.youtube.com/watch?v=dnUFEg68ESM" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">Eric Evans · YouTube · keynote</div>
+                            <div class="res-title">Tackling Complexity in the Heart of Software</div>
+                            <p class="res-desc">Klíčová Evansova přednáška. Stručnější verze stejnojmenné knihy, dobrá pro pochopení motivace v hodině času.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.youtube.com/watch?v=JHGkaShoyNs" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">Greg Young · YouTube · konference</div>
+                            <div class="res-title">CQRS and Event Sourcing</div>
+                            <p class="res-desc">Greg Young v ostře praktickém režimu – kdy má smysl rozlišovat command/query a kdy jít až k event-sourced uložišti.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">Jimmy Bogard · YouTube · konference</div>
+                            <div class="res-title">Vertical Slice Architecture</div>
+                            <p class="res-desc">Videoverze stejnojmenného článku. Argumentace dovedená do živé prezentace, vč. odpovědí na typické námitky.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.youtube.com/channel/UC3PGn-hQdbtRiqxZK9XBGqQ" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">Domain-Driven Design Europe · YouTube kanál</div>
+                            <div class="res-title">DDD Europe – záznamy z konferencí</div>
+                            <p class="res-desc">Roční konference v Amsterdamu, dnes hlavní setkání DDD komunity. Stovky záznamů, převážně silné přednášky od praktiků.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfonycasts.com/screencast/messenger" target="_blank" rel="noopener">
+                        <span class="res-num">05</span>
+                        <div class="res-body">
+                            <div class="res-meta">SymfonyCasts · placený kurz</div>
+                            <div class="res-title">Symfony Messenger – screencast</div>
+                            <p class="res-desc">Praktická série o Messengeru od základů po pokročilé scénáře (async transport, middleware, CQRS bus). Pokud Messenger používáte denně, vyplatí se.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        <section id="repositories" aria-labelledby="repositories-heading">
+            <h2 id="repositories-heading" class="h-section"><span class="h-num">D</span> GitHub repozitáře</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://github.com/CodelyTV/php-ddd-example" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">CodelyTV · PHP · Symfony</div>
+                            <div class="res-title">php-ddd-example</div>
+                            <p class="res-desc">Referenční implementace hexagonální architektury, DDD a CQRS v PHP nad Symfony. Pečlivě udržovaná, dobré pro inspiraci konkrétní strukturou složek.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://github.com/jorge07/symfony-7-es-cqrs-boilerplate" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">Jorge Arco · PHP · Symfony 7</div>
+                            <div class="res-title">symfony-7-es-cqrs-boilerplate</div>
+                            <p class="res-desc">Boilerplate s plnou implementací Event Sourcingu a CQRS v Symfony. Pokud začínáte, dobrá kostra k orientaci.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://github.com/dddinphp/ddd" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">DDD in PHP · Buenosvinos / Soronellas / Akbary</div>
+                            <div class="res-title">dddinphp/ddd</div>
+                            <p class="res-desc">Příklady kódu z knihy <em>Domain-Driven Design in PHP</em>. Mírně staršího data, ale obsahově konzistentní s Vernonem.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://github.com/Sylius/Sylius" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">Sylius Team · Symfony · e-commerce</div>
+                            <div class="res-title">Sylius/Sylius</div>
+                            <p class="res-desc">Produkční e-commerce platforma postavená na Symfony s DDD principy. Užitečné jako reálný příklad rozsáhlého kódu, nejen jako teoretická ukázka.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        <section id="courses" aria-labelledby="courses-heading">
+            <h2 id="courses-heading" class="h-section"><span class="h-num">E</span> Online kurzy</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://www.pluralsight.com/courses/domain-driven-design-fundamentals" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">Pluralsight · Steve Smith / Julie Lerman · C#</div>
+                            <div class="res-title">Domain-Driven Design Fundamentals</div>
+                            <p class="res-desc">Úvodní kurz pokrývající strategický i taktický design. Přestože je v C#, koncepty jsou jazykově neutrální.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.pluralsight.com/courses/cqrs-in-practice" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">Pluralsight · Vladimir Khorikov · C#</div>
+                            <div class="res-title">CQRS in Practice</div>
+                            <p class="res-desc">Praktická aplikace CQRS krok za krokem, vč. čistého oddělení čtecího a zápisového modelu. Doporučuji po základech DDD.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://codely.com/blog/ddd" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">CodelyTV · PHP · placený</div>
+                            <div class="res-title">DDD in PHP</div>
+                            <p class="res-desc">Kurz od stejné party, která stojí za referenční implementací výše. Aplikuje DDD a hexagonální architekturu konkrétně v PHP.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfonycasts.com/screencast/messenger" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">SymfonyCasts · placený</div>
+                            <div class="res-title">Symfony Messenger</div>
+                            <p class="res-desc">Messenger v praxi – async transport, middleware, command a query bus. Pokud chcete CQRS v Symfony, je to nejkratší cesta.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        <section id="communities" aria-labelledby="communities-heading">
+            <h2 id="communities-heading" class="h-section"><span class="h-num">F</span> Komunity</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://dddcommunity.org/" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">dddcommunity.org · web</div>
+                            <div class="res-title">DDD Community</div>
+                            <p class="res-desc">Oficiální stránky komunity založené Ericem Evansem. Reference, články a odkazy na konference.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.meetup.com/ddd-czechia/" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">Meetup · česky</div>
+                            <div class="res-title">Domain-Driven Design Czechia</div>
+                            <p class="res-desc">Lokální česká skupina. Praktické setkání s lidmi, kteří DDD reálně používají v produkčních systémech.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://www.meetup.com/topics/domain-driven-design/" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">Meetup · globálně</div>
+                            <div class="res-title">DDD Meetup Groups</div>
+                            <p class="res-desc">Adresář DDD meetupů po celém světě. Pokud cestujete, pravděpodobně někde v okolí najdete živou skupinu.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfony.com/community" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">symfony.com · oficiální</div>
+                            <div class="res-title">Symfony Community</div>
+                            <p class="res-desc">Slack kanál, SymfonyCon, lokální meetupy. Pro otázky kolem frameworku, nikoliv čistě DDD.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        <section id="official-docs" aria-labelledby="docs-heading">
+            <h2 id="docs-heading" class="h-section"><span class="h-num">G</span> Oficiální dokumentace</h2>
+            <ol class="res-list">
+                <li class="res-item">
+                    <a class="res-link" href="https://symfony.com/doc/current/index.html" target="_blank" rel="noopener">
+                        <span class="res-num">01</span>
+                        <div class="res-body">
+                            <div class="res-meta">symfony.com · oficiální</div>
+                            <div class="res-title">Symfony Documentation</div>
+                            <p class="res-desc">Hlavní rozcestník oficiální dokumentace Symfony.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfony.com/doc/current/messenger.html" target="_blank" rel="noopener">
+                        <span class="res-num">02</span>
+                        <div class="res-body">
+                            <div class="res-meta">symfony.com · komponenta</div>
+                            <div class="res-title">Symfony Messenger</div>
+                            <p class="res-desc">Bez Messengeru se CQRS v Symfony neimplementuje. Klíčová referenční dokumentace.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfony.com/doc/current/doctrine.html" target="_blank" rel="noopener">
+                        <span class="res-num">03</span>
+                        <div class="res-body">
+                            <div class="res-meta">symfony.com · komponenta</div>
+                            <div class="res-title">Symfony &amp; Doctrine ORM</div>
+                            <p class="res-desc">Persistence doménových objektů v Symfony. Praktická referenční dokumentace pro každodenní práci.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfony.com/doc/current/validation.html" target="_blank" rel="noopener">
+                        <span class="res-num">04</span>
+                        <div class="res-body">
+                            <div class="res-meta">symfony.com · komponenta</div>
+                            <div class="res-title">Symfony Validator</div>
+                            <p class="res-desc">Validace na hranici aplikace. Pozor – invariant uvnitř agregátu patří do agregátu, ne do Validatoru.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                <li class="res-item">
+                    <a class="res-link" href="https://symfony.com/doc/current/event_dispatcher.html" target="_blank" rel="noopener">
+                        <span class="res-num">05</span>
+                        <div class="res-body">
+                            <div class="res-meta">symfony.com · komponenta</div>
+                            <div class="res-title">Symfony Event Dispatcher</div>
+                            <p class="res-desc">Synchronní eventy v jednom procesu. Pro doménové události uvnitř jednoho requestu je dostatečný; pro mezi-kontextovou integraci je vhodnější Messenger.</p>
+                        </div>
+                        <span class="res-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+            </ol>
+        </section>
+
+        {% set _addnote %}
+            <p>
+                Tento seznam není vyčerpávající. Pokud znáte zdroj, který sem patří a chybí, ozvěte se přes
+                <a href="{{ path('about') }}">kontaktní údaje autora</a>.
+            </p>
+        {% endset %}
+        {% include '_partials/callout.html.twig' with {
+            type: 'note',
+            label: 'Doplnění',
+            body: _addnote
+        } %}
+    </div>
+</article>
+{% endblock %}

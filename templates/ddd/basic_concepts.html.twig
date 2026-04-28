@@ -2,7 +2,7 @@
 
 {% block title %}Základní koncepty Domain-Driven Design | DDD Symfony{% endblock %}
 
-{% block meta_description %}Detailní průvodce základními koncepty Domain-Driven Design: entity, hodnotové objekty, kořeny agregátů, doménové služby, repozitáře a další. Naučte se, jak tyto koncepty implementovat v Symfony.{% endblock %}
+{% block meta_description %}Základní stavební kameny taktického DDD: entity, hodnotové objekty, agregáty, repozitáře, doménové události a služby – s ukázkami v PHP 8.4+ a Symfony 8.{% endblock %}
 
 {% block meta_keywords %}DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace{% endblock %}
 
@@ -19,8 +19,8 @@
           "@context": "https://schema.org",
           "@type": "TechArticle",
           "headline": "Základní koncepty Domain-Driven Design",
-          "description": "{{ block('meta_description') }}",
-  "keywords": "{{ block('meta_keywords') }}",
+          "description": "{{ block('meta_description')|escape('js') }}",
+  "keywords": "{{ block('meta_keywords')|escape('js') }}",
   "author": {
             "@type": "Person",
             "name": "Michal Katuščák",
@@ -35,7 +35,8 @@
             "name": "Michal Katuščák"
   },
   "datePublished": "2025-04-24",
-  "dateModified": "2026-04-12",
+  "dateModified": "{{ block('article_modified_time')|trim }}",
+  "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
@@ -60,17 +61,7 @@
     {% include '_partials/article_toc.html.twig' %}
 
     <div class="art-body" data-chapter-number="02">
-        <div class="examples-banner" role="note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"  viewBox="0 0 16 16">
-                <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0m6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0"/>
-            </svg>
-            <span>
-                Ke kapitole patří <strong>živá ukázka kódu</strong>:
-                <a href="https://github.com/MichalKatuscak/ddd-symfony-examples/tree/main/src/Chapter03_BasicConcepts"  target="_blank" rel="noopener">
-                    Zobrazit na GitHubu →
-                </a>
-            </span>
-        </div>
+        {% include '_partials/github_examples.html.twig' with { path: 'Chapter03_BasicConcepts' } %}
 
         <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
             <h2 id="bounded-contexts-heading" class="h-section"><span class="h-num">02.01</span> Ohraničené kontexty (Bounded Contexts)</h2>
@@ -622,9 +613,9 @@ class PaymentService
             <p>
                 V tomto příkladu je <code>PaymentService</code> doménová služba, která zapouzdřuje doménovou logiku
                 zpracování plateb a vytváří objekt <code>Payment</code>. Doménová služba je bezstavová a
-                neobsahuje repozitáře - persistence vraceného objektu je zodpovědností volající vrstvy
+                neobsahuje repozitáře – persistence vraceného objektu je zodpovědností volající vrstvy
                 (Application Service nebo Command Handler).
-                Třídy <code>Payment</code>, <code>PaymentId</code> a <code>PaymentMethod</code> jsou součástí doménového modelu plateb - jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
+                Třídy <code>Payment</code>, <code>PaymentId</code> a <code>PaymentMethod</code> jsou součástí doménového modelu plateb – jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
             </p>
 
             {% set _callout_body %}
@@ -656,7 +647,7 @@ class PaymentService
             <p>
                 Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
                 doménový význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
-                k popisu dané změny stavu - nespoléhají na pozdější dotazování.
+                k popisu dané změny stavu – nespoléhají na pozdější dotazování.
             </p>
 
             {% set _code %}<?php
@@ -736,7 +727,7 @@ final class OrderCreatedEvent
                 },
                 {
                     question: 'Co je Doménová událost a k čemu slouží?',
-                    answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena" nebo „platba byla přijata". Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
+                    answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena“ nebo „platba byla přijata“. Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
                 }
             ]
         } %}

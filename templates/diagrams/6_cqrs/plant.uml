@@ -1,66 +1,6 @@
-@startuml
-skinparam dpi 150
-skinparam backgroundColor #FAFAFA
-skinparam shadowing false
+@startuml diagram
+!include ../theme.iuml
 
-skinparam defaultFontName "Nunito"
-skinparam defaultFontSize 16
-skinparam defaultTextAlignment center
-
-skinparam node {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-  BorderThickness 2
-}
-
-skinparam component {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-  BorderThickness 2
-}
-
-skinparam rectangle {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-  BorderThickness 2
-}
-
-skinparam arrowColor #005A9C
-skinparam arrowThickness 2
-
-skinparam activity {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-}
-
-skinparam sequence {
-  ParticipantBorderColor #005A9C
-  LifeLineBorderColor #005A9C
-  LifeLineBackgroundColor #E6F0FA
-  ParticipantBackgroundColor #FFFFFF
-}
-
-skinparam package {
-  BackgroundColor #FAFAFA
-  BorderColor #005A9C
-}
-
-skinparam note {
-  BackgroundColor #E6F0FA
-  BorderColor #005A9C
-}
-
-skinparam title {
-  BackgroundColor #FFFFFF
-  BorderColor #005A9C
-}
-
-' Pro sekvenční diagramy
-skinparam sequenceArrowThickness 2
-skinparam sequenceArrowColor #005A9C
-
-
-' Nadpis
 title CQRS v Symfony 8
 
 ' Definice obálek (package)
@@ -70,7 +10,7 @@ package "Prezentační vrstva" {
     +injectCommandBus(MessageBusInterface)
     +injectQueryBus(MessageBusInterface)
   }
-  
+
   class ViewModel {
     +data
   }
@@ -81,12 +21,12 @@ package "Aplikační vrstva - Commands" {
     +properties
     +__construct()
   }
-  
+
   class CommandHandler {
     +__construct(dependencies)
     +__invoke(Command): void
   }
-  
+
   class CommandBus {
     +dispatch(Command)
   }
@@ -97,12 +37,12 @@ package "Aplikační vrstva - Queries" {
     +properties
     +__construct()
   }
-  
+
   class QueryHandler {
     +__construct(dependencies)
     +__invoke(Query): ?ViewModel
   }
-  
+
   class QueryBus {
     +dispatch(Query)
   }
@@ -112,13 +52,13 @@ package "Doménová vrstva" {
   class Entity {
     +methods()
   }
-  
+
   class Repository {
     <<interface>>
     +save(Entity)
     +findById(id)
   }
-  
+
   class DomainEvent {
     +properties
   }
@@ -130,12 +70,12 @@ package "Infrastrukturní vrstva" {
     +save(Entity)
     +findById(id)
   }
-  
+
   class MessengerComponent {
     +handle(message)
     +route(message)
   }
-  
+
   class Transport {
     +sync
     +async
