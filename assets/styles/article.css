@@ -5,7 +5,9 @@
 .article {
   max-width: var(--page-article);
   margin: 0 auto;
-  padding: var(--s-7) var(--s-5) var(--s-9);
+  /* Bottom padding s-8 (64 px) místo s-9 (96 px) — chapter_nav před koncem
+     .art-body už drží uzavírací rytmus, větší vakuum k footeru zbytečné. */
+  padding: var(--s-7) var(--s-5) var(--s-8);
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: var(--s-7);
@@ -282,13 +284,15 @@ section > h4:first-child { margin-top: 0; }
   margin: var(--s-5) 0 var(--s-2);
 }
 
-/* Inline code (jediná deklarace pro article body, FAQ, landing deck a obecný .ic) */
+/* Inline code (jediná deklarace pro article body, FAQ, landing deck a obecný .ic).
+   font-size: 0.92em — kompromis mezi optickým odlišením od těla (kde tělo je 13–16 px)
+   a čitelností v menších kontextech (FAQ a glosář, kde rodič je 13 px → kód 12 px). */
 .ic,
 .art-body code,
 .faq-answer code, .faq-answer .ic,
 .land-deck code, .land-deck .ic {
   font-family: var(--font-mono);
-  font-size: 0.88em;
+  font-size: 0.92em;
   letter-spacing: var(--tracking-mono);
   background: var(--bg-2);
   border: 1px solid var(--stroke);
@@ -337,7 +341,6 @@ section > h4:first-child { margin-top: 0; }
   line-height: var(--lh-normal);
   color: var(--fg-muted);
 }
-.callout-body code, .callout-body .ic { font-size: 0.92em; }
 .callout-body p { margin: 0 0 var(--s-3); }
 .callout-body p:last-child { margin-bottom: 0; }
 
@@ -508,7 +511,9 @@ section > h4:first-child { margin-top: 0; }
   font-family: var(--font-mono);
   font-size: var(--t-xs);
   letter-spacing: var(--tracking-mono);
-  color: var(--fg-dim);
+  /* fg-muted (≈ 8.5 : 1) místo fg-dim (≈ 5.1 : 1) — pro 11 px metadata
+     je vyšší kontrast bezpečnější (WCAG AAA pro malé texty). */
+  color: var(--fg-muted);
   margin-top: var(--s-3);
   padding-top: var(--s-2);
   border-top: 1px solid var(--stroke);

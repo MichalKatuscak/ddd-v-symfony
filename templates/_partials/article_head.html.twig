@@ -41,7 +41,9 @@
         <div class="art-meta-row">
             <span class="art-meta-k">Náročnost</span>
             <span class="art-meta-v">
-                <span class="diff-bar">
+                {# Vizuální indikátor pro vidící uživatele; samotný text obtížnosti je dál
+                   pro screen-reader. Bez aria-hidden by SR četl 4 prázdné <i> elementy. #}
+                <span class="diff-bar" aria-hidden="true">
                     {% for i in 1..4 %}<i class="{{ i <= difficulty ? 'on' : '' }}"></i>{% endfor %}
                 </span>
                 {% set diff_label = ['základní', 'mírně pokročilá', 'pokročilá', 'náročná'] %}
