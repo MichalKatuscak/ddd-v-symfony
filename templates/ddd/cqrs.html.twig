@@ -324,7 +324,38 @@
     {% set _callout_body %}
 
         <h3 id="messenger-config-heading">Konfigurace Symfony Messenger pro CQRS</h3>
-        {% set _code %} PLACEHOLDER0 {% endset %}
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
+framework:
+    messenger:
+        # Výchozí bus - použitý, když není specifikovaný jiný
+        default_bus: command.bus
+
+        # Konfigurace transportů
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+            sync: 'sync://'
+
+        # Konfigurace busů
+        buses:
+            command.bus:
+                middleware:
+                    - validation
+                    - doctrine_transaction
+
+            query.bus:
+                middleware:
+                    - validation
+
+        # Směrování zpráv - mapuje konkrétní třídy nebo rozhraní na transport
+        routing:
+            # Příkazy vhodné pro asynchronní zpracování:
+            # operace, kde uživatel nemusí čekat na výsledek
+            App\Notification\Application\Command\SendWelcomeEmail: async
+            App\Reporting\Application\Command\GenerateMonthlyReport: async
+
+            # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
+            # App\UserManagement\Profile\Query\GetUserProfile: sync{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/packages/messenger.yaml',
                 language: 'yaml',
@@ -404,7 +435,35 @@
     {% set _callout_body %}
 
         <h3 id="command-example-heading">PHP: Implementace příkazu v Symfony 8</h3>
-        {% set _code %} PLACEHOLDER1 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Registration\Command;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * Příkaz pro registraci nového uživatele.
+ * Immutabilní DTO - neslouží k business logice, pouze přenáší data.
+ */
+final class RegisterUser
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 2, max: 255)]
+        public readonly string $name,
+
+        #[Assert\NotBlank]
+        #[Assert\Email]
+        public readonly string $email,
+
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 8)]
+        public readonly string $password
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Registration/Command/RegisterUser.php',
                 language: 'php',
@@ -455,7 +514,23 @@
     {% set _callout_body %}
 
         <h3 id="query-example-heading">PHP: Implementace dotazu v Symfony 8</h3>
-        {% set _code %} PLACEHOLDER2 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Profile\Query;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+final class GetUserProfile
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $userId
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Profile/Query/GetUserProfile.php',
                 language: 'php',
@@ -480,7 +555,34 @@
             Reálné aplikace potřebují dotazy složitější než pouhé „dej mi záznam podle ID“. Queries
             mohou obsahovat filtrovací kritéria, řazení a stránkování:
         </p>
-        {% set _code %} PLACEHOLDER3 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Query;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+final class ListOrders
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $customerId,
+
+        public readonly ?string $status = null,
+
+        #[Assert\Range(min: 1, max: 100)]
+        public readonly int $limit = 20,
+
+        #[Assert\PositiveOrZero]
+        public readonly int $offset = 0,
+
+        public readonly string $sortBy = 'createdAt',
+        public readonly string $sortDirection = 'DESC',
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Ordering/Application/Query/ListOrders.php',
                 language: 'php',
@@ -520,7 +622,50 @@
     {% set _callout_body %}
 
         <h3 id="command-handler-heading">PHP: Command handler – RegisterUserHandler</h3>
-        {% set _code %} PLACEHOLDER4 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Registration\Command;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\Service\PasswordHasher;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class RegisterUserHandler
+{
+    public function __construct(
+        private UserRepository $userRepository,
+        private PasswordHasher $passwordHasher
+    ) {
+    }
+
+    public function __invoke(RegisterUser $command): void
+    {
+        $email = new Email($command->email);
+
+        if ($this->userRepository->findByEmail($email)) {
+            throw new \DomainException('User with this email already exists');
+        }
+
+        $hashedPassword = $this->passwordHasher->hashPassword(
+            $command->password
+        );
+
+        $user = User::register(
+            new UserId(),
+            $command->name,
+            $email,
+            $hashedPassword
+        );
+
+        $this->userRepository->save($user);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Registration/Command/RegisterUserHandler.php',
                 language: 'php',
@@ -550,7 +695,29 @@
     {% set _callout_body %}
 
         <h3 id="query-handler-example-heading">PHP: Query handler – GetUserProfileHandler</h3>
-        {% set _code %} PLACEHOLDER5 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Profile\Query;
+
+use App\UserManagement\Profile\ReadModel\UserProfileReadRepository;
+use App\UserManagement\Profile\ViewModel\UserProfileViewModel;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class GetUserProfileHandler
+{
+    public function __construct(
+        private UserProfileReadRepository $readRepository
+    ) {
+    }
+
+    public function __invoke(GetUserProfile $query): ?UserProfileViewModel
+    {
+        return $this->readRepository->findById($query->userId);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Profile/Query/GetUserProfileHandler.php',
                 language: 'php',
@@ -585,7 +752,28 @@
     {% set _callout_body %}
 
         <h3 id="viewmodel-example-heading">PHP: UserProfileViewModel</h3>
-        {% set _code %} PLACEHOLDER6 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Profile\ViewModel;
+
+/**
+ * Read model pro zobrazení uživatelského profilu.
+ * Obsahuje pouze data potřebná pro prezentaci - žádná business logika.
+ */
+final readonly class UserProfileViewModel
+{
+    public function __construct(
+        public string $userId,
+        public string $name,
+        public string $email,
+        public \DateTimeImmutable $registeredAt,
+        public int $totalOrders,
+        public string $membershipTier,
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Profile/ViewModel/UserProfileViewModel.php',
                 language: 'php',
@@ -609,7 +797,50 @@
     {% set _callout_body %}
 
         <h3 id="read-repository-example-heading">PHP: Read repozitář s přímým SQL (Doctrine DBAL)</h3>
-        {% set _code %} PLACEHOLDER7 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\ReadModel;
+
+use App\UserManagement\Profile\ReadModel\UserProfileReadRepository;
+use App\UserManagement\Profile\ViewModel\UserProfileViewModel;
+use Doctrine\DBAL\Connection;
+
+final class DbalUserProfileReadRepository implements UserProfileReadRepository
+{
+    public function __construct(
+        private readonly Connection $connection,
+    ) {}
+
+    public function findById(string $userId): ?UserProfileViewModel
+    {
+        $row = $this->connection->fetchAssociative(
+            'SELECT u.id, u.name, u.email, u.registered_at,
+                    COUNT(o.id) AS total_orders,
+                    COALESCE(m.tier, :defaultTier) AS membership_tier
+               FROM users u
+          LEFT JOIN orders o ON o.customer_id = u.id
+          LEFT JOIN memberships m ON m.user_id = u.id
+              WHERE u.id = :userId
+           GROUP BY u.id',
+            ['userId' => $userId, 'defaultTier' => 'standard'],
+        );
+
+        if (!$row) {
+            return null;
+        }
+
+        return new UserProfileViewModel(
+            userId: $row['id'],
+            name: $row['name'],
+            email: $row['email'],
+            registeredAt: new \DateTimeImmutable($row['registered_at']),
+            totalOrders: (int) $row['total_orders'],
+            membershipTier: $row['membership_tier'],
+        );
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Infrastructure/ReadModel/DbalUserProfileReadRepository.php',
                 language: 'php',
@@ -651,7 +882,58 @@
     {% set _callout_body %}
 
         <h3 id="buses-example-heading">PHP: Použití command busu v controlleru</h3>
-        {% set _code %} PLACEHOLDER8 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Registration\Controller;
+
+use App\UserManagement\Registration\Command\RegisterUser;
+use App\UserManagement\Registration\Form\RegistrationFormType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Attribute\Route;
+
+final class RegistrationController extends AbstractController
+{
+    public function __construct(
+        private MessageBusInterface $commandBus
+    ) {
+    }
+
+    #[Route('/register', name: 'app_register')]
+    public function register(Request $request): Response
+    {
+        $form = $this->createForm(RegistrationFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            $command = new RegisterUser(
+                $data['name'],
+                $data['email'],
+                $data['password']
+            );
+
+            try {
+                $this->commandBus->dispatch($command);
+
+                $this->addFlash('success', 'Váš účet byl vytvořen. Nyní se můžete přihlásit.');
+
+                return $this->redirectToRoute('app_login');
+            } catch (\DomainException $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
+        }
+
+        return $this->render('@UserManagement/Registration/View/registration.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Registration/Controller/RegistrationController.php',
                 language: 'php',
@@ -667,7 +949,44 @@
     {% set _callout_body %}
 
         <h3 id="query-bus-example-heading">PHP: Použití query busu v controlleru</h3>
-        {% set _code %} PLACEHOLDER9 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Profile\Controller;
+
+use App\UserManagement\Profile\Query\GetUserProfile;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+final class ProfileController extends AbstractController
+{
+    public function __construct(
+        private MessageBusInterface $queryBus
+    ) {
+    }
+
+    #[Route('/profile', name: 'app_profile')]
+    public function profile(UserInterface $user): Response
+    {
+        $query = new GetUserProfile($user->getUserIdentifier());
+
+        $envelope = $this->queryBus->dispatch($query);
+        $profile = $envelope->last(HandledStamp::class)->getResult();
+
+        if (!$profile) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        return $this->render('@UserManagement/Profile/View/profile.html.twig', [
+            'profile' => $profile,
+        ]);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/UserManagement/Profile/Controller/ProfileController.php',
                 language: 'php',
@@ -768,7 +1087,89 @@
     {% set _callout_body %}
 
         <h3 id="denorm-projekce-heading">PHP: Projektor aktualizující denormalizovanou tabulku</h3>
-        {% set _code %} PLACEHOLDER10 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Infrastructure\Projection;
+
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderShipped;
+use App\Ordering\Domain\Event\OrderCancelled;
+use Doctrine\DBAL\Connection;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+/**
+ * Asynchronní projektor: naslouchá doménovým událostem a aktualizuje
+ * denormalizovanou tabulku order_dashboard, optimalizovanou pro
+ * obrazovku "Přehled objednávek".
+ */
+#[AsMessageHandler]
+final class OrderDashboardProjector
+{
+    public function __construct(
+        private readonly Connection $connection,
+    ) {}
+
+    public function __invoke(OrderPlaced|OrderShipped|OrderCancelled $event): void
+    {
+        match (true) {
+            $event instanceof OrderPlaced => $this->onOrderPlaced($event),
+            $event instanceof OrderShipped => $this->onOrderShipped($event),
+            $event instanceof OrderCancelled => $this->onOrderCancelled($event),
+        };
+    }
+
+    private function onOrderPlaced(OrderPlaced $event): void
+    {
+        $this->connection->executeStatement(
+            'INSERT INTO order_dashboard
+                (order_id, customer_name, total_amount, status, placed_at, updated_at)
+             VALUES (:orderId, :customerName, :totalAmount, :status, :placedAt, :updatedAt)
+             ON DUPLICATE KEY UPDATE
+                status = VALUES(status), updated_at = VALUES(updated_at)',
+            [
+                'orderId'      => $event->orderId(),
+                'customerName' => $event->customerName(),
+                'totalAmount'  => $event->totalAmount(),
+                'status'       => 'placed',
+                'placedAt'     => $event->occurredOn()->format('Y-m-d H:i:s'),
+                'updatedAt'    => $event->occurredOn()->format('Y-m-d H:i:s'),
+            ],
+        );
+    }
+
+    private function onOrderShipped(OrderShipped $event): void
+    {
+        $this->connection->executeStatement(
+            'UPDATE order_dashboard
+                SET status = :status,
+                    tracking_number = :trackingNumber,
+                    updated_at = :updatedAt
+              WHERE order_id = :orderId',
+            [
+                'orderId'        => $event->orderId(),
+                'status'         => 'shipped',
+                'trackingNumber' => $event->trackingNumber(),
+                'updatedAt'      => $event->occurredOn()->format('Y-m-d H:i:s'),
+            ],
+        );
+    }
+
+    private function onOrderCancelled(OrderCancelled $event): void
+    {
+        $this->connection->executeStatement(
+            'UPDATE order_dashboard
+                SET status = :status, updated_at = :updatedAt
+              WHERE order_id = :orderId',
+            [
+                'orderId'   => $event->orderId(),
+                'status'    => 'cancelled',
+                'updatedAt' => $event->occurredOn()->format('Y-m-d H:i:s'),
+            ],
+        );
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Ordering/Infrastructure/Projection/OrderDashboardProjector.php',
                 language: 'php',
@@ -906,7 +1307,56 @@
     {% set _callout_body %}
 
         <h3 id="ec-priklad-heading">PHP: Optimistická aktualizace – controller vrací data z command handleru</h3>
-        {% set _code %} PLACEHOLDER11 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Controller;
+
+use App\Ordering\Application\Command\PlaceOrder;
+use App\Ordering\Application\Form\PlaceOrderFormType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Ramsey\Uuid\Uuid;
+
+final class PlaceOrderController extends AbstractController
+{
+    public function __construct(
+        private MessageBusInterface $commandBus,
+    ) {}
+
+    #[Route('/orders', name: 'place_order', methods: ['POST'])]
+    public function __invoke(Request $request): Response
+    {
+        $form = $this->createForm(PlaceOrderFormType::class);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $this->redirectToRoute('cart');
+        }
+
+        // ID generováno na straně klienta - command nemusí vracet hodnotu
+        $orderId = Uuid::uuid4()->toString();
+        $data = $form->getData();
+
+        $command = new PlaceOrder(
+            orderId: $orderId,
+            customerId: $this->getUser()->getUserIdentifier(),
+            items: $data['items'],
+        );
+
+        $this->commandBus->dispatch($command);
+
+        // Redirect na detail objednávky - read model se může
+        // ještě aktualizovat, ale uživatel vidí potvrzení
+        $this->addFlash('success', 'Objednávka byla úspěšně vytvořena.');
+
+        return $this->redirectToRoute('order_detail', ['id' => $orderId]);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Ordering/Application/Controller/PlaceOrderController.php',
                 language: 'php',
@@ -957,7 +1407,35 @@
     {% set _callout_body %}
 
         <h3 id="async-example-heading">Konfigurace asynchronního zpracování v Symfony 8</h3>
-        {% set _code %} PLACEHOLDER12 {% endset %}
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
+framework:
+    messenger:
+        # Konfigurace transportů
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: commands
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+                    max_delay: 60000
+
+            async_priority_high:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: high_priority
+
+        # Směrování zpráv - mapuje konkrétní třídy nebo rozhraní na transport
+        routing:
+            # Příkazy vhodné pro asynchronní zpracování:
+            # odesílání notifikací, generování reportů, aktualizace read modelů
+            App\Notification\Application\Command\SendWelcomeEmail: async
+            App\Reporting\Application\Command\GenerateMonthlyReport: async
+
+            # Vysoká priorita - aktualizace read modelů pro kritické obrazovky
+            App\Ordering\Domain\Event\OrderPlaced: async_priority_high{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/packages/messenger.yaml',
                 language: 'yaml',
@@ -980,7 +1458,19 @@
     {% set _callout_body %}
 
         <h3 id="worker-heading">Spuštění Messenger workerů</h3>
-        {% set _code %} PLACEHOLDER13 {% endset %}
+        {% set _code %}{% verbatim %}# Konzumace zpráv z obou front - high_priority má přednost
+$ php bin/console messenger:consume async_priority_high async
+
+# V produkci: Supervisor nebo systemd pro automatický restart
+# /etc/supervisor/conf.d/messenger-worker.conf
+[program:messenger-consume]
+command=php /var/www/app/bin/console messenger:consume async_priority_high async --time-limit=3600 --memory-limit=128M
+numprocs=2
+autostart=true
+autorestart=true
+startsecs=0
+redirect_stderr=true
+stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
                 language: 'bash',
@@ -1049,7 +1539,14 @@
     {% set _callout_body %}
 
         <h3 id="failed-transport-heading">Konfigurace failed transportu a diagnostické příkazy</h3>
-        {% set _code %} PLACEHOLDER14 {% endset %}
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            failed:
+                dsn: 'doctrine://default?queue_name=failed'{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/packages/messenger.yaml',
                 language: 'yaml',
@@ -1057,7 +1554,20 @@
                 highlights: []
             } %}
 
-        {% set _code %} PLACEHOLDER15 {% endset %}
+        {% set _code %}{% verbatim %}# Zobrazení selhavších zpráv
+$ php bin/console messenger:failed:show
+
+# Detail konkrétní selhavší zprávy (včetně výjimky)
+$ php bin/console messenger:failed:show 42
+
+# Opakované zpracování selhavší zprávy
+$ php bin/console messenger:failed:retry 42
+
+# Opakování všech selhavších zpráv
+$ php bin/console messenger:failed:retry
+
+# Trvalé odstranění selhavší zprávy (po analýze)
+$ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
                 language: 'bash',
@@ -1104,7 +1614,57 @@
     {% set _callout_body %}
 
         <h3 id="middleware-priklad-heading">PHP: Logovací middleware pro command bus</h3>
-        {% set _code %} PLACEHOLDER16 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Messenger\Middleware;
+
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
+use Symfony\Component\Messenger\Middleware\StackInterface;
+
+final class CommandLoggingMiddleware implements MiddlewareInterface
+{
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {}
+
+    public function handle(Envelope $envelope, StackInterface $stack): Envelope
+    {
+        $message = $envelope->getMessage();
+        $commandName = (new \ReflectionClass($message))->getShortName();
+
+        $this->logger->info('Dispatching command: {command}', [
+            'command' => $commandName,
+            // Pozor: v produkci filtrujte citlivá pole (hesla, tokeny)
+            // pomocí vlastního serializéru nebo allowlistu properties
+            'payload' => get_object_vars($message),
+        ]);
+
+        $startTime = microtime(true);
+
+        try {
+            $envelope = $stack->next()->handle($envelope, $stack);
+
+            $this->logger->info('Command handled: {command} ({duration}ms)', [
+                'command'  => $commandName,
+                'duration' => round((microtime(true) - $startTime) * 1000, 2),
+            ]);
+
+            return $envelope;
+        } catch (\Throwable $e) {
+            $this->logger->error('Command failed: {command} - {error}', [
+                'command'  => $commandName,
+                'error'    => $e->getMessage(),
+                'duration' => round((microtime(true) - $startTime) * 1000, 2),
+            ]);
+
+            throw $e;
+        }
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Infrastructure/Messenger/Middleware/CommandLoggingMiddleware.php',
                 language: 'php',
@@ -1120,7 +1680,15 @@
     {% set _callout_body %}
 
         <h3 id="middleware-registrace-heading">Registrace vlastního middleware</h3>
-        {% set _code %} PLACEHOLDER17 {% endset %}
+        {% set _code %}{% verbatim %}# config/packages/messenger.yaml
+framework:
+    messenger:
+        buses:
+            command.bus:
+                middleware:
+                    - App\Infrastructure\Messenger\Middleware\CommandLoggingMiddleware
+                    - validation
+                    - doctrine_transaction{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/packages/messenger.yaml',
                 language: 'yaml',
@@ -1158,7 +1726,64 @@
     {% set _callout_body %}
 
         <h3 id="test-command-handler-heading">PHP: Test command handleru</h3>
-        {% set _code %} PLACEHOLDER18 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Registration\Command;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\Service\PasswordHasher;
+use App\UserManagement\Registration\Command\RegisterUser;
+use App\UserManagement\Registration\Command\RegisterUserHandler;
+use PHPUnit\Framework\TestCase;
+
+final class RegisterUserHandlerTest extends TestCase
+{
+    public function testRegistersNewUser(): void
+    {
+        $repository = $this->createMock(UserRepository::class);
+        $repository->expects($this->once())
+            ->method('findByEmail')
+            ->willReturn(null); // žádný existující uživatel
+
+        $repository->expects($this->once())
+            ->method('save')
+            ->with($this->isInstanceOf(User::class));
+
+        $hasher = $this->createMock(PasswordHasher::class);
+        $hasher->method('hashPassword')->willReturn('hashed_password');
+
+        $handler = new RegisterUserHandler($repository, $hasher);
+
+        $handler(new RegisterUser(
+            name: 'Jan Novák',
+            email: 'jan@example.com',
+            password: 'securepassword123',
+        ));
+    }
+
+    public function testRejectsDuplicateEmail(): void
+    {
+        $repository = $this->createMock(UserRepository::class);
+        $repository->method('findByEmail')
+            ->willReturn($this->createMock(User::class)); // uživatel existuje
+
+        $hasher = $this->createMock(PasswordHasher::class);
+
+        $handler = new RegisterUserHandler($repository, $hasher);
+
+        $this->expectException(\DomainException::class);
+        $this->expectExceptionMessage('User with this email already exists');
+
+        $handler(new RegisterUser(
+            name: 'Jan Novák',
+            email: 'jan@example.com',
+            password: 'securepassword123',
+        ));
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Registration/Command/RegisterUserHandlerTest.php',
                 language: 'php',
@@ -1180,7 +1805,55 @@
     {% set _callout_body %}
 
         <h3 id="test-query-handler-heading">PHP: Test query handleru</h3>
-        {% set _code %} PLACEHOLDER19 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Profile\Query;
+
+use App\UserManagement\Profile\Query\GetUserProfile;
+use App\UserManagement\Profile\Query\GetUserProfileHandler;
+use App\UserManagement\Profile\ReadModel\UserProfileReadRepository;
+use App\UserManagement\Profile\ViewModel\UserProfileViewModel;
+use PHPUnit\Framework\TestCase;
+
+final class GetUserProfileHandlerTest extends TestCase
+{
+    public function testReturnsProfileForExistingUser(): void
+    {
+        $expectedProfile = new UserProfileViewModel(
+            userId: '550e8400-e29b-41d4-a716-446655440000',
+            name: 'Jan Novák',
+            email: 'jan@example.com',
+            registeredAt: new \DateTimeImmutable('2025-01-15'),
+            totalOrders: 5,
+            membershipTier: 'gold',
+        );
+
+        $readRepository = $this->createMock(UserProfileReadRepository::class);
+        $readRepository->method('findById')
+            ->with('550e8400-e29b-41d4-a716-446655440000')
+            ->willReturn($expectedProfile);
+
+        $handler = new GetUserProfileHandler($readRepository);
+
+        $result = $handler(new GetUserProfile('550e8400-e29b-41d4-a716-446655440000'));
+
+        $this->assertSame($expectedProfile, $result);
+    }
+
+    public function testReturnsNullForNonExistingUser(): void
+    {
+        $readRepository = $this->createMock(UserProfileReadRepository::class);
+        $readRepository->method('findById')->willReturn(null);
+
+        $handler = new GetUserProfileHandler($readRepository);
+
+        $result = $handler(new GetUserProfile('non-existing-id'));
+
+        $this->assertNull($result);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Profile/Query/GetUserProfileHandlerTest.php',
                 language: 'php',
@@ -1202,7 +1875,79 @@
     {% set _callout_body %}
 
         <h3 id="test-projektor-heading">PHP: Integrační test projektoru</h3>
-        {% set _code %} PLACEHOLDER20 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\Ordering\Infrastructure\Projection;
+
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderShipped;
+use App\Ordering\Infrastructure\Projection\OrderDashboardProjector;
+use Doctrine\DBAL\Connection;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+final class OrderDashboardProjectorTest extends KernelTestCase
+{
+    private Connection $connection;
+    private OrderDashboardProjector $projector;
+
+    protected function setUp(): void
+    {
+        $this->connection = self::getContainer()->get(Connection::class);
+        $this->projector = new OrderDashboardProjector($this->connection);
+
+        // Vyčistit testovací tabulku
+        $this->connection->executeStatement('DELETE FROM order_dashboard');
+    }
+
+    public function testProjectsOrderLifecycle(): void
+    {
+        // Given: objednávka byla vytvořena
+        ($this->projector)(new OrderPlaced(
+            orderId: 'order-1',
+            customerName: 'Jan Novák',
+            totalAmount: 1500,
+        ));
+
+        // When: objednávka byla odeslána
+        ($this->projector)(new OrderShipped(
+            orderId: 'order-1',
+            trackingNumber: 'CZ123456789',
+        ));
+
+        // Then: read model obsahuje aktuální stav
+        $row = $this->connection->fetchAssociative(
+            'SELECT * FROM order_dashboard WHERE order_id = :id',
+            ['id' => 'order-1'],
+        );
+
+        $this->assertSame('shipped', $row['status']);
+        $this->assertSame('CZ123456789', $row['tracking_number']);
+        $this->assertSame(1500, (int) $row['total_amount']);
+    }
+
+    public function testIdempotentProjection(): void
+    {
+        $event = new OrderPlaced(
+            orderId: 'order-2',
+            customerName: 'Eva Černá',
+            totalAmount: 800,
+        );
+
+        // Zpracovat stejnou událost dvakrát (at-least-once delivery)
+        ($this->projector)($event);
+        ($this->projector)($event);
+
+        // Read model obsahuje záznam pouze jednou
+        $count = $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM order_dashboard WHERE order_id = :id',
+            ['id' => 'order-2'],
+        );
+
+        $this->assertSame(1, (int) $count);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/Ordering/Infrastructure/Projection/OrderDashboardProjectorTest.php',
                 language: 'php',

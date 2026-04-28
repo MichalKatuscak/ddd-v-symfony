@@ -156,7 +156,74 @@
     {% set _callout_body %}
 
         <h3>Příklad: Test pro Email value object (PHPUnit)</h3>
-        {% set _code %} PLACEHOLDER0 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Domain\ValueObject;
+
+use PHPUnit\Framework\TestCase;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\Exception\InvalidEmailException;
+
+final class EmailTest extends TestCase
+{
+    public function testCreatesValidEmail(): void
+    {
+        $email = new Email('jan.novak@example.com');
+
+        $this->assertSame('jan.novak@example.com', $email->value());
+    }
+
+    public function testNormalizesToLowercase(): void
+    {
+        $email = new Email('Jan.Novak@EXAMPLE.COM');
+
+        $this->assertSame('jan.novak@example.com', $email->value());
+    }
+
+    public function testThrowsExceptionForInvalidFormat(): void
+    {
+        $this->expectException(InvalidEmailException::class);
+        $this->expectExceptionMessage('Neplatná e-mailová adresa: "not-an-email"');
+
+        new Email('not-an-email');
+    }
+
+    public function testThrowsExceptionForEmptyString(): void
+    {
+        $this->expectException(InvalidEmailException::class);
+
+        new Email('');
+    }
+
+    public function testEqualityBySameValue(): void
+    {
+        $email1 = new Email('jan@example.com');
+        $email2 = new Email('jan@example.com');
+
+        $this->assertTrue($email1->equals($email2));
+    }
+
+    public function testInequalityForDifferentValues(): void
+    {
+        $email1 = new Email('jan@example.com');
+        $email2 = new Email('petr@example.com');
+
+        $this->assertFalse($email1->equals($email2));
+    }
+
+    public function testImmutabilityViaNewInstance(): void
+    {
+        $original = new Email('jan@example.com');
+        // Hodnotové objekty jsou immutabilní - změna vyžaduje vytvoření nové instance
+        $different = new Email('petr@example.com');
+
+        $this->assertSame('jan@example.com', $original->value());
+        $this->assertSame('petr@example.com', $different->value());
+        $this->assertFalse($original->equals($different));
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Domain/ValueObject/EmailTest.php',
                 language: 'php',
@@ -178,7 +245,75 @@
     {% set _callout_body %}
 
         <h3>Příklad: Test pro User entitu</h3>
-        {% set _code %} PLACEHOLDER1 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Domain\Model;
+
+use PHPUnit\Framework\TestCase;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\Exception\UserAlreadyActiveException;
+
+final class UserTest extends TestCase
+{
+    private UserId $userId;
+    private Email $email;
+
+    protected function setUp(): void
+    {
+        $this->userId = UserId::generate();
+        $this->email  = new Email('jan@example.com');
+    }
+
+    public function testCreatesInactiveUserByDefault(): void
+    {
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+
+        $this->assertFalse($user->isActive());
+    }
+
+    public function testActivatesUser(): void
+    {
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user->activate();
+
+        $this->assertTrue($user->isActive());
+    }
+
+    public function testThrowsExceptionWhenActivatingAlreadyActiveUser(): void
+    {
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user->activate();
+
+        $this->expectException(UserAlreadyActiveException::class);
+
+        $user->activate();
+    }
+
+    public function testChangesEmailAddress(): void
+    {
+        $user     = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $newEmail = new Email('novy@example.com');
+
+        $user->changeEmail($newEmail);
+
+        $this->assertTrue($newEmail->equals($user->email()));
+    }
+
+    public function testEmailRemainsUnchangedWhenSameValueProvided(): void
+    {
+        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+
+        $user->changeEmail(new Email('jan@example.com'));
+
+        // Žádná událost by neměla být vydána, email je stále stejný
+        $this->assertCount(0, $user->releaseDomainEvents());
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Domain/Model/UserTest.php',
                 language: 'php',
@@ -215,7 +350,78 @@
     {% set _callout_body %}
 
         <h3>Příklad: Test pro Order agregát</h3>
-        {% set _code %} PLACEHOLDER2 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\OrderManagement\Domain\Model;
+
+use PHPUnit\Framework\TestCase;
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\Currency;
+use App\OrderManagement\Domain\Event\OrderPlaced;
+use App\OrderManagement\Domain\Event\OrderItemAdded;
+use App\OrderManagement\Domain\Exception\EmptyOrderException;
+use App\OrderManagement\Domain\Exception\OrderAlreadyPlacedException;
+
+final class OrderTest extends TestCase
+{
+    public function testAddsItemToOrder(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+
+        $order->addItem('Kniha o DDD', new Money(49900, Currency::CZK), 2);
+
+        $this->assertSame(1, $order->itemCount());          // 1 řádek objednávky
+        $this->assertEquals(new Money(99800, Currency::CZK), $order->total()); // 49 900 × 2
+    }
+
+    public function testThrowsExceptionWhenPlacingEmptyOrder(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+
+        $this->expectException(EmptyOrderException::class);
+
+        $order->place();
+    }
+
+    public function testPlacesOrderSuccessfully(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
+
+        $order->place();
+
+        $this->assertTrue($order->isPlaced());
+    }
+
+    public function testThrowsExceptionWhenPlacingAlreadyPlacedOrder(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
+        $order->place();
+
+        $this->expectException(OrderAlreadyPlacedException::class);
+
+        $order->place();
+    }
+
+    public function testReleasesOrderPlacedEvent(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
+        $order->place();
+
+        $events = $order->releaseDomainEvents();
+
+        $this->assertCount(2, $events); // OrderItemAdded + OrderPlaced
+        $this->assertInstanceOf(OrderItemAdded::class, $events[0]);
+        $this->assertInstanceOf(OrderPlaced::class, $events[1]);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/OrderManagement/Domain/Model/OrderTest.php',
                 language: 'php',
@@ -255,7 +461,113 @@
     {% set _callout_body %}
 
         <h3>Příklad: Trait pro testování doménových událostí</h3>
-        {% set _code %} PLACEHOLDER3 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\Shared\Domain;
+
+use App\Shared\Domain\Event\DomainEvent;
+
+/**
+ * Reusable trait pro ověřování doménových událostí v unit testech.
+ * Použití: `use DomainEventAssertions;` ve třídě TestCase.
+ */
+trait DomainEventAssertions
+{
+    /**
+     * Ověří, že kolekce událostí obsahuje právě jednu událost daného typu.
+     *
+     * @param array<DomainEvent> $events
+     */
+    protected function assertSingleEventOfType(string $expectedType, array $events): DomainEvent
+    {
+        $matching = array_filter($events, fn(DomainEvent $e) => $e instanceof $expectedType);
+
+        $this->assertCount(
+            1,
+            $matching,
+            sprintf('Očekávána právě jedna událost typu %s, nalezeno %d.', $expectedType, count($matching))
+        );
+
+        return array_values($matching)[0];
+    }
+
+    /**
+     * Ověří, že kolekce událostí neobsahuje žádnou událost daného typu.
+     *
+     * @param array<DomainEvent> $events
+     */
+    protected function assertNoEventOfType(string $unexpectedType, array $events): void
+    {
+        $matching = array_filter($events, fn(DomainEvent $e) => $e instanceof $unexpectedType);
+
+        $this->assertCount(
+            0,
+            $matching,
+            sprintf('Neočekávána žádná událost typu %s, ale nalezena.', $unexpectedType)
+        );
+    }
+
+    /**
+     * Ověří přesné pořadí vydaných událostí.
+     *
+     * @param array<class-string>  $expectedTypes
+     * @param array<DomainEvent> $events
+     */
+    protected function assertEventSequence(array $expectedTypes, array $events): void
+    {
+        $actualTypes = array_map(fn(DomainEvent $e) => $e::class, $events);
+
+        $this->assertSame(
+            $expectedTypes,
+            $actualTypes,
+            'Pořadí doménových událostí neodpovídá očekávání.'
+        );
+    }
+}
+
+// --- Příklad použití traitu v testu ---
+
+namespace Tests\OrderManagement\Domain\Model;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\Currency;
+use App\OrderManagement\Domain\Event\OrderPlaced;
+
+final class OrderEventsTest extends \PHPUnit\Framework\TestCase
+{
+    use DomainEventAssertions;
+
+    public function testOrderPlacedEventContainsCorrectData(): void
+    {
+        $customerId = CustomerId::generate();
+        $order      = Order::create(OrderId::generate(), $customerId);
+        $order->addItem('Produkt A', new Money(25000, Currency::CZK), 3);
+        $order->place();
+
+        $events      = $order->releaseDomainEvents();
+        $placedEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
+
+        // Ověření dat události
+        $this->assertTrue($customerId->equals($placedEvent->customerId()));
+        $this->assertEquals(new Money(75000, Currency::CZK), $placedEvent->total());
+        $this->assertNotNull($placedEvent->occurredOn());
+    }
+
+    public function testNoOrderPlacedEventWhenOrderNotPlaced(): void
+    {
+        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order->addItem('Produkt B', new Money(10000, Currency::CZK), 1);
+
+        $events = $order->releaseDomainEvents();
+
+        $this->assertNoEventOfType(OrderPlaced::class, $events);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/Shared/Domain/DomainEventAssertions.php',
                 language: 'php',
@@ -317,7 +629,69 @@
     {% set _callout_body %}
 
         <h3>Příklad: InMemoryUserRepository implementace</h3>
-        {% set _code %} PLACEHOLDER4 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Infrastructure\Repository;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\Repository\UserRepository;
+
+/**
+ * InMemory implementace UserRepository pro unit a integrační testy.
+ * Simuluje chování Doctrine repozitáře bez potřeby databáze.
+ */
+final class InMemoryUserRepository implements UserRepository
+{
+    /** @var array<string, User> */
+    private array $storage = [];
+
+    public function save(User $user): void
+    {
+        $this->storage[(string) $user->id()] = $user;
+    }
+
+    public function findById(UserId $id): ?User
+    {
+        return $this->storage[(string) $id] ?? null;
+    }
+
+    public function findByEmail(Email $email): ?User
+    {
+        foreach ($this->storage as $user) {
+            if ($user->email()->equals($email)) {
+                return $user;
+            }
+        }
+
+        return null;
+    }
+
+    public function existsByEmail(Email $email): bool
+    {
+        return $this->findByEmail($email) !== null;
+    }
+
+    public function remove(User $user): void
+    {
+        unset($this->storage[(string) $user->id()]);
+    }
+
+    /** Pomocná metoda pro assertiony v testech. */
+    public function count(): int
+    {
+        return count($this->storage);
+    }
+
+    /** @return array<User> */
+    public function all(): array
+    {
+        return array_values($this->storage);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Infrastructure/Repository/InMemoryUserRepository.php',
                 language: 'php',
@@ -333,7 +707,70 @@
     {% set _callout_body %}
 
         <h3>Příklad: Test command handleru s InMemoryRepository</h3>
-        {% set _code %} PLACEHOLDER5 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Application\Command;
+
+use PHPUnit\Framework\TestCase;
+use App\UserManagement\Registration\Command\RegisterUser;
+use App\UserManagement\Registration\Command\RegisterUserHandler;
+use App\UserManagement\Domain\Exception\EmailAlreadyTakenException;
+use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
+
+final class RegisterUserHandlerTest extends TestCase
+{
+    private InMemoryUserRepository $userRepository;
+    private RegisterUserHandler $handler;
+
+    protected function setUp(): void
+    {
+        $this->userRepository = new InMemoryUserRepository();
+        $this->handler        = new RegisterUserHandler($this->userRepository);
+    }
+
+    public function testRegistersNewUser(): void
+    {
+        $command = new RegisterUser(
+            name: 'Jan Novák',
+            email: 'jan@example.com',
+            password: 'SilneHeslo123!'
+        );
+
+        ($this->handler)($command);
+
+        $this->assertSame(1, $this->userRepository->count());
+
+        $user = $this->userRepository->findByEmail(new \App\UserManagement\Domain\ValueObject\Email('jan@example.com'));
+        $this->assertNotNull($user);
+        $this->assertFalse($user->isActive()); // nový uživatel je neaktivní
+    }
+
+    public function testThrowsExceptionWhenEmailAlreadyTaken(): void
+    {
+        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
+        ($this->handler)($command); // první registrace
+
+        $this->expectException(EmailAlreadyTakenException::class);
+
+        ($this->handler)($command); // duplicitní registrace
+    }
+
+    public function testDoesNotPersistUserWhenEmailAlreadyTaken(): void
+    {
+        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
+        ($this->handler)($command);
+
+        try {
+            ($this->handler)($command);
+        } catch (EmailAlreadyTakenException) {
+            // očekáváno
+        }
+
+        $this->assertSame(1, $this->userRepository->count());
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Application/Command/RegisterUserHandlerTest.php',
                 language: 'php',
@@ -407,7 +844,87 @@
     {% set _callout_body %}
 
         <h3>Příklad: Integrační test DoctrineUserRepository</h3>
-        {% set _code %} PLACEHOLDER6 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Infrastructure\Repository;
+
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\Exception\UserNotFoundException;
+use App\UserManagement\Infrastructure\Repository\DoctrineUserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+/**
+ * Integrační test pro DoctrineUserRepository.
+ * Vyžaduje běžící databázi (konfigurovanou přes DATABASE_URL v .env.test).
+ * Transakční rollback zajišťuje dama/doctrine-test-bundle.
+ */
+final class DoctrineUserRepositoryTest extends KernelTestCase
+{
+    private EntityManagerInterface $entityManager;
+    private DoctrineUserRepository $repository;
+
+    protected function setUp(): void
+    {
+        self::bootKernel();
+
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->repository    = static::getContainer()->get(DoctrineUserRepository::class);
+    }
+
+    public function testPersistsAndRetrievesUser(): void
+    {
+        $userId = UserId::generate();
+        $email  = new Email('integrace@example.com');
+        $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
+
+        $this->repository->save($user);
+        $this->entityManager->clear(); // vyčistíme identity map - nutné pro skutečné čtení z DB
+
+        $retrieved = $this->repository->findById($userId);
+
+        $this->assertTrue($userId->equals($retrieved->id()));
+        $this->assertTrue($email->equals($retrieved->email()));
+    }
+
+    public function testThrowsExceptionForNonExistentUser(): void
+    {
+        $this->expectException(UserNotFoundException::class);
+
+        $this->repository->findById(UserId::generate());
+    }
+
+    public function testFindsByEmailAddress(): void
+    {
+        $email = new Email('hledat@example.com');
+        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
+
+        $this->repository->save($user);
+        $this->entityManager->clear();
+
+        $found = $this->repository->findByEmail($email);
+
+        $this->assertNotNull($found);
+        $this->assertTrue($email->equals($found->email()));
+    }
+
+    public function testExistsByEmail(): void
+    {
+        $email = new Email('exists@example.com');
+        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
+
+        $this->assertFalse($this->repository->existsByEmail($email));
+
+        $this->repository->save($user);
+
+        $this->assertTrue($this->repository->existsByEmail($email));
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Infrastructure/Repository/DoctrineUserRepositoryTest.php',
                 language: 'php',
@@ -461,7 +978,99 @@
     {% set _callout_body %}
 
         <h3>Příklad: Funkční test registračního endpointu</h3>
-        {% set _code %} PLACEHOLDER7 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace Tests\UserManagement\Registration\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+/**
+ * Funkční testy registračního REST API endpointu.
+ * Testují HTTP vrstvu + celý zásobník až po databázi.
+ */
+final class RegistrationControllerTest extends WebTestCase
+{
+    public function testRegistersUserSuccessfully(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'email'    => 'novy@example.com',
+                'password' => 'SilneHeslo123!',
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertResponseHeaderSame('Content-Type', 'application/json');
+
+        $responseData = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertArrayHasKey('userId', $responseData);
+        $this->assertSame('novy@example.com', $responseData['email']);
+    }
+
+    public function testReturns422ForInvalidEmail(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'email'    => 'not-valid-email',
+                'password' => 'Heslo123!',
+            ])
+        );
+
+        $this->assertResponseStatusCodeSame(422);
+
+        $responseData = json_decode($client->getResponse()->getContent(), true);
+
+        $this->assertArrayHasKey('errors', $responseData);
+        $this->assertStringContainsString('email', strtolower($responseData['errors'][0]['field']));
+    }
+
+    public function testReturns409WhenEmailAlreadyRegistered(): void
+    {
+        $client = static::createClient();
+
+        $payload = json_encode(['email' => 'existujici@example.com', 'password' => 'Heslo123!']);
+
+        $client->request('POST', '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: $payload
+        );
+        $this->assertResponseStatusCodeSame(201);
+
+        // druhý pokus se stejným emailem
+        $client->request('POST', '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: $payload
+        );
+        $this->assertResponseStatusCodeSame(409);
+    }
+
+    public function testReturns400ForMissingRequiredFields(): void
+    {
+        $client = static::createClient();
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([])
+        );
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'Tests/UserManagement/Registration/Controller/RegistrationControllerTest.php',
                 language: 'php',
@@ -508,7 +1117,65 @@
     {% set _callout_body %}
 
         <h3>Příklad: deptrac.yaml konfigurace pro DDD projekt</h3>
-        {% set _code %} PLACEHOLDER8 {% endset %}
+        {% set _code %}{% verbatim %}deptrac:
+  paths:
+    - ./src
+
+  layers:
+    - name: Domain
+      collectors:
+        - type: directory
+          value: src/.*/Domain/.*
+
+    - name: Application
+      collectors:
+        - type: directory
+          value: src/.*/Application/.*
+
+    - name: Infrastructure
+      collectors:
+        - type: directory
+          value: src/.*/Infrastructure/.*
+
+    - name: Presentation
+      collectors:
+        - type: directory
+          value: src/.*/Controller/.*
+
+    - name: Shared
+      collectors:
+        - type: directory
+          value: src/Shared/.*
+
+  ruleset:
+    Domain:
+      # Doménová vrstva nesmí záviset na ničem jiném než na Shared
+      - Shared
+
+    Application:
+      # Aplikační vrstva závisí na doméně a sdílených komponentách
+      - Domain
+      - Shared
+
+    Infrastructure:
+      # Infrastruktura implementuje doménová rozhraní - závisí na doméně
+      - Domain
+      - Application
+      - Shared
+
+    Presentation:
+      # Kontrolery závisí na aplikační vrstvě (Commands, Queries)
+      - Application
+      - Shared
+
+    Shared:
+      # Sdílené komponenty nezávisí na ničem projektovém
+      []
+
+  skip_violations:
+    # Dočasné výjimky - měly by být minimalizovány
+    # UserManagement\Domain\Model\User:
+    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně - antipattern{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'config/services.yaml',
                 language: 'yaml',
@@ -524,7 +1191,16 @@
     {% set _callout_body %}
 
         <h3>Příklad: Spuštění Deptrac v CI</h3>
-        {% set _code %} PLACEHOLDER9 {% endset %}
+        {% set _code %}{% verbatim %}# Instalace (dev závislost)
+composer require --dev qossmic/deptrac-shim
+
+# Spuštění analýzy
+./vendor/bin/deptrac analyze --config-file=deptrac.yaml
+
+# Výstup v případě porušení:
+# [ERROR] Found 1 Violation
+# UserManagement\Domain\Model\User must not depend on
+# Doctrine\ORM\Mapping\Column (Infrastructure layer){% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
                 language: 'bash',
@@ -548,7 +1224,38 @@
     {% set _callout_body %}
 
         <h3>Příklad: PHP-Arkitect pravidla</h3>
-        {% set _code %} PLACEHOLDER10 {% endset %}
+        {% set _code %}{% verbatim %}<?php
+
+// phparkitect.php
+use Arkitect\ClassSet;
+use Arkitect\CLI\Config;
+use Arkitect\Expression\ForClasses\HaveNameMatching;
+use Arkitect\Expression\ForClasses\NotDependsOnTheseNamespaces;
+use Arkitect\Expression\ForClasses\ResideInOneOfTheseNamespaces;
+use Arkitect\Rules\Rule;
+
+return static function (Config $config): void {
+    $srcSet = ClassSet::fromDir(__DIR__ . '/src');
+
+    $config->add(
+        $srcSet,
+
+        // Doménová vrstva nesmí záviset na Symfony ani Doctrine
+        Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces('App\UserManagement\Domain'))
+            ->should(new NotDependsOnTheseNamespaces(
+                'Symfony',
+                'Doctrine',
+            ))
+            ->because('Doménová vrstva musí být nezávislá na frameworku a infrastruktuře.'),
+
+        // Všechny třídy v Command namespace musí mít suffix Command nebo Handler
+        Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces('App\UserManagement\Application\Command'))
+            ->should(new HaveNameMatching('*Command|*Handler'))
+            ->because('Command namespace smí obsahovat pouze Command a Handler třídy (konvence projektu).'),
+    );
+};{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.php',
                 language: 'php',
@@ -657,7 +1364,20 @@
     {% set _callout_body %}
 
         <h3>Příklad: Správná konfigurace PHPUnit pro DDD projekt (phpunit.xml)</h3>
-        {% set _code %} PLACEHOLDER11 {% endset %}
+        {% set _code %}{% verbatim %}# Spuštění unit testů doménové vrstvy (rychlé, bez kernelu)
+./vendor/bin/phpunit --testsuite=Domain
+
+# Spuštění integračních testů (vyžaduje databázi)
+./vendor/bin/phpunit --testsuite=Integration
+
+# Spuštění funkčních testů
+./vendor/bin/phpunit --testsuite=Functional
+
+# Generování HTML coverage reportu (vyžaduje Xdebug nebo PCOV)
+XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
+
+# Spuštění architektonických testů s Deptrac
+./vendor/bin/deptrac analyze{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
                 language: 'bash',

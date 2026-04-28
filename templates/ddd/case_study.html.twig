@@ -142,7 +142,158 @@
     <p>
         Struktura projektu odráží jak strategický, tak taktický design DDD. Níže je ukázka správné struktury projektu, kde každý bounded context má svou vlastní doménovou vrstvu, infrastrukturu a aplikační služby:
     </p>
-    {% set _code %} PLACEHOLDER0 {% endset %}
+    {% set _code %}{% verbatim %}src/
+├── UserManagement/            # Bounded Context: Správa uživatelů
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── User.php        # Entita uživatele (Aggregate Root)
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── UserId.php      # Identifikátor uživatele
+│   │   │   └── Email.php       # Email uživatele
+│   │   ├── Event/             # Doménové události
+│   │   │   └── UserRegistered.php  # Událost registrace uživatele
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── UserRepository.php  # Rozhraní pro práci s uživateli
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineUserRepository.php  # Doctrine implementace
+│   ├── Registration/          # Feature: Registrace uživatele
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── RegisterUser.php  # Příkaz pro registraci uživatele
+│   │   │   └── RegisterUserHandler.php  # Handler příkazu
+│   │   └── Controller/        # Kontrolery
+│   │       └── RegistrationController.php  # Kontroler pro registraci
+│   ├── Authentication/        # Feature: Autentizace
+│   │   └── Controller/        # Kontrolery
+│   │       └── SecurityController.php  # Kontroler pro autentizaci
+│   └── GetUser/               # Feature: Získání uživatele
+│       ├── Query/             # Dotazy
+│       │   ├── GetUser.php      # Dotaz pro získání uživatele
+│       │   └── GetUserHandler.php  # Handler dotazu
+│       └── ViewModel/         # View modely
+│           └── UserViewModel.php  # View model uživatele
+├── ProjectManagement/         # Bounded Context: Správa projektů
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   ├── Project.php     # Entita projektu (Aggregate Root)
+│   │   │   └── ProjectMember.php  # Entita člena projektu
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── ProjectId.php    # Identifikátor projektu
+│   │   │   └── ProjectStatus.php  # Status projektu
+│   │   ├── Event/             # Doménové události
+│   │   │   ├── ProjectCreated.php  # Událost vytvoření projektu
+│   │   │   └── MemberAdded.php  # Událost přidání člena
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── ProjectRepository.php  # Rozhraní pro práci s projekty
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineProjectRepository.php  # Doctrine implementace
+│   ├── CreateProject/         # Feature: Vytvoření projektu
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── CreateProject.php  # Příkaz pro vytvoření projektu
+│   │   │   └── CreateProjectHandler.php  # Handler příkazu
+│   │   └── Controller/        # Kontrolery
+│   │       └── ProjectController.php  # Kontroler pro vytvoření projektu
+│   └── GetProjects/           # Feature: Seznam projektů
+│       ├── Query/             # Dotazy
+│       │   ├── GetProjects.php  # Dotaz pro získání projektů
+│       │   └── GetProjectsHandler.php  # Handler dotazu
+│       ├── Controller/        # Kontrolery
+│       │   └── ProjectsController.php  # Kontroler pro seznam projektů
+│       └── ViewModel/         # View modely
+│           └── ProjectViewModel.php  # View model projektu
+├── TaskManagement/            # Bounded Context: Správa úkolů
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── Task.php        # Entita úkolu (Aggregate Root)
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   ├── TaskId.php      # Identifikátor úkolu
+│   │   │   └── TaskStatus.php  # Status úkolu
+│   │   ├── Event/             # Doménové události
+│   │   │   ├── TaskCreated.php  # Událost vytvoření úkolu
+│   │   │   ├── TaskAssigned.php  # Událost přiřazení úkolu
+│   │   │   └── TaskStatusChanged.php  # Událost změny stavu
+│   │   ├── Service/           # Doménové služby
+│   │   │   └── TaskAssignmentService.php  # Služba pro přiřazení úkolu
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── TaskRepository.php  # Rozhraní pro práci s úkoly
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineTaskRepository.php  # Doctrine implementace
+│   ├── CreateTask/            # Feature: Vytvoření úkolu
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── CreateTask.php   # Příkaz pro vytvoření úkolu
+│   │   │   └── CreateTaskHandler.php  # Handler příkazu
+│   │   └── Controller/        # Kontrolery
+│   │       └── TaskController.php  # Kontroler pro úkoly
+│   ├── AssignTask/            # Feature: Přiřazení úkolu
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── AssignTask.php   # Příkaz pro přiřazení úkolu
+│   │   │   └── AssignTaskHandler.php  # Handler příkazu
+│   │   └── Controller/        # Kontrolery
+│   │       └── AssignController.php  # Kontroler pro přiřazení
+│   ├── ChangeStatus/          # Feature: Změna stavu úkolu
+│   │   ├── Command/           # Příkazy
+│   │   │   ├── ChangeTaskStatus.php  # Příkaz pro změnu stavu
+│   │   │   └── ChangeTaskStatusHandler.php  # Handler příkazu
+│   │   └── Controller/        # Kontrolery
+│   │       └── StatusController.php  # Kontroler pro změnu stavu
+│   └── GetTask/               # Feature: Získání úkolu
+│       ├── Query/             # Dotazy
+│       │   ├── GetTask.php      # Dotaz pro získání úkolu
+│       │   └── GetTaskHandler.php  # Handler dotazu
+│       └── ViewModel/         # View modely
+│           └── TaskViewModel.php  # View model úkolu
+├── CommentManagement/         # Bounded Context: Správa komentářů
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── Comment.php     # Entita komentáře
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   └── CommentId.php   # Identifikátor komentáře
+│   │   ├── Event/             # Doménové události
+│   │   │   └── CommentAdded.php  # Událost přidání komentáře
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── CommentRepository.php  # Rozhraní pro práci s komentáři
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineCommentRepository.php  # Doctrine implementace
+│   └── AddComment/            # Feature: Přidání komentáře
+│       ├── Command/           # Příkazy
+│       │   ├── AddComment.php   # Příkaz pro přidání komentáře
+│       │   └── AddCommentHandler.php  # Handler příkazu
+│       └── Controller/        # Kontrolery
+│           └── CommentController.php  # Kontroler pro komentáře
+├── ActivityTracking/          # Bounded Context: Sledování aktivity
+│   ├── Domain/                # Doménová vrstva
+│   │   ├── Model/             # Doménové modely
+│   │   │   └── Activity.php    # Entita aktivity
+│   │   ├── ValueObject/       # Hodnotové objekty
+│   │   │   └── ActivityId.php  # Identifikátor aktivity
+│   │   └── Repository/        # Repozitáře (rozhraní)
+│   │       └── ActivityRepository.php  # Rozhraní pro práci s aktivitami
+│   ├── Infrastructure/        # Infrastrukturní vrstva
+│   │   └── Repository/        # Implementace repozitářů
+│   │       └── DoctrineActivityRepository.php  # Doctrine implementace
+│   └── RecordActivity/        # Feature: Zaznamenání aktivity
+│       ├── Command/           # Příkazy
+│       │   ├── RecordActivity.php  # Příkaz pro zaznamenání aktivity
+│       │   └── RecordActivityHandler.php  # Handler příkazu
+│       └── Controller/        # Kontrolery
+│           └── ActivityController.php  # Kontroler pro aktivity
+└── Shared/                    # Sdílené komponenty
+    ├── Domain/                # Sdílená doménová logika
+    │   ├── Exception/         # Výjimky
+    │   │   └── DomainException.php  # Základní doménová výjimka
+    │   └── Bus/               # Rozhraní pro message bus
+    │       ├── CommandBus.php   # Rozhraní pro command bus
+    │       └── QueryBus.php     # Rozhraní pro query bus
+    └── Infrastructure/        # Sdílená infrastruktura
+        ├── Bus/               # Implementace message bus
+        │   ├── MessengerCommandBus.php  # Implementace command bus
+        │   └── MessengerQueryBus.php  # Implementace query bus
+        └── Persistence/        # Sdílená persistence
+            └── DoctrineTypes/    # Vlastní Doctrine typy
+                └── UuidType.php    # Typ pro UUID{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
                 language: 'bash',
@@ -178,7 +329,134 @@
         (XML/YAML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
         na doménových hodnotových objektech a událostech.
     </p>
-    {% set _code %} PLACEHOLDER1 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\Domain\Model;
+
+use App\ProjectManagement\Domain\Event\ProjectCreated;
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+// UserId je sdílený identifikátor - v produkčním systému by byl v Shared Kernel
+use App\UserManagement\Domain\ValueObject\UserId;
+
+class Project
+{
+    private readonly ProjectId $id;
+    private string $name;
+    private ?string $description;
+    private readonly UserId $ownerId;
+
+    /** @var UserId[] */
+    private array $memberIds = [];
+
+    private readonly \DateTimeImmutable $createdAt;
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    private array $domainEvents = [];
+
+    private function __construct(ProjectId $id, string $name, ?string $description, UserId $ownerId)
+    {
+        $this->id = $id;
+        $this->name = $name;
+        $this->description = $description;
+        $this->ownerId = $ownerId;
+        $this->memberIds = [$ownerId];
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new ProjectCreated($id, $name, $ownerId));
+    }
+
+    public static function create(ProjectId $id, string $name, ?string $description, UserId $ownerId): self
+    {
+        return new self($id, $name, $description, $ownerId);
+    }
+
+    public function id(): ProjectId
+    {
+        return $this->id;
+    }
+
+    public function name(): string
+    {
+        return $this->name;
+    }
+
+    public function description(): ?string
+    {
+        return $this->description;
+    }
+
+    public function ownerId(): UserId
+    {
+        return $this->ownerId;
+    }
+
+    /** @return UserId[] */
+    public function memberIds(): array
+    {
+        return $this->memberIds;
+    }
+
+    public function addMember(UserId $userId): void
+    {
+        foreach ($this->memberIds as $existingId) {
+            if ($existingId->equals($userId)) {
+                return; // Již je členem
+            }
+        }
+        $this->memberIds[] = $userId;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function removeMember(UserId $userId): void
+    {
+        if ($this->ownerId->equals($userId)) {
+            throw new \DomainException('Cannot remove owner from project');
+        }
+
+        $this->memberIds = array_filter(
+            $this->memberIds,
+            fn(UserId $id) => !$id->equals($userId)
+        );
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateName(string $name): void
+    {
+        $this->name = $name;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateDescription(?string $description): void
+    {
+        $this->description = $description;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function updatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->domainEvents[] = $event;
+    }
+
+    public function releaseDomainEvents(): array
+    {
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
+
+        return $events;
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/ProjectManagement/Domain/Model/Project.php',
                 language: 'php',
@@ -199,7 +477,139 @@
             } %}
 
     <h3 id="task-model-heading">Doménový model: Úkol (kořen agregátu)</h3>
-    {% set _code %} PLACEHOLDER2 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManagement\Domain\Model;
+
+use App\TaskManagement\Domain\Event\TaskCreated;
+use App\TaskManagement\Domain\Event\TaskAssigned;
+use App\TaskManagement\Domain\Event\TaskStatusChanged;
+use App\TaskManagement\Domain\ValueObject\TaskId;
+use App\TaskManagement\Domain\ValueObject\TaskStatus;
+// ProjectId a UserId jsou sdílené identifikátory - v produkčním systému by byly v Shared Kernel
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
+
+class Task
+{
+    private readonly TaskId $id;
+    private string $title;
+    private ?string $description;
+    private readonly ProjectId $projectId;
+    private ?UserId $assigneeId = null;
+    private TaskStatus $status;
+    private readonly \DateTimeImmutable $createdAt;
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    private array $domainEvents = [];
+
+    private function __construct(TaskId $id, string $title, ?string $description, ProjectId $projectId)
+    {
+        $this->id = $id;
+        $this->title = $title;
+        $this->description = $description;
+        $this->projectId = $projectId;
+        $this->status = TaskStatus::TODO;
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TaskCreated($id, $title, $projectId));
+    }
+
+    public static function create(TaskId $id, string $title, ?string $description, ProjectId $projectId): self
+    {
+        return new self($id, $title, $description, $projectId);
+    }
+
+    public function id(): TaskId
+    {
+        return $this->id;
+    }
+
+    public function title(): string
+    {
+        return $this->title;
+    }
+
+    public function description(): ?string
+    {
+        return $this->description;
+    }
+
+    public function projectId(): ProjectId
+    {
+        return $this->projectId;
+    }
+
+    public function assigneeId(): ?UserId
+    {
+        return $this->assigneeId;
+    }
+
+    public function status(): TaskStatus
+    {
+        return $this->status;
+    }
+
+    public function assign(UserId $assigneeId): void
+    {
+        $this->assigneeId = $assigneeId;
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TaskAssigned($this->id, $assigneeId));
+    }
+
+    public function unassign(): void
+    {
+        $this->assigneeId = null;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function changeStatus(TaskStatus $status): void
+    {
+        $oldStatus = $this->status;
+        $this->status = $status;
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TaskStatusChanged($this->id(), $oldStatus, $status));
+    }
+
+    public function updateTitle(string $title): void
+    {
+        $this->title = $title;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function updateDescription(?string $description): void
+    {
+        $this->description = $description;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function createdAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function updatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->domainEvents[] = $event;
+    }
+
+    public function releaseDomainEvents(): array
+    {
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
+
+        return $events;
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/TaskManagement/Domain/Model/Task.php',
                 language: 'php',
@@ -208,7 +618,29 @@
             } %}
 
     <h3 id="create-project-command-heading">Command: Vytvoření projektu (Command Pattern)</h3>
-    {% set _code %} PLACEHOLDER3 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\CreateProject\Command;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class CreateProject
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 3, max: 255)]
+        public readonly string $name,
+
+        public readonly ?string $description,
+
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $ownerId
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/ProjectManagement/CreateProject/Command/CreateProject.php',
                 language: 'php',
@@ -217,7 +649,42 @@
             } %}
 
     <h3 id="create-project-handler-heading">Command Handler: Zpracování vytvoření projektu (Application Service)</h3>
-    {% set _code %} PLACEHOLDER4 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\CreateProject\Command;
+
+use App\ProjectManagement\Domain\Model\Project;
+use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class CreateProjectHandler
+{
+    public function __construct(
+        private readonly ProjectRepository $projectRepository
+    ) {
+    }
+
+    public function __invoke(CreateProject $command): string
+    {
+        $projectId = new ProjectId();
+
+        $project = Project::create(
+            $projectId,
+            $command->name,
+            $command->description,
+            new UserId($command->ownerId)
+        );
+
+        $this->projectRepository->save($project);
+
+        return $projectId->value();
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/ProjectManagement/CreateProject/Command/CreateProjectHandler.php',
                 language: 'php',
@@ -226,7 +693,27 @@
             } %}
 
     <h3 id="assign-task-command-heading">Command: Přiřazení úkolu (Command Pattern)</h3>
-    {% set _code %} PLACEHOLDER5 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManagement\AssignTask\Command;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class AssignTask
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $taskId,
+
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $assigneeId
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/TaskManagement/AssignTask/Command/AssignTask.php',
                 language: 'php',
@@ -235,7 +722,64 @@
             } %}
 
     <h3 id="assign-task-handler-heading">Command Handler: Zpracování přiřazení úkolu (Application Service)</h3>
-    {% set _code %} PLACEHOLDER6 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManagement\AssignTask\Command;
+
+use App\TaskManagement\Domain\Repository\TaskRepository;
+use App\TaskManagement\Domain\ValueObject\TaskId;
+use App\TaskManagement\Domain\Service\TaskAssignmentService;
+use App\TaskManagement\Domain\Port\ProjectChecker;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+// Port definovaný v TaskManagement doméně - abstrahuje závislost na jiném bounded contextu.
+// Infrastrukturní implementace volá ProjectManagement interně (přes DB nebo API),
+// aniž by TaskManagement cokoliv věděl o interním modelu ProjectManagement.
+//
+// interface ProjectChecker {
+//     public function exists(ProjectId $projectId): bool;
+//     public function isMember(ProjectId $projectId, UserId $userId): bool;
+// }
+
+#[AsMessageHandler]
+class AssignTaskHandler
+{
+    public function __construct(
+        private readonly TaskRepository $taskRepository,
+        private readonly ProjectChecker $projectChecker,
+        private readonly TaskAssignmentService $taskAssignmentService
+    ) {
+    }
+
+    public function __invoke(AssignTask $command): void
+    {
+        $task = $this->taskRepository->findById(new TaskId($command->taskId));
+
+        if (!$task) {
+            throw new \DomainException('Task not found');
+        }
+
+        $assigneeId = new UserId($command->assigneeId);
+
+        // Ověření přes port - bez přímé závislosti na ProjectManagement
+        if (!$this->projectChecker->exists($task->projectId())) {
+            throw new \DomainException('Project not found');
+        }
+
+        if (!$this->projectChecker->isMember($task->projectId(), $assigneeId)) {
+            throw new \DomainException('Assignee is not a member of the project');
+        }
+
+        // Použití doménové služby pro přiřazení úkolu
+        $this->taskAssignmentService->assignTask($task, $assigneeId);
+
+        // Uložení úkolu
+        $this->taskRepository->save($task);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/TaskManagement/AssignTask/Command/AssignTaskHandler.php',
                 language: 'php',
@@ -244,7 +788,23 @@
             } %}
 
     <h3 id="get-projects-query-heading">Query: Získání projektů uživatele (Query Pattern)</h3>
-    {% set _code %} PLACEHOLDER7 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\GetProjects\Query;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
+class GetProjects
+{
+    public function __construct(
+        #[Assert\NotBlank]
+        #[Assert\Uuid]
+        public readonly string $userId
+    ) {
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/ProjectManagement/GetProjects/Query/GetProjects.php',
                 language: 'php',
@@ -253,7 +813,45 @@
             } %}
 
     <h3 id="get-projects-handler-heading">Query Handler: Zpracování získání projektů uživatele (Read Model)</h3>
-    {% set _code %} PLACEHOLDER8 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\GetProjects\Query;
+
+use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use App\ProjectManagement\GetProjects\ViewModel\ProjectViewModel;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+class GetProjectsHandler
+{
+    public function __construct(
+        private readonly ProjectRepository $projectRepository
+    ) {
+    }
+
+    public function __invoke(GetProjects $query): array
+    {
+        $projects = $this->projectRepository->findByMemberId(new UserId($query->userId));
+
+        $result = [];
+
+        foreach ($projects as $project) {
+            $result[] = new ProjectViewModel(
+                $project->id()->value(),
+                $project->name(),
+                $project->description(),
+                $project->ownerId()->value(),
+                count($project->memberIds()),
+                $project->createdAt()
+            );
+        }
+
+        return $result;
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php',
                 language: 'php',
@@ -262,7 +860,24 @@
             } %}
 
     <h3 id="task-assignment-service-heading">Doménová služba: Přiřazení úkolu</h3>
-    {% set _code %} PLACEHOLDER9 {% endset %}
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManagement\Domain\Service;
+
+use App\TaskManagement\Domain\Model\Task;
+use App\UserManagement\Domain\ValueObject\UserId;
+
+class TaskAssignmentService
+{
+    // Doménová služba pracuje výhradně s objekty vlastního bounded contextu.
+    // Ověření příslušnosti k projektu zajišťuje handler přes ProjectChecker port.
+    public function assignTask(Task $task, UserId $assigneeId): void
+    {
+        $task->assign($assigneeId);
+    }
+}{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/TaskManagement/Domain/Service/TaskAssignmentService.php',
                 language: 'php',
