@@ -388,3 +388,38 @@ V produkci s gzip + nginx cca 3× rychlejší. Žádná blockující věc.
 ### Stav po třetím kole
 
 23 commitů celkem od `21256b5` po `0b4ff04`. Druhý audit (R2) zachytil 5 oprav, třetí audit (R3) přidal 1 a11y opravu (drawer inert + aria-current). Web pokrývá WCAG AA u všech zkoumaných kontrastních kombinací, a11y interakcí a sémantiky.
+
+---
+
+## Čtvrté kolo auditu (2026-04-28 odpoledne)
+
+Performance polish, SEO meta length, security pro external linky.
+
+### R4-1 Font preload kritických subsetů (commit `c650e47`)
+
+**Nález:** Vite-builded fonty (woff2 s hash names) nelze preloadovat přes Symfony `asset()` — ten manifest nezná. Bez preload hint browser čeká s žádostí o font až na vyhodnocení CSS, což zpožďuje swap z fallback fontu.
+
+**Fix:** Nový Twig extension `src/Twig/ViteManifestExtension.php` se dvěma funkcemi:
+- `vite_asset(sourcePath)` — vrátí hashovanou URL pro daný zdroj.
+- `vite_font_preloads(paths)` — emituje `<link rel="preload" as="font" type="woff2" crossorigin>` pro pole cest, escape-safe HTML.
+
+V `base.html.twig` přidán preload pro 3 nejvyužívanější subsety: `inter-latin.woff2` (Czech ASCII), `inter-latin-ext.woff2` (Czech diakritika), `jetbrains-mono-latin.woff2` (inline code + code blocky). Ostatní subsets (cyrillic, greek, vietnamese) se loadují lazily přes unicode-range. Verifikováno: fonts startují loadit v 109 ms (před FCP).
+
+### R4-2 rel="noopener" na externí linky (commit `c091eac`)
+
+**Nález:** 35 odkazů s `target="_blank"` napříč 7 kapitolami postrádalo `rel="noopener"`. Bez něj má cílová stránka přes `window.opener` referenci na originální tab — tabnabbing vektor + drobný perf issue (browser musí spojit kontexty).
+
+**Fix:** Regex průchod přidal `rel="noopener"` na všechny 35 dotčených odkazů. Distribuce: what_is_ddd 12, horizontal_vs_vertical 10, basic_concepts 5, migration_from_crud 5, anti_patterns 1, performance_aspects 1, testing_ddd 1. Zbylých 57 external linků už `noopener` mělo (resources stránka kompletní, glossary většinou).
+
+### R4-3 Page title nad 60 znaků (commit `d314810`)
+
+**Nález:** 3 šablony překračovaly Google SERP truncation práh (~55–60 chars):
+- horizontal_vs_vertical: 79 chars
+- what_is_ddd: 65 chars
+- practical_examples: 63 chars
+
+**Fix:** Sjednoceno bez ztráty informace na 50–56 znaků. Všech 25 page titles je teď ≤ 60 znaků.
+
+### Stav po čtvrtém kole
+
+26 commitů celkem od `21256b5` po `d314810`. R4 přidal 3 perf/SEO opravy. Font preload, noopener security, title length compliance. Web teď opravdu polished.
