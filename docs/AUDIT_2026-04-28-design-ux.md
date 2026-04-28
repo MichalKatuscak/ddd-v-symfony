@@ -469,3 +469,52 @@ Datumy teď drží na jedné řádce i na 320 px viewportu.
 ### Stav po pátém kole
 
 29 commitů celkem od `21256b5` po `fb2d2a3`. Pátý průchod (R5) odstranil 3 zbytečné horizontální linie (art-head top-border, art-nav top-border, redundance s FAQ uzavírací linkou) a opravil zalomení dat na úzkých viewportech. Web má teď konzistentní vertikální rytmus napříč hub/landing/article/error stránkami a všechny linie jsou intencionální (uzavření sekcí, separátory položek, chrome komponent).
+
+---
+
+## Šesté kolo auditu (2026-04-28 večer)
+
+Plný viewport sweep + axe-core a11y scan.
+
+### R6-1 NBSP před en pomlčkou v titulech (commit `f610ac2`)
+
+**Nález:** Na 390 px se titul typu „DDD v praxi – kde to bolí" lámal tak, že en pomlčka padla na začátek druhého řádku, vypadající jako odrážka. Český typografický standard: před en pomlčkou má NBSP, aby pomlčka držela u předchozího slova.
+
+**Fix:** 3 kapitoly (ddd_ai, ddd_pain_points, when_not_to_use_ddd) v include `title:` parametru a paralelně několik `{% block title %}` (about, hub_*, index, atd.).
+
+### R6-2 axe-core a11y scan (commit `dd50ac9`)
+
+**Audit:** Po instalaci `@axe-core/playwright` proběhl scan přes Playwright na /cqrs at 1280 px. **4 violations** detekovány:
+
+- color-contrast (serious, 13×): `.foot-a-num` color #3D424E na #0B0D10 = 1.93 : 1 contrast pod 4.5 : 1 práh.
+- heading-order (moderate, 1×): `.foot-a-col h4` po `.foot-a-h h2` skok přes h3.
+- landmark-complementary-is-top-level (moderate, 36×): `<aside class="callout">` a `<aside class="toc">` jsou complementary landmarky uvnitř main+article.
+- scrollable-region-focusable (serious, 18×): `.table-responsive`, `.code-body`, `.diagram` mají overflow-x: auto bez tabindex — keyboard users nemohou scrollovat.
+
+**Fixy:**
+
+1. **color-contrast**: `.foot-a-num` `var(--fg-faint)` → `var(--fg-dim)` (5.16 : 1, AA pass).
+2. **heading-order**: `.foot-a-col` `<h4>` → `<h3>` (4× v `base.html.twig`); CSS `hub.css` `.foot-a-col h4` → `.foot-a-col h3`.
+3. **landmark-complementary**: callout partial dostal `role="note"` (přepisuje implicitní landmark <aside>); article_toc partial přechází z `<aside class="toc">` na `<nav class="toc" aria-label="Obsah kapitoly">` — sémanticky správnější (TOC je navigace).
+4. **scrollable-region-focusable**: `.code-body` má `tabindex="0"` v partialu; `.table-responsive` a `.diagram` dostávají tabindex přes JS init v `code-block.js`.
+
+### R6-3 .toc-m-count kontrast (commit `1ae44d0`)
+
+**Nález:** Druhý axe scan na 390 px mobile cqrs odhalil dodatečnou color-contrast violation: `.toc-m-count` (text „18 sekcí" v summary mobilního TOC) měl `var(--fg-faint)` = 1.93 : 1.
+
+**Fix:** Sjednoceno na `var(--fg-dim)` (5.16 : 1).
+
+### Stav po šestém kole
+
+32 commitů celkem od `21256b5` po `1ae44d0`. **0 axe-core violations** napříč 6 typy stránek (homepage, hub, kapitola, glosář, about, 404 error) na 1280 i 390 px viewportu. **49 axe-core passes** per stránka.
+
+### Plný mobilní sweep (390 px)
+
+Otestováno všech 25 šablon na 390 px:
+
+- 16 kapitol: cqrs, event-sourcing, sagy, vykonnostni, prakticke, testovani, migrace, ddd-pain-points, anti-vzory, kdy-nepouzivat, pripadova-studie, ddd-ai, co-je-ddd, zakladni-koncepty, vertikalni-slice, implementace
+- 4 huby: zaklady, vzory, praxe, reference
+- 5 reference: glosar, zdroje, o-autorovi, security-policy, /
+- 3 error: /404, /403, /500
+
+Žádné neočekávané vizuální regrese. Title NBSP fix udržuje en pomlčky u předchozího slova. Datum řádek v meta drží inline na všech viewportech.
