@@ -307,6 +307,12 @@
   border-bottom: 1px dashed var(--stroke);
   letter-spacing: var(--tracking-mono);
 }
+@media screen and (max-width: 540px) {
+
+  .foot-a-spec > div {
+    grid-template-columns: 50px 1fr;
+  }
+}
 .foot-a-spec > div:last-child { border-bottom: 0; }
 .foot-a-spec dt {
   color: var(--fg-dim);

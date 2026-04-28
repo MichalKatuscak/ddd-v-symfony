@@ -50,7 +50,7 @@
 .navlink.active { color: var(--fg); }
 .navlink.active::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: -19px; height: 1px;
+  position: absolute; left: 0; right: 0; bottom: -14px; height: 1px;
   background: var(--accent);
 }
 

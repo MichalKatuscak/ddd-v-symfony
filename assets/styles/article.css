@@ -16,9 +16,6 @@
 .article > * { min-width: 0; }
 .art-head {
   grid-column: 1 / -1;
-  /* border-top byl odstraněn — topnav border-bottom drží stejnou roli (oddělit chrome od obsahu).
-     Dvě tenké linky 24–48 px nad sebou působily jako redundantní. */
-  margin-bottom: var(--s-7);
 }
 .art-crumb {
   font-family: var(--font-mono);
@@ -188,6 +185,7 @@
   line-height: var(--lh-loose);
   color: var(--fg);
 }
+.art-body > *:first-child {margin-top:0;}
 .art-body p, .art-body li { overflow-wrap: break-word; }
 .art-body code, .art-body .ic { overflow-wrap: anywhere; }
 
@@ -320,6 +318,9 @@ section > h4:first-child { margin-top: 0; }
 }
 .callout > * { min-width: 0; }
 .callout-body { overflow-wrap: anywhere; }
+.callout-body > *:last-child {
+  margin-bottom: 0;
+}
 .callout-rail {
   border-right: 1px solid var(--stroke);
   padding: var(--s-3) 0;
