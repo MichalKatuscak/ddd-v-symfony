@@ -893,7 +893,9 @@ section > h4:first-child { margin-top: 0; }
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.85);
+  /* Téměř neprůhledné — `rgba(0,0,0,0.85)` propouštělo článek (text + originál
+     diagramu) za modalem, na mobilu vznikal duch-efekt přes celou plochu. */
+  background: var(--bg-0, #000);
   opacity: 0;
   transition: opacity 0.15s ease;
 }
@@ -920,6 +922,16 @@ section > h4:first-child { margin-top: 0; }
 .diagram-modal-stage > img {
   display: block;
   transform-origin: 0 0;
+  /* Override globální `img, svg { max-width: 100% }` z base.css — v modalu
+     potřebujeme, aby se SVG/obrázek renderoval ve své vlastní (intrinsické)
+     velikosti dle viewBox/naturalWidth. JS pak aplikuje fitToViewport scale
+     tak, aby diagram seděl do viewportu. Bez tohoto override se SVG zmenší
+     na šířku rodiče (390 px na mobilu) a fit-scale ho pak zmenší podruhé,
+     výsledek = miniatura v rohu. */
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
 }
 .diagram-modal-toolbar {
   position: absolute;

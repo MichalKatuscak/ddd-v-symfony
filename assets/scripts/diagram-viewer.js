@@ -137,6 +137,17 @@ class StageController {
   }
 
   _baseDims(stageRect) {
+    // Použít layout-box rozměry (před transformem) — to je co reálně browser
+    // vykreslí, ne abstraktní viewBox/naturalWidth. Globální `img, svg
+    // { max-width: 100% }` v base.css totiž SVG/img omezuje na šířku rodiče,
+    // takže rendered ≠ intrinsic. Pro inline diagramy: rendered = stage width
+    // (díky `.diagram-stage > svg { width: 100% }`). Pro modal diagramy
+    // (s CSS overridem `max-width: none`): rendered = intrinsic. Pan/zoom
+    // matematika tak vychází správně v obou kontextech.
+    const w = this.content.clientWidth;
+    const h = this.content.clientHeight;
+    if (w && h) return { baseW: w, baseH: h };
+    // Fallback pro vzácné případy (img ještě nenahraný, SVG bez layoutu).
     let baseW, baseH;
     if (this.content.tagName.toLowerCase() === 'img') {
       baseW = this.content.naturalWidth  || stageRect.width;
@@ -159,8 +170,24 @@ class StageController {
   _updateButtonStates() {
     if (this.btnZoomIn)  this.btnZoomIn.disabled  = this.scale >= this.maxScale - 1e-6;
     if (this.btnZoomOut) this.btnZoomOut.disabled = this.scale <= this.minScale + 1e-6;
-    if (this.btnFit)     this.btnFit.disabled =
-      Math.abs(this.scale - 1) < 1e-6 && this.tx === 0 && this.ty === 0;
+    if (!this.btnFit) return;
+    // Fit je disabled, když aktuální stav odpovídá tomu, co by spočítalo fit() —
+    // pro inline to vychází na scale=1, tx=ty=0, pro modal na fit-scale + center.
+    const stageRect = this.stage.getBoundingClientRect();
+    const { baseW, baseH } = this._baseDims(stageRect);
+    if (!baseW || !baseH) { this.btnFit.disabled = false; return; }
+    const fitScale = clamp(
+      Math.min(stageRect.width / baseW, stageRect.height / baseH),
+      this.minScale, this.maxScale
+    );
+    const contentW = baseW * fitScale;
+    const contentH = baseH * fitScale;
+    const fitTx = contentW <= stageRect.width  ? (stageRect.width  - contentW) / 2 : 0;
+    const fitTy = contentH <= stageRect.height ? (stageRect.height - contentH) / 2 : 0;
+    this.btnFit.disabled =
+      Math.abs(this.scale - fitScale) < 1e-3 &&
+      Math.abs(this.tx - fitTx) < 0.5 &&
+      Math.abs(this.ty - fitTy) < 0.5;
   }
 
   _clamp() {
@@ -169,13 +196,15 @@ class StageController {
     const contentW = baseW * this.scale;
     const contentH = baseH * this.scale;
 
+    // Když je obsah menší než stage, vycentrovat (ne zarovnat top-left) —
+    // typicky se to stane v modalu po zoom-out pod fit-scale.
     if (contentW <= stageRect.width) {
-      this.tx = 0;
+      this.tx = (stageRect.width - contentW) / 2;
     } else {
       this.tx = clamp(this.tx, stageRect.width - contentW, 0);
     }
     if (contentH <= stageRect.height) {
-      this.ty = 0;
+      this.ty = (stageRect.height - contentH) / 2;
     } else {
       this.ty = clamp(this.ty, stageRect.height - contentH, 0);
     }
@@ -198,25 +227,32 @@ class StageController {
     this._applyTransform();
   }
 
+  // Fit-na-stage — sjednocená logika pro inline i modal.
+  // - Inline: rendered = stage width (SVG má `width: 100%`), takže fitScale = 1
+  //   a chování je identické s původním "scale = 1" resetem.
+  // - Modal: rendered = intrinsic (díky CSS overridu `max-width: none`),
+  //   fitScale zmenší obsah, _clamp ho vycentruje.
   fit() {
-    this.scale = 1;
+    const stageRect = this.stage.getBoundingClientRect();
+    const { baseW, baseH } = this._baseDims(stageRect);
+    if (!baseW || !baseH) {
+      this.scale = 1;
+      this.tx = 0;
+      this.ty = 0;
+      this._applyTransform();
+      return;
+    }
+    const fitScale = Math.min(stageRect.width / baseW, stageRect.height / baseH);
+    this.scale = clamp(fitScale, this.minScale, this.maxScale);
     this.tx = 0;
     this.ty = 0;
+    this._clamp();
     this._applyTransform();
   }
 
-  // Fit-na-viewport — vypočte scale tak, aby se obsah vešel do stage celý.
-  fitToViewport() {
-    const stageRect = this.stage.getBoundingClientRect();
-    const { baseW, baseH } = this._baseDims(stageRect);
-    if (!baseW || !baseH) { this.fit(); return; }
-    const fitScale = Math.min(stageRect.width / baseW, stageRect.height / baseH);
-    this.scale = clamp(fitScale, this.minScale, this.maxScale);
-    // Vycentrovat obsah ve stage:
-    this.tx = (stageRect.width - baseW * this.scale) / 2;
-    this.ty = (stageRect.height - baseH * this.scale) / 2;
-    this._applyTransform();
-  }
+  // Alias pro callery, kteří voláním `fitToViewport` deklarují záměr
+  // "spočítat fit-scale" (typicky modal po otevření / resize).
+  fitToViewport() { this.fit(); }
 }
 
 class DiagramViewer {
