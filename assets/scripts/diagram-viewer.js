@@ -257,6 +257,28 @@ class DiagramViewer {
       this.modalCtrl._zoomAt(cx, cy, newScale);
     }, { passive: false });
 
+    // Focus management — uložit původní fokus, dát na zavírací X
+    this._prevActive = document.activeElement;
+    closeBtn.focus();
+
+    // Focus trap — Tab cyklí mezi focusable v modalu
+    const focusables = () => Array.from(
+      modal.querySelectorAll('button:not([disabled])')
+    );
+    this._trapHandler = (e) => {
+      if (e.key !== 'Tab') return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last  = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
+    modal.addEventListener('keydown', this._trapHandler);
+
     // Close handlers
     closeBtn.addEventListener('click', () => this.closeFullscreen());
     modal.addEventListener('click', (e) => {
@@ -277,13 +299,19 @@ class DiagramViewer {
     if (!this.modal) return;
     document.removeEventListener('keydown', this._escHandler);
     document.body.style.overflow = this._prevBodyOverflow || '';
+    this.modal.removeEventListener('keydown', this._trapHandler);
     this.modal.remove();
     this.modal = null;
     this.modalStage = null;
     this.modalCloseBtn = null;
     this.modalToolbar = null;
     this.modalCtrl = null;
-    if (this.btnFs) this.btnFs.focus();
+    if (this._prevActive && this._prevActive.focus) {
+      this._prevActive.focus();
+    } else if (this.btnFs) {
+      this.btnFs.focus();
+    }
+    this._prevActive = null;
   }
 }
 
