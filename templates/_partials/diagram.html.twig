@@ -16,7 +16,14 @@
         {% if title is defined and title %}<span class="diagram-title">{{ title }}</span>{% endif %}
     </header>
     {% if inline is defined and inline %}
-        <div role="img" aria-label="{{ alt|default(title|default('Diagram')) }}">{{ inline|raw }}</div>
+        {# PlantUML generuje SVG s preserveAspectRatio="none" + inline pixel
+           dimenzemi (style="width:1698px;height:876px"), což způsobuje deformaci
+           obsahu, když CSS sníží šířku na mobilu. Strip obojího — necháme browser
+           škálovat dle viewBox a preserveAspectRatio default (xMidYMid meet). #}
+        {% set _safe_svg = inline
+            |replace({'preserveAspectRatio="none"': 'preserveAspectRatio="xMidYMid meet"'})
+            |replace({' style="width:': ' data-orig-style="width:'}) %}
+        <div role="img" aria-label="{{ alt|default(title|default('Diagram')) }}">{{ _safe_svg|raw }}</div>
     {% elseif src is defined and src %}
         <img src="{{ asset(src) }}" alt="{{ alt|default(title|default('Diagram')) }}" loading="lazy">
     {% endif %}
