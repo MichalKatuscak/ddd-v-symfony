@@ -2,7 +2,7 @@
 
 {% block title %}Případová studie: Implementace DDD v Symfony | DDD Symfony{% endblock %}
 
-{% block meta_description %}Případová studie e-shopu v DDD architektuře krok za krokem: bounded contexts, agregáty, CQRS, projekce a event-driven workflow v Symfony 8.{% endblock %}
+{% block meta_description %}Případová studie systému pro správu projektů v DDD architektuře krok za krokem: bounded contexts, agregáty, CQRS, projekce s reconciliation a event-driven workflow v Symfony 8.{% endblock %}
 
 {% block meta_keywords %}případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi{% endblock %}
 
@@ -52,7 +52,7 @@
         category: 'Praxe',
         title: 'Případová studie',
         deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu. Sledujte celý proces od analýzy domény, identifikace bounded contexts, strategického a taktického designu až po implementaci s využitím DDD principů a CQRS.',
-        reading_time: 45,
+        reading_time: 50,
         difficulty: 4,
         published: block('article_published_time'),
         last_updated: block('article_modified_time'),
@@ -248,38 +248,68 @@
     <section id="architecture" aria-labelledby="architecture-heading">
     <h2 id="architecture-heading" class="h-section"><span class="h-num">15.04</span> Architektura</h2>
     <p>
-        Pro implementaci systému pro správu projektů jsme zvolili kombinaci strategického a taktického DDD s CQRS architekturou v Symfony 8.
-        Na strategické úrovni jsme identifikovali hlavní bounded contexts a jejich vzájemné vztahy. Na taktické úrovni jsme implementovali doménové modely, agregáty, hodnotové objekty a doménové služby.
-        Pro organizaci kódu jsme zvolili vertikální slice architekturu, která nám umožňuje organizovat kód podle funkcí (features) místo technických vrstev, což vede k lepší modularitě a udržitelnosti.
+        Architektura kombinuje strategický a taktický DDD s CQRS v Symfony 8. Na strategické úrovni vznikla
+        pětice bounded contexts a kontextová mapa popisující jejich vztahy. Taktická úroveň pokrývá agregáty,
+        hodnotové objekty, doménové události a doménové služby. Kód je organizovaný do vertikálních sliců –
+        každá feature obsahuje vše od příkazu po view model, čímž se omezí šíření změn napříč vrstvami.
     </p>
 
     <h3>Strategický design: Bounded Contexts a Context Map</h3>
     <p>
-        Prvním krokem při implementaci DDD bylo identifikovat bounded contexts (ohraničené kontexty) a vytvořit context map (mapu kontextů), která definuje vztahy mezi nimi.
-        Systém je rozdělen do následujících bounded contexts:
+        Identifikace bounded contexts vychází z doménové analýzy v <a href="#discovery">sekci 15.03</a>.
+        Systém je rozdělen do následujících kontextů:
     </p>
 
     <ul>
-        <li><strong>UserManagement</strong> – Správa uživatelů, registrace, autentizace. Tento kontext obsahuje vše, co souvisí s identitou a přístupovými právy uživatelů.</li>
-        <li><strong>ProjectManagement</strong> – Správa projektů, vytváření, aktualizace. Tento kontext se zaměřuje na životní cyklus projektů a jejich vlastnosti.</li>
-        <li><strong>TaskManagement</strong> – Správa úkolů, vytváření, aktualizace, přiřazování. Tento kontext řeší vše, co souvisí s úkoly v projektech.</li>
-        <li><strong>CommentManagement</strong> – Správa komentářů, přidávání, aktualizace. Tento kontext se zabývá komunikací a zpětnou vazbou k úkolům.</li>
-        <li><strong>ActivityTracking</strong> – Sledování aktivity, zaznamenávání událostí. Tento kontext poskytuje přehled o aktivitách v systému.</li>
+        <li><strong>UserManagement</strong> – identita, registrace, autentizace; vlastník přístupových práv uživatelů.</li>
+        <li><strong>ProjectManagement</strong> – životní cyklus projektů a členství uživatelů v projektu.</li>
+        <li><strong>TaskManagement</strong> – úkoly, jejich přiřazování a stavové přechody.</li>
+        <li><strong>CommentManagement</strong> – komentáře a zpětná vazba k úkolům.</li>
+        <li><strong>ActivityTracking</strong> – auditní stopa nad událostmi z ostatních kontextů.</li>
     </ul>
 
+    {% set _diagram_inline %}{% include '/diagrams/15_case_study/context_map.svg' %}{% endset %}
+            {% include '_partials/diagram.html.twig' with {
+                fig: '15.4-A',
+                title: 'Kontextová mapa: vztahy mezi pěti bounded contexts',
+                inline: _diagram_inline
+            } %}
+
     <p>
-        Mezi těmito kontexty jsme definovali následující vztahy:
+        Vztahy zachycené v kontextové mapě:
     </p>
 
     <ul>
-        <li><strong>UserManagement ⟷ ProjectManagement</strong>: Vztah typu Partnership, kde oba kontexty spolupracují na správě členství uživatelů v projektech.</li>
-        <li><strong>ProjectManagement ⟷ TaskManagement</strong>: Vztah typu Customer-Supplier, kde ProjectManagement je zákazníkem a TaskManagement dodavatelem služeb pro správu úkolů v projektech.</li>
-        <li><strong>TaskManagement ⟷ CommentManagement</strong>: Vztah typu Customer-Supplier, kde TaskManagement je zákazníkem a CommentManagement dodavatelem služeb pro komentáře k úkolům.</li>
-        <li><strong>ActivityTracking</strong>: Ostatní kontexty publikují doménové události přes Open Host Service / Published Language; ActivityTracking je čistě downstream konzument – naslouchá těmto událostem a zaznamenává je, aniž by ovlivňoval vydávající kontexty.</li>
+        <li><strong>UserManagement ⟷ ProjectManagement</strong> – <em>Partnership</em>. Oba kontexty
+            ovlivňují společný model členství v projektu. Změna kontraktu vyžaduje koordinaci obou týmů.</li>
+        <li><strong>ProjectManagement → TaskManagement</strong> – <em>Customer / Supplier</em>.
+            ProjectManagement určuje, jaký kontrakt o existenci a členství projektu TaskManagement potřebuje;
+            TaskManagement se přizpůsobuje upstreamu.</li>
+        <li><strong>TaskManagement → CommentManagement</strong> – <em>Customer / Supplier</em>.
+            CommentManagement vystavuje API pro komentáře nad úkoly, TaskManagement je downstream zákazník.</li>
+        <li><strong>Všechny kontexty → ActivityTracking</strong> – <em>Open Host Service / Published Language</em>.
+            Vydávající kontexty publikují doménové události veřejným kontraktem (Published Language);
+            ActivityTracking je čistě downstream konzument, který nemá vliv zpět.</li>
+        <li><strong>Shared Kernel</strong> – <code>UserId</code>, <code>ProjectId</code>, <code>TaskId</code>
+            jsou sdílené hodnotové objekty napříč kontexty. Volba a její cena jsou rozebrány
+            v <a href="#trade-off-shared-kernel-heading">sekci 15.07.2</a>.</li>
     </ul>
 
     <p>
-        Pro komunikaci mezi kontexty jsme implementovali Anti-Corruption Layer (ACL) tam, kde bylo potřeba překládat koncepty mezi různými kontexty, a použili jsme doménové události pro asynchronní komunikaci.
+        <strong>Anti-Corruption Layer (ACL)</strong> v této studii nabývá zjednodušené podoby. Mezi
+        TaskManagement a ProjectManagement není potřeba sémantická translace – Shared Kernel
+        sdílí <code>ProjectId</code> i <code>UserId</code> –, přesto TaskManagement nesmí ze své doménové
+        vrstvy přímo volat infrastrukturu jiného kontextu. Hranici proto tvoří port
+        <code>ProjectChecker</code> definovaný v doméně TaskManagement; jeho infrastrukturní implementace
+        je adaptér do ProjectManagement. Port plní funkci ACL i tam, kde se nepřekládají typy: chrání
+        TaskManagement před přímým provázáním s interním modelem upstream kontextu. Synchronní vs.
+        asynchronní volba je popsaná v <a href="#trade-off-sync-acl-heading">sekci 15.07.3</a>.
+    </p>
+
+    <p>
+        Pro asynchronní integraci mezi kontexty slouží doménové události publikované přes Symfony Messenger.
+        Konkrétní ukázka projekce, která naslouchá událostem ze tří kontextů, je v
+        <a href="#read-model">sekci 15.06</a>.
     </p>
 
     <h3>Taktický design a struktura projektu</h3>
@@ -492,9 +522,11 @@ declare(strict_types=1);
 
 namespace App\ProjectManagement\Domain\Model;
 
+use App\ProjectManagement\Domain\Event\MemberAdded;
+use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
-// UserId je sdílený identifikátor - v produkčním systému by byl v Shared Kernel
+// UserId, ProjectId a TaskId jsou sdílené v Shared Kernelu (viz sekce 15.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
 
 class Project
@@ -559,11 +591,13 @@ class Project
     {
         foreach ($this->memberIds as $existingId) {
             if ($existingId->equals($userId)) {
-                return; // Již je členem
+                return; // již je členem – idempotentní operace
             }
         }
         $this->memberIds[] = $userId;
         $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new MemberAdded($this->id, $userId));
     }
 
     public function removeMember(UserId $userId): void
@@ -572,11 +606,18 @@ class Project
             throw new \DomainException('Cannot remove owner from project');
         }
 
-        $this->memberIds = array_filter(
+        $before = count($this->memberIds);
+        $this->memberIds = array_values(array_filter(
             $this->memberIds,
             fn(UserId $id) => !$id->equals($userId)
-        );
+        ));
+
+        if (count($this->memberIds) === $before) {
+            return; // nebyl členem – idempotentní operace
+        }
+
         $this->updatedAt = new \DateTimeImmutable();
+        $this->recordEvent(new MemberRemoved($this->id, $userId));
     }
 
     public function updateName(string $name): void
@@ -622,9 +663,12 @@ class Project
             } %}
 
     {% set _callout_body %}
-
         <p>
-            V tomto příkladu sdílíme <code>UserId</code> napříč kontexty. V produkčním systému by identifikátor byl buď v Shared Kernel, nebo by každý kontext měl vlastní kopii identifikátoru jako primitivní typ (string UUID).
+            <code>UserId</code> je v této studii sdílen mezi kontexty přes Shared Kernel –
+            jeho cena a alternativa (samostatný primitiv v každém kontextu) jsou rozebrány
+            v <a href="#trade-off-shared-kernel-heading">sekci 15.07.2</a>. V kontextech, kde
+            by se model musel rozejít (jiná validace, jiná sériová reprezentace), by sdílení
+            přes Shared Kernel nestačilo a kontext by si držel vlastní kopii.
         </p>
     {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -645,7 +689,7 @@ use App\TaskManagement\Domain\Event\TaskAssigned;
 use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
-// ProjectId a UserId jsou sdílené identifikátory - v produkčním systému by byly v Shared Kernel
+// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekce 15.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
 
@@ -729,7 +773,7 @@ class Task
         $this->status = $status;
         $this->updatedAt = new \DateTimeImmutable();
 
-        $this->recordEvent(new TaskStatusChanged($this->id(), $oldStatus, $status));
+        $this->recordEvent(new TaskStatusChanged($this->id, $oldStatus, $status));
     }
 
     public function updateTitle(string $title): void
@@ -772,6 +816,232 @@ class Task
                 language: 'php',
                 code: _code,
                 highlights: []
+            } %}
+
+    <h3 id="domain-events-heading">Doménové události</h3>
+    <p>
+        Agregáty publikují skutečnosti, které pro doménu mají význam. Každá událost je neměnný záznam minulé skutečnosti –
+        proto jsou všechny třídy <code>final readonly</code> s veřejnými promovanými parametry. Atribut
+        <code>occurredAt</code> nese okamžik vzniku v UTC; payload obsahuje minimální množinu identifikátorů
+        a hodnot potřebnou k rekonstrukci kontextu. Teoretický základ doménových událostí je v kapitole
+        <a href="{{ path('basic_concepts') }}#domain-events">Základní koncepty DDD</a>; návaznost na Event
+        Sourcing v kapitole <a href="{{ path('event_sourcing') }}">Event Sourcing</a>.
+    </p>
+
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\Domain\Event;
+
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
+
+final readonly class ProjectCreated
+{
+    public function __construct(
+        public ProjectId $projectId,
+        public string $name,
+        public UserId $ownerId,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {
+    }
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/Domain/Event/ProjectCreated.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\Domain\Event;
+
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\UserManagement\Domain\ValueObject\UserId;
+
+final readonly class MemberAdded
+{
+    public function __construct(
+        public ProjectId $projectId,
+        public UserId $userId,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {
+    }
+}
+
+final readonly class MemberRemoved
+{
+    public function __construct(
+        public ProjectId $projectId,
+        public UserId $userId,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {
+    }
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/Domain/Event/MemberAdded.php a MemberRemoved.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManagement\Domain\Event;
+
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
+use App\TaskManagement\Domain\ValueObject\TaskId;
+use App\TaskManagement\Domain\ValueObject\TaskStatus;
+use App\UserManagement\Domain\ValueObject\UserId;
+
+final readonly class TaskCreated
+{
+    public function __construct(
+        public TaskId $taskId,
+        public string $title,
+        public ProjectId $projectId,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {
+    }
+}
+
+final readonly class TaskAssigned
+{
+    public function __construct(
+        public TaskId $taskId,
+        public UserId $assigneeId,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {
+    }
+}
+
+final readonly class TaskStatusChanged
+{
+    public function __construct(
+        public TaskId $taskId,
+        public TaskStatus $oldStatus,
+        public TaskStatus $newStatus,
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+    ) {
+    }
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/TaskManagement/Domain/Event/TaskCreated.php, TaskAssigned.php, TaskStatusChanged.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+
+    {% set _callout_body %}
+        <p>
+            Doménová událost zde nese pouze identifikátory a hodnoty, ne celý agregát. Konzument události
+            si v případě potřeby dohledá zbytek dat přes repozitář nebo lokální projekci. Tlustý payload
+            (sériově předávané reference na celý agregát) je anti-vzor – při opakovaném zpracování může vést
+            k nekonzistentnímu stavu, pokud se mezitím agregát změnil.
+        </p>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
+            } %}
+
+    <h3 id="value-objects-heading">Hodnotové objekty: identifikátory a stav úkolu</h3>
+    <p>
+        Identifikátory <code>ProjectId</code>, <code>TaskId</code> a <code>UserId</code> sdílí společné
+        rozhraní: konstruktor bez argumentů vygeneruje nové UUID, konstruktor se stringem ho ověří
+        a uloží. Metoda <code>value()</code> vrací surový string pro persistenci, <code>equals()</code>
+        srovnává podle hodnoty. <code>TaskStatus</code> je výčtový typ s explicitním business jazykem.
+        Plný rozbor Value Objektů je v kapitole
+        <a href="{{ path('basic_concepts') }}#value-objects">Základní koncepty DDD</a>.
+    </p>
+
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\Domain\ValueObject;
+
+use Symfony\Component\Uid\Uuid;
+
+final class ProjectId
+{
+    private readonly string $value;
+
+    public function __construct(string $value = '')
+    {
+        $resolved = $value === '' ? Uuid::v7()->toRfc4122() : $value;
+        if (!Uuid::isValid($resolved)) {
+            throw new \InvalidArgumentException('ProjectId must be a valid UUID');
+        }
+        $this->value = $resolved;
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/Domain/ValueObject/ProjectId.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManagement\Domain\ValueObject;
+
+enum TaskStatus: string
+{
+    case TODO        = 'todo';
+    case IN_PROGRESS = 'in_progress';
+    case DONE        = 'done';
+
+    public function canTransitionTo(self $next): bool
+    {
+        return match ([$this, $next]) {
+            [self::TODO,        self::IN_PROGRESS] => true,
+            [self::IN_PROGRESS, self::DONE]        => true,
+            [self::IN_PROGRESS, self::TODO]        => true,
+            default                                 => false,
+        };
+    }
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/TaskManagement/Domain/ValueObject/TaskStatus.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+
+    {% set _callout_body %}
+        <p>
+            Konstruktor <code>new ProjectId()</code> bez argumentů generuje UUID v7 (časově řazené,
+            vhodné jako primární klíč). <code>new ProjectId($uuid)</code> hydratuje existující identifikátor
+            z databáze nebo z příchozího příkazu. <code>TaskId</code> a <code>UserId</code> následují
+            stejnou konvenci. Diskuse o sdílení těchto VO mezi kontexty (Shared Kernel vs. duplikace)
+            je v <a href="#trade-off-shared-kernel-heading">sekci 15.07.2</a>.
+        </p>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Konvence',
+                body: _callout_body
             } %}
 
     <h3 id="create-project-command-heading">Command: Vytvoření projektu (Command Pattern)</h3>
@@ -885,22 +1155,25 @@ declare(strict_types=1);
 
 namespace App\TaskManagement\AssignTask\Command;
 
-use App\TaskManagement\Domain\Repository\TaskRepository;
-use App\TaskManagement\Domain\ValueObject\TaskId;
-use App\TaskManagement\Domain\Service\TaskAssignmentService;
+use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\TaskManagement\Domain\Port\ProjectChecker;
+use App\TaskManagement\Domain\Repository\TaskRepository;
+use App\TaskManagement\Domain\Service\TaskAssignmentService;
+use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-// Port definovaný v TaskManagement doméně - abstrahuje závislost na jiném bounded contextu.
-// Infrastrukturní implementace volá ProjectManagement interně (přes DB nebo API),
-// aniž by TaskManagement cokoliv věděl o interním modelu ProjectManagement.
-//
-// interface ProjectChecker {
-//     public function exists(ProjectId $projectId): bool;
-//     public function isMember(ProjectId $projectId, UserId $userId): bool;
-// }
-
+/**
+ * Port ProjectChecker tvoří hranici (Anti-Corruption Layer) mezi TaskManagement
+ * a ProjectManagement. TaskManagement nezná interní model ProjectManagement;
+ * adaptér v infrastruktuře přeloží dotaz na konkrétní volání upstream kontextu.
+ *
+ * Skutečné rozhraní:
+ *   interface ProjectChecker {
+ *       public function exists(ProjectId $projectId): bool;
+ *       public function isMember(ProjectId $projectId, UserId $userId): bool;
+ *   }
+ */
 #[AsMessageHandler]
 class AssignTaskHandler
 {
@@ -1176,7 +1449,10 @@ class ProjectListProjection
     {
         $view = $this->em->find(ProjectListView::class, $event->projectId->value());
         if ($view === null) {
-            return; // out-of-order delivery; reconciler dorovná
+            // Out-of-order delivery: MemberAdded přišlo dřív než ProjectCreated.
+            // Reconciler (sekce 15.06.5) dohledá zaostalou view a obnoví ji
+            // ze zdrojových agregátů.
+            return;
         }
         $userId = $event->userId->value();
         if (!in_array($userId, $view->memberIds, strict: true)) {
@@ -1221,10 +1497,13 @@ class ProjectListProjection
                 highlights: []
             } %}
 
-    <h3 id="read-model-query-heading">Query handler nad read modelem</h3>
+    <h3 id="read-model-query-heading">Query handler nad read modelem (revize <code>GetProjectsHandler</code>)</h3>
     <p>
-        Po zavedení projekce se <code>GetProjectsHandler</code> přepsal na čistý SQL/DBAL dotaz nad read tabulkou.
-        Žádné agregáty, žádná doménová logika – jen výběr sloupců a mapování na <code>ProjectViewModel</code>.
+        Naivní verze ze <a href="#get-projects-handler-heading">sekce 15.05</a> hydratovala doménové agregáty
+        jen kvůli zobrazení. Po zavedení projekce se třída <code>GetProjectsHandler</code> přepsala na čistý
+        DBAL dotaz nad read tabulkou. Žádné agregáty, žádná doménová logika – jen výběr sloupců a mapování
+        na <code>ProjectViewModel</code>. Stejný název třídy, stejný command, jiná implementace; volající
+        ani Symfony Messenger o změně nevědí.
     </p>
 
     {% set _code %}{% verbatim %}<?php
@@ -1275,6 +1554,128 @@ class GetProjectsHandler
                 language: 'php',
                 code: _code,
                 highlights: []
+            } %}
+
+    <h3 id="read-model-reconciliation-heading">Idempotence projekce a reconciliation</h3>
+    <p>
+        Asynchronní doručování přes Messenger nezaručuje pořadí zpráv: pokud transport přerozdělí
+        zprávy mezi více workerů, může <code>MemberAdded</code> dorazit dřív než <code>ProjectCreated</code>
+        téhož projektu. Projekce na to musí být připravená dvěma vlastnostmi.
+    </p>
+
+    <p>
+        <strong>Idempotence.</strong> Opakované zpracování téže události nesmí změnit výsledek. V ukázce
+        výše to zajišťují tři detaily: <code>onMemberAdded</code> nepřidá uživatele dvakrát díky kontrole
+        <code>in_array(..., strict: true)</code>; <code>onMemberRemoved</code> přepočítává
+        <code>memberCount</code> z aktuální délky pole, ne inkrementem; <code>onProjectCreated</code>
+        při kolizi PK skončí výjimkou, kterou Messenger zaloguje a dál se nepokouší (po prvním zpracování
+        už view existuje). Pro silnější záruku lze do <code>project_list_view</code> přidat sloupec
+        <code>last_event_id</code> a každou událost zpracovat jen tehdy, pokud její ID je novější.
+    </p>
+
+    <p>
+        <strong>Reconciler.</strong> Pokud událost přijde mimo pořadí (line 1184 vrací <code>return</code>
+        bez zápisu) nebo se ztratí, projekce zůstává zastaralá. Reconciler je samostatný proces, který
+        v pravidelném intervalu detekuje rozdíl mezi write modelem a read modelem a doplní chybějící data.
+        V této studii je řešen jako Symfony console command spouštěný z cronu jednou za hodinu (frekvence je
+        kompromis mezi čerstvostí a zatížením DB):
+    </p>
+
+    {% set _code %}{% verbatim %}<?php
+
+declare(strict_types=1);
+
+namespace App\ProjectManagement\Infrastructure\ReadModel;
+
+use App\ProjectManagement\Domain\Repository\ProjectRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+#[AsCommand(
+    name: 'project-list:reconcile',
+    description: 'Dorovná zaostalý read model project_list_view ze zdrojových agregátů.',
+)]
+final class ReconcileProjectListView extends Command
+{
+    public function __construct(
+        private readonly ProjectRepository $projects,
+        private readonly EntityManagerInterface $em,
+    ) {
+        parent::__construct();
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $now = new \DateTimeImmutable();
+        $repaired = 0;
+
+        foreach ($this->projects->all() as $project) {
+            $view = $this->em->find(ProjectListView::class, $project->id()->value());
+            $expectedMembers = array_map(
+                static fn($id) => $id->value(),
+                $project->memberIds(),
+            );
+
+            if ($view === null) {
+                $view = new ProjectListView();
+                $view->projectId  = $project->id()->value();
+                $view->ownerId    = $project->ownerId()->value();
+                $view->createdAt  = $project->createdAt();
+                $this->em->persist($view);
+            }
+
+            $needsRepair = $view->name !== $project->name()
+                || $view->memberIds !== $expectedMembers
+                || $view->memberCount !== count($expectedMembers);
+
+            if (!$needsRepair) {
+                continue;
+            }
+
+            $view->name        = $project->name();
+            $view->description = $project->description();
+            $view->memberIds   = $expectedMembers;
+            $view->memberCount = count($expectedMembers);
+            $view->updatedAt   = $now;
+            $repaired++;
+        }
+
+        $this->em->flush();
+        $output->writeln(sprintf('Dorovnáno %d projektů.', $repaired));
+
+        return Command::SUCCESS;
+    }
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/ProjectManagement/Infrastructure/ReadModel/ReconcileProjectListView.php',
+                language: 'php',
+                code: _code,
+                highlights: []
+            } %}
+
+    <p>
+        Reconciler nepřebírá roli projekce; jen dorovnává to, co projekce z technických důvodů
+        nedoručila. Pro <code>task_count</code> by se obdobně načetly počty úkolů z
+        <code>TaskRepository</code>. V provozu je užitečné mít alert, který detekuje rozdíl
+        a varuje, pokud je počet dorovnaných záznamů vysoký – signalizuje to systémový problém
+        s transportem, ne jen drobné pořadí zpráv.
+    </p>
+
+    {% set _callout_body %}
+        <p>
+            Pokud projekt přejde na Event Sourcing, reconciler se zjednoduší: znovuvytvoří view čistě
+            replay-em událostí z event store. V tomto projektu reconciler čte přímo write model,
+            protože doménové události nejsou perzistentní (zveřejňují se transientně přes Messenger).
+            Detaily v kapitole <a href="{{ path('event_sourcing') }}">Event Sourcing</a>.
+        </p>
+    {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'note',
+                label: 'Poznámka',
+                body: _callout_body
             } %}
 
     <h3 id="read-model-consistency-heading">Důsledky pro konzistenci</h3>
@@ -1375,7 +1776,9 @@ class GetProjectsHandler
         <strong>Alternativa pro distribuovaný systém:</strong> <strong>TaskManagement</strong> by si držel lokální
         projekci „project members“ aktualizovanou přes eventy z <strong>ProjectManagement</strong>. Validace by běžela
         nad lokální tabulkou, bez síťového volání. Pro monolit jde o předčasnou optimalizaci, ale jakmile by se kontexty
-        oddělily, je to první refaktor, který by měl proběhnout.
+        oddělily, je to první refaktor, který by měl proběhnout. Pokud by validace selhala až po dokončení přiřazení,
+        bylo by třeba vrátit stav přes kompenzační scénář – vzor, který popisuje kapitola
+        <a href="{{ path('sagas') }}">Sagas a Process Manager</a>.
     </p>
 
     <h3 id="trade-off-domain-service-heading">4. Doménová služba vs. logika v handleru</h3>
@@ -1461,7 +1864,10 @@ class GetProjectsHandler
             <strong>Vertikální slice architektura pro modularitu</strong> – Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti. Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.
         </li>
         <li>
-            <strong>Testování doménového modelu</strong> – Doménové objekty bez závislostí na frameworku se testují snadno. Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.
+            <strong>Testování doménového modelu</strong> – Doménové objekty bez závislostí na frameworku se testují snadno.
+            Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.
+            Podrobná strategie pro DDD projekty je v kapitole
+            <a href="{{ path('testing_ddd') }}">Testování DDD aplikací</a>.
         </li>
         <li>
             <strong>Read modely jako samostatný artefakt</strong> – Oddělení write a read strany přes projekce ukázalo svou hodnotu, jakmile dataset překročil několik tisíc projektů. Hydratace agregátů pro účely výpisu je drahá; denormalizovaný read model umožnil držet odezvu výpisu pod 50 ms i při tisícovkách projektů na uživatele. Cenou byla eventual consistency, kterou tým ošetřil optimistickou aktualizací UI v kombinaci s read-your-writes pro kritické flowy.

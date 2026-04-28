@@ -26,7 +26,7 @@ final class Chapters
             ['n' => '12', 'route' => 'ddd_pain_points',           't' => 'DDD v praxi – kde to bolí',      'd' => '20 reálných problémů: Doctrine, ACL, strangler fig…',     'time' => 35, 'lvl' => 4, 'tag' => 'Praxe',     'group' => 'practice'],
             ['n' => '13', 'route' => 'anti_patterns',             't' => 'Anti-vzory a typické chyby',     'd' => 'Anemic model, smart UI, leaky abstractions',              'time' => 35, 'lvl' => 2, 'tag' => 'Praxe',     'group' => 'practice'],
             ['n' => '14', 'route' => 'when_not_to_use_ddd',       't' => 'Kdy DDD nepoužívat',             'd' => '7 situací, kdy DDD přinese víc škody než užitku',         'time' => 14, 'lvl' => 2, 'tag' => 'Praxe',     'group' => 'practice'],
-            ['n' => '15', 'route' => 'case_study',                't' => 'Případová studie',               'd' => 'E-shop v DDD architektuře, krok za krokem',               'time' => 45, 'lvl' => 4, 'tag' => 'Praxe',     'group' => 'practice'],
+            ['n' => '15', 'route' => 'case_study',                't' => 'Případová studie',               'd' => 'Systém pro správu projektů v DDD a CQRS, krok za krokem','time' => 50, 'lvl' => 4, 'tag' => 'Praxe',     'group' => 'practice'],
             ['n' => '16', 'route' => 'ddd_ai',                    't' => 'DDD a umělá inteligence',        'd' => 'Eric Evans · Fowler · Beck · DHH o vztahu DDD a AI',      'time' => 20, 'lvl' => 1, 'tag' => 'Reference','group' => 'reference'],
         ];
     }
