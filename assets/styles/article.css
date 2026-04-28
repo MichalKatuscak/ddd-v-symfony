@@ -816,9 +816,9 @@ section > h4:first-child { margin-top: 0; }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s-4);
+  /* Bez border-top — FAQ nahoře už uzavírá border-bottom na last-of-type, kartičky
+     samy mají border, tak by druhá linka 1 px nad nimi působila jako duplicitní rule. */
   margin: var(--s-8) 0 var(--s-6);
-  padding-top: var(--s-6);
-  border-top: 1px solid var(--stroke);
   max-width: var(--measure-prose);
 }
 .art-body .art-nav-item {
