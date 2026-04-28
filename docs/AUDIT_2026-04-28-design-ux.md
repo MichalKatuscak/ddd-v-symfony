@@ -325,3 +325,66 @@ Tyto interakce byly v R2 testovány a fungují korektně:
 ### Stav po druhém kole
 
 5 dalších oprav, 16 nových commitů celkem od `21256b5` po `7532404`. Web prošel druhým hloubkovým auditem bez dalších nálezů. Všechny důležité interakce a komponenty otestovány programově přes Playwright a Twig integration testy.
+
+---
+
+## Třetí kolo auditu (2026-04-28 odpoledne)
+
+Hlubší a11y a perf audit, programové testování všech interakcí.
+
+### R3-1 Drawer inert + aria-current na topnav (commit `0b4ff04`)
+
+**R3-1a Drawer mimo focus order při zavření.** Mobilní `.nav-drawer` byl při zavření stále v DOMu a tabovatelný — focus mohl skočit „off-screen" na nedostupné odkazy. Ověřeno přes Playwright `document.querySelectorAll(focusable).length` zachytávalo 5 drawer linků i při `data-open="false"`.
+
+**Fix:** Přidán `inert` atribut na drawer, `topnav.js` toggluje při open/close. Programové `.focus()` na child link při `inert=true` se nepřevezme — browser respektuje. Verifikováno: open → focus na první link „Základy", close ESC → `inert=true` + focus zpět na toggle.
+
+**R3-1b aria-current na navigaci.** Topnav i drawer linky měly jen třídu `.active` jako vizuální indikátor. Pro screen-reader uživatele neexistovala sémantika.
+
+**Fix:** Přidáno `aria-current="page"` když je uživatel na hubu samotném (`/vzory`), `aria-current="true"` když je v sekci ale na konkrétní kapitole (`/cqrs`). Třída `.active` zůstává jako vizuální indikátor, aria-current ji doplňuje. Položka „O autorovi" v draweru má aria-current="page" jen na `/o-autorovi`.
+
+### Testováno bez nálezu
+
+**Color contrast (canvas-based reálná hodnota, ne výpočet z OKLCH stringu):**
+- `--fg` (#E6E8EC) on `--bg-0` (#0B0D10): **15.86 : 1** (AAA)
+- `--fg-muted` (#A6ADBB) on `--bg-0`: **8.63 : 1** (AAA)
+- `--fg-muted` on `--bg-1`: **8.18 : 1** (AAA)
+- `--fg-dim` (#7C8492) on `--bg-0`: **5.16 : 1** (AA)
+- `--fg-dim` on `--bg-1`: **4.89 : 1** (AA)
+- `--fg-dim` on `--bg-2`: **4.62 : 1** (AA, hraniční nad 4.5)
+- `--accent` (rgb(240, 165, 86)) on `--bg-0`: **9.47 : 1** (AAA)
+- `--state-err` on `--bg-2`: **6.56 : 1** (AA)
+- `--state-ok/info/warn` on `--bg-2`: **8.92–9.85 : 1** (AAA)
+
+Všechny kombinace pasují WCAG AA, většina i AAA. Žádný fail.
+
+**Typografie a duplicity v textu:**
+- 0 skutečných duplikovaných slov ve větě (předchozí false-positives byly heading→paragraph repetice).
+- 0 ASCII pomlček v próze (po R2-4 fixu).
+- 23/25 šablon meta_description v 100–160 znacích (po R2-3 fixu).
+
+**Heading hierarchy:** 1× h1 per stránka, žádné skipy úrovně.
+
+**Tab order:** 79 focusable elementů na chapter page, logické pořadí (skip-link → brand → hamburger → topnav → content → footer). Drawer linky správně mimo focus order při zavření (po R3-1a).
+
+**Performance metrics (dev server, no gzip):**
+- DOM Content Loaded: ~1690 ms
+- First Contentful Paint: 344 ms
+- Transfer size: 217 KB / page
+- CSS bundle: 50 KB (raw)
+- JS bundle: 51 KB (raw, hljs s 8 vybranými jazyky)
+
+V produkci s gzip + nginx cca 3× rychlejší. Žádná blockující věc.
+
+**Interakce:**
+- Skip-link funguje
+- Mobile drawer: open/close, focus management, ESC, focus trap, inert
+- TOC scroll-spy: aktivuje `.toc-current` na desktop sidebar i mobile `<details>`
+- Copy button: `.code-copied` třída + label „zkopírováno ✓"
+- FAQ accordion: `<details>` toggle
+- 0 broken interních anchor linků
+
+**OG/Twitter meta:** všechny tagy přítomny per stránka, lokalizace `cs_CZ`, `og:image` na `images/social.png` (existuje).
+
+### Stav po třetím kole
+
+23 commitů celkem od `21256b5` po `0b4ff04`. Druhý audit (R2) zachytil 5 oprav, třetí audit (R3) přidal 1 a11y opravu (drawer inert + aria-current). Web pokrývá WCAG AA u všech zkoumaných kontrastních kombinací, a11y interakcí a sémantiky.
