@@ -46,8 +46,10 @@
 }
 .art-meta {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--s-4);
+  /* auto-fit s minimální šířkou — kapitoly s 4 položkami zaplní řadu, ne-kapitoly
+     se 2 položkami zůstanou kompaktní bez prázdného trackingu. */
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--s-4) var(--s-7);
   padding: var(--s-4) 0;
   border-top: 1px solid var(--stroke);
   border-bottom: 1px solid var(--stroke);
@@ -97,14 +99,17 @@
   color: var(--fg-muted);
   line-height: var(--lh-snug);
   cursor: pointer;
-}
-.toc-list li:hover { color: var(--fg); }
-.toc-list a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
   border-radius: 2px;
 }
+.toc-list li:hover { color: var(--fg); }
+/* Focus-within zvýrazní celý <li> řádek (číslo + titul) když uživatel tabuje na odkaz uvnitř.
+   Samotný <a> vrací display: contents, takže outline na něm by neměl box k obkroužení. */
+.toc-list li:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .toc-list a { color: inherit; text-decoration: none; display: contents; }
+.toc-list a:focus-visible { outline: none; }
 .toc-num {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -673,7 +678,11 @@ section > h4:first-child { margin-top: 0; }
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.code-copied { color: var(--state-ok); }
+.code-copy.code-copied {
+  color: var(--state-ok);
+  border-color: color-mix(in oklch, var(--state-ok) 50%, transparent);
+  background: color-mix(in oklch, var(--state-ok) 12%, transparent);
+}
 
 .code-body {
   margin: 0;
@@ -770,6 +779,16 @@ section > h4:first-child { margin-top: 0; }
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+    /* Scroll-shadow indikátor — totožný princip jako .table-responsive a .code-body */
+    background-image:
+      linear-gradient(to right, var(--bg-1), var(--bg-1)),
+      linear-gradient(to right, var(--bg-1), var(--bg-1)),
+      radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)),
+      radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+    background-position: 0 0, 100% 0, 0 0, 100% 0;
+    background-repeat: no-repeat;
+    background-size: 24px 100%, 24px 100%, 14px 100%, 14px 100%;
+    background-attachment: local, local, scroll, scroll;
   }
   .diagram > img,
   .diagram > svg {
