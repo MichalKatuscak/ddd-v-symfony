@@ -242,7 +242,7 @@ class DiagramViewer {
     this.modalCtrl.fitToViewport();
 
     // Wheel zoom kolem pozice kurzoru (jen v modalu, ne v inline)
-    stage.addEventListener('wheel', (e) => {
+    this._wheelHandler = (e) => {
       e.preventDefault();
       const factor = e.deltaY < 0 ? STEP : 1 / STEP;
       const newScale = clamp(
@@ -255,7 +255,12 @@ class DiagramViewer {
       const cx = e.clientX - stageRect.left;
       const cy = e.clientY - stageRect.top;
       this.modalCtrl._zoomAt(cx, cy, newScale);
-    }, { passive: false });
+    };
+    stage.addEventListener('wheel', this._wheelHandler, { passive: false });
+
+    // Resize — přizpůsobit modal při změně rozměrů okna (rotace, resize)
+    this._resizeHandler = () => this.modalCtrl && this.modalCtrl.fitToViewport();
+    window.addEventListener('resize', this._resizeHandler);
 
     // Focus management — uložit původní fokus, dát na zavírací X
     this._prevActive = document.activeElement;
@@ -298,6 +303,8 @@ class DiagramViewer {
   closeFullscreen() {
     if (!this.modal) return;
     document.removeEventListener('keydown', this._escHandler);
+    window.removeEventListener('resize', this._resizeHandler);
+    if (this.modalStage) this.modalStage.removeEventListener('wheel', this._wheelHandler);
     document.body.style.overflow = this._prevBodyOverflow || '';
     this.modal.removeEventListener('keydown', this._trapHandler);
     this.modal.remove();
@@ -306,6 +313,8 @@ class DiagramViewer {
     this.modalCloseBtn = null;
     this.modalToolbar = null;
     this.modalCtrl = null;
+    this._wheelHandler = null;
+    this._resizeHandler = null;
     if (this._prevActive && this._prevActive.focus) {
       this._prevActive.focus();
     } else if (this.btnFs) {
