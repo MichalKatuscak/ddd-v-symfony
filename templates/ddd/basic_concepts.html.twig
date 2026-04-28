@@ -133,6 +133,8 @@
                 Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderManagement</code> může být uživatel
                 reprezentován pouze jako <code>UserId</code>,
                 zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
+                Kompletní příklad rozdělení reálného systému do pěti bounded contexts je v kapitole
+                <a href="{{ path('case_study') }}#discovery">Případová studie – Doménová analýza</a>.
             </p>
         </section>
 
@@ -326,7 +328,9 @@ class Email
                 Agregát je skupina souvisejících objektů, která tvoří jednu transakční hranici konzistence
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[3]</a>.
                 Každý agregát má kořen agregátu (aggregate root),
-                který je jediným vstupním bodem pro veškeré vnější interakce s agregátem.
+                který je jediným vstupním bodem pro veškeré vnější interakce s agregátem. Špatně zvolená velikost
+                agregátu patří mezi nejčastější chyby v DDD – velkoobjemové „God Aggregaty“ rozebírá kapitola
+                <a href="{{ path('anti_patterns') }}">Anti-vzory a typické chyby</a>.
             </p>
 
             {% set _code %}<?php
@@ -565,6 +569,8 @@ interface OrderRepository
                 V tomto příkladu je <code>OrderRepository</code> rozhraní, které definuje metody pro ukládání a načítání
                 objednávek.
                 Konkrétní implementace tohoto rozhraní by mohla používat Doctrine ORM nebo jiný mechanismus persistence.
+                Praktickou implementaci repozitáře v Symfony 8 popisuje kapitola
+                <a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony 8</a>.
             </p>
         </section>
 
@@ -699,7 +705,9 @@ final class OrderCreatedEvent
                 V tomto příkladu je <code>OrderCreatedEvent</code> doménová událost, která reprezentuje vytvoření nové
                 objednávky.
                 Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy se
-                to stalo.
+                to stalo. Domain Events tvoří základ pro dvě důležité architektonické techniky: oddělení čtení a zápisu
+                v <a href="{{ path('cqrs') }}">CQRS</a> a uložení stavu jako sekvence událostí v
+                <a href="{{ path('event_sourcing') }}">Event Sourcingu</a>.
             </p>
 
         </section>

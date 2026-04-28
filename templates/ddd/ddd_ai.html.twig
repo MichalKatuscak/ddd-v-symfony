@@ -136,7 +136,8 @@
             zbavená nejednoznačností a obohacená o doménová pravidla. To z ní dělá přirozený most mezi
             doménovými experty a LLM: pojmy, které jsou jasné lidem, jsou jasné i modelu. Otázka zní,
             zda náklady na vybudování a udržení ubiquitous language jsou proporcionální k výhodám –
-            a odpověď se liší projekt od projektu.
+            a odpověď se liší projekt od projektu. Definici a roli ubiquitous language v DDD popisuje
+            kapitola <a href="{{ path('basic_concepts') }}#ubiquitous-language">Základní koncepty DDD</a>.
         </p>
     </section>
 
@@ -307,6 +308,9 @@
             události jako přirozené kontrakty – jsou přirozeně testovatelné na úrovni domény.
             Agregát definuje pravidlo; test verifikuje pravidlo; AI generuje implementaci; test
             signalizuje odchylku. Tento cyklus je robustnější než testování implementačních detailů.
+            Konkrétní strategie testování DDD modelů – unit testy agregátů, integrační testy
+            přes Messenger, contract testy mezi kontexty – popisuje kapitola
+            <a href="{{ path('testing_ddd') }}">Testování DDD</a>.
         </p>
     </section>
 
@@ -377,6 +381,8 @@
             skutečně komplexní domény versus CRUD monkeying? A mění AI tuto hranici tím,
             že CRUD kód zlevní natolik, že zbyde čas na komplexní doménu – nebo tím,
             že komplexní doménové problémy de facto „zjednodušší“ na LLM-supported decisions?
+            Pro praktické rozhraničení toho, kdy DDD nasazovat a kdy ne, viz kapitolu
+            <a href="{{ path('when_not_to_use_ddd') }}">Kdy DDD nepoužívat</a>.
         </p>
     </section>
 

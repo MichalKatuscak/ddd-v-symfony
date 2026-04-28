@@ -112,7 +112,7 @@
 
             <p>
                 V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener">[2]</a>.
+                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener">[2]</a>. Doménové stavební kameny – entity, hodnotové objekty, agregáty, doménové služby – jsou společné pro oba přístupy a popisuje je kapitola <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a>.
             </p>
         </section>
 
@@ -299,7 +299,7 @@
 
             <h3 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h3>
             <p>
-                Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev:
+                Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev. Detaily konfigurace Messengeru, DI a Doctrine pro DDD model popisuje kapitola <a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony 8</a>; kompletní příklad reálného projektu členěného do bounded contexts je v <a href="{{ path('case_study') }}">Případové studii</a>.
             </p>
 
             {% set _code %}src/

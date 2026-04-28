@@ -70,6 +70,8 @@
         Domain-Driven Design a automatizované testování se vzájemně přirozeně doplňují. Čistá doménová vrstva, která neobsahuje závislosti na frameworku,
         databázi ani jiné infrastruktuře, je ze své podstaty snadno testovatelná. Zatímco v tradičních vrstvených architekturách jsou unit testy
         kompromitovány provázaností s frameworkem, v DDD je doménová logika izolována a lze ji testovat čistými PHP třídami bez jakéhokoli bootstrappingu.
+        Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje kapitola
+        <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a>.
     </p>
 
     {% set _callout_body %}
@@ -442,6 +444,8 @@ final class OrderTest extends TestCase
         Doménové události jsou hlavním mechanismem DDD pro komunikaci mezi agregáty a bounded contexty. Je nezbytné
         testovat, že agregát vydá správné události se správnými daty jako reakci na doménové operace.
         Přímé testování doménových událostí – bez spoléhání na vedlejší efekty event dispatcheru – je nejspolehlivější přístup.
+        Pokud váš systém používá události jako zdroj pravdy, doplňující strategie testování auditovatelnosti
+        a rebuildu projekcí je v kapitole <a href="{{ path('event_sourcing') }}">Event Sourcing</a>.
     </p>
 
     {% set _callout_body %}
