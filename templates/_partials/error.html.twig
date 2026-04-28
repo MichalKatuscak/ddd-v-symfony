@@ -1,0 +1,14 @@
+{# args: code (string), title, description (string|raw HTML allowed), eyebrow (default 'Chyba') #}
+<div class="error-shell">
+    <div class="error-card">
+        <div class="error-eyebrow">{{ eyebrow|default('Chyba') }}</div>
+        <p class="error-code" aria-hidden="true">{{ code }}</p>
+        <h1 class="error-title">{{ title }}</h1>
+        <p class="error-description">{{ description|raw }}</p>
+        <div class="error-actions">
+            <a class="btn btn-primary" href="{{ path('homepage') }}">
+                Zpět na úvodní stránku <span class="btn-arrow">→</span>
+            </a>
+        </div>
+    </div>
+</div>

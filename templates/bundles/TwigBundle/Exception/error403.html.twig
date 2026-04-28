@@ -1,24 +1,13 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Přístup odepřen | Architektura DDD v Symfony 8{% endblock %}
+{% block meta_description %}Přístup k této stránce není povolen.{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 text-center">
-                <div class="error-page">
-                    <h1 class="error-code">403</h1>
-                    <h2 class="error-title">Přístup odepřen</h2>
-                    <p class="error-description">
-                        Omlouváme se, ale nemáte oprávnění k přístupu na tuto stránku. Pokud si myslíte, že by vám měl být přístup umožněn, kontaktujte prosím správce webu.
-                    </p>
-                    <div class="error-actions">
-                        <a href="{{ path('homepage') }}" class="btn btn-primary">
-                            Zpět na úvodní stránku
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include '_partials/error.html.twig' with {
+        code: '403',
+        eyebrow: 'Přístup odepřen',
+        title: 'Sem se podívat nemůžete',
+        description: 'K této stránce nemáte oprávnění. Pokud si myslíte, že by to mělo být jinak, kontaktujte správce webu.'
+    } only %}
 {% endblock %}

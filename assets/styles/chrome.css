@@ -107,6 +107,60 @@
 }
 .nav-drawer-backdrop[data-open="true"] { display: block; }
 
+/* ── Error pages (404 / 403 / 500 / generic) ──────────────────────────── */
+.error-shell {
+  max-width: var(--page-article);
+  margin: 0 auto;
+  padding: var(--s-9) var(--s-5);
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.error-card {
+  text-align: center;
+  max-width: 60ch;
+}
+.error-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  color: var(--accent);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: var(--s-4);
+}
+.error-code {
+  font-size: clamp(72px, 12vw, 128px);
+  font-weight: 600;
+  letter-spacing: -0.026em;
+  line-height: 1;
+  margin: 0 0 var(--s-4);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.error-title {
+  font-size: var(--t-2xl);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: var(--lh-snug);
+  margin: 0 0 var(--s-4);
+  color: var(--fg);
+  text-wrap: balance;
+}
+.error-description {
+  font-size: var(--t-md);
+  color: var(--fg-muted);
+  line-height: var(--lh-loose);
+  margin: 0 0 var(--s-7);
+  text-wrap: pretty;
+}
+.error-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--s-3);
+}
+
 /* ── Responsive (mobile breakpoint 900px – sjednoceno s article.css) ───── */
 @media (max-width: 900px) {
   .topnav { grid-template-columns: 1fr auto; }

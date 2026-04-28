@@ -1,24 +1,13 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Stránka nenalezena | Architektura DDD v Symfony 8{% endblock %}
+{% block meta_description %}Stránka nenalezena. Vraťte se na úvod, nebo si vyberte kapitolu z rozcestníku.{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 text-center">
-                <div class="error-page">
-                    <h1 class="error-code">404</h1>
-                    <h2 class="error-title">Stránka nenalezena</h2>
-                    <p class="error-description">
-                        Omlouváme se, ale požadovaná stránka nebyla nalezena. Je možné, že byla přesunuta, smazána nebo nikdy neexistovala.
-                    </p>
-                    <div class="error-actions">
-                        <a href="{{ path('homepage') }}" class="btn btn-primary">
-                            Zpět na úvodní stránku
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include '_partials/error.html.twig' with {
+        code: '404',
+        eyebrow: 'Stránka nenalezena',
+        title: 'Tato stránka tu není',
+        description: 'Adresa, na kterou jste přišli, neexistuje – mohla být přesunuta, smazána, nebo nikdy neexistovala. Vraťte se na úvod nebo si vyberte kapitolu z rozcestníku v hlavní navigaci.'
+    } only %}
 {% endblock %}
