@@ -1,11 +1,12 @@
 {# Desktop: sticky levostranná TOC. Mobile (<900px): kolapsovatelný <details>. #}
 {# Oba seznamy plní article-toc.js z <h2> v .art-body. #}
-<aside class="toc" data-toc-target>
+{# <nav> místo <aside> — sémantika navigace; aria-label rozlišuje od main nav. #}
+<nav class="toc" data-toc-target aria-label="Obsah kapitoly">
     <div class="toc-label">Obsah kapitoly</div>
     <ol class="toc-list" data-toc-list>
         {# Naplní article-toc.js #}
     </ol>
-</aside>
+</nav>
 
 <details class="toc-m" data-toc-mobile>
     <summary class="toc-m-summary">

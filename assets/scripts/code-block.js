@@ -2,6 +2,20 @@
 // Code block — po hljs highlight wrapne každý řádek, řeší copy button
 // ──────────────────────────────────────────────────────────────────────────
 
+// Scrollable region a11y: tabindex="0" na .table-responsive a .diagram
+// (oba mají overflow-x: auto), aby keyboard users mohli scrollovat.
+// axe-core: "scrollable-region-focusable". Code-body má tabindex="0" už
+// v partialu kapitoly (deterministické před hydration).
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.table-responsive, .diagram').forEach(function (el) {
+    if (!el.hasAttribute('tabindex')) {
+      el.setAttribute('tabindex', '0');
+    }
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+
 window.__enhanceCodeBlock = function (codeEl) {
   if (codeEl.dataset.enhanced === 'true') return;
   codeEl.dataset.enhanced = 'true';

@@ -4,7 +4,9 @@
 {% set glyphs = {'pattern': '◢', 'anti': '✕', 'note': '§', 'warn': '!'} %}
 {% set default_labels = {'pattern': 'Vzor', 'anti': 'Anti-vzor', 'note': 'Poznámka', 'warn': 'Pozor'} %}
 {% set _label = label|default(default_labels[type]) %}
-<aside class="callout callout-{{ type }}">
+{# role="note" overruluje implicitní landmark role <aside>; bez něj axe-core flaguje
+   "landmark-complementary-is-top-level" pro každý callout uvnitř <main> kontejneru. #}
+<aside class="callout callout-{{ type }}" role="note">
     <div class="callout-rail">
         <span class="callout-glyph">{{ glyphs[type] }}</span>
         <span class="callout-label">{{ _label }}</span>

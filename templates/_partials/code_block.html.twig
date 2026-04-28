@@ -31,5 +31,6 @@
             <span class="code-copy-label" aria-live="polite">Kopírovat</span>
         </button>
     </header>
-    <pre class="code-body" data-highlight="{{ _hl }}"><code class="language-{{ language }}">{{- code|trim('\n') -}}</code></pre>
+    {# tabindex="0" činí scrollable code container fokusovatelný klávesnicí (axe a11y). #}
+    <pre class="code-body" data-highlight="{{ _hl }}" tabindex="0"><code class="language-{{ language }}">{{- code|trim('\n') -}}</code></pre>
 </figure>

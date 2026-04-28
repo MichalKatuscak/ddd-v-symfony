@@ -136,7 +136,7 @@
 
             <div class="foot-a-cols">
                 <div class="foot-a-col">
-                    <h4><a href="{{ path('hub_basics') }}">Základy</a></h4>
+                    <h3><a href="{{ path('hub_basics') }}">Základy</a></h4>
                     <ul class="foot-a-list">
                         {% for c in _foot_basics %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
@@ -144,7 +144,7 @@
                     </ul>
                 </div>
                 <div class="foot-a-col">
-                    <h4><a href="{{ path('hub_patterns') }}">Vzory</a></h4>
+                    <h3><a href="{{ path('hub_patterns') }}">Vzory</a></h3>
                     <ul class="foot-a-list">
                         {% for c in _foot_patterns %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
@@ -152,7 +152,7 @@
                     </ul>
                 </div>
                 <div class="foot-a-col">
-                    <h4><a href="{{ path('hub_practice') }}">Praxe</a></h4>
+                    <h3><a href="{{ path('hub_practice') }}">Praxe</a></h3>
                     <ul class="foot-a-list">
                         {% for c in _foot_practice_top %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
@@ -161,7 +161,7 @@
                     <a class="foot-a-more" href="{{ path('hub_practice') }}">Více · {{ _foot_practice|length }} kapitol →</a>
                 </div>
                 <div class="foot-a-col">
-                    <h4><a href="{{ path('hub_reference') }}">Reference</a></h4>
+                    <h3><a href="{{ path('hub_reference') }}">Reference</a></h3>
                     <ul class="foot-a-list">
                         {% for c in _foot_reference %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>

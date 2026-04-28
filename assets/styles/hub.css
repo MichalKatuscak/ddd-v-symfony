@@ -333,7 +333,7 @@
   padding-bottom: var(--s-6);
   border-bottom: 1px solid var(--stroke);
 }
-.foot-a-col h4 {
+.foot-a-col h3 {
   font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: var(--tracking-wide);
@@ -342,13 +342,13 @@
   margin: 0 0 var(--s-4);
   font-weight: 500;
 }
-.foot-a-col h4 a {
+.foot-a-col h3 a {
   color: inherit;
   text-decoration: none;
   border-bottom: 1px dashed transparent;
   transition: color var(--motion-fast) ease, border-color var(--motion-fast) ease;
 }
-.foot-a-col h4 a:hover {
+.foot-a-col h3 a:hover {
   color: var(--accent);
   border-bottom-color: currentColor;
 }
@@ -373,7 +373,9 @@
 .foot-a-list a:hover .foot-a-num { color: var(--accent); }
 .foot-a-num {
   font-family: var(--font-mono);
-  color: var(--fg-faint);
+  /* fg-dim (≈ 5.16 : 1) místo fg-faint (≈ 1.93 : 1) — fg-faint propadá na 11 px text
+     pod WCAG AA (4.5 : 1). axe-core flagovalo 13 výskytů ve footeru. */
+  color: var(--fg-dim);
   font-size: 11px;
   letter-spacing: var(--tracking-mono);
   font-variant-numeric: tabular-nums;
