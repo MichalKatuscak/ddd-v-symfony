@@ -760,7 +760,9 @@ section > h4:first-child { margin-top: 0; }
   overflow: hidden;
 }
 .diagram-head {
-  display: flex; gap: var(--s-3); align-items: center;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
   padding: var(--s-3) var(--s-4);
   border-bottom: 1px solid var(--stroke);
   font-family: var(--font-mono);
@@ -771,22 +773,77 @@ section > h4:first-child { margin-top: 0; }
   letter-spacing: var(--tracking-wide);
   font-weight: 500;
 }
-.diagram-title { color: var(--fg-muted); letter-spacing: var(--tracking-mono); }
-/* Inline SVG je obalené v <div role="img"> kvůli a11y; selektor proto musí
-   být potomek, ne přímý child. Stejně tak <img> může být přímo v .diagram
-   (varianta src) i wrapnutý do <div> (varianta inline). */
-.diagram img,
-.diagram svg,
-.diagram > div > svg {
-  display: block; width: 100%; height: auto;
+.diagram-title {
+  color: var(--fg-muted);
+  letter-spacing: var(--tracking-mono);
+}
+
+/* Toolbar */
+.diagram-toolbar {
+  margin-left: auto;
+  display: flex;
+  gap: var(--s-1);
+}
+.mv-btn {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  line-height: 1;
+  padding: var(--s-1) var(--s-2);
+  background: transparent;
+  color: var(--fg-muted);
+  border: 1px solid var(--stroke);
+  border-radius: var(--r-1);
+  cursor: pointer;
+  min-width: 1.75rem;
+}
+.mv-btn:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.mv-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.mv-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Toolbar je skrytý dokud JS nepřidá .diagram-js (no-JS fallback) */
+.diagram:not(.diagram-js) .diagram-toolbar {
+  display: none;
+}
+
+/* Stage (viewport pro SVG/img) */
+.diagram-stage {
+  overflow: hidden;
+  touch-action: none;
+  position: relative;
+}
+.diagram-stage > svg,
+.diagram-stage > img {
+  display: block;
+  width: 100%;
+  height: auto;
   background: var(--bg-1);
   padding: var(--s-4);
   box-sizing: border-box;
+  transform-origin: 0 0;
+  will-change: transform;
+  transition: transform 0.15s ease;
 }
-.diagram > div[role="img"] {
-  display: block;
-  line-height: 0;
+.diagram-js .diagram-stage {
+  cursor: grab;
 }
+.diagram-js .diagram-stage.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.diagram-js .diagram-stage.is-dragging > svg,
+.diagram-js .diagram-stage.is-dragging > img {
+  transition: none;
+}
+
 .diagram-caption {
   padding: var(--s-3) var(--s-4);
   border-top: 1px solid var(--stroke);
@@ -794,33 +851,20 @@ section > h4:first-child { margin-top: 0; }
   font-size: var(--t-xs);
   color: var(--fg-muted);
   letter-spacing: var(--tracking-mono);
-  display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: center;
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  align-items: center;
 }
-.d-cap-num { color: var(--accent); font-weight: 600; }
+.d-cap-num {
+  color: var(--accent);
+  font-weight: 600;
+}
 
-@media (max-width: 540px) {
-  .diagram {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* Scroll-shadow indikátor — totožný princip jako .table-responsive a .code-body */
-    background-image:
-      linear-gradient(to right, var(--bg-1), var(--bg-1)),
-      linear-gradient(to right, var(--bg-1), var(--bg-1)),
-      radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)),
-      radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
-    background-position: 0 0, 100% 0, 0 0, 100% 0;
-    background-repeat: no-repeat;
-    background-size: 24px 100%, 24px 100%, 14px 100%, 14px 100%;
-    background-attachment: local, local, scroll, scroll;
-  }
-  .diagram img,
-  .diagram svg,
-  .diagram > div > svg {
-    width: auto;
-    min-width: 720px;
-    max-width: none;
-    height: auto;
+@media (prefers-reduced-motion: reduce) {
+  .diagram-stage > svg,
+  .diagram-stage > img {
+    transition: none;
   }
 }
 

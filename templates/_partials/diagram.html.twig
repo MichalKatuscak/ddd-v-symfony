@@ -10,23 +10,31 @@
                   hlavička FIG. + title bez captionu.
     alt         – alt text pro img (volitelné, default = title)
 #}
-<figure class="diagram">
+<figure class="diagram" data-diagram>
     <header class="diagram-head">
         {% if fig is defined and fig %}<span class="diagram-num">FIG. {{ fig }}</span>{% endif %}
         {% if title is defined and title %}<span class="diagram-title">{{ title }}</span>{% endif %}
+        <div class="diagram-toolbar" role="toolbar" aria-label="Ovládání diagramu">
+            <button type="button" class="mv-btn" data-action="zoom-in"    aria-label="Přiblížit">+</button>
+            <button type="button" class="mv-btn" data-action="zoom-out"   aria-label="Oddálit">−</button>
+            <button type="button" class="mv-btn" data-action="fit"        aria-label="Přizpůsobit">⤢</button>
+            <button type="button" class="mv-btn" data-action="fullscreen" aria-label="Celá obrazovka">⛶</button>
+        </div>
     </header>
-    {% if inline is defined and inline %}
-        {# PlantUML generuje SVG s preserveAspectRatio="none" + inline pixel
-           dimenzemi (style="width:1698px;height:876px"), což způsobuje deformaci
-           obsahu, když CSS sníží šířku na mobilu. Strip obojího — necháme browser
-           škálovat dle viewBox a preserveAspectRatio default (xMidYMid meet). #}
-        {% set _safe_svg = inline
-            |replace({'preserveAspectRatio="none"': 'preserveAspectRatio="xMidYMid meet"'})
-            |replace({' style="width:': ' data-orig-style="width:'}) %}
-        <div role="img" aria-label="{{ alt|default(title|default('Diagram')) }}">{{ _safe_svg|raw }}</div>
-    {% elseif src is defined and src %}
-        <img src="{{ asset(src) }}" alt="{{ alt|default(title|default('Diagram')) }}" loading="lazy">
-    {% endif %}
+    <div class="diagram-stage" role="img" aria-label="{{ alt|default(title|default('Diagram')) }}">
+        {% if inline is defined and inline %}
+            {# PlantUML generuje SVG s preserveAspectRatio="none" + inline pixel
+               dimenzemi (style="width:1698px;height:876px"), což způsobuje deformaci
+               obsahu, když CSS sníží šířku na mobilu. Strip obojího — necháme browser
+               škálovat dle viewBox a preserveAspectRatio default (xMidYMid meet). #}
+            {% set _safe_svg = inline
+                |replace({'preserveAspectRatio="none"': 'preserveAspectRatio="xMidYMid meet"'})
+                |replace({' style="width:': ' data-orig-style="width:'}) %}
+            {{ _safe_svg|raw }}
+        {% elseif src is defined and src %}
+            <img src="{{ asset(src) }}" alt="{{ alt|default(title|default('Diagram')) }}" loading="lazy">
+        {% endif %}
+    </div>
     {% if caption is defined and caption %}
         <figcaption class="diagram-caption">{{ caption|raw }}</figcaption>
     {% endif %}
