@@ -16,6 +16,7 @@ final class ChaptersExtension extends AbstractExtension
             new TwigFunction('ddd_chapters',          static fn(): array => Chapters::all()),
             new TwigFunction('ddd_extras',            static fn(): array => Chapters::extras()),
             new TwigFunction('ddd_chapters_by_group', static fn(string $group): array => Chapters::byGroup($group)),
+            new TwigFunction('ddd_chapter_neighbors', static fn(string $route): array => Chapters::neighbors($route)),
         ];
     }
 }

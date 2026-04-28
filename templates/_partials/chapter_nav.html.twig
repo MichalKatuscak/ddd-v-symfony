@@ -1,0 +1,26 @@
+{# Renderuje prev/next link pár podle aktuální Symfony route. Pokud kapitola
+   nemá souseda v dané ose (první/poslední), renderuje se nevidírelný spacer,
+   aby grid layout zůstal symetrický. #}
+{%- set _n = ddd_chapter_neighbors(app.request.attributes.get('_route')) -%}
+{%- if _n.prev or _n.next -%}
+<nav class="art-nav" aria-label="Navigace kapitol">
+    {%- if _n.prev -%}
+        <a class="art-nav-item art-nav-prev" href="{{ path(_n.prev.route) }}">
+            <span class="art-nav-dir">← Předchozí</span>
+            <span class="art-nav-num">{{ _n.prev.n }}</span>
+            <span class="art-nav-title">{{ _n.prev.t }}</span>
+        </a>
+    {%- else -%}
+        <span class="art-nav-item art-nav-empty" aria-hidden="true"></span>
+    {%- endif -%}
+    {%- if _n.next -%}
+        <a class="art-nav-item art-nav-next" href="{{ path(_n.next.route) }}">
+            <span class="art-nav-dir">Další →</span>
+            <span class="art-nav-num">{{ _n.next.n }}</span>
+            <span class="art-nav-title">{{ _n.next.t }}</span>
+        </a>
+    {%- else -%}
+        <span class="art-nav-item art-nav-empty" aria-hidden="true"></span>
+    {%- endif -%}
+</nav>
+{%- endif -%}

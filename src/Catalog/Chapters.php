@@ -49,4 +49,29 @@ final class Chapters
     {
         return array_values(array_filter(self::all(), static fn(array $c): bool => $c['group'] === $group));
     }
+
+    /**
+     * @return array{prev:?array{n:string,route:string,t:string,tag:string},next:?array{n:string,route:string,t:string,tag:string}}
+     */
+    public static function neighbors(string $route): array
+    {
+        $all = self::all();
+        $idx = null;
+        foreach ($all as $i => $c) {
+            if ($c['route'] === $route) {
+                $idx = $i;
+                break;
+            }
+        }
+        if ($idx === null) {
+            return ['prev' => null, 'next' => null];
+        }
+        $project = static fn(array $c): array => [
+            'n' => $c['n'], 'route' => $c['route'], 't' => $c['t'], 'tag' => $c['tag'],
+        ];
+        return [
+            'prev' => $idx > 0 ? $project($all[$idx - 1]) : null,
+            'next' => $idx < count($all) - 1 ? $project($all[$idx + 1]) : null,
+        ];
+    }
 }
