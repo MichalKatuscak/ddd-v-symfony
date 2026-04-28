@@ -39,6 +39,7 @@ hljs.registerLanguage('plaintext', plaintext);
 import './scripts/topnav.js';
 import './scripts/code-block.js';
 import './scripts/article-toc.js';
+import './scripts/diagram-viewer.js';
 
 // Init na DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function () {
