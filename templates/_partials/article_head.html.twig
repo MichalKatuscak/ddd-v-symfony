@@ -1,5 +1,13 @@
 {# args: chapter_number, category, title, deck, reading_time (min), difficulty (1-4),
-        published (ISO datum nebo block content), last_updated (ISO datum), author #}
+        published (ISO datum nebo block content), last_updated (ISO datum), author
+
+   Konvence číslování sekcí v rámci stránky (h-section uvnitř .art-body):
+   - Kapitoly s chapter_number: NN.MM (např. 05.01, 05.02) – kapitolní prefix
+     dělá identifikátor jednoznačný napříč webem.
+   - Glosář: 01, 02, ... – sekvenční bez prefixu (glosář je samostatný dokument
+     bez chapter_number).
+   - Meta-stránky bez chapter_number (about, resources, security_policy):
+     A, B, C, ... – písmena pro krátké strukturální sekce. #}
 {%- set _has_pub = published is defined and published and (published|trim) -%}
 {%- set _has_mod = last_updated is defined and last_updated and (last_updated|trim) -%}
 <header class="art-head">

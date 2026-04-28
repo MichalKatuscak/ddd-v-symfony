@@ -4,7 +4,10 @@
     title       – např. 'Tok jednoho příkazu'
     src         – relativní cesta v public/ k SVG/PNG (např. 'images/diagrams/4_implementation/command_flow.svg')
     inline      – alternativně inline SVG/HTML jako string (volitelné, vyšší priorita než src)
-    caption     – HTML caption pod diagramem (volitelné)
+    caption     – HTML caption pod diagramem (volitelné). Konvence: caption se používá jen
+                  tehdy, když diagram obsahuje vizuální sémantiku, kterou nelze pochopit bez
+                  vysvětlení (barvy, šipky, vzor čar). Pro běžné architektonické diagramy stačí
+                  hlavička FIG. + title bez captionu.
     alt         – alt text pro img (volitelné, default = title)
 #}
 <figure class="diagram">
