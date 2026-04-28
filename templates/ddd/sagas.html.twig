@@ -65,7 +65,7 @@
 
     <p>
         V předchozí kapitole jsme se zabývali
-        <a href="{{ path('event_sourcing') }}">Event Sourcingem</a> - vzorem persistence,
+        <a href="{{ path('event_sourcing') }}">Event Sourcingem</a> – vzorem persistence,
         který ukládá stav jako sekvenci neměnných událostí. Ságy na tento koncept přirozeně
         navazují: zatímco Event Sourcing řeší persistenci uvnitř jednoho agregátu, ságy
         koordinují procesy <strong>napříč více agregáty a Bounded Contexts</strong>, které
@@ -84,10 +84,10 @@
     </p>
 
     <ol>
-        <li><strong>Ordering</strong> - vytvoření objednávky (agregát <code>Order</code>),</li>
-        <li><strong>Payment</strong> - stržení platby zákazníkovi (agregát <code>Payment</code>),</li>
-        <li><strong>Warehouse</strong> - rezervace zboží na skladě (agregát <code>StockReservation</code>),</li>
-        <li><strong>Shipping</strong> - vytvoření zásilky (agregát <code>Shipment</code>).</li>
+        <li><strong>Ordering</strong> – vytvoření objednávky (agregát <code>Order</code>),</li>
+        <li><strong>Payment</strong> – stržení platby zákazníkovi (agregát <code>Payment</code>),</li>
+        <li><strong>Warehouse</strong> – rezervace zboží na skladě (agregát <code>StockReservation</code>),</li>
+        <li><strong>Shipping</strong> – vytvoření zásilky (agregát <code>Shipment</code>).</li>
     </ol>
 
     <p>
@@ -116,13 +116,13 @@
             nevhodný z několika důvodů:
         </p>
         <ul>
-            <li><strong>Výkonnostní overhead</strong> - všichni účastníci drží zámky po celou dobu
+            <li><strong>Výkonnostní overhead</strong> – všichni účastníci drží zámky po celou dobu
                 obou fází, což dramaticky snižuje propustnost systému.</li>
-            <li><strong>Tight coupling</strong> - všechny kontexty musí být dostupné současně;
+            <li><strong>Tight coupling</strong> – všechny kontexty musí být dostupné současně;
                 výpadek jediného účastníka zablokuje celou transakci.</li>
-            <li><strong>Single point of failure</strong> - koordinátor 2PC je kritické místo;
+            <li><strong>Single point of failure</strong> – koordinátor 2PC je kritické místo;
                 jeho selhání mezi fázemi zanechá účastníky v nejistém stavu.</li>
-            <li><strong>Nekompatibilita s autonomií Bounded Contexts</strong> - 2PC vyžaduje, aby
+            <li><strong>Nekompatibilita s autonomií Bounded Contexts</strong> – 2PC vyžaduje, aby
                 všechny kontexty sdílely transakční protokol, čímž porušuje princip nezávislého
                 nasazení a vývoje jednotlivých kontextů.</li>
         </ul>
@@ -501,7 +501,7 @@ framework:
         kontexty se stává prakticky nemožné vizualizovat kompletní tok – nikdo nemá přehled
         o tom, které kroky po sobě následují, kde se proces větví a jaké jsou alternativní
         cesty při selhání. Vzniká fenomén, který se někdy označuje jako
-        <strong>„distribuované špagety“</strong> (<em>distributed spaghetti</em>) - analogie
+        <strong>„distribuované špagety“</strong> (<em>distributed spaghetti</em>) – analogie
         ke špagetovému kódu, ale rozloženému do celého systému.
     </p>
 
@@ -511,7 +511,7 @@ framework:
         pokud chceme mezi platbu a sklad vložit krok „ověření proti podvodům“ (Fraud Detection),
         musíme změnit handler ve Warehouse, aby místo události <code>PaymentSucceeded</code>
         naslouchal na <code>FraudCheckPassed</code>. Tím porušujeme
-        <strong>Open-Closed Principle</strong> - stávající kód kontextu Warehouse je nutné
+        <strong>Open-Closed Principle</strong> – stávající kód kontextu Warehouse je nutné
         upravit, aby fungoval s novým krokem. Při orchestraci by stačilo přidat krok do
         centrálního Process Manageru bez zásahu do existujících kontextů.
     </p>
@@ -569,8 +569,8 @@ framework:
     <h2 id="orchestrace-heading" class="h-section"><span class="h-num">07.05</span> Orchestrace – Process Manager</h2>
 
     <p>
-        Orchestrace je přístup, při kterém existuje <strong>centrální koordinátor</strong> -
-        tzv. <strong>Process Manager</strong> - který řídí celý business proces jako stavový
+        Orchestrace je přístup, při kterém existuje <strong>centrální koordinátor</strong> –
+        tzv. <strong>Process Manager</strong> – který řídí celý business proces jako stavový
         automat s definovanými stavy a přechody. V našem e-shop scénáři je tímto koordinátorem
         třída <code>OrderProcessManager</code>, která přijímá události ze všech kontextů
         (Payment, Warehouse, Shipping) a na jejich základě rozhoduje, jaký příkaz vydat jako
@@ -1077,7 +1077,7 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
 
     <p>
         Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu ságy. Nyní
-        propojíme obě části s <strong>Symfony Messenger</strong> - asynchronním message busem,
+        propojíme obě části s <strong>Symfony Messenger</strong> – asynchronním message busem,
         který zajistí spolehlivé doručování událostí a příkazů mezi kontexty.
         Základní konfigurace Messenger busů je popsána v kapitole
         <a href="{{ path('cqrs') }}#symfony-messenger">CQRS – Symfony Messenger</a>; zde se
@@ -1179,7 +1179,7 @@ final readonly class OrderPlaced
         <code>onOrderPlaced()</code>. Ta uloží stav ságy a dispatchne příkaz
         <code>ChargeCustomer</code> na command bus. Messenger tento příkaz routuje do transportu
         <code>async_commands</code>, kde ho vyzvedne handler v kontextu Payment. Po úspěšném
-        zpracování Payment publikuje <code>PaymentSucceeded</code> - a cyklus se opakuje
+        zpracování Payment publikuje <code>PaymentSucceeded</code> – a cyklus se opakuje
         pro další krok procesu.
     </p>
 
@@ -1244,7 +1244,7 @@ final readonly class OrderPlaced
         nedostupnost platební brány, ztráta zprávy ve frontě – v distribuovaném systému musíte
         vždy počítat s tím, že odpověď nepřijde. Bez explicitního timeout mechanismu sága zůstane
         navždy ve stavu <code>AwaitingPayment</code> a objednávka se nikdy nedokončí ani nezruší.
-        Proto potřebujeme <strong>timeout check</strong> - odložený příkaz, který po uplynutí
+        Proto potřebujeme <strong>timeout check</strong> – odložený příkaz, který po uplynutí
         stanovené doby zkontroluje, zda se sága posunula dál, a pokud ne, spustí kompenzaci.
     </p>
 
@@ -1455,7 +1455,7 @@ private function onOrderPlaced(OrderPlaced $event): void
         vrátit systém do konzistentního stavu provedením kompenzačních akcí v
         <strong>opačném pořadí</strong> dokončených kroků. Klíčový princip:
         kompenzace je <strong>sémantická</strong>, nikoli technická. Neděláme
-        <code>DELETE FROM payments</code> - místo toho dispatchujeme nový doménový příkaz
+        <code>DELETE FROM payments</code> – místo toho dispatchujeme nový doménový příkaz
         <code>RefundCustomer</code>, který vytvoří novou transakci (refund). Každá kompenzační
         akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
     </p>
@@ -1639,7 +1639,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
             Při paralelních krocích mohou dvě události (<code>StockReserved</code> a
             <code>InvoiceCreated</code>) dorazit téměř současně a oba handlery se pokusí
             aktualizovat stejný <code>SagaState</code> záznam. Bez ochrany hrozí ztráta dat
-            (lost update). Řešením je <strong>optimistické zamykání</strong> - entita
+            (lost update). Řešením je <strong>optimistické zamykání</strong> – entita
             <code>SagaState</code> obsahuje sloupec <code>version</code> (viz
             <a href="#perzistence-stavu">sekce 6</a>) a při uložení Doctrine ověří, že verze
             nebyla mezitím změněna. Pokud ano, vyhodí
@@ -1660,7 +1660,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
     <h2 id="monitoring-heading" class="h-section"><span class="h-num">07.11</span> Monitoring a observabilita</h2>
 
     <p>
-        Produkční ságy potřebují <strong>observabilitu</strong> - musíte vědět, které ságy právě
+        Produkční ságy potřebují <strong>observabilitu</strong> – musíte vědět, které ságy právě
         běží, které se zasekly a které selhaly. Bez monitoringu je ladění distribuovaných procesů
         noční můrou: zprávy se ztratí ve frontě, stav ságy zamrzne a nikdo si toho nevšimne, dokud
         si zákazník nestěžuje. Pro řešení těchto problémů existují dva hlavní nástroje: korelační ID pro
@@ -1670,7 +1670,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
     <h3 id="korelacni-id-heading">Korelační ID</h3>
 
     <p>
-        Každá zpráva v jedné sáze nese stejné <strong>korelační ID</strong> - typicky
+        Každá zpráva v jedné sáze nese stejné <strong>korelační ID</strong> – typicky
         <code>orderId</code>. Díky němu můžete v logu vyfiltrovat všechny zprávy patřící
         ke konkrétní objednávce a sledovat celý průběh procesu od začátku do konce.
         Více o korelačních identifikátorech najdete v

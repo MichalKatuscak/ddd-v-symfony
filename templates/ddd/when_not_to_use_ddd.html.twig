@@ -199,8 +199,8 @@ class ArticleCrudController extends AbstractCrudController
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>EasyAdmin</strong> - pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
-                <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> - pro jednoduchý CRUD bez business logiky.</li>
+                <li><strong>EasyAdmin</strong> – pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
+                <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> – pro jednoduchý CRUD bez business logiky.</li>
             </ul>
             Doménový model zavádíte tehdy, když máte doménu. CRUD admin doménu nemá.
             Martin Fowler tento anti-pattern pojmenoval
@@ -234,7 +234,7 @@ class ArticleCrudController extends AbstractCrudController
 
         <p>
             <strong>Důležitá nuance:</strong> Strategické DDD nástroje – zejména
-            <a href="{{ path('basic_concepts') }}">Event Storming a Context Mapping</a> - mohou být
+            <a href="{{ path('basic_concepts') }}">Event Storming a Context Mapping</a> – mohou být
             ve fázi hledání naopak velmi užitečné. Pomáhají pojmenovat, co ještě nerozumíte.
             Co nedává smysl, je taktické DDD (agregáty, doménové události, repozitáře) pro model,
             který se příští týden změní od základů.
@@ -298,7 +298,7 @@ class Order {
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>Flat MVC s Doctrine Entities</strong> - rychlé iterace, změny jsou levné.</li>
+                <li><strong>Flat MVC s Doctrine Entities</strong> – rychlé iterace, změny jsou levné.</li>
                 <li>Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně – viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
                 <li>Strategické nástroje DDD (Event Storming, Context Mapping) je vhodné zavést od začátku – pomáhají rychleji porozumět doméně.</li>
             </ul>
@@ -337,7 +337,7 @@ class Order {
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) - dobře strukturovaný kód bez přílišné abstrakce.</li>
+                <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) – dobře strukturovaný kód bez přílišné abstrakce.</li>
                 <li>DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na <a href="{{ path('basic_concepts') }}">Event Storming</a>.</li>
             </ul>
         {% endset %}
@@ -371,7 +371,7 @@ class Order {
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>Service layer s plain PHP objekty</strong> - jednoduché třídy pro transformaci, bez agregátů.</li>
+                <li><strong>Service layer s plain PHP objekty</strong> – jednoduché třídy pro transformaci, bez agregátů.</li>
                 <li><strong>Symfony Messenger</strong> pro asynchronní zpracování pipeline kroků – bez DDD overhead. Viz <a href="{{ path('cqrs') }}">kapitola o CQRS</a> pro inspiraci, jak Messenger používat v praxi.</li>
             </ul>
         {% endset %}
@@ -413,7 +413,7 @@ class Order {
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>Prostý Symfony controller + Doctrine</strong> - nejkratší cesta od požadavku k funkčnímu kódu.</li>
+                <li><strong>Prostý Symfony controller + Doctrine</strong> – nejkratší cesta od požadavku k funkčnímu kódu.</li>
                 <li>Pokud projekt nečekaně vyroste, refaktorovat z jednoduchého kódu na DDD je snazší než vysvětlovat, proč jednoduchý projekt má 40 tříd. Postup najdete v <a href="{{ path('migration_from_crud') }}">Migraci z CRUD</a>.</li>
             </ul>
         {% endset %}
@@ -537,7 +537,7 @@ final class Order
         <p>
             <strong>Zásadní rozdíl oproti bodu 3:</strong> V bodě 3 chybí lidé – máte malý tým bez přístupu
             k expertům, ale doména může být jasná (pojišťovnictví, e-commerce...). Zde je problém v tom,
-            že <strong>nikdo doménu nechápe</strong> - ani potenciální experti. Požadavky se teprve formují,
+            že <strong>nikdo doménu nechápe</strong> – ani potenciální experti. Požadavky se teprve formují,
             pojmy nejsou ustálené, business pravidla se mění s každou schůzkou.
         </p>
 
@@ -551,7 +551,7 @@ final class Order
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>Event Storming napřed</strong> - než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
+                <li><strong>Event Storming napřed</strong> – než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
                 <li>Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte – viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
             </ul>
         {% endset %}
@@ -681,11 +681,11 @@ final class Order
             <ul>
                 <li>
                     <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">Martin Fowler: BoundedContext</a>
-                    (2014) - srozumitelné vysvětlení jednoho z hlavních DDD konceptů.
+                    (2014) – srozumitelné vysvětlení jednoho z hlavních DDD konceptů.
                 </li>
                 <li>
                     <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Martin Fowler: AnemicDomainModel</a>
-                    (2003) - proč „DDD bez chování“ je anti-pattern.
+                    (2003) – proč „DDD bez chování“ je anti-pattern.
                 </li>
             </ul>
         {% endset %}

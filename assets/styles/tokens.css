@@ -91,4 +91,8 @@
   --measure-prose: 68ch;
   --measure-wide:  88ch;
   --canvas-max:    1280px;
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --motion-fast:   120ms;
+  --motion-medium: 200ms;
 }

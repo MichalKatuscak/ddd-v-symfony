@@ -103,11 +103,11 @@
     </p>
 
     <ul>
-        <li><strong>UserManagement</strong> - Správa uživatelů, registrace, autentizace. Tento kontext obsahuje vše, co souvisí s identitou a přístupovými právy uživatelů.</li>
-        <li><strong>ProjectManagement</strong> - Správa projektů, vytváření, aktualizace. Tento kontext se zaměřuje na životní cyklus projektů a jejich vlastnosti.</li>
-        <li><strong>TaskManagement</strong> - Správa úkolů, vytváření, aktualizace, přiřazování. Tento kontext řeší vše, co souvisí s úkoly v projektech.</li>
-        <li><strong>CommentManagement</strong> - Správa komentářů, přidávání, aktualizace. Tento kontext se zabývá komunikací a zpětnou vazbou k úkolům.</li>
-        <li><strong>ActivityTracking</strong> - Sledování aktivity, zaznamenávání událostí. Tento kontext poskytuje přehled o aktivitách v systému.</li>
+        <li><strong>UserManagement</strong> – Správa uživatelů, registrace, autentizace. Tento kontext obsahuje vše, co souvisí s identitou a přístupovými právy uživatelů.</li>
+        <li><strong>ProjectManagement</strong> – Správa projektů, vytváření, aktualizace. Tento kontext se zaměřuje na životní cyklus projektů a jejich vlastnosti.</li>
+        <li><strong>TaskManagement</strong> – Správa úkolů, vytváření, aktualizace, přiřazování. Tento kontext řeší vše, co souvisí s úkoly v projektech.</li>
+        <li><strong>CommentManagement</strong> – Správa komentářů, přidávání, aktualizace. Tento kontext se zabývá komunikací a zpětnou vazbou k úkolům.</li>
+        <li><strong>ActivityTracking</strong> – Sledování aktivity, zaznamenávání událostí. Tento kontext poskytuje přehled o aktivitách v systému.</li>
     </ul>
 
     <p>
@@ -131,12 +131,12 @@
     </p>
 
     <ul>
-        <li><strong>Entity</strong> - Objekty s identitou, které se v průběhu času mění (např. User, Project, Task).</li>
-        <li><strong>Value Objects</strong> - Neměnné objekty bez identity, které reprezentují koncepty v doméně (např. UserId, ProjectId, TaskStatus).</li>
-        <li><strong>Aggregates</strong> - Shluky objektů, které jsou považovány za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).</li>
-        <li><strong>Domain Events</strong> - Události, které nastávají v doméně a mají význam pro doménové experty (např. ProjectCreated, TaskAssigned).</li>
-        <li><strong>Repositories</strong> - Objekty, které zapouzdřují přístup k persistenci agregátů (např. ProjectRepository, TaskRepository).</li>
-        <li><strong>Domain Services</strong> - Služby, které implementují doménovou logiku, která nepatří do žádné entity nebo hodnotového objektu (např. TaskAssignmentService).</li>
+        <li><strong>Entity</strong> – Objekty s identitou, které se v průběhu času mění (např. User, Project, Task).</li>
+        <li><strong>Value Objects</strong> – Neměnné objekty bez identity, které reprezentují koncepty v doméně (např. UserId, ProjectId, TaskStatus).</li>
+        <li><strong>Aggregates</strong> – Shluky objektů, které jsou považovány za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).</li>
+        <li><strong>Domain Events</strong> – Události, které nastávají v doméně a mají význam pro doménové experty (např. ProjectCreated, TaskAssigned).</li>
+        <li><strong>Repositories</strong> – Objekty, které zapouzdřují přístup k persistenci agregátů (např. ProjectRepository, TaskRepository).</li>
+        <li><strong>Domain Services</strong> – Služby, které implementují doménovou logiku, která nepatří do žádné entity nebo hodnotového objektu (např. TaskAssignmentService).</li>
     </ul>
 
     <p>
@@ -315,12 +315,12 @@
     </p>
 
     <ul>
-        <li><strong>Project</strong> - Organizační jednotka, která sdružuje související úkoly a členy týmu.</li>
-        <li><strong>Task</strong> - Jednotka práce, která má být dokončena v projektu.</li>
-        <li><strong>Assignee</strong> - Člen týmu, kterému je přiřazen úkol.</li>
-        <li><strong>Status</strong> - Stav úkolu (To Do, In Progress, Done).</li>
-        <li><strong>Comment</strong> - Textová zpětná vazba k úkolu.</li>
-        <li><strong>Activity</strong> - Záznam o akci provedené v systému.</li>
+        <li><strong>Project</strong> – Organizační jednotka, která sdružuje související úkoly a členy týmu.</li>
+        <li><strong>Task</strong> – Jednotka práce, která má být dokončena v projektu.</li>
+        <li><strong>Assignee</strong> – Člen týmu, kterému je přiřazen úkol.</li>
+        <li><strong>Status</strong> – Stav úkolu (To Do, In Progress, Done).</li>
+        <li><strong>Comment</strong> – Textová zpětná vazba k úkolu.</li>
+        <li><strong>Activity</strong> – Záznam o akci provedené v systému.</li>
     </ul>
 
     <h3 id="project-model-heading">Doménový model: Projekt (kořen agregátu)</h3>
@@ -895,22 +895,22 @@ class TaskAssignmentService
 
     <ol>
         <li>
-            <strong>Strategický design rozhoduje o výsledku</strong> - Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
+            <strong>Strategický design rozhoduje o výsledku</strong> – Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
         </li>
         <li>
-            <strong>Ubiquitous Language je základem úspěchu</strong> - Vytvoření a používání společného jazyka s doménovými experty výrazně zlepšilo komunikaci a vedlo k přesnějšímu modelu. Konzistentní používání tohoto jazyka v kódu usnadnilo pochopení a údržbu.
+            <strong>Ubiquitous Language je základem úspěchu</strong> – Vytvoření a používání společného jazyka s doménovými experty výrazně zlepšilo komunikaci a vedlo k přesnějšímu modelu. Konzistentní používání tohoto jazyka v kódu usnadnilo pochopení a údržbu.
         </li>
         <li>
-            <strong>Agregáty a hranice transakcí</strong> - Správné definování agregátů a jejich hranic umožnilo konzistentní správu dat. Každý agregát byl zodpovědný za udržování své vnitřní konzistence a byl měněn v jedné transakci.
+            <strong>Agregáty a hranice transakcí</strong> – Správné definování agregátů a jejich hranic umožnilo konzistentní správu dat. Každý agregát byl zodpovědný za udržování své vnitřní konzistence a byl měněn v jedné transakci.
         </li>
         <li>
-            <strong>Doménové události pro integraci</strong> - Doménové události zajistily komunikaci mezi různými bounded contexts. Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými kontexty bez vytváření přímých závislostí.
+            <strong>Doménové události pro integraci</strong> – Doménové události zajistily komunikaci mezi různými bounded contexts. Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými kontexty bez vytváření přímých závislostí.
         </li>
         <li>
-            <strong>CQRS pro oddělení zodpovědností</strong> - Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu. Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování. Symfony Messenger poskytl výkonnou infrastrukturu pro implementaci CQRS.
+            <strong>CQRS pro oddělení zodpovědností</strong> – Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu. Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování. Symfony Messenger poskytl výkonnou infrastrukturu pro implementaci CQRS.
         </li>
         <li>
-            <strong>Vertikální slice architektura pro modularitu</strong> - Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti. Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.
+            <strong>Vertikální slice architektura pro modularitu</strong> – Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti. Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.
         </li>
         <li>
             <strong>Testování doménového modelu</strong> – Doménové objekty bez závislostí na frameworku se testují snadno. Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.

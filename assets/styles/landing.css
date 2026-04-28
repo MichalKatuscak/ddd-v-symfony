@@ -174,7 +174,7 @@
   align-items: baseline;
   padding: 14px 0;
   border-bottom: 1px solid var(--stroke);
-  transition: background 120ms ease;
+  transition: background var(--motion-fast) ease;
   position: relative;
   text-decoration: none;
   color: inherit;

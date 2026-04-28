@@ -104,7 +104,7 @@
     </p>
 
     <p>
-        <strong>Příčina:</strong> Doctrine Unit of Work je <em>session-scoped</em> - drží
+        <strong>Příčina:</strong> Doctrine Unit of Work je <em>session-scoped</em> – drží
         identity map všech načtených entit a při <code>flush()</code> uloží všechny změny
         najednou v jediné databázové transakci. To je výkonné pro CRUD, ale pro DDD to znamená,
         že neúmyslně načtená entita z jiného agregátu může být commitnuta společně s vaší
@@ -231,7 +231,7 @@ final class ConfirmTransferService
             </tr>
             <tr>
                 <td>Komplexní read queries</td>
-                <td>Použijte <code>HYDRATE_ARRAY</code> nebo raw SQL přes <code>$em-&gt;getConnection()</code> - EM nehydratuje objekty</td>
+                <td>Použijte <code>HYDRATE_ARRAY</code> nebo raw SQL přes <code>$em-&gt;getConnection()</code> – EM nehydratuje objekty</td>
             </tr>
             <tr>
                 <td>Celý controller je read-only</td>
@@ -429,7 +429,7 @@ private ?Money $price = null;{% endverbatim %}{% endset %}
 
     <p>
         <strong>Řešení:</strong> Generujte UUID v doméně, v konstruktoru agregátu.
-        Doctrine nakonfigurujte s <code>strategy: 'NONE'</code> - ID předáváte sami,
+        Doctrine nakonfigurujte s <code>strategy: 'NONE'</code> – ID předáváte sami,
         Doctrine ho jen uloží.
     </p>
 
@@ -670,7 +670,7 @@ final class OutboxEvent
     <p>
         Klíčový detail: outbox záznamy musí být persistovány <em>uvnitř</em> téže transakce
         jako agregát. Listener musí reagovat na událost <code>onFlush</code> (ještě před
-        commitem) - nikoliv na <code>postFlush</code>, který se volá <em>po</em> commitu
+        commitem) – nikoliv na <code>postFlush</code>, který se volá <em>po</em> commitu
         transakce a tedy mimo ni. Použití <code>postFlush</code> s voláním dalšího
         <code>flush()</code> by navíc způsobilo nekonečnou rekurzi.
     </p>
@@ -1038,7 +1038,7 @@ try {
 
         <p>
             <strong>Pozor:</strong> Pro ordering problémy <em>nepoužívejte</em>
-            <code>UnrecoverableMessageHandlingException</code> - ta zprávu
+            <code>UnrecoverableMessageHandlingException</code> – ta zprávu
             <strong>přeskočí retry strategii</strong> a zprávu okamžitě přesune do failed transport.
             Správný přístup je hodit <strong>standardní výjimku</strong>; Messenger zprávu
             odloží do retry fronty s exponential backoff. Pokud po vyčerpání všech retries
@@ -1293,16 +1293,16 @@ final class StripePaymentGateway implements PaymentGateway
             Aktualizuje se při každém přejmenování.
         </li>
         <li>
-            <strong>Architecture Decision Records (ADR)</strong> - při každém záměrném
+            <strong>Architecture Decision Records (ADR)</strong> – při každém záměrném
             přejmenování konceptu zapište ADR s důvodem. Budoucí vývojář pochopí, proč
             <code>Contract</code> nahradil <code>Order</code>.
         </li>
         <li>
-            <strong>Event Storming jako pravidelná aktivita</strong> - ne jednorázový workshop
+            <strong>Event Storming jako pravidelná aktivita</strong> – ne jednorázový workshop
             na začátku projektu, ale čtvrtletní revize s doménovými experty.
         </li>
         <li>
-            <strong>Living documentation přes testy</strong> - BDD-style popis v testech
+            <strong>Living documentation přes testy</strong> – BDD-style popis v testech
             (<code>it_places_an_order_when_items_are_in_stock()</code>) tvoří čitelnou dokumentaci
             aktuálního chování.
         </li>

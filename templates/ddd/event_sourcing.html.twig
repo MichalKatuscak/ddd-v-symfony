@@ -144,27 +144,27 @@
             <h3 id="es-pojmy-heading">Klíčové pojmy Event Sourcingu:</h3>
             <ul>
                 <li>
-                    <strong>Event (Událost)</strong> - Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený
+                    <strong>Event (Událost)</strong> – Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený
                     v minulém čase (např. <code>OrderPlaced</code>, <code>PaymentReceived</code>). Obsahuje všechna data
                     potřebná k rekonstrukci změny stavu.
                 </li>
                 <li>
-                    <strong>Event Store</strong> - Specializované append-only úložiště pro události. Události se
+                    <strong>Event Store</strong> – Specializované append-only úložiště pro události. Události se
                     do něj pouze přidávají; nikdy se neupravují ani nemažou. Každá událost patří do event streamu
                     konkrétního agregátu.
                 </li>
                 <li>
-                    <strong>Aggregate (<a href="{{ path('basic_concepts') }}#aggregates">Agregát</a>)</strong> - V kontextu ES je agregát rekonstruován přehráním všech
+                    <strong>Aggregate (<a href="{{ path('basic_concepts') }}#aggregates">Agregát</a>)</strong> – V kontextu ES je agregát rekonstruován přehráním všech
                     událostí ze svého event streamu. Každá mutace stavu agregátu produkuje novou událost místo
                     přímé modifikace atributů.
                 </li>
                 <li>
-                    <strong>Projection (Projekce)</strong> - Read model sestavený z událostí. Projekce transformují
-                    event stream do podoby vhodné pro konkrétní dotazy (query) - například denormalizovaná tabulka
+                    <strong>Projection (Projekce)</strong> – Read model sestavený z událostí. Projekce transformují
+                    event stream do podoby vhodné pro konkrétní dotazy (query) – například denormalizovaná tabulka
                     pro přehled objednávek.
                 </li>
                 <li>
-                    <strong>Snapshot</strong> - Periodicky ukládaný snímek aktuálního stavu agregátu, který slouží
+                    <strong>Snapshot</strong> – Periodicky ukládaný snímek aktuálního stavu agregátu, který slouží
                     jako zkratka při replay. Umožňuje přehrát pouze události novější než poslední snapshot místo
                     celého event streamu od počátku.
                 </li>
@@ -183,7 +183,7 @@
             Event Sourcing a <a href="{{ path('cqrs') }}">CQRS</a> jsou dva samostatné vzory, které se však přirozeně
             doplňují
             <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank" rel="noopener noreferrer">[2]</a>.
-            <strong>Nejsou totéž</strong> - lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
+            <strong>Nejsou totéž</strong> – lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
             jejich kombinace je velmi mocná a v praxi DDD aplikací běžná.
         </p>
         <p>
@@ -203,7 +203,7 @@
                 <li>Nové události jsou uloženy do <strong>Event Store</strong> (append).</li>
                 <li><strong>Event Bus</strong> (Symfony Messenger) distribuuje události odběratelům.</li>
                 <li><strong>Projectors</strong> přijmou události a aktualizují <strong>Read Models</strong>.</li>
-                <li>Uživatel následně dotazuje read model přes <strong>Query</strong> - čte z optimalizované projekce.</li>
+                <li>Uživatel následně dotazuje read model přes <strong>Query</strong> – čte z optimalizované projekce.</li>
             </ol>
         {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -215,8 +215,8 @@
 
             <h3 id="es-cqrs-rozdil-heading">Zásadní rozdíl mezi ES a CQRS</h3>
             <p>
-                <strong>CQRS</strong> řeší <em>jak oddělit zápis od čtení</em> - je to organizační vzor zodpovědností.
-                <strong>Event Sourcing</strong> řeší <em>jak persistovat stav</em> - je to vzor persistence.
+                <strong>CQRS</strong> řeší <em>jak oddělit zápis od čtení</em> – je to organizační vzor zodpovědností.
+                <strong>Event Sourcing</strong> řeší <em>jak persistovat stav</em> – je to vzor persistence.
                 Při jejich kombinaci ES přirozeně zásobuje CQRS read side daty: každá událost o změně je současně
                 vstupem pro aktualizaci projekcí.
             </p>
@@ -238,23 +238,23 @@
 
         <ul>
             <li>
-                <strong>Immutabilita</strong> - Po vytvoření nelze událost měnit. Veškeré její properties jsou
+                <strong>Immutabilita</strong> – Po vytvoření nelze událost měnit. Veškeré její properties jsou
                 read-only, nastavené v konstruktoru.
             </li>
             <li>
-                <strong>Serializovatelnost</strong> - Událost musí být serializovatelná do trvalého formátu (JSON,
+                <strong>Serializovatelnost</strong> – Událost musí být serializovatelná do trvalého formátu (JSON,
                 MessagePack…) a deserializovatelná zpět, ideálně bez ztráty informace.
             </li>
             <li>
-                <strong>Verzování</strong> - Schéma události se v čase může vyvíjet. Je nutné udržovat kompatibilitu
+                <strong>Verzování</strong> – Schéma události se v čase může vyvíjet. Je nutné udržovat kompatibilitu
                 starých událostí nebo implementovat upcasting (transformaci starých verzí na aktuální).
             </li>
             <li>
-                <strong>Pojmenování v minulém čase</strong> - Události vyjadřují fakta, která již nastala:
+                <strong>Pojmenování v minulém čase</strong> – Události vyjadřují fakta, která již nastala:
                 <code>UserRegistered</code>, <code>OrderPlaced</code>, <code>PaymentFailed</code>.
             </li>
             <li>
-                <strong>Dostatečná granularita dat</strong> - Událost musí obsahovat veškerá data potřebná k tomu,
+                <strong>Dostatečná granularita dat</strong> – Událost musí obsahovat veškerá data potřebná k tomu,
                 aby z ní bylo možné rekonstruovat stav, aniž by byl nutný přístup k externím zdrojům.
             </li>
         </ul>
@@ -397,10 +397,10 @@ final class UserRegistered implements DomainEvent
                 Pro splnění práva na výmaz (GDPR čl. 17) existují dva hlavní přístupy:
             </p>
             <ul>
-                <li><strong>Crypto-shredding</strong> - osobní údaje v eventech jsou šifrovány klíčem
+                <li><strong>Crypto-shredding</strong> – osobní údaje v eventech jsou šifrovány klíčem
                     specifickým pro daného uživatele. Při žádosti o výmaz se smaže klíč, čímž se data
                     stanou nečitelnými.</li>
-                <li><strong>Referenční přístup</strong> - event obsahuje pouze ID uživatele, osobní
+                <li><strong>Referenční přístup</strong> – event obsahuje pouze ID uživatele, osobní
                     údaje jsou uloženy v separátní tabulce s možností DELETE.</li>
             </ul>
         {% endset %}
@@ -661,18 +661,18 @@ final class DoctrineEventStore implements EventStore
         </p>
         <ul>
             <li>
-                <strong>Mutační metody</strong> (public business API) - validují invarianty, rozhodují, která událost
+                <strong>Mutační metody</strong> (public business API) – validují invarianty, rozhodují, která událost
                 nastane, a volají interní metodu pro nahrání události (typicky <code>recordEvent()</code>).
             </li>
             <li>
-                <strong><code>apply*()</code> metody</strong> (private/protected) - přijmou konkrétní typ události
+                <strong><code>apply*()</code> metody</strong> (private/protected) – přijmou konkrétní typ události
                 a aplikují změnu na interní stav. Tyto metody jsou volány jak při nahrávání nové události, tak
                 při replay z Event Store.
             </li>
         </ul>
         <p>
             Tato struktura má přímý dopad na testování: event-sourcované agregáty se testují vzorem
-            <strong>given/when/then</strong> - given: historické události, when: volání metody, then: nově emitované
+            <strong>given/when/then</strong> – given: historické události, when: volání metody, then: nově emitované
             události. Podrobně viz kapitola <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
         </p>
 
@@ -977,12 +977,12 @@ final class EventSourcedOrderRepository
         <h3>Synchronní vs. asynchronní projekce</h3>
         <ul>
             <li>
-                <strong>Synchronní projekce</strong> - Projekce se aktualizuje přímo v téže transakci jako
+                <strong>Synchronní projekce</strong> – Projekce se aktualizuje přímo v téže transakci jako
                 zápis události. Garantuje konzistenci dat v okamžiku odpovědi na command, ale zvyšuje latenci zápisu
                 a zavádí těsnou vazbu mezi write a read stranou.
             </li>
             <li>
-                <strong>Asynchronní projekce</strong> - Události jsou po uložení do Event Store zařazeny do fronty
+                <strong>Asynchronní projekce</strong> – Události jsou po uložení do Event Store zařazeny do fronty
                 (Symfony Messenger + transport jako RabbitMQ nebo Redis). Projector je konzument, který zpracovává
                 zprávy nezávisle. Read model je v krátkém časovém okně nekonzistentní (eventual consistency), ale
                 write side je rychlejší a decoupled.
@@ -1356,11 +1356,11 @@ final class IdempotentOrderProjector
         </p>
         <ul>
             <li>
-                <strong>Retry transport</strong> - zpráva se po selhání automaticky vrátí do fronty
+                <strong>Retry transport</strong> – zpráva se po selhání automaticky vrátí do fronty
                 s exponenciálním backoffem (výchozí: 3 pokusy s násobičem 2).
             </li>
             <li>
-                <strong>Failed transport (dead letter queue)</strong> - po vyčerpání retry pokusů se
+                <strong>Failed transport (dead letter queue)</strong> – po vyčerpání retry pokusů se
                 zpráva přesune do samostatné fronty, kde čeká na manuální zásah. Nedojde ke ztrátě
                 události ani k zablokování zbytku fronty.
             </li>
@@ -1409,9 +1409,9 @@ final class IdempotentOrderProjector
             Pro diagnostiku a opětovné zpracování selhavších zpráv slouží příkazy Symfony Messenger:
         </p>
         <ul>
-            <li><code>bin/console messenger:failed:show</code> - zobrazí zprávy v dead letter queue</li>
-            <li><code>bin/console messenger:failed:retry</code> - pokusí se zprávy znovu zpracovat</li>
-            <li><code>bin/console messenger:failed:remove {id}</code> - odstraní neplatnou zprávu</li>
+            <li><code>bin/console messenger:failed:show</code> – zobrazí zprávy v dead letter queue</li>
+            <li><code>bin/console messenger:failed:retry</code> – pokusí se zprávy znovu zpracovat</li>
+            <li><code>bin/console messenger:failed:remove {id}</code> – odstraní neplatnou zprávu</li>
         </ul>
 
         <h3>Rebuild projekcí</h3>
@@ -1560,17 +1560,17 @@ final class RebuildProjectionCommand extends Command
         </p>
         <ul>
             <li>
-                <strong>Optimistická aktualizace UI</strong> - Frontend po úspěšné odpovědi na command
+                <strong>Optimistická aktualizace UI</strong> – Frontend po úspěšné odpovědi na command
                 okamžitě zobrazí očekávaný stav (např. "Potvrzeno"), aniž čeká na aktualizaci projekce.
                 Nejjednodušší a nejčastější řešení.
             </li>
             <li>
-                <strong>Potvrzovací stránka</strong> - Po provedení akce přesměrovat uživatele na stránku,
+                <strong>Potvrzovací stránka</strong> – Po provedení akce přesměrovat uživatele na stránku,
                 která nezávisí na projekci (např. "Objednávka č. X byla potvrzena"), místo okamžitého
                 návratu na výpis.
             </li>
             <li>
-                <strong>Polling / SSE</strong> - Frontend periodicky dotazuje API nebo naslouchá Server-Sent
+                <strong>Polling / SSE</strong> – Frontend periodicky dotazuje API nebo naslouchá Server-Sent
                 Events, dokud projekce nedorazí do požadovaného stavu.
             </li>
         </ul>
@@ -1775,13 +1775,13 @@ final class SnapshottingOrderRepository
         <h2 id="verzovani-udalosti-heading" class="h-section"><span class="h-num">06.10</span> Verzování událostí (Event Versioning)</h2>
 
         <p>
-            V Event Sourcingu jsou události <strong>permanentní</strong> - jednou uložené do Event Store se nikdy
+            V Event Sourcingu jsou události <strong>permanentní</strong> – jednou uložené do Event Store se nikdy
             nemažou ani nepřepisují. Zároveň se ale doménový model v čase vyvíjí: přibývají nové atributy, mění se
             struktura dat, původní pole se rozdělují nebo slučují. Vzniká tak praktický problém:
             <strong>jak přečíst starou událost novým kódem?</strong>
         </p>
         <p>
-            Řešením je <strong>event versioning</strong> - strategie, která zajistí zpětnou čitelnost starých událostí
+            Řešením je <strong>event versioning</strong> – strategie, která zajistí zpětnou čitelnost starých událostí
             i po změně jejich schématu. Nejrozšířenějším vzorem je <strong>upcasting</strong>: při deserializaci
             se starší verze payloadu transformuje na aktuální formát, takže doménový model vždy pracuje pouze
             s nejnovější verzí události.
@@ -1790,15 +1790,15 @@ final class SnapshottingOrderRepository
         <h3>Proč je verzování nezbytné</h3>
         <ul>
             <li>
-                <strong>Append-only princip</strong> - Události v Event Store nelze měnit. Pokud změníte
+                <strong>Append-only princip</strong> – Události v Event Store nelze měnit. Pokud změníte
                 schéma události, stará data zůstávají v původním formátu navždy.
             </li>
             <li>
-                <strong>Replay a projekce</strong> - Při přebudování projekcí nebo replay agregátu se přehrávají
+                <strong>Replay a projekce</strong> – Při přebudování projekcí nebo replay agregátu se přehrávají
                 <em>všechny</em> historické události, včetně těch z prvních verzí systému.
             </li>
             <li>
-                <strong>Dlouhověkost systému</strong> - Event-sourcovaný systém může běžet roky. Za tu dobu
+                <strong>Dlouhověkost systému</strong> – Event-sourcovaný systém může běžet roky. Za tu dobu
                 se business požadavky změní mnohokrát a schémata událostí se musejí vyvíjet spolu s nimi.
             </li>
         </ul>
@@ -2016,13 +2016,13 @@ final readonly class UpcasterChain
             </p>
             <ul>
                 <li>
-                    <strong>Weak schema (slabé schéma)</strong> - Payload je uložen jako volný JSON bez formální
+                    <strong>Weak schema (slabé schéma)</strong> – Payload je uložen jako volný JSON bez formální
                     definice. Upcasters transformují data ad-hoc. Výhodou je flexibilita a rychlost vývoje;
                     nevýhodou je, že chyby v transformaci se projeví až za běhu a je obtížné ověřit konzistenci
                     napříč verzemi.
                 </li>
                 <li>
-                    <strong>Strong schema (silné schéma)</strong> - Každá verze události má explicitně definované
+                    <strong>Strong schema (silné schéma)</strong> – Každá verze události má explicitně definované
                     schéma (např. pomocí JSON Schema nebo PHP třídy s validací). Upcaster pak transformuje mezi
                     dvěma dobře definovanými strukturami. Výhodou je vyšší bezpečnost a možnost automatického
                     testování kompatibility; nevýhodou je vyšší režie při každé změně schématu.
@@ -2051,26 +2051,26 @@ final readonly class UpcasterChain
         <h3>Vhodné use cases</h3>
         <ul>
             <li>
-                <strong>Auditní log jako business požadavek</strong> - Finanční systémy, zdravotnické záznamy,
+                <strong>Auditní log jako business požadavek</strong> – Finanční systémy, zdravotnické záznamy,
                 nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log
                 poskytuje přirozeně a bez nutnosti extra implementace.
             </li>
             <li>
-                <strong>Komplexní doménová logika s bohatými stavovými přechody</strong> - Agregáty procházejí
+                <strong>Komplexní doménová logika s bohatými stavovými přechody</strong> – Agregáty procházejí
                 mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové
                 systémy, workflow enginy, bankovní transakce.
             </li>
             <li>
-                <strong>Temporální dotazy</strong> - Potřeba "přehrát" stav systému k libovolnému bodu v minulosti
+                <strong>Temporální dotazy</strong> – Potřeba "přehrát" stav systému k libovolnému bodu v minulosti
                 (debugging, analýza, "what-if" scénáře). U ES stačí replay eventů do daného timestampu.
             </li>
             <li>
-                <strong>Event-driven integrace</strong> - Systém produkuje události, které konzumují jiné bounded
+                <strong>Event-driven integrace</strong> – Systém produkuje události, které konzumují jiné bounded
                 contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena – Event Store je
                 zdrojem pravdy pro integraci.
             </li>
             <li>
-                <strong>CQRS s vysokou čtecí zátěží</strong> - ES umožňuje vybudovat libovolný počet optimalizovaných
+                <strong>CQRS s vysokou čtecí zátěží</strong> – ES umožňuje vybudovat libovolný počet optimalizovaných
                 read modelů z jednoho event streamu, aniž by bylo nutné měnit write model.
             </li>
         </ul>
@@ -2078,20 +2078,20 @@ final readonly class UpcasterChain
         <h3>Nevhodné use cases</h3>
         <ul>
             <li>
-                <strong>Jednoduché CRUD aplikace</strong> - Pokud doménová logika spočívá v základních operacích
+                <strong>Jednoduché CRUD aplikace</strong> – Pokud doménová logika spočívá v základních operacích
                 Create/Read/Update/Delete bez složitých stavových přechodů, ES přináší jen zbytečnou složitost.
             </li>
             <li>
-                <strong>Systémy orientované převážně na reporting</strong> - Pokud je primárním požadavkem rychlé
+                <strong>Systémy orientované převážně na reporting</strong> – Pokud je primárním požadavkem rychlé
                 čtení a agregace dat (BI, analytics), jsou vhodnější klasická DW řešení nebo OLAP databáze.
             </li>
             <li>
-                <strong>Prototypy a MVP</strong> - Rychlá validace business nápadu nepotřebuje složitou
+                <strong>Prototypy a MVP</strong> – Rychlá validace business nápadu nepotřebuje složitou
                 infrastrukturu. ES lze přidat do zralého systému incrementálně, pokud se ukáže potřeba -
                 viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>.
             </li>
             <li>
-                <strong>Týmy bez zkušeností s ES</strong> - Implementace Event Sourcingu bez předchozí zkušenosti
+                <strong>Týmy bez zkušeností s ES</strong> – Implementace Event Sourcingu bez předchozí zkušenosti
                 přináší vysoké riziko chyb v kritické infrastruktuře (Event Store, serializace, versioning).
                 Doporučuje se začít s menším bounded contextem jako experimentem.
             </li>

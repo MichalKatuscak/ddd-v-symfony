@@ -121,7 +121,7 @@
             Pokud načteme N agregátů <code>Order</code> a každý agregát obsahuje kolekci <code>OrderItem</code>
             mapovanou jako lazy asociace, Doctrine odloží načtení položek do okamžiku prvního přístupu.
             Iterace přes všechny objednávky a přístup k jejich položkám způsobí N samostatných SELECT dotazů
-            nad tabulkou <code>order_item</code> - jeden pro každou objednávku.
+            nad tabulkou <code>order_item</code> – jeden pro každou objednávku.
         </p>
     {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -446,9 +446,9 @@ final class DoctrineOrderRepository
 
         <h3>Zásady read modelu v CQRS</h3>
         <ul>
-            <li>Query handlery <strong>nepoužívají doménové repozitáře</strong> - přistupují přímo k databázi přes DQL nebo nativní SQL.</li>
+            <li>Query handlery <strong>nepoužívají doménové repozitáře</strong> – přistupují přímo k databázi přes DQL nebo nativní SQL.</li>
             <li>Výsledkem je <strong>DTO (Data Transfer Object)</strong> nebo plain PHP array – žádné bohaté doménové objekty.</li>
-            <li>Read model může být <strong>denormalizovaný</strong> - data jsou již předpřipravena pro konkrétní view.</li>
+            <li>Read model může být <strong>denormalizovaný</strong> – data jsou již předpřipravena pro konkrétní view.</li>
             <li>Read side lze <strong>nezávisle cachovat</strong> bez ohrožení doménové konzistence.</li>
         </ul>
     {% endset %}
@@ -1364,7 +1364,7 @@ final class QueryCountingMiddleware implements Middleware
         <ol>
             <li>Otevřete Symfony Profiler panel <strong>Doctrine</strong> a seřaďte dotazy podle doby trvání.</li>
             <li>Dotazy trvající déle než 100 ms jsou kandidáty pro optimalizaci – zkopírujte SQL a spusťte <code>EXPLAIN ANALYZE</code> v databázi.</li>
-            <li>Hledejte <code>Seq Scan</code> (PostgreSQL) nebo <code>Full Table Scan</code> (MySQL/MariaDB) - signalizují chybějící index.</li>
+            <li>Hledejte <code>Seq Scan</code> (PostgreSQL) nebo <code>Full Table Scan</code> (MySQL/MariaDB) – signalizují chybějící index.</li>
             <li>Zkontrolujte, zda se opakují strukturálně stejné dotazy lišící se pouze parametrem – typický příznak N+1 problému.</li>
             <li>Pro N+1 přidejte <code>JOIN FETCH</code> do příslušného repozitáře nebo přepište dotaz na read model (DTO).</li>
         </ol>

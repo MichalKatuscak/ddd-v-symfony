@@ -52,7 +52,7 @@ img, svg { max-width: 100%; height: auto; display: block; }
   font-size: var(--t-sm);
   z-index: 100;
   border-radius: var(--r-1);
-  transition: top 120ms ease;
+  transition: top var(--motion-fast) ease;
 }
 .skip-link:focus { top: 8px; }
 
@@ -96,7 +96,7 @@ main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   border-radius: var(--r-2);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background var(--motion-fast) ease, border-color var(--motion-fast) ease;
   text-decoration: none;
 }
 .btn-primary {
@@ -105,7 +105,7 @@ main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   border-color: var(--accent);
 }
 .btn-primary:hover { background: oklch(0.82 0.13 65); }
-.btn-arrow { transition: transform 160ms ease; }
+.btn-arrow { transition: transform var(--motion-fast) ease; }
 .btn-primary:hover .btn-arrow { transform: translateX(3px); }
 .btn-ghost {
   background: transparent;

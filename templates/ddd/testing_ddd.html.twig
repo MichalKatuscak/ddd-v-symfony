@@ -75,10 +75,10 @@
 
         <h3>Proč je DDD přirozeně testovatelný:</h3>
         <ul>
-            <li><strong>Žádné závislosti na frameworku</strong> - Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
-            <li><strong>Explicitní závislosti</strong> - Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
-            <li><strong>Bohaté doménové modely</strong> - Veškerá doménová logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
-            <li><strong>Invarianty jsou vynucovány při konstrukci</strong> - Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
+            <li><strong>Žádné závislosti na frameworku</strong> – Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
+            <li><strong>Explicitní závislosti</strong> – Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
+            <li><strong>Bohaté doménové modely</strong> – Veškerá doménová logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
+            <li><strong>Invarianty jsou vynucovány při konstrukci</strong> – Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
         </ul>
     {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -593,16 +593,16 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         <h3>Typy test doubles a jejich použití v DDD:</h3>
         <ul>
             <li>
-                <strong>Stub</strong> - Vrací předpřipravené odpovědi bez jakékoli logiky. Vhodný, když potřebujeme, aby závislost vrátila konkrétní hodnotu, ale nezajímá nás, zda a kolikrát byla volána. Příklad: <code>$stub->method('findById')->willReturn($user)</code>.
+                <strong>Stub</strong> – Vrací předpřipravené odpovědi bez jakékoli logiky. Vhodný, když potřebujeme, aby závislost vrátila konkrétní hodnotu, ale nezajímá nás, zda a kolikrát byla volána. Příklad: <code>$stub->method('findById')->willReturn($user)</code>.
             </li>
             <li>
-                <strong>Mock</strong> - Stub s ověřením volání. Ověřuje, že byla zavolána konkrétní metoda s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: <code>$mock->expects($this->once())->method('save')</code>.
+                <strong>Mock</strong> – Stub s ověřením volání. Ověřuje, že byla zavolána konkrétní metoda s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: <code>$mock->expects($this->once())->method('save')</code>.
             </li>
             <li>
-                <strong>Fake</strong> - Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá reálnou databázovou závislost, ale chová se stejně jako skutečná implementace. <strong>Nejlepší přístup pro DDD repozitáře</strong> - umožňuje psát čitelné testy bez konfigurování mocků.
+                <strong>Fake</strong> – Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá reálnou databázovou závislost, ale chová se stejně jako skutečná implementace. <strong>Nejlepší přístup pro DDD repozitáře</strong> – umožňuje psát čitelné testy bez konfigurování mocků.
             </li>
             <li>
-                <strong>Spy</strong> - Podobný mocku, ale ověření probíhá až po akci (post-assertion style). Méně časté v PHP.
+                <strong>Spy</strong> – Podobný mocku, ale ověření probíhá až po akci (post-assertion style). Méně časté v PHP.
             </li>
         </ul>
     {% endset %}
@@ -812,11 +812,11 @@ final class RegisterUserHandlerTest extends TestCase
         <h3>KernelTestCase vs WebTestCase:</h3>
         <ul>
             <li>
-                <strong>KernelTestCase</strong> - Bootstrapuje Symfony kernel bez HTTP vrstvy. Vhodný pro testování
+                <strong>KernelTestCase</strong> – Bootstrapuje Symfony kernel bez HTTP vrstvy. Vhodný pro testování
                 Doctrine repozitářů, služeb z DI kontejneru a dalších komponent infrastruktury. Rychlejší než WebTestCase.
             </li>
             <li>
-                <strong>WebTestCase</strong> - Bootstrapuje kernel i simulovaný HTTP klient. Vhodný pro funkční testy
+                <strong>WebTestCase</strong> – Bootstrapuje kernel i simulovaný HTTP klient. Vhodný pro funkční testy
                 kontrolerů a API endpointů. Pomalejší, ale testuje celý zásobník.
             </li>
         </ul>
@@ -941,7 +941,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
 
         <h3 id="entity-manager-clear-heading">Proč volat <code>$entityManager->clear()</code>?</h3>
         <p>
-            Doctrine udržuje tzv. <em>Identity Map</em> - interní cache, která vrátí stejnou instanci objektu
+            Doctrine udržuje tzv. <em>Identity Map</em> – interní cache, která vrátí stejnou instanci objektu
             pro stejné ID bez dalšího dotazu do databáze. Bez volání <code>clear()</code> by integrační test
             mohl úspěšně projít, i kdyby data v databázi vůbec nebyla uložena – Doctrine by je vrátil
             z paměti. Voláme tedy <code>clear()</code> mezi zápisem a čtením, aby byl test skutečně integrační.
@@ -1281,10 +1281,10 @@ return static function (Config $config): void {
 
         <h3>Doporučené pokrytí pro DDD vrstvy:</h3>
         <ul>
-            <li><strong>Doménová vrstva (Domain)</strong> - 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
-            <li><strong>Aplikační vrstva (Application)</strong> - 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
-            <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> - 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
-            <li><strong>Prezentační vrstva (Presentation)</strong> - 50–70 %. Kontrolery pokryjte funkčními testy pro hlavní scénáře.</li>
+            <li><strong>Doménová vrstva (Domain)</strong> – 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí být pokryto testy.</li>
+            <li><strong>Aplikační vrstva (Application)</strong> – 80–90 %. Command a query handlery by měly být pokryty unit testy s InMemory repozitáři.</li>
+            <li><strong>Infrastrukturní vrstva (Infrastructure)</strong> – 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) nemusí být testován.</li>
+            <li><strong>Prezentační vrstva (Presentation)</strong> – 50–70 %. Kontrolery pokryjte funkčními testy pro hlavní scénáře.</li>
         </ul>
     {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1314,9 +1314,9 @@ return static function (Config $config): void {
             Každý test by měl být strukturován do tří jasně oddělených fází:
         </p>
         <ol>
-            <li><strong>Arrange (připrav)</strong> - Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.</li>
-            <li><strong>Act (proveď)</strong> - Proveď jednu testovanou akci: zavolej metodu, odešli command.</li>
-            <li><strong>Assert (ověř)</strong> - Ověř výsledek: assertuj výstup, zkontroluj stav objektu, ověř vydané události.</li>
+            <li><strong>Arrange (připrav)</strong> – Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.</li>
+            <li><strong>Act (proveď)</strong> – Proveď jednu testovanou akci: zavolej metodu, odešli command.</li>
+            <li><strong>Assert (ověř)</strong> – Ověř výsledek: assertuj výstup, zkontroluj stav objektu, ověř vydané události.</li>
         </ol>
         <p>
             Každý test by měl ověřovat právě jednu věc (jeden logický assertion). Více assertů v jednom testu je přijatelné,
@@ -1333,26 +1333,26 @@ return static function (Config $config): void {
         <h3 id="common-mistakes-heading">Nejčastější chyby při testování DDD</h3>
         <ul>
             <li>
-                <strong>Testování getterů místo chování</strong> - Špatně: <code>$this->assertSame('jan@example.com', $user->getEmail())</code> po přímém nastavení fieldu.
+                <strong>Testování getterů místo chování</strong> – Špatně: <code>$this->assertSame('jan@example.com', $user->getEmail())</code> po přímém nastavení fieldu.
                 Správně: zavolat doménovou operaci a ověřit výsledný stav.
             </li>
             <li>
-                <strong>Přímý přístup k privátním fieldům přes reflexi</strong> - Porušuje zapouzdření. Pokud potřebujete přistupovat k privátnímu stavu v testu, je to příznak špatného návrhu API třídy.
+                <strong>Přímý přístup k privátním fieldům přes reflexi</strong> – Porušuje zapouzdření. Pokud potřebujete přistupovat k privátnímu stavu v testu, je to příznak špatného návrhu API třídy.
             </li>
             <li>
-                <strong>Bootstrapování celého Symfony kernelu v unit testech</strong> - Unit testy doménové vrstvy nesmí volat <code>self::bootKernel()</code>. To je výsadou integračních testů. Zbytečně zpomaluje sadu testů.
+                <strong>Bootstrapování celého Symfony kernelu v unit testech</strong> – Unit testy doménové vrstvy nesmí volat <code>self::bootKernel()</code>. To je výsadou integračních testů. Zbytečně zpomaluje sadu testů.
             </li>
             <li>
-                <strong>Sdílený stav mezi testy</strong> - Každý test musí být zcela nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
+                <strong>Sdílený stav mezi testy</strong> – Každý test musí být zcela nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
             </li>
             <li>
-                <strong>Mockování value objects</strong> - Value objekty jsou jednoduché datové třídy bez závislostí. Není důvod je mockovat – vždy vytvořte skutečnou instanci.
+                <strong>Mockování value objects</strong> – Value objekty jsou jednoduché datové třídy bez závislostí. Není důvod je mockovat – vždy vytvořte skutečnou instanci.
             </li>
             <li>
-                <strong>Ignorování doménových výjimek v testech</strong> - Každá doménová výjimka (<code>InvalidEmailException</code>, <code>OrderAlreadyPlacedException</code> apod.) musí mít test ověřující, že je skutečně vyhozena za správných podmínek.
+                <strong>Ignorování doménových výjimek v testech</strong> – Každá doménová výjimka (<code>InvalidEmailException</code>, <code>OrderAlreadyPlacedException</code> apod.) musí mít test ověřující, že je skutečně vyhozena za správných podmínek.
             </li>
             <li>
-                <strong>Chybějící test pro releaseDomainEvents() po operaci</strong> - Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
+                <strong>Chybějící test pro releaseDomainEvents() po operaci</strong> – Pokud agregát vydává doménové události, každá veřejná operace, která by měla událost vydávat, musí mít test ověřující typ, počet a obsah vydaných událostí.
             </li>
         </ul>
     {% endset %}

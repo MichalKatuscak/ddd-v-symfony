@@ -73,10 +73,10 @@
             </p>
 
             <ul>
-                <li><strong>Prezentační vrstva (Presentation Layer)</strong> - Zodpovědná za interakci s uživatelem.</li>
-                <li><strong>Aplikační vrstva (Application Layer)</strong> - Koordinuje aplikační aktivity a deleguje práci doménové vrstvě.</li>
-                <li><strong>Doménová vrstva (Domain Layer)</strong> - Obsahuje doménový model a doménovou logiku.</li>
-                <li><strong>Infrastrukturní vrstva (Infrastructure Layer)</strong> - Poskytuje technické služby pro ostatní vrstvy.</li>
+                <li><strong>Prezentační vrstva (Presentation Layer)</strong> – Zodpovědná za interakci s uživatelem.</li>
+                <li><strong>Aplikační vrstva (Application Layer)</strong> – Koordinuje aplikační aktivity a deleguje práci doménové vrstvě.</li>
+                <li><strong>Doménová vrstva (Domain Layer)</strong> – Obsahuje doménový model a doménovou logiku.</li>
+                <li><strong>Infrastrukturní vrstva (Infrastructure Layer)</strong> – Poskytuje technické služby pro ostatní vrstvy.</li>
             </ul>
 
             {% set _code %}src/
@@ -192,10 +192,10 @@
                     V celém průvodci používáme konzistentní strukturu pro vertikální slice architekturu:
                 </p>
                 <ul>
-                    <li><code>{BC}/Domain/</code> - doménová vrstva sdílená uvnitř bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
-                    <li><code>{BC}/Infrastructure/</code> - infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
-                    <li><code>{BC}/{Feature}/</code> - feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
-                    <li><code>Shared/</code> - pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
+                    <li><code>{BC}/Domain/</code> – doménová vrstva sdílená uvnitř bounded contextu (Model, ValueObject, Event, Repository rozhraní, Service)</li>
+                    <li><code>{BC}/Infrastructure/</code> – infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry)</li>
+                    <li><code>{BC}/{Feature}/</code> – feature slice s Command/, Query/, Controller/ přímo uvnitř</li>
+                    <li><code>Shared/</code> – pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní)</li>
                 </ul>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -422,11 +422,11 @@
             </p>
 
             <ul>
-                <li><strong>Messenger komponenta</strong> - Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
-                <li><strong>Validator komponenta</strong> - Pro validaci doménových objektů.</li>
-                <li><strong>Form komponenta</strong> - Pro zpracování vstupů od uživatele.</li>
-                <li><strong>Security komponenta</strong> - Pro autentizaci a autorizaci.</li>
-                <li><strong>Doctrine ORM</strong> - Pro persistenci doménových objektů.</li>
+                <li><strong>Messenger komponenta</strong> – Pro implementaci CQRS a asynchronní zpracování <a href="https://symfony.com/doc/current/messenger.html" target="_blank">[10]</a>.</li>
+                <li><strong>Validator komponenta</strong> – Pro validaci doménových objektů.</li>
+                <li><strong>Form komponenta</strong> – Pro zpracování vstupů od uživatele.</li>
+                <li><strong>Security komponenta</strong> – Pro autentizaci a autorizaci.</li>
+                <li><strong>Doctrine ORM</strong> – Pro persistenci doménových objektů.</li>
             </ul>
 
         </section>

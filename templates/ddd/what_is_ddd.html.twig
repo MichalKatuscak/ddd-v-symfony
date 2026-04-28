@@ -76,21 +76,21 @@
             {% set _callout_body %}
                 <h3 id="key-aspects-heading">Základní aspekty DDD:</h3>
                 <ul>
-                    <li><strong>Doména (Domain)</strong> - Oblast znalostí, problémů a aktivit, na kterou se aplikace
+                    <li><strong>Doména (Domain)</strong> – Oblast znalostí, problémů a aktivit, na kterou se aplikace
                         zaměřuje <a href="https://martinfowler.com/bliki/DomainDrivenDesign.html"
                                     target="_blank">[2]</a>. Doména představuje specifickou oblast, kterou se software
                         snaží modelovat a řešit.
                     </li>
-                    <li><strong>Ubiquitous Language</strong> - Společný jazyk používaný vývojáři a doménovými experty <a
+                    <li><strong>Ubiquitous Language</strong> – Společný jazyk používaný vývojáři a doménovými experty <a
                                 href="https://martinfowler.com/bliki/UbiquitousLanguage.html" target="_blank">[3]</a>.
                         Tento jazyk eliminuje nedorozumění a zajišťuje, že všichni účastníci projektu mluví stejným
                         jazykem.
                     </li>
-                    <li><strong>Bounded Context</strong> - Jasně definovaná hranice, ve které je model platný <a
+                    <li><strong>Bounded Context</strong> – Jasně definovaná hranice, ve které je model platný <a
                                 href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank">[4]</a>.
                         Bounded Context pomáhá rozdělit složité domény do menších, lépe zvládnutelných částí.
                     </li>
-                    <li><strong>Model-Driven Design</strong> - Návrh softwaru založený na modelu domény <a
+                    <li><strong>Model-Driven Design</strong> – Návrh softwaru založený na modelu domény <a
                                 href="https://www.infoq.com/articles/ddd-in-practice/" target="_blank">[5]</a>. Model je
                         zjednodušenou reprezentací domény, která zachycuje její podstatné aspekty.
                     </li>
@@ -108,11 +108,11 @@
                 Hlavní milníky ve vývoji DDD <a href="https://dddcommunity.org/" target="_blank">[6]</a>:
             </p>
             <ul>
-                <li><strong>2003</strong> - Eric Evans vydává knihu <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický/taktický design.</li>
-                <li><strong>2013</strong> - Vaughn Vernon vydává <em>Implementing Domain-Driven Design</em>, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.</li>
-                <li><strong>2013</strong> - Alberto Brandolini představuje <em>Event Storming</em> - workshopovou techniku pro kolaborativní modelování domény s doménovými experty.</li>
-                <li><strong>2016</strong> - Vaughn Vernon vydává <em>Domain-Driven Design Distilled</em>, zkrácenou a přístupnější verzi pro rychlé pochopení hlavních konceptů.</li>
-                <li><strong>Po roce 2015</strong> - DDD si nachází přirozené uplatnění v architektuře mikroslužeb: Bounded Context se stává standardním vodítkem pro určení hranic jednotlivých služeb <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">[7]</a>.</li>
+                <li><strong>2003</strong> – Eric Evans vydává knihu <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický/taktický design.</li>
+                <li><strong>2013</strong> – Vaughn Vernon vydává <em>Implementing Domain-Driven Design</em>, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.</li>
+                <li><strong>2013</strong> – Alberto Brandolini představuje <em>Event Storming</em> – workshopovou techniku pro kolaborativní modelování domény s doménovými experty.</li>
+                <li><strong>2016</strong> – Vaughn Vernon vydává <em>Domain-Driven Design Distilled</em>, zkrácenou a přístupnější verzi pro rychlé pochopení hlavních konceptů.</li>
+                <li><strong>Po roce 2015</strong> – DDD si nachází přirozené uplatnění v architektuře mikroslužeb: Bounded Context se stává standardním vodítkem pro určení hranic jednotlivých služeb <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/" target="_blank">[7]</a>.</li>
             </ul>
         </section>
 
@@ -124,27 +124,27 @@
 
             <ol>
                 <li>
-                    <strong>Zaměření na doménu</strong> - DDD se zaměřuje na doménu a doménovou logiku. Technické
+                    <strong>Zaměření na doménu</strong> – DDD se zaměřuje na doménu a doménovou logiku. Technické
                     detaily jsou sekundární.
                 </li>
                 <li>
-                    <strong>Ubiquitous Language</strong> - DDD používá společný jazyk mezi vývojáři a doménovými
+                    <strong>Ubiquitous Language</strong> – DDD používá společný jazyk mezi vývojáři a doménovými
                     experty, který je používán v kódu, dokumentaci a komunikaci.
                 </li>
                 <li>
-                    <strong>Bounded Context</strong> - DDD rozděluje složité domény do menších, jasně definovaných
+                    <strong>Bounded Context</strong> – DDD rozděluje složité domény do menších, jasně definovaných
                     kontextů s explicitními hranicemi.
                 </li>
                 <li>
-                    <strong>Model-Driven Design</strong> - DDD používá model jako základ pro návrh softwaru. Model je
+                    <strong>Model-Driven Design</strong> – DDD používá model jako základ pro návrh softwaru. Model je
                     zjednodušenou reprezentací domény.
                 </li>
                 <li>
-                    <strong>Strategic Design</strong> - DDD poskytuje nástroje pro strategický návrh, který pomáhá
+                    <strong>Strategic Design</strong> – DDD poskytuje nástroje pro strategický návrh, který pomáhá
                     definovat hranice mezi různými částmi systému.
                 </li>
                 <li>
-                    <strong>Tactical Design</strong> - DDD poskytuje vzory pro taktický návrh, které pomáhají
+                    <strong>Tactical Design</strong> – DDD poskytuje vzory pro taktický návrh, které pomáhají
                     implementovat doménový model v kódu.
                 </li>
             </ol>
@@ -159,36 +159,36 @@
 
             <ul>
                 <li>
-                    <strong>Bounded Context</strong> - Ohraničený kontext je explicitní hranice, ve které je doménový
+                    <strong>Bounded Context</strong> – Ohraničený kontext je explicitní hranice, ve které je doménový
                     model platný. Každý bounded context má svůj vlastní Ubiquitous Language a model.
                 </li>
                 <li>
-                    <strong>Context Map</strong> - Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto
+                    <strong>Context Map</strong> – Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto
                     vztahy mohou být různého typu, například Partnership, Customer-Supplier, Conformist, Anti-Corruption
                     Layer, atd.
                 </li>
                 <li>
-                    <strong>Shared Kernel</strong> - Sdílené jádro je část modelu, která je sdílena mezi dvěma nebo více
+                    <strong>Shared Kernel</strong> – Sdílené jádro je část modelu, která je sdílena mezi dvěma nebo více
                     bounded contexts. Toto sdílení vyžaduje úzkou spolupráci mezi týmy.
                 </li>
                 <li>
-                    <strong>Customer-Supplier</strong> - Vztah zákazník-dodavatel mezi dvěma bounded contexts, kde jeden
+                    <strong>Customer-Supplier</strong> – Vztah zákazník-dodavatel mezi dvěma bounded contexts, kde jeden
                     kontext (dodavatel) poskytuje služby druhému kontextu (zákazník).
                 </li>
                 <li>
-                    <strong>Conformist</strong> - Vztah, kde jeden kontext přijímá model jiného kontextu bez možnosti
+                    <strong>Conformist</strong> – Vztah, kde jeden kontext přijímá model jiného kontextu bez možnosti
                     jej ovlivnit.
                 </li>
                 <li>
-                    <strong>Anti-Corruption Layer</strong> - Vrstva, která překládá mezi dvěma bounded contexts s
+                    <strong>Anti-Corruption Layer</strong> – Vrstva, která překládá mezi dvěma bounded contexts s
                     různými modely, aby chránila integritu cílového modelu.
                 </li>
                 <li>
-                    <strong>Open Host Service</strong> - Služba, která definuje protokol pro přístup k bounded contextu,
+                    <strong>Open Host Service</strong> – Služba, která definuje protokol pro přístup k bounded contextu,
                     aby usnadnila integraci s mnoha jinými kontexty.
                 </li>
                 <li>
-                    <strong>Published Language</strong> - Dobře dokumentovaný jazyk, který usnadňuje komunikaci mezi
+                    <strong>Published Language</strong> – Dobře dokumentovaný jazyk, který usnadňuje komunikaci mezi
                     různými bounded contexts.
                 </li>
             </ul>
@@ -203,36 +203,36 @@
 
             <ul>
                 <li>
-                    <strong>Entity</strong> - Objekty, které mají identitu a kontinuitu v čase. Entity jsou definovány
+                    <strong>Entity</strong> – Objekty, které mají identitu a kontinuitu v čase. Entity jsou definovány
                     svou identitou, nikoli svými atributy. Například, zákazník v e-shopu je entita, protože má unikátní
                     identifikátor (CustomerId), i když se jeho ostatní atributy (jméno, e-mail, adresa) v průběhu času mění.
                 </li>
                 <li>
-                    <strong>Value Object</strong> - Hodnotové objekty jsou definovány svými atributy, nikoli identitou.
+                    <strong>Value Object</strong> – Hodnotové objekty jsou definovány svými atributy, nikoli identitou.
                     Jsou neměnné (immutable) a používají se k popisu aspektů domény. Například, adresa nebo peněžní
                     částka jsou hodnotové objekty.
                 </li>
                 <li>
-                    <strong>Aggregate</strong> - Agregát je shluk objektů, které jsou považovány za jednu jednotku z
+                    <strong>Aggregate</strong> – Agregát je shluk objektů, které jsou považovány za jednu jednotku z
                     hlediska změn dat. Každý agregát má kořen agregátu (Aggregate Root), který je jediným vstupním
                     bodem pro veškeré vnější interakce s agregátem.
                 </li>
                 <li>
-                    <strong>Domain Event</strong> - Doménová událost reprezentuje něco, co se stalo v doméně a má význam
+                    <strong>Domain Event</strong> – Doménová událost reprezentuje něco, co se stalo v doméně a má význam
                     pro doménové experty. Doménové události jsou často používány pro komunikaci mezi různými bounded
                     contexts.
                 </li>
                 <li>
-                    <strong>Service</strong> - Doménová služba implementuje doménovou logiku, která nepatří přirozeně do
+                    <strong>Service</strong> – Doménová služba implementuje doménovou logiku, která nepatří přirozeně do
                     žádné entity nebo hodnotového objektu. Služby jsou bezstavové a jejich názvy by měly být odvozeny z
                     Ubiquitous Language.
                 </li>
                 <li>
-                    <strong>Repository</strong> - Repozitář zapouzdřuje logiku pro přístup k persistenci agregátů.
+                    <strong>Repository</strong> – Repozitář zapouzdřuje logiku pro přístup k persistenci agregátů.
                     Poskytuje abstrakci nad datovým úložištěm a umožňuje pracovat s agregáty jako s objekty v paměti.
                 </li>
                 <li>
-                    <strong>Factory</strong> - Továrna zapouzdřuje logiku pro vytváření složitých objektů a agregátů.
+                    <strong>Factory</strong> – Továrna zapouzdřuje logiku pro vytváření složitých objektů a agregátů.
                     Používá se, když je vytvoření objektu složité nebo když je potřeba zajistit konzistenci nově
                     vytvořených objektů.
                 </li>
@@ -244,10 +244,10 @@
                     V e-commerce doméně by objednávka (Order) mohla být agregátem s následujícími částmi:
                 </p>
                 <ul>
-                    <li><strong>Order</strong> - Kořen agregátu (Aggregate Root)</li>
-                    <li><strong>OrderLine</strong> - Entity reprezentující položky objednávky</li>
-                    <li><strong>Money</strong> - Hodnotový objekt reprezentující peněžní částku</li>
-                    <li><strong>Address</strong> - Hodnotový objekt reprezentující dodací adresu</li>
+                    <li><strong>Order</strong> – Kořen agregátu (Aggregate Root)</li>
+                    <li><strong>OrderLine</strong> – Entity reprezentující položky objednávky</li>
+                    <li><strong>Money</strong> – Hodnotový objekt reprezentující peněžní částku</li>
+                    <li><strong>Address</strong> – Hodnotový objekt reprezentující dodací adresu</li>
                 </ul>
                 <p>
                     Přístup k OrderLine entitám je možný pouze přes Order entitu, což zajistí konzistenci celého
@@ -275,35 +275,35 @@
 
             <ol>
                 <li>
-                    <strong>Pochopení domény</strong> - Prvním krokem je důkladné pochopení domény ve spolupráci s
+                    <strong>Pochopení domény</strong> – Prvním krokem je důkladné pochopení domény ve spolupráci s
                     doménovými experty. Tato fáze zahrnuje rozhovory, workshopy a modelování.
                 </li>
                 <li>
-                    <strong>Vytvoření Ubiquitous Language</strong> - Definování společného jazyka, který bude používán
+                    <strong>Vytvoření Ubiquitous Language</strong> – Definování společného jazyka, který bude používán
                     vývojáři i doménovými experty. Tento jazyk by měl být dokumentován a neustále aktualizován.
                 </li>
                 <li>
-                    <strong>Identifikace Bounded Contexts</strong> - Rozdělení složité domény do menších, jasně
+                    <strong>Identifikace Bounded Contexts</strong> – Rozdělení složité domény do menších, jasně
                     definovaných kontextů s explicitními hranicemi.
                 </li>
                 <li>
-                    <strong>Vytvoření Context Map</strong> - Definování vztahů mezi různými bounded contexts a způsobu
+                    <strong>Vytvoření Context Map</strong> – Definování vztahů mezi různými bounded contexts a způsobu
                     jejich integrace.
                 </li>
                 <li>
-                    <strong>Modelování domény</strong> - Vytvoření doménového modelu pro každý bounded context, který
+                    <strong>Modelování domény</strong> – Vytvoření doménového modelu pro každý bounded context, který
                     zachycuje podstatné koncepty a vztahy v doméně.
                 </li>
                 <li>
-                    <strong>Implementace taktických vzorů</strong> - Použití taktických vzorů DDD (Entity, Value Object,
+                    <strong>Implementace taktických vzorů</strong> – Použití taktických vzorů DDD (Entity, Value Object,
                     Aggregate, Repository, atd.) pro implementaci doménového modelu v kódu.
                 </li>
                 <li>
-                    <strong>Testování</strong> - Důkladné testování doménového modelu a jeho chování, aby bylo
+                    <strong>Testování</strong> – Důkladné testování doménového modelu a jeho chování, aby bylo
                     zajištěno, že správně modeluje doménu.
                 </li>
                 <li>
-                    <strong>Iterace a vylepšování</strong> - Neustálé vylepšování modelu na základě zpětné vazby od
+                    <strong>Iterace a vylepšování</strong> – Neustálé vylepšování modelu na základě zpětné vazby od
                     doménových expertů a zkušeností z implementace.
                 </li>
             </ol>
@@ -316,12 +316,12 @@
             </p>
 
             <ul>
-                <li><strong>Lepší komunikace</strong> - Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci.</li>
-                <li><strong>Flexibilita a odolnost vůči změnám</strong> - Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v business požadavcích se přirozeněji promítají do kódu.</li>
-                <li><strong>Modularita</strong> - Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.</li>
-                <li><strong>Testovatelnost</strong> - Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz <a href="{{ path('testing_ddd') }}">kapitola o testování</a>).</li>
-                <li><strong>Snížení technického dluhu</strong> - Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.</li>
-                <li><strong>Zaměření na hodnotu</strong> - DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší business hodnotu.</li>
+                <li><strong>Lepší komunikace</strong> – Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci.</li>
+                <li><strong>Flexibilita a odolnost vůči změnám</strong> – Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v business požadavcích se přirozeněji promítají do kódu.</li>
+                <li><strong>Modularita</strong> – Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.</li>
+                <li><strong>Testovatelnost</strong> – Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz <a href="{{ path('testing_ddd') }}">kapitola o testování</a>).</li>
+                <li><strong>Snížení technického dluhu</strong> – Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.</li>
+                <li><strong>Zaměření na hodnotu</strong> – DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší business hodnotu.</li>
             </ul>
 
             <p>
@@ -337,28 +337,28 @@
             </p>
 
             <ul>
-                <li><strong>Složitost</strong> - DDD může být složité pochopit a implementovat, zejména pro začátečníky.
+                <li><strong>Složitost</strong> – DDD může být složité pochopit a implementovat, zejména pro začátečníky.
                     Vyžaduje hluboké pochopení domény a architektonických principů.
                 </li>
-                <li><strong>Časová náročnost</strong> - Implementace DDD může být časově náročná, zejména v počátečních
+                <li><strong>Časová náročnost</strong> – Implementace DDD může být časově náročná, zejména v počátečních
                     fázích projektu. Modelování domény a vytváření Ubiquitous Language vyžaduje čas a úsilí.
                 </li>
-                <li><strong>Nevhodnost pro jednoduché aplikace</strong> - DDD je navržen pro složité aplikace s bohatou
+                <li><strong>Nevhodnost pro jednoduché aplikace</strong> – DDD je navržen pro složité aplikace s bohatou
                     doménou. Pro jednoduché aplikace s minimální doménovou logikou může být zbytečně složitý a nákladný.
                 </li>
-                <li><strong>Potřeba doménových expertů</strong> - DDD vyžaduje přístup k doménovým expertům, což nemusí
+                <li><strong>Potřeba doménových expertů</strong> – DDD vyžaduje přístup k doménovým expertům, což nemusí
                     být vždy možné. Bez doménových expertů je obtížné vytvořit přesný model domény.
                 </li>
-                <li><strong>Organizace týmu</strong> - DDD může vyžadovat změny v organizaci týmu, aby podporovala
+                <li><strong>Organizace týmu</strong> – DDD může vyžadovat změny v organizaci týmu, aby podporovala
                     spolupráci mezi vývojáři a doménovými experty. To může být v některých organizacích obtížné.
                 </li>
-                <li><strong>Integrace s legacy systémy</strong> - Integrace DDD s existujícími legacy systémy může být
+                <li><strong>Integrace s legacy systémy</strong> – Integrace DDD s existujícími legacy systémy může být
                     náročná a může vyžadovat vytvoření Anti-Corruption Layer.
                 </li>
-                <li><strong>Výkonnost</strong> - Některé vzory DDD, jako jsou agregáty a repozitáře, mohou mít dopad na
+                <li><strong>Výkonnost</strong> – Některé vzory DDD, jako jsou agregáty a repozitáře, mohou mít dopad na
                     výkonnost, pokud nejsou správně implementovány.
                 </li>
-                <li><strong>Učební křivka</strong> - DDD má strmou učební křivku a může trvat nějakou dobu, než tým získá
+                <li><strong>Učební křivka</strong> – DDD má strmou učební křivku a může trvat nějakou dobu, než tým získá
                     potřebné znalosti a zkušenosti.
                 </li>
             </ul>
@@ -372,7 +372,7 @@
 
             <ul>
                 <li>
-                    <strong>DDD vs. Transaction Script</strong> - Transaction Script (Martin Fowler, <em>PoEAA</em>) organizuje
+                    <strong>DDD vs. Transaction Script</strong> – Transaction Script (Martin Fowler, <em>PoEAA</em>) organizuje
                     logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla
                     a ukládá výsledek. <strong>Rozdíl:</strong> Transaction Script nemá doménový model – logika je v procedurách,
                     ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí však dochází k duplicitě
@@ -380,14 +380,14 @@
                     napříč více use cases.
                 </li>
                 <li>
-                    <strong>DDD vs. CRUD</strong> - CRUD (Create, Read, Update, Delete) je datově orientovaný přístup:
+                    <strong>DDD vs. CRUD</strong> – CRUD (Create, Read, Update, Delete) je datově orientovaný přístup:
                     aplikace je v podstatě editor databázových tabulek. <strong>Rozdíl:</strong> CRUD nerozlišuje mezi
                     doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu
                     modeluje chování domény (objednávku nelze jen „updatovat“, ale „potvrdit“, „zrušit“ nebo „odeslat“).
                     Pro jednoduché správy dat je CRUD zcela dostačující.
                 </li>
                 <li>
-                    <strong>DDD vs. Hexagonální architektura</strong> - Hexagonální architektura (Ports and Adapters,
+                    <strong>DDD vs. Hexagonální architektura</strong> – Hexagonální architektura (Ports and Adapters,
                     Alistair Cockburn) řeší <em>jak strukturovat závislosti</em>: doménové jádro komunikuje s vnějším
                     světem přes porty (rozhraní) a adaptéry (implementace). <strong>Rozdíl:</strong> DDD řeší <em>jak
                     modelovat doménu</em> (Entity, Value Objects, Aggregates), hexagonální architektura řeší <em>jak
@@ -395,7 +395,7 @@
                     doménové jádro, hexagonální architektura poskytuje strukturu pro jeho izolaci.
                 </li>
                 <li>
-                    <strong>DDD vs. Mikroservisy</strong> - Mikroservisy jsou architektonický styl zaměřený na <em>jak
+                    <strong>DDD vs. Mikroservisy</strong> – Mikroservisy jsou architektonický styl zaměřený na <em>jak
                     nasazovat a škálovat</em> části systému nezávisle. <strong>Rozdíl:</strong> DDD řeší logické hranice
                     domény (Bounded Contexts), mikroservisy řeší fyzické hranice nasazení. Bounded Context z DDD je
                     přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky – jeden Bounded Context
@@ -429,11 +429,11 @@
             </p>
 
             <ul>
-                <li><strong>Strategický design</strong> - Bounded Contexts, Context Map, Ubiquitous Language</li>
-                <li><strong>Taktický design</strong> - Entity, Value Objects, Aggregates, Repositories, Domain Events,
+                <li><strong>Strategický design</strong> – Bounded Contexts, Context Map, Ubiquitous Language</li>
+                <li><strong>Taktický design</strong> – Entity, Value Objects, Aggregates, Repositories, Domain Events,
                     Services, Factories
                 </li>
-                <li><strong>Implementační vzory</strong> - Anti-Corruption Layer,
+                <li><strong>Implementační vzory</strong> – Anti-Corruption Layer,
                     <a href="{{ path('glossary') }}#term-specifikace">Specification</a>,
                     <a href="{{ path('glossary') }}#term-saga">Saga / Process Manager</a>
                 </li>

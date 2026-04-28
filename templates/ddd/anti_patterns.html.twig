@@ -81,17 +81,17 @@
                 <p>Chyby při implementaci DDD lze rozdělit do tří kategorií:</p>
                 <ul>
                     <li>
-                        <strong>Strategické chyby</strong> - špatně definované Bounded Contexts, ignorování
+                        <strong>Strategické chyby</strong> – špatně definované Bounded Contexts, ignorování
                         Ubiquitous Language, sdílená databáze napříč kontexty. Tyto chyby mají nejzávažnější
                         dopad, protože ovlivňují celkovou architekturu systému.
                     </li>
                     <li>
-                        <strong>Taktické chyby</strong> - anémický doménový model, příliš velké agregáty,
+                        <strong>Taktické chyby</strong> – anémický doménový model, příliš velké agregáty,
                         Primitive Obsession. Tyto chyby se projevují na úrovni doménového modelu a narušují
                         objektově orientované principy.
                     </li>
                     <li>
-                        <strong>Implementační chyby</strong> - doménová logika v infrastrukturní vrstvě,
+                        <strong>Implementační chyby</strong> – doménová logika v infrastrukturní vrstvě,
                         mutovatelné události, over-engineering. Tyto chyby vznikají při konkrétní implementaci
                         a jsou obvykle nejsnáze opravitelné.
                     </li>
@@ -118,22 +118,22 @@
                 <h3 id="anemicky-definice-heading">Proč je anémický model problém?</h3>
                 <ul>
                     <li>
-                        <strong>Porušení zapouzdření (encapsulation)</strong> - základní princip OOP říká, že data
+                        <strong>Porušení zapouzdření (encapsulation)</strong> – základní princip OOP říká, že data
                         a chování, které na nich operuje, by měly být společně. Anémický model toto porušuje tím,
                         že data jsou v entitě, ale logika je jinde.
                     </li>
                     <li>
-                        <strong>Ztráta modelu jako abstrakce domény</strong> - pokud entity obsahují pouze data,
+                        <strong>Ztráta modelu jako abstrakce domény</strong> – pokud entity obsahují pouze data,
                         model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým
                         do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla,
                         pouze strukturu dat – model tak ztrácí svůj komunikační a dokumentační přínos.
                     </li>
                     <li>
-                        <strong>Duplicita logiky</strong> - doménová pravidla rozptýlená do service tříd vedou
+                        <strong>Duplicita logiky</strong> – doménová pravidla rozptýlená do service tříd vedou
                         k jejich kopírování na více místech, protože není jasné kanonické místo pro logiku.
                     </li>
                     <li>
-                        <strong>Obtížná testovatelnost</strong> - testování logiky v servisní vrstvě vyžaduje
+                        <strong>Obtížná testovatelnost</strong> – testování logiky v servisní vrstvě vyžaduje
                         mockování závislostí, kdežto doménová logika v entitě je testovatelná izolovaně bez
                         jakýchkoliv závislostí.
                     </li>
@@ -410,21 +410,21 @@ class User
                 <h3 id="primitive-problemy-heading">Problémy způsobené Primitive Obsession</h3>
                 <ul>
                     <li>
-                        <strong>Ztráta validace</strong> - primitivní <code>string</code> může obsahovat jakoukoliv hodnotu,
+                        <strong>Ztráta validace</strong> – primitivní <code>string</code> může obsahovat jakoukoliv hodnotu,
                         zatímco hodnotový objekt <code>Email</code> garantuje, že vždy obsahuje platnou e-mailovou adresu.
                     </li>
                     <li>
-                        <strong>Chybějící sémantika</strong> - typ <code>string</code> neříká nic o tom, co hodnota
+                        <strong>Chybějící sémantika</strong> – typ <code>string</code> neříká nic o tom, co hodnota
                         reprezentuje. <code>Email</code>, <code>PhoneNumber</code> nebo <code>PostalCode</code> jsou
                         sémanticky bohaté.
                     </li>
                     <li>
-                        <strong>Záměna identifikátorů</strong> - používání <code>int</code> pro všechna ID vede
+                        <strong>Záměna identifikátorů</strong> – používání <code>int</code> pro všechna ID vede
                         k tomu, že typový systém PHP ani IDE nemohou odhalit záměnu <code>$orderId</code> a <code>$userId</code>
                         - obě jsou jen <code>int</code>.
                     </li>
                     <li>
-                        <strong>Rozptýlená validační logika</strong> - bez hodnotových objektů se validace opakuje
+                        <strong>Rozptýlená validační logika</strong> – bez hodnotových objektů se validace opakuje
                         na každém místě, kde se s hodnotou pracuje.
                     </li>
                 </ul>
@@ -641,21 +641,21 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
                 <h3 id="agregat-problemy-heading">Problémy způsobené příliš velkým agregátem</h3>
                 <ul>
                     <li>
-                        <strong>Výkonnostní problémy</strong> - načtení celého agregátu z databáze je pomalé,
+                        <strong>Výkonnostní problémy</strong> – načtení celého agregátu z databáze je pomalé,
                         pokud obsahuje stovky nebo tisíce podřízených entit (např. všechny položky objednávky
                         zákazníka za celý rok).
                     </li>
                     <li>
-                        <strong>Problémy s konkurencí (concurrency)</strong> - agregát je zamčen jako celek
+                        <strong>Problémy s konkurencí (concurrency)</strong> – agregát je zamčen jako celek
                         při každé změně. Velký agregát znamená větší pravděpodobnost konfliktů při souběžném
                         přístupu.
                     </li>
                     <li>
-                        <strong>Těsné provázání (tight coupling)</strong> - příliš mnoho entit uvnitř jednoho
+                        <strong>Těsné provázání (tight coupling)</strong> – příliš mnoho entit uvnitř jednoho
                         agregátu ztěžuje nezávislý vývoj a testování.
                     </li>
                     <li>
-                        <strong>Narušení Bounded Context hranic</strong> - god agregát bývá příznakem špatně
+                        <strong>Narušení Bounded Context hranic</strong> – god agregát bývá příznakem špatně
                         definovaných hranic kontextů.
                     </li>
                 </ul>

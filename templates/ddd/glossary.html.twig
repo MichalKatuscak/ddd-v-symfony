@@ -103,9 +103,9 @@
                         <p>
                             Část celkové domény, vymezená z pohledu problémového prostoru. Subdomény vznikají
                             analýzou domény a rozdělením problémového prostoru na soudržné oblasti. Rozlišujeme
-                            tři typy: <strong>Klíčová subdoména</strong> (Core Domain) - zdroj konkurenční výhody;
-                            <strong>Podpůrná subdoména</strong> (Supporting Subdomain) - nutná pro fungování, ale
-                            ne zdrojem výhody; <strong>Generická subdoména</strong> (Generic Subdomain) - řešitelná
+                            tři typy: <strong>Klíčová subdoména</strong> (Core Domain) – zdroj konkurenční výhody;
+                            <strong>Podpůrná subdoména</strong> (Supporting Subdomain) – nutná pro fungování, ale
+                            ne zdrojem výhody; <strong>Generická subdoména</strong> (Generic Subdomain) – řešitelná
                             hotovými produkty. Subdomény patří do <em>problémového prostoru</em>; Bounded Contexts
                             jsou jejich protějškem v <em>prostoru řešení</em>. Jeden Bounded Context zpravidla
                             implementuje jednu subdoménu, ale ne vždy v poměru 1:1.
@@ -378,7 +378,7 @@
                 <p>
                     Taktické vzory DDD jsou konkrétní objektově-orientované stavební bloky, s jejichž pomocí
                     se doménový model implementuje uvnitř jednoho Bounded Contextu. Taktický design odpovídá
-                    na otázku <em>„jak“</em> - jak modelovat entitu, jak vynucovat invarianty, jak uchovávat
+                    na otázku <em>„jak“</em> – jak modelovat entitu, jak vynucovat invarianty, jak uchovávat
                     stav, jak vyjádřit doménové operace. Tyto vzory nejsou samoúčelné – mají smysl pouze tehdy,
                     jsou-li zasazeny do správně definovaného strategického rámce.
                 </p>
@@ -395,7 +395,7 @@
                         <p>
                             Doménový objekt s jedinečnou, přetrvávající identitou, která ho odlišuje i v případě,
                             že se změní všechny jeho atributy. Příklad: uživatel identifikovaný hodnotou
-                            <code>UserId</code> - i když změní jméno, e-mail i adresu, zůstává stejnou entitou.
+                            <code>UserId</code> – i když změní jméno, e-mail i adresu, zůstává stejnou entitou.
                             Dvě entity se stejnými daty, ale odlišnými identifikátory, jsou různé entity.
                             Rovnost entit je určena identitou, nikoli stavem. Na rozdíl od Hodnotového objektu
                             musí entita mít explicitní identifikátor, ideálně jako silně typovaný Value Object.
@@ -579,10 +579,10 @@
                             whitepaperu.
                         </p>
                         <p>
-                            Specifikace má tři hlavní způsoby použití: <strong>validace</strong> - ověření,
+                            Specifikace má tři hlavní způsoby použití: <strong>validace</strong> – ověření,
                             zda objekt splňuje obchodní pravidlo (splňuje objednávka podmínky k potvrzení?);
-                            <strong>selekce (dotazování)</strong> - výběr objektů z kolekce podle kritéria
-                            (vyber zákazníky splňující kritéria věrnostního programu); a <strong>konstrukce</strong> -
+                            <strong>selekce (dotazování)</strong> – výběr objektů z kolekce podle kritéria
+                            (vyber zákazníky splňující kritéria věrnostního programu); a <strong>konstrukce</strong> –
                             specifikace požadavků na nově vytvářený objekt (smí být produkt přidán do košíku?).
                             Centralizují pravidla, která by jinak byla rozptýlena po celé doméně, a umožňují
                             jejich testování v izolaci.
@@ -783,7 +783,7 @@
                     <dd>
                         <p>
                             Princip Bertranda Meyera: metoda je buď Command (mění stav, vrací void), nebo Query
-                            (vrací data, nemá žádné vedlejší efekty) - nikdy obojí. Porušení CQS vede ke kódu,
+                            (vrací data, nemá žádné vedlejší efekty) – nikdy obojí. Porušení CQS vede ke kódu,
                             který je obtížně testovatelný a jehož chování je nepředvídatelné při vícenásobném
                             volání. CQRS aplikuje tento princip na architektonické úrovni – celé modely jsou
                             odděleny, nejen metody. CQRS na CQS přirozeně navazuje, ale není to striktní
@@ -887,9 +887,9 @@
                             „Process Manager“ je alternativní název z CQRS komunity.
                         </p>
                         <p>
-                            Rozlišujeme dva přístupy: <strong>choreografie</strong> - ságy řízené výhradně
+                            Rozlišujeme dva přístupy: <strong>choreografie</strong> – ságy řízené výhradně
                             doménovými událostmi bez centrálního koordinátora; každý účastník reaguje na události
-                            ostatních a publikuje vlastní. <strong>Orchestrace</strong> - centrální správce procesů
+                            ostatních a publikuje vlastní. <strong>Orchestrace</strong> – centrální správce procesů
                             (Process Manager) řídí průběh ságy, přijímá události, rozhoduje o dalším kroku
                             a vydává příkazy. Choreografie je jednodušší pro krátké procesy; orchestrace je
                             vhodnější pro komplexní procesy s mnoha kroky a podmínkami.
@@ -1057,7 +1057,7 @@
                             (funkce přijímající <code>int orderId</code> a <code>int userId</code> může
                             přijmout argumenty v nesprávném pořadí bez chyby překladače). Lékem je zavedení
                             hodnotových objektů: <code>OrderId</code>, <code>UserId</code>, <code>Email</code>,
-                            <code>Money</code> - typy nesoucí validaci a sémantiku.
+                            <code>Money</code> – typy nesoucí validaci a sémantiku.
                         </p>
                         <p class="term-source">Zdroj: Martin Fowler et al., <em>Refactoring</em> (1999), kap. 3 (code smell); Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5</p>
                         <p class="term-related">Viz také: <a href="#term-hodnotovy-objekt">Hodnotový objekt</a>, <a href="#term-anemicky-model">Anémický model</a></p>
@@ -1131,7 +1131,7 @@
                     <dd>
                         <p>
                             Obecný termín pro jakýkoliv objekt, který v testu nahrazuje reálnou závislost.
-                            Pochází z filmového světa - „stunt double“ je herec, který zastupuje hvězdu
+                            Pochází z filmového světa – „stunt double“ je herec, který zastupuje hvězdu
                             v nebezpečných scénách. Taxonomie dle Gerarda Meszarose (<em>xUnit Test Patterns</em>,
                             2007): Dummy, Stub, Fake, Mock, Spy. Každý typ má jiné vlastnosti a jiný účel.
                             Používání správného typu testovacího dvojníku je podstatné pro testovatelný
@@ -1188,7 +1188,7 @@
                     <dd>
                         <p>
                             Fungující, avšak zjednodušená implementace rozhraní. Příklad:
-                            <code>InMemoryUserRepository</code> - plně funkční, ukládá data do pole
+                            <code>InMemoryUserRepository</code> – plně funkční, ukládá data do pole
                             v paměti, nevyžaduje databázi. Fake je preferovaný testovací dvojník pro
                             repozitáře v DDD: na rozdíl od Mocku neváže testy na implementační detaily;
                             na rozdíl od Stubů skutečně funguje a odhalí chyby v doménové logice, která
