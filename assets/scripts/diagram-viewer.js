@@ -241,6 +241,22 @@ class DiagramViewer {
     // Po umístění do DOM má stage nenulové rozměry — fit:
     this.modalCtrl.fitToViewport();
 
+    // Wheel zoom kolem pozice kurzoru (jen v modalu, ne v inline)
+    stage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? STEP : 1 / STEP;
+      const newScale = clamp(
+        this.modalCtrl.scale * factor,
+        this.modalCtrl.minScale,
+        this.modalCtrl.maxScale
+      );
+      if (newScale === this.modalCtrl.scale) return;
+      const stageRect = stage.getBoundingClientRect();
+      const cx = e.clientX - stageRect.left;
+      const cy = e.clientY - stageRect.top;
+      this.modalCtrl._zoomAt(cx, cy, newScale);
+    }, { passive: false });
+
     // Close handlers
     closeBtn.addEventListener('click', () => this.closeFullscreen());
     modal.addEventListener('click', (e) => {
