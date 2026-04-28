@@ -1,4 +1,7 @@
-{# args: chapter_number, category, title, deck, reading_time (min), difficulty (1-4), last_updated, author #}
+{# args: chapter_number, category, title, deck, reading_time (min), difficulty (1-4),
+        published (ISO datum nebo block content), last_updated (ISO datum), author #}
+{%- set _has_pub = published is defined and published and (published|trim) -%}
+{%- set _has_mod = last_updated is defined and last_updated and (last_updated|trim) -%}
 <header class="art-head">
     <div class="art-crumb">
         {% if chapter_number is defined and chapter_number %}<span>Kapitola {{ chapter_number }}</span>{% endif %}
@@ -14,7 +17,7 @@
         <p class="art-deck">{{ deck|raw }}</p>
     {% endif %}
 
-    {% if reading_time is defined or difficulty is defined or last_updated is defined %}
+    {% if reading_time is defined or difficulty is defined or _has_pub or _has_mod %}
     <div class="art-meta">
         <div class="art-meta-row">
             <span class="art-meta-k">Autor</span>
@@ -38,10 +41,22 @@
             </span>
         </div>
         {% endif %}
-        {% if last_updated is defined and last_updated %}
+        {% if _has_pub or _has_mod %}
         <div class="art-meta-row">
-            <span class="art-meta-k">Aktualizace</span>
-            <span class="art-meta-v">{{ last_updated|date("j. n. Y") }}</span>
+            <span class="art-meta-k">
+                {%- if _has_pub and _has_mod -%}
+                    Publikováno · Aktualizováno
+                {%- elseif _has_pub -%}
+                    Publikováno
+                {%- else -%}
+                    Aktualizace
+                {%- endif -%}
+            </span>
+            <span class="art-meta-v">
+                {%- if _has_pub %}<time datetime="{{ published|trim }}">{{ published|trim|date("j. n. Y") }}</time>{% endif -%}
+                {%- if _has_pub and _has_mod %} · {% endif -%}
+                {%- if _has_mod %}<time datetime="{{ last_updated|trim }}">{{ last_updated|trim|date("j. n. Y") }}</time>{% endif -%}
+            </span>
         </div>
         {% endif %}
     </div>

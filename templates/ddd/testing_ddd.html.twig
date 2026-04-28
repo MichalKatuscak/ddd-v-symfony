@@ -54,7 +54,8 @@
         deck: 'Akademický průvodce testováním Domain-Driven Design kódu v Symfony. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac.',
         reading_time: 18,
         difficulty: 3,
-        last_updated: '2026-04-22'|date,
+        published: block('article_published_time'),
+        last_updated: block('article_modified_time'),
         author: 'M. Katuščák'
     } %}
 

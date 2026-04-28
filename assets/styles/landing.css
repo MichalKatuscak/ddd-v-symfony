@@ -51,15 +51,7 @@
   text-wrap: pretty;
 }
 .land-deck em { color: var(--accent); font-style: normal; font-weight: 500; }
-.land-deck code, .land-deck .ic {
-  font-family: var(--font-mono);
-  background: var(--bg-2);
-  border: 1px solid var(--stroke);
-  border-radius: var(--r-1);
-  padding: 1px 5px;
-  font-size: 0.88em;
-  color: var(--fg);
-}
+/* Inline code v .land-deck dědí z .ic, .art-body code, .faq-answer code, .land-deck code v article.css */
 
 .land-author {
   display: flex; align-items: center; gap: var(--s-3);

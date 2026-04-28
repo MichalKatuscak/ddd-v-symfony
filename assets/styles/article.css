@@ -182,7 +182,18 @@
   margin: var(--s-5) 0;
   border: 1px solid var(--stroke);
   border-radius: var(--r-2);
-  background: var(--bg-1);
+  background-color: var(--bg-1);
+  /* Scroll-shadow: solid covers (local) přes shadow gradienty (scroll) — shadow je
+     vidět jen když je obsah scrollovatelný v dané ose. */
+  background-image:
+    linear-gradient(to right, var(--bg-1), var(--bg-1)),
+    linear-gradient(to right, var(--bg-1), var(--bg-1)),
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-repeat: no-repeat;
+  background-size: 24px 100%, 24px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
   scrollbar-color: var(--accent-dim) transparent;
 }
 .art-body .table-responsive::-webkit-scrollbar { height: 6px; }
@@ -266,8 +277,11 @@ section > h4:first-child { margin-top: 0; }
   margin: var(--s-5) 0 var(--s-2);
 }
 
-/* Inline code */
-.ic, .art-body code {
+/* Inline code (jediná deklarace pro article body, FAQ, landing deck a obecný .ic) */
+.ic,
+.art-body code,
+.faq-answer code, .faq-answer .ic,
+.land-deck code, .land-deck .ic {
   font-family: var(--font-mono);
   font-size: 0.88em;
   letter-spacing: var(--tracking-mono);
@@ -336,10 +350,11 @@ section > h4:first-child { margin-top: 0; }
 .callout-body a {
   color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: var(--accent-dim);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
-.callout-body a:hover { text-decoration-color: var(--accent); }
+.callout-body a:hover { text-decoration-thickness: 2px; }
 .callout-body strong { color: var(--fg); font-weight: 600; }
 
 /* ── Bio card (about page) ─────────────────────────────────────────────── */
@@ -390,10 +405,11 @@ section > h4:first-child { margin-top: 0; }
 .bio-links a {
   color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: var(--accent-dim);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
-.bio-links a:hover { text-decoration-color: var(--accent); }
+.bio-links a:hover { text-decoration-thickness: 2px; }
 @media (max-width: 540px) {
   .bio-card {
     grid-template-columns: 1fr;
@@ -404,6 +420,10 @@ section > h4:first-child { margin-top: 0; }
 }
 
 /* ── Glossary (glossary page) ──────────────────────────────────────────── */
+/* Pozn.: `.note` je **decentní** úvodní box používaný uvnitř glosáře pro popis sekcí
+   („Co jsou strategické vzory?" apod.). Záměrně bez rail/glyfu, aby v dlouhém seznamu
+   hesel nepůsobil jako primární obsah. Pojmenovaný callout (s glyfem a labelem)
+   je v partialu `_partials/callout.html.twig` typ `note`. Obojí ponecháno záměrně. */
 .art-body .note {
   margin: var(--s-5) 0;
   padding: var(--s-4) var(--s-5);
@@ -493,10 +513,11 @@ section > h4:first-child { margin-top: 0; }
 .glossary-entry dd a {
   color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: var(--accent-dim);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
-.glossary-entry dd a:hover { text-decoration-color: var(--accent); }
+.glossary-entry dd a:hover { text-decoration-thickness: 2px; }
 
 /* ── Resource list (resources page) ────────────────────────────────────── */
 .res-list {
@@ -657,13 +678,23 @@ section > h4:first-child { margin-top: 0; }
 .code-body {
   margin: 0;
   padding: var(--s-3) 0;
-  background: var(--bg-2);
+  background-color: var(--bg-2);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--t-sm);
   line-height: var(--lh-code);
   color: var(--fg);
   letter-spacing: var(--tracking-mono);
   overflow-x: auto;
+  /* Scroll-shadow: stejný princip jako .table-responsive */
+  background-image:
+    linear-gradient(to right, var(--bg-2), var(--bg-2)),
+    linear-gradient(to right, var(--bg-2), var(--bg-2)),
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-repeat: no-repeat;
+  background-size: 24px 100%, 24px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
 }
 .code-body code {
   background: transparent;
@@ -821,20 +852,11 @@ section > h4:first-child { margin-top: 0; }
 .faq-answer a {
   color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: var(--accent-dim);
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
-.faq-answer a:hover { text-decoration-color: var(--accent); }
-.faq-answer code, .faq-answer .ic {
-  font-family: var(--font-mono);
-  font-size: 0.88em;
-  letter-spacing: var(--tracking-mono);
-  background: var(--bg-2);
-  border: 1px solid var(--stroke);
-  border-radius: var(--r-1);
-  padding: 1px 5px;
-  color: var(--fg);
-}
+.faq-answer a:hover { text-decoration-thickness: 2px; }
 
 /* ── Responsive (mobile) ───────────────────────────────────────────────── */
 @media (max-width: 900px) {
