@@ -894,16 +894,20 @@ section > h4:first-child { margin-top: 0; }
   inset: 0;
   z-index: 1000;
   background: rgba(0, 0, 0, 0.85);
-  display: flex;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 .diagram-modal--open {
   opacity: 1;
 }
+/* Stage je absolutně pozicované přes modal — flex layout způsoboval
+   bug: flex item má default `min-width: auto` = intrinsic content size,
+   takže stage rostl na šířku SVG (např. 1168 px) a přerůstal viewport,
+   `fitToViewport()` pak viděl stage rect = SVG rect → fitScale = 1.0,
+   diagram zůstal v plné velikosti vlevo, viditelný jen jeho levý sloupec. */
 .diagram-modal-stage {
-  flex: 1;
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   touch-action: none;
   cursor: grab;
