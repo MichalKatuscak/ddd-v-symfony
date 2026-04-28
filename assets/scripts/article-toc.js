@@ -1,15 +1,21 @@
 // ──────────────────────────────────────────────────────────────────────────
-// Article TOC — generuje seznam z <h2> v .art-body, scroll-spy aktivního
+// Article TOC — generuje seznam z <h2> v .art-body, scroll-spy aktivního.
+// Plní paralelně všechny [data-toc-list] (desktop sidebar + mobile <details>).
 // ──────────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', function () {
-  const tocList = document.querySelector('[data-toc-list]');
+  const tocLists = Array.from(document.querySelectorAll('[data-toc-list]'));
   const body = document.querySelector('.art-body');
-  if (!tocList || !body) return;
-  if (tocList.children.length > 0) return;
+  if (tocLists.length === 0 || !body) return;
+  if (tocLists[0].children.length > 0) return;
 
   const headings = Array.from(body.querySelectorAll('h2'));
-  if (headings.length === 0) return;
+  if (headings.length < 2) {
+    document.querySelectorAll('[data-toc-target], [data-toc-mobile]').forEach(function (el) {
+      el.style.display = 'none';
+    });
+    return;
+  }
 
   // Slugify Czech: lowercase, ASCII fold approx, remove non-alphanum
   function slugify(text) {
@@ -36,32 +42,51 @@ document.addEventListener('DOMContentLoaded', function () {
   const chapterEl = document.querySelector('[data-chapter-number]');
   const chapterNum = chapterEl ? chapterEl.dataset.chapterNumber : '';
 
-  const items = headings.map(function (h, i) {
+  const itemsData = headings.map(function (h, i) {
     if (!h.id) h.id = uniqueSlug(h.textContent || ('section-' + (i + 1)));
     const num = chapterNum
       ? chapterNum + '.' + String(i + 1).padStart(2, '0')
       : String(i + 1).padStart(2, '0');
 
-    // Pokud h2 obsahuje <span class="h-num">, použij text bez něj
     const numSpan = h.querySelector('.h-num');
     const titleText = numSpan
       ? h.textContent.replace(numSpan.textContent, '').trim()
       : h.textContent.trim();
 
-    const li = document.createElement('li');
-    li.dataset.targetId = h.id;
-    li.innerHTML =
-      '<span class="toc-num">' + num + '</span>' +
-      '<a href="#' + h.id + '"><span class="toc-text">' + titleText + '</span></a>';
-    return li;
+    return { id: h.id, num: num, title: titleText };
   });
 
-  items.forEach(function (li) { tocList.appendChild(li); });
+  function buildLi(data) {
+    const li = document.createElement('li');
+    li.dataset.targetId = data.id;
+    li.innerHTML =
+      '<span class="toc-num">' + data.num + '</span>' +
+      '<a href="#' + data.id + '"><span class="toc-text">' + data.title + '</span></a>';
+    return li;
+  }
+
+  tocLists.forEach(function (list) {
+    itemsData.forEach(function (data) { list.appendChild(buildLi(data)); });
+  });
+
+  // Section count v summary mobilního TOC (s českou deklinací)
+  const countEls = document.querySelectorAll('[data-toc-count]');
+  if (countEls.length > 0) {
+    const n = itemsData.length;
+    const word = n === 1 ? 'sekce' : (n >= 2 && n <= 4 ? 'sekce' : 'sekcí');
+    countEls.forEach(function (el) { el.textContent = n + ' ' + word; });
+  }
+
+  // Auto-close mobile <details> po kliknutí na položku
+  const mobileDetails = document.querySelector('[data-toc-mobile]');
+  if (mobileDetails) {
+    mobileDetails.addEventListener('click', function (e) {
+      const a = e.target.closest('a[href^="#"]');
+      if (a && mobileDetails.contains(a)) mobileDetails.open = false;
+    });
+  }
 
   // Scroll-spy přes IntersectionObserver — vybírá topmost h2 podle bounding rect
-  const linkByHash = new Map();
-  items.forEach(function (li) { linkByHash.set(li.dataset.targetId, li); });
-
   function updateCurrent() {
     const threshold = 80;
     let current = null;
@@ -73,16 +98,14 @@ document.addEventListener('DOMContentLoaded', function () {
         break;
       }
     }
-    // Pokud žádný heading ještě nepřekročil práh, použij první (po scrollu zhora)
     if (!current && headings.length > 0) {
       const firstTop = headings[0].getBoundingClientRect().top;
       if (firstTop < window.innerHeight * 0.4) current = headings[0];
     }
-    items.forEach(function (x) { x.classList.remove('toc-current'); });
-    if (current) {
-      const li = linkByHash.get(current.id);
-      if (li) li.classList.add('toc-current');
-    }
+    const currentId = current ? current.id : null;
+    document.querySelectorAll('[data-toc-list] > li').forEach(function (li) {
+      li.classList.toggle('toc-current', li.dataset.targetId === currentId);
+    });
   }
 
   const observer = new IntersectionObserver(function () {
