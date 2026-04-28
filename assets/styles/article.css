@@ -797,6 +797,17 @@ section > h4:first-child { margin-top: 0; }
   border-radius: var(--r-1);
   cursor: pointer;
   min-width: 1.75rem;
+  min-height: 1.75rem;
+}
+
+/* Tap targets must be ≥44px on touch devices (WCAG 2.5.5) */
+@media (pointer: coarse) {
+  .mv-btn {
+    font-size: var(--t-sm);
+    padding: var(--s-2) var(--s-3);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
 }
 .mv-btn:hover:not(:disabled) {
   color: var(--accent);
@@ -817,10 +828,17 @@ section > h4:first-child { margin-top: 0; }
 }
 
 /* Stage (viewport pro SVG/img) */
+/* touch-action: pan-y default = page vertical scroll passes through diagram
+   on mobile when content fits in viewport. When .is-zoomed (content larger
+   than stage), we take over all gestures. Modal stage always overrides to
+   touch-action: none — its overlay covers the page so scroll is meaningless. */
 .diagram-stage {
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-y;
   position: relative;
+}
+.diagram-stage.is-zoomed {
+  touch-action: none;
 }
 .diagram-stage > svg,
 .diagram-stage > img {
@@ -833,10 +851,11 @@ section > h4:first-child { margin-top: 0; }
   transform-origin: 0 0;
   transition: transform 0.15s ease;
 }
-.diagram-js .diagram-stage {
+/* Cursor only signals draggability when there's actually something to pan */
+.diagram-js .diagram-stage.is-zoomed {
   cursor: grab;
 }
-.diagram-js .diagram-stage.is-dragging {
+.diagram-js .diagram-stage.is-zoomed.is-dragging {
   cursor: grabbing;
   user-select: none;
 }
@@ -900,27 +919,41 @@ section > h4:first-child { margin-top: 0; }
 }
 .diagram-modal-toolbar {
   position: absolute;
-  top: var(--s-3);
-  right: calc(var(--s-3) + 3rem); /* místo pro × tlačítko */
+  top: max(var(--s-3), env(safe-area-inset-top));
+  right: calc(max(var(--s-3), env(safe-area-inset-right)) + 3.5rem);
   display: flex;
-  gap: var(--s-1);
+  gap: var(--s-2);
   z-index: 1;
+}
+
+@media (pointer: coarse) {
+  .diagram-modal-toolbar {
+    right: calc(max(var(--s-3), env(safe-area-inset-right)) + 4rem);
+  }
 }
 .diagram-modal-close {
   position: absolute;
-  top: var(--s-3);
-  right: var(--s-3);
+  top: max(var(--s-3), env(safe-area-inset-top));
+  right: max(var(--s-3), env(safe-area-inset-right));
   z-index: 1;
   font-family: var(--font-mono);
-  font-size: var(--t-md);
+  font-size: var(--t-lg);
   line-height: 1;
-  width: 2.5rem;
-  height: 2.5rem;
-  background: transparent;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: rgba(0, 0, 0, 0.4);
   color: var(--fg);
   border: 1px solid var(--stroke);
   border-radius: var(--r-1);
   cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .diagram-modal-close {
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: var(--t-xl);
+  }
 }
 .diagram-modal-close:hover,
 .diagram-modal-close:focus-visible {

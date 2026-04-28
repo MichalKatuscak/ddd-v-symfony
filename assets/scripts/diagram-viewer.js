@@ -152,6 +152,7 @@ class StageController {
   _applyTransform() {
     this.content.style.transform =
       `translate(${this.tx}px, ${this.ty}px) scale(${this.scale})`;
+    this.stage.classList.toggle('is-zoomed', this._isPannable());
     this._updateButtonStates();
   }
 
@@ -286,13 +287,17 @@ class DiagramViewer {
       minScale: MODAL_MIN_SCALE,
       maxScale: MODAL_MAX_SCALE,
     });
-    // Defer fit to next animation frame — mobile Chrome/Safari sometimes
-    // doesn't synchronously layout fixed+flex children, so getBoundingClientRect
-    // returns near-zero before the next paint. rAF ensures the stage has its
-    // final size when we compute the fit.
-    requestAnimationFrame(() => {
+    // ResizeObserver fires once the stage has actual dimensions — more
+    // robust than requestAnimationFrame on slow mobile devices where
+    // first paint may not have laid out fixed+flex children yet.
+    // Keeps observing so subsequent resizes (rotation, URL bar collapse)
+    // also re-fit. We replace the manual window resize listener.
+    this._modalResizeObs = new ResizeObserver((entries) => {
+      const rect = entries[0] && entries[0].contentRect;
+      if (!rect || rect.width === 0 || rect.height === 0) return;
       if (this.modalCtrl) this.modalCtrl.fitToViewport();
     });
+    this._modalResizeObs.observe(stage);
 
     // Wheel zoom kolem pozice kurzoru (jen v modalu, ne v inline)
     this._wheelHandler = (e) => {
@@ -310,10 +315,6 @@ class DiagramViewer {
       this.modalCtrl._zoomAt(cx, cy, newScale);
     };
     stage.addEventListener('wheel', this._wheelHandler, { passive: false });
-
-    // Resize — přizpůsobit modal při změně rozměrů okna (rotace, resize)
-    this._resizeHandler = () => this.modalCtrl && this.modalCtrl.fitToViewport();
-    window.addEventListener('resize', this._resizeHandler);
 
     // Focus management — uložit původní fokus, dát na zavírací X
     this._prevActive = document.activeElement;
@@ -356,7 +357,10 @@ class DiagramViewer {
   closeFullscreen() {
     if (!this.modal) return;
     document.removeEventListener('keydown', this._escHandler);
-    window.removeEventListener('resize', this._resizeHandler);
+    if (this._modalResizeObs) {
+      this._modalResizeObs.disconnect();
+      this._modalResizeObs = null;
+    }
     if (this.modalStage) this.modalStage.removeEventListener('wheel', this._wheelHandler);
     document.body.style.overflow = this._prevBodyOverflow || '';
     this.modal.removeEventListener('keydown', this._trapHandler);
@@ -367,7 +371,6 @@ class DiagramViewer {
     this.modalToolbar = null;
     this.modalCtrl = null;
     this._wheelHandler = null;
-    this._resizeHandler = null;
     if (this._prevActive && this._prevActive.focus) {
       this._prevActive.focus();
     } else if (this.btnFs) {
