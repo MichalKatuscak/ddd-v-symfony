@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Context Mapping — 8 vztahů mezi Bounded Contexts | DDD Symfony{% endblock %}
+{% block title %}Context Mapping – 8 vztahů mezi Bounded Contexts | DDD Symfony{% endblock %}
 
 {% block meta_description %}Strategický DDD: Context Map a 8 vztahů mezi Bounded Contexts (Partnership, Customer/Supplier, Conformist, ACL, OHS, PL, Shared Kernel, Separate Ways) s ukázkami v Symfony 8.{% endblock %}
 
@@ -18,7 +18,7 @@
 {
   "@context": "https://schema.org",
   "@type": "TechArticle",
-  "headline": "Context Mapping — 8 vztahů mezi Bounded Contexts",
+  "headline": "Context Mapping – 8 vztahů mezi Bounded Contexts",
   "description": "{{ block('meta_description')|escape('js') }}",
   "keywords": "{{ block('meta_keywords')|escape('js') }}",
   "author": {
@@ -51,7 +51,7 @@
         chapter_number: '04',
         category: 'Strategie',
         title: 'Context Mapping — 8 vztahů mezi Bounded Contexts',
-        deck: 'Bounded Context vám definuje hranici. Context Mapping vám definuje, co se na té hranici děje. Osm pojmenovaných vztahů, které popisují všechny způsoby, jak spolu BC komunikují — od těsné spolupráce po úmyslnou separaci.',
+        deck: 'Bounded Context vám definuje hranici. Context Mapping vám definuje, co se na té hranici děje. Osm pojmenovaných vztahů, které popisují všechny způsoby, jak spolu BC komunikují – od těsné spolupráce po úmyslnou separaci.',
         reading_time: 28,
         difficulty: 3,
         published: block('article_published_time'),
@@ -65,9 +65,9 @@
 
         <p>
             Strategický design v DDD má dvě stránky. <strong>Bounded Context</strong> definuje
-            <em>hranici</em> jednoho modelu — co je uvnitř, co je venku, kde končí jeden
+            <em>hranici</em> jednoho modelu – co je uvnitř, co je venku, kde končí jeden
             Ubiquitous Language a začíná druhý. Detail viz kapitola
-            <a href="{{ path('basic_concepts') }}#bounded-contexts">Základní koncepty — Bounded Contexts</a>.
+            <a href="{{ path('basic_concepts') }}#bounded-contexts">Základní koncepty – Bounded Contexts</a>.
             Bounded Context však sám o sobě neřeší jednu klíčovou otázku: <strong>co se děje na té
             hranici</strong>, když dva kontexty potřebují spolupracovat.
         </p>
@@ -82,7 +82,7 @@
             rozvedl o praktickou implementaci v moderním stacku
             <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>.
             Tato kapitola pokrývá všech osm pojmenovaných vztahů mezi BC, jejich kompromisy
-            a způsob, jakým se realizují v Symfony 8 — typicky kombinací
+            a způsob, jakým se realizují v Symfony 8 – typicky kombinací
             <a href="{{ path('cqrs') }}">CQRS s Symfony Messenger</a>, REST API a HTTP klientů.
         </p>
 
@@ -108,10 +108,10 @@
             </p>
 
             <ul>
-                <li><strong>Vizuální složka</strong> — diagram s krabičkami (Bounded Contexts) a
+                <li><strong>Vizuální složka</strong> – diagram s krabičkami (Bounded Contexts) a
                     šipkami (vztahy) opatřenými stereotypy (<code>&lt;&lt;ACL&gt;&gt;</code>,
                     <code>&lt;&lt;OHS&gt;&gt;</code>, <code>U/D</code> pro upstream/downstream).</li>
-                <li><strong>Textová složka</strong> — krátký dokument popisující každý vztah:
+                <li><strong>Textová složka</strong> – krátký dokument popisující každý vztah:
                     odpovědné týmy, kontrakt, frekvenci změn, eskalační kontakt. Tato část je
                     důležitější než obrázek; obrázek se mění rychleji než se aktualizuje.</li>
             </ul>
@@ -136,13 +136,13 @@
             {% set _callout_body %}
                 <h3 id="when-to-draw-heading">Kdy Context Map nakreslit</h3>
                 <ul>
-                    <li><strong>Při zahájení projektu</strong> jako součást discovery fáze — typicky
+                    <li><strong>Při zahájení projektu</strong> jako součást discovery fáze – typicky
                         výstup <a href="{{ path('event_storming') }}">Event Stormingu</a>.</li>
-                    <li><strong>Před přidáním nového Bounded Contextu</strong> — abychom věděli, s
+                    <li><strong>Před přidáním nového Bounded Contextu</strong> – abychom věděli, s
                         jakým existujícím vztahem se nový BC zapojí.</li>
-                    <li><strong>Před migrací nebo náhradou legacy systému</strong> — Context Map
+                    <li><strong>Před migrací nebo náhradou legacy systému</strong> – Context Map
                         ukáže, kolik downstream BC bude potřebovat ACL upgrade.</li>
-                    <li><strong>Při onboardingu nových inženýrů</strong> — mapa řekne víc o
+                    <li><strong>Při onboardingu nových inženýrů</strong> – mapa řekne víc o
                         architektuře za 10 minut než README za hodinu.</li>
                 </ul>
             {% endset %}
@@ -153,18 +153,26 @@
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           04.02 Osm typů vztahů — přehled
+           04.02 Osm typů vztahů – přehled
            ─────────────────────────────────────────────────────────── #}
         <section id="osm-typu-prehled" aria-labelledby="osm-typu-prehled-heading">
-            <h2 id="osm-typu-prehled-heading" class="h-section"><span class="h-num">04.02</span> Osm typů vztahů — přehled</h2>
+            <h2 id="osm-typu-prehled-heading" class="h-section"><span class="h-num">04.02</span> Osm typů vztahů – přehled</h2>
 
             <p>
                 Eric Evans katalogizoval <strong>osm pojmenovaných vztahů</strong>, kterými mohou
                 Bounded Contexts spolu vyjít. Vaughn Vernon je v IDDD (2013) doplnil o nuance a
                 kombinace, ale jádro pojmenování zůstalo. Tato osmičlenná taxonomie je užitečná
-                ze dvou důvodů: <strong>(1)</strong> dává nám sdílený slovník („tady je to
+                ze dvou důvodů: <strong>(1)</strong> dává nám sdílený slovník („zde je to
                 Customer/Supplier, ne Conformist“) a <strong>(2)</strong> zviditelňuje cenu
-                vztahu — některé jsou dražší než jiné a volba mezi nimi je strategická.
+                vztahu – některé jsou dražší než jiné a volba mezi nimi je strategická.
+            </p>
+            <p>
+                <em>Pozn.:</em> Evansova kapitola 14 v <em>Domain-Driven Design</em> obsahuje
+                ještě devátý vzor – <strong>Big Ball of Mud</strong>. V této kapitole je probírán
+                samostatně v sekci <a href="#big-ball-of-mud">04.12 Anti-vzor: Big Ball of Mud</a>,
+                protože nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu,
+                kterému se aktivně bráníme. Osm vztahů níže jsou tedy <em>navržitelné</em> volby;
+                Big Ball of Mud je co se stane, když žádnou volbu neuděláte.
             </p>
 
             <div class="table-responsive">
@@ -240,7 +248,7 @@
             </div>
 
             <p>
-                Tabulka ukazuje, že vztahy nejsou nezávislé varianty — některé se kombinují.
+                Tabulka ukazuje, že vztahy nejsou nezávislé varianty – některé se kombinují.
                 Customer/Supplier typicky <em>používá</em> Open Host Service jako kanál a
                 Published Language jako formát zpráv. Anti-Corruption Layer je technika, kterou
                 downstream <em>aplikuje</em>, když je v Customer/Supplier nebo Conformist pozici
@@ -274,7 +282,7 @@
                 <strong>Partnership</strong> je symetrický vztah mezi dvěma Bounded Contexts,
                 jejichž týmy <em>společně uspějí, nebo společně padnou</em>. Sdílí business cíl,
                 koordinují plánování a typicky se nasazují společným release procesem. Není to
-                „náhodná spolupráce“ — Partnership je <strong>vědomé strategické rozhodnutí</strong>,
+                „náhodná spolupráce“ – Partnership je <strong>vědomé strategické rozhodnutí</strong>,
                 že integrační náklady (synchronní mítinky, společný roadmap, časté merge konflikty)
                 jsou nižší než cena, kterou by oba týmy zaplatily, kdyby pracovaly nezávisle.
             </p>
@@ -296,8 +304,8 @@
             </p>
 
             <ul>
-                <li>Catalog bez Pricingu je k ničemu — produktovou stránku nelze zobrazit bez ceny.</li>
-                <li>Pricing bez Catalogu je k ničemu — cena bez produktu nedává smysl.</li>
+                <li>Catalog bez Pricingu je k ničemu – produktovou stránku nelze zobrazit bez ceny.</li>
+                <li>Pricing bez Catalogu je k ničemu – cena bez produktu nedává smysl.</li>
             </ul>
 
             <p>
@@ -329,7 +337,7 @@ composer.json        &larr; jeden composer.json pro oba BC
                 V tomto uspořádání mají oba BC <strong>vlastní namespacy</strong>
                 (<code>App\Catalog</code>, <code>App\Pricing</code>) i <strong>vlastní invarianty</strong>,
                 ale sdílí infrastrukturu (DI kontejner, RabbitMQ, databázový server). Komunikace
-                mezi nimi je in-process přes Symfony Messenger sync transport — žádné
+                mezi nimi je in-process přes Symfony Messenger sync transport – žádné
                 serializované JSON přes drát.
             </p>
 
@@ -337,7 +345,7 @@ composer.json        &larr; jeden composer.json pro oba BC
 
             <p>
                 Když se týmy rozhodnou pro Partnership, <strong>aniž by si tu otázku položily</strong>
-                — typicky proto, že „nemáme čas se domluvit, takže to budeme dělat dohromady“ —
+                – typicky proto, že „nemáme čas se domluvit, takže to budeme dělat dohromady“ –
                 vede to přímo k <em>Big Ball of Mud</em>. Agregáty jednoho BC začnou číst tabulky
                 druhého BC „protože je to rychlejší“, doménové eventy se přestanou používat ve
                 prospěch sdílených service tříd, a po roce nikdo nedokáže říct, kde přesně končí
@@ -347,7 +355,7 @@ composer.json        &larr; jeden composer.json pro oba BC
             {% set _callout_body %}
                 <p>
                     <strong>Partnership = nákladná spolupráce.</strong> Použít jen tehdy, když oba
-                    týmy explicitně podepíší „padáme nebo letíme spolu“. Pokud váháte — pravděpodobně
+                    týmy explicitně podepíší „padáme nebo letíme spolu“. Pokud váháte – pravděpodobně
                     chcete <a href="#customer-supplier">Customer/Supplier</a> nebo
                     <a href="#shared-kernel">Shared Kernel</a>. Partnership má tendenci se rozpadnout,
                     jakmile týmy začnou mít odlišné priority, a v tu chvíli vás čeká bolestivá
@@ -361,10 +369,10 @@ composer.json        &larr; jeden composer.json pro oba BC
 
             <h3>Indikátory, že Partnership přestává fungovat</h3>
             <ul>
-                <li>Týmy začínají odložit své vlastní featury, aby čekaly na druhý tým — celková rychlost klesá.</li>
+                <li>Týmy začínají odložit své vlastní featury, aby čekaly na druhý tým – celková rychlost klesá.</li>
                 <li>Retrospektivy se opakovaně točí kolem stejných „mezi-týmových“ napětí.</li>
                 <li>Release proces se prodlužuje, protože koordinace dvou roadmap je příliš nákladná.</li>
-                <li>Jeden tým získá silně odlišnou prioritu (např. Catalog SEO sprint, zatímco Pricing dělá compliance) — společné nasazení přestává mít smysl.</li>
+                <li>Jeden tým získá silně odlišnou prioritu (např. Catalog SEO sprint, zatímco Pricing dělá compliance) – společné nasazení přestává mít smysl.</li>
             </ul>
             <p>
                 V tu chvíli je čas <em>Partnership rozpustit</em> a přejít na
@@ -455,10 +463,10 @@ final readonly class Money
 </code></pre>
 
             <p>
-                <code>Money</code> je VO bez identity — ideální kandidát na SK. Nemá závislosti
+                <code>Money</code> je VO bez identity – ideální kandidát na SK. Nemá závislosti
                 na žádné infrastruktuře, je <code>readonly</code>, neměnný, plně testovatelný.
                 Catalog ho používá pro vyjádření základní ceny, Pricing pro vyjádření slevy,
-                Ordering pro celkovou částku objednávky — a <strong>ve všech BC znamená přesně totéž</strong>.
+                Ordering pro celkovou částku objednávky – a <strong>ve všech BC znamená přesně totéž</strong>.
             </p>
 
             <h3>Symfony detail: composer path repository</h3>
@@ -491,7 +499,7 @@ final readonly class Money
 
             <p>
                 Nejčastější selhání Shared Kernelu je <strong>jeho růst</strong>. Tým si řekne:
-                „máme tu <code>Money</code>, přidáme <code>Address</code> — vždyť adresa je taky
+                „máme tu <code>Money</code>, přidáme <code>Address</code> – vždyť adresa je taky
                 všude stejná“. Pak <code>PhoneNumber</code>, pak <code>Customer</code>, pak
                 <code>Order</code>… a najednou má SK 200 tříd a každá změna trvá týdny, protože
                 vyžaduje souhlas tří týmů. V tu chvíli SK přestal být kernel a stal se
@@ -509,7 +517,7 @@ final readonly class Money
             {% set _callout_body %}
                 <p>
                     <strong>Shared Kernel vs. sdílená utility knihovna.</strong> Sdílená logger
-                    knihovna nebo HTTP klient <em>nejsou</em> Shared Kernel — jsou to běžné
+                    knihovna nebo HTTP klient <em>nejsou</em> Shared Kernel – jsou to běžné
                     technické závislosti. Shared Kernel obsahuje výhradně <strong>doménový
                     model</strong>: VO, doménové eventy, doménové výjimky. Pokud váš „SK“
                     obsahuje <code>HttpClient</code>, <code>Cache</code> nebo
@@ -558,7 +566,7 @@ final readonly class Money
             <p>
                 Když Ordering tým řekne „potřebujeme v product DTO i <code>availableStock</code>“,
                 Catalog tým <strong>nedělá to okamžitě</strong>. Posoudí, zda to dává smysl pro
-                Catalog model (ano — <em>Stock</em> patří do Catalogu), naplánuje to do následujícího
+                Catalog model (ano – <em>Stock</em> patří do Catalogu), naplánuje to do následujícího
                 sprintu a dodá. Pokud by to nedávalo smysl pro Catalog model, navrhl by alternativu
                 (např. samostatný <em>Inventory BC</em> s vlastním API).
             </p>
@@ -645,8 +653,8 @@ final class ProductPriceChangedHandler
 
             <ul>
                 <li><strong>Pravidelný cross-team grooming</strong> (typicky 1× za sprint), kde downstream prezentuje své požadavky.</li>
-                <li><strong>Dokumentovaný roadmap upstreamu</strong> — downstream musí vidět, co se chystá a kdy očekávat breaking changes.</li>
-                <li><strong>Eskalační kanál</strong> — kdo rozhoduje, když se týmy neshodnou? Typicky produktový manažer nebo architekt.</li>
+                <li><strong>Dokumentovaný roadmap upstreamu</strong> – downstream musí vidět, co se chystá a kdy očekávat breaking changes.</li>
+                <li><strong>Eskalační kanál</strong> – kdo rozhoduje, když se týmy neshodnou? Typicky produktový manažer nebo architekt.</li>
             </ul>
 
             <p>
@@ -664,7 +672,7 @@ final class ProductPriceChangedHandler
             <p>
                 <strong>Conformist</strong> je asymetrický vztah, ve kterém downstream
                 <em>vědomě rezignuje</em> na vlastní model a přijímá upstream model 1:1.
-                Žádný překlad, žádná validace, žádné mapování. Conformist není ostuda — je to
+                Žádný překlad, žádná validace, žádné mapování. Conformist není ostuda – je to
                 <strong>strategické rozhodnutí</strong>, že <em>boj o vlastní model nestojí
                 za to</em>.
             </p>
@@ -681,9 +689,9 @@ final class ProductPriceChangedHandler
             <h3>Kdy Conformist zvolit</h3>
 
             <ul>
-                <li><strong>Externí dodavatel</strong> — používáte SaaS (Stripe, Shopify, Auth0)
+                <li><strong>Externí dodavatel</strong> – používáte SaaS (Stripe, Shopify, Auth0)
                     a nemá smysl bojovat proti jejich datovým modelům.</li>
-                <li><strong>Regulátor</strong> — banka přijímá ISO 20022 zprávy. Boj proti formátu
+                <li><strong>Regulátor</strong> – banka přijímá ISO 20022 zprávy. Boj proti formátu
                     by byl boj proti standardu.</li>
                 <li><strong>Reporting nebo dashboard BC</strong>, který data jen přebírá a zobrazuje.</li>
                 <li><strong>Krátkodobé řešení</strong>, dokud nemá smysl investovat do ACL.</li>
@@ -763,7 +771,7 @@ final class StripePaymentReportRepository
                 <li>Při každé breaking change upstreamu se downstream musí přepsat.</li>
                 <li>Doménová logika downstreamu používá pojmy upstreamu, což zhoršuje srozumitelnost.</li>
                 <li>Pokud se upstream rozhodne odejít (Stripe zavře službu), je downstream rukojmí.</li>
-                <li>Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe — celá business logika je „stripeovaná“).</li>
+                <li>Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá business logika je „stripeovaná“).</li>
             </ul>
 
             {% set _callout_body %}
@@ -784,7 +792,7 @@ final class StripePaymentReportRepository
             <h3>Conformist jako přechodný stav</h3>
 
             <p>
-                Často je Conformist přijatelný <em>dočasně</em> — projekt potřebuje rychle
+                Často je Conformist přijatelný <em>dočasně</em> – projekt potřebuje rychle
                 dodat MVP a integrace s upstreamem je třeba okamžitě. V tu chvíli je rozumné
                 napsat Conformist, ale <strong>vypsat technický dluh do backlogu</strong>:
                 „za 6 měsíců, až budeme vědět, jak Reporting používáme, postavíme ACL“. Bez
@@ -803,7 +811,7 @@ final class StripePaymentReportRepository
                 <strong>Anti-Corruption Layer</strong> (ACL) je izolační vrstva mezi downstream
                 doménovým modelem a cizím (legacy, externím, neupřímným) modelem. Překládá
                 oběma směry, validuje vstupní data a <em>filtruje neplatné stavy</em> ještě
-                předtím, než dorazí do domény. ACL je v praxi nejčastěji používaný vztah —
+                předtím, než dorazí do domény. ACL je v praxi nejčastěji používaný vztah –
                 a nejčastěji špatně implementovaný.
             </p>
 
@@ -829,15 +837,15 @@ final class StripePaymentReportRepository
             <h3>Tři odpovědnosti ACL</h3>
 
             <ol>
-                <li><strong>Schema mapping</strong> — překlad datových struktur. SOAP response,
-                    REST DTO, CSV řádek na doménová VO a entity. Tady řešíme „jak vypadá payload“.</li>
-                <li><strong>Concept translation</strong> — překlad <em>významu</em> dat. Upstream
+                <li><strong>Schema mapping</strong> – překlad datových struktur. SOAP response,
+                    REST DTO, CSV řádek na doménová VO a entity. Zde se řeší „jak vypadá payload“.</li>
+                <li><strong>Concept translation</strong> – překlad <em>významu</em> dat. Upstream
                     používá <code>customerNumber</code> jako int, my používáme <code>CustomerId</code>
                     jako UUID. Upstream má status <code>"PENDING"</code>, my máme enum
-                    <code>OrderState::AwaitingPayment</code>. Tady řešíme „co to znamená“.</li>
-                <li><strong>Anti-corruption</strong> — validace a filtrace. Negativní částky,
-                    chybějící required pole, status mimo známý enum, datum v budoucnosti — všechno
-                    musí ACL odmítnout, <em>než</em> se to dostane do domény. Tady řešíme „je to
+                    <code>OrderState::AwaitingPayment</code>. Zde se řeší „co to znamená“.</li>
+                <li><strong>Anti-corruption</strong> – validace a filtrace. Negativní částky,
+                    chybějící required pole, status mimo známý enum, datum v budoucnosti – všechno
+                    musí ACL odmítnout, <em>než</em> se to dostane do domény. Zde se řeší „je to
                     důvěryhodné“.</li>
             </ol>
 
@@ -903,7 +911,7 @@ final class LegacyBillingTranslator
             <p>
                 Translator je <strong>jediná veřejná metoda</strong>, <code>final</code> třída,
                 bez stavu. Žádný state, žádná cache, žádný side-effect. Vstup je upstream DTO,
-                výstup je doménová událost. Toto je důvod, proč je ACL tak silný — a tak křehký,
+                výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký,
                 když ho implementujete jinak.
             </p>
 
@@ -992,17 +1000,17 @@ final class LegacyBillingTranslatorTest extends TestCase
                 sdílejících state. Jeden upstream koncept = jeden translator. Výstup translátoru
                 je <em>vždy</em> doménový VO/entity/event, nikdy raw DTO. Pokud translátor začíná
                 obsahovat business logiku, je to signál, že máte <em>Application Service</em>
-                schovanou v ACL — vyčleňte ji.
+                schovanou v ACL – vyčleňte ji.
             </p>
 
             <h3>ACL a Strangler Fig pattern</h3>
 
             <p>
-                Anti-Corruption Layer je klíčový stavební prvek <em>Strangler Fig</em> patternu
+                Anti-Corruption Layer je důležitý stavební prvek <em>Strangler Fig</em> patternu
                 pro postupnou migraci z legacy. Detail viz kapitola
                 <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>. V Strangler
                 Fig přístupu je <strong>každý nový BC obklopen ACL</strong>, dokud legacy nezmizí
-                — a v tu chvíli ACL většinou taky zmizí (nebo se zjednodušší na čistý translator
+                – a v tu chvíli ACL většinou taky zmizí (nebo se zjednodušší na čistý translator
                 bez anti-corruption logiky).
             </p>
         </section>
@@ -1035,7 +1043,7 @@ final class LegacyBillingTranslatorTest extends TestCase
             <h3>Kdy zvolit OHS</h3>
 
             <ul>
-                <li><strong>3+ downstream konzumentů</strong>. S 1 konzumentem je OHS overkill —
+                <li><strong>3+ downstream konzumentů</strong>. S 1 konzumentem je OHS overkill –
                     stačí Customer/Supplier ad hoc.</li>
                 <li><strong>Stabilní doména</strong>. Upstream model se mění zřídka, takže
                     investice do veřejného protokolu má návratnost.</li>
@@ -1108,8 +1116,8 @@ final class ProductController extends AbstractController
 </code></pre>
 
             <p>
-                Klíčové: <strong>v1 a v2 koexistují</strong>. Zveřejnění OHS v1 je <em>závazek</em>
-                — jakmile nějaký downstream začne v1 používat, nesmíte ji rozbít. Bez explicitního
+                Důležité: <strong>v1 a v2 koexistují</strong>. Zveřejnění OHS v1 je <em>závazek</em>
+                – jakmile nějaký downstream začne v1 používat, nesmíte ji rozbít. Bez explicitního
                 versioningu to není OHS, jenom „REST endpoint s nedostatečnou disciplínou“.
             </p>
 
@@ -1120,11 +1128,11 @@ final class ProductController extends AbstractController
             </p>
 
             <ul>
-                <li><strong>URI versioning</strong> (<code>/api/v1/...</code>) — nejčitelnější,
+                <li><strong>URI versioning</strong> (<code>/api/v1/...</code>) – nejčitelnější,
                     snadno cacheovatelné, doporučené pro veřejné API.</li>
                 <li><strong>Header versioning</strong> (<code>Accept: application/vnd.catalog.v2+json</code>)
-                    — čistější URL, ale komplikovaná diagnostika a debugging.</li>
-                <li><strong>Query parameter</strong> (<code>?api-version=2</code>) — flexibilní,
+                    – čistější URL, ale komplikovaná diagnostika a debugging.</li>
+                <li><strong>Query parameter</strong> (<code>?api-version=2</code>) – flexibilní,
                     ale bývá zneužívaný k „polo-versioningu“ (nikdy nezmizí v1).</li>
             </ul>
 
@@ -1148,7 +1156,7 @@ final class ProductController extends AbstractController
                     <strong>OHS bez versioningu není OHS.</strong> Je to neoznačený REST endpoint.
                     Když nemůžete vyjmenovat všechny breaking changes posledního roku, zveřejnit
                     deprecation kalendář a ukázat downstream onboarding průvodce, váš API není
-                    Open Host Service — i kdyby vypadalo jako to.
+                    Open Host Service – i kdyby vypadalo jako to.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1174,25 +1182,25 @@ final class ProductController extends AbstractController
                 Evans (2003, str. 370): „<em>Use a well-documented shared language that can express
                 the necessary domain information as a common medium of communication, translating
                 as necessary into and out of that language.</em>“ Vernon (2013) zdůrazňuje, že
-                Published Language není jen schema — je to <em>ubiquitous language pro integraci</em>:
+                Published Language není jen schema – je to <em>ubiquitous language pro integraci</em>:
                 pojmenovává koncepty, jejich invarianty a sémantiku.
             </p>
 
-            <h3>OHS vs. PL — kanál vs. formát</h3>
+            <h3>OHS vs. PL – kanál vs. formát</h3>
 
             <p>
                 Vztah OHS a PL je často matoucí. Pamatujte:
             </p>
 
             <ul>
-                <li><strong>OHS je kanál</strong> — REST endpoint, gRPC service, AMQP exchange. „Jak se data dostanou ven.“</li>
-                <li><strong>PL je formát</strong> — JSON Schema, OpenAPI, Avro, Protocol Buffers. „Jak data vypadají a co znamenají.“</li>
+                <li><strong>OHS je kanál</strong> – REST endpoint, gRPC service, AMQP exchange. „Jak se data dostanou ven.“</li>
+                <li><strong>PL je formát</strong> – JSON Schema, OpenAPI, Avro, Protocol Buffers. „Jak data vypadají a co znamenají.“</li>
             </ul>
 
             <p>
-                Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) — a je to špatně,
+                Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) – a je to špatně,
                 protože downstream nemá jak validovat. Můžete mít PL bez OHS (Avro schema na
-                disku) — a je to taky špatně, protože nikdo neví, jak data získat. <strong>Plnohodnotná
+                disku) – a je to taky špatně, protože nikdo neví, jak data získat. <strong>Plnohodnotná
                 veřejná integrace = OHS + PL</strong>.
             </p>
 
@@ -1200,14 +1208,14 @@ final class ProductController extends AbstractController
 
             <ul>
                 <li><strong>JSON Schema</strong> (<a href="https://json-schema.org/" target="_blank" rel="noopener">json-schema.org</a>)
-                    — nejběžnější pro REST a event payloady.</li>
+                    – nejběžnější pro REST a event payloady.</li>
                 <li><strong>OpenAPI</strong> (<a href="https://www.openapis.org/" target="_blank" rel="noopener">openapis.org</a>)
-                    — popis kompletního REST API včetně paths, parameters, schemas.</li>
+                    – popis kompletního REST API včetně paths, parameters, schemas.</li>
                 <li><strong>AsyncAPI</strong> (<a href="https://www.asyncapi.com/" target="_blank" rel="noopener">asyncapi.com</a>)
-                    — analogie OpenAPI pro asynchronní (eventní) integrace.</li>
+                    – analogie OpenAPI pro asynchronní (eventní) integrace.</li>
                 <li><strong>CloudEvents</strong> (<a href="https://cloudevents.io/" target="_blank" rel="noopener">cloudevents.io</a>)
-                    — CNCF specifikace obálky pro eventy (typ, source, id, time).</li>
-                <li><strong>Avro / Protobuf</strong> — binární formáty s povinným schema, oblíbené pro Kafka/gRPC.</li>
+                    – CNCF specifikace obálky pro eventy (typ, source, id, time).</li>
+                <li><strong>Avro / Protobuf</strong> – binární formáty s povinným schema, oblíbené pro Kafka/gRPC.</li>
             </ul>
 
             <h3>Code sample: JSON Schema pro OrderPlaced event</h3>
@@ -1310,10 +1318,10 @@ final class OrderPlacedValidator
             {% set _callout_body %}
                 <h3 id="pl-tooling-heading">Tooling: schema-first vs. code-first</h3>
                 <ul>
-                    <li><strong>Schema-first</strong> — JSON Schema / OpenAPI je zdrojem pravdy,
+                    <li><strong>Schema-first</strong> – JSON Schema / OpenAPI je zdrojem pravdy,
                         kód je generován (např. <code>jane-php/open-api</code>). Upstream nemůže
-                        omylem rozbít kontrakt — kontrakt je oddělený artefakt.</li>
-                    <li><strong>Code-first</strong> — entity v kódu jsou zdrojem pravdy, schema
+                        omylem rozbít kontrakt – kontrakt je oddělený artefakt.</li>
+                    <li><strong>Code-first</strong> – entity v kódu jsou zdrojem pravdy, schema
                         se generuje (Symfony Serializer s <code>nelmio/api-doc-bundle</code>).
                         Snadnější vývoj, ale riziko, že interní změna kódu projde do veřejného
                         kontraktu nepozorovaně.</li>
@@ -1374,21 +1382,21 @@ final class OrderPlacedValidator
             </ul>
 
             <p>
-                Není to ideální — můžou nastat krátké okna, kdy odhlášený zákazník dostane jednu
-                kampaň navíc — ale je to <strong>levné</strong> a <strong>legal-compliant</strong>.
+                Není to ideální – můžou nastat krátké okna, kdy odhlášený zákazník dostane jednu
+                kampaň navíc – ale je to <strong>levné</strong> a <strong>legal-compliant</strong>.
                 A hlavně: je to <em>vědomé rozhodnutí</em>, ne nedopatření.
             </p>
 
             <h3>Kdy Separate Ways zvážit</h3>
 
             <ul>
-                <li><strong>Low-value integrace</strong> — synchronizovaná data nepřinesou výrazné
+                <li><strong>Low-value integrace</strong> – synchronizovaná data nepřinesou výrazné
                     UX zlepšení.</li>
-                <li><strong>High-effort sync</strong> — integrace by vyžadovala distribuovaný
+                <li><strong>High-effort sync</strong> – integrace by vyžadovala distribuovaný
                     konsensus, eventually consistent projekce, complex retry logiku.</li>
-                <li><strong>Krátká životnost jednoho z BC</strong> — Marketing kampaňový engine
+                <li><strong>Krátká životnost jednoho z BC</strong> – Marketing kampaňový engine
                     se mění každé 2 roky; investice do hluboké integrace se nevyplatí.</li>
-                <li><strong>Externí SaaS</strong> bez kvalitního API — integrace by stejně byla
+                <li><strong>Externí SaaS</strong> bez kvalitního API – integrace by stejně byla
                     nestabilní.</li>
             </ul>
 
@@ -1397,7 +1405,7 @@ final class OrderPlacedValidator
             <p>
                 Separate Ways je strategické rozhodnutí, ne výmluva pro vyhnutí se práci. Pokud
                 tým řekne „my to nebudeme integrovat, je to moc komplikované“ <em>bez</em>
-                vyčíslení nákladů a hodnoty, není to Separate Ways — je to technický dluh
+                vyčíslení nákladů a hodnoty, není to Separate Ways – je to technický dluh
                 v převleku. Skutečný Separate Ways má dokumentovanou alternativu (jak jsme to
                 vyřešili bez integrace) a dokumentovaný edge case (co se stane, když se to
                 rozpadne).
@@ -1410,7 +1418,7 @@ final class OrderPlacedValidator
                     když compliance audit přijde s otázkou „proč máte dva seznamy zákazníků?“),
                     je to validní moment Separate Ways zrušit a postavit
                     <a href="#customer-supplier">Customer/Supplier</a>. Strategická rozhodnutí
-                    jsou platná v daném kontextu — ne navždy.
+                    jsou platná v daném kontextu – ne navždy.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1423,7 +1431,7 @@ final class OrderPlacedValidator
            04.11 Praktický postup
            ─────────────────────────────────────────────────────────── #}
         <section id="postup" aria-labelledby="postup-heading">
-            <h2 id="postup-heading" class="h-section"><span class="h-num">04.11</span> Praktický postup — jak nakreslit Context Map za 90 minut</h2>
+            <h2 id="postup-heading" class="h-section"><span class="h-num">04.11</span> Praktický postup – jak nakreslit Context Map za 90 minut</h2>
 
             <p>
                 Context Map se nepíše v izolaci jedním architektem. Je to <strong>týmové cvičení</strong>,
@@ -1440,7 +1448,7 @@ final class OrderPlacedValidator
                     <strong>(0–15 min) Vyjmenovat všechny Bounded Contexts.</strong>
                     Sticky note pro každý BC, jméno + 1 věta popisu („Catalog: produktové info“,
                     „Pricing: cena včetně slev“). Pokud někdo přidá víc než 12 BC, varovný
-                    signál — možná je modeluje příliš jemně.
+                    signál – možná je modeluje příliš jemně.
                 </li>
                 <li>
                     <strong>(15–45 min) Pro každou dvojici BC, která spolu interaguje, nakreslit šipku.</strong>
@@ -1453,7 +1461,7 @@ final class OrderPlacedValidator
                     <strong>(45–60 min) Označit upstream (U) a downstream (D).</strong>
                     Na každé šipce napsat U na straně, která rozhoduje, a D na straně, která
                     se přizpůsobuje. Pokud nikdo neví, kdo je U a kdo D, vztah <em>není pojmenovaný</em>
-                    — eskalace.
+                    – eskalace.
                 </li>
                 <li>
                     <strong>(60–80 min) Identifikovat „nebezpečné“ vztahy.</strong>
@@ -1493,9 +1501,9 @@ final class OrderPlacedValidator
 
             <ul>
                 <li>Datum poslední aktualizace v patičce povinné.</li>
-                <li>Verzování přes git — Markdown a SVG/PNG v repu.</li>
+                <li>Verzování přes git – Markdown a SVG/PNG v repu.</li>
                 <li>Revize po každé větší architektonické změně (nový BC, zánik BC, změna typu vztahu).</li>
-                <li>Plánovaná revize 1× za 6 měsíců, i když se nic „nestalo“ — často se ukáže, že
+                <li>Plánovaná revize 1× za 6 měsíců, i když se nic „nestalo“ – často se ukáže, že
                     něco se stalo a nikdo to nezdokumentoval.</li>
             </ul>
 
@@ -1503,9 +1511,9 @@ final class OrderPlacedValidator
                 <p>
                     <strong>Context Map zastarává.</strong> Přepište ji při každé větší
                     architektonické změně. Datum + verze v patičce povinné. Mapa, která je rok
-                    stará, je horší než žádná mapa — uvádí v omyl. Pokud nemáte čas Context Map
+                    stará, je horší než žádná mapa – uvádí v omyl. Pokud nemáte čas Context Map
                     pravidelně udržovat, ponechte si jen textovou složku
-                    (<code>docs/context-map.md</code>) — ta zastará pomaleji.
+                    (<code>docs/context-map.md</code>) – ta zastará pomaleji.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1527,7 +1535,7 @@ final class OrderPlacedValidator
                 „<em>A Big Ball of Mud is a haphazardly structured, sprawling, sloppy, duct-tape
                 and baling-wire, spaghetti-code jungle.</em>“ V jazyce Context Mappingu: systém,
                 kde každý BC „nějak“ mluví s každým, sdílí databázové tabulky, sdílí entity, sdílí
-                ad-hoc service vrstvy — a nikdo nedokáže nakreslit Context Map, protože vztahy
+                ad-hoc service vrstvy – a nikdo nedokáže nakreslit Context Map, protože vztahy
                 nejsou pojmenované.
             </p>
 
@@ -1535,10 +1543,10 @@ final class OrderPlacedValidator
 
             <ul>
                 <li><strong>Sdílená databáze</strong> mezi více BC, kde každý BC čte (a často píše) tabulky druhých.</li>
-                <li><strong>Cirkulární závislosti</strong> mezi BC — A volá B volá C volá A.</li>
-                <li><strong>Doctrine entity sdílené</strong> napříč BC — jediná třída <code>Order</code> je používaná v Catalog, Pricing i Billing s odlišnými očekáváními.</li>
+                <li><strong>Cirkulární závislosti</strong> mezi BC – A volá B volá C volá A.</li>
+                <li><strong>Doctrine entity sdílené</strong> napříč BC – jediná třída <code>Order</code> je používaná v Catalog, Pricing i Billing s odlišnými očekáváními.</li>
                 <li><strong>Service tříd s 50+ veřejnými metodami</strong>, které „obstarají všechno“.</li>
-                <li><strong>Žádný explicitní integrační kontrakt</strong> — komunikace přes přímé volání DB, sdílené Redis klíče, file system.</li>
+                <li><strong>Žádný explicitní integrační kontrakt</strong> – komunikace přes přímé volání DB, sdílené Redis klíče, file system.</li>
                 <li><strong>Nemožnost říci „kde končí jeden BC a začíná druhý“.</strong></li>
             </ul>
 
@@ -1577,7 +1585,7 @@ final class OrderPlacedValidator
                 <p>
                     <strong>Big Ball of Mud je <em>výsledek</em>, ne <em>příčina</em>.</strong>
                     Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem
-                    refactoringu <em>není</em> psaní kódu — je to nakreslení (čistě deskriptivní)
+                    refactoringu <em>není</em> psaní kódu – je to nakreslení (čistě deskriptivní)
                     Context Mapy popisující současný stav. Teprve s mapou v ruce se dá
                     plánovat cesta ven.
                 </p>
@@ -1596,7 +1604,7 @@ final class OrderPlacedValidator
 
             <p>
                 Context Mapping je strategická disciplína, která dává smysl Bounded Contextům
-                tím, že popisuje, co se na jejich hranicích děje. Klíčové body:
+                tím, že popisuje, co se na jejich hranicích děje. Hlavní body:
             </p>
 
             <ul>
@@ -1630,9 +1638,9 @@ final class OrderPlacedValidator
             <p>
                 Pro praktické nakreslení Context Mapy doporučujeme techniku
                 <a href="{{ path('event_storming') }}">Event Stormingu</a> jako discovery
-                workshop — odhalí jak hranice BC, tak vztahy mezi nimi v jediném sezení.
+                workshop – odhalí jak hranice BC, tak vztahy mezi nimi v jediném sezení.
                 Pro propojení s organizačním designem viz
-                <a href="{{ path('team_topologies') }}">Team Topologies</a> — Conway's Law říká,
+                <a href="{{ path('team_topologies') }}">Team Topologies</a> – Conway's Law říká,
                 že Context Map a org chart musí korespondovat, jinak jeden z nich vyhraje
                 a ten druhý se rozsype.
             </p>
@@ -1645,23 +1653,23 @@ final class OrderPlacedValidator
             items: [
                 {
                     question: 'Jak často aktualizovat Context Map?',
-                    answer: 'Při každé větší architektonické změně (nový BC, zánik BC, změna typu vztahu) okamžitě, plus plánovaná revize minimálně 1× za 6 měsíců. Pokud nemáte čas vizuální složku udržovat aktualně, ponechte si alespoň textový popis (<code>docs/context-map.md</code>) — ten zastará pomaleji než obrázek. Datum poslední aktualizace v patičce je povinné. Detail v <a href="#postup">sekci 04.11 Praktický postup</a>.'
+                    answer: 'Při každé větší architektonické změně (nový BC, zánik BC, změna typu vztahu) okamžitě, plus plánovaná revize minimálně 1× za 6 měsíců. Pokud nemáte čas vizuální složku udržovat aktualně, ponechte si alespoň textový popis (<code>docs/context-map.md</code>) – ten zastará pomaleji než obrázek. Datum poslední aktualizace v patičce je povinné. Detail v <a href="#postup">sekci 04.11 Praktický postup</a>.'
                 },
                 {
                     question: 'Můžu mít více než 1 typ vztahu mezi 2 BC?',
                     answer: 'Ano, je to běžné a často nutné. Customer/Supplier popisuje organizační vztah (kdo rozhoduje, kdo prosí), Open Host Service popisuje technický kanál a Published Language popisuje formát. Tyto tři se typicky kombinují do jednoho komplexního vztahu. Anti-Corruption Layer je technika, kterou downstream aplikuje uvnitř Customer/Supplier nebo Conformist vztahu. Při kreslení mapy stačí na šipku napsat všechny relevantní stereotypy: <code>&lt;&lt;Customer/Supplier&gt;&gt; &lt;&lt;OHS&gt;&gt; &lt;&lt;PL&gt;&gt;</code>.'
                 },
                 {
-                    question: 'ACL vs. Adapter — jaký je rozdíl?',
-                    answer: 'Adapter (z Hexagonal Architecture / GoF) je technický vzor: třída, která implementuje port a překládá volání na konkrétní knihovnu (Doctrine, HTTP klient, Redis). ACL je strategický vzor: vrstva, která chrání váš doménový model před modelem cizího Bounded Contextu. ACL je <em>typicky implementován pomocí Adapterů</em>, ale ne každý Adapter je ACL. ACL má navíc tři specifické odpovědnosti — schema mapping, concept translation a anti-corruption (filtraci) — které „obyčejný“ Adapter nemá. Detail v <a href="#acl">sekci 04.07</a>.'
+                    question: 'ACL vs. Adapter – jaký je rozdíl?',
+                    answer: 'Adapter (z Hexagonal Architecture / GoF) je technický vzor: třída, která implementuje port a překládá volání na konkrétní knihovnu (Doctrine, HTTP klient, Redis). ACL je strategický vzor: vrstva, která chrání váš doménový model před modelem cizího Bounded Contextu. ACL je <em>typicky implementován pomocí Adapterů</em>, ale ne každý Adapter je ACL. ACL má navíc tři specifické odpovědnosti – schema mapping, concept translation a anti-corruption (filtraci) – které „obyčejný“ Adapter nemá. Detail v <a href="#acl">sekci 04.07</a>.'
                 },
                 {
                     question: 'Co dělat, když si všimnu Conformist vztahu, který tam neměl být?',
-                    answer: 'Tři kroky. (1) Ověřte, že je to opravdu nechtěný Conformist — někdy je to vědomé strategické rozhodnutí, které tým zapomněl zdokumentovat. (2) Pokud je nechtěný, vyčíslete cenu jeho opravy: kolik domén pojmů upstreamu prosáklo do downstream modelu, kolik testů by bylo třeba přepsat, jak často upstream dělá breaking changes. (3) Otevřete ADR (Architecture Decision Record) s návrhem migrace na ACL — typicky inkrementálně, jeden translator za sprintem. Dokud není ADR schválené, držte si Conformist jako známý technický dluh v backlogu, ne jako překvapení v produkci.'
+                    answer: 'Tři kroky. (1) Ověřte, že je to opravdu nechtěný Conformist – někdy je to vědomé strategické rozhodnutí, které tým zapomněl zdokumentovat. (2) Pokud je nechtěný, vyčíslete cenu jeho opravy: kolik domén pojmů upstreamu prosáklo do downstream modelu, kolik testů by bylo třeba přepsat, jak často upstream dělá breaking changes. (3) Otevřete ADR (Architecture Decision Record) s návrhem migrace na ACL – typicky inkrementálně, jeden translator za sprintem. Dokud není ADR schválené, držte si Conformist jako známý technický dluh v backlogu, ne jako překvapení v produkci.'
                 },
                 {
                     question: 'Je Context Map součást Architecture Decision Record (ADR)?',
-                    answer: 'Context Map sama o sobě není ADR — je to <em>průběžně udržovaný stav</em>, kdežto ADR popisuje konkrétní rozhodnutí v čase. Ale <strong>každá změna Context Mapy by měla mít ADR</strong>: „Změnili jsme vztah Catalog &harr; Pricing z Partnership na Customer/Supplier, protože…“. ADR pak slouží jako historie změn Context Mapy a dává budoucím inženýrům kontext, proč je mapa taková, jaká je. V repu typicky drží mapa <code>docs/context-map.md</code>, ADR <code>docs/adr/0023-rozdeleni-catalog-pricing.md</code>.'
+                    answer: 'Context Map sama o sobě není ADR – je to <em>průběžně udržovaný stav</em>, kdežto ADR popisuje konkrétní rozhodnutí v čase. Ale <strong>každá změna Context Mapy by měla mít ADR</strong>: „Změnili jsme vztah Catalog &harr; Pricing z Partnership na Customer/Supplier, protože…“. ADR pak slouží jako historie změn Context Mapy a dává budoucím inženýrům kontext, proč je mapa taková, jaká je. V repu typicky drží mapa <code>docs/context-map.md</code>, ADR <code>docs/adr/0023-rozdeleni-catalog-pricing.md</code>.'
                 },
                 {
                     question: 'Jak Context Map kreslit v textu, ne nástrojem?',
@@ -1682,8 +1690,8 @@ final class OrderPlacedValidator
                 <li>Brian Foote &amp; Joseph Yoder, <em>Big Ball of Mud</em>, PLoP 1997 <a href="http://www.laputan.org/mud/" target="_blank" rel="noopener">[3]</a>.</li>
                 <li>Martin Fowler, <em>Bounded Context</em> (bliki) <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">[4]</a>.</li>
                 <li>Martin Fowler, <em>Context Map</em> (bliki) <a href="https://martinfowler.com/bliki/ContextMap.html" target="_blank" rel="noopener">[5]</a>.</li>
-                <li>Vaughn Vernon, <em>Domain-Driven Design Distilled</em> (Addison-Wesley, 2016) — zkrácená přístupnější verze pro úvod do strategického designu.</li>
-                <li>DDD Crew, <em>Context Mapping</em> shareable resources <a href="https://github.com/ddd-crew/context-mapping" target="_blank" rel="noopener">[6]</a> — moderní vizuální notace pro Context Mapping.</li>
+                <li>Vaughn Vernon, <em>Domain-Driven Design Distilled</em> (Addison-Wesley, 2016) – zkrácená přístupnější verze pro úvod do strategického designu.</li>
+                <li>DDD Crew, <em>Context Mapping</em> shareable resources <a href="https://github.com/ddd-crew/context-mapping" target="_blank" rel="noopener">[6]</a> – moderní vizuální notace pro Context Mapping.</li>
             </ul>
         </section>
 

@@ -491,8 +491,10 @@ section > h4:first-child { margin-top: 0; }
   flex-wrap: wrap;
   gap: var(--s-2);
 }
-.glossary-entry dt strong {
+.glossary-entry dt strong,
+.glossary-entry dt dfn {
   font-weight: 600;
+  font-style: normal;
   color: var(--fg);
 }
 .term-en {

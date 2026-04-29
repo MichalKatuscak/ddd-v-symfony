@@ -157,7 +157,8 @@
         {% set _callout_body %}
 
             <h3 id="data-table-heading">Přehled dostupných dat: bounded contexts a AI generovaný kód</h3>
-            <table>
+            <div class="table-responsive">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">Metrika</th>
@@ -183,6 +184,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
             <p class="table-note">
                 <em>Zdroj: UnderstandingData.com (James Phoenix, 2026). Data jsou orientační odhady
                 autora blogpostu – nepocházejí z kontrolované studie, nemají definovanou metodologii
@@ -519,7 +521,8 @@
         {% set _callout_body %}
 
             <h3 id="spectrum-heading">Spektrum pozic: od synergie DDD a AI po důraz na jednoduchost</h3>
-            <table>
+            <div class="table-responsive">
+            <table class="table table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">Autor</th>
@@ -565,6 +568,7 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
         {% endset %}
             {% include '_partials/callout.html.twig' with {
                 type: 'pattern',
@@ -596,7 +600,7 @@
         </p>
 
         <p>
-            Klíčové je rozhodovat se na základě domény, týmu a projektu. Kde leží doménová
+            Důležité je rozhodovat se na základě domény, týmu a projektu. Kde leží doménová
             komplexita? Kde jsou náklady na chybu vysoké? Kde bude systém žít pět let?
             Tyto otázky – ne přítomnost nebo nepřítomnost AI v toolchainu – by měly řídit
             architektonické rozhodnutí.

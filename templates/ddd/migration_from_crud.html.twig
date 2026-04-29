@@ -92,7 +92,7 @@
                     </li>
                     <li>
                         <strong>Business logika v repozitářích</strong> – Doctrine repozitáře obsahují komplexní
-                        podmínky, které vyjadřují doménová pravidla (např. "objednávky, které je možné zrušit").
+                        podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit”).
                         Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
                     </li>
                     <li>
@@ -105,7 +105,7 @@
                     </li>
                     <li>
                         <strong>Komunikační propast</strong> – Vývojáři a doménoví experti používají jiný slovník.
-                        Kód neodráží jazyk businessu; pojmy jako "aktivace účtu" nebo "storno objednávky" nejsou
+                        Kód neodráží jazyk businessu; pojmy jako „aktivace účtu” nebo „storno objednávky” nejsou
                         viditelné v názvech tříd a metod.
                     </li>
                 </ul>
@@ -161,7 +161,7 @@
             <p>
                 Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
                 <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank" rel="noopener">[2]</a>,
-                která umožňuje postupnou náhradu starého systému novým bez nutnosti "big bang" přepisu. Název pochází
+                která umožňuje postupnou náhradu starého systému novým bez nutnosti „big bang” přepisu. Název pochází
                 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
             </p>
 
@@ -241,15 +241,15 @@
 
             <h3>Výhody oproti přímé refaktorizaci (Big Bang Rewrite)</h3>
             <p>
-                Přímý přepis celého systému najednou (tzv. "big bang rewrite") je považován za jedno z největších rizik
-                v softwarovém vývoji. Joel Spolsky ve svém slavném článku "Things You Should Never Do"
+                Přímý přepis celého systému najednou (tzv. „big bang rewrite”) je považován za jedno z největších rizik
+                v softwarovém vývoji. Joel Spolsky ve svém slavném článku „Things You Should Never Do”
                 <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/" target="_blank" rel="noopener">[3]</a>
                 popisuje, proč firmy ztratily konkurenční výhodu tím, že kompletně přepsaly fungující systémy.
                 Strangler Fig Pattern oproti tomu:
             </p>
             <ul>
                 <li>Umožňuje kontinuální dodávku nové hodnoty zákazníkovi i během migrace.</li>
-                <li>Snižuje riziko – systém nikdy není kompletně "rozbitý".</li>
+                <li>Snižuje riziko – systém nikdy není kompletně „rozbitý”.</li>
                 <li>Poskytuje možnost rollbacku: pokud nová implementace selhává, stará stále funguje.</li>
                 <li>Umožňuje týmu učit se DDD postupně, na reálném produkčním kódu.</li>
                 <li>Refaktoring lze zastavit kdykoli – systém zůstává v konzistentním, funkčním stavu.</li>
@@ -279,8 +279,8 @@
                     Bounded Contexts skryté v jedné třídě.
                 </li>
                 <li>
-                    <strong>Opakující se slovo s různým významem</strong> – pokud "zákazník" v kontextu prodeje
-                    znamená něco jiného než "zákazník" v kontextu zákaznické podpory, jde o přirozené rozhraní
+                    <strong>Opakující se slovo s různým významem</strong> – pokud „zákazník” v kontextu prodeje
+                    znamená něco jiného než „zákazník” v kontextu zákaznické podpory, jde o přirozené rozhraní
                     dvou Bounded Contexts.
                 </li>
             </ul>
@@ -607,7 +607,7 @@ final class Email
                 <p>
                     Díky Value Objectu <code>Email</code> je validace zapouzdřena na jednom místě. Kdykoli je
                     vytvořena instance <code>Email</code>, máme garantovanou platnost hodnoty – bez ohledu na to,
-                    kde v aplikaci k vytvoření dochází. Toto je základní princip "Make Illegal States Unrepresentable".
+                    kde v aplikaci k vytvoření dochází. Toto je základní princip „Make Illegal States Unrepresentable”.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -919,7 +919,7 @@ class UserController extends AbstractController
 
             <h3>Charakterizační testy (Characterization Tests)</h3>
             <p>
-                Pojem "charakterizační testy" pochází z knihy Michaela Featherse "Working Effectively with Legacy
+                Pojem „charakterizační testy” pochází z knihy Michaela Featherse "Working Effectively with Legacy
                 Code"
                 <a href="https://www.oreilly.com/library/view/working-effectively-with/0131177052/" target="_blank" rel="noopener">[5]</a>.
                 Charakterizační test nepopisuje, jaké <em>by mělo být</em> správné chování systému, ale zachycuje
@@ -1150,7 +1150,7 @@ final class UserTest extends TestCase
                 <p>
                     <strong>Nikdy nezačínejte migraci na DDD kompletním přepisem systému.</strong> Big Bang Rewrite
                     je architektonicky nejrizikovější rozhodnutí, které může tým učinit. Typický scénář:
-                    tým začne "přepis na zelenou louku", po 6 měsících zjistí, že nový systém nesplňuje všechny
+                    tým začne „přepis na zelenou louku”, po 6 měsících zjistí, že nový systém nesplňuje všechny
                     edge cases původního systému (které nikdo nezdokumentoval), původní systém dostává mezitím
                     nové funkcionality, nový systém za ním nestíhá. Výsledkem je buď zrušení projektu přepisu,
                     nebo spuštění nedokončeného systému s fatálními chybami.
@@ -1174,12 +1174,12 @@ final class UserTest extends TestCase
         </section>
 
         <section id="refactoring-kucharka" aria-labelledby="refactoring-kucharka-heading">
-            <h2 id="refactoring-kucharka-heading" class="h-section"><span class="h-num">11.09</span> Refactoring kuchařka — krátké recepty</h2>
+            <h2 id="refactoring-kucharka-heading" class="h-section"><span class="h-num">11.09</span> Refactoring kuchařka – krátké recepty</h2>
 
             <p>
                 Strangler Fig je strategický pohled na celou migraci. V denní praxi narazíte na opakující se mikrosituace.
                 Tato kuchařka obsahuje 8 nejčastějších, každá ve formátu <em>„symptomy → krok 1, 2, 3"</em>.
-                Recepty jsou záměrně krátké — když potřebujete kontext nebo důkladnější rozbor, projděte odkazované kapitoly.
+                Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladnější rozbor, projděte odkazované kapitoly.
             </p>
 
             <h3 id="recept-anemic-entita-heading">Recept 1: Mám anémickou Doctrine entitu</h3>
@@ -1188,14 +1188,14 @@ final class UserTest extends TestCase
                 <li>Identifikuj invarianty entity (co nesmí být porušeno).</li>
                 <li>Pro každý invariant najdi metodu v <code>*Service</code>, která ho dnes drží.</li>
                 <li>Přesuň metodu do entity, getter/setter na <code>private</code> nebo zruš.</li>
-                <li>Service se stane tenkým koordinátorem (Application Service) — jen volá entitu, transakce, eventy.</li>
+                <li>Service se stane tenkým koordinátorem (Application Service) – jen volá entitu, transakce, eventy.</li>
                 <li>Cross-link: <a href="{{ path('anti_patterns') }}">Anti-vzor: Anemic Domain Model</a> · <a href="{{ path('lesser_known_patterns') }}#domain-services">Domain Services vs. Application Services</a>.</li>
             </ol>
 
             <h3 id="recept-doctrine-anotace-heading">Recept 2: Doctrine anotace v doménové třídě</h3>
             <p><strong>Symptomy:</strong> <code>App\Domain\Order</code> má <code>#[ORM\Entity]</code>, doména závisí na Doctrine.</p>
             <ol>
-                <li>Vytvoř separated mapping — XML/YAML schema v <code>App\&lt;BC&gt;\Infrastructure\Doctrine\Mapping\</code>. Doménová třída zůstane bez anotací.</li>
+                <li>Vytvoř separated mapping – XML/YAML schema v <code>App\&lt;BC&gt;\Infrastructure\Doctrine\Mapping\</code>. Doménová třída zůstane bez anotací.</li>
                 <li>Přesuň konfiguraci repozitáře do <code>services.yaml</code>.</li>
                 <li>Otestuj: <code>composer require --dev phpat/phpat</code> a přidej rule <code>App\Domain\* nesmí závisět na Doctrine\*</code>.</li>
             </ol>
@@ -1212,7 +1212,7 @@ final class UserTest extends TestCase
             <p><strong>Symptomy:</strong> tabulka <code>users</code> se používá v Ordering BC i Billing BC, oba ji modify.</p>
             <ol>
                 <li>Identify owning BC (typicky Identity).</li>
-                <li>Ostatní BC ji nesmí modify — jen READ. Přesuň reads do read-modelů (každý BC má vlastní projekci).</li>
+                <li>Ostatní BC ji nesmí modify – jen READ. Přesuň reads do read-modelů (každý BC má vlastní projekci).</li>
                 <li>Modify nahraď voláním Identity API (sync HTTP nebo async event publishing s outbox).</li>
                 <li>Cross-link: <a href="{{ path('outbox_pattern') }}">Outbox Pattern</a>.</li>
             </ol>
@@ -1239,7 +1239,7 @@ final class UserTest extends TestCase
                 <li>Aggregate uchová eventy v <code>private array $releasedEvents</code>.</li>
                 <li>Aplikační handler po <code>repository-&gt;save()</code> volá <code>$order-&gt;releaseEvents()</code> a publikuje (přes outbox).</li>
                 <li>Doména ztratí závislost na Symfony EventDispatcheru. Test je čistý.</li>
-                <li>Cross-link: <a href="{{ path('outbox_pattern') }}#aggregate-publishes">Outbox — Aggregate publikuje</a>.</li>
+                <li>Cross-link: <a href="{{ path('outbox_pattern') }}#aggregate-publishes">Outbox – Aggregate publikuje</a>.</li>
             </ol>
 
             <h3 id="recept-fields-jako-stav-heading">Recept 8: Stav je sloupec <code>string $status</code></h3>

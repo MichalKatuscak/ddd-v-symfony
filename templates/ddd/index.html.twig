@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Domain-Driven Design v Symfony 8 – průvodce architekturou{% endblock %}
-{% block meta_description %}Šestnáctikapitolová příručka pro seniorní vývojáře. Od ohraničených kontextů přes CQRS a Event Sourcing po případové studie – v PHP 8.4+ a Symfony 8.{% endblock %}
+{% block meta_description %}Pětadvacetidílná příručka pro seniorní vývojáře. Od ohraničených kontextů přes CQRS a Event Sourcing po případové studie – v PHP 8.4+ a Symfony 8.{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -53,9 +53,9 @@
     <section class="land-hero">
         <div class="land-left">
             <div class="land-eyebrow">
-                <span class="land-eyebrow-num">VOL. I</span>
+                <span class="land-eyebrow-num">PŘÍRUČKA</span>
                 <span class="land-eyebrow-rule"></span>
-                <span class="land-eyebrow-meta">{{ "now"|date("Y") }} EDITION · ČESKY · ZDARMA</span>
+                <span class="land-eyebrow-meta">ČESKY · ZDARMA · OPEN SOURCE</span>
             </div>
 
             <h1 class="land-title">
@@ -64,25 +64,32 @@
             </h1>
 
             <p class="land-deck">
-                Šestnáctikapitolová příručka pro seniorní vývojáře a architekty.
+                Pětadvacetidílná příručka pro seniorní vývojáře a architekty.
                 Od ohraničených kontextů přes <em>CQRS</em> a <em>Event Sourcing</em>
                 až po reálné případové studie – v PHP 8.4+ a Symfony 8.
             </p>
 
-            <div class="land-author">
-                <div class="land-author-mark" aria-hidden="true"></div>
+            <a class="land-author" href="{{ path('about') }}">
+                <img
+                    class="land-author-mark"
+                    src="{{ asset('img/author.webp') }}"
+                    alt="Michal Katuščák – autor průvodce"
+                    width="40"
+                    height="40"
+                    loading="eager"
+                >
                 <div>
                     <div class="land-author-name">Michal Katuščák</div>
                     <div class="land-author-role">PHP / Symfony · 13+ let komerčního vývoje</div>
                 </div>
-            </div>
+            </a>
 
             <div class="land-cta">
                 <a class="btn btn-primary" href="{{ path('what_is_ddd') }}">
                     Otevřít první kapitolu <span class="btn-arrow">→</span>
                 </a>
                 <a class="land-skip" href="{{ path('cqrs') }}">
-                    nebo skočit rovnou na <span class="land-skip-tar">CQRS · 05</span>
+                    nebo skočit rovnou na <span class="land-skip-tar">CQRS · 08</span>
                 </a>
             </div>
 
@@ -91,18 +98,18 @@
                 <div class="land-path-list">
                     <a class="land-path" href="{{ path('what_is_ddd') }}">
                         <span class="land-path-tag">Začátečník</span>
-                        <span class="land-path-route">01 → 02 → 04 → 09</span>
-                        <span class="land-path-time">≈ 92 min</span>
+                        <span class="land-path-route">01 → 02 → 05 → 07</span>
+                        <span class="land-path-time">≈ 77 min</span>
                     </a>
-                    <a class="land-path" href="{{ path('cqrs') }}">
+                    <a class="land-path" href="{{ path('architectural_styles') }}">
                         <span class="land-path-tag">Pokročilý</span>
-                        <span class="land-path-route">05 → 06 → 07 → 10</span>
-                        <span class="land-path-time">≈ 90 min</span>
+                        <span class="land-path-route">06 → 08 → 09 → 10</span>
+                        <span class="land-path-time">≈ 142 min</span>
                     </a>
-                    <a class="land-path" href="{{ path('when_not_to_use_ddd') }}">
+                    <a class="land-path" href="{{ path('subdomains') }}">
                         <span class="land-path-tag">Architekt</span>
-                        <span class="land-path-route">14 → 11 → 12 → 08</span>
-                        <span class="land-path-time">≈ 84 min</span>
+                        <span class="land-path-route">03 → 04 → 17 → 15</span>
+                        <span class="land-path-time">≈ 98 min</span>
                     </a>
                 </div>
             </div>
@@ -110,7 +117,7 @@
 
         <div class="land-right">
             <header class="land-toc-head">
-                <span class="land-toc-num">CONTENTS</span>
+                <span class="land-toc-num">OBSAH</span>
                 <span class="land-toc-rule"></span>
                 <span class="land-toc-meta">{{ chapters|length }} kapitol · ~{{ hours }} h {{ minutes }} min čtení</span>
             </header>
@@ -154,7 +161,7 @@
     <section class="land-featured">
         <a class="land-featured-card" href="{{ path('case_study') }}" aria-label="Otevřít případovou studii: systém pro správu projektů end-to-end">
             <div>
-                <div class="land-featured-eyebrow">FEATURED · KAPITOLA 15</div>
+                <div class="land-featured-eyebrow">DOPORUČUJEME · KAPITOLA 24</div>
                 <h2 class="land-featured-title">Případová studie: systém pro správu projektů end-to-end</h2>
                 <p class="land-featured-deck">
                     Kompletní systém pro správu projektů a úkolů v DDD architektuře krok za krokem –

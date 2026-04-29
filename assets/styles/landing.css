@@ -59,23 +59,19 @@
   border-top: 1px solid var(--stroke);
   border-bottom: 1px solid var(--stroke);
   margin-bottom: var(--s-6);
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--motion-fast) ease;
 }
+.land-author:hover { background: var(--bg-1); }
+.land-author:hover .land-author-name { color: var(--accent); }
 .land-author-mark {
-  width: 36px; height: 36px;
-  background: var(--bg-2);
+  width: 40px; height: 40px;
   border: 1px solid var(--stroke-strong);
-  position: relative;
+  border-radius: 50%;
+  object-fit: cover;
   flex-shrink: 0;
-}
-.land-author-mark::after {
-  content: "MK";
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--accent);
-  letter-spacing: 0.08em;
-  font-weight: 600;
+  display: block;
 }
 .land-author-name { font-size: 14px; font-weight: 500; color: var(--fg); }
 .land-author-role {
