@@ -104,7 +104,7 @@
         netriviální – tedy přesně v situacích, pro které byl DDD vytvořen – chybějící vzory
         způsobují bobtnání agregátů, anémii doménového modelu, duplikaci pravidel mezi vrstvami
         a&nbsp;nečitelnou organizaci kódu, která zatemňuje business strukturu projektu. Evans
-        těmto vzorům věnuje desítky stran s důvodem: jsou součástí ucelené sady, která drží
+        těmto vzorům věnuje desítky stran z dobrého důvodu: jsou součástí ucelené sady, která drží
         pohromadě.
     </p>
 
@@ -232,7 +232,7 @@
         <p>
             Začátečníci po objevení vzoru často propadnou „kladivovému efektu“ a&nbsp;vytvoří
             třídy <code>OrderTotalGreaterThanSpecification</code>, <code>OrderTotalLessThanSpecification</code>,
-            <code>OrderTotalEqualsSpecification</code> &mdash; každá obsahuje jeden řádek kódu.
+            <code>OrderTotalEqualsSpecification</code> – každá obsahuje jeden řádek kódu.
             To je over-engineering: ztrácíte čitelnost domény, protože jména přestanou být
             doménová a&nbsp;stanou se z nich obecné prepozice. Specification má reprezentovat
             <em>celou business otázku</em>, ne jednotlivý operátor.
@@ -732,8 +732,8 @@ final class DoctrineOrderRepository implements OrderRepository
     <p>
         Tímto způsobem vyřešíte klasický problém <em>„jak se má pravidlo aplikovat jen jednou –
         v PHP nebo v SQL?“</em>. Specifikace je <strong>zdroj pravdy</strong>, obě její role
-        (in-memory predikát i&nbsp;query překladač) sedí v&nbsp;jedné třídě a&nbsp;jsou
-        nemožné rozejít.
+        (in-memory predikát i&nbsp;query překladač) sedí v&nbsp;jedné třídě a&nbsp;nelze
+        je oddělit.
     </p>
 
     <p>
@@ -1094,7 +1094,7 @@ final class MoneyTransferService
 
     <ul>
         <li>
-            <strong>Trivální vznik</strong> &mdash; <code>OrderFactory::create($cust, $items)</code>,
+            <strong>Triviální vznik</strong> – <code>OrderFactory::create($cust, $items)</code>,
             která interně volá <code>new Order(...)</code> a&nbsp;jinak nic. To není Factory,
             to je redundantní vrstva.
         </li>
@@ -1504,7 +1504,7 @@ public static function reconstitute(
                 je to e-shop, banka, IS pro pojišťovnu? Vidíte pouze, že to má entity a&nbsp;controllery.
             </li>
             <li>
-                <strong>Forsuje horizontální vrstvy</strong>. Změna jednoho business pravidla
+                <strong>Vynucuje horizontální vrstvy</strong>. Změna jednoho business pravidla
                 často vyžaduje editovat soubor v&nbsp;5 různých složkách, místo jednoho modulu.
             </li>
             <li>
@@ -1513,9 +1513,10 @@ public static function reconstitute(
             </li>
         </ul>
         <p>
-            Type packaging má místo: ve <em>velmi malých</em> aplikacích, kde se domain neexistuje
-            (CRUD nad jedním objektem), nebo v&nbsp;ukázkových repozitářích pro výuku
-            jednotlivých Symfony komponent. V doménově bohaté aplikaci je třeba se mu vyhnout.
+            Type packaging má své opodstatnění: ve <em>velmi malých</em> aplikacích, kde doména
+            prakticky neexistuje (CRUD nad jedním objektem), nebo v&nbsp;ukázkových repozitářích
+            pro výuku jednotlivých Symfony komponent. V doménově bohaté aplikaci je třeba se mu
+            vyhnout.
         </p>
     {% endset %}
     {% include '_partials/callout.html.twig' with {
@@ -1934,7 +1935,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
         items: [
             {
                 question: 'Kdy přesně se vyplatí Specification Pattern?',
-                answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho potřebujete v doméně i v repozitáři přes double-dispatch. Pokud pravidlo používáte jednou a obsahuje jeden řádek kódu, je samostatná třída over-engineering – inlinujte ho. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification jeho jménu dá kód. Pokud byste třídu pojmenovali <code>OrderTotalGreaterThanSpec</code>, je to jen operátor &mdash; vraťte se k inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
+                answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho potřebujete v doméně i v repozitáři přes double-dispatch. Pokud pravidlo používáte jednou a obsahuje jeden řádek kódu, je samostatná třída over-engineering – inlinujte ho. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification jeho jménu dá kód. Pokud byste třídu pojmenovali <code>OrderTotalGreaterThanSpec</code>, je to jen operátor – vraťte se k inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
             },
             {
                 question: 'Má Domain Service mít stav?',
