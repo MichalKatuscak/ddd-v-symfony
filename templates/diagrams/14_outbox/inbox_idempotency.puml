@@ -1,0 +1,39 @@
+@startuml inbox_idempotency
+!include ../theme.iuml
+
+title Idempotent Inbox: deduplikace na straně subscribera
+
+queue "Broker\n(RabbitMQ)" as mq
+participant "Subscriber Handler" as h
+database "Inbox table\n(processed_event_ids)" as inbox
+database "Read Model" as rm
+
+mq -> h : delivery (event_id=X)
+h -> inbox : SELECT 1 FROM inbox\nWHERE event_id=X
+alt event_id X už zpracován
+  inbox --> h : found
+  h --> mq : ack (skip processing)
+  note right of h
+    At-least-once delivery
+    + dedup v inboxu
+    = exactly-once efekt
+    pro side-effect na read modelu.
+  end note
+else event_id X je nový
+  inbox --> h : not found
+  h -> rm : BEGIN
+  h -> rm : UPDATE / UPSERT read model
+  h -> inbox : INSERT INTO inbox\n(event_id=X, processed_at=NOW())
+  h -> rm : COMMIT
+  note right of h
+    INSERT s UNIQUE constraintem
+    je v téže transakci jako
+    update read modelu.
+    Race condition se 2 workery
+    skončí ConstraintViolation
+    a Messenger zprávu retry-uje.
+  end note
+  h --> mq : ack
+end
+
+@enduml
