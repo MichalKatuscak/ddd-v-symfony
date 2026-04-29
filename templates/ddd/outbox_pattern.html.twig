@@ -1076,6 +1076,82 @@ process_name=%(program_name)s
         začíná být úzkým hrdlem.
     </p>
 
+    <p>
+        Pro úplnost ukázka, jak vypadá konfigurace Debezium konektoru pro Postgres outbox
+        tabulku. Nasazuje se do Kafka Connectu jako JSON přes REST API, ekvivalentní YAML
+        pro deklarativní deploy (Strimzi operator, ArgoCD) je:
+    </p>
+
+    {% set _callout_body %}
+        <h3 id="debezium-config-heading">YAML: Debezium konektor pro outbox tabulku</h3>
+        {% set _code %}{% verbatim %}# kafka-connect/debezium-outbox-connector.yaml
+# Strimzi KafkaConnector custom resource pro Debezium 2.x.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: ordering-outbox-connector
+  labels:
+    strimzi.io/cluster: kafka-connect
+spec:
+  class: io.debezium.connector.postgresql.PostgresConnector
+  tasksMax: 1
+  config:
+    # Připojení k Postgres (logická replikace zapnutá v postgresql.conf:
+    # wal_level=logical, max_replication_slots=4).
+    database.hostname: pg-primary.internal
+    database.port: 5432
+    database.user: debezium
+    database.password: ${secrets:debezium-pg-pwd}
+    database.dbname: ordering
+    database.server.name: ordering
+    plugin.name: pgoutput
+    slot.name: debezium_outbox
+
+    # Snímat pouze tabulku outbox — ne celou DB.
+    table.include.list: public.outbox
+
+    # Outbox Event Router transformace: čte řádky outboxu a routuje je
+    # do Kafka topiců podle sloupce message_type. Klíčový rys Debezia
+    # pro outbox use-case (DBZ-1063+).
+    transforms: outbox
+    transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
+    transforms.outbox.table.field.event.id: id
+    transforms.outbox.table.field.event.key: aggregate_id
+    transforms.outbox.table.field.event.type: message_type
+    transforms.outbox.table.field.event.payload: payload
+    transforms.outbox.route.by.field: message_type
+    transforms.outbox.route.topic.replacement: outbox.${routedByValue}
+
+    # Po přečtení řádku Debezium ho NEUPDATUJE. Outbox tabulka je
+    # immutable log; mazání starých řádků řeší samostatný cron job.
+    tombstones.on.delete: false{% endverbatim %}{% endset %}
+        {% include '_partials/code_block.html.twig' with {
+            filename: 'kafka-connect/debezium-outbox-connector.yaml',
+            language: 'yaml',
+            code: _code,
+            highlights: [25, 30, 31, 32]
+        } %}
+    {% endset %}
+    {% include '_partials/callout.html.twig' with {
+        type: 'pattern',
+        body: _callout_body
+    } %}
+
+    <p>
+        Klíčové části jsou <code>transforms.outbox</code> (Debezium Outbox Event Router,
+        <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" rel="noopener">DBZ-1063</a>),
+        která čte řádky outbox tabulky a směruje je do Kafka topiců podle <code>message_type</code>,
+        a <code>plugin.name: pgoutput</code> pro Postgres logickou replikaci. Žádný kód na
+        aplikační straně se proti variantě A nemění — handler dál zapisuje do outbox tabulky
+        v DB transakci, jen dispatcher je nahrazen Debezium konektorem.
+    </p>
+
+    <p>
+        <em>Citace: Debezium dokumentace —
+        <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" rel="noopener">Outbox Event Router</a>
+        (Red Hat, 2019+).</em>
+    </p>
+
     </section>
 
     {# ───────────────────────────────────────────────────────────
@@ -1285,9 +1361,13 @@ final readonly class OrderPlacedReadModelUpdater
     </p>
 
     <p>
-        Stripe popularizoval <strong>Idempotency Key</strong> jako standardní řešení: klient
-        v hlavičce <code>Idempotency-Key</code> pošle UUID, server si první request uloží do
-        cache (Redis nebo DB tabulka <code>http_idempotency</code>) i s odpovědí, a všechny
+        <a href="https://docs.stripe.com/api/idempotent_requests" rel="noopener">Stripe</a>
+        popularizoval <strong>Idempotency Key</strong> jako standardní řešení a jeho
+        <a href="https://docs.stripe.com/api/idempotent_requests" rel="noopener">specifikace</a>
+        je dnes de-facto referencí pro REST API (převzala ji např. PayPal, Shopify, Square,
+        IETF draft <a href="https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/" rel="noopener">draft-ietf-httpapi-idempotency-key-header</a>).
+        Klient pošle v hlavičce <code>Idempotency-Key</code> UUID, server si první request uloží
+        do cache (Redis nebo DB tabulka <code>http_idempotency</code>) spolu s odpovědí, a všechny
         další requesty se stejným klíčem vrátí cached response — bez znovuvytvoření objednávky.
     </p>
 
@@ -1411,6 +1491,14 @@ final readonly class IdempotencyKeyListener
             programátorská chyba a server vrací 422. Pro většinu projektů stačí klíč + cesta.
         </li>
     </ul>
+
+    <p>
+        <em>Citace:
+        <a href="https://docs.stripe.com/api/idempotent_requests" rel="noopener">Stripe API Reference — Idempotent Requests</a>
+        (kanonická specifikace);
+        <a href="https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/" rel="noopener">IETF draft-ietf-httpapi-idempotency-key-header</a>
+        (probíhající standardizace HTTP header).</em>
+    </p>
 
     </section>
 

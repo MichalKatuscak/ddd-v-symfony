@@ -402,6 +402,74 @@
                 seznam tříd. Big Picture je strategický nástroj — taktiku řeší až Design Level.
             </p>
 
+            <h3 id="bp-online">14.04.4 Online varianta — Miro / Mural setup</h3>
+
+            <p>
+                Když workshop musí být online (distribuovaný tým, pandemie, zahraniční doménový expert),
+                příprava je o něco delší než pro offline, ale výsledek je téměř srovnatelný — pokud
+                dodržíte několik pravidel:
+            </p>
+
+            <ol>
+                <li>
+                    <strong>Frame 12 000 × 4 000 px.</strong> Většina týmů podcení velikost kanvasu.
+                    Big Picture na 50+ eventů potřebuje hodně horizontálního prostoru, jinak se účastníci
+                    začnou navzájem překrývat. V Miro založte nový board a první frame udělejte explicitně
+                    s těmito rozměry — parametr <em>Frame size</em>.
+                </li>
+                <li>
+                    <strong>Předpřipravená paleta.</strong> Vlevo na boardu položte 7-9 zdrojových stickies
+                    (jednu od každé barvy) a kolem nich rámeček s popiskem „<em>Drag from here — copy &amp; paste pak Ctrl+D</em>".
+                    Účastníci si stickies kopírují místo aby pracně otevírali sticky picker.
+                </li>
+                <li>
+                    <strong>Voice-only, kamery vypnuté.</strong> Kamery odvádějí pozornost od boardu;
+                    všichni se musí dívat na stejný kanvas. Výjimka: úvodních 5 minut představení a
+                    pak při hot-spot diskusích.
+                </li>
+                <li>
+                    <strong>Breakout místnosti pro dvě fáze.</strong> Při Pivotal Events fázi rozdělte
+                    skupinu do 2-3 breakout místností po 4 lidech. Každá skupina si v Miru pracuje na
+                    jednom segmentu časové osy. Po 20 minutách se vše vrátí zpět do hlavní místnosti
+                    a synchronizuje. Bez breakoutů online workshop kolabuje na jednoho aktivního a
+                    pět pasivních pozorovatelů.
+                </li>
+                <li>
+                    <strong>Přestávky každých 60 minut.</strong> Online unavuje rychleji než offline.
+                    Vložte 10 minutové přestávky, ne smlouvejte se s nimi.
+                </li>
+                <li>
+                    <strong>Asynchronní pre-work.</strong> Pošlete účastníkům 24 hodin předem otevřený
+                    Miro board s úvodním textem a požádejte je, aby <em>před</em> workshopem nalepili
+                    5-10 eventů, které je napadnou. Workshop pak začíná z teplého stavu a ne z prázdné stěny.
+                </li>
+            </ol>
+
+            <h3 id="bp-when-again">14.04.5 Kdy Big Picture <em>nedělat</em></h3>
+
+            <p>
+                Big Picture není univerzální nástroj. Vynechte ho v těchto situacích:
+            </p>
+
+            <ul>
+                <li>
+                    <strong>Zralý produkt s ustáleným modelem.</strong> Když tým 3 roky pracuje v jedné
+                    doméně a má aktuální Context Map, nový Big Picture typicky neodhalí nic nového —
+                    investujte raději do Process Level pro konkrétní bolavý BC.
+                </li>
+                <li>
+                    <strong>Tým není ochotný diskutovat.</strong> Big Picture stojí na otevřené debatě.
+                    Pokud je v týmu strach z konfrontace nebo silně hierarchická kultura, nejdřív tu
+                    bariéru zlomte — jinak workshop produkuje falešný konsenzus.
+                </li>
+                <li>
+                    <strong>Doménoví experti jsou v různých časových pásmech bez přesahu.</strong>
+                    Big Picture musí proběhnout najednou. Pokud nemůžete najít 3-4 hodinové okno, kdy
+                    všichni klíčoví hráči jsou online, udělejte místo toho sérii Domain Storytelling
+                    sessionů 1:1 a výstupy slijte.
+                </li>
+            </ul>
+
             {% set _callout_body %}
                 <h3 id="facilitator-rule-heading">Facilitátor nesmí být tech lead</h3>
                 <p>
@@ -824,6 +892,55 @@ if ($items === []) {
                 type: 'note',
                 body: _callout_body
             } %}
+
+            <h3 id="ds-egon-walkthrough">14.07.4 Praktický egon.io walkthrough</h3>
+
+            <p>
+                <strong><a href="https://egon.io/" target="_blank" rel="noopener">egon.io</a></strong> je
+                open-source webová aplikace (postavená na bpmn-js), která Domain Storytelling notaci
+                plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír,
+                je to optimální nástroj. Postup pro první session:
+            </p>
+
+            <ol>
+                <li>
+                    <strong>Otevřete egon.io v prohlížeči</strong> — nevyžaduje registraci. Vlevo nahoře
+                    je toolbar s ikonkami: actor (panáček), work object (obdélník), activity (šipka).
+                </li>
+                <li>
+                    <strong>Začněte s actorem.</strong> Přetáhněte ikonu „person" na plátno a pojmenujte
+                    ji rolí, ne osobou — <code>Customer</code>, ne <code>Petr Novák</code>. Pojmenování
+                    je důležité; v exportu se objeví u každé activity.
+                </li>
+                <li>
+                    <strong>Přidejte work object.</strong> Druhý nejčastější tvar — věc, se kterou actor
+                    pracuje. V e-shopu typicky <code>Cart</code>, <code>Order</code>, <code>Invoice</code>,
+                    <code>ShipmentLabel</code>.
+                </li>
+                <li>
+                    <strong>Spojte je activity.</strong> Klik na actora, drag na work object — egon.io
+                    vytvoří očíslovanou šipku. Slovesné jméno (<em>browses</em>, <em>submits</em>,
+                    <em>confirms</em>) se píše do labelu šipky.
+                </li>
+                <li>
+                    <strong>Buďte prostí.</strong> Jeden Domain Storytelling diagram by měl mít
+                    <strong>jeden lineární příběh</strong> s 5-15 activities. Když jich máte 30,
+                    rozdělte ho na dva diagramy.
+                </li>
+                <li>
+                    <strong>Export do SVG.</strong> Menu vpravo nahoře → Download → SVG. Soubor
+                    pojmenujte <code>&lt;datum&gt;-&lt;story-name&gt;.svg</code> a uložte do
+                    <code>docs/discovery/&lt;datum&gt;/storytelling/</code>. SVG je textový formát,
+                    který se v gitu pěkně diffuje a v PR review vidíte změny.
+                </li>
+            </ol>
+
+            <p>
+                Pro tým, který chce diagramy generovat z kódu (např. v dokumentaci aktualizované
+                CI), egon.io umí číst i <strong>vlastní DSL formát</strong> ve YAML, ze kterého
+                pak rendrouje SVG. Tím můžete například mít zdrojový text storyboardu uložený
+                v repu a jeho rendrovaná verze se generuje při buildu dokumentace.
+            </p>
         </section>
 
         {# ───────────────────────────────────────────────────────────
@@ -1033,6 +1150,96 @@ Description:
 Hot spot z Big Picture workshopu 2026-04-29 (foto: docs/discovery/2026-04-29-big-picture/02-payment-area.jpg).
 Tým si není jist, zda se zásilka vrací zpět, nebo se účet zákazníka jen označí jako neuhrazený.
 Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ordering BC.</code></pre>
+
+            <h3 id="post-5-repo">14.09.5 Doporučená struktura repa po prvním workshopu</h3>
+
+            <p>
+                Aby výstup workshopu nebyl pohřben v Slacku, doporučuji v Symfony projektu rovnou založit
+                tuto adresářovou strukturu. Každý soubor má jasný účel a nikdo nemusí hádat, kam co patří:
+            </p>
+
+            <pre><code>my-symfony-app/
+├── docs/
+│   ├── discovery/
+│   │   └── 2026-04-29-big-picture/
+│   │       ├── 00-wide-angle.jpg
+│   │       ├── 01-customer-area.jpg
+│   │       ├── 02-payment-area.jpg
+│   │       ├── 03-shipment-area.jpg
+│   │       ├── 99-miro-export.png
+│   │       ├── events.md           ← seznam doménových eventů (text)
+│   │       ├── hot-spots.md        ← otázky k vyřešení
+│   │       └── README.md           ← účastníci, datum, link na Miro
+│   ├── context-map.png             ← aktualizovaná z workshopu
+│   ├── context-map.md              ← textový popis vztahů mezi BC
+│   └── ubiquitous-language.md      ← rostoucí slovník pojmů
+├── src/
+│   ├── Ordering/                   ← jeden BC z workshopu = jeden namespace
+│   │   ├── Domain/
+│   │   ├── Application/
+│   │   └── Infrastructure/
+│   ├── Payment/
+│   └── Shipment/
+└── ...</code></pre>
+
+            <p>
+                Adresář <code>docs/discovery/</code> je <strong>append-only</strong> — staré workshopy
+                se nemažou, jen se přidávají nové (s novým datem). Tým tak má historii, jak se mapa
+                domény vyvíjela, a re-storming může jednoduše porovnat <code>docs/discovery/2026-04-29-big-picture/events.md</code>
+                s <code>docs/discovery/2026-10-15-re-storming/events.md</code>.
+            </p>
+
+            <p>
+                Dolní hranice <code>src/Ordering</code>, <code>src/Payment</code>, <code>src/Shipment</code>
+                přímo zrcadlí 3 fialové stickies z workshopu — Bounded Contexty. Když nový developer
+                otevře projekt, vidí strukturu, která mu odpovídá tomu, co viděl na fotce ze workshopu.
+                Tato vazba mezi <em>artefaktem v repu</em> a <em>artefaktem ze stěny</em> je jediná
+                ochrana proti tomu, aby se jazyk workshopu po půl roce vytratil z kódu.
+            </p>
+
+            <h3 id="post-6-prvni-pr">14.09.6 První PR po workshopu</h3>
+
+            <p>
+                První pull request po workshopu by měl být <strong>malý a explicitně značený</strong>
+                jako follow-up — ne velký commit s implementací první feature. Doporučená velikost:
+            </p>
+
+            <ul>
+                <li>Vytvoření <code>docs/discovery/&lt;datum&gt;/</code> se všemi výstupy workshopu.</li>
+                <li>Aktualizace <code>docs/context-map.md</code> a <code>docs/ubiquitous-language.md</code>.</li>
+                <li>Založení prázdných namespace adresářů (<code>src/&lt;BC&gt;/Domain/</code>) s krátkým <code>README.md</code> v každém — kdy vznikl, z jakého workshopu, co obsahuje.</li>
+                <li>Tickety pro hot spoty (případně přes script, který je vytvoří hromadně).</li>
+            </ul>
+
+            <p>
+                Žádný kód doménové logiky. Tento PR má jediný úkol: <strong>uložit společnou paměť
+                workshopu do repa, než ji všichni zapomenou.</strong> Implementace prvního agregátu
+                přijde v dalším PR, který už je Design Level výstupem.
+            </p>
+
+            {% set _callout_body %}
+                <h3 id="commit-disclaimer-heading">Workshop commit message konvence</h3>
+                <p>
+                    Pro PR navazující na workshop používejte konzistentní commit message, aby šly
+                    v gitu vyhledat:
+                </p>
+                <pre><code>docs(discovery): big picture workshop 2026-04-29
+
+Účastníci: 4 doménoví experti, 5 vývojářů, 1 PM, 1 facilitátor.
+Identifikováno: 5 BC (Ordering, Payment, Shipment, Catalog, Identity),
+               12 hot spotů, 47 doménových eventů.
+Miro: https://miro.com/board/xyz123 (read-only)
+Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
+                <p>
+                    Za rok, když si potřebujete dohledat „kdy jsme rozhodli, že refunds patří do Payment
+                    BC, ne do Ordering", <code>git log --grep="discovery"</code> vás dovede k odpovědi
+                    za 5 vteřin.
+                </p>
+            {% endset %}
+            {% include '_partials/callout.html.twig' with {
+                type: 'pattern',
+                body: _callout_body
+            } %}
         </section>
 
         {# ───────────────────────────────────────────────────────────
@@ -1078,6 +1285,108 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
             <p>
                 Brandolini tomu říká „<em>Strategic re-storming</em>" — typicky ho dělá menší skupina (3-5 lidí
                 z původního workshopu) a trvá kratší dobu, protože hodně mapy se zachová.
+            </p>
+        </section>
+
+        {# ───────────────────────────────────────────────────────────
+           14.10b Most workshop → TDD
+           ─────────────────────────────────────────────────────────── #}
+        <section id="workshop-to-tdd" aria-labelledby="workshop-to-tdd-heading">
+            <h2 id="workshop-to-tdd-heading" class="h-section"><span class="h-num">14.10b</span> Most z workshopu do testů</h2>
+
+            <p>
+                Design Level Event Storming přirozeně ústí do test-driven development. Každý invariant
+                napsaný na sticky agregátu je <strong>jeden test case</strong>. Každý hot spot, který
+                se za běhu workshopu vyřešil, je <strong>jeden další test case</strong>. Tým, který
+                z workshopu odejde a nezačne psát testy podle invariantů, ztrácí polovinu hodnoty
+                workshopu.
+            </p>
+
+            <h3 id="tdd-mapping">14.10b.1 Mapping invariantů na PHPUnit testy</h3>
+
+            <p>Sticky agregátu z workshopu:</p>
+
+            <pre><code>Order Aggregate
+- Inv-1: nemůže být confirmed bez aspoň jedné položky
+- Inv-2: po cancelled už nelze confirm
+- Inv-3: součet item.quantity * item.price = total
+- Inv-4: confirm vyžaduje, aby payment byl Settled (hot spot Order-7)</code></pre>
+
+            <p>Přímý překlad do testů:</p>
+
+            <pre><code class="language-php">final class OrderTest extends TestCase
+{
+    /** @test Inv-1 (workshop 2026-04-29) */
+    public function place_throws_when_no_items(): void
+    {
+        $this-&gt;expectException(EmptyOrderNotAllowed::class);
+        Order::place(OrderId::new(), new CustomerId('c1'), []);
+    }
+
+    /** @test Inv-2 (workshop 2026-04-29) */
+    public function cannot_confirm_after_cancellation(): void
+    {
+        $order = Order::place(OrderId::new(), new CustomerId('c1'), [$this-&gt;item()]);
+        $order-&gt;cancel('customer request');
+        $this-&gt;expectException(CannotConfirmFromStatus::class);
+        $order-&gt;confirm();
+    }
+
+    /** @test Inv-3 (workshop 2026-04-29) */
+    public function total_equals_sum_of_line_subtotals(): void
+    {
+        $order = Order::place(
+            OrderId::new(),
+            new CustomerId('c1'),
+            [$this-&gt;item(qty: 2, price: 100), $this-&gt;item(qty: 1, price: 50)],
+        );
+        self::assertSame(250, $order-&gt;total()-&gt;amount());
+    }
+}</code></pre>
+
+            <p>
+                Komentáře <code>Inv-1 (workshop 2026-04-29)</code> nejsou kosmetika — jsou
+                <em>traceability</em>. Když test selže za půl roku a nový developer chce zjistit,
+                proč pravidlo existuje, doloví ho přes git blame nebo podle data workshopu.
+            </p>
+
+            <h3 id="tdd-events">14.10b.2 Doménové eventy jako tests</h3>
+
+            <p>
+                Z Process Levelu máte sekvenci <code>Command → Event → Policy → Command</code>.
+                Tato sekvence je acceptance test:
+            </p>
+
+            <pre><code class="language-php">final class PlaceOrderHandlerTest extends KernelTestCase
+{
+    /** @test Workshop scenario "Customer places an order" (2026-04-29) */
+    public function place_order_emits_OrderPlaced_and_triggers_payment(): void
+    {
+        $bus = self::getContainer()-&gt;get(MessageBusInterface::class);
+        $events = $this-&gt;collectEvents();
+
+        $bus-&gt;dispatch(new PlaceOrderCommand(
+            new CustomerId('c1'),
+            [new ItemDto('SKU-1', 1, 100)],
+        ));
+
+        self::assertCount(1, $events-&gt;ofType(OrderPlaced::class));
+        // Policy z workshopu: OrderPlaced ⇒ ChargeCard
+        self::assertCount(1, $events-&gt;commands(ChargeCardCommand::class));
+    }
+}</code></pre>
+
+            <p>
+                Toto má dva přínosy. První: testy jsou <em>readable</em> doménovým expertům —
+                pojmenování přesně odpovídá workshopu, takže ne-developer si test může přečíst
+                a potvrdit, že vyjadřuje to, co měl na mysli. Druhý: testy jsou <strong>regression
+                guard</strong>. Když někdo za rok refaktoruje a omylem porušuje invariant z workshopu,
+                test ho chytí.
+            </p>
+
+            <p>
+                Podrobně viz kapitolu <a href="{{ path('testing_ddd') }}">Testování v DDD</a> — testovací
+                strategie, doménové testy, integrační testy s Symfony Messenger.
             </p>
         </section>
 

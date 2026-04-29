@@ -222,6 +222,54 @@
                 DDD — třeba historická organizační struktura, kterou nikdo neaktualizoval. Tady přichází
                 Inverse Conway Maneuver (sekce 15.05).
             </p>
+
+            <h3 id="bc-team-mismatch">Co dělat, když Context Map a Team Map nesedí</h3>
+
+            <p>
+                V reálu narazíte na 4 typy nesouladu mezi Context Mapem a Team Mapem. Každý vyžaduje
+                jiný typ akce:
+            </p>
+
+            <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Symptom</th>
+                        <th>Příčina</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>BC bez týmu</td>
+                        <td>BC vznikl architekturou na papíře, nikdy nikomu nepřiřazen</td>
+                        <td>Sloučit s jiným BC nebo přiřadit existujícímu týmu jako 2. BC</td>
+                    </tr>
+                    <tr>
+                        <td>Tým bez BC</td>
+                        <td>Horizontální tým (frontend / DBA) bez doménové odpovědnosti</td>
+                        <td>Inverse Conway: rozpustit a přerozdělit do stream-aligned týmů</td>
+                    </tr>
+                    <tr>
+                        <td>BC sdílený 2 týmy</td>
+                        <td>Organické zvětšování bez split BC nebo split týmu</td>
+                        <td>Buď split BC na 2 menší + Customer/Supplier, nebo merge týmů</td>
+                    </tr>
+                    <tr>
+                        <td>1 tým vlastní 5+ BC</td>
+                        <td>Akumulace bez měření cognitive load</td>
+                        <td>Split týmu (sekce <a href="#cognitive-load">15.06</a>) nebo redukce počtu BC</td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+
+            <p>
+                Žádný z těchto scénářů není akutní krize — Conway's Law dává systému dostatek setrvačnosti,
+                aby s nesouladem fungoval měsíce. Ale dlouhodobě se nesoulad projeví v rostoucích lead time,
+                rostoucí change failure rate a klesající morálce týmů. Nesoulad je pomalý jed, ne explozivní
+                porucha.
+            </p>
         </section>
 
         <section id="team-topologies-typy" aria-labelledby="team-topologies-typy-heading">
@@ -553,6 +601,55 @@
                 a zvažujete Inverse Conway Maneuver bez explicitního zadání od CTO, raději se nejdřív
                 zeptejte. Detail komunikace s managementem je v sekci 15.09.
             </p>
+
+            <h3 id="inverse-checklist">Praktický checklist před spuštěním Inverse Conway Maneuver</h3>
+
+            <p>
+                Než zahájíte re-org, projděte následující seznam. Pokud na <em>kterýkoli</em> bod
+                odpovíte „ne", Inverse Conway je předčasný a v 90 % případů selže:
+            </p>
+
+            <ol>
+                <li>
+                    <strong>Existuje kanonická Context Map?</strong> Bez ní není definovaná cílová
+                    architektura. Krok 1 selhal a kroky 2–4 nemají kam směřovat. Pokud nemáte Context Map,
+                    začněte tam (kapitola o <a href="{{ path('context_mapping') }}">Context Mappingu</a>).
+                </li>
+                <li>
+                    <strong>Má re-org explicitní podporu CTO / VP Engineering?</strong> Re-org je politický
+                    akt. Bez backingu shora není odpor odolatelný — lidé budou hledat výjimky a starou
+                    strukturu obnoví neoficiálně.
+                </li>
+                <li>
+                    <strong>Máte 6 měsíců času?</strong> Re-org pod 6 měsíců typicky nefunguje. Lidé
+                    potřebují čas se přesunout, naučit se nové domény, vybudovat nové vztahy.
+                </li>
+                <li>
+                    <strong>Existuje plán pro Platform team?</strong> Bez self-service platformy se
+                    stream-aligned týmy zaseknou na infrastruktuře. Platform team musí mít alespoň
+                    minimum-viable IDP připravený před re-orgem (1-click new-BC bootstrap, CI šablona,
+                    observability default).
+                </li>
+                <li>
+                    <strong>Změřili jste DORA metriky před re-orgem?</strong> Bez baseline neumíte
+                    obhájit úspěch ani identifikovat regresi. Jednoduché měření: lead time z PR-merge
+                    do produkce, deployment frequency, change failure rate (% deploy s rollbackem),
+                    MTTR (medián času na vyřešení P1 incidentu).
+                </li>
+                <li>
+                    <strong>Je organizace v Westrum generative kultuře?</strong> V pathological / bureaucratic
+                    re-org formálně proběhne, ale operativní vztahy se vrátí (sekce <a href="#westrum">15.09</a>).
+                </li>
+                <li>
+                    <strong>Je obsazená pozice „topology owner"?</strong> Někdo musí re-org vést na
+                    denní bázi — typicky staff engineer + manažer. Bez vlastníka se re-org rozplyne
+                    do běžných sprint priorit.
+                </li>
+            </ol>
+
+            <p>
+                Pokud máte všech 7 bodů „ano", máte vyšší šanci než průměr. Zbývá jen práce.
+            </p>
         </section>
 
         <section id="cognitive-load" aria-labelledby="cognitive-load-heading">
@@ -651,6 +748,72 @@
             <p>
                 <em>Pokud je průměr bodu 5 pod 3, tým je v krizovém režimu — žádné nové BC, žádné nové
                 technologie. Nejdřív stabilizovat extraneous load.</em>
+            </p>
+
+            <p>
+                Tady je rubrika ve formátu, který stačí vlepit do <code>docs/cognitive-load.md</code>
+                v repu týmu. Vejde se na 1 stránku A4, vyplní se za 30 minut na konci sprintu a je dobrým
+                vstupem pro retro:
+            </p>
+
+            {% set _rubric %}# Cognitive Load Rubric — Q?/YYYY
+
+Tým: <název týmu>
+Bounded Contexts ve vlastnictví: <seznam BC>
+Velikost týmu: <N> lidí
+Datum měření: YYYY-MM-DD
+
+## 1. Doménová komplexita (intrinsic)
+Otázka: "Rozumím kompletně doméně, kterou náš tým vlastní?"
+Skóre 1–5: __
+Komentář: ____________________________________________
+
+## 2. Technická komplexita (intrinsic)
+Otázka: "Rozumím všem technologiím, které používáme (jazyk, framework, DB, broker)?"
+Skóre 1–5: __
+Komentář: ____________________________________________
+
+## 3. Stabilita platformy (extraneous, inverze)
+Otázka: "Můžu se spolehnout na CI/CD, observability, deploy bez ad hoc oprav?"
+Skóre 1–5: __ (5 = stabilní, 1 = každý deploy je dobrodružství)
+Komentář: ____________________________________________
+
+## 4. Kvalita dokumentace (extraneous, inverze)
+Otázka: "Najdu v interní dokumentaci potřebné info do 5 minut?"
+Skóre 1–5: __
+Komentář: ____________________________________________
+
+## 5. Prostor na učení (germane)
+Otázka: "Mám každý sprint alespoň 2 hodiny na zlepšení / learning / refactoring?"
+Skóre 1–5: __
+Komentář: ____________________________________________
+
+## Vyhodnocení (vyplní team-lead po sběru od všech členů týmu)
+
+Průměr 1+2 (intrinsic kapacita): __
+Průměr 3+4 (extraneous tlak):    __
+Bod 5 (germane prostor):         __
+
+## Akce na další kvartál
+
+- [ ] Pokud bod 5 < 3 → zastavit přírůstek BC.
+- [ ] Pokud body 3+4 < 3 → eskalovat na Platform team (extraneous load).
+- [ ] Pokud body 1+2 < 3 → zvážit split BC nebo přidání člena týmu.
+- [ ] Pokud > 4 BC ve vlastnictví → naplánovat split do 2 kvartálů.
+{% endset %}
+
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'docs/cognitive-load.md',
+                language: 'markdown',
+                code: _rubric
+            } %}
+
+            <p>
+                Rubrika je záměrně subjektivní — měří <em>vnímání</em> členů týmu, ne metrické fakty.
+                Důvod: cognitive load je psychologická kategorie, žádná metrika z Grafany ji nezachytí.
+                Skelton a Pais (2019, kap. 6) explicitně varují před snahou cognitive load „objektivizovat"
+                přes počet řádků kódu, count of services, nebo ticket throughput. Tyto proxy metriky
+                nemají korelaci s tím, jak se tým reálně cítí.
             </p>
 
             {% set _callout_body %}
@@ -1112,7 +1275,7 @@
                 },
                 {
                     question: 'Jaký je vztah mezi Team Topologies a mikroservisy?',
-                    answer: 'Team Topologies není o mikroservisech, ale mikroservisy bez Team Topologies obvykle vedou k distribuovanému monolitu. Mikroservis je <em>fyzická</em> hranice nasazení; stream-aligned tým je <em>organizační</em> hranice odpovědnosti. V ideálním stavu jsou izomorfní — 1 stream-aligned tým = 1 BC = 1 mikroservis (nebo modul v modulárním monolitu). Pokud máte 30 mikroservis a 5 týmů, nejste v mikroservisové architektuře — jste v distribuovaném monolitu, kde každý tým „vlastní" 6 služeb a žádná hranice nemá soudržného vlastníka. Kapitola o <a href="{{ path('architectural_styles') }}">architektonických stylech</a> rozebírá detail.'
+                    answer: 'Team Topologies není o mikroservisech, ale mikroservisy bez Team Topologies obvykle vedou k distribuovanému monolitu. Mikroservis je <em>fyzická</em> hranice nasazení; stream-aligned tým je <em>organizační</em> hranice odpovědnosti. V ideálním stavu jsou izomorfní — 1 stream-aligned tým = 1 BC = 1 mikroservis (nebo modul v modulárním monolitu). Pokud máte 30 mikroservis a 5 týmů, nejste v mikroservisové architektuře — jste v distribuovaném monolitu, kde každý tým „vlastní" 6 služeb a žádná hranice nemá soudržného vlastníka. Kapitola o <a href="' ~ path('architectural_styles') ~ '">architektonických stylech</a> rozebírá detail.'
                 }
             ]
         } %}
