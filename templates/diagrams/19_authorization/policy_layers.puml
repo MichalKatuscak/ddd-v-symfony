@@ -5,7 +5,7 @@ title 4 vrstvy autorizace v DDD aplikaci
 
 rectangle "1. Edge\n(API gateway / firewall)" as edge
 rectangle "2. Use Case\n(Application Service / Voter)" as uc
-rectangle "3. Aggregate\n(invarianty + permissions)" as agg #$ACCENT_DIM
+rectangle "3. Aggregate\n(invarianty + permissions)" as agg $ACCENT
 rectangle "4. Field\n(read-time projekce)" as field
 
 edge -down-> uc : "kdo? je přihlášený?"

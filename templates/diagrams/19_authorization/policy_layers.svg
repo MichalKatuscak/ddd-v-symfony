@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="796.875px" preserveAspectRatio="none" style="width:879px;height:796px;background:#11141A;" version="1.1" viewBox="0 0 879 796" width="879.6875px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="478.125" x="205.4688" y="26.1063">4 vrstvy autorizace v DDD aplikaci</text><!--MD5=[ce247ceb37f676e33360d84601c77157]
+entity edge--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="267.1875" x="39.0625" y="49.9268"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="82.8125" x="131.25" y="85.8566">1. Edge</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="235.9375" x="54.6875" y="111.3205">(API gateway / firewall)</text><!--MD5=[3a45786a43c258a5cec52944ed422cce]
+entity uc--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="326.5625" x="9.375" y="263.9893"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="129.6875" x="107.8125" y="299.9191">2. Use Case</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="295.3125" x="25" y="325.383">(Application Service / Voter)</text><!--MD5=[b0fd78db2cca6e3dc4cfcb6fdc4395ed]
+entity agg--><rect fill="#F0A456" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="309.375" x="17.9688" y="478.0518"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="103.125" y="513.9816">3. Aggregate</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="278.125" x="33.5938" y="539.4455">(invarianty + permissions)</text><!--MD5=[b7a4e88e8c44f8e9519778c53f932cf8]
+entity field--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="250" x="47.6563" y="692.1143"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="76.5625" x="134.375" y="728.0441">4. Field</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="218.75" x="63.2813" y="753.508">(read-time projekce)</text><path d="M361.7188,49.9268 L361.7188,85.083 L306.4688,91.333 L361.7188,97.583 L361.7188,132.5684 A4.6875,4.6875 0 0 0 366.4063,137.2559 L794.5313,137.2559 A4.6875,4.6875 0 0 0 799.2188,132.5684 L799.2188,60.8643 L783.5938,45.2393 L366.4063,45.2393 A4.6875,4.6875 0 0 0 361.7188,49.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M783.5938,45.2393 L783.5938,58.5205 A2.3438,2.3438 0 0 0 785.9375,60.8643 L799.2188,60.8643 L783.5938,45.2393 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="404.6875" x="371.0938" y="73.3566">Hrubé: anonymous vs. authenticated.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="270.3125" x="371.0938" y="98.8205">HTTP, ne doménový kód.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="371.0938" y="124.2844">Symfony:</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="162.5" x="475.7813" y="124.2844">access_control</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="6.25" x="638.2813" y="124.2844">,</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="650.7813" y="124.2844">JWT firewall</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="6.25" x="767.9688" y="124.2844">.</text><path d="M390.625,263.9893 L390.625,299.1455 L335.9375,305.3955 L390.625,311.6455 L390.625,346.6309 A4.6875,4.6875 0 0 0 395.3125,351.3184 L856.25,351.3184 A4.6875,4.6875 0 0 0 860.9375,346.6309 L860.9375,274.9268 L845.3125,259.3018 L395.3125,259.3018 A4.6875,4.6875 0 0 0 390.625,263.9893 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M845.3125,259.3018 L845.3125,272.583 A2.3438,2.3438 0 0 0 847.6563,274.9268 L860.9375,274.9268 L845.3125,259.3018 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="332.8125" x="400" y="287.4191">Symfony Voter / VoterInterface.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="390.625" x="400" y="312.883">„Smí customer X stornovat order Y?"</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="437.5" x="400" y="338.3469">Doménová pravidla, ale mimo aggregate.</text><path d="M382.8125,478.0518 L382.8125,513.208 L327.625,519.458 L382.8125,525.708 L382.8125,560.6934 A4.6875,4.6875 0 0 0 387.5,565.3809 L810.9375,565.3809 A4.6875,4.6875 0 0 0 815.625,560.6934 L815.625,488.9893 L800,473.3643 L387.5,473.3643 A4.6875,4.6875 0 0 0 382.8125,478.0518 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M800,473.3643 L800,486.6455 A2.3438,2.3438 0 0 0 802.3438,488.9893 L815.625,488.9893 L800,473.3643 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="285.9375" x="392.1875" y="501.4816">Aggregate sám rozhoduje.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="400" x="392.1875" y="526.9455">„Order může cancelovat jen vlastník."</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="378.125" x="392.1875" y="552.4094">Throw ForbiddenDomainException.</text><path d="M353.125,692.1143 L353.125,727.2705 L297.9063,733.5205 L353.125,739.7705 L353.125,774.7559 A4.6875,4.6875 0 0 0 357.8125,779.4434 L737.5,779.4434 A4.6875,4.6875 0 0 0 742.1875,774.7559 L742.1875,703.0518 L726.5625,687.4268 L357.8125,687.4268 A4.6875,4.6875 0 0 0 353.125,692.1143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M726.5625,687.4268 L726.5625,700.708 A2.3438,2.3438 0 0 0 728.9063,703.0518 L742.1875,703.0518 L726.5625,687.4268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="212.5" x="362.5" y="715.5441">Read model filtrace.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="348.4375" x="362.5" y="741.008">Sloupec audit_log vidí jen admin.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="356.25" x="362.5" y="766.4719">Twig if + Voter, NEBO query filter.</text><!--MD5=[678473631c0bc2be4f83276245b91386]
+link edge to uc--><path d="M172.6563,133.0674 C172.6563,167.958 172.6563,218.583 172.6563,255.6455 " fill="none" id="edge-&gt;uc" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="172.6563,263.8174,178.9063,249.7549,172.6563,256.0049,166.4063,249.7549,172.6563,263.8174" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="203.125" x="174.2188" y="206.1691">kdo? je přihlášený?</text><!--MD5=[545d010c52ee7329bfee69cfbb00015e]
+link uc to agg--><path d="M172.6563,347.1299 C172.6563,382.0205 172.6563,432.6455 172.6563,469.708 " fill="none" id="uc-&gt;agg" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="172.6563,477.8799,178.9063,463.8174,172.6563,470.0674,166.4063,463.8174,172.6563,477.8799" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="242.1875" x="174.2188" y="420.2316">smí vykonat use case?</text><!--MD5=[b8e9430130283e07eafa779c501d61d5]
+link agg to field--><path d="M172.6563,561.1924 C172.6563,596.083 172.6563,646.708 172.6563,683.7705 " fill="none" id="agg-&gt;field" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="172.6563,691.9424,178.9063,677.8799,172.6563,684.1299,166.4063,677.8799,172.6563,691.9424" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="428.125" x="174.2188" y="634.2941">v rámci use case smí na konkrétní data?</text><!--MD5=[67910a462ebf7e0ea1f8f2b197615f01]
+@startuml policy_layers
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title 4 vrstvy autorizace v DDD aplikaci
+
+rectangle "1. Edge\n(API gateway / firewall)" as edge
+rectangle "2. Use Case\n(Application Service / Voter)" as uc
+rectangle "3. Aggregate\n(invarianty + permissions)" as agg #F0A456
+rectangle "4. Field\n(read-time projekce)" as field
+
+edge -down-> uc : "kdo? je přihlášený?"
+uc -down-> agg : "smí vykonat use case?"
+agg -down-> field : "v rámci use case smí na konkrétní data?"
+
+note right of edge
+  Hrubé: anonymous vs. authenticated.
+  HTTP, ne doménový kód.
+  Symfony: <i>access_control</i>, <i>JWT firewall</i>.
+end note
+
+note right of uc
+  Symfony Voter / VoterInterface.
+  „Smí customer X stornovat order Y?"
+  Doménová pravidla, ale mimo aggregate.
+end note
+
+note right of agg
+  Aggregate sám rozhoduje.
+  „Order může cancelovat jen vlastník."
+  Throw ForbiddenDomainException.
+end note
+
+note right of field
+  Read model filtrace.
+  Sloupec audit_log vidí jen admin.
+  Twig if + Voter, NEBO query filter.
+end note
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.11+10-1-deb13u2-Debian
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
