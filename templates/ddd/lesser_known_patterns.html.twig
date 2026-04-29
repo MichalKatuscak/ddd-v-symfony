@@ -93,8 +93,8 @@
     <p>
         Většina online tutoriálů o DDD končí někde u Aggregate. Programátor, který se právě naučil
         odlišovat Entity od Value Objektu a&nbsp;chápe význam invariantů, má pocit, že už ovládá
-        „taktický design". Specification, Domain Service, Factory a Module se mu pak jeví jako
-        „nadbytečná abstrakce" – vždyť přece to, co dělají, lze napsat i jinak: <em>if</em>-em,
+        „taktický design“. Specification, Domain Service, Factory a Module se mu pak jeví jako
+        „nadbytečná abstrakce“ – vždyť přece to, co dělají, lze napsat i jinak: <em>if</em>-em,
         statickou metodou nebo prostým balíčkem v <code>src/</code>. Tato intuice je ale klamná
         a kapitola ukáže, proč.
     </p>
@@ -143,7 +143,7 @@
     <p>
         <strong>Specification</strong> je prvotřídní objekt, který zapouzdřuje jeden booleovský
         predikát nad doménovým objektem – typicky odpověď na otázku tvaru „splňuje tento agregát
-        konkrétní pravidlo?". Minimální rozhraní vypadá takto:
+        konkrétní pravidlo?“. Minimální rozhraní vypadá takto:
     </p>
 
     {% set _code %}{% verbatim %}interface Specification
@@ -159,8 +159,8 @@
 
     <p>
         Zdánlivě banální. Jenže právě tahle banalita je síla: každé pravidlo doménového jazyka
-        – <em>„zákazník je premium"</em>, <em>„objednávka má nárok na dopravu zdarma"</em>,
-        <em>„faktura je po splatnosti"</em> – dostane vlastní třídu s mluvícím jménem. Pravidlo
+        – <em>„zákazník je premium“</em>, <em>„objednávka má nárok na dopravu zdarma“</em>,
+        <em>„faktura je po splatnosti“</em> – dostane vlastní třídu s mluvícím jménem. Pravidlo
         přestává být pouhou kombinací <code>if</code>-ů uvnitř service vrstvy a stává se
         <strong>jmenovaným prvkem ubiquitous language</strong>.
     </p>
@@ -179,21 +179,21 @@
         <li>
             <strong>Komplexní business pravidla, která se mají skládat.</strong> Pokud máte
             v různých částech aplikace rekombinace téhož motivu – někde
-            „<em>premium AND v EU</em>", jinde „<em>premium OR má slevový kód</em>" –
+            „<em>premium AND v EU</em>“, jinde „<em>premium OR má slevový kód</em>“ –
             kompozice pomocí Specification vám ušetří duplikaci a&nbsp;udrží pravidla
             konzistentní.
         </li>
         <li>
             <strong>Pravidla použitelná jak v doméně, tak v repozitáři.</strong> Jedna a tatáž
             specifikace musí umět odpovědět na otázku „<em>splňuje tento konkrétní objekt
-            pravidlo?</em>" (in-memory predikát) i „<em>vrať mi z databáze všechny objekty,
-            které pravidlo splňují?</em>" (query). Tomuto se říká
+            pravidlo?</em>“ (in-memory predikát) i „<em>vrať mi z databáze všechny objekty,
+            které pravidlo splňují?</em>“ (query). Tomuto se říká
             <strong>double-dispatch</strong> a vyhnete se tím duplikaci pravidla mezi PHP
             kódem a SQL/Doctrine DQL.
         </li>
         <li>
             <strong>Pravidla, která se skládají za běhu.</strong> Promo kód, který má v admin UI
-            podmínky <em>„platí pro nákupy &gt; 1000&nbsp;Kč v ČR a SK, kromě výprodejového zboží"</em>,
+            podmínky <em>„platí pro nákupy &gt; 1000&nbsp;Kč v ČR a SK, kromě výprodejového zboží“</em>,
             se v doméně reprezentuje jako instance <code>AndSpecification</code> složená z N pod-pravidel
             čitelných z databáze.
         </li>
@@ -223,14 +223,14 @@
         </li>
         <li>
             Konfigurační a&nbsp;technické flagy – Specification má reprezentovat
-            <em>doménové</em> pravidlo, ne podmínku <em>„má feature flag enabled"</em>.
+            <em>doménové</em> pravidlo, ne podmínku <em>„má feature flag enabled“</em>.
         </li>
     </ul>
 
     {% set _callout_body %}
         <h3 id="spec-anti-heading">Anti-vzor: Specification pro každé porovnání</h3>
         <p>
-            Začátečníci po objevení vzoru často propadnou „kladivovému efektu" a&nbsp;vytvoří
+            Začátečníci po objevení vzoru často propadnou „kladivovému efektu“ a&nbsp;vytvoří
             třídy <code>OrderTotalGreaterThanSpecification</code>, <code>OrderTotalLessThanSpecification</code>,
             <code>OrderTotalEqualsSpecification</code> &mdash; každá obsahuje jeden řádek kódu.
             To je over-engineering: ztrácíte čitelnost domény, protože jména přestanou být
@@ -257,7 +257,7 @@
         fig: '12.2-A',
         title: 'Specification Pattern: kompozice booleovské logiky',
         inline: _diag,
-        alt: 'Třídní diagram Specification Patternu — interface, abstraktní CompositeSpecification, kombinátory And/Or/Not, konkrétní doménové specifikace.',
+        alt: 'Třídní diagram Specification Patternu – interface, abstraktní CompositeSpecification, kombinátory And/Or/Not, konkrétní doménové specifikace.',
         caption: 'Abstraktní <code>CompositeSpecification</code> poskytuje implementaci kombinátorů, takže každá konkrétní doménová specifikace dědí <code>and()</code>, <code>or()</code> a <code>not()</code> zdarma.'
     } %}
 
@@ -275,7 +275,7 @@ declare(strict_types=1);
 namespace App\SharedKernel\Domain\Specification;
 
 /**
- * Doménová specifikace — prvotřídní objekt zapouzdřující booleovský predikát.
+ * Doménová specifikace – prvotřídní objekt zapouzdřující booleovský predikát.
  *
  * @template T
  */
@@ -563,7 +563,7 @@ final class NotInBlacklist extends CompositeSpecification
 
     <p>
         Teprve nyní vidíme skutečnou hodnotu vzoru. Komplexní marketingová akce
-        <em>„doprava zdarma pro nákupy nad 1000&nbsp;Kč v EU, kromě zákazníků na blacklistu"</em>
+        <em>„doprava zdarma pro nákupy nad 1000&nbsp;Kč v EU, kromě zákazníků na blacklistu“</em>
         je pouze trojice atomických specifikací spojená kombinátorem <code>and</code> – jedna
         čitelná řádka místo trojnásobně vnořeného <code>if</code>-u:
     </p>
@@ -731,7 +731,7 @@ final class DoctrineOrderRepository implements OrderRepository
 
     <p>
         Tímto způsobem vyřešíte klasický problém <em>„jak se má pravidlo aplikovat jen jednou –
-        v PHP nebo v SQL?"</em>. Specifikace je <strong>zdroj pravdy</strong>, obě její role
+        v PHP nebo v SQL?“</em>. Specifikace je <strong>zdroj pravdy</strong>, obě její role
         (in-memory predikát i&nbsp;query překladač) sedí v&nbsp;jedné třídě a&nbsp;jsou
         nemožné rozejít.
     </p>
@@ -766,7 +766,7 @@ final class DoctrineOrderRepository implements OrderRepository
     <p>
         Jinými slovy: pokud existuje doménová operace <em>X</em>, kterou musíte umět provést, ale
         když si na chvíli položíte otázku <em>„které z mých Entit/Value Objektů tato operace
-        přirozeně patří?"</em>, žádná odpověď není uspokojivá – protože by to znamenalo, že daná
+        přirozeně patří?“</em>, žádná odpověď není uspokojivá – protože by to znamenalo, že daná
         Entita musí znát příliš mnoho o&nbsp;druhé – pak je čas vytvořit Domain Service.
     </p>
 
@@ -789,7 +789,7 @@ final class DoctrineOrderRepository implements OrderRepository
         </li>
         <li>
             <strong>Credit scoring</strong> – výpočet skóre žadatele o&nbsp;úvěr.
-            Hledá se odpověď na <em>„má tento zákazník nárok na úvěr X?"</em> kombinací několika
+            Hledá se odpověď na <em>„má tento zákazník nárok na úvěr X?“</em> kombinací několika
             faktorů.
         </li>
         <li>
@@ -822,7 +822,7 @@ final class DoctrineOrderRepository implements OrderRepository
         <li>
             <strong>Je to skutečně doménová operace, nebo aplikační?</strong> Domain Service
             obsahuje business pravidla. Application Service koordinuje
-            (transakce, autorizace, eventy). Pokud byste musel ve „doménové" service
+            (transakce, autorizace, eventy). Pokud byste musel ve „doménové“ service
             volat <code>EntityManager-&gt;flush()</code> – je to Application Service.
         </li>
         <li>
@@ -851,13 +851,13 @@ use App\Banking\Domain\TransferReference;
 use App\SharedKernel\Domain\Money;
 
 /**
- * Domain Service — převod peněz mezi dvěma účty.
+ * Domain Service – převod peněz mezi dvěma účty.
  *
  * Operace nepatří do žádného z účtů, protože jeden z nich nesmí znát
  * druhý: agregáty jsou autonomní. Jde o doménovou logiku (validace
  * dostupnosti prostředků, kontrola limitu), nikoliv o aplikační koordinaci.
  *
- * Stateless — bez instance variables, bez side-effectů na kolaborátorech.
+ * Stateless – bez instance variables, bez side-effectů na kolaborátorech.
  */
 final class MoneyTransferService
 {
@@ -874,7 +874,7 @@ final class MoneyTransferService
 
         if (!$from->currency()->equals($to->currency())) {
             throw new \DomainException(
-                'Currency mismatch — use FxTransferService for cross-currency transfers.',
+                'Currency mismatch – use FxTransferService for cross-currency transfers.',
             );
         }
 
@@ -890,7 +890,7 @@ final class MoneyTransferService
     } %}
 
     <p>
-        Všimněte si tří rysů, podle kterých poznáte „opravdovou" Domain Service:
+        Všimněte si tří rysů, podle kterých poznáte „opravdovou“ Domain Service:
     </p>
 
     <ol>
@@ -1011,7 +1011,7 @@ final class MoneyTransferService
         Tabulka odhaluje, proč slepé pojmenování všeho na <code>*Service</code> je problematické –
         a&nbsp;proč se v&nbsp;moderním DDD upouští od sufixu <em>Service</em>
         u&nbsp;Application vrstvy ve prospěch <em>Handler</em> nebo <em>UseCase</em>. Doménová
-        Service má sufix <em>Service</em> jen tehdy, když pomáhá zdůraznit „operace bez vlastníka".
+        Service má sufix <em>Service</em> jen tehdy, když pomáhá zdůraznit „operace bez vlastníka“.
         V mnoha doménách dokonce i&nbsp;u&nbsp;Domain Service zvolíme přímo doménové jméno
         (<code>FundsTransfer</code>, <code>PricingEngine</code>) bez sufixu.
     </p>
@@ -1058,7 +1058,7 @@ final class MoneyTransferService
         agregátu nebo Value Objektu</strong>, kde standardní konstruktor nestačí. Eric Evans
         v&nbsp;kapitole&nbsp;6 <em>Domain-Driven Design</em> (2003) píše:
         <em>„Vytváření složených objektů by mělo být odděleno od jejich provozu, tím spíše,
-        když jejich vznik vyžaduje pravidla nebo polymorfismus."</em>
+        když jejich vznik vyžaduje pravidla nebo polymorfismus.“</em>
     </p>
 
     <p>
@@ -1069,7 +1069,7 @@ final class MoneyTransferService
     <ul>
         <li>
             Vznik agregátu vyžaduje validaci, kterou nelze provést až <em>po</em> konstrukci
-            (např. <em>„nový Order musí mít alespoň 1 položku, jinak agregát neexistuje"</em>).
+            (např. <em>„nový Order musí mít alespoň 1 položku, jinak agregát neexistuje“</em>).
         </li>
         <li>
             Vznik je polymorfní – z různých vstupů vznikají různé pod-typy stejného agregátu
@@ -1104,7 +1104,7 @@ final class MoneyTransferService
         </li>
         <li>
             <strong>Factory pro každý objekt v doméně</strong> – over-engineering. DDD říká
-            <em>„Factory podle potřeby"</em>, ne <em>„Factory pro všechno"</em>.
+            <em>„Factory podle potřeby“</em>, ne <em>„Factory pro všechno“</em>.
         </li>
     </ul>
 
@@ -1168,7 +1168,7 @@ final class Order extends AggregateRoot
     }
 
     /**
-     * Polymorfní vznik — pouze digitální obsah, jiná pravidla
+     * Polymorfní vznik – pouze digitální obsah, jiná pravidla
      * (žádná dopravní adresa, instantní doručení).
      *
      * @param list<DigitalItem> $items
@@ -1192,7 +1192,7 @@ final class Order extends AggregateRoot
     }
 
     /**
-     * Vznik z importu — odlišná validace, neidentifikuje zákazníka přes CustomerId,
+     * Vznik z importu – odlišná validace, neidentifikuje zákazníka přes CustomerId,
      * ale přes externí key, který se uvnitř naváže na guest CustomerId.
      */
     public static function fromImport(
@@ -1258,7 +1258,7 @@ use App\SharedKernel\Domain\CustomerId;
 use Psr\Clock\ClockInterface;
 
 /**
- * Factory class — vznik objednávky z košíku vyžaduje
+ * Factory class – vznik objednávky z košíku vyžaduje
  * načtení košíku a aplikaci aktuálního pricingu.
  * Static method by tyto závislosti nemohla převzít.
  */
@@ -1296,7 +1296,7 @@ final class OrderFromCartFactory
 
     <p>
         Všimněte si, že Factory class <strong>uvnitř volá</strong> <code>Order::place()</code> –
-        nepřebírá zodpovědnost za invariant „aspoň 1 položka", ten zůstává v&nbsp;named
+        nepřebírá zodpovědnost za invariant „aspoň 1 položka“, ten zůstává v&nbsp;named
         constructor agregátu. Factory řeší pouze <em>orchestraci vstupních dat</em>.
     </p>
 
@@ -1309,7 +1309,7 @@ final class OrderFromCartFactory
             poskytnout parametrem.&ldquo;</strong> Důvod je triviální: statická metoda na agregátu
             drží invarianty pohromadě s&nbsp;kódem agregátu, samostatná Factory je rozdělí na dva
             soubory a vystavuje agregát public konstruktoru, což oslabuje invariant „nelze vytvořit
-            nevalidní stav".
+            nevalidní stav“.
         </p>
         <p>
             Aplikováno na PHP&nbsp;8.4: privátní konstruktor + statické <code>::place()</code>,
@@ -1334,7 +1334,7 @@ final class OrderFromCartFactory
 
     {% set _code %}{% verbatim %}/**
  * Rekonstituce ze stavu načteného z DB / event streamu.
- * Tento pojmenovaný konstruktor neaplikuje invarianty —
+ * Tento pojmenovaný konstruktor neaplikuje invarianty –
  * rekonstruovaný stav je z definice valid, jinak by se nedostal do persistence.
  *
  * @internal Smí volat pouze infrastruktura repozitáře.
@@ -1386,14 +1386,14 @@ public static function reconstitute(
         <strong>Module</strong> je v&nbsp;Evansově terminologii <strong>vědomá organizace kódu
         do balíčků pojmenovaných podle ubiquitous language</strong>. Není to PHP feature, není
         to namespace – je to <em>princip</em>, který říká: <em>„rozhraní balíčků vašeho kódu má
-        odrážet doménový jazyk, ne technické vrstvy a&nbsp;ne použité knihovny."</em>
+        odrážet doménový jazyk, ne technické vrstvy a&nbsp;ne použité knihovny.“</em>
     </p>
 
     <p>
         Evans věnoval Modules celou samostatnou pasáž v&nbsp;kapitole&nbsp;5 <em>Domain-Driven
         Design</em> (2003). Citace: <em>„Modules in DDD are a way of expressing the higher-level
         structure of a model... Modules should reflect the domain language, not the technical
-        organization of code."</em>
+        organization of code.“</em>
     </p>
 
     <p>
@@ -1494,7 +1494,7 @@ public static function reconstitute(
         <p>
             Symfony skeleton historicky zaváděl složky podle technické role: <code>src/Entity/</code>
             pro entity, <code>src/Repository/</code> pro repozitáře, <code>src/Controller/</code>
-            pro kontrolery, <code>src/Service/</code> pro „všechno ostatní". Tato organizace má
+            pro kontrolery, <code>src/Service/</code> pro „všechno ostatní“. Tato organizace má
             název <strong>type packaging</strong> a&nbsp;v&nbsp;netriviálních doménách je
             problematická:
         </p>
@@ -1576,7 +1576,7 @@ public static function reconstitute(
 
     # Auto-registrace všech služeb v každém modulu, v jejich Infrastructure
     # a Application vrstvách. Doménová vrstva je zcela bez auto-konfigurace
-    # — doménové objekty si žijí vlastním životem mimo container.
+    # – doménové objekty si žijí vlastním životem mimo container.
     App\Ordering\Application\:
         resource: '../src/Ordering/Application/'
     App\Ordering\Infrastructure\:
@@ -1587,7 +1587,7 @@ public static function reconstitute(
         resource: '../src/Billing/Infrastructure/'
     # ...
 
-    # Controllery z modulů — Symfony je standardně hledá v App\Controller\
+    # Controllery z modulů – Symfony je standardně hledá v App\Controller\
     App\Ordering\Infrastructure\Http\:
         resource: '../src/Ordering/Infrastructure/Http/'
         tags: ['controller.service_arguments']{% endverbatim %}{% endset %}
@@ -1641,7 +1641,7 @@ return static function (Config $config): void {
             'App\\Shipping',
         ]))
         ->because(
-            'Ordering BC je autonomní — integrace s ostatními BC '
+            'Ordering BC je autonomní – integrace s ostatními BC '
           . 'probíhá výhradně přes domain events (Outbox).',
         );
 
@@ -1784,7 +1784,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
     </div>
 
     <p>
-        Klíčový vztah: <strong>Agregát uvnitř používá Specifications</strong> pro invarianty,
+        Hlavní vztah: <strong>Agregát uvnitř používá Specifications</strong> pro invarianty,
         <strong>vzniká přes Factory</strong> (named constructor), <strong>spolupracuje s 2+ jinými
         agregáty přes Domain Service</strong>, a&nbsp;celá ta skupina <strong>žije v jednom
         Module</strong>, který odpovídá Bounded Contextu. To je vzájemně provázaný design,
@@ -1934,7 +1934,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
         items: [
             {
                 question: 'Kdy přesně se vyplatí Specification Pattern?',
-                answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho potřebujete v doméně i v repozitáři přes double-dispatch. Pokud pravidlo používáte jednou a obsahuje jeden řádek kódu, je samostatná třída over-engineering – inlinujte ho. Klíčový test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification jeho jménu dá kód. Pokud byste třídu pojmenovali <code>OrderTotalGreaterThanSpec</code>, je to jen operátor &mdash; vraťte se k inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
+                answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho potřebujete v doméně i v repozitáři přes double-dispatch. Pokud pravidlo používáte jednou a obsahuje jeden řádek kódu, je samostatná třída over-engineering – inlinujte ho. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification jeho jménu dá kód. Pokud byste třídu pojmenovali <code>OrderTotalGreaterThanSpec</code>, je to jen operátor &mdash; vraťte se k inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
             },
             {
                 question: 'Má Domain Service mít stav?',

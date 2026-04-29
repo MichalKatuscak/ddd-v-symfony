@@ -50,7 +50,7 @@
     {% include '_partials/article_head.html.twig' with {
         chapter_number: '17',
         category: 'Praxe',
-        title: 'DDD a microservices — Bounded Context jako service boundary',
+        title: 'DDD a microservices – Bounded Context jako service boundary',
         deck: '„Microservice je tak velký, jak velký je jeden Bounded Context“ – slogan, který je polopravda. Bounded Context je <em>logická</em> hranice; microservice je <em>fyzická</em>. Kapitola o tom, kdy mapování 1:1 dává smysl, kdy modular monolith poráží microservices a jak rozeznat distributed monolith včas.',
         reading_time: 30,
         difficulty: 4,
@@ -398,7 +398,7 @@
     │       └── Currency.php
     └── Application/{% endset %}
             {% include '_partials/code_block.html.twig' with {
-                filename: 'Struktura src/ — modular monolith',
+                filename: 'Struktura src/ – modular monolith',
                 language: 'bash',
                 code: _code
             } %}
@@ -450,7 +450,7 @@ return static function (Config $config): void {
         );
 
     // Pravidlo 2: Domain vrstva nesmí znát žádný jiný BC.
-    // Ani jeho Application — Domain je nejvíc izolovaná.
+    // Ani jeho Application – Domain je nejvíc izolovaná.
     $domainIsolation = Rule::allClasses()
         ->that(new ResideInOneOfTheseNamespaces('App\Ordering\Domain'))
         ->should(new NotDependsOnAnyOfTheseNamespaces([
@@ -459,7 +459,7 @@ return static function (Config $config): void {
             'App\Shipping',
         ]))
         ->because(
-            'Doménová vrstva BC je čistá — nezná ostatní BC ani jejich Application vrstvu. '
+            'Doménová vrstva BC je čistá – nezná ostatní BC ani jejich Application vrstvu. '
             . 'Cross-BC integrace patří do Application/IntegrationEvent.'
         );
 
@@ -650,7 +650,7 @@ return static function (Config $config): void {
             <h3 id="sync-kdy-heading">Synchronní volání – kdy</h3>
             <ul>
                 <li>
-                    <strong>Query (read), kde caller potřebuje odpověď v rámci request flow.</strong> Frontend potřebuje
+                    <strong>Query (read), kde caller potřebuje odpověď během request flow.</strong> Frontend potřebuje
                     detail produktu pro vykreslení stránky; <code>catalog-svc</code> ho vrátí přes REST. Bez odpovědi
                     nemůže pokračovat.
                 </li>
@@ -993,7 +993,7 @@ return static function (Config $config): void {
             </p>
 
             <p>
-                Klíčové pravidlo: <strong>publisher a subscriber NEsdílejí PHP třídu eventu.</strong> Publisher má svůj
+                Pravidlo: <strong>publisher a subscriber NEsdílejí PHP třídu eventu.</strong> Publisher má svůj
                 doménový event v <code>App\Ordering\Domain\Event\OrderPlaced</code> uvnitř ordering-svc kódu. Subscriber
                 v billing-svc má vlastní <code>App\Billing\Application\IntegrationEvent\OrderPlacedReceived</code> –
                 samostatnou třídu, která se naplní z deserializovaného AMQP payloadu. Důvody jsou v sekci 17.04
@@ -1215,7 +1215,7 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
         $payload = json_decode($encodedEnvelope['body'], true, flags: JSON_THROW_ON_ERROR);
 
         // Mapping payloadu z publishera (App\Ordering\Domain\Event\OrderPlaced)
-        // na náš subscriber-side DTO. Defenzivní — žádná pole z payloadu,
+        // na náš subscriber-side DTO. Defenzivní – žádná pole z payloadu,
         // která bychom nepoužívali.
         $message = new $targetClass(
             eventId: $payload['eventId'],
@@ -1231,7 +1231,7 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
 
     public function encode(Envelope $envelope): array
     {
-        // Subscriber neencodes — to dělá publisher na své straně.
+        // Subscriber neencodes – to dělá publisher na své straně.
         throw new \LogicException('IntegrationEventSerializer is decode-only.');
     }
 }{% endset %}
@@ -1270,7 +1270,7 @@ final readonly class OrderPlacedReceivedHandler
 
     public function __invoke(OrderPlacedReceived $event): void
     {
-        // Idempotence — pokud už jsme tento eventId zpracovali, no-op.
+        // Idempotence – pokud už jsme tento eventId zpracovali, no-op.
         // Detail v outbox_pattern.html.twig#inbox-idempotency
         if ($this->inbox->wasProcessed($event->eventId)) {
             return;
@@ -1529,7 +1529,7 @@ final readonly class OrderPlacedReceivedHandler
             </p>
 
             <p>
-                Klíčová doporučení této kapitoly:
+                Hlavní doporučení této kapitoly:
             </p>
             <ul>
                 <li>
@@ -1632,7 +1632,7 @@ final readonly class OrderPlacedReceivedHandler
                 },
                 {
                     question: 'Můžu mít 2 Bounded Contexty v jedné microservice?',
-                    answer: 'Ano, a často je to správné rozhodnutí – to je definice <strong>modular monolithu</strong> nebo malého „mikro-monolithu“. Pokud dva BC sdílejí stream-aligned tým a podobné scaling potřeby, jejich provozování ve dvou samostatných servisách je operační overhead bez benefitu. Klíčová podmínka: hranice mezi BC <em>uvnitř</em> servise musí být vynucená kódem (typicky phparkitect pravidly). Pokud se obejdou, máte unstructured monolith, ne modular monolith. Detail v <a href="#modular-monolith">sekci 17.03</a>.'
+                    answer: 'Ano, a často je to správné rozhodnutí – to je definice <strong>modular monolithu</strong> nebo malého „mikro-monolithu“. Pokud dva BC sdílejí stream-aligned tým a podobné scaling potřeby, jejich provozování ve dvou samostatných servisách je operační overhead bez benefitu. Hlavní podmínka: hranice mezi BC <em>uvnitř</em> servise musí být vynucená kódem (typicky phparkitect pravidly). Pokud se obejdou, máte unstructured monolith, ne modular monolith. Detail v <a href="#modular-monolith">sekci 17.03</a>.'
                 },
                 {
                     question: 'Kdy přejít z monolithu na microservices?',
@@ -1640,7 +1640,7 @@ final readonly class OrderPlacedReceivedHandler
                 },
                 {
                     question: 'Co je BFF (Backend For Frontend) a kam patří v DDD?',
-                    answer: 'BFF je vzor, ve kterém má každý frontend (web, mobile, partner API) <em>vlastní</em> backend agregátor, který volá downstream microservisy a sestavuje view-model přesně přizpůsobený danému klientovi. V DDD termínologii je to typicky <strong>Open Host Service</strong> (OHS) s <strong>Published Language</strong> v rámci Anti-Corruption Layeru – viz <a href="' ~ path('context_mapping') ~ '#ohs-pl">Context Mapping</a>. BFF nepatří do žádného doménového Bounded Contextu; je to integrační vrstva, vlastní BC sám o sobě (typicky „Web Frontend BC“).'
+                    answer: 'BFF je vzor, ve kterém má každý frontend (web, mobile, partner API) <em>vlastní</em> backend agregátor, který volá downstream microservisy a sestavuje view-model přesně přizpůsobený danému klientovi. V DDD terminologii je to typicky <strong>Open Host Service</strong> (OHS) s <strong>Published Language</strong>, doplněný Anti-Corruption Layerem proti volaným službám – viz <a href="' ~ path('context_mapping') ~ '#ohs-pl">Context Mapping</a>. BFF nepatří do žádného doménového Bounded Contextu; je to integrační vrstva, vlastní BC sám o sobě (typicky „Web Frontend BC“).'
                 },
                 {
                     question: 'GraphQL Federation jako náhrada microservices integrace?',

@@ -81,16 +81,16 @@
 
             <p>
                 Standardní reakce vývojářského týmu, který má zahájit nový projekt nebo přepsat existující,
-                je <em>„dejte nám specifikaci a my to naprogramujeme"</em>. Specifikace ale typicky neexistuje
+                je <em>„dejte nám specifikaci a my to naprogramujeme“</em>. Specifikace ale typicky neexistuje
                 ve formě, která by stačila. Existují wiki stránky staré tři roky, e-mailová vlákna, ticketovací
-                systém s 1 800 issues, a čtyři lidé, kteří „to vědí". Žádný z těchto zdrojů není autoritativní
+                systém s 1 800 issues, a čtyři lidé, kteří „to vědí“. Žádný z těchto zdrojů není autoritativní
                 – každý zachycuje doménu z jiného úhlu, v jiné době a často si protiřečí.
             </p>
 
             <p>
                 A to je v pořádku. Doména není <em>knihovna</em>, kterou lze přečíst; je to <em>znalostní síť</em>,
                 která žije v hlavách doménových expertů. Když se vás obchodní ředitel a šéf logistiky liší v tom,
-                co znamená „odeslaná objednávka", není to bug, ale signál: existují dva pohledy, dva kontexty,
+                co znamená „odeslaná objednávka“, není to bug, ale signál: existují dva pohledy, dva kontexty,
                 a tudíž – pravděpodobně – i dva <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexty</a>.
                 Workshop je formát, ve kterém tyto kontradikce <strong>vidíte v reálném čase</strong> a řešíte je
                 společně. Wiki vám je nikdy neukáže; vždy zachytí pohled toho, kdo ji psal.
@@ -108,8 +108,8 @@
                 <ul>
                     <li><strong>Kontradikce v reálném čase.</strong> Když dva experti řeknou totéž jinak, vidíte to a řešíte hned.</li>
                     <li><strong>Slovník, který si lidé sami vytvořili.</strong> Kód pak může používat přesně ty výrazy.</li>
-                    <li><strong>Sdílená paměť události.</strong> Tým si pamatuje „když jsme řešili Stripe, padlo, že refundy jsou async". Wiki se zapomene.</li>
-                    <li><strong>Hot Spots – místa, která doména nemá vyřešená.</strong> Ta byste z dokumentace neidentifikovali, protože dokumentace je vždy psaná jako „hotová".</li>
+                    <li><strong>Sdílená paměť události.</strong> Tým si pamatuje „když jsme řešili Stripe, padlo, že refundy jsou async“. Wiki se zapomene.</li>
+                    <li><strong>Hot Spots – místa, která doména nemá vyřešená.</strong> Ta byste z dokumentace neidentifikovali, protože dokumentace je vždy psaná jako „hotová“.</li>
                 </ul>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -142,31 +142,31 @@
             <ol>
                 <li>
                     <strong>Big Picture Event Storming</strong> – strategická úroveň. Otázka: <em>„Co se v naší
-                    doméně vůbec děje?"</em> Cílem je objevit Bounded Contexty a klíčové procesy. Trvání 2-4 h,
+                    doméně vůbec děje?“</em> Cílem je objevit Bounded Contexty a klíčové procesy. Trvání 2-4 h,
                     8-12 účastníků.
                 </li>
                 <li>
                     <strong>Process Level Event Storming</strong> – operační úroveň. Otázka: <em>„Jak konkrétně
-                    běží jeden konkrétní proces?"</em> Cílem je popsat jeden Bounded Context detailněji, včetně
+                    běží jeden konkrétní proces?“</em> Cílem je popsat jeden Bounded Context detailněji, včetně
                     Commands, Actors, Policies a externích systémů. Trvání 4-8 h.
                 </li>
                 <li>
                     <strong>Design Level Event Storming</strong> – taktická úroveň. Otázka: <em>„Jak se tato
-                    část modelu přeloží do tříd?"</em> Cílem jsou kandidáti na <a href="{{ path('basic_concepts') }}#aggregates">agregáty</a>,
+                    část modelu přeloží do tříd?“</em> Cílem jsou kandidáti na <a href="{{ path('basic_concepts') }}#aggregates">agregáty</a>,
                     invariantní pravidla a první draft API. Trvání 2-6 h, typicky per BC.
                 </li>
             </ol>
 
             <p>
                 Vaughn Vernon v <em>Domain-Driven Design Distilled</em> (Addison-Wesley, 2016, kap. 7) označuje
-                Event Storming za „nejrychlejší známou cestu k pracovnímu modelu domény" a doporučuje ho jako
+                Event Storming za „nejrychlejší známou cestu k pracovnímu modelu domény“ a doporučuje ho jako
                 první techniku, kterou by tým adoptoval předtím, než se pustí do taktických DDD vzorů.
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/17_event_storming/big_picture_levels.svg' ignore missing %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
                 fig: '14.2-A',
-                title: 'Tři úrovně Event Stormingu — od strategického přehledu k taktickému návrhu',
+                title: 'Tři úrovně Event Stormingu – od strategického přehledu k taktickému návrhu',
                 inline: _diagram_inline,
                 caption: 'Big Picture poskytuje mapu domény a hranice Bounded Contextů. Process Level zhušťuje jeden BC do toku Command → Event → Policy. Design Level zachycuje agregáty a jejich invarianty.'
             } %}
@@ -181,7 +181,7 @@
             <p>
                 Event Storming používá <strong>standardizovanou paletu barev</strong>, kterou Brandolini ustanovil
                 v roce 2014 a která se od té doby téměř nezměnila. Každá barva má jeden konkrétní význam a tým by
-                ji měl dodržovat – jakmile začnete improvizovat, ztrácíte schopnost rychle „číst" cizí mapu.
+                ji měl dodržovat – jakmile začnete improvizovat, ztrácíte schopnost rychle „číst“ cizí mapu.
             </p>
 
             <div class="table-responsive">
@@ -229,28 +229,28 @@
                             <td><strong>Růžová</strong></td>
                             <td>otočená do kosočtverce</td>
                             <td>Hot Spot</td>
-                            <td>„Co když platba selže?"</td>
+                            <td>„Co když platba selže?“</td>
                             <td>Otázka, kontroverze, nevyjasněné místo. <strong>Nediskutuje se</strong> hned, jen se zaznamenává.</td>
                         </tr>
                         <tr>
                             <td><strong>Lila / světle fialová</strong></td>
                             <td>větší sticky</td>
                             <td>Policy / Reactive logic</td>
-                            <td>„When OrderPlaced ⇒ send confirmation"</td>
-                            <td>Reaktivní pravidlo: „kdykoliv se stane X, udělej Y".</td>
+                            <td>„When OrderPlaced ⇒ send confirmation“</td>
+                            <td>Reaktivní pravidlo: „kdykoliv se stane X, udělej Y“.</td>
                         </tr>
                         <tr>
                             <td><strong>Zelená</strong></td>
                             <td>menší sticky</td>
                             <td>Read Model / Query Model</td>
-                            <td>„Order detail page"</td>
+                            <td>„Order detail page“</td>
                             <td>Pohled / projekce, na základě které se actor rozhodne pro command.</td>
                         </tr>
                         <tr>
                             <td><strong>Fialová</strong></td>
                             <td>velká sticky / čára</td>
                             <td>Bounded Context</td>
-                            <td>„Ordering BC"</td>
+                            <td>„Ordering BC“</td>
                             <td>Hranice mezi modely. Kreslí se až ke konci Big Picture.</td>
                         </tr>
                         <tr>
@@ -274,13 +274,13 @@
                 <p>
                     Důvod není kosmetický. Minulý čas vás <em>jazykově nutí</em> mluvit o tom, co už nastalo
                     (a tedy o doménové realitě), místo toho, co bychom rádi (záměru či featuře). Tento posun
-                    perspektivy je klíčový – zabraňuje workshopu sklouznout do diskuse o tom, co bude umět
+                    perspektivy je zásadní – zabraňuje workshopu sklouznout do diskuse o tom, co bude umět
                     formulář, a drží ho u toho, jak doména opravdu funguje. Brandolini to označuje jako
-                    <em>„grammar discipline"</em>.
+                    <em>„grammar discipline“</em>.
                 </p>
                 <p>
                     Když si nejste jistí, zda je sticky event, command, nebo policy: zkuste si ji přečíst nahlas.
-                    Zní v minulém čase? Event. V imperativu? Command. „Když se stane X, dělej Y"? Policy.
+                    Zní v minulém čase? Event. V imperativu? Command. „Když se stane X, dělej Y“? Policy.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -335,7 +335,7 @@
                 </li>
                 <li>
                     <strong>Pozvánka.</strong> Pošlete účastníkům 1-stránkovou agendu předem. Doménové experty
-                    upozorněte, že <em>nebudou prezentovat slidy</em>, ale budou „vyprávět příběh".
+                    upozorněte, že <em>nebudou prezentovat slidy</em>, ale budou „vyprávět příběh“.
                 </li>
             </ul>
 
@@ -353,12 +353,12 @@
                     stickies (~15 každý) a píší události, které je napadnou. <strong>Lepí kamkoliv</strong>
                     bez pořadí. Toto je záměrně chaos – chcete, aby si lidé vzpomněli na vše, ne aby
                     okamžitě strukturovali. Facilitátor sbírá poznámky a tlačí lidi: „a co se stane potom?
-                    a předtím?".
+                    a předtím?“.
                 </li>
                 <li>
                     <strong>(30 min) Time enforcement.</strong> Facilitátor začne přesouvat eventy doleva
                     (raně) a doprava (později). Vznikne časová osa. Účastníci do toho mluví – „ne, refund
-                    je až po reklamaci, posuň to". Duplicitní eventy se slučují, ale jen se souhlasem
+                    je až po reklamaci, posuň to“. Duplicitní eventy se slučují, ale jen se souhlasem
                     účastníků.
                 </li>
                 <li>
@@ -370,7 +370,7 @@
                 </li>
                 <li>
                     <strong>(30-45 min) Hot Spots.</strong> Kdykoliv během workshopu zazní otázka, kterou
-                    nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?"), <strong>nediskutuje se</strong> –
+                    nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?“), <strong>nediskutuje se</strong> –
                     napíše se na růžovou sticky a nalepí se přesně tam, kde otázka vznikla. Po 45 minutách máte
                     typicky 8-15 hot spotů. Toto je <em>nejcennější výstup</em> Big Picture.
                 </li>
@@ -419,7 +419,7 @@
                 </li>
                 <li>
                     <strong>Předpřipravená paleta.</strong> Vlevo na boardu položte 7-9 zdrojových stickies
-                    (jednu od každé barvy) a kolem nich rámeček s popiskem „<em>Drag from here – copy &amp; paste pak Ctrl+D</em>".
+                    (jednu od každé barvy) a kolem nich rámeček s popiskem „<em>Drag from here – copy &amp; paste pak Ctrl+D</em>“.
                     Účastníci si stickies kopírují místo aby pracně otevírali sticky picker.
                 </li>
                 <li>
@@ -465,7 +465,7 @@
                 <li>
                     <strong>Doménoví experti jsou v různých časových pásmech bez přesahu.</strong>
                     Big Picture musí proběhnout najednou. Pokud nemůžete najít 3-4 hodinové okno, kdy
-                    všichni klíčoví hráči jsou online, udělejte místo toho sérii Domain Storytelling
+                    všichni hlavní hráči jsou online, udělejte místo toho sérii Domain Storytelling
                     sessionů 1:1 a výstupy slijte.
                 </li>
             </ul>
@@ -484,7 +484,7 @@
                     lead bude během workshopu mlčet a mluvit jen tehdy, když se ho někdo přímo zeptá.
                 </p>
                 <p>
-                    Brandolini v <em>Introducing EventStorming</em> tomu říká „<em>facilitator's silence</em>" –
+                    Brandolini v <em>Introducing EventStorming</em> tomu říká „<em>facilitator's silence</em>“ –
                     facilitátor neformuluje obsah, jen drží proces.
                 </p>
             {% endset %}
@@ -512,7 +512,7 @@
             <ul>
                 <li><strong>Commands</strong> (modré) – záměry, které vedou k eventům.</li>
                 <li><strong>Actors</strong> (žluté) – kdo command spouští.</li>
-                <li><strong>Policies</strong> (lila / světle fialové) – reaktivní pravidla typu „kdykoliv X, udělej Y".</li>
+                <li><strong>Policies</strong> (lila / světle fialové) – reaktivní pravidla typu „kdykoliv X, udělej Y“.</li>
                 <li><strong>External Systems</strong> (šedé) – třetí strany.</li>
                 <li><strong>Read Models</strong> (zelené) – projekce, na základě kterých se actor rozhoduje.</li>
             </ul>
@@ -531,20 +531,20 @@
                 </li>
                 <li>
                     Pro každou událost dopředně doplňte: <strong>co se v reakci stane?</strong> Zelené
-                    policy stickies. „Kdykoliv <code>OrderPlaced</code>, pošli potvrzovací mail".
+                    policy stickies. „Kdykoliv <code>OrderPlaced</code>, pošli potvrzovací mail“.
                 </li>
                 <li>
                     Identifikujte commands, které volají externí systémy nebo na něj reagují (šedé). „Po
-                    <code>PaymentRequested</code> volám Stripe, čekám na <code>StripePaymentSucceeded</code>".
+                    <code>PaymentRequested</code> volám Stripe, čekám na <code>StripePaymentSucceeded</code>“.
                 </li>
                 <li>
                     Pro každý command identifikujte, jaký <strong>read model</strong> actor potřebuje vidět,
                     aby command spustil. „Cashier potvrdí objednávku, když vidí, že platba prošla – read
-                    model <code>OrderDetail</code> musí obsahovat <code>paymentStatus</code>".
+                    model <code>OrderDetail</code> musí obsahovat <code>paymentStatus</code>“.
                 </li>
                 <li>
                     Aktualizujte hot spoty – některé z Big Picture se na této úrovni vyřeší, jiné se rozpadnou
-                    na podrobnější (např. „Co když Stripe vrátí 500?").
+                    na podrobnější (např. „Co když Stripe vrátí 500?“).
                 </li>
             </ol>
 
@@ -618,17 +618,17 @@
                 </li>
                 <li>
                     Pod každý agregát vypište jeho <strong>invarianty</strong>. „Order: nemůže být
-                    confirmed bez aspoň jedné položky„, „Order: po cancelled už nelze confirm”, „Order:
-                    součet item.quantity * item.price = total".
+                    confirmed bez aspoň jedné položky“, „Order: po cancelled už nelze confirm“, „Order:
+                    součet item.quantity * item.price = total“.
                 </li>
                 <li>
                     Pro každý command vyznačte <strong>pre-conditions</strong>: „<code>ConfirmOrder</code>
                     vyžaduje, aby <code>Order</code> byl ve stavu <code>Pending</code> a měl alespoň
-                    jeden item".
+                    jeden item“.
                 </li>
                 <li>
                     Označte hot spoty, které vám chybí pro úplnou specifikaci agregátu („Co když item
-                    má nulovou cenu? Je to legitimní freebie nebo bug?").
+                    má nulovou cenu? Je to legitimní freebie nebo bug?“).
                 </li>
             </ol>
 
@@ -741,7 +741,7 @@ if ($items === []) {
                 <p>
                     Tato vazba je k nezaplacení. Za půl roku, když nový developer čte kód, ví, odkud
                     pravidlo pochází, a může si ho ověřit u doménového experta – místo aby ho v dobré
-                    víře smazal jako „divnou validaci".
+                    víře smazal jako „divnou validaci“.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -768,8 +768,8 @@ if ($items === []) {
 
             <ul>
                 <li>
-                    <strong>Actor</strong> – postavička panáčka. Kdo v doméně něco dělá. „Customer",
-                    „Cashier„, „Warehouse worker”. Mohou to být i jiné systémy nebo organizace.
+                    <strong>Actor</strong> – postavička panáčka. Kdo v doméně něco dělá. „Customer“,
+                    „Cashier“, „Warehouse worker“. Mohou to být i jiné systémy nebo organizace.
                 </li>
                 <li>
                     <strong>Work Object</strong> – piktogram věci, se kterou actor pracuje. Dokument
@@ -779,7 +779,7 @@ if ($items === []) {
                 <li>
                     <strong>Activity</strong> – šipka mezi actorem a work objectem, opatřená
                     <strong>číslem v pořadí</strong> (1, 2, 3...) a slovesem. „Customer (1) sends order
-                    to Cashier".
+                    to Cashier“.
                 </li>
                 <li>
                     <strong>Annotation</strong> – text bublina s poznámkou (důvod, hodnota, podmínka).
@@ -792,13 +792,13 @@ if ($items === []) {
 
             <h3 id="ds-priklad">14.07.2 Konkrétní příklad – proces objednávky v e-shopu</h3>
 
-            <p>Story <em>„Customer places an order"</em> v Domain Storytelling notaci, čtená v pořadí čísel:</p>
+            <p>Story <em>„Customer places an order“</em> v Domain Storytelling notaci, čtená v pořadí čísel:</p>
 
             <ol>
                 <li><strong>Customer</strong> →(1) <em>browses</em> → <strong>Catalog</strong></li>
                 <li><strong>Customer</strong> →(2) <em>adds product to</em> → <strong>Cart</strong></li>
                 <li><strong>Customer</strong> →(3) <em>submits</em> → <strong>Order</strong> →(4) <em>to</em> → <strong>Order System</strong></li>
-                <li><strong>Order System</strong> →(5) <em>requests payment from</em> → <strong>Payment Gateway</strong> (annotation: „Stripe; async webhook")</li>
+                <li><strong>Order System</strong> →(5) <em>requests payment from</em> → <strong>Payment Gateway</strong> (annotation: „Stripe; async webhook“)</li>
                 <li><strong>Payment Gateway</strong> →(6) <em>confirms payment to</em> → <strong>Order System</strong></li>
                 <li><strong>Order System</strong> →(7) <em>sends</em> → <strong>Confirmation Email</strong> →(8) <em>to</em> → <strong>Customer</strong></li>
                 <li><strong>Order System</strong> →(9) <em>creates</em> → <strong>Shipment Order</strong> →(10) <em>for</em> → <strong>Warehouse</strong></li>
@@ -871,7 +871,7 @@ if ($items === []) {
                 Hofer a Schwentner v knize zdůrazňují, že obě techniky se <strong>nekonkurují</strong>, ale
                 doplňují: Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv), Domain
                 Storytelling pak v každém z nich odkryje detail (teleobjektiv). Doporučují kombinovat – Big
-                Picture Event Storming pro strategický přehled, Domain Storytelling pro jednotlivé klíčové
+                Picture Event Storming pro strategický přehled, Domain Storytelling pro jednotlivé hlavní
                 procesy, Process / Design Level Event Storming pro implementaci.
             </p>
 
@@ -908,7 +908,7 @@ if ($items === []) {
                     je toolbar s ikonkami: actor (panáček), work object (obdélník), activity (šipka).
                 </li>
                 <li>
-                    <strong>Začněte s actorem.</strong> Přetáhněte ikonu „person" na plátno a pojmenujte
+                    <strong>Začněte s actorem.</strong> Přetáhněte ikonu „person“ na plátno a pojmenujte
                     ji rolí, ne osobou – <code>Customer</code>, ne <code>Petr Novák</code>. Pojmenování
                     je důležité; v exportu se objeví u každé activity.
                 </li>
@@ -956,7 +956,7 @@ if ($items === []) {
             </p>
 
             {% set _callout_body %}
-                <h3 id="anti-no-experts-heading">„Doménoví experti nemají čas, uděláme to bez nich."</h3>
+                <h3 id="anti-no-experts-heading">„Doménoví experti nemají čas, uděláme to bez nich.“</h3>
                 <p>
                     <strong>Bez doménových expertů to není workshop, ale brainstorming developerů</strong>,
                     kteří si vymýšlí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný –
@@ -975,7 +975,7 @@ if ($items === []) {
             } %}
 
             {% set _callout_body %}
-                <h3 id="anti-skip-bp-heading">„Začneme rovnou Design Level, na Big Picture nemáme čas."</h3>
+                <h3 id="anti-skip-bp-heading">„Začneme rovnou Design Level, na Big Picture nemáme čas.“</h3>
                 <p>
                     Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém Bounded Contextu
                     leží. Výsledek: <em>God Aggregate</em> typu <code>Order</code>, který obsahuje payment
@@ -993,12 +993,12 @@ if ($items === []) {
             } %}
 
             {% set _callout_body %}
-                <h3 id="anti-tech-lead-heading">„Workshop facilituje senior dev / tech lead."</h3>
+                <h3 id="anti-tech-lead-heading">„Workshop facilituje senior dev / tech lead.“</h3>
                 <p>
                     Senior developer při facilitaci podsouvá technický pohled – automaticky strukturuje
                     eventy podle toho, co se dá hezky implementovat, místo podle toho, jak doména reálně
                     funguje. Doménoví experti to vycítí a začnou potlačovat svůj jazyk ve prospěch toho
-                    „technicky čistého".
+                    „technicky čistého“.
                 </p>
                 <p>
                     <strong>Řešení:</strong> facilitátor by měl být PM, agile coach, designer, nebo externí
@@ -1012,7 +1012,7 @@ if ($items === []) {
             } %}
 
             {% set _callout_body %}
-                <h3 id="anti-word-heading">„Zápis = Word dokument."</h3>
+                <h3 id="anti-word-heading">„Zápis = Word dokument.“</h3>
                 <p>
                     Když převedete vizuální workshop do lineárního textu, ztratíte 80 % informace –
                     rozložení v prostoru, vztahy, blízkost hot spotů k eventům. Word dokument o 8
@@ -1032,7 +1032,7 @@ if ($items === []) {
             } %}
 
             {% set _callout_body %}
-                <h3 id="anti-no-followup-heading">„Po workshopu se to nezapíše do kódu."</h3>
+                <h3 id="anti-no-followup-heading">„Po workshopu se to nezapíše do kódu.“</h3>
                 <p>
                     Workshop, který skončí slávou, fotkou stěny a sdílením v Slacku, ale jehož výstup se
                     nepromítne do kódu, je za 3 měsíce zapomenutý. Slovník, který v místnosti vznikl,
@@ -1051,7 +1051,7 @@ if ($items === []) {
             } %}
 
             {% set _callout_body %}
-                <h3 id="anti-perfectionism-heading">„Big Picture musíme dotáhnout k dokonalosti."</h3>
+                <h3 id="anti-perfectionism-heading">„Big Picture musíme dotáhnout k dokonalosti.“</h3>
                 <p>
                     Big Picture nemá být dokonalý. Je to první mapa neznámého území. Pokud se na něm
                     strávíte 8 hodin a debatujete o tom, zda <code>OrderShipped</code> je
@@ -1138,8 +1138,8 @@ if ($items === []) {
             <h3 id="post-4-hotspots">14.09.4 Hot Spots → tickety</h3>
 
             <p>
-                Každý hot spot z workshopu = jeden ticket v issue trackeru, ve formátu „<em>Discovery question</em>"
-                nebo „<em>Domain question</em>", s odkazem na fotku/Miro. Ticket je přiřazen doménovému expertovi,
+                Každý hot spot z workshopu = jeden ticket v issue trackeru, ve formátu „<em>Discovery question</em>“
+                nebo „<em>Domain question</em>“, s odkazem na fotku/Miro. Ticket je přiřazen doménovému expertovi,
                 ne developerovi – protože odpověď leží v doméně, ne v kódu.
             </p>
 
@@ -1250,7 +1250,7 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
 
             <p>
                 Doména se vyvíjí. Pivotní událost, která dnes platí (<code>OrderPlaced</code>), může za rok
-                ztratit význam, protože byznys přešel na model <em>subscription</em> a klíčovým eventem se
+                ztratit význam, protože byznys přešel na model <em>subscription</em> a ústředním eventem se
                 stane <code>SubscriptionRenewed</code>. Když tým neudělá nový workshop, kód a doména se
                 rozejdou – a nikdo si toho hned nevšimne, protože jednotlivé PR vypadají rozumně.
             </p>
@@ -1268,7 +1268,7 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
                     model, akvizice. Re-storming proběhne <em>před</em> implementací, ne po ní.
                 </li>
                 <li>
-                    <strong>Při akutních problémech</strong>: tým má pocit, že kód „nedává smysl" nebo že
+                    <strong>Při akutních problémech</strong>: tým má pocit, že kód „nedává smysl“ nebo že
                     feature requesty se opakovaně modelují špatně. Pak je čas znovu vytáhnout stickies.
                 </li>
             </ul>
@@ -1278,12 +1278,12 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
             <p>
                 Po re-stormingu porovnejte novou mapu se starou (uloženou v <code>docs/discovery/&lt;starý-datum&gt;/</code>).
                 Místa, kde se mapa změnila <strong>nejvíc</strong>, jsou <strong>kandidáti na refaktoring</strong> –
-                tam doména reálně dopředu „utekla" kódu. Naopak místa, kde se mapa změnila málo, jsou stabilní
+                tam doména reálně dopředu „utekla“ kódu. Naopak místa, kde se mapa změnila málo, jsou stabilní
                 a kód v nich je pravděpodobně v pořádku.
             </p>
 
             <p>
-                Brandolini tomu říká „<em>Strategic re-storming</em>" – typicky ho dělá menší skupina (3-5 lidí
+                Brandolini tomu říká „<em>Strategic re-storming</em>“ – typicky ho dělá menší skupina (3-5 lidí
                 z původního workshopu) a trvá kratší dobu, protože hodně mapy se zachová.
             </p>
         </section>
@@ -1412,7 +1412,7 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
                 <li>
                     <strong>Domain Storytelling</strong> je <em>úzkoúhlý teleobjektiv</em> pro hloubkovou
                     diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity je
-                    intuitivní a vhodná pro kontexty, kde Event Storming je „příliš velký".
+                    intuitivní a vhodná pro kontexty, kde Event Storming je „příliš velký“.
                 </li>
                 <li>
                     <strong>Vychází se ven, ne dovnitř.</strong> Workshop začíná u doménového experta, ne
@@ -1459,8 +1459,8 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
                     answer: 'Engineering. Argument je jednoduchý: bez workshopu engineering vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů. V praxi by produkt a engineering měli platit společně – workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně.'
                 },
                 {
-                    question: 'Co když doménoví experti nemluví anglicky a používají slang („nějaký posraný zákazník nezaplatil")?',
-                    answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky češtinou. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „posraný zákazník", napište to na sticky tak, jak to řekl, a v kódu pak modelujte koncept (s neutrálnějším jménem typu <code>DelinquentCustomer</code> nebo <code>ChronicLatePayer</code>), ale dokumentujte, že lidově se mu říká takhle. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
+                    question: 'Co když doménoví experti nemluví anglicky a používají slang („nějaký posraný zákazník nezaplatil“)?',
+                    answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky češtinou. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „posraný zákazník“, napište to na sticky tak, jak to řekl, a v kódu pak modelujte koncept (s neutrálnějším jménem typu <code>DelinquentCustomer</code> nebo <code>ChronicLatePayer</code>), ale dokumentujte, že lidově se mu říká takhle. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
                 },
                 {
                     question: 'Když máme jen sólo developer a PM, dá se Event Storming dělat ve dvou?',

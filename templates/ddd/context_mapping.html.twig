@@ -50,7 +50,7 @@
     {% include '_partials/article_head.html.twig' with {
         chapter_number: '04',
         category: 'Strategie',
-        title: 'Context Mapping — 8 vztahů mezi Bounded Contexts',
+        title: 'Context Mapping – 8 vztahů mezi Bounded Contexts',
         deck: 'Bounded Context vám definuje hranici. Context Mapping vám definuje, co se na té hranici děje. Osm pojmenovaných vztahů, které popisují všechny způsoby, jak spolu BC komunikují – od těsné spolupráce po úmyslnou separaci.',
         reading_time: 28,
         difficulty: 3,
@@ -68,7 +68,7 @@
             <em>hranici</em> jednoho modelu – co je uvnitř, co je venku, kde končí jeden
             Ubiquitous Language a začíná druhý. Detail viz kapitola
             <a href="{{ path('basic_concepts') }}#bounded-contexts">Základní koncepty – Bounded Contexts</a>.
-            Bounded Context však sám o sobě neřeší jednu klíčovou otázku: <strong>co se děje na té
+            Bounded Context však sám o sobě neřeší jednu zásadní otázku: <strong>co se děje na té
             hranici</strong>, když dva kontexty potřebují spolupracovat.
         </p>
 
@@ -238,7 +238,7 @@
                         </tr>
                         <tr>
                             <td><a href="#separate-ways"><strong>Separate Ways</strong></a></td>
-                            <td>—</td>
+                            <td>–</td>
                             <td>Žádný</td>
                             <td>Žádná integrace, vědomá duplicita</td>
                             <td>Strategické rozhodnutí</td>
@@ -539,7 +539,7 @@ final readonly class Money
             <p>
                 <strong>Customer/Supplier</strong> je asymetrický vztah, ve kterém upstream
                 (<em>supplier</em>) poskytuje data nebo službu a downstream (<em>customer</em>)
-                je konzumuje. Klíčový rozdíl proti Conformist (viz dále): downstream <strong>má hlas</strong>.
+                je konzumuje. Hlavní rozdíl proti Conformist (viz dále): downstream <strong>má hlas</strong>.
                 Může od supplieru explicitně požadovat featury, supplier je do svého backlogu
                 přijme a dohodne se na termínu. <em>Supplier ale rozhoduje, kdy a jak feature
                 dodá.</em>
@@ -579,7 +579,7 @@ final readonly class Money
                 Ordering ho konzumuje přes external Messenger transport.
             </p>
 
-            <pre><code class="language-yaml"># config/packages/messenger.yaml — downstream Ordering BC
+            <pre><code class="language-yaml"># config/packages/messenger.yaml – downstream Ordering BC
 framework:
     messenger:
         transports:
@@ -624,7 +624,7 @@ final class ProductPriceChangedHandler
 
     public function __invoke(ProductPriceChanged $event): void
     {
-        // Ordering si drží lokální projekci ceny — eventually consistent.
+        // Ordering si drží lokální projekci ceny – eventually consistent.
         $this-&gt;priceCache-&gt;update(
             productId: $event-&gt;productId,
             newPrice: $event-&gt;newPriceCents,
@@ -731,7 +731,7 @@ final class StripePaymentReportRepository
         $payments = $this-&gt;getRecentPayments(/* ... */);
 
         return array_map(
-            // Reporting prostě používá Stripe pole jak jsou — currency, amount,
+            // Reporting prostě používá Stripe pole jak jsou – currency, amount,
             // status. Žádný překlad na Money VO, žádná Czech terminologie.
             fn(PaymentIntent $p) =&gt; [
                 'id'       =&gt; $p-&gt;id,
@@ -867,9 +867,9 @@ use Symfony\Component\Messenger\Exception\IncomingMessageRejected;
  * ACL mezi legacy Billing systémem (SOAP) a Ordering BC.
  *
  * Tři odpovědnosti:
- *   1. Schema mapping  — InvoicePaidSoapResponse =&gt; InvoicePaidEvent
- *   2. Concept translation — invoiceNumber (int) =&gt; InvoiceId (UUID)
- *   3. Anti-corruption — odmítá invalid stavy z legacy
+ *   1. Schema mapping  – InvoicePaidSoapResponse =&gt; InvoicePaidEvent
+ *   2. Concept translation – invoiceNumber (int) =&gt; InvoiceId (UUID)
+ *   3. Anti-corruption – odmítá invalid stavy z legacy
  */
 final class LegacyBillingTranslator
 {
@@ -1091,7 +1091,7 @@ final class ProductController extends AbstractController
     }
 
     /**
-     * OHS v1 — stabilní kontrakt zveřejněný v OpenAPI.
+     * OHS v1 – stabilní kontrakt zveřejněný v OpenAPI.
      * Verze v URL ('/api/v1/...') je explicitní záruka, že se kontrakt nemění.
      */
     #[Route('/api/v1/products/{id}', name: 'api_v1_product_get', methods: ['GET'])]
@@ -1103,7 +1103,7 @@ final class ProductController extends AbstractController
     }
 
     /**
-     * OHS v2 — přidává pole 'availableStock'. v1 zůstává funkční pro staré klienty.
+     * OHS v2 – přidává pole 'availableStock'. v1 zůstává funkční pro staré klienty.
      */
     #[Route('/api/v2/products/{id}', name: 'api_v2_product_get', methods: ['GET'])]
     public function getProductV2(string $id): JsonResponse

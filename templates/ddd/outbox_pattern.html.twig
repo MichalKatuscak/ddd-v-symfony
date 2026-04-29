@@ -50,7 +50,7 @@
     {% include '_partials/article_head.html.twig' with {
         chapter_number: '11',
         category: 'Vzory',
-        title: 'Outbox Pattern — spolehlivé publikování doménových eventů',
+        title: 'Outbox Pattern – spolehlivé publikování doménových eventů',
         deck: 'Klasický bug: zapíšete <code>Order</code> do databáze, vzápětí se rozbije RabbitMQ, ale order tam zůstane bez události <code>OrderPlaced</code>. Subscribery o objednávce nikdy neví. Outbox Pattern řeší tento <em>dual-write problem</em> na úrovni jedné DB transakce; jeho dvojče Inbox Pattern řeší deduplikaci na straně subscriberů. V Symfony 8 je to jeden Doctrine entity manager, jeden Messenger transport a zhruba 80 řádků kódu.',
         reading_time: 28,
         difficulty: 4,
@@ -250,7 +250,7 @@ final readonly class PlaceOrderHandlerNaive
     <p>
         Idea Outbox Pattern je překvapivě jednoduchá: <strong>nepublikujeme událost přímo do
         brokera, ale zapíšeme ji do tabulky <code>outbox</code></strong> ve stejné databázi,
-        kde žije business state, a to <em>v rámci stejné DB transakce</em>, jako úprava agregátu.
+        kde žije business state, a to <em>uvnitř stejné DB transakce</em>, jako úprava agregátu.
         Buď se tedy úspěšně zapíše obojí (order i jeho event), nebo se nezapíše nic (rollback
         celé transakce). Atomicita je obnovena – protože jsou oba zápisy v jediném ACID kontextu
         jedné databáze, ne ve dvou různých systémech.
@@ -266,10 +266,10 @@ final readonly class PlaceOrderHandlerNaive
     {% set _diagram_inline %}{% include 'diagrams/14_outbox/outbox_flow.svg' ignore missing %}{% endset %}
     {% include '_partials/diagram.html.twig' with {
         fig: '11.2-A',
-        title: 'Transactional Outbox — čtyři fáze publikování',
+        title: 'Transactional Outbox – čtyři fáze publikování',
         inline: _diagram_inline,
         alt: 'Sekvenční diagram čtyř fází: business transakce, polling outboxu, publish do brokeru, konzumace subscriberem',
-        caption: 'Pásmo mezi fází 1 a fází 3 je „outbox lag“ — typicky pod 1 sekundu při polling intervalu 100&nbsp;ms. Klíčová atomicita je v fázi 1: order i outbox řádek vznikají v jediném <code>COMMIT</code>.'
+        caption: 'Pásmo mezi fází 1 a fází 3 je „outbox lag“ – typicky pod 1 sekundu při polling intervalu 100&nbsp;ms. Atomicita patří do fáze 1: order i outbox řádek vznikají v jediném <code>COMMIT</code>.'
     } %}
 
     <ol>
@@ -280,13 +280,13 @@ final readonly class PlaceOrderHandlerNaive
         <li>
             <strong>Fáze 2 – polling outboxu.</strong> Relay worker periodicky (např. každých
             100 ms) selectuje pending řádky z outboxu, seřazené podle <code>occurred_at</code>,
-            aby zachoval kauzální pořadí v rámci jedné DB.
+            aby zachoval kauzální pořadí uvnitř jedné DB.
         </li>
         <li>
             <strong>Fáze 3 – publish do brokeru.</strong> Pro každý řádek relay publishne event
             do brokera a po obdržení ACK řádek označí jako <code>sent</code>. Obě operace nejsou
             v jedné transakci – pokud crashne mezi nimi, řádek zůstane <code>pending</code>
-            a po restartu se publishne znovu. Z toho plyne klíčová garance:
+            a po restartu se publishne znovu. Z toho plyne základní garance:
         </li>
         <li>
             <strong>Fáze 4 – konzumace subscriberem.</strong> Subscriber dostane delivery,
@@ -457,7 +457,7 @@ class OutboxMessage
                 <td><code>occurred_at</code></td>
                 <td>TIMESTAMPTZ</td>
                 <td>Čas vzniku události v doménové transakci. Slouží pro řazení v relayi
-                    (FIFO v rámci jedné DB) a pro výpočet outbox lagu.</td>
+                    (FIFO uvnitř jedné DB) a pro výpočet outbox lagu.</td>
             </tr>
             <tr>
                 <td><code>attempts</code></td>
@@ -661,7 +661,7 @@ namespace App\Ordering\Domain\Event;
 use Symfony\Component\Uid\Ulid;
 
 /**
- * Doménová událost — neměnná, serializovatelná, nese pouze
+ * Doménová událost – neměnná, serializovatelná, nese pouze
  * data nutná pro subscribery. Včetně vlastního event_id pro
  * deduplikaci v Inboxu.
  */
@@ -921,7 +921,7 @@ final class OutboxDispatchCommand extends Command
                     $message,
                     [
                         new TransportNamesStamp(['async']),
-                        // event_id propagujeme do brokera —
+                        // event_id propagujeme do brokera –
                         // subscriber ho použije pro Inbox dedup.
                         new TransportMessageIdStamp((string) $row->id),
                     ],
@@ -932,7 +932,7 @@ final class OutboxDispatchCommand extends Command
                 $this->outbox->markFailed($row->id, $e->getMessage());
 
                 $output->writeln(sprintf(
-                    '<error>[outbox] %s — %s</error>',
+                    '<error>[outbox] %s – %s</error>',
                     $row->id,
                     $e->getMessage(),
                 ));
@@ -968,7 +968,7 @@ stopwaitsecs=10
 stdout_logfile=/var/log/outbox-dispatch.log
 stderr_logfile=/var/log/outbox-dispatch.err
 user=www-data
-numprocs=1                  ; jediný worker — vyhneme se duplicitnímu pollingu
+numprocs=1                  ; jediný worker – vyhneme se duplicitnímu pollingu
 process_name=%(program_name)s
 
 ; Loop: command běží 1× za invocation, supervisord ho restartuje
@@ -1107,11 +1107,11 @@ spec:
     plugin.name: pgoutput
     slot.name: debezium_outbox
 
-    # Snímat pouze tabulku outbox — ne celou DB.
+    # Snímat pouze tabulku outbox – ne celou DB.
     table.include.list: public.outbox
 
     # Outbox Event Router transformace: čte řádky outboxu a routuje je
-    # do Kafka topiců podle sloupce message_type. Klíčový rys Debezia
+    # do Kafka topiců podle sloupce message_type. Hlavní rys Debezia
     # pro outbox use-case (DBZ-1063+).
     transforms: outbox
     transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
@@ -1180,10 +1180,10 @@ spec:
     {% set _diagram_inline %}{% include 'diagrams/14_outbox/inbox_idempotency.svg' ignore missing %}{% endset %}
     {% include '_partials/diagram.html.twig' with {
         fig: '11.6-A',
-        title: 'Idempotent Inbox — deduplikace na straně subscribera',
+        title: 'Idempotent Inbox – deduplikace na straně subscribera',
         inline: _diagram_inline,
         alt: 'Sekvenční diagram zachycující dvě větve: duplicitní event vs. nový event a transakční INSERT do inbox tabulky',
-        caption: 'Klíč je v tom, že INSERT do inboxu a update read modelu jsou v jediné DB transakci. Dva paralelní workery selžou na UNIQUE constraintu — Messenger jeden z nich retry-uje a podruhé už narazí na branch „found“.'
+        caption: 'Klíč je v tom, že INSERT do inboxu a update read modelu jsou v jediné DB transakci. Dva paralelní workery selžou na UNIQUE constraintu – Messenger jeden z nich retry-uje a podruhé už narazí na branch „found“.'
     } %}
 
     {% set _callout_body %}
@@ -1282,12 +1282,12 @@ final readonly class OrderPlacedReadModelUpdater
     public function __invoke(OrderPlaced $event): void
     {
         $this->em->wrapInTransaction(function () use ($event): void {
-            // 1) Idempotency check — duplikát ackneme bez side-effectu.
+            // 1) Idempotency check – duplikát ackneme bez side-effectu.
             if ($this->inbox->isProcessed($event->eventId, self::CONSUMER)) {
                 return;
             }
 
-            // 2) Aplikace business logiky — typicky upsert read modelu.
+            // 2) Aplikace business logiky – typicky upsert read modelu.
             $this->readModel->upsertOrderRow(
                 orderId: $event->orderId,
                 customerId: $event->customerId,
@@ -1299,7 +1299,7 @@ final readonly class OrderPlacedReadModelUpdater
             // UNIQUE constraint je pojistka proti race condition:
             // pokud dva workery dostanou stejný event paralelně,
             // druhý dostane UniqueConstraintViolationException
-            // a Messenger retry-uje — podruhé už narazí na branch isProcessed=true.
+            // a Messenger retry-uje – podruhé už narazí na branch isProcessed=true.
             $this->inbox->markProcessed($event->eventId, self::CONSUMER);
         });
     }
@@ -1431,7 +1431,7 @@ final readonly class IdempotencyKeyListener
         $response = $event->getResponse();
 
         if ($response->getStatusCode() >= 500) {
-            return; // 5xx necachujeme — klient ať retry-uje.
+            return; // 5xx necachujeme – klient ať retry-uje.
         }
 
         $cacheKey = $this->cacheKey($key, $request->getPathInfo());
@@ -1804,7 +1804,7 @@ final class OutboxCleanupCommand extends Command
     <h3 id="migrace-krok-2-heading">Krok 2: Refactor jednoho handleru</h3>
 
     <p>
-        Vyberte jeden klíčový handler – typicky <code>PlaceOrderHandler</code> nebo cokoli,
+        Vyberte jeden hlavní handler – typicky <code>PlaceOrderHandler</code> nebo cokoli,
         kde dual-write nejvíc bolí. Přidejte do něj <code>wrapInTransaction</code> a místo
         <code>$bus->dispatch($event)</code> volejte <code>$outbox->store(OutboxMessage::fromDomainEvent($event))</code>.
         <em>Nemažte</em> ještě staré <code>$bus->dispatch()</code> – pokud máte legacy subscribery,
@@ -1891,7 +1891,7 @@ final class OutboxCleanupCommand extends Command
     </p>
 
     <p>
-        Klíčové body pro praxi:
+        Hlavní body pro praxi:
     </p>
 
     <ul>
