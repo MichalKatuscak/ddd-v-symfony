@@ -133,8 +133,8 @@ final class OrderController extends AbstractController
             <p>
                 Co je špatně: stejný use case se volá i z konzolového commandu (cron, batch),
                 z Symfony Messenger handleru (asynchronní queue) a z administračního panelu.
-                Při každém volání musí někdo to <code>if</code> zopakovat – a stačí, aby jeden
-                vstupní bod zapomněl, a celá ochrana padá. Doménové pravidlo „smí cancelnout
+                Při každém volání musí někdo tutéž podmínku zopakovat – a stačí, aby jeden
+                vstupní bod selhal, a celá ochrana padá. Doménové pravidlo „smí cancelnout
                 jen vlastník“ je rozeseté po infrastruktuře, ne na jednom místě.
             </p>
 
@@ -706,9 +706,9 @@ final class Order
             </ol>
 
             <p>
-                Sedm vrstev kontroly v sedmi krocích – a každá vrstva selže <em>jiným</em> způsobem,
-                s <em>jiným</em> HTTP statusem, s <em>jinou</em> error message. To je rozdíl mezi
-                doménově navrženou autorizací a generickým „Access denied“.
+                Několik vrstev kontroly v jediné cestě requestu – a každá vrstva selže <em>jiným</em>
+                způsobem, s <em>jiným</em> HTTP statusem, s <em>jinou</em> error message. To je
+                rozdíl mezi doménově navrženou autorizací a generickým „Access denied“.
             </p>
 
             {% set _callout_body %}
@@ -1391,8 +1391,8 @@ final class CancelOrderPolicyTest extends TestCase
 
             <h3 id="anti-controller-heading">Anti-vzor 1: Autorizace v controlleru</h3>
             <p>
-                Probrali jsme v sekci <a href="#tri-chyby">16.01</a>. Stojí za znovu zdůraznění,
-                protože je nejčastější. Symptom: stejná autorizační podmínka opakovaná v 3+
+                Probrali jsme v sekci <a href="#tri-chyby">16.01</a>. Vyplatí se to zdůraznit znovu,
+                protože jde o nejčastější chybu. Symptom: stejná autorizační podmínka opakovaná v 3+
                 controllerech, neexistující ve verzích volaných z konzolového commandu nebo
                 Messenger handleru. Náprava: přesun do Voteru + volání
                 <code>AuthorizationCheckerInterface</code> v Application Service. Cross-link na
