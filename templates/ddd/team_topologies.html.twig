@@ -104,7 +104,7 @@
                 <li>
                     <strong>Tým rozdělený podle vrstev → Layered Architecture.</strong>
                     Společnost s 30 vývojáři rozdělená na „frontend tým“, „backend tým“ a „DBA tým“
-                    nevyhnutelně vyprodukuje třívrstvou architekturu. Každý team má vlastní release cyklus,
+                    nevyhnutelně vyprodukuje třívrstvou architekturu. Každý tým má vlastní release cyklus,
                     vlastní CI/CD pipeline, vlastní sprint review. Bounded Context se stane v lepším případě
                     interní záležitostí backend týmu – frontend a DBA o něm nevědí. <em>Důsledek:</em>
                     změna jednoho business požadavku se obtočí přes všechny tři týmy a tři sprinty.
@@ -466,7 +466,7 @@
             <p>
                 <strong>Dva týmy společně, intenzivně řeší problém.</strong> Sdílí backlog, plánují spolu,
                 code-review napříč. Mód je <em>vysoce produktivní, ale drahý</em> – duplikuje meetingy,
-                rozmazává odpovědnost, ničí cognitive load každého ze týmů. Proto je explicitně
+                rozmazává odpovědnost, zatěžuje cognitive load obou týmů. Proto je explicitně
                 <strong>časově omezený</strong>.
             </p>
 
@@ -822,8 +822,8 @@ Bod 5 (germane prostor):         __
                     Velmi častá past: tým s úspěšným Core BC dostane od managementu „ještě jeden malý BC,
                     dáte to“. Pak ještě jeden. Pak ještě jeden. Po roce má tým 4 BC, je vyhořelý a žádný
                     BC není dotažen. <strong>Zdravý mechanismus: kdykoli se přidává BC, někdo musí
-                    explicitně zodpovědět – co odebíráme?</strong> Pokud nic, tým rosteme nebo rozdělíme.
-                    Žádná akumulace.
+                    explicitně zodpovědět – co odebíráme?</strong> Pokud nic, tým buď rozšíříme,
+                    nebo rozdělíme. Žádná akumulace.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1262,8 +1262,8 @@ Bod 5 (germane prostor):         __
                     answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – typicky 2, ojediněle 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">15.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte split na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
                 },
                 {
-                    question: 'Jak se Team Topologies a Spotify Model spřízněné?',
-                    answer: 'Spotify Model (squads, tribes, chapters, guilds, popsaný 2012) byl jeden z prvních pokusů popsat moderní organizační strukturu pro software. Stream-aligned tým ≈ Spotify squad. Tribe (kolekce squadů kolem doménové oblasti) v Team Topologies žádný přímý ekvivalent nemá – Skelton a Pais se mu vyhli, protože zkušenosti ukazují, že tribes se snadno stávají Conway-stylové „divize“, které brzdí toky napříč. Chapters a guilds (komunity sdílení znalostí, např. „všichni iOS devs“) fungují i v Team Topologies – typicky jako neformální komunity nad rámec hlavní topologie. Hlavní rozdíl: Spotify model byl popis jednoho úspěšného podniku v jeden čas; Team Topologies je obecný rámec s explicitními typy a interakcemi.'
+                    question: 'Jak Team Topologies souvisí se Spotify Modelem?',
+                    answer: 'Spotify Model (squads, tribes, chapters, guilds, popsaný 2012) byl jeden z prvních pokusů popsat moderní organizační strukturu pro software. Stream-aligned tým ≈ Spotify squad. Tribe (kolekce squadů kolem doménové oblasti) v Team Topologies žádný přímý ekvivalent nemá – Skelton a Pais se jí vyhnuli, protože zkušenosti ukazují, že tribes se snadno stávají Conway-stylové „divize“, které brzdí toky napříč. Chapters a guilds (komunity sdílení znalostí, např. „všichni iOS devs“) fungují i v Team Topologies – typicky jako neformální komunity nad rámec hlavní topologie. Hlavní rozdíl: Spotify Model byl popisem jednoho úspěšného podniku v určitém období; Team Topologies je obecný rámec s explicitními typy a interakcemi.'
                 },
                 {
                     question: 'Vyplatí se Team Topologies v 50-člověké firmě?',
