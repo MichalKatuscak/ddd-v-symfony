@@ -62,4 +62,4 @@ Drobnosti, které „dotáhnou knihu k dokonalosti"
 - Glossář Symfony↔DDD mappingu — jednostránková tabulka „MessageHandler = Application Service", „Voter = ?", „EventSubscriber vs. Domain Event Handler" atd.
 
 Pokud bych měl vybrat jednu věc, kterou bych jako autor přidal nejdřív, byla by to kapitola Strategic DDD / Context Mapping — protože bez ní zůstává kniha skvělou taktickou příručkou, ale neposkytuje druhou polovinu DDD
-myšlení.<?php
+myšlení.

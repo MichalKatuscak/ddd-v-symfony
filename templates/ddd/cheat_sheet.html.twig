@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+{% block title %}DDD Cheat Sheet | DDD Symfony{% endblock %}
+{% block meta_description %}Jednostránková reference: kdy který DDD vzor, jak se Symfony konstrukty mapují na DDD pojmy a slovní pasti, kterým se vyhnout.{% endblock %}
+{% block breadcrumb_name %}Cheat Sheet{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block article_published_time %}2026-04-29{% endblock %}
+{% block article_modified_time %}2026-04-29{% endblock %}
+{% block body %}
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        category: 'Reference',
+        title: 'DDD Cheat Sheet',
+        deck: 'Cheat sheet se právě připravuje. Plný obsah bude zveřejněn brzy.',
+        published: '2026-04-29',
+        last_updated: '2026-04-29',
+        author: 'M. Katuščák'
+    } %}
+    <div class="art-body">
+        <p>Obsah se právě dokončuje. Mezitím doporučujeme <a href="{{ path('hub_reference') }}">Reference rozcestník</a>.</p>
+    </div>
+</article>
+{% endblock %}

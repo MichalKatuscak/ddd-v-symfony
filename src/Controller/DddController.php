@@ -28,6 +28,15 @@ class DddController extends AbstractController
         ]);
     }
 
+    #[Route('/strategie', name: 'hub_strategic')]
+    public function hubStrategic(): Response
+    {
+        return $this->render('ddd/hub_strategic.html.twig', [
+            'title' => 'Strategický DDD — rozcestník',
+            'hub_chapters' => Chapters::byGroup('strategic'),
+        ]);
+    }
+
     #[Route('/vzory', name: 'hub_patterns')]
     public function hubPatterns(): Response
     {
@@ -219,6 +228,86 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/about.html.twig', [
             'title' => 'O autorovi',
+        ]);
+    }
+
+    #[Route('/subdomeny', name: 'subdomains')]
+    public function subdomains(): Response
+    {
+        return $this->render('ddd/subdomains.html.twig', [
+            'title' => 'Subdomény: Core, Supporting, Generic',
+        ]);
+    }
+
+    #[Route('/context-mapping', name: 'context_mapping')]
+    public function contextMapping(): Response
+    {
+        return $this->render('ddd/context_mapping.html.twig', [
+            'title' => 'Context Mapping — vztahy mezi Bounded Contexts',
+        ]);
+    }
+
+    #[Route('/architektonicke-styly', name: 'architectural_styles')]
+    public function architecturalStyles(): Response
+    {
+        return $this->render('ddd/architectural_styles.html.twig', [
+            'title' => 'Architektonické styly: Hexagonal, Onion, Clean',
+        ]);
+    }
+
+    #[Route('/outbox-pattern', name: 'outbox_pattern')]
+    public function outboxPattern(): Response
+    {
+        return $this->render('ddd/outbox_pattern.html.twig', [
+            'title' => 'Outbox Pattern — spolehlivé publikování doménových eventů',
+        ]);
+    }
+
+    #[Route('/mene-zname-vzory', name: 'lesser_known_patterns')]
+    public function lesserKnownPatterns(): Response
+    {
+        return $this->render('ddd/lesser_known_patterns.html.twig', [
+            'title' => 'Méně známé taktické vzory: Specifications, Domain Services, Factories, Modules',
+        ]);
+    }
+
+    #[Route('/event-storming', name: 'event_storming')]
+    public function eventStorming(): Response
+    {
+        return $this->render('ddd/event_storming.html.twig', [
+            'title' => 'Event Storming a Domain Storytelling',
+        ]);
+    }
+
+    #[Route('/team-topologies', name: 'team_topologies')]
+    public function teamTopologies(): Response
+    {
+        return $this->render('ddd/team_topologies.html.twig', [
+            'title' => 'Conway\'s Law a Team Topologies',
+        ]);
+    }
+
+    #[Route('/autorizace-v-ddd', name: 'authorization_in_ddd')]
+    public function authorizationInDdd(): Response
+    {
+        return $this->render('ddd/authorization_in_ddd.html.twig', [
+            'title' => 'Autorizace v DDD na Symfony',
+        ]);
+    }
+
+    #[Route('/ddd-a-microservices', name: 'microservices_and_ddd')]
+    public function microservicesAndDdd(): Response
+    {
+        return $this->render('ddd/microservices_and_ddd.html.twig', [
+            'title' => 'DDD a microservices — Bounded Context jako service boundary',
+        ]);
+    }
+
+    #[Route('/cheat-sheet', name: 'cheat_sheet')]
+    public function cheatSheet(): Response
+    {
+        return $this->render('ddd/cheat_sheet.html.twig', [
+            'title' => 'DDD Cheat Sheet',
         ]);
     }
 }

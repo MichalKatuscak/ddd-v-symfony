@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+{% block title %}DDD a microservices | DDD Symfony{% endblock %}
+{% block meta_description %}Mapování DDD Bounded Context na microservice. Kdy BC = service, kdy modular monolith, jak se vyhnout distributed monolithu.{% endblock %}
+{% block breadcrumb_name %}DDD a microservices{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block article_published_time %}2026-04-29{% endblock %}
+{% block article_modified_time %}2026-04-29{% endblock %}
+{% block body %}
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '17',
+        category: 'Praxe',
+        title: 'DDD a microservices',
+        deck: 'Kapitola se právě připravuje. Plný obsah bude zveřejněn brzy.',
+        reading_time: 30,
+        difficulty: 4,
+        published: '2026-04-29',
+        last_updated: '2026-04-29',
+        author: 'M. Katuščák'
+    } %}
+    <div class="art-body">
+        <p>Obsah této kapitoly se právě dokončuje. Mezitím doporučujeme přečíst <a href="{{ path('hub_basics') }}">Základy</a> nebo <a href="{{ path('homepage') }}">přehled celé knihy</a>.</p>
+        {% include '_partials/chapter_nav.html.twig' %}
+    </div>
+</article>
+{% endblock %}

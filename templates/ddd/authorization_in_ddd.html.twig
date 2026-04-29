@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+{% block title %}Autorizace v DDD na Symfony | DDD Symfony{% endblock %}
+{% block meta_description %}Kde má sedět autorizační logika v DDD aplikaci v Symfony 8? Edge, use case, aggregate, field — 4 vrstvy s ukázkami Voterů.{% endblock %}
+{% block breadcrumb_name %}Autorizace v DDD{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block article_published_time %}2026-04-29{% endblock %}
+{% block article_modified_time %}2026-04-29{% endblock %}
+{% block body %}
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: '16',
+        category: 'Praxe',
+        title: 'Autorizace v DDD na Symfony',
+        deck: 'Kapitola se právě připravuje. Plný obsah bude zveřejněn brzy.',
+        reading_time: 25,
+        difficulty: 3,
+        published: '2026-04-29',
+        last_updated: '2026-04-29',
+        author: 'M. Katuščák'
+    } %}
+    <div class="art-body">
+        <p>Obsah této kapitoly se právě dokončuje. Mezitím doporučujeme přečíst <a href="{{ path('hub_basics') }}">Základy</a> nebo <a href="{{ path('homepage') }}">přehled celé knihy</a>.</p>
+        {% include '_partials/chapter_nav.html.twig' %}
+    </div>
+</article>
+{% endblock %}

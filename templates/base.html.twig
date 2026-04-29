@@ -50,10 +50,11 @@
 </head>
 <body>
     {%- set _route = app.request.attributes.get('_route') -%}
-    {%- set _basics_routes = ['hub_basics', 'what_is_ddd', 'basic_concepts', 'horizontal_vs_vertical', 'implementation_in_symfony'] -%}
-    {%- set _patterns_routes = ['hub_patterns', 'cqrs', 'event_sourcing', 'sagas', 'performance_aspects'] -%}
-    {%- set _practice_routes = ['hub_practice', 'practical_examples', 'testing_ddd', 'migration_from_crud', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd', 'case_study'] -%}
-    {%- set _reference_routes = ['hub_reference', 'ddd_ai', 'glossary', 'resources'] -%}
+    {%- set _basics_routes = ['hub_basics', 'what_is_ddd', 'basic_concepts', 'horizontal_vs_vertical', 'architectural_styles', 'implementation_in_symfony'] -%}
+    {%- set _strategic_routes = ['hub_strategic', 'subdomains', 'context_mapping'] -%}
+    {%- set _patterns_routes = ['hub_patterns', 'cqrs', 'event_sourcing', 'sagas', 'outbox_pattern', 'lesser_known_patterns', 'performance_aspects'] -%}
+    {%- set _practice_routes = ['hub_practice', 'event_storming', 'team_topologies', 'authorization_in_ddd', 'microservices_and_ddd', 'practical_examples', 'testing_ddd', 'migration_from_crud', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd', 'case_study'] -%}
+    {%- set _reference_routes = ['hub_reference', 'ddd_ai', 'glossary', 'resources', 'cheat_sheet'] -%}
 
     <a href="#content" class="skip-link">Přejít na obsah</a>
 
@@ -76,6 +77,7 @@
             </div>
             <div class="topnav-center">
                 <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Základy</a>
+                <a class="navlink {% if _route in _strategic_routes %}active{% endif %}" href="{{ path('hub_strategic') }}"{% if _route == 'hub_strategic' %} aria-current="page"{% elseif _route in _strategic_routes %} aria-current="true"{% endif %}>Strategie</a>
                 <a class="navlink {% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}"{% if _route == 'hub_patterns' %} aria-current="page"{% elseif _route in _patterns_routes %} aria-current="true"{% endif %}>Vzory</a>
                 <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a>
                 <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a>
@@ -96,6 +98,7 @@
     <aside class="nav-drawer" aria-label="Mobilní navigace">
         <ul class="nav-drawer-list">
             <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Základy</a></li>
+            <li><a class="{% if _route in _strategic_routes %}active{% endif %}" href="{{ path('hub_strategic') }}"{% if _route == 'hub_strategic' %} aria-current="page"{% elseif _route in _strategic_routes %} aria-current="true"{% endif %}>Strategie</a></li>
             <li><a class="{% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}"{% if _route == 'hub_patterns' %} aria-current="page"{% elseif _route in _patterns_routes %} aria-current="true"{% endif %}>Vzory</a></li>
             <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a></li>
             <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a></li>
@@ -108,6 +111,7 @@
     </main>
 
     {%- set _foot_basics    = ddd_chapters_by_group('basics') -%}
+    {%- set _foot_strategic = ddd_chapters_by_group('strategic') -%}
     {%- set _foot_patterns  = ddd_chapters_by_group('patterns') -%}
     {%- set _foot_practice  = ddd_chapters_by_group('practice') -%}
     {%- set _foot_reference = ddd_chapters_by_group('reference') -%}
@@ -137,12 +141,20 @@
 
             <div class="foot-a-cols">
                 <div class="foot-a-col">
-                    <h3><a href="{{ path('hub_basics') }}">Základy</a></h4>
+                    <h3><a href="{{ path('hub_basics') }}">Základy</a></h3>
                     <ul class="foot-a-list">
                         {% for c in _foot_basics %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
                         {% endfor %}
                     </ul>
+                    {% if _foot_strategic|length > 0 %}
+                        <h3 style="margin-top:1.5rem"><a href="{{ path('hub_strategic') }}">Strategie</a></h3>
+                        <ul class="foot-a-list">
+                            {% for c in _foot_strategic %}
+                                <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </div>
                 <div class="foot-a-col">
                     <h3><a href="{{ path('hub_patterns') }}">Vzory</a></h3>
