@@ -70,7 +70,7 @@
             s něčím, co se dá zítra otevřít v IDE: <strong>Event Storming</strong> Alberta Brandoliniho
             (2013) a <strong>Domain Storytelling</strong> Stefana Hofera a Henninga Schwentnera (2021).
             Obě techniky řeší stejný problém – extrakci tacitních doménových znalostí – ale různými
-            cestami. Po této kapitole budete vědět, kterou kdy zvolit a jak ji prakticky odřídit.
+            cestami. Po této kapitole budete vědět, kterou kdy zvolit a jak ji prakticky uřídit.
         </p>
 
         {# ───────────────────────────────────────────────────────────
@@ -366,7 +366,7 @@
                     eventy, kolem kterých se přirozeně sdružuje skupina ostatních. V e-shopu typicky:
                     <code>CustomerRegistered</code>, <code>OrderPlaced</code>, <code>PaymentSettled</code>,
                     <code>ShipmentDispatched</code>, <code>OrderClosed</code>. Označí je velkou červenou
-                    šipkou nebo vodorovnou čarou pod osu. Tipicky 3-7 pivotal events.
+                    šipkou nebo vodorovnou čarou pod osu. Typicky 3-7 pivotal events.
                 </li>
                 <li>
                     <strong>(30-45 min) Hot Spots.</strong> Kdykoliv během workshopu zazní otázka, kterou
@@ -436,7 +436,7 @@
                 </li>
                 <li>
                     <strong>Přestávky každých 60 minut.</strong> Online unavuje rychleji než offline.
-                    Vložte 10 minutové přestávky, ne smlouvejte se s nimi.
+                    Vložte 10minutové přestávky a nezkracujte je.
                 </li>
                 <li>
                     <strong>Asynchronní pre-work.</strong> Pošlete účastníkům 24 hodin předem otevřený
@@ -1154,7 +1154,7 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
             <h3 id="post-5-repo">14.09.5 Doporučená struktura repa po prvním workshopu</h3>
 
             <p>
-                Aby výstup workshopu nebyl pohřben v Slacku, doporučuji v Symfony projektu rovnou založit
+                Aby výstup workshopu nebyl pohřben v Slacku, doporučujeme v Symfony projektu rovnou založit
                 tuto adresářovou strukturu. Každý soubor má jasný účel a nikdo nemusí hádat, kam co patří:
             </p>
 
@@ -1459,8 +1459,8 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
                     answer: 'Engineering. Argument je jednoduchý: bez workshopu engineering vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů. V praxi by produkt a engineering měli platit společně – workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně.'
                 },
                 {
-                    question: 'Co když doménoví experti nemluví anglicky a používají slang („nějaký posraný zákazník nezaplatil“)?',
-                    answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky češtinou. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „posraný zákazník“, napište to na sticky tak, jak to řekl, a v kódu pak modelujte koncept (s neutrálnějším jménem typu <code>DelinquentCustomer</code> nebo <code>ChronicLatePayer</code>), ale dokumentujte, že lidově se mu říká takhle. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
+                    question: 'Co když doménoví experti používají hovorovou češtinu a slang („chronický neplatič nás zase odbil“)?',
+                    answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky češtinou s vlastním slangem. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „chronický neplatič“, napište to na sticky tak, jak to řekl, a v kódu pak modelujte koncept s tímto jménem (např. <code>ChronicLatePayer</code>), případně doplňte synonymum používané v týmu jako PHPDoc komentář. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
                 },
                 {
                     question: 'Když máme jen sólo developer a PM, dá se Event Storming dělat ve dvou?',
