@@ -76,14 +76,14 @@
     </p>
 
     <p>
-        Tato kapitola popisuje <strong>Transactional Outbox Pattern</strong>, kanonické řešení
-        dual-write problému, a jeho symetrický protějšek <strong>Idempotent Inbox Pattern</strong>,
-        který zajišťuje deduplikaci na straně subscriberů. Postupně si projdeme původ vzoru
-        v práci Pata Hellanda <em>Life Beyond Distributed Transactions</em> (2007), schéma
-        outbox tabulky s povinným indexem, kompletní implementaci s Doctrine ORM a Symfony
-        Messenger, dvě varianty relay procesu (polling worker vs. CDC / Debezium) a operační
-        aspekty – outbox lag, kompakce, dead-letter queue. V závěru přidáme migrační postup
-        pro existující projekt a srovnání s alternativami.
+        <strong>Transactional Outbox Pattern</strong> je kanonické řešení dual-write problému;
+        jeho symetrický protějšek <strong>Idempotent Inbox Pattern</strong> zajišťuje deduplikaci
+        na straně subscriberů. V dalších sekcích si projdeme původ vzoru v práci Pata Hellanda
+        <em>Life Beyond Distributed Transactions</em> (2007), schéma outbox tabulky s povinným
+        indexem, kompletní implementaci s Doctrine ORM a Symfony Messenger, dvě varianty relay
+        procesu (polling worker vs. CDC / Debezium) a operační aspekty – outbox lag, kompakce,
+        dead-letter queue. V závěru přidáme migrační postup pro existující projekt a srovnání
+        s alternativami.
     </p>
 
     {# ───────────────────────────────────────────────────────────
@@ -221,7 +221,7 @@ final readonly class PlaceOrderHandlerNaive
             </li>
         </ul>
         <p>
-            Outbox Pattern je <strong>levnější, robustnější a infrastrukturně neutrální</strong>
+            Outbox Pattern je <strong>levnější, spolehlivější a infrastrukturně neutrální</strong>
             náhrada XA: vystačíme si s jednou ACID transakcí v jedné DB, kterou stejně používáme
             pro persistenci agregátu.
         </p>
@@ -841,11 +841,12 @@ interface OutboxRepository
         Implementace rozhraní pomocí Doctrine je triviální – konstruktor přijímá
         <code>EntityManagerInterface</code>, <code>store()</code> volá <code>persist()</code>
         (NIKOLI <code>flush()</code> – flush patří aplikačnímu transakčnímu wrapperu),
-        <code>fetchPending()</code> vrací DQL <code>SELECT m FROM OutboxMessage m WHERE
-        m.status = 'pending' ORDER BY m.occurredAt ASC SETMAXRESULTS :limit</code>
-        a <code>markSent()</code>/<code>markFailed()</code> volají <code>m.markSent()</code>
-        / <code>m.markFailed()</code> a flushnou. Vynechávám zde plný výpis – je to mechanická
-        adapter třída.
+        <code>fetchPending()</code> sestaví DQL <code>SELECT m FROM OutboxMessage m WHERE
+        m.status = 'pending' ORDER BY m.occurredAt ASC</code> a omezí výsledek voláním
+        <code>$query-&gt;setMaxResults($limit)</code>; <code>markSent()</code>
+        a <code>markFailed()</code> volají <code>$m-&gt;markSent()</code>,
+        respektive <code>$m-&gt;markFailed()</code> a následně flushnou. Plný výpis vynecháváme
+        – jde o mechanickou adapter třídu.
     </p>
 
     </section>
@@ -1683,10 +1684,10 @@ final class OutboxCleanupCommand extends Command
     </p>
 
     {% set _callout_body %}
-        <h3 id="anti-direct-publish-heading">Publish napřímo z agregát metody</h3>
+        <h3 id="anti-direct-publish-heading">Publish napřímo z metody agregátu</h3>
         <p>
-            Někteří framework wrappery (Laravel events, Symfony EventDispatcher na DB
-            entitách) lákají k „<em>fire-and-forget</em>“ stylu přímo z metody agregátu.
+            Některé framework wrappery (Laravel events, Symfony EventDispatcher nad DB
+            entitami) lákají k „<em>fire-and-forget</em>“ stylu přímo z metody agregátu.
             Pokud event letí do brokera ještě před commitem doménové transakce – ať už
             kvůli sync transportu, kvůli middleware pořadí nebo kvůli explicitnímu
             <code>$bus->dispatch()</code> – máme dual-write zpět. Outbox je celý smysl
@@ -1842,8 +1843,9 @@ final class OutboxCleanupCommand extends Command
     <p>
         Po měsíci provozu projděte metriky: jaký je medián lagu, jak rychle roste tabulka,
         kolik řádků skončilo ve <code>failed</code>, kolik duplicit Inbox odchytil. Z těchto
-        čísel se dá vyladit polling interval relayie, batch limit, cleanup retention a alert
-        prahy. Outbox není „set-and-forget“ – je to operační closet, který chce občasnou údržbu.
+        čísel se dá vyladit polling interval relay procesu, batch limit, cleanup retention
+        a alert prahy. Outbox není „set-and-forget“ – je to operační kout, který občasnou
+        údržbu vyžaduje.
     </p>
 
     {% set _callout_body %}
