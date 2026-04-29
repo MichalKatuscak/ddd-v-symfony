@@ -1173,6 +1173,84 @@ final class UserTest extends TestCase
             </p>
         </section>
 
+        <section id="refactoring-kucharka" aria-labelledby="refactoring-kucharka-heading">
+            <h2 id="refactoring-kucharka-heading" class="h-section"><span class="h-num">11.09</span> Refactoring kuchařka — krátké recepty</h2>
+
+            <p>
+                Strangler Fig je strategický pohled na celou migraci. V denní praxi narazíte na opakující se mikrosituace.
+                Tato kuchařka obsahuje 8 nejčastějších, každá ve formátu <em>„symptomy → krok 1, 2, 3"</em>.
+                Recepty jsou záměrně krátké — když potřebujete kontext nebo důkladnější rozbor, projděte odkazované kapitoly.
+            </p>
+
+            <h3 id="recept-anemic-entita-heading">Recept 1: Mám anémickou Doctrine entitu</h3>
+            <p><strong>Symptomy:</strong> entita má jen gettery/settery, vší logika v Service třídě.</p>
+            <ol>
+                <li>Identifikuj invarianty entity (co nesmí být porušeno).</li>
+                <li>Pro každý invariant najdi metodu v <code>*Service</code>, která ho dnes drží.</li>
+                <li>Přesuň metodu do entity, getter/setter na <code>private</code> nebo zruš.</li>
+                <li>Service se stane tenkým koordinátorem (Application Service) — jen volá entitu, transakce, eventy.</li>
+                <li>Cross-link: <a href="{{ path('anti_patterns') }}">Anti-vzor: Anemic Domain Model</a> · <a href="{{ path('lesser_known_patterns') }}#domain-services">Domain Services vs. Application Services</a>.</li>
+            </ol>
+
+            <h3 id="recept-doctrine-anotace-heading">Recept 2: Doctrine anotace v doménové třídě</h3>
+            <p><strong>Symptomy:</strong> <code>App\Domain\Order</code> má <code>#[ORM\Entity]</code>, doména závisí na Doctrine.</p>
+            <ol>
+                <li>Vytvoř separated mapping — XML/YAML schema v <code>App\&lt;BC&gt;\Infrastructure\Doctrine\Mapping\</code>. Doménová třída zůstane bez anotací.</li>
+                <li>Přesuň konfiguraci repozitáře do <code>services.yaml</code>.</li>
+                <li>Otestuj: <code>composer require --dev phpat/phpat</code> a přidej rule <code>App\Domain\* nesmí závisět na Doctrine\*</code>.</li>
+            </ol>
+
+            <h3 id="recept-id-string-heading">Recept 3: Mám primitivní ID jako <code>string</code> / <code>int</code></h3>
+            <p><strong>Symptomy:</strong> <code>Order::$id: string</code>, kdekoli se předává jen <code>string</code>.</p>
+            <ol>
+                <li>Zaveď VO <code>OrderId</code> (<code>final readonly class OrderId { public function __construct(public Ulid $value) {} }</code>).</li>
+                <li>Doctrine custom type pro <code>OrderId</code> (mapping z DB string ↔ VO).</li>
+                <li>Postupně refaktoruj signature napříč handlery. PHPStan na úrovni 8 odhalí každý zapomenutý <code>string</code>.</li>
+            </ol>
+
+            <h3 id="recept-shared-tabulka-heading">Recept 4: Sdílím Doctrine tabulku napříč BC</h3>
+            <p><strong>Symptomy:</strong> tabulka <code>users</code> se používá v Ordering BC i Billing BC, oba ji modify.</p>
+            <ol>
+                <li>Identify owning BC (typicky Identity).</li>
+                <li>Ostatní BC ji nesmí modify — jen READ. Přesuň reads do read-modelů (každý BC má vlastní projekci).</li>
+                <li>Modify nahraď voláním Identity API (sync HTTP nebo async event publishing s outbox).</li>
+                <li>Cross-link: <a href="{{ path('outbox_pattern') }}">Outbox Pattern</a>.</li>
+            </ol>
+
+            <h3 id="recept-business-logika-controlleru-heading">Recept 5: Business logika v controlleru</h3>
+            <p><strong>Symptomy:</strong> 200-řádkový controller s if-else stromem doménových rozhodnutí.</p>
+            <ol>
+                <li>Vytvoř <code>Command</code> DTO + <code>CommandHandler</code> v Application vrstvě.</li>
+                <li>Controller se zúží na: validate input → dispatch command → vrátit response.</li>
+                <li>Authorization přesun do Voteru (cross-link <a href="{{ path('authorization_in_ddd') }}">Autorizace</a>).</li>
+            </ol>
+
+            <h3 id="recept-aggregate-bobtna-heading">Recept 6: Aggregate bobtná (1000+ řádků)</h3>
+            <p><strong>Symptomy:</strong> <code>Order</code> má 30 metod a 15 polí.</p>
+            <ol>
+                <li>Najdi pole, která se mění nezávisle (různé invarianty, různé use cases).</li>
+                <li>Zvážit split na 2 agregáty (např. <code>Order</code> + <code>OrderShipment</code>). Spojí je sdílené <code>OrderId</code>, žádná silná reference.</li>
+                <li>Specifikační logiku vyextrahovat do <code>Specification</code> tříd (cross-link <a href="{{ path('lesser_known_patterns') }}#specification">Specifications</a>).</li>
+            </ol>
+
+            <h3 id="recept-event-publish-uvnitr-heading">Recept 7: <code>eventDispatcher-&gt;dispatch()</code> uvnitř doménové metody</h3>
+            <p><strong>Symptomy:</strong> Aggregate volá Symfony <code>EventDispatcher</code> přímo.</p>
+            <ol>
+                <li>Aggregate uchová eventy v <code>private array $releasedEvents</code>.</li>
+                <li>Aplikační handler po <code>repository-&gt;save()</code> volá <code>$order-&gt;releaseEvents()</code> a publikuje (přes outbox).</li>
+                <li>Doména ztratí závislost na Symfony EventDispatcheru. Test je čistý.</li>
+                <li>Cross-link: <a href="{{ path('outbox_pattern') }}#aggregate-publishes">Outbox — Aggregate publikuje</a>.</li>
+            </ol>
+
+            <h3 id="recept-fields-jako-stav-heading">Recept 8: Stav je sloupec <code>string $status</code></h3>
+            <p><strong>Symptomy:</strong> <code>Order::$status: string</code>, podmínky všude <code>if ($order-&gt;status === 'PLACED')</code>.</p>
+            <ol>
+                <li>Zaveď enum (PHP 8.1+): <code>enum OrderStatus: string { case PLACED = 'placed'; case CANCELLED = 'cancelled'; }</code>.</li>
+                <li>Aggregate metody dělají transitions: <code>$this-&gt;status = OrderStatus::CANCELLED</code>.</li>
+                <li>Pro komplexní transition rules zvažit State Machine (Symfony Workflow component nebo doménová reprezentace).</li>
+            </ol>
+        </section>
+
         {% include '_partials/faq.html.twig' with {
             items: [
                 {

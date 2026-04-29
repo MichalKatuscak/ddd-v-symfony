@@ -1244,6 +1244,171 @@
             </dl>
         </section>
 
+        {# ==================== FALSE FRIENDS ==================== #}
+        <section id="false-friends" aria-labelledby="false-friends-heading">
+            <h2 id="false-friends-heading" class="h-section"><span class="h-num">06</span> Slovní pasti — false friends</h2>
+
+            <div class="note" role="note" aria-labelledby="false-friends-intro-heading">
+                <h3 id="false-friends-intro-heading">Proč to vzniká</h3>
+                <p>
+                    DDD termíny se sémanticky překrývají s mnoha pojmy z PHP/Symfony světa, ze Symfony bezpečnosti, z Doctrine, ze Spring/Java kultury. Stejné slovo má v různých kontextech různý význam — a běžný code review tu kontradikci přehlíží. Tato sekce explicitně rozplete pasti, které vidím v každém DDD projektu.
+                </p>
+            </div>
+
+            <dl class="glossary-list">
+                <div class="glossary-entry" id="ff-acl">
+                    <dt><dfn>ACL</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> Anti-Corruption Layer — překládací vrstva mezi BC a cizím modelem. <strong>Mimo DDD:</strong> Access Control List — autorizační seznam (kdo smí na co). V DDD literatuře se „ACL" vždy myslí to první. <a href="{{ path('context_mapping') }}#acl">Detail</a>.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-repository">
+                    <dt><dfn>Repository</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> doménová abstrakce, interface v <code>App\&lt;BC&gt;\Domain</code> deklarující <code>get()</code>/<code>save()</code> agregátu, jako by žil v paměti. <strong>V Symfony/Doctrine:</strong> <code>Doctrine\ORM\EntityRepository</code> — třída s <code>findBy</code>/<code>findAll</code>. Pravidlo: DDD Repository je vždy interface; Doctrine <code>EntityRepository</code> je vždy implementace v <code>App\&lt;BC&gt;\Infrastructure</code>.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-service">
+                    <dt><dfn>Service</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> Domain Service (doménová pravidla bez vlastníka), Application Service (use case koordinace), Infrastructure Service (porty/adaptéry). <strong>V Symfony:</strong> jakákoli třída v DI kontejneru. Pravidlo: nikdy nepojmenovávejte třídu <code>FooService</code> bez kvalifikace, jaký typ.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-event">
+                    <dt><dfn>Event</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> Domain Event (<code>OrderPlaced</code> — fakt, který nastal v doméně). <strong>V Symfony:</strong> objekt předávaný <code>EventDispatcher</code>u — typicky framework / kernel události (<code>KernelEvents::REQUEST</code>). Třídy se nemají sdílet — Domain Events nesmí extends <code>Symfony\Contracts\EventDispatcher\Event</code>, jinak doména závisí na frameworku.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-entity">
+                    <dt><dfn>Entity</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> objekt s identitou (Customer, Order). Může být kořenem agregátu nebo uvnitř agregátu. <strong>V Doctrine:</strong> třída s <code>#[ORM\Entity]</code> anotací mapovaná na databázový řádek. DDD Entity může (ale nemusí) být současně Doctrine Entity.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-domain">
+                    <dt><dfn>Domain</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> oblast byznysu, kterou software modeluje (Ordering, Billing, Catalog). <strong>V Twig/i18n:</strong> translation domain (<code>messages</code>, <code>validators</code>). Mimo DDD je „Domain" v PHP velmi vzácné, takže matení bývá jen v Twig.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-controller">
+                    <dt><dfn>Controller</dfn></dt>
+                    <dd>
+                        <p><strong>V Symfony:</strong> třída obsluhující HTTP request. <strong>V DDD pojmosloví:</strong> infrastructure adapter — patří do <code>App\&lt;BC&gt;\Infrastructure\Http\</code>. Nikoli do Application a už vůbec ne do Domain.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-handler">
+                    <dt><dfn>Handler</dfn></dt>
+                    <dd>
+                        <p><strong>V Symfony Messenger:</strong> třída implementující business logiku spuštěnou message busem. Typicky <code>#[AsMessageHandler]</code>. <strong>V DDD:</strong> Application Service (Use Case) — pokud zpracovává Command; Domain Event Handler — pokud reaguje na Domain Event. Stejná třída, různé pojmenování v různém kontextu.</p>
+                    </dd>
+                </div>
+
+                <div class="glossary-entry" id="ff-aggregate">
+                    <dt><dfn>Aggregate</dfn></dt>
+                    <dd>
+                        <p><strong>V DDD:</strong> shluk objektů, které se mění atomicky. <strong>V SQL/reportech:</strong> agregační funkce (<code>SUM</code>, <code>COUNT</code>). Pojmy se neprolínají, ale junior dev to často mate.</p>
+                    </dd>
+                </div>
+            </dl>
+        </section>
+
+        {# ==================== SYMFONY ↔ DDD MAPPING ==================== #}
+        <section id="symfony-ddd-mapping" aria-labelledby="symfony-ddd-mapping-heading">
+            <h2 id="symfony-ddd-mapping-heading" class="h-section"><span class="h-num">07</span> Symfony ↔ DDD mapping (rozšířená tabulka)</h2>
+
+            <div class="note" role="note">
+                <p>Krátká verze této tabulky je v <a href="{{ path('cheat_sheet') }}#symfony-mapping">Cheat Sheetu</a>. Tato je rozšířená — s odkazy na konkrétní kapitoly a anti-vzory.</p>
+            </div>
+
+            <table class="glossary-table">
+                <thead>
+                    <tr>
+                        <th>Symfony konstrukt</th>
+                        <th>DDD pojem</th>
+                        <th>Kde to v projektu sedí</th>
+                        <th>Detail / anti-vzor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Controller</code> (HTTP)</td>
+                        <td>Infrastructure adapter</td>
+                        <td><code>App\&lt;BC&gt;\Infrastructure\Http\</code></td>
+                        <td><a href="{{ path('architectural_styles') }}#hexagonal">Hexagonal — Adapter</a> · <a href="{{ path('anti_patterns') }}">Anti-vzor: business logika v controlleru</a></td>
+                    </tr>
+                    <tr>
+                        <td><code>#[AsMessageHandler]</code> handler</td>
+                        <td>Application Service / Use Case</td>
+                        <td><code>App\&lt;BC&gt;\Application\Handler\</code></td>
+                        <td><a href="{{ path('cqrs') }}">CQRS</a></td>
+                    </tr>
+                    <tr>
+                        <td><code>EntityRepository</code> (Doctrine)</td>
+                        <td>Repository — implementace</td>
+                        <td><code>App\&lt;BC&gt;\Infrastructure\Doctrine\Doctrine&lt;X&gt;Repository.php</code></td>
+                        <td>Interface je v doméně!</td>
+                    </tr>
+                    <tr>
+                        <td><code>Voter</code></td>
+                        <td>Use case authorization</td>
+                        <td><code>App\&lt;BC&gt;\Infrastructure\Security\</code></td>
+                        <td><a href="{{ path('authorization_in_ddd') }}#use-case-voter">Autorizace — Voter</a></td>
+                    </tr>
+                    <tr>
+                        <td><code>Form</code></td>
+                        <td>Input mapping (DTO)</td>
+                        <td><code>App\&lt;BC&gt;\Infrastructure\Http\Form\</code></td>
+                        <td>Form <code>getData()</code> → Command DTO, ne přímo Aggregate</td>
+                    </tr>
+                    <tr>
+                        <td>Twig template</td>
+                        <td>View / Read Model</td>
+                        <td><code>templates/&lt;bc&gt;/</code></td>
+                        <td>Read model, ne write model</td>
+                    </tr>
+                    <tr>
+                        <td>Messenger transport (sync)</td>
+                        <td>In-process command/event bus</td>
+                        <td>monolith</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Messenger transport (AMQP)</td>
+                        <td>Integration event channel</td>
+                        <td>cross-BC nebo cross-service</td>
+                        <td><a href="{{ path('outbox_pattern') }}">Outbox</a> + <a href="{{ path('microservices_and_ddd') }}">Microservices</a></td>
+                    </tr>
+                    <tr>
+                        <td><code>Console Command</code></td>
+                        <td>Driving adapter (alternativa HTTP)</td>
+                        <td><code>App\&lt;BC&gt;\Infrastructure\Cli\</code></td>
+                        <td>Volá stejné Application Services jako HTTP Controller</td>
+                    </tr>
+                    <tr>
+                        <td>Doctrine Migration</td>
+                        <td>Schema evolution</td>
+                        <td><code>migrations/</code></td>
+                        <td>Žádný DDD ekvivalent — čistě infrastruktura</td>
+                    </tr>
+                    <tr>
+                        <td><code>EventSubscriber</code> (Doctrine <code>postPersist</code>)</td>
+                        <td>Infrastructure (NE Domain Event Handler)</td>
+                        <td><code>App\&lt;BC&gt;\Infrastructure\Doctrine\EventListener\</code></td>
+                        <td>Anti-vzor: doménová pravidla v Doctrine listeneru</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
         {# ==================== LITERATURA ==================== #}
         <section id="literatura" aria-labelledby="literatura-heading">
             <h2 id="literatura-heading" class="h-section"><span class="h-num">★</span> Primární literatura</h2>
