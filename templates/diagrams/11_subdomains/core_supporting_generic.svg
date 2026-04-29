@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="814.0625px" preserveAspectRatio="none" style="width:1323px;height:814px;background:#11141A;" version="1.1" viewBox="0 0 1323 814" width="1323.4375px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="568.75" x="401.5625" y="26.1063">E-shop: subdoménové členění a investice</text><!--MD5=[01435ace8273dc3cae88e7f376e4d373]
+cluster core--><rect fill="#F0A456" height="196.875" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="1156.25" x="46.875" y="82.7393"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="157.8125" x="546.0938" y="106.1691">Core Domain</text><!--MD5=[f93e6055f4b4ebde50acf4f2fb26f793]
+cluster supp--><rect fill="#161A22" height="196.875" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="1026.5625" x="46.875" y="342.1143"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="279.6875" x="420.3125" y="365.5441">Supporting Subdomain</text><!--MD5=[05a8c2a6982e1798c112589c315fda43]
+cluster gen--><rect fill="#161A22" height="196.875" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="1259.375" x="46.875" y="601.4893"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="240.625" x="556.25" y="624.9191">Generic Subdomain</text><!--MD5=[a2835e0ab7403dd35478ea0bd73c9abd]
+entity pricing--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="257.8125" x="550.7813" y="167.8955"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="226.5625" x="566.4063" y="203.8254">Pricing &amp; Promotions</text><!--MD5=[beccccabbdc43772418e83d4b5a7a2cb]
+entity recom--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="381.25" x="114.0625" y="167.8955"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="350" x="129.6875" y="203.8254">Personalized Recommendations</text><path d="M863.2813,154.6143 L863.2813,189.7705 L809,196.0205 L863.2813,202.2705 L863.2813,237.2559 A4.6875,4.6875 0 0 0 867.9688,241.9434 L1160.1563,241.9434 A4.6875,4.6875 0 0 0 1164.8438,237.2559 L1164.8438,165.5518 L1149.2188,149.9268 L867.9688,149.9268 A4.6875,4.6875 0 0 0 863.2813,154.6143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1149.2188,149.9268 L1149.2188,163.208 A2.3438,2.3438 0 0 0 1151.5625,165.5518 L1164.8438,165.5518 L1149.2188,149.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="256.25" x="872.6563" y="178.0441">KONKURENČNÍ VÝHODA</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="268.75" x="872.6563" y="203.508">plný DDD taktický design</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="239.0625" x="872.6563" y="228.9719">in-house, seniorní tým</text><!--MD5=[8c4df3fda8d2ea9c86c0713a30d32477]
+entity order--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="240.625" x="300" y="427.2705"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="209.375" x="315.625" y="463.2004">Order Management</text><!--MD5=[f9195ead6d4a7c05e2024494f14fc8cd]
+entity inv--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="129.6875" x="114.8438" y="427.2705"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="130.4688" y="463.2004">Inventory</text><path d="M595.3125,413.9893 L595.3125,449.1455 L540.7656,455.3955 L595.3125,461.6455 L595.3125,496.6309 A4.6875,4.6875 0 0 0 600,501.3184 L1031.25,501.3184 A4.6875,4.6875 0 0 0 1035.9375,496.6309 L1035.9375,424.9268 L1020.3125,409.3018 L600,409.3018 A4.6875,4.6875 0 0 0 595.3125,413.9893 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1020.3125,409.3018 L1020.3125,422.583 A2.3438,2.3438 0 0 0 1022.6563,424.9268 L1035.9375,424.9268 L1020.3125,409.3018 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="407.8125" x="604.6875" y="437.4191">Nutné pro byznys, ale ne diferenciátor</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="284.375" x="604.6875" y="462.883">DDD light + Doctrine ORM</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="187.5" x="604.6875" y="488.3469">junior-medior tým</text><!--MD5=[e29493a8775effcafa538aa0485107d1]
+entity auth--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="187.5" x="685.9375" y="686.6455"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="156.25" x="701.5625" y="722.5754">Authentication</text><!--MD5=[37c6948bc95ac73d10cc402861091b60]
+entity pay--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="221.875" x="409.375" y="686.6455"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="190.625" x="425" y="722.5754">Payments (Stripe)</text><!--MD5=[d112aecbd7ccc75573a6ee2503a173b3]
+entity email--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="239.0625" x="114.8438" y="686.6455"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="207.8125" x="130.4688" y="722.5754">Email delivery (SES)</text><path d="M928.9063,673.3643 L928.9063,708.5205 L873.6875,714.7705 L928.9063,721.0205 L928.9063,756.0059 A4.6875,4.6875 0 0 0 933.5938,760.6934 L1263.2813,760.6934 A4.6875,4.6875 0 0 0 1267.9688,756.0059 L1267.9688,684.3018 L1252.3438,668.6768 L933.5938,668.6768 A4.6875,4.6875 0 0 0 928.9063,673.3643 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1252.3438,668.6768 L1252.3438,681.958 A2.3438,2.3438 0 0 0 1254.6875,684.3018 L1267.9688,684.3018 L1252.3438,668.6768 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="101.5625" x="938.2813" y="696.7941">Komodita</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="306.25" x="938.2813" y="722.258">SaaS / off-the-shelf knihovna</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="938.2813" y="747.7219">minimum custom kódu</text><!--MD5=[45e3676bf431a0f64b763f1fd9b9c486]
+link core to supp--><!--MD5=[122a81be028d264adc062ee6424e3a9d]
+link supp to gen--><!--MD5=[55a073c8c98ee37e259cdbc3715cb8ff]
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title E-shop: subdoménové členění a investice
+
+rectangle "Core Domain" as core #F0A456 {
+  rectangle "Pricing & Promotions" as pricing
+  rectangle "Personalized Recommendations" as recom
+  note right of pricing
+    KONKURENČNÍ VÝHODA
+    plný DDD taktický design
+    in-house, seniorní tým
+  end note
+}
+
+rectangle "Supporting Subdomain" as supp {
+  rectangle "Order Management" as order
+  rectangle "Inventory" as inv
+  note right of order
+    Nutné pro byznys, ale ne diferenciátor
+    DDD light + Doctrine ORM
+    junior-medior tým
+  end note
+}
+
+rectangle "Generic Subdomain" as gen {
+  rectangle "Authentication" as auth
+  rectangle "Payments (Stripe)" as pay
+  rectangle "Email delivery (SES)" as email
+  note right of auth
+    Komodita
+    SaaS / off-the-shelf knihovna
+    minimum custom kódu
+  end note
+}
+
+core -[hidden]down- supp
+supp -[hidden]down- gen
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.11+10-1-deb13u2-Debian
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

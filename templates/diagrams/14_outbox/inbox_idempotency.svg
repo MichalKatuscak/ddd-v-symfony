@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1282.8125px" preserveAspectRatio="none" style="width:1117px;height:1282px;background:#11141A;" version="1.1" viewBox="0 0 1117 1282" width="1117.1875px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="734.375" x="192.1875" y="41.7313">Idempotent Inbox: deduplikace na straně subscribera</text><rect fill="#11141A" height="787.793" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="1078.125" x="20.3125" y="328.8086"/><rect fill="#11141A" height="522.1191" style="stroke: none; stroke-width: 1.5625;" width="1078.125" x="20.3125" y="594.4824"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="110.9375" x2="110.9375" y1="182.1045" y2="1143.1641"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="378.125" x2="378.125" y1="182.1045" y2="1143.1641"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="801.5625" x2="801.5625" y1="182.1045" y2="1143.1641"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="1014.0625" x2="1014.0625" y1="182.1045" y2="1143.1641"/><path d="M43.75,115.5518 L179.6875,115.5518 C187.5,115.5518 187.5,148.8281 187.5,148.8281 C187.5,148.8281 187.5,182.1045 179.6875,182.1045 L43.75,182.1045 C35.9375,182.1045 35.9375,148.8281 35.9375,148.8281 C35.9375,148.8281 35.9375,115.5518 43.75,115.5518 " fill="#1B202A" style="stroke: #A80036; stroke-width: 3.125;"/><path d="M179.6875,115.5518 C171.875,115.5518 171.875,148.8281 171.875,148.8281 C171.875,182.1045 179.6875,182.1045 179.6875,182.1045 " fill="none" style="stroke: #A80036; stroke-width: 3.125;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="71.875" x="67.9688" y="143.6691">Broker</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="120.3125" x="43.75" y="169.133">(RabbitMQ)</text><path d="M43.75,1141.6016 L179.6875,1141.6016 C187.5,1141.6016 187.5,1174.8779 187.5,1174.8779 C187.5,1174.8779 187.5,1208.1543 179.6875,1208.1543 L43.75,1208.1543 C35.9375,1208.1543 35.9375,1174.8779 35.9375,1174.8779 C35.9375,1174.8779 35.9375,1141.6016 43.75,1141.6016 " fill="#1B202A" style="stroke: #A80036; stroke-width: 3.125;"/><path d="M179.6875,1141.6016 C171.875,1141.6016 171.875,1174.8779 171.875,1174.8779 C171.875,1208.1543 179.6875,1208.1543 179.6875,1208.1543 " fill="none" style="stroke: #A80036; stroke-width: 3.125;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="71.875" x="67.9688" y="1169.7189">Broker</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="120.3125" x="43.75" y="1195.1828">(RabbitMQ)</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="226.5625" x="265.625" y="133.2031"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="204.6875" x="276.5625" y="164.4455">Subscriber Handler</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="226.5625" x="265.625" y="1141.6016"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="204.6875" x="276.5625" y="1172.8439">Subscriber Handler</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="739.0625" y="151.4816">Inbox table</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="245.3125" x="675" y="176.9455">(processed_event_ids)</text><path d="M774.2188,74.9268 C774.2188,59.3018 802.3438,59.3018 802.3438,59.3018 C802.3438,59.3018 830.4688,59.3018 830.4688,74.9268 L830.4688,115.5518 C830.4688,131.1768 802.3438,131.1768 802.3438,131.1768 C802.3438,131.1768 774.2188,131.1768 774.2188,115.5518 L774.2188,74.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M774.2188,74.9268 C774.2188,90.5518 802.3438,90.5518 802.3438,90.5518 C802.3438,90.5518 830.4688,90.5518 830.4688,74.9268 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="739.0625" y="1161.9064">Inbox table</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="245.3125" x="675" y="1187.3703">(processed_event_ids)</text><path d="M774.2188,1208.1543 C774.2188,1192.5293 802.3438,1192.5293 802.3438,1192.5293 C802.3438,1192.5293 830.4688,1192.5293 830.4688,1208.1543 L830.4688,1248.7793 C830.4688,1264.4043 802.3438,1264.4043 802.3438,1264.4043 C802.3438,1264.4043 774.2188,1264.4043 774.2188,1248.7793 L774.2188,1208.1543 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M774.2188,1208.1543 C774.2188,1223.7793 802.3438,1223.7793 802.3438,1223.7793 C802.3438,1223.7793 830.4688,1223.7793 830.4688,1208.1543 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="128.125" x="945.3125" y="176.9455">Read Model</text><path d="M985.9375,100.3906 C985.9375,84.7656 1014.0625,84.7656 1014.0625,84.7656 C1014.0625,84.7656 1042.1875,84.7656 1042.1875,100.3906 L1042.1875,141.0156 C1042.1875,156.6406 1014.0625,156.6406 1014.0625,156.6406 C1014.0625,156.6406 985.9375,156.6406 985.9375,141.0156 L985.9375,100.3906 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M985.9375,100.3906 C985.9375,116.0156 1014.0625,116.0156 1014.0625,116.0156 C1014.0625,116.0156 1042.1875,116.0156 1042.1875,100.3906 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="128.125" x="945.3125" y="1161.9064">Read Model</text><path d="M985.9375,1182.6904 C985.9375,1167.0654 1014.0625,1167.0654 1014.0625,1167.0654 C1014.0625,1167.0654 1042.1875,1167.0654 1042.1875,1182.6904 L1042.1875,1223.3154 C1042.1875,1238.9404 1014.0625,1238.9404 1014.0625,1238.9404 C1014.0625,1238.9404 985.9375,1238.9404 985.9375,1223.3154 L985.9375,1182.6904 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M985.9375,1182.6904 C985.9375,1198.3154 1014.0625,1198.3154 1014.0625,1198.3154 C1014.0625,1198.3154 1042.1875,1198.3154 1042.1875,1182.6904 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="360.1563,226.3184,375.7813,232.5684,360.1563,238.8184,366.4063,232.5684" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="111.7188" x2="369.5313" y1="232.5684" y2="232.5684"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="226.5625" x="122.6563" y="224.2844">delivery (event_id=X)</text><polygon fill="#F0A456" points="783.5938,299.1211,799.2188,305.3711,783.5938,311.6211,789.8438,305.3711" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="378.9063" x2="792.9688" y1="305.3711" y2="305.3711"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="237.5" x="389.8438" y="271.6232">SELECT 1 FROM inbox</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="209.375" x="389.8438" y="297.0871">WHERE event_id=X</text><path d="M25,328.8086 L120.3125,328.8086 L120.3125,341.3086 L104.6875,356.9336 L20.3125,356.9336 L20.3125,333.4961 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><rect fill="none" height="787.793" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="1078.125" x="20.3125" y="328.8086"/><text fill="#F0A456" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="29.6875" x="43.75" y="350.676">alt</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="318.75" x="143.75" y="352.2385">[event_id X už zpracován]</text><polygon fill="#F0A456" points="396.0938,388.0127,380.4688,394.2627,396.0938,400.5127,389.8438,394.2627" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="386.7188" x2="800.7813" y1="394.2627" y2="394.2627"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="62.5" x="405.4688" y="385.9787">found</text><polygon fill="#F0A456" points="128.9063,435.3516,113.2813,441.6016,128.9063,447.8516,122.6563,441.6016" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="119.5313" x2="377.3438" y1="441.6016" y2="441.6016"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="229.6875" x="138.2813" y="433.3176">ack (skip processing)</text><path d="M385.9375,466.6016 L385.9375,580.6641 A4.6875,4.6875 0 0 0 390.625,585.3516 L765.625,585.3516 A4.6875,4.6875 0 0 0 770.3125,580.6641 L770.3125,477.5391 L754.6875,461.9141 L390.625,461.9141 A4.6875,4.6875 0 0 0 385.9375,466.6016 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M754.6875,461.9141 L754.6875,475.1953 A2.3438,2.3438 0 0 0 757.0313,477.5391 L770.3125,477.5391 L754.6875,461.9141 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="231.25" x="462.5" y="490.0314">At-least-once delivery</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="190.625" x="482.8125" y="515.4953">+ dedup v inboxu</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="28.125" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="293.75" x="431.25" y="546.7606">exactly-once efekt</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="337.5" x="409.375" y="573.6984">pro side-effect na read modelu.</text><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 2.0,2.0;" x1="20.3125" x2="1098.4375" y1="596.0449" y2="596.0449"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="242.1875" x="28.125" y="616.3498">[event_id X je nový]</text><polygon fill="#F0A456" points="396.0938,651.6602,380.4688,657.9102,396.0938,664.1602,389.8438,657.9102" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="386.7188" x2="800.7813" y1="657.9102" y2="657.9102"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="104.6875" x="405.4688" y="649.6262">not found</text><polygon fill="#F0A456" points="995.3125,698.999,1010.9375,705.249,995.3125,711.499,1001.5625,705.249" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="378.9063" x2="1004.6875" y1="705.249" y2="705.249"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="67.1875" x="389.8438" y="696.965">BEGIN</text><polygon fill="#F0A456" points="995.3125,746.3379,1010.9375,752.5879,995.3125,758.8379,1001.5625,752.5879" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="378.9063" x2="1004.6875" y1="752.5879" y2="752.5879"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="325" x="389.8438" y="744.3039">UPDATE / UPSERT read model</text><polygon fill="#F0A456" points="783.5938,819.1406,799.2188,825.3906,783.5938,831.6406,789.8438,825.3906" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="378.9063" x2="792.9688" y1="825.3906" y2="825.3906"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="200" x="389.8438" y="791.6428">INSERT INTO inbox</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="385.9375" x="389.8438" y="817.1066">(event_id=X, processed_at=NOW())</text><polygon fill="#F0A456" points="995.3125,866.4795,1010.9375,872.7295,995.3125,878.9795,1001.5625,872.7295" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="378.9063" x2="1004.6875" y1="872.7295" y2="872.7295"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="89.0625" x="389.8438" y="864.4455">COMMIT</text><path d="M385.9375,897.7295 L385.9375,1055.542 A4.6875,4.6875 0 0 0 390.625,1060.2295 L762.5,1060.2295 A4.6875,4.6875 0 0 0 767.1875,1055.542 L767.1875,908.667 L751.5625,893.042 L390.625,893.042 A4.6875,4.6875 0 0 0 385.9375,897.7295 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M751.5625,893.042 L751.5625,906.3232 A2.3438,2.3438 0 0 0 753.9063,908.667 L767.1875,908.667 L751.5625,893.042 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="409.375" y="921.1594">INSERT s UNIQUE constraintem</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="243.75" x="454.6875" y="946.6232">je v téže transakci jako</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="225" x="464.0625" y="972.0871">update read modelu.</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="424.2188" y="997.551">Race condition se 2 workery</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="278.125" x="437.5" y="1023.0148">skončí ConstraintViolation</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="320.3125" x="416.4063" y="1048.4787">a Messenger zprávu retry-uje.</text><polygon fill="#F0A456" points="128.9063,1097.8516,113.2813,1104.1016,128.9063,1110.3516,122.6563,1104.1016" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="119.5313" x2="377.3438" y1="1104.1016" y2="1104.1016"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="37.5" x="138.2813" y="1095.8176">ack</text><!--MD5=[1a79d07ec796098dcd32f103d2b0b77d]
+@startuml inbox_idempotency
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Idempotent Inbox: deduplikace na straně subscribera
+
+queue "Broker\n(RabbitMQ)" as mq
+participant "Subscriber Handler" as h
+database "Inbox table\n(processed_event_ids)" as inbox
+database "Read Model" as rm
+
+mq -> h : delivery (event_id=X)
+h -> inbox : SELECT 1 FROM inbox\nWHERE event_id=X
+alt event_id X už zpracován
+  inbox - -> h : found
+  h - -> mq : ack (skip processing)
+  note right of h
+    At-least-once delivery
+    + dedup v inboxu
+    = exactly-once efekt
+    pro side-effect na read modelu.
+  end note
+else event_id X je nový
+  inbox - -> h : not found
+  h -> rm : BEGIN
+  h -> rm : UPDATE / UPSERT read model
+  h -> inbox : INSERT INTO inbox\n(event_id=X, processed_at=NOW())
+  h -> rm : COMMIT
+  note right of h
+    INSERT s UNIQUE constraintem
+    je v téže transakci jako
+    update read modelu.
+    Race condition se 2 workery
+    skončí ConstraintViolation
+    a Messenger zprávu retry-uje.
+  end note
+  h - -> mq : ack
+end
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.11+10-1-deb13u2-Debian
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="571.875px" preserveAspectRatio="none" style="width:1306px;height:571px;background:#11141A;" version="1.1" viewBox="0 0 1306 571" width="1306.25px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="790.625" x="262.5" y="26.1063">Context Map: 5 Bounded Contexts a všech 8 typů vztahů</text><!--MD5=[c9cea0ee923861e4bd87e30fcc0aab3d]
+entity catalog--><rect fill="#F0A456" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="150" x="9.375" y="284.3018"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="118.75" x="25" y="320.2316">Catalog BC</text><!--MD5=[a2835e0ab7403dd35478ea0bd73c9abd]
+entity pricing--><rect fill="#F0A456" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="140.625" x="1107.8125" y="284.3018"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="109.375" x="1123.4375" y="320.2316">Pricing BC</text><!--MD5=[38d5a64c9ce34dc831b7f818d4435c61]
+entity ordering--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="162.5" x="453.125" y="284.3018"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="131.25" x="468.75" y="320.2316">Ordering BC</text><!--MD5=[41af07caac6f22b95af08b7577e9a574]
+entity billing--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="131.25" x="468.75" y="492.8955"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="100" x="484.375" y="528.8254">Billing BC</text><!--MD5=[e7744e8fbc1b270a63d01eb8a46af6a2]
+entity identity--><rect fill="#555555" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="146.875" x="506.25" y="49.9268"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="521.875" y="85.8566">Identity BC</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="79.6875" x="539.8438" y="111.3205">(Auth0)</text><path d="M1068.75,492.1143 L1068.75,549.292 A4.6875,4.6875 0 0 0 1073.4375,553.9795 L1282.8125,553.9795 A4.6875,4.6875 0 0 0 1287.5,549.292 L1287.5,503.0518 L1271.875,487.4268 L1184.375,487.4268 L1178.125,340.8486 L1171.875,487.4268 L1073.4375,487.4268 A4.6875,4.6875 0 0 0 1068.75,492.1143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1271.875,487.4268 L1271.875,500.708 A2.3438,2.3438 0 0 0 1274.2188,503.0518 L1287.5,503.0518 L1271.875,487.4268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="185.9375" x="1078.125" y="515.5441">Shared Kernel:</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="181.25" x="1078.125" y="541.008">Money, Currency</text><path d="M654.6875,492.1143 L654.6875,514.7705 L600.4688,521.0205 L654.6875,527.2705 L654.6875,549.292 A4.6875,4.6875 0 0 0 659.375,553.9795 L968.75,553.9795 A4.6875,4.6875 0 0 0 973.4375,549.292 L973.4375,503.0518 L957.8125,487.4268 L659.375,487.4268 A4.6875,4.6875 0 0 0 654.6875,492.1143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M957.8125,487.4268 L957.8125,500.708 A2.3438,2.3438 0 0 0 960.1563,503.0518 L973.4375,503.0518 L957.8125,487.4268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="162.5" x="664.0625" y="515.5441">Billing = legacy</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="285.9375" x="664.0625" y="541.008">ACL chrání Ordering model</text><!--MD5=[eb7a6141f076e6c40ccafd44eec8a649]
+entity marketing--><rect fill="#555555" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="175" x="990.625" y="49.9268"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="1006.25" y="85.8566">Marketing BC</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="1020.3125" y="111.3205">(SendGrid)</text><path d="M708.5938,49.9268 L708.5938,132.5684 A4.6875,4.6875 0 0 0 713.2813,137.2559 L930.4688,137.2559 A4.6875,4.6875 0 0 0 935.1563,132.5684 L935.1563,97.583 L990.0938,91.333 L935.1563,85.083 L935.1563,60.8643 L919.5313,45.2393 L713.2813,45.2393 A4.6875,4.6875 0 0 0 708.5938,49.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M919.5313,45.2393 L919.5313,58.5205 A2.3438,2.3438 0 0 0 921.875,60.8643 L935.1563,60.8643 L919.5313,45.2393 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="193.75" x="717.9688" y="73.3566">Separate Ways:</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="179.6875" x="717.9688" y="98.8205">žádná integrace,</text><text fill="#A6ADBB" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="184.375" x="717.9688" y="124.2844">vlastní mailing list</text><!--MD5=[53c48f18ca28d6c4af78ace4564f15f5]
+link catalog to pricing--><path d="M167.4063,282.8486 C298.2031,239.9111 560.3281,168.7236 783.5938,199.9268 C896,215.6455 1021.3438,255.3799 1099.9688,283.1455 " fill="none" id="catalog-pricing" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1107.4219,285.8018,1096.2563,275.2119,1100.0585,283.1911,1092.0792,286.9933,1107.4219,285.8018" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="159.75,285.3799,175.0646,286.8899,167.166,282.9228,171.1332,275.0242,159.75,285.3799" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="610.9375" y="206.1691">Partnership</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="198.4375" x="583.5938" y="231.633">(společný release)</text><!--MD5=[8bf6a7cc583d99949174dab8cc45fb40]
+link catalog to ordering--><path d="M159.6875,312.4268 C238.2344,312.4268 361.2813,312.4268 444.7656,312.4268 " fill="none" id="catalog-&gt;ordering" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="452.7188,312.4268,438.6563,306.1768,444.9063,312.4268,438.6563,318.6768,452.7188,312.4268" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="229.6875" x="191.4063" y="276.4816">Customer/Supplier</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="235.9375" x="188.2813" y="301.9455">produktové ID + cena</text><!--MD5=[6589c6dd02d2667dfd7e67743d3a3ea8]
+link ordering to billing--><path d="M532.2188,341.1768 C531.2344,355.0049 530.1719,372.0986 529.6875,387.4268 C528.9375,411.0205 528.9844,416.958 529.6875,440.5518 C530.1094,454.8643 530.9688,470.6143 531.8438,484.2549 " fill="none" id="ordering-&gt;billing" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="532.375,492.458,537.6867,478.0149,531.8613,484.6624,525.2138,478.8369,532.375,492.458" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="48.4375" x="630.4688" y="409.2941">ACL</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="531.25" y="434.758">OrderPlaced -&gt; Invoice</text><!--MD5=[d0e9cf0f311c80ed520905aaae8f8cd2]
+reverse link ordering to billing--><path d="M444.5625,320.5205 C353.2031,329.2549 220.6563,348.4111 189.0625,387.4268 C110.9063,483.9424 348.1875,509.9893 468.7031,516.958 " fill="none" id="ordering&lt;-billing" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="452.7188,319.7549,438.129,314.8604,444.9411,320.4924,439.3091,327.3045,452.7188,319.7549" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="325" x="190.625" y="409.2941">(Conformist v opačném směru</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="235.9375" x="235.1563" y="434.758">pokud chybí ACL)&lt;/i&gt;</text><!--MD5=[22d836e2b9f6a145705f9e56ec09f3f4]
+link identity to ordering--><path d="M505.9062,98.708 C449.0469,107.5049 373.9063,129.5049 335.9375,184.3018 C322.4844,203.708 322.4531,218.0518 335.9375,237.4268 C360.625,272.8955 404.5469,291.2705 444.7969,300.7861 " fill="none" id="identity-&gt;ordering" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="452.7812,302.5674,440.4094,293.4156,445.1548,300.8726,437.6978,305.618,452.7812,302.5674" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="229.6875" x="337.5" y="206.1691">Open Host Service</text><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="175" x="364.8438" y="231.633">REST + JWT (PL)</text><!--MD5=[2344a9db9c0eb18eae9edc78adce1cce]
+link identity to billing--><path d="M653.3125,125.2549 C712.3281,151.2393 785.4219,183.5205 785.9375,184.3018 C848.0469,279.7705 854.1719,349.3643 785.9375,440.5518 C741.7031,499.6611 696.875,464.8799 626.5625,487.4268 C620.4219,489.3955 614.0625,491.4893 607.6875,493.6299 " fill="none" id="identity-&gt;billing" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="600.2188,496.1455,615.5413,497.5725,607.6214,493.6482,611.5457,485.7283,600.2188,496.1455" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="DejaVu Sans" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="229.6875" x="837.5" y="320.2316">Open Host Service</text><!--MD5=[88bce776568af784f3a3b581e039fe0b]
+@startuml
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Context Map: 5 Bounded Contexts a všech 8 typů vztahů
+
+rectangle "Catalog BC" as catalog #F0A456
+rectangle "Pricing BC" as pricing #F0A456
+rectangle "Ordering BC" as ordering
+rectangle "Billing BC" as billing
+rectangle "Identity BC\n(Auth0)" as identity #555555
+
+catalog <-> pricing : <b>Partnership</b>\n(společný release)
+
+note bottom of pricing
+  <b>Shared Kernel:</b>
+  Money, Currency
+end note
+
+catalog -> ordering : <b>Customer/Supplier</b>\nproduktové ID + cena
+
+ordering -down-> billing : <b>ACL</b>\nOrderPlaced -> Invoice
+note right of billing
+  Billing = legacy
+  ACL chrání Ordering model
+end note
+
+billing -up-> ordering : <i>(Conformist v opačném směru\npokud chybí ACL)</i>
+
+identity -[#F0A456]-> ordering : <b>Open Host Service</b>\nREST + JWT (PL)
+identity -[#F0A456]-> billing : <b>Open Host Service</b>
+
+rectangle "Marketing BC\n(SendGrid)" as marketing #555555
+note left of marketing
+  <b>Separate Ways:</b>
+  žádná integrace,
+  vlastní mailing list
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.11+10-1-deb13u2-Debian
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
