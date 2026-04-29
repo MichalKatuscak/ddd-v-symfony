@@ -81,7 +81,7 @@
             Vaughn Vernon v <em>Implementing Domain-Driven Design</em> (2013) tuto disciplínu
             rozvedl o praktickou implementaci v moderním stacku
             <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>.
-            Tato kapitola pokrývá všech osm pojmenovaných vztahů mezi BC, jejich kompromisy
+            Následující sekce pokrývají všech osm pojmenovaných vztahů mezi BC, jejich kompromisy
             a způsob, jakým se realizují v Symfony 8 – typicky kombinací
             <a href="{{ path('cqrs') }}">CQRS s Symfony Messenger</a>, REST API a HTTP klientů.
         </p>
@@ -168,11 +168,11 @@
             </p>
             <p>
                 <em>Pozn.:</em> Evansova kapitola 14 v <em>Domain-Driven Design</em> obsahuje
-                ještě devátý vzor – <strong>Big Ball of Mud</strong>. V této kapitole je probírán
-                samostatně v sekci <a href="#big-ball-of-mud">04.12 Anti-vzor: Big Ball of Mud</a>,
+                ještě devátý vzor – <strong>Big Ball of Mud</strong>. Probíráme jej samostatně
+                v sekci <a href="#big-ball-of-mud">04.12 Anti-vzor: Big Ball of Mud</a>,
                 protože nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu,
                 kterému se aktivně bráníme. Osm vztahů níže jsou tedy <em>navržitelné</em> volby;
-                Big Ball of Mud je co se stane, když žádnou volbu neuděláte.
+                Big Ball of Mud je to, co se stane, když žádnou volbu neuděláte.
             </p>
 
             <div class="table-responsive">
@@ -559,13 +559,13 @@ final readonly class Money
             <p>
                 Ordering BC potřebuje znát produktové ID a aktuální cenu, aby mohl sestavit
                 objednávku. Catalog je vlastníkem produktových dat. Vztah je čistě jednosměrný:
-                Ordering čerpá z Catalogu, Catalog si Ordering rozmyslí jako „prvotřídní zákazník“,
+                Ordering čerpá z Catalogu, Catalog bere Ordering jako „prvotřídního zákazníka“,
                 ale neztrácí svobodu rozhodovat o vlastním modelu.
             </p>
 
             <p>
                 Když Ordering tým řekne „potřebujeme v product DTO i <code>availableStock</code>“,
-                Catalog tým <strong>nedělá to okamžitě</strong>. Posoudí, zda to dává smysl pro
+                Catalog tým to <strong>neudělá okamžitě</strong>. Posoudí, zda to dává smysl pro
                 Catalog model (ano – <em>Stock</em> patří do Catalogu), naplánuje to do následujícího
                 sprintu a dodá. Pokud by to nedávalo smysl pro Catalog model, navrhl by alternativu
                 (např. samostatný <em>Inventory BC</em> s vlastním API).
@@ -639,7 +639,7 @@ final class ProductPriceChangedHandler
 
             <p>
                 Customer/Supplier vyžaduje <strong>stabilní kontrakt</strong>. Bez něj je každá
-                změna upstream modelu breaking change pro všechny downstream. V praxi se
+                změna upstream modelu breaking change pro všechny downstream konzumenty. V praxi se
                 Customer/Supplier <em>kombinuje</em> s <a href="#ohs">Open Host Service</a> jako
                 kanálem a <a href="#published-language">Published Language</a> jako formátem zpráv.
                 Detail viz sekce 04.08 a 04.09.
@@ -658,7 +658,7 @@ final class ProductPriceChangedHandler
             </ul>
 
             <p>
-                Bez těchto rituálů Customer/Supplier degraduje do <a href="#conformist">Conformist</a>:
+                Bez těchto rituálů sklouzne Customer/Supplier do <a href="#conformist">Conformistu</a>:
                 downstream přestane mít hlas, jen se přizpůsobuje.
             </p>
         </section>
@@ -777,7 +777,7 @@ final class StripePaymentReportRepository
             {% set _callout_body %}
                 <p>
                     <strong>Conformist je krátkodobá úleva s dlouhodobou cenou.</strong> Když
-                    upstream udělá breaking change, lámeš se s ním. Pokud má downstream
+                    upstream udělá breaking change, láme se s ním downstream. Pokud má downstream
                     <em>jakoukoliv</em> doménovou logiku, která je závislá na konzumovaných datech
                     (a vy plánujete s tou logikou žít déle než upstream), <strong>postavte ACL</strong>.
                     Conformist použijte jen tam, kde downstream je opravdu jen průchozí
@@ -1010,7 +1010,7 @@ final class LegacyBillingTranslatorTest extends TestCase
                 pro postupnou migraci z legacy. Detail viz kapitola
                 <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>. V Strangler
                 Fig přístupu je <strong>každý nový BC obklopen ACL</strong>, dokud legacy nezmizí
-                – a v tu chvíli ACL většinou taky zmizí (nebo se zjednodušší na čistý translator
+                – a v tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator
                 bez anti-corruption logiky).
             </p>
         </section>
@@ -1154,9 +1154,9 @@ final class ProductController extends AbstractController
             {% set _callout_body %}
                 <p>
                     <strong>OHS bez versioningu není OHS.</strong> Je to neoznačený REST endpoint.
-                    Když nemůžete vyjmenovat všechny breaking changes posledního roku, zveřejnit
-                    deprecation kalendář a ukázat downstream onboarding průvodce, váš API není
-                    Open Host Service – i kdyby vypadalo jako to.
+                    Pokud nedokážete vyjmenovat všechny breaking changes posledního roku, zveřejnit
+                    deprecation kalendář a ukázat downstream onboarding průvodce, vaše API není
+                    Open Host Service – ani když tak vypadá.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1189,7 +1189,7 @@ final class ProductController extends AbstractController
             <h3>OHS vs. PL – kanál vs. formát</h3>
 
             <p>
-                Vztah OHS a PL je často matoucí. Pamatujte:
+                Vztah OHS a PL bývá matoucí. Klíčový rozdíl:
             </p>
 
             <ul>
@@ -1382,7 +1382,7 @@ final class OrderPlacedValidator
             </ul>
 
             <p>
-                Není to ideální – můžou nastat krátké okna, kdy odhlášený zákazník dostane jednu
+                Není to ideální – mohou nastat krátká okna, kdy odhlášený zákazník dostane jednu
                 kampaň navíc – ale je to <strong>levné</strong> a <strong>legal-compliant</strong>.
                 A hlavně: je to <em>vědomé rozhodnutí</em>, ne nedopatření.
             </p>
@@ -1447,8 +1447,8 @@ final class OrderPlacedValidator
                 <li>
                     <strong>(0–15 min) Vyjmenovat všechny Bounded Contexts.</strong>
                     Sticky note pro každý BC, jméno + 1 věta popisu („Catalog: produktové info“,
-                    „Pricing: cena včetně slev“). Pokud někdo přidá víc než 12 BC, varovný
-                    signál – možná je modeluje příliš jemně.
+                    „Pricing: cena včetně slev“). Pokud někdo přidá víc než 12 BC, je to varovný
+                    signál – možná je modelujete příliš jemně.
                 </li>
                 <li>
                     <strong>(15–45 min) Pro každou dvojici BC, která spolu interaguje, nakreslit šipku.</strong>
