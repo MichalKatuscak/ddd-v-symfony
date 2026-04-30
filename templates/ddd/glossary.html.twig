@@ -706,7 +706,7 @@
                         <p>
                             V Hexagonální architektuře: rozhraní definující, jak aplikace komunikuje s vnějším
                             světem. Driving porty definují, jak vnější aktéři aplikaci volají (například
-                            rozhraní command handlerů). Driven porty definují, co aplikace potřebuje od
+                            <code>MessageBusInterface</code> nebo explicitní use-case rozhraní jako <code>PlaceOrderUseCase</code>). Driven porty definují, co aplikace potřebuje od
                             infrastruktury (například <code>UserRepositoryInterface</code>,
                             <code>EmailSenderInterface</code>). Porty patří do aplikačního jádra –
                             jsou součástí doménové nebo aplikační vrstvy, nikoli infrastruktury.
@@ -727,7 +727,7 @@
                             mezi protokolem vnějšího světa a rozhraním aplikačního jádra. Příklady:
                             <code>DoctrineUserRepository</code> implementuje port <code>UserRepositoryInterface</code>;
                             <code>SymfonyMailerEmailSender</code> implementuje port <code>EmailSenderInterface</code>;
-                            HTTP controller implementuje driving port tím, že volá command handler.
+                            HTTP controller je driving adaptér, který volá aplikaci přes driving port (například <code>MessageBusInterface</code>).
                             Adaptéry patří do infrastrukturní vrstvy a jsou zaměnitelné bez dotyku
                             doménového modelu.
                         </p>
@@ -1157,7 +1157,7 @@
                             hodnotu, aby test mohl pokračovat. Příklad: <code>StubExchangeRateProvider</code>
                             vždy vrátí kurz 25 CZK/EUR. Nezajímá nás, zda byl volán – jen co vrátil.
                         </p>
-                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (martinfowler.com, 2007)</p>
+                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (martinfowler.com, 2004)</p>
                         <p class="term-related">Viz také: <a href="#term-testovaci-dvojnik">Testovací dvojník</a>, <a href="#term-mock">Mock</a>, <a href="#term-fake">Fake</a></p>
                     </dd>
                 </div>
@@ -1176,7 +1176,7 @@
                             pro ověření vydávání doménových událostí nebo volání externích portů, nikoli
                             pro interní volání uvnitř agregátu.
                         </p>
-                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (2007)</p>
+                        <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (2004)</p>
                         <p class="term-related">Viz také: <a href="#term-testovaci-dvojnik">Testovací dvojník</a>, <a href="#term-stub">Stub</a>, <a href="#term-fake">Fake</a></p>
                     </dd>
                 </div>

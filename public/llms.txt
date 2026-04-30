@@ -1,50 +1,69 @@
 # Architektura DDD v Symfony 8
 
-> Podrobný průvodce Domain-Driven Design v Symfony 8. Obsahuje strategický i taktický design, CQRS, Event Sourcing, Ságy, praktické příklady v PHP 8.4+ a reálné zkušenosti z produkce.
-
-Autor: Michal Katuščák – PHP/React vývojář, 13+ let komerčního vývoje. Průvodce je v češtině a je zdarma.
-
-Obsah je rozdělen do čtyř sekcí přesně mapovaných na navigaci webu: základy DDD (kapitoly 01–04), pokročilé vzory CQRS, Event Sourcing, Ságy a výkon (05–08), praxe a zkušenosti – kde DDD bolí, jak migrovat, jak testovat, kdy nepoužívat (09–15), a referenční materiály včetně AI a glosáře (kapitola 16, glosář, zdroje).
+> Podrobný průvodce Domain-Driven Design v Symfony 8. Obsahuje strategický i taktický design, CQRS, Event Sourcing, Ságy, Outbox Pattern, pokročilé vzory, autorizaci, microservices, praktické příklady v PHP 8.4+ a reálné zkušenosti z produkce. Autor: Michal Katuščák – PHP/React vývojář, 13+ let komerčního vývoje. Průvodce je v češtině a je zdarma.
 
 ## Rozcestníky sekcí
 
-- [Základy](https://ddd-v-symfony.katuscak.cz/zaklady): Filozofie, jazyk, ohraničení, slicing a první implementace v Symfony 8 (kapitoly 01–04).
-- [Vzory](https://ddd-v-symfony.katuscak.cz/vzory): Taktické vzory v Symfony 8 – CQRS, Event Sourcing, Ságy a výkonnostní aspekty (kapitoly 05–08).
-- [Praxe](https://ddd-v-symfony.katuscak.cz/praxe): Co bolí, jak migrovat, co testovat, anti-vzory a případová studie (kapitoly 09–15).
-- [Reference](https://ddd-v-symfony.katuscak.cz/reference): Glosář, zdroje a vztah DDD a AI (kapitola 16, glosář, zdroje).
+- [Základy](https://ddd-v-symfony.katuscak.cz/zaklady): Strategický design – filozofie DDD, subdomény, context mapping, event storming, team topologies (kapitoly 01–05).
+- [Taktika](https://ddd-v-symfony.katuscak.cz/takticke-vzory): Taktické modelování – koncepty, návrh agregátu, doplňkové vzory (kapitoly 06–08).
+- [Architektura](https://ddd-v-symfony.katuscak.cz/architektura): Architektonické styly, implementace v Symfony 8, vertikální slice, autorizace (kapitoly 09–12).
+- [Vzory](https://ddd-v-symfony.katuscak.cz/vzory): Pokročilé vzory – CQRS, Event Sourcing, Ságy, Outbox, read modely (kapitoly 13–17).
+- [Praxe](https://ddd-v-symfony.katuscak.cz/praxe): Praxe a provoz – testování, migrace, microservices, bolestivá místa, anti-vzory, kdy DDD nepoužívat (kapitoly 18–23).
+- [Syntéza](https://ddd-v-symfony.katuscak.cz/synteza): Syntéza – praktické příklady a kompletní případová studie (kapitoly 24–25).
+- [Reference](https://ddd-v-symfony.katuscak.cz/reference): Glosář, cheat sheet, zdroje a DDD a AI.
 
-## Základy DDD
+## Základy DDD (kapitoly 01–05)
 
-- [Co je Domain-Driven Design?](https://ddd-v-symfony.katuscak.cz/co-je-ddd): Definice DDD, historie, Ubiquitous Language, Bounded Context, strategický vs. taktický design.
-- [Základní koncepty DDD](https://ddd-v-symfony.katuscak.cz/zakladni-koncepty): Entity, Value Objects, Agregáty, Repozitáře, Doménové události, Služby, Factory.
-- [Vertikální slice architektura](https://ddd-v-symfony.katuscak.cz/vertikalni-slice): Srovnání horizontální a vertikální organizace kódu, kdy zvolit kterou.
-- [Implementace DDD v Symfony 8](https://ddd-v-symfony.katuscak.cz/implementace-v-symfony): Jak mapovat DDD koncepty na Symfony komponenty, adresářová struktura, Doctrine.
+- [Co je Domain-Driven Design?](https://ddd-v-symfony.katuscak.cz/co-je-ddd): Definice DDD, historie (Evans 2003 – Vernon 2016), Ubiquitous Language, Bounded Context, strategický vs. taktický design.
+- [Subdomény: Core, Supporting, Generic](https://ddd-v-symfony.katuscak.cz/subdomeny): Kde investovat modelovací úsilí, co koupit a co outsourcovat, identifikace Core Domény.
+- [Bounded Context a Context Mapping](https://ddd-v-symfony.katuscak.cz/context-mapping): Partnership · Customer/Supplier · Conformist · Anti-Corruption Layer · Open Host Service · Published Language · Shared Kernel.
+- [Event Storming a Domain Storytelling](https://ddd-v-symfony.katuscak.cz/event-storming): Workshopy pro objevení domény před první řádkou kódu – Big Picture, Process Level, Design Level.
+- [Conway's Law a Team Topologies](https://ddd-v-symfony.katuscak.cz/team-topologies): Inverse Conway Maneuver – týmová struktura jako architektonické rozhodnutí, Stream-aligned, Platform, Enabling, Complicated-Subsystem týmy.
 
-## Vzory – CQRS, Event Sourcing, Ságy, výkon
+## Taktické modelování (kapitoly 06–08)
 
-- [CQRS v Symfony 8](https://ddd-v-symfony.katuscak.cz/cqrs): Command Query Responsibility Segregation s Messenger komponentou, Command Bus, Query Bus.
-- [Event Sourcing](https://ddd-v-symfony.katuscak.cz/event-sourcing): Uchování stavu jako sekvence událostí, event store, snapshoty, replay.
-- [Ságy a Process Managery](https://ddd-v-symfony.katuscak.cz/sagy-a-process-managery): Dlouhotrvající transakce napříč bounded contexty, orchestrace vs. choreografie.
-- [Výkonnostní aspekty DDD v Symfony](https://ddd-v-symfony.katuscak.cz/vykonnostni-aspekty): N+1 problém, lazy loading, bohaté agregáty vs. výkon, zlaté pravidlo optimalizace.
+- [Základní koncepty DDD](https://ddd-v-symfony.katuscak.cz/zakladni-koncepty): Entity · Value Objects · Agregáty · Repozitáře · Doménové události · Doménové služby · Factory.
+- [Návrh agregátu](https://ddd-v-symfony.katuscak.cz/navrh-agregatu): Hranice agregátu, transakční konzistence, invarianty, eventual consistency, snapshotting, UUID/ULID.
+- [Doplňkové taktické vzory](https://ddd-v-symfony.katuscak.cz/mene-zname-vzory): Specification Pattern · Domain Service · Factory (statická metoda vs. třída) · Modules.
 
-## Praxe – co bolí, jak migrovat, co testovat
+## Architektura a implementace (kapitoly 09–12)
 
-- [Praktické příklady](https://ddd-v-symfony.katuscak.cz/prakticke-priklady): Ukázky DDD kódu v PHP 8.4+ a Symfony 8.
-- [Testování DDD kódu v Symfony](https://ddd-v-symfony.katuscak.cz/testovani-ddd): Testování agregátů, doménových služeb a repozitářů bez mockování infrastruktury.
-- [Migrace z CRUD architektury na DDD](https://ddd-v-symfony.katuscak.cz/migrace-z-crud): Postupný přechod z CRUD na DDD pomocí strangler fig patternu.
-- [DDD v praxi – kde to bolí](https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli): 20 reálných problémů: Doctrine, Messenger, validace, ACL, strangler fig pattern, přesvědčování managementu.
-- [Anti-vzory a typické chyby v DDD](https://ddd-v-symfony.katuscak.cz/anti-vzory): Anemický model, god aggregate, repository as DAO, a další častá pochybení.
-- [Kdy DDD nepoužívat](https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd): 7 situací, kdy DDD přinese víc škody než užitku (CRUD admin, startup s měnící se doménou, malé týmy, ETL, krátkodobé projekty).
-- [Případová studie](https://ddd-v-symfony.katuscak.cz/pripadova-studie): Kompletní e-shop postavený na DDD architektuře krok za krokem.
+- [Architektonické styly](https://ddd-v-symfony.katuscak.cz/architektonicke-styly): Hexagonální architektura (Ports & Adapters) · Onion Architecture · Clean Architecture · Layered Architecture – srovnání a kdy co použít.
+- [Vertikální slice architektura](https://ddd-v-symfony.katuscak.cz/vertikalni-slice): Organizace kódu podle feature místo vrstvy – srovnání s horizontálním slicingem, kdy zvolit vertikální přístup.
+- [Implementace DDD v Symfony 8](https://ddd-v-symfony.katuscak.cz/implementace-v-symfony): Adresářová struktura projektu, Symfony Messenger jako Command/Query Bus, Doctrine ORM 3, DI kontejner.
+- [Autorizace v DDD](https://ddd-v-symfony.katuscak.cz/autorizace-v-ddd): Symfony Security Voters · ACL na agregátu · policy-based autorizace · ABAC v Symfony 8 – jak udržet bezpečnostní logiku v doméně.
 
-## Reference – AI, glosář, zdroje
+## Pokročilé vzory a infrastruktura (kapitoly 13–17)
 
-- [DDD a umělá inteligence](https://ddd-v-symfony.katuscak.cz/ddd-a-umela-inteligence): Co říkají Eric Evans, Martin Fowler, Kent Beck a DHH o vztahu DDD a AI nástrojů. Ubiquitous language jako rozhraní pro LLM, bounded contexts a kvalita generovaného kódu.
-- [Glosář DDD terminologie](https://ddd-v-symfony.katuscak.cz/glosar): Přehled hlavních pojmů DDD s vysvětlením v češtině.
-- [Zdroje a další četba](https://ddd-v-symfony.katuscak.cz/zdroje): Knihy, články a videa o DDD v angličtině i češtině.
+- [CQRS v Symfony 8](https://ddd-v-symfony.katuscak.cz/cqrs): Command Query Responsibility Segregation – Command Bus, Query Bus, HandlersStamp, Middleware, oddělení čtení a zápisu přes Messenger.
+- [Event Sourcing](https://ddd-v-symfony.katuscak.cz/event-sourcing): Uchování stavu jako sekvence doménových událostí – event store, snapshoty, replay, projekce, at-least-once delivery.
+- [Ságy a Process Managery](https://ddd-v-symfony.katuscak.cz/sagy-a-process-managery): Dlouhotrvající transakce napříč Bounded Contexts – choreografie vs. orchestrace, kompenzace, Process Manager v Symfony.
+- [Outbox Pattern](https://ddd-v-symfony.katuscak.cz/outbox-pattern): Spolehlivé publikování doménových událostí – eliminace dual-write problému, transactional outbox, Idempotent Inbox, Idempotency Key v HTTP API.
+- [Read modely, projekce a výkon](https://ddd-v-symfony.katuscak.cz/vykonnostni-aspekty): N+1 problém, lazy loading, snapshoty agregátů, projekce, cache strategie, denormalizované read modely.
+
+## Praxe a provoz (kapitoly 18–23)
+
+- [Testování DDD kódu v Symfony](https://ddd-v-symfony.katuscak.cz/testovani-ddd): Unit testy agregátů, doménových služeb a repozitářů – InMemory repozitáře, test doubles, Deptrac, PHP-Arkitect, architecture testing.
+- [Migrace z CRUD architektury na DDD](https://ddd-v-symfony.katuscak.cz/migrace-z-crud): Strangler Fig Pattern – postupný přechod z CRUD na DDD bez big-bang rewritu.
+- [DDD a microservices](https://ddd-v-symfony.katuscak.cz/ddd-a-microservices): Bounded Context jako service boundary · modular monolith · distributed monolith – kdy rozdělit, kdy ne.
+- [DDD v praxi – kde to bolí](https://ddd-v-symfony.katuscak.cz/ddd-v-praxi-kde-to-boli): 20 reálných problémů: Doctrine vs. doménový model, asynchronní infrastruktura, modelování, Symfony-specifické třenice, organizace a tým.
+- [Anti-vzory a typické chyby v DDD](https://ddd-v-symfony.katuscak.cz/anti-vzory): Anémický doménový model · Primitive Obsession · God Aggregate · sdílená databáze · mutovatelné události · over-engineering · ignorování Ubiquitous Language.
+- [Kdy DDD nepoužívat](https://ddd-v-symfony.katuscak.cz/kdy-nepouzivat-ddd): 7 situací, kdy DDD přinese víc škody než užitku – CRUD admin, startup s měnící se doménou, malé týmy bez expertů, ETL pipeline, krátkodobé projekty.
+
+## Syntéza (kapitoly 24–25)
+
+- [Praktické příklady](https://ddd-v-symfony.katuscak.cz/prakticke-priklady): End-to-end příklady – nákupní košík, správa uživatelů – plné DDD implementace v PHP 8.4+ a Symfony 8.
+- [Případová studie](https://ddd-v-symfony.katuscak.cz/pripadova-studie): Kompletní systém pro správu projektů postavený na DDD a CQRS – doménová analýza, architektura, implementace, read modely, trade-offy, ponaučení.
+
+## Reference
+
+- [Glosář DDD terminologie](https://ddd-v-symfony.katuscak.cz/glosar): 40+ pojmů DDD s definicí v češtině, anglickým ekvivalentem, příklady a citacemi zdrojů.
+- [Cheat sheet](https://ddd-v-symfony.katuscak.cz/cheat-sheet): Pattern decision tree, Symfony↔DDD mapping, reading paths pro různé profily čtenáře.
+- [Zdroje a další četba](https://ddd-v-symfony.katuscak.cz/zdroje): Knihy (Evans, Vernon, Millett), články, videa a kurzy o DDD.
+- [DDD a umělá inteligence](https://ddd-v-symfony.katuscak.cz/ddd-a-umela-inteligence): Co říkají Eric Evans, Martin Fowler, Kent Beck a DHH o vztahu DDD a AI nástrojů. Ubiquitous Language jako rozhraní pro LLM.
 
 ## O webu
 
-- [O autorovi](https://ddd-v-symfony.katuscak.cz/o-autorovi): Michal Katuščák – PHP/React vývojář, odkazy na další projekty (katuscak.cz, blog.katuscak.cz, LinkedIn).
+- [O autorovi](https://ddd-v-symfony.katuscak.cz/o-autorovi): Michal Katuščák – PHP/React vývojář, 13+ let komerčního vývoje, odkazy na katuscak.cz, blog a LinkedIn.
 - [Bezpečnostní zásady](https://ddd-v-symfony.katuscak.cz/security-policy): Postup pro nahlášení bezpečnostního problému (responsible disclosure).
-- [Úvodní strana](https://ddd-v-symfony.katuscak.cz/): Rozcestník a přehled všech kapitol.
+- [Úvodní strana](https://ddd-v-symfony.katuscak.cz/): Rozcestník a přehled všech 25 kapitol.

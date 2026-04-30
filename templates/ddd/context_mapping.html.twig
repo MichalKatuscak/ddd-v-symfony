@@ -66,7 +66,7 @@
         <p>
             Strategický design v DDD má dvě stránky. <strong>Bounded Context</strong> definuje
             <em>hranici</em> jednoho modelu – co je uvnitř, co je venku, kde končí jeden
-            Ubiquitous Language a začíná druhý. Detail viz kapitola
+            Ubiquitous Language a začíná druhý. Detail viz kapitolu
             <a href="{{ path('basic_concepts') }}#bounded-contexts">Základní koncepty – Bounded Contexts</a>.
             Bounded Context však sám o sobě neřeší jednu podstatnou otázku: <strong>co se děje na té
             hranici</strong>, když dva kontexty potřebují spolupracovat.
@@ -169,7 +169,7 @@
             <p>
                 <em>Pozn.:</em> Evansova kapitola 14 v <em>Domain-Driven Design</em> obsahuje
                 ještě devátý vzor – <strong>Big Ball of Mud</strong>. Probíráme jej samostatně
-                v sekci <a href="#big-ball-of-mud">04.12 Anti-vzor: Big Ball of Mud</a>,
+                v sekci <a href="#big-ball-of-mud">03.12 Anti-vzor: Big Ball of Mud</a>,
                 protože nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu,
                 kterému se aktivně bráníme. Osm vztahů níže jsou tedy <em>navržitelné</em> volby;
                 Big Ball of Mud je to, co se stane, když žádnou volbu neuděláte.
@@ -662,7 +662,7 @@ final class ProductPriceChangedHandler
                 změna upstream modelu breaking change pro všechny downstream konzumenty. V praxi se
                 Customer/Supplier <em>kombinuje</em> s <a href="#ohs">Open Host Service</a> jako
                 kanálem a <a href="#published-language">Published Language</a> jako formátem zpráv.
-                Detail viz sekce 04.08 a 04.09.
+                Detail viz sekci 03.08 a 03.09.
             </p>
 
             <h3>Plánovací rituály mezi týmy</h3>
@@ -1039,7 +1039,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 
             <p>
                 Anti-Corruption Layer je důležitý stavební prvek <em>Strangler Fig</em> patternu
-                pro postupnou migraci z legacy. Detail viz kapitola
+                pro postupnou migraci z legacy. Detail viz kapitolu
                 <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>. V Strangler
                 Fig přístupu je <strong>každý nový BC obklopen ACL</strong>, dokud legacy nezmizí
                 – a v tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator

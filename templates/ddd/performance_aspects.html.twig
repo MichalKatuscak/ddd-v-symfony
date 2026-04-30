@@ -174,7 +174,7 @@ foreach ($orders as $order) {
     {% set _callout_body %}
 
         <h3 id="extra-lazy-heading">Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)</h3>
-        <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML/YAML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
+        <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
         {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
@@ -429,7 +429,7 @@ final class DoctrineOrderRepository
     <p>
         Základním pravidlem DDD je, že <strong>agregát musí být navržen podle doménových invariantů,
         nikoli podle výkonnostních požadavků</strong>. Pokud jsou výkonnostní požadavky v konfliktu
-        s doménovým modelem, je správným řešením zavedení read modelu (viz sekce CQRS), nikoli
+        s doménovým modelem, je správným řešením zavedení read modelu (viz sekci CQRS), nikoli
         kompromitování doménové integrity.
     </p>
 </section>
@@ -734,7 +734,7 @@ final class UserId
     {% set _callout_body %}
 
         <h3 id="doctrine-uuid-mapping-heading">Doctrine mapování pro ULID a UUID</h3>
-        <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML/YAML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
+        <p class="mt-2 mb-2"><em>Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (#[ORM\Entity]) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.</em></p>
         {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);

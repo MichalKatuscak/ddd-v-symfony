@@ -220,7 +220,7 @@
                 <li>
                     <strong>Vlastní data</strong> – kontext drží svá data v oddělené databázi (nebo alespoň v oddělených tabulkách
                     s vlastním schema ownerem), na která ostatní kontexty nesahají přímo, ale jen přes API nebo události.
-                    Sdílená databáze napříč servisy je určujícím znakem <em>distributed monolithu</em> – viz sekce 20.04.
+                    Sdílená databáze napříč servisy je určujícím znakem <em>distributed monolithu</em> – viz sekci 20.04.
                 </li>
                 <li>
                     <strong>Nezávislý release cyklus</strong> – kontext lze deployovat bez současného deployu jiných
@@ -612,7 +612,7 @@ return static function (Config $config): void {
                 </li>
                 <li>
                     <strong>Availability.</strong> Pokud každá service má 99,9% uptime, řetězec deseti servis má
-                    99,0 % – desetinásobně horší MTBF.
+                    99,0 % – desetinásobně větší nedostupnost.
                 </li>
                 <li>
                     <strong>Debugging.</strong> Trace jednoho requestu prochází N servisami. Bez distributed tracing
@@ -836,8 +836,8 @@ return static function (Config $config): void {
             <p>
                 Detailní implementaci ság v Symfony 8 (kompenzace, idempotence, choreografie vs. orchestrace, timeouty,
                 paralelní kroky) probírá samostatná
-                <a href="{{ path('sagas') }}">kapitola 10 – Ságy a Process Managery</a>. Pro účely této kapitoly stačí
-                rozumět, že saga je <strong>jediný realistický mechanismus distribuované transakce v microservices</strong>
+                <a href="{{ path('sagas') }}">kapitola 15 – Ságy a Process Managery</a>. Pro účely této kapitoly stačí
+                rozumět, že saga je <strong>nejrozšířenější a v DDD kontextu doporučovaný mechanismus distribuované transakce v microservices</strong>
                 a že daní za to je eventual consistency a kompenzační logika.
             </p>
 
@@ -1556,7 +1556,7 @@ final readonly class OrderPlacedReceivedHandler
                 <li>
                     <strong>Distribuované transakce – saga, ne 2PC</strong> – 2PC nepoužitelné v moderním stacku.
                     Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace.
-                    Detail v <a href="{{ path('sagas') }}">kapitole 10</a>.
+                    Detail v <a href="{{ path('sagas') }}">kapitole 15</a>.
                 </li>
                 <li>
                     <strong>Symfony Messenger umí obojí</strong> – sync transport pro modular monolith, AMQP transport
@@ -1645,7 +1645,7 @@ final readonly class OrderPlacedReceivedHandler
                 },
                 {
                     question: 'GraphQL Federation jako náhrada microservices integrace?',
-                    answer: 'GraphQL Federation umožňuje, aby více servisů exposovalo svou část graf schématu a aby gateway (Apollo Router) je sloučila do jednoho schema z pohledu klienta. Pro <em>read</em> operace přes microservices to je elegantní – odstíní klienta od fyzického rozdělení. Pro <em>write</em> operace federation neřeší distribuované transakce; pořád potřebujete <a href="' ~ path('sagas') ~ '">ságu</a>. Doporučení: federation jako read fasáda, nikoli jako náhrada eventem řízené architektury.'
+                    answer: 'GraphQL Federation umožňuje, aby více servisů vystavilo svou část schématu a aby gateway (Apollo Router) je sloučila do jednoho schema z pohledu klienta. Pro <em>read</em> operace přes microservices to je elegantní – odstíní klienta od fyzického rozdělení. Pro <em>write</em> operace federation neřeší distribuované transakce; pořád potřebujete <a href="' ~ path('sagas') ~ '">ságu</a>. Doporučení: federation jako read fasáda, nikoli jako náhrada eventem řízené architektury.'
                 },
                 {
                     question: 'Které service vlastní data o customerovi napříč BC?',

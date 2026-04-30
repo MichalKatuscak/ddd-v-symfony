@@ -956,6 +956,10 @@ final class CancelOrderPolicy implements Policy
             } %}
 
             <p>
+                Poznámka: pravidla <code>subject.status == "PLACED"</code> a časové okno 24 h jsou v politice pro ilustraci ABAC zápisu. Jak popisuje sekce 12.05, tyto doménové invarianty patří primárně do agregátu – politika je ověřuje jako pre-check před dosažením domény (obrana do hloubky), ale agregát musí být zdrojem pravdy a nepřijmout neplatný příkaz ani bez autorizační vrstvy.
+            </p>
+
+            <p>
                 Jednoduchý <code>PolicyEvaluator</code> používá Symfony ExpressionLanguage komponentu
                 a vyhodnocuje pravidla v daném kontextu:
             </p>

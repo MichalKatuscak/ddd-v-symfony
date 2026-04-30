@@ -599,7 +599,7 @@ final class Email
     }
 }{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
-                filename: 'src/UserManagement/Domain/ValueObject/UserController.php',
+                filename: 'src/UserManagement/Domain/ValueObject/Email.php',
                 language: 'php',
                 code: _code,
                 highlights: []
@@ -1195,7 +1195,7 @@ final class UserTest extends TestCase
             <h3 id="recept-doctrine-anotace-heading">Recept 2: Doctrine anotace v doménové třídě</h3>
             <p><strong>Symptomy:</strong> <code>App\Domain\Order</code> má <code>#[ORM\Entity]</code>, doména závisí na Doctrine.</p>
             <ol>
-                <li>Vytvořte oddělený mapping – XML/YAML schema v <code>App\&lt;BC&gt;\Infrastructure\Doctrine\Mapping\</code>. Doménová třída zůstane bez anotací.</li>
+                <li>Vytvořte oddělený XML mapping v <code>App\&lt;BC&gt;\Infrastructure\Doctrine\Mapping\</code>. Doménová třída zůstane bez anotací.</li>
                 <li>Přesuňte konfiguraci repozitáře do <code>services.yaml</code>.</li>
                 <li>Otestujte: <code>composer require --dev phpat/phpat</code> a přidejte rule <code>App\Domain\* nesmí závisět na Doctrine\*</code>.</li>
             </ol>

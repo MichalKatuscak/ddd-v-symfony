@@ -918,7 +918,7 @@ class SagaState
         return $this->correlationId;
     }
 
-    public function isCompleted(): bool
+    public function isTerminated(): bool
     {
         return $this->completedAt !== null;
     }
@@ -1215,7 +1215,7 @@ final readonly class OrderPlaced
             <code>outbox</code> v téže databázové transakci jako doménová změna. Samostatný
             proces (relay/poller) pak události z outbox tabulky přenáší do message brokeru a po
             úspěšném odeslání je označí jako zpracované. Tím je zaručeno, že žádná událost se
-            neztratí – a to i při selhání mezi kroky. Podrobněji viz sekce
+            neztratí – a to i při selhání mezi kroky. Podrobněji viz sekci
             <a href="{{ path('event_sourcing') }}#outbox">Outbox a transakční doručování událostí</a>
             v kapitole Event Sourcing, kde je vzor popsán v kontextu event store, včetně relay workeru
             a checkpoint tabulky.
@@ -1366,7 +1366,7 @@ final readonly class CheckSagaTimeoutHandler
 
 private function onOrderPlaced(OrderPlaced $event): void
 {
-    // ... (vytvoření SagaState a dispatch ChargeCustomer - viz sekce 5)
+    // ... (vytvoření SagaState a dispatch ChargeCustomer - viz sekci 5)
 
     // Naplánovat timeout check za 5 minut
     $this->commandBus->dispatch(

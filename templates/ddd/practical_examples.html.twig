@@ -2,7 +2,7 @@
 
 {% block title %}Praktické příklady DDD v Symfony 8 | DDD Symfony{% endblock %}
 
-{% block meta_description %}Praktické příklady DDD v Symfony 8: e-commerce, blog a fakturace v PHP 8.4+. Bounded Contexts, agregáty a vertikální slice na třech minimálních projektech.{% endblock %}
+{% block meta_description %}Praktické příklady DDD v Symfony 8: e-commerce, blog a správa uživatelů v PHP 8.4+. Bounded Contexts, agregáty a vertikální slice na třech minimálních projektech.{% endblock %}
 
 {% block meta_keywords %}DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty{% endblock %}
 
@@ -320,10 +320,6 @@ class AddItemToCart
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public readonly int $quantity,
-
-        #[Assert\NotBlank]
-        #[Assert\GreaterThan(0)]
-        public readonly int $priceInCents
     ) {
     }
 }{% endverbatim %}{% endset %}
@@ -342,17 +338,18 @@ declare(strict_types=1);
 namespace App\Cart\AddItem\Command;
 
 use App\Cart\Domain\Repository\CartRepository;
+use App\Cart\Domain\Repository\ProductRepository;
 use App\Cart\Domain\ValueObject\CartId;
 use App\Cart\Domain\ValueObject\ProductId;
 use App\Cart\Domain\ValueObject\Quantity;
-use App\Cart\Domain\ValueObject\Money;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
 class AddItemToCartHandler
 {
     public function __construct(
-        private readonly CartRepository $cartRepository
+        private readonly CartRepository $cartRepository,
+        private readonly ProductRepository $productRepository
     ) {
     }
 
@@ -364,10 +361,17 @@ class AddItemToCartHandler
             throw new \DomainException('Cart not found');
         }
 
+        $productId = new ProductId($command->productId);
+        $product = $this->productRepository->findById($productId);
+
+        if (!$product) {
+            throw new \DomainException('Product not found');
+        }
+
         $cart->addItem(
-            new ProductId($command->productId),
+            $productId,
             new Quantity($command->quantity),
-            new Money($command->priceInCents, 'CZK')
+            $product->price()
         );
 
         $this->cartRepository->save($cart);
@@ -415,7 +419,6 @@ class CartController extends AbstractController
             $cartId,
             $request->request->get('product_id'),
             (int) $request->request->get('quantity', 1),
-            (int) $request->request->get('price_in_cents')
         );
 
         try {
@@ -838,7 +841,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private readonly UserId $id;
     private string $name;
     private Email $email;
-    private string $password;
+    private ?string $password = null;
     private array $roles = [];
     private readonly \DateTimeImmutable $createdAt;
 
@@ -912,7 +915,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     // Implementace PasswordAuthenticatedUserInterface
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }

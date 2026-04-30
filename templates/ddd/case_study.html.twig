@@ -513,7 +513,7 @@
     <h3 id="project-model-heading">Doménový model: Projekt (kořen agregátu)</h3>
     <p>
         Doménový model neobsahuje Doctrine ORM anotace – ty patří do infrastrukturní vrstvy
-        (XML/YAML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
+        (XML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
         na doménových hodnotových objektech a událostech.
     </p>
     {% set _code %}{% verbatim %}<?php
@@ -526,7 +526,7 @@ use App\ProjectManagement\Domain\Event\MemberAdded;
 use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
-// UserId, ProjectId a TaskId jsou sdílené v Shared Kernelu (viz sekce 25.07.2)
+// UserId, ProjectId a TaskId jsou sdílené v Shared Kernelu (viz sekci 25.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
 
 class Project
@@ -689,7 +689,7 @@ use App\TaskManagement\Domain\Event\TaskAssigned;
 use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
-// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekce 25.07.2)
+// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekci 25.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
 

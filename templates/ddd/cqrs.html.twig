@@ -495,7 +495,7 @@ final class RegisterUser
                 vygenerované před dispatchem. Handler toto ID použije. Klient zná ID okamžitě, command nemusí
                 nic vracet. Toto je preferovaný přístup.</li>
             <li><strong>ID vracet z handleru</strong> – Handler vrátí ID přes <code>HandledStamp</code>.
-                Jednodušší na implementaci, ale porušuje striktní CQS a komplikuje asynchronní zpracování.</li>
+                Jednodušší na implementaci, ale porušuje striktní CQS. <strong>Nefunguje pro asynchronní transport</strong> – handler běží v jiném procesu a výsledek přes HandledStamp do původního requestu nedoputuje.</li>
         </ul>
     {% endset %}
             {% include '_partials/callout.html.twig' with {

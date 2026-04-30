@@ -624,15 +624,15 @@ final class Order extends AggregateRoot
     </section>
 
     {# ───────────────────────────────────────────────────────────
-       07.08 Doctrine 4 mapování
+       07.08 Doctrine ORM 3 mapování
        ─────────────────────────────────────────────────────────── #}
     <section id="symfony-doctrine" aria-labelledby="symfony-doctrine-heading">
-        <h2 id="symfony-doctrine-heading" class="h-section"><span class="h-num">07.08</span> Mapování v Symfony 8 a Doctrine 4</h2>
+        <h2 id="symfony-doctrine-heading" class="h-section"><span class="h-num">07.08</span> Mapování v Symfony 8 a Doctrine ORM 3</h2>
 
         <p>
             Doctrine ORM je v Symfony projektech defaultní volba a v jeho konfiguraci se nejčastěji
             rozhoduje, zda bude agregátní model čistý, nebo se rozplyne. Vernon v IDDD věnuje této otázce
-            celou kapitolu 12. Aktualizovaná pravidla pro Doctrine 4:
+            celou kapitolu 12. Pravidla pro Doctrine ORM 3:
         </p>
 
         <ul>
@@ -810,7 +810,7 @@ doctrine:
 
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'
-        enable_lazy_ghost_objects: true   # Doctrine 4: výchozí pro nové projekty
+        enable_lazy_ghost_objects: true   # Doctrine ORM 3: výchozí pro nové projekty
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         mappings:
@@ -875,8 +875,8 @@ doctrine:
             <li><strong>Single-writer pattern.</strong> Agregát existuje v paměti jediného procesu (actor
                 model, Akka, Orleans). Symfony to nativně neumí; alternativou je Messenger s deduplicací
                 přes konzistentní hash a single consumer per aggregate ID.</li>
-            <li><strong>Příjmout eventual consistency uvnitř.</strong> Napříkad u counterů
-                (<em>like count</em>) je přesný stav nedůležitý – stačí period replikace s nepřesností
+            <li><strong>Přijmout eventual consistency uvnitř.</strong> Například u counterů
+                (<em>like count</em>) je přesný stav nedůležitý – stačí zpožděná replikace s nepřesností
                 v řádech sekund.</li>
         </ul>
 
@@ -936,7 +936,7 @@ doctrine:
                 Nevýhoda: insertion order není seřazen, což zhoršuje I/O pattern u clustered indexů (MySQL/InnoDB).</li>
             <li><strong>ULID nebo UUID v7.</strong> Time-ordered, distribuovaně generovatelná, řadí
                 se podle času vzniku. <strong>Doporučená volba</strong> pro většinu nových projektů.
-                Symfony 7+ má <code>Symfony\Component\Uid\Ulid</code> v core.</li>
+                Symfony 5.2+ nabízí <code>Symfony\Component\Uid\Ulid</code> a <code>Uuid::v7()</code> prostřednictvím balíčku <code>symfony/uid</code>.</li>
             <li><strong>Sekvenční integer.</strong> Krátký, lidsky čitelný, rychlý. Nevýhody: vyžaduje
                 centrální generátor (DB sekvence), prozrazuje řád a počet entit, špatně se merguje
                 z více DB (microservices).</li>
@@ -1090,8 +1090,8 @@ doctrine:
                 answer: 'Eventual consistency znamená, že stav dvou agregátů je konzistentní s krátkým zpožděním (typicky sekundy), ne okamžitě. Použijte ji všude, kde invariant nemusí platit v každý okamžik – například „po vystavení objednávky se zákazníkovi pošle e-mail“ nebo „při změně adresy v Customer agregátu se upraví doručovací adresa v rozpracovaných objednávkách“. Implementačně: agregát A publikuje doménový event, sága ho přijme a v separátní transakci modifikuje agregát B. Pravidla, která musí platit okamžitě (například „bilance debetů a kreditů je nulová“), patří do jednoho agregátu. Detail v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
             },
             {
-                question: 'Jak v Doctrine 4 namapovat referenci na jiný agregát?',
-                answer: 'Jako jednoduchý sloupec s vlastním Doctrine typem (<code>order_id</code>, <code>customer_id</code>), který konvertuje mezi databázovou hodnotou a Value Objectem (<code>OrderId</code>, <code>CustomerId</code>). Žádná <code>ManyToOne</code> asociace mezi agregáty. Doctrine asociace ponechte jen pro entity uvnitř stejného agregátu (typicky <code>OneToMany</code> z kořene na vnitřní entity s <code>cascade=["persist", "remove"]</code> a <code>orphanRemoval=true</code>). Hodnotové objekty s více poli (Money, Address) mapujte přes <code>#[ORM\\Embedded]</code>. Detail v <a href="#symfony-doctrine">sekci Mapování v Doctrine 4</a>.'
+                question: 'Jak v Doctrine ORM 3 namapovat referenci na jiný agregát?',
+                answer: 'Jako jednoduchý sloupec s vlastním Doctrine typem (<code>order_id</code>, <code>customer_id</code>), který konvertuje mezi databázovou hodnotou a Value Objectem (<code>OrderId</code>, <code>CustomerId</code>). Žádná <code>ManyToOne</code> asociace mezi agregáty. Doctrine asociace ponechte jen pro entity uvnitř stejného agregátu (typicky <code>OneToMany</code> z kořene na vnitřní entity s <code>cascade=["persist", "remove"]</code> a <code>orphanRemoval=true</code>). Hodnotové objekty s více poli (Money, Address) mapujte přes <code>#[ORM\\Embedded]</code>. Detail v <a href="#symfony-doctrine">sekci Mapování v Doctrine ORM 3</a>.'
             },
             {
                 question: 'Co je hot aggregate a jak poznat, že ho mám?',

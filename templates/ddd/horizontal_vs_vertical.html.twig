@@ -278,7 +278,7 @@
             {% set _callout_body %}
                 <h3 id="vertical-slice-when-to-use-heading">Kdy použít vertikální slice architekturu:</h3>
                 <ul>
-                    <li>Pro větší a složitější aplikace <a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank" rel="noopener">[6]</a>.</li>
+                    <li>Pro větší a složitější aplikace.</li>
                     <li>Když je důležitá modularita a nezávislost funkcí.</li>
                     <li>Pro aplikace, které budou v budoucnu rozděleny do mikroslužeb.</li>
                     <li>Když chcete implementovat CQRS.</li>
@@ -356,7 +356,8 @@
 
             <h3 id="vertical-slice-symfony-implementation-heading">Implementace vertikální slice architektury v Symfony 8:</h3>
             <p>
-                Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank" rel="noopener">[8]</a>:
+                Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) <a href="https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo" target="_blank" rel="noopener">[8]</a>.
+                Oproti základnímu modelu z <a href="#vertical-slice">sekce 10.02</a> (kde celý <code>Domain/</code> leží na úrovni kontextu) jde tato varianta hlouběji: každá feature dostane vlastní <code>Domain/</code> pro doménové služby a události specifické pro ni, zatímco sdílený agregátový model zůstává v kontextovém <code>Domain/</code>.
             </p>
 
             {% set _code %}src/

@@ -235,7 +235,7 @@ class ArticleCrudController extends AbstractCrudController
 
         <p>
             <strong>Důležitá nuance:</strong> Strategické DDD nástroje – zejména
-            <a href="{{ path('basic_concepts') }}">Event Storming a Context Mapping</a> – mohou být
+            <a href="{{ path('event_storming') }}">Event Storming</a> a <a href="{{ path('context_mapping') }}">Context Mapping</a> – mohou být
             ve fázi hledání naopak velmi užitečné. Pomáhají pojmenovat, co ještě nerozumíte.
             Co nedává smysl, je taktické DDD (agregáty, doménové události, repozitáře) pro model,
             který se příští týden změní od základů.
@@ -339,7 +339,7 @@ class Order {
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>Vrstvená architektura</strong> (Controller → Service → Repository) – dobře strukturovaný kód bez přílišné abstrakce.</li>
-                <li>DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na <a href="{{ path('basic_concepts') }}">Event Storming</a>.</li>
+                <li>DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na <a href="{{ path('event_storming') }}">Event Storming</a>.</li>
             </ul>
         {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -552,7 +552,7 @@ final class Order
 
             <strong>Doporučené alternativy:</strong>
             <ul>
-                <li><strong>Event Storming napřed</strong> – než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v <a href="{{ path('basic_concepts') }}">základních konceptech</a>.</li>
+                <li><strong>Event Storming napřed</strong> – než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v kapitole <a href="{{ path('event_storming') }}">Event Storming</a>.</li>
                 <li>Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte – viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a>.</li>
             </ul>
         {% endset %}

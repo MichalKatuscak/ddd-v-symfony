@@ -76,7 +76,7 @@
 
     <p>
         Konkrétně si vysvětlíme: <strong>Specification Pattern</strong> jako kompozici doménových
-        booleovských predikátů (Evans 2003, kap.&nbsp;9; Fowler PoEAA, 2003), <strong>Domain
+        booleovských predikátů (Evans 2003, kap.&nbsp;9), <strong>Domain
         Services</strong> jako stateless objekty pro logiku, jež nemá přirozeného vlastníka mezi
         Entitami a Value Objekty (Evans 2003, kap.&nbsp;5), <strong>Factories</strong> pro zapouzdření
         vzniku agregátu se složitými invarianty (Evans 2003, kap.&nbsp;6; Vernon 2013, kap.&nbsp;11)
@@ -166,10 +166,11 @@
     </p>
 
     <p>
-        Eric Evans vzor poprvé představil v <em>Domain-Driven Design</em> (2003), kapitole&nbsp;9
-        s názvem <em>Making Implicit Concepts Explicit</em>. Martin Fowler ho ve stejném roce
-        zařadil do své knihy <em>Patterns of Enterprise Application Architecture</em> jako
-        samostatný vzor. Společný motiv obou autorů: pravidla, která se v doméně objevují
+        Eric Evans vzor poprvé formálně popsal v <em>Domain-Driven Design</em> (2003), kapitole&nbsp;9
+        s názvem <em>Making Implicit Concepts Explicit</em>. Evans a Fowler ho dříve rozpracovali
+        v pracovním papíru <em>Specifications</em>
+        <a href="https://martinfowler.com/apsupp/spec.pdf" target="_blank" rel="noopener">[martinfowler.com]</a>.
+        Společný motiv: pravidla, která se v doméně objevují
         opakovaně, si zaslouží vlastní jméno a vlastní typ.
     </p>
 
@@ -741,7 +742,7 @@ final class DoctrineOrderRepository implements OrderRepository
         kapitola&nbsp;9 <em>Making Implicit Concepts Explicit</em>; Fowler, M., <em>Patterns of
         Enterprise Application Architecture</em> (2003), heslo <em>Specification</em>.
         Praktická aplikace na agregátech: Vernon, V., <em>Implementing Domain-Driven Design</em>
-        (2013), kapitola&nbsp;9.
+        (2013).
     </p>
 
     </section>

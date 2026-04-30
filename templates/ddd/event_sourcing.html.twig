@@ -674,7 +674,7 @@ final class DoctrineEventStore implements EventStore
         <p>
             Tato struktura má přímý dopad na testování: event-sourcované agregáty se testují vzorem
             <strong>given/when/then</strong> – given: historické události, when: volání metody, then: nově emitované
-            události. Podrobně viz kapitola <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
+            události. Podrobně viz kapitolu <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
         </p>
 
         {% set _callout_body %}
@@ -1608,7 +1608,7 @@ final class RebuildProjectionCommand extends Command
 
         <h3>Kdy vytvářet snapshots</h3>
         <ul>
-            <li>Poté, co event stream agregátu překročí určitý počet událostí (typicky 50–200).</li>
+            <li>Poté, co replay agregátu začne měřitelně zpomalovat – práh závisí na doméně, typicky se pohybuje od stovek po tisíce událostí.</li>
             <li>Periodicky (např. jednou denně) pro agregáty s vysokou frekvencí událostí.</li>
             <li>Na vyžádání – jako optimalizační krok po migraci nebo importu dat.</li>
         </ul>
