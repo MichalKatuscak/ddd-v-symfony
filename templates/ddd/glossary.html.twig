@@ -128,7 +128,7 @@
                             primární důvod existence softwaru. Měla by dostávat největší investice, nejlepší
                             vývojáře a plnou aplikaci taktických vzorů DDD. Všechny ostatní subdomény jsou
                             periferní – slouží Core Doméně, ale nejsou jejím cílem. Její identifikace
-                            patří k nejdůležitějším výsledkům strategické analýzy.
+                            patří k podstatným výsledkům strategické analýzy.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 15, str. 396–397; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 2</p>
                         <p class="term-related">Viz také: <a href="#term-subdomena">Subdoména</a>, <a href="#term-podporna-subdomena">Podpůrná subdoména</a>, <a href="#term-genericka-subdomena">Generická subdoména</a></p>
@@ -201,7 +201,7 @@
                     <dd>
                         <p>
                             Explicitní hranice, uvnitř níž je konkrétní doménový model definován a platný.
-                            Uvnitř Bounded Contextu je Ubiquitous Language konzistentní a jednoznačná –
+                            Uvnitř Bounded Contextu je Ubiquitous Language konzistentní a jednoznačný –
                             každý pojem má jeden přesný význam. Různé Bounded Contexty mohou používat stejné
                             slovo pro odlišné koncepty, aniž by si odporovaly. Bounded Context je
                             fundamentální jednotkou návrhu i nasazení v DDD. Určuje hranice týmů, nasazení,
@@ -303,7 +303,7 @@
                             čímž brání „korupci“ doménového modelu cizími koncepty. Implementuje se typicky
                             jako sada adaptérů, fasád nebo překladačů na hranici kontextu. Je nezbytná při
                             integraci s špatně navrženými legacy systémy nebo s externími API, která mají
-                            odlišnou sémantiku. ACL je jeden z nejdůležitějších obranných mechanismů v DDD.
+                            odlišnou sémantiku. ACL patří k základním obranným mechanismům v DDD.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14, str. 364–367</p>
                         <p class="term-related">Viz také: <a href="#term-konformista">Konformista</a>, <a href="#term-mapa-kontextu">Mapa kontextů</a>, <a href="#term-adapter">Adaptér</a></p>
@@ -399,7 +399,7 @@
                             <code>UserId</code> – i když změní jméno, e-mail i adresu, zůstává stejnou entitou.
                             Dvě entity se stejnými daty, ale odlišnými identifikátory, jsou různé entity.
                             Rovnost entit je určena identitou, nikoli stavem. Na rozdíl od Hodnotového objektu
-                            musí entita mít explicitní identifikátor, ideálně jako silně typovaný Value Object.
+                            musí entita mít explicitní identifikátor, nejlépe jako silně typovaný Value Object.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5, str. 89–97</p>
                         <p class="term-related">Viz také: <a href="#term-hodnotovy-objekt">Hodnotový objekt</a>, <a href="#term-agregat">Agregát</a>, <a href="#term-koren-agregatu">Kořen agregátu</a></p>
@@ -687,8 +687,8 @@
                             Architektura navržená Alistairem Cockburnem: jádro aplikace (doména + aplikační
                             vrstva) komunikuje s vnějším světem výhradně prostřednictvím Portů (rozhraní)
                             a Adaptérů (implementací). Driving adaptéry (HTTP, CLI, konzole) volají aplikaci;
-                            driven adaptéry (databáze, messaging, e-mail) jsou aplikací volány. Klíčový přínos:
-                            doménový model je zcela izolován od infrastruktury – lze ho testovat bez databáze,
+                            driven adaptéry (databáze, messaging, e-mail) jsou aplikací volány. Hlavní přínos:
+                            doménový model je plně izolován od infrastruktury – lze ho testovat bez databáze,
                             HTTP frameworku ani externích systémů. Základní princip inverze závislostí (DIP)
                             je zde aplikován systematicky.
                         </p>
@@ -879,7 +879,7 @@
                     </dt>
                     <dd>
                         <p>
-                            Koordinuje dlouhodobě běžící byznysový proces, který zahrnuje více agregátů nebo
+                            Koordinuje dlouhodobě běžící obchodní proces, který zahrnuje více agregátů nebo
                             Bounded Contextů. Sága naslouchá doménovým událostem, vydává příkazy (Commands)
                             a udržuje stav procesu. Pro případ selhání definuje kompenzační transakce – akce,
                             které vrátí systém do konzistentního stavu (obdoba rollbacku v distribuovaném
@@ -970,10 +970,10 @@
                             (typicky <code>SELECT … FOR UPDATE</code> nebo <code>LOCK TABLES</code>) na celou
                             dobu transakce. Souběžné operace nad stejným záznamem jsou zablokovány a čekají
                             ve frontě. Vhodné pro scénáře s vysokou konfliktností, krátkými transakcemi
-                            a vyšší cenou opakování operace než cenou čekání. Daň: snížený throughput
-                            a riziko deadlocků; kompenzuje se pečlivým pořadím zamykání a krátkými držbami zámků.
-                            V Event Sourcingu se zpravidla nepoužívá – stream events natural a verze plus
-                            optimistický check stačí.
+                            a vyšší cenou opakování operace než cenou čekání. Daň: snížená propustnost
+                            a riziko uváznutí (deadlocků); kompenzuje se pečlivým pořadím zamykání a krátkými držbami zámků.
+                            V Event Sourcingu se zpravidla nepoužívá – události streamu jsou přirozeně řazené
+                            a verze + optimistický check stačí.
                         </p>
                         <p class="term-source">Zdroj: Martin Fowler, <em>Patterns of Enterprise Application Architecture</em> (2002), str. 426–427; Bernstein &amp; Newcomer, <em>Principles of Transaction Processing</em> (2009), kap. 6</p>
                         <p class="term-related">Viz také: <a href="#term-optimisticke-zamykani">Optimistické zamykání</a>, <a href="#term-agregat">Agregát</a></p>
@@ -991,10 +991,10 @@
                             modelu. Vzniká jako důsledek CQRS: zatímco zápisová strana drží invarianty na
                             agregátech a pracuje skrze repozitáře, čtecí strana plní obrazovky a reporty
                             předpočítanými, denormalizovanými projekcemi. Read Model lze udržovat synchronně
-                            (v rámci téže transakce jako zápis) nebo asynchronně (přes <a href="#term-projekce">projekce</a>
+                            (v téže transakci jako zápis) nebo asynchronně (přes <a href="#term-projekce">projekce</a>
                             naslouchající doménovým událostem). Typicky obsahuje data napříč více agregáty,
                             jejichž společné dotazování by na zápisové straně porušovalo izolaci agregátů.
-                            Klíčová vlastnost: čtecí model může být pro různé use-case různý – jeden agregát
+                            Důležitá vlastnost: čtecí model může být pro různé use-case různý – jeden agregát
                             přispívá do mnoha čtecích modelů.
                         </p>
                         <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4 a 8</p>
@@ -1015,7 +1015,7 @@
                             <code>ReserveInventory</code>. Kompenzační kroky musí být <strong>idempotentní</strong>
                             (opakované volání má stejný efekt jako jediné), <strong>tolerantní k absenci kompenzovaného kroku</strong>
                             (např. když se selhalo ještě před rezervací) a měly by být <strong>commutative</strong>
-                            v rámci ságy, aby pořadí kompenzací při paralelním běhu neovlivnilo výsledek.
+                            uvnitř ságy, aby pořadí kompenzací při paralelním běhu neovlivnilo výsledek.
                             Některé efekty technicky vrátit nelze (odeslaný e-mail, fyzický výdej zboží) – pak
                             se kompenzuje jiným způsobem (omluvný e-mail, vrácení peněz, dobropis).
                         </p>
@@ -1031,13 +1031,13 @@
                     </dt>
                     <dd>
                         <p>
-                            Anti-vzor, v němž doménové třídy obsahují pouze data (gettery/settery) a byznysová
+                            Anti-vzor, v němž doménové třídy obsahují pouze data (gettery/settery) a doménová
                             logika je umístěna do servisních tříd. Porušuje zapouzdření objektově-orientovaného
                             programování a odporuje principu bohatého doménového modelu (Rich Domain Model) v DDD.
                             Výsledkem jsou třídy, které jsou pouze datovými strukturami – ne doménovými objekty.
-                            Byznysová logika je rozptýlena a obtížně lokalizovatelná. Martin Fowler ho označil
+                            Doménová logika je rozptýlena a obtížně lokalizovatelná. Martin Fowler ho označil
                             za anti-vzor v roce 2003 (martinfowler.com/bliki/AnemicDomainModel.html). Ironicky
-                            jde o nejrozšířenější „DDD“ implementaci v praxi.
+                            jde o nejrozšířenější „DDD“ implementaci.
                         </p>
                         <p class="term-source">Zdroj: Martin Fowler, <em>AnemicDomainModel</em> (2003); Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5</p>
                         <p class="term-related">Viz také: <a href="#term-entita">Entita</a>, <a href="#term-domenova-sluzba">Doménová služba</a>, <a href="#term-primitive-obsession">Primitive Obsession</a></p>
@@ -1294,21 +1294,21 @@
                 <div class="glossary-entry" id="ff-domain">
                     <dt><dfn>Domain</dfn></dt>
                     <dd>
-                        <p><strong>V DDD:</strong> oblast byznysu, kterou software modeluje (Ordering, Billing, Catalog). <strong>V Twig/i18n:</strong> translation domain (<code>messages</code>, <code>validators</code>). Mimo DDD je „Domain“ v PHP velmi vzácné, takže matení bývá jen v Twig.</p>
+                        <p><strong>V DDD:</strong> oblast podnikání, kterou software modeluje (Ordering, Billing, Catalog). <strong>V Twig/i18n:</strong> translation domain (<code>messages</code>, <code>validators</code>). Mimo DDD je „Domain“ v PHP velmi vzácné, takže matení bývá jen v Twig.</p>
                     </dd>
                 </div>
 
                 <div class="glossary-entry" id="ff-controller">
                     <dt><dfn>Controller</dfn></dt>
                     <dd>
-                        <p><strong>V Symfony:</strong> třída obsluhující HTTP request. <strong>V DDD pojmosloví:</strong> infrastructure adapter – patří do <code>App\&lt;BC&gt;\Infrastructure\Http\</code>. Nikoli do Application a už vůbec ne do Domain.</p>
+                        <p><strong>V Symfony:</strong> třída obsluhující HTTP požadavek. <strong>V DDD pojmosloví:</strong> infrastructure adapter – patří do <code>App\&lt;BC&gt;\Infrastructure\Http\</code>. Nikoli do Application a už vůbec ne do Domain.</p>
                     </dd>
                 </div>
 
                 <div class="glossary-entry" id="ff-handler">
                     <dt><dfn>Handler</dfn></dt>
                     <dd>
-                        <p><strong>V Symfony Messenger:</strong> třída implementující business logiku spuštěnou message busem. Typicky <code>#[AsMessageHandler]</code>. <strong>V DDD:</strong> Application Service (Use Case) – pokud zpracovává Command; Domain Event Handler – pokud reaguje na Domain Event. Stejná třída, různé pojmenování v různém kontextu.</p>
+                        <p><strong>V Symfony Messenger:</strong> třída implementující doménovou logiku spuštěnou message busem. Typicky <code>#[AsMessageHandler]</code>. <strong>V DDD:</strong> Application Service (Use Case) – pokud zpracovává Command; Domain Event Handler – pokud reaguje na Domain Event. Stejná třída, různé pojmenování v různém kontextu.</p>
                     </dd>
                 </div>
 
@@ -1344,7 +1344,7 @@
                         <td><code>Controller</code> (HTTP)</td>
                         <td>Infrastructure adapter</td>
                         <td><code>App\&lt;BC&gt;\Infrastructure\Http\</code></td>
-                        <td><a href="{{ path('architectural_styles') }}#hexagonal">Hexagonal – Adapter</a> · <a href="{{ path('anti_patterns') }}">Anti-vzor: business logika v controlleru</a></td>
+                        <td><a href="{{ path('architectural_styles') }}#hexagonal">Hexagonal – Adapter</a> · <a href="{{ path('anti_patterns') }}">Anti-vzor: doménová logika v controlleru</a></td>
                     </tr>
                     <tr>
                         <td><code>#[AsMessageHandler]</code> handler</td>

@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '05',
+        chapter_number: '13',
         category: 'Vzory',
         title: 'CQRS v Symfony 8',
         deck: 'Implementace CQRS (Command Query Responsibility Segregation) v Symfony 8 s využitím DDD principů – oddělení operací čtení a zápisu, optimalizace read modelů, řešení eventual consistency a stavba škálovatelných aplikací.',
@@ -61,11 +61,11 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="05">
+    <div class="art-body" data-chapter-number="13">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter05_CQRS' } %}
 
 <section id="what-is-cqrs" aria-labelledby="what-is-cqrs-heading">
-    <h2 id="what-is-cqrs-heading" class="h-section"><span class="h-num">05.01</span> Co je CQRS?</h2>
+    <h2 id="what-is-cqrs-heading" class="h-section"><span class="h-num">13.01</span> Co je CQRS?</h2>
     <p>
         CQRS vychází z jednoho přímočarého pozorování: <strong>model, který slouží k zápisu dat, nemusí být tentýž model,
         který slouží k jejich čtení</strong>. CQRS (Command Query Responsibility Segregation) tento princip
@@ -106,7 +106,7 @@
     </section>
 
     <section id="cqs-vs-cqrs" aria-labelledby="cqs-vs-cqrs-heading">
-    <h2 id="cqs-vs-cqrs-heading" class="h-section"><span class="h-num">05.02</span> CQS vs. CQRS – kde je hranice?</h2>
+    <h2 id="cqs-vs-cqrs-heading" class="h-section"><span class="h-num">13.02</span> CQS vs. CQRS – kde je hranice?</h2>
 
     <p>
         Bertrand Meyer formuloval princip <strong>Command-Query Separation (CQS)</strong> jako pravidlo
@@ -210,7 +210,7 @@
     </section>
 
     <section id="benefits" aria-labelledby="benefits-heading">
-    <h2 id="benefits-heading" class="h-section"><span class="h-num">05.03</span> Výhody CQRS</h2>
+    <h2 id="benefits-heading" class="h-section"><span class="h-num">13.03</span> Výhody CQRS</h2>
     <p>
         CQRS přináší řadu architektonických výhod, které se projevují zejména u aplikací
         s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
@@ -247,7 +247,7 @@
     </section>
 
     <section id="challenges" aria-labelledby="challenges-heading">
-    <h2 id="challenges-heading" class="h-section"><span class="h-num">05.04</span> Výzvy a omezení CQRS</h2>
+    <h2 id="challenges-heading" class="h-section"><span class="h-num">13.04</span> Výzvy a omezení CQRS</h2>
     <p>
         CQRS není stříbrná kulka. Jako každý architektonický vzor přináší kompromisy,
         které je nutné pečlivě zvážit ještě před zavedením:
@@ -307,7 +307,7 @@
     </section>
 
     <section id="symfony-messenger" aria-labelledby="symfony-messenger-heading">
-    <h2 id="symfony-messenger-heading" class="h-section"><span class="h-num">05.05</span> Symfony Messenger jako základ CQRS</h2>
+    <h2 id="symfony-messenger-heading" class="h-section"><span class="h-num">13.05</span> Symfony Messenger jako základ CQRS</h2>
     <p>
         Symfony Messenger je komponenta, která poskytuje infrastrukturu pro odesílání a zpracování zpráv.
         Pro CQRS je podstatná schopnost definovat <strong>více message busů</strong> – jeden pro příkazy
@@ -317,7 +317,7 @@
 
     {% set _diagram_inline %}{% include '/diagrams/6_cqrs/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '05.1-A',
+                fig: '13.1-A',
                 title: 'Symfony Messenger jako CQRS bus',
                 inline: _diagram_inline
             } %}
@@ -417,7 +417,7 @@ framework:
     </section>
 
     <section id="commands" aria-labelledby="commands-heading">
-    <h2 id="commands-heading" class="h-section"><span class="h-num">05.06</span> Implementace Commands</h2>
+    <h2 id="commands-heading" class="h-section"><span class="h-num">13.06</span> Implementace Commands</h2>
     <p>
         Commands v CQRS jsou příkazy, které mění stav systému. V Symfony 8 se implementují jako jednoduché
         PHP třídy – immutabilní datové objekty (DTO), které nesou veškerá data potřebná pro vykonání operace.
@@ -505,7 +505,7 @@ final class RegisterUser
     </section>
 
     <section id="queries" aria-labelledby="queries-heading">
-    <h2 id="queries-heading" class="h-section"><span class="h-num">05.07</span> Implementace Queries</h2>
+    <h2 id="queries-heading" class="h-section"><span class="h-num">13.07</span> Implementace Queries</h2>
     <p>
         Queries v CQRS jsou dotazy, které vrací data bez změny stavu systému. Podobně jako commands
         se implementují jako immutabilní DTO třídy, ale na rozdíl od commands <strong>vždy vracejí
@@ -598,7 +598,7 @@ final class ListOrders
     </section>
 
     <section id="handlers" aria-labelledby="handlers-heading">
-    <h2 id="handlers-heading" class="h-section"><span class="h-num">05.08</span> Implementace Handlers</h2>
+    <h2 id="handlers-heading" class="h-section"><span class="h-num">13.08</span> Implementace Handlers</h2>
     <p>
         Handlers v CQRS jsou objekty, které zpracovávají příkazy a dotazy. V Symfony 8 se implementují
         jako PHP třídy s atributem <code>AsMessageHandler</code> a metodou <code>__invoke()</code>.
@@ -740,7 +740,7 @@ final class GetUserProfileHandler
     </section>
 
     <section id="view-models" aria-labelledby="view-models-heading">
-    <h2 id="view-models-heading" class="h-section"><span class="h-num">05.09</span> ViewModely a Read Modely</h2>
+    <h2 id="view-models-heading" class="h-section"><span class="h-num">13.09</span> ViewModely a Read Modely</h2>
 
     <p>
         ViewModel (nebo Read Model) je datová struktura navržená výhradně pro potřeby konkrétního dotazu
@@ -873,7 +873,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     </section>
 
     <section id="buses" aria-labelledby="buses-heading">
-    <h2 id="buses-heading" class="h-section"><span class="h-num">05.10</span> Implementace Command a Query Buses</h2>
+    <h2 id="buses-heading" class="h-section"><span class="h-num">13.10</span> Implementace Command a Query Buses</h2>
     <p>
         Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery.
         V Symfony 8 se pro injektování správného busu používá named autowiring – názvy parametrů
@@ -1015,7 +1015,7 @@ final class ProfileController extends AbstractController
     </section>
 
     <section id="read-model-optimalizace" aria-labelledby="read-model-optimalizace-heading">
-    <h2 id="read-model-optimalizace-heading" class="h-section"><span class="h-num">05.11</span> Optimalizace Read Modelů</h2>
+    <h2 id="read-model-optimalizace-heading" class="h-section"><span class="h-num">13.11</span> Optimalizace Read Modelů</h2>
 
     <p>
         Jednou z hlavních výhod CQRS je možnost <strong>nezávisle optimalizovat read stranu</strong>
@@ -1230,7 +1230,7 @@ final class OrderDashboardProjector
     </section>
 
     <section id="eventual-consistency" aria-labelledby="eventual-consistency-heading">
-    <h2 id="eventual-consistency-heading" class="h-section"><span class="h-num">05.12</span> Eventual Consistency v praxi</h2>
+    <h2 id="eventual-consistency-heading" class="h-section"><span class="h-num">13.12</span> Eventual Consistency v praxi</h2>
 
     <p>
         Eventual consistency je nejčastějším zdrojem nejistoty při zavádění CQRS. Při asynchronní
@@ -1247,7 +1247,7 @@ final class OrderDashboardProjector
 
     {% set _diagram_inline %}{% include '/diagrams/6_cqrs/eventual_consistency.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '05.2-A',
+                fig: '13.2-A',
                 title: 'Eventual consistency v CQRS toku',
                 inline: _diagram_inline
             } %}
@@ -1397,7 +1397,7 @@ final class PlaceOrderController extends AbstractController
     </section>
 
     <section id="async" aria-labelledby="async-heading">
-    <h2 id="async-heading" class="h-section"><span class="h-num">05.13</span> Asynchronní zpracování</h2>
+    <h2 id="async-heading" class="h-section"><span class="h-num">13.13</span> Asynchronní zpracování</h2>
     <p>
         Jednou z výhod CQRS je možnost asynchronního zpracování příkazů. V Symfony 8 se asynchronní
         zpracování konfiguruje přes transporty v Messenger komponentě. Příkaz označený pro asynchronní
@@ -1508,7 +1508,7 @@ stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
     </section>
 
     <section id="error-handling" aria-labelledby="error-handling-heading">
-    <h2 id="error-handling-heading" class="h-section"><span class="h-num">05.14</span> Zpracování chyb a Dead Letter Queue</h2>
+    <h2 id="error-handling-heading" class="h-section"><span class="h-num">13.14</span> Zpracování chyb a Dead Letter Queue</h2>
 
     <p>
         V asynchronním prostředí je zpracování chyb podstatně odlišné od synchronního zpracování.
@@ -1600,7 +1600,7 @@ $ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
     </section>
 
     <section id="middleware" aria-labelledby="middleware-heading">
-    <h2 id="middleware-heading" class="h-section"><span class="h-num">05.15</span> Middleware v CQRS</h2>
+    <h2 id="middleware-heading" class="h-section"><span class="h-num">13.15</span> Middleware v CQRS</h2>
 
     <p>
         Symfony Messenger middleware je řetěz (chain) komponent, které zpracovávají zprávu
@@ -1710,7 +1710,7 @@ framework:
     </section>
 
     <section id="testovani-cqrs" aria-labelledby="testovani-cqrs-heading">
-    <h2 id="testovani-cqrs-heading" class="h-section"><span class="h-num">05.16</span> Testování CQRS</h2>
+    <h2 id="testovani-cqrs-heading" class="h-section"><span class="h-num">13.16</span> Testování CQRS</h2>
 
     <p>
         CQRS přirozeně vede k <strong>snadno testovatelné architektuře</strong>. Command handlers,
@@ -1969,7 +1969,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
     </section>
 
     <section id="saga" aria-labelledby="saga-heading">
-    <h2 id="saga-heading" class="h-section"><span class="h-num">05.17</span> Saga / Process Manager</h2>
+    <h2 id="saga-heading" class="h-section"><span class="h-num">13.17</span> Saga / Process Manager</h2>
 
     <p>
         Při použití CQRS s více <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexts</a>

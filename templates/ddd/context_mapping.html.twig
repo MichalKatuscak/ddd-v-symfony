@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '04',
+        chapter_number: '03',
         category: 'Strategie',
         title: 'Context Mapping – 8 vztahů mezi Bounded Contexts',
         deck: 'Bounded Context vám definuje hranici. Context Mapping vám definuje, co se na té hranici děje. Osm pojmenovaných vztahů, které popisují všechny způsoby, jak spolu BC komunikují – od těsné spolupráce po úmyslnou separaci.',
@@ -61,14 +61,14 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="04">
+    <div class="art-body" data-chapter-number="03">
 
         <p>
             Strategický design v DDD má dvě stránky. <strong>Bounded Context</strong> definuje
             <em>hranici</em> jednoho modelu – co je uvnitř, co je venku, kde končí jeden
             Ubiquitous Language a začíná druhý. Detail viz kapitola
             <a href="{{ path('basic_concepts') }}#bounded-contexts">Základní koncepty – Bounded Contexts</a>.
-            Bounded Context však sám o sobě neřeší jednu zásadní otázku: <strong>co se děje na té
+            Bounded Context však sám o sobě neřeší jednu podstatnou otázku: <strong>co se děje na té
             hranici</strong>, když dva kontexty potřebují spolupracovat.
         </p>
 
@@ -90,7 +90,7 @@
            04.01 Co je Context Map
            ─────────────────────────────────────────────────────────── #}
         <section id="co-je-context-map" aria-labelledby="co-je-context-map-heading">
-            <h2 id="co-je-context-map-heading" class="h-section"><span class="h-num">04.01</span> Co je Context Map a proč ji nakreslit</h2>
+            <h2 id="co-je-context-map-heading" class="h-section"><span class="h-num">03.01</span> Co je Context Map a proč ji nakreslit</h2>
 
             <p>
                 Eric Evans popisuje Context Map takto: „<em>Identify each model in play on the
@@ -104,7 +104,7 @@
             </p>
 
             <p>
-                V praxi má Context Map dvě složky:
+                Context Map má dvě složky:
             </p>
 
             <ul>
@@ -113,7 +113,7 @@
                     <code>&lt;&lt;OHS&gt;&gt;</code>, <code>U/D</code> pro upstream/downstream).</li>
                 <li><strong>Textová složka</strong> – krátký dokument popisující každý vztah:
                     odpovědné týmy, kontrakt, frekvenci změn, eskalační kontakt. Tato část je
-                    důležitější než obrázek; obrázek se mění rychleji než se aktualizuje.</li>
+                    důležitější než obrázek; obrázek zastarává rychleji, než se stačí aktualizovat.</li>
             </ul>
 
             <p>
@@ -121,12 +121,12 @@
                 tým A ví, že volá tým B, ale nikdo nikde neřekl, jakým způsobem se to děje, kdo
                 kontrakt vlastní a co se stane, když ho jednostranně změníme. Implicitní vztahy
                 vedou k integračním bugům, plíživému sdílení modelů a v konečném důsledku k
-                <em>Big Ball of Mud</em> (viz <a href="#big-ball-of-mud">04.12</a>).
+                <em>Big Ball of Mud</em> (viz <a href="#big-ball-of-mud">03.12</a>).
             </p>
 
             {% set _diagram_inline %}{% include 'diagrams/12_context_mapping/context_map_patterns.svg' ignore missing %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '04.1-A',
+                fig: '03.1-A',
                 title: 'Context Map: 5 Bounded Contexts a všech 8 typů vztahů',
                 inline: _diagram_inline,
                 alt: 'Context Map zobrazující 5 BC (Catalog, Pricing, Ordering, Billing, Identity, Marketing) a všech 8 typů vztahů mezi nimi',
@@ -156,7 +156,7 @@
            04.02 Osm typů vztahů – přehled
            ─────────────────────────────────────────────────────────── #}
         <section id="osm-typu-prehled" aria-labelledby="osm-typu-prehled-heading">
-            <h2 id="osm-typu-prehled-heading" class="h-section"><span class="h-num">04.02</span> Osm typů vztahů – přehled</h2>
+            <h2 id="osm-typu-prehled-heading" class="h-section"><span class="h-num">03.02</span> Osm typů vztahů – přehled</h2>
 
             <p>
                 Eric Evans katalogizoval <strong>osm pojmenovaných vztahů</strong>, kterými mohou
@@ -252,7 +252,7 @@
                 Customer/Supplier typicky <em>používá</em> Open Host Service jako kanál a
                 Published Language jako formát zpráv. Anti-Corruption Layer je technika, kterou
                 downstream <em>aplikuje</em>, když je v Customer/Supplier nebo Conformist pozici
-                vůči nepřátelskému (legacy) modelu.
+                vůči nevstřícnému (legacy) modelu.
             </p>
 
             {% set _callout_body %}
@@ -276,14 +276,14 @@
            04.03 Partnership
            ─────────────────────────────────────────────────────────── #}
         <section id="partnership" aria-labelledby="partnership-heading">
-            <h2 id="partnership-heading" class="h-section"><span class="h-num">04.03</span> Partnership</h2>
+            <h2 id="partnership-heading" class="h-section"><span class="h-num">03.03</span> Partnership</h2>
 
             <p>
                 <strong>Partnership</strong> je symetrický vztah mezi dvěma Bounded Contexts,
                 jejichž týmy <em>společně uspějí, nebo společně padnou</em>. Sdílí doménový cíl,
                 koordinují plánování a typicky se nasazují společným release procesem. Není to
                 „náhodná spolupráce“ – Partnership je <strong>vědomé strategické rozhodnutí</strong>,
-                že integrační náklady (synchronní mítinky, společný roadmap, časté merge konflikty)
+                že integrační náklady (synchronní porady, společný roadmap, časté merge konflikty)
                 jsou nižší než cena, kterou by oba týmy zaplatily, kdyby pracovaly nezávisle.
             </p>
 
@@ -358,7 +358,7 @@ composer.json        ← jeden composer.json pro oba BC{% endverbatim %}{% endse
 
             {% set _callout_body %}
                 <p>
-                    <strong>Partnership = nákladná spolupráce.</strong> Použít jen tehdy, když oba
+                    <strong>Partnership znamená nákladnou spolupráci.</strong> Použít jen tehdy, když oba
                     týmy explicitně podepíší „padáme nebo letíme spolu“. Pokud váháte – pravděpodobně
                     chcete <a href="#customer-supplier">Customer/Supplier</a> nebo
                     <a href="#shared-kernel">Shared Kernel</a>. Partnership má tendenci se rozpadnout,
@@ -389,7 +389,7 @@ composer.json        ← jeden composer.json pro oba BC{% endverbatim %}{% endse
            04.04 Shared Kernel
            ─────────────────────────────────────────────────────────── #}
         <section id="shared-kernel" aria-labelledby="shared-kernel-heading">
-            <h2 id="shared-kernel-heading" class="h-section"><span class="h-num">04.04</span> Shared Kernel</h2>
+            <h2 id="shared-kernel-heading" class="h-section"><span class="h-num">03.04</span> Shared Kernel</h2>
 
             <p>
                 <strong>Shared Kernel</strong> je <em>malý</em> modul kódu fyzicky sdílený mezi
@@ -546,7 +546,7 @@ final readonly class Money
            04.05 Customer / Supplier
            ─────────────────────────────────────────────────────────── #}
         <section id="customer-supplier" aria-labelledby="customer-supplier-heading">
-            <h2 id="customer-supplier-heading" class="h-section"><span class="h-num">04.05</span> Customer / Supplier</h2>
+            <h2 id="customer-supplier-heading" class="h-section"><span class="h-num">03.05</span> Customer / Supplier</h2>
 
             <p>
                 <strong>Customer/Supplier</strong> je asymetrický vztah, ve kterém upstream
@@ -687,7 +687,7 @@ final class ProductPriceChangedHandler
            04.06 Conformist
            ─────────────────────────────────────────────────────────── #}
         <section id="conformist" aria-labelledby="conformist-heading">
-            <h2 id="conformist-heading" class="h-section"><span class="h-num">04.06</span> Conformist</h2>
+            <h2 id="conformist-heading" class="h-section"><span class="h-num">03.06</span> Conformist</h2>
 
             <p>
                 <strong>Conformist</strong> je asymetrický vztah, ve kterém downstream
@@ -772,9 +772,9 @@ final class StripePaymentReportRepository
             <p>
                 Reporting je vědomě Conformist vůči Stripe. Žádný převod na <code>Money</code> VO,
                 žádný překlad <code>'usd'</code> &rarr; <code>Currency::USD</code>. Když Stripe
-                přejmenuje pole nebo přidá nový status, Reporting musí jednoduše přijmout změnu.
+                přejmenuje pole nebo přidá nový status, Reporting musí změnu přijmout.
                 Cena za to je <strong>nulová investice do ACL</strong>; cena, kterou platíme, je
-                <strong>křehkost vůči breaking changes upstreamu</strong>.
+                <strong>křehkost vůči neslučitelným změnám upstreamu</strong>.
             </p>
 
             <h3>Trade-off Conformistu</h3>
@@ -792,16 +792,16 @@ final class StripePaymentReportRepository
                 Conformist <em>zaplatí</em>:
             </p>
             <ul>
-                <li>Při každé breaking change upstreamu se downstream musí přepsat.</li>
+                <li>Při každé neslučitelné změně upstreamu se downstream musí přepsat.</li>
                 <li>Doménová logika downstreamu používá pojmy upstreamu, což zhoršuje srozumitelnost.</li>
-                <li>Pokud se upstream rozhodne odejít (Stripe zavře službu), je downstream rukojmí.</li>
-                <li>Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá doménová logika je „stripeovaná“).</li>
+                <li>Pokud se upstream rozhodne odejít (Stripe zavře službu), je downstream odkázán na vendora.</li>
+                <li>Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá doménová logika kopíruje Stripe).</li>
             </ul>
 
             {% set _callout_body %}
                 <p>
                     <strong>Conformist je krátkodobá úleva s dlouhodobou cenou.</strong> Když
-                    upstream udělá breaking change, láme se s ním downstream. Pokud má downstream
+                    upstream provede neslučitelnou změnu, láme se s ním downstream. Pokud má downstream
                     <em>jakoukoliv</em> doménovou logiku, která je závislá na konzumovaných datech
                     (a vy plánujete s tou logikou žít déle než upstream), <strong>postavte ACL</strong>.
                     Conformist použijte jen tam, kde downstream je opravdu jen průchozí
@@ -829,13 +829,13 @@ final class StripePaymentReportRepository
            04.07 Anti-Corruption Layer (ACL)
            ─────────────────────────────────────────────────────────── #}
         <section id="acl" aria-labelledby="acl-heading">
-            <h2 id="acl-heading" class="h-section"><span class="h-num">04.07</span> Anti-Corruption Layer (ACL)</h2>
+            <h2 id="acl-heading" class="h-section"><span class="h-num">03.07</span> Anti-Corruption Layer (ACL)</h2>
 
             <p>
                 <strong>Anti-Corruption Layer</strong> (ACL) je izolační vrstva mezi downstream
                 doménovým modelem a cizím (legacy, externím, neupřímným) modelem. Překládá
                 oběma směry, validuje vstupní data a <em>filtruje neplatné stavy</em> ještě
-                předtím, než dorazí do domény. ACL je v praxi nejčastěji používaný vztah –
+                předtím, než dorazí do domény. ACL je nejčastěji používaný vztah –
                 a nejčastěji špatně implementovaný.
             </p>
 
@@ -851,7 +851,7 @@ final class StripePaymentReportRepository
 
             {% set _diagram_inline %}{% include 'diagrams/12_context_mapping/acl_anatomy.svg' ignore missing %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '04.7-A',
+                fig: '03.7-A',
                 title: 'Anatomie Anti-Corruption Layeru: tři odpovědnosti translátoru',
                 inline: _diagram_inline,
                 alt: 'Sekvenční diagram zobrazující tok zprávy od legacy SOAP služby přes ACL translator do Order agregátu',
@@ -1051,7 +1051,7 @@ final class LegacyBillingTranslatorTest extends TestCase
            04.08 Open Host Service (OHS)
            ─────────────────────────────────────────────────────────── #}
         <section id="ohs" aria-labelledby="ohs-heading">
-            <h2 id="ohs-heading" class="h-section"><span class="h-num">04.08</span> Open Host Service (OHS)</h2>
+            <h2 id="ohs-heading" class="h-section"><span class="h-num">03.08</span> Open Host Service (OHS)</h2>
 
             <p>
                 <strong>Open Host Service</strong> je vzor, kdy upstream <em>otevřeně publikuje</em>
@@ -1190,7 +1190,7 @@ final class ProductController extends AbstractController
             {% set _callout_body %}
                 <p>
                     <strong>OHS bez versioningu není OHS.</strong> Je to neoznačený REST endpoint.
-                    Pokud nedokážete vyjmenovat všechny breaking changes posledního roku, zveřejnit
+                    Pokud nedokážete vyjmenovat všechny neslučitelné změny za poslední rok, zveřejnit
                     deprecation kalendář a ukázat downstream onboarding průvodce, vaše API není
                     Open Host Service – ani když tak vypadá.
                 </p>
@@ -1205,7 +1205,7 @@ final class ProductController extends AbstractController
            04.09 Published Language (PL)
            ─────────────────────────────────────────────────────────── #}
         <section id="published-language" aria-labelledby="published-language-heading">
-            <h2 id="published-language-heading" class="h-section"><span class="h-num">04.09</span> Published Language (PL)</h2>
+            <h2 id="published-language-heading" class="h-section"><span class="h-num">03.09</span> Published Language (PL)</h2>
 
             <p>
                 <strong>Published Language</strong> je dobře dokumentovaný, formálně specifikovaný
@@ -1225,7 +1225,7 @@ final class ProductController extends AbstractController
             <h3>OHS vs. PL – kanál vs. formát</h3>
 
             <p>
-                Vztah OHS a PL bývá matoucí. Klíčový rozdíl:
+                Vztah OHS a PL bývá matoucí. Hlavní rozdíl:
             </p>
 
             <ul>
@@ -1385,7 +1385,7 @@ final class OrderPlacedValidator
            04.10 Separate Ways
            ─────────────────────────────────────────────────────────── #}
         <section id="separate-ways" aria-labelledby="separate-ways-heading">
-            <h2 id="separate-ways-heading" class="h-section"><span class="h-num">04.10</span> Separate Ways</h2>
+            <h2 id="separate-ways-heading" class="h-section"><span class="h-num">03.10</span> Separate Ways</h2>
 
             <p>
                 <strong>Separate Ways</strong> je strategické rozhodnutí, že dva Bounded Contexts
@@ -1414,7 +1414,7 @@ final class OrderPlacedValidator
             </ul>
 
             <p>
-                Ale Marketing tým si spočítá: za rok pošle 50 kampaní, integrace stojí 200 hodin
+                Marketingový tým si spočítá: za rok rozešle 50 kampaní, integrace stojí 200 hodin
                 vývoje + 8 hodin údržby měsíčně, a riziko špatně synchronizovaného opt-in stavu
                 by stejně bylo nenulové. Místo toho přijme <strong>Separate Ways</strong>:
             </p>
@@ -1428,7 +1428,7 @@ final class OrderPlacedValidator
             <p>
                 Není to ideální – mohou nastat krátká okna, kdy odhlášený zákazník dostane jednu
                 kampaň navíc – ale je to <strong>levné</strong> a <strong>legal-compliant</strong>.
-                A hlavně: je to <em>vědomé rozhodnutí</em>, ne nedopatření.
+                A hlavně: je to <em>vědomé rozhodnutí</em>, ne opomenutí.
             </p>
 
             <h3>Kdy Separate Ways zvážit</h3>
@@ -1448,9 +1448,8 @@ final class OrderPlacedValidator
 
             <p>
                 Separate Ways je strategické rozhodnutí, ne výmluva pro vyhnutí se práci. Pokud
-                tým řekne „my to nebudeme integrovat, je to moc komplikované“ <em>bez</em>
-                vyčíslení nákladů a hodnoty, není to Separate Ways – je to technický dluh
-                v převleku. Skutečný Separate Ways má dokumentovanou alternativu (jak jsme to
+                tým prohlásí „my to nebudeme integrovat, je to příliš složité“ <em>bez</em>
+                vyčíslení nákladů a hodnoty, není to Separate Ways – je to skrytý technický dluh. Skutečný Separate Ways má dokumentovanou alternativu (jak jsme to
                 vyřešili bez integrace) a dokumentovaný edge case (co se stane, když se to
                 rozpadne).
             </p>
@@ -1475,14 +1474,14 @@ final class OrderPlacedValidator
            04.11 Praktický postup
            ─────────────────────────────────────────────────────────── #}
         <section id="postup" aria-labelledby="postup-heading">
-            <h2 id="postup-heading" class="h-section"><span class="h-num">04.11</span> Praktický postup – jak nakreslit Context Map za 90 minut</h2>
+            <h2 id="postup-heading" class="h-section"><span class="h-num">03.11</span> Praktický postup – jak nakreslit Context Map za 90 minut</h2>
 
             <p>
                 Context Map se nepíše v izolaci jedním architektem. Je to <strong>týmové cvičení</strong>,
                 které vyžaduje účast lidí znalých všech BC v systému. Ideální velikost skupiny:
                 3–8 lidí. Ideální nástroj: tabule, sticky notes, fixy. Digitální nástroje
-                (Miro, FigJam) jsou v pořádku, ale fyzická interakce u tabule odhalí víc napětí
-                mezi týmy než cokoliv online.
+                (Miro, FigJam) jsou v pořádku, fyzická interakce u tabule však odhalí mezi týmy víc
+                napětí než cokoli online.
             </p>
 
             <h3>Pět kroků workshopu</h3>
@@ -1511,8 +1510,8 @@ final class OrderPlacedValidator
                     <strong>(60–80 min) Identifikovat „nebezpečné“ vztahy.</strong>
                     Conformist k upstreamu, který se rychle mění; Big Ball of Mud (vícenásobné
                     nepojmenované vztahy mezi stejnými BC); Shared Kernel, který přerůstá; Partnership,
-                    která už nemá doménový důvod. Pro každý nebezpečný vztah vytvořit akční položku
-                    (Jira ticket / ADR draft).
+                    která už nemá doménový důvod. Pro každý nebezpečný vztah vytvořit konkrétní úkol
+                    (Jira ticket / koncept ADR).
                 </li>
                 <li>
                     <strong>(80–90 min) Zachytit výsledek.</strong>
@@ -1574,7 +1573,7 @@ final class OrderPlacedValidator
            04.12 Big Ball of Mud
            ─────────────────────────────────────────────────────────── #}
         <section id="big-ball-of-mud" aria-labelledby="big-ball-of-mud-heading">
-            <h2 id="big-ball-of-mud-heading" class="h-section"><span class="h-num">04.12</span> Anti-vzor: Big Ball of Mud</h2>
+            <h2 id="big-ball-of-mud-heading" class="h-section"><span class="h-num">03.12</span> Anti-vzor: Big Ball of Mud</h2>
 
             <p>
                 <strong>Big Ball of Mud</strong> popsali Brian Foote a Joseph Yoder v roce 1997
@@ -1648,7 +1647,7 @@ final class OrderPlacedValidator
            04.13 Shrnutí
            ─────────────────────────────────────────────────────────── #}
         <section id="summary" aria-labelledby="summary-heading">
-            <h2 id="summary-heading" class="h-section"><span class="h-num">04.13</span> Shrnutí</h2>
+            <h2 id="summary-heading" class="h-section"><span class="h-num">03.13</span> Shrnutí</h2>
 
             <p>
                 Context Mapping je strategická disciplína, která dává smysl Bounded Contextům
@@ -1730,7 +1729,7 @@ final class OrderPlacedValidator
            Další četba
            ─────────────────────────────────────────────────────────── #}
         <section id="further-reading" aria-labelledby="further-reading-heading">
-            <h2 id="further-reading-heading" class="h-section"><span class="h-num">04.14</span> Další četba</h2>
+            <h2 id="further-reading-heading" class="h-section"><span class="h-num">03.14</span> Další četba</h2>
 
             <ul>
                 <li>Eric Evans, <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, kap. 14 „Maintaining Model Integrity“ (Addison-Wesley, 2003) <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.</li>

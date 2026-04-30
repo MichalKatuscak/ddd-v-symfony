@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Syntéza – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Souhrnné ukázky DDD v Symfony 8: praktické end-to-end příklady a kompletní případová studie systému pro správu projektů s CQRS a projekcemi.{% endblock %}
+{% block breadcrumb_name %}Syntéza{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "Syntéza – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · SYNTÉZA',
+        hub_h_main: 'Syntéza,',
+        hub_h_em: 'co předchozí kapitoly probíraly odděleně.',
+        hub_deck: 'Závěrečná část průvodce, kde se dílčí pojmy spojují do běžících příkladů. <strong>Praktické příklady</strong> ukazují minimální end-to-end implementace v doménách e-shopu, fakturace a inventáře. <strong>Případová studie</strong> staví od doménové analýzy přes ohraničené kontexty, agregáty a CQRS až po projekce s reconciliation kompletní systém pro správu projektů.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Předpoklady', v: 'Vše ostatní' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART VI',
+        hub_part_title: 'Příklady · případová studie',
+        hub_part_sub: 'všechno dohromady',
+        hub_chapters: hub_chapters
+    } only %}
+{% endblock %}

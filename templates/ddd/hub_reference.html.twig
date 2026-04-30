@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Reference DDD – rozcestník | DDD Symfony 8{% endblock %}
-{% block meta_description %}Slovník, zdroje a poznámky k Domain-Driven Design. Glosář pojmů, doporučená literatura (Evans, Vernon, Fowler), vztah DDD a moderních AI vývojových nástrojů.{% endblock %}
+{% block meta_description %}Slovník, zdroje a poznámky k Domain-Driven Design. Glosář pojmů, cheat sheet, doporučená literatura (Evans, Vernon, Fowler), vztah DDD a moderních AI nástrojů.{% endblock %}
 {% block breadcrumb_name %}Reference{% endblock %}
 
 {% block structured_data %}
@@ -31,15 +31,15 @@
         hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · REFERENCE',
         hub_h_main: 'Reference,',
         hub_h_em: 'slovník a poznámky stranou hlavního textu.',
-        hub_deck: 'Sem patří vše, co se v hlavním textu nevejde, ale bez čeho je hlavní text nepochopitelný. <strong>Glosář</strong> definuje termíny, které průvodce používá důsledně a jednotně. <strong>Zdroje</strong> ukazují primární literaturu, z níž text čerpá. A <strong>kapitola o DDD a AI</strong> shrnuje, co o jejich vztahu říkají Eric Evans, Martin Fowler, Kent Beck a David Heinemeier Hansson.',
+        hub_deck: 'Sem patří vše, co se v hlavním textu nevejde, ale bez čeho je hlavní text nepochopitelný. <strong>Glosář</strong> definuje termíny, které průvodce používá důsledně a jednotně. <strong>Cheat sheet</strong> shrnuje rozhodovací stromy a mapování Symfony↔DDD. <strong>Zdroje</strong> ukazují primární literaturu, z níž text čerpá. <strong>DDD a umělá inteligence</strong> shrnuje, co o jejich vztahu říkají Eric Evans, Martin Fowler, Kent Beck a David Heinemeier Hansson.',
         hub_meta: [
-            { k: 'Kapitol', v: hub_chapters|length },
-            { k: 'Dodatky', v: extras|length ~ ' (glosář, zdroje)' },
-            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Položek', v: extras|length },
+            { k: 'Čtení', v: 'různé' },
+            { k: 'Účel', v: 'doplněk hlavního textu' },
             { k: 'Aktualizace', v: updated }
         ],
-        hub_part: 'PART IV',
-        hub_part_title: 'Anti-vzory · AI · glosář · zdroje',
+        hub_part: 'APPENDIX',
+        hub_part_title: 'Glosář · cheat sheet · zdroje · AI',
         hub_part_sub: 'slovník a souvislosti',
         hub_chapters: hub_chapters,
         hub_extras: extras

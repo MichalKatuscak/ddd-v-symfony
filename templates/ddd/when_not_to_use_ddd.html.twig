@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '14',
+        chapter_number: '23',
         category: 'Praxe',
         title: 'Kdy DDD nepoužívat – upřímně',
         deck: '7 konkrétních situací, kdy DDD nepoužívat – s alternativami, ukázkami kódu a rozhodovacím stromem. Upřímný průvodce pro PHP vývojáře, kteří nechtějí zavádět zbytečnou komplexitu.',
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="14">
+    <div class="art-body" data-chapter-number="23">
 <p>
         DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
         zpomaluje vývoj a frustruje tým – aniž by přinesla cokoliv hodnotného.
@@ -79,7 +79,7 @@
        Rozhodovací strom
        ═══════════════════════════════════════════════════════════ #}
     <section id="rozhodovaci-strom" aria-labelledby="rozhodovaci-strom-heading">
-        <h2 id="rozhodovaci-strom-heading" class="h-section"><span class="h-num">14.01</span> Rozhodovací strom: Mám použít DDD?</h2>
+        <h2 id="rozhodovaci-strom-heading" class="h-section"><span class="h-num">23.01</span> Rozhodovací strom: Mám použít DDD?</h2>
 
         <p>
             Než se ponoříte do jednotlivých situací, projděte si pět otázek. Pokud na kteroukoli odpovíte
@@ -88,7 +88,7 @@
 
         {% set _diagram_inline %}{% include '/diagrams/9_when_not_to_use_ddd/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '14.1-A',
+                fig: '23.1-A',
                 title: 'Rozhodovací strom: pět bran k DDD',
                 inline: _diagram_inline
             } %}
@@ -102,7 +102,7 @@
        1. CRUD admin
        ═══════════════════════════════════════════════════════════ #}
     <section id="crud-admin" aria-labelledby="crud-admin-heading">
-        <h2 id="crud-admin-heading" class="h-section"><span class="h-num">14.02</span> 1. CRUD admin a jednoduchý backoffice</h2>
+        <h2 id="crud-admin-heading" class="h-section"><span class="h-num">23.02</span> 1. CRUD admin a jednoduchý backoffice</h2>
 
         <p>
             Typickým příkladem je aplikace, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuje 1:1 na tabulku.
@@ -219,7 +219,7 @@ class ArticleCrudController extends AbstractCrudController
        2. Startup
        ═══════════════════════════════════════════════════════════ #}
     <section id="startup" aria-labelledby="startup-heading">
-        <h2 id="startup-heading" class="h-section"><span class="h-num">14.03</span> 2. Startup – doména se mění každý sprint</h2>
+        <h2 id="startup-heading" class="h-section"><span class="h-num">23.03</span> 2. Startup – doména se mění každý sprint</h2>
 
         <p>
             Hledáte product-market fit. Co dnes je objednávka, zítra je subscription. Co dnes je
@@ -315,7 +315,7 @@ class Order {
        3. Malý tým
        ═══════════════════════════════════════════════════════════ #}
     <section id="small-team" aria-labelledby="small-team-heading">
-        <h2 id="small-team-heading" class="h-section"><span class="h-num">14.04</span> 3. Malý tým bez doménových expertů</h2>
+        <h2 id="small-team-heading" class="h-section"><span class="h-num">23.04</span> 3. Malý tým bez doménových expertů</h2>
 
         <p>
             DDD stojí na spolupráci vývojářů s lidmi, kteří doméně rozumí – zákazníci, produktoví manažeři,
@@ -353,7 +353,7 @@ class Order {
        4. Data pipeline
        ═══════════════════════════════════════════════════════════ #}
     <section id="data-pipeline" aria-labelledby="data-pipeline-heading">
-        <h2 id="data-pipeline-heading" class="h-section"><span class="h-num">14.05</span> 4. Data pipeline, ETL a reportovací systémy</h2>
+        <h2 id="data-pipeline-heading" class="h-section"><span class="h-num">23.05</span> 4. Data pipeline, ETL a reportovací systémy</h2>
 
         <p>
             Systém načítá data z externích zdrojů, transformuje je a ukládá nebo reportuje.
@@ -387,7 +387,7 @@ class Order {
        5. Krátkodobý projekt
        ═══════════════════════════════════════════════════════════ #}
     <section id="short-lived" aria-labelledby="short-lived-heading">
-        <h2 id="short-lived-heading" class="h-section"><span class="h-num">14.06</span> 5. Projekt s životností kratší než rok</h2>
+        <h2 id="short-lived-heading" class="h-section"><span class="h-num">23.06</span> 5. Projekt s životností kratší než rok</h2>
 
         <p>
             Interní nástroj, landing page, jednorázová migrace, prototyp pro demo zákazníkovi.
@@ -429,7 +429,7 @@ class Order {
        6. Tým DDD nezná
        ═══════════════════════════════════════════════════════════ #}
     <section id="no-knowledge" aria-labelledby="no-knowledge-heading">
-        <h2 id="no-knowledge-heading" class="h-section"><span class="h-num">14.07</span> 6. Tým DDD nezná a čas na učení není</h2>
+        <h2 id="no-knowledge-heading" class="h-section"><span class="h-num">23.07</span> 6. Tým DDD nezná a čas na učení není</h2>
 
         <p>
             DDD vyžaduje, aby tým rozuměl konceptům –
@@ -528,7 +528,7 @@ final class Order
        7. Nejasná doména
        ═══════════════════════════════════════════════════════════ #}
     <section id="unclear-domain" aria-labelledby="unclear-domain-heading">
-        <h2 id="unclear-domain-heading" class="h-section"><span class="h-num">14.08</span> 7. Doména je nejasná, experti nejsou k dispozici</h2>
+        <h2 id="unclear-domain-heading" class="h-section"><span class="h-num">23.08</span> 7. Doména je nejasná, experti nejsou k dispozici</h2>
 
         <p>
             Zákazník neví, co chce. Požadavky jsou vágní. Doménový expert buď neexistuje, nebo
@@ -567,7 +567,7 @@ final class Order
        Kdy DDD smysl má
        ═══════════════════════════════════════════════════════════ #}
     <section id="when-ddd-fits" aria-labelledby="when-ddd-fits-heading">
-        <h2 id="when-ddd-fits-heading" class="h-section"><span class="h-num">14.09</span> Kdy DDD naopak smysl má</h2>
+        <h2 id="when-ddd-fits-heading" class="h-section"><span class="h-num">23.09</span> Kdy DDD naopak smysl má</h2>
 
         <p>
             DDD není špatná architektura. Je to architektura pro specifický kontext. Smysl má, když platí
@@ -650,7 +650,7 @@ final class Order
        Zdroje
        ═══════════════════════════════════════════════════════════ #}
     <section id="zdroje" aria-labelledby="zdroje-heading">
-        <h2 id="zdroje-heading" class="h-section"><span class="h-num">14.10</span> Zdroje a další čtení</h2>
+        <h2 id="zdroje-heading" class="h-section"><span class="h-num">23.10</span> Zdroje a další čtení</h2>
 
         {% set _callout_body %}
 

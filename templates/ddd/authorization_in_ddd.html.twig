@@ -48,10 +48,10 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '16',
+        chapter_number: '12',
         category: 'Praxe',
         title: 'Autorizace v DDD na Symfony',
-        deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní 4-vrstvový framework: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá jinou otázku a používá jiný Symfony nástroj.',
+        deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá jinou otázku a používá jiný Symfony nástroj.',
         reading_time: 25,
         difficulty: 3,
         published: block('article_published_time'),
@@ -61,16 +61,16 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="16">
+    <div class="art-body" data-chapter-number="12">
 
         <p>
             Autorizace je v DDD aplikacích dlouhodobě podceněné téma. Většina týmů zvládne autentizaci
             (Symfony firewall, JWT, OAuth) bez větších potíží – ale když přijde na otázku <em>„kdo
             smí udělat co s konkrétní entitou v konkrétním stavu“</em>, kód se rozsype napříč
             controllery, listenery, twig templaty a Doctrine query buildery. Tato kapitola dává
-            <strong>4-vrstvový framework</strong>, podle kterého poznáte, kam které pravidlo patří,
-            a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby se Symfony Security
-            komponenta protlačila do doménového jádra.
+            <strong>čtyřvrstvý rámec</strong>, podle kterého poznáte, kam které pravidlo patří,
+            a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby Symfony Security
+            komponenta pronikla do doménového jádra.
         </p>
 
         <p>
@@ -82,10 +82,10 @@
         </p>
 
         <section id="tri-chyby" aria-labelledby="tri-chyby-heading">
-            <h2 id="tri-chyby-heading" class="h-section"><span class="h-num">16.01</span> Tři chyby s autorizací, které se v review opakovaně objevují</h2>
+            <h2 id="tri-chyby-heading" class="h-section"><span class="h-num">12.01</span> Tři chyby s autorizací, které se v review opakovaně objevují</h2>
 
             <p>
-                Předtím, než se ponoříme do správného přístupu, projděme si tři opakující se chyby.
+                Než přejdeme ke správnému přístupu, projděme si tři opakující se chyby.
                 V code review za poslední tři roky se objevily téměř ve všech projektech, které
                 pracovaly s neformální DDD strukturou nad Symfony. Diagnóza: chybějící framework,
                 kde co umístit.
@@ -93,7 +93,7 @@
 
             <h3 id="tri-chyby-controller-heading">Chyba 1: Vše v controlleru</h3>
             <p>
-                Nejčastější vzor. Controller přijme HTTP request, načte entitu z repository
+                Nejčastější vzor. Controller přijme HTTP požadavek, načte entitu z repository
                 a inline porovná atributy uživatele s atributy entity:
             </p>
 
@@ -134,8 +134,8 @@ final class OrderController extends AbstractController
                 Co je špatně: stejný use case se volá i z konzolového commandu (cron, batch),
                 z Symfony Messenger handleru (asynchronní queue) a z administračního panelu.
                 Při každém volání musí někdo tutéž podmínku zopakovat – a stačí, aby jeden
-                vstupní bod selhal, a celá ochrana padá. Doménové pravidlo „smí cancelnout
-                jen vlastník“ je rozeseté po infrastruktuře, ne na jednom místě.
+                vstupní bod selhal, a celá ochrana padá. Doménové pravidlo „zrušit smí jen vlastník“ je
+                rozeseté po infrastruktuře, ne na jednom místě.
             </p>
 
             <h3 id="tri-chyby-vse-voter-heading">Chyba 2: Vše ve Voteru, doména nezná autorizaci</h3>
@@ -200,9 +200,9 @@ final class OrderVoter extends Voter
                 <p>
                     Společným jmenovatelem všech tří chyb je absence rozhodovacího rámce. Vývojář
                     má v každém okamžiku <strong>jednu konkrétní otázku</strong> („smí to vidět?“,
-                    „smí to udělat?“, „je to vůbec možné?“, „má vidět tenhle sloupec?“) a každou
+                    „smí to udělat?“, „je to vůbec možné?“, „má vidět tento sloupec?“) a každou
                     z nich řeší správný nástroj na správné vrstvě. Když chybí mapa, použije se
-                    první nástroj, který přijde pod ruku – a kód se rozpadne. V další sekci ten
+                    první nástroj, který má po ruce – a kód se rozpadne. V další sekci ten
                     framework dáme dohromady.
                 </p>
             {% endset %}
@@ -213,7 +213,7 @@ final class OrderVoter extends Voter
         </section>
 
         <section id="ctyri-vrstvy" aria-labelledby="ctyri-vrstvy-heading">
-            <h2 id="ctyri-vrstvy-heading" class="h-section"><span class="h-num">16.02</span> Čtyři vrstvy autorizace</h2>
+            <h2 id="ctyri-vrstvy-heading" class="h-section"><span class="h-num">12.02</span> Čtyři vrstvy autorizace</h2>
 
             <p>
                 Autorizační rozhodnutí v DDD aplikaci nikdy nepadá na jednom místě – padá ve čtyřech
@@ -224,7 +224,7 @@ final class OrderVoter extends Voter
 
             {% set _diagram_inline %}{% include '/diagrams/19_authorization/policy_layers.svg' ignore missing %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '16.2-A',
+                fig: '12.2-A',
                 title: '4 vrstvy autorizace v DDD aplikaci',
                 inline: _diagram_inline,
                 alt: 'Diagram čtyř vrstev autorizace: Edge, Use Case, Aggregate, Field'
@@ -249,7 +249,7 @@ final class OrderVoter extends Voter
                         </tr>
                         <tr>
                             <td><strong>Use Case</strong></td>
-                            <td>Smí vykonat use case na tomhle objektu?</td>
+                            <td>Smí vykonat use case na tomto objektu?</td>
                             <td><code>Voter</code></td>
                             <td>„Smí Petr cancelnout order #42?“</td>
                         </tr>
@@ -288,13 +288,13 @@ final class OrderVoter extends Voter
         </section>
 
         <section id="edge" aria-labelledby="edge-heading">
-            <h2 id="edge-heading" class="h-section"><span class="h-num">16.03</span> Edge – Symfony firewall a access_control</h2>
+            <h2 id="edge-heading" class="h-section"><span class="h-num">12.03</span> Edge – Symfony firewall a access_control</h2>
 
             <p>
                 Edge je nejhrubější vrstva a leží mimo doménový kód. Odpovídá pouze na otázku
                 <strong>„kdo je vůbec na druhém konci socketu?“</strong> – anonymous, authenticated,
                 případně role-based pro hrubě dělené sekce (<code>/admin/*</code>,
-                <code>/api/v1/*</code>). Doménová pravidla typu „customer X smí na tenhle order“
+                <code>/api/v1/*</code>). Doménová pravidla typu „zákazník X smí na tuto objednávku“
                 sem <em>nepatří</em> – to je use-case-level.
             </p>
 
@@ -347,13 +347,13 @@ security:
 
             <ul>
                 <li><strong>Žádná doménová znalost.</strong> Edge nezná pojem „order“, „customer“, „cancellation window“. Pracuje jen s URL pattern + roles + autentizační stav.</li>
-                <li><strong>Default deny.</strong> Poslední pravidlo v <code>access_control</code> je „všechno ostatní vyžaduje login“. Bez tohoto fallbacku stačí přidat nový endpoint a zapomenout ho zařadit – automaticky bude veřejný.</li>
+                <li><strong>Default deny.</strong> Poslední pravidlo v <code>access_control</code> je „všechno ostatní vyžaduje přihlášení“. Bez tohoto fallbacku stačí přidat nový endpoint a zapomenout ho zařadit – automaticky bude veřejný.</li>
                 <li><strong>Role-based, ne attribute-based.</strong> ROLE_ADMIN je hrubá kategorizace; jemnější rozhodnutí jako „admin tenantu T1, ne T2“ patří do Voteru, ne do <code>access_control</code>.</li>
                 <li><strong>JWT firewall vs. session.</strong> API typicky stateless (<code>jwt</code> autentikátor), web typicky session-based. Pro JWT v Symfony existuje balíček <code>lexik/jwt-authentication-bundle</code> nebo nativní <code>OidcAuthenticator</code> pro OpenID Connect provider <a href="https://openid.net/specs/openid-connect-core-1_0.html" target="_blank" rel="noopener">[3]</a>.</li>
             </ul>
 
             {% set _callout_body %}
-                <h3 id="edge-stripe-heading">Patternová analogie: Stripe API key model</h3>
+                <h3 id="edge-stripe-heading">Vzorová analogie: Stripe API key model</h3>
                 <p>
                     Stripe rozlišuje API klíče na úrovni edge: <code>sk_test_*</code>,
                     <code>sk_live_*</code>, <code>pk_*</code>, restricted keys
@@ -372,11 +372,11 @@ security:
         </section>
 
         <section id="use-case-voter" aria-labelledby="use-case-voter-heading">
-            <h2 id="use-case-voter-heading" class="h-section"><span class="h-num">16.04</span> Use Case – Symfony Voter</h2>
+            <h2 id="use-case-voter-heading" class="h-section"><span class="h-num">12.04</span> Use Case – Symfony Voter</h2>
 
             <p>
-                Use case vrstva odpovídá na otázku <strong>„smí <em>tenhle</em> uživatel vykonat
-                <em>tenhle</em> use case na <em>tomhle</em> objektu?“</strong>. Symfony Voter je
+                Use case vrstva odpovídá na otázku <strong>„smí <em>tento</em> uživatel vykonat
+                <em>tento</em> use case na <em>tomto</em> objektu?“</strong>. Symfony Voter je
                 přesně k tomu navržený nástroj. Pravidlo: <strong>1 use case = 1 atribut Voteru</strong>;
                 jeden Voter může pokrývat N atributů, pokud se týkají stejné entity (typicky
                 CRUD operace nad agregátem).
@@ -386,7 +386,7 @@ security:
                 Voter zná dvě věci: <strong>identitu uživatele</strong> (přes <code>TokenInterface</code>)
                 a <strong>cílový subjekt</strong> (typicky aggregate root). Co Voter
                 <em>nesmí</em> dělat: fetchovat entity z databáze (to je práce handleru), znát
-                doménové invarianty (to je práce aggregate) a obsahovat business rules typu
+                doménové invarianty (to je práce aggregate) a obsahovat doménová pravidla typu
                 „cancellation window“ (to je doménový stav, který Voter nesmí natáhnout zvenku).
             </p>
 
@@ -579,12 +579,12 @@ final readonly class CancelOrderHandler
         </section>
 
         <section id="aggregate-level" aria-labelledby="aggregate-level-heading">
-            <h2 id="aggregate-level-heading" class="h-section"><span class="h-num">16.05</span> Aggregate-level – doména sama rozhoduje</h2>
+            <h2 id="aggregate-level-heading" class="h-section"><span class="h-num">12.05</span> Aggregate-level – doména sama rozhoduje</h2>
 
             <p>
                 Některá pravidla <strong>nelze</strong> rozumně dát do Voteru, protože vyžadují
                 znalost <em>doménového stavu</em>, který Voter nemá natáhnout zvenku – typicky
-                časové okno, předchozí stav agregátu, business invarianty napříč vlastními
+                časové okno, předchozí stav agregátu, doménové invarianty napříč vlastními
                 entitami uvnitř agregátu. Tato pravidla patří do <strong>aggregate root</strong>
                 a vynucují se vyhozením <em>doménové exception</em>.
             </p>
@@ -594,8 +594,8 @@ final readonly class CancelOrderHandler
             </p>
 
             <ul>
-                <li>Pokud lze pravidlo zformulovat v jazyce <em>uživatel + use case + entita</em> („smí Petr cancelnout order #42“), patří do <strong>Voteru</strong>.</li>
-                <li>Pokud pravidlo vyžaduje <em>aggregate state + business rule</em> („order musí být ve stavu PLACED a ne starší než 24 h“), patří do <strong>Aggregate</strong>.</li>
+                <li>Pokud lze pravidlo zformulovat v jazyce <em>uživatel + use case + entita</em> („smí Petr zrušit objednávku #42“), patří do <strong>Voteru</strong>.</li>
+                <li>Pokud pravidlo vyžaduje <em>stav agregátu + doménové pravidlo</em> („order musí být ve stavu PLACED a ne starší než 24 h“), patří do <strong>Aggregate</strong>.</li>
                 <li>Pokud pravidlo kombinuje obojí, rozdělte ho: část do Voteru, část do Aggregate, a každá vrstva ověří svou polovinu.</li>
             </ul>
 
@@ -674,7 +674,7 @@ final class Order
 
             <ul>
                 <li><strong>Žádná závislost na Symfony.</strong> Aggregate používá pouze PHP standardní typy a vlastní doménové třídy. Žádný <code>TokenInterface</code>, žádný <code>AuthorizationChecker</code>, žádný <code>UserInterface</code>. Třídu lze testovat unit testem bez Symfony Kernel.</li>
-                <li><strong>Doménové exceptions.</strong> <code>InvalidOrderStateException</code> a <code>CancellationWindowExpiredException</code> jsou doménové třídy v <code>App\Ordering\Domain\Exception</code>. Nesou business kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – <em>není to autorizační selhání, je to doménový stav</em>).</li>
+                <li><strong>Doménové exceptions.</strong> <code>InvalidOrderStateException</code> a <code>CancellationWindowExpiredException</code> jsou doménové třídy v <code>App\Ordering\Domain\Exception</code>. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – <em>není to autorizační selhání, je to doménový stav</em>).</li>
                 <li><strong>Idempotentní pomocná metoda <code>isCancellable()</code>.</strong> Voter ani Twig ji nevolají; používá ji UI pro skrytí tlačítka (kombinováno s <code>is_granted</code>). Tatáž logika je sdílená s <code>cancel()</code> přes konstantu <code>CANCELLATION_WINDOW_SECONDS</code> – žádná duplicita.</li>
                 <li><strong>Domain Events.</strong> Po úspěšné operaci se do <code>$releasedEvents</code> přidá <code>OrderCancelled</code>. Aplikační handler je po <code>repository-&gt;save()</code> publikuje (typicky přes <a href="{{ path('outbox_pattern') }}">Outbox</a>). Aggregate sám nikdy nevolá <code>EventDispatcher</code>.</li>
             </ul>
@@ -690,8 +690,8 @@ final class Order
             <h3 id="aggregate-trace-heading">End-to-end trace: cancellation request</h3>
 
             <p>
-                Pro úplnost si projděme, co se konkrétně stane, když customer Petr klikne na
-                tlačítko „Cancel order #42“ v UI:
+                Pro úplnost si projděme, co se konkrétně stane, když zákazník Petr klikne na
+                tlačítko „Cancel order #42“ v rozhraní:
             </p>
 
             <ol>
@@ -706,8 +706,8 @@ final class Order
             </ol>
 
             <p>
-                Několik vrstev kontroly v jediné cestě requestu – a každá vrstva selže <em>jiným</em>
-                způsobem, s <em>jiným</em> HTTP statusem, s <em>jinou</em> error message. To je
+                Několik vrstev kontroly v jediné cestě požadavku – a každá vrstva selže <em>jiným</em>
+                způsobem, s <em>jiným</em> HTTP statusem, s <em>jinou</em> chybovou hláškou. To je
                 rozdíl mezi doménově navrženou autorizací a generickým „Access denied“.
             </p>
 
@@ -732,7 +732,7 @@ final class Order
         </section>
 
         <section id="field-level" aria-labelledby="field-level-heading">
-            <h2 id="field-level-heading" class="h-section"><span class="h-num">16.06</span> Field-level – read model filtrace</h2>
+            <h2 id="field-level-heading" class="h-section"><span class="h-num">12.06</span> Field-level – read model filtrace</h2>
 
             <p>
                 Nejjemnější vrstva. Až dosud jsme řešili <em>akce</em> (smí udělat) a <em>existenci</em>
@@ -742,13 +742,13 @@ final class Order
             </p>
 
             <p>
-                Existují dva přístupy s odlišnými trade-offy:
+                Existují dva přístupy s odlišnými kompromisy:
             </p>
 
             <h3 id="field-twig-heading">Přístup 1: Twig if (view-level)</h3>
 
             <p>
-                Nejjednodušší, ale s <em>data leakem</em>: data se z databáze načtou všechna,
+                Nejjednodušší, ale s <em>únikem dat</em>: data se z databáze načtou všechna,
                 jen se ve view zahodí. Pro většinu UI to stačí; <strong>nikdy</strong> to nepoužívejte
                 pro citlivá data, která mohou unikat skrz HTML komentáře, JSON serializaci
                 v JS aplikaci nebo Etag hashing.
@@ -848,14 +848,14 @@ final readonly class OrderDetailReadModel
             </div>
 
             <p>
-                Pro ne-citlivá data je Twig if úplně dostatečný a šetří čas. Pro citlivá data
+                Pro necitlivá data je Twig if zcela dostatečný a šetří čas. Pro citlivá data
                 vždy query filter – OWASP Top 10 v kategorii „A01 Broken Access Control“ výslovně
                 varuje před UI-only kontrolou jako jedinou bariérou.
             </p>
         </section>
 
         <section id="policy-based" aria-labelledby="policy-based-heading">
-            <h2 id="policy-based-heading" class="h-section"><span class="h-num">16.07</span> Policy-based přístup (ABAC)</h2>
+            <h2 id="policy-based-heading" class="h-section"><span class="h-num">12.07</span> Policy-based přístup (ABAC)</h2>
 
             <p>
                 Když počet pravidel naroste a vrstvení do Voterů začne být neudržovatelné
@@ -1001,7 +1001,7 @@ final class PolicyEvaluator
             </p>
 
             <ul>
-                <li><strong>Auditovatelnost.</strong> Pravidla jsou data, ne kód. <code>PolicyEvaluator</code> vrací <em>které</em> pravidlo selhalo – uživatel dostane přesnou chybovou hlášku („Cancellation window 24 h ještě neuplynulo“) místo generického „Access denied“.</li>
+                <li><strong>Auditovatelnost.</strong> Pravidla jsou data, ne kód. <code>PolicyEvaluator</code> vrací, <em>které</em> pravidlo selhalo – uživatel dostane přesnou chybovou hlášku („Cancellation window 24 h ještě neuplynulo“) místo generického „Access denied“.</li>
                 <li><strong>Versioning.</strong> Policy je třída v repu – změny přes git, code review, deploy. ABAC standardně vyžaduje policy versioning <a href="https://csrc.nist.gov/publications/detail/sp/800-162/final" target="_blank" rel="noopener">[2]</a>.</li>
                 <li><strong>Testovatelnost.</strong> Test policy je čistý unit test bez frameworku – pro každé pravidlo jeden case.</li>
                 <li><strong>Externí policy engine.</strong> Když policy přerostou aplikaci, lze je portovat do <strong>Open Policy Agent (OPA)</strong> – engine v Go s vlastním policy language (Rego). Symfony aplikace potom dělá HTTP volání místo lokálního <code>evaluate()</code>.</li>
@@ -1010,12 +1010,12 @@ final class PolicyEvaluator
             {% set _callout_body %}
                 <h3 id="abac-vs-rbac-heading">RBAC vs. ABAC: kdy přejít?</h3>
                 <p>
-                    RBAC stačí, dokud platí <em>„role popisuje permissions sama o sobě“</em>
-                    – admin smí všechno, customer smí svoje, refund agent smí refundy. Jakmile
-                    permissions závisí na <em>vztazích mezi entitami</em> (tenant, vlastnictví,
-                    časové okno, stavový automat), RBAC začne explodovat – buď vznikají hyper-specific
+                    RBAC stačí, dokud platí <em>„role popisuje oprávnění sama o sobě“</em>
+                    – admin smí všechno, zákazník smí svoje, refund agent smí refundy. Jakmile
+                    oprávnění závisí na <em>vztazích mezi entitami</em> (tenant, vlastnictví,
+                    časové okno, stavový automat), RBAC začne nekontrolovaně narůstat – buď vznikají hyper-specific
                     role typu <code>ROLE_TENANT_42_ORDER_REFUND_AGENT</code>, nebo se logika
-                    rozsype do Voterů s 200 řádky if-else. Tehdy je čas na ABAC.
+                    rozpadne do Voterů s 200 řádky if-else. Tehdy je čas na ABAC.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1025,7 +1025,7 @@ final class PolicyEvaluator
         </section>
 
         <section id="multi-tenancy" aria-labelledby="multi-tenancy-heading">
-            <h2 id="multi-tenancy-heading" class="h-section"><span class="h-num">16.08</span> Multi-tenancy – owner kontext</h2>
+            <h2 id="multi-tenancy-heading" class="h-section"><span class="h-num">12.08</span> Multi-tenancy – owner kontext</h2>
 
             <p>
                 Multi-tenancy (vícenájemnost) je speciální případ ABAC, kdy stejná aplikace
@@ -1098,7 +1098,7 @@ doctrine:
             } %}
 
             <p>
-                Hlavní detail: filter se musí <strong>aktivovat v každém requestu</strong> a předat
+                Hlavní detail: filter se musí <strong>aktivovat v každém požadavku</strong> a předat
                 mu správné <code>tenant_id</code>. Bez toho je výchozí stav „filter vypnutý“ –
                 tedy žádná izolace. Aktivaci řeší kernel event listener:
             </p>
@@ -1153,8 +1153,8 @@ final readonly class TenantContextListener
 
             <ul>
                 <li><strong>Priority 7</strong> v <code>AsEventListener</code> – v Symfony platí <em>vyšší priority = dřívější vykonání</em>. Symfony Firewall registruje svůj <code>onKernelRequest</code> s prioritou 8, takže aby měl listener k dispozici už autentizovaného uživatele, musí běžet s prioritou <em>nižší než 8</em> (typicky 7 nebo 0). Detail v <a href="https://symfony.com/doc/current/event_dispatcher.html" target="_blank" rel="noopener">Symfony EventDispatcher dokumentaci</a>.</li>
-                <li><strong>Main request guard.</strong> Bez <code>$event-&gt;isMainRequest()</code> by se filter nastavoval i pro sub-requesty (např. ESI, render fragments) – tam typicky není token a listener by spadl.</li>
-                <li><strong>Anonymous fallback.</strong> Pokud je request anonymní (login, register, health), listener prostě filter neaktivuje – Doctrine queries nevrátí žádné <code>TenantAware</code> entity bez explicitního filteru. Tím vzniká <em>fail-closed</em> default.</li>
+                <li><strong>Main request guard.</strong> Bez <code>$event-&gt;isMainRequest()</code> by se filter nastavoval i pro dílčí požadavky (např. ESI, render fragments) – tam typicky není token a listener by spadl.</li>
+                <li><strong>Anonymous fallback.</strong> Pokud je požadavek anonymní (login, register, health), listener prostě filter neaktivuje – Doctrine queries nevrátí žádné <code>TenantAware</code> entity bez explicitního filteru. Tím vzniká <em>fail-closed</em> default.</li>
             </ul>
 
             {% set _callout_body %}
@@ -1175,7 +1175,7 @@ final readonly class TenantContextListener
         </section>
 
         <section id="testing" aria-labelledby="testing-heading">
-            <h2 id="testing-heading" class="h-section"><span class="h-num">16.09</span> Test pyramida pro autorizaci</h2>
+            <h2 id="testing-heading" class="h-section"><span class="h-num">12.09</span> Test pyramida pro autorizaci</h2>
 
             <p>
                 Každá ze 4 vrstev se testuje jiným druhem testu – a snaha pokrýt vše end-to-end
@@ -1377,12 +1377,12 @@ final class CancelOrderPolicyTest extends TestCase
                 Tabulkový test má dvě hodnoty navíc oproti klasickému test-per-method přístupu:
                 přidání pravidla = přidání jednoho řádku v <code>scenarios()</code>; a celý
                 test sloužit jako <em>spustitelná dokumentace policy</em> – netechnický reviewer
-                vidí všechny případy v jedné tabulce a může schválit business rules.
+                vidí všechny případy v jedné tabulce a může schválit doménová pravidla.
             </p>
         </section>
 
         <section id="antivzory" aria-labelledby="antivzory-heading">
-            <h2 id="antivzory-heading" class="h-section"><span class="h-num">16.10</span> Anti-vzory</h2>
+            <h2 id="antivzory-heading" class="h-section"><span class="h-num">12.10</span> Anti-vzory</h2>
 
             <p>
                 Čtyři opakující se anti-vzory, které se v projektech objevují nejčastěji. Každý
@@ -1391,7 +1391,7 @@ final class CancelOrderPolicyTest extends TestCase
 
             <h3 id="anti-controller-heading">Anti-vzor 1: Autorizace v controlleru</h3>
             <p>
-                Probrali jsme v sekci <a href="#tri-chyby">16.01</a>. Vyplatí se to zdůraznit znovu,
+                Probrali jsme v sekci <a href="#tri-chyby">12.01</a>. Vyplatí se to zdůraznit znovu,
                 protože jde o nejčastější chybu. Symptom: stejná autorizační podmínka opakovaná v 3+
                 controllerech, neexistující ve verzích volaných z konzolového commandu nebo
                 Messenger handleru. Náprava: přesun do Voteru + volání
@@ -1435,7 +1435,7 @@ final class OrderVoter extends Voter
             <p>
                 Symptom: cancellation window pravidlo („order ne starší než 24 h“) je zapsané
                 <em>jak</em> ve Voteru, <em>tak</em> v <code>Order::cancel()</code>. Když se
-                business pravidlo změní (např. window se prodlouží na 48 h), je třeba upravit
+                doménové pravidlo změní (např. window se prodlouží na 48 h), je třeba upravit
                 obě místa – a typicky se zapomene jedno.
             </p>
 
@@ -1490,8 +1490,8 @@ final class Order
                 <h3 id="anti-summary-heading">Společný jmenovatel anti-vzorů</h3>
                 <p>
                     Všechny čtyři anti-vzory vznikají z jediné chyby: <em>autorizační rozhodnutí
-                    se umístilo do nesprávné vrstvy</em>. Když máte 4-vrstvový framework z
-                    <a href="#ctyri-vrstvy">16.02</a> v hlavě, code review takové chyby
+                    se umístilo do nesprávné vrstvy</em>. Když máte čtyřvrstvý rámec z
+                    <a href="#ctyri-vrstvy">12.02</a> na zřeteli, code review takové chyby
                     odhalí na první pohled.
                 </p>
             {% endset %}
@@ -1502,7 +1502,7 @@ final class Order
         </section>
 
         <section id="summary" aria-labelledby="summary-heading">
-            <h2 id="summary-heading" class="h-section"><span class="h-num">16.11</span> Shrnutí</h2>
+            <h2 id="summary-heading" class="h-section"><span class="h-num">12.11</span> Shrnutí</h2>
 
             <p>
                 Autorizace v DDD aplikaci na Symfony 8 sedí na čtyřech vrstvách, každá s vlastním
@@ -1553,14 +1553,14 @@ final class Order
             {% set _callout_body %}
                 <h3 id="audit-log-heading">Audit log autorizačních rozhodnutí</h3>
                 <p>
-                    Pro regulované domény (zdravotnictví, finance, GDPR Article 30) je třeba
+                    Pro regulované domény (zdravotnictví, finance, GDPR čl. 30) je třeba
                     audit log <em>každého</em> autorizačního rozhodnutí, ne jen úspěšných operací.
                     Idiomaticky se to v Symfony řeší <strong>decorator pattern</strong>em
                     nad <code>AuthorizationCheckerInterface</code>: vlastní třída obalí původní
                     checker, zaloguje volání (kdo, na čem, jaký atribut, jaký výsledek)
                     a deleguje. Symfony DI to umožňuje přes
                     <code>#[AsDecorator(decorates: 'security.authorization_checker')]</code>.
-                    Loguje se obvykle do dedikovaného Monolog channelu <code>authorization</code>
+                    Loguje se obvykle do vyhrazeného Monolog channelu <code>authorization</code>
                     a odtud do ELK / Loki / centrálního SIEM.
                 </p>
             {% endset %}
@@ -1578,11 +1578,11 @@ final class Order
                 },
                 {
                     question: 'Smí Voter načítat aggregate z databáze?',
-                    answer: 'Ne. Voter dostává <code>$subject</code> jako parametr; handler ho už načetl a předává v paměti. Voterové fetchování je anti-vzor (<a href="#anti-fetching-voter-heading">16.10</a>) – vede k duplicate query, race condition a pomalé test suitě. Pokud Voter potřebuje další data, předajte je přes konstruktor (např. config) nebo přes obohacený DTO subject, ne přes repository.'
+                    answer: 'Ne. Voter dostává <code>$subject</code> jako parametr; handler ho už načetl a předává v paměti. Voterové fetchování je anti-vzor (<a href="#anti-fetching-voter-heading">12.10</a>) – vede k duplicate query, race condition a pomalé test suitě. Pokud Voter potřebuje další data, předajte je přes konstruktor (např. config) nebo přes obohacený DTO subject, ne přes repository.'
                 },
                 {
                     question: 'Kdy stačí ROLE_USER a kdy je třeba attribute-based přístup?',
-                    answer: 'RBAC (role) stačí, dokud platí „role popisuje permissions sama o sobě“ – ROLE_ADMIN smí všechno, ROLE_REFUND_AGENT smí refundy bez ohledu na konkrétní entitu. Jakmile permissions závisí na vztazích (vlastnictví, tenant, časové okno, stav agregátu), RBAC explodne – vznikají hyper-specific role typu ROLE_TENANT_42_ORDER_AGENT. Tehdy přejít na ABAC (<a href="#policy-based">16.07</a>): permissions vyhodnocují atributy subjektu, uživatele a kontextu proti policy.'
+                    answer: 'RBAC (role) stačí, dokud platí „role popisuje permissions sama o sobě“ – ROLE_ADMIN smí všechno, ROLE_REFUND_AGENT smí refundy bez ohledu na konkrétní entitu. Jakmile permissions závisí na vztazích (vlastnictví, tenant, časové okno, stav agregátu), RBAC explodne – vznikají hyper-specific role typu ROLE_TENANT_42_ORDER_AGENT. Tehdy přejít na ABAC (<a href="#policy-based">12.07</a>): permissions vyhodnocují atributy subjektu, uživatele a kontextu proti policy.'
                 },
                 {
                     question: 'Co když máme 100 různých rolí?',
@@ -1590,17 +1590,17 @@ final class Order
                 },
                 {
                     question: 'Smí doménový Aggregate záviset na Symfony Security komponentě?',
-                    answer: 'Ne. Doména musí být framework-agnostic – bez ní nelze unit-testovat bez Kernel, nelze sdílet kód mezi web a CLI, nelze migrovat na jiný framework. Pokud potřebuje aggregate „znát“ uživatele, dostane <em>vlastní</em> doménový typ (<code>CustomerId</code>, doménový <code>AppUser</code>). Aplikační handler překládá Symfony <code>UserInterface</code> na doménový typ. Detail v anti-vzoru 4 v <a href="#anti-symfony-user-domain-heading">16.10</a>.'
+                    answer: 'Ne. Doména musí být framework-agnostic – bez ní nelze unit-testovat bez Kernel, nelze sdílet kód mezi web a CLI, nelze migrovat na jiný framework. Pokud potřebuje aggregate „znát“ uživatele, dostane <em>vlastní</em> doménový typ (<code>CustomerId</code>, doménový <code>AppUser</code>). Aplikační handler překládá Symfony <code>UserInterface</code> na doménový typ. Detail v anti-vzoru 4 v <a href="#anti-symfony-user-domain-heading">12.10</a>.'
                 },
                 {
                     question: 'Kam ukládat audit log autorizačních rozhodnutí?',
-                    answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně doporučuji decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz hub o <a href="' ~ path('hub_basics') ~ '">Základech</a>, případně sekci o testování v <a href="#testing">16.09</a>.'
+                    answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně doporučuji decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz hub o <a href="' ~ path('hub_basics') ~ '">Základech</a>, případně sekci o testování v <a href="#testing">12.09</a>.'
                 }
             ]
         } %}
 
         <section id="further-reading" aria-labelledby="further-reading-heading">
-            <h2 id="further-reading-heading" class="h-section"><span class="h-num">16.12</span> Další četba</h2>
+            <h2 id="further-reading-heading" class="h-section"><span class="h-num">12.12</span> Další četba</h2>
 
             <ul>
                 <li><a href="https://symfony.com/doc/current/security.html" target="_blank" rel="noopener">Symfony Security komponenta – oficiální dokumentace</a></li>

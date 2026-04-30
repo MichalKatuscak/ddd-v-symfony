@@ -50,10 +50,12 @@
 </head>
 <body>
     {%- set _route = app.request.attributes.get('_route') -%}
-    {%- set _basics_routes = ['hub_basics', 'what_is_ddd', 'basic_concepts', 'horizontal_vs_vertical', 'architectural_styles', 'implementation_in_symfony'] -%}
-    {%- set _strategic_routes = ['hub_strategic', 'subdomains', 'context_mapping'] -%}
-    {%- set _patterns_routes = ['hub_patterns', 'cqrs', 'event_sourcing', 'sagas', 'outbox_pattern', 'lesser_known_patterns', 'performance_aspects'] -%}
-    {%- set _practice_routes = ['hub_practice', 'event_storming', 'team_topologies', 'authorization_in_ddd', 'microservices_and_ddd', 'practical_examples', 'testing_ddd', 'migration_from_crud', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd', 'case_study'] -%}
+    {%- set _basics_routes = ['hub_basics', 'what_is_ddd', 'subdomains', 'context_mapping', 'event_storming', 'team_topologies'] -%}
+    {%- set _tactics_routes = ['hub_tactics', 'basic_concepts', 'aggregate_design', 'lesser_known_patterns'] -%}
+    {%- set _architecture_routes = ['hub_architecture', 'architectural_styles', 'horizontal_vs_vertical', 'implementation_in_symfony', 'authorization_in_ddd'] -%}
+    {%- set _patterns_routes = ['hub_patterns', 'cqrs', 'event_sourcing', 'sagas', 'outbox_pattern', 'performance_aspects'] -%}
+    {%- set _practice_routes = ['hub_practice', 'testing_ddd', 'migration_from_crud', 'microservices_and_ddd', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd'] -%}
+    {%- set _synthesis_routes = ['hub_synthesis', 'practical_examples', 'case_study'] -%}
     {%- set _reference_routes = ['hub_reference', 'ddd_ai', 'glossary', 'resources', 'cheat_sheet'] -%}
 
     <a href="#content" class="skip-link">Přejít na obsah</a>
@@ -76,10 +78,12 @@
                 </a>
             </div>
             <div class="topnav-center">
-                <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Základy</a>
-                <a class="navlink {% if _route in _strategic_routes %}active{% endif %}" href="{{ path('hub_strategic') }}"{% if _route == 'hub_strategic' %} aria-current="page"{% elseif _route in _strategic_routes %} aria-current="true"{% endif %}>Strategie</a>
+                <a class="navlink {% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Úvod</a>
+                <a class="navlink {% if _route in _tactics_routes %}active{% endif %}" href="{{ path('hub_tactics') }}"{% if _route == 'hub_tactics' %} aria-current="page"{% elseif _route in _tactics_routes %} aria-current="true"{% endif %}>Taktika</a>
+                <a class="navlink {% if _route in _architecture_routes %}active{% endif %}" href="{{ path('hub_architecture') }}"{% if _route == 'hub_architecture' %} aria-current="page"{% elseif _route in _architecture_routes %} aria-current="true"{% endif %}>Architektura</a>
                 <a class="navlink {% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}"{% if _route == 'hub_patterns' %} aria-current="page"{% elseif _route in _patterns_routes %} aria-current="true"{% endif %}>Vzory</a>
                 <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a>
+                <a class="navlink {% if _route in _synthesis_routes %}active{% endif %}" href="{{ path('hub_synthesis') }}"{% if _route == 'hub_synthesis' %} aria-current="page"{% elseif _route in _synthesis_routes %} aria-current="true"{% endif %}>Syntéza</a>
                 <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a>
             </div>
             <div class="topnav-right">
@@ -97,10 +101,12 @@
     <div class="nav-drawer-backdrop" aria-hidden="true"></div>
     <aside class="nav-drawer" aria-label="Mobilní navigace">
         <ul class="nav-drawer-list">
-            <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Základy</a></li>
-            <li><a class="{% if _route in _strategic_routes %}active{% endif %}" href="{{ path('hub_strategic') }}"{% if _route == 'hub_strategic' %} aria-current="page"{% elseif _route in _strategic_routes %} aria-current="true"{% endif %}>Strategie</a></li>
+            <li><a class="{% if _route in _basics_routes %}active{% endif %}" href="{{ path('hub_basics') }}"{% if _route == 'hub_basics' %} aria-current="page"{% elseif _route in _basics_routes %} aria-current="true"{% endif %}>Úvod a strategie</a></li>
+            <li><a class="{% if _route in _tactics_routes %}active{% endif %}" href="{{ path('hub_tactics') }}"{% if _route == 'hub_tactics' %} aria-current="page"{% elseif _route in _tactics_routes %} aria-current="true"{% endif %}>Taktika</a></li>
+            <li><a class="{% if _route in _architecture_routes %}active{% endif %}" href="{{ path('hub_architecture') }}"{% if _route == 'hub_architecture' %} aria-current="page"{% elseif _route in _architecture_routes %} aria-current="true"{% endif %}>Architektura</a></li>
             <li><a class="{% if _route in _patterns_routes %}active{% endif %}" href="{{ path('hub_patterns') }}"{% if _route == 'hub_patterns' %} aria-current="page"{% elseif _route in _patterns_routes %} aria-current="true"{% endif %}>Vzory</a></li>
             <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a></li>
+            <li><a class="{% if _route in _synthesis_routes %}active{% endif %}" href="{{ path('hub_synthesis') }}"{% if _route == 'hub_synthesis' %} aria-current="page"{% elseif _route in _synthesis_routes %} aria-current="true"{% endif %}>Syntéza</a></li>
             <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a></li>
             <li><a href="{{ path('about') }}"{% if _route == 'about' %} aria-current="page"{% endif %}>O autorovi</a></li>
         </ul>
@@ -110,14 +116,14 @@
         {% block body %}{% endblock %}
     </main>
 
-    {%- set _foot_basics    = ddd_chapters_by_group('basics') -%}
-    {%- set _foot_strategic = ddd_chapters_by_group('strategic') -%}
-    {%- set _foot_patterns  = ddd_chapters_by_group('patterns') -%}
-    {%- set _foot_practice  = ddd_chapters_by_group('practice') -%}
-    {%- set _foot_reference = ddd_chapters_by_group('reference') -%}
-    {%- set _foot_extras    = ddd_extras() -%}
-    {%- set _foot_practice_top = _foot_practice|slice(0, 4) -%}
-    {%- set _foot_total = ddd_chapters()|length -%}
+    {%- set _foot_basics       = ddd_chapters_by_group('basics') -%}
+    {%- set _foot_tactics      = ddd_chapters_by_group('tactics') -%}
+    {%- set _foot_architecture = ddd_chapters_by_group('architecture') -%}
+    {%- set _foot_patterns     = ddd_chapters_by_group('patterns') -%}
+    {%- set _foot_practice     = ddd_chapters_by_group('practice') -%}
+    {%- set _foot_synthesis    = ddd_chapters_by_group('synthesis') -%}
+    {%- set _foot_extras       = ddd_extras() -%}
+    {%- set _foot_total        = ddd_chapters()|length -%}
     <footer class="foot-a" aria-label="Patička webu">
         <div class="foot-a-inner">
             <div class="foot-a-head">
@@ -141,23 +147,27 @@
 
             <div class="foot-a-cols">
                 <div class="foot-a-col">
-                    <h3><a href="{{ path('hub_basics') }}">Základy</a></h3>
+                    <h3><a href="{{ path('hub_basics') }}">Úvod a strategie</a></h3>
                     <ul class="foot-a-list">
                         {% for c in _foot_basics %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
                         {% endfor %}
                     </ul>
-                    {% if _foot_strategic|length > 0 %}
-                        <h3 style="margin-top:1.5rem"><a href="{{ path('hub_strategic') }}">Strategie</a></h3>
-                        <ul class="foot-a-list">
-                            {% for c in _foot_strategic %}
-                                <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
+                    <h3 style="margin-top:1.5rem"><a href="{{ path('hub_tactics') }}">Taktika</a></h3>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_tactics %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                    </ul>
                 </div>
                 <div class="foot-a-col">
-                    <h3><a href="{{ path('hub_patterns') }}">Vzory</a></h3>
+                    <h3><a href="{{ path('hub_architecture') }}">Architektura</a></h3>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_architecture %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                    </ul>
+                    <h3 style="margin-top:1.5rem"><a href="{{ path('hub_patterns') }}">Vzory</a></h3>
                     <ul class="foot-a-list">
                         {% for c in _foot_patterns %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
@@ -167,18 +177,20 @@
                 <div class="foot-a-col">
                     <h3><a href="{{ path('hub_practice') }}">Praxe</a></h3>
                     <ul class="foot-a-list">
-                        {% for c in _foot_practice_top %}
+                        {% for c in _foot_practice %}
                             <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
                         {% endfor %}
                     </ul>
-                    <a class="foot-a-more" href="{{ path('hub_practice') }}">Více · {{ _foot_practice|length }} kapitol →</a>
+                    <h3 style="margin-top:1.5rem"><a href="{{ path('hub_synthesis') }}">Syntéza</a></h3>
+                    <ul class="foot-a-list">
+                        {% for c in _foot_synthesis %}
+                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
+                        {% endfor %}
+                    </ul>
                 </div>
                 <div class="foot-a-col">
                     <h3><a href="{{ path('hub_reference') }}">Reference</a></h3>
                     <ul class="foot-a-list">
-                        {% for c in _foot_reference %}
-                            <li><a href="{{ path(c.route) }}"><span class="foot-a-num">{{ c.n }}</span><span>{{ c.t }}</span></a></li>
-                        {% endfor %}
                         {% for e in _foot_extras %}
                             <li><a href="{{ path(e.route) }}"><span class="foot-a-num">–</span><span>{{ e.t }}</span></a></li>
                         {% endfor %}

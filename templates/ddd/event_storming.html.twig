@@ -48,10 +48,10 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '14',
+        chapter_number: '04',
         category: 'Praxe',
         title: 'Event Storming a Domain Storytelling',
-        deck: 'Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě nejprověřenější workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Návod, který v Symfony projektu skutečně funguje.',
+        deck: 'Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě nejprověřenější workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Průvodce, který v Symfony projektu funguje.',
         reading_time: 25,
         difficulty: 2,
         published: block('article_published_time'),
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="14">
+    <div class="art-body" data-chapter-number="04">
 
         <p>
             DDD se nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí lidé, kteří kód píší,
@@ -74,10 +74,10 @@
         </p>
 
         {# ───────────────────────────────────────────────────────────
-           14.01 Proč workshop, proč ne čtení dokumentace
+           04.01 Proč workshop, proč ne čtení dokumentace
            ─────────────────────────────────────────────────────────── #}
         <section id="proc-workshop" aria-labelledby="proc-workshop-heading">
-            <h2 id="proc-workshop-heading" class="h-section"><span class="h-num">14.01</span> Proč workshop, proč ne čtení dokumentace</h2>
+            <h2 id="proc-workshop-heading" class="h-section"><span class="h-num">04.01</span> Proč workshop, proč ne čtení dokumentace</h2>
 
             <p>
                 Standardní reakce vývojářského týmu, který má zahájit nový projekt nebo přepsat existující,
@@ -88,7 +88,7 @@
             </p>
 
             <p>
-                A to je v pořádku. Doména není <em>knihovna</em>, kterou lze přečíst; je to <em>znalostní síť</em>,
+                To je v pořádku. Doména není <em>knihovna</em>, kterou lze přečíst; je to <em>znalostní síť</em>,
                 která žije v hlavách doménových expertů. Když se vás obchodní ředitel a šéf logistiky liší v tom,
                 co znamená „odeslaná objednávka“, není to bug, ale signál: existují dva pohledy, dva kontexty,
                 a tudíž – pravděpodobně – i dva <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Contexty</a>.
@@ -119,10 +119,10 @@
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.02 Event Storming – co to je a co umí
+           04.02 Event Storming – co to je a co umí
            ─────────────────────────────────────────────────────────── #}
         <section id="event-storming-co" aria-labelledby="event-storming-co-heading">
-            <h2 id="event-storming-co-heading" class="h-section"><span class="h-num">14.02</span> Event Storming – co to je a co umí</h2>
+            <h2 id="event-storming-co-heading" class="h-section"><span class="h-num">04.02</span> Event Storming – co to je a co umí</h2>
 
             <p>
                 <strong>Event Storming</strong> je kolaborativní modelovací technika, kterou v roce 2013 představil
@@ -130,7 +130,7 @@
                 dlouhou stěnu (nebo Miro/Mural board) <strong>oranžové sticky notes s doménovými událostmi vyjádřenými
                 v minulém čase</strong> a postupně z nich vytvářejí časovou osu toho, co se v doméně děje. Jak osa
                 roste, přidávají se další barvy – modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots –
-                a obraz domény se zaostřuje.
+                a obraz domény se vyjasňuje.
             </p>
 
             <p>
@@ -142,7 +142,7 @@
             <ol>
                 <li>
                     <strong>Big Picture Event Storming</strong> – strategická úroveň. Otázka: <em>„Co se v naší
-                    doméně vůbec děje?“</em> Cílem je objevit Bounded Contexty a klíčové procesy. Trvání 2-4 h,
+                    doméně vůbec děje?“</em> Cílem je objevit Bounded Contexty a hlavní procesy. Trvání 2-4 h,
                     8-12 účastníků.
                 </li>
                 <li>
@@ -160,12 +160,12 @@
             <p>
                 Vaughn Vernon v <em>Domain-Driven Design Distilled</em> (Addison-Wesley, 2016, kap. 7) označuje
                 Event Storming za „nejrychlejší známou cestu k pracovnímu modelu domény“ a doporučuje ho jako
-                první techniku, kterou by tým adoptoval předtím, než se pustí do taktických DDD vzorů.
+                první techniku, kterou by tým zavedl předtím, než se pustí do taktických DDD vzorů.
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/17_event_storming/big_picture_levels.svg' ignore missing %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '14.2-A',
+                fig: '04.2-A',
                 title: 'Tři úrovně Event Stormingu – od strategického přehledu k taktickému návrhu',
                 inline: _diagram_inline,
                 caption: 'Big Picture poskytuje mapu domény a hranice Bounded Contextů. Process Level zhušťuje jeden BC do toku Command → Event → Policy. Design Level zachycuje agregáty a jejich invarianty.'
@@ -173,10 +173,10 @@
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.03 Notace – barvy a tvary
+           04.03 Notace – barvy a tvary
            ─────────────────────────────────────────────────────────── #}
         <section id="notace" aria-labelledby="notace-heading">
-            <h2 id="notace-heading" class="h-section"><span class="h-num">14.03</span> Notace – barvy a tvary</h2>
+            <h2 id="notace-heading" class="h-section"><span class="h-num">04.03</span> Notace – barvy a tvary</h2>
 
             <p>
                 Event Storming používá <strong>standardizovanou paletu barev</strong>, kterou Brandolini ustanovil
@@ -267,14 +267,14 @@
             {% set _callout_body %}
                 <h3 id="past-tense-rule-heading">Pravidlo minulého času</h3>
                 <p>
-                    Nejdůležitější jazykové pravidlo Event Stormingu: <strong>doménové eventy se píšou v minulém
+                    Hlavní jazykové pravidlo Event Stormingu: <strong>doménové eventy se píšou v minulém
                     čase</strong>. Píšete <code>OrderPlaced</code>, ne <code>PlaceOrder</code>. <code>PaymentReceived</code>,
                     ne <code>ReceivePayment</code>. <code>ShipmentDispatched</code>, ne <code>DispatchShipment</code>.
                 </p>
                 <p>
                     Důvod není kosmetický. Minulý čas vás <em>jazykově nutí</em> mluvit o tom, co už nastalo
                     (a tedy o doménové realitě), místo toho, co bychom rádi (záměru či featuře). Tento posun
-                    perspektivy je zásadní – zabraňuje workshopu sklouznout do diskuse o tom, co bude umět
+                    perspektivy je rozhodující – zabraňuje workshopu sklouznout do diskuse o tom, co bude umět
                     formulář, a drží ho u toho, jak doména opravdu funguje. Brandolini to označuje jako
                     <em>„grammar discipline“</em>.
                 </p>
@@ -297,10 +297,10 @@
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.04 Big Picture workshop – návod krok za krokem
+           04.04 Big Picture workshop – návod krok za krokem
            ─────────────────────────────────────────────────────────── #}
         <section id="big-picture" aria-labelledby="big-picture-heading">
-            <h2 id="big-picture-heading" class="h-section"><span class="h-num">14.04</span> Big Picture workshop – návod krok za krokem</h2>
+            <h2 id="big-picture-heading" class="h-section"><span class="h-num">04.04</span> Big Picture workshop – návod krok za krokem</h2>
 
             <p>
                 Big Picture je první workshop, který tým s novou doménou (nebo s migrací z existujícího CRUD
@@ -309,7 +309,7 @@
                 identifikace 3-7 Bounded Contextů.
             </p>
 
-            <h3 id="bp-priprava">14.04.1 Příprava (-1 týden)</h3>
+            <h3 id="bp-priprava">04.04.1 Příprava (-1 týden)</h3>
 
             <p>Před workshopem se nelze vyhnout přípravě:</p>
 
@@ -339,7 +339,7 @@
                 </li>
             </ul>
 
-            <h3 id="bp-postup">14.04.2 Postup workshopu (2-4 hodiny)</h3>
+            <h3 id="bp-postup">04.04.2 Postup workshopu (2-4 hodiny)</h3>
 
             <ol>
                 <li>
@@ -351,7 +351,7 @@
                 <li>
                     <strong>(20-30 min) Chaotic exploration.</strong> Všichni dostanou stejně oranžových
                     stickies (~15 každý) a píší události, které je napadnou. <strong>Lepí kamkoliv</strong>
-                    bez pořadí. Toto je záměrně chaos – chcete, aby si lidé vzpomněli na vše, ne aby
+                    bez pořadí. Jde o záměrný chaos – chcete, aby si lidé vzpomněli na vše, ne aby
                     okamžitě strukturovali. Facilitátor sbírá poznámky a tlačí lidi: „a co se stane potom?
                     a předtím?“.
                 </li>
@@ -372,7 +372,7 @@
                     <strong>(30-45 min) Hot Spots.</strong> Kdykoliv během workshopu zazní otázka, kterou
                     nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?“), <strong>nediskutuje se</strong> –
                     napíše se na růžovou sticky a nalepí se přesně tam, kde otázka vznikla. Po 45 minutách máte
-                    typicky 8-15 hot spotů. Toto je <em>nejcennější výstup</em> Big Picture.
+                    typicky 8-15 hot spotů. To je <em>nejcennější výstup</em> Big Picture.
                 </li>
                 <li>
                     <strong>(20-30 min) Bounded Context boundaries.</strong> Facilitátor s týmem hledá místa,
@@ -387,7 +387,7 @@
                 </li>
             </ol>
 
-            <h3 id="bp-vystup">14.04.3 Co máte na konci Big Picture</h3>
+            <h3 id="bp-vystup">04.04.3 Co máte na konci Big Picture</h3>
 
             <ul>
                 <li>Časová osa s 30-100 doménovými eventy.</li>
@@ -398,11 +398,11 @@
             </ul>
 
             <p>
-                Co <strong>nemáte</strong> a ani mít nemáte: kompletní model, schéma databáze, finální
+                Co <strong>nemáte</strong> a ani by nemělo být cílem: kompletní model, schéma databáze, finální
                 seznam tříd. Big Picture je strategický nástroj – taktiku řeší až Design Level.
             </p>
 
-            <h3 id="bp-online">14.04.4 Online varianta – Miro / Mural setup</h3>
+            <h3 id="bp-online">04.04.4 Online varianta – Miro / Mural setup</h3>
 
             <p>
                 Když workshop musí být online (distribuovaný tým, pandemie, zahraniční doménový expert),
@@ -412,7 +412,7 @@
 
             <ol>
                 <li>
-                    <strong>Frame 12 000 × 4 000 px.</strong> Většina týmů podcení velikost kanvasu.
+                    <strong>Frame 12 000 × 4 000 px.</strong> Týmy často podcení velikost plátna.
                     Big Picture na 50+ eventů potřebuje hodně horizontálního prostoru, jinak se účastníci
                     začnou navzájem překrývat. V Miro založte nový board a první frame udělejte explicitně
                     s těmito rozměry – parametr <em>Frame size</em>.
@@ -441,11 +441,11 @@
                 <li>
                     <strong>Asynchronní pre-work.</strong> Pošlete účastníkům 24 hodin předem otevřený
                     Miro board s úvodním textem a požádejte je, aby <em>před</em> workshopem nalepili
-                    5-10 eventů, které je napadnou. Workshop pak začíná z teplého stavu a ne z prázdné stěny.
+                    5-10 eventů, které je napadnou. Workshop pak nezačíná u prázdné stěny.
                 </li>
             </ol>
 
-            <h3 id="bp-when-again">14.04.5 Kdy Big Picture <em>nedělat</em></h3>
+            <h3 id="bp-when-again">04.04.5 Kdy Big Picture <em>nedělat</em></h3>
 
             <p>
                 Big Picture není univerzální nástroj. Vynechte ho v těchto situacích:
@@ -453,8 +453,8 @@
 
             <ul>
                 <li>
-                    <strong>Zralý produkt s ustáleným modelem.</strong> Když tým 3 roky pracuje v jedné
-                    doméně a má aktuální Context Map, nový Big Picture typicky neodhalí nic nového –
+                    <strong>Zralý produkt s ustáleným modelem.</strong> Když tým pracuje v jedné
+                    doméně tři roky a má aktuální Context Map, nový Big Picture typicky neodhalí nic nového –
                     investujte raději do Process Level pro konkrétní bolavý BC.
                 </li>
                 <li>
@@ -473,8 +473,8 @@
             {% set _callout_body %}
                 <h3 id="facilitator-rule-heading">Facilitátor nesmí být tech lead</h3>
                 <p>
-                    Tech lead má názor. Velmi silný. A v okamžiku, kdy facilituje, ten názor – vědomě
-                    či nevědomě – protlačí. Doménoví experti to vycítí a začnou se přikyvovat místo
+                    Tech lead má názor – často velmi silný. V okamžiku, kdy facilituje, ten názor – vědomě
+                    či nevědomě – protlačí. Doménoví experti to vycítí a začnou si přikyvovat namísto toho,
                     aby přinášeli vlastní pohled.
                 </p>
                 <p>
@@ -495,10 +495,10 @@
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.05 Process Level – jeden BC, hlubší detail
+           04.05 Process Level – jeden BC, hlubší detail
            ─────────────────────────────────────────────────────────── #}
         <section id="process-level" aria-labelledby="process-level-heading">
-            <h2 id="process-level-heading" class="h-section"><span class="h-num">14.05</span> Process Level – jeden BC, hlubší detail</h2>
+            <h2 id="process-level-heading" class="h-section"><span class="h-num">04.05</span> Process Level – jeden BC, hlubší detail</h2>
 
             <p>
                 Po Big Picture máte 3-7 Bounded Contextů. Process Level Event Storming si vždy bere
@@ -507,7 +507,7 @@
                 a <code>Event</code>ů na <a href="{{ path('cqrs') }}">message busu</a>.
             </p>
 
-            <h3 id="pl-co-pridava">14.05.1 Co Process Level přidává oproti Big Picture</h3>
+            <h3 id="pl-co-pridava">04.05.1 Co Process Level přidává oproti Big Picture</h3>
 
             <ul>
                 <li><strong>Commands</strong> (modré) – záměry, které vedou k eventům.</li>
@@ -517,7 +517,7 @@
                 <li><strong>Read Models</strong> (zelené) – projekce, na základě kterých se actor rozhoduje.</li>
             </ul>
 
-            <h3 id="pl-postup">14.05.2 Postup (4-8 hodin per BC)</h3>
+            <h3 id="pl-postup">04.05.2 Postup (4-8 hodin per BC)</h3>
 
             <ol>
                 <li>
@@ -548,7 +548,7 @@
                 </li>
             </ol>
 
-            <h3 id="pl-priklad">14.05.3 Příklad – Ordering BC e-shopu</h3>
+            <h3 id="pl-priklad">04.05.3 Příklad – Ordering BC e-shopu</h3>
 
             <p>Sekvence pro happy path:</p>
 
@@ -582,7 +582,7 @@
                 <li>Read model <code>OrderDetailView</code> pro UI.</li>
             </ul>
 
-            <h3 id="pl-vystup">14.05.4 Co máte na konci Process Level</h3>
+            <h3 id="pl-vystup">04.05.4 Co máte na konci Process Level</h3>
 
             <ul>
                 <li>Pro každý BC: detailní mapu commands, events, policies, externals, read models.</li>
@@ -594,10 +594,10 @@
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.06 Design Level – pro každý BC zvlášť
+           04.06 Design Level – pro každý BC zvlášť
            ─────────────────────────────────────────────────────────── #}
         <section id="design-level" aria-labelledby="design-level-heading">
-            <h2 id="design-level-heading" class="h-section"><span class="h-num">14.06</span> Design Level – pro každý BC zvlášť</h2>
+            <h2 id="design-level-heading" class="h-section"><span class="h-num">04.06</span> Design Level – pro každý BC zvlášť</h2>
 
             <p>
                 Design Level je nejtaktičtější vrstva Event Stormingu a první, která se přibližuje kódu.
@@ -605,7 +605,7 @@
                 <strong>invariantní pravidla</strong> a způsob, jakým commands modifikují stav agregátu.
             </p>
 
-            <h3 id="dl-co-pridava">14.06.1 Co Design Level přidává</h3>
+            <h3 id="dl-co-pridava">04.06.1 Co Design Level přidává</h3>
 
             <ul>
                 <li><strong>Aggregates</strong> (žlutooranžové, velké) – konzistenční hranice. Pro každý command identifikujte agregát, který ho obsluhuje.</li>
@@ -613,7 +613,7 @@
                 <li><strong>Pre-conditions</strong> – co musí být splněno, aby command směl projít.</li>
             </ul>
 
-            <h3 id="dl-postup">14.06.2 Postup (2-6 hodin per BC)</h3>
+            <h3 id="dl-postup">04.06.2 Postup (2-6 hodin per BC)</h3>
 
             <ol>
                 <li>
@@ -632,12 +632,12 @@
                     jeden item“.
                 </li>
                 <li>
-                    Označte hot spoty, které vám chybí pro úplnou specifikaci agregátu („Co když item
-                    má nulovou cenu? Je to legitimní freebie nebo bug?“).
+                    Označte hot spoty, které vám chybí pro úplnou specifikaci agregátu („Co když má položka
+                    nulovou cenu? Jde o legitimní freebie nebo chybu?“).
                 </li>
             </ol>
 
-            <h3 id="dl-mapping">14.06.3 Mapping z workshopu do Symfony</h3>
+            <h3 id="dl-mapping">04.06.3 Mapping z workshopu do Symfony</h3>
 
             <p>Workshop: <code>Customer → PlaceOrder → Order Aggregate → OrderPlaced</code></p>
 
@@ -754,7 +754,7 @@ if ($items === []) {
                     code: _code
                 } %}
                 <p>
-                    Tato vazba je k nezaplacení. Za půl roku, když nový developer čte kód, ví, odkud
+                    Tato vazba je nedocenitelná. Za půl roku, když nový developer čte kód, ví, odkud
                     pravidlo pochází, a může si ho ověřit u doménového experta – místo aby ho v dobré
                     víře smazal jako „divnou validaci“.
                 </p>
@@ -766,10 +766,10 @@ if ($items === []) {
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.07 Domain Storytelling – alternativa pro malé týmy
+           04.07 Domain Storytelling – alternativa pro malé týmy
            ─────────────────────────────────────────────────────────── #}
         <section id="domain-storytelling" aria-labelledby="domain-storytelling-heading">
-            <h2 id="domain-storytelling-heading" class="h-section"><span class="h-num">14.07</span> Domain Storytelling – alternativa pro malé týmy</h2>
+            <h2 id="domain-storytelling-heading" class="h-section"><span class="h-num">04.07</span> Domain Storytelling – alternativa pro malé týmy</h2>
 
             <p>
                 <strong>Domain Storytelling</strong> je workshopová technika, kterou v knize stejného jména
@@ -779,7 +779,7 @@ if ($items === []) {
                 standardizované piktogramové notace.
             </p>
 
-            <h3 id="ds-notace">14.07.1 Notace</h3>
+            <h3 id="ds-notace">04.07.1 Notace</h3>
 
             <ul>
                 <li>
@@ -788,7 +788,7 @@ if ($items === []) {
                 </li>
                 <li>
                     <strong>Work Object</strong> – piktogram věci, se kterou actor pracuje. Dokument
-                    (objednávka), peníze, e-mail, balík, zboží. Hofer s Schwentnerem v knize
+                    (objednávka), peníze, e-mail, balík, zboží. Hofer se Schwentnerem v knize
                     doporučují konkrétní ikonky, ale stačí stylizace.
                 </li>
                 <li>
@@ -805,7 +805,7 @@ if ($items === []) {
                 </li>
             </ul>
 
-            <h3 id="ds-priklad">14.07.2 Konkrétní příklad – proces objednávky v e-shopu</h3>
+            <h3 id="ds-priklad">04.07.2 Konkrétní příklad – proces objednávky v e-shopu</h3>
 
             <p>Story <em>„Customer places an order“</em> v Domain Storytelling notaci, čtená v pořadí čísel:</p>
 
@@ -825,7 +825,7 @@ if ($items === []) {
                 a že každá activity má slovesné jméno.
             </p>
 
-            <h3 id="ds-vs-es">14.07.3 Domain Storytelling vs. Event Storming – kdy zvolit co</h3>
+            <h3 id="ds-vs-es">04.07.3 Domain Storytelling vs. Event Storming – kdy zvolit co</h3>
 
             <div class="table-responsive">
                 <table class="table table-bordered">
@@ -908,7 +908,7 @@ if ($items === []) {
                 body: _callout_body
             } %}
 
-            <h3 id="ds-egon-walkthrough">14.07.4 Praktický egon.io walkthrough</h3>
+            <h3 id="ds-egon-walkthrough">04.07.4 Praktický egon.io walkthrough</h3>
 
             <p>
                 <strong><a href="https://egon.io/" target="_blank" rel="noopener">egon.io</a></strong> je
@@ -925,7 +925,7 @@ if ($items === []) {
                 <li>
                     <strong>Začněte s actorem.</strong> Přetáhněte ikonu „person“ na plátno a pojmenujte
                     ji rolí, ne osobou – <code>Customer</code>, ne <code>Petr Novák</code>. Pojmenování
-                    je důležité; v exportu se objeví u každé activity.
+                    je důležité; v exportu se objeví u každé aktivity.
                 </li>
                 <li>
                     <strong>Přidejte work object.</strong> Druhý nejčastější tvar – věc, se kterou actor
@@ -938,8 +938,8 @@ if ($items === []) {
                     <em>confirms</em>) se píše do labelu šipky.
                 </li>
                 <li>
-                    <strong>Buďte prostí.</strong> Jeden Domain Storytelling diagram by měl mít
-                    <strong>jeden lineární příběh</strong> s 5-15 activities. Když jich máte 30,
+                    <strong>Buďte struční.</strong> Jeden Domain Storytelling diagram by měl mít
+                    <strong>jeden lineární příběh</strong> s 5-15 aktivitami. Když jich máte 30,
                     rozdělte ho na dva diagramy.
                 </li>
                 <li>
@@ -959,14 +959,14 @@ if ($items === []) {
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.08 Anti-vzory workshopů
+           04.08 Anti-vzory workshopů
            ─────────────────────────────────────────────────────────── #}
         <section id="anti-vzory" aria-labelledby="anti-vzory-heading">
-            <h2 id="anti-vzory-heading" class="h-section"><span class="h-num">14.08</span> Anti-vzory workshopů</h2>
+            <h2 id="anti-vzory-heading" class="h-section"><span class="h-num">04.08</span> Anti-vzory workshopů</h2>
 
             <p>
                 Workshop, který je špatně připravený nebo špatně řízený, je horší než žádný workshop –
-                vytvoří iluzi konsensu, který tam není, a tým podle něj implementuje špatný model.
+                vytvoří zdání shody, která neexistuje, a tým podle něj implementuje špatný model.
                 Zde je seznam nejčastějších anti-vzorů a jejich řešení.
             </p>
 
@@ -1030,7 +1030,7 @@ if ($items === []) {
                 <h3 id="anti-word-heading">„Zápis = Word dokument.“</h3>
                 <p>
                     Když převedete vizuální workshop do lineárního textu, ztratíte 80 % informace –
-                    rozložení v prostoru, vztahy, blízkost hot spotů k eventům. Word dokument o 8
+                    rozložení v prostoru, vztahy, blízkost hot spotů k eventům. Wordový dokument o osmi
                     stranách nikdo nepřečte; foto a Miro export se otevřou na 5 sekund a všichni
                     si vzpomenou, co kde stálo.
                 </p>
@@ -1068,8 +1068,8 @@ if ($items === []) {
             {% set _callout_body %}
                 <h3 id="anti-perfectionism-heading">„Big Picture musíme dotáhnout k dokonalosti.“</h3>
                 <p>
-                    Big Picture nemá být dokonalý. Je to první mapa neznámého území. Pokud se na něm
-                    strávíte 8 hodin a debatujete o tom, zda <code>OrderShipped</code> je
+                    Big Picture nemá být dokonalý. Je to první mapa neznámého území. Pokud na něm
+                    strávíte 8 hodin a budete debatovat o tom, zda <code>OrderShipped</code> je
                     <code>ShipmentDispatched</code> nebo <code>OrderDispatched</code>, ztrácíte čas –
                     rozhodnutí padne až na Process Levelu, kde uvidíte kontext.
                 </p>
@@ -1086,17 +1086,17 @@ if ($items === []) {
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.09 Po workshopu – co s výstupem
+           04.09 Po workshopu – co s výstupem
            ─────────────────────────────────────────────────────────── #}
         <section id="po-workshopu" aria-labelledby="po-workshopu-heading">
-            <h2 id="po-workshopu-heading" class="h-section"><span class="h-num">14.09</span> Po workshopu – co s výstupem</h2>
+            <h2 id="po-workshopu-heading" class="h-section"><span class="h-num">04.09</span> Po workshopu – co s výstupem</h2>
 
             <p>
                 Workshop bez follow-upu je promarněná investice. Zde je seznam <strong>4 konkrétních artefaktů</strong>,
                 které musí jít do repa do 24 hodin po skončení workshopu.
             </p>
 
-            <h3 id="post-1-foto">14.09.1 Foto / Miro link</h3>
+            <h3 id="post-1-foto">04.09.1 Foto / Miro link</h3>
 
             <p>
                 Wide-angle foto stěny v originálu, detailní fotky po sekcích, Miro export PNG i link.
@@ -1118,7 +1118,7 @@ if ($items === []) {
 
             <p><code>README.md</code> obsahuje datum, účastníky, BC, a link na živý Miro board.</p>
 
-            <h3 id="post-2-bc">14.09.2 Aktualizovaný Context Map</h3>
+            <h3 id="post-2-bc">04.09.2 Aktualizovaný Context Map</h3>
 
             <p>
                 Z fialových BC stickies aktualizujte
@@ -1127,7 +1127,7 @@ if ($items === []) {
                 (<a href="{{ path('subdomains') }}">core / supporting / generic</a>).
             </p>
 
-            <h3 id="post-3-events">14.09.3 Seznam doménových eventů</h3>
+            <h3 id="post-3-events">04.09.3 Seznam doménových eventů</h3>
 
             <p>
                 Plain-text soubor s jedním eventem na řádek. Slouží jako reference pro budoucí PR – když
@@ -1160,7 +1160,7 @@ if ($items === []) {
                 code: _code
             } %}
 
-            <h3 id="post-4-hotspots">14.09.4 Hot Spots → tickety</h3>
+            <h3 id="post-4-hotspots">04.09.4 Hot Spots → tickety</h3>
 
             <p>
                 Každý hot spot z workshopu = jeden ticket v issue trackeru, ve formátu „<em>Discovery question</em>“
@@ -1181,7 +1181,7 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
                 code: _code
             } %}
 
-            <h3 id="post-5-repo">14.09.5 Doporučená struktura repa po prvním workshopu</h3>
+            <h3 id="post-5-repo">04.09.5 Doporučená struktura repa po prvním workshopu</h3>
 
             <p>
                 Aby výstup workshopu nebyl pohřben v Slacku, doporučujeme v Symfony projektu rovnou založit
@@ -1232,7 +1232,7 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
                 ochrana proti tomu, aby se jazyk workshopu po půl roce vytratil z kódu.
             </p>
 
-            <h3 id="post-6-prvni-pr">14.09.6 První PR po workshopu</h3>
+            <h3 id="post-6-prvni-pr">04.09.6 První PR po workshopu</h3>
 
             <p>
                 První pull request po workshopu by měl být <strong>malý a explicitně značený</strong>
@@ -1255,7 +1255,7 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
             {% set _callout_body %}
                 <h3 id="commit-disclaimer-heading">Workshop commit message konvence</h3>
                 <p>
-                    Pro PR navazující na workshop používejte konzistentní commit message, aby šly
+                    Pro PR navazující na workshop používejte konzistentní commit message, aby je šlo
                     v gitu vyhledat:
                 </p>
                 {% set _code %}{% verbatim %}docs(discovery): big picture workshop 2026-04-29
@@ -1283,19 +1283,19 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.10 Pravidelné re-stormingy
+           04.10 Pravidelné re-stormingy
            ─────────────────────────────────────────────────────────── #}
         <section id="re-storming" aria-labelledby="re-storming-heading">
-            <h2 id="re-storming-heading" class="h-section"><span class="h-num">14.10</span> Pravidelné re-stormingy</h2>
+            <h2 id="re-storming-heading" class="h-section"><span class="h-num">04.10</span> Pravidelné re-stormingy</h2>
 
             <p>
                 Doména se vyvíjí. Pivotní událost, která dnes platí (<code>OrderPlaced</code>), může za rok
-                ztratit význam, protože byznys přešel na model <em>subscription</em> a ústředním eventem se
+                ztratit význam, protože podnikání přešlo na model <em>subscription</em> a ústředním eventem se
                 stane <code>SubscriptionRenewed</code>. Když tým neudělá nový workshop, kód a doména se
                 rozejdou – a nikdo si toho hned nevšimne, protože jednotlivé PR vypadají rozumně.
             </p>
 
-            <h3 id="re-cadence">14.10.1 Doporučená frekvence</h3>
+            <h3 id="re-cadence">04.10.1 Doporučená frekvence</h3>
 
             <ul>
                 <li>
@@ -1304,7 +1304,7 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
                     produkt jednou ročně.
                 </li>
                 <li>
-                    <strong>Po velkém produktovém rozhodnutí</strong>: nový tržní segment, nový business
+                    <strong>Po velkém produktovém rozhodnutí</strong>: nový tržní segment, nový obchodní
                     model, akvizice. Re-storming proběhne <em>před</em> implementací, ne po ní.
                 </li>
                 <li>
@@ -1313,7 +1313,7 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
                 </li>
             </ul>
 
-            <h3 id="re-diff">14.10.2 Diff jako priorita refaktoringu</h3>
+            <h3 id="re-diff">04.10.2 Diff jako priorita refaktoringu</h3>
 
             <p>
                 Po re-stormingu porovnejte novou mapu se starou (uloženou v <code>docs/discovery/&lt;starý-datum&gt;/</code>).
@@ -1329,20 +1329,20 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.10b Most workshop → TDD
+           04.10b Most workshop → TDD
            ─────────────────────────────────────────────────────────── #}
         <section id="workshop-to-tdd" aria-labelledby="workshop-to-tdd-heading">
-            <h2 id="workshop-to-tdd-heading" class="h-section"><span class="h-num">14.10b</span> Most z workshopu do testů</h2>
+            <h2 id="workshop-to-tdd-heading" class="h-section"><span class="h-num">04.10b</span> Most z workshopu do testů</h2>
 
             <p>
-                Design Level Event Storming přirozeně ústí do test-driven development. Každý invariant
+                Design Level Event Storming přirozeně ústí v test-driven development. Každý invariant
                 napsaný na sticky agregátu je <strong>jeden test case</strong>. Každý hot spot, který
                 se za běhu workshopu vyřešil, je <strong>jeden další test case</strong>. Tým, který
                 z workshopu odejde a nezačne psát testy podle invariantů, ztrácí polovinu hodnoty
                 workshopu.
             </p>
 
-            <h3 id="tdd-mapping">14.10b.1 Mapping invariantů na PHPUnit testy</h3>
+            <h3 id="tdd-mapping">04.10b.1 Mapping invariantů na PHPUnit testy</h3>
 
             <p>Sticky agregátu z workshopu:</p>
 
@@ -1400,7 +1400,7 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
                 proč pravidlo existuje, doloví ho přes git blame nebo podle data workshopu.
             </p>
 
-            <h3 id="tdd-events">14.10b.2 Doménové eventy jako tests</h3>
+            <h3 id="tdd-events">04.10b.2 Doménové eventy jako tests</h3>
 
             <p>
                 Z Process Levelu máte sekvenci <code>Command → Event → Policy → Command</code>.
@@ -1446,10 +1446,10 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
         </section>
 
         {# ───────────────────────────────────────────────────────────
-           14.11 Shrnutí
+           04.11 Shrnutí
            ─────────────────────────────────────────────────────────── #}
         <section id="summary" aria-labelledby="summary-heading">
-            <h2 id="summary-heading" class="h-section"><span class="h-num">14.11</span> Shrnutí</h2>
+            <h2 id="summary-heading" class="h-section"><span class="h-num">04.11</span> Shrnutí</h2>
 
             <p>
                 Event Storming a Domain Storytelling jsou dvě konkrétní, prověřené techniky, jak před
@@ -1499,7 +1499,7 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
             items: [
                 {
                     question: 'Kolik lidí by mělo být na Event Storming workshopu?',
-                    answer: 'Pro Big Picture 6-12 lidí: 2-4 doménoví experti, 3-5 vývojářů (včetně tech leada), 1 PM nebo product owner, 1 facilitátor. Méně než 4 lidé znamená příliš úzký pohled; více než 14 lidí znamená, že se část účastníků stane diváky a workshop ztrácí dynamiku. Pro Process Level a Design Level stačí 4-8 lidí; tam jde o detail jednoho BC. Pro Domain Storytelling 2-5 lidí. Detailní rozpis v <a href="#big-picture">sekci 14.04</a>.'
+                    answer: 'Pro Big Picture 6-12 lidí: 2-4 doménoví experti, 3-5 vývojářů (včetně tech leada), 1 PM nebo product owner, 1 facilitátor. Méně než 4 lidé znamená příliš úzký pohled; více než 14 lidí znamená, že se část účastníků stane diváky a workshop ztrácí dynamiku. Pro Process Level a Design Level stačí 4-8 lidí; tam jde o detail jednoho BC. Pro Domain Storytelling 2-5 lidí. Detailní rozpis v <a href="#big-picture">sekci 04.04</a>.'
                 },
                 {
                     question: 'Dá se Event Storming dělat online?',
@@ -1528,7 +1528,7 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
            Další četba
            ─────────────────────────────────────────────────────────── #}
         <section id="further-reading" aria-labelledby="further-reading-heading">
-            <h2 id="further-reading-heading" class="h-section"><span class="h-num">14.12</span> Další četba</h2>
+            <h2 id="further-reading-heading" class="h-section"><span class="h-num">04.12</span> Další četba</h2>
 
             <ul>
                 <li>

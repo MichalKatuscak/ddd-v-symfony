@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '08',
+        chapter_number: '17',
         category: 'Vzory',
         title: 'Výkonnostní aspekty DDD v Symfony',
         deck: 'Výkonnostní aspekty Domain-Driven Design v Symfony s Doctrine ORM – řešení N+1 problému, optimalizace agregátů, implementace read modelu přes CQRS, správné používání UUID a cachování doménových objektů.',
@@ -61,9 +61,9 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="08">
+    <div class="art-body" data-chapter-number="17">
 <section id="uvodem" aria-labelledby="uvodem-heading">
-    <h2 id="uvodem-heading" class="h-section"><span class="h-num">08.01</span> Výkon v kontextu DDD</h2>
+    <h2 id="uvodem-heading" class="h-section"><span class="h-num">17.01</span> Výkon v kontextu DDD</h2>
     <p>
         DDD proslulo pověstí pomalé architektury. Tato pověst vzniká z konkrétní příčiny: výkonnostní problémy
         přicházejí z nesprávné implementace – příliš velkých agregátů, nevhodného lazy loadingu, absence read modelu
@@ -108,7 +108,7 @@
 </section>
 
 <section id="n-plus-1-problem" aria-labelledby="n-plus-1-heading">
-    <h2 id="n-plus-1-heading" class="h-section"><span class="h-num">08.02</span> N+1 problém a lazy loading v Doctrine</h2>
+    <h2 id="n-plus-1-heading" class="h-section"><span class="h-num">17.02</span> N+1 problém a lazy loading v Doctrine</h2>
     <p>
         N+1 problém je jedním z nejčastějších výkonnostních antipatternů při práci s ORM. Nastává tehdy, když
         aplikace provede 1 dotaz pro načtení seznamu entit a poté pro každou entitu provede další dotaz
@@ -313,7 +313,7 @@ final class DoctrineOrderRepository implements OrderRepository
 </section>
 
 <section id="agregat-hranice" aria-labelledby="agregat-hranice-heading">
-    <h2 id="agregat-hranice-heading" class="h-section"><span class="h-num">08.03</span> Agregát a výkon: správné určení hranic</h2>
+    <h2 id="agregat-hranice-heading" class="h-section"><span class="h-num">17.03</span> Agregát a výkon: správné určení hranic</h2>
     <p>
         Jedním ze základních principů DDD je, že agregát tvoří konzistenční hranici – veškeré invarianty
         doménového modelu jsou zaručeny v jednom agregátu. Problém nastává, pokud jsou hranice
@@ -435,7 +435,7 @@ final class DoctrineOrderRepository
 </section>
 
 <section id="read-model-optimalizace" aria-labelledby="read-model-heading">
-    <h2 id="read-model-heading" class="h-section"><span class="h-num">08.04</span> Optimalizace read modelu (CQRS)</h2>
+    <h2 id="read-model-heading" class="h-section"><span class="h-num">17.04</span> Optimalizace read modelu (CQRS)</h2>
     <p>
         Jedním z nejsilnějších nástrojů pro řešení výkonnostních problémů v DDD je striktní oddělení
         write side (doménové operace přes agregáty) od read side (dotazy vracející data pro prezentaci).
@@ -611,7 +611,7 @@ final class SalesReportQueryService
 </section>
 
 <section id="uuid-vs-integer" aria-labelledby="uuid-heading">
-    <h2 id="uuid-heading" class="h-section"><span class="h-num">08.05</span> UUID vs. integer primární klíče</h2>
+    <h2 id="uuid-heading" class="h-section"><span class="h-num">17.05</span> UUID vs. integer primární klíče</h2>
     <p>
         V DDD je doporučenou praxí, aby agregát znal svoji identitu již před uložením do databáze.
         To umožňuje generovat <code>AggregateId</code> v doménovém kódu bez závislosti na databázové
@@ -783,7 +783,7 @@ final class Order
 </section>
 
 <section id="doctrine-identity-map" aria-labelledby="identity-map-heading">
-    <h2 id="identity-map-heading" class="h-section"><span class="h-num">08.06</span> Doctrine Identity Map a Unit of Work</h2>
+    <h2 id="identity-map-heading" class="h-section"><span class="h-num">17.06</span> Doctrine Identity Map a Unit of Work</h2>
     <p>
         Doctrine ORM implementuje vzor Identity Map (Martin Fowler, <em>Patterns of Enterprise Application Architecture</em>):
         každý spravovaný objekt (managed entity) je v jednom <code>EntityManager</code>u uložen v paměti pod svým
@@ -895,7 +895,7 @@ final class ImportProductsHandler
 </section>
 
 <section id="cachovani" aria-labelledby="cachovani-heading">
-    <h2 id="cachovani-heading" class="h-section"><span class="h-num">08.07</span> Caching v DDD architektuře</h2>
+    <h2 id="cachovani-heading" class="h-section"><span class="h-num">17.07</span> Caching v DDD architektuře</h2>
     <p>
         Caching je mocný nástroj, ale v DDD architektuře vyžaduje pečlivý design. Základní otázka je:
         <strong>co cachovat</strong>? Obecné pravidlo zní: cachujeme výsledky operací, které jsou
@@ -1065,7 +1065,7 @@ final class InvalidateUserCacheOnEmailChanged
 </section>
 
 <section id="bulk-operace" aria-labelledby="bulk-operace-heading">
-    <h2 id="bulk-operace-heading" class="h-section"><span class="h-num">08.08</span> Bulk operace a hromadné zpracování</h2>
+    <h2 id="bulk-operace-heading" class="h-section"><span class="h-num">17.08</span> Bulk operace a hromadné zpracování</h2>
     <p>
         Standardní DDD workflow – načti agregát, aplikuj doménovou logiku, zavolej <code>flush()</code>
         - funguje výborně pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
@@ -1226,7 +1226,7 @@ final class StartProductImportHandler
 </section>
 
 <section id="profiling" aria-labelledby="profiling-heading">
-    <h2 id="profiling-heading" class="h-section"><span class="h-num">08.09</span> Profiling DDD aplikací</h2>
+    <h2 id="profiling-heading" class="h-section"><span class="h-num">17.09</span> Profiling DDD aplikací</h2>
     <p>
         Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
         ekosystému existuje škála nástrojů od jednoduchého development profileru až po pokročilé

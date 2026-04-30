@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '13',
+        chapter_number: '22',
         category: 'Praxe',
         title: 'Anti-vzory a typické chyby v DDD',
         deck: 'Přehled nejčastějších anti-vzorů a typických chyb při implementaci Domain-Driven Design: anémický doménový model, Primitive Obsession, příliš velký agregát, sdílená databáze napříč Bounded Contexts, mutovatelné události a over-engineering.',
@@ -61,9 +61,9 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="13">
+    <div class="art-body" data-chapter-number="22">
 <section id="uvodem" aria-labelledby="uvodem-heading">
-            <h2 id="uvodem-heading" class="h-section"><span class="h-num">13.01</span> Úvodem: Proč je důležité znát anti-vzory</h2>
+            <h2 id="uvodem-heading" class="h-section"><span class="h-num">22.01</span> Úvodem: Proč je důležité znát anti-vzory</h2>
             <p>
                 Domain-Driven Design je mocný přístup k návrhu softwaru, ale jeho komplexnost s sebou přináší
                 mnohá úskalí. Zkušenosti z praxe ukazují, že týmy, které s DDD začínají, opakovaně narážejí
@@ -108,7 +108,7 @@
         </section>
 
         <section id="anemicky-domenovy-model" aria-labelledby="anemicky-domenovy-model-heading">
-            <h2 id="anemicky-domenovy-model-heading" class="h-section"><span class="h-num">13.02</span> Anti-vzor: Anémický doménový model (Anemic Domain Model)</h2>
+            <h2 id="anemicky-domenovy-model-heading" class="h-section"><span class="h-num">22.02</span> Anti-vzor: Anémický doménový model (Anemic Domain Model)</h2>
             <p>
                 Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji
                 obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003
@@ -401,7 +401,7 @@ class User
         </section>
 
         <section id="primitive-obsession" aria-labelledby="primitive-obsession-heading">
-            <h2 id="primitive-obsession-heading" class="h-section"><span class="h-num">13.03</span> Anti-vzor: Primitive Obsession (posedlost primitivy)</h2>
+            <h2 id="primitive-obsession-heading" class="h-section"><span class="h-num">22.03</span> Anti-vzor: Primitive Obsession (posedlost primitivy)</h2>
             <p>
                 Primitive Obsession je anti-vzor, při němž vývojáři používají primitivní datové typy (<code>string</code>,
                 <code>int</code>, <code>float</code>) tam, kde by měly být použity hodnotové objekty (Value Objects).
@@ -632,7 +632,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
         </section>
 
         <section id="prilis-velky-agregat" aria-labelledby="prilis-velky-agregat-heading">
-            <h2 id="prilis-velky-agregat-heading" class="h-section"><span class="h-num">13.04</span> Anti-vzor: Příliš velký agregát (God Aggregate)</h2>
+            <h2 id="prilis-velky-agregat-heading" class="h-section"><span class="h-num">22.04</span> Anti-vzor: Příliš velký agregát (God Aggregate)</h2>
             <p>
                 Agregát by měl být navrhován kolem transakční konzistence – to jest kolem nejmenší skupiny objektů,
                 která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako "God Aggregate")
@@ -855,7 +855,7 @@ class Wishlist
         </section>
 
         <section id="sdilena-databaze" aria-labelledby="sdilena-databaze-heading">
-            <h2 id="sdilena-databaze-heading" class="h-section"><span class="h-num">13.05</span> Anti-vzor: Sdílená databáze napříč Bounded Contexts</h2>
+            <h2 id="sdilena-databaze-heading" class="h-section"><span class="h-num">22.05</span> Anti-vzor: Sdílená databáze napříč Bounded Contexts</h2>
             <p>
                 Jeden z nejzávažnějších strategických anti-vzorů nastává, když různé Bounded Contexts sdílejí
                 stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. I když se to na počátku
@@ -1034,7 +1034,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
         </section>
 
         <section id="mutovatelne-udalosti" aria-labelledby="mutovatelne-udalosti-heading">
-            <h2 id="mutovatelne-udalosti-heading" class="h-section"><span class="h-num">13.06</span> Anti-vzor: Mutovatelné doménové události</h2>
+            <h2 id="mutovatelne-udalosti-heading" class="h-section"><span class="h-num">22.06</span> Anti-vzor: Mutovatelné doménové události</h2>
             <p>
                 Doménová událost reprezentuje fakt, který se stal v minulosti – a minulost nelze změnit.
                 Události musí být striktně <strong>immutable</strong> (neměnné). Mutovatelná událost je
@@ -1191,7 +1191,7 @@ final class OrderCancelledEvent
         </section>
 
         <section id="logika-v-infrastrukture" aria-labelledby="logika-v-infrastrukture-heading">
-            <h2 id="logika-v-infrastrukture-heading" class="h-section"><span class="h-num">13.07</span> Anti-vzor: Doménová logika v infrastrukturní vrstvě</h2>
+            <h2 id="logika-v-infrastrukture-heading" class="h-section"><span class="h-num">22.07</span> Anti-vzor: Doménová logika v infrastrukturní vrstvě</h2>
             <p>
                 DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře,
                 Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku
@@ -1389,7 +1389,7 @@ class UserController extends AbstractController
         </section>
 
         <section id="over-engineering" aria-labelledby="over-engineering-heading">
-            <h2 id="over-engineering-heading" class="h-section"><span class="h-num">13.08</span> Anti-vzor: Over-engineering u jednoduchých aplikací</h2>
+            <h2 id="over-engineering-heading" class="h-section"><span class="h-num">22.08</span> Anti-vzor: Over-engineering u jednoduchých aplikací</h2>
             <p>
                 DDD není vhodné pro každý projekt. Eric Evans sám upozorňuje, že DDD přináší největší přidanou
                 hodnotu u <strong>komplexních domén se složitou doménovou logikou</strong>. Pro jednoduché CRUD aplikace,
@@ -1476,7 +1476,7 @@ class UserController extends AbstractController
         </section>
 
         <section id="missing-ubiquitous-language" aria-labelledby="missing-ubiquitous-language-heading">
-            <h2 id="missing-ubiquitous-language-heading" class="h-section"><span class="h-num">13.09</span> Anti-vzor: Ignorování Ubiquitous Language</h2>
+            <h2 id="missing-ubiquitous-language-heading" class="h-section"><span class="h-num">22.09</span> Anti-vzor: Ignorování Ubiquitous Language</h2>
             <p>
                 Jedním ze základních pilířů DDD je Ubiquitous Language – společný jazyk sdílený vývojáři,
                 doménovými experty a všemi zainteresovanými stranami. Tento jazyk musí být konzistentně

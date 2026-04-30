@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '11',
+        chapter_number: '19',
         category: 'Praxe',
         title: 'Migrace z CRUD architektury na DDD',
         deck: 'Podrobný průvodce migrací z CRUD architektury na Domain-Driven Design v Symfony. Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a postupné zavedení CQRS s praktickými PHP příklady.',
@@ -61,11 +61,11 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="11">
+    <div class="art-body" data-chapter-number="19">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter09_Migration' } %}
 
 <section id="kdy-migrovat" aria-labelledby="kdy-migrovat-heading">
-            <h2 id="kdy-migrovat-heading" class="h-section"><span class="h-num">11.01</span> Kdy a proč migrovat z CRUD na DDD</h2>
+            <h2 id="kdy-migrovat-heading" class="h-section"><span class="h-num">19.01</span> Kdy a proč migrovat z CRUD na DDD</h2>
             <p>
                 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
                 Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
@@ -157,7 +157,7 @@
         </section>
 
         <section id="strangler-fig" aria-labelledby="strangler-fig-heading">
-            <h2 id="strangler-fig-heading" class="h-section"><span class="h-num">11.02</span> Strangler Fig Pattern – vzor postupné náhrady</h2>
+            <h2 id="strangler-fig-heading" class="h-section"><span class="h-num">19.02</span> Strangler Fig Pattern – vzor postupné náhrady</h2>
             <p>
                 Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
                 <a href="https://martinfowler.com/bliki/StranglerFigApplication.html" target="_blank" rel="noopener">[2]</a>,
@@ -257,7 +257,7 @@
         </section>
 
         <section id="analyza-domeny" aria-labelledby="analyza-domeny-heading">
-            <h2 id="analyza-domeny-heading" class="h-section"><span class="h-num">11.03</span> Krok 1: Analýza existující domény</h2>
+            <h2 id="analyza-domeny-heading" class="h-section"><span class="h-num">19.03</span> Krok 1: Analýza existující domény</h2>
             <p>
                 Než začneme přesouvat kód, musíme pochopit doménu. Nejčastější chybou je přímý skok do refaktoringu
                 bez předchozí analýzy – výsledkem je pak DDD architektura, která přesně kopíruje strukturu starých
@@ -383,7 +383,7 @@ class UserController extends AbstractController
         </section>
 
         <section id="extrakce-domainove-vrstvy" aria-labelledby="extrakce-domainove-vrstvy-heading">
-            <h2 id="extrakce-domainove-vrstvy-heading" class="h-section"><span class="h-num">11.04</span> Krok 2: Extrakce doménové vrstvy</h2>
+            <h2 id="extrakce-domainove-vrstvy-heading" class="h-section"><span class="h-num">19.04</span> Krok 2: Extrakce doménové vrstvy</h2>
             <p>
                 Extrakce doménové vrstvy znamená přesunutí doménových pravidel z kontrolerů a service tříd do doménových
                 objektů. Cílem je, aby doménové objekty samy vynucovaly svá invarianty – pravidla, která musí být
@@ -617,7 +617,7 @@ final class Email
         </section>
 
         <section id="zavedeni-repozitaru" aria-labelledby="zavedeni-repozitaru-heading">
-            <h2 id="zavedeni-repozitaru-heading" class="h-section"><span class="h-num">11.05</span> Krok 3: Zavedení repozitářů</h2>
+            <h2 id="zavedeni-repozitaru-heading" class="h-section"><span class="h-num">19.05</span> Krok 3: Zavedení repozitářů</h2>
             <p>
                 V CRUD architektuře se pro přístup k datům typicky používá <code>EntityManagerInterface</code> nebo
                 Doctrine repozitáře přímo v kontrolerech a service třídách. DDD přináší doménové rozhraní repozitáře,
@@ -760,7 +760,7 @@ services:
         </section>
 
         <section id="cqrs-postupne" aria-labelledby="cqrs-postupne-heading">
-            <h2 id="cqrs-postupne-heading" class="h-section"><span class="h-num">11.06</span> Krok 4: Postupné zavedení CQRS</h2>
+            <h2 id="cqrs-postupne-heading" class="h-section"><span class="h-num">19.06</span> Krok 4: Postupné zavedení CQRS</h2>
             <p>
                 Command Query Responsibility Segregation (CQRS) je přirozené rozšíření DDD, avšak jeho zavedení
                 by mělo přijít až poté, co je doménový model dobře etablován. Předčasné zavedení CQRS bez zralého
@@ -909,7 +909,7 @@ class UserController extends AbstractController
         </section>
 
         <section id="testovani-pri-migraci" aria-labelledby="testovani-pri-migraci-heading">
-            <h2 id="testovani-pri-migraci-heading" class="h-section"><span class="h-num">11.07</span> Testování při migraci</h2>
+            <h2 id="testovani-pri-migraci-heading" class="h-section"><span class="h-num">19.07</span> Testování při migraci</h2>
             <p>
                 Testování je kritickým aspektem migrace. Bez dostatečného pokrytí testy hrozí, že refaktoring
                 zavede regrese, které jsou odhaleny až v produkci. Strategie testování při migraci z CRUD na DDD
@@ -1083,7 +1083,7 @@ final class UserTest extends TestCase
         </section>
 
         <section id="rizika-a-doporuceni" aria-labelledby="rizika-a-doporuceni-heading">
-            <h2 id="rizika-a-doporuceni-heading" class="h-section"><span class="h-num">11.08</span> Rizika a doporučení</h2>
+            <h2 id="rizika-a-doporuceni-heading" class="h-section"><span class="h-num">19.08</span> Rizika a doporučení</h2>
 
             <h3>Nejčastější chyby při migraci</h3>
             <ul>
@@ -1174,7 +1174,7 @@ final class UserTest extends TestCase
         </section>
 
         <section id="refactoring-kucharka" aria-labelledby="refactoring-kucharka-heading">
-            <h2 id="refactoring-kucharka-heading" class="h-section"><span class="h-num">11.09</span> Refactoring kuchařka – krátké recepty</h2>
+            <h2 id="refactoring-kucharka-heading" class="h-section"><span class="h-num">19.09</span> Refactoring kuchařka – krátké recepty</h2>
 
             <p>
                 Strangler Fig je strategický pohled na celou migraci. V denní praxi narazíte na opakující se mikrosituace.

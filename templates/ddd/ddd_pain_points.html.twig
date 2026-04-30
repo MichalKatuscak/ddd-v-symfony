@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '12',
+        chapter_number: '21',
         category: 'Praxe',
         title: 'DDD v praxi – kde to bolí',
         deck: 'Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další.',
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="12">
+    <div class="art-body" data-chapter-number="21">
 <p>
         Předchozí kapitoly pokryly teorii i pokročilé vzory: od
         <a href="{{ path('basic_concepts') }}">základních stavebních bloků</a> přes
@@ -83,7 +83,7 @@
        BLOK A: Doctrine vs. doménový model
        ═══════════════════════════════════════════════════════════ #}
     <section id="doctrine" aria-labelledby="doctrine-heading">
-    <h2 id="doctrine-heading" class="h-section"><span class="h-num">12.01</span> A – Doctrine vs. doménový model</h2>
+    <h2 id="doctrine-heading" class="h-section"><span class="h-num">21.01</span> A – Doctrine vs. doménový model</h2>
 
     <p>
         Doctrine ORM je mocný nástroj, ale jeho interní model (Unit of Work, Identity Map, lazy loading)
@@ -575,7 +575,7 @@ private string $id;{% endverbatim %}{% endset %}
        BLOK B: Asynchronní infrastruktura
        ═══════════════════════════════════════════════════════════ #}
     <section id="async" aria-labelledby="async-heading">
-    <h2 id="async-heading" class="h-section"><span class="h-num">12.02</span> B – Asynchronní infrastruktura</h2>
+    <h2 id="async-heading" class="h-section"><span class="h-num">21.02</span> B – Asynchronní infrastruktura</h2>
 
     <p>
         Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci –
@@ -1061,7 +1061,7 @@ try {
        BLOK C: Modelování
        ═══════════════════════════════════════════════════════════ #}
     <section id="modelovani" aria-labelledby="modelovani-heading">
-    <h2 id="modelovani-heading" class="h-section"><span class="h-num">12.03</span> C – Modelování</h2>
+    <h2 id="modelovani-heading" class="h-section"><span class="h-num">21.03</span> C – Modelování</h2>
 
     <p>
         Správné doménové modelování je obtížnější než implementace – vyžaduje disciplínu
@@ -1317,7 +1317,7 @@ final class StripePaymentGateway implements PaymentGateway
        BLOK D: Symfony-specifické třenice
        ═══════════════════════════════════════════════════════════ #}
     <section id="symfony" aria-labelledby="symfony-heading">
-    <h2 id="symfony-heading" class="h-section"><span class="h-num">12.04</span> D – Symfony-specifické třenice</h2>
+    <h2 id="symfony-heading" class="h-section"><span class="h-num">21.04</span> D – Symfony-specifické třenice</h2>
 
     <p>
         Symfony je mocný framework, ale některé jeho konvence jsou navrženy pro CRUD aplikace.
@@ -1540,7 +1540,7 @@ final class OrderVoter extends Voter
        BLOK E: Organizace a tým
        ═══════════════════════════════════════════════════════════ #}
     <section id="tym" aria-labelledby="tym-heading">
-    <h2 id="tym-heading" class="h-section"><span class="h-num">12.05</span> E – Organizace a tým</h2>
+    <h2 id="tym-heading" class="h-section"><span class="h-num">21.05</span> E – Organizace a tým</h2>
 
     <p>
         DDD selže ne proto, že by byl technicky špatný – ale proto, že tým ho nepochopil,

@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '02',
+        chapter_number: '06',
         category: 'Základy',
         title: 'Základní koncepty DDD',
         deck: 'Domain-Driven Design nabízí sadu stavebních bloků, které pomáhají převést znalosti o doméně do strukturovaného softwarového modelu. Každý z těchto konceptů řeší konkrétní problém – od vymezení hranic mezi částmi systému přes zachycení identity objektů až po komunikaci mezi komponentami.',
@@ -61,11 +61,11 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="02">
+    <div class="art-body" data-chapter-number="06">
         {% include '_partials/github_examples.html.twig' with { path: 'Chapter03_BasicConcepts' } %}
 
         <section id="bounded-contexts" aria-labelledby="bounded-contexts-heading">
-            <h2 id="bounded-contexts-heading" class="h-section"><span class="h-num">02.01</span> Ohraničené kontexty (Bounded Contexts)</h2>
+            <h2 id="bounded-contexts-heading" class="h-section"><span class="h-num">06.01</span> Ohraničené kontexty (Bounded Contexts)</h2>
             <p>
                 Ohraničený kontext je explicitní hranice, ve které je model platný
                 <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">[1]</a>.
@@ -75,7 +75,7 @@
 
             {% set _diagram_inline %}{% include '/diagrams/5_bounded_contexts/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '02.1-A',
+                fig: '06.1-A',
                 title: 'Ohraničené kontexty',
                 inline: _diagram_inline
             } %}
@@ -139,7 +139,7 @@
         </section>
 
         <section id="ubiquitous-language" aria-labelledby="ubiquitous-language-heading">
-            <h2 id="ubiquitous-language-heading" class="h-section"><span class="h-num">02.02</span> Všudypřítomný jazyk (Ubiquitous Language)</h2>
+            <h2 id="ubiquitous-language-heading" class="h-section"><span class="h-num">06.02</span> Všudypřítomný jazyk (Ubiquitous Language)</h2>
 
             <p>
                 Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty
@@ -150,7 +150,7 @@
 
             {% set _diagram_inline %}{% include '/diagrams/4_ubiquitous_language/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '02.2-A',
+                fig: '06.2-A',
                 title: 'Všudypřítomný jazyk',
                 inline: _diagram_inline
             } %}
@@ -187,7 +187,7 @@
         </section>
 
         <section id="entities" aria-labelledby="entities-heading">
-            <h2 id="entities-heading" class="h-section"><span class="h-num">02.03</span> Entity</h2>
+            <h2 id="entities-heading" class="h-section"><span class="h-num">06.03</span> Entity</h2>
             <p>
                 Entita je objekt, který je definován svou identitou, nikoli svými atributy
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[3]</a>.
@@ -264,7 +264,7 @@ class User
         </section>
 
         <section id="value-objects" aria-labelledby="value-objects-heading">
-            <h2 id="value-objects-heading" class="h-section"><span class="h-num">02.04</span> Hodnotové objekty (Value Objects)</h2>
+            <h2 id="value-objects-heading" class="h-section"><span class="h-num">06.04</span> Hodnotové objekty (Value Objects)</h2>
             <p>
                 Hodnotové objekty jsou objekty definované svými atributy, nikoli identitou
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[3]</a>.
@@ -322,7 +322,7 @@ class Email
         </section>
 
         <section id="aggregates" aria-labelledby="aggregates-heading">
-            <h2 id="aggregates-heading" class="h-section"><span class="h-num">02.05</span> Agregáty (Aggregates)</h2>
+            <h2 id="aggregates-heading" class="h-section"><span class="h-num">06.05</span> Agregáty (Aggregates)</h2>
             <p>
                 Agregát je skupina souvisejících objektů, která tvoří jednu transakční hranici konzistence
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[3]</a>.
@@ -532,7 +532,7 @@ enum OrderStatus: string
         </section>
 
         <section id="repositories" aria-labelledby="repositories-heading">
-            <h2 id="repositories-heading" class="h-section"><span class="h-num">02.06</span> Repozitáře (Repositories)</h2>
+            <h2 id="repositories-heading" class="h-section"><span class="h-num">06.06</span> Repozitáře (Repositories)</h2>
             <p>
                 Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily
                 persistence a poskytují
@@ -574,7 +574,7 @@ interface OrderRepository
         </section>
 
         <section id="domain-services" aria-labelledby="domain-services-heading">
-            <h2 id="domain-services-heading" class="h-section"><span class="h-num">02.07</span> Doménové služby (Domain Services)</h2>
+            <h2 id="domain-services-heading" class="h-section"><span class="h-num">06.07</span> Doménové služby (Domain Services)</h2>
             <p>
                 Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity
                 nebo hodnotového objektu.
@@ -649,7 +649,7 @@ class PaymentService
         </section>
 
         <section id="domain-events" aria-labelledby="domain-events-heading">
-            <h2 id="domain-events-heading" class="h-section"><span class="h-num">02.08</span> Doménové události (Domain Events)</h2>
+            <h2 id="domain-events-heading" class="h-section"><span class="h-num">06.08</span> Doménové události (Domain Events)</h2>
             <p>
                 Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
                 význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná

@@ -85,8 +85,8 @@
 
         <p>
             Jedním z nejkonkrétnějších výroků o vztahu DDD a AI pochází přímo od Erica Evanse. Na konferenci
-            Explore DDD 2024 Evans popisoval experiment, ve kterém tým fine-tunoval LLM na ubiquitous language
-            jednoho bounded contextu – na terminologii, pravidla a výrazy, které tým denně používal v diskuzích
+            Explore DDD 2024 Evans popisoval experiment, ve kterém tým doladil (fine-tuning) LLM na ubiquitous language
+            jednoho bounded contextu – na terminologii, pravidla a výrazy, které tým denně používal v diskusích
             s doménovými experty. Výsledek byl podle Evanse překvapivě přesvědčivý: specializovaný model
             byl levnější v provozu i přesnější než univerzální model, který musel doménu vyvozovat z kontextu
             v promptu.
@@ -125,13 +125,13 @@
             aby LLM chápal kód bez speciální terminologie – a že preferovaný formát AI je Markdown,
             nikoli doménový jazyk definovaný formálními pravidly. DHH poukazuje na to, že Rails 8.1 přidal
             nativní Markdown rendering právě proto, že to je formát, ve kterém AI přirozeně komunikuje.
-            Z jeho pohledu je ubiquitous language elegantní myšlenka pro komplexní enterprise systémy,
+            Z jeho pohledu je ubiquitous language užitečná myšlenka pro komplexní enterprise systémy,
             ale pro většinu webových aplikací je konvence nad konfigurací – prostá angličtina nebo čeština
             v komentářích a názvech – dostatečně výmluvná.
         </p>
 
         <p>
-            Důležitý kontext: velké jazykové modely pracují s přirozeným jazykem jako svým primárním médiem.
+            Pro úplnost: velké jazykové modely pracují s přirozeným jazykem jako svým primárním médiem.
             Ubiquitous language v DDD je precizní podmnožina přirozeného jazyka – terminologie domény
             zbavená nejednoznačností a obohacená o doménová pravidla. To z ní dělá přirozený most mezi
             doménovými experty a LLM: pojmy, které jsou jasné lidem, jsou jasné i modelu. Otázka zní,
@@ -198,11 +198,11 @@
 
         <p>
             Nick Tune je jedním z nejvíce aktivních praktiků na průsečíku DDD a AI. V článku pro O'Reilly
-            Radar (2026) popisuje, jak použil Claude Code k reverse engineeringu softwarové architektury –
-            automatickému mapování end-to-end toků, závislostí a hranic v existující codebase.
+            Radar (2026) popisuje, jak použil Claude Code k reverznímu inženýrství softwarové architektury –
+            automatickému mapování end-to-end toků, závislostí a hranic v existující kódové bázi.
             V návazném článku pak ukazuje, jak lze pomocí knihovny ts-morph deterministicky extrahovat
             architektonické vzory, které slouží jako vstup pro AI agenty. Tune vidí DDD
-            bounded contexts jako přirozený rámec pro tento přístup – každý context má svůj kontext
+            bounded contexts jako přirozený rámec pro tento přístup – každý kontext má svůj rámec
             (ve smyslu CLAUDE.md nebo Cursor rules), svou terminologii a své invarianty. AI agent
             pracující uvnitř jednoho bounded contextu potřebuje znát méně – a tím dělá méně chyb.
         </p>
@@ -224,7 +224,7 @@
             stavu z roku 2021. GitClear hovoří o kódu, který je „lokálně koherentní,
             ale architektonicky nekonzistentní“: každý soubor nebo funkce může být syntakticky správná
             a pro svůj bezprostřední účel funkční, ale větší architektonické vzory – jako jsou hranice
-            mezi moduly, zachování invariantů nebo konzistentní pojmenovávání napříč codebase – jsou
+            mezi moduly, zachování invariantů nebo konzistentní pojmenování napříč kódovou bází – jsou
             porušeny. Bounded contexts jsou právě odpovědí na tento problém, ale je otázka, zda samotná
             existence bounded contextu stačí, nebo zda AI agent potřebuje explicitní instruktáž o každém
             pravidle uvnitř kontextu.
@@ -260,13 +260,13 @@
             signálem, že AI se odchýlila od záměru. TDD tak ve spolupráci s AI plní roli, která
             v tradičním vývoji náleží code review: průběžná verifikace toho, zda kód dělá to,
             co má. Beck přiznává, že sám testuje méně věcí než dříve, ale testy, které píše, jsou
-            úmyslnější – zaměřené na doménová pravidla a hraniční případy, nikoli na happy path.
+            úmyslnější – zaměřené na doménová pravidla a hraniční případy, nikoli na ideální průběh (happy path).
         </p>
 
         <p>
             Martin Fowler přichází s podobným, ale méně optimistickým rámcem. V rozhovoru pro
             The New Stack Fowler přirovnává AI k „pochybnému kolegovi“ – kolaborátorovi, jehož
-            output je třeba pečlivě revidovat, nikoli slepě přijímat.
+            výstup je třeba pečlivě revidovat, nikoli slepě přijímat.
         </p>
 
         <blockquote>
@@ -286,7 +286,7 @@
 
         <p>
             Protiváhou k tomuto techno-optimismu je DHH, jehož vyjádření jsou záměrně provokativní.
-            V sérii blogpostů a přednášek DHH popisuje vlastní zkušenost s intenzivním používáním
+            V sérii článků a přednášek DHH popisuje vlastní zkušenost s intenzivním používáním
             AI asistentů a vyvozuje z ní znepokojivý závěr:
         </p>
 
@@ -297,7 +297,7 @@
 
         <p>
             DHH varuje před nebezpečím, kdy vývojář přestane rozumět kódu, který provozuje – stane
-            se project managerem AI místo inženýrem. Tento argument není anti-AI – DHH AI používá –
+            se manažerem projektu AI místo inženýrem. Tento argument není anti-AI – DHH AI používá –
             ale je to varování, že nekritické přijetí AI výstupu degraduje schopnost rozpoznat,
             kdy AI dělá chybu. Bez doménového porozumění nejsou testy dostatečné: vývojář, který
             nechápe doménu, nepíše správné testy, a AI pak plní testy generováním falešně pozitivního
@@ -309,7 +309,7 @@
             je s nimi historicky propojena. Taktické DDD vzory – agregáty s invarianty, doménové
             události jako přirozené kontrakty – jsou přirozeně testovatelné na úrovni domény.
             Agregát definuje pravidlo; test verifikuje pravidlo; AI generuje implementaci; test
-            signalizuje odchylku. Tento cyklus je robustnější než testování implementačních detailů.
+            signalizuje odchylku. Tento cyklus je odolnější než testování implementačních detailů.
             Konkrétní strategie testování DDD modelů – unit testy agregátů, integrační testy
             přes Messenger, contract testy mezi kontexty – popisuje kapitola
             <a href="{{ path('testing_ddd') }}">Testování DDD</a>.
@@ -336,7 +336,7 @@
         <p>
             Tato taxonomie má přímý dopad na to, kde AI dává smysl a kde ne. Ve vysoce komplexní
             doméně – pojišťovnictví, bankovnictví, zdravotnictví – je podíl hard-coded decisions
-            vysoký a náklady na chybu dramatické. Paradoxně to jsou domény, kde DDD přináší největší
+            vysoký a náklady na chybu vysoké. Paradoxně to jsou domény, kde DDD přináší největší
             hodnotu, ale kde je AI nejnebezpečnější, pokud není správně ohraničena. LLM-supported
             decisions existují i zde – například kategorizace dokumentů nebo návrh odpovědi zákaznickému
             servisu – ale musí být jasně odděleny od hard-coded logiky.
@@ -433,11 +433,11 @@
         </p>
 
         <p>
-            Protiváha je důležitá: tyto nástroje fungují i bez DDD. Jednoduchý kód s jasnými
+            Pro vyváženost dodejme: tyto nástroje fungují i bez DDD. Jednoduchý kód s jasnými
             konvencemi – convention over configuration v Rails stylu – může být pro AI stejně
             čitelný jako explicitně modelovaný bounded context. Pokud projekt dodržuje konzistentní
             pojmenování, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
-            i bez formálního DDD modelu. Proslulý blogpost „DHH Is Wrong“ a série na toto téma
+            i bez formálního DDD modelu. Proslulý článek „DHH Is Wrong“ a série na toto téma
             ilustrují, že konvence může být stejně výkonná jako explicitní modelování –
             otázka je, co se stane, když projekt vyroste za hranice, kde konvence stačí.
         </p>
@@ -469,7 +469,7 @@
         <p>
             Alberto Brandolini – autor EventStorming – se k propojení AI a doménového modelování
             veřejně vyjadřuje zdrženlivě. Vzdělávací firma Avanscoperta, kterou spoluzaložil,
-            nabízí workshopy zaměřené na AI-augmentované vývojové workflow (např. „The Agentic
+            nabízí workshopy zaměřené na AI-augmentované vývojové postupy (např. „The Agentic
             Developer Workshop“), ale ty nejsou přímo zaměřené na kombinaci DDD a AI.
             EventStorming zůstává v Brandoliniho pojetí fundamentálně lidskou aktivitou –
             sdílené pochopení domény se buduje v konverzaci, nikoliv v promptu.
@@ -579,7 +579,7 @@
             Syntéza pozic autorit vede k opatrnému, ale celkem konzistentnímu závěru: většina
             předních myslitelů v oblasti softwarového inženýrství vidí potenciální synergii
             mezi DDD principy a praktickým využitím AI. Evans a Tune jsou nejkonkrétnější –
-            sdílejí praktické vzory a data. Fowler a Beck jsou opatrně optimistické a zdůrazňují
+            sdílejí praktické vzory a data. Fowler a Beck jsou opatrně optimističtí a zdůrazňují
             potřebu nových nástrojů a metrik. Brandolini zachovává lidský prvek v centru.
         </p>
 
@@ -600,7 +600,7 @@
         </p>
 
         <p>
-            Důležité je rozhodovat se na základě domény, týmu a projektu. Kde leží doménová
+            Rozhodovat se má smysl podle domény, týmu a projektu. Kde leží doménová
             komplexita? Kde jsou náklady na chybu vysoké? Kde bude systém žít pět let?
             Tyto otázky – ne přítomnost nebo nepřítomnost AI v toolchainu – by měly řídit
             architektonické rozhodnutí.
@@ -628,7 +628,7 @@
                     kontext pro AI agenty – praktický výsledek DDD modelování.
                 </li>
                 <li>
-                    <strong>DHH:</strong> Pro CRUD aplikace je DDD přesold. Konvence může být
+                    <strong>DHH:</strong> Pro CRUD aplikace je DDD přeceňované. Konvence může být
                     stejně výkonná jako explicitní modelování – a AI generuje CRUD kód výborně.
                 </li>
                 <li>

@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '03',
+        chapter_number: '10',
         category: 'Základy',
         title: 'Vertikální slice architektura vs. Tradiční DDD',
         deck: 'Srovnání vertikální slice architektury a tradičního vrstveného přístupu k Domain-Driven Design – jejich výhody, nevýhody a vodítko pro volbu přístupu v Symfony projektu.',
@@ -61,9 +61,9 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="03">
+    <div class="art-body" data-chapter-number="10">
         <section id="traditional" aria-labelledby="traditional-heading">
-            <h2 id="traditional-heading" class="h-section"><span class="h-num">03.01</span> Tradiční přístup k DDD</h2>
+            <h2 id="traditional-heading" class="h-section"><span class="h-num">10.01</span> Tradiční přístup k DDD</h2>
             <p>
                 S rostoucí složitostí projektu se struktura adresářů a modulů stává jedním z rozhodujících faktorů
                 udržitelnosti kódu. Špatně zvolená organizace vede k tomu, že související logika je rozptýlena
@@ -117,7 +117,7 @@
         </section>
 
         <section id="vertical-slice" aria-labelledby="vertical-slice-heading">
-            <h2 id="vertical-slice-heading" class="h-section"><span class="h-num">03.02</span> Vertikální slice architektura (Vertical Slice Architecture)</h2>
+            <h2 id="vertical-slice-heading" class="h-section"><span class="h-num">10.02</span> Vertikální slice architektura (Vertical Slice Architecture)</h2>
             <p>
                 Vertikální slice architektura organizuje kód podle funkcí (feature slices) namísto technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" rel="noopener">[3]</a>.
                 Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
@@ -206,7 +206,7 @@
         </section>
 
         <section id="comparison" aria-labelledby="comparison-heading">
-            <h2 id="comparison-heading" class="h-section"><span class="h-num">03.03</span> Porovnání přístupů</h2>
+            <h2 id="comparison-heading" class="h-section"><span class="h-num">10.03</span> Porovnání přístupů</h2>
 
             <div class="table-responsive">
                 <table class="table table-bordered" aria-labelledby="comparison-heading">
@@ -259,7 +259,7 @@
         </section>
 
         <section id="when-to-use" aria-labelledby="when-to-use-heading">
-            <h2 id="when-to-use-heading" class="h-section"><span class="h-num">03.04</span> Kdy použít který přístup</h2>
+            <h2 id="when-to-use-heading" class="h-section"><span class="h-num">10.04</span> Kdy použít který přístup</h2>
 
             {% set _callout_body %}
                 <h3 id="traditional-when-to-use-heading">Kdy použít tradiční DDD:</h3>
@@ -292,7 +292,7 @@
         </section>
 
         <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
-            <h2 id="symfony-implementation-heading" class="h-section"><span class="h-num">03.05</span> Implementace v Symfony 8</h2>
+            <h2 id="symfony-implementation-heading" class="h-section"><span class="h-num">10.05</span> Implementace v Symfony 8</h2>
             <p>
                 Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank" rel="noopener">[7]</a>.
             </p>

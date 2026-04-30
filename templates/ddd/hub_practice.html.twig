@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}DDD v praxi – rozcestník | DDD Symfony 8{% endblock %}
-{% block meta_description %}Sedm kapitol o tom, co se reálně děje, když DDD potká legacy kód, deadline a tým: praktické příklady, testování, migrace, anti-vzory, případová studie.{% endblock %}
+{% block title %}Praxe a provoz DDD – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Šest kapitol o tom, co se reálně děje, když DDD potká legacy kód, deadline a tým: testování, migrace z CRUD, microservices, pain points, anti-vzory, kdy DDD nepoužívat.{% endblock %}
 {% block breadcrumb_name %}Praxe{% endblock %}
 
 {% block structured_data %}
@@ -11,7 +11,7 @@
     "@type": "CollectionPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
     "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
-    "name": "DDD v praxi – rozcestník",
+    "name": "Praxe a provoz DDD – rozcestník",
     "description": "{{ block('meta_description')|escape('js') }}",
     "inLanguage": "cs-CZ",
     "isPartOf": {
@@ -28,18 +28,18 @@
 
 {% block body %}
     {% include '_partials/hub.html.twig' with {
-        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · PRAXE',
-        hub_h_main: 'Praxe,',
-        hub_h_em: 'kde to bolí a kde to opravdu funguje.',
-        hub_deck: 'Tato sekce je o překladu z teorie do reality. <strong>Praktické příklady</strong> a <strong>testování</strong> ukazují, jak vypadá zdravý běh. <strong>Migrace z CRUD</strong>, <strong>kde to bolí</strong>, <strong>anti-vzory</strong> a <strong>kdy DDD nepoužívat</strong> jsou poznámky, které byste obvykle slyšeli až při code review – tady jsou pohromadě. <strong>Případová studie</strong> spojuje vše do jednoho běžícího systému pro správu projektů.',
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · PRAXE A PROVOZ',
+        hub_h_main: 'Praxe a provoz,',
+        hub_h_em: 'kde to bolí a kde se to láme.',
+        hub_deck: 'Sekce o překladu teorie do reality. <strong>Testování</strong> ukazuje, jak vypadá zdravý běh. <strong>Migrace z CRUD</strong> popisuje strangler fig přechod ke zdravému modelu. <strong>Microservices a Bounded Contexts</strong> řeší, kdy z BC udělat servisu a kdy zůstat u modulárního monolitu. <strong>Pain points</strong>, <strong>anti-vzory</strong> a <strong>kdy DDD nepoužívat</strong> jsou poznámky, které obvykle slyšíte až při code review – zde jsou pohromadě.',
         hub_meta: [
             { k: 'Kapitol', v: hub_chapters|length },
             { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
-            { k: 'Případová studie', v: 'kapitola 24 · 50 min' },
+            { k: 'Předpoklady', v: 'Taktika · architektura · vzory' },
             { k: 'Aktualizace', v: updated }
         ],
-        hub_part: 'PART III',
-        hub_part_title: 'Co bolí · jak migrovat · co testovat',
+        hub_part: 'PART V',
+        hub_part_title: 'Testy · migrace · služby · pasti',
         hub_part_sub: 'realita za diagramy',
         hub_chapters: hub_chapters
     } only %}

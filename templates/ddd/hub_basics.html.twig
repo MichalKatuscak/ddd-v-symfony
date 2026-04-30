@@ -1,8 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Základy DDD – rozcestník | DDD Symfony 8{% endblock %}
-{% block meta_description %}Čtyři kapitoly, kterými začíná každý kontakt s Domain-Driven Design v Symfony 8. Filozofie, jazyk, ohraničení, slicing a první implementace.{% endblock %}
-{% block breadcrumb_name %}Základy{% endblock %}
+{% block title %}Úvod a strategie DDD – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Pět kapitol, kterými začíná každý kontakt s Domain-Driven Design: filozofie a Ubiquitous Language, subdomény, Bounded Context a Context Mapping, Event Storming a Team Topologies.{% endblock %}
+{% block breadcrumb_name %}Úvod a strategie{% endblock %}
 
 {% block structured_data %}
 <script type="application/ld+json">
@@ -11,7 +11,7 @@
     "@type": "CollectionPage",
     "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
     "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
-    "name": "Základy DDD – rozcestník",
+    "name": "Úvod a strategie DDD – rozcestník",
     "description": "{{ block('meta_description')|escape('js') }}",
     "inLanguage": "cs-CZ",
     "isPartOf": {
@@ -28,19 +28,19 @@
 
 {% block body %}
     {% include '_partials/hub.html.twig' with {
-        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · ZÁKLADY',
-        hub_h_main: 'Základy DDD,',
-        hub_h_em: 'než napíšete první řádek kódu.',
-        hub_deck: 'Tato sekce je <strong>vstupní brána</strong> celé příručky. Začíná se filozofií a sdíleným jazykem, pokračuje hranicemi domény a slicingem, končí konkrétní strukturou Symfony 8 projektu. Pokud nečtete od začátku, sem se vraťte vždy, když diskuse o kódu sklouzává od pojmů k názorům.',
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · ÚVOD A STRATEGIE',
+        hub_h_main: 'Úvod a strategie DDD,',
+        hub_h_em: 'než nakreslíte první třídu.',
+        hub_deck: 'Vstupní brána celé příručky. Začíná se filozofií a sdíleným jazykem, pokračuje rozdělením domény na subdomény, ohraničeným kontextem a vztahy mezi nimi. Uzavírají ji workshopy, kterými se doména objevuje, a pohled na týmovou strukturu jako součást architektury. Pokud nečtete od začátku, sem se vracejte vždy, když diskuse o kódu sklouzává od pojmů k názorům.',
         hub_meta: [
             { k: 'Kapitol', v: hub_chapters|length },
             { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
-            { k: 'Předpoklady', v: 'PHP 8.4 · Symfony 8' },
+            { k: 'Předpoklady', v: 'žádné' },
             { k: 'Aktualizace', v: updated }
         ],
         hub_part: 'PART I',
-        hub_part_title: 'Filozofie · jazyk · ohraničení',
-        hub_part_sub: 'pojmy a struktura projektu',
+        hub_part_title: 'Filozofie · subdomény · BC · workshopy · týmy',
+        hub_part_sub: 'co řešit dřív než kód',
         hub_chapters: hub_chapters
     } only %}
 {% endblock %}

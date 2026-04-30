@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '06',
+        chapter_number: '14',
         category: 'Vzory',
         title: 'Event Sourcing',
         deck: 'Event Sourcing v kontextu Domain-Driven Design a Symfony – implementace Event Store, event-sourcovaných agregátů, projekcí, Outbox patternu, snapshottingu a verzování událostí. Včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.',
@@ -61,11 +61,11 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="06">
+    <div class="art-body" data-chapter-number="14">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter06_EventSourcing' } %}
 
 <section id="co-je-event-sourcing" aria-labelledby="co-je-event-sourcing-heading">
-        <h2 id="co-je-event-sourcing-heading" class="h-section"><span class="h-num">06.01</span> Co je Event Sourcing?</h2>
+        <h2 id="co-je-event-sourcing-heading" class="h-section"><span class="h-num">14.01</span> Co je Event Sourcing?</h2>
 
         <p>
             Tradiční CRUD persistence má slepou skvrnu: při každé změně přepíše předchozí stav a veškerá
@@ -178,7 +178,7 @@
     </section>
 
     <section id="vztah-k-cqrs" aria-labelledby="vztah-k-cqrs-heading">
-        <h2 id="vztah-k-cqrs-heading" class="h-section"><span class="h-num">06.02</span> Vztah k CQRS</h2>
+        <h2 id="vztah-k-cqrs-heading" class="h-section"><span class="h-num">14.02</span> Vztah k CQRS</h2>
 
         <p>
             Event Sourcing a <a href="{{ path('cqrs') }}">CQRS</a> jsou dva samostatné vzory, které se však přirozeně
@@ -229,7 +229,7 @@
     </section>
 
     <section id="domenove-udalosti" aria-labelledby="domenove-udalosti-heading">
-        <h2 id="domenove-udalosti-heading" class="h-section"><span class="h-num">06.03</span> Doménové události jako základ Event Sourcingu</h2>
+        <h2 id="domenove-udalosti-heading" class="h-section"><span class="h-num">14.03</span> Doménové události jako základ Event Sourcingu</h2>
 
         <p>
             V Event Sourcingu jsou doménové události (Domain Events) primárním datovým artefaktem. Na rozdíl od
@@ -419,7 +419,7 @@ final class UserRegistered implements DomainEvent
     </section>
 
     <section id="event-store" aria-labelledby="event-store-heading">
-        <h2 id="event-store-heading" class="h-section"><span class="h-num">06.04</span> Implementace Event Store</h2>
+        <h2 id="event-store-heading" class="h-section"><span class="h-num">14.04</span> Implementace Event Store</h2>
 
         <p>
             Event Store je srdcem Event Sourcingu. Jedná se o append-only databázové úložiště, do nějž se ukládají
@@ -650,7 +650,7 @@ final class DoctrineEventStore implements EventStore
     </section>
 
     <section id="aggregate-s-es" aria-labelledby="aggregate-s-es-heading">
-        <h2 id="aggregate-s-es-heading" class="h-section"><span class="h-num">06.05</span> Agregát s Event Sourcingem</h2>
+        <h2 id="aggregate-s-es-heading" class="h-section"><span class="h-num">14.05</span> Agregát s Event Sourcingem</h2>
 
         <p>
             V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
@@ -967,7 +967,7 @@ final class EventSourcedOrderRepository
     </section>
 
     <section id="projekce" aria-labelledby="projekce-heading">
-        <h2 id="projekce-heading" class="h-section"><span class="h-num">06.06</span> Projekce (Projections)</h2>
+        <h2 id="projekce-heading" class="h-section"><span class="h-num">14.06</span> Projekce (Projections)</h2>
 
         <p>
             Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
@@ -1126,7 +1126,7 @@ final class OrderSummaryProjector
     </section>
 
     <section id="outbox" aria-labelledby="outbox-heading">
-        <h2 id="outbox-heading" class="h-section"><span class="h-num">06.07</span> Outbox a transakční doručování událostí</h2>
+        <h2 id="outbox-heading" class="h-section"><span class="h-num">14.07</span> Outbox a transakční doručování událostí</h2>
 
         <p>
             Předchozí sekce ukazovala projektory jako Messenger handlery, které dostávají doménové
@@ -1223,7 +1223,7 @@ final class OrderSummaryProjector
     </section>
 
     <section id="prakticke-problemy-projekci" aria-labelledby="prakticke-problemy-projekci-heading">
-        <h2 id="prakticke-problemy-projekci-heading" class="h-section"><span class="h-num">06.08</span> Praktické problémy projekcí</h2>
+        <h2 id="prakticke-problemy-projekci-heading" class="h-section"><span class="h-num">14.08</span> Praktické problémy projekcí</h2>
 
         <p>
             Předchozí sekce ukázaly, jak projekci vybudovat a jak události spolehlivě doručit. V praxi
@@ -1593,7 +1593,7 @@ final class RebuildProjectionCommand extends Command
     </section>
 
     <section id="snapshotting" aria-labelledby="snapshotting-heading">
-        <h2 id="snapshotting-heading" class="h-section"><span class="h-num">06.09</span> Snapshotting</h2>
+        <h2 id="snapshotting-heading" class="h-section"><span class="h-num">14.09</span> Snapshotting</h2>
 
         <p>
             Se stárnutím systému rostou event streamy agregátů. Agregát s tisíci událostmi vyžaduje načtení a přehrání
@@ -1773,7 +1773,7 @@ final class SnapshottingOrderRepository
     </section>
 
     <section id="verzovani-udalosti" aria-labelledby="verzovani-udalosti-heading">
-        <h2 id="verzovani-udalosti-heading" class="h-section"><span class="h-num">06.10</span> Verzování událostí (Event Versioning)</h2>
+        <h2 id="verzovani-udalosti-heading" class="h-section"><span class="h-num">14.10</span> Verzování událostí (Event Versioning)</h2>
 
         <p>
             V Event Sourcingu jsou události <strong>permanentní</strong> – jednou uložené do Event Store se nikdy
@@ -2042,7 +2042,7 @@ final readonly class UpcasterChain
     </section>
 
     <section id="kdy-pouzit" aria-labelledby="kdy-pouzit-heading">
-        <h2 id="kdy-pouzit-heading" class="h-section"><span class="h-num">06.11</span> Kdy použít Event Sourcing</h2>
+        <h2 id="kdy-pouzit-heading" class="h-section"><span class="h-num">14.11</span> Kdy použít Event Sourcing</h2>
 
         <p>
             Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho zavedením je nutné pečlivě

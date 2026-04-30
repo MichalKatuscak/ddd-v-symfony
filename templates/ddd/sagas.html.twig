@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '07',
+        chapter_number: '15',
         category: 'Vzory',
         title: 'Ságy a Process Managery',
         deck: 'Ságy a Process Managery v DDD a Symfony 8 – implementace kompenzačních transakcí, choreografie i orchestrace dlouhotrvajících procesů pomocí Symfony Messenger. Včetně timeoutů, paralelních kroků a monitorování distribuovaných procesů.',
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="07">
+    <div class="art-body" data-chapter-number="15">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter07_Sagas' } %}
 
     <p>
@@ -77,7 +77,7 @@
        Sekce 1: Proč potřebujeme ságy?
        ─────────────────────────────────────────────────────────── #}
     <section id="proc-sagy" aria-labelledby="proc-sagy-heading">
-    <h2 id="proc-sagy-heading" class="h-section"><span class="h-num">07.01</span> Proč potřebujeme ságy?</h2>
+    <h2 id="proc-sagy-heading" class="h-section"><span class="h-num">15.01</span> Proč potřebujeme ságy?</h2>
 
     <p>
         Jako ilustrativní příklad slouží typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
@@ -169,7 +169,7 @@
        Sekce 2: Kompenzační transakce
        ─────────────────────────────────────────────────────────── #}
     <section id="kompenzacni-transakce" aria-labelledby="kompenzacni-transakce-heading">
-    <h2 id="kompenzacni-transakce-heading" class="h-section"><span class="h-num">07.02</span> Kompenzační transakce</h2>
+    <h2 id="kompenzacni-transakce-heading" class="h-section"><span class="h-num">15.02</span> Kompenzační transakce</h2>
 
     <p>
         Kompenzační transakce je <strong>sémantické vrácení efektu předchozího kroku</strong>.
@@ -316,7 +316,7 @@ final readonly class ChargeCustomer implements CompensatableCommand
        Sekce 3: Choreografie
        ─────────────────────────────────────────────────────────── #}
     <section id="choreografie" aria-labelledby="choreografie-heading">
-    <h2 id="choreografie-heading" class="h-section"><span class="h-num">07.03</span> Choreografie</h2>
+    <h2 id="choreografie-heading" class="h-section"><span class="h-num">15.03</span> Choreografie</h2>
 
     <p>
         Choreografie je přístup ke koordinaci ságy, při němž <strong>neexistuje centrální
@@ -487,7 +487,7 @@ framework:
        Sekce 4: Limity choreografie
        ─────────────────────────────────────────────────────────── #}
     <section id="limity-choreografie" aria-labelledby="limity-choreografie-heading">
-    <h2 id="limity-choreografie-heading" class="h-section"><span class="h-num">07.04</span> Limity choreografie</h2>
+    <h2 id="limity-choreografie-heading" class="h-section"><span class="h-num">15.04</span> Limity choreografie</h2>
 
     <p>
         Choreografie funguje dobře pro jednoduché procesy, ale s rostoucí komplexitou naráží
@@ -567,7 +567,7 @@ framework:
        Sekce 5: Orchestrace – Process Manager
        ─────────────────────────────────────────────────────────── #}
     <section id="orchestrace" aria-labelledby="orchestrace-heading">
-    <h2 id="orchestrace-heading" class="h-section"><span class="h-num">07.05</span> Orchestrace – Process Manager</h2>
+    <h2 id="orchestrace-heading" class="h-section"><span class="h-num">15.05</span> Orchestrace – Process Manager</h2>
 
     <p>
         Orchestrace je přístup, při kterém existuje <strong>centrální koordinátor</strong> –
@@ -587,7 +587,7 @@ framework:
 
     {% set _diag %}{% include 'diagrams/8_sagas/saga_state_machine.svg' %}{% endset %}
     {% include '_partials/diagram.html.twig' with {
-        fig: '07.1-A',
+        fig: '15.1-A',
         title: 'Stavový automat OrderProcessManager',
         inline: _diag,
         alt: 'Stavový automat OrderProcessManager – 6 stavů, přechody řízené doménovými událostmi',
@@ -812,7 +812,7 @@ final class OrderProcessManager
        Sekce 6: Perzistence stavu ságy
        ─────────────────────────────────────────────────────────── #}
     <section id="perzistence-stavu" aria-labelledby="perzistence-stavu-heading">
-    <h2 id="perzistence-stavu-heading" class="h-section"><span class="h-num">07.06</span> Perzistence stavu ságy</h2>
+    <h2 id="perzistence-stavu-heading" class="h-section"><span class="h-num">15.06</span> Perzistence stavu ságy</h2>
 
     <p>
         Process Manager potřebuje <strong>perzistentní úložiště stavu</strong>, aby přežil
@@ -1074,7 +1074,7 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
        Sekce 7: Implementace v Symfony Messenger
        ─────────────────────────────────────────────────────────── #}
     <section id="messenger-implementace" aria-labelledby="messenger-implementace-heading">
-    <h2 id="messenger-implementace-heading" class="h-section"><span class="h-num">07.07</span> Implementace v Symfony Messenger</h2>
+    <h2 id="messenger-implementace-heading" class="h-section"><span class="h-num">15.07</span> Implementace v Symfony Messenger</h2>
 
     <p>
         Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu ságy. Nyní
@@ -1238,7 +1238,7 @@ final readonly class OrderPlaced
        Sekce 8: Timeouty a deadliny
        ─────────────────────────────────────────────────────────── #}
     <section id="timeouty" aria-labelledby="timeouty-heading">
-    <h2 id="timeouty-heading" class="h-section"><span class="h-num">07.08</span> Timeouty a deadliny</h2>
+    <h2 id="timeouty-heading" class="h-section"><span class="h-num">15.08</span> Timeouty a deadliny</h2>
 
     <p>
         Co se stane, když událost <code>PaymentSucceeded</code> nikdy nedorazí? Síťový výpadek,
@@ -1429,7 +1429,7 @@ private function onOrderPlaced(OrderPlaced $event): void
        Sekce 9: Kompenzační strategie v praxi
        ─────────────────────────────────────────────────────────── #}
     <section id="kompenzacni-strategie" aria-labelledby="kompenzacni-strategie-heading">
-    <h2 id="kompenzacni-strategie-heading" class="h-section"><span class="h-num">07.09</span> Kompenzační strategie v praxi</h2>
+    <h2 id="kompenzacni-strategie-heading" class="h-section"><span class="h-num">15.09</span> Kompenzační strategie v praxi</h2>
 
     <p>
         Když krok ságy selže, máme dvě základní strategie, jak situaci řešit. Volba závisí
@@ -1535,7 +1535,7 @@ private function compensate(SagaState $state): void
        Sekce 10: Paralelní kroky
        ─────────────────────────────────────────────────────────── #}
     <section id="paralelni-kroky" aria-labelledby="paralelni-kroky-heading">
-    <h2 id="paralelni-kroky-heading" class="h-section"><span class="h-num">07.10</span> Paralelní kroky</h2>
+    <h2 id="paralelni-kroky-heading" class="h-section"><span class="h-num">15.10</span> Paralelní kroky</h2>
 
     <p>
         Dosud jsme uvažovali sériové provádění kroků – jeden po druhém. V praxi však některé
@@ -1658,7 +1658,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
        Sekce 11: Monitoring a observabilita
        ─────────────────────────────────────────────────────────── #}
     <section id="monitoring" aria-labelledby="monitoring-heading">
-    <h2 id="monitoring-heading" class="h-section"><span class="h-num">07.11</span> Monitoring a observabilita</h2>
+    <h2 id="monitoring-heading" class="h-section"><span class="h-num">15.11</span> Monitoring a observabilita</h2>
 
     <p>
         Produkční ságy potřebují <strong>observabilitu</strong> – musíte vědět, které ságy právě
@@ -1835,7 +1835,7 @@ final class CheckStaleSagasCommand extends Command
        Sekce 12: Testování ság
        ─────────────────────────────────────────────────────────── #}
     <section id="testovani" aria-labelledby="testovani-heading">
-    <h2 id="testovani-heading" class="h-section"><span class="h-num">07.12</span> Testování ság</h2>
+    <h2 id="testovani-heading" class="h-section"><span class="h-num">15.12</span> Testování ság</h2>
 
     <p>
         Ságy koordinují složité vícekrokové procesy napříč Bounded Contexts – testování je proto

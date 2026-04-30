@@ -51,7 +51,7 @@
     {% include '_partials/article_head.html.twig' with {
         category: 'Reference',
         title: 'DDD Cheat Sheet',
-        deck: 'Jednostránková navigace celou knihou. Když si pamatujete jen pojem, najděte ho zde – je tu hyperlink na detail. Když si nejste jisti, který vzor použít, projděte rozhodovací strom. Tato stránka je úmyslně bez příkladů – všechno najdete v odkazovaných kapitolách.',
+        deck: 'Jednostránková navigace celou knihou. Když si pamatujete jen pojem, najděte ho zde – je tu hyperlink na detail. Když si nejste jisti, který vzor použít, projděte rozhodovací strom. Stránka je bez příkladů – všechno najdete v odkazovaných kapitolách.',
         published: block('article_published_time'),
         last_updated: block('article_modified_time'),
         author: 'M. Katuščák'
@@ -304,7 +304,7 @@
                     </tr>
                     <tr>
                         <td><strong>Domain</strong></td>
-                        <td>Oblast businessu</td>
+                        <td>Oblast podnikání</td>
                         <td>Twig translation domain (<code>messages</code>)</td>
                         <td>Obvykle myšleno DDD</td>
                     </tr>
@@ -328,9 +328,9 @@
             </p>
             <ol>
                 <li><a href="{{ path('what_is_ddd') }}">01 – Co je DDD</a></li>
-                <li><a href="{{ path('basic_concepts') }}">02 – Základní koncepty</a></li>
-                <li><a href="{{ path('horizontal_vs_vertical') }}">05 – Vertical Slice Architecture</a></li>
-                <li><a href="{{ path('performance_aspects') }}">13 – Výkonnostní aspekty</a></li>
+                <li><a href="{{ path('basic_concepts') }}">06 – Základní koncepty</a></li>
+                <li><a href="{{ path('horizontal_vs_vertical') }}">10 – Vertical Slice Architecture</a></li>
+                <li><a href="{{ path('performance_aspects') }}">17 – Read modely, projekce a výkon</a></li>
             </ol>
             <p>
                 <strong>Doba čtení:</strong> ~2 hodiny. <strong>Cíl:</strong> rozumět slovníku a vědět, co znamená
@@ -343,12 +343,12 @@
                 topologii týmů, integrační vzory:
             </p>
             <ol>
-                <li><a href="{{ path('subdomains') }}">03 – Subdomény</a></li>
-                <li><a href="{{ path('context_mapping') }}">04 – Context Mapping</a></li>
-                <li><a href="{{ path('architectural_styles') }}">06 – Architektonické styly: Hexagonal, Onion, Clean</a></li>
-                <li><a href="{{ path('event_storming') }}">14 – Event Storming + Domain Storytelling</a></li>
-                <li><a href="{{ path('team_topologies') }}">15 – Conway's Law a Team Topologies</a></li>
-                <li><a href="{{ path('microservices_and_ddd') }}">17 – DDD a microservices</a></li>
+                <li><a href="{{ path('subdomains') }}">02 – Subdomény</a></li>
+                <li><a href="{{ path('context_mapping') }}">03 – Bounded Context a Context Mapping</a></li>
+                <li><a href="{{ path('event_storming') }}">04 – Event Storming + Domain Storytelling</a></li>
+                <li><a href="{{ path('team_topologies') }}">05 – Conway's Law a Team Topologies</a></li>
+                <li><a href="{{ path('architectural_styles') }}">09 – Architektonické styly: Hexagonal, Onion, Clean</a></li>
+                <li><a href="{{ path('microservices_and_ddd') }}">20 – DDD a microservices</a></li>
             </ol>
             <p>
                 <strong>Doba čtení:</strong> ~4 hodiny. <strong>Cíl:</strong> mít ucelený obraz pro architekturní
@@ -361,9 +361,10 @@
             </p>
             <ol>
                 <li><a href="{{ path('what_is_ddd') }}">01 – Co je DDD</a></li>
-                <li><a href="{{ path('basic_concepts') }}">02 – Základní koncepty</a></li>
-                <li><a href="{{ path('event_storming') }}">14 – Event Storming</a> (objevení implicitní domény)</li>
-                <li><a href="{{ path('migration_from_crud') }}">11 – Migrace z CRUD na DDD</a> (vč. <a href="{{ path('migration_from_crud') }}#refactoring-kucharka">Refactoring kuchařky</a>)</li>
+                <li><a href="{{ path('event_storming') }}">04 – Event Storming</a> (objevení implicitní domény)</li>
+                <li><a href="{{ path('basic_concepts') }}">06 – Základní koncepty</a></li>
+                <li><a href="{{ path('aggregate_design') }}">07 – Návrh agregátu</a></li>
+                <li><a href="{{ path('migration_from_crud') }}">19 – Migrace z CRUD na DDD</a> (vč. <a href="{{ path('migration_from_crud') }}#refactoring-kucharka">Refactoring kuchařky</a>)</li>
                 <li><a href="{{ path('anti_patterns') }}">22 – Anti-vzory</a></li>
             </ol>
             <p>
@@ -373,15 +374,15 @@
 
             <h3 id="path-techlead-heading">Tech lead před release</h3>
             <p>
-                Před produkčním release chcete mít jistotu, že kritické infrastrukturní vzory (CQRS, ES, Sagas, Outbox)
+                Před produkčním release chcete mít jistotu, že stěžejní infrastrukturní vzory (CQRS, ES, Sagas, Outbox)
                 jsou správně postavené a otestované:
             </p>
             <ol>
-                <li><a href="{{ path('cqrs') }}">08 – CQRS v Symfony</a></li>
-                <li><a href="{{ path('event_sourcing') }}">09 – Event Sourcing</a></li>
-                <li><a href="{{ path('sagas') }}">10 – Sagy a Process Manager</a></li>
-                <li><a href="{{ path('outbox_pattern') }}">11 – Outbox Pattern</a></li>
-                <li><a href="{{ path('testing_ddd') }}">19 – Testování v DDD</a></li>
+                <li><a href="{{ path('cqrs') }}">13 – CQRS v Symfony</a></li>
+                <li><a href="{{ path('event_sourcing') }}">14 – Event Sourcing</a></li>
+                <li><a href="{{ path('sagas') }}">15 – Sagy a Process Manager</a></li>
+                <li><a href="{{ path('outbox_pattern') }}">16 – Outbox Pattern</a></li>
+                <li><a href="{{ path('testing_ddd') }}">18 – Testování v DDD</a></li>
             </ol>
             <p>
                 <strong>Doba čtení:</strong> ~3 hodiny. <strong>Cíl:</strong> mít checklist pro release review.
@@ -448,7 +449,7 @@
                 </li>
                 <li>
                     <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" rel="noopener">Jimmy Bogard – Vertical Slice Architecture</a>
-                    (konference, ~45 min). Argument pro vertikální slicing místo horizontálních vrstev – důležité pro organizaci kódu uvnitř Bounded Contextu.
+                    (konference, ~45 min). Argument pro vertikální slicing místo horizontálních vrstev – podstatné pro organizaci kódu uvnitř Bounded Contextu.
                 </li>
             </ol>
 

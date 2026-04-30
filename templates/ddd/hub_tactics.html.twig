@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Taktické modelování – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Taktická vrstva Domain-Driven Design: stavební bloky doménového modelu, návrh agregátů, doplňkové vzory (Specification, Domain Service, Factory, Module).{% endblock %}
+{% block breadcrumb_name %}Taktika{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "Taktické modelování – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · TAKTIKA',
+        hub_h_main: 'Taktické modelování,',
+        hub_h_em: 'kde doména získává tvar.',
+        hub_deck: 'Tato sekce řeší <strong>jak</strong> – stavební bloky doménového modelu, hranice agregátů a doplňkové vzory. <strong>Entity, Value Objects, Repozitáře a Doménové události</strong> jsou základní slovník. <strong>Návrh agregátu</strong> rozhoduje o transakční konzistenci. <strong>Specification, Domain Service, Factory a Module</strong> doplňují slovník o vzory, bez kterých model rychle anemizuje.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Předpoklady', v: 'Úvod a strategie' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART II',
+        hub_part_title: 'Stavební bloky · agregáty · doplňkové vzory',
+        hub_part_sub: 'jak doména žije v kódu',
+        hub_chapters: hub_chapters
+    } only %}
+{% endblock %}

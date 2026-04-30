@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '15',
+        chapter_number: '05',
         category: 'Praxe',
         title: 'Conway\'s Law a Team Topologies',
         deck: 'Když Conway v roce 1968 publikoval tezi, že „systém kopíruje komunikační strukturu organizace, která ho stvořila“, popisoval gravitační zákon softwarového designu. DDD Bounded Contexts dávají smysl jen tehdy, když mapují na týmy – jinak vznikají falešné hranice. Kapitola o tom, jak vědomě navrhnout týmy kolem domény.',
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="15">
+    <div class="art-body" data-chapter-number="05">
 
         <p>
             Většina knih o DDD končí Bounded Contextem a Context Mapem – jako kdyby architektura žila ve vakuu.
@@ -73,7 +73,7 @@
         </p>
 
         <section id="conway-law" aria-labelledby="conway-law-heading">
-            <h2 id="conway-law-heading" class="h-section"><span class="h-num">15.01</span> Conway's Law – gravitační zákon softwarové architektury</h2>
+            <h2 id="conway-law-heading" class="h-section"><span class="h-num">05.01</span> Conway's Law – gravitační zákon softwarové architektury</h2>
 
             <p>
                 V dubnu 1968 vyšel v časopise <em>Datamation</em> krátký esej Melvina Conwaye s názvem
@@ -107,7 +107,7 @@
                     nevyhnutelně vyprodukuje třívrstvou architekturu. Každý tým má vlastní release cyklus,
                     vlastní CI/CD pipeline, vlastní sprint review. Bounded Context se stane v lepším případě
                     interní záležitostí backend týmu – frontend a DBA o něm nevědí. <em>Důsledek:</em>
-                    změna jednoho business požadavku se obtočí přes všechny tři týmy a tři sprinty.
+                    změna jednoho doménového požadavku se obtočí přes všechny tři týmy a tři sprinty.
                 </li>
                 <li>
                     <strong>Tým rozdělený podle produktu/streamu → mikroservis nebo modul per BC.</strong>
@@ -129,12 +129,12 @@
                 <h3 id="conway-not-law-heading">„Law“ je trochu silné slovo</h3>
                 <p>
                     Conway's Law není zákon ve smyslu fyzikálního zákona – je to <em>silná tendence</em>,
-                    kterou způsobuje praktický fakt: tým, který spolu denně mluví, snadno koordinuje sdílené
+                    kterou způsobuje praktický fakt: tým, který spolu denně mluví, snadno koordinuje sdílená
                     rozhodnutí; tým, který spolu nemluví, koordinaci nahrazuje stabilním rozhraním (API,
                     schématem, kontraktem). Tato rozhraní se časem petrifikují a stanou se architektonickými
                     švy. Conway's Law je tedy <strong>statistický důsledek nákladů na komunikaci</strong>,
                     ne metafyzika – proto ji lze obejít, ale stojí to vědomé úsilí (Inverse Conway Maneuver,
-                    sekce 15.05).
+                    sekce 05.05).
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -144,7 +144,7 @@
 
             {% set _diagram_inline %}{% include 'diagrams/18_team_topologies/conway_inverse.svg' ignore missing %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '15.1-A',
+                fig: '05.1-A',
                 title: 'Conway vs. Inverse Conway Maneuver',
                 inline: _diagram_inline,
                 alt: 'Porovnání klasického Conway (org chart řídí architekturu) a Inverse Conway Maneuver (cílová architektura řídí org chart)',
@@ -153,7 +153,7 @@
         </section>
 
         <section id="bc-team-boundary" aria-labelledby="bc-team-boundary-heading">
-            <h2 id="bc-team-boundary-heading" class="h-section"><span class="h-num">15.02</span> Bounded Context = týmová hranice</h2>
+            <h2 id="bc-team-boundary-heading" class="h-section"><span class="h-num">05.02</span> Bounded Context = týmová hranice</h2>
 
             <p>
                 Vaughn Vernon v knize <em>Implementing Domain-Driven Design</em> (2013, kap. 2)
@@ -177,8 +177,8 @@
                 <li>
                     <strong>Jeden Bounded Context = jeden tým (vždy).</strong>
                     Pokud dva týmy sdílejí jeden BC, Conway's Law okamžitě vstoupí – buď vznikne neoficiální
-                    sub-hranice (a tedy fakticky dva BC, ale nikdo to nepřiznal), nebo vznikne <em>shared
-                    ownership</em>, který znamená, že BC nikdo nevlastní a degraduje na Big Ball of Mud
+                    sub-hranice (a tedy fakticky dva BC, ale nikdo to nepřiznal), nebo vznikne <em>sdílené
+                    vlastnictví</em>, které znamená, že BC nikdo nevlastní a degraduje na Big Ball of Mud
                     s <a href="{{ path('context_mapping') }}#shared-kernel">Shared Kernel</a>
                     režií. <em>Pravidlo:</em> nikdy nesdílejte BC mezi týmy bez explicitního Shared Kernel
                     vztahu – a Shared Kernel sám je drahý vztah, ne default.
@@ -186,7 +186,7 @@
                 <li>
                     <strong>Jeden tým = jeden nebo více Bounded Contexts (povoleno).</strong>
                     Malý tým (5–9 lidí) může v pohodě vlastnit 2–3 menší BC. Důvodem k limitu je
-                    <a href="#cognitive-load">kognitivní zátěž</a> – viz sekce 15.06. Velký tým, který by
+                    <a href="#cognitive-load">kognitivní zátěž</a> – viz sekce 05.06. Velký tým, který by
                     vlastnil 5+ BC, je signál, že tým má být rozdělen.
                 </li>
             </ul>
@@ -220,13 +220,13 @@
             <p>
                 A obráceně: pokud máte 4 BC a 7 týmů, je jasné, že na BC vás ovlivnil někdo, kdo nepoužíval
                 DDD – třeba historická organizační struktura, kterou nikdo neaktualizoval. Zde přichází
-                Inverse Conway Maneuver (sekce 15.05).
+                Inverse Conway Maneuver (sekce 05.05).
             </p>
 
             <h3 id="bc-team-mismatch">Co dělat, když Context Map a Team Map nesedí</h3>
 
             <p>
-                V reálu narazíte na 4 typy nesouladu mezi Context Mapem a Team Mapem. Každý vyžaduje
+                V praxi narazíte na 4 typy nesouladu mezi Context Mapem a Team Mapem. Každý vyžaduje
                 jiný typ akce:
             </p>
 
@@ -258,7 +258,7 @@
                     <tr>
                         <td>1 tým vlastní 5+ BC</td>
                         <td>Akumulace bez měření cognitive load</td>
-                        <td>Split týmu (sekce <a href="#cognitive-load">15.06</a>) nebo redukce počtu BC</td>
+                        <td>Split týmu (sekce <a href="#cognitive-load">05.06</a>) nebo redukce počtu BC</td>
                     </tr>
                 </tbody>
             </table>
@@ -273,7 +273,7 @@
         </section>
 
         <section id="team-topologies-typy" aria-labelledby="team-topologies-typy-heading">
-            <h2 id="team-topologies-typy-heading" class="h-section"><span class="h-num">15.03</span> Team Topologies – 4 typy týmů (Skelton &amp; Pais 2019)</h2>
+            <h2 id="team-topologies-typy-heading" class="h-section"><span class="h-num">05.03</span> Team Topologies – 4 typy týmů (Skelton &amp; Pais 2019)</h2>
 
             <p>
                 V roce 2019 vydali Matthew Skelton a Manuel Pais knihu
@@ -297,7 +297,7 @@
                 <strong>Vlastník end-to-end value streamu – typicky jeden Bounded Context.</strong>
                 Stream-aligned tým má všechny role potřebné k tomu, aby samostatně doručil hodnotu
                 koncovému uživateli: vývojáře (frontend i backend), QA, designéra, někdy product ownera.
-                Tým rozhoduje, deliveruje a operuje v produkci – žádný „handoff“ do jiného týmu.
+                Tým rozhoduje, doručuje a provozuje v produkci – žádné „předání“ do jiného týmu.
             </p>
 
             <ul>
@@ -310,7 +310,7 @@
             <p>
                 <em>Většina týmů v každé zdravé technologické organizaci jsou stream-aligned týmy.</em>
                 Pokud máte 10 týmů a méně než 7 z nich jsou stream-aligned, podíváme se na anti-vzory
-                v sekci 15.08.
+                v sekci 05.08.
             </p>
 
             <h3 id="platform-team">Platform team</h3>
@@ -325,9 +325,9 @@
             <p>
                 Hlavní atribut Platform teamu je slovo <strong>self-service</strong>. Stream-aligned tým
                 si na platformu nezadává ticket („potřebuju nový Postgres“) a nečeká týden – naklikne ho
-                sám přes portál nebo deployne přes IaC modul, který Platform team udržuje. Pokud Platform
+                sám přes portál nebo nasadí přes IaC modul, který Platform team udržuje. Pokud Platform
                 team funguje jako ticketová fronta, není to Platform team – je to <em>infrastruktura jako
-                bottleneck</em> a anti-vzor (sekce 15.08).
+                bottleneck</em> a anti-vzor (sekce 05.08).
             </p>
 
             <ul>
@@ -346,7 +346,7 @@
             </p>
 
             <p>
-                Enabling team se snadno zamění s Center of Excellence. Rozdíl je zásadní:
+                Enabling team se snadno zamění s Center of Excellence. Rozdíl je podstatný:
             </p>
 
             <div class="table-responsive">
@@ -396,7 +396,7 @@
             <ul>
                 <li><strong>Vznik:</strong> jen tehdy, kdy stream-aligned tým objektivně narazí na strop.</li>
                 <li><strong>Komunikace:</strong> obvykle X-as-a-Service vůči stream-aligned týmům.</li>
-                <li><strong>Past:</strong> snadno se ze stream-aligned týmu stane „complicated subsystem“ jen proto, že je víc senior. To není důvod – pravým důvodem je <em>objektivní specializace</em>.</li>
+                <li><strong>Past:</strong> snadno se ze stream-aligned týmu stane „complicated subsystem“ jen proto, že má seniornější obsazení. To není důvod – pravým důvodem je <em>objektivní specializace</em>.</li>
             </ul>
 
             <h3 id="subdomain-mapping">Mapování DDD subdomén na typy týmů</h3>
@@ -452,7 +452,7 @@
         </section>
 
         <section id="interakcni-mody" aria-labelledby="interakcni-mody-heading">
-            <h2 id="interakcni-mody-heading" class="h-section"><span class="h-num">15.04</span> Tři interakční módy mezi týmy</h2>
+            <h2 id="interakcni-mody-heading" class="h-section"><span class="h-num">05.04</span> Tři interakční módy mezi týmy</h2>
 
             <p>
                 Skelton a Pais nedefinovali jen typy týmů, ale i 3 (a jen 3) povolené módy interakce mezi
@@ -518,7 +518,7 @@
                 </p>
                 <p>
                     Při onboardingu nového týmu napište explicitně: „<em>S týmem A jsme v X-as-a-Service,
-                    s týmem B jsme v 4-měsíční Collaboration na bootstrap nového BC, s Enabling teamem
+                    s týmem B jsme ve 4měsíční Collaboration na bootstrap nového BC, s Enabling teamem
                     máme kontrakt na 3-měsíční facilitaci CQRS.</em>“ Pokud to nedokážete napsat, vztah
                     je neformální = v ohrožení.
                 </p>
@@ -530,7 +530,7 @@
         </section>
 
         <section id="inverse-conway" aria-labelledby="inverse-conway-heading">
-            <h2 id="inverse-conway-heading" class="h-section"><span class="h-num">15.05</span> Inverse Conway Maneuver</h2>
+            <h2 id="inverse-conway-heading" class="h-section"><span class="h-num">05.05</span> Inverse Conway Maneuver</h2>
 
             <p>
                 Conway's Law říká „struktura kopíruje organizaci“. <strong>Inverse Conway Maneuver</strong>
@@ -552,13 +552,13 @@
                 <li>
                     <strong>Spočítat počet stream-aligned týmů.</strong> Hrubé pravidlo: 1 BC = 1 tým.
                     Pokud máte 6 BC, potřebujete 6 stream-aligned týmů. Pokud máte aktuálně 3 týmy
-                    (frontend, backend, DBA), znamená to re-org na 6 vertikálních týmů – buď z existujících
+                    (frontend, backend, DBA), znamená to reorganizaci na 6 vertikálních týmů – buď z existujících
                     lidí, nebo nábor.
                 </li>
                 <li>
                     <strong>Re-org: rozpustit horizontální týmy, poskládat vertikální stream-aligned týmy.</strong>
-                    Klasický bod, kde implementace selže. Frontend lidi nechtějí být „v Catalog týmu“ –
-                    chtějí být s ostatními frontend lidmi. Manažeři nechtějí ztratit tým 12 lidí pro tým
+                    Klasický bod, kde implementace selže. Frontendoví lidé nechtějí být „v Catalog týmu“ –
+                    chtějí být s ostatními frontend kolegy. Manažeři nechtějí ztratit tým 12 lidí pro tým
                     7 lidí. Tato fáze potřebuje silnou podporu CTO/VP Engineering.
                 </li>
                 <li>
@@ -569,7 +569,7 @@
             </ol>
 
             <p>
-                Skelton a Pais explicitně varují: <strong>Inverse Conway Maneuver bez podpory managementu
+                Skelton a Pais výslovně varují: <strong>Inverse Conway Maneuver bez podpory managementu
                 neuspěje</strong>. Re-org je politický akt. Pokud CTO řekne „udělejte to, ale beze změny
                 org chartu“, máte před sebou 6 měsíců práce, která nikam nevede – Conway's Law původní
                 org chart vrátí každý refactor.
@@ -596,10 +596,10 @@
             } %}
 
             <p>
-                Praktická pasť: re-org JE bolestivý. Lidé ztrácejí seniority, manažeři ztrácejí pravomoci,
+                Praktická past: reorganizace je bolestivá. Lidé ztrácejí seniority, manažeři ztrácejí pravomoci,
                 domácí kultury týmů (frontend kávovar, backend stand-up) se rozbijí. Pokud jste team-lead
-                a zvažujete Inverse Conway Maneuver bez explicitního zadání od CTO, raději se nejdřív
-                zeptejte. Detail komunikace s managementem je v sekci 15.09.
+                a zvažujete Inverse Conway Maneuver bez výslovného zadání od CTO, raději se nejdřív
+                zeptejte. Detail komunikace s managementem je v sekci 05.09.
             </p>
 
             <h3 id="inverse-checklist">Praktický checklist před spuštěním Inverse Conway Maneuver</h3>
@@ -616,8 +616,8 @@
                     začněte tam (kapitola o <a href="{{ path('context_mapping') }}">Context Mappingu</a>).
                 </li>
                 <li>
-                    <strong>Má re-org explicitní podporu CTO / VP Engineering?</strong> Re-org je politický
-                    akt. Bez backingu shora není odpor odolatelný – lidé budou hledat výjimky a starou
+                    <strong>Má reorganizace výslovnou podporu CTO / VP Engineering?</strong> Reorganizace je politický
+                    akt. Bez podpory shora není odpor odolatelný – lidé budou hledat výjimky a starou
                     strukturu obnoví neoficiálně.
                 </li>
                 <li>
@@ -638,7 +638,7 @@
                 </li>
                 <li>
                     <strong>Je organizace v Westrum generative kultuře?</strong> V pathological / bureaucratic
-                    re-org formálně proběhne, ale operativní vztahy se vrátí (sekce <a href="#westrum">15.09</a>).
+                    re-org formálně proběhne, ale operativní vztahy se vrátí (sekce <a href="#westrum">05.09</a>).
                 </li>
                 <li>
                     <strong>Je obsazená pozice „topology owner“?</strong> Někdo musí re-org vést na
@@ -653,7 +653,7 @@
         </section>
 
         <section id="cognitive-load" aria-labelledby="cognitive-load-heading">
-            <h2 id="cognitive-load-heading" class="h-section"><span class="h-num">15.06</span> Cognitive Load – limit pro velikost týmu/BC</h2>
+            <h2 id="cognitive-load-heading" class="h-section"><span class="h-num">05.06</span> Cognitive Load – limit pro velikost týmu/BC</h2>
 
             <p>
                 Pojem <strong>kognitivní zátěž</strong> (cognitive load) převzali Skelton a Pais
@@ -681,7 +681,7 @@
 
             <p>
                 Cíl: <strong>maximalizovat intrinsic + germane, minimalizovat extraneous.</strong>
-                Tým, který tráví 80 % energie v boji s CI a deploy procesem, nemá kapacitu zlepšovat
+                Tým, který tráví 80 % energie zápasem s CI a deploy procesem, nemá kapacitu zlepšovat
                 doménový model.
             </p>
 
@@ -709,12 +709,12 @@
                     <tr>
                         <td>7–9 lidí</td>
                         <td>1–2 BC</td>
-                        <td>Zdravý sweet-spot stream-aligned týmu.</td>
+                        <td>Zdravé optimum stream-aligned týmu.</td>
                     </tr>
                     <tr>
                         <td>10+ lidí</td>
                         <td>Tým je už příliš velký – rozdělit</td>
-                        <td>Dunbar number (familiarity ≈ 15). Komunikační overhead exponenciálně roste.</td>
+                        <td>Dunbar number (familiarity ≈ 15). Komunikační režie exponenciálně roste.</td>
                     </tr>
                     <tr>
                         <td>Tým s 4+ BC</td>
@@ -811,7 +811,7 @@ Bod 5 (germane prostor):         __
             <p>
                 Rubrika je záměrně subjektivní – měří <em>vnímání</em> členů týmu, ne metrické fakty.
                 Důvod: cognitive load je psychologická kategorie, žádná metrika z Grafany ji nezachytí.
-                Skelton a Pais (2019, kap. 6) explicitně varují před snahou cognitive load „objektivizovat“
+                Skelton a Pais (2019, kap. 6) výslovně varují před snahou cognitive load „objektivizovat“
                 přes počet řádků kódu, count of services, nebo ticket throughput. Tyto proxy metriky
                 nemají korelaci s tím, jak se tým reálně cítí.
             </p>
@@ -820,7 +820,7 @@ Bod 5 (germane prostor):         __
                 <h3 id="cognitive-warning-heading">Varování: BC growth bias</h3>
                 <p>
                     Velmi častá past: tým s úspěšným Core BC dostane od managementu „ještě jeden malý BC,
-                    dáte to“. Pak ještě jeden. Pak ještě jeden. Po roce má tým 4 BC, je vyhořelý a žádný
+                    zvládnete to“. Pak ještě jeden. Pak ještě jeden. Po roce má tým 4 BC, je vyhořelý a žádný
                     BC není dotažen. <strong>Zdravý mechanismus: kdykoli se přidává BC, někdo musí
                     explicitně zodpovědět – co odebíráme?</strong> Pokud nic, tým buď rozšíříme,
                     nebo rozdělíme. Žádná akumulace.
@@ -833,7 +833,7 @@ Bod 5 (germane prostor):         __
         </section>
 
         <section id="scenare" aria-labelledby="scenare-heading">
-            <h2 id="scenare-heading" class="h-section"><span class="h-num">15.07</span> Praktické scénáře (5 / 20 / 200+ lidí)</h2>
+            <h2 id="scenare-heading" class="h-section"><span class="h-num">05.07</span> Praktické scénáře (5 / 20 / 200+ lidí)</h2>
 
             <p>
                 Team Topologies není doktrína „udělejte všech 4 typy týmů a 3 módy hned“. Je to
@@ -852,11 +852,11 @@ Bod 5 (germane prostor):         __
                 <li><strong>Architektura:</strong> jeden Symfony monolit; BC jsou složky/moduly s explicitními rozhraními (kapitola o <a href="{{ path('architectural_styles') }}">architektonických stylech</a>).</li>
                 <li><strong>Generic subdomény:</strong> SaaS – Auth0 nebo Clerk pro identity, Stripe pro fakturaci, SendGrid pro e-mail. Žádný vlastní implementace.</li>
                 <li><strong>Hosting:</strong> Heroku, Vercel, Railway, Fly.io – managed services nahrazují Platform team.</li>
-                <li><strong>Co NEdělat:</strong> nepouštět se do Kubernetes, vlastní observability stack, mikroservisy. Předčasné.</li>
+                <li><strong>Čeho se vyvarovat:</strong> nepouštět se do Kubernetes, vlastní observability stack, mikroservisy. Předčasné.</li>
             </ul>
 
             <p>
-                <em>Chyba startupů:</em> kopírovat enterprise architekturu „aby to bylo budoucnosti připraveno“.
+                <em>Chyba startupů:</em> kopírovat enterprise architekturu „aby to bylo připraveno na budoucnost“.
                 Cognitive load 5-členného týmu nemá kapacitu na 6 mikroservisů. Modulární monolit je správná
                 volba.
             </p>
@@ -876,8 +876,8 @@ Bod 5 (germane prostor):         __
             </ul>
 
             <p>
-                Tato fáze je nejnebezpečnější – organizace už není malá, ale ještě nemá kapacitu na plný
-                rozsah Team Topologies. Klasická chyba: rozjede se Center of Excellence („architektonický
+                Tato fáze je nejrizikovější – organizace už není malá, ale ještě nemá kapacitu na plný
+                rozsah Team Topologies. Klasická chyba: vznikne Center of Excellence („architektonický
                 výbor“), který se stane bottleneckem.
             </p>
 
@@ -892,13 +892,13 @@ Bod 5 (germane prostor):         __
                 <li><strong>1–2 Platform teamy</strong> – typicky 1 hlavní (IDP, K8s, observability) + někdy specializovaný (data platform, ML platform).</li>
                 <li><strong>1–3 Enabling teamy</strong> – rotující, time-boxed, podle aktuálních potřeb (např. „security enabling team“ na 6 měsíců, „event sourcing enabling team“ na 3 měsíce).</li>
                 <li><strong>1–2 Complicated-subsystem teamy</strong> – jen pro objektivně specializované domény (např. risk engine v bance, video transcoder v médiích, ML scoring v ad-techu).</li>
-                <li><strong>Topology design:</strong> sami Skelton a Pais doporučují, aby v této velikosti existoval malý <em>topology team</em> (1–2 lidi, není to Center of Excellence) – sleduje cognitive load týmů a navrhuje re-orgy. Často je to staff engineer + manažer.</li>
+                <li><strong>Topology design:</strong> Skelton a Pais doporučují, aby v této velikosti existoval malý <em>topology team</em> (1–2 lidi, není to Center of Excellence) – sleduje cognitive load týmů a navrhuje reorganizace. Často je to staff engineer + manažer.</li>
             </ul>
 
             <p>
                 Důležité: i v 200-členné firmě by mělo být <strong>aspoň 75 % lidí ve stream-aligned týmech</strong>.
                 Pokud máte 200 lidí a 100 z nich je v Platform/Enabling/CoE/architekti, máte problém –
-                stream-aligned týmy nesou business hodnotu, ostatní jsou multiplikátory. Multiplikátorů
+                stream-aligned týmy nesou doménovou hodnotu, ostatní jsou multiplikátory. Multiplikátorů
                 nemá být víc než multiplicandů.
             </p>
 
@@ -924,16 +924,16 @@ Bod 5 (germane prostor):         __
         </section>
 
         <section id="antivzory" aria-labelledby="antivzory-heading">
-            <h2 id="antivzory-heading" class="h-section"><span class="h-num">15.08</span> Anti-vzory</h2>
+            <h2 id="antivzory-heading" class="h-section"><span class="h-num">05.08</span> Anti-vzory</h2>
 
             <p>
                 Než se dostaneme k tomu, jak to udělat, je užitečné vědět, jak to <em>nedělat</em>.
-                Následující 5 anti-vzorů je ze zkušenosti autorů Team Topologies nejčastějších a nejdražších.
+                Následujících pět anti-vzorů je ze zkušenosti autorů Team Topologies nejčastějších a nejdražších.
                 Detailní katalog DDD anti-vzorů je v samostatné kapitole o
                 <a href="{{ path('anti_patterns') }}">anti-vzorech</a>.
             </p>
 
-            <h3 id="antivzor-shared-repo">1. „Sdílíme jeden monorepo bez modul boundaries“</h3>
+            <h3 id="antivzor-shared-repo">1. „Sdílíme jeden monorepo bez hranic modulů“</h3>
 
             <p>
                 Více týmů commituje do jednoho repozitáře bez jasných hranic mezi moduly. Důsledek:
@@ -942,9 +942,9 @@ Bod 5 (germane prostor):         __
             </p>
 
             <p>
-                <strong>Řešení:</strong> buď jasné modul boundaries v monorepu (Nx, Bazel, Turborepo
+                <strong>Řešení:</strong> buď jasné hranice modulů v monorepu (Nx, Bazel, Turborepo
                 pro JS; doctrine bundles pro Symfony) s explicitními ownerships v <code>CODEOWNERS</code>,
-                nebo separátní repa per BC. Nikdy ne „všichni do jednoho repa, nějak se domluvíme“.
+                nebo separátní repa per BC. Nikdy ne princip „všichni do jednoho repa, nějak se domluvíme“.
             </p>
 
             <h3 id="antivzor-frontend-backend">2. „Frontend / Backend / Mobile týmy“</h3>
@@ -952,7 +952,7 @@ Bod 5 (germane prostor):         __
             <p>
                 Klasický anti-vzor přímo z Conway's Law – týmy rozdělené po vrstvách. Každý feature
                 vyžaduje koordinaci 3 týmů, 3 sprintů, 3 retrospektiv. Lead time přes 6 týdnů na úpravu,
-                která má reálně 3 dny práce.
+                která si vyžádá zhruba 3 dny práce.
             </p>
 
             <p>
@@ -964,7 +964,7 @@ Bod 5 (germane prostor):         __
             </p>
 
             <p>
-                Výjimka: pokud máte jen 1 mobile dev na celou organizaci, dočasné „mobile guild“ má smysl
+                Výjimka: pokud máte jen jednoho mobilního vývojáře na celou organizaci, dočasná „mobile guild“ má smysl
                 – ne jako tým s vlastním backlog, ale jako komunita pro sdílení znalostí.
             </p>
 
@@ -978,8 +978,8 @@ Bod 5 (germane prostor):         __
 
             <p>
                 <strong>Co je špatně:</strong> CoE typicky drží <em>kontrolní bod</em>, ne expertní podporu.
-                Schvalování ze své podstaty zpomaluje, vytváří frontu a deresponsibilizuje stream-aligned
-                týmy („to nám neschválili, nemůžeme za to“).
+                Schvalování ze své podstaty zpomaluje, vytváří frontu a zbavuje stream-aligned týmy
+                odpovědnosti („to nám neschválili, nemůžeme za to“).
             </p>
 
             <p>
@@ -999,8 +999,8 @@ Bod 5 (germane prostor):         __
 
             <p>
                 <strong>Řešení:</strong> Platform team má povinnost dodávat <em>self-service</em> rozhraní
-                (CLI, portál, IaC moduly). Pokud stream-aligned tým musí ticketovat, je to chyba designu
-                platformy, ne chyba ticketujícího týmu.
+                (CLI, portál, IaC moduly). Pokud stream-aligned tým musí zadávat tikety, je to chyba designu
+                platformy, ne chyba zadávajícího týmu.
             </p>
 
             <p>
@@ -1033,7 +1033,7 @@ Bod 5 (germane prostor):         __
                     <li>Je každá interakce mezi 2 týmy explicitně Collaboration / X-as-a-Service / Facilitating?</li>
                 </ol>
                 <p>
-                    Pokud na 2+ otázky odpovídáte „ne“ / „ano (CoE)“ / „ticketuje“, máte work to do.
+                    Pokud na 2+ otázky odpovídáte „ne“ / „ano (CoE)“ / „zadává tiket“, máte před sebou práci.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1043,17 +1043,17 @@ Bod 5 (germane prostor):         __
         </section>
 
         <section id="management" aria-labelledby="management-heading">
-            <h2 id="management-heading" class="h-section"><span class="h-num">15.09</span> Komunikace s managementem – jak prodat re-org</h2>
+            <h2 id="management-heading" class="h-section"><span class="h-num">05.09</span> Komunikace s managementem – jak prodat re-org</h2>
 
             <p>
-                Inverse Conway Maneuver je zásadní organizační změna. Týmy bude třeba rozdělit, manažery
+                Inverse Conway Maneuver je hluboká organizační změna. Týmy bude třeba rozdělit, manažery
                 přealokovat, lidé možná ztratí senioritu nebo „svůj koutek“. Bez pochopení a podpory
                 managementu (CTO / VP Engineering / People Ops) Inverse Conway selže – protože re-org
                 bez podpory shora se v praxi neudělá vůbec.
             </p>
 
             <p>
-                Klíčem je <strong>mluvit jazykem, kterému management rozumí</strong> – ne jazykem DDD.
+                Podstatné je <strong>mluvit jazykem, kterému management rozumí</strong> – ne jazykem DDD.
                 Manažeři neumí ocenit „elegantnější doménový model“ nebo „čistější Bounded Contexts“.
                 Umí ocenit metriky.
             </p>
@@ -1064,7 +1064,7 @@ Bod 5 (germane prostor):         __
                 Nicole Forsgren, Jez Humble a Gene Kim v knize <em>Accelerate</em> (2018)
                 <a href="https://itrevolution.com/product/accelerate/" target="_blank" rel="noopener">[4]</a>
                 zveřejnili 4 metriky (DORA), které měří efektivitu doručování softwaru a které <em>silně
-                korelují</em> s business outcomes (zisk, růst, customer satisfaction):
+                korelují</em> s obchodními výsledky (zisk, růst, customer satisfaction):
             </p>
 
             <ul>
@@ -1077,7 +1077,7 @@ Bod 5 (germane prostor):         __
             <p>
                 <strong>Před re-orgem změřte 4 DORA metriky. Po re-orgu změřte znovu po 6 měsících.</strong>
                 Pokud Inverse Conway funguje, lead time se zkrátí o 30–80 %, change failure rate se sníží
-                o 30–50 %. Tyto čísla CTO chápe.
+                o 30–50 %. Tato čísla CTO chápe.
             </p>
 
             <h3 id="argumenty-nefunguji">Argumenty, které nefungují</h3>
@@ -1095,7 +1095,7 @@ Bod 5 (germane prostor):         __
             <p>
                 Sociolog Ron Westrum v roce 2004 publikoval typologii organizačních kultur
                 <a href="https://qualitysafety.bmj.com/content/13/suppl_2/ii22" target="_blank" rel="noopener">[5]</a>,
-                kterou později použil Forsgren v <em>Accelerate</em> jako klíčový prediktor úspěchu DevOps
+                kterou později použil Forsgren v <em>Accelerate</em> jako hlavní prediktor úspěchu DevOps
                 transformací. Westrum rozlišuje 3 typy:
             </p>
 
@@ -1119,7 +1119,7 @@ Bod 5 (germane prostor):         __
                     <tr>
                         <td>Chyby</td>
                         <td>Trestány</td>
-                        <td>Vedou k spravedlnosti</td>
+                        <td>Vedou k hledání viníků</td>
                         <td>Vedou k učení</td>
                     </tr>
                     <tr>
@@ -1139,16 +1139,16 @@ Bod 5 (germane prostor):         __
             </div>
 
             <p>
-                <strong>Team Topologies funguje JEN v generative kultuře.</strong> V pathological kultuře
+                <strong>Team Topologies funguje jen v generative kultuře.</strong> V pathological kultuře
                 (manažer trestá za chyby, hierarchie je vše) stream-aligned týmy nedostanou autonomii –
                 manažer chce mít kontrolní bod, takže Platform team se stane gatekeeper. V bureaucratic
-                kultuře (přesné role, formální procesy) re-org se odsouhlasí, ale operativní vztahy
-                se nezmění – Conway's Law přijde zpět přes formální schvalování.
+                kultuře (přesné role, formální procesy) reorganizace projde, ale provozní vztahy
+                zůstanou – Conway's Law přijde zpět přes formální schvalování.
             </p>
 
             <p>
                 Pokud poznáte, že vaše organizace je pathological nebo bureaucratic, <em>Inverse Conway
-                Maneuver není první krok</em>. První krok je změna kultury (nebo změna místa, kde pracujete).
+                Maneuver není první krok</em>. První krok je změna kultury (nebo i změna pracoviště).
                 To je smutná, ale realistická diagnóza.
             </p>
 
@@ -1161,7 +1161,7 @@ Bod 5 (germane prostor):         __
                 </p>
                 <p>
                     2. „<em>Hlavní příčina: rozdělení týmů podle vrstev (frontend/backend/DBA), které způsobuje
-                    handoffs a coordination overhead. Conway's Law nám brání rychlejšímu doručování.</em>“
+                    předávky a koordinační režii. Conway's Law nám brání rychlejšímu doručování.</em>“
                 </p>
                 <p>
                     3. „<em>Návrh: re-org na stream-aligned týmy podle Bounded Contexts během 6 měsíců.
@@ -1181,7 +1181,7 @@ Bod 5 (germane prostor):         __
         </section>
 
         <section id="summary" aria-labelledby="summary-heading">
-            <h2 id="summary-heading" class="h-section"><span class="h-num">15.10</span> Shrnutí</h2>
+            <h2 id="summary-heading" class="h-section"><span class="h-num">05.10</span> Shrnutí</h2>
 
             <p>
                 Conway's Law z roku 1968 říká: architektura kopíruje organizační strukturu. Pro DDD
@@ -1203,7 +1203,7 @@ Bod 5 (germane prostor):         __
                 </li>
                 <li>
                     <strong>3 interakční módy:</strong> Collaboration (drahá, časově omezená),
-                    X-as-a-Service (default vyspělý vztah), Facilitating (mentoring time-boxed).
+                    X-as-a-Service (výchozí vyspělý vztah), Facilitating (mentoring time-boxed).
                 </li>
                 <li>
                     <strong>Vernonovo pravidlo:</strong> 1 BC = 1 tým. 1 tým může vlastnit 1–3 BC,
@@ -1259,7 +1259,7 @@ Bod 5 (germane prostor):         __
                 },
                 {
                     question: 'Můžu mít 1 tým, který vlastní 5 Bounded Contexts?',
-                    answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – typicky 2, ojediněle 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">15.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte split na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
+                    answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – typicky 2, ojediněle 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">05.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte split na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
                 },
                 {
                     question: 'Jak Team Topologies souvisí se Spotify Modelem?',
@@ -1271,7 +1271,7 @@ Bod 5 (germane prostor):         __
                 },
                 {
                     question: 'Co dělat, když management nesouhlasí s re-orgem?',
-                    answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte re-org na sebe, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formálního re-orgu. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte managament o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plný re-org. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">15.09</a>), Team Topologies neuspěje ani s formálním re-orgem. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 15.09</a>.'
+                    answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte re-org na sebe, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formálního re-orgu. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte managament o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plný re-org. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">05.09</a>), Team Topologies neuspěje ani s formálním re-orgem. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 05.09</a>.'
                 },
                 {
                     question: 'Jaký je vztah mezi Team Topologies a mikroservisy?',
@@ -1281,7 +1281,7 @@ Bod 5 (germane prostor):         __
         } %}
 
         <section id="dalsi-cetba" aria-labelledby="dalsi-cetba-heading">
-            <h2 id="dalsi-cetba-heading" class="h-section"><span class="h-num">15.11</span> Další četba a citované zdroje</h2>
+            <h2 id="dalsi-cetba-heading" class="h-section"><span class="h-num">05.11</span> Další četba a citované zdroje</h2>
 
             <ol>
                 <li id="ref-conway-1968">

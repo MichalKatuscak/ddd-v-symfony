@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '15',
+        chapter_number: '25',
         category: 'Praxe',
         title: 'Případová studie',
         deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu – celý proces od analýzy domény, identifikace bounded contexts a strategického i taktického designu až po implementaci s využitím DDD principů a CQRS.',
@@ -61,9 +61,9 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="15">
+    <div class="art-body" data-chapter-number="25">
 <section id="introduction" aria-labelledby="introduction-heading">
-    <h2 id="introduction-heading" class="h-section"><span class="h-num">15.01</span> Úvod</h2>
+    <h2 id="introduction-heading" class="h-section"><span class="h-num">25.01</span> Úvod</h2>
     <p>
         Případová studie popisuje implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8.
         Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
@@ -72,7 +72,7 @@
     </section>
 
     <section id="requirements" aria-labelledby="requirements-heading">
-    <h2 id="requirements-heading" class="h-section"><span class="h-num">15.02</span> Požadavky</h2>
+    <h2 id="requirements-heading" class="h-section"><span class="h-num">25.02</span> Požadavky</h2>
     <p>
         Systém pro správu projektů má následující požadavky:
     </p>
@@ -90,7 +90,7 @@
     </section>
 
     <section id="discovery" aria-labelledby="discovery-heading">
-    <h2 id="discovery-heading" class="h-section"><span class="h-num">15.03</span> Doménová analýza</h2>
+    <h2 id="discovery-heading" class="h-section"><span class="h-num">25.03</span> Doménová analýza</h2>
     <p>
         Architektura nezačíná u kódu, ale u rozhovoru s doménovými experty. Tato sekce ukazuje, jak vznikla pětice
         bounded contexts ze sekce <a href="#architecture">Architektura</a> – jaká data byla na vstupu a jakými kroky
@@ -246,7 +246,7 @@
     </section>
 
     <section id="architecture" aria-labelledby="architecture-heading">
-    <h2 id="architecture-heading" class="h-section"><span class="h-num">15.04</span> Architektura</h2>
+    <h2 id="architecture-heading" class="h-section"><span class="h-num">25.04</span> Architektura</h2>
     <p>
         Architektura kombinuje strategický a taktický DDD s CQRS v Symfony 8. Na strategické úrovni vznikla
         pětice bounded contexts a kontextová mapa popisující jejich vztahy. Taktická úroveň pokrývá agregáty,
@@ -256,7 +256,7 @@
 
     <h3>Strategický design: Bounded Contexts a Context Map</h3>
     <p>
-        Identifikace bounded contexts vychází z doménové analýzy v <a href="#discovery">sekci 15.03</a>.
+        Identifikace bounded contexts vychází z doménové analýzy v <a href="#discovery">sekci 25.03</a>.
         Systém je rozdělen do následujících kontextů:
     </p>
 
@@ -270,7 +270,7 @@
 
     {% set _diagram_inline %}{% include '/diagrams/15_case_study/context_map.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '15.4-A',
+                fig: '25.4-A',
                 title: 'Kontextová mapa: vztahy mezi pěti bounded contexts',
                 inline: _diagram_inline
             } %}
@@ -292,7 +292,7 @@
             ActivityTracking je čistě downstream konzument, který nemá vliv zpět.</li>
         <li><strong>Shared Kernel</strong> – <code>UserId</code>, <code>ProjectId</code>, <code>TaskId</code>
             jsou sdílené hodnotové objekty napříč kontexty. Volba a její cena jsou rozebrány
-            v <a href="#trade-off-shared-kernel-heading">sekci 15.07.2</a>.</li>
+            v <a href="#trade-off-shared-kernel-heading">sekci 25.07.2</a>.</li>
     </ul>
 
     <p>
@@ -303,13 +303,13 @@
         <code>ProjectChecker</code> definovaný v doméně TaskManagement; jeho infrastrukturní implementace
         je adaptér do ProjectManagement. Port plní funkci ACL i tam, kde se nepřekládají typy: chrání
         TaskManagement před přímým provázáním s interním modelem upstream kontextu. Synchronní vs.
-        asynchronní volba je popsaná v <a href="#trade-off-sync-acl-heading">sekci 15.07.3</a>.
+        asynchronní volba je popsaná v <a href="#trade-off-sync-acl-heading">sekci 25.07.3</a>.
     </p>
 
     <p>
         Pro asynchronní integraci mezi kontexty slouží doménové události publikované přes Symfony Messenger.
         Konkrétní ukázka projekce, která naslouchá událostem ze tří kontextů, je v
-        <a href="#read-model">sekci 15.06</a>.
+        <a href="#read-model">sekci 25.06</a>.
     </p>
 
     <h3>Taktický design a struktura projektu</h3>
@@ -491,7 +491,7 @@
     </section>
 
     <section id="implementation" aria-labelledby="implementation-heading">
-    <h2 id="implementation-heading" class="h-section"><span class="h-num">15.05</span> Implementace</h2>
+    <h2 id="implementation-heading" class="h-section"><span class="h-num">25.05</span> Implementace</h2>
     <p>
         Následující sekce ukazuje implementaci hlavních částí systému s aplikací DDD principů.
     </p>
@@ -526,7 +526,7 @@ use App\ProjectManagement\Domain\Event\MemberAdded;
 use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
-// UserId, ProjectId a TaskId jsou sdílené v Shared Kernelu (viz sekce 15.07.2)
+// UserId, ProjectId a TaskId jsou sdílené v Shared Kernelu (viz sekce 25.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
 
 class Project
@@ -666,7 +666,7 @@ class Project
         <p>
             <code>UserId</code> je v této studii sdílen mezi kontexty přes Shared Kernel –
             jeho cena a alternativa (samostatný primitiv v každém kontextu) jsou rozebrány
-            v <a href="#trade-off-shared-kernel-heading">sekci 15.07.2</a>. V kontextech, kde
+            v <a href="#trade-off-shared-kernel-heading">sekci 25.07.2</a>. V kontextech, kde
             by se model musel rozejít (jiná validace, jiná sériová reprezentace), by sdílení
             přes Shared Kernel nestačilo a kontext by si držel vlastní kopii.
         </p>
@@ -689,7 +689,7 @@ use App\TaskManagement\Domain\Event\TaskAssigned;
 use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
-// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekce 15.07.2)
+// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekce 25.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
 
@@ -1035,7 +1035,7 @@ enum TaskStatus: string
             vhodné jako primární klíč). <code>new ProjectId($uuid)</code> hydratuje existující identifikátor
             z databáze nebo z příchozího příkazu. <code>TaskId</code> a <code>UserId</code> následují
             stejnou konvenci. Diskuse o sdílení těchto VO mezi kontexty (Shared Kernel vs. duplikace)
-            je v <a href="#trade-off-shared-kernel-heading">sekci 15.07.2</a>.
+            je v <a href="#trade-off-shared-kernel-heading">sekci 25.07.2</a>.
         </p>
     {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1318,7 +1318,7 @@ class TaskAssignmentService
     </section>
 
     <section id="read-model" aria-labelledby="read-model-heading">
-    <h2 id="read-model-heading" class="h-section"><span class="h-num">15.06</span> Read modely a projekce</h2>
+    <h2 id="read-model-heading" class="h-section"><span class="h-num">25.06</span> Read modely a projekce</h2>
     <p>
         Implementace v <a href="#implementation">sekci Implementace</a> ukazuje stranu zápisu (commands).
         <code>GetProjectsHandler</code> ale stále načítá projekty přes doménový repozitář – tedy hydratuje agregáty,
@@ -1450,7 +1450,7 @@ class ProjectListProjection
         $view = $this->em->find(ProjectListView::class, $event->projectId->value());
         if ($view === null) {
             // Out-of-order delivery: MemberAdded přišlo dřív než ProjectCreated.
-            // Reconciler (sekce 15.06.5) dohledá zaostalou view a obnoví ji
+            // Reconciler (sekce 25.06.5) dohledá zaostalou view a obnoví ji
             // ze zdrojových agregátů.
             return;
         }
@@ -1499,7 +1499,7 @@ class ProjectListProjection
 
     <h3 id="read-model-query-heading">Query handler nad read modelem (revize <code>GetProjectsHandler</code>)</h3>
     <p>
-        Naivní verze ze <a href="#get-projects-handler-heading">sekce 15.05</a> hydratovala doménové agregáty
+        Naivní verze ze <a href="#get-projects-handler-heading">sekce 25.05</a> hydratovala doménové agregáty
         jen kvůli zobrazení. Po zavedení projekce se třída <code>GetProjectsHandler</code> přepsala na čistý
         DBAL dotaz nad read tabulkou. Žádné agregáty, žádná doménová logika – jen výběr sloupců a mapování
         na <code>ProjectViewModel</code>. Stejný název třídy, stejný command, jiná implementace; volající
@@ -1713,7 +1713,7 @@ final class ReconcileProjectListView extends Command
     </section>
 
     <section id="trade-offs" aria-labelledby="trade-offs-heading">
-    <h2 id="trade-offs-heading" class="h-section"><span class="h-num">15.07</span> Výzvy a rozhodnutí</h2>
+    <h2 id="trade-offs-heading" class="h-section"><span class="h-num">25.07</span> Výzvy a rozhodnutí</h2>
     <p>
         Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí představuje místa, kde tým váhal mezi
         dvěma legitimními možnostmi. Cílem této sekce není ukázat „správnou“ odpověď, ale popsat kontext, který určil
@@ -1837,7 +1837,7 @@ final class ReconcileProjectListView extends Command
     </section>
 
     <section id="lessons" aria-labelledby="lessons-heading">
-    <h2 id="lessons-heading" class="h-section"><span class="h-num">15.08</span> Ponaučení</h2>
+    <h2 id="lessons-heading" class="h-section"><span class="h-num">25.08</span> Ponaučení</h2>
     <p>
         Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla deset
         ponaučení, která lze přenést do dalších projektů. Prvních sedm vychází ze strategického a taktického designu,

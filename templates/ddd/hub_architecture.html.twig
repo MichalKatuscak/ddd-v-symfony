@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Architektura a implementace – rozcestník | DDD Symfony 8{% endblock %}
+{% block meta_description %}Architektonická rovina Domain-Driven Design v Symfony 8: vrstvení vs. Hexagonal/Onion/Clean, vertikální slice, struktura projektu, autorizace.{% endblock %}
+{% block breadcrumb_name %}Architektura{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "url": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}",
+    "name": "Architektura a implementace – rozcestník",
+    "description": "{{ block('meta_description')|escape('js') }}",
+    "inLanguage": "cs-CZ",
+    "isPartOf": {
+        "@type": "WebSite",
+        "name": "Architektura DDD v Symfony 8",
+        "url": "{{ app.request.schemeAndHttpHost }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% set total_time = 0 %}{% for c in hub_chapters %}{% set total_time = total_time + c.time %}{% endfor %}
+{% set updated = "now"|date("j. n. Y") %}
+
+{% block body %}
+    {% include '_partials/hub.html.twig' with {
+        hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · ARCHITEKTURA',
+        hub_h_main: 'Architektura a implementace,',
+        hub_h_em: 'kam to v projektu položit.',
+        hub_deck: 'Sekce o tvaru projektu. <strong>Architektonické styly</strong> srovnává Hexagonal, Onion a Clean Architecture s tradičním vrstvením. <strong>Vertikální slice</strong> ukazuje alternativu k horizontálnímu členění. <strong>Implementace v Symfony 8</strong> mapuje DDD pojmy na Messenger, DI a Doctrine. <strong>Autorizace v DDD</strong> rozhoduje, kam patří kontrola oprávnění – do agregátu, do voteru, nebo ven z domény.',
+        hub_meta: [
+            { k: 'Kapitol', v: hub_chapters|length },
+            { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
+            { k: 'Stack', v: 'Symfony 8 · Doctrine · Security' },
+            { k: 'Aktualizace', v: updated }
+        ],
+        hub_part: 'PART III',
+        hub_part_title: 'Vrstvy · slicing · Symfony · autorizace',
+        hub_part_sub: 'jak projekt poskládat',
+        hub_chapters: hub_chapters
+    } only %}
+{% endblock %}

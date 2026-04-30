@@ -28,12 +28,27 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/strategie', name: 'hub_strategic')]
-    public function hubStrategic(): Response
+    #[Route('/strategie', name: 'hub_strategic_redirect')]
+    public function hubStrategicRedirect(): Response
     {
-        return $this->render('ddd/hub_strategic.html.twig', [
-            'title' => 'Strategický DDD – rozcestník',
-            'hub_chapters' => Chapters::byGroup('strategic'),
+        return $this->redirectToRoute('hub_basics', [], 301);
+    }
+
+    #[Route('/takticke-vzory', name: 'hub_tactics')]
+    public function hubTactics(): Response
+    {
+        return $this->render('ddd/hub_tactics.html.twig', [
+            'title' => 'Taktické modelování – rozcestník',
+            'hub_chapters' => Chapters::byGroup('tactics'),
+        ]);
+    }
+
+    #[Route('/architektura', name: 'hub_architecture')]
+    public function hubArchitecture(): Response
+    {
+        return $this->render('ddd/hub_architecture.html.twig', [
+            'title' => 'Architektura a implementace – rozcestník',
+            'hub_chapters' => Chapters::byGroup('architecture'),
         ]);
     }
 
@@ -41,7 +56,7 @@ class DddController extends AbstractController
     public function hubPatterns(): Response
     {
         return $this->render('ddd/hub_patterns.html.twig', [
-            'title' => 'Taktické vzory DDD – rozcestník',
+            'title' => 'Pokročilé vzory a infrastruktura – rozcestník',
             'hub_chapters' => Chapters::byGroup('patterns'),
         ]);
     }
@@ -50,8 +65,17 @@ class DddController extends AbstractController
     public function hubPractice(): Response
     {
         return $this->render('ddd/hub_practice.html.twig', [
-            'title' => 'DDD v praxi – rozcestník',
+            'title' => 'Praxe a provoz – rozcestník',
             'hub_chapters' => Chapters::byGroup('practice'),
+        ]);
+    }
+
+    #[Route('/synteza', name: 'hub_synthesis')]
+    public function hubSynthesis(): Response
+    {
+        return $this->render('ddd/hub_synthesis.html.twig', [
+            'title' => 'Syntéza – rozcestník',
+            'hub_chapters' => Chapters::byGroup('synthesis'),
         ]);
     }
 
@@ -60,7 +84,7 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/hub_reference.html.twig', [
             'title' => 'Reference DDD – rozcestník',
-            'hub_chapters' => Chapters::byGroup('reference'),
+            'hub_chapters' => [],
             'extras' => Chapters::extras(),
         ]);
     }
@@ -92,6 +116,14 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/basic_concepts.html.twig', [
             'title' => 'Základní koncepty DDD',
+        ]);
+    }
+
+    #[Route('/navrh-agregatu', name: 'aggregate_design')]
+    public function aggregateDesign(): Response
+    {
+        return $this->render('ddd/aggregate_design.html.twig', [
+            'title' => 'Návrh agregátu',
         ]);
     }
 

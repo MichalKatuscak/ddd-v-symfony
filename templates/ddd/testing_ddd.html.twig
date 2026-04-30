@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '10',
+        chapter_number: '18',
         category: 'Praxe',
         title: 'Testování DDD kódu v Symfony',
         deck: 'Akademický průvodce testováním Domain-Driven Design kódu v Symfony. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac.',
@@ -61,11 +61,11 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="10">
+    <div class="art-body" data-chapter-number="18">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter08_Testing' } %}
 
 <section id="filozofie-testovani" aria-labelledby="filozofie-testovani-heading">
-    <h2 id="filozofie-testovani-heading" class="h-section"><span class="h-num">10.01</span> Filozofie testování v DDD</h2>
+    <h2 id="filozofie-testovani-heading" class="h-section"><span class="h-num">18.01</span> Filozofie testování v DDD</h2>
     <p>
         Domain-Driven Design a automatizované testování se vzájemně přirozeně doplňují. Čistá doménová vrstva, která neobsahuje závislosti na frameworku,
         databázi ani jiné infrastruktuře, je ze své podstaty snadno testovatelná. Zatímco v tradičních vrstvených architekturách jsou unit testy
@@ -142,7 +142,7 @@
     </section>
 
     <section id="unit-testy-domeny" aria-labelledby="unit-testy-domeny-heading">
-    <h2 id="unit-testy-domeny-heading" class="h-section"><span class="h-num">10.02</span> Unit testy doménové vrstvy</h2>
+    <h2 id="unit-testy-domeny-heading" class="h-section"><span class="h-num">18.02</span> Unit testy doménové vrstvy</h2>
     <p>
         Unit testy doménové vrstvy jsou nejcennější součástí testovací sady DDD aplikace. Testují čisté PHP objekty bez jakýchkoli závislostí
         na frameworku. Pro jejich spuštění stačí nainstalovat PHPUnit a samotné doménové třídy – žádný bootstrap Symfony kernelu není potřeba.
@@ -439,7 +439,7 @@ final class OrderTest extends TestCase
     </section>
 
     <section id="testovani-domain-events" aria-labelledby="testovani-domain-events-heading">
-    <h2 id="testovani-domain-events-heading" class="h-section"><span class="h-num">10.03</span> Testování doménových událostí</h2>
+    <h2 id="testovani-domain-events-heading" class="h-section"><span class="h-num">18.03</span> Testování doménových událostí</h2>
     <p>
         Doménové události jsou hlavním mechanismem DDD pro komunikaci mezi agregáty a bounded contexty. Je nezbytné
         testovat, že agregát vydá správné události se správnými daty jako reakci na doménové operace.
@@ -587,7 +587,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
     </section>
 
     <section id="test-doubles" aria-labelledby="test-doubles-heading">
-    <h2 id="test-doubles-heading" class="h-section"><span class="h-num">10.04</span> Test doubles a InMemory repozitáře</h2>
+    <h2 id="test-doubles-heading" class="h-section"><span class="h-num">18.04</span> Test doubles a InMemory repozitáře</h2>
     <p>
         Test doubles jsou náhradní implementace závislostí používané v testech místo reálných objektů.
         Správná volba typu test double závisí na tom, co testujeme a jaké chování chceme ověřit.
@@ -805,7 +805,7 @@ final class RegisterUserHandlerTest extends TestCase
     </section>
 
     <section id="integracni-testy" aria-labelledby="integracni-testy-heading">
-    <h2 id="integracni-testy-heading" class="h-section"><span class="h-num">10.05</span> Integrační testy s Doctrine</h2>
+    <h2 id="integracni-testy-heading" class="h-section"><span class="h-num">18.05</span> Integrační testy s Doctrine</h2>
     <p>
         Integrační testy ověřují spolupráci doménového kódu s infrastrukturou – především správnost Doctrine mapování,
         dotazů repozitářů a transakčního chování. Na rozdíl od unit testů potřebují skutečnou databázi (typicky SQLite
@@ -959,7 +959,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     </section>
 
     <section id="funkcni-testy" aria-labelledby="funkcni-testy-heading">
-    <h2 id="funkcni-testy-heading" class="h-section"><span class="h-num">10.06</span> Funkční testy API a kontrolerů</h2>
+    <h2 id="funkcni-testy-heading" class="h-section"><span class="h-num">18.06</span> Funkční testy API a kontrolerů</h2>
     <p>
         Funkční testy ověřují chování celé aplikace přes HTTP vrstvu. Testují, že správný request na správnou URL
         vrátí správnou odpověď – včetně HTTP status kódu, formátu těla odpovědi (JSON), hlaviček a chování
@@ -1104,7 +1104,7 @@ final class RegistrationControllerTest extends WebTestCase
     </section>
 
     <section id="architektonicke-testy" aria-labelledby="architektonicke-testy-heading">
-    <h2 id="architektonicke-testy-heading" class="h-section"><span class="h-num">10.07</span> Architektonické testy</h2>
+    <h2 id="architektonicke-testy-heading" class="h-section"><span class="h-num">18.07</span> Architektonické testy</h2>
     <p>
         Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla – především
         pravidla závislostí mezi vrstvami. V DDD je základním pravidlem, že doménová vrstva nesmí záviset
@@ -1275,7 +1275,7 @@ return static function (Config $config): void {
     </section>
 
     <section id="pokryti-a-best-practices" aria-labelledby="pokryti-a-best-practices-heading">
-    <h2 id="pokryti-a-best-practices-heading" class="h-section"><span class="h-num">10.08</span> Code coverage a best practices</h2>
+    <h2 id="pokryti-a-best-practices-heading" class="h-section"><span class="h-num">18.08</span> Code coverage a best practices</h2>
     <p>
         Code coverage (pokrytí kódem) je metrika udávající, jaké procento kódu je spouštěno při běhu testů.
         Vysoké pokrytí samo o sobě nezaručuje kvalitu testů – lze dosáhnout 100% pokrytí s testy, které

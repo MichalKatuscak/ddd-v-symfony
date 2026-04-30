@@ -48,10 +48,10 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '12',
+        chapter_number: '08',
         category: 'Vzory',
         title: 'Méně známé taktické vzory: Specifications, Domain Services, Factories, Modules',
-        deck: 'Vedle entit, value objektů a agregátů obsahuje Evansova kniha čtyři další taktické vzory, které programátoři často přeskočí: <strong>Specifications</strong> jako prvotřídní booleovská logika, <strong>Domain Services</strong> pro chování bez přirozeného vlastníka, <strong>Factories</strong> pro komplexní vznik agregátů a <strong>Modules</strong> jako vědomá organizace kódu. Tato kapitola je jejich detailní průvodce v Symfony 8 a PHP 8.4 – s code samples, anti-vzory a srovnávacími tabulkami.',
+        deck: 'Vedle entit, value objektů a agregátů obsahuje Evansova kniha čtyři další taktické vzory, které programátoři často přeskočí: <strong>Specifications</strong> jako prvotřídní booleovská logika, <strong>Domain Services</strong> pro chování bez přirozeného vlastníka, <strong>Factories</strong> pro komplexní vznik agregátů a <strong>Modules</strong> jako vědomá organizace kódu. Tato kapitola je jejich detailní průvodce v Symfony 8 a PHP 8.4 – s ukázkami kódu, anti-vzory a srovnávacími tabulkami.',
         reading_time: 28,
         difficulty: 3,
         published: block('article_published_time'),
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="12">
+    <div class="art-body" data-chapter-number="08">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter12_LesserPatterns' } %}
 
     <p>
@@ -69,8 +69,8 @@
         čtyři pilíře taktického designu: <strong>Entity</strong>, <strong>Value Object</strong>,
         <strong>Aggregate</strong> a stručně i <strong>Domain Service</strong> a <strong>Factory</strong>.
         Eric Evans ovšem v částech II a III své knihy z roku 2003 věnuje hloubkovou pozornost ještě
-        čtyřem dalším vzorům – a právě ty bývají v praktických tutoriálech přehlíženy nebo zaměňovány
-        s něčím jiným. Cílem této kapitoly je vrátit jim plné kontury: kdy jsou skutečně užitečné,
+        čtyřem dalším vzorům – a právě ty bývají v praktických průvodcích přehlíženy nebo zaměňovány
+        s něčím jiným. Cílem této kapitoly je vrátit jim plný význam: kdy jsou skutečně užitečné,
         jak je zapsat v moderním PHP&nbsp;8.4 a jaká rizika přinášejí, pokud je použijeme špatně.
     </p>
 
@@ -88,10 +88,10 @@
        Sekce 1: Proč tyto vzory přehlížíme
        ─────────────────────────────────────────────────────────── #}
     <section id="proc-prehlizime" aria-labelledby="proc-prehlizime-heading">
-    <h2 id="proc-prehlizime-heading" class="h-section"><span class="h-num">12.01</span> Proč tyto vzory přehlížíme</h2>
+    <h2 id="proc-prehlizime-heading" class="h-section"><span class="h-num">08.01</span> Proč tyto vzory přehlížíme</h2>
 
     <p>
-        Většina online tutoriálů o DDD končí někde u Aggregate. Programátor, který se právě naučil
+        Většina online průvodců o DDD končí někde u Aggregate. Programátor, který se právě naučil
         odlišovat Entity od Value Objektu a&nbsp;chápe význam invariantů, má pocit, že už ovládá
         „taktický design“. Specification, Domain Service, Factory a Module se mu pak jeví jako
         „nadbytečná abstrakce“ – vždyť přece to, co dělají, lze napsat i jinak: <em>if</em>-em,
@@ -136,7 +136,7 @@
        Sekce 2: Specification Pattern
        ─────────────────────────────────────────────────────────── #}
     <section id="specification" aria-labelledby="specification-heading">
-    <h2 id="specification-heading" class="h-section"><span class="h-num">12.02</span> Specification Pattern</h2>
+    <h2 id="specification-heading" class="h-section"><span class="h-num">08.02</span> Specification Pattern</h2>
 
     <h3 id="spec-definice">Co to je</h3>
 
@@ -158,7 +158,7 @@
     } %}
 
     <p>
-        Zdánlivě banální. Jenže právě tahle banalita je síla: každé pravidlo doménového jazyka
+        Zdánlivě banální. Jenže právě tato banalita je síla: každé pravidlo doménového jazyka
         – <em>„zákazník je premium“</em>, <em>„objednávka má nárok na dopravu zdarma“</em>,
         <em>„faktura je po splatnosti“</em> – dostane vlastní třídu s mluvícím jménem. Pravidlo
         přestává být pouhou kombinací <code>if</code>-ů uvnitř service vrstvy a stává se
@@ -230,7 +230,7 @@
     {% set _callout_body %}
         <h3 id="spec-anti-heading">Anti-vzor: Specification pro každé porovnání</h3>
         <p>
-            Začátečníci po objevení vzoru často propadnou „kladivovému efektu“ a&nbsp;vytvoří
+            Začátečníci po objevení vzoru často propadnou „efektu kladiva“ a&nbsp;vytvoří
             třídy <code>OrderTotalGreaterThanSpecification</code>, <code>OrderTotalLessThanSpecification</code>,
             <code>OrderTotalEqualsSpecification</code> – každá obsahuje jeden řádek kódu.
             To je over-engineering: ztrácíte čitelnost domény, protože jména přestanou být
@@ -246,7 +246,7 @@
     <h3 id="spec-diagram">Skladba pomocí kombinátorů</h3>
 
     <p>
-        Síla vzoru spočívá v&nbsp;tom, že specifikace lze <strong>skládat</strong> pomocí
+        Vzor je silný tím, že specifikace lze <strong>skládat</strong> pomocí
         booleovských kombinátorů <code>and</code>, <code>or</code>, <code>not</code>. Místo
         klubka <code>if</code>-ů a&nbsp;<code>else</code>-ů zapíšete pravidlo jako algebraický
         výraz nad pojmenovanými atomy. Třídní hierarchie vypadá následovně:
@@ -254,7 +254,7 @@
 
     {% set _diag %}{% include 'diagrams/16_lesser_patterns/specification_compose.svg' ignore missing %}{% endset %}
     {% include '_partials/diagram.html.twig' with {
-        fig: '12.2-A',
+        fig: '08.2-A',
         title: 'Specification Pattern: kompozice booleovské logiky',
         inline: _diag,
         alt: 'Třídní diagram Specification Patternu – interface, abstraktní CompositeSpecification, kombinátory And/Or/Not, konkrétní doménové specifikace.',
@@ -562,7 +562,7 @@ final class NotInBlacklist extends CompositeSpecification
     <h3 id="spec-compose">Kompozice v aplikační vrstvě</h3>
 
     <p>
-        Teprve nyní vidíme skutečnou hodnotu vzoru. Komplexní marketingová akce
+        Tady se ukazuje skutečná hodnota vzoru. Komplexní marketingová akce
         <em>„doprava zdarma pro nákupy nad 1000&nbsp;Kč v EU, kromě zákazníků na blacklistu“</em>
         je pouze trojice atomických specifikací spojená kombinátorem <code>and</code> – jedna
         čitelná řádka místo trojnásobně vnořeného <code>if</code>-u:
@@ -606,7 +606,7 @@ final class ApplyFreeShippingHandler
     <p>
         Pravidlo lze v testu rozložit na atomy a&nbsp;ověřit každý zvlášť. Když produktový tým
         rozhodne, že na blacklist se nově dívat nemá, smažete jeden řádek z kompozice – bez
-        nutnosti hrabat se v sevřeném <code>if</code>-u uvnitř komplexní service vrstvy.
+        nutnosti pročítat sevřený <code>if</code> uvnitř komplexní service vrstvy.
     </p>
 
     <h3 id="spec-doctrine">Double-dispatch do Doctrine</h3>
@@ -750,7 +750,7 @@ final class DoctrineOrderRepository implements OrderRepository
        Sekce 3: Domain Services
        ─────────────────────────────────────────────────────────── #}
     <section id="domain-services" aria-labelledby="domain-services-heading">
-    <h2 id="domain-services-heading" class="h-section"><span class="h-num">12.03</span> Domain Services</h2>
+    <h2 id="domain-services-heading" class="h-section"><span class="h-num">08.03</span> Domain Services</h2>
 
     <h3 id="ds-definice">Co to je</h3>
 
@@ -933,7 +933,7 @@ final class MoneyTransferService
     <h3 id="ds-srovnani">Domain Service vs. Application Service vs. Infrastructure Service</h3>
 
     <p>
-        V kódu se <em>nějaká</em> &bdquo;Service&ldquo; třída vyskytne téměř vždy. Klíč je vědět,
+        V kódu se <em>nějaká</em> &bdquo;Service&ldquo; třída vyskytne téměř vždy. Otázkou je,
         kterou ze tří odlišných rolí daná Service hraje. Následující srovnávací tabulka shrnuje
         rozdíly, na které se v&nbsp;code review ptáme:
     </p>
@@ -1008,7 +1008,7 @@ final class MoneyTransferService
     </div>
 
     <p>
-        Tabulka odhaluje, proč slepé pojmenování všeho na <code>*Service</code> je problematické –
+        Tabulka ukazuje, proč je problematické pojmenovat vše na <code>*Service</code> –
         a&nbsp;proč se v&nbsp;moderním DDD upouští od sufixu <em>Service</em>
         u&nbsp;Application vrstvy ve prospěch <em>Handler</em> nebo <em>UseCase</em>. Doménová
         Service má sufix <em>Service</em> jen tehdy, když pomáhá zdůraznit „operace bez vlastníka“.
@@ -1049,7 +1049,7 @@ final class MoneyTransferService
        Sekce 4: Factories
        ─────────────────────────────────────────────────────────── #}
     <section id="factories" aria-labelledby="factories-heading">
-    <h2 id="factories-heading" class="h-section"><span class="h-num">12.04</span> Factories</h2>
+    <h2 id="factories-heading" class="h-section"><span class="h-num">08.04</span> Factories</h2>
 
     <h3 id="fac-definice">Co to je</h3>
 
@@ -1238,7 +1238,7 @@ final class Order extends AggregateRoot
     <h3 id="fac-class">Vzor 2: Factory class (když potřebujete DI)</h3>
 
     <p>
-        Static method factory selhává v&nbsp;jediné situaci: když vznik agregátu potřebuje
+        Statická metoda nestačí v&nbsp;jediné situaci: když vznik agregátu potřebuje
         <strong>injektované závislosti</strong> (repozitáře, externí services, konfiguraci).
         Statickou metodou nelze přijímat DI bez service locatoru, takže se přechází na
         samostatnou Factory class:
@@ -1304,9 +1304,9 @@ final class OrderFromCartFactory
         <h3 id="vernon-rule-heading">Pravidlo (Vernon 2013): static method preferred</h3>
         <p>
             Vaughn Vernon ve své knize <em>Implementing Domain-Driven Design</em> (2013), kapitola&nbsp;11,
-            formuluje pravidlo: <strong>&bdquo;Preferujte named constructor. Sahejte po samostatné
-            Factory class teprve tehdy, když vznik nutně potřebuje DI závislosti, kterou nelze
-            poskytnout parametrem.&ldquo;</strong> Důvod je triviální: statická metoda na agregátu
+            formuluje pravidlo: <strong>&bdquo;Preferujte named constructor. Po samostatné
+            Factory class sahejte teprve tehdy, když vznik nutně potřebuje DI závislosti, kterou nelze
+            poskytnout parametrem.&ldquo;</strong> Důvod je prostý: statická metoda na agregátu
             drží invarianty pohromadě s&nbsp;kódem agregátu, samostatná Factory je rozdělí na dva
             soubory a vystavuje agregát public konstruktoru, což oslabuje invariant „nelze vytvořit
             nevalidní stav“.
@@ -1326,7 +1326,7 @@ final class OrderFromCartFactory
     <h3 id="fac-reconstitute">Reconstitution: zvláštní případ Factory</h3>
 
     <p>
-        Třetí typ factory, na který se v praxi narazí, je <strong>reconstitution</strong> –
+        Třetí typ factory, s nímž se setkáte, je <strong>reconstitution</strong> –
         rekonstrukce agregátu z perzistence. Doctrine to dělá za vás (přes hydrator), ale pokud
         máte Event Sourcing nebo custom mapper, potřebujete factory, která <strong>nevolá
         invarianty</strong> (rekonstruovaný agregát už invariant prošel kdysi v&nbsp;minulosti):
@@ -1378,7 +1378,7 @@ public static function reconstitute(
        Sekce 5: Modules
        ─────────────────────────────────────────────────────────── #}
     <section id="modules" aria-labelledby="modules-heading">
-    <h2 id="modules-heading" class="h-section"><span class="h-num">12.05</span> Modules</h2>
+    <h2 id="modules-heading" class="h-section"><span class="h-num">08.05</span> Modules</h2>
 
     <h3 id="mod-definice">Co to je</h3>
 
@@ -1483,8 +1483,8 @@ public static function reconstitute(
         Této organizaci se v komunitě říká také <em>vertical slicing</em> – viz kapitolu
         <a href="{{ path('horizontal_vs_vertical') }}">Horizontální vs. vertikální dělení</a>,
         která jí věnuje detailní rozbor. Pro účely této kapitoly stačí pozorování: <em>shora
-        vidíte doménovou mapu projektu</em> (Ordering, Billing, SharedKernel), nikoliv technický
-        Twig/Doctrine/Service salát.
+        vidíte doménovou mapu projektu</em> (Ordering, Billing, SharedKernel), a ne technický
+        chaos složek Twig/Doctrine/Service.
     </p>
 
     <h3 id="mod-anti">Anti-vzor: type packaging</h3>
@@ -1699,14 +1699,14 @@ vendor/bin/phparkitect check --config=phparkitect.php
     } %}
 
     {% set _callout_body %}
-        <h3 id="phparkitect-tip-heading">Bez architektury testů je Modules pouze přání</h3>
+        <h3 id="phparkitect-tip-heading">Bez architektonických testů je Modules jen přání</h3>
         <p>
-            Modulární organizace, která není vynucená v CI, eroduje rychlostí týmu – během 6 měsíců
-            ji někdo poruší v&nbsp;hot-fix tlaku, refaktoring na původní stav je pak týdenní práce.
-            Doporučujeme <strong>od prvního commitu</strong> nasadit phparkitect (nebo
-            <code>deptrac</code>, alternativa) a&nbsp;udržovat zelený build. Cena je nízká
-            (jeden YAML/PHP soubor v repu), zisk obrovský – modul zůstává modulem,
-            i&nbsp;když do projektu přijde 5. nový vývojář, který Evansův text nikdy nečetl.
+            Modulární organizace, která není vynucená v CI, se rozpadá rychlostí, jakou tým postupuje –
+            během 6 měsíců ji někdo poruší v&nbsp;hot-fix tlaku, refaktoring na původní stav je pak
+            týdenní práce. Doporučujeme <strong>od prvního commitu</strong> nasadit phparkitect (nebo
+            <code>deptrac</code>, alternativa) a&nbsp;udržovat zelený build. Náklad je nízký
+            (jeden YAML/PHP soubor v repu), přínos vysoký – modul zůstává modulem,
+            i&nbsp;když do projektu přijde pátý nový vývojář, který Evansův text nikdy nečetl.
         </p>
         <p>
             Dokumentace: <a href="https://phparkitect.com/" target="_blank" rel="noopener">phparkitect.com</a>;
@@ -1738,7 +1738,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
        Sekce 6: Vztah těchto vzorů ke zbytku DDD
        ─────────────────────────────────────────────────────────── #}
     <section id="vztahy" aria-labelledby="vztahy-heading">
-    <h2 id="vztahy-heading" class="h-section"><span class="h-num">12.06</span> Vztah těchto vzorů ke zbytku DDD</h2>
+    <h2 id="vztahy-heading" class="h-section"><span class="h-num">08.06</span> Vztah těchto vzorů ke zbytku DDD</h2>
 
     <p>
         Čtyři vzory této kapitoly nejsou izolované; <strong>vzájemně se podporují</strong>
@@ -1799,7 +1799,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
        Sekce 7: Anti-vzory souhrn
        ─────────────────────────────────────────────────────────── #}
     <section id="antivzory" aria-labelledby="antivzory-heading">
-    <h2 id="antivzory-heading" class="h-section"><span class="h-num">12.07</span> Anti-vzory souhrn</h2>
+    <h2 id="antivzory-heading" class="h-section"><span class="h-num">08.07</span> Anti-vzory souhrn</h2>
 
     <p>
         Pro rychlou referenci v code review zde shrneme nejčastější anti-vzory, které
@@ -1877,11 +1877,11 @@ vendor/bin/phparkitect check --config=phparkitect.php
        Sekce 8: Shrnutí
        ─────────────────────────────────────────────────────────── #}
     <section id="summary" aria-labelledby="summary-heading">
-    <h2 id="summary-heading" class="h-section"><span class="h-num">12.08</span> Shrnutí</h2>
+    <h2 id="summary-heading" class="h-section"><span class="h-num">08.08</span> Shrnutí</h2>
 
     <p>
         Čtyři vzory této kapitoly – Specifications, Domain Services, Factories, Modules –
-        bývají v praktických tutoriálech přehlíženy. Evans jim ovšem věnuje desítky stran
+        bývají v praktických průvodcích přehlíženy. Evans jim ovšem věnuje desítky stran
         z dobrého důvodu: jsou součástí ucelené sady taktického DDD a&nbsp;bez nich agregáty
         bobtnají, doménový model anemizuje a&nbsp;organizace projektu zatemňuje doménovou
         strukturu.
@@ -1926,7 +1926,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
         aspekty DDD</a>: jak se agregáty chovají při tisících transakcí za sekundu, kde má
         DDD overhead a&nbsp;jak ho minimalizovat. Kapitola
         <a href="{{ path('anti_patterns') }}">Anti-vzory v DDD</a> doplňuje detail
-        u&nbsp;anémického modelu, který v&nbsp;sekci 12.03 padl jen krátce.
+        u&nbsp;anémického modelu, který v&nbsp;sekci 08.03 padl jen krátce.
     </p>
 
     </section>
@@ -1947,7 +1947,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
             },
             {
                 question: 'Jak vynutit hranice mezi Moduly v PHP projektu?',
-                answer: 'Konvence sama o sobě eroduje – vývojáři pod tlakem &bdquo;udělej rychle&ldquo; přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://phparkitect.com/" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/qossmic/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu <em>&bdquo;App\\Ordering nesmí závisět na App\\Billing&ldquo;</em>, <em>&bdquo;App\\Ordering\\Domain nesmí znát Doctrine&ldquo;</em>, a CI build selže při porušení. Cena je jeden konfigurační soubor, zisk je netušená záruka, že modulární organizace přežije i 5. nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
+                answer: 'Konvence sama o sobě se rozpadá – vývojáři pod tlakem &bdquo;udělej rychle&ldquo; přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://phparkitect.com/" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/qossmic/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu <em>&bdquo;App\\Ordering nesmí závisět na App\\Billing&ldquo;</em>, <em>&bdquo;App\\Ordering\\Domain nesmí znát Doctrine&ldquo;</em>, a CI build selže při porušení. Náklad je jeden konfigurační soubor, zisk je výrazná záruka, že modulární organizace přežije i&nbsp;pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
             },
             {
                 question: 'Jak má vypadat namespace třídy, která sedí na hranici dvou Bounded Contextů?',
@@ -1955,7 +1955,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
             },
             {
                 question: 'Můžu Specification a Domain Service kombinovat?',
-                answer: 'Ano, a&nbsp;v praxi to často děláte. Domain Service obvykle koordinuje 2+ agregáty, kde jedno z rozhodnutí je vyjádřeno jako Specification – typicky <em>&bdquo;může tato objednávka projít k expedici?&ldquo;</em> = kompozice <code>HasBeenPaid AND ItemsInStock AND NotInBlacklist</code>. Domain Service tu specifikaci instancuje a&nbsp;volá <code>isSatisfiedBy()</code>, podle výsledku zavolá metodu na agregátu. Vzory se vzájemně doplňují: Specification je <em>pravidlo</em>, Domain Service je <em>akce</em>, která pravidlo aplikuje na 2+ agregáty. Detail v <a href="#vztahy">sekci 12.06 Vztah těchto vzorů</a>.'
+                answer: 'Ano, a&nbsp;v praxi to často děláte. Domain Service obvykle koordinuje 2+ agregáty, kde jedno z rozhodnutí je vyjádřeno jako Specification – typicky <em>&bdquo;může tato objednávka projít k expedici?&ldquo;</em> = kompozice <code>HasBeenPaid AND ItemsInStock AND NotInBlacklist</code>. Domain Service tu specifikaci instancuje a&nbsp;volá <code>isSatisfiedBy()</code>, podle výsledku zavolá metodu na agregátu. Vzory se vzájemně doplňují: Specification je <em>pravidlo</em>, Domain Service je <em>akce</em>, která pravidlo aplikuje na 2+ agregáty. Detail v <a href="#vztahy">sekci 08.06 Vztah těchto vzorů</a>.'
             }
         ]
     } %}

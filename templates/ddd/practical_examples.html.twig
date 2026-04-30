@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '09',
+        chapter_number: '24',
         category: 'Praxe',
         title: 'Praktické příklady',
         deck: 'Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury.',
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="09">
+    <div class="art-body" data-chapter-number="24">
 <p>
             V předchozích kapitolách jsme prošli teorii i implementační detaily –
             od <a href="{{ path('cqrs') }}">CQRS</a> přes
@@ -72,7 +72,7 @@
         </p>
 
 <section id="e-commerce" aria-labelledby="e-commerce-heading">
-            <h2 id="e-commerce-heading" class="h-section"><span class="h-num">09.01</span> Příklad: E-commerce aplikace</h2>
+            <h2 id="e-commerce-heading" class="h-section"><span class="h-num">24.01</span> Příklad: E-commerce aplikace</h2>
             <p>
                 V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí vertikální slice architektury
                 a CQRS v Symfony 8.
@@ -81,7 +81,7 @@
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/eshop/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '09.1-A',
+                fig: '24.1-A',
                 title: 'E-shop: bounded contexts Cart a Order',
                 inline: _diagram_inline
             } %}
@@ -523,7 +523,7 @@ class GetCartHandler
         </section>
 
         <section id="blog" aria-labelledby="blog-heading">
-            <h2 id="blog-heading" class="h-section"><span class="h-num">09.02</span> Příklad: Blog</h2>
+            <h2 id="blog-heading" class="h-section"><span class="h-num">24.02</span> Příklad: Blog</h2>
             <p>
                 V této části si ukážeme, jak implementovat jednoduchý blog pomocí vertikální slice architektury a CQRS v
                 Symfony 8.
@@ -531,7 +531,7 @@ class GetCartHandler
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/blog/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '09.2-A',
+                fig: '24.2-A',
                 title: 'Blog: doménový model a feature slices',
                 inline: _diagram_inline
             } %}
@@ -766,7 +766,7 @@ class CreatePostHandler
         </section>
 
         <section id="user-management" aria-labelledby="user-management-heading">
-            <h2 id="user-management-heading" class="h-section"><span class="h-num">09.03</span> Příklad: Správa uživatelů</h2>
+            <h2 id="user-management-heading" class="h-section"><span class="h-num">24.03</span> Příklad: Správa uživatelů</h2>
             <p>
                 V této sekci implementujeme správu uživatelů pomocí DDD a CQRS v Symfony 8 – uživatelé
                 tvoří společnou doménu a DDD slouží k oddělení jednotlivých feature (registrace, autentizace, profil).
@@ -774,7 +774,7 @@ class CreatePostHandler
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/users/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '09.3-A',
+                fig: '24.3-A',
                 title: 'Správa uživatelů: feature slices',
                 inline: _diagram_inline
             } %}

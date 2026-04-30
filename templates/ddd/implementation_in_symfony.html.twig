@@ -48,7 +48,7 @@
 {% block body %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
-        chapter_number: '04',
+        chapter_number: '11',
         category: 'Základy',
         title: 'Implementace DDD v Symfony 8',
         deck: 'Praktický překlad DDD konceptů do Symfony 8: jak strukturovat projekt podle Bounded Contextů, jak persistovat agregáty přes Doctrine, jak konfigurovat Messenger a kdy sáhnout po Doctrine custom types pro hodnotové objekty.',
@@ -61,7 +61,7 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body" data-chapter-number="04">
+    <div class="art-body" data-chapter-number="11">
 {% include '_partials/github_examples.html.twig' with { path: 'Chapter04_Implementation' } %}
 
         {% set _callout_body %}
@@ -84,7 +84,7 @@
             } %}
 
     <section id="ddd-vs-symfony-boundary" aria-labelledby="ddd-vs-symfony-boundary-heading">
-        <h2 id="ddd-vs-symfony-boundary-heading" class="h-section"><span class="h-num">04.01</span> Kde končí DDD a kde začíná Symfony</h2>
+        <h2 id="ddd-vs-symfony-boundary-heading" class="h-section"><span class="h-num">11.01</span> Kde končí DDD a kde začíná Symfony</h2>
 
         <p>
             Následující diagram ukazuje hranici mezi čistým DDD kódem (zelená oblast) a Symfony infrastrukturou
@@ -95,7 +95,7 @@
 
         {% set _diagram_inline %}{% include '/diagrams/3_implementation_in_symfony/boundary.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '04.1-A',
+                fig: '11.1-A',
                 title: 'Hranice mezi DDD a Symfony',
                 inline: _diagram_inline
             } %}
@@ -108,7 +108,7 @@
     </section>
 
 <section id="project-structure" aria-labelledby="project-structure-heading">
-    <h2 id="project-structure-heading" class="h-section"><span class="h-num">04.02</span> Struktura projektu</h2>
+    <h2 id="project-structure-heading" class="h-section"><span class="h-num">11.02</span> Struktura projektu</h2>
     <p>
         Při implementaci DDD s vertikální slice architekturou v Symfony 8 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 8:
     </p>
@@ -211,7 +211,7 @@
 
     {% set _diagram_inline %}{% include '/diagrams/3_implementation_in_symfony/diagram.svg' %}{% endset %}
             {% include '_partials/diagram.html.twig' with {
-                fig: '04.2-A',
+                fig: '11.2-A',
                 title: 'Struktura projektu s Bounded Contexts',
                 inline: _diagram_inline
             } %}
@@ -251,7 +251,7 @@
     </section>
 
     <section id="entities" aria-labelledby="entities-heading">
-    <h2 id="entities-heading" class="h-section"><span class="h-num">04.03</span> Implementace entit</h2>
+    <h2 id="entities-heading" class="h-section"><span class="h-num">11.03</span> Implementace entit</h2>
     <p>
         Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 se implementují entity jako běžné PHP třídy:
     </p>
@@ -384,7 +384,7 @@ class User
     </section>
 
     <section id="value-objects" aria-labelledby="value-objects-heading">
-    <h2 id="value-objects-heading" class="h-section"><span class="h-num">04.04</span> Implementace hodnotových objektů</h2>
+    <h2 id="value-objects-heading" class="h-section"><span class="h-num">11.04</span> Implementace hodnotových objektů</h2>
     <p>
         Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 se implementují hodnotové objekty jako neměnné PHP třídy:
     </p>
@@ -447,7 +447,7 @@ class Email
     </section>
 
     <section id="repositories" aria-labelledby="repositories-heading">
-    <h2 id="repositories-heading" class="h-section"><span class="h-num">04.05</span> Implementace repozitářů</h2>
+    <h2 id="repositories-heading" class="h-section"><span class="h-num">11.05</span> Implementace repozitářů</h2>
     <p>
         Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 se implementují repozitáře jako rozhraní a jejich implementace:
     </p>
@@ -570,7 +570,7 @@ class DoctrineUserRepository implements UserRepository
     </section>
 
     <section id="doctrine-xml-mapping" aria-labelledby="doctrine-xml-mapping-heading">
-    <h2 id="doctrine-xml-mapping-heading" class="h-section"><span class="h-num">04.06</span> Separace Doctrine mapování pomocí XML</h2>
+    <h2 id="doctrine-xml-mapping-heading" class="h-section"><span class="h-num">11.06</span> Separace Doctrine mapování pomocí XML</h2>
     <p>
         V předchozích příkladech jste si všimli, že doménové entity a hodnotové objekty neobsahují žádné Doctrine atributy (<code>#[ORM\Entity]</code>, <code>#[ORM\Column]</code> apod.).
         To je záměrné – v čistém DDD přístupu by doménová vrstva neměla mít žádnou závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
@@ -706,7 +706,7 @@ doctrine:
     </section>
 
     <section id="doctrine-custom-types" aria-labelledby="doctrine-custom-types-heading">
-    <h2 id="doctrine-custom-types-heading" class="h-section"><span class="h-num">04.07</span> Doctrine custom types pro Value Objects</h2>
+    <h2 id="doctrine-custom-types-heading" class="h-section"><span class="h-num">11.07</span> Doctrine custom types pro Value Objects</h2>
     <p>
         Alternativou k ukládání hodnotových objektů jako primitivních typů (viz
         <a href="#entities">implementace entit</a>) je vytvoření <strong>Doctrine custom type</strong>,
@@ -807,7 +807,7 @@ doctrine:
     </section>
 
     <section id="php-enums" aria-labelledby="php-enums-heading">
-    <h2 id="php-enums-heading" class="h-section"><span class="h-num">04.08</span> PHP 8.1+ Enums pro stavové typy</h2>
+    <h2 id="php-enums-heading" class="h-section"><span class="h-num">11.08</span> PHP 8.1+ Enums pro stavové typy</h2>
     <p>
         Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums), které představují idiomatický způsob, jak v DDD implementovat stavové hodnotové objekty
         s konečnou množinou hodnot – například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
@@ -987,7 +987,7 @@ final class Order
     </section>
 
     <section id="domain-services" aria-labelledby="domain-services-heading">
-    <h2 id="domain-services-heading" class="h-section"><span class="h-num">04.09</span> Implementace doménových služeb</h2>
+    <h2 id="domain-services-heading" class="h-section"><span class="h-num">11.09</span> Implementace doménových služeb</h2>
     <p>
         Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
         V Symfony 8 se implementují doménové služby jako běžné PHP třídy:
@@ -1046,7 +1046,7 @@ class PaymentService
     </section>
 
     <section id="specification-pattern" aria-labelledby="specification-pattern-heading">
-    <h2 id="specification-pattern-heading" class="h-section"><span class="h-num">04.10</span> Specification Pattern</h2>
+    <h2 id="specification-pattern-heading" class="h-section"><span class="h-num">11.10</span> Specification Pattern</h2>
     <p>
         Specification Pattern (Eric Evans, <em>DDD</em>, kap. 9) zapouzdřuje doménová pravidla a podmínky
         do samostatných, znovu použitelných objektů. Specifikace odpovídá na otázku „splňuje tento objekt
@@ -1164,7 +1164,7 @@ final class ShippingService
     </section>
 
     <section id="domain-events" aria-labelledby="domain-events-heading">
-    <h2 id="domain-events-heading" class="h-section"><span class="h-num">04.11</span> Implementace doménových událostí</h2>
+    <h2 id="domain-events-heading" class="h-section"><span class="h-num">11.11</span> Implementace doménových událostí</h2>
     <p>
         Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 se implementují doménové události jako neměnné PHP třídy:
     </p>
@@ -1258,7 +1258,7 @@ class UserRegistered
     </section>
 
     <section id="error-handling" aria-labelledby="error-handling-heading">
-    <h2 id="error-handling-heading" class="h-section"><span class="h-num">04.12</span> Strategie zpracování chyb v DDD</h2>
+    <h2 id="error-handling-heading" class="h-section"><span class="h-num">11.12</span> Strategie zpracování chyb v DDD</h2>
     <p>
         V DDD se výjimky liší podle vrstvy, ve které vznikají. Každá vrstva
         má jiné odpovědnosti a jiný typ chyb:
@@ -1344,7 +1344,7 @@ final class InvalidOrderStateTransitionException extends \DomainException
     </section>
 
     <section id="application-services" aria-labelledby="application-services-heading">
-    <h2 id="application-services-heading" class="h-section"><span class="h-num">04.13</span> Implementace aplikačních služeb</h2>
+    <h2 id="application-services-heading" class="h-section"><span class="h-num">11.13</span> Implementace aplikačních služeb</h2>
     <p>
         Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 se implementují aplikační služby
         jako command a query handlery:
@@ -1533,7 +1533,7 @@ class GetUserProfileHandler
     </section>
 
     <section id="controllers" aria-labelledby="controllers-heading">
-    <h2 id="controllers-heading" class="h-section"><span class="h-num">04.14</span> Implementace kontrolerů</h2>
+    <h2 id="controllers-heading" class="h-section"><span class="h-num">11.14</span> Implementace kontrolerů</h2>
     <p>
         Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 se implementují kontrolery
         jako běžné Symfony kontrolery:
@@ -1608,7 +1608,7 @@ class RegistrationController extends AbstractController
     </section>
 
     <section id="dependency-injection" aria-labelledby="dependency-injection-heading">
-    <h2 id="dependency-injection-heading" class="h-section"><span class="h-num">04.15</span> Dependency Injection a autowiring</h2>
+    <h2 id="dependency-injection-heading" class="h-section"><span class="h-num">11.15</span> Dependency Injection a autowiring</h2>
     <p>
         Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
         Symfony 8 poskytuje výkonný Dependency Injection Container, který slouží pro konfiguraci služeb:
