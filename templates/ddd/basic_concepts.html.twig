@@ -132,7 +132,7 @@
                 kontexty.
                 Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderManagement</code> může být uživatel
                 reprezentován pouze jako <code>UserId</code>,
-                zatímco v kontextu <code>UserManagement</code> je uživatel reprezentován jako plnohodnotná entita <code>User</code>.
+                zatímco v kontextu <code>UserManagement</code> je uživatel modelován jako plnohodnotná entita <code>User</code>.
                 Kompletní příklad rozdělení reálného systému do pěti bounded contexts je v kapitole
                 <a href="{{ path('case_study') }}#discovery">Případová studie – Doménová analýza</a>.
             </p>
@@ -144,8 +144,8 @@
             <p>
                 Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty
                 <a href="https://martinfowler.com/bliki/UbiquitousLanguage.html" target="_blank" rel="noopener">[2]</a>.
-                Tento jazyk je používán v kódu, dokumentaci a komunikaci.
-                Všudypřítomný jazyk pomáhá překonat komunikační bariéry mezi vývojáři a doménovými experty.
+                Používá se v kódu, dokumentaci i v běžné komunikaci a pomáhá překonávat bariéry mezi vývojáři
+                a doménovými experty.
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/4_ubiquitous_language/diagram.svg' %}{% endset %}
@@ -180,10 +180,9 @@
             } %}
 
             <p>
-                Tyto pojmy by byly používány konzistentně v kódu, dokumentaci a komunikaci mezi vývojáři a doménovými
-                experty.
-                Například, místo použití termínu "uživatel" by se používal termín "zákazník", pokud se jedná o osobu,
-                která nakupuje produkty.
+                Tyto pojmy se používají konzistentně v kódu, dokumentaci i v komunikaci mezi vývojáři a doménovými
+                experty. Pokud se hovoří o osobě, která nakupuje produkty, používá se důsledně termín
+                „zákazník“ – nikoli obecné „uživatel“.
             </p>
         </section>
 
@@ -653,7 +652,7 @@ class PaymentService
             <h2 id="domain-events-heading" class="h-section"><span class="h-num">02.08</span> Doménové události (Domain Events)</h2>
             <p>
                 Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
-                doménový význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
+                význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
                 k popisu dané změny stavu – nespoléhají na pozdější dotazování.
             </p>
 
@@ -704,9 +703,9 @@ final class OrderCreatedEvent
             <p>
                 V tomto příkladu je <code>OrderCreatedEvent</code> doménová událost, která reprezentuje vytvoření nové
                 objednávky.
-                Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy se
-                to stalo. Domain Events tvoří základ pro dvě důležité architektonické techniky: oddělení čtení a zápisu
-                v <a href="{{ path('cqrs') }}">CQRS</a> a uložení stavu jako sekvence událostí v
+                Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy
+                k tomu došlo. Domain Events tvoří základ pro dvě důležité architektonické techniky: oddělení čtení
+                a zápisu v <a href="{{ path('cqrs') }}">CQRS</a> a uložení stavu jako sekvence událostí v
                 <a href="{{ path('event_sourcing') }}">Event Sourcingu</a>.
             </p>
 
@@ -728,7 +727,7 @@ final class OrderCreatedEvent
                 },
                 {
                     question: 'Jakou roli má Repozitář v DDD?',
-                    answer: 'Repozitář poskytuje doménové vrstvě kolekci-podobné rozhraní pro ukládání a načítání agregátů, aniž by doména musela znát konkrétní persistenční technologii. Pro kód v doménové vrstvě vypadá repozitář jako in-memory kolekce objektů; skutečné uložení do databáze probíhá v infrastrukturní vrstvě, která rozhraní implementuje. Díky tomu lze testovat doménu proti in-memory repozitáři a nahradit úložiště bez zásahu do doménových pravidel. Více v <a href="#repositories">sekci o Repozitářích</a>.'
+                    answer: 'Repozitář poskytuje doménové vrstvě rozhraní podobné kolekci pro ukládání a načítání agregátů, aniž by doména musela znát konkrétní persistenční technologii. Pro kód v doménové vrstvě vypadá repozitář jako in-memory kolekce objektů; skutečné uložení do databáze probíhá v infrastrukturní vrstvě, která rozhraní implementuje. Díky tomu lze testovat doménu proti in-memory repozitáři a nahradit úložiště bez zásahu do doménových pravidel. Více v <a href="#repositories">sekci o Repozitářích</a>.'
                 },
                 {
                     question: 'Kdy použít Doménovou službu místo metody na Entitě?',

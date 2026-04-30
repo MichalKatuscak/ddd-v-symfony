@@ -51,7 +51,7 @@
         chapter_number: '03',
         category: 'Základy',
         title: 'Vertikální slice architektura vs. Tradiční DDD',
-        deck: 'Porovnání vertikální slice architektury a tradičního přístupu k Domain-Driven Design. Zjistěte, který přístup je vhodnější pro váš Symfony projekt a jaké jsou jejich výhody a nevýhody.',
+        deck: 'Srovnání vertikální slice architektury a tradičního vrstveného přístupu k Domain-Driven Design – jejich výhody, nevýhody a vodítko pro volbu přístupu v Symfony projektu.',
         reading_time: 12,
         difficulty: 2,
         published: block('article_published_time'),
@@ -68,7 +68,7 @@
                 S rostoucí složitostí projektu se struktura adresářů a modulů stává jedním z rozhodujících faktorů
                 udržitelnosti kódu. Špatně zvolená organizace vede k tomu, že související logika je rozptýlena
                 napříč celou aplikací a každá změna vyžaduje úpravy na mnoha místech. Tradiční přístup k DDD,
-                často označovaný jako "vrstvený" (layered), tento problém řeší rozdělením kódu do vrstev
+                často označovaný jako „vrstvený“ (layered), tento problém řeší rozdělením kódu do vrstev
                 podle technické odpovědnosti <a href="https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/" target="_blank" rel="noopener">[1]</a>.
                 Typické vrstvy v tradičním DDD jsou:
             </p>
@@ -119,7 +119,7 @@
         <section id="vertical-slice" aria-labelledby="vertical-slice-heading">
             <h2 id="vertical-slice-heading" class="h-section"><span class="h-num">03.02</span> Vertikální slice architektura (Vertical Slice Architecture)</h2>
             <p>
-                Vertikální slice architektura (někdy nepřesně označovaná jako "horizontální DDD") organizuje kód podle funkcí (feature slices) místo technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" rel="noopener">[3]</a>.
+                Vertikální slice architektura organizuje kód podle funkcí (feature slices) namísto technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" rel="noopener">[3]</a>.
                 Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
             </p>
 

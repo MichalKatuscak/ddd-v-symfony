@@ -51,7 +51,7 @@
         chapter_number: '01',
         category: 'Základy',
         title: 'Co je Domain-Driven Design?',
-        deck: 'Objevte, co je Domain-Driven Design (DDD) a jaké jsou jeho základní principy. Naučte se, jak DDD pomáhá řešit komplexní domény a zlepšuje komunikaci mezi vývojáři a doménovými experty.',
+        deck: 'Domain-Driven Design (DDD), jeho základní principy a způsob, jakým pomáhá řešit složité domény a zlepšuje komunikaci mezi vývojáři a doménovými experty.',
         reading_time: 12,
         difficulty: 1,
         published: block('article_published_time'),
@@ -70,8 +70,8 @@
                 Softwarové projekty selhávají překvapivě často nikoli kvůli technickým nedostatkům, ale proto, že vývojáři
                 nedostatečně rozumí problémové oblasti, kterou jejich aplikace řeší. Právě na tento problém reaguje
                 Domain-Driven Design (DDD) – přístup k vývoji softwaru, který staví modelování domény do středu
-                celého návrhu. Poprvé jej systematicky popsal Eric Evans v knize "Domain-Driven Design: Tackling
-                Complexity in the Heart of Software" v roce 2003 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
+                celého návrhu. Poprvé jej systematicky popsal Eric Evans v knize <em>Domain-Driven Design: Tackling
+                Complexity in the Heart of Software</em> v roce 2003 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
             </p>
 
             {% set _callout_body %}
@@ -198,20 +198,20 @@
         <section id="tactical-design" aria-labelledby="tactical-design-heading">
             <h2 id="tactical-design-heading" class="h-section"><span class="h-num">01.05</span> Taktický design (Tactical Design)</h2>
             <p>
-                Taktický design se zabývá implementací doménového modelu v jednom bounded contextu. Klíčové vzory
+                Taktický design se zabývá implementací doménového modelu v jednom bounded contextu. Hlavní vzory
                 taktického designu:
             </p>
 
             <ul>
                 <li>
                     <strong>Entity</strong> – Objekty, které mají identitu a kontinuitu v čase. Entity jsou definovány
-                    svou identitou, nikoli svými atributy. Například, zákazník v e-shopu je entita, protože má unikátní
+                    svou identitou, nikoli svými atributy. Například zákazník v e-shopu je entita, protože má unikátní
                     identifikátor (CustomerId), i když se jeho ostatní atributy (jméno, e-mail, adresa) v průběhu času mění.
                 </li>
                 <li>
                     <strong>Value Object</strong> – Hodnotové objekty jsou definovány svými atributy, nikoli identitou.
-                    Jsou neměnné (immutable) a používají se k popisu aspektů domény. Například, adresa nebo peněžní
-                    částka jsou hodnotové objekty.
+                    Jsou neměnné (immutable) a používají se k popisu aspektů domény. Typickým příkladem hodnotového
+                    objektu je adresa nebo peněžní částka.
                 </li>
                 <li>
                     <strong>Aggregate</strong> – Agregát je shluk objektů, které jsou považovány za jednu jednotku z
@@ -220,7 +220,7 @@
                 </li>
                 <li>
                     <strong>Domain Event</strong> – Doménová událost reprezentuje něco, co se stalo v doméně a má význam
-                    pro doménové experty. Doménové události jsou často používány pro komunikaci mezi různými bounded
+                    pro doménové experty. Doménové události slouží mimo jiné ke komunikaci mezi různými bounded
                     contexts.
                 </li>
                 <li>
@@ -300,8 +300,8 @@
                     Aggregate, Repository, atd.) pro implementaci doménového modelu v kódu.
                 </li>
                 <li>
-                    <strong>Testování</strong> – Důkladné testování doménového modelu a jeho chování, aby bylo
-                    zajištěno, že správně modeluje doménu.
+                    <strong>Testování</strong> – Důkladné ověření doménového modelu a jeho chování, aby bylo jisté,
+                    že model doménu skutečně odpovídajícím způsobem zachycuje.
                 </li>
                 <li>
                     <strong>Iterace a vylepšování</strong> – Neustálé vylepšování modelu na základě zpětné vazby od
@@ -318,11 +318,11 @@
 
             <ul>
                 <li><strong>Lepší komunikace</strong> – Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci.</li>
-                <li><strong>Flexibilita a odolnost vůči změnám</strong> – Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v business požadavcích se přirozeněji promítají do kódu.</li>
+                <li><strong>Flexibilita a odolnost vůči změnám</strong> – Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v obchodních požadavcích se přirozeněji promítají do kódu.</li>
                 <li><strong>Modularita</strong> – Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.</li>
                 <li><strong>Testovatelnost</strong> – Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz <a href="{{ path('testing_ddd') }}">kapitola o testování</a>).</li>
                 <li><strong>Snížení technického dluhu</strong> – Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.</li>
-                <li><strong>Zaměření na hodnotu</strong> – DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší business hodnotu.</li>
+                <li><strong>Zaměření na hodnotu</strong> – DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší obchodní hodnotu.</li>
             </ul>
 
             <p>
@@ -334,7 +334,7 @@
         <section id="challenges" aria-labelledby="challenges-heading">
             <h2 id="challenges-heading" class="h-section"><span class="h-num">01.08</span> Výzvy a omezení DDD</h2>
             <p>
-                I když DDD přináší mnoho výhod, má také své výzvy a omezení, které je třeba zvážit před jeho adopcí:
+                I když DDD přináší mnoho výhod, má také své výzvy a omezení, která je třeba zvážit před jeho zavedením:
             </p>
 
             <ul>
@@ -353,8 +353,8 @@
                 <li><strong>Organizace týmu</strong> – DDD může vyžadovat změny v organizaci týmu, aby podporovala
                     spolupráci mezi vývojáři a doménovými experty. To může být v některých organizacích obtížné.
                 </li>
-                <li><strong>Integrace s legacy systémy</strong> – Integrace DDD s existujícími legacy systémy může být
-                    náročná a může vyžadovat vytvoření Anti-Corruption Layer.
+                <li><strong>Integrace s legacy systémy</strong> – Napojení DDD na existující legacy systémy bývá
+                    náročné a často vyžaduje vytvoření Anti-Corruption Layer.
                 </li>
                 <li><strong>Výkonnost</strong> – Některé vzory DDD, jako jsou agregáty a repozitáře, mohou mít dopad na
                     výkonnost, pokud nejsou správně implementovány.
@@ -425,7 +425,7 @@
         <section id="summary" aria-labelledby="summary-heading">
             <h2 id="summary-heading" class="h-section"><span class="h-num">01.10</span> Shrnutí</h2>
             <p>
-                Domain-Driven Design je mocný přístup k vývoji softwaru, který se zaměřuje na modelování domény a její
+                Domain-Driven Design je ucelený přístup k vývoji softwaru, který se zaměřuje na modelování domény a její
                 implementaci v kódu. Stěžejní koncepty DDD zahrnují:
             </p>
 
