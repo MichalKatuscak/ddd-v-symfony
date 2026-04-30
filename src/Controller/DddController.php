@@ -23,7 +23,7 @@ class DddController extends AbstractController
     public function hubBasics(): Response
     {
         return $this->render('ddd/hub_basics.html.twig', [
-            'title' => 'Základy DDD — rozcestník',
+            'title' => 'Základy DDD – rozcestník',
             'hub_chapters' => Chapters::byGroup('basics'),
         ]);
     }
@@ -32,7 +32,7 @@ class DddController extends AbstractController
     public function hubStrategic(): Response
     {
         return $this->render('ddd/hub_strategic.html.twig', [
-            'title' => 'Strategický DDD — rozcestník',
+            'title' => 'Strategický DDD – rozcestník',
             'hub_chapters' => Chapters::byGroup('strategic'),
         ]);
     }
@@ -41,7 +41,7 @@ class DddController extends AbstractController
     public function hubPatterns(): Response
     {
         return $this->render('ddd/hub_patterns.html.twig', [
-            'title' => 'Taktické vzory DDD — rozcestník',
+            'title' => 'Taktické vzory DDD – rozcestník',
             'hub_chapters' => Chapters::byGroup('patterns'),
         ]);
     }
@@ -50,7 +50,7 @@ class DddController extends AbstractController
     public function hubPractice(): Response
     {
         return $this->render('ddd/hub_practice.html.twig', [
-            'title' => 'DDD v praxi — rozcestník',
+            'title' => 'DDD v praxi – rozcestník',
             'hub_chapters' => Chapters::byGroup('practice'),
         ]);
     }
@@ -59,7 +59,7 @@ class DddController extends AbstractController
     public function hubReference(): Response
     {
         return $this->render('ddd/hub_reference.html.twig', [
-            'title' => 'Reference DDD — rozcestník',
+            'title' => 'Reference DDD – rozcestník',
             'hub_chapters' => Chapters::byGroup('reference'),
             'extras' => Chapters::extras(),
         ]);
@@ -179,7 +179,7 @@ class DddController extends AbstractController
     public function dddPainPoints(): Response
     {
         return $this->render('ddd/ddd_pain_points.html.twig', [
-            'title' => 'DDD v praxi — kde to bolí',
+            'title' => 'DDD v praxi – kde to bolí',
         ]);
     }
 
@@ -211,7 +211,7 @@ class DddController extends AbstractController
     public function whenNotToUseDdd(): Response
     {
         return $this->render('ddd/when_not_to_use_ddd.html.twig', [
-            'title' => 'Kdy DDD nepoužívat — upřímně',
+            'title' => 'Kdy DDD nepoužívat – upřímně',
         ]);
     }
 
@@ -219,7 +219,7 @@ class DddController extends AbstractController
     public function dddAi(): Response
     {
         return $this->render('ddd/ddd_ai.html.twig', [
-            'title' => 'DDD a umělá inteligence — co říkají autority',
+            'title' => 'DDD a umělá inteligence – co říkají autority',
         ]);
     }
 
@@ -243,7 +243,7 @@ class DddController extends AbstractController
     public function contextMapping(): Response
     {
         return $this->render('ddd/context_mapping.html.twig', [
-            'title' => 'Context Mapping — vztahy mezi Bounded Contexts',
+            'title' => 'Context Mapping – vztahy mezi Bounded Contexts',
         ]);
     }
 
@@ -259,7 +259,7 @@ class DddController extends AbstractController
     public function outboxPattern(): Response
     {
         return $this->render('ddd/outbox_pattern.html.twig', [
-            'title' => 'Outbox Pattern — spolehlivé publikování doménových eventů',
+            'title' => 'Outbox Pattern – spolehlivé publikování doménových eventů',
         ]);
     }
 
@@ -299,7 +299,7 @@ class DddController extends AbstractController
     public function microservicesAndDdd(): Response
     {
         return $this->render('ddd/microservices_and_ddd.html.twig', [
-            'title' => 'DDD a microservices — Bounded Context jako service boundary',
+            'title' => 'DDD a microservices – Bounded Context jako service boundary',
         ]);
     }
 

@@ -447,8 +447,8 @@ class Order {
 
             <h4 id="pseudo-ddd-heading">Pseudo-DDD: vypadá jako DDD, ale není</h4>
             {% set _code %}{% verbatim %}<?php
-// ❌ Pseudo-DDD - tým „zavedl DDD" bez pochopení
-// Výsledek: Doctrine entity přejmenovaná na „Aggregate", setter zůstal
+// ❌ Pseudo-DDD - tým „zavedl DDD“ bez pochopení
+// Výsledek: Doctrine entity přejmenovaná na „Aggregate“, setter zůstal
 
 final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agregát
 {
@@ -461,9 +461,9 @@ final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agre
         $this->status = $status;  // žádná validace, žádné business rules
     }
 
-    // „Repository" je jen přejmenovaný EntityRepository
-    // „Command" je jen přejmenovaný DTO bez handleru
-    // „Domain Event" se dispatchuje, ale nikdo ho neposlouchá
+    // „Repository“ je jen přejmenovaný EntityRepository
+    // „Command“ je jen přejmenovaný DTO bez handleru
+    // „Domain Event“ se dispatchuje, ale nikdo ho neposlouchá
 }{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/OrderAggregate.php',
