@@ -118,7 +118,7 @@
             title: 'Hranice agregátu Order vs. Customer',
             inline: _diag_boundary,
             alt: 'Diagram dvou agregátů – Order obsahuje OrderItem a ShippingAddress jako vnitřní entity a value objekty, Customer je samostatný agregát; Order odkazuje na Customer pouze přes CustomerId, nikoliv přes objektovou referenci.',
-            caption: 'Vnitřní entity a hodnotové objekty žijí <strong>uvnitř</strong> agregátu a nikdy nejsou dostupné mimo kořen. Reference mezi agregáty (Order → Customer) jdou pouze přes identifikátor, ne přes objektovou referenci. Doctrine asociace (<code>OneToMany</code>, <code>ManyToOne</code>) <strong>nikdy</strong> nepřekračuje hranici.'
+            caption: 'Vnitřní entity a hodnotové objekty žijí <strong>uvnitř</strong> agregátu a nikdy nejsou dostupné mimo kořen. Reference mezi agregáty (Order → Customer) jdou pouze přes identifikátor, ne přes objektovou referenci. Doctrine asociace <code>OneToMany</code> ani <code>ManyToOne</code> <strong>nikdy</strong> nepřekračuje hranici.'
         } %}
     </section>
 
