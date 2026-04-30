@@ -131,7 +131,7 @@
             } %}
 
             <p>
-                Ještě jeden zdroj nedorozumění stojí za zmínku: pojem „Bounded Context“ se v komunitě někdy používá
+                Ještě jedno nedorozumění zaslouží upozornění: pojem „Bounded Context“ se v komunitě někdy používá
                 volněji než ho definoval Eric Evans. Někdy se jím myslí pouhý modul, jindy celá produktová doména.
                 Vaughn Vernon v knize <em>Implementing Domain-Driven Design</em> (2013) v kapitole 2 striktně připomíná,
                 že Bounded Context je <strong>jazyková hranice</strong>: uvnitř jednoho BC má každý termín jediný význam.
@@ -149,8 +149,8 @@
 
             <p>
                 Tabulka pod čárou shrnuje, čím se Bounded Context a microservice liší a v jaké rovině se rozhoduje.
-                Pamatujte si tento rozdíl při čtení dalších sekcí – většina anti-vzorů v této kapitole vzniká z toho,
-                že tým plete jednu úroveň s druhou.
+                Tento rozdíl je dobré mít na paměti při čtení dalších sekcí – většina anti-vzorů v této kapitole
+                vzniká z toho, že tým plete jednu úroveň s druhou.
             </p>
 
             <div class="table-responsive">
@@ -339,9 +339,9 @@
                 </li>
                 <li>
                     <strong>Operační kapacita &lt; 30 % engineering kapacity</strong> – Newman radí, že přechod na
-                    microservices smysl, pokud organizace investuje výraznou část kapacity do platformy (CI/CD,
-                    observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith vás
-                    chrání před tím, abyste si zhoršili produktivitu.
+                    microservices má smysl jen tehdy, pokud organizace investuje výraznou část kapacity do platformy
+                    (CI/CD, observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith
+                    vás chrání před tím, abyste si zhoršili produktivitu.
                 </li>
             </ul>
 
@@ -1175,7 +1175,7 @@ final readonly class OrderPlacedReceived
 
             <p>
                 Custom serializer dělá překlad mezi binárním AMQP payloadem a konkrétní integration event třídou
-                podle <code>event_type</code> hlavičky. Toto je jediné místo v subscribero­vě, kde se „dotýkáte“
+                podle <code>event_type</code> hlavičky. Toto je jediné místo v subscriberu, kde se „dotýkáte“
                 formátu publishera. Změny v doménovém eventu publishera vás zasáhnou jen zde – zbytek kódu
                 pracuje s vaší vlastní třídou.
             </p>
@@ -1628,7 +1628,7 @@ final readonly class OrderPlacedReceivedHandler
             items: [
                 {
                     question: 'Kolik je správná velikost jednoho microservice?',
-                    answer: 'Velikost není primární kritérium – autonomní deployovatelnost je. Microservice správně velký, když ho jeden stream-aligned tým dokáže měnit, nasazovat a provozovat samostatně. To může být 500 řádků kódu nebo 50 000. Sam Newman v <em>Building Microservices, 2nd ed.</em> doporučuje, aby velikost vznikala z domény (jeden Bounded Context nebo logická část), ne z technického ideálu „malé service“. Detail v <a href="#bc-jedna-service">sekci 17.02</a> a v anti-vzoru <a href="#antivzor-5-heading">nano-services</a>.'
+                    answer: 'Velikost není primární kritérium – autonomní deployovatelnost je. Microservice je správně velký tehdy, když ho jeden stream-aligned tým dokáže měnit, nasazovat a provozovat samostatně. To může být 500 řádků kódu nebo 50 000. Sam Newman v <em>Building Microservices, 2nd ed.</em> doporučuje, aby velikost vznikala z domény (jeden Bounded Context nebo logická část), ne z technického ideálu „malé service“. Detail v <a href="#bc-jedna-service">sekci 17.02</a> a v anti-vzoru <a href="#antivzor-5-heading">nano-services</a>.'
                 },
                 {
                     question: 'Můžu mít 2 Bounded Contexty v jedné microservice?',
