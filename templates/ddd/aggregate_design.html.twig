@@ -1103,7 +1103,7 @@ doctrine:
             },
             {
                 question: 'Jaký identifikátor zvolit pro nový agregát?',
-                answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code> v core od 7.0). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
+                answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code>, balíček <code>symfony/uid</code> dostupný od Symfony 5.2). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
             },
             {
                 question: 'Jak rychle ověřit, že hranice agregátu je správně?',

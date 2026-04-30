@@ -1700,7 +1700,7 @@ final class OrderPlacedValidator
             items: [
                 {
                     question: 'Jak často aktualizovat Context Map?',
-                    answer: 'Při každé větší architektonické změně (nový BC, zánik BC, změna typu vztahu) okamžitě, plus plánovaná revize minimálně 1× za 6 měsíců. Pokud nemáte čas vizuální složku udržovat aktualně, ponechte si alespoň textový popis (<code>docs/context-map.md</code>) – ten zastará pomaleji než obrázek. Datum poslední aktualizace v patičce je povinné. Detail v <a href="#postup">sekci 04.11 Praktický postup</a>.'
+                    answer: 'Při každé větší architektonické změně (nový BC, zánik BC, změna typu vztahu) okamžitě, plus plánovaná revize minimálně 1× za 6 měsíců. Pokud nemáte čas vizuální složku udržovat aktualně, ponechte si alespoň textový popis (<code>docs/context-map.md</code>) – ten zastará pomaleji než obrázek. Datum poslední aktualizace v patičce je povinné. Detail v <a href="#postup">sekci 03.11 Praktický postup</a>.'
                 },
                 {
                     question: 'Můžu mít více než 1 typ vztahu mezi 2 BC?',
@@ -1708,7 +1708,7 @@ final class OrderPlacedValidator
                 },
                 {
                     question: 'ACL vs. Adapter – jaký je rozdíl?',
-                    answer: 'Adapter (z Hexagonal Architecture / GoF) je technický vzor: třída, která implementuje port a překládá volání na konkrétní knihovnu (Doctrine, HTTP klient, Redis). ACL je strategický vzor: vrstva, která chrání váš doménový model před modelem cizího Bounded Contextu. ACL je <em>typicky implementován pomocí Adapterů</em>, ale ne každý Adapter je ACL. ACL má navíc tři specifické odpovědnosti – schema mapping, concept translation a anti-corruption (filtraci) – které „obyčejný“ Adapter nemá. Detail v <a href="#acl">sekci 04.07</a>.'
+                    answer: 'Adapter (z Hexagonal Architecture / GoF) je technický vzor: třída, která implementuje port a překládá volání na konkrétní knihovnu (Doctrine, HTTP klient, Redis). ACL je strategický vzor: vrstva, která chrání váš doménový model před modelem cizího Bounded Contextu. ACL je <em>typicky implementován pomocí Adapterů</em>, ale ne každý Adapter je ACL. ACL má navíc tři specifické odpovědnosti – schema mapping, concept translation a anti-corruption (filtraci) – které „obyčejný“ Adapter nemá. Detail v <a href="#acl">sekci 03.07</a>.'
                 },
                 {
                     question: 'Co dělat, když si všimnu Conformist vztahu, který tam neměl být?',
