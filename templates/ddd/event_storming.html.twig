@@ -552,7 +552,7 @@
 
             <p>Sekvence pro happy path:</p>
 
-            <pre><code>Customer (actor)
+            {% set _code %}{% verbatim %}Customer (actor)
     → PlaceOrder (command)
         → OrderPlaced (event)
             → "Reserve stock" (policy)
@@ -562,7 +562,12 @@
             → "Initiate payment" (policy)
                 → ChargeCard (command, jiný BC: Payment)
                     → Stripe (external system)
-                    → PaymentReceived (event)</code></pre>
+                    → PaymentReceived (event){% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Sekvence Process Level – happy path',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <p>
                 Tato sekvence není kód – je to mapa. Ale je z ní <strong>okamžitě vidět</strong>, že
@@ -638,7 +643,7 @@
 
             <p>Symfony / PHP draft (toto je první draft, ne finální kód):</p>
 
-            <pre><code class="language-php">// Application/Command/PlaceOrderCommand.php
+            {% set _code %}{% verbatim %}// Application/Command/PlaceOrderCommand.php
 namespace App\Ordering\Application\Command;
 
 final readonly class PlaceOrderCommand
@@ -718,7 +723,12 @@ final readonly class PlaceOrderHandler
         }
         return $order->id();
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Symfony / PHP draft Ordering BC',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Všimněte si, jak se <strong>každý prvek z workshopu mapuje 1:1 do kódu</strong>:
@@ -732,12 +742,17 @@ final readonly class PlaceOrderHandler
                 <p>
                     Když píšete invariantní check v doménové třídě, dejte k němu komentář s odkazem na workshop:
                 </p>
-                <pre><code class="language-php">// Invariant Order-3 (workshop 2026-04-29):
+                {% set _code %}{% verbatim %}// Invariant Order-3 (workshop 2026-04-29):
 // "Order nemůže být confirmed bez aspoň jedné položky."
 // Hot spot Order-7 (otevřený): co když je položka backorder?
 if ($items === []) {
     throw new EmptyOrderNotAllowed();
-}</code></pre>
+}{% endverbatim %}{% endset %}
+                {% include '_partials/code_block.html.twig' with {
+                    filename: 'src/Ordering/Domain/Order.php (fragment)',
+                    language: 'php',
+                    code: _code
+                } %}
                 <p>
                     Tato vazba je k nezaplacení. Za půl roku, když nový developer čte kód, ví, odkud
                     pravidlo pochází, a může si ho ověřit u doménového experta – místo aby ho v dobré
@@ -1088,13 +1103,18 @@ if ($items === []) {
                 Uložit do:
             </p>
 
-            <pre><code>docs/discovery/2026-04-29-big-picture/
+            {% set _code %}{% verbatim %}docs/discovery/2026-04-29-big-picture/
 ├── 00-wide-angle.jpg
 ├── 01-customer-area.jpg
 ├── 02-payment-area.jpg
 ├── 03-shipment-area.jpg
 ├── 99-miro-export.png
-└── README.md</code></pre>
+└── README.md{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'docs/discovery/<datum>/',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <p><code>README.md</code> obsahuje datum, účastníky, BC, a link na živý Miro board.</p>
 
@@ -1114,7 +1134,7 @@ if ($items === []) {
                 vývojář přidává nový event, kontroluje, zda už nějaký podobný neexistuje.
             </p>
 
-            <pre><code># docs/discovery/2026-04-29-big-picture/events.md
+            {% set _code %}{% verbatim %}# docs/discovery/2026-04-29-big-picture/events.md
 
 ## Ordering BC
 - OrderPlaced
@@ -1133,7 +1153,12 @@ if ($items === []) {
 - ShipmentCreated
 - ShipmentDispatched
 - ShipmentDelivered
-- ShipmentReturned</code></pre>
+- ShipmentReturned{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'docs/discovery/2026-04-29-big-picture/events.md',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <h3 id="post-4-hotspots">14.09.4 Hot Spots → tickety</h3>
 
@@ -1143,13 +1168,18 @@ if ($items === []) {
                 ne developerovi – protože odpověď leží v doméně, ne v kódu.
             </p>
 
-            <pre><code>Title: [Discovery] Co když platba selže po vytvoření zásilky?
+            {% set _code %}{% verbatim %}Title: [Discovery] Co když platba selže po vytvoření zásilky?
 Labels: discovery, ordering-bc
 Assignee: @business-expert-name
 Description:
 Hot spot z Big Picture workshopu 2026-04-29 (foto: docs/discovery/2026-04-29-big-picture/02-payment-area.jpg).
 Tým si není jist, zda se zásilka vrací zpět, nebo se účet zákazníka jen označí jako neuhrazený.
-Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ordering BC.</code></pre>
+Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ordering BC.{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Šablona ticketu z hot spotu',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <h3 id="post-5-repo">14.09.5 Doporučená struktura repa po prvním workshopu</h3>
 
@@ -1158,7 +1188,7 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
                 tuto adresářovou strukturu. Každý soubor má jasný účel a nikdo nemusí hádat, kam co patří:
             </p>
 
-            <pre><code>my-symfony-app/
+            {% set _code %}{% verbatim %}my-symfony-app/
 ├── docs/
 │   ├── discovery/
 │   │   └── 2026-04-29-big-picture/
@@ -1180,7 +1210,12 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
 │   │   └── Infrastructure/
 │   ├── Payment/
 │   └── Shipment/
-└── ...</code></pre>
+└── ...{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Doporučená struktura repa',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <p>
                 Adresář <code>docs/discovery/</code> je <strong>append-only</strong> – staré workshopy
@@ -1223,13 +1258,18 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
                     Pro PR navazující na workshop používejte konzistentní commit message, aby šly
                     v gitu vyhledat:
                 </p>
-                <pre><code>docs(discovery): big picture workshop 2026-04-29
+                {% set _code %}{% verbatim %}docs(discovery): big picture workshop 2026-04-29
 
 Účastníci: 4 doménoví experti, 5 vývojářů, 1 PM, 1 facilitátor.
 Identifikováno: 5 BC (Ordering, Payment, Shipment, Catalog, Identity),
                12 hot spotů, 47 doménových eventů.
 Miro: https://miro.com/board/xyz123 (read-only)
-Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
+Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
+                {% include '_partials/code_block.html.twig' with {
+                    filename: 'git commit message konvence',
+                    language: 'plaintext',
+                    code: _code
+                } %}
                 <p>
                     Za rok, když si potřebujete dohledat „kdy jsme rozhodli, že refunds patří do Payment
                     BC, ne do Ordering“, <code>git log --grep="discovery"</code> vás dovede k odpovědi
@@ -1306,30 +1346,35 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
 
             <p>Sticky agregátu z workshopu:</p>
 
-            <pre><code>Order Aggregate
+            {% set _code %}{% verbatim %}Order Aggregate
 - Inv-1: nemůže být confirmed bez aspoň jedné položky
 - Inv-2: po cancelled už nelze confirm
 - Inv-3: součet item.quantity * item.price = total
-- Inv-4: confirm vyžaduje, aby payment byl Settled (hot spot Order-7)</code></pre>
+- Inv-4: confirm vyžaduje, aby payment byl Settled (hot spot Order-7){% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Sticky agregátu Order',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <p>Přímý překlad do testů:</p>
 
-            <pre><code class="language-php">final class OrderTest extends TestCase
+            {% set _code %}{% verbatim %}final class OrderTest extends TestCase
 {
     /** @test Inv-1 (workshop 2026-04-29) */
     public function place_throws_when_no_items(): void
     {
-        $this-&gt;expectException(EmptyOrderNotAllowed::class);
+        $this->expectException(EmptyOrderNotAllowed::class);
         Order::place(OrderId::new(), new CustomerId('c1'), []);
     }
 
     /** @test Inv-2 (workshop 2026-04-29) */
     public function cannot_confirm_after_cancellation(): void
     {
-        $order = Order::place(OrderId::new(), new CustomerId('c1'), [$this-&gt;item()]);
-        $order-&gt;cancel('customer request');
-        $this-&gt;expectException(CannotConfirmFromStatus::class);
-        $order-&gt;confirm();
+        $order = Order::place(OrderId::new(), new CustomerId('c1'), [$this->item()]);
+        $order->cancel('customer request');
+        $this->expectException(CannotConfirmFromStatus::class);
+        $order->confirm();
     }
 
     /** @test Inv-3 (workshop 2026-04-29) */
@@ -1338,11 +1383,16 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
         $order = Order::place(
             OrderId::new(),
             new CustomerId('c1'),
-            [$this-&gt;item(qty: 2, price: 100), $this-&gt;item(qty: 1, price: 50)],
+            [$this->item(qty: 2, price: 100), $this->item(qty: 1, price: 50)],
         );
-        self::assertSame(250, $order-&gt;total()-&gt;amount());
+        self::assertSame(250, $order->total()->amount());
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'tests/Ordering/OrderTest.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Komentáře <code>Inv-1 (workshop 2026-04-29)</code> nejsou kosmetika – jsou
@@ -1357,24 +1407,29 @@ Foto: docs/discovery/2026-04-29-big-picture/</code></pre>
                 Tato sekvence je acceptance test:
             </p>
 
-            <pre><code class="language-php">final class PlaceOrderHandlerTest extends KernelTestCase
+            {% set _code %}{% verbatim %}final class PlaceOrderHandlerTest extends KernelTestCase
 {
     /** @test Workshop scenario "Customer places an order" (2026-04-29) */
     public function place_order_emits_OrderPlaced_and_triggers_payment(): void
     {
-        $bus = self::getContainer()-&gt;get(MessageBusInterface::class);
-        $events = $this-&gt;collectEvents();
+        $bus = self::getContainer()->get(MessageBusInterface::class);
+        $events = $this->collectEvents();
 
-        $bus-&gt;dispatch(new PlaceOrderCommand(
+        $bus->dispatch(new PlaceOrderCommand(
             new CustomerId('c1'),
             [new ItemDto('SKU-1', 1, 100)],
         ));
 
-        self::assertCount(1, $events-&gt;ofType(OrderPlaced::class));
+        self::assertCount(1, $events->ofType(OrderPlaced::class));
         // Policy z workshopu: OrderPlaced ⇒ ChargeCard
-        self::assertCount(1, $events-&gt;commands(ChargeCardCommand::class));
+        self::assertCount(1, $events->commands(ChargeCardCommand::class));
     }
-}</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'tests/Ordering/PlaceOrderHandlerTest.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Toto má dva přínosy. První: testy jsou <em>readable</em> doménovým expertům –

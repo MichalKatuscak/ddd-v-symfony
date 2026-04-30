@@ -317,21 +317,25 @@
 
             <h3>Symfony detail: monorepo a společný release</h3>
 
-            <pre><code class="language-text">app/
+            {% set _code %}{% verbatim %}app/
   src/
-    Catalog/         &larr; Catalog BC
+    Catalog/         ← Catalog BC
       Domain/
       Application/
       Infrastructure/
-    Pricing/         &larr; Pricing BC (Partnership)
+    Pricing/         ← Pricing BC (Partnership)
       Domain/
       Application/
       Infrastructure/
   config/
-    services.yaml    &larr; sdílená DI registrace
-    messenger.yaml   &larr; sdílená message bus konfigurace
-composer.json        &larr; jeden composer.json pro oba BC
-</code></pre>
+    services.yaml    ← sdílená DI registrace
+    messenger.yaml   ← sdílená message bus konfigurace
+composer.json        ← jeden composer.json pro oba BC{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'Monorepo struktura',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <p>
                 V tomto uspořádání mají oba BC <strong>vlastní namespacy</strong>
@@ -417,7 +421,7 @@ composer.json        &larr; jeden composer.json pro oba BC
 
             <h3>Code sample: SharedKernel\Money modul</h3>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -432,7 +436,7 @@ final readonly class Money
         public int $amountCents,
         public Currency $currency,
     ) {
-        if ($amountCents &lt; 0) {
+        if ($amountCents < 0) {
             throw new InvalidArgumentException(
                 'Money cannot be negative; use SignedMoney for credits/debits.'
             );
@@ -441,26 +445,30 @@ final readonly class Money
 
     public function add(self $other): self
     {
-        if (!$this-&gt;currency-&gt;equals($other-&gt;currency)) {
+        if (!$this->currency->equals($other->currency)) {
             throw new InvalidArgumentException(
-                "Cannot add {$this-&gt;currency-&gt;code} and {$other-&gt;currency-&gt;code}."
+                "Cannot add {$this->currency->code} and {$other->currency->code}."
             );
         }
-        return new self($this-&gt;amountCents + $other-&gt;amountCents, $this-&gt;currency);
+        return new self($this->amountCents + $other->amountCents, $this->currency);
     }
 
     public function multiply(int $factor): self
     {
-        return new self($this-&gt;amountCents * $factor, $this-&gt;currency);
+        return new self($this->amountCents * $factor, $this->currency);
     }
 
     public function equals(self $other): bool
     {
-        return $this-&gt;amountCents === $other-&gt;amountCents
-            &amp;&amp; $this-&gt;currency-&gt;equals($other-&gt;currency);
+        return $this->amountCents === $other->amountCents
+            && $this->currency->equals($other->currency);
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'shared-kernel/src/Money/Money.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 <code>Money</code> je VO bez identity – ideální kandidát na SK. Nemá závislosti
@@ -471,7 +479,7 @@ final readonly class Money
 
             <h3>Symfony detail: composer path repository</h3>
 
-            <pre><code class="language-json">{
+            {% set _code %}{% verbatim %}{
     "name": "ddd/eshop",
     "type": "project",
     "repositories": [
@@ -484,8 +492,12 @@ final readonly class Money
     "require": {
         "ddd/shared-kernel": "*"
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'composer.json',
+                language: 'json',
+                code: _code
+            } %}
 
             <p>
                 Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balíček
@@ -579,7 +591,7 @@ final readonly class Money
                 Ordering ho konzumuje přes external Messenger transport.
             </p>
 
-            <pre><code class="language-yaml"># config/packages/messenger.yaml – downstream Ordering BC
+            {% set _code %}{% verbatim %}# config/packages/messenger.yaml – downstream Ordering BC
 framework:
     messenger:
         transports:
@@ -598,14 +610,18 @@ framework:
                     multiplier: 2
         routing:
             'App\Ordering\Application\ExternalEvent\ProductPriceChanged': from_catalog
-            'App\Ordering\Application\ExternalEvent\ProductDiscontinued': from_catalog
-</code></pre>
+            'App\Ordering\Application\ExternalEvent\ProductDiscontinued': from_catalog{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'config/packages/messenger.yaml (Ordering BC)',
+                language: 'yaml',
+                code: _code
+            } %}
 
             <p>
                 A handler v Orderingu:
             </p>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -625,15 +641,19 @@ final class ProductPriceChangedHandler
     public function __invoke(ProductPriceChanged $event): void
     {
         // Ordering si drží lokální projekci ceny – eventually consistent.
-        $this-&gt;priceCache-&gt;update(
-            productId: $event-&gt;productId,
-            newPrice: $event-&gt;newPriceCents,
-            currency: $event-&gt;currency,
-            effectiveAt: $event-&gt;occurredAt,
+        $this->priceCache->update(
+            productId: $event->productId,
+            newPrice: $event->newPriceCents,
+            currency: $event->currency,
+            effectiveAt: $event->occurredAt,
         );
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Application/EventHandler/ProductPriceChangedHandler.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <h3>Stabilní kontrakt jako základ</h3>
 
@@ -699,7 +719,7 @@ final class ProductPriceChangedHandler
 
             <h3>Příklad: Reporting BC přijímá Stripe payment objekty 1:1</h3>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -720,30 +740,34 @@ final class StripePaymentReportRepository
      */
     public function getRecentPayments(\DateTimeImmutable $since): array
     {
-        return $this-&gt;stripe-&gt;paymentIntents-&gt;all([
-            'created' =&gt; ['gte' =&gt; $since-&gt;getTimestamp()],
-            'limit'   =&gt; 100,
-        ])-&gt;data;
+        return $this->stripe->paymentIntents->all([
+            'created' => ['gte' => $since->getTimestamp()],
+            'limit'   => 100,
+        ])->data;
     }
 
     public function generateMonthlyRevenue(int $year, int $month): array
     {
-        $payments = $this-&gt;getRecentPayments(/* ... */);
+        $payments = $this->getRecentPayments(/* ... */);
 
         return array_map(
             // Reporting prostě používá Stripe pole jak jsou – currency, amount,
             // status. Žádný překlad na Money VO, žádná Czech terminologie.
-            fn(PaymentIntent $p) =&gt; [
-                'id'       =&gt; $p-&gt;id,
-                'amount'   =&gt; $p-&gt;amount,        // Stripe používá centy
-                'currency' =&gt; $p-&gt;currency,      // 'usd', 'eur' lower-case
-                'status'   =&gt; $p-&gt;status,
+            fn(PaymentIntent $p) => [
+                'id'       => $p->id,
+                'amount'   => $p->amount,        // Stripe používá centy
+                'currency' => $p->currency,      // 'usd', 'eur' lower-case
+                'status'   => $p->status,
             ],
             $payments,
         );
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Reporting/Application/StripePaymentReportRepository.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Reporting je vědomě Conformist vůči Stripe. Žádný převod na <code>Money</code> VO,
@@ -851,7 +875,7 @@ final class StripePaymentReportRepository
 
             <h3>Code sample: kompletní LegacyBillingTranslator</h3>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -867,8 +891,8 @@ use Symfony\Component\Messenger\Exception\IncomingMessageRejected;
  * ACL mezi legacy Billing systémem (SOAP) a Ordering BC.
  *
  * Tři odpovědnosti:
- *   1. Schema mapping  – InvoicePaidSoapResponse =&gt; InvoicePaidEvent
- *   2. Concept translation – invoiceNumber (int) =&gt; InvoiceId (UUID)
+ *   1. Schema mapping  – InvoicePaidSoapResponse => InvoicePaidEvent
+ *   2. Concept translation – invoiceNumber (int) => InvoiceId (UUID)
  *   3. Anti-corruption – odmítá invalid stavy z legacy
  */
 final class LegacyBillingTranslator
@@ -880,33 +904,37 @@ final class LegacyBillingTranslator
     public function translateInvoicePaid(InvoicePaidSoapResponse $r): InvoicePaidEvent
     {
         // (3) Anti-corruption: legacy umí poslat negativní amount jako "credit"
-        if ($r-&gt;amountCents &lt; 0) {
+        if ($r->amountCents < 0) {
             throw new IncomingMessageRejected(
                 'Negative amount from legacy; credits are not supported in Ordering BC.'
             );
         }
 
         // (3) Anti-corruption: chybějící identifikátor
-        if ($r-&gt;invoiceNumber === '' || $r-&gt;invoiceNumber === null) {
+        if ($r->invoiceNumber === '' || $r->invoiceNumber === null) {
             throw new IncomingMessageRejected('Missing invoiceNumber in legacy payload.');
         }
 
         // (3) Anti-corruption: legacy umí poslat status, kterému nerozumíme
-        if ($r-&gt;status !== 'PAID') {
+        if ($r->status !== 'PAID') {
             throw new IncomingMessageRejected(
-                "Unsupported legacy status '{$r-&gt;status}'; expected PAID."
+                "Unsupported legacy status '{$r->status}'; expected PAID."
             );
         }
 
         // (1) Schema mapping + (2) Concept translation
         return new InvoicePaidEvent(
-            invoiceId: InvoiceId::fromLegacy($r-&gt;invoiceNumber),
-            paidAt:    new \DateTimeImmutable($r-&gt;paidAtIso),
-            amount:    Money::ofCents($r-&gt;amountCents, Currency::EUR),
+            invoiceId: InvoiceId::fromLegacy($r->invoiceNumber),
+            paidAt:    new \DateTimeImmutable($r->paidAtIso),
+            amount:    Money::ofCents($r->amountCents, Currency::EUR),
         );
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Infrastructure/Acl/LegacyBillingTranslator.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Translator je <strong>jediná veřejná metoda</strong>, <code>final</code> třída,
@@ -917,7 +945,7 @@ final class LegacyBillingTranslator
 
             <h3>Test ACL: snadný a důležitý</h3>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -933,26 +961,26 @@ final class LegacyBillingTranslatorTest extends TestCase
 {
     public function testTranslatesPaidInvoice(): void
     {
-        $soap = $this-&gt;createMock(LegacyBillingClient::class);
+        $soap = $this->createMock(LegacyBillingClient::class);
         $translator = new LegacyBillingTranslator($soap);
 
-        $event = $translator-&gt;translateInvoicePaid(new InvoicePaidSoapResponse(
+        $event = $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-2025-00042',
             amountCents:   12_345,
             status:        'PAID',
             paidAtIso:     '2025-04-29T10:00:00Z',
         ));
 
-        $this-&gt;assertSame(12_345, $event-&gt;amount-&gt;amountCents);
-        $this-&gt;assertSame('EUR', $event-&gt;amount-&gt;currency-&gt;code);
+        $this->assertSame(12_345, $event->amount->amountCents);
+        $this->assertSame('EUR', $event->amount->currency->code);
     }
 
     public function testRejectsNegativeAmount(): void
     {
-        $translator = new LegacyBillingTranslator($this-&gt;createMock(LegacyBillingClient::class));
+        $translator = new LegacyBillingTranslator($this->createMock(LegacyBillingClient::class));
 
-        $this-&gt;expectException(IncomingMessageRejected::class);
-        $translator-&gt;translateInvoicePaid(new InvoicePaidSoapResponse(
+        $this->expectException(IncomingMessageRejected::class);
+        $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-1',
             amountCents:   -100,
             status:        'PAID',
@@ -962,18 +990,22 @@ final class LegacyBillingTranslatorTest extends TestCase
 
     public function testRejectsUnknownStatus(): void
     {
-        $translator = new LegacyBillingTranslator($this-&gt;createMock(LegacyBillingClient::class));
+        $translator = new LegacyBillingTranslator($this->createMock(LegacyBillingClient::class));
 
-        $this-&gt;expectException(IncomingMessageRejected::class);
-        $translator-&gt;translateInvoicePaid(new InvoicePaidSoapResponse(
+        $this->expectException(IncomingMessageRejected::class);
+        $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-2',
             amountCents:   100,
             status:        'CANCELLED', // legacy občas takhle pošle
             paidAtIso:     '2025-04-29T10:00:00Z',
         ));
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'tests/Ordering/Infrastructure/Acl/LegacyBillingTranslatorTest.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Protože ACL nemá stav a má jediný entrypoint, testuje se velmi snadno: tabulka
@@ -1068,7 +1100,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 
             <h3>Code sample: minimální OHS endpoint s versioningem</h3>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1087,7 +1119,7 @@ final class ProductController extends AbstractController
 
     public function __construct(MessageBusInterface $queryBus)
     {
-        $this-&gt;messageBus = $queryBus;
+        $this->messageBus = $queryBus;
     }
 
     /**
@@ -1097,9 +1129,9 @@ final class ProductController extends AbstractController
     #[Route('/api/v1/products/{id}', name: 'api_v1_product_get', methods: ['GET'])]
     public function getProductV1(string $id): JsonResponse
     {
-        $product = $this-&gt;handle(new GetProductQuery($id));
+        $product = $this->handle(new GetProductQuery($id));
 
-        return $this-&gt;json($product, context: ['groups' =&gt; ['ohs.v1']]);
+        return $this->json($product, context: ['groups' => ['ohs.v1']]);
     }
 
     /**
@@ -1108,12 +1140,16 @@ final class ProductController extends AbstractController
     #[Route('/api/v2/products/{id}', name: 'api_v2_product_get', methods: ['GET'])]
     public function getProductV2(string $id): JsonResponse
     {
-        $product = $this-&gt;handle(new GetProductQuery($id));
+        $product = $this->handle(new GetProductQuery($id));
 
-        return $this-&gt;json($product, context: ['groups' =&gt; ['ohs.v1', 'ohs.v2']]);
+        return $this->json($product, context: ['groups' => ['ohs.v1', 'ohs.v2']]);
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Catalog/Infrastructure/Http/OpenHostService/ProductController.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Důležité: <strong>v1 a v2 koexistují</strong>. Zveřejnění OHS v1 je <em>závazek</em>
@@ -1220,7 +1256,7 @@ final class ProductController extends AbstractController
 
             <h3>Code sample: JSON Schema pro OrderPlaced event</h3>
 
-            <pre><code class="language-json">{
+            {% set _code %}{% verbatim %}{
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/events/order-placed-v1.json",
   "title": "OrderPlaced",
@@ -1260,8 +1296,12 @@ final class ProductController extends AbstractController
     }
   },
   "additionalProperties": false
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'order-placed-v1.json',
+                language: 'json',
+                code: _code
+            } %}
 
             <p>
                 Toto schema je publikováno na URL <code>https://example.com/events/order-placed-v1.json</code>
@@ -1273,7 +1313,7 @@ final class ProductController extends AbstractController
 
             <h3>Validace proti schema v Symfony</h3>
 
-            <pre><code class="language-php">&lt;?php
+            {% set _code %}{% verbatim %}<?php
 
 declare(strict_types=1);
 
@@ -1293,20 +1333,24 @@ final class OrderPlacedValidator
     {
         $data = json_decode($json, false, flags: JSON_THROW_ON_ERROR);
 
-        $result = $this-&gt;validator-&gt;validate(
+        $result = $this->validator->validate(
             $data,
             'https://example.com/events/order-placed-v1.json',
         );
 
-        if (!$result-&gt;isValid()) {
-            $errors = (new ErrorFormatter())-&gt;format($result-&gt;error());
+        if (!$result->isValid()) {
+            $errors = (new ErrorFormatter())->format($result->error());
             throw new IncomingMessageRejected(
                 'Payload does not match OrderPlaced v1 schema: ' . json_encode($errors),
             );
         }
     }
-}
-</code></pre>
+}{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'src/Ordering/Infrastructure/PublishedLanguage/OrderPlacedValidator.php',
+                language: 'php',
+                code: _code
+            } %}
 
             <p>
                 Schema validation je první krok ACL na konzumující straně. Pokud payload neprojde
@@ -1481,7 +1525,7 @@ final class OrderPlacedValidator
 
             <h3>Co dát do textového popisu vztahu</h3>
 
-            <pre><code class="language-markdown">## Catalog -&gt; Ordering (Customer/Supplier + OHS + PL)
+            {% set _code %}{% verbatim %}## Catalog -> Ordering (Customer/Supplier + OHS + PL)
 
 - **Upstream tým**: @catalog-team
 - **Downstream tým**: @ordering-team
@@ -1490,8 +1534,12 @@ final class OrderPlacedValidator
 - **Frekvence změn**: ~1× kvartál (minor), 1× rok (major)
 - **Eskalační kontakt**: @lead-architect
 - **SLA**: 99.9% delivery within 5s, dead letter queue po 3 retry
-- **Onboarding**: docs/onboarding/consume-catalog-events.md
-</code></pre>
+- **Onboarding**: docs/onboarding/consume-catalog-events.md{% endverbatim %}{% endset %}
+            {% include '_partials/code_block.html.twig' with {
+                filename: 'docs/context-map.md (fragment)',
+                language: 'plaintext',
+                code: _code
+            } %}
 
             <h3>Verzování Context Mapy</h3>
 
