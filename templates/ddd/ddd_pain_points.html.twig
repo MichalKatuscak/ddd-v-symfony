@@ -669,7 +669,7 @@ final class OutboxEvent
             } %}
 
     <p>
-        Klíčový detail: outbox záznamy musí být persistovány <em>uvnitř</em> téže transakce
+        Důležitý detail: outbox záznamy musí být persistovány <em>uvnitř</em> téže transakce
         jako agregát. Listener musí reagovat na událost <code>onFlush</code> (ještě před
         commitem) – nikoliv na <code>postFlush</code>, který se volá <em>po</em> commitu
         transakce a tedy mimo ni. Použití <code>postFlush</code> s voláním dalšího
@@ -1074,7 +1074,7 @@ try {
 
     <p>
         <strong>Problém:</strong> Validace je rozeseta na třech místech: Symfony Validator
-        (anotace na DTO), Application Service (business podmínky) a doménový konstruktor
+        (anotace na DTO), Application Service (doménové podmínky) a doménový konstruktor
         (invarianty). Výsledkem je buď duplicita (stejná pravidla na dvou místech),
         nebo díry (pravidlo chybí na jednom místě).
     </p>
@@ -1100,7 +1100,7 @@ try {
                 <td>Množství nesmí být nulové, cena nesmí být záporná</td>
             </tr>
             <tr>
-                <td><strong>Business pravidlo</strong></td>
+                <td><strong>Doménová politika</strong></td>
                 <td>Domain Service nebo Application Service</td>
                 <td>Zákazník nesmí mít více než 5 otevřených objednávek</td>
             </tr>
@@ -1114,7 +1114,7 @@ try {
     </div>
 
     <p>
-        <strong>Klíčové pravidlo:</strong> Doménový invariant vždy vynucujte v doméně –
+        <strong>Hlavní pravidlo:</strong> Doménový invariant vždy vynucujte v doméně –
         nikdy nespoléhejte na validaci ve vyšší vrstvě, protože doménový objekt může být
         sestaven i z jiného místa (CLI command, test, import). Symfony Validator je
         <em>první linie obrany</em> pro uživatelský vstup, nikoli náhrada doménové validace.
@@ -1274,7 +1274,7 @@ final class StripePaymentGateway implements PaymentGateway
         <strong>Problém:</strong> Po šesti měsících vývoje kód mluví jiným jazykem než
         doménový expert. V kódu je <code>Invoice</code>, zákazník říká „faktura“,
         účetní systém zná „Bill“. Třída <code>Order</code> pokrývá pojmy, které
-        business rozděluje na „nabídku“, „objednávku“ a „smlouvu“. Vývojáři si
+        doména rozděluje na „nabídku“, „objednávku“ a „smlouvu“. Vývojáři si
         přestávají být jisti, co třída modeluje.
     </p>
 
@@ -1500,7 +1500,7 @@ final class Order
     }
 }
 
-// Voter - pouze adaptér, žádná business logika
+// Voter - pouze adaptér, žádná doménová logika
 final class OrderVoter extends Voter
 {
     protected function supports(string $attribute, mixed $subject): bool
@@ -1553,7 +1553,7 @@ final class OrderVoter extends Voter
 
     <p>
         <strong>Problém:</strong> Management vidí náklady refaktoringu (čas, riziko),
-        ale ne benefity. „Přepsat to do DDD“ zní jako technická čistota bez business hodnoty.
+        ale ne benefity. „Přepsat to do DDD“ zní jako technická čistota bez obchodní hodnoty.
         Vývojáři neumí výhody přeložit do jazyka, který rozhodující osoby slyší.
     </p>
 
@@ -1596,8 +1596,8 @@ final class OrderVoter extends Voter
     </div>
 
     <p>
-        <strong>Taktika:</strong> Nezačínejte argumentem „naše kód je špatný.“
-        Začněte konkrétní business bolestí: „Přidání nového způsobu platby trvá 3 týdny
+        <strong>Taktika:</strong> Nezačínejte argumentem „náš kód je špatný.“
+        Začněte konkrétní obchodní bolestí: „Přidání nového způsobu platby trvá 3 týdny
         a vždy způsobí regression v objednávkovém modulu. Níže je uvedena příčina a způsob řešení.“
     </p>
 
@@ -1609,14 +1609,14 @@ final class OrderVoter extends Voter
 
     <p>
         <strong>Problém:</strong> Big-bang rewrite – přepsání celé aplikace do DDD najednou –
-        téměř vždy selže: trvá déle než odhadnuto, tým ztrácí motivaci, business se nedočká
+        téměř vždy selže: trvá déle než odhadnuto, tým ztrácí motivaci, byznys se nedočká
         nových funkcí. A přitom původní aplikace musí dál žít.
     </p>
 
     <p>
         <strong>Řešení – strangler fig pattern:</strong> Identifikujte jeden modul
         s nejvyšší změnovou frekvencí (highest-churn), nejčastějšími bugy nebo největší
-        business hodnotou. Implementujte právě ten modul v DDD. Zbytek aplikace zůstane
+        obchodní hodnotou. Implementujte právě ten modul v DDD. Zbytek aplikace zůstane
         beze změny.
     </p>
 
@@ -1666,7 +1666,7 @@ final class OrderVoter extends Voter
         <strong>Problém:</strong> Doménový model je komplexní – a po roce vývoje
         mu rozumí dobře jen jeden člověk. Pokud tento člověk onemocní, odejde nebo
         je přetížen, tým stojí. Onboarding nového vývojáře trvá měsíce.
-        Bus factor = 1 je pro business kritické riziko.
+        Bus factor = 1 je pro projekt kritické riziko.
     </p>
 
     <p>

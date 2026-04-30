@@ -218,7 +218,7 @@
 
     {% set _callout_body %}
 
-        <h3>Klíčové principy správné struktury DDD projektu:</h3>
+        <h3>Hlavní principy správné struktury DDD projektu:</h3>
         <ul>
             <li><strong>Izolace domén</strong> – Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.</li>
             <li><strong>Ubiquitous Language</strong> – Každá doména může mít svůj vlastní jazyk, který je konzistentně používán v kódu.</li>
@@ -1151,7 +1151,7 @@ final class ShippingService
 
         <h3>Kdy použít Specification Pattern?</h3>
         <ul>
-            <li><strong>Validace</strong> – ověření, zda doménový objekt splňuje business pravidlo.</li>
+            <li><strong>Validace</strong> – ověření, zda doménový objekt splňuje doménové pravidlo.</li>
             <li><strong>Selekce</strong> – filtrování kolekcí objektů podle kritéria.</li>
             <li><strong>Vytváření na zakázku</strong> – zajištění, že nově vytvořený objekt splňuje invarianty.</li>
             <li><strong>Kombinace pravidel</strong> – specifikace lze skládat pomocí <code>AndSpecification</code>, <code>OrSpecification</code>, <code>NotSpecification</code>.</li>
@@ -1269,7 +1269,7 @@ class UserRegistered
         <h3 id="exception-types-heading">Typy výjimek podle vrstvy</h3>
         <ul>
             <li>
-                <strong>Doménové výjimky</strong> – porušení business pravidel a invariantů.
+                <strong>Doménové výjimky</strong> – porušení doménových pravidel a invariantů.
                 Vyhazuje je doménový model (entity, agregáty, value objects).
                 Příklady: <code>OrderCannotBeConfirmedException</code>,
                 <code>InsufficientFundsException</code>, <code>InvalidEmailException</code>.
@@ -1331,7 +1331,7 @@ final class InvalidOrderStateTransitionException extends \DomainException
 
         <h3>Doporučení pro výjimky v DDD</h3>
         <ul>
-            <li>Doménové výjimky by měly <strong>dědit z <code>\DomainException</code></strong> – tím signalizují, že jde o porušení business pravidla, ne o technickou chybu.</li>
+            <li>Doménové výjimky by měly <strong>dědit z <code>\DomainException</code></strong> – tím signalizují, že jde o porušení doménového pravidla, ne o technickou chybu.</li>
             <li>Používejte <strong>statické factory metody</strong> (<code>cannotTransition()</code>) pro čitelné a konzistentní vytváření výjimek.</li>
             <li><strong>Nepropagujte infrastrukturní výjimky</strong> do doménové vrstvy – repozitáře by je měly zachytit a přeložit na doménové výjimky.</li>
             <li>Kontrolery by měly zachytávat doménové výjimky a <strong>překládat je na HTTP odpovědi</strong> (400, 404, 409).</li>
@@ -1514,7 +1514,7 @@ class GetUserProfileHandler
                 přímo na command třídách. Tato validace chrání doménovou vrstvu před neplatnými vstupy.
             </li>
             <li>
-                <strong>Doménová validace (doménová vrstva)</strong> – business pravidla vynucovaná
+                <strong>Doménová validace (doménová vrstva)</strong> – doménová pravidla vynucovaná
                 uvnitř entit, agregátů a value objects: „uživatel s tímto e-mailem již existuje“,
                 „objednávku nelze potvrdit bez položek“. Tato validace je součástí doménového modelu
                 a nesmí na ní záviset Symfony Validator.
@@ -1522,7 +1522,7 @@ class GetUserProfileHandler
         </ul>
         <p>
             <strong>Pravidlo:</strong> Symfony Validator řeší <em>syntaktickou</em> validaci (formát),
-            doménová vrstva řeší <em>sémantickou</em> validaci (business pravidla).
+            doménová vrstva řeší <em>sémantickou</em> validaci (doménová pravidla).
         </p>
     {% endset %}
             {% include '_partials/callout.html.twig' with {

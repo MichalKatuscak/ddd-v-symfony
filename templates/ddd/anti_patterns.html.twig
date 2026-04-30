@@ -394,7 +394,7 @@ class User
             } %}
 
             <p>
-                Klíčovým rozdílem je, že správná entita vystavuje doménově orientované metody (<code>activate()</code>,
+                Hlavním rozdílem je, že správná entita vystavuje doménově orientované metody (<code>activate()</code>,
                 <code>deactivate()</code>, <code>register()</code>) namísto generických setterů. Entita sama garantuje
                 své invarianty – nikdo zvenčí nemůže entitu dostat do nekonzistentního stavu.
             </p>
@@ -1255,12 +1255,12 @@ class UserController extends AbstractController
         $user = $this->userRepository->find($userId);
         $token = $request->query->get('token');
 
-        // Business logika v kontroleru!
+        // Doménová logika v kontroleru!
         if (empty($token) || strlen($token) !== 32) {
             return $this->json(['error' => 'Invalid token format'], 400);
         }
         if ($user->getCreatedAt() < new \DateTime('-24 hours')) {
-            // Expirace tokenu - business pravidlo patří do domény, ne do kontroleru!
+            // Expirace tokenu - doménové pravidlo patří do domény, ne do kontroleru!
             $user->setStatus('expired');
             $this->entityManager->flush();
             return $this->json(['error' => 'Token expired'], 400);
@@ -1414,7 +1414,7 @@ class UserController extends AbstractController
                         ani na komplexní reporting.
                     </li>
                     <li>
-                        Tým tráví více času navrhováním architektury než implementací business hodnoty.
+                        Tým tráví více času navrhováním architektury než implementací obchodní hodnoty.
                     </li>
                     <li>
                         Přidání nové funkce vyžaduje úpravu desítek souborů v různých vrstvách,
@@ -1439,7 +1439,7 @@ class UserController extends AbstractController
                 <p>
                     Vhodné indikátory pro zavedení DDD: <em>složitá doménová pravidla, která se neustále mění</em>;
                     <em>více doménových expertů s odlišnými pohledy na problém</em>; <em>systém, u nějž se předpokládá
-                    dlouhodobý vývoj a vysoká míra změn v business logice</em>.
+                    dlouhodobý vývoj a vysoká míra změn v doménové logice</em>.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1460,7 +1460,7 @@ class UserController extends AbstractController
 ✗ Blog nebo CMS (kategorie, příspěvky, komentáře - čistý CRUD)
 ✗ Jednoduchý e-shop s desítkami produktů a základními objednávkami
 ✗ Interní admin panel pro správu číselníků
-✗ Prototyp nebo MVP s nejistou business logikou
+✗ Prototyp nebo MVP s nejistou doménovou logikou
 ✗ Microservice s jednou jasnou a stabilní odpovědností{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
@@ -1526,7 +1526,7 @@ class User { /* ... */ }  // Třída "User", tabulka "clients" - zmatek
 function getCustomerById(int $id): User { /* ... */ }   // Vrací User, bere customer
 function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací Customer
 
-// Výsledek: vývojář musí neustále překládat mezi vrstvami místo práce na business logikou{% endverbatim %}{% endset %}
+// Výsledek: vývojář musí neustále překládat mezi vrstvami místo práce na doménové logice{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/User.php',
                 language: 'php',

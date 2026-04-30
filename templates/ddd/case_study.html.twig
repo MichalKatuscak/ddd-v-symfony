@@ -51,7 +51,7 @@
         chapter_number: '15',
         category: 'Praxe',
         title: 'Případová studie',
-        deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu. Sledujte celý proces od analýzy domény, identifikace bounded contexts, strategického a taktického designu až po implementaci s využitím DDD principů a CQRS.',
+        deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu – celý proces od analýzy domény, identifikace bounded contexts a strategického i taktického designu až po implementaci s využitím DDD principů a CQRS.',
         reading_time: 50,
         difficulty: 4,
         published: block('article_published_time'),
@@ -126,7 +126,7 @@
         Slovník událostí odhalil několik důležitých rozhodnutí ještě před prvním řádkem kódu. Slovo „uživatel“ má
         v každém kontextu jiný význam: v <strong>UserManagement</strong> je to identita s e-mailem a heslem,
         v <strong>ProjectManagement</strong> je to vlastník nebo člen, v <strong>TaskManagement</strong> přiřazený
-        řešitel a v <strong>CommentManagement</strong> autor textu. Stejné slovo, jiná zodpovědnost. Právě toto
+        řešitel a v <strong>CommentManagement</strong> autor textu. Stejné slovo, jiná odpovědnost. Právě toto
         zjištění je zárodkem rozdělení do bounded contexts.
     </p>
 
@@ -957,7 +957,7 @@ final readonly class TaskStatusChanged
         Identifikátory <code>ProjectId</code>, <code>TaskId</code> a <code>UserId</code> sdílí společné
         rozhraní: konstruktor bez argumentů vygeneruje nové UUID, konstruktor se stringem ho ověří
         a uloží. Metoda <code>value()</code> vrací surový string pro persistenci, <code>equals()</code>
-        srovnává podle hodnoty. <code>TaskStatus</code> je výčtový typ s explicitním business jazykem.
+        srovnává podle hodnoty. <code>TaskStatus</code> je výčtový typ s explicitním doménovým jazykem.
         Plný rozbor Value Objektů je v kapitole
         <a href="{{ path('basic_concepts') }}#value-objects">Základní koncepty DDD</a>.
     </p>
@@ -1902,7 +1902,7 @@ final class ReconcileProjectListView extends Command
             },
             {
                 question: 'Proč má smysl oddělit read model od doménového modelu?',
-                answer: 'Doménový model existuje pro vynucování invariantů a reprezentaci business pravidel; výpis projektů žádné invarianty nepotřebuje. Hydratace agregátu jen kvůli zobrazení názvu a počtu členů je drahá – při růstu datasetu rozhoduje rozdíl mezi 5 ms a 200 ms odezvy. Denormalizovaný read model aktualizovaný přes projekce umožní oddělit tempo zápisu a čtení a optimalizovat každou stranu zvlášť. Cenou je eventual consistency. Konkrétní implementace v <a href="#read-model">sekci Read modely a projekce</a>.'
+                answer: 'Doménový model existuje pro vynucování invariantů a reprezentaci doménových pravidel; výpis projektů žádné invarianty nepotřebuje. Hydratace agregátu jen kvůli zobrazení názvu a počtu členů je drahá – při růstu datasetu rozhoduje rozdíl mezi 5 ms a 200 ms odezvy. Denormalizovaný read model aktualizovaný přes projekce umožní oddělit tempo zápisu a čtení a optimalizovat každou stranu zvlášť. Cenou je eventual consistency. Konkrétní implementace v <a href="#read-model">sekci Read modely a projekce</a>.'
             },
             {
                 question: 'Jaká jsou tři nejdůležitější ponaučení z projektu?',
