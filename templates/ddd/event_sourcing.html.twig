@@ -51,7 +51,7 @@
         chapter_number: '06',
         category: 'Vzory',
         title: 'Event Sourcing',
-        deck: 'Hluboký ponor do Event Sourcingu v kontextu Domain-Driven Design a Symfony. Naučte se implementovat Event Store, event-sourcované agregáty, projekce, Outbox pattern, snapshotting a verzování událostí – včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.',
+        deck: 'Event Sourcing v kontextu Domain-Driven Design a Symfony – implementace Event Store, event-sourcovaných agregátů, projekcí, Outbox patternu, snapshottingu a verzování událostí. Včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.',
         reading_time: 45,
         difficulty: 4,
         published: block('article_published_time'),
@@ -76,9 +76,9 @@
             vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
         </p>
         <p>
-            Princip lze vyjádřit větou: <strong>"current state is derived from the history of events"</strong>.
-            Namísto jediného řádku v databázové tabulce, který je přepisován při každé změně, existuje append-only log
-            všech událostí, které kdy na agregátu nastaly.
+            Princip lze vyjádřit větou: <strong><em>current state is derived from the history of events</em></strong>.
+            Namísto jediného řádku v databázové tabulce, který je při každé změně přepisován, existuje append-only log
+            všech událostí, jež kdy na agregátu nastaly.
         </p>
 
         <h3>Porovnání s tradiční CRUD persistencí</h3>
@@ -662,7 +662,7 @@ final class DoctrineEventStore implements EventStore
         </p>
         <ul>
             <li>
-                <strong>Mutační metody</strong> (public business API) – validují invarianty, rozhodují, která událost
+                <strong>Mutační metody</strong> (veřejné rozhraní agregátu) – validují invarianty, rozhodují, která událost
                 nastane, a volají interní metodu pro nahrání události (typicky <code>recordEvent()</code>).
             </li>
             <li>
@@ -846,7 +846,7 @@ final class Order extends EventSourcedAggregate
     }
 
     // --- apply* metody - MUSÍ být protected (ne private), aby je base class mohla volat dynamicky ---
-    // --- Obsahují POUZE změnu interního stavu, žádnou business logiku ---
+    // --- Obsahují POUZE změnu interního stavu, žádnou doménovou logiku ---
 
     protected function applyOrderCreated(OrderCreated $event): void
     {
@@ -1120,7 +1120,7 @@ final class OrderSummaryProjector
 
         <p>
             Projekce lze také <strong>přebudovat</strong> (rebuild) přehráním celého Event Store od začátku –
-            tato schopnost je jednou z největších výhod Event Sourcingu. Při změně business požadavků stačí
+            tato schopnost je jednou z největších výhod Event Sourcingu. Při změně doménových požadavků stačí
             vytvořit novou projekci a přehrát historii; u CRUD systémů jsou historická data nenávratně ztracena.
         </p>
     </section>
@@ -1186,7 +1186,7 @@ final class OrderSummaryProjector
 
         <h3 id="outbox-zaruky-heading">Záruky doručení a jejich důsledky</h3>
         <p>
-            Outbox dává <strong>at-least-once</strong> doručení v rámci jednoho kanálu se zachovaným
+            Outbox dává <strong>at-least-once</strong> doručení uvnitř jednoho kanálu se zachovaným
             globálním pořadím podle <code>event_store.id</code>. Konkrétně:
         </p>
         <ul>
@@ -1407,7 +1407,7 @@ final class IdempotentOrderProjector
             } %}
 
         <p>
-            Pro diagnostiku a opětovné zpracování selhavších zpráv slouží příkazy Symfony Messenger:
+            Pro diagnostiku a opětovné zpracování selhalých zpráv slouží příkazy Symfony Messenger:
         </p>
         <ul>
             <li><code>bin/console messenger:failed:show</code> – zobrazí zprávy v dead letter queue</li>
@@ -1800,7 +1800,7 @@ final class SnapshottingOrderRepository
             </li>
             <li>
                 <strong>Dlouhověkost systému</strong> – Event-sourcovaný systém může běžet roky. Za tu dobu
-                se business požadavky změní mnohokrát a schémata událostí se musejí vyvíjet spolu s nimi.
+                se doménové požadavky změní mnohokrát a schémata událostí se musejí vyvíjet spolu s nimi.
             </li>
         </ul>
 
@@ -1865,7 +1865,7 @@ interface EventUpcaster
         <h3>Konkrétní příklad: rozdělení pole <code>fullName</code></h3>
         <p>
             Představme si reálnou situaci: při spuštění systému událost <code>UserRegistered</code> obsahovala
-            pole <code>fullName</code> (celé jméno jako jeden řetězec). Později business požadoval rozlišit
+            pole <code>fullName</code> (celé jméno jako jeden řetězec). Později se objevil požadavek rozlišit
             křestní jméno a příjmení – vznikla verze 2 se dvěma poli <code>firstName</code>
             a <code>lastName</code>. V Event Store ale stále existují tisíce událostí v1 s polem <code>fullName</code>.
         </p>
@@ -2045,14 +2045,14 @@ final readonly class UpcasterChain
         <h2 id="kdy-pouzit-heading" class="h-section"><span class="h-num">06.11</span> Kdy použít Event Sourcing</h2>
 
         <p>
-            Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho adopcí je nutné pečlivě
+            Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho zavedením je nutné pečlivě
             zvážit, zda přínosy pro daný kontext převažují nad náklady na implementaci a provoz.
         </p>
 
         <h3>Vhodné use cases</h3>
         <ul>
             <li>
-                <strong>Auditní log jako business požadavek</strong> – Finanční systémy, zdravotnické záznamy,
+                <strong>Auditní log jako doménový požadavek</strong> – Finanční systémy, zdravotnické záznamy
                 nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log
                 poskytuje přirozeně a bez nutnosti extra implementace.
             </li>
@@ -2087,8 +2087,8 @@ final readonly class UpcasterChain
                 čtení a agregace dat (BI, analytics), jsou vhodnější klasická DW řešení nebo OLAP databáze.
             </li>
             <li>
-                <strong>Prototypy a MVP</strong> – Rychlá validace business nápadu nepotřebuje složitou
-                infrastrukturu. ES lze přidat do zralého systému incrementálně, pokud se ukáže potřeba –
+                <strong>Prototypy a MVP</strong> – Rychlá validace produktového nápadu nepotřebuje složitou
+                infrastrukturu. ES lze přidat do zralého systému inkrementálně, pokud se ukáže potřeba –
                 viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>.
             </li>
             <li>
@@ -2114,7 +2114,7 @@ final readonly class UpcasterChain
                 Nepoužívejte Event Sourcing paušálně pro celou aplikaci. Správný přístup v DDD je aplikovat ES
                 <strong>selektivně na bounded contexts</strong>, kde skutečně přináší hodnotu – typicky Core Domain
                 s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
-                Časté chyby při adopci ES shrnuje kapitola <a href="{{ path('anti_patterns') }}">Anti-vzory</a>.
+                Časté chyby při zavádění ES shrnuje kapitola <a href="{{ path('anti_patterns') }}">Anti-vzory</a>.
             </p>
         {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -2148,7 +2148,7 @@ final readonly class UpcasterChain
             },
             {
                 question: 'Kdy se vyplatí Event Sourcing nasadit?',
-                answer: 'Event Sourcing se vyplatí tam, kde je historie změn sama o sobě byznysově cenná – finanční systémy, sklady, auditované procesy, regulovaná odvětví – nebo kde je třeba rekonstruovat stav v libovolném bodě minulosti. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace. Nasazuje se zpravidla selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Rozhodovací kritéria v <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
+                answer: 'Event Sourcing se vyplatí tam, kde je historie změn sama o sobě doménově cenná – finanční systémy, sklady, auditované procesy, regulovaná odvětví – nebo kde je třeba rekonstruovat stav v libovolném bodě minulosti. Nevhodný je pro prototypy, MVP a prosté CRUD aplikace. Nasazuje se zpravidla selektivně na jeden bounded context, nikoli plošně na celou aplikaci. Rozhodovací kritéria v <a href="#kdy-pouzit">sekci Kdy použít Event Sourcing</a>.'
             }
         ]
     } %}

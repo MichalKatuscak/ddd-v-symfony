@@ -51,7 +51,7 @@
         chapter_number: '05',
         category: 'Vzory',
         title: 'CQRS v Symfony 8',
-        deck: 'Kompletní průvodce implementací CQRS (Command Query Responsibility Segregation) v Symfony 8 s využitím DDD principů. Naučte se oddělit operace čtení a zápisu, optimalizovat read modely, řešit eventual consistency a budovat škálovatelné aplikace.',
+        deck: 'Implementace CQRS (Command Query Responsibility Segregation) v Symfony 8 s využitím DDD principů – oddělení operací čtení a zápisu, optimalizace read modelů, řešení eventual consistency a stavba škálovatelných aplikací.',
         reading_time: 35,
         difficulty: 3,
         published: block('article_published_time'),
@@ -87,7 +87,7 @@
         <ul>
             <li><strong>Commands</strong> – Příkazy, které mění stav systému. Ve striktním pojetí CQS nevracejí žádná data; v praxi CQRS mohou vracet identifikátor vytvořeného záznamu.</li>
             <li><strong>Queries</strong> – Dotazy, které vrací data, ale nemění stav systému.</li>
-            <li><strong>Oddělené modely</strong> – Write model (bohatý doménový model s business logikou) a Read model (jednoduchá denormalizovaná datová struktura optimalizovaná pro dotazy).</li>
+            <li><strong>Oddělené modely</strong> – Write model (bohatý doménový model s doménovou logikou) a Read model (jednoduchá denormalizovaná datová struktura optimalizovaná pro dotazy).</li>
             <li><strong>Oddělené databáze</strong> – V pokročilých implementacích mohou být použity oddělené databáze pro čtení a zápis, čímž lze nezávisle škálovat zátěž.</li>
         </ul>
     {% endset %}
@@ -192,7 +192,7 @@
         </ol>
         <p>
             Doporučený přístup: začněte na úrovni 1 nebo 2. Na úroveň 3 a 4 přejděte teprve tehdy,
-            když to vyžadují konkrétní škálovací nebo business požadavky. Pokud máte existující
+            když to vyžadují konkrétní škálovací nebo doménové požadavky. Pokud máte existující
             CRUD aplikaci, postup migrace popisuje kapitola
             <a href="{{ path('migration_from_crud') }}">Migrace z CRUD</a>.
         </p>
@@ -218,7 +218,7 @@
 
     <ul>
         <li>
-            <strong>Oddělení zodpovědností</strong> – Write model se soustředí výhradně na business logiku,
+            <strong>Oddělení odpovědností</strong> – Write model se soustředí výhradně na doménovou logiku,
             validaci invariantů a konzistenci dat. Read model se soustředí na rychlou prezentaci dat
             uživateli. Každý model obsahuje přesně to, co potřebuje – nic navíc.
         </li>
@@ -235,13 +235,13 @@
         <li>
             <strong>Testovatelnost</strong> – Command handlers se testují jako čistě doménová logika
             (given state → when command → then events/state). Query handlers se testují na správnost
-            vrácených dat. Žádné propletení obou zodpovědností v jedné testovací sadě.
+            vrácených dat. Žádné propletení obou odpovědností v jedné testovací sadě.
             Viz kapitola <a href="{{ path('testing_ddd') }}">Testování DDD kódu</a>.
         </li>
         <li>
             <strong>Flexibilita evoluce</strong> – Read model lze kdykoli přebudovat (rebuild projekcí),
-            přidat nový read model pro nový use case, nebo změnit strukturu dotazu – bez jakéhokoli
-            dopadu na write model a business logiku.
+            přidat nový read model pro nový use case nebo změnit strukturu dotazu – bez jakéhokoli
+            dopadu na write model a doménovou logiku.
         </li>
     </ul>
     </section>
@@ -250,7 +250,7 @@
     <h2 id="challenges-heading" class="h-section"><span class="h-num">05.04</span> Výzvy a omezení CQRS</h2>
     <p>
         CQRS není stříbrná kulka. Jako každý architektonický vzor přináší kompromisy,
-        které je nutné pečlivě zvážit ještě před adopcí:
+        které je nutné pečlivě zvážit ještě před zavedením:
     </p>
 
     <ul>
@@ -421,7 +421,7 @@ framework:
     <p>
         Commands v CQRS jsou příkazy, které mění stav systému. V Symfony 8 se implementují jako jednoduché
         PHP třídy – immutabilní datové objekty (DTO), které nesou veškerá data potřebná pro vykonání operace.
-        Command sám o sobě neobsahuje žádnou business logiku; je to pouhý přepravní kontejner dat.
+        Command sám o sobě neobsahuje žádnou doménovou logiku; je to pouhý přepravní kontejner dat.
     </p>
     <p>
         Dobře navržený command má několik vlastností:
@@ -430,7 +430,7 @@ framework:
         <li>Je <strong>immutabilní</strong> (<code>readonly</code> properties) – po vytvoření se nemění.</li>
         <li>Obsahuje <strong>validační atributy</strong> – díky middleware <code>validation</code> na command busu se command validuje ještě před předáním handleru.</li>
         <li>Pojmenování vyjadřuje <strong>záměr</strong> – <code>RegisterUser</code>, <code>PlaceOrder</code>, <code>CancelSubscription</code>. Ne <code>SaveUser</code> nebo <code>UpdateOrder</code>.</li>
-        <li>Pracuje typicky s primitivními typy (string, int, float) nebo serializovatelnými hodnotovými objekty (např. <code>OrderId</code>, <code>Money</code>); klíčové je, aby bylo možné command bezpečně přenést přes asynchronní kanál.</li>
+        <li>Pracuje typicky s primitivními typy (string, int, float) nebo serializovatelnými hodnotovými objekty (např. <code>OrderId</code>, <code>Money</code>); podstatné je, aby bylo možné command bezpečně přenést přes asynchronní kanál.</li>
     </ul>
 
     {% set _callout_body %}
@@ -446,7 +446,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Příkaz pro registraci nového uživatele.
- * Immutabilní DTO - neslouží k business logice, pouze přenáší data.
+ * Immutabilní DTO - neslouží k doménové logice, pouze přenáší data.
  */
 final class RegisterUser
 {
@@ -605,11 +605,11 @@ final class ListOrders
         Symfony Messenger automaticky spojí handler s jeho command/query podle type-hintu parametru.
     </p>
     <p>
-        Command handler a query handler mají odlišnou zodpovědnost:
+        Command handler a query handler mají odlišnou odpovědnost:
     </p>
     <ul>
         <li>
-            <strong>Command handler</strong> – Načte agregát z repozitáře, zavolá na něm business metodu
+            <strong>Command handler</strong> – Načte agregát z repozitáře, zavolá na něm doménovou metodu
             (která validuje invarianty) a uloží změny. Může emitovat doménové události.
             Pracuje s <strong>doménovým modelem</strong> (entity, value objects, repozitáře).
         </li>
@@ -744,7 +744,7 @@ final class GetUserProfileHandler
 
     <p>
         ViewModel (nebo Read Model) je datová struktura navržená výhradně pro potřeby konkrétního dotazu
-        nebo obrazovky. Na rozdíl od doménové entity neobsahuje žádnou business logiku – je to čistě
+        nebo obrazovky. Na rozdíl od doménové entity neobsahuje žádnou doménovou logiku – je to čistě
         prezentační objekt. Zatímco doménová entita <code>User</code> chrání invarianty a zapouzdřuje
         chování, ViewModel <code>UserProfileViewModel</code> obsahuje přesně ta data, která potřebuje
         šablona nebo API endpoint.
@@ -761,7 +761,7 @@ namespace App\UserManagement\Profile\ViewModel;
 
 /**
  * Read model pro zobrazení uživatelského profilu.
- * Obsahuje pouze data potřebná pro prezentaci - žádná business logika.
+ * Obsahuje pouze data potřebná pro prezentaci - žádná doménová logika.
  */
 final readonly class UserProfileViewModel
 {
@@ -1233,7 +1233,7 @@ final class OrderDashboardProjector
     <h2 id="eventual-consistency-heading" class="h-section"><span class="h-num">05.12</span> Eventual Consistency v praxi</h2>
 
     <p>
-        Eventual consistency je nejčastějším zdrojem nejistoty při adopci CQRS. Při asynchronní
+        Eventual consistency je nejčastějším zdrojem nejistoty při zavádění CQRS. Při asynchronní
         propagaci změn z write strany na read stranu existuje <strong>časové okno</strong> (typicky
         milisekundy až jednotky sekund), kdy read model ještě neodráží poslední zápis. Uživatel
         odešle formulář, dostane potvrzení o úspěchu, ale seznam na další stránce ještě nezobrazuje
@@ -1387,7 +1387,7 @@ final class PlaceOrderController extends AbstractController
         <p>
             Pro tyto scénáře zajistěte konzistenci na <strong>write straně</strong> (v command handleru
             přes doménový model a databázová omezení), ne přes read model. Read model eventual consistency
-            má vliv pouze na <em>zobrazení</em> dat, nikoli na <em>business rozhodnutí</em>.
+            má vliv pouze na <em>zobrazení</em> dat, nikoli na <em>doménová rozhodnutí</em>.
         </p>
     {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1519,7 +1519,7 @@ stdout_logfile=/var/log/messenger-worker.log{% endverbatim %}{% endset %}
 
     <h3>Retry strategie</h3>
     <p>
-        Symfony Messenger podporuje automatické opakování selhavších zpráv. Konfigurace
+        Symfony Messenger podporuje automatické opakování selhalých zpráv. Konfigurace
         <code>retry_strategy</code> na transportu definuje, kolikrát a s jakým zpožděním
         se handler znovu zavolá:
     </p>
@@ -1555,19 +1555,19 @@ framework:
                 highlights: []
             } %}
 
-        {% set _code %}{% verbatim %}# Zobrazení selhavších zpráv
+        {% set _code %}{% verbatim %}# Zobrazení selhalých zpráv
 $ php bin/console messenger:failed:show
 
-# Detail konkrétní selhavší zprávy (včetně výjimky)
+# Detail konkrétní selhalé zprávy (včetně výjimky)
 $ php bin/console messenger:failed:show 42
 
-# Opakované zpracování selhavší zprávy
+# Opakované zpracování selhalé zprávy
 $ php bin/console messenger:failed:retry 42
 
-# Opakování všech selhavších zpráv
+# Opakování všech selhalých zpráv
 $ php bin/console messenger:failed:retry
 
-# Trvalé odstranění selhavší zprávy (po analýze)
+# Trvalé odstranění selhalé zprávy (po analýze)
 $ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'snippet.sh',
@@ -1583,7 +1583,7 @@ $ php bin/console messenger:failed:remove 42{% endverbatim %}{% endset %}
 
     {% set _callout_body %}
 
-        <h3 id="failed-monitoring-heading">Monitoring selhavších zpráv</h3>
+        <h3 id="failed-monitoring-heading">Monitoring selhalých zpráv</h3>
         <p>
             Dead letter queue není „koš“ – je to <strong>fronta vyžadující pozornost</strong>.
             V produkčním systému musíte monitorovat počet zpráv na failed transportu
@@ -1976,7 +1976,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         vzniká potřeba koordinovat dlouhotrvající procesy napříč kontexty.
         Vzor <strong>Saga</strong> (neboli <strong>Process Manager</strong>) naslouchá doménovým událostem
         a na základě nich odesílá příkazy, čímž propojuje command a event stranu CQRS do ucelených
-        business procesů.
+        doménových procesů.
     </p>
     <p>
         Podrobný výklad ság – včetně implementace v Symfony Messenger,
