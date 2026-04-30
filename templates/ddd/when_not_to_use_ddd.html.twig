@@ -117,7 +117,7 @@
         <p>
             Eric Evans to v <em>Domain-Driven Design</em> říká explicitně: DDD má smysl pro
             <strong>komplexní doménovou logiku</strong>. CRUD operace komplexní doménovou logiku nemají –
-            jsou to operace nad daty bez business pravidel.
+            jsou to operace nad daty bez doménových pravidel.
         </p>
 
         {% set _callout_body %}
@@ -201,7 +201,7 @@ class ArticleCrudController extends AbstractCrudController
             <strong>Doporučené alternativy:</strong>
             <ul>
                 <li><strong>EasyAdmin</strong> – pro backoffice a CMS adminy. Konfigurací, ne kódem.</li>
-                <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> – pro jednoduchý CRUD bez business logiky.</li>
+                <li><strong>Symfony Forms + Doctrine Entity přímo v controlleru</strong> – pro jednoduchý CRUD bez doménové logiky.</li>
             </ul>
             Doménový model zavádíte tehdy, když máte doménu. CRUD admin doménu nemá.
             Martin Fowler tento anti-pattern pojmenoval
@@ -357,7 +357,7 @@ class Order {
 
         <p>
             Systém načítá data z externích zdrojů, transformuje je a ukládá nebo reportuje.
-            Žádné business rules, žádné invarianty, žádná doménová logika.
+            Žádná doménová pravidla, žádné invarianty, žádná doménová logika.
             Jde o přesun a transformaci dat – ne o modelování domény.
         </p>
 
@@ -365,7 +365,7 @@ class Order {
             Agregáty chrání invarianty. Pokud žádné invarianty nemáte, agregáty nemáte k čemu potřebovat.
             Výsledkem je přidaná komplexita bez věcného důvodu. Jak píše Evans: agregát je
             <em>cluster of associated objects that we treat as a unit for the purpose of data changes</em>
-            - klíčové slovo je „data changes“ s business pravidly, ne „data transfer“.
+            – podstatné slovní spojení je „data changes“ s doménovými pravidly, nikoli „data transfer“.
         </p>
 
         {% set _callout_body %}
@@ -458,7 +458,7 @@ final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agre
     // Setter - agregát nemá chránit invarianty, jen přepisuje data
     public function setStatus(string $status): void
     {
-        $this->status = $status;  // žádná validace, žádné business rules
+        $this->status = $status;  // žádná validace, žádná doménová pravidla
     }
 
     // „Repository“ je jen přejmenovaný EntityRepository
@@ -493,7 +493,7 @@ final class Order
         $this->status = OrderStatus::CANCELLED;
         $this->domainEvents[] = new OrderCancelled($this->id, $clock->now());
     }
-    // Žádné settery - stav se mění jen přes explicitní business operace
+    // Žádné settery - stav se mění jen přes explicitní doménové operace
 }{% endverbatim %}{% endset %}
             {% include '_partials/code_block.html.twig' with {
                 filename: 'src/Order.php',
@@ -539,7 +539,7 @@ final class Order
             <strong>Zásadní rozdíl oproti bodu 3:</strong> V bodě 3 chybí lidé – máte malý tým bez přístupu
             k expertům, ale doména může být jasná (pojišťovnictví, e-commerce...). Zde je problém v tom,
             že <strong>nikdo doménu nechápe</strong> – ani potenciální experti. Požadavky se teprve formují,
-            pojmy nejsou ustálené, business pravidla se mění s každou schůzkou.
+            pojmy nejsou ustálené, doménová pravidla se mění s každou schůzkou.
         </p>
 
         <p>
@@ -587,7 +587,7 @@ final class Order
                 <tr>
                     <td>Komplexní doménová logika (ne jen CRUD)</td>
                     <td>DDD chrání invarianty a modeluje pravidla – bez pravidel nemá co chránit</td>
-                    <td>Pojistné smlouvy s 50+ business pravidly pro schválení, pojistné události s workflow</td>
+                    <td>Pojistné smlouvy s 50+ doménovými pravidly pro schválení, pojistné události s workflow</td>
                 </tr>
                 <tr>
                     <td>Projekt bude žít a růst roky</td>

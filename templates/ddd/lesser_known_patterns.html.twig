@@ -2,7 +2,7 @@
 
 {% block title %}Specifications, Domain Services, Factories, Modules – kompletně | DDD Symfony{% endblock %}
 
-{% block meta_description %}Čtyři často přehlížené taktické vzory DDD: Specification Pattern (kompozice business pravidel), Domain Services (logika mimo entity), Factories (komplexní vznik aggregate), Modules (Eric Evans organization). Praktická implementace v Symfony 8 a PHP 8.4.{% endblock %}
+{% block meta_description %}Čtyři často přehlížené taktické vzory DDD: Specification Pattern (kompozice doménových pravidel), Domain Services (logika mimo entity), Factories (komplexní vznik aggregate), Modules (Eric Evans organization). Praktická implementace v Symfony 8 a PHP 8.4.{% endblock %}
 
 {% block meta_keywords %}specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model{% endblock %}
 
@@ -103,7 +103,7 @@
         V malých projektech opravdu bez těchto vzorů přežijete. Jenže právě tam, kde je doména
         netriviální – tedy přesně v situacích, pro které byl DDD vytvořen – chybějící vzory
         způsobují bobtnání agregátů, anémii doménového modelu, duplikaci pravidel mezi vrstvami
-        a&nbsp;nečitelnou organizaci kódu, která zatemňuje business strukturu projektu. Evans
+        a&nbsp;nečitelnou organizaci kódu, která zatemňuje doménovou strukturu projektu. Evans
         těmto vzorům věnuje desítky stran z dobrého důvodu: jsou součástí ucelené sady, která drží
         pohromadě.
     </p>
@@ -177,7 +177,7 @@
 
     <ol>
         <li>
-            <strong>Komplexní business pravidla, která se mají skládat.</strong> Pokud máte
+            <strong>Komplexní doménová pravidla, která se mají skládat.</strong> Pokud máte
             v různých částech aplikace rekombinace téhož motivu – někde
             „<em>premium AND v EU</em>“, jinde „<em>premium OR má slevový kód</em>“ –
             kompozice pomocí Specification vám ušetří duplikaci a&nbsp;udrží pravidla
@@ -235,7 +235,7 @@
             <code>OrderTotalEqualsSpecification</code> – každá obsahuje jeden řádek kódu.
             To je over-engineering: ztrácíte čitelnost domény, protože jména přestanou být
             doménová a&nbsp;stanou se z nich obecné prepozice. Specification má reprezentovat
-            <em>celou business otázku</em>, ne jednotlivý operátor.
+            <em>celou doménovou otázku</em>, ne jednotlivý operátor.
         </p>
     {% endset %}
     {% include '_partials/callout.html.twig' with {
@@ -446,7 +446,7 @@ final class NotSpecification extends CompositeSpecification
     <h3 id="spec-domain">Doménová specifikace</h3>
 
     <p>
-        S kostrou hotovou ukážeme konkrétní doménové specifikace. Jedná se o skutečná business
+        S kostrou hotovou ukážeme konkrétní doménové specifikace. Jedná se o skutečná doménová
         pravidla z Ordering kontextu – všimněte si, že každá z nich nese mluvící doménové jméno
         a&nbsp;dědí kombinátory <code>and</code>/<code>or</code>/<code>not</code> automaticky:
     </p>
@@ -821,7 +821,7 @@ final class DoctrineOrderRepository implements OrderRepository
         </li>
         <li>
             <strong>Je to skutečně doménová operace, nebo aplikační?</strong> Domain Service
-            obsahuje business pravidla. Application Service koordinuje
+            obsahuje doménová pravidla. Application Service koordinuje
             (transakce, autorizace, eventy). Pokud byste musel ve „doménové“ service
             volat <code>EntityManager-&gt;flush()</code> – je to Application Service.
         </li>
@@ -1483,7 +1483,7 @@ public static function reconstitute(
         Této organizaci se v komunitě říká také <em>vertical slicing</em> – viz kapitolu
         <a href="{{ path('horizontal_vs_vertical') }}">Horizontální vs. vertikální dělení</a>,
         která jí věnuje detailní rozbor. Pro účely této kapitoly stačí pozorování: <em>shora
-        vidíte business mapu projektu</em> (Ordering, Billing, SharedKernel), nikoliv technický
+        vidíte doménovou mapu projektu</em> (Ordering, Billing, SharedKernel), nikoliv technický
         Twig/Doctrine/Service salát.
     </p>
 
@@ -1504,7 +1504,7 @@ public static function reconstitute(
                 je to e-shop, banka, IS pro pojišťovnu? Vidíte pouze, že to má entity a&nbsp;controllery.
             </li>
             <li>
-                <strong>Vynucuje horizontální vrstvy</strong>. Změna jednoho business pravidla
+                <strong>Vynucuje horizontální vrstvy</strong>. Změna jednoho doménového pravidla
                 často vyžaduje editovat soubor v&nbsp;5 různých složkách, místo jednoho modulu.
             </li>
             <li>
@@ -1819,7 +1819,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
             <tr>
                 <th>Specification jako 1-line if</th>
                 <td><code>OrderTotalGreaterThanSpecification</code> s&nbsp;jediným porovnáním</td>
-                <td>Inlinujte podmínku; Specification má reprezentovat celou business otázku</td>
+                <td>Inlinujte podmínku; Specification má reprezentovat celou doménovou otázku</td>
             </tr>
             <tr>
                 <th>Specification reimplementující SQL</th>
@@ -1828,7 +1828,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
             </tr>
             <tr>
                 <th>&bdquo;*Service&ldquo; všude</th>
-                <td><code>OrderService</code>, <code>CustomerService</code> obsahuje business logiku, kterou by měla obsahovat Entity</td>
+                <td><code>OrderService</code>, <code>CustomerService</code> obsahuje doménovou logiku, kterou by měla obsahovat Entity</td>
                 <td>Přesuňte logiku do Entity; Domain Service jen pro operace bez vlastníka</td>
             </tr>
             <tr>
@@ -1883,13 +1883,13 @@ vendor/bin/phparkitect check --config=phparkitect.php
         Čtyři vzory této kapitoly – Specifications, Domain Services, Factories, Modules –
         bývají v praktických tutoriálech přehlíženy. Evans jim ovšem věnuje desítky stran
         z dobrého důvodu: jsou součástí ucelené sady taktického DDD a&nbsp;bez nich agregáty
-        bobtnají, doménový model anemizuje a&nbsp;organizace projektu zatemňuje business
+        bobtnají, doménový model anemizuje a&nbsp;organizace projektu zatemňuje doménovou
         strukturu.
     </p>
 
     <ul>
         <li>
-            <strong>Specification Pattern</strong> proměňuje booleovská business pravidla
+            <strong>Specification Pattern</strong> proměňuje booleovská doménová pravidla
             v&nbsp;prvotřídní objekty s&nbsp;mluvícími jmény. Kombinátory <code>and</code>,
             <code>or</code>, <code>not</code> umožňují skládání bez vnořených <code>if</code>-ů,
             double-dispatch eliminuje duplikaci pravidla mezi PHP a&nbsp;Doctrine.

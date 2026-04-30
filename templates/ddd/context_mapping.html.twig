@@ -191,7 +191,7 @@
                             <td><a href="#partnership"><strong>Partnership</strong></a></td>
                             <td>Symetrický</td>
                             <td>Vysoký</td>
-                            <td>Společné business cíle, společný release</td>
+                            <td>Společné doménové cíle, společný release</td>
                             <td>Oba týmy</td>
                         </tr>
                         <tr>
@@ -262,7 +262,7 @@
                     <li><strong>Když downstream <em>má hlas</em></strong> (může požádat o změnu kontraktu) &rarr; <a href="#customer-supplier">Customer/Supplier</a>.</li>
                     <li><strong>Když downstreamu <em>vůbec nezáleží</em></strong> a integrace musí být co nejlevnější &rarr; <a href="#conformist">Conformist</a>.</li>
                     <li><strong>Když je upstream zveřejněn pro <em>mnoho</em> konzumentů</strong> &rarr; <a href="#ohs">OHS</a> + <a href="#published-language">PL</a>.</li>
-                    <li><strong>Když dva týmy <em>nemůžou žít odděleně</em></strong> a sdílí business cíl &rarr; <a href="#partnership">Partnership</a>.</li>
+                    <li><strong>Když dva týmy <em>nemůžou žít odděleně</em></strong> a sdílí doménový cíl &rarr; <a href="#partnership">Partnership</a>.</li>
                     <li><strong>Když by integrace stála <em>víc než vědomá duplicita</em></strong> &rarr; <a href="#separate-ways">Separate Ways</a>.</li>
                 </ul>
             {% endset %}
@@ -280,7 +280,7 @@
 
             <p>
                 <strong>Partnership</strong> je symetrický vztah mezi dvěma Bounded Contexts,
-                jejichž týmy <em>společně uspějí, nebo společně padnou</em>. Sdílí business cíl,
+                jejichž týmy <em>společně uspějí, nebo společně padnou</em>. Sdílí doménový cíl,
                 koordinují plánování a typicky se nasazují společným release procesem. Není to
                 „náhodná spolupráce“ – Partnership je <strong>vědomé strategické rozhodnutí</strong>,
                 že integrační náklady (synchronní mítinky, společný roadmap, časté merge konflikty)
@@ -795,7 +795,7 @@ final class StripePaymentReportRepository
                 <li>Při každé breaking change upstreamu se downstream musí přepsat.</li>
                 <li>Doménová logika downstreamu používá pojmy upstreamu, což zhoršuje srozumitelnost.</li>
                 <li>Pokud se upstream rozhodne odejít (Stripe zavře službu), je downstream rukojmí.</li>
-                <li>Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá business logika je „stripeovaná“).</li>
+                <li>Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá doménová logika je „stripeovaná“).</li>
             </ul>
 
             {% set _callout_body %}
@@ -1031,7 +1031,7 @@ final class LegacyBillingTranslatorTest extends TestCase
                 Pravidlo: <strong>ACL je single-purpose třída</strong>, ne layer s desítkami metod
                 sdílejících state. Jeden upstream koncept = jeden translator. Výstup translátoru
                 je <em>vždy</em> doménový VO/entity/event, nikdy raw DTO. Pokud translátor začíná
-                obsahovat business logiku, je to signál, že máte <em>Application Service</em>
+                obsahovat doménovou logiku, je to signál, že máte <em>Application Service</em>
                 schovanou v ACL – vyčleňte ji.
             </p>
 
@@ -1511,7 +1511,7 @@ final class OrderPlacedValidator
                     <strong>(60–80 min) Identifikovat „nebezpečné“ vztahy.</strong>
                     Conformist k upstreamu, který se rychle mění; Big Ball of Mud (vícenásobné
                     nepojmenované vztahy mezi stejnými BC); Shared Kernel, který přerůstá; Partnership,
-                    která už nemá business důvod. Pro každý nebezpečný vztah vytvořit akční položku
+                    která už nemá doménový důvod. Pro každý nebezpečný vztah vytvořit akční položku
                     (Jira ticket / ADR draft).
                 </li>
                 <li>

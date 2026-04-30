@@ -69,7 +69,7 @@
             a jeden Ubiquitous Language. V <a href="{{ path('context_mapping') }}">Context Mappingu</a> jsme rozebrali,
             jak různé Bounded Contexts spolu komunikují (Customer-Supplier, Conformist, Anti-Corruption Layer, Open Host
             Service, Published Language). V kapitole o <a href="{{ path('sagas') }}">ságách a Process Managerech</a>
-            jsme ukázali, jak koordinovat business proces napříč více Bounded Contexts pomocí kompenzací místo distribuovaných
+            jsme ukázali, jak koordinovat doménový proces napříč více Bounded Contexts pomocí kompenzací místo distribuovaných
             transakcí.
         </p>
 
@@ -109,7 +109,7 @@
                 o tom, zda kontext skutečně dostat vlastní deployment unit, závisí na faktorech jako velikost týmu,
                 rozdílné scaling potřeby, různý release cyklus a operační kapacita organizace. Chris Richardson v knize
                 <em>Microservices Patterns</em> (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by
-                business capability“ a zdůrazňuje, že rozdělení musí mít business důvod, ne čistě technický.
+                business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
             </p>
 
             {% set _callout_body %}
@@ -180,7 +180,7 @@
                     </tr>
                     <tr>
                         <td>Mění se kvůli</td>
-                        <td>Změně business modelu</td>
+                        <td>Změně doménového modelu</td>
                         <td>Scaling, release cyklu, ops</td>
                     </tr>
                     <tr>
@@ -251,7 +251,7 @@
             <ul>
                 <li><strong>Catalog</strong> – produktový katalog, search, kategorie, atributy. Read-heavy, malé write
                     operace, agresivní cache. Tým 8 lidí.</li>
-                <li><strong>Ordering</strong> – košík, objednávky, stav, refundy z business pohledu. Transakční,
+                <li><strong>Ordering</strong> – košík, objednávky, stav, refundy z doménového pohledu. Transakční,
                     latency-sensitive, tvrdá konzistence. Tým 9 lidí.</li>
                 <li><strong>Payment</strong> – integrace platebních bran, autorizace, capture, recurring payments,
                     refundy z technického pohledu. PCI DSS scope, audit trail. Tým 6 lidí.</li>
@@ -710,7 +710,7 @@ return static function (Config $config): void {
                 </li>
                 <li>
                     Asynchronní tok přirozeněji zapadá do <a href="{{ path('event_storming') }}">Event Storming</a>
-                    modelu – doménové eventy jsou stejně jednotka business reality.
+                    modelu – doménové eventy jsou stejně jednotkou doménové reality.
                 </li>
             </ul>
 
@@ -773,7 +773,7 @@ return static function (Config $config): void {
             <h2 id="distribuovane-transakce-heading" class="h-section"><span class="h-num">17.06</span> Distribuované transakce – Saga, ne 2PC</h2>
 
             <p>
-                Jakmile business proces překročí hranici jednoho Bounded Contextu (a v microservices architektuře tedy
+                Jakmile doménový proces překročí hranici jednoho Bounded Contextu (a v microservices architektuře tedy
                 hranici jedné service), musíte řešit otázku <strong>konzistence napříč servisami</strong>. ACID
                 transakce, na kterou jste zvyklí v jedné databázi, v distribuovaném prostředí přestává platit. Klasickou
                 odpovědí kdysi býval <em>Two-Phase Commit</em> (2PC, XA transactions). V moderní microservices
@@ -789,7 +789,7 @@ return static function (Config $config): void {
                 </li>
                 <li>
                     <strong>Blocking.</strong> Účastníci 2PC drží zámky během obou fází. Při latenci sítě v desítkách
-                    milisekund a více účastnících je to blokáda celé business transakce na stovky milisekund.
+                    milisekund a více účastnících je to blokáda celé doménové transakce na stovky milisekund.
                     Throughput katastrofálně klesá.
                 </li>
                 <li>
@@ -846,7 +846,7 @@ return static function (Config $config): void {
                     2PC se snaží zachovat ACID model přes hranici sítě a v praxi to končí blokádou nebo in-doubt stavem.
                     Saga ACID opouští – místo toho akceptuje, že systém je dočasně nekonzistentní a že se konzistence
                     obnoví prostřednictvím sémantických kompenzací. Pro doménové experty je to často přirozenější model
-                    než 2PC: business proces v reálném světě (objednávka, platba, expedice) vždy běží jako sekvence
+                    než 2PC: doménový proces v reálném světě (objednávka, platba, expedice) vždy běží jako sekvence
                     kroků s explicitní undo strategií, ne jako jeden atomický commit.
                 </p>
             {% endset %}
@@ -1060,7 +1060,7 @@ framework:
             } %}
 
             <p>
-                Outbox transport zapisuje event do tabulky v stejné DB transakci jako business commit (Doctrine
+                Outbox transport zapisuje event do tabulky v stejné DB transakci jako doménový commit (Doctrine
                 Outbox). Externí relay (worker přes <code>messenger:consume</code>) potom polluje outbox table
                 a publishuje payload do AMQP exchange. Detail v <a href="{{ path('outbox_pattern') }}">kapitole o
                 Outbox patternu</a>.
@@ -1433,10 +1433,10 @@ final readonly class OrderPlacedReceivedHandler
             <p>
                 <strong>Symptom:</strong> tým rozdělil monolit do servis dříve, než provedl Event Storming nebo
                 Domain Storytelling. Hranice servis odpovídají technickým vrstvám (auth-svc, user-svc, db-svc) nebo
-                CRUD entitám (order-svc, customer-svc, product-svc), ne business kontextům.
+                CRUD entitám (order-svc, customer-svc, product-svc), ne doménovým kontextům.
             </p>
             <p>
-                <strong>Důsledek:</strong> business proces musí pro vyřízení projít napříč pěti až deseti servisami.
+                <strong>Důsledek:</strong> doménový proces musí pro vyřízení projít napříč pěti až deseti servisami.
                 Synchronní coupling všude. Je to distributed monolith z definice.
             </p>
             <p>
@@ -1461,7 +1461,7 @@ final readonly class OrderPlacedReceivedHandler
 
             <h3 id="antivzor-3-heading">3. Synchronní orchestrace všeho přes REST</h3>
             <p>
-                <strong>Symptom:</strong> každá business operace je řetězec sync HTTP volání. Vyřízení objednávky:
+                <strong>Symptom:</strong> každá doménová operace je řetězec sync HTTP volání. Vyřízení objednávky:
                 ordering volá payment, payment volá fraud-detection, fraud-detection volá ai-scoring, ai-scoring
                 volá customer, ... Jeden user request = 12 vnořených HTTP volání.
             </p>

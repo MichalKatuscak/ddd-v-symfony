@@ -94,7 +94,7 @@
 
     <p>
         Nejjednodušší implementace publikování doménové události vypadá nevinně: po dokončení
-        business operace zapíšeme stav do databáze a pak rovnou dispatchneme událost na message
+        doménové operace zapíšeme stav do databáze a pak rovnou dispatchneme událost na message
         bus. Code review takový kód projde bez poznámek – dokud se v produkci nezačnou množit
         ztracené události a paralelní stížnosti subscriberů typu „<em>vidím v API objednávku
         12345, ale event <code>OrderPlaced</code> mi nikdy nedorazil</em>“.
@@ -160,7 +160,7 @@ final readonly class PlaceOrderHandlerNaive
             ale event <code>OrderPlaced</code> se nikdy neodeslal. Subscriber kontext (Payment,
             Warehouse, Notifications) o objednávce <em>neví</em>. Zákazník ji vidí v API,
             ale platba se nestrhne, sklad nezarezervuje, e-mail nepřijde. Tichá ztráta
-            business události. Nejhorší scénář, protože v logu nezůstane žádná stopa
+            doménové události. Nejhorší scénář, protože v logu nezůstane žádná stopa
             „chybějící“ události.
         </li>
         <li>
@@ -250,7 +250,7 @@ final readonly class PlaceOrderHandlerNaive
     <p>
         Idea Outbox Pattern je překvapivě jednoduchá: <strong>nepublikujeme událost přímo do
         brokera, ale zapíšeme ji do tabulky <code>outbox</code></strong> ve stejné databázi,
-        kde žije business state, a to <em>uvnitř stejné DB transakce</em>, jako úprava agregátu.
+        kde žije doménový stav, a to <em>uvnitř stejné DB transakce</em>, jako úprava agregátu.
         Buď se tedy úspěšně zapíše obojí (order i jeho event), nebo se nezapíše nic (rollback
         celé transakce). Atomicita je obnovena – protože jsou oba zápisy v jediném ACID kontextu
         jedné databáze, ne ve dvou různých systémech.
@@ -268,13 +268,13 @@ final readonly class PlaceOrderHandlerNaive
         fig: '11.2-A',
         title: 'Transactional Outbox – čtyři fáze publikování',
         inline: _diagram_inline,
-        alt: 'Sekvenční diagram čtyř fází: business transakce, polling outboxu, publish do brokeru, konzumace subscriberem',
+        alt: 'Sekvenční diagram čtyř fází: doménová transakce, polling outboxu, publish do brokeru, konzumace subscriberem',
         caption: 'Pásmo mezi fází 1 a fází 3 je „outbox lag“ – typicky pod 1 sekundu při polling intervalu 100&nbsp;ms. Atomicita patří do fáze 1: order i outbox řádek vznikají v jediném <code>COMMIT</code>.'
     } %}
 
     <ol>
         <li>
-            <strong>Fáze 1 – business transakce.</strong> Application handler v jedné Doctrine
+            <strong>Fáze 1 – doménová transakce.</strong> Application handler v jedné Doctrine
             transakci uloží agregát i odpovídající outbox řádky. Buď oboje, nebo nic.
         </li>
         <li>
@@ -580,7 +580,7 @@ final class Version20260429120000 extends AbstractMigration
     <p>
         Hlavní princip DDD říká, že agregát <strong>nezná infrastrukturu</strong> – neví
         nic o Doctrine, RabbitMQ ani outbox tabulce. Agregát pouze produkuje seznam doménových
-        událostí, které jsou důsledkem business operace. Application handler je pak vezme
+        událostí, které jsou důsledkem doménové operace. Application handler je pak vezme
         a zařadí do outbox tabulky <em>v téže transakci</em>, ve které ukládá agregát samotný.
     </p>
 
@@ -1173,7 +1173,7 @@ spec:
         <strong>Idempotent Inbox Pattern</strong> řeší tuto situaci doplňkem k outboxu – tabulkou
         <code>inbox</code> v databázi subscribera se sloupcem <code>event_id</code> a UNIQUE
         constraintem. Před zpracováním eventu handler zkontroluje, zda je daný event_id už
-        v inboxu; pokud ano, ackne brokerovi a skončí. Pokud ne, zpracuje business logiku
+        v inboxu; pokud ano, ackne brokerovi a skončí. Pokud ne, zpracuje doménovou logiku
         a v <em>téže transakci</em> vloží nový řádek do inboxu. UNIQUE constraint je pojistka
         proti race condition.
     </p>
@@ -1288,7 +1288,7 @@ final readonly class OrderPlacedReadModelUpdater
                 return;
             }
 
-            // 2) Aplikace business logiky – typicky upsert read modelu.
+            // 2) Aplikace doménové logiky – typicky upsert read modelu.
             $this->readModel->upsertOrderRow(
                 orderId: $event->orderId,
                 customerId: $event->customerId,
@@ -1567,7 +1567,7 @@ ORDER BY bucket;{% endverbatim %}{% endset %}
     <h3 id="kompakce-heading">Kompakce outbox tabulky</h3>
 
     <p>
-        Outbox tabulka roste lineárně s počtem business eventů. Bez kompakce po roce
+        Outbox tabulka roste lineárně s počtem doménových eventů. Bez kompakce po roce
         provozu obsahuje miliony historických řádků, což zpomaluje i indexované dotazy
         a zbytečně okupuje disk. Standardní strategie: <strong>mažeme řádky, které jsou
         ve stavu <code>sent</code> a starší než N dní</strong> – kde N je obvykle 7 až 30
@@ -1648,7 +1648,7 @@ final class OutboxCleanupCommand extends Command
         <li><strong>Mít na ně CLI nástroj</strong> – <code>app:outbox:retry-failed</code> nebo
             ruční SQL update statusu zpět na <code>pending</code> po opravě subscribera.</li>
         <li><strong>Nikdy nemazat automaticky</strong> – failed řádek je důkaz nedoručeného
-            business eventu a chce ho mít evidovaný i po týdnu.</li>
+            doménového eventu a chce ho mít evidovaný i po týdnu.</li>
     </ul>
 
     {% set _callout_body %}
@@ -1691,7 +1691,7 @@ final class OutboxCleanupCommand extends Command
             Pokud event letí do brokera ještě před commitem doménové transakce – ať už
             kvůli sync transportu, kvůli middleware pořadí nebo kvůli explicitnímu
             <code>$bus->dispatch()</code> – máme dual-write zpět. Outbox je celý smysl
-            v tom, že event jde <strong>do té samé DB transakce</strong> jako business state.
+            v tom, že event jde <strong>do té samé DB transakce</strong> jako doménový stav.
         </p>
     {% endset %}
     {% include '_partials/callout.html.twig' with {
@@ -1897,7 +1897,7 @@ final class OutboxCleanupCommand extends Command
     </p>
 
     <ul>
-        <li>Outbox je <strong>tabulka v téže DB jako business state</strong> – jinak nedává smysl.</li>
+        <li>Outbox je <strong>tabulka v téže DB jako doménový stav</strong> – jinak nedává smysl.</li>
         <li>Doctrine entita s <code>#[ORM\Index(columns: ['status', 'occurred_at'])]</code>
             je nepostradatelný detail.</li>
         <li><code>$em->wrapInTransaction(...)</code> v handleru garantuje atomicitu order +
@@ -1936,7 +1936,7 @@ final class OutboxCleanupCommand extends Command
         items: [
             {
                 question: 'Outbox vs. CDC / Debezium – co kdy?',
-                answer: 'Pro 99 % Symfony projektů zvolte polling worker (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je naprosto dostatečná pro typické business scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 11.05</a>.'
+                answer: 'Pro 99 % Symfony projektů zvolte polling worker (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je naprosto dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 11.05</a>.'
             },
             {
                 question: 'Co když používáme NoSQL databázi (MongoDB, Cassandra, DynamoDB)?',
@@ -1952,7 +1952,7 @@ final class OutboxCleanupCommand extends Command
             },
             {
                 question: 'Co dělat při dlouhodobém výpadku brokera?',
-                answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál bez problémů zapisují business eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém – řádky jsou malé), (c) kompakce ne-mazat pending stará než N dní, jen sent. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
+                answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál bez problémů zapisují doménové eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém – řádky jsou malé), (c) kompakce ne-mazat pending stará než N dní, jen sent. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
             },
             {
                 question: 'Musím použít UUID/ULID, nebo stačí AUTO_INCREMENT?',
