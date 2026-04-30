@@ -242,7 +242,7 @@ final class EmailTest extends TestCase
     <h3>Testování entit</h3>
     <p>
         Entity mají identitu a měnitelný stav. Testy entit ověřují doménová pravidla (invarianty), správné chování metod a vyhazování
-        doménových výjimek při porušení pravidel. Klíčové je testovat chování, ne strukturu – tedy co entita dělá, ne jak vypadají její fieldy.
+        doménových výjimek při porušení pravidel. Důležité je testovat chování, ne strukturu – tedy co entita dělá, ne jak vypadají její fieldy.
     </p>
 
     {% set _callout_body %}
@@ -1107,7 +1107,7 @@ final class RegistrationControllerTest extends WebTestCase
     <h2 id="architektonicke-testy-heading" class="h-section"><span class="h-num">10.07</span> Architektonické testy</h2>
     <p>
         Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla – především
-        pravidla závislostí mezi vrstvami. V DDD je klíčovým pravidlem, že doménová vrstva nesmí záviset
+        pravidla závislostí mezi vrstvami. V DDD je základním pravidlem, že doménová vrstva nesmí záviset
         na infrastrukturní ani aplikační vrstvě. Manuální code review nestačí; architektonické testy toto pravidlo
         vynucují v CI/CD pipeline a zabrání regresi.
     </p>

@@ -51,7 +51,7 @@
         chapter_number: '09',
         category: 'Praxe',
         title: 'Praktické příklady',
-        deck: 'Praktické příklady implementace Domain-Driven Design v Symfony 8 na reálných projektech. Prozkoumejte ukázky kódu pro e-commerce, blog a další typy aplikací s využitím bounded contexts, doménových modelů a vertikální slice architektury.',
+        deck: 'Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury.',
         reading_time: 30,
         difficulty: 3,
         published: block('article_published_time'),
@@ -768,7 +768,8 @@ class CreatePostHandler
         <section id="user-management" aria-labelledby="user-management-heading">
             <h2 id="user-management-heading" class="h-section"><span class="h-num">09.03</span> Příklad: Správa uživatelů</h2>
             <p>
-                V této části si ukážeme, jak implementovat správu uživatelů pomocí DDD a CQRS v Symfony 8, kde společná doména budou uživatelé a DDD použijeme pro oddělení funkcí.
+                V této sekci implementujeme správu uživatelů pomocí DDD a CQRS v Symfony 8 – uživatelé
+                tvoří společnou doménu a DDD slouží k oddělení jednotlivých feature (registrace, autentizace, profil).
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/users/diagram.svg' %}{% endset %}
@@ -1022,7 +1023,7 @@ class RegisterUserHandler
 
     <p>
         Všechny tři příklady ukazují stejný vzor: kontroler pouze dispatchuje command nebo query,
-        aplikační vrstva koordinuje operaci a doménový model vynucuje business pravidla.
+        aplikační vrstva koordinuje operaci a doménový model vynucuje doménová pravidla.
         Konkrétní strukturu a konfiguraci takového projektu popisuje kapitola
         <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony 8</a>.
     </p>
@@ -1049,7 +1050,7 @@ class RegisterUserHandler
                 },
                 {
                     question: 'Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?',
-                    answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější business pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Strukturu adresářů je vhodné použít jako výchozí šablonu a postupně ji rozšiřovat podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="' ~ path('implementation_in_symfony') ~ '">Implementace DDD v Symfony 8</a>.'
+                    answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Strukturu adresářů je vhodné použít jako výchozí šablonu a postupně ji rozšiřovat podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="' ~ path('implementation_in_symfony') ~ '">Implementace DDD v Symfony 8</a>.'
                 }
             ]
         } %}

@@ -51,7 +51,7 @@
         chapter_number: '08',
         category: 'Vzory',
         title: 'Výkonnostní aspekty DDD v Symfony',
-        deck: 'Kompletní průvodce výkonnostními aspekty Domain-Driven Design v Symfony s Doctrine ORM. Naučte se řešit N+1 problém, optimalizovat agregáty, implementovat read model přes CQRS, správně používat UUID a cachovat doménové objekty.',
+        deck: 'Výkonnostní aspekty Domain-Driven Design v Symfony s Doctrine ORM – řešení N+1 problému, optimalizace agregátů, implementace read modelu přes CQRS, správné používání UUID a cachování doménových objektů.',
         reading_time: 30,
         difficulty: 4,
         published: block('article_published_time'),
@@ -427,7 +427,7 @@ final class DoctrineOrderRepository
             } %}
 
     <p>
-        Klíčovým pravidlem DDD je, že <strong>agregát musí být navržen podle doménových invariantů,
+        Základním pravidlem DDD je, že <strong>agregát musí být navržen podle doménových invariantů,
         nikoli podle výkonnostních požadavků</strong>. Pokud jsou výkonnostní požadavky v konfliktu
         s doménovým modelem, je správným řešením zavedení read modelu (viz sekce CQRS), nikoli
         kompromitování doménové integrity.
@@ -1392,7 +1392,7 @@ final class QueryCountingMiddleware implements Middleware
             } %}
 
     <p>
-        Výkonnostní aspekty DDD jsou nedílnou součástí správné implementace. Klíčovým nástrojem je
+        Výkonnostní aspekty DDD jsou nedílnou součástí správné implementace. Hlavním nástrojem je
         oddělení read a write modelu přes CQRS, eliminace N+1 problémů a správně zvolené hranice
         agregátů. Vhodným pokračováním je kapitola
         <a href="{{ path('cqrs') }}">CQRS v Symfony 8</a> a

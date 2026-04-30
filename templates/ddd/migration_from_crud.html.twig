@@ -105,7 +105,7 @@
                     </li>
                     <li>
                         <strong>Komunikační propast</strong> – Vývojáři a doménoví experti používají jiný slovník.
-                        Kód neodráží jazyk businessu; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou
+                        Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou
                         viditelné v názvech tříd a metod.
                     </li>
                 </ul>
@@ -294,7 +294,7 @@
             </p>
             <ul>
                 <li>Odkrytí implicitní doménové logiky skryté v kontrolerech a service třídách.</li>
-                <li>Identifikaci přechodů stavů entit (z pohledu businessu, nikoli databáze).</li>
+                <li>Identifikaci přechodů stavů entit (z pohledu domény, nikoli databáze).</li>
                 <li>Nalezení přirozených hranic Bounded Contexts.</li>
                 <li>Zapojení doménových expertů do návrhu nové architektury.</li>
             </ul>
@@ -390,7 +390,7 @@ class UserController extends AbstractController
                 vždy splněna, bez ohledu na to, kdo s objektem pracuje.
             </p>
 
-            <h3>Přesunutí business pravidel do doménových objektů</h3>
+            <h3>Přesunutí doménových pravidel do doménových objektů</h3>
             <p>
                 Refaktoring probíhá ve dvou hlavních krocích: nejprve vytvoříme doménové Value Objects pro primitivní
                 typy nesoucí doménová pravidla, poté extrahujeme logiku do doménových entit a služeb.
@@ -528,7 +528,7 @@ class User
 
             <h3>Zavedení Value Objects místo primitive types</h3>
             <p>
-                Primitive Obsession je code smell, při kterém jsou koncepty s business sémantikou reprezentovány
+                Primitive Obsession je code smell, při kterém jsou koncepty s doménovou sémantikou reprezentovány
                 primitivními typy jako <code>string</code> nebo <code>int</code>. Value Object nahrazuje primitiv
                 objektem, který zapouzdřuje validaci a chování.
             </p>
@@ -567,7 +567,7 @@ final class Email
             );
         }
 
-        // Zakázané domény (business pravidlo)
+        // Zakázané domény (doménové pravidlo)
         $domain = substr($normalized, strpos($normalized, '@') + 1);
         if (in_array($domain, ['example.com', 'test.com'], true)) {
             throw new \DomainException(
@@ -847,7 +847,7 @@ final class RegisterUserHandler
         $email = new Email($command->email);
         $password = HashedPassword::fromPlaintext($command->password);
 
-        // Doménová politika ověřuje business pravidla přes repozitář
+        // Doménová politika ověřuje pravidla přes repozitář
         $this->policy->assertEmailIsUnique($email);
 
         $user = User::register(
@@ -1130,7 +1130,7 @@ final class UserTest extends TestCase
                     doménové objekty nesmějí záviset na infrastruktuře.
                 </li>
                 <li>
-                    Komunikujte s managementem v pojmech <strong>business hodnoty</strong>, nikoli technické
+                    Komunikujte s managementem v pojmech <strong>obchodní hodnoty</strong>, nikoli technické
                     architektury. Migrace na DDD = schopnost rychleji a bezpečněji přidávat nové funkce.
                 </li>
             </ul>
@@ -1217,7 +1217,7 @@ final class UserTest extends TestCase
                 <li>Cross-link: <a href="{{ path('outbox_pattern') }}">Outbox Pattern</a>.</li>
             </ol>
 
-            <h3 id="recept-business-logika-controlleru-heading">Recept 5: Business logika v controlleru</h3>
+            <h3 id="recept-business-logika-controlleru-heading">Recept 5: Doménová logika v controlleru</h3>
             <p><strong>Symptomy:</strong> 200řádkový controller s if-else stromem doménových rozhodnutí.</p>
             <ol>
                 <li>Vytvořte <code>Command</code> DTO + <code>CommandHandler</code> v Application vrstvě.</li>
@@ -1255,7 +1255,7 @@ final class UserTest extends TestCase
             items: [
                 {
                     question: 'Jaké příznaky ukazují, že CRUD aplikace je zralá na migraci?',
-                    answer: 'Typickými signály jsou God Services o stovkách řádků, kontrolery obsahující business pravidla, doménová logika zamíchaná v Doctrine repozitářích, opakované regresní chyby při drobných změnách a rostoucí čas potřebný pro onboarding nových vývojářů. Pokud aplikace tyto příznaky nevykazuje a zůstává prostým mapováním formulářů na tabulky, migrace odpovídající hodnotu nepřinese. Obecnější otázku, pro jaké projekty je DDD vhodné, řeší samostatná kapitola <a href="' ~ path('when_not_to_use_ddd') ~ '">Kdy DDD nepoužívat</a>. Viz také <a href="#kdy-migrovat">sekci Kdy a proč migrovat</a>.'
+                    answer: 'Typickými signály jsou God Services o stovkách řádků, kontrolery obsahující doménová pravidla, doménová logika zamíchaná v Doctrine repozitářích, opakované regresní chyby při drobných změnách a rostoucí čas potřebný pro onboarding nových vývojářů. Pokud aplikace tyto příznaky nevykazuje a zůstává prostým mapováním formulářů na tabulky, migrace odpovídající hodnotu nepřinese. Obecnější otázku, pro jaké projekty je DDD vhodné, řeší samostatná kapitola <a href="' ~ path('when_not_to_use_ddd') ~ '">Kdy DDD nepoužívat</a>. Viz také <a href="#kdy-migrovat">sekci Kdy a proč migrovat</a>.'
                 },
                 {
                     question: 'Co je Strangler Fig Pattern?',
