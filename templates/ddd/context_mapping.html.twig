@@ -73,17 +73,17 @@
         </p>
 
         <p>
-            <strong>Context Mapping</strong> je odpověď. Eric Evans ji představil v roce 2003
-            v knize <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>
-            v kapitole 14 (<em>Maintaining Model Integrity</em>) jako vizuální i textovou
-            dokumentaci všech Bounded Contexts v systému a všech vztahů mezi nimi
+            <strong>Context Mapping</strong> je odpověď. Evans ji popsal v roce 2003 v knize
+            <em>Domain-Driven Design: Tackling Complexity in the Heart of Software</em>, kapitola 14
+            (<em>Maintaining Model Integrity</em>). Šlo o vizuální i textovou dokumentaci
+            všech Bounded Contexts v systému a všech vztahů mezi nimi
             <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
             Vaughn Vernon v <em>Implementing Domain-Driven Design</em> (2013) tuto disciplínu
-            rozvedl o praktickou implementaci v moderním stacku
+            rozvedl o praktické implementační vzory
             <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>.
-            Následující sekce pokrývají všech osm pojmenovaných vztahů mezi BC, jejich kompromisy
-            a způsob, jakým se realizují v Symfony 8 – typicky kombinací
-            <a href="{{ path('cqrs') }}">CQRS s Symfony Messenger</a>, REST API a HTTP klientů.
+            Sekce pokrývají všech osm pojmenovaných vztahů mezi BC a jejich kompromisy.
+            Ukázky realizace v Symfony 8 využívají
+            <a href="{{ path('cqrs') }}">CQRS s Symfony Messenger</a>, REST API nebo HTTP klienty.
         </p>
 
         {# ───────────────────────────────────────────────────────────
@@ -117,9 +117,9 @@
             </ul>
 
             <p>
-                Proč tu mapu nakreslit? Protože alternativou je <strong>implicitní vztahový graf</strong>:
-                tým A ví, že volá tým B, ale nikdo nikde neřekl, jakým způsobem se to děje, kdo
-                kontrakt vlastní a co se stane, když ho jednostranně změníme. Implicitní vztahy
+                Proč tu mapu nakreslit? Protože alternativou je <strong>implicitní vztahový graf</strong>.
+                Tým A ví, že volá tým B – ale nikdo neřekl jakým způsobem, kdo kontrakt vlastní
+                a co se stane, když ho někdo jednostranně změní. Implicitní vztahy
                 vedou k integračním bugům, plíživému sdílení modelů a v konečném důsledku k
                 <em>Big Ball of Mud</em> (viz <a href="#big-ball-of-mud">03.12</a>).
             </p>
@@ -351,9 +351,8 @@ composer.json        ← jeden composer.json pro oba BC{% endverbatim %}{% endse
                 Když se týmy rozhodnou pro Partnership, <strong>aniž by si tu otázku položily</strong>
                 – typicky proto, že „nemáme čas se domluvit, takže to budeme dělat dohromady“ –
                 vede to přímo k <em>Big Ball of Mud</em>. Agregáty jednoho BC začnou číst tabulky
-                druhého BC „protože je to rychlejší“, doménové eventy se přestanou používat ve
-                prospěch sdílených service tříd, a po roce nikdo nedokáže říct, kde přesně končí
-                Catalog a začíná Pricing.
+                druhého „protože je to rychlejší”. Doménové eventy ustoupí sdíleným service třídám.
+                Po roce nikdo nedokáže říct, kde přesně končí Catalog a začíná Pricing.
             </p>
 
             {% set _callout_body %}
@@ -521,7 +520,7 @@ final readonly class Money
             <p>
                 Pravidlo: <strong>SK musí být malý, neměnný a recenzovaný oběma týmy</strong>.
                 Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých
-                BC ve skutečnosti <em>odlišné</em> (jen vypadají podobně) a měly by být modelovány
+                BC ve skutečnosti <em>odlišné</em> (jen vypadají podobně) a měly by se modelovat
                 samostatně. Pokud koncept opravdu patří do SK ale je velký, je třeba ho vyčlenit
                 do vlastního BC s <a href="#ohs">Open Host Service</a>.
             </p>
@@ -885,7 +884,7 @@ use App\Ordering\Domain\Event\InvoicePaidEvent;
 use App\Ordering\Domain\ValueObject\InvoiceId;
 use App\SharedKernel\Money\Currency;
 use App\SharedKernel\Money\Money;
-use Symfony\Component\Messenger\Exception\IncomingMessageRejected;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 
 /**
  * ACL mezi legacy Billing systémem (SOAP) a Ordering BC.
@@ -905,19 +904,19 @@ final class LegacyBillingTranslator
     {
         // (3) Anti-corruption: legacy umí poslat negativní amount jako "credit"
         if ($r->amountCents < 0) {
-            throw new IncomingMessageRejected(
+            throw new UnrecoverableMessageHandlingException(
                 'Negative amount from legacy; credits are not supported in Ordering BC.'
             );
         }
 
         // (3) Anti-corruption: chybějící identifikátor
         if ($r->invoiceNumber === '' || $r->invoiceNumber === null) {
-            throw new IncomingMessageRejected('Missing invoiceNumber in legacy payload.');
+            throw new UnrecoverableMessageHandlingException('Missing invoiceNumber in legacy payload.');
         }
 
         // (3) Anti-corruption: legacy umí poslat status, kterému nerozumíme
         if ($r->status !== 'PAID') {
-            throw new IncomingMessageRejected(
+            throw new UnrecoverableMessageHandlingException(
                 "Unsupported legacy status '{$r->status}'; expected PAID."
             );
         }
@@ -955,7 +954,7 @@ use App\Ordering\Infrastructure\Acl\InvoicePaidSoapResponse;
 use App\Ordering\Infrastructure\Acl\LegacyBillingClient;
 use App\Ordering\Infrastructure\Acl\LegacyBillingTranslator;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Messenger\Exception\IncomingMessageRejected;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 
 final class LegacyBillingTranslatorTest extends TestCase
 {
@@ -979,7 +978,7 @@ final class LegacyBillingTranslatorTest extends TestCase
     {
         $translator = new LegacyBillingTranslator($this->createMock(LegacyBillingClient::class));
 
-        $this->expectException(IncomingMessageRejected::class);
+        $this->expectException(UnrecoverableMessageHandlingException::class);
         $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-1',
             amountCents:   -100,
@@ -992,7 +991,7 @@ final class LegacyBillingTranslatorTest extends TestCase
     {
         $translator = new LegacyBillingTranslator($this->createMock(LegacyBillingClient::class));
 
-        $this->expectException(IncomingMessageRejected::class);
+        $this->expectException(UnrecoverableMessageHandlingException::class);
         $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-2',
             amountCents:   100,
@@ -1040,9 +1039,9 @@ final class LegacyBillingTranslatorTest extends TestCase
             <p>
                 Anti-Corruption Layer je důležitý stavební prvek <em>Strangler Fig</em> patternu
                 pro postupnou migraci z legacy. Detail viz kapitolu
-                <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>. V Strangler
-                Fig přístupu je <strong>každý nový BC obklopen ACL</strong>, dokud legacy nezmizí
-                – a v tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator
+                <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>.
+                V Strangler Fig přístupu <strong>každý nový BC obklopuje ACL</strong>, dokud legacy nezmizí.
+                V tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator
                 bez anti-corruption logiky).
             </p>
         </section>
@@ -1092,8 +1091,8 @@ final class LegacyBillingTranslatorTest extends TestCase
             <ul>
                 <li><strong>REST API</strong> přes <code>api-platform/core</code> nebo vlastní
                     controllery, popsané OpenAPI spec.</li>
-                <li><strong>gRPC</strong> přes <code>spiral/php-grpc</code> nebo
-                    <code>roadrunner-server/grpc</code>, popsané <code>.proto</code> souborem.</li>
+                <li><strong>gRPC</strong> přes <code>spiral/roadrunner-grpc</code>,
+                    popsané <code>.proto</code> souborem.</li>
                 <li><strong>Event stream</strong> publikovaný přes RabbitMQ / Kafka, popsaný
                     JSON Schema (přechod k <a href="#published-language">PL</a>).</li>
             </ul>
@@ -1321,7 +1320,7 @@ namespace App\Ordering\Infrastructure\PublishedLanguage;
 
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Validator;
-use Symfony\Component\Messenger\Exception\IncomingMessageRejected;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 
 final class OrderPlacedValidator
 {
@@ -1340,7 +1339,7 @@ final class OrderPlacedValidator
 
         if (!$result->isValid()) {
             $errors = (new ErrorFormatter())->format($result->error());
-            throw new IncomingMessageRejected(
+            throw new UnrecoverableMessageHandlingException(
                 'Payload does not match OrderPlaced v1 schema: ' . json_encode($errors),
             );
         }
@@ -1354,7 +1353,7 @@ final class OrderPlacedValidator
 
             <p>
                 Schema validation je první krok ACL na konzumující straně. Pokud payload neprojde
-                schema validací, vrací se <code>IncomingMessageRejected</code> a zpráva se
+                schema validací, vrací se <code>UnrecoverableMessageHandlingException</code> a zpráva se
                 přesouvá do dead letter queue. Bez schema validace se downstream BC vystavuje
                 všem chybám upstreamu.
             </p>
@@ -1414,9 +1413,9 @@ final class OrderPlacedValidator
             </ul>
 
             <p>
-                Marketingový tým si spočítá: za rok rozešle 50 kampaní, integrace stojí 200 hodin
-                vývoje + 8 hodin údržby měsíčně, a riziko špatně synchronizovaného opt-in stavu
-                by stejně bylo nenulové. Místo toho přijme <strong>Separate Ways</strong>:
+                Marketingový tým si spočítá: 50 kampaní ročně, integrace stojí 200 hodin vývoje
+                a 8 hodin údržby měsíčně. Riziko špatně synchronizovaného opt-in stavu zůstane
+                nenulové i s integrací. Místo toho přijme <strong>Separate Ways</strong>:
             </p>
 
             <ul>
@@ -1606,8 +1605,7 @@ final class OrderPlacedValidator
 
             <ul>
                 <li>Tým je pod tlakem dodat funkčnost rychle a nemá čas přemýšlet o hranicích.</li>
-                <li>Onboarding nových inženýrů probíhá kopírováním existujících vzorů, které samy
-                    o sobě jsou špatné.</li>
+                <li>Noví inženýři kopírují existující vzory – a ty jsou samy o sobě špatné.</li>
                 <li>Architekt(i) chybí nebo jsou ignorováni.</li>
                 <li>Refactoring je politicky obtížný (přidává riziko ke krátkodobému dodání).</li>
             </ul>
@@ -1615,11 +1613,10 @@ final class OrderPlacedValidator
             <h3>Cesta ven</h3>
 
             <p>
-                Big Ball of Mud se nedá „opravit“ rewriteem. Jediný funkční postup je
-                <strong>Strangler Fig</strong>: postupně vyčleňovat čisté BC s ACL (viz
-                <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>),
-                každý BC obklopit Anti-Corruption Layerem, postupně přesouvat funkčnost ze
-                staré spaghetti vrstvy do nového čistého modelu.
+                Big Ball of Mud se nedá „opravit” rewriteem. Jediný funkční postup je
+                <strong>Strangler Fig</strong>: postupně vyčleňovat čisté BC, každý obklopit ACL
+                a přesouvat funkčnost ze staré spaghetti vrstvy do nového čistého modelu.
+                Detail viz <a href=”{{ path('migration_from_crud') }}”>Migrace z CRUD do DDD</a>.
             </p>
 
             <p>
