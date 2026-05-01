@@ -68,20 +68,17 @@
         V kapitole <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a> jsme prošli
         čtyři pilíře taktického designu: <strong>Entity</strong>, <strong>Value Object</strong>,
         <strong>Aggregate</strong> a stručně i <strong>Domain Service</strong> a <strong>Factory</strong>.
-        Eric Evans ovšem v částech II a III své knihy z roku 2003 věnuje hloubkovou pozornost ještě
-        čtyřem dalším vzorům – a právě ty bývají v praktických průvodcích přehlíženy nebo zaměňovány
-        s něčím jiným. Cílem této kapitoly je vrátit jim plný význam: kdy jsou skutečně užitečné,
-        jak je zapsat v moderním PHP&nbsp;8.4 a jaká rizika přinášejí, pokud je použijeme špatně.
+        Eric Evans jim věnuje v částech II a III desítky stran. V průvodcích je vývojáři přeskakují
+        nebo si je pletou s jinými vzory. Cílem této kapitoly je vrátit jim plný význam: kdy jsou skutečně užitečné,
+        jak je zapsat v PHP&nbsp;8.4 a jaká rizika přinášejí, pokud je použijeme špatně.
     </p>
 
     <p>
-        Konkrétně si vysvětlíme: <strong>Specification Pattern</strong> jako kompozici doménových
-        booleovských predikátů (Evans 2003, kap.&nbsp;9), <strong>Domain
-        Services</strong> jako stateless objekty pro logiku, jež nemá přirozeného vlastníka mezi
-        Entitami a Value Objekty (Evans 2003, kap.&nbsp;5), <strong>Factories</strong> pro zapouzdření
-        vzniku agregátu se složitými invarianty (Evans 2003, kap.&nbsp;6; Vernon 2013, kap.&nbsp;11)
-        a&nbsp;<strong>Modules</strong> jako prostředek vědomé organizace kódu podle ubiquitous
-        language (Evans 2003, kap.&nbsp;5).
+        Čtyři vzory, každý s vlastní kapitolou v Evansově knize:
+        <strong>Specification Pattern</strong> (kap.&nbsp;9) – kompozice doménových predikátů jako prvotřídních objektů.
+        <strong>Domain Services</strong> (kap.&nbsp;5) – logika bez přirozeného vlastníka mezi Entitami a Value Objekty.
+        <strong>Factories</strong> (kap.&nbsp;6; Vernon kap.&nbsp;11) – zapouzdření vzniku agregátů se složitými invarianty.
+        <strong>Modules</strong> (kap.&nbsp;5) – vědomá organizace kódu podle ubiquitous language.
     </p>
 
 {# ───────────────────────────────────────────────────────────
@@ -100,11 +97,10 @@
     </p>
 
     <p>
-        V malých projektech opravdu bez těchto vzorů přežijete. Jenže právě tam, kde je doména
-        netriviální – tedy přesně v situacích, pro které byl DDD vytvořen – chybějící vzory
-        způsobují bobtnání agregátů, anémii doménového modelu, duplikaci pravidel mezi vrstvami
-        a&nbsp;nečitelnou organizaci kódu, která zatemňuje doménovou strukturu projektu. Evans
-        těmto vzorům věnuje desítky stran z dobrého důvodu: jsou součástí ucelené sady, která drží
+        V malých projektech opravdu bez těchto vzorů přežijete. Jenže tam, kde je doména
+        netriviální – tedy přesně tam, kde DDD platí – chybějící vzory způsobují bobtnání agregátů,
+        anémii modelu a&nbsp;duplikaci pravidel. Kód přestává odrážet doménovou strukturu projektu.
+        Evans těmto vzorům věnuje desítky stran z dobrého důvodu: jsou součástí ucelené sady, která drží
         pohromadě.
     </p>
 
@@ -563,7 +559,7 @@ final class NotInBlacklist extends CompositeSpecification
     <h3 id="spec-compose">Kompozice v aplikační vrstvě</h3>
 
     <p>
-        Tady se ukazuje skutečná hodnota vzoru. Komplexní marketingová akce
+        Zde se ukazuje skutečná hodnota vzoru. Komplexní marketingová akce
         <em>„doprava zdarma pro nákupy nad 1000&nbsp;Kč v EU, kromě zákazníků na blacklistu“</em>
         je pouze trojice atomických specifikací spojená kombinátorem <code>and</code> – jedna
         čitelná řádka místo trojnásobně vnořeného <code>if</code>-u:
@@ -740,7 +736,7 @@ final class DoctrineOrderRepository implements OrderRepository
     <p>
         Pro hluboký teoretický základ vzoru: Evans, E., <em>Domain-Driven Design</em> (2003),
         kapitola&nbsp;9 <em>Making Implicit Concepts Explicit</em>; Fowler, M., <em>Patterns of
-        Enterprise Application Architecture</em> (2003), heslo <em>Specification</em>.
+        Enterprise Application Architecture</em> (2002), heslo <em>Specification</em>.
         Praktická aplikace na agregátech: Vernon, V., <em>Implementing Domain-Driven Design</em>
         (2013).
     </p>
@@ -765,10 +761,8 @@ final class DoctrineOrderRepository implements OrderRepository
     </p>
 
     <p>
-        Jinými slovy: pokud existuje doménová operace <em>X</em>, kterou musíte umět provést, ale
-        když si na chvíli položíte otázku <em>„které z mých Entit/Value Objektů tato operace
-        přirozeně patří?“</em>, žádná odpověď není uspokojivá – protože by to znamenalo, že daná
-        Entita musí znát příliš mnoho o&nbsp;druhé – pak je čas vytvořit Domain Service.
+        Jinak řečeno: existuje operace <em>X</em>, ale žádná Entita ji nemůže vlastnit, aniž by
+        musela znát příliš mnoho o&nbsp;druhé. To je signál pro Domain Service.
     </p>
 
     <h3 id="ds-kdy">Kdy použít</h3>
@@ -780,8 +774,8 @@ final class DoctrineOrderRepository implements OrderRepository
     <ul>
         <li>
             <strong>Funds Transfer</strong> – převod peněz mezi dvěma účty. Patří do agregátu
-            <code>Account</code>? Žádný z&nbsp;obou účtů ten druhý nezná, sám sebe by neměl
-            převádět. Operace je sama o&nbsp;sobě doménový koncept.
+            <code>Account</code>? Ani jeden z&nbsp;účtů nezná ten druhý. Ani jeden není přirozeným
+            vlastníkem operace. Jde o&nbsp;doménový koncept sám o&nbsp;sobě.
         </li>
         <li>
             <strong>Pricing engine</strong> – výpočet ceny objednávky. Závisí na pricing
@@ -1010,7 +1004,7 @@ final class MoneyTransferService
 
     <p>
         Tabulka ukazuje, proč je problematické pojmenovat vše na <code>*Service</code> –
-        a&nbsp;proč se v&nbsp;moderním DDD upouští od sufixu <em>Service</em>
+        a&nbsp;proč se v&nbsp;současném DDD upouští od sufixu <em>Service</em>
         u&nbsp;Application vrstvy ve prospěch <em>Handler</em> nebo <em>UseCase</em>. Doménová
         Service má sufix <em>Service</em> jen tehdy, když pomáhá zdůraznit „operace bez vlastníka“.
         V mnoha doménách dokonce i&nbsp;u&nbsp;Domain Service zvolíme přímo doménové jméno
@@ -1112,7 +1106,7 @@ final class MoneyTransferService
     <h3 id="fac-static">Vzor 1: Static method factory (preferovaný)</h3>
 
     <p>
-        V moderním PHP&nbsp;8.4 je <strong>nejčistší forma Factory</strong> statická pojmenovaná
+        V PHP&nbsp;8.4 je <strong>nejčistší forma Factory</strong> statická pojmenovaná
         konstrukční metoda na samotném agregátu (named constructor). Konstruktor je privátní,
         publikujete pouze pojmenované entry pointy s&nbsp;jasnou doménovou sémantikou:
     </p>
@@ -1306,7 +1300,7 @@ final class OrderFromCartFactory
         <p>
             Vaughn Vernon ve své knize <em>Implementing Domain-Driven Design</em> (2013), kapitola&nbsp;11,
             formuluje pravidlo: <strong>&bdquo;Preferujte named constructor. Po samostatné
-            Factory class sahejte teprve tehdy, když vznik nutně potřebuje DI závislosti, kterou nelze
+            Factory class sáhejte teprve tehdy, když vznik nutně potřebuje DI závislosti, kterou nelze
             poskytnout parametrem.&ldquo;</strong> Důvod je prostý: statická metoda na agregátu
             drží invarianty pohromadě s&nbsp;kódem agregátu, samostatná Factory je rozdělí na dva
             soubory a vystavuje agregát public konstruktoru, což oslabuje invariant „nelze vytvořit
@@ -1398,7 +1392,7 @@ public static function reconstitute(
     </p>
 
     <p>
-        V Symfony 8 a&nbsp;moderním PHP&nbsp;8.4 to konkrétně znamená:
+        V Symfony 8 a&nbsp;PHP&nbsp;8.4 to konkrétně znamená:
     </p>
 
     <ul>
@@ -1414,7 +1408,7 @@ public static function reconstitute(
     <h3 id="mod-bc">Modul jako Bounded Context</h3>
 
     <p>
-        Nejmocnější aplikace Modules vzoru je <strong>1 modul = 1 Bounded Context</strong>.
+        Nejčastěji se vzor uplatní jako <strong>1 modul = 1 Bounded Context</strong>.
         Projekt strukturovaný tímto způsobem vypadá takto:
     </p>
 
@@ -1702,9 +1696,8 @@ vendor/bin/phparkitect check --config=phparkitect.php
     {% set _callout_body %}
         <h3 id="phparkitect-tip-heading">Bez architektonických testů je Modules jen přání</h3>
         <p>
-            Modulární organizace, která není vynucená v CI, se rozpadá rychlostí, jakou tým postupuje –
-            během 6 měsíců ji někdo poruší v&nbsp;hot-fix tlaku, refaktoring na původní stav je pak
-            týdenní práce. Doporučujeme <strong>od prvního commitu</strong> nasadit phparkitect (nebo
+            Modulární organizace bez vynucení v CI se rozpadá. Stačí 6 měsíců a&nbsp;hot-fix tlak –
+            refaktoring zpět je pak týdenní práce. Doporučujeme <strong>od prvního commitu</strong> nasadit phparkitect (nebo
             <code>deptrac</code>, alternativa) a&nbsp;udržovat zelený build. Náklad je nízký
             (jeden YAML/PHP soubor v repu), přínos vysoký – modul zůstává modulem,
             i&nbsp;když do projektu přijde pátý nový vývojář, který Evansův text nikdy nečetl.
