@@ -130,9 +130,8 @@
             <p>
                 V tomto příkladu jsou <code>OrderManagement</code> a <code>UserManagement</code> dva ohraničené
                 kontexty.
-                Každý kontext má svůj vlastní model a jazyk. V kontextu <code>OrderManagement</code> může být uživatel
-                reprezentován pouze jako <code>UserId</code>,
-                zatímco v kontextu <code>UserManagement</code> je uživatel modelován jako plnohodnotná entita <code>User</code>.
+                Každý kontext má svůj vlastní model a jazyk. <code>OrderManagement</code> reprezentuje uživatele pouze
+                jako <code>UserId</code>; <code>UserManagement</code> ho modeluje jako plnohodnotnou entitu <code>User</code>.
                 Kompletní příklad rozdělení reálného systému do pěti bounded contexts je v kapitole
                 <a href="{{ path('case_study') }}#discovery">Případová studie – Doménová analýza</a>.
             </p>
@@ -257,7 +256,7 @@ class User
             } %}
 
             <p>
-                V tomto příkladu je <code>User</code> entita, která je definována svou identitou (<code>UserId</code>).
+                V tomto příkladu je <code>User</code> entita definovaná identitou (<code>UserId</code>).
                 Uživatel může změnit své jméno nebo e-mail,
                 ale jeho identita zůstává stejná.
             </p>
@@ -315,9 +314,9 @@ class Email
             } %}
 
             <p>
-                V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. E-mailová
+                V tomto příkladu je <code>Email</code> hodnotový objekt definovaný svou hodnotou. E-mailová
                 adresa je neměnná a nemá žádnou identitu.
-                Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu.
+                Dva e-maily se považují za stejné, pokud mají stejnou hodnotu.
             </p>
         </section>
 
@@ -326,7 +325,7 @@ class Email
             <p>
                 Agregát je skupina souvisejících objektů, která tvoří jednu transakční hranici konzistence
                 <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[3]</a>.
-                Každý agregát má kořen agregátu (aggregate root),
+                Každý agregát má kořen agregátu (Aggregate Root),
                 který je jediným vstupním bodem pro veškeré vnější interakce s agregátem. Špatně zvolená velikost
                 agregátu patří mezi nejčastější chyby v DDD – velkoobjemové „God Aggregaty“ rozebírá kapitola
                 <a href="{{ path('anti_patterns') }}">Anti-vzory a typické chyby</a>.
@@ -487,7 +486,7 @@ class OrderItem
 
             <p>
                 V tomto příkladu je <code>Order</code> agregát, který obsahuje kolekci <code>OrderItem</code> objektů.
-                <code>Order</code> je kořenem agregátu (aggregate root)
+                <code>Order</code> je kořenem agregátu (Aggregate Root)
                 a poskytuje metody pro manipulaci s položkami objednávky.
             </p>
 
@@ -627,7 +626,7 @@ class PaymentService
             {% set _callout_body %}
                 <h3 id="service-vs-aggregate-heading">Kdy doménová služba vs. metoda na agregátu?</h3>
                 <p>
-                    Všimněte si, že výpočet celkové částky (<code>totalAmount()</code>) je metodou přímo
+                    Výpočet celkové částky (<code>totalAmount()</code>) je metodou přímo
                     na agregátu <code>Order</code>, protože pracuje výhradně s jeho daty. Doménová služba
                     je vhodná tehdy, když logika:
                 </p>
@@ -715,7 +714,7 @@ final class OrderCreatedEvent
             items: [
                 {
                     question: 'Jaký je rozdíl mezi Entitou a Value Objectem?',
-                    answer: 'Entita má jednoznačnou identitu (ID), která ji odlišuje od ostatních instancí i tehdy, když mají stejné atributy – například dva uživatelé se stejným jménem a e-mailem jsou stále dvě různé entity. Value Object identitu nemá a porovnává se podle hodnot všech svých atributů – typické příklady jsou <code>Money</code>, <code>Address</code>, <code>Email</code>. Entitu lze v čase měnit, Value Object je zpravidla neměnný. Srovnání obou konceptů v <a href="#entities">sekci o Entitách</a> a <a href="#value-objects">sekci o Value Objects</a>.'
+                    answer: 'Entita má jednoznačnou identitu (ID), která ji odlišuje od ostatních instancí i tehdy, sdílejí-li stejné atributy – dva uživatelé se stejným jménem a e-mailem jsou stále dvě různé entity. Value Object identitu nemá a porovnává se podle hodnot všech svých atributů – typické příklady jsou <code>Money</code>, <code>Address</code>, <code>Email</code>. Entitu lze v čase měnit, Value Object je zpravidla neměnný. Srovnání obou konceptů v <a href="#entities">sekci o Entitách</a> a <a href="#value-objects">sekci o Value Objects</a>.'
                 },
                 {
                     question: 'K čemu slouží Hodnotový objekt (Value Object)?',
@@ -723,7 +722,7 @@ final class OrderCreatedEvent
                 },
                 {
                     question: 'Co je Agregát a proč je jeho hranice důležitá?',
-                    answer: 'Agregát je shluk doménových objektů, které k sobě logicky patří a mění se jako jeden celek – přístup k jeho vnitřním částem vede pouze přes kořenovou entitu (Aggregate Root). Hranice agregátu je zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Podrobný rozbor v <a href="#aggregates">sekci o Agregátech</a>.'
+                    answer: 'Agregát je shluk doménových objektů, které se mění jako jeden celek – přístup k jeho vnitřním částem vede výhradně přes kořenovou entitu (Aggregate Root). Hranice agregátu je zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Podrobný rozbor v <a href="#aggregates">sekci o Agregátech</a>.'
                 },
                 {
                     question: 'Jakou roli má Repozitář v DDD?',
@@ -731,7 +730,7 @@ final class OrderCreatedEvent
                 },
                 {
                     question: 'Kdy použít Doménovou službu místo metody na Entitě?',
-                    answer: 'Doménová služba se použije, když doménová operace přirozeně nepatří žádné konkrétní Entitě ani Value Objectu – typicky zahrnuje více agregátů, komunikaci s externím systémem nebo výpočet nad kolekcí objektů. Pokud lze chování přirozeně umístit do metody Entity, má vždy přednost. Doménová služba není datový transfer objekt ani aplikační koordinátor – drží doménovou logiku bez stavu. Rozbor a typické případy užití v <a href="#domain-services">sekci o Doménových službách</a>.'
+                    answer: 'Doménová služba se použije, když operace přirozeně nepatří žádné Entitě ani Value Objectu – koordinuje více agregátů, komunikuje s externím systémem nebo počítá nad kolekcí objektů. Pokud lze chování přirozeně umístit do metody Entity, má vždy přednost. Doménová služba není datový transfer objekt ani aplikační koordinátor – drží doménovou logiku bez stavu. Rozbor a typické případy užití v <a href="#domain-services">sekci o Doménových službách</a>.'
                 },
                 {
                     question: 'Co je Doménová událost a k čemu slouží?',
