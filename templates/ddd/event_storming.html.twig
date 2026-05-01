@@ -128,7 +128,7 @@
                 <strong>Event Storming</strong> je kolaborativní modelovací technika, kterou v roce 2013 představil
                 italský konzultant Alberto Brandolini. Princip je jednoduchý: účastníci v reálném čase pokládají na
                 dlouhou stěnu (nebo Miro/Mural board) <strong>oranžové sticky notes s doménovými událostmi vyjádřenými
-                v minulém čase</strong> a postupně z nich vytvářejí časovou osu toho, co se v doméně děje. Jak osa
+                v minulém čase</strong>. Postupně z nich vzniká časová osa toho, co se v doméně děje. Jak osa
                 roste, přidávají se další barvy – modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots –
                 a obraz domény se vyjasňuje.
             </p>
@@ -159,8 +159,8 @@
 
             <p>
                 Vaughn Vernon v <em>Domain-Driven Design Distilled</em> (Addison-Wesley, 2016, kap. 7) označuje
-                Event Storming za „nejrychlejší známou cestu k pracovnímu modelu domény“ a doporučuje ho jako
-                první techniku, kterou by tým zavedl předtím, než se pustí do taktických DDD vzorů.
+                Event Storming za „nejrychlejší známou cestu k pracovnímu modelu domény”. Doporučuje ho jako
+                první techniku, kterou tým zavede, než se pustí do taktických DDD vzorů.
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/17_event_storming/big_picture_levels.svg' ignore missing %}{% endset %}
@@ -731,7 +731,7 @@ final readonly class PlaceOrderHandler
             } %}
 
             <p>
-                Všimněte si, jak se <strong>každý prvek z workshopu mapuje 1:1 do kódu</strong>:
+                <strong>Každý prvek z workshopu se mapuje 1:1 do kódu</strong>:
                 command sticky → <code>PlaceOrderCommand</code>; aggregate sticky →
                 <code>Order</code> entita; invariant z bullet pointu → throw v doménové
                 výjimce; event sticky → <code>OrderPlaced</code> dispatchovaný na bus.
@@ -754,9 +754,8 @@ if ($items === []) {
                     code: _code
                 } %}
                 <p>
-                    Tato vazba je nedocenitelná. Za půl roku, když nový developer čte kód, ví, odkud
-                    pravidlo pochází, a může si ho ověřit u doménového experta – místo aby ho v dobré
-                    víře smazal jako „divnou validaci“.
+                    Tato vazba má praktický dopad. Za půl roku nový developer ví, odkud pravidlo pochází,
+                    a může si ho ověřit u doménového experta. Nesmaže ho v dobré víře jako „divnou validaci”.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -774,9 +773,9 @@ if ($items === []) {
             <p>
                 <strong>Domain Storytelling</strong> je workshopová technika, kterou v knize stejného jména
                 (Addison-Wesley, 2021) představili Stefan Hofer a Henning Schwentner. Stejně jako Event
-                Storming řeší problém extrakce doménových znalostí, ale dělá to jinou cestou: místo časové
-                osy událostí kreslíte <strong>příběh</strong> o tom, jak doménový expert pracuje, pomocí
-                standardizované piktogramové notace.
+                Storming řeší extrakci doménových znalostí, ale jinou cestou: místo časové osy událostí
+                kreslíte <strong>příběh</strong> o práci doménového experta ve standardizované piktogramové
+                notaci.
             </p>
 
             <h3 id="ds-notace">04.07.1 Notace</h3>
@@ -885,9 +884,9 @@ if ($items === []) {
             <p>
                 Hofer a Schwentner v knize zdůrazňují, že obě techniky se <strong>nekonkurují</strong>, ale
                 doplňují: Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv), Domain
-                Storytelling pak v každém z nich odkryje detail (teleobjektiv). Doporučují kombinovat – Big
+                Storytelling pak v každém z nich odkryje detail (teleobjektiv). Doporučují kombinovat: Big
                 Picture Event Storming pro strategický přehled, Domain Storytelling pro jednotlivé hlavní
-                procesy, Process / Design Level Event Storming pro implementaci.
+                procesy a Process / Design Level Event Storming pro implementaci.
             </p>
 
             {% set _callout_body %}
@@ -914,7 +913,7 @@ if ($items === []) {
                 <strong><a href="https://egon.io/" target="_blank" rel="noopener">egon.io</a></strong> je
                 open-source webová aplikace (postavená na bpmn-js), která Domain Storytelling notaci
                 plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír,
-                je to optimální nástroj. Postup pro první session:
+                je to vhodný nástroj. Postup pro první session:
             </p>
 
             <ol>
@@ -1220,7 +1219,7 @@ Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ord
             <p>
                 Adresář <code>docs/discovery/</code> je <strong>append-only</strong> – staré workshopy
                 se nemažou, jen se přidávají nové (s novým datem). Tým tak má historii, jak se mapa
-                domény vyvíjela, a re-storming může jednoduše porovnat <code>docs/discovery/2026-04-29-big-picture/events.md</code>
+                domény vyvíjela, a re-storming porovná <code>docs/discovery/2026-04-29-big-picture/events.md</code>
                 s <code>docs/discovery/2026-10-15-re-storming/events.md</code>.
             </p>
 
@@ -1395,8 +1394,8 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
             } %}
 
             <p>
-                Komentáře <code>Inv-1 (workshop 2026-04-29)</code> nejsou kosmetika – jsou
-                <em>traceability</em>. Když test selže za půl roku a nový developer chce zjistit,
+                Komentáře <code>Inv-1 (workshop 2026-04-29)</code> nejsou kosmetika – umožňují
+                dohledání původu. Když test selže za půl roku a nový developer chce zjistit,
                 proč pravidlo existuje, doloví ho přes git blame nebo podle data workshopu.
             </p>
 
@@ -1432,10 +1431,10 @@ Foto: docs/discovery/2026-04-29-big-picture/{% endverbatim %}{% endset %}
             } %}
 
             <p>
-                Toto má dva přínosy. První: testy jsou <em>readable</em> doménovým expertům –
+                Toto má dva přínosy. První: testy jsou <em>čitelné pro doménové experty</em> –
                 pojmenování přesně odpovídá workshopu, takže ne-developer si test může přečíst
-                a potvrdit, že vyjadřuje to, co měl na mysli. Druhý: testy jsou <strong>regression
-                guard</strong>. Když někdo za rok refaktoruje a omylem porušuje invariant z workshopu,
+                a potvrdit, že vyjadřuje to, co měl na mysli. Druhý: testy jsou <strong>ochrana
+                před regresí</strong>. Když někdo za rok refaktoruje a omylem porušuje invariant z workshopu,
                 test ho chytí.
             </p>
 
