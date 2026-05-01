@@ -69,7 +69,7 @@
             <p>
                 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
                 Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
-                komplexní logiky – je CRUD zcela dostačující a přidávání vrstev DDD by bylo přebytečným inženýrstvím.
+                komplexní logiky – je CRUD zcela dostačující a přidávání vrstev DDD by bylo zbytečnou složitostí.
                 Problém nastává tehdy, kdy se aplikace postupem času stává komplexnější a doménová logika začíná pronikat
                 na nevhodná místa.
             </p>
@@ -150,8 +150,8 @@
             <p>
                 Migrace z CRUD na DDD není jednorázová akce. Je to kontinuální proces, který může trvat měsíce
                 až roky v závislosti na velikosti kódové základny. Migrace sama o sobě
-                nepřináší okamžitou hodnotu pro zákazníka – hodnotu přinese až zlepšená schopnost rychleji a bezpečněji
-                přidávat nové funkcionality. Tým by měl management přesvědčit tím, že migraci provádí inkrementálně
+                nepřináší okamžitou hodnotu pro zákazníka. Hodnotu přinese zlepšená schopnost přidávat nové funkcionality
+                s nižším rizikem regresí. Tým by měl management přesvědčit tím, že migraci provádí inkrementálně
                 souběžně s vývojem nových funkcionalit, nikoli jako izolovaný refaktoringový projekt.
             </p>
         </section>
@@ -898,8 +898,8 @@ class UserController extends AbstractController
                 <p>
                     Command <code>RegisterUser</code> je prosté DTO (Data Transfer Object) bez závislostí. Handler
                     <code>RegisterUserHandler</code> orchestruje doménový model. Kontroler je redukován na HTTP
-                    vrstvu, která pouze přeloží HTTP požadavek na Command. Tato separace odpovědností výrazně
-                    zlepšuje testovatelnost každé vrstvy zvlášť.
+                    vrstvu, která pouze přeloží HTTP požadavek na Command. Tato separace odpovědností
+                    umožňuje testovat každou vrstvu zvlášť.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1167,8 +1167,8 @@ final class UserTest extends TestCase
             } %}
 
             <p>
-                Pro hlubší pochopení DDD konceptů a jejich implementace v Symfony je vhodné prostudovat
-                kapitolu <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony</a>
+                DDD koncepty a jejich implementaci v Symfony rozebírají navazující kapitoly
+                <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony</a>
                 a <a href="{{ path('cqrs') }}">CQRS v Symfony</a>.
             </p>
         </section>

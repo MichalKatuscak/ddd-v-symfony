@@ -65,9 +65,9 @@
 <section id="uvodem" aria-labelledby="uvodem-heading">
             <h2 id="uvodem-heading" class="h-section"><span class="h-num">22.01</span> Úvodem: Proč je důležité znát anti-vzory</h2>
             <p>
-                Domain-Driven Design je mocný přístup k návrhu softwaru, ale jeho komplexnost s sebou přináší
-                mnohá úskalí. Zkušenosti z praxe ukazují, že týmy, které s DDD začínají, opakovaně narážejí
-                na stejné chyby – a to i přesto, že dobře rozumí teorii. Znát anti-vzory je proto stejně důležité
+                Domain-Driven Design přináší při návrhu softwaru velkou sílu, ale jeho komplexnost s sebou nese
+                mnohá úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí
+                na stejné chyby – i přesto, že teorii dobře rozumí. Znát anti-vzory je proto stejně důležité
                 jako znát vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt,
                 agregát, bounded context) jsou v kapitole
                 <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a>; reálné problémy z produkčního
@@ -405,7 +405,7 @@ class User
             <p>
                 Primitive Obsession je anti-vzor, při němž vývojáři používají primitivní datové typy (<code>string</code>,
                 <code>int</code>, <code>float</code>) tam, kde by měly být použity hodnotové objekty (Value Objects).
-                Tento anti-vzor je zákeřný, protože primitiva jsou na první pohled jednodušší a rychlejší na použití,
+                Tento anti-vzor je zákeřný, protože primitiva jsou na první pohled lákavě přímočará,
                 ale vedou k závažným problémům.
             </p>
 
@@ -635,7 +635,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
             <h2 id="prilis-velky-agregat-heading" class="h-section"><span class="h-num">22.04</span> Anti-vzor: Příliš velký agregát (God Aggregate)</h2>
             <p>
                 Agregát by měl být navrhován kolem transakční konzistence – to jest kolem nejmenší skupiny objektů,
-                která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako "God Aggregate")
+                která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako „God Aggregate“)
                 sdružuje příliš mnoho entit a logiky do jednoho celku, čímž porušuje princip jedné odpovědnosti
                 a způsobuje řadu závažných problémů.
             </p>
@@ -1113,7 +1113,7 @@ class OrderPlacedEvent
                 <h3 id="udalosti-spravne-heading">Správně: Immutable událost s readonly properties</h3>
                 <p>
                     Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a poté nelze žádnou
-                    její vlastnost změnit. PHP 8.1+ <code>readonly</code> properties jsou ideálním nástrojem.
+                    její vlastnost změnit. PHP 8.1+ <code>readonly</code> properties jsou pro to přesně určeným nástrojem.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1429,12 +1429,12 @@ class UserController extends AbstractController
 
             {% set _callout_body %}
 
-                <h3 id="overeng-warning-heading">Start simple, add complexity when needed</h3>
+                <h3 id="overeng-warning-heading">Začněte jednoduše, složitost přidávejte podle potřeby</h3>
                 <p>
                     Začněte s jednoduchým přístupem – aktivní záznamy, jednoduché service třídy nebo MVC bez DDD.
                     DDD prvky přidávejte inkrementálně, jakmile se doménová složitost začne projevovat. Refaktoring
-                    od jednoduchého k DDD je mnohem snazší než odstraňování zbytečné složitosti z přenavržené
-                    architektury.
+                    od jednoduchého ke složitějšímu je mnohem méně nákladný než odstraňování zbytečné složitosti
+                    z přenavržené architektury.
                 </p>
                 <p>
                     Vhodné indikátory pro zavedení DDD: <em>složitá doménová pravidla, která se neustále mění</em>;
@@ -1480,9 +1480,9 @@ class UserController extends AbstractController
             <p>
                 Jedním ze základních pilířů DDD je Ubiquitous Language – společný jazyk sdílený vývojáři,
                 doménovými experty a všemi zainteresovanými stranami. Tento jazyk musí být konzistentně
-                používán v kódu, dokumentaci, testech i v komunikaci. Ignorování tohoto principu vede
-                k situaci, kdy se tatáž doménová entita nazývá různě na různých místech, což způsobuje
-                nedorozumění, chyby a ztrátu doménového vhledu v kódu.
+                používán v kódu, dokumentaci, testech i v komunikaci. Ignorování tohoto principu způsobuje,
+                že tatáž doménová entita nese různé názvy na různých místech. Výsledkem jsou nedorozumění,
+                chyby a ztráta doménového vhledu v kódu.
             </p>
 
             {% set _callout_body %}
@@ -1626,9 +1626,9 @@ class InsurancePolicy
 
                 <h3 id="ubiq-mapa-heading">Doménový slovník jako živý artefakt</h3>
                 <p>
-                    Doporučenou praxí je udržovat živý glosář (tzv. <em>doménový slovník</em>), který mapuje
+                    Udržujte živý glosář (tzv. <em>doménový slovník</em>), který mapuje
                     pojmy z doménového jazyka na odpovídající třídy, metody a databázové struktury v kódu.
-                    Tento slovník by měl být dostupný všem členům týmu a pravidelně aktualizován.
+                    Slovník musí být dostupný všem členům týmu a pravidelně aktualizovaný.
                 </p>
                 <ul>
                     <li><strong>Pojistník</strong> → třída <code>PolicyHolder</code>, tabulka <code>policy_holders</code></li>
@@ -1649,11 +1649,9 @@ class InsurancePolicy
             } %}
 
             <p>
-                Tato kapitola pokryla nejčastější anti-vzory a typické chyby při implementaci DDD. Dobrá znalost
-                těchto úskalí pomáhá udržet kvalitu doménového modelu v průběhu celého životního cyklu
-                projektu. Pro hlubší porozumění je vhodné studovat <a href="{{ path('resources') }}">doporučené zdroje</a>,
-                zejména Vaughn Vernonovu knihu <em>Implementing Domain-Driven Design</em>, která se anti-vzorům
-                věnuje podrobně na praktických příkladech.
+                Znalost těchto anti-vzorů pomáhá udržet kvalitu doménového modelu po celý životní cyklus
+                projektu. Vaughn Vernonova kniha <em>Implementing Domain-Driven Design</em> se anti-vzorům
+                věnuje podrobně na praktických příkladech – viz <a href="{{ path('resources') }}">doporučené zdroje</a>.
             </p>
         </section>
 

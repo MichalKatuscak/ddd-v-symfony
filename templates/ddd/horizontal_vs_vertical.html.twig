@@ -112,7 +112,7 @@
 
             <p>
                 V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-                Vrstvená architektura je odlišná od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) architektury, s nimiž se někdy zaměňuje – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener">[2]</a>. Doménové stavební kameny – entity, hodnotové objekty, agregáty, doménové služby – jsou společné pro oba přístupy a popisuje je kapitola <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a>.
+                Vrstvená architektura se liší od hexagonální (Ports &amp; Adapters) nebo cibulové (Onion) – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů <a href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener">[2]</a>. Doménové stavební kameny – entity, hodnotové objekty, agregáty, doménové služby – jsou společné pro oba přístupy a popisuje je kapitola <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a>.
             </p>
         </section>
 
@@ -120,7 +120,7 @@
             <h2 id="vertical-slice-heading" class="h-section"><span class="h-num">10.02</span> Vertikální slice architektura (Vertical Slice Architecture)</h2>
             <p>
                 Vertikální slice architektura organizuje kód podle funkcí (feature slices) namísto technických vrstev <a href="https://www.jimmybogard.com/vertical-slice-architecture/" target="_blank" rel="noopener">[3]</a>.
-                Každá funkce (feature) obsahuje všechny vrstvy potřebné pro její implementaci, což umožňuje lepší modularitu a nezávislost jednotlivých částí aplikace.
+                Každá funkce (feature) obsahuje všechny vrstvy potřebné pro svou implementaci, čímž se snižují vazby mezi funkcemi a každá část aplikace může být vyvíjena nezávisle.
             </p>
 
             {% set _code %}src/
@@ -183,7 +183,7 @@
             } %}
 
             <p>
-                Ve vertikální slice architektuře jsou funkce (features) organizovány jako vertikální řezy (slices) přes všechny vrstvy, přičemž každá funkce obsahuje všechny vrstvy potřebné pro její implementaci.
+                Ve vertikální slice architektuře kód dělíme podle funkcí (feature slices) – každá funkce prochází celým stackem a obsahuje vše, co potřebuje pro svou implementaci.
                 Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" rel="noopener">[4]</a>. Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
             </p>
 
@@ -236,12 +236,12 @@
                         <tr>
                             <td><strong>Testovatelnost</strong></td>
                             <td>Často vyžaduje mnoho mocků pro testování</td>
-                            <td>Snazší testování, méně mocků</td>
+                            <td>Méně mocků, protože závislosti jsou lokální</td>
                         </tr>
                         <tr>
                             <td><strong>Škálovatelnost</strong></td>
                             <td>Může být obtížné škálovat při růstu aplikace</td>
-                            <td>Snazší škálování, funkce mohou být rozděleny do mikroslužeb</td>
+                            <td>Funkce lze přesunout do mikroslužeb bez přeorganizování všech vrstev</td>
                         </tr>
                         <tr>
                             <td><strong>Složitost</strong></td>
@@ -294,7 +294,7 @@
         <section id="symfony-implementation" aria-labelledby="symfony-implementation-heading">
             <h2 id="symfony-implementation-heading" class="h-section"><span class="h-num">10.05</span> Implementace v Symfony 8</h2>
             <p>
-                Symfony 8 poskytuje mnoho nástrojů a komponent, které usnadňují implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank" rel="noopener">[7]</a>.
+                Symfony 8 poskytuje nástroje a komponenty pro implementaci obou přístupů k DDD <a href="https://symfony.com/doc/current/index.html" target="_blank" rel="noopener">[7]</a>.
             </p>
 
             <h3 id="traditional-symfony-implementation-heading">Implementace tradičního DDD v Symfony 8:</h3>
@@ -420,7 +420,7 @@
             } %}
 
             <p>
-                Symfony 8 poskytuje mnoho komponent, které jsou užitečné pro implementaci vertikální slice architektury <a href="https://symfony.com/doc/current/components/index.html" target="_blank" rel="noopener">[9]</a>:
+                Pro vertikální slice architekturu jsou v Symfony 8 relevantní zejména tyto komponenty <a href="https://symfony.com/doc/current/components/index.html" target="_blank" rel="noopener">[9]</a>:
             </p>
 
             <ul>

@@ -65,10 +65,10 @@
 
         <p>
             Autorizace je v DDD aplikacích dlouhodobě podceněné téma. Většina týmů zvládne autentizaci
-            (Symfony firewall, JWT, OAuth) bez větších potíží – ale když přijde na otázku <em>„kdo
-            smí udělat co s konkrétní entitou v konkrétním stavu“</em>, kód se rozsype napříč
+            (Symfony firewall, JWT, OAuth) bez větších potíží. Jenže jakmile přijde otázka <em>„kdo
+            smí udělat co s konkrétní entitou v konkrétním stavu”</em>, kód se rozsype napříč
             controllery, listenery, twig templaty a Doctrine query buildery. Tato kapitola dává
-            <strong>čtyřvrstvý rámec</strong>, podle kterého poznáte, kam které pravidlo patří,
+            <strong>čtyřvrstvý rámec</strong>, podle kterého poznáte, kam které pravidlo patří
             a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby Symfony Security
             komponenta pronikla do doménového jádra.
         </p>
@@ -86,9 +86,8 @@
 
             <p>
                 Než přejdeme ke správnému přístupu, projděme si tři opakující se chyby.
-                V code review za poslední tři roky se objevily téměř ve všech projektech, které
-                pracovaly s neformální DDD strukturou nad Symfony. Diagnóza: chybějící framework,
-                kde co umístit.
+                Tyto chyby se v projektech s neformální DDD strukturou nad Symfony vyskytují
+                pravidelně. Diagnóza je vždy stejná: chybí rozhodovací rámec, kam které pravidlo patří.
             </p>
 
             <h3 id="tri-chyby-controller-heading">Chyba 1: Vše v controlleru</h3>
@@ -449,7 +448,7 @@ final class OrderVoter extends Voter
             } %}
 
             <p>
-                Tři detaily, které stojí za pozornost:
+                Tři implementační detaily:
             </p>
 
             <ul>

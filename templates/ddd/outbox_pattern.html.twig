@@ -1510,10 +1510,9 @@ final readonly class IdempotencyKeyListener
     <h2 id="provoz-heading" class="h-section"><span class="h-num">16.08</span> Provozní aspekty</h2>
 
     <p>
-        Outbox v <em>development</em> prostředí funguje sám od sebe a je snadné mít pocit, že
-        je „hotov“. V produkci ale narazíte na čtyři operační otázky: jak měřit lag, jak držet
-        tabulku malou, co s permanentně failovanými řádky a jak monitorovat, že se na něco
-        nezapomnělo.
+        Outbox v <em>development</em> prostředí funguje, jak má. V produkci ale narazíte na čtyři
+        operační otázky: jak měřit lag, jak držet tabulku malou, co s permanentně failovanými
+        řádky a jak monitorovat, že se na něco nezapomnělo.
     </p>
 
     <h3 id="outbox-lag-heading">Outbox lag</h3>
@@ -1876,7 +1875,7 @@ final class OutboxCleanupCommand extends Command
     <h2 id="summary-heading" class="h-section"><span class="h-num">16.11</span> Shrnutí</h2>
 
     <p>
-        Outbox Pattern má <strong>jednoduchou implementaci a velký provozní přínos</strong>: vyřeší
+        Outbox Pattern má <strong>přímočarou implementaci a velký provozní přínos</strong>: vyřeší
         celou třídu chyb (ztracené eventy, fantom eventy), které jinak musíte ladit reaktivně
         ve tři ráno z logů. Cena je tabulka navíc, jeden Symfony command a úprava jednoho
         application handleru. Garance, kterou tím získáte, je at-least-once delivery doménových

@@ -311,8 +311,8 @@
             <p>
                 V této fázi se týmy <strong>záměrně</strong> rozhodnou pro Partnership: jeden
                 produktový manažer pokrývá oba BC, retrospektivy se konají společně, release
-                proces je jednotný (deploy obou BC současně). To je optimální, dokud se domény
-                neusadí natolik, aby mohly žít vlastním tempem.
+                proces je jednotný (deploy obou BC současně). Toto uspořádání funguje, dokud se
+                domény neusadí natolik, aby mohly žít vlastním tempem.
             </p>
 
             <h3>Symfony detail: monorepo a společný release</h3>
@@ -502,7 +502,7 @@ final readonly class Money
                 Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balíček
                 v adresáři <code>shared-kernel/</code>. Verzování probíhá přes git tagy
                 (<code>v1.0.0</code>, <code>v1.1.0</code>) a změny SK procházejí <strong>společným
-                code review</strong> obou (či více) týmů. Pull request do SK má v ideálním případě
+                code review</strong> obou (či více) týmů. Pull request do SK by měl mít
                 CODEOWNERS pravidlo, které automaticky přiřadí review obou týmů.
             </p>
 

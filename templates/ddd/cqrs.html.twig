@@ -212,7 +212,7 @@
     <section id="benefits" aria-labelledby="benefits-heading">
     <h2 id="benefits-heading" class="h-section"><span class="h-num">13.03</span> Výhody CQRS</h2>
     <p>
-        CQRS přináší řadu architektonických výhod, které se projevují zejména u aplikací
+        CQRS přináší architektonické výhody zejména u aplikací
         s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
     </p>
 
@@ -370,9 +370,9 @@ framework:
             } %}
 
     <p>
-        V této konfiguraci jsou definovány dva transporty: <code>async</code> pro asynchronní zpracování a <code>sync</code> pro synchronní zpracování.
-        Jsou také definovány dva message busy: <code>command.bus</code> (command bus) pro příkazy s <code>doctrine_transaction</code>
-        middleware (automatická transakce kolem handleru) a <code>query.bus</code> (query bus) pro dotazy pouze s validací.
+        Konfigurace definuje dva transporty: <code>async</code> pro asynchronní zpracování a <code>sync</code> pro synchronní zpracování.
+        Dva message busy: <code>command.bus</code> pro příkazy s <code>doctrine_transaction</code>
+        middleware (automatická transakce kolem handleru) a <code>query.bus</code> pro dotazy pouze s validací.
     </p>
 
     {% set _callout_body %}
@@ -1007,9 +1007,9 @@ final class ProfileController extends AbstractController
     </p>
 
     <p>
-        Dosud jsme se soustředili na základní infrastrukturu CQRS – příkazy, dotazy, handlery a busy.
-        V následujících sekcích se zaměříme na pokročilejší aspekty: jak optimalizovat read stranu
-        pro konkrétní dotazy, jak pracovat s eventual consistency a jak řešit provozní problémy
+        Základní infrastruktura CQRS – příkazy, dotazy, handlery a busy – je tímto pokryta.
+        Následující sekce se věnují pokročilejším aspektům: optimalizaci read strany
+        pro konkrétní dotazy, eventual consistency a provozním problémům
         v asynchronním prostředí.
     </p>
     </section>

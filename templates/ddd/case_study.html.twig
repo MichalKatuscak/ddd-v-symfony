@@ -314,11 +314,11 @@
 
     <h3>Taktický design a struktura projektu</h3>
     <p>
-        Na taktické úrovni jsme implementovali následující DDD vzory:
+        Na taktické úrovni implementace pokrývá tyto DDD vzory:
     </p>
 
     <ul>
-        <li><strong>Entity</strong> – Objekty s identitou, které se v průběhu času mění (např. User, Project, Task).</li>
+        <li><strong>Entity</strong> – Objekty s identitou, které se v čase mění (např. User, Project, Task).</li>
         <li><strong>Value Objects</strong> – Neměnné objekty bez identity, které reprezentují koncepty v doméně (např. UserId, ProjectId, TaskStatus).</li>
         <li><strong>Aggregates</strong> – Shluky objektů, které jsou považovány za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).</li>
         <li><strong>Domain Events</strong> – Události, které nastávají v doméně a mají význam pro doménové experty (např. ProjectCreated, TaskAssigned).</li>
@@ -498,7 +498,7 @@
 
     <h3 id="ubiquitous-language-heading">Ubiquitous Language</h3>
     <p>
-        Před zahájením implementace jsme vytvořili Ubiquitous Language (všudypřítomný jazyk) ve spolupráci s doménovými experty. Tento jazyk je používán konzistentně v kódu, dokumentaci a komunikaci. Například:
+        Ubiquitous Language vznikl ve spolupráci s doménovými experty ještě před zahájením implementace. Je konzistentně používán v kódu, dokumentaci i komunikaci. Klíčové pojmy:
     </p>
 
     <ul>
@@ -1858,7 +1858,7 @@ final class ReconcileProjectListView extends Command
             <strong>Doménové události pro integraci</strong> – Doménové události zajistily komunikaci mezi různými bounded contexts. Například, když byl vytvořen nový úkol, byla vygenerována událost <code>TaskCreated</code>, která mohla být zpracována jinými kontexty bez vytváření přímých závislostí.
         </li>
         <li>
-            <strong>CQRS pro oddělení zodpovědností</strong> – Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu. Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování. Symfony Messenger poskytl výkonnou infrastrukturu pro implementaci CQRS.
+            <strong>CQRS pro oddělení zodpovědností</strong> – Oddělení operací čtení a zápisu vedlo k čistšímu a udržitelnějšímu kódu. Příkazy a dotazy byly jasně odděleny, což usnadnilo testování a rozšiřování. Symfony Messenger poskytnul infrastrukturu pro implementaci CQRS.
         </li>
         <li>
             <strong>Vertikální slice architektura pro modularitu</strong> – Organizace kódu podle funkcí (features) místo technických vrstev vedla k lepší modularitě a udržitelnosti. Každá funkce obsahovala všechny vrstvy potřebné pro její implementaci, což usnadnilo změny a rozšíření.

@@ -51,7 +51,7 @@
         chapter_number: '18',
         category: 'Praxe',
         title: 'Testování DDD kódu v Symfony',
-        deck: 'Akademický průvodce testováním Domain-Driven Design kódu v Symfony. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac.',
+        deck: 'Testování Domain-Driven Design kódu v Symfony v praxi. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac.',
         reading_time: 30,
         difficulty: 3,
         published: block('article_published_time'),
@@ -67,9 +67,9 @@
 <section id="filozofie-testovani" aria-labelledby="filozofie-testovani-heading">
     <h2 id="filozofie-testovani-heading" class="h-section"><span class="h-num">18.01</span> Filozofie testování v DDD</h2>
     <p>
-        Domain-Driven Design a automatizované testování se vzájemně přirozeně doplňují. Čistá doménová vrstva, která neobsahuje závislosti na frameworku,
-        databázi ani jiné infrastruktuře, je ze své podstaty snadno testovatelná. Zatímco v tradičních vrstvených architekturách jsou unit testy
-        kompromitovány provázaností s frameworkem, v DDD je doménová logika izolována a lze ji testovat čistými PHP třídami bez jakéhokoli bootstrappingu.
+        Domain-Driven Design a automatizované testování se vzájemně přirozeně doplňují. Čistá doménová vrstva bez závislostí na frameworku,
+        databázi ani jiné infrastruktuře je ze své podstaty testovatelná bez komplikací. Zatímco v tradičních vrstvených architekturách jsou unit testy
+        svázány provázaností s frameworkem, v DDD je doménová logika izolována a lze ji testovat čistými PHP třídami bez jakéhokoli bootstrappingu.
         Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje kapitola
         <a href="{{ path('basic_concepts') }}">Základní koncepty DDD</a>.
     </p>
@@ -79,7 +79,7 @@
         <h3>Proč je DDD přirozeně testovatelný:</h3>
         <ul>
             <li><strong>Žádné závislosti na frameworku</strong> – Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.</li>
-            <li><strong>Explicitní závislosti</strong> – Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich snadnou záměnu za test doubles.</li>
+            <li><strong>Explicitní závislosti</strong> – Závislosti jsou vždy předávány přes konstruktor (constructor injection), nikoli získávány ze statických globálních objektů. To umožňuje jejich záměnu za test doubles.</li>
             <li><strong>Bohaté doménové modely</strong> – Veškerá doménová logika je soustředěna v doménových objektech, nikoliv roztroušena v kontrolerech nebo šablonách, takže testy pokrývají skutečně důležité chování.</li>
             <li><strong>Invarianty jsou vynucovány při konstrukci</strong> – Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách, což usnadňuje testování správného i nesprávného stavu.</li>
         </ul>
@@ -454,7 +454,7 @@ final class OrderTest extends TestCase
         <p>
             Agregáty sbírají vydané události interně v privátním poli (viz <code>AggregateRoot</code> bázová třída nebo trait).
             Metoda <code>releaseDomainEvents()</code> vrátí všechny nashromážděné události a pole vymaže – tento přístup nevyžaduje
-            žádný event dispatcher ani bus v unit testech. Testovací kód pak jednoduše zavolá doménovou operaci a ověří
+            žádný event dispatcher ani bus v unit testech. Testovací kód zavolá doménovou operaci a ověří
             obsah vrácených událostí.
         </p>
     {% endset %}
@@ -972,7 +972,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         <p>
             <code>Symfony\Bundle\FrameworkBundle\Test\WebTestCase</code> poskytuje metodu <code>createClient()</code>,
             která vrátí HTTP klienta simulujícího prohlížeč. Klient lze použít k odeslání GET, POST, PUT, PATCH a DELETE
-            requestů. Response obsahuje status kód, tělo a hlavičky, které lze snadno assertovat.
+            requestů. Response obsahuje status kód, tělo a hlavičky – vše přímo assertovatelné.
         </p>
     {% endset %}
             {% include '_partials/callout.html.twig' with {

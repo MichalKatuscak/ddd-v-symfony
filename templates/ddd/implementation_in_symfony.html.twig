@@ -110,7 +110,7 @@
 <section id="project-structure" aria-labelledby="project-structure-heading">
     <h2 id="project-structure-heading" class="h-section"><span class="h-num">11.02</span> Struktura projektu</h2>
     <p>
-        Při implementaci DDD s vertikální slice architekturou v Symfony 8 je důležité zvolit vhodnou strukturu projektu, která respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Zde je příklad správné struktury projektu pro DDD s vertikální slice architekturou v Symfony 8:
+        Při implementaci DDD s vertikální slice architekturou v Symfony 8 je struktura projektu klíčovým rozhodnutím. Respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
     </p>
 
     {% set _callout_body %}
@@ -206,7 +206,7 @@
             } %}
 
     <p>
-        Tato struktura projektu organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má svou vlastní doménovou vrstvu, která obsahuje modely, hodnotové objekty, události a repozitáře specifické pro danou doménu. Tím je zajištěna izolace domén a respektování principů DDD.
+        Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Domény jsou tak izolované a principy DDD jsou respektovány.
     </p>
 
     {% set _diagram_inline %}{% include '/diagrams/3_implementation_in_symfony/diagram.svg' %}{% endset %}
@@ -253,7 +253,7 @@
     <section id="entities" aria-labelledby="entities-heading">
     <h2 id="entities-heading" class="h-section"><span class="h-num">11.03</span> Implementace entit</h2>
     <p>
-        Entity v DDD jsou objekty, které jsou definovány svou identitou. V Symfony 8 se implementují entity jako běžné PHP třídy:
+        Entita v DDD je objekt s jedinečnou, přetrvávající identitou. V Symfony 8 se implementuje jako běžná PHP třída:
     </p>
 
     {% set _callout_body %}
@@ -386,7 +386,7 @@ class User
     <section id="value-objects" aria-labelledby="value-objects-heading">
     <h2 id="value-objects-heading" class="h-section"><span class="h-num">11.04</span> Implementace hodnotových objektů</h2>
     <p>
-        Hodnotové objekty v DDD jsou objekty, které jsou definovány svými atributy. V Symfony 8 se implementují hodnotové objekty jako neměnné PHP třídy:
+        Hodnotový objekt v DDD nemá identitu – je definován svými atributy. V Symfony 8 se implementuje jako neměnná PHP třída:
     </p>
 
     {% set _callout_body %}
@@ -441,8 +441,8 @@ class Email
             } %}
 
     <p>
-        V tomto příkladu je <code>Email</code> hodnotový objekt, který je definován svou hodnotou. Hodnotové objekty jsou neměnné (vlastnost <code>$value</code> je <code>readonly</code>) a nemají žádnou identitu.
-        Dva e-maily jsou považovány za stejné, pokud mají stejnou hodnotu. Stejně jako u entit, ani hodnotové objekty neobsahují Doctrine atributy – mapování je řešeno externě.
+        <code>Email</code> je hodnotový objekt definovaný svou hodnotou. Je neměnný (vlastnost <code>$value</code> je <code>readonly</code>) a nemá identitu.
+        Dva e-maily se stejnou hodnotou jsou rovnocenné. Stejně jako entity, ani hodnotové objekty neobsahují Doctrine atributy – mapování je řešeno externě.
     </p>
     </section>
 
@@ -1496,8 +1496,8 @@ class GetUserProfileHandler
             } %}
 
     <p>
-        V těchto příkladech jsou <code>RegisterUserHandler</code> a <code>GetUserProfileHandler</code> aplikační služby, které zpracovávají příkazy a dotazy.
-        Tyto služby koordinují aplikační aktivity a delegují práci doménové vrstvě.
+        <code>RegisterUserHandler</code> a <code>GetUserProfileHandler</code> jsou aplikační služby (command a query handlery).
+        Koordinují use case a delegují doménovou logiku na entitu nebo doménovou službu.
     </p>
 
     {% set _callout_body %}
@@ -1610,8 +1610,8 @@ class RegistrationController extends AbstractController
     <section id="dependency-injection" aria-labelledby="dependency-injection-heading">
     <h2 id="dependency-injection-heading" class="h-section"><span class="h-num">11.15</span> Dependency Injection a autowiring</h2>
     <p>
-        Dependency Injection je důležitou součástí DDD, protože umožňuje oddělení závislostí a usnadňuje testování.
-        Symfony 8 poskytuje výkonný Dependency Injection Container, který slouží pro konfiguraci služeb:
+        Dependency Injection odděluje závislosti a umožňuje testování bez reálné infrastruktury.
+        Symfony 8 poskytuje DI Container pro konfiguraci služeb:
     </p>
 
     {% set _callout_body %}
@@ -1671,10 +1671,8 @@ services:
 
     <h3 id="autowiring-bounded-contexts">Autowiring s oddělenými Bounded Contexts</h3>
     <p>
-        Ve velkých projektech s více bounded kontexty je vhodné konfigurovat autowiring pro každý kontext samostatně.
-        Tím získáte přesnější kontrolu nad tím, které třídy jsou registrovány jako služby, a můžete pro každý kontext
-        definovat specifická pravidla. Tento přístup také lépe odráží izolaci kontextů – každý bounded context
-        má svou vlastní konfiguraci a je jasně ohraničen i na úrovni service containeru.
+        Ve větších projektech s více Bounded Contexts konfigurujte autowiring pro každý kontext samostatně.
+        Každý kontext dostane vlastní blok v <code>services.yaml</code> a je ohraničen i na úrovni service containeru.
     </p>
 
     {% set _callout_body %}

@@ -223,7 +223,7 @@ class Order
 
             <ul>
                 <li><strong>Junior tým a rychlý start</strong> – Symfony skeleton, <code>make:*</code> commandy, předvídatelná struktura.</li>
-                <li><strong>Aplikace s 10–50 endpointy</strong> – kde investice do izolace nepřinese měřitelný benefit.</li>
+                <li><strong>Aplikace s 10–50 endpointy</strong> – kde investice do izolace nepřinese měřitelný přínos.</li>
                 <li><strong>Krátký horizont produktu</strong> (MVP, prototyp, interní nástroj) – kde Doctrine vendor lock-in není riziko, protože migrace nikdy nepřijde.</li>
                 <li><strong>Tým, který Symfony ovládá plynně</strong> – kde dodatečná složitost by jen brzdila, aniž by řešila reálný problém.</li>
             </ul>
@@ -1326,7 +1326,7 @@ final class PlaceOrderController
             <h3 id="srovnani-vyber-heading">Doporučená výchozí volba pro Symfony 8</h3>
 
             <p>
-                Z dlouhodobé praxe DDD v Symfony (od verze 2.7 přes 4, 5, 6, 7 až k 8) vychází pro středně velký projekt jako výchozí volba:
+                Pro středně velký projekt vychází jako výchozí volba:
             </p>
 
             <p>
@@ -1353,7 +1353,7 @@ final class PlaceOrderController
                 <ol>
                     <li><strong>Kolik bude use casů za rok?</strong> Pokud &lt; 30, Layered. Pokud 50–500, Hexagonal/Vertical Slice. Pokud 200+, Clean nebo hybrid.</li>
                     <li><strong>Vyplatí se izolovat doménu od Doctrine?</strong> Pokud chcete testy bez databáze nebo plánujete migraci persistence vrstvy, ANO → Hexagonal+. Pokud Doctrine zůstane navždy a testy přes fixtures jsou OK, NE → Layered stačí.</li>
-                    <li><strong>Kolik vstupních kanálů má aplikace?</strong> Pokud jen HTTP, Layered je v pořádku. Pokud HTTP + CLI + Messenger + GraphQL, Hexagonal/Clean dává obří hodnotu.</li>
+                    <li><strong>Kolik vstupních kanálů má aplikace?</strong> Pokud jen HTTP, Layered je v pořádku. Pokud HTTP + CLI + Messenger + GraphQL, Hexagonal/Clean se výrazně vyplatí.</li>
                 </ol>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1461,7 +1461,7 @@ final class PlaceOrderController
                     Vaughn Vernon v <em>Implementing Domain-Driven Design</em> (2013) <a href="https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577" target="_blank" rel="noopener">[7]</a> nazývá tento vzor <em>differentiated investment</em>: 80 % modelovací investice teče do 20 % kódové báze (Core Domain). Zbylých 80 % kódu si vystačí s pragmatickou strukturou. To přímo odpovídá Pareto principu a v praxi vede k nejlepšímu poměru kvalita / čas.
                 </p>
                 <p>
-                    Hybridní přístup je tedy nejen pragmatický, ale i <strong>doporučený</strong> autoritami DDD literatury. Pokud vaše firma trvá na „jednotné architektuře všude“, máte nejspíš problém s firemní kulturou, ne s architekturou – ne každá část projektu si zaslouží stejnou pozornost.
+                    Hybridní přístup je tedy nejen pragmatický, ale i <strong>doporučený</strong> autoritami DDD literatury. Tlak na „jednotnou architekturu všude” jde proti tomuto principu – ne každá část projektu si zaslouží stejnou investici.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1534,7 +1534,7 @@ final class PlaceOrderController
             <h3 id="anti-6-heading">Anti-vzor 6: Architecture astronaut (astronaut architektury)</h3>
 
             <p>
-                Tým investuje měsíce do „dokonalé architektury“ – eight-vrstvová Clean s explicitními BCE rolemi, formálními use case katalogy, presenter třídami, gateway hierarchiemi… ale koncový uživatel pořád čeká na první funkci. Architektura se stala cílem, ne nástrojem.
+                Tým investuje měsíce do „dokonalé architektury” – osmivrstvová Clean s explicitními BCE rolemi, formálními use case katalogy, presenter třídami, gateway hierarchiemi… ale koncový uživatel pořád čeká na první funkci. Architektura se stala cílem, ne nástrojem.
             </p>
 
             <p>
@@ -1670,7 +1670,7 @@ framework:
                 },
                 {
                     question: 'Jak migrovat z Layered na Hexagonal v existujícím Symfony projektu?',
-                    answer: 'Strangler Fig pattern: nezačínejte velký rewrite, ale postupně. Vyberte jeden Bounded Context (ideálně Core Domain) a v něm jednu feature. Pro tu feature zaveďte port (interface v Domain/Port/) a adapter (implementace v Infrastructure/), původní Doctrine entitu rozdělte na čistou doménovou třídu + persistence-friendly OrmEntity + Mapper. Otestujte. Iterujte na další feature. Pokud Core Domain doženete celý, druhý BC možná stačí ponechat v Layered (hybridní přístup). Nikdy nemigrujte všechno najednou – riziko regressí je obrovské. Detail strangler fig v kapitole <a href="' ~ path('migration_from_crud') ~ '">Migrace z CRUD</a>.'
+                    answer: 'Strangler Fig pattern: nezačínejte velký rewrite, ale postupně. Vyberte jeden Bounded Context (ideálně Core Domain) a v něm jednu feature. Pro tu feature zaveďte port (interface v Domain/Port/) a adapter (implementace v Infrastructure/), původní Doctrine entitu rozdělte na čistou doménovou třídu + persistence-friendly OrmEntity + Mapper. Otestujte. Iterujte na další feature. Pokud Core Domain doženete celý, druhý BC možná stačí ponechat v Layered (hybridní přístup). Nikdy nemigrujte všechno najednou – riziko regresí je vysoké. Detail strangler fig v kapitole <a href="' ~ path('migration_from_crud') ~ '">Migrace z CRUD</a>.'
                 },
                 {
                     question: 'Co je „Port“ přesně a jak se liší od běžného PHP interface?',

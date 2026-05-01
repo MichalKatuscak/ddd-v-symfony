@@ -70,7 +70,7 @@
                     řízením vztahů mezi nimi. Tato vrstva návrhu odpovídá na otázku <em>„co a kde“</em> –
                     kde leží hranice modelu, kdo za jakou část domény zodpovídá a jak spolu jednotlivé části
                     komunikují. Strategický design je základem, na němž teprve spočívají taktické stavební bloky.
-                    Bez solidního strategického designu se taktický design stává náhodnou sbírkou vzorů bez kontextu.
+                    Bez strategického designu se taktický design stává náhodnou sbírkou vzorů bez kontextu.
                 </p>
             </div>
 
@@ -927,7 +927,7 @@
                     </dt>
                     <dd>
                         <p>
-                            Model konzistence, v němž jsou repliky dat zaručeně konvergovat ke stejné hodnotě,
+                            Model konzistence, v němž repliky dat konvergují ke stejné hodnotě,
                             pokud nejsou prováděny žádné další aktualizace – avšak ne nutně okamžitě.
                             V architektuře DDD + CQRS: po zpracování příkazu a publikování události může
                             čtecí model dočasně zaostávat za zápisovým modelem. Toto zpoždění je akceptovatelné
@@ -1251,7 +1251,7 @@
             <div class="note" role="note" aria-labelledby="false-friends-intro-heading">
                 <h3 id="false-friends-intro-heading">Proč to vzniká</h3>
                 <p>
-                    DDD termíny se sémanticky překrývají s mnoha pojmy z PHP/Symfony světa, ze Symfony bezpečnosti, z Doctrine, ze Spring/Java kultury. Stejné slovo má v různých kontextech různý význam – a běžný code review tu kontradikci přehlíží. Tato sekce explicitně rozplete pasti, které vidím v každém DDD projektu.
+                    DDD termíny se sémanticky překrývají s mnoha pojmy z PHP/Symfony světa, ze Symfony bezpečnosti, z Doctrine, ze Spring/Java kultury. Stejné slovo má v různých kontextech různý význam – a běžný code review tu kontradikci přehlíží. Tato sekce rozplete pasti, které se v DDD projektech opakují bez ohledu na tým nebo framework.
                 </p>
             </div>
 

@@ -85,9 +85,9 @@
             } %}
 
     <p>
-        Výkon se stává kritickým především v těchto scénářích: aplikace pracující s <strong>komplexními doménami</strong>
-        obsahujícími desítky propojených agregátů, <strong>velké agregáty</strong> s kolekcemi obsahujícími stovky
-        či tisíce položek, nebo systémy s vysokou frekvencí čtení, kde je každý milisekund důležitý.
+        Výkon se stává kritickým ve třech scénářích: aplikace s <strong>desítkami propojených agregátů</strong>,
+        <strong>velké agregáty</strong> s kolekcemi tisíců položek a systémy s vysokou frekvencí čtení
+        a latency požadavky v desítkách milisekund.
     </p>
 
     {% set _callout_body %}
@@ -112,7 +112,7 @@
     <p>
         N+1 problém je jedním z nejčastějších výkonnostních antipatternů při práci s ORM. Nastává tehdy, když
         aplikace provede 1 dotaz pro načtení seznamu entit a poté pro každou entitu provede další dotaz
-        pro načtení asociovaných dat – celkem tedy N+1 SQL dotazů místo optimálních 1–2 dotazů.
+        pro načtení asociovaných dat – celkem tedy N+1 SQL dotazů místo 1–2 dotazů.
     </p>
 
     {% set _callout_body %}
@@ -437,8 +437,8 @@ final class DoctrineOrderRepository
 <section id="read-model-optimalizace" aria-labelledby="read-model-heading">
     <h2 id="read-model-heading" class="h-section"><span class="h-num">17.04</span> Optimalizace read modelu (CQRS)</h2>
     <p>
-        Jedním z nejsilnějších nástrojů pro řešení výkonnostních problémů v DDD je striktní oddělení
-        write side (doménové operace přes agregáty) od read side (dotazy vracející data pro prezentaci).
+        Striktní oddělení write side (doménové operace přes agregáty) od read side (dotazy vracející data
+        pro prezentaci) je základní nástroj pro řešení výkonnostních problémů v DDD.
         Na read side není potřeba načítat doménové objekty – stačí vrátit strukturu dat přesně odpovídající
         potřebám uživatelského rozhraní nebo API klienta.
     </p>
@@ -537,8 +537,8 @@ final class GetOrderSummaryListHandler
 
     <h3>Doctrine NativeQuery pro komplexní reportovací dotazy</h3>
     <p>
-        DQL je mocný nástroj, ale pro složité reportovací dotazy (agregace, window funkce, CTE)
-        může být omezující. Doctrine umožňuje provádět nativní SQL dotazy s vlastním mapováním
+        DQL pokrývá většinu dotazů, ale pro složité reportovací dotazy (agregace, window funkce, CTE)
+        nestačí. Doctrine umožňuje provádět nativní SQL dotazy s vlastním mapováním
         výsledků přes <code>ResultSetMapping</code>.
     </p>
 
@@ -897,7 +897,7 @@ final class ImportProductsHandler
 <section id="cachovani" aria-labelledby="cachovani-heading">
     <h2 id="cachovani-heading" class="h-section"><span class="h-num">17.07</span> Caching v DDD architektuře</h2>
     <p>
-        Caching je mocný nástroj, ale v DDD architektuře vyžaduje pečlivý design. Základní otázka je:
+        Caching v DDD architektuře vyžaduje pečlivý design. Základní otázka je:
         <strong>co cachovat</strong>? Obecné pravidlo zní: cachujeme výsledky operací, které jsou
         výpočetně nebo I/O nákladné a jejichž výsledek se v čase nemění (nebo se mění předvídatelně).
         Business logiku nikdy do cache klíče nezahrnujeme – cache slouží pro infrastrukturní výsledky,
@@ -1019,8 +1019,8 @@ final class CachedUserRepository implements UserRepository
 
     <h3>Cache invalidace při doménových událostech</h3>
     <p>
-        Elegantním přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Kdy dojde
-        ke změně agregátu (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
+        Elegantním přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Když agregát
+        změní stav (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
         Tím se cache invalidace stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
     </p>
 
@@ -1392,7 +1392,7 @@ final class QueryCountingMiddleware implements Middleware
             } %}
 
     <p>
-        Výkonnostní aspekty DDD jsou nedílnou součástí správné implementace. Hlavním nástrojem je
+        Výkon v DDD se řeší na třech úrovních: hranice agregátů, read model a profiling. Hlavním nástrojem je
         oddělení read a write modelu přes CQRS, eliminace N+1 problémů a správně zvolené hranice
         agregátů. Vhodným pokračováním je kapitola
         <a href="{{ path('cqrs') }}">CQRS v Symfony 8</a> a

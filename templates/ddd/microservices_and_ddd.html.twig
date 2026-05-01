@@ -837,7 +837,7 @@ return static function (Config $config): void {
                 Detailní implementaci ság v Symfony 8 (kompenzace, idempotence, choreografie vs. orchestrace, timeouty,
                 paralelní kroky) probírá samostatná
                 <a href="{{ path('sagas') }}">kapitola 15 – Ságy a Process Managery</a>. Pro účely této kapitoly stačí
-                rozumět, že saga je <strong>nejrozšířenější a v DDD kontextu doporučovaný mechanismus distribuované transakce v microservices</strong>
+                rozumět, že saga je <strong>v DDD kontextu doporučovaný mechanismus pro distribuované transakce v microservices</strong>
                 a že daní za to je eventual consistency a kompenzační logika.
             </p>
 
@@ -1315,11 +1315,11 @@ final readonly class OrderPlacedReceivedHandler
             <h2 id="migrace-heading" class="h-section"><span class="h-num">20.09</span> Postupná migrace monolit → microservices</h2>
 
             <p>
-                Tato sekce je <strong>nejdůležitější</strong> v celé kapitole pro týmy, které dnes mají monolit a
-                uvažují, kam dál. Většinu reálných systémů totiž nepostavíte jako microservices na zelené louce.
-                Postavíte je jako monolit, ten doroste do bolesti, a pak se zeptáte, kterou část máte rozdělit. Mottem
-                sekce je heslo Sama Newmana z <em>Building Microservices, 2nd ed.</em>: <strong>„don't do a big-bang
-                rewrite“</strong>. Velká přepisovací migrace v 9 z 10 případů selže.
+                Tato sekce je pro týmy, které dnes mají monolit a uvažují, kam dál. Většinu reálných systémů
+                nepostavíte jako microservices na zelené louce. Postavíte je jako monolit, ten doroste do bolesti,
+                a pak se zeptáte, kterou část máte rozdělit. Mottem sekce je heslo Sama Newmana z <em>Building
+                Microservices, 2nd ed.</em>: <strong>„don't do a big-bang rewrite”</strong>. Velká přepisovací
+                migrace v 9 z 10 případů selže.
             </p>
 
             <h3 id="strangler-fig-heading">Strangler Fig pattern</h3>
@@ -1415,7 +1415,7 @@ final readonly class OrderPlacedReceivedHandler
 
             <p>
                 Detailnější rozbor migrace z CRUD na DDD (která je úzce propojená s migrací na microservices) najdete
-                v <a href="{{ path('migration_from_crud') }}">kapitole 20 – Migrace z CRUD na DDD</a>.
+                v <a href="{{ path('migration_from_crud') }}">kapitole 19 – Migrace z CRUD na DDD</a>.
             </p>
         </section>
 

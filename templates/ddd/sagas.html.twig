@@ -100,7 +100,7 @@
     </p>
 
     <p>
-        Proč nemůžeme jednoduše zabalit všechny čtyři kroky do jediné databázové transakce?
+        Proč nelze zabalit všechny čtyři kroky do jediné databázové transakce?
         Jednotlivé kontexty mohou běžet na různých serverech, používat různé databázové systémy
         (PostgreSQL pro objednávky, Redis pro skladové rezervace, externí platební bránu pro platby)
         a komunikovat asynchronně přes frontu zpráv. Koncept atomické transakce se zde rozpadá.
@@ -478,7 +478,7 @@ framework:
         mu přicházejí. Přidání nového kontextu (například Loyalty, který přidělí body za
         objednávku) je triviální: stačí vytvořit nový handler naslouchající
         <code>OrderPlaced</code>. Pro jednoduché procesy se dvěma až třemi kroky je choreografie
-        elegantní a snadno pochopitelné řešení.
+        přímočaré a srozumitelné řešení.
     </p>
 
     </section>
@@ -1838,9 +1838,8 @@ final class CheckStaleSagasCommand extends Command
     <h2 id="testovani-heading" class="h-section"><span class="h-num">15.12</span> Testování ság</h2>
 
     <p>
-        Ságy koordinují složité vícekrokové procesy napříč Bounded Contexts – testování je proto
-        <strong>kriticky důležité</strong>. Pokud sága obsahuje chybu v přechodové logice nebo
-        kompenzacích, důsledky se projeví až v produkci a mohou být velmi nákladné (stržená platba
+        Ságy koordinují složité vícekrokové procesy napříč Bounded Contexts. Chyba v přechodové logice nebo
+        v kompenzacích se projeví až v produkci a může být velmi nákladná (stržená platba
         bez doručeného zboží, duplikované zásilky apod.). Testujeme na třech úrovních.
     </p>
 

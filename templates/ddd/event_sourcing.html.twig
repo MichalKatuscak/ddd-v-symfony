@@ -69,11 +69,11 @@
 
         <p>
             Tradiční CRUD persistence má slepou skvrnu: při každé změně přepíše předchozí stav a veškerá
-            historie se nenávratně ztrácí. Event Sourcing (ES) tento problém řeší tím, že stav systému neukládá
-            jako aktuální snímek dat, nýbrž jako <strong>sekvenci neměnných událostí</strong>, jež k danému stavu
+            historie se nenávratně ztrácí. Event Sourcing (ES) tento problém řeší jinak – stav systému
+            neukládá jako aktuální snímek, nýbrž jako <strong>sekvenci neměnných událostí</strong>, jež k danému stavu
             vedly <a href="https://martinfowler.com/eaaDev/EventSourcing.html" target="_blank" rel="noopener noreferrer">[1]</a>.
-            Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty; aktuální stav agregátu pak
-            vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
+            Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty.
+            Aktuální stav agregátu pak vzniká <em>přehráním</em> (replay) těchto událostí od počátku.
         </p>
         <p>
             Princip lze vyjádřit větou: <strong><em>current state is derived from the history of events</em></strong>.
@@ -185,7 +185,7 @@
             doplňují
             <a href="https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf" target="_blank" rel="noopener noreferrer">[2]</a>.
             <strong>Nejsou totéž</strong> – lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS, ale
-            jejich kombinace je velmi mocná a v praxi DDD aplikací běžná.
+            jejich kombinace přináší výrazné synergické výhody a v praxi DDD aplikací je běžná.
         </p>
         <p>
             Důvodem přirozené synergie je, že Event Sourcing produkuje události jako prvotřídní artefakt
@@ -2045,7 +2045,7 @@ final readonly class UpcasterChain
         <h2 id="kdy-pouzit-heading" class="h-section"><span class="h-num">14.11</span> Kdy použít Event Sourcing</h2>
 
         <p>
-            Event Sourcing je mocný nástroj, ale s výraznou přidanou složitostí. Před jeho zavedením je nutné pečlivě
+            Event Sourcing přináší výrazné výhody, ale i výraznou přidanou složitost. Před jeho zavedením je nutné pečlivě
             zvážit, zda přínosy pro daný kontext převažují nad náklady na implementaci a provoz.
         </p>
 

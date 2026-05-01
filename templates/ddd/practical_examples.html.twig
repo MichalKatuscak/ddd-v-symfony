@@ -67,16 +67,14 @@
             od <a href="{{ path('cqrs') }}">CQRS</a> přes
             <a href="{{ path('event_sourcing') }}">Event Sourcing</a> až po
             <a href="{{ path('sagas') }}">ságy a process managery</a>.
-            Nyní je čas zasadit tyto vzory do reálnějšího kontextu a ukázat, jak spolu
-            fungují v praxi.
+            Tato kapitola zasazuje tyto vzory do reálnějšího kontextu a ukazuje, jak spolu fungují.
         </p>
 
 <section id="e-commerce" aria-labelledby="e-commerce-heading">
             <h2 id="e-commerce-heading" class="h-section"><span class="h-num">24.01</span> Příklad: E-commerce aplikace</h2>
             <p>
-                V této části si ukážeme, jak implementovat část e-commerce aplikace pomocí vertikální slice architektury
-                a CQRS v Symfony 8.
-                Zaměříme se na funkcionalitu košíku a objednávek.
+                Tato část ukazuje implementaci části e-commerce aplikace pomocí vertikální slice architektury
+                a CQRS v Symfony 8 na funkcionalitě košíku a objednávek.
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/eshop/diagram.svg' %}{% endset %}
@@ -528,8 +526,7 @@ class GetCartHandler
         <section id="blog" aria-labelledby="blog-heading">
             <h2 id="blog-heading" class="h-section"><span class="h-num">24.02</span> Příklad: Blog</h2>
             <p>
-                V této části si ukážeme, jak implementovat jednoduchý blog pomocí vertikální slice architektury a CQRS v
-                Symfony 8.
+                Tato část ukazuje implementaci blogu pomocí vertikální slice architektury a CQRS v Symfony 8.
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/blog/diagram.svg' %}{% endset %}
@@ -771,8 +768,8 @@ class CreatePostHandler
         <section id="user-management" aria-labelledby="user-management-heading">
             <h2 id="user-management-heading" class="h-section"><span class="h-num">24.03</span> Příklad: Správa uživatelů</h2>
             <p>
-                V této sekci implementujeme správu uživatelů pomocí DDD a CQRS v Symfony 8 – uživatelé
-                tvoří společnou doménu a DDD slouží k oddělení jednotlivých feature (registrace, autentizace, profil).
+                Tato sekce ukazuje správu uživatelů pomocí DDD a CQRS v Symfony 8. Uživatelé tvoří společnou doménu;
+                DDD odděluje jednotlivé funkce (registrace, autentizace, profil).
             </p>
 
             {% set _diagram_inline %}{% include '/diagrams/7_examples/users/diagram.svg' %}{% endset %}
