@@ -51,3 +51,69 @@ Diagrams live in `templates/diagrams/<N>_<topic>/`. PlantUML `.puml` files are t
 ## Routing
 
 All routes use PHP attributes in `DddController`. Route paths are Czech slugs (e.g., `/co-je-ddd`, `/zakladni-koncepty`).
+
+## Voice, tón a jazyk
+
+Platí vždy — při každé editaci i psaní nového obsahu.
+
+### Hlas průvodce
+
+Průvodce mluví jako zkušený praktik, který věci dobře zná a nebojí se říct názor. Neprodává, nevybízí, nenadsazuje. Tvrzení jsou přímá a podložená. Čtenář se cítí respektován jako profesionál.
+
+### Pravidla věty
+
+- Věty: krátké až střední (do ~25 slov). Dlouhé věty rozdělit.
+- Věta říká jednu věc. Pokud říká dvě, rozdělit.
+- Žádný odstavec nezačíná „Je důležité...", „V rámci...", „Je třeba poznamenat...".
+
+### Zakázáno — marketing a hype
+
+| Vzor | Problém |
+|---|---|
+| mocný, výkonný, elegantní, robustní | vágní přídavná jména bez obsahu |
+| revoluční, průlomový, game-changer | nadsázka |
+| moderní, cutting-edge, state-of-the-art | časově nestabilní, prázdné |
+| perfektní, ideální, optimální | bez zdůvodnění jsou lži |
+| bezproblémový, hladký, seamless | marketingový jazyk |
+| jednoduše, snadno, rychle | podceňuje čtenářův kontext |
+| „posune váš projekt na další úroveň" | hype bez obsahu |
+| „plně využít potenciál" | PR fráze |
+| „nová éra", „nový přístup k..." | inflační superlativy |
+| best practice (bez dalšího) | overused — nahradit konkrétním popisem |
+
+### Zakázáno — výplň a filler
+
+| Vzor | Náhrada |
+|---|---|
+| „je důležité si uvědomit, že" | smazat, věc říct přímo |
+| „hraje klíčovou roli" | konkrétní sloveso (zajišťuje / umožňuje / brání) |
+| „stojí za zmínku, že" | smazat |
+| „je třeba poznamenat, že" | smazat |
+| „jak jsme již zmínili" | odkaz na sekci, nebo smazat |
+| „v rámci" | nahradit „v", „při", „pro" |
+| „klíčový" bez konkrétního obsahu | smazat nebo specifikovat |
+| „s ohledem na" | „protože", „vzhledem k" |
+| „co se týče X" | začít rovnou větou o X |
+| „v neposlední řadě" | smazat |
+| „samozřejmě", „pochopitelně", „logicky" | smazat |
+| „zcela", „naprosto", „absolutně" | smazat nebo zdůvodnit |
+| „jinými slovy" (opakovaně) | smazat, přeformulovat přímo |
+| „celkově vzato", „shrnuto" | nahradit konkrétním shrnutím |
+| „není pochyb o tom, že" | smazat |
+| „jak víme" | smazat |
+
+### Typografie a forma
+
+- Em dash (—) zakázán → en pomlčka (–) s mezerami, nebo přeformulovat
+- Anglické uvozovky "" zakázány → české „"
+- Vykat — nikdy tykat
+- „Zde" nikdy „Tady"
+- „průvodce" nikdy „kurz" ani „tutoriál"
+- Žádné osobní komentáře autora („z mé zkušenosti", „překvapilo mě")
+
+### Prompt soubory
+
+Pro komplexní úlohy použij dedikované prompt soubory:
+
+- `docs/prompts/review-chapter.md` — revize existující kapitoly (voice, jazyk, fakta, konzistentnost)
+- `docs/prompts/write-chapter.md` — psaní nové kapitoly od začátku
