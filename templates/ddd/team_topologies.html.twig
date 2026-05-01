@@ -67,7 +67,7 @@
             Většina knih o DDD končí Bounded Contextem a Context Mapem – jako kdyby architektura žila ve vakuu.
             Realita je jiná: jakmile máte víc než jeden tým, organizační struktura začne tlačit architekturu
             do svého obrazu. Kapitola, kterou právě čtete, je o tomto <em>gravitačním poli</em> –
-            o Conway's Law z roku 1968, o Team Topologies (Skelton &amp; Pais 2019) jako moderním rámci
+            o Conway's Law z roku 1968, o Team Topologies (Skelton &amp; Pais 2019) jako organizačním rámci
             pro vědomý návrh týmů a o tom, proč je <strong>jeden Bounded Context = jeden tým</strong>
             jediné DDD pravidlo, které vám management zlomí jako první.
         </p>
@@ -539,7 +539,7 @@
             </p>
 
             <p>
-                Inverse Conway Maneuver popsali Skelton a Pais (2019, kap. 3) jako 4-krokový postup,
+                Inverse Conway Maneuver popsali Skelton a Pais (2019, kap. 2) jako 4-krokový postup,
                 navazující na dřívější Forsgrenův výzkum DORA <em>Accelerate</em> (2018):
             </p>
 
@@ -850,7 +850,7 @@ Bod 5 (germane prostor):         __
 
             <ul>
                 <li><strong>Architektura:</strong> jeden Symfony monolit; BC jsou složky/moduly s explicitními rozhraními (kapitola o <a href="{{ path('architectural_styles') }}">architektonických stylech</a>).</li>
-                <li><strong>Generic subdomény:</strong> SaaS – Auth0 nebo Clerk pro identity, Stripe pro fakturaci, SendGrid pro e-mail. Žádný vlastní implementace.</li>
+                <li><strong>Generic subdomény:</strong> SaaS – Auth0 nebo Clerk pro identity, Stripe pro fakturaci, SendGrid pro e-mail. Žádná vlastní implementace.</li>
                 <li><strong>Hosting:</strong> Heroku, Vercel, Railway, Fly.io – managed services nahrazují Platform team.</li>
                 <li><strong>Čeho se vyvarovat:</strong> nepouštět se do Kubernetes, vlastní observability stack, mikroservisy. Předčasné.</li>
             </ul>
