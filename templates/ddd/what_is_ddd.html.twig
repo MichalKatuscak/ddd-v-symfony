@@ -79,13 +79,11 @@
                 <ul>
                     <li><strong>Doména (Domain)</strong> – Oblast znalostí, problémů a aktivit, na kterou se aplikace
                         zaměřuje <a href="https://martinfowler.com/bliki/DomainDrivenDesign.html"
-                                    target="_blank" rel="noopener">[2]</a>. Doména představuje specifickou oblast, kterou se software
-                        snaží modelovat a řešit.
+                                    target="_blank" rel="noopener">[2]</a>.
                     </li>
                     <li><strong>Ubiquitous Language</strong> – Společný jazyk používaný vývojáři a doménovými experty <a
                                 href="https://martinfowler.com/bliki/UbiquitousLanguage.html" target="_blank" rel="noopener">[3]</a>.
-                        Tento jazyk eliminuje nedorozumění a zajišťuje, že všichni účastníci projektu mluví stejným
-                        jazykem.
+                        Eliminuje nedorozumění tím, že stejné pojmy se používají v kódu, dokumentaci i v komunikaci s doménovými experty.
                     </li>
                     <li><strong>Bounded Context</strong> – Jasně definovaná hranice, ve které je model platný <a
                                 href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">[4]</a>.
@@ -129,8 +127,7 @@
                     detaily jsou sekundární.
                 </li>
                 <li>
-                    <strong>Ubiquitous Language</strong> – DDD používá společný jazyk mezi vývojáři a doménovými
-                    experty, který je používán v kódu, dokumentaci a komunikaci.
+                    <strong>Ubiquitous Language</strong> – DDD prosazuje společný jazyk vývojářů a doménových expertů, který se promítá do kódu, dokumentace i komunikace.
                 </li>
                 <li>
                     <strong>Bounded Context</strong> – DDD rozděluje složité domény do menších, jasně definovaných
@@ -214,8 +211,7 @@
                     objektu je adresa nebo peněžní částka.
                 </li>
                 <li>
-                    <strong>Aggregate</strong> – Agregát je shluk objektů, které jsou považovány za jednu jednotku z
-                    hlediska změn dat. Každý agregát má kořen agregátu (Aggregate Root), který je jediným vstupním
+                    <strong>Aggregate</strong> – Agregát je shluk objektů, se kterými se zachází jako s jednou jednotkou při zápisu dat. Každý agregát má kořen agregátu (Aggregate Root), který je jediným vstupním
                     bodem pro veškeré vnější interakce s agregátem.
                 </li>
                 <li>
@@ -280,8 +276,7 @@
                     doménovými experty. Tato fáze zahrnuje rozhovory, workshopy a modelování.
                 </li>
                 <li>
-                    <strong>Vytvoření Ubiquitous Language</strong> – Definování společného jazyka, který bude používán
-                    vývojáři i doménovými experty. Tento jazyk by měl být dokumentován a neustále aktualizován.
+                    <strong>Vytvoření Ubiquitous Language</strong> – Definování společného jazyka vývojářů a doménových expertů. Dokumentujte ho a průběžně aktualizujte.
                 </li>
                 <li>
                     <strong>Identifikace Bounded Contexts</strong> – Rozdělení složité domény do menších, jasně
@@ -300,8 +295,7 @@
                     Aggregate, Repository, atd.) pro implementaci doménového modelu v kódu.
                 </li>
                 <li>
-                    <strong>Testování</strong> – Důkladné ověření doménového modelu a jeho chování, aby bylo jisté,
-                    že model doménu skutečně odpovídajícím způsobem zachycuje.
+                    <strong>Testování</strong> – Ověření, zda model věrně zachycuje doménové chování.
                 </li>
                 <li>
                     <strong>Iterace a vylepšování</strong> – Neustálé vylepšování modelu na základě zpětné vazby od
