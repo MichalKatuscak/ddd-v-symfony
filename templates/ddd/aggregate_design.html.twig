@@ -86,8 +86,8 @@
         <p>
             Agregát je shluk doménových objektů, které jsou pro vnější svět nedělitelnou jednotkou
             konzistence. Eric Evans ho zavedl jako odpověď na dvě otázky, které objektově orientovaný
-            model neřeší sám od sebe: <em>kdo je zodpovědný za vymáhání invariantů</em> a <em>co se
-            uloží v jedné transakci</em>. Vstupním bodem do agregátu je <strong>kořen agregátu</strong>
+            model neřeší sám od sebe. První: <em>kdo je zodpovědný za vymáhání invariantů</em>.
+            Druhá: <em>co se uloží v jedné transakci</em>. Vstupním bodem do agregátu je <strong>kořen agregátu</strong>
             (aggregate root); ostatní objekty uvnitř hranice nesmí být pro zbytek aplikace přímo dostupné.
         </p>
 
@@ -237,9 +237,8 @@
                 generují N+1 dotazů.</li>
             <li><strong>Kompozitní invarianty.</strong> Velký agregát zákonitě obsahuje pravidla, která
                 spolu nesouvisí. Jakákoli změna jedné části vyžaduje ověření všech invariantů – nárůst
-                složitosti je kvadratický. Vernon to nazývá <em>aggregate cohesion problem</em>: čím více
-                pravidel agregát chrání, tím slabší je každé jedno, protože ostatní pravidla se musí
-                ověřit při každé změně.</li>
+                složitosti je kvadratický. Čím více pravidel agregát chrání, tím složitější je každá
+                operace – při každé změně je nutné ověřit všechny invarianty najednou.</li>
         </ul>
 
         <p>
@@ -283,11 +282,11 @@
             <li>Helland v <em>Life Beyond Distributed Transactions</em>
                 <a href="https://queue.acm.org/detail.cfm?id=3025012" target="_blank" rel="noopener">[5]</a>
                 ukazuje, že distributed transactions (XA, two-phase commit) v praxi nefungují udržitelně –
-                jediný sustainable přístup je „one entity per transaction“, což je přesně Vernonovo pravidlo.</li>
+                jediný udržitelný přístup je „one entity per transaction”, což je přesně Vernonovo pravidlo.</li>
         </ul>
 
         <p>
-            V Symfony 8 to znamená: <code>EntityManager::flush()</code> uvnitř Command Handleru by měl
+            V Symfony 8 to znamená: <code>EntityManager::flush()</code> uvnitř command handleru by měl
             ukládat změny <em>jednoho</em> agregátu. Změna v dalším agregátu patří do separátního
             handleru, spuštěného přes Messenger po publikaci doménové události.
         </p>
@@ -599,7 +598,7 @@ final class Order extends AggregateRoot
         } %}
 
         <p>
-            Stojí za pozornost: konstruktor je <code>private</code>, protože vznik agregátu řídí
+            Konstruktor je <code>private</code>: vznik agregátu řídí
             statická factory metoda <code>place()</code>, která vymáhá invariant „objednávka musí mít
             alespoň jednu položku“. <code>customerId</code> je hodnotový objekt, ne reference na entitu.
             Stavový přechod <code>ship()</code> je jediný způsob, jak změnit <code>status</code>;
@@ -875,7 +874,7 @@ doctrine:
             <li><strong>Single-writer pattern.</strong> Agregát existuje v paměti jediného procesu (actor
                 model, Akka, Orleans). Symfony to nativně neumí; alternativou je Messenger s deduplicací
                 přes konzistentní hash a single consumer per aggregate ID.</li>
-            <li><strong>Přijmout eventual consistency uvnitř.</strong> Například u counterů
+            <li><strong>Přijmout eventual consistency uvnitř.</strong> Například u čítačů
                 (<em>like count</em>) je přesný stav nedůležitý – stačí zpožděná replikace s nepřesností
                 v řádech sekund.</li>
         </ul>
@@ -885,7 +884,8 @@ doctrine:
         <p>
             U Event-Sourced agregátů je rebuild stavu z eventů O(N) v počtu eventů. Pro agregáty
             s 10 000+ eventy je to neúnosné. Snapshot ukládá serializovaný stav agregátu po každých
-            N eventech (typicky 100); load pak rekonstruuje stav od posledního snapshotu plus eventy navrch.
+            N eventech (typicky 100); při načtení se stav rekonstruuje od posledního snapshotu a navrch
+            se aplikují zbývající eventy.
             Důležité detaily:
         </p>
 
@@ -936,7 +936,8 @@ doctrine:
                 Nevýhoda: insertion order není seřazen, což zhoršuje I/O pattern u clustered indexů (MySQL/InnoDB).</li>
             <li><strong>ULID nebo UUID v7.</strong> Time-ordered, distribuovaně generovatelná, řadí
                 se podle času vzniku. <strong>Doporučená volba</strong> pro většinu nových projektů.
-                Symfony 5.2+ nabízí <code>Symfony\Component\Uid\Ulid</code> a <code>Uuid::v7()</code> prostřednictvím balíčku <code>symfony/uid</code>.</li>
+                Symfony 5.2+ nabízí <code>Symfony\Component\Uid\Ulid</code> prostřednictvím balíčku
+                <code>symfony/uid</code>; <code>Uuid::v7()</code> přibylo v Symfony 6.2.</li>
             <li><strong>Sekvenční integer.</strong> Krátký, lidsky čitelný, rychlý. Nevýhody: vyžaduje
                 centrální generátor (DB sekvence), prozrazuje řád a počet entit, špatně se merguje
                 z více DB (microservices).</li>
