@@ -67,19 +67,19 @@
             <h2 id="proc-subdomeny-heading" class="h-section"><span class="h-num">02.01</span> Proč subdomény předcházejí všemu ostatnímu</h2>
 
             <p>
-                Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a v naprosté většině produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování – naopak, pokus modelovat <em>všechno</em> stejně pečlivě je jednou z nejspolehlivějších cest, jak vyčerpat rozpočet ještě dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Eric Evans v <em>Domain-Driven Design</em> (2003), kapitola 15 „Distillation”, proto zavádí strategický filtr: před prvním Aggregate, prvním Value Objectem, prvním <code>UseCaseHandler</code>em si poctivě odpovězte, <strong>která část domény je vaše konkurenční výhoda, která je nutné zlo a kterou nedává smysl vůbec psát</strong>. Tomuto filtru se říká rozdělení domény na <strong>Core</strong>, <strong>Supporting</strong> a <strong>Generic</strong> subdomény <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
+                Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a v naprosté většině produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování – naopak, pokus modelovat <em>všechno</em> stejně pečlivě je jednou z nejspolehlivějších cest, jak vyčerpat rozpočet ještě dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Evans v <em>Domain-Driven Design</em> (2003), kapitola 15 „Distillation”, zavádí strategický filtr pro celou doménu. Než napíšete první Aggregate nebo Value Object, odpovězte si: <strong>která část domény je vaše konkurenční výhoda, která nutné zlo a kterou nedává smysl vůbec psát</strong>. Tomuto filtru se říká rozdělení domény na <strong>Core</strong>, <strong>Supporting</strong> a <strong>Generic</strong> subdomény <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
             </p>
 
             <p>
-                Subdoména není totéž co <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Context</a>, ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je <em>implementační</em> hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jedním deployment artefaktem. Subdoména je naproti tomu <em>byznysová</em> hranice – kus problému, který se v organizaci řeší jako jedna ucelená kapitola. Vztah mezi nimi není 1:1: jedna subdoména („Pricing“) může být rozdělena do více Bounded Contexts (BC „Catalog“ počítá indikativní cenu, BC „Checkout“ počítá závaznou cenu se slevami a daněmi), a naopak jeden BC může pokrývat více malých subdomén najednou (BC „Backoffice“ obvykle obsahuje kousky reportingu, fakturace i správy uživatelů).
+                Subdoména není totéž co <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Context</a>, ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je <em>implementační</em> hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jedním deployment artefaktem. Subdoména je naproti tomu <em>byznysová</em> hranice – kus problému, který se v organizaci řeší jako jedna ucelená kapitola. Vztah mezi nimi není 1:1. Jedna subdoména („Pricing”) může být rozdělena do více BC – Catalog počítá indikativní cenu, Checkout závaznou cenu se slevami. Naopak jeden BC může pokrývat více malých subdomén, například Backoffice zpravidla sdruží kousky reportingu, fakturace i správy uživatelů.
             </p>
 
             <p>
-                Vaughn Vernon v <em>Implementing Domain-Driven Design</em> (2013), kapitola 2 „Domains, Subdomains, and Bounded Contexts“, to formuluje pragmaticky: <em>doména</em> je celý problémový prostor organizace; <em>subdoména</em> je jeho logická část; <em>Bounded Context</em> je řešení, které pro tu část navrhujete <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>. Vlad Khononov v <em>Learning Domain-Driven Design</em> (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“, k tomu doplňuje, že <strong>klasifikace subdomén je první nástroj, který v DDD máte k dispozici, a zároveň ten nejlevnější – stojí jediný workshop a změní distribuci milionů korun rozpočtu</strong> <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a>.
+                Vernon to v kapitole 2 <em>Implementing Domain-Driven Design</em> (2013) formuluje pragmaticky <a href=”https://kalele.io/books/” target=”_blank” rel=”noopener”>[2]</a>: <em>doména</em> je celý problémový prostor organizace; <em>subdoména</em> je jeho logická část; <em>Bounded Context</em> je řešení, které pro ni navrhujete. Vlad Khononov v <em>Learning Domain-Driven Design</em> (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“, k tomu doplňuje, že <strong>klasifikace subdomén je první nástroj, který v DDD máte k dispozici, a zároveň ten nejlevnější – stojí jediný workshop a změní distribuci milionů korun rozpočtu</strong> <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a>.
             </p>
 
             <p>
-                V souladu s tím, co o strategickém DDD říká i <a href="{{ path('what_is_ddd') }}#strategic-design">úvodní kapitola</a>, platí, že chyba ve volbě subdomény vás bude stát násobně víc než chyba v jednotlivém Aggregate. Špatně navržený Aggregate refaktorujete za dva sprinty; špatně klasifikovaná Core Domain znamená, že jste rok rozvíjeli něco, co jste měli koupit, a zároveň jste odsunuli to, čím jste se měli odlišit od konkurence. Proto si tato kapitola dává za cíl naučit vás <strong>filtrovat dřív, než modelujete</strong>.
+                Jak potvrzuje <a href="{{ path('what_is_ddd') }}#strategic-design">úvodní kapitola</a>: chyba ve volbě subdomény vás bude stát násobně víc než chyba v jednotlivém Aggregate. Špatně navržený Aggregate refaktorujete za dva sprinty. Špatně klasifikovaná Core Domain znamená rok vývoje v nesprávné oblasti – a promarněný čas na skutečném diferenciátoru. Proto si tato kapitola dává za cíl naučit vás <strong>filtrovat dřív, než modelujete</strong>.
             </p>
 
             {% set _callout_body %}
@@ -115,7 +115,7 @@
                         Část domény, která tvoří <strong>konkurenční výhodu organizace</strong> – to, kvůli čemu zákazníci platí právě vám a ne někomu jinému. Test: <em>„pokud z toho zítra ustoupíme, ztratíme zákazníky.“</em> Nebo formulováno opačně: pokud byste si stejnou funkcionalitu mohli stejně levně koupit od dodavatele, není to Core, je to Generic.
                     </p>
                     <p>
-                        Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíce automatizovaných testů, nejvíce code review a nejvíce diskusí s doménovými experty. Khononov uvádí jako tržní příklad <strong>algoritmus dynamického ratingu Uberu, fulfillment optimalizaci Amazonu nebo doporučovací systém Spotify</strong> – v každé z těch firem je „komodita pro ostatní“ v jejich vlastním pohledu Core Domain a investují do toho odpovídající rozpočet <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a>.
+                        Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíce automatizovaných testů, nejvíce code review a nejvíce diskusí s doménovými experty. Khononov uvádí tři příklady <a href=”https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/” target=”_blank” rel=”noopener”>[3]</a>: algoritmus dynamického ratingu Uberu, fulfillment optimalizaci Amazonu, doporučovací systém Spotify. Každý z nich je pro svou firmu Core – to, čím se liší od trhu.
                     </p>
                 </dd>
 
@@ -125,7 +125,7 @@
                         Část domény, která je <strong>nezbytná pro provoz, ale nediferencuje vás</strong>. Test: <em>„potřebujeme to, ale nikdo nás kvůli tomu nenajme.“</em> Klasické příklady: správa objednávek v e-shopu, evidence skladu, fakturace, reporting pro management. Kdyby Supporting fungoval „stejně jako u konkurence“, nikdo by si toho nevšiml – ale kdyby vůbec nefungoval, provoz by stál.
                     </p>
                     <p>
-                        Důsledky pro tým a stack: lehký DDD (často stačí <em>anemic</em> model s těžkým <a href="{{ path('implementation_in_symfony') }}">Doctrine ORM</a>), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je <strong>fungovat spolehlivě s minimálními náklady na údržbu</strong>, ne mít nejhezčí model. Vernon doporučuje pro Supporting subdomény skutečně používat lehčí variantu DDD – pokud by se na nich uplatnil plný taktický design, organizace zbytečně utratí seniorní kapacitu na něco, co nikoho nezajímá <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>.
+                        Důsledky pro tým a stack: lehký DDD (často stačí <em>anemic</em> model s těžkým <a href="{{ path('implementation_in_symfony') }}">Doctrine ORM</a>), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je <strong>fungovat spolehlivě s minimálními náklady na údržbu</strong>, ne mít nejhezčí model. Vernon doporučuje pro Supporting subdomény skutečně používat lehčí variantu DDD – pokud by se na nich uplatnil plný taktický design, organizace zbytečně vynaloží seniorní čas na něco, co nikoho nezajímá <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>.
                     </p>
                 </dd>
 
@@ -213,7 +213,7 @@
             <h2 id="rozpoznat-core-heading" class="h-section"><span class="h-num">02.03</span> Jak rozpoznat Core Domain – pětibodový test</h2>
 
             <p>
-                Nejtěžším krokem je rozpoznat <em>právě tu jednu</em> Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a> a Brandoliniho diskuse o Core Domain Charts <a href="https://www.eventstorming.com/" target="_blank" rel="noopener">[4]</a>. Každou položku ohodnoťte ANO/NE. Pokud máte tři a více ANO, kandidát na Core Domain. Pokud máte tři a více NE, je to Supporting nebo Generic.
+                Nejtěžším krokem je rozpoznat <em>právě tu jednu</em> Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a> a Core Domain Charts komunity ddd-crew <a href="https://github.com/ddd-crew/core-domain-charts" target="_blank" rel="noopener">[5]</a>. Každou položku ohodnoťte ANO/NE. Pokud máte tři a více ANO, kandidát na Core Domain. Pokud máte tři a více NE, je to Supporting nebo Generic.
             </p>
 
             <ol>
@@ -267,11 +267,11 @@
             <h2 id="vsechno-core-antipattern-heading" class="h-section"><span class="h-num">02.04</span> Anti-vzor: „všechno je Core“</h2>
 
             <p>
-                Nejčastější chyba ve strategickém DDD se nejmenuje „špatně navržený Aggregate“, ale <strong>„všechno je Core“</strong>. Týmy mají k této chybě silný psychologický sklon: každý vývojář, kterého se zeptáte, jestli je jeho oblast strategická, řekne ANO – ego, kariérní obavy z toho, že na „nedůležitém“ se nedá vybudovat seniorní pozice, a obecná lidská tendence připisovat své práci větší význam, než má. Brandolini tomu říká <em>„hero syndrome“</em>: každá funkcionalita má svého hrdinu, který ji obhajuje jako nezbytnou pro firmu <a href="https://www.eventstorming.com/" target="_blank" rel="noopener">[4]</a>.
+                Nejčastější chyba ve strategickém DDD se nejmenuje „špatně navržený Aggregate“, ale <strong>„všechno je Core“</strong>. Týmy mají k této chybě silný psychologický sklon. Každý vývojář, kterého se zeptáte, zda je jeho oblast strategická, řekne ANO. Důvody: ego, kariérní obavy z „nedůležité” oblasti a obecná tendence přeceňovat vlastní práci. Brandolini tomu říká <em>„hero syndrome“</em>: každá funkcionalita má svého hrdinu, který ji obhajuje jako nezbytnou pro firmu <a href="https://www.eventstorming.com/" target="_blank" rel="noopener">[4]</a>.
             </p>
 
             <p>
-                Manažerská rovina ten anti-vzor zhoršuje. Ředitel bez technického zázemí slyší od každého vedoucího týmu, že jeho oblast je strategická, a nemá nástroj, jak vyhodnotit, kde je investice opodstatněná a kde je to obhajoba pozic. Výsledek: rozpočet se rozteče po všech subdoménách rovnoměrně, Core Doména dostane stejně peněz jako fakturace, a do dvou let je firma předběhnuta menším konkurentem, který soustředil pětinásobnou investici do svého reálného Core.
+                Manažerská rovina ten anti-vzor zhoršuje. Ředitel bez technického zázemí slyší od každého vedoucího týmu, že jeho oblast je strategická, a nemá nástroj, jak vyhodnotit, kde je investice opodstatněná a kde je to obhajoba pozic. Výsledek: rozpočet se rozteče rovnoměrně, Core dostane stejně jako fakturace. Do dvou let firmu předběhne menší konkurent, který soustředil pětinásobek do svého skutečného Core.
             </p>
 
             <p>
@@ -303,7 +303,7 @@
             } %}
 
             <p>
-                Obrana proti anti-vzoru „všechno je Core“ je překvapivě jednoduchá: <strong>vynuťte si rozpočet</strong>. Před začátkem každého kvartálu (nebo OKR cyklu, podle toho, jak váš tým plánuje) si nakreslete tři škatulky – Core / Supporting / Generic – a do každé napište procentní podíl celkové vývojové kapacity. Pokud vám do Core spadne 80 %, není to 80 % Core, ale 80 % iluze. Realistická distribuce u průměrné B2B SaaS firmy je <strong>20–30 % Core, 50–60 % Supporting, 10–20 % Generic</strong> (poslední číslo má být malé, protože Generic se z definice <em>nepíše</em>, jen se integruje).
+                Obrana proti anti-vzoru „všechno je Core“ je překvapivě jednoduchá: <strong>vynuťte si rozpočet</strong>. Před začátkem každého kvartálu (nebo OKR cyklu, podle toho, jak váš tým plánuje) si nakreslete tři škatulky – Core / Supporting / Generic – a do každé napište procentní podíl celkové vývojové kapacity. Pokud vám do Core spadne 80 %, není to 80 % Core, ale 80 % iluze. Realistická distribuce u průměrné B2B SaaS firmy: <strong>20–30 % Core, 50–60 % Supporting, 10–20 % Generic</strong>. Poslední číslo bývá nejnižší – Generic se z definice <em>nepíše</em>, jen integruje.
             </p>
         </section>
 
@@ -841,10 +841,10 @@ final class Auth0UserProvider implements UserProviderInterface
             {% set _callout_body %}
                 <h3 id="audit-not-event-heading">Strategický audit není událost, je to proces</h3>
                 <p>
-                    Strategický audit subdomén nesmí být jednorázový workshop, který skončí PowerPointem v share-pointu. Cílem auditu je <strong>zaktualizovat investiční prioritu na další 12–18 měsíců</strong>: kde se bude přidávat headcount, kde se bude škrtat, co se bude outsourcovat. Bez tohoto výstupu je workshop nákladnou ztrátou času.
+                    Strategický audit subdomén nesmí být jednorázový workshop, který skončí PowerPointem v share-pointu. Cílem auditu je <strong>zaktualizovat investiční prioritu na další 12–18 měsíců</strong>: kde porostou týmy, kde se bude škrtat, co se bude outsourcovat. Bez tohoto výstupu je workshop nákladnou ztrátou času.
                 </p>
                 <p>
-                    Tip: výstup auditu zveřejněte celému inženýrskému týmu (alespoň formou one-pager rekapitulace „co je nově Core a proč“). Tým, který nezná aktuální klasifikaci, neumí prioritizovat.
+                    Tip: výstup auditu zveřejněte celému inženýrskému týmu (alespoň formou jednostránkového shrnutí „co je nově Core a proč“). Tým, který nezná aktuální klasifikaci, neumí prioritizovat.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
