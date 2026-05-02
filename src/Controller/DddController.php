@@ -95,14 +95,6 @@ class DddController extends AbstractController
         return $this->redirectToRoute('horizontal_vs_vertical', [], 301);
     }
 
-    #[Route('/vertikalni-slice', name: 'horizontal_vs_vertical')]
-    public function horizontalVsVertical(): Response
-    {
-        return $this->render('ddd/horizontal_vs_vertical.html.twig', [
-            'title' => 'Vertikální slice architektura vs. Tradiční DDD',
-        ]);
-    }
-
     #[Route('/navrh-agregatu', name: 'aggregate_design')]
     public function aggregateDesign(): Response
     {
@@ -156,14 +148,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/security_policy.html.twig', [
             'title' => 'Bezpečnostní zásady',
-        ]);
-    }
-
-    #[Route('/migrace-z-crud', name: 'migration_from_crud')]
-    public function migrationFromCrud(): Response
-    {
-        return $this->render('ddd/migration_from_crud.html.twig', [
-            'title' => 'Migrace z CRUD architektury na DDD',
         ]);
     }
 
