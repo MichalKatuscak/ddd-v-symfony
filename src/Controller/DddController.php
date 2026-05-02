@@ -103,14 +103,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/zakladni-koncepty', name: 'basic_concepts')]
-    public function basicConcepts(): Response
-    {
-        return $this->render('ddd/basic_concepts.html.twig', [
-            'title' => 'Základní koncepty DDD',
-        ]);
-    }
-
     #[Route('/navrh-agregatu', name: 'aggregate_design')]
     public function aggregateDesign(): Response
     {
@@ -228,14 +220,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/glossary.html.twig', [
             'title' => 'Glosář DDD terminologie',
-        ]);
-    }
-
-    #[Route('/kdy-nepouzivat-ddd', name: 'when_not_to_use_ddd')]
-    public function whenNotToUseDdd(): Response
-    {
-        return $this->render('ddd/when_not_to_use_ddd.html.twig', [
-            'title' => 'Kdy DDD nepoužívat – upřímně',
         ]);
     }
 
