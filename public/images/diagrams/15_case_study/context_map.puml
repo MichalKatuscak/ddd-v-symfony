@@ -1,0 +1,61 @@
+@startuml context_map
+!include ../theme.iuml
+
+title Context Map: Systém pro správu projektů
+
+package "Shared Kernel" as SK <<frame>> {
+  rectangle "UserId\nProjectId\nTaskId" as IDS
+}
+
+package "UserManagement" as UM {
+  [User]
+  [Authentication]
+}
+
+package "ProjectManagement" as PM {
+  [Project]
+  [ProjectMember]
+}
+
+package "TaskManagement" as TM {
+  [Task]
+  [TaskAssignmentService]
+  [ProjectChecker port] as PC
+}
+
+package "CommentManagement" as CM {
+  [Comment]
+}
+
+package "ActivityTracking" as AT {
+  [Activity]
+}
+
+' Vztahy mezi kontexty
+UM -[thickness=2]- PM : "Partnership"
+PM -[thickness=2]-> TM : "Customer / Supplier"
+TM -[thickness=2]-> CM : "Customer / Supplier"
+
+' ACL přes port: TM volá PM bez znalosti interního modelu
+PM .[thickness=2,#F0A456].> PC : "ACL\n(přes port)"
+
+' Open Host Service / Published Language: ostatní publikují události,
+' ActivityTracking je downstream konzument (žádný vliv zpět).
+UM .[#A6ADBB].> AT : "OHS / PL"
+PM .[#A6ADBB].> AT : "OHS / PL"
+TM .[#A6ADBB].> AT : "OHS / PL"
+CM .[#A6ADBB].> AT : "OHS / PL"
+
+' Sdílené identifikátory
+SK -[#A6ADBB,dashed]- UM
+SK -[#A6ADBB,dashed]- PM
+SK -[#A6ADBB,dashed]- TM
+
+legend right
+  |= Vztah |= Význam |
+  | Partnership | Oba kontexty mají vliv na společný model členství |
+  | Customer / Supplier | Upstream určuje kontrakt, downstream se přizpůsobuje |
+  | OHS / PL | Open Host Service + Published Language (publikuje události pro libovolného downstreama) |
+  | ACL | Anti-Corruption Layer (port chrání lokální model před cizími koncepty) |
+endlegend
+@enduml

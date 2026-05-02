@@ -1,0 +1,135 @@
+@startuml diagram
+!include ../theme.iuml
+
+title CQRS v Symfony 8
+
+' Definice obálek (package)
+package "Prezentační vrstva" {
+  class Controller {
+    +action()
+    +injectCommandBus(MessageBusInterface)
+    +injectQueryBus(MessageBusInterface)
+  }
+
+  class ViewModel {
+    +data
+  }
+}
+
+package "Aplikační vrstva - Commands" {
+  class Command {
+    +properties
+    +__construct()
+  }
+
+  class CommandHandler {
+    +__construct(dependencies)
+    +__invoke(Command): void
+  }
+
+  class CommandBus {
+    +dispatch(Command)
+  }
+}
+
+package "Aplikační vrstva - Queries" {
+  class Query {
+    +properties
+    +__construct()
+  }
+
+  class QueryHandler {
+    +__construct(dependencies)
+    +__invoke(Query): ?ViewModel
+  }
+
+  class QueryBus {
+    +dispatch(Query)
+  }
+}
+
+package "Doménová vrstva" {
+  class Entity {
+    +methods()
+  }
+
+  class Repository {
+    <<interface>>
+    +save(Entity)
+    +findById(id)
+  }
+
+  class DomainEvent {
+    +properties
+  }
+}
+
+package "Infrastrukturní vrstva" {
+  class DoctrineRepository {
+    -EntityManagerInterface entityManager
+    +save(Entity)
+    +findById(id)
+  }
+
+  class MessengerComponent {
+    +handle(message)
+    +route(message)
+  }
+
+  class Transport {
+    +sync
+    +async
+  }
+}
+
+' Vztahy mezi třídami a komponentami
+Controller --> CommandBus : dispatch
+Controller --> QueryBus : dispatch
+Controller --> Command : creates
+Controller --> Query : creates
+CommandBus --> CommandHandler : routes to
+QueryBus --> QueryHandler : routes to
+CommandHandler --> Entity : modifies
+CommandHandler --> Repository : uses
+QueryHandler --> Repository : uses
+QueryHandler --> ViewModel : returns
+DoctrineRepository ..|> Repository : implements
+MessengerComponent --> Transport : uses
+CommandBus --|> MessengerComponent : extends
+QueryBus --|> MessengerComponent : extends
+Entity --> DomainEvent : creates
+
+' Poznámky pro vysvětlení
+note bottom of Command
+  RegisterUser
+  CreateOrder
+  UpdateProfile
+end note
+
+note bottom of Query
+  GetUserProfile
+  GetOrderHistory
+  FindProducts
+end note
+
+note right of CommandHandler
+  Asynchronní zpracování (možné)
+  Mění stav systému
+  Nevrací data
+end note
+
+note right of QueryHandler
+  Synchronní zpracování
+  Nemodifikuje data
+  Vrací ViewModel
+end note
+
+note bottom of Transport
+  sync://    - Synchronní transport
+  doctrine:// - Doctrine transport
+  redis://    - Redis transport
+  amqp://    - RabbitMQ transport
+end note
+
+
+@enduml

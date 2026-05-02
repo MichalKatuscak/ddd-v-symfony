@@ -1,0 +1,54 @@
+@startuml boundary
+!include ../theme.iuml
+
+title Kde končí DDD a kde začíná Symfony
+
+package "DDD – čistý PHP, žádné závislosti na frameworku" as DDD {
+  rectangle "**Entity**\nUser, Order" as entity
+  rectangle "**Value Object**\nEmail, Money, OrderId" as vo
+  rectangle "**Aggregate Root**\ninvarianty, doménová pravidla" as agg
+  rectangle "**Domain Event**\nUserRegistered, OrderPlaced" as event
+  rectangle "**Repository interface**\nUserRepositoryInterface" as repo_if
+  rectangle "**Domain Service**\nPaymentService" as dsvc
+  rectangle "**Specification**\nActiveUserSpecification" as spec
+}
+
+package "Symfony – frameworková infrastruktura" as SYM {
+  rectangle "**Doctrine Repository**\nDoctrineUserRepository\nimplementuje UserRepositoryInterface" as repo_impl
+  rectangle "**Doctrine ORM Mapping**\nXML / atributy" as mapping
+  rectangle "**Messenger**\nCommandBus, QueryBus\nHandleři" as messenger
+  rectangle "**Controller**\nHTTP vstupní bod\nForm, Request, Response" as ctrl
+  rectangle "**EventDispatcher**\ndispatch doménových událostí" as evdisp
+  rectangle "**services.yaml**\nautowiring, interface binding" as di
+}
+
+' Vztahy uvnitř DDD
+agg -down-> entity : obsahuje
+agg -down-> vo : používá
+agg -right-> event : vytváří
+dsvc -up-> repo_if : závisí na (interface)
+dsvc -up-> agg : operuje nad
+spec -up-> agg : filtruje
+
+' Hranice: Symfony implementuje DDD kontrakty
+repo_impl -up-|> repo_if : implementuje
+mapping -up-> entity : mapuje na DB
+messenger -up-> dsvc : volá přes handler
+ctrl -right-> messenger : dispatch command/query
+evdisp -up-> event : propaguje
+di -up-> repo_if : binds interface\n→ implementace
+
+note bottom of DDD
+  **Testovatelné bez frameworku**
+  Unit testy nepotřebují Symfony kernel,
+  Doctrine ani databázi.
+end note
+
+note bottom of SYM
+  **Vyměnitelné**
+  Doctrine lze nahradit jiným ORM,
+  Messenger jiným bus systémem –
+  doménová vrstva se nezmění.
+end note
+
+@enduml

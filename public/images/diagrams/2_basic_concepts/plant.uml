@@ -1,0 +1,64 @@
+@startuml diagram
+!include ../theme.iuml
+
+class Entity {
+  +identity
+  +mutableState
+  +equals(other) bool
+}
+
+class ValueObject {
+  +immutableState
+  +noIdentity
+  +equals(other) bool
+}
+
+class AggregateRoot {
+  +Entity
+  +rootOfConsistencyBoundary
+  +transactionalConsistency
+}
+
+interface Repository {
+  +find(id)
+  +save(aggregate)
+  +remove(aggregate)
+}
+
+class DomainService {
+  +businessLogic()
+  +stateless
+  +operatesOnMultipleEntities()
+}
+
+class Factory {
+  +createComplexObjects()
+  +encapsulatesCreationLogic()
+}
+
+class DomainEvent {
+  +name
+  +timestamp
+  +data
+  +notification
+}
+
+class BoundedContext {
+  +autonomousDomain
+  +explicitBoundaries
+  +ubiquitousLanguage
+}
+
+AggregateRoot --|> Entity: je
+AggregateRoot o-- Entity: obsahuje
+AggregateRoot o-- ValueObject: obsahuje
+Repository ..> AggregateRoot: pracuje s
+Factory ..> AggregateRoot: vytváří
+DomainService ..> Entity: používá
+DomainService ..> ValueObject: používá
+AggregateRoot ..> DomainEvent: publikuje
+BoundedContext o-- AggregateRoot: obsahuje
+BoundedContext o-- Repository: obsahuje
+BoundedContext o-- DomainService: obsahuje
+
+@enduml

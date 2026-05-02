@@ -4,6 +4,10 @@ controllers:
         namespace: App\Controller
     type: attribute
 
+chapters_content:
+    resource: .
+    type: chapter_content
+
 # Explicitní routy pro chybové stránky
 error_404:
     path: /404

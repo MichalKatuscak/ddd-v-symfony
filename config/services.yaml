@@ -30,3 +30,9 @@ services:
         arguments:
             - '@twig'
             - '%kernel.debug%'
+
+    App\Content\ChapterRouteLoader:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+        tags:
+            - { name: routing.loader }

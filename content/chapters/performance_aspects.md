@@ -1,0 +1,1134 @@
+---
+route: performance_aspects
+path: /vykonnostni-aspekty
+title: Výkonnostní aspekty DDD v Symfony
+page_title: "Výkonnostní aspekty DDD v Symfony a Doctrine | DDD Symfony"
+meta_description: "Výkonnostní aspekty DDD v Symfony a Doctrine: N+1 problém, hranice agregátů, čtecí modely přes CQRS, snapshoty, UUID/ULID a cachování doménových objektů."
+meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
+og_type: article
+published: "2025-04-24"
+modified: "2026-04-28"
+breadcrumb_name: Výkonnostní aspekty
+schema_type: TechArticle
+schema_headline: "Výkonnostní aspekty DDD v Symfony a Doctrine"
+chapter_number: "17"
+category: Vzory
+deck: "Výkonnostní aspekty Domain-Driven Design v Symfony s Doctrine ORM – řešení N+1 problému, optimalizace agregátů, implementace read modelu přes CQRS, správné používání UUID a cachování doménových objektů."
+reading_time: 30
+difficulty: 4
+---
+
+## 17.01 Výkon v kontextu DDD {#uvodem}
+
+DDD proslulo pověstí pomalé architektury. Tato pověst vzniká z konkrétní příčiny: výkonnostní problémy
+přicházejí z nesprávné implementace – příliš velkých agregátů, nevhodného lazy loadingu, absence read modelu
+– ne z DDD samotného. Bohatý doménový model a rychlá aplikace nejsou v rozporu.
+
+:::callout{type="note"}
+### DDD vs. výkon: mýty a realita
+
+- **Mýtus:** DDD je vždy pomalejší než anémický model (anemic domain model). **Realita:** Správně navržené DDD s CQRS a optimalizovanými repozitáři je srovnatelně rychlé, protože read side nepotřebuje vůbec načítat doménové objekty.
+- **Mýtus:** Agregáty způsobují zbytečné JOIN operace. **Realita:** Problém nastává při špatně definovaných hranicích agregátů – příliš velký agregát načítá zbytečná data.
+- **Mýtus:** Doctrine ORM je pomalý pro DDD. **Realita:** Doctrine nabízí bohatou sadu nástrojů (DQL, native queries, extra lazy loading, query cache, result cache), které při správném použití odstraňují výkonnostní bottlenecky.
+:::
+
+Výkon se stává kritickým ve třech scénářích: aplikace s **desítkami propojených agregátů**,
+**velké agregáty** s kolekcemi tisíců položek a systémy s vysokou frekvencí čtení
+a latency požadavky v desítkách milisekund.
+
+:::callout{type="warn"}
+### Zlaté pravidlo optimalizace
+
+**Nikdy neoptimalizujte naslepo.** Každá optimalizace musí být podložena měřením.
+Předčasná optimalizace (premature optimization) vede k zbytečně složitému kódu, který řeší neexistující
+problémy. Nejprve profilujte, identifikujte skutečný bottleneck a teprve potom optimalizujte.
+Donald Knuth to vyjádřil nejlépe: *"Premature optimization is the root of all evil."*
+[[1]](https://dl.acm.org/doi/10.1145/356635.356640)
+:::
+
+## 17.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
+
+N+1 problém je jedním z nejčastějších výkonnostních antipatternů při práci s ORM. Nastává tehdy, když
+aplikace provede 1 dotaz pro načtení seznamu entit a poté pro každou entitu provede další dotaz
+pro načtení asociovaných dat – celkem tedy N+1 SQL dotazů místo 1–2 dotazů.
+
+:::callout{type="note"}
+### Přesná definice N+1 problému
+
+Pokud načteme N agregátů `Order` a každý agregát obsahuje kolekci `OrderItem`
+mapovanou jako lazy asociace, Doctrine odloží načtení položek do okamžiku prvního přístupu.
+Iterace přes všechny objednávky a přístup k jejich položkám způsobí N samostatných SELECT dotazů
+nad tabulkou `order_item` – jeden pro každou objednávku.
+:::
+
+:::callout{type="pattern"}
+### Příklad: kód způsobující N+1 problém
+
+:::code{language="php" filename="snippet.php"}
+<?php
+// Tento kód způsobí N+1 problém!
+// 1 dotaz: SELECT * FROM `order`
+$orders = $this->orderRepository->findAll();
+
+foreach ($orders as $order) {
+    // Každá iterace způsobí 1 SELECT z order_item - celkem N dalších dotazů
+    foreach ($order->getItems() as $item) {
+        echo $item->getProductName() . ': ' . $item->getQuantity();
+    }
+}
+:::
+:::
+
+Doctrine ve výchozím nastavení používá pro kolekce (OneToMany, ManyToMany) strategii
+**lazy loading**: kolekce není načtena z databáze, dokud k ní není poprvé přistoupeno.
+To je výhodné v situacích, kdy kolekce vůbec nepotřebujeme, ale při iteraci přes mnoho agregátů
+vede k výše popsanému N+1 problému.
+
+### Řešení 1: EXTRA_LAZY kolekce
+
+Doctrine nabízí strategii `EXTRA_LAZY` pro kolekce. Na rozdíl od standardního lazy loadingu,
+který načte celou kolekci při prvním přístupu, EXTRA_LAZY umožňuje provádět operace jako
+`count()`, `contains()` nebo `slice()` přímými SQL dotazy
+bez načtení celé kolekce do paměti.
+
+:::callout{type="pattern"}
+### Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)
+
+*Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (`#[ORM\Entity]`) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.*
+
+:::code{language="php" filename="src/Order/Domain/Model/Order.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Domain\Model;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: '`order`')]
+final class Order
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36, unique: true)]
+    private readonly string $id;
+
+    /** @var Collection<int, OrderItem> */
+    #[ORM\OneToMany(
+        targetEntity: OrderItem::class,
+        mappedBy: 'order',
+        fetch: 'EXTRA_LAZY',
+        cascade: ['persist', 'remove']
+    )]
+    private Collection $items;
+
+    public function __construct(string $id)
+    {
+        $this->id = $id;
+        $this->items = new ArrayCollection();
+    }
+
+    public function countItems(): int
+    {
+        // S EXTRA_LAZY provede SELECT COUNT(*) - bez načtení všech položek
+        return $this->items->count();
+    }
+}
+:::
+:::
+
+### Řešení 2: JOIN FETCH v DQL pro eager loading
+
+Pokud víme předem, že budeme iterovat přes kolekce, je efektivnější použít DQL s klauzulí
+`JOIN FETCH`. Tím instrukujeme Doctrine, aby načetlo agregát včetně asociovaných
+objektů v jediném SQL dotazu s LEFT JOIN nebo INNER JOIN.
+
+:::callout{type="pattern"}
+### Příklad: JOIN FETCH v DQL a Query Builderu
+
+:::code{language="php" filename="src/Order/Infrastructure/Repository/DoctrineOrderRepository.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Infrastructure\Repository;
+
+use App\Order\Domain\Model\Order;
+use App\Order\Domain\Repository\OrderRepository;
+use Doctrine\ORM\EntityManagerInterface;
+
+final class DoctrineOrderRepository implements OrderRepository
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    /**
+     * Načte objednávky včetně položek v jediném SQL dotazu (JOIN FETCH).
+     * Vhodné pro iteraci a export - eliminuje N+1 problém.
+     *
+     * @return Order[]
+     */
+    public function findAllWithItems(): array
+    {
+        // DQL s JOIN FETCH - Doctrine provede LEFT JOIN a hydratuje kolekci
+        return $this->em->createQuery(
+            'SELECT o, i
+             FROM App\Order\Domain\Model\Order o
+             JOIN FETCH o.items i
+             WHERE o.status = :status'
+        )
+            ->setParameter('status', 'confirmed')
+            ->getResult();
+    }
+
+    /**
+     * Alternativa přes Query Builder s addSelect()
+     *
+     * @return Order[]
+     */
+    public function findRecentWithItemsAndProduct(): array
+    {
+        return $this->em->createQueryBuilder()
+            ->select('o')
+            ->addSelect('i')          // eager load položek
+            ->addSelect('p')          // eager load produktů přes položky
+            ->from(Order::class, 'o')
+            ->leftJoin('o.items', 'i')
+            ->leftJoin('i.product', 'p')
+            ->where('o.createdAt > :since')
+            ->setParameter('since', new \DateTimeImmutable('-30 days'))
+            ->orderBy('o.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+}
+:::
+:::
+
+Pozor: při použití `JOIN FETCH` s paginací (`setMaxResults()`, `setFirstResult()`)
+Doctrine emituje varování a provede paginaci v paměti (in-memory pagination), nikoli na úrovni SQL.
+Řešením je buď stránkovat pouze přes identifikátory a následně načíst data, nebo použít nativní SQL
+s vlastním mapováním výsledků.
+
+## 17.03 Agregát a výkon: správné určení hranic {#agregat-hranice}
+
+Jedním ze základních principů DDD je, že agregát tvoří konzistenční hranici – veškeré invarianty
+doménového modelu jsou zaručeny v jednom agregátu. Problém nastává, pokud jsou hranice
+agregátu definovány příliš široce: agregát pak při každém načtení tahá z databáze rozsáhlý
+objektový graf, i když potřebujeme jen malou část dat.
+
+:::callout{type="note"}
+### Příznak příliš velkého agregátu
+
+- Načtení agregátu trvá neúměrně dlouho, i když používáme jen jeho kořen.
+- Kolekce asociovaných entit obsahují stovky nebo tisíce záznamů.
+- ORM lazy loading způsobuje N+1 v jiných částech systému.
+- Různé use-case scénáře potřebují různé podmnožiny dat agregátu.
+:::
+
+:::callout{type="pattern"}
+### Příklad: problematický Order agregát s 1000 OrderItems
+
+:::code{language="php" filename="snippet.php"}
+<?php
+// PROBLÉM: Každé načtení Order způsobí SELECT s 1000 řádky z order_item,
+// i když chceme jen zobrazit hlavičku objednávky (číslo, datum, zákazník).
+
+$order = $this->orderRepository->findById($orderId);
+
+// Pouze toto potřebujeme - ale agregát načetl 1000 položek zbytečně
+echo $order->getOrderNumber();
+echo $order->getCreatedAt()->format('d.m.Y');
+echo $order->getCustomer()->getFullName();
+:::
+:::
+
+### Řešení: rozdělení agregátu a specializované repozitářní metody
+
+Prvním krokem je kriticky přezkoumat, zda `OrderItem` skutečně musí být součástí
+agregátu `Order`, nebo zda se jedná o samostatný agregát s odkazem na `OrderId`.
+V e-commerce doméně bývá správné mít `Order` jako agregát kořene s přímým přístupem
+pouze k metadatům (číslo, datum, stav, celková cena) a `OrderItem` jako samostatný
+agregát odkazující na `OrderId`.
+
+:::callout{type="pattern"}
+### Příklad: specializované repozitářní metody pro různé kontexty
+
+:::code{language="php" filename="src/Order/Infrastructure/Repository/DoctrineOrderRepository.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Infrastructure\Repository;
+
+use App\Order\Domain\Model\Order;
+use App\Order\Domain\ValueObject\OrderId;
+use Doctrine\ORM\EntityManagerInterface;
+
+final class DoctrineOrderRepository
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    /**
+     * Načte pouze hlavičku objednávky (bez položek) - pro seznam objednávek.
+     * Doctrine neinicializuje kolekci items díky lazy loadingu.
+     */
+    public function findHeaderById(OrderId $id): ?Order
+    {
+        // Tato metoda vrátí Order, jehož kolekce items zůstane neinicializovaná,
+        // dokud k ní explicitně nepřistoupíme.
+        return $this->em->find(Order::class, $id->value());
+    }
+
+    /**
+     * Načte objednávku s položkami - pouze pro detailní zobrazení nebo zpracování.
+     */
+    public function findWithItemsById(OrderId $id): ?Order
+    {
+        return $this->em->createQuery(
+            'SELECT o, i FROM App\Order\Domain\Model\Order o
+             JOIN FETCH o.items i
+             WHERE o.id = :id'
+        )
+            ->setParameter('id', $id->value())
+            ->getOneOrNullResult();
+    }
+}
+:::
+:::
+
+Základním pravidlem DDD je, že **agregát musí být navržen podle doménových invariantů,
+nikoli podle výkonnostních požadavků**. Pokud jsou výkonnostní požadavky v konfliktu
+s doménovým modelem, je správným řešením zavedení read modelu (viz sekci CQRS), nikoli
+kompromitování doménové integrity.
+
+## 17.04 Optimalizace read modelu (CQRS) {#read-model-optimalizace}
+
+Striktní oddělení write side (doménové operace přes agregáty) od read side (dotazy vracející data
+pro prezentaci) je základní nástroj pro řešení výkonnostních problémů v DDD.
+Na read side není potřeba načítat doménové objekty – stačí vrátit strukturu dat přesně odpovídající
+potřebám uživatelského rozhraní nebo API klienta.
+
+:::callout{type="note"}
+### Zásady read modelu v CQRS
+
+- Query handlery **nepoužívají doménové repozitáře** – přistupují přímo k databázi přes DQL nebo nativní SQL.
+- Výsledkem je **DTO (Data Transfer Object)** nebo plain PHP array – žádné bohaté doménové objekty.
+- Read model může být **denormalizovaný** – data jsou již předpřipravena pro konkrétní view.
+- Read side lze **nezávisle cachovat** bez ohrožení doménové konzistence.
+:::
+
+:::callout{type="pattern"}
+### Příklad: QueryHandler vracející DTO přes DQL
+
+:::code{language="php" filename="src/Order/Application/Query/OrderSummaryDTO.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Application\Query;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+final class OrderSummaryDTO
+{
+    public function __construct(
+        public readonly string $orderId,
+        public readonly string $orderNumber,
+        public readonly string $customerName,
+        public readonly string $status,
+        public readonly int    $itemCount,
+        public readonly string $totalAmount,
+        public readonly \DateTimeImmutable $createdAt,
+    ) {}
+}
+
+#[AsMessageHandler]
+final class GetOrderSummaryListHandler
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    /**
+     * @return OrderSummaryDTO[]
+     */
+    public function __invoke(GetOrderSummaryList $query): array
+    {
+        // DQL NEW expression - Doctrine hydratuje přímo do DTO
+        // bez vytváření spravovaných doménových entit
+        $dtos = $this->em->createQuery(
+            'SELECT NEW App\Order\Application\Query\OrderSummaryDTO(
+                o.id,
+                o.orderNumber,
+                CONCAT(c.firstName, \' \', c.lastName),
+                o.status,
+                COUNT(i.id),
+                CONCAT(o.totalAmount.amount, \' \', o.totalAmount.currency),
+                o.createdAt
+             )
+             FROM App\Order\Domain\Model\Order o
+             JOIN o.customer c
+             LEFT JOIN o.items i
+             WHERE o.status IN (:statuses)
+             GROUP BY o.id, o.orderNumber, c.firstName, c.lastName,
+                      o.status, o.totalAmount.amount, o.totalAmount.currency, o.createdAt
+             ORDER BY o.createdAt DESC'
+        )
+            ->setParameter('statuses', $query->statuses)
+            ->setMaxResults($query->limit)
+            ->setFirstResult($query->offset)
+            ->getResult();
+
+        return $dtos;
+    }
+}
+:::
+:::
+
+### Doctrine NativeQuery pro komplexní reportovací dotazy
+
+DQL pokrývá většinu dotazů, ale pro složité reportovací dotazy (agregace, window funkce, CTE)
+nestačí. Doctrine umožňuje provádět nativní SQL dotazy s vlastním mapováním
+výsledků přes `ResultSetMapping`.
+
+:::callout{type="pattern"}
+### Příklad: NativeQuery s ResultSetMapping pro reportovací dotaz
+
+:::code{language="php" filename="src/Reporting/Infrastructure/Query/SalesReportQueryService.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Reporting\Infrastructure\Query;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
+
+final class SalesReportQueryService
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    /**
+     * Vrací měsíční obrat po zákaznících - komplexní agregace přes nativní SQL.
+     * Syntaxe: PostgreSQL (TO_CHAR, ::text cast). Pro MySQL použijte DATE_FORMAT() a CAST().
+     *
+     * @return array<int, array{customer_id: string, customer_name: string, month: string, revenue: string}>
+     */
+    public function getMonthlySalesByCustomer(\DateTimeImmutable $from, \DateTimeImmutable $to): array
+    {
+        $rsm = new ResultSetMappingBuilder($this->em);
+        // Mapujeme scalar výsledky (ne entity) - žádný overhead doménových objektů
+        $rsm->addScalarResult('customer_id',   'customer_id',   'string');
+        $rsm->addScalarResult('customer_name', 'customer_name', 'string');
+        $rsm->addScalarResult('month',         'month',         'string');
+        $rsm->addScalarResult('revenue',       'revenue',       'string');
+
+        $sql = "
+            SELECT
+                c.id                                          AS customer_id,
+                CONCAT(c.first_name, ' ', c.last_name)        AS customer_name,
+                TO_CHAR(o.created_at, 'YYYY-MM')              AS month,
+                SUM(oi.unit_price_amount * oi.quantity)::text AS revenue
+            FROM \"order\" o
+            JOIN customer c  ON c.id = o.customer_id
+            JOIN order_item oi ON oi.order_id = o.id
+            WHERE o.status = 'completed'
+              AND o.created_at BETWEEN :from AND :to
+            GROUP BY c.id, c.first_name, c.last_name, TO_CHAR(o.created_at, 'YYYY-MM')
+            ORDER BY month DESC, revenue DESC
+        ";
+
+        return $this->em
+            ->createNativeQuery($sql, $rsm)
+            ->setParameter('from', $from->format('Y-m-d'))
+            ->setParameter('to',   $to->format('Y-m-d'))
+            ->getScalarResult();
+    }
+}
+:::
+:::
+
+## 17.05 UUID vs. integer primární klíče {#uuid-vs-integer}
+
+V DDD je doporučenou praxí, aby agregát znal svoji identitu již před uložením do databáze.
+To umožňuje generovat `AggregateId` v doménovém kódu bez závislosti na databázové
+sekvenci nebo auto-increment hodnotě – podstatná vlastnost pro distribuované systémy, event sourcing
+a optimistické paralelní vytváření agregátů.
+
+:::callout{type="note"}
+### Výhody UUID pro DDD
+
+- Identita je generována v doméně – agregát je kompletní před persistencí.
+- Vhodné pro distribuované systémy – žádné centrální generování ID.
+- UUID lze bezpečně přenášet do API bez rizika enumeration útoků (na rozdíl od sekvenčních integerů).
+- Event sourcing: událost nese ID agregátu, který ještě neexistuje v databázi.
+
+### Výkonnostní dopady UUID
+
+- **Index fragmentace:** UUID v4 jsou náhodné – nové záznamy jsou vkládány na náhodné pozice v B-tree indexu, což způsobuje fragmentaci a zpomalení INSERT operací.
+- **Větší velikost:** UUID zabírá 16 bajtů (binárně) nebo 36 znaků (textově) oproti 4–8 bajtům pro integer – větší index, více I/O operací.
+- **Problém s cizími klíči:** Každý FK odkazující na UUID agregát nese 16 bajtů místo 4.
+:::
+
+### ULID jako kompromis
+
+ULID (Universally Unique Lexicographically Sortable Identifier) a UUID verze 6/7 (ordered UUID)
+řeší problém fragmentace indexů tím, že jsou **monotónně rostoucí**: nové hodnoty
+jsou vždy větší než předchozí, čímž jsou vkládány na konec B-tree indexu – stejné chování
+jako u auto-increment integeru, ale se zachováním globální unikátnosti bez centrálního generátoru.
+
+:::callout{type="pattern"}
+### Příklad: Použití symfony/uid (ULID a UUID v7)
+
+:::code{language="php" filename="src/Shared/Domain/ValueObject/OrderId.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Shared\Domain\ValueObject;
+
+use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
+
+/**
+ * Hodnotový objekt pro identitu objednávky - používá ULID pro výkon.
+ * ULID je lexikograficky řaditelný a monotónně rostoucí - přátelský k B-tree indexům.
+ */
+final class OrderId
+{
+    private function __construct(
+        private readonly string $value
+    ) {}
+
+    public static function generate(): self
+    {
+        return new self((string) new Ulid());
+    }
+
+    public static function fromString(string $value): self
+    {
+        if (!Ulid::isValid($value)) {
+            throw new \InvalidArgumentException(
+                sprintf('"%s" is not a valid ULID.', $value)
+            );
+        }
+        return new self($value);
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+}
+
+// Pro UUID v7 (ordered) - alternativa k ULID
+final class UserId
+{
+    private function __construct(
+        private readonly string $value
+    ) {}
+
+    public static function generate(): self
+    {
+        // UUID v7 - time-based, monotónně rostoucí, RFC 9562 kompatibilní
+        return new self((string) Uuid::v7());
+    }
+
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public function value(): string
+    {
+        return $this->value;
+    }
+}
+:::
+:::
+
+:::callout{type="pattern"}
+### Doctrine mapování pro ULID a UUID
+
+*Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (`#[ORM\Entity]`) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.*
+
+:::code{language="php" filename="src/Order/Domain/Model/Order.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Domain\Model;
+
+use App\Shared\Domain\ValueObject\OrderId;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UlidType;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+
+#[ORM\Entity]
+#[ORM\Table(name: '`order`')]
+final class Order
+{
+    #[ORM\Id]
+    // Symfony Bridge registruje 'ulid' typ - ukládá jako BINARY(16) nebo UUID v PostgreSQL
+    #[ORM\Column(type: UlidType::NAME, unique: true)]
+    private readonly string $id;
+
+    #[ORM\Column(type: 'string', length: 50)]
+    private readonly string $orderNumber;
+
+    public function __construct(OrderId $id, string $orderNumber)
+    {
+        $this->id          = $id->value();
+        $this->orderNumber = $orderNumber;
+    }
+
+    public function id(): OrderId
+    {
+        return OrderId::fromString($this->id);
+    }
+}
+:::
+:::
+
+## 17.06 Doctrine Identity Map a Unit of Work {#doctrine-identity-map}
+
+Doctrine ORM implementuje vzor Identity Map (Martin Fowler, *Patterns of Enterprise Application Architecture*):
+každý spravovaný objekt (managed entity) je v jednom `EntityManager`u uložen v paměti pod svým
+identifikátorem. Pokud načtete tentýž agregát dvakrát, Doctrine vrátí tentýž PHP objekt z paměti
+bez opakovaného SQL dotazu.
+
+:::callout{type="note"}
+### Identity Map a Unit of Work – co to znamená pro DDD
+
+- **Konzistence v requestu:** Všechny části kódu vidí tentýž stav agregátu – žádné nekonzistentní kopie.
+- **Jedno místo změn:** Změny agregátu jsou sledovány Unit of Work a při `flush()` jsou synchronizovány do databáze. Není třeba explicitně volat `save()` pro každou změnu.
+- **Automatická detekce změn (dirty checking):** Doctrine porovnává aktuální stav entit s jejich původním stavem (snapshot) a generuje UPDATE pouze pro skutečně změněné atributy.
+:::
+
+### Problém s batch zpracováním
+
+Identity Map je navržena pro typický web request, kdy zpracujeme jednotky až desítky agregátů.
+Při hromadném zpracování (import, migrace, generování reportů) jsou do Identity Map vkládány
+tisíce objektů, které se hromadí v paměti po celou dobu zpracování. To vede k postupnému
+nárůstu spotřeby paměti (*memory leak*) a zpomalování dirty checkingu, protože Doctrine
+musí procházet stále větší množinu spravovaných objektů.
+
+:::callout{type="pattern"}
+### Příklad: správné clearování Entity Manageru při batch operacích
+
+:::code{language="php" filename="src/Import/Application/Command/ImportProductsHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Import\Application\Command;
+
+use App\Product\Domain\Model\Product;
+use App\Product\Domain\ValueObject\ProductId;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class ImportProductsHandler
+{
+    private const BATCH_SIZE = 100;
+
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    public function __invoke(ImportProducts $command): void
+    {
+        $i = 0;
+
+        foreach ($command->productRows as $row) {
+            $product = new Product(
+                ProductId::generate(),
+                $row['name'],
+                $row['sku'],
+                $row['price']
+            );
+
+            // persist přidá objekt do Identity Map, ale SQL zatím nevydá
+            $this->em->persist($product);
+
+            if (++$i % self::BATCH_SIZE === 0) {
+                // flush() vydá batch INSERT/UPDATE do databáze
+                $this->em->flush();
+                // clear() uvolní Identity Map - PHP GC může objekty uvolnit z paměti
+                // POZOR: po clear() jsou dříve spravované objekty odpojeny (detached)
+                $this->em->clear();
+            }
+        }
+
+        // Zpracování zbývajících záznamů po posledním batch
+        $this->em->flush();
+        $this->em->clear();
+    }
+}
+:::
+:::
+
+:::callout{type="warn"}
+### Pozor na clear() a detached entity
+
+Po zavolání `$this->em->clear()` jsou **všechny** spravované entity odpojeny
+(stav *detached*). Jakýkoli pokus o přístup k jejich lazy-loaded asociacím způsobí výjimku
+`LazyInitializationException`. Ujistěte se, že po `clear()` nepracujete
+s referencemi na dříve spravované objekty.
+:::
+
+## 17.07 Caching v DDD architektuře {#cachovani}
+
+Caching v DDD architektuře vyžaduje pečlivý design. Základní otázka je:
+**co cachovat**? Obecné pravidlo zní: cachujeme výsledky operací, které jsou
+výpočetně nebo I/O nákladné a jejichž výsledek se v čase nemění (nebo se mění předvídatelně).
+Business logiku nikdy do cache klíče nezahrnujeme – cache slouží pro infrastrukturní výsledky,
+nikoli pro doménová rozhodnutí.
+
+:::callout{type="note"}
+### Co cachovat a co ne
+
+- **Vhodné pro cache:** výsledky read modelu (DTO), výsledky reportovacích dotazů, výsledky volání externích API, výpočetně náročné projekce.
+- **Nevhodné pro cache:** aktuální stav agregátů, které jsou právě modifikovány (způsobí dirty reads), výsledky, jejichž neaktuálnost by způsobila doménové nekonzistence.
+- **Nikdy:** nezahrnujte výsledek doménové logiky do cache klíče (např. nevypočítávejte slevu při sestavování cache klíče).
+:::
+
+### Query cache a result cache v Doctrine
+
+Doctrine nabízí dvě úrovně cachování SQL dotazů:
+
+- **Query cache:** cachuje přeložený DQL → SQL. DQL parsing je relativně nákladný; query cache eliminuje opakované parsování pro identické DQL dotazy. Výsledky se nemění.
+- **Result cache:** cachuje výsledky SQL dotazu. Musí být explicitně nakonfigurován a invalidován při změnách dat. Vhodný pro read-heavy dotazy s řízenou dobou platnosti.
+
+:::callout{type="pattern"}
+### Příklad: CachedUserRepository (Decorator pattern)
+
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/CachedUserRepository.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\Repository;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\Email;
+use Psr\Cache\CacheItemPoolInterface;
+
+/**
+ * Dekorátor pro UserRepository přidávající aplikační vrstvu cache.
+ * Doménový kontrakt (interface UserRepository) je zachován beze změny.
+ */
+final class CachedUserRepository implements UserRepository
+{
+    private const TTL = 300; // 5 minut
+
+    public function __construct(
+        private UserRepository         $inner,  // dekorovaný repozitář (Doctrine implementace)
+        private CacheItemPoolInterface $cache
+    ) {}
+
+    public function findById(UserId $id): ?User
+    {
+        $cacheKey = 'user_' . $id->value();
+        $item     = $this->cache->getItem($cacheKey);
+
+        if ($item->isHit()) {
+            return $item->get();
+        }
+
+        $user = $this->inner->findById($id);
+
+        $item->set($user)->expiresAfter(self::TTL);
+        $this->cache->save($item);
+
+        return $user;
+    }
+
+    public function findByEmail(Email $email): ?User
+    {
+        // Email lookup cachujeme kratší dobu - email se může změnit
+        $cacheKey = 'user_email_' . md5($email->value());
+        $item     = $this->cache->getItem($cacheKey);
+
+        if ($item->isHit()) {
+            return $item->get();
+        }
+
+        $user = $this->inner->findByEmail($email);
+
+        $item->set($user)->expiresAfter(60);
+        $this->cache->save($item);
+
+        return $user;
+    }
+
+    public function save(User $user): void
+    {
+        // Po uložení invalidujeme cache pro daného uživatele
+        $this->inner->save($user);
+        $this->cache->deleteItem('user_' . $user->id()->value());
+        $this->cache->deleteItem('user_email_' . md5($user->email()->value()));
+    }
+
+    public function remove(User $user): void
+    {
+        $this->inner->remove($user);
+        $this->cache->deleteItem('user_' . $user->id()->value());
+        $this->cache->deleteItem('user_email_' . md5($user->email()->value()));
+    }
+}
+:::
+:::
+
+### Cache invalidace při doménových událostech
+
+Účinným přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Když agregát
+změní stav (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
+Cache invalidace se tím stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
+
+:::callout{type="pattern"}
+### Cache invalidace přes Symfony EventDispatcher
+
+:::code{language="php" filename="src/UserManagement/Infrastructure/EventListener/InvalidateUserCacheOnEmailChanged.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\EventListener;
+
+use App\UserManagement\Domain\Event\UserEmailChanged;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+
+#[AsEventListener(event: UserEmailChanged::class)]
+final class InvalidateUserCacheOnEmailChanged
+{
+    public function __construct(
+        private CacheItemPoolInterface $cache
+    ) {}
+
+    public function __invoke(UserEmailChanged $event): void
+    {
+        $this->cache->deleteItem('user_' . $event->userId->value());
+        $this->cache->deleteItem('user_email_' . md5($event->oldEmail->value()));
+        $this->cache->deleteItem('user_email_' . md5($event->newEmail->value()));
+    }
+}
+:::
+:::
+
+## 17.08 Bulk operace a hromadné zpracování {#bulk-operace}
+
+Standardní DDD workflow – načti agregát, aplikuj doménovou logiku, zavolej `flush()`
+– funguje výborně pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
+hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní: každý cyklus načítá
+a spravuje jeden agregát, dirty checking zpracovává celou Identity Map a celkový čas zpracování
+roste lineárně s počtem záznamů.
+
+### DQL bulk UPDATE a DELETE – bypass Identity Map
+
+Pro hromadné aktualizace, kde není potřeba procházet doménovou logiku, nabízí Doctrine možnost
+provést `UPDATE` nebo `DELETE` přímo přes DQL. Tyto operace zcela obcházejí
+Identity Map a Unit of Work – jsou to přímé SQL příkazy přeložené z DQL. **Nevýhoda:**
+po DQL bulk operaci mohou být spravované entity v Identity Map nekonzistentní se stavem v databázi.
+Je nutné zavolat `clear()`.
+
+:::callout{type="pattern"}
+### Příklad: efektivní bulk import s Doctrine
+
+:::code{language="php" filename="src/Order/Infrastructure/Command/BulkUpdateOrderStatusHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Infrastructure\Command;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class BulkUpdateOrderStatusHandler
+{
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    /**
+     * Hromadná změna stavu objednávek přes DQL UPDATE - jeden SQL příkaz.
+     * Nevyužívá doménovou logiku agregátu - vhodné jen pro migrační/admin operace.
+     */
+    public function __invoke(BulkUpdateOrderStatus $command): int
+    {
+        $affectedRows = $this->em->createQuery(
+            'UPDATE App\Order\Domain\Model\Order o
+             SET o.status = :newStatus
+             WHERE o.status = :oldStatus
+               AND o.createdAt < :before'
+        )
+            ->setParameter('newStatus', $command->newStatus)
+            ->setParameter('oldStatus', $command->oldStatus)
+            ->setParameter('before', $command->before)
+            ->execute();
+
+        // Po DQL UPDATE je Identity Map zastaralá - musíme ji vyčistit
+        $this->em->clear();
+
+        return $affectedRows;
+    }
+}
+
+// ---
+// Příklad: batch INSERT přes persist/flush s clear() po každém batch
+final class BatchProductImportHandler
+{
+    private const BATCH_SIZE = 50;
+
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
+
+    public function __invoke(BatchImportProducts $command): void
+    {
+        $counter = 0;
+        // Poznámka: Doctrine DBAL 3+ odstranil setSQLLogger() - debug logging
+        // se vypíná konfigurací (doctrine.dbal.logging: false) nebo odebráním
+        // logovacího middleware z services.yaml, ne programaticky.
+
+        foreach ($command->rows as $row) {
+            $product = Product::create(
+                ProductId::generate(),
+                $row['name'],
+                Money::of($row['price'], $row['currency'])
+            );
+
+            $this->em->persist($product);
+
+            if (++$counter % self::BATCH_SIZE === 0) {
+                $this->em->flush();
+                $this->em->clear();
+            }
+        }
+
+        $this->em->flush();
+        $this->em->clear();
+    }
+}
+:::
+:::
+
+### Symfony Messenger pro asynchronní hromadné zpracování
+
+Namísto synchronního zpracování tisíců záznamů v jednom PHP procesu je doporučeným přístupem
+rozdělení práce na menší úlohy zasílané přes Symfony Messenger na asynchronní transport
+(RabbitMQ, Redis Streams, Amazon SQS). Každá zpráva zpracuje jeden nebo malý batch agregátů,
+čímž jsou paměťové nároky a doba zpracování jedné zprávy předvídatelné.
+
+:::callout{type="pattern"}
+### Rozložení bulk importu přes Symfony Messenger
+
+:::code{language="php" filename="src/Import/Application/Command/StartProductImportHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Import\Application\Command;
+
+use Symfony\Component\Messenger\MessageBusInterface;
+
+// 1. Controller nebo CLI příkaz rozdělí vstupní data na chunky
+final class StartProductImportHandler
+{
+    private const CHUNK_SIZE = 100;
+
+    public function __construct(
+        private MessageBusInterface $commandBus
+    ) {}
+
+    public function __invoke(StartProductImport $command): void
+    {
+        // Každých 100 řádků odešleme jako samostatnou zprávu
+        foreach (array_chunk($command->rows, self::CHUNK_SIZE) as $chunk) {
+            $this->commandBus->dispatch(new ImportProductChunk($chunk));
+        }
+        // Messenger Worker zpracuje každou zprávu nezávisle
+        // - žádný memory leak, paralelizovatelné přes více workerů
+    }
+}
+:::
+:::
+
+## 17.09 Profiling DDD aplikací {#profiling}
+
+Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
+ekosystému existuje škála nástrojů od jednoduchého development profileru až po pokročilé
+produkční profiling nástroje.
+
+### Symfony Profiler (Web Debug Toolbar)
+
+Ve vývojovém prostředí je Symfony Profiler (aktivní při `APP_ENV=dev`) nejrychlejším
+nástrojem pro odhalení výkonnostních problémů. Panel **Doctrine** zobrazuje:
+
+- Celkový počet SQL dotazů za request – nadměrný počet dotazů signalizuje N+1 problém.
+- Dobu trvání každého dotazu – pomalé dotazy vyžadují indexování nebo přepis.
+- Kompletní SQL s parametry – umožňuje přímé testování v databázovém klientovi.
+- Stack trace pro každý dotaz – identifikuje, která část kódu dotaz vydala.
+
+### Doctrine query logging
+
+Pro programatické zachycení SQL dotazů (např. v integračních testech nebo při ladění batch operací)
+lze Doctrine konfigurovat s vlastním SQL loggerem.
+
+:::callout{type="pattern"}
+### Programatické zachycení SQL dotazů přes Doctrine Middleware
+
+:::code{language="php" filename="src/Shared/Infrastructure/Doctrine/QueryCountingMiddleware.php"}
+<?php
+// V Doctrine DBAL 3+ se logging provádí přes Middleware (ne SQLLogger)
+// config/packages/doctrine.yaml
+
+// doctrine:
+//   dbal:
+//     logging: true   # aktivuje vestavěný logger v dev prostředí
+
+// Pro vlastní middleware:
+namespace App\Shared\Infrastructure\Doctrine;
+
+use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Middleware;
+
+final class QueryCountingMiddleware implements Middleware
+{
+    private int $queryCount = 0;
+
+    public function wrap(Driver $driver): Driver
+    {
+        $middleware = $this;
+
+        return new class($driver, $middleware) extends \Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware {
+            public function __construct(
+                Driver $wrappedDriver,
+                private QueryCountingMiddleware $middleware
+            ) {
+                parent::__construct($wrappedDriver);
+            }
+
+            public function connect(array $params): \Doctrine\DBAL\Driver\Connection
+            {
+                return new class(parent::connect($params), $this->middleware)
+                    implements \Doctrine\DBAL\Driver\Connection
+                {
+                    public function __construct(
+                        private \Doctrine\DBAL\Driver\Connection $inner,
+                        private QueryCountingMiddleware $middleware
+                    ) {}
+
+                    public function prepare(string $sql): \Doctrine\DBAL\Driver\Statement
+                    {
+                        $this->middleware->increment();
+                        return $this->inner->prepare($sql);
+                    }
+
+                    public function query(string $sql): \Doctrine\DBAL\Driver\Result
+                    {
+                        $this->middleware->increment();
+                        return $this->inner->query($sql);
+                    }
+
+                    public function exec(string $sql): int|string
+                    {
+                        $this->middleware->increment();
+                        return $this->inner->exec($sql);
+                    }
+
+                    // Zbývající metody delegují na $this->inner
+                    public function lastInsertId(): int|string { return $this->inner->lastInsertId(); }
+                    public function beginTransaction(): void { $this->inner->beginTransaction(); }
+                    public function commit(): void { $this->inner->commit(); }
+                    public function rollBack(): void { $this->inner->rollBack(); }
+                    public function getNativeConnection(): mixed { return $this->inner->getNativeConnection(); }
+                    public function getServerVersion(): string { return $this->inner->getServerVersion(); }
+                };
+            }
+        };
+    }
+
+    public function increment(): void
+    {
+        $this->queryCount++;
+    }
+
+    public function reset(): void
+    {
+        $this->queryCount = 0;
+    }
+
+    public function getQueryCount(): int
+    {
+        return $this->queryCount;
+    }
+}
+:::
+:::
+
+### Blackfire.io pro produkční profiling
+
+Pro profiling v produkčním nebo stage prostředí je Blackfire.io standardním nástrojem v PHP komunitě.
+Blackfire zachytí kompletní call graph každého requestu nebo CLI příkazu – s přesným měřením
+doby trvání, počtu volání a paměťové stopy pro každou funkci. Umožňuje psát *performance tests*
+(Blackfire Builds) jako součást CI/CD pipeline, čímž zabraňuje výkonnostním regresím.
+
+:::callout{type="pattern"}
+### Interpretace SQL dotazů v Symfony Profileru – praktický postup
+
+1. Otevřete Symfony Profiler panel **Doctrine** a seřaďte dotazy podle doby trvání.
+2. Dotazy trvající déle než 100 ms jsou kandidáty pro optimalizaci – zkopírujte SQL a spusťte `EXPLAIN ANALYZE` v databázi.
+3. Hledejte `Seq Scan` (PostgreSQL) nebo `Full Table Scan` (MySQL/MariaDB) – signalizují chybějící index.
+4. Zkontrolujte, zda se opakují strukturálně stejné dotazy lišící se pouze parametrem – typický příznak N+1 problému.
+5. Pro N+1 přidejte `JOIN FETCH` do příslušného repozitáře nebo přepište dotaz na read model (DTO).
+:::
+
+:::callout{type="warn"}
+### Varování: neprovádějte předčasnou optimalizaci
+
+Optimalizujte **pouze** na základě naměřených dat. Každá optimalizace – přidání cache,
+přepsání DQL na nativní SQL, rozdělení agregátu – zvyšuje komplexitu kódu a ztěžuje budoucí
+údržbu. Pokud profiler ukazuje, že daný kód nezpůsobuje výkonnostní problém, ponechte jej
+v čitelné, doménově srozumitelné podobě. Výkonnostní optimalizace bez měření je prací naslepo
+a pravidelně vede k regresi v jiných částech systému.
+:::
+
+Výkon v DDD se řeší na třech úrovních: hranice agregátů, read model a profiling. Hlavním nástrojem je
+oddělení read a write modelu přes CQRS, eliminace N+1 problémů a správně zvolené hranice
+agregátů. Vhodným pokračováním je kapitola
+[CQRS v Symfony 8](/cqrs) a
+[praktické příklady implementace DDD](/prakticke-priklady).
+
+:::faq{}
+- question: Zpomaluje DDD aplikaci oproti CRUD?
+  answer: 'Samotné DDD výkon nesnižuje – doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte se víc dat, než je třeba), chybí optimalizovaný read model v CQRS nebo se nesprávně používá Doctrine lazy loading, což vede k N+1 dotazům. Při správném návrhu je DDD aplikace srovnatelná s CRUD a lépe optimalizovatelná díky explicitním hranicím. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
+- question: Jak v DDD řešit N+1 problém s agregáty?
+  answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch="EAGER"</code> u mapování, <code>fetchJoin()</code> v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
+- question: Má velikost agregátu vliv na výkon?
+  answer: 'Ano, zásadně. Příliš velký agregát vede k načítání desítek vnitřních entit při každé operaci a k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty – to zvyšuje paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
+- question: Jak optimalizovat read model v CQRS?
+  answer: 'Read model se navrhuje přímo pro daný dotaz – denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou: dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem, nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
+- question: Je lepší UUID, nebo integer primární klíč z pohledu výkonu?
+  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což je v DDD ideální – agregát dostane ID před persistencí. Výkonový rozdíl je v řádu jednotek procent a v praxi je pohlcen vyšší přehledností doménového kódu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
+:::

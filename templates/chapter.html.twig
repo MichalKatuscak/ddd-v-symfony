@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+{% set fm = chapter.frontmatter %}
+
+{% block title %}{{ fm.pageTitle|raw }}{% endblock %}
+{% block og_title %}{{ fm.title|raw }}{% endblock %}
+{% block meta_description %}{{ fm.metaDescription|raw }}{% endblock %}
+{% block meta_keywords %}{{ fm.metaKeywords|raw }}{% endblock %}
+{% block og_type %}{{ fm.ogType }}{% endblock %}
+{% block article_published_time %}{{ fm.published }}{% endblock %}
+{% block article_modified_time %}{{ fm.modified }}{% endblock %}
+{% block breadcrumb_name %}{{ fm.breadcrumbName|raw }}{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "{{ fm.schemaType }}",
+      "headline": {{ fm.schemaHeadline|json_encode|raw }},
+      "description": {{ fm.metaDescription|json_encode|raw }},
+      "keywords": {{ fm.metaKeywords|json_encode|raw }},
+      "author": {
+        "@type": "Person",
+        "name": "Michal Katuščák",
+        "url": "https://www.katuscak.cz/",
+        "sameAs": [
+          "https://blog.katuscak.cz/",
+          "https://www.linkedin.com/in/michal-katu%C5%A1%C4%8D%C3%A1k-04a249184/"
+        ]
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Michal Katuščák"
+      }
+      {% if fm.published %},"datePublished": {{ fm.published|json_encode|raw }}{% endif %}
+      {% if fm.modified %},"dateModified": {{ fm.modified|json_encode|raw }}{% endif %}
+      ,"image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}"
+      ,"mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
+      }
+    }
+    </script>
+{% endblock %}
+
+{% block body %}
+<article class="article">
+    {% include '_partials/article_head.html.twig' with {
+        chapter_number: fm.chapterNumber,
+        category:       fm.category,
+        title:          fm.title,
+        deck:           fm.deck,
+        reading_time:   fm.readingTime,
+        difficulty:     fm.difficulty,
+        published:      fm.published,
+        last_updated:   fm.modified,
+        author:         'M. Katuščák'
+    } %}
+
+    {% include '_partials/article_toc.html.twig' %}
+
+    <div class="art-body"{% if fm.chapterNumber %} data-chapter-number="{{ fm.chapterNumber }}"{% endif %}>
+        {% if fm.githubExamples %}
+            {% include '_partials/github_examples.html.twig' with { path: fm.githubExamples } %}
+        {% endif %}
+
+        {{ chapter.html|raw }}
+    </div>
+
+    {% include '_partials/chapter_nav.html.twig' %}
+</article>
+{% endblock %}

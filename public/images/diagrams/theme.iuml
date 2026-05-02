@@ -1,0 +1,199 @@
+' ============================================================
+' Sdílené téma pro všechny PlantUML diagramy
+' Tmavá paleta odpovídající webu (var(--bg-1), --fg, --accent)
+' Renderovací font: DejaVu Sans (systémový, plný český support)
+' Po renderu se font-family přepisuje na Inter pomocí scripts/postprocess-svg.sh
+' ============================================================
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+' Globální barvy
+!$BG     = "#11141A"
+!$BG_ALT = "#161A22"
+!$BG_HI  = "#1B202A"
+!$FG     = "#E6E8EC"
+!$FG_DIM = "#A6ADBB"
+!$STROKE = "#3D424E"
+!$ACCENT = "#F0A456"
+!$ACCENT_DIM = "#7A5530"
+
+skinparam ArrowColor $ACCENT
+skinparam ArrowFontColor $FG
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam component {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam rectangle {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam package {
+  BackgroundColor $BG
+  BorderColor $ACCENT
+  FontColor $ACCENT
+}
+
+skinparam folder {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam frame {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam database {
+  BackgroundColor $BG_HI
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam queue {
+  BackgroundColor $BG_HI
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam cloud {
+  BackgroundColor $BG_HI
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+skinparam actor {
+  BackgroundColor $BG_ALT
+  BorderColor $ACCENT
+  FontColor $FG
+}
+
+skinparam usecase {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+' Class / objekt diagramy
+skinparam class {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  HeaderBackgroundColor $BG_HI
+  ArrowColor $ACCENT
+  FontColor $FG
+  AttributeFontColor $FG_DIM
+  StereotypeFontColor $ACCENT
+}
+
+skinparam object {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+' Sekvenční diagramy
+skinparam sequence {
+  ParticipantBackgroundColor $BG_ALT
+  ParticipantBorderColor $STROKE
+  ParticipantFontColor $FG
+  ActorBackgroundColor $BG_ALT
+  ActorBorderColor $ACCENT
+  ActorFontColor $FG
+  LifeLineBorderColor $STROKE
+  LifeLineBackgroundColor $BG_HI
+  ArrowColor $ACCENT
+  ArrowFontColor $FG
+  GroupBackgroundColor $BG_HI
+  GroupBorderColor $STROKE
+  GroupFontColor $FG_DIM
+  GroupHeaderFontColor $ACCENT
+  BoxBackgroundColor $BG
+  BoxBorderColor $ACCENT
+  BoxFontColor $ACCENT
+  DividerBackgroundColor $BG_HI
+  DividerBorderColor $STROKE
+  DividerFontColor $FG_DIM
+  ReferenceBackgroundColor $BG_ALT
+  ReferenceBorderColor $STROKE
+  ReferenceFontColor $FG
+  ReferenceHeaderBackgroundColor $BG_HI
+  StereotypeFontColor $ACCENT
+}
+
+' Stavový (state) diagram
+skinparam state {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+  StartColor $ACCENT
+  EndColor $ACCENT
+  ArrowColor $ACCENT
+  AttributeFontColor $FG_DIM
+}
+
+' Aktivity
+skinparam activity {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+  ArrowColor $ACCENT
+  StartColor $ACCENT
+  EndColor $ACCENT
+  BarColor $ACCENT
+  DiamondBackgroundColor $BG_HI
+  DiamondBorderColor $STROKE
+  DiamondFontColor $FG
+}
+
+' Notes
+skinparam note {
+  BackgroundColor $BG_HI
+  BorderColor $STROKE
+  FontColor $FG_DIM
+}
+
+skinparam title {
+  FontColor $FG
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG_DIM
+}
+
+skinparam caption {
+  FontColor $FG_DIM
+}
+
+skinparam stereotype {
+  CBackgroundColor $BG_HI
+  CBorderColor $ACCENT
+  ABackgroundColor $BG_HI
+  ABorderColor $ACCENT
+  IBackgroundColor $BG_HI
+  IBorderColor $ACCENT
+  EBackgroundColor $BG_HI
+  EBorderColor $ACCENT
+}

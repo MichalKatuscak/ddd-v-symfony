@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1978.125px" preserveAspectRatio="none" style="width:4667px;height:1978px;background:#11141A;" version="1.1" viewBox="0 0 4667 1978" width="4667.1875px" zoomAndPan="magnify"><defs/><g><!--MD5=[b323384cef0f9016c667ce8a79c096ed]
+cluster Cart--><polygon fill="#11141A" points="34.375,314.8438,317.1875,314.8438,328.125,349.6826,3267.1875,349.6826,3267.1875,1959.375,34.375,1959.375,34.375,314.8438" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="34.375" x2="328.125" y1="349.6826" y2="349.6826"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="273.4375" x="40.625" y="338.2736">Cart Bounded Context</text><!--MD5=[32cc0cf9a225a47366ceee4674294e06]
+cluster CartDomain--><polygon fill="#11141A" points="71.875,796.0938,171.875,796.0938,182.8125,830.9326,1046.875,830.9326,1046.875,1921.875,71.875,1921.875,71.875,796.0938" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="71.875" x2="182.8125" y1="830.9326" y2="830.9326"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="90.625" x="78.125" y="819.5236">Domain</text><!--MD5=[66f6fc97c539144186dc17b5d2b2f617]
+cluster CartModel--><polygon fill="#11141A" points="109.375,863.2813,192.1875,863.2813,203.125,898.1201,650,898.1201,650,1612.5,109.375,1612.5,109.375,863.2813" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="109.375" x2="203.125" y1="898.1201" y2="898.1201"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="73.4375" x="115.625" y="886.7111">Model</text><!--MD5=[a1ce4aacbc78afdd78c1f5e3b9c28493]
+cluster CartValueObject--><polygon fill="#11141A" points="109.375,1703.125,267.1875,1703.125,278.125,1737.9639,839.0625,1737.9639,839.0625,1884.375,109.375,1884.375,109.375,1703.125" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="109.375" x2="278.125" y1="1737.9639" y2="1737.9639"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="115.625" y="1726.5549">ValueObject</text><!--MD5=[62e5920ae5d364bdb038bb316c54205d]
+cluster CartEvent--><polygon fill="#11141A" points="712.5,1380.4688,790.625,1380.4688,801.5625,1415.3076,1000,1415.3076,1000,1561.7188,712.5,1561.7188,712.5,1380.4688" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="712.5" x2="801.5625" y1="1415.3076" y2="1415.3076"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="68.75" x="718.75" y="1403.8986">Event</text><!--MD5=[ff39213708e92b56f1b485c195c8e17a]
+cluster CartRepository--><polygon fill="#11141A" points="687.5,914.0625,829.6875,914.0625,840.625,948.9014,1009.375,948.9014,1009.375,1146.875,687.5,1146.875,687.5,914.0625" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="687.5" x2="840.625" y1="948.9014" y2="948.9014"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="693.75" y="937.4924">Repository</text><!--MD5=[b8d3053fb0066463d1a4341f3e32498b]
+cluster CartInfrastructure--><polygon fill="#11141A" points="1084.375,1287.5,1265.625,1287.5,1276.5625,1322.3389,1509.375,1322.3389,1509.375,1625,1084.375,1625,1084.375,1287.5" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="1084.375" x2="1276.5625" y1="1322.3389" y2="1322.3389"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="171.875" x="1090.625" y="1310.9299">Infrastructure</text><!--MD5=[ecc78f701922c2d7f0dc12367766f18a]
+cluster CartInfraRepo--><polygon fill="#11141A" points="1121.875,1354.6875,1264.0625,1354.6875,1275,1389.5264,1471.875,1389.5264,1471.875,1587.5,1121.875,1587.5,1121.875,1354.6875" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="1121.875" x2="1275" y1="1389.5264" y2="1389.5264"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="1128.125" y="1378.1174">Repository</text><!--MD5=[ae3d5603dae7ba9506626bfe7a342a65]
+cluster CartApplication--><polygon fill="#11141A" points="1084.375,382.0313,1229.6875,382.0313,1240.625,416.8701,2078.125,416.8701,2078.125,1209.375,1084.375,1209.375,1084.375,382.0313" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="1084.375" x2="1240.625" y1="416.8701" y2="416.8701"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="135.9375" x="1090.625" y="405.4611">Application</text><!--MD5=[6855142ce3ee39a3cad114fdad4eaf28]
+cluster CartCommand--><polygon fill="#11141A" points="1625,449.2188,1756.25,449.2188,1767.1875,484.0576,2040.625,484.0576,2040.625,1171.875,1625,1171.875,1625,449.2188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="1625" x2="1767.1875" y1="484.0576" y2="484.0576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="121.875" x="1631.25" y="472.6486">Command</text><!--MD5=[57429135d9c7494411079c52d2fd9cdc]
+cluster CartQuery--><polygon fill="#11141A" points="1121.875,449.2188,1206.25,449.2188,1217.1875,484.0576,1587.5,484.0576,1587.5,1133.5938,1121.875,1133.5938,1121.875,449.2188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="1121.875" x2="1217.1875" y1="484.0576" y2="484.0576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="75" x="1128.125" y="472.6486">Query</text><!--MD5=[19b3ec64df4eddf98c877520308624a5]
+cluster CartPresentation--><polygon fill="#11141A" points="2115.625,382.0313,2282.8125,382.0313,2293.75,416.8701,3229.6875,416.8701,3229.6875,692.9688,2115.625,692.9688,2115.625,382.0313" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="2115.625" x2="2293.75" y1="416.8701" y2="416.8701"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="157.8125" x="2121.875" y="405.4611">Presentation</text><!--MD5=[2985c26e55d3ad09f0f78eb74496a2f5]
+cluster CartController--><polygon fill="#11141A" points="2446.875,449.2188,2579.6875,449.2188,2590.625,484.0576,3192.1875,484.0576,3192.1875,655.4688,2446.875,655.4688,2446.875,449.2188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="2446.875" x2="2590.625" y1="484.0576" y2="484.0576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="123.4375" x="2453.125" y="472.6486">Controller</text><!--MD5=[8e140d14095f16625a750c99418cb8b4]
+cluster CartViewModel--><polygon fill="#11141A" points="2153.125,461.7188,2296.875,461.7188,2307.8125,496.5576,2409.375,496.5576,2409.375,642.9688,2153.125,642.9688,2153.125,461.7188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="2153.125" x2="2307.8125" y1="496.5576" y2="496.5576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="134.375" x="2159.375" y="485.1486">ViewModel</text><!--MD5=[4523f918a499262345e8d765b0fe948b]
+cluster Order--><polygon fill="#11141A" points="3304.6875,327.3438,3607.8125,327.3438,3618.75,362.1826,4632.8125,362.1826,4632.8125,717.9688,3304.6875,717.9688,3304.6875,327.3438" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3304.6875" x2="3618.75" y1="362.1826" y2="362.1826"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="293.75" x="3310.9375" y="350.7736">Order Bounded Context</text><!--MD5=[140abd6d958b635175b0a04a9534d7bd]
+cluster OrderDomain--><polygon fill="#11141A" points="3342.1875,394.5313,3442.1875,394.5313,3453.125,429.3701,4595.3125,429.3701,4595.3125,680.4688,3342.1875,680.4688,3342.1875,394.5313" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3342.1875" x2="3453.125" y1="429.3701" y2="429.3701"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="90.625" x="3348.4375" y="417.9611">Domain</text><!--MD5=[f801d190568d9b08fc85197bae18e0ad]
+cluster OrderModel--><polygon fill="#11141A" points="4189.0625,461.7188,4271.875,461.7188,4282.8125,496.5576,4557.8125,496.5576,4557.8125,642.9688,4189.0625,642.9688,4189.0625,461.7188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="4189.0625" x2="4282.8125" y1="496.5576" y2="496.5576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="73.4375" x="4195.3125" y="485.1486">Model</text><!--MD5=[5c99dc1a7b98abc21dee7e791afcbbe8]
+cluster OrderValueObject--><polygon fill="#11141A" points="3973.4375,461.7188,4131.25,461.7188,4142.1875,496.5576,4151.5625,496.5576,4151.5625,642.9688,3973.4375,642.9688,3973.4375,461.7188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3973.4375" x2="4142.1875" y1="496.5576" y2="496.5576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="3979.6875" y="485.1486">ValueObject</text><!--MD5=[cef0040ccd9d7975f6f3c7af04967e2c]
+cluster OrderEvent--><polygon fill="#11141A" points="3692.1875,461.7188,3770.3125,461.7188,3781.25,496.5576,3935.9375,496.5576,3935.9375,642.9688,3692.1875,642.9688,3692.1875,461.7188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3692.1875" x2="3781.25" y1="496.5576" y2="496.5576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="68.75" x="3698.4375" y="485.1486">Event</text><!--MD5=[32a4751baf3c8bd54f8fd0cc3c8a333f]
+cluster OrderRepository--><polygon fill="#11141A" points="3379.6875,461.7188,3521.875,461.7188,3532.8125,496.5576,3654.6875,496.5576,3654.6875,642.9688,3379.6875,642.9688,3379.6875,461.7188" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3379.6875" x2="3532.8125" y1="496.5576" y2="496.5576"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="3385.9375" y="485.1486">Repository</text><!--MD5=[0d99d65ace22e45511a90a7e65fdb1f1]
+cluster Shared--><polygon fill="#11141A" points="3304.6875,805.4688,3401.5625,805.4688,3412.5,840.3076,4156.25,840.3076,4156.25,1196.0938,3304.6875,1196.0938,3304.6875,805.4688" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3304.6875" x2="3412.5" y1="840.3076" y2="840.3076"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="87.5" x="3310.9375" y="828.8986">Shared</text><!--MD5=[43d204b2dcb911519d1e78cb3ff71192]
+cluster SharedInfra--><polygon fill="#11141A" points="3342.1875,872.6563,3523.4375,872.6563,3534.375,907.4951,4118.75,907.4951,4118.75,1158.5938,3342.1875,1158.5938,3342.1875,872.6563" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3342.1875" x2="3534.375" y1="907.4951" y2="907.4951"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="171.875" x="3348.4375" y="896.0861">Infrastructure</text><!--MD5=[d1580035dbe090a06ac86f0727cc0c2a]
+cluster SharedBus--><polygon fill="#11141A" points="3379.6875,939.8438,3434.375,939.8438,3445.3125,974.6826,4081.25,974.6826,4081.25,1121.0938,3379.6875,1121.0938,3379.6875,939.8438" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="3379.6875" x2="3445.3125" y1="974.6826" y2="974.6826"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="45.3125" x="3385.9375" y="963.2736">Bus</text><!--MD5=[33564ab9fc901e205820c2c835537d61]
+class CartEntity--><rect fill="#161A22" height="224.6582" id="CartEntity" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="489.0625" x="135.1563" y="947.6563"/><ellipse cx="351.5625" cy="971.0938" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M355.2979,978.4424 Q354.541,978.833 353.7109,979.0283 Q352.9053,979.2236 352.002,979.2236 Q348.7793,979.2236 347.0703,977.0996 Q345.3857,974.9756 345.3857,970.9473 Q345.3857,966.9189 347.0703,964.7949 Q348.7793,962.6709 352.002,962.6709 Q352.9053,962.6709 353.7354,962.8662 Q354.5654,963.0615 355.2979,963.4277 L355.2979,966.9434 Q354.4922,966.1865 353.7109,965.8447 Q352.9541,965.5029 352.1484,965.5029 Q350.415,965.5029 349.5361,966.8701 Q348.6572,968.2373 348.6572,970.9473 Q348.6572,973.6328 349.5361,975.0244 Q350.415,976.3916 352.1484,976.3916 Q352.9541,976.3916 353.7109,976.0498 Q354.4922,975.6836 355.2979,974.9512 L355.2979,978.4424 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="43.75" x="381.25" y="978.6667">Cart</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="136.7188" x2="622.6563" y1="994.5313" y2="994.5313"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="136.7188" x2="622.6563" y1="1007.0313" y2="1007.0313"/><ellipse cx="152.3438" cy="1024.2188" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="110.9375" x="164.8438" y="1033.5861">id(): CartId</text><ellipse cx="152.3438" cy="1049.6826" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="157.8125" x="164.8438" y="1059.05">userId(): string</text><ellipse cx="152.3438" cy="1075.1465" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="450" x="164.8438" y="1084.5139">addItem(ProductId, Quantity, Money): void</text><ellipse cx="152.3438" cy="1100.6104" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="164.8438" y="1109.9777">removeItem(ProductId): void</text><ellipse cx="152.3438" cy="1126.0742" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="164.8438" y="1135.4416">items(): array</text><ellipse cx="152.3438" cy="1151.5381" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="232.8125" x="164.8438" y="1160.9055">totalAmount(): Money</text><!--MD5=[34aa1721e174b9ea6a1c60620dd200ef]
+class CartItemEntity--><rect fill="#161A22" height="173.7305" id="CartItemEntity" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="275" x="242.1875" y="1414.0625"/><ellipse cx="328.125" cy="1437.5" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M331.8604,1444.8486 Q331.1035,1445.2393 330.2734,1445.4346 Q329.4678,1445.6299 328.5645,1445.6299 Q325.3418,1445.6299 323.6328,1443.5059 Q321.9482,1441.3818 321.9482,1437.3535 Q321.9482,1433.3252 323.6328,1431.2012 Q325.3418,1429.0771 328.5645,1429.0771 Q329.4678,1429.0771 330.2979,1429.2725 Q331.1279,1429.4678 331.8604,1429.834 L331.8604,1433.3496 Q331.0547,1432.5928 330.2734,1432.251 Q329.5166,1431.9092 328.7109,1431.9092 Q326.9775,1431.9092 326.0986,1433.2764 Q325.2197,1434.6436 325.2197,1437.3535 Q325.2197,1440.0391 326.0986,1441.4307 Q326.9775,1442.7979 328.7109,1442.7979 Q329.5166,1442.7979 330.2734,1442.4561 Q331.0547,1442.0898 331.8604,1441.3574 L331.8604,1444.8486 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="90.625" x="357.8125" y="1445.0729">CartItem</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="243.75" x2="515.625" y1="1460.9375" y2="1460.9375"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="243.75" x2="515.625" y1="1473.4375" y2="1473.4375"/><ellipse cx="259.375" cy="1490.625" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="235.9375" x="271.875" y="1499.9924">productId(): ProductId</text><ellipse cx="259.375" cy="1516.0889" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="204.6875" x="271.875" y="1525.4562">quantity(): Quantity</text><ellipse cx="259.375" cy="1541.5527" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="271.875" y="1550.9201">price(): Money</text><ellipse cx="259.375" cy="1567.0166" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="271.875" y="1576.384">totalPrice(): Money</text><!--MD5=[487a65f65d70fd86e1e3121ad8b6ec71]
+class CartIdVO--><rect fill="#161A22" height="71.875" id="CartIdVO" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="109.375" x="704.6875" y="1787.5"/><ellipse cx="726.5625" cy="1810.9375" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M730.2979,1818.2861 Q729.541,1818.6768 728.7109,1818.8721 Q727.9053,1819.0674 727.002,1819.0674 Q723.7793,1819.0674 722.0703,1816.9434 Q720.3857,1814.8193 720.3857,1810.791 Q720.3857,1806.7627 722.0703,1804.6387 Q723.7793,1802.5146 727.002,1802.5146 Q727.9053,1802.5146 728.7354,1802.71 Q729.5654,1802.9053 730.2979,1803.2715 L730.2979,1806.7871 Q729.4922,1806.0303 728.7109,1805.6885 Q727.9541,1805.3467 727.1484,1805.3467 Q725.415,1805.3467 724.5361,1806.7139 Q723.6572,1808.0811 723.6572,1810.791 Q723.6572,1813.4766 724.5361,1814.8682 Q725.415,1816.2354 727.1484,1816.2354 Q727.9541,1816.2354 728.7109,1815.8936 Q729.4922,1815.5273 730.2979,1814.7949 L730.2979,1818.2861 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="62.5" x="746.875" y="1818.5104">CartId</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="706.25" x2="812.5" y1="1834.375" y2="1834.375"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="706.25" x2="812.5" y1="1846.875" y2="1846.875"/><!--MD5=[c4e6c1444dace508ec75528132a1fc5d]
+class ProductIdVO--><rect fill="#161A22" height="71.875" id="ProductIdVO" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="150" x="500" y="1787.5"/><ellipse cx="521.875" cy="1810.9375" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M525.6104,1818.2861 Q524.8535,1818.6768 524.0234,1818.8721 Q523.2178,1819.0674 522.3145,1819.0674 Q519.0918,1819.0674 517.3828,1816.9434 Q515.6982,1814.8193 515.6982,1810.791 Q515.6982,1806.7627 517.3828,1804.6387 Q519.0918,1802.5146 522.3145,1802.5146 Q523.2178,1802.5146 524.0479,1802.71 Q524.8779,1802.9053 525.6104,1803.2715 L525.6104,1806.7871 Q524.8047,1806.0303 524.0234,1805.6885 Q523.2666,1805.3467 522.4609,1805.3467 Q520.7275,1805.3467 519.8486,1806.7139 Q518.9697,1808.0811 518.9697,1810.791 Q518.9697,1813.4766 519.8486,1814.8682 Q520.7275,1816.2354 522.4609,1816.2354 Q523.2666,1816.2354 524.0234,1815.8936 Q524.8047,1815.5273 525.6104,1814.7949 L525.6104,1818.2861 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="103.125" x="542.1875" y="1818.5104">ProductId</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="501.5625" x2="648.4375" y1="1834.375" y2="1834.375"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="501.5625" x2="648.4375" y1="1846.875" y2="1846.875"/><!--MD5=[432ea7b251f567c2daacf143459ee83e]
+class QuantityVO--><rect fill="#161A22" height="71.875" id="QuantityVO" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="135.9375" x="135.1563" y="1787.5"/><ellipse cx="157.0313" cy="1810.9375" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M160.7666,1818.2861 Q160.0098,1818.6768 159.1797,1818.8721 Q158.374,1819.0674 157.4707,1819.0674 Q154.248,1819.0674 152.5391,1816.9434 Q150.8545,1814.8193 150.8545,1810.791 Q150.8545,1806.7627 152.5391,1804.6387 Q154.248,1802.5146 157.4707,1802.5146 Q158.374,1802.5146 159.2041,1802.71 Q160.0342,1802.9053 160.7666,1803.2715 L160.7666,1806.7871 Q159.9609,1806.0303 159.1797,1805.6885 Q158.4229,1805.3467 157.6172,1805.3467 Q155.8838,1805.3467 155.0049,1806.7139 Q154.126,1808.0811 154.126,1810.791 Q154.126,1813.4766 155.0049,1814.8682 Q155.8838,1816.2354 157.6172,1816.2354 Q158.4229,1816.2354 159.1797,1815.8936 Q159.9609,1815.5273 160.7666,1814.7949 L160.7666,1818.2861 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="89.0625" x="177.3438" y="1818.5104">Quantity</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="136.7188" x2="269.5313" y1="1834.375" y2="1834.375"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="136.7188" x2="269.5313" y1="1846.875" y2="1846.875"/><!--MD5=[94ee14459726c79703aa0f64f7eb3560]
+class MoneyVO--><rect fill="#161A22" height="71.875" id="MoneyVO" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="118.75" x="326.5625" y="1787.5"/><ellipse cx="348.4375" cy="1810.9375" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M352.1729,1818.2861 Q351.416,1818.6768 350.5859,1818.8721 Q349.7803,1819.0674 348.877,1819.0674 Q345.6543,1819.0674 343.9453,1816.9434 Q342.2607,1814.8193 342.2607,1810.791 Q342.2607,1806.7627 343.9453,1804.6387 Q345.6543,1802.5146 348.877,1802.5146 Q349.7803,1802.5146 350.6104,1802.71 Q351.4404,1802.9053 352.1729,1803.2715 L352.1729,1806.7871 Q351.3672,1806.0303 350.5859,1805.6885 Q349.8291,1805.3467 349.0234,1805.3467 Q347.29,1805.3467 346.4111,1806.7139 Q345.5322,1808.0811 345.5322,1810.791 Q345.5322,1813.4766 346.4111,1814.8682 Q347.29,1816.2354 349.0234,1816.2354 Q349.8291,1816.2354 350.5859,1815.8936 Q351.3672,1815.5273 352.1729,1814.7949 L352.1729,1818.2861 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="71.875" x="368.75" y="1818.5104">Money</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="328.125" x2="443.75" y1="1834.375" y2="1834.375"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="328.125" x2="443.75" y1="1846.875" y2="1846.875"/><!--MD5=[16b927e997821941bf3dd222c78672b6]
+class ItemAddedToCartEvent--><rect fill="#161A22" height="71.875" id="ItemAddedToCartEvent" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="235.9375" x="738.2813" y="1464.8438"/><ellipse cx="760.1563" cy="1488.2813" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M763.8916,1495.6299 Q763.1348,1496.0205 762.3047,1496.2158 Q761.499,1496.4111 760.5957,1496.4111 Q757.373,1496.4111 755.6641,1494.2871 Q753.9795,1492.1631 753.9795,1488.1348 Q753.9795,1484.1064 755.6641,1481.9824 Q757.373,1479.8584 760.5957,1479.8584 Q761.499,1479.8584 762.3291,1480.0537 Q763.1592,1480.249 763.8916,1480.6152 L763.8916,1484.1309 Q763.0859,1483.374 762.3047,1483.0322 Q761.5479,1482.6904 760.7422,1482.6904 Q759.0088,1482.6904 758.1299,1484.0576 Q757.251,1485.4248 757.251,1488.1348 Q757.251,1490.8203 758.1299,1492.2119 Q759.0088,1493.5791 760.7422,1493.5791 Q761.5479,1493.5791 762.3047,1493.2373 Q763.0859,1492.8711 763.8916,1492.1387 L763.8916,1495.6299 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="189.0625" x="780.4688" y="1495.8542">ItemAddedToCart</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="739.8438" x2="972.6563" y1="1511.7188" y2="1511.7188"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="739.8438" x2="972.6563" y1="1524.2188" y2="1524.2188"/><!--MD5=[3f594f404d201caa1d8567460d4a997e]
+class CartRepositoryInterface--><rect fill="#161A22" height="122.8027" id="CartRepositoryInterface" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="270.3125" x="713.2813" y="998.4375"/><ellipse cx="763.9844" cy="1021.875" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M767.7197,1029.2236 Q766.9629,1029.6143 766.1328,1029.8096 Q765.3271,1030.0049 764.4238,1030.0049 Q761.2012,1030.0049 759.4922,1027.8809 Q757.8076,1025.7568 757.8076,1021.7285 Q757.8076,1017.7002 759.4922,1015.5762 Q761.2012,1013.4521 764.4238,1013.4521 Q765.3271,1013.4521 766.1572,1013.6475 Q766.9873,1013.8428 767.7197,1014.209 L767.7197,1017.7246 Q766.9141,1016.9678 766.1328,1016.626 Q765.376,1016.2842 764.5703,1016.2842 Q762.8369,1016.2842 761.958,1017.6514 Q761.0791,1019.0186 761.0791,1021.7285 Q761.0791,1024.4141 761.958,1025.8057 Q762.8369,1027.1729 764.5703,1027.1729 Q765.376,1027.1729 766.1328,1026.8311 Q766.9141,1026.4648 767.7197,1025.7324 L767.7197,1029.2236 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="159.375" x="790.7031" y="1029.4479">CartRepository</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="714.8438" x2="982.0313" y1="1045.3125" y2="1045.3125"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="714.8438" x2="982.0313" y1="1057.8125" y2="1057.8125"/><ellipse cx="730.4688" cy="1075" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="231.25" x="742.9688" y="1084.3674">findById(CartId): ?Cart</text><ellipse cx="730.4688" cy="1100.4639" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="742.9688" y="1109.8312">save(Cart): void</text><!--MD5=[c093792dab88a8ef93127316bcc18dc8]
+class DoctrineCartRepo--><rect fill="#161A22" height="122.8027" id="DoctrineCartRepo" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="298.4375" x="1147.6563" y="1439.0625"/><ellipse cx="1169.5313" cy="1462.5" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1173.2666,1469.8486 Q1172.5098,1470.2393 1171.6797,1470.4346 Q1170.874,1470.6299 1169.9707,1470.6299 Q1166.748,1470.6299 1165.0391,1468.5059 Q1163.3545,1466.3818 1163.3545,1462.3535 Q1163.3545,1458.3252 1165.0391,1456.2012 Q1166.748,1454.0771 1169.9707,1454.0771 Q1170.874,1454.0771 1171.7041,1454.2725 Q1172.5342,1454.4678 1173.2666,1454.834 L1173.2666,1458.3496 Q1172.4609,1457.5928 1171.6797,1457.251 Q1170.9229,1456.9092 1170.1172,1456.9092 Q1168.3838,1456.9092 1167.5049,1458.2764 Q1166.626,1459.6436 1166.626,1462.3535 Q1166.626,1465.0391 1167.5049,1466.4307 Q1168.3838,1467.7979 1170.1172,1467.7979 Q1170.9229,1467.7979 1171.6797,1467.4561 Q1172.4609,1467.0898 1173.2666,1466.3574 L1173.2666,1469.8486 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="251.5625" x="1189.8438" y="1470.0729">DoctrineCartRepository</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1149.2188" x2="1444.5313" y1="1485.9375" y2="1485.9375"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1149.2188" x2="1444.5313" y1="1498.4375" y2="1498.4375"/><ellipse cx="1164.8438" cy="1515.625" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="231.25" x="1177.3438" y="1524.9924">findById(CartId): ?Cart</text><ellipse cx="1164.8438" cy="1541.0889" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="1177.3438" y="1550.4562">save(Cart): void</text><!--MD5=[e6829da673d4b6d393431db42f6e1e2b]
+class AddItemToCartCommand--><rect fill="#161A22" height="173.7305" id="AddItemToCartCommand" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="217.1875" x="1778.9063" y="973.4375"/><ellipse cx="1805" cy="996.875" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1808.7354,1004.2236 Q1807.9785,1004.6143 1807.1484,1004.8096 Q1806.3428,1005.0049 1805.4395,1005.0049 Q1802.2168,1005.0049 1800.5078,1002.8809 Q1798.8232,1000.7568 1798.8232,996.7285 Q1798.8232,992.7002 1800.5078,990.5762 Q1802.2168,988.4521 1805.4395,988.4521 Q1806.3428,988.4521 1807.1729,988.6475 Q1808.0029,988.8428 1808.7354,989.209 L1808.7354,992.7246 Q1807.9297,991.9678 1807.1484,991.626 Q1806.3916,991.2842 1805.5859,991.2842 Q1803.8525,991.2842 1802.9736,992.6514 Q1802.0947,994.0186 1802.0947,996.7285 Q1802.0947,999.4141 1802.9736,1000.8057 Q1803.8525,1002.1729 1805.5859,1002.1729 Q1806.3916,1002.1729 1807.1484,1001.8311 Q1807.9297,1001.4648 1808.7354,1000.7324 L1808.7354,1004.2236 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="160.9375" x="1826.25" y="1004.4479">AddItemToCart</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1780.4688" x2="1994.5313" y1="1020.3125" y2="1020.3125"/><ellipse cx="1796.0938" cy="1037.5" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="134.375" x="1808.5938" y="1046.8674">cartId: string</text><ellipse cx="1796.0938" cy="1062.9639" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="178.125" x="1808.5938" y="1072.3312">productId: string</text><ellipse cx="1796.0938" cy="1088.4277" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="126.5625" x="1808.5938" y="1097.7951">quantity: int</text><ellipse cx="1796.0938" cy="1113.8916" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="112.5" x="1808.5938" y="1123.259">price: float</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1780.4688" x2="1994.5313" y1="1134.668" y2="1134.668"/><!--MD5=[9649014ab8a2591231f7f32792c5e913]
+class AddItemToCartHandler--><rect fill="#161A22" height="97.3389" id="AddItemToCartHandler" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="365.625" x="1650" y="533.5938"/><ellipse cx="1705.625" cy="557.0313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1709.3604,564.3799 Q1708.6035,564.7705 1707.7734,564.9658 Q1706.9678,565.1611 1706.0645,565.1611 Q1702.8418,565.1611 1701.1328,563.0371 Q1699.4482,560.9131 1699.4482,556.8848 Q1699.4482,552.8564 1701.1328,550.7324 Q1702.8418,548.6084 1706.0645,548.6084 Q1706.9678,548.6084 1707.7979,548.8037 Q1708.6279,548.999 1709.3604,549.3652 L1709.3604,552.8809 Q1708.5547,552.124 1707.7734,551.7822 Q1707.0166,551.4404 1706.2109,551.4404 Q1704.4775,551.4404 1703.5986,552.8076 Q1702.7197,554.1748 1702.7197,556.8848 Q1702.7197,559.5703 1703.5986,560.9619 Q1704.4775,562.3291 1706.2109,562.3291 Q1707.0166,562.3291 1707.7734,561.9873 Q1708.5547,561.6211 1709.3604,560.8887 L1709.3604,564.3799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="243.75" x="1733.4375" y="564.6042">AddItemToCartHandler</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1651.5625" x2="2014.0625" y1="580.4688" y2="580.4688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1651.5625" x2="2014.0625" y1="592.9688" y2="592.9688"/><ellipse cx="1667.1875" cy="610.1563" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="326.5625" x="1679.6875" y="619.5236">__invoke(AddItemToCart): void</text><!--MD5=[7de14ffea941b92efcd3454fa557d32f]
+class GetCartQuery--><rect fill="#161A22" height="97.3389" id="GetCartQuery" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="173.4375" x="1358.5938" y="1011.7188"/><ellipse cx="1400.1563" cy="1035.1563" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1403.8916,1042.5049 Q1403.1348,1042.8955 1402.3047,1043.0908 Q1401.499,1043.2861 1400.5957,1043.2861 Q1397.373,1043.2861 1395.6641,1041.1621 Q1393.9795,1039.0381 1393.9795,1035.0098 Q1393.9795,1030.9814 1395.6641,1028.8574 Q1397.373,1026.7334 1400.5957,1026.7334 Q1401.499,1026.7334 1402.3291,1026.9287 Q1403.1592,1027.124 1403.8916,1027.4902 L1403.8916,1031.0059 Q1403.0859,1030.249 1402.3047,1029.9072 Q1401.5479,1029.5654 1400.7422,1029.5654 Q1399.0088,1029.5654 1398.1299,1030.9326 Q1397.251,1032.2998 1397.251,1035.0098 Q1397.251,1037.6953 1398.1299,1039.0869 Q1399.0088,1040.4541 1400.7422,1040.4541 Q1401.5479,1040.4541 1402.3047,1040.1123 Q1403.0859,1039.7461 1403.8916,1039.0137 L1403.8916,1042.5049 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="82.8125" x="1424.8438" y="1042.7292">GetCart</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1360.1563" x2="1530.4688" y1="1058.5938" y2="1058.5938"/><ellipse cx="1375.7813" cy="1075.7813" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="134.375" x="1388.2813" y="1085.1486">cartId: string</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1360.1563" x2="1530.4688" y1="1096.5576" y2="1096.5576"/><!--MD5=[96ed852b66416e4a6b52f8f051831795]
+class GetCartHandler--><rect fill="#161A22" height="97.3389" id="GetCartHandler" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="414.0625" x="1147.6563" y="533.5938"/><ellipse cx="1265.625" cy="557.0313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1269.3604,564.3799 Q1268.6035,564.7705 1267.7734,564.9658 Q1266.9678,565.1611 1266.0645,565.1611 Q1262.8418,565.1611 1261.1328,563.0371 Q1259.4482,560.9131 1259.4482,556.8848 Q1259.4482,552.8564 1261.1328,550.7324 Q1262.8418,548.6084 1266.0645,548.6084 Q1266.9678,548.6084 1267.7979,548.8037 Q1268.6279,548.999 1269.3604,549.3652 L1269.3604,552.8809 Q1268.5547,552.124 1267.7734,551.7822 Q1267.0166,551.4404 1266.2109,551.4404 Q1264.4775,551.4404 1263.5986,552.8076 Q1262.7197,554.1748 1262.7197,556.8848 Q1262.7197,559.5703 1263.5986,560.9619 Q1264.4775,562.3291 1266.2109,562.3291 Q1267.0166,562.3291 1267.7734,561.9873 Q1268.5547,561.6211 1269.3604,560.8887 L1269.3604,564.3799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="165.625" x="1295.3125" y="564.6042">GetCartHandler</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1149.2188" x2="1560.1563" y1="580.4688" y2="580.4688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1149.2188" x2="1560.1563" y1="592.9688" y2="592.9688"/><ellipse cx="1164.8438" cy="610.1563" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="375" x="1177.3438" y="619.5236">__invoke(GetCart): ?CartViewModel</text><!--MD5=[5632c3cc0be025c48d03723a6509b69b]
+class CartControllerClass--><rect fill="#161A22" height="97.3389" id="CartControllerClass" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="384.375" x="2782.8125" y="533.5938"/><ellipse cx="2894.5313" cy="557.0313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M2898.2666,564.3799 Q2897.5098,564.7705 2896.6797,564.9658 Q2895.874,565.1611 2894.9707,565.1611 Q2891.748,565.1611 2890.0391,563.0371 Q2888.3545,560.9131 2888.3545,556.8848 Q2888.3545,552.8564 2890.0391,550.7324 Q2891.748,548.6084 2894.9707,548.6084 Q2895.874,548.6084 2896.7041,548.8037 Q2897.5342,548.999 2898.2666,549.3652 L2898.2666,552.8809 Q2897.4609,552.124 2896.6797,551.7822 Q2895.9229,551.4404 2895.1172,551.4404 Q2893.3838,551.4404 2892.5049,552.8076 Q2891.626,554.1748 2891.626,556.8848 Q2891.626,559.5703 2892.5049,560.9619 Q2893.3838,562.3291 2895.1172,562.3291 Q2895.9229,562.3291 2896.6797,561.9873 Q2897.4609,561.6211 2898.2666,560.8887 L2898.2666,564.3799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="2924.2188" y="564.6042">CartController</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2784.375" x2="3165.625" y1="580.4688" y2="580.4688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2784.375" x2="3165.625" y1="592.9688" y2="592.9688"/><ellipse cx="2800" cy="610.1563" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="345.3125" x="2812.5" y="619.5236">addToCart(Request): Response</text><!--MD5=[7b71a135d616eff476eb453917390671]
+class CheckoutController--><rect fill="#161A22" height="71.875" id="CheckoutController" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="256.25" x="2471.875" y="546.0938"/><ellipse cx="2493.75" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M2497.4854,576.8799 Q2496.7285,577.2705 2495.8984,577.4658 Q2495.0928,577.6611 2494.1895,577.6611 Q2490.9668,577.6611 2489.2578,575.5371 Q2487.5732,573.4131 2487.5732,569.3848 Q2487.5732,565.3564 2489.2578,563.2324 Q2490.9668,561.1084 2494.1895,561.1084 Q2495.0928,561.1084 2495.9229,561.3037 Q2496.7529,561.499 2497.4854,561.8652 L2497.4854,565.3809 Q2496.6797,564.624 2495.8984,564.2822 Q2495.1416,563.9404 2494.3359,563.9404 Q2492.6025,563.9404 2491.7236,565.3076 Q2490.8447,566.6748 2490.8447,569.3848 Q2490.8447,572.0703 2491.7236,573.4619 Q2492.6025,574.8291 2494.3359,574.8291 Q2495.1416,574.8291 2495.8984,574.4873 Q2496.6797,574.1211 2497.4854,573.3887 L2497.4854,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="209.375" x="2514.0625" y="577.1042">CheckoutController</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2473.4375" x2="2726.5625" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2473.4375" x2="2726.5625" y1="605.4688" y2="605.4688"/><!--MD5=[309827a15d3681fdcbf37f0a80cb29fc]
+class CartViewModelClass--><rect fill="#161A22" height="71.875" id="CartViewModelClass" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="206.25" x="2178.125" y="546.0938"/><ellipse cx="2200" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M2203.7354,576.8799 Q2202.9785,577.2705 2202.1484,577.4658 Q2201.3428,577.6611 2200.4395,577.6611 Q2197.2168,577.6611 2195.5078,575.5371 Q2193.8232,573.4131 2193.8232,569.3848 Q2193.8232,565.3564 2195.5078,563.2324 Q2197.2168,561.1084 2200.4395,561.1084 Q2201.3428,561.1084 2202.1729,561.3037 Q2203.0029,561.499 2203.7354,561.8652 L2203.7354,565.3809 Q2202.9297,564.624 2202.1484,564.2822 Q2201.3916,563.9404 2200.5859,563.9404 Q2198.8525,563.9404 2197.9736,565.3076 Q2197.0947,566.6748 2197.0947,569.3848 Q2197.0947,572.0703 2197.9736,573.4619 Q2198.8525,574.8291 2200.5859,574.8291 Q2201.3916,574.8291 2202.1484,574.4873 Q2202.9297,574.1211 2203.7354,573.3887 L2203.7354,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="159.375" x="2220.3125" y="577.1042">CartViewModel</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2179.6875" x2="2382.8125" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2179.6875" x2="2382.8125" y1="605.4688" y2="605.4688"/><!--MD5=[1fde0b218a7f71ea10604b4ae1efe892]
+class OrderEntity--><rect fill="#161A22" height="71.875" id="OrderEntity" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="107.8125" x="4424.2188" y="546.0938"/><ellipse cx="4446.0938" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M4449.8291,576.8799 Q4449.0723,577.2705 4448.2422,577.4658 Q4447.4365,577.6611 4446.5332,577.6611 Q4443.3105,577.6611 4441.6016,575.5371 Q4439.917,573.4131 4439.917,569.3848 Q4439.917,565.3564 4441.6016,563.2324 Q4443.3105,561.1084 4446.5332,561.1084 Q4447.4365,561.1084 4448.2666,561.3037 Q4449.0967,561.499 4449.8291,561.8652 L4449.8291,565.3809 Q4449.0234,564.624 4448.2422,564.2822 Q4447.4854,563.9404 4446.6797,563.9404 Q4444.9463,563.9404 4444.0674,565.3076 Q4443.1885,566.6748 4443.1885,569.3848 Q4443.1885,572.0703 4444.0674,573.4619 Q4444.9463,574.8291 4446.6797,574.8291 Q4447.4854,574.8291 4448.2422,574.4873 Q4449.0234,574.1211 4449.8291,573.3887 L4449.8291,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="60.9375" x="4466.4063" y="577.1042">Order</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="4425.7813" x2="4530.4688" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="4425.7813" x2="4530.4688" y1="605.4688" y2="605.4688"/><!--MD5=[9ad4dcf25dae3082b741f76eb34eb279]
+class OrderItemEntity--><rect fill="#161A22" height="71.875" id="OrderItemEntity" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="154.6875" x="4214.8438" y="546.0938"/><ellipse cx="4236.7188" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M4240.4541,576.8799 Q4239.6973,577.2705 4238.8672,577.4658 Q4238.0615,577.6611 4237.1582,577.6611 Q4233.9355,577.6611 4232.2266,575.5371 Q4230.542,573.4131 4230.542,569.3848 Q4230.542,565.3564 4232.2266,563.2324 Q4233.9355,561.1084 4237.1582,561.1084 Q4238.0615,561.1084 4238.8916,561.3037 Q4239.7217,561.499 4240.4541,561.8652 L4240.4541,565.3809 Q4239.6484,564.624 4238.8672,564.2822 Q4238.1104,563.9404 4237.3047,563.9404 Q4235.5713,563.9404 4234.6924,565.3076 Q4233.8135,566.6748 4233.8135,569.3848 Q4233.8135,572.0703 4234.6924,573.4619 Q4235.5713,574.8291 4237.3047,574.8291 Q4238.1104,574.8291 4238.8672,574.4873 Q4239.6484,574.1211 4240.4541,573.3887 L4240.4541,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="107.8125" x="4257.0313" y="577.1042">OrderItem</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="4216.4063" x2="4367.9688" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="4216.4063" x2="4367.9688" y1="605.4688" y2="605.4688"/><!--MD5=[ee82ff1337421c74e3843dcaa6c8c888]
+class OrderIdVO--><rect fill="#161A22" height="71.875" id="OrderIdVO" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="126.5625" x="3999.2188" y="546.0938"/><ellipse cx="4021.0938" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M4024.8291,576.8799 Q4024.0723,577.2705 4023.2422,577.4658 Q4022.4365,577.6611 4021.5332,577.6611 Q4018.3105,577.6611 4016.6016,575.5371 Q4014.917,573.4131 4014.917,569.3848 Q4014.917,565.3564 4016.6016,563.2324 Q4018.3105,561.1084 4021.5332,561.1084 Q4022.4365,561.1084 4023.2666,561.3037 Q4024.0967,561.499 4024.8291,561.8652 L4024.8291,565.3809 Q4024.0234,564.624 4023.2422,564.2822 Q4022.4854,563.9404 4021.6797,563.9404 Q4019.9463,563.9404 4019.0674,565.3076 Q4018.1885,566.6748 4018.1885,569.3848 Q4018.1885,572.0703 4019.0674,573.4619 Q4019.9463,574.8291 4021.6797,574.8291 Q4022.4854,574.8291 4023.2422,574.4873 Q4024.0234,574.1211 4024.8291,573.3887 L4024.8291,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="79.6875" x="4041.4063" y="577.1042">OrderId</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="4000.7813" x2="4124.2188" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="4000.7813" x2="4124.2188" y1="605.4688" y2="605.4688"/><!--MD5=[4d89566860677351e0925db064e847c2]
+class OrderCreatedEvent--><rect fill="#161A22" height="71.875" id="OrderCreatedEvent" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="193.75" x="3717.1875" y="546.0938"/><ellipse cx="3739.0625" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M3742.7979,576.8799 Q3742.041,577.2705 3741.2109,577.4658 Q3740.4053,577.6611 3739.502,577.6611 Q3736.2793,577.6611 3734.5703,575.5371 Q3732.8857,573.4131 3732.8857,569.3848 Q3732.8857,565.3564 3734.5703,563.2324 Q3736.2793,561.1084 3739.502,561.1084 Q3740.4053,561.1084 3741.2354,561.3037 Q3742.0654,561.499 3742.7979,561.8652 L3742.7979,565.3809 Q3741.9922,564.624 3741.2109,564.2822 Q3740.4541,563.9404 3739.6484,563.9404 Q3737.915,563.9404 3737.0361,565.3076 Q3736.1572,566.6748 3736.1572,569.3848 Q3736.1572,572.0703 3737.0361,573.4619 Q3737.915,574.8291 3739.6484,574.8291 Q3740.4541,574.8291 3741.2109,574.4873 Q3741.9922,574.1211 3742.7979,573.3887 L3742.7979,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="146.875" x="3759.375" y="577.1042">OrderCreated</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3718.75" x2="3909.375" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3718.75" x2="3909.375" y1="605.4688" y2="605.4688"/><!--MD5=[81b803e21fef0537f903d7dede88bfdd]
+class OrderRepositoryInterface--><rect fill="#161A22" height="71.875" id="OrderRepositoryInterface" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="223.4375" x="3405.4688" y="546.0938"/><ellipse cx="3427.3438" cy="569.5313" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M3431.0791,576.8799 Q3430.3223,577.2705 3429.4922,577.4658 Q3428.6865,577.6611 3427.7832,577.6611 Q3424.5605,577.6611 3422.8516,575.5371 Q3421.167,573.4131 3421.167,569.3848 Q3421.167,565.3564 3422.8516,563.2324 Q3424.5605,561.1084 3427.7832,561.1084 Q3428.6865,561.1084 3429.5166,561.3037 Q3430.3467,561.499 3431.0791,561.8652 L3431.0791,565.3809 Q3430.2734,564.624 3429.4922,564.2822 Q3428.7354,563.9404 3427.9297,563.9404 Q3426.1963,563.9404 3425.3174,565.3076 Q3424.4385,566.6748 3424.4385,569.3848 Q3424.4385,572.0703 3425.3174,573.4619 Q3426.1963,574.8291 3427.9297,574.8291 Q3428.7354,574.8291 3429.4922,574.4873 Q3430.2734,574.1211 3431.0791,573.3887 L3431.0791,576.8799 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="176.5625" x="3447.6563" y="577.1042">OrderRepository</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3407.0313" x2="3627.3438" y1="592.9688" y2="592.9688"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3407.0313" x2="3627.3438" y1="605.4688" y2="605.4688"/><!--MD5=[bd9674495545fc574986ddeabb8ed457]
+class CommandBus--><rect fill="#161A22" height="71.875" id="CommandBus" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="321.875" x="3734.375" y="1024.2188"/><ellipse cx="3756.25" cy="1047.6563" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M3759.9854,1055.0049 Q3759.2285,1055.3955 3758.3984,1055.5908 Q3757.5928,1055.7861 3756.6895,1055.7861 Q3753.4668,1055.7861 3751.7578,1053.6621 Q3750.0732,1051.5381 3750.0732,1047.5098 Q3750.0732,1043.4814 3751.7578,1041.3574 Q3753.4668,1039.2334 3756.6895,1039.2334 Q3757.5928,1039.2334 3758.4229,1039.4287 Q3759.2529,1039.624 3759.9854,1039.9902 L3759.9854,1043.5059 Q3759.1797,1042.749 3758.3984,1042.4072 Q3757.6416,1042.0654 3756.8359,1042.0654 Q3755.1025,1042.0654 3754.2236,1043.4326 Q3753.3447,1044.7998 3753.3447,1047.5098 Q3753.3447,1050.1953 3754.2236,1051.5869 Q3755.1025,1052.9541 3756.8359,1052.9541 Q3757.6416,1052.9541 3758.3984,1052.6123 Q3759.1797,1052.2461 3759.9854,1051.5137 L3759.9854,1055.0049 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="275" x="3776.5625" y="1055.2292">MessengerCommandBus</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3735.9375" x2="4054.6875" y1="1071.0938" y2="1071.0938"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3735.9375" x2="4054.6875" y1="1083.5938" y2="1083.5938"/><!--MD5=[12680f9dc6009799af67943c9d14e13d]
+class QueryBus--><rect fill="#161A22" height="71.875" id="QueryBus" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="275" x="3404.6875" y="1024.2188"/><ellipse cx="3426.5625" cy="1047.6563" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M3430.2979,1055.0049 Q3429.541,1055.3955 3428.7109,1055.5908 Q3427.9053,1055.7861 3427.002,1055.7861 Q3423.7793,1055.7861 3422.0703,1053.6621 Q3420.3857,1051.5381 3420.3857,1047.5098 Q3420.3857,1043.4814 3422.0703,1041.3574 Q3423.7793,1039.2334 3427.002,1039.2334 Q3427.9053,1039.2334 3428.7354,1039.4287 Q3429.5654,1039.624 3430.2979,1039.9902 L3430.2979,1043.5059 Q3429.4922,1042.749 3428.7109,1042.4072 Q3427.9541,1042.0654 3427.1484,1042.0654 Q3425.415,1042.0654 3424.5361,1043.4326 Q3423.6572,1044.7998 3423.6572,1047.5098 Q3423.6572,1050.1953 3424.5361,1051.5869 Q3425.415,1052.9541 3427.1484,1052.9541 Q3427.9541,1052.9541 3428.7109,1052.6123 Q3429.4922,1052.2461 3430.2979,1051.5137 L3430.2979,1055.0049 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="228.125" x="3446.875" y="1055.2292">MessengerQueryBus</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3406.25" x2="3678.125" y1="1071.0938" y2="1071.0938"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="3406.25" x2="3678.125" y1="1083.5938" y2="1083.5938"/><!--MD5=[e1dc4e4f27abf9e0b41be6639ac15441]
+reverse link CartEntity to CartItemEntity--><path d="M379.6875,1193.3906 C379.6875,1264.8906 379.6875,1351.2344 379.6875,1413.9219 " fill="none" id="CartEntity&lt;-CartItemEntity" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="379.6875,1172.6875,373.4375,1182.0625,379.6875,1191.4375,385.9375,1182.0625,379.6875,1172.6875" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="14.0625" x="364.9548" y="1204.9478">1</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="57.8125" x="318.1714" y="1396.5073">many</text><!--MD5=[101b57d5de48ddebbfc8f6df9828ce68]
+link CartEntity to CartIdVO--><path d="M477.0313,1172.8906 C501.25,1204.3906 525.4688,1239.75 543.75,1275 C621.3906,1424.7656 589.7188,1482.4844 656.25,1637.5 C678.0781,1688.375 710.0156,1743.3438 732.5625,1779.9062 " fill="none" id="CartEntity-&gt;CartIdVO" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="736.9375,1786.9688,734.8445,1771.7229,732.823,1780.3275,724.2185,1778.306,736.9375,1786.9688" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="657.8125" y="1508.5861">uses</text><!--MD5=[669019104dd9f6bb6f2210bfeaa35aa9]
+link CartEntity to ItemAddedToCartEvent--><path d="M563.2344,1172.8594 C590.2031,1192.0938 616.875,1212.8594 640.625,1234.375 C717.9063,1304.375 790.75,1403.1719 828.7969,1458.1719 " fill="none" id="CartEntity-&gt;ItemAddedToCartEvent" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="833.2656,1464.6563,830.438,1449.5294,828.8349,1458.2217,820.1426,1456.6186,833.2656,1464.6563" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="104.6875" x="670.3125" y="1256.2424">publishes</text><!--MD5=[1e68eada2b3c2451af842daa42afb554]
+link CartItemEntity to ProductIdVO--><path d="M431.7656,1587.5469 C469.9063,1649.9375 519.9688,1731.8594 549.6875,1780.4688 " fill="none" id="CartItemEntity-&gt;ProductIdVO" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="553.9219,1787.4063,551.9489,1772.1444,549.8598,1780.7328,541.2714,1778.6438,553.9219,1787.4063" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="485.9375" y="1671.8674">uses</text><!--MD5=[4bb56fa05733c397f490f50de9fb3c6a]
+link CartItemEntity to QuantityVO--><path d="M332.6094,1587.5469 C298.1406,1649.9375 252.8594,1731.8594 226,1780.4688 " fill="none" id="CartItemEntity-&gt;QuantityVO" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="222.1719,1787.4063,234.4647,1778.1487,225.966,1780.5769,223.5377,1772.0781,222.1719,1787.4063" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="298.4375" y="1671.8674">uses</text><!--MD5=[fc0ca612cf1850f0c147b2f3c916ca6e]
+link CartItemEntity to MoneyVO--><path d="M381.3594,1587.5469 C382.5625,1649.4219 384.1563,1730.5156 385.1094,1779.2656 " fill="none" id="CartItemEntity-&gt;MoneyVO" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="385.2656,1787.4063,391.2332,1773.2216,385.1094,1779.5953,378.7357,1773.4715,385.2656,1787.4063" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="385.9375" y="1671.8674">uses</text><!--MD5=[7761c572acd60363950343605e5b5209]
+reverse link CartRepositoryInterface to DoctrineCartRepo--><path d="M933.2344,1144.4375 C1021.1563,1230.2187 1156.5156,1362.2813 1234.9063,1438.7656 " fill="none" id="CartRepositoryInterface&lt;-DoctrineCartRepo" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="none" points="925.0469,1151.75,910.3125,1122.0938,940.3281,1136.0781,925.0469,1151.75" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="126.5625" x="1048.4375" y="1256.2424">implements</text><!--MD5=[7c4d0d7342e893103cbba514fa9d8a4f]
+link AddItemToCartHandler to CartRepositoryInterface--><path d="M1774.4219,630.4844 C1727.1094,665.375 1657.1094,710.3281 1587.5,730.4688 C1531.7813,746.5938 1116.6406,715.3594 1065.625,742.9688 C967.7813,795.9219 905.0781,914.4063 873.3594,990.1875 " fill="none" id="AddItemToCartHandler-&gt;CartRepositoryInterface" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="870.2031,997.8438,881.3531,987.2374,873.1889,990.6243,869.802,982.4601,870.2031,997.8438" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="1067.1875" y="764.8361">uses</text><!--MD5=[1cfe0d953eaab527316201ba4a8c0355]
+link AddItemToCartHandler to CartEntity--><path d="M1774.4531,630.5938 C1727.1719,665.5625 1657.1719,710.5313 1587.5,730.4688 C1512.5469,751.9063 963.1094,731.9375 885.9375,742.9688 C838.9063,749.6875 829.3906,761.7344 782.8125,771.0938 C740.9219,779.5156 726.3438,765.7969 687.5,783.5938 C608.3125,819.8906 534.9063,883.7344 479.6719,940.7656 " fill="none" id="AddItemToCartHandler-&gt;CartEntity" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="473.7031,946.9687,487.94,941.1267,479.1033,941.3231,478.9069,932.4865,473.7031,946.9687" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="131.25" x="887.5" y="764.8361">manipulates</text><!--MD5=[a672f4112425f356e3df54b9af9d7258]
+link AddItemToCartHandler to AddItemToCartCommand--><path d="M1838.25,630.875 C1847.1875,708.4844 1865.125,864.2813 1876.7031,964.875 " fill="none" id="AddItemToCartHandler-&gt;AddItemToCartCommand" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="1877.6719,973.2344,1882.2752,958.5502,1876.7798,965.473,1869.857,959.9776,1877.6719,973.2344" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="85.9375" x="1856.25" y="764.8361">handles</text><!--MD5=[28b7d5ab01a1264a925c7eb3e452c29e]
+link GetCartHandler to CartRepositoryInterface--><path d="M1147.4531,608.0937 C983.2188,632.2813 772.9063,675.5313 720.3125,742.9688 C661.5313,818.3438 728.0469,924.3438 785.0625,992.2656 " fill="none" id="GetCartHandler-&gt;CartRepositoryInterface" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="790.2031,998.3125,785.8561,983.5504,785.1427,992.3604,776.3327,991.647,790.2031,998.3125" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="721.875" y="764.8361">uses</text><!--MD5=[1a0e4eb9dc9dd56f53eb3c19a8fcabc6]
+link GetCartHandler to CartViewModelClass--><path d="M1389.1094,533.25 C1434.9375,473.0156 1522.2656,373.6406 1625,333.5938 C1797.1094,266.5156 1870.5313,261.5469 2040.625,333.5938 C2139.1875,375.3438 2217.1563,479.4063 2255.4219,538.7656 " fill="none" id="GetCartHandler-&gt;CartViewModelClass" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="2259.8906,545.7656,2257.6037,530.5477,2255.692,539.1773,2247.0623,537.2655,2259.8906,545.7656" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="1828.125" y="283.5861">creates</text><!--MD5=[69dd9a9cdba278648bfde9acb805558d]
+link GetCartHandler to GetCartQuery--><path d="M1363.7031,630.875 C1380.6094,719.4375 1416.9219,909.8281 1434.8594,1003.8125 " fill="none" id="GetCartHandler-&gt;GetCartQuery" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="1436.3281,1011.5,1439.8165,996.5117,1434.8561,1003.8274,1427.5404,998.867,1436.3281,1011.5" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="85.9375" x="1392.1875" y="764.8361">handles</text><!--MD5=[8014eb2f2f4271fd1d2ee6ace3abf736]
+link CartControllerClass to AddItemToCartCommand--><path d="M2918.2031,630.7031 C2876,663.375 2815.6719,705.3906 2756.25,730.4688 C2731.4063,740.9531 2722.7188,735.2656 2696.875,742.9688 C2443.9688,818.3438 2158.6719,938.125 2003.4219,1006.4063 " fill="none" id="CartControllerClass-&gt;AddItemToCartCommand" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="1996.125,1009.6094,2011.5138,1009.6585,2003.2743,1006.4592,2006.4735,998.2197,1996.125,1009.6094" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="2698.4375" y="764.8361">creates</text><!--MD5=[f8beeffa789597d4c492c920e31659d4]
+link CartControllerClass to CommandBus--><path d="M3086.5938,630.5156 C3166.875,662.6875 3278.4219,704.1406 3379.6875,730.4688 C3522.6719,767.6406 3583.1562,704.3125 3707.8125,783.5938 C3796.375,839.9063 3853.6406,954.7344 3879.4531,1016.7031 " fill="none" id="CartControllerClass-&gt;CommandBus" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="3882.4375,1023.9844,3882.8624,1008.6014,3879.4629,1016.7603,3871.304,1013.3608,3882.4375,1023.9844" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="118.75" x="3687.5" y="764.8361">dispatches</text><!--MD5=[7db88a529cbef3d0d44339b8e29d0669]
+link CheckoutController to GetCartQuery--><path d="M2567.1563,618.2188 C2531.8125,653.0781 2472.1563,705.1719 2409.375,730.4688 C2256.4531,792.1094 2205.1094,759.5781 2040.625,771.0938 C2017.5781,772.7031 1645.1563,772.2969 1625,783.5938 C1539.7344,831.4063 1488.0938,938.4531 1463.2813,1004 " fill="none" id="CheckoutController-&gt;GetCartQuery" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="1460.5313,1011.3906,1471.2916,1000.3892,1463.2548,1004.0682,1459.5758,996.0315,1460.5313,1011.3906" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="2376.5625" y="764.8361">creates</text><!--MD5=[1c6641b74da90eadededa1db73df06b1]
+link CheckoutController to QueryBus--><path d="M2630.0156,618.2344 C2659.5469,650.6406 2707.2031,698.6875 2756.25,730.4688 C2971.5313,869.9844 3256,971.0938 3416.9844,1021.7969 " fill="none" id="CheckoutController-&gt;QueryBus" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="3424.5625,1024.1719,3412.994,1014.0237,3417.1032,1021.8492,3409.2777,1025.9585,3424.5625,1024.1719" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="118.75" x="2815.625" y="764.8361">dispatches</text><!--MD5=[80797bff0f2bec88b7514975b19524be]
+@startuml diagram
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+
+
+package "Cart Bounded Context" as Cart {
+  package "Domain" as CartDomain {
+    package "Model" as CartModel {
+      class "Cart" as CartEntity {
+        + id(): CartId
+        + userId(): string
+        + addItem(ProductId, Quantity, Money): void
+        + removeItem(ProductId): void
+        + items(): array
+        + totalAmount(): Money
+      }
+      
+      class "CartItem" as CartItemEntity {
+        + productId(): ProductId
+        + quantity(): Quantity
+        + price(): Money
+        + totalPrice(): Money
+      }
+    }
+    
+    package "ValueObject" as CartValueObject {
+      class "CartId" as CartIdVO
+      class "ProductId" as ProductIdVO
+      class "Quantity" as QuantityVO
+      class "Money" as MoneyVO
+    }
+    
+    package "Event" as CartEvent {
+      class "ItemAddedToCart" as ItemAddedToCartEvent
+    }
+    
+    package "Repository" as CartRepository {
+      class "CartRepository" as CartRepositoryInterface {
+        + findById(CartId): ?Cart
+        + save(Cart): void
+      }
+    }
+  }
+  
+  package "Infrastructure" as CartInfrastructure {
+    package "Repository" as CartInfraRepo {
+      class "DoctrineCartRepository" as DoctrineCartRepo {
+        + findById(CartId): ?Cart
+        + save(Cart): void
+      }
+    }
+  }
+  
+  package "Application" as CartApplication {
+    package "Command" as CartCommand {
+      class "AddItemToCart" as AddItemToCartCommand {
+        + cartId: string
+        + productId: string
+        + quantity: int
+        + price: float
+      }
+      
+      class "AddItemToCartHandler" as AddItemToCartHandler {
+        + __invoke(AddItemToCart): void
+      }
+    }
+    
+    package "Query" as CartQuery {
+      class "GetCart" as GetCartQuery {
+        + cartId: string
+      }
+      
+      class "GetCartHandler" as GetCartHandler {
+        + __invoke(GetCart): ?CartViewModel
+      }
+    }
+  }
+  
+  package "Presentation" as CartPresentation {
+    package "Controller" as CartController {
+      class "CartController" as CartControllerClass {
+        + addToCart(Request): Response
+      }
+      
+      class "CheckoutController" as CheckoutController
+    }
+    
+    package "ViewModel" as CartViewModel {
+      class "CartViewModel" as CartViewModelClass
+    }
+  }
+}
+
+package "Order Bounded Context" as Order {
+  package "Domain" as OrderDomain {
+    package "Model" as OrderModel {
+      class "Order" as OrderEntity
+      class "OrderItem" as OrderItemEntity
+    }
+    
+    package "ValueObject" as OrderValueObject {
+      class "OrderId" as OrderIdVO
+    }
+    
+    package "Event" as OrderEvent {
+      class "OrderCreated" as OrderCreatedEvent
+    }
+    
+    package "Repository" as OrderRepository {
+      class "OrderRepository" as OrderRepositoryInterface
+    }
+  }
+}
+
+package "Shared" as Shared {
+  package "Infrastructure" as SharedInfra {
+    package "Bus" as SharedBus {
+      class "MessengerCommandBus" as CommandBus
+      class "MessengerQueryBus" as QueryBus
+    }
+  }
+}
+
+CartEntity "1" *- - "many" CartItemEntity
+CartEntity ..> CartIdVO : uses
+CartEntity ..> ItemAddedToCartEvent : publishes
+CartItemEntity ..> ProductIdVO : uses
+CartItemEntity ..> QuantityVO : uses
+CartItemEntity ..> MoneyVO : uses
+
+CartRepositoryInterface <|.. DoctrineCartRepo : implements
+
+AddItemToCartHandler ..> CartRepositoryInterface : uses
+AddItemToCartHandler ..> CartEntity : manipulates
+AddItemToCartHandler ..> AddItemToCartCommand : handles
+
+GetCartHandler ..> CartRepositoryInterface : uses
+GetCartHandler ..> CartViewModelClass : creates
+GetCartHandler ..> GetCartQuery : handles
+
+CartControllerClass ..> AddItemToCartCommand : creates
+CartControllerClass ..> CommandBus : dispatches
+CheckoutController ..> GetCartQuery : creates
+CheckoutController ..> QueryBus : dispatches
+
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>
