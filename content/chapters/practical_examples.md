@@ -34,7 +34,7 @@ a CQRS v Symfony 8 na funkcionalitě košíku a objednávek.
 
 ### Struktura projektu {#e-commerce-structure-heading}
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 src/
 ├── Cart/                      # Bounded Context: Košík
 │   ├── Domain/                # Doménová vrstva
@@ -96,11 +96,11 @@ src/
         └── Bus/               # Implementace message bus
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus
-```
+:::
 
 ### Doménový model: Košík {#cart-model-heading}
 
-```php
+:::code{language="php" filename="src/Cart/Domain/Model/Cart.php"}
 <?php
 
 declare(strict_types=1);
@@ -235,11 +235,11 @@ class Cart
         return $events;
     }
 }
-```
+:::
 
 ### Command: Přidání položky do košíku {#add-to-cart-command-heading}
 
-```php
+:::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCart.php"}
 <?php
 
 declare(strict_types=1);
@@ -265,11 +265,11 @@ class AddItemToCart
     ) {
     }
 }
-```
+:::
 
 ### Command Handler: Zpracování přidání položky do košíku {#add-to-cart-handler-heading}
 
-```php
+:::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCartHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -316,11 +316,11 @@ class AddItemToCartHandler
         $this->cartRepository->save($cart);
     }
 }
-```
+:::
 
 ### Controller: Přidání položky do košíku {#add-to-cart-controller-heading}
 
-```php
+:::code{language="php" filename="src/Cart/AddItem/Controller/CartController.php"}
 <?php
 
 declare(strict_types=1);
@@ -372,11 +372,11 @@ class CartController extends AbstractController
         }
     }
 }
-```
+:::
 
 ### Query: Získání košíku {#get-cart-query-heading}
 
-```php
+:::code{language="php" filename="src/Cart/GetCart/Query/GetCart.php"}
 <?php
 
 declare(strict_types=1);
@@ -394,11 +394,11 @@ class GetCart
     ) {
     }
 }
-```
+:::
 
 ### Query Handler: Zpracování získání košíku {#get-cart-handler-heading}
 
-```php
+:::code{language="php" filename="src/Cart/GetCart/Query/GetCartHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -446,7 +446,7 @@ class GetCartHandler
         );
     }
 }
-```
+:::
 
 ## 24.02 Příklad: Blog {#blog}
 
@@ -457,7 +457,7 @@ Tato část ukazuje implementaci blogu pomocí vertikální slice architektury a
 
 ### Struktura projektu {#blog-structure-heading}
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 src/
 ├── Blog/                      # Bounded Context: Blog
 │   ├── Domain/                # Doménová vrstva
@@ -504,11 +504,11 @@ src/
         └── Bus/               # Implementace message bus
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus
-```
+:::
 
 ### Doménový model: Příspěvek {#post-model-heading}
 
-```php
+:::code{language="php" filename="src/Blog/Domain/Model/Post.php"}
 <?php
 
 declare(strict_types=1);
@@ -600,11 +600,11 @@ class Post
         return $events;
     }
 }
-```
+:::
 
 ### Command: Vytvoření příspěvku
 
-```php
+:::code{language="php" filename="src/Blog/CreatePost/Command/CreatePost.php"}
 <?php
 
 declare(strict_types=1);
@@ -628,11 +628,11 @@ class CreatePost
     ) {
     }
 }
-```
+:::
 
 ### Command Handler: Zpracování vytvoření příspěvku
 
-```php
+:::code{language="php" filename="src/Blog/CreatePost/Command/CreatePostHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -668,7 +668,7 @@ class CreatePostHandler
         return $postId->value();
     }
 }
-```
+:::
 
 ## 24.03 Příklad: Správa uživatelů {#user-management}
 
@@ -680,7 +680,7 @@ DDD odděluje jednotlivé funkce (registrace, autentizace, profil).
 
 ### Struktura projektu
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva
@@ -714,11 +714,11 @@ src/
         └── Bus/               # Implementace message bus
             ├── MessengerCommandBus.php  # Implementace command bus
             └── MessengerQueryBus.php  # Implementace query bus
-```
+:::
 
 ### Doménový model: Uživatel
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
 <?php
 
 declare(strict_types=1);
@@ -828,11 +828,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $events;
     }
 }
-```
+:::
 
 ### Command: Registrace uživatele
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUser.php"}
 <?php
 
 declare(strict_types=1);
@@ -858,11 +858,11 @@ class RegisterUser
     ) {
     }
 }
-```
+:::
 
 ### Command Handler: Zpracování registrace uživatele
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -906,7 +906,7 @@ class RegisterUserHandler
         $this->userRepository->save($user);
     }
 }
-```
+:::
 
 Všechny tři příklady ukazují stejný vzor: kontroler pouze dispatchuje command nebo query,
 aplikační vrstva koordinuje operaci a doménový model vynucuje doménová pravidla.

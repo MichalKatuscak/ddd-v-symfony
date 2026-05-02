@@ -436,7 +436,7 @@ Níže je rubrika ve formátu, který stačí vlepit do `docs/cognitive-load.md`
 v repu týmu. Vejde se na 1 stránku A4, vyplní se za 30 minut na konci sprintu a je dobrým
 vstupem pro retro:
 
-```markdown
+:::code{language="markdown" filename="docs/cognitive-load.md"}
 # Cognitive Load Rubric – Q?/YYYY
 
 Tým: <název týmu>
@@ -481,7 +481,7 @@ Bod 5 (germane prostor):         __
 - [ ] Pokud body 3+4 < 3 → eskalovat na Platform team (extraneous load).
 - [ ] Pokud body 1+2 < 3 → zvážit split BC nebo přidání člena týmu.
 - [ ] Pokud > 4 BC ve vlastnictví → naplánovat split do 2 kvartálů.
-```
+:::
 
 Rubrika je záměrně subjektivní – měří *vnímání* členů týmu, ne metrické fakty.
 Důvod: cognitive load je psychologická kategorie, žádná metrika z Grafany ji nezachytí.

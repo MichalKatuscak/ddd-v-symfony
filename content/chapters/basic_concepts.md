@@ -29,7 +29,7 @@ Různé ohraničené kontexty mají různé modely a jazyky – to je záměr, n
 :::diagram{fig="06.1-A" title="Ohraničené kontexty" src="images/diagrams/5_bounded_contexts/diagram.svg"}
 :::
 
-```bash
+:::code{language="bash" filename="src/ (struktura)"}
 src/
 ├── OrderManagement/           # Ohraničený kontext: Správa objednávek
 │   ├── Domain/
@@ -70,7 +70,7 @@ src/
         └── Query/
             ├── GetUser.php
             └── GetUserHandler.php
-```
+:::
 
 V tomto příkladu jsou `OrderManagement` a `UserManagement` dva ohraničené
 kontexty.
@@ -115,7 +115,7 @@ Entita je objekt, který je definován svou identitou, nikoli svými atributy
 Entity mají životní cyklus a mohou se v průběhu času měnit,
 ale jejich identita zůstává stejná.
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
 <?php
 
 declare(strict_types=1);
@@ -170,7 +170,7 @@ class User
         return $this->createdAt;
     }
 }
-```
+:::
 
 V tomto příkladu je `User` entita definovaná identitou (`UserId`).
 Uživatel může změnit své jméno nebo e-mail,
@@ -182,7 +182,7 @@ Hodnotové objekty jsou objekty definované svými atributy, nikoli identitou
 [[3]](https://www.domainlanguage.com/ddd/).
 Hodnotové objekty jsou neměnné (immutable) a porovnávají se hodnotou, nikoli referencí.
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
 <?php
 
 declare(strict_types=1);
@@ -219,7 +219,7 @@ class Email
         return $this->value;
     }
 }
-```
+:::
 
 V tomto příkladu je `Email` hodnotový objekt definovaný svou hodnotou. E-mailová
 adresa je neměnná a nemá žádnou identitu.
@@ -234,7 +234,7 @@ který je jediným vstupním bodem pro veškeré vnější interakce s agregáte
 agregátu patří mezi nejčastější chyby v DDD – velkoobjemové „God Agregaty" rozebírá kapitola
 [Anti-vzory a typické chyby](/anti-vzory).
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);
@@ -341,9 +341,9 @@ final class Order
         return $this->createdAt;
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Model/OrderItem.php"}
 <?php
 
 declare(strict_types=1);
@@ -377,7 +377,7 @@ class OrderItem
     public function quantity(): int { return $this->quantity; }
     public function unitPrice(): Money { return $this->unitPrice; }
 }
-```
+:::
 
 V tomto příkladu je `Order` agregát, který obsahuje kolekci `OrderItem` objektů.
 `Order` je kořenem agregátu (Aggregate Root)
@@ -389,7 +389,7 @@ a poskytuje metody pro manipulaci s položkami objednávky.
 Od PHP 8.1 je pro jednoduché stavové typy (jako `OrderStatus`) idiomatické
 použít nativní `enum` místo tradičního hodnotového objektu:
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Model/OrderStatus.php"}
 <?php
 
 declare(strict_types=1);
@@ -404,7 +404,7 @@ enum OrderStatus: string
     case DELIVERED = 'delivered';
     case CANCELLED = 'cancelled';
 }
-```
+:::
 
 **Kdy enum, kdy plný Value Object?** Enum je vhodný pro konečnou množinu stavů
 bez další logiky. Plný Value Object (třída) je lepší volbou, pokud typ obsahuje validaci,
@@ -418,7 +418,7 @@ Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. R
 persistence a poskytují
 doménově orientované rozhraní pro přístup k datům.
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Repository/OrderRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -437,7 +437,7 @@ interface OrderRepository
 
     public function findByUserId(UserId $userId): array;
 }
-```
+:::
 
 V tomto příkladu je `OrderRepository` rozhraní, které definuje metody pro ukládání a načítání
 objednávek.
@@ -451,7 +451,7 @@ Doménová služba je objekt, který poskytuje doménovou logiku, která nepatř
 nebo hodnotového objektu.
 Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Service/PaymentService.php"}
 <?php
 
 declare(strict_types=1);
@@ -480,7 +480,7 @@ class PaymentService
         );
     }
 }
-```
+:::
 
 V tomto příkladu je `PaymentService` doménová služba, která zapouzdřuje doménovou logiku
 zpracování plateb a vytváří objekt `Payment`. Doménová služba je bezstavová a
@@ -510,7 +510,7 @@ Doménová událost je neměnný záznam o skutečnosti, která nastala v domén
 význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
 k popisu dané změny stavu – nespoléhají na pozdější dotazování.
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderCreatedEvent.php"}
 <?php
 
 declare(strict_types=1);
@@ -548,7 +548,7 @@ final class OrderCreatedEvent
         return $this->occurredAt;
     }
 }
-```
+:::
 
 V tomto příkladu je `OrderCreatedEvent` doménová událost, která reprezentuje vytvoření nové
 objednávky.

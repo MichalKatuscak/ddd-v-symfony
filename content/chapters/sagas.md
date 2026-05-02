@@ -115,7 +115,7 @@ příkaz s vlastní logikou, validací a vedlejšími efekty.
 :::callout{type="pattern"}
 ### PHP: Rozhraní CompensatableCommand {#compensatable-command-heading}
 
-```php
+:::code{language="php" filename="src/SharedKernel/Application/Command/CompensatableCommand.php"}
 <?php
 
 declare(strict_types=1);
@@ -132,13 +132,13 @@ interface CompensatableCommand
      */
     public function compensation(): object;
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: ChargeCustomer s kompenzací {#charge-customer-heading}
 
-```php
+:::code{language="php" filename="src/Payment/Application/Command/ChargeCustomer.php"}
 <?php
 
 declare(strict_types=1);
@@ -165,7 +165,7 @@ final readonly class ChargeCustomer implements CompensatableCommand
         );
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -200,7 +200,7 @@ emergentně z reakcí jednotlivých kontextů na události ostatních – bez ce
 
 **Handler 1 – InitiatePaymentOnOrderPlaced:**
 
-```php
+:::code{language="php" filename="src/Payment/Application/Handler/InitiatePaymentOnOrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
@@ -228,11 +228,11 @@ final readonly class InitiatePaymentOnOrderPlaced
         ));
     }
 }
-```
+:::
 
 **Handler 2 – ReserveStockOnPaymentSucceeded:**
 
-```php
+:::code{language="php" filename="src/Warehouse/Application/Handler/ReserveStockOnPaymentSucceeded.php"}
 <?php
 
 declare(strict_types=1);
@@ -258,11 +258,11 @@ final readonly class ReserveStockOnPaymentSucceeded
         ));
     }
 }
-```
+:::
 
 **Handler 3 – CreateShipmentOnStockReserved:**
 
-```php
+:::code{language="php" filename="src/Shipping/Application/Handler/CreateShipmentOnStockReserved.php"}
 <?php
 
 declare(strict_types=1);
@@ -288,13 +288,13 @@ final readonly class CreateShipmentOnStockReserved
         ));
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### YAML: Konfigurace Messenger pro choreografii {#choreografie-messenger-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -306,7 +306,7 @@ framework:
             'App\Ordering\Domain\Event\OrderPlaced': async
             'App\Payment\Domain\Event\PaymentSucceeded': async
             'App\Warehouse\Domain\Event\StockReserved': async
-```
+:::
 :::
 
 Hlavní výhodou choreografie je **volné provázání** (loose coupling) mezi
@@ -396,7 +396,7 @@ přechody, červené selhání a oranžová cesta vede přes kompenzaci:
 :::callout{type="pattern"}
 ### PHP: Enum OrderSagaStatus {#saga-status-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderSagaStatus.php"}
 <?php
 
 declare(strict_types=1);
@@ -412,13 +412,13 @@ enum OrderSagaStatus: string
     case Compensating = 'compensating';
     case Failed = 'failed';
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: OrderProcessManager – jádro orchestrace {#process-manager-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderProcessManager.php"}
 <?php
 
 declare(strict_types=1);
@@ -560,7 +560,7 @@ final class OrderProcessManager
         $this->commandBus->dispatch(new ConfirmOrder(orderId: $event->orderId));
     }
 }
-```
+:::
 :::
 
 Orchestrace přináší oproti choreografii několik praktických výhod: celý doménový proces je
@@ -593,7 +593,7 @@ ukládáme do databáze jako Doctrine entitu.
 :::callout{type="pattern"}
 ### PHP: SagaState – Doctrine entita {#saga-state-entity-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Saga/SagaState.php"}
 <?php
 
 declare(strict_types=1);
@@ -701,13 +701,13 @@ class SagaState
         return $this->updatedAt;
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Rozhraní SagaStateRepositoryInterface {#saga-state-repo-interface-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Saga/SagaStateRepositoryInterface.php"}
 <?php
 
 declare(strict_types=1);
@@ -727,13 +727,13 @@ interface SagaStateRepositoryInterface
     /** @return list<SagaState> */
     public function findStale(\DateTimeImmutable $olderThan): array;
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Doctrine implementace SagaStateRepository {#saga-state-repository-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Saga/SagaStateRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -781,7 +781,7 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
             ->getResult();
     }
 }
-```
+:::
 :::
 
 Díky perzistenci stavu je obnova po selhání přímočará: představte si, že worker spadne
@@ -817,7 +817,7 @@ procesů.
 :::callout{type="pattern"}
 ### YAML: Kompletní konfigurace Messenger {#messenger-yaml-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -858,13 +858,13 @@ framework:
             'App\Warehouse\Application\Command\ReserveStock': async_commands
             'App\Warehouse\Application\Command\ReleaseStock': async_commands
             'App\Shipping\Application\Command\CreateShipment': async_commands
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Doménová událost OrderPlaced {#order-placed-event-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
@@ -880,7 +880,7 @@ final readonly class OrderPlaced
         public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {}
 }
-```
+:::
 :::
 
 Celý tok funguje následovně: agregát `Order` v kontextu Ordering publikuje
@@ -938,7 +938,7 @@ stanovené doby zkontroluje, zda se sága posunula dál, a pokud ne, spustí kom
 :::callout{type="pattern"}
 ### PHP: CheckSagaTimeout command {#check-saga-timeout-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Command/CheckSagaTimeout.php"}
 <?php
 
 declare(strict_types=1);
@@ -952,13 +952,13 @@ final readonly class CheckSagaTimeout
         public string $expectedStatus,
     ) {}
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: CheckSagaTimeoutHandler {#check-saga-timeout-handler-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Handler/CheckSagaTimeoutHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -1020,7 +1020,7 @@ final readonly class CheckSagaTimeoutHandler
         ));
     }
 }
-```
+:::
 :::
 
 Timeout check naplánujeme přímo v Process Manageru při zpracování události
@@ -1030,7 +1030,7 @@ podrží v transportu po zadanou dobu a teprve poté ji doručí workeru:
 :::callout{type="pattern"}
 ### PHP: Naplánování timeout checku v OrderProcessManager {#delay-stamp-heading}
 
-```php
+:::code{language="php" filename="snippet.php"}
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 private function onOrderPlaced(OrderPlaced $event): void
@@ -1046,7 +1046,7 @@ private function onOrderPlaced(OrderPlaced $event): void
         [new DelayStamp(5 * 60 * 1000)], // 5 minut v milisekundách
     );
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -1100,7 +1100,7 @@ akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
 :::callout{type="pattern"}
 ### PHP: Kompenzační logika v opačném pořadí kroků {#compensate-method-heading}
 
-```php
+:::code{language="php" filename="snippet.php"}
 /**
  * Kompenzace: spouštěna při selhání libovolného kroku.
  * Provádí kompenzační akce v opačném pořadí dokončených kroků.
@@ -1134,7 +1134,7 @@ private function compensate(SagaState $state): void
     $state->transitionTo(OrderSagaStatus::Failed);
     $this->sagaStateRepository->save($state);
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -1166,7 +1166,7 @@ jako splněné, sága pokračuje dalším krokem – vytvořením zásilky. Tomu
 :::callout{type="pattern"}
 ### PHP: Paralelní zpracování kroků se synchronizační bariérou {#parallel-steps-heading}
 
-```php
+:::code{language="php" filename="snippet.php"}
 private function onPaymentSucceeded(PaymentSucceeded $event): void
 {
     $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
@@ -1216,7 +1216,7 @@ private function proceedIfParallelStepsCompleted(SagaState $state): void
         ));
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -1265,7 +1265,7 @@ Middleware pro Symfony Messenger, který loguje každou zprávu procházející 
 Zaregistrujte ho v `messenger.yaml` a všechny zprávy se automaticky
 zaznamenají s korelačním ID:
 
-```php
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Middleware/SagaLoggingMiddleware.php"}
 <?php
 
 declare(strict_types=1);
@@ -1305,7 +1305,7 @@ final readonly class SagaLoggingMiddleware implements MiddlewareInterface
         return $envelope;
     }
 }
-```
+:::
 :::
 
 ### Detekce zaseklých ság {#detekce-zaseklych-heading}
@@ -1317,7 +1317,7 @@ pravidelně kontroluje, zda některá sága nezůstala příliš dlouho v mezist
 :::callout{type="pattern"}
 ### Symfony Console příkaz pro detekci zaseklých ság {#check-stale-sagas-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Command/CheckStaleSagasCommand.php"}
 <?php
 
 declare(strict_types=1);
@@ -1366,7 +1366,7 @@ final class CheckStaleSagasCommand extends Command
         return Command::FAILURE;
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -1397,7 +1397,7 @@ příkazy, a místo databáze in-memory repozitář:
 :::callout{type="pattern"}
 ### PHPUnit test ságy {#saga-unit-test-heading}
 
-```php
+:::code{language="php" filename="src/Tests/Ordering/Application/Saga/OrderProcessManagerTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -1488,7 +1488,7 @@ final class OrderProcessManagerTest extends TestCase
         self::assertSame(OrderSagaStatus::Failed, $state->status());
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -1496,7 +1496,7 @@ final class OrderProcessManagerTest extends TestCase
 
 Testovací in-memory implementace repozitáře, kterou používáme místo Doctrine:
 
-```php
+:::code{language="php" filename="src/Tests/Ordering/Application/Saga/InMemorySagaStateRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -1524,7 +1524,7 @@ final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
             );
     }
 }
-```
+:::
 :::
 
 Další vzory pro testování doménové logiky, agregátů a event handlerů najdete v kapitole

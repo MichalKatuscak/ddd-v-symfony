@@ -62,9 +62,9 @@ z pravidla jeden agregát = jedna transakce** za předpokladu, že oba agregáty
 leží ve stejném Bounded Context a stejné databázi.
 
 :::callout{type="pattern"}
-### PHP: Application Service jako transakční hranice {#a1-code-heading}
+#### PHP: Application Service jako transakční hranice {#a1-code-heading}
 
-```php
+:::code{language="php" filename="src/Warehouse/Application/Service/ConfirmTransferService.php"}
 <?php
 
 declare(strict_types=1);
@@ -103,7 +103,7 @@ final class ConfirmTransferService
         }
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -147,9 +147,9 @@ z `Doctrine\DBAL\Types`. Typ definuje, jak se PHP objekt serializuje
 do SQL hodnoty a zpět. Zaregistrujte typ v `config/packages/doctrine.yaml`.
 
 :::callout{type="pattern"}
-### PHP: Custom Type pro Money Value Object {#a3-code-heading}
+#### PHP: Custom Type pro Money Value Object {#a3-code-heading}
 
-```php
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/Type/MoneyType.php"}
 <?php
 
 declare(strict_types=1);
@@ -187,24 +187,24 @@ final class MoneyType extends Type
         return $value->amountInCents() . '_' . $value->currency()->code();
     }
 }
-```
+:::
 :::
 
 Typ zaregistrujte v `config/packages/doctrine.yaml`:
 
-```yaml
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
 doctrine:
     dbal:
         types:
             money: App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType
-```
+:::
 
 Poté ho použijte v entitě:
 
-```php
+:::code{language="php" filename="snippet.php"}
 #[ORM\Column(type: 'money', nullable: true)]
 private ?Money $price = null;
-```
+:::
 
 :::callout{type="note"}
 Pro **polymorfní VO** (různé typy platby: karta, hotovost, voucher)
@@ -251,9 +251,9 @@ Doctrine nakonfigurujte s `strategy: 'NONE'` – ID předáváte sami,
 Doctrine ho jen uloží.
 
 :::callout{type="pattern"}
-### PHP: UUID v konstruktoru agregátu (PHP 8.4 + Symfony Uid) {#a5-code-heading}
+#### PHP: UUID v konstruktoru agregátu (PHP 8.4 + Symfony Uid) {#a5-code-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php"}
 <?php
 
 declare(strict_types=1);
@@ -301,17 +301,17 @@ final class Order
         // ...
     }
 }
-```
+:::
 :::
 
 Doctrine mapping pro UUID ID:
 
-```php
+:::code{language="php" filename="snippet.php"}
 #[ORM\Id]
 #[ORM\Column(type: 'string', length: 36)]
 #[ORM\GeneratedValue(strategy: 'NONE')] // Doctrine ID nepřiřazuje
 private string $id;
-```
+:::
 
 ### A6. Polymorfismus a discriminator map {#a6-polymorfismus}
 
@@ -357,9 +357,9 @@ jako agregát. Separátní worker pak z tabulky čte a odešle zprávy do Messen
 Atomicita je garantována databázovou transakcí; at-least-once doručení zajišťuje worker.
 
 :::callout{type="pattern"}
-### PHP: OutboxEvent entita a OutboxPublisher service {#b1-code-heading}
+#### PHP: OutboxEvent entita a OutboxPublisher service {#b1-code-heading}
 
-```php
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Outbox/OutboxEvent.php"}
 <?php
 
 declare(strict_types=1);
@@ -405,7 +405,7 @@ final class OutboxEvent
     public function eventType(): string  { return $this->eventType; }
     public function payload(): array     { return $this->payload; }
 }
-```
+:::
 :::
 
 Důležitý detail: outbox záznamy musí být persistovány *uvnitř* téže transakce
@@ -414,7 +414,7 @@ commitem) – nikoliv na `postFlush`, který se volá *po* commitu
 transakce a tedy mimo ni. Použití `postFlush` s voláním dalšího
 `flush()` by navíc způsobilo nekonečnou rekurzi.
 
-```php
+:::code{language="php" filename="src/OutboxEventListener.php"}
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
@@ -442,7 +442,7 @@ final class OutboxEventListener
         // Žádný další flush() - outbox záznamy jsou součástí probíhající transakce
     }
 }
-```
+:::
 
 :::callout{type="note"}
 Symfony Messenger nabízí vlastní **Doctrine Transport**,
@@ -458,27 +458,30 @@ Handler ale nikdy nezavolal. Jak zjistit, kde zpráva skončila?
 
 **Postup debuggingu:**
 
-1. **Zkontrolujte failed transport:**
-   ```bash
-   php bin/console messenger:failed:show
-   ```
-   Pokud je zpráva zde, zobrazí se s chybou. Znovu ji zpracujte:
-   ```bash
-   php bin/console messenger:failed:retry
-   ```
+**1. Zkontrolujte failed transport:**
 
-2. **Zapněte verbose logging:** V `config/packages/monolog.yaml`
-   přidejte handler pro `messenger` channel na úroveň `debug`.
-   Každý dispatch, receive a zpracování se zaloguje.
+:::code{language="bash" filename="snippet.sh"}
+php bin/console messenger:failed:show
+:::
 
-3. **Correlation ID middleware:** Přidejte vlastní middleware, který
-   přiřadí každé zprávě UUID a loguje ho při dispatch i při receive. Pak hledáte
-   v logu podle ID.
+Pokud je zpráva zde, zobrazí se s chybou. Znovu ji zpracujte:
+
+:::code{language="bash" filename="snippet.sh"}
+php bin/console messenger:failed:retry
+:::
+
+**2. Zapněte verbose logging:** V `config/packages/monolog.yaml`
+přidejte handler pro `messenger` channel na úroveň `debug`.
+Každý dispatch, receive a zpracování se zaloguje.
+
+**3. Correlation ID middleware:** Přidejte vlastní middleware, který
+přiřadí každé zprávě UUID a loguje ho při dispatch i při receive. Pak hledáte
+v logu podle ID.
 
 :::callout{type="pattern"}
-### PHP: Middleware pro Correlation ID logging {#b2-code-heading}
+#### PHP: Middleware pro Correlation ID logging {#b2-code-heading}
 
-```php
+:::code{language="bash" filename="snippet.sh"}
 <?php
 
 declare(strict_types=1);
@@ -517,19 +520,19 @@ final class CorrelationIdMiddleware implements MiddlewareInterface
         );
     }
 }
-```
+:::
 :::
 
 Zaregistrujte middleware v `config/packages/messenger.yaml`:
 
-```yaml
+:::code{language="bash" filename="snippet.sh"}
 framework:
     messenger:
         buses:
             command.bus:
                 middleware:
                     - App\SharedKernel\Infrastructure\Messenger\CorrelationIdMiddleware
-```
+:::
 
 ### B3. Idempotence handlerů {#b3-idempotence}
 
@@ -544,9 +547,9 @@ Každá zpráva nese `IdempotencyStamp` s unikátním klíčem
 databázovou tabulku – pokud klíč existuje, zprávu přeskočí.
 
 :::callout{type="pattern"}
-### PHP: IdempotencyMiddleware {#b3-code-heading}
+#### PHP: IdempotencyMiddleware {#b3-code-heading}
 
-```php
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/CorrelationIdStamp.php"}
 <?php
 
 declare(strict_types=1);
@@ -596,7 +599,7 @@ final class IdempotencyMiddleware implements MiddlewareInterface
         return $result;
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -619,7 +622,7 @@ Bezpečné řešení: proveďte zpracování a INSERT do deduplikační tabulky
 **v téže databázové transakci**. Při selhání handleru transakce
 selže celá (klíč se nevloží) a Messenger zprávu zopakuje:
 
-```php
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 $this->connection->beginTransaction();
 try {
     // Unique constraint na idempotency_key zabrání duplicitě na DB úrovni
@@ -637,7 +640,7 @@ try {
     $this->connection->rollBack(); // handler selhal - klíč se nezapíše, Messenger zopakuje
     throw $e;
 }
-```
+:::
 :::
 
 ### B4. Ordering zpráv – zpráva B dorazí před A {#b4-ordering}
@@ -701,7 +704,7 @@ dává smysl.
 zda je přechod validní (guard condition), provede změnu stavu a zaregistruje
 doménovou událost.
 
-```php
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/IdempotencyStamp.php"}
 final class Order
 {
     private OrderStatus $status = OrderStatus::Draft;
@@ -725,7 +728,7 @@ final class Order
         $this->record(new OrderShipped($this->id, $trackingNumber));
     }
 }
-```
+:::
 
 :::callout{type="note"}
 **Symfony Workflow** může spravovat přechody stavů – ale jako
@@ -746,9 +749,9 @@ od externího systému – v doménových pojmech. Infrastrukturní vrstva imple
 **Adapter**, který přeloží externí API do doménového rozhraní.
 
 :::callout{type="pattern"}
-### PHP: Port v doméně + Adapter v infrastruktuře {#c3-code-heading}
+#### PHP: Port v doméně + Adapter v infrastruktuře {#c3-code-heading}
 
-```php
+:::code{language="php" filename="src/PaymentGateway.php"}
 <?php
 
 // Port - v doméně (App\Payment\Domain\Port)
@@ -788,7 +791,7 @@ final class StripePaymentGateway implements PaymentGateway
         ]);
     }
 }
-```
+:::
 :::
 
 Doménový kód pracuje pouze s `PaymentGateway` rozhraním – nic neví
@@ -839,7 +842,7 @@ aby `FormInterface` pronikl do aplikační vrstvy.
 (formulářový objekt), Application Service pak sestaví immutable Command.
 Žádná ze dvou vrstev neví o existenci té druhé.
 
-```php
+:::code{language="php" filename="src/PlaceOrderFormData.php"}
 // 1. Formulářový objekt - mutable, framework-friendly
 final class PlaceOrderFormData
 {
@@ -866,7 +869,7 @@ if ($form->isSubmitted() && $form->isValid()) {
 
     $this->commandBus->dispatch($command);
 }
-```
+:::
 
 `PlaceOrderCommand` je readonly PHP class – doménový kód s ní pracuje
 bez jakékoli závislosti na Symfony Form komponentě.
@@ -883,9 +886,9 @@ ani nechat API Platform je modifikovat bez Application Service.
 a `StateProcessor`, které fungují jako adaptéry k Application Services.
 
 :::callout{type="pattern"}
-### PHP: StateProcessor jako adapter k Application Service {#d2-code-heading}
+#### PHP: StateProcessor jako adapter k Application Service {#d2-code-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/ApiPlatform/OrderResource.php"}
 <?php
 
 declare(strict_types=1);
@@ -930,7 +933,7 @@ final class PlaceOrderProcessor implements ProcessorInterface
         return new OrderResponse($orderId->toString());
     }
 }
-```
+:::
 :::
 
 ### D3. Security Voter vs. doménová oprávnění {#d3-voter}
@@ -946,9 +949,9 @@ který deleguje rozhodnutí na doménovou metodu agregátu. Doménová metoda je
 čistá funkce – testovatelná bez frameworku.
 
 :::callout{type="pattern"}
-### PHP: Voter jako tenký adaptér + doménová metoda {#d3-code-heading}
+#### PHP: Voter jako tenký adaptér + doménová metoda {#d3-code-heading}
 
-```php
+:::code{language="php" filename="src/Order.php"}
 <?php
 
 declare(strict_types=1);
@@ -987,7 +990,7 @@ final class OrderVoter extends Voter
         return $subject->canBeCancelledBy(UserId::fromString($user->getId()), new \DateTimeImmutable());
     }
 }
-```
+:::
 :::
 
 ## 21.05 E – Organizace a tým {#tym}

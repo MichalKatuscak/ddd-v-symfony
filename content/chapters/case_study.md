@@ -184,7 +184,7 @@ Na taktické úrovni implementace pokrývá tyto DDD vzory:
 
 Struktura projektu odráží jak strategický, tak taktický design DDD. Níže je ukázka správné struktury projektu, kde každý bounded context má svou vlastní doménovou vrstvu, infrastrukturu a aplikační služby:
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 src/
 ├── UserManagement/            # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva
@@ -337,7 +337,7 @@ src/
         └── Persistence/        # Sdílená persistence
             └── DoctrineTypes/    # Vlastní Doctrine typy
                 └── UuidType.php    # Typ pro UUID
-```
+:::
 
 ## 25.05 Implementace {#implementation}
 
@@ -360,7 +360,7 @@ Doménový model neobsahuje Doctrine ORM anotace – ty patří do infrastruktur
 (XML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
 na doménových hodnotových objektech a událostech.
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Domain/Model/Project.php"}
 <?php
 
 declare(strict_types=1);
@@ -500,7 +500,7 @@ class Project
         return $events;
     }
 }
-```
+:::
 
 :::callout{type="note"}
 `UserId` je v této studii sdílen mezi kontexty přes Shared Kernel –
@@ -512,7 +512,7 @@ přes Shared Kernel nestačilo a kontext by si držel vlastní kopii.
 
 ### Doménový model: Úkol (kořen agregátu) {#task-model-heading}
 
-```php
+:::code{language="php" filename="src/TaskManagement/Domain/Model/Task.php"}
 <?php
 
 declare(strict_types=1);
@@ -646,7 +646,7 @@ class Task
         return $events;
     }
 }
-```
+:::
 
 ### Doménové události {#domain-events-heading}
 
@@ -657,7 +657,7 @@ a hodnot potřebnou k rekonstrukci kontextu. Teoretický základ doménových ud
 [Základní koncepty DDD](/zakladni-koncepty#domain-events); návaznost na Event
 Sourcing v kapitole [Event Sourcing](/event-sourcing).
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Domain/Event/ProjectCreated.php"}
 <?php
 
 declare(strict_types=1);
@@ -677,9 +677,9 @@ final readonly class ProjectCreated
     ) {
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Domain/Event/MemberAdded.php a MemberRemoved.php"}
 <?php
 
 declare(strict_types=1);
@@ -708,9 +708,9 @@ final readonly class MemberRemoved
     ) {
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/TaskManagement/Domain/Event/TaskCreated.php, TaskAssigned.php, TaskStatusChanged.php"}
 <?php
 
 declare(strict_types=1);
@@ -753,7 +753,7 @@ final readonly class TaskStatusChanged
     ) {
     }
 }
-```
+:::
 
 :::callout{type="note"}
 Doménová událost zde nese pouze identifikátory a hodnoty, ne celý agregát. Konzument události
@@ -771,7 +771,7 @@ srovnává podle hodnoty. `TaskStatus` je výčtový typ s explicitním doménov
 Plný rozbor Value Objektů je v kapitole
 [Základní koncepty DDD](/zakladni-koncepty#value-objects).
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Domain/ValueObject/ProjectId.php"}
 <?php
 
 declare(strict_types=1);
@@ -803,9 +803,9 @@ final class ProjectId
         return $this->value === $other->value;
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/TaskManagement/Domain/ValueObject/TaskStatus.php"}
 <?php
 
 declare(strict_types=1);
@@ -828,7 +828,7 @@ enum TaskStatus: string
         };
     }
 }
-```
+:::
 
 :::callout{type="note"}
 Konstruktor `new ProjectId()` bez argumentů generuje UUID v7 (časově řazené,
@@ -840,7 +840,7 @@ je v [sekci 25.07.2](#trade-off-shared-kernel-heading).
 
 ### Command: Vytvoření projektu (Command Pattern) {#create-project-command-heading}
 
-```php
+:::code{language="php" filename="src/ProjectManagement/CreateProject/Command/CreateProject.php"}
 <?php
 
 declare(strict_types=1);
@@ -864,11 +864,11 @@ class CreateProject
     ) {
     }
 }
-```
+:::
 
 ### Command Handler: Zpracování vytvoření projektu (Application Service) {#create-project-handler-heading}
 
-```php
+:::code{language="php" filename="src/ProjectManagement/CreateProject/Command/CreateProjectHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -905,11 +905,11 @@ class CreateProjectHandler
         return $projectId->value();
     }
 }
-```
+:::
 
 ### Command: Přiřazení úkolu (Command Pattern) {#assign-task-command-heading}
 
-```php
+:::code{language="php" filename="src/TaskManagement/AssignTask/Command/AssignTask.php"}
 <?php
 
 declare(strict_types=1);
@@ -931,11 +931,11 @@ class AssignTask
     ) {
     }
 }
-```
+:::
 
 ### Command Handler: Zpracování přiřazení úkolu (Application Service) {#assign-task-handler-heading}
 
-```php
+:::code{language="php" filename="src/TaskManagement/AssignTask/Command/AssignTaskHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -997,11 +997,11 @@ class AssignTaskHandler
         $this->taskRepository->save($task);
     }
 }
-```
+:::
 
 ### Query: Získání projektů uživatele (Query Pattern) {#get-projects-query-heading}
 
-```php
+:::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjects.php"}
 <?php
 
 declare(strict_types=1);
@@ -1019,11 +1019,11 @@ class GetProjects
     ) {
     }
 }
-```
+:::
 
 ### Query Handler: Zpracování získání projektů uživatele (Read Model) {#get-projects-handler-heading}
 
-```php
+:::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -1063,11 +1063,11 @@ class GetProjectsHandler
         return $result;
     }
 }
-```
+:::
 
 ### Doménová služba: Přiřazení úkolu {#task-assignment-service-heading}
 
-```php
+:::code{language="php" filename="src/TaskManagement/Domain/Service/TaskAssignmentService.php"}
 <?php
 
 declare(strict_types=1);
@@ -1086,7 +1086,7 @@ class TaskAssignmentService
         $task->assign($assigneeId);
     }
 }
-```
+:::
 
 ## 25.06 Read modely a projekce {#read-model}
 
@@ -1108,7 +1108,7 @@ obsahuje vypočítané hodnoty (`member_count`, `task_count`) a denormalizované
 `member_ids` jako JSON. Tato tabulka není zdrojem pravdy; lze ji kdykoli rebuildovat z událostí
 nebo z primárních tabulek.
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListView.php"}
 <?php
 
 declare(strict_types=1);
@@ -1152,14 +1152,14 @@ class ProjectListView
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     public \DateTimeImmutable $updatedAt;
 }
-```
+:::
 
 ### Projection: aktualizace read modelu z událostí {#read-model-projection-heading}
 
 Projekce naslouchá doménovým událostem ze všech kontextů, které mají vliv na podobu výpisu projektů.
 Je registrovaná jako asynchronní message handler – běží mimo originální transakci a nemůže ji shodit.
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListProjection.php"}
 <?php
 
 declare(strict_types=1);
@@ -1253,7 +1253,7 @@ class ProjectListProjection
         $this->em->flush();
     }
 }
-```
+:::
 
 ### Query handler nad read modelem (revize `GetProjectsHandler`) {#read-model-query-heading}
 
@@ -1263,7 +1263,7 @@ DBAL dotaz nad read tabulkou. Žádné agregáty, žádná doménová logika –
 na `ProjectViewModel`. Stejný název třídy, stejný command, jiná implementace; volající
 ani Symfony Messenger o změně nevědí.
 
-```php
+:::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -1307,7 +1307,7 @@ class GetProjectsHandler
         );
     }
 }
-```
+:::
 
 ### Idempotence projekce a reconciliation {#read-model-reconciliation-heading}
 
@@ -1329,7 +1329,7 @@ v pravidelném intervalu detekuje rozdíl mezi write modelem a read modelem a do
 V této studii je řešen jako Symfony console command spouštěný z cronu jednou za hodinu (frekvence je
 kompromis mezi čerstvostí a zatížením DB):
 
-```php
+:::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ReconcileProjectListView.php"}
 <?php
 
 declare(strict_types=1);
@@ -1398,7 +1398,7 @@ final class ReconcileProjectListView extends Command
         return Command::SUCCESS;
     }
 }
-```
+:::
 
 Reconciler nepřebírá roli projekce; jen dorovnává to, co projekce z technických důvodů
 nedoručila. Pro `task_count` by se obdobně načetly počty úkolů z

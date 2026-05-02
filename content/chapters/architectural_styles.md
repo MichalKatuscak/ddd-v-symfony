@@ -59,7 +59,7 @@ Vrstvená architektura je nejstarší a nejrozšířenější způsob, jak organ
 
 ### Typická Symfony struktura {#layered-symfony-heading}
 
-```bash
+:::code{language="bash" filename="src/ (Symfony Layered konvence)"}
 src/
 ├── Controller/                      # Presentation
 │   ├── OrderController.php
@@ -76,13 +76,13 @@ src/
 │   └── CustomerRepository.php
 └── Form/                             # Presentation (vstupy)
     └── OrderType.php
-```
+:::
 
 Tato struktura je výchozí *Symfony skeleton*: `make:entity`, `make:controller` a `make:repository` ji generují automaticky. Pro junior tým je dobře čitelná – každý soubor má své místo, a přidání nového use casu je triviální (controller + service + entity + repository).
 
 ### Příklad doménové entity ve vrstveném DDD {#layered-priklad-heading}
 
-```php
+:::code{language="php" filename="src/Entity/Order.php" highlights="9,10,11,18,19,20,21,22,23,24,25,26"}
 <?php
 
 declare(strict_types=1);
@@ -126,7 +126,7 @@ class Order
         $this->status = 'cancelled';
     }
 }
-```
+:::
 
 Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty – to je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes anotace `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku" je definováno v doménovém kódu, ale zároveň ten kód *ví*, že se ukládá přes Doctrine. To je tzv. *domain leak* – doménová vrstva vyžaduje knihovnu z Infrastructure vrstvy, aby se vůbec dala zkompilovat.
 
@@ -148,7 +148,7 @@ Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje inv
 
 Pro úplnost ukázka, jak vypadá orchestrační kód v Layered architektuře. Controller volá Application Service, ten načte Doctrine entitu z repository, zavolá doménovou metodu a flushne změny. Žádné porty, žádné DTO mappery, žádné explicitní rozhraní mezi vrstvami.
 
-```php
+:::code{language="php" filename="src/Controller/OrderController.php"}
 <?php
 
 declare(strict_types=1);
@@ -183,7 +183,7 @@ final class OrderController extends AbstractController
         return new JsonResponse(['status' => $order->getStatus()]);
     }
 }
-```
+:::
 
 Tento kód je čitelný, krátký a v Symfony idiomu standardní. Cena je v testech: pro test `OrderController::confirm()` potřebujete buď `WebTestCase` s celým bootem aplikace, nebo komplikovaný setup s mockováním `OrderRepository` i `OrderService`. V Hexagonal struktuře byste místo toho jen zavolali use case bez controlleru.
 
@@ -210,7 +210,7 @@ Adaptéry implementují porty: **Driving adaptér** (Symfony Controller, CLI Com
 
 ### Symfony struktura podle Hexagonal {#hexagonal-symfony-heading}
 
-```bash
+:::code{language="bash" filename="src/ (Symfony Hexagonal struktura)"}
 src/
 ├── Ordering/                           # Bounded Context
 │   ├── Domain/                         # Doménové jádro (žádné framework deps)
@@ -240,7 +240,7 @@ src/
 └── Shared/
     └── Domain/
         └── DomainException.php
-```
+:::
 
 Z této struktury plyne několik věcí:
 
@@ -251,7 +251,7 @@ Z této struktury plyne několik věcí:
 
 ### Příklad: Outbound port a jeho adaptér {#hexagonal-priklad-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Port/OrderRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -272,9 +272,9 @@ interface OrderRepository
      */
     public function findByCustomer(string $customerId): array;
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Persistence/DoctrineOrderRepository.php" highlights="13,14,15,16,17,18,19,24,25"}
 <?php
 
 declare(strict_types=1);
@@ -319,7 +319,7 @@ final class DoctrineOrderRepository implements OrderRepository
         return array_map(fn (OrderOrmEntity $r) => $this->mapper->toDomain($r), $rows);
     }
 }
-```
+:::
 
 Doménová třída `Order` nemá žádné Doctrine anotace – je to čisté PHP. `OrderOrmEntity` je samostatná persistence-friendly třída s Doctrine mapováním a `OrderMapper` překlápí mezi nimi. Cena: dvojí třída a explicitní mapování. Zisk: doménový model je testovatelný v paměti bez databáze, lze ho serializovat do JSON Event Storu beze změny tvaru, a změna persistence vrstvy nezasáhne doménu.
 
@@ -327,7 +327,7 @@ Doménová třída `Order` nemá žádné Doctrine anotace – je to čisté PHP
 
 Driving (inbound) port definuje, co aplikace umí. V DDD termínech je to kontrakt Application Service. V Symfony 8 se zpravidla mapuje na CQRS Command/Query handler dispatchovaný přes Messenger Bus, ale port lze také definovat explicitně jako interface, který má jediný handler jako implementaci.
 
-```php
+:::code{language="php" filename="src/Ordering/Application/UseCase/PlaceOrder.php"}
 <?php
 
 declare(strict_types=1);
@@ -346,11 +346,11 @@ interface PlaceOrder
 {
     public function handle(PlaceOrderInput $input): PlaceOrderOutput;
 }
-```
+:::
 
 HTTP adapter pak nezná konkrétní třídu handleru – zná jen rozhraní portu, a Symfony DI ho automaticky napojí na implementaci. Tím získáte schopnost handler v testech vyměnit za fake bez celé aplikační vrstvy.
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php" highlights="13,14,15,16"}
 <?php
 
 declare(strict_types=1);
@@ -388,13 +388,13 @@ final class PlaceOrderController
         ], 201);
     }
 }
-```
+:::
 
 ### Symfony Service Container a auto-wiring {#hexagonal-symfony-di-heading}
 
 Symfony Dependency Injection automaticky binduje rozhraní na implementaci, pokud je *jen jedna* implementace daného rozhraní. Pokud je víc (např. `InMemoryOrderRepository` pro testy a `DoctrineOrderRepository` pro produkci), explicitně určíte mapování v `config/services.yaml`:
 
-```yaml
+:::code{language="yaml" filename="config/services.yaml" highlights="10,11"}
 services:
     _defaults:
         autowire: true
@@ -408,11 +408,11 @@ services:
         alias: App\Ordering\Infrastructure\Persistence\DoctrineOrderRepository
 
     # Pro testy lze přepsat v config/services_test.yaml
-```
+:::
 
 Alternativa s atributem `#[Autowire]` přímo v konstruktoru use casu:
 
-```php
+:::code{language="php" filename="src/Ordering/Application/UseCase/PlaceOrderHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -431,13 +431,13 @@ final class PlaceOrderHandler implements PlaceOrder
     ) {
     }
 }
-```
+:::
 
 ### Druhý port: publisher doménových událostí {#hexagonal-event-port-heading}
 
 Repository je nejviditelnější, ale ne jediný outbound port. Druhým častým kandidátem je publikace doménových událostí. Doména volá `EventPublisher::publish($event)` a nestará se, kdo eventy konzumuje – Symfony Messenger, RabbitMQ, in-memory dispatcher pro testy, nebo nikdo (event bus může být no-op v jednoduchých scénářích).
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Port/EventPublisher.php"}
 <?php
 
 declare(strict_types=1);
@@ -455,9 +455,9 @@ interface EventPublisher
      */
     public function publishAll(iterable $events): void;
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Messaging/MessengerEventPublisher.php"}
 <?php
 
 declare(strict_types=1);
@@ -487,11 +487,11 @@ final class MessengerEventPublisher implements EventPublisher
         }
     }
 }
-```
+:::
 
 Pro testy si napíšete `InMemoryEventPublisher`, který eventy pouze sbírá do pole a umožní v testu zkontrolovat, jaké eventy doména publikovala. Žádné Symfony Messenger, žádný RabbitMQ, žádná infrastruktura. Test běží v 5 milisekundách místo 500.
 
-```php
+:::code{language="php" filename="tests/Ordering/Doubles/InMemoryEventPublisher.php"}
 <?php
 
 declare(strict_types=1);
@@ -526,7 +526,7 @@ final class InMemoryEventPublisher implements EventPublisher
         return $this->published;
     }
 }
-```
+:::
 
 :::diagram{fig="09.3-A" title="Čtyři architektonické styly aplikované na DDD" src="images/diagrams/13_architectural_styles/hexagonal_vs_onion.svg"}
 :::
@@ -579,7 +579,7 @@ Pokud váš projekt používá Hexagonal slovník (port, adapter, driving, drive
 
 Domain Service obsahuje *doménovou logiku*, která nepatří do agregátu (typicky kvůli tomu, že pracuje s víc agregáty najednou nebo vyžaduje data, která agregát nemá k dispozici). Application Service je *orchestrátor* – řídí transakci, načítá agregáty z repository, volá doménovou logiku a publikuje výstupy.
 
-```php
+:::code{language="php" filename="src/Pricing/Domain/Service/PriceCalculator.php"}
 <?php
 
 declare(strict_types=1);
@@ -610,9 +610,9 @@ final class PriceCalculator
         return $subtotal->subtract($discount)->add($vat);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Pricing/Application/Service/CalculateCartPrice.php" highlights="16,17,18,19,20,21,22,23,24"}
 <?php
 
 declare(strict_types=1);
@@ -653,13 +653,13 @@ final class CalculateCartPrice
         return $this->calculator->calculate($cart, $customer, $policy);
     }
 }
-```
+:::
 
 Rozdíl: `PriceCalculator` nezná repository – bere si *již načtené* objekty. `CalculateCartPrice` zná repository (přes porty) – orchestruje načtení a předání dat. Pokud byste obě zodpovědnosti slili do jedné třídy, ztratíte schopnost testovat výpočet ceny izolovaně, bez databáze.
 
 ### Onion struktura v Symfony {#onion-symfony-heading}
 
-```bash
+:::code{language="bash" filename="src/ (Symfony Onion struktura)"}
 src/
 ├── Pricing/                            # Bounded Context
 │   ├── Domain/                         # Vnitřní prsten (jádro)
@@ -685,7 +685,7 @@ src/
 └── Shared/
     └── Domain/
         └── Money.php
-```
+:::
 
 Symfony auto-wiring funguje pro Onion stejně jako pro Hexagonal – Application Service závisí na Domain Service a portech, vnější HTTP adapter závisí na Application Service. Důležité je, že žádná třída v `Domain/` nepoužívá `use Symfony\…` ani `use Doctrine\…`; jediné `use` v jádře jsou na vlastní třídy z `Domain/`.
 
@@ -721,7 +721,7 @@ V DDD termínech: Use Case z Clean Architecture ≈ DDD Application Service ≈ 
 
 ### Příklad: Use Case s Request/Response DTO {#clean-priklad-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/UseCase/PlaceOrder/PlaceOrderRequest.php"}
 <?php
 
 declare(strict_types=1);
@@ -744,9 +744,9 @@ final readonly class PlaceOrderRequest
     ) {
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/UseCase/PlaceOrder/PlaceOrderResponse.php"}
 <?php
 
 declare(strict_types=1);
@@ -766,9 +766,9 @@ final readonly class PlaceOrderResponse
     ) {
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/UseCase/PlaceOrder/PlaceOrderUseCase.php" highlights="13,22,23,41"}
 <?php
 
 declare(strict_types=1);
@@ -815,13 +815,13 @@ final class PlaceOrderUseCase
         );
     }
 }
-```
+:::
 
 Use Case `PlaceOrderUseCase` je *jediný vstupní bod* pro tuto aplikační schopnost. Ať už ho zavolá HTTP Controller, CLI Command, Messenger Handler, GraphQL Resolver nebo testovací suite – všichni používají stejný kontrakt: `PlaceOrderRequest` dovnitř, `PlaceOrderResponse` ven.
 
 ### Adaptér: Symfony HTTP Controller jako Interface Adapter {#clean-controller-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php"}
 <?php
 
 declare(strict_types=1);
@@ -861,7 +861,7 @@ final class PlaceOrderController
         ], 201);
     }
 }
-```
+:::
 
 Controller dělá přesně tři věci: dekóduje HTTP vstup do `PlaceOrderRequest`, zavolá use case, zformátuje výstup zpět do JSON. Žádná doménová logika, žádné rozhodování. Stejný use case lze obsloužit z CLI commandu pár řádky kódu, ze Symfony Messengeru jako CommandHandler, nebo zavolat přímo z PHPUnit testu bez celého frameworku.
 
@@ -908,7 +908,7 @@ Detail tohoto stylu, jeho srovnání s vrstveným DDD a Symfony konvence pro Ver
 
 ### Symfony struktura podle Vertical Slice {#vs-priklad-heading}
 
-```bash
+:::code{language="bash" filename="src/ (Symfony Vertical Slice struktura)"}
 src/
 ├── Ordering/                           # Bounded Context
 │   ├── Domain/                         # Sdílený doménový model
@@ -931,7 +931,7 @@ src/
 │       ├── GetOrderHistoryHandler.php
 │       ├── OrderHistoryReadModel.php
 │       └── GetOrderHistoryController.php
-```
+:::
 
 ### Vertical Slice a Hexagonal jsou ortogonální {#vs-vs-hexagonal-heading}
 
@@ -986,7 +986,7 @@ Detail klasifikace subdomén (Core / Supporting / Generic) je v kapitole [Subdom
 
 ### Příklad: e-shop s diferencovanou architekturou {#hybrid-priklad-heading}
 
-```bash
+:::code{language="bash" filename="src/ (hybridní rozložení e-shopu)"}
 src/
 ├── Ordering/                           # CORE DOMAIN – plný Hexagonal
 │   ├── Domain/
@@ -1039,7 +1039,7 @@ src/
     └── Bus/
         ├── CommandBus.php              # Interface
         └── EventBus.php
-```
+:::
 
 ### Pravidla hybridního přístupu {#hybrid-pravidla-heading}
 
@@ -1116,7 +1116,7 @@ Symfony historicky stavěl na bundlech jako jednotce modularity. V Symfony 8 je 
 
 Pokud máte víc Bounded Contexts (Ordering, Billing, Customer, …), můžete pro každý mít vlastní YAML konfiguraci v `config/packages/contexts/`. To je užitečné zejména v hybridním přístupu, kde různé BC mají různé úrovně izolace. Příklad: jen Core Domain BC má explicitní binding portů, ostatní BC spoléhají na auto-wiring.
 
-```yaml
+:::code{language="yaml" filename="config/services.yaml" highlights="13,14,15,16,17"}
 # config/services.yaml
 imports:
     - { resource: 'packages/contexts/ordering.yaml' }
@@ -1135,7 +1135,7 @@ services:
             - '../src/**/Domain/Model/'        # Doménové modely nejsou služby
             - '../src/**/Domain/Event/'        # Události také ne
             - '../src/**/Application/Dto/'     # DTO také ne
-```
+:::
 
 Doménové modely je třeba **vyloučit z auto-registrace v Service Containeru**. Doménové entity, hodnotové objekty a doménové eventy *nejsou služby* – jsou to data. Pokud je necháte registrovat jako služby, riskujete, že Symfony do nich zkusí injektovat závislosti, což porušuje DDD pravidla.
 
@@ -1143,7 +1143,7 @@ Doménové modely je třeba **vyloučit z auto-registrace v Service Containeru**
 
 Pro všechny styly kromě Layered je Symfony Messenger ideální nástroj pro implementaci Command Bus a Event Bus pattern. V Hexagonal a Clean Architecture každý use case dispatchujete jako Command, handler je váš inbound adaptér nebo přímo use case. Konfigurace per-bus:
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -1166,7 +1166,7 @@ framework:
         routing:
             App\Ordering\Domain\Event\OrderConfirmed: async
             App\Ordering\Domain\Event\OrderCancelled: async
-```
+:::
 
 Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly DDD aplikaci. Detail konfigurace Messengeru pro DDD je v kapitole [CQRS](/cqrs) a v kapitole [Implementace v Symfony 8](/implementace-v-symfony).
 

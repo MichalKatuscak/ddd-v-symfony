@@ -83,7 +83,7 @@ validaci – že neplatné vstupy vyvolají odpovídající výjimku.
 :::callout{type="pattern"}
 ### Příklad: Test pro Email value object (PHPUnit)
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Domain/ValueObject/EmailTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -152,7 +152,7 @@ final class EmailTest extends TestCase
         $this->assertFalse($original->equals($different));
     }
 }
-```
+:::
 :::
 
 ### Testování entit
@@ -163,7 +163,7 @@ doménových výjimek při porušení pravidel. Testuje se chování, ne struktu
 :::callout{type="pattern"}
 ### Příklad: Test pro User entitu
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Domain/Model/UserTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -233,7 +233,7 @@ final class UserTest extends TestCase
         $this->assertCount(0, $user->releaseDomainEvents());
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -251,7 +251,7 @@ jako vedlejší efekt doménových operací.
 :::callout{type="pattern"}
 ### Příklad: Test pro Order agregát
 
-```php
+:::code{language="php" filename="Tests/OrderManagement/Domain/Model/OrderTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -324,7 +324,7 @@ final class OrderTest extends TestCase
         $this->assertInstanceOf(OrderPlaced::class, $events[1]);
     }
 }
-```
+:::
 :::
 
 ## 18.03 Testování doménových událostí {#testovani-domain-events}
@@ -347,7 +347,7 @@ obsah vrácených událostí.
 :::callout{type="pattern"}
 ### Příklad: Trait pro testování doménových událostí
 
-```php
+:::code{language="php" filename="Tests/Shared/Domain/DomainEventAssertions.php"}
 <?php
 
 declare(strict_types=1);
@@ -455,7 +455,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $this->assertNoEventOfType(OrderPlaced::class, $events);
     }
 }
-```
+:::
 :::
 
 ## 18.04 Test doubles a InMemory repozitáře {#test-doubles}
@@ -484,7 +484,7 @@ Správná volba typu test double závisí na tom, co testujeme a jaké chování
 :::callout{type="pattern"}
 ### Příklad: InMemoryUserRepository implementace
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Infrastructure/Repository/InMemoryUserRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -548,13 +548,13 @@ final class InMemoryUserRepository implements UserRepository
         return array_values($this->storage);
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Příklad: Test command handleru s InMemoryRepository
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Application/Command/RegisterUserHandlerTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -619,7 +619,7 @@ final class RegisterUserHandlerTest extends TestCase
         $this->assertSame(1, $this->userRepository->count());
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -658,7 +658,7 @@ nad `Connection`. Bez toho by každý test zanechával data v databázi a testy 
 :::callout{type="pattern"}
 ### Příklad: Integrační test DoctrineUserRepository
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Infrastructure/Repository/DoctrineUserRepositoryTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -740,7 +740,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $this->assertTrue($this->repository->existsByEmail($email));
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -769,7 +769,7 @@ requestů. Response obsahuje status kód, tělo a hlavičky – vše přímo ass
 :::callout{type="pattern"}
 ### Příklad: Funkční test registračního endpointu
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Registration/Controller/RegistrationControllerTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -863,7 +863,7 @@ final class RegistrationControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(400);
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -890,7 +890,7 @@ v kódu a nahlásí porušení. Typicky se spouští v CI jako součást statick
 :::callout{type="pattern"}
 ### Příklad: deptrac.yaml konfigurace pro DDD projekt
 
-```yaml
+:::code{language="yaml" filename="deptrac.yaml"}
 deptrac:
   paths:
     - ./src
@@ -950,13 +950,13 @@ deptrac:
     # Dočasné výjimky - měly by být minimalizovány
     # UserManagement\Domain\Model\User:
     #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně - antipattern
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Příklad: Spuštění Deptrac v CI
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 # Instalace (dev závislost)
 composer require --dev qossmic/deptrac-shim
 
@@ -967,7 +967,7 @@ composer require --dev qossmic/deptrac-shim
 # [ERROR] Found 1 Violation
 # UserManagement\Domain\Model\User must not depend on
 # Doctrine\ORM\Mapping\Column (Infrastructure layer)
-```
+:::
 :::
 
 ### PHP-Arkitect jako alternativa
@@ -980,7 +980,7 @@ takže výsledky se integrují přímo do testovací sady.
 :::callout{type="pattern"}
 ### Příklad: PHP-Arkitect pravidla
 
-```php
+:::code{language="php" filename="phparkitect.php"}
 <?php
 
 // phparkitect.php
@@ -1013,7 +1013,7 @@ return static function (Config $config): void {
             ->because('Command namespace smí obsahovat pouze Command a Handler třídy (konvence projektu).'),
     );
 };
-```
+:::
 :::
 
 ## 18.08 Code coverage a doporučené postupy {#pokryti-a-best-practices}
@@ -1069,7 +1069,7 @@ pokud všechny společně ověřují jeden konzistentní scénář.
 :::callout{type="pattern"}
 ### Příklad: Spuštění testových sad pro DDD projekt
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 # Spuštění unit testů doménové vrstvy (rychlé, bez kernelu)
 ./vendor/bin/phpunit --testsuite=Domain
 
@@ -1084,7 +1084,7 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
 
 # Spuštění architektonických testů s Deptrac
 ./vendor/bin/deptrac analyze
-```
+:::
 :::
 
 Testovací pyramida v DDD staví na tom, že doménová vrstva je čistý PHP bez závislostí na frameworku –

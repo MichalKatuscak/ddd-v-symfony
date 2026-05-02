@@ -32,7 +32,7 @@ Typické vrstvy v tradičním DDD jsou:
 - **Doménová vrstva (Domain Layer)** – Obsahuje doménový model a doménovou logiku.
 - **Infrastrukturní vrstva (Infrastructure Layer)** – Poskytuje technické služby pro ostatní vrstvy.
 
-```bash
+:::code{language="bash" filename="src/ (tradiční DDD struktura)"}
 src/
 ├── Presentation/                # Prezentační vrstva
 │   └── Controller/
@@ -56,7 +56,7 @@ src/
         └── Doctrine/
             └── Mapping/
                 └── User.orm.xml
-```
+:::
 
 V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
 Vrstvená architektura se liší od hexagonální (Ports & Adapters) nebo cibulové (Onion) – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů [[2]](https://alistair.cockburn.us/hexagonal-architecture/). Doménové stavební kameny – entity, hodnotové objekty, agregáty, doménové služby – jsou společné pro oba přístupy a popisuje je kapitola [Základní koncepty DDD](/zakladni-koncepty).
@@ -66,7 +66,7 @@ Vrstvená architektura se liší od hexagonální (Ports & Adapters) nebo cibulo
 Vertikální slice architektura organizuje kód podle funkcí (feature slices) namísto technických vrstev [[3]](https://www.jimmybogard.com/vertical-slice-architecture/).
 Každá funkce (feature) obsahuje všechny vrstvy potřebné pro svou implementaci, čímž se snižují vazby mezi funkcemi a každá část aplikace může být vyvíjena nezávisle.
 
-```bash
+:::code{language="bash" filename="src/ (vertical slice struktura)"}
 src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                # Doménová vrstva - sdílená pro celý kontext
@@ -119,7 +119,7 @@ src/
     └── Domain/
         └── Exception/
             └── DomainException.php
-```
+:::
 
 Ve vertikální slice architektuře kód dělíme podle funkcí (feature slices) – každá funkce prochází celým stackem a obsahuje vše, co potřebuje pro svou implementaci.
 Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce [[4]](https://www.youtube.com/watch?v=SUiWfhAhgQw). Zároveň zachovává principy DDD tím, že respektuje bounded contexts a doménový model.
@@ -176,7 +176,7 @@ Symfony 8 poskytuje nástroje a komponenty pro implementaci obou přístupů k D
 
 Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev. Detaily konfigurace Messengeru, DI a Doctrine pro DDD model popisuje kapitola [Implementace v Symfony 8](/implementace-v-symfony); kompletní příklad reálného projektu členěného do bounded contexts je v [Případové studii](/pripadova-studie).
 
-```bash
+:::code{language="bash" filename="src/ (Symfony 8 – tradiční)"}
 src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Presentation/            # Prezentační vrstva
@@ -222,14 +222,14 @@ src/
     └── Domain/                 # Sdílená doménová logika
         └── Exception/
             └── DomainException.php
-```
+:::
 
 ### Implementace vertikální slice architektury v Symfony 8: {#vertical-slice-symfony-implementation-heading}
 
 Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) [[8]](https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo).
 Oproti základnímu modelu z [sekce 10.02](#vertical-slice) (kde celý `Domain/` leží na úrovni kontextu) jde tato varianta hlouběji: každá feature dostane vlastní `Domain/` pro doménové služby a události specifické pro ni, zatímco sdílený agregátový model zůstává v kontextovém `Domain/`.
 
-```bash
+:::code{language="bash" filename="src/ (Symfony 8 – vertical slice)"}
 src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Registration/           # Feature: Registrace uživatelů
@@ -282,7 +282,7 @@ src/
     └── Domain/
         └── Exception/
             └── DomainException.php
-```
+:::
 
 Pro vertikální slice architekturu jsou v Symfony 8 relevantní zejména tyto komponenty [[9]](https://symfony.com/doc/current/components/index.html):
 

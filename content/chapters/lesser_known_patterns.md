@@ -70,12 +70,12 @@ celou samostatnou kapitolu – **Specification Pattern**.
 predikát nad doménovým objektem – typicky odpověď na otázku tvaru „splňuje tento agregát
 konkrétní pravidlo?". Minimální rozhraní vypadá takto:
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php"}
 interface Specification
 {
     public function isSatisfiedBy(mixed $candidate): bool;
 }
-```
+:::
 
 Zdánlivě banální. Jenže právě tato banalita je síla: každé pravidlo doménového jazyka
 – *„zákazník je premium"*, *„objednávka má nárok na dopravu zdarma"*,
@@ -150,7 +150,7 @@ výraz nad pojmenovanými atomy. Třídní hierarchie vypadá následovně:
 Začneme rozhraním, které vystaví všechny tři kombinátory, a abstraktní třídou, která je
 implementuje pomocí AndSpecification, OrSpecification, NotSpecification:
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php"}
 <?php
 
 declare(strict_types=1);
@@ -182,12 +182,12 @@ interface Specification
     /** @return Specification<T> */
     public function not(): self;
 }
-```
+:::
 
 Aby každá konkrétní specifikace nemusela kombinátory implementovat sama, abstraktní
 třída je dodá zdarma:
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/CompositeSpecification.php"}
 <?php
 
 declare(strict_types=1);
@@ -218,9 +218,9 @@ abstract class CompositeSpecification implements Specification
         return new NotSpecification($this);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/AndSpecification.php"}
 <?php
 
 declare(strict_types=1);
@@ -248,9 +248,9 @@ final class AndSpecification extends CompositeSpecification
             && $this->right->isSatisfiedBy($candidate);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/OrSpecification.php"}
 <?php
 
 declare(strict_types=1);
@@ -278,9 +278,9 @@ final class OrSpecification extends CompositeSpecification
             || $this->right->isSatisfiedBy($candidate);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/NotSpecification.php"}
 <?php
 
 declare(strict_types=1);
@@ -301,7 +301,7 @@ final class NotSpecification extends CompositeSpecification
         return !$this->inner->isSatisfiedBy($candidate);
     }
 }
-```
+:::
 
 ### Doménová specifikace {#spec-domain}
 
@@ -309,7 +309,7 @@ S kostrou hotovou ukážeme konkrétní doménové specifikace. Jedná se o skut
 pravidla z Ordering kontextu – všimněte si, že každá z nich nese mluvící doménové jméno
 a dědí kombinátory `and`/`or`/`not` automaticky:
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Specification/EligibleForFreeShipping.php"}
 <?php
 
 declare(strict_types=1);
@@ -337,9 +337,9 @@ final class EligibleForFreeShipping extends CompositeSpecification
         return $candidate->total()->isGreaterThanOrEqual($this->threshold);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Specification/InEUCountry.php"}
 <?php
 
 declare(strict_types=1);
@@ -367,9 +367,9 @@ final class InEUCountry extends CompositeSpecification
             && $candidate->shippingAddress()->country()->equals($this->country);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Specification/NotInBlacklist.php"}
 <?php
 
 declare(strict_types=1);
@@ -403,7 +403,7 @@ final class NotInBlacklist extends CompositeSpecification
         return true;
     }
 }
-```
+:::
 
 ### Kompozice v aplikační vrstvě {#spec-compose}
 
@@ -412,7 +412,7 @@ Zde se ukazuje skutečná hodnota vzoru. Komplexní marketingová akce
 je pouze trojice atomických specifikací spojená kombinátorem `and` – jedna
 čitelná řádka místo trojnásobně vnořeného `if`-u:
 
-```php
+:::code{language="php" filename="src/Ordering/Application/CommandHandler/ApplyFreeShippingHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -441,7 +441,7 @@ final class ApplyFreeShippingHandler
         }
     }
 }
-```
+:::
 
 Pravidlo lze v testu rozložit na atomy a ověřit každý zvlášť. Když produktový tým
 rozhodne, že na blacklist se nově dívat nemá, smažete jeden řádek z kompozice – bez
@@ -456,7 +456,7 @@ specifikaci, převede ji na DQL/SQL kritérium a vrátí výsledek. Tomuto pří
 říká **double-dispatch**: specifikace nese pravidlo, repozitář ví, jak ho
 přeložit do persistence.
 
-```php
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/QuerySpecification.php"}
 <?php
 
 declare(strict_types=1);
@@ -477,9 +477,9 @@ interface QuerySpecification extends Specification
 {
     public function asDoctrineCriteria(QueryBuilder $qb, string $alias): void;
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Specification/EligibleForFreeShipping.php (rozšířená verze)"}
 <?php
 
 declare(strict_types=1);
@@ -513,12 +513,12 @@ final class EligibleForFreeShipping extends CompositeSpecification implements Qu
            ->setParameter('threshold', $this->threshold->amount());
     }
 }
-```
+:::
 
 Repozitář pak vystaví obecnou metodu `match()`, která přijme jakoukoliv
 `QuerySpecification` a přeloží ji na DQL:
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -549,7 +549,7 @@ final class DoctrineOrderRepository implements OrderRepository
         return $qb->getQuery()->getResult();
     }
 }
-```
+:::
 
 Tímto způsobem vyřešíte klasický problém *„jak se má pravidlo aplikovat jen jednou –
 v PHP nebo v SQL?"*. Specifikace je **zdroj pravdy**, obě její role
@@ -619,7 +619,7 @@ Klasický bankovní příklad – převod peněz ze zdrojového účtu na cílov
 do `$from` (nezná `$to`), ani do `$to` (nezná
 `$from`). Je to doménová operace bez přirozeného vlastníka:
 
-```php
+:::code{language="php" filename="src/Banking/Domain/Service/MoneyTransferService.php"}
 <?php
 
 declare(strict_types=1);
@@ -663,7 +663,7 @@ final class MoneyTransferService
         $to->deposit($amount, $reference, $when);
     }
 }
-```
+:::
 
 Všimněte si tří rysů, podle kterých poznáte „opravdovou" Domain Service:
 
@@ -774,7 +774,7 @@ V PHP 8.4 je **nejčistší forma Factory** statická pojmenovaná
 konstrukční metoda na samotném agregátu (named constructor). Konstruktor je privátní,
 publikujete pouze pojmenované entry pointy s jasnou doménovou sémantikou:
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Order.php"}
 <?php
 
 declare(strict_types=1);
@@ -865,7 +865,7 @@ final class Order extends AggregateRoot
         return self::place($customerId, $items, $placedAt);
     }
 }
-```
+:::
 
 Tři výhody static method factory oproti samostatné Factory class:
 
@@ -886,7 +886,7 @@ Statická metoda nestačí v jediné situaci: když vznik agregátu potřebuje
 Statickou metodou nelze přijímat DI bez service locatoru, takže se přechází na
 samostatnou Factory class:
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Factory/OrderFromCartFactory.php"}
 <?php
 
 declare(strict_types=1);
@@ -930,7 +930,7 @@ final class OrderFromCartFactory
         );
     }
 }
-```
+:::
 
 Všimněte si, že Factory class **uvnitř volá** `Order::place()` –
 nepřebírá zodpovědnost za invariant „aspoň 1 položka", ten zůstává v named
@@ -960,7 +960,7 @@ rekonstrukce agregátu z perzistence. Doctrine to dělá za vás (přes hydrator
 máte Event Sourcing nebo custom mapper, potřebujete factory, která **nevolá
 invarianty** (rekonstruovaný agregát už invariant prošel kdysi v minulosti):
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Order.php (fragment)"}
 /**
  * Rekonstituce ze stavu načteného z DB / event streamu.
  * Tento pojmenovaný konstruktor neaplikuje invarianty –
@@ -979,7 +979,7 @@ public static function reconstitute(
 ): self {
     return new self($id, $customerId, $items, $type, $placedAt);
 }
-```
+:::
 
 Pojmenování `::reconstitute()` a PHPDoc `@internal` jasně
 signalizují, že tato cesta vzniku je vyhrazena pro infrastrukturu. Doménový handler,
@@ -1021,7 +1021,7 @@ V Symfony 8 a PHP 8.4 to konkrétně znamená:
 Nejčastěji se vzor uplatní jako **1 modul = 1 Bounded Context**.
 Projekt strukturovaný tímto způsobem vypadá takto:
 
-```bash
+:::code{language="bash" filename="Adresářová struktura podle Modules vzoru"}
 src/
   Ordering/                                  ← MODULE = Bounded Context
     Domain/
@@ -1077,7 +1077,7 @@ src/
         OrSpecification.php
         NotSpecification.php
         QuerySpecification.php
-```
+:::
 
 Této organizaci se v komunitě říká také *vertical slicing* – viz kapitolu
 [Horizontální vs. vertikální dělení](/vertikalni-slice),
@@ -1115,7 +1115,7 @@ Aby PSR-4 namespace odpovídala adresářové struktuře, je nutné upravit
 `composer.json`. Default Symfony nastavení mapuje `App\` na
 `src/`, ale my chceme každý modul s vlastním kořenem:
 
-```json
+:::code{language="json" filename="composer.json (fragment)"}
 {
     "name": "your-org/your-app",
     "type": "project",
@@ -1140,14 +1140,14 @@ Aby PSR-4 namespace odpovídala adresářové struktuře, je nutné upravit
         }
     }
 }
-```
+:::
 
 Po úpravě je nutné spustit `composer dump-autoload`. Symfony skeleton očekává
 controllery v `App\Controller\`; pro Modules layout musíte buď přesunout
 controllery do `App\Ordering\Infrastructure\Http\` a upravit
 `config/services.yaml`:
 
-```yaml
+:::code{language="yaml" filename="config/services.yaml (fragment)"}
 services:
     _defaults:
         autowire: true
@@ -1170,7 +1170,7 @@ services:
     App\Ordering\Infrastructure\Http\:
         resource: '../src/Ordering/Infrastructure/Http/'
         tags: ['controller.service_arguments']
-```
+:::
 
 ### Architecture testing s phparkitect {#mod-phparkitect}
 
@@ -1180,11 +1180,11 @@ pravidlo testem**. Pro PHP existuje knihovna
 [phparkitect](https://github.com/phparkitect/arkitect),
 která spouští architektonické asercie v CI:
 
-```bash
+:::code{language="bash" filename="Instalace"}
 composer require --dev phparkitect/phparkitect
-```
+:::
 
-```php
+:::code{language="php" filename="phparkitect.php"}
 <?php
 
 declare(strict_types=1);
@@ -1244,9 +1244,9 @@ return static function (Config $config): void {
     $config
         ->add($classSet, $orderingIsolated, $domainPure, $applicationCleanArch);
 };
-```
+:::
 
-```bash
+:::code{language="bash" filename="CI run"}
 # CI runner spustí pravidla a selže build, pokud došlo k porušení.
 vendor/bin/phparkitect check --config=phparkitect.php
 
@@ -1255,7 +1255,7 @@ vendor/bin/phparkitect check --config=phparkitect.php
 #   - vendor/bin/phparkitect check
 #   - vendor/bin/phpstan analyse
 #   - vendor/bin/phpunit
-```
+:::
 
 :::callout{type="pattern"}
 ### Bez architektonických testů je Modules jen přání {#phparkitect-tip-heading}

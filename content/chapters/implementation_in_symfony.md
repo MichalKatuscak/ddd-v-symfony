@@ -53,7 +53,7 @@ Při implementaci DDD s vertikální slice architekturou v Symfony 8 se struktur
 :::callout{type="pattern"}
 ### Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                 # Doménová vrstva pro UserManagement
@@ -131,7 +131,7 @@ src/
             └── Doctrine/
                 └── Mapping/
                     └── MappingTrait.php
-```
+:::
 :::
 
 Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Závislosti mezi kontexty procházejí výhradně přes Application vrstvu nebo události – nikdy přes přímý import doménových tříd cizího kontextu.
@@ -166,7 +166,7 @@ Entita v DDD je objekt s jedinečnou, přetrvávající identitou. V Symfony 8 s
 :::callout{type="pattern"}
 ### Příklad: Implementace entity v Symfony 8 {#entity-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
 <?php
 
 declare(strict_types=1);
@@ -251,7 +251,7 @@ class User
         return $events;
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `User` entita, která je definována svou identitou (`UserId`). Všimněte si, že entita neobsahuje žádné Doctrine atributy – doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekci [Separace Doctrine mapování](#doctrine-xml-mapping)). Neměnné vlastnosti (`$id`, `$createdAt`) jsou označeny jako `readonly`. Entity mohou také generovat doménové události,
@@ -279,7 +279,7 @@ Hodnotový objekt v DDD nemá identitu – je definován svými atributy. V Symf
 :::callout{type="pattern"}
 ### Příklad: Implementace hodnotového objektu v Symfony 8 {#value-object-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
 <?php
 
 declare(strict_types=1);
@@ -316,7 +316,7 @@ class Email
         return $this->value;
     }
 }
-```
+:::
 :::
 
 `Email` je hodnotový objekt definovaný svou hodnotou. Je neměnný (vlastnost `$value` je `readonly`) a nemá identitu.
@@ -329,7 +329,7 @@ Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8
 :::callout{type="pattern"}
 ### Příklad: Implementace repozitáře v Symfony 8 {#repository-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Repository/UserRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -348,9 +348,9 @@ interface UserRepository
 
     public function findByEmail(Email $email): ?User;
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -393,7 +393,7 @@ class DoctrineUserRepository implements UserRepository
             ->findOneBy(['email' => $email->value()]);
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `UserRepository` rozhraní, které definuje metody pro ukládání a načítání uživatelů.
@@ -441,7 +441,7 @@ mimo doménovou vrstvu:
 :::callout{type="pattern"}
 ### Příklad: Struktura souborů pro XML mapování {#xml-mapping-structure-heading}
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 config/
 └── doctrine/
     ├── UserManagement/
@@ -449,13 +449,13 @@ config/
     └── OrderManagement/
         ├── Order.orm.xml
         └── OrderItem.orm.xml
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Příklad: XML mapování entity Order {#xml-mapping-example-heading}
 
-```xml
+:::code{language="xml" filename="snippet.xml"}
 <?xml version="1.0" encoding="UTF-8"?>
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -480,13 +480,13 @@ config/
     </entity>
 
 </doctrine-mapping>
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Příklad: Konfigurace Doctrine pro XML mapování v Symfony {#xml-mapping-config-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
 # config/packages/doctrine.yaml
 doctrine:
     orm:
@@ -503,7 +503,7 @@ doctrine:
                 prefix: App\OrderManagement\Domain\Model
                 alias: OrderManagement
                 is_bundle: false
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -525,7 +525,7 @@ Entita pak může mít vlastnosti přímo typu `Email` nebo `UserId`.
 :::callout{type="pattern"}
 ### Příklad: Doctrine custom type pro Email {#custom-type-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Infrastructure/Doctrine/Type/EmailType.php"}
 <?php
 
 declare(strict_types=1);
@@ -559,25 +559,25 @@ final class EmailType extends StringType
     }
 
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Registrace custom type v Symfony {#custom-type-registration-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
 # config/packages/doctrine.yaml
 doctrine:
     dbal:
         types:
             email_vo:
                 class: App\UserManagement\Infrastructure\Doctrine\Type\EmailType
-```
+:::
 
-```xml
+:::code{language="xml" filename="snippet.xml"}
 <!-- config/doctrine/UserManagement/User.orm.xml -->
 <field name="email" type="email_vo" length="255" column="email"/>
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -596,7 +596,7 @@ nebo jako plnohodnotné hodnotové objekty, avšak nativní enums nabízejí typ
 :::callout{type="pattern"}
 ### Příklad: Backed enum pro stav objednávky {#enum-example-heading}
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/ValueObject/OrderStatus.php"}
 <?php
 
 declare(strict_types=1);
@@ -634,13 +634,13 @@ enum OrderStatus: string
         return in_array($target, $this->allowedTransitions(), true);
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Příklad: Použití enum v doménové entitě {#enum-usage-heading}
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);
@@ -716,7 +716,7 @@ final class Order
         return $events;
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -743,7 +743,7 @@ V Symfony 8 se implementují doménové služby jako běžné PHP třídy:
 :::callout{type="pattern"}
 ### Příklad: Implementace doménové služby v Symfony 8 {#domain-service-example-heading}
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Service/PaymentService.php"}
 <?php
 
 declare(strict_types=1);
@@ -773,7 +773,7 @@ class PaymentService
         );
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `PaymentService` doménová služba, která zapouzdřuje doménovou logiku
@@ -790,7 +790,7 @@ dané kritérium?" a lze ji použít pro validaci, filtrování i vyhledávání
 :::callout{type="pattern"}
 ### Příklad: Specification Pattern v PHP {#specification-example-heading}
 
-```php
+:::code{language="php" filename="src/Shared/Domain/Specification/Specification.php"}
 <?php
 
 declare(strict_types=1);
@@ -806,9 +806,9 @@ interface Specification
     /** @param T $candidate */
     public function isSatisfiedBy(mixed $candidate): bool;
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Specification/OrderEligibleForShipping.php"}
 <?php
 
 declare(strict_types=1);
@@ -832,9 +832,9 @@ final class OrderEligibleForShipping implements Specification
         return $candidate->status() === OrderStatus::PAID;
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Service/ShippingService.php"}
 <?php
 
 declare(strict_types=1);
@@ -862,7 +862,7 @@ final class ShippingService
         $order->transitionTo(OrderStatus::SHIPPED);
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -881,7 +881,7 @@ Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfon
 :::callout{type="pattern"}
 ### Příklad: Implementace doménové události v Symfony 8 {#domain-event-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Event/UserRegistered.php"}
 <?php
 
 declare(strict_types=1);
@@ -919,7 +919,7 @@ class UserRegistered
         return $this->occurredAt;
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `UserRegistered` doménová událost, která reprezentuje registraci nového uživatele.
@@ -967,7 +967,7 @@ má jiné odpovědnosti a jiný typ chyb:
 :::callout{type="pattern"}
 ### Příklad: Vlastní doménová výjimka {#custom-exception-heading}
 
-```php
+:::code{language="php" filename="src/OrderManagement/Domain/Exception/InvalidOrderStateTransitionException.php"}
 <?php
 
 declare(strict_types=1);
@@ -988,7 +988,7 @@ final class InvalidOrderStateTransitionException extends \DomainException
         ));
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -1008,7 +1008,7 @@ jako command a query handlery:
 :::callout{type="pattern"}
 ### Příklad: Implementace command handleru v Symfony 8 {#command-handler-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUser.php"}
 <?php
 
 declare(strict_types=1);
@@ -1024,9 +1024,9 @@ class RegisterUser
     ) {
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -1066,13 +1066,13 @@ class RegisterUserHandler
         $this->userRepository->save($user);
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Příklad: Implementace query handleru v Symfony 8 {#query-handler-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfile.php"}
 <?php
 
 declare(strict_types=1);
@@ -1086,9 +1086,9 @@ class GetUserProfile
     ) {
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -1123,7 +1123,7 @@ class GetUserProfileHandler
         );
     }
 }
-```
+:::
 :::
 
 `RegisterUserHandler` a `GetUserProfileHandler` jsou aplikační služby (command a query handlery).
@@ -1155,7 +1155,7 @@ jako běžné Symfony kontrolery:
 :::callout{type="pattern"}
 ### Příklad: Implementace kontroleru v Symfony 8 {#controller-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Controller/RegistrationController.php"}
 <?php
 
 declare(strict_types=1);
@@ -1203,7 +1203,7 @@ class RegistrationController extends AbstractController
         ]);
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `RegistrationController` kontroler, který zpracovává registraci uživatele.
@@ -1217,7 +1217,7 @@ Symfony 8 poskytuje DI Container pro konfiguraci služeb:
 :::callout{type="pattern"}
 ### Příklad: Konfigurace služeb v Symfony 8 {#dependency-injection-example-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/services.yaml
 services:
     _defaults:
@@ -1252,7 +1252,7 @@ services:
     #             query.bus:
     #                 middleware:
     #                     - validation
-```
+:::
 :::
 
 Repozitáře jsou explicitně konfigurovány, aby Symfony DI Container bindoval rozhraní na konkrétní implementaci.
@@ -1266,7 +1266,7 @@ Každý kontext dostane vlastní blok v `services.yaml` a je ohraničen i na úr
 :::callout{type="pattern"}
 ### Příklad: Samostatný autowiring pro každý Bounded Context {#autowiring-bc-example-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
 # config/services.yaml
 services:
     _defaults:
@@ -1306,7 +1306,7 @@ services:
         resource: '../src/Shared/'
         exclude:
             - '../src/Shared/Domain/ValueObject/'
-```
+:::
 :::
 
 :::callout{type="note"}

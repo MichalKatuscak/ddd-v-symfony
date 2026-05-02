@@ -12,6 +12,7 @@ use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\CommonMark\Node\Block\Heading;
+use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\MarkdownConverter;
 use Symfony\Component\Yaml\Yaml;
 
@@ -28,6 +29,7 @@ final class ChapterMarkdownParser
         $env = new Environment();
         $env->addExtension(new CommonMarkCoreExtension());
         $env->addExtension(new AttributesExtension());
+        $env->addExtension(new TableExtension());
         $env->addRenderer(Heading::class, new ChapterHeadingRenderer());
         $this->converter = new MarkdownConverter($env);
     }
@@ -51,18 +53,7 @@ final class ChapterMarkdownParser
     private function renderMarkdown(string $markdown): string
     {
         $blocks = [];
-
-        // Pre-process :::type{attrs}\nbody\n::: blocks
-        $processed = preg_replace_callback(
-            '/^:::(\w+)(?:\{([^}]*)\})?\n(.*?)^:::/ms',
-            function (array $matches) use (&$blocks): string {
-                $idx = count($blocks);
-                $blocks[] = ['type' => $matches[1], 'attrs' => $matches[2] ?? '', 'body' => $matches[3]];
-                // Block-level HTML div: CommonMark won't wrap it in <p>
-                return "\n\n<div data-block=\"{$idx}\"></div>\n\n";
-            },
-            $markdown,
-        );
+        $processed = $this->extractTopLevelBlocks($markdown, $blocks);
 
         $html = $this->converter->convert($processed)->getContent();
 
@@ -74,9 +65,63 @@ final class ChapterMarkdownParser
         return $html;
     }
 
+    /**
+     * Depth-aware parser that extracts :::type{attrs}...body...::: blocks.
+     * Handles nested ::: blocks (e.g. :::code inside :::callout).
+     */
+    private function extractTopLevelBlocks(string $markdown, array &$blocks): string
+    {
+        $lines  = explode("\n", $markdown);
+        $output = [];
+        $i      = 0;
+        $n      = count($lines);
+
+        while ($i < $n) {
+            $line = $lines[$i];
+
+            if (preg_match('/^:::(\w+)(?:\{([^}]*)\})?$/', $line, $m)) {
+                $type      = $m[1];
+                $attrs     = $m[2] ?? '';
+                $depth     = 1;
+                $bodyLines = [];
+                $i++;
+
+                while ($i < $n) {
+                    $inner = $lines[$i];
+                    if (preg_match('/^:::(\w+)/', $inner)) {
+                        $depth++;
+                        $bodyLines[] = $inner;
+                    } elseif ($inner === ':::') {
+                        $depth--;
+                        if ($depth === 0) {
+                            $i++;
+                            break;
+                        }
+                        $bodyLines[] = $inner;
+                    } else {
+                        $bodyLines[] = $inner;
+                    }
+                    $i++;
+                }
+
+                $idx      = count($blocks);
+                $blocks[] = ['type' => $type, 'attrs' => $attrs, 'body' => implode("\n", $bodyLines)];
+                $output[] = '';
+                $output[] = "<div data-block=\"{$idx}\"></div>";
+                $output[] = '';
+            } else {
+                $output[] = $line;
+                $i++;
+            }
+        }
+
+        return implode("\n", $output);
+    }
+
     private function renderBlock(array $block): string
     {
-        $markdownToHtml = fn(string $md): string => $this->converter->convert($md)->getContent();
+        // Blocks with a body use renderMarkdown() so nested ::: blocks are processed.
+        $markdownToHtml = fn(string $md): string => $this->renderMarkdown($md);
 
         return match ($block['type']) {
             'callout' => $this->callout->render($block['attrs'], $block['body'], $markdownToHtml),
@@ -89,14 +134,16 @@ final class ChapterMarkdownParser
 
     private function wrapSections(string $html): string
     {
-        // Wrap each h2 with id="X-heading" in <section id="X" aria-labelledby="X-heading">
+        // Wrap each h2 with id="X-heading" class="h-section" in <section>.
+        // Only matches h2 elements rendered by ChapterHeadingRenderer (have class="h-section").
+        // Skips h2 elements from block renderers (e.g. FAQ) which lack class="h-section".
         $sectionCount = 0;
         $result = preg_replace_callback(
-            '/<h2 id="([^"]+)-heading"/',
+            '/<h2 id="([^"]+)-heading" class="h-section"/',
             static function (array $m) use (&$sectionCount): string {
                 $sectionCount++;
                 return '</section><section id="' . $m[1] . '" aria-labelledby="' . $m[1] . '-heading">'
-                    . '<h2 id="' . $m[1] . '-heading"';
+                    . '<h2 id="' . $m[1] . '-heading" class="h-section"';
             },
             $html,
         );

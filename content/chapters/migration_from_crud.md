@@ -89,7 +89,7 @@ od tropického fíkovníku, který roste kolem hostitelského stromu a postupně
 :::callout{type="pattern"}
 ### Příklad: Koexistence CRUD a DDD ve struktuře projektu {#strangler-struktura-heading}
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 src/
 ├── Controller/                    # Stará CRUD vrstva (postupně se zmenšuje)
 │   ├── UserController.php         # Původní CRUD kontroler
@@ -122,7 +122,7 @@ src/
     └── Infrastructure/
         └── Repository/
             └── DoctrineUserRepository.php  # Implementace repozitáře
-```
+:::
 :::
 
 ### Výhody oproti přímé refaktorizaci (Big Bang Rewrite)
@@ -171,7 +171,7 @@ pro:
 Následující příklad ilustruje typický CRUD kontroler, ve kterém je skryta netriviální doménová
 logika. Tato logika bude v dalších krocích extrahována do doménového modelu.
 
-```php
+:::code{language="php" filename="src/Controller/UserController.php"}
 <?php
 
 // PŘED migrací: Typický CRUD kontroler s ukrytou doménovou logikou
@@ -230,7 +230,7 @@ class UserController extends AbstractController
         return $this->json(['id' => $user->getId()], 201);
     }
 }
-```
+:::
 
 V tomto kontroleru lze identifikovat nejméně pět oblastí doménové logiky, které patří do
 doménového modelu: validace formátu e-mailu, unikátnost e-mailu, bezpečnostní pravidla hesla,
@@ -251,7 +251,7 @@ typy nesoucí doménová pravidla, poté extrahujeme logiku do doménových enti
 :::callout{type="pattern"}
 ### Příklad: Refaktorizace UserService – before/after {#before-after-heading}
 
-```php
+:::code{language="php" filename="src/Service/UserService.php"}
 <?php
 
 // PŘED: God Service s přímou závislostí na Doctrine
@@ -290,9 +290,9 @@ class UserService
         return $user;
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
 <?php
 
 declare(strict_types=1);
@@ -358,7 +358,7 @@ class User
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
 }
-```
+:::
 
 Doménová entita `User` nyní sama vynucuje svá pravidla: výchozí stav, přechod stavu
 při aktivaci, emituje Domain Event při registraci. Kontroler ani service nemůže tyto invarianty
@@ -374,7 +374,7 @@ objektem, který zapouzdřuje validaci a chování.
 :::callout{type="pattern"}
 ### Příklad: Refaktorizace string emailu na Email Value Object {#email-vo-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
 <?php
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
@@ -437,7 +437,7 @@ final class Email
         return $this->value;
     }
 }
-```
+:::
 
 Díky Value Objectu `Email` je validace zapouzdřena na jednom místě. Kdykoli je
 vytvořena instance `Email`, máme garantovanou platnost hodnoty – bez ohledu na to,
@@ -459,7 +459,7 @@ z pohledu domény. Neobsahuje žádné zmínky o Doctrine, SQL nebo jiné infras
 :::callout{type="pattern"}
 ### Příklad: Doménové rozhraní vs. Doctrine implementace {#repository-interface-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Domain/Repository/UserRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -484,9 +484,9 @@ interface UserRepository
 
     public function nextIdentity(): UserId;
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -540,7 +540,7 @@ final class DoctrineUserRepository implements UserRepository
         return UserId::generate();
     }
 }
-```
+:::
 
 Doménová vrstva závisí pouze na rozhraní `UserRepository`. Symfony DI container
 zajistí, že do doménových služeb bude injektována `DoctrineUserRepository`. Díky
@@ -550,12 +550,12 @@ tomu lze implementaci repozitáře vyměnit v konfiguračním souboru bez změny
 :::callout{type="note"}
 ### Konfigurace Dependency Injection v Symfony {#di-config-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
 # config/services.yaml
 services:
     App\UserManagement\Domain\Repository\UserRepository:
         alias: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository
-```
+:::
 
 Tato konfigurace zajistí, že Symfony automaticky injektuje Doctrine implementaci všude tam,
 kde je typovaná závislost na doménovém rozhraní `UserRepository`.
@@ -577,7 +577,7 @@ nebo ji ponechat jako optimalizované SQL dotazy i v DDD systému (read modely).
 :::callout{type="pattern"}
 ### Příklad: Extrakce RegisterUserCommand z UserController {#command-extraction-heading}
 
-```php
+:::code{language="php" filename="src/Controller/UserController.php"}
 <?php
 
 // PŘED: Logika přímo v kontroleru nebo service
@@ -601,9 +601,9 @@ class UserController extends AbstractController
         return $this->json(['status' => 'ok'], 201);
     }
 }
-```
+:::
 
-```php
+:::code{language="php" filename="src/UserManagement/Application/Command/RegisterUser.php"}
 <?php
 
 // --- Soubor: RegisterUser.php ---
@@ -685,7 +685,7 @@ class UserController extends AbstractController
         return $this->json(['status' => 'ok'], 201);
     }
 }
-```
+:::
 
 Command `RegisterUser` je prosté DTO (Data Transfer Object) bez závislostí. Handler
 `RegisterUserHandler` orchestruje doménový model. Kontroler je redukován na HTTP
@@ -712,7 +712,7 @@ při refaktoringu.
 :::callout{type="pattern"}
 ### Příklad: Charakterizační test pro CRUD kontroler {#char-test-heading}
 
-```php
+:::code{language="php" filename="Tests/Characterization/UserRegistrationCharacterizationTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -776,7 +776,7 @@ class UserRegistrationCharacterizationTest extends WebTestCase
         self::assertResponseStatusCodeSame(409);
     }
 }
-```
+:::
 
 Charakterizační testy jsou psány *před* refaktoringem. Cílem je, aby všechny procházely
 po celou dobu migrace – selhání testu signalizuje, že refaktoring změnil pozorovatelné chování
@@ -792,7 +792,7 @@ a přesně dokumentují doménová pravidla.
 :::callout{type="pattern"}
 ### Příklad: Unit test doménové entity {#domain-unit-test-heading}
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Domain/Model/UserTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -842,7 +842,7 @@ final class UserTest extends TestCase
         $user->activate($token); // druhá aktivace musí selhat
     }
 }
-```
+:::
 :::
 
 ## 19.08 Rizika a doporučení {#rizika-a-doporuceni}

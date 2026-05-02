@@ -47,7 +47,7 @@ ztracené události a stížnosti subscriberů typu „*vidím v API objednávku
 :::callout{type="warn"}
 ### Naivní implementace publikování – anti-vzor {#naive-publish-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandlerNaive.php" highlights="22,25"}
 <?php
 
 declare(strict_types=1);
@@ -81,7 +81,7 @@ final readonly class PlaceOrderHandlerNaive
         }
     }
 }
-```
+:::
 :::
 
 Problém je v tom, že **krok 1 a krok 2 jsou dvě nezávislé transakce ve dvou
@@ -207,7 +207,7 @@ existovat kompozitní index `(status, occurred_at)`.
 :::callout{type="pattern"}
 ### PHP: Doctrine entita OutboxMessage {#outbox-message-entity-heading}
 
-```php
+:::code{language="php" filename="src/Outbox/Domain/OutboxMessage.php" highlights="11,12"}
 <?php
 
 declare(strict_types=1);
@@ -275,7 +275,7 @@ class OutboxMessage
         );
     }
 }
-```
+:::
 :::
 
 ### Význam jednotlivých sloupců {#vyznam-sloupcu-heading}
@@ -310,7 +310,7 @@ bez sortu). Plánovač dotazů Postgresu pak relay query odbavuje jako
 :::callout{type="pattern"}
 ### SQL: Doctrine migrace pro outbox tabulku {#migration-heading}
 
-```php
+:::code{language="php" filename="migrations/Version20260429120000.php" highlights="33,34,35"}
 <?php
 
 declare(strict_types=1);
@@ -354,7 +354,7 @@ final class Version20260429120000 extends AbstractMigration
         $this->addSql('DROP TABLE outbox');
     }
 }
-```
+:::
 :::
 
 Po migraci spusťte `php bin/console doctrine:migrations:migrate` a ověřte,
@@ -375,7 +375,7 @@ a zařadí do outbox tabulky *v téže transakci*, ve které ukládá agregát s
 :::callout{type="pattern"}
 ### PHP: Agregát Order produkuje doménové události {#order-aggregate-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Order.php"}
 <?php
 
 declare(strict_types=1);
@@ -428,13 +428,13 @@ final class Order
         return $events;
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Doménová událost OrderPlaced {#domain-event-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
@@ -459,13 +459,13 @@ final readonly class OrderPlaced
         public \DateTimeImmutable $occurredAt,
     ) {}
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: PlaceOrderHandler – atomický zápis order + outbox {#place-order-handler-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandler.php" highlights="29,30,38,39,40,41,42,43,44"}
 <?php
 
 declare(strict_types=1);
@@ -513,7 +513,7 @@ final readonly class PlaceOrderHandler
         });
     }
 }
-```
+:::
 :::
 
 Pozornost si zaslouží volání `$this->em->wrapInTransaction(...)`. Tato metoda
@@ -526,7 +526,7 @@ celý handler do jedné transakce – pokud ho v `messenger.yaml` máte, můžet
 :::callout{type="pattern"}
 ### PHP: DomainEventSerializer – neutrální převod na JSON {#serializer-heading}
 
-```php
+:::code{language="php" filename="src/Outbox/Application/DomainEventSerializer.php"}
 <?php
 
 declare(strict_types=1);
@@ -558,13 +558,13 @@ final readonly class DomainEventSerializer
         return $payload;
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Rozhraní OutboxRepository {#repo-interface-heading}
 
-```php
+:::code{language="php" filename="src/Outbox/Application/OutboxRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -585,7 +585,7 @@ interface OutboxRepository
 
     public function markFailed(Ulid $id, string $error): void;
 }
-```
+:::
 :::
 
 Implementace rozhraní pomocí Doctrine je triviální – konstruktor přijímá
@@ -616,7 +616,7 @@ Deploymentu jako trvale běžící proces.
 :::callout{type="pattern"}
 ### PHP: OutboxDispatchCommand {#dispatch-command-heading}
 
-```php
+:::code{language="php" filename="src/Outbox/Infrastructure/Console/OutboxDispatchCommand.php"}
 <?php
 
 declare(strict_types=1);
@@ -686,13 +686,13 @@ final class OutboxDispatchCommand extends Command
         return Command::SUCCESS;
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Konfigurace supervisord pro outbox dispatch {#supervisor-heading}
 
-```bash
+:::code{language="bash" filename="/etc/supervisor/conf.d/outbox-dispatch.conf"}
 ; /etc/supervisor/conf.d/outbox-dispatch.conf
 [program:outbox-dispatch]
 command=php /var/www/app/bin/console app:outbox:dispatch
@@ -709,7 +709,7 @@ process_name=%(program_name)s
 ; Loop: command běží 1× za invocation, supervisord ho restartuje
 ; cca každých 100 ms díky autorestart=true a startsecs=2.
 ; Alternativně použijte vnitřní while(true) + sleep(0.1) v commandu.
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -762,7 +762,7 @@ pro deklarativní deploy (Strimzi operator, ArgoCD) je:
 :::callout{type="pattern"}
 ### YAML: Debezium konektor pro outbox tabulku {#debezium-config-heading}
 
-```yaml
+:::code{language="yaml" filename="kafka-connect/debezium-outbox-connector.yaml" highlights="25,30,31,32"}
 # kafka-connect/debezium-outbox-connector.yaml
 # Strimzi KafkaConnector custom resource pro Debezium 2.x.
 apiVersion: kafka.strimzi.io/v1beta2
@@ -804,7 +804,7 @@ spec:
     # Po přečtení řádku Debezium ho NEUPDATUJE. Outbox tabulka je
     # immutable log; mazání starých řádků řeší samostatný cron job.
     tombstones.on.delete: false
-```
+:::
 :::
 
 Hlavní části jsou `transforms.outbox` (Debezium Outbox Event Router,
@@ -839,7 +839,7 @@ proti race condition.
 :::callout{type="pattern"}
 ### PHP: Doctrine entita InboxMessage {#inbox-message-entity-heading}
 
-```php
+:::code{language="php" filename="src/Inbox/Domain/InboxMessage.php" highlights="11,12"}
 <?php
 
 declare(strict_types=1);
@@ -866,13 +866,13 @@ class InboxMessage
         public \DateTimeImmutable $processedAt = new \DateTimeImmutable(),
     ) {}
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Rozhraní InboxRepository {#inbox-repository-heading}
 
-```php
+:::code{language="php" filename="src/Inbox/Application/InboxRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -887,13 +887,13 @@ interface InboxRepository
 
     public function markProcessed(Ulid $eventId, string $consumer): void;
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: OrderPlacedReadModelUpdater s inbox checkem {#read-model-updater-heading}
 
-```php
+:::code{language="php" filename="src/Reporting/Application/Subscriber/OrderPlacedReadModelUpdater.php" highlights="27,28,29,30,44"}
 <?php
 
 declare(strict_types=1);
@@ -942,7 +942,7 @@ final readonly class OrderPlacedReadModelUpdater
         });
     }
 }
-```
+:::
 :::
 
 Sloupec `consumer` v inbox tabulce není zanedbatelný: jeden a tentýž
@@ -985,7 +985,7 @@ další requesty se stejným klíčem vrátí cached response – bez znovuvytvo
 :::callout{type="pattern"}
 ### PHP: IdempotencyKeyListener (Symfony Kernel listener) {#idempotency-listener-heading}
 
-```php
+:::code{language="php" filename="src/Http/Idempotency/IdempotencyKeyListener.php"}
 <?php
 
 declare(strict_types=1);
@@ -1067,7 +1067,7 @@ final readonly class IdempotencyKeyListener
         return 'idem.' . hash('xxh128', $path . '|' . $key);
     }
 }
-```
+:::
 :::
 
 Detaily, na které se snadno zapomíná:
@@ -1104,7 +1104,7 @@ operační otázky: jak měřit lag, jak držet tabulku malou, co s permanentně
 :::callout{type="pattern"}
 ### SQL: Měření outbox lagu {#lag-query-heading}
 
-```sql
+:::code{language="sql" filename="snippet.sql"}
 -- Aktuální lag: nejstarší pending event v sekundách.
 SELECT
     EXTRACT(EPOCH FROM (NOW() - MIN(occurred_at))) AS oldest_pending_seconds,
@@ -1124,7 +1124,7 @@ WHERE sent_at > NOW() - INTERVAL '24 hours'
   AND status = 'sent'
 GROUP BY bucket
 ORDER BY bucket;
-```
+:::
 :::
 
 Tyto metriky exportujte do Prometheu (`outbox_pending_seconds`,
@@ -1144,7 +1144,7 @@ podle compliance požadavků.
 :::callout{type="pattern"}
 ### PHP: Kompakce outbox tabulky (Symfony command) {#cleanup-command-heading}
 
-```php
+:::code{language="php" filename="src/Outbox/Infrastructure/Console/OutboxCleanupCommand.php"}
 <?php
 
 declare(strict_types=1);
@@ -1183,7 +1183,7 @@ final class OutboxCleanupCommand extends Command
         return Command::SUCCESS;
     }
 }
-```
+:::
 :::
 
 `LIMIT 10000` je tam záměrně – chceme batch delete, ne `DELETE FROM

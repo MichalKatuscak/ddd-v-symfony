@@ -169,7 +169,7 @@ vlastní transport a vlastní strategii zpracování.
 :::callout{type="pattern"}
 ### Konfigurace Symfony Messenger pro CQRS {#messenger-config-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -202,7 +202,7 @@ framework:
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
             # App\UserManagement\Profile\Query\GetUserProfile: sync
-```
+:::
 :::
 
 Konfigurace definuje dva transporty: `async` pro asynchronní zpracování a `sync` pro synchronní zpracování.
@@ -250,7 +250,7 @@ Dobře navržený command má několik vlastností:
 :::callout{type="pattern"}
 ### PHP: Implementace příkazu v Symfony 8 {#command-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUser.php"}
 <?php
 
 declare(strict_types=1);
@@ -280,7 +280,7 @@ final class RegisterUser
     ) {
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `RegisterUser` příkaz, který obsahuje data potřebná pro registraci uživatele.
@@ -309,7 +309,7 @@ hodnotu** – handler vrací data přes `HandledStamp`.
 :::callout{type="pattern"}
 ### PHP: Implementace dotazu v Symfony 8 {#query-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfile.php"}
 <?php
 
 declare(strict_types=1);
@@ -327,7 +327,7 @@ final class GetUserProfile
     ) {
     }
 }
-```
+:::
 :::
 
 V tomto příkladu je `GetUserProfile` dotaz, který obsahuje ID uživatele, jehož profil chceme získat.
@@ -339,7 +339,7 @@ Dotaz používá atributy pro validaci dat – nevalidní UUID bude odmítnuto j
 Reálné aplikace potřebují dotazy složitější než pouhé „dej mi záznam podle ID". Queries
 mohou obsahovat filtrovací kritéria, řazení a stránkování:
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Query/ListOrders.php"}
 <?php
 
 declare(strict_types=1);
@@ -368,7 +368,7 @@ final class ListOrders
     ) {
     }
 }
-```
+:::
 :::
 
 ## 13.08 Implementace Handlers {#handlers}
@@ -389,7 +389,7 @@ Command handler a query handler mají odlišnou odpovědnost:
 :::callout{type="pattern"}
 ### PHP: Command handler – RegisterUserHandler {#command-handler-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -434,7 +434,7 @@ final class RegisterUserHandler
         $this->userRepository->save($user);
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -446,7 +446,7 @@ Alternativní přístup s `HashedPassword` hodnotovým objektem je ukázán v ka
 :::callout{type="pattern"}
 ### PHP: Query handler – GetUserProfileHandler {#query-handler-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -470,7 +470,7 @@ final class GetUserProfileHandler
         return $this->readRepository->findById($query->userId);
     }
 }
-```
+:::
 :::
 
 Všimněte si podstatného rozdílu: command handler pracuje s doménovým modelem (`UserRepository`,
@@ -489,7 +489,7 @@ chování, ViewModel `UserProfileViewModel` obsahuje přesně ta data, která po
 :::callout{type="pattern"}
 ### PHP: UserProfileViewModel {#viewmodel-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Profile/ViewModel/UserProfileViewModel.php"}
 <?php
 
 declare(strict_types=1);
@@ -512,7 +512,7 @@ final readonly class UserProfileViewModel
     ) {
     }
 }
-```
+:::
 :::
 
 ViewModel často obsahuje **data z více agregátů** – v příkladu výše kombinuje
@@ -524,7 +524,7 @@ připravená v denormalizované podobě.
 :::callout{type="pattern"}
 ### PHP: Read repozitář s přímým SQL (Doctrine DBAL) {#read-repository-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Infrastructure/ReadModel/DbalUserProfileReadRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -569,7 +569,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
         );
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -592,7 +592,7 @@ v konstruktoru musejí odpovídat konfiguraci v `messenger.yaml`:
 :::callout{type="pattern"}
 ### PHP: Použití command busu v controlleru {#buses-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Registration/Controller/RegistrationController.php"}
 <?php
 
 declare(strict_types=1);
@@ -645,13 +645,13 @@ final class RegistrationController extends AbstractController
         ]);
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### PHP: Použití query busu v controlleru {#query-bus-example-heading}
 
-```php
+:::code{language="php" filename="src/UserManagement/Profile/Controller/ProfileController.php"}
 <?php
 
 declare(strict_types=1);
@@ -690,7 +690,7 @@ final class ProfileController extends AbstractController
         ]);
     }
 }
-```
+:::
 :::
 
 V těchto příkladech je `commandBus` a `queryBus` injektováno pomocí named autowiring –
@@ -731,7 +731,7 @@ Tabulka se aktualizuje asynchronně přes doménové události.
 :::callout{type="pattern"}
 ### PHP: Projektor aktualizující denormalizovanou tabulku {#denorm-projekce-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Infrastructure/Projection/OrderDashboardProjector.php"}
 <?php
 
 declare(strict_types=1);
@@ -815,7 +815,7 @@ final class OrderDashboardProjector
         );
     }
 }
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -886,7 +886,7 @@ Existuje několik osvědčených vzorů, jak eventual consistency v UI řešit:
 :::callout{type="pattern"}
 ### PHP: Optimistická aktualizace – controller vrací data z command handleru {#ec-priklad-heading}
 
-```php
+:::code{language="php" filename="src/Ordering/Application/Controller/PlaceOrderController.php"}
 <?php
 
 declare(strict_types=1);
@@ -937,7 +937,7 @@ final class PlaceOrderController extends AbstractController
         return $this->redirectToRoute('order_detail', ['id' => $orderId]);
     }
 }
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -967,7 +967,7 @@ vyzvedne a předá handleru.
 :::callout{type="pattern"}
 ### Konfigurace asynchronního zpracování v Symfony 8 {#async-example-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -997,7 +997,7 @@ framework:
 
             # Vysoká priorita - aktualizace read modelů pro kritické obrazovky
             App\Ordering\Domain\Event\OrderPlaced: async_priority_high
-```
+:::
 :::
 
 V této konfiguraci jsou příkazy pro odesílání e-mailů a generování reportů směrovány na asynchronní
@@ -1008,7 +1008,7 @@ pro tuto frontu může běžet s vyšší prioritou nebo na dedikovaném serveru
 :::callout{type="pattern"}
 ### Spuštění Messenger workerů {#worker-heading}
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 # Konzumace zpráv z obou front - high_priority má přednost
 $ php bin/console messenger:consume async_priority_high async
 
@@ -1022,7 +1022,7 @@ autorestart=true
 startsecs=0
 redirect_stderr=true
 stdout_logfile=/var/log/messenger-worker.log
-```
+:::
 :::
 
 :::callout{type="note"}
@@ -1067,7 +1067,7 @@ vývojář je může prozkoumat, opravit příčinu chyby a znovu odeslat.
 :::callout{type="pattern"}
 ### Konfigurace failed transportu a diagnostické příkazy {#failed-transport-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -1076,9 +1076,9 @@ framework:
         transports:
             failed:
                 dsn: 'doctrine://default?queue_name=failed'
-```
+:::
 
-```bash
+:::code{language="bash" filename="snippet.sh"}
 # Zobrazení selhalých zpráv
 $ php bin/console messenger:failed:show
 
@@ -1093,7 +1093,7 @@ $ php bin/console messenger:failed:retry
 
 # Trvalé odstranění selhalé zprávy (po analýze)
 $ php bin/console messenger:failed:remove 42
-```
+:::
 :::
 
 :::callout{type="warn"}
@@ -1119,7 +1119,7 @@ již viděli v konfiguraci. Pro pokročilejší scénáře si můžete vytvořit
 :::callout{type="pattern"}
 ### PHP: Logovací middleware pro command bus {#middleware-priklad-heading}
 
-```php
+:::code{language="php" filename="src/Infrastructure/Messenger/Middleware/CommandLoggingMiddleware.php"}
 <?php
 
 declare(strict_types=1);
@@ -1171,13 +1171,13 @@ final class CommandLoggingMiddleware implements MiddlewareInterface
         }
     }
 }
-```
+:::
 :::
 
 :::callout{type="pattern"}
 ### Registrace vlastního middleware {#middleware-registrace-heading}
 
-```yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -1187,7 +1187,7 @@ framework:
                     - App\Infrastructure\Messenger\Middleware\CommandLoggingMiddleware
                     - validation
                     - doctrine_transaction
-```
+:::
 :::
 
 Pořadí middleware je důležité: v příkladu výše se logování provede jako první (zachytí
@@ -1208,7 +1208,7 @@ správně validuje invarianty, volá doménový model a ukládá změny:
 :::callout{type="pattern"}
 ### PHP: Test command handleru {#test-command-handler-heading}
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Registration/Command/RegisterUserHandlerTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -1267,7 +1267,7 @@ final class RegisterUserHandlerTest extends TestCase
         ));
     }
 }
-```
+:::
 :::
 
 ### Testování query handlerů
@@ -1278,7 +1278,7 @@ Pro integrační testy s reálnou databází můžete ověřit i správnost SQL 
 :::callout{type="pattern"}
 ### PHP: Test query handleru {#test-query-handler-heading}
 
-```php
+:::code{language="php" filename="Tests/UserManagement/Profile/Query/GetUserProfileHandlerTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -1328,7 +1328,7 @@ final class GetUserProfileHandlerTest extends TestCase
         $this->assertNull($result);
     }
 }
-```
+:::
 :::
 
 ### Testování projektorů
@@ -1339,7 +1339,7 @@ Projektory se nejlépe testují jako integrační testy s reálnou databází. O
 :::callout{type="pattern"}
 ### PHP: Integrační test projektoru {#test-projektor-heading}
 
-```php
+:::code{language="php" filename="Tests/Ordering/Infrastructure/Projection/OrderDashboardProjectorTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -1413,7 +1413,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         $this->assertSame(1, (int) $count);
     }
 }
-```
+:::
 :::
 
 Kompletnější přehled testovacích strategií pro DDD kód – včetně testování agregátů,

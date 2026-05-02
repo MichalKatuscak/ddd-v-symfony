@@ -111,7 +111,7 @@ Konkrétní indikátory, podle kterých modular monolith poráží microservices
 
 V Symfony se modular monolith přirozeně realizuje strukturou adresářů pod `src/`. Každý Bounded Context dostává vlastní namespace a vlastní podadresář – typicky se třemi vrstvami (Domain, Application, Infrastructure) kvůli souladu s [vertikálním řezem](/vertikalni-slice):
 
-```bash
+:::code{language="bash" filename="Struktura src/ – modular monolith"}
 src/
 ├── Catalog/                      # Bounded Context: Catalog
 │   ├── Domain/
@@ -156,7 +156,7 @@ src/
     │       ├── Money.php
     │       └── Currency.php
     └── Application/
-```
+:::
 
 Všimněte si dvou důležitých detailů. Za prvé: `SharedKernel` obsahuje pouze technické typy (Money, UUID, Result), **nikdy doménové entity**. Sdílení doménových entit napříč BC porušuje samotnou definici Bounded Contextu. Za druhé: každý BC má vlastní `Application/IntegrationEvent/`, kam mapuje příchozí události z jiných kontextů – stejný princip, který v sekci 20.08 použijeme i mezi separátními servisami.
 
@@ -167,7 +167,7 @@ Adresářová struktura sama o sobě nestačí. Vývojář pod tlakem deadlinu s
 :::callout{type="pattern"}
 ### PHP: Pravidla pro modular monolith v phparkitect {#phparkitect-rules-heading}
 
-```php
+:::code{language="php" filename="phparkitect.php" highlights="16,17,18,19,20,21,47,48,49,50,51"}
 <?php
 
 declare(strict_types=1);
@@ -224,12 +224,12 @@ return static function (Config $config): void {
 
     $config->add($classSet, $orderingIsolation, $domainIsolation, $eventsArePrivate);
 };
-```
+:::
 :::
 
 Pravidlo se spouští v CI jako součást běžné kontroly kvality:
 
-```yaml
+:::code{language="yaml" filename="composer.json + CI"}
 # composer.json scripts
 "scripts": {
     "phparkitect": "phparkitect check --config=phparkitect.php",
@@ -243,7 +243,7 @@ Pravidlo se spouští v CI jako součást běžné kontroly kvality:
 # .github/workflows/ci.yml
 - name: Architecture rules
   run: composer phparkitect
-```
+:::
 
 S tímto pravidlem můžete bezpečně zůstat v monolithu měsíce a roky. Hranice mezi BC jsou vynucené stejně tvrdě, jako by byly za HTTP/AMQP – ale platíte za ně řádově méně operační složitosti.
 
@@ -409,7 +409,7 @@ Pravidlo: **publisher a subscriber *nesdílejí* PHP třídu eventu.** Publisher
 :::callout{type="pattern"}
 ### YAML: Messenger config – publisher (ordering-svc) {#messenger-publisher-heading}
 
-```yaml
+:::code{language="yaml" filename="ordering-svc/config/packages/messenger.yaml" highlights="37,38,39,40"}
 # config/packages/messenger.yaml v ordering-svc
 framework:
     messenger:
@@ -455,7 +455,7 @@ framework:
             # CRITICAL: publishneme náš VLASTNÍ doménový event,
             # ne sdílenou třídu. AMQP payload je serializovaný DTO.
             'App\Ordering\Domain\Event\OrderPlaced': events_out
-```
+:::
 :::
 
 Outbox transport zapisuje event do tabulky v stejné DB transakci jako doménový commit (Doctrine Outbox). Externí relay (worker přes `messenger:consume`) potom polluje outbox table a publishuje payload do AMQP exchange. Detail v [kapitole o Outbox patternu](/outbox-pattern).
@@ -465,7 +465,7 @@ Subscriber service má zrcadlovou konfiguraci – AMQP transport pro příchozí
 :::callout{type="pattern"}
 ### YAML: Messenger config – subscriber (billing-svc) {#messenger-subscriber-heading}
 
-```yaml
+:::code{language="yaml" filename="billing-svc/config/packages/messenger.yaml" highlights="38,39,40,41"}
 # config/packages/messenger.yaml v billing-svc
 framework:
     messenger:
@@ -506,7 +506,7 @@ framework:
             # Vlastní DTO = vlastní lifecycle, vlastní validace, vlastní version compat.
             'App\Billing\Application\IntegrationEvent\OrderPlacedReceived': events_in
             'App\Billing\Application\IntegrationEvent\OrderCancelledReceived': events_in
-```
+:::
 :::
 
 `IntegrationEventSerializer` je customní serializer, který namapuje deserializovaný AMQP payload (typicky JSON s `event_type` diskriminátorem) na konkrétní třídu integration eventu. Zde je místo, kde se subscriber rozhoduje, jak interpretovat payload – ne podle PHP typu, ale podle `event_type` stringu v hlavičce. Tím je publisher a subscriber *plně oddělený na úrovni kódu*.
@@ -514,7 +514,7 @@ framework:
 :::callout{type="pattern"}
 ### PHP: Integration event DTO v subscriberovi {#integration-event-class-heading}
 
-```php
+:::code{language="php" filename="billing-svc/src/Application/IntegrationEvent/OrderPlacedReceived.php"}
 <?php
 
 declare(strict_types=1);
@@ -542,12 +542,12 @@ final readonly class OrderPlacedReceived
         public string $currency,
     ) {}
 }
-```
+:::
 :::
 
 Custom serializer dělá překlad mezi binárním AMQP payloadem a konkrétní integration event třídou podle `event_type` hlavičky. Toto je jediné místo v subscriberu, kde se „dotýkáte" formátu publishera. Změny v doménovém eventu publishera vás zasáhnou jen zde – zbytek kódu pracuje s vaší vlastní třídou.
 
-```php
+:::code{language="php" filename="billing-svc/src/Infrastructure/Messaging/IntegrationEventSerializer.php" highlights="22,23,24,25"}
 <?php
 
 declare(strict_types=1);
@@ -603,13 +603,13 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
         throw new \LogicException('IntegrationEventSerializer is decode-only.');
     }
 }
-```
+:::
 
 ### Handler integration eventu {#symfony-handler-heading}
 
 Jakmile máte deserializaci, handler je už standardní Messenger handler. Konvertuje příchozí IntegrationEvent na lokální command do vlastního BC:
 
-```php
+:::code{language="php" filename="billing-svc/src/Application/Handler/OrderPlacedReceivedHandler.php"}
 <?php
 
 declare(strict_types=1);
@@ -648,7 +648,7 @@ final readonly class OrderPlacedReceivedHandler
         $this->inbox->markProcessed($event->eventId);
     }
 }
-```
+:::
 
 Tímto vzorem dosáhneme čtyř důležitých vlastností:
 
