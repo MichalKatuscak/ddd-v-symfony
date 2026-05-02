@@ -127,22 +127,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/outbox-pattern', name: 'outbox_pattern')]
-    public function outboxPattern(): Response
-    {
-        return $this->render('ddd/outbox_pattern.html.twig', [
-            'title' => 'Outbox Pattern – spolehlivé publikování doménových eventů',
-        ]);
-    }
-
-    #[Route('/mene-zname-vzory', name: 'lesser_known_patterns')]
-    public function lesserKnownPatterns(): Response
-    {
-        return $this->render('ddd/lesser_known_patterns.html.twig', [
-            'title' => 'Méně známé taktické vzory: Specifications, Domain Services, Factories, Modules',
-        ]);
-    }
-
     #[Route('/cheat-sheet', name: 'cheat_sheet')]
     public function cheatSheet(): Response
     {
