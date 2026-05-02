@@ -95,14 +95,6 @@ class DddController extends AbstractController
         return $this->redirectToRoute('horizontal_vs_vertical', [], 301);
     }
 
-    #[Route('/cqrs', name: 'cqrs')]
-    public function cqrs(): Response
-    {
-        return $this->render('ddd/cqrs.html.twig', [
-            'title' => 'CQRS v Symfony 8',
-        ]);
-    }
-
     #[Route('/zdroje', name: 'resources')]
     public function resources(): Response
     {
@@ -116,14 +108,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/security_policy.html.twig', [
             'title' => 'Bezpečnostní zásady',
-        ]);
-    }
-
-    #[Route('/sagy-a-process-managery', name: 'sagas')]
-    public function sagas(): Response
-    {
-        return $this->render('ddd/sagas.html.twig', [
-            'title' => 'Ságy a Process Managery',
         ]);
     }
 
