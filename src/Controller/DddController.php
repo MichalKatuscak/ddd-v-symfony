@@ -95,14 +95,6 @@ class DddController extends AbstractController
         return $this->redirectToRoute('horizontal_vs_vertical', [], 301);
     }
 
-    #[Route('/navrh-agregatu', name: 'aggregate_design')]
-    public function aggregateDesign(): Response
-    {
-        return $this->render('ddd/aggregate_design.html.twig', [
-            'title' => 'Návrh agregátu',
-        ]);
-    }
-
     #[Route('/implementace-v-symfony', name: 'implementation_in_symfony')]
     public function implementationInSymfony(): Response
     {
@@ -116,14 +108,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/cqrs.html.twig', [
             'title' => 'CQRS v Symfony 8',
-        ]);
-    }
-
-    #[Route('/prakticke-priklady', name: 'practical_examples')]
-    public function practicalExamples(): Response
-    {
-        return $this->render('ddd/practical_examples.html.twig', [
-            'title' => 'Praktické příklady',
         ]);
     }
 
@@ -207,27 +191,11 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/ddd-a-umela-inteligence', name: 'ddd_ai')]
-    public function dddAi(): Response
-    {
-        return $this->render('ddd/ddd_ai.html.twig', [
-            'title' => 'DDD a umělá inteligence – co říkají autority',
-        ]);
-    }
-
     #[Route('/o-autorovi', name: 'about')]
     public function about(): Response
     {
         return $this->render('ddd/about.html.twig', [
             'title' => 'O autorovi',
-        ]);
-    }
-
-    #[Route('/subdomeny', name: 'subdomains')]
-    public function subdomains(): Response
-    {
-        return $this->render('ddd/subdomains.html.twig', [
-            'title' => 'Subdomény: Core, Supporting, Generic',
         ]);
     }
 
