@@ -22,13 +22,13 @@ github_examples: Chapter04_Implementation
 :::callout{type="pattern"}
 ### Evoluce příkladů napříč průvodcem
 
-Kódové příklady v tomto průvodci záměrně přibývají na komplexitě. V kapitole
-[Základní koncepty](/zakladni-koncepty) jsou příklady zjednodušeny
-na minimum, aby ilustrovaly čistý koncept. V této kapitole přidáváme reálné aspekty
+Kódové příklady v tomto průvodci záměrně přibývají na komplexitě. Kapitola
+[Základní koncepty](/zakladni-koncepty) zjednodušuje příklady
+na minimum, aby ilustrovala čistý koncept. Tato kapitola přidává reálné aspekty
 implementace v Symfony: oddělení doménových objektů od Doctrine mappingu, ukládání
 hodnotových objektů jako primitivních typů kvůli Doctrine hydration a generování
-doménových událostí. V kapitole [Anti-vzory](/anti-vzory)
-pak ukazujeme produkční kvalitu kódu s custom výjimkami, factory metodami a plnou
+doménových událostí. Kapitola [Anti-vzory](/anti-vzory)
+pak ukazuje produkční kvalitu kódu s custom výjimkami, factory metodami a plnou
 validací invariantů.
 :::
 
@@ -48,7 +48,7 @@ jiným ORM nebo Messenger jiným bus systémem, aniž by se dotklo doménové lo
 
 ## 11.02 Struktura projektu {#project-structure}
 
-Při implementaci DDD s vertikální slice architekturou v Symfony 8 se struktura projektu organizuje podle Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
+Při implementaci DDD s vertikální slice architekturou v Symfony 8 organizujte strukturu projektu podle Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
 
 :::callout{type="pattern"}
 ### Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8
@@ -134,7 +134,7 @@ src/
 :::
 :::
 
-Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Závislosti mezi kontexty procházejí výhradně přes Application vrstvu nebo události – nikdy přes přímý import doménových tříd cizího kontextu.
+Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Závislosti mezi kontexty procházejí přes Application vrstvu nebo události – nikdy přes přímý import doménových tříd cizího kontextu.
 
 :::diagram{fig="11.2-A" title="Struktura projektu s Bounded Contexts" src="images/diagrams/3_implementation_in_symfony/diagram.svg"}
 :::
@@ -143,8 +143,8 @@ Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a fu
 ### Hlavní principy správné struktury DDD projektu:
 
 - **Izolace domén** – Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.
-- **Ubiquitous Language** – Každá doména může mít svůj vlastní jazyk, který je konzistentně používán v kódu.
-- **Jasné hranice** – Jasně definované hranice mezi doménami pomáhají vývojářům lépe pochopit, kde končí jedna doména a začíná druhá.
+- **Ubiquitous Language** – Každá doména může mít svůj vlastní jazyk, který tým konzistentně používá v kódu.
+- **Jasné hranice** – Definované hranice mezi doménami pomáhají vývojářům pochopit, kde končí jedna doména a začíná druhá.
 - **Minimalizace závislostí** – Domény by měly být co nejvíce nezávislé, aby změna v jedné doméně neovlivnila jinou doménu.
 :::
 
@@ -254,20 +254,20 @@ class User
 :::
 :::
 
-V tomto příkladu je `User` entita, která je definována svou identitou (`UserId`). Všimněte si, že entita neobsahuje žádné Doctrine atributy – doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi je řešeno externě pomocí XML (viz sekci [Separace Doctrine mapování](#doctrine-xml-mapping)). Neměnné vlastnosti (`$id`, `$createdAt`) jsou označeny jako `readonly`. Entity mohou také generovat doménové události,
-které jsou uloženy v poli `$domainEvents` a mohou být později uvolněny a zpracovány.
+V tomto příkladu je `User` entita definovaná svou identitou (`UserId`). Entita neobsahuje žádné Doctrine atributy – doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi řeší externí XML soubor (viz sekci [Separace Doctrine mapování](#doctrine-xml-mapping)). Neměnné vlastnosti (`$id`, `$createdAt`) jsou označeny jako `readonly`. Entity také generují doménové události,
+které pole `$domainEvents` drží a později uvolní ke zpracování.
 
 :::callout{type="note"}
 ### Proč ukládáme hodnotové objekty jako primitivní typy? {#doctrine-hydration-heading}
 
-Všimněte si, že entita interně ukládá `UserId` a `Email` jako
+Entita interně ukládá `UserId` a `Email` jako
 `string` (ne jako hodnotové objekty): `$this->id = $id->value()`.
 Gettery pak vrací nové instance VO: `return new UserId($this->id)`.
 
 Tento kompromis je nutný kvůli **Doctrine hydration** – Doctrine při načítání
 entity z databáze nastavuje vlastnosti přímo, bez volání konstruktoru. Kdyby vlastnost
-byla typu `UserId`, Doctrine by do ní vložil `string` z databáze,
-což by způsobilo TypeError. Alternativou je **Doctrine custom type**
+měla typ `UserId`, Doctrine by do ní vložil `string` z databáze,
+což by vedlo na TypeError. Alternativou je **Doctrine custom type**
 (viz sekci [Doctrine custom types](#doctrine-custom-types)), který automaticky
 konvertuje mezi primitivním typem a hodnotovým objektem.
 :::
@@ -320,7 +320,7 @@ class Email
 :::
 
 `Email` je hodnotový objekt definovaný svou hodnotou. Je neměnný (vlastnost `$value` je `readonly`) a nemá identitu.
-Dva e-maily se stejnou hodnotou jsou rovnocenné. Stejně jako entity, ani hodnotové objekty neobsahují Doctrine atributy – mapování je řešeno externě.
+Dva e-maily se stejnou hodnotou jsou rovnocenné. Stejně jako entity, ani hodnotové objekty neobsahují Doctrine atributy – mapování řeší externí XML soubor.
 
 ## 11.05 Implementace repozitářů {#repositories}
 
@@ -402,18 +402,18 @@ V tomto příkladu je `UserRepository` rozhraní, které definuje metody pro ukl
 :::callout{type="warn"}
 ### Dispatch událostí a transakční bezpečnost {#event-dispatch-heading}
 
-Ve výše uvedeném příkladu jsou události dispatchovány **po** volání
+Příklad výše dispatchuje události **po** volání
 `flush()`. Pokud dispatch selže (např. Messenger transport je nedostupný),
-data jsou již persistována, ale události nebyly zpracovány – dochází k nekonzistenci.
+data se sice persistovala, ale události se nezpracovaly – dochází k nekonzistenci.
 
-V produkčních systémech existují dva robustnější přístupy:
+V produkčních systémech existují dva spolehlivější přístupy:
 
 - **Outbox pattern** – události se uloží do databázové tabulky `outbox`
   v téže transakci jako agregát. Separátní worker poté události přečte a dispatchuje.
-  Tím je zaručena atomicita. Podrobněji viz
+  Tím se zaručí atomicita. Podrobněji viz
   [Outbox a transakční doručování událostí](/event-sourcing#outbox)
   a recept v [DDD v praxi – B1](/ddd-v-praxi-kde-to-boli#b1-outbox).
-- **Doctrine lifecycle events** – Doctrine `postFlush` se volá
+- **Doctrine lifecycle events** – Doctrine volá `postFlush`
   po dokončení `flush()`, ale **před commitem transakce**, pokud
   používáte explicitní transakce. Pro dispatch po úspěšném commitu použijte
   `postTransactionCommit` event (Doctrine ORM 2.14+) nebo vlastní
@@ -423,14 +423,14 @@ V produkčních systémech existují dva robustnější přístupy:
 ## 11.06 Separace Doctrine mapování pomocí XML {#doctrine-xml-mapping}
 
 V předchozích příkladech jste si všimli, že doménové entity a hodnotové objekty neobsahují žádné Doctrine atributy (`#[ORM\Entity]`, `#[ORM\Column]` apod.).
-To je záměrné – v čistém DDD přístupu by doménová vrstva neměla mít žádnou závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
-mezi doménovým modelem a persistenční vrstvou, čímž porušují princip **Dependency Inversion**.
+To je záměrné. V čistém DDD přístupu doménová vrstva nemá závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
+mezi doménovým modelem a persistenční vrstvou, a tím porušují princip **Dependency Inversion**.
 
 :::callout{type="warn"}
 ### Proč Doctrine atributy nepatří do doménové vrstvy?
 
 - **Porušení Dependency Inversion Principle** – doménová vrstva (vysokoúrovňový modul) závisí na Doctrine ORM (nízkoúrovňový modul). Správný směr závislosti je opačný.
-- **Znečištění doménového modelu** – `use Doctrine\ORM\Mapping as ORM;` v doménové entitě znamená, že doména „ví" o databázi. Čistá doména by měla být POPO (Plain Old PHP Object).
+- **Znečištění doménového modelu** – `use Doctrine\ORM\Mapping as ORM;` v doménové entitě znamená, že doména „ví“ o databázi. Čistá doména by měla být POPO (Plain Old PHP Object).
 - **Obtížná záměnitelnost** – pokud chcete změnit persistenční mechanismus (např. z MySQL na MongoDB nebo Event Store), musíte upravovat doménové entity.
 - **Komplikace testování** – unit testy doménových entit nepotřebují Doctrine, ale atributy vytvářejí nepříjemnou závislost při autoloadingu.
 :::
@@ -512,14 +512,14 @@ doctrine:
 - **Čistá doménová vrstva** – entity jsou prosté PHP objekty (POPO) bez jakýchkoliv závislostí na frameworku či ORM.
 - **Validace schématem** – XML soubory lze validovat proti XSD schématu Doctrine, čímž se snižuje riziko chyb v mapování.
 - **Oddělení odpovědností** – mapování je infrastrukturní záležitost a patří do infrastrukturní vrstvy, nikoliv do domény.
-- **Snadná záměna persistence** – při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.
+- **Záměna persistence bez zásahu do domény** – při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.
 :::
 
 ## 11.07 Doctrine custom types pro Value Objects {#doctrine-custom-types}
 
 Alternativou k ukládání hodnotových objektů jako primitivních typů (viz
-[implementace entit](#entities)) je vytvoření **Doctrine custom type**,
-který automaticky konvertuje mezi primitivním databázovým typem a doménovým hodnotovým objektem.
+[implementace entit](#entities)) je **Doctrine custom type**.
+Ten automaticky konvertuje mezi primitivním databázovým typem a doménovým hodnotovým objektem.
 Entita pak může mít vlastnosti přímo typu `Email` nebo `UserId`.
 
 :::callout{type="pattern"}
@@ -589,9 +589,9 @@ doctrine:
 
 ## 11.08 PHP 8.1+ Enums pro stavové typy {#php-enums}
 
-Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums), které představují idiomatický způsob, jak v DDD implementovat stavové hodnotové objekty
+Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums). V DDD se hodí pro stavové hodnotové objekty
 s konečnou množinou hodnot – například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
-nebo jako plnohodnotné hodnotové objekty, avšak nativní enums nabízejí typovou bezpečnost přímo na úrovni jazyka.
+nebo jako plnohodnotné hodnotové objekty. Nativní enums nabízejí typovou bezpečnost přímo na úrovni jazyka.
 
 :::callout{type="pattern"}
 ### Příklad: Backed enum pro stav objednávky {#enum-example-heading}
@@ -785,7 +785,7 @@ neobsahuje repozitáře – persistence vraceného objektu je zodpovědností vo
 
 Specification Pattern (Eric Evans, *DDD*, kap. 9) zapouzdřuje doménová pravidla a podmínky
 do samostatných, znovu použitelných objektů. Specifikace odpovídá na otázku „splňuje tento objekt
-dané kritérium?" a lze ji použít pro validaci, filtrování i vyhledávání.
+dané kritérium?“ a lze ji použít pro validaci, filtrování i vyhledávání.
 
 :::callout{type="pattern"}
 ### Příklad: Specification Pattern v PHP {#specification-example-heading}
@@ -960,7 +960,7 @@ má jiné odpovědnosti a jiný typ chyb:
   Příklady: `UserNotFoundException`,
   `DuplicateEmailException`.
 - **Infrastrukturní výjimky** – technické chyby (databáze, síť, souborový systém).
-  Vznikají v infrastrukturní vrstvě a jsou zachytávány aplikační vrstvou.
+  Vznikají v infrastrukturní vrstvě a zachytává je aplikační vrstva.
   Příklady: `ConnectionException`, `TimeoutException`.
 :::
 
@@ -1138,10 +1138,10 @@ V DDD existují dva druhy validace, každý na jiné vrstvě:
   na úrovni Commands a Queries: formát e-mailu, délka jména, povinná pole.
   Používejte atributy `#[Assert\Email]`, `#[Assert\NotBlank]`
   přímo na command třídách. Tato validace chrání doménovou vrstvu před neplatnými vstupy.
-- **Doménová validace (doménová vrstva)** – doménová pravidla vynucovaná
-  uvnitř entit, agregátů a value objects: „uživatel s tímto e-mailem již existuje",
-  „objednávku nelze potvrdit bez položek". Tato validace je součástí doménového modelu
-  a nesmí na ní záviset Symfony Validator.
+- **Doménová validace (doménová vrstva)** – doménová pravidla, která vynucují
+  entity, agregáty a value objects: „uživatel s tímto e-mailem již existuje“,
+  „objednávku nelze potvrdit bez položek“. Tato validace je součástí doménového modelu
+  a Symfony Validator na ní nesmí záviset.
 
 **Pravidlo:** Symfony Validator řeší *syntaktickou* validaci (formát),
 doménová vrstva řeší *sémantickou* validaci (doménová pravidla).
@@ -1255,13 +1255,13 @@ services:
 :::
 :::
 
-Repozitáře jsou explicitně konfigurovány, aby Symfony DI Container bindoval rozhraní na konkrétní implementaci.
-Doménové modely, hodnotové objekty a události jsou z auto-registrace vyloučeny – nejsou to služby, ale data.
+Repozitáře konfigurujeme explicitně, aby Symfony DI Container bindoval rozhraní na konkrétní implementaci.
+Doménové modely, hodnotové objekty a události z auto-registrace vylučujeme – nejsou to služby, ale data.
 
 ### Autowiring s oddělenými Bounded Contexts {#autowiring-bounded-contexts}
 
 Ve větších projektech s více Bounded Contexts konfigurujte autowiring pro každý kontext samostatně.
-Každý kontext dostane vlastní blok v `services.yaml` a je ohraničen i na úrovni service containeru.
+Každý kontext dostane vlastní blok v `services.yaml`, čímž ohraničíme kontext i na úrovni service containeru.
 
 :::callout{type="pattern"}
 ### Příklad: Samostatný autowiring pro každý Bounded Context {#autowiring-bc-example-heading}
@@ -1315,7 +1315,7 @@ services:
 - **Explicitní hranice** – každý bounded context má svůj vlastní blok konfigurace, což jasně dokumentuje hranice kontextů i na úrovni infrastruktury.
 - **Granulární exclude pravidla** – můžete pro každý kontext vyloučit jiné adresáře (např. jeden kontext může mít doménové služby, jiný ne).
 - **Snazší refaktoring** – při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z `services.yaml`.
-- **Prevence nechtěných závislostí** – pokud kontext A omylem importuje třídu z kontextu B, je snadné to odhalit v konfiguraci.
+- **Prevence nechtěných závislostí** – pokud kontext A omylem importuje třídu z kontextu B, lze to odhalit v konfiguraci.
 :::
 
 :::callout{type="note"}
@@ -1339,7 +1339,7 @@ Doménové modely, hodnotové objekty a repozitáře by měly být umístěny v 
 - question: Jak odlišit Aplikační službu od Doménové služby?
   answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Podrobný rozbor v <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
 - question: Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?
-  answer: 'V PHP a Symfony ekosystému jsou výjimky dominantní cestou: při porušení invariantu agregát vyhodí konkrétní doménovou výjimku (například <code>InsufficientFundsException</code>), kterou aplikační vrstva přeloží na HTTP odpověď nebo zprávu uživateli. Result/Either typ je v PHP možný, ale přidává složitost bez odpovídajícího přínosu. Kontrolery zachytávají jen doménové podtypy, nikdy obecnou <code>Exception</code>. Rozbor variant v <a href="#error-handling">sekci Strategie zpracování chyb</a>.'
+  answer: 'V PHP a Symfony ekosystému jsou výjimky dominantní cestou. Při porušení invariantu agregát vyhodí konkrétní doménovou výjimku (například <code>InsufficientFundsException</code>). Aplikační vrstva ji přeloží na HTTP odpověď nebo zprávu uživateli. Result/Either typ je v PHP možný, ale přidává složitost bez odpovídajícího přínosu. Kontrolery zachytávají jen doménové podtypy, nikdy obecnou <code>Exception</code>. Rozbor variant v <a href="#error-handling">sekci Strategie zpracování chyb</a>.'
 - question: Kdy použít Doctrine Custom Type pro Value Object?
-  answer: 'Doctrine Custom Type se hodí tam, kde je hodnotový objekt ukládán jako jednoduchá hodnota v jednom sloupci – peněžní částka, e-mail, URL, vlastní identifikátor. Custom Type přeloží hodnotový objekt při zápisu do primitivu a při čtení ho zpět rekonstruuje, takže doménový kód pracuje vždy s typovým objektem. Pro hodnotové objekty složené z více sloupců je vhodnější <code>embeddable</code> mapování. Detailní rozbor v <a href="#doctrine-custom-types">sekci Doctrine custom types pro Value Objects</a>.'
+  answer: 'Doctrine Custom Type se hodí tam, kde se hodnotový objekt ukládá jako jednoduchá hodnota v jednom sloupci – peněžní částka, e-mail, URL, vlastní identifikátor. Custom Type přeloží hodnotový objekt při zápisu do primitivu a při čtení ho zpět rekonstruuje. Doménový kód pak pracuje vždy s typovým objektem. Pro hodnotové objekty složené z více sloupců je vhodnější <code>embeddable</code> mapování. Detailní rozbor v <a href="#doctrine-custom-types">sekci Doctrine custom types pro Value Objects</a>.'
 :::
