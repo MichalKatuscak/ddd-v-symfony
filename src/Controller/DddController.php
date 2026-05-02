@@ -199,22 +199,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/event-storming', name: 'event_storming')]
-    public function eventStorming(): Response
-    {
-        return $this->render('ddd/event_storming.html.twig', [
-            'title' => 'Event Storming a Domain Storytelling',
-        ]);
-    }
-
-    #[Route('/autorizace-v-ddd', name: 'authorization_in_ddd')]
-    public function authorizationInDdd(): Response
-    {
-        return $this->render('ddd/authorization_in_ddd.html.twig', [
-            'title' => 'Autorizace v DDD na Symfony',
-        ]);
-    }
-
     #[Route('/cheat-sheet', name: 'cheat_sheet')]
     public function cheatSheet(): Response
     {
