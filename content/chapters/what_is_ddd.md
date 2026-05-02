@@ -62,7 +62,7 @@ Domain-Driven Design je založen na několika základních principech:
 Strategický design se zabývá širším kontextem systému a definuje, jak různé části systému spolu interagují. Hlavní koncepty strategického designu zahrnují:
 
 - **Bounded Context** – Ohraničený kontext je explicitní hranice, ve které je doménový model platný. Každý bounded context má svůj vlastní Ubiquitous Language a model.
-- **Context Map** – Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto vztahy mohou být různého typu, například Partnership, Customer-Supplier, Conformist, Anti-Corruption Layer, atd.
+- **Context Map** – Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto vztahy mohou být různého typu, například Partnership, Customer-Supplier, Conformist nebo Anti-Corruption Layer.
 - **Shared Kernel** – Sdílené jádro je část modelu, která je sdílena mezi dvěma nebo více bounded contexts. Toto sdílení vyžaduje úzkou spolupráci mezi týmy.
 - **Customer-Supplier** – Vztah zákazník-dodavatel mezi dvěma bounded contexts, kde jeden kontext (dodavatel) poskytuje služby druhému kontextu (zákazník).
 - **Conformist** – Vztah, kde jeden kontext přijímá model jiného kontextu bez možnosti jej ovlivnit.
@@ -107,7 +107,7 @@ Implementace Domain-Driven Design v praxi zahrnuje tyto kroky:
 3. **Identifikace Bounded Contexts** – Rozdělení složité domény do menších, jasně definovaných kontextů s explicitními hranicemi.
 4. **Vytvoření Context Map** – Definování vztahů mezi různými bounded contexts a způsobu jejich integrace.
 5. **Modelování domény** – Vytvoření doménového modelu pro každý bounded context, který zachycuje podstatné koncepty a vztahy v doméně.
-6. **Implementace taktických vzorů** – Použití taktických vzorů DDD (Entity, Value Object, Aggregate, Repository, atd.) pro implementaci doménového modelu v kódu.
+6. **Implementace taktických vzorů** – Použití taktických vzorů DDD (Entity, Value Object, Aggregate, Repository a další) pro implementaci doménového modelu v kódu.
 7. **Testování** – Ověření, zda model věrně zachycuje doménové chování.
 8. **Iterace a vylepšování** – Neustálé vylepšování modelu na základě zpětné vazby od doménových expertů a zkušeností z implementace.
 
@@ -142,7 +142,7 @@ I když DDD přináší mnoho výhod, má také své výzvy a omezení, která j
 Domain-Driven Design lze porovnat s jinými přístupy k vývoji softwaru:
 
 - **DDD vs. Transaction Script** – Transaction Script (Martin Fowler, *PoEAA*) organizuje logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla a ukládá výsledek. **Rozdíl:** Transaction Script nemá doménový model – logika je v procedurách, ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí však dochází k duplicitě pravidel a těžko udržovatelnému kódu. DDD je vhodnější, jakmile doménová pravidla začnou být sdílena napříč více use cases.
-- **DDD vs. CRUD** – CRUD (Create, Read, Update, Delete) je datově orientovaný přístup: aplikace je v podstatě editor databázových tabulek. **Rozdíl:** CRUD nerozlišuje mezi doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu modeluje chování domény (objednávku nelze jen „updatovat", ale „potvrdit", „zrušit" nebo „odeslat"). Pro jednoduché správy dat CRUD dostačuje.
+- **DDD vs. CRUD** – CRUD (Create, Read, Update, Delete) je datově orientovaný přístup: aplikace je v podstatě editor databázových tabulek. **Rozdíl:** CRUD nerozlišuje mezi doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu modeluje chování domény (objednávku nelze jen „updatovat“, ale „potvrdit“, „zrušit“ nebo „odeslat“). Pro jednoduché správy dat CRUD dostačuje.
 - **DDD vs. Hexagonální architektura** – Hexagonální architektura (Ports and Adapters, Alistair Cockburn) řeší *jak strukturovat závislosti*: doménové jádro komunikuje s vnějším světem přes porty (rozhraní) a adaptéry (implementace). **Rozdíl:** DDD řeší *jak modelovat doménu* (Entity, Value Objects, Aggregates), hexagonální architektura řeší *jak oddělit doménu od infrastruktury*. Tyto přístupy jsou komplementární: DDD poskytuje vzory pro doménové jádro, hexagonální architektura poskytuje strukturu pro jeho izolaci.
 - **DDD vs. Mikroservisy** – Mikroservisy jsou architektonický styl zaměřený na *jak nasazovat a škálovat* části systému nezávisle. **Rozdíl:** DDD řeší logické hranice domény (Bounded Contexts), mikroservisy řeší fyzické hranice nasazení. Bounded Context z DDD je přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky – jeden Bounded Context může být implementován jako více mikroservis a naopak. DDD lze nasadit i v monolitické architektuře.
 
@@ -173,7 +173,7 @@ DDD se osvědčuje v aplikacích s bohatou doménou, kde přesné modelování o
 - question: Co je Ubiquitous Language v DDD?
   answer: 'Ubiquitous Language (všudypřítomný jazyk) je společný slovník používaný vývojáři i doménovými experty při návrhu, diskuzi i implementaci systému. Stejné pojmy se objevují v doménové dokumentaci, v rozhovorech nad modelem i přímo v kódu. Tím se eliminují nedorozumění a snižuje se riziko, že kód bude modelovat něco jiného, než doména skutečně potřebuje. Více v <a href="#strategic-design">sekci o strategickém designu</a>.'
 - question: Co je Bounded Context a k čemu slouží?
-  answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer" ve fakturaci a „Customer" v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části a bývají přirozenými hranicemi pro mikroservisy. Viz <a href="#strategic-design">strategický design</a>.'
+  answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer“ ve fakturaci a „Customer“ v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části a bývají přirozenými hranicemi pro mikroservisy. Viz <a href="#strategic-design">strategický design</a>.'
 - question: Kdy se DDD nevyplatí použít?
   answer: 'Stručně: DDD nepřináší odpovídající hodnotu u projektů s triviální doménovou logikou, v týmech bez přístupu k doménovým expertům a při krátkém horizontu produktu. Detailní rozbor podmínek, příznaků a alternativ obsahuje samostatná kapitola <a href="/kdy-nepouzivat-ddd">Kdy DDD nepoužívat</a>.'
 :::
