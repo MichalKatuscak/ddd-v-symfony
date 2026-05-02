@@ -37,8 +37,8 @@ final readonly class ChapterFrontmatter
             metaDescription: $data['meta_description'],
             metaKeywords: $data['meta_keywords'],
             ogType: $data['og_type'] ?? 'article',
-            published: isset($data['published']) ? (string) $data['published'] : null,
-            modified: isset($data['modified']) ? (string) $data['modified'] : null,
+            published: isset($data['published']) ? self::normalizeDate($data['published']) : null,
+            modified: isset($data['modified']) ? self::normalizeDate($data['modified']) : null,
             breadcrumbName: $data['breadcrumb_name'],
             schemaType: $data['schema_type'] ?? 'TechArticle',
             schemaHeadline: $data['schema_headline'] ?? $data['title'],
@@ -49,5 +49,13 @@ final readonly class ChapterFrontmatter
             difficulty: isset($data['difficulty']) ? (int) $data['difficulty'] : null,
             githubExamples: $data['github_examples'] ?? null,
         );
+    }
+
+    private static function normalizeDate(mixed $value): string
+    {
+        if (is_int($value)) {
+            return date('Y-m-d', $value);
+        }
+        return (string) $value;
     }
 }
