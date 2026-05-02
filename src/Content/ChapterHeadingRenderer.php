@@ -33,7 +33,7 @@ final class ChapterHeadingRenderer implements NodeRendererInterface
 
         // Extract NN.MM prefix (e.g. "01.01" from "01.01 Definice DDD")
         $text = $innerHtml;
-        if (preg_match('/^(\d+\.\d+)\s+(.+)$/s', strip_tags($innerHtml), $m)) {
+        if (preg_match('/^(\d+\.\d+)\s+(.+)$/s', $innerHtml, $m)) {
             $text = '<span class="h-num">' . $m[1] . '</span> ' . $m[2];
         }
 
