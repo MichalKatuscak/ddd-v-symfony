@@ -26,8 +26,8 @@ Tato kapitola zasazuje tyto vzory do reálnějšího kontextu a ukazuje, jak spo
 
 ## 24.01 Příklad: E-commerce aplikace {#e-commerce}
 
-Tato část ukazuje implementaci části e-commerce aplikace pomocí vertikální slice architektury
-a CQRS v Symfony 8 na funkcionalitě košíku a objednávek.
+Tato sekce ukazuje implementaci výřezu e-commerce aplikace pomocí vertikální slice architektury
+a CQRS v Symfony 8 nad košíkem a objednávkami.
 
 :::diagram{fig="24.1-A" title="E-shop: bounded contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
 :::
@@ -450,7 +450,7 @@ class GetCartHandler
 
 ## 24.02 Příklad: Blog {#blog}
 
-Tato část ukazuje implementaci blogu pomocí vertikální slice architektury a CQRS v Symfony 8.
+Tato sekce ukazuje implementaci blogu pomocí vertikální slice architektury a CQRS v Symfony 8.
 
 :::diagram{fig="24.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
@@ -921,7 +921,7 @@ Konkrétní strukturu a konfiguraci takového projektu popisuje kapitola
 - question: Proč agregát Cart pracuje s hodnotovými objekty Money a Quantity místo primitivních typů?
   answer: 'Hodnotové objekty nesou doménovou sémantiku a vynucují validaci při vzniku – <code>Quantity</code> nemůže být záporná, <code>Money</code> vždy nese měnu. Signatura metody <code>addItem(ProductId, Quantity, Money)</code> je samopopisná a typový systém brání záměně argumentů. Primitivní typy takovou kontrolu neposkytují a typické chyby (prohozené argumenty, neplatné hodnoty) se projeví až za běhu. Ukázka použití v <a href="#cart-model-heading">sekci Doménový model: Košík</a>.'
 - question: Jak kontroler v Symfony 8 předává příkaz handleru?
-  answer: 'Kontroler sestaví DTO příkazu (např. <code>AddItemToCart</code>) a předá jej do <code>MessageBusInterface::dispatch()</code>. Messenger podle atributu <code>#[AsMessageHandler]</code> najde příslušný handler a zavolá jej. Kontroler tedy nezná konkrétní handler, pouze sběrnici – což usnadňuje testování, výměnu implementací a asynchronní zpracování. Konfigurace sběrnice je popsána v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
+  answer: 'Kontroler sestaví DTO příkazu (např. <code>AddItemToCart</code>) a předá jej do <code>MessageBusInterface::dispatch()</code>. Messenger podle atributu <code>#[AsMessageHandler]</code> najde příslušný handler a zavolá jej. Kontroler tedy nezná konkrétní handler, pouze sběrnici – což usnadňuje testování, výměnu implementací a asynchronní zpracování. Konfiguraci sběrnice popisuje kapitola <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
   answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Strukturu adresářů je vhodné použít jako výchozí šablonu a postupně ji rozšiřovat podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
 :::
