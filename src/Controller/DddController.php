@@ -89,14 +89,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/co-je-ddd', name: 'what_is_ddd')]
-    public function whatIsDdd(): Response
-    {
-        return $this->render('ddd/what_is_ddd.html.twig', [
-            'title' => 'Co je Domain-Driven Design?',
-        ]);
-    }
-
     #[Route('/horizontalni-vs-vertikalni', name: 'horizontal_vs_vertical_redirect')]
     public function horizontalVsVerticalRedirect(): Response
     {
