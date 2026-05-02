@@ -21,9 +21,9 @@ difficulty: 2
 ## 10.01 Tradiční přístup k DDD {#traditional}
 
 S rostoucí složitostí projektu se struktura adresářů a modulů stává jedním z rozhodujících faktorů
-udržitelnosti kódu. Špatně zvolená organizace vede k tomu, že související logika je rozptýlena
-napříč celou aplikací a každá změna vyžaduje úpravy na mnoha místech. Tradiční přístup k DDD,
-často označovaný jako „vrstvený" (layered), tento problém řeší rozdělením kódu do vrstev
+udržitelnosti kódu. Špatně zvolená organizace rozptýlí související logiku napříč celou aplikací.
+Každá změna pak vyžaduje úpravy na mnoha místech. Tradiční přístup k DDD,
+často označovaný jako „vrstvený“ (layered), tento problém řeší rozdělením kódu do vrstev
 podle technické odpovědnosti [[1]](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/).
 Typické vrstvy v tradičním DDD jsou:
 
@@ -58,13 +58,13 @@ src/
                 └── User.orm.xml
 :::
 
-V tradičním přístupu jsou vrstvy organizovány horizontálně, což znamená, že každá vrstva poskytuje služby vrstvě nad ní.
-Vrstvená architektura se liší od hexagonální (Ports & Adapters) nebo cibulové (Onion) – ty kladou důraz na inverzi závislostí a izolaci domény od infrastruktury, zatímco prostá vrstvená architektura závislosti pouze směruje shora dolů [[2]](https://alistair.cockburn.us/hexagonal-architecture/). Doménové stavební kameny – entity, hodnotové objekty, agregáty, doménové služby – jsou společné pro oba přístupy a popisuje je kapitola [Základní koncepty DDD](/zakladni-koncepty).
+V tradičním přístupu jsou vrstvy organizovány horizontálně. Každá vrstva poskytuje služby vrstvě nad ní.
+Vrstvená architektura se liší od hexagonální (Ports & Adapters) nebo cibulové (Onion). Hexagonální i cibulová architektura kladou důraz na inverzi závislostí a izolaci domény od infrastruktury. Prostá vrstvená architektura závislosti pouze směruje shora dolů [[2]](https://alistair.cockburn.us/hexagonal-architecture/). Doménové stavební kameny – entity, hodnotové objekty, agregáty, doménové služby – jsou společné pro oba přístupy a popisuje je kapitola [Základní koncepty DDD](/zakladni-koncepty).
 
 ## 10.02 Vertikální slice architektura (Vertical Slice Architecture) {#vertical-slice}
 
 Vertikální slice architektura organizuje kód podle funkcí (feature slices) namísto technických vrstev [[3]](https://www.jimmybogard.com/vertical-slice-architecture/).
-Každá funkce (feature) obsahuje všechny vrstvy potřebné pro svou implementaci, čímž se snižují vazby mezi funkcemi a každá část aplikace může být vyvíjena nezávisle.
+Každá funkce (feature) obsahuje všechny vrstvy potřebné pro svou implementaci. Tím se snižují vazby mezi funkcemi a každou část aplikace lze vyvíjet nezávisle.
 
 :::code{language="bash" filename="src/ (vertical slice struktura)"}
 src/
@@ -145,7 +145,7 @@ V celém průvodci používáme konzistentní strukturu pro vertikální slice a
 | **Testovatelnost** | Často vyžaduje mnoho mocků pro testování | Méně mocků, protože závislosti jsou lokální |
 | **Škálovatelnost** | Může být obtížné škálovat při růstu aplikace | Funkce lze přesunout do mikroslužeb bez přeorganizování všech vrstev |
 | **Složitost** | Jednodušší pro pochopení na začátku | Může být složitější pro pochopení na začátku |
-| **Vhodnost pro CQRS** | Vyžaduje dodatečnou práci pro implementaci CQRS | Přirozeně podporuje CQRS [[5]](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
+| **Vhodnost pro CQRS** | CQRS vyžaduje dodatečnou práci | Přirozeně podporuje CQRS [[5]](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
 
 ## 10.04 Kdy použít který přístup {#when-to-use}
 
@@ -174,7 +174,7 @@ Symfony 8 poskytuje nástroje a komponenty pro implementaci obou přístupů k D
 
 ### Implementace tradičního DDD v Symfony 8: {#traditional-symfony-implementation-heading}
 
-Pro implementaci tradičního DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev. Detaily konfigurace Messengeru, DI a Doctrine pro DDD model popisuje kapitola [Implementace v Symfony 8](/implementace-v-symfony); kompletní příklad reálného projektu členěného do bounded contexts je v [Případové studii](/pripadova-studie).
+Pro tradiční DDD v Symfony 8 můžete použít standardní adresářovou strukturu Symfony a rozdělit kód do vrstev. Detaily konfigurace Messengeru, DI a Doctrine pro DDD model popisuje kapitola [Implementace v Symfony 8](/implementace-v-symfony); kompletní příklad reálného projektu členěného do bounded contexts najdete v [Případové studii](/pripadova-studie).
 
 :::code{language="bash" filename="src/ (Symfony 8 – tradiční)"}
 src/
@@ -226,7 +226,7 @@ src/
 
 ### Implementace vertikální slice architektury v Symfony 8: {#vertical-slice-symfony-implementation-heading}
 
-Pro implementaci vertikální slice architektury v Symfony 8 můžete organizovat kód podle funkcí (features) [[8]](https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo).
+Pro vertikální slice architekturu v Symfony 8 můžete organizovat kód podle funkcí (features) [[8]](https://dev.to/etienneleba/another-way-to-structure-your-symfony-project-llo).
 Oproti základnímu modelu z [sekce 10.02](#vertical-slice) (kde celý `Domain/` leží na úrovni kontextu) jde tato varianta hlouběji: každá feature dostane vlastní `Domain/` pro doménové služby a události specifické pro ni, zatímco sdílený agregátový model zůstává v kontextovém `Domain/`.
 
 :::code{language="bash" filename="src/ (Symfony 8 – vertical slice)"}
@@ -294,9 +294,9 @@ Pro vertikální slice architekturu jsou v Symfony 8 relevantní zejména tyto k
 
 :::faq{}
 - question: Co je Vertical Slice Architecture?
-  answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec" obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
+  answer: 'Vertical Slice je přístup, který kód organizuje kolem feature neboli use casu, nikoli kolem technické vrstvy. Každá funkčnost má vlastní „sloupec“ obsahující vše potřebné – command, handler, doménový model, read model, validaci – v jednom balíčku. Opakem je tradiční horizontální členění (Controller, Service, Repository vrstvy), kde jeden use case zasahuje do několika balíčků. Viz <a href="#vertical-slice">sekci Vertikální slice architektura</a>.'
 - question: Jaký je rozdíl mezi tradiční vrstvovou architekturou a Vertical Slice?
-  answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice jednodušeji škáluje počet feature bez narůstajících vazeb. Srovnání obou přístupů v <a href="#comparison">sekci Porovnání přístupů</a>.'
+  answer: 'Vrstvová architektura (Controller, Service, Repository, Entity) je horizontální: kód podobného typu žije pohromadě, ale jeden use case je roztroušený napříč vrstvami. Vertical Slice obrací orientaci – každý use case má vlastní izolovaný sloupec kódu, takže změna feature typicky nezasahuje jiné sloupce. Vrstvová architektura je tradičnější, Vertical Slice škáluje počet feature s menším nárůstem vazeb. Srovnání obou přístupů v <a href="#comparison">sekci Porovnání přístupů</a>.'
 - question: Kdy zvolit Vertical Slice a kdy tradiční DDD vrstvy?
   answer: 'Vertical Slice je vhodný pro aplikace s mnoha nezávislými use casy a rychlým vývojovým tempem, kde je přínosem izolace každé feature. Tradiční vrstvové DDD se osvědčuje tam, kde má doménový model silné sdílené invarianty, které je třeba jednotně vymáhat napříč celou aplikací. V praxi se přístupy kombinují: Vertical Slice pro aplikační vrstvu, sdílený doménový model uvnitř Bounded Contextu. Rozhodovací kritéria v <a href="#when-to-use">sekci Kdy použít který přístup</a>.'
 - question: Lze Vertical Slice kombinovat s DDD?
