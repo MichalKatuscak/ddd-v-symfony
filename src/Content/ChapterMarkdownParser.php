@@ -90,13 +90,20 @@ final class ChapterMarkdownParser
     private function wrapSections(string $html): string
     {
         // Wrap each h2 with id="X-heading" in <section id="X" aria-labelledby="X-heading">
+        $sectionCount = 0;
         $result = preg_replace_callback(
             '/<h2 id="([^"]+)-heading"/',
-            static fn(array $m): string =>
-                '</section><section id="' . $m[1] . '" aria-labelledby="' . $m[1] . '-heading">'
-                . '<h2 id="' . $m[1] . '-heading"',
+            static function (array $m) use (&$sectionCount): string {
+                $sectionCount++;
+                return '</section><section id="' . $m[1] . '" aria-labelledby="' . $m[1] . '-heading">'
+                    . '<h2 id="' . $m[1] . '-heading"';
+            },
             $html,
         );
+
+        if ($sectionCount === 0) {
+            return $html;
+        }
 
         // Remove spurious </section> injected before the first <section>
         $firstSection = strpos($result, '<section ');
