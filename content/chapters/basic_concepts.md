@@ -106,7 +106,7 @@ V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
 
 Tyto pojmy se používají konzistentně v kódu, dokumentaci i v komunikaci mezi vývojáři a doménovými
 experty. Pokud se hovoří o osobě, která nakupuje produkty, používá se důsledně termín
-„zákazník" – nikoli obecné „uživatel".
+„zákazník“ – nikoli obecné „uživatel“.
 
 ## 06.03 Entity {#entities}
 
@@ -231,7 +231,7 @@ Agregát je skupina souvisejících objektů, která tvoří jednu transakční 
 [[3]](https://www.domainlanguage.com/ddd/).
 Každý agregát má kořen agregátu (Aggregate Root),
 který je jediným vstupním bodem pro veškeré vnější interakce s agregátem. Špatně zvolená velikost
-agregátu patří mezi nejčastější chyby v DDD – velkoobjemové „God Agregaty" rozebírá kapitola
+agregátu patří mezi nejčastější chyby v DDD – velkoobjemové „God Agregaty“ rozebírá kapitola
 [Anti-vzory a typické chyby](/anti-vzory).
 
 :::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
@@ -486,7 +486,7 @@ V tomto příkladu je `PaymentService` doménová služba, která zapouzdřuje d
 zpracování plateb a vytváří objekt `Payment`. Doménová služba je bezstavová a
 neobsahuje repozitáře – persistence vraceného objektu je zodpovědností volající vrstvy
 (Application Service nebo Command Handler).
-Třídy `Payment`, `PaymentId` a `PaymentMethod` jsou součástí doménového modelu plateb – jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
+Třídy `Payment`, `PaymentId` a `PaymentMethod` jsou součástí doménového modelu plateb. Jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
 
 :::callout{type="note"}
 ### Kdy doménová služba vs. metoda na agregátu? {#service-vs-aggregate-heading}
@@ -553,7 +553,7 @@ final class OrderCreatedEvent
 V tomto příkladu je `OrderCreatedEvent` doménová událost, která reprezentuje vytvoření nové
 objednávky.
 Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy
-k tomu došlo. Domain Events tvoří základ pro dvě důležité architektonické techniky: oddělení čtení
+k tomu došlo. Domain Events tvoří základ pro dvě architektonické techniky: oddělení čtení
 a zápisu v [CQRS](/cqrs) a uložení stavu jako sekvence událostí v
 [Event Sourcingu](/event-sourcing).
 
@@ -569,5 +569,5 @@ a zápisu v [CQRS](/cqrs) a uložení stavu jako sekvence událostí v
 - question: Kdy použít Doménovou službu místo metody na Entitě?
   answer: 'Doménová služba se použije, když operace přirozeně nepatří žádné Entitě ani Value Objectu – koordinuje více agregátů, komunikuje s externím systémem nebo počítá nad kolekcí objektů. Pokud lze chování přirozeně umístit do metody Entity, má vždy přednost. Doménová služba není datový transfer objekt ani aplikační koordinátor – drží doménovou logiku bez stavu. Rozbor a typické případy užití v <a href="#domain-services">sekci o Doménových službách</a>.'
 - question: Co je Doménová událost a k čemu slouží?
-  answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena" nebo „platba byla přijata". Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
+  answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena“ nebo „platba byla přijata“. Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
 :::
