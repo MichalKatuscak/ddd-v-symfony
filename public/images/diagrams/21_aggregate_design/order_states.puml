@@ -1,0 +1,45 @@
+@startuml order_states
+!include ../theme.iuml
+
+title Životní cyklus agregátu Order – stavové přechody
+
+[*] --> Draft : place(items)
+Draft --> Paid : pay(payment)
+Draft --> Cancelled : cancel(reason)
+
+Paid --> Shipped : ship(shipmentId)
+Paid --> Refunded : refund(reason)
+
+Shipped --> Delivered : confirmDelivery()
+Shipped --> Returned : returnRequest()
+
+Returned --> Refunded : approveRefund()
+
+Delivered --> [*]
+Cancelled --> [*]
+Refunded --> [*]
+
+note right of Draft
+  Invariant: alespoň
+  jedna položka.
+end note
+
+note right of Paid
+  Invariant: payment.amount
+  == sum(items).
+end note
+
+note bottom of Cancelled
+  Cancel jen z Draft.
+  Po Paid je nutný refund,
+  ne cancel.
+end note
+
+note bottom of Shipped
+  Po Shipped není
+  cesta zpět do Paid.
+  Vrácení = oddělený
+  stav Returned.
+end note
+
+@enduml

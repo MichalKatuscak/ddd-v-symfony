@@ -1,0 +1,25 @@
+@startuml diagram
+!include ../theme.iuml
+
+rectangle "Doménový expert" {
+  rectangle "Byznys vize a požadavky" as DE
+  rectangle "Doménová terminologie" as DET
+}
+
+rectangle "Vývojový tým" {
+  rectangle "Implementace kódu" as DEV
+  rectangle "Technická terminologie" as DEVT
+}
+
+rectangle "Ubiquitous Language" {
+  rectangle "Sdílený jazyk" as UL
+  rectangle "Slovník pojmů" as ULDICT
+  rectangle "Context Map" as CC
+}
+
+DE --> UL
+DET --> ULDICT
+UL --> DEV
+ULDICT --> DEVT
+CC --> DEV
+@enduml

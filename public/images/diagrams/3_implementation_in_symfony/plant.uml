@@ -1,0 +1,145 @@
+@startuml diagram
+!include ../theme.iuml
+
+package "Prezentační vrstva" {
+  class Controller {
+    + action(Request request): Response
+  }
+  class Form {
+    + buildForm()
+    + handleRequest(Request request)
+  }
+  class ViewModel {
+    + data
+  }
+}
+
+package "Aplikační vrstva" {
+  class CommandBus {
+    + dispatch(Command command)
+  }
+  class Command {
+    + properties
+  }
+  class CommandHandler {
+    + __invoke(Command command)
+  }
+  class QueryBus {
+    + dispatch(Query query)
+  }
+  class Query {
+    + properties
+  }
+  class QueryHandler {
+    + __invoke(Query query): ViewModel
+  }
+}
+
+package "Doménová vrstva" {
+  class Entity {
+    - EntityId id
+    + methods()
+  }
+  class ValueObject {
+    - value
+    + equals(ValueObject vo): bool
+  }
+  class AggregateRoot {
+    - EntityId id
+    - Collection entities
+    - array events
+    + applyDomainEvent()
+    + releaseEvents(): array
+  }
+  class DomainEvent {
+    - occurredAt
+    + properties
+  }
+  interface Repository {
+    + findById(EntityId id): Entity
+    + save(AggregateRoot ar): void
+  }
+  class DomainService {
+    + performDomainOperation()
+  }
+}
+
+package "Infrastrukturní vrstva" {
+  class DoctrineRepository {
+    - EntityManagerInterface entityManager
+    + findById(EntityId id): Entity
+    + save(AggregateRoot ar): void
+  }
+  class EventDispatcher {
+    + dispatch(DomainEvent event)
+  }
+}
+
+' Vztahy mezi vrstvami
+Controller --> CommandBus : dispatch
+Controller --> QueryBus : dispatch
+Controller --> Form : vytváří
+Form --> Command : mapuje na
+QueryHandler --> ViewModel : vrací
+
+CommandBus --> CommandHandler : směruje ke
+CommandHandler --> Repository : používá
+CommandHandler --> DomainService : používá
+QueryBus --> QueryHandler : směruje ke
+QueryHandler --> Repository : používá
+
+AggregateRoot --|> Entity : dědí
+AggregateRoot o-- Entity : obsahuje
+AggregateRoot ..> DomainEvent : vytváří
+Entity ..> ValueObject : používá
+Repository ..> AggregateRoot : spravuje
+DomainService ..> Entity : operuje nad
+DomainService ..> ValueObject : používá
+
+DoctrineRepository ..|> Repository : implementuje
+DoctrineRepository --> EventDispatcher : používá
+
+note right of Entity
+  Bounded Contexts:
+  - UserManagement
+    - Domain/Model/User.php
+  - OrderManagement
+    - Domain/Model/Order.php
+    - Domain/Model/OrderItem.php
+end note
+
+note right of ValueObject
+  ValueObjects:
+  - UserId.php
+  - Email.php
+  - OrderId.php
+  - Money.php
+end note
+
+note right of DoctrineRepository
+  Implementace:
+  - DoctrineUserRepository
+  - DoctrineOrderRepository
+end note
+
+note as ProjectStructure
+  Struktura projektu:
+  src/
+  ├── UserManagement/
+  │   ├── Domain/
+  │   │   ├── Model/
+  │   │   ├── ValueObject/
+  │   │   ├── Event/
+  │   │   └── Repository/
+  │   ├── Infrastructure/
+  │   ├── Registration/
+  │   └── Profile/
+  ├── OrderManagement/
+  │   ├── Domain/
+  │   ├── Infrastructure/
+  │   ├── Checkout/
+  │   └── OrderHistory/
+  └── Shared/
+end note
+
+@enduml

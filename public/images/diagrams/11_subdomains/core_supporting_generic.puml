@@ -1,0 +1,39 @@
+@startuml
+!include ../theme.iuml
+
+title E-shop: subdoménové členění a investice
+
+rectangle "Core Domain" as core $ACCENT {
+  rectangle "Pricing & Promotions" as pricing
+  rectangle "Personalized Recommendations" as recom
+  note right of pricing
+    KONKURENČNÍ VÝHODA
+    plný DDD taktický design
+    in-house, seniorní tým
+  end note
+}
+
+rectangle "Supporting Subdomain" as supp {
+  rectangle "Order Management" as order
+  rectangle "Inventory" as inv
+  note right of order
+    Nutné pro byznys, ale ne diferenciátor
+    DDD light + Doctrine ORM
+    junior–medior tým
+  end note
+}
+
+rectangle "Generic Subdomain" as gen {
+  rectangle "Authentication" as auth
+  rectangle "Payments (Stripe)" as pay
+  rectangle "Email delivery (SES)" as email
+  note right of auth
+    Komodita
+    SaaS / off-the-shelf knihovna
+    minimum custom kódu
+  end note
+}
+
+core -[hidden]down- supp
+supp -[hidden]down- gen
+@enduml
