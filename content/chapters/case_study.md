@@ -1323,8 +1323,7 @@ při kolizi PK skončí výjimkou, kterou Messenger zaloguje a dál se nepokouš
 už view existuje). Pro silnější záruku lze do `project_list_view` přidat sloupec
 `last_event_id` a každou událost zpracovat jen tehdy, pokud její ID je novější.
 
-**Reconciler.** Pokud událost přijde mimo pořadí (line 1184 vrací `return`
-bez zápisu) nebo se ztratí, projekce zůstává zastaralá. Reconciler je samostatný proces, který
+**Reconciler.** Pokud událost přijde mimo pořadí (handler vrátí `return` bez zápisu, protože `$view === null`) nebo se ztratí, projekce zůstává zastaralá. Reconciler je samostatný proces, který
 v pravidelném intervalu detekuje rozdíl mezi write modelem a read modelem a doplní chybějící data.
 V této studii je řešen jako Symfony console command spouštěný z cronu jednou za hodinu (frekvence je
 kompromis mezi čerstvostí a zatížením DB):
