@@ -70,7 +70,7 @@ jejich kombinace přináší výrazné synergické výhody a v praxi DDD aplikac
 
 Důvodem přirozené synergie je, že Event Sourcing produkuje události jako prvotřídní artefakt
 persistence, a CQRS potřebuje způsob, jak aktualizovat read modely při každé změně write strany.
-Události jsou ideálním mechanismem pro tuto propagaci: write side uloží událost do Event Store,
+Události tuto propagaci přirozeně zajišťují: write side uloží událost do Event Store,
 read side ji přečte a aktualizuje projekci.
 
 :::callout{type="note"}
@@ -101,7 +101,7 @@ doménových událostí používaných pouze k notifikaci (side effects) jsou v 
 o stavu systému. Musejí proto splňovat přísné požadavky:
 
 - **Immutabilita** – Po vytvoření nelze událost měnit. Veškeré její properties jsou read-only, nastavené v konstruktoru.
-- **Serializovatelnost** – Událost musí být serializovatelná do trvalého formátu (JSON, MessagePack…) a deserializovatelná zpět, ideálně bez ztráty informace.
+- **Serializovatelnost** – Událost musí být serializovatelná do trvalého formátu (JSON, MessagePack…) a deserializovatelná zpět bez ztráty informace.
 - **Verzování** – Schéma události se v čase může vyvíjet. Je nutné udržovat kompatibilitu starých událostí nebo implementovat upcasting (transformaci starých verzí na aktuální).
 - **Pojmenování v minulém čase** – Události vyjadřují fakta, která již nastala: `UserRegistered`, `OrderPlaced`, `PaymentFailed`.
 - **Dostatečná granularita dat** – Událost musí obsahovat veškerá data potřebná k tomu, aby z ní bylo možné rekonstruovat stav, aniž by byl nutný přístup k externím zdrojům.
@@ -451,7 +451,7 @@ final class DoctrineEventStore implements EventStore
 ## 14.05 Agregát s Event Sourcingem {#aggregate-s-es}
 
 V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
-mechanismus zcela jiný: **každá změna stavu musí projít přes doménovou událost**. Metody
+mechanismus jiný: **každá změna stavu musí projít přes doménovou událost**. Metody
 agregátu nevytváří efekt přímo – nahrávají událost, a teprve aplikace této události mění interní stav.
 
 Výsledkem je, že agregát obsahuje dvě sady metod:
@@ -732,7 +732,7 @@ final class EventSourcedOrderRepository
 ## 14.06 Projekce (Projections) {#projekce}
 
 Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
-ad-hoc dotazy (např. „všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč"),
+ad-hoc dotazy (např. „všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč“),
 je nutné ze stream událostí vybudovat optimalizované denormalizované datové struktury určené pro čtení.
 
 ### Synchronní vs. asynchronní projekce
@@ -1192,13 +1192,13 @@ událostí zvažte dávkové zpracování s `--batch-size` a monitoring paměti.
 
 Při asynchronních projekcích existuje časové okno (typicky milisekundy až jednotky sekund),
 kdy uživatel provede akci (např. potvrdí objednávku), ale read model ještě neobsahuje
-aktualizovaná data. Uživatel tak po kliknutí na „Potvrdit" může vidět stále „Draft" stav.
+aktualizovaná data. Uživatel tak po kliknutí na „Potvrdit“ může vidět stále „Draft“ stav.
 
 Tento problém není bug – je to vlastnost eventual consistency. Existuje několik
 osvědčených přístupů, jak s ním v UI pracovat:
 
-- **Optimistická aktualizace UI** – Frontend po úspěšné odpovědi na command okamžitě zobrazí očekávaný stav (např. „Potvrzeno"), aniž čeká na aktualizaci projekce. Nejjednodušší a nejčastější řešení.
-- **Potvrzovací stránka** – Po provedení akce přesměrovat uživatele na stránku, která nezávisí na projekci (např. „Objednávka č. X byla potvrzena"), místo okamžitého návratu na výpis.
+- **Optimistická aktualizace UI** – Frontend po úspěšné odpovědi na command okamžitě zobrazí očekávaný stav (např. „Potvrzeno“), aniž čeká na aktualizaci projekce. Nejčastější řešení.
+- **Potvrzovací stránka** – Po provedení akce přesměrovat uživatele na stránku, která nezávisí na projekci (např. „Objednávka č. X byla potvrzena“), místo okamžitého návratu na výpis.
 - **Polling / SSE** – Frontend periodicky dotazuje API nebo naslouchá Server-Sent Events, dokud projekce nedorazí do požadovaného stavu.
 
 :::callout{type="note"}
@@ -1360,7 +1360,7 @@ snapshotu vyvíjel v souladu se změnami doménového modelu.
 Při změně struktury agregátu (nové properties, přejmenování, změna typů) se staré snapshoty
 stanou neplatné – deserializace vrátí nekompletní nebo chybný stav. Řešení:
 buď přidejte k snapshotu číslo verze a implementujte migraci (analogicky k upcasterům),
-nebo starší snapshoty jednoduše invalidujte (smažte) a nechte repozitář přehrát celý
+nebo starší snapshoty invalidujte (smažte) a nechte repozitář přehrát celý
 event stream. U agregátů s krátkými streamy (desítky událostí) je invalidace dostatečná;
 u dlouhých streamů (tisíce událostí) se vyplatí migrace.
 Více o výkonnostních dopadech viz [Výkonnostní aspekty](/vykonnostni-aspekty).
@@ -1386,7 +1386,7 @@ s nejnovější verzí události.
 
 ### Vzor Upcaster
 
-Upcaster je objekt zodpovědný za transformaci payloadu události z jedné verze do následující.
+Upcaster je objekt, který transformuje payload události z jedné verze do následující.
 Upcasters se řetězí: pokud existuje událost ve verzi 1 a aktuální verze je 3, proběhne
 transformace v1 → v2 → v3. Upcasting se provádí **při čtení** (deserializaci),
 nikoli při zápisu – původní data v Event Store zůstávají nedotčena.
@@ -1586,7 +1586,7 @@ zvážit, zda přínosy pro daný kontext převažují nad náklady na implement
 
 - **Auditní log jako doménový požadavek** – Finanční systémy, zdravotnické záznamy nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log poskytuje přirozeně a bez nutnosti extra implementace.
 - **Komplexní doménová logika s bohatými stavovými přechody** – Agregáty procházejí mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové systémy, workflow enginy, bankovní transakce.
-- **Temporální dotazy** – Potřeba „přehrát" stav systému k libovolnému bodu v minulosti (debugging, analýza, „what-if" scénáře). U ES stačí replay eventů do daného timestampu.
+- **Temporální dotazy** – Potřeba „přehrát“ stav systému k libovolnému bodu v minulosti (debugging, analýza, „what-if“ scénáře). U ES stačí replay eventů do daného timestampu.
 - **Event-driven integrace** – Systém produkuje události, které konzumují jiné bounded contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena – Event Store je zdrojem pravdy pro integraci.
 - **CQRS s vysokou čtecí zátěží** – ES umožňuje vybudovat libovolný počet optimalizovaných read modelů z jednoho event streamu, aniž by bylo nutné měnit write model.
 
@@ -1600,7 +1600,7 @@ zvážit, zda přínosy pro daný kontext převažují nad náklady na implement
 :::callout{type="warn"}
 ### Varování: Event Sourcing výrazně zvyšuje složitost systému {#es-warning-heading}
 
-Event Sourcing není „lepší CRUD". Přináší výrazné zvýšení komplexity na všech úrovních:
+Event Sourcing není „lepší CRUD“. Přináší výrazné zvýšení komplexity na všech úrovních:
 **infrastruktura** (Event Store, event bus, snapshot store),
 **doménový model** (apply metody, immutabilita událostí, verzování schémat),
 **testování** ([given/when/then scénáře](/testovani-ddd) s event streamy) a
@@ -1616,7 +1616,7 @@ s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klas
 
 :::faq{}
 - question: Co je Event Sourcing?
-  answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events": nic se v event logu nikdy nepřepisuje ani nemaže. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
+  answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: nic se v event logu nikdy nepřepisuje ani nemaže. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
 - question: Jaký je vztah mezi Event Sourcingem a CQRS?
   answer: 'Event Sourcing a CQRS jsou dva nezávislé vzory, které se často kombinují. Každý z nich lze zavést samostatně: CQRS funguje i s klasickou ORM persistencí, ES lze implementovat i bez rozdělení na write a read modely. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů) – což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
 - question: Co je Event Store a k čemu slouží?
