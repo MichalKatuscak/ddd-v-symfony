@@ -22,9 +22,9 @@ github_examples: Chapter07_Sagas
 V předchozí kapitole jsme se zabývali
 [Event Sourcingem](/event-sourcing) – vzorem persistence,
 který ukládá stav jako sekvenci neměnných událostí. Ságy na tento koncept přirozeně
-navazují: zatímco Event Sourcing řeší persistenci uvnitř jednoho agregátu, ságy
-koordinují procesy **napříč více agregáty a Bounded Contexts**, které
-spolu komunikují právě prostřednictvím doménových událostí.
+navazují. Event Sourcing řeší persistenci uvnitř jednoho agregátu; ságy koordinují
+procesy **napříč více agregáty a Bounded Contexts**, které spolu komunikují
+prostřednictvím doménových událostí.
 
 ## 15.01 Proč potřebujeme ságy? {#proc-sagy}
 
@@ -43,9 +43,9 @@ autonomii kontextů, jež je základním pilířem DDD. Jeden kontext nesmí sah
 jiného kontextu; komunikace probíhá výhradně prostřednictvím zpráv (událostí a příkazů).
 
 Proč nelze zabalit všechny čtyři kroky do jediné databázové transakce?
-Jednotlivé kontexty mohou běžet na různých serverech, používat různé databázové systémy
-(PostgreSQL pro objednávky, Redis pro skladové rezervace, externí platební bránu pro platby)
-a komunikovat asynchronně přes frontu zpráv. Koncept atomické transakce se zde rozpadá.
+Jednotlivé kontexty mohou běžet na různých serverech a používat různé databázové systémy
+(PostgreSQL pro objednávky, Redis pro skladové rezervace, externí platební bránu pro platby).
+Komunikují asynchronně přes frontu zpráv. Koncept atomické transakce se zde rozpadá.
 
 :::callout{type="note"}
 ### Proč ne Two-Phase Commit (2PC)? {#2pc-heading}
@@ -92,10 +92,10 @@ a jejich praktickou implementaci v Symfony 8 s využitím
 ## 15.02 Kompenzační transakce {#kompenzacni-transakce}
 
 Kompenzační transakce je **sémantické vrácení efektu předchozího kroku**.
-Na rozdíl od technického rollbacku databázové transakce (který „vymaže" změny, jako by
-se nikdy nestaly) je kompenzace plnohodnotná doménová operace, která má vlastní vedlejší
+Na rozdíl od technického rollbacku databázové transakce (který „vymaže“ změny, jako by
+se nikdy nestaly) je kompenzace plnohodnotná doménová operace. Má vlastní vedlejší
 efekty – notifikace, auditní záznamy, aktualizace stavů. Kompenzace nevrací systém do
-původního stavu bit po bitu; místo toho přivede systém do stavu, který je z doménového
+původního stavu bit po bitu. Místo toho přivede systém do stavu, který je z doménového
 pohledu ekvivalentní stavu před provedením kompenzovaného kroku.
 
 Pro náš e-shop scénář vypadá mapa akcí a jejich kompenzací následovně:
@@ -106,7 +106,7 @@ Pro náš e-shop scénář vypadá mapa akcí a jejich kompenzací následovně:
 | `ReserveStock` | `ReleaseStock` | Uvolnění rezervace, nikoliv smazání |
 | `CreateShipment` | `CancelShipment` | Pouze do okamžiku odeslání |
 
-Klíčový princip: kompenzace **není přesný inverzní příkaz**. Zatímco
+Kompenzace **není přesný inverzní příkaz**. Zatímco
 `ChargeCustomer` strhne peníze, kompenzační `RefundCustomer` nejenže
 vrátí peníze, ale navíc odešle zákazníkovi notifikaci o vrácení platby, zapíše záznam
 do auditního logu a může aktualizovat interní metriky. Každá kompenzace je samostatný
@@ -325,35 +325,35 @@ zahrnuje pět a více kontextů nebo vyžaduje podmíněné větvení toku.
 ### 1. Neviditelný tok procesu {#neviditelny-tok-heading}
 
 Při choreografii neexistuje žádné jedno místo, kde by byl celý doménový proces popsán.
-Tok procesu je „rozprostřen" do desítek handlerů v různých kontextech. S pěti a více
-kontexty se stává prakticky nemožné vizualizovat kompletní tok – nikdo nemá přehled
+Tok procesu je „rozprostřen“ do desítek handlerů v různých kontextech. S pěti a více
+kontexty se stává prakticky nemožné vizualizovat kompletní tok. Nikdo nemá přehled
 o tom, které kroky po sobě následují, kde se proces větví a jaké jsou alternativní
 cesty při selhání. Vzniká fenomén, který se někdy označuje jako
-**„distribuované špagety"** (*distributed spaghetti*) – analogie
+**„distribuované špagety“** (*distributed spaghetti*) – analogie
 ke špagetovému kódu, ale rozloženému do celého systému.
 
 ### 2. Porušení Open-Closed Principle {#ocp-heading}
 
 Přidání nového kroku do procesu často vyžaduje úpravu existujícího kontextu. Například
-pokud chceme mezi platbu a sklad vložit krok „ověření proti podvodům" (Fraud Detection),
-musíme změnit handler ve Warehouse, aby místo události `PaymentSucceeded`
-naslouchal na `FraudCheckPassed`. Tím porušujeme
+pokud chceme mezi platbu a sklad vložit krok „ověření proti podvodům“ (Fraud Detection),
+musíme změnit handler ve Warehouse. Místo události `PaymentSucceeded`
+musí naslouchat na `FraudCheckPassed`. Tím porušujeme
 **Open-Closed Principle** – stávající kód kontextu Warehouse je nutné
 upravit, aby fungoval s novým krokem. Při orchestraci by stačilo přidat krok do
 centrálního Process Manageru bez zásahu do existujících kontextů.
 
 ### 3. Obtížná diagnostika selhání {#diagnostika-heading}
 
-Když se proces „zasekne", kde hledat příčinu? Každý kontext zná pouze svůj krok –
+Když se proces „zasekne“, kde hledat příčinu? Každý kontext zná pouze svůj krok –
 neví, jaký je celkový stav procesu. Operátor musí ručně procházet logy všech
 kontextů, korelovat události podle `orderId` a rekonstruovat, kde přesně
 proces selhal. Neexistuje centrální dashboard, který by zobrazil:
-„Objednávka #42 – platba OK, sklad SELHÁNÍ, zásilka NESPUŠTĚNA."
+„Objednávka #42 – platba OK, sklad SELHÁNÍ, zásilka NESPUŠTĚNA.“
 V produkčním prostředí s tisíci objednávkami denně je tento přístup neúnosný.
 
 ### 4. Chybějící timeout management {#timeout-heading}
 
-Kdo detekuje, že proces „visí"? Pokud kontext Payment strhne platbu, ale Warehouse
+Kdo detekuje, že proces „visí“? Pokud kontext Payment strhne platbu, ale Warehouse
 nikdy nezareaguje (handler spadl, zpráva se ztratila ve frontě), kdo zjistí, že
 proces stojí? Každý kontext zná pouze svůj krok a nemá přehled o časových limitech
 celého procesu. V choreografii neexistuje přirozené místo pro definici globálního
@@ -371,7 +371,7 @@ a spouští kompenzace. Tímto centrálním místem je [orchestrátor
 Choreografie je stále legitimním řešením pro jednoduché procesy se dvěma až třemi
 kroky, kde je tok lineární a selhání řeší jednoduchá kompenzace. Nepřehánějte
 engineering – pokud váš proces zahrnuje pouze „vytvoření objednávky → stržení
-platby → potvrzení", choreografie je jednodušší a přímočařejší než plnohodnotný
+platby → potvrzení“, choreografie je jednodušší a přímočařejší než plnohodnotný
 Process Manager. Orchestraci zavádějte až ve chvíli, kdy narazíte na výše popsané
 problémy.
 :::
@@ -381,10 +381,10 @@ problémy.
 Orchestrace je přístup, při kterém existuje **centrální koordinátor** –
 tzv. **Process Manager** – který řídí celý doménový proces jako stavový
 automat s definovanými stavy a přechody. V našem e-shop scénáři je tímto koordinátorem
-třída `OrderProcessManager`, která přijímá události ze všech kontextů
+třída `OrderProcessManager`. Přijímá události ze všech kontextů
 (Payment, Warehouse, Shipping) a na jejich základě rozhoduje, jaký příkaz vydat jako
-další krok. Na rozdíl od choreografie, kde je tok „rozprostřen" do desítek handlerů,
-orchestrátor koncentruje celou logiku procesu do jediné třídy – jednoho místa, kde je
+další krok. Na rozdíl od choreografie, kde je tok „rozprostřen“ do desítek handlerů,
+orchestrátor koncentruje celou logiku procesu do jediné třídy. Na jednom místě je
 viditelný kompletní tok od `OrderPlaced` po `ConfirmOrder`.
 
 Následující diagram zobrazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
@@ -565,11 +565,10 @@ final class OrderProcessManager
 
 Orchestrace přináší oproti choreografii několik praktických výhod: celý doménový proces je
 popsán na **jediném místě**, takže vývojář okamžitě vidí kompletní tok
-od objednávky po potvrzení. Debugování je výrazně jednodušší – stačí zkontrolovat stav
-ságy v databázi a okamžitě je jasné, ve kterém kroku proces stojí. Rozšíření procesu
+od objednávky po potvrzení. Debugování je přímočařejší – stačí zkontrolovat stav
+ságy v databázi a hned je jasné, ve kterém kroku proces stojí. Rozšíření procesu
 o nový krok (například přidání Fraud Detection mezi platbu a sklad) znamená přidání jedné
-metody do Process Manageru a jednoho nového stavu do enumu – bez zásahu do existujících
-kontextů.
+metody do Process Manageru a jednoho nového stavu do enumu. Existující kontexty se nemění.
 
 :::callout{type="note"}
 ### Každá metoda = jeden krok stavového automatu {#step-method-heading}
@@ -586,8 +585,8 @@ a jedné události – stávající metody ani stávající kontexty se nemění
 Process Manager potřebuje **perzistentní úložiště stavu**, aby přežil
 restart workeru, nové nasazení aplikace i horizontální škálování na více instancí.
 Bez perzistence by pád workeru mezi kroky `OrderPlaced` a
-`PaymentSucceeded` znamenal ztrátu informace o tom, kde se proces nachází –
-sága by zůstala navždy „viset" bez možnosti dokončení nebo kompenzace. Stav ságy proto
+`PaymentSucceeded` znamenal ztrátu informace o tom, kde se proces nachází.
+Sága by zůstala navždy „viset“ bez možnosti dokončení nebo kompenzace. Stav ságy proto
 ukládáme do databáze jako Doctrine entitu.
 
 :::callout{type="pattern"}
@@ -787,9 +786,9 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
 Díky perzistenci stavu je obnova po selhání přímočará: představte si, že worker spadne
 mezi zpracováním `OrderPlaced` a příchodem `PaymentSucceeded`.
 Po restartu workeru Messenger znovu doručí nedokončenou událost a Process Manager načte
-stav ságy z databáze – okamžitě ví, že sága čeká na platbu
+stav ságy z databáze. Okamžitě ví, že sága čeká na platbu
 (`AwaitingPayment`), a pokračuje od správného kroku. Metoda
-`findStale()` v repository navíc umožňuje periodicky detekovat „zaseklé" ságy,
+`findStale()` v repository navíc umožňuje periodicky detekovat „zaseklé“ ságy,
 které se déle než stanovený práh neposunuly kupředu, a spustit pro ně kompenzaci nebo
 eskalaci.
 
@@ -809,10 +808,10 @@ Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu s
 propojíme obě části s **Symfony Messenger** – asynchronním message busem,
 který zajistí spolehlivé doručování událostí a příkazů mezi kontexty.
 Základní konfigurace Messenger busů je popsána v kapitole
-[CQRS – Symfony Messenger](/cqrs#symfony-messenger); zde se
+[CQRS – Symfony Messenger](/cqrs#symfony-messenger). Zde se
 zaměříme na specifika pro ságy: **oddělené transporty** pro události
-a příkazy a **retry strategie** kritické pro spolehlivost dlouhotrvajících
-procesů.
+a příkazy a **retry strategie**, které jsou kritické pro spolehlivost
+dlouhotrvajících procesů.
 
 :::callout{type="pattern"}
 ### YAML: Kompletní konfigurace Messenger {#messenger-yaml-heading}
@@ -907,9 +906,9 @@ Messenger zajistí, že každou zprávu zpracuje právě jeden worker.
 ### Pozor na ztrátu zpráv: Outbox pattern {#outbox-pattern-heading}
 
 Výše uvedená konfigurace předpokládá, že doménová událost se spolehlivě dostane do
-message brokeru. V praxi to však není samozřejmé: agregát uloží změny do databáze
+message brokeru. V praxi to však není samozřejmé. Agregát uloží změny do databáze
 (Doctrine flush), ale dispatch události do fronty může selhat – síťový výpadek,
-pád workeru mezi flush a dispatch, restart aplikace. Výsledkem je „ztracená" událost
+pád workeru mezi flush a dispatch, restart aplikace. Výsledkem je „ztracená“ událost
 a sága, která se nikdy nespustí.
 
 Řešením je **Outbox pattern**: událost se zapíše do speciální tabulky
@@ -1053,8 +1052,8 @@ private function onOrderPlaced(OrderPlaced $event): void
 ### Konfigurovatelné timeouty {#configurable-timeouts-heading}
 
 Každý krok ságy může vyžadovat jiný timeout. Platební brána typicky potřebuje
-**5 minut** (zákazník zadává údaje karty), rezervace skladu by měla
-proběhnout do **30 sekund** (interní synchronní operace) a potvrzení
+**5 minut** (zákazník zadává údaje karty). Rezervace skladu by měla
+proběhnout do **30 sekund** (interní synchronní operace). Potvrzení
 zásilky může trvat i **24 hodin** (závisí na externím dopravci).
 Timeouty proto definujte konfigurovatelně – ideálně jako parametry v
 `services.yaml`, aby je bylo možné upravit bez změny kódu.
@@ -1091,8 +1090,8 @@ a opakování může uspět.
 
 Při **trvalých chybách** (selhání s doménovou příčinou) musíme spustit kompenzaci –
 vrátit systém do konzistentního stavu provedením kompenzačních akcí v
-**opačném pořadí** dokončených kroků. Klíčový princip:
-kompenzace je **sémantická**, nikoli technická. Neděláme
+**opačném pořadí** dokončených kroků. Kompenzace je
+**sémantická**, nikoli technická. Neděláme
 `DELETE FROM payments` – místo toho dispatchujeme nový doménový příkaz
 `RefundCustomer`, který vytvoří novou transakci (refund). Každá kompenzační
 akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
@@ -1157,7 +1156,7 @@ platbě chceme zároveň **rezervovat zboží na skladě** a
 **vygenerovat fakturu**. Obě operace jsou nezávislé – výsledek jedné
 neovlivňuje druhou. Paralelním zpracováním zkrátíme celkovou dobu trvání ságy.
 
-Princip je jednoduchý: sága dispatchuje oba příkazy současně a přejde do stavu
+Princip: sága dispatchuje oba příkazy současně a přejde do stavu
 `AwaitingStockAndInvoice`. V kontextu si uchovává dva příznaky
 (`stockReserved` a `invoiceCreated`). Teprve když oba dorazí
 jako splněné, sága pokračuje dalším krokem – vytvořením zásilky. Tomuto vzoru se říká
@@ -1246,7 +1245,7 @@ nebyla mezitím změněna. Pokud ano, vyhodí
 
 Produkční ságy potřebují **observabilitu** – musíte vědět, které ságy právě
 běží, které se zasekly a které selhaly. Bez monitoringu je ladění distribuovaných procesů
-noční můrou: zprávy se ztratí ve frontě, stav ságy zamrzne a nikdo si toho nevšimne, dokud
+nepraktické: zprávy se ztratí ve frontě, stav ságy zamrzne a nikdo si toho nevšimne, dokud
 si zákazník nestěžuje. Pro řešení těchto problémů existují dva hlavní nástroje: korelační ID pro
 trasování a detekce zaseklých ság.
 
@@ -1538,7 +1537,7 @@ Další vzory pro testování doménové logiky, agregátů a event handlerů na
 - question: Jak implementovat kompenzační transakce v Symfony?
   answer: 'Kompenzace je samostatná operace nebo command handler, který vrací systém do stavu před selhaným krokem – například <code>CancelPayment</code> jako protějšek <code>AuthorizePayment</code>. V Messenger ságe se kompenzace spouští, když příchozí událost signalizuje selhání některého z pozdějších kroků. Kompenzační příkazy musí být idempotentní a tolerantní k situaci, že kompenzovaný krok nikdy neproběhl. Ne každou operaci lze technicky vrátit, proto se někdy kompenzuje jiným způsobem. Praktický příklad v <a href="#kompenzacni-strategie">sekci Kompenzační strategie v praxi</a>.'
 - question: Jak zajistit idempotenci ságy při opakovaném doručení událostí?
-  answer: 'Messenger může stejnou zprávu doručit vícekrát – při selhání workera nebo přebalení na retry queue – takže handler musí opakované zpracování bezpečně ignorovat. Standardní řešení jsou dvě: jedinečný identifikátor zprávy uložený do tabulky zpracovaných ID, nebo stavový automat ságy, který u každého kroku kontroluje, zda už není ve stavu „dokončeno". Obě techniky brání duplicitnímu publikování příkazů i duplicitním kompenzacím. Podrobný rozbor v <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
+  answer: 'Messenger může stejnou zprávu doručit vícekrát – při selhání workera nebo přebalení na retry queue – takže handler musí opakované zpracování bezpečně ignorovat. Standardní řešení jsou dvě: jedinečný identifikátor zprávy uložený do tabulky zpracovaných ID, nebo stavový automat ságy, který u každého kroku kontroluje, zda už není ve stavu „dokončeno“. Obě techniky brání duplicitnímu publikování příkazů i duplicitním kompenzacím. Podrobný rozbor v <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
 - question: Má se sága obsluhovat přes Command Bus, nebo Event Bus?
   answer: 'Obojí, s jasně rozdělenou rolí. Události na Event Busu spouštějí reakce ságy – informují, že se něco stalo, a sága na ně navazuje. Příkazy na Command Busu sága sama vydává, aby řídila další kroky. Typická smyčka má tvar: příchozí event → Process Manager → odchozí command → handler → nový event. Nikdy se nezaměňuje: event nic nepřikazuje, command nic neoznamuje. Viz <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
 :::
