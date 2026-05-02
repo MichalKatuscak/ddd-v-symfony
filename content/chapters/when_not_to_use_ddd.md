@@ -20,22 +20,22 @@ difficulty: 2
 
 DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
 zpomaluje vývoj a frustruje tým – aniž by přinesla cokoliv hodnotného.
-Tato kapitola říká přímo, kdy DDD vynechat, a co místo toho použít.
+Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít.
 
 Předchozí kapitola ukázala [kde DDD v praxi bolí](/ddd-v-praxi-kde-to-boli),
 i když je nasazeno správně. Tato kapitola se věnuje situacím, kde DDD nasazovat nemá smysl.
-Je to pohled, který DDD literatura – soustředěná přirozeně na to, kdy vzor použít –
+Je to pohled, který DDD literatura – soustředěná na to, kdy vzor použít –
 zpravidla nerozvádí dostatečně.
 
 ## 23.01 Rozhodovací strom: Mám použít DDD? {#rozhodovaci-strom}
 
 Než se ponoříte do jednotlivých situací, projděte si pět otázek. Pokud na kteroukoli odpovíte
-„ne", DDD pravděpodobně není ta správná volba – nebo ještě ne.
+„ne“, DDD pravděpodobně není správná volba – nebo ještě ne.
 
 :::diagram{fig="23.1-A" title="Rozhodovací strom: pět bran k DDD" src="images/diagrams/9_when_not_to_use_ddd/diagram.svg"}
 :::
 
-Každá z těchto pěti bran odpovídá jedné nebo více sekcím níže, které jsou podrobně popsány v dalším textu.
+Každá z těchto pěti bran odpovídá jedné nebo více sekcím níže.
 
 ## 23.02 1. CRUD admin a jednoduchý backoffice {#crud-admin}
 
@@ -136,8 +136,8 @@ to neplatí. Každý refaktoring agregátů a [bounded contextů](/zakladni-konc
 vás zpomaluje a vývojové iterace se soustředí na kódovou architekturu namísto na hodnotu pro zákazníka.
 
 **Důležitá nuance:** Strategické DDD nástroje – zejména
-[Event Storming](/event-storming) a [Context Mapping](/context-mapping) – mohou být
-ve fázi hledání naopak velmi užitečné. Pomáhají pojmenovat, co ještě nerozumíte.
+[Event Storming](/event-storming) a [Context Mapping](/context-mapping) – ve fázi hledání
+naopak pomáhají. Dávají jména tomu, čemu ještě nerozumíte.
 Co nedává smysl, je taktické DDD (agregáty, doménové události, repozitáře) pro model,
 který se příští týden změní od základů.
 
@@ -217,16 +217,16 @@ Systém načítá data z externích zdrojů, transformuje je a ukládá nebo rep
 Žádná doménová pravidla, žádné invarianty, žádná doménová logika.
 Jde o přesun a transformaci dat – ne o modelování domény.
 
-Agregáty chrání invarianty. Pokud žádné invarianty nemáte, agregáty nemáte k čemu potřebovat.
+Agregáty chrání invarianty. Pokud žádné invarianty nemáte, agregáty nepotřebujete.
 Výsledkem je přidaná komplexita bez věcného důvodu. Jak píše Evans: agregát je
 *cluster of associated objects that we treat as a unit for the purpose of data changes*
-– podstatné slovní spojení je „data changes" s doménovými pravidly, nikoli „data transfer".
+– podstatné slovní spojení je „data changes“ s doménovými pravidly, nikoli „data transfer“.
 
 :::callout{type="note"}
 **Doporučené alternativy:**
 
 - **Service layer s plain PHP objekty** – jednoduché třídy pro transformaci, bez agregátů.
-- **Symfony Messenger** pro asynchronní zpracování pipeline kroků – bez DDD overhead. Viz [kapitola o CQRS](/cqrs) pro inspiraci, jak Messenger používat v praxi.
+- **Symfony Messenger** pro asynchronní zpracování pipeline kroků – bez režie DDD. Viz [kapitola o CQRS](/cqrs) pro inspiraci, jak Messenger používat v praxi.
 :::
 
 ## 23.06 5. Projekt s životností kratší než rok {#short-lived}
@@ -235,16 +235,16 @@ Interní nástroj, landing page, jednorázová migrace, prototyp pro demo zákaz
 Kód napíšete, použijete a zahodíte.
 
 DDD investice se vrátí na projektech, které žijí roky a rostou. Na krátkodobých projektech
-tým zaplatí cenu DDD (čas, komplexita, learning curve) aniž by kdy sklidil
+tým zaplatí cenu DDD (čas, komplexita, learning curve), aniž by kdy sklidil
 výhody (udržovatelnost, evolvability).
 
-**Proč zrovna rok?** Hranice „jeden rok" není absolutní – je to orientační bod
+**Proč zrovna rok?** Hranice „jeden rok“ není absolutní – je to orientační bod
 založený na praxi. DDD vyžaduje počáteční investici: modelování domény, budování
 Ubiquitous Language, návrh agregátů a bounded contextů. Tato investice se typicky začíná
 vracet po 6–12 měsících, kdy projekt roste a tým profituje z čistých doménových hranic.
 U projektů kratších než rok tuto návratnost nedosáhnete.
 Vernon v *Domain-Driven Design Distilled* doporučuje zvážit
-„strategickou hodnotu" projektu – pokud je nízká, DDD se nevyplatí.
+„strategickou hodnotu“ projektu – pokud je nízká, DDD se nevyplatí.
 
 :::callout{type="note"}
 **Doporučené alternativy:**
@@ -260,7 +260,7 @@ DDD vyžaduje, aby tým rozuměl konceptům –
 Špatně pochopené DDD je horší než žádné DDD: produkuje pseudo-DDD kód,
 který má přidanou komplexitu bez architektonických výhod.
 
-„Naučíme se za pochodu" na produkčním projektu s deadlinem je recept na technický dluh,
+„Naučíme se za pochodu“ na produkčním projektu s deadlinem je recept na technický dluh,
 který bude bolet roky.
 
 :::callout{type="pattern"}
@@ -319,7 +319,7 @@ final class Order
 :::callout{type="note"}
 **Doporučené alternativy:**
 
-- Klasická architektura, kterou tým zná dobře – srozumitelný kód je vždy lepší než „správná" architektura, které nikdo nerozumí.
+- Klasická architektura, kterou tým zná dobře – srozumitelný kód je vždy lepší než „správná“ architektura, které nikdo nerozumí.
 - DDD zaveďte na vedlejším projektu nebo v části systému jako experiment, pak přenášejte zkušenosti postupně.
 - Jako odrazový můstek se osvědčil Vernon: *Domain-Driven Design Distilled* – nejrychlejší cesta k pochopení DDD konceptů.
 :::
@@ -334,14 +334,14 @@ k expertům, ale doména může být jasná (pojišťovnictví, e-commerce...). 
 že **nikdo doménu nechápe** – ani potenciální experti. Požadavky se teprve formují,
 pojmy nejsou ustálené, doménová pravidla se mění s každou schůzkou.
 
-DDD bez znalosti domény je jen přejmenování tříd. „Order", „Customer", „Product" –
+DDD bez znalosti domény je jen přejmenování tříd. „Order“, „Customer“, „Product“ –
 vypadá to jako DDD, ale model neodráží skutečnou doménu. Za rok, až doménu pochopíte,
 přepíšete stejně všechno.
 
 :::callout{type="note"}
 **Doporučené alternativy:**
 
-- **Event Storming napřed** – než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho neví DDD co modelovat. Více o Event Stormingu v kapitole [Event Storming](/event-storming).
+- **Event Storming napřed** – než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho DDD nemá co modelovat. Více o Event Stormingu v kapitole [Event Storming](/event-storming).
 - Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte – viz [Migrace z CRUD na DDD](/migrace-z-crud).
 :::
 
@@ -367,13 +367,13 @@ Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte
 
 :::faq{}
 - question: Vyplatí se DDD pro jednoduchý CRUD admin?
-  answer: 'Ne. CRUD administrace, která pouze mapuje formulář na databázovou tabulku, postrádá doménovou logiku, kterou by DDD mohlo chránit. Nasazení agregátů, value objectů a repozitářů nad prostým „create/update/delete" přináší komplexitu bez odpovídající hodnoty. V této situaci je lepší volbou přímá CRUD implementace, například přes EasyAdmin nebo Sonata Admin. Podrobněji v <a href="#crud-admin">sekci CRUD admin a jednoduchý backoffice</a>.'
+  answer: 'Ne. CRUD administrace, která pouze mapuje formulář na databázovou tabulku, postrádá doménovou logiku, kterou by DDD mohlo chránit. Nasazení agregátů, value objectů a repozitářů nad prostým „create/update/delete“ přináší komplexitu bez odpovídající hodnoty. V této situaci je lepší volbou přímá CRUD implementace, například přes EasyAdmin nebo Sonata Admin. Podrobněji v <a href="#crud-admin">sekci CRUD admin a jednoduchý backoffice</a>.'
 - question: Má smysl DDD ve startupu, kde se doména rychle mění?
-  answer: 'Spíše ne, dokud startup hledá product-market fit. DDD investuje do přesného modelování domény – když se doména s každým sprintem překopává, tato investice se odepisuje ještě dřív, než přinese hodnotu. Pragmatičtější je začít s jednoduchou architekturou a DDD zavést selektivně až v okamžiku, kdy se jádro produktu stabilizuje a doménová pravidla začnou být sdílena napříč use casy. Rozbor situace v <a href="#startup">sekci Startup – doména se mění každý sprint</a>.'
+  answer: 'Spíše ne, dokud startup hledá product-market fit. DDD investuje do přesného modelování domény. Když se doména s každým sprintem překopává, tato investice se odepisuje dřív, než přinese hodnotu. Pragmatičtější je začít s jednoduchou architekturou. DDD pak zaveďte selektivně, až se jádro produktu stabilizuje a doménová pravidla začnou být sdílena napříč use casy. Rozbor situace v <a href="#startup">sekci Startup – doména se mění každý sprint</a>.'
 - question: Co když tým nemá s DDD zkušenosti?
   answer: 'Bez zkušenosti s DDD tým typicky produkuje anemický model: taktické vzory (agregáty, repozitáře, events) se používají jako prázdné obaly kolem CRUD logiky, zatímco strategický design schází. Výsledkem je komplikovaná architektura bez reálných přínosů. Pokud chybí čas na učení, lepší je začít čistou, dobře strukturovanou CRUD architekturou a DDD prvky přidávat postupně, až s rostoucí doménovou složitostí. Detailní rozbor v <a href="#no-knowledge">sekci Tým DDD nezná a čas na učení není</a>.'
 - question: Kdy DDD naopak smysl má?
-  answer: 'DDD se vyplatí tam, kde se sejde několik podmínek současně: komplexní doménová logika s mnoha invarianty, dlouhodobý horizont projektu (roky, ne měsíce), přístup k doménovým expertům a tým s dostatečnými zkušenostmi nebo časem na učení. Typické domény, kde DDD dlouhodobě vyhrává, jsou core banking, pojišťovnictví, zdravotnictví, logistika nebo regulovaná odvětví s bohatými pravidly. Rozhodnutí by nemělo stát na popularitě DDD, ale na konkrétní povaze projektu a týmu. Rozhodovací kritéria a domény v <a href="#when-ddd-fits">sekci Kdy DDD naopak smysl má</a>.'
+  answer: 'DDD se vyplatí tam, kde se sejde několik podmínek současně. Patří mezi ně komplexní doménová logika s mnoha invarianty, dlouhodobý horizont projektu (roky, ne měsíce), přístup k doménovým expertům a tým s dostatečnými zkušenostmi nebo časem na učení. Typické domény, kde DDD dlouhodobě vyhrává, jsou core banking, pojišťovnictví, zdravotnictví, logistika nebo regulovaná odvětví s bohatými pravidly. Rozhodnutí by nemělo stát na popularitě DDD, ale na konkrétní povaze projektu a týmu. Rozhodovací kritéria a domény v <a href="#when-ddd-fits">sekci Kdy DDD naopak smysl má</a>.'
 :::
 
 ## 23.10 Zdroje a další čtení {#zdroje}
@@ -399,5 +399,5 @@ Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte
 - <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">Martin Fowler: BoundedContext</a>
   (2014) – srozumitelné vysvětlení jednoho z hlavních DDD konceptů.
 - <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Martin Fowler: AnemicDomainModel</a>
-  (2003) – proč „DDD bez chování" je anti-pattern.
+  (2003) – proč „DDD bez chování“ je anti-pattern.
 :::
