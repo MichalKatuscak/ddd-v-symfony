@@ -20,21 +20,21 @@ difficulty: 4
 
 ## 17.01 Výkon v kontextu DDD {#uvodem}
 
-DDD proslulo pověstí pomalé architektury. Tato pověst vzniká z konkrétní příčiny: výkonnostní problémy
-přicházejí z nesprávné implementace – příliš velkých agregátů, nevhodného lazy loadingu, absence read modelu
-– ne z DDD samotného. Bohatý doménový model a rychlá aplikace nejsou v rozporu.
+DDD má pověst pomalé architektury. Výkonnostní problémy přicházejí z nesprávné implementace
+– příliš velkých agregátů, nevhodného lazy loadingu, absence read modelu – ne z DDD samotného.
+Doménový model a rychlá aplikace nejsou v rozporu.
 
 :::callout{type="note"}
 ### DDD vs. výkon: mýty a realita
 
 - **Mýtus:** DDD je vždy pomalejší než anémický model (anemic domain model). **Realita:** Správně navržené DDD s CQRS a optimalizovanými repozitáři je srovnatelně rychlé, protože read side nepotřebuje vůbec načítat doménové objekty.
 - **Mýtus:** Agregáty způsobují zbytečné JOIN operace. **Realita:** Problém nastává při špatně definovaných hranicích agregátů – příliš velký agregát načítá zbytečná data.
-- **Mýtus:** Doctrine ORM je pomalý pro DDD. **Realita:** Doctrine nabízí bohatou sadu nástrojů (DQL, native queries, extra lazy loading, query cache, result cache), které při správném použití odstraňují výkonnostní bottlenecky.
+- **Mýtus:** Doctrine ORM je pomalý pro DDD. **Realita:** Doctrine nabízí sadu nástrojů (DQL, native queries, extra lazy loading, query cache, result cache), které při správném použití odstraňují výkonnostní bottlenecky.
 :::
 
 Výkon se stává kritickým ve třech scénářích: aplikace s **desítkami propojených agregátů**,
 **velké agregáty** s kolekcemi tisíců položek a systémy s vysokou frekvencí čtení
-a latency požadavky v desítkách milisekund.
+a požadavky na odezvu v desítkách milisekund.
 
 :::callout{type="warn"}
 ### Zlaté pravidlo optimalizace
@@ -42,15 +42,15 @@ a latency požadavky v desítkách milisekund.
 **Nikdy neoptimalizujte naslepo.** Každá optimalizace musí být podložena měřením.
 Předčasná optimalizace (premature optimization) vede k zbytečně složitému kódu, který řeší neexistující
 problémy. Nejprve profilujte, identifikujte skutečný bottleneck a teprve potom optimalizujte.
-Donald Knuth to vyjádřil nejlépe: *"Premature optimization is the root of all evil."*
+Donald Knuth to vyjádřil takto: *„Premature optimization is the root of all evil.“*
 [[1]](https://dl.acm.org/doi/10.1145/356635.356640)
 :::
 
 ## 17.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
 
-N+1 problém je jedním z nejčastějších výkonnostních antipatternů při práci s ORM. Nastává tehdy, když
-aplikace provede 1 dotaz pro načtení seznamu entit a poté pro každou entitu provede další dotaz
-pro načtení asociovaných dat – celkem tedy N+1 SQL dotazů místo 1–2 dotazů.
+N+1 problém patří k nejčastějším výkonnostním antipatternům při práci s ORM. Aplikace provede
+1 dotaz pro načtení seznamu entit a poté pro každou entitu další dotaz pro načtení asociovaných dat.
+Celkem tedy N+1 SQL dotazů místo 1–2 dotazů.
 
 :::callout{type="note"}
 ### Přesná definice N+1 problému
@@ -142,8 +142,8 @@ final class Order
 ### Řešení 2: JOIN FETCH v DQL pro eager loading
 
 Pokud víme předem, že budeme iterovat přes kolekce, je efektivnější použít DQL s klauzulí
-`JOIN FETCH`. Tím instrukujeme Doctrine, aby načetlo agregát včetně asociovaných
-objektů v jediném SQL dotazu s LEFT JOIN nebo INNER JOIN.
+`JOIN FETCH`. Doctrine pak načte agregát včetně asociovaných objektů v jediném SQL
+dotazu s LEFT JOIN nebo INNER JOIN.
 
 :::callout{type="pattern"}
 ### Příklad: JOIN FETCH v DQL a Query Builderu
@@ -209,13 +209,13 @@ final class DoctrineOrderRepository implements OrderRepository
 :::
 
 Pozor: při použití `JOIN FETCH` s paginací (`setMaxResults()`, `setFirstResult()`)
-Doctrine emituje varování a provede paginaci v paměti (in-memory pagination), nikoli na úrovni SQL.
+Doctrine vypíše varování a provede paginaci v paměti (in-memory pagination), nikoli na úrovni SQL.
 Řešením je buď stránkovat pouze přes identifikátory a následně načíst data, nebo použít nativní SQL
 s vlastním mapováním výsledků.
 
 ## 17.03 Agregát a výkon: správné určení hranic {#agregat-hranice}
 
-Jedním ze základních principů DDD je, že agregát tvoří konzistenční hranici – veškeré invarianty
+Základním principem DDD je, že agregát tvoří konzistenční hranici – invarianty
 doménového modelu jsou zaručeny v jednom agregátu. Problém nastává, pokud jsou hranice
 agregátu definovány příliš široce: agregát pak při každém načtení tahá z databáze rozsáhlý
 objektový graf, i když potřebujeme jen malou část dat.
@@ -249,9 +249,9 @@ echo $order->getCustomer()->getFullName();
 ### Řešení: rozdělení agregátu a specializované repozitářní metody
 
 Prvním krokem je kriticky přezkoumat, zda `OrderItem` skutečně musí být součástí
-agregátu `Order`, nebo zda se jedná o samostatný agregát s odkazem na `OrderId`.
-V e-commerce doméně bývá správné mít `Order` jako agregát kořene s přímým přístupem
-pouze k metadatům (číslo, datum, stav, celková cena) a `OrderItem` jako samostatný
+agregátu `Order`, nebo zda jde o samostatný agregát s odkazem na `OrderId`.
+V e-commerce doméně bývá správné mít `Order` jako kořen agregátu s přímým přístupem
+pouze k metadatům (číslo, datum, stav, celková cena). `OrderItem` pak tvoří samostatný
 agregát odkazující na `OrderId`.
 
 :::callout{type="pattern"}
@@ -304,21 +304,21 @@ final class DoctrineOrderRepository
 
 Základním pravidlem DDD je, že **agregát musí být navržen podle doménových invariantů,
 nikoli podle výkonnostních požadavků**. Pokud jsou výkonnostní požadavky v konfliktu
-s doménovým modelem, je správným řešením zavedení read modelu (viz sekci CQRS), nikoli
-kompromitování doménové integrity.
+s doménovým modelem, řešením je zavedení read modelu (viz sekci CQRS), nikoli
+porušení doménové integrity.
 
 ## 17.04 Optimalizace read modelu (CQRS) {#read-model-optimalizace}
 
 Striktní oddělení write side (doménové operace přes agregáty) od read side (dotazy vracející data
 pro prezentaci) je základní nástroj pro řešení výkonnostních problémů v DDD.
-Na read side není potřeba načítat doménové objekty – stačí vrátit strukturu dat přesně odpovídající
+Na read side není potřeba načítat doménové objekty – stačí vrátit strukturu dat odpovídající
 potřebám uživatelského rozhraní nebo API klienta.
 
 :::callout{type="note"}
 ### Zásady read modelu v CQRS
 
 - Query handlery **nepoužívají doménové repozitáře** – přistupují přímo k databázi přes DQL nebo nativní SQL.
-- Výsledkem je **DTO (Data Transfer Object)** nebo plain PHP array – žádné bohaté doménové objekty.
+- Výsledkem je **DTO (Data Transfer Object)** nebo plain PHP array – žádné doménové objekty.
 - Read model může být **denormalizovaný** – data jsou již předpřipravena pro konkrétní view.
 - Read side lze **nezávisle cachovat** bez ohrožení doménové konzistence.
 :::
@@ -395,7 +395,7 @@ final class GetOrderSummaryListHandler
 ### Doctrine NativeQuery pro komplexní reportovací dotazy
 
 DQL pokrývá většinu dotazů, ale pro složité reportovací dotazy (agregace, window funkce, CTE)
-nestačí. Doctrine umožňuje provádět nativní SQL dotazy s vlastním mapováním
+nestačí. Doctrine umožňuje spouštět nativní SQL dotazy s vlastním mapováním
 výsledků přes `ResultSetMapping`.
 
 :::callout{type="pattern"}
@@ -459,7 +459,7 @@ final class SalesReportQueryService
 
 ## 17.05 UUID vs. integer primární klíče {#uuid-vs-integer}
 
-V DDD je doporučenou praxí, aby agregát znal svoji identitu již před uložením do databáze.
+V DDD je doporučenou praxí, aby agregát znal svoji identitu už před uložením do databáze.
 To umožňuje generovat `AggregateId` v doménovém kódu bez závislosti na databázové
 sekvenci nebo auto-increment hodnotě – podstatná vlastnost pro distribuované systémy, event sourcing
 a optimistické paralelní vytváření agregátů.
@@ -482,8 +482,8 @@ a optimistické paralelní vytváření agregátů.
 ### ULID jako kompromis
 
 ULID (Universally Unique Lexicographically Sortable Identifier) a UUID verze 6/7 (ordered UUID)
-řeší problém fragmentace indexů tím, že jsou **monotónně rostoucí**: nové hodnoty
-jsou vždy větší než předchozí, čímž jsou vkládány na konec B-tree indexu – stejné chování
+řeší problém fragmentace indexů tím, že jsou **monotónně rostoucí**. Nové hodnoty
+jsou vždy větší než předchozí a vkládají se na konec B-tree indexu. Chování je stejné
 jako u auto-increment integeru, ale se zachováním globální unikátnosti bez centrálního generátoru.
 
 :::callout{type="pattern"}
@@ -606,8 +606,8 @@ final class Order
 
 ## 17.06 Doctrine Identity Map a Unit of Work {#doctrine-identity-map}
 
-Doctrine ORM implementuje vzor Identity Map (Martin Fowler, *Patterns of Enterprise Application Architecture*):
-každý spravovaný objekt (managed entity) je v jednom `EntityManager`u uložen v paměti pod svým
+Doctrine ORM implementuje vzor Identity Map (Martin Fowler, *Patterns of Enterprise Application Architecture*).
+Každý spravovaný objekt (managed entity) je v jednom `EntityManager`u uložen v paměti pod svým
 identifikátorem. Pokud načtete tentýž agregát dvakrát, Doctrine vrátí tentýž PHP objekt z paměti
 bez opakovaného SQL dotazu.
 
@@ -622,7 +622,7 @@ bez opakovaného SQL dotazu.
 ### Problém s batch zpracováním
 
 Identity Map je navržena pro typický web request, kdy zpracujeme jednotky až desítky agregátů.
-Při hromadném zpracování (import, migrace, generování reportů) jsou do Identity Map vkládány
+Při hromadném zpracování (import, migrace, generování reportů) se do Identity Map vkládají
 tisíce objektů, které se hromadí v paměti po celou dobu zpracování. To vede k postupnému
 nárůstu spotřeby paměti (*memory leak*) a zpomalování dirty checkingu, protože Doctrine
 musí procházet stále větší množinu spravovaných objektů.
@@ -687,15 +687,15 @@ final class ImportProductsHandler
 ### Pozor na clear() a detached entity
 
 Po zavolání `$this->em->clear()` jsou **všechny** spravované entity odpojeny
-(stav *detached*). Jakýkoli pokus o přístup k jejich lazy-loaded asociacím způsobí výjimku
+(stav *detached*). Jakýkoli pokus o přístup k jejich lazy-loaded asociacím vyvolá výjimku
 `LazyInitializationException`. Ujistěte se, že po `clear()` nepracujete
 s referencemi na dříve spravované objekty.
 :::
 
 ## 17.07 Caching v DDD architektuře {#cachovani}
 
-Caching v DDD architektuře vyžaduje pečlivý design. Základní otázka je:
-**co cachovat**? Obecné pravidlo zní: cachujeme výsledky operací, které jsou
+Caching v DDD architektuře vyžaduje pečlivý návrh. Základní otázka zní:
+**co cachovat**? Obecné pravidlo říká: cachujeme výsledky operací, které jsou
 výpočetně nebo I/O nákladné a jejichž výsledek se v čase nemění (nebo se mění předvídatelně).
 Business logiku nikdy do cache klíče nezahrnujeme – cache slouží pro infrastrukturní výsledky,
 nikoli pro doménová rozhodnutí.
@@ -801,7 +801,7 @@ final class CachedUserRepository implements UserRepository
 
 Účinným přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Když agregát
 změní stav (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
-Cache invalidace se tím stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
+Cache invalidace se tím stává součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
 
 :::callout{type="pattern"}
 ### Cache invalidace přes Symfony EventDispatcher
@@ -837,15 +837,15 @@ final class InvalidateUserCacheOnEmailChanged
 ## 17.08 Bulk operace a hromadné zpracování {#bulk-operace}
 
 Standardní DDD workflow – načti agregát, aplikuj doménovou logiku, zavolej `flush()`
-– funguje výborně pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
-hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní: každý cyklus načítá
-a spravuje jeden agregát, dirty checking zpracovává celou Identity Map a celkový čas zpracování
+– funguje pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
+hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní. Každý cyklus načítá
+a spravuje jeden agregát, dirty checking zpracovává celou Identity Map. Celkový čas zpracování
 roste lineárně s počtem záznamů.
 
 ### DQL bulk UPDATE a DELETE – bypass Identity Map
 
 Pro hromadné aktualizace, kde není potřeba procházet doménovou logiku, nabízí Doctrine možnost
-provést `UPDATE` nebo `DELETE` přímo přes DQL. Tyto operace zcela obcházejí
+provést `UPDATE` nebo `DELETE` přímo přes DQL. Tyto operace obcházejí
 Identity Map a Unit of Work – jsou to přímé SQL příkazy přeložené z DQL. **Nevýhoda:**
 po DQL bulk operaci mohou být spravované entity v Identity Map nekonzistentní se stavem v databázi.
 Je nutné zavolat `clear()`.
@@ -936,9 +936,9 @@ final class BatchProductImportHandler
 ### Symfony Messenger pro asynchronní hromadné zpracování
 
 Namísto synchronního zpracování tisíců záznamů v jednom PHP procesu je doporučeným přístupem
-rozdělení práce na menší úlohy zasílané přes Symfony Messenger na asynchronní transport
-(RabbitMQ, Redis Streams, Amazon SQS). Každá zpráva zpracuje jeden nebo malý batch agregátů,
-čímž jsou paměťové nároky a doba zpracování jedné zprávy předvídatelné.
+rozdělit práci na menší úlohy zasílané přes Symfony Messenger na asynchronní transport
+(RabbitMQ, Redis Streams, Amazon SQS). Každá zpráva zpracuje jeden nebo malý batch agregátů.
+Paměťové nároky a doba zpracování jedné zprávy jsou pak předvídatelné.
 
 :::callout{type="pattern"}
 ### Rozložení bulk importu přes Symfony Messenger
@@ -977,8 +977,7 @@ final class StartProductImportHandler
 ## 17.09 Profiling DDD aplikací {#profiling}
 
 Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
-ekosystému existuje škála nástrojů od jednoduchého development profileru až po pokročilé
-produkční profiling nástroje.
+ekosystému existuje škála nástrojů od development profileru až po produkční profiling nástroje.
 
 ### Symfony Profiler (Web Debug Toolbar)
 
@@ -1092,7 +1091,7 @@ final class QueryCountingMiddleware implements Middleware
 Pro profiling v produkčním nebo stage prostředí je Blackfire.io standardním nástrojem v PHP komunitě.
 Blackfire zachytí kompletní call graph každého requestu nebo CLI příkazu – s přesným měřením
 doby trvání, počtu volání a paměťové stopy pro každou funkci. Umožňuje psát *performance tests*
-(Blackfire Builds) jako součást CI/CD pipeline, čímž zabraňuje výkonnostním regresím.
+(Blackfire Builds) jako součást CI/CD pipeline a tím předcházet výkonnostním regresím.
 
 :::callout{type="pattern"}
 ### Interpretace SQL dotazů v Symfony Profileru – praktický postup
@@ -1108,7 +1107,7 @@ doby trvání, počtu volání a paměťové stopy pro každou funkci. Umožňuj
 ### Varování: neprovádějte předčasnou optimalizaci
 
 Optimalizujte **pouze** na základě naměřených dat. Každá optimalizace – přidání cache,
-přepsání DQL na nativní SQL, rozdělení agregátu – zvyšuje komplexitu kódu a ztěžuje budoucí
+přepsání DQL na nativní SQL, rozdělení agregátu – zvyšuje složitost kódu a ztěžuje budoucí
 údržbu. Pokud profiler ukazuje, že daný kód nezpůsobuje výkonnostní problém, ponechte jej
 v čitelné, doménově srozumitelné podobě. Výkonnostní optimalizace bez měření je prací naslepo
 a pravidelně vede k regresi v jiných částech systému.
@@ -1116,19 +1115,19 @@ a pravidelně vede k regresi v jiných částech systému.
 
 Výkon v DDD se řeší na třech úrovních: hranice agregátů, read model a profiling. Hlavním nástrojem je
 oddělení read a write modelu přes CQRS, eliminace N+1 problémů a správně zvolené hranice
-agregátů. Vhodným pokračováním je kapitola
+agregátů. Pokračováním je kapitola
 [CQRS v Symfony 8](/cqrs) a
 [praktické příklady implementace DDD](/prakticke-priklady).
 
 :::faq{}
 - question: Zpomaluje DDD aplikaci oproti CRUD?
-  answer: 'Samotné DDD výkon nesnižuje – doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte se víc dat, než je třeba), chybí optimalizovaný read model v CQRS nebo se nesprávně používá Doctrine lazy loading, což vede k N+1 dotazům. Při správném návrhu je DDD aplikace srovnatelná s CRUD a lépe optimalizovatelná díky explicitním hranicím. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
+  answer: 'Samotné DDD výkon nesnižuje – doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte víc dat, než je třeba). Další příčinou je chybějící read model v CQRS nebo nesprávné použití Doctrine lazy loadingu, které vede k N+1 dotazům. Při správném návrhu je DDD aplikace srovnatelná s CRUD a lépe optimalizovatelná díky explicitním hranicím. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
 - question: Jak v DDD řešit N+1 problém s agregáty?
   answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch="EAGER"</code> u mapování, <code>fetchJoin()</code> v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
   answer: 'Ano, zásadně. Příliš velký agregát vede k načítání desítek vnitřních entit při každé operaci a k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty – to zvyšuje paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?
-  answer: 'Read model se navrhuje přímo pro daný dotaz – denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou: dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem, nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
+  answer: 'Read model se navrhuje přímo pro daný dotaz – denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
 - question: Je lepší UUID, nebo integer primární klíč z pohledu výkonu?
-  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což je v DDD ideální – agregát dostane ID před persistencí. Výkonový rozdíl je v řádu jednotek procent a v praxi je pohlcen vyšší přehledností doménového kódu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
+  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což DDD vyžaduje – agregát dostane ID před persistencí. Výkonový rozdíl je v řádu jednotek procent a v praxi je pohlcen vyšší přehledností doménového kódu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
 :::
