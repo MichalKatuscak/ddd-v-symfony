@@ -167,22 +167,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/context-mapping', name: 'context_mapping')]
-    public function contextMapping(): Response
-    {
-        return $this->render('ddd/context_mapping.html.twig', [
-            'title' => 'Context Mapping – vztahy mezi Bounded Contexts',
-        ]);
-    }
-
-    #[Route('/architektonicke-styly', name: 'architectural_styles')]
-    public function architecturalStyles(): Response
-    {
-        return $this->render('ddd/architectural_styles.html.twig', [
-            'title' => 'Architektonické styly: Hexagonal, Onion, Clean',
-        ]);
-    }
-
     #[Route('/outbox-pattern', name: 'outbox_pattern')]
     public function outboxPattern(): Response
     {
