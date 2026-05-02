@@ -151,14 +151,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/anti-vzory', name: 'anti_patterns')]
-    public function antiPatterns(): Response
-    {
-        return $this->render('ddd/anti_patterns.html.twig', [
-            'title' => 'Anti-vzory a typické chyby v DDD',
-        ]);
-    }
-
     #[Route('/glosar', name: 'glossary')]
     public function glossary(): Response
     {
@@ -220,14 +212,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/authorization_in_ddd.html.twig', [
             'title' => 'Autorizace v DDD na Symfony',
-        ]);
-    }
-
-    #[Route('/ddd-a-microservices', name: 'microservices_and_ddd')]
-    public function microservicesAndDdd(): Response
-    {
-        return $this->render('ddd/microservices_and_ddd.html.twig', [
-            'title' => 'DDD a microservices – Bounded Context jako service boundary',
         ]);
     }
 
