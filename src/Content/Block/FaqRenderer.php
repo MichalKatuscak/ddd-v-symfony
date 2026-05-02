@@ -14,7 +14,10 @@ final readonly class FaqRenderer
     public function render(string $attrs, string $body): string
     {
         $parsed = $this->parseAttrs($attrs);
-        $items = Yaml::parse(trim($body));
+        $items = Yaml::parse(trim($body)) ?? [];
+        if (!is_array($items)) {
+            throw new \InvalidArgumentException('FaqRenderer: body must be a YAML sequence of {question, answer} items.');
+        }
 
         $params = ['items' => $items];
         if (!empty($parsed['heading'])) {
