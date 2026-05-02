@@ -135,14 +135,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/event-sourcing', name: 'event_sourcing')]
-    public function eventSourcing(): Response
-    {
-        return $this->render('ddd/event_sourcing.html.twig', [
-            'title' => 'Event Sourcing v DDD a Symfony',
-        ]);
-    }
-
     #[Route('/sagy-a-process-managery', name: 'sagas')]
     public function sagas(): Response
     {
