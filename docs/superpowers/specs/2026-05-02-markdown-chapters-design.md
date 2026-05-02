@@ -98,14 +98,15 @@ Generuje identický HTML jako `_partials/code_block.html.twig`.
 ### FAQ
 
 ```markdown
-:::faq
-**Otázka: Kdy použít DDD?**
-Odpověď...
-
-**Otázka: Co je Aggregate?**
-Odpověď...
+:::faq{heading="Časté otázky"}
+- question: Kdy použít DDD?
+  answer: Odpověď...
+- question: Co je Aggregate?
+  answer: Odpověď...
 :::
 ```
+
+Vnitřní obsah se parsuje jako YAML list. Extension generuje identický HTML jako `_partials/faq.html.twig` včetně `FAQPage` JSON-LD schema.
 
 ### Nadpisy se sekcemi
 
@@ -135,7 +136,7 @@ GET /co-je-ddd
 - `{% block structured_data %}` — JSON-LD (identický s dnešním)
 - `{% block breadcrumb_name %}`
 - parametry pro `_partials/article_head.html.twig`
-- parametry pro `_partials/article_toc.html.twig`
+- `_partials/article_toc.html.twig` (bez parametrů — JavaScript ho plní z `<h2>` v `.art-body`)
 
 ## RouteLoader
 
