@@ -89,7 +89,7 @@
 
             <p>
                 Existuje rozšířený slogan, který v různých variantách koluje v komunitě DDD a microservices:
-                <em>„Each microservice should be one Bounded Context.“</em> Slogan zní logicky a má i historické opodstatnění
+                <em>„Each microservice should be one Bounded Context.“</em> Slogan má zdánlivou logiku a historické opodstatnění
                 – DDD definuje hranici modelu a microservices definuje hranici nasazení; přirozeným zjednodušením je obojí
                 ztotožnit. Praxe ale tento závěr nepotvrzuje. Slogan je <strong>polopravda</strong>, která vede k chybným
                 architektonickým rozhodnutím častěji než ke správným.
@@ -776,7 +776,7 @@ return static function (Config $config): void {
                 Jakmile doménový proces překročí hranici jednoho Bounded Contextu (a v microservices architektuře tedy
                 hranici jedné service), musíte řešit otázku <strong>konzistence napříč servisami</strong>. ACID
                 transakce, na kterou jste zvyklí v jedné databázi, v distribuovaném prostředí přestává platit. Klasickou
-                odpovědí kdysi býval <em>Two-Phase Commit</em> (2PC, XA transactions). V moderní microservices
+                odpovědí kdysi býval <em>Two-Phase Commit</em> (2PC, XA transactions). V microservices
                 architektuře je 2PC <strong>prakticky nepoužitelný</strong>.
             </p>
 
@@ -1318,7 +1318,7 @@ final readonly class OrderPlacedReceivedHandler
                 Tato sekce je pro týmy, které dnes mají monolit a uvažují, kam dál. Většinu reálných systémů
                 nepostavíte jako microservices na zelené louce. Postavíte je jako monolit, ten doroste do bolesti,
                 a pak se zeptáte, kterou část máte rozdělit. Mottem sekce je heslo Sama Newmana z <em>Building
-                Microservices, 2nd ed.</em>: <strong>„don't do a big-bang rewrite”</strong>. Velká přepisovací
+                Microservices, 2nd ed.</em>: <strong>„don't do a big-bang rewrite“</strong>. Velká přepisovací
                 migrace v 9 z 10 případů selže.
             </p>
 
@@ -1546,7 +1546,7 @@ final readonly class OrderPlacedReceivedHandler
                 <li>
                     <strong>Distributed monolith je horší než monolith</strong> – sdílená DB, synchronní volání všude,
                     coupled deploy, sdílená library s doménovými typy. Pět příznaků, dva a víc znamená, že máte
-                    distributed monolith. Nejdražší architektonická chyba v moderním vývoji.
+                    distributed monolith. Nejdražší architektonická chyba v microservices architektuře.
                 </li>
                 <li>
                     <strong>Sync vs. async – async-first</strong> – sync jen pro queries v request flow a pro blokující
@@ -1554,7 +1554,7 @@ final readonly class OrderPlacedReceivedHandler
                     microservices.
                 </li>
                 <li>
-                    <strong>Distribuované transakce – saga, ne 2PC</strong> – 2PC nepoužitelné v moderním stacku.
+                    <strong>Distribuované transakce – saga, ne 2PC</strong> – 2PC nepoužitelné v microservices stacku.
                     Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace.
                     Detail v <a href="{{ path('sagas') }}">kapitole 15</a>.
                 </li>

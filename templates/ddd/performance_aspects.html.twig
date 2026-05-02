@@ -1019,9 +1019,9 @@ final class CachedUserRepository implements UserRepository
 
     <h3>Cache invalidace při doménových událostech</h3>
     <p>
-        Elegantním přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Když agregát
+        Účinným přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Když agregát
         změní stav (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
-        Tím se cache invalidace stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
+        Cache invalidace se tím stane součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
     </p>
 
     {% set _callout_body %}

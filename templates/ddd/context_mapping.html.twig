@@ -351,7 +351,7 @@ composer.json        ← jeden composer.json pro oba BC{% endverbatim %}{% endse
                 Když se týmy rozhodnou pro Partnership, <strong>aniž by si tu otázku položily</strong>
                 – typicky proto, že „nemáme čas se domluvit, takže to budeme dělat dohromady“ –
                 vede to přímo k <em>Big Ball of Mud</em>. Agregáty jednoho BC začnou číst tabulky
-                druhého „protože je to rychlejší”. Doménové eventy ustoupí sdíleným service třídám.
+                druhého „protože je to rychlejší“. Doménové eventy ustoupí sdíleným service třídám.
                 Po roce nikdo nedokáže říct, kde přesně končí Catalog a začíná Pricing.
             </p>
 
@@ -1613,10 +1613,10 @@ final class OrderPlacedValidator
             <h3>Cesta ven</h3>
 
             <p>
-                Big Ball of Mud se nedá „opravit” rewriteem. Jediný funkční postup je
+                Big Ball of Mud se nedá „opravit“ rewriteem. Jediný funkční postup je
                 <strong>Strangler Fig</strong>: postupně vyčleňovat čisté BC, každý obklopit ACL
                 a přesouvat funkčnost ze staré spaghetti vrstvy do nového čistého modelu.
-                Detail viz <a href=”{{ path('migration_from_crud') }}”>Migrace z CRUD do DDD</a>.
+                Detail viz <a href="{{ path('migration_from_crud') }}">Migrace z CRUD do DDD</a>.
             </p>
 
             <p>

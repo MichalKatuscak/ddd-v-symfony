@@ -227,7 +227,7 @@
         <ul>
             <li><strong>Konkurence.</strong> Větší agregát = větší zámek = více konfliktů mezi uživateli.
                 Pokud <code>Project</code> drží všechny <code>Task</code>y, dvě paralelní úpravy úkolů
-                si konkurují, i když logicky nesouvisejí. V e-shopovém kontextu má jeden zákazník typicky
+                si konkurují, i když spolu věcně nesouvisejí. V e-shopovém kontextu má jeden zákazník typicky
                 jednu objednávku v rozpracovaném stavu, takže <code>Order</code> jako agregát s desítkami
                 <code>OrderItem</code> je v pořádku. Naproti tomu <code>Project</code> s tisícem
                 <code>Task</code> dává každému členovi týmu šanci na konflikt s každým jiným.</li>
@@ -282,7 +282,7 @@
             <li>Helland v <em>Life Beyond Distributed Transactions</em>
                 <a href="https://queue.acm.org/detail.cfm?id=3025012" target="_blank" rel="noopener">[5]</a>
                 ukazuje, že distributed transactions (XA, two-phase commit) v praxi nefungují udržitelně –
-                jediný udržitelný přístup je „one entity per transaction”, což je přesně Vernonovo pravidlo.</li>
+                jediný udržitelný přístup je „one entity per transaction“, což je přesně Vernonovo pravidlo.</li>
         </ul>
 
         <p>
@@ -907,7 +907,7 @@ doctrine:
 
         <ul>
             <li><strong>Filtr na tabulkové úrovni.</strong> Doctrine <code>SQLFilter</code> vynucuje
-                <code>tenant_id = :current_tenant</code> v každém dotazu. Bezpečné, ale snadno se obejde
+                <code>tenant_id = :current_tenant</code> v každém dotazu. Bezpečné, ale lze obejít
                 native SQL.</li>
             <li><strong>Schema per tenant.</strong> Každý tenant má vlastní DB schema. Bezpečnější,
                 ale operace přes tenanty (např. agregátní reporty) vyžadují cross-schema dotazy.</li>

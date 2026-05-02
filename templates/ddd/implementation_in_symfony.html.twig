@@ -110,7 +110,7 @@
 <section id="project-structure" aria-labelledby="project-structure-heading">
     <h2 id="project-structure-heading" class="h-section"><span class="h-num">11.02</span> Struktura projektu</h2>
     <p>
-        Při implementaci DDD s vertikální slice architekturou v Symfony 8 je struktura projektu klíčovým rozhodnutím. Respektuje principy DDD a zejména koncept Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
+        Při implementaci DDD s vertikální slice architekturou v Symfony 8 se struktura projektu organizuje podle Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
     </p>
 
     {% set _callout_body %}
@@ -206,7 +206,7 @@
             } %}
 
     <p>
-        Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Domény jsou tak izolované a principy DDD jsou respektovány.
+        Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Závislosti mezi kontexty procházejí výhradně přes Application vrstvu nebo události – nikdy přes přímý import doménových tříd cizího kontextu.
     </p>
 
     {% set _diagram_inline %}{% include '/diagrams/3_implementation_in_symfony/diagram.svg' %}{% endset %}
@@ -976,7 +976,7 @@ final class Order
 
         <h3>Doctrine a PHP enums</h3>
         <p>
-            Doctrine ORM 2.19+ a 3.x nativně podporují PHP enums. Při použití XML mapování stačí u pole uvést <code>type="string"</code> a <code>enumType="App\OrderManagement\Domain\ValueObject\OrderStatus"</code>.
+            Doctrine ORM 2.11+ a 3.x nativně podporují PHP enums. Při použití XML mapování stačí u pole uvést <code>type="string"</code> a <code>enumType="App\OrderManagement\Domain\ValueObject\OrderStatus"</code>.
             Doctrine automaticky konvertuje hodnotu mezi PHP enum a databázovým sloupcem. Pro backed enums se ukládá backing value (<code>string</code> nebo <code>int</code>).
         </p>
     {% endset %}
@@ -1664,9 +1664,8 @@ services:
             } %}
 
     <p>
-        V tomto příkladu je konfigurace služeb v Symfony 8. Služby jsou automaticky registrovány a autowired.
-        Repozitáře jsou explicitně konfigurovány, aby bylo možné použít rozhraní místo konkrétních implementací.
-        Messenger komponenta je konfigurována pro implementaci CQRS.
+        Repozitáře jsou explicitně konfigurovány, aby Symfony DI Container bindoval rozhraní na konkrétní implementaci.
+        Doménové modely, hodnotové objekty a události jsou z auto-registrace vyloučeny – nejsou to služby, ale data.
     </p>
 
     <h3 id="autowiring-bounded-contexts">Autowiring s oddělenými Bounded Contexts</h3>

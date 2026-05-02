@@ -118,7 +118,7 @@
         <a href="{{ path('event_sourcing') }}#outbox">Outbox</a> + <a href="{{ path('sagas') }}">Sagu</a>),
         zavolejte explicitně
         <code>beginTransaction()</code> / <code>commit()</code> v Application Service
-        a oba repozitáře volejte v rámci téže transakce. Toto je <strong>přijatelná výjimka
+        a oba repozitáře volejte v téže transakci. Toto je <strong>přijatelná výjimka
         z pravidla jeden agregát = jedna transakce</strong> za předpokladu, že oba agregáty
         leží ve stejném Bounded Context a stejné databázi.
     </p>
@@ -1717,7 +1717,7 @@ final class OrderVoter extends Voter
             },
             {
                 question: 'Jak udržet Ubiquitous Language, aby časem neutrpěl drift?',
-                answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice“, zákazník říká „faktura“. Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová feature zavádí pojem, který doménový expert nezná – v ten moment je třeba buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
+                answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice“, zákazník říká „faktura“. Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová feature zavádí pojem, který doménový expert nezná – v ten moment je nutné buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
             },
             {
                 question: 'Jak přežít paralelní existenci staré CRUD části a nové DDD vrstvy?',

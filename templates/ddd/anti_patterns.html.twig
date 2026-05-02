@@ -65,7 +65,7 @@
 <section id="uvodem" aria-labelledby="uvodem-heading">
             <h2 id="uvodem-heading" class="h-section"><span class="h-num">22.01</span> Úvodem: Proč je důležité znát anti-vzory</h2>
             <p>
-                Domain-Driven Design přináší při návrhu softwaru velkou sílu, ale jeho komplexnost s sebou nese
+                Domain-Driven Design při návrhu softwaru přináší strukturu a vyjadřovací sílu, ale jeho komplexnost s sebou nese
                 mnohá úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí
                 na stejné chyby – i přesto, že teorii dobře rozumí. Znát anti-vzory je proto stejně důležité
                 jako znát vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt,
@@ -1429,11 +1429,11 @@ class UserController extends AbstractController
 
             {% set _callout_body %}
 
-                <h3 id="overeng-warning-heading">Začněte jednoduše, složitost přidávejte podle potřeby</h3>
+                <h3 id="overeng-warning-heading">Začněte minimálně, složitost přidávejte podle potřeby</h3>
                 <p>
-                    Začněte s jednoduchým přístupem – aktivní záznamy, jednoduché service třídy nebo MVC bez DDD.
+                    Začněte s minimálním přístupem – aktivní záznamy, service třídy nebo MVC bez DDD.
                     DDD prvky přidávejte inkrementálně, jakmile se doménová složitost začne projevovat. Refaktoring
-                    od jednoduchého ke složitějšímu je mnohem méně nákladný než odstraňování zbytečné složitosti
+                    od menšího ke složitějšímu je mnohem méně nákladný než odstraňování zbytečné složitosti
                     z přenavržené architektury.
                 </p>
                 <p>
@@ -1667,7 +1667,7 @@ class InsurancePolicy
                 },
                 {
                     question: 'Jak poznat, že je agregát příliš velký?',
-                    answer: 'Typické příznaky God Aggregate jsou: agregát obsahuje desítky vnitřních entit, jeho načtení zabere stovky SQL dotazů, nebo souběžné operace nad různými částmi narážejí na optimistické zamykání. Pokud dvě metody agregátu řeší zcela nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Praktický příklad refaktoringu v <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
+                    answer: 'Typické příznaky God Aggregate jsou: agregát obsahuje desítky vnitřních entit, jeho načtení zabere stovky SQL dotazů, nebo souběžné operace nad různými částmi narážejí na optimistické zamykání. Pokud dvě metody agregátu řeší vzájemně nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Praktický příklad refaktoringu v <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
                 },
                 {
                     question: 'Proč je sdílená databáze mezi Bounded Contexts problém?',

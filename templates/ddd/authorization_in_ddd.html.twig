@@ -66,7 +66,7 @@
         <p>
             Autorizace je v DDD aplikacích dlouhodobě podceněné téma. Většina týmů zvládne autentizaci
             (Symfony firewall, JWT, OAuth) bez větších potíží. Jenže jakmile přijde otázka <em>„kdo
-            smí udělat co s konkrétní entitou v konkrétním stavu”</em>, kód se rozsype napříč
+            smí udělat co s konkrétní entitou v konkrétním stavu“</em>, kód se rozsype napříč
             controllery, listenery, twig templaty a Doctrine query buildery. Tato kapitola dává
             <strong>čtyřvrstvý rámec</strong>, podle kterého poznáte, kam které pravidlo patří
             a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby Symfony Security
@@ -847,7 +847,7 @@ final readonly class OrderDetailReadModel
             </div>
 
             <p>
-                Pro necitlivá data je Twig if zcela dostatečný a šetří čas. Pro citlivá data
+                Pro necitlivá data Twig if stačí a šetří čas. Pro citlivá data
                 vždy query filter – OWASP Top 10 v kategorii „A01 Broken Access Control“ výslovně
                 varuje před UI-only kontrolou jako jedinou bariérou.
             </p>
@@ -1379,7 +1379,7 @@ final class CancelOrderPolicyTest extends TestCase
             <p>
                 Tabulkový test má dvě hodnoty navíc oproti klasickému test-per-method přístupu:
                 přidání pravidla = přidání jednoho řádku v <code>scenarios()</code>; a celý
-                test sloužit jako <em>spustitelná dokumentace policy</em> – netechnický reviewer
+                test slouží jako <em>spustitelná dokumentace policy</em> – netechnický reviewer
                 vidí všechny případy v jedné tabulce a může schválit doménová pravidla.
             </p>
         </section>

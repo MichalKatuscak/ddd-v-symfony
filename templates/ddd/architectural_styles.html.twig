@@ -1147,7 +1147,7 @@ final class PlaceOrderController
                     <li>Symfony Messenger Bus ≈ „interactor“ routing v Clean</li>
                 </ul>
                 <p>
-                    V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte tedy Clean Architecture „zadarmo“ – stačí Use Case přejmenovat na <code>*Handler</code> a Request na <code>*Command</code>. Mnoho moderních DDD projektů funguje jako kombinace <em>Hexagonal + CQRS + Clean Use Cases</em> v jednom hybridním stylu.
+                    V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte tedy Clean Architecture „zadarmo“ – stačí Use Case přejmenovat na <code>*Handler</code> a Request na <code>*Command</code>. Řada DDD projektů funguje jako kombinace <em>Hexagonal + CQRS + Clean Use Cases</em> v jednom hybridním stylu.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1220,7 +1220,7 @@ final class PlaceOrderController
             </p>
 
             <p>
-                Kombinace <strong>Hexagonal + Vertical Slice</strong> bývá rozšířenou výchozí volbou v moderních Symfony projektech. Bounded Context má sdílený doménový model (agregáty, value objekty, repository interfaces), ale aplikační vrstva je rozdělená do feature slice. Každý slice má svůj Command/Handler (nebo Query/Handler) a svůj HTTP Controller. Tato kombinace dává nejlepší poměr testovatelnosti, organizace a srozumitelnosti pro tým.
+                Kombinace <strong>Hexagonal + Vertical Slice</strong> je v současných Symfony projektech rozšířenou výchozí volbou. Bounded Context má sdílený doménový model (agregáty, value objekty, repository interfaces), ale aplikační vrstva je rozdělená do feature slice. Každý slice má svůj Command/Handler (nebo Query/Handler) a svůj HTTP Controller. Tato kombinace dává nejlepší poměr testovatelnosti, organizace a srozumitelnosti pro tým.
             </p>
         </section>
 
@@ -1345,7 +1345,7 @@ final class PlaceOrderController
             </ul>
 
             <p>
-                Tato volba není univerzální pravda. Pokud váš projekt má 20 endpointů a jde o interní administrativní aplikaci s desetiletým horizontem, obyčejná Layered struktura ze Symfony skeletu je naprosto v pořádku a pravděpodobně rychlejší k iteraci. Pokud je váš projekt enterprise CRM s 500+ use casy a 15 vývojáři, Clean Architecture s explicitním Use Case katalogem se vyplatí.
+                Tato volba není univerzální pravda. Pokud váš projekt má 20 endpointů a jde o interní administrativní aplikaci s desetiletým horizontem, obyčejná Layered struktura ze Symfony skeletu je plně dostačující a pravděpodobně rychlejší k iteraci. Pokud je váš projekt enterprise CRM s 500+ use casy a 15 vývojáři, Clean Architecture s explicitním Use Case katalogem se vyplatí.
             </p>
 
             {% set _callout_body %}
@@ -1461,7 +1461,7 @@ final class PlaceOrderController
                     Vaughn Vernon v <em>Implementing Domain-Driven Design</em> (2013) <a href="https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577" target="_blank" rel="noopener">[7]</a> nazývá tento vzor <em>differentiated investment</em>: 80 % modelovací investice teče do 20 % kódové báze (Core Domain). Zbylých 80 % kódu si vystačí s pragmatickou strukturou. To přímo odpovídá Pareto principu a v praxi vede k nejlepšímu poměru kvalita / čas.
                 </p>
                 <p>
-                    Hybridní přístup je tedy nejen pragmatický, ale i <strong>doporučený</strong> autoritami DDD literatury. Tlak na „jednotnou architekturu všude” jde proti tomuto principu – ne každá část projektu si zaslouží stejnou investici.
+                    Hybridní přístup je tedy nejen pragmatický, ale i <strong>doporučený</strong> autoritami DDD literatury. Tlak na „jednotnou architekturu všude“ jde proti tomuto principu – ne každá část projektu si zaslouží stejnou investici.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -1534,7 +1534,7 @@ final class PlaceOrderController
             <h3 id="anti-6-heading">Anti-vzor 6: Architecture astronaut (astronaut architektury)</h3>
 
             <p>
-                Tým investuje měsíce do „dokonalé architektury” – osmivrstvová Clean s explicitními BCE rolemi, formálními use case katalogy, presenter třídami, gateway hierarchiemi… ale koncový uživatel pořád čeká na první funkci. Architektura se stala cílem, ne nástrojem.
+                Tým investuje měsíce do „dokonalé architektury“ – osmivrstvová Clean s explicitními BCE rolemi, formálními use case katalogy, presenter třídami, gateway hierarchiemi… ale koncový uživatel pořád čeká na první funkci. Architektura se stala cílem, ne nástrojem.
             </p>
 
             <p>
@@ -1650,7 +1650,7 @@ framework:
                     <strong>Čtyři vrstvové styly mají stejnou základní myšlenku – izolaci domény – ale jiný slovník a jinou granularitu.</strong> Hexagonal mluví o portech a adaptérech, Onion o koncentrických vrstvách, Clean o use casech jako prvotřídním konceptu. V praxi se často kombinují do jednoho hybridního stylu.
                 </li>
                 <li>
-                    <strong>Vertical Slice je ortogonální k vrstvovým stylům.</strong> Popisuje, jak organizovat feature mezi sebou, ne jak strukturovat závislosti uvnitř feature. Hexagonal + Vertical Slice + CQRS je rozšířená výchozí volba v moderních Symfony 8 projektech.
+                    <strong>Vertical Slice je ortogonální k vrstvovým stylům.</strong> Popisuje, jak organizovat feature mezi sebou, ne jak strukturovat závislosti uvnitř feature. Hexagonal + Vertical Slice + CQRS je rozšířená výchozí volba v Symfony 8 projektech.
                 </li>
                 <li>
                     <strong>Hybridní přístup (různé styly pro různé subdomény) je nejen pragmatický, ale i doporučený autoritami DDD literatury.</strong> Investujte modelovací úsilí do Core Domain; Supporting a Generic si vystačí s jednodušší strukturou. Architektura je investice, ne dekorace.

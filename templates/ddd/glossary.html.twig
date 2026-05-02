@@ -441,7 +441,7 @@
                             přímou referencí na vnitřní entity. Agregát definuje transakční hranici:
                             v jedné transakci se smí modifikovat maximálně jeden agregát. Správné
                             dimenzování agregátů je jedním z nejtěžších aspektů DDD – příliš velké agregáty
-                            vedou k výkonostním problémům, příliš malé ke slabé doménové konzistenci.
+                            vedou k výkonnostním problémům, příliš malé ke slabé doménové konzistenci.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 6, str. 125–136; Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 10</p>
                         <p class="term-related">Viz také: <a href="#term-koren-agregatu">Kořen agregátu</a>, <a href="#term-invariant">Invariant</a>, <a href="#term-repozitar">Repozitář</a></p>
@@ -912,7 +912,7 @@
                 <p>
                     Integrační vzory a pojmy popisují, jak spolu různé části systému komunikují, jak se udržuje
                     konzistence v distribuovaném prostředí a jak se předcházejí souběžnostním konfliktům.
-                    Zahrnují také důležité anti-vzory – běžné chyby v modelování domény, na které je třeba
+                    Zahrnují také anti-vzory – běžné chyby v modelování domény, na které je třeba
                     dávat pozor. Bez porozumění těmto pojmům se systémy, které musí správně fungovat
                     při souběžném přístupu nebo dočasné nedostupnosti komponent, navrhují obtížně.
                 </p>
@@ -928,7 +928,7 @@
                     <dd>
                         <p>
                             Model konzistence, v němž repliky dat konvergují ke stejné hodnotě,
-                            pokud nejsou prováděny žádné další aktualizace – avšak ne nutně okamžitě.
+                            pokud neprobíhají žádné další aktualizace – avšak ne nutně okamžitě.
                             V architektuře DDD + CQRS: po zpracování příkazu a publikování události může
                             čtecí model dočasně zaostávat za zápisovým modelem. Toto zpoždění je akceptovatelné
                             a musí být komunikováno s byznysem – stakeholdeři musí rozumět, že „čerstvost“

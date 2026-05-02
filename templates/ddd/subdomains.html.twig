@@ -67,15 +67,15 @@
             <h2 id="proc-subdomeny-heading" class="h-section"><span class="h-num">02.01</span> Proč subdomény předcházejí všemu ostatnímu</h2>
 
             <p>
-                Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a v naprosté většině produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování – naopak, pokus modelovat <em>všechno</em> stejně pečlivě je jednou z nejspolehlivějších cest, jak vyčerpat rozpočet ještě dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Evans v <em>Domain-Driven Design</em> (2003), kapitola 15 „Distillation”, zavádí strategický filtr pro celou doménu. Než napíšete první Aggregate nebo Value Object, odpovězte si: <strong>která část domény je vaše konkurenční výhoda, která nutné zlo a kterou nedává smysl vůbec psát</strong>. Tomuto filtru se říká rozdělení domény na <strong>Core</strong>, <strong>Supporting</strong> a <strong>Generic</strong> subdomény <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
+                Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a v naprosté většině produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování – naopak, pokus modelovat <em>všechno</em> stejně pečlivě je jednou z nejspolehlivějších cest, jak vyčerpat rozpočet ještě dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Evans v <em>Domain-Driven Design</em> (2003), kapitola 15 „Distillation“, zavádí strategický filtr pro celou doménu. Než napíšete první Aggregate nebo Value Object, odpovězte si: <strong>která část domény je vaše konkurenční výhoda, která nutné zlo a kterou nedává smysl vůbec psát</strong>. Tomuto filtru se říká rozdělení domény na <strong>Core</strong>, <strong>Supporting</strong> a <strong>Generic</strong> subdomény <a href="https://www.domainlanguage.com/ddd/" target="_blank" rel="noopener">[1]</a>.
             </p>
 
             <p>
-                Subdoména není totéž co <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Context</a>, ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je <em>implementační</em> hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jedním deployment artefaktem. Subdoména je naproti tomu <em>byznysová</em> hranice – kus problému, který se v organizaci řeší jako jedna ucelená kapitola. Vztah mezi nimi není 1:1. Jedna subdoména („Pricing”) může být rozdělena do více BC – Catalog počítá indikativní cenu, Checkout závaznou cenu se slevami. Naopak jeden BC může pokrývat více malých subdomén, například Backoffice zpravidla sdruží kousky reportingu, fakturace i správy uživatelů.
+                Subdoména není totéž co <a href="{{ path('basic_concepts') }}#bounded-contexts">Bounded Context</a>, ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je <em>implementační</em> hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jedním deployment artefaktem. Subdoména je naproti tomu <em>byznysová</em> hranice – kus problému, který se v organizaci řeší jako jedna ucelená kapitola. Vztah mezi nimi není 1:1. Jedna subdoména („Pricing“) může být rozdělena do více BC – Catalog počítá indikativní cenu, Checkout závaznou cenu se slevami. Naopak jeden BC může pokrývat více malých subdomén, například Backoffice zpravidla sdruží kousky reportingu, fakturace i správy uživatelů.
             </p>
 
             <p>
-                Vernon to v kapitole 2 <em>Implementing Domain-Driven Design</em> (2013) formuluje pragmaticky <a href=”https://kalele.io/books/” target=”_blank” rel=”noopener”>[2]</a>: <em>doména</em> je celý problémový prostor organizace; <em>subdoména</em> je jeho logická část; <em>Bounded Context</em> je řešení, které pro ni navrhujete. Vlad Khononov v <em>Learning Domain-Driven Design</em> (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“, k tomu doplňuje, že <strong>klasifikace subdomén je první nástroj, který v DDD máte k dispozici, a zároveň ten nejlevnější – stojí jediný workshop a změní distribuci milionů korun rozpočtu</strong> <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a>.
+                Vernon to v kapitole 2 <em>Implementing Domain-Driven Design</em> (2013) formuluje pragmaticky <a href="https://kalele.io/books/" target="_blank" rel="noopener">[2]</a>: <em>doména</em> je celý problémový prostor organizace; <em>subdoména</em> je jeho logická část; <em>Bounded Context</em> je řešení, které pro ni navrhujete. Vlad Khononov v <em>Learning Domain-Driven Design</em> (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“, k tomu doplňuje, že <strong>klasifikace subdomén je první nástroj, který v DDD máte k dispozici, a zároveň ten nejlevnější – stojí jediný workshop a změní distribuci milionů korun rozpočtu</strong> <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a>.
             </p>
 
             <p>
@@ -115,7 +115,7 @@
                         Část domény, která tvoří <strong>konkurenční výhodu organizace</strong> – to, kvůli čemu zákazníci platí právě vám a ne někomu jinému. Test: <em>„pokud z toho zítra ustoupíme, ztratíme zákazníky.“</em> Nebo formulováno opačně: pokud byste si stejnou funkcionalitu mohli stejně levně koupit od dodavatele, není to Core, je to Generic.
                     </p>
                     <p>
-                        Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíce automatizovaných testů, nejvíce code review a nejvíce diskusí s doménovými experty. Khononov uvádí tři příklady <a href=”https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/” target=”_blank” rel=”noopener”>[3]</a>: algoritmus dynamického ratingu Uberu, fulfillment optimalizaci Amazonu, doporučovací systém Spotify. Každý z nich je pro svou firmu Core – to, čím se liší od trhu.
+                        Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíce automatizovaných testů, nejvíce code review a nejvíce diskusí s doménovými experty. Khononov uvádí tři příklady <a href="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/" target="_blank" rel="noopener">[3]</a>: algoritmus dynamického ratingu Uberu, fulfillment optimalizaci Amazonu, doporučovací systém Spotify. Každý z nich je pro svou firmu Core – to, čím se liší od trhu.
                     </p>
                 </dd>
 
@@ -267,7 +267,7 @@
             <h2 id="vsechno-core-antipattern-heading" class="h-section"><span class="h-num">02.04</span> Anti-vzor: „všechno je Core“</h2>
 
             <p>
-                Nejčastější chyba ve strategickém DDD se nejmenuje „špatně navržený Aggregate“, ale <strong>„všechno je Core“</strong>. Týmy mají k této chybě silný psychologický sklon. Každý vývojář, kterého se zeptáte, zda je jeho oblast strategická, řekne ANO. Důvody: ego, kariérní obavy z „nedůležité” oblasti a obecná tendence přeceňovat vlastní práci. Brandolini tomu říká <em>„hero syndrome“</em>: každá funkcionalita má svého hrdinu, který ji obhajuje jako nezbytnou pro firmu <a href="https://www.eventstorming.com/" target="_blank" rel="noopener">[4]</a>.
+                Nejčastější chyba ve strategickém DDD se nejmenuje „špatně navržený Aggregate“, ale <strong>„všechno je Core“</strong>. Týmy mají k této chybě silný psychologický sklon. Každý vývojář, kterého se zeptáte, zda je jeho oblast strategická, řekne ANO. Důvody: ego, kariérní obavy z „nedůležité“ oblasti a obecná tendence přeceňovat vlastní práci. Brandolini tomu říká <em>„hero syndrome“</em>: každá funkcionalita má svého hrdinu, který ji obhajuje jako nezbytnou pro firmu <a href="https://www.eventstorming.com/" target="_blank" rel="noopener">[4]</a>.
             </p>
 
             <p>
@@ -886,7 +886,7 @@ final class Auth0UserProvider implements UserProviderInterface
             <h3 id="dvs-template" class="h-sub">Šablona Domain Vision Statementu</h3>
 
             <p>
-                Domain Vision Statement (DVS) je krátký dokument, který pro Core subdoménu definuje <em>co, proč, kdo, kdy</em>. Inspirovaný Evansovou kapitolou 14, ale zkrácený do moderního agile formátu – 15–20 řádků markdown:
+                Domain Vision Statement (DVS) je krátký dokument, který pro Core subdoménu definuje <em>co, proč, kdo, kdy</em>. Inspirovaný Evansovou kapitolou 15, ale zkrácený do moderního agile formátu – 15–20 řádků markdown:
             </p>
 
             {% include '_partials/code_block.html.twig' with {

@@ -69,7 +69,7 @@
             <p>
                 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
                 Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
-                komplexní logiky – je CRUD zcela dostačující a přidávání vrstev DDD by bylo zbytečnou složitostí.
+                komplexní logiky – CRUD pro tyto případy dostačuje a přidávání vrstev DDD by bylo zbytečnou složitostí.
                 Problém nastává tehdy, kdy se aplikace postupem času stává komplexnější a doménová logika začíná pronikat
                 na nevhodná místa.
             </p>
@@ -119,7 +119,7 @@
             <p>
                 Rozhodnutí o migraci by mělo být podloženo analýzou komplexity domény, nikoli módními trendy.
                 Martin Fowler ve své práci o architektonických vzorech upozorňuje, že aplikace Transaction Script
-                (a jeho specializace CRUD) jsou zcela legitimní pro aplikace s jednoduchými doménovými pravidly
+                a CRUD přístupy jsou legitimní pro aplikace s jednoduchými doménovými pravidly
                 <a href="https://martinfowler.com/eaaCatalog/transactionScript.html" target="_blank" rel="noopener">[1]</a>.
             </p>
 
@@ -242,7 +242,7 @@
             <h3>Výhody oproti přímé refaktorizaci (Big Bang Rewrite)</h3>
             <p>
                 Přímý přepis celého systému najednou (tzv. „big bang rewrite“) je považován za jedno z největších rizik
-                v softwarovém vývoji. Joel Spolsky ve svém slavném článku „Things You Should Never Do“
+                v softwarovém vývoji. Joel Spolsky ve svém článku „Things You Should Never Do“
                 <a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/" target="_blank" rel="noopener">[3]</a>
                 popisuje, proč firmy ztratily konkurenční výhodu tím, že kompletně přepsaly fungující systémy.
                 Strangler Fig Pattern oproti tomu:

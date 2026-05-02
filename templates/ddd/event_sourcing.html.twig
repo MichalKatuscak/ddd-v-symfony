@@ -1553,7 +1553,7 @@ final class RebuildProjectionCommand extends Command
         <p>
             Při asynchronních projekcích existuje časové okno (typicky milisekundy až jednotky sekund),
             kdy uživatel provede akci (např. potvrdí objednávku), ale read model ještě neobsahuje
-            aktualizovaná data. Uživatel tak po kliknutí na "Potvrdit" může vidět stále "Draft" stav.
+            aktualizovaná data. Uživatel tak po kliknutí na „Potvrdit" může vidět stále „Draft" stav.
         </p>
         <p>
             Tento problém není bug – je to vlastnost eventual consistency. Existuje několik
@@ -1581,7 +1581,7 @@ final class RebuildProjectionCommand extends Command
             <h3 id="ec-note-heading">Synchronní projekce jako pragmatický kompromis</h3>
             <p>
                 Pokud vaše aplikace nemá vysokou zátěž na write straně a latence zápisu je přijatelná,
-                je zcela legitimní začít se <strong>synchronními projekcemi</strong> a na asynchronní přejít
+                je legitimní začít se <strong>synchronními projekcemi</strong> a na asynchronní přejít
                 až ve chvíli, kdy se synchronní aktualizace stane úzkým hrdlem. Vyhýbáte se tak problémům
                 s eventual consistency v raných fázích projektu.
             </p>

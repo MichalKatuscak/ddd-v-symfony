@@ -1934,7 +1934,7 @@ final class OutboxCleanupCommand extends Command
         items: [
             {
                 question: 'Outbox vs. CDC / Debezium – co kdy?',
-                answer: 'Pro 99 % Symfony projektů zvolte polling worker (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je naprosto dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 16.05</a>.'
+                answer: 'Pro 99 % Symfony projektů zvolte polling worker (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 16.05</a>.'
             },
             {
                 question: 'Co když používáme NoSQL databázi (MongoDB, Cassandra, DynamoDB)?',
