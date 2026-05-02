@@ -95,27 +95,11 @@ class DddController extends AbstractController
         return $this->redirectToRoute('horizontal_vs_vertical', [], 301);
     }
 
-    #[Route('/implementace-v-symfony', name: 'implementation_in_symfony')]
-    public function implementationInSymfony(): Response
-    {
-        return $this->render('ddd/implementation_in_symfony.html.twig', [
-            'title' => 'Implementace DDD v Symfony 8',
-        ]);
-    }
-
     #[Route('/cqrs', name: 'cqrs')]
     public function cqrs(): Response
     {
         return $this->render('ddd/cqrs.html.twig', [
             'title' => 'CQRS v Symfony 8',
-        ]);
-    }
-
-    #[Route('/pripadova-studie', name: 'case_study')]
-    public function caseStudy(): Response
-    {
-        return $this->render('ddd/case_study.html.twig', [
-            'title' => 'Případová studie',
         ]);
     }
 
