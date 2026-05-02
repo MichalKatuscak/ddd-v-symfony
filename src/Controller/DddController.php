@@ -159,14 +159,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/ddd-v-praxi-kde-to-boli', name: 'ddd_pain_points')]
-    public function dddPainPoints(): Response
-    {
-        return $this->render('ddd/ddd_pain_points.html.twig', [
-            'title' => 'DDD v praxi – kde to bolí',
-        ]);
-    }
-
     #[Route('/anti-vzory', name: 'anti_patterns')]
     public function antiPatterns(): Response
     {
@@ -236,14 +228,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/event_storming.html.twig', [
             'title' => 'Event Storming a Domain Storytelling',
-        ]);
-    }
-
-    #[Route('/team-topologies', name: 'team_topologies')]
-    public function teamTopologies(): Response
-    {
-        return $this->render('ddd/team_topologies.html.twig', [
-            'title' => 'Conway\'s Law a Team Topologies',
         ]);
     }
 
