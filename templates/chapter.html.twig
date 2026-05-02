@@ -1,13 +1,14 @@
 {% extends 'base.html.twig' %}
 {% set fm = chapter.frontmatter %}
 
-{% block title %}{{ fm.pageTitle }}{% endblock %}
-{% block meta_description %}{{ fm.metaDescription }}{% endblock %}
-{% block meta_keywords %}{{ fm.metaKeywords }}{% endblock %}
+{% block title %}{{ fm.pageTitle|raw }}{% endblock %}
+{% block og_title %}{{ fm.title|raw }}{% endblock %}
+{% block meta_description %}{{ fm.metaDescription|raw }}{% endblock %}
+{% block meta_keywords %}{{ fm.metaKeywords|raw }}{% endblock %}
 {% block og_type %}{{ fm.ogType }}{% endblock %}
 {% block article_published_time %}{{ fm.published }}{% endblock %}
 {% block article_modified_time %}{{ fm.modified }}{% endblock %}
-{% block breadcrumb_name %}{{ fm.breadcrumbName }}{% endblock %}
+{% block breadcrumb_name %}{{ fm.breadcrumbName|raw }}{% endblock %}
 
 {% block structured_data %}
     <script type="application/ld+json">
