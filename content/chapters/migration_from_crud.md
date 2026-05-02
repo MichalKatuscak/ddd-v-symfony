@@ -22,25 +22,25 @@ github_examples: Chapter09_Migration
 ## 19.01 Kdy a proč migrovat z CRUD na DDD {#kdy-migrovat}
 
 CRUD architektura (Create, Read, Update, Delete) je přirozený výchozí bod pro mnoho aplikací.
-Pro jednoduché správy dat – záznamy kontaktů, katalogy produktů, administrační rozhraní bez
-komplexní logiky – CRUD pro tyto případy dostačuje a přidávání vrstev DDD by bylo zbytečnou složitostí.
-Problém nastává tehdy, kdy se aplikace postupem času stává komplexnější a doménová logika začíná pronikat
+Pro správu dat bez komplexní logiky – záznamy kontaktů, katalogy produktů, administrační rozhraní –
+CRUD dostačuje a přidávání vrstev DDD přináší zbytečnou složitost.
+Problém nastává v okamžiku, kdy aplikace roste do větší komplexity a doménová logika proniká
 na nevhodná místa.
 
 :::callout{type="note"}
 ### Příznaky, že CRUD architektura nestačí {#priznaky-heading}
 
 - **God Services (Boží služby)** – Třídy jako `UserService` nebo `OrderService` obsahují stovky řádků kódu a stávají se centrálním místem pro veškerou doménovou logiku. Přidání jakékoli nové funkce vyžaduje zásah do stejné třídy a riziko regresí roste.
-- **Fat Controllers (Tlusté kontrolery)** – Symfony kontrolery přestaly být tenkou vrstvou pro HTTP adaptaci a místo toho přímo implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler by měl delegovat na doménový model, nikoli ho suplovat.
-- **Business logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit"). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
+- **Fat Controllers (Tlusté kontrolery)** – Symfony kontrolery přestaly být tenkou vrstvou pro HTTP adaptaci. Místo toho přímo implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler má delegovat na doménový model, nikoli ho suplovat.
+- **Business logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
 - **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
 - **Nízká testovatelnost** – Business logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlý mocking.
-- **Komunikační propast** – Vývojáři a doménoví experti používají jiný slovník. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu" nebo „storno objednávky" nejsou viditelné v názvech tříd a metod.
+- **Komunikační propast** – Vývojáři a doménoví experti používají jiný slovník. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
 :::
 
 ### Kdy DDD přináší hodnotu a kdy je CRUD dostačující
 
-Rozhodnutí o migraci by mělo být podloženo analýzou komplexity domény, nikoli módními trendy.
+Rozhodnutí o migraci podložte analýzou komplexity domény, nikoli módními trendy.
 Martin Fowler ve své práci o architektonických vzorech upozorňuje, že aplikace Transaction Script
 a CRUD přístupy jsou legitimní pro aplikace s jednoduchými doménovými pravidly
 [[1]](https://martinfowler.com/eaaCatalog/transactionScript.html).
@@ -56,7 +56,7 @@ a CRUD přístupy jsou legitimní pro aplikace s jednoduchými doménovými prav
 
 ### Kdy zůstat u CRUD
 
-- Aplikace je v podstatě CRUD nad databázovými tabulkami bez doménové logiky.
+- Aplikace zůstává CRUD nad databázovými tabulkami bez doménové logiky.
 - Doménová pravidla jsou triviální a stabilní.
 - Tým je malý a čas na migraci není dostupný.
 - Aplikace je krátkodobá nebo se bude v blízké budoucnosti kompletně přepisovat.
@@ -64,17 +64,17 @@ a CRUD přístupy jsou legitimní pro aplikace s jednoduchými doménovými prav
 
 ### Realistické zhodnocení nákladů migrace
 
-Migrace z CRUD na DDD není jednorázová akce. Je to kontinuální proces, který může trvat měsíce
-až roky v závislosti na velikosti kódové základny. Migrace sama o sobě
+Migrace z CRUD na DDD není jednorázová akce. Je to kontinuální proces, který trvá měsíce
+až roky podle velikosti kódové základny. Migrace sama o sobě
 nepřináší okamžitou hodnotu pro zákazníka. Hodnotu přinese zlepšená schopnost přidávat nové funkcionality
-s nižším rizikem regresí. Tým by měl management přesvědčit tím, že migraci provádí inkrementálně
+s nižším rizikem regresí. Tým management přesvědčí tím, že migraci provádí inkrementálně
 souběžně s vývojem nových funkcionalit, nikoli jako izolovaný refaktoringový projekt.
 
 ## 19.02 Strangler Fig Pattern – vzor postupné náhrady {#strangler-fig}
 
 Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie popsaná Martinem Fowlerem
 [[2]](https://martinfowler.com/bliki/StranglerFigApplication.html),
-která umožňuje postupnou náhradu starého systému novým bez nutnosti „big bang" přepisu. Název pochází
+která umožňuje postupnou náhradu starého systému novým bez nutnosti „big bang“ přepisu. Název pochází
 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
 
 :::callout{type="note"}
@@ -83,7 +83,7 @@ od tropického fíkovníku, který roste kolem hostitelského stromu a postupně
 1. **Nová funkcionalita** je vždy implementována v DDD stylu – nové Bounded Contexts, doménové objekty, repozitáře.
 2. **Stará funkcionalita** zůstává v CRUD podobě a je postupně nahrazována při refaktoringu nebo při úpravách stávajících funkcí.
 3. **Koexistence** – obě části systému fungují paralelně a jsou propojeny přes Anti-Corruption Layer nebo sdílenou databázi.
-4. **Postupná eliminace** – s každou iterací se CRUD část zmenšuje a DDD část roste, dokud starý kód zcela nevymizí.
+4. **Postupná eliminace** – s každou iterací se CRUD část zmenšuje a DDD část roste, dokud starý kód nevymizí.
 :::
 
 :::callout{type="pattern"}
@@ -127,14 +127,14 @@ src/
 
 ### Výhody oproti přímé refaktorizaci (Big Bang Rewrite)
 
-Přímý přepis celého systému najednou (tzv. „big bang rewrite") je považován za jedno z největších rizik
-v softwarovém vývoji. Joel Spolsky ve svém článku „Things You Should Never Do"
+Přímý přepis celého systému najednou (tzv. „big bang rewrite“) patří mezi největší rizika
+v softwarovém vývoji. Joel Spolsky ve svém článku „Things You Should Never Do“
 [[3]](https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/)
 popisuje, proč firmy ztratily konkurenční výhodu tím, že kompletně přepsaly fungující systémy.
 Strangler Fig Pattern oproti tomu:
 
 - Umožňuje kontinuální dodávku nové hodnoty zákazníkovi i během migrace.
-- Snižuje riziko – systém nikdy není kompletně „rozbitý".
+- Snižuje riziko – systém nikdy není kompletně „rozbitý“.
 - Poskytuje možnost rollbacku: pokud nová implementace selhává, stará stále funguje.
 - Umožňuje týmu učit se DDD postupně, na reálném produkčním kódu.
 - Refaktoring lze zastavit kdykoli – systém zůstává v konzistentním, funkčním stavu.
@@ -151,13 +151,13 @@ Bounded Contexts lze v existující CRUD aplikaci identifikovat sledováním př
 
 - **Skupiny entit a tabulek**, které jsou silně provázané navzájem, ale slabě propojené s ostatními skupinami – to jsou kandidáti na jeden Bounded Context.
 - **God Services** – velké service třídy jsou paradoxně dobrým vodítkem. Pokud `OrderService` obsahuje logiku objednávky, platby i doručení, jsou to tři různé Bounded Contexts skryté v jedné třídě.
-- **Opakující se slovo s různým významem** – pokud „zákazník" v kontextu prodeje znamená něco jiného než „zákazník" v kontextu zákaznické podpory, jde o přirozené rozhraní dvou Bounded Contexts.
+- **Opakující se slovo s různým významem** – pokud „zákazník“ v kontextu prodeje znamená něco jiného než „zákazník“ v kontextu zákaznické podpory, jde o přirozené rozhraní dvou Bounded Contexts.
 
 ### Event Storming jako nástroj pro analýzu
 
 Event Storming je workshopová technika navržená Albertem Brandolinim
 [[4]](https://www.eventstorming.com/), která umožňuje kolaborativně
-modelovat doménu prostřednictvím doménových událostí. V kontextu migrace z CRUD je velmi užitečná
+modelovat doménu prostřednictvím doménových událostí. Při migraci z CRUD slouží
 pro:
 
 - Odkrytí implicitní doménové logiky skryté v kontrolerech a service třídách.
@@ -168,8 +168,8 @@ pro:
 :::callout{type="pattern"}
 ### Příklad: Identifikace doménové logiky v CRUD kontroleru {#crud-before-heading}
 
-Následující příklad ilustruje typický CRUD kontroler, ve kterém je skryta netriviální doménová
-logika. Tato logika bude v dalších krocích extrahována do doménového modelu.
+Následující příklad ilustruje typický CRUD kontroler, ve kterém se skrývá netriviální doménová
+logika. Tuto logiku v dalších krocích extrahujeme do doménového modelu.
 
 :::code{language="php" filename="src/Controller/UserController.php"}
 <?php
@@ -367,8 +367,8 @@ obejít.
 
 ### Zavedení Value Objects místo primitive types
 
-Primitive Obsession je code smell, při kterém jsou koncepty s doménovou sémantikou reprezentovány
-primitivními typy jako `string` nebo `int`. Value Object nahrazuje primitiv
+Primitive Obsession je code smell, při kterém koncepty s doménovou sémantikou reprezentují
+primitivní typy jako `string` nebo `int`. Value Object nahrazuje primitiv
 objektem, který zapouzdřuje validaci a chování.
 
 :::callout{type="pattern"}
@@ -439,9 +439,9 @@ final class Email
 }
 :::
 
-Díky Value Objectu `Email` je validace zapouzdřena na jednom místě. Kdykoli je
-vytvořena instance `Email`, máme garantovanou platnost hodnoty – bez ohledu na to,
-kde v aplikaci k vytvoření dochází. Toto je základní princip „Make Illegal States Unrepresentable".
+Value Object `Email` zapouzdřuje validaci na jednom místě. Kdykoli vznikne
+instance `Email`, máme garantovanou platnost hodnoty – bez ohledu na to,
+kde v aplikaci k vytvoření dochází. Toto je základní princip „Make Illegal States Unrepresentable“.
 :::
 
 ## 19.05 Krok 3: Zavedení repozitářů {#zavedeni-repozitaru}
@@ -543,7 +543,7 @@ final class DoctrineUserRepository implements UserRepository
 :::
 
 Doménová vrstva závisí pouze na rozhraní `UserRepository`. Symfony DI container
-zajistí, že do doménových služeb bude injektována `DoctrineUserRepository`. Díky
+injektuje do doménových služeb `DoctrineUserRepository`. Díky
 tomu lze implementaci repozitáře vyměnit v konfiguračním souboru bez změny doménového kódu.
 :::
 
@@ -563,9 +563,9 @@ kde je typovaná závislost na doménovém rozhraní `UserRepository`.
 
 ## 19.06 Krok 4: Postupné zavedení CQRS {#cqrs-postupne}
 
-Command Query Responsibility Segregation (CQRS) je přirozené rozšíření DDD, avšak jeho zavedení
-by mělo přijít až poté, co je doménový model dobře etablován. Předčasné zavedení CQRS bez zralého
-doménového modelu vede k přesunu komplexity z doménové vrstvy do handleru, kde je neviditelná a
+Command Query Responsibility Segregation (CQRS) je přirozené rozšíření DDD, jeho zavedení
+ale přichází až poté, co se doménový model usadí. Předčasné zavedení CQRS bez zralého
+doménového modelu přesouvá komplexitu z doménové vrstvy do handleru, kde je neviditelná a
 hůře testovatelná.
 
 ### Začít s Command stranou (write side)
@@ -688,22 +688,22 @@ class UserController extends AbstractController
 :::
 
 Command `RegisterUser` je prosté DTO (Data Transfer Object) bez závislostí. Handler
-`RegisterUserHandler` orchestruje doménový model. Kontroler je redukován na HTTP
+`RegisterUserHandler` orchestruje doménový model. Kontroler se zužuje na HTTP
 vrstvu, která pouze přeloží HTTP požadavek na Command. Tato separace odpovědností
 umožňuje testovat každou vrstvu zvlášť.
 :::
 
 ## 19.07 Testování při migraci {#testovani-pri-migraci}
 
-Testování je kritickým aspektem migrace. Bez dostatečného pokrytí testy hrozí, že refaktoring
-zavede regrese, které jsou odhaleny až v produkci. Strategie testování při migraci z CRUD na DDD
+Testování rozhoduje o úspěchu migrace. Bez dostatečného pokrytí testy hrozí, že refaktoring
+zavede regrese, které se projeví až v produkci. Strategie testování při migraci z CRUD na DDD
 kombinuje dvě techniky: charakterizační testy pro zachycení stávajícího chování a postupné
 doplňování unit testů pro novou doménovou vrstvu.
 
 ### Charakterizační testy (Characterization Tests)
 
-Pojem „charakterizační testy" pochází z knihy Michaela Featherse „Working Effectively with Legacy
-Code"
+Pojem „charakterizační testy“ pochází z knihy Michaela Featherse „Working Effectively with Legacy
+Code“
 [[5]](https://www.oreilly.com/library/view/working-effectively-with/0131177052/).
 Charakterizační test nepopisuje, jaké *by mělo být* správné chování systému, ale zachycuje
 jaké chování systém *aktuálně má*. Slouží jako síť, která zachytí nechtěné změny chování
@@ -778,15 +778,15 @@ class UserRegistrationCharacterizationTest extends WebTestCase
 }
 :::
 
-Charakterizační testy jsou psány *před* refaktoringem. Cílem je, aby všechny procházely
+Charakterizační testy vznikají *před* refaktoringem. Cílem je, aby všechny procházely
 po celou dobu migrace – selhání testu signalizuje, že refaktoring změnil pozorovatelné chování
 systému, ať záměrně nebo omylem.
 :::
 
 ### Unit testy doménové vrstvy
 
-Jednou z největších výhod DDD je, že doménové objekty jsou testovatelné v izolaci bez nutnosti
-databáze, HTTP klienta nebo jiné infrastruktury. Unit testy doménové vrstvy jsou rychlé, deterministické
+Jednou z výhod DDD je testovatelnost doménových objektů v izolaci bez databáze,
+HTTP klienta nebo jiné infrastruktury. Unit testy doménové vrstvy jsou rychlé, deterministické
 a přesně dokumentují doménová pravidla.
 
 :::callout{type="pattern"}
@@ -874,10 +874,10 @@ psát charakterizační testy), nedostatečná znalost domény v týmu, absence 
 ### Varování před Big Bang Rewrites {#big-bang-warning-heading}
 
 **Nikdy nezačínejte migraci na DDD kompletním přepisem systému.** Big Bang Rewrite
-je architektonicky nejrizikovější rozhodnutí, které může tým učinit. Typický scénář:
-tým začne „přepis na zelenou louku", po 6 měsících zjistí, že nový systém nesplňuje všechny
-edge cases původního systému (které nikdo nezdokumentoval), původní systém dostává mezitím
-nové funkcionality, nový systém za ním nestíhá. Výsledkem je buď zrušení projektu přepisu,
+je architektonicky nejrizikovější rozhodnutí, které tým může učinit. Typický scénář:
+tým začne „přepis na zelenou louku“. Po 6 měsících zjistí, že nový systém nesplňuje všechny
+edge cases původního systému (které nikdo nezdokumentoval). Původní systém mezitím dostává
+nové funkcionality a nový systém za ním nestíhá. Výsledkem je buď zrušení projektu přepisu,
 nebo spuštění nedokončeného systému s fatálními chybami.
 
 Vždy preferujte **inkrementální migraci pomocí Strangler Fig Patternu**:
@@ -892,7 +892,7 @@ a [CQRS v Symfony](/cqrs).
 ## 19.09 Refactoring kuchařka – krátké recepty {#refactoring-kucharka}
 
 Strangler Fig je strategický pohled na celou migraci. V denní praxi narazíte na opakující se mikrosituace.
-Tato kuchařka obsahuje 8 nejčastějších, každá ve formátu *„symptomy → krok 1, 2, 3"*.
+Tato kuchařka obsahuje 8 nejčastějších, každá ve formátu *„symptomy → krok 1, 2, 3“*.
 Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladnější rozbor, projděte odkazované kapitoly.
 
 ### Recept 1: Anémická Doctrine entita {#recept-anemic-entita-heading}
@@ -965,9 +965,9 @@ Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladněj
 
 :::faq{}
 - question: Jaké příznaky ukazují, že CRUD aplikace je zralá na migraci?
-  answer: 'Typickými signály jsou God Services o stovkách řádků, kontrolery obsahující doménová pravidla, doménová logika zamíchaná v Doctrine repozitářích, opakované regresní chyby při drobných změnách a rostoucí čas potřebný pro onboarding nových vývojářů. Pokud aplikace tyto příznaky nevykazuje a zůstává prostým mapováním formulářů na tabulky, migrace odpovídající hodnotu nepřinese. Obecnější otázku, pro jaké projekty je DDD vhodné, řeší samostatná kapitola <a href="/kdy-nepouzivat-ddd">Kdy DDD nepoužívat</a>. Viz také <a href="#kdy-migrovat">sekci Kdy a proč migrovat</a>.'
+  answer: 'Typickými signály jsou God Services o stovkách řádků a kontrolery obsahující doménová pravidla. Dále doménová logika zamíchaná v Doctrine repozitářích, opakované regresní chyby při drobných změnách a rostoucí čas potřebný pro onboarding nových vývojářů. Pokud aplikace tyto příznaky nevykazuje a zůstává prostým mapováním formulářů na tabulky, migrace odpovídající hodnotu nepřinese. Obecnější otázku, pro jaké projekty je DDD vhodné, řeší samostatná kapitola <a href="/kdy-nepouzivat-ddd">Kdy DDD nepoužívat</a>. Viz také <a href="#kdy-migrovat">sekci Kdy a proč migrovat</a>.'
 - question: Co je Strangler Fig Pattern?
-  answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste" starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Podrobný rozbor v <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
+  answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste“ starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Podrobný rozbor v <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
 - question: Jak začít s analýzou existující domény?
   answer: 'Začíná se Event Stormingem nebo obdobnou kolaborativní technikou s doménovými experty – zmapují se hlavní události, commands a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language. Paralelně se v existujícím kódu hledají implicitní hranice modelu: moduly, tabulky nebo funkční celky, které jsou málo propojené. Cílem první iterace je hrubá mapa, ne úplný model. Praktický postup v <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
 - question: Jak extrahovat doménovou vrstvu z existujícího CRUD kódu?
