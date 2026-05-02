@@ -135,14 +135,6 @@ class DddController extends AbstractController
         ]);
     }
 
-    #[Route('/testovani-ddd', name: 'testing_ddd')]
-    public function testingDdd(): Response
-    {
-        return $this->render('ddd/testing_ddd.html.twig', [
-            'title' => 'Testování DDD kódu v Symfony',
-        ]);
-    }
-
     #[Route('/event-sourcing', name: 'event_sourcing')]
     public function eventSourcing(): Response
     {
@@ -164,14 +156,6 @@ class DddController extends AbstractController
     {
         return $this->render('ddd/anti_patterns.html.twig', [
             'title' => 'Anti-vzory a typické chyby v DDD',
-        ]);
-    }
-
-    #[Route('/vykonnostni-aspekty', name: 'performance_aspects')]
-    public function performanceAspects(): Response
-    {
-        return $this->render('ddd/performance_aspects.html.twig', [
-            'title' => 'Výkonnostní aspekty DDD v Symfony',
         ]);
     }
 
