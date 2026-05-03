@@ -533,7 +533,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 }
 :::
 
-Protože ACL nemá stav a má jediný entrypoint, testuje se velmi snadno: tabulka vstup → výstup, plus tabulka vstup → výjimka. Každý nový edge case z produkce se promítá jako nový test.
+Protože ACL nemá stav a má jediný entrypoint, testy mají tvar tabulky vstup → výstup a tabulky vstup → výjimka. Každý nový edge case z produkce se promítá jako nový test.
 
 ### Anti-vzor: prosakující ACL
 
@@ -626,7 +626,7 @@ Důležité: **v1 a v2 koexistují**. Zveřejnění OHS v1 je *závazek* – jak
 
 Tři běžné přístupy k versioningu OHS:
 
-- **URI versioning** (`/api/v1/...`) – nejčitelnější, snadno cacheovatelné, doporučené pro veřejné API.
+- **URI versioning** (`/api/v1/...`) – nejčitelnější, cacheovatelné na úrovni HTTP, doporučené pro veřejné API.
 - **Header versioning** (`Accept: application/vnd.catalog.v2+json`) – čistší URL, ale komplikovaná diagnostika a debugging.
 - **Query parameter** (`?api-version=2`) – flexibilní, ale bývá zneužívaný k „polo-versioningu“ (nikdy nezmizí v1).
 
@@ -910,4 +910,4 @@ Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu]
 - Martin Fowler, *Bounded Context* (bliki) [[4]](https://martinfowler.com/bliki/BoundedContext.html).
 - Martin Fowler, *Context Map* (bliki) [[5]](https://martinfowler.com/bliki/ContextMap.html).
 - Vaughn Vernon, *Domain-Driven Design Distilled* (Addison-Wesley, 2016) – zkrácená přístupnější verze pro úvod do strategického designu.
-- DDD Crew, *Context Mapping* shareable resources [[6]](https://github.com/ddd-crew/context-mapping) – moderní vizuální notace pro Context Mapping.
+- DDD Crew, *Context Mapping* shareable resources [[6]](https://github.com/ddd-crew/context-mapping) – komunitní vizuální notace pro Context Mapping.

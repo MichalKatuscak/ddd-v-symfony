@@ -48,7 +48,7 @@ vše, co EM sleduje.
 
 **Příčina:** Doctrine Unit of Work je *session-scoped* – drží
 identity map všech načtených entit a při `flush()` uloží všechny změny
-najednou v jediné databázové transakci. To je výkonné pro CRUD, ale pro DDD to znamená,
+najednou v jediné databázové transakci. Pro CRUD to dává smysl, pro DDD to znamená,
 že neúmyslně načtená entita z jiného agregátu může být commitnuta společně s vaší
 záměrnou změnou.
 
@@ -241,8 +241,9 @@ v sobě implicitně spoléhá na aktivní databázové připojení.
 persistován a flushed. Tím se porušuje doménový invariant: každý agregát musí
 mít identitu od okamžiku vzniku.
 
-**Příčina:** Databázové generování ID je výkonné, ale váže vznik identity
-na infrastrukturu. Doménový model by neměl vědět o databázi; identita patří do domény.
+**Příčina:** Databázové generování ID šetří jednu round-trip pro získání ID, ale váže
+vznik identity na infrastrukturu. Doménový model by neměl vědět o databázi; identita
+patří do domény.
 
 **Řešení:** Generujte UUID v doméně, v konstruktoru agregátu.
 Doctrine nakonfigurujte s `strategy: 'NONE'` – ID předáváte sami,

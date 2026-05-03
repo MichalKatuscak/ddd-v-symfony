@@ -117,7 +117,7 @@ Test: ukažte si org chart a ukažte si Context Map. Pokud na org chart neumíte
 jméno týmu pro každý BC, váš BC je fikce.
 :::
 
-Důsledek je nepříjemný pro mnoho organizací: **Context Map a Team Map jsou v ideálním
+Důsledek je nepříjemný pro mnoho organizací: **Context Map a Team Map jsou ve zdravém
 stavu téměř izomorfní**. Pokud máte 7 BC a 4 týmy, máte buď mismatch (3 BC nemají
 vlastníka), nebo jeden tým vlastní 2+ BC (a to musí být vědomé rozhodnutí, ne nedopatření).
 Detail vztahu mezi Context Map a Team Map je v kapitole o
@@ -777,7 +777,7 @@ pro DORA metriky a Westrumovu typologii. Originální Conway 1968 esej je krátk
 - question: Co dělat, když management nesouhlasí s re-orgem?
   answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte re-org na sebe, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formálního re-orgu. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte management o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plný re-org. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">05.09</a>), Team Topologies neuspěje ani s formálním re-orgem. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 05.09</a>.'
 - question: Jaký je vztah mezi Team Topologies a mikroservisy?
-  answer: 'Team Topologies není o mikroservisech, ale mikroservisy bez Team Topologies obvykle vedou k distribuovanému monolitu. Mikroservis je <em>fyzická</em> hranice nasazení; stream-aligned tým je <em>organizační</em> hranice odpovědnosti. V ideálním stavu jsou izomorfní – 1 stream-aligned tým = 1 BC = 1 mikroservis (nebo modul v modulárním monolitu). Pokud máte 30 mikroservis a 5 týmů, nejste v mikroservisové architektuře. Jste v distribuovaném monolitu, kde každý tým „vlastní“ 6 služeb a žádná hranice nemá soudržného vlastníka. Kapitola o <a href="/architektonicke-styly">architektonických stylech</a> rozebírá detail.'
+  answer: 'Team Topologies není o mikroservisech, ale mikroservisy bez Team Topologies obvykle vedou k distribuovanému monolitu. Mikroservis je <em>fyzická</em> hranice nasazení; stream-aligned tým je <em>organizační</em> hranice odpovědnosti. Ve zdravém stavu jsou izomorfní – 1 stream-aligned tým = 1 BC = 1 mikroservis (nebo modul v modulárním monolitu). Pokud máte 30 mikroservis a 5 týmů, nejste v mikroservisové architektuře. Jste v distribuovaném monolitu, kde každý tým „vlastní“ 6 služeb a žádná hranice nemá soudržného vlastníka. Kapitola o <a href="/architektonicke-styly">architektonických stylech</a> rozebírá detail.'
 :::
 
 ## 05.11 Další četba a citované zdroje {#dalsi-cetba}

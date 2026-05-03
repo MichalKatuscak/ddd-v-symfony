@@ -52,7 +52,7 @@ event logu; žádná informace se nikdy nepřepisuje ani nemaže.
 :::
 
 :::callout{type="note"}
-### Klíčové pojmy Event Sourcingu: {#es-pojmy-heading}
+### Pojmy Event Sourcingu: {#es-pojmy-heading}
 
 - **Event (Událost)** – Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený v minulém čase (např. `OrderPlaced`, `PaymentReceived`). Obsahuje všechna data potřebná k rekonstrukci změny stavu.
 - **Event Store** – Specializované append-only úložiště pro události. Události se do něj pouze přidávají; nikdy se neupravují ani nemažou. Každá událost patří do event streamu konkrétního agregátu.

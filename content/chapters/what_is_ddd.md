@@ -109,7 +109,7 @@ Domain-Driven Design přináší mnoho výhod pro vývoj softwaru:
 - **Modularita** – Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.
 - **Testovatelnost** – Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz [kapitola o testování](/testovani-ddd)).
 - **Snížení technického dluhu** – Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.
-- **Zaměření na hodnotu** – DDD rozlišuje Core Domain (klíčovou konkurenční výhodu) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší obchodní hodnotu.
+- **Zaměření na hodnotu** – DDD rozlišuje Core Domain (zdroj konkurenční výhody) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší obchodní hodnotu.
 
 Praktické příklady Ubiquitous Language a dalších konceptů naleznete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 

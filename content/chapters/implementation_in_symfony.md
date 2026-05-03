@@ -1087,7 +1087,7 @@ Doménová služba je správná volba ve třech přesně vymezených případech
 
 - **Operace nad 2+ agregáty.** Klasický `MoneyTransferService::transfer($from, $to, $amount)`
   – pravidlo „součet zůstatků je konstantní" se týká dvou účtů a nepatří jednomu
-  ani druhému. (Pozor: stejně se ukládá v rámci jedné transakce na jeden agregát –
+  ani druhému. (Pozor: stejně se ukládá v jedné transakci na jeden agregát –
   viz [agregát = transakční hranice](/navrh-agregatu#transactional-consistency).)
 - **Bezstavový výpočet s externí znalostí.** Daňová sazba podle jurisdikce a typu
   zboží, převod měn podle aktuálního kurzu. Logika je čistě doménová, ale
@@ -1259,7 +1259,7 @@ Symfony nabízí dva mechanismy pro „něco se stalo":
 **Volba podle role příjemce:**
 
 - **In-context, in-request listenery** (read model uvnitř téhož kontextu,
-  audit log, cache invalidace v rámci téhož commitu) → **EventDispatcher**.
+  audit log, cache invalidace uvnitř téhož commitu) → **EventDispatcher**.
   Žádná serializace, listenery vidí stejný `EntityManager`, stejnou transakci.
 - **Cross-context komunikace** (publikace události mimo Bounded Context, kterou
   zpracuje jiný kontext / služba / projekce) → **Messenger** přes outbox.
@@ -1800,7 +1800,7 @@ Drobný rozdíl v syntaxi `services.yaml`, dramatický rozdíl v chování:
   EntityManagery, dva sady listenerů, dva separátní stavy. Při autowiringu
   může vznikat zmatek, kterou instanci `MessageBus` injektuje.
 
-V moderním Symfony je idiomatičtější forma atribut `#[AsAlias]` přímo na implementaci –
+V Symfony 6.3+ je idiomatičtější forma atribut `#[AsAlias]` přímo na implementaci –
 viz [Symfony idiomy: `#[AsAlias]`](#symfony-idiomy-asalias). Konfigurace v YAML
 se hodí, když implementace patří do jiného balíčku, který nemůžete upravit.
 :::

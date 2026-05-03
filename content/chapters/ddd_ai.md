@@ -171,7 +171,7 @@ nikoli implementační detaily, ale doménová pravidla. Selhání testu je pak 
 signálem, že AI se odchýlila od záměru. TDD tak ve spolupráci s AI plní roli, která
 v tradičním vývoji náleží code review: průběžná verifikace toho, zda kód dělá to,
 co má. Beck přiznává, že sám testuje méně věcí než dříve. Testy, které píše, jsou
-ale úmyslnější – zaměřené na doménová pravidla a hraniční případy, nikoli na ideální průběh (happy path).
+ale úmyslnější – zaměřené na doménová pravidla a hraniční případy, nikoli na happy path.
 
 Martin Fowler přichází s podobným, ale méně optimistickým rámcem. V rozhovoru pro
 The New Stack Fowler přirovnává AI k „pochybnému kolegovi“ – kolaborátorovi, jehož
@@ -454,7 +454,7 @@ architektonické rozhodnutí.
 - question: Jak Bounded Contexts ovlivňují kvalitu kódu generovaného AI?
   answer: 'Bounded Context vymezuje srozumitelný rozsah, ve kterém se AI pohybuje – místo „celé aplikace“ pracuje s jedním modelem, jednou sadou pravidel a jedním slovníkem. Menší, dobře ohraničený kontext znamená méně protichůdných informací v promptu a menší prostor pro halucinace. Bounded Contexts také přirozeně navazují na struktury jako Cursor rules nebo CLAUDE.md, které AI nástrojům dávají konkrétní pracovní perimetr. Rozbor v <a href="#bounded-contexts">sekci Bounded contexts a kvalita generovaného kódu</a>.'
 - question: Jakou roli hrají testy při práci s AI?
-  answer: 'Testy fungují jako kontrolní mechanismus, který zachytává rozdíl mezi tím, co AI vygenerovala, a tím, co doména skutečně požaduje. Kent Beck hovoří o konceptu augmented coding: AI píše kód, testy potvrzují chování, a teprve když oba stojí spolu, jde změna do kódové báze. Bez testů se riziko nevyřešených chyb z AI výstupu kumuluje, protože LLM kód působí syntakticky správně, i když logicky selhává. Praktický rozbor v <a href="#testovani">sekci Testování jako kontrolní mechanismus pro AI</a>.'
+  answer: 'Testy fungují jako kontrolní mechanismus, který zachytává rozdíl mezi tím, co AI vygenerovala, a tím, co doména skutečně požaduje. Kent Beck hovoří o konceptu augmented coding: AI píše kód, testy potvrzují chování, a teprve když oba stojí spolu, jde změna do kódové báze. Bez testů se riziko nevyřešených chyb z AI výstupu kumuluje, protože LLM kód působí syntakticky správně, i když na úrovni chování selhává. Praktický rozbor v <a href="#testovani">sekci Testování jako kontrolní mechanismus pro AI</a>.'
 - question: Kde jsou limity AI v doménově komplexním kódu?
   answer: 'AI zatím dobře zvládá rutinní úlohy (boilerplate, CRUD, jednoduché transformace), ale naráží u kódu, který odráží nekonzistentní doménovou realitu nebo vyžaduje modelování nových pravidel se stakeholdery. Martin Fowler popisuje AI jako „dodgy collaborator“, jejíž výstup je třeba pečlivě verifikovat – zejména u operací s vysokými náklady chyby. Otevřené otázky se týkají metrik kvality doménového modelu, role člověka v EventStormingu a dlouhodobého dopadu AI na kompetence vývojářů. Viz <a href="#otevrene-otazky">sekci Otevřené otázky a limity</a>.'
 :::
