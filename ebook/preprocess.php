@@ -158,25 +158,14 @@ function renderCallout(array $attrs, string $body, string $target): string
     $innerBody = processBlocks($body, $target);
 
     if ($target === 'pdf') {
-        // Bold hlavička + tělo na samostatných odstavcích.
-        // Tělo nesmí být zabaleno v blockquote ani jiné struktuře, jinak by
-        // pandoc nerozpoznal nadpisy `### …` a `{#anchor}` uvnitř callouta.
-        // Unicode ikony vynecháváme – DejaVu Serif některé nepokrývá
-        // (např. `ℹ`, `💡`) a sazba se rozbije.
-        $labels = [
-            'note'      => 'Poznámka',
-            'warning'   => 'Pozor',
-            'warn'      => 'Pozor',
-            'tip'       => 'Tip',
-            'important' => 'Důležité',
-            'pattern'   => 'Vzor',
-        ];
-        $label = $labels[$ctype] ?? 'Poznámka';
-
-        // Vodorovné linky před a za vytváří vizuální oddělení.
-        $header = "---\n\n**{$label}**";
+        // Pandoc fenced div – Lua filter `pdf_callout.lua` ho obalí do
+        // typst `#block(...)` s barevným pruhem a pozadím podle typu.
+        // Tělo zůstává jako pandoc Blocks → headings, bold, code, listy
+        // se uvnitř parsují normálně.
+        // Vyšší fence pro případ vnořených fenced divs uvnitř těla.
+        $fence = ':::::::';
         $bodyTrim = trim($innerBody);
-        return "{$header}\n\n{$bodyTrim}\n\n---";
+        return "{$fence} callout-{$cssType}\n{$bodyTrim}\n{$fence}";
     }
 
     return "<div class=\"callout callout-{$cssType}\">\n"

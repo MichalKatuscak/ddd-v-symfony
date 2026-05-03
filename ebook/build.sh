@@ -106,6 +106,7 @@ if command -v typst &>/dev/null; then
     --resource-path="$ROOT_DIR/public" \
     --wrap=none \
     --lua-filter="$SCRIPT_DIR/filters/pdf_internal_links.lua" \
+    --lua-filter="$SCRIPT_DIR/filters/pdf_callout.lua" \
     -V mainfont="DejaVu Serif" \
     -V monofont="DejaVu Sans Mono" \
     -V sansfont="DejaVu Sans" \
