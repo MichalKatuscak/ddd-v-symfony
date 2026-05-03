@@ -345,7 +345,71 @@ přepíšete stejně všechno.
 - Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte – viz [Migrace z CRUD na DDD](/migrace-z-crud).
 :::
 
-## 23.09 Kdy DDD naopak smysl má {#when-ddd-fits}
+## 23.09 Subdoména-based hybrid – DDD kde dává smysl {#hybrid-subdomain}
+
+V reálných projektech retírka odpověď „celé DDD ano, nebo celé ne" málokdy odpovídá
+realitě. Khononov v *Learning DDD* (2021) prosazuje **subdoména-based architecture**:
+DDD se aplikuje per Bounded Context podle typu subdomény:
+
+| Typ subdomény | Architektonický styl | Důvod |
+|---|---|---|
+| **Core Domain** | Plné DDD (taktické + strategické vzory, agregáty, eventy) | Konkurenční výhoda, komplexní pravidla, vysoký ROI investice do modelu |
+| **Supporting Subdomain** | Lehké DDD (entity + repository, žádné agregáty) nebo Active Record | Pravidla existují, ale nejsou diferenciační. Plné DDD je over-engineering. |
+| **Generic Subdomain** | CRUD nebo SaaS (auth, notifikace) | Nepřináší konkurenční výhodu, kupte nebo použijte off-the-shelf. |
+
+Konkrétně: pojišťovna má **Core** Underwriting (DDD ano), **Supporting** Customer
+Management (lehké DDD), **Generic** Notifikace (CRUD nebo SaaS jako Twilio).
+Plné DDD ve všech třech kontextech znamená 3× kód a 3× operační dluh, ze kterých
+2 nepřináší úměrnou hodnotu.
+
+V Symfony projektu se to projevuje strukturou monolitu, kde
+`src/Underwriting/` má plnou DDD strukturu (Domain/Application/Infrastructure
++ agregáty + eventy), `src/Customer/` má jednodušší rozdělení Entity + Repository,
+a `src/Notification/` je čistý EasyAdmin nad Doctrine entitami nebo dokonce
+externí service.
+
+:::callout{type="warn"}
+### Migration cost paradox {#migration-paradox-heading}
+
+Standardní rozhodnutí je „nový projekt → DDD od začátku, legacy → nech být".
+Reálný kontext bývá složitější: legacy CRUD kód přerůstá v komplexní doménu,
+ale migrace celého kódu na DDD je nereálná. Nastává **migration cost paradox**:
+
+- Cena udržovat anemický legacy = X / rok (rostoucí s časem).
+- Cena big-bang rewrite na DDD = 5–10X (jednorázová) + riziko regrese.
+- Cena postupné migrace přes [Strangler Fig](/migrace-z-crud) = 3–4X (rozprostřená)
+  + ztráta produktivity během migrace.
+
+Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaná životnost
+po migraci > 3× cena migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
+je migrace marketing decision, ne technická.
+
+Khononov uvádí příklad telco, který strávil 3 roky migrací na DDD jen aby
+zjistil, že platforma byla po té době nahrazena jinou při akvizici.
+3 roky engineering kapacity vyhozeno.
+:::
+
+### Pseudo-DDD – cargo cult warning {#pseudo-ddd-cargo-cult-heading}
+
+Nejhorší výsledek není „nepoužít DDD". Je to **pseudo-DDD**: tým má adresářovou
+strukturu DDD (`Domain/`, `Application/`, `Infrastructure/`), používá slovník
+DDD ve standupech, ale doménový model je anémický CRUD. Symptomy:
+
+- Agregáty mají gettery, settery a žádné chování.
+- Doménové eventy se publikují, ale žádný handler na ně neposlouchá ve smyslu
+  doménové logiky – jen logování nebo audit.
+- Bounded Contexts existují jako adresáře, ale tým je přejmenoval z původního
+  technického dělení (`UserModule/` → `UserBoundedContext/`).
+- Code review diskuse jsou o „je tohle správné DDD" místo „chrání tahle změna
+  invariant".
+
+Pseudo-DDD má všechny náklady DDD (víc kódu, learning curve) a žádný přínos
+(invarianty nejsou chráněné, doména není modelovaná). V tomto stavu je **honest
+CRUD lepší volba** – přiznejte si, že doména komplexní logiku nemá, a zjednodušte.
+
+Detail v [kapitole o anti-vzorech](/anti-vzory#anemicky-domenovy-model).
+
+## 23.10 Kdy DDD naopak smysl má {#when-ddd-fits}
 
 DDD není špatná architektura. Je to architektura pro specifický kontext. Smysl má, když platí
 **většina** z těchto podmínek:
@@ -376,7 +440,7 @@ Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte
   answer: 'DDD se vyplatí tam, kde se sejde několik podmínek současně. Patří mezi ně komplexní doménová logika s mnoha invarianty, dlouhodobý horizont projektu (roky, ne měsíce), přístup k doménovým expertům a tým s dostatečnými zkušenostmi nebo časem na učení. Typické domény, kde DDD dlouhodobě vyhrává, jsou core banking, pojišťovnictví, zdravotnictví, logistika nebo regulovaná odvětví s bohatými pravidly. Rozhodnutí by nemělo stát na popularitě DDD, ale na konkrétní povaze projektu a týmu. Rozhodovací kritéria a domény v <a href="#when-ddd-fits">sekci Kdy DDD naopak smysl má</a>.'
 :::
 
-## 23.10 Zdroje a další čtení {#zdroje}
+## 23.11 Zdroje a další čtení {#zdroje}
 
 :::callout{type="note"}
 **Knihy:**
