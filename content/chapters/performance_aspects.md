@@ -988,6 +988,9 @@ příklady: globální `Inventory` jednoho produktu při rozjezdu kampaně, `Tou
 agregát s 1000 účastníky, kteří všichni paralelně potvrdí účast, nebo `BankAccount`
 firmy s tisíci transakcí denně.
 
+:::diagram{fig="17.9-A" title="Optimistic lock thrash: 3 souběžné modifikace, 2 retry" src="images/diagrams/17_performance/hot_aggregate_thrash.svg"}
+:::
+
 S `#[ORM\Version]` (optimistický zámek) souběžná modifikace vyhází
 `OptimisticLockException`. Při nízké souběžnosti (5 % konfliktů) je retry levný.
 Při hot aggregate (50–80 % konfliktů) systém **degraduje na sériový provoz**:
@@ -1055,6 +1058,9 @@ bez měřitelného přínosu.
 V CQRS architektuře jsou read modely často vhodný kandidát pro **read replicy** –
 samostatná databáze (nebo Postgres streaming replica), na kterou jdou všechny
 queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
+
+:::diagram{fig="17.9-B" title="Routing: write na primary, read na replicu, replikační lag" src="images/diagrams/17_performance/read_replica_routing.svg"}
+:::
 
 - **Repozitář write strany** drží `EntityManagerInterface` namapovaný na primary.
 - **Query handler read strany** drží separátní `Connection` nebo

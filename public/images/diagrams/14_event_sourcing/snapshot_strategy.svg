@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1546.875px" preserveAspectRatio="none" style="width:926px;height:1546px;background:#11141A;" version="1.1" viewBox="0 0 926 1546" width="926.5625px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="670.3125" x="121.4844" y="41.7313">Snapshotting: zhuštěný stav místo plného replay</text><rect fill="#11141A" height="77.9541" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="872.6563" x="20.3125" y="454.7363"/><rect fill="#11141A" height="77.9541" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="872.6563" x="20.3125" y="962.3291"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="104.6875" x2="104.6875" y1="156.6406" y2="1433.0566"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="488.2813" x2="488.2813" y1="156.6406" y2="1433.0566"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="660.1563" x2="660.1563" y1="156.6406" y2="1433.0566"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="810.1563" x2="810.1563" y1="156.6406" y2="1433.0566"/><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="137.5" x="35.9375" y="107.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="46.875" y="138.9816">Repository</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="137.5" x="35.9375" y="1431.4941"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="46.875" y="1462.7365">Repository</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="400.7813" y="151.4816">Snapshot Store</text><path d="M460.9375,74.9268 C460.9375,59.3018 489.0625,59.3018 489.0625,59.3018 C489.0625,59.3018 517.1875,59.3018 517.1875,74.9268 L517.1875,115.5518 C517.1875,131.1768 489.0625,131.1768 489.0625,131.1768 C489.0625,131.1768 460.9375,131.1768 460.9375,115.5518 L460.9375,74.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M460.9375,74.9268 C460.9375,90.5518 489.0625,90.5518 489.0625,90.5518 C489.0625,90.5518 517.1875,90.5518 517.1875,74.9268 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="400.7813" y="1451.799">Snapshot Store</text><path d="M460.9375,1472.583 C460.9375,1456.958 489.0625,1456.958 489.0625,1456.958 C489.0625,1456.958 517.1875,1456.958 517.1875,1472.583 L517.1875,1513.208 C517.1875,1528.833 489.0625,1528.833 489.0625,1528.833 C489.0625,1528.833 460.9375,1528.833 460.9375,1513.208 L460.9375,1472.583 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M460.9375,1472.583 C460.9375,1488.208 489.0625,1488.208 489.0625,1488.208 C489.0625,1488.208 517.1875,1488.208 517.1875,1472.583 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="125" x="592.9688" y="151.4816">Event Store</text><path d="M632.0313,74.9268 C632.0313,59.3018 660.1563,59.3018 660.1563,59.3018 C660.1563,59.3018 688.2813,59.3018 688.2813,74.9268 L688.2813,115.5518 C688.2813,131.1768 660.1563,131.1768 660.1563,131.1768 C660.1563,131.1768 632.0313,131.1768 632.0313,115.5518 L632.0313,74.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M632.0313,74.9268 C632.0313,90.5518 660.1563,90.5518 660.1563,90.5518 C660.1563,90.5518 688.2813,90.5518 688.2813,74.9268 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="125" x="592.9688" y="1451.799">Event Store</text><path d="M632.0313,1472.583 C632.0313,1456.958 660.1563,1456.958 660.1563,1456.958 C660.1563,1456.958 688.2813,1456.958 688.2813,1472.583 L688.2813,1513.208 C688.2813,1528.833 660.1563,1528.833 660.1563,1528.833 C660.1563,1528.833 632.0313,1528.833 632.0313,1513.208 L632.0313,1472.583 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M632.0313,1472.583 C632.0313,1488.208 660.1563,1488.208 660.1563,1488.208 C660.1563,1488.208 688.2813,1488.208 688.2813,1472.583 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="134.375" x="742.9688" y="107.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="112.5" x="753.9063" y="138.9816">Aggregate</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="134.375" x="742.9688" y="1431.4941"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="112.5" x="753.9063" y="1462.7365">Aggregate</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="903.9063" x="4.6875" y="205.3101"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="908.5938" y1="205.3101" y2="205.3101"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="908.5938" y1="209.9976" y2="209.9976"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="451.5625" x="230.8594" y="187.8906"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="421.875" x="240.2344" y="214.4455">Hydration s plným replay (pomalé)</text><path d="M40.625,253.9795 L40.625,310.2295 A4.6875,4.6875 0 0 0 45.3125,314.917 L868.75,314.917 A4.6875,4.6875 0 0 0 873.4375,310.2295 L873.4375,264.917 L857.8125,249.292 L45.3125,249.292 A4.6875,4.6875 0 0 0 40.625,253.9795 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M857.8125,249.292 L857.8125,262.5732 A2.3438,2.3438 0 0 0 860.1563,264.917 L873.4375,264.917 L857.8125,249.292 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="385.9375" x="264.4531" y="277.4094">Long-lived agregát s 10 000 eventy:</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="418.75" x="248.0469" y="302.8732">bez snapshotu trvá hydration sekundy.</text><polygon fill="#F0A456" points="641.4063,377.71,657.0313,383.96,641.4063,390.21,647.6563,383.96" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="650.7813" y1="383.96" y2="383.96"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="250" x="115.625" y="350.2121">SELECT * FROM events</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="456.25" x="115.625" y="375.676">WHERE aggregate_id = $id (10 000 řádků)</text><polygon fill="#F0A456" points="121.875,425.0488,106.25,431.2988,121.875,437.5488,115.625,431.2988" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="112.5" x2="658.5938" y1="431.2988" y2="431.2988"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="131.25" y="423.0148">všechny eventy</text><path d="M25,454.7363 L143.75,454.7363 L143.75,467.2363 L128.125,482.8613 L20.3125,482.8613 L20.3125,459.4238 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><rect fill="none" height="77.9541" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="872.6563" x="20.3125" y="454.7363"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="43.75" y="476.6037">loop</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="123.4375" x="167.1875" y="478.1662">[10 000×]</text><polygon fill="#F0A456" points="791.4063,513.9404,807.0313,520.1904,791.4063,526.4404,797.6563,520.1904" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="800.7813" y1="520.1904" y2="520.1904"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="115.625" y="511.9064">apply(event)</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="903.9063" x="4.6875" y="576.6724"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="908.5938" y1="576.6724" y2="576.6724"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="908.5938" y1="581.3599" y2="581.3599"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="448.4375" x="232.4219" y="559.2529"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="418.75" x="241.7969" y="585.8078">Hydration se snapshotem (rychlé)</text><polygon fill="#F0A456" points="470.3125,692.3584,485.9375,698.6084,470.3125,704.8584,476.5625,698.6084" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="479.6875" y1="698.6084" y2="698.6084"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="290.625" x="115.625" y="639.3967">SELECT * FROM snapshots</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="290.625" x="115.625" y="664.8605">WHERE aggregate_id = $id</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="346.875" x="115.625" y="690.3244">ORDER BY version DESC LIMIT 1</text><polygon fill="#F0A456" points="121.875,739.6973,106.25,745.9473,121.875,752.1973,115.625,745.9473" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="112.5" x2="487.5" y1="745.9473" y2="745.9473"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="282.8125" x="131.25" y="737.6633">snapshot @ version 9 800</text><polygon fill="#F0A456" points="791.4063,787.0361,807.0313,793.2861,791.4063,799.5361,797.6563,793.2861" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="800.7813" y1="793.2861" y2="793.2861"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="256.25" x="115.625" y="785.0021">restore(snapshot.state)</text><polygon fill="#F0A456" points="641.4063,885.3027,657.0313,891.5527,641.4063,897.8027,647.6563,891.5527" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="650.7813" y1="891.5527" y2="891.5527"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="250" x="115.625" y="832.341">SELECT * FROM events</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="290.625" x="115.625" y="857.8049">WHERE aggregate_id = $id</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="225" x="115.625" y="883.2687">AND version &gt; 9 800</text><polygon fill="#F0A456" points="121.875,932.6416,106.25,938.8916,121.875,945.1416,115.625,938.8916" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="112.5" x2="658.5938" y1="938.8916" y2="938.8916"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="295.3125" x="131.25" y="930.6076">200 eventů (od snapshotu)</text><path d="M25,962.3291 L143.75,962.3291 L143.75,974.8291 L128.125,990.4541 L20.3125,990.4541 L20.3125,967.0166 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><rect fill="none" height="77.9541" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="872.6563" x="20.3125" y="962.3291"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="43.75" y="984.1965">loop</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="84.375" x="167.1875" y="985.759">[200×]</text><polygon fill="#F0A456" points="791.4063,1021.5332,807.0313,1027.7832,791.4063,1034.0332,797.6563,1027.7832" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="800.7813" y1="1027.7832" y2="1027.7832"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="115.625" y="1019.4992">apply(event)</text><polygon fill="#F0A456" points="791.4063,1079.8096,807.0313,1086.0596,791.4063,1092.3096,797.6563,1086.0596" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="104.6875" x2="800.7813" y1="1086.0596" y2="1086.0596"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="115.625" y="1077.7756">current state</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="903.9063" x="4.6875" y="1131.604"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="908.5938" y1="1131.604" y2="1131.604"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="908.5938" y1="1136.2915" y2="1136.2915"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="360.9375" x="276.1719" y="1114.1846"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="331.25" x="285.5469" y="1140.7394">Periodic snapshot creation</text><path d="M29.6875,1180.2734 L29.6875,1236.5234 A4.6875,4.6875 0 0 0 34.375,1241.2109 L557.8125,1241.2109 A4.6875,4.6875 0 0 0 562.5,1236.5234 L562.5,1191.2109 L546.875,1175.5859 L34.375,1175.5859 A4.6875,4.6875 0 0 0 29.6875,1180.2734 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M546.875,1175.5859 L546.875,1188.8672 A2.3438,2.3438 0 0 0 549.2188,1191.2109 L562.5,1191.2109 L546.875,1175.5859 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="404.6875" x="94.1406" y="1203.7033">Po každých N eventech (typicky 100):</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="471.875" x="60.5469" y="1229.1672">zachycení agregátního stavu jako snapshot.</text><polygon fill="#F0A456" points="791.4063,1278.54,807.0313,1284.79,791.4063,1291.04,797.6563,1284.79" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="800.7813" y1="1284.79" y2="1284.79"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="115.625" y="1276.506">extractSnapshot()</text><polygon fill="#F0A456" points="121.875,1325.8789,106.25,1332.1289,121.875,1338.3789,115.625,1332.1289" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="112.5" x2="808.5938" y1="1332.1289" y2="1332.1289"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="314.0625" x="131.25" y="1323.8449">SnapshotData(version, state)</text><polygon fill="#F0A456" points="470.3125,1398.6816,485.9375,1404.9316,470.3125,1411.1816,476.5625,1404.9316" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="479.6875" y1="1404.9316" y2="1404.9316"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="256.25" x="115.625" y="1371.1838">INSERT INTO snapshots</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="314.0625" x="115.625" y="1396.6476">(aggregate_id, version, state)</text><!--MD5=[3323d87fd9a082271adaf138b465edde]
+@startuml snapshot_strategy
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Snapshotting: zhuštěný stav místo plného replay
+
+participant "Repository" as repo
+database "Snapshot Store" as ss
+database "Event Store" as es
+participant "Aggregate" as agg
+
+== Hydration s plným replay (pomalé) ==
+note over repo, agg
+  Long-lived agregát s 10 000 eventy:
+  bez snapshotu trvá hydration sekundy.
+end note
+
+repo -> es : SELECT * FROM events\nWHERE aggregate_id = $id (10 000 řádků)
+es - -> repo : všechny eventy
+loop 10 000×
+  repo -> agg : apply(event)
+end
+
+== Hydration se snapshotem (rychlé) ==
+repo -> ss : SELECT * FROM snapshots\nWHERE aggregate_id = $id\nORDER BY version DESC LIMIT 1
+ss - -> repo : snapshot @ version 9 800
+repo -> agg : restore(snapshot.state)
+
+repo -> es : SELECT * FROM events\nWHERE aggregate_id = $id\nAND version > 9 800
+es - -> repo : 200 eventů (od snapshotu)
+
+loop 200×
+  repo -> agg : apply(event)
+end
+
+repo - -> agg : current state
+
+== Periodic snapshot creation ==
+note over repo, ss
+  Po každých N eventech (typicky 100):
+  zachycení agregátního stavu jako snapshot.
+end note
+
+repo -> agg : extractSnapshot()
+agg - -> repo : SnapshotData(version, state)
+repo -> ss : INSERT INTO snapshots\n(aggregate_id, version, state)
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

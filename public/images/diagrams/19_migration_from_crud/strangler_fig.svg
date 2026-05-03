@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1550px" preserveAspectRatio="none" style="width:2848px;height:1550px;background:#11141A;" version="1.1" viewBox="0 0 2848 1550" width="2848.4375px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="943.75" x="957.8125" y="26.1063">Strangler Fig: postupná migrace CRUD → DDD bez big-bang rewrite</text><!--MD5=[dc61f514d9982fdc343c7f6a523f14e6]
+cluster p0--><rect fill="#161A22" height="537.5" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="285.9375" x="46.875" y="82.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="260.9375" x="59.375" y="106.1691">Fáze 0: Legacy CRUD</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="171.875" x="103.9063" y="131.633">(výchozí stav)</text><!--MD5=[fedee1b5a49a422abb3fa93dface23fd]
+cluster p1--><rect fill="#161A22" height="590.625" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="543.75" x="395.3125" y="395.2393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="260.9375" x="536.7188" y="418.6691">Fáze 1: Routing layer</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="228.125" x="553.125" y="444.133">(Strangler Facade)</text><!--MD5=[c43102eb9af13b6e0584468567583f91]
+cluster p2--><rect fill="#161A22" height="528.125" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="890.625" x="1001.5625" y="773.3643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="329.6875" x="1282.0313" y="796.7941">Fáze 2: Postupná extrakce</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="128.125" x="1382.8125" y="822.258">(BC za BC)</text><!--MD5=[7f2e6138616fc2c683da5289fe2d6fe4]
+cluster p3--><rect fill="#161A22" height="420.3125" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="332.8125" x="1954.6875" y="1113.9893"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="307.8125" x="1967.1875" y="1137.4191">Fáze 3: Legacy odstaven</text><!--MD5=[6c2e8282ebf2226251de134581428bd0]
+entity p0_app--><rect fill="#1B202A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="189.0625" x="89.8438" y="499.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="120.3125" x="124.2188" y="535.8566">Monolitická</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="157.8125" x="105.4688" y="561.3205">CRUD aplikace</text><!--MD5=[490a865cb95e6bda7ef6fe21818f45d4]
+entity p0_user--><rect fill="#11141A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="128.125" x="120.3125" y="174.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="50" x="159.375" y="210.8566">User</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="135.9375" y="236.3205">requests</text><!--MD5=[a87d2cba08f23e2696b4c9bc6bb74d02]
+entity p1_strangler--><rect fill="#1B202A" height="107.6416" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="192.1875" x="525.7813" y="487.4268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="573.4375" y="523.3566">Strangler</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="78.125" x="582.8125" y="548.8205">Facade</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="160.9375" x="541.4063" y="574.2844">(reverse proxy)</text><!--MD5=[4923b8107630e82c2e4d70cd3513259f]
+entity p1_legacy--><rect fill="#11141A" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="176.5625" x="433.5938" y="878.833"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="145.3125" x="449.2188" y="914.7629">Legacy CRUD</text><!--MD5=[07878ffe57468a2be0dff67f8330d745]
+entity p1_new--><rect fill="#1B202A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="223.4375" x="664.8438" y="865.5518"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="125" x="714.0625" y="901.4816">DDD modul</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="680.4688" y="926.9455">UserManagement</text><!--MD5=[2f12747057a79317149ba7002477172c]
+entity p2_strangler--><rect fill="#1B202A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="128.125" x="1432.8125" y="865.5518"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="1448.4375" y="901.4816">Strangler</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="78.125" x="1457.8125" y="926.9455">Facade</text><!--MD5=[e1f41f0e032b5b3fd9822be01e8d4c06]
+entity p2_legacy--><rect fill="#11141A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="176.5625" x="1039.8438" y="1181.1768"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="145.3125" x="1055.4688" y="1217.1066">Legacy CRUD</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="87.5" x="1084.375" y="1242.5705">(zbytek)</text><!--MD5=[c2ea28bde94f8548561802e271afbb8e]
+entity p2_um--><rect fill="#1B202A" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="223.4375" x="1271.0938" y="1194.458"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="1286.7188" y="1230.3879">UserManagement</text><!--MD5=[3934f7452f30ed2e6aedd2059ce0f724]
+entity p2_ord--><rect fill="#1B202A" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="125" x="1550" y="1194.458"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="93.75" x="1565.625" y="1230.3879">Ordering</text><!--MD5=[ac15bfc66749930ff1d2455cf1fa8da7]
+entity p2_cat--><rect fill="#1B202A" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="112.5" x="1729.6875" y="1194.458"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="1745.3125" y="1230.3879">Catalog</text><!--MD5=[ddcd64b872943f12ae78162ae170e08e]
+entity p3_ddd--><rect fill="#1B202A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="210.9375" x="1997.6563" y="1181.1768"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="145.3125" x="2030.4688" y="1217.1066">DDD aplikace</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="179.6875" x="2013.2813" y="1242.5705">(plně migrovaná)</text><!--MD5=[ae7097542eccdf995bf97b3c92990826]
+entity p3_facade--><rect fill="#11141A" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="212.5" x="1996.875" y="1413.9893"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="181.25" x="2012.5" y="1449.9191">Strangler Facade</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="2033.5938" y="1475.383">(odstraněna)</text><path d="M2325.7813,1426.4893 L2325.7813,1483.667 A4.6875,4.6875 0 0 0 2330.4688,1488.3545 L2825.7813,1488.3545 A4.6875,4.6875 0 0 0 2830.4688,1483.667 L2830.4688,1437.4268 L2814.8438,1421.8018 L2330.4688,1421.8018 A4.6875,4.6875 0 0 0 2325.7813,1426.4893 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M2814.8438,1421.8018 L2814.8438,1435.083 A2.3438,2.3438 0 0 0 2817.1875,1437.4268 L2830.4688,1437.4268 L2814.8438,1421.8018 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="471.875" x="2335.1563" y="1449.9191">Klíč: každá fáze je deployable a testovatelná</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="453.125" x="2335.1563" y="1475.383">v izolaci. Žádná „velká migrace" o víkendu.</text><!--MD5=[6cfaa2385fc2328cab3685f21fa0d086]
+link p0_user to p0_app--><path d="M184.375,258.0049 C184.375,317.208 184.375,427.7705 184.375,491.3799 " fill="none" id="p0_user-&gt;p0_app" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="184.375,499.6611,190.625,485.5986,184.375,491.8486,178.125,485.5986,184.375,499.6611" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[1f909d0ebd1e12467caaf9195333b649]
+link p1_strangler to p1_legacy--><path d="M591.0938,595.8174 C581.1719,614.8174 570.9688,636.7393 564.0625,657.7393 C539.8594,731.3799 528.9219,822.1299 524.5,870.7393 " fill="none" id="p1_strangler-&gt;p1_legacy" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="523.7969,878.7393,531.2666,865.2849,524.4881,870.9574,518.8156,864.1789,523.7969,878.7393" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="126.5625" x="565.625" y="704.6066">většina rout</text><!--MD5=[b1b29feb823cf56af903014ccd22c806]
+link p1_strangler to p1_new--><path d="M662.7031,595.8018 C675.9063,614.6299 689.75,636.4424 700,657.7393 C731.8594,723.9424 754.2344,806.4268 766.25,857.5049 " fill="none" id="p1_strangler-&gt;p1_new" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="768.0938,865.4268,771.0087,850.3165,766.3305,857.8158,758.8312,853.1377,768.0938,865.4268" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="735.9375" y="692.1066">/register,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="109.375" x="729.6875" y="717.5705">/users/$id</text><!--MD5=[91cbfbd91e678998f072fe0124229705]
+link p2_strangler to p2_legacy--><path d="M1432.4375,922.2861 C1372.75,937.9268 1284.6563,968.6611 1226.5625,1023.3643 C1182.9375,1064.4268 1155.8906,1129.0205 1141.4375,1173.0986 " fill="none" id="p2_strangler-&gt;p2_legacy" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1138.8906,1181.083,1149.1429,1169.6067,1141.2806,1173.6451,1137.2422,1165.7827,1138.8906,1181.083" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="193.75" x="1228.125" y="1057.7316">už jen reportování</text><!--MD5=[832fd0134de9d6de63deb3b512a782cc]
+link p2_strangler to p2_um--><path d="M1482.2031,948.7393 C1459.5625,1010.7393 1416.5469,1128.583 1395.3125,1186.7705 " fill="none" id="p2_strangler-&gt;p2_um" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1392.5938,1194.2236,1403.284,1183.1541,1395.2708,1186.8841,1391.5408,1178.8709,1392.5938,1194.2236" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[bf30092da897a26cc6b91b13c0946fbd]
+link p2_strangler to p2_ord--><path d="M1511.75,948.7393 C1534.6875,1010.7393 1578.2969,1128.583 1599.8281,1186.7705 " fill="none" id="p2_strangler-&gt;p2_ord" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1602.5937,1194.2236,1603.5904,1178.8671,1599.8898,1186.894,1591.8629,1183.1934,1602.5937,1194.2236" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[80564840608f994989bbe92d3f744643]
+link p2_strangler to p2_cat--><path d="M1518.6094,948.6299 C1530.9844,968.9424 1547.8594,993.0361 1567.1875,1010.8643 C1618.4063,1058.1143 1652.9062,1040.6768 1703.125,1088.9893 C1732.6094,1117.3486 1756.1406,1158.2705 1770.4844,1187.0049 " fill="none" id="p2_strangler-&gt;p2_cat" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1773.9219,1194.0361,1773.3604,1178.6575,1770.4905,1187.0175,1762.1306,1184.1477,1773.9219,1194.0361" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[bb5b9664a13fedf3e9de03cda7dae0de]
+link p3_ddd to p3_facade--><path d="M2103.125,1264.1611 C2103.125,1303.4424 2103.125,1363.4111 2103.125,1405.3643 " fill="none" id="p3_ddd-&gt;p3_facade" style="stroke: #7A5530; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#7A5530" points="2103.125,1413.5049,2109.375,1399.4424,2103.125,1405.6924,2096.875,1399.4424,2103.125,1413.5049" style="stroke: #7A5530; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="56.25" x="2104.6875" y="1360.8566">retire</text><!--MD5=[1d2adc40eca78d0911ed52e6f0bec0ee]
+link p0 to p1--><path d="M333.7506,219.258 C334.0974,219.2942 334.4505,219.3312 334.8098,219.3689 C337.6842,219.6707 340.9557,220.0194 344.5966,220.4152 C359.1606,221.9983 379.6366,224.3354 404.2595,227.4434 C453.5054,233.6592 519.3389,242.958 587.6387,255.4736 C724.2383,280.5049 870.7031,318.4033 914.0625,370.2393 C920.0273,377.3701 924.7136,385.313 928.3457,393.7601 C928.4592,394.024 928.5716,394.2885 928.6831,394.5535 " fill="none" id="p0-&gt;p1" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="928.6831,394.5535,928.9916,379.1677,925.6539,387.3521,917.4694,384.0145,928.6831,394.5535" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="922.6563" y="326.4816">1. workshop</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="187.5" x="895.3125" y="351.9455">2. zavedení proxy</text><!--MD5=[4ef60940496ff64d6ff13fdfdd3cc31c]
+link p1 to p2--><path d="M940.3181,543.7355 C941.212,543.7921 942.1473,543.8517 943.1231,543.9143 C945.0747,544.0396 947.1887,544.177 949.4596,544.3268 C954.0013,544.6264 959.1707,544.9757 964.9241,545.3766 C987.9377,546.9806 1020.2969,549.4128 1059.2178,552.812 C1137.0596,559.6104 1241.1484,570.2764 1349.2148,585.9189 C1565.3477,617.2041 1797.3906,668.3955 1867.1875,748.3643 C1872.8516,754.8545 1877.311,762.125 1880.7766,769.8855 C1881.2098,770.8556 1881.6275,771.8333 1882.03,772.8181 " fill="none" id="p1-&gt;p2" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1882.03,772.8181,1882.4945,757.4363,1879.074,765.5864,1870.9239,762.1659,1882.03,772.8181" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="150" x="1853.125" y="679.6066">extrakce 1 BC</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="68.75" x="1893.75" y="705.0705">v čase</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="159.375" x="1848.4375" y="730.5344">(týdny-měsíce)</text><!--MD5=[631cd75849dcfb6f71ae14dd4cd4585a]
+link p2 to p3--><path d="M1892.7828,911.0927 C1900.2333,912.6564 1910.5911,914.9706 1923.1499,918.1365 C1948.2676,924.4683 1982.1895,934.207 2019.2656,948.1631 C2093.418,976.0752 2180.1875,1020.8564 2234.375,1088.9893 C2238.9316,1094.7197 2242.866,1100.9985 2246.2619,1107.6088 C2247.1108,1109.2614 2247.9262,1110.9347 2248.7092,1112.6253 C2248.9049,1113.048 2249.0986,1113.4717 2249.2904,1113.8965 " fill="none" id="p2-&gt;p3" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="2249.2904,1113.8965,2249.2017,1098.5079,2246.0763,1106.7757,2237.8085,1103.6503,2249.2904,1113.8965" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="129.6875" x="2253.9063" y="1045.2316">poslední BC</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="193.75" x="2221.875" y="1070.6955">migruje, legacy off</text><!--MD5=[33fe160da9047a1d22db460a70868613]
+link p3 to GMN30--><path d="M2288.2092,1239.6811 C2288.4519,1239.8604 2288.6964,1240.0409 2288.9427,1240.2228 C2289.4352,1240.5866 2289.935,1240.9557 2290.4418,1241.3301 C2291.4553,1242.0787 2292.4972,1242.8482 2293.5662,1243.6378 C2295.7044,1245.217 2297.9514,1246.8767 2300.2996,1248.6111 C2319.0845,1262.4858 2344.335,1281.1367 2371.9863,1301.5615 C2427.2891,1342.4111 2492.1953,1390.3564 2534.1875,1421.3799 " fill="none" id="p3-GMN30" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><!--MD5=[99e5c521d3c55bafdb9bb9dd59bf5249]
+@startuml strangler_fig
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Strangler Fig: postupná migrace CRUD → DDD bez big-bang rewrite
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+rectangle "Fáze 0: Legacy CRUD\n(výchozí stav)" as p0 {
+  rectangle "Monolitická\nCRUD aplikace" as p0_app #1B202A
+  rectangle "User\nrequests" as p0_user #11141A
+  p0_user -[#F0A456]-> p0_app
+}
+
+rectangle "Fáze 1: Routing layer\n(Strangler Facade)" as p1 {
+  rectangle "Strangler\nFacade\n(reverse proxy)" as p1_strangler #1B202A
+  rectangle "Legacy CRUD" as p1_legacy #11141A
+  rectangle "DDD modul\nUserManagement" as p1_new #1B202A
+  p1_strangler -[#F0A456]-> p1_legacy : většina rout
+  p1_strangler -[#F0A456]-> p1_new : /register,\n/users/$id
+}
+
+rectangle "Fáze 2: Postupná extrakce\n(BC za BC)" as p2 {
+  rectangle "Strangler\nFacade" as p2_strangler #1B202A
+  rectangle "Legacy CRUD\n(zbytek)" as p2_legacy #11141A
+  rectangle "UserManagement" as p2_um #1B202A
+  rectangle "Ordering" as p2_ord #1B202A
+  rectangle "Catalog" as p2_cat #1B202A
+  p2_strangler -[#F0A456]-> p2_legacy : už jen reportování
+  p2_strangler -[#F0A456]-> p2_um
+  p2_strangler -[#F0A456]-> p2_ord
+  p2_strangler -[#F0A456]-> p2_cat
+}
+
+rectangle "Fáze 3: Legacy odstaven" as p3 {
+  rectangle "DDD aplikace\n(plně migrovaná)" as p3_ddd #1B202A
+  rectangle "Strangler Facade\n(odstraněna)" as p3_facade #11141A
+  p3_ddd -[#7A5530,dashed]-> p3_facade : retire
+}
+
+p0 -[#F0A456]-> p1 : 1. workshop\n2. zavedení proxy
+p1 -[#F0A456]-> p2 : extrakce 1 BC\nv čase\n(týdny-měsíce)
+p2 -[#F0A456]-> p3 : poslední BC\nmigruje, legacy off
+
+note bottom of p3
+  Klíč: každá fáze je deployable a testovatelná
+  v izolaci. Žádná „velká migrace" o víkendu.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

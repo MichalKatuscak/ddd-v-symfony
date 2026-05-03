@@ -1,0 +1,58 @@
+@startuml anemic_vs_rich
+!include ../theme.iuml
+
+title Anémický vs. bohatý doménový model
+
+skinparam package {
+  BackgroundColor $BG
+  BorderColor $ACCENT
+  FontColor $ACCENT
+}
+
+package "ANTI-VZOR: anemic model (data carrier)" as bad #260000 {
+  class "Order" as a_order {
+    + id, customerId, status, items
+    --
+    + getStatus(), setStatus(s)
+    + getItems(), setItems(i)
+    + addItem(item)         ' bez validace
+    + removeItem(item)      ' bez kontroly
+  }
+  class "OrderService" as a_svc {
+    + placeOrder(o, items)
+    + confirmOrder(o)       ' všechna pravidla zde
+    + cancelOrder(o)        ' všechna pravidla zde
+    + payOrder(o, payment)  ' kontroluje stav přes getStatus()
+  }
+  a_svc -[#F0A456]-> a_order : čte/zapisuje\npřímo do polí
+  note bottom of a_order #161A22
+    Order je struct s gettery a settery.
+    Nemá invarianty. Nemá chování.
+    Logika sedí v servisě – kdokoli ji obejde,
+    obejde i pravidla.
+  end note
+}
+
+package "SPRÁVNĚ: rich model (chování + invarianty)" as good #102B00 {
+  class "Order (final)" as r_order {
+    - id, customerId, status, items   ' private
+    --
+    + {static} place(items, customerId) : Order
+    + pay(amount, method) : Payment   ' invariant: status == CONFIRMED
+    + ship(shipmentId)               ' invariant: status == PAID
+    + cancel(reason)                 ' invariant: status in [DRAFT, CONFIRMED]
+    + addItem(productId, qty)        ' invariant: status == DRAFT
+  }
+  class "PlaceOrderHandler" as r_h {
+    + __invoke(cmd)
+  }
+  r_h -[#F0A456]-> r_order : volá\ndoménové metody
+  note bottom of r_order #161A22
+    Order chrání své invarianty.
+    Stavový přechod = volání metody.
+    Žádný setter neporuší pravidlo,
+    protože setter neexistuje.
+  end note
+}
+
+@enduml

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="925px" preserveAspectRatio="none" style="width:1609px;height:925px;background:#11141A;" version="1.1" viewBox="0 0 1609 925" width="1609.375px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="539.0625" x="544.5313" y="26.1063">Anémický vs. bohatý doménový model</text><!--MD5=[54d151dfe341457c80a8d830b0ad2844]
+cluster bad--><polygon fill="#260000" points="34.375,70.2393,535.9375,70.2393,546.875,105.0781,721.875,105.0781,721.875,907.7393,34.375,907.7393,34.375,70.2393" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="34.375" x2="546.875" y1="105.0781" y2="105.0781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="492.1875" x="40.625" y="93.6691">ANTI-VZOR: anemic model (data carrier)</text><!--MD5=[4b4fcc21959b44b7293758900907bb92]
+cluster good--><polygon fill="#102B00" points="759.375,108.5205,1304.6875,108.5205,1315.625,143.3594,1575,143.3594,1575,907.7393,759.375,907.7393,759.375,108.5205" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="759.375" x2="1315.625" y1="143.3594" y2="143.3594"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="535.9375" x="765.625" y="131.9504">SPRÁVNĚ: rich model (chování + invarianty)</text><!--MD5=[1b6318404298114abee29bc64dd8c581]
+class a_order--><rect fill="#161A22" height="199.1943" id="a_order" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="410.9375" x="172.6563" y="458.5205"/><ellipse cx="341.4063" cy="481.958" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M345.1416,489.3066 Q344.3848,489.6973 343.5547,489.8926 Q342.749,490.0879 341.8457,490.0879 Q338.623,490.0879 336.9141,487.9639 Q335.2295,485.8398 335.2295,481.8115 Q335.2295,477.7832 336.9141,475.6592 Q338.623,473.5352 341.8457,473.5352 Q342.749,473.5352 343.5791,473.7305 Q344.4092,473.9258 345.1416,474.292 L345.1416,477.8076 Q344.3359,477.0508 343.5547,476.709 Q342.7979,476.3672 341.9922,476.3672 Q340.2588,476.3672 339.3799,477.7344 Q338.501,479.1016 338.501,481.8115 Q338.501,484.4971 339.3799,485.8887 Q340.2588,487.2559 341.9922,487.2559 Q342.7979,487.2559 343.5547,486.9141 Q344.3359,486.5479 345.1416,485.8154 L345.1416,489.3066 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="60.9375" x="371.0938" y="489.5309">Order</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="174.2188" x2="582.0313" y1="505.3955" y2="505.3955"/><ellipse cx="223.4375" cy="522.583" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="235.9375" y="531.9504">id, customerId, status, items</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="174.2188" x2="582.0313" y1="543.3594" y2="543.3594"/><ellipse cx="189.8438" cy="560.5469" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="264.0625" x="202.3438" y="569.9142">getStatus(), setStatus(s)</text><ellipse cx="189.8438" cy="586.0107" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="237.5" x="202.3438" y="595.3781">getItems(), setItems(i)</text><ellipse cx="189.8438" cy="611.4746" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="350" x="202.3438" y="620.842">addItem(item)         ' bez validace</text><ellipse cx="189.8438" cy="636.9385" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="371.875" x="202.3438" y="646.3058">removeItem(item)      ' bez kontroly</text><!--MD5=[00cd994efad295b596d9790b27cddfa2]
+class a_svc--><rect fill="#161A22" height="173.7305" id="a_svc" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="635.9375" x="60.1563" y="124.9268"/><ellipse cx="302.3438" cy="148.3643" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M306.0791,155.7129 Q305.3223,156.1035 304.4922,156.2988 Q303.6865,156.4941 302.7832,156.4941 Q299.5605,156.4941 297.8516,154.3701 Q296.167,152.2461 296.167,148.2178 Q296.167,144.1895 297.8516,142.0654 Q299.5605,139.9414 302.7832,139.9414 Q303.6865,139.9414 304.5166,140.1367 Q305.3467,140.332 306.0791,140.6982 L306.0791,144.2139 Q305.2734,143.457 304.4922,143.1152 Q303.7354,142.7734 302.9297,142.7734 Q301.1963,142.7734 300.3174,144.1406 Q299.4385,145.5078 299.4385,148.2178 Q299.4385,150.9033 300.3174,152.2949 Q301.1963,153.6621 302.9297,153.6621 Q303.7354,153.6621 304.4922,153.3203 Q305.2734,152.9541 306.0791,152.2217 L306.0791,155.7129 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="332.0313" y="155.9372">OrderService</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="61.7188" x2="694.5313" y1="171.8018" y2="171.8018"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="61.7188" x2="694.5313" y1="184.3018" y2="184.3018"/><ellipse cx="77.3438" cy="201.4893" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="220.3125" x="89.8438" y="210.8566">placeOrder(o, items)</text><ellipse cx="77.3438" cy="226.9531" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="450" x="89.8438" y="236.3205">confirmOrder(o)       ' všechna pravidla zde</text><ellipse cx="77.3438" cy="252.417" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="446.875" x="89.8438" y="261.7844">cancelOrder(o)        ' všechna pravidla zde</text><ellipse cx="77.3438" cy="277.8809" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="596.875" x="89.8438" y="287.2482">payOrder(o, payment)  ' kontroluje stav přes getStatus()</text><path d="M151.5625,770.2393 L151.5625,878.3447 A4.6875,4.6875 0 0 0 156.25,883.0322 L600,883.0322 A4.6875,4.6875 0 0 0 604.6875,878.3447 L604.6875,781.1768 L589.0625,765.5518 L384.375,765.5518 L378.125,657.333 L371.875,765.5518 L156.25,765.5518 A4.6875,4.6875 0 0 0 151.5625,770.2393 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M589.0625,765.5518 L589.0625,778.833 A2.3438,2.3438 0 0 0 591.4063,781.1768 L604.6875,781.1768 L589.0625,765.5518 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="362.5" x="160.9375" y="793.6691">Order je struct s gettery a settery.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="339.0625" x="160.9375" y="819.133">Nemá invarianty. Nemá chování.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="420.3125" x="160.9375" y="844.5969">Logika sedí v servisě - kdokoli ji obejde,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="179.6875" x="160.9375" y="870.0607">obejde i pravidla.</text><!--MD5=[8133eac430108139e69f2db2cc7e38e2]
+class r_order--><rect fill="#161A22" height="224.6582" id="r_order" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="767.1875" x="783.5938" y="445.2393"/><ellipse cx="1098.4375" cy="468.6768" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1102.1729,476.0254 Q1101.416,476.416 1100.5859,476.6113 Q1099.7803,476.8066 1098.877,476.8066 Q1095.6543,476.8066 1093.9453,474.6826 Q1092.2607,472.5586 1092.2607,468.5303 Q1092.2607,464.502 1093.9453,462.3779 Q1095.6543,460.2539 1098.877,460.2539 Q1099.7803,460.2539 1100.6104,460.4492 Q1101.4404,460.6445 1102.1729,461.0107 L1102.1729,464.5264 Q1101.3672,463.7695 1100.5859,463.4277 Q1099.8291,463.0859 1099.0234,463.0859 Q1097.29,463.0859 1096.4111,464.4531 Q1095.5322,465.8203 1095.5322,468.5303 Q1095.5322,471.2158 1096.4111,472.6074 Q1097.29,473.9746 1099.0234,473.9746 Q1099.8291,473.9746 1100.5859,473.6328 Q1101.3672,473.2666 1102.1729,472.5342 L1102.1729,476.0254 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="125" x="1128.125" y="476.2497">Order (final)</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="785.1563" x2="1549.2188" y1="492.1143" y2="492.1143"/><rect fill="none" height="9.375" style="stroke: #C82930; stroke-width: 1.5625;" width="9.375" x="957.0313" y="504.6143"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="406.25" x="974.2188" y="518.6691">id, customerId, status, items   ' private</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="785.1563" x2="1549.2188" y1="530.0781" y2="530.0781"/><ellipse cx="800.7813" cy="547.2656" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" text-decoration="underline" textLength="348.4375" x="813.2813" y="556.633">place(items, customerId) : Order</text><ellipse cx="800.7813" cy="572.7295" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="728.125" x="813.2813" y="582.0969">pay(amount, method) : Payment   ' invariant: status == CONFIRMED</text><ellipse cx="800.7813" cy="598.1934" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="556.25" x="813.2813" y="607.5607">ship(shipmentId)               ' invariant: status == PAID</text><ellipse cx="800.7813" cy="623.6572" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="712.5" x="813.2813" y="633.0246">cancel(reason)                 ' invariant: status in [DRAFT, CONFIRMED]</text><ellipse cx="800.7813" cy="649.1211" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="606.25" x="813.2813" y="658.4885">addItem(productId, qty)        ' invariant: status == DRAFT</text><!--MD5=[284d7b54a5a2781f0fa62bcf30f82a07]
+class r_h--><rect fill="#161A22" height="97.3389" id="r_h" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="248.4375" x="1042.9688" y="163.208"/><ellipse cx="1064.8438" cy="186.6455" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1068.5791,193.9941 Q1067.8223,194.3848 1066.9922,194.5801 Q1066.1865,194.7754 1065.2832,194.7754 Q1062.0605,194.7754 1060.3516,192.6514 Q1058.667,190.5273 1058.667,186.499 Q1058.667,182.4707 1060.3516,180.3467 Q1062.0605,178.2227 1065.2832,178.2227 Q1066.1865,178.2227 1067.0166,178.418 Q1067.8467,178.6133 1068.5791,178.9795 L1068.5791,182.4951 Q1067.7734,181.7383 1066.9922,181.3965 Q1066.2354,181.0547 1065.4297,181.0547 Q1063.6963,181.0547 1062.8174,182.4219 Q1061.9385,183.7891 1061.9385,186.499 Q1061.9385,189.1846 1062.8174,190.5762 Q1063.6963,191.9434 1065.4297,191.9434 Q1066.2354,191.9434 1066.9922,191.6016 Q1067.7734,191.2354 1068.5791,190.5029 L1068.5791,193.9941 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="1085.1563" y="194.2184">PlaceOrderHandler</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1044.5313" x2="1289.8438" y1="210.083" y2="210.083"/><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1044.5313" x2="1289.8438" y1="222.583" y2="222.583"/><ellipse cx="1060.1563" cy="239.7705" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="1072.6563" y="249.1379">__invoke(cmd)</text><path d="M968.75,770.2393 L968.75,878.3447 A4.6875,4.6875 0 0 0 973.4375,883.0322 L1360.9375,883.0322 A4.6875,4.6875 0 0 0 1365.625,878.3447 L1365.625,781.1768 L1350,765.5518 L1173.4375,765.5518 L1167.1875,670.958 L1160.9375,765.5518 L973.4375,765.5518 A4.6875,4.6875 0 0 0 968.75,770.2393 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1350,765.5518 L1350,778.833 A2.3438,2.3438 0 0 0 1352.3438,781.1768 L1365.625,781.1768 L1350,765.5518 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="289.0625" x="978.125" y="793.6691">Order chrání své invarianty.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="364.0625" x="978.125" y="819.133">Stavový přechod = volání metody.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="978.125" y="844.5969">Žádný setter neporuší pravidlo,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="278.125" x="978.125" y="870.0607">protože setter neexistuje.</text><!--MD5=[9b2fa260d9e6adb90a1cdbedb8746e8b]
+link a_svc to a_order--><path d="M378.125,298.4268 C378.125,344.1924 378.125,401.0205 378.125,449.6768 " fill="none" id="a_svc-&gt;a_order" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="378.125,458.0361,384.375,443.9736,378.125,450.2236,371.875,443.9736,378.125,458.0361" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="131.25" x="383.5938" y="367.1066">čte/zapisuje</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="379.6875" y="392.5705">přímo do polí</text><!--MD5=[31d6badbe795e63c6b611ca7de4b1d07]
+link r_h to r_order--><path d="M1167.1875,260.1768 C1167.1875,305.4736 1167.1875,375.9268 1167.1875,436.7236 " fill="none" id="r_h-&gt;r_order" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1167.1875,444.8643,1173.4375,430.8018,1167.1875,437.0518,1160.9375,430.8018,1167.1875,444.8643" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="42.1875" x="1249.2188" y="367.1066">volá</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="203.125" x="1168.75" y="392.5705">doménové metody</text><!--MD5=[476e7c010fe0b1a3993c8d2c2b6665ba]
+@startuml anemic_vs_rich
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Anémický vs. bohatý doménový model
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+package "ANTI-VZOR: anemic model (data carrier)" as bad #260000 {
+  class "Order" as a_order {
+    + id, customerId, status, items
+    - -
+    + getStatus(), setStatus(s)
+    + getItems(), setItems(i)
+    + addItem(item)         ' bez validace
+    + removeItem(item)      ' bez kontroly
+  }
+  class "OrderService" as a_svc {
+    + placeOrder(o, items)
+    + confirmOrder(o)       ' všechna pravidla zde
+    + cancelOrder(o)        ' všechna pravidla zde
+    + payOrder(o, payment)  ' kontroluje stav přes getStatus()
+  }
+  a_svc -[#F0A456]-> a_order : čte/zapisuje\npřímo do polí
+  note bottom of a_order #161A22
+    Order je struct s gettery a settery.
+    Nemá invarianty. Nemá chování.
+    Logika sedí v servisě - kdokoli ji obejde,
+    obejde i pravidla.
+  end note
+}
+
+package "SPRÁVNĚ: rich model (chování + invarianty)" as good #102B00 {
+  class "Order (final)" as r_order {
+    - id, customerId, status, items   ' private
+    - -
+    + {static} place(items, customerId) : Order
+    + pay(amount, method) : Payment   ' invariant: status == CONFIRMED
+    + ship(shipmentId)               ' invariant: status == PAID
+    + cancel(reason)                 ' invariant: status in [DRAFT, CONFIRMED]
+    + addItem(productId, qty)        ' invariant: status == DRAFT
+  }
+  class "PlaceOrderHandler" as r_h {
+    + __invoke(cmd)
+  }
+  r_h -[#F0A456]-> r_order : volá\ndoménové metody
+  note bottom of r_order #161A22
+    Order chrání své invarianty.
+    Stavový přechod = volání metody.
+    Žádný setter neporuší pravidlo,
+    protože setter neexistuje.
+  end note
+}
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

@@ -77,6 +77,9 @@ Strangler Fig Pattern (vzor fíkovníku škrtiče) je architektonická strategie
 která umožňuje postupnou náhradu starého systému novým bez nutnosti „big bang“ přepisu. Název pochází
 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho nahrazuje.
 
+:::diagram{fig="19.2-A" title="Strangler Fig: čtyři fáze migrace CRUD → DDD" src="images/diagrams/19_migration_from_crud/strangler_fig.svg"}
+:::
+
 :::callout{type="note"}
 ### Princip fungování {#strangler-princip-heading}
 

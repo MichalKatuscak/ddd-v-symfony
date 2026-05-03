@@ -1,0 +1,40 @@
+@startuml projection_lifecycle
+!include ../theme.iuml
+
+title Projekce: tok z event streamu do read modelu
+
+participant "Aggregate" as agg
+database "Event Store" as es
+queue "Event Bus\n(Messenger)" as bus
+participant "Projector\n(OrderListProjector)" as proj
+database "Read Model\n(orders_view)" as rm
+participant "Query Handler" as qh
+actor "User" as user
+
+== Write side: vznik eventu ==
+agg -> es : append(OrderPlaced)
+es -> bus : publish event\n(přes outbox)
+
+== Projection: aktualizace read modelu ==
+bus -> proj : OrderPlaced
+proj -> rm : SELECT last_processed_event_id\nFROM projection_checkpoint
+proj -> proj : event_id > checkpoint?\n(idempotence guard)
+alt nový event
+  proj -> rm : INSERT INTO orders_view\n(order_id, customer, status, ...)
+  proj -> rm : UPDATE projection_checkpoint\nSET last_event_id = ?
+else duplicita
+  proj -> proj : skip\n(už zpracován)
+end
+
+== Read side: dotaz uživatele ==
+user -> qh : GET /orders
+qh -> rm : SELECT * FROM orders_view\nWHERE customer_id = ?
+rm --> qh : denormalizovaná data
+qh --> user : view model
+
+note over rm
+  Read model je předpočítaný projection.
+  Dotazy jsou jednoduché SELECTy bez JOINů.
+end note
+
+@enduml

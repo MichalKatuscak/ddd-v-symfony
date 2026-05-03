@@ -1,0 +1,54 @@
+@startuml hot_aggregate_thrash
+!include ../theme.iuml
+
+title Hot aggregate: optimistic lock thrash při vysoké souběžnosti
+
+participant "Worker A" as a
+participant "Worker B" as b
+participant "Worker C" as c
+database "Inventory\n(version=42)" as inv
+
+== Tři klienti chtějí strhnout 1 ks naráz ==
+
+a -> inv : SELECT * (version=42)
+b -> inv : SELECT * (version=42)
+c -> inv : SELECT * (version=42)
+
+a -> a : modify (qty -1)
+b -> b : modify (qty -1)
+c -> c : modify (qty -1)
+
+a -> inv : UPDATE … WHERE version=42
+inv -> a : OK (version=43)
+
+b -> inv : UPDATE … WHERE version=42
+inv -> b : 0 rows ⇒ OptimisticLockException
+note right of b : Retry musí celou operaci zopakovat
+
+c -> inv : UPDATE … WHERE version=42
+inv -> c : 0 rows ⇒ OptimisticLockException
+
+== Retry storm: B a C zopakují celou load+modify+save ==
+
+b -> inv : SELECT * (version=43)
+c -> inv : SELECT * (version=43)
+
+b -> inv : UPDATE … WHERE version=43
+inv -> b : OK (version=44)
+
+c -> inv : UPDATE … WHERE version=43
+inv -> c : 0 rows ⇒ retry…
+
+note over a, c
+  Při 50–80 % konfliktů systém degraduje na sériový provoz.
+  Throughput o řád dolů, latence nahoru.
+end note
+
+note over inv
+  Řešení není pessimistic lock,
+  ale REDESIGN HRANIC AGREGÁTU
+  (per-warehouse, per-region)
+  nebo eventual consistency přes ságu.
+end note
+
+@enduml

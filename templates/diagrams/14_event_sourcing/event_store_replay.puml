@@ -1,0 +1,33 @@
+@startuml event_store_replay
+!include ../theme.iuml
+
+title Event Sourcing: replay agregátu z event streamu
+
+participant "Repository" as repo
+database "Event Store\n(events table)" as es
+participant "EventSourcedAggregate\n(Order)" as agg
+
+repo -> es : SELECT * FROM events\nWHERE aggregate_id = $id\nORDER BY version ASC
+es --> repo : [OrderPlaced, ItemAdded, ItemAdded,\n OrderConfirmed, OrderPaid, OrderShipped]
+
+note right of repo
+  Stream nese kompletní historii.
+  Stav agregátu = projekce všech eventů.
+end note
+
+repo -> agg : new Order() (prázdný)
+
+loop pro každý event v pořadí
+  repo -> agg : apply(event)
+  agg -> agg : aktualizuj interní stav\nbez emise nových eventů
+end
+
+repo --> agg : agregát ve stavu po\nvšech eventech (current state)
+
+note over agg
+  Agregát je nyní jako by procházel
+  původní sekvencí, ale BEZ side effects.
+  Žádné nové eventy nevznikly.
+end note
+
+@enduml

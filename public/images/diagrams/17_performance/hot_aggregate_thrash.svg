@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1676.5625px" preserveAspectRatio="none" style="width:1178px;height:1676px;background:#11141A;" version="1.1" viewBox="0 0 1178 1676" width="1178.125px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="834.375" x="164.8438" y="41.7313">Hot aggregate: optimistic lock thrash při vysoké souběžnosti</text><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="170.3125" x2="170.3125" y1="182.1045" y2="1536.8164"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="344.5313" x2="344.5313" y1="182.1045" y2="1536.8164"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="519.5313" x2="519.5313" y1="182.1045" y2="1536.8164"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="923.4375" x2="923.4375" y1="182.1045" y2="1536.8164"/><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="118.75" x="110.9375" y="133.2031"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="121.875" y="164.4455">Worker A</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="118.75" x="110.9375" y="1535.2539"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="96.875" x="121.875" y="1566.4963">Worker A</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="120.3125" x="285.1563" y="133.2031"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="296.0938" y="164.4455">Worker B</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="120.3125" x="285.1563" y="1535.2539"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="296.0938" y="1566.4963">Worker B</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="120.3125" x="460.1563" y="133.2031"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="471.0938" y="164.4455">Worker C</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="120.3125" x="460.1563" y="1535.2539"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="471.0938" y="1566.4963">Worker C</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="869.5313" y="151.4816">Inventory</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="848.4375" y="176.9455">(version=42)</text><path d="M895.3125,74.9268 C895.3125,59.3018 923.4375,59.3018 923.4375,59.3018 C923.4375,59.3018 951.5625,59.3018 951.5625,74.9268 L951.5625,115.5518 C951.5625,131.1768 923.4375,131.1768 923.4375,131.1768 C923.4375,131.1768 895.3125,131.1768 895.3125,115.5518 L895.3125,74.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M895.3125,74.9268 C895.3125,90.5518 923.4375,90.5518 923.4375,90.5518 C923.4375,90.5518 951.5625,90.5518 951.5625,74.9268 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="98.4375" x="869.5313" y="1555.5588">Inventory</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="848.4375" y="1581.0226">(version=42)</text><path d="M895.3125,1601.8066 C895.3125,1586.1816 923.4375,1586.1816 923.4375,1586.1816 C923.4375,1586.1816 951.5625,1586.1816 951.5625,1601.8066 L951.5625,1642.4316 C951.5625,1658.0566 923.4375,1658.0566 923.4375,1658.0566 C923.4375,1658.0566 895.3125,1658.0566 895.3125,1642.4316 L895.3125,1601.8066 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M895.3125,1601.8066 C895.3125,1617.4316 923.4375,1617.4316 923.4375,1617.4316 C923.4375,1617.4316 951.5625,1617.4316 951.5625,1601.8066 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="1154.6875" x="4.6875" y="230.7739"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1159.375" y1="230.7739" y2="230.7739"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1159.375" y1="235.4614" y2="235.4614"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="468.75" x="347.6563" y="213.3545"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="439.0625" x="357.0313" y="239.9094">Tři klienti chtějí strhnout 1 ks naráz</text><polygon fill="#F0A456" points="904.6875,295.5322,920.3125,301.7822,904.6875,308.0322,910.9375,301.7822" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="170.3125" x2="914.0625" y1="301.7822" y2="301.7822"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="181.25" y="293.4982">SELECT * (version=42)</text><polygon fill="#F0A456" points="904.6875,342.8711,920.3125,349.1211,904.6875,355.3711,910.9375,349.1211" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="345.3125" x2="914.0625" y1="349.1211" y2="349.1211"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="356.25" y="340.8371">SELECT * (version=42)</text><polygon fill="#F0A456" points="904.6875,390.21,920.3125,396.46,904.6875,402.71,910.9375,396.46" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="520.3125" x2="914.0625" y1="396.46" y2="396.46"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="531.25" y="388.176">SELECT * (version=42)</text><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="170.3125" x2="235.9375" y1="443.7988" y2="443.7988"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="235.9375" x2="235.9375" y1="443.7988" y2="464.1113"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="171.875" x2="235.9375" y1="464.1113" y2="464.1113"/><polygon fill="#F0A456" points="187.5,457.8613,171.875,464.1113,187.5,470.3613,181.25,464.1113" style="stroke: #F0A456; stroke-width: 1.5625;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="181.25" y="435.5148">modify (qty -1)</text><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="345.3125" x2="410.9375" y1="511.4502" y2="511.4502"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="410.9375" x2="410.9375" y1="511.4502" y2="531.7627"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="346.875" x2="410.9375" y1="531.7627" y2="531.7627"/><polygon fill="#F0A456" points="362.5,525.5127,346.875,531.7627,362.5,538.0127,356.25,531.7627" style="stroke: #F0A456; stroke-width: 1.5625;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="356.25" y="503.1662">modify (qty -1)</text><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="520.3125" x2="585.9375" y1="579.1016" y2="579.1016"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="585.9375" x2="585.9375" y1="579.1016" y2="599.4141"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="521.875" x2="585.9375" y1="599.4141" y2="599.4141"/><polygon fill="#F0A456" points="537.5,593.1641,521.875,599.4141,537.5,605.6641,531.25,599.4141" style="stroke: #F0A456; stroke-width: 1.5625;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="531.25" y="570.8176">modify (qty -1)</text><polygon fill="#F0A456" points="904.6875,640.5029,920.3125,646.7529,904.6875,653.0029,910.9375,646.7529" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="170.3125" x2="914.0625" y1="646.7529" y2="646.7529"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="181.25" y="638.4689">UPDATE … WHERE version=42</text><polygon fill="#F0A456" points="187.5,687.8418,171.875,694.0918,187.5,700.3418,181.25,694.0918" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="178.125" x2="921.875" y1="694.0918" y2="694.0918"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="178.125" x="196.875" y="685.8078">OK (version=43)</text><polygon fill="#F0A456" points="904.6875,735.1807,920.3125,741.4307,904.6875,747.6807,910.9375,741.4307" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="345.3125" x2="914.0625" y1="741.4307" y2="741.4307"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="356.25" y="733.1467">UPDATE … WHERE version=42</text><polygon fill="#F0A456" points="362.5,782.5195,346.875,788.7695,362.5,795.0195,356.25,788.7695" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="353.125" x2="921.875" y1="788.7695" y2="788.7695"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="365.625" x="371.875" y="780.4855">0 rows ⇒ OptimisticLockException</text><path d="M353.125,813.7695 L353.125,845.0195 A4.6875,4.6875 0 0 0 357.8125,849.707 L778.125,849.707 A4.6875,4.6875 0 0 0 782.8125,845.0195 L782.8125,824.707 L767.1875,809.082 L357.8125,809.082 A4.6875,4.6875 0 0 0 353.125,813.7695 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M767.1875,809.082 L767.1875,822.3633 A2.3438,2.3438 0 0 0 769.5313,824.707 L782.8125,824.707 L767.1875,809.082 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="382.8125" x="376.5625" y="837.1994">Retry musí celou operaci zopakovat</text><polygon fill="#F0A456" points="904.6875,886.5723,920.3125,892.8223,904.6875,899.0723,910.9375,892.8223" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="520.3125" x2="914.0625" y1="892.8223" y2="892.8223"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="531.25" y="884.5383">UPDATE … WHERE version=42</text><polygon fill="#F0A456" points="537.5,933.9111,521.875,940.1611,537.5,946.4111,531.25,940.1611" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="528.125" x2="921.875" y1="940.1611" y2="940.1611"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="365.625" x="546.875" y="931.8771">0 rows ⇒ OptimisticLockException</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="1154.6875" x="4.6875" y="985.7056"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1159.375" y1="985.7056" y2="985.7056"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1159.375" y1="990.3931" y2="990.3931"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="676.5625" x="243.75" y="968.2861"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="646.875" x="253.125" y="994.841">Retry storm: B a C zopakují celou load+modify+save</text><polygon fill="#F0A456" points="904.6875,1050.4639,920.3125,1056.7139,904.6875,1062.9639,910.9375,1056.7139" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="345.3125" x2="914.0625" y1="1056.7139" y2="1056.7139"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="356.25" y="1048.4299">SELECT * (version=43)</text><polygon fill="#F0A456" points="904.6875,1097.8027,920.3125,1104.0527,904.6875,1110.3027,910.9375,1104.0527" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="520.3125" x2="914.0625" y1="1104.0527" y2="1104.0527"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="531.25" y="1095.7687">SELECT * (version=43)</text><polygon fill="#F0A456" points="904.6875,1145.1416,920.3125,1151.3916,904.6875,1157.6416,910.9375,1151.3916" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="345.3125" x2="914.0625" y1="1151.3916" y2="1151.3916"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="356.25" y="1143.1076">UPDATE … WHERE version=43</text><polygon fill="#F0A456" points="362.5,1192.4805,346.875,1198.7305,362.5,1204.9805,356.25,1198.7305" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="353.125" x2="921.875" y1="1198.7305" y2="1198.7305"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="178.125" x="371.875" y="1190.4465">OK (version=44)</text><polygon fill="#F0A456" points="904.6875,1239.8193,920.3125,1246.0693,904.6875,1252.3193,910.9375,1246.0693" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="520.3125" x2="914.0625" y1="1246.0693" y2="1246.0693"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="531.25" y="1237.7853">UPDATE … WHERE version=43</text><polygon fill="#F0A456" points="537.5,1287.1582,521.875,1293.4082,537.5,1299.6582,531.25,1293.4082" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="528.125" x2="921.875" y1="1293.4082" y2="1293.4082"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="173.4375" x="546.875" y="1285.1242">0 rows ⇒ retry…</text><path d="M12.5,1318.4082 L12.5,1374.6582 A4.6875,4.6875 0 0 0 17.1875,1379.3457 L675,1379.3457 A4.6875,4.6875 0 0 0 679.6875,1374.6582 L679.6875,1329.3457 L664.0625,1313.7207 L17.1875,1313.7207 A4.6875,4.6875 0 0 0 12.5,1318.4082 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M664.0625,1313.7207 L664.0625,1327.002 A2.3438,2.3438 0 0 0 666.4063,1329.3457 L679.6875,1329.3457 L664.0625,1313.7207 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="620.3125" x="35.9375" y="1341.8381">Při 50-80 % konfliktů systém degraduje na sériový provoz.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="423.4375" x="134.375" y="1367.3019">Throughput o řád dolů, latence nahoru.</text><path d="M693.75,1400.5859 L693.75,1508.3984 A4.6875,4.6875 0 0 0 698.4375,1513.0859 L1146.875,1513.0859 A4.6875,4.6875 0 0 0 1151.5625,1508.3984 L1151.5625,1411.5234 L1135.9375,1395.8984 L698.4375,1395.8984 A4.6875,4.6875 0 0 0 693.75,1400.5859 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1135.9375,1395.8984 L1135.9375,1409.1797 A2.3438,2.3438 0 0 0 1138.2813,1411.5234 L1151.5625,1411.5234 L1135.9375,1395.8984 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="310.9375" x="767.1875" y="1424.0158">Řešení není pessimistic lock,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="365.625" x="739.8438" y="1449.4797">ale REDESIGN HRANIC AGREGÁTU</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="770.3125" y="1474.9435">(per-warehouse, per-region)</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="410.9375" x="717.1875" y="1500.4074">nebo eventual consistency přes ságu.</text><!--MD5=[82ef4cb1d270f4971a733210e6ce6d08]
+@startuml hot_aggregate_thrash
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Hot aggregate: optimistic lock thrash při vysoké souběžnosti
+
+participant "Worker A" as a
+participant "Worker B" as b
+participant "Worker C" as c
+database "Inventory\n(version=42)" as inv
+
+== Tři klienti chtějí strhnout 1 ks naráz ==
+
+a -> inv : SELECT * (version=42)
+b -> inv : SELECT * (version=42)
+c -> inv : SELECT * (version=42)
+
+a -> a : modify (qty -1)
+b -> b : modify (qty -1)
+c -> c : modify (qty -1)
+
+a -> inv : UPDATE … WHERE version=42
+inv -> a : OK (version=43)
+
+b -> inv : UPDATE … WHERE version=42
+inv -> b : 0 rows ⇒ OptimisticLockException
+note right of b : Retry musí celou operaci zopakovat
+
+c -> inv : UPDATE … WHERE version=42
+inv -> c : 0 rows ⇒ OptimisticLockException
+
+== Retry storm: B a C zopakují celou load+modify+save ==
+
+b -> inv : SELECT * (version=43)
+c -> inv : SELECT * (version=43)
+
+b -> inv : UPDATE … WHERE version=43
+inv -> b : OK (version=44)
+
+c -> inv : UPDATE … WHERE version=43
+inv -> c : 0 rows ⇒ retry…
+
+note over a, c
+  Při 50-80 % konfliktů systém degraduje na sériový provoz.
+  Throughput o řád dolů, latence nahoru.
+end note
+
+note over inv
+  Řešení není pessimistic lock,
+  ale REDESIGN HRANIC AGREGÁTU
+  (per-warehouse, per-region)
+  nebo eventual consistency přes ságu.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

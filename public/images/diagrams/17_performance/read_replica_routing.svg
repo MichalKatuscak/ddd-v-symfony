@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1468.75px" preserveAspectRatio="none" style="width:1303px;height:1468px;background:#11141A;" version="1.1" viewBox="0 0 1303 1468" width="1303.125px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="732.8125" x="278.125" y="41.7313">CQRS s read replikou: routing dotazů a replikační lag</text><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="60.9375" x2="60.9375" y1="183.2031" y2="1329.1748"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="267.9688" x2="267.9688" y1="183.2031" y2="1329.1748"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="539.0625" x2="539.0625" y1="183.2031" y2="1329.1748"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="753.125" x2="753.125" y1="183.2031" y2="1329.1748"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="931.25" x2="931.25" y1="183.2031" y2="1329.1748"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="1193.75" x2="1193.75" y1="183.2031" y2="1329.1748"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="50" x="31.25" y="178.0441">User</text><ellipse cx="60.9375" cy="74.9268" fill="#161A22" rx="12.5" ry="12.5" style="stroke: #F0A456; stroke-width: 3.125;"/><path d="M60.9375,87.4268 L60.9375,129.6143 M40.625,99.9268 L81.25,99.9268 M60.9375,129.6143 L40.625,153.0518 M60.9375,129.6143 L81.25,153.0518 " fill="none" style="stroke: #F0A456; stroke-width: 3.125;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="50" x="31.25" y="1347.9172">User</text><ellipse cx="60.9375" cy="1368.7012" fill="#161A22" rx="12.5" ry="12.5" style="stroke: #F0A456; stroke-width: 3.125;"/><path d="M60.9375,1381.2012 L60.9375,1423.3887 M40.625,1393.7012 L81.25,1393.7012 M60.9375,1423.3887 L40.625,1446.8262 M60.9375,1423.3887 L81.25,1446.8262 " fill="none" style="stroke: #F0A456; stroke-width: 3.125;"/><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="126.5625" x="205.4688" y="134.3018"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="104.6875" x="216.4063" y="165.5441">Controller</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="126.5625" x="205.4688" y="1327.6123"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="104.6875" x="216.4063" y="1358.8547">Controller</text><rect fill="#161A22" height="72.8027" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="221.875" x="428.125" y="108.8379"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="200" x="439.0625" y="140.0803">Command Handler</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="70.3125" x="503.9063" y="165.5441">(Write)</text><rect fill="#161A22" height="72.8027" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="221.875" x="428.125" y="1327.6123"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="200" x="439.0625" y="1358.8547">Command Handler</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="70.3125" x="503.9063" y="1384.3185">(Write)</text><rect fill="#161A22" height="72.8027" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="175" x="665.625" y="108.8379"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="676.5625" y="140.0803">Query Handler</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="71.875" x="717.1875" y="165.5441">(Read)</text><rect fill="#161A22" height="72.8027" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="175" x="665.625" y="1327.6123"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="153.125" x="676.5625" y="1358.8547">Query Handler</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="71.875" x="717.1875" y="1384.3185">(Read)</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="867.9688" y="152.5803">Primary DB</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="856.25" y="178.0441">(write model)</text><path d="M903.125,76.0254 C903.125,60.4004 931.25,60.4004 931.25,60.4004 C931.25,60.4004 959.375,60.4004 959.375,76.0254 L959.375,116.6504 C959.375,132.2754 931.25,132.2754 931.25,132.2754 C931.25,132.2754 903.125,132.2754 903.125,116.6504 L903.125,76.0254 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M903.125,76.0254 C903.125,91.6504 931.25,91.6504 931.25,91.6504 C931.25,91.6504 959.375,91.6504 959.375,76.0254 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="867.9688" y="1347.9172">Primary DB</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="856.25" y="1373.381">(write model)</text><path d="M903.125,1394.165 C903.125,1378.54 931.25,1378.54 931.25,1378.54 C931.25,1378.54 959.375,1378.54 959.375,1394.165 L959.375,1434.79 C959.375,1450.415 931.25,1450.415 931.25,1450.415 C931.25,1450.415 903.125,1450.415 903.125,1434.79 L903.125,1394.165 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M903.125,1394.165 C903.125,1409.79 931.25,1409.79 931.25,1409.79 C931.25,1409.79 959.375,1409.79 959.375,1394.165 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="1118.75" y="152.5803">Read Replica</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="137.5" x="1120.3125" y="178.0441">(read model)</text><path d="M1165.625,76.0254 C1165.625,60.4004 1193.75,60.4004 1193.75,60.4004 C1193.75,60.4004 1221.875,60.4004 1221.875,76.0254 L1221.875,116.6504 C1221.875,132.2754 1193.75,132.2754 1193.75,132.2754 C1193.75,132.2754 1165.625,132.2754 1165.625,116.6504 L1165.625,76.0254 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M1165.625,76.0254 C1165.625,91.6504 1193.75,91.6504 1193.75,91.6504 C1193.75,91.6504 1221.875,91.6504 1221.875,76.0254 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="140.625" x="1118.75" y="1347.9172">Read Replica</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="137.5" x="1120.3125" y="1373.381">(read model)</text><path d="M1165.625,1394.165 C1165.625,1378.54 1193.75,1378.54 1193.75,1378.54 C1193.75,1378.54 1221.875,1378.54 1221.875,1394.165 L1221.875,1434.79 C1221.875,1450.415 1193.75,1450.415 1193.75,1450.415 C1193.75,1450.415 1165.625,1450.415 1165.625,1434.79 L1165.625,1394.165 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M1165.625,1394.165 C1165.625,1409.79 1193.75,1409.79 1193.75,1409.79 C1193.75,1409.79 1221.875,1409.79 1221.875,1394.165 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M848.4375,211.3281 L848.4375,267.5781 A4.6875,4.6875 0 0 0 853.125,272.2656 L1271.875,272.2656 A4.6875,4.6875 0 0 0 1276.5625,267.5781 L1276.5625,222.2656 L1260.9375,206.6406 L853.125,206.6406 A4.6875,4.6875 0 0 0 848.4375,211.3281 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1260.9375,206.6406 L1260.9375,219.9219 A2.3438,2.3438 0 0 0 1263.2813,222.2656 L1276.5625,222.2656 L1260.9375,206.6406 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="381.25" x="871.875" y="234.758">Streaming replikace: lag 10-100 ms</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="270.3125" x="927.3438" y="260.2219">za normálních podmínek.</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="1279.6875" x="4.6875" y="314.0503"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1284.375" y1="314.0503" y2="314.0503"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1284.375" y1="318.7378" y2="318.7378"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="478.125" x="405.4688" y="296.6309"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="448.4375" x="414.8438" y="323.1857">Write path: command jde na primary</text><polygon fill="#F0A456" points="250,378.8086,265.625,385.0586,250,391.3086,256.25,385.0586" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="60.9375" x2="259.375" y1="385.0586" y2="385.0586"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="71.875" y="376.7746">POST /orders</text><polygon fill="#F0A456" points="520.3125,426.1475,535.9375,432.3975,520.3125,438.6475,526.5625,432.3975" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="268.75" x2="529.6875" y1="432.3975" y2="432.3975"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="232.8125" x="279.6875" y="424.1135">PlaceOrder command</text><polygon fill="#F0A456" points="912.5,473.4863,928.125,479.7363,912.5,485.9863,918.75,479.7363" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="539.0625" x2="921.875" y1="479.7363" y2="479.7363"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="234.375" x="550" y="471.4523">INSERT INTO orders…</text><polygon fill="#F0A456" points="912.5,520.8252,928.125,527.0752,912.5,533.3252,918.75,527.0752" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="539.0625" x2="921.875" y1="527.0752" y2="527.0752"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="239.0625" x="550" y="518.7912">INSERT INTO outbox…</text><polygon fill="#F0A456" points="556.25,568.1641,540.625,574.4141,556.25,580.6641,550,574.4141" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="546.875" x2="929.6875" y1="574.4141" y2="574.4141"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="31.25" x="565.625" y="566.1301">OK</text><polygon fill="#F0A456" points="1175,640.9668,1190.625,647.2168,1175,653.4668,1181.25,647.2168" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="931.25" x2="1184.375" y1="647.2168" y2="647.2168"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="225" x="942.1875" y="613.4689">streaming replication</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="214.0625" x="942.1875" y="638.9328">(async, ~50 ms lag)</text><polygon fill="#F0A456" points="78.125,713.7695,62.5,720.0195,78.125,726.2695,71.875,720.0195" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="68.75" x2="267.1875" y1="720.0195" y2="720.0195"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="134.375" x="87.5" y="686.2717">201 Created</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="87.5" y="711.7355">{ orderId }</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="1279.6875" x="4.6875" y="765.564"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1284.375" y1="765.564" y2="765.564"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1284.375" y1="770.2515" y2="770.2515"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="417.1875" x="435.9375" y="748.1445"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="387.5" x="445.3125" y="774.6994">Read path: query jde na replicu</text><polygon fill="#F0A456" points="250,830.3223,265.625,836.5723,250,842.8223,256.25,836.5723" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="60.9375" x2="259.375" y1="836.5723" y2="836.5723"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="170.3125" x="71.875" y="828.2883">GET /orders/$id</text><polygon fill="#F0A456" points="734.375,877.6611,750,883.9111,734.375,890.1611,740.625,883.9111" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="268.75" x2="743.75" y1="883.9111" y2="883.9111"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="279.6875" y="875.6271">GetOrder query</text><polygon fill="#F0A456" points="1175,950.4639,1190.625,956.7139,1175,962.9639,1181.25,956.7139" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="753.125" x2="1184.375" y1="956.7139" y2="956.7139"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="764.0625" y="922.966">SELECT * FROM orders_view</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="168.75" x="764.0625" y="948.4299">WHERE id = $id</text><polygon fill="#F0A456" points="770.3125,997.8027,754.6875,1004.0527,770.3125,1010.3027,764.0625,1004.0527" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="760.9375" x2="1192.1875" y1="1004.0527" y2="1004.0527"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="46.875" x="779.6875" y="995.7687">data</text><polygon fill="#F0A456" points="285.9375,1045.1416,270.3125,1051.3916,285.9375,1057.6416,279.6875,1051.3916" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="276.5625" x2="751.5625" y1="1051.3916" y2="1051.3916"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="120.3125" x="295.3125" y="1043.1076">view model</text><polygon fill="#F0A456" points="78.125,1092.4805,62.5,1098.7305,78.125,1104.9805,71.875,1098.7305" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="68.75" x2="267.1875" y1="1098.7305" y2="1098.7305"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="79.6875" x="87.5" y="1090.4465">200 OK</text><rect fill="#1B202A" height="4.6875" style="stroke: #1B202A; stroke-width: 1.5625;" width="1279.6875" x="4.6875" y="1144.2749"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1284.375" y1="1144.2749" y2="1144.2749"/><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="4.6875" x2="1284.375" y1="1148.9624" y2="1148.9624"/><rect fill="#1B202A" height="37.9639" style="stroke: #3D424E; stroke-width: 3.125;" width="353.125" x="467.9688" y="1126.8555"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="323.4375" x="477.3438" y="1153.4103">Read-your-writes problém</text><path d="M12.5,1192.9443 L12.5,1300.7568 A4.6875,4.6875 0 0 0 17.1875,1305.4443 L1237.5,1305.4443 A4.6875,4.6875 0 0 0 1242.1875,1300.7568 L1242.1875,1203.8818 L1226.5625,1188.2568 L17.1875,1188.2568 A4.6875,4.6875 0 0 0 12.5,1192.9443 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1226.5625,1188.2568 L1226.5625,1201.5381 A2.3438,2.3438 0 0 0 1228.9063,1203.8818 L1242.1875,1203.8818 L1226.5625,1188.2568 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="414.0625" x="420.3125" y="1216.3742">Pokud user pošle GET ihned po POST,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="387.5" x="433.5938" y="1241.8381">replica ještě nemá nová data → 404.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="410.9375" x="421.875" y="1267.3019">Řešení: routing podle freshness flagu,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="589.0625" x="332.8125" y="1292.7658">nebo synchronní čtení z primary pro „read your writes".</text><!--MD5=[2b22796e51634b5bcea0a38c5e5a49ca]
+@startuml read_replica_routing
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title CQRS s read replikou: routing dotazů a replikační lag
+
+actor "User" as u
+participant "Controller" as ctrl
+participant "Command Handler\n(Write)" as wh
+participant "Query Handler\n(Read)" as qh
+database "Primary DB\n(write model)" as primary
+database "Read Replica\n(read model)" as replica
+
+note over primary, replica
+  Streaming replikace: lag 10-100 ms
+  za normálních podmínek.
+end note
+
+== Write path: command jde na primary ==
+
+u -> ctrl : POST /orders
+ctrl -> wh : PlaceOrder command
+wh -> primary : INSERT INTO orders…
+wh -> primary : INSERT INTO outbox…
+primary - -> wh : OK
+
+primary - -> replica : streaming replication\n(async, ~50 ms lag)
+
+ctrl - -> u : 201 Created\n{ orderId }
+
+== Read path: query jde na replicu ==
+
+u -> ctrl : GET /orders/$id
+ctrl -> qh : GetOrder query
+qh -> replica : SELECT * FROM orders_view\nWHERE id = $id
+replica - -> qh : data
+qh - -> ctrl : view model
+ctrl - -> u : 200 OK
+
+== Read-your-writes problém ==
+
+note over u, replica
+  Pokud user pošle GET ihned po POST,
+  replica ještě nemá nová data → 404.
+  Řešení: routing podle freshness flagu,
+  nebo synchronní čtení z primary pro „read your writes".
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

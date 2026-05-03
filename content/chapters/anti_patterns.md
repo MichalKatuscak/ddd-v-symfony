@@ -39,6 +39,9 @@ Chyby při implementaci DDD lze rozdělit do tří kategorií:
 
 Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). V této situaci doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
 
+:::diagram{fig="22.2-A" title="Anémický vs. bohatý doménový model — kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
+:::
+
 :::callout{type="note"}
 ### Proč je anémický model problém? {#anemicky-definice-heading}
 
@@ -440,6 +443,9 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 ## 22.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
 
 Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako „God Aggregate“) sdružuje příliš mnoho entit a logiky do jednoho celku. Tím porušuje princip jedné odpovědnosti a způsobuje řadu závažných problémů.
+
+:::diagram{fig="22.4-A" title="God Aggregate vs. správně rozdělené agregáty propojené přes ID" src="images/diagrams/22_anti_patterns/god_aggregate.svg"}
+:::
 
 :::callout{type="note"}
 ### Problémy způsobené příliš velkým agregátem {#agregat-problemy-heading}

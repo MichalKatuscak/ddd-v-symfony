@@ -1,0 +1,48 @@
+@startuml read_replica_routing
+!include ../theme.iuml
+
+title CQRS s read replikou: routing dotazů a replikační lag
+
+actor "User" as u
+participant "Controller" as ctrl
+participant "Command Handler\n(Write)" as wh
+participant "Query Handler\n(Read)" as qh
+database "Primary DB\n(write model)" as primary
+database "Read Replica\n(read model)" as replica
+
+note over primary, replica
+  Streaming replikace: lag 10–100 ms
+  za normálních podmínek.
+end note
+
+== Write path: command jde na primary ==
+
+u -> ctrl : POST /orders
+ctrl -> wh : PlaceOrder command
+wh -> primary : INSERT INTO orders…
+wh -> primary : INSERT INTO outbox…
+primary --> wh : OK
+
+primary --> replica : streaming replication\n(async, ~50 ms lag)
+
+ctrl --> u : 201 Created\n{ orderId }
+
+== Read path: query jde na replicu ==
+
+u -> ctrl : GET /orders/$id
+ctrl -> qh : GetOrder query
+qh -> replica : SELECT * FROM orders_view\nWHERE id = $id
+replica --> qh : data
+qh --> ctrl : view model
+ctrl --> u : 200 OK
+
+== Read-your-writes problém ==
+
+note over u, replica
+  Pokud user pošle GET ihned po POST,
+  replica ještě nemá nová data → 404.
+  Řešení: routing podle freshness flagu,
+  nebo synchronní čtení z primary pro „read your writes".
+end note
+
+@enduml

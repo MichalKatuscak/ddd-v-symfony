@@ -1,0 +1,77 @@
+@startuml god_aggregate
+!include ../theme.iuml
+
+title Anti-vzor: God Aggregate vs. správně rozdělené agregáty
+
+skinparam package {
+  BackgroundColor $BG
+  BorderColor $ACCENT
+  FontColor $ACCENT
+}
+
+package "ANTI-VZOR: Customer jako God Aggregate" as bad #260000 {
+  class "Customer (Aggregate Root)" as god {
+    + id : CustomerId
+    + name, email
+    --
+    + orders : Order[]              ' celá historie
+    + addresses : Address[]         ' všechny adresy
+    + creditCards : CreditCard[]    ' platební karty
+    + reviews : ProductReview[]     ' všechny recenze
+    + wishlistItems : WishlistItem[]
+    + auditLog : AuditEntry[]       ' log akcí
+    --
+    + place(order)
+    + addReview(...)
+    + addToWishlist(...)
+    + updateAddress(...)
+  }
+  note bottom of god #161A22
+    Hydrate: SELECT 6 tabulek, JOIN.
+    1 změna review → zámek na celém Customer.
+    50+ paralelních requestů → deadlock peklo.
+  end note
+}
+
+package "SPRÁVNĚ: separátní agregáty propojené přes ID" as good #102B00 {
+  class "Customer" as c {
+    + id : CustomerId
+    + name, email
+    --
+    + register(), changeName(), …
+  }
+  class "Order" as o {
+    + id : OrderId
+    + customerId : CustomerId   ' jen ID, ne reference
+    + items : OrderItem[]
+    --
+    + place(), pay(), ship(), …
+  }
+  class "ProductReview" as r {
+    + id : ReviewId
+    + customerId : CustomerId
+    + productId : ProductId
+    + rating, text
+    --
+    + submit(), edit(), …
+  }
+  class "Wishlist" as w {
+    + id : WishlistId
+    + customerId : CustomerId
+    + items : WishlistItem[]
+    --
+    + add(), remove()
+  }
+
+  c ..> o : referuje\nsemanticky\n(ne objektově)
+  c ..> r
+  c ..> w
+}
+
+note bottom of good #161A22
+  Každý agregát = vlastní transakce, vlastní zámek.
+  Změna review nezasahuje do Order ani Customer.
+  Reference jen přes CustomerId VO.
+end note
+
+@enduml

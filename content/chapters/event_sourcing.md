@@ -667,6 +667,9 @@ Repozitář pro event-sourcovaný agregát neprovádí SELECT do tabulky entit. 
 event stream z Event Store a předá jej statické tovární metodě `reconstituteFromEvents()`.
 Výsledný agregát má přesně takový stav, jaký odpovídá historii jeho událostí.
 
+:::diagram{fig="14.5-A" title="Replay agregátu z event streamu" src="images/diagrams/14_event_sourcing/event_store_replay.svg"}
+:::
+
 :::callout{type="pattern"}
 ### PHP: EventSourced repozitář pro Order agregát {#es-repo-heading}
 
@@ -734,6 +737,9 @@ final class EventSourcedOrderRepository
 Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
 ad-hoc dotazy (např. „všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč“),
 je nutné ze stream událostí vybudovat optimalizované denormalizované datové struktury určené pro čtení.
+
+:::diagram{fig="14.6-A" title="Tok eventu z agregátu do read modelu přes projektor" src="images/diagrams/14_event_sourcing/projection_lifecycle.svg"}
+:::
 
 ### Synchronní vs. asynchronní projekce
 
@@ -1219,6 +1225,9 @@ systémech projevuje velmi brzy.
 Řešením je **snapshotting**: v pravidelných intervalech (každých N událostí, nebo
 časově) se aktuální stav agregátu serializuje a uloží jako snapshot. Při příštím načtení repozitář
 nejprve vyhledá poslední snapshot a z Event Store načte pouze události novější než tento snapshot.
+
+:::diagram{fig="14.9-A" title="Snapshot strategie: zhuštěný stav místo plného replay" src="images/diagrams/14_event_sourcing/snapshot_strategy.svg"}
+:::
 
 ### Kdy vytvářet snapshots
 

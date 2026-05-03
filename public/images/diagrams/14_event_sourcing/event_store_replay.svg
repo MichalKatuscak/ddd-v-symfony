@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1026.5625px" preserveAspectRatio="none" style="width:1170px;height:1026px;background:#11141A;" version="1.1" viewBox="0 0 1170 1026" width="1170.3125px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="682.8125" x="245.3125" y="41.7313">Event Sourcing: replay agregátu z event streamu</text><rect fill="#11141A" height="171.0693" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="1132.8125" x="20.3125" y="509.2529"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="104.6875" x2="104.6875" y1="182.1045" y2="887.3291"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="608.5938" x2="608.5938" y1="182.1045" y2="887.3291"/><line style="stroke: #3D424E; stroke-width: 1.5625; stroke-dasharray: 5.0,5.0;" x1="846.0938" x2="846.0938" y1="182.1045" y2="887.3291"/><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="137.5" x="35.9375" y="133.2031"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="46.875" y="164.4455">Repository</text><rect fill="#161A22" height="47.3389" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="137.5" x="35.9375" y="885.7666"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="46.875" y="917.009">Repository</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="125" x="542.1875" y="151.4816">Event Store</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="530.4688" y="176.9455">(events table)</text><path d="M581.25,74.9268 C581.25,59.3018 609.375,59.3018 609.375,59.3018 C609.375,59.3018 637.5,59.3018 637.5,74.9268 L637.5,115.5518 C637.5,131.1768 609.375,131.1768 609.375,131.1768 C609.375,131.1768 581.25,131.1768 581.25,115.5518 L581.25,74.9268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M581.25,74.9268 C581.25,90.5518 609.375,90.5518 609.375,90.5518 C609.375,90.5518 637.5,90.5518 637.5,74.9268 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="125" x="542.1875" y="906.0715">Event Store</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="530.4688" y="931.5353">(events table)</text><path d="M581.25,952.3193 C581.25,936.6943 609.375,936.6943 609.375,936.6943 C609.375,936.6943 637.5,936.6943 637.5,952.3193 L637.5,992.9443 C637.5,1008.5693 609.375,1008.5693 609.375,1008.5693 C609.375,1008.5693 581.25,1008.5693 581.25,992.9443 L581.25,952.3193 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 2.34375;"/><path d="M581.25,952.3193 C581.25,967.9443 609.375,967.9443 609.375,967.9443 C609.375,967.9443 637.5,967.9443 637.5,952.3193 " fill="none" style="stroke: #3D424E; stroke-width: 2.34375;"/><rect fill="#161A22" height="72.8027" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="285.9375" x="703.9063" y="107.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="264.0625" x="714.8438" y="138.9816">EventSourcedAggregate</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="76.5625" x="808.5938" y="164.4455">(Order)</text><rect fill="#161A22" height="72.8027" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="285.9375" x="703.9063" y="885.7666"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="264.0625" x="714.8438" y="917.009">EventSourcedAggregate</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="76.5625" x="808.5938" y="942.4728">(Order)</text><polygon fill="#F0A456" points="590.625,277.2461,606.25,283.4961,590.625,289.7461,596.875,283.4961" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="600" y1="283.4961" y2="283.4961"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="250" x="115.625" y="224.2844">SELECT * FROM events</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="290.625" x="115.625" y="249.7482">WHERE aggregate_id = $id</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="250" x="115.625" y="275.2121">ORDER BY version ASC</text><polygon fill="#F0A456" points="121.875,350.0488,106.25,356.2988,121.875,362.5488,115.625,356.2988" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="112.5" x2="607.8125" y1="356.2988" y2="356.2988"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="406.25" x="131.25" y="322.551">[OrderPlaced, ItemAdded, ItemAdded,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="460.9375" x="137.5" y="348.0148">OrderConfirmed, OrderPaid, OrderShipped]</text><path d="M112.5,381.2988 L112.5,437.5488 A4.6875,4.6875 0 0 0 117.1875,442.2363 L585.9375,442.2363 A4.6875,4.6875 0 0 0 590.625,437.5488 L590.625,392.2363 L575,376.6113 L117.1875,376.6113 A4.6875,4.6875 0 0 0 112.5,381.2988 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M575,376.6113 L575,389.8926 A2.3438,2.3438 0 0 0 577.3438,392.2363 L590.625,392.2363 L575,376.6113 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="332.8125" x="185.1563" y="404.7287">Stream nese kompletní historii.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="431.25" x="135.9375" y="430.1926">Stav agregátu = projekce všech eventů.</text><polygon fill="#F0A456" points="828.125,479.5654,843.75,485.8154,828.125,492.0654,834.375,485.8154" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="837.5" y1="485.8154" y2="485.8154"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="235.9375" x="115.625" y="477.5314">new Order() (prázdný)</text><path d="M25,509.2529 L143.75,509.2529 L143.75,521.7529 L128.125,537.3779 L20.3125,537.3779 L20.3125,513.9404 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><rect fill="none" height="171.0693" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 3.125;" width="1132.8125" x="20.3125" y="509.2529"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="53.125" x="43.75" y="531.1203">loop</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="326.5625" x="167.1875" y="532.6828">[pro každý event v pořadí]</text><polygon fill="#F0A456" points="828.125,568.457,843.75,574.707,828.125,580.957,834.375,574.707" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="104.6875" x2="837.5" y1="574.707" y2="574.707"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="115.625" y="566.423">apply(event)</text><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="846.875" x2="912.5" y1="647.5098" y2="647.5098"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="912.5" x2="912.5" y1="647.5098" y2="667.8223"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="848.4375" x2="912.5" y1="667.8223" y2="667.8223"/><polygon fill="#F0A456" points="864.0625,661.5723,848.4375,667.8223,864.0625,674.0723,857.8125,667.8223" style="stroke: #F0A456; stroke-width: 1.5625;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="223.4375" x="857.8125" y="613.7619">aktualizuj interní stav</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="276.5625" x="857.8125" y="639.2258">bez emise nových eventů</text><polygon fill="#F0A456" points="828.125,745.3125,843.75,751.5625,828.125,757.8125,834.375,751.5625" style="stroke: #F0A456; stroke-width: 1.5625;"/><line style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 2.0,2.0;" x1="104.6875" x2="837.5" y1="751.5625" y2="751.5625"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="212.5" x="115.625" y="717.8146">agregát ve stavu po</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="332.8125" x="115.625" y="743.2785">všech eventech (current state)</text><path d="M612.5,776.5625 L612.5,857.8125 A4.6875,4.6875 0 0 0 617.1875,862.5 L1075,862.5 A4.6875,4.6875 0 0 0 1079.6875,857.8125 L1079.6875,787.5 L1064.0625,771.875 L617.1875,771.875 A4.6875,4.6875 0 0 0 612.5,776.5625 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1064.0625,771.875 L1064.0625,785.1563 A2.3438,2.3438 0 0 0 1066.4063,787.5 L1079.6875,787.5 L1064.0625,771.875 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="353.125" x="669.5313" y="799.9924">Agregát je nyní jako by procházel</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="420.3125" x="635.9375" y="825.4562">původní sekvencí, ale BEZ side effects.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="318.75" x="686.7188" y="850.9201">Žádné nové eventy nevznikly.</text><!--MD5=[f960bd624af0545f77d36cb2f89f26f0]
+@startuml event_store_replay
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Event Sourcing: replay agregátu z event streamu
+
+participant "Repository" as repo
+database "Event Store\n(events table)" as es
+participant "EventSourcedAggregate\n(Order)" as agg
+
+repo -> es : SELECT * FROM events\nWHERE aggregate_id = $id\nORDER BY version ASC
+es - -> repo : [OrderPlaced, ItemAdded, ItemAdded,\n OrderConfirmed, OrderPaid, OrderShipped]
+
+note right of repo
+  Stream nese kompletní historii.
+  Stav agregátu = projekce všech eventů.
+end note
+
+repo -> agg : new Order() (prázdný)
+
+loop pro každý event v pořadí
+  repo -> agg : apply(event)
+  agg -> agg : aktualizuj interní stav\nbez emise nových eventů
+end
+
+repo - -> agg : agregát ve stavu po\nvšech eventech (current state)
+
+note over agg
+  Agregát je nyní jako by procházel
+  původní sekvencí, ale BEZ side effects.
+  Žádné nové eventy nevznikly.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

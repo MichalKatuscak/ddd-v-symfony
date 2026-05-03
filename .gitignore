@@ -15,4 +15,12 @@ screenshots/
 .playwright-mcp/
 /node_modules/
 /public/build/
+# Vývojářské screenshoty v rootu (lokální debug, ne v repo)
 /*.png
+/*.jpg
+# Claude harness state
+/.claude/scheduled_tasks.lock
+/.claude/agents/
+# Ebook build artefakty
+/ebook/output/
+/ebook/chapters/

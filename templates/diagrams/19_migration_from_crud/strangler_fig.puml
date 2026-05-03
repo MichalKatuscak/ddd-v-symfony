@@ -1,0 +1,53 @@
+@startuml strangler_fig
+!include ../theme.iuml
+
+title Strangler Fig: postupná migrace CRUD → DDD bez big-bang rewrite
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+rectangle "Fáze 0: Legacy CRUD\n(výchozí stav)" as p0 {
+  rectangle "Monolitická\nCRUD aplikace" as p0_app #1B202A
+  rectangle "User\nrequests" as p0_user #11141A
+  p0_user -[#F0A456]-> p0_app
+}
+
+rectangle "Fáze 1: Routing layer\n(Strangler Facade)" as p1 {
+  rectangle "Strangler\nFacade\n(reverse proxy)" as p1_strangler #1B202A
+  rectangle "Legacy CRUD" as p1_legacy #11141A
+  rectangle "DDD modul\nUserManagement" as p1_new #1B202A
+  p1_strangler -[#F0A456]-> p1_legacy : většina rout
+  p1_strangler -[#F0A456]-> p1_new : /register,\n/users/$id
+}
+
+rectangle "Fáze 2: Postupná extrakce\n(BC za BC)" as p2 {
+  rectangle "Strangler\nFacade" as p2_strangler #1B202A
+  rectangle "Legacy CRUD\n(zbytek)" as p2_legacy #11141A
+  rectangle "UserManagement" as p2_um #1B202A
+  rectangle "Ordering" as p2_ord #1B202A
+  rectangle "Catalog" as p2_cat #1B202A
+  p2_strangler -[#F0A456]-> p2_legacy : už jen reportování
+  p2_strangler -[#F0A456]-> p2_um
+  p2_strangler -[#F0A456]-> p2_ord
+  p2_strangler -[#F0A456]-> p2_cat
+}
+
+rectangle "Fáze 3: Legacy odstaven" as p3 {
+  rectangle "DDD aplikace\n(plně migrovaná)" as p3_ddd #1B202A
+  rectangle "Strangler Facade\n(odstraněna)" as p3_facade #11141A
+  p3_ddd -[#7A5530,dashed]-> p3_facade : retire
+}
+
+p0 -[#F0A456]-> p1 : 1. workshop\n2. zavedení proxy
+p1 -[#F0A456]-> p2 : extrakce 1 BC\nv čase\n(týdny–měsíce)
+p2 -[#F0A456]-> p3 : poslední BC\nmigruje, legacy off
+
+note bottom of p3
+  Klíč: každá fáze je deployable a testovatelná
+  v izolaci. Žádná „velká migrace" o víkendu.
+end note
+
+@enduml
