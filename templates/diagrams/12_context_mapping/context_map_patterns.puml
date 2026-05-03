@@ -9,7 +9,7 @@ rectangle "Ordering BC" as ordering
 rectangle "Billing BC" as billing
 rectangle "Identity BC\n(Auth0)" as identity #555555
 
-' Partnership (Catalog <-> Pricing — společný release)
+' Partnership (Catalog <-> Pricing – společný release)
 catalog <-> pricing : <b>Partnership</b>\n(společný release)
 
 ' Shared Kernel (Catalog & Pricing sdílí Money VO)
@@ -35,7 +35,7 @@ billing -up-> ordering : <i>(Conformist v opačném směru\npokud chybí ACL)</i
 identity -[#F0A456]-> ordering : <b>Open Host Service</b>\nREST + JWT (PL)
 identity -[#F0A456]-> billing : <b>Open Host Service</b>
 
-' Separate Ways (Marketing — zde zobrazený samostatně)
+' Separate Ways (Marketing – samostatný BC)
 rectangle "Marketing BC\n(SendGrid)" as marketing #555555
 note left of marketing
   <b>Separate Ways:</b>

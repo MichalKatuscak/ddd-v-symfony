@@ -78,7 +78,7 @@ end note
 
 note left of composite
   Abstraktní třída
-  poskytuje implicitní
+  poskytuje sdílené
   kombinátory pro všechny
   potomky (DRY princip).
 end note

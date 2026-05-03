@@ -31,7 +31,7 @@ else event_id X je nový
     update read modelu.
     Race condition se 2 workery
     skončí ConstraintViolation
-    a Messenger zprávu retry-uje.
+    a Messenger zprávu znovu doručí.
   end note
   h --> mq : ack
 end

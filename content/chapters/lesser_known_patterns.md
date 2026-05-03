@@ -941,7 +941,7 @@ constructor agregátu. Factory řeší pouze *orchestraci vstupních dat*.
 
 Vaughn Vernon ve své knize *Implementing Domain-Driven Design* (2013), kapitola 11,
 formuluje pravidlo: **„Preferujte named constructor. Po samostatné
-Factory class sáhejte teprve tehdy, když vznik nutně potřebuje DI závislosti, kterou nelze
+Factory class sáhněte teprve tehdy, když vznik nutně potřebuje DI závislosti, kterou nelze
 poskytnout parametrem.“** Důvod je prostý: statická metoda na agregátu
 drží invarianty pohromadě s kódem agregátu. Samostatná Factory je rozdělí na dva
 soubory a vystavuje agregát public konstruktoru, což oslabuje invariant „nelze vytvořit

@@ -1129,7 +1129,7 @@ ORDER BY bucket;
 
 Tyto metriky exportujte do Prometheu (`outbox_pending_seconds`,
 `outbox_pending_count`) a v Grafaně postavte alert: **kritický
-prah typicky 30 sekund**. Pokud lag překročí tuto hranici, něco se zaseklo –
+práh typicky 30 sekund**. Pokud lag překročí tuto hranici, něco se zaseklo –
 relay worker padl, broker je nedostupný, DB má 100% CPU. Při normálním provozu
 je medián lagu pod 1 sekundou.
 
@@ -1194,7 +1194,7 @@ za běh stačí na realistické workloady (cca 3 mil. eventů/den).
 ### Dead-letter queue pro permanentní selhání {#dlq-heading}
 
 Některé eventy se nikdy nepublishnou: schema změna v subscriberu, kterou nikdo
-nepořešil, broken payload (NaN v JSON), poison message, který shodí libovolného
+nevyřešil, broken payload (NaN v JSON), poison message, který shodí libovolného
 consumera. Po N attempts (typicky 5) je `OutboxMessage::markFailed()`
 přepne do stavu `failed`. Tyto řádky chceme:
 
