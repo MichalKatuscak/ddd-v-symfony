@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="940.625px" preserveAspectRatio="none" style="width:2671px;height:940px;background:#11141A;" version="1.1" viewBox="0 0 2671 940" width="2671.875px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="801.5625" x="944.5313" y="26.1063">Anti-vzor: God Aggregate vs. správně rozdělené agregáty</text><!--MD5=[54d151dfe341457c80a8d830b0ad2844]
+cluster bad--><polygon fill="#260000" points="2043.75,70.2393,2578.125,70.2393,2589.0625,105.0781,2637.5,105.0781,2637.5,857.7393,2043.75,857.7393,2043.75,70.2393" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="2043.75" x2="2589.0625" y1="105.0781" y2="105.0781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="525" x="2050" y="93.6691">ANTI-VZOR: Customer jako God Aggregate</text><!--MD5=[4b4fcc21959b44b7293758900907bb92]
+cluster good--><polygon fill="#102B00" points="46.875,178.833,648.4375,178.833,659.375,213.6719,1406.25,213.6719,1406.25,923.3643,46.875,923.3643,46.875,178.833" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="46.875" x2="659.375" y1="213.6719" y2="213.6719"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="592.1875" x="53.125" y="202.2629">SPRÁVNĚ: separátní agregáty propojené přes ID</text><!--MD5=[7ed3305d6fbf038837f0e850607fc672]
+class god--><rect fill="#161A22" height="389.9414" id="god" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="543.75" x="2068.75" y="124.9268"/><ellipse cx="2185.1563" cy="148.3643" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M2188.8916,155.7129 Q2188.1348,156.1035 2187.3047,156.2988 Q2186.499,156.4941 2185.5957,156.4941 Q2182.373,156.4941 2180.6641,154.3701 Q2178.9795,152.2461 2178.9795,148.2178 Q2178.9795,144.1895 2180.6641,142.0654 Q2182.373,139.9414 2185.5957,139.9414 Q2186.499,139.9414 2187.3291,140.1367 Q2188.1592,140.332 2188.8916,140.6982 L2188.8916,144.2139 Q2188.0859,143.457 2187.3047,143.1152 Q2186.5479,142.7734 2185.7422,142.7734 Q2184.0088,142.7734 2183.1299,144.1406 Q2182.251,145.5078 2182.251,148.2178 Q2182.251,150.9033 2183.1299,152.2949 Q2184.0088,153.6621 2185.7422,153.6621 Q2186.5479,153.6621 2187.3047,153.3203 Q2188.0859,152.9541 2188.8916,152.2217 L2188.8916,155.7129 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="298.4375" x="2214.8438" y="155.9372">Customer (Aggregate Root)</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="2070.3125" x2="2610.9375" y1="171.8018" y2="171.8018"/><ellipse cx="2256.25" cy="188.9893" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="164.0625" x="2268.75" y="198.3566">id : CustomerId</text><ellipse cx="2256.25" cy="214.4531" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="129.6875" x="2268.75" y="223.8205">name, email</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="2070.3125" x2="2610.9375" y1="235.2295" y2="235.2295"/><ellipse cx="2085.9375" cy="252.417" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="395.3125" x="2098.4375" y="261.7844">orders : Order[]              ' celá historie</text><ellipse cx="2085.9375" cy="277.8809" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="473.4375" x="2098.4375" y="287.2482">addresses : Address[]         ' všechny adresy</text><ellipse cx="2085.9375" cy="303.3447" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="453.125" x="2098.4375" y="312.7121">creditCards : CreditCard[]    ' platební karty</text><ellipse cx="2085.9375" cy="328.8086" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="504.6875" x="2098.4375" y="338.176">reviews : ProductReview[]     ' všechny recenze</text><ellipse cx="2085.9375" cy="354.2725" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="301.5625" x="2098.4375" y="363.6398">wishlistItems : WishlistItem[]</text><ellipse cx="2085.9375" cy="379.7363" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="373.4375" x="2098.4375" y="389.1037">auditLog : AuditEntry[]       ' log akcí</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="2070.3125" x2="2610.9375" y1="400.5127" y2="400.5127"/><ellipse cx="2238.2813" cy="417.7002" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="131.25" x="2250.7813" y="427.0676">place(order)</text><ellipse cx="2238.2813" cy="443.1641" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="151.5625" x="2250.7813" y="452.5314">addReview(...)</text><ellipse cx="2238.2813" cy="468.6279" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="184.375" x="2250.7813" y="477.9953">addToWishlist(...)</text><ellipse cx="2238.2813" cy="494.0918" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="200" x="2250.7813" y="503.4592">updateAddress(...)</text><path d="M2076.5625,745.2393 L2076.5625,827.8809 A4.6875,4.6875 0 0 0 2081.25,832.5684 L2600,832.5684 A4.6875,4.6875 0 0 0 2604.6875,827.8809 L2604.6875,756.1768 L2589.0625,740.5518 L2346.875,740.5518 L2340.625,515.583 L2334.375,740.5518 L2081.25,740.5518 A4.6875,4.6875 0 0 0 2076.5625,745.2393 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M2589.0625,740.5518 L2589.0625,753.833 A2.3438,2.3438 0 0 0 2591.4063,756.1768 L2604.6875,756.1768 L2589.0625,740.5518 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="346.875" x="2085.9375" y="768.6691">Hydrate: SELECT 6 tabulek, JOIN.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="495.3125" x="2085.9375" y="794.133">1 změna review → zámek na celém Customer.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="475" x="2085.9375" y="819.5969">50+ paralelních requestů → deadlock peklo.</text><!--MD5=[e3471f280e59d1431a9a122c0f31e779]
+class c--><rect fill="#161A22" height="148.2666" id="c" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="343.75" x="670.3125" y="246.0205"/><ellipse cx="782.8125" cy="269.458" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M786.5479,276.8066 Q785.791,277.1973 784.9609,277.3926 Q784.1553,277.5879 783.252,277.5879 Q780.0293,277.5879 778.3203,275.4639 Q776.6357,273.3398 776.6357,269.3115 Q776.6357,265.2832 778.3203,263.1592 Q780.0293,261.0352 783.252,261.0352 Q784.1553,261.0352 784.9854,261.2305 Q785.8154,261.4258 786.5479,261.792 L786.5479,265.3076 Q785.7422,264.5508 784.9609,264.209 Q784.2041,263.8672 783.3984,263.8672 Q781.665,263.8672 780.7861,265.2344 Q779.9072,266.6016 779.9072,269.3115 Q779.9072,271.9971 780.7861,273.3887 Q781.665,274.7559 783.3984,274.7559 Q784.2041,274.7559 784.9609,274.4141 Q785.7422,274.0479 786.5479,273.3154 L786.5479,276.8066 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="106.25" x="812.5" y="277.0309">Customer</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="671.875" x2="1012.5" y1="292.8955" y2="292.8955"/><ellipse cx="757.8125" cy="310.083" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="164.0625" x="770.3125" y="319.4504">id : CustomerId</text><ellipse cx="757.8125" cy="335.5469" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="129.6875" x="770.3125" y="344.9142">name, email</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="671.875" x2="1012.5" y1="356.3232" y2="356.3232"/><ellipse cx="687.5" cy="373.5107" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="304.6875" x="700" y="382.8781">register(), changeName(), …</text><!--MD5=[232b6b5a43d5a1f4245de9c83d91ecd6]
+class o--><rect fill="#161A22" height="173.7305" id="o" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="548.4375" x="85.1563" y="699.9268"/><ellipse cx="322.6563" cy="723.3643" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M326.3916,730.7129 Q325.6348,731.1035 324.8047,731.2988 Q323.999,731.4941 323.0957,731.4941 Q319.873,731.4941 318.1641,729.3701 Q316.4795,727.2461 316.4795,723.2178 Q316.4795,719.1895 318.1641,717.0654 Q319.873,714.9414 323.0957,714.9414 Q323.999,714.9414 324.8291,715.1367 Q325.6592,715.332 326.3916,715.6982 L326.3916,719.2139 Q325.5859,718.457 324.8047,718.1152 Q324.0479,717.7734 323.2422,717.7734 Q321.5088,717.7734 320.6299,719.1406 Q319.751,720.5078 319.751,723.2178 Q319.751,725.9033 320.6299,727.2949 Q321.5088,728.6621 323.2422,728.6621 Q324.0479,728.6621 324.8047,728.3203 Q325.5859,727.9541 326.3916,727.2217 L326.3916,730.7129 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="60.9375" x="352.3438" y="730.9372">Order</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="86.7188" x2="632.0313" y1="746.8018" y2="746.8018"/><ellipse cx="102.3438" cy="763.9893" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="118.75" x="114.8438" y="773.3566">id : OrderId</text><ellipse cx="102.3438" cy="789.4531" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="509.375" x="114.8438" y="798.8205">customerId : CustomerId   ' jen ID, ne reference</text><ellipse cx="102.3438" cy="814.917" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="203.125" x="114.8438" y="824.2844">items : OrderItem[]</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="86.7188" x2="632.0313" y1="835.6934" y2="835.6934"/><ellipse cx="233.5938" cy="852.8809" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="246.0938" y="862.2482">place(), pay(), ship(), …</text><!--MD5=[7aa6147af76c4248339d5a2582390b8a]
+class r--><rect fill="#161A22" height="199.1943" id="r" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="306.25" x="689.0625" y="687.4268"/><ellipse cx="755.4688" cy="710.8643" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M759.2041,718.2129 Q758.4473,718.6035 757.6172,718.7988 Q756.8115,718.9941 755.9082,718.9941 Q752.6855,718.9941 750.9766,716.8701 Q749.292,714.7461 749.292,710.7178 Q749.292,706.6895 750.9766,704.5654 Q752.6855,702.4414 755.9082,702.4414 Q756.8115,702.4414 757.6416,702.6367 Q758.4717,702.832 759.2041,703.1982 L759.2041,706.7139 Q758.3984,705.957 757.6172,705.6152 Q756.8604,705.2734 756.0547,705.2734 Q754.3213,705.2734 753.4424,706.6406 Q752.5635,708.0078 752.5635,710.7178 Q752.5635,713.4033 753.4424,714.7949 Q754.3213,716.1621 756.0547,716.1621 Q756.8604,716.1621 757.6172,715.8203 Q758.3984,715.4541 759.2041,714.7217 L759.2041,718.2129 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="160.9375" x="785.1563" y="718.4372">ProductReview</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="690.625" x2="993.75" y1="734.3018" y2="734.3018"/><ellipse cx="706.25" cy="751.4893" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="134.375" x="718.75" y="760.8566">id : ReviewId</text><ellipse cx="706.25" cy="776.9531" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="267.1875" x="718.75" y="786.3205">customerId : CustomerId</text><ellipse cx="706.25" cy="802.417" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="226.5625" x="718.75" y="811.7844">productId : ProductId</text><ellipse cx="706.25" cy="827.8809" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="114.0625" x="718.75" y="837.2482">rating, text</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="690.625" x2="993.75" y1="848.6572" y2="848.6572"/><ellipse cx="743.75" cy="865.8447" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="756.25" y="875.2121">submit(), edit(), …</text><!--MD5=[e27ec6c0f62a2819cd01b5dacade6e8e]
+class w--><rect fill="#161A22" height="173.7305" id="w" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="306.25" x="1050" y="699.9268"/><ellipse cx="1156.25" cy="723.3643" fill="#1B202A" rx="15.625" ry="15.625" style="stroke: #F0A456; stroke-width: 1.5625;"/><path d="M1159.9854,730.7129 Q1159.2285,731.1035 1158.3984,731.2988 Q1157.5928,731.4941 1156.6895,731.4941 Q1153.4668,731.4941 1151.7578,729.3701 Q1150.0732,727.2461 1150.0732,723.2178 Q1150.0732,719.1895 1151.7578,717.0654 Q1153.4668,714.9414 1156.6895,714.9414 Q1157.5928,714.9414 1158.4229,715.1367 Q1159.2529,715.332 1159.9854,715.6982 L1159.9854,719.2139 Q1159.1797,718.457 1158.3984,718.1152 Q1157.6416,717.7734 1156.8359,717.7734 Q1155.1025,717.7734 1154.2236,719.1406 Q1153.3447,720.5078 1153.3447,723.2178 Q1153.3447,725.9033 1154.2236,727.2949 Q1155.1025,728.6621 1156.8359,728.6621 Q1157.6416,728.6621 1158.3984,728.3203 Q1159.1797,727.9541 1159.9854,727.2217 L1159.9854,730.7129 Z "/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="1185.9375" y="730.9372">Wishlist</text><line style="stroke: #3D424E; stroke-width: 2.34375;" x1="1051.5625" x2="1354.6875" y1="746.8018" y2="746.8018"/><ellipse cx="1067.1875" cy="763.9893" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="1079.6875" y="773.3566">id : WishlistId</text><ellipse cx="1067.1875" cy="789.4531" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="267.1875" x="1079.6875" y="798.8205">customerId : CustomerId</text><ellipse cx="1067.1875" cy="814.917" fill="none" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="223.4375" x="1079.6875" y="824.2844">items : WishlistItem[]</text><line style="stroke: #3D424E; stroke-width: 1.5625;" x1="1051.5625" x2="1354.6875" y1="835.6934" y2="835.6934"/><ellipse cx="1117.9688" cy="852.8809" fill="#84BE84" rx="4.6875" ry="4.6875" style="stroke: #038048; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="165.625" x="1130.4688" y="862.2482">add(), remove()</text><path d="M1444.5313,745.2393 L1444.5313,827.8809 A4.6875,4.6875 0 0 0 1449.2188,832.5684 L2013.2813,832.5684 A4.6875,4.6875 0 0 0 2017.9688,827.8809 L2017.9688,756.1768 L2002.3438,740.5518 L1449.2188,740.5518 A4.6875,4.6875 0 0 0 1444.5313,745.2393 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M2002.3438,740.5518 L2002.3438,753.833 A2.3438,2.3438 0 0 0 2004.6875,756.1768 L2017.9688,756.1768 L2002.3438,740.5518 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="528.125" x="1453.9063" y="768.6691">Každý agregát = vlastní transakce, vlastní zámek.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="540.625" x="1453.9063" y="794.133">Změna review nezasahuje do Order ani Customer.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="381.25" x="1453.9063" y="819.5969">Reference jen přes CustomerId VO.</text><!--MD5=[62f4cd03acd3eb2df9df1c2f06545fda]
+link c to o--><path d="M766.2188,394.6924 C681.8906,475.6143 545.6875,606.3174 454.375,693.9268 " fill="none" id="c-&gt;o" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="448.4219,699.6299,462.8938,694.3974,454.0568,694.2185,454.2357,685.3815,448.4219,699.6299" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="82.8125" x="625.7813" y="584.2941">referuje</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="121.875" x="606.25" y="609.758">semanticky</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="156.25" x="589.0625" y="635.2219">(ne objektově)</text><!--MD5=[d9cf395dd1582eae1c364247d823f605]
+link c to r--><path d="M842.1875,394.6924 C842.1875,471.0986 842.1875,591.8955 842.1875,678.8955 " fill="none" id="c-&gt;r" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="842.1875,687.1924,848.4375,673.1299,842.1875,679.3799,835.9375,673.1299,842.1875,687.1924" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[1486b0da8781de8523d6998bcace28fd]
+link c to w--><path d="M898.9844,394.6924 C961.8906,475.4424 1063.4375,605.7861 1131.7031,693.3955 " fill="none" id="c-&gt;w" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#F0A456" points="1136.5469,699.6299,1132.8356,684.6953,1131.7458,693.4667,1122.9744,692.377,1136.5469,699.6299" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[488fe1774cbf78073a473799afe5d181]
+link good to GMN15--><path d="M1406.5786,339.4048 C1406.797,339.7046 1407.0179,340.0078 1407.2413,340.3145 C1408.1349,341.5413 1409.0687,342.823 1410.0412,344.158 C1411.9861,346.8279 1414.0861,349.7107 1416.3305,352.7917 C1420.8194,358.9537 1425.886,365.9089 1431.446,373.5413 C1453.686,404.0708 1483.8193,445.4355 1516.4395,490.2139 C1581.6797,579.7705 1656.8672,682.9814 1698.75,740.4736 " fill="none" id="good-GMN15" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><!--MD5=[775b24bbd4f35cafaf66b6567a3cfe4b]
+@startuml god_aggregate
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Anti-vzor: God Aggregate vs. správně rozdělené agregáty
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+package "ANTI-VZOR: Customer jako God Aggregate" as bad #260000 {
+  class "Customer (Aggregate Root)" as god {
+    + id : CustomerId
+    + name, email
+    - -
+    + orders : Order[]              ' celá historie
+    + addresses : Address[]         ' všechny adresy
+    + creditCards : CreditCard[]    ' platební karty
+    + reviews : ProductReview[]     ' všechny recenze
+    + wishlistItems : WishlistItem[]
+    + auditLog : AuditEntry[]       ' log akcí
+    - -
+    + place(order)
+    + addReview(...)
+    + addToWishlist(...)
+    + updateAddress(...)
+  }
+  note bottom of god #161A22
+    Hydrate: SELECT 6 tabulek, JOIN.
+    1 změna review → zámek na celém Customer.
+    50+ paralelních requestů → deadlock peklo.
+  end note
+}
+
+package "SPRÁVNĚ: separátní agregáty propojené přes ID" as good #102B00 {
+  class "Customer" as c {
+    + id : CustomerId
+    + name, email
+    - -
+    + register(), changeName(), …
+  }
+  class "Order" as o {
+    + id : OrderId
+    + customerId : CustomerId   ' jen ID, ne reference
+    + items : OrderItem[]
+    - -
+    + place(), pay(), ship(), …
+  }
+  class "ProductReview" as r {
+    + id : ReviewId
+    + customerId : CustomerId
+    + productId : ProductId
+    + rating, text
+    - -
+    + submit(), edit(), …
+  }
+  class "Wishlist" as w {
+    + id : WishlistId
+    + customerId : CustomerId
+    + items : WishlistItem[]
+    - -
+    + add(), remove()
+  }
+
+  c ..> o : referuje\nsemanticky\n(ne objektově)
+  c ..> r
+  c ..> w
+}
+
+note bottom of good #161A22
+  Každý agregát = vlastní transakce, vlastní zámek.
+  Změna review nezasahuje do Order ani Customer.
+  Reference jen přes CustomerId VO.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>
