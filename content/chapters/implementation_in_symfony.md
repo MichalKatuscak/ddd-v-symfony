@@ -25,11 +25,25 @@ github_examples: Chapter04_Implementation
 Kódové příklady v tomto průvodci záměrně přibývají na komplexitě. Kapitola
 [Základní koncepty](/zakladni-koncepty) zjednodušuje příklady
 na minimum, aby ilustrovala čistý koncept. Tato kapitola přidává reálné aspekty
-implementace v Symfony: oddělení doménových objektů od Doctrine mappingu, ukládání
-hodnotových objektů jako primitivních typů kvůli Doctrine hydration a generování
-doménových událostí. Kapitola [Anti-vzory](/anti-vzory)
-pak ukazuje produkční kvalitu kódu s custom výjimkami, factory metodami a plnou
-validací invariantů.
+implementace v Symfony: Doctrine atributy s custom typy pro hodnotové objekty,
+optimistický zámek a generování doménových událostí. Kapitola
+[Anti-vzory](/anti-vzory) pak ukazuje produkční kvalitu kódu s custom
+výjimkami, factory metodami a plnou validací invariantů.
+:::
+
+:::callout{type="note"}
+### Mapping volba: atributy jako default {#mapping-volba-heading}
+
+Tento průvodce používá **Doctrine atributy přímo na doménových třídách**
+(`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
+*Dependency Inversion* – doména „ví" o Doctrine. V praxi je ten import metadata,
+ne chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
+oficiální dokumentace i drtivá většina open-source Symfony projektů používá atributy.
+
+Pokud chcete striktně oddělenou doménu, korektní cesta není XML mapping (taky
+„znečištěné", jen jiným formátem), ale **Persisted Object Pattern** – samostatná
+persistence třída + mapper na doménový agregát. Detail v sekci
+[Persisted Object Pattern – pure DDD varianta](#persisted-object-pattern).
 :::
 
 ## 11.01 Kde končí DDD a kde začíná Symfony {#ddd-vs-symfony-boundary}
@@ -161,89 +175,34 @@ Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
 
 ## 11.03 Implementace entit {#entities}
 
-Entita v DDD je objekt s jedinečnou, přetrvávající identitou. V Symfony 8 se implementuje jako běžná PHP třída:
+Entita v DDD je objekt s jedinečnou, přetrvávající identitou. Vstupní bod do agregátu
+je **kořen agregátu** – třída `final`, dědí z bázové `AggregateRoot`,
+konstruktor je `private` a vznik probíhá přes pojmenovanou factory metodu
+(`User::register()`, `Order::place()`). To zaručuje, že nelze vytvořit
+agregát v nekonzistentním stavu.
 
 :::callout{type="pattern"}
-### Příklad: Implementace entity v Symfony 8 {#entity-example-heading}
+### Příklad: kořen agregátu User {#entity-example-heading}
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
+:::code{language="php" filename="src/Shared/Domain/AggregateRoot.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\UserManagement\Domain\Model;
+namespace App\Shared\Domain;
 
-use App\UserManagement\Domain\Event\UserRegistered;
-use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\ValueObject\HashedPassword;
-use App\UserManagement\Domain\ValueObject\UserId;
-
-class User
+abstract class AggregateRoot
 {
-    private readonly string $id;
-    private string $name;
-    private string $email;
-    private readonly string $hashedPassword;
-    private readonly \DateTimeImmutable $createdAt;
-
-    /** @var object[] */
+    /** @var list<object> */
     private array $domainEvents = [];
 
-    private function __construct(UserId $id, string $name, Email $email, HashedPassword $password)
-    {
-        $this->id = $id->value();
-        $this->name = $name;
-        $this->email = $email->value();
-        $this->hashedPassword = $password->value();
-        $this->createdAt = new \DateTimeImmutable();
-
-        $this->recordEvent(new UserRegistered($id, $email));
-    }
-
-    public static function register(UserId $id, string $name, Email $email, HashedPassword $password): self
-    {
-        return new self($id, $name, $email, $password);
-    }
-
-    public function id(): UserId
-    {
-        return new UserId($this->id);
-    }
-
-    public function name(): string
-    {
-        return $this->name;
-    }
-
-    public function email(): Email
-    {
-        return new Email($this->email);
-    }
-
-    public function changeName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    public function changeEmail(Email $email): void
-    {
-        $this->email = $email->value();
-    }
-
-    public function createdAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    private function recordEvent(object $event): void
+    final protected function record(object $event): void
     {
         $this->domainEvents[] = $event;
     }
 
-    /**
-     * @return object[]
-     */
-    public function releaseDomainEvents(): array
+    /** @return list<object> */
+    final public function releaseDomainEvents(): array
     {
         $events = $this->domainEvents;
         $this->domainEvents = [];
@@ -252,32 +211,142 @@ class User
     }
 }
 :::
+
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Domain\Model;
+
+use App\Shared\Domain\AggregateRoot;
+use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+final class User extends AggregateRoot
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'user_id')]
+    public readonly UserId $id;
+
+    #[ORM\Embedded(class: UserName::class)]
+    private UserName $name;
+
+    #[ORM\Column(type: 'email_vo', unique: true)]
+    private Email $email;
+
+    #[ORM\Embedded(class: HashedPassword::class)]
+    private readonly HashedPassword $hashedPassword;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    public readonly \DateTimeImmutable $createdAt;
+
+    #[ORM\Version]
+    #[ORM\Column(type: 'integer')]
+    private int $version = 1;
+
+    private function __construct(
+        UserId $id,
+        UserName $name,
+        Email $email,
+        HashedPassword $hashedPassword,
+    ) {
+        $this->id = $id;
+        $this->name = $name;
+        $this->email = $email;
+        $this->hashedPassword = $hashedPassword;
+        $this->createdAt = new \DateTimeImmutable();
+
+        $this->record(new UserRegistered($id, $email, $this->createdAt));
+    }
+
+    public static function register(
+        UserId $id,
+        UserName $name,
+        Email $email,
+        HashedPassword $hashedPassword,
+    ): self {
+        return new self($id, $name, $email, $hashedPassword);
+    }
+
+    public function name(): UserName
+    {
+        return $this->name;
+    }
+
+    public function email(): Email
+    {
+        return $this->email;
+    }
+
+    public function rename(UserName $newName): void
+    {
+        if ($this->name->equals($newName)) {
+            return;
+        }
+
+        $this->name = $newName;
+    }
+
+    public function changeEmail(Email $newEmail): void
+    {
+        if ($this->email->equals($newEmail)) {
+            return;
+        }
+
+        $this->email = $newEmail;
+    }
+}
+:::
 :::
 
-V tomto příkladu je `User` entita definovaná svou identitou (`UserId`). Entita neobsahuje žádné Doctrine atributy – doménová vrstva musí zůstat nezávislá na infrastruktuře. Mapování na databázi řeší externí XML soubor (viz sekci [Separace Doctrine mapování](#doctrine-xml-mapping)). Neměnné vlastnosti (`$id`, `$createdAt`) jsou označeny jako `readonly`. Entity také generují doménové události,
-které pole `$domainEvents` drží a později uvolní ke zpracování.
+Co tady stojí za pozornost:
+
+- **`final` + `extends AggregateRoot`.** `AggregateRoot` poskytuje `record()`
+  a `releaseDomainEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
+  kopii v každé entitě. `final` zabraňuje dědění (entita s subklasou nezachová
+  invarianty kořene).
+- **Privátní konstruktor + factory `register()`.** Jediná legální cesta vytvoření.
+  Kdyby přibyla další kategorie (importovaný uživatel z LDAP), přidá se další
+  factory, ne přepínač uvnitř konstruktoru.
+- **VO uloženy přímo, ne jako primitivy.** `UserId`, `Email`, `UserName`
+  a `HashedPassword` jsou typy vlastností. Doctrine je hydratuje přes custom typy
+  (`user_id`, `email_vo`) nebo `#[ORM\Embedded]`. Žádné re-validace v getterech.
+- **`#[ORM\Version]` pro optimistický zámek.** Souběžné modifikace agregátu
+  vyhází `OptimisticLockException`, kterou aplikační vrstva přeloží na retry.
+- **Method names z Ubiquitous Language.** `rename()` místo `setName()`,
+  `changeEmail()` místo `updateEmail()`. Doménový jazyk, ne CRUD slovník.
 
 :::callout{type="note"}
-### Proč ukládáme hodnotové objekty jako primitivní typy? {#doctrine-hydration-heading}
+### Proč VO ukládáme přímo, ne jako primitivy {#doctrine-hydration-heading}
 
-Entita interně ukládá `UserId` a `Email` jako
-`string` (ne jako hodnotové objekty): `$this->id = $id->value()`.
-Gettery pak vrací nové instance VO: `return new UserId($this->id)`.
+V dřívějších verzích tohoto průvodce se v entitě VO ukládaly jako string a getter
+vracel `new UserId($this->id)`. Důvod byl Doctrine hydration: Doctrine při čtení
+z DB nastavuje vlastnosti přímo, bez konstruktoru, takže `UserId` jako typ vlastnosti
+by skončilo na TypeError.
 
-Tento kompromis je nutný kvůli **Doctrine hydration** – Doctrine při načítání
-entity z databáze nastavuje vlastnosti přímo, bez volání konstruktoru. Kdyby vlastnost
-měla typ `UserId`, Doctrine by do ní vložil `string` z databáze,
-což by vedlo na TypeError. Alternativou je **Doctrine custom type**
-(viz sekci [Doctrine custom types](#doctrine-custom-types)), který automaticky
-konvertuje mezi primitivním typem a hodnotovým objektem.
+Doctrine ORM 3 to ale řeší přes **custom DBAL types** (`UserIdType`, `EmailType`)
+a `#[ORM\Embedded]`. Při načítání Doctrine sám zavolá custom type, který
+vyrobí instanci VO, a vlastnost dostane správný objektový typ. Kód agregátu pak
+pracuje výhradně s typovými hodnotami, bez re-konstrukce při každém volání getteru.
+
+Detaily a registrace v sekci [Doctrine custom types](#doctrine-custom-types).
 :::
 
 ## 11.04 Implementace hodnotových objektů {#value-objects}
 
-Hodnotový objekt v DDD nemá identitu – je definován svými atributy. V Symfony 8 se implementuje jako neměnná PHP třída:
+Hodnotový objekt v DDD nemá identitu – je definován svými atributy. Je neměnný,
+validuje se v konstruktoru a dvě instance se stejnými atributy jsou rovnocenné.
+V Symfony 8 se implementuje jako `final readonly` PHP třída:
 
 :::callout{type="pattern"}
-### Příklad: Implementace hodnotového objektu v Symfony 8 {#value-object-example-heading}
+### Příklad: hodnotový objekt Email {#value-object-example-heading}
 
 :::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
 <?php
@@ -286,24 +355,24 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Domain\ValueObject;
 
-class Email
+final readonly class Email
 {
-    private readonly string $value;
-
-    public function __construct(string $value)
-    {
-        $normalized = mb_strtolower(trim($value));
-
-        if (!filter_var($normalized, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException('Invalid email address');
+    public function __construct(
+        public string $value,
+    ) {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException(
+                sprintf('Neplatný formát e-mailu: "%s".', $value),
+            );
         }
-
-        $this->value = $normalized;
     }
 
-    public function value(): string
+    public static function fromUserInput(string $raw): self
     {
-        return $this->value;
+        // Vstupy z formulářů normalizujeme zde (lowercase, trim).
+        // Konstruktor se nedotýká – chrání invariant „dvě instance se stejnou
+        // hodnotou jsou rovnocenné".
+        return new self(mb_strtolower(trim($raw)));
     }
 
     public function equals(self $other): bool
@@ -319,8 +388,82 @@ class Email
 :::
 :::
 
-`Email` je hodnotový objekt definovaný svou hodnotou. Je neměnný (vlastnost `$value` je `readonly`) a nemá identitu.
-Dva e-maily se stejnou hodnotou jsou rovnocenné. Stejně jako entity, ani hodnotové objekty neobsahují Doctrine atributy – mapování řeší externí XML soubor.
+:::callout{type="warn"}
+### Limity `FILTER_VALIDATE_EMAIL` {#email-validate-limits-heading}
+
+PHP `FILTER_VALIDATE_EMAIL` ověřuje syntaxi podle zjednodušeného RFC 5322.
+Drobnosti, které je dobré znát:
+
+- **Akceptuje technicky platné, ale podivné adresy** – `a@b` (bez TLD)
+  s `FILTER_FLAG_EMAIL_UNICODE` nepustí, ale s defaultním nastavením ano.
+- **Nepouští IDN domény** (`uživatel@české-domény.cz`)
+  bez explicitního převodu přes `idn_to_ascii()`.
+- **Neověřuje existenci schránky.** Validní syntaxe ≠ doručitelná adresa.
+
+V doménové vrstvě tedy validujeme **syntakticky**. Pravdivost ověří až
+e-mail s ověřovacím odkazem (out-of-band proces), který v doméně modeluje
+agregát `EmailVerification` nebo událost `EmailVerificationRequested`.
+Pro pokročilejší syntaktickou validaci existuje knihovna
+[`egulias/email-validator`](https://github.com/egulias/EmailValidator),
+kterou používá i Symfony Validator pod kapotou.
+:::
+
+:::callout{type="pattern"}
+### Příklad: hodnotový objekt UserName s vlastními invarianty {#user-name-vo-heading}
+
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/UserName.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Domain\ValueObject;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Embeddable]
+final class UserName
+{
+    public const MIN_LENGTH = 2;
+    public const MAX_LENGTH = 100;
+
+    #[ORM\Column(type: 'string', length: self::MAX_LENGTH)]
+    public readonly string $value;
+
+    public function __construct(string $value)
+    {
+        $trimmed = trim($value);
+        $length = mb_strlen($trimmed);
+
+        if ($length < self::MIN_LENGTH || $length > self::MAX_LENGTH) {
+            throw new \InvalidArgumentException(sprintf(
+                'Jméno musí mít %d–%d znaků (zadáno %d).',
+                self::MIN_LENGTH,
+                self::MAX_LENGTH,
+                $length,
+            ));
+        }
+
+        $this->value = $trimmed;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}
+:::
+:::
+
+`UserName` ukazuje plnou cenu hodnotového objektu: invariant „jméno není prázdné
+a má rozumnou délku" je vynucen typem. Volající kód nemá šanci vložit prázdný
+string – pokud by to zkusil, dostane výjimku v konstruktoru, ne až v repozitáři.
+`#[ORM\Embeddable]` říká Doctrine, že VO se ukládá jako sloupec ve stejné tabulce
+jako vlastník (žádná samostatná tabulka pro VO).
 
 ## 11.05 Implementace repozitářů {#repositories}
 
@@ -427,100 +570,158 @@ transakci s retry strategií. **Tohle je doporučená produkční varianta a v d
 příkladech v této knize ji používáme jako default.**
 :::
 
-## 11.06 Separace Doctrine mapování pomocí XML {#doctrine-xml-mapping}
+## 11.06 Persisted Object Pattern – pure DDD varianta {#persisted-object-pattern}
 
-V předchozích příkladech jste si všimli, že doménové entity a hodnotové objekty neobsahují žádné Doctrine atributy (`#[ORM\Entity]`, `#[ORM\Column]` apod.).
-To je záměrné. V čistém DDD přístupu doménová vrstva nemá závislost na infrastruktuře, včetně ORM. Doctrine atributy (dříve anotace) zavádějí přímou vazbu
-mezi doménovým modelem a persistenční vrstvou, a tím porušují princip **Dependency Inversion**.
+Pokud trváte na tom, že doménová vrstva nesmí obsahovat ani metadata
+o persistenci, korektní cesta není XML mapping (taky „znečištěné", jen jiným
+formátem), ale **Persisted Object Pattern** (Khononov, *Learning DDD*, kap. 11).
 
-:::callout{type="warn"}
-### Proč Doctrine atributy nepatří do doménové vrstvy?
-
-- **Porušení Dependency Inversion Principle** – doménová vrstva (vysokoúrovňový modul) závisí na Doctrine ORM (nízkoúrovňový modul). Správný směr závislosti je opačný.
-- **Znečištění doménového modelu** – `use Doctrine\ORM\Mapping as ORM;` v doménové entitě znamená, že doména „ví“ o databázi. Čistá doména by měla být POPO (Plain Old PHP Object).
-- **Obtížná záměnitelnost** – pokud chcete změnit persistenční mechanismus (např. z MySQL na MongoDB nebo Event Store), musíte upravovat doménové entity.
-- **Komplikace testování** – unit testy doménových entit nepotřebují Doctrine, ale atributy vytvářejí nepříjemnou závislost při autoloadingu.
-:::
-
-Řešením je **XML mapování**. Mapovací soubory se umístí do konfiguračního adresáře
-mimo doménovou vrstvu:
+Idea: doménová třída zůstane POPO bez atributů. Vedle ní v infrastrukturní
+vrstvě existuje samostatná persistence třída se všemi Doctrine atributy.
+Dva mappery (one-way každým směrem) překládají mezi nimi.
 
 :::callout{type="pattern"}
-### Příklad: Struktura souborů pro XML mapování {#xml-mapping-structure-heading}
+### Příklad: doména POPO + persistence model + mapper {#persisted-object-example-heading}
 
-:::code{language="bash" filename="snippet.sh"}
-config/
-└── doctrine/
-    ├── UserManagement/
-    │   └── User.orm.xml
-    └── OrderManagement/
-        ├── Order.orm.xml
-        └── OrderItem.orm.xml
-:::
-:::
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (POPO – bez atributů)"}
+<?php
 
-:::callout{type="pattern"}
-### Příklad: XML mapování entity Order {#xml-mapping-example-heading}
+declare(strict_types=1);
 
-:::code{language="xml" filename="snippet.xml"}
-<?xml version="1.0" encoding="UTF-8"?>
-<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
-                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+namespace App\UserManagement\Domain\Model;
 
-    <entity name="App\OrderManagement\Domain\Model\Order" table="orders">
-        <id name="id" type="string" length="36">
-            <generator strategy="NONE"/>
-        </id>
+use App\Shared\Domain\AggregateRoot;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 
-        <field name="customerId" type="string" length="36" column="customer_id"/>
-        <field name="status" type="string" length="20" column="status"/>
-        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+final class User extends AggregateRoot
+{
+    private function __construct(
+        public readonly UserId $id,
+        private UserName $name,
+        private Email $email,
+        private readonly HashedPassword $hashedPassword,
+        public readonly \DateTimeImmutable $createdAt,
+    ) {}
 
-        <one-to-many field="items" target-entity="App\OrderManagement\Domain\Model\OrderItem" mapped-by="order">
-            <cascade>
-                <cascade-persist/>
-                <cascade-remove/>
-            </cascade>
-        </one-to-many>
-    </entity>
+    public static function register(/* ... */): self { /* ... */ }
+    public static function reconstitute(
+        UserId $id,
+        UserName $name,
+        Email $email,
+        HashedPassword $hashedPassword,
+        \DateTimeImmutable $createdAt,
+    ): self {
+        // Speciální factory pro mapper – obnovuje agregát z perzistovaného stavu
+        // bez vyhazování doménových událostí.
+        return new self($id, $name, $email, $hashedPassword, $createdAt);
+    }
 
-</doctrine-mapping>
-:::
+    // doménové operace ...
+}
 :::
 
-:::callout{type="pattern"}
-### Příklad: Konfigurace Doctrine pro XML mapování v Symfony {#xml-mapping-config-heading}
+:::code{language="php" filename="src/UserManagement/Infrastructure/Persistence/Doctrine/UserPersistenceModel.php"}
+<?php
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
-# config/packages/doctrine.yaml
-doctrine:
-    orm:
-        mappings:
-            UserManagement:
-                type: xml
-                dir: '%kernel.project_dir%/config/doctrine/UserManagement'
-                prefix: App\UserManagement\Domain\Model
-                alias: UserManagement
-                is_bundle: false
-            OrderManagement:
-                type: xml
-                dir: '%kernel.project_dir%/config/doctrine/OrderManagement'
-                prefix: App\OrderManagement\Domain\Model
-                alias: OrderManagement
-                is_bundle: false
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\Persistence\Doctrine;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+class UserPersistenceModel
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 26)]
+    public string $id;
+
+    #[ORM\Column(type: 'string', length: 100)]
+    public string $name;
+
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    public string $email;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    public string $passwordHash;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    public \DateTimeImmutable $createdAt;
+
+    #[ORM\Version]
+    #[ORM\Column(type: 'integer')]
+    public int $version = 1;
+}
+:::
+
+:::code{language="php" filename="src/UserManagement/Infrastructure/Persistence/Doctrine/UserMapper.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\Persistence\Doctrine;
+
+use App\UserManagement\Domain\Model\User;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
+
+final class UserMapper
+{
+    public function toDomain(UserPersistenceModel $row): User
+    {
+        return User::reconstitute(
+            new UserId($row->id),
+            new UserName($row->name),
+            new Email($row->email),
+            HashedPassword::fromHash($row->passwordHash),
+            $row->createdAt,
+        );
+    }
+
+    public function toPersistence(User $user): UserPersistenceModel
+    {
+        $model = new UserPersistenceModel();
+        $model->id = $user->id->value();
+        $model->name = (string) $user->name();
+        $model->email = $user->email()->value;
+        $model->passwordHash = $user->hashedPassword()->value();
+        $model->createdAt = $user->createdAt;
+
+        return $model;
+    }
+}
 :::
 :::
 
 :::callout{type="note"}
-### Výhody XML mapování pro DDD
+### Cena pure varianty {#persisted-object-tradeoffs-heading}
 
-- **Čistá doménová vrstva** – entity jsou prosté PHP objekty (POPO) bez jakýchkoliv závislostí na frameworku či ORM.
-- **Validace schématem** – XML soubory lze validovat proti XSD schématu Doctrine, čímž se snižuje riziko chyb v mapování.
-- **Oddělení odpovědností** – mapování je infrastrukturní záležitost a patří do infrastrukturní vrstvy, nikoliv do domény.
-- **Záměna persistence bez zásahu do domény** – při změně persistenčního mechanismu stačí vyměnit mapovací soubory, doménové entity zůstanou nedotčeny.
+Persisted Object Pattern je **opravdu** čistá doména – žádné atributy, žádné stopy
+ORM, žádné `use Doctrine\…`. Cena:
+
+- **2× kód.** Doménová třída + persistence model + mapper. Pro každý agregát.
+- **Mapování VO ručně.** Custom typy z hlavní cesty zde nepoužiješ – musí to dělat
+  mapper. U 5+ VO se kód mapperu rozrůstá.
+- **Riziko driftu.** Když přibude pole v doméně, musí přibýt v persistence modelu
+  i v mapperech. Žádný compiler to nehlídá.
+- **Optimistický zámek je řešení navíc.** `#[ORM\Version]` je v persistence modelu;
+  doména `User` musí přijmout `version` jako parametr `reconstitute()` nebo
+  spoléhat na infrastruktuře, že verzi sleduje sama.
+
+Doporučení: použít Persisted Object **jen v kontextech, kde je oddělení
+opravdu důležité** (Core Domain s vysokou hodnotou, dlouhodobá údržba, plán
+na výměnu persistence). Pro většinu Bounded Contextů jsou atributy přijatelný kompromis.
 :::
+
+V dalších příkladech v tomto průvodci pokračujeme s atributy přímo na agregátech.
+Persisted Object Pattern dále nerozvíjíme – principy jsou identické, jen vyžadují
+explicitní mapper na každý agregát.
 
 ## 11.07 Doctrine custom types pro Value Objects {#doctrine-custom-types}
 
@@ -1046,19 +1247,33 @@ Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký
 :::callout{type="note"}
 ### Symfony EventDispatcher vs. Messenger pro doménové události {#dispatcher-vs-messenger-heading}
 
-Symfony nabízí dva mechanismy pro práci s událostmi – každý pro jiný účel:
+Symfony nabízí dva mechanismy pro „něco se stalo":
 
 - **EventDispatcher** (`EventDispatcherInterface`) – synchronní,
-  in-process. Všechny listenery se provedou okamžitě v témž PHP požadavku.
-  Vhodné pro: side effects v téže transakci (aktualizace cache, logování).
-- **Messenger** (`MessageBusInterface`) – může být synchronní
-  i asynchronní. Podporuje transporty (RabbitMQ, Redis, Doctrine), retry strategii
-  a sériovou serializaci. Vhodné pro: komunikaci mezi Bounded Contexts, asynchronní
-  projekce, notifikace.
+  in-process. Listenery se provedou okamžitě v témž PHP požadavku, ve sdíleném
+  paměťovém prostoru. Bez serializace, bez network round-tripu.
+- **Messenger** (`MessageBusInterface`) – může být synchronní i asynchronní.
+  Podporuje transporty (RabbitMQ, Redis, Doctrine outbox), retry strategii
+  a sériovou serializaci zprávy. Příjemce může běžet v jiném procesu, jiném serveru.
 
-**Doporučení:** Pro doménové události v DDD preferujte **Messenger**,
-protože umožňuje pozdější přechod na asynchronní zpracování bez změny kódu producenta.
-EventDispatcher používejte pro Symfony-specifické události (kernel events, form events).
+**Volba podle role příjemce:**
+
+- **In-context, in-request listenery** (read model uvnitř téhož kontextu,
+  audit log, cache invalidace v rámci téhož commitu) → **EventDispatcher**.
+  Žádná serializace, listenery vidí stejný `EntityManager`, stejnou transakci.
+- **Cross-context komunikace** (publikace události mimo Bounded Context, kterou
+  zpracuje jiný kontext / služba / projekce) → **Messenger** přes outbox.
+  Zpráva přejde DB transakci, dorazí do brokera, jiný kontext si ji odebere.
+
+V praxi to znamená: agregát publikuje doménovou událost do svého `domainEvents` pole.
+Repozitář při `save()` zapíše událost do outbox tabulky. Z outboxu pak worker
+*synchronně* (přes EventDispatcher) doručí lokálním listenerům uvnitř téhož kontextu
+a *asynchronně* (přes Messenger transport) propustí ven pro ostatní kontexty.
+
+**Anti-vzor:** používat Messenger jako náhradu za EventDispatcher uvnitř téhož
+kontextu, protože „je to flexibilnější". Cena: každá zpráva projde JSON serializací,
+ztráta typů, ztráta transakční koheze, nutnost správy transportů. Zvolte mechanismus
+podle hranice, kterou událost překračuje – ne podle hypotetické budoucí potřeby.
 :::
 
 ## 11.12 Strategie zpracování chyb v DDD {#error-handling}
@@ -1133,14 +1348,23 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Command;
 
-class RegisterUser
+use Symfony\Component\Validator\Constraints as Assert;
+
+final readonly class RegisterUser
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $email,
-        public readonly string $password
-    ) {
-    }
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 2, max: 100)]
+        public string $name,
+
+        #[Assert\NotBlank]
+        #[Assert\Email(mode: Assert\Email::VALIDATION_MODE_STRICT)]
+        public string $email,
+
+        #[Assert\NotBlank]
+        #[Assert\Length(min: 12)]
+        public string $password,
+    ) {}
 }
 :::
 
@@ -1157,23 +1381,24 @@ use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class RegisterUserHandler
+final readonly class RegisterUserHandler
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
+        private UserRepository $userRepository,
     ) {}
 
     public function __invoke(RegisterUser $command): void
     {
-        $email = new Email($command->email);
+        $email = Email::fromUserInput($command->email);
 
         $user = User::register(
             UserId::generate(),
-            $command->name,
+            new UserName($command->name),
             $email,
             HashedPassword::fromPlainText($command->password),
         );
@@ -1184,9 +1409,6 @@ final class RegisterUserHandler
             // Spoléháme na DB unique constraint na sloupci `email`. Aplikační check
             // přes findByEmail() je vůči souběžným registracím nedostatečný (TOCTOU
             // race – dvě paralelní volání oba projdou check a oba uloží).
-            // Repozitář infrastrukturní výjimku DBAL nepouští dál nezměněnou; mělo by
-            // jít buď o zachycení v repo a překlad na doménovou výjimku, nebo zde –
-            // viz callout pod kódem.
             throw DuplicateEmailException::with($email, $e);
         }
     }
@@ -1270,26 +1492,25 @@ use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class GetUserProfileHandler
+final readonly class GetUserProfileHandler
 {
     public function __construct(
-        private UserRepository $userRepository
-    ) {
-    }
+        private UserRepository $userRepository,
+    ) {}
 
     public function __invoke(GetUserProfile $query): ?UserProfileViewModel
     {
         $user = $this->userRepository->findById(new UserId($query->userId));
 
-        if (!$user) {
+        if ($user === null) {
             return null;
         }
 
         return new UserProfileViewModel(
-            $user->id()->value(),
-            $user->name(),
-            $user->email()->value(),
-            $user->createdAt()
+            id: $user->id->value(),
+            name: (string) $user->name(),
+            email: $user->email()->value,
+            createdAt: $user->createdAt,
         );
     }
 }
@@ -1319,11 +1540,17 @@ doménová vrstva řeší *sémantickou* validaci (doménová pravidla).
 
 ## 11.14 Implementace kontrolerů {#controllers}
 
-Kontrolery v DDD jsou součástí prezentační vrstvy a zodpovídají za interakci s uživatelem. V Symfony 8 se implementují kontrolery
-jako běžné Symfony kontrolery:
+Kontroler je adapter mezi HTTP a aplikační vrstvou. Smí: validovat formát vstupu,
+transformovat ho na command/query, dispatchovat, přeložit doménovou výjimku
+na HTTP odpověď. Nesmí: nést doménová pravidla, volat repozitáře přímo,
+manipulovat s agregáty.
+
+Symfony 7+ nabízí `#[MapRequestPayload]`, který deserializuje a validuje
+JSON požadavek přímo do typového commandu. Pro klasické HTML formuláře pak existuje
+varianta `#[MapRequestPayload(acceptFormat: 'form')]` nebo Symfony Form.
 
 :::callout{type="pattern"}
-### Příklad: Implementace kontroleru v Symfony 8 {#controller-example-heading}
+### Příklad: kontroler s MapRequestPayload (JSON API) {#controller-example-heading}
 
 :::code{language="php" filename="src/UserManagement/Registration/Controller/RegistrationController.php"}
 <?php
@@ -1332,52 +1559,190 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Controller;
 
+use App\UserManagement\Domain\Exception\DuplicateEmailException;
 use App\UserManagement\Registration\Command\RegisterUser;
-use App\UserManagement\Registration\Form\RegistrationFormType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-class RegistrationController extends AbstractController
+final class RegistrationController
 {
-    #[Route('/register', name: 'app_register')]
-    public function register(Request $request, MessageBusInterface $commandBus): Response
-    {
-        $form = $this->createForm(RegistrationFormType::class);
-        $form->handleRequest($request);
+    public function __construct(
+        private readonly MessageBusInterface $commandBus,
+    ) {}
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            $command = new RegisterUser(
-                $data['name'],
-                $data['email'],
-                $data['password']
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
+    public function register(
+        #[MapRequestPayload] RegisterUser $command,
+    ): Response {
+        try {
+            $this->commandBus->dispatch($command);
+        } catch (DuplicateEmailException $e) {
+            return new JsonResponse(
+                ['error' => $e->getMessage()],
+                Response::HTTP_CONFLICT,
             );
-
-            try {
-                $commandBus->dispatch($command);
-
-                $this->addFlash('success', 'Your account has been created. You can now log in.');
-
-                return $this->redirectToRoute('app_login');
-            } catch (\DomainException $e) {
-                $this->addFlash('error', $e->getMessage());
-            }
         }
 
-        return $this->render('@UserManagement/Registration/View/registration.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return new JsonResponse(['status' => 'created'], Response::HTTP_CREATED);
     }
 }
 :::
 :::
 
-V tomto příkladu je `RegistrationController` kontroler, který zpracovává registraci uživatele.
-Kontroler vytváří formulář, zpracovává požadavek a odesílá příkaz `RegisterUser` přes command bus.
+`MapRequestPayload` převezme deserializaci, validaci přes Symfony Validator
+(atributy `#[Assert\…]` na commandu) i překlad chyby validace na HTTP 422.
+Kontroler tak má jen tři odpovědnosti: dispatch, mapování doménových výjimek
+na HTTP, návrat odpovědi.
+
+:::callout{type="note"}
+### Symfony idiomy: `#[AsAlias]` pro repozitáře {#symfony-idiomy-asalias}
+
+Místo aliasování v `services.yaml` můžete od Symfony 6.3+ použít atribut
+`#[AsAlias]` přímo na implementaci:
+
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php (s AsAlias)"}
+<?php
+
+use App\UserManagement\Domain\Repository\UserRepository;
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+
+#[AsAlias(id: UserRepository::class)]
+final class DoctrineUserRepository implements UserRepository
+{
+    // ...
+}
+:::
+
+DI Container automaticky zaregistruje `DoctrineUserRepository` jako alias na
+rozhraní `UserRepository`. `services.yaml` zůstane čistý, závislosti zůstanou
+v jednom souboru s implementací. Pro většinu projektů je tohle preferovaná cesta.
+:::
+
+:::callout{type="pattern"}
+### Příklad: kernel test command handleru {#kernel-test-heading}
+
+DDD agregáty se testují jako čistý PHP. Aplikační handlery, které se opírají
+o repozitář, se nejlépe testují jako **kernel test** s in-memory implementací
+repozitáře nebo s testovací databází (Doctrine SQLite v `KERNEL_TEST` env).
+
+:::code{language="php" filename="tests/UserManagement/Registration/RegisterUserHandlerTest.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\UserManagement\Registration;
+
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Registration\Command\RegisterUser;
+use App\UserManagement\Registration\Command\RegisterUserHandler;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+final class RegisterUserHandlerTest extends KernelTestCase
+{
+    public function test_registers_new_user(): void
+    {
+        $container = static::getContainer();
+        $handler = $container->get(RegisterUserHandler::class);
+        $repo = $container->get(UserRepository::class);
+
+        $handler(new RegisterUser(
+            name: 'Jan Novák',
+            email: 'jan@novak.cz',
+            password: 'tajne-heslo-1234',
+        ));
+
+        $user = $repo->findByEmail(\App\UserManagement\Domain\ValueObject\Email::fromUserInput('jan@novak.cz'));
+        self::assertNotNull($user);
+        self::assertSame('Jan Novák', (string) $user->name());
+    }
+
+    public function test_rejects_duplicate_email(): void
+    {
+        $handler = static::getContainer()->get(RegisterUserHandler::class);
+
+        $handler(new RegisterUser(
+            name: 'První',
+            email: 'duplicate@test.cz',
+            password: 'tajne-heslo-1234',
+        ));
+
+        $this->expectException(\App\UserManagement\Domain\Exception\DuplicateEmailException::class);
+
+        $handler(new RegisterUser(
+            name: 'Druhý',
+            email: 'duplicate@test.cz',
+            password: 'jine-tajne-heslo-1234',
+        ));
+    }
+}
+:::
+:::
+
+Použití skutečného DB transportu (SQLite v testech, PostgreSQL v CI) garantuje,
+že unique constraint, transakční chování a outbox skutečně fungují.
+In-memory mock repozitáře tyto vlastnosti negarantuje.
+
+:::callout{type="pattern"}
+### Symfony Voter pro autorizaci nad agregátem {#voter-heading}
+
+Autorizace „kdo smí volat tuto akci" patří do prezentační/aplikační vrstvy, ne do agregátu.
+Symfony nabízí Voter API – idiomatické místo, kde se ptát „má aktuální uživatel právo
+udělat X s tímto agregátem":
+
+:::code{language="php" filename="src/OrderManagement/Infrastructure/Security/OrderVoter.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Infrastructure\Security;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\UserManagement\Domain\Model\User;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+
+final class OrderVoter extends Voter
+{
+    public const VIEW = 'ORDER_VIEW';
+    public const CANCEL = 'ORDER_CANCEL';
+
+    protected function supports(string $attribute, mixed $subject): bool
+    {
+        return in_array($attribute, [self::VIEW, self::CANCEL], true)
+            && $subject instanceof Order;
+    }
+
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    {
+        $user = $token->getUser();
+        if (!$user instanceof User || !$subject instanceof Order) {
+            return false;
+        }
+
+        return match ($attribute) {
+            self::VIEW => $subject->customerId->equals($user->id->asCustomerId()),
+            self::CANCEL => $subject->customerId->equals($user->id->asCustomerId())
+                && $subject->status->canBeCancelled(),
+            default => false,
+        };
+    }
+}
+:::
+
+Voter pak volá kontroler před dispatchem commandu:
+
+:::code{language="php" filename="(controller)"}
+$this->denyAccessUnlessGranted(OrderVoter::CANCEL, $order);
+$this->commandBus->dispatch(new CancelOrder($order->id->value()));
+:::
+
+Voter chrání **právo na akci**. Doménový invariant „lze stornovat jen objednávku
+ve stavu A" je v `Order::cancel()` metodě – Voter ho nedubluje, jen zabraňuje
+volání, které by stejně skončilo `DomainException`.
+:::
 
 ## 11.15 Dependency Injection a autowiring {#dependency-injection}
 
