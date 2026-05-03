@@ -7,7 +7,7 @@ meta_description: "Výkonnostní aspekty DDD v Symfony a Doctrine: N+1 problém,
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Výkonnostní aspekty DDD v Symfony a Doctrine"

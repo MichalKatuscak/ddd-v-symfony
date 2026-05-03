@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, PHP-Arkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage"
 og_type: article
 published: "2025-04-24"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"

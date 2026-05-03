@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"

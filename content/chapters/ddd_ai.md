@@ -7,7 +7,7 @@ meta_description: "Vztah DDD a AI nástrojů očima Erica Evanse, Martina Fowler
 meta_keywords: "DDD AI, domain-driven design umělá inteligence, DDD LLM, Eric Evans AI, Martin Fowler AI, Kent Beck AI, DDD bounded context AI, ubiquitous language LLM"
 og_type: article
 published: "2026-03-27"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: DDD a AI
 schema_type: TechArticle
 schema_headline: "DDD a umělá inteligence – co říkají autority"

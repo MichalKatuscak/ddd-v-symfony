@@ -7,7 +7,7 @@ meta_description: "Případová studie systému pro správu projektů v DDD arch
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"

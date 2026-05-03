@@ -7,7 +7,7 @@ meta_description: "Domain-Driven Design srozumitelně: filozofie Erica Evanse, U
 meta_keywords: "Domain-Driven Design, DDD, Eric Evans, Ubiquitous Language, Bounded Context, doménový model, doménová logika, strategický design, taktický design"
 og_type: article
 published: "2025-04-24"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Co je DDD
 schema_type: TechArticle
 schema_headline: "Co je Domain-Driven Design? Podrobné vysvětlení DDD"

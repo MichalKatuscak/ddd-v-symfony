@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"

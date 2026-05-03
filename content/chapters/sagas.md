@@ -7,7 +7,7 @@ meta_description: "Ságy a Process Managery v DDD a Symfony Messenger: kompenzac
 meta_keywords: "saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce"
 og_type: article
 published: "2026-03-26"
-modified: "2026-04-28"
+modified: "2026-05-03"
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
