@@ -48,6 +48,9 @@ Hlavní milníky ve vývoji DDD [[6]](https://dddcommunity.org/):
 
 ## 01.03 Strategický design (Strategic Design) {#strategic-design}
 
+:::diagram{fig="01.3-A" title="Strategický vs. taktický design - dvě úrovně rozhodování v DDD" src="images/diagrams/1_layers/strategic_vs_tactical.svg"}
+:::
+
 Strategický design se zabývá širším kontextem systému a definuje, jak různé části systému spolu interagují. Hlavní koncepty strategického designu zahrnují:
 
 - **Bounded Context** – Ohraničený kontext je explicitní hranice, ve které je doménový model platný. Každý bounded context má svůj vlastní Ubiquitous Language a model.

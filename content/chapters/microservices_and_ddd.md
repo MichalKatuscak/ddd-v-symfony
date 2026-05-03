@@ -293,6 +293,10 @@ Detailní rozbor obecných anti-vzorů, které k distributed monolithu vedou (mi
 Reálné systémy zřídka spadají do jedné z čistých kategorií „monolit" vs. „microservices".
 V praxi se objevuje **hybridní topologie**: jeden modulární monolit jako *core*
 plus 1–3 extrahované servisy pro kontexty, které mají jasný důvod existovat samostatně.
+
+:::diagram{fig="20.4-A" title="Hybridní topologie - core monolit + 2 extrakty s důvody" src="images/diagrams/20_microservices/hybrid_topology.svg"}
+:::
+
 Typický scénář:
 
 ```text

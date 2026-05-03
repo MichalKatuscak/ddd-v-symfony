@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="975px" preserveAspectRatio="none" style="width:1025px;height:975px;background:#11141A;" version="1.1" viewBox="0 0 1025 975" width="1025px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="512.5" x="261.7188" y="26.1063">Testovací pyramida pro DDD aplikaci</text><!--MD5=[715dd8da794ffb6223feb43bde53b4a2]
+entity e2e--><rect fill="#260000" height="133.1055" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="348.4375" x="32.8125" y="45.2393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="185.9375" x="114.0625" y="81.1691">End-to-end (E2E)</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="103.125" x="155.4688" y="106.633">5 % testů</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="110.9375" y="132.0969">— jen kritické flow</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="317.1875" x="48.4375" y="157.5607">— Symfony Panther / Cypress</text><!--MD5=[b1c884860531777bc081940d82065b2a]
+entity int--><rect fill="#1B202A" height="158.5693" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="365.625" x="24.2188" y="271.8018"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="206.25" x="103.9063" y="307.7316">Integration (Kernel)</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="148.4375" y="333.1955">15 % testů</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="296.875" x="58.5938" y="358.6594">— Symfony KernelTestCase</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="329.6875" x="42.1875" y="384.1232">— Doctrine in-memory / SQLite</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="334.375" x="39.8438" y="409.5871">— Command + Query handlers</text><!--MD5=[953543167c6874d2f2ca47c5aea302dc]
+entity comp--><rect fill="#1B202A" height="158.5693" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="287.5" x="63.2813" y="523.3643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="181.25" x="116.4063" y="559.2941">Component (BC)</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="148.4375" y="584.758">30 % testů</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="225" x="94.5313" y="610.2219">— modul/BC isolated</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="256.25" x="78.9063" y="635.6857">— in-memory repository</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="242.1875" x="85.9375" y="661.1496">— Application Services</text><!--MD5=[735b48506a591e47526ca36b4b4b7f20]
+entity unit--><rect fill="#102B00" height="184.0332" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="395.3125" x="9.375" y="774.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="42.1875" x="185.9375" y="810.8566">Unit</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="148.4375" y="836.3205">50 % testů</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="168.75" x="122.6563" y="861.7844">— čistý PHPUnit</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="364.0625" x="25" y="887.2482">— Aggregate, VO, Domain Service</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="293.75" x="60.1563" y="912.7121">— bez frameworku, bez DB</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="146.875" x="133.5938" y="938.176">— rychlé (ms)</text><path d="M460.1563,825.708 L460.1563,860.8643 L405,867.1143 L460.1563,873.3643 L460.1563,908.3496 A4.6875,4.6875 0 0 0 464.8438,913.0371 L1002.3438,913.0371 A4.6875,4.6875 0 0 0 1007.0313,908.3496 L1007.0313,836.6455 L991.4063,821.0205 L464.8438,821.0205 A4.6875,4.6875 0 0 0 460.1563,825.708 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M991.4063,821.0205 L991.4063,834.3018 A2.3438,2.3438 0 0 0 993.75,836.6455 L1007.0313,836.6455 L991.4063,821.0205 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="214.0625" x="469.5313" y="849.1379">Doménová vrstva</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="204.6875" x="689.8438" y="849.1379">v DDD je čistý PHP.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="387.5" x="469.5313" y="874.6017">Test invariantu agregátu = unit test.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="514.0625" x="469.5313" y="900.0656">Žádný EntityManager, žádný Symfony container.</text><path d="M405.4688,560.8643 L405.4688,596.0205 L351.2031,602.2705 L405.4688,608.5205 L405.4688,643.5059 A4.6875,4.6875 0 0 0 410.1563,648.1934 L938.2813,648.1934 A4.6875,4.6875 0 0 0 942.9688,643.5059 L942.9688,571.8018 L927.3438,556.1768 L410.1563,556.1768 A4.6875,4.6875 0 0 0 405.4688,560.8643 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M927.3438,556.1768 L927.3438,569.458 A2.3438,2.3438 0 0 0 929.6875,571.8018 L942.9688,571.8018 L927.3438,556.1768 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="368.75" x="414.8438" y="584.2941">Agregát + Application Service</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="54.6875" x="789.8438" y="584.2941">v BC.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="451.5625" x="414.8438" y="609.758">In-memory repository pro test koordinace.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="504.6875" x="414.8438" y="635.2219">Validuje use case, ne integraci s frameworkem.</text><path d="M444.5313,296.8018 L444.5313,344.458 L389.9688,350.708 L444.5313,356.958 L444.5313,404.9072 A4.6875,4.6875 0 0 0 449.2188,409.5947 L930.4688,409.5947 A4.6875,4.6875 0 0 0 935.1563,404.9072 L935.1563,307.7393 L919.5313,292.1143 L449.2188,292.1143 A4.6875,4.6875 0 0 0 444.5313,296.8018 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M919.5313,292.1143 L919.5313,305.3955 A2.3438,2.3438 0 0 0 921.875,307.7393 L935.1563,307.7393 L919.5313,292.1143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="417.1875" x="453.9063" y="320.2316">Skutečný kontejner, skutečná DB.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="440.625" x="453.9063" y="345.6955">Kontroluje, že Doctrine mapping funguje,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="457.8125" x="453.9063" y="371.1594">unique constraint vyhází správnou výjimku,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="412.5" x="453.9063" y="396.6232">outbox uloží event ve stejné transakci.</text><path d="M435.9375,70.2393 L435.9375,105.3955 L381.5781,111.6455 L435.9375,117.8955 L435.9375,152.8809 A4.6875,4.6875 0 0 0 440.625,157.5684 L960.9375,157.5684 A4.6875,4.6875 0 0 0 965.625,152.8809 L965.625,81.1768 L950,65.5518 L440.625,65.5518 A4.6875,4.6875 0 0 0 435.9375,70.2393 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M950,65.5518 L950,78.833 A2.3438,2.3438 0 0 0 952.3438,81.1768 L965.625,81.1768 L950,65.5518 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="392.1875" x="445.3125" y="93.6691">Drahé (provoz prohlížeče, full stack).</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="414.0625" x="445.3125" y="119.133">Pokrývají JEN business-critical scénáře:</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="496.875" x="445.3125" y="144.5969">„registrace → přihlášení", „checkout → platba".</text><!--MD5=[b2c48c3fc858b208e34bb3f4df93aad8]
+reverse link comp to unit--><path d="M207.0313,689.9736 C207.0313,717.1299 207.0313,747.208 207.0313,774.6768 " fill="none" id="comp&lt;-unit" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="207.0313,681.6455,200.7813,695.708,207.0313,689.458,213.2813,695.708,207.0313,681.6455" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[15469ce729d8d987aa81d2024bfdff21]
+reverse link int to comp--><path d="M207.0313,438.6143 C207.0313,466.083 207.0313,496.2549 207.0313,523.0518 " fill="none" id="int&lt;-comp" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="207.0313,430.1924,200.7813,444.2549,207.0313,438.0049,213.2813,444.2549,207.0313,430.1924" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[676f3c4b528a8f8a7e291991d6b6123b]
+reverse link e2e to int--><path d="M207.0313,186.5674 C207.0313,213.6143 207.0313,244.3174 207.0313,271.708 " fill="none" id="e2e&lt;-int" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="207.0313,178.3018,200.7813,192.3643,207.0313,186.1143,213.2813,192.3643,207.0313,178.3018" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[2dd832b42a0bdb529d1344d165da1b76]
+@startuml test_pyramid
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Testovací pyramida pro DDD aplikaci
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+rectangle "End-to-end (E2E)\n5 % testů\n— jen kritické flow\n— Symfony Panther / Cypress" as e2e #260000
+rectangle "Integration (Kernel)\n15 % testů\n— Symfony KernelTestCase\n— Doctrine in-memory / SQLite\n— Command + Query handlers" as int #1B202A
+rectangle "Component (BC)\n30 % testů\n— modul/BC isolated\n— in-memory repository\n— Application Services" as comp #1B202A
+rectangle "Unit\n50 % testů\n— čistý PHPUnit\n— Aggregate, VO, Domain Service\n— bez frameworku, bez DB\n— rychlé (ms)" as unit #102B00
+
+unit -[#F0A456]up-> comp
+comp -[#F0A456]up-> int
+int -[#F0A456]up-> e2e
+
+note right of unit
+  **Doménová vrstva** v DDD je čistý PHP.
+  Test invariantu agregátu = unit test.
+  Žádný EntityManager, žádný Symfony container.
+end note
+
+note right of comp
+  **Agregát + Application Service** v BC.
+  In-memory repository pro test koordinace.
+  Validuje use case, ne integraci s frameworkem.
+end note
+
+note right of int
+  **Skutečný kontejner, skutečná DB.**
+  Kontroluje, že Doctrine mapping funguje,
+  unique constraint vyhází správnou výjimku,
+  outbox uloží event ve stejné transakci.
+end note
+
+note right of e2e
+  Drahé (provoz prohlížeče, full stack).
+  Pokrývají JEN business-critical scénáře:
+  „registrace → přihlášení", „checkout → platba".
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

@@ -1380,6 +1380,9 @@ nový leader → double publish.
 si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure,
 škáluje se lineárně s počtem worker replik.
 
+:::diagram{fig="16.8-A" title="Distributed relay - 4 workery paralelně přes SKIP LOCKED" src="images/diagrams/14_outbox/distributed_relay.svg"}
+:::
+
 :::callout{type="pattern"}
 ### SQL: Concurrent dispatch přes SKIP LOCKED {#skip-locked-heading}
 

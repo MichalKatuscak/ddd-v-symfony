@@ -39,7 +39,7 @@ Chyby při implementaci DDD lze rozdělit do tří kategorií:
 
 Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). V této situaci doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
 
-:::diagram{fig="22.2-A" title="Anémický vs. bohatý doménový model — kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
+:::diagram{fig="22.2-A" title="Anémický vs. bohatý doménový model – kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
 :::
 
 :::callout{type="note"}

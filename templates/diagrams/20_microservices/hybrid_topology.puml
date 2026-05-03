@@ -1,0 +1,59 @@
+@startuml hybrid_topology
+!include ../theme.iuml
+
+title Hybridní topologie: monolit jako core + extrahované servisy
+
+skinparam rectangle {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+actor User as u
+rectangle "Public API\n(rate limiting, versioning)" as api #102B00
+
+rectangle "Modulární monolit (core)" as monolith #1B202A {
+  rectangle "Catalog" as cat
+  rectangle "Ordering" as ord
+  rectangle "Customer" as cust
+  cat -[#7A5530]-> ord : in-process\nfunction call
+  ord -[#7A5530]-> cust
+}
+
+rectangle "Reporting svc\n(read-heavy,\nseparátní DB,\nCQRS read replica)" as rep #102B00
+rectangle "Payment svc\n(PCI scope,\naudit isolation,\nseparátní compliance)" as pay #260000
+
+u -[#F0A456]-> api
+api -[#F0A456]-> monolith : většina rout
+api -[#F0A456]-> rep : reportovací dotazy
+monolith -[#F0A456]-> pay : ChargeRequested\n(message broker)
+pay -[#F0A456]-> monolith : PaymentSettled\n(message broker)
+
+note bottom of monolith
+  Core domény tightly coupled.
+  Refaktor v IDE, ne přes ACL.
+end note
+
+note bottom of pay
+  Důvody extrakce:
+  + PCI compliance scope
+  + Auditní izolace
+  + Vlastní release cyklus regulátora
+end note
+
+note bottom of rep
+  Důvody extrakce:
+  + Read traffic 100× větší
+  + Vlastní DB topologie (CQRS)
+  + Heavy aggregation queries
+end note
+
+note as N1
+  Hybrid není přechodný stav.
+  Je to legitimní cíl, když:
+  – Core BC jsou silně provázané
+  – Periferní BC mají operační důvod (compliance, scaling)
+  – Tým neunese N+1 servisů
+end note
+
+@enduml

@@ -1,0 +1,75 @@
+@startuml styles_comparison
+!include ../theme.iuml
+
+title Layered vs. Hexagonal vs. Onion vs. Clean Architecture
+
+skinparam package {
+  BackgroundColor $BG
+  BorderColor $ACCENT
+  FontColor $ACCENT
+}
+
+package "LAYERED (3-tier)" as l #1B202A {
+  rectangle "Presentation\n(Controllers, Forms)" as l1
+  rectangle "Application\n(Services, Workflows)" as l2
+  rectangle "Domain Model\n(s Doctrine atributy)" as l3
+  rectangle "Infrastructure\n(DB, MessageBus)" as l4
+
+  l1 -[#F0A456]down-> l2
+  l2 -[#F0A456]down-> l3
+  l3 -[#F0A456]down-> l4
+  note bottom of l4 #161A22
+    Doména závisí na infrastruktuře.
+    Pragmatický default Symfony.
+  end note
+}
+
+package "HEXAGONAL (Ports & Adapters)" as h #1B202A {
+  rectangle "Application Core\n(Domain + UseCases)" as hc
+  rectangle "Inbound Port\n(PlaceOrder)" as hi
+  rectangle "Outbound Port\n(OrderRepository)" as ho
+  rectangle "HTTP Adapter\n(Controller)" as ha1
+  rectangle "DB Adapter\n(Doctrine impl)" as ha2
+
+  ha1 -[#F0A456]-> hi
+  hi -[#F0A456]-> hc
+  hc -[#F0A456]-> ho
+  ho <-[#F0A456]- ha2
+  note bottom of ha2 #161A22
+    Doména nezná adaptéry.
+    Vše jde přes porty (interfaces).
+  end note
+}
+
+package "ONION (vrstvy jako cibule)" as o #1B202A {
+  rectangle "Domain Model\n(jádro)" as od
+  rectangle "Domain Services" as ods
+  rectangle "Application Services" as oas
+  rectangle "Infrastructure\n(DB, UI, externí)" as oi
+
+  od -[#F0A456]-> ods : "vyšší vrstva\nzná nižší"
+  ods -[#F0A456]-> oas
+  oas -[#F0A456]-> oi
+  note bottom of oi #161A22
+    Závislost JEN dovnitř.
+    Domain core neví o ničem vyšším.
+  end note
+}
+
+package "CLEAN (Uncle Bob)" as c #1B202A {
+  rectangle "Entities\n(Enterprise rules)" as ce
+  rectangle "Use Cases" as cu
+  rectangle "Interface Adapters\n(Presenters, Gateways)" as cia
+  rectangle "Frameworks & Drivers\n(Web, DB, UI)" as cfd
+
+  ce -[#F0A456]-> cu : "výsledek\ndependency rule"
+  cu -[#F0A456]-> cia
+  cia -[#F0A456]-> cfd
+  note bottom of cfd #161A22
+    Stejný princip jako Onion,
+    explicitnější vrstvy + boundary
+    interfaces na všech úrovních.
+  end note
+}
+
+@enduml

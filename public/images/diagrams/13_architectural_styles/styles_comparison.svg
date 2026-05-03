@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1189.0625px" preserveAspectRatio="none" style="width:1862px;height:1189px;background:#11141A;" version="1.1" viewBox="0 0 1862 1189" width="1862.5px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="771.875" x="562.5" y="26.1063">Layered vs. Hexagonal vs. Onion vs. Clean Architecture</text><!--MD5=[111e76b7750b177dc86a17904ed6b67c]
+cluster l--><path d="M39.0625,70.2393 L240.625,70.2393 A7.0313,7.0313 0 0 1 245.3125,74.9268 L256.25,105.0781 L457.8125,105.0781 A4.6875,4.6875 0 0 1 462.5,109.7656 L462.5,988.9893 A4.6875,4.6875 0 0 1 457.8125,993.6768 L39.0625,993.6768 A4.6875,4.6875 0 0 1 34.375,988.9893 L34.375,74.9268 A4.6875,4.6875 0 0 1 39.0625,70.2393 " fill="#1B202A" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="34.375" x2="256.25" y1="105.0781" y2="105.0781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="40.625" y="93.6691">LAYERED (3-tier)</text><!--MD5=[de5e3ac9c47e5be61e90a04a80699c61]
+cluster h--><path d="M504.6875,70.2393 L895.3125,70.2393 A7.0313,7.0313 0 0 1 900,74.9268 L910.9375,105.0781 L910.9375,105.0781 A4.6875,4.6875 0 0 1 915.625,109.7656 L915.625,1167.1143 A4.6875,4.6875 0 0 1 910.9375,1171.8018 L504.6875,1171.8018 A4.6875,4.6875 0 0 1 500,1167.1143 L500,74.9268 A4.6875,4.6875 0 0 1 504.6875,70.2393 " fill="#1B202A" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="500" x2="910.9375" y1="105.0781" y2="105.0781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="390.625" x="506.25" y="93.6691">HEXAGONAL (Ports &amp; Adapters)</text><!--MD5=[681afae6640faca68c2d704cb11e6132]
+cluster o--><path d="M957.8125,70.2393 L1278.125,70.2393 A7.0313,7.0313 0 0 1 1282.8125,74.9268 L1293.75,105.0781 L1395.3125,105.0781 A4.6875,4.6875 0 0 1 1400,109.7656 L1400,988.9893 A4.6875,4.6875 0 0 1 1395.3125,993.6768 L957.8125,993.6768 A4.6875,4.6875 0 0 1 953.125,988.9893 L953.125,74.9268 A4.6875,4.6875 0 0 1 957.8125,70.2393 " fill="#1B202A" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="953.125" x2="1293.75" y1="105.0781" y2="105.0781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="320.3125" x="959.375" y="93.6691">ONION (vrstvy jako cibule)</text><!--MD5=[b3179ce4f793cc951a1964cbf548eaa1]
+cluster c--><path d="M1442.1875,70.2393 L1671.875,70.2393 A7.0313,7.0313 0 0 1 1676.5625,74.9268 L1687.5,105.0781 L1839.0625,105.0781 A4.6875,4.6875 0 0 1 1843.75,109.7656 L1843.75,1001.4893 A4.6875,4.6875 0 0 1 1839.0625,1006.1768 L1442.1875,1006.1768 A4.6875,4.6875 0 0 1 1437.5,1001.4893 L1437.5,74.9268 A4.6875,4.6875 0 0 1 1442.1875,70.2393 " fill="#1B202A" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="1437.5" x2="1687.5" y1="105.0781" y2="105.0781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="229.6875" x="1443.75" y="93.6691">CLEAN (Uncle Bob)</text><!--MD5=[1072370d482470345a8308294de351f0]
+entity l1--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="243.75" x="126.5625" y="124.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="137.5" x="179.6875" y="160.8566">Presentation</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="212.5" x="142.1875" y="186.3205">(Controllers, Forms)</text><!--MD5=[fd34c2c33e7226844454d8b5b87ac510]
+entity l2--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="259.375" x="118.75" y="354.6143"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="117.1875" x="189.8438" y="390.5441">Application</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="228.125" x="134.375" y="416.008">(Services, Workflows)</text><!--MD5=[f5cebd9ecd1fd2c273c77b13e02bebd2]
+entity l3--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="243.75" x="126.5625" y="532.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="171.0938" y="568.6691">Domain Model</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="212.5" x="142.1875" y="594.133">(s Doctrine atributy)</text><!--MD5=[c732666bdc386b39dc469646131c2c8f]
+entity l4--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="232.8125" x="132.0313" y="710.8643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="176.5625" y="746.7941">Infrastructure</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="147.6563" y="772.258">(DB, MessageBus)</text><path d="M59.375,906.1768 L59.375,963.3545 A4.6875,4.6875 0 0 0 64.0625,968.042 L432.8125,968.042 A4.6875,4.6875 0 0 0 437.5,963.3545 L437.5,917.1143 L421.875,901.4893 L254.6875,901.4893 L248.4375,793.708 L242.1875,901.4893 L64.0625,901.4893 A4.6875,4.6875 0 0 0 59.375,906.1768 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M421.875,901.4893 L421.875,914.7705 A2.3438,2.3438 0 0 0 424.2188,917.1143 L437.5,917.1143 L421.875,901.4893 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="345.3125" x="68.75" y="929.6066">Doména závisí na infrastruktuře.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="312.5" x="68.75" y="955.0705">Pragmatický default Symfony.</text><!--MD5=[18576a7f1ce6668320db16a453d3a29a]
+entity hc--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="270.3125" x="572.6563" y="532.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="175" x="620.3125" y="568.6691">Application Core</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="239.0625" x="588.2813" y="594.133">(Domain + UseCases)</text><!--MD5=[099903a3b53ebf674f0d25718e161399]
+entity hi--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="170.3125" x="622.6563" y="354.6143"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="139.0625" x="638.2813" y="390.5441">Inbound Port</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="134.375" x="640.625" y="416.008">(PlaceOrder)</text><!--MD5=[ca8d5ef75bdaa233b42eedec696b74ab]
+entity ho--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="223.4375" x="596.0938" y="710.8643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="159.375" x="628.125" y="746.7941">Outbound Port</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="611.7188" y="772.258">(OrderRepository)</text><!--MD5=[a9d05f7f70b84ddb3c2779d8f2bc364a]
+entity ha1--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="179.6875" x="617.9688" y="124.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="633.5938" y="160.8566">HTTP Adapter</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="120.3125" x="647.6563" y="186.3205">(Controller)</text><!--MD5=[5c72dcd057bf048d972fa74bff54be94]
+entity ha2--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="189.0625" x="613.2813" y="893.6768"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="123.4375" x="646.0938" y="929.6066">DB Adapter</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="157.8125" x="628.9063" y="955.0705">(Doctrine impl)</text><path d="M526.5625,1084.3018 L526.5625,1141.4795 A4.6875,4.6875 0 0 0 531.25,1146.167 L884.375,1146.167 A4.6875,4.6875 0 0 0 889.0625,1141.4795 L889.0625,1095.2393 L873.4375,1079.6143 L714.0625,1079.6143 L707.8125,976.8018 L701.5625,1079.6143 L531.25,1079.6143 A4.6875,4.6875 0 0 0 526.5625,1084.3018 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M873.4375,1079.6143 L873.4375,1092.8955 A2.3438,2.3438 0 0 0 875.7813,1095.2393 L889.0625,1095.2393 L873.4375,1079.6143 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="271.875" x="535.9375" y="1107.7316">Doména nezná adaptéry.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="329.6875" x="535.9375" y="1133.1955">Vše jde přes porty (interfaces).</text><!--MD5=[d6e171e4b57dc40b52861039c73f98e2]
+entity od--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="185.9375" x="1083.5938" y="124.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="1099.2188" y="160.8566">Domain Model</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="68.75" x="1142.1875" y="186.3205">(jádro)</text><!--MD5=[f9cf873b660f6749d376d98f288e887e]
+entity ods--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="210.9375" x="1071.0938" y="367.8955"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="179.6875" x="1086.7188" y="403.8254">Domain Services</text><!--MD5=[06ff4f800113a1e221b099ecd5a39a2a]
+entity oas--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="245.3125" x="1053.9063" y="546.0205"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="214.0625" x="1069.5313" y="581.9504">Application Services</text><!--MD5=[63f09cfeee78d69dce01cee367453ff5]
+entity oi--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="198.4375" x="1077.3438" y="710.8643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="143.75" x="1104.6875" y="746.7941">Infrastructure</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="1092.9688" y="772.258">(DB, UI, externí)</text><path d="M978.125,906.1768 L978.125,963.3545 A4.6875,4.6875 0 0 0 982.8125,968.042 L1370.3125,968.042 A4.6875,4.6875 0 0 0 1375,963.3545 L1375,917.1143 L1359.375,901.4893 L1182.8125,901.4893 L1176.5625,793.708 L1170.3125,901.4893 L982.8125,901.4893 A4.6875,4.6875 0 0 0 978.125,906.1768 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1359.375,901.4893 L1359.375,914.7705 A2.3438,2.3438 0 0 0 1361.7188,917.1143 L1375,917.1143 L1359.375,901.4893 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="221.875" x="987.5" y="929.6066">Závislost JEN dovnitř.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="364.0625" x="987.5" y="955.0705">Domain core neví o ničem vyšším.</text><!--MD5=[6632b33b39407557a00fd011b25eedf0]
+entity ce--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="217.1875" x="1524.2188" y="124.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="79.6875" x="1592.9688" y="160.8566">Entities</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="185.9375" x="1539.8438" y="186.3205">(Enterprise rules)</text><!--MD5=[de986dcb507bf2f296d81308ef3245eb]
+entity cu--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="146.875" x="1560.9375" y="367.8955"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="1576.5625" y="403.8254">Use Cases</text><!--MD5=[9b49fd5a8945adc8dd37441262a3dbb9]
+entity cia--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="282.8125" x="1496.0938" y="532.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="196.875" x="1539.0625" y="568.6691">Interface Adapters</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="251.5625" x="1511.7188" y="594.133">(Presenters, Gateways)</text><!--MD5=[0b5f772da23684c22411210d8d142215]
+entity cfd--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="268.75" x="1504.6875" y="710.8643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="237.5" x="1520.3125" y="746.7941">Frameworks &amp; Drivers</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="142.1875" x="1567.9688" y="772.258">(Web, DB, UI)</text><path d="M1462.5,893.6768 L1462.5,976.3184 A4.6875,4.6875 0 0 0 1467.1875,981.0059 L1814.0625,981.0059 A4.6875,4.6875 0 0 0 1818.75,976.3184 L1818.75,904.6143 L1803.125,888.9893 L1646.4844,888.9893 L1639.4063,793.708 L1633.9844,888.9893 L1467.1875,888.9893 A4.6875,4.6875 0 0 0 1462.5,893.6768 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1803.125,888.9893 L1803.125,902.2705 A2.3438,2.3438 0 0 0 1805.4688,904.6143 L1818.75,904.6143 L1803.125,888.9893 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="270.3125" x="1471.875" y="917.1066">Stejný princip jako Onion,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="323.4375" x="1471.875" y="942.5705">explicitnější vrstvy + boundary</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="314.0625" x="1471.875" y="968.0344">interfaces na všech úrovních.</text><!--MD5=[27e9677f690c75f6a9b1ad23085ba667]
+link l1 to l2--><path d="M248.4375,207.8799 C248.4375,246.458 248.4375,304.9424 248.4375,346.1143 " fill="none" id="l1-&gt;l2" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="248.4375,354.1143,254.6875,340.0518,248.4375,346.3018,242.1875,340.0518,248.4375,354.1143" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[32a049719e8cf2d444d1c3263723bd33]
+link l2 to l3--><path d="M248.4375,437.7393 C248.4375,463.5205 248.4375,497.1611 248.4375,524.3955 " fill="none" id="l2-&gt;l3" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="248.4375,532.6143,254.6875,518.5518,248.4375,524.8018,242.1875,518.5518,248.4375,532.6143" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[1044fc52a7dea5be8cc887e6e4a3221c]
+link l3 to l4--><path d="M248.4375,615.8643 C248.4375,641.6455 248.4375,675.2861 248.4375,702.5205 " fill="none" id="l3-&gt;l4" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="248.4375,710.7393,254.6875,696.6768,248.4375,702.9268,242.1875,696.6768,248.4375,710.7393" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[1c43f6f0c9ed1de539959c9ac16b2126]
+link ha1 to hi--><path d="M707.8125,207.8799 C707.8125,246.458 707.8125,304.9424 707.8125,346.1143 " fill="none" id="ha1-&gt;hi" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="707.8125,354.1143,714.0625,340.0518,707.8125,346.3018,701.5625,340.0518,707.8125,354.1143" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[9a9ed648a8915b754d11e1f5d0555b1f]
+link hi to hc--><path d="M707.8125,437.7393 C707.8125,463.5205 707.8125,497.1611 707.8125,524.3955 " fill="none" id="hi-&gt;hc" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="707.8125,532.6143,714.0625,518.5518,707.8125,524.8018,701.5625,518.5518,707.8125,532.6143" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[3a99e5e5f47c4f1bf2de46474d4e8282]
+link hc to ho--><path d="M707.8125,615.8643 C707.8125,641.6455 707.8125,675.2861 707.8125,702.5205 " fill="none" id="hc-&gt;ho" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="707.8125,710.7393,714.0625,696.6768,707.8125,702.9268,701.5625,696.6768,707.8125,710.7393" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[e36d25ef8c2c99a9828da7fa1ad2e5b8]
+reverse link ho to ha2--><path d="M707.8125,801.5518 C707.8125,830.1143 707.8125,865.9893 707.8125,893.1299 " fill="none" id="ho&lt;-ha2" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="707.8125,793.708,701.5625,807.7705,707.8125,801.5205,714.0625,807.7705,707.8125,793.708" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[10bcd9849e7ad6d6f9cb5440985d1b2f]
+link od to ods--><path d="M1176.5625,207.8799 C1176.5625,250.8174 1176.5625,318.3643 1176.5625,359.3174 " fill="none" id="od-&gt;ods" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1176.5625,367.6455,1182.8125,353.583,1176.5625,359.833,1170.3125,353.583,1176.5625,367.6455" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="120.3125" x="1178.125" y="276.4816">vyšší vrstva</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="93.75" x="1191.4063" y="301.9455">zná nižší</text><!--MD5=[d77ace33da83cf9e6685c920de15b14d]
+link ods to oas--><path d="M1176.5625,424.1611 C1176.5625,454.4893 1176.5625,504.1768 1176.5625,537.6299 " fill="none" id="ods-&gt;oas" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1176.5625,545.7549,1182.8125,531.6924,1176.5625,537.9424,1170.3125,531.6924,1176.5625,545.7549" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[f82e1bd29df44205be71c4ae9240ba16]
+link oas to oi--><path d="M1176.5625,602.2861 C1176.5625,628.9111 1176.5625,670.458 1176.5625,702.833 " fill="none" id="oas-&gt;oi" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1176.5625,710.8643,1182.8125,696.8018,1176.5625,703.0518,1170.3125,696.8018,1176.5625,710.8643" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[193d010920686f88a83cfe14bc1eaa49]
+link ce to cu--><path d="M1633.0938,207.8799 C1633.3906,250.8174 1633.8438,318.3643 1634.125,359.3174 " fill="none" id="ce-&gt;cu" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1634.1875,367.6455,1640.3167,353.53,1634.1205,359.8333,1627.8172,353.6371,1634.1875,367.6455" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="93.75" x="1678.9063" y="276.4816">výsledek</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="182.8125" x="1634.375" y="301.9455">dependency rule</text><!--MD5=[c2d4101c8595b77542b50d137d98315b]
+link cu to cia--><path d="M1634.8438,424.1611 C1635.3281,450.7861 1636.0625,492.333 1636.6406,524.708 " fill="none" id="cu-&gt;cia" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1636.7813,532.7393,1642.7886,518.5714,1636.647,524.9279,1630.2904,518.7863,1636.7813,532.7393" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[f5e266a6aaa73af97e944a019f9ff5da]
+link cia to cfd--><path d="M1637.8594,615.8643 C1638.0938,641.6455 1638.3906,675.2861 1638.625,702.5205 " fill="none" id="cia-&gt;cfd" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1638.7031,710.7393,1644.8324,696.6237,1638.6362,702.927,1632.3328,696.7308,1638.7031,710.7393" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[838a7fd29885fbc8ae66917e719094e3]
+@startuml styles_comparison
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Layered vs. Hexagonal vs. Onion vs. Clean Architecture
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+package "LAYERED (3-tier)" as l #1B202A {
+  rectangle "Presentation\n(Controllers, Forms)" as l1
+  rectangle "Application\n(Services, Workflows)" as l2
+  rectangle "Domain Model\n(s Doctrine atributy)" as l3
+  rectangle "Infrastructure\n(DB, MessageBus)" as l4
+
+  l1 -[#F0A456]down-> l2
+  l2 -[#F0A456]down-> l3
+  l3 -[#F0A456]down-> l4
+  note bottom of l4 #161A22
+    Doména závisí na infrastruktuře.
+    Pragmatický default Symfony.
+  end note
+}
+
+package "HEXAGONAL (Ports & Adapters)" as h #1B202A {
+  rectangle "Application Core\n(Domain + UseCases)" as hc
+  rectangle "Inbound Port\n(PlaceOrder)" as hi
+  rectangle "Outbound Port\n(OrderRepository)" as ho
+  rectangle "HTTP Adapter\n(Controller)" as ha1
+  rectangle "DB Adapter\n(Doctrine impl)" as ha2
+
+  ha1 -[#F0A456]-> hi
+  hi -[#F0A456]-> hc
+  hc -[#F0A456]-> ho
+  ho <-[#F0A456]- ha2
+  note bottom of ha2 #161A22
+    Doména nezná adaptéry.
+    Vše jde přes porty (interfaces).
+  end note
+}
+
+package "ONION (vrstvy jako cibule)" as o #1B202A {
+  rectangle "Domain Model\n(jádro)" as od
+  rectangle "Domain Services" as ods
+  rectangle "Application Services" as oas
+  rectangle "Infrastructure\n(DB, UI, externí)" as oi
+
+  od -[#F0A456]-> ods : "vyšší vrstva\nzná nižší"
+  ods -[#F0A456]-> oas
+  oas -[#F0A456]-> oi
+  note bottom of oi #161A22
+    Závislost JEN dovnitř.
+    Domain core neví o ničem vyšším.
+  end note
+}
+
+package "CLEAN (Uncle Bob)" as c #1B202A {
+  rectangle "Entities\n(Enterprise rules)" as ce
+  rectangle "Use Cases" as cu
+  rectangle "Interface Adapters\n(Presenters, Gateways)" as cia
+  rectangle "Frameworks & Drivers\n(Web, DB, UI)" as cfd
+
+  ce -[#F0A456]-> cu : "výsledek\ndependency rule"
+  cu -[#F0A456]-> cia
+  cia -[#F0A456]-> cfd
+  note bottom of cfd #161A22
+    Stejný princip jako Onion,
+    explicitnější vrstvy + boundary
+    interfaces na všech úrovních.
+  end note
+}
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

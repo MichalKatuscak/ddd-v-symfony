@@ -1,0 +1,57 @@
+@startuml strategic_vs_tactical
+!include ../theme.iuml
+
+title Strategický vs. taktický design v DDD
+
+skinparam package {
+  BackgroundColor $BG
+  BorderColor $ACCENT
+  FontColor $ACCENT
+}
+
+package "STRATEGIC DESIGN: hranice a vztahy" as strategic #1B202A {
+  rectangle "Domain\n(celá doména)" as s_dom
+  rectangle "Subdomény:\nCore · Supporting · Generic" as s_sub
+  rectangle "Bounded Contexts\n(BC1, BC2, BC3)" as s_bc
+  rectangle "Context Map\n(Partnership, ACL, OHS, …)" as s_cm
+  rectangle "Ubiquitous Language\nper BC" as s_ul
+
+  s_dom -[#F0A456]-> s_sub : rozdělení podle\nbusiness hodnoty
+  s_sub -[#F0A456]-> s_bc : hranice modelu
+  s_bc -[#F0A456]-> s_cm : vztahy mezi BC
+  s_bc -[#F0A456]-> s_ul : každý BC\nmá vlastní jazyk
+
+  note bottom of s_cm #161A22
+    Strategic: KDE rozdělit doménu,
+    JAK BC interagují,
+    JAK řídit slovník.
+    Architekt + Tým.
+  end note
+}
+
+package "TACTICAL DESIGN: stavební bloky uvnitř BC" as tactical #1B202A {
+  rectangle "Aggregate\n(transakční hranice)" as t_agg
+  rectangle "Entity\n(identita)" as t_ent
+  rectangle "Value Object\n(immutable atribut)" as t_vo
+  rectangle "Domain Event\n(co se stalo)" as t_de
+  rectangle "Domain Service\n(operace nad agregáty)" as t_ds
+  rectangle "Repository\n(persistenční abstrakce)" as t_repo
+  rectangle "Factory\n(složitá konstrukce)" as t_f
+
+  t_agg -[#F0A456]-> t_ent : kořen + interní entity
+  t_agg -[#F0A456]-> t_vo : nemá identitu
+  t_agg -[#F0A456]-> t_de : emise při změně stavu
+  t_repo -[#F0A456]-> t_agg : ukládá / načítá
+  t_ds -[#F0A456]-> t_agg : operace přes hranice
+  t_f -[#F0A456]-> t_agg : vytváří v platném stavu
+
+  note bottom of t_repo #161A22
+    Tactical: JAK modelovat
+    doménová pravidla v kódu.
+    Vývojář + Doménový expert.
+  end note
+}
+
+strategic -[#7A5530,dashed]-> tactical : strategic\nrozhoduje\nO HRANICÍCH,\ntactical PLNÍ\nKAŽDÝ BC
+
+@enduml

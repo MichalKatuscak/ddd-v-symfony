@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1184.375px" preserveAspectRatio="none" style="width:1429px;height:1184px;background:#11141A;" version="1.1" viewBox="0 0 1429 1184" width="1429.6875px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="840.625" x="299.2188" y="26.1063">Hybridní topologie: monolit jako core + extrahované servisy</text><!--MD5=[489b2b70e8a4fd6f3fbb29434dcab199]
+cluster monolith--><rect fill="#1B202A" height="614.8438" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="326.5625" x="406.25" y="553.833"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="301.5625" x="418.75" y="577.2629">Modulární monolit (core)</text><!--MD5=[c2784bb9942e9bccc8157aaa0cc9bf0e]
+entity cat--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="112.5" x="468.75" y="621.0205"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="81.25" x="484.375" y="656.9504">Catalog</text><!--MD5=[f392f7308ca4d56b96bbaa0410d4af9a]
+entity ord--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="125" x="471.875" y="892.8955"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="93.75" x="487.5" y="928.8254">Ordering</text><!--MD5=[4597a36bbce88b098162e644e240bdb2]
+entity cust--><rect fill="#161A22" height="56.7139" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="137.5" x="468.75" y="1074.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="106.25" x="484.375" y="1110.8566">Customer</text><!--MD5=[7d46d6cd919e02e6168a09ad91eae8b4]
+entity u--><ellipse cx="379.6875" cy="71.0205" fill="#161A22" rx="12.5" ry="12.5" style="stroke: #F0A456; stroke-width: 2.34375;"/><path d="M379.6875,83.5205 L379.6875,125.708 M359.375,96.0205 L400,96.0205 M379.6875,125.708 L359.375,149.1455 M379.6875,125.708 L400,149.1455 " fill="none" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="50" x="354.6875" y="173.3566">User</text><!--MD5=[e2307af040e3f87d22824e7603ca28ec]
+entity api--><rect fill="#102B00" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="293.75" x="232.8125" y="308.5205"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="103.125" x="328.125" y="344.4504">Public API</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="262.5" x="248.4375" y="369.9142">(rate limiting, versioning)</text><!--MD5=[81706498707a5d8e052123cee1fc602f]
+entity rep--><rect fill="#102B00" height="133.1055" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="232.8125" x="103.9063" y="582.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="146.0938" y="618.6691">Reporting svc</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="153.9063" y="644.133">(read-heavy,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="145.3125" x="147.6563" y="669.5969">separátní DB,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="201.5625" x="119.5313" y="695.0607">CQRS read replica)</text><!--MD5=[37c6948bc95ac73d10cc402861091b60]
+entity pay--><rect fill="#260000" height="133.1055" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="268.75" x="837.5" y="283.5205"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="135.9375" x="903.9063" y="319.4504">Payment svc</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="121.875" x="910.9375" y="344.9142">(PCI scope,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="894.5313" y="370.3781">audit isolation,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="237.5" x="853.125" y="395.842">separátní compliance)</text><path d="M769.5313,892.1143 L769.5313,949.292 A4.6875,4.6875 0 0 0 774.2188,953.9795 L1113.2813,953.9795 A4.6875,4.6875 0 0 0 1117.9688,949.292 L1117.9688,903.0518 L1102.3438,887.4268 L774.2188,887.4268 A4.6875,4.6875 0 0 0 769.5313,892.1143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1102.3438,887.4268 L1102.3438,900.708 A2.3438,2.3438 0 0 0 1104.6875,903.0518 L1117.9688,903.0518 L1102.3438,887.4268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="315.625" x="778.9063" y="915.5441">Core domény tightly coupled.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="298.4375" x="778.9063" y="941.008">Refaktor v IDE, ne přes ACL.</text><path d="M1007.8125,595.2393 L1007.8125,703.3447 A4.6875,4.6875 0 0 0 1012.5,708.0322 L1406.25,708.0322 A4.6875,4.6875 0 0 0 1410.9375,703.3447 L1410.9375,606.1768 L1395.3125,590.5518 L1012.5,590.5518 A4.6875,4.6875 0 0 0 1007.8125,595.2393 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1395.3125,590.5518 L1395.3125,603.833 A2.3438,2.3438 0 0 0 1397.6563,606.1768 L1410.9375,606.1768 L1395.3125,590.5518 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="187.5" x="1017.1875" y="618.6691">Důvody extrakce:</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="262.5" x="1017.1875" y="644.133">+ PCI compliance scope</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="179.6875" x="1017.1875" y="669.5969">+ Auditní izolace</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="370.3125" x="1017.1875" y="695.0607">+ Vlastní release cyklus regulátora</text><path d="M9.375,867.1143 L9.375,975.2197 A4.6875,4.6875 0 0 0 14.0625,979.9072 L364.0625,979.9072 A4.6875,4.6875 0 0 0 368.75,975.2197 L368.75,878.0518 L353.125,862.4268 L201.9531,862.4268 L212.75,715.7705 L189.4531,862.4268 L14.0625,862.4268 A4.6875,4.6875 0 0 0 9.375,867.1143 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M353.125,862.4268 L353.125,875.708 A2.3438,2.3438 0 0 0 355.4688,878.0518 L368.75,878.0518 L353.125,862.4268 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="187.5" x="18.75" y="890.5441">Důvody extrakce:</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="268.75" x="18.75" y="916.008">+ Read traffic 100× větší</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="326.5625" x="18.75" y="941.4719">+ Vlastní DB topologie (CQRS)</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="312.5" x="18.75" y="966.9357">+ Heavy aggregation queries</text><path d="M458.5938,50.708 L458.5938,184.2773 A4.6875,4.6875 0 0 0 463.2813,188.9648 L1080.4688,188.9648 A4.6875,4.6875 0 0 0 1085.1563,184.2773 L1085.1563,61.6455 L1069.5313,46.0205 L463.2813,46.0205 A4.6875,4.6875 0 0 0 458.5938,50.708 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1069.5313,46.0205 L1069.5313,59.3018 A2.3438,2.3438 0 0 0 1071.875,61.6455 L1085.1563,61.6455 L1069.5313,46.0205 " fill="#1B202A" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="298.4375" x="467.9688" y="74.1379">Hybrid není přechodný stav.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="240.625" x="467.9688" y="99.6017">Je to legitimní cíl, když:</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="329.6875" x="467.9688" y="125.0656">- Core BC jsou silně provázané</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="593.75" x="467.9688" y="150.5295">- Periferní BC mají operační důvod (compliance, scaling)</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="300" x="467.9688" y="175.9933">- Tým neunese N+1 servisů</text><!--MD5=[93b4b26724446726e6e2808f364f8c48]
+link cat to ord--><path d="M525.9375,677.458 C527.6406,726.3643 531.2656,830.1299 533.1563,884.5205 " fill="none" id="cat-&gt;ord" style="stroke: #7A5530; stroke-width: 2.34375;"/><polygon fill="#7A5530" points="533.4531,892.8174,539.2176,878.549,533.1854,885.0095,526.7249,878.9773,533.4531,892.8174" style="stroke: #7A5530; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="114.0625" x="538.2813" y="784.2941">in-process</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="128.125" x="531.25" y="809.758">function call</text><!--MD5=[e9d8dab5fe4e4064105ae76dd175c93e]
+link ord to cust--><path d="M534.8438,949.7549 C535.3906,981.0674 536.2969,1032.583 536.8906,1066.7861 " fill="none" id="ord-&gt;cust" style="stroke: #7A5530; stroke-width: 2.34375;"/><polygon fill="#7A5530" points="537.0313,1074.6455,543.0393,1060.4779,536.8973,1066.8342,530.5411,1060.6922,537.0313,1074.6455" style="stroke: #7A5530; stroke-width: 2.34375;"/><!--MD5=[d70a60d857ad576c165050428b4e3251]
+link u to api--><path d="M379.6875,178.4268 C379.6875,216.4893 379.6875,265.1299 379.6875,300.6143 " fill="none" id="u-&gt;api" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="379.6875,308.4268,385.9375,294.3643,379.6875,300.6143,373.4375,294.3643,379.6875,308.4268" style="stroke: #F0A456; stroke-width: 2.34375;"/><!--MD5=[2f0cacfc25d34684d6198b11b44cf793]
+link api to monolith--><path d="M406.9375,392.0518 C435.8125,431.3174 485.2969,488.833 543.75,516.333 C571.2031,529.2393 656.0625,509.8018 679.6875,528.833 C684.9063,533.0381 689.4109,537.9661 693.2979,543.3802 C695.2413,546.0873 697.0304,548.9159 698.6771,551.8365 C698.8829,552.2016 699.0865,552.5681 699.288,552.936 C699.3887,553.1199 699.4888,553.3042 699.5884,553.4888 " fill="none" id="api-&gt;monolith" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="699.5884,553.4888,698.4118,538.145,695.8789,546.6132,687.4108,544.0803,699.5884,553.4888" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="126.5625" x="545.3125" y="497.5754">většina rout</text><!--MD5=[db64618c03010de4c2fe516f7bab6aab]
+link api to rep--><path d="M315.2656,391.5205 C290.4688,410.2393 264.3125,434.7236 248.4375,463.208 C229.6719,496.8643 222.2813,539.0674 219.7344,574.5986 " fill="none" id="api-&gt;rep" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="219.2344,582.5518,226.3567,568.9103,219.7259,574.7547,213.8815,568.1239,219.2344,582.5518" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="198.4375" x="250" y="497.5754">reportovací dotazy</text><!--MD5=[1094d9370f5395711964bea8c6ef7ecb]
+link monolith to pay--><path d="M733.3,640.8705 C734.02,640.555 734.7607,640.2288 735.5213,639.8917 C737.0427,639.2176 738.6441,638.5004 740.3198,637.7407 C753.7256,631.6631 771.8887,622.8623 791.9023,611.5908 C831.9297,589.0479 879.3594,556.6221 910.9375,516.333 C931.9375,489.5518 946.2031,454.8018 955.625,424.1299 " fill="none" id="monolith-&gt;pay" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="957.9062,416.4268,947.895,428.114,955.6716,423.9128,959.8727,431.6894,957.9062,416.4268" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="198.4375" x="940.625" y="485.0754">ChargeRequested</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="943.75" y="510.5392">(message broker)</text><!--MD5=[c6a11f9570226b2b6a48e278a371c139]
+link pay to monolith--><path d="M837.3438,374.5986 C786.4688,390.583 733.5469,417.5986 703.125,463.208 C691.8984,480.0322 687.0488,499.7422 686.1174,519.8987 C685.6517,529.9769 686.1656,540.1668 687.3517,550.1634 C687.4258,550.7882 687.5025,551.4122 687.5818,552.0354 C687.6215,552.347 687.6618,552.6584 687.7027,552.9696 " fill="none" id="pay-&gt;monolith" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="687.7027,552.9696,692.066,538.2123,686.6842,545.2238,679.6727,539.842,687.7027,552.9696" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="170.3125" x="715.625" y="485.0754">PaymentSettled</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="192.1875" x="704.6875" y="510.5392">(message broker)</text><!--MD5=[2bfaa80bb718d7c28ffde3e2c09e0606]
+link monolith to GMN17--><path d="M733.1889,669.6766 C733.3737,669.8958 733.5598,670.1166 733.7472,670.339 C734.1222,670.7838 734.5026,671.2351 734.8883,671.6927 C735.6598,672.608 736.4526,673.5486 737.2661,674.5137 C738.893,676.4438 740.6024,678.4718 742.3879,680.5901 C756.6724,697.5366 775.833,720.2676 796.6738,744.9912 C838.3555,794.4385 886.7578,851.8564 916.3125,886.9111 " fill="none" id="monolith-GMN17" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><!--MD5=[9285629a34f41122edd2913a73f94106]
+link pay to GMN20--><path d="M1106.3906,403.3799 C1132.5469,419.0361 1157.3125,438.7549 1175,463.208 C1201.5156,499.8799 1209.375,551.083 1211.0156,590.2236 " fill="none" id="pay-GMN20" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><!--MD5=[046a0145d51559879c0110ba63b9886a]
+@startuml hybrid_topology
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Hybridní topologie: monolit jako core + extrahované servisy
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+actor User as u
+rectangle "Public API\n(rate limiting, versioning)" as api #102B00
+
+rectangle "Modulární monolit (core)" as monolith #1B202A {
+  rectangle "Catalog" as cat
+  rectangle "Ordering" as ord
+  rectangle "Customer" as cust
+  cat -[#7A5530]-> ord : in-process\nfunction call
+  ord -[#7A5530]-> cust
+}
+
+rectangle "Reporting svc\n(read-heavy,\nseparátní DB,\nCQRS read replica)" as rep #102B00
+rectangle "Payment svc\n(PCI scope,\naudit isolation,\nseparátní compliance)" as pay #260000
+
+u -[#F0A456]-> api
+api -[#F0A456]-> monolith : většina rout
+api -[#F0A456]-> rep : reportovací dotazy
+monolith -[#F0A456]-> pay : ChargeRequested\n(message broker)
+pay -[#F0A456]-> monolith : PaymentSettled\n(message broker)
+
+note bottom of monolith
+  Core domény tightly coupled.
+  Refaktor v IDE, ne přes ACL.
+end note
+
+note bottom of pay
+  Důvody extrakce:
+  + PCI compliance scope
+  + Auditní izolace
+  + Vlastní release cyklus regulátora
+end note
+
+note bottom of rep
+  Důvody extrakce:
+  + Read traffic 100× větší
+  + Vlastní DB topologie (CQRS)
+  + Heavy aggregation queries
+end note
+
+note as N1
+  Hybrid není přechodný stav.
+  Je to legitimní cíl, když:
+  - Core BC jsou silně provázané
+  - Periferní BC mají operační důvod (compliance, scaling)
+  - Tým neunese N+1 servisů
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

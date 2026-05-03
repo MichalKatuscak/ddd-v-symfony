@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1335.9375px" preserveAspectRatio="none" style="width:1879px;height:1335px;background:#11141A;" version="1.1" viewBox="0 0 1879 1335" width="1879.6875px" zoomAndPan="magnify"><defs/><g><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28.125" lengthAdjust="spacingAndGlyphs" textLength="521.875" x="702.3438" y="26.1063">Strategický vs. taktický design v DDD</text><!--MD5=[86804661457e766312600c3203a76a54]
+cluster strategic--><path d="M51.5625,82.7393 L504.6875,82.7393 A7.0313,7.0313 0 0 1 509.375,87.4268 L520.3125,117.5781 L760.9375,117.5781 A4.6875,4.6875 0 0 1 765.625,122.2656 L765.625,1313.9893 A4.6875,4.6875 0 0 1 760.9375,1318.6768 L51.5625,1318.6768 A4.6875,4.6875 0 0 1 46.875,1313.9893 L46.875,87.4268 A4.6875,4.6875 0 0 1 51.5625,82.7393 " fill="#1B202A" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="46.875" x2="520.3125" y1="117.5781" y2="117.5781"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="453.125" x="53.125" y="106.1691">STRATEGIC DESIGN: hranice a vztahy</text><!--MD5=[0f60ceb5d34d984c1d522cf5b7178d9b]
+cluster tactical--><path d="M832.8125,446.8018 L1365.625,446.8018 A7.0313,7.0313 0 0 1 1370.3125,451.4893 L1381.25,481.6406 L1856.25,481.6406 A4.6875,4.6875 0 0 1 1860.9375,486.3281 L1860.9375,1073.3643 A4.6875,4.6875 0 0 1 1856.25,1078.0518 L832.8125,1078.0518 A4.6875,4.6875 0 0 1 828.125,1073.3643 L828.125,451.4893 A4.6875,4.6875 0 0 1 832.8125,446.8018 " fill="#1B202A" style="stroke: #F0A456; stroke-width: 2.34375;"/><line style="stroke: #F0A456; stroke-width: 2.34375;" x1="828.125" x2="1381.25" y1="481.6406" y2="481.6406"/><text fill="#F0A456" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="532.8125" x="834.375" y="470.2316">TACTICAL DESIGN: stavební bloky uvnitř BC</text><!--MD5=[e1a1b400c7835bd8c88cb72d183cfc27]
+entity s_dom--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="185.9375" x="266.4063" y="149.9268"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="82.8125" x="317.9688" y="185.8566">Domain</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="282.0313" y="211.3205">(celá doména)</text><!--MD5=[a3f3be71828a34253f135aa5edd217b9]
+entity s_sub--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="323.4375" x="197.6563" y="513.9893"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="137.5" x="290.625" y="549.9191">Subdomény:</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="292.1875" x="213.2813" y="575.383">Core · Supporting · Generic</text><!--MD5=[d00eb689e3500885b1c3cf60e48d0932]
+entity s_bc--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="234.375" x="242.1875" y="723.3643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="203.125" x="257.8125" y="759.2941">Bounded Contexts</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="176.5625" x="271.0938" y="784.758">(BC1, BC2, BC3)</text><!--MD5=[5d83bdaf1bfac2fd21708038f8753b8b]
+entity s_cm--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="317.1875" x="83.5938" y="957.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="135.9375" x="174.2188" y="993.6691">Context Map</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="285.9375" x="99.2188" y="1019.133">(Partnership, ACL, OHS, …)</text><!--MD5=[d1edc18cfe6b3478e3b946d710a51027]
+entity s_ul--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="259.375" x="456.25" y="957.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="228.125" x="471.875" y="993.6691">Ubiquitous Language</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="73.4375" x="549.2188" y="1019.133">per BC</text><path d="M85.1563,1168.6768 L85.1563,1276.7822 A4.6875,4.6875 0 0 0 89.8438,1281.4697 L457.0313,1281.4697 A4.6875,4.6875 0 0 0 461.7188,1276.7822 L461.7188,1179.6143 L446.0938,1163.9893 L271.5469,1163.9893 L247.8438,1040.5986 L259.0469,1163.9893 L89.8438,1163.9893 A4.6875,4.6875 0 0 0 85.1563,1168.6768 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M446.0938,1163.9893 L446.0938,1177.2705 A2.3438,2.3438 0 0 0 448.4375,1179.6143 L461.7188,1179.6143 L446.0938,1163.9893 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="343.75" x="94.5313" y="1192.1066">Strategic: KDE rozdělit doménu,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="181.25" x="94.5313" y="1217.5705">JAK BC interagují,</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="164.0625" x="94.5313" y="1243.0344">JAK řídit slovník.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="178.125" x="94.5313" y="1268.4982">Architekt + Tým.</text><!--MD5=[f3e60c3f06f64e9cc08d7fb786cc9009]
+entity t_agg--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="243.75" x="1187.5" y="723.3643"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="112.5" x="1253.125" y="759.2941">Aggregate</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="212.5" x="1203.125" y="784.758">(transakční hranice)</text><!--MD5=[2cd5594f65cff846d840944f91462425]
+entity t_ent--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="126.5625" x="953.9063" y="957.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="59.375" x="987.5" y="993.6691">Entity</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="95.3125" x="969.5313" y="1019.133">(identita)</text><!--MD5=[3f6d134f4d82dc58ded4365f6a1034e7]
+entity t_vo--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="234.375" x="1179.6875" y="957.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="135.9375" x="1228.9063" y="993.6691">Value Object</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="203.125" x="1195.3125" y="1019.133">(immutable atribut)</text><!--MD5=[6ebaf05f4ccfa9ec0553401459eb9a03]
+entity t_de--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="181.25" x="1468.75" y="957.7393"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="150" x="1484.375" y="993.6691">Domain Event</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="132.8125" x="1492.9688" y="1019.133">(co se stalo)</text><!--MD5=[6c63091937422c3711592186ef4c5c0e]
+entity t_ds--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="282.8125" x="1194.5313" y="513.9893"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="1252.3438" y="549.9191">Domain Service</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="251.5625" x="1210.1563" y="575.383">(operace nad agregáty)</text><!--MD5=[2e321ba81e28a0e55262eb4f0382398f]
+entity t_repo--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="292.1875" x="1532.0313" y="513.9893"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="115.625" x="1620.3125" y="549.9191">Repository</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="260.9375" x="1547.6563" y="575.383">(persistenční abstrakce)</text><!--MD5=[d30a3ea1d5d8ed06865b6a526abd54a8]
+entity t_f--><rect fill="#161A22" height="82.1777" rx="4.6875" ry="4.6875" style="stroke: #3D424E; stroke-width: 2.34375;" width="243.75" x="895.3125" y="513.9893"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="78.125" x="978.125" y="549.9191">Factory</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="212.5" x="910.9375" y="575.383">(složitá konstrukce)</text><path d="M1486.7188,723.3643 L1486.7188,806.0059 A4.6875,4.6875 0 0 0 1491.4063,810.6934 L1817.9688,810.6934 A4.6875,4.6875 0 0 0 1822.6563,806.0059 L1822.6563,734.3018 L1807.0313,718.6768 L1491.4063,718.6768 A4.6875,4.6875 0 0 0 1486.7188,723.3643 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><path d="M1807.0313,718.6768 L1807.0313,731.958 A2.3438,2.3438 0 0 0 1809.375,734.3018 L1822.6563,734.3018 L1807.0313,718.6768 " fill="#161A22" style="stroke: #3D424E; stroke-width: 1.5625;"/><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="246.875" x="1496.0938" y="746.7941">Tactical: JAK modelovat</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="285.9375" x="1496.0938" y="772.258">doménová pravidla v kódu.</text><text fill="#A6ADBB" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="303.125" x="1496.0938" y="797.7219">Vývojář + Doménový expert.</text><!--MD5=[edd47a5ad2c5e8f7eff149d13e879df4]
+link s_dom to s_sub--><path d="M359.375,232.8955 C359.375,299.708 359.375,433.708 359.375,505.6143 " fill="none" id="s_dom-&gt;s_sub" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="359.375,513.6455,365.625,499.583,359.375,505.833,353.125,499.583,359.375,513.6455" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="374.2188" y="339.7629">rozdělení podle</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="193.75" x="360.9375" y="365.2267">business hodnoty</text><!--MD5=[f0c784173c609ee9d8ee36f9ded2a151]
+link s_sub to s_bc--><path d="M359.375,597.208 C359.375,631.0049 359.375,679.3486 359.375,715.1611 " fill="none" id="s_sub-&gt;s_bc" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="359.375,723.0518,365.625,708.9893,359.375,715.2393,353.125,708.9893,359.375,723.0518" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="167.1875" x="360.9375" y="665.5441">hranice modelu</text><!--MD5=[6bbcacc82958dd2166bb7a1c0e541fae]
+link s_bc to s_cm--><path d="M327.1875,806.208 C315.6563,821.6924 303.1875,839.9736 293.75,857.7393 C278.2188,886.9893 265.3438,921.9424 256.3281,949.583 " fill="none" id="s_bc-&gt;s_cm" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="253.8906,957.1768,264.1329,945.6915,256.2741,949.7367,252.2289,941.8779,253.8906,957.1768" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="164.0625" x="295.3125" y="892.1066">vztahy mezi BC</text><!--MD5=[e6b1a132ada503cf116edcb053e02e87]
+link s_bc to s_ul--><path d="M410.2656,806.5674 C428.7656,821.9424 449.4844,840.0518 467.1875,857.7393 C496.7187,887.2549 527.1406,923.208 549.8125,951.2705 " fill="none" id="s_bc-&gt;s_ul" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="554.8125,957.4893,550.8882,942.6092,549.9239,951.3953,541.1378,950.4309,554.8125,957.4893" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="100" x="550" y="879.6066">každý BC</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="165.625" x="517.1875" y="905.0705">má vlastní jazyk</text><!--MD5=[785771bbef8653414bb1f19fb48453ba]
+link t_agg to t_ent--><path d="M1187.0938,787.0205 C1141.6406,800.333 1093,822.1143 1059.375,857.7393 C1036.1406,882.3486 1025.6719,919.3018 1020.9687,949.0518 " fill="none" id="t_agg-&gt;t_ent" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1019.7813,957.2236,1027.9729,944.1963,1020.8955,949.491,1015.6007,942.4135,1019.7813,957.2236" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="226.5625" x="1060.9375" y="892.1066">kořen + interní entity</text><!--MD5=[56eefb4e21880fd63f473a1635285d76]
+link t_agg to t_vo--><path d="M1307.2031,806.6143 C1305.0625,846.1611 1301.7969,906.5361 1299.5156,948.7861 " fill="none" id="t_agg-&gt;t_vo" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1299.0625,956.9893,1306.0677,943.2873,1299.4872,949.1883,1293.5862,942.6078,1299.0625,956.9893" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="148.4375" x="1304.6875" y="892.1066">nemá identitu</text><!--MD5=[59da68bf747338f6c30b81e840c54165]
+link t_agg to t_de--><path d="M1394.6094,806.1924 C1419.6563,820.3174 1446,837.7393 1467.1875,857.7393 C1495.2656,884.2393 1519.0156,920.8486 1535.375,949.9736 " fill="none" id="t_agg-&gt;t_de" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1539.3594,957.208,1538.053,941.8747,1535.5918,950.364,1527.1026,947.9028,1539.3594,957.208" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="243.75" x="1512.5" y="892.1066">emise při změně stavu</text><!--MD5=[916e749bc1eb47450c9abdc5527f0f85]
+link t_repo to t_agg--><path d="M1640.7656,597.2549 C1616.6875,621.3955 1583.6719,651.3018 1550,671.8018 C1515.8281,692.6143 1476.125,710.0361 1438.9375,723.9111 " fill="none" id="t_repo-&gt;t_agg" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1431.5469,726.6455,1446.9034,727.6422,1438.8765,723.9416,1442.5771,715.9147,1431.5469,726.6455" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="154.6875" x="1589.0625" y="665.5441">ukládá / načítá</text><!--MD5=[e4a0c3817788cdf1ae271ff12ddfbbb6]
+link t_ds to t_agg--><path d="M1321.9531,597.0518 C1317.5469,611.5518 1313.2344,628.1768 1310.9375,643.6768 C1307.4688,667.083 1306.7813,693.3486 1307.0938,715.2861 " fill="none" id="t_ds-&gt;t_agg" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1307.2344,723.1455,1313.2019,708.9608,1307.0782,715.3346,1300.7044,709.2108,1307.2344,723.1455" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="229.6875" x="1312.5" y="665.5441">operace přes hranice</text><!--MD5=[2aabcc6bb51505a4208f4b8e568ca15b]
+link t_f to t_agg--><path d="M1020.1563,597.1299 C1023.9531,621.5361 1032.4844,651.7393 1051.5625,671.8018 C1085.2969,707.2549 1133.625,728.9736 1179.3594,742.2705 " fill="none" id="t_f-&gt;t_agg" style="stroke: #F0A456; stroke-width: 2.34375;"/><polygon fill="#F0A456" points="1187.2656,744.5049,1175.3994,734.7064,1179.7404,742.4059,1172.041,746.7468,1187.2656,744.5049" style="stroke: #F0A456; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="240.625" x="1053.125" y="665.5441">vytváří v platném stavu</text><!--MD5=[4a325ea0ebbd5aa3003b2ff263180e31]
+link t_repo to GMN30--><path d="M1740.4688,596.8955 C1764.5781,617.6768 1783.5781,644.4111 1770.3125,671.8018 C1761.5,689.9893 1747.125,705.6611 1731.4375,718.6299 " fill="none" id="t_repo-GMN30" style="stroke: #F0A456; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><!--MD5=[7ea6088e0f02cc22594d59acb90e3d24]
+link strategic to tactical--><path d="M765.7254,244.8716 C765.8459,245.3685 765.967,245.8681 766.0888,246.3703 C766.5758,248.3793 767.0732,250.4308 767.5803,252.5225 C775.6938,285.9883 786.2939,329.7119 796.8926,373.4307 C807.4912,417.1494 818.0884,460.8633 826.196,494.3096 C826.7028,496.4 827.1998,498.4502 827.6865,500.4579 C827.8081,500.9598 827.9291,501.4591 828.0495,501.9556 " fill="none" id="strategic-&gt;tactical" style="stroke: #7A5530; stroke-width: 2.34375; stroke-dasharray: 7.0,7.0;"/><polygon fill="#7A5530" points="828.0495,501.9556,830.8107,486.8166,826.209,494.363,818.6625,489.7613,828.0495,501.9556" style="stroke: #7A5530; stroke-width: 2.34375;"/><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="93.75" x="834.375" y="301.4816">strategic</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="109.375" x="826.5625" y="326.9455">rozhoduje</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="146.875" x="807.8125" y="352.4094">O HRANICÍCH,</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="126.5625" x="817.9688" y="377.8732">tactical PLNÍ</text><text fill="#E6E8EC" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="21.875" lengthAdjust="spacingAndGlyphs" textLength="112.5" x="825" y="403.3371">KAŽDÝ BC</text><!--MD5=[a76337fc4c63b1111f60dba90d325e56]
+@startuml strategic_vs_tactical
+skinparam dpi 150
+skinparam backgroundColor #11141A
+skinparam shadowing false
+skinparam roundCorner 6
+
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam defaultFontColor #E6E8EC
+skinparam defaultTextAlignment center
+
+
+skinparam ArrowColor #F0A456
+skinparam ArrowFontColor #E6E8EC
+skinparam ArrowThickness 1.5
+
+skinparam node {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam component {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam rectangle {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+skinparam folder {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam frame {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam database {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam queue {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam cloud {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam actor {
+  BackgroundColor #161A22
+  BorderColor #F0A456
+  FontColor #E6E8EC
+}
+
+skinparam usecase {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam class {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  HeaderBackgroundColor #1B202A
+  ArrowColor #F0A456
+  FontColor #E6E8EC
+  AttributeFontColor #A6ADBB
+  StereotypeFontColor #F0A456
+}
+
+skinparam object {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+}
+
+skinparam sequence {
+  ParticipantBackgroundColor #161A22
+  ParticipantBorderColor #3D424E
+  ParticipantFontColor #E6E8EC
+  ActorBackgroundColor #161A22
+  ActorBorderColor #F0A456
+  ActorFontColor #E6E8EC
+  LifeLineBorderColor #3D424E
+  LifeLineBackgroundColor #1B202A
+  ArrowColor #F0A456
+  ArrowFontColor #E6E8EC
+  GroupBackgroundColor #1B202A
+  GroupBorderColor #3D424E
+  GroupFontColor #A6ADBB
+  GroupHeaderFontColor #F0A456
+  BoxBackgroundColor #11141A
+  BoxBorderColor #F0A456
+  BoxFontColor #F0A456
+  DividerBackgroundColor #1B202A
+  DividerBorderColor #3D424E
+  DividerFontColor #A6ADBB
+  ReferenceBackgroundColor #161A22
+  ReferenceBorderColor #3D424E
+  ReferenceFontColor #E6E8EC
+  ReferenceHeaderBackgroundColor #1B202A
+  StereotypeFontColor #F0A456
+}
+
+skinparam state {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  StartColor #F0A456
+  EndColor #F0A456
+  ArrowColor #F0A456
+  AttributeFontColor #A6ADBB
+}
+
+skinparam activity {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #E6E8EC
+  ArrowColor #F0A456
+  StartColor #F0A456
+  EndColor #F0A456
+  BarColor #F0A456
+  DiamondBackgroundColor #1B202A
+  DiamondBorderColor #3D424E
+  DiamondFontColor #E6E8EC
+}
+
+skinparam note {
+  BackgroundColor #1B202A
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam title {
+  FontColor #E6E8EC
+  FontSize 18
+}
+
+skinparam legend {
+  BackgroundColor #161A22
+  BorderColor #3D424E
+  FontColor #A6ADBB
+}
+
+skinparam caption {
+  FontColor #A6ADBB
+}
+
+skinparam stereotype {
+  CBackgroundColor #1B202A
+  CBorderColor #F0A456
+  ABackgroundColor #1B202A
+  ABorderColor #F0A456
+  IBackgroundColor #1B202A
+  IBorderColor #F0A456
+  EBackgroundColor #1B202A
+  EBorderColor #F0A456
+}
+
+title Strategický vs. taktický design v DDD
+
+skinparam package {
+  BackgroundColor #11141A
+  BorderColor #F0A456
+  FontColor #F0A456
+}
+
+package "STRATEGIC DESIGN: hranice a vztahy" as strategic #1B202A {
+  rectangle "Domain\n(celá doména)" as s_dom
+  rectangle "Subdomény:\nCore · Supporting · Generic" as s_sub
+  rectangle "Bounded Contexts\n(BC1, BC2, BC3)" as s_bc
+  rectangle "Context Map\n(Partnership, ACL, OHS, …)" as s_cm
+  rectangle "Ubiquitous Language\nper BC" as s_ul
+
+  s_dom -[#F0A456]-> s_sub : rozdělení podle\nbusiness hodnoty
+  s_sub -[#F0A456]-> s_bc : hranice modelu
+  s_bc -[#F0A456]-> s_cm : vztahy mezi BC
+  s_bc -[#F0A456]-> s_ul : každý BC\nmá vlastní jazyk
+
+  note bottom of s_cm #161A22
+    Strategic: KDE rozdělit doménu,
+    JAK BC interagují,
+    JAK řídit slovník.
+    Architekt + Tým.
+  end note
+}
+
+package "TACTICAL DESIGN: stavební bloky uvnitř BC" as tactical #1B202A {
+  rectangle "Aggregate\n(transakční hranice)" as t_agg
+  rectangle "Entity\n(identita)" as t_ent
+  rectangle "Value Object\n(immutable atribut)" as t_vo
+  rectangle "Domain Event\n(co se stalo)" as t_de
+  rectangle "Domain Service\n(operace nad agregáty)" as t_ds
+  rectangle "Repository\n(persistenční abstrakce)" as t_repo
+  rectangle "Factory\n(složitá konstrukce)" as t_f
+
+  t_agg -[#F0A456]-> t_ent : kořen + interní entity
+  t_agg -[#F0A456]-> t_vo : nemá identitu
+  t_agg -[#F0A456]-> t_de : emise při změně stavu
+  t_repo -[#F0A456]-> t_agg : ukládá / načítá
+  t_ds -[#F0A456]-> t_agg : operace přes hranice
+  t_f -[#F0A456]-> t_agg : vytváří v platném stavu
+
+  note bottom of t_repo #161A22
+    Tactical: JAK modelovat
+    doménová pravidla v kódu.
+    Vývojář + Doménový expert.
+  end note
+}
+
+strategic -[#7A5530,dashed]-> tactical : strategic\nrozhoduje\nO HRANICÍCH,\ntactical PLNÍ\nKAŽDÝ BC
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Debian-1deb13u1
+Operating System: Linux
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

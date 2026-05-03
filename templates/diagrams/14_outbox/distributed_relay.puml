@@ -1,0 +1,64 @@
+@startuml distributed_relay
+!include ../theme.iuml
+
+title Distributed relay: 4 workery paralelně přes SKIP LOCKED
+
+participant "Worker A" as a
+participant "Worker B" as b
+participant "Worker C" as c
+participant "Worker D" as d
+database "outbox table" as db
+queue "RabbitMQ" as mq
+
+note over db
+  100 pending řádků k publikaci.
+  Každý worker si zarezervuje vlastní batch.
+end note
+
+== Souběžné SELECT … FOR UPDATE SKIP LOCKED ==
+
+a -> db : SELECT … LIMIT 25\nFOR UPDATE SKIP LOCKED
+db --> a : řádky 1–25 (zamknuté pro A)
+
+b -> db : SELECT … LIMIT 25\nFOR UPDATE SKIP LOCKED
+db --> b : řádky 26–50 (zamknuté pro B)
+
+c -> db : SELECT … LIMIT 25\nFOR UPDATE SKIP LOCKED
+db --> c : řádky 51–75 (zamknuté pro C)
+
+d -> db : SELECT … LIMIT 25\nFOR UPDATE SKIP LOCKED
+db --> d : řádky 76–100 (zamknuté pro D)
+
+note over a, d
+  Žádný worker nečeká na druhý.
+  4 batche běží paralelně.
+end note
+
+== Publish + UPDATE status ==
+
+par
+    a -> mq : publish 25 events
+    a -> db : UPDATE … SET status='sent'
+    db --> a : COMMIT
+also
+    b -> mq : publish 25 events
+    b -> db : UPDATE … SET status='sent'
+    db --> b : COMMIT
+also
+    c -> mq : publish 25 events
+    c -> db : UPDATE … SET status='sent'
+    db --> c : COMMIT
+also
+    d -> mq : publish 25 events
+    d -> db : UPDATE … SET status='sent'
+    db --> d : COMMIT
+end
+
+note over a, d
+  Throughput: 4× single worker propustnost.
+  Cena: out-of-order delivery (každý batch nezávisle).
+  Pokud subscriber pořadí potřebuje, partition outbox
+  na aggregate_id a každý worker zpracovává vlastní partition.
+end note
+
+@enduml

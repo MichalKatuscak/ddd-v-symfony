@@ -1,0 +1,46 @@
+@startuml test_pyramid
+!include ../theme.iuml
+
+title Testovací pyramida pro DDD aplikaci
+
+skinparam rectangle {
+  BackgroundColor $BG_ALT
+  BorderColor $STROKE
+  FontColor $FG
+}
+
+rectangle "End-to-end (E2E)\n5 % testů\n— jen kritické flow\n— Symfony Panther / Cypress" as e2e #260000
+rectangle "Integration (Kernel)\n15 % testů\n— Symfony KernelTestCase\n— Doctrine in-memory / SQLite\n— Command + Query handlers" as int #1B202A
+rectangle "Component (BC)\n30 % testů\n— modul/BC isolated\n— in-memory repository\n— Application Services" as comp #1B202A
+rectangle "Unit\n50 % testů\n— čistý PHPUnit\n— Aggregate, VO, Domain Service\n— bez frameworku, bez DB\n— rychlé (ms)" as unit #102B00
+
+unit -[#F0A456]up-> comp
+comp -[#F0A456]up-> int
+int -[#F0A456]up-> e2e
+
+note right of unit
+  **Doménová vrstva** v DDD je čistý PHP.
+  Test invariantu agregátu = unit test.
+  Žádný EntityManager, žádný Symfony container.
+end note
+
+note right of comp
+  **Agregát + Application Service** v BC.
+  In-memory repository pro test koordinace.
+  Validuje use case, ne integraci s frameworkem.
+end note
+
+note right of int
+  **Skutečný kontejner, skutečná DB.**
+  Kontroluje, že Doctrine mapping funguje,
+  unique constraint vyhází správnou výjimku,
+  outbox uloží event ve stejné transakci.
+end note
+
+note right of e2e
+  Drahé (provoz prohlížeče, full stack).
+  Pokrývají JEN business-critical scénáře:
+  „registrace → přihlášení", „checkout → platba".
+end note
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml compensation_flow
+!include ../theme.iuml
+
+title Kompenzační flow: rollback ságy v opačném pořadí kroků
+
+participant "OrderPM" as pm
+participant "Order BC" as ord
+participant "Inventory BC" as inv
+participant "Payment BC" as pay
+participant "Shipping BC" as ship
+
+== Šťastná cesta (1–4 OK) ==
+
+pm -> ord : place(items) ✓
+pm -> inv : reserve(items) ✓
+pm -> pay : charge(amount) ✓
+pm -> ship : ship() ✗  shipment provider down
+ship --> pm : ShipmentFailed
+
+note over pm
+  Krok 4 selhal po 3 retry.
+  Sága spouští kompenzaci v opačném pořadí.
+end note
+
+== Kompenzace v opačném pořadí ==
+
+pm -> pay : refund(amount)
+pay --> pm : PaymentRefunded
+note right : Kompenzace #3:\nfinanční vrácení
+
+pm -> inv : releaseReservation(items)
+inv --> pm : InventoryReleased
+note right : Kompenzace #2:\nvolné položky zpět\nna sklad
+
+pm -> ord : cancel(reason='shipping_failed')
+ord --> pm : OrderCancelled
+note right : Kompenzace #1:\nstornovat objednávku
+
+pm -> pm : status = Cancelled
+pm -> pm : record SagaCompensated event
+
+note over pm
+  Klíčová pravidla kompenzace:
+  1. Opačné pořadí (LIFO)
+  2. Každá kompenzace musí být IDEMPOTENTNÍ
+  3. Kompenzace, která sama selže, jde na DLQ
+     – manuální zásah nutný
+end note
+
+@enduml

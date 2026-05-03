@@ -186,6 +186,9 @@ koordinátor**. Každý Bounded Context reaguje na události publikované jiným
 kontexty a na jejich základě provádí svůj krok procesu. Žádná služba neví o celém
 toku – každá zná pouze svou část a ví, na které události má reagovat.
 
+:::diagram{fig="15.3-A" title="Choreografie vs. orchestrace - kdo koordinuje ságu" src="images/diagrams/8_sagas/choreography_vs_orchestration.svg"}
+:::
+
 V našem e-shop scénáři probíhá choreografická sága následovně: kontext Ordering
 publikuje událost `OrderPlaced`. Kontext Payment na ni reaguje, strhne
 platbu a publikuje `PaymentSucceeded`. Kontext Warehouse naslouchá
@@ -1233,6 +1236,9 @@ vrátit systém do konzistentního stavu provedením kompenzačních akcí v
 `DELETE FROM payments` – místo toho dispatchujeme nový doménový příkaz
 `RefundCustomer`, který vytvoří novou transakci (refund). Každá kompenzační
 akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
+
+:::diagram{fig="15.9-A" title="Kompenzační flow - rollback ságy v opačném pořadí" src="images/diagrams/8_sagas/compensation_flow.svg"}
+:::
 
 :::callout{type="pattern"}
 ### PHP: Kompenzační logika v opačném pořadí kroků {#compensate-method-heading}

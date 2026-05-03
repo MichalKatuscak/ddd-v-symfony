@@ -1,0 +1,57 @@
+@startuml staleness_window
+!include ../theme.iuml
+
+title Staleness window: kdy uživatel vidí starý read model
+
+actor User as u
+participant "Controller" as ctrl
+participant "Command Bus" as cb
+participant "Order Aggregate" as agg
+database "Write DB" as wdb
+queue "Event Bus" as eb
+participant "Projector" as p
+database "Read Model" as rm
+
+== T0: User odešle command ==
+
+u -> ctrl : POST /orders\n{items, address}
+ctrl -> cb : PlaceOrder cmd
+cb -> agg : place(items, address)
+agg -> wdb : INSERT order, INSERT outbox
+agg -> eb : OrderPlaced event
+ctrl --> u : 201 Created\n{ orderId: 42 }
+note right of u : T+0 ms: command potvrzen
+
+== T0–T100ms: STALENESS WINDOW ==
+
+note over u, rm
+  Zde je read model starý:
+  GET /orders/42 vrátí 404, protože projector
+  ještě eventu nezpracoval.
+end note
+
+u -> ctrl : GET /orders/42
+ctrl -> rm : SELECT * WHERE id=42
+rm --> ctrl : NULL ⚠️
+ctrl --> u : 404 Not Found 😕
+
+== T+100ms: projector dohnal stav ==
+
+eb -> p : OrderPlaced event
+p -> rm : INSERT INTO orders_view\n(id=42, ...)
+
+== T+150ms: read model konzistentní ==
+
+u -> ctrl : GET /orders/42 (retry)
+ctrl -> rm : SELECT * WHERE id=42
+rm --> ctrl : data
+ctrl --> u : 200 OK ✓
+
+note over u
+  UI vzory pro řešení staleness:
+  1. Optimistic update (UI ukáže ihned, mark "pending")
+  2. Wait-and-poll (klient čeká 100–500 ms, pak GET)
+  3. Read your writes (sync GET z primary, ne z read modelu)
+end note
+
+@enduml

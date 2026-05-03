@@ -27,6 +27,9 @@ jsou unit testy svázány s frameworkem. V DDD je doménová logika izolovaná a
 Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje kapitola
 [Základní koncepty DDD](/zakladni-koncepty).
 
+:::diagram{fig="18.1-A" title="Testovací pyramida pro DDD aplikaci - poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
+:::
+
 :::callout{type="note"}
 ### Proč je DDD dobře testovatelný:
 

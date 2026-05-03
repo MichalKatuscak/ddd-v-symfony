@@ -1,0 +1,52 @@
+@startuml choreography_vs_orchestration
+!include ../theme.iuml
+
+title Sága: choreografie vs. orchestrace
+
+skinparam package {
+  BackgroundColor $BG
+  BorderColor $ACCENT
+  FontColor $ACCENT
+}
+
+package "CHOREOGRAFIE: žádný centrální koordinátor" as choreo {
+  rectangle "Order BC\n(emit OrderPlaced)" as c_order
+  rectangle "Inventory BC\n(reserve, emit InventoryReserved)" as c_inv
+  rectangle "Payment BC\n(charge, emit PaymentCompleted)" as c_pay
+  rectangle "Shipping BC\n(ship, emit OrderShipped)" as c_ship
+
+  c_order -[#F0A456]-> c_inv : OrderPlaced
+  c_inv -[#F0A456]-> c_pay : InventoryReserved
+  c_pay -[#F0A456]-> c_ship : PaymentCompleted
+
+  note bottom of c_ship #161A22
+    + Loose coupling, autonomie BC
+    – Nikdo neví, kde sága stojí
+    – Cycle dependency riziko
+    – Kompenzace skrytá
+  end note
+}
+
+package "ORCHESTRACE: explicitní Process Manager" as orch {
+  rectangle "OrderProcessManager\n(centrální koordinátor)" as o_pm
+
+  rectangle "Order BC" as o_order
+  rectangle "Inventory BC" as o_inv
+  rectangle "Payment BC" as o_pay
+  rectangle "Shipping BC" as o_ship
+
+  o_pm -[#F0A456]-> o_order : 1. OrderPlaced?
+  o_pm -[#F0A456]-> o_inv : 2. ReserveInventory cmd
+  o_pm -[#F0A456]-> o_pay : 3. ChargePayment cmd
+  o_pm -[#F0A456]-> o_ship : 4. ShipOrder cmd
+
+  note bottom of o_pm #161A22
+    + Stav ságy explicitní (DB row)
+    + Kompenzace v jedné třídě
+    + Snadné monitoring + recovery
+    – Centrální koordinátor je vlastní
+      doménový aggregate, který chce data store
+  end note
+}
+
+@enduml
