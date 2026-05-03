@@ -974,7 +974,126 @@ final class StartProductImportHandler
 :::
 :::
 
-## 17.09 Profiling DDD aplikací {#profiling}
+## 17.09 Provozní výkonové vzory {#provozni-vzory}
+
+Předchozí sekce řeší výkon na úrovni jednoho dotazu nebo jednoho agregátu. Jakmile
+aplikace běží 24/7 s reálnou zátěží, narážíte na třídu problémů, které lokální profiling
+neukáže: souběžnost více klientů, omezení databáze jako sdíleného zdroje a operační
+omezení Doctrine ve více procesech.
+
+### Hot aggregates a optimistic lock thrash {#hot-aggregates-heading}
+
+**Hot aggregate** je agregát, který je modifikován mnoha klienty současně. Klasické
+příklady: globální `Inventory` jednoho produktu při rozjezdu kampaně, `Tournament`
+agregát s 1000 účastníky, kteří všichni paralelně potvrdí účast, nebo `BankAccount`
+firmy s tisíci transakcí denně.
+
+S `#[ORM\Version]` (optimistický zámek) souběžná modifikace vyhází
+`OptimisticLockException`. Při nízké souběžnosti (5 % konfliktů) je retry levný.
+Při hot aggregate (50–80 % konfliktů) systém **degraduje na sériový provoz**:
+worker dělá retry → load → modify → save → conflict → retry. Throughput klesne
+o řád, latence stoupne.
+
+Tři strategie, podle pořadí preference:
+
+- **Re-design hranic agregátu.** Pokud je `Inventory` hot, není to často
+  jeden agregát, ale **N samostatných agregátů per warehouse + sklad pool**.
+  Jeden agregát na region/sku/sklad. Konflikty pak nejsou „mezi všemi klienty",
+  ale „mezi klienty stejné lokace".
+- **Eventual consistency místo strong.** Místo „strhni 1 ks z `Inventory` synchronně"
+  publikuj `ItemReserved(productId, qty)` event a agregát ho zpracuje
+  asynchronně přes saga. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
+- **CRDT / counter-only agregáty.** Pokud doménová operace je čistý increment
+  (`view_count`, `like_count`), nepotřebuješ celý agregát – stačí
+  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. To není „obvykle DDD",
+  ale je to validní u skutečně commutative operací.
+
+:::callout{type="warn"}
+### Anti-vzor: pessimistic lock místo redesignu {#anti-pessimistic-lock-heading}
+
+Když optimistic lock generuje konflikty, lákavé řešení je
+`#[ORM\Lock(LockMode::PESSIMISTIC_WRITE)]` – databáze drží `SELECT FOR UPDATE`
+zámek a další klient čeká. Konflikty zmizí, ale výsledek je horší: klienti se
+serializují na úrovni databáze místo aplikace, zámky drží přes celou transakci
+(včetně síťové komunikace s app serverem), pravděpodobnost deadlocku roste.
+Pessimistic lock řeší appearance problému, ne příčinu. Pokud je agregát hot,
+**hranice je špatně**.
+:::
+
+### Partitioning velkých tabulek {#partitioning-heading}
+
+PostgreSQL declarative partitioning je standardní řešení pro tabulky s 50M+ řádky,
+kde aktivně se mění jen poslední část (typicky podle `created_at`):
+
+- **`orders` partitioned po měsících** – aktivní partition za poslední měsíc
+  drží 1M řádků, vlézá do RAM, indexy malé. Staré partitions (read-only) můžou
+  být na pomalejším disku nebo v archivu.
+- **`audit_log` partitioned po dnech** – `DROP PARTITION` po retention period
+  je atomický a nezamyká aktivní tabulku.
+- **`projection_*` tabulky** s vysokým write rate.
+
+Pro DDD má partitioning jeden důsledek navíc: **agregátní reference přes ID
+musí být kompozitní** (id + partition key, např. `created_at`). Pokud doména
+zná jen `OrderId`, partition lookup vyžaduje plný scan napříč partitions
+(slow). Standardní řešení: zahrnout `created_at` (nebo derivovaný měsíc)
+do hodnotového objektu `OrderId`, aby ho repozitář uměl použít pro partition pruning.
+
+:::callout{type="note"}
+### Kdy partition použít {#partitioning-kdy-heading}
+
+- Tabulka roste lineárně s časem (audit, outbox, orders, eventy).
+- 90 % dotazů se týká poslední X dní/měsíců.
+- Drop staré dat je vyžadovaný (compliance, GDPR, retention).
+- Velikost tabulky překročí 50 mil. řádků nebo 50 GB.
+
+**Nepoužívejte** pro malé tabulky (< 10 mil.) – přidává operační složitost
+bez měřitelného přínosu.
+:::
+
+### Read replicy a connection pooling {#replicy-pooling-heading}
+
+V CQRS architektuře jsou read modely často vhodný kandidát pro **read replicy** –
+samostatná databáze (nebo Postgres streaming replica), na kterou jdou všechny
+queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
+
+- **Repozitář write strany** drží `EntityManagerInterface` namapovaný na primary.
+- **Query handler read strany** drží separátní `Connection` nebo
+  `EntityManager` namapovaný na replicu (`doctrine.orm.read_entity_manager`).
+- **Replikační lag** (typicky 10–100 ms) znamená, že po `save()` na primary
+  query na replicu nemusí ihned vidět změnu – stejný „read your writes"
+  problém jako u eventual consistency. Vzor řešení viz
+  [CQRS – eventual consistency v UI](/cqrs#eventual-consistency).
+
+Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP proces
+= 1 DB connection" se nasčítá: 100 PHP-FPM workerů × 4 DB pody × 10 read replicas
+= 4000 connections, což překročí default `max_connections = 100` v Postgresu.
+Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
+pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**
+(Doctrine používá), takže potřebujete buď session pooling (méně efektivní),
+nebo PgBouncer ve verzi 1.21+ s `prepared_statements = true`.
+
+### Snapshotting v Event Sourcingu (přehled) {#snapshotting-prehled-heading}
+
+Při Event Sourcingu (kapitola [Event Sourcing](/event-sourcing)) je rebuild stavu
+agregátu lineární s počtem eventů. Pro agregát s 100 eventy je to instant; pro
+1000 eventů to začíná být znát; pro 100k+ eventů (long-lived agregát jako
+`UserAccount` po letech provozu) je hydration nepoužitelná.
+
+**Snapshot** je zhuštěný stav agregátu uložený periodicky:
+
+- Po každých N eventech (typicky 50–100) se uloží `Snapshot{aggregateId, version, state}`.
+- Při hydration se načte poslední snapshot + jen eventy *novější* než snapshot version.
+- Tradeoff: rychlejší read, ale snapshot tabulka roste a její struktura je vázaná
+  na konkrétní verzi agregátu (schema evolution problém – viz
+  [Event Sourcing – verzování](/event-sourcing#verzovani-udalosti)).
+
+Detailní implementace včetně Symfony kódu je v sekci
+[Event Sourcing – Snapshotting](/event-sourcing#snapshotting). V kontextu výkonu
+si pamatujte: **snapshot není výchozí volba, ale escape hatch pro long-lived
+agregáty**. Většina DDD agregátů má desítky eventů za celý lifecycle a snapshotting
+nepotřebuje.
+
+## 17.10 Profiling DDD aplikací {#profiling}
 
 Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
 ekosystému existuje škála nástrojů od development profileru až po produkční profiling nástroje.

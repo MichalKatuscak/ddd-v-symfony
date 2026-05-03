@@ -1218,6 +1218,219 @@ přepne do stavu `failed`. Tyto řádky chceme:
   `outbox_dispatched_total`.
 :::
 
+### Vacuum a index bloat (PostgreSQL) {#vacuum-heading}
+
+Outbox má specifický I/O profil: vysoký INSERT rate, krátký lifecycle (řádek vznikne →
+během sekund se UPDATE na `sent` → po N dnech DELETE), nikdy se nečte historie.
+PostgreSQL standardní autovacuum tunning na takový profil **není dimenzovaný**
+a po několika dnech provozu narážíte na index bloat:
+
+- INSERT vytváří mrtvé řádky v tabulce i v indexech (kvůli MVCC).
+- UPDATE statusu vytváří další verze řádku.
+- Standardní autovacuum threshold (`autovacuum_vacuum_scale_factor = 0.2`)
+  čeká, než se nasbírá 20 % mrtvých řádků – při 5 000 events/s to je řád minut.
+- Mezitím index `(status, occurred_at)` nabobtná na 10× původní velikost,
+  selecty pomalují, lag stoupá.
+
+Standardní opatření: **per-table vacuum tuning**.
+
+:::callout{type="pattern"}
+### SQL: Per-table autovacuum pro outbox {#vacuum-tuning-heading}
+
+:::code{language="sql" filename="snippet.sql"}
+ALTER TABLE outbox SET (
+    autovacuum_vacuum_scale_factor = 0.05,    -- vacuum už při 5 % mrtvých řádků
+    autovacuum_vacuum_threshold = 1000,       -- minimum 1000 mrtvých řádků
+    autovacuum_analyze_scale_factor = 0.02,
+    autovacuum_vacuum_cost_limit = 2000       -- vyšší rozpočet → rychleji dokončí
+);
+
+-- Pravidelně sledujte index bloat:
+SELECT
+    schemaname, tablename, indexname,
+    pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
+    idx_scan, idx_tup_read, idx_tup_fetch
+FROM pg_stat_user_indexes
+JOIN pg_class ON pg_class.oid = indexrelid
+WHERE schemaname = 'public' AND tablename = 'outbox';
+
+-- REINDEX CONCURRENTLY když index naroste přes 2× očekávané velikosti:
+REINDEX INDEX CONCURRENTLY outbox_status_occurred_at_idx;
+:::
+:::
+
+### Partitioning při vysokém objemu {#partitioning-heading}
+
+Při sustained 5k+ events/s je single-table outbox provozní úzké hrdlo. PostgreSQL
+declarative partitioning podle `occurred_at` umožňuje:
+
+- **Rychlé mazání starých dat** přes `DROP PARTITION` místo `DELETE` –
+  nemá zámky na celé tabulce, runtime O(1) místo O(n).
+- **Cílené vacuum** – autovacuum operuje per-partition, takže staré (read-only)
+  partice se nevakuují vůbec.
+- **Index lokalita** – aktivní partition obsahuje jen poslední hodiny eventů,
+  index je malý a vlézá do RAM.
+
+:::callout{type="pattern"}
+### SQL: Outbox jako daily-partitioned tabulka {#partitioning-sql-heading}
+
+:::code{language="sql" filename="snippet.sql"}
+-- Hlavní tabulka jako partitioned parent.
+CREATE TABLE outbox (
+    id           UUID NOT NULL,
+    event_type   VARCHAR(255) NOT NULL,
+    payload      JSONB NOT NULL,
+    status       VARCHAR(20) NOT NULL DEFAULT 'pending',
+    occurred_at  TIMESTAMPTZ NOT NULL,
+    sent_at      TIMESTAMPTZ,
+    attempts     INT NOT NULL DEFAULT 0,
+    last_error   TEXT,
+    PRIMARY KEY (id, occurred_at)
+) PARTITION BY RANGE (occurred_at);
+
+-- Partition na den (vytváří pg_partman nebo cron).
+CREATE TABLE outbox_2026_05_03 PARTITION OF outbox
+    FOR VALUES FROM ('2026-05-03') TO ('2026-05-04');
+
+-- Index na pending řádky – jen v aktivních partitions.
+CREATE INDEX outbox_2026_05_03_pending_idx
+    ON outbox_2026_05_03 (occurred_at)
+    WHERE status = 'pending';
+
+-- Cleanup = atomicky odpojit a smazat starou partition.
+ALTER TABLE outbox DETACH PARTITION outbox_2026_04_01;
+DROP TABLE outbox_2026_04_01;
+:::
+:::
+
+Provozní automatizace: rozšíření [pg_partman](https://github.com/pgpartman/pg_partman)
+spravuje vznik nových partitions i mazání starých přes cron. Pro MySQL existuje
+nativní `PARTITION BY RANGE` se stejným efektem, ale bez pg_partman ekvivalentu –
+správa je manuální.
+
+### Distributed relay – multi-instance {#distributed-relay-heading}
+
+Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší setup, ale
+má dvě slabiny: **single point of failure** (worker spadne → lag roste, dokud
+`livenessProbe` ho nerestartuje) a **omezenou propustnost** (jeden PHP proces
+zvládne ~5k events/s na consumer-grade hardware).
+
+Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízí dvě cesty:
+
+**Cesta 1 – leader election přes Redis/etcd.** Více workerů běží, ale jen jeden
+je „leader" a publikuje. Když leader spadne, do 5 s ho nahradí jiný. Důsledek:
+HA bez double publish, ale pořád jen jeden worker dispatchuje (nezvyšuje propustnost).
+
+:::callout{type="pattern"}
+### PHP: Leader election přes Redis SET NX EX {#leader-election-heading}
+
+:::code{language="php" filename="src/Outbox/Infrastructure/Worker/LeaderElection.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Outbox\Infrastructure\Worker;
+
+use Predis\ClientInterface;
+
+final class LeaderElection
+{
+    private const LEASE_KEY = 'outbox:relay:leader';
+    private const LEASE_TTL_SECONDS = 10;
+
+    public function __construct(
+        private readonly ClientInterface $redis,
+        private readonly string $instanceId, // např. POD_NAME z Kubernetes
+    ) {}
+
+    public function acquireOrRenew(): bool
+    {
+        // SET key value NX EX ttl – atomický „acquire if not exists, with TTL".
+        $result = $this->redis->set(
+            self::LEASE_KEY,
+            $this->instanceId,
+            'EX',
+            self::LEASE_TTL_SECONDS,
+            'NX',
+        );
+        if ($result === 'OK') {
+            return true; // získán nový lease
+        }
+
+        // Lease drží někdo. Jsme to my? Pokud ano, prodlouž TTL.
+        $current = $this->redis->get(self::LEASE_KEY);
+        if ($current === $this->instanceId) {
+            $this->redis->expire(self::LEASE_KEY, self::LEASE_TTL_SECONDS);
+            return true;
+        }
+
+        return false;
+    }
+}
+:::
+:::
+
+Worker volá `acquireOrRenew()` každé 3 sekundy (TTL 10 s dává buffer pro síťové
+zpoždění). Když vrátí `false`, worker stojí. Když ji při následujícím tiku vrátí `true`,
+začne dispatchovat – nový leader. Pozor: lease musí mít **kratší TTL než
+processing batch**, jinak by leader mohl dokončit batch, který už dispatchuje
+nový leader → double publish.
+
+**Cesta 2 – `SELECT … FOR UPDATE SKIP LOCKED`.** Více workerů paralelně, každý
+si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure,
+škáluje se lineárně s počtem worker replik.
+
+:::callout{type="pattern"}
+### SQL: Concurrent dispatch přes SKIP LOCKED {#skip-locked-heading}
+
+:::code{language="sql" filename="snippet.sql"}
+BEGIN;
+
+-- Worker si zarezervuje 100 pending řádků. Ostatní workery uvidí jen ty,
+-- které tento worker NEzamknul.
+SELECT id, event_type, payload, occurred_at
+FROM outbox
+WHERE status = 'pending'
+ORDER BY occurred_at
+LIMIT 100
+FOR UPDATE SKIP LOCKED;
+
+-- Worker řádky publikuje do brokera, pak:
+UPDATE outbox
+SET status = 'sent', sent_at = NOW()
+WHERE id = ANY($1);  -- pole ID právě publikovaných
+
+COMMIT;
+:::
+:::
+
+Důsledek: 4 workery × 5k events/s = 20k events/s propustnost při zachování
+**at-least-once** garance. PostgreSQL od verze 9.5 (`SKIP LOCKED`) i MySQL 8
+to podporují. Cena: nutnost koordinace pořadí (events ze stejného agregátu
+mohou být publishovány out-of-order, pokud workery zpracovávají různé batche).
+Pokud subscriber pořadí potřebuje, partition outbox na `aggregate_id` a každý
+worker řízeně zpracovává jen vlastní partition.
+
+### Backpressure – co když broker nestíhá {#backpressure-heading}
+
+Když Kafka/RabbitMQ nestíhá přijímat (síťová chyba, broker disk full, partition
+leader election), relay worker dostává timeout/error na publish. Outbox řádky
+zůstávají `pending`, kupí se. **Nezasahujte do produkčních INSERTů** – jakmile
+začnete blokovat aplikační vrstvu, šíříte výpadek brokera do core domény.
+
+Standardní vzor:
+
+- **Worker exponential backoff** – po failed publish čeká 1 s, 2 s, 4 s,
+  max 30 s. Mezitím loguje `outbox_publish_errors_total`.
+- **Alert na rychlost růstu pending** – `delta(outbox_pending_count[5m]) > 10000`
+  signalizuje, že produce > consume → broker nestíhá.
+- **Capacity planning na DB** – outbox musí umět absorbovat 30 minut
+  brokerového výpadku. Při 1k events/s to je 1.8M řádků navíc – rozpočet
+  na disk a vacuum.
+- **Zvážit sampling pro low-priority eventy** – některé eventy (audit, metrics)
+  jsou tolerantní ke ztrátě. Při sustained backpressure můžete řízeně dropnout.
+  Doménové eventy (`OrderPlaced`) ale **nikdy** – ty musí dorazit.
+
 ## 16.09 Anti-vzory {#antivzory}
 
 Outbox vypadá triviálně, ale provázejí ho klasické chyby, které ruší

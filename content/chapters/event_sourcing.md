@@ -1577,6 +1577,119 @@ pro kritické události v Core Doméně (finanční transakce, stavy objednávek
 pro méně kritické události v podpůrných kontextech (notifikace, logy aktivit).
 :::
 
+### Změny, které upcasting neřeší {#breaking-changes-heading}
+
+Upcasting předpokládá, že stará data lze deterministicky přeložit na nový formát.
+Některé změny tuto vlastnost nemají:
+
+- **Sémantická změna pole.** `Order.shippingPrice` původně zahrnoval DPH,
+  od v3 ho neobsahuje. Stará data nelze správně přeložit – DPH sazba
+  v okamžiku vystavení objednávky není v eventu uložená. Upcaster může jen
+  *předpokládat* (např. konstantní 21 %), což je nepřesné a generuje
+  reporty s chybnými čísly.
+- **Event splitting.** Původní `OrderPlaced` obsahoval `customerData`
+  inline. V nové verzi se rozděluje na `OrderPlaced` + `CustomerSnapshotted`
+  (samostatný event). Upcaster by musel vytvořit *druhý* event z prvního,
+  což porušuje princip „1 fyzický event v Event Store = 1 logický fakt".
+- **Event merging.** Dva eventy `ItemAdded` + `ItemQuantityChanged` se
+  v nové doméně spojí do jednoho `ItemUpserted`. Upcasting jdoucí jednou
+  cestou nestačí – potřebujete agregátní transformaci napříč streamem.
+- **Sémantický bug v doménové logice.** Stará data byla validní podle
+  starého modelu, ale ten model byl chybný. Replay přes opravený kód
+  vyhodí výjimky.
+
+Tři možné cesty, podle závažnosti:
+
+:::callout{type="pattern"}
+### Strategie 1: Copy-and-replace stream {#copy-replace-heading}
+
+Spustí se one-time migrace, která čte starý stream, transformuje events
+v PHP kódu (žádný upcaster, plnohodnotná migrace) a zapíše do **nového** streamu
+(`order_v2`). Starý stream zůstává jako audit trail, ale doménový kód
+ho ignoruje.
+
+```text
+order_v1 (frozen, audit only)
+    │
+    ▼ migration script
+order_v2 (active)
+```
+
+Cena: doba běhu migrace (může to být hodiny u velkých streamů), nutnost double-write
+během přechodného období (aplikace zapisuje do obou streamů, dokud migrace nedokončí).
+:::
+
+:::callout{type="pattern"}
+### Strategie 2: Multi-version event store {#multi-version-heading}
+
+V Event Store fyzicky koexistují **obě verze** schémat. Repozitář při hydration
+vybere podle `aggregate_version` mark, který stream číst. Nově vzniklé agregáty
+zapisují v3, staré dál ve v1. Přepnutí na nový tvar nastane teprve při příští
+domain operation (lazy migration).
+
+Cena: doménový kód musí umět obsloužit obě verze (větvení v factory metodách).
+Vhodné pokud breaking change ovlivňuje jen malou část streamů.
+:::
+
+:::callout{type="pattern"}
+### Strategie 3: Compensating event {#compensating-event-heading}
+
+Místo přepisování historie se vloží **nová událost**, která starý fakt
+opravuje:
+
+```text
+v1: OrderPlaced(price=100, includedVAT=true)
+v2: PriceCorrectedDueToVATBug(orderId, originalPrice=100, correctedNet=82.64)
+v3: ... (další eventy pracují s opravenou hodnotou)
+```
+
+Doménový kód při replay aplikuje obě události a stav konverguje na správnou
+hodnotu. Audit trail je explicitní – stará data jsou zachována, oprava je
+samostatný fakt.
+
+Cena: doménový model získává „šum" event typů, které řeší minulé bugy.
+Po pár letech provozu je 5–10 % event types historických oprav.
+:::
+
+### Stream archivation a storage tiering {#archivation-heading}
+
+Long-lived agregáty (`UserAccount`, `Subscription`, `LedgerAccount`) generují
+po letech provozu desítky až stovky tisíc eventů. Aktivní Event Store tabulka
+roste, queries pomalují, snapshots musí být časté.
+
+Standardní řešení: **storage tiering** podle stáří streamu.
+
+- **Hot tier** (PostgreSQL master) – události za posledních 90 dní, dotazy < 10 ms.
+- **Warm tier** (Postgres replica nebo Doctrine on slow disk) – události 90 dní – 2 roky.
+  Hydration sahá sem jen pro forensické dotazy nebo plný replay projekce.
+- **Cold tier** (S3, Glacier, on-prem object storage) – události starší než 2 roky.
+  Read-only, accessed jen pro auditní reporty a compliance.
+
+Implementace: každou noc se spustí job, který
+přesune `event_store` řádky starší než N dní do `event_store_archive` tabulky
+(nebo přímo do S3 jako Parquet). Repozitář při hydration **nečte cold tier
+defaultně** – pokud agregát potřebuje plný replay, operátor explicitně rehydratuje
+ze snapshotu novějšího než cold cutoff. Pro audit dotazy funguje zvlášť query
+service, který umí číst všechny tři tiers.
+
+:::callout{type="warn"}
+### GDPR a immutable Event Store {#gdpr-event-store-heading}
+
+Event Store je per definitionem append-only, ale GDPR požaduje právo na výmaz
+(article 17). Konflikt řeší **crypto shredding**: osobní údaje v eventech
+jsou zašifrovány klíčem per-subject. Po žádosti o výmaz se zničí klíč,
+události zůstávají, ale jsou nečitelné.
+
+Implementace v PHP: každý subject (uživatel) má v separátní tabulce
+`subject_keys` symetrický klíč. Doménová událost při serializaci
+zašifruje PII pole (`email`, `name`, `address`) tímto klíčem; zbytek
+payloadu zůstává čitelný (audit trail funguje). Smazání klíče = právo na
+zapomnění, audit zachycen na úrovni „uživatel #42 učinil akci v čase T",
+ale identifikace uživatele není možná.
+
+Detail v sekci [GDPR a osobní údaje v Event Store](#gdpr-es-heading).
+:::
+
 ## 14.11 Kdy použít Event Sourcing {#kdy-pouzit}
 
 Event Sourcing přináší výrazné výhody, ale i výraznou přidanou složitost. Před jeho zavedením je nutné pečlivě
