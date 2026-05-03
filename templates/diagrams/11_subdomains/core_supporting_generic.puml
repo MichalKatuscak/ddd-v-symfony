@@ -1,7 +1,7 @@
 @startuml
 !include ../theme.iuml
 
-title E-shop: subdoménové členění a investice
+title E-shop: subdomény a úroveň investice do návrhu
 
 rectangle "Core Domain" as core $ACCENT {
   rectangle "Pricing & Promotions" as pricing

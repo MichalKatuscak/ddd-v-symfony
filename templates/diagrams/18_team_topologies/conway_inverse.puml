@@ -24,7 +24,7 @@ package "Inverse Conway Maneuver (vědomě)" {
     rectangle "Reorganizace na 4 stream-aligned\ntýmy + 1 Platform team\n(observability, CI/CD)\n+ 1 Enabling team (time-boxed)" as org2
     sw2 -down-> org2 : <b>diktuje</b>
     note bottom of org2
-      Nejdřív rozhodneme
+      Nejprve rozhodneme
       architekturu (Context Map),
       pak postavíme týmy tak,
       aby ji přirozeně produkovaly.

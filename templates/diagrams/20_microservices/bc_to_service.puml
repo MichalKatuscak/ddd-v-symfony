@@ -3,14 +3,14 @@
 
 title 3 mapování BC ↔ Service: kdy které dává smysl
 
-package "Scénář 1: 1 BC = 1 service\n(ideální microservice)" as p1 {
+package "Scénář 1: 1 BC = 1 service\n(čistá microservice)" as p1 {
     rectangle "Ordering BC" as bc1 #F0A456
     cloud "ordering-service\n(deploy unit)" as svc1
     bc1 -down-> svc1
     note bottom of svc1
       Stream-aligned tým,
       vlastní DB, vlastní deploy,
-      nezávislé scaling.
+      nezávislý scaling.
     end note
 }
 
@@ -25,7 +25,7 @@ package "Scénář 2: 1 BC = N services\n(přehnané dělení)" as p2 {
     note bottom of svc2c
       <b>Anti-pattern</b>
       Každý CRUD endpoint = service.
-      Vede k distributed monolithu —
+      Vede k distributed monolithu –
       sdílená DB, sync calls, společný release.
     end note
 }
@@ -41,7 +41,7 @@ package "Scénář 3: N BC = 1 service\n(modular monolith)" as p3 {
     note bottom of svc3
       Architektonicky oddělené BC,
       nasazované jako 1 artefakt.
-      Ideální pro malé týmy a
+      Vhodné pro malé týmy a
       počáteční fázi produktu.
     end note
 }

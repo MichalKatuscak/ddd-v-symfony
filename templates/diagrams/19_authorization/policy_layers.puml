@@ -10,7 +10,7 @@ rectangle "4. Field\n(read-time projekce)" as field
 
 edge -down-> uc : "kdo? je přihlášený?"
 uc -down-> agg : "smí vykonat use case?"
-agg -down-> field : "v rámci use case smí na konkrétní data?"
+agg -down-> field : "smí v use case na konkrétní data?"
 
 note right of edge
   Hrubé: anonymous vs. authenticated.
@@ -20,13 +20,13 @@ end note
 
 note right of uc
   Symfony Voter / VoterInterface.
-  „Smí customer X stornovat order Y?"
+  „Smí customer X stornovat order Y?“
   Doménová pravidla, ale mimo aggregate.
 end note
 
 note right of agg
   Aggregate sám rozhoduje.
-  „Order může cancelovat jen vlastník."
+  „Order může cancelovat jen vlastník.“
   Throw ForbiddenDomainException.
 end note
 

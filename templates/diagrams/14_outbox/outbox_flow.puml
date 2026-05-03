@@ -15,7 +15,7 @@ h -> db : INSERT INTO orders (...)
 h -> db : INSERT INTO outbox\n(event_id, payload, status='pending')
 h -> db : COMMIT
 note right of db
-  Atomicky: order i outbox row.
+  Atomicky: záznam v orders i v outbox.
   Nelze ztratit jeden bez druhého.
 end note
 
@@ -24,7 +24,7 @@ relay -> db : SELECT * FROM outbox\nWHERE status='pending'\nORDER BY occurred_at
 db -> relay : 100 rows
 
 == Fáze 3: publish do brokera ==
-loop pro každý row
+loop pro každý záznam
   relay -> mq : publish(event_id, payload)
   mq --> relay : ack
   relay -> db : UPDATE outbox SET status='sent',\nsent_at=NOW() WHERE id=...
