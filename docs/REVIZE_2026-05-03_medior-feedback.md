@@ -13,37 +13,37 @@
 
 | # | Téma | Soubor | Stav |
 |---|---|---|---|
-| 1 | `chapter_nav` grid layout: `grid-column: 1 / -1` | `assets/styles/article.css` | |
-| 2 | Cheat sheet tabulky přetékají 700 px sloupec | `assets/styles/article.css` + `cheat_sheet.md` | |
-| 3 | Sticky TOC neprosakuje přes článek a footer | `assets/styles/article.css` | |
+| 1 | `chapter_nav` grid layout: `grid-column: 2 / -1` | `assets/styles/article.css` | ✅ |
+| 2 | Cheat sheet tabulky přetékají 700 px sloupec | `assets/styles/article.css` | ✅ |
+| 3 | Sticky TOC neprosakuje přes článek a footer | `assets/styles/article.css` | ✅ |
 
 ## Fáze 2 – Faktické chyby v kódu
 
 | # | Téma | Soubor | Stav |
 |---|---|---|---|
-| 4 | `services.yaml` alias syntaxe (`@...` místo `class:`) | `implementation_in_symfony.md` | |
-| 5 | Race condition v `RegisterUserHandler` (DB unique + ACL) | `implementation_in_symfony.md` | |
-| 6 | Outbox jako primární `repo.save()` příklad | `implementation_in_symfony.md` | |
-| 7 | `PaymentService` invariant přesunout do agregátu `Order` | `implementation_in_symfony.md` | |
+| 4 | `services.yaml` alias syntaxe (`@...` místo `class:`) | `implementation_in_symfony.md` | ✅ |
+| 5 | Race condition v `RegisterUserHandler` (DB unique + ACL) | `implementation_in_symfony.md` | ✅ |
+| 6 | Outbox jako primární `repo.save()` příklad | `implementation_in_symfony.md` | ✅ |
+| 7 | `PaymentService` invariant přesunout do agregátu `Order` | `implementation_in_symfony.md` | ✅ |
 
 ## Fáze 3 – Konzistence kapitoly 11
 
 | # | Téma | Soubor | Stav |
 |---|---|---|---|
-| 8 | Mapping na atributy + Persisted Object sekce | `implementation_in_symfony.md` (+ aggregate_design pokud potřeba) | |
-| 9 | User entita: final, AggregateRoot, factory, `UserName` VO | `implementation_in_symfony.md` | |
-| 10 | Symfony idiomy: `MapRequestPayload`, `#[AsAlias]`, Voters, kernel testy | `implementation_in_symfony.md` | |
-| 11 | EventDispatcher vs Messenger – nuance | `implementation_in_symfony.md` | |
+| 8 | Mapping na atributy + Persisted Object sekce | `implementation_in_symfony.md` | ✅ |
+| 9 | User entita: final, AggregateRoot, factory, `UserName` VO | `implementation_in_symfony.md` | ✅ |
+| 10 | Symfony idiomy: `MapRequestPayload`, `#[AsAlias]`, Voters, kernel testy | `implementation_in_symfony.md` | ✅ |
+| 11 | EventDispatcher vs Messenger – nuance | `implementation_in_symfony.md` | ✅ |
 
 ## Fáze 4 – Didaktika a drobnosti
 
 | # | Téma | Soubor | Stav |
 |---|---|---|---|
-| 12 | Homepage CTA – odstranit „rovnou na agregáty 07" | `templates/ddd/index.html.twig` | |
-| 13 | Hub stránky – „proč tato sekce, kdo to čte" | `templates/ddd/hub_*.html.twig` | |
-| 14 | Kap. 1 – eliminovat duplicitní bullet listy | `what_is_ddd.md` | |
-| 15 | CQRS `doctrine_transaction` middleware vs „1 agregát = 1 transakce" | `cqrs.md` | |
-| 16 | Email VO – limity `FILTER_VALIDATE_EMAIL` | `implementation_in_symfony.md` | |
+| 12 | Homepage CTA – odstranit „rovnou na agregáty 07" | `templates/ddd/index.html.twig` | ✅ |
+| 13 | Hub stránky – „proč tato sekce, kdo to čte" | `templates/ddd/hub_*.html.twig` | ✅ stávající `hub_deck` dostatečné |
+| 14 | Kap. 1 – eliminovat duplicitní bullet listy | `what_is_ddd.md` | ✅ |
+| 15 | CQRS `doctrine_transaction` middleware vs „1 agregát = 1 transakce" | `cqrs.md` | ✅ |
+| 16 | Email VO – limity `FILTER_VALIDATE_EMAIL` | `implementation_in_symfony.md` | ✅ |
 
 ## Faktické chyby zachycené během procházky (referenční)
 
