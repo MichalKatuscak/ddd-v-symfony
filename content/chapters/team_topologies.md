@@ -41,7 +41,7 @@ jehož struktura kopíruje komunikační strukturu této organizace.**
 Není to architektonická preskripce – je to *empirické pozorování*. A je to vysoce
 spolehlivé. Pokud máte oddělený frontend a backend tým, dostanete oddělený frontend a backend
 v kódu. Pokud máte oddělený DBA tým, dostanete v kódu vrstvu, která jen obsluhuje databázi.
-Pokud máte *jeden tým bez subhraničení*, dostanete Big Ball of Mud.
+Pokud máte *jeden tým bez sub-hranic*, dostanete Big Ball of Mud.
 
 ### Tři reálné případy Conway's Law v praxi
 
@@ -775,7 +775,7 @@ pro DORA metriky a Westrumovu typologii. Originální Conway 1968 esej je krátk
 - question: Vyplatí se Team Topologies v 50-člověké firmě?
   answer: 'Ano, ale ne v plné formě. 50-člověká firma odpovídá scénáři B (scale-up): typicky 4–6 stream-aligned týmů + 1 mini-Platform team (3–5 lidí). Žádný permanentní Enabling team, žádný Complicated-subsystem team (pokud nejste banka nebo ML startup). Hlavní hodnota Team Topologies v této velikosti je <em>jazyk</em>. Pokud začnete mluvit o „Platform team“ a „Stream-aligned team“, okamžitě se ukáže, kdo dělá co a co je ticket-fronta vs. self-service. Detail v <a href="#scenar-scaleup">scénáři B</a>.'
 - question: Co dělat, když management nesouhlasí s re-orgem?
-  answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte re-org na sebe, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formálního re-orgu. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte managament o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plný re-org. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">05.09</a>), Team Topologies neuspěje ani s formálním re-orgem. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 05.09</a>.'
+  answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte re-org na sebe, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formálního re-orgu. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte management o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plný re-org. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">05.09</a>), Team Topologies neuspěje ani s formálním re-orgem. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 05.09</a>.'
 - question: Jaký je vztah mezi Team Topologies a mikroservisy?
   answer: 'Team Topologies není o mikroservisech, ale mikroservisy bez Team Topologies obvykle vedou k distribuovanému monolitu. Mikroservis je <em>fyzická</em> hranice nasazení; stream-aligned tým je <em>organizační</em> hranice odpovědnosti. V ideálním stavu jsou izomorfní – 1 stream-aligned tým = 1 BC = 1 mikroservis (nebo modul v modulárním monolitu). Pokud máte 30 mikroservis a 5 týmů, nejste v mikroservisové architektuře. Jste v distribuovaném monolitu, kde každý tým „vlastní“ 6 služeb a žádná hranice nemá soudržného vlastníka. Kapitola o <a href="/architektonicke-styly">architektonických stylech</a> rozebírá detail.'
 :::

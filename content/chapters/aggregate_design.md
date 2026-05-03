@@ -447,8 +447,8 @@ Stavový přechod `ship()` je jediný způsob, jak změnit `status`;
 `OrderStatus` se nikdy nenastavuje setterem zvenčí.
 
 Stavové přechody tvoří uzavřený graf, který musí být explicitně vymodelovaný. Každá
-doménová operace odpovídá hraně grafu; cesty, které v grafu chybí, nejsou jen „nezatím
-implementované“ – jsou explicitně zakázané. Životní cyklus agregátu `Order`
+doménová operace odpovídá hraně grafu; cesty, které v grafu chybí, nejsou jen „ještě
+neimplementované“ – jsou explicitně zakázané. Životní cyklus agregátu `Order`
 ilustruje následující diagram:
 
 :::diagram{fig="07.7-A" title="Stavový diagram agregátu Order" src="images/diagrams/21_aggregate_design/order_states.svg"}
@@ -651,7 +651,7 @@ tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven
   `$project->getTasks()->count()` bez načtení kolekce, případně
   `$project->getTasks()->matching($criteria)`. Použitelné, pokud agregát
   kolekci skutečně potřebuje pro invarianty (např. limit počtu úkolů na projekt).
-- **Aggregate as service boundary.** Vnitřní kolekci nahradit aggregát-aware
+- **Aggregate as service boundary.** Vnitřní kolekci nahradit agregát-aware
   službou, která dotazem v repozitáři ověřuje invariant. Funguje, ale je to znamení, že
   hranice je špatně.
 
@@ -668,7 +668,7 @@ je nepoužitelná. Přístupy:
   event je append-only. Konflikty řeší stream version (kapitola
   [Event Sourcing](/event-sourcing)).
 - **Single-writer pattern.** Agregát existuje v paměti jediného procesu (actor
-  model, Akka, Orleans). Symfony to nativně neumí; alternativou je Messenger s deduplicací
+  model, Akka, Orleans). Symfony to nativně neumí; alternativou je Messenger s deduplikací
   přes konzistentní hash a single consumer per aggregate ID.
 - **Přijmout eventual consistency uvnitř.** Například u čítačů
   (*like count*) je přesný stav nedůležitý – stačí zpožděná replikace s nepřesností
@@ -783,7 +783,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
   je porušení hranice. Vnitřní entity jsou dosažitelné jen přes kořen; jejich „samostatná“
   identita patří do read modelu, ne do write modelu.
 - **Domain Event jako notifikace mezi vrstvami.** Event není mechanismus
-  pro „když se aggregát změní, smaž cache“. Eventy jsou doménová fakta, ne infrastrukturní
+  pro „když se agregát změní, smaž cache“. Eventy jsou doménová fakta, ne infrastrukturní
   signály. Cache invalidaci řešte v projekci, která event konzumuje.
 
 ## 07.13 Checklist návrhu agregátu {#checklist}
@@ -824,7 +824,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Co je hot aggregate a jak poznat, že ho mám?
   answer: 'Hot aggregate je agregát, na který se souběžně sahá z mnoha transakcí (nákupní košík během Black Friday, sportovní výsledek, real-time hra, čítač lajků na virálním příspěvku). Příznak v provozu: většina commandů selže s <code>OptimisticLockException</code>, retry trvá vteřiny, latence stoupá, uživatelská zkušenost se hroutí. Diagnosticky: pokud peak provoz překročí ~5 souběžných změn za sekundu na jednu instanci agregátu, jste v ohrožení. Detail příznaků a rozhodovací logika v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jak hot aggregate vyřešit?
-  answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger s deduplicací konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
+  answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger s deduplikací konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?
   answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code>, balíček <code>symfony/uid</code> dostupný od Symfony 5.2). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
 - question: Jak rychle ověřit, že hranice agregátu je správně?
