@@ -1048,7 +1048,7 @@ src/
 - **Generic subdomény** jsou tenké adaptéry. Žádné agregáty, žádné domain services – jen wrap kolem externí knihovny nebo SaaS API.
 - **Nemíchejte styly uvnitř jednoho Bounded Contextu.** Jeden BC = jeden styl. Hybrid znamená „různé BC mají různé styly“, ne „jeden BC má polovinu Hexagonal a polovinu Layered“.
 
-### Cena vs. zisk hybridního přístupu {#hybrid-zhuibost-heading}
+### Cena vs. zisk hybridního přístupu {#hybrid-cena-zisk-heading}
 
 Cena: tým musí umět víc stylů a vědět, kdy který použít. Junior to nezvládne – musíte mít aspoň jednoho seniora, který architekturu hlídá. Mezi BC jsou *nutně* rozdílné konvence, což může čtenáře kódu mást.
 
