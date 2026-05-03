@@ -356,9 +356,10 @@ Ubiquitous Language vznikl ve spolupráci s doménovými experty ještě před z
 
 ### Doménový model: Projekt (kořen agregátu) {#project-model-heading}
 
-Doménový model neobsahuje Doctrine ORM anotace – ty patří do infrastrukturní vrstvy
-(XML mapping nebo samostatná Doctrine mapping třída). Doménová entita závisí pouze
-na doménových hodnotových objektech a událostech.
+Agregát používá Doctrine atributy přímo na doménové třídě – jako pragmatický default,
+v souladu s [kapitolou 11](/implementace-v-symfony#mapping-volba-heading). Třída je `final`,
+dědí z `AggregateRoot` (sdílené chování pro `record` a `releaseDomainEvents`),
+konstruktor je `private` a vznik agregátu probíhá přes statickou factory metodu `create()`.
 
 :::code{language="php" filename="src/ProjectManagement/Domain/Model/Project.php"}
 <?php
@@ -371,23 +372,41 @@ use App\ProjectManagement\Domain\Event\MemberAdded;
 use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
-// UserId, ProjectId a TaskId jsou sdílené v Shared Kernelu (viz sekci 25.07.2)
+use App\Shared\Domain\AggregateRoot;
+// UserId je sdílený v Shared Kernelu (viz sekci 25.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
 
-class Project
+#[ORM\Entity]
+#[ORM\Table(name: 'projects')]
+final class Project extends AggregateRoot
 {
-    private readonly ProjectId $id;
-    private string $name;
-    private ?string $description;
-    private readonly UserId $ownerId;
+    #[ORM\Id]
+    #[ORM\Column(type: 'project_id')]
+    public readonly ProjectId $id;
 
-    /** @var UserId[] */
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $name;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description;
+
+    #[ORM\Column(type: 'user_id')]
+    public readonly UserId $ownerId;
+
+    /** @var list<UserId> */
+    #[ORM\Column(type: 'user_id_list')]
     private array $memberIds = [];
 
-    private readonly \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: 'datetime_immutable')]
+    public readonly \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    private array $domainEvents = [];
+    #[ORM\Version]
+    #[ORM\Column(type: 'integer')]
+    private int $version = 1;
 
     private function __construct(ProjectId $id, string $name, ?string $description, UserId $ownerId)
     {
@@ -398,17 +417,12 @@ class Project
         $this->memberIds = [$ownerId];
         $this->createdAt = new \DateTimeImmutable();
 
-        $this->recordEvent(new ProjectCreated($id, $name, $ownerId));
+        $this->record(new ProjectCreated($id, $name, $ownerId));
     }
 
     public static function create(ProjectId $id, string $name, ?string $description, UserId $ownerId): self
     {
         return new self($id, $name, $description, $ownerId);
-    }
-
-    public function id(): ProjectId
-    {
-        return $this->id;
     }
 
     public function name(): string
@@ -421,12 +435,7 @@ class Project
         return $this->description;
     }
 
-    public function ownerId(): UserId
-    {
-        return $this->ownerId;
-    }
-
-    /** @return UserId[] */
+    /** @return list<UserId> */
     public function memberIds(): array
     {
         return $this->memberIds;
@@ -442,19 +451,19 @@ class Project
         $this->memberIds[] = $userId;
         $this->updatedAt = new \DateTimeImmutable();
 
-        $this->recordEvent(new MemberAdded($this->id, $userId));
+        $this->record(new MemberAdded($this->id, $userId));
     }
 
     public function removeMember(UserId $userId): void
     {
         if ($this->ownerId->equals($userId)) {
-            throw new \DomainException('Cannot remove owner from project');
+            throw new \DomainException('Vlastníka projektu nelze odebrat z členů.');
         }
 
         $before = count($this->memberIds);
         $this->memberIds = array_values(array_filter(
             $this->memberIds,
-            fn(UserId $id) => !$id->equals($userId)
+            fn(UserId $id) => !$id->equals($userId),
         ));
 
         if (count($this->memberIds) === $before) {
@@ -462,42 +471,30 @@ class Project
         }
 
         $this->updatedAt = new \DateTimeImmutable();
-        $this->recordEvent(new MemberRemoved($this->id, $userId));
+        $this->record(new MemberRemoved($this->id, $userId));
     }
 
-    public function updateName(string $name): void
+    public function rename(string $newName): void
     {
-        $this->name = $name;
+        if ($this->name === $newName) {
+            return;
+        }
+        $this->name = $newName;
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function updateDescription(?string $description): void
+    public function changeDescription(?string $newDescription): void
     {
-        $this->description = $description;
+        if ($this->description === $newDescription) {
+            return;
+        }
+        $this->description = $newDescription;
         $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function createdAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
     }
 
     public function updatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    private function recordEvent(object $event): void
-    {
-        $this->domainEvents[] = $event;
-    }
-
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-
-        return $events;
     }
 }
 :::

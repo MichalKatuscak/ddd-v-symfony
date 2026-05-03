@@ -300,25 +300,40 @@ declare(strict_types=1);
 // PO: Doménová entita s vlastními invarianty
 namespace App\UserManagement\Domain\Model;
 
-use App\UserManagement\Domain\ValueObject\UserId;
+use App\Shared\Domain\AggregateRoot;
+use App\UserManagement\Domain\Event\UserActivated;
+use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
-use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
 
-class User
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+final class User extends AggregateRoot
 {
-    private readonly UserId $id;
-    private Email $email;
-    private HashedPassword $password;
-    private UserStatus $status;
-    private readonly \DateTimeImmutable $registeredAt;
-    private array $domainEvents = [];
+    #[ORM\Id]
+    #[ORM\Column(type: 'user_id')]
+    public readonly UserId $id;
 
-    private function __construct(
-        UserId $id,
-        Email $email,
-        HashedPassword $password
-    ) {
+    #[ORM\Column(type: 'email_vo', unique: true)]
+    private Email $email;
+
+    #[ORM\Embedded(class: HashedPassword::class)]
+    private HashedPassword $password;
+
+    #[ORM\Column(enumType: UserStatus::class)]
+    private UserStatus $status;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    public readonly \DateTimeImmutable $registeredAt;
+
+    #[ORM\Version]
+    #[ORM\Column(type: 'integer')]
+    private int $version = 1;
+
+    private function __construct(UserId $id, Email $email, HashedPassword $password)
+    {
         $this->id = $id;
         $this->email = $email;
         $this->password = $password;
@@ -326,15 +341,12 @@ class User
         $this->registeredAt = new \DateTimeImmutable();
 
         // Doménová událost – side-effect registrace je nyní explicitní
-        $this->domainEvents[] = new UserRegistered($id, $email);
+        $this->record(new UserRegistered($id, $email));
     }
 
     // Named constructor vyjadřuje záměr lépe než new User()
-    public static function register(
-        UserId $id,
-        Email $email,
-        HashedPassword $password
-    ): self {
+    public static function register(UserId $id, Email $email, HashedPassword $password): self
+    {
         return new self($id, $email, $password);
     }
 
@@ -345,16 +357,9 @@ class User
         }
         $token->validate(); // Token si validuje sám sebe
         $this->status = UserStatus::ACTIVE;
+        $this->record(new UserActivated($this->id));
     }
 
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-        return $events;
-    }
-
-    public function id(): UserId { return $this->id; }
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
 }
@@ -905,13 +910,22 @@ Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladněj
 4. Service se stane tenkým koordinátorem (Application Service) – jen volá entitu, transakce, eventy.
 5. Cross-link: [Anti-vzor: Anemic Domain Model](/anti-vzory) · [Domain Services vs. Application Services](/mene-zname-vzory#domain-services).
 
-### Recept 2: Doctrine anotace v doménové třídě {#recept-doctrine-anotace-heading}
+### Recept 2: Doctrine atributy v doménové třídě – kdy je to problém {#recept-doctrine-anotace-heading}
 
 **Symptomy:** `App\Domain\Order` má `#[ORM\Entity]`, doména závisí na Doctrine.
 
-1. Vytvořte oddělený XML mapping v `App\<BC>\Infrastructure\Doctrine\Mapping\`. Doménová třída zůstane bez anotací.
-2. Přesuňte konfiguraci repozitáře do `services.yaml`.
-3. Otestujte: `composer require --dev phpat/phpat` a přidejte rule `App\Domain\* nesmí závisět na Doctrine\*`.
+Pragmatický default v tomto průvodci atributy přijímá – jsou to metadata, ne chování,
+a Symfony ekosystém s nimi pracuje idiomaticky (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)).
+Pokud váš projekt skutečně potřebuje striktní oddělení (Hexagonal, dlouhodobá výměna ORM,
+core doména s vysokou hodnotou), postup je:
+
+1. Zaveďte [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) –
+   doménová třída zůstane POPO, persistence model + mapper jdou do
+   `App\<BC>\Infrastructure\Persistence\Doctrine\`.
+2. Mapper hydratujte z perzistence přes `User::reconstitute(...)` factory metodu, která
+   neemituje doménové události.
+3. Hlídejte hranici staticky: `composer require --dev phpat/phpat` + rule
+   `App\<BC>\Domain\* nesmí závisět na Doctrine\*`.
 
 ### Recept 3: Primitivní ID jako `string` / `int` {#recept-id-string-heading}
 

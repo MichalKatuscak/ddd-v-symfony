@@ -94,7 +94,7 @@ bez načtení celé kolekce do paměti.
 :::callout{type="pattern"}
 ### Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)
 
-*Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (`#[ORM\Entity]`) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci default (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro pure DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
 
 :::code{language="php" filename="src/Order/Domain/Model/Order.php"}
 <?php
@@ -564,7 +564,7 @@ final class UserId
 :::callout{type="pattern"}
 ### Doctrine mapování pro ULID a UUID
 
-*Poznámka: Následující příklad ukazuje doménovou entitu s Doctrine ORM atributy (`#[ORM\Entity]`) přímo na třídě. V čistém DDD by doménová entita neměla obsahovat infrastrukturní anotace – mapování by bylo řešeno externě (XML mapping nebo samostatná infrastrukturní třída). Zde je ORM mapování uvedeno pro přehlednost a zjednodušení příkladu.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci default (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro pure DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
 
 :::code{language="php" filename="src/Order/Domain/Model/Order.php"}
 <?php

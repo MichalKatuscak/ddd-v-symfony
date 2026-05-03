@@ -128,7 +128,7 @@ class Order
 }
 :::
 
-Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty – to je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes anotace `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku“ je definováno v doménovém kódu, ale zároveň ten kód *ví*, že se ukládá přes Doctrine. To je tzv. *domain leak* – doménová vrstva vyžaduje knihovnu z Infrastructure vrstvy, aby se vůbec dala zkompilovat.
+Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty – to je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes atributy `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku“ je definováno v doménovém kódu, ale zároveň ten kód *ví*, že se ukládá přes Doctrine. Z pohledu **Hexagonal/Onion architektury** je to *domain leak* – doménová vrstva potřebuje knihovnu z Infrastructure, aby se vůbec dala zkompilovat. Pragmatický pohled (Layered, který tu rozebíráme) tento kompromis přijímá; Hexagonal trvá na separaci přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern).
 
 ### Kdy se Layered hodí {#layered-kdy-heading}
 
@@ -246,7 +246,7 @@ Z této struktury plyne několik věcí:
 
 - Adresář `Domain/` neobsahuje *žádný* import z Doctrine, Symfony, Twig ani jiné knihovny. Pouze čisté PHP a vlastní typy.
 - Repository rozhraní (`OrderRepository`) žije v `Domain/Port/`; jeho implementace (`DoctrineOrderRepository`) žije v `Infrastructure/Persistence/`. Doména závisí na rozhraní, infrastruktura ho implementuje.
-- Doménová entita (`Order`) **není Doctrine entita**. K mapování slouží `OrderOrmEntity` nebo Doctrine XML mapping – doména zůstává čistá.
+- Doménová entita (`Order`) **není Doctrine entita**. K mapování slouží samostatná `OrderOrmEntity` + mapper (vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern)) – doména zůstává čistá. *Pozn.: Hexagonal Architecture trvá na této separaci. Pragmatičtější přístup, který zbytek průvodce používá jako default, atributy přímo na agregátu připouští – viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading).*
 - Vstup do aplikace prochází přes *inbound port* (`PlaceOrder`). HTTP Controller a CLI Command nezávisí na doméně přímo, ale na tomto portu.
 
 ### Příklad: Outbound port a jeho adaptér {#hexagonal-priklad-heading}
@@ -1076,7 +1076,7 @@ Tým přečte Cockburnův článek a každý CRUD endpoint dostane port + adapte
 
 Klasický Layered problém přenesený do Hexagonal: tým má `Domain/Port/OrderRepository`, ale třída `Domain/Model/Order.php` má `#[ORM\Entity]`, `#[ORM\Column]`, `#[ORM\OneToMany]`. Doména stále závisí na Doctrine knihovně. Cíl izolace padá.
 
-**Náprava:** Buď použijte Doctrine XML mapping (žádné anotace v doménových třídách) nebo zaveďte separátní persistence-friendly třídu (`OrderOrmEntity`) a Mapper. Cena je dvojí třída a explicitní mapování – zisk je čistá doména.
+**Náprava (pro Hexagonal/Onion):** zaveďte separátní persistence-friendly třídu (`OrderOrmEntity`) a Mapper – vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Cena je dvojí třída a explicitní mapping – zisk je čistá doména. Pokud projekt Hexagonal hranici reálně nepotřebuje, atributy přímo na agregátu jsou pragmatický kompromis (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)).
 
 ### Anti-vzor 3: Anemic Hexagonal / Anemic Clean {#anti-3-heading}
 

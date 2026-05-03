@@ -108,103 +108,111 @@ declare(strict_types=1);
 namespace App\Cart\Domain\Model;
 
 use App\Cart\Domain\Event\ItemAddedToCart;
+use App\Cart\Domain\Event\ItemRemovedFromCart;
 use App\Cart\Domain\ValueObject\CartId;
+use App\Cart\Domain\ValueObject\Money;
 use App\Cart\Domain\ValueObject\ProductId;
 use App\Cart\Domain\ValueObject\Quantity;
-use App\Cart\Domain\ValueObject\Money;
+use App\Shared\Domain\AggregateRoot;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
-class Cart
+#[ORM\Entity]
+#[ORM\Table(name: 'carts')]
+final class Cart extends AggregateRoot
 {
-    private readonly CartId $id;
-    private readonly string $userId;
-    private array $items = [];
-    private readonly \DateTimeImmutable $createdAt;
-    private \DateTimeImmutable $updatedAt;
-    private array $domainEvents = [];
+    #[ORM\Id]
+    #[ORM\Column(type: 'cart_id')]
+    public readonly CartId $id;
 
-    private function __construct(CartId $id, string $userId)
+    #[ORM\Column(type: 'user_id')]
+    public readonly UserId $userId;
+
+    /** @var Collection<int, CartItem> */
+    #[ORM\OneToMany(
+        mappedBy: 'cart',
+        targetEntity: CartItem::class,
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true,
+    )]
+    private Collection $items;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    public readonly \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $updatedAt;
+
+    #[ORM\Version]
+    #[ORM\Column(type: 'integer')]
+    private int $version = 1;
+
+    private function __construct(CartId $id, UserId $userId)
     {
         $this->id = $id;
         $this->userId = $userId;
+        $this->items = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = $this->createdAt;
     }
 
-    public static function create(CartId $id, string $userId): self
+    public static function open(CartId $id, UserId $userId): self
     {
         return new self($id, $userId);
     }
 
-    public function id(): CartId
-    {
-        return $this->id;
-    }
-
-    public function userId(): string
-    {
-        return $this->userId;
-    }
-
     public function addItem(ProductId $productId, Quantity $quantity, Money $price): void
     {
-        // Kontrola, zda produkt již v košíku existuje
-        foreach ($this->items as $item) {
-            if ($item->productId()->equals($productId)) {
-                $item->increaseQuantity($quantity);
+        foreach ($this->items as $existing) {
+            if ($existing->productId()->equals($productId)) {
+                $existing->increaseQuantity($quantity);
                 $this->updatedAt = new \DateTimeImmutable();
-
-                $this->recordEvent(new ItemAddedToCart(
-                    $this->id,
-                    $productId,
-                    $quantity,
-                    $price
-                ));
+                $this->record(new ItemAddedToCart($this->id, $productId, $quantity, $price));
 
                 return;
             }
         }
 
-        // Přidání nové položky do košíku
-        $this->items[] = new CartItem(
-            $this->id,
-            $productId,
-            $quantity,
-            $price
-        );
-
+        $this->items->add(new CartItem($this, $productId, $quantity, $price));
         $this->updatedAt = new \DateTimeImmutable();
-
-        $this->recordEvent(new ItemAddedToCart(
-            $this->id,
-            $productId,
-            $quantity,
-            $price
-        ));
+        $this->record(new ItemAddedToCart($this->id, $productId, $quantity, $price));
     }
 
     public function removeItem(ProductId $productId): void
     {
-        $this->items = array_filter($this->items, function (CartItem $item) use ($productId) {
-            return !$item->productId()->equals($productId);
-        });
+        $removed = false;
+        foreach ($this->items as $item) {
+            if ($item->productId()->equals($productId)) {
+                $this->items->removeElement($item);
+                $removed = true;
+                break;
+            }
+        }
+
+        if (!$removed) {
+            return;
+        }
 
         $this->updatedAt = new \DateTimeImmutable();
+        $this->record(new ItemRemovedFromCart($this->id, $productId));
     }
 
+    /** @return list<CartItem> */
     public function items(): array
     {
-        return $this->items;
+        return array_values($this->items->toArray());
     }
 
     public function isEmpty(): bool
     {
-        return empty($this->items);
+        return $this->items->isEmpty();
     }
 
     public function totalAmount(): Money
     {
-        $total = new Money(0, 'CZK');
-
+        $total = Money::zero('CZK');
         foreach ($this->items as $item) {
             $total = $total->add($item->totalPrice());
         }
@@ -212,27 +220,9 @@ class Cart
         return $total;
     }
 
-    public function createdAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
     public function updatedAt(): \DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    private function recordEvent(object $event): void
-    {
-        $this->domainEvents[] = $event;
-    }
-
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-
-        return $events;
     }
 }
 :::
