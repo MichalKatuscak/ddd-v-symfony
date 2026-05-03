@@ -209,13 +209,38 @@ Konfigurace definuje dva transporty: `async` pro asynchronní zpracování a `sy
 Dva message busy: `command.bus` pro příkazy s `doctrine_transaction`
 middleware (automatická transakce kolem handleru) a `query.bus` pro dotazy pouze s validací.
 
+:::callout{type="warn"}
+### `doctrine_transaction` middleware vs. „jeden agregát = jedna transakce" {#doctrine-transaction-konflikt-heading}
+
+`doctrine_transaction` middleware obaluje **celý handler** do jedné transakce.
+To znamená, že pokud handler dělá `save()` na dva různé agregáty, oba se zapíší
+atomicky. To je v rozporu s pravidlem z [Návrh agregátu – Transakční konzistence](/navrh-agregatu#transactional-consistency):
+*„jeden command modifikuje právě jeden agregát"*.
+
+Dvě použitelné strategie:
+
+- **Striktní DDD:** middleware necháte zapnutý, ale **pravidlo „1 command = 1 agregát"
+  vynucuje code review**. Middleware pak slouží jen jako pojistka pro idiomatické
+  uložení outboxu + agregátu uvnitř `save()` repozitáře. Pokud někdo poruší
+  pravidlo, atomicita transakcí mu kompenzuje chybu, ale nikoli architektonický dluh.
+- **Bez `doctrine_transaction`:** middleware vypnete a transakční hranice si řídí
+  repozitář explicitně přes `EntityManager::wrapInTransaction()` v metodě
+  `save()`. Komplikovanější setup, ale handler dostane garantovanou izolaci
+  „1 save = 1 transakce" a víc agregátů v jednom commandu prostě nelze atomicky uložit
+  (což je správně).
+
+V průvodci pokračujeme se zapnutým middleware – pro většinu projektů je to
+pragmatický kompromis, sledování pravidla „1 agregát = 1 transakce" pak patří
+do code review.
+:::
+
 :::callout{type="note"}
 ### Proč dva oddělené busy? {#proc-dva-busy-heading}
 
 Oddělení command busu a query busu není jen formální gesto. Má konkrétní praktické důsledky:
 
-- **Různý middleware** – Command bus potřebuje `doctrine_transaction`
-  (každý command je atomická operace). Query bus transakci nepotřebuje – jen čte data.
+- **Různý middleware** – Command bus potřebuje `doctrine_transaction` jako pojistku,
+  query bus ne (jen čte data).
 - **Různé transporty** – Commands mohou být směrovány na async transport
   (frontu). Queries jsou vždy synchronní – uživatel čeká na odpověď.
 - **Type safety** – Pokud controller injektuje `$commandBus`,
