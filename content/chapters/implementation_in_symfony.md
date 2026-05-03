@@ -357,67 +357,74 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Infrastructure\Repository;
 
+use App\Shared\Infrastructure\Outbox\OutboxRecorder;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 
-class DoctrineUserRepository implements UserRepository
+final class DoctrineUserRepository implements UserRepository
 {
     public function __construct(
-        private EntityManagerInterface $entityManager,
-        private MessageBusInterface $eventBus
-    ) {
-    }
+        private readonly EntityManagerInterface $em,
+        private readonly OutboxRecorder $outbox,
+    ) {}
 
     public function save(User $user): void
     {
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->em->wrapInTransaction(function () use ($user): void {
+            $this->em->persist($user);
 
-        foreach ($user->releaseDomainEvents() as $event) {
-            $this->eventBus->dispatch($event);
-        }
+            // Doménové eventy uložíme do outbox tabulky ve STEJNÉ transakci jako
+            // agregát. Tím získáme atomicitu „state + event" – buď oboje, nebo nic.
+            // Worker (Symfony Messenger consumer) je z outboxu vyzobává a dispatchuje
+            // do reálného transportu. Detail viz kapitola „Outbox Pattern".
+            foreach ($user->releaseDomainEvents() as $event) {
+                $this->outbox->record($event);
+            }
+
+            $this->em->flush();
+        });
     }
 
     public function findById(UserId $id): ?User
     {
-        return $this->entityManager->find(User::class, $id->value());
+        return $this->em->find(User::class, $id->value());
     }
 
     public function findByEmail(Email $email): ?User
     {
-        return $this->entityManager->getRepository(User::class)
+        return $this->em->getRepository(User::class)
             ->findOneBy(['email' => $email->value()]);
     }
 }
 :::
 :::
 
-V tomto příkladu je `UserRepository` rozhraní, které definuje metody pro ukládání a načítání uživatelů.
-`DoctrineUserRepository` je implementace tohoto rozhraní, která používá Doctrine ORM pro persistenci.
+`DoctrineUserRepository` implementuje doménové rozhraní `UserRepository` přes Doctrine ORM.
+`save()` zapisuje agregát i jeho události uvnitř jedné transakce – stav a publikace
+události tak nemůžou divergovat. `OutboxRecorder` je tenká utilita, která serializuje
+event do tabulky `outbox`; samostatný worker ji čte a doručuje do Messenger transportu.
+Podrobnosti v kapitole [Outbox Pattern](/outbox-pattern).
 
 :::callout{type="warn"}
-### Dispatch událostí a transakční bezpečnost {#event-dispatch-heading}
+### Proč ne přímý dispatch po flush? {#event-dispatch-heading}
 
-Příklad výše dispatchuje události **po** volání
-`flush()`. Pokud dispatch selže (např. Messenger transport je nedostupný),
-data se sice persistovala, ale události se nezpracovaly – dochází k nekonzistenci.
+Naivní varianta zapíše agregát přes `flush()` a pak iteruje přes `eventBus->dispatch($event)`.
+Vypadá nevinně, ale má dvě skryté chyby:
 
-V produkčních systémech existují dva spolehlivější přístupy:
+- **Atomicita selhává.** Pokud `dispatch()` selže (Messenger transport je
+  nedostupný, RabbitMQ down, síťová chyba), agregát už je v databázi, ale událost ne.
+  Z pohledu volajících kontextů se „registrace neudála" – přitom uživatel reálně existuje.
+- **Pořadí transakcí.** `flush()` provede UPDATE/INSERT, ale Doctrine *v některých
+  konfiguracích* nezavře transakci přímo v něm (např. uvnitř `wrapInTransaction`).
+  Dispatch před commitem vidí změny, které ostatní procesy ještě ne. Race condition.
 
-- **Outbox pattern** – události se uloží do databázové tabulky `outbox`
-  v téže transakci jako agregát. Separátní worker poté události přečte a dispatchuje.
-  Tím se zaručí atomicita. Podrobněji viz
-  [Outbox a transakční doručování událostí](/event-sourcing#outbox)
-  a recept v [DDD v praxi – B1](/ddd-v-praxi-kde-to-boli#b1-outbox).
-- **Doctrine lifecycle events** – Doctrine volá `postFlush`
-  po dokončení `flush()`, ale **před commitem transakce**, pokud
-  používáte explicitní transakce. Pro dispatch po úspěšném commitu použijte
-  `postTransactionCommit` event (Doctrine ORM 2.14+) nebo vlastní
-  middleware v Symfony Messenger.
+Outbox pattern obojí řeší: událost je v stejné DB transakci jako agregát, takže
+buď doručíme obojí (v pořádku), nebo nic (rollback). Worker doručuje v separátní
+transakci s retry strategií. **Tohle je doporučená produkční varianta a v dalších
+příkladech v této knize ji používáme jako default.**
 :::
 
 ## 11.06 Separace Doctrine mapování pomocí XML {#doctrine-xml-mapping}
@@ -735,51 +742,162 @@ Doctrine ORM 2.11+ a 3.x nativně podporují PHP enums. Při použití XML mapov
 Doctrine automaticky konvertuje hodnotu mezi PHP enum a databázovým sloupcem. Pro backed enums se ukládá backing value (`string` nebo `int`).
 :::
 
-## 11.09 Implementace doménových služeb {#domain-services}
+## 11.09 Doménové služby (a kdy je *nepoužít*) {#domain-services}
 
-Doménové služby v DDD poskytují doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu.
-V Symfony 8 se implementují doménové služby jako běžné PHP třídy:
+Doménová služba zapouzdřuje pravidlo, které **přirozeně nepatří žádnému agregátu
+ani hodnotovému objektu** – typicky operaci nad dvěma a více agregáty
+(`MoneyTransferService` mezi dvěma účty) nebo bezstavový výpočet vyžadující
+externí zdroj (kurzovní převod, kalkulace daně podle jurisdikce).
 
-:::callout{type="pattern"}
-### Příklad: Implementace doménové služby v Symfony 8 {#domain-service-example-heading}
+**Než sáhnete po doménové službě, ptejte se nejdřív: nepatří to do agregátu?**
+Pravidlo „lze platit jen confirmed objednávku" je čistý invariant agregátu `Order` –
+jen `Order` zná svůj stav a jen on smí ten stav měnit. Domain service na to
+je anti-vzor, který oslabuje agregát a vede k anemickému modelu.
 
-:::code{language="php" filename="src/OrderManagement/Domain/Service/PaymentService.php"}
+:::callout{type="anti"}
+### Anti-vzor: doménová služba pro invariant jednoho agregátu {#anti-payment-service-heading}
+
+:::code{language="php" filename="src/OrderManagement/Domain/Service/PaymentService.php (ANTI-VZOR)"}
 <?php
 
-declare(strict_types=1);
-
-namespace App\OrderManagement\Domain\Service;
-
-use App\OrderManagement\Domain\Model\Order;
-use App\OrderManagement\Domain\Model\Payment;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\OrderStatus;
-use App\OrderManagement\Domain\ValueObject\PaymentId;
-use App\OrderManagement\Domain\ValueObject\PaymentMethod;
-
-class PaymentService
+// ANTI-VZOR: pravidlo „lze platit jen confirmed objednávku" je invariant
+// agregátu Order, ne odpovědnost externí služby.
+final class PaymentService
 {
-    public function processPayment(Order $order, Money $amount, PaymentMethod $paymentMethod): Payment
+    public function processPayment(Order $order, Money $amount, PaymentMethod $pm): Payment
     {
         if ($order->status() !== OrderStatus::CONFIRMED) {
             throw new \DomainException('Cannot process payment for a non-confirmed order');
         }
 
-        return new Payment(
-            new PaymentId(),
-            $order->id(),
-            $amount,
-            $paymentMethod
-        );
+        return new Payment(PaymentId::generate(), $order->id(), $amount, $pm);
+    }
+}
+:::
+
+Co se tu pokazilo:
+
+- **Invariant uniká agregátu.** `Order` neví, že někdo kontroluje jeho stav
+  zvenčí. Když přibude nový stav (`REFUNDED`), musíte sáhnout do servicu,
+  ne do agregátu.
+- **Anemický model.** `Order` má getter `status()` jako veřejné API,
+  což je signál, že vnitřní stav je manipulovatelný zvenčí.
+- **Otevřená cesta k inkonzistenci.** Nikdo nezabrání druhé službě, aby
+  obešla pravidlo a vytvořila `Payment` přímo.
+:::
+
+:::callout{type="pattern"}
+### Správně: invariant uvnitř agregátu, factory metoda na výsledek {#payment-aggregate-heading}
+
+:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Domain\Model;
+
+use App\OrderManagement\Domain\Event\PaymentRecorded;
+use App\OrderManagement\Domain\Exception\InvalidOrderStateTransitionException;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\OrderStatus;
+use App\OrderManagement\Domain\ValueObject\PaymentId;
+use App\OrderManagement\Domain\ValueObject\PaymentMethod;
+
+final class Order extends AggregateRoot
+{
+    // ... id, status, items, factory method `place()` viz dříve ...
+
+    public function recordPayment(Money $amount, PaymentMethod $method): Payment
+    {
+        if ($this->status !== OrderStatus::CONFIRMED) {
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                'PAID',
+            );
+        }
+
+        if (!$amount->equals($this->totalAmount())) {
+            throw new \DomainException('Payment amount does not match order total.');
+        }
+
+        $this->status = OrderStatus::PAID;
+
+        $payment = Payment::record(PaymentId::generate(), $this->id, $amount, $method);
+
+        $this->record(new PaymentRecorded($this->id, $payment->id(), $amount));
+
+        return $payment;
     }
 }
 :::
 :::
 
-V tomto příkladu je `PaymentService` doménová služba, která zapouzdřuje doménovou logiku
-zpracování plateb a vytváří objekt `Payment`. Doménová služba je bezstavová a
-neobsahuje repozitáře – persistence vraceného objektu je zodpovědností volající vrstvy
-(Application Service nebo Command Handler).
+`Order::recordPayment()` zapouzdřuje **pravidlo i přechod stavu** uvnitř agregátu.
+Jediný způsob, jak vytvořit `Payment` pro danou objednávku, vede přes tuto metodu –
+což znamená, že invariant „platit lze jen confirmed objednávku" je vynucen
+typovým systémem, ne nadějí, že někdo zavolá správnou službu. Aplikační handler
+pak má triviální koordinační roli:
+
+:::callout{type="pattern"}
+### Aplikační handler nad agregátem {#payment-handler-heading}
+
+:::code{language="php" filename="src/OrderManagement/Application/Command/RecordPaymentHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\OrderManagement\Application\Command;
+
+use App\OrderManagement\Domain\Repository\OrderRepository;
+use App\OrderManagement\Domain\Repository\PaymentRepository;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\PaymentMethod;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler]
+final class RecordPaymentHandler
+{
+    public function __construct(
+        private readonly OrderRepository $orders,
+        private readonly PaymentRepository $payments,
+    ) {}
+
+    public function __invoke(RecordPayment $cmd): void
+    {
+        $order = $this->orders->get(OrderId::fromString($cmd->orderId));
+
+        $payment = $order->recordPayment(
+            Money::fromAmount($cmd->amount, $cmd->currency),
+            PaymentMethod::from($cmd->method),
+        );
+
+        $this->orders->save($order);
+        $this->payments->save($payment);
+    }
+}
+:::
+:::
+
+:::callout{type="note"}
+### Kdy doménová služba *opravdu* dává smysl {#kdy-domain-service-heading}
+
+Doménová služba je správná volba ve třech přesně vymezených případech:
+
+- **Operace nad 2+ agregáty.** Klasický `MoneyTransferService::transfer($from, $to, $amount)`
+  – pravidlo „součet zůstatků je konstantní" se týká dvou účtů a nepatří jednomu
+  ani druhému. (Pozor: stejně se ukládá v rámci jedné transakce na jeden agregát –
+  viz [agregát = transakční hranice](/navrh-agregatu#transactional-consistency).)
+- **Bezstavový výpočet s externí znalostí.** Daňová sazba podle jurisdikce a typu
+  zboží, převod měn podle aktuálního kurzu. Logika je čistě doménová, ale
+  vstupy přicházejí zvenčí.
+- **Generická doménová operace bez přirozeného vlastníka.** „Vyčisti expirované
+  rezervace starší než X dnů" – akce nad množinou agregátů, kde žádný z nich
+  není přirozený vlastník pravidla.
+
+Ve všech ostatních případech: pravidlo patří do agregátu, hodnotového objektu nebo
+specifikace ([Specification Pattern](#specification-pattern)).
+:::
 
 ## 11.10 Specification Pattern {#specification-pattern}
 
@@ -1033,37 +1151,89 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Command;
 
+use App\UserManagement\Domain\Exception\DuplicateEmailException;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-class RegisterUserHandler
+final class RegisterUserHandler
 {
     public function __construct(
-        private UserRepository $userRepository,
-    ) {
-    }
+        private readonly UserRepository $userRepository,
+    ) {}
 
     public function __invoke(RegisterUser $command): void
     {
         $email = new Email($command->email);
 
-        if ($this->userRepository->findByEmail($email)) {
-            throw new \DomainException('User with this email already exists');
-        }
-
         $user = User::register(
-            new UserId(),
+            UserId::generate(),
             $command->name,
             $email,
-            HashedPassword::fromPlainText($command->password)
+            HashedPassword::fromPlainText($command->password),
         );
 
-        $this->userRepository->save($user);
+        try {
+            $this->userRepository->save($user);
+        } catch (UniqueConstraintViolationException $e) {
+            // Spoléháme na DB unique constraint na sloupci `email`. Aplikační check
+            // přes findByEmail() je vůči souběžným registracím nedostatečný (TOCTOU
+            // race – dvě paralelní volání oba projdou check a oba uloží).
+            // Repozitář infrastrukturní výjimku DBAL nepouští dál nezměněnou; mělo by
+            // jít buď o zachycení v repo a překlad na doménovou výjimku, nebo zde –
+            // viz callout pod kódem.
+            throw DuplicateEmailException::with($email, $e);
+        }
+    }
+}
+:::
+:::
+
+:::callout{type="warn"}
+### Race condition v naivní variantě s `findByEmail()` {#register-race-heading}
+
+V dřívějších verzích tohoto průvodce handler zjišťoval unikátnost přes
+`findByEmail()` před `save()`. To je **TOCTOU race**: dvě paralelní
+registrace se stejným e-mailem oba projdou checkem (databáze ještě neviděla zápis
+toho druhého) a oba úspěšně uloží. Výsledek: dva uživatelé se stejným e-mailem.
+
+Bezpečné řešení má dvě vrstvy:
+
+- **DB unique constraint** na sloupci `email`. Druhý INSERT
+  vyhodí `UniqueConstraintViolationException`. Toto je jediná
+  garance napříč souběžnými requesty.
+- **Překlad na doménovou výjimku** v command handleru (nebo lépe v repozitáři),
+  aby aplikační vrstva nemusela znát infrastrukturní typy.
+
+Aplikační check přes `findByEmail()` můžete ponechat *navíc* pro hezčí
+chybovou hlášku v běžném (ne-souběžném) případu – ale **nikdy jako jedinou ochranu**.
+:::
+
+:::callout{type="pattern"}
+### Příklad: doménová výjimka s factory metodou {#duplicate-email-exception-heading}
+
+:::code{language="php" filename="src/UserManagement/Domain/Exception/DuplicateEmailException.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Domain\Exception;
+
+use App\UserManagement\Domain\ValueObject\Email;
+
+final class DuplicateEmailException extends \DomainException
+{
+    public static function with(Email $email, ?\Throwable $previous = null): self
+    {
+        return new self(
+            sprintf('Uživatel s e-mailem "%s" již existuje.', $email->value()),
+            previous: $previous,
+        );
     }
 }
 :::
@@ -1217,7 +1387,7 @@ Symfony 8 poskytuje DI Container pro konfiguraci služeb:
 :::callout{type="pattern"}
 ### Příklad: Konfigurace služeb v Symfony 8 {#dependency-injection-example-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/services.yaml"}
 # config/services.yaml
 services:
     _defaults:
@@ -1233,13 +1403,11 @@ services:
             - '../src/*/Domain/ValueObject/'
             - '../src/*/Domain/Event/'
 
-    # Explicitní konfigurace repozitářů pro UserManagement doménu
-    App\UserManagement\Domain\Repository\UserRepository:
-        class: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository
-
-    # Explicitní konfigurace repozitářů pro OrderManagement doménu
-    App\OrderManagement\Domain\Repository\OrderRepository:
-        class: App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository
+    # Alias rozhraní → implementace. Klíč je FQN rozhraní, hodnota je @-reference
+    # na existující službu (Symfony si DoctrineUserRepository zaregistruje sama
+    # přes autowiring výše). Tím vznikne JEDNA instance, na kterou se odkazují obě jména.
+    App\UserManagement\Domain\Repository\UserRepository: '@App\UserManagement\Infrastructure\Repository\DoctrineUserRepository'
+    App\OrderManagement\Domain\Repository\OrderRepository: '@App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository'
 
     # Messenger busy se konfigurují v config/packages/messenger.yaml, nikoli zde:
     # framework:
@@ -1255,8 +1423,26 @@ services:
 :::
 :::
 
-Repozitáře konfigurujeme explicitně, aby Symfony DI Container bindoval rozhraní na konkrétní implementaci.
-Doménové modely, hodnotové objekty a události z auto-registrace vylučujeme – nejsou to služby, ale data.
+:::callout{type="warn"}
+### Pozor: alias `@...` vs. nová služba `class: ...` {#alias-vs-class-heading}
+
+Drobný rozdíl v syntaxi `services.yaml`, dramatický rozdíl v chování:
+
+- `App\…\UserRepository: '@App\…\DoctrineUserRepository'` – **alias**.
+  Kontejner použije existující službu pod druhým jménem. Jedna instance, dvě jména.
+- `App\…\UserRepository: { class: App\…\DoctrineUserRepository }` – **nová služba**
+  pod klíčem rozhraní. Vznikne *druhá* instance `DoctrineUserRepository` – dva
+  EntityManagery, dva sady listenerů, dva separátní stavy. Při autowiringu
+  může vznikat zmatek, kterou instanci `MessageBus` injektuje.
+
+V moderním Symfony je idiomatičtější forma atribut `#[AsAlias]` přímo na implementaci –
+viz [Symfony idiomy: `#[AsAlias]`](#symfony-idiomy-asalias). Konfigurace v YAML
+se hodí, když implementace patří do jiného balíčku, který nemůžete upravit.
+:::
+
+Alias zajistí, že Symfony DI Container injektuje stejnou instanci `DoctrineUserRepository`
+všude, kde závislost typuje na `UserRepository`. Doménové modely, hodnotové objekty
+a události z auto-registrace vylučujeme – nejsou to služby, ale data.
 
 ### Autowiring s oddělenými Bounded Contexts {#autowiring-bounded-contexts}
 
@@ -1266,7 +1452,7 @@ Každý kontext dostane vlastní blok v `services.yaml`, čímž ohraničíme ko
 :::callout{type="pattern"}
 ### Příklad: Samostatný autowiring pro každý Bounded Context {#autowiring-bc-example-heading}
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/services.yaml"}
 # config/services.yaml
 services:
     _defaults:
@@ -1283,8 +1469,7 @@ services:
             - '../src/UserManagement/Domain/ValueObject/'
             - '../src/UserManagement/Domain/Event/'
 
-    App\UserManagement\Domain\Repository\UserRepository:
-        class: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository
+    App\UserManagement\Domain\Repository\UserRepository: '@App\UserManagement\Infrastructure\Repository\DoctrineUserRepository'
 
     # ──────────────────────────────────────────────────
     # Bounded Context: OrderManagement
@@ -1296,8 +1481,7 @@ services:
             - '../src/OrderManagement/Domain/ValueObject/'
             - '../src/OrderManagement/Domain/Event/'
 
-    App\OrderManagement\Domain\Repository\OrderRepository:
-        class: App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository
+    App\OrderManagement\Domain\Repository\OrderRepository: '@App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository'
 
     # ──────────────────────────────────────────────────
     # Shared: sdílené komponenty napříč kontexty
