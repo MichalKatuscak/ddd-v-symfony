@@ -1,0 +1,278 @@
+/* ─── Typografie ───────────────────────────────────────────────────── */
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1em;
+  line-height: 1.65;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Nadpisy ──────────────────────────────────────────────────────── */
+
+h1 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.9em;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 3em 0 0.6em 0;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid #1a1a1a;
+  page-break-before: always;
+}
+
+h1:first-child {
+  page-break-before: avoid;
+}
+
+h2 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.35em;
+  font-weight: 700;
+  margin: 2.2em 0 0.5em 0;
+  color: #1a1a1a;
+}
+
+h3 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 1.8em 0 0.4em 0;
+  color: #333;
+}
+
+h4 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1em;
+  font-weight: 600;
+  margin: 1.4em 0 0.3em 0;
+  color: #444;
+}
+
+/* ─── Odstavce a text ──────────────────────────────────────────────── */
+
+p {
+  margin: 0 0 0.9em 0;
+  orphans: 3;
+  widows: 3;
+}
+
+strong {
+  font-weight: 700;
+}
+
+em {
+  font-style: italic;
+}
+
+/* ─── Kód ──────────────────────────────────────────────────────────── */
+
+code {
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  font-size: 0.85em;
+  background: #f4f4f4;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: #c7254e;
+}
+
+pre {
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  font-size: 0.8em;
+  line-height: 1.5;
+  background: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #2c5282;
+  padding: 1em 1.2em;
+  margin: 1.2em 0;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 1em;
+}
+
+/* ─── Tabulky ──────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+  page-break-inside: avoid;
+}
+
+th {
+  background: #2c5282;
+  color: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  padding: 0.6em 0.9em;
+  text-align: left;
+}
+
+td {
+  padding: 0.55em 0.9em;
+  border-bottom: 1px solid #ddd;
+  vertical-align: top;
+}
+
+tr:nth-child(even) td {
+  background: #f9f9f9;
+}
+
+/* ─── Seznamy ──────────────────────────────────────────────────────── */
+
+ul, ol {
+  margin: 0.5em 0 1em 0;
+  padding-left: 1.8em;
+}
+
+li {
+  margin-bottom: 0.3em;
+  line-height: 1.55;
+}
+
+li > ul, li > ol {
+  margin: 0.2em 0 0.3em 0;
+}
+
+/* ─── Citace ───────────────────────────────────────────────────────── */
+
+blockquote {
+  margin: 1.5em 0;
+  padding: 0.8em 1.2em;
+  border-left: 4px solid #2c5282;
+  background: #ebf4ff;
+  color: #2d3748;
+  font-style: normal;
+}
+
+blockquote p {
+  margin: 0;
+}
+
+/* ─── Callout bloky ────────────────────────────────────────────────── */
+
+.callout {
+  margin: 1.5em 0;
+  padding: 0.9em 1.2em 0.9em 1.1em;
+  border-radius: 4px;
+  border-left: 5px solid #2c5282;
+  page-break-inside: avoid;
+}
+
+.callout-icon {
+  font-size: 1.1em;
+  margin-right: 0.4em;
+  float: left;
+}
+
+.callout p {
+  margin: 0 0 0.5em 0;
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.callout-note {
+  background: #ebf4ff;
+  border-color: #2c5282;
+  color: #1a365d;
+}
+
+.callout-warning {
+  background: #fffbeb;
+  border-color: #d69e2e;
+  color: #744210;
+}
+
+.callout-tip {
+  background: #f0fff4;
+  border-color: #276749;
+  color: #1c4532;
+}
+
+.callout-important {
+  background: #fff5f5;
+  border-color: #c53030;
+  color: #63171b;
+}
+
+/* ─── Diagramy ─────────────────────────────────────────────────────── */
+
+.diagram-figure {
+  margin: 2em auto;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+.diagram-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 0.6em auto;
+}
+
+figcaption {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.85em;
+  color: #555;
+  text-align: center;
+  font-style: italic;
+  margin-top: 0.4em;
+}
+
+/* ─── FAQ ──────────────────────────────────────────────────────────── */
+
+.faq {
+  margin: 1.5em 0;
+}
+
+.faq dl {
+  margin: 0;
+}
+
+.faq dt {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1em;
+  color: #1a1a1a;
+  margin: 1.2em 0 0.3em 0;
+  padding-left: 0;
+}
+
+.faq dd {
+  margin: 0 0 0.5em 1.2em;
+  color: #333;
+}
+
+/* ─── Horizontální linka ───────────────────────────────────────────── */
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 2em 0;
+}
+
+/* ─── Obrázky ──────────────────────────────────────────────────────── */
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+}
+
+/* ─── Titulní strana (h1 první v dokumentu) ───────────────────────── */
+
+.epub-title-page {
+  text-align: center;
+  padding-top: 4em;
+}

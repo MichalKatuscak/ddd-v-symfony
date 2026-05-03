@@ -1,0 +1,15 @@
+---
+title: 'Domain-Driven Design v Symfony 8'
+subtitle: 'Průvodce architekturou'
+author: 'Michal Katuščák'
+language: cs-CZ
+rights: 'Copyright © 2025 Michal Katuščák. Všechna práva vyhrazena.'
+publisher: 'ddd-v-symfony.cz'
+date: '2025'
+description: |
+  Praktický průvodce implementací Domain-Driven Design v Symfony 8.
+  Od základní filozofie přes taktické vzory až po Event Sourcing, CQRS
+  a ságy. Vše s ukázkami kódu v PHP a Symfony 8.
+toc-title: 'Obsah'
+epub-chapter-level: 1
+toc-depth: 2
