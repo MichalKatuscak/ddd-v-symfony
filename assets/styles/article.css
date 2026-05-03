@@ -82,9 +82,20 @@
 /* TOC sidebar */
 .toc {
   position: sticky; top: 80px;
+  /* max-height udržuje TOC uvnitř viewportu i u 16+ sekcí (kap. 11, 25);
+     bez tohoto pravidla spodní část TOC nikdy nedosáhne na obrazovku. */
+  max-height: calc(100vh - 80px - var(--s-5));
+  overflow-y: auto;
   border-left: 1px solid var(--stroke);
   padding-left: var(--s-4);
+  /* Odsunutí scrollbaru, aby nezakrýval text. */
+  padding-right: var(--s-2);
+  scrollbar-color: var(--stroke) transparent;
+  scrollbar-width: thin;
 }
+.toc::-webkit-scrollbar { width: 6px; }
+.toc::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 3px; }
+.toc::-webkit-scrollbar-track { background: transparent; }
 .toc-label {
   font-family: var(--font-mono);
   font-size: 10.5px;
@@ -244,6 +255,25 @@
 .art-body table td { color: var(--fg-muted); }
 .art-body table.table-bordered th + th,
 .art-body table.table-bordered td + td { border-left: 1px solid var(--stroke); }
+
+/* Cheat sheet a glossary tabulky — kompaktní reference, přijatelné zalamování textu
+   namísto horizontálního scrollu. Používá se na cheat-sheet stránce a v sekci
+   „Symfony ↔ DDD mapping" v glosáři. */
+.art-body table.glossary-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+.art-body table.glossary-table th,
+.art-body table.glossary-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.art-body table.glossary-table code,
+.art-body table.glossary-table .ic {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .art-body p { margin: 0 0 var(--s-5); text-wrap: pretty; }
 .art-body em { color: var(--accent); font-style: normal; font-weight: 500; }
 .art-body strong { color: var(--fg); font-weight: 600; }
@@ -991,6 +1021,9 @@ section > h4:first-child { margin-top: 0; }
 
 /* ── Chapter nav (prev / next) ─────────────────────────────────────────── */
 .art-nav {
+  /* grid-column: 2 / -1 — patří pod .art-body (pravý sloupec). Bez tohoto
+     pravidla se chapter_nav umístí pod .toc (levý 220 px sloupec) a překryje se s ním. */
+  grid-column: 2 / -1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s-4);
@@ -999,7 +1032,7 @@ section > h4:first-child { margin-top: 0; }
   margin: var(--s-8) 0 var(--s-6);
   max-width: var(--measure-prose);
 }
-.art-body .art-nav-item {
+.art-nav-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -1145,6 +1178,8 @@ section > h4:first-child { margin-top: 0; }
   .toc-m { display: block; }
   .art-meta { grid-template-columns: repeat(2, 1fr); }
   .art-title { font-size: var(--t-2xl); }
+  /* Single-column layout — chapter_nav přes celou šířku. */
+  .art-nav { grid-column: 1 / -1; }
 }
 @media (max-width: 540px) {
   .code-body { font-size: 12.5px; }
