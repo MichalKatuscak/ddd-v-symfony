@@ -1457,7 +1457,7 @@ v tom, že event jde **do té samé DB transakce** jako doménový stav.
 Řádek bez UNIQUE může být v race condition zapsán dvakrát (relay padá uprostřed
 INSERTu, retry přijde s tímtéž ULIDem). Bez UNIQUE constraintu DB to dovolí
 a pak relay publikuje *dvojí* verzi téže události. UNIQUE je technický
-invariant – ne nice-to-have.
+invariant – ne příjemný bonus.
 :::
 
 :::callout{type="warn"}

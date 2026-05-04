@@ -872,8 +872,8 @@ final class RegistrationControllerTest extends WebTestCase
 :::callout{type="warn"}
 ### Rozsah funkčních testů
 
-Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze hlavní happy path a hlavní chybové scénáře.
-Vše ostatní (edge cases, validace, doménová pravidla) pokryjte unit testy doménové vrstvy.
+Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze hlavní scénář a hlavní chybové scénáře.
+Vše ostatní (okrajové případy, validace, doménová pravidla) pokryjte unit testy doménové vrstvy.
 Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů spouštět testy lokálně.
 :::
 

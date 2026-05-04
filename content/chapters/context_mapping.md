@@ -533,7 +533,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 }
 :::
 
-Protože ACL nemá stav a má jediný entrypoint, testy mají tvar tabulky vstup → výstup a tabulky vstup → výjimka. Každý nový edge case z produkce se promítá jako nový test.
+Protože ACL nemá stav a má jediný entrypoint, testy mají tvar tabulky vstup → výstup a tabulky vstup → výjimka. Každý nový okrajový případ z produkce se promítá jako nový test.
 
 ### Anti-vzor: prosakující ACL
 
@@ -793,7 +793,7 @@ Marketingový tým si spočítá: 50 kampaní ročně, integrace stojí 200 hodi
 
 ### Anti-vzor: „Separate Ways z lenosti“
 
-Separate Ways je strategické rozhodnutí, ne výmluva pro vyhnutí se práci. Pokud tým prohlásí „my to nebudeme integrovat, je to příliš složité“ *bez* vyčíslení nákladů a hodnoty, není to Separate Ways – je to skrytý technický dluh. Skutečný Separate Ways má dokumentovanou alternativu (jak jsme to vyřešili bez integrace) a dokumentovaný edge case (co se stane, když se to rozpadne).
+Separate Ways je strategické rozhodnutí, ne výmluva pro vyhnutí se práci. Pokud tým prohlásí „my to nebudeme integrovat, je to příliš složité“ *bez* vyčíslení nákladů a hodnoty, není to Separate Ways – je to skrytý technický dluh. Skutečný Separate Ways má dokumentovanou alternativu (jak jsme to vyřešili bez integrace) a dokumentovaný okrajový případ (co se stane, když se to rozpadne).
 
 :::callout{type="note"}
 **Separate Ways nevylučuje pozdější integraci.** Pokud se ukáže, že duplicita je dražší než integrace, je to validní moment Separate Ways zrušit a postavit [Customer/Supplier](#customer-supplier). Typicky to nastane, když objem dat naroste, nebo když compliance audit přijde s otázkou „proč máte dva seznamy zákazníků?“. Strategická rozhodnutí jsou platná v daném kontextu – ne navždy.

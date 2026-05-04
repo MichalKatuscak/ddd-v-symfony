@@ -164,9 +164,9 @@ Po Big Picture máte 3-7 Bounded Contextů. Process Level Event Storming si vžd
 
 ### 04.05.3 Příklad – Ordering BC e-shopu {#pl-priklad}
 
-Sekvence pro happy path:
+Sekvence pro hlavní scénář:
 
-:::code{language="plaintext" filename="Sekvence Process Level – happy path"}
+:::code{language="plaintext" filename="Sekvence Process Level – hlavní scénář"}
 Customer (actor)
     → PlaceOrder (command)
         → OrderPlaced (event)

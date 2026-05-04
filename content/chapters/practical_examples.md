@@ -18,10 +18,10 @@ reading_time: 12
 difficulty: 3
 ---
 
-Tato kapitola je **shrnující průžez** předchozími kapitolami. Tři krátké příklady ukazují,
+Tato kapitola je **shrnující průřez** předchozími kapitolami. Tři krátké příklady ukazují,
 jak se vzory z taktického DDD, CQRS a Implementace v Symfony skládají do funkční aplikace.
 Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Pro detailní implementace
-(plné Doctrine mapování, testy, edge cases) odkazuje na předchozí kapitoly.
+(plné Doctrine mapování, testy, okrajové případy) odkazuje na předchozí kapitoly.
 
 Pro hluboký ponor do reálného projektu pokračujte v navazující [Případové studii](/pripadova-studie),
 která pokrývá systém pro správu projektů krok za krokem.

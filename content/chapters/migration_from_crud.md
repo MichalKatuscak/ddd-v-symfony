@@ -884,7 +884,7 @@ psát charakterizační testy), nedostatečná znalost domény v týmu, absence 
 **Nikdy nezačínejte migraci na DDD kompletním přepisem systému.** Big Bang Rewrite
 je architektonicky nejrizikovější rozhodnutí, které tým může učinit. Typický scénář:
 tým začne „přepis na zelenou louku“. Po 6 měsících zjistí, že nový systém nesplňuje všechny
-edge cases původního systému (které nikdo nezdokumentoval). Původní systém mezitím dostává
+okrajové případy původního systému (které nikdo nezdokumentoval). Původní systém mezitím dostává
 nové funkcionality a nový systém za ním nestíhá. Výsledkem je buď zrušení projektu přepisu,
 nebo spuštění nedokončeného systému s fatálními chybami.
 

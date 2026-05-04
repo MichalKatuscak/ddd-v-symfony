@@ -834,7 +834,7 @@ final class OrderVoterTest extends TestCase
 
 ### End-to-end: WebTestCase {#testing-e2e-heading}
 
-Pro pokrytí celé pipeline (firewall → controller → handler → voter → aggregate) slouží Symfony `WebTestCase`. Zde už je to integration test, který používá kernel a databázi. Doporučená míra: *1 e2e test na use case*, pokrývající happy path + 1-2 nejdůležitější chybové stavy. Detailní edge-case pokrytí patří do unit testů na nižších vrstvách.
+Pro pokrytí celé pipeline (firewall → controller → handler → voter → aggregate) slouží Symfony `WebTestCase`. Zde už je to integration test, který používá kernel a databázi. Doporučená míra: *1 e2e test na use case*, pokrývající hlavní scénář + 1-2 nejdůležitější chybové stavy. Detailní pokrytí okrajových případů patří do unit testů na nižších vrstvách.
 
 Detail pyramidy + příklady fixture builderů v [samostatné kapitole o testování](/testovani-ddd).
 
