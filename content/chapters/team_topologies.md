@@ -349,7 +349,7 @@ zeptejte. Detail komunikace s managementem je v sekci 05.09.
 
 ### Praktický checklist před spuštěním Inverse Conway Maneuver {#inverse-checklist}
 
-Než zahájíte re-org, projděte následující seznam. Pokud na *kterýkoli* bod
+Než zahájíte reorganizaci, projděte následující seznam. Pokud na *kterýkoli* bod
 odpovíte „ne“, Inverse Conway je předčasný a v 90 % případů selže:
 
 1. **Existuje kanonická Context Map?** Bez ní není definovaná cílová
@@ -360,24 +360,24 @@ odpovíte „ne“, Inverse Conway je předčasný a v 90 % případů selže:
    akt. Bez podpory shora není odpor odolatelný – lidé budou hledat výjimky a starou
    strukturu obnoví neoficiálně.
 
-3. **Máte 6 měsíců času?** Re-org pod 6 měsíců typicky nefunguje. Lidé
+3. **Máte 6 měsíců času?** Reorganizace pod 6 měsíců typicky nefunguje. Lidé
    potřebují čas se přesunout, naučit se nové domény, vybudovat nové vztahy.
 
 4. **Existuje plán pro Platform team?** Bez self-service platformy se
    stream-aligned týmy zaseknou na infrastruktuře. Platform team musí mít alespoň
-   minimum-viable IDP připravený před re-orgem (1-click new-BC bootstrap, CI šablona,
+   minimum-viable IDP připravený před reorganizací (1-click new-BC bootstrap, CI šablona,
    observability default).
 
-5. **Změřili jste DORA metriky před re-orgem?** Bez baseline neumíte
+5. **Změřili jste DORA metriky před reorganizací?** Bez baseline neumíte
    obhájit úspěch ani identifikovat regresi. Jednoduché měření: lead time z PR-merge
    do produkce, deployment frequency, change failure rate (% deploy s rollbackem),
    MTTR (medián času na vyřešení P1 incidentu).
 
 6. **Je organizace v Westrum generative kultuře?** V pathological / bureaucratic
-   re-org formálně proběhne, ale operativní vztahy se vrátí (sekce [05.09](#westrum)).
+   reorganizace formálně proběhne, ale operativní vztahy se vrátí (sekce [05.09](#westrum)).
 
-7. **Je obsazená pozice „topology owner“?** Někdo musí re-org vést na
-   denní bázi – typicky staff engineer + manažer. Bez vlastníka se re-org rozplyne
+7. **Je obsazená pozice „topology owner“?** Někdo musí reorganizaci vést na
+   denní bázi – typicky staff engineer + manažer. Bez vlastníka se reorganizace rozplyne
    do běžných sprint priorit.
 
 Pokud máte všech 7 bodů „ano“, máte vyšší šanci než průměr. Zbývá jen práce.
@@ -644,11 +644,11 @@ doména nejde rozdělit.
 Pokud na 2+ otázky odpovídáte „ne“ / „ano (CoE)“ / „zadává tiket“, máte před sebou práci.
 :::
 
-## 05.09 Komunikace s managementem – jak prodat re-org {#management}
+## 05.09 Komunikace s managementem – jak prodat reorganizaci {#management}
 
 Inverse Conway Maneuver je hluboká organizační změna. Týmy bude třeba rozdělit, manažery
 přealokovat, lidé možná ztratí senioritu nebo „svůj koutek“. Bez pochopení a podpory
-managementu (CTO / VP Engineering / People Ops) Inverse Conway selže – protože re-org
+managementu (CTO / VP Engineering / People Ops) Inverse Conway selže – protože reorganizace
 bez podpory shora se v praxi neudělá vůbec.
 
 Podstatné je **mluvit jazykem, kterému management rozumí** – ne jazykem DDD.
@@ -667,7 +667,7 @@ korelují* s obchodními výsledky (zisk, růst, customer satisfaction):
 - **Change failure rate** – % deploymentů, které způsobí incident. Stream-aligned: pod 15 %. Horizontální: 30–60 %.
 - **Mean time to restore (MTTR)** – čas zotavení z incidentu. Stream-aligned: hodina. Horizontální: dny.
 
-**Před re-orgem změřte 4 DORA metriky. Po re-orgu změřte znovu po 6 měsících.**
+**Před reorganizací změřte 4 DORA metriky. Po reorganizaci změřte znovu po 6 měsících.**
 Pokud Inverse Conway funguje, lead time se zkrátí o 30–80 %, change failure rate se sníží
 o 30–50 %. Tato čísla CTO chápe.
 
@@ -713,7 +713,7 @@ lead time hodiny, deploy víckrát denně, change failure rate pod 15 %.*“
 2. „*Hlavní příčina: rozdělení týmů podle vrstev (frontend/backend/DBA), které způsobuje
 předávky a koordinační režii. Conway's Law nám brání rychlejšímu doručování.*“
 
-3. „*Návrh: re-org na stream-aligned týmy podle Bounded Contexts během 6 měsíců.
+3. „*Návrh: reorganizace na stream-aligned týmy podle Bounded Contexts během 6 měsíců.
 Cíl: lead time pod 3 dny, deploy denně, change failure rate pod 20 %. Měření
 a re-evaluace po 6 měsících.*“
 
@@ -774,8 +774,8 @@ pro DORA metriky a Westrumovu typologii. Originální Conway 1968 esej je krátk
   answer: 'Spotify Model (squads, tribes, chapters, guilds, popsaný 2012) byl jeden z prvních pokusů popsat organizační strukturu pro software v poměrech velké internetové firmy. Stream-aligned tým ≈ Spotify squad. Tribe (kolekce squadů kolem doménové oblasti) v Team Topologies žádný přímý ekvivalent nemá. Skelton a Pais se jí vyhnuli, protože zkušenosti ukazují, že tribes se stávají Conway-stylové „divize“, které brzdí toky napříč. Chapters a guilds (komunity sdílení znalostí, např. „všichni iOS devs“) fungují i v Team Topologies – typicky jako neformální komunity nad rámec hlavní topologie. Hlavní rozdíl: Spotify Model byl popisem jednoho úspěšného podniku v určitém období; Team Topologies je obecný rámec s explicitními typy a interakcemi.'
 - question: Vyplatí se Team Topologies v 50-člověké firmě?
   answer: 'Ano, ale ne v plné formě. 50-člověká firma odpovídá scénáři B (scale-up): typicky 4–6 stream-aligned týmů + 1 mini-Platform team (3–5 lidí). Žádný permanentní Enabling team, žádný Complicated-subsystem team (pokud nejste banka nebo ML startup). Hlavní hodnota Team Topologies v této velikosti je <em>jazyk</em>. Pokud začnete mluvit o „Platform team“ a „Stream-aligned team“, okamžitě se ukáže, kdo dělá co a co je ticket-fronta vs. self-service. Detail v <a href="#scenar-scaleup">scénáři B</a>.'
-- question: Co dělat, když management nesouhlasí s re-orgem?
-  answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte re-org na sebe, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formálního re-orgu. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte management o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plný re-org. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">05.09</a>), Team Topologies neuspěje ani s formálním re-orgem. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 05.09</a>.'
+- question: Co dělat, když management nesouhlasí s reorganizací?
+  answer: 'Tři možnosti, podle závažnosti. (1) <em>Postupný posun:</em> nedělejte reorganizaci najednou, ale ovlivňujte hranice „pod kapotou“ – modul boundaries v monorepu, code owners, separátní deploys. To eliminuje 30–50 % handoffs i bez formální reorganizace. (2) <em>Pilot stream-aligned týmu:</em> přesvědčte management o jednom pilotním týmu (5–7 lidí) na 6 měsíců. Změřte DORA metriky před a po. Pokud pilot uspěje, máte case pro plnou reorganizaci. (3) <em>Diagnóza Westrum kultury:</em> pokud je organizace pathological/bureaucratic (sekce <a href="#westrum">05.09</a>), Team Topologies neuspěje ani s formální reorganizací. Zvážte změnu místa. Detail komunikace s CTO v <a href="#management">sekci 05.09</a>.'
 - question: Jaký je vztah mezi Team Topologies a mikroservisy?
   answer: 'Team Topologies není o mikroservisech, ale mikroservisy bez Team Topologies obvykle vedou k distribuovanému monolitu. Mikroservis je <em>fyzická</em> hranice nasazení; stream-aligned tým je <em>organizační</em> hranice odpovědnosti. Ve zdravém stavu jsou izomorfní – 1 stream-aligned tým = 1 BC = 1 mikroservis (nebo modul v modulárním monolitu). Pokud máte 30 mikroservis a 5 týmů, nejste v mikroservisové architektuře. Jste v distribuovaném monolitu, kde každý tým „vlastní“ 6 služeb a žádná hranice nemá soudržného vlastníka. Kapitola o <a href="/architektonicke-styly">architektonických stylech</a> rozebírá detail.'
 :::
