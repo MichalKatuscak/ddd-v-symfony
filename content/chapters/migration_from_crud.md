@@ -3,7 +3,7 @@ route: migration_from_crud
 path: /migrace-z-crud
 title: Migrace z CRUD architektury na DDD
 page_title: "Migrace z CRUD architektury na DDD v Symfony | DDD Symfony"
-meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a CQRS bez velkého big-bangu."
+meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a CQRS bez velké revoluce."
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
