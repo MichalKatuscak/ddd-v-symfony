@@ -869,7 +869,7 @@ Foote & Yoder upozorňují: *Big Ball of Mud is the de-facto standard architectu
 
 Big Ball of Mud se nedá „opravit“ rewriteem. Jediný funkční postup je **Strangler Fig**: postupně vyčleňovat čisté BC, každý obklopit ACL a přesouvat funkčnost ze staré spaghetti vrstvy do nového čistého modelu. Detail viz [Migrace z CRUD do DDD](/migrace-z-crud).
 
-Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Tato kapitola pokrývá konkrétní symptomy v PHP/Symfony stacku a strategie jejich nápravy.
+Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Tato kapitola pokrývá konkrétní symptomy v PHP/Symfony technologii a strategie jejich nápravy.
 
 :::callout{type="warn"}
 **Big Ball of Mud je *výsledek*, ne *příčina*.** Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem refaktoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
