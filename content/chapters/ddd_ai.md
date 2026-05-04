@@ -132,7 +132,7 @@ bounded contexts jako přirozený rámec pro tento přístup – každý kontext
 (ve smyslu CLAUDE.md nebo Cursor rules), svou terminologii a své invarianty. AI agent
 pracující uvnitř jednoho bounded contextu potřebuje znát méně – a tím dělá méně chyb.
 
-Tune rovněž poukazuje na zajímavý fenomén: dnešní AI nástroje si de facto vybudovaly
+Tune také poukazuje na zajímavý fenomén: dnešní AI nástroje si de facto vybudovaly
 vlastní verzi bounded contextu na úrovni konfigurace. Cursor používá soubory
 `.cursor/rules/*.mdc`, GitHub Copilot má `.github/copilot-instructions.md`,
 Claude Code používá `CLAUDE.md`. Každý z těchto souborů definuje pravidla,

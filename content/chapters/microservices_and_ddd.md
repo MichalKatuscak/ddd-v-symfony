@@ -29,7 +29,7 @@ V komunitě DDD a microservices koluje v různých variantách slogan: *„Each 
 
 Podstatné je rozlišit dvě úrovně, které slogan slévá do jedné. Bounded Context je **logická hranice modelu**: definuje, kde platí jeden konzistentní výklad pojmů, jeden Ubiquitous Language a jeden set invariantů. Microservice je **fyzická hranice deploymentu**: definuje, co se buildí jako jeden artefakt, nasazuje jako jeden proces, vlastní jednu databázi a má jeden tým, který za ni odpovídá. Tyto dvě úrovně se mohou – ale nemusí – překrývat.
 
-Sam Newman v knize *Building Microservices, 2nd ed.* (2021) tuto distinkci zdůrazňuje opakovaně. V kapitole 2 píše, že Bounded Context představuje silný kandidát pro service boundary. Rozhodnutí, zda kontext skutečně dostane vlastní deployment unit, závisí na faktorech jako velikost týmu, rozdílné scaling potřeby, různý release cyklus a operační kapacita organizace. Chris Richardson v knize *Microservices Patterns* (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
+Sam Newman v knize *Building Microservices, 2nd ed.* (2021) tuto distinkci zdůrazňuje opakovaně. V kapitole 2 píše, že Bounded Context představuje silný kandidát pro service boundary. Rozhodnutí, zda kontext skutečně dostane vlastní nasazovací jednotku, závisí na faktorech jako velikost týmu, rozdílné potřeby škálování, různý release cyklus a operační kapacita organizace. Chris Richardson v knize *Microservices Patterns* (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
 
 :::callout{type="note"}
 ### Pravda místo sloganu {#mytus-pravda-heading}
@@ -61,12 +61,12 @@ Mapování 1:1 mezi Bounded Contextem a microservice je v komunitě často preze
 
 ### Kdy rozdělit BC do vlastní service {#kdy-rozdelit-heading}
 
-Konkrétní podmínky, které mluví pro vlastní deployment unit:
+Konkrétní podmínky, které mluví pro vlastní nasazovací jednotku:
 
 - **Vlastní stream-aligned tým** – kontext má dedikovaný tým, který má autonomii nad backlogem, release cyklem a operačními rozhodnutími. Bez toho je vlastní service jen administrativní zátěž navíc. Detail v [Team Topologies](/team-topologies) (Skelton & Pais 2019).
 - **Vlastní data** – kontext drží svá data v oddělené databázi (nebo alespoň v oddělených tabulkách s vlastním schema ownerem). Ostatní kontexty na ně nesahají přímo, ale jen přes API nebo události. Sdílená databáze napříč servisy je určujícím znakem *distributed monolithu* – viz sekci 20.04.
-- **Nezávislý release cyklus** – kontext lze deployovat bez současného deployu jiných kontextů. Pokud změna v service A vyžaduje současnou změnu v service B, lepšími hranicemi se to neřeší. Tým má jednu deployment unit a jen si ji rozdělil na dvě procesní role.
-- **Rozdílné scaling potřeby** – kontext má řádově jiný objem zpracování (např. catalog s velkým read trafficem vs. ordering s nízkým, ale transakčně náročným) nebo jiné latency požadavky. Rozdělení umožní horizontálně škálovat jen ten, který to potřebuje.
+- **Nezávislý release cyklus** – kontext lze deployovat bez současného deployu jiných kontextů. Pokud změna v service A vyžaduje současnou změnu v service B, lepšími hranicemi se to neřeší. Tým má jednu nasazovací jednotku a jen si ji rozdělil na dvě procesní role.
+- **Rozdílné potřeby škálování** – kontext má řádově jiný objem zpracování (např. catalog s velkým read trafficem vs. ordering s nízkým, ale transakčně náročným) nebo jiné latency požadavky. Rozdělení umožní horizontálně škálovat jen ten, který to potřebuje.
 - **Rozdílný stack nebo runtime** – kontext potřebuje jiné runtime parametry (jiná PHP verze, jiné dependencies, jiné memory limity) nebo dokonce jiný jazyk. Vzácné, ale legitimní.
 - **Rozdílný compliance režim** – kontext zpracovává citlivá data (PCI DSS, GDPR speciální kategorie), která mají striktní oddělení od ostatního systému. Network isolation a samostatný audit trail jsou přirozenějším řešením, když kontext žije ve vlastní service.
 
@@ -75,11 +75,11 @@ Konkrétní podmínky, které mluví pro vlastní deployment unit:
 Středně velká e-commerce platforma s 30 inženýry rozdělenými do čtyř stream-aligned týmů identifikovala během [Event Storming](/event-storming) workshopu čtyři Bounded Contexty:
 
 - **Catalog** – produktový katalog, search, kategorie, atributy. Read-heavy, malé write operace, agresivní cache. Tým 8 lidí.
-- **Ordering** – košík, objednávky, stav, refundy z doménového pohledu. Transakční, latency-sensitive, tvrdá konzistence. Tým 9 lidí.
+- **Ordering** – košík, objednávky, stav, refundy z doménového pohledu. Transakční, citlivý na latenci, tvrdá konzistence. Tým 9 lidí.
 - **Payment** – integrace platebních bran, autorizace, capture, recurring payments, refundy z technického pohledu. PCI DSS scope, audit trail. Tým 6 lidí.
 - **Shipping** – integrace s dopravci, sledování, doručovací okna. Eventual konzistence s ordering, dlouhý write cyklus (hodiny i dny). Tým 7 lidí.
 
-Každý z těchto kontextů má vlastní tým, vlastní DB schema, vlastní release cyklus a měřitelně jiné scaling potřeby. Rozhodnutí mít čtyři Symfony aplikace (catalog-svc, ordering-svc, payment-svc, shipping-svc) je v této organizační realitě obhajitelné. Komunikují asynchronně přes [Outbox](/outbox-pattern) a [ságu](/sagy-a-process-managery) typu „Place Order“.
+Každý z těchto kontextů má vlastní tým, vlastní DB schema, vlastní release cyklus a měřitelně jiné potřeby škálování. Rozhodnutí mít čtyři Symfony aplikace (catalog-svc, ordering-svc, payment-svc, shipping-svc) je v této organizační realitě obhajitelné. Komunikují asynchronně přes [Outbox](/outbox-pattern) a [ságu](/sagy-a-process-managery) typu „Place Order“.
 
 Zopakujme podstatné slovo z předchozího odstavce: **obhajitelné**. Microservices nejsou jen „lepší architektura“. Jsou architektonickým rozhodnutím s kompromisy – vyšší operační složitost, potřeba distributed tracing, eventual consistency všude, kde dříve byla ACID transakce. Tato kapitola tyto kompromisy probírá v dalších sekcích.
 
@@ -93,7 +93,7 @@ Pokud zaškrtnete **tři až pět**, zvažte, zda dvě sousední kontexty raděj
 
 ## 19.03 Kdy zvolit modular monolith {#modular-monolith}
 
-Modular monolith je architektonický styl, ve kterém jeden deployable artefakt (jedna Symfony aplikace, jedna databáze, jeden proces) interně obsahuje **více Bounded Contexts jako moduly** s vynucenými hranicemi. Z venku vypadá jako klasický monolit; uvnitř má disciplínu, kterou byste jinak vynucovali přes service boundary.
+Modular monolith je architektonický styl, ve kterém se jeden nasazovaný celek (jedna Symfony aplikace, jedna databáze, jeden proces) interně skládá **z více Bounded Contexts jako modulů** s vynucenými hranicemi. Z venku vypadá jako klasický monolit; uvnitř má disciplínu, kterou byste jinak vynucovali přes service boundary.
 
 Proč o něm mluvit v kapitole o microservices? Pro většinu týmů, které začínají s DDD, je to rozumný výchozí bod. Martin Fowler v článku *MonolithFirst* (2015) argumentuje, že microservices předčasně rozdělují systém, jehož hranice ještě nejsou ustálené. Tím vznikají technické dluhy, které se těžce rozplétají. Sam Newman v *Building Microservices, 2nd ed.* (kap. 3) tento postoj přejímá a explicitně jako výchozí strategii doporučuje monolith-first nebo modular monolith-first.
 
@@ -103,7 +103,7 @@ Konkrétní indikátory, podle kterých modular monolith poráží microservices
 
 - **Malá organizace** – pod ~30 lidí na celém produktu. Není dost stream-aligned týmů na to, aby každý microservice měl dedikovaného vlastníka. Rozdělení do servis pak vede k tomu, že jeden tým spravuje pět servis a strávil polovinu týdne přepínáním kontextu.
 - **Nestabilní hranice** – produkt je v rané fázi a Bounded Contexty ještě procházejí iteracemi. Refaktor hranice uvnitř monolithu je triviální (přesun souborů a tříd); refaktor přes síťovou hranici dvou servis je migrace dat, koordinovaný release a Anti-Corruption Layer.
-- **Podobné scaling potřeby všech kontextů** – pokud catalog, ordering i shipping mají podobný objem a profil, není co odděleně škálovat. Horizontální škálování celého monolithu je operačně levnější než škálování čtyř servis.
+- **Podobné potřeby škálování všech kontextů** – pokud catalog, ordering i shipping mají podobný objem a profil, není co odděleně škálovat. Horizontální škálování celého monolithu je operačně levnější než škálování čtyř servis.
 - **Nemáte operační platformu pro N servisů** – žádný Kubernetes, žádný service mesh, žádné centralizované logging a tracing. Bez nich budou microservices fungovat technicky, ale ladění incidentů bude noční můra. Více v [sekci o ops](#ops).
 - **Operační kapacita < 30 % engineering kapacity** – Newman radí, že přechod na microservices má smysl jen tehdy, když organizace investuje výraznou část kapacity do platformy (CI/CD, observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith vás chrání před zhoršením produktivity.
 
@@ -251,7 +251,7 @@ S tímto pravidlem můžete bezpečně zůstat v monolithu měsíce a roky. Hran
 
 Modular monolith není trvalý cíl, ale výchozí stav, který v určitém bodě některé BC opustí. Indikátory, že jeden konkrétní modul je připraven na vlastní service:
 
-1. Modul má výrazně jiný scaling profil – typicky read-heavy modul (catalog, search) nebo modul s nepravidelnými špičkami (notifications, batch reporting).
+1. Modul má výrazně jiný profil zátěže – typicky read-heavy modul (catalog, search) nebo modul s nepravidelnými špičkami (notifications, batch reporting).
 2. Modul má vlastní stream-aligned tým, který chce vlastní release cyklus a má operační kapacitu se postarat o samostatný runtime.
 3. Modul potřebuje compliance isolation (PCI DSS, GDPR speciální data).
 4. Hranice modulu se posledních ~6 měsíců neměnila – model je stabilní, refaktor přes síťovou hranici nehrozí.
@@ -790,7 +790,7 @@ Doporučená postupná cesta pro Symfony tým, který dnes má monolit bez expli
 
 #### Fáze 2: Strangler Fig – první extrakce (1–3 měsíce na první service) {#faze-2-heading}
 
-**Cíl:** vytáhnout první BC do samostatné service. Vyberte ten, který má největší důvod (typicky read-heavy modul s odlišným scaling profilem nebo modul s compliance isolation).
+**Cíl:** vytáhnout první BC do samostatné service. Vyberte ten, který má největší důvod (typicky read-heavy modul s odlišným profilem zátěže nebo modul s compliance isolation).
 
 - Postavte fasádu (Symfony API gateway, nginx routing, AWS API Gateway) před monolit.
 - Postavte nový Symfony projekt jako samostatnou service. Skopírujte (nikdy ne `git mv`) kód cílového BC z monolithu.
@@ -859,7 +859,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 ### 5. Nano-services {#antivzor-5-heading}
 
-**Symptom:** service o 50 řádcích kódu, vlastní deploy, vlastní DB. „Single responsibility principle“ aplikované na deployment unit. Sto servis pro produkt s 30 inženýry.
+**Symptom:** service o 50 řádcích kódu, vlastní deploy, vlastní DB. „Single responsibility principle“ aplikované na nasazovací jednotku. Sto servis pro produkt s 30 inženýry.
 
 **Důsledek:** operační režie 100x. Každá service potřebuje monitoring, alerty, CI/CD, runtime, knowledge base, pager rotation. Tým 30 lidí má na servis 0,3 inženýra. Nikdo nemá ownership hluboce, všichni „udržují“.
 
@@ -874,7 +874,7 @@ Vztah mezi Bounded Contextem a microservice nelze redukovat na jednu rovnici. Bo
 Hlavní doporučení této kapitoly:
 
 - **Modular monolith jako default** – pro většinu týmů (≤30 lidí) je modular monolith s vynucenými hranicemi přes phparkitect rozumnější výchozí stav než microservices na zelené louce. Hranice mezi BC tam jsou vynucené stejně tvrdě, ale platíte za ně řádově méně operační složitosti.
-- **1 BC = 1 service jen tehdy, když má smysl** – vlastní stream-aligned tým, vlastní data, nezávislý release cyklus, různé scaling potřeby, případně compliance isolation. Pokud zaškrtnete tři a méně z těchto bodů, zůstaňte v monolithu.
+- **1 BC = 1 service jen tehdy, když má smysl** – vlastní stream-aligned tým, vlastní data, nezávislý release cyklus, různé potřeby škálování, případně compliance isolation. Pokud zaškrtnete tři a méně z těchto bodů, zůstaňte v monolithu.
 - **Distributed monolith je horší než monolith** – sdílená DB, synchronní volání všude, coupled deploy, sdílená library s doménovými typy. Pět příznaků, dva a víc znamená, že máte distributed monolith. Nejdražší architektonická chyba v microservices architektuře.
 - **Sync vs. async – async-first** – sync jen pro queries v request flow a pro blokující validace; všechno ostatní eventy přes broker. Tight temporal coupling je největší ztráta hodnoty microservices.
 - **Distribuované transakce – saga, ne 2PC** – 2PC nepoužitelné v microservices stacku. Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace. Detail v [kapitole 14](/sagy-a-process-managery).
@@ -898,9 +898,9 @@ Stručně: nezačínejte microservices. Začněte modular monolithem s explicitn
 - question: Kolik je správná velikost jednoho microservice?
   answer: 'Velikost není primární kritérium – autonomní deployovatelnost je. Microservice je správně velký tehdy, když ho jeden stream-aligned tým dokáže měnit, nasazovat a provozovat samostatně. To může být 500 řádků kódu nebo 50 000. Sam Newman v <em>Building Microservices, 2nd ed.</em> doporučuje, aby velikost vznikala z domény (jeden Bounded Context nebo logická část), ne z technického ideálu „malé service“. Detail v <a href="#bc-jedna-service">sekci 20.02</a> a v anti-vzoru <a href="#antivzor-5-heading">nano-services</a>.'
 - question: Můžu mít 2 Bounded Contexty v jedné microservice?
-  answer: 'Ano, a často je to správné rozhodnutí – to je definice <strong>modular monolithu</strong> nebo malého „mikro-monolithu“. Pokud dva BC sdílejí stream-aligned tým a podobné scaling potřeby, jejich provozování ve dvou samostatných servisách je operační overhead bez benefitu. Hlavní podmínka: hranice mezi BC <em>uvnitř</em> servise musí být vynucená kódem (typicky phparkitect pravidly). Pokud se obejdou, máte unstructured monolith, ne modular monolith. Detail v <a href="#modular-monolith">sekci 20.03</a>.'
+  answer: 'Ano, a často je to správné rozhodnutí – to je definice <strong>modular monolithu</strong> nebo malého „mikro-monolithu“. Pokud dva BC sdílejí stream-aligned tým a podobné potřeby škálování, jejich provozování ve dvou samostatných servisách je operační overhead bez benefitu. Hlavní podmínka: hranice mezi BC <em>uvnitř</em> servise musí být vynucená kódem (typicky phparkitect pravidly). Pokud se obejdou, máte unstructured monolith, ne modular monolith. Detail v <a href="#modular-monolith">sekci 20.03</a>.'
 - question: Kdy přejít z monolithu na microservices?
-  answer: 'Když máte konkrétní bolest, kterou microservices skutečně řeší – typicky odlišné scaling potřeby jednoho modulu, různé compliance režimy nebo organizační oddělení (různé stream-aligned týmy s různými release cykly). Bez konkrétní bolesti je přechod čistá ztráta – získáte operační složitost, žádnou hodnotu navíc. Postup vždy přes Strangler Fig (postupná extrakce 1 BC v čase), nikdy big-bang rewrite. Detail v <a href="#migrace">sekci 20.09</a>.'
+  answer: 'Když máte konkrétní bolest, kterou microservices skutečně řeší – typicky odlišné potřeby škálování jednoho modulu, různé compliance režimy nebo organizační oddělení (různé stream-aligned týmy s různými release cykly). Bez konkrétní bolesti je přechod čistá ztráta – získáte operační složitost, žádnou hodnotu navíc. Postup vždy přes Strangler Fig (postupná extrakce 1 BC v čase), nikdy big-bang rewrite. Detail v <a href="#migrace">sekci 20.09</a>.'
 - question: Co je BFF (Backend For Frontend) a kam patří v DDD?
   answer: 'BFF je vzor, ve kterém má každý frontend (web, mobile, partner API) <em>vlastní</em> backend agregátor, který volá downstream microservisy a sestavuje view-model přesně přizpůsobený danému klientovi. V DDD terminologii je to typicky <strong>Open Host Service</strong> (OHS) s <strong>Published Language</strong>, doplněný Anti-Corruption Layerem proti volaným službám – viz <a href="/context-mapping#ohs">Open Host Service</a> a <a href="/context-mapping#published-language">Published Language</a>. BFF nepatří do žádného doménového Bounded Contextu; je to integrační vrstva, vlastní BC sám o sobě (typicky „Web Frontend BC“).'
 - question: GraphQL Federation jako náhrada microservices integrace?

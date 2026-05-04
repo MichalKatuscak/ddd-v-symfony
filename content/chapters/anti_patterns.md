@@ -26,7 +26,7 @@ Tato kapitola je **katalog kódových a modelovacích anti-vzorů** v DDD. Pro
 Command) viz [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli). Pro **rozhodovací rámec**,
 jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
-Domain-Driven Design při návrhu softwaru přináší strukturu a vyjadřovací sílu, ale jeho komplexnost s sebou nese mnohá úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí na stejné chyby – i přesto, že teorii dobře rozumí. Anti-vzory je tedy potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
+Domain-Driven Design při návrhu softwaru přináší strukturu a vyjadřovací sílu, ale jeho složitost přináší řadu úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí na stejné chyby – i přesto, že teorii dobře rozumí. Anti-vzory je proto potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 
 Anti-vzor je přístup, který vypadá správně – nebo k němu vývojáři přirozeně sklouznou – ale narušuje principy DDD a způsobuje dlouhodobé problémy s udržovatelností, testovatelností a výkonem.
 
@@ -53,7 +53,7 @@ Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzore
 - **Porušení zapouzdření (encapsulation)** – základní princip OOP říká, že data a chování, které na nich operuje, by měly být společně. Anémický model toto porušuje tím, že data jsou v entitě, ale logika je jinde.
 - **Ztráta modelu jako abstrakce domény** – pokud entity obsahují pouze data, model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla, pouze strukturu dat – model tak ztrácí svůj komunikační a dokumentační přínos.
 - **Duplicita logiky** – doménová pravidla rozptýlená do service tříd vedou k jejich kopírování na více místech, protože není jasné kanonické místo pro logiku.
-- **Obtížná testovatelnost** – testování logiky v servisní vrstvě vyžaduje mockování závislostí, kdežto doménová logika v entitě je testovatelná izolovaně bez jakýchkoliv závislostí.
+- **Obtížná testovatelnost** – testování logiky v servisní vrstvě vyžaduje mockování závislostí, zatímco doménová logika v entitě je testovatelná izolovaně bez jakýchkoli závislostí.
 :::
 
 :::callout{type="warn"}

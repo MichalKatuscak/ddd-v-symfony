@@ -64,7 +64,7 @@ Vaughn Vernon shrnul nejčastější pasti návrhu agregátu do série tří ese
 Doporučení vycházejí z analýzy reálných projektů, kde příliš velké agregáty zablokovaly
 výkon a kde příliš malé rozbily invarianty. Čtyři pravidla, která doporučuje aplikovat v pořadí:
 
-1. **Modelujte true invarianty uvnitř konzistenční hranice.** Pokud pravidlo
+1. **Modelujte skutečné invarianty uvnitř konzistenční hranice.** Pokud pravidlo
    musí platit v každý okamžik (například „součet položek faktury se rovná celkové ceně“),
    patří dovnitř jednoho agregátu. Pokud pravidlo smí být porušené po několik sekund
    (například „uživateli s podpisem smlouvy se odešle vítací e-mail“), eventual consistency stačí.
