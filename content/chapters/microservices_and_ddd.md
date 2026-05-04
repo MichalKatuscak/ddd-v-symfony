@@ -88,7 +88,7 @@ Zopakujme podstatné slovo z předchozího odstavce: **obhajitelné**. Microserv
 
 Pokud z předchozího seznamu zaškrtnete **všech šest** bodů (vlastní tým, vlastní data, nezávislý release, různé scaling, různý stack/compliance), je 1:1 mapování silně doporučitelné.
 
-Pokud zaškrtnete **tři až pět**, zvažte, zda dvě sousední kontexty raději neudržet v jednom deployu jako moduly – split vás bude stát víc, než ušetří. Pokud zaškrtnete **méně než tři**, zůstaňte v [modular monolithu](#modular-monolith). Microservices nejsou cílem, ale nástrojem.
+Pokud zaškrtnete **tři až pět**, zvažte, zda dvě sousední kontexty raději neudržet v jednom deployu jako moduly – rozdělení vás bude stát víc, než ušetří. Pokud zaškrtnete **méně než tři**, zůstaňte v [modular monolithu](#modular-monolith). Microservices nejsou cílem, ale nástrojem.
 :::
 
 ## 19.03 Kdy zvolit modular monolith {#modular-monolith}

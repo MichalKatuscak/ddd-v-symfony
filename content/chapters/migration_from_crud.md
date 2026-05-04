@@ -960,7 +960,7 @@ core doména s vysokou hodnotou), postup je:
 **Symptomy:** `Order` má 30 metod a 15 polí.
 
 1. Najděte pole, která se mění nezávisle (různé invarianty, různé use cases).
-2. Zvažte split na 2 agregáty (např. `Order` + `OrderShipment`). Spojí je sdílené `OrderId`, žádná silná reference.
+2. Zvažte rozdělení na 2 agregáty (např. `Order` + `OrderShipment`). Spojí je sdílené `OrderId`, žádná silná reference.
 3. Specifikační logiku vyextrahujte do `Specification` tříd (souvisí [Specifications](/mene-zname-vzory#specification)).
 
 ### Recept 7: `eventDispatcher->dispatch()` uvnitř doménové metody {#recept-event-publish-uvnitr-heading}

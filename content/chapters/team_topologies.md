@@ -136,7 +136,7 @@ jiný typ akce:
 |---|---|---|
 | BC bez týmu | BC vznikl architekturou na papíře, nikdy nikomu nepřiřazen | Sloučit s jiným BC nebo přiřadit existujícímu týmu jako 2. BC |
 | Tým bez BC | Horizontální tým (frontend / DBA) bez doménové odpovědnosti | Inverse Conway: rozpustit a přerozdělit do stream-aligned týmů |
-| BC sdílený 2 týmy | Organické zvětšování bez split BC nebo split týmu | Buď split BC na 2 menší + Customer/Supplier, nebo merge týmů |
+| BC sdílený 2 týmy | Organické zvětšování bez rozdělení BC nebo týmu | Buď rozdělit BC na 2 menší + Customer/Supplier, nebo sloučit týmy |
 | 1 tým vlastní 5+ BC | Akumulace bez měření cognitive load | Split týmu (sekce [05.06](#cognitive-load)) nebo redukce počtu BC |
 
 Žádný z těchto scénářů není akutní krize – Conway's Law dává systému dostatek setrvačnosti,
@@ -413,7 +413,7 @@ Skelton a Pais doporučují praktickou heuristiku:
 | 5 lidí | 1 BC (max 2 malé) | Limit bližšího vědomí; každý zná každý kus kódu. |
 | 7–9 lidí | 1–2 BC | Zdravé optimum stream-aligned týmu. |
 | 10+ lidí | Tým je už příliš velký – rozdělit | Dunbar number (familiarity ≈ 15). Komunikační režie exponenciálně roste. |
-| Tým s 4+ BC | – | Signál pro split. BC nemají soudržného vlastníka. |
+| Tým s 4+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
 
 ### Jak změřit cognitive load (jednoduchá rubrika) {#cognitive-load-rubric}
 
@@ -479,8 +479,8 @@ Bod 5 (germane prostor):         __
 
 - [ ] Pokud bod 5 < 3 → zastavit přírůstek BC.
 - [ ] Pokud body 3+4 < 3 → eskalovat na Platform team (extraneous load).
-- [ ] Pokud body 1+2 < 3 → zvážit split BC nebo přidání člena týmu.
-- [ ] Pokud > 4 BC ve vlastnictví → naplánovat split do 2 kvartálů.
+- [ ] Pokud body 1+2 < 3 → zvážit rozdělení BC nebo přidání člena týmu.
+- [ ] Pokud > 4 BC ve vlastnictví → naplánovat rozdělení do 2 kvartálů.
 :::
 
 Rubrika je záměrně subjektivní – měří *vnímání* členů týmu, ne metrické fakty.
@@ -744,7 +744,7 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
   Generic → SaaS, Platform team integruje.
 - **Inverse Conway Maneuver:** nejdřív definovat cílovou architekturu,
   pak postavit týmy tak, aby ji přirozeně vyprodukovaly. Bez podpory CTO neuspěje.
-- **Cognitive load:** ≤ 2 BC na 5–9 lidí. 4+ BC na tým = signál pro split.
+- **Cognitive load:** ≤ 2 BC na 5–9 lidí. 4+ BC na tým = signál pro rozdělení.
   Měřte kvartálně.
 - **Proporce:** 75 % stream-aligned, 15 % platform, 10 % enabling
   + complicated-subsystem.
@@ -769,7 +769,7 @@ pro DORA metriky a Westrumovu typologii. Originální Conway 1968 esej je krátk
 - question: Co když máme jediný tým? Platí Team Topologies i pro nás?
   answer: 'Ano, ale v zjednodušené podobě. Jednočlenný stream-aligned tým (5–9 lidí) je legitimní organizační struktura – typický startup. Nemáte Platform team (využijete managed services jako Heroku/Vercel/Stripe/Auth0), nemáte Enabling team (najmete externího konzultanta na 3 měsíce, pokud potřebujete). Jediné, co řeší Team Topologies pro vás, je interní rozdělení týmu – nepoužívejte „mini-frontend / mini-backend“ rozdělení uvnitř 6 lidí. Detail v <a href="#scenar-startup">scénáři A</a>.'
 - question: Můžu mít 1 tým, který vlastní 5 Bounded Contexts?
-  answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – typicky 2, ojediněle 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">05.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte split na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
+  answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – typicky 2, ojediněle 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">05.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte rozdělení na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
 - question: Jak Team Topologies souvisí se Spotify Modelem?
   answer: 'Spotify Model (squads, tribes, chapters, guilds, popsaný 2012) byl jeden z prvních pokusů popsat organizační strukturu pro software v poměrech velké internetové firmy. Stream-aligned tým ≈ Spotify squad. Tribe (kolekce squadů kolem doménové oblasti) v Team Topologies žádný přímý ekvivalent nemá. Skelton a Pais se jí vyhnuli, protože zkušenosti ukazují, že tribes se stávají Conway-stylové „divize“, které brzdí toky napříč. Chapters a guilds (komunity sdílení znalostí, např. „všichni iOS devs“) fungují i v Team Topologies – typicky jako neformální komunity nad rámec hlavní topologie. Hlavní rozdíl: Spotify Model byl popisem jednoho úspěšného podniku v určitém období; Team Topologies je obecný rámec s explicitními typy a interakcemi.'
 - question: Vyplatí se Team Topologies v 50-člověké firmě?
