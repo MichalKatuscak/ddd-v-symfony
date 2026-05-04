@@ -7,911 +7,310 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-05-04"
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
 chapter_number: "24"
 category: Praxe
 deck: "Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury."
-reading_time: 30
+reading_time: 12
 difficulty: 3
 ---
 
-Předchozí kapitoly pokryly teorii i implementační detaily –
-od [CQRS](/cqrs) přes
-[Event Sourcing](/event-sourcing) až po
-[ságy a process managery](/sagy-a-process-managery).
-Tato kapitola zasazuje tyto vzory do reálnějšího kontextu a ukazuje, jak spolu fungují.
+Tato kapitola je **shrnující průžez** předchozími kapitolami. Tři krátké příklady ukazují,
+jak se vzory z taktického DDD, CQRS a Implementace v Symfony skládají do funkční aplikace.
+Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Pro detailní implementace
+(plné Doctrine mapování, testy, edge cases) odkazuje na předchozí kapitoly.
+
+Pro hluboký ponor do reálného projektu pokračujte v navazující [Případové studii](/pripadova-studie),
+která pokrývá systém pro správu projektů krok za krokem.
 
 ## 24.01 Příklad: E-commerce aplikace {#e-commerce}
 
-Tato sekce ukazuje implementaci výřezu e-commerce aplikace pomocí vertikální slice architektury
-a CQRS v Symfony 8 nad košíkem a objednávkami.
+E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart** (rozpracovaný nákup)
+a **Order** (potvrzená transakce). Komunikace mezi nimi probíhá přes doménovou událost
+`CartCheckedOut`, která spustí vytvoření `Order` agregátu.
 
 :::diagram{fig="24.1-A" title="E-shop: bounded contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
 :::
 
-### Struktura projektu {#e-commerce-structure-heading}
+### Struktura projektu {#e-commerce-structure}
 
-:::code{language="bash" filename="snippet.sh"}
+:::code{language="bash" filename="src/ struktura"}
 src/
 ├── Cart/                      # Bounded Context: Košík
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
-│   │   │   ├── Cart.php        # Entita košíku (Aggregate Root)
-│   │   │   └── CartItem.php    # Entita položky košíku
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   ├── CartId.php      # Identifikátor košíku
-│   │   │   ├── ProductId.php   # Identifikátor produktu
-│   │   │   ├── Quantity.php    # Množství
-│   │   │   └── Money.php       # Peněžní částka
-│   │   ├── Event/             # Doménové události
-│   │   │   └── ItemAddedToCart.php  # Událost přidání položky
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── CartRepository.php  # Rozhraní pro práci s košíkem
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineCartRepository.php  # Doctrine implementace
-│   ├── AddItem/               # Feature: Přidání položky do košíku
-│   │   ├── Command/           # Příkazy
-│   │   │   ├── AddItemToCart.php  # Příkaz pro přidání položky
-│   │   │   └── AddItemToCartHandler.php  # Handler příkazu
-│   │   └── Controller/        # Kontrolery
-│   │       └── CartController.php  # Kontroler pro přidání do košíku
-│   ├── GetCart/               # Feature: Získání košíku
-│   │   ├── Query/             # Dotazy
-│   │   │   ├── GetCart.php      # Dotaz pro získání košíku
-│   │   │   └── GetCartHandler.php  # Handler dotazu
-│   │   └── ViewModel/         # View modely
-│   │       └── CartViewModel.php  # View model košíku
-│   └── Checkout/              # Feature: Pokladna
-│       └── Controller/        # Kontrolery
-│           └── CheckoutController.php  # Kontroler pro pokladnu
+│   ├── Domain/
+│   │   ├── Model/Cart.php          # Aggregate Root
+│   │   ├── Model/CartItem.php
+│   │   ├── ValueObject/CartId.php, ProductId.php, Quantity.php, Money.php
+│   │   ├── Event/ItemAddedToCart.php, CartCheckedOut.php
+│   │   └── Repository/CartRepository.php
+│   ├── Infrastructure/Repository/DoctrineCartRepository.php
+│   ├── AddItem/{Command, Controller}/  # Feature slice
+│   ├── GetCart/{Query, ViewModel}/     # Feature slice
+│   └── Checkout/Controller/             # Feature slice
 ├── Order/                     # Bounded Context: Objednávky
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
-│   │   │   ├── Order.php       # Entita objednávky (Aggregate Root)
-│   │   │   └── OrderItem.php   # Entita položky objednávky
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   └── OrderId.php     # Identifikátor objednávky
-│   │   ├── Event/             # Doménové události
-│   │   │   └── OrderCreated.php  # Událost vytvoření objednávky
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── OrderRepository.php  # Rozhraní pro práci s objednávkami
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineOrderRepository.php  # Doctrine implementace
-│   └── CreateOrder/           # Feature: Vytvoření objednávky
-│       ├── Command/           # Příkazy
-│       │   ├── CreateOrder.php  # Příkaz pro vytvoření objednávky
-│       │   └── CreateOrderHandler.php  # Handler příkazu
-│       └── Controller/        # Kontrolery
-│           └── OrderController.php  # Kontroler pro objednávky
-└── Shared/                    # Sdílené komponenty
-    ├── Domain/                # Sdílená doménová logika
-    │   └── Exception/         # Výjimky
-    │       └── DomainException.php  # Základní doménová výjimka
-    └── Infrastructure/        # Sdílená infrastruktura
-        └── Bus/               # Implementace message bus
-            ├── MessengerCommandBus.php  # Implementace command bus
-            └── MessengerQueryBus.php  # Implementace query bus
+│   ├── Domain/Model/Order.php          # Aggregate Root
+│   ├── Domain/Event/OrderCreated.php
+│   └── CreateOrder/{Command, Controller}/
+└── Shared/Domain/Exception/DomainException.php
 :::
 
-### Doménový model: Košík {#cart-model-heading}
+### Klíčový agregát: Cart {#cart-aggregate}
 
-:::code{language="php" filename="src/Cart/Domain/Model/Cart.php"}
-<?php
+Agregát `Cart` chrání invariant „položka s týmž `productId` se nepřidává duplicitně, ale
+zvyšuje se její quantity“. Skeleton:
 
-declare(strict_types=1);
-
-namespace App\Cart\Domain\Model;
-
-use App\Cart\Domain\Event\ItemAddedToCart;
-use App\Cart\Domain\Event\ItemRemovedFromCart;
-use App\Cart\Domain\ValueObject\CartId;
-use App\Cart\Domain\ValueObject\Money;
-use App\Cart\Domain\ValueObject\ProductId;
-use App\Cart\Domain\ValueObject\Quantity;
-use App\Shared\Domain\AggregateRoot;
-use App\UserManagement\Domain\ValueObject\UserId;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-
-#[ORM\Entity]
-#[ORM\Table(name: 'carts')]
+:::code{language="php" filename="src/Cart/Domain/Model/Cart.php (skeleton)"}
 final class Cart extends AggregateRoot
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'cart_id')]
     public readonly CartId $id;
-
-    #[ORM\Column(type: 'user_id')]
     public readonly UserId $userId;
-
     /** @var Collection<int, CartItem> */
-    #[ORM\OneToMany(
-        mappedBy: 'cart',
-        targetEntity: CartItem::class,
-        cascade: ['persist', 'remove'],
-        orphanRemoval: true,
-    )]
     private Collection $items;
 
-    #[ORM\Column(type: 'datetime_immutable')]
-    public readonly \DateTimeImmutable $createdAt;
-
-    #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $updatedAt;
-
-    #[ORM\Version]
-    #[ORM\Column(type: 'integer')]
-    private int $version = 1;
-
-    private function __construct(CartId $id, UserId $userId)
-    {
-        $this->id = $id;
-        $this->userId = $userId;
-        $this->items = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = $this->createdAt;
-    }
-
-    public static function open(CartId $id, UserId $userId): self
-    {
-        return new self($id, $userId);
-    }
+    public static function open(CartId $id, UserId $userId): self { /* ... */ }
 
     public function addItem(ProductId $productId, Quantity $quantity, Money $price): void
     {
-        foreach ($this->items as $existing) {
-            if ($existing->productId()->equals($productId)) {
-                $existing->increaseQuantity($quantity);
-                $this->updatedAt = new \DateTimeImmutable();
-                $this->record(new ItemAddedToCart($this->id, $productId, $quantity, $price));
-
-                return;
-            }
-        }
-
-        $this->items->add(new CartItem($this, $productId, $quantity, $price));
-        $this->updatedAt = new \DateTimeImmutable();
-        $this->record(new ItemAddedToCart($this->id, $productId, $quantity, $price));
+        // Invariant: pokud productId existuje, zvyš quantity; jinak přidej nový item.
+        // Vyemituje ItemAddedToCart event.
     }
 
-    public function removeItem(ProductId $productId): void
-    {
-        $removed = false;
-        foreach ($this->items as $item) {
-            if ($item->productId()->equals($productId)) {
-                $this->items->removeElement($item);
-                $removed = true;
-                break;
-            }
-        }
-
-        if (!$removed) {
-            return;
-        }
-
-        $this->updatedAt = new \DateTimeImmutable();
-        $this->record(new ItemRemovedFromCart($this->id, $productId));
-    }
-
-    /** @return list<CartItem> */
-    public function items(): array
-    {
-        return array_values($this->items->toArray());
-    }
-
-    public function isEmpty(): bool
-    {
-        return $this->items->isEmpty();
-    }
-
-    public function totalAmount(): Money
-    {
-        $total = Money::zero('CZK');
-        foreach ($this->items as $item) {
-            $total = $total->add($item->totalPrice());
-        }
-
-        return $total;
-    }
-
-    public function updatedAt(): \DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
+    public function removeItem(ProductId $productId): void { /* ... */ }
+    public function totalAmount(): Money { /* sumace přes items */ }
+    public function checkout(): void { /* invariant: cart nesmí být prázdný */ }
 }
 :::
 
-### Command: Přidání položky do košíku {#add-to-cart-command-heading}
+Plnou implementaci včetně Doctrine mappingu (`#[ORM\OneToMany]`, `cascade`, `orphanRemoval`,
+optimistický zámek přes `#[ORM\Version]`) ukazuje [Návrh agregátu](/navrh-agregatu) a
+[Implementace v Symfony](/implementace-v-symfony).
 
-:::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCart.php"}
-<?php
+### Command Handler: AddItemToCart {#add-item-handler}
 
-declare(strict_types=1);
+Tenký aplikační handler: načte agregát, deleguje doménovou logiku, uloží.
 
-namespace App\Cart\AddItem\Command;
-
-use Symfony\Component\Validator\Constraints as Assert;
-
-class AddItemToCart
-{
-    public function __construct(
-        #[Assert\NotBlank]
-        #[Assert\Uuid]
-        public readonly string $cartId,
-
-        #[Assert\NotBlank]
-        #[Assert\Uuid]
-        public readonly string $productId,
-
-        #[Assert\NotBlank]
-        #[Assert\GreaterThan(0)]
-        public readonly int $quantity,
-    ) {
-    }
-}
-:::
-
-### Command Handler: Zpracování přidání položky do košíku {#add-to-cart-handler-heading}
-
-:::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCartHandler.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Cart\AddItem\Command;
-
-use App\Cart\Domain\Repository\CartRepository;
-use App\Cart\Domain\Repository\ProductRepository;
-use App\Cart\Domain\ValueObject\CartId;
-use App\Cart\Domain\ValueObject\ProductId;
-use App\Cart\Domain\ValueObject\Quantity;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-
+:::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCartHandler.php (skeleton)"}
 #[AsMessageHandler]
-class AddItemToCartHandler
+final class AddItemToCartHandler
 {
     public function __construct(
-        private readonly CartRepository $cartRepository,
-        private readonly ProductRepository $productRepository
-    ) {
-    }
+        private CartRepository $cartRepository,
+        private ProductRepository $productRepository,
+    ) {}
 
     public function __invoke(AddItemToCart $command): void
     {
-        $cart = $this->cartRepository->findById(new CartId($command->cartId));
+        $cart = $this->cartRepository->findByIdOrFail(new CartId($command->cartId));
+        $product = $this->productRepository->findByIdOrFail(new ProductId($command->productId));
 
-        if (!$cart) {
-            throw new \DomainException('Cart not found');
-        }
-
-        $productId = new ProductId($command->productId);
-        $product = $this->productRepository->findById($productId);
-
-        if (!$product) {
-            throw new \DomainException('Product not found');
-        }
-
-        $cart->addItem(
-            $productId,
-            new Quantity($command->quantity),
-            $product->price()
-        );
+        $cart->addItem($product->id(), new Quantity($command->quantity), $product->price());
 
         $this->cartRepository->save($cart);
     }
 }
 :::
 
-### Controller: Přidání položky do košíku {#add-to-cart-controller-heading}
-
-:::code{language="php" filename="src/Cart/AddItem/Controller/CartController.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Cart\AddItem\Controller;
-
-use App\Cart\AddItem\Command\AddItemToCart;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Routing\Attribute\Route;
-
-class CartController extends AbstractController
-{
-    public function __construct(
-        private readonly MessageBusInterface $commandBus
-    ) {
-    }
-
-    #[Route('/cart/add', name: 'cart_add', methods: ['POST'])]
-    public function addToCart(Request $request): Response
-    {
-        $cartId = $request->getSession()->get('cart_id');
-
-        if (!$cartId) {
-            // Vytvoření nového košíku by mělo být implementováno v jiném handleru
-            throw new \RuntimeException('Cart not initialized');
-        }
-
-        $command = new AddItemToCart(
-            $cartId,
-            $request->request->get('product_id'),
-            (int) $request->request->get('quantity', 1),
-        );
-
-        try {
-            $this->commandBus->dispatch($command);
-
-            $this->addFlash('success', 'Product added to cart');
-
-            return $this->redirectToRoute('cart_view');
-        } catch (\DomainException $e) {
-            $this->addFlash('error', $e->getMessage());
-
-            return $this->redirectToRoute('product_detail', [
-                'id' => $request->request->get('product_id')
-            ]);
-        }
-    }
-}
-:::
-
-### Query: Získání košíku {#get-cart-query-heading}
-
-:::code{language="php" filename="src/Cart/GetCart/Query/GetCart.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Cart\GetCart\Query;
-
-use Symfony\Component\Validator\Constraints as Assert;
-
-class GetCart
-{
-    public function __construct(
-        #[Assert\NotBlank]
-        #[Assert\Uuid]
-        public readonly string $cartId
-    ) {
-    }
-}
-:::
-
-### Query Handler: Zpracování získání košíku {#get-cart-handler-heading}
-
-:::code{language="php" filename="src/Cart/GetCart/Query/GetCartHandler.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Cart\GetCart\Query;
-
-use App\Cart\Domain\Repository\CartRepository;
-use App\Cart\Domain\ValueObject\CartId;
-use App\Cart\GetCart\ViewModel\CartItemViewModel;
-use App\Cart\GetCart\ViewModel\CartViewModel;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-
-#[AsMessageHandler]
-class GetCartHandler
-{
-    public function __construct(
-        private readonly CartRepository $cartRepository
-    ) {
-    }
-
-    public function __invoke(GetCart $query): ?CartViewModel
-    {
-        $cart = $this->cartRepository->findById(new CartId($query->cartId));
-
-        if (!$cart) {
-            return null;
-        }
-
-        $items = [];
-
-        foreach ($cart->items() as $item) {
-            $items[] = new CartItemViewModel(
-                $item->productId()->value(),
-                $item->quantity()->value(),
-                $item->price()->value(),
-                $item->totalPrice()->value()
-            );
-        }
-
-        return new CartViewModel(
-            $cart->id()->value(),
-            $items,
-            $cart->totalAmount()->value(),
-            $cart->updatedAt()
-        );
-    }
-}
-:::
+Plné CQRS implementaci s validací, autorizací a outbox patternem ukazuje [CQRS](/cqrs) a
+[Outbox Pattern](/outbox-pattern).
 
 ## 24.02 Příklad: Blog {#blog}
 
-Tato sekce ukazuje implementaci blogu pomocí vertikální slice architektury a CQRS v Symfony 8.
+Blogová aplikace s jedním Bounded Contextem (Blog), dvěma agregáty (`Post`, `Comment`) a
+sekcemi pro vytvoření příspěvku, výpis a detail.
 
 :::diagram{fig="24.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
 
-### Struktura projektu {#blog-structure-heading}
+### Struktura projektu {#blog-structure}
 
-:::code{language="bash" filename="snippet.sh"}
+:::code{language="bash" filename="src/ struktura"}
 src/
-├── Blog/                      # Bounded Context: Blog
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
-│   │   │   ├── Post.php        # Entita příspěvku (Aggregate Root)
-│   │   │   └── Comment.php     # Entita komentáře
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   ├── PostId.php      # Identifikátor příspěvku
-│   │   │   └── CommentId.php   # Identifikátor komentáře
-│   │   ├── Event/             # Doménové události
-│   │   │   └── PostCreated.php  # Událost vytvoření příspěvku
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── PostRepository.php  # Rozhraní pro práci s příspěvky
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrinePostRepository.php  # Doctrine implementace
-│   ├── CreatePost/            # Feature: Vytvoření příspěvku
-│   │   ├── Command/           # Příkazy
-│   │   │   ├── CreatePost.php   # Příkaz pro vytvoření příspěvku
-│   │   │   └── CreatePostHandler.php  # Handler příkazu
-│   │   └── Controller/        # Kontrolery
-│   │       └── CreatePostController.php  # Kontroler pro vytvoření příspěvku
-│   ├── GetPost/               # Feature: Zobrazení příspěvku
-│   │   ├── Query/             # Dotazy
-│   │   │   ├── GetPost.php      # Dotaz pro získání příspěvku
-│   │   │   └── GetPostHandler.php  # Handler dotazu
-│   │   ├── Controller/        # Kontrolery
-│   │   │   └── PostController.php  # Kontroler pro zobrazení příspěvku
-│   │   └── ViewModel/         # View modely
-│   │       └── PostViewModel.php  # View model příspěvku
-│   └── GetPosts/              # Feature: Seznam příspěvků
-│       ├── Query/             # Dotazy
-│       │   ├── GetPosts.php     # Dotaz pro získání příspěvků
-│       │   └── GetPostsHandler.php  # Handler dotazu
-│       ├── Controller/        # Kontrolery
-│       │   └── PostsController.php  # Kontroler pro seznam příspěvků
-│       └── ViewModel/         # View modely
-│           └── PostListViewModel.php  # View model seznamu příspěvků
-└── Shared/                    # Sdílené komponenty
-    ├── Domain/                # Sdílená doménová logika
-    │   └── Exception/         # Výjimky
-    │       └── DomainException.php  # Základní doménová výjimka
-    └── Infrastructure/        # Sdílená infrastruktura
-        └── Bus/               # Implementace message bus
-            ├── MessengerCommandBus.php  # Implementace command bus
-            └── MessengerQueryBus.php  # Implementace query bus
+└── Blog/                      # Bounded Context: Blog
+    ├── Domain/
+    │   ├── Model/Post.php           # Aggregate Root
+    │   ├── Model/Comment.php
+    │   ├── ValueObject/PostId.php, CommentId.php, AuthorId.php
+    │   ├── Event/PostCreated.php, CommentAdded.php
+    │   └── Repository/PostRepository.php
+    ├── Infrastructure/Repository/DoctrinePostRepository.php
+    ├── CreatePost/{Command, Controller}/
+    ├── GetPost/{Query, Controller, ViewModel}/
+    └── GetPosts/{Query, Controller, ViewModel}/
 :::
 
-### Doménový model: Příspěvek {#post-model-heading}
+### Klíčový agregát: Post {#post-aggregate}
 
-:::code{language="php" filename="src/Blog/Domain/Model/Post.php"}
-<?php
+Agregát `Post` se vytváří přes named constructor `create()`, který emituje `PostCreated` event.
+Vlastní invarianty (titul má 3–255 znaků, autor není prázdný) jsou vynucené v konstruktoru.
 
-declare(strict_types=1);
-
-namespace App\Blog\Domain\Model;
-
-use App\Blog\Domain\Event\PostCreated;
-use App\Blog\Domain\ValueObject\PostId;
-
-class Post
+:::code{language="php" filename="src/Blog/Domain/Model/Post.php (skeleton)"}
+final class Post extends AggregateRoot
 {
-    private readonly PostId $id;
-    private string $title;
-    private string $content;
-    private readonly string $author;
-    private readonly \DateTimeImmutable $createdAt;
-    private ?\DateTimeImmutable $updatedAt = null;
-
-    private array $domainEvents = [];
-
-    private function __construct(PostId $id, string $title, string $content, string $author)
-    {
-        $this->id = $id;
-        $this->title = $title;
-        $this->content = $content;
-        $this->author = $author;
-        $this->createdAt = new \DateTimeImmutable();
-
-        $this->recordEvent(new PostCreated($id, $title, $author));
-    }
-
-    public static function create(PostId $id, string $title, string $content, string $author): self
-    {
-        return new self($id, $title, $content, $author);
-    }
-
-    public function id(): PostId
-    {
-        return $this->id;
-    }
-
-    public function title(): string
-    {
-        return $this->title;
-    }
-
-    public function content(): string
-    {
-        return $this->content;
-    }
-
-    public function author(): string
-    {
-        return $this->author;
-    }
-
-    public function updateTitle(string $title): void
-    {
-        $this->title = $title;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function updateContent(string $content): void
-    {
-        $this->content = $content;
-        $this->updatedAt = new \DateTimeImmutable();
-    }
-
-    public function createdAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function updatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    private function recordEvent(object $event): void
-    {
-        $this->domainEvents[] = $event;
-    }
-
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-
-        return $events;
-    }
-}
-:::
-
-### Command: Vytvoření příspěvku
-
-:::code{language="php" filename="src/Blog/CreatePost/Command/CreatePost.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Blog\CreatePost\Command;
-
-use Symfony\Component\Validator\Constraints as Assert;
-
-class CreatePost
-{
-    public function __construct(
-        #[Assert\NotBlank]
-        #[Assert\Length(min: 3, max: 255)]
-        public readonly string $title,
-
-        #[Assert\NotBlank]
-        public readonly string $content,
-
-        #[Assert\NotBlank]
-        public readonly string $author
+    private function __construct(
+        public readonly PostId $id,
+        private string $title,
+        private string $content,
+        public readonly AuthorId $authorId,
+        public readonly \DateTimeImmutable $createdAt,
     ) {
+        $this->record(new PostCreated($id, $title, $authorId));
     }
+
+    public static function create(PostId $id, string $title, string $content, AuthorId $authorId): self
+    {
+        // Invarianty: title 3–255 znaků, content nesmí být prázdný
+        return new self($id, $title, $content, $authorId, new \DateTimeImmutable());
+    }
+
+    public function updateTitle(string $newTitle): void { /* ... */ }
+    public function updateContent(string $newContent): void { /* ... */ }
 }
 :::
 
-### Command Handler: Zpracování vytvoření příspěvku
+### Command Handler: CreatePost {#create-post-handler}
 
-:::code{language="php" filename="src/Blog/CreatePost/Command/CreatePostHandler.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Blog\CreatePost\Command;
-
-use App\Blog\Domain\Model\Post;
-use App\Blog\Domain\Repository\PostRepository;
-use App\Blog\Domain\ValueObject\PostId;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-
+:::code{language="php" filename="src/Blog/CreatePost/Command/CreatePostHandler.php (skeleton)"}
 #[AsMessageHandler]
-class CreatePostHandler
+final class CreatePostHandler
 {
-    public function __construct(
-        private readonly PostRepository $postRepository
-    ) {
-    }
+    public function __construct(private PostRepository $posts) {}
 
     public function __invoke(CreatePost $command): string
     {
-        $postId = new PostId();
-
         $post = Post::create(
-            $postId,
+            PostId::generate(),
             $command->title,
             $command->content,
-            $command->author
+            new AuthorId($command->authorId),
         );
 
-        $this->postRepository->save($post);
+        $this->posts->save($post);
 
-        return $postId->value();
+        return $post->id->value();
     }
 }
 :::
 
+Pro implementaci read modelu pro výpis příspěvků (paginace, řazení podle data, projekce
+z eventů) viz [CQRS – ViewModely a Read Modely](/cqrs#view-models) a [Výkonnostní aspekty](/vykonnostni-aspekty).
+
 ## 24.03 Příklad: Správa uživatelů {#user-management}
 
-Tato sekce ukazuje správu uživatelů pomocí DDD a CQRS v Symfony 8. Uživatelé tvoří společnou doménu;
-DDD odděluje jednotlivé funkce (registrace, autentizace, profil).
+Bounded Context **UserManagement** s jediným agregátem `User` a třemi sub-features: registrace,
+autentizace, profil. Integruje se se Symfony Security komponentou (implementuje
+`UserInterface`).
 
 :::diagram{fig="24.3-A" title="Správa uživatelů: feature slices" src="images/diagrams/7_examples/users/diagram.svg"}
 :::
 
-### Struktura projektu
+### Struktura projektu {#user-mgmt-structure}
 
-:::code{language="bash" filename="snippet.sh"}
+:::code{language="bash" filename="src/ struktura"}
 src/
-├── UserManagement/            # Bounded Context: Správa uživatelů
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
-│   │   │   └── User.php       # Entita uživatele (Aggregate Root)
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   ├── UserId.php
-│   │   │   └── Email.php
-│   │   ├── Event/             # Doménové události
-│   │   │   └── UserRegistered.php
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── UserRepository.php
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/
-│   │       └── DoctrineUserRepository.php
-│   ├── Registration/          # Sub-feature: Registrace
-│   │   ├── RegisterUser.php   # Command
-│   │   ├── RegisterUserHandler.php  # Command Handler
-│   │   └── RegistrationController.php  # Controller
-│   ├── Authentication/        # Sub-feature: Autentizace
-│   │   └── SecurityController.php  # Controller
-│   └── Profile/               # Sub-feature: Profil
-│       ├── GetUserProfile.php  # Query
-│       ├── GetUserProfileHandler.php  # Query Handler
-│       └── ProfileController.php  # Controller
-└── Shared/                    # Sdílené komponenty (pouze cross-cutting concerns)
-    ├── Domain/                # Sdílená doménová logika
-    │   └── Exception/         # Výjimky
-    │       └── DomainException.php  # Základní doménová výjimka
-    └── Infrastructure/        # Sdílená infrastruktura
-        └── Bus/               # Implementace message bus
-            ├── MessengerCommandBus.php  # Implementace command bus
-            └── MessengerQueryBus.php  # Implementace query bus
+└── UserManagement/            # Bounded Context: Správa uživatelů
+    ├── Domain/
+    │   ├── Model/User.php           # Aggregate Root
+    │   ├── ValueObject/UserId.php, Email.php, HashedPassword.php
+    │   ├── Event/UserRegistered.php
+    │   └── Repository/UserRepository.php
+    ├── Infrastructure/Repository/DoctrineUserRepository.php
+    ├── Registration/{RegisterUser, RegisterUserHandler, RegistrationController}.php
+    ├── Authentication/SecurityController.php
+    └── Profile/{GetUserProfile, GetUserProfileHandler, ProfileController}.php
 :::
 
-### Doménový model: Uživatel
+### Klíčový agregát: User {#user-aggregate}
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
-<?php
+Agregát `User` implementuje Symfony `UserInterface` pro Security komponentu. Hodnotový
+objekt `Email` validuje formát v konstruktoru, `HashedPassword` zapouzdřuje hash logiku.
 
-declare(strict_types=1);
-
-namespace App\UserManagement\Domain\Model;
-
-use App\UserManagement\Domain\Event\UserRegistered;
-use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\ValueObject\UserId;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (skeleton)"}
+final class User extends AggregateRoot implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    private readonly UserId $id;
-    private string $name;
-    private Email $email;
-    private ?string $password = null;
-    private array $roles = [];
-    private readonly \DateTimeImmutable $createdAt;
-
-    private array $domainEvents = [];
-
-    private function __construct(UserId $id, string $name, Email $email)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-        $this->roles = ['ROLE_USER'];
-        $this->createdAt = new \DateTimeImmutable();
-
-        $this->recordEvent(new UserRegistered($id, $email));
-    }
-
-    public static function register(UserId $id, string $name, Email $email): self
-    {
-        return new self($id, $name, $email);
-    }
-
-    public function id(): UserId
-    {
-        return $this->id;
-    }
-
-    public function name(): string
-    {
-        return $this->name;
-    }
-
-    public function email(): Email
-    {
-        return $this->email;
-    }
-
-    public function setPassword(string $password): void
-    {
-        $this->password = $password;
-    }
-
-    public function changeName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    public function changeEmail(Email $email): void
-    {
-        $this->email = $email;
-    }
-
-    public function createdAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    // Implementace UserInterface
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    public function eraseCredentials(): void
-    {
-        // Pokud ukládáte dočasné, citlivé údaje o uživateli, vymažte je zde
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->email->value();
-    }
-
-    // Implementace PasswordAuthenticatedUserInterface
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    private function recordEvent(object $event): void
-    {
-        $this->domainEvents[] = $event;
-    }
-
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-
-        return $events;
-    }
-}
-:::
-
-### Command: Registrace uživatele
-
-:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUser.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\UserManagement\Registration\Command;
-
-use Symfony\Component\Validator\Constraints as Assert;
-
-class RegisterUser
-{
-    public function __construct(
-        #[Assert\NotBlank]
-        #[Assert\Length(min: 2, max: 255)]
-        public readonly string $name,
-
-        #[Assert\NotBlank]
-        #[Assert\Email]
-        public readonly string $email,
-
-        #[Assert\NotBlank]
-        #[Assert\Length(min: 8)]
-        public readonly string $password
+    private function __construct(
+        public readonly UserId $id,
+        private string $name,
+        private Email $email,
+        private HashedPassword $password,
+        public readonly \DateTimeImmutable $createdAt,
     ) {
+        $this->record(new UserRegistered($id, $email));
     }
+
+    public static function register(UserId $id, string $name, Email $email, HashedPassword $password): self
+    {
+        return new self($id, $name, $email, $password, new \DateTimeImmutable());
+    }
+
+    public function changeEmail(Email $newEmail): void { /* invariant: nový != starý */ }
+    public function changeName(string $newName): void { /* ... */ }
+
+    // UserInterface
+    public function getRoles(): array { return ['ROLE_USER']; }
+    public function getUserIdentifier(): string { return $this->email->value(); }
+    public function getPassword(): ?string { return $this->password->hash(); }
+    public function eraseCredentials(): void {}
 }
 :::
 
-### Command Handler: Zpracování registrace uživatele
+### Command Handler: RegisterUser {#register-user-handler}
 
-:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\UserManagement\Registration\Command;
-
-use App\UserManagement\Domain\Model\User;
-use App\UserManagement\Domain\Repository\UserRepository;
-use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\ValueObject\UserId;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
+:::code{language="php" filename="src/UserManagement/Registration/RegisterUserHandler.php (skeleton)"}
 #[AsMessageHandler]
-class RegisterUserHandler
+final class RegisterUserHandler
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly UserPasswordHasherInterface $passwordHasher
-    ) {
-    }
+        private UserRepository $users,
+        private UserPasswordHasherInterface $passwordHasher,
+    ) {}
 
     public function __invoke(RegisterUser $command): void
     {
         $email = new Email($command->email);
 
-        if ($this->userRepository->findByEmail($email)) {
-            throw new \DomainException('User with this email already exists');
+        // Invariant na úrovni handleru: email musí být unikátní (DB unique constraint
+        // je pojistka pro race condition, viz Implementace v Symfony, sekce 11.13).
+        if ($this->users->findByEmail($email) !== null) {
+            throw new \DomainException('User with this email already exists.');
         }
 
         $user = User::register(
-            new UserId(),
+            UserId::generate(),
             $command->name,
-            $email
+            $email,
+            HashedPassword::fromHasher($this->passwordHasher, $command->password),
         );
 
-        // Set password
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $command->password);
-        $user->setPassword($hashedPassword);
-
-        $this->userRepository->save($user);
+        $this->users->save($user);
     }
 }
 :::
 
-Všechny tři příklady ukazují stejný vzor: kontroler pouze dispatchuje command nebo query,
-aplikační vrstva koordinuje operaci a doménový model vynucuje doménová pravidla.
-Konkrétní strukturu a konfiguraci takového projektu popisuje kapitola
-[Implementace DDD v Symfony 8](/implementace-v-symfony).
+Pro autorizaci uživatele po přihlášení (čtyři vrstvy přístupu, Voter, doménové invarianty)
+viz [Autorizace v DDD](/autorizace-v-ddd).
+
+## Závěr
+
+Tři příklady ukazují stejný vzor: kontroler → command bus → handler → agregát → repozitář →
+event. Drobné variace (počet Bounded Contexts, počet agregátů, integrace se Symfony Security)
+nemění základní strukturu. Doménové invarianty jsou v agregátu, aplikační orchestrace v handleru,
+infrastruktura v repozitáři.
+
+Pro hluboký ponor do reálného projektu (s plnou doménovou analýzou, kontextovou mapou, read
+modely, reconciliation a důsledky pro konzistenci) pokračujte v navazující [Případové
+studii](/pripadova-studie). Pokrývá systém pro správu projektů krok za krokem od event stormingu
+po deployment.
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
-  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature), CQRS určuje, jak oddělit čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8. Rozbor principu v <a href="#e-commerce">sekci E-commerce aplikace</a>.'
-- question: Jaký je rozdíl mezi Command a Query handlerem v těchto ukázkách?
-  answer: 'Command handler mění stav agregátu a zpravidla nevrací nic (výjimkou je identifikátor nově vytvořeného objektu – viz <code>CreatePostHandler</code>). Query handler čte data a vrací view model optimalizovaný pro konkrétní obrazovku, nikoli doménový agregát – viz <code>GetCartHandler</code> vracející <code>CartViewModel</code>. Oddělení umožňuje každou stranu škálovat a testovat nezávisle. Ukázka obou v <a href="#e-commerce">sekci E-commerce aplikace</a>.'
-- question: Proč agregát Cart pracuje s hodnotovými objekty Money a Quantity místo primitivních typů?
-  answer: 'Hodnotové objekty nesou doménovou sémantiku a vynucují validaci při vzniku – <code>Quantity</code> nemůže být záporná, <code>Money</code> vždy nese měnu. Signatura metody <code>addItem(ProductId, Quantity, Money)</code> je samopopisná a typový systém brání záměně argumentů. Primitivní typy takovou kontrolu neposkytují a typické chyby (prohozené argumenty, neplatné hodnoty) se projeví až za běhu. Ukázka použití v <a href="#cart-model-heading">sekci Doménový model: Košík</a>.'
-- question: Jak kontroler v Symfony 8 předává příkaz handleru?
-  answer: 'Kontroler sestaví DTO příkazu (např. <code>AddItemToCart</code>) a předá jej do <code>MessageBusInterface::dispatch()</code>. Messenger podle atributu <code>#[AsMessageHandler]</code> najde příslušný handler a zavolá jej. Kontroler tedy nezná konkrétní handler, pouze sběrnici – což usnadňuje testování, výměnu implementací a asynchronní zpracování. Konfiguraci sběrnice popisuje kapitola <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
+  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature), CQRS určuje, jak oddělit čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
   answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Strukturu adresářů je vhodné použít jako výchozí šablonu a postupně ji rozšiřovat podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
+- question: Kde najdu plnou implementaci agregátu se všemi metodami?
+  answer: 'V kapitolách <a href="/navrh-agregatu">Návrh agregátu</a> (kompletní agregát Order s invariantami, optimistickým zámkem, doménovými událostmi a Doctrine mappingem) a <a href="/implementace-v-symfony">Implementace v Symfony 8</a> (User agregát s Symfony Security, custom typy pro hodnotové objekty, repozitář s outbox patternem).'
+- question: Proč je v každém příkladu jen jeden Bounded Context kromě e-shopu?
+  answer: 'Pro shrnující příklady jsou jednodušší případy s jedním kontextem srozumitelnější. E-shop má dva kontexty (Cart a Order), aby ilustroval cross-context komunikaci přes doménovou událost <code>CartCheckedOut</code>. V reálném projektu by každý ze tří příkladů měl pravděpodobně více kontextů (Identity, Billing, Notifications), ale to už je doména <a href="/pripadova-studie">Případové studie</a>.'
 :::
