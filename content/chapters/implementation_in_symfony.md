@@ -32,7 +32,7 @@ výjimkami, factory metodami a plnou validací invariantů.
 :::
 
 :::callout{type="note"}
-### Mapping volba: atributy jako default {#mapping-volba-heading}
+### Mapping volba: atributy jako výchozí přístup {#mapping-volba-heading}
 
 Tento průvodce používá **Doctrine atributy přímo na doménových třídách**
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
@@ -567,7 +567,7 @@ Vypadá nevinně, ale má dvě skryté chyby:
 Outbox pattern obojí řeší: událost je v stejné DB transakci jako agregát, takže
 buď doručíme obojí (v pořádku), nebo nic (rollback). Worker doručuje v separátní
 transakci s retry strategií. **Tohle je doporučená produkční varianta a v dalších
-příkladech v této knize ji používáme jako default.**
+příkladech v této knize ji používáme jako výchozí volbu.**
 :::
 
 ## 10.06 Persisted Object Pattern – pure DDD varianta {#persisted-object-pattern}
@@ -1885,7 +1885,7 @@ Doménové modely, hodnotové objekty a repozitáře by měly být umístěny v 
 - question: Kam v Symfony projektu patří doménová vrstva a proč ji držet odděleně?
   answer: 'Doménová vrstva se umisťuje do samostatného adresáře – typicky <code>src/Domain/</code> s podsložkami pro jednotlivé Bounded Contexty – odděleně od kontrolerů, Doctrine mapování a infrastruktury. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
 - question: Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?
-  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatický default – jsou to metadata, ne chování. Pokud trváte na čisté doméně bez stop ORM, korektní řešení je <strong>Persisted Object Pattern</strong> (Khononov, <em>Learning DDD</em>): doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern – pure DDD varianta</a>.'
+  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu – jsou to metadata, ne chování. Pokud trváte na čisté doméně bez stop ORM, korektní řešení je <strong>Persisted Object Pattern</strong> (Khononov, <em>Learning DDD</em>): doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern – pure DDD varianta</a>.'
 - question: Jak odlišit Aplikační službu od Doménové služby?
   answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Podrobný rozbor v <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
 - question: Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?

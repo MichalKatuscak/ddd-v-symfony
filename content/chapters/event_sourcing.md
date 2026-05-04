@@ -1676,8 +1676,7 @@ Standardní řešení: **storage tiering** podle stáří streamu.
 
 Implementace: každou noc se spustí job, který
 přesune `event_store` řádky starší než N dní do `event_store_archive` tabulky
-(nebo přímo do S3 jako Parquet). Repozitář při hydration **nečte cold tier
-defaultně** – pokud agregát potřebuje plný replay, operátor explicitně rehydratuje
+(nebo přímo do S3 jako Parquet). Repozitář při hydration **ve výchozím nastavení cold tier nečte** – pokud agregát potřebuje plný replay, operátor explicitně rehydratuje
 ze snapshotu novějšího než cold cutoff. Pro audit dotazy funguje zvlášť query
 service, který umí číst všechny tři tiers.
 

@@ -118,7 +118,7 @@ jméno týmu pro každý BC, váš BC je fikce.
 :::
 
 Důsledek je nepříjemný pro mnoho organizací: **Context Map a Team Map jsou ve zdravém
-stavu téměř izomorfní**. Pokud máte 7 BC a 4 týmy, máte buď mismatch (3 BC nemají
+stavu téměř izomorfní**. Pokud máte 7 BC a 4 týmy, máte buď nesoulad (3 BC nemají
 vlastníka), nebo jeden tým vlastní 2+ BC (a to musí být vědomé rozhodnutí, ne nedopatření).
 Detail vztahu mezi Context Map a Team Map je v kapitole o
 [Context Mappingu](/context-mapping).

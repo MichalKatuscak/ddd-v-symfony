@@ -246,7 +246,7 @@ Z této struktury plyne několik věcí:
 
 - Adresář `Domain/` neobsahuje *žádný* import z Doctrine, Symfony, Twig ani jiné knihovny. Pouze čisté PHP a vlastní typy.
 - Repository rozhraní (`OrderRepository`) žije v `Domain/Port/`; jeho implementace (`DoctrineOrderRepository`) žije v `Infrastructure/Persistence/`. Doména závisí na rozhraní, infrastruktura ho implementuje.
-- Doménová entita (`Order`) **není Doctrine entita**. K mapování slouží samostatná `OrderOrmEntity` + mapper (vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern)) – doména zůstává čistá. *Pozn.: Hexagonal Architecture trvá na této separaci. Pragmatičtější přístup, který zbytek průvodce používá jako default, atributy přímo na agregátu připouští – viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading).*
+- Doménová entita (`Order`) **není Doctrine entita**. K mapování slouží samostatná `OrderOrmEntity` + mapper (vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern)) – doména zůstává čistá. *Pozn.: Hexagonal Architecture trvá na této separaci. Pragmatičtější přístup, který zbytek průvodce používá jako výchozí, atributy přímo na agregátu připouští – viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading).*
 - Vstup do aplikace prochází přes *inbound port* (`PlaceOrder`). HTTP Controller a CLI Command nezávisí na doméně přímo, ale na tomto portu.
 
 ### Příklad: Outbound port a jeho adaptér {#hexagonal-priklad-heading}

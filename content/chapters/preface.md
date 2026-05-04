@@ -174,7 +174,7 @@ Kniha používá vykání. Věty jsou krátké a jedna věta říká jednu věc.
 
 Kód cílí na PHP 8.4 a Symfony 8 s Doctrine ORM 3. Některé příklady používají rysy z PHP 8.4 (asymmetric visibility, property hooks, readonly properties). Pokud váš projekt běží na starší verzi, princip zůstává platný, jen syntaxe je jiná.
 
-Atributy Doctrine (`#[ORM\Entity]`) jsou na doménových třídách jako pragmatický default. Pro striktní oddělení doménové vrstvy od ORM existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatná persistence třída plus mapper. Většina příkladů v knize používá první variantu, protože v reálných Symfony projektech je rozšířenější.
+Atributy Doctrine (`#[ORM\Entity]`) jsou na doménových třídách jako pragmatická výchozí volba. Pro striktní oddělení doménové vrstvy od ORM existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatná persistence třída plus mapper. Většina příkladů v knize používá první variantu, protože v reálných Symfony projektech je rozšířenější.
 
 ### Callouty
 

@@ -112,7 +112,7 @@ composer.json        ← jeden composer.json pro oba BC
 
 V tomto uspořádání mají oba BC **vlastní namespacy** (`App\Catalog`, `App\Pricing`) i **vlastní invarianty**, ale sdílí infrastrukturu (DI kontejner, RabbitMQ, databázový server). Komunikace mezi nimi je in-process přes Symfony Messenger sync transport – žádné serializované JSON přes drát.
 
-### Anti-vzor: „Partnership jako default“
+### Anti-vzor: „Partnership jako výchozí volba“
 
 Když se týmy rozhodnou pro Partnership **aniž by si tu otázku položily**, vede to přímo k *Big Ball of Mud*. Typický důvod: „nemáme čas se domluvit, takže to budeme dělat dohromady“. Agregáty jednoho BC začnou číst tabulky druhého „protože je to rychlejší“. Doménové eventy ustoupí sdíleným service třídám. Po roce nikdo nedokáže říct, kde přesně končí Catalog a začíná Pricing.
 

@@ -22,7 +22,7 @@ difficulty: 2
 
 Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a u většiny produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování. Pokus modelovat *všechno* stejně pečlivě patří mezi nejspolehlivější cesty, jak vyčerpat rozpočet dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Evans v *Domain-Driven Design* (2003), kapitola 15 „Distillation“, zavádí strategický filtr pro celou doménu. Než napíšete první Aggregate nebo Value Object, odpovězte si: **která část domény je vaše konkurenční výhoda, která nutné zlo a kterou nedává smysl vůbec psát**. Tomuto filtru se říká rozdělení domény na **Core**, **Supporting** a **Generic** subdomény [[1]](https://www.domainlanguage.com/ddd/).
 
-Subdoména není totéž co [Bounded Context](/zakladni-koncepty#bounded-contexts), ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je *implementační* hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jedním deployment artefaktem. Subdoména je naproti tomu *byznysová* hranice – kus problému, který organizace řeší jako jednu ucelenou kapitolu. Vztah mezi nimi není 1:1. Jedna subdoména („Pricing“) může být rozdělena do více BC – Catalog počítá indikativní cenu, Checkout závaznou cenu se slevami. Naopak jeden BC může pokrývat více malých subdomén, například Backoffice zpravidla sdruží kousky reportingu, fakturace i správy uživatelů.
+Subdoména není totéž co [Bounded Context](/zakladni-koncepty#bounded-contexts), ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je *implementační* hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jednou nasazovací jednotkou. Subdoména je naproti tomu *byznysová* hranice – kus problému, který organizace řeší jako jednu ucelenou kapitolu. Vztah mezi nimi není 1:1. Jedna subdoména („Pricing“) může být rozdělena do více BC – Catalog počítá indikativní cenu, Checkout závaznou cenu se slevami. Naopak jeden BC může pokrývat více malých subdomén, například Backoffice zpravidla sdruží kousky reportingu, fakturace i správy uživatelů.
 
 Vernon to v kapitole 2 *Implementing Domain-Driven Design* (2013) formuluje pragmaticky [[2]](https://kalele.io/books/): *doména* je celý problémový prostor organizace; *subdoména* je jeho logická část; *Bounded Context* je řešení, které pro ni navrhujete. Vlad Khononov v *Learning Domain-Driven Design* (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“, k tomu doplňuje: **klasifikace subdomén je první nástroj DDD a zároveň nejlevnější**. Stojí jediný workshop a změní distribuci milionů korun rozpočtu [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
@@ -57,7 +57,7 @@ Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžký
 
 **Generic Subdomain** *(generická subdoména)*
 
-Část domény, která je **komoditizovaná**. Test: *„řešení existuje 30 let, prodává se v krabici nebo v cloudu, koupíme.“* Klasické příklady: autentizace uživatelů, posílání transakčních e-mailů, platební bránová integrace, generování PDF faktur, fulltext, antispam. V Generic subdoméně je **custom kód anti-vzor** – důkaz, že tým v té oblasti znovuobjevuje kolo a ubírá z rozpočtu Core Domény.
+Část domény, která je **komoditizovaná**. Test: *„řešení existuje 30 let, prodává se v krabici nebo v cloudu, koupíme.“* Klasické příklady: autentizace uživatelů, posílání transakčních e-mailů, platební bránová integrace, generování PDF faktur, fulltext, antispam. V Generic subdoméně je **vlastní kód anti-vzor** – důkaz, že tým v té oblasti znovuobjevuje kolo a ubírá z rozpočtu Core Domény.
 
 Důsledky pro tým a stack: SaaS, open-source knihovna, externí API, případně tenký bridge / Anti-Corruption Layer mezi naším modelem a komoditním řešením. Sem patří integrace na Auth0 / Keycloak, Stripe, Mailgun, AWS SES, Algolia. **Velikostní pravidlo:** pokud na konkrétní Generic subdoméně sedíte víc než 5–10 % vývojové kapacity, něco je špatně – buď jste si vybrali špatný produkt, nebo jste si nesprávně klasifikovali subdoménu.
 
@@ -71,7 +71,7 @@ Stejná tabulka, kterou by měl mít na zdi každý tech-lead a CTO, který pode
 
 | Aspekt | Core | Supporting | Generic |
 |---|---|---|---|
-| Modelovací úsilí | Maximální – plný taktický DDD | Střední – lehký DDD nebo CRUD+ | Minimální – žádný custom model |
+| Modelovací úsilí | Maximální – plný taktický DDD | Střední – lehký DDD nebo CRUD+ | Minimální – žádný vlastní model |
 | Seniorita týmu | Senior + doménový expert | Medior, junior pod dohledem | Junior, integrátor |
 | Technologie | Vlastní IP, žádné SaaS v jádru | Doctrine ORM, standardní bundles | SaaS, open-source, externí API |
 | Vlastnictví IP | 100 % in-house | In-house, ale bez ambicí | Žádné – komodita |

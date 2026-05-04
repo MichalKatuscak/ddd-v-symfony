@@ -917,7 +917,7 @@ Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladněj
 
 **Symptomy:** `App\Domain\Order` má `#[ORM\Entity]`, doména závisí na Doctrine.
 
-Pragmatický default v tomto průvodci atributy přijímá – jsou to metadata, ne chování,
+Pragmatická výchozí volba v tomto průvodci atributy přijímá – jsou to metadata, ne chování,
 a Symfony ekosystém s nimi pracuje idiomaticky (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)).
 Pokud váš projekt skutečně potřebuje striktní oddělení (Hexagonal, dlouhodobá výměna ORM,
 core doména s vysokou hodnotou), postup je:

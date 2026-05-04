@@ -219,9 +219,9 @@ Tím se vyhnete discriminator map, která je pro VO těžkopádná.
 
 ### A4. Lazy loading vs. bohaté agregáty {#a4-lazy-loading}
 
-**Problém:** Doctrine defaultně načítá asociace lazy – místo skutečného
+**Problém:** Doctrine ve výchozím nastavení načítá asociace lazy – místo skutečného
 objektu vloží do property proxy třídu, která se inicializuje až při prvním přístupu.
-Bohaté agregáty (metody jako `totalPrice()`, `items()`) mohou neúmyslně triggerovat
+Bohaté agregáty (metody jako `totalPrice()`, `items()`) mohou neúmyslně spouštět
 lazy load *mimo otevřenou transakci* nebo *po detach()*. Výsledkem je výjimka
 `UninitializedLazyObjectException` (PHP 8.4 lazy objects) nebo
 `ORMInvalidArgumentException` v starších verzích Doctrine ORM.
@@ -1079,7 +1079,7 @@ Bus factor = 1 je pro projekt kritické riziko.
 
 :::faq{}
 - question: Proč tradiční Doctrine mapování komplikuje čistý doménový model?
-  answer: 'Doctrine očekává klasické PHP třídy s veřejnými nebo reflektovanými atributy, zatímco DDD agregát vyžaduje neměnnost, privátní settery a invarianty vynucené v konstruktoru. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého“ EntityManageru při dlouhých transakcích a omezení typů pro hodnotové objekty. Pragmatický default je nechat atributy přímo na agregátu (jsou to metadata, ne chování) a používat Doctrine custom typy pro hodnotové objekty. Pokud chcete striktně oddělenou doménu, jděte cestou <a href="/implementace-v-symfony#persisted-object-pattern">Persisted Object Pattern</a> – samostatný persistence model + mapper. Detail v <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
+  answer: 'Doctrine očekává klasické PHP třídy s veřejnými nebo reflektovanými atributy, zatímco DDD agregát vyžaduje neměnnost, privátní settery a invarianty vynucené v konstruktoru. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého“ EntityManageru při dlouhých transakcích a omezení typů pro hodnotové objekty. Pragmatická výchozí volba je nechat atributy přímo na agregátu (jsou to metadata, ne chování) a používat Doctrine custom typy pro hodnotové objekty. Pokud chcete striktně oddělenou doménu, jděte cestou <a href="/implementace-v-symfony#persisted-object-pattern">Persisted Object Pattern</a> – samostatný persistence model + mapper. Detail v <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
 - question: Jak řešit Outbox Pattern pro spolehlivé doručení doménových událostí?
   answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Praktický příklad v <a href="#b1-outbox">sekci Outbox Pattern</a>.'
 - question: Jak vysvětlit přínos DDD managementu, když první iterace zpomaluje?
