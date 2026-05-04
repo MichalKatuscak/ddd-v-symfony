@@ -210,7 +210,7 @@ final class TransferMoneyHandler
             // Doctrine flush() commitne obojí atomicky.
             // Vypadá to bezpečně, ale ve skutečnosti:
             //   1) zámek napříč dvěma agregáty zabíjí škálování,
-            //   2) deadlock při concurrent transferech (A→B vs. B→A),
+            //   2) deadlock při souběžných transferech (A→B vs. B→A),
             //   3) tato třída nelze rozdělit na microservices,
             //   4) chybí auditní stopa o pokusu o převod (selhání = nic se nestalo).
         });
@@ -304,7 +304,7 @@ typu `OrderId`, `CustomerId`), nikdy přes objektovou referenci. Důvody:
 - Objektová reference svádí k řetězené úpravě „`$order->getCustomer()->changeAddress(...)`“ –
   v jediné transakci tak měníme dva agregáty. Programátor často ani neví, že to dělá.
 - Lazy loading u Doctrine sice teoreticky odděluje načtení, prakticky ale skrývá, že druhý
-  agregát musí být v paměti, aby se dotaz vykonal. Při concurrent přístupu vzniká skrytý zámek.
+  agregát musí být v paměti, aby se dotaz vykonal. Při souběžném přístupu vzniká skrytý zámek.
 - Identifikátorová reference funguje stejně na monolitu, modulárním monolitu i na microservices.
   Migrace mezi těmito tvary nasazení nevyžaduje refaktoring doménového modelu, jen výměnu
   `CustomerRepository::get()` za HTTP volání.
@@ -816,7 +816,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Jak velký má být agregát?
   answer: 'Tak velký, aby obsahoval všechny invarianty, které musí platit okamžitě, a ne větší. Výchozí volba je agregát s jedním kořenovým objektem a několika hodnotovými objekty plus volitelně několika vnitřními entitami. Větší agregát potřebuje konkrétní obhajobu invariantem, ne pohodlí ORM. Praktická heuristika: pokud načtení agregátu z DB generuje stovky řádků, je příliš velký – buď ho rozdělte, nebo přepněte vnitřní kolekce na <code>EXTRA_LAZY</code> s explicitním filtrováním přes <code>Criteria</code>. Detail v <a href="#aggregate-size">sekci Velikost agregátu</a>.'
 - question: Proč nelze měnit dva agregáty v jedné transakci?
-  answer: 'Technicky to lze, ale je to anti-vzor. Hranice agregátu je zároveň hranice konzistence a hranice škálování. Pokud dva agregáty pravidelně mění stav společně, je to signál, že buď tvoří jeden agregát, nebo je mezi nimi sága. Konkrétní důvody: zámek napříč agregáty zabíjí škálování, deadlocky se vyrojí při concurrent transakcích, kód nelze rozdělit do microservices, optimistický zámek přestane fungovat. Detail v <a href="#transactional-consistency">sekci Transakční konzistence</a>, alternativní řešení v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
+  answer: 'Technicky to lze, ale je to anti-vzor. Hranice agregátu je zároveň hranice konzistence a hranice škálování. Pokud dva agregáty pravidelně mění stav společně, je to signál, že buď tvoří jeden agregát, nebo je mezi nimi sága. Konkrétní důvody: zámek napříč agregáty zabíjí škálování, deadlocky se vyrojí při souběžných transakcích, kód nelze rozdělit do microservices, optimistický zámek přestane fungovat. Detail v <a href="#transactional-consistency">sekci Transakční konzistence</a>, alternativní řešení v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
 - question: Co je eventual consistency a kdy ji použít?
   answer: 'Eventual consistency znamená, že stav dvou agregátů je konzistentní s krátkým zpožděním (typicky sekundy), ne okamžitě. Použijte ji všude, kde invariant nemusí platit v každý okamžik – například „po vystavení objednávky se zákazníkovi pošle e-mail“ nebo „při změně adresy v Customer agregátu se upraví doručovací adresa v rozpracovaných objednávkách“. Implementačně: agregát A publikuje doménový event, sága ho přijme a v separátní transakci modifikuje agregát B. Pravidla, která musí platit okamžitě (například „bilance debetů a kreditů je nulová“), patří do jednoho agregátu. Detail v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
 - question: Jak v Doctrine ORM 3 namapovat referenci na jiný agregát?
