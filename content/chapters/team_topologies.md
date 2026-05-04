@@ -210,7 +210,7 @@ Enabling team se často zamění s Center of Excellence. Rozdíl je podstatný:
 ### Complicated-subsystem team {#complicated-subsystem-team}
 
 **Vlastní algoritmicky náročnou doménu, kterou by stream-aligned tým nezvládl
-bez vyhrazených specialistů.** Typické příklady: real-time risk engine v bance,
+bez vyhrazených specialistů.** Typické příklady: risk engine v reálném čase v bance,
 ML scoring model, video transcoder, fyzikální simulátor, kompilátor, kryptografická
 knihovna. Tým má vysokou koncentraci specializovaných znalostí (PhD v matematice/fyzice/CS,
 hluboké know-how v doméně), které nelze rozprostřít přes 6 stream-aligned týmů.

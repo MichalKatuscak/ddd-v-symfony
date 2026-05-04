@@ -658,7 +658,7 @@ tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven
 ### Hot aggregate {#hot-aggregate}
 
 Hot aggregate je agregát, který souběžně modifikuje mnoho uživatelů (nákupní košík během
-Black Friday, sportovní výsledek, real-time hra). Optimistický zámek selhává – většina
+Black Friday, sportovní výsledek, hra v reálném čase). Optimistický zámek selhává – většina
 transakcí spadne na `OptimisticLockException`, retry trvá, uživatelská zkušenost
 je nepoužitelná. Přístupy:
 
@@ -822,7 +822,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Jak v Doctrine ORM 3 namapovat referenci na jiný agregát?
   answer: 'Jako jednoduchý sloupec s vlastním Doctrine typem (<code>order_id</code>, <code>customer_id</code>), který konvertuje mezi databázovou hodnotou a Value Objectem (<code>OrderId</code>, <code>CustomerId</code>). Žádná <code>ManyToOne</code> asociace mezi agregáty. Doctrine asociace ponechte jen pro entity uvnitř stejného agregátu (typicky <code>OneToMany</code> z kořene na vnitřní entity s <code>cascade=["persist", "remove"]</code> a <code>orphanRemoval=true</code>). Hodnotové objekty s více poli (Money, Address) mapujte přes <code>#[ORM\\Embedded]</code>. Detail v <a href="#symfony-doctrine">sekci Mapování v Doctrine ORM 3</a>.'
 - question: Co je hot aggregate a jak poznat, že ho mám?
-  answer: 'Hot aggregate je agregát, na který se souběžně sahá z mnoha transakcí (nákupní košík během Black Friday, sportovní výsledek, real-time hra, čítač lajků na virálním příspěvku). Příznak v provozu: většina commandů selže s <code>OptimisticLockException</code>, retry trvá vteřiny, latence stoupá, uživatelská zkušenost se hroutí. Diagnosticky: pokud peak provoz překročí ~5 souběžných změn za sekundu na jednu instanci agregátu, jste v ohrožení. Detail příznaků a rozhodovací logika v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
+  answer: 'Hot aggregate je agregát, na který se souběžně sahá z mnoha transakcí (nákupní košík během Black Friday, sportovní výsledek, hra v reálném čase, čítač lajků na virálním příspěvku). Příznak v provozu: většina commandů selže s <code>OptimisticLockException</code>, retry trvá vteřiny, latence stoupá, uživatelská zkušenost se hroutí. Diagnosticky: pokud peak provoz překročí ~5 souběžných změn za sekundu na jednu instanci agregátu, jste v ohrožení. Detail příznaků a rozhodovací logika v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jak hot aggregate vyřešit?
   answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger s deduplikací konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?

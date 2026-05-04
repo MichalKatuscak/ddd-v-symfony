@@ -638,7 +638,7 @@ use App\SharedKernel\Domain\Money;
  * druhý: agregáty jsou autonomní. Jde o doménovou logiku (validace
  * dostupnosti prostředků, kontrola limitu), nikoliv o aplikační koordinaci.
  *
- * Stateless – bez instance variables, bez side-effectů na kolaborátorech.
+ * Stateless – bez instance variables, bez vedlejších efektů na kolaborátorech.
  */
 final class MoneyTransferService
 {

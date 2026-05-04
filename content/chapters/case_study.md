@@ -1444,7 +1444,7 @@ failure pro hlavní use case. Pokud je transport pro audit nedostupný, zápis p
 dokončí; aktivita se zaznamená později při replay z outbox tabulky.
 
 **Cena:** uživatel s rolí auditor vidí novou aktivitu se zpožděním. Pro audit log, kde čtenář
-není stejný uživatel jako autor akce, je toto zpoždění přijatelné. Pro real-time notifikace by tento
+není stejný uživatel jako autor akce, je toto zpoždění přijatelné. Pro notifikace v reálném čase by tento
 kompromis nestačil – tam pomůže synchronní integrace nebo websocket push z projekce.
 
 ### 2. Shared Kernel vs. duplikace identifikátorů {#trade-off-shared-kernel-heading}

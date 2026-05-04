@@ -470,7 +470,7 @@ final class LegacyBillingTranslator
 }
 :::
 
-Translator je **jediná veřejná metoda**, `final` třída, bez stavu. Žádný state, žádná cache, žádný side-effect. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
+Translator je **jediná veřejná metoda**, `final` třída, bez stavu. Žádný state, žádná cache, žádný vedlejší efekt. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
 
 ### Test ACL: snadný a důležitý
 

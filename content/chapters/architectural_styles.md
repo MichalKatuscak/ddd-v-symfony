@@ -1027,7 +1027,7 @@ Konkrétně: Bounded Context má vlastní adresář (`src/Ordering/`). Uvnitř `
 - **Doménové testy bez databáze** – agregáty jsou čisté PHP, mockují se jen porty.
 - **Jednoduché code review** – diff jedné feature je v jednom adresáři.
 - **CLI/HTTP/Messenger paritu** – Symfony Messenger Bus dispatchuje stejný Command z libovolného adaptéru.
-- **Symfony idiomatičnost** – Messenger je first-class komponenta, není nutné psát vlastní bus.
+- **Symfony idiomatičnost** – Messenger je prvotřídní komponenta, není nutné psát vlastní bus.
 
 Tato volba není univerzální pravda. Pokud váš projekt má 20 endpointů a jde o interní administrativní aplikaci s desetiletým horizontem, obyčejná Layered struktura ze Symfony skeletu stačí a pravděpodobně iteruje rychleji. Pokud je váš projekt enterprise CRM s 500+ use casy a 15 vývojáři, Clean Architecture s explicitním Use Case katalogem se vyplatí.
 

@@ -280,7 +280,7 @@ Pokud vám sedí dva a více těchto bodů, máte distributed monolith:
 
 Pokud máte coupling jako monolith a operační režii jako microservices, dostáváte to nejhorší z obou světů. Konkrétně:
 
-- **Latence.** Vnitřní volání monolithu je function call (~µs); volání mezi servisami je síťový round-trip (~ms) plus serializace, deserializace a validace. Při 10 vnořených voláních je rozdíl 4 řády.
+- **Latence.** Vnitřní volání monolithu je function call (~µs); volání mezi servisami je síťová cesta tam a zpět (~ms) plus serializace, deserializace a validace. Při 10 vnořených voláních je rozdíl 4 řády.
 - **Availability.** Pokud každá service má 99,9% uptime, řetězec deseti servis má 99,0 % – desetinásobně větší nedostupnost.
 - **Debugging.** Trace jednoho requestu prochází N servisami. Bez distributed tracing je incident skoro nedohledatelný. S ním je drahý.
 - **Refactoring.** Přesunutí pole z jedné entity do jiné je v monolithu refactoring v IDE. Mezi servisami je to migrace dat, change API smluv, koordinovaný deploy a období dual-write.
@@ -399,7 +399,7 @@ Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existu
 
 - **Query (read), kde caller potřebuje odpověď během request flow.** Frontend potřebuje detail produktu pro vykreslení stránky; `catalog-svc` ho vrátí přes REST. Bez odpovědi nemůže pokračovat.
 - **Validace, která blokuje další krok.** Před uložením objednávky musí `ordering-svc` ověřit u `catalog-svc`, že produkt existuje a je dostupný. Volání musí být sync, jinak riskujete, že uložíte objednávku na neexistující produkt.
-- **Latence-sensitive operace.** Real-time check fraud detection, autorizace platby, rate limit check.
+- **Latence-sensitive operace.** Detekce podvodů v reálném čase, autorizace platby, rate limit check.
 - **Idempotentní lookup.** Neměnné nebo zřídka měnící se data, kde latence sítě je akceptovatelná a kde je možné použít cache.
 
 ### Asynchronní eventy – kdy {#async-kdy-heading}

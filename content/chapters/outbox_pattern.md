@@ -821,7 +821,7 @@ v DB transakci, jen dispatcher je nahrazen Debezium konektorem.
 ## 15.06 Idempotent Inbox – strana subscribera {#inbox}
 
 Outbox dává at-least-once delivery, takže subscriber **musí** počítat s tím,
-že stejný event dostane víckrát. Pokud je side-effect handleru ne-idempotentní (typicky
+že stejný event dostane víckrát. Pokud je vedlejší efekt handleru ne-idempotentní (typicky
 `UPDATE counter SET value = value + 1`), duplicita se okamžitě projeví jako
 chybný stav read modelu – zákazník vidí 200 Kč na účtě místo 100 Kč, počet objednávek
 je dvojnásobný, e-mail dorazí 2×.
@@ -959,7 +959,7 @@ Marketing materiály brokerů občas slibují „exactly-once delivery“. **Tat
 garance neexistuje v žádném distribuovaném systému** – viz Two Generals'
 Problem nebo papery Lamporta a Lynchové. Co Outbox+Inbox dohromady
 poskytují, je *exactly-once efekt na straně subscribera*. Zpráva může do
-brokera dorazit a opustit ho víckrát, ale side-effect (úprava read modelu, odeslání
+brokera dorazit a opustit ho víckrát, ale vedlejší efekt (úprava read modelu, odeslání
 e-mailu, strhnutí platby) proběhne *právě jednou*.
 
 Helland v paperu z roku 2007 to formuluje úsporně: *„The world is at-least-once;
@@ -1461,10 +1461,10 @@ invariant – ne příjemný bonus.
 :::
 
 :::callout{type="warn"}
-### Inbox check a side-effect ne v jedné transakci {#anti-inbox-no-tx-heading}
+### Inbox check a vedlejší efekt ne v jedné transakci {#anti-inbox-no-tx-heading}
 
 Klasická chyba: `if ($inbox->isProcessed($id)) return;` se provede
-v autocommit režimu, side-effect na read modelu se provede také v autocommit režimu
+v autocommit režimu, vedlejší efekt na read modelu se provede také v autocommit režimu
 a teprve *potom* se vloží řádek do inboxu. Mezi check a insert ale může
 prolézt druhý paralelní worker, který stejný check provede jako „nový“ a zduplikuje
 update. Řešením je **celý handler obalit do `wrapInTransaction`**
@@ -1474,7 +1474,7 @@ a UNIQUE constraint na inboxu jako pojistka.
 :::callout{type="warn"}
 ### Read model bez idempotentní logiky {#anti-no-idempotent-side-effect-heading}
 
-I se správným inboxem se může stát, že side-effect uvnitř transakce nebyl dotažen
+I se správným inboxem se může stát, že vedlejší efekt uvnitř transakce nebyl dotažen
 do idempotentního stavu. Klasický příklad: `UPDATE counter SET value = value + 1`
 pro každý `OrderPlaced` – pokud kdy v budoucnu vypneme inbox check
 (např. při reseedingu), counter naskočí o víc. Doporučení: pokud možno preferovat

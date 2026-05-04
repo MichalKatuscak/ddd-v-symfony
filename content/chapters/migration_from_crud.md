@@ -237,7 +237,7 @@ class UserController extends AbstractController
 
 V tomto kontroleru lze identifikovat nejméně pět oblastí doménové logiky, které patří do
 doménového modelu: validace formátu e-mailu, unikátnost e-mailu, bezpečnostní pravidla hesla,
-výchozí stav uživatele a side-effect registrace (uvítací e-mail jako Domain Event).
+výchozí stav uživatele a vedlejší efekt registrace (uvítací e-mail jako Domain Event).
 :::
 
 ## 18.04 Krok 2: Extrakce doménové vrstvy {#extrakce-domainove-vrstvy}
@@ -343,7 +343,7 @@ final class User extends AggregateRoot
         $this->status = UserStatus::PENDING_VERIFICATION;
         $this->registeredAt = new \DateTimeImmutable();
 
-        // Doménová událost – side-effect registrace je nyní explicitní
+        // Doménová událost – vedlejší efekt registrace je nyní explicitní
         $this->record(new UserRegistered($id, $email));
     }
 
