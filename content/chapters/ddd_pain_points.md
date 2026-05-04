@@ -608,7 +608,7 @@ final class IdempotencyMiddleware implements MiddlewareInterface
 
 :::callout{type="note"}
 Tabulka `processed_messages` poroste bez omezení. Přidejte
-pravidelný cleanup (cron) nebo `TTL` index pro automatické mazání
+pravidelný úklid (cron) nebo `TTL` index pro automatické mazání
 starých záznamů. Obvyklá retence je 7–30 dní – doba, po které broker
 přestane doručovat retries.
 :::

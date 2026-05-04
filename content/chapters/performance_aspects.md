@@ -1213,7 +1213,7 @@ final class QueryCountingMiddleware implements Middleware
 
 ### Blackfire.io pro produkční profiling
 
-Pro profiling v produkčním nebo stage prostředí je Blackfire.io standardním nástrojem v PHP komunitě.
+Pro profiling v produkčním nebo stagingovém prostředí je Blackfire.io standardním nástrojem v PHP komunitě.
 Blackfire zachytí kompletní call graph každého requestu nebo CLI příkazu – s přesným měřením
 doby trvání, počtu volání a paměťové stopy pro každou funkci. Umožňuje psát *performance tests*
 (Blackfire Builds) jako součást CI/CD pipeline a tím předcházet výkonnostním regresím.
