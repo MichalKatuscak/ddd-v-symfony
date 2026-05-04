@@ -121,7 +121,7 @@ class ArticleCrudController extends AbstractCrudController
 - **Symfony Forms + Doctrine Entity přímo v controlleru** – pro jednoduchý CRUD bez doménové logiky.
 
 Doménový model zavádíte tehdy, když máte doménu. CRUD admin doménu nemá.
-Martin Fowler tento anti-pattern pojmenoval
+Martin Fowler tento anti-vzor pojmenoval
 <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Anemic Domain Model</a>
 - model, který vypadá jako DDD, ale neobsahuje žádné chování.
 :::
@@ -464,5 +464,5 @@ Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte
 - <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">Martin Fowler: BoundedContext</a>
   (2014) – srozumitelné vysvětlení jednoho z hlavních DDD konceptů.
 - <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Martin Fowler: AnemicDomainModel</a>
-  (2003) – proč „DDD bez chování“ je anti-pattern.
+  (2003) – proč „DDD bez chování“ je anti-vzor.
 :::

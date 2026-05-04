@@ -952,7 +952,7 @@ deptrac:
   skip_violations:
     # Dočasné výjimky - měly by být minimalizovány
     # UserManagement\Domain\Model\User:
-    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně - antipattern
+    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně - anti-vzor
 :::
 :::
 

@@ -48,7 +48,7 @@ Donald Knuth to vyjádřil takto: *„Premature optimization is the root of all 
 
 ## 16.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
 
-N+1 problém patří k nejčastějším výkonnostním antipatternům při práci s ORM. Aplikace provede
+N+1 problém patří k nejčastějším výkonnostním anti-vzorům při práci s ORM. Aplikace provede
 1 dotaz pro načtení seznamu entit a poté pro každou entitu další dotaz pro načtení asociovaných dat.
 Celkem tedy N+1 SQL dotazů místo 1–2 dotazů.
 

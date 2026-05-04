@@ -1252,7 +1252,7 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
 
 - **EventDispatcher** (`EventDispatcherInterface`) – synchronní,
   in-process. Listenery se provedou okamžitě v témž PHP požadavku, ve sdíleném
-  paměťovém prostoru. Bez serializace, bez network round-tripu.
+  paměťovém prostoru. Bez serializace, bez síťové cesty tam a zpět.
 - **Messenger** (`MessageBusInterface`) – může být synchronní i asynchronní.
   Podporuje transporty (RabbitMQ, Redis, Doctrine outbox), retry strategii
   a sériovou serializaci zprávy. Příjemce může běžet v jiném procesu, jiném serveru.

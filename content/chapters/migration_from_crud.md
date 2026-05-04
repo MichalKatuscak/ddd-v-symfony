@@ -859,7 +859,7 @@ final class UserTest extends TestCase
 
 - **Anémický doménový model** – Nejčastější past. Vývojáři vytvoří třídy s názvem jako v DDD (`User`, `Order`), ale tyto třídy obsahují pouze gettery a settery bez doménové logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie s CRUD implementací.
 - **Přílišná granularita Bounded Contexts** – Rozdělení domény na příliš mnoho malých kontextů vede k distribuované komplexitě. Každá integrace mezi kontexty přidává overhead. Začněte s většími kontexty a rozdělujte je až tehdy, když je důvod k tomu jasný.
-- **Doctrine entity jako doménové entity** – Přímé přidávání DDD logiky do Doctrine entit je antipattern. Doctrine mapování (anotace, atributy) svazuje doménový objekt s infrastrukturní technologií. Oddělte doménové entity od persistence mapování.
+- **Doctrine entity jako doménové entity** – Přímé přidávání DDD logiky do Doctrine entit je anti-vzor. Doctrine mapování (anotace, atributy) svazuje doménový objekt s infrastrukturní technologií. Oddělte doménové entity od persistence mapování.
 - **CQRS bez doménového modelu** – Zavedení CommandBusu a QueryBusu bez refaktorovaného doménového modelu přidá vrstvy komplexity bez přínosu. CQRS je amplifikátor – zesílí jak výhody, tak problémy stávající architektury.
 - **Ignorování Anti-Corruption Layer** – Při integraci nové DDD vrstvy se starým CRUD kódem je nutné vytvořit překladovou vrstvu. Bez ní pronikají koncepty starého modelu do nového a kontaminují ho.
 

@@ -682,7 +682,7 @@ N eventech (typicky 100); při načtení se stav rekonstruuje od posledního sna
 se aplikují zbývající eventy.
 Detaily implementace:
 
-- Snapshot není autoritativní stav – jen optimalizace. Pokud serializace selže, rebuildujte
+- Snapshot není autoritativní stav – jen optimalizace. Pokud serializace selže, sestavte znovu
   od začátku streamu.
 - Versioning snapshotu musí být kompatibilní s versioningem eventů; při změně schématu
   stavu invalidujte staré snapshoty.
