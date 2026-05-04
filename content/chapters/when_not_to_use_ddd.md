@@ -356,7 +356,7 @@ DDD se aplikuje per Bounded Context podle toho, o jakou subdoménu jde:
 |---|---|---|
 | **Core Domain** | Plné DDD (taktické + strategické vzory, agregáty, eventy) | Konkurenční výhoda, komplexní pravidla, vysoký ROI investice do modelu |
 | **Supporting Subdomain** | Lehké DDD (entity + repository, žádné agregáty) nebo Active Record | Pravidla existují, ale nejsou diferenciační. Plné DDD je over-engineering. |
-| **Generic Subdomain** | CRUD nebo SaaS (auth, notifikace) | Nepřináší konkurenční výhodu, kupte nebo použijte off-the-shelf. |
+| **Generic Subdomain** | CRUD nebo SaaS (auth, notifikace) | Nepřináší konkurenční výhodu, kupte nebo použijte hotové řešení. |
 
 Konkrétně: pojišťovna má **Core** Underwriting (DDD ano), **Supporting** Customer
 Management (lehké DDD), **Generic** Notifikace (CRUD nebo SaaS jako Twilio).

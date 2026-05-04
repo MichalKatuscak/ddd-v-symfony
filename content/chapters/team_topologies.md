@@ -229,7 +229,7 @@ Klasifikace subdomén z kapitoly o
 |---|---|---|
 | **Core** (konkurenční výhoda) | Stream-aligned (1 tým per BC) nebo Complicated-subsystem (pokud je algoritmicky náročná) | Zde leží konkurenční výhoda firmy. Plná kontrola nad designem, deploymentem i operací; nejlepší lidé. |
 | **Supporting** (potřebné, ale nediferencuje) | Stream-aligned (často sdílí tým s jiným supporting BC) | Stačí udržovat na úrovni „good enough“; standardní vzory, žádný over-engineering. |
-| **Generic** (komodita: identity, fakturace, e-mail) | Žádný vlastní tým – Platform team integruje SaaS / off-the-shelf řešení | Nepřináší konkurenční výhodu; psát to vlastně = plýtvat. Auth0 / Stripe / SendGrid. |
+| **Generic** (komodita: identity, fakturace, e-mail) | Žádný vlastní tým – Platform team integruje SaaS / hotové řešení | Nepřináší konkurenční výhodu; psát si to znamená plýtvat. Auth0 / Stripe / SendGrid. |
 
 :::callout{type="pattern"}
 ### Core domain dostane nejlepší tým {#core-stream-heading}
