@@ -393,7 +393,7 @@ Conformist *zaplatí*:
 
 ### Conformist jako přechodný stav
 
-Často je Conformist přijatelný *dočasně* – projekt potřebuje rychle dodat MVP a integrace s upstreamem je třeba okamžitě. V tu chvíli je rozumné napsat Conformist, ale **vypsat technický dluh do backlogu**: „za 6 měsíců, až budeme vědět, jak Reporting používáme, postavíme ACL“. Bez explicitního zápisu do backlogu Conformist „uzraje“ na permanentní řešení a refactor je pak dvojnásob bolestivý.
+Často je Conformist přijatelný *dočasně* – projekt potřebuje rychle dodat MVP a integrace s upstreamem je třeba okamžitě. V tu chvíli je rozumné napsat Conformist, ale **vypsat technický dluh do backlogu**: „za 6 měsíců, až budeme vědět, jak Reporting používáme, postavíme ACL“. Bez explicitního zápisu do backlogu Conformist „uzraje“ na permanentní řešení a refaktor je pak dvojnásob bolestivý.
 
 ## 03.07 Anti-Corruption Layer (ACL) {#acl}
 
@@ -872,7 +872,7 @@ Big Ball of Mud se nedá „opravit“ rewriteem. Jediný funkční postup je **
 Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Tato kapitola pokrývá konkrétní symptomy v PHP/Symfony stacku a strategie jejich nápravy.
 
 :::callout{type="warn"}
-**Big Ball of Mud je *výsledek*, ne *příčina*.** Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem refactoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
+**Big Ball of Mud je *výsledek*, ne *příčina*.** Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem refaktoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
 :::
 
 ## 03.13 Shrnutí {#summary}

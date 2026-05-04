@@ -897,7 +897,7 @@ DDD koncepty a jejich implementaci v Symfony rozebírají navazující kapitoly
 [Implementace DDD v Symfony](/implementace-v-symfony)
 a [CQRS v Symfony](/cqrs).
 
-## 18.09 Refactoring kuchařka – krátké recepty {#refactoring-kucharka}
+## 18.09 Refaktoring kuchařka – krátké recepty {#refactoring-kucharka}
 
 Strangler Fig je strategický pohled na celou migraci. V denní praxi narazíte na opakující se mikrosituace.
 Tato kuchařka obsahuje 8 nejčastějších, každá ve formátu *„symptomy → krok 1, 2, 3“*.

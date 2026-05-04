@@ -254,7 +254,7 @@ code-review napříč. Mód je *vysoce produktivní, ale drahý* – duplikuje m
 rozmazává odpovědnost, zatěžuje cognitive load obou týmů. Proto je explicitně
 **časově omezený**.
 
-- **Kdy:** při objevu nového problému (discovery), při zásadním refactoringu, při bootstrapu nového BC.
+- **Kdy:** při objevu nového problému (discovery), při zásadním refaktoringu, při bootstrapu nového BC.
 - **Kdy ukončit:** jakmile je interface jasný – přejít na X-as-a-Service.
 - **Mapování na DDD:** Partnership / Shared Kernel z Context Mapu.
 - **Past:** permanentní Collaboration → tyto dva týmy mají být *jeden tým*. Spojte je.
@@ -326,7 +326,7 @@ navazující na výzkum Forsgren, Humble a Kim v *Accelerate* (2018):
 Skelton a Pais výslovně varují: **Inverse Conway Maneuver bez podpory managementu
 neuspěje**. Re-org je politický akt. Pokud CTO řekne „udělejte to, ale beze změny
 org chartu“, máte před sebou 6 měsíců práce, která nikam nevede – Conway's Law původní
-org chart vrátí každý refactor.
+org chart vrátí každý refaktor.
 
 :::callout{type="note"}
 ### Reálný příběh: Amazon, 2002 {#inverse-real-world-heading}
@@ -465,7 +465,7 @@ Skóre 1–5: __
 Komentář: ____________________________________________
 
 ## 5. Prostor na učení (germane)
-Otázka: „Mám každý sprint alespoň 2 hodiny na zlepšení / learning / refactoring?“
+Otázka: „Mám každý sprint alespoň 2 hodiny na zlepšení / learning / refaktoring?“
 Skóre 1–5: __
 Komentář: ____________________________________________
 

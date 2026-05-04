@@ -1104,7 +1104,7 @@ src/
 
 ### Pravidla hybridního přístupu {#hybrid-pravidla-heading}
 
-- **Core Domain** dostává plný Hexagonal, Vertical Slice a CQRS. Sem teče modelovací úsilí, sem teče refactoring čas, sem teče investice do testů.
+- **Core Domain** dostává plný Hexagonal, Vertical Slice a CQRS. Sem teče modelovací úsilí, sem teče čas na refaktoring, sem teče investice do testů.
 - **Supporting subdomény** mají Layered strukturu – controller, service, entity, repository. Dostatečně dobré, rychlé k napsání, čitelné.
 - **Generic subdomény** jsou tenké adaptéry. Žádné agregáty, žádné domain services – jen wrap kolem externí knihovny nebo SaaS API.
 - **Nemíchejte styly uvnitř jednoho Bounded Contextu.** Jeden BC = jeden styl. Hybrid znamená „různé BC mají různé styly“, ne „jeden BC má polovinu Hexagonal a polovinu Layered“.

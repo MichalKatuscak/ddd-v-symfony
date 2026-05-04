@@ -458,7 +458,7 @@ Klasifikace subdomén nemá smysl, pokud z ní neplynou rozhodnutí. Přímé ma
 
 Praktický důsledek pro rozhodování o nákupu: než tým podepíše smlouvu na SaaS, položte si otázku – *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup – odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
 
-Třetí varianta sourcingu – **partnership** – je vhodná pro Supporting subdomény, kde existuje hotové řešení, ale potřebujete větší míru přizpůsobení, než dovolí standardní SaaS. Příklad: e-shop integruje fakturaci přes API jiné fintech firmy, která za měsíční poplatek provádí daňové výpočty pro 30 jurisdikcí. Není to BUY (žádná krabice), není to BUILD (cizí tým), je to partnerství s rizikem dlouhodobé závislosti. Vyžaduje smluvní jistoty (data ownership, exit clause, SLA) a Anti-Corruption Layer na hranici.
+Třetí varianta sourcingu – **partnership** – je vhodná pro Supporting subdomény, kde existuje hotové řešení, ale potřebujete větší míru přizpůsobení, než dovolí standardní SaaS. Příklad: e-shop integruje fakturaci přes API jiné fintech firmy, která za měsíční poplatek provádí daňové výpočty pro 30 jurisdikcí. Není to BUY (žádná krabice), není to BUILD (cizí tým), je to partnerství s rizikem dlouhodobé závislosti. Vyžaduje smluvní jistoty (vlastnictví dat, exit clause, SLA) a Anti-Corruption Layer na hranici.
 
 :::callout{type="note"}
 ### Vendor lock-in je daň za Generic, ne za Core {#vendor-lockin-heading}
