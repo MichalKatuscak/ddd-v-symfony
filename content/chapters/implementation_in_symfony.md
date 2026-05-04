@@ -27,7 +27,7 @@ Kódové příklady v tomto průvodci záměrně přibývají na komplexitě. Ka
 na minimum, aby ilustrovala čistý koncept. Tato kapitola přidává reálné aspekty
 implementace v Symfony: Doctrine atributy s custom typy pro hodnotové objekty,
 optimistický zámek a generování doménových událostí. Kapitola
-[Anti-vzory](/anti-vzory) pak ukazuje produkční kvalitu kódu s custom
+[Anti-vzory](/anti-vzory) pak ukazuje produkční kvalitu kódu s vlastními
 výjimkami, factory metodami a plnou validací invariantů.
 :::
 

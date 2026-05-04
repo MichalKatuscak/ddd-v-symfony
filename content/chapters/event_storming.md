@@ -381,7 +381,7 @@ Knihu *Domain Storytelling* doplňuje volně přístupný web [domainstorytellin
 3. **Přidejte work object.** Druhý nejčastější tvar – věc, se kterou actor pracuje. V e-shopu typicky `Cart`, `Order`, `Invoice`, `ShipmentLabel`.
 4. **Spojte je activity.** Klik na actora, drag na work object – egon.io vytvoří očíslovanou šipku. Slovesné jméno (*browses*, *submits*, *confirms*) se píše do labelu šipky.
 5. **Buďte struční.** Jeden Domain Storytelling diagram by měl mít **jeden lineární příběh** s 5-15 aktivitami. Když jich máte 30, rozdělte ho na dva diagramy.
-6. **Export do SVG.** Menu vpravo nahoře → Download → SVG. Soubor pojmenujte `<datum>-<story-name>.svg` a uložte do `docs/discovery/<datum>/storytelling/`. SVG je textový formát, který se v gitu pěkně diffuje a v PR review vidíte změny.
+6. **Export do SVG.** Menu vpravo nahoře → Download → SVG. Soubor pojmenujte `<datum>-<story-name>.svg` a uložte do `docs/discovery/<datum>/storytelling/`. SVG je textový formát, ve kterém git přehledně zobrazuje rozdíly a v PR review vidíte změny.
 
 Pro tým, který chce diagramy generovat z kódu (např. v dokumentaci aktualizované CI), egon.io umí číst i **vlastní DSL formát** ve YAML. Z něj pak vyrendruje SVG. Tím můžete například mít zdrojový text storyboardu uložený v repu a jeho rendrovaná verze se generuje při buildu dokumentace.
 
