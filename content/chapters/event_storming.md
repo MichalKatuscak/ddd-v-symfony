@@ -345,7 +345,7 @@ Story *„Customer places an order“* v Domain Storytelling notaci, čtená v p
 6. **Order System** →(7) *sends* → **Confirmation Email** →(8) *to* → **Customer**
 7. **Order System** →(9) *creates* → **Shipment Order** →(10) *for* → **Warehouse**
 
-Kresba je úmyslně jednoduchá – ručně nakreslené piktogramy nebo nástroj [egon.io](https://egon.io/) (open source, browser-based). Příběh je čitelný shora dolů ve sledu čísel a každá activity má slovesné jméno.
+Kresba je úmyslně jednoduchá – ručně nakreslené piktogramy nebo nástroj [egon.io](https://egon.io/) (open source, v prohlížeči). Příběh je čitelný shora dolů ve sledu čísel a každá activity má slovesné jméno.
 
 ### 04.07.3 Domain Storytelling vs. Event Storming – kdy zvolit co {#ds-vs-es}
 

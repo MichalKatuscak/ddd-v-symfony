@@ -851,7 +851,7 @@ po DQL bulk operaci mohou být spravované entity v Identity Map nekonzistentní
 Je nutné zavolat `clear()`.
 
 :::callout{type="pattern"}
-### Příklad: efektivní bulk import s Doctrine
+### Příklad: efektivní hromadný import s Doctrine
 
 :::code{language="php" filename="src/Order/Infrastructure/Command/BulkUpdateOrderStatusHandler.php"}
 <?php
