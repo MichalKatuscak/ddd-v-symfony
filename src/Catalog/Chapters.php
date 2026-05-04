@@ -22,7 +22,7 @@ final class Chapters
             // Hub 2 – Taktické modelování
             ['n' => '06', 'route' => 'basic_concepts',            't' => 'Základní koncepty DDD',          'd' => 'Entity · Value Objects · Agregáty · Repozitáře · Events', 'time' => 18, 'lvl' => 2, 'tag' => 'Taktika',     'group' => 'tactics'],
             ['n' => '07', 'route' => 'aggregate_design',          't' => 'Návrh agregátu',                  'd' => 'Hranice agregátu, transakční konzistence, invarianty, eventual consistency', 'time' => 30, 'lvl' => 4, 'tag' => 'Taktika',     'group' => 'tactics'],
-            ['n' => '08', 'route' => 'lesser_known_patterns',     't' => 'Doplňkové taktické vzory',       'd' => 'Specification · Domain Service · Factory · Module',       'time' => 28, 'lvl' => 3, 'tag' => 'Taktika',     'group' => 'tactics'],
+            ['n' => '08', 'route' => 'lesser_known_patterns',     't' => 'Doplňující taktické vzory',      'd' => 'Specification · Domain Service · Factory · Module',       'time' => 28, 'lvl' => 3, 'tag' => 'Taktika',     'group' => 'tactics'],
 
             // Hub 3 – Architektura a implementace
             ['n' => '09', 'route' => 'architectural_styles',      't' => 'Architektonické styly',          'd' => 'Hexagonal · Onion · Clean Architecture vs. Layered',      'time' => 22, 'lvl' => 3, 'tag' => 'Architektura', 'group' => 'architecture'],

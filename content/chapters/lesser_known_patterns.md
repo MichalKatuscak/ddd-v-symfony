@@ -1,16 +1,16 @@
 ---
 route: lesser_known_patterns
 path: /mene-zname-vzory
-title: 'Méně známé taktické vzory: Specifications, Domain Services, Factories, Modules'
+title: 'Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules'
 page_title: "Specifications, Domain Services, Factories, Modules – kompletně | DDD Symfony"
-meta_description: "Čtyři často přehlížené taktické vzory DDD: Specification Pattern (kompozice doménových pravidel), Domain Services (logika mimo entity), Factories (komplexní vznik aggregate), Modules (Eric Evans organization). Praktická implementace v Symfony 8 a PHP 8.4."
+meta_description: "Čtyři doplňující taktické vzory DDD: Specification Pattern (kompozice doménových pravidel), Domain Services (logika mimo entity), Factories (komplexní vznik aggregate), Modules (Eric Evans organization). Praktická implementace v Symfony 8 a PHP 8.4."
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: "2026-04-29"
-breadcrumb_name: Méně známé taktické vzory
+modified: "2026-05-04"
+breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
-schema_headline: "Méně známé taktické vzory: Specifications, Domain Services, Factories, Modules"
+schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
 chapter_number: "08"
 category: Vzory
 deck: 'Vedle entit, value objektů a agregátů obsahuje Evansova kniha čtyři další taktické vzory, které programátoři často přeskočí: <strong>Specifications</strong> jako prvotřídní booleovská logika, <strong>Domain Services</strong> pro chování bez přirozeného vlastníka, <strong>Factories</strong> pro komplexní vznik agregátů a <strong>Modules</strong> jako vědomá organizace kódu. Tato kapitola je jejich detailní průvodce v Symfony 8 a PHP 8.4 – s ukázkami kódu, anti-vzory a srovnávacími tabulkami.'
