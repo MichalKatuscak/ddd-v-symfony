@@ -105,7 +105,7 @@ Konkrétní indikátory, podle kterých modular monolith poráží microservices
 - **Nestabilní hranice** – produkt je v rané fázi a Bounded Contexty ještě procházejí iteracemi. Refaktor hranice uvnitř monolithu je triviální (přesun souborů a tříd); refaktor přes síťovou hranici dvou servis je migrace dat, koordinovaný release a Anti-Corruption Layer.
 - **Podobné potřeby škálování všech kontextů** – pokud catalog, ordering i shipping mají podobný objem a profil, není co odděleně škálovat. Horizontální škálování celého monolithu je operačně levnější než škálování čtyř servis.
 - **Nemáte operační platformu pro N servisů** – žádný Kubernetes, žádný service mesh, žádné centralizované logging a tracing. Bez nich budou microservices fungovat technicky, ale ladění incidentů bude noční můra. Více v [sekci o ops](#ops).
-- **Operační kapacita < 30 % engineering kapacity** – Newman radí, že přechod na microservices má smysl jen tehdy, když organizace investuje výraznou část kapacity do platformy (CI/CD, observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith vás chrání před zhoršením produktivity.
+- **Operační kapacita < 30 % vývojové kapacity** – Newman radí, že přechod na microservices má smysl jen tehdy, když organizace investuje výraznou část kapacity do platformy (CI/CD, observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith vás chrání před zhoršením produktivity.
 
 ### Modular monolith v Symfony 8 {#modular-monolith-symfony-heading}
 

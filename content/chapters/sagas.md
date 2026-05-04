@@ -372,8 +372,8 @@ a spouští kompenzace. Tímto centrálním místem je [orchestrátor
 ### Choreografie má své místo {#choreografie-stale-validni-heading}
 
 Choreografie je stále legitimním řešením pro jednoduché procesy se dvěma až třemi
-kroky, kde je tok lineární a selhání řeší jednoduchá kompenzace. Nepřehánějte
-engineering – pokud váš proces zahrnuje pouze „vytvoření objednávky → stržení
+kroky, kde je tok lineární a selhání řeší jednoduchá kompenzace. Nepřehánějte to
+s návrhem – pokud váš proces zahrnuje pouze „vytvoření objednávky → stržení
 platby → potvrzení“, choreografie je jednodušší a přímočařejší než plnohodnotný
 Process Manager. Orchestraci zavádějte až ve chvíli, kdy narazíte na výše popsané
 problémy.
