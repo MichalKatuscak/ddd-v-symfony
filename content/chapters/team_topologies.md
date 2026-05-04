@@ -109,7 +109,7 @@ Pravidlo má dvě části, které se často chybně čtou jako jedno:
 ### Vernon Rule: 1 BC = 1 tým {#vernon-rule-heading}
 
 Když to zkrátíme na jednu větu pro management: **každý Bounded Context má právě
-jednoho vlastníka – jeden tým s explicitním závazkem ho vyvíjet, deployovat
+jednoho vlastníka – jeden tým s explicitním závazkem ho vyvíjet, nasazovat
 a opravovat v noci.** Pokud takový vlastník neexistuje, BC neexistuje
 architektonicky – je to jen složka v repu.
 
@@ -752,7 +752,7 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
   Westrumova generative kultura je předpoklad, ne výstup.
 
 Pokud z této kapitoly odejdete s jednou větou, ať je to tato: **Bounded Context
-není soubor v repu – je to závazek konkrétního týmu vyvíjet, deployovat a opravovat
+není soubor v repu – je to závazek konkrétního týmu vyvíjet, nasazovat a opravovat
 v noci konkrétní část domény.** Bez tohoto závazku není BC.
 
 Pro hlubší studium doporučujeme Skelton & Pais – *Team Topologies*

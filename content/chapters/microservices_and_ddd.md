@@ -65,7 +65,7 @@ Konkrétní podmínky, které mluví pro vlastní nasazovací jednotku:
 
 - **Vlastní stream-aligned tým** – kontext má dedikovaný tým, který má autonomii nad backlogem, release cyklem a operačními rozhodnutími. Bez toho je vlastní service jen administrativní zátěž navíc. Detail v [Team Topologies](/team-topologies) (Skelton & Pais 2019).
 - **Vlastní data** – kontext drží svá data v oddělené databázi (nebo alespoň v oddělených tabulkách s vlastním schema ownerem). Ostatní kontexty na ně nesahají přímo, ale jen přes API nebo události. Sdílená databáze napříč servisy je určujícím znakem *distributed monolithu* – viz sekci 20.04.
-- **Nezávislý release cyklus** – kontext lze deployovat bez současného deployu jiných kontextů. Pokud změna v service A vyžaduje současnou změnu v service B, lepšími hranicemi se to neřeší. Tým má jednu nasazovací jednotku a jen si ji rozdělil na dvě procesní role.
+- **Nezávislý release cyklus** – kontext lze nasadit bez současného nasazení jiných kontextů. Pokud změna v service A vyžaduje současnou změnu v service B, lepšími hranicemi se to neřeší. Tým má jednu nasazovací jednotku a jen si ji rozdělil na dvě procesní role.
 - **Rozdílné potřeby škálování** – kontext má řádově jiný objem zpracování (např. catalog s velkým read trafficem vs. ordering s nízkým, ale transakčně náročným) nebo jiné latency požadavky. Rozdělení umožní horizontálně škálovat jen ten, který to potřebuje.
 - **Rozdílný stack nebo runtime** – kontext potřebuje jiné runtime parametry (jiná PHP verze, jiné dependencies, jiné memory limity) nebo dokonce jiný jazyk. Vzácné, ale legitimní.
 - **Rozdílný compliance režim** – kontext zpracovává citlivá data (PCI DSS, GDPR speciální kategorie), která mají striktní oddělení od ostatního systému. Network isolation a samostatný audit trail jsou přirozenějším řešením, když kontext žije ve vlastní service.
@@ -271,7 +271,7 @@ Pokud vám sedí dva a více těchto bodů, máte distributed monolith:
 
 1. **Sdílená databáze napříč servisami.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Toto je nejjasnější příznak – Newman ho označuje za *„the single greatest cause of distributed monolith“*.
 2. **Synchronní HTTP/gRPC volání mezi servisami v každém request flow.** Vyřízení jednoho user requestu vyžaduje 5–10 vnořených volání. Latence je součet všech volání; availability je součin všech availabilities; failure jednoho znamená failure celého řetězce.
-3. **Coupled deployment.** Změnu API service A nelze nasadit, dokud současně nedeployujete service B, která konzumuje to API. „Release je atomický“, „máme deployment train“ – to jsou eufemizmy pro coupled deploy. Sam Newman: pokud nelze service deployovat samostatně, není to microservice.
+3. **Coupled deployment.** Změnu API service A nelze nasadit, dokud současně nenasadíte service B, která konzumuje to API. „Release je atomický“, „máme deployment train“ – to jsou eufemizmy pro coupled deploy. Sam Newman: pokud nelze service nasadit samostatně, není to microservice.
 4. **End-to-end test vyžaduje všechny servisy.** Test jednoho user flow nelze spustit bez toho, abyste měli runtime všech N servis (lokálně přes docker-compose, v CI přes test environment). Žádná service není testovatelná v izolaci.
 5. **Sdílená library s doménovými typy.** Existuje balíček `company/domain-shared`, který obsahuje třídy jako `OrderPlaced`, `Money`, `CustomerId` používané všemi servisami. Změna v balíčku vynucuje současný release všech servis. Coupling je tu silný stejně jako v monolithu – jen se schovává za package version.
 :::
@@ -404,7 +404,7 @@ Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existu
 
 ### Asynchronní eventy – kdy {#async-kdy-heading}
 
-- **State changes (write), kde caller nepotřebuje vědět, co dál.** Po uložení objednávky publishuje `ordering-svc` event `OrderPlaced`. `billing-svc`, `shipping-svc` a `notification-svc` ho zpracují, kdy mohou. Caller čeká jen na lokální commit.
+- **State changes (write), kde caller nepotřebuje vědět, co dál.** Po uložení objednávky publikuje `ordering-svc` event `OrderPlaced`. `billing-svc`, `shipping-svc` a `notification-svc` ho zpracují, kdy mohou. Caller čeká jen na lokální commit.
 - **Cross-BC reakce, kde jednotlivé BC nemají závislost na výsledku.** Saga zpracovává krok po kroku přes eventy + commands; každý krok je nezávislý.
 - **Operace, která může bezpečně probíhat se zpožděním.** Generování faktury, odeslání e-mailu, aktualizace search indexu, generování sitemapy.
 - **Multi-subscriber broadcast.** Jeden event konzumuje N nezávislých subscriberů; publisher o nich nemusí vědět.
@@ -495,7 +495,7 @@ Přechod z modular monolithu na microservices je primárně **investice do opera
 
 ## 19.08 Symfony konkrétně – kdy a jak {#symfony}
 
-Symfony 8 dokáže obsloužit obě architektury – modular monolith i microservices – bez zásadní změny kódu vrstvy domény. Rozdíl je v **routing konfiguraci Messenger**: ve stejném monolithu všechny eventy a commands směřujete na `sync` transport (function call) nebo na lokální `async` (in-memory worker); přes hranici dvou servis je směrujete na `amqp` transport, který fyzicky publishne zprávu do RabbitMQ.
+Symfony 8 dokáže obsloužit obě architektury – modular monolith i microservices – bez zásadní změny kódu vrstvy domény. Rozdíl je v **routing konfiguraci Messenger**: ve stejném monolithu všechny eventy a commands směřujete na `sync` transport (function call) nebo na lokální `async` (in-memory worker); přes hranici dvou servis je směrujete na `amqp` transport, který fyzicky publikuje zprávu do RabbitMQ.
 
 ### Modular monolith v Symfony {#symfony-monolith-heading}
 
@@ -561,7 +561,7 @@ framework:
 :::
 :::
 
-Outbox transport zapisuje event do tabulky v stejné DB transakci jako doménový commit (Doctrine Outbox). Externí relay (worker přes `messenger:consume`) potom polluje outbox table a publishuje payload do AMQP exchange. Detail v [kapitole o Outbox patternu](/outbox-pattern).
+Outbox transport zapisuje event do tabulky v stejné DB transakci jako doménový commit (Doctrine Outbox). Externí relay (worker přes `messenger:consume`) potom polluje outbox table a publikuje payload do AMQP exchange. Detail v [kapitole o Outbox patternu](/outbox-pattern).
 
 Subscriber service má zrcadlovou konfiguraci – AMQP transport pro příchozí zprávy, vlastní mapping na integration event DTO, lokální command bus pro spuštění reakce:
 
@@ -631,7 +631,7 @@ namespace App\Billing\Application\IntegrationEvent;
  * Když publisher přidá pole do svého doménového eventu, NÁŠ
  * IntegrationEvent se nezmění, dokud nepřepíšeme deserializer.
  *
- * Tím je oddělený lifecycle obou servisů. Publisher může deployovat
+ * Tím je oddělený lifecycle obou servisů. Publisher může nasadit
  * novou verzi domény bez current release subscribera.
  */
 final readonly class OrderPlacedReceived
@@ -851,7 +851,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 ### 4. Jeden deployment artefakt pro N servisů {#antivzor-4-heading}
 
-**Symptom:** CI/CD pipeline buildí všechny servisy společně. Release schedule je centralizovaný („máme deployment train“, „release window v úterý“). Změnu v jedné servise nelze deploynout bez ostatních.
+**Symptom:** CI/CD pipeline buildí všechny servisy společně. Release schedule je centralizovaný („máme deployment train“, „release window v úterý“). Změnu v jedné servise nelze nasadit bez ostatních.
 
 **Důsledek:** všechny servisy musí být kompatibilní v každém okamžiku. Žádná feature toggleability, žádný gradual rollout, žádný rychlý rollback. Coupled deploy je definující znak distributed monolithu.
 

@@ -171,10 +171,10 @@ nebo *dispatcher*) tabulku asynchronně polluje. Vybírá řádky se stavem
 2. **Fáze 2 – polling outboxu.** Relay worker periodicky (např. každých
    100 ms) selectuje pending řádky z outboxu, seřazené podle `occurred_at`,
    aby zachoval kauzální pořadí uvnitř jedné DB.
-3. **Fáze 3 – publish do brokeru.** Pro každý řádek relay publishne event
+3. **Fáze 3 – publish do brokeru.** Pro každý řádek relay publikuje event
    do brokera a po obdržení ACK řádek označí jako `sent`. Obě operace nejsou
-   v jedné transakci – pokud crashne mezi nimi, řádek zůstane `pending`
-   a po restartu se publishne znovu. Z toho plyne základní garance:
+   v jedné transakci – pokud spadne mezi nimi, řádek zůstane `pending`
+   a po restartu se publikace zopakuje. Z toho plyne základní garance:
 4. **Fáze 4 – konzumace subscriberem.** Subscriber dostane delivery,
    zpracuje ji idempotentně (typicky přes [Inbox Pattern](#inbox)) a
    ackne brokerovi.
@@ -184,10 +184,10 @@ nebo *dispatcher*) tabulku asynchronně polluje. Vybírá řádky se stavem
 
 Outbox samotný garantuje **at-least-once delivery** – každá doménová
 událost se k subscriberům dostane *alespoň jednou*, ale může se stát, že
-i víckrát. Konkrétní scénář duplikace: relay úspěšně publishne event do brokera
-(broker poslal ACK, event je trvale uložen). Relay ale crashne *před* tím,
+i víckrát. Konkrétní scénář duplikace: relay úspěšně publikuje event do brokera
+(broker poslal ACK, event je trvale uložen). Relay ale spadne *před* tím,
 než stihne zapsat `UPDATE outbox SET status='sent'`. Po restartu vidí
-řádek pořád jako `pending` a publishne ho znovu. Subscriber tak dostane
+řádek pořád jako `pending` a publikuje ho znovu. Subscriber tak dostane
 stejný event dvakrát.
 
 Toto je *záměrná* volba: přijímáme možnost duplikace výměnou za to, že žádný
@@ -285,7 +285,7 @@ class OutboxMessage
 | `id` | ULID (16 B) | Unikátní identifikátor řádku – slouží zároveň jako **event_id** pro deduplikaci na straně subscribera (viz Inbox). |
 | `message_type` | VARCHAR(255) | FQCN doménové události (např. `App\Ordering\Domain\Event\OrderPlaced`). Relay podle něj namapuje payload zpět na PHP třídu. |
 | `payload` | JSON / JSONB | Serializovaný stav události. JSONB v Postgresu je preferovaný – umožňuje indexovat jednotlivá pole pro debugging. |
-| `status` | VARCHAR(16) | Stavový enum: `pending` (čeká na publish), `sent` (úspěšně publishnuto), `failed` (po N pokusech vzdáno, vyžaduje manuální resolve). |
+| `status` | VARCHAR(16) | Stavový enum: `pending` (čeká na publish), `sent` (úspěšně publikováno), `failed` (po N pokusech vzdáno, vyžaduje manuální resolve). |
 | `occurred_at` | TIMESTAMPTZ | Čas vzniku události v doménové transakci. Slouží pro řazení v relayi (FIFO uvnitř jedné DB) a pro výpočet outbox lagu. |
 | `attempts` | INT | Počet neúspěšných pokusů o publish. Po překročení prahu (typicky 5) řádek přechází do `failed` a opouští hot path. |
 | `sent_at` | TIMESTAMPTZ NULL | Vyplněno při přechodu do `sent`. Používá se pro kompakci (mazání starších `sent` řádků). |
@@ -609,7 +609,7 @@ nebo polyglot infrastrukturu).
 ### Varianta A: Polling worker (Symfony Console command) {#relay-polling-heading}
 
 Polling worker je obyčejný Symfony Console command, který v nekonečné smyčce volá
-`fetchPending()`, publishne řádky a označí je jako `sent`.
+`fetchPending()`, publikuje řádky a označí je jako `sent`.
 Spouští se z `supervisord`, `systemd` timeru nebo Kubernetes
 Deploymentu jako trvale běžící proces.
 
@@ -1193,12 +1193,12 @@ za běh stačí na realistické workloady (cca 3 mil. eventů/den).
 
 ### Dead-letter queue pro permanentní selhání {#dlq-heading}
 
-Některé eventy se nikdy nepublishnou: schema změna v subscriberu, kterou nikdo
+Některé eventy se nikdy nepublikují: schema změna v subscriberu, kterou nikdo
 nevyřešil, broken payload (NaN v JSON), poison message, který shodí libovolného
 consumera. Po N attempts (typicky 5) je `OutboxMessage::markFailed()`
 přepne do stavu `failed`. Tyto řádky chceme:
 
-- **Vyčlenit z hot pathy** – relay je už nezkouší publishovat.
+- **Vyčlenit z hot pathy** – relay je už nezkouší publikovat.
 - **Hlasitě upozornit** – alert `outbox_failed_total > 0`.
 - **Mít na ně CLI nástroj** – `app:outbox:retry-failed` nebo
   ruční SQL update statusu zpět na `pending` po opravě subscribera.
@@ -1456,7 +1456,7 @@ v tom, že event jde **do té samé DB transakce** jako doménový stav.
 
 Řádek bez UNIQUE může být v race condition zapsán dvakrát (relay padá uprostřed
 INSERTu, retry přijde s tímtéž ULIDem). Bez UNIQUE constraintu DB to dovolí
-a pak relay publishne *dvojí* verzi téže události. UNIQUE je technický
+a pak relay publikuje *dvojí* verzi téže události. UNIQUE je technický
 invariant – ne nice-to-have.
 :::
 
@@ -1528,7 +1528,7 @@ kteří poslouchají na sync transportu, ti by přestali fungovat.
 ### Krok 3: Nasadit relay command {#migrace-krok-3-heading}
 
 Implementujte `OutboxDispatchCommand` ze sekce [16.05](#relay)
-a deploynete pod supervisorem. V tomto bodě může worker už publishovat eventy
+a nasaďte pod supervisorem. V tomto bodě může worker už publikovat eventy
 z outboxu – pokud máte legacy publish dál aktivní, broker dostane *obě* verze.
 Subscribery ale ještě nemají Inbox, takže duplicitu řeší... přesně, neřeší.
 
