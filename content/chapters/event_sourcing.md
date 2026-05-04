@@ -97,7 +97,7 @@ vstupem pro aktualizaci projekcí.
 ## 13.03 Doménové události jako základ Event Sourcingu {#domenove-udalosti}
 
 V Event Sourcingu jsou doménové události (Domain Events) primárním datovým artefaktem. Na rozdíl od
-doménových událostí používaných pouze k notifikaci (side effects) jsou v ES události *zdrojem pravdy*
+doménových událostí používaných pouze k notifikaci (vedlejší efekty) jsou v ES události *zdrojem pravdy*
 o stavu systému. Musejí proto splňovat přísné požadavky:
 
 - **Immutabilita** – Po vytvoření nelze událost měnit. Veškeré její properties jsou read-only, nastavené v konstruktoru.

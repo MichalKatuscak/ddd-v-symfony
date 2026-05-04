@@ -3,7 +3,7 @@ route: authorization_in_ddd
 path: /autorizace-v-ddd
 title: Autorizace v DDD na Symfony
 page_title: "Autorizace v DDD na Symfony – Voters, ACL na agregátu, policy-based | DDD Symfony"
-meta_description: "Kde má sedět autorizační logika v DDD aplikaci v Symfony 8? Edge, use case, aggregate, field – 4 vrstvy s konkrétními ukázkami Voterů, doménových exceptions a policy-based přístupu."
+meta_description: "Kde má sedět autorizační logika v DDD aplikaci v Symfony 8? Edge, use case, aggregate, field – 4 vrstvy s konkrétními ukázkami Voterů, doménových výjimek a policy-based přístupu."
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
@@ -116,7 +116,7 @@ Autorizační rozhodnutí v DDD aplikaci nikdy nepadá na jednom místě – pad
 |---|---|---|---|
 | **Edge** | Je přihlášený? Smí na tuhle URL? | `access_control`, JWT firewall | `/admin/*` jen pro `ROLE_ADMIN` |
 | **Use Case** | Smí vykonat use case na tomto objektu? | `Voter` | „Smí Petr cancelnout order #42?“ |
-| **Aggregate** | Dá se to vůbec teď udělat? | doménový check + exception | „Order lze cancelnout jen 24 h od vytvoření“ |
+| **Aggregate** | Dá se to vůbec teď udělat? | doménový check + výjimka | „Order lze cancelnout jen 24 h od vytvoření“ |
 | **Field** | Smí vidět konkrétní pole? | Twig + Voter, query filter | „Sloupec `audit_log` vidí jen admin“ |
 
 Pravidlo: každé autorizační rozhodnutí patří do *právě jedné* vrstvy. Pokud zjistíte, že stejné pravidlo musíte zapsat na dvou vrstvách, jedna z nich je špatně zvolená. V [sekci o anti-vzorech](#antivzory) ukážeme typické duplicity, kterým se vyhnout.
@@ -324,7 +324,7 @@ Pokud váš Voter dělá `$this->repository->find($id)` nebo `$this->em->getRepo
 
 ## 11.05 Aggregate-level – doména sama rozhoduje {#aggregate-level}
 
-Některá pravidla nelze rozumně dát do Voteru. Vyžadují znalost *doménového stavu*, který Voter nemá natáhnout zvenku – typicky časové okno, předchozí stav agregátu, doménové invarianty napříč vlastními entitami uvnitř agregátu. Tato pravidla patří do **aggregate root** a vynucují se vyhozením *doménové exception*.
+Některá pravidla nelze rozumně dát do Voteru. Vyžadují znalost *doménového stavu*, který Voter nemá natáhnout zvenku – typicky časové okno, předchozí stav agregátu, doménové invarianty napříč vlastními entitami uvnitř agregátu. Tato pravidla patří do **aggregate root** a vynucují se vyhozením *doménové výjimky*.
 
 Praktická heuristika:
 
@@ -399,7 +399,7 @@ final class Order
 Vlastnosti tohoto kódu:
 
 - **Žádná závislost na Symfony.** Aggregate používá pouze PHP standardní typy a vlastní doménové třídy. Žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze testovat unit testem bez Symfony Kernel.
-- **Doménové exceptions.** `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – *není to autorizační selhání, je to doménový stav*).
+- **Doménové výjimky.** `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – *není to autorizační selhání, je to doménový stav*).
 - **Idempotentní pomocná metoda `isCancellable()`.** Voter ani Twig ji nevolají; používá ji UI pro skrytí tlačítka (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita.
 - **Domain Events.** Po úspěšné operaci se do `$releasedEvents` přidá `OrderCancelled`. Aplikační handler je po `repository->save()` publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
 
@@ -423,7 +423,7 @@ Několik vrstev kontroly v jediné cestě požadavku – a každá vrstva selže
 :::callout{type="note"}
 ### 403 vs. 409: která chyba kdy? {#aggregate-403-vs-409-heading}
 
-Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dvě různé exception handlery: `AccessDeniedDomainException → 403`, `InvalidOrderStateException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
+Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dva různé handlery výjimek: `AccessDeniedDomainException → 403`, `InvalidOrderStateException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
 :::
 
 ## 11.06 Field-level – read model filtrace {#field-level}
@@ -972,7 +972,7 @@ Autorizace v DDD aplikaci na Symfony 8 sedí na čtyřech vrstvách, každá s v
 
 - **Edge** – Symfony firewall + `access_control`. Anonymous vs. authenticated, role-based hrubá separace. Žádná doménová znalost.
 - **Use Case** – Symfony Voter. „Smí Petr cancelnout order #42?“ Aplikační handler volá `AuthorizationCheckerInterface::isGranted()`; doména to nesmí.
-- **Aggregate** – doménový invariant + doménová exception. „Order musí být PLACED a ne starší než 24 h.“ Aggregate vyhazuje `InvalidOrderStateException`; aplikační vrstva to mapuje na HTTP 409.
+- **Aggregate** – doménový invariant + doménová výjimka. „Order musí být PLACED a ne starší než 24 h.“ Aggregate vyhazuje `InvalidOrderStateException`; aplikační vrstva to mapuje na HTTP 409.
 - **Field** – Twig `is_granted` pro view-level (s rizikem data leaku) nebo query filter / read model pro citlivá data (PII, audit log).
 
 Kde co řešit:

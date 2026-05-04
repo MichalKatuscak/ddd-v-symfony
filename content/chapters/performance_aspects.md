@@ -29,7 +29,7 @@ Doménový model a rychlá aplikace nejsou v rozporu.
 
 - **Mýtus:** DDD je vždy pomalejší než anémický model (anemic domain model). **Realita:** Správně navržené DDD s CQRS a optimalizovanými repozitáři je srovnatelně rychlé, protože read side nepotřebuje vůbec načítat doménové objekty.
 - **Mýtus:** Agregáty způsobují zbytečné JOIN operace. **Realita:** Problém nastává při špatně definovaných hranicích agregátů – příliš velký agregát načítá zbytečná data.
-- **Mýtus:** Doctrine ORM je pomalý pro DDD. **Realita:** Doctrine nabízí sadu nástrojů (DQL, native queries, extra lazy loading, query cache, result cache), které při správném použití odstraňují výkonnostní bottlenecky.
+- **Mýtus:** Doctrine ORM je pomalý pro DDD. **Realita:** Doctrine nabízí sadu nástrojů (DQL, native queries, extra lazy loading, query cache, result cache), které při správném použití odstraňují výkonnostní úzká místa.
 :::
 
 Výkon se stává kritickým ve třech scénářích: aplikace s **desítkami propojených agregátů**,
@@ -41,7 +41,7 @@ a požadavky na odezvu v desítkách milisekund.
 
 **Nikdy neoptimalizujte naslepo.** Každá optimalizace musí být podložena měřením.
 Předčasná optimalizace (premature optimization) vede k zbytečně složitému kódu, který řeší neexistující
-problémy. Nejprve profilujte, identifikujte skutečný bottleneck a teprve potom optimalizujte.
+problémy. Nejprve profilujte, identifikujte skutečné úzké místo a teprve potom optimalizujte.
 Donald Knuth to vyjádřil takto: *„Premature optimization is the root of all evil.“*
 [[1]](https://dl.acm.org/doi/10.1145/356635.356640)
 :::

@@ -1475,7 +1475,7 @@ Uživatel čeká na odpověď příkazu a chce hned vědět, zda přiřazení pr
 
 **Cena:** **TaskManagement** má časovou závislost na **ProjectManagement**.
 Pokud druhý kontext není dostupný, přiřazení selže. V monolitu je tato závislost neviditelná, ve světě služeb
-přidá síťový hop a riziko cascading failures.
+přidá síťový hop a riziko kaskádových selhání.
 
 **Alternativa pro distribuovaný systém:** **TaskManagement** by si držel lokální
 projekci „project members“ aktualizovanou přes eventy z **ProjectManagement**. Validace by běžela

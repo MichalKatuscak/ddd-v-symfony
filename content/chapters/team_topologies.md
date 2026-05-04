@@ -185,7 +185,7 @@ Hlavní atribut Platform teamu je slovo **self-service**. Stream-aligned tým
 si na platformu nezadává ticket („potřebuju nový Postgres“) a nečeká týden – naklikne ho
 sám přes portál nebo nasadí přes IaC modul, který Platform team udržuje. Pokud Platform
 team funguje jako ticketová fronta, není to Platform team – je to *infrastruktura jako
-bottleneck* a anti-vzor (sekce 05.08).
+úzké hrdlo* a anti-vzor (sekce 05.08).
 
 - **Velikost:** 1 Platform team na 50–150 vývojářů; obvykle 5–9 lidí.
 - **Měření:** NPS od stream-aligned týmů, adoption rate, time-to-first-deploy pro nový BC.
@@ -611,7 +611,7 @@ podle dokumentovaných standardů, ne externí výbor.
 
 Platform team, který funguje jako infrastructure ticket support: stream-aligned tým
 potřebuje nový Postgres, vytvoří JIRA ticket, čeká 5 dnů. Potřebuje upravit CI pipeline,
-vytvoří ticket, čeká týden. Reálně se z Platform teamu stal úzký bottleneck pro celou
+vytvoří ticket, čeká týden. Reálně se z Platform teamu stalo úzké hrdlo pro celou
 organizaci.
 
 **Řešení:** Platform team má povinnost dodávat *self-service* rozhraní
