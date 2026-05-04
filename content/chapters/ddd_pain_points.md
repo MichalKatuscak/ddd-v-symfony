@@ -847,7 +847,7 @@ aby `FormInterface` pronikl do aplikační vrstvy.
 Žádná ze dvou vrstev neví o existenci té druhé.
 
 :::code{language="php" filename="src/PlaceOrderFormData.php"}
-// 1. Formulářový objekt - mutable, framework-friendly
+// 1. Formulářový objekt - mutable, kompatibilní s frameworkem
 final class PlaceOrderFormData
 {
     public string $customerId = '';

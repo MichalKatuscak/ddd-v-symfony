@@ -321,7 +321,7 @@ final class DoctrineOrderRepository implements OrderRepository
 }
 :::
 
-Doménová třída `Order` nemá žádné Doctrine anotace – je to čisté PHP. `OrderOrmEntity` je samostatná persistence-friendly třída s Doctrine mapováním a `OrderMapper` překlápí mezi nimi. Cena: dvojí třída a explicitní mapování. Zisk: doménový model je testovatelný v paměti bez databáze, lze ho serializovat do JSON Event Storu beze změny tvaru, a změna persistence vrstvy nezasáhne doménu.
+Doménová třída `Order` nemá žádné Doctrine anotace – je to čisté PHP. `OrderOrmEntity` je samostatná persistenční třída s Doctrine mapováním a `OrderMapper` překlápí mezi nimi. Cena: dvojí třída a explicitní mapování. Zisk: doménový model je testovatelný v paměti bez databáze, lze ho serializovat do JSON Event Storu beze změny tvaru, a změna persistence vrstvy nezasáhne doménu.
 
 ### Příklad: Inbound port a jeho HTTP adapter {#hexagonal-inbound-heading}
 
@@ -1137,7 +1137,7 @@ Tým přečte Cockburnův článek a každý CRUD endpoint dostane port + adapte
 
 Klasický Layered problém přenesený do Hexagonal: tým má `Domain/Port/OrderRepository`, ale třída `Domain/Model/Order.php` má `#[ORM\Entity]`, `#[ORM\Column]`, `#[ORM\OneToMany]`. Doména stále závisí na Doctrine knihovně. Cíl izolace padá.
 
-**Náprava (pro Hexagonal/Onion):** zaveďte separátní persistence-friendly třídu (`OrderOrmEntity`) a Mapper – vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Cena je dvojí třída a explicitní mapping – zisk je čistá doména. Pokud projekt Hexagonal hranici reálně nepotřebuje, atributy přímo na agregátu jsou pragmatický kompromis (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)).
+**Náprava (pro Hexagonal/Onion):** zaveďte separátní persistenční třídu (`OrderOrmEntity`) a Mapper – vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Cena je dvojí třída a explicitní mapping – zisk je čistá doména. Pokud projekt Hexagonal hranici reálně nepotřebuje, atributy přímo na agregátu jsou pragmatický kompromis (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)).
 
 ### Anti-vzor 3: Anemic Hexagonal / Anemic Clean {#anti-3-heading}
 
@@ -1244,7 +1244,7 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 - question: Můžu použít Hexagonal bez DDD?
   answer: 'Ano, technicky to funguje. Hexagonal řeší <em>jak strukturovat závislosti</em>, DDD řeší <em>jak modelovat doménu</em> – jsou ortogonální. Můžete mít Hexagonal nad anémickým CRUD modelem a žádné DDD principy nepoužívat. Praktický zisk je ale omezený: bez bohatého doménového modelu uvnitř je Hexagonal jen vrstvení rituálu, které zhoršuje code review a zpomaluje vývoj. Anti-vzor „Anemic Hexagonal“ je v reálných projektech běžný. Detail v <a href="#anti-3-heading">anti-vzorech</a>.'
 - question: Jak migrovat z Layered na Hexagonal v existujícím Symfony projektu?
-  answer: 'Strangler Fig pattern: nezačínejte velký rewrite, ale postupně. Vyberte jeden Bounded Context (ideálně Core Domain) a v něm jednu feature. Pro tu feature zaveďte port (interface v Domain/Port/) a adapter (implementace v Infrastructure/), původní Doctrine entitu rozdělte na čistou doménovou třídu + persistence-friendly OrmEntity + Mapper. Otestujte. Iterujte na další feature. Pokud Core Domain doženete celý, druhý BC možná stačí ponechat v Layered (hybridní přístup). Nikdy nemigrujte všechno najednou – riziko regresí je vysoké. Detail strangler fig v kapitole <a href="/migrace-z-crud">Migrace z CRUD</a>.'
+  answer: 'Strangler Fig pattern: nezačínejte velký rewrite, ale postupně. Vyberte jeden Bounded Context (ideálně Core Domain) a v něm jednu feature. Pro tu feature zaveďte port (interface v Domain/Port/) a adapter (implementace v Infrastructure/), původní Doctrine entitu rozdělte na čistou doménovou třídu + persistenční OrmEntity + Mapper. Otestujte. Iterujte na další feature. Pokud Core Domain doženete celý, druhý BC možná stačí ponechat v Layered (hybridní přístup). Nikdy nemigrujte všechno najednou – riziko regresí je vysoké. Detail strangler fig v kapitole <a href="/migrace-z-crud">Migrace z CRUD</a>.'
 - question: Co je „Port“ přesně a jak se liší od běžného PHP interface?
   answer: 'Port je interface s explicitní architektonickou rolí: definuje hranici mezi doménou a vnějším světem. Technicky je to běžný PHP <code>interface</code>, ale konvenčně žije v adresáři <code>Domain/Port/</code>, nemá framework závislosti a má smysluplné jméno z domain language (<code>OrderRepository</code>, ne <code>OrderRepositoryInterface</code>). Cockburn rozlišuje driving porty (vnější svět volá doménu) a driven porty (doména volá vnější svět). V Symfony auto-wiringu je port automaticky napojen na svou jedinou implementaci, nebo můžete explicitně mapovat v services.yaml. Detail v <a href="#hexagonal">sekci o Hexagonal</a>.'
 - question: Vyplatí se Clean Architecture v malé Symfony aplikaci?

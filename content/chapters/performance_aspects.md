@@ -94,7 +94,7 @@ bez načtení celé kolekce do paměti.
 :::callout{type="pattern"}
 ### Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)
 
-*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro pure DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
 
 :::code{language="php" filename="src/Order/Domain/Model/Order.php"}
 <?php
@@ -564,7 +564,7 @@ final class UserId
 :::callout{type="pattern"}
 ### Doctrine mapování pro ULID a UUID
 
-*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro pure DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
 
 :::code{language="php" filename="src/Order/Domain/Model/Order.php"}
 <?php
