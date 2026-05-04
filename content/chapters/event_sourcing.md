@@ -1599,7 +1599,7 @@ Některé změny tuto vlastnost nemají:
 - **Event splitting.** Původní `OrderPlaced` obsahoval `customerData`
   inline. V nové verzi se rozděluje na `OrderPlaced` + `CustomerSnapshotted`
   (samostatný event). Upcaster by musel vytvořit *druhý* event z prvního,
-  což porušuje princip „1 fyzický event v Event Store = 1 logický fakt".
+  což porušuje princip „1 fyzický event v Event Store = 1 logický fakt“.
 - **Event merging.** Dva eventy `ItemAdded` + `ItemQuantityChanged` se
   v nové doméně spojí do jednoho `ItemUpserted`. Upcasting jdoucí jednou
   cestou nestačí – potřebujete agregátní transformaci napříč streamem.
@@ -1656,7 +1656,7 @@ Doménový kód při replay aplikuje obě události a stav konverguje na správn
 hodnotu. Audit trail je explicitní – stará data jsou zachována, oprava je
 samostatný fakt.
 
-Cena: doménový model získává „šum" event typů, které řeší minulé bugy.
+Cena: doménový model získává „šum“ event typů, které řeší minulé bugy.
 Po pár letech provozu je 5–10 % event types historických oprav.
 :::
 
@@ -1693,7 +1693,7 @@ Implementace v PHP: každý subject (uživatel) má v separátní tabulce
 `subject_keys` symetrický klíč. Doménová událost při serializaci
 zašifruje PII pole (`email`, `name`, `address`) tímto klíčem; zbytek
 payloadu zůstává čitelný (audit trail funguje). Smazání klíče = právo na
-zapomnění, audit zachycen na úrovni „uživatel #42 učinil akci v čase T",
+zapomnění, audit zachycen na úrovni „uživatel #42 učinil akci v čase T“,
 ale identifikace uživatele není možná.
 
 Detail v sekci [GDPR a osobní údaje v Event Store](#gdpr-es-heading).

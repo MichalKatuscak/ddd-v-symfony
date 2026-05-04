@@ -290,7 +290,7 @@ Detailní rozbor obecných anti-vzorů, které k distributed monolithu vedou (mi
 
 ### Hybridní topologie – mix monolitu a extraktů {#hybridni-topologie-heading}
 
-Reálné systémy zřídka spadají do jedné z čistých kategorií „monolit" vs. „microservices".
+Reálné systémy zřídka spadají do jedné z čistých kategorií „monolit“ vs. „microservices“.
 V praxi se objevuje **hybridní topologie**: jeden modulární monolit jako *core*
 plus 1–3 extrahované servisy pro kontexty, které mají jasný důvod existovat samostatně.
 
@@ -315,7 +315,7 @@ Typický scénář:
 └─────────────────┘    └──────────────────┘
 ```
 
-Hybrid je legitimní cíl – ne přechodný stav „dokud nedokončíme migraci na microservices".
+Hybrid je legitimní cíl – ne přechodný stav „dokud nedokončíme migraci na microservices“.
 Důvody, proč zůstat hybridní dlouhodobě:
 
 - **Core domény jsou úzce provázané** mezi sebou (Catalog ↔ Ordering ↔ Customer)
@@ -328,7 +328,7 @@ Důvody, proč zůstat hybridní dlouhodobě:
 
 ### De-microservicing – návrat k monolitu {#de-microservicing-heading}
 
-Trend „microservices za každou cenu" z let 2014–2018 se po dekádě provozu obrátil.
+Trend „microservices za každou cenu“ z let 2014–2018 se po dekádě provozu obrátil.
 Adrian Cockcroft (bývalý VP Cloud Architecture v Netflixu, kde microservices vznikly)
 v rozhovorech od roku 2022 explicitně varuje před předčasným rozdělením.
 Případ **Amazon Prime Video** (2023, oficiální článek na Amazon engineering blog)
@@ -367,13 +367,13 @@ Postup de-microservicingu je opačný k extraction patternu z 20.09:
 
 Klíčový princip: **de-microservicing není failure**, je to legitimní architektonická
 volba reagující na změnu kontextu (tým se zmenšil, scaling profil se vyrovnal,
-operační kapacita klesla). Honest naming pomáhá – nekomunikujte to jako „regression"
-ale jako „consolidation".
+operační kapacita klesla). Honest naming pomáhá – nekomunikujte to jako „regression“
+ale jako „consolidation“.
 :::
 
 ### Náklady microservices – realistický rozpočet {#naklady-heading}
 
-Sam Newman v *Building Microservices, 2nd ed.* (kap. 1, sekce „Microservice Pain Points") shrnuje nákladové oblasti,
+Sam Newman v *Building Microservices, 2nd ed.* (kap. 1, sekce „Microservice Pain Points“) shrnuje nákladové oblasti,
 které se v rozhodování o microservices často přehlíží. Pro středně velký projekt
 (10–20 servis) jsou tyto nákladové položky **každoročně se opakující**:
 
@@ -389,7 +389,7 @@ které se v rozhodování o microservices často přehlíží. Pro středně vel
 Kalkulace pro start-up s 30 inženýry: vlastní platform tým (3 FTE × 80 000 USD/rok
 = 240k) + observability stack (60k) + cloud overhead (40k vs. monolit) ≈ **340k USD/rok**
 operačního dluhu navíc proti modulárnímu monolithu. To je rozhodovací číslo, které
-patří do diskuse, ne „microservices jsou prostě lepší".
+patří do diskuse, ne „microservices jsou prostě lepší“.
 
 ## 20.05 Kontrakt mezi services – sync vs. async {#kontrakt}
 

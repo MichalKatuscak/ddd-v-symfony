@@ -36,12 +36,12 @@ výjimkami, factory metodami a plnou validací invariantů.
 
 Tento průvodce používá **Doctrine atributy přímo na doménových třídách**
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
-*Dependency Inversion* – doména „ví" o Doctrine. V praxi je ten import metadata,
+*Dependency Inversion* – doména „ví“ o Doctrine. V praxi je ten import metadata,
 ne chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
 oficiální dokumentace i drtivá většina open-source Symfony projektů používá atributy.
 
 Pokud chcete striktně oddělenou doménu, korektní cesta není XML mapping (taky
-„znečištěné", jen jiným formátem), ale **Persisted Object Pattern** – samostatná
+„znečištěné“, jen jiným formátem), ale **Persisted Object Pattern** – samostatná
 persistence třída + mapper na doménový agregát. Detail v sekci
 [Persisted Object Pattern – pure DDD varianta](#persisted-object-pattern).
 :::
@@ -460,7 +460,7 @@ final class UserName
 :::
 
 `UserName` ukazuje plnou cenu hodnotového objektu: invariant „jméno není prázdné
-a má rozumnou délku" je vynucen typem. Volající kód nemá šanci vložit prázdný
+a má rozumnou délku“ je vynucen typem. Volající kód nemá šanci vložit prázdný
 string – pokud by to zkusil, dostane výjimku v konstruktoru, ne až v repozitáři.
 `#[ORM\Embeddable]` říká Doctrine, že VO se ukládá jako sloupec ve stejné tabulce
 jako vlastník (žádná samostatná tabulka pro VO).
@@ -559,7 +559,7 @@ Vypadá nevinně, ale má dvě skryté chyby:
 
 - **Atomicita selhává.** Pokud `dispatch()` selže (Messenger transport je
   nedostupný, RabbitMQ down, síťová chyba), agregát už je v databázi, ale událost ne.
-  Z pohledu volajících kontextů se „registrace neudála" – přitom uživatel reálně existuje.
+  Z pohledu volajících kontextů se „registrace neudála“ – přitom uživatel reálně existuje.
 - **Pořadí transakcí.** `flush()` provede UPDATE/INSERT, ale Doctrine *v některých
   konfiguracích* nezavře transakci přímo v něm (např. uvnitř `wrapInTransaction`).
   Dispatch před commitem vidí změny, které ostatní procesy ještě ne. Race condition.
@@ -573,9 +573,9 @@ příkladech v této knize ji používáme jako default.**
 ## 11.06 Persisted Object Pattern – pure DDD varianta {#persisted-object-pattern}
 
 Pokud trváte na tom, že doménová vrstva nesmí obsahovat ani metadata
-o persistenci, korektní cesta není XML mapping (taky „znečištěné", jen jiným
+o persistenci, korektní cesta není XML mapping (také „znečištěné“, jen jiným
 formátem), ale **Persisted Object Pattern** – varianta vzoru *Data Mapper* (Fowler, *PoEAA*, 2002),
-kterou v DDD kontextu rozebírá Vlad Khorikov v sérii blogpostů „Persistence model" a Vaughn Vernon v *IDDD*, kap. 6.
+kterou v DDD kontextu rozebírá Vlad Khorikov v sérii blogpostů „Persistence model“ a Vaughn Vernon v *IDDD*, kap. 6.
 
 Idea: doménová třída zůstane POPO bez atributů. Vedle ní v infrastrukturní
 vrstvě existuje samostatná persistence třída se všemi Doctrine atributy.
@@ -952,7 +952,7 @@ ani hodnotovému objektu** – typicky operaci nad dvěma a více agregáty
 externí zdroj (kurzovní převod, kalkulace daně podle jurisdikce).
 
 **Než sáhnete po doménové službě, ptejte se nejdřív: nepatří to do agregátu?**
-Pravidlo „lze platit jen confirmed objednávku" je čistý invariant agregátu `Order` –
+Pravidlo „lze platit jen confirmed objednávku“ je čistý invariant agregátu `Order` –
 jen `Order` zná svůj stav a jen on smí ten stav měnit. Domain service na to
 je anti-vzor, který oslabuje agregát a vede k anemickému modelu.
 
@@ -1036,7 +1036,7 @@ final class Order extends AggregateRoot
 
 `Order::recordPayment()` zapouzdřuje **pravidlo i přechod stavu** uvnitř agregátu.
 Jediný způsob, jak vytvořit `Payment` pro danou objednávku, vede přes tuto metodu –
-což znamená, že invariant „platit lze jen confirmed objednávku" je vynucen
+což znamená, že invariant „platit lze jen confirmed objednávku“ je vynucen
 typovým systémem, ne nadějí, že někdo zavolá správnou službu. Aplikační handler
 pak má triviální koordinační roli:
 
@@ -1087,14 +1087,14 @@ final class RecordPaymentHandler
 Doménová služba je správná volba ve třech přesně vymezených případech:
 
 - **Operace nad 2+ agregáty.** Klasický `MoneyTransferService::transfer($from, $to, $amount)`
-  – pravidlo „součet zůstatků je konstantní" se týká dvou účtů a nepatří jednomu
+  – pravidlo „součet zůstatků je konstantní“ se týká dvou účtů a nepatří jednomu
   ani druhému. (Pozor: stejně se ukládá v jedné transakci na jeden agregát –
   viz [agregát = transakční hranice](/navrh-agregatu#transactional-consistency).)
 - **Bezstavový výpočet s externí znalostí.** Daňová sazba podle jurisdikce a typu
   zboží, převod měn podle aktuálního kurzu. Logika je čistě doménová, ale
   vstupy přicházejí zvenčí.
 - **Generická doménová operace bez přirozeného vlastníka.** „Vyčisti expirované
-  rezervace starší než X dnů" – akce nad množinou agregátů, kde žádný z nich
+  rezervace starší než X dnů“ – akce nad množinou agregátů, kde žádný z nich
   není přirozený vlastník pravidla.
 
 Ve všech ostatních případech: pravidlo patří do agregátu, hodnotového objektu nebo
@@ -1248,7 +1248,7 @@ Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký
 :::callout{type="note"}
 ### Symfony EventDispatcher vs. Messenger pro doménové události {#dispatcher-vs-messenger-heading}
 
-Symfony nabízí dva mechanismy pro „něco se stalo":
+Symfony nabízí dva mechanismy pro „něco se stalo“:
 
 - **EventDispatcher** (`EventDispatcherInterface`) – synchronní,
   in-process. Listenery se provedou okamžitě v témž PHP požadavku, ve sdíleném
@@ -1272,7 +1272,7 @@ Repozitář při `save()` zapíše událost do outbox tabulky. Z outboxu pak wor
 a *asynchronně* (přes Messenger transport) propustí ven pro ostatní kontexty.
 
 **Anti-vzor:** používat Messenger jako náhradu za EventDispatcher uvnitř téhož
-kontextu, protože „je to flexibilnější". Cena: každá zpráva projde JSON serializací,
+kontextu, protože „je to flexibilnější“. Cena: každá zpráva projde JSON serializací,
 ztráta typů, ztráta transakční koheze, nutnost správy transportů. Zvolte mechanismus
 podle hranice, kterou událost překračuje – ne podle hypotetické budoucí potřeby.
 :::
@@ -1689,9 +1689,9 @@ In-memory mock repozitáře tyto vlastnosti negarantuje.
 :::callout{type="pattern"}
 ### Symfony Voter pro autorizaci nad agregátem {#voter-heading}
 
-Autorizace „kdo smí volat tuto akci" patří do prezentační/aplikační vrstvy, ne do agregátu.
+Autorizace „kdo smí volat tuto akci“ patří do prezentační/aplikační vrstvy, ne do agregátu.
 Symfony nabízí Voter API – idiomatické místo, kde se ptát „má aktuální uživatel právo
-udělat X s tímto agregátem":
+udělat X s tímto agregátem“:
 
 :::code{language="php" filename="src/OrderManagement/Infrastructure/Security/OrderVoter.php"}
 <?php
@@ -1741,7 +1741,7 @@ $this->commandBus->dispatch(new CancelOrder($order->id->value()));
 :::
 
 Voter chrání **právo na akci**. Doménový invariant „lze stornovat jen objednávku
-ve stavu A" je v `Order::cancel()` metodě – Voter ho nedubluje, jen zabraňuje
+ve stavu A“ je v `Order::cancel()` metodě – Voter ho nedubluje, jen zabraňuje
 volání, které by stejně skončilo `DomainException`.
 :::
 

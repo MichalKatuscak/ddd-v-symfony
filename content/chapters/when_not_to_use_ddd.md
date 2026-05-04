@@ -43,7 +43,7 @@ Typickým příkladem je aplikace, kde uživatel vytvoří záznam, upraví ho a
 Žádná doménová logika – jen persistence.
 
 DDD zde přidá agregáty, repozitáře, doménové události a value objekty pro věci,
-které jsou přirozeně jenom řádky v databázi. Výsledek: 5× více kódu, žádná přidaná hodnota.
+které jsou přirozeně jen řádky v databázi. Výsledek: 5× více kódu, žádná přidaná hodnota.
 
 Eric Evans to v *Domain-Driven Design* říká explicitně: DDD má smysl pro
 **komplexní doménovou logiku**. CRUD operace komplexní doménovou logiku nemají –
@@ -347,7 +347,7 @@ přepíšete stejně všechno.
 
 ## 23.09 Hybrid podle typu subdomény – DDD tam, kde dává smysl {#hybrid-subdomain}
 
-V reálných projektech odpověď „celé DDD ano, nebo celé ne" málokdy odpovídá
+V reálných projektech odpověď „celé DDD ano, nebo celé ne“ málokdy odpovídá
 realitě. Khononov v *Learning DDD* (2021) prosazuje architekturu **podle typu subdomény**:
 DDD se aplikuje per Bounded Context podle toho, o jakou subdoménu jde:
 
@@ -371,7 +371,7 @@ externí service.
 :::callout{type="warn"}
 ### Migration cost paradox {#migration-paradox-heading}
 
-Standardní rozhodnutí je „nový projekt → DDD od začátku, legacy → nech být".
+Standardní rozhodnutí je „nový projekt → DDD od začátku, legacy → nech být“.
 Reálný kontext bývá složitější: legacy CRUD kód přerůstá v komplexní doménu,
 ale migrace celého kódu na DDD je nereálná. Nastává **migration cost paradox**:
 
@@ -391,7 +391,7 @@ zjistil, že platforma byla po té době nahrazena jinou při akvizici.
 
 ### Pseudo-DDD – varování před cargo cultem {#pseudo-ddd-cargo-cult-heading}
 
-Nejhorší výsledek není „nepoužít DDD". Je to **pseudo-DDD**: tým má adresářovou
+Nejhorší výsledek není „nepoužít DDD“. Je to **pseudo-DDD**: tým má adresářovou
 strukturu DDD (`Domain/`, `Application/`, `Infrastructure/`), používá slovník
 DDD ve standupech, ale doménový model je anémický CRUD. Symptomy:
 
@@ -400,8 +400,8 @@ DDD ve standupech, ale doménový model je anémický CRUD. Symptomy:
   doménové logiky – jen logování nebo audit.
 - Bounded Contexts existují jako adresáře, ale tým je přejmenoval z původního
   technického dělení (`UserModule/` → `UserBoundedContext/`).
-- Code review diskuse jsou o „je toto správné DDD" místo „chrání tato změna
-  invariant".
+- Code review diskuse jsou o „je toto správné DDD“ místo „chrání tato změna
+  invariant“.
 
 Pseudo-DDD má všechny náklady DDD (víc kódu, learning curve) a žádný přínos
 (invarianty nejsou chráněné, doména není modelovaná). V tomto stavu je **honest

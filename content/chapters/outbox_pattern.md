@@ -1318,7 +1318,7 @@ zvládne ~5k events/s na consumer-grade hardware).
 Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízí dvě cesty:
 
 **Cesta 1 – leader election přes Redis/etcd.** Více workerů běží, ale jen jeden
-je „leader" a publikuje. Když leader spadne, do 5 s ho nahradí jiný. Důsledek:
+je „leader“ a publikuje. Když leader spadne, do 5 s ho nahradí jiný. Důsledek:
 HA bez double publish, ale pořád jen jeden worker dispatchuje (nezvyšuje propustnost).
 
 :::callout{type="pattern"}
@@ -1464,7 +1464,7 @@ invariant – ne nice-to-have.
 ### Inbox check a side-effect ne v jedné transakci {#anti-inbox-no-tx-heading}
 
 Klasická chyba: `if ($inbox->isProcessed($id)) return;` se provede
-v autocommit režimu, side-effect na read modelu se provede taky v autocommit režimu
+v autocommit režimu, side-effect na read modelu se provede také v autocommit režimu
 a teprve *potom* se vloží řádek do inboxu. Mezi check a insert ale může
 prolézt druhý paralelní worker, který stejný check provede jako „nový“ a zduplikuje
 update. Řešením je **celý handler obalit do `wrapInTransaction`**

@@ -1001,14 +1001,14 @@ Tři strategie, podle pořadí preference:
 
 - **Re-design hranic agregátu.** Pokud je `Inventory` hot, není to často
   jeden agregát, ale **N samostatných agregátů per warehouse + sklad pool**.
-  Jeden agregát na region/sku/sklad. Konflikty pak nejsou „mezi všemi klienty",
-  ale „mezi klienty stejné lokace".
-- **Eventual consistency místo strong.** Místo „strhni 1 ks z `Inventory` synchronně"
+  Jeden agregát na region/sku/sklad. Konflikty pak nejsou „mezi všemi klienty“,
+  ale „mezi klienty stejné lokace“.
+- **Eventual consistency místo strong.** Místo „strhni 1 ks z `Inventory` synchronně“
   publikuj `ItemReserved(productId, qty)` event a agregát ho zpracuje
   asynchronně přes saga. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
 - **CRDT / counter-only agregáty.** Pokud doménová operace je čistý increment
   (`view_count`, `like_count`), nepotřebuješ celý agregát – stačí
-  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. To není „obvykle DDD",
+  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. To není „obvykle DDD“,
   ale je to validní u skutečně commutative operací.
 
 :::callout{type="warn"}
@@ -1066,12 +1066,12 @@ queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
 - **Query handler read strany** drží separátní `Connection` nebo
   `EntityManager` namapovaný na replicu (`doctrine.orm.read_entity_manager`).
 - **Replikační lag** (typicky 10–100 ms) znamená, že po `save()` na primary
-  query na replicu nemusí ihned vidět změnu – stejný „read your writes"
+  query na replicu nemusí ihned vidět změnu – stejný „read your writes“
   problém jako u eventual consistency. Vzor řešení viz
   [CQRS – eventual consistency v UI](/cqrs#eventual-consistency).
 
 Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP proces
-= 1 DB connection" se nasčítá: 100 PHP-FPM workerů × 4 DB pody × 10 read replicas
+= 1 DB connection“ se nasčítá: 100 PHP-FPM workerů × 4 DB pody × 10 read replicas
 = 4000 connections, což překročí default `max_connections = 100` v Postgresu.
 Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
 pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**

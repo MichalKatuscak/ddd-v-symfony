@@ -13,7 +13,7 @@ schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
 chapter_number: "12"
 category: Praxe
-deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?"</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá jinou otázku a používá jiný Symfony nástroj.'
+deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá jinou otázku a používá jiný Symfony nástroj.'
 reading_time: 25
 difficulty: 3
 ---
@@ -432,7 +432,7 @@ Existují dva přístupy s odlišnými kompromisy:
 
 ### Přístup 1: Twig if (view-level) {#field-twig-heading}
 
-Nejjednodušší, ale s *únikem dat*: data se z databáze načtou všechna, jen se ve view zahodí. Pro většinu UI to stačí; **nikdy** to nepoužívejte pro citlivá data, která mohou unikat skrz HTML komentáře, JSON serializaci v JS aplikaci nebo Etag hashing.
+Nejjednodušší, ale s *únikem dat*: data se z databáze načtou všechna, jen se ve view zahodí. Pro většinu UI to stačí; **nikdy** to nepoužívejte pro citlivá data, která mohou unikat přes HTML komentáře, JSON serializaci v JS aplikaci nebo Etag hashing.
 
 :::code{language="twig" filename="templates/order/detail.html.twig" highlights="7,8,9,10,11,12,13,14,15,16"}
 {# templates/order/detail.html.twig #}

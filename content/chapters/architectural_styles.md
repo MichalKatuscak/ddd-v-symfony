@@ -37,7 +37,7 @@ Při návrhu projektu si vždy oddělte tyto dvě otázky:
 - **Modelovací osa** – od CRUD/Transaction Script přes Anemic Domain Model k bohatému DDD modelu (agregáty, value objekty, doménové události, invarianty).
 - **Strukturální osa** – od jednoduché Layered struktury přes Hexagonal/Onion/Clean s explicitní inverzí závislostí až po Vertical Slice s feature-first organizací.
 
-Posun po jedné ose neimplikuje posun po druhé. Pokud váš projekt trpí *špatným modelováním domény*, přechod na Hexagonal samotný to nevyřeší. A pokud trpí *špatnou izolací od infrastruktury*, přechod na DDD s dál pevně provázanými Doctrine entitami to taky neopraví.
+Posun po jedné ose neimplikuje posun po druhé. Pokud váš projekt trpí *špatným modelováním domény*, přechod na Hexagonal samotný to nevyřeší. A pokud trpí *špatnou izolací od infrastruktury*, přechod na DDD s dál pevně provázanými Doctrine entitami to také neopraví.
 :::
 
 Eric Evans v původní knize *Domain-Driven Design* (2003) [[1]](https://www.domainlanguage.com/ddd/) popisuje doporučenou „layered architecture“ jen v jedné krátké kapitole. Explicitně říká, že DDD je primárně o modelování – strukturální vrstvy jsou způsob, jak ten model chránit před technickými detaily, ne cíl sám o sobě. Pozdější autoři (Vernon, Khononov, Millett & Tune) ukazují DDD ve více strukturálních stylech – vrstvové i hexagonální i feature-first. Všechny fungují, pokud doménový model uvnitř má skutečný obsah.

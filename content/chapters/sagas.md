@@ -819,7 +819,7 @@ balancing, RabbitMQ multiple consumers). Důsledky:
   `order_id` jednoho z nich zabije, druhý zůstane. Bez constraint → dvě paralelní
   ságy téhož orderu, koliduje to o stav.
 - **Out-of-order events.** `PaymentCompleted` dorazí dřív než
-  `OrderConfirmed`, sága zatím není ve stavu „čeká na platbu". Process Manager
+  `OrderConfirmed`, sága zatím není ve stavu „čeká na platbu“. Process Manager
   netuší, co s ní – buď event zahodí (bug v doméně), nebo ho zařadí do
   *pending* fronty pro pozdější zpracování (komplexní stavový automat).
 - **Kompenzační závody.** Sága rozhodne `Compensate`, vyšle `RefundPayment`,
@@ -886,7 +886,7 @@ Tři stavební prvky, které zde fungují společně:
   a načte existující ságu místo vytvoření nové.
 - **`processedEventIds` v entitě** drží seznam již zpracovaných event ID.
   Stejný event přijde dvakrát → druhé volání skončí na guardu. To je „inbox
-  per saga" – paralela [Idempotent Inbox z Outbox kapitoly](/outbox-pattern#inbox).
+  per saga“ – paralela [Idempotent Inbox z Outbox kapitoly](/outbox-pattern#inbox).
 - **State machine guard** odmítne out-of-order event. Buď ho zahodí
   (idempotentně), nebo ho zařadí do *pending events* sloupce pro pozdější aplikaci.
 
@@ -897,7 +897,7 @@ lock na `Order#1` a žádá o `Inventory#42`; sága B drží lock na `Inventory#
 a žádá o `Order#1`. Postgres deadlock detector po cca 1 s jednu z transakcí
 zabije, ale do té doby čeká celý connection pool a stojí workers.
 
-S **eventual consistency** (Vernonovo „eventual consistency mimo hranici agregátu",
+S **eventual consistency** (Vernonovo „eventual consistency mimo hranici agregátu“,
 viz [Návrh agregátu](/navrh-agregatu#transactional-consistency)) deadlock
 **nemůže nastat na úrovni databáze** – každý krok ságy je samostatná transakce
 na jeden agregát. Ale jiný typ deadlocku stále možný: **logický cycle deadlock**

@@ -620,7 +620,7 @@ final class ProductController extends AbstractController
 }
 :::
 
-Důležité: **v1 a v2 koexistují**. Zveřejnění OHS v1 je *závazek* – jakmile nějaký downstream začne v1 používat, nesmíte ji rozbít. Bez explicitního versioningu to není OHS, jenom „REST endpoint s nedostatečnou disciplínou“.
+Důležité: **v1 a v2 koexistují**. Zveřejnění OHS v1 je *závazek* – jakmile nějaký downstream začne v1 používat, nesmíte ji rozbít. Bez explicitního verzování to není OHS, jen „REST endpoint s nedostatečnou disciplínou“.
 
 ### Strategie verzování
 
@@ -656,7 +656,7 @@ Vztah OHS a PL bývá matoucí. Hlavní rozdíl:
 - **OHS je kanál** – REST endpoint, gRPC service, AMQP exchange. „Jak se data dostanou ven.“
 - **PL je formát** – JSON Schema, OpenAPI, Avro, Protocol Buffers. „Jak data vypadají a co znamenají.“
 
-Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) – a je to špatně, protože downstream nemá jak validovat. Můžete mít PL bez OHS (Avro schema na disku) – a je to taky špatně, protože nikdo neví, jak data získat. **Plnohodnotná veřejná integrace = OHS + PL**.
+Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) – a je to špatně, protože downstream nemá jak validovat. Můžete mít PL bez OHS (Avro schema na disku) – a je to také špatně, protože nikdo neví, jak data získat. **Plnohodnotná veřejná integrace = OHS + PL**.
 
 ### Příklady standardů PL
 
