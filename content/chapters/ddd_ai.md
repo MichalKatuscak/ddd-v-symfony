@@ -142,8 +142,8 @@ modelování, aniž by to tak nutně nazývali.
 
 Protiváhu tvoří data z GitClear z roku 2024, analyzovaná Visual Studio Magazine. Code churn
 je podíl řádků přepsaných nebo smazaných do dvou týdnů od vytvoření. Podle tohoto výzkumu
-se u AI generovaného kódu v roce 2024 přibližně zdvojnásobil oproti pre-AI
-stavu z roku 2021. GitClear hovoří o kódu, který je „lokálně koherentní,
+se u AI generovaného kódu v roce 2024 přibližně zdvojnásobil oproti stavu
+z roku 2021 před nástupem AI. GitClear hovoří o kódu, který je „lokálně koherentní,
 ale architektonicky nekonzistentní“. Každý soubor nebo funkce může být syntakticky správná
 a pro svůj bezprostřední účel funkční. Větší architektonické vzory – hranice
 mezi moduly, zachování invariantů nebo konzistentní pojmenování napříč kódovou bází – jsou
