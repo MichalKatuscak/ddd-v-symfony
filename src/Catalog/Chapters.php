@@ -12,6 +12,9 @@ final class Chapters
     public static function all(): array
     {
         return [
+            // Předmluva
+            ['n' => '00', 'route' => 'preface',                   't' => 'Předmluva',                      'd' => 'Pro koho je kniha, co pokrývá, jak číst podle role',     'time' => 8,  'lvl' => 1, 'tag' => 'Úvod',        'group' => 'preface'],
+
             // Hub 1 – Úvod a strategie
             ['n' => '01', 'route' => 'what_is_ddd',               't' => 'Co je Domain-Driven Design',     'd' => 'Filozofie, Ubiquitous Language, Bounded Context',         'time' => 12, 'lvl' => 1, 'tag' => 'Základy',     'group' => 'basics'],
             ['n' => '02', 'route' => 'subdomains',                't' => 'Subdomény: Core, Supporting, Generic', 'd' => 'Kde investovat modelovací úsilí, co koupit, co outsourcovat', 'time' => 18, 'lvl' => 2, 'tag' => 'Základy',     'group' => 'basics'],

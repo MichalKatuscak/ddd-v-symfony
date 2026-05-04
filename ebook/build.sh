@@ -21,6 +21,7 @@ cd "$ROOT_DIR"
 
 # ─── Pořadí kapitol (dle Chapters.php) ────────────────────────────────────
 CHAPTER_ORDER=(
+  preface
   what_is_ddd
   subdomains
   context_mapping
