@@ -1092,7 +1092,7 @@ Detaily, na které se často zapomíná:
 
 ## 15.08 Provozní aspekty {#provoz}
 
-Outbox v *development* prostředí funguje, jak má. V produkci ale narazíte na čtyři
+Outbox ve *vývojovém* prostředí funguje, jak má. V produkci ale narazíte na čtyři
 operační otázky: jak měřit lag, jak držet tabulku malou, co s permanentně failovanými
 řádky a jak monitorovat, že se na něco nezapomnělo.
 
