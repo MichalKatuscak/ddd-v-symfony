@@ -280,7 +280,7 @@ Pokud vám sedí dva a více těchto bodů, máte distributed monolith:
 
 Pokud máte coupling jako monolith a operační režii jako microservices, dostáváte to nejhorší z obou světů. Konkrétně:
 
-- **Latence.** Vnitřní volání monolithu je function call (~µs); volání mezi servisami je síťová cesta tam a zpět (~ms) plus serializace, deserializace a validace. Při 10 vnořených voláních je rozdíl 4 řády.
+- **Latence.** Vnitřní volání monolithu je volání funkce (~µs); volání mezi servisami je síťová cesta tam a zpět (~ms) plus serializace, deserializace a validace. Při 10 vnořených voláních je rozdíl 4 řády.
 - **Availability.** Pokud každá service má 99,9% uptime, řetězec deseti servis má 99,0 % – desetinásobně větší nedostupnost.
 - **Debugging.** Trace jednoho requestu prochází N servisami. Bez distributed tracing je incident skoro nedohledatelný. S ním je drahý.
 - **Refaktoring.** Přesunutí pole z jedné entity do jiné je v monolithu refaktoring v IDE. Mezi servisami je to migrace dat, change API smluv, koordinovaný deploy a období dual-write.
@@ -338,7 +338,7 @@ ušetřil **90 % infrastrukturních nákladů** a zlepšil scaling.
 Symptomy, které mluví pro de-microservicing:
 
 - **Latenční zátěž,** která neodpovídá síťové latenci mezi servisami. Často znamená,
-  že interakce by měla být in-process function call, ne network hop.
+  že interakce by měla být volání funkce v jednom procesu, ne síťový skok.
 - **Refaktor kontextu vyžaduje současné změny v 3+ servisách.** Hranice byla špatně
   zvolená; refaktor v monolitu je triviální.
 - **Inženýrská kapacita > 50 % na operační platformu.** Tým udržuje Kubernetes,
@@ -495,7 +495,7 @@ Přechod z modular monolithu na microservices je primárně **investice do opera
 
 ## 19.08 Symfony konkrétně – kdy a jak {#symfony}
 
-Symfony 8 dokáže obsloužit obě architektury – modular monolith i microservices – bez zásadní změny kódu vrstvy domény. Rozdíl je v **routing konfiguraci Messenger**: ve stejném monolithu všechny eventy a commands směřujete na `sync` transport (function call) nebo na lokální `async` (in-memory worker); přes hranici dvou servis je směrujete na `amqp` transport, který fyzicky publikuje zprávu do RabbitMQ.
+Symfony 8 dokáže obsloužit obě architektury – modular monolith i microservices – bez zásadní změny kódu vrstvy domény. Rozdíl je v **routing konfiguraci Messenger**: ve stejném monolithu všechny eventy a commands směřujete na `sync` transport (přímé volání) nebo na lokální `async` (in-memory worker); přes hranici dvou servis je směrujete na `amqp` transport, který fyzicky publikuje zprávu do RabbitMQ.
 
 ### Modular monolith v Symfony {#symfony-monolith-heading}
 
