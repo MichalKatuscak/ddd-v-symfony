@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-05-04"
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -21,7 +21,12 @@ github_examples: null
 
 ## 22.01 Úvodem: Proč znát anti-vzory {#uvodem}
 
-Domain-Driven Design při návrhu softwaru přináší strukturu a vyjadřovací sílu, ale jeho komplexnost s sebou nese mnohá úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí na stejné chyby – i přesto, že teorii dobře rozumí. Anti-vzory je tedy potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty). Reálné problémy z produkčního provozu DDD systémů popisuje kapitola [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli).
+Tato kapitola je **katalog kódových a modelovacích anti-vzorů** v DDD. Pro
+**provozní/infrastrukturní třenice** (Doctrine, Messenger, ACL k externím API, Symfony Form vs.
+Command) viz [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli). Pro **rozhodovací rámec**,
+jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
+
+Domain-Driven Design při návrhu softwaru přináší strukturu a vyjadřovací sílu, ale jeho komplexnost s sebou nese mnohá úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí na stejné chyby – i přesto, že teorii dobře rozumí. Anti-vzory je tedy potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 
 Anti-vzor je přístup, který vypadá správně – nebo k němu vývojáři přirozeně sklouznou – ale narušuje principy DDD a způsobuje dlouhodobé problémy s udržovatelností, testovatelností a výkonem.
 

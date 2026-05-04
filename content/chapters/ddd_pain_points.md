@@ -7,7 +7,7 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: "2026-05-03"
+modified: "2026-05-04"
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
@@ -27,9 +27,14 @@ V praxi se implementace DDD střetává s řadou problémů, na které standardn
 většinou neupozorňuje. Architektonické principy narážejí na realitu frameworku, databáze,
 asynchronní infrastruktury i týmové dynamiky.
 
-Tato kapitola je **katalog 20 reálných problémů**, se kterými se setkávají týmy
-implementující DDD v PHP a Symfony. Pro každý problém najdete: popis situace, analýzu příčiny
-a doporučené řešení – tam kde je to výmluvné, s ukázkou kódu.
+Tato kapitola je **katalog 20 reálných provozních problémů**, se kterými se setkávají týmy
+implementující DDD v PHP a Symfony. Zaměřuje se na třenice s konkrétní technologií: Doctrine
+Unit of Work, Symfony Messenger, Outbox pattern, autorizace, race conditions. Pro každý problém
+najdete: popis situace, analýzu příčiny a doporučené řešení – tam kde je to výmluvné, s ukázkou kódu.
+
+Pro úhel **kódových a modelovacích anti-vzorů** (anémický model, Primitive Obsession, God
+Aggregate, sdílená databáze napříč BC) viz [Anti-vzory](/anti-vzory). Pro **rozhodovací rámec**,
+jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 ## 21.01 A – Doctrine vs. doménový model {#doctrine}
 

@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: "2026-05-03"
+modified: "2026-05-04"
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -18,14 +18,15 @@ reading_time: 14
 difficulty: 2
 ---
 
+Tato kapitola je **rozhodovací rámec**: kdy DDD nasadit a kdy ne. Pro **detailní katalog
+kódových anti-vzorů**, kdy už DDD nasadíte, ale uděláte chyby, viz [Anti-vzory](/anti-vzory).
+Pro **provozní třenice** s Doctrine, Messenger a Symfony, kdy DDD je správně nasazen, ale
+infrastruktura bolí, viz [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli).
+
 DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
 zpomaluje vývoj a frustruje tým – aniž by přinesla cokoliv hodnotného.
-Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít.
-
-Předchozí kapitola ukázala [kde DDD v praxi bolí](/ddd-v-praxi-kde-to-boli),
-i když je nasazeno správně. Tato kapitola se věnuje situacím, kde DDD nasazovat nemá smysl.
-Je to pohled, který DDD literatura – soustředěná na to, kdy vzor použít –
-zpravidla nerozvádí dostatečně.
+Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít. Je to pohled, který DDD
+literatura – soustředěná na to, kdy vzor použít – zpravidla nerozvádí dostatečně.
 
 ## 23.01 Rozhodovací strom: Mám použít DDD? {#rozhodovaci-strom}
 
