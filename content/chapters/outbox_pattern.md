@@ -86,7 +86,7 @@ final readonly class PlaceOrderHandlerNaive
 
 Problém je v tom, že **krok 1 a krok 2 jsou dvě nezávislé transakce ve dvou
 různých systémech**. Jakmile mezi nimi dojde k jakékoliv chybě – síťový timeout,
-crash workeru, restart aplikace, výpadek brokera, OOM kill PHP procesu – skončíme
+pád workeru, restart aplikace, výpadek brokera, OOM kill PHP procesu – skončíme
 v jednom ze dvou nesymetrických nekonzistentních stavů:
 
 - **DB write succeeded, broker dispatch failed.** Order existuje v databázi,
