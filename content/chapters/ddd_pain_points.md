@@ -11,7 +11,7 @@ modified: "2026-05-04"
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
-chapter_number: "21"
+chapter_number: "20"
 category: Praxe
 deck: "Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další."
 reading_time: 35
@@ -36,7 +36,7 @@ Pro úhel **kódových a modelovacích anti-vzorů** (anémický model, Primitiv
 Aggregate, sdílená databáze napříč BC) viz [Anti-vzory](/anti-vzory). Pro **rozhodovací rámec**,
 jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
-## 21.01 A – Doctrine vs. doménový model {#doctrine}
+## 20.01 A – Doctrine vs. doménový model {#doctrine}
 
 Doctrine ORM je bohatý nástroj, ale jeho interní model (Unit of Work, Identity Map, lazy loading)
 byl navržen pro jednoduchý CRUD. Bohaté doménové modely s ním přicházejí do konfliktu na šesti
@@ -339,7 +339,7 @@ jeden enum sloupec pro typ, jeden JSON sloupec pro specifická data varianty.
 Logika se přesouvá do doménových metod, které přijímají VO jako parametr –
 ne do dědičnosti.
 
-## 21.02 B – Asynchronní infrastruktura {#async}
+## 20.02 B – Asynchronní infrastruktura {#async}
 
 Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci –
 a s ní distribuované problémy: zprávy se ztrácejí, doručují dvakrát, přicházejí
@@ -673,7 +673,7 @@ stále selhává, teprve pak skončí v failed transport – kde ji lze prozkoum
 a znovu odeslat.
 :::
 
-## 21.03 C – Modelování {#modelovani}
+## 20.03 C – Modelování {#modelovani}
 
 Správné doménové modelování je obtížnější než implementace – vyžaduje disciplínu
 v rozhodnutích, která se zdají triviální, dokud nezpůsobí problém.
@@ -830,7 +830,7 @@ s pochopením domény. Bez aktivní správy kód zaostává za aktuálním cháp
    (`it_places_an_order_when_items_are_in_stock()`) tvoří čitelnou dokumentaci
    aktuálního chování.
 
-## 21.04 D – Symfony-specifické třenice {#symfony}
+## 20.04 D – Symfony-specifické třenice {#symfony}
 
 Symfony je rozsáhlý framework, ale některé jeho konvence jsou navrženy pro CRUD aplikace.
 Tato sekce popisuje tři místa, kde framework-first přístup koliduje s DDD.
@@ -997,7 +997,7 @@ final class OrderVoter extends Voter
 :::
 :::
 
-## 21.05 E – Organizace a tým {#tym}
+## 20.05 E – Organizace a tým {#tym}
 
 DDD selže ne proto, že by byl technicky špatný – ale proto, že tým ho nepochopil,
 management ho nepodpořil nebo znalosti zůstaly u jednoho člověka.

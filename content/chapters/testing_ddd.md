@@ -11,7 +11,7 @@ modified: "2026-05-03"
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
-chapter_number: "18"
+chapter_number: "17"
 category: Praxe
 deck: "Testování Domain-Driven Design kódu v Symfony v praxi. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac."
 reading_time: 30
@@ -19,7 +19,7 @@ difficulty: 3
 github_examples: Chapter08_Testing
 ---
 
-## 18.01 Filozofie testování v DDD {#filozofie-testovani}
+## 17.01 Filozofie testování v DDD {#filozofie-testovani}
 
 Domain-Driven Design a automatizované testování se doplňují. Čistá doménová vrstva nezávisí na frameworku,
 databázi ani jiné infrastruktuře, a proto ji lze testovat přímo. V tradičních vrstvených architekturách
@@ -71,7 +71,7 @@ v DDD kontextu definuje tři vrstvy testů. Každá vrstva pokrývá jinou čás
 - **Prezentační vrstva:** Správné HTTP status kódy, formát odpovědi, autentizace a autorizace.
 :::
 
-## 18.02 Unit testy doménové vrstvy {#unit-testy-domeny}
+## 17.02 Unit testy doménové vrstvy {#unit-testy-domeny}
 
 Unit testy doménové vrstvy tvoří nejcennější část testovací sady DDD aplikace. Testují čisté PHP objekty bez závislostí
 na frameworku. Pro jejich spuštění stačí nainstalovat PHPUnit a samotné doménové třídy – žádný bootstrap Symfony kernelu není potřeba.
@@ -330,7 +330,7 @@ final class OrderTest extends TestCase
 :::
 :::
 
-## 18.03 Testování doménových událostí {#testovani-domain-events}
+## 17.03 Testování doménových událostí {#testovani-domain-events}
 
 Doménové události jsou hlavním mechanismem DDD pro komunikaci mezi agregáty a bounded contexty. Testy musí ověřit,
 že agregát vydá správné události se správnými daty jako reakci na doménové operace.
@@ -461,7 +461,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 :::
 :::
 
-## 18.04 Test doubles a InMemory repozitáře {#test-doubles}
+## 17.04 Test doubles a InMemory repozitáře {#test-doubles}
 
 Test doubles jsou náhradní implementace závislostí, které se v testech používají místo reálných objektů.
 Volba typu test double závisí na tom, co testujeme a jaké chování chceme ověřit.
@@ -634,7 +634,7 @@ i když se chování systému nezměnilo. Preferujte InMemory Fake implementace 
 pouze tam, kde ověřujete vedlejší efekty (odeslání e-mailu, volání externího API).
 :::
 
-## 18.05 Integrační testy s Doctrine {#integracni-testy}
+## 17.05 Integrační testy s Doctrine {#integracni-testy}
 
 Integrační testy ověřují spolupráci doménového kódu s infrastrukturou – správnost Doctrine mapování,
 dotazů repozitářů a transakčního chování. Na rozdíl od unit testů potřebují skutečnou databázi (typicky SQLite
@@ -755,7 +755,7 @@ mohl projít, i kdyby data v databázi vůbec nebyla uložena – Doctrine by je
 z paměti. Voláme tedy `clear()` mezi zápisem a čtením, aby byl test skutečně integrační.
 :::
 
-## 18.06 Funkční testy API a kontrolerů {#funkcni-testy}
+## 17.06 Funkční testy API a kontrolerů {#funkcni-testy}
 
 Funkční testy ověřují chování celé aplikace přes HTTP vrstvu. Testují, že správný request na správnou URL
 vrátí očekávanou odpověď – včetně HTTP status kódu, formátu těla odpovědi (JSON), hlaviček a chování
@@ -877,7 +877,7 @@ Vše ostatní (edge cases, validace, doménová pravidla) pokryjte unit testy do
 Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů spouštět testy lokálně.
 :::
 
-## 18.07 Architektonické testy {#architektonicke-testy}
+## 17.07 Architektonické testy {#architektonicke-testy}
 
 Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla – zejména
 pravidla závislostí mezi vrstvami. V DDD platí, že doménová vrstva nesmí záviset
@@ -1019,7 +1019,7 @@ return static function (Config $config): void {
 :::
 :::
 
-## 18.08 Code coverage a doporučené postupy {#pokryti-a-best-practices}
+## 17.08 Code coverage a doporučené postupy {#pokryti-a-best-practices}
 
 Code coverage (pokrytí kódem) je metrika udávající, jaké procento kódu je spouštěno při běhu testů.
 Vysoké pokrytí samo o sobě nezaručuje kvalitu testů – lze dosáhnout 100% pokrytí s testy, které

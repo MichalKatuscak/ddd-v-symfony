@@ -11,7 +11,7 @@ modified: "2026-05-03"
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
-chapter_number: "15"
+chapter_number: "14"
 category: Vzory
 deck: 'Ságy a Process Managery v DDD a Symfony 8 – implementace kompenzačních transakcí, choreografie i orchestrace dlouhotrvajících procesů pomocí Symfony Messenger. Včetně timeoutů, paralelních kroků a monitorování distribuovaných procesů.'
 reading_time: 40
@@ -26,7 +26,7 @@ navazují. Event Sourcing řeší persistenci uvnitř jednoho agregátu; ságy k
 procesy **napříč více agregáty a Bounded Contexts**, které spolu komunikují
 prostřednictvím doménových událostí.
 
-## 15.01 Proč potřebujeme ságy? {#proc-sagy}
+## 14.01 Proč potřebujeme ságy? {#proc-sagy}
 
 Jako ilustrativní příklad slouží typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
 napříč odlišnými [Bounded Contexts](/zakladni-koncepty#bounded-contexts):
@@ -89,7 +89,7 @@ V následujících sekcích si ukážeme dva základní přístupy ke koordinaci
 a jejich praktickou implementaci v Symfony 8 s využitím
 [Symfony Messenger](/cqrs).
 
-## 15.02 Kompenzační transakce {#kompenzacni-transakce}
+## 14.02 Kompenzační transakce {#kompenzacni-transakce}
 
 Kompenzační transakce je **sémantické vrácení efektu předchozího kroku**.
 Na rozdíl od technického rollbacku databázové transakce (který „vymaže“ změny, jako by
@@ -179,7 +179,7 @@ Typicky se toho dosahuje kontrolou aktuálního stavu před provedením akce
 (např. `RefundCustomer` nejprve ověří, zda platba již nebyla vrácena).
 :::
 
-## 15.03 Choreografie {#choreografie}
+## 14.03 Choreografie {#choreografie}
 
 Choreografie je přístup ke koordinaci ságy, při němž **neexistuje centrální
 koordinátor**. Každý Bounded Context reaguje na události publikované jinými
@@ -319,7 +319,7 @@ objednávku) je triviální: stačí vytvořit nový handler naslouchající
 `OrderPlaced`. Pro jednoduché procesy se dvěma až třemi kroky je choreografie
 přímočaré a srozumitelné řešení.
 
-## 15.04 Limity choreografie {#limity-choreografie}
+## 14.04 Limity choreografie {#limity-choreografie}
 
 Choreografie funguje dobře pro jednoduché procesy, ale s rostoucí komplexitou naráží
 na reálné limity. V praxi se tyto problémy projeví obvykle ve chvíli, kdy proces
@@ -379,7 +379,7 @@ Process Manager. Orchestraci zavádějte až ve chvíli, kdy narazíte na výše
 problémy.
 :::
 
-## 15.05 Orchestrace – Process Manager {#orchestrace}
+## 14.05 Orchestrace – Process Manager {#orchestrace}
 
 Orchestrace je přístup, při kterém existuje **centrální koordinátor** –
 tzv. **Process Manager** – který řídí celý doménový proces jako stavový
@@ -583,7 +583,7 @@ a jedné události – stávající metody ani stávající kontexty se nemění
 (nové kroky), ale uzavřený pro modifikaci (existující kroky zůstávají beze změny).
 :::
 
-## 15.06 Perzistence stavu ságy {#perzistence-stavu}
+## 14.06 Perzistence stavu ságy {#perzistence-stavu}
 
 Process Manager potřebuje **perzistentní úložiště stavu**, aby přežil
 restart workeru, nové nasazení aplikace i horizontální škálování na více instancí.
@@ -943,7 +943,7 @@ změnila tvar `state` JSONu. Operátor potřebuje nástroje:
   obnoví správný stav. Vyžaduje tracking správného starting eventu (typicky
   `OrderPlaced` event ID).
 
-## 15.07 Implementace v Symfony Messenger {#messenger-implementace}
+## 14.07 Implementace v Symfony Messenger {#messenger-implementace}
 
 Předchozí sekce ukázaly Process Manager (orchestrátor) a perzistenci stavu ságy. Nyní
 propojíme obě části s **Symfony Messenger** – asynchronním message busem,
@@ -1066,7 +1066,7 @@ Podrobnější informace o asynchronním zpracování zpráv, konfiguraci transp
 strategiích najdete v kapitole [CQRS – asynchronní
 zpracování](/cqrs#async).
 
-## 15.08 Timeouty a deadliny {#timeouty}
+## 14.08 Timeouty a deadliny {#timeouty}
 
 Co se stane, když událost `PaymentSucceeded` nikdy nedorazí? Síťový výpadek,
 nedostupnost platební brány, ztráta zprávy ve frontě – v distribuovaném systému musíte
@@ -1211,7 +1211,7 @@ nativně (používá sloupec `available_at`). Pokud používáte
 (`sync://`) `DelayStamp` ignoruje a zprávu doručí okamžitě.
 :::
 
-## 15.09 Kompenzační strategie v praxi {#kompenzacni-strategie}
+## 14.09 Kompenzační strategie v praxi {#kompenzacni-strategie}
 
 Když krok ságy selže, máme dvě základní strategie, jak situaci řešit. Volba závisí
 na povaze chyby – je přechodná (síťový výpadek, dočasná nedostupnost služby), nebo
@@ -1292,7 +1292,7 @@ refundu ověřit, zda refund pro danou objednávku již neexistuje.
 Podrobnější informace o Dead Letter Queue, retry strategiích a zpracování chyb v Messenger
 najdete v kapitole [CQRS – zpracování chyb](/cqrs#error-handling).
 
-## 15.10 Paralelní kroky {#paralelni-kroky}
+## 14.10 Paralelní kroky {#paralelni-kroky}
 
 Dosud jsme uvažovali sériové provádění kroků – jeden po druhém. V praxi však některé
 kroky na sobě nezávisí a mohou běžet **současně**. Například po úspěšné
@@ -1385,7 +1385,7 @@ nebyla mezitím změněna. Pokud ano, vyhodí
 `OptimisticLockException` a Messenger zprávu automaticky zopakuje.
 :::
 
-## 15.11 Monitoring a observabilita {#monitoring}
+## 14.11 Monitoring a observabilita {#monitoring}
 
 Produkční ságy potřebují **observabilitu** – musíte vědět, které ságy právě
 běží, které se zasekly a které selhaly. Bez monitoringu je ladění distribuovaných procesů
@@ -1525,7 +1525,7 @@ může běžet jako Kubernetes CronJob nebo Symfony Scheduler task.
 Podrobnosti o implementaci middleware v Symfony Messenger najdete v kapitole
 [CQRS – sekce middleware](/cqrs#middleware).
 
-## 15.12 Testování ság {#testovani}
+## 14.12 Testování ság {#testovani}
 
 Ságy koordinují složité vícekrokové procesy napříč Bounded Contexts. Chyba v přechodové logice nebo
 v kompenzacích se projeví až v produkci a může být velmi nákladná (stržená platba

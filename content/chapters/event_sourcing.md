@@ -11,7 +11,7 @@ modified: "2026-05-03"
 breadcrumb_name: Event Sourcing
 schema_type: TechArticle
 schema_headline: "Event Sourcing v DDD a Symfony"
-chapter_number: "14"
+chapter_number: "13"
 category: Vzory
 deck: 'Event Sourcing v kontextu Domain-Driven Design a Symfony – implementace Event Store, event-sourcovaných agregátů, projekcí, Outbox patternu, snapshottingu a verzování událostí. Včetně praktických problémů: idempotence projektorů, rebuild projekcí a eventual consistency.'
 reading_time: 45
@@ -19,7 +19,7 @@ difficulty: 4
 github_examples: Chapter06_EventSourcing
 ---
 
-## 14.01 Co je Event Sourcing? {#co-je-event-sourcing}
+## 13.01 Co je Event Sourcing? {#co-je-event-sourcing}
 
 Tradiční CRUD persistence má slepou skvrnu: při každé změně přepíše předchozí stav a veškerá
 historie se nenávratně ztrácí. Event Sourcing (ES) tento problém řeší jinak – stav systému
@@ -61,7 +61,7 @@ event logu; žádná informace se nikdy nepřepisuje ani nemaže.
 - **Snapshot** – Periodicky ukládaný snímek aktuálního stavu agregátu, který slouží jako zkratka při replay. Umožňuje přehrát pouze události novější než poslední snapshot místo celého event streamu od počátku.
 :::
 
-## 14.02 Vztah k CQRS {#vztah-k-cqrs}
+## 13.02 Vztah k CQRS {#vztah-k-cqrs}
 
 Event Sourcing a [CQRS](/cqrs) jsou dva samostatné vzory, které se však přirozeně
 doplňují [[2]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf).
@@ -94,7 +94,7 @@ Při jejich kombinaci ES přirozeně zásobuje CQRS read side daty: každá udá
 vstupem pro aktualizaci projekcí.
 :::
 
-## 14.03 Doménové události jako základ Event Sourcingu {#domenove-udalosti}
+## 13.03 Doménové události jako základ Event Sourcingu {#domenove-udalosti}
 
 V Event Sourcingu jsou doménové události (Domain Events) primárním datovým artefaktem. Na rozdíl od
 doménových událostí používaných pouze k notifikaci (side effects) jsou v ES události *zdrojem pravdy*
@@ -240,7 +240,7 @@ Konvence pojmenování událostí by měla být konzistentní napříč celým p
 `ordering.order_placed` nebo `payment.payment_received`. Tato konvence usnadňuje
 routing událostí v Symfony Messenger a jejich filtrování v Event Store.
 
-## 14.04 Implementace Event Store {#event-store}
+## 13.04 Implementace Event Store {#event-store}
 
 Event Store je srdcem Event Sourcingu. Jedná se o append-only databázové úložiště, do nějž se ukládají
 všechny doménové události. Každý záznam reprezentuje jednu událost s jejím kontextem (ke kterému agregátu
@@ -448,7 +448,7 @@ final class DoctrineEventStore implements EventStore
 *src/Infrastructure/EventSourcing/DoctrineEventStore.php*
 :::
 
-## 14.05 Agregát s Event Sourcingem {#aggregate-s-es}
+## 13.05 Agregát s Event Sourcingem {#aggregate-s-es}
 
 V klasickém DDD agregát mění svůj stav přímou modifikací vlastních atributů. V Event Sourcingu je tento
 mechanismus jiný: **každá změna stavu musí projít přes doménovou událost**. Metody
@@ -732,7 +732,7 @@ final class EventSourcedOrderRepository
 *src/Infrastructure/Ordering/EventSourcedOrderRepository.php*
 :::
 
-## 14.06 Projekce (Projections) {#projekce}
+## 13.06 Projekce (Projections) {#projekce}
 
 Projekce jsou read modely sestavené z event streamu. Protože Event Store je append-only a neumožňuje
 ad-hoc dotazy (např. „všechny objednávky zákazníka X s celkovou hodnotou nad 1000 Kč“),
@@ -862,7 +862,7 @@ Projekce lze také **přebudovat** (rebuild) přehráním celého Event Store od
 tato schopnost je jednou z největších výhod Event Sourcingu. Při změně doménových požadavků stačí
 vytvořit novou projekci a přehrát historii; u CRUD systémů jsou historická data nenávratně ztracena.
 
-## 14.07 Outbox a transakční doručování událostí {#outbox}
+## 13.07 Outbox a transakční doručování událostí {#outbox}
 
 Předchozí sekce ukazovala projektory jako Messenger handlery, které dostávají doménové
 události z asynchronní fronty. Implicitně jsme předpokládali, že se událost po zápisu
@@ -924,7 +924,7 @@ Před vlastní implementací zvažte také **Doctrine Transport** v Symfony Mess
 který ukládá zprávy do databáze a poskytuje at-least-once doručení bez vlastního relay kódu.
 :::
 
-## 14.08 Praktické problémy projekcí {#prakticke-problemy-projekci}
+## 13.08 Praktické problémy projekcí {#prakticke-problemy-projekci}
 
 Předchozí sekce ukázaly, jak projekci vybudovat a jak události spolehlivě doručit. V praxi
 se ale objevují problémy, které z jednoduchých ukázek nejsou patrné. Tato sekce pokrývá
@@ -1216,7 +1216,7 @@ až ve chvíli, kdy se synchronní aktualizace stane úzkým hrdlem. Vyhýbáte 
 s eventual consistency v raných fázích projektu.
 :::
 
-## 14.09 Snapshotting {#snapshotting}
+## 13.09 Snapshotting {#snapshotting}
 
 Se stárnutím systému rostou event streamy agregátů. Agregát s tisíci událostmi vyžaduje načtení a přehrání
 tisíce řádků z databáze při každém command handleru – to je výkonnostní problém, který se v reálných
@@ -1375,7 +1375,7 @@ u dlouhých streamů (tisíce událostí) se vyplatí migrace.
 Více o výkonnostních dopadech viz [Výkonnostní aspekty](/vykonnostni-aspekty).
 :::
 
-## 14.10 Verzování událostí (Event Versioning) {#verzovani-udalosti}
+## 13.10 Verzování událostí (Event Versioning) {#verzovani-udalosti}
 
 V Event Sourcingu jsou události **permanentní** – jednou uložené do Event Store se nikdy
 nemažou ani nepřepisují. Zároveň se ale doménový model v čase vyvíjí: přibývají nové atributy, mění se
@@ -1699,7 +1699,7 @@ ale identifikace uživatele není možná.
 Detail v sekci [GDPR a osobní údaje v Event Store](#gdpr-es-heading).
 :::
 
-## 14.11 Kdy použít Event Sourcing {#kdy-pouzit}
+## 13.11 Kdy použít Event Sourcing {#kdy-pouzit}
 
 Event Sourcing přináší výrazné výhody, ale i výraznou přidanou složitost. Před jeho zavedením je nutné pečlivě
 zvážit, zda přínosy pro daný kontext převažují nad náklady na implementaci a provoz.

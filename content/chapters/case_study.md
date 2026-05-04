@@ -11,20 +11,20 @@ modified: "2026-05-03"
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
-chapter_number: "25"
+chapter_number: "24"
 category: Praxe
 deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu – celý proces od analýzy domény, identifikace bounded contexts a strategického i taktického designu až po implementaci s využitím DDD principů a CQRS.'
 reading_time: 50
 difficulty: 4
 ---
 
-## 25.01 Úvod {#introduction}
+## 24.01 Úvod {#introduction}
 
 Případová studie popisuje implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8.
 Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
 Studie klade důraz na správnou aplikaci strategických i taktických vzorů DDD v reálném projektu.
 
-## 25.02 Požadavky {#requirements}
+## 24.02 Požadavky {#requirements}
 
 Systém pro správu projektů má následující požadavky:
 
@@ -37,7 +37,7 @@ Systém pro správu projektů má následující požadavky:
 - Uživatelé mohou sledovat aktivitu na projektech a úkolech.
 - Systém musí být škálovatelný a udržitelný.
 
-## 25.03 Doménová analýza {#discovery}
+## 24.03 Doménová analýza {#discovery}
 
 Architektura nezačíná u kódu, ale u rozhovoru s doménovými experty. Tato sekce ukazuje, jak vznikla pětice
 bounded contexts ze sekce [Architektura](#architecture) – jaká data byla na vstupu a jakými kroky
@@ -121,7 +121,7 @@ Doménový model je *živý dokument* – při každém větším incrementu se 
 v kódu odpovídá slovníku v týmu.
 :::
 
-## 25.04 Architektura {#architecture}
+## 24.04 Architektura {#architecture}
 
 Architektura kombinuje strategický a taktický DDD s CQRS v Symfony 8. Na strategické úrovni vznikla
 pětice bounded contexts a kontextová mapa popisující jejich vztahy. Taktická úroveň pokrývá agregáty,
@@ -339,7 +339,7 @@ src/
                 └── UuidType.php    # Typ pro UUID
 :::
 
-## 25.05 Implementace {#implementation}
+## 24.05 Implementace {#implementation}
 
 Následující sekce ukazuje implementaci hlavních částí systému s aplikací DDD principů.
 
@@ -1085,7 +1085,7 @@ class TaskAssignmentService
 }
 :::
 
-## 25.06 Read modely a projekce {#read-model}
+## 24.06 Read modely a projekce {#read-model}
 
 Implementace v [sekci Implementace](#implementation) ukazuje stranu zápisu (commands).
 `GetProjectsHandler` ale stále načítá projekty přes doménový repozitář – tedy hydratuje agregáty,
@@ -1428,7 +1428,7 @@ publikace události na transport selhat – read model zůstane navždy nesynchr
 [Event Sourcing](/event-sourcing) v sekci o transactional outbox.
 :::
 
-## 25.07 Výzvy a rozhodnutí {#trade-offs}
+## 24.07 Výzvy a rozhodnutí {#trade-offs}
 
 Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí představuje místa, kde tým váhal mezi
 dvěma legitimními možnostmi. Cílem této sekce není ukázat „správnou“ odpověď, ale popsat kontext, který určil
@@ -1528,7 +1528,7 @@ na invariant). Rozbor transakčních hranic je v kapitole
 [Základní koncepty DDD](/zakladni-koncepty); anti-vzory typu *God Aggregate*
 v kapitole [Anti-vzory a typické chyby](/anti-vzory).
 
-## 25.08 Ponaučení {#lessons}
+## 24.08 Ponaučení {#lessons}
 
 Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla deset
 ponaučení, která lze přenést do dalších projektů. Prvních sedm vychází ze strategického a taktického designu,

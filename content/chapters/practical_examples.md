@@ -11,7 +11,7 @@ modified: "2026-05-04"
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
-chapter_number: "24"
+chapter_number: "23"
 category: Praxe
 deck: "Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury."
 reading_time: 12
@@ -26,7 +26,7 @@ Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Pro 
 Pro hluboký ponor do reálného projektu pokračujte v navazující [Případové studii](/pripadova-studie),
 která pokrývá systém pro správu projektů krok za krokem.
 
-## 24.01 Příklad: E-commerce aplikace {#e-commerce}
+## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
 E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart** (rozpracovaný nákup)
 a **Order** (potvrzená transakce). Komunikace mezi nimi probíhá přes doménovou událost
@@ -116,7 +116,7 @@ final class AddItemToCartHandler
 Plné CQRS implementaci s validací, autorizací a outbox patternem ukazuje [CQRS](/cqrs) a
 [Outbox Pattern](/outbox-pattern).
 
-## 24.02 Příklad: Blog {#blog}
+## 23.02 Příklad: Blog {#blog}
 
 Blogová aplikace s jedním Bounded Contextem (Blog), dvěma agregáty (`Post`, `Comment`) a
 sekcemi pro vytvoření příspěvku, výpis a detail.
@@ -197,7 +197,7 @@ final class CreatePostHandler
 Pro implementaci read modelu pro výpis příspěvků (paginace, řazení podle data, projekce
 z eventů) viz [CQRS – ViewModely a Read Modely](/cqrs#view-models) a [Výkonnostní aspekty](/vykonnostni-aspekty).
 
-## 24.03 Příklad: Správa uživatelů {#user-management}
+## 23.03 Příklad: Správa uživatelů {#user-management}
 
 Bounded Context **UserManagement** s jediným agregátem `User` a třemi sub-features: registrace,
 autentizace, profil. Integruje se se Symfony Security komponentou (implementuje

@@ -606,7 +606,7 @@ final class DoctrineOrderRepository implements OrderRepository
     }
 
     // ŽÁDNÉ findAll(), findBy(), žádné metody pro čtení vnitřních entit.
-    // Read modely jsou samostatné (CQRS, kapitola 13).
+    // Read modely jsou samostatné (CQRS, kapitola 12).
 }
 :::
 

@@ -92,7 +92,13 @@ class DddController extends AbstractController
     #[Route('/horizontalni-vs-vertikalni', name: 'horizontal_vs_vertical_redirect')]
     public function horizontalVsVerticalRedirect(): Response
     {
-        return $this->redirectToRoute('horizontal_vs_vertical', [], 301);
+        return $this->redirectToRoute('architectural_styles', [], 301);
+    }
+
+    #[Route('/vertikalni-slice', name: 'vertical_slice_redirect')]
+    public function verticalSliceRedirect(): Response
+    {
+        return $this->redirectToRoute('architectural_styles', [], 301);
     }
 
     #[Route('/zdroje', name: 'resources')]

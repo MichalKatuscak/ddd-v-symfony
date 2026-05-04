@@ -11,7 +11,7 @@ modified: "2026-05-04"
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
-chapter_number: "12"
+chapter_number: "11"
 category: Praxe
 deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá jinou otázku a používá jiný Symfony nástroj.'
 reading_time: 25
@@ -24,7 +24,7 @@ Autorizace je v DDD aplikacích dlouhodobě podceněné téma. Většina týmů 
 
 Kapitola navazuje na [Implementaci v Symfony](/implementace-v-symfony), která pokrývá Voter API jako jeden z několika Symfony idiomů. Doplňuje praktický pohled k tématům [CQRS](/cqrs) (kde sedí ověření Command Handleru), [Testování](/testovani-ddd) (jak otestovat každou ze 4 vrstev samostatně) a [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli) (kde jsme autorizaci jen letmo zmínili).
 
-## 12.01 Tři chyby s autorizací, které se v review opakovaně objevují {#tri-chyby}
+## 11.01 Tři chyby s autorizací, které se v review opakovaně objevují {#tri-chyby}
 
 Než přejdeme ke správnému přístupu, projděme si tři opakující se chyby. V projektech s neformální DDD strukturou nad Symfony se vyskytují pravidelně. Diagnóza je vždy stejná: chybí rozhodovací rámec, kam které pravidlo patří.
 
@@ -105,7 +105,7 @@ Tým objeví Doctrine SQLFilter a rozhodne, že autorizaci vyřeší v perzisten
 Společným jmenovatelem všech tří chyb je absence rozhodovacího rámce. Vývojář má v každém okamžiku **jednu konkrétní otázku** („smí to vidět?“, „smí to udělat?“, „je to vůbec možné?“, „má vidět tento sloupec?“). Každou z nich řeší správný nástroj na správné vrstvě. Když chybí mapa, použije se první nástroj, který má po ruce – a kód se rozpadne. V další sekci ten rámec dáme dohromady.
 :::
 
-## 12.02 Čtyři vrstvy autorizace {#ctyri-vrstvy}
+## 11.02 Čtyři vrstvy autorizace {#ctyri-vrstvy}
 
 Autorizační rozhodnutí v DDD aplikaci nikdy nepadá na jednom místě – padá ve čtyřech postupných vrstvách, každá s vlastní otázkou, vlastním Symfony nástrojem a vlastní granularitou. Vrstvy fungují jako *filtry*: každá další odpovídá jemnější otázku a předpokládá, že předchozí vrstva už řekla „ano“.
 
@@ -123,7 +123,7 @@ Pravidlo: každé autorizační rozhodnutí patří do *právě jedné* vrstvy. 
 
 *Citace: Symfony Security komponenta dokumentuje vícevrstvý přístup v sekci „Authorization“ [[1]](https://symfony.com/doc/current/security.html#access-control-authorization); obecné principy ABAC vs. RBAC najdete v NIST SP 800-162 [[2]](https://csrc.nist.gov/publications/detail/sp/800-162/final); praktický pohled na vrstvení autorizace v doménové aplikaci dává Vernon ve *Implementing Domain-Driven Design* (kap. 14, „Application“).*
 
-## 12.03 Edge – Symfony firewall a access_control {#edge}
+## 11.03 Edge – Symfony firewall a access_control {#edge}
 
 Edge je nejhrubší vrstva a leží mimo doménový kód. Odpovídá pouze na otázku **„kdo je vůbec na druhém konci socketu?“** – anonymous, authenticated, případně role-based pro hrubě dělené sekce (`/admin/*`, `/api/v1/*`). Doménová pravidla typu „zákazník X smí na tuto objednávku“ sem *nepatří* – to je use-case-level.
 
@@ -179,7 +179,7 @@ Principy edge vrstvy:
 Stripe rozlišuje API klíče na úrovni edge: `sk_test_*`, `sk_live_*`, `pk_*`, restricted keys s explicitním scope [[4]](https://stripe.com/docs/keys). Klíč rozhoduje, zda volání vůbec dorazí do API – to je edge vrstva. Ale *kdo konkrétně* je za klíčem (jaký účet, jaké permissions na konkrétní Customer/Charge entitu) řeší až další vrstva. Tatáž logika by měla platit ve vašem Symfony API: JWT validuje, kdo to je; Voter rozhoduje, co s konkrétním objektem smí.
 :::
 
-## 12.04 Use Case – Symfony Voter {#use-case-voter}
+## 11.04 Use Case – Symfony Voter {#use-case-voter}
 
 Use case vrstva odpovídá na otázku **„smí *tento* uživatel vykonat *tento* use case na *tomto* objektu?“**. Symfony Voter je přesně k tomu navržený nástroj. Pravidlo: **1 use case = 1 atribut Voteru**; jeden Voter může pokrývat N atributů, pokud se týkají stejné entity (typicky CRUD operace nad agregátem).
 
@@ -322,7 +322,7 @@ Pozor: `{% if is_granted(...) %}` v Twigu jen schová tlačítko – neověří,
 Pokud váš Voter dělá `$this->repository->find($id)` nebo `$this->em->getRepository(Order::class)->findBy(...)`, je to anti-vzor. Voter dostává subjekt jako parametr (`$subject`); handler ho už načetl a předává v paměti. Voterové fetchování vede k *duplicate query* (handler načetl, voter načetl znovu) a v horším případě k *race condition* (mezi fetchnutím ve voteru a operací v handleru se entita změní). Vždy předávejte načtenou entitu.
 :::
 
-## 12.05 Aggregate-level – doména sama rozhoduje {#aggregate-level}
+## 11.05 Aggregate-level – doména sama rozhoduje {#aggregate-level}
 
 Některá pravidla nelze rozumně dát do Voteru. Vyžadují znalost *doménového stavu*, který Voter nemá natáhnout zvenku – typicky časové okno, předchozí stav agregátu, doménové invarianty napříč vlastními entitami uvnitř agregátu. Tato pravidla patří do **aggregate root** a vynucují se vyhozením *doménové exception*.
 
@@ -426,7 +426,7 @@ Několik vrstev kontroly v jediné cestě požadavku – a každá vrstva selže
 Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dvě různé exception handlery: `AccessDeniedDomainException → 403`, `InvalidOrderStateException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
 :::
 
-## 12.06 Field-level – read model filtrace {#field-level}
+## 11.06 Field-level – read model filtrace {#field-level}
 
 Nejjemnější vrstva. Až dosud jsme řešili *akce* (smí udělat) a *existenci* operace (dá se vůbec); field-level řeší **viditelnost konkrétního pole** během jinak povoleného čtení. Klasický příklad: detail orderu vidí customer i admin, ale sloupec `audit_log` (kdo a kdy editoval) má vidět jen admin.
 
@@ -505,7 +505,7 @@ Volba mezi přístupy:
 
 Pro necitlivá data Twig if stačí a šetří čas. Pro citlivá data vždy query filter – OWASP Top 10 v kategorii „A01 Broken Access Control“ výslovně varuje před UI-only kontrolou jako jedinou bariérou.
 
-## 12.07 Policy-based přístup (ABAC) {#policy-based}
+## 11.07 Policy-based přístup (ABAC) {#policy-based}
 
 Když počet pravidel naroste a vrstvení do Voterů přestane být udržitelné (typicky 5+ rolí × 10+ entit × 3+ atributy = 150+ pravidel), je čas přejít z **RBAC** (Role-Based Access Control) na **ABAC** (Attribute-Based Access Control). RBAC říká „role X smí Y“. ABAC vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno.
 
@@ -633,7 +633,7 @@ Výhody policy-based přístupu:
 RBAC stačí, dokud platí *„role popisuje oprávnění sama o sobě“* – admin smí všechno, zákazník smí svoje, refund agent smí refundy. Jakmile oprávnění závisí na *vztazích mezi entitami* (tenant, vlastnictví, časové okno, stavový automat), RBAC začne nekontrolovaně narůstat. Buď vznikají hyper-specific role typu `ROLE_TENANT_42_ORDER_REFUND_AGENT`, nebo se logika rozpadne do Voterů s 200 řádky if-else. Tehdy je čas na ABAC.
 :::
 
-## 12.08 Multi-tenancy – owner kontext {#multi-tenancy}
+## 11.08 Multi-tenancy – owner kontext {#multi-tenancy}
 
 Multi-tenancy (vícenájemnost) je speciální případ ABAC, kdy stejná aplikace obsluhuje více *oddělených zákazníků* (organizací, mandantů, tenantů) a žádný tenant nesmí vidět data jiného. Existují tři architektonické strategie:
 
@@ -735,7 +735,7 @@ Tři detaily, které se vyplatí zachytit:
 Doctrine SQLFilter modifikuje pouze `QueryBuilder` a `EntityManager::find`. Pokud aplikace volá `$conn->executeQuery('SELECT ...')`, používá Redis, Elasticsearch nebo externí HTTP API, *žádný filter se neaplikuje*. V těchto místech musíte tenant_id přidat ručně. V code review hledejte anti-vzor: surové SQL bez tenant_id v `WHERE`. Statická analýza (Phpstan-rule nebo PHPArkitect) umí takové query odhalit.
 :::
 
-## 12.09 Test pyramida pro autorizaci {#testing}
+## 11.09 Test pyramida pro autorizaci {#testing}
 
 Každá ze 4 vrstev se testuje jiným druhem testu – a snaha pokrýt vše end-to-end vede k pomalé, křehké test suitě. Dělení odpovídá klasické *test pyramidě*: hodně rychlých unit testů, méně integration, pár end-to-end.
 
@@ -900,7 +900,7 @@ final class CancelOrderPolicyTest extends TestCase
 
 Tabulkový test má dvě hodnoty navíc oproti klasickému test-per-method přístupu. Přidání pravidla = přidání jednoho řádku v `scenarios()`. A celý test slouží jako *spustitelná dokumentace policy* – netechnický reviewer vidí všechny případy v jedné tabulce a může schválit doménová pravidla.
 
-## 12.10 Anti-vzory {#antivzory}
+## 11.10 Anti-vzory {#antivzory}
 
 Čtyři opakující se anti-vzory, které se v projektech objevují nejčastěji. Každý je pojmenován, doložen konkrétním příkladem a doplněn náhradou.
 
@@ -966,7 +966,7 @@ Doména teď závisí na `Symfony\Component\Security`. Pokud byste chtěli stejn
 Všechny čtyři anti-vzory vznikají z jediné chyby: *autorizační rozhodnutí se umístilo do nesprávné vrstvy*. Když máte čtyřvrstvý rámec z [12.02](#ctyri-vrstvy) na zřeteli, code review takové chyby odhalí na první pohled.
 :::
 
-## 12.11 Shrnutí {#summary}
+## 11.11 Shrnutí {#summary}
 
 Autorizace v DDD aplikaci na Symfony 8 sedí na čtyřech vrstvách, každá s vlastním Symfony nástrojem a vlastní granularitou:
 
@@ -1017,7 +1017,7 @@ Regulované domény (zdravotnictví, finance, GDPR čl. 30) vyžadují audit log
   answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně doporučuji decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz sekci o testování v <a href="#testing">12.09</a>.'
 :::
 
-## 12.12 Další četba {#further-reading}
+## 11.12 Další četba {#further-reading}
 
 - [Symfony Security komponenta – oficiální dokumentace](https://symfony.com/doc/current/security.html)
 - [Symfony Voters – Custom Authorization](https://symfony.com/doc/current/security/voters.html)

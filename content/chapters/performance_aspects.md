@@ -11,14 +11,14 @@ modified: "2026-05-03"
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Výkonnostní aspekty DDD v Symfony a Doctrine"
-chapter_number: "17"
+chapter_number: "16"
 category: Vzory
 deck: "Výkonnostní aspekty Domain-Driven Design v Symfony s Doctrine ORM – řešení N+1 problému, optimalizace agregátů, implementace read modelu přes CQRS, správné používání UUID a cachování doménových objektů."
 reading_time: 30
 difficulty: 4
 ---
 
-## 17.01 Výkon v kontextu DDD {#uvodem}
+## 16.01 Výkon v kontextu DDD {#uvodem}
 
 DDD má pověst pomalé architektury. Výkonnostní problémy přicházejí z nesprávné implementace
 – příliš velkých agregátů, nevhodného lazy loadingu, absence read modelu – ne z DDD samotného.
@@ -46,7 +46,7 @@ Donald Knuth to vyjádřil takto: *„Premature optimization is the root of all 
 [[1]](https://dl.acm.org/doi/10.1145/356635.356640)
 :::
 
-## 17.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
+## 16.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
 
 N+1 problém patří k nejčastějším výkonnostním antipatternům při práci s ORM. Aplikace provede
 1 dotaz pro načtení seznamu entit a poté pro každou entitu další dotaz pro načtení asociovaných dat.
@@ -213,7 +213,7 @@ Doctrine vypíše varování a provede paginaci v paměti (in-memory pagination)
 Řešením je buď stránkovat pouze přes identifikátory a následně načíst data, nebo použít nativní SQL
 s vlastním mapováním výsledků.
 
-## 17.03 Agregát a výkon: správné určení hranic {#agregat-hranice}
+## 16.03 Agregát a výkon: správné určení hranic {#agregat-hranice}
 
 Základním principem DDD je, že agregát tvoří konzistenční hranici – invarianty
 doménového modelu jsou zaručeny v jednom agregátu. Problém nastává, pokud jsou hranice
@@ -307,7 +307,7 @@ nikoli podle výkonnostních požadavků**. Pokud jsou výkonnostní požadavky 
 s doménovým modelem, řešením je zavedení read modelu (viz sekci CQRS), nikoli
 porušení doménové integrity.
 
-## 17.04 Optimalizace read modelu (CQRS) {#read-model-optimalizace}
+## 16.04 Optimalizace read modelu (CQRS) {#read-model-optimalizace}
 
 Striktní oddělení write side (doménové operace přes agregáty) od read side (dotazy vracející data
 pro prezentaci) je základní nástroj pro řešení výkonnostních problémů v DDD.
@@ -457,7 +457,7 @@ final class SalesReportQueryService
 :::
 :::
 
-## 17.05 UUID vs. integer primární klíče {#uuid-vs-integer}
+## 16.05 UUID vs. integer primární klíče {#uuid-vs-integer}
 
 V DDD je doporučenou praxí, aby agregát znal svoji identitu už před uložením do databáze.
 To umožňuje generovat `AggregateId` v doménovém kódu bez závislosti na databázové
@@ -604,7 +604,7 @@ final class Order
 :::
 :::
 
-## 17.06 Doctrine Identity Map a Unit of Work {#doctrine-identity-map}
+## 16.06 Doctrine Identity Map a Unit of Work {#doctrine-identity-map}
 
 Doctrine ORM implementuje vzor Identity Map (Martin Fowler, *Patterns of Enterprise Application Architecture*).
 Každý spravovaný objekt (managed entity) je v jednom `EntityManager`u uložen v paměti pod svým
@@ -692,7 +692,7 @@ Po zavolání `$this->em->clear()` jsou **všechny** spravované entity odpojeny
 s referencemi na dříve spravované objekty.
 :::
 
-## 17.07 Caching v DDD architektuře {#cachovani}
+## 16.07 Caching v DDD architektuře {#cachovani}
 
 Caching v DDD architektuře vyžaduje pečlivý návrh. Základní otázka zní:
 **co cachovat**? Obecné pravidlo říká: cachujeme výsledky operací, které jsou
@@ -834,7 +834,7 @@ final class InvalidateUserCacheOnEmailChanged
 :::
 :::
 
-## 17.08 Bulk operace a hromadné zpracování {#bulk-operace}
+## 16.08 Bulk operace a hromadné zpracování {#bulk-operace}
 
 Standardní DDD workflow – načti agregát, aplikuj doménovou logiku, zavolej `flush()`
 – funguje pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
@@ -974,7 +974,7 @@ final class StartProductImportHandler
 :::
 :::
 
-## 17.09 Provozní výkonové vzory {#provozni-vzory}
+## 16.09 Provozní výkonové vzory {#provozni-vzory}
 
 Předchozí sekce řeší výkon na úrovni jednoho dotazu nebo jednoho agregátu. Jakmile
 aplikace běží 24/7 s reálnou zátěží, narážíte na třídu problémů, které lokální profiling
@@ -1099,7 +1099,7 @@ si pamatujte: **snapshot není výchozí volba, ale escape hatch pro long-lived
 agregáty**. Většina DDD agregátů má desítky eventů za celý lifecycle a snapshotting
 nepotřebuje.
 
-## 17.10 Profiling DDD aplikací {#profiling}
+## 16.10 Profiling DDD aplikací {#profiling}
 
 Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
 ekosystému existuje škála nástrojů od development profileru až po produkční profiling nástroje.

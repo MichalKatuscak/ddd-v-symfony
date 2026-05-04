@@ -891,13 +891,70 @@ Pokud znáte CQRS pattern (kapitola [CQRS](/cqrs)), všimnete si, že Use Case v
 V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte tedy Clean Architecture „zadarmo“ – stačí Use Case přejmenovat na `*Handler` a Request na `*Command`. Řada DDD projektů funguje jako kombinace *Hexagonal + CQRS + Clean Use Cases* v jednom hybridním stylu.
 :::
 
-## 09.06 Vertical Slice Architecture {#vertical-slice}
+## 09.06 Vertical Slice Architecture (a horizontální vs. vertikální dělení) {#vertical-slice}
 
 Jimmy Bogard popsal *Vertical Slice Architecture* v roce 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/) jako reakci na náklady vrstvových architektur. Jeden jednoduchý use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné feature vyžaduje úpravy ve všech sedmi.
 
-Vertical Slice Architecture organizuje kód **podle feature, ne podle vrstvy**. Každá feature dostane svůj adresář, ve kterém žije všechno potřebné: Command/Query, Handler, Validátor, Read Model, Controller. Slice je kompletní vertikální „sloupec“ přes všechny technické vrstvy aplikace.
+Vertical Slice Architecture organizuje kód **podle feature, ne podle vrstvy**. Každá feature dostane svůj adresář, ve kterém žije všechno potřebné: Command/Query, Handler, Validátor, Read Model, Controller. Slice je kompletní vertikální „sloupec“ přes všechny technické vrstvy aplikace. To je v ostrém kontrastu s tradičním vrstveným (horizontálním) přístupem, kde se kód člení podle technické odpovědnosti (Controller / Service / Repository / Entity), a jeden use case se rozprostírá napříč všemi vrstvami.
 
-Detail tohoto stylu, jeho srovnání s vrstveným DDD a Symfony konvence pro Vertical Slice řeší samostatná kapitola [Vertikální slice architektura](/vertikalni-slice). V této kapitole shrneme jen hlavní rozdíly a vztah k Hexagonal/Onion/Clean.
+### Horizontální dělení – tradiční vrstvený přístup {#horizontalni-deleni}
+
+V tradičním vrstveném DDD je projekt organizovaný **podle technických vrstev**. Každá vrstva má svůj adresář, soubory podobného typu žijí spolu. Typický `src/`:
+
+:::code{language="bash" filename="src/ (tradiční DDD struktura)"}
+src/
+├── Presentation/                # Prezentační vrstva
+│   └── Controller/UserController.php
+├── Application/                 # Aplikační vrstva
+│   ├── Service/UserService.php
+│   └── DTO/UserDTO.php
+├── Domain/                      # Doménová vrstva
+│   ├── Model/User.php
+│   ├── Repository/UserRepository.php
+│   └── Service/DomainUserService.php
+└── Infrastructure/              # Infrastrukturní vrstva
+    ├── Repository/DoctrineUserRepository.php
+    └── Persistence/Doctrine/Mapping/User.orm.xml
+:::
+
+Vrstvy jsou organizovány horizontálně. Každá vrstva poskytuje služby vrstvě nad ní. Doménové stavební kameny (entity, hodnotové objekty, agregáty, doménové služby) jsou stejné jako u jakéhokoli jiného architektonického stylu.
+
+### Vertikální dělení – Vertical Slice {#vertikalni-deleni}
+
+Vertikální slice organizuje kód **podle feature**. Každá funkce (registrace uživatele, vytvoření objednávky, generování faktury) má svůj adresář, který obsahuje všechny vrstvy potřebné pro svou implementaci. Sdílený doménový model zůstává v `{BC}/Domain/`, ale aplikační, prezentační a infrastrukturní logika je rozdělená per feature.
+
+:::code{language="bash" filename="src/ (Vertical Slice struktura)"}
+src/
+├── UserManagement/             # Bounded Context
+│   ├── Domain/                 # Sdílený doménový model BC
+│   │   ├── Model/User.php
+│   │   ├── ValueObject/{UserId, Email}.php
+│   │   ├── Event/UserRegistered.php
+│   │   └── Repository/UserRepository.php
+│   ├── Infrastructure/         # Sdílená infrastruktura BC
+│   │   └── Repository/DoctrineUserRepository.php
+│   ├── Registration/           # Feature: Registrace
+│   │   ├── Command/{RegisterUser, RegisterUserHandler}.php
+│   │   └── Controller/RegistrationController.php
+│   └── Profile/                # Feature: Profil
+│       ├── Query/{GetUserProfile, GetUserProfileHandler}.php
+│       ├── Controller/ProfileController.php
+│       └── ViewModel/UserProfileViewModel.php
+└── Shared/Domain/Exception/DomainException.php
+:::
+
+Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje vazby uvnitř funkce [[7]](https://www.youtube.com/watch?v=SUiWfhAhgQw). Zároveň zachovává principy DDD – respektuje Bounded Contexts a sdílený doménový model.
+
+:::callout{type="note"}
+### Konvence struktury v této knize {#konvence-heading}
+
+Většina příkladů v knize používá vertikální slice s těmito konvencemi:
+
+- `{BC}/Domain/` – doménová vrstva sdílená uvnitř Bounded Contextu (Model, ValueObject, Event, Repository rozhraní, Service).
+- `{BC}/Infrastructure/` – infrastrukturní implementace (Doctrine repozitáře, event bus adaptéry).
+- `{BC}/{Feature}/` – feature slice s `Command/`, `Query/`, `Controller/` přímo uvnitř.
+- `Shared/` – pouze skutečně sdílené komponenty (abstraktní typy, výjimky, bus rozhraní).
+:::
 
 ### Co Vertical Slice mění {#vs-rozdil-heading}
 
@@ -906,32 +963,33 @@ Detail tohoto stylu, jeho srovnání s vrstveným DDD a Symfony konvence pro Ver
 - **Diff jedné feature** sedí v jednom adresáři. Code review se zjednoduší – recenzent vidí celý use case na jednom místě.
 - **Akceptační test** může pokrýt celý slice najednou (HTTP request → response), aniž by bylo nutné mockovat sedm vrstev.
 
-### Symfony struktura podle Vertical Slice {#vs-priklad-heading}
+### Srovnání horizontálního a vertikálního dělení {#srovnani-deleni}
 
-:::code{language="bash" filename="src/ (Symfony Vertical Slice struktura)"}
-src/
-├── Ordering/                           # Bounded Context
-│   ├── Domain/                         # Sdílený doménový model
-│   │   ├── Order.php
-│   │   ├── OrderId.php
-│   │   └── OrderRepository.php         # Interface
-│   ├── Infrastructure/                 # Sdílená infrastruktura
-│   │   └── DoctrineOrderRepository.php
-│   ├── PlaceOrder/                     # Feature slice
-│   │   ├── PlaceOrderCommand.php
-│   │   ├── PlaceOrderHandler.php
-│   │   ├── PlaceOrderValidator.php
-│   │   └── PlaceOrderController.php
-│   ├── CancelOrder/                    # Feature slice
-│   │   ├── CancelOrderCommand.php
-│   │   ├── CancelOrderHandler.php
-│   │   └── CancelOrderController.php
-│   └── GetOrderHistory/                # Feature slice
-│       ├── GetOrderHistoryQuery.php
-│       ├── GetOrderHistoryHandler.php
-│       ├── OrderHistoryReadModel.php
-│       └── GetOrderHistoryController.php
-:::
+| Aspekt | Horizontální (vrstvený) | Vertikální slice |
+|---|---|---|
+| **Organizace kódu** | Podle technických vrstev | Podle funkcí (features) |
+| **Vazby** | Silné mezi vrstvami | Silné uvnitř funkce, slabé mezi funkcemi |
+| **Změna jednoho use casu** | Úpravy v 5–7 souborech napříč vrstvami | Úpravy v jednom adresáři |
+| **Testovatelnost** | Vyžaduje více mocků (vrstvy mezi sebou) | Méně mocků, závislosti jsou lokální |
+| **Škálovatelnost na microservices** | Vyžaduje přeorganizování všech vrstev | Feature lze přesunout jako celek |
+| **Pochopení na začátku** | Jednodušší (tradičnější) | Vyžaduje pochopení slice jako jednotky |
+| **Vhodnost pro CQRS** | CQRS vyžaduje dodatečnou práci | Přirozeně podporuje CQRS [[8]](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
+
+### Kdy zvolit který přístup {#kdy-vs}
+
+**Horizontální (vrstvený) přístup** se vyplatí, když:
+
+- Tým má dlouhou zkušenost s vrstvenou architekturou a CQRS není v plánu.
+- Aplikace má 10–30 endpointů a malou doménovou složitost.
+- Doménový model má silně sdílené invarianty napříč více feature, které je třeba jednotně vymáhat.
+- Preference týmu je explicitní oddělení technických vrstev před organizací podle funkcí.
+
+**Vertikální slice** se vyplatí, když:
+
+- Aplikace má 50+ feature s nezávislými use casy.
+- Tým plánuje CQRS nebo je už zavedlo (Symfony Messenger jako Command/Query Bus).
+- Aplikace bude v budoucnu rozdělena do mikroslužeb – feature jako celek se snadněji extrahuje.
+- Preferujete rychlou iteraci s minimální koordinací mezi vrstvami.
 
 ### Vertical Slice a Hexagonal jsou ortogonální {#vs-vs-hexagonal-heading}
 

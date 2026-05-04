@@ -11,7 +11,7 @@ modified: "2026-05-03"
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
-chapter_number: "11"
+chapter_number: "10"
 category: Základy
 deck: 'Praktický překlad DDD konceptů do Symfony 8: jak strukturovat projekt podle Bounded Contextů, jak persistovat agregáty přes Doctrine, jak konfigurovat Messenger a kdy sáhnout po Doctrine custom types pro hodnotové objekty.'
 reading_time: 35
@@ -46,7 +46,7 @@ persistence třída + mapper na doménový agregát. Detail v sekci
 [Persisted Object Pattern – pure DDD varianta](#persisted-object-pattern).
 :::
 
-## 11.01 Kde končí DDD a kde začíná Symfony {#ddd-vs-symfony-boundary}
+## 10.01 Kde končí DDD a kde začíná Symfony {#ddd-vs-symfony-boundary}
 
 Následující diagram ukazuje hranici mezi čistým DDD kódem (zelená oblast) a Symfony infrastrukturou
 (oranžová oblast). Vše v zelené oblasti je čistý PHP bez závislosti na frameworku –
@@ -60,7 +60,7 @@ Směr závislostí je určující: Symfony závisí na DDD (implementuje jeho ro
 Doménová vrstva neimportuje žádný Symfony namespace. Díky tomu lze Doctrine nahradit
 jiným ORM nebo Messenger jiným bus systémem, aniž by se dotklo doménové logiky.
 
-## 11.02 Struktura projektu {#project-structure}
+## 10.02 Struktura projektu {#project-structure}
 
 Při implementaci DDD s vertikální slice architekturou v Symfony 8 organizujte strukturu projektu podle Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
 
@@ -173,7 +173,7 @@ Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
 - **Ignorování Ubiquitous Language** – Používejte konzistentní jazyk v kódu, dokumentaci a komunikaci.
 :::
 
-## 11.03 Implementace entit {#entities}
+## 10.03 Implementace entit {#entities}
 
 Entita v DDD je objekt s jedinečnou, přetrvávající identitou. Vstupní bod do agregátu
 je **kořen agregátu** – třída `final`, dědí z bázové `AggregateRoot`,
@@ -339,7 +339,7 @@ pracuje výhradně s typovými hodnotami, bez re-konstrukce při každém volán
 Detaily a registrace v sekci [Doctrine custom types](#doctrine-custom-types).
 :::
 
-## 11.04 Implementace hodnotových objektů {#value-objects}
+## 10.04 Implementace hodnotových objektů {#value-objects}
 
 Hodnotový objekt v DDD nemá identitu – je definován svými atributy. Je neměnný,
 validuje se v konstruktoru a dvě instance se stejnými atributy jsou rovnocenné.
@@ -465,7 +465,7 @@ string – pokud by to zkusil, dostane výjimku v konstruktoru, ne až v repozit
 `#[ORM\Embeddable]` říká Doctrine, že VO se ukládá jako sloupec ve stejné tabulce
 jako vlastník (žádná samostatná tabulka pro VO).
 
-## 11.05 Implementace repozitářů {#repositories}
+## 10.05 Implementace repozitářů {#repositories}
 
 Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 se implementují repozitáře jako rozhraní a jejich implementace:
 
@@ -570,7 +570,7 @@ transakci s retry strategií. **Tohle je doporučená produkční varianta a v d
 příkladech v této knize ji používáme jako default.**
 :::
 
-## 11.06 Persisted Object Pattern – pure DDD varianta {#persisted-object-pattern}
+## 10.06 Persisted Object Pattern – pure DDD varianta {#persisted-object-pattern}
 
 Pokud trváte na tom, že doménová vrstva nesmí obsahovat ani metadata
 o persistenci, korektní cesta není XML mapping (také „znečištěné“, jen jiným
@@ -724,7 +724,7 @@ V dalších příkladech v tomto průvodci pokračujeme s atributy přímo na ag
 Persisted Object Pattern dále nerozvíjíme – principy jsou identické, jen vyžadují
 explicitní mapper na každý agregát.
 
-## 11.07 Doctrine custom types pro Value Objects {#doctrine-custom-types}
+## 10.07 Doctrine custom types pro Value Objects {#doctrine-custom-types}
 
 Alternativou k ukládání hodnotových objektů jako primitivních typů (viz
 [implementace entit](#entities)) je **Doctrine custom type**.
@@ -796,7 +796,7 @@ doctrine:
 - **Primitivní ukládání** – jednodušší, méně kódu. Vhodné pro projekty s méně value objects nebo při začátku s DDD.
 :::
 
-## 11.08 PHP 8.1+ Enums pro stavové typy {#php-enums}
+## 10.08 PHP 8.1+ Enums pro stavové typy {#php-enums}
 
 Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums). V DDD se hodí pro stavové hodnotové objekty
 s konečnou množinou hodnot – například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
@@ -944,7 +944,7 @@ Doctrine ORM 2.11+ a 3.x nativně podporují PHP enums. Při použití XML mapov
 Doctrine automaticky konvertuje hodnotu mezi PHP enum a databázovým sloupcem. Pro backed enums se ukládá backing value (`string` nebo `int`).
 :::
 
-## 11.09 Doménové služby (a kdy je *nepoužít*) {#domain-services}
+## 10.09 Doménové služby (a kdy je *nepoužít*) {#domain-services}
 
 Doménová služba zapouzdřuje pravidlo, které **přirozeně nepatří žádnému agregátu
 ani hodnotovému objektu** – typicky operaci nad dvěma a více agregáty
@@ -1101,7 +1101,7 @@ Ve všech ostatních případech: pravidlo patří do agregátu, hodnotového ob
 specifikace ([Specification Pattern](#specification-pattern)).
 :::
 
-## 11.10 Specification Pattern {#specification-pattern}
+## 10.10 Specification Pattern {#specification-pattern}
 
 Specification Pattern (Eric Evans, *DDD*, kap. 9) zapouzdřuje doménová pravidla a podmínky
 do samostatných, znovu použitelných objektů. Specifikace odpovídá na otázku „splňuje tento objekt
@@ -1194,7 +1194,7 @@ final class ShippingService
 - **Kombinace pravidel** – specifikace lze skládat pomocí `AndSpecification`, `OrSpecification`, `NotSpecification`.
 :::
 
-## 11.11 Implementace doménových událostí {#domain-events}
+## 10.11 Implementace doménových událostí {#domain-events}
 
 Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 se implementují doménové události jako neměnné PHP třídy:
 
@@ -1277,7 +1277,7 @@ ztráta typů, ztráta transakční koheze, nutnost správy transportů. Zvolte 
 podle hranice, kterou událost překračuje – ne podle hypotetické budoucí potřeby.
 :::
 
-## 11.12 Strategie zpracování chyb v DDD {#error-handling}
+## 10.12 Strategie zpracování chyb v DDD {#error-handling}
 
 V DDD se výjimky liší podle vrstvy, ve které vznikají. Každá vrstva
 má jiné odpovědnosti a jiný typ chyb:
@@ -1334,7 +1334,7 @@ final class InvalidOrderStateTransitionException extends \DomainException
 - Kontrolery by měly zachytávat doménové výjimky a **překládat je na HTTP odpovědi** (400, 404, 409).
 :::
 
-## 11.13 Implementace aplikačních služeb {#application-services}
+## 10.13 Implementace aplikačních služeb {#application-services}
 
 Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 se implementují aplikační služby
 jako command a query handlery:
@@ -1539,7 +1539,7 @@ V DDD existují dva druhy validace, každý na jiné vrstvě:
 doménová vrstva řeší *sémantickou* validaci (doménová pravidla).
 :::
 
-## 11.14 Implementace kontrolerů {#controllers}
+## 10.14 Implementace kontrolerů {#controllers}
 
 Kontroler je adapter mezi HTTP a aplikační vrstvou. Smí: validovat formát vstupu,
 transformovat ho na command/query, dispatchovat, přeložit doménovou výjimku
@@ -1745,7 +1745,7 @@ ve stavu A“ je v `Order::cancel()` metodě – Voter ho nedubluje, jen zabraň
 volání, které by stejně skončilo `DomainException`.
 :::
 
-## 11.15 Dependency Injection a autowiring {#dependency-injection}
+## 10.15 Dependency Injection a autowiring {#dependency-injection}
 
 Dependency Injection odděluje závislosti a umožňuje testování bez reálné infrastruktury.
 Symfony 8 poskytuje DI Container pro konfiguraci služeb:

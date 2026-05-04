@@ -31,7 +31,6 @@ CHAPTER_ORDER=(
   aggregate_design
   lesser_known_patterns
   architectural_styles
-  horizontal_vs_vertical
   implementation_in_symfony
   authorization_in_ddd
   cqrs

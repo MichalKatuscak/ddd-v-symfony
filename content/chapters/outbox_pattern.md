@@ -11,7 +11,7 @@ modified: "2026-05-03"
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
-chapter_number: "16"
+chapter_number: "15"
 category: Vzory
 deck: 'Typická chyba: zapíšete <code>Order</code> do databáze, vzápětí se rozbije RabbitMQ, ale order tam zůstane bez události <code>OrderPlaced</code>. Subscribeři se o objednávce nedozvědí. Outbox Pattern řeší tento <em>dual-write problem</em> na úrovni jedné DB transakce; jeho dvojče Inbox Pattern řeší deduplikaci na straně subscriberů. V Symfony 8 je to jeden Doctrine entity manager, jeden Messenger transport a zhruba 80 řádků kódu.'
 reading_time: 28
@@ -36,7 +36,7 @@ procesu (polling worker vs. CDC / Debezium) a operační aspekty – outbox lag,
 dead-letter queue. V závěru přidáme migrační postup pro existující projekt a srovnání
 s alternativami.
 
-## 16.01 Dual-write problem {#dual-write}
+## 15.01 Dual-write problem {#dual-write}
 
 Nejjednodušší implementace publikování doménové události vypadá nevinně: po dokončení
 doménové operace zapíšeme stav do databáze a pak rovnou dispatchneme událost na message
@@ -149,7 +149,7 @@ CIDR (2007); Richardson, C. **Microservices Patterns**, Manning (2018),
 kapitola 3 – Transactional messaging; Microservices.io –
 [Pattern: Transactional Outbox](https://microservices.io/patterns/data/transactional-outbox.html).*
 
-## 16.02 Transactional Outbox – princip {#princip}
+## 15.02 Transactional Outbox – princip {#princip}
 
 Princip Outbox Pattern je prostý: **nepublikujeme událost přímo do
 brokera, ale zapíšeme ji do tabulky `outbox`** ve stejné databázi,
@@ -197,7 +197,7 @@ Co lze v praxi dosáhnout, je *exactly-once efekt* na straně subscribera –
 a o to se postará [Idempotent Inbox](#inbox).
 :::
 
-## 16.03 Schéma `outbox` tabulky a Doctrine mapping {#schema}
+## 15.03 Schéma `outbox` tabulky a Doctrine mapping {#schema}
 
 Outbox tabulka má málo sloupců, ale **každý z nich je nezbytný**.
 Vynechání kteréhokoli z nich vede k provozním problémům, které se projeví až pod zátěží.
@@ -365,7 +365,7 @@ Po migraci spusťte `php bin/console doctrine:migrations:migrate` a ověřte,
 (PostgreSQL). V CI doporučujeme přidat regresní test, který tento index kontroluje –
 při refactoringu schématu se totiž často ztratí.
 
-## 16.04 Aggregate publikuje, handler ukládá do outboxu {#aggregate-publishes}
+## 15.04 Aggregate publikuje, handler ukládá do outboxu {#aggregate-publishes}
 
 Princip DDD říká, že agregát **nezná infrastrukturu** – neví
 nic o Doctrine, RabbitMQ ani outbox tabulce. Agregát pouze produkuje seznam doménových
@@ -598,7 +598,7 @@ a `markFailed()` volají `$m->markSent()`,
 respektive `$m->markFailed()` a následně flushnou. Plný výpis vynecháváme
 – jde o mechanickou adapter třídu.
 
-## 16.05 Relay process – dvě varianty {#relay}
+## 15.05 Relay process – dvě varianty {#relay}
 
 Outbox tabulka sama o sobě nic nepublikuje – potřebuje relay proces, který v určité
 kadenci vybírá pending řádky a posílá je do brokera. V praxi se používají dvě varianty:
@@ -818,7 +818,7 @@ v DB transakci, jen dispatcher je nahrazen Debezium konektorem.
 [Outbox Event Router](https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html)
 (Red Hat, 2019+).*
 
-## 16.06 Idempotent Inbox – strana subscribera {#inbox}
+## 15.06 Idempotent Inbox – strana subscribera {#inbox}
 
 Outbox dává at-least-once delivery, takže subscriber **musí** počítat s tím,
 že stejný event dostane víckrát. Pokud je side-effect handleru ne-idempotentní (typicky
@@ -966,7 +966,7 @@ Helland v paperu z roku 2007 to formuluje úsporně: *„The world is at-least-o
 the application makes it look like exactly-once.“*
 :::
 
-## 16.07 Idempotency Key v HTTP API {#idempotency-api}
+## 15.07 Idempotency Key v HTTP API {#idempotency-api}
 
 Outbox řeší idempotenci uvnitř systému (broker → subscriber); ale stejný problém vzniká
 i o úroveň výš, na hranici HTTP API. Klient (mobilní aplikace, JS frontend, partnerská
@@ -1090,7 +1090,7 @@ Detaily, na které se často zapomíná:
 [IETF draft-ietf-httpapi-idempotency-key-header](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/)
 (probíhající standardizace HTTP header).*
 
-## 16.08 Provozní aspekty {#provoz}
+## 15.08 Provozní aspekty {#provoz}
 
 Outbox v *development* prostředí funguje, jak má. V produkci ale narazíte na čtyři
 operační otázky: jak měřit lag, jak držet tabulku malou, co s permanentně failovanými
@@ -1434,7 +1434,7 @@ Standardní vzor:
   jsou tolerantní ke ztrátě. Při sustained backpressure můžete řízeně dropnout.
   Doménové eventy (`OrderPlaced`) ale **nikdy** – ty musí dorazit.
 
-## 16.09 Anti-vzory {#antivzory}
+## 15.09 Anti-vzory {#antivzory}
 
 Outbox vypadá triviálně, ale provázejí ho klasické chyby, které ruší
 jeho garance a vrací systém zpět k dual-write problému. Následující seznam shrnuje
@@ -1503,7 +1503,7 @@ Výchozí bus chování v Symfony 8 je *auto-commit per dispatch*, ne per
 handler – častý zdroj chyb.
 :::
 
-## 16.10 Migrace existujícího projektu – krok za krokem {#migrace}
+## 15.10 Migrace existujícího projektu – krok za krokem {#migrace}
 
 Jak na Outbox, když máte 18 měsíců starý Symfony projekt, sto handlerů a jakési
 publish-after-flush už tam někde je? Postup je inkrementální, ne big-bang refactor.
@@ -1566,7 +1566,7 @@ produkčního DB), a ověřte:
   (proveďte na staging a porovnejte read model před a po).
 :::
 
-## 16.11 Shrnutí {#summary}
+## 15.11 Shrnutí {#summary}
 
 Outbox Pattern má **přímočarou implementaci a měřitelný provozní přínos**: vyřeší
 celou třídu chyb (ztracené eventy, fantom eventy), které jinak musíte ladit reaktivně

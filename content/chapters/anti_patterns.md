@@ -11,7 +11,7 @@ modified: "2026-05-04"
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
-chapter_number: "22"
+chapter_number: "21"
 category: Praxe
 deck: "Přehled nejčastějších anti-vzorů a typických chyb při implementaci Domain-Driven Design: anémický doménový model, Primitive Obsession, příliš velký agregát, sdílená databáze napříč Bounded Contexts, mutovatelné události a over-engineering."
 reading_time: 35
@@ -19,7 +19,7 @@ difficulty: 2
 github_examples: null
 ---
 
-## 22.01 Úvodem: Proč znát anti-vzory {#uvodem}
+## 21.01 Úvodem: Proč znát anti-vzory {#uvodem}
 
 Tato kapitola je **katalog kódových a modelovacích anti-vzorů** v DDD. Pro
 **provozní/infrastrukturní třenice** (Doctrine, Messenger, ACL k externím API, Symfony Form vs.
@@ -40,7 +40,7 @@ Chyby při implementaci DDD lze rozdělit do tří kategorií:
 - **Implementační chyby** – doménová logika v infrastrukturní vrstvě, mutovatelné události, over-engineering. Tyto chyby vznikají při konkrétní implementaci a jsou obvykle nejsnáze opravitelné.
 :::
 
-## 22.02 Anti-vzor: Anémický doménový model (Anemic Domain Model) {#anemicky-domenovy-model}
+## 21.02 Anti-vzor: Anémický doménový model (Anemic Domain Model) {#anemicky-domenovy-model}
 
 Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). V této situaci doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
 
@@ -269,7 +269,7 @@ class User
 
 Hlavním rozdílem je, že správná entita vystavuje doménově orientované metody (`activate()`, `deactivate()`, `register()`) namísto generických setterů. Entita sama garantuje své invarianty – nikdo zvenčí nemůže entitu dostat do nekonzistentního stavu.
 
-## 22.03 Anti-vzor: Primitive Obsession (posedlost primitivy) {#primitive-obsession}
+## 21.03 Anti-vzor: Primitive Obsession (posedlost primitivy) {#primitive-obsession}
 
 Primitive Obsession je anti-vzor, při němž vývojáři používají primitivní datové typy (`string`, `int`, `float`) tam, kam patří hodnotové objekty (Value Objects). Tento anti-vzor je zákeřný, protože primitiva působí na první pohled přímočaře, ale vedou k závažným problémům.
 
@@ -445,7 +445,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 :::
 :::
 
-## 22.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
+## 21.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
 
 Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako „God Aggregate“) sdružuje příliš mnoho entit a logiky do jednoho celku. Tím porušuje princip jedné odpovědnosti a způsobuje řadu závažných problémů.
 
@@ -610,7 +610,7 @@ class Wishlist
 
 Pravidlo pro navrhování agregátů zní: *agregát by měl být co nejmenší, aby zachoval invarianty (doménová pravidla) platné v jedné transakci*. Pokud změna jednoho objektu nevyžaduje konzistentní změnu druhého ve stejné transakci, patří do různých agregátů.
 
-## 22.05 Anti-vzor: Sdílená databáze napříč Bounded Contexts {#sdilena-databaze}
+## 21.05 Anti-vzor: Sdílená databáze napříč Bounded Contexts {#sdilena-databaze}
 
 Jeden z nejzávažnějších strategických anti-vzorů nastává, když různé Bounded Contexts sdílejí stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. I když se to na počátku jeví jako pragmatické řešení, vede to k těsnému provázání, které znemožňuje nezávislý vývoj a nasazení jednotlivých kontextů.
 
@@ -748,7 +748,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
 
 Alternativou k synchronnímu HTTP volání je asynchronní komunikace přes doménové události. Billing kontext může naslouchat události `CustomerBillingDataUpdated` a lokálně si ukládat kopii potřebných dat (tzv. *Read Model projection*). Tím se eliminuje synchronní závislost za cenu eventuální konzistence.
 
-## 22.06 Anti-vzor: Mutovatelné doménové události {#mutovatelne-udalosti}
+## 21.06 Anti-vzor: Mutovatelné doménové události {#mutovatelne-udalosti}
 
 Doménová událost reprezentuje fakt, který se stal v minulosti – a minulost nelze změnit. Události musí být striktně **immutable** (neměnné). Mutovatelná událost je konceptuální rozpor: pokud lze událost po vytvoření změnit, ztrácí svou sémantickou hodnotu jako historický záznam.
 
@@ -866,7 +866,7 @@ final class OrderCancelledEvent
 :::
 :::
 
-## 22.07 Anti-vzor: Doménová logika v infrastrukturní vrstvě {#logika-v-infrastrukture}
+## 21.07 Anti-vzor: Doménová logika v infrastrukturní vrstvě {#logika-v-infrastrukture}
 
 DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře, Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku do doménové vrstvy. Pokud se doménová pravidla začnou objevovat v infrastrukturních třídách, dochází k narušení architekturních hranic a ke vzniku skryté, těžko testovatelné logiky.
 
@@ -1028,7 +1028,7 @@ class UserController extends AbstractController
 :::
 :::
 
-## 22.08 Anti-vzor: Over-engineering u jednoduchých aplikací {#over-engineering}
+## 21.08 Anti-vzor: Over-engineering u jednoduchých aplikací {#over-engineering}
 
 DDD není vhodné pro každý projekt. Eric Evans sám upozorňuje, že DDD přináší největší přidanou hodnotu u **komplexních domén se složitou doménovou logikou**. Pro jednoduché CRUD aplikace, administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované – přináší vysokou počáteční složitost bez odpovídajícího přínosu.
 
@@ -1069,7 +1069,7 @@ Vhodné indikátory pro zavedení DDD: *složitá doménová pravidla, která se
 :::
 :::
 
-## 22.09 Anti-vzor: Ignorování Ubiquitous Language {#missing-ubiquitous-language}
+## 21.09 Anti-vzor: Ignorování Ubiquitous Language {#missing-ubiquitous-language}
 
 Jedním ze základních pilířů DDD je Ubiquitous Language – společný jazyk sdílený vývojáři, doménovými experty a všemi zainteresovanými stranami. Tento jazyk používáme konzistentně v kódu, dokumentaci, testech i v komunikaci. Ignorování tohoto principu způsobuje, že tatáž doménová entita nese různé názvy na různých místech. Výsledkem jsou nedorozumění, chyby a ztráta doménového vhledu v kódu.
 
