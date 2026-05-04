@@ -1220,7 +1220,7 @@ přepne do stavu `failed`. Tyto řádky chceme:
 
 ### Vacuum a index bloat (PostgreSQL) {#vacuum-heading}
 
-Outbox má specifický I/O profil: vysoký INSERT rate, krátký lifecycle (řádek vznikne →
+Outbox má specifický I/O profil: vysoký INSERT rate, krátký životní cyklus (řádek vznikne →
 během sekund se UPDATE na `sent` → po N dnech DELETE), nikdy se nečte historie.
 PostgreSQL standardní autovacuum tunning na takový profil **není dimenzovaný**
 a po několika dnech provozu narážíte na index bloat:

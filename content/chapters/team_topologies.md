@@ -490,7 +490,7 @@ přes počet řádků kódu, count of services, nebo ticket throughput. Tyto pro
 nemají korelaci s tím, jak se tým reálně cítí.
 
 :::callout{type="warn"}
-### Varování: BC growth bias {#cognitive-warning-heading}
+### Varování: sklon k rozšiřování BC {#cognitive-warning-heading}
 
 Velmi častá past: tým s úspěšným Core BC dostane od managementu „ještě jeden malý BC,
 zvládnete to“. Pak ještě jeden. Pak ještě jeden. Po roce má tým 4 BC, je vyhořelý a žádný

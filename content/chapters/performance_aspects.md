@@ -836,7 +836,7 @@ final class InvalidateUserCacheOnEmailChanged
 
 ## 16.08 Bulk operace a hromadné zpracování {#bulk-operace}
 
-Standardní DDD workflow – načti agregát, aplikuj doménovou logiku, zavolej `flush()`
+Standardní DDD postup – načti agregát, aplikuj doménovou logiku, zavolej `flush()`
 – funguje pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
 hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní. Každý cyklus načítá
 a spravuje jeden agregát, dirty checking zpracovává celou Identity Map. Celkový čas zpracování
@@ -1096,7 +1096,7 @@ agregátu lineární s počtem eventů. Pro agregát s 100 eventy je to instant;
 Detailní implementace včetně Symfony kódu je v sekci
 [Event Sourcing – Snapshotting](/event-sourcing#snapshotting). V kontextu výkonu
 si pamatujte: **snapshot není výchozí volba, ale úniková páka pro dlouho žijící
-agregáty**. Většina DDD agregátů má desítky eventů za celý lifecycle a snapshotting
+agregáty**. Většina DDD agregátů má desítky eventů za celý životní cyklus a snapshotting
 nepotřebuje.
 
 ## 16.10 Profiling DDD aplikací {#profiling}
