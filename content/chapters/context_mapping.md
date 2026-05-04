@@ -141,7 +141,7 @@ Evans (2003, str. 355): „*Designate with an explicit boundary some subset of t
 - Konceptů je málo (řekněme < 10 tříd) a jsou stabilní (mění se jednou ročně, ne týdně).
 - Týmy mají dobrou komunikaci a souhlasí, že koordinaci budou dělat.
 
-### Code sample: SharedKernel\Money modul
+### Ukázka kódu: SharedKernel\Money modul
 
 :::code{language="php" filename="shared-kernel/src/Money/Money.php"}
 <?php
@@ -234,7 +234,7 @@ Ordering BC potřebuje znát produktové ID a aktuální cenu, aby mohl sestavit
 
 Když Ordering tým řekne „potřebujeme v product DTO i `availableStock`“, Catalog tým to **neudělá okamžitě**. Posoudí, zda to dává smysl pro Catalog model (ano – *Stock* patří do Catalogu), naplánuje to do následujícího sprintu a dodá. Pokud by to nedávalo smysl pro Catalog model, navrhl by alternativu (např. samostatný *Inventory BC* s vlastním API).
 
-### Code sample: Symfony Messenger external transport
+### Ukázka kódu: Symfony Messenger external transport
 
 Customer/Supplier vztah se v Symfony 8 typicky implementuje přes **asynchronní eventy**. Catalog publikuje `ProductPriceChanged` do AMQP exchange, Ordering ho konzumuje přes external Messenger transport.
 
@@ -410,7 +410,7 @@ Evans (2003, str. 365): „*Translation layers can be simple, even elegant, when
 2. **Concept translation** – překlad *významu* dat. Upstream používá `customerNumber` jako int, my používáme `CustomerId` jako UUID. Upstream má status `"PENDING"`, my máme enum `OrderState::AwaitingPayment`. Zde se řeší „co to znamená“.
 3. **Anti-corruption** – validace a filtrace. Negativní částky, chybějící required pole, status mimo známý enum, datum v budoucnosti – všechno musí ACL odmítnout, *než* se to dostane do domény. Zde se řeší „je to důvěryhodné“.
 
-### Code sample: kompletní LegacyBillingTranslator
+### Ukázka kódu: kompletní LegacyBillingTranslator
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Acl/LegacyBillingTranslator.php"}
 <?php
@@ -570,7 +570,7 @@ V Symfony 8 OHS typicky znamená jedno z:
 - **gRPC** přes `spiral/roadrunner-grpc`, popsané `.proto` souborem.
 - **Event stream** publikovaný přes RabbitMQ / Kafka, popsaný JSON Schema (přechod k [PL](#published-language)).
 
-### Code sample: minimální OHS endpoint s versioningem
+### Ukázka kódu: minimální OHS endpoint s versioningem
 
 :::code{language="php" filename="src/Catalog/Infrastructure/Http/OpenHostService/ProductController.php"}
 <?php
@@ -666,7 +666,7 @@ Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) – a je to šp
 - **CloudEvents** ([cloudevents.io](https://cloudevents.io/)) – CNCF specifikace obálky pro eventy (typ, source, id, time).
 - **Avro / Protobuf** – binární formáty s povinným schema, oblíbené pro Kafka/gRPC.
 
-### Code sample: JSON Schema pro OrderPlaced event
+### Ukázka kódu: JSON Schema pro OrderPlaced event
 
 :::code{language="json" filename="order-placed-v1.json"}
 {
