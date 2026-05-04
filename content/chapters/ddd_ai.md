@@ -13,6 +13,7 @@ schema_type: TechArticle
 schema_headline: "DDD a umělá inteligence – co říkají autority"
 chapter_number: "ai"
 category: Reference
+ebook: false
 deck: "Přehled názorů předních autorit softwarového inženýrství na vztah Domain-Driven Designu a umělé inteligence – Eric Evans, Martin Fowler, Kent Beck, DHH a další. Jejich pozice, argumenty a data."
 reading_time: 20
 difficulty: 1
