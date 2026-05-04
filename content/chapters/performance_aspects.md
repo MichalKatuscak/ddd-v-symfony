@@ -1101,8 +1101,8 @@ nepotřebuje.
 
 ## 16.10 Profiling DDD aplikací {#profiling}
 
-Správná identifikace výkonnostního bottlenecku vyžaduje nástrojovou podporu. V PHP/Symfony
-ekosystému existuje škála nástrojů od development profileru až po produkční profiling nástroje.
+Správná identifikace výkonnostního úzkého místa vyžaduje nástrojovou podporu. V PHP/Symfony
+ekosystému existuje škála nástrojů od vývojového profileru až po produkční profiling nástroje.
 
 ### Symfony Profiler (Web Debug Toolbar)
 
