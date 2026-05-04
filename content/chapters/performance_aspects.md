@@ -1095,7 +1095,7 @@ agregátu lineární s počtem eventů. Pro agregát s 100 eventy je to instant;
 
 Detailní implementace včetně Symfony kódu je v sekci
 [Event Sourcing – Snapshotting](/event-sourcing#snapshotting). V kontextu výkonu
-si pamatujte: **snapshot není výchozí volba, ale escape hatch pro long-lived
+si pamatujte: **snapshot není výchozí volba, ale úniková páka pro dlouho žijící
 agregáty**. Většina DDD agregátů má desítky eventů za celý lifecycle a snapshotting
 nepotřebuje.
 

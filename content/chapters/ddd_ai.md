@@ -99,7 +99,7 @@ mají měřitelný dopad na kvalitu kódu generovaného LLM.
     </thead>
     <tbody>
         <tr>
-            <td>Production-ready kód (bez úprav)</td>
+            <td>Produkčně použitelný kód (bez úprav)</td>
             <td>~55 %</td>
             <td>~88 %</td>
         </tr>

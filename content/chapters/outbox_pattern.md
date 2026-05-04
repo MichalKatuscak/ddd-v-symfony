@@ -1477,7 +1477,7 @@ a UNIQUE constraint na inboxu jako pojistka.
 I se správným inboxem se může stát, že vedlejší efekt uvnitř transakce nebyl dotažen
 do idempotentního stavu. Klasický příklad: `UPDATE counter SET value = value + 1`
 pro každý `OrderPlaced` – pokud kdy v budoucnu vypneme inbox check
-(např. při reseedingu), counter naskočí o víc. Doporučení: pokud možno preferovat
+(např. při reinicializaci), counter naskočí o víc. Doporučení: pokud možno preferovat
 `UPSERT` / `INSERT ... ON CONFLICT DO UPDATE` nad inkrementálními
 patterny, a counter dopočítávat z agregace v report queries, ne držet jako materializovaný
 stav.
