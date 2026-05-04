@@ -7,7 +7,7 @@ meta_description: "Kde má sedět autorizační logika v DDD aplikaci v Symfony 
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
-modified: "2026-04-29"
+modified: "2026-05-04"
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
@@ -18,9 +18,11 @@ reading_time: 25
 difficulty: 3
 ---
 
+V předchozí kapitole jsme implementovali agregáty, repozitáře a Application Services v Symfony 8. Otevřená zůstala otázka, kterou většina projektů řeší ad-hoc: **kdo smí který use case zavolat a za jakých podmínek**. V této kapitole zavedeme čtyřvrstvý rámec, který autorizační rozhodnutí umístí na správnou vrstvu – od HTTP firewallu přes Symfony Voter v aplikační vrstvě až po doménové invarianty v agregátu. V navazující kapitole o CQRS pak ukážeme, jak se autorizace integruje do Command Handleru.
+
 Autorizace je v DDD aplikacích dlouhodobě podceněné téma. Většina týmů zvládne autentizaci (Symfony firewall, JWT, OAuth) bez větších potíží. Jakmile ale přijde otázka *„kdo smí udělat co s konkrétní entitou v konkrétním stavu“*, kód se rozsype napříč controllery, listenery, twig templaty a Doctrine query buildery. Kapitola dává **čtyřvrstvý rámec**, podle kterého poznáte, kam které pravidlo patří a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby Symfony Security komponenta pronikla do doménového jádra.
 
-Kapitola navazuje na [DDD Pain Points](/ddd-v-praxi-kde-to-boli), kde jsme autorizaci jen letmo zmínili, a doplňuje praktický pohled k tématům [CQRS](/cqrs) (kde sedí ověření Command Handleru) a [Testování](/testovani-ddd) (jak otestovat každou ze 4 vrstev samostatně).
+Kapitola navazuje na [Implementaci v Symfony](/implementace-v-symfony), která pokrývá Voter API jako jeden z několika Symfony idiomů. Doplňuje praktický pohled k tématům [CQRS](/cqrs) (kde sedí ověření Command Handleru), [Testování](/testovani-ddd) (jak otestovat každou ze 4 vrstev samostatně) a [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli) (kde jsme autorizaci jen letmo zmínili).
 
 ## 12.01 Tři chyby s autorizací, které se v review opakovaně objevují {#tri-chyby}
 
