@@ -1007,7 +1007,7 @@ Tři strategie, podle pořadí preference:
   publikuj `ItemReserved(productId, qty)` event a agregát ho zpracuje
   asynchronně přes saga. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
 - **CRDT / counter-only agregáty.** Pokud doménová operace je čistý increment
-  (`view_count`, `like_count`), nepotřebuješ celý agregát – stačí
+  (`view_count`, `like_count`), nepotřebujete celý agregát – stačí
   Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. To není „obvykle DDD“,
   ale je to validní u skutečně commutative operací.
 
