@@ -22,7 +22,7 @@ github_examples: Chapter01_WhatIsDDD
 ## 01.01 Definice DDD {#definition}
 
 Softwarové projekty selhávají překvapivě často nikoli kvůli technickým nedostatkům, ale proto, že vývojáři
-nedostatečně rozumí problémové oblasti, kterou jejich aplikace řeší. Právě na tento problém reaguje
+nedostatečně rozumí problémové oblasti, kterou jejich aplikace řeší. Na tento problém reaguje
 Domain-Driven Design (DDD) – přístup k vývoji softwaru, který staví modelování domény do středu
 celého návrhu. Poprvé jej systematicky popsal Eric Evans v knize *Domain-Driven Design: Tackling
 Complexity in the Heart of Software* v roce 2003 [[1]](https://www.domainlanguage.com/ddd/).
@@ -53,7 +53,7 @@ Hlavní milníky ve vývoji DDD [[6]](https://dddcommunity.org/):
 
 Strategický design se zabývá širším kontextem systému a definuje, jak různé části systému spolu interagují. Hlavní koncepty strategického designu zahrnují:
 
-- **Bounded Context** – Ohraničený kontext je explicitní hranice, ve které je doménový model platný. Každý bounded context má svůj vlastní Ubiquitous Language a model.
+- **Bounded Context** – Ohraničený kontext je explicitně vymezená oblast, uvnitř které platí jeden doménový model. Každý bounded context má svůj vlastní Ubiquitous Language a model.
 - **Context Map** – Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto vztahy mohou být různého typu, například Partnership, Customer-Supplier, Conformist nebo Anti-Corruption Layer.
 - **Shared Kernel** – Sdílené jádro je část modelu, která je sdílena mezi dvěma nebo více bounded contexts. Toto sdílení vyžaduje úzkou spolupráci mezi týmy.
 - **Customer-Supplier** – Vztah zákazník-dodavatel mezi dvěma bounded contexts, kde jeden kontext (dodavatel) poskytuje služby druhému kontextu (zákazník).
@@ -68,7 +68,7 @@ Taktický design se zabývá implementací doménového modelu v jednom bounded 
 
 - **Entity** – Objekty, které mají identitu a kontinuitu v čase. Entity jsou definovány svou identitou, nikoli svými atributy. Například zákazník v e-shopu je entita, protože má unikátní identifikátor (CustomerId), i když se jeho ostatní atributy (jméno, e-mail, adresa) v průběhu času mění.
 - **Value Object** – Hodnotové objekty jsou definovány svými atributy, nikoli identitou. Jsou neměnné (immutable) a používají se k popisu aspektů domény. Typickým příkladem hodnotového objektu je adresa nebo peněžní částka.
-- **Aggregate** – Agregát je shluk objektů, se kterými se zachází jako s jednou jednotkou při zápisu dat. Každý agregát má kořen agregátu (Aggregate Root), který je jediným vstupním bodem pro veškeré vnější interakce s agregátem.
+- **Aggregate** – Agregát je skupina objektů, která tvoří jednu jednotku konzistence při zápisu dat. Každý agregát má kořen agregátu (Aggregate Root), který je jediným vstupním bodem pro veškeré vnější interakce s agregátem.
 - **Domain Event** – Doménová událost reprezentuje něco, co se stalo v doméně a má význam pro doménové experty. Doménové události slouží mimo jiné ke komunikaci mezi různými bounded contexts.
 - **Service** – Doménová služba implementuje doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu. Služby jsou bezstavové a jejich názvy by měly být odvozeny z Ubiquitous Language.
 - **Repository** – Repozitář zapouzdřuje logiku pro přístup k persistenci agregátů. Poskytuje abstrakci nad datovým úložištěm a umožňuje pracovat s agregáty jako s objekty v paměti.
@@ -110,7 +110,7 @@ Domain-Driven Design přináší mnoho výhod pro vývoj softwaru:
 - **Lepší komunikace** – Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci.
 - **Flexibilita a odolnost vůči změnám** – Model orientovaný na doménu je stabilnější než model orientovaný na technická řešení; změny v obchodních požadavcích se přirozeněji promítají do kódu.
 - **Modularita** – Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.
-- **Testovatelnost** – Čisté doménové objekty bez infrastrukturních závislostí jsou testovatelné v izolaci bez mockování (viz [kapitola o testování](/testovani-ddd)).
+- **Testovatelnost** – Doménové objekty bez infrastrukturních závislostí lze testovat v izolaci bez mockování (viz [kapitola o testování](/testovani-ddd)).
 - **Snížení technického dluhu** – Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.
 - **Zaměření na hodnotu** – DDD rozlišuje Core Domain (zdroj konkurenční výhody) od podpůrných domén, což pomáhá soustředit investice tam, kde přinášejí největší obchodní hodnotu.
 
@@ -118,7 +118,7 @@ Praktické příklady Ubiquitous Language a dalších konceptů naleznete v kapi
 
 ## 01.07 Výzvy a omezení DDD {#challenges}
 
-I když DDD přináší mnoho výhod, má také své výzvy a omezení, která je dobré znát před rozhodnutím zavést DDD:
+I když DDD přináší mnoho výhod, má také svá omezení, která je třeba znát před rozhodnutím zavést DDD:
 
 - **Složitost** – DDD může být složité pochopit a implementovat, zejména pro začátečníky. Vyžaduje hluboké pochopení domény a architektonických principů.
 - **Časová náročnost** – Implementace DDD může být časově náročná, zejména v počátečních fázích projektu. Modelování domény a vytváření Ubiquitous Language vyžaduje čas a úsilí.
@@ -134,7 +134,7 @@ I když DDD přináší mnoho výhod, má také své výzvy a omezení, která j
 Domain-Driven Design lze porovnat s jinými přístupy k vývoji softwaru:
 
 - **DDD vs. Transaction Script** – Transaction Script (Martin Fowler, *PoEAA*) organizuje logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla a ukládá výsledek. **Rozdíl:** Transaction Script nemá doménový model – logika je v procedurách, ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí však dochází k duplicitě pravidel a těžko udržovatelnému kódu. DDD je vhodnější, jakmile doménová pravidla začnou být sdílena napříč více use cases.
-- **DDD vs. CRUD** – CRUD (Create, Read, Update, Delete) je datově orientovaný přístup: aplikace je v podstatě editor databázových tabulek. **Rozdíl:** CRUD nerozlišuje mezi doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu modeluje chování domény (objednávku nelze jen „updatovat“, ale „potvrdit“, „zrušit“ nebo „odeslat“). Pro jednoduché správy dat CRUD dostačuje.
+- **DDD vs. CRUD** – CRUD (Create, Read, Update, Delete) je datově orientovaný přístup: aplikace je v podstatě editor databázových tabulek. **Rozdíl:** CRUD nerozlišuje mezi doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu modeluje chování domény (objednávku nelze jen „updatovat“, ale „potvrdit“, „zrušit“ nebo „odeslat“). Pro jednoduchou správu dat CRUD postačí.
 - **DDD vs. Hexagonální architektura** – Hexagonální architektura (Ports and Adapters, Alistair Cockburn) řeší *jak strukturovat závislosti*: doménové jádro komunikuje s vnějším světem přes porty (rozhraní) a adaptéry (implementace). **Rozdíl:** DDD řeší *jak modelovat doménu* (Entity, Value Objects, Aggregates), hexagonální architektura řeší *jak oddělit doménu od infrastruktury*. Tyto přístupy jsou komplementární: DDD poskytuje vzory pro doménové jádro, hexagonální architektura poskytuje strukturu pro jeho izolaci.
 - **DDD vs. Mikroservisy** – Mikroservisy jsou architektonický styl zaměřený na *jak nasazovat a škálovat* části systému nezávisle. **Rozdíl:** DDD řeší logické hranice domény (Bounded Contexts), mikroservisy řeší fyzické hranice nasazení. Bounded Context z DDD je přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky – jeden Bounded Context může být implementován jako více mikroservis a naopak. DDD lze nasadit i v monolitické architektuře.
 

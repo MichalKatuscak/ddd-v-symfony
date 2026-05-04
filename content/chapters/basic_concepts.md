@@ -21,7 +21,7 @@ github_examples: Chapter03_BasicConcepts
 
 ## 06.01 Ohraničené kontexty (Bounded Contexts) {#bounded-contexts}
 
-Ohraničený kontext je explicitní hranice, ve které je model platný
+Ohraničený kontext je explicitně vymezená oblast, uvnitř které platí jeden model
 [[1]](https://martinfowler.com/bliki/BoundedContext.html).
 Uvnitř ohraničeného kontextu existuje konzistentní model a všudypřítomný jazyk.
 Různé ohraničené kontexty mají různé modely a jazyky – to je záměr, ne nedostatek.
@@ -231,7 +231,7 @@ Agregát je skupina souvisejících objektů, která tvoří jednu transakční 
 [[3]](https://www.domainlanguage.com/ddd/).
 Každý agregát má kořen agregátu (Aggregate Root),
 který je jediným vstupním bodem pro veškeré vnější interakce s agregátem. Špatně zvolená velikost
-agregátu patří mezi nejčastější chyby v DDD – velkoobjemové „God Agregaty“ rozebírá kapitola
+agregátu patří mezi nejčastější chyby v DDD – přerostlé „God Aggregates“ rozebírá kapitola
 [Anti-vzory a typické chyby](/anti-vzory).
 
 :::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
@@ -563,7 +563,7 @@ a zápisu v [CQRS](/cqrs) a uložení stavu jako sekvence událostí v
 - question: K čemu slouží Hodnotový objekt (Value Object)?
   answer: 'Hodnotový objekt zapouzdřuje doménový koncept, který je definován pouze svými hodnotami, nikoli identitou – například peněžní částka s měnou, rozsah kalendářních dní nebo e-mailová adresa. Umožňuje přesunout pravidla platnosti a doménové chování blízko dat, která popisují, a eliminuje tzv. Primitive Obsession (používání primitivních typů tam, kde patří doménový pojem). Neměnnost Value Objectu zjednodušuje uvažování o kódu i paralelním přístupu. Více v <a href="#value-objects">sekci o Hodnotových objektech</a>.'
 - question: Co je Agregát a proč je jeho hranice důležitá?
-  answer: 'Agregát je shluk doménových objektů, které se mění jako jeden celek – přístup k jeho vnitřním částem vede výhradně přes kořenovou entitu (Aggregate Root). Hranice agregátu je zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Podrobný rozbor v <a href="#aggregates">sekci o Agregátech</a>.'
+  answer: 'Agregát je skupina doménových objektů, které se mění jako jeden celek – přístup k jeho vnitřním částem vede výhradně přes kořenovou entitu (Aggregate Root). Hranice agregátu je zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Podrobný rozbor v <a href="#aggregates">sekci o Agregátech</a>.'
 - question: Jakou roli má Repozitář v DDD?
   answer: 'Repozitář poskytuje doménové vrstvě rozhraní podobné kolekci pro ukládání a načítání agregátů, aniž by doména musela znát konkrétní persistenční technologii. Pro kód v doménové vrstvě vypadá repozitář jako in-memory kolekce objektů; skutečné uložení do databáze probíhá v infrastrukturní vrstvě, která rozhraní implementuje. Díky tomu lze testovat doménu proti in-memory repozitáři a nahradit úložiště bez zásahu do doménových pravidel. Více v <a href="#repositories">sekci o Repozitářích</a>.'
 - question: Kdy použít Doménovou službu místo metody na Entitě?

@@ -32,7 +32,7 @@ a [Ságy](/sagy-a-process-managery).
 
 ## 07.01 Proč existují agregáty {#why-aggregates}
 
-Agregát je shluk doménových objektů, které jsou pro vnější svět nedělitelnou jednotkou
+Agregát je skupina doménových objektů, která je pro vnější svět nedělitelnou jednotkou
 konzistence. Eric Evans ho zavedl jako odpověď na dvě otázky, které objektově orientovaný
 model neřeší sám od sebe. První: *kdo je zodpovědný za vymáhání invariantů*.
 Druhá: *co se uloží v jedné transakci*. Vstupním bodem do agregátu je **kořen agregátu**
@@ -274,7 +274,7 @@ kontextů). Procesy, které sekundy nesnesou, jsou kandidáty na *jeden* agregá
 :::callout{type="warn"}
 **Pozor na uživatelskou zkušenost**
 
-Eventual consistency je prostá v back-endu, ale vyžaduje pozornost ve UI. Pokud uživatel
+Eventual consistency je prostá v back-endu, ale vyžaduje pozornost v UI. Pokud uživatel
 zadá objednávku a čeká stránku „Objednávka přijata“, nesmí ji vidět dříve, než ji vidí
 read model.
 
@@ -639,7 +639,7 @@ doctrine:
 ### Large-collection problem {#large-collection}
 
 Klasický anti-vzor: agregát `Project` drží `OneToMany` kolekci úkolů.
-S desítkami úkolů je to v pohodě, s tisíci je to katastrofa – každý load agregátu načte
+S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každý load agregátu načte
 všechny úkoly, každý add způsobí flush celé kolekce. Khononov pro tento případ definuje
 tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/):
 
@@ -713,7 +713,7 @@ Reference přes ID je jasné pravidlo, ale typů ID je víc a každý má dopad 
   Nevýhoda: insertion order není seřazen, což zhoršuje I/O pattern u clustered indexů (MySQL/InnoDB).
 - **ULID nebo UUID v7.** Time-ordered, distribuovaně generovatelná, řadí
   se podle času vzniku. **Doporučená volba** pro většinu nových projektů.
-  Symfony 5.2+ nabízí `Symfony\Component\Uid\Ulid` prostřednictvím balíčku
+  Symfony 5.1+ nabízí `Symfony\Component\Uid\Ulid` prostřednictvím balíčku
   `symfony/uid`; `Uuid::v7()` přibylo v Symfony 6.2.
 - **Sekvenční integer.** Krátký, lidsky čitelný, rychlý. Nevýhody: vyžaduje
   centrální generátor (DB sekvence), prozrazuje řád a počet entit, špatně se merguje
@@ -803,10 +803,10 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 
 ## 07.14 Další četba {#further-reading}
 
-- Eric Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*, kap. 6 „Aggregates“ (Addison-Wesley, 2003) [[1]](https://www.dddcommunity.org/book/evans_2003/).
+- Eric Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*, kap. 6 „The Life Cycle of a Domain Object“ (sekce Aggregates) (Addison-Wesley, 2003) [[1]](https://www.dddcommunity.org/book/evans_2003/).
 - Vaughn Vernon, *Effective Aggregate Design*, Part I–III (2011) [[2]](https://www.dddcommunity.org/library/vernon_2011/) – kanonický text o pravidlech návrhu agregátu, na který odkazuje téměř každá pozdější DDD kniha.
 - Vaughn Vernon, *Implementing Domain-Driven Design*, kap. 10 „Aggregates“ a kap. 12 „Repositories“ (Addison-Wesley, 2013) [[3]](https://www.informit.com/store/implementing-domain-driven-design-9780321834577).
-- Vlad Khononov, *Learning Domain-Driven Design*, kap. 8 „Architectural Patterns“ a kap. 10 „Event-Sourced Domain Model“ (O'Reilly, 2021) [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+- Vlad Khononov, *Learning Domain-Driven Design*, kap. 6 „Tackling Complex Business Logic“ a kap. 7 „Modeling the Dimension of Time“ (O'Reilly, 2021) [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 - Pat Helland, *Life Beyond Distributed Transactions: an Apostate's Opinion*, ACM Queue (2007, reprint 2017) [[5]](https://queue.acm.org/detail.cfm?id=3025012).
 - Martin Fowler, *DDD_Aggregate* (bliki) [[6]](https://martinfowler.com/bliki/DDD_Aggregate.html).
 - Greg Young, *CQRS Documents* (2010) [[7]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf) – relevantní především kapitoly o Event Sourcingu a snapshotech.
@@ -826,7 +826,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Jak hot aggregate vyřešit?
   answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger s deduplikací konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?
-  answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code>, balíček <code>symfony/uid</code> dostupný od Symfony 5.2). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
+  answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code>, balíček <code>symfony/uid</code> dostupný od Symfony 5.1). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
 - question: Jak rychle ověřit, že hranice agregátu je správně?
   answer: 'Tři rychlé kontroly. (1) <strong>Test invariantu</strong>: existuje pravidlo, které by se porušilo, kdybyste agregát rozdělili na dva? (2) <strong>Test velikosti</strong>: načtení z DB vrací desítky, ne stovky řádků? (3) <strong>Test reference</strong>: ven z agregátu se odkazujete jen přes ID, ne přes objektovou referenci? Pokud na všechny tři odpovídáte „ano“, hranice je nejspíš správná. Plný checklist s 12 body v <a href="#checklist">sekci Checklist</a>, sedmikrokový postup návrhu v <a href="#workflow">sekci Postup návrhu</a>.'
 :::

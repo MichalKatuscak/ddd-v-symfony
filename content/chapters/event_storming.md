@@ -41,7 +41,7 @@ Eric Evans v *Domain-Driven Design* (2003) píše, že [Ubiquitous Language](/co
 
 **Event Storming** je kolaborativní modelovací technika, kterou v roce 2013 představil italský konzultant Alberto Brandolini. Princip je přímočarý: účastníci v reálném čase pokládají na dlouhou stěnu (nebo Miro/Mural board) **oranžové sticky notes s doménovými událostmi vyjádřenými v minulém čase**. Postupně z nich vzniká časová osa toho, co se v doméně děje. Jak osa roste, přidávají se další barvy – modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots – a obraz domény se vyjasňuje.
 
-Brandolini techniku původně vyvíjel jako rychlý způsob, jak v *jednom dni* dostat do shody konzultanty, vývojáře a doménové experty. V *Introducing EventStorming* (Leanpub, 2021) pak techniku formálně rozdělil do tří úrovní detailu – každá řeší jinou otázku a má jiný cíl:
+Brandolini techniku původně vyvíjel jako rychlý způsob, jak v *jednom dni* dostat do shody konzultanty, vývojáře a doménové experty. V *Introducing EventStorming* (Leanpub, 2018) pak techniku formálně rozdělil do tří úrovní detailu – každá řeší jinou otázku a má jiný cíl:
 
 1. **Big Picture Event Storming** – strategická úroveň. Otázka: *„Co se v naší doméně vůbec děje?"* Cílem je objevit Bounded Contexty a hlavní procesy. Trvání 2-4 h, 8-12 účastníků.
 2. **Process Level Event Storming** – operační úroveň. Otázka: *„Jak konkrétně běží jeden zvolený proces?"* Cílem je popsat jeden Bounded Context detailněji, včetně Commands, Actors, Policies a externích systémů. Trvání 4-8 h.
@@ -89,7 +89,7 @@ Big Picture je první workshop, který tým s novou doménou (nebo s migrací z 
 Před workshopem se nelze vyhnout přípravě:
 
 - **Místnost a stěna.** 4-8 m dlouhá rovná stěna, nejlépe bez oken (světlo odlepuje stickies). Pokud je workshop online, založte v Miro nebo Mural *frame* minimálně 6000×3000 px.
-- **Účastníci.** 6-12 lidí. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z developer side: 3-5 vývojářů včetně tech leada. Plus jeden facilitátor (viz níže).
+- **Účastníci.** 6-12 lidí. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany: 3-5 vývojářů včetně tech leada. Plus jeden facilitátor (viz níže).
 - **Materiál.** 5-10 balíčků oranžových stickies (3M Post-It, 76×76 mm), 2 balíčky růžových, 2 modrých, 1 žlutý, 1 šedý, 1 zelený, 1 lila (světle fialový), 1 tmavě fialový. Černé fixy Sharpie pro každého (žádné kuličkové pera – text nebude čitelný z 2 m).
 - **Catering.** Káva, voda, ovoce, oběd. Workshop unaví – bez catering padá energie po 90 minutách.
 - **Pozvánka.** Pošlete účastníkům 1-stránkovou agendu předem. Doménové experty upozorněte, že *nebudou prezentovat slidy*, ale budou „vyprávět příběh".
@@ -102,7 +102,7 @@ Před workshopem se nelze vyhnout přípravě:
 4. **(30-45 min) Pivotal Events.** Facilitátor identifikuje *zlomové body* – eventy, kolem kterých se přirozeně sdružuje skupina ostatních. V e-shopu typicky: `CustomerRegistered`, `OrderPlaced`, `PaymentSettled`, `ShipmentDispatched`, `OrderClosed`. Označí je velkou červenou šipkou nebo vodorovnou čarou pod osu. Typicky 3-7 pivotal events.
 5. **(30-45 min) Hot Spots.** Kdykoliv během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?"), **nediskutuje se**. Místo toho se napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla. Po 45 minutách máte typicky 8-15 hot spotů. To je *nejcennější výstup* Big Picture.
 6. **(20-30 min) Bounded Context boundaries.** Facilitátor s týmem hledá místa, kde se mění slovník – kde *tentýž* pojem znamená něco jiného, kde končí jeden příběh a začíná jiný. Označí je fialovými stickies nebo silnými fialovými čarami. Typicky 3-7 BC.
-7. **(15 min) Foto a transkripce.** Wide-angle foto stěny v originálu, pak detailní fotky po sekcích. Vše uložit do `docs/discovery/<datum>/` v repu. Online workshop: Miro export jako PNG i jako board (link).
+7. **(15 min) Foto a transkripce.** Širokoúhlé foto stěny v originálu, pak detailní fotky po sekcích. Vše uložit do `docs/discovery/<datum>/` v repu. Online workshop: Miro export jako PNG i jako board (link).
 
 ### 04.04.3 Co máte na konci Big Picture {#bp-vystup}
 
@@ -374,7 +374,7 @@ Knihu *Domain Storytelling* doplňuje volně přístupný web [domainstorytellin
 
 ### 04.07.4 Praktický egon.io walkthrough {#ds-egon-walkthrough}
 
-[egon.io](https://egon.io/) je open-source webová aplikace (postavená na bpmn-js), která Domain Storytelling notaci plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír, je to vhodný nástroj. Postup pro první session:
+[egon.io](https://egon.io/) je open-source webová aplikace (postavená na bpmn-js), která Domain Storytelling notaci plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír, je to vhodný nástroj. Postup pro první sezení:
 
 1. **Otevřete egon.io v prohlížeči** – nevyžaduje registraci. Vlevo nahoře je toolbar s ikonkami: actor (panáček), work object (obdélník), activity (šipka).
 2. **Začněte s actorem.** Přetáhněte ikonu „person" na plátno a pojmenujte ji rolí, ne osobou – `Customer`, ne `Petr Novák`. Pojmenování je důležité; v exportu se objeví u každé aktivity.
@@ -383,7 +383,7 @@ Knihu *Domain Storytelling* doplňuje volně přístupný web [domainstorytellin
 5. **Buďte struční.** Jeden Domain Storytelling diagram by měl mít **jeden lineární příběh** s 5-15 aktivitami. Když jich máte 30, rozdělte ho na dva diagramy.
 6. **Export do SVG.** Menu vpravo nahoře → Download → SVG. Soubor pojmenujte `<datum>-<story-name>.svg` a uložte do `docs/discovery/<datum>/storytelling/`. SVG je textový formát, který se v gitu pěkně diffuje a v PR review vidíte změny.
 
-Pro tým, který chce diagramy generovat z kódu (např. v dokumentaci aktualizované CI), egon.io umí číst i **vlastní DSL formát** ve YAML. Z něj pak rendrouje SVG. Tím můžete například mít zdrojový text storyboardu uložený v repu a jeho rendrovaná verze se generuje při buildu dokumentace.
+Pro tým, který chce diagramy generovat z kódu (např. v dokumentaci aktualizované CI), egon.io umí číst i **vlastní DSL formát** ve YAML. Z něj pak vyrendruje SVG. Tím můžete například mít zdrojový text storyboardu uložený v repu a jeho rendrovaná verze se generuje při buildu dokumentace.
 
 ## 04.08 Anti-vzory workshopů {#anti-vzory}
 
@@ -418,7 +418,7 @@ Senior developer při facilitaci podsouvá technický pohled – automaticky str
 
 Když převedete vizuální workshop do lineárního textu, ztratíte 80 % informace – rozložení v prostoru, vztahy, blízkost hot spotů k eventům. Wordový dokument o osmi stranách nikdo nepřečte; foto a Miro export se otevřou na 5 sekund a všichni si vzpomenou, co kde stálo.
 
-**Řešení:** wide-angle foto stěny v originálu (4K), detailní fotky po sekcích, Miro link s read-only přístupem pro celý tým. Vše do `docs/discovery/<datum>/` v repu, vedle čistého `events.md` s prostým seznamem objevených eventů (řádek na event).
+**Řešení:** širokoúhlé foto stěny v originálu (4K), detailní fotky po sekcích, Miro link s read-only přístupem pro celý tým. Vše do `docs/discovery/<datum>/` v repu, vedle čistého `events.md` s prostým seznamem objevených eventů (řádek na event).
 :::
 
 :::callout{type="warn"}
@@ -443,7 +443,7 @@ Workshop bez follow-upu je promarněná investice. Zde je seznam **4 konkrétní
 
 ### 04.09.1 Foto / Miro link {#post-1-foto}
 
-Wide-angle foto stěny v originálu, detailní fotky po sekcích, Miro export PNG i link. Uložit do:
+Širokoúhlé foto stěny v originálu, detailní fotky po sekcích, Miro export PNG i link. Uložit do:
 
 :::code{language="plaintext" filename="docs/discovery/<datum>/"}
 docs/discovery/2026-04-29-big-picture/
@@ -691,7 +691,7 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 
 ## 04.12 Další četba {#further-reading}
 
-- [Alberto Brandolini – *Introducing EventStorming* (Leanpub, 2021)](https://leanpub.com/introducing_eventstorming). Autoritativní kniha přímo od autora techniky; detailní popis všech tří úrovní, příklady, anti-patterny.
+- [Alberto Brandolini – *Introducing EventStorming* (Leanpub, 2018)](https://leanpub.com/introducing_eventstorming). Autoritativní kniha přímo od autora techniky; detailní popis všech tří úrovní, příklady, anti-patterny.
 - [eventstorming.com](https://www.eventstorming.com/) – oficiální web techniky, kde Brandolini publikuje šablony, fotografie z workshopů a aktuální postupy.
 - [Stefan Hofer & Henning Schwentner – *Domain Storytelling: A Collaborative, Visual, and Agile Way to Build Domain-Driven Software* (Addison-Wesley, 2021)](https://domainstorytelling.org/). Komplexní kniha o Domain Storytellingu s notací, příklady a integrací s DDD.
 - [egon.io](https://egon.io/) – open-source webový nástroj pro Domain Storytelling. Drag-and-drop editor, export do SVG.

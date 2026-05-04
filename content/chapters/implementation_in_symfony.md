@@ -306,7 +306,7 @@ final class User extends AggregateRoot
 :::
 :::
 
-Co tady stojí za pozornost:
+Co zde stojí za pozornost:
 
 - **`final` + `extends AggregateRoot`.** `AggregateRoot` poskytuje `record()`
   a `releaseDomainEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
@@ -574,7 +574,8 @@ příkladech v této knize ji používáme jako default.**
 
 Pokud trváte na tom, že doménová vrstva nesmí obsahovat ani metadata
 o persistenci, korektní cesta není XML mapping (taky „znečištěné", jen jiným
-formátem), ale **Persisted Object Pattern** (Khononov, *Learning DDD*, kap. 11).
+formátem), ale **Persisted Object Pattern** – varianta vzoru *Data Mapper* (Fowler, *PoEAA*, 2002),
+kterou v DDD kontextu rozebírá Vlad Khorikov v sérii blogpostů „Persistence model" a Vaughn Vernon v *IDDD*, kap. 6.
 
 Idea: doménová třída zůstane POPO bez atributů. Vedle ní v infrastrukturní
 vrstvě existuje samostatná persistence třída se všemi Doctrine atributy.
@@ -1618,7 +1619,7 @@ final class DoctrineUserRepository implements UserRepository
 
 DI Container automaticky zaregistruje `DoctrineUserRepository` jako alias na
 rozhraní `UserRepository`. `services.yaml` zůstane čistý, závislosti zůstanou
-v jednom souboru s implementací. Pro většinu projektů je tohle preferovaná cesta.
+v jednom souboru s implementací. Pro většinu projektů je to preferovaná cesta.
 :::
 
 :::callout{type="pattern"}

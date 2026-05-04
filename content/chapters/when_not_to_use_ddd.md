@@ -235,8 +235,8 @@ Interní nástroj, landing page, jednorázová migrace, prototyp pro demo zákaz
 Kód napíšete, použijete a zahodíte.
 
 DDD investice se vrátí na projektech, které žijí roky a rostou. Na krátkodobých projektech
-tým zaplatí cenu DDD (čas, komplexita, learning curve), aniž by kdy sklidil
-výhody (udržovatelnost, evolvability).
+tým zaplatí cenu DDD (čas, komplexita, učební křivka), aniž by kdy sklidil
+výhody (udržovatelnost, schopnost rozvíjet se).
 
 **Proč zrovna rok?** Hranice „jeden rok“ není absolutní – je to orientační bod
 založený na praxi. DDD vyžaduje počáteční investici: modelování domény, budování
@@ -345,11 +345,11 @@ přepíšete stejně všechno.
 - Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte – viz [Migrace z CRUD na DDD](/migrace-z-crud).
 :::
 
-## 23.09 Subdoména-based hybrid – DDD kde dává smysl {#hybrid-subdomain}
+## 23.09 Hybrid podle typu subdomény – DDD tam, kde dává smysl {#hybrid-subdomain}
 
-V reálných projektech retírka odpověď „celé DDD ano, nebo celé ne" málokdy odpovídá
-realitě. Khononov v *Learning DDD* (2021) prosazuje **subdoména-based architecture**:
-DDD se aplikuje per Bounded Context podle typu subdomény:
+V reálných projektech odpověď „celé DDD ano, nebo celé ne" málokdy odpovídá
+realitě. Khononov v *Learning DDD* (2021) prosazuje architekturu **podle typu subdomény**:
+DDD se aplikuje per Bounded Context podle toho, o jakou subdoménu jde:
 
 | Typ subdomény | Architektonický styl | Důvod |
 |---|---|---|
@@ -389,7 +389,7 @@ zjistil, že platforma byla po té době nahrazena jinou při akvizici.
 3 roky engineering kapacity vyhozeno.
 :::
 
-### Pseudo-DDD – cargo cult warning {#pseudo-ddd-cargo-cult-heading}
+### Pseudo-DDD – varování před cargo cultem {#pseudo-ddd-cargo-cult-heading}
 
 Nejhorší výsledek není „nepoužít DDD". Je to **pseudo-DDD**: tým má adresářovou
 strukturu DDD (`Domain/`, `Application/`, `Infrastructure/`), používá slovník
@@ -400,7 +400,7 @@ DDD ve standupech, ale doménový model je anémický CRUD. Symptomy:
   doménové logiky – jen logování nebo audit.
 - Bounded Contexts existují jako adresáře, ale tým je přejmenoval z původního
   technického dělení (`UserModule/` → `UserBoundedContext/`).
-- Code review diskuse jsou o „je tohle správné DDD" místo „chrání tahle změna
+- Code review diskuse jsou o „je toto správné DDD" místo „chrání tato změna
   invariant".
 
 Pseudo-DDD má všechny náklady DDD (víc kódu, learning curve) a žádný přínos
@@ -420,7 +420,7 @@ DDD není špatná architektura. Je to architektura pro specifický kontext. Smy
 | Projekt bude žít a růst roky | Investice do architektury se vrátí jen při dostatečném horizontu | Core banking systém, ERP, zdravotnický informační systém |
 | Přístup k doménovým expertům | Ubiquitous Language a model se tvoří ve spolupráci – ne ze vzduchoprázdna | Pojistný matematik, zkušený účetní, vedoucí skladu – lidé, kteří žijí doménou denně |
 | Tým rozumí DDD nebo má čas se učit | Špatně implementované DDD je horší než žádné DDD | Tým prošel školením, má za sebou alespoň jeden DDD projekt, nebo má 2–3 měsíce na ramp-up |
-| Více bounded contexts nebo mikroslužby | DDD dává přirozené hranice pro dekompozici systému | E-commerce s oddělenými kontexty: katalog, objednávky, platby, logistika |
+| Více bounded contexts nebo mikroservisy | DDD dává přirozené hranice pro dekompozici systému | E-commerce s oddělenými kontexty: katalog, objednávky, platby, logistika |
 
 Pokud váš projekt splňuje tyto podmínky, DDD se vyplatí. Pokud ne – použijte jednodušší
 přístup a ušetřete si bolest.

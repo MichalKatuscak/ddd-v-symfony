@@ -32,9 +32,9 @@ na nevhodná místa.
 
 - **God Services (Boží služby)** – Třídy jako `UserService` nebo `OrderService` obsahují stovky řádků kódu a stávají se centrálním místem pro veškerou doménovou logiku. Přidání jakékoli nové funkce vyžaduje zásah do stejné třídy a riziko regresí roste.
 - **Fat Controllers (Tlusté kontrolery)** – Symfony kontrolery přestaly být tenkou vrstvou pro HTTP adaptaci. Místo toho přímo implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler má delegovat na doménový model, nikoli ho suplovat.
-- **Business logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
+- **Doménová logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
 - **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
-- **Nízká testovatelnost** – Business logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlý mocking.
+- **Nízká testovatelnost** – Doménová logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlý mocking.
 - **Komunikační propast** – Vývojáři a doménoví experti používají jiný slovník. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
 :::
 
@@ -866,7 +866,7 @@ final class UserTest extends TestCase
 ### Tipy pro týmovou komunikaci
 
 - Vytvořte **glosář pojmů** (Ubiquitous Language) a udržujte ho aktuální. Vyvěste ho na wiki nebo přímo v repozitáři jako součást dokumentace.
-- Pravidelně pořádejte **krátké Event Storming sessiony** (30–60 minut) pro nové funkcionality před jejich implementací.
+- Pravidelně pořádejte **krátká Event Storming sezení** (30–60 minut) pro nové funkcionality před jejich implementací.
 - Nastavte **code review pravidla**: doménová logika nesmí být v kontrolerech, doménové objekty nesmějí záviset na infrastruktuře.
 - Komunikujte s managementem v pojmech **obchodní hodnoty**, nikoli technické architektury. Migrace na DDD = schopnost rychleji a bezpečněji přidávat nové funkce.
 
@@ -988,7 +988,7 @@ core doména s vysokou hodnotou), postup je:
 - question: Jak začít s analýzou existující domény?
   answer: 'Začíná se Event Stormingem nebo obdobnou kolaborativní technikou s doménovými experty – zmapují se hlavní události, commands a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language. Paralelně se v existujícím kódu hledají implicitní hranice modelu: moduly, tabulky nebo funkční celky, které jsou málo propojené. Cílem první iterace je hrubá mapa, ne úplný model. Praktický postup v <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
 - question: Jak extrahovat doménovou vrstvu z existujícího CRUD kódu?
-  answer: 'Migrace začíná u jednoho vybraného Bounded Contextu, pro který vzniká nová doménová vrstva oddělená od Doctrine entit. Business logika ze service tříd a kontrolerů se přesouvá do metod agregátu, zatímco původní CRUD kód zůstává jako adaptér pro API a persistenci. Nejprve se zavede Anti-Corruption Layer, pak se refaktorují jednotlivé use casy. Charakterizační testy proti původnímu chování minimalizují regrese. Detailní rozbor v <a href="#extrakce-domainove-vrstvy">sekci Extrakce doménové vrstvy</a>.'
+  answer: 'Migrace začíná u jednoho vybraného Bounded Contextu, pro který vzniká nová doménová vrstva oddělená od Doctrine entit. Doménová logika ze service tříd a kontrolerů se přesouvá do metod agregátu, zatímco původní CRUD kód zůstává jako adaptér pro API a persistenci. Nejprve se zavede Anti-Corruption Layer, pak se refaktorují jednotlivé use casy. Charakterizační testy proti původnímu chování minimalizují regrese. Detailní rozbor v <a href="#extrakce-domainove-vrstvy">sekci Extrakce doménové vrstvy</a>.'
 - question: Jaká jsou hlavní rizika migrace z CRUD na DDD a jak je zmírnit?
   answer: 'Nejčastější pastí je anémický model: nové třídy mají DDD názvy, ale logika zůstává v servisech. Dále hrozí nadměrná granularita Bounded Contexts, přímé ukládání doménové logiky do Doctrine entit a zavádění CQRS bez přepracovaného modelu. Největším rizikem je Big Bang Rewrite, který se zřídka dotáhne do konce. Migrace má probíhat inkrementálně přes Strangler Fig, u středně velké aplikace s realistickým odhadem 12–24 měsíců. Rozbor rizik a zmírňujících opatření v <a href="#rizika-a-doporuceni">sekci Rizika a doporučení</a>.'
 :::

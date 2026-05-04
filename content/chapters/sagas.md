@@ -879,7 +879,7 @@ final class OrderSaga extends AggregateRoot
 :::
 :::
 
-Tři stavební prvky, které tady fungují společně:
+Tři stavební prvky, které zde fungují společně:
 
 - **UNIQUE constraint na `order_id`** zabrání duplicitnímu vzniku ságy.
   Druhý INSERT vyhodí `UniqueConstraintViolationException`, handler ji zachytí

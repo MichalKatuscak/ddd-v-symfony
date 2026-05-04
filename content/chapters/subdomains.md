@@ -95,7 +95,7 @@ Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sk
 
    Pokud ANO → silný indikátor Core. Vývoj „jinak než ostatní" je nákladný a smysl má jen tehdy, pokud z té odlišnosti plyne tržní výhoda. Pokud děláme něco jinak *bez* hmatatelné výhody, je to často špatně klasifikovaná subdoména – měli jsme koupit standardní řešení.
 
-4. **„Mluví o tom CEO / VP product na týdenní bázi?"**
+4. **„Mluví o tom CEO / VP product každý týden?"**
 
    Pokud ANO → silný indikátor Core. Vrcholný management se nezabývá Supporting subdoménami; o těch slyší jen tehdy, když přestanou fungovat. Pokud o určité funkcionalitě průběžně rozhoduje CEO, je to konkurenční diferenciátor – tedy Core. Pokud ne, je to provoz.
 
@@ -114,7 +114,7 @@ Pokud z testu vyjde, že máte pět nebo víc Core domén, něco je špatně. Co
 - Reporting je v BI startupu Core. V e-shopu je to Supporting (potřebuju to, ale neutrhneme se tím).
 - Identita uživatelů je v Auth0 Core. U vás je to Generic (kupte si Auth0).
 
-Pravidlo palce: **jedna Core Doména na produkt**. Pokud máte víc, zvažte, zda nejsou některé z nich ve skutečnosti Supporting subdomény, kterým marketing přidělil heroickou nálepku.
+Empirické pravidlo: **jedna Core Doména na produkt**. Pokud máte víc, zvažte, zda nejsou některé z nich ve skutečnosti Supporting subdomény, kterým marketing přidělil heroickou nálepku.
 :::
 
 ## 02.04 Anti-vzor: „všechno je Core" {#vsechno-core-antipattern}
@@ -145,7 +145,7 @@ Obrana proti anti-vzoru „všechno je Core" je přímočará: **vynuťte si roz
 
 ## 02.05 Mapování subdomén na Bounded Contexts {#subdomeny-na-bc}
 
-Subdoména a Bounded Context se mapují skrz tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména je rozdělená do více BC, typické pro Core), a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov upozorňuje, že u Core Domén je 1:N často nevyhnutelné, protože stejné doménové pravidlo se uplatňuje v různých kontextech (čtenářském vs. zápisovém) [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména je rozdělená do více BC, typické pro Core), a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov upozorňuje, že u Core Domén je 1:N často nevyhnutelné, protože stejné doménové pravidlo se uplatňuje v různých kontextech (čtenářském vs. zápisovém) [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
 Pro názornost mapujme imaginární e-shop střední velikosti (3–4 týmy, 25 vývojářů) na subdomény a Bounded Contexts:
 
@@ -488,7 +488,7 @@ Příklad: **cloud storage**. Dropbox v roce 2008 měl Core v synchronizaci soub
 
 ### Ze Supporting do Generic – když dorazí kvalitní SaaS {#shift-supporting-to-generic}
 
-Příklad: **helpdesk / ticketing**. V roce 2005 většina středních firem implementovala vlastní helpdesk modul – Supporting subdoména. Dnes je Zendesk / Freshdesk / Intercom dost dobrý, aby pokryl 90 % požadavků, a vlastní implementace je nesmyslná. Subdoména se posunula z Supporting do Generic, a tým, který ji nadále udržuje vlastní, plýtvá rozpočtem.
+Příklad: **helpdesk / ticketing**. V roce 2005 většina středních firem implementovala vlastní helpdesk modul – Supporting subdoména. Dnes je Zendesk / Freshdesk / Intercom dost dobrý, aby pokryl 90 % požadavků, a vlastní implementace je nesmyslná. Subdoména se posunula z Supporting do Generic, a tým, který ji nadále udržuje sám, plýtvá rozpočtem.
 
 Praktická obrana proti zastarávání klasifikace:
 

@@ -697,7 +697,7 @@ s referencemi na dříve spravované objekty.
 Caching v DDD architektuře vyžaduje pečlivý návrh. Základní otázka zní:
 **co cachovat**? Obecné pravidlo říká: cachujeme výsledky operací, které jsou
 výpočetně nebo I/O nákladné a jejichž výsledek se v čase nemění (nebo se mění předvídatelně).
-Business logiku nikdy do cache klíče nezahrnujeme – cache slouží pro infrastrukturní výsledky,
+Doménovou logiku nikdy do cache klíče nezahrnujeme – cache slouží pro infrastrukturní výsledky,
 nikoli pro doménová rozhodnutí.
 
 :::callout{type="note"}

@@ -622,9 +622,9 @@ final class ProductController extends AbstractController
 
 Důležité: **v1 a v2 koexistují**. Zveřejnění OHS v1 je *závazek* – jakmile nějaký downstream začne v1 používat, nesmíte ji rozbít. Bez explicitního versioningu to není OHS, jenom „REST endpoint s nedostatečnou disciplínou“.
 
-### Versioning strategie
+### Strategie verzování
 
-Tři běžné přístupy k versioningu OHS:
+Tři běžné přístupy k verzování OHS:
 
 - **URI versioning** (`/api/v1/...`) – nejčitelnější, cacheovatelné na úrovni HTTP, doporučené pro veřejné API.
 - **Header versioning** (`Accept: application/vnd.catalog.v2+json`) – čistší URL, ale komplikovaná diagnostika a debugging.

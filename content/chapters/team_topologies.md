@@ -485,7 +485,7 @@ Bod 5 (germane prostor):         __
 
 Rubrika je záměrně subjektivní – měří *vnímání* členů týmu, ne metrické fakty.
 Důvod: cognitive load je psychologická kategorie, žádná metrika z Grafany ji nezachytí.
-Skelton a Pais (2019, kap. 6) výslovně varují před snahou cognitive load „objektivizovat“
+Skelton a Pais (2019, kap. 3 „Team-First Thinking“) výslovně varují před snahou cognitive load „objektivizovat“
 přes počet řádků kódu, count of services, nebo ticket throughput. Tyto proxy metriky
 nemají korelaci s tím, jak se tým reálně cítí.
 
@@ -575,7 +575,7 @@ každá netriviální změna jednoho týmu vyžaduje code review od ostatních (
 se ujistili, že to nic nerozbije“). Druhý tým má fakticky veto na změny prvního.
 
 **Řešení:** buď jasné hranice modulů v monorepu (Nx, Bazel, Turborepo
-pro JS; doctrine bundles pro Symfony) s explicitními ownerships v `CODEOWNERS`,
+pro JS; Symfony Bundles pro Symfony) s explicitními ownerships v `CODEOWNERS`,
 nebo separátní repa per BC. Nikdy ne princip „všichni do jednoho repa, nějak se domluvíme“.
 
 ### 2. „Frontend / Backend / Mobile týmy“ {#antivzor-frontend-backend}
@@ -618,7 +618,7 @@ organizaci.
 (CLI, portál, IaC moduly). Pokud stream-aligned tým musí zadávat tikety, je to chyba designu
 platformy, ne chyba zadávajícího týmu.
 
-Hlavní metrika: **time-to-first-deploy pro nový BC**. V zdravé organizaci
+Hlavní metrika: **time-to-first-deploy pro nový BC**. Ve zdravé organizaci
 pod 1 den. V nezdravé organizaci „ozkoušíme to za měsíc, jakmile platform team má kapacitu“.
 
 ### 5. „Sdílený Bounded Context mezi 2 týmy“ {#antivzor-shared-bc}
@@ -683,12 +683,12 @@ o 30–50 %. Tato čísla CTO chápe.
 
 Sociolog Ron Westrum v roce 2004 publikoval typologii organizačních kultur
 [[5]](https://qualitysafety.bmj.com/content/13/suppl_2/ii22),
-kterou později použil Forsgren v *Accelerate* jako hlavní prediktor úspěchu DevOps
+kterou později použila Forsgren v *Accelerate* jako hlavní prediktor úspěchu DevOps
 transformací. Westrum rozlišuje 3 typy:
 
 | Aspekt | Pathological (power-oriented) | Bureaucratic (rule-oriented) | Generative (performance-oriented) |
 |---|---|---|---|
-| Spolupráce | Nízká | Modulární | Vysoká |
+| Spolupráce | Nízká | Mírná | Vysoká |
 | Chyby | Trestány | Vedou k hledání viníků | Vedou k učení |
 | Nové nápady | Drceny | Považovány za problém | Vítány |
 | Sdílení informací | Skryto | Ignorováno | Aktivně podporováno |

@@ -177,7 +177,7 @@ Na taktické úrovni implementace pokrývá tyto DDD vzory:
 
 - **Entity** – Objekty s identitou, které se v čase mění (např. User, Project, Task).
 - **Value Objects** – Neměnné objekty bez identity, které reprezentují koncepty v doméně (např. UserId, ProjectId, TaskStatus).
-- **Aggregates** – Shluky objektů, které doména považuje za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).
+- **Aggregates** – Skupiny objektů, které doména považuje za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).
 - **Domain Events** – Události, které nastávají v doméně a mají význam pro doménové experty (např. ProjectCreated, TaskAssigned).
 - **Repositories** – Objekty, které zapouzdřují přístup k persistenci agregátů (např. ProjectRepository, TaskRepository).
 - **Domain Services** – Služby, které implementují doménovou logiku, která nepatří do žádné entity nebo hodnotového objektu (např. TaskAssignmentService).
