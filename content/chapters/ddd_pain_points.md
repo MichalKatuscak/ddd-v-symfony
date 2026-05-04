@@ -826,7 +826,7 @@ s pochopením domény. Bez aktivní správy kód zaostává za aktuálním cháp
 3. **Event Storming jako pravidelná aktivita** – ne jednorázový workshop
    na začátku projektu, ale čtvrtletní revize s doménovými experty.
 
-4. **Living documentation přes testy** – BDD-style popis v testech
+4. **Živá dokumentace přes testy** – BDD-style popis v testech
    (`it_places_an_order_when_items_are_in_stock()`) tvoří čitelnou dokumentaci
    aktuálního chování.
 
