@@ -600,7 +600,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
 :::callout{type="note"}
 ### Proč ne Doctrine ORM pro read stranu? {#read-model-poznamka-heading}
 
-Doctrine ORM je navržen pro práci s doménovým modelem – mapuje entity, řeší vztahy,
+Doctrine ORM je stavěný pro práci s doménovým modelem – mapuje entity, řeší vztahy,
 lazy loading, identity map a unit of work. Pro read stranu CQRS je to zbytečná režie.
 Read model potřebuje pouze **rychle načíst data a namapovat je na ViewModel**.
 Doctrine DBAL (přímý SQL přes Connection) nebo nativní PDO je pro tento účel rychlejší,

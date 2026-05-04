@@ -39,7 +39,7 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 ## 20.01 A – Doctrine vs. doménový model {#doctrine}
 
 Doctrine ORM je bohatý nástroj, ale jeho interní model (Unit of Work, Identity Map, lazy loading)
-byl navržen pro jednoduchý CRUD. Bohaté doménové modely s ním přicházejí do konfliktu na šesti
+je stavěný pro jednoduchý CRUD. Bohaté doménové modely s ním přicházejí do konfliktu na šesti
 místech.
 
 ### A1. Transakce přes agregáty a Doctrine Unit of Work {#a1-transakce}
@@ -832,7 +832,7 @@ s pochopením domény. Bez aktivní správy kód zaostává za aktuálním cháp
 
 ## 20.04 D – Symfony-specifické třenice {#symfony}
 
-Symfony je rozsáhlý framework, ale některé jeho konvence jsou navrženy pro CRUD aplikace.
+Symfony je rozsáhlý framework, ale některé jeho konvence cílí na CRUD aplikace.
 Tato sekce popisuje tři místa, kde framework-first přístup koliduje s DDD.
 
 ### D1. Symfony Form vs. Command {#d1-form}
@@ -1083,9 +1083,9 @@ Bus factor = 1 je pro projekt kritické riziko.
 - question: Jak řešit Outbox Pattern pro spolehlivé doručení doménových událostí?
   answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Praktický příklad v <a href="#b1-outbox">sekci Outbox Pattern</a>.'
 - question: Jak vysvětlit přínos DDD managementu, když první iterace zpomaluje?
-  answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových feature po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který doručí první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Management</a>.'
+  answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových funkcí po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který doručí první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Management</a>.'
 - question: Jak udržet Ubiquitous Language, aby časem neutrpěl drift?
-  answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice“, zákazník říká „faktura“. Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová feature zavádí pojem, který doménový expert nezná – v ten moment je nutné buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
+  answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice“, zákazník říká „faktura“. Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová funkce zavádí pojem, který doménový expert nezná – v ten moment je nutné buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
 - question: Jak přežít paralelní existenci staré CRUD části a nové DDD vrstvy?
-  answer: 'Strangler Fig pattern umožňuje oba stavy držet v jedné aplikaci: staré CRUD moduly zůstávají v provozu, nové feature vznikají v DDD stylu a propojení řeší Anti-Corruption Layer. Výzvou je sdílená databáze, autentizace a uživatelský stav. Pragmatické řešení: postupně migrovat podle Bounded Contextu, ne podle modulu, a explicitně přijmout, že projekt bude mít smíšený stav po 12–24 měsíců. Viz <a href="#e2-strangler">sekci Strangler pattern</a>.'
+  answer: 'Strangler Fig pattern umožňuje oba stavy držet v jedné aplikaci: staré CRUD moduly zůstávají v provozu, nové funkce vznikají v DDD stylu a propojení řeší Anti-Corruption Layer. Výzvou je sdílená databáze, autentizace a uživatelský stav. Pragmatické řešení: postupně migrovat podle Bounded Contextu, ne podle modulu, a explicitně přijmout, že projekt bude mít smíšený stav po 12–24 měsíců. Viz <a href="#e2-strangler">sekci Strangler pattern</a>.'
 :::

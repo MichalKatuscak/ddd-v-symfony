@@ -893,7 +893,7 @@ V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte
 
 ## 09.06 Vertical Slice Architecture (a horizontální vs. vertikální dělení) {#vertical-slice}
 
-Jimmy Bogard popsal *Vertical Slice Architecture* v roce 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/) jako reakci na náklady vrstvových architektur. Jeden jednoduchý use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné feature vyžaduje úpravy ve všech sedmi.
+Jimmy Bogard popsal *Vertical Slice Architecture* v roce 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/) jako reakci na náklady vrstvových architektur. Jeden jednoduchý use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy ve všech sedmi.
 
 Vertical Slice Architecture organizuje kód **podle feature, ne podle vrstvy**. Každá feature dostane svůj adresář, ve kterém žije všechno potřebné: Command/Query, Handler, Validátor, Read Model, Controller. Slice je kompletní vertikální „sloupec“ přes všechny technické vrstvy aplikace. To je v ostrém kontrastu s tradičním vrstveným (horizontálním) přístupem, kde se kód člení podle technické odpovědnosti (Controller / Service / Repository / Entity), a jeden use case se rozprostírá napříč všemi vrstvami.
 
@@ -981,12 +981,12 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 
 - Tým má dlouhou zkušenost s vrstvenou architekturou a CQRS není v plánu.
 - Aplikace má 10–30 endpointů a malou doménovou složitost.
-- Doménový model má silně sdílené invarianty napříč více feature, které je třeba jednotně vymáhat.
+- Doménový model má silně sdílené invarianty napříč více funkcemi, které je třeba jednotně vymáhat.
 - Preference týmu je explicitní oddělení technických vrstev před organizací podle funkcí.
 
 **Vertikální slice** se vyplatí, když:
 
-- Aplikace má 50+ feature s nezávislými use casy.
+- Aplikace má 50+ funkcí s nezávislými use casy.
 - Tým plánuje CQRS nebo je už zavedlo (Symfony Messenger jako Command/Query Bus).
 - Aplikace bude v budoucnu rozdělena do mikroslužeb – feature jako celek se snadněji extrahuje.
 - Preferujete rychlou iteraci s minimální koordinací mezi vrstvami.
@@ -1248,7 +1248,7 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 - question: Co je „Port“ přesně a jak se liší od běžného PHP interface?
   answer: 'Port je interface s explicitní architektonickou rolí: definuje hranici mezi doménou a vnějším světem. Technicky je to běžný PHP <code>interface</code>, ale konvenčně žije v adresáři <code>Domain/Port/</code>, nemá framework závislosti a má smysluplné jméno z domain language (<code>OrderRepository</code>, ne <code>OrderRepositoryInterface</code>). Cockburn rozlišuje driving porty (vnější svět volá doménu) a driven porty (doména volá vnější svět). V Symfony auto-wiringu je port automaticky napojen na svou jedinou implementaci, nebo můžete explicitně mapovat v services.yaml. Detail v <a href="#hexagonal">sekci o Hexagonal</a>.'
 - question: Vyplatí se Clean Architecture v malé Symfony aplikaci?
-  answer: 'Spíše ne. Clean Architecture vyžaduje DTO ping-pong (Request DTO → Use Case → Response DTO → Adapter překládá zpět), je významný overhead – pro každou feature tři až čtyři další třídy. V malé aplikaci s 20–30 endpointy je to čistá ztráta. Vyplatí se až v aplikacích s explicitním seznamem use casů (200+ schopností), kde je důležitá auditability „co aplikace umí“ a kde je víc vstupních kanálů (HTTP + CLI + Messenger + GraphQL). Pro malou Symfony aplikaci stačí Layered nebo Hexagonal s méně rituálem. Detail v <a href="#srovnani">rozhodovací matici</a>.'
+  answer: 'Spíše ne. Clean Architecture vyžaduje DTO ping-pong (Request DTO → Use Case → Response DTO → Adapter překládá zpět), je významný overhead – pro každou funkci tři až čtyři další třídy. V malé aplikaci s 20–30 endpointy je to čistá ztráta. Vyplatí se až v aplikacích s explicitním seznamem use casů (200+ schopností), kde je důležitá auditability „co aplikace umí“ a kde je víc vstupních kanálů (HTTP + CLI + Messenger + GraphQL). Pro malou Symfony aplikaci stačí Layered nebo Hexagonal s méně rituálem. Detail v <a href="#srovnani">rozhodovací matici</a>.'
 - question: Jak Vertical Slice zapadá mezi Hexagonal/Onion/Clean?
   answer: 'Vertical Slice je ortogonální k vrstvovým stylům. Hexagonal/Onion/Clean popisují <em>jak strukturovat závislosti uvnitř jedné feature</em>; Vertical Slice popisuje <em>jak organizovat feature mezi sebou</em>. Tyto dvě dimenze lze kombinovat: každý vertikální slice může uvnitř používat Hexagonal port-adapter strukturu, nebo nemusí. V moderních Symfony projektech je rozšířená kombinace <strong>Hexagonal + Vertical Slice + CQRS přes Symfony Messenger</strong> – Bounded Context má sdílený doménový model, ale aplikační vrstva je rozdělená do feature slice. Detail Vertical Slice v <a href="/vertikalni-slice">samostatné kapitole</a>.'
 :::

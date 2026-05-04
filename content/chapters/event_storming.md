@@ -136,7 +136,7 @@ Když workshop musí být online (distribuovaný tým, pandemie, zahraniční do
 
 Tech lead má názor – často velmi silný. V okamžiku, kdy facilituje, ten názor – vědomě či nevědomě – protlačí. Doménoví experti to vycítí a začnou si přikyvovat namísto toho, aby přinášeli vlastní pohled.
 
-Facilitátor by měl být buď externí konzultant, nebo někdo z týmu, kdo *není* senior developer ani tech lead – typicky senior PM, agile coach nebo product designer. Pokud takovou roli nemáte, **explicitně si domluvte**, že tech lead bude během workshopu mlčet. Promluví jen tehdy, když se ho někdo přímo zeptá.
+Facilitátor by měl být buď externí konzultant, nebo někdo z týmu, kdo *není* senior vývojář ani tech lead – typicky senior PM, agile coach nebo product designer. Pokud takovou roli nemáte, **explicitně si domluvte**, že tech lead bude během workshopu mlčet. Promluví jen tehdy, když se ho někdo přímo zeptá.
 
 Brandolini v *Introducing EventStorming* tomu říká „*facilitator's silence*“ – facilitátor neformuluje obsah, jen drží proces.
 :::
@@ -318,7 +318,7 @@ if ($items === []) {
 }
 :::
 
-Tato vazba má praktický dopad. Za půl roku nový developer ví, odkud pravidlo pochází, a může si ho ověřit u doménového experta. Nesmaže ho v dobré víře jako „divnou validaci“.
+Tato vazba má praktický dopad. Za půl roku nový vývojář ví, odkud pravidlo pochází, a může si ho ověřit u doménového experta. Nesmaže ho v dobré víře jako „divnou validaci“.
 :::
 
 ## 04.07 Domain Storytelling – alternativa pro malé týmy {#domain-storytelling}
@@ -363,7 +363,7 @@ Kresba je úmyslně jednoduchá – ručně nakreslené piktogramy nebo nástroj
 Hofer a Schwentner v knize zdůrazňují, že obě techniky se **nekonkurují**, ale doplňují: Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv), Domain Storytelling pak v každém z nich odkryje detail (teleobjektiv). Doporučují kombinovat: Big Picture Event Storming pro strategický přehled, Domain Storytelling pro jednotlivé hlavní procesy a Process / Design Level Event Storming pro implementaci.
 
 :::callout{type="note"}
-### Tooling pro Domain Storytelling {#ds-tooling-heading}
+### Nástroje pro Domain Storytelling {#ds-tooling-heading}
 
 - **[egon.io](https://egon.io/)** – open-source nástroj přímo v prohlížeči. Drag-and-drop actor / work object / activity, export do SVG. Vhodný pro online workshopy a archivaci.
 - **Miro / Mural** – pomocí vlastních tvarů. Méně specializované, ale tým ho už typicky zná.
@@ -392,7 +392,7 @@ Workshop, který je špatně připravený nebo špatně řízený, je horší ne
 :::callout{type="warn"}
 ### „Doménoví experti nemají čas, uděláme to bez nich.“ {#anti-no-experts-heading}
 
-**Bez doménových expertů to není workshop, ale brainstorming developerů**, kteří si vymýšlí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný – chybí mu validní kontradikce a hot spoty.
+**Bez doménových expertů to není workshop, ale brainstorming vývojářů**, kteří si vymýšlí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný – chybí mu validní kontradikce a hot spoty.
 
 **Řešení:** nepřesvědčujte experty na 4 hodiny. Domluvte si *90 minut Big Picture*. Téměř vždy se to dá v kalendáři vyargumentovat. A pokud opravdu nikdo z expertů nemůže, workshop odložte – neudělejte ho jen proto, že máte rezervovanou místnost.
 :::
@@ -408,7 +408,7 @@ Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém B
 :::callout{type="warn"}
 ### „Workshop facilituje senior dev / tech lead.“ {#anti-tech-lead-heading}
 
-Senior developer při facilitaci podsouvá technický pohled – automaticky strukturuje eventy podle toho, co se dá hezky implementovat, místo podle toho, jak doména reálně funguje. Doménoví experti to vycítí a začnou potlačovat svůj jazyk ve prospěch toho „technicky čistého“.
+Senior vývojář při facilitaci podsouvá technický pohled – automaticky strukturuje eventy podle toho, co se dá hezky implementovat, místo podle toho, jak doména reálně funguje. Doménoví experti to vycítí a začnou potlačovat svůj jazyk ve prospěch toho „technicky čistého“.
 
 **Řešení:** facilitátor by měl být PM, agile coach, designer, nebo externí konzultant. Pokud takovou roli nemáte, alespoň si hlídejte tech leada – nejlépe ať během workshopu mlčí.
 :::
@@ -534,7 +534,7 @@ my-symfony-app/
 
 Adresář `docs/discovery/` je **append-only** – staré workshopy nemažete, jen přidáváte nové (s novým datem). Tým tak má historii, jak se mapa domény vyvíjela, a re-storming porovná `docs/discovery/2026-04-29-big-picture/events.md` s `docs/discovery/2026-10-15-re-storming/events.md`.
 
-Dolní hranice `src/Ordering`, `src/Payment`, `src/Shipment` přímo zrcadlí 3 fialové stickies z workshopu – Bounded Contexty. Když nový developer otevře projekt, vidí strukturu, která mu odpovídá tomu, co viděl na fotce ze workshopu. Tato vazba mezi *artefaktem v repu* a *artefaktem ze stěny* chrání jazyk workshopu před tím, aby se po půl roce vytratil z kódu.
+Dolní hranice `src/Ordering`, `src/Payment`, `src/Shipment` přímo zrcadlí 3 fialové stickies z workshopu – Bounded Contexty. Když nový vývojář otevře projekt, vidí strukturu, která mu odpovídá tomu, co viděl na fotce ze workshopu. Tato vazba mezi *artefaktem v repu* a *artefaktem ze stěny* chrání jazyk workshopu před tím, aby se po půl roce vytratil z kódu.
 
 ### 04.09.6 První PR po workshopu {#post-6-prvni-pr}
 
@@ -631,7 +631,7 @@ final class OrderTest extends TestCase
 }
 :::
 
-Komentáře `Inv-1 (workshop 2026-04-29)` nejsou kosmetika – umožňují dohledání původu. Když test selže za půl roku a nový developer chce zjistit, proč pravidlo existuje, doloví ho přes git blame nebo podle data workshopu.
+Komentáře `Inv-1 (workshop 2026-04-29)` nejsou kosmetika – umožňují dohledání původu. Když test selže za půl roku a nový vývojář chce zjistit, proč pravidlo existuje, doloví ho přes git blame nebo podle data workshopu.
 
 ### 04.10b.2 Doménové eventy jako tests {#tdd-events}
 
@@ -658,7 +658,7 @@ final class PlaceOrderHandlerTest extends KernelTestCase
 }
 :::
 
-Toto má dva přínosy. První: testy jsou *čitelné pro doménové experty*. Pojmenování přesně odpovídá workshopu, takže ne-developer si test může přečíst a potvrdit, že vyjadřuje to, co měl na mysli. Druhý: testy jsou **ochrana před regresí**. Když někdo za rok refaktoruje a omylem porušuje invariant z workshopu, test ho chytí.
+Toto má dva přínosy. První: testy jsou *čitelné pro doménové experty*. Pojmenování přesně odpovídá workshopu, takže nevývojář si test může přečíst a potvrdit, že vyjadřuje to, co měl na mysli. Druhý: testy jsou **ochrana před regresí**. Když někdo za rok refaktoruje a omylem porušuje invariant z workshopu, test ho chytí.
 
 Podrobně viz kapitolu [Testování v DDD](/testovani-ddd) – testovací strategie, doménové testy, integrační testy s Symfony Messenger.
 
@@ -685,8 +685,8 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
   answer: 'Engineering. Argument je jednoduchý: bez workshopu engineering vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů. V praxi by produkt a engineering měli platit společně – workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně.'
 - question: Co když doménoví experti používají hovorovou češtinu a slang („chronický neplatič nás zase odbil“)?
   answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky češtinou s vlastním slangem. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „chronický neplatič“, napište to na sticky tak, jak to řekl, a v kódu pak modelujte koncept s tímto jménem (např. <code>ChronicLatePayer</code>), případně doplňte synonymum používané v týmu jako PHPDoc komentář. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
-- question: Když máme jen sólo developer a PM, dá se Event Storming dělat ve dvou?
-  answer: 'Ne, Event Storming ve dvou ztrácí smysl – je založen na konfrontaci více pohledů. Místo toho použijte <a href="#domain-storytelling">Domain Storytelling</a>, který je pro 2-5 lidí navržený. PM hraje doménového experta, developer kreslí story, debatujete krok za krokem. Za 60-90 minut dostanete srovnatelný výstup pro jeden konkrétní proces. Až přibude třetí člen týmu nebo se uvolní více doménových expertů, přejděte k Big Picture Event Stormingu.'
+- question: Když máme jen sólo vývojáře a PM, dá se Event Storming dělat ve dvou?
+  answer: 'Ne, Event Storming ve dvou ztrácí smysl – je založen na konfrontaci více pohledů. Místo toho použijte <a href="#domain-storytelling">Domain Storytelling</a>, který je pro 2-5 lidí navržený. PM hraje doménového experta, vývojář kreslí story, debatujete krok za krokem. Za 60-90 minut dostanete srovnatelný výstup pro jeden konkrétní proces. Až přibude třetí člen týmu nebo se uvolní více doménových expertů, přejděte k Big Picture Event Stormingu.'
 :::
 
 ## 04.12 Další četba {#further-reading}

@@ -911,7 +911,7 @@ Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladněj
 2. Pro každý invariant najděte metodu v `*Service`, která ho dnes drží.
 3. Přesuňte metodu do entity, getter/setter zúžte na `private` nebo zrušte.
 4. Service se stane tenkým koordinátorem (Application Service) – jen volá entitu, transakce, eventy.
-5. Cross-link: [Anti-vzor: Anemic Domain Model](/anti-vzory) · [Domain Services vs. Application Services](/mene-zname-vzory#domain-services).
+5. Souvisí: [Anti-vzor: Anemic Domain Model](/anti-vzory) · [Domain Services vs. Application Services](/mene-zname-vzory#domain-services).
 
 ### Recept 2: Doctrine atributy v doménové třídě – kdy je to problém {#recept-doctrine-anotace-heading}
 
@@ -945,7 +945,7 @@ core doména s vysokou hodnotou), postup je:
 1. Identifikujte vlastnícího BC (typicky Identity).
 2. Ostatní BC do ní nesmí zapisovat – jen číst. Reads přesuňte do read-modelů (každý BC má vlastní projekci).
 3. Zápisy nahraďte voláním Identity API (sync HTTP nebo async event publishing s outboxem).
-4. Cross-link: [Outbox Pattern](/outbox-pattern).
+4. Souvisí: [Outbox Pattern](/outbox-pattern).
 
 ### Recept 5: Doménová logika v controlleru {#recept-business-logika-controlleru-heading}
 
@@ -953,7 +953,7 @@ core doména s vysokou hodnotou), postup je:
 
 1. Vytvořte `Command` DTO + `CommandHandler` v Application vrstvě.
 2. Controller se zúží na: validate input → dispatch command → vrátit response.
-3. Autorizaci přesuňte do Voteru (cross-link [Autorizace](/autorizace-v-ddd)).
+3. Autorizaci přesuňte do Voteru (souvisí [Autorizace](/autorizace-v-ddd)).
 
 ### Recept 6: Aggregate bobtná (1000+ řádků) {#recept-aggregate-bobtna-heading}
 
@@ -961,7 +961,7 @@ core doména s vysokou hodnotou), postup je:
 
 1. Najděte pole, která se mění nezávisle (různé invarianty, různé use cases).
 2. Zvažte split na 2 agregáty (např. `Order` + `OrderShipment`). Spojí je sdílené `OrderId`, žádná silná reference.
-3. Specifikační logiku vyextrahujte do `Specification` tříd (cross-link [Specifications](/mene-zname-vzory#specification)).
+3. Specifikační logiku vyextrahujte do `Specification` tříd (souvisí [Specifications](/mene-zname-vzory#specification)).
 
 ### Recept 7: `eventDispatcher->dispatch()` uvnitř doménové metody {#recept-event-publish-uvnitr-heading}
 
@@ -970,7 +970,7 @@ core doména s vysokou hodnotou), postup je:
 1. Aggregate uchová eventy v `private array $releasedEvents`.
 2. Aplikační handler po `repository->save()` volá `$order->releaseEvents()` a publikuje (přes outbox).
 3. Doména ztratí závislost na Symfony EventDispatcheru. Test je čistý.
-4. Cross-link: [Outbox – Aggregate publikuje](/outbox-pattern#aggregate-publishes).
+4. Souvisí: [Outbox – Aggregate publikuje](/outbox-pattern#aggregate-publishes).
 
 ### Recept 8: Stav je sloupec `string $status` {#recept-fields-jako-stav-heading}
 

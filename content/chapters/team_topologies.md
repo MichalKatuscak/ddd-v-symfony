@@ -580,14 +580,14 @@ nebo separátní repa per BC. Nikdy ne princip „všichni do jednoho repa, něj
 
 ### 2. „Frontend / Backend / Mobile týmy“ {#antivzor-frontend-backend}
 
-Klasický anti-vzor přímo z Conway's Law – týmy rozdělené po vrstvách. Každý feature
+Klasický anti-vzor přímo z Conway's Law – týmy rozdělené po vrstvách. Každá nová funkce
 vyžaduje koordinaci 3 týmů, 3 sprintů, 3 retrospektiv. Lead time přes 6 týdnů na úpravu,
 která si vyžádá zhruba 3 dny práce.
 
 **Řešení:** Inverse Conway Maneuver. Rozpustit horizontální týmy a poskládat
 vertikální stream-aligned týmy, kde má každý tým *všechny* potřebné role
 (frontend dev + backend dev + mobile dev + QA + designer). Pokud je mobile aplikace
-zásadní část produktu, ne extra-feature, mobile vývojáři patří do stream-aligned týmů,
+zásadní část produktu, ne vedlejší kanál, mobile vývojáři patří do stream-aligned týmů,
 ne do separátního „mobile týmu“.
 
 Výjimka: pokud máte jen jednoho mobilního vývojáře na celou organizaci, dočasná „mobile guild“ má smysl

@@ -755,7 +755,7 @@ final class OrderPlacedValidator
 Schema validation je první krok ACL na konzumující straně. Pokud payload neprojde schema validací, vrací se `UnrecoverableMessageHandlingException` a zpráva se přesouvá do dead letter queue. Bez schema validace se downstream BC vystavuje všem chybám upstreamu.
 
 :::callout{type="note"}
-### Tooling: schema-first vs. code-first
+### Nástroje: schema-first vs. code-first
 
 - **Schema-first** – JSON Schema / OpenAPI je zdrojem pravdy, kód je generován (např. `jane-php/open-api`). Upstream nemůže omylem rozbít kontrakt – kontrakt je oddělený artefakt.
 - **Code-first** – entity v kódu jsou zdrojem pravdy, schema se generuje (Symfony Serializer s `nelmio/api-doc-bundle`). Snadnější vývoj, ale riziko, že interní změna kódu projde do veřejného kontraktu nepozorovaně.

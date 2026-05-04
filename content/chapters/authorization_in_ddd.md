@@ -89,7 +89,7 @@ final class OrderVoter extends Voter
 }
 :::
 
-Co je špatně: Aggregate `Order::setStatus(OrderStatus::CANCELLED)` stále existuje a je veřejné. Stačí, aby kdokoli (test, fixture, migration script, jiný developer) zavolal setter mimo Voter – a invariant „24h cancellation window“ je porušen. Voter je jen *volitelný* filtr před vstupem; doména nemá žádnou pojistku. Pravidlo „cancellation window“ je doménové, ne use-case-level.
+Co je špatně: Aggregate `Order::setStatus(OrderStatus::CANCELLED)` stále existuje a je veřejné. Stačí, aby kdokoli (test, fixture, migration script, jiný vývojář) zavolal setter mimo Voter – a invariant „24h cancellation window“ je porušen. Voter je jen *volitelný* filtr před vstupem; doména nemá žádnou pojistku. Pravidlo „cancellation window“ je doménové, ne use-case-level.
 
 ### Chyba 3: Autorizace na úrovni databázových řádků {#tri-chyby-doctrine-heading}
 
@@ -906,7 +906,7 @@ Tabulkový test má dvě hodnoty navíc oproti klasickému test-per-method pří
 
 ### Anti-vzor 1: Autorizace v controlleru {#anti-controller-heading}
 
-Probrali jsme v sekci [12.01](#tri-chyby). Vyplatí se to zdůraznit znovu, protože jde o nejčastější chybu. Symptom: stejná autorizační podmínka opakovaná v 3+ controllerech, neexistující ve verzích volaných z konzolového commandu nebo Messenger handleru. Náprava: přesun do Voteru + volání `AuthorizationCheckerInterface` v Application Service. Cross-link na [obecné anti-vzory v DDD](/anti-vzory).
+Probrali jsme v sekci [12.01](#tri-chyby). Vyplatí se to zdůraznit znovu, protože jde o nejčastější chybu. Symptom: stejná autorizační podmínka opakovaná v 3+ controllerech, neexistující ve verzích volaných z konzolového commandu nebo Messenger handleru. Náprava: přesun do Voteru + volání `AuthorizationCheckerInterface` v Application Service. Souvisí: [obecné anti-vzory v DDD](/anti-vzory).
 
 ### Anti-vzor 2: Voter, který fetchne aggregate z databáze {#anti-fetching-voter-heading}
 

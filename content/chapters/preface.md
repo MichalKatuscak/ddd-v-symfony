@@ -18,7 +18,7 @@ reading_time: 8
 difficulty: 1
 ---
 
-Tato kniha vznikla z opakované zkušenosti: vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran teorie a zavře knihu se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi originálním textem z roku 2003 a praktickým PHP projektem v roce 2026 leží tlustá vrstva implementačních detailů, kterou Evans nemohl pokrýt. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) zaplnil pro Javu a C#. Pro PHP a Symfony zatím podobně systematická kniha nebyla.
+Tato kniha vznikla z opakované zkušenosti: vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran teorie a zavře knihu se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi originálním textem z roku 2003 a praktickým PHP projektem v roce 2026 leží silná vrstva implementačních detailů, kterou Evans nemohl pokrýt. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) zaplnil pro Javu a C#. Pro PHP a Symfony zatím podobně systematická kniha nebyla.
 
 Cílem této knihy je tu mezeru zaplnit. Začínáme tím, kdy DDD vůbec dává smysl, pokračujeme přes strategický a taktický design až po konkrétní Symfony 8 kód s Doctrine ORM, Symfony Messenger a PHP 8.4. Každá kapitola obsahuje funkční ukázky, které můžete převzít do svého projektu, ne jen pseudokód.
 
@@ -29,9 +29,9 @@ Kniha předpokládá zkušenost s PHP a Symfony, objektově orientovaným progra
 Kniha je psaná pro pět typických rolí:
 
 - **Senior PHP developer**, který do projektu narazil na limity klasické vrstvené architektury – `OrderService` má 1500 řádků, každá nová feature způsobí regresi v jiné oblasti, onboarding nového kolegy trvá měsíce.
-- **Symfony developer**, který si všiml, že větší projekty „rostou“ odlišně než ty malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
+- **Symfony developer**, který si všiml, že větší projekty „rostou“ jinak než malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
 - **Architekt**, který stojí před rozhodnutím, jaký přístup k modelování doménové logiky zvolit – DDD, klasické CRUD, modulární monolit, nebo microservices.
-- **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management v jazyce DORA metrik a obchodní hodnoty.
+- **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management v termínech DORA metrik a obchodní hodnoty.
 - **Vývojář migrující z CRUD aplikace na DDD**, který má v produkci spaghetti kód a hledá inkrementální cestu ven.
 
 Pro každou roli kniha nabízí jinou doporučenou cestu čtení – viz [P.03 Jak číst tuto knihu](#jak-cist).
@@ -49,7 +49,7 @@ Kniha předpokládá tyto výchozí znalosti:
 
 - **PHP 8.1+:** atributy (`#[Attribute]`), enums, readonly properties, named arguments, `match`. Některé příklady používají PHP 8.4 (asymmetric visibility, property hooks).
 - **Symfony 6+:** Service Container, Dependency Injection, Doctrine ORM, Symfony Messenger, atributy `#[Route]`, `#[AsMessageHandler]`. Většina kódu cílí na Symfony 8.
-- **Objektově orientované programování:** dědičnost vs. kompozice, polymorfismus, encapsulation, SOLID principy.
+- **Objektově orientované programování:** dědičnost vs. kompozice, polymorfismus, zapouzdření, SOLID principy.
 - **Designové vzory:** Repository, Factory, Strategy, Observer. Není nutné je znát formálně, ale měli byste je v kódu poznat.
 - **Relační databáze:** ACID, transakce, indexy, JOIN, optimistický a pesimistický zámek.
 
@@ -73,13 +73,13 @@ Doplňující taktické vzory (Specification Pattern, Factory, Module) a srovná
 
 ### Část 3 – Implementace v Symfony (kap. 10–11) {#cast-3}
 
-Konkrétní mapování DDD do Symfony 8: adresářová struktura podle Bounded Contexts, Doctrine ORM custom types pro hodnotové objekty, Symfony Messenger jako Command/Query Bus, Dependency Injection a autowiring.
+Konkrétní mapování DDD do Symfony 8: adresářová struktura podle Bounded Contexts, vlastní Doctrine typy pro hodnotové objekty, Symfony Messenger jako Command/Query Bus, Dependency Injection a autowiring.
 
 Kapitola 11 řeší autorizaci ve čtyřech vrstvách – Edge (firewall), Use Case (Voter), Aggregate (doménový invariant), Field (read model filtrace).
 
 ### Část 4 – Pokročilé vzory (kap. 12–15) {#cast-4}
 
-CQRS (oddělení čtení a zápisu), Event Sourcing (stav jako sekvence událostí), Ságy a Process Managery (long-running procesy s kompenzací), Outbox Pattern (spolehlivé doručení doménových událostí).
+CQRS (oddělení čtení a zápisu), Event Sourcing (stav jako sekvence událostí), Ságy a Process Managery (dlouho běžící procesy s kompenzací), Outbox Pattern (spolehlivé doručení doménových událostí).
 
 Tyto vzory nejsou pro každý projekt. Kapitoly začínají rozhodovacím rámcem „kdy ano a kdy ne“.
 
@@ -89,7 +89,7 @@ Výkonové aspekty (N+1 problém, lazy loading, read modely, snapshoty, hot aggr
 
 ### Část 6 – Migrace a microservices (kap. 18–19) {#cast-6}
 
-Postupný přechod z CRUD architektury na DDD pomocí Strangler Fig Pattern. Vztah Bounded Context vs. microservice – kdy 1:1 dává smysl, kdy modular monolith poráží distribuované servisy a jak rozeznat distributed monolith včas.
+Postupný přechod z CRUD architektury na DDD pomocí Strangler Fig Pattern. Vztah Bounded Context vs. microservice – kdy 1:1 dává smysl, kdy modulární monolit poráží distribuované služby a jak rozeznat distributed monolith včas.
 
 ### Část 7 – Provozní problémy a anti-vzory (kap. 20–22) {#cast-7}
 
@@ -97,7 +97,7 @@ Tři kapitoly s odlišným úhlem na to, co se v DDD pokazí. **Kapitola 20** po
 
 ### Část 8 – Praktické příklady (kap. 23–24) {#cast-8}
 
-Tři krátké příklady (e-shop, blog, správa uživatelů) jako shrnující průžez. Závěrečná case study popisuje implementaci systému pro správu projektů krok za krokem – od doménové analýzy přes architekturu, agregáty, CQRS až po read modely s reconciliation.
+Tři krátké příklady (e-shop, blog, správa uživatelů) jako shrnující průřez. Závěrečná case study popisuje implementaci systému pro správu projektů krok za krokem – od doménové analýzy přes architekturu, agregáty, CQRS až po read modely s reconciliation.
 
 > **Pozn.:** Mimo hlavní řadu kapitol existuje na webu ještě [DDD a umělá inteligence](/ddd-a-umela-inteligence) – přehled toho, co o vztahu DDD a AI říkají Eric Evans, Martin Fowler, Kent Beck a další. V tištěné a EPUB verzi knihy tato kapitola není, protože téma se v posledních letech intenzivně vyvíjí a aktualizace na webu jsou pružnější.
 
@@ -119,9 +119,9 @@ Volitelně po měsíci praxe: [CQRS](/cqrs) a [Anti-vzory](/anti-vzory).
 
 ### Pro senior PHP developera {#cesta-senior}
 
-Lineární čtení od kapitoly 1 do 24. Pokud chcete urychlit, projděte strategickou část (kap. 1–5) a taktickou část (kap. 6–9), pak vyberte pokročilé vzory (kap. 12–15) podle aktuálního projektu.
+Lineární čtení od kapitoly 1 do 24. Pokud chcete postupovat rychleji, projděte strategickou část (kap. 1–5) a taktickou část (kap. 6–9), pak vyberte pokročilé vzory (kap. 12–15) podle aktuálního projektu.
 
-Pro fast-track: [Co je DDD](/co-je-ddd) → [Základní koncepty](/zakladni-koncepty) → [Návrh agregátu](/navrh-agregatu) → [Implementace v Symfony](/implementace-v-symfony) → [CQRS](/cqrs) → [Anti-vzory](/anti-vzory) → [Případová studie](/pripadova-studie).
+Rychlá cesta: [Co je DDD](/co-je-ddd) → [Základní koncepty](/zakladni-koncepty) → [Návrh agregátu](/navrh-agregatu) → [Implementace v Symfony](/implementace-v-symfony) → [CQRS](/cqrs) → [Anti-vzory](/anti-vzory) → [Případová studie](/pripadova-studie).
 
 ### Pro architekta {#cesta-architekt}
 
@@ -170,7 +170,7 @@ Několik konvencí, které platí napříč knihou.
 
 Kniha používá vykání. Věty jsou krátké a jedna věta říká jednu věc. Žádný marketingový jazyk – místo „mocný framework“ stojí v textu konkrétně, co Symfony Messenger umí a co ne. Žádné osobní komentáře autora, žádné nadsázky.
 
-### Code style
+### Styl kódu
 
 Kód cílí na PHP 8.4 a Symfony 8 s Doctrine ORM 3. Některé příklady používají rysy z PHP 8.4 (asymmetric visibility, property hooks, readonly properties). Pokud váš projekt běží na starší verzi, princip zůstává platný, jen syntaxe je jiná.
 
@@ -189,9 +189,9 @@ Kniha používá čtyři typy callout boxů:
 
 Diagramy jsou v PlantUML zdrojovém formátu v `templates/diagrams/`, vyrenderované do SVG a vložené do textu. Pokud diagram potřebujete převzít, najdete `.puml` zdroj ve stejné složce jako SVG.
 
-### Cross-linky
+### Vnitřní odkazy
 
-Vnitřní odkazy mezi kapitolami používají *cesty* (`/co-je-ddd`, `/zakladni-koncepty`), ne čísla kapitol. Tím přečíslování nezneplatní odkazy. Externí odkazy na knihy a články používají plný URL.
+Vnitřní odkazy mezi kapitolami používají *cesty* (`/co-je-ddd`, `/zakladni-koncepty`), ne čísla kapitol. Přečíslování tak odkazy nezneplatní. Externí odkazy na knihy a články používají plný URL.
 
 ### Citace
 
