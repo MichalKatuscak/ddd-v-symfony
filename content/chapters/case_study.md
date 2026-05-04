@@ -1102,7 +1102,7 @@ agregáty, žádná hydratace doménových objektů. Hlubší teoretický zákla
 
 Tabulka `project_list_view` drží tvar potřebný pro výpis projektů uživatele. Není normalizovaná –
 obsahuje vypočítané hodnoty (`member_count`, `task_count`) a denormalizované pole
-`member_ids` jako JSON. Tato tabulka není zdrojem pravdy; lze ji kdykoli rebuildovat z událostí
+`member_ids` jako JSON. Tato tabulka není zdrojem pravdy; lze ji kdykoli znovu sestavit z událostí
 nebo z primárních tabulek.
 
 :::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListView.php"}

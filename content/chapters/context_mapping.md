@@ -431,7 +431,7 @@ use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
  * Tři odpovědnosti:
  *   1. Schema mapping  – InvoicePaidSoapResponse => InvoicePaidEvent
  *   2. Concept translation – invoiceNumber (int) => InvoiceId (UUID)
- *   3. Anti-corruption – odmítá invalid stavy z legacy
+ *   3. Anti-corruption – odmítá neplatné stavy z legacy
  */
 final class LegacyBillingTranslator
 {

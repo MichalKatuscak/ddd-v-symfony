@@ -27,7 +27,7 @@ Tato kapitola odpovídá na otázku, kterou si dříve nebo později položí ka
 
 V komunitě DDD a microservices koluje v různých variantách slogan: *„Each microservice should be one Bounded Context.“* Slogan má zdánlivou logiku a historické opodstatnění. DDD definuje hranici modelu, microservices definuje hranici nasazení; přirozeným zjednodušením je obojí ztotožnit. Praxe ale tento závěr nepotvrzuje. Slogan je **polopravda**, která vede k chybným architektonickým rozhodnutím častěji než ke správným.
 
-Podstatné je rozlišit dvě úrovně, které slogan slévá do jedné. Bounded Context je **logická hranice modelu**: definuje, kde platí jeden konzistentní výklad pojmů, jeden Ubiquitous Language a jeden set invariantů. Microservice je **fyzická hranice deploymentu**: definuje, co se buildí jako jeden artefakt, nasazuje jako jeden proces, vlastní jednu databázi a má jeden tým, který za ni odpovídá. Tyto dvě úrovně se mohou – ale nemusí – překrývat.
+Podstatné je rozlišit dvě úrovně, které slogan slévá do jedné. Bounded Context je **logická hranice modelu**: definuje, kde platí jeden konzistentní výklad pojmů, jeden Ubiquitous Language a jeden set invariantů. Microservice je **fyzická hranice deploymentu**: definuje, co se sestavuje jako jeden artefakt, nasazuje jako jeden proces, vlastní jednu databázi a má jeden tým, který za ni odpovídá. Tyto dvě úrovně se mohou – ale nemusí – překrývat.
 
 Sam Newman v knize *Building Microservices, 2nd ed.* (2021) tuto distinkci zdůrazňuje opakovaně. V kapitole 2 píše, že Bounded Context představuje silný kandidát pro service boundary. Rozhodnutí, zda kontext skutečně dostane vlastní nasazovací jednotku, závisí na faktorech jako velikost týmu, rozdílné potřeby škálování, různý release cyklus a operační kapacita organizace. Chris Richardson v knize *Microservices Patterns* (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
 
@@ -413,7 +413,7 @@ Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existu
 
 Chris Richardson v *Microservices Patterns* (kap. 3) formuluje doporučení: **preferujte asynchronní messaging**, sync použijte jen tam, kde je to objektivně nutné. Důvody:
 
-- Asynchronní subscriber lze restartovat, retryovat, rozdělit do replik. Sync caller čeká a buď dostane odpověď, nebo timeout – bez zotavení.
+- Asynchronní subscriber lze restartovat, opakovat, rozdělit do replik. Sync caller čeká a buď dostane odpověď, nebo timeout – bez zotavení.
 - Asynchronní messaging má lepší časové oddělení: subscriber může být dočasně nedostupný a publisher to neví. Při sync volání je publisher přímo závislý na uptime callee.
 - Asynchronní toky lépe škálují: fronta zpráv se hromadí a worker ji konzumuje vlastním tempem; sync flow se musí škálovat synchronně a end-to-end.
 - Asynchronní tok přirozeněji zapadá do [Event Storming](/event-storming) modelu – doménové eventy jsou stejně jednotkou domény.
@@ -851,7 +851,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 ### 4. Jeden deployment artefakt pro N servisů {#antivzor-4-heading}
 
-**Symptom:** CI/CD pipeline buildí všechny servisy společně. Release schedule je centralizovaný („máme deployment train“, „release window v úterý“). Změnu v jedné servise nelze nasadit bez ostatních.
+**Symptom:** CI/CD pipeline sestavuje všechny servisy společně. Release schedule je centralizovaný („máme deployment train“, „release window v úterý“). Změnu v jedné servise nelze nasadit bez ostatních.
 
 **Důsledek:** všechny servisy musí být kompatibilní v každém okamžiku. Žádná feature toggleability, žádný gradual rollout, žádný rychlý rollback. Coupled deploy je definující znak distributed monolithu.
 

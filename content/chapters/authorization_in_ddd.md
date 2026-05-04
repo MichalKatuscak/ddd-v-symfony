@@ -319,7 +319,7 @@ Pozor: `{% if is_granted(...) %}` v Twigu jen schová tlačítko – neověří,
 :::callout{type="warn"}
 ### Voter nesmí fetchovat z databáze {#voter-anti-fetching-heading}
 
-Pokud váš Voter dělá `$this->repository->find($id)` nebo `$this->em->getRepository(Order::class)->findBy(...)`, je to anti-vzor. Voter dostává subjekt jako parametr (`$subject`); handler ho už načetl a předává v paměti. Voterové fetchování vede k *duplicate query* (handler načetl, voter načetl znovu) a v horším případě k *race condition* (mezi fetchnutím ve voteru a operací v handleru se entita změní). Vždy předávejte načtenou entitu.
+Pokud váš Voter dělá `$this->repository->find($id)` nebo `$this->em->getRepository(Order::class)->findBy(...)`, je to anti-vzor. Voter dostává subjekt jako parametr (`$subject`); handler ho už načetl a předává v paměti. Voterové načítání vede k *duplicate query* (handler načetl, voter načetl znovu) a v horším případě k *race condition* (mezi načtením ve voteru a operací v handleru se entita změní). Vždy předávejte načtenou entitu.
 :::
 
 ## 11.05 Aggregate-level – doména sama rozhoduje {#aggregate-level}
@@ -908,7 +908,7 @@ Tabulkový test má dvě hodnoty navíc oproti klasickému test-per-method pří
 
 Probrali jsme v sekci [12.01](#tri-chyby). Vyplatí se to zdůraznit znovu, protože jde o nejčastější chybu. Symptom: stejná autorizační podmínka opakovaná v 3+ controllerech, neexistující ve verzích volaných z konzolového commandu nebo Messenger handleru. Náprava: přesun do Voteru + volání `AuthorizationCheckerInterface` v Application Service. Souvisí: [obecné anti-vzory v DDD](/anti-vzory).
 
-### Anti-vzor 2: Voter, který fetchne aggregate z databáze {#anti-fetching-voter-heading}
+### Anti-vzor 2: Voter, který načte aggregate z databáze {#anti-fetching-voter-heading}
 
 Symptom:
 
@@ -920,7 +920,7 @@ final class OrderVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        // Anti-vzor: voter dostane jen ID a fetchne entitu
+        // Anti-vzor: voter dostane jen ID a sám načte entitu
         $order = $this->orders->find($subject);
         // ... rozhodování ...
     }
