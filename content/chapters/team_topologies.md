@@ -261,7 +261,7 @@ rozmazává odpovědnost, zatěžuje cognitive load obou týmů. Proto je explic
 
 ### X-as-a-Service {#x-as-a-service}
 
-**Jeden tým konzumuje druhý jako black-box přes stabilní API/kontrakt.**
+**Jeden tým konzumuje druhý jako černou skříňku přes stabilní API/kontrakt.**
 Konzument nezná ani interní strukturu, ani sprint plan poskytovatele – má pouze SLA, dokumentaci
 a release notes. Toto je výchozí stav většiny mezi-týmových vztahů ve zralé organizaci.
 
