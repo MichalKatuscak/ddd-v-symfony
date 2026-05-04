@@ -337,7 +337,7 @@ ušetřil **90 % infrastrukturních nákladů** a zlepšil scaling.
 
 Symptomy, které mluví pro de-microservicing:
 
-- **Latenční zátěž,** která neodpovídá cross-service síťové latenci. Často znamená,
+- **Latenční zátěž,** která neodpovídá síťové latenci mezi servisami. Často znamená,
   že interakce by měla být in-process function call, ne network hop.
 - **Refaktor kontextu vyžaduje současné změny v 3+ servisách.** Hranice byla špatně
   zvolená; refaktor v monolitu je triviální.
@@ -383,7 +383,7 @@ které se v rozhodování o microservices často přehlíží. Pro středně vel
 | Cloud infrastruktura navíc | +30–80 % vs. monolit | Více DB, message broker, load balancery, NAT |
 | Observability tools | $20k–$200k | Datadog/NewRelic licence rostou s počtem hostů a metrik |
 | CI/CD navíc | +50 % build minutes | N pipelines místo jedné, integration testy přes docker-compose |
-| Onboarding nových inženýrů | +1–2 týdny | Pochopit topologii, deployment, debugging across services |
+| Onboarding nových inženýrů | +1–2 týdny | Pochopit topologii, deployment, ladění napříč servisami |
 | Incident response | +30 % MTTR | Distributed tracing zjednodušuje, ale 5 servis ≠ 1 service |
 
 Kalkulace pro start-up s 30 inženýry: vlastní platform tým (3 FTE × 80 000 USD/rok
@@ -418,7 +418,7 @@ Chris Richardson v *Microservices Patterns* (kap. 3) formuluje doporučení: **p
 - Asynchronní toky lépe škálují: fronta zpráv se hromadí a worker ji konzumuje vlastním tempem; sync flow se musí škálovat synchronně a end-to-end.
 - Asynchronní tok přirozeněji zapadá do [Event Storming](/event-storming) modelu – doménové eventy jsou stejně jednotkou domény.
 
-Praktická implementace asynchronní cross-service komunikace v Symfony probíhá přes Symfony Messenger (transport AMQP nebo Redis), v kombinaci s [Outbox patternem](/outbox-pattern) kvůli atomicitě zápisu eventu se zápisem doménového stavu. Detail v sekci [20.08 Symfony konkrétně](#symfony).
+Praktická implementace asynchronní komunikace mezi servisami v Symfony probíhá přes Symfony Messenger (transport AMQP nebo Redis), v kombinaci s [Outbox patternem](/outbox-pattern) kvůli atomicitě zápisu eventu se zápisem doménového stavu. Detail v sekci [20.08 Symfony konkrétně](#symfony).
 
 | Aspekt | Sync (REST/gRPC) | Async (eventy) |
 |---|---|---|
@@ -527,7 +527,7 @@ framework:
                     max_retries: 3
                     multiplier: 2
 
-            # outbox transport pro cross-service eventy
+            # outbox transport pro eventy mezi servisami
             # používá Doctrine pro atomicitu zápisu eventu se zápisem domény
             events_out:
                 dsn: 'doctrine://default?queue_name=outbox_events'
@@ -878,7 +878,7 @@ Hlavní doporučení této kapitoly:
 - **Distributed monolith je horší než monolith** – sdílená DB, synchronní volání všude, coupled deploy, sdílená library s doménovými typy. Pět příznaků, dva a víc znamená, že máte distributed monolith. Nejdražší architektonická chyba v microservices architektuře.
 - **Sync vs. async – async-first** – sync jen pro queries v request flow a pro blokující validace; všechno ostatní eventy přes broker. Tight temporal coupling je největší ztráta hodnoty microservices.
 - **Distribuované transakce – saga, ne 2PC** – 2PC nepoužitelné v microservices stacku. Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace. Detail v [kapitole 14](/sagy-a-process-managery).
-- **Symfony Messenger umí obojí** – sync transport pro modular monolith, AMQP transport s Outbox patternem pro cross-service eventy. Publisher a subscriber *nesdílejí* PHP třídu eventu; subscriber má vlastní integration event DTO. Bez tohoto pravidla po rozdělení monolithu vznikne sdílená library = distributed monolith.
+- **Symfony Messenger umí obojí** – sync transport pro modular monolith, AMQP transport s Outbox patternem pro eventy mezi servisami. Publisher a subscriber *nesdílejí* PHP třídu eventu; subscriber má vlastní integration event DTO. Bez tohoto pravidla po rozdělení monolithu vznikne sdílená library = distributed monolith.
 - **Migrace přes Strangler Fig, ne big-bang** – postupně, jeden BC v čase, s fasádou a obdobím dual-write. Big-bang rewrite v 9 z 10 případů selže.
 - **Microservices jsou primárně operační problém** – bez orchestrátoru, distributed tracingu, service discovery a CI/CD per service je modular monolith rozumnější.
 
