@@ -52,7 +52,7 @@ Tabulka níže shrnuje, čím se Bounded Context a microservice liší a v jaké
 | Hranice | Logická – model a jazyk | Fyzická – proces, deploy, DB |
 | Definice z knihy | Evans 2003, Vernon 2013 | Newman 2021, Richardson 2018 |
 | Vlastník | Tým doménových expertů + vývojářů | Stream-aligned team (Skelton & Pais 2019) |
-| Mění se kvůli | Změně doménového modelu | Škálování, release cyklu, ops |
+| Mění se kvůli | Změně doménového modelu | Škálování, release cyklu, provoz |
 | Existuje i v monolitu | Ano, vždy – jako modul | Ne, monolit je jeden deployment |
 
 ## 19.02 Kdy 1 BC = 1 service (cílový stav) {#bc-jedna-service}
@@ -104,7 +104,7 @@ Konkrétní indikátory, podle kterých modular monolith poráží microservices
 - **Malá organizace** – pod ~30 lidí na celém produktu. Není dost stream-aligned týmů na to, aby každý microservice měl dedikovaného vlastníka. Rozdělení do servis pak vede k tomu, že jeden tým spravuje pět servis a strávil polovinu týdne přepínáním kontextu.
 - **Nestabilní hranice** – produkt je v rané fázi a Bounded Contexty ještě procházejí iteracemi. Refaktor hranice uvnitř monolithu je triviální (přesun souborů a tříd); refaktor přes síťovou hranici dvou servis je migrace dat, koordinovaný release a Anti-Corruption Layer.
 - **Podobné potřeby škálování všech kontextů** – pokud catalog, ordering i shipping mají podobný objem a profil, není co odděleně škálovat. Horizontální škálování celého monolithu je operačně levnější než škálování čtyř servis.
-- **Nemáte operační platformu pro N servisů** – žádný Kubernetes, žádný service mesh, žádné centralizované logging a tracing. Bez nich budou microservices fungovat technicky, ale ladění incidentů bude noční můra. Více v [sekci o ops](#ops).
+- **Nemáte operační platformu pro N servisů** – žádný Kubernetes, žádný service mesh, žádné centralizované logging a tracing. Bez nich budou microservices fungovat technicky, ale ladění incidentů bude noční můra. Více v [sekci o provozu](#ops).
 - **Operační kapacita < 30 % vývojové kapacity** – Newman radí, že přechod na microservices má smysl jen tehdy, když organizace investuje výraznou část kapacity do platformy (CI/CD, observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith vás chrání před zhoršením produktivity.
 
 ### Modular monolith v Symfony 8 {#modular-monolith-symfony-heading}
@@ -458,7 +458,7 @@ Detailní implementaci ság v Symfony 8 (kompenzace, idempotence, choreografie v
 2PC se snaží zachovat ACID model přes hranici sítě a v praxi to končí blokádou nebo in-doubt stavem. Saga ACID opouští – místo toho akceptuje, že systém je dočasně nekonzistentní a konzistence se obnoví přes sémantické kompenzace. Pro doménové experty je to často přirozenější model než 2PC. Doménový proces v reálném světě (objednávka, platba, expedice) vždy běží jako sekvence kroků s explicitní undo strategií, ne jako jeden atomický commit.
 :::
 
-## 19.07 Service mesh, observability, ops {#ops}
+## 19.07 Service mesh, observability, provoz {#ops}
 
 Microservices nejsou primárně programátorský problém – jsou **operační problém**. Tým, který přejde z monolithu na deset servis, najednou musí řešit věci, které dříve obstarával operační systém a Symfony framework: routing mezi procesy, retry, circuit breaking, mTLS, distribuovaný debug, service discovery, centralizované logy, rate limiting. Každá z těchto věcí má svůj nástroj a svou cenu. Dohromady tvoří stack, který někdo musí provozovat.
 
