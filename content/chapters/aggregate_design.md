@@ -76,7 +76,7 @@ výkon a kde příliš malé rozbily invarianty. Čtyři pravidla, která doporu
    je signál, že někde chybí hranice nebo že eventual consistency čeká na zavedení.
 4. **Eventual consistency mimo hranici.** Změnu napříč agregáty řešte doménovou
    událostí a samostatnou transakcí. „Když se X stane v agregátu A, sága upraví agregát B.“
-   Toto je jediná správná cesta, jak několik agregátů koordinovat.
+   Tak se napříč agregáty koordinuje stav.
 
 Khononov v *Learning DDD* (2021) dodává páté pravidlo, které z Vernonových implicitně
 plyne, ale stojí za výslovné formulování: **jeden command modifikuje právě jeden agregát.**
@@ -125,7 +125,7 @@ agregátu. Druhá patří mimo ni a řeší ji sága nebo process manager (kapit
 
 ## 07.04 Velikost agregátu a její dopady {#aggregate-size}
 
-Velký agregát zní bezpečně – „raději víc v jedné transakci než riziko nekonzistence“. V praxi
+Velký agregát vypadá bezpečně: „raději víc v jedné transakci než riziko nekonzistence“. V praxi
 ale platí opak. Tři důvody:
 
 - **Konkurence.** Větší agregát = větší zámek = více konfliktů mezi uživateli.
@@ -266,7 +266,7 @@ V praxi nahrazuje transakci napříč agregáty čtyřmi explicitními kroky:
 4. Pokud krok 3 selže, sága vykoná kompenzaci nebo retry; doména je explicitně připravena
    na chvilkovou nekonzistenci.
 
-Otázka zní: *jak dlouho smí nekonzistence trvat?* Většina byznys procesů snese
+Klíčová otázka: *jak dlouho smí nekonzistence trvat?* Většina byznys procesů snese
 řádově sekundy (vystavení faktury po dokončení objednávky, propagace změny adresy do druhotných
 kontextů). Procesy, které sekundy nesnesou, jsou kandidáty na *jeden* agregát, ne na ságu.
 
