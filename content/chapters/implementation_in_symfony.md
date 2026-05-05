@@ -306,7 +306,7 @@ final class User extends AggregateRoot
 :::
 :::
 
-Detaily, na které kód cílí:
+Detaily implementace:
 
 - **`final` + `extends AggregateRoot`.** `AggregateRoot` poskytuje `record()`
   a `releaseDomainEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
@@ -703,8 +703,8 @@ final class UserMapper
 :::callout{type="note"}
 ### Cena pure varianty {#persisted-object-tradeoffs-heading}
 
-Persisted Object Pattern je **opravdu** čistá doména – žádné atributy, žádné stopy
-ORM, žádné `use Doctrine\…`. Cena:
+Persisted Object Pattern drží doménu úplně mimo ORM. Žádný atribut, žádný `use
+Doctrine\…`, žádná stopa po infrastruktuře. Cena:
 
 - **2× kód.** Doménová třída + persistence model + mapper. Pro každý agregát.
 - **Mapování VO ručně.** Custom typy z hlavní cesty zde nepoužiješ – musí to dělat
@@ -1266,7 +1266,7 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
   zpracuje jiný kontext / služba / projekce) → **Messenger** přes outbox.
   Zpráva přejde DB transakci, dorazí do brokera, jiný kontext si ji odebere.
 
-V praxi to znamená: agregát publikuje doménovou událost do svého `domainEvents` pole.
+Konkrétně: agregát publikuje doménovou událost do svého `domainEvents` pole.
 Repozitář při `save()` zapíše událost do outbox tabulky. Z outboxu pak worker
 *synchronně* (přes EventDispatcher) doručí lokálním listenerům uvnitř téhož kontextu
 a *asynchronně* (přes Messenger transport) propustí ven pro ostatní kontexty.
