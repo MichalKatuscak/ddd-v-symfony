@@ -42,7 +42,7 @@ Slogan „BC = microservice“ je užitečný jen jako *výchozí hypotéza*, kt
 Ještě jedno nedorozumění zaslouží upozornění: pojem „Bounded Context“ se v komunitě někdy používá volněji než ho definoval Eric Evans. Někdy se jím myslí pouhý modul, jindy celá produktová doména. Vaughn Vernon v knize *Implementing Domain-Driven Design* (2013) v kapitole 2 striktně připomíná, že Bounded Context je **jazyková hranice**. Uvnitř jednoho BC má každý termín jediný význam. Pokud o stejném pojmu (například „Customer“) mluví dva týmy odlišně, jsou to dva Bounded Contexts – bez ohledu na to, zda běží v jednom či dvou Symfony procesech.
 
 :::diagram{fig="20.1-A" title="Tři scénáře mapování Bounded Context ↔ Service" src="images/diagrams/20_microservices/bc_to_service.svg"}
-Tři scénáře: 1 BC = 1 service (správně oddělený microservice), 1 BC = N services (přehnané dělení, typicky distributed monolith) a N BC = 1 service (modular monolith). Volba mezi nimi není technická, ale organizační.
+Tři scénáře: 1 BC = 1 service (správně oddělený microservice), 1 BC = N services (přehnané dělení, typicky distributed monolith) a N BC = 1 service (modular monolith). Volba mezi nimi je organizační, ne technická.
 :::
 
 Tabulka níže shrnuje, čím se Bounded Context a microservice liší a v jaké rovině se rozhoduje. Tento rozdíl si při čtení dalších sekcí pamatujte. Většina anti-vzorů v této kapitole vzniká z toho, že tým plete jednu úroveň s druhou.
@@ -249,7 +249,7 @@ S tímto pravidlem můžete bezpečně zůstat v monolithu měsíce a roky. Hran
 
 ### Kdy z modular monolithu odejít {#kdy-z-monolithu-heading}
 
-Modular monolith není trvalý cíl, ale výchozí stav, který v určitém bodě některé BC opustí. Indikátory, že jeden konkrétní modul je připraven na vlastní service:
+Modular monolith je výchozí stav, který v určitém bodě některé BC opustí. Indikátory, že jeden konkrétní modul je připraven na vlastní service:
 
 1. Modul má výrazně jiný profil zátěže – typicky read-heavy modul (catalog, search) nebo modul s nepravidelnými špičkami (notifications, batch reporting).
 2. Modul má vlastní stream-aligned tým, který chce vlastní release cyklus a má operační kapacitu se postarat o samostatný runtime.
@@ -365,8 +365,8 @@ Postup de-microservicingu je opačný k extraction patternu z 19.09:
 5. **Vyřazení servisy.** Po N týdnech souběžného běhu se původní servis odstaví,
    smazat lze až po čas pro forenzní kontrolu (typicky 90 dní).
 
-Klíčový princip: **de-microservicing není selhání**, je to legitimní architektonická
-volba reagující na změnu kontextu (tým se zmenšil, profil zátěže se vyrovnal,
+Klíčový princip: **de-microservicing je legitimní architektonická volba**, ne selhání.
+Reaguje na změnu kontextu (tým se zmenšil, profil zátěže se vyrovnal,
 operační kapacita klesla). Poctivé pojmenování pomáhá – nekomunikujte to jako „regression“
 ale jako „consolidation“.
 :::
@@ -393,7 +393,7 @@ patří do diskuse, ne „microservices jsou prostě lepší“.
 
 ## 19.05 Kontrakt mezi services – sync vs. async {#kontrakt}
 
-Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existují dva základní vzory – **synchronní** (REST, gRPC, SOAP) a **asynchronní** (events přes message broker – RabbitMQ, Kafka, NATS, AWS SNS/SQS). Většina reálných systémů kombinuje obojí. Volba pro každý konkrétní interakční vzor není kosmetická – určuje výsledné coupling, latenci a availability.
+Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existují dva základní vzory – **synchronní** (REST, gRPC, SOAP) a **asynchronní** (events přes message broker – RabbitMQ, Kafka, NATS, AWS SNS/SQS). Většina reálných systémů kombinuje obojí. Volba interakčního vzoru určuje výsledné coupling, latenci a availability.
 
 ### Synchronní volání – kdy {#sync-kdy-heading}
 
@@ -869,7 +869,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 **Důsledek:** operační režie 100x. Každá service potřebuje monitoring, alerty, CI/CD, runtime, znalostní bázi, pohotovostní rotaci. Tým 30 lidí má na servis 0,3 inženýra. Nikdo nemá hluboké vlastnictví, všichni „udržují“.
 
-**Oprava:** agregovat blízce příbuzné servisy do jedné – typicky sloučit do BC, do kterého patří. „Microservice“ není „malá service“ – je to *samostatně nasazovatelná jednotka*. Velikost je vedlejší. Sam Newman v *Building Microservices, 2nd ed.* kapitole 4 explicitně doporučuje, aby velikost service vznikala z domény, ne z technické gymnastiky.
+**Oprava:** agregovat blízce příbuzné servisy do jedné – typicky sloučit do BC, do kterého patří. „Microservice“ znamená *samostatně nasazovatelnou jednotku*, ne „malou service“. Velikost je vedlejší. Sam Newman v *Building Microservices, 2nd ed.* kapitole 4 explicitně doporučuje, aby velikost service vznikala z domény, ne z technické gymnastiky.
 
 Obecnější rozbor anti-vzorů v DDD (nejen microservices) najdete v [kapitole 21 – Anti-vzory](/anti-vzory).
 
