@@ -18,7 +18,7 @@ reading_time: 25
 difficulty: 2
 ---
 
-DDD se nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí lidé, kteří kód píší, a lidé, kteří doménu reálně provozují. Tato kapitola popisuje dvě konkrétní techniky, jak takovou místnost zařídit. Cílem je strávit v ní dvě až čtyři hodiny smysluplně a odejít s něčím, co se dá zítra otevřít v IDE: **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2021). Obě techniky řeší stejný problém – extrakci tacitních doménových znalostí – ale různými cestami. Po této kapitole budete vědět, kterou kdy zvolit a jak ji prakticky uřídit.
+DDD se nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí lidé, kteří kód píší, a lidé, kteří doménu reálně provozují. Tato kapitola popisuje dvě konkrétní techniky, jak takovou místnost zařídit. Cílem je strávit v ní dvě až čtyři hodiny smysluplně a odejít s něčím, co se dá zítra otevřít v IDE. Půjde o **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2021). Obě techniky řeší stejný problém – extrakci tacitních doménových znalostí – ale různými cestami. Po této kapitole budete vědět, kterou kdy zvolit a jak ji prakticky uřídit.
 
 ## 04.01 Proč workshop, proč ne čtení dokumentace {#proc-workshop}
 
@@ -39,7 +39,7 @@ Eric Evans v *Domain-Driven Design* (2003) píše, že [Ubiquitous Language](/co
 
 ## 04.02 Event Storming – co to je a co umí {#event-storming-co}
 
-**Event Storming** je kolaborativní modelovací technika, kterou v roce 2013 představil italský konzultant Alberto Brandolini. Princip je přímočarý: účastníci v reálném čase pokládají na dlouhou stěnu (nebo Miro/Mural board) **oranžové sticky notes s doménovými událostmi vyjádřenými v minulém čase**. Postupně z nich vzniká časová osa toho, co se v doméně děje. Jak osa roste, přidávají se další barvy – modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots – a obraz domény se vyjasňuje.
+**Event Storming** zavedl italský konzultant Alberto Brandolini v roce 2013. Princip je přímočarý: účastníci v reálném čase pokládají na dlouhou stěnu (nebo Miro/Mural board) **oranžové sticky notes s doménovými událostmi vyjádřenými v minulém čase**. Postupně z nich vzniká časová osa toho, co se v doméně děje. Jak osa roste, přidávají se další barvy – modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots – a obraz domény se vyjasňuje.
 
 Brandolini techniku původně vyvíjel jako rychlý způsob, jak v *jednom dni* dostat do shody konzultanty, vývojáře a doménové experty. V *Introducing EventStorming* (Leanpub, 2018) pak techniku formálně rozdělil do tří úrovní detailu – každá řeší jinou otázku a má jiný cíl:
 
@@ -54,7 +54,7 @@ Vaughn Vernon v *Domain-Driven Design Distilled* (Addison-Wesley, 2016, kap. 7) 
 
 ## 04.03 Notace – barvy a tvary {#notace}
 
-Event Storming používá **standardizovanou paletu barev**, kterou Brandolini ustanovil v roce 2014 a která se od té doby téměř nezměnila. Každá barva má jeden konkrétní význam a tým by ji měl dodržovat – jakmile začnete improvizovat, ztrácíte schopnost rychle „číst“ cizí mapu.
+Brandolini paletu barev ustanovil v roce 2014 a od té doby se téměř nezměnila. Každá barva má jeden konkrétní význam a tým by ji měl dodržovat – jakmile začnete improvizovat, ztrácíte schopnost rychle „číst“ cizí mapu.
 
 | Barva | Tvar | Notace | Příklad | Význam |
 |---|---|---|---|---|
@@ -302,7 +302,7 @@ final readonly class PlaceOrderHandler
 }
 :::
 
-**Každý prvek z workshopu se mapuje 1:1 do kódu**: command sticky → `PlaceOrderCommand`; aggregate sticky → `Order` entita; invariant z bullet pointu → throw v doménové výjimce; event sticky → `OrderPlaced` dispatchovaný na bus.
+**Každý prvek z workshopu se mapuje 1:1 do kódu.** Command sticky → `PlaceOrderCommand`. Aggregate sticky → `Order` entita. Invariant z bullet pointu → throw v doménové výjimce. Event sticky → `OrderPlaced` dispatchovaný na bus.
 
 :::callout{type="pattern"}
 ### Komentář v kódu = pojítko s workshopem {#design-level-comment-heading}
@@ -323,7 +323,7 @@ Tato vazba má praktický dopad. Za půl roku nový vývojář ví, odkud pravid
 
 ## 04.07 Domain Storytelling – alternativa pro malé týmy {#domain-storytelling}
 
-**Domain Storytelling** je workshopová technika, kterou v knize stejného jména (Addison-Wesley, 2021) představili Stefan Hofer a Henning Schwentner. Stejně jako Event Storming řeší extrakci doménových znalostí, ale jinou cestou: místo časové osy událostí kreslíte **příběh** o práci doménového experta ve standardizované piktogramové notaci.
+**Domain Storytelling** představili Stefan Hofer a Henning Schwentner v knize stejného jména (Addison-Wesley, 2021). Stejně jako Event Storming řeší extrakci doménových znalostí, ale jinou cestou: místo časové osy událostí kreslíte **příběh** o práci doménového experta ve standardizované piktogramové notaci.
 
 ### 04.07.1 Notace {#ds-notace}
 
@@ -360,7 +360,7 @@ Kresba je úmyslně jednoduchá – ručně nakreslené piktogramy nebo nástroj
 | Doporučený nástroj | Stěna + Post-It nebo Miro | egon.io, papír, Miro |
 | Kdy zvolit | Nový BC, migrace, strategický přehled | Hluboká diskuse o jednom procesu, malý tým, omezený čas |
 
-Hofer a Schwentner v knize zdůrazňují, že obě techniky se **nekonkurují**, ale doplňují: Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv), Domain Storytelling pak v každém z nich odkryje detail (teleobjektiv). Doporučují kombinovat: Big Picture Event Storming pro strategický přehled, Domain Storytelling pro jednotlivé hlavní procesy a Process / Design Level Event Storming pro implementaci.
+Hofer a Schwentner v knize zdůrazňují, že obě techniky se **nekonkurují**, ale doplňují. Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv). Domain Storytelling v každém z nich pak odkryje detail (teleobjektiv). Doporučují kombinovat: Big Picture Event Storming pro strategický přehled, Domain Storytelling pro jednotlivé hlavní procesy a Process / Design Level Event Storming pro implementaci.
 
 :::callout{type="note"}
 ### Nástroje pro Domain Storytelling {#ds-tooling-heading}
@@ -432,7 +432,7 @@ Workshop, který skončí slávou, fotkou stěny a sdílením v Slacku, ale jeho
 :::callout{type="warn"}
 ### „Big Picture musíme dotáhnout k dokonalosti.“ {#anti-perfectionism-heading}
 
-Big Picture nemá být dokonalý. Je to první mapa neznámého území. Pokud na něm strávíte 8 hodin a budete debatovat o tom, zda `OrderShipped` je `ShipmentDispatched` nebo `OrderDispatched`, ztrácíte čas – rozhodnutí padne až na Process Levelu, kde uvidíte kontext.
+Big Picture nemá být dokonalý. Je to první mapa neznámého území. Pokud na něm strávíte 8 hodin a budete debatovat o tom, zda `OrderShipped` je `ShipmentDispatched` nebo `OrderDispatched`, ztrácíte čas. Rozhodnutí padne až na Process Levelu, kde uvidíte kontext.
 
 **Řešení:** stanovte si 4hodinový timebox. Pak workshop skončete, i kdyby polovina hot spotů byla nevyřešená – to je v pořádku. Hot spoty *mají* zůstat otevřené.
 :::
