@@ -794,7 +794,7 @@ Doporučená postupná cesta pro Symfony tým, který dnes má monolit bez expli
 
 - Postavte fasádu (Symfony API gateway, nginx routing, AWS API Gateway) před monolit.
 - Postavte nový Symfony projekt jako samostatnou service. Skopírujte (nikdy ne `git mv`) kód cílového BC z monolithu.
-- Migrace dat: postupně replikovat tabulky cílového BC do nové DB. Období dual-write – monolit i nová service obě píší. Postupně cutover read traffic.
+- Migrace dat: postupně replikovat tabulky cílového BC do nové DB. Období dual-write – monolit i nová service obě píší. Postupně přepnout čtecí provoz.
 - Cross-BC eventy nahradit AMQP transportem v Messenger. Subscriber side má vlastní integration event DTO (sekce 20.08).
 - Po stabilizaci smažte zbytky cílového BC z monolithu.
 
@@ -812,7 +812,7 @@ Doporučená postupná cesta pro Symfony tým, který dnes má monolit bez expli
 Pravidelně se vracející selhání: tým se rozhodne postavit nové microservices na zelené louce, starý monolith zatím udržovat, a po 18 měsících přepnout. Co se stane:
 
 - Po 6 měsících je nová architektura na 30 % funkcionality monolithu, ale monolith mezitím získal novou funkcionalitu, takže rozdíl narůstá.
-- Nikdy není dobrý čas na cutover – produkční nápor, regulatorní změna, audity.
+- Nikdy není dobrý čas na přepnutí – produkční nápor, regulatorní změna, audity.
 - Tým je rozdělený na „starý“ a „nový“; znalosti chybí na obou stranách.
 - Po 18 měsících se projekt zastaví a obě verze zůstávají v produkci. Distributed monolith v nejhorší podobě.
 
