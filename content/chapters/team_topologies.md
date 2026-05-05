@@ -66,7 +66,7 @@ A jeden tým bez sub-hranic vyrobí Big Ball of Mud.
 :::callout{type="note"}
 ### „Law“ je trochu silné slovo {#conway-not-law-heading}
 
-Conway's Law není zákon ve smyslu fyzikálního zákona, ale *silná tendence*. Stojí
+Conway's Law popisuje silnou tendenci, ne fyzikální zákonitost. Stojí
 za ní praktický fakt: tým, který spolu denně mluví, koordinuje sdílená
 rozhodnutí přímo. Tým, který spolu nemluví, koordinaci nahrazuje stabilním rozhraním
 (API, schématem, kontraktem). Tato rozhraní se časem petrifikují a stanou se architektonickými
@@ -148,8 +148,8 @@ porucha.
 V roce 2019 vydali Matthew Skelton a Manuel Pais knihu
 *Team Topologies: Organizing Business and Technology Teams for Fast Flow*
 [[3]](https://teamtopologies.com/book). Poprvé systematicky popsali, **jaké typy
-týmů má organizace mít** a **jak mezi sebou mají komunikovat**. Nejde o nový framework
-jako SAFe nebo LeSS – Team Topologies je *jazyk*, kterým se dá mluvit o organizačním návrhu.
+týmů má organizace mít** a **jak mezi sebou mají komunikovat**. Team Topologies dodává *slovník* pro organizační návrh,
+nepředepisuje proces jako SAFe nebo LeSS.
 A pro DDD je to chybějící doplněk Vernona.
 
 Skelton a Pais identifikovali 4 typy týmů. Cokoliv jiného (klasický „enterprise architecture
@@ -181,8 +181,8 @@ secrets management, šablony pro nové BC, vývojářský portál.
 Hlavní atribut Platform teamu je slovo **self-service**. Stream-aligned tým
 si na platformu nezadává ticket („potřebuju nový Postgres“) a nečeká týden. Naklikne ho
 sám přes portál nebo nasadí přes IaC modul, který Platform team udržuje. Platform
-team fungující jako ticketová fronta není Platform team. Je to *infrastruktura jako
-úzké hrdlo* a anti-vzor (sekce 05.08).
+team, který funguje jako ticketová fronta, se mění v úzké hrdlo
+infrastruktury – anti-vzor v sekci 05.08.
 
 - **Velikost:** 1 Platform team na 50–150 vývojářů; obvykle 5–9 lidí.
 - **Měření:** NPS od stream-aligned týmů, adoption rate, time-to-first-deploy pro nový BC.
@@ -482,7 +482,7 @@ Bod 5 (germane prostor):         __
 - [ ] Pokud > 4 BC ve vlastnictví → naplánovat rozdělení do 2 kvartálů.
 :::
 
-Rubrika je záměrně subjektivní – měří *vnímání* členů týmu, ne metrické fakty.
+Rubrika záměrně měří *vnímání* členů týmu; tvrdá metrika z Grafany cognitive load nezachytí.
 Důvod: cognitive load je psychologická kategorie, žádná metrika z Grafany ji nezachytí.
 Skelton a Pais (2019, kap. 3 „Team-First Thinking“) výslovně varují před snahou cognitive load „objektivizovat“
 přes počet řádků kódu, count of services, nebo ticket throughput. Tyto proxy metriky
@@ -751,8 +751,8 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
   Westrumova generative kultura je předpoklad, ne výstup.
 
 Pokud z této kapitoly odejdete s jednou větou, ať je to tato: **Bounded Context
-není soubor v repu. Je to závazek konkrétního týmu vyvíjet, nasazovat a opravovat
-v noci konkrétní část domény.** Bez tohoto závazku není BC.
+je závazek konkrétního týmu vyvíjet, nasazovat a v noci opravovat svou část
+domény.** Bez tohoto závazku zůstává jen složkou v repu.
 
 Pro hlubší studium doporučujeme Skelton & Pais – *Team Topologies*
 [[3]](https://teamtopologies.com/book),
