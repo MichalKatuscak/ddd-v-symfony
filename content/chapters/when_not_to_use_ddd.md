@@ -411,7 +411,7 @@ Detail v [kapitole o anti-vzorech](/anti-vzory#anemicky-domenovy-model).
 
 ## 22.10 Kdy DDD naopak smysl má {#when-ddd-fits}
 
-DDD není špatná architektura. Je to architektura pro specifický kontext. Smysl má, když platí
+DDD se hodí na specifický kontext, ne na každý projekt. Smysl má, když platí
 **většina** z těchto podmínek:
 
 | Podmínka | Proč záleží | Příklad z praxe |
