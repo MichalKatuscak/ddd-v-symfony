@@ -20,7 +20,7 @@ difficulty: 4
 
 ## 16.01 Výkon v kontextu DDD {#uvodem}
 
-Pověst pomalého modelu DDD si tahá z anekdot, ne z měření. Výkonnostní problémy
+Pověst pomalého DDD pochází z anekdot, ne z měření. Výkonnostní problémy
 přicházejí ze špatné implementace: příliš velkých agregátů, nevhodného lazy loadingu,
 absence read modelu. Doménový model rychlou aplikaci nevylučuje.
 
