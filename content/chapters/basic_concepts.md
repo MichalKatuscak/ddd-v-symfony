@@ -225,7 +225,7 @@ ID, žádné settery. Dva e-maily se shodují právě tehdy, když mají stejnou
 ## 06.05 Agregáty (Aggregates) {#aggregates}
 
 Objednávka má položky, dodací adresu, stav a celkovou částku. Změnit položku znamená
-přepočítat částku; zrušit objednávku znamená překontrolovat stav. Pokud tyto pravidla
+přepočítat částku; zrušit objednávku znamená překontrolovat stav. Pokud tato pravidla
 nepatří jednomu strážci, rozsypou se. Agregát je právě tento strážce – skupina objektů,
 které se mění jako jeden celek a tvoří jednu transakční hranici konzistence
 [[3]](https://www.domainlanguage.com/ddd/). Vstup do agregátu vede výhradně přes kořen
@@ -494,7 +494,7 @@ na agregátu `Order`, protože pracuje výhradně s jeho daty. Doménová služb
 je vhodná tehdy, když logika:
 
 - Přesahuje hranice jednoho agregátu a koordinuje více z nich.
-- Vyžaduje znalost, která nepatří do žádné konkrétní entity.
+- Vyžaduje znalost, která nepatří do žádné konkrétní entity ani agregátu.
 - Reprezentuje doménový proces, nikoli stav (např. zpracování platby).
 
 `PaymentService` je oprávněná jako služba, protože
