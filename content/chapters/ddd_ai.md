@@ -241,8 +241,8 @@ neměnné.
 Referenční implementace Microsoftu – eShopOnContainers – ilustruje toto rozlišení
 na praktickém příkladu. Modul `Ordering` používá plné taktické DDD:
 agregáty, doménové události, CQRS. Modul `Catalog` je prostý CRUD
-s Entity Framework. Rozdělení vzniklo záměrně, ne historickou nehodou: komplexitu
-implementace má nést tam, kde leží doménová komplexita. S příchodem AI se k této úvaze
+s Entity Framework. Rozdělení vzniklo záměrně, ne historickou nehodou: implementační
+komplexita patří tam, kde leží komplexita doménová. S příchodem AI se k této úvaze
 přidává nová otázka: kde leží hranice mezi tím, co AI může autonomně rozhodovat,
 a kde musí platit explicitní doménová pravidla?
 
