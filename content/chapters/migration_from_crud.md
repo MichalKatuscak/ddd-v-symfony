@@ -34,7 +34,7 @@ na nevhodná místa.
 - **Fat Controllers (Tlusté kontrolery)** – Symfony kontrolery přestaly být tenkou vrstvou pro HTTP adaptaci. Místo toho přímo implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler má delegovat na doménový model, nikoli ho suplovat.
 - **Doménová logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
 - **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
-- **Nízká testovatelnost** – Doménová logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlý mocking.
+- **Nízká testovatelnost** – Doménová logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlé mockování.
 - **Komunikační propast** – Vývojáři a doménoví experti používají jiný slovník. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
 :::
 
