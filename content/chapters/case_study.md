@@ -1532,7 +1532,7 @@ v kapitole [Anti-vzory a typické chyby](/anti-vzory).
 
 Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla deset
 ponaučení, která lze přenést do dalších projektů. Prvních sedm vychází ze strategického a taktického designu,
-zbylá tři z provozu read modelů a vědomého řízení trade-offů.
+zbylá tři z provozu read modelů a vědomého řízení kompromisů.
 
 1. **Strategický design rozhoduje o výsledku** – Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
 2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Díky tomu kód dává smysl i bez komentářů.
@@ -1562,5 +1562,5 @@ zbylá tři z provozu read modelů a vědomého řízení trade-offů.
 - question: Jaká jsou tři nejdůležitější ponaučení z projektu?
   answer: 'Zaprvé, investice do strategického designu a kontextové mapy na začátku projektu se mnohonásobně vyplatila – pozdější změny architektury by byly dražší. Zadruhé, důsledné budování ubiquitous language s doménovými experty zabránilo většině nedorozumění v komunikaci. Zatřetí, malé agregáty s jasnou transakční hranicí udržely model konzistentní bez potřeby distribuovaných transakcí. Úplný seznam včetně ponaučení o read modelech a vědomých trade-offech v <a href="#lessons">sekci Ponaučení</a>.'
 - question: Co bylo nejtěžším rozhodnutím projektu?
-  answer: 'Volba mezi synchronním ověřením členství v projektu (přes port <code>ProjectChecker</code>) a asynchronní reakcí přes lokální projekci. Synchronní cesta v monolitu znamená méně pohyblivých částí, ale vytváří časovou závislost mezi kontexty. Tým zvolil synchronní variantu jako pragmatický kompromis pro fázi monolitu, s vědomím, že při budoucím štěpení do služeb přijde refaktor na lokální projekci. Plný kontext rozhodnutí včetně dalších čtyř trade-offů v <a href="#trade-offs">sekci Výzvy a rozhodnutí</a>.'
+  answer: 'Volba mezi synchronním ověřením členství v projektu (přes port <code>ProjectChecker</code>) a asynchronní reakcí přes lokální projekci. Synchronní cesta v monolitu znamená méně pohyblivých částí, ale vytváří časovou závislost mezi kontexty. Tým zvolil synchronní variantu jako pragmatický kompromis pro fázi monolitu, s vědomím, že při budoucím štěpení do služeb přijde refaktor na lokální projekci. Plný kontext rozhodnutí včetně dalších čtyř kompromisů v <a href="#trade-offs">sekci Výzvy a rozhodnutí</a>.'
 :::

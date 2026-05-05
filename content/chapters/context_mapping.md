@@ -372,7 +372,7 @@ final class StripePaymentReportRepository
 
 Reporting je vědomě Conformist vůči Stripe. Žádný převod na `Money` VO, žádný překlad `'usd'` → `Currency::USD`. Když Stripe přejmenuje pole nebo přidá nový status, Reporting musí změnu přijmout. Cena za to je **nulová investice do ACL**; cena, kterou platíme, je **křehkost vůči neslučitelným změnám upstreamu**.
 
-### Trade-off Conformistu
+### Kompromis Conformistu
 
 Conformist *ušetří*:
 

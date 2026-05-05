@@ -657,7 +657,7 @@ stavu).
 
 **Řešení – tři přístupy podle kontextu:**
 
-| Přístup | Kdy použít | Trade-off |
+| Přístup | Kdy použít | Kompromis |
 |---|---|---|
 | **Optimistický retry** | Závislost je krátkodobá (ms) | Handler hodí výjimku → Messenger retry s `DelayStamp` |
 | **Jeden worker na agregát** | Ordering je kritický | Nižší throughput, ale garantované pořadí per-aggregate |
