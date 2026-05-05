@@ -1008,11 +1008,11 @@ organization of code.“*
 
 V Symfony 8 a PHP 8.4 to konkrétně znamená:
 
-- **PSR-4 namespace + folder layout** uspořádané podle
+- **PSR-4 namespace + uspořádání složek** podle
   [Bounded Contextů](/zakladni-koncepty#bounded-contexts).
 - **`composer.json` autoload sekce**, která mapuje namespace
   `App\Ordering\` na `src/Ordering/` – ne na
-  `src/` jako v default Symfony skeletonu.
+  `src/` jako ve výchozím Symfony skeletu.
 - **Architecture testing**, který zkontroluje, že žádný kód
   v `App\Billing\` přímo nedotahuje do `App\Ordering\`.
 
@@ -1112,7 +1112,7 @@ vyhnout.
 ### composer.json autoload {#mod-composer}
 
 Aby PSR-4 namespace odpovídala adresářové struktuře, upravte
-`composer.json`. Default Symfony nastavení mapuje `App\` na
+`composer.json`. Výchozí Symfony nastavení mapuje `App\` na
 `src/`, ale chceme každý modul s vlastním kořenem:
 
 :::code{language="json" filename="composer.json (fragment)"}
@@ -1143,7 +1143,7 @@ Aby PSR-4 namespace odpovídala adresářové struktuře, upravte
 :::
 
 Po úpravě spusťte `composer dump-autoload`. Symfony skeleton očekává
-controllery v `App\Controller\`. Pro Modules layout přesuňte
+controllery v `App\Controller\`. Pro modulové uspořádání přesuňte
 controllery do `App\Ordering\Infrastructure\Http\` a upravte
 `config/services.yaml`:
 

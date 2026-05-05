@@ -356,7 +356,7 @@ Ubiquitous Language vznikl ve spolupráci s doménovými experty ještě před z
 
 ### Doménový model: Projekt (kořen agregátu) {#project-model-heading}
 
-Agregát používá Doctrine atributy přímo na doménové třídě – jako pragmatický default,
+Agregát používá Doctrine atributy přímo na doménové třídě – jako pragmatickou výchozí volbu,
 v souladu s [kapitolou 11](/implementace-v-symfony#mapping-volba-heading). Třída je `final`,
 dědí z `AggregateRoot` (sdílené chování pro `record` a `releaseDomainEvents`),
 konstruktor je `private` a vznik agregátu probíhá přes statickou factory metodu `create()`.
