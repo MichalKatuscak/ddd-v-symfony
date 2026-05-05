@@ -808,8 +808,8 @@ doménový expert. V kódu je `Invoice`, zákazník říká „faktura“,
 doména rozděluje na „nabídku“, „objednávku“ a „smlouvu“. Vývojáři si
 přestávají být jisti, co třída modeluje.
 
-**Příčina:** Ubiquitous Language není statický artefakt – vyvíjí se
-s pochopením domény. Bez aktivní správy kód zaostává za aktuálním chápáním.
+**Příčina:** Ubiquitous Language se vyvíjí s pochopením domény, není to jednou
+zapsaný artefakt. Bez aktivní správy kód zaostává za aktuálním chápáním.
 
 **Opatření – čtyři praktiky:**
 
