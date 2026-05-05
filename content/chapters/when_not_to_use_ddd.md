@@ -226,7 +226,7 @@ Výsledkem je přidaná komplexita bez věcného důvodu. Jak píše Evans: agre
 :::callout{type="note"}
 **Doporučené alternativy:**
 
-- **Service layer s plain PHP objekty** – jednoduché třídy pro transformaci, bez agregátů.
+- **Servisní vrstva s obyčejnými PHP objekty** – jednoduché třídy pro transformaci, bez agregátů.
 - **Symfony Messenger** pro asynchronní zpracování pipeline kroků – bez režie DDD. Viz [kapitola o CQRS](/cqrs) pro inspiraci, jak Messenger používat v praxi.
 :::
 
