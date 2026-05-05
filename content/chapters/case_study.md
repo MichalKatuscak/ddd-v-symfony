@@ -77,7 +77,7 @@ zjištění je zárodkem rozdělení do bounded contexts.
 ### Krok 2: Seskupení událostí do subdomén {#discovery-grouping-heading}
 
 Tým druhý den shlukoval události podle významu. Otázka pro každou skupinu zněla: kdo z byznysu za toto odpovídá?
-Skupina, kterou rozumí jediný expert, je kandidát na subdoménu. Výsledkem byla mapa události na subdoménu:
+Skupina, které rozumí jediný expert, je kandidát na subdoménu. Výsledkem byla mapa události na subdoménu:
 
 | Subdoména | Událost | Doménový expert |
 |---|---|---|
@@ -1433,7 +1433,7 @@ publikace události na transport selhat – read model zůstane navždy nesynchr
 
 ## 24.07 Výzvy a rozhodnutí {#trade-offs}
 
-Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí jsou místa, kde tým váhal mezi
+Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí ukazuje místa, kde tým váhal mezi
 dvěma legitimními možnostmi. „Správná" odpověď neexistuje – existuje kontext, který volbu určil, a cena, kterou
 za ni tým platí. Stejná otázka v jiném projektu by mohla dopadnout jinak.
 
@@ -1539,7 +1539,7 @@ designu, tři z provozu read modelů a vědomého řízení kompromisů.
 1. **Strategický design rozhoduje o výsledku** – Identifikace pěti bounded contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel" znamená v každém kontextu něco jiného. Bez kontextové mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
 2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produkťák mluví o `TaskAssigned`, ne každý o něčem jiném.
 3. **Agregáty a hranice transakcí** – Vymezené agregáty udržely data konzistentní. Každý agregát si hlídal vnitřní konzistenci a měnil se v jedné transakci.
-4. **Doménové události pro integraci** – Doménové události odvázaly bounded contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval `TaskCreated` agregát; ActivityTracking i ProjectListProjection na něj reagovaly samostatně, aniž by o sobě věděly.
+4. **Doménové události pro integraci** – Doménové události odvázaly bounded contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval agregát událost `TaskCreated`; ActivityTracking i ProjectListProjection na ni reagovaly samostatně, aniž by o sobě věděly.
 5. **CQRS pro oddělení zodpovědností** – Příkazy mění stav, dotazy čtou bez vedlejších efektů. Každá strana má vlastní handler, vlastní model a vlastní testy. Roli message busu obstaral Symfony Messenger.
 6. **Vertikální slice architektura pro modularitu** – Organizace kódu podle feature místo technických vrstev znamenala, že změna v jedné feature se zpravidla nedotýká ostatních. Každá feature nese vlastní command, handler, kontroler i view model. Nová feature obvykle vznikne přidáním adresáře, ne úpravou existujících tříd.
 7. **Testování doménového modelu** – Doménové objekty bez závislostí na frameworku lze testovat čistým PHPUnit bez bootstrappingu kernelu.
