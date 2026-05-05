@@ -628,7 +628,7 @@ final class RegisterUserHandlerTest extends TestCase
 :::callout{type="warn"}
 ### Varování: Přílišné používání mocků
 
-Nadměrné použití mocků (mockování každé závislosti) vede k tzv. *over-specification* testů.
+Nadměrné použití mocků (mockování každé závislosti) vede k tzv. *nadměrné specifikaci* testů.
 Takové testy ověřují implementační detaily, nikoli chování. Při každém refaktoringu přestanou procházet,
 i když se chování systému nezměnilo. Preferujte InMemory Fake implementace pro repozitáře a mocky používejte
 pouze tam, kde ověřujete vedlejší efekty (odeslání e-mailu, volání externího API).
