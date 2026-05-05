@@ -593,7 +593,7 @@ Hlavní pravidla na zapamatování:
 4. **Mapování subdomén na Bounded Contexts není 1:1** – Core typicky 1:N (sdílené pravidlo v různých BC), Supporting 1:1, Generic přebírá cizí BC přes ACL. Subdoména je obchodní hranice, BC je implementační hranice; nezaměňujte je.
 5. **Klasifikace stárne** – re-evaluujte každých 12–18 měsíců. Generic se může stát Core (Stripe), Core se může stát Supporting (cloud storage), Supporting se může stát Generic (helpdesk). Tým, který nemá aktuální klasifikaci, neumí prioritizovat.
 
-Subdoménová klasifikace je nástroj pro *rozhodování*, ne pro estetiku. Kapitola splní účel, jakmile z ní vznikne konkrétní seznam subdomén vlastního produktu a u každé z nich rozhodnutí o sourcing strategii. Pouhý dojem „takto by se to dalo kategorizovat“ znamená, že je třeba ji projít znovu s konkrétním projektem v ruce.
+Subdoménová klasifikace je nástroj pro *rozhodování*, ne pro estetiku. Kapitola splní účel, jakmile z ní vznikne konkrétní seznam subdomén vlastního produktu a u každé z nich rozhodnutí o sourcing strategii. Pouhý dojem „takto by se to dalo kategorizovat“ znamená, že kapitola zůstala teorií – projděte ji znovu s konkrétním projektem v ruce.
 
 :::faq{}
 - question: Jaký je rozdíl mezi subdoménou a Bounded Contextem?
