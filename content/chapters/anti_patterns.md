@@ -26,23 +26,23 @@ Tato kapitola je **katalog kódových a modelovacích anti-vzorů** v DDD. Pro
 Command) viz [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli). Pro **rozhodovací rámec**,
 jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
-Domain-Driven Design při návrhu softwaru přináší strukturu a vyjadřovací sílu, ale jeho složitost přináší řadu úskalí. Praxe ukazuje, že týmy začínající s DDD opakovaně narážejí na stejné chyby – i přesto, že teorii dobře rozumí. Anti-vzory je proto potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
+DDD nabízí strukturu pro modelování domény, ale s tou strukturou přicházejí specifická úskalí. Týmy začínající s DDD opakovaně narážejí na stejné chyby, i když teorii rozumějí. Anti-vzory je proto potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 
-Anti-vzor je přístup, který vypadá správně – nebo k němu vývojáři přirozeně sklouznou – ale narušuje principy DDD a způsobuje dlouhodobé problémy s udržovatelností, testovatelností a výkonem.
+Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon.
 
 :::callout{type="note"}
 ### Klasifikace typických chyb v DDD {#klasifikace-heading}
 
 Chyby při implementaci DDD lze rozdělit do tří kategorií:
 
-- **Strategické chyby** – špatně definované Bounded Contexts, ignorování Ubiquitous Language, sdílená databáze napříč kontexty. Tyto chyby mají nejzávažnější dopad, protože ovlivňují celkovou architekturu systému.
-- **Taktické chyby** – anémický doménový model, příliš velké agregáty, Primitive Obsession. Tyto chyby se projevují na úrovni doménového modelu a narušují objektově orientované principy.
-- **Implementační chyby** – doménová logika v infrastrukturní vrstvě, mutovatelné události, over-engineering. Tyto chyby vznikají při konkrétní implementaci a jsou obvykle nejsnáze opravitelné.
+- **Strategické chyby** – špatně definované Bounded Contexts, ignorování Ubiquitous Language, sdílená databáze napříč kontexty. Dopad je nejzávažnější, protože strategické chyby ovlivňují celkovou architekturu systému.
+- **Taktické chyby** – anémický doménový model, příliš velké agregáty, Primitive Obsession. Projevují se na úrovni doménového modelu a narušují objektově orientované principy.
+- **Implementační chyby** – doménová logika v infrastrukturní vrstvě, mutovatelné události, over-engineering. Vznikají při konkrétní implementaci a obvykle se opravují nejsnáz.
 :::
 
 ## 21.02 Anti-vzor: Anémický doménový model (Anemic Domain Model) {#anemicky-domenovy-model}
 
-Anémický doménový model je pravděpodobně nejrozšířenějším anti-vzorem v objektově orientovaném vývoji obecně, a v DDD zvláště. Termín popularizoval Martin Fowler ve svém článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). V této situaci doménové třídy (entity, agregáty) slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
+Anémický model je nejrozšířenější anti-vzor objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
 
 :::diagram{fig="22.2-A" title="Anémický vs. bohatý doménový model – kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
 :::
@@ -267,11 +267,11 @@ class User
 :::
 :::
 
-Hlavním rozdílem je, že správná entita vystavuje doménově orientované metody (`activate()`, `deactivate()`, `register()`) namísto generických setterů. Entita sama garantuje své invarianty – nikdo zvenčí nemůže entitu dostat do nekonzistentního stavu.
+Rozdíl je v tom, že správná entita vystavuje doménově orientované metody (`activate()`, `deactivate()`, `register()`) místo generických setterů. Entita sama garantuje své invarianty – nikdo zvenčí ji nedostane do nekonzistentního stavu.
 
 ## 21.03 Anti-vzor: Primitive Obsession (posedlost primitivy) {#primitive-obsession}
 
-Primitive Obsession je anti-vzor, při němž vývojáři používají primitivní datové typy (`string`, `int`, `float`) tam, kam patří hodnotové objekty (Value Objects). Tento anti-vzor je zákeřný, protože primitiva působí na první pohled přímočaře, ale vedou k závažným problémům.
+Primitive Obsession nastává, když vývojáři používají primitivní datové typy (`string`, `int`, `float`) tam, kam patří hodnotové objekty (Value Objects). Primitiva působí na první pohled přímočaře, ale vedou k závažným problémům.
 
 :::callout{type="note"}
 ### Problémy způsobené Primitive Obsession {#primitive-problemy-heading}
@@ -447,7 +447,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 
 ## 21.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
 
-Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, která musí být vždy v konzistentním stavu. Příliš velký agregát (někdy označovaný jako „God Aggregate“) sdružuje příliš mnoho entit a logiky do jednoho celku. Tím porušuje princip jedné odpovědnosti a způsobuje řadu závažných problémů.
+Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, která musí být vždy v konzistentním stavu. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže.
 
 :::diagram{fig="22.4-A" title="God Aggregate vs. správně rozdělené agregáty propojené přes ID" src="images/diagrams/22_anti_patterns/god_aggregate.svg"}
 :::
@@ -612,7 +612,7 @@ Pravidlo pro navrhování agregátů zní: *agregát by měl být co nejmenší,
 
 ## 21.05 Anti-vzor: Sdílená databáze napříč Bounded Contexts {#sdilena-databaze}
 
-Jeden z nejzávažnějších strategických anti-vzorů nastává, když různé Bounded Contexts sdílejí stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. I když se to na počátku jeví jako pragmatické řešení, vede to k těsnému provázání, které znemožňuje nezávislý vývoj a nasazení jednotlivých kontextů.
+Sdílená databáze napříč Bounded Contexts patří mezi nejzávažnější strategické anti-vzory. Nastává, když různé kontexty sdílejí stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. Na počátku to vypadá pragmaticky, ale vede k těsnému provázání, které blokuje nezávislý vývoj a nasazení jednotlivých kontextů.
 
 :::callout{type="warn"}
 ### Špatně: Přímý přístup ke sdíleným tabulkám {#sdilena-db-spatne-heading}
@@ -746,11 +746,11 @@ class HttpUserManagementAdapter implements CustomerDataProvider
 :::
 :::
 
-Alternativou k synchronnímu HTTP volání je asynchronní komunikace přes doménové události. Billing kontext může naslouchat události `CustomerBillingDataUpdated` a lokálně si ukládat kopii potřebných dat (tzv. *Read Model projection*). Tím se eliminuje synchronní závislost za cenu eventuální konzistence.
+Alternativou k synchronnímu HTTP volání je asynchronní komunikace přes doménové události. Billing kontext může naslouchat události `CustomerBillingDataUpdated` a lokálně si ukládat kopii potřebných dat (tzv. *Read Model projection*). Tím odstraníme synchronní závislost za cenu eventuální konzistence.
 
 ## 21.06 Anti-vzor: Mutovatelné doménové události {#mutovatelne-udalosti}
 
-Doménová událost reprezentuje fakt, který se stal v minulosti – a minulost nelze změnit. Události musí být striktně **immutable** (neměnné). Mutovatelná událost je konceptuální rozpor: pokud lze událost po vytvoření změnit, ztrácí svou sémantickou hodnotu jako historický záznam.
+Doménová událost popisuje fakt, který se v minulosti stal. Minulost nelze měnit, a tak musí být událost striktně **immutable** (neměnná). Mutovatelná událost je konceptuální rozpor: pokud lze událost po vytvoření změnit, ztrácí svou sémantickou hodnotu jako historický záznam.
 
 Mutovatelné události navíc způsobují praktické problémy při event sourcingu, auditních logách a při komunikaci mezi Bounded Contexts. Přijímající kontext totiž předpokládá, že obdrží konzistentní a neměnná data.
 
@@ -868,7 +868,7 @@ final class OrderCancelledEvent
 
 ## 21.07 Anti-vzor: Doménová logika v infrastrukturní vrstvě {#logika-v-infrastrukture}
 
-DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře, Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku do doménové vrstvy. Pokud se doménová pravidla začnou objevovat v infrastrukturních třídách, dochází k narušení architekturních hranic a ke vzniku skryté, těžko testovatelné logiky.
+DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře, Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku do doménové vrstvy. Doménová pravidla v infrastrukturních třídách narušují hranice vrstev a vytvářejí skrytou, těžko testovatelnou logiku.
 
 :::callout{type="warn"}
 ### Špatně: Doménová logika v Doctrine repozitáři {#infra-spatne-heading}
@@ -1030,7 +1030,7 @@ class UserController extends AbstractController
 
 ## 21.08 Anti-vzor: Over-engineering u jednoduchých aplikací {#over-engineering}
 
-DDD není vhodné pro každý projekt. Eric Evans sám upozorňuje, že DDD přináší největší přidanou hodnotu u **komplexních domén se složitou doménovou logikou**. Pro jednoduché CRUD aplikace, administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované – přináší vysokou počáteční složitost bez odpovídajícího přínosu.
+DDD není vhodné pro každý projekt. Eric Evans upozorňuje, že největší přínos má u **komplexních domén se složitou doménovou logikou**. Pro CRUD aplikace, administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované: přináší vysokou počáteční složitost bez odpovídajícího efektu.
 
 :::callout{type="note"}
 ### Příznaky over-engineeringu v DDD kontextu {#overeng-příznaky-heading}
@@ -1071,7 +1071,7 @@ Vhodné indikátory pro zavedení DDD: *složitá doménová pravidla, která se
 
 ## 21.09 Anti-vzor: Ignorování Ubiquitous Language {#missing-ubiquitous-language}
 
-Jedním ze základních pilířů DDD je Ubiquitous Language – společný jazyk sdílený vývojáři, doménovými experty a všemi zainteresovanými stranami. Tento jazyk používáme konzistentně v kódu, dokumentaci, testech i v komunikaci. Ignorování tohoto principu způsobuje, že tatáž doménová entita nese různé názvy na různých místech. Výsledkem jsou nedorozumění, chyby a ztráta doménového vhledu v kódu.
+Ubiquitous Language je společný jazyk vývojářů, doménových expertů a dalších zainteresovaných stran. Používá se konzistentně v kódu, dokumentaci, testech i v komunikaci. Když tento princip selhává, tatáž doménová entita nese různé názvy na různých místech. Výsledkem jsou nedorozumění, chyby a ztráta doménového vhledu v kódu.
 
 :::callout{type="warn"}
 ### Špatně: Různé názvy pro stejný koncept {#ubiq-spatne-heading}
