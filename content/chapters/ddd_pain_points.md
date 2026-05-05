@@ -38,9 +38,9 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 ## 20.01 A – Doctrine vs. doménový model {#doctrine}
 
-Doctrine ORM je bohatý nástroj, ale jeho interní model (Unit of Work, Identity Map, lazy loading)
-je stavěný pro jednoduchý CRUD. Bohaté doménové modely s ním přicházejí do konfliktu na šesti
-místech.
+Doctrine ORM má interní model (Unit of Work, Identity Map, lazy loading) stavěný pro jednoduchý
+CRUD. Doménový model s neměnnými konstruktory, privátními settery a invarianty s ním sráží
+na šesti místech, která následují.
 
 ### A1. Transakce přes agregáty a Doctrine Unit of Work {#a1-transakce}
 
@@ -217,21 +217,20 @@ Typ uložte jako enum do jednoho sloupce a detaily jako JSON do druhého.
 Tím se vyhnete discriminator map, která je pro VO těžkopádná.
 :::
 
-### A4. Lazy loading vs. bohaté agregáty {#a4-lazy-loading}
+### A4. Lazy loading a doménové metody {#a4-lazy-loading}
 
-**Problém:** Doctrine ve výchozím nastavení načítá asociace lazy – místo skutečného
-objektu vloží do property proxy třídu, která se inicializuje až při prvním přístupu.
-Bohaté agregáty (metody jako `totalPrice()`, `items()`) mohou neúmyslně spouštět
-lazy load *mimo otevřenou transakci* nebo *po detach()*. Výsledkem je výjimka
+Doctrine ve výchozím nastavení načítá asociace lazy – do property vloží proxy třídu,
+která se inicializuje až při prvním přístupu. Doménová metoda jako `totalPrice()`
+nebo `items()` o tom nic neví a implicitně spoléhá na aktivní databázové připojení.
+Když ji zavoláte mimo otevřenou transakci nebo po `detach()`, dostanete
 `UninitializedLazyObjectException` (PHP 8.4 lazy objects) nebo
-`ORMInvalidArgumentException` v starších verzích Doctrine ORM.
+`ORMInvalidArgumentException` ve starších verzích Doctrine ORM.
 
-**Příčina:** Lazy proxy je infrastrukturní koncept – doménový model
-o ní neví a nesmí vědět. Bohužel, pokud Doctrine vloží proxy na místo
-`OrderItems`, doménová metoda `$order->items()`
-v sobě implicitně spoléhá na aktivní databázové připojení.
+Lazy proxy je infrastrukturní koncept. Doménový model o ní vědět nesmí, jenže ji
+v paměti nese. Volba načítání tedy musí přijít zvenčí – ze strany repozitáře nebo
+konkrétní query.
 
-**Řešení – podle složitosti situace:**
+**Řešení podle složitosti situace:**
 
 | Situace | Řešení |
 |---|---|
@@ -675,8 +674,8 @@ a znovu odeslat.
 
 ## 20.03 C – Modelování {#modelovani}
 
-Správné doménové modelování je obtížnější než implementace – vyžaduje disciplínu
-v rozhodnutích, která se zdají triviální, dokud nezpůsobí problém.
+Modelovací rozhodnutí se zdají triviální, dokud nezpůsobí problém v produkci.
+Čtyři pasti, které se vrací nejčastěji.
 
 ### C1. Kde žije validace {#c1-validace}
 
@@ -699,14 +698,13 @@ i z jiného místa (CLI command, test, import). Symfony Validator je
 
 ### C2. Stavový automat bez anémického modelu {#c2-stavy}
 
-**Problém:** Objednávka prochází stavy: *Draft → Placed → Paid →
-Shipped → Delivered → Cancelled*. Anémický přístup: `$order->setStatus('shipped')`
-– stav se změní bez guard conditions, bez vedlejších efektů, bez kontroly, zda přechod
-dává smysl.
+Objednávka prochází stavy *Draft → Placed → Paid → Shipped → Delivered → Cancelled*.
+Anémický přístup `$order->setStatus('shipped')` přepíše hodnotu bez guard conditions
+a bez kontroly, jestli přechod dává smysl. Doména ztrácí pravidla, která ji definují.
 
-**Řešení:** Explicitní metody pro každý přechod. Metoda ověřuje,
-zda je přechod validní (guard condition), provede změnu stavu a zaregistruje
-doménovou událost.
+Explicitní metoda pro každý přechod tento problém zavírá. Ověří, jestli je přechod
+validní, provede změnu stavu a zaregistruje doménovou událost. Tři kroky v jedné
+metodě, žádný setter navenek.
 
 :::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/IdempotencyStamp.php"}
 final class Order
@@ -832,8 +830,8 @@ s pochopením domény. Bez aktivní správy kód zaostává za aktuálním cháp
 
 ## 20.04 D – Symfony-specifické třenice {#symfony}
 
-Symfony je rozsáhlý framework, ale některé jeho konvence cílí na CRUD aplikace.
-Tato sekce popisuje tři místa, kde framework-first přístup koliduje s DDD.
+Symfony konvence cílí převážně na CRUD. Tři místa, kde framework-first přístup
+koliduje s doménovým modelem nejviditelněji.
 
 ### D1. Symfony Form vs. Command {#d1-form}
 
@@ -999,8 +997,8 @@ final class OrderVoter extends Voter
 
 ## 20.05 E – Organizace a tým {#tym}
 
-DDD selže ne proto, že by byl technicky špatný – ale proto, že tým ho nepochopil,
-management ho nepodpořil nebo znalosti zůstaly u jednoho člověka.
+Technické selhání DDD je vzácné. Mnohem častější bývá, že tým vzor nepochopí,
+management k němu nedá mandát nebo znalost zůstane v hlavě jednoho seniora.
 
 ### E1. Business case pro DDD refaktoring {#e1-management}
 
@@ -1024,7 +1022,7 @@ a vždy způsobí regression v objednávkovém modulu. Níže je uvedena příč
 ### E2. Postupné zavedení – strangler fig pattern {#e2-strangler}
 
 **Problém:** Big-bang rewrite – přepsání celé aplikace do DDD najednou –
-téměř vždy selže. Trvá déle než odhadnuto, tým ztrácí motivaci, byznys se nedočká
+selže ve většině týmů. Trvá déle než odhadnuto, tým ztrácí motivaci, byznys se nedočká
 nových funkcí. A přitom původní aplikace musí dál žít.
 
 **Řešení – strangler fig pattern:** Identifikujte jeden modul
