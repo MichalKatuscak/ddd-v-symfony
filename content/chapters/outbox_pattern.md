@@ -1313,7 +1313,7 @@ správa je manuální.
 Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší konfigurace, ale
 má dvě slabiny: **single point of failure** (worker spadne → lag roste, dokud
 `livenessProbe` ho nerestartuje) a **omezenou propustnost** (jeden PHP proces
-zvládne ~5k events/s na consumer-grade hardware).
+zvládne ~5k events/s na běžném hardwaru).
 
 Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízí dvě cesty:
 
