@@ -943,7 +943,7 @@ core doména s vysokou hodnotou), postup je:
 **Symptomy:** tabulka `users` se používá v Ordering BC i Billing BC; oba do ní zapisují.
 
 1. Identifikujte vlastnícího BC (typicky Identity).
-2. Ostatní BC do ní nesmí zapisovat – jen číst. Reads přesuňte do read-modelů (každý BC má vlastní projekci).
+2. Ostatní BC do ní nesmí zapisovat – jen číst. Čtení přesuňte do read-modelů (každý BC má vlastní projekci).
 3. Zápisy nahraďte voláním Identity API (sync HTTP nebo async event publishing s outboxem).
 4. Souvisí: [Outbox Pattern](/outbox-pattern).
 
