@@ -19,13 +19,13 @@ difficulty: 3
 github_examples: null
 ---
 
-Když tým poprvé pronese „přejdeme na DDD“, obvykle si pod tím představuje dvě věci najednou: *budeme líp modelovat doménu* a zároveň *přerovnáme adresářovou strukturu*. Tato dvě rozhodnutí jsou ve skutečnosti **ortogonální**. Domain-Driven Design je modelovací technika; architektonický styl je rozhodnutí o uspořádání kódu a směru závislostí. Můžete dělat DDD ve vrstvené architektuře, v Hexagonální, v Onion, v Clean i ve Vertical Slice. Můžete naopak vést Hexagonální architekturu nad anémickým CRUD modelem a tím nemít s DDD nic společného.
+Když tým poprvé pronese „přejdeme na DDD“, pod tím slovem se schovávají dvě věci najednou: *budeme líp modelovat doménu* a zároveň *přerovnáme adresářovou strukturu*. Tato dvě rozhodnutí jsou ve skutečnosti **ortogonální**. Domain-Driven Design je modelovací technika; architektonický styl je rozhodnutí o uspořádání kódu a směru závislostí. DDD lze provozovat ve vrstvené architektuře, v Hexagonální, v Onion, v Clean i ve Vertical Slice. A naopak: Hexagonální architektura postavená nad anémickým CRUD modelem nemá s DDD nic společného.
 
-Následující sekce srovnávají čtyři vrstvové styly (Layered, Hexagonal, Onion, Clean) s pátým – feature-orientovaným Vertical Slice – a ukazují, jak konkrétně každý vypadá v Symfony 8 projektu. Cílem není prohlásit jeden styl za vítěze: každý má svůj kontext, kde dává smysl. Cílem je dát vám rozhodovací kritéria a varovat před nejčastějšími anti-vzory, které z dobré teorie udělají špatný kód.
+Následující sekce srovnávají čtyři vrstvové styly (Layered, Hexagonal, Onion, Clean) s pátým – feature-orientovaným Vertical Slice – a ukazují, jak konkrétně každý vypadá v Symfony 8 projektu. Žádný styl tu není prohlašován za vítěze – každý má svůj kontext, kde dává smysl. Smyslem srovnání je dát vám rozhodovací kritéria a varovat před nejčastějšími anti-vzory, které z dobré teorie udělají špatný kód.
 
 ## 09.01 Proč architektonický styl není totéž co DDD {#proc-styl}
 
-Asi nejčastější zdroj zmatku v DDD literatuře je směšování dvou nezávislých rozhodnutí. První rozhodnutí se týká **modelovací techniky**: budeme používat agregáty, hodnotové objekty, doménové události, ubiquitous language a bounded contexts? Nebo zůstaneme u procedurálního CRUDu, kde controller čte z databáze, aplikuje validaci a zapíše zpět? Druhé rozhodnutí se týká **uspořádání kódu**: budeme členit projekt podle technických vrstev, přes porty a adaptéry, do koncentrických prstenců, nebo podle feature?
+Nejčastější zdroj zmatku v DDD literatuře je směšování dvou nezávislých rozhodnutí. První je **modelovací technika**: budeme používat agregáty, hodnotové objekty, doménové události, ubiquitous language a bounded contexts? Nebo zůstaneme u procedurálního CRUDu, kde controller čte z databáze, aplikuje validaci a zapíše zpět? Druhé pak otevírá otázku **uspořádání kódu**: členit projekt podle technických vrstev, přes porty a adaptéry, do koncentrických prstenců, nebo podle feature?
 
 Tato dvě rozhodnutí lze kombinovat libovolně. Najdete projekty s čistým CRUD modelem v Hexagonální architektuře (porty oddělují HTTP od databáze, ale uvnitř je anémický řádek tabulky). Najdete bohaté DDD agregáty v klasické vrstvené struktuře (Doctrine entity v adresáři `src/Entity`, ale s metodami jako `$order->confirm()`, `$order->cancel()` a invarianty kontrolovanými v konstruktoru). Architektonický styl ovlivňuje *testovatelnost a kompozici*, ne *modelovací metodu*.
 
@@ -44,11 +44,11 @@ Eric Evans v původní knize *Domain-Driven Design* (2003) [[1]](https://www.dom
 
 Pokud je vaše doména triviální (CRUD nad několika tabulkami, žádné invarianty, žádné stavové přechody), žádný architektonický styl vám nepomůže – protože není co chránit. Pokud je vaše doména bohatá, ale neoddělíte ji od framework-specifických věcí (Doctrine anotace, Symfony Request/Response objekty, externí HTTP klienti), získáte na první pohled „čistý“ kód. Ten se ale nedá testovat bez celé infrastruktury.
 
-V dalších sekcích projdeme jednotlivé styly v pořadí od nejjednoduššího k nejkomplexnějšímu. Pro každý definujeme: co styl říká, jak vypadá v Symfony, kdy se hodí, kdy ne, a jaký je nejčastější anti-vzor.
+Následuje katalog stylů v pořadí od nejjednoduššího k nejkomplexnějšímu. U každého: co styl říká, jak vypadá v Symfony, kdy se hodí, kdy ne, a jaký je nejčastější anti-vzor.
 
 ## 09.02 Layered (klasická vrstvená) {#layered}
 
-Vrstvená architektura je nejstarší a nejrozšířenější způsob, jak organizovat podnikovou aplikaci. Martin Fowler ji popsal v knize *Patterns of Enterprise Application Architecture* (2002) [[2]](https://martinfowler.com/eaaCatalog/) jako „Service Layer + Domain Model + Data Source Layer“, což pozdější DDD literatura zjednodušila na čtyři vrstvy: Presentation, Application, Domain, Infrastructure. Eric Evans v *Domain-Driven Design* (2003) převzal totéž schéma a přidal pravidlo, že **vrstva smí záviset jen na vrstvách pod sebou**, nikdy nahoru.
+Vrstvená architektura je výchozí způsob, jak v podnikové aplikaci uspořádat kód. Martin Fowler ji v *Patterns of Enterprise Application Architecture* (2002) [[2]](https://martinfowler.com/eaaCatalog/) popsal jako „Service Layer + Domain Model + Data Source Layer“. Pozdější DDD literatura schéma zjednodušila na čtyři vrstvy: Presentation, Application, Domain, Infrastructure. Eric Evans v *Domain-Driven Design* (2003) totéž rozdělení převzal a přidal pravidlo, že **vrstva smí záviset jen na vrstvách pod sebou**, nikdy nahoru.
 
 ### Čtyři standardní vrstvy {#layered-vrstvy-heading}
 
@@ -197,7 +197,7 @@ Příznak: třída `Order` má jen `$status`, `setStatus()`, `getStatus()`, ale 
 
 ## 09.03 Hexagonal Architecture (Ports & Adapters, Cockburn 2005) {#hexagonal}
 
-Alistair Cockburn publikoval *Hexagonal Architecture (Ports and Adapters)* v roce 2005 [[3]](https://alistair.cockburn.us/hexagonal-architecture/) jako reakci na klasickou tří-vrstvou strukturu (UI / Logic / Database), kde testy aplikační logiky nutně procházely buď přes UI nebo přes databázi. Cockburnova teze: **aplikační jádro (doména) komunikuje s vnějším světem výhradně přes dobře definované porty (rozhraní)**; konkrétní technologie (HTTP, SQL, e-mail, fronta zpráv) tyto porty implementují jako adaptéry.
+V klasické tří-vrstvé struktuře (UI / Logic / Database) testy aplikační logiky nutně procházely buď přes UI, nebo přes databázi. To Alistairu Cockburnovi vadilo a v roce 2005 článkem *Hexagonal Architecture (Ports and Adapters)* [[3]](https://alistair.cockburn.us/hexagonal-architecture/) navrhl jiné uspořádání. Jeho teze: **aplikační jádro (doména) komunikuje s vnějším světem výhradně přes dobře definované porty (rozhraní)**; konkrétní technologie (HTTP, SQL, e-mail, fronta zpráv) tyto porty implementují jako adaptéry.
 
 Geometrická metafora hexagonu (šestiúhelníku) je pouze grafická pomůcka – Cockburn původně chtěl ukázat, že kolem jádra je víc než dvě strany (UI nahoře, DB dole), že portů může být libovolný počet. Číslo „šest“ nemá žádný význam; stejně dobře by mohl být osmiúhelník, desetiúhelník nebo trojúhelník.
 
@@ -554,7 +554,7 @@ Druhý častý anti-vzor: **port = repository, ostatní jsou jen služby**. Tým
 
 ## 09.04 Onion Architecture (Palermo 2008) {#onion}
 
-Jeffrey Palermo publikoval *Onion Architecture* ve čtyřech blogových postech v roce 2008 [[4]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) jako vylepšení vrstvené architektury, které explicitně staví doménový model do středu a uvádí **Dependency Rule**: závislosti smí směřovat pouze *dovnitř*, nikdy ven. Geometrickou metaforou je cibule (onion) s koncentrickými prstenci.
+Onion Architecture vznikla v roce 2008 ve čtyřdílné blogové sérii Jeffreyho Palerma [[4]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/). Je to vylepšení vrstvené architektury, které explicitně staví doménový model do středu a zavádí **Dependency Rule**: závislosti smí směřovat pouze *dovnitř*, nikdy ven. Geometrickou metaforou je cibule (onion) s koncentrickými prstenci.
 
 ### Čtyři koncentrické vrstvy Onion {#onion-vrstvy-heading}
 
@@ -569,9 +569,9 @@ Podstatné je slovo **koncentrické**. Vrstvy nejsou vertikálně poskládané (
 
 Onion a Hexagonal mají stejnou základní myšlenku – izolovat doménu, závislosti dovnitř – a v běžné implementaci jsou v Symfony nerozlišitelné. Tři jemné odlišnosti:
 
-- **Onion explicitně rozlišuje Domain Services a Application Services** jako dvě samostatné vrstvy. Hexagonal je topologicky střídmější – port + adaptér, žádné vnitřní vrstvení.
-- **Onion popisuje vrstvy**, Hexagonal popisuje porty a adaptéry. Onion je „statický“ model (kdo na koho závisí), Hexagonal je „dynamický“ (kudy data tečou).
-- **Onion neodděluje driving a driven porty.** V Onion je v UI vrstvě i HTTP controller (driving) i Doctrine repository (driven), což je z pohledu Hexagonal nepřesné – driving adaptér *volá* aplikaci, driven adaptér *je volán* doménou.
+- **Vrstvení uvnitř.** Onion explicitně rozlišuje Domain Services a Application Services jako dvě samostatné vrstvy. Hexagonal je topologicky střídmější – port + adaptér, žádné vnitřní vrstvení.
+- **Statický vs. dynamický pohled.** Onion popisuje vrstvy a kdo na koho závisí. Hexagonal popisuje porty, adaptéry a kudy data tečou.
+- **Driving vs. driven porty.** V Onion je v UI vrstvě i HTTP controller (driving) i Doctrine repository (driven). Z pohledu Hexagonal je to nepřesné – driving adaptér *volá* aplikaci, driven adaptér *je volán* doménou.
 
 Pokud váš projekt používá Hexagonal slovník (port, adapter, driving, driven), ale uvnitř má dvě vrstvy služeb (Domain Service, Application Service), děláte de facto hybrid Hexagonal+Onion. To je v pořádku – málokdo dnes implementuje jeden styl „čistě“.
 
@@ -691,18 +691,18 @@ Symfony auto-wiring funguje pro Onion stejně jako pro Hexagonal – Application
 
 ### Kdy se Onion hodí {#onion-kdy-heading}
 
-- **Domény s mnoha doménovými službami** – pricing engine, risk scoring, tax calculation, kde hodně logiky pracuje s víc agregáty najednou.
+- **Domény s rozsáhlými Domain Services** – pricing engine, risk scoring, tax calculation, kde hodně logiky pracuje s víc agregáty najednou.
 - **Týmy, které mají rády explicitní vrstvení** – Onion má jasné jméno pro každou vrstvu a každá závislost se dá zkontrolovat statickou analýzou.
 - **Enterprise aplikace s 100+ use casy** – kde rozdělení Domain Services a Application Services brání monolitickým „God service“ třídám.
 
 ### Kdy Onion nedává smysl {#onion-kdy-ne-heading}
 
-- **Doména má málo doménových služeb** – pak je Onion zbytečně složitý a Hexagonal stačí.
+- **Doména má málo Domain Services** – pak je Onion zbytečně složitý a Hexagonal stačí.
 - **Mladší tým** – rozdíl mezi Domain Service a Application Service není intuitivní a chybné rozhodnutí způsobí silně provázané kostky.
 
 ## 09.05 Clean Architecture (Robert C. Martin 2012) {#clean}
 
-Robert C. Martin (známý pod přezdívkou „Uncle Bob“) publikoval *Clean Architecture* v roce 2012 jako blogový post [[5]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) a v roce 2017 ji rozvinul do stejnojmenné knihy. Jeho cílem bylo zobecnit společné rysy Hexagonal, Onion, DCI a BCE (Boundary-Control-Entity od Ivara Jacobsona) do jednoho srozumitelného modelu.
+Robert C. Martin (známý pod přezdívkou „Uncle Bob“) chtěl zobecnit společné rysy Hexagonal, Onion, DCI a BCE (Boundary-Control-Entity od Ivara Jacobsona) do jednoho srozumitelného modelu. Výsledkem byl blogový post *Clean Architecture* z roku 2012 [[5]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html), který v roce 2017 rozvedl do stejnojmenné knihy.
 
 ### Čtyři prsteny Clean Architecture {#clean-prsteny-heading}
 
@@ -893,7 +893,7 @@ V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte
 
 ## 09.06 Vertical Slice Architecture (a horizontální vs. vertikální dělení) {#vertical-slice}
 
-Jimmy Bogard popsal *Vertical Slice Architecture* v roce 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/) jako reakci na náklady vrstvových architektur. Jeden jednoduchý use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy ve všech sedmi.
+Vrstvové architektury mají skrytou daň: jeden běžný use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy ve všech sedmi. Na tuto bolest reaguje *Vertical Slice Architecture* od Jimmyho Bogarda z roku 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/).
 
 Vertical Slice Architecture organizuje kód **podle feature, ne podle vrstvy**. Každá feature dostane svůj adresář, ve kterém žije všechno potřebné: Command/Query, Handler, Validátor, Read Model, Controller. Slice je kompletní vertikální „sloupec“ přes všechny technické vrstvy aplikace. To je v ostrém kontrastu s tradičním vrstveným (horizontálním) přístupem, kde se kód člení podle technické odpovědnosti (Controller / Service / Repository / Entity), a jeden use case se rozprostírá napříč všemi vrstvami.
 
@@ -1240,9 +1240,9 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 
 :::faq{}
 - question: Hexagonal vs. Onion – jaký je praktický rozdíl?
-  answer: 'V běžné Symfony implementaci jsou téměř nerozlišitelné: oba mají interfaces v doméně, implementace v infrastruktuře, závislosti směřují dovnitř. Tři jemné odlišnosti: Hexagonal explicitně rozlišuje driving (inbound) a driven (outbound) porty; Onion rozlišuje Domain Services a Application Services jako dvě samostatné vrstvy; Onion je „statický“ model závislostí, Hexagonal „dynamický“ model toku dat. Pokud váš projekt používá Hexagonal slovník (port, adapter), ale uvnitř má Domain Service i Application Service, děláte v podstatě hybrid – což je v pořádku. Detail v <a href="#onion">sekci o Onion Architecture</a>.'
+  answer: 'V běžné Symfony implementaci jsou téměř nerozlišitelné: oba mají interfaces v doméně, implementace v infrastruktuře, závislosti směřují dovnitř. Tři jemné odlišnosti: Hexagonal explicitně dělí driving (inbound) a driven (outbound) porty; Onion staví Domain Services a Application Services jako dvě samostatné vrstvy; Onion je „statický“ model závislostí, Hexagonal „dynamický“ model toku dat. Pokud váš projekt používá Hexagonal slovník (port, adapter), ale uvnitř má Domain Service i Application Service, děláte v podstatě hybrid – což je v pořádku. Detail v <a href="#onion">sekci o Onion Architecture</a>.'
 - question: Můžu použít Hexagonal bez DDD?
-  answer: 'Ano, technicky to funguje. Hexagonal řeší <em>jak strukturovat závislosti</em>, DDD řeší <em>jak modelovat doménu</em> – jsou ortogonální. Můžete mít Hexagonal nad anémickým CRUD modelem a žádné DDD principy nepoužívat. Praktický zisk je ale omezený: bez bohatého doménového modelu uvnitř je Hexagonal jen vrstvení rituálu, které zhoršuje code review a zpomaluje vývoj. Anti-vzor „Anemic Hexagonal“ je v reálných projektech běžný. Detail v <a href="#anti-3-heading">anti-vzorech</a>.'
+  answer: 'Ano, technicky to funguje. Hexagonal řeší <em>jak strukturovat závislosti</em>, zatímco DDD popisuje <em>jak modelovat doménu</em> – jde o ortogonální dimenze. Můžete mít Hexagonal nad anémickým CRUD modelem a žádné DDD principy nepoužívat. Praktický zisk je ale omezený: bez bohatého doménového modelu uvnitř je Hexagonal jen vrstvení rituálu, které zhoršuje code review a zpomaluje vývoj. Anti-vzor „Anemic Hexagonal“ je v reálných projektech běžný. Detail v <a href="#anti-3-heading">anti-vzorech</a>.'
 - question: Jak migrovat z Layered na Hexagonal v existujícím Symfony projektu?
   answer: 'Strangler Fig pattern: nezačínejte velký rewrite, ale postupně. Vyberte jeden Bounded Context (ideálně Core Domain) a v něm jednu feature. Pro tu feature zaveďte port (interface v Domain/Port/) a adapter (implementace v Infrastructure/), původní Doctrine entitu rozdělte na čistou doménovou třídu + persistenční OrmEntity + Mapper. Otestujte. Iterujte na další feature. Pokud Core Domain doženete celý, druhý BC možná stačí ponechat v Layered (hybridní přístup). Nikdy nemigrujte všechno najednou – riziko regresí je vysoké. Detail strangler fig v kapitole <a href="/migrace-z-crud">Migrace z CRUD</a>.'
 - question: Co je „Port“ přesně a jak se liší od běžného PHP interface?
