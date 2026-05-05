@@ -1420,7 +1420,7 @@ vytvořený projekt. Praxe ukazuje dvě cesty, jak tento gap pokrýt:
   výsledek své akce.
 - **Read-your-writes přes write model** – pro kritické dotazy okamžitě po commandu (např.
   stránka *Detail nově vytvořeného projektu*) handler čte přímo z write modelu nebo z cache namapované
-  na ID právě dokončené operace. Cena: ztráta výhod read modelu pro tento jeden flow.
+  na ID právě dokončené operace. Cena: ztráta výhod read modelu pro tento jeden tok.
 
 :::callout{type="warn"}
 Outbox pattern je předpokladem spolehlivé projekce. Bez něj může transakce zápisu agregátu projít, ale
@@ -1439,8 +1439,8 @@ volbu, a její cenu. Stejné rozhodnutí v jiném projektu by mohlo dopadnout ji
 **Otázka:** má být zápis aktivity v **ActivityTracking** součástí téže transakce
 jako vydávající operace (např. zápis projektu), nebo asynchronní reakce na publikovanou událost?
 
-**Volba:** asynchronní zpracování přes Messenger transport. Audit se nesmí stát single point of
-failure pro hlavní use case. Pokud je transport pro audit nedostupný, zápis projektu se přesto úspěšně
+**Volba:** asynchronní zpracování přes Messenger transport. Audit se nesmí stát kritickým bodem
+selhání pro hlavní use case. Pokud je transport pro audit nedostupný, zápis projektu se přesto úspěšně
 dokončí; aktivita se zaznamená později při replay z outbox tabulky.
 
 **Cena:** uživatel s rolí auditor vidí novou aktivitu se zpožděním. Pro audit log, kde čtenář
@@ -1475,7 +1475,7 @@ Uživatel čeká na odpověď příkazu a chce hned vědět, zda přiřazení pr
 
 **Cena:** **TaskManagement** má časovou závislost na **ProjectManagement**.
 Pokud druhý kontext není dostupný, přiřazení selže. V monolitu je tato závislost neviditelná, ve světě služeb
-přidá síťový hop a riziko kaskádových selhání.
+přidá síťový skok a riziko kaskádových selhání.
 
 **Alternativa pro distribuovaný systém:** **TaskManagement** by si držel lokální
 projekci „project members“ aktualizovanou přes eventy z **ProjectManagement**. Validace by běžela
@@ -1489,7 +1489,7 @@ stav vrací kompenzační scénář – vzor, který popisuje kapitola
 **Otázka:** `TaskAssignmentService::assignTask()` aktuálně volá pouze
 `Task::assign()`. Má smysl mít doménovou službu, která jen deleguje?
 
-**Volba:** zachovat ji jako *extension point*. Přiřazení úkolu je doménový koncept, který
+**Volba:** zachovat ji jako *místo pro rozšíření*. Přiřazení úkolu je doménový koncept, který
 v budoucnu zřejmě poroste – notifikace přiřazenému, kontrola pracovní zátěže, validace deadline, integrace
 s kalendářem. Vystavená abstrakce dovolí přidat tato pravidla, aniž by se dotkly handleru, controlleru ani
 agregátu.
@@ -1544,8 +1544,8 @@ zbylá tři z provozu read modelů a vědomého řízení trade-offů.
    Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.
    Podrobná strategie pro DDD projekty je v kapitole
    [Testování DDD aplikací](/testovani-ddd).
-8. **Read modely jako samostatný artefakt** – Oddělení write a read strany přes projekce ukázalo svou hodnotu, jakmile dataset překročil několik tisíc projektů. Hydratace agregátů pro účely výpisu je drahá; denormalizovaný read model umožnil držet odezvu výpisu pod 50 ms i při tisícovkách projektů na uživatele. Cenou byla eventual consistency, kterou tým ošetřil optimistickou aktualizací UI v kombinaci s read-your-writes pro kritické flowy.
-9. **Doménová analýza předchází kódu** – Tři kroky event stormingu (sběr událostí, seskupení do subdomén, definice hranic) zafungovaly jako filtr proti předčasné technické dekompozici. Bez tohoto kroku by hranice kontextů kopírovaly databázové tabulky nebo screen flow, ne sémantické bloky domény. Workshop trval dva dny; následný refaktor by trval řády déle.
+8. **Read modely jako samostatný artefakt** – Oddělení write a read strany přes projekce ukázalo svou hodnotu, jakmile dataset překročil několik tisíc projektů. Hydratace agregátů pro účely výpisu je drahá; denormalizovaný read model umožnil držet odezvu výpisu pod 50 ms i při tisícovkách projektů na uživatele. Cenou byla eventual consistency, kterou tým ošetřil optimistickou aktualizací UI v kombinaci s read-your-writes pro kritické scénáře.
+9. **Doménová analýza předchází kódu** – Tři kroky event stormingu (sběr událostí, seskupení do subdomén, definice hranic) zafungovaly jako filtr proti předčasné technické dekompozici. Bez tohoto kroku by hranice kontextů kopírovaly databázové tabulky nebo obrazovkový tok, ne sémantické bloky domény. Workshop trval dva dny; následný refaktor by trval řády déle.
 10. **Trade-offy dokumentovat, ne řešit** – Ne každé rozhodnutí má jednu správnou odpověď. Sdílený kernel pro identifikátory, eventual consistency u auditu, synchronní ACL přes port – každá z těchto voleb má cenu, kterou tým přijal s vědomím alternativy. Záznam těchto rozhodnutí v dokumentaci (ADR) zachoval kontext pro pozdější refaktor; bez něj by se za půl roku diskuse opakovala znovu.
 
 :::faq{}
