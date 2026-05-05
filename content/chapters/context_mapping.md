@@ -388,7 +388,7 @@ Conformist *zaplatí*:
 - Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá doménová logika kopíruje Stripe).
 
 :::callout{type="warn"}
-**Conformist je krátkodobá úleva s dlouhodobou cenou.** Když upstream provede neslučitelnou změnu, láme se s ním downstream. Pokud má downstream *jakoukoliv* doménovou logiku, která je závislá na konzumovaných datech (a vy plánujete s tou logikou žít déle než upstream), **postavte ACL**. Conformist použijte jen tam, kde downstream je opravdu jen průchozí transformací (reporting, log forwarder, simple webhook handler).
+**Conformist je krátkodobá úleva s dlouhodobou cenou.** Když upstream provede neslučitelnou změnu, láme se s ním downstream. Pokud má downstream *jakoukoliv* doménovou logiku, která je závislá na konzumovaných datech (a vy plánujete s tou logikou žít déle než upstream), **postavte ACL**. Conformist použijte jen tam, kde downstream je opravdu jen průchozí transformací (reporting, log forwarder, jednoduchý webhook handler).
 :::
 
 ### Conformist jako přechodný stav
