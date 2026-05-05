@@ -20,7 +20,7 @@ difficulty: 4
 
 ## 16.01 Výkon v kontextu DDD {#uvodem}
 
-Pověst pomalého DDD pochází z anekdot, ne z měření. Výkonnostní problémy
+Pověst pomalého DDD se opírá o anekdoty místo měření. Výkonnostní problémy
 přicházejí ze špatné implementace: příliš velkých agregátů, nevhodného lazy loadingu,
 absence read modelu. Doménový model rychlou aplikaci nevylučuje.
 
@@ -301,8 +301,8 @@ final class DoctrineOrderRepository
 :::
 :::
 
-Pravidlo zní: **agregát kreslete podle doménových invariantů, ne podle výkonnostních
-požadavků**. Když výkon tlačí proti doménovému modelu, odpovědí je read model
+Pravidlo zní: **hranice agregátu vede přes doménové invarianty**, výkonnostní
+požadavky se řeší jinde. Když výkon tlačí proti doménovému modelu, odpovědí je read model
 (viz sekci CQRS), ne porušení doménové integrity.
 
 ## 16.04 Optimalizace read modelu (CQRS) {#read-model-optimalizace}
@@ -1013,7 +1013,7 @@ Když optimistic lock generuje konflikty, lákavé řešení je
 zámek a další klient čeká. Konflikty zmizí, ale výsledek je horší: klienti se
 serializují na úrovni databáze místo aplikace, zámky drží přes celou transakci
 (včetně síťové komunikace s app serverem), pravděpodobnost deadlocku roste.
-Pessimistic lock řeší appearance problému, ne příčinu. Pokud je agregát hot,
+Pessimistic lock zakryje příznak, ne příčinu. Pokud je agregát hot,
 **hranice je špatně**.
 :::
 

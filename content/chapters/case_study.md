@@ -41,7 +41,7 @@ Systém pro správu projektů má následující požadavky:
 
 ## 24.03 Doménová analýza {#discovery}
 
-Architektura nezačíná u kódu, ale u rozhovoru s doménovými experty. Než přijde rozhodnutí o tabulkách
+Architektura začíná u rozhovoru s doménovými experty, ne u kódu. Než přijde rozhodnutí o tabulkách
 a třídách, musí tým vědět, co se v doméně děje a kde leží hranice. Pět bounded contexts z následující
 [sekce Architektura](#architecture) nevypadlo z hlavy architekta – vyplynulo ze tří kroků
 *event stormingu* (Alberto Brandolini): sběru doménových událostí, jejich seskupení do subdomén
@@ -1434,7 +1434,7 @@ publikace události na transport selhat – read model zůstane navždy nesynchr
 ## 24.07 Výzvy a rozhodnutí {#trade-offs}
 
 Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí ukazuje místa, kde tým váhal mezi
-dvěma legitimními možnostmi. „Správná" odpověď neexistuje – existuje kontext, který volbu určil, a cena, kterou
+dvěma legitimními možnostmi. Místo „správné" odpovědi existuje kontext, který volbu určil, a cena, kterou
 za ni tým platí. Stejná otázka v jiném projektu by mohla dopadnout jinak.
 
 ### 1. Eventual consistency napříč kontexty {#trade-off-consistency-heading}

@@ -416,7 +416,7 @@ je stále CRUD, že jednoduchost má svou hodnotu a že AI dovede být účinná
 formálního doménového modelování. Pozice není v rozporu s DDD – je to připomínka,
 že DDD nemá odpověď na každou otázku.
 
-Konvergenci roku 2026 lze shrnout jednou větou: struktura pomáhá. Ať už jde o
+Konvergence roku 2026 stojí na jediné věci: struktura pomáhá. Ať už jde o
 DDD bounded contexts, Cursor rules nebo CLAUDE.md – explicitní, sdílený kontext
 zlepšuje výsledky AI. DDD přináší bohatou tradici myšlení o tom, jak takový
 kontext definovat. Existují i další cesty – konvence, dobré testy a čistý kód

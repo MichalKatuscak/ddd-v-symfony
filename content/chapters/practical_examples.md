@@ -58,8 +58,8 @@ src/
 
 ### Klíčový agregát: Cart {#cart-aggregate}
 
-Agregát `Cart` hlídá pravidlo: stejný `productId` se nepřidává jako nová položka, ale navyšuje
-quantity stávající. Skeleton:
+Agregát `Cart` hlídá pravidlo: u stejného `productId` navyšuje quantity stávající
+položky místo přidání nové. Skeleton:
 
 :::code{language="php" filename="src/Cart/Domain/Model/Cart.php (skeleton)"}
 final class Cart extends AggregateRoot

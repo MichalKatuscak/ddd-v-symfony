@@ -64,8 +64,8 @@ a CRUD jsou legitimní volbou pro aplikace s jednoduchými doménovými pravidly
 
 ### Realistické zhodnocení nákladů migrace
 
-Migrace z CRUD na DDD trvá měsíce až roky, podle velikosti kódové základny. Není to akce,
-je to dlouhý proces. Sama o sobě nepřináší zákazníkovi okamžitou hodnotu –
+Migrace z CRUD na DDD trvá měsíce až roky podle velikosti kódové základny — jde o dlouhý
+proces, ne jednorázovou akci. Sama o sobě nepřináší zákazníkovi okamžitou hodnotu –
 hodnota přijde s tím, jak tým začne přidávat funkce rychleji a s menším rizikem regresí.
 Management přijme migraci snáz, když probíhá inkrementálně souběžně s vývojem nových funkcí,
 ne jako izolovaný refaktoringový projekt.

@@ -1049,7 +1049,7 @@ je ale opačně: tam, kde je pokrytí nízké, leží kód, který nikdo netestu
 :::callout{type="note"}
 ### Arrange-Act-Assert (AAA) pattern:
 
-Každý test by měl mít tři jasně oddělené fáze:
+Každý test má tři oddělené fáze:
 
 1. **Arrange (připrav)** – Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.
 2. **Act (proveď)** – Proveď jednu testovanou akci: zavolej metodu, odešli command.
