@@ -20,9 +20,11 @@ difficulty: 4
 
 ## 24.01 Úvod {#introduction}
 
-Případová studie popisuje implementaci systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8.
-Systém umožňuje uživatelům vytvářet projekty, přidávat úkoly, přiřazovat úkoly členům týmu a sledovat jejich stav.
-Studie klade důraz na správnou aplikaci strategických i taktických vzorů DDD v reálném projektu.
+Tým dostal zadání postavit systém pro správu projektů. Uživatelé zakládají projekty, přidávají úkoly, přiřazují
+je členům týmu, mění jejich stav a komentují je. Triviální zadání. První instinkt vývojáře je tabulka `projects`,
+tabulka `tasks` s cizím klíčem, tabulka `comments` a `UserService`, který vše obslouží. Za tři měsíce má `TaskService`
+osm set řádků a každá změna v přiřazování úkolů rozbije reportování. Tato studie ukazuje druhou cestu –
+strategický a taktický DDD s CQRS v Symfony 8 od prvního workshopu po projekce s reconciliation.
 
 ## 24.02 Požadavky {#requirements}
 
@@ -39,10 +41,11 @@ Systém pro správu projektů má následující požadavky:
 
 ## 24.03 Doménová analýza {#discovery}
 
-Architektura nezačíná u kódu, ale u rozhovoru s doménovými experty. Tato sekce ukazuje, jak vznikla pětice
-bounded contexts ze sekce [Architektura](#architecture) – jaká data byla na vstupu a jakými kroky
-se ze seznamu událostí stala mapa kontextů. Postup čerpá z techniky *event storming* (Alberto Brandolini)
-a probíhal ve třech krocích: sběr doménových událostí, jejich seskupení do subdomén a definice kontextových hranic.
+Architektura nezačíná u kódu, ale u rozhovoru s doménovými experty. Než přijde rozhodnutí o tabulkách
+a třídách, musí tým vědět, co se v doméně děje a kde leží hranice. Pět bounded contexts z následující
+[sekce Architektura](#architecture) nevypadlo z hlavy architekta – vyplynulo ze tří kroků
+*event stormingu* (Alberto Brandolini): sběru doménových událostí, jejich seskupení do subdomén
+a vykreslení kontextových hranic.
 
 ### Krok 1: Sběr doménových událostí {#discovery-events-heading}
 
@@ -73,8 +76,8 @@ zjištění je zárodkem rozdělení do bounded contexts.
 
 ### Krok 2: Seskupení událostí do subdomén {#discovery-grouping-heading}
 
-Druhý krok shlukuje události podle významu. Tým hledal odpověď na otázku, které události patří k sobě
-z pohledu doménového experta. Výsledkem byla tabulka mapující událost na subdoménu:
+Tým druhý den shlukoval události podle významu. Otázka pro každou skupinu zněla: kdo z byznysu za toto odpovídá?
+Skupina, kterou rozumí jediný expert, je kandidát na subdoménu. Výsledkem byla mapa události na subdoménu:
 
 | Subdoména | Událost | Doménový expert |
 |---|---|---|
@@ -123,10 +126,10 @@ v kódu odpovídá slovníku v týmu.
 
 ## 24.04 Architektura {#architecture}
 
-Architektura kombinuje strategický a taktický DDD s CQRS v Symfony 8. Na strategické úrovni vznikla
-pětice bounded contexts a kontextová mapa popisující jejich vztahy. Taktická úroveň pokrývá agregáty,
-hodnotové objekty, doménové události a doménové služby. Kód je organizovaný do vertikálních sliců –
-každá feature obsahuje vše od příkazu po view model, čímž se omezí šíření změn napříč vrstvami.
+Strategická úroveň drží pět bounded contexts a kontextovou mapu jejich vztahů. Taktická úroveň drží
+agregáty, hodnotové objekty, doménové události a doménové služby. Kód je organizovaný do vertikálních sliců:
+každá feature obsahuje vše od příkazu po view model. Změna v přiřazování úkolů se neprojeví v reportování,
+protože obě věci žijí v různých slicích a komunikují přes explicitní kontrakty.
 
 ### Strategický design: Bounded Contexts a Context Map
 
@@ -182,7 +185,7 @@ Na taktické úrovni implementace pokrývá tyto DDD vzory:
 - **Repositories** – Objekty, které zapouzdřují přístup k persistenci agregátů (např. ProjectRepository, TaskRepository).
 - **Domain Services** – Služby, které implementují doménovou logiku, která nepatří do žádné entity nebo hodnotového objektu (např. TaskAssignmentService).
 
-Struktura projektu odráží jak strategický, tak taktický design DDD. Níže je ukázka správné struktury projektu, kde každý bounded context má svou vlastní doménovou vrstvu, infrastrukturu a aplikační služby:
+Struktura adresářů odráží oba designy zároveň. Každý bounded context má vlastní doménovou vrstvu, infrastrukturu i feature slice; sdílené komponenty žijí v `Shared/`:
 
 :::code{language="bash" filename="snippet.sh"}
 src/
@@ -341,11 +344,12 @@ src/
 
 ## 24.05 Implementace {#implementation}
 
-Následující sekce ukazuje implementaci hlavních částí systému s aplikací DDD principů.
+Sekce prochází jádro systému – od slovníku přes agregáty a doménové události až po command a query stranu CQRS.
 
 ### Ubiquitous Language {#ubiquitous-language-heading}
 
-Ubiquitous Language vznikl ve spolupráci s doménovými experty ještě před zahájením implementace. Stejné pojmy se používají v kódu, dokumentaci i komunikaci. Hlavní pojmy:
+Slovník vznikl s doménovými experty ještě před prvním řádkem kódu. Tytéž pojmy najdete v třídách, v rozhovoru
+s produkťákem i v ticketech. Hlavní pojmy:
 
 - **Project** – Organizační jednotka, která sdružuje související úkoly a členy týmu.
 - **Task** – Jednotka práce, která má být dokončena v projektu.
@@ -647,8 +651,8 @@ class Task
 
 ### Doménové události {#domain-events-heading}
 
-Agregáty publikují skutečnosti, které pro doménu mají význam. Každá událost je neměnný záznam minulé skutečnosti –
-proto jsou všechny třídy `final readonly` s veřejnými promovanými parametry. Atribut
+Agregáty publikují skutečnosti, které pro doménu mají význam. Událost je neměnný záznam minulého
+děje – proto jsou všechny třídy `final readonly` s veřejnými promovanými parametry. Atribut
 `occurredAt` nese okamžik vzniku v UTC; payload obsahuje minimální množinu identifikátorů
 a hodnot potřebnou k rekonstrukci kontextu. Teoretický základ doménových událostí je v kapitole
 [Základní koncepty DDD](/zakladni-koncepty#domain-events); návaznost na Event
@@ -1087,15 +1091,14 @@ class TaskAssignmentService
 
 ## 24.06 Read modely a projekce {#read-model}
 
-Implementace v [sekci Implementace](#implementation) ukazuje stranu zápisu (commands).
-`GetProjectsHandler` ale stále načítá projekty přes doménový repozitář – tedy hydratuje agregáty,
-i když potřebuje jen tabulkový výpis. Pro malý dataset to funguje. Při růstu (tisíce projektů, desetitisíce
-úkolů, obohacený výpis se jmény členů a počtem úkolů) by každý dotaz znamenal opakované `JOIN`y
-a hydratace doménových objektů jen pro účely zobrazení.
+`GetProjectsHandler` z [předchozí sekce](#implementation) načítá projekty přes doménový repozitář.
+Hydratuje agregáty, i když potřebuje jen tabulkový výpis. Pro malý dataset to funguje. Jakmile dataset
+naroste na tisíce projektů a desetitisíce úkolů a výpis se obohatí o jména členů a počty úkolů,
+každý dotaz znamená opakované `JOIN`y a hydrataci agregátů kvůli zobrazení.
 
-Tato sekce ukazuje, jak v systému postupně vznikl samostatný read model. Princip: doménové události
-aktualizují denormalizovanou tabulku, ze které čte *query handler*. Žádný `JOIN` mezi
-agregáty, žádná hydratace doménových objektů. Hlubší teoretický základ je v kapitolách
+V projektu proto postupně vznikl samostatný read model. Princip: doménové události aktualizují
+denormalizovanou tabulku, ze které čte *query handler*. Žádný `JOIN` mezi agregáty, žádná
+hydratace doménových objektů. Hlubší teoretický základ je v kapitolách
 [CQRS](/cqrs) a [Výkonnostní aspekty](/vykonnostni-aspekty).
 
 ### Schéma read modelu {#read-model-schema-heading}
@@ -1411,9 +1414,9 @@ Detaily v kapitole [Event Sourcing](/event-sourcing).
 
 ### Důsledky pro konzistenci {#read-model-consistency-heading}
 
-Read model je *eventually consistent*. Mezi commitem zápisu a aktualizací projekce existuje krátké okno
-(typicky milisekundy, při zatížení Messengeru sekundy), ve kterém vrácený seznam ještě neobsahuje nově
-vytvořený projekt. Praxe ukazuje dvě cesty, jak tento gap pokrýt:
+Read model je *eventually consistent*. Mezi commitem zápisu a aktualizací projekce zůstává okno
+(typicky milisekundy, při zatížení Messengeru sekundy), ve kterém vrácený seznam neobsahuje nově
+vytvořený projekt. Toto okno se v projektu pokrylo dvěma cestami:
 
 - **Optimistická aktualizace UI** – po úspěšné odpovědi na command klient přidá záznam
   do lokálního stavu a teprve po další navigaci načítá aktualizovaný read model. Uživatel okamžitě vidí
@@ -1430,9 +1433,9 @@ publikace události na transport selhat – read model zůstane navždy nesynchr
 
 ## 24.07 Výzvy a rozhodnutí {#trade-offs}
 
-Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí představuje místa, kde tým váhal mezi
-dvěma legitimními možnostmi. Cílem této sekce není ukázat „správnou“ odpověď, ale popsat kontext, který určil
-volbu, a její cenu. Stejné rozhodnutí v jiném projektu by mohlo dopadnout jinak.
+Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí jsou místa, kde tým váhal mezi
+dvěma legitimními možnostmi. „Správná" odpověď neexistuje – existuje kontext, který volbu určil, a cena, kterou
+za ni tým platí. Stejná otázka v jiném projektu by mohla dopadnout jinak.
 
 ### 1. Eventual consistency napříč kontexty {#trade-off-consistency-heading}
 
@@ -1491,8 +1494,8 @@ stav vrací kompenzační scénář – vzor, který popisuje kapitola
 
 **Volba:** zachovat ji jako *místo pro rozšíření*. Přiřazení úkolu je doménový koncept, který
 v budoucnu zřejmě poroste – notifikace přiřazenému, kontrola pracovní zátěže, validace deadline, integrace
-s kalendářem. Vystavená abstrakce dovolí přidat tato pravidla, aniž by se dotkly handleru, controlleru ani
-agregátu.
+s kalendářem. Vystavená abstrakce dovolí přidat tato pravidla, aniž by se musel měnit handler, controller
+nebo samotný agregát.
 
 **Cena:** aktuálně prázdná abstrakce, která může čtenáři kódu připadat nadbytečná.
 
@@ -1530,16 +1533,15 @@ v kapitole [Anti-vzory a typické chyby](/anti-vzory).
 
 ## 24.08 Ponaučení {#lessons}
 
-Implementace systému pro správu projektů pomocí Domain-Driven Design a CQRS v Symfony 8 přinesla deset
-ponaučení, která lze přenést do dalších projektů. Prvních sedm vychází ze strategického a taktického designu,
-zbylá tři z provozu read modelů a vědomého řízení kompromisů.
+Z provozu vyplynulo deset bodů, které drží i mimo tuto studii. Sedm z nich vychází ze strategického a taktického
+designu, tři z provozu read modelů a vědomého řízení kompromisů.
 
-1. **Strategický design rozhoduje o výsledku** – Identifikace bounded contexts a jejich vztahů na začátku projektu poskytla jasný rámec pro vývoj. Definice context map pomohla předejít nedorozuměním a zajistila konzistentní integraci mezi kontexty.
-2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Díky tomu kód dává smysl i bez komentářů.
-3. **Agregáty a hranice transakcí** – Správně vymezené agregáty a jejich hranice udržely data konzistentní. Každý agregát si hlídal vnitřní konzistenci a měnil se v jedné transakci.
-4. **Doménové události pro integraci** – Doménové události zajistily komunikaci mezi různými bounded contexts. Po vytvoření úkolu se publikovala událost `TaskCreated`, na kterou reagovaly jiné kontexty bez přímých závislostí.
-5. **CQRS pro oddělení zodpovědností** – Příkazy mění stav, dotazy čtou bez vedlejších efektů. Každá strana má vlastní handler, vlastní model a vlastní testy. Symfony Messenger poskytl infrastrukturu pro implementaci CQRS.
-6. **Vertikální slice architektura pro modularitu** – Organizace kódu podle feature místo technických vrstev znamenala, že změna v jedné feature se nedotýká ostatních. Každá feature nese vlastní command, handler, kontroler i view model – přidání nové feature nevyžaduje zásahy do existujícího kódu.
+1. **Strategický design rozhoduje o výsledku** – Identifikace pěti bounded contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel" znamená v každém kontextu něco jiného. Bez kontextové mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
+2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produkťák mluví o `TaskAssigned`, ne každý o něčem jiném.
+3. **Agregáty a hranice transakcí** – Vymezené agregáty udržely data konzistentní. Každý agregát si hlídal vnitřní konzistenci a měnil se v jedné transakci.
+4. **Doménové události pro integraci** – Doménové události odvázaly bounded contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval `TaskCreated` agregát; ActivityTracking i ProjectListProjection na něj reagovaly samostatně, aniž by o sobě věděly.
+5. **CQRS pro oddělení zodpovědností** – Příkazy mění stav, dotazy čtou bez vedlejších efektů. Každá strana má vlastní handler, vlastní model a vlastní testy. Roli message busu obstaral Symfony Messenger.
+6. **Vertikální slice architektura pro modularitu** – Organizace kódu podle feature místo technických vrstev znamenala, že změna v jedné feature se zpravidla nedotýká ostatních. Každá feature nese vlastní command, handler, kontroler i view model. Nová feature obvykle vznikne přidáním adresáře, ne úpravou existujících tříd.
 7. **Testování doménového modelu** – Doménové objekty bez závislostí na frameworku lze testovat čistým PHPUnit bez bootstrappingu kernelu.
    Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.
    Podrobná strategie pro DDD projekty je v kapitole
