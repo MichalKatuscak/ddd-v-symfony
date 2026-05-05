@@ -121,7 +121,7 @@ nový test. Nepoužívejte ho pro:
   nepotřebuje vlastní třídu.
 - Pravidla, která jsou ve skutečnosti **součástí invariantu Aggregate**
   (a tedy patří přímo do něj jako privátní metoda).
-- Konfigurační a technické flagy – Specification má reprezentovat
+- Konfigurační a technické příznaky – Specification má reprezentovat
   *doménové* pravidlo, ne podmínku *„má feature flag enabled“*.
 
 :::callout{type="warn"}
