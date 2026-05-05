@@ -21,10 +21,11 @@ github_examples: Chapter03_BasicConcepts
 
 ## 06.01 Ohraničené kontexty (Bounded Contexts) {#bounded-contexts}
 
-Ohraničený kontext je explicitně vymezená oblast, uvnitř které platí jeden model
-[[1]](https://martinfowler.com/bliki/BoundedContext.html).
-Uvnitř ohraničeného kontextu existuje konzistentní model a všudypřítomný jazyk.
-Různé ohraničené kontexty mají různé modely a jazyky – to je záměr, ne nedostatek.
+Doména větší aplikace nikdy nemluví jediným jazykem. Slovo „zákazník“ má v marketingu
+jiný význam než ve fakturaci a v expedici jiný než v reklamacích. Ohraničený kontext
+je explicitně vymezená oblast, uvnitř které platí jeden konzistentní model a jeden
+slovník [[1]](https://martinfowler.com/bliki/BoundedContext.html). Různé kontexty mají
+různé modely – to je záměr, ne nedostatek.
 
 :::diagram{fig="06.1-A" title="Ohraničené kontexty" src="images/diagrams/5_bounded_contexts/diagram.svg"}
 :::
@@ -72,19 +73,19 @@ src/
             └── GetUserHandler.php
 :::
 
-V tomto příkladu jsou `OrderManagement` a `UserManagement` dva ohraničené
-kontexty.
-Každý kontext má svůj vlastní model a jazyk. `OrderManagement` reprezentuje uživatele pouze
+`OrderManagement` a `UserManagement` jsou ve výše uvedené ukázce dva oddělené kontexty.
+Každý má svůj model a jazyk. `OrderManagement` reprezentuje uživatele pouze
 jako `UserId`; `UserManagement` ho modeluje jako plnohodnotnou entitu `User`.
 Kompletní příklad rozdělení reálného systému do pěti bounded contexts je v kapitole
 [Případová studie – Doménová analýza](/pripadova-studie#discovery).
 
 ## 06.02 Všudypřítomný jazyk (Ubiquitous Language) {#ubiquitous-language}
 
-Všudypřítomný jazyk je společný jazyk používaný vývojáři a doménovými experty
+Pokud vývojář říká „uživatel“, produktový manažer „klient“ a obchod „lead“, mluví o téže
+osobě třemi termíny. Tři termíny znamenají tři různé představy o jejím chování. Všudypřítomný
+jazyk tuto trhlinu uzavírá: vývojáři a doménoví experti se domluví na jediném slovníku, který
+pak důsledně používají v kódu, dokumentaci i běžné konverzaci
 [[2]](https://martinfowler.com/bliki/UbiquitousLanguage.html).
-Používá se v kódu, dokumentaci i v běžné komunikaci a pomáhá překonávat bariéry mezi vývojáři
-a doménovými experty.
 
 :::diagram{fig="06.2-A" title="Všudypřítomný jazyk" src="images/diagrams/4_ubiquitous_language/diagram.svg"}
 :::
@@ -92,28 +93,25 @@ a doménovými experty.
 :::callout{type="note"}
 ### Příklad: Všudypřítomný jazyk v e-commerce doméně
 
-V e-commerce doméně by všudypřítomný jazyk mohl zahrnovat pojmy jako:
+Slovník e-shopu obvykle obsahuje pojmy jako produkt, kategorie, košík, zákazník,
+objednávka, platba a dodání. Některé jsou triviální, jiné nesou hodně doménové
+váhy a vyžadují přesnou definici:
 
-- **Košík (Cart)** – Dočasná kolekce produktů, které si zákazník vybral k nákupu.
-- **Objednávka (Order)** – Potvrzený nákup zákazníka, který obsahuje produkty, dodací adresu a platební informace.
-- **Katalog (Catalog)** – Kolekce všech produktů dostupných k prodeji.
-- **Zákazník (Customer)** – Osoba, která nakupuje produkty.
-- **Produkt (Product)** – Položka, která je dostupná k prodeji.
-- **Kategorie (Category)** – Skupina souvisejících produktů.
-- **Platba (Payment)** – Transakce, kterou zákazník platí za objednávku.
-- **Dodání (Shipping)** – Proces doručení objednávky zákazníkovi.
+- **Košík** je dočasná kolekce produktů, které si zákazník vybral. Není to ještě objednávka, lze ho opustit a vrátit se k němu.
+- **Objednávka** je potvrzený nákup s adresou a platebními údaji. Existuje až po explicitním kroku zákazníka.
+- **Zákazník** je osoba, která nakupuje – v tomto jazyce nikdy ne „uživatel“.
+- Katalog, kategorie, produkt, platba a dodání mají v tomto kontextu významy odpovídající běžnému užívání.
 :::
 
-Tyto pojmy se používají konzistentně v kódu, dokumentaci i v komunikaci mezi vývojáři a doménovými
-experty. Pokud se hovoří o osobě, která nakupuje produkty, používá se důsledně termín
-„zákazník“ – nikoli obecné „uživatel“.
+Tyto pojmy se objevují stejně v kódu, dokumentaci i e-mailu od PM. Pokud kód mluví
+o `Customer` a produktový tým o „uživateli“, slovník selhal a je potřeba ho srovnat.
 
 ## 06.03 Entity {#entities}
 
-Entita je objekt, který je definován svou identitou, nikoli svými atributy
-[[3]](https://www.domainlanguage.com/ddd/).
-Entity mají životní cyklus a mohou se v průběhu času měnit,
-ale jejich identita zůstává stejná.
+Co odlišuje uživatele se stejným jménem a stejným e-mailem? Identita. Entita je
+doménový objekt, který nese vlastní identifikátor a zachovává si ho po celý život
+[[3]](https://www.domainlanguage.com/ddd/). Atributy se v čase mění – jméno, adresa,
+e-mail – identita zůstává.
 
 :::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
 <?php
@@ -172,15 +170,15 @@ class User
 }
 :::
 
-V tomto příkladu je `User` entita definovaná identitou (`UserId`).
-Uživatel může změnit své jméno nebo e-mail,
-ale jeho identita zůstává stejná.
+`User` je v ukázce entita definovaná `UserId`. Uživatel může změnit jméno
+i e-mail, identifikátor zůstává stejný.
 
 ## 06.04 Hodnotové objekty (Value Objects) {#value-objects}
 
-Hodnotové objekty jsou objekty definované svými atributy, nikoli identitou
-[[3]](https://www.domainlanguage.com/ddd/).
-Hodnotové objekty jsou neměnné (immutable) a porovnávají se hodnotou, nikoli referencí.
+Dva e-maily se stejným textem nejsou „dvě adresy“ – je to jedna a tatáž hodnota.
+Hodnotový objekt je doménový pojem, který identifikuje sám sebe celou svou hodnotou,
+ne odděleným ID [[3]](https://www.domainlanguage.com/ddd/). Z toho plynou dvě
+vlastnosti: neměnnost (immutable) a rovnost po hodnotě, ne po referenci.
 
 :::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
 <?php
@@ -221,18 +219,18 @@ class Email
 }
 :::
 
-V tomto příkladu je `Email` hodnotový objekt definovaný svou hodnotou. E-mailová
-adresa je neměnná a nemá žádnou identitu.
-Dva e-maily se považují za stejné, pokud mají stejnou hodnotu.
+`Email` v ukázce nese pouze normalizovaný řetězec a metodu `equals()`. Žádné
+ID, žádné settery. Dva e-maily se shodují právě tehdy, když mají stejnou hodnotu.
 
 ## 06.05 Agregáty (Aggregates) {#aggregates}
 
-Agregát je skupina souvisejících objektů, která tvoří jednu transakční hranici konzistence
-[[3]](https://www.domainlanguage.com/ddd/).
-Každý agregát má kořen agregátu (Aggregate Root),
-který je jediným vstupním bodem pro veškeré vnější interakce s agregátem. Špatně zvolená velikost
-agregátu patří mezi nejčastější chyby v DDD – přerostlé „God Aggregates“ rozebírá kapitola
-[Anti-vzory a typické chyby](/anti-vzory).
+Objednávka má položky, dodací adresu, stav a celkovou částku. Změnit položku znamená
+přepočítat částku; zrušit objednávku znamená překontrolovat stav. Pokud tyto pravidla
+nepatří jednomu strážci, rozsypou se. Agregát je právě tento strážce – skupina objektů,
+které se mění jako jeden celek a tvoří jednu transakční hranici konzistence
+[[3]](https://www.domainlanguage.com/ddd/). Vstup do agregátu vede výhradně přes kořen
+(Aggregate Root). Špatně zvolená velikost patří mezi nejčastější chyby v DDD; přerostlé
+„God Aggregates“ rozebírá kapitola [Anti-vzory a typické chyby](/anti-vzory).
 
 :::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
 <?php
@@ -379,15 +377,15 @@ class OrderItem
 }
 :::
 
-V tomto příkladu je `Order` agregát, který obsahuje kolekci `OrderItem` objektů.
-`Order` je kořenem agregátu (Aggregate Root)
-a poskytuje metody pro manipulaci s položkami objednávky.
+`Order` v ukázce je kořen agregátu a drží kolekci `OrderItem` objektů. Vnější
+volání jdou výhradně přes metody na `Order`; vlastní `OrderItem` zvenku
+nikdo neinstancuje ani nemění.
 
 :::callout{type="note"}
 ### PHP 8.1+ Enum pro stavové typy {#enum-poznamka-heading}
 
-Od PHP 8.1 je pro jednoduché stavové typy (jako `OrderStatus`) idiomatické
-použít nativní `enum` místo tradičního hodnotového objektu:
+Pro konečnou množinu stavů typu `OrderStatus` se od PHP 8.1 obvykle volí nativní
+`enum` místo plnohodnotného hodnotového objektu:
 
 :::code{language="php" filename="src/OrderManagement/Domain/Model/OrderStatus.php"}
 <?php
@@ -406,17 +404,17 @@ enum OrderStatus: string
 }
 :::
 
-**Kdy enum, kdy plný Value Object?** Enum je vhodný pro konečnou množinu stavů
-bez další logiky. Plný Value Object (třída) je lepší volbou, pokud typ obsahuje validaci,
-výpočty nebo kompozici více hodnot (např. `Money`, `Email`,
-`DateRange`).
+**Kdy enum, kdy plný Value Object?** Enum stačí pro konečnou množinu stavů
+bez další logiky. Vlastní třída je lepší tam, kde typ nese validaci, výpočty
+nebo kompozici více hodnot – `Money`, `Email`, `DateRange`.
 :::
 
 ## 06.06 Repozitáře (Repositories) {#repositories}
 
-Repozitář je objekt, který poskytuje rozhraní pro přístup k agregátům. Repozitáře skrývají detaily
-persistence a poskytují
-doménově orientované rozhraní pro přístup k datům.
+Doménová vrstva by neměla vědět, jestli agregát žije v PostgreSQL, MongoDB,
+nebo v paměti. Repozitář je rozhraní, které tuto neznalost umožňuje – pro doménu
+vypadá jako kolekce agregátů v paměti, skutečné uložení řeší implementace
+v infrastrukturní vrstvě.
 
 :::code{language="php" filename="src/OrderManagement/Domain/Repository/OrderRepository.php"}
 <?php
@@ -439,17 +437,17 @@ interface OrderRepository
 }
 :::
 
-V tomto příkladu je `OrderRepository` rozhraní, které definuje metody pro ukládání a načítání
-objednávek.
-Konkrétní implementace tohoto rozhraní by mohla používat Doctrine ORM nebo jiný mechanismus persistence.
-Praktickou implementaci repozitáře v Symfony 8 popisuje kapitola
+`OrderRepository` v ukázce definuje metody pro ukládání a načítání objednávek.
+Implementaci si volí infrastruktura – nejčastěji Doctrine ORM, ale stejně dobře
+in-memory varianta pro testy. Praktickou implementaci v Symfony 8 popisuje kapitola
 [Implementace v Symfony 8](/implementace-v-symfony).
 
 ## 06.07 Doménové služby (Domain Services) {#domain-services}
 
-Doménová služba je objekt, který poskytuje doménovou logiku, která nepatří přirozeně do žádné entity
-nebo hodnotového objektu.
-Doménové služby jsou bezstavové a pracují s entitami a hodnotovými objekty.
+Některá pravidla nepatří jednomu agregátu ani jednomu hodnotovému objektu –
+koordinují více objektů nebo zachycují proces, který nemá vlastníka. Doménová
+služba je bezstavové místo, kam takovou logiku umístit. Nedrží stav, nemá
+životní cyklus, jen pracuje s entitami a hodnotovými objekty.
 
 :::code{language="php" filename="src/OrderManagement/Domain/Service/PaymentService.php"}
 <?php
@@ -482,11 +480,11 @@ class PaymentService
 }
 :::
 
-V tomto příkladu je `PaymentService` doménová služba, která zapouzdřuje doménovou logiku
-zpracování plateb a vytváří objekt `Payment`. Doménová služba je bezstavová a
-neobsahuje repozitáře – persistence vraceného objektu je zodpovědností volající vrstvy
-(Application Service nebo Command Handler).
-Třídy `Payment`, `PaymentId` a `PaymentMethod` jsou součástí doménového modelu plateb. Jejich implementace následuje stejné principy jako ostatní entity a hodnotové objekty v této kapitole.
+`PaymentService` v ukázce zapouzdřuje logiku zpracování platby a vrací nový objekt
+`Payment`. Repozitář ani databázi nezná – uložení vraceného agregátu řeší volající
+vrstva (Application Service nebo Command Handler). Třídy `Payment`, `PaymentId`
+a `PaymentMethod` patří do doménového modelu plateb a řídí se stejnými principy jako
+ostatní entity a hodnotové objekty v této kapitole.
 
 :::callout{type="note"}
 ### Kdy doménová služba vs. metoda na agregátu? {#service-vs-aggregate-heading}
@@ -495,8 +493,8 @@ Výpočet celkové částky (`totalAmount()`) je metodou přímo
 na agregátu `Order`, protože pracuje výhradně s jeho daty. Doménová služba
 je vhodná tehdy, když logika:
 
-- Přesahuje hranice jednoho agregátu (koordinuje více agregátů).
-- Vyžaduje znalost, která nepatří do žádného konkrétního agregátu.
+- Přesahuje hranice jednoho agregátu a koordinuje více z nich.
+- Vyžaduje znalost, která nepatří do žádné konkrétní entity.
 - Reprezentuje doménový proces, nikoli stav (např. zpracování platby).
 
 `PaymentService` je oprávněná jako služba, protože
@@ -506,9 +504,10 @@ je vhodná tehdy, když logika:
 
 ## 06.08 Doménové události (Domain Events) {#domain-events}
 
-Doménová událost je neměnný záznam o skutečnosti, která nastala v doméně a má pro doménové experty
-význam. Události jsou vyjádřeny minulým časem a musí obsahovat všechna data potřebná
-k popisu dané změny stavu – nespoléhají na pozdější dotazování.
+„Objednávka byla potvrzena.“ „Platba byla přijata.“ Doménová událost je
+neměnný záznam o věci, která se v doméně stala a o které doménoví experti chtějí
+vědět. Název je vždy v minulém čase. Událost obsahuje všechna data potřebná k popisu
+změny – nespoléhá na pozdější dotazování zdrojového agregátu.
 
 :::code{language="php" filename="src/OrderManagement/Domain/Event/OrderCreatedEvent.php"}
 <?php
@@ -550,12 +549,11 @@ final class OrderCreatedEvent
 }
 :::
 
-V tomto příkladu je `OrderCreatedEvent` doménová událost, která reprezentuje vytvoření nové
-objednávky.
-Tato událost obsahuje informace o tom, která objednávka byla vytvořena, pro kterého uživatele a kdy
-k tomu došlo. Domain Events tvoří základ pro dvě architektonické techniky: oddělení čtení
-a zápisu v [CQRS](/cqrs) a uložení stavu jako sekvence událostí v
-[Event Sourcingu](/event-sourcing).
+`OrderCreatedEvent` v ukázce nese tři údaje: které objednávky se týká, kterého
+uživatele a kdy k vytvoření došlo. Tolik stačí příjemcům, aby na změnu mohli
+reagovat bez dalšího dotazu zpět do `OrderManagement`. Domain Events tvoří základ
+pro dvě architektonické techniky: oddělení čtení a zápisu v [CQRS](/cqrs) a uložení
+stavu jako sekvence událostí v [Event Sourcingu](/event-sourcing).
 
 :::faq{}
 - question: Jaký je rozdíl mezi Entitou a Value Objectem?
