@@ -321,7 +321,7 @@ jednoduché procesy se dvěma až třemi kroky je choreografie přímočaré ře
 
 U procesů s pěti a více kontexty nebo s podmíněným větvením narazí choreografie na
 čtyři problémy, které se v menším měřítku skrývají. V produkci se tyto problémy
-projeví ve chvíli, kdy do toku přibyde šestý kontext nebo větvení podle stavu.
+projeví ve chvíli, kdy do toku přibude šestý kontext nebo větvení podle stavu.
 
 ### 1. Neviditelný tok procesu {#neviditelny-tok-heading}
 
