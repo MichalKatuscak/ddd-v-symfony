@@ -39,7 +39,7 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 ## 20.01 A – Doctrine vs. doménový model {#doctrine}
 
 Doctrine ORM má interní model (Unit of Work, Identity Map, lazy loading) stavěný pro jednoduchý
-CRUD. Doménový model s neměnnými konstruktory, privátními settery a invarianty s ním sráží
+CRUD. Doménový model s neměnnými konstruktory, privátními settery a invarianty na něj naráží
 na šesti místech, která následují.
 
 ### A1. Transakce přes agregáty a Doctrine Unit of Work {#a1-transakce}
