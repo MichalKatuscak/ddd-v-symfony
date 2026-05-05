@@ -639,8 +639,8 @@ doctrine:
 ### Large-collection problem {#large-collection}
 
 Klasický anti-vzor: agregát `Project` drží `OneToMany` kolekci úkolů.
-S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každý load agregátu načte
-všechny úkoly, každý add způsobí flush celé kolekce. Khononov pro tento případ definuje
+S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každé načtení agregátu načte
+všechny úkoly, každé přidání způsobí flush celé kolekce. Khononov pro tento případ definuje
 tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/):
 
 - **Rozdělit agregát.** `Project` a `Task` jsou samostatné
@@ -651,8 +651,8 @@ tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven
   `$project->getTasks()->count()` bez načtení kolekce, případně
   `$project->getTasks()->matching($criteria)`. Použitelné, pokud agregát
   kolekci skutečně potřebuje pro invarianty (např. limit počtu úkolů na projekt).
-- **Aggregate as service boundary.** Vnitřní kolekci nahradit agregát-aware
-  službou, která dotazem v repozitáři ověřuje invariant. Funguje, ale je to znamení, že
+- **Agregát jako hranice služby.** Vnitřní kolekci nahradit službou pracující
+  s agregátem, která dotazem v repozitáři ověřuje invariant. Funguje, ale je to znamení, že
   hranice je špatně.
 
 ### Hot aggregate {#hot-aggregate}
