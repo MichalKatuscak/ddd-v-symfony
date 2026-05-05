@@ -98,7 +98,7 @@ Pravidlo má dvě části, které se často chybně čtou jako jedno:
   vlastnictví*, které znamená, že BC nikdo nevlastní a degraduje na Big Ball of Mud
   se [Shared Kernel](/context-mapping#shared-kernel)
   režií. *Pravidlo:* nikdy nesdílejte BC mezi týmy bez explicitního Shared Kernel
-  vztahu – a Shared Kernel sám je drahý vztah, ne default.
+  vztahu – a Shared Kernel sám je drahý vztah, ne výchozí volba.
 
 - **Jeden tým = jeden nebo více Bounded Contexts (povoleno).**
   Malý tým (5–9 lidí) může vlastnit 2–3 menší BC. Důvodem k limitu je
@@ -366,7 +366,7 @@ odpovíte „ne“, Inverse Conway je předčasný a v 90 % případů selže:
 4. **Existuje plán pro Platform team?** Bez self-service platformy se
    stream-aligned týmy zaseknou na infrastruktuře. Platform team musí mít alespoň
    minimum-viable IDP připravený před reorganizací (1-click new-BC bootstrap, CI šablona,
-   observability default).
+   výchozí observability).
 
 5. **Změřili jste DORA metriky před reorganizací?** Bez baseline neumíte
    obhájit úspěch ani identifikovat regresi. Jednoduché měření: lead time z PR-merge

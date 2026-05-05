@@ -873,7 +873,7 @@ Vztah mezi Bounded Contextem a microservice nelze redukovat na jednu rovnici. Bo
 
 Hlavní doporučení této kapitoly:
 
-- **Modular monolith jako default** – pro většinu týmů (≤30 lidí) je modular monolith s vynucenými hranicemi přes phparkitect rozumnější výchozí stav než microservices na zelené louce. Hranice mezi BC tam jsou vynucené stejně tvrdě, ale platíte za ně řádově méně operační složitosti.
+- **Modular monolith jako výchozí volba** – pro většinu týmů (≤30 lidí) je modular monolith s vynucenými hranicemi přes phparkitect rozumnější výchozí stav než microservices na zelené louce. Hranice mezi BC tam jsou vynucené stejně tvrdě, ale platíte za ně řádově méně operační složitosti.
 - **1 BC = 1 service jen tehdy, když má smysl** – vlastní stream-aligned tým, vlastní data, nezávislý release cyklus, různé potřeby škálování, případně compliance isolation. Pokud zaškrtnete tři a méně z těchto bodů, zůstaňte v monolithu.
 - **Distributed monolith je horší než monolith** – sdílená DB, synchronní volání všude, coupled deploy, sdílená library s doménovými typy. Pět příznaků, dva a víc znamená, že máte distributed monolith. Nejdražší architektonická chyba v microservices architektuře.
 - **Sync vs. async – async-first** – sync jen pro queries v request flow a pro blokující validace; všechno ostatní eventy přes broker. Tight temporal coupling je největší ztráta hodnoty microservices.

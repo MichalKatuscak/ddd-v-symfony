@@ -1072,7 +1072,7 @@ queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
 
 Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP proces
 = 1 DB connection“ se nasčítá: 100 PHP-FPM workerů × 4 DB pody × 10 read replicas
-= 4000 connections, což překročí default `max_connections = 100` v Postgresu.
+= 4000 connections, což překročí výchozí `max_connections = 100` v Postgresu.
 Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
 pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**
 (Doctrine používá), takže potřebujete buď session pooling (méně efektivní),

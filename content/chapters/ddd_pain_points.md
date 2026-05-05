@@ -144,7 +144,7 @@ načtení (*change tracking*). Volání getterů, které interně modifikují st
 VO (jméno + příjmení → dva sloupce). Limity narazíte v několika případech:
 polymorfní VO (různé typy cen), nullable VO v kolekcích, VO s vlastní serializační
 logikou (Money = integer + string). Stejně tak u VO, které se mapují na jiný datový
-typ než default (enum, JSONB, custom SQL type).
+typ než výchozí (enum, JSONB, custom SQL type).
 
 **Řešení – Custom Doctrine Type:** Implementujte `Type`
 z `Doctrine\DBAL\Types`. Typ definuje, jak se PHP objekt serializuje
