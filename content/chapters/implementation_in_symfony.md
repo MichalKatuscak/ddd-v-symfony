@@ -62,7 +62,7 @@ jiným ORM nebo Messenger jiným bus systémem, aniž by se dotklo doménové lo
 
 ## 10.02 Struktura projektu {#project-structure}
 
-Při implementaci DDD s vertikální slice architekturou v Symfony 8 organizujte strukturu projektu podle Bounded Contexts (ohraničených kontextů). Příklad správné struktury:
+Vertikální slice architektura v Symfony 8 organizuje strukturu projektu podle Bounded Contexts (ohraničených kontextů). Každý kontext drží svou doménu, infrastrukturu i feature složky pohromadě. Příklad:
 
 :::callout{type="pattern"}
 ### Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8
@@ -159,27 +159,27 @@ Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a fu
 - **Izolace domén** – Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.
 - **Ubiquitous Language** – Každá doména může mít svůj vlastní jazyk, který tým konzistentně používá v kódu.
 - **Jasné hranice** – Definované hranice mezi doménami pomáhají vývojářům pochopit, kde končí jedna doména a začíná druhá.
-- **Minimalizace závislostí** – Domény by měly být co nejvíce nezávislé, aby změna v jedné doméně neovlivnila jinou doménu.
+- **Minimalizace závislostí** – Kontexty drží své modely odděleně. Změna v jednom by neměla nutit úpravu druhého.
 :::
 
 :::callout{type="warn"}
 ### Časté chyby při implementaci DDD
 
-Při implementaci DDD v Symfony se vyvarujte těchto častých chyb:
+Časté chyby při implementaci DDD v Symfony:
 
-- **Umístění všech doménových modelů do sdílené složky** – Každá doména by měla mít své vlastní modely.
-- **Sdílení doménových modelů mezi doménami** – Pokud potřebujete sdílet data mezi doménami, použijte Anti-Corruption Layer nebo Domain Events.
-- **Příliš mnoho závislostí mezi doménami** – Domény by měly být co nejvíce nezávislé.
-- **Ignorování Ubiquitous Language** – Používejte konzistentní jazyk v kódu, dokumentaci a komunikaci.
+- **Umístění všech doménových modelů do sdílené složky** – Každá doména patří do svého kontextu, ne do `Shared/`.
+- **Sdílení doménových modelů mezi doménami** – Když potřebujete data z cizího kontextu, jděte přes Anti-Corruption Layer nebo Domain Events.
+- **Příliš mnoho závislostí mezi doménami** – Cross-context import doménových tříd je signál chybějící Anti-Corruption Layer.
+- **Ignorování Ubiquitous Language** – Kód, dokumentace i komunikace v týmu používají stejné výrazy.
 :::
 
 ## 10.03 Implementace entit {#entities}
 
-Entita v DDD je objekt s jedinečnou, přetrvávající identitou. Vstupní bod do agregátu
-je **kořen agregátu** – třída `final`, dědí z bázové `AggregateRoot`,
+Vstupní bod do agregátu je **kořen agregátu** – třída `final`, dědí z bázové `AggregateRoot`,
 konstruktor je `private` a vznik probíhá přes pojmenovanou factory metodu
 (`User::register()`, `Order::place()`). To zaručuje, že nelze vytvořit
-agregát v nekonzistentním stavu.
+agregát v nekonzistentním stavu. Definice entity je v kapitole
+[Základní koncepty](/zakladni-koncepty); tato sekce řeší její podobu v Symfony.
 
 :::callout{type="pattern"}
 ### Příklad: kořen agregátu User {#entity-example-heading}
@@ -306,7 +306,7 @@ final class User extends AggregateRoot
 :::
 :::
 
-Co zde stojí za pozornost:
+Detaily, na které kód cílí:
 
 - **`final` + `extends AggregateRoot`.** `AggregateRoot` poskytuje `record()`
   a `releaseDomainEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
@@ -341,9 +341,9 @@ Detaily a registrace v sekci [Doctrine custom types](#doctrine-custom-types).
 
 ## 10.04 Implementace hodnotových objektů {#value-objects}
 
-Hodnotový objekt v DDD nemá identitu – je definován svými atributy. Je neměnný,
-validuje se v konstruktoru a dvě instance se stejnými atributy jsou rovnocenné.
-V Symfony 8 se implementuje jako `final readonly` PHP třída:
+V Symfony 8 se hodnotový objekt zapisuje jako `final readonly` PHP třída.
+Validace patří do konstruktoru, rovnost se počítá z hodnot, ne z identity.
+Detailní rozbor sémantiky VO je v kapitole [Základní koncepty](/zakladni-koncepty):
 
 :::callout{type="pattern"}
 ### Příklad: hodnotový objekt Email {#value-object-example-heading}
@@ -467,7 +467,7 @@ jako vlastník (žádná samostatná tabulka pro VO).
 
 ## 10.05 Implementace repozitářů {#repositories}
 
-Repozitáře v DDD poskytují rozhraní pro přístup k agregátům. V Symfony 8 se implementují repozitáře jako rozhraní a jejich implementace:
+Repozitář se v Symfony 8 dělí na dvojici: rozhraní v doméně + Doctrine implementace v infrastruktuře. Doménový kód se opírá pouze o rozhraní, výměna persistence se odehraje v jediném souboru:
 
 :::callout{type="pattern"}
 ### Příklad: Implementace repozitáře v Symfony 8 {#repository-example-heading}
@@ -1188,15 +1188,15 @@ final class ShippingService
 :::callout{type="note"}
 ### Kdy použít Specification Pattern?
 
-- **Validace** – ověření, zda doménový objekt splňuje doménové pravidlo.
-- **Selekce** – filtrování kolekcí objektů podle kritéria.
-- **Vytváření na zakázku** – zajištění, že nově vytvořený objekt splňuje invarianty.
-- **Kombinace pravidel** – specifikace lze skládat pomocí `AndSpecification`, `OrSpecification`, `NotSpecification`.
+- **Validace** – agregát se sám zeptá, zda splňuje pravidlo, než přechod stavu povolí dál.
+- **Selekce** – předat specifikaci do repozitáře a dostat zpět jen ty agregáty, které vyhovují.
+- **Konstrukční invariant** – factory metoda zkontroluje specifikaci dřív, než vrátí novou instanci.
+- **Skládání.** `AndSpecification`, `OrSpecification` a `NotSpecification` umožní kombinovat malá pravidla do složitějších bez kopírování kódu.
 :::
 
 ## 10.11 Implementace doménových událostí {#domain-events}
 
-Doménové události v DDD reprezentují něco, co se stalo v doméně. V Symfony 8 se implementují doménové události jako neměnné PHP třídy:
+Doménová událost je fakt minulého času: registrace proběhla, platba byla zaznamenaná. Kód ji v Symfony 8 modeluje jako neměnnou PHP třídu, kterou agregát publikuje při změně stavu:
 
 :::callout{type="pattern"}
 ### Příklad: Implementace doménové události v Symfony 8 {#domain-event-example-heading}
@@ -1242,8 +1242,8 @@ class UserRegistered
 :::
 :::
 
-V tomto příkladu je `UserRegistered` doménová událost, která reprezentuje registraci nového uživatele.
-Tato událost obsahuje informace o tom, který uživatel byl registrován, jaký má e-mail a kdy se to stalo.
+`UserRegistered` nese minimum potřebné pro obnovu kontextu: ID uživatele, e-mail a čas registrace.
+Listenery i externí konzumenti z těchto tří hodnot poskládají reakci, aniž by sahali zpět do `UserRepository`.
 
 :::callout{type="note"}
 ### Symfony EventDispatcher vs. Messenger pro doménové události {#dispatcher-vs-messenger-heading}
@@ -1336,8 +1336,8 @@ final class InvalidOrderStateTransitionException extends \DomainException
 
 ## 10.13 Implementace aplikačních služeb {#application-services}
 
-Aplikační služby v DDD koordinují aplikační aktivity a delegují práci doménové vrstvě. V Symfony 8 se implementují aplikační služby
-jako command a query handlery:
+Aplikační služba má v Symfony 8 podobu command nebo query handleru. Načte agregáty přes repozitář,
+zavolá doménovou metodu a zapíše výsledek – žádná doménová pravidla v ní nežijí:
 
 :::callout{type="pattern"}
 ### Příklad: Implementace command handleru v Symfony 8 {#command-handler-example-heading}
@@ -1747,8 +1747,8 @@ volání, které by stejně skončilo `DomainException`.
 
 ## 10.15 Dependency Injection a autowiring {#dependency-injection}
 
-Dependency Injection odděluje závislosti a umožňuje testování bez reálné infrastruktury.
-Symfony 8 poskytuje DI Container pro konfiguraci služeb:
+DI Container v Symfony 8 váže rozhraní z doménové vrstvy na konkrétní implementaci v infrastruktuře.
+Konfigurace určuje, kterou třídu autowiring injektuje, když handler typuje na `UserRepository`:
 
 :::callout{type="pattern"}
 ### Příklad: Konfigurace služeb v Symfony 8 {#dependency-injection-example-heading}
@@ -1878,7 +1878,7 @@ Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, kte
 - Obecné výjimky
 - Infrastrukturní komponenty používané napříč doménami
 
-Doménové modely, hodnotové objekty a repozitáře by měly být umístěny v příslušných doménách, nikoli ve sdílené složce.
+Doménové modely, hodnotové objekty a repozitáře patří do svých Bounded Contextů, ne do `Shared/`.
 :::
 
 :::faq{}
