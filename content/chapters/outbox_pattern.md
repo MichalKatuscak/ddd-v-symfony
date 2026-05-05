@@ -162,7 +162,7 @@ nebo *dispatcher*) tabulku asynchronně polluje. Vybírá řádky se stavem
 `pending` a publikuje je do skutečného message brokeru. Po úspěšném publishi
 řádek označí jako `sent`. Tok má čtyři jasně oddělené fáze:
 
-:::diagram{fig="16.2-A" title="Transactional Outbox – čtyři fáze publikování" src="images/diagrams/14_outbox/outbox_flow.svg"}
+:::diagram{fig="15.2-A" title="Transactional Outbox – čtyři fáze publikování" src="images/diagrams/14_outbox/outbox_flow.svg"}
 :::
 
 1. **Fáze 1 – doménová transakce.** Application handler v jedné Doctrine
@@ -829,7 +829,7 @@ v inboxu; pokud ano, ackne brokerovi a skončí. Pokud ne, zpracuje doménovou l
 a v *téže transakci* vloží nový řádek do inboxu. UNIQUE constraint je pojistka
 proti race condition.
 
-:::diagram{fig="16.6-A" title="Idempotent Inbox – deduplikace na straně subscribera" src="images/diagrams/14_outbox/inbox_idempotency.svg"}
+:::diagram{fig="15.6-A" title="Idempotent Inbox – deduplikace na straně subscribera" src="images/diagrams/14_outbox/inbox_idempotency.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -1376,7 +1376,7 @@ nový leader → double publish.
 si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure,
 škáluje se lineárně s počtem worker replik.
 
-:::diagram{fig="16.8-A" title="Distributed relay - 4 workery paralelně přes SKIP LOCKED" src="images/diagrams/14_outbox/distributed_relay.svg"}
+:::diagram{fig="15.8-A" title="Distributed relay - 4 workery paralelně přes SKIP LOCKED" src="images/diagrams/14_outbox/distributed_relay.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -1406,7 +1406,7 @@ COMMIT;
 Důsledek: 4 workery × 5k events/s = 20k events/s propustnost při zachování
 **at-least-once** garance. PostgreSQL od verze 9.5 (`SKIP LOCKED`) i MySQL 8
 to podporují. Cena: nutnost koordinace pořadí (eventy ze stejného agregátu
-mohou jít publishnout out-of-order, pokud workery zpracovávají různé batche).
+se mohou publikovat out-of-order, pokud workery zpracovávají různé batche).
 Pokud subscriber pořadí potřebuje, partition outbox na `aggregate_id` a každý
 worker řízeně zpracovává jen vlastní partition.
 
@@ -1434,7 +1434,7 @@ Standardní vzor:
 
 Outbox má jednoduché schéma, a právě proto kolem něj v code review padají stejné
 chyby, které ruší jeho garance a vrací systém k dual-write problému. Seznam níže
-zachycuje vzory, které se vrací nejčastěji.
+zachycuje vzory, které se vracejí nejčastěji.
 
 :::callout{type="warn"}
 ### Publish napřímo z metody agregátu {#anti-direct-publish-heading}
@@ -1502,7 +1502,7 @@ handler – častý zdroj chyb.
 ## 15.10 Migrace existujícího projektu – krok za krokem {#migrace}
 
 Jak na Outbox, když máte 18 měsíců starý Symfony projekt, sto handlerů a publish-after-flush
-už zaplá někde v útrobách? Postup je inkrementální, ne big-bang refaktor.
+už běží někde v útrobách? Postup je inkrementální, ne big-bang refaktor.
 Outbox přidáváte handler po handleru, vedle stávajícího chování, a starý kód odstraňujete
 teprve když nový jistě funguje.
 
