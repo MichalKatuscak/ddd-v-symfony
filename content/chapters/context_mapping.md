@@ -19,7 +19,7 @@ difficulty: 3
 github_examples: null
 ---
 
-Strategický design v DDD má dvě stránky. **Bounded Context** definuje *hranici* jednoho modelu – co je uvnitř, co je venku, kde končí jeden Ubiquitous Language a začíná druhý. Detail viz kapitolu [Základní koncepty – Bounded Contexts](/zakladni-koncepty#bounded-contexts). Bounded Context však sám o sobě neřeší jednu podstatnou otázku: **co se děje na té hranici**, když dva kontexty potřebují spolupracovat.
+Strategický design v DDD má dvě stránky. **Bounded Context** definuje *hranici* jednoho modelu – co je uvnitř, co je venku, kde končí jeden Ubiquitous Language a začíná druhý. Detail viz kapitolu [Základní koncepty – Bounded Contexts](/zakladni-koncepty#bounded-contexts). Sám o sobě však neřeší jednu podstatnou otázku: **co se děje na té hranici**, když dva kontexty potřebují spolupracovat.
 
 **Context Mapping** je odpověď. Evans ji popsal v roce 2003 v knize *Domain-Driven Design: Tackling Complexity in the Heart of Software*, kapitola 14 (*Maintaining Model Integrity*). Šlo o vizuální i textovou dokumentaci všech Bounded Contexts v systému a všech vztahů mezi nimi [[1]](https://www.domainlanguage.com/ddd/). Vaughn Vernon v *Implementing Domain-Driven Design* (2013) tuto disciplínu rozvedl o praktické implementační vzory [[2]](https://kalele.io/books/). Sekce pokrývají všech osm pojmenovaných vztahů mezi BC a jejich kompromisy. Ukázky realizace v Symfony 8 využívají [CQRS s Symfony Messenger](/cqrs), REST API nebo HTTP klienty.
 
@@ -216,7 +216,7 @@ Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balí
 
 Nejčastější selhání Shared Kernelu je **jeho růst**. Tým si řekne: „máme tu `Money`, přidáme `Address` – vždyť adresa je taky všude stejná“. Pak `PhoneNumber`, pak `Customer`, pak `Order`… a najednou má SK 200 tříd a každá změna trvá týdny, protože vyžaduje souhlas tří týmů. V tu chvíli SK přestal být kernel a stal se *Big Ball of Shared Mud*.
 
-Pravidlo: **SK musí být malý, neměnný a recenzovaný oběma týmy**. Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých BC ve skutečnosti *odlišné*. Jen vypadají podobně a měly by se modelovat samostatně. Pokud koncept opravdu patří do SK ale je velký, je třeba ho vyčlenit do vlastního BC s [Open Host Service](#ohs).
+Pravidlo: **SK musí být malý, neměnný a recenzovaný oběma týmy**. Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých BC ve skutečnosti *odlišné*. Jen vypadají podobně a měly by se modelovat samostatně. Pokud koncept do SK skutečně patří, ale je velký, vyčleňte ho do samostatného BC s [Open Host Service](#ohs).
 
 :::callout{type="note"}
 **Shared Kernel vs. sdílená utility knihovna.** Sdílená logger knihovna nebo HTTP klient *nejsou* Shared Kernel – jsou to běžné technické závislosti. Shared Kernel obsahuje výhradně **doménový model**: VO, doménové eventy, doménové výjimky. Pokud váš „SK“ obsahuje `HttpClient`, `Cache` nebo `EventDispatcher`, není to Shared Kernel.
@@ -310,7 +310,7 @@ Bez těchto rituálů sklouzne Customer/Supplier do [Conformistu](#conformist): 
 
 ## 03.06 Conformist {#conformist}
 
-**Conformist** je asymetrický vztah, ve kterém downstream *vědomě rezignuje* na vlastní model a přijímá upstream model 1:1. Žádný překlad, žádná validace, žádné mapování. Conformist není ostuda – je to **strategické rozhodnutí**, že *boj o vlastní model nestojí za to*.
+**Conformist** je asymetrický vztah, ve kterém downstream *vědomě rezignuje* na vlastní model a přijímá upstream model 1:1. Žádný překlad, žádná validace, žádné mapování. Není to ostuda – je to **strategické rozhodnutí**, že *boj o vlastní model nestojí za to*.
 
 Evans (2003, str. 360): „*When two development teams have an upstream/downstream relationship in which the upstream has no motivation to provide for the downstream team's needs, the downstream team is helpless. […] Eliminate the complexity of translation between bounded contexts by slavishly adhering to the model of the upstream team. […] In some cases, the upstream design is good or compatible enough that this won't cause much trouble.*“
 
@@ -397,7 +397,7 @@ Conformist *zaplatí*:
 
 ## 03.07 Anti-Corruption Layer (ACL) {#acl}
 
-**Anti-Corruption Layer** (ACL) je izolační vrstva mezi downstream doménovým modelem a cizím (legacy, externím, neupřímným) modelem. Překládá oběma směry, validuje vstupní data a *filtruje neplatné stavy* ještě předtím, než dorazí do domény. ACL je nejčastěji používaný vztah – a nejčastěji špatně implementovaný.
+**Anti-Corruption Layer** (ACL) je izolační vrstva mezi downstream doménovým modelem a cizím (legacy, externím, neupřímným) protějškem. Překládá oběma směry, validuje vstupní data a *filtruje neplatné stavy* ještě předtím, než dorazí do domény. ACL je nejčastěji používaný vztah – a nejčastěji špatně implementovaný.
 
 Evans (2003, str. 365): „*Translation layers can be simple, even elegant, when bridging well-designed bounded contexts with cooperative teams. But when control or communication is not adequate to pull off a shared kernel, partnership, or customer-supplier relationship, translation becomes more complex. The translation layer takes on a more defensive tone. […] Therefore: As a downstream client, create an isolating layer to provide your system with functionality of the upstream system in terms of your own domain model.*“
 
@@ -548,7 +548,7 @@ Pravidlo: **ACL je single-purpose třída**, ne vrstva s desítkami metod sdíle
 
 ### ACL a Strangler Fig pattern
 
-Anti-Corruption Layer je důležitý stavební prvek *Strangler Fig* patternu pro postupnou migraci z legacy. Detail viz kapitolu [Migrace z CRUD do DDD](/migrace-z-crud). V Strangler Fig přístupu **každý nový BC obklopuje ACL**, dokud legacy nezmizí. V tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator bez anti-corruption logiky).
+Anti-Corruption Layer tvoří jádro *Strangler Fig* patternu pro postupnou migraci z legacy. Detail viz kapitolu [Migrace z CRUD do DDD](/migrace-z-crud). V Strangler Fig přístupu **každý nový BC obklopuje ACL**, dokud legacy nezmizí. V tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator bez anti-corruption logiky).
 
 ## 03.08 Open Host Service (OHS) {#ohs}
 
@@ -899,7 +899,7 @@ Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu]
 - question: Je Context Map součást Architecture Decision Record (ADR)?
   answer: 'Context Map sama o sobě není ADR – je to <em>průběžně udržovaný stav</em>, zatímco ADR popisuje konkrétní rozhodnutí v čase. Ale <strong>každá změna Context Mapy by měla mít ADR</strong>: „Změnili jsme vztah Catalog ↔ Pricing z Partnership na Customer/Supplier, protože…“. ADR pak slouží jako historie změn Context Mapy a dává budoucím inženýrům kontext, proč je mapa taková, jaká je. V repu typicky drží mapa <code>docs/context-map.md</code>, ADR <code>docs/adr/0023-rozdeleni-catalog-pricing.md</code>.'
 - question: Jak Context Map kreslit v textu, ne nástrojem?
-  answer: 'Pro malé systémy (do 5 BC) je textová Context Map v Markdownu dostatečná. Formát: pro každý vztah jeden odstavec s polotučnou hlavičkou ve tvaru <code>**Catalog -&gt; Ordering**</code>, šipka určuje směr (upstream → downstream), v textu typ vztahu (Customer/Supplier + OHS + PL), kontrakt, kontakt. Výhody: žádný nástroj, snadná git review, snadný full-text search. Nevýhody: chybí vizuální „aha“ efekt. Doporučení: textová verze <em>vždy</em>, vizuální verze (PlantUML, Mermaid, Excalidraw) navíc pro systémy s 5+ BC. PlantUML zdrojový kód lze držet vedle Markdownu a renderovat při CI.'
+  answer: 'Pro malé systémy (do 5 BC) je textová Context Map v Markdownu dostatečná. Formát: pro každý vztah jeden odstavec s polotučnou hlavičkou ve tvaru <code>**Catalog -&gt; Ordering**</code>, šipka určuje směr (upstream → downstream), v textu typ vztahu (Customer/Supplier + OHS + PL), kontrakt, kontakt. Výhody: žádný nástroj, git review beze změny pipeline, full-text search. Nevýhody: chybí vizuální „aha“ efekt. Doporučení: textová verze <em>vždy</em>, vizuální verze (PlantUML, Mermaid, Excalidraw) navíc pro systémy s 5+ BC. PlantUML zdrojový kód lze držet vedle Markdownu a renderovat při CI.'
 :::
 
 ## 03.14 Další četba {#further-reading}
