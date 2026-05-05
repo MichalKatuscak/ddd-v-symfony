@@ -86,7 +86,7 @@ Zopakujme podstatné slovo z předchozího odstavce: **obhajitelné**. Microserv
 :::callout{type="pattern"}
 ### Heuristika 1:1 – kdy ji uplatnit {#bc-1-1-heuristika-heading}
 
-Pokud z předchozího seznamu zaškrtnete **všech šest** bodů (vlastní tým, vlastní data, nezávislý release, různé scaling, různý stack/compliance), je 1:1 mapování silně doporučitelné.
+Pokud z předchozího seznamu zaškrtnete **všech šest** bodů (vlastní tým, vlastní data, nezávislý release, různé škálování, různý stack/compliance), je 1:1 mapování silně doporučitelné.
 
 Pokud zaškrtnete **tři až pět**, zvažte, zda dvě sousední kontexty raději neudržet v jednom deployu jako moduly – rozdělení vás bude stát víc, než ušetří. Pokud zaškrtnete **méně než tři**, zůstaňte v [modular monolithu](#modular-monolith). Microservices nejsou cílem, ale nástrojem.
 :::
@@ -333,7 +333,7 @@ Adrian Cockcroft (bývalý VP Cloud Architecture v Netflixu, kde microservices v
 v rozhovorech od roku 2022 explicitně varuje před předčasným rozdělením.
 Případ **Amazon Prime Video** (2023, oficiální článek na Amazon engineering blog)
 popsal, jak tým vrátil video monitoring stack z microservices do monolitu –
-ušetřil **90 % infrastrukturních nákladů** a zlepšil scaling.
+ušetřil **90 % infrastrukturních nákladů** a zlepšil škálování.
 
 Symptomy, které mluví pro de-microservicing:
 
@@ -347,7 +347,7 @@ Symptomy, které mluví pro de-microservicing:
   + API Gateway + DynamoDB napříč 20 servisami stojí 10× co srovnatelný EC2
   monolit.
 - **Incident MTTR > 60 minut.** Distributed tracing není dost na to, aby tým
-  rychle identifikoval root cause v N servisách.
+  rychle identifikoval kořenovou příčinu v N servisách.
 
 Postup de-microservicingu je opačný k extraction patternu z 20.09:
 
@@ -357,17 +357,17 @@ Postup de-microservicingu je opačný k extraction patternu z 20.09:
 1. **Audit BC hranic.** Které servisy reálně mají vlastní team/data/release/scaling?
    Které byly rozděleny předčasně?
 2. **Strangler v opačném směru.** Místo extrakce z monolitu se konsoliduje *do*
-   monolitu. Začínáte u nejvíce coupled servisy s nejnižším operačním přínosem.
+   monolitu. Začínáte u nejvíce provázané servisy s nejnižším operačním přínosem.
 3. **Replikace doménového kódu.** Servisa A se stane modulem `App\Catalog\` v monolithu.
    Eventy, které dříve šly přes broker, jdou interním EventDispatcherem.
 4. **Migrace dat.** Databáze servis se buď konsolidují do schémat monolitu, nebo se
    nová modulární data získávají z bývalé service DB jako read-only zdroj během přechodu.
-5. **Vyřazení servisy.** Po N týdnech double-running se původní servis odstaví,
-   smazat lze až po čas pro forensic review (typicky 90 dní).
+5. **Vyřazení servisy.** Po N týdnech souběžného běhu se původní servis odstaví,
+   smazat lze až po čas pro forenzní kontrolu (typicky 90 dní).
 
-Klíčový princip: **de-microservicing není failure**, je to legitimní architektonická
-volba reagující na změnu kontextu (tým se zmenšil, scaling profil se vyrovnal,
-operační kapacita klesla). Honest naming pomáhá – nekomunikujte to jako „regression“
+Klíčový princip: **de-microservicing není selhání**, je to legitimní architektonická
+volba reagující na změnu kontextu (tým se zmenšil, profil zátěže se vyrovnal,
+operační kapacita klesla). Poctivé pojmenování pomáhá – nekomunikujte to jako „regression“
 ale jako „consolidation“.
 :::
 
@@ -802,7 +802,7 @@ Doporučená postupná cesta pro Symfony tým, který dnes má monolit bez expli
 
 **Cíl:** rozhodnout, zda pokračovat dalším BC, nebo zastavit a žít s hybridní architekturou (monolith + 1–2 servisy). Hybridní stav je **legitimní cílový stav**, ne dočasná fáze. Mnoho úspěšných systémů nikdy nedojede do plně microservices architektury – protože nemají důvod.
 
-- Změřit, zda první extrakce splnila očekávání (lepší scaling, rychlejší release, lepší vlastnictví). Pokud ne, zastavit a analyzovat proč.
+- Změřit, zda první extrakce splnila očekávání (lepší škálování, rychlejší release, lepší vlastnictví). Pokud ne, zastavit a analyzovat proč.
 - Pokračovat dalším BC, který má jasné odůvodnění.
 - Investovat průběžně do operační platformy – bez ní každá další extrakce zhoršuje produktivitu.
 
