@@ -21,7 +21,7 @@ github_examples: Chapter05_CQRS
 
 ## 12.01 Co je CQRS? {#what-is-cqrs}
 
-CQRS vychází z jednoho přímočarého pozorování: **model, který slouží k zápisu dat, nemusí být tentýž model,
+CQRS vychází z prostého pozorování: **model, který slouží k zápisu dat, nemusí být tentýž model,
 který slouží k jejich čtení**. CQRS (Command Query Responsibility Segregation) tento princip
 přenáší na úroveň architektury – popsal jej Greg Young
 [[1]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf)
@@ -884,7 +884,7 @@ milisekundy až jednotky sekund), kdy read model ještě neodráží poslední z
 odešle formulář, dostane potvrzení o úspěchu, ale seznam na další stránce ještě nezobrazuje
 nový záznam.
 
-Tento problém není bug – je to **vlastnost distribuované architektury**.
+Eventual consistency je **vlastnost distribuované architektury**, ne bug.
 Následující diagram zachycuje celý datový tok – od zápisu přes asynchronní propagaci
 až po čtení – a zvýrazňuje okno, ve kterém k eventual consistency dochází:
 
@@ -1129,7 +1129,7 @@ $ php bin/console messenger:failed:remove 42
 :::callout{type="warn"}
 ### Monitoring selhalých zpráv {#failed-monitoring-heading}
 
-Dead letter queue není „koš“ – je to **fronta vyžadující pozornost**.
+Dead letter queue není odkladiště. Patří do ní zprávy, které **vyžadují pozornost**.
 V produkčním systému musíte monitorovat počet zpráv na failed transportu
 a nastavit alerting (např. přes Prometheus metriky nebo jednoduchý cron job
 kontrolující `messenger:failed:show --format=json`). Neošetřené selhávající
