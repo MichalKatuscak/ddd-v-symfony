@@ -168,7 +168,7 @@ Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a fu
 Časté chyby při implementaci DDD v Symfony:
 
 - **Umístění všech doménových modelů do sdílené složky** – Každá doména patří do svého kontextu, ne do `Shared/`.
-- **Sdílení doménových modelů mezi doménami** – Když potřebujete data z cizího kontextu, jděte přes Anti-Corruption Layer nebo Domain Events.
+- **Sdílení doménových modelů mezi doménami** – Cesta k datům z cizího kontextu vede přes Anti-Corruption Layer nebo Domain Events.
 - **Příliš mnoho závislostí mezi doménami** – Cross-context import doménových tříd je signál chybějící Anti-Corruption Layer.
 - **Ignorování Ubiquitous Language** – Kód, dokumentace i komunikace v týmu používají stejné výrazy.
 :::
@@ -1196,7 +1196,7 @@ final class ShippingService
 
 ## 10.11 Implementace doménových událostí {#domain-events}
 
-Doménová událost je fakt minulého času: registrace proběhla, platba byla zaznamenaná. Kód ji v Symfony 8 modeluje jako neměnnou PHP třídu, kterou agregát publikuje při změně stavu:
+Doménová událost je fakt minulého času: registrace proběhla, platba byla zaznamenána. Kód ji v Symfony 8 modeluje jako neměnnou PHP třídu, kterou agregát publikuje při změně stavu:
 
 :::callout{type="pattern"}
 ### Příklad: Implementace doménové události v Symfony 8 {#domain-event-example-heading}
