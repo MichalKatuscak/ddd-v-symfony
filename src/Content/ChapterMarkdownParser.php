@@ -56,6 +56,7 @@ final class ChapterMarkdownParser
         $processed = $this->extractTopLevelBlocks($markdown, $blocks);
 
         $html = $this->converter->convert($processed)->getContent();
+        $html = $this->wrapTables($html);
 
         foreach ($blocks as $idx => $block) {
             $rendered = $this->renderBlock($block);
@@ -63,6 +64,20 @@ final class ChapterMarkdownParser
         }
 
         return $html;
+    }
+
+    /**
+     * Obalí každou <table> do .table-responsive — wrapper z article.css zajistí
+     * horizontální scroll na úzkých displejích a dekorativní scroll-shadow.
+     * Bez wrappu by široká tabulka roztáhla layout stránky.
+     */
+    private function wrapTables(string $html): string
+    {
+        return (string) preg_replace(
+            '/<table>.*?<\/table>/s',
+            '<div class="table-responsive">$0</div>',
+            $html,
+        );
     }
 
     /**
