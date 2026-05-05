@@ -81,7 +81,7 @@ Stejná tabulka, kterou by měl mít na zdi každý tech-lead a CTO, který pode
 
 ## 02.03 Jak rozpoznat Core Domain – pětibodový test {#rozpoznat-core}
 
-Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) a Core Domain Charts komunity ddd-crew [[5]](https://github.com/ddd-crew/core-domain-charts). Každou položku ohodnoťte ANO/NE. Pokud máte tři a více ANO, jde o kandidáta na Core Domain. Pokud máte tři a více NE, je to Supporting nebo Generic.
+Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) a Core Domain Charts komunity ddd-crew [[5]](https://github.com/ddd-crew/core-domain-charts). Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain. Při třech a více NE je to Supporting nebo Generic.
 
 1. **„Pokud bychom to outsourcovali, můžeme i tak prodávat hlavní produkt?“**
 
@@ -175,7 +175,7 @@ Detailní rozbor vztahů mezi Bounded Contexts (Customer-Supplier, Conformist, A
 
 ## 02.06 Subdomény v Symfony – co to znamená pro strukturu projektu {#symfony-implications}
 
-Symfony 8 dává plnou volnost v adresářové struktuře pod `src/`. Výchozí dělení `src/Controller/`, `src/Entity/`, `src/Repository/` je *technické* – řadí kód podle vrstev. Pro DDD aplikaci je to chyba: ztratíte schopnost na první pohled poznat, do které subdomény funkcionalita patří. Junior, který hledá „jak se počítá cena“, musí proběhnout všechny tři adresáře. Doporučovaná alternativa zní: **strukturovat `src/` primárně podle subdomén, sekundárně podle vrstev uvnitř subdomény**.
+Symfony 8 dává plnou volnost v adresářové struktuře pod `src/`. Výchozí dělení `src/Controller/`, `src/Entity/`, `src/Repository/` je *technické* – řadí kód podle vrstev. Pro DDD aplikaci je to chyba: ztratíte schopnost na první pohled poznat, do které subdomény funkcionalita patří. Junior, který hledá „jak se počítá cena“, musí proběhnout všechny tři adresáře. Lepší cesta: **strukturovat `src/` primárně podle subdomén, sekundárně podle vrstev uvnitř subdomény**.
 
 Konkrétní rozložení v Symfony 8 e-shopu:
 
@@ -456,9 +456,9 @@ Klasifikace subdomén nemá smysl, pokud z ní neplynou rozhodnutí. Přímé ma
 
 Často přehlížený detail: **klasifikace závisí na perspektivě firmy**. Pro běžnou B2C firmu je „CRM“ Generic – koupí Salesforce nebo HubSpot. Pro startup, který staví CRM jako svůj hlavní produkt, je „CRM“ Core. Stejně tak: „autentizace“ je Generic pro 99 % organizací, ale pro Auth0 / Okta je to jejich Core. **Subdoménová klasifikace je vždy relativní k vašemu obchodnímu modelu, ne absolutní**.
 
-Praktický důsledek pro rozhodování o nákupu: než tým podepíše smlouvu na SaaS, položte si otázku – *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup – odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
+Praktický důsledek pro rozhodování o nákupu: před podpisem SaaS smlouvy si tým odpoví na otázku – *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup – odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
 
-Třetí varianta sourcingu – **partnership** – je vhodná pro Supporting subdomény, kde existuje hotové řešení, ale potřebujete větší míru přizpůsobení, než dovolí standardní SaaS. Příklad: e-shop integruje fakturaci přes API jiné fintech firmy, která za měsíční poplatek provádí daňové výpočty pro 30 jurisdikcí. Není to BUY (žádná krabice), není to BUILD (cizí tým), je to partnerství s rizikem dlouhodobé závislosti. Vyžaduje smluvní jistoty (vlastnictví dat, exit clause, SLA) a Anti-Corruption Layer na hranici.
+Třetí varianta sourcingu – **partnerství** – je vhodná pro Supporting subdomény, kde existuje hotové řešení, ale potřebujete větší míru přizpůsobení, než dovolí standardní SaaS. Příklad: e-shop integruje fakturaci přes API jiné fintech firmy, která za měsíční poplatek provádí daňové výpočty pro 30 jurisdikcí. Není to BUY (žádná krabice), není to BUILD (cizí tým), je to partnerství s rizikem dlouhodobé závislosti. Vyžaduje smluvní jistoty (vlastnictví dat, exit clause, SLA) a Anti-Corruption Layer na hranici.
 
 :::callout{type="note"}
 ### Vendor lock-in je daň za Generic, ne za Core {#vendor-lockin-heading}
@@ -474,7 +474,7 @@ Pravidlo: chraňte se před lock-inem v Core (vlastní IP, vlastní data), nikol
 
 ## 02.08 Evoluce subdomén v čase {#evoluce}
 
-Klasifikace subdomén není jednorázové cvičení. Trh se mění, technologie zrají, vaše konkurence se posouvá – a to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD* a varuje, že **nedokázat re-evaluovat klasifikaci je stejně drahá chyba jako klasifikovat ji špatně poprvé** [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Klasifikace subdomén není jednorázové cvičení. Trh i technologie se za pár let posunou natolik, že to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD* a varuje, že **nedokázat re-evaluovat klasifikaci je stejně drahá chyba jako klasifikovat ji špatně poprvé** [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
 Tři typické posuny:
 
@@ -484,7 +484,7 @@ Příklad: **online platby v roce 2010 byly pro většinu firem Generic** – ko
 
 ### Z Core do Supporting – komoditizace {#shift-core-to-supporting}
 
-Příklad: **cloud storage**. Dropbox v roce 2008 měl Core v synchronizaci souborů – nepříjemný problém s race conditions, latencemi a binární diff propagací, který nikdo jiný neuměl. Dnes je „cloud storage“ komoditizován cloud providerem (AWS S3, Azure Blob, GCS) a Dropbox musel posunout Core jinam – do produktivních nástrojů (Paper, integrace), aby zůstal odlišený. Pokud vidíte, že vaše Core Doména začíná být dostupná jako služba u tří velkých vendorů, nečekejte: snížíte investici, refaktorujete model na lehčí, hledáte nový diferenciátor.
+Příklad: **cloud storage**. Dropbox v roce 2008 měl Core v synchronizaci souborů – nepříjemný problém s race conditions, latencemi a binární diff propagací, který nikdo jiný neuměl. Dnes je „cloud storage“ komoditizován cloud providerem (AWS S3, Azure Blob, GCS) a Dropbox musel posunout Core jinam – do produktivních nástrojů (Paper, integrace), aby zůstal odlišený. Jakmile je Core Doména dostupná jako služba u tří velkých vendorů, je čas snížit investici, refaktorovat model na lehčí a hledat nový diferenciátor.
 
 ### Ze Supporting do Generic – když dorazí kvalitní SaaS {#shift-supporting-to-generic}
 
@@ -507,7 +507,7 @@ Tip: výstup auditu zveřejněte celému inženýrskému týmu (alespoň formou 
 
 ## 02.09 Praktický postup – krok za krokem {#postup}
 
-Konkrétní 5-krokový postup pro tým, který chce poprvé klasifikovat subdomény vlastního produktu. Doporučená délka workshopu: půl dne, 5–8 účastníků (architekt, tech-lead, product manager, doménový expert, případně CTO / VP product).
+Pětikrokový postup pro první klasifikaci subdomén vlastního produktu. Doporučená délka workshopu: půl dne, 5–8 účastníků (architekt, tech-lead, product manager, doménový expert, případně CTO / VP product).
 
 1. **Vypsat všechny capability / use-case.**
 
@@ -583,7 +583,7 @@ Kontrolní otázka: porozumí DVS za 3 minuty čtení i člověk, který není v
 
 ## 02.10 Shrnutí {#summary}
 
-Subdoménová klasifikace je první a nejdůležitější rozhodnutí strategického DDD. Bez ní nemá smysl řešit Bounded Contexts, Aggregaty ani Doctrine mapping – modelujete naslepo a rozpočet se rozplývá rovnoměrně po nedůležitých částech aplikace.
+Bez subdoménové klasifikace nemá smysl řešit Bounded Contexts, Aggregaty ani Doctrine mapping. Modelujete naslepo a rozpočet se rozplývá rovnoměrně po nedůležitých částech aplikace.
 
 Hlavní pravidla na zapamatování:
 
@@ -593,7 +593,7 @@ Hlavní pravidla na zapamatování:
 4. **Mapování subdomén na Bounded Contexts není 1:1** – Core typicky 1:N (sdílené pravidlo v různých BC), Supporting 1:1, Generic přebírá cizí BC přes ACL. Subdoména je obchodní hranice, BC je implementační hranice; nezaměňujte je.
 5. **Klasifikace stárne** – re-evaluujte každých 12–18 měsíců. Generic se může stát Core (Stripe), Core se může stát Supporting (cloud storage), Supporting se může stát Generic (helpdesk). Tým, který nemá aktuální klasifikaci, neumí prioritizovat.
 
-Subdoménová klasifikace je nástroj pro *rozhodování*, ne pro estetiku. Pokud z kapitoly odcházíte s konkrétním seznamem subdomén vlastního produktu a u každé z nich s rozhodnutím o sourcing strategii, kapitola splnila svůj účel. Pokud máte jen dojem „takto by se to dalo kategorizovat“, projděte si ji ještě jednou s vlastním projektem v ruce.
+Subdoménová klasifikace je nástroj pro *rozhodování*, ne pro estetiku. Kapitola splní účel, jakmile z ní vznikne konkrétní seznam subdomén vlastního produktu a u každé z nich rozhodnutí o sourcing strategii. Pouhý dojem „takto by se to dalo kategorizovat“ znamená, že je třeba ji projít znovu s konkrétním projektem v ruce.
 
 :::faq{}
 - question: Jaký je rozdíl mezi subdoménou a Bounded Contextem?
