@@ -27,7 +27,7 @@ Následující sekce srovnávají čtyři vrstvové styly (Layered, Hexagonal, O
 
 Nejčastější zdroj zmatku v DDD literatuře je směšování dvou nezávislých rozhodnutí. První je **modelovací technika**: budeme používat agregáty, hodnotové objekty, doménové události, ubiquitous language a bounded contexts? Nebo zůstaneme u procedurálního CRUDu, kde controller čte z databáze, aplikuje validaci a zapíše zpět? Druhé pak otevírá otázku **uspořádání kódu**: členit projekt podle technických vrstev, přes porty a adaptéry, do koncentrických prstenců, nebo podle feature?
 
-Tato dvě rozhodnutí lze kombinovat libovolně. Najdete projekty s čistým CRUD modelem v Hexagonální architektuře (porty oddělují HTTP od databáze, ale uvnitř je anémický řádek tabulky). Najdete bohaté DDD agregáty v klasické vrstvené struktuře (Doctrine entity v adresáři `src/Entity`, ale s metodami jako `$order->confirm()`, `$order->cancel()` a invarianty kontrolovanými v konstruktoru). Architektonický styl ovlivňuje *testovatelnost a kompozici*, ne *modelovací metodu*.
+Tato dvě rozhodnutí lze kombinovat libovolně. Najdete projekty s čistým CRUD modelem v Hexagonální architektuře (porty oddělují HTTP od databáze, ale uvnitř je anémický řádek tabulky). Najdete bohaté DDD agregáty v klasické vrstvené struktuře (Doctrine entity v adresáři `src/Entity`, ale s metodami jako `$order->confirm()`, `$order->cancel()` a invarianty kontrolovanými v konstruktoru). Architektonický styl ovlivňuje *testovatelnost a kompozici*; na modelovací metodu nesahá.
 
 :::callout{type="note"}
 ### Dva ortogonální axisy rozhodnutí
@@ -1159,9 +1159,9 @@ Tým si přečte „Dependency Inversion Principle“ a začne otáčet závislo
 
 ### Anti-vzor 6: Architecture astronaut (astronaut architektury) {#anti-6-heading}
 
-Tým investuje měsíce do „dokonalé architektury“ – osmivrstvová Clean s explicitními BCE rolemi, formálními use case katalogy, presenter třídami, gateway hierarchiemi. Koncový uživatel pořád čeká na první funkci. Architektura se stala cílem, ne nástrojem.
+Tým investuje měsíce do „dokonalé architektury“ – osmivrstvová Clean s explicitními BCE rolemi, formálními use case katalogy, presenter třídami, gateway hierarchiemi. Koncový uživatel pořád čeká na první funkci. Architektura se stala cílem sama o sobě.
 
-**Náprava:** *Architektura je investice, ne dekorace.* Každá vrstva, každý pattern, každá abstrakce musí mít konkrétní zisk pro projekt. Pokud nedokážete za pět minut vysvětlit, jaký reálný problém daná abstrakce řeší, pravděpodobně neřeší žádný a měla by se odstranit.
+**Náprava:** *Architektura má vracet investici.* Každá vrstva, každý pattern, každá abstrakce musí mít konkrétní zisk pro projekt. Pokud nedokážete za pět minut vysvětlit, jaký reálný problém daná abstrakce řeší, pravděpodobně neřeší žádný a měla by se odstranit.
 
 Detail dalších anti-vzorů (Anemic Domain Model, God Service, Smart UI, Leaky Abstractions) je v samostatné kapitole [Anti-vzory a typické chyby](/anti-vzory).
 
@@ -1236,7 +1236,7 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 - **Architektonický styl ≠ DDD.** DDD je modelovací technika; architektonický styl je rozhodnutí o uspořádání kódu. Lze je kombinovat libovolně – DDD funguje v Layered, Hexagonal, Onion, Clean i Vertical Slice.
 - **Čtyři vrstvové styly mají stejnou základní myšlenku – izolaci domény – ale jiný slovník a jinou granularitu.** Hexagonal mluví o portech a adaptérech, Onion o koncentrických vrstvách, Clean o use casech jako prvotřídním konceptu. V praxi se často kombinují do jednoho hybridního stylu.
 - **Vertical Slice je ortogonální k vrstvovým stylům.** Popisuje, jak organizovat feature mezi sebou, ne jak strukturovat závislosti uvnitř feature. Hexagonal + Vertical Slice + CQRS je rozšířená výchozí volba v Symfony 8 projektech.
-- **Hybridní přístup (různé styly pro různé subdomény) je nejen pragmatický, ale i doporučený autoritami DDD literatury.** Investujte modelovací úsilí do Core Domain; Supporting a Generic si vystačí s jednodušší strukturou. Architektura je investice, ne dekorace.
+- **Hybridní přístup (různé styly pro různé subdomény) je nejen pragmatický, ale i doporučený autoritami DDD literatury.** Investujte modelovací úsilí do Core Domain; Supporting a Generic si vystačí s jednodušší strukturou. Každá vrstva architektury se musí vrátit v projektu.
 
 :::faq{}
 - question: Hexagonal vs. Onion – jaký je praktický rozdíl?
