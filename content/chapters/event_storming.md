@@ -114,7 +114,7 @@ Před workshopem se nelze vyhnout přípravě:
 
 Co **nemáte** a ani by nemělo být cílem: kompletní model, schéma databáze, finální seznam tříd. Big Picture je strategický nástroj – taktiku řeší až Design Level.
 
-### 04.04.4 Online varianta – Miro / Mural setup {#bp-online}
+### 04.04.4 Online varianta – nastavení Miro/Mural {#bp-online}
 
 Když workshop musí být online (distribuovaný tým, pandemie, zahraniční doménový expert), příprava je o něco delší než pro offline. Výsledek je ale téměř srovnatelný – pokud dodržíte několik pravidel:
 
@@ -123,7 +123,7 @@ Když workshop musí být online (distribuovaný tým, pandemie, zahraniční do
 3. **Voice-only, kamery vypnuté.** Kamery odvádějí pozornost od boardu; všichni se musí dívat na stejný kanvas. Výjimka: úvodních 5 minut představení a pak při hot-spot diskusích.
 4. **Breakout místnosti pro dvě fáze.** Při Pivotal Events fázi rozdělte skupinu do 2-3 breakout místností po 4 lidech. Každá skupina si v Miru pracuje na jednom segmentu časové osy. Po 20 minutách se vše vrátí zpět do hlavní místnosti a synchronizuje. Bez breakoutů online workshop kolabuje na jednoho aktivního a pět pasivních pozorovatelů.
 5. **Přestávky každých 60 minut.** Online unavuje rychleji než offline. Vložte 10minutové přestávky a nezkracujte je.
-6. **Asynchronní pre-work.** Pošlete účastníkům 24 hodin předem otevřený Miro board s úvodním textem a požádejte je, aby *před* workshopem nalepili 5-10 eventů, které je napadnou. Workshop pak nezačíná u prázdné stěny.
+6. **Asynchronní příprava.** Pošlete účastníkům 24 hodin předem otevřený Miro board s úvodním textem a požádejte je, aby *před* workshopem nalepili 5-10 eventů, které je napadnou. Workshop pak nezačíná u prázdné stěny.
 
 ### 04.04.5 Kdy Big Picture *nedělat* {#bp-when-again}
 
