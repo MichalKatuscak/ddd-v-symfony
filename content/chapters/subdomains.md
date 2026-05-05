@@ -103,7 +103,7 @@ Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sk
 
    Pokud ANO → Core. Frekvence změn je proxy pro to, jak silně se v té oblasti hraje o trh. V Generic subdoménách se pravidla nemění – autentizace funguje letos stejně jako loni. V Core Doméně tým testuje, A/B měří a iteruje na doménových pravidlech, protože právě v iteraci je výhoda.
 
-Test má jeden užitečný vedlejší efekt: **nutí formulovat obchodní důvody před technickými**. Pokud na otázku 4 („mluví o tom CEO?“) tým odpoví „nevím, neptali jsme se“, je to znamení, že strategický rozhovor je třeba vyvolat ještě před začátkem implementace.
+Test má jeden užitečný vedlejší efekt: **nutí formulovat obchodní důvody před technickými**. Pokud na otázku 4 („mluví o tom CEO?“) tým odpoví „nevím, neptali jsme se“, je to znamení, že strategický rozhovor musí proběhnout ještě před začátkem implementace.
 
 :::callout{type="note"}
 ### Když test říká, že máte 5 Core domén {#too-many-cores-heading}
@@ -121,7 +121,7 @@ Empirické pravidlo: **jedna Core Doména na produkt**. Pokud máte víc, zvažt
 
 Nejčastější chyba ve strategickém DDD se nejmenuje „špatně navržený Aggregate“, ale **„všechno je Core“**. Týmy mají k této chybě silný psychologický sklon. Každý vývojář, kterého se zeptáte, zda je jeho oblast strategická, řekne ANO. Důvody: ego, kariérní obavy z „nedůležité“ oblasti a obecná tendence přeceňovat vlastní práci. Brandolini tomu říká *„hero syndrome“*: každá funkcionalita má svého hrdinu, který ji obhajuje jako nezbytnou pro firmu [[4]](https://www.eventstorming.com/).
 
-Manažerská rovina anti-vzor zhoršuje. Ředitel bez technického zázemí slyší od každého vedoucího týmu, že jeho oblast je strategická. Nemá nástroj, jak vyhodnotit, kde je investice opodstatněná a kde jde o obhajobu pozic. Výsledek: rozpočet se rozteče rovnoměrně, Core dostane stejně jako fakturace. Do dvou let firmu předběhne menší konkurent, který soustředil pětinásobek do svého skutečného Core.
+Manažerská rovina situaci zhoršuje. Ředitel bez technického zázemí slyší od každého vedoucího týmu, že jeho oblast je strategická. Nemá nástroj, jak vyhodnotit, kde je investice opodstatněná a kde jde o obhajobu pozic. Výsledek: rozpočet se rozteče rovnoměrně, Core dostane stejně jako fakturace. Do dvou let firmu předběhne menší konkurent, který soustředil pětinásobek do svého skutečného Core.
 
 Třetí rozměr je technický. Pokud je „všechno Core“, vznikne **monolitický doménový model bez priorit**: každá entita je prvotřídní, každý use case má vlastní Aggregate, každá akce má Domain Event. Refactor jednoho zákoutí se dotýká dvaceti dalších, výkon trpí, testy běží hodinu. Zdravá DDD aplikace má naopak ostře vyhraněnou hierarchii – pár Aggregatů v Core, lehké modely v Supporting a tenké adaptéry v Generic.
 
@@ -474,7 +474,7 @@ Pravidlo: chraňte se před lock-inem v Core (vlastní IP, vlastní data), nikol
 
 ## 02.08 Evoluce subdomén v čase {#evoluce}
 
-Klasifikace subdomén není jednorázové cvičení. Trh i technologie se za pár let posunou natolik, že to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD* a varuje, že **nedokázat re-evaluovat klasifikaci je stejně drahá chyba jako klasifikovat ji špatně poprvé** [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Klasifikace subdomén není jednorázové cvičení. Trh i technologie se za pár let posunou natolik, že to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD* a varuje, že **opomenutá re-evaluace stojí stejně jako špatná první klasifikace** [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
 Tři typické posuny:
 
@@ -593,7 +593,7 @@ Hlavní pravidla na zapamatování:
 4. **Mapování subdomén na Bounded Contexts není 1:1** – Core typicky 1:N (sdílené pravidlo v různých BC), Supporting 1:1, Generic přebírá cizí BC přes ACL. Subdoména je obchodní hranice, BC je implementační hranice; nezaměňujte je.
 5. **Klasifikace stárne** – re-evaluujte každých 12–18 měsíců. Generic se může stát Core (Stripe), Core se může stát Supporting (cloud storage), Supporting se může stát Generic (helpdesk). Tým, který nemá aktuální klasifikaci, neumí prioritizovat.
 
-Subdoménová klasifikace je nástroj pro *rozhodování*, ne pro estetiku. Kapitola splní účel, jakmile z ní vznikne konkrétní seznam subdomén vlastního produktu a u každé z nich rozhodnutí o sourcing strategii. Pouhý dojem „takto by se to dalo kategorizovat“ znamená, že kapitola zůstala teorií – projděte ji znovu s konkrétním projektem v ruce.
+Subdoménová klasifikace slouží k rozhodování o investici, ne k estetickému dělení kódu. Kapitola splní účel, jakmile z ní vznikne konkrétní seznam subdomén vlastního produktu a u každé z nich rozhodnutí o sourcing strategii. Pouhý dojem „takto by se to dalo kategorizovat“ znamená, že kapitola zůstala teorií – projděte ji znovu s konkrétním projektem v ruce.
 
 :::faq{}
 - question: Jaký je rozdíl mezi subdoménou a Bounded Contextem?
