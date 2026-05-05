@@ -111,6 +111,11 @@
 
 # Zabezpečení
 <IfModule mod_headers.c>
+    # Vary — bez User-Agent; Google považuje Vary: User-Agent za signál
+    # potenciálního cloakingu, i když obsah na UA nezávisí.
+    Header unset Vary
+    Header always set Vary "Accept-Encoding"
+
     # MIME-sniffing
     Header set X-Content-Type-Options "nosniff"
 

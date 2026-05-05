@@ -5,8 +5,8 @@ framework:
         version: '%env(APP_VERSION)%'
     #csrf_protection: true
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    # Bez session — web je čistě obsahový, žádné session by způsobily
+    # Cache-Control: no-cache, private a tím znemožnily edge cache.
 
     #esi: true
     #fragments: true
@@ -17,5 +17,3 @@ framework:
 when@test:
     framework:
         test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file
