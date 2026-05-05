@@ -1703,7 +1703,7 @@ Detail v sekci [GDPR a osobní údaje v Event Store](#gdpr-es-heading).
 Event Sourcing přináší výrazné výhody, ale i výraznou přidanou složitost. Před jeho zavedením je nutné pečlivě
 zvážit, zda přínosy pro daný kontext převažují nad náklady na implementaci a provoz.
 
-### Vhodné use cases
+### Vhodné případy užití
 
 - **Auditní log jako doménový požadavek** – Finanční systémy, zdravotnické záznamy nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log poskytuje přirozeně a bez nutnosti extra implementace.
 - **Komplexní doménová logika s bohatými stavovými přechody** – Agregáty procházejí mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové systémy, workflow enginy, bankovní transakce.
@@ -1711,7 +1711,7 @@ zvážit, zda přínosy pro daný kontext převažují nad náklady na implement
 - **Event-driven integrace** – Systém produkuje události, které konzumují jiné bounded contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena – Event Store je zdrojem pravdy pro integraci.
 - **CQRS s vysokou čtecí zátěží** – ES umožňuje vybudovat libovolný počet optimalizovaných read modelů z jednoho event streamu, aniž by bylo nutné měnit write model.
 
-### Nevhodné use cases
+### Nevhodné případy užití
 
 - **Jednoduché CRUD aplikace** – Pokud doménová logika spočívá v základních operacích Create/Read/Update/Delete bez složitých stavových přechodů, ES přináší jen zbytečnou složitost.
 - **Systémy orientované převážně na reporting** – Pokud je primárním požadavkem rychlé čtení a agregace dat (BI, analytics), jsou vhodnější klasická DW řešení nebo OLAP databáze.
