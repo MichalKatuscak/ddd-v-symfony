@@ -192,18 +192,9 @@
 }
 .land-toc-bar i.on { background: var(--accent); }
 
-/* Přečteno — tichá stopa: tlumené číslo a titul, tenký proužek vlevo. */
+/* Přečteno — tichá stopa: tlumené číslo a titul, žádný extra glyf. */
 .land-toc-item.is-read .land-toc-n     { color: var(--fg-faint); }
 .land-toc-item.is-read .land-toc-title { color: var(--fg-muted); }
-.land-toc-item.is-read::after {
-  content: "";
-  position: absolute;
-  left: -2px;
-  top: 14px;
-  bottom: 14px;
-  width: 2px;
-  background: var(--accent-dim);
-}
 
 /* Featured case study */
 .land-featured {
