@@ -853,7 +853,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 **Symptom:** CI/CD pipeline sestavuje všechny servisy společně. Release schedule je centralizovaný („máme deployment train“, „release window v úterý“). Změnu v jedné servise nelze nasadit bez ostatních.
 
-**Důsledek:** všechny servisy musí být kompatibilní v každém okamžiku. Žádná feature toggleability, žádný gradual rollout, žádný rychlý rollback. Coupled deploy je definující znak distributed monolithu.
+**Důsledek:** všechny servisy musí být kompatibilní v každém okamžiku. Žádné přepínání funkcí, žádný gradual rollout, žádný rychlý rollback. Coupled deploy je definující znak distributed monolithu.
 
 **Oprava:** každá service má vlastní pipeline, vlastní release cyklus, vlastní rollback. Cross-service kompatibilita se řeší schema versioning a integration event verzováním (subscriber přijímá starší i novější verzi).
 
@@ -898,7 +898,7 @@ Stručně: nezačínejte microservices. Začněte modular monolithem s explicitn
 - question: Kolik je správná velikost jednoho microservice?
   answer: 'Velikost není primární kritérium – autonomní deployovatelnost je. Microservice je správně velký tehdy, když ho jeden stream-aligned tým dokáže měnit, nasazovat a provozovat samostatně. To může být 500 řádků kódu nebo 50 000. Sam Newman v <em>Building Microservices, 2nd ed.</em> doporučuje, aby velikost vznikala z domény (jeden Bounded Context nebo logická část), ne z technického ideálu „malé service“. Detail v <a href="#bc-jedna-service">sekci 20.02</a> a v anti-vzoru <a href="#antivzor-5-heading">nano-services</a>.'
 - question: Můžu mít 2 Bounded Contexty v jedné microservice?
-  answer: 'Ano, a často je to správné rozhodnutí – to je definice <strong>modular monolithu</strong> nebo malého „mikro-monolithu“. Pokud dva BC sdílejí stream-aligned tým a podobné potřeby škálování, jejich provozování ve dvou samostatných servisách je operační overhead bez benefitu. Hlavní podmínka: hranice mezi BC <em>uvnitř</em> servise musí být vynucená kódem (typicky phparkitect pravidly). Pokud se obejdou, máte unstructured monolith, ne modular monolith. Detail v <a href="#modular-monolith">sekci 20.03</a>.'
+  answer: 'Ano, a často je to správné rozhodnutí – to je definice <strong>modular monolithu</strong> nebo malého „mikro-monolithu“. Pokud dva BC sdílejí stream-aligned tým a podobné potřeby škálování, jejich provozování ve dvou samostatných servisách je operační overhead bez benefitu. Hlavní podmínka: hranice mezi BC <em>uvnitř</em> servise musí být vynucená kódem (typicky phparkitect pravidly). Pokud se obejdou, máte nestrukturovaný monolit, ne modular monolith. Detail v <a href="#modular-monolith">sekci 20.03</a>.'
 - question: Kdy přejít z monolithu na microservices?
   answer: 'Když máte konkrétní bolest, kterou microservices skutečně řeší – typicky odlišné potřeby škálování jednoho modulu, různé compliance režimy nebo organizační oddělení (různé stream-aligned týmy s různými release cykly). Bez konkrétní bolesti je přechod čistá ztráta – získáte operační složitost, žádnou hodnotu navíc. Postup vždy přes Strangler Fig (postupná extrakce 1 BC v čase), nikdy big-bang rewrite. Detail v <a href="#migrace">sekci 20.09</a>.'
 - question: Co je BFF (Backend For Frontend) a kam patří v DDD?
