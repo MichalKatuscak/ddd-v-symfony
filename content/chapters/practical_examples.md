@@ -292,14 +292,14 @@ viz [Autorizace v DDD](/autorizace-v-ddd).
 
 ## Závěr
 
-Všechny tři příklady jedou stejný řetězec: kontroler → command bus → handler → agregát →
+Všechny tři příklady sledují stejný řetězec: kontroler → command bus → handler → agregát →
 repozitář → event. Variace v počtu Bounded Contexts, počtu agregátů a integraci se Symfony
 Security tu kostru nemění. Doménové invarianty patří do agregátu, aplikační orchestraci nese
 handler, infrastrukturu drží repozitář.
 
 Reálný projekt s plnou doménovou analýzou, kontextovou mapou, read modely, reconciliation a
-důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Vede
-systémem pro správu projektů krok za krokem od event stormingu po deployment.
+důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Provází
+systém pro správu projektů krok za krokem od event stormingu po deployment.
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
