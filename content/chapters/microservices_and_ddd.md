@@ -855,7 +855,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 **Důsledek:** všechny servisy musí být kompatibilní v každém okamžiku. Žádné přepínání funkcí, žádný gradual rollout, žádný rychlý rollback. Coupled deploy je definující znak distributed monolithu.
 
-**Oprava:** každá service má vlastní pipeline, vlastní release cyklus, vlastní rollback. Cross-service kompatibilita se řeší schema versioning a integration event verzováním (subscriber přijímá starší i novější verzi).
+**Oprava:** každá service má vlastní pipeline, vlastní release cyklus, vlastní rollback. Cross-service kompatibilita se řeší verzováním schématu a verzováním integration eventů (subscriber přijímá starší i novější verzi).
 
 ### 5. Nano-services {#antivzor-5-heading}
 

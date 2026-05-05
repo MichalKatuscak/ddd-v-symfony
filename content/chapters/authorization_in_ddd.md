@@ -623,7 +623,7 @@ final class PolicyEvaluator
 Výhody policy-based přístupu:
 
 - **Auditovatelnost.** Pravidla jsou data, ne kód. `PolicyEvaluator` vrací, *které* pravidlo selhalo – uživatel dostane přesnou chybovou hlášku („Cancellation window 24 h ještě neuplynulo“) místo generického „Access denied“.
-- **Versioning.** Policy je třída v repu – změny přes git, code review, deploy. ABAC standardně vyžaduje policy versioning [[2]](https://csrc.nist.gov/publications/detail/sp/800-162/final).
+- **Verzování.** Policy je třída v repu – změny přes git, code review, deploy. ABAC standardně vyžaduje verzování policy [[2]](https://csrc.nist.gov/publications/detail/sp/800-162/final).
 - **Testovatelnost.** Test policy je čistý unit test bez frameworku – pro každé pravidlo jeden case.
 - **Externí policy engine.** Když policy přerostou aplikaci, lze je portovat do **Open Policy Agent (OPA)** – engine v Go s vlastním policy language (Rego). Symfony aplikace potom dělá HTTP volání místo lokálního `evaluate()`.
 
