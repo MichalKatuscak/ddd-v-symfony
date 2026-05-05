@@ -27,7 +27,7 @@ zbytečnou komplexitu v době, kdy AI dokáže generovat kód z jednoduchého po
 Tento článek mapuje, co o vztahu DDD a umělé inteligence říkají přední autority softwarového
 inženýrství – Eric Evans, Martin Fowler, Kent Beck, Vaughn Vernon, Nick Tune, Alberto Brandolini
 a DHH. Cílem je objektivní přehled jejich pozic, argumentů a dat, nikoli obhajoba ani kritika
-konkrétního přístupu. Článek není benchmark ani tutorial – je to průřez tím, co víme a čeho
+konkrétního přístupu. Článek není srovnání ani návod krok za krokem – je to průřez tím, co víme a čeho
 se ještě teprve učíme.
 
 ## ai.01 Ubiquitous language jako rozhraní pro LLM {#ubiquitous-language}
