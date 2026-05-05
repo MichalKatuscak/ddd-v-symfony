@@ -476,7 +476,7 @@ V monolithu stačila kombinace strukturovaných logů a metrik. V microservices 
 
 - **Logs** – centralizované log aggregation (ELK / Loki / CloudWatch). Každý log line musí mít `trace_id` a `service_name`, jinak není možné poskládat časovou řadu událostí napříč servisami.
 - **Metrics** – Prometheus + Grafana, nebo cloudový ekvivalent (Datadog, NewRelic). Standardní metriky (RED – rate, errors, duration) per service a per endpoint.
-- **Traces** – OpenTelemetry + Jaeger / Tempo / Honeycomb. Jeden user request se trasuje napříč všemi servisami, každý hop má span. Bez tohoto je ladění nemožné – pět servis a dvacet logů v incidentu nedávají dohromady jednu časovou řadu.
+- **Traces** – OpenTelemetry + Jaeger / Tempo / Honeycomb. Jeden user request se trasuje napříč všemi servisami, každý skok má span. Bez tohoto je ladění nemožné – pět servis a dvacet logů v incidentu nedávají dohromady jednu časovou řadu.
 
 ### Service discovery a deployment {#service-discovery-heading}
 
