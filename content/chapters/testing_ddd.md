@@ -21,11 +21,11 @@ github_examples: Chapter08_Testing
 
 ## 17.01 Filozofie testování v DDD {#filozofie-testovani}
 
-Domain-Driven Design a automatizované testování se doplňují. Čistá doménová vrstva nezávisí na frameworku,
-databázi ani jiné infrastruktuře, a proto ji lze testovat přímo. V tradičních vrstvených architekturách
-jsou unit testy svázány s frameworkem. V DDD je doménová logika izolovaná a testují ji čisté PHP třídy bez bootstrappingu.
-Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje kapitola
-[Základní koncepty DDD](/zakladni-koncepty).
+Doménová vrstva v DDD nezávisí na frameworku ani na databázi, takže ji lze testovat přímo z PHPUnitu bez
+bootstrappingu Symfony kernelu. To je hlavní praktický rozdíl proti tradičním vrstveným architekturám,
+kde jsou unit testy svázané s kontejnerem a kde běh tisíce testů trvá minuty. V DDD běží stejný počet testů
+v sekundách. Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje
+kapitola [Základní koncepty DDD](/zakladni-koncepty).
 
 :::diagram{fig="18.1-A" title="Testovací pyramida pro DDD aplikaci - poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
 :::
@@ -43,7 +43,7 @@ Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, do
 
 Testovací pyramida (koncept popularizovaný Mikem Cohnem v knize *Succeeding with Agile*, 2009
 [[1]](https://www.mountaingoatsoftware.com/blog/the-forgotten-layer-of-the-test-automation-pyramid))
-v DDD kontextu definuje tři vrstvy testů. Každá vrstva pokrývá jinou část aplikace a má jiný poměr rychlosti, izolace a pokrytí:
+rozděluje testovací sadu do tří vrstev. Liší se rychlostí, mírou izolace a tím, kolik kódu jeden test pokryje:
 
 :::callout{type="note"}
 ### Vrstvy testovací pyramidy:
@@ -73,15 +73,15 @@ v DDD kontextu definuje tři vrstvy testů. Každá vrstva pokrývá jinou čás
 
 ## 17.02 Unit testy doménové vrstvy {#unit-testy-domeny}
 
-Unit testy doménové vrstvy tvoří nejcennější část testovací sady DDD aplikace. Testují čisté PHP objekty bez závislostí
-na frameworku. Pro jejich spuštění stačí nainstalovat PHPUnit a samotné doménové třídy – žádný bootstrap Symfony kernelu není potřeba.
+Unit testy doménové vrstvy tvoří základ testovací sady DDD aplikace. Pokrývají největší podíl kódu, běží
+v řádu milisekund a nepotřebují nic jiného než PHPUnit a samotné doménové třídy. Žádný bootstrap Symfony
+kernelu, žádná databáze, žádné fixtures.
 
 ### Testování Value Objects
 
-Value objekty jsou immutabilní a porovnávají se hodnotou, nikoli identitou. Testy value objektů ověřují:
-immutabilitu (operace vrací novou instanci, nikoli modifikuje stávající),
-rovnost dvou instancí se stejnou hodnotou,
-validaci – že neplatné vstupy vyvolají odpovídající výjimku.
+Test value objektu ověřuje tři věci: že neplatný vstup vyhodí odpovídající výjimku, že dvě instance
+se stejnou hodnotou jsou si rovny přes `equals()`, a že každá operace vrací novou instanci místo
+modifikace stávající. Tím je hodnotový objekt pokrytý.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro Email value object (PHPUnit)
@@ -160,8 +160,9 @@ final class EmailTest extends TestCase
 
 ### Testování entit
 
-Entity mají identitu a měnitelný stav. Testy entit ověřují doménová pravidla (invarianty), chování metod a vyhazování
-doménových výjimek při porušení pravidel. Testuje se chování, ne struktura – tedy co entita dělá, ne jak vypadají její fieldy.
+Test entity ověřuje, co entita dělá, ne jak vypadají její fieldy. Volá se veřejná metoda, ověřuje se
+výsledný stav přes další veřejné metody a u zakázaných operací se očekává konkrétní doménová výjimka.
+Přístup k privátním vlastnostem přes reflexi je signál, že test sleduje implementaci místo chování.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro User entitu
@@ -247,9 +248,9 @@ Plnou implementaci s `VerificationToken` naleznete v kapitole
 
 ### Testování agregátů
 
-Agregáty jsou nejsložitějšími doménovými objekty – chrání konzistenci skupiny entit a vydávají doménové události.
-Testy agregátů ověřují transakční invarianty (pravidla platná pro celý agregát) a vydávání doménových událostí
-jako vedlejší efekt doménových operací.
+Agregát chrání konzistenci skupiny entit a vydává doménové události. Test agregátu má proto dvě role:
+ověřit transakční invarianty (pravidla platná pro celý agregát po každé operaci) a zkontrolovat, že
+správné události byly vydány ve správném pořadí jako vedlejší efekt doménových operací.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro Order agregát
@@ -332,11 +333,11 @@ final class OrderTest extends TestCase
 
 ## 17.03 Testování doménových událostí {#testovani-domain-events}
 
-Doménové události jsou hlavním mechanismem DDD pro komunikaci mezi agregáty a bounded contexty. Testy musí ověřit,
-že agregát vydá správné události se správnými daty jako reakci na doménové operace.
-Přímé testování doménových událostí – bez spoléhání na vedlejší efekty event dispatcheru – je nejspolehlivější přístup.
-Pokud váš systém používá události jako zdroj pravdy, doplňující strategie testování auditovatelnosti
-a rebuildu projekcí najdete v kapitole [Event Sourcing](/event-sourcing).
+Doménové události jsou způsob, jak agregát mluví se zbytkem systému. Test proto ověřuje přímo to, co
+agregát po operaci vydá – typ události, její data a pořadí během jedné transakce. Spoléhat se na
+vedlejší efekt event dispatcheru je křehké a do unit testu přibírá zbytečnou závislost. Pokud váš systém
+používá události jako zdroj pravdy, doplňující strategie testování auditovatelnosti a rebuildu projekcí
+najdete v kapitole [Event Sourcing](/event-sourcing).
 
 :::callout{type="note"}
 ### Pattern „Record and Verify Events“:
@@ -463,8 +464,9 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 
 ## 17.04 Test doubles a InMemory repozitáře {#test-doubles}
 
-Test doubles jsou náhradní implementace závislostí, které se v testech používají místo reálných objektů.
-Volba typu test double závisí na tom, co testujeme a jaké chování chceme ověřit.
+Test double je obecný název pro náhradu reálné závislosti v testu. PHPUnit a literatura rozlišují čtyři
+varianty (stub, mock, fake, spy) a v DDD má každá z nich jiný dopad: vede k jinému stylu testu a k jiné
+odolnosti vůči refaktoringu.
 
 :::callout{type="note"}
 ### Typy test doubles a jejich použití v DDD:
@@ -636,9 +638,9 @@ pouze tam, kde ověřujete vedlejší efekty (odeslání e-mailu, volání exter
 
 ## 17.05 Integrační testy s Doctrine {#integracni-testy}
 
-Integrační testy ověřují spolupráci doménového kódu s infrastrukturou – správnost Doctrine mapování,
-dotazů repozitářů a transakčního chování. Na rozdíl od unit testů potřebují skutečnou databázi (typicky SQLite
-in-memory nebo testovací PostgreSQL/MySQL instanci).
+Integrační testy odpovídají na otázku, kterou unit testy pokrýt nemohou: zda Doctrine mapování, dotazy
+repozitářů a transakce skutečně dělají to, co jejich rozhraní slibuje. Spouští se proti reálné databázi –
+typicky SQLite in-memory pro rychlost, nebo testovací PostgreSQL/MySQL instance pro shodu s produkcí.
 
 :::callout{type="note"}
 ### KernelTestCase vs WebTestCase:
@@ -757,9 +759,10 @@ z paměti. Voláme tedy `clear()` mezi zápisem a čtením, aby byl test skuteč
 
 ## 17.06 Funkční testy API a kontrolerů {#funkcni-testy}
 
-Funkční testy ověřují chování celé aplikace přes HTTP vrstvu. Testují, že správný request na správnou URL
-vrátí očekávanou odpověď – včetně HTTP status kódu, formátu těla odpovědi (JSON), hlaviček a chování
-při chybových stavech. V DDD kontextu ověřují integraci prezentační vrstvy s aplikační vrstvou.
+Funkční test prochází celý zásobník: request přijde do kontroleru, projde aplikační vrstvou, dotkne se
+databáze a vrátí odpověď. Ověřuje se HTTP status kód, tělo (typicky JSON), hlavičky a chování při
+chybových vstupech. V DDD je to jediná vrstva testů, která ověří, že prezentace s aplikační vrstvou
+spolu skutečně mluví správně.
 
 :::callout{type="note"}
 ### WebTestCase v Symfony:
@@ -879,10 +882,10 @@ Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje mo
 
 ## 17.07 Architektonické testy {#architektonicke-testy}
 
-Architektonické testy automaticky ověřují, že kód dodržuje definovaná architektonická pravidla – zejména
-pravidla závislostí mezi vrstvami. V DDD platí, že doménová vrstva nesmí záviset
-na infrastrukturní ani aplikační vrstvě. Manuální code review nestačí. Architektonické testy toto pravidlo
-vynucují v CI/CD pipeline a zabrání regresi.
+Pravidlo, že doménová vrstva nesmí záviset na infrastruktuře ani na aplikační vrstvě, drží jen do první
+spěchající code review, ve které někdo přidá `use Doctrine\ORM\Mapping` do entity. Architektonické testy
+tomu zabraňují technicky: pravidla závislostí jsou popsána deklarativně a porušení padne v CI jako
+spadlý test, ne až v review.
 
 ### Deptrac
 
@@ -1021,9 +1024,9 @@ return static function (Config $config): void {
 
 ## 17.08 Code coverage a doporučené postupy {#pokryti-a-best-practices}
 
-Code coverage (pokrytí kódem) je metrika udávající, jaké procento kódu je spouštěno při běhu testů.
-Vysoké pokrytí samo o sobě nezaručuje kvalitu testů – lze dosáhnout 100% pokrytí s testy, které
-neověřují žádné chování. Přesto pokrytí ukazuje neotestované oblasti.
+Code coverage měří, jaké procento řádků kódu se při běhu testů provede. Sama metrika nic neříká
+o kvalitě testů – 100% pokrytí lze dosáhnout testy, které jen volají metody bez assertů. Užitečná
+je ale opačně: tam, kde je pokrytí nízké, leží kód, který nikdo netestuje. Tam stojí za to se podívat.
 
 :::callout{type="pattern"}
 ### Doporučené pokrytí pro DDD vrstvy:
@@ -1090,9 +1093,9 @@ XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
 :::
 :::
 
-Testovací pyramida v DDD staví na tom, že doménová vrstva je čistý PHP bez závislostí na frameworku.
-Unit testování je proto rychlé a přímočaré. Integrační a funkční testy doplňují pokrytí tam,
-kde vstupuje infrastruktura.
+Testovací pyramida v DDD funguje díky tomu, že doménová vrstva je čistý PHP bez závislostí na frameworku.
+Tisíce unit testů proto běží v sekundách. Integrační a funkční testy doplňují pokrytí tam, kde vstupuje
+infrastruktura, a architektonické testy hlídají, aby tato izolace nezmizela při dalším refaktoringu.
 
 :::faq{}
 - question: Jak testovat agregát – unit test s mock repozitářem, nebo integrační test?
