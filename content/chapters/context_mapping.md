@@ -470,7 +470,7 @@ final class LegacyBillingTranslator
 }
 :::
 
-Translator je **jediná veřejná metoda**, `final` třída, bez stavu. Žádný state, žádná cache, žádný vedlejší efekt. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
+Translator je **jediná veřejná metoda**, `final` třída, bez stavu. Žádný stav, žádná cache, žádný vedlejší efekt. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
 
 ### Test ACL: snadný a důležitý
 
@@ -544,7 +544,7 @@ Nejčastější selhání ACL: **cizí pojmy začnou prosakovat do domény**. Sy
 - Application Service kontroluje `$soapResponse->status === 'PAID'`.
 - ACL třída se rozrůstá do 1000 řádků s mnoha veřejnými metodami a sdíleným stavem.
 
-Pravidlo: **ACL je single-purpose třída**, ne layer s desítkami metod sdílejících state. Jeden upstream koncept = jeden translator. Výstup translátoru je *vždy* doménový VO/entity/event, nikdy raw DTO. Pokud translátor začíná obsahovat doménovou logiku, je to signál, že máte *Application Service* schovanou v ACL – vyčleňte ji.
+Pravidlo: **ACL je single-purpose třída**, ne vrstva s desítkami metod sdílejících stav. Jeden upstream koncept = jeden translator. Výstup translátoru je *vždy* doménový VO/entity/event, nikdy raw DTO. Pokud translátor začíná obsahovat doménovou logiku, je to signál, že máte *Application Service* schovanou v ACL – vyčleňte ji.
 
 ### ACL a Strangler Fig pattern
 
