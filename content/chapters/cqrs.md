@@ -103,7 +103,7 @@ s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
 
 - **Oddělení odpovědností** – Write model nese doménovou logiku, validaci invariantů
   a konzistenci dat. Read straně zbývá jediný úkol: dostat data v podobě, kterou potřebuje
-  obrazovka. Každý model obsahuje jen to, co k své práci potřebuje.
+  obrazovka. Každý model obsahuje jen to, co ke své práci potřebuje.
 - **Nezávislá optimalizace** – Write model může používat normalizované relační schéma
   a Doctrine ORM entity s bohatou doménovou logikou. Read model může být denormalizovaná tabulka,
   Elasticsearch index, nebo Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům.
