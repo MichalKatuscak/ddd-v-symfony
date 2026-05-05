@@ -626,21 +626,21 @@ Důležité: **v1 a v2 koexistují**. Zveřejnění OHS v1 je *závazek* – jak
 
 Tři běžné přístupy k verzování OHS:
 
-- **URI versioning** (`/api/v1/...`) – nejčitelnější, cacheovatelné na úrovni HTTP, doporučené pro veřejné API.
-- **Header versioning** (`Accept: application/vnd.catalog.v2+json`) – čistší URL, ale komplikovaná diagnostika a debugging.
+- **Verzování v URI** (`/api/v1/...`) – nejčitelnější, cacheovatelné na úrovni HTTP, doporučené pro veřejné API.
+- **Verzování v hlavičce** (`Accept: application/vnd.catalog.v2+json`) – čistší URL, ale komplikovaná diagnostika a debugging.
 - **Query parameter** (`?api-version=2`) – flexibilní, ale bývá zneužívaný k „polo-versioningu“ (nikdy nezmizí v1).
 
-### Deprecation politika
+### Politika zastarávání
 
-OHS musí mít explicitní deprecation politiku. Příklad pro veřejné API:
+OHS musí mít explicitní politiku zastarávání. Příklad pro veřejné API:
 
-- Při zveřejnění nové majoritní verze (v3) se starší verze (v1) označí jako *deprecated* v dokumentaci.
+- Při zveřejnění nové majoritní verze (v3) se starší verze (v1) označí jako *zastaralá* v dokumentaci.
 - Hlavička `Deprecation: true` a `Sunset: Sat, 31 Dec 2025 23:59:59 GMT` se posílá v každé odpovědi v1.
 - Minimálně 6 měsíců před odstraněním v1 jsou všichni známí klienti notifikováni.
 - Po odstranění v1 vrací `410 Gone` s odkazem na migrační průvodce.
 
 :::callout{type="pattern"}
-**OHS bez versioningu není OHS.** Je to neoznačený REST endpoint. Pokud nedokážete vyjmenovat všechny neslučitelné změny za poslední rok, zveřejnit deprecation kalendář a ukázat downstream onboarding průvodce, vaše API není Open Host Service – ani když tak vypadá.
+**OHS bez verzování není OHS.** Je to neoznačený REST endpoint. Pokud nedokážete vyjmenovat všechny neslučitelné změny za poslední rok, zveřejnit kalendář zastarávání a ukázat průvodce pro onboarding downstream konzumentů, vaše API není Open Host Service – ani když tak vypadá.
 :::
 
 ## 03.09 Published Language (PL) {#published-language}
@@ -712,7 +712,7 @@ Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) – a je to šp
 }
 :::
 
-Toto schema je publikováno na URL `https://example.com/events/order-placed-v1.json` a slouží jako **kanonický kontrakt**. Každý producer i konzument může proti němu validovat. Když Ordering BC chce přidat nové pole (například `shippingAddressId`), publikuje `order-placed-v2.json` a oba schémata koexistují minimálně po dobu deprecation okna.
+Toto schema je publikováno na URL `https://example.com/events/order-placed-v1.json` a slouží jako **kanonický kontrakt**. Každý producer i konzument může proti němu validovat. Když Ordering BC chce přidat nové pole (například `shippingAddressId`), publikuje `order-placed-v2.json` a oba schémata koexistují minimálně po dobu okna zastarávání.
 
 ### Validace proti schema v Symfony
 
