@@ -31,9 +31,9 @@ final class ChapterHeadingRenderer implements NodeRendererInterface
         $sectionId = $attrs['id'];
         $headingId = $sectionId . '-heading';
 
-        // Extract NN.MM prefix (e.g. "01.01" from "01.01 Definice DDD")
+        // Extract prefix like "01.01", "P.01" or "cs.01"
         $text = $innerHtml;
-        if (preg_match('/^(\d+\.\d+)\s+(.+)$/s', $innerHtml, $m)) {
+        if (preg_match('/^([A-Za-z\d]+\.\d+)\s+(.+)$/s', $innerHtml, $m)) {
             $text = '<span class="h-num">' . $m[1] . '</span> ' . $m[2];
         }
 
