@@ -93,8 +93,8 @@ z dokumentace do typového systému jazyka. Typické zdroje invariantů:
 
 - **Sumační pravidla.** Součet položek odpovídá celkové ceně. Počet
   rezervovaných míst nepřekračuje kapacitu. Bilance debetů a kreditů je nulová.
-- **Stavové přechody.** Faktura ve stavu `PAID` nelze vrátit
-  do stavu `DRAFT`. Objednávka po `SHIPPED` nelze stornovat
+- **Stavové přechody.** Fakturu ve stavu `PAID` nelze vrátit
+  do stavu `DRAFT`. Objednávku po `SHIPPED` nelze stornovat
   bez kompenzační operace.
 - **Existenční pravidla.** Faktura musí mít alespoň jednu položku. Tým
   musí mít alespoň jednoho administrátora.
@@ -138,10 +138,9 @@ ale platí opak. Tři důvody:
   `Project` s tisícem úkolů znamená tisíc řádků v každé operaci, i když
   měníme jediný úkol. V Doctrine to navíc zhoršují asociace s lazy loadingem, které
   generují N+1 dotazů.
-- **Kompozitní invarianty.** Velký agregát zákonitě obsahuje pravidla, která
-  spolu nesouvisejí. Jakákoli změna jedné části vyžaduje ověření všech invariantů – nárůst
-  složitosti je kvadratický. Čím více pravidel agregát chrání, tím složitější je každá
-  operace – při každé změně je nutné ověřit všechny invarianty najednou.
+- **Kompozitní invarianty.** Velký agregát obsahuje pravidla, která spolu věcně
+  nesouvisejí. Každá změna musí projít validací všech naráz a režie roste kvadraticky
+  s počtem chráněných invariantů.
 
 Praktická heuristika: pokud nemáte konkrétní invariant, který by si *vynutil* vzájemnou
 přítomnost dvou entit v jedné transakci, jsou to dva agregáty. „Pohodlí“ Doctrine asociace
@@ -173,8 +172,8 @@ se porušuje nejčastěji. Důvody pravidla:
   deadlocků.
 - Helland v *Life Beyond Distributed Transactions*
   [[5]](https://queue.acm.org/detail.cfm?id=3025012)
-  ukazuje, že distributed transactions (XA, two-phase commit) v praxi nefungují udržitelně –
-  jediný udržitelný přístup je „one entity per transaction“, což je přesně Vernonovo pravidlo.
+  ukazuje, že distributed transactions (XA, two-phase commit) v praxi nefungují udržitelně.
+  Jediná životaschopná cesta je „one entity per transaction“, což přesně odpovídá Vernonovu pravidlu.
 
 V Symfony 8 to znamená: `EntityManager::flush()` uvnitř command handleru by měl
 ukládat změny *jednoho* agregátu. Změna v dalším agregátu patří do separátního
@@ -257,8 +256,8 @@ final class InitiateTransferHandler
 
 ## 07.06 Eventual consistency mezi agregáty {#eventual-consistency}
 
-Eventual consistency je strašák u týmů, které z monolitické CRUD aplikace přecházejí k DDD.
-V praxi je to nástroj, který nahrazuje transakci napříč agregáty čtyřmi explicitními kroky:
+Eventual consistency vyvolává obavy v týmech, které přicházejí z monolitické CRUD aplikace.
+V praxi nahrazuje transakci napříč agregáty čtyřmi explicitními kroky:
 
 1. Kořen agregátu A vykoná operaci a publikuje doménovou událost (např. `OrderPlaced`).
 2. Outbox Pattern (kapitola [Outbox](/outbox-pattern)) zajistí, že
@@ -274,9 +273,9 @@ kontextů). Procesy, které sekundy nesnesou, jsou kandidáty na *jeden* agregá
 :::callout{type="warn"}
 **Pozor na uživatelskou zkušenost**
 
-Eventual consistency je prostá v back-endu, ale vyžaduje pozornost v UI. Pokud uživatel
-zadá objednávku a čeká stránku „Objednávka přijata“, nesmí ji vidět dříve, než ji vidí
-read model.
+Eventual consistency má v back-endu jasná řešení (outbox, sága), ale vyžaduje pozornost
+v UI. Pokud uživatel zadá objednávku a čeká stránku „Objednávka přijata“, nesmí ji vidět
+dříve, než ji vidí read model.
 
 Tři osvědčené přístupy:
 
@@ -456,7 +455,7 @@ ilustruje následující diagram:
 
 ## 07.08 Mapování v Symfony 8 a Doctrine ORM 3 {#symfony-doctrine}
 
-Doctrine ORM je v Symfony projektech defaultní volba a v jeho konfiguraci se nejčastěji
+Doctrine ORM je v Symfony projektech výchozí volba a v jeho konfiguraci se nejčastěji
 rozhoduje, zda bude agregátní model čistý, nebo se rozplyne. Vernon v IDDD věnuje této otázce
 celou kapitolu 12. Pravidla pro Doctrine ORM 3:
 
@@ -639,8 +638,8 @@ doctrine:
 ### Large-collection problem {#large-collection}
 
 Klasický anti-vzor: agregát `Project` drží `OneToMany` kolekci úkolů.
-S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každé načtení agregátu načte
-všechny úkoly, každé přidání způsobí flush celé kolekce. Khononov pro tento případ definuje
+S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každé načtení agregátu vyhydrátuje
+celou kolekci, každé přidání položky způsobí flush všech úkolů. Khononov pro tento případ definuje
 tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/):
 
 - **Rozdělit agregát.** `Project` a `Task` jsou samostatné
@@ -657,13 +656,13 @@ tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven
 
 ### Hot aggregate {#hot-aggregate}
 
-Hot aggregate je agregát, který souběžně modifikuje mnoho uživatelů (nákupní košík během
-Black Friday, sportovní výsledek, hra v reálném čase). Optimistický zámek selhává – většina
-transakcí spadne na `OptimisticLockException`, retry trvá, uživatelská zkušenost
-je nepoužitelná. Přístupy:
+Hot aggregate je agregát, na který souběžně sahá mnoho uživatelů (nákupní košík během
+Black Friday, sportovní výsledek, hra v reálném čase). Optimistický zámek selhává –
+většina transakcí spadne na `OptimisticLockException`, retry trvá, uživatelská
+zkušenost se hroutí. Přístupy:
 
 - **Rozdělit agregát na menší.** Místo `Stadium` s tisícem sedaček
-  modelujte `Section` s desítkami. Souběžné transakce se rozprostřou.
+  vznikne `Section` s desítkami. Souběžné transakce se rozprostřou.
 - **Přepnout na Event Sourcing.** ES eliminuje race condition na update – každý
   event je append-only. Konflikty řeší stream version (kapitola
   [Event Sourcing](/event-sourcing)).
@@ -676,10 +675,10 @@ je nepoužitelná. Přístupy:
 
 ### Snapshoty v Event Sourcingu {#es-snapshots}
 
-U Event-Sourced agregátů je rebuild stavu z eventů O(N) v počtu eventů. Pro agregáty
-s 10 000+ eventy je to neúnosné. Snapshot ukládá serializovaný stav agregátu po každých
-N eventech (typicky 100); při načtení se stav rekonstruuje od posledního snapshotu a navrch
-se aplikují zbývající eventy.
+U Event-Sourced agregátů má rebuild stavu z eventů složitost O(N). Při historii nad
+10 000 záznamů je to neúnosné. Snapshot ukládá serializovaný stav agregátu po každých
+N eventech (typicky 100); při načtení se stav rekonstruuje od posledního snapshotu
+a navrch se aplikuje zbývající ocas streamu.
 Detaily implementace:
 
 - Snapshot není autoritativní stav – jen optimalizace. Pokud serializace selže, sestavte znovu
@@ -735,8 +734,8 @@ tehdy, když máte konkrétní multi-tenancy požadavek.
 
 ## 07.11 Postup návrhu krok za krokem {#workflow}
 
-Návrh agregátu není kreslení tříd v IDE – je to disciplinovaný proces. Doporučený postup
-v sedmi krocích, který vychází z Vernonovy metodiky a praktických zkušeností:
+Návrh agregátu je disciplinovaný proces, ne kreslení tříd v IDE. Sedmikrokový postup
+vychází z Vernonovy metodiky a praktických zkušeností:
 
 1. **Sepište invarianty.** Z Event Stormingu, doménových workshopů nebo
    rozhovorů s experty vytáhněte všechna pravidla. Každé zformulujte jako větu „v každý
@@ -765,9 +764,9 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 
 - **Velký agregát kvůli pohodlí ORM.** „Když už máme `OneToMany`,
   dáme tam i objednávku.“ Asociace jsou nástroj mapování, ne vodítko pro hranici.
-- **Smazání transakcí přes ságu pro jednoduchá pravidla.** Pokud invariant
-  musí platit okamžitě, sága ho neudržuje. Pravidlo „pojistka nikdy nesmí být zaplacena
-  bez podepsané smlouvy“ nesnese několik sekund čekání – patří do agregátu.
+- **Sága tam, kde má být agregát.** Pokud invariant musí platit okamžitě, sága
+  ho neudržuje. Pravidlo „pojistka nikdy nesmí být zaplacena bez podepsané smlouvy“
+  nesnese několik sekund čekání – patří do agregátu.
 - **Vystavený mutátor uvnitř agregátu.** `$order->getItems()->add(...)`
   obchází kořen. Kolekce by měla být immutable z pohledu vnějšku; přidávání položky jde
   výhradně metodou na kořeni.
