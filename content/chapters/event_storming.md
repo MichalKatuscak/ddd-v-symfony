@@ -490,7 +490,7 @@ Plain-text soubor s jedním eventem na řádek. Slouží jako reference pro budo
 
 ### 04.09.4 Hot Spots → tickety {#post-4-hotspots}
 
-Každý hot spot z workshopu = jeden ticket v issue trackeru, ve formátu „*Discovery question*“ nebo „*Domain question*“, s odkazem na fotku/Miro. Ticket je přiřazen doménovému expertovi, ne developerovi – protože odpověď leží v doméně, ne v kódu.
+Každý hot spot z workshopu = jeden ticket v issue trackeru, ve formátu „*Discovery question*“ nebo „*Domain question*“, s odkazem na fotku/Miro. Ticket je přiřazen doménovému expertovi, ne vývojáři – protože odpověď leží v doméně, ne v kódu.
 
 :::code{language="plaintext" filename="Šablona ticketu z hot spotu"}
 Title: [Discovery] Co když platba selže po vytvoření zásilky?
@@ -680,7 +680,7 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 - question: Dá se Event Storming dělat online?
   answer: 'Ano, ale s kompromisy. Online (Miro, Mural, Lucidspark) odpadá fyzická únava a tým nemusí cestovat, ale ztrácíte něco z energie chaotic exploration fáze – v Miru lidé píšou pomaleji než lepí Post-It na zeď. Doporučení: Big Picture v úvodu projektu udělejte offline, pokud to lze; následné Process / Design Level a re-stormingy pak klidně online. Nezapomeňte na breakout místnosti pro paralelní diskuse a častější přestávky (online unaví víc).'
 - question: Jak vést hot spoty během workshopu?
-  answer: 'Pravidlo zní: <strong>nediskutuje se, jen se zaznamenává</strong>. Když během workshopu zazní otázka, kterou nikdo neumí hned odpovědět, facilitátor ji okamžitě napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla, a workshop pokračuje dál. Pokus o vyřešení hot spotu hned vždy konzumuje 15-30 minut a typicky se nedořeší – protože odpověď leží mimo místnost. Po workshopu se každý hot spot stane ticketem přiřazeným doménovému expertovi, ne developerovi.'
+  answer: 'Pravidlo zní: <strong>nediskutuje se, jen se zaznamenává</strong>. Když během workshopu zazní otázka, kterou nikdo neumí hned odpovědět, facilitátor ji okamžitě napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla, a workshop pokračuje dál. Pokus o vyřešení hot spotu hned vždy konzumuje 15-30 minut a typicky se nedořeší – protože odpověď leží mimo místnost. Po workshopu se každý hot spot stane ticketem přiřazeným doménovému expertovi, ne vývojáři.'
 - question: Kdo platí workshop – produkt nebo vývoj?
   answer: 'Vývoj. Argument je jednoduchý: bez workshopu vývoj vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů. V praxi by produkt a vývoj měly platit společně – workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně.'
 - question: Co když doménoví experti používají hovorovou češtinu a slang („chronický neplatič nás zase odbil“)?
