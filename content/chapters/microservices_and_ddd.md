@@ -52,7 +52,7 @@ Tabulka níže shrnuje, čím se Bounded Context a microservice liší a v jaké
 | Hranice | Logická – model a jazyk | Fyzická – proces, deploy, DB |
 | Definice z knihy | Evans 2003, Vernon 2013 | Newman 2021, Richardson 2018 |
 | Vlastník | Tým doménových expertů + vývojářů | Stream-aligned team (Skelton & Pais 2019) |
-| Mění se kvůli | Změně doménového modelu | Scaling, release cyklu, ops |
+| Mění se kvůli | Změně doménového modelu | Škálování, release cyklu, ops |
 | Existuje i v monolitu | Ano, vždy – jako modul | Ne, monolit je jeden deployment |
 
 ## 19.02 Kdy 1 BC = 1 service (cílový stav) {#bc-jedna-service}
