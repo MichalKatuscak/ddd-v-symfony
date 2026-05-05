@@ -310,7 +310,7 @@ Co zde stojí za pozornost:
 
 - **`final` + `extends AggregateRoot`.** `AggregateRoot` poskytuje `record()`
   a `releaseDomainEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
-  kopii v každé entitě. `final` zabraňuje dědění (entita s subklasou nezachová
+  kopii v každé entitě. `final` zabraňuje dědění (entita s podtřídou nezachová
   invarianty kořene).
 - **Privátní konstruktor + factory `register()`.** Jediná legální cesta vytvoření.
   Kdyby přibyla další kategorie (importovaný uživatel z LDAP), přidá se další
@@ -320,7 +320,7 @@ Co zde stojí za pozornost:
   (`user_id`, `email_vo`) nebo `#[ORM\Embedded]`. Žádné re-validace v getterech.
 - **`#[ORM\Version]` pro optimistický zámek.** Souběžné modifikace agregátu
   vyhází `OptimisticLockException`, kterou aplikační vrstva přeloží na retry.
-- **Method names z Ubiquitous Language.** `rename()` místo `setName()`,
+- **Názvy metod z Ubiquitous Language.** `rename()` místo `setName()`,
   `changeEmail()` místo `updateEmail()`. Doménový jazyk, ne CRUD slovník.
 
 :::callout{type="note"}
