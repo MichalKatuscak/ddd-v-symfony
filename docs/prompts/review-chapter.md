@@ -51,12 +51,13 @@ Před hledáním vzorů identifikuj typ kapitoly podle níže uvedeného seznamu
 
 **Co Claude hledá:**
 
-1. **Wikipedijní úvody sekcí** — 1–2 obecné věty na začátku sekce typu „X je přístup, který přináší Y a řeší Z". Vyřezat nebo přepsat tak, aby sekce začínala konkrétním tvrzením.
+1. **Wikipedijní úvody sekcí** — 1–2 obecné věty na začátku sekce typu „X je přístup, který přináší Y a řeší Z". Vyřezat nebo přepsat tak, aby sekce začínala konkrétním tvrzením. Přepsaný úvod drží deklarativní tón knihy — nikdy nepřepisuj na imperativ („Použijte", „Definujte"). Imperativy patří jen do callout `pattern` a numerovaných postupů, ne do definičních ani srovnávacích pasáží.
 2. **Paralelismy** — sousední věty se stejnou syntaktickou kostrou. Rozbít druhou větu (jiný rytmus, jiné sloveso, jiná délka).
 3. **Pravidelnost bulletů** — pokud má sekce 4+ bullet listů s identickým rytmem `**Pojem** – věta`, alespoň jeden přepsat (próza / různé délky / bez tučného leadu).
 4. **Dvojí slovo ve větě** — stejné plnovýznamové slovo dvakrát ve větě → přepsat.
-5. **Klišé** — z rozšířeného seznamu v `CLAUDE.md` sekce „Zakázáno — marketing a hype": „není stříbrná kulka", „není binární volba", „svatý grál", „v dnešní době" atd. Pokud už nález zaznamenán v Průchodu 1 jako `[V-N]`, neopakuj zde — tato kategorie slouží pro klišé typu strukturní idiom (frázové vzory přes 2+ slova).
-6. **Kontextové vsuvky** — fráze typu „kterou většina příruček mlčky přeskočí", „jak víme", „jak jsme již zmínili" — vyřezat.
+5. **Kontextové vsuvky** — fráze typu „kterou většina příruček mlčky přeskočí", „jak víme", „jak jsme již zmínili" — vyřezat.
+
+(Klišé jako „není stříbrná kulka", „svatý grál" atd. řeší Průchod 1 jako `[V-N]` na základě seznamu v `CLAUDE.md` — neopakuj zde.)
 
 **Rozsah zásahu:**
 
@@ -73,7 +74,7 @@ Pro každý nález:
 [S-N] Řádek <číslo>
 Originál: <text>
 Návrh:    <přepis>
-Důvod:    <kategorie 1–6>
+Důvod:    <kategorie 1–5>
 ```
 
 ---
@@ -178,8 +179,14 @@ Celkem nálezů vyžadujících akci: <součet OPRAVIT ze všech kategorií>
 
 Po explicitním potvrzení reportu uživatelem:
 
-1. Zapiš opravy do souboru — pouze nálezy se stavem OPRAVIT (ne NEJISTÉ)
-2. Neměň frontmatter, callout markup (`:::callout{...}`), code bloky (`:::code{...}`), diagram bloky (`:::diagram{...}`), citace `[N]` a jejich URL, cross-linky (`/cqrs`, `/zakladni-koncepty`, atd.). Pouze textový obsah odstavců, bullet listů, nadpisů a tabulek.
-3. Zachovej markdown syntaxi a odsazení beze změny
-4. Po zápisu spusť: `git diff content/chapters/<soubor>.md`
-5. Počkej na potvrzení uživatele — teprve pak commitni
+1. Před každou aplikací návrhu OPRAVIT, který přepisuje větu nebo odstavec, znovu přečti přepsaný text. Zkontroluj:
+   - shodu rodu mezi přídavným jménem/zájmenem a podstatným jménem („tato pravidla", ne „tyto pravidla")
+   - správnost zvratných sloves (sloveso s reciprocitou vyžaduje „se" / „si" — „naráží na něj" nebo „se s ním sráží", ne „s ním sráží")
+   - logické vazby konektorů (po „protože" následuje příčina, po „proto" následek)
+
+   Pokud cokoli zní nepřirozeně, klasifikuj nález jako NEJISTÉ a neaplikuj.
+2. Zapiš opravy do souboru — pouze nálezy se stavem OPRAVIT (ne NEJISTÉ)
+3. Neměň frontmatter, callout markup (`:::callout{...}`), code bloky (`:::code{...}`), diagram bloky (`:::diagram{...}`), citace `[N]` a jejich URL, cross-linky (`/cqrs`, `/zakladni-koncepty`, atd.). Pouze textový obsah odstavců, bullet listů, nadpisů a tabulek.
+4. Zachovej markdown syntaxi a odsazení beze změny
+5. Po zápisu spusť: `git diff content/chapters/<soubor>.md`
+6. Počkej na potvrzení uživatele — teprve pak commitni
