@@ -40,6 +40,7 @@ import './scripts/topnav.js';
 import './scripts/code-block.js';
 import './scripts/article-toc.js';
 import './scripts/diagram-viewer.js';
+import './scripts/reading-progress.js';
 
 // Init na DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function () {

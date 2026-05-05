@@ -43,7 +43,7 @@
 {% endblock %}
 
 {% block body %}
-<article class="article">
+<article class="article" data-chapter-route="{{ app.request.attributes.get('_route') }}">
     {% include '_partials/article_head.html.twig' with {
         chapter_number: fm.chapterNumber,
         category:       fm.category,

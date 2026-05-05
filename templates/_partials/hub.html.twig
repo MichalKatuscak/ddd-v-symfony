@@ -27,7 +27,7 @@
             </header>
             <div class="hub-a-grid">
                 {% for c in hub_chapters %}
-                    <a class="hub-a-card" href="{{ path(c.route) }}">
+                    <a class="hub-a-card" href="{{ path(c.route) }}" data-route="{{ c.route }}">
                         <span class="hub-a-card-n">{{ c.n }}</span>
                         <div class="hub-a-card-body">
                             <div class="hub-a-card-t">{{ c.t }}</div>
@@ -54,7 +54,7 @@
                 </header>
                 <div class="hub-a-grid">
                     {% for e in hub_extras %}
-                        <a class="hub-a-card" href="{{ path(e.route) }}">
+                        <a class="hub-a-card" href="{{ path(e.route) }}" data-route="{{ e.route }}">
                             <span class="hub-a-card-n">–</span>
                             <div class="hub-a-card-body">
                                 <div class="hub-a-card-t">{{ e.t }}</div>

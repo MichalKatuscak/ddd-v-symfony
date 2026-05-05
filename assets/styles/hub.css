@@ -210,6 +210,20 @@
   transition: transform var(--motion-fast) ease, color var(--motion-fast) ease;
 }
 
+/* Přečteno — tichá stopa: tlumené číslo místo akcentu, drobná kontrolka.
+   Bez ✓, bez progress baru. Hover stále zvedá akcent na titulu. */
+.hub-a-card.is-read .hub-a-card-n { color: var(--fg-faint); }
+.hub-a-card.is-read .hub-a-card-t { color: var(--fg-muted); }
+.hub-a-card.is-read::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent-dim);
+}
+
 @media (max-width: 900px) {
   .hub-a-shell { padding: var(--s-5) var(--s-4) var(--s-7); }
   .hub-a-head {

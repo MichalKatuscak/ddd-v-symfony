@@ -105,7 +105,7 @@
             <ol class="land-toc">
                 {% for c in chapters %}
                 <li>
-                    <a class="land-toc-item" href="{{ path(c.route) }}">
+                    <a class="land-toc-item" href="{{ path(c.route) }}" data-route="{{ c.route }}">
                         <span class="land-toc-n">{{ c.n }}</span>
                         <div class="land-toc-text">
                             <span class="land-toc-title">{{ c.t }}</span>
@@ -123,7 +123,7 @@
                 {% endfor %}
                 {% for e in extras %}
                 <li>
-                    <a class="land-toc-item" href="{{ path(e.route) }}">
+                    <a class="land-toc-item" href="{{ path(e.route) }}" data-route="{{ e.route }}">
                         <span class="land-toc-n">–</span>
                         <div class="land-toc-text">
                             <span class="land-toc-title">{{ e.t }}</span>
