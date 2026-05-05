@@ -420,7 +420,7 @@ DDD není špatná architektura. Je to architektura pro specifický kontext. Smy
 | Komplexní doménová logika (ne jen CRUD) | DDD chrání invarianty a modeluje pravidla – bez pravidel nemá co chránit | Pojistné smlouvy s 50+ doménovými pravidly pro schválení, pojistné události s workflow |
 | Projekt bude žít a růst roky | Investice do architektury se vrátí jen při dostatečném horizontu | Core banking systém, ERP, zdravotnický informační systém |
 | Přístup k doménovým expertům | Ubiquitous Language a model se tvoří ve spolupráci – ne ze vzduchoprázdna | Pojistný matematik, zkušený účetní, vedoucí skladu – lidé, kteří žijí doménou denně |
-| Tým rozumí DDD nebo má čas se učit | Špatně implementované DDD je horší než žádné DDD | Tým prošel školením, má za sebou alespoň jeden DDD projekt, nebo má 2–3 měsíce na ramp-up |
+| Tým rozumí DDD nebo má čas se učit | Špatně implementované DDD je horší než žádné DDD | Tým prošel školením, má za sebou alespoň jeden DDD projekt, nebo má 2–3 měsíce na rozjezd |
 | Více bounded contexts nebo mikroservisy | DDD dává přirozené hranice pro dekompozici systému | E-commerce s oddělenými kontexty: katalog, objednávky, platby, logistika |
 
 Pokud váš projekt splňuje tyto podmínky, DDD se vyplatí. Pokud ne – použijte jednodušší
