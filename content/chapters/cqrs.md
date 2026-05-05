@@ -852,7 +852,7 @@ zpracování téže události nesmí vést k nesprávným datům. V příkladu v
 zajištěna konstrukcí `ON DUPLICATE KEY UPDATE`, která při opakovaném insertu
 provede pouze update. Alternativní přístupy:
 
-- **Position tracking** – projektor si ukládá pozici posledního zpracovaného
+- **Sledování pozice** – projektor si ukládá pozici posledního zpracovaného
   eventu (event ID nebo sequence number) a ignoruje události se stejnou nebo nižší pozicí.
 - **Upsert/Merge** – `INSERT ... ON CONFLICT DO UPDATE` (PostgreSQL)
   nebo `REPLACE INTO` (MySQL). Jednoduchý, ale méně flexibilní.
@@ -894,7 +894,7 @@ až po čtení – a zvýrazňuje okno, ve kterém k eventual consistency dochá
 Konkrétnější časový pohled na to, kdy uživatel vidí 404 navzdory tomu, že command
 proběhl úspěšně, je v následující sekvenci:
 
-:::diagram{fig="13.12-A" title="Staleness window - kdy GET vrátí 404 po úspěšném POST" src="images/diagrams/6_cqrs/staleness_window.svg"}
+:::diagram{fig="13.12-A" title="Okno zastaralosti – kdy GET vrátí 404 po úspěšném POST" src="images/diagrams/6_cqrs/staleness_window.svg"}
 :::
 
 Existuje několik osvědčených vzorů, jak eventual consistency v UI řešit:
