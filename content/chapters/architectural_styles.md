@@ -185,7 +185,7 @@ final class OrderController extends AbstractController
 }
 :::
 
-Tento kód je čitelný, krátký a v Symfony idiomu standardní. Cena je v testech: pro test `OrderController::confirm()` potřebujete buď `WebTestCase` s celým bootem aplikace, nebo komplikovaný setup s mockováním `OrderRepository` i `OrderService`. V Hexagonal struktuře byste místo toho jen zavolali use case bez controlleru.
+Tento kód je čitelný, krátký a v Symfony idiomu standardní. Cena je v testech: pro test `OrderController::confirm()` potřebujete buď `WebTestCase` s celým bootem aplikace, nebo komplikované nastavení s mockováním `OrderRepository` i `OrderService`. V Hexagonal struktuře byste místo toho jen zavolali use case bez controlleru.
 
 :::callout{type="warn"}
 ### Anti-vzor: Anemic Domain Model {#layered-anti-heading}

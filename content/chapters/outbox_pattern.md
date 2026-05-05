@@ -1310,7 +1310,7 @@ správa je manuální.
 
 ### Distributed relay – multi-instance {#distributed-relay-heading}
 
-Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší setup, ale
+Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší konfigurace, ale
 má dvě slabiny: **single point of failure** (worker spadne → lag roste, dokud
 `livenessProbe` ho nerestartuje) a **omezenou propustnost** (jeden PHP proces
 zvládne ~5k events/s na consumer-grade hardware).
@@ -1622,5 +1622,5 @@ kap. 11 (Stream Processing);
 - question: 'Co dělat při dlouhodobém výpadku brokera?'
   answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál zapisují doménové eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém – řádky jsou malé), (c) kompakce ne-mazat pending stará než N dní, jen sent. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
 - question: 'Musím použít UUID/ULID, nebo stačí AUTO_INCREMENT?'
-  answer: 'Použijte ULID (nebo UUIDv7), ne AUTO_INCREMENT. Důvody: (1) ULID je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) ULID nese časový komponent, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) ULID je předvídatelný klientem, který může poslat event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region setupy. Symfony Uid komponenta poskytuje pohodlné API: <code>new Ulid()</code> v entitě stačí.'
+  answer: 'Použijte ULID (nebo UUIDv7), ne AUTO_INCREMENT. Důvody: (1) ULID je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) ULID nese časový komponent, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) ULID je předvídatelný klientem, který může poslat event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region nastavení. Symfony Uid komponenta poskytuje pohodlné API: <code>new Ulid()</code> v entitě stačí.'
 :::

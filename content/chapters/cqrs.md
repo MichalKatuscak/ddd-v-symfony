@@ -225,7 +225,7 @@ Dvě použitelné strategie:
   pravidlo, atomicita transakcí mu kompenzuje chybu, ale nikoli architektonický dluh.
 - **Bez `doctrine_transaction`:** middleware vypnete a transakční hranice si řídí
   repozitář explicitně přes `EntityManager::wrapInTransaction()` v metodě
-  `save()`. Komplikovanější setup, ale handler dostane garantovanou izolaci
+  `save()`. Komplikovanější nastavení, ale handler dostane garantovanou izolaci
   „1 save = 1 transakce“ a víc agregátů v jednom commandu prostě nelze atomicky uložit
   (což je správně).
 
