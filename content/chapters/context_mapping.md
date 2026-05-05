@@ -216,7 +216,7 @@ Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balí
 
 Nejčastější selhání Shared Kernelu je **jeho růst**. Tým si řekne: „máme tu `Money`, přidáme `Address` – vždyť adresa je taky všude stejná“. Pak `PhoneNumber`, pak `Customer`, pak `Order`… a najednou má SK 200 tříd a každá změna trvá týdny, protože vyžaduje souhlas tří týmů. V tu chvíli SK přestal být kernel a stal se *Big Ball of Shared Mud*.
 
-Pravidlo: **SK musí být malý, neměnný a recenzovaný oběma týmy**. Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých BC ve skutečnosti *odlišné*. Jen vypadají podobně a měly by se modelovat samostatně. Pokud koncept do SK skutečně patří, ale je velký, vyčleňte ho do samostatného BC s [Open Host Service](#ohs).
+Pravidlo: **SK musí být malý, neměnný a recenzovaný oběma týmy**. Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých BC ve skutečnosti *odlišné*. Jen vypadají podobně a měly by se modelovat samostatně. Pokud koncept do SK skutečně patří, ale je velký, patří do samostatného BC s [Open Host Service](#ohs).
 
 :::callout{type="note"}
 **Shared Kernel vs. sdílená utility knihovna.** Sdílená logger knihovna nebo HTTP klient *nejsou* Shared Kernel – jsou to běžné technické závislosti. Shared Kernel obsahuje výhradně **doménový model**: VO, doménové eventy, doménové výjimky. Pokud váš „SK“ obsahuje `HttpClient`, `Cache` nebo `EventDispatcher`, není to Shared Kernel.
@@ -548,7 +548,7 @@ Pravidlo: **ACL je single-purpose třída**, ne vrstva s desítkami metod sdíle
 
 ### ACL a Strangler Fig pattern
 
-Anti-Corruption Layer tvoří jádro *Strangler Fig* patternu pro postupnou migraci z legacy. Detail viz kapitolu [Migrace z CRUD do DDD](/migrace-z-crud). V Strangler Fig přístupu **každý nový BC obklopuje ACL**, dokud legacy nezmizí. V tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator bez anti-corruption logiky).
+Anti-Corruption Layer je nosný prvek *Strangler Fig* patternu pro postupnou migraci z legacy. Detail viz kapitolu [Migrace z CRUD do DDD](/migrace-z-crud). V Strangler Fig přístupu **každý nový BC obklopuje ACL**, dokud legacy nezmizí. V tu chvíli ACL většinou také zmizí (nebo se zjednoduší na čistý translator bez anti-corruption logiky).
 
 ## 03.08 Open Host Service (OHS) {#ohs}
 
