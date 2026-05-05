@@ -18,15 +18,15 @@ reading_time: 25
 difficulty: 3
 ---
 
-V předchozí kapitole jsme implementovali agregáty, repozitáře a Application Services v Symfony 8. Otevřená zůstala otázka, kterou většina projektů řeší ad-hoc: **kdo smí který use case zavolat a za jakých podmínek**. V této kapitole zavedeme čtyřvrstvý rámec, který autorizační rozhodnutí umístí na správnou vrstvu – od HTTP firewallu přes Symfony Voter v aplikační vrstvě až po doménové invarianty v agregátu. V navazující kapitole o CQRS pak ukážeme, jak se autorizace integruje do Command Handleru.
+V předchozí kapitole jsme implementovali agregáty, repozitáře a Application Services v Symfony 8. Otevřená zůstala otázka, kterou projekty obvykle řeší případ od případu: **kdo smí který use case zavolat a za jakých podmínek**. V této kapitole zavedeme čtyřvrstvý rámec, který autorizační rozhodnutí umístí na správnou vrstvu – od HTTP firewallu přes Symfony Voter v aplikační vrstvě až po doménové invarianty v agregátu. V navazující kapitole o CQRS pak ukážeme, jak se autorizace integruje do Command Handleru.
 
-Autorizace je v DDD aplikacích dlouhodobě podceněné téma. Většina týmů zvládne autentizaci (Symfony firewall, JWT, OAuth) bez větších potíží. Jakmile ale přijde otázka *„kdo smí udělat co s konkrétní entitou v konkrétním stavu“*, kód se rozsype napříč controllery, listenery, twig templaty a Doctrine query buildery. Kapitola dává **čtyřvrstvý rámec**, podle kterého poznáte, kam které pravidlo patří a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby Symfony Security komponenta pronikla do doménového jádra.
+Autentizaci (Symfony firewall, JWT, OAuth) tým většinou postaví bez větších potíží. Otázka *„kdo smí udělat co s konkrétní entitou v konkrétním stavu“* je ale jiná disciplína. Bez rámce se odpověď rozpadne mezi controllery, listenery, twig šablony a Doctrine query buildery. Kapitola dává **čtyřvrstvý rámec**, podle kterého poznáte, kam které pravidlo patří a jak ho v Symfony 8 implementovat idiomaticky – bez toho, aby Symfony Security komponenta pronikla do doménového jádra.
 
 Kapitola navazuje na [Implementaci v Symfony](/implementace-v-symfony), která pokrývá Voter API jako jeden z několika Symfony idiomů. Doplňuje praktický pohled k tématům [CQRS](/cqrs) (kde sedí ověření Command Handleru), [Testování](/testovani-ddd) (jak otestovat každou ze 4 vrstev samostatně) a [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli) (kde jsme autorizaci jen letmo zmínili).
 
 ## 11.01 Tři chyby s autorizací, které se v review opakovaně objevují {#tri-chyby}
 
-Než přejdeme ke správnému přístupu, projděme si tři opakující se chyby. V projektech s neformální DDD strukturou nad Symfony se vyskytují pravidelně. Diagnóza je vždy stejná: chybí rozhodovací rámec, kam které pravidlo patří.
+Tři vzory níže se v code review objevují pravidelně, zejména v projektech, kde DDD běží na Symfony bez ujasněných hranic. Diagnóza je pokaždé stejná: chybí rozhodovací rámec, kam které pravidlo patří.
 
 ### Chyba 1: Vše v controlleru {#tri-chyby-controller-heading}
 
@@ -324,7 +324,7 @@ Pokud váš Voter dělá `$this->repository->find($id)` nebo `$this->em->getRepo
 
 ## 11.05 Aggregate-level – doména sama rozhoduje {#aggregate-level}
 
-Některá pravidla nelze rozumně dát do Voteru. Vyžadují znalost *doménového stavu*, který Voter nemá natáhnout zvenku – typicky časové okno, předchozí stav agregátu, doménové invarianty napříč vlastními entitami uvnitř agregátu. Tato pravidla patří do **aggregate root** a vynucují se vyhozením *doménové výjimky*.
+Některá pravidla do Voteru nepatří. Vyžadují znalost *doménového stavu*, který Voter nemá natáhnout zvenku – typicky časové okno, předchozí stav agregátu, doménové invarianty napříč vlastními entitami uvnitř agregátu. Tato pravidla patří do **aggregate root** a vynucují se vyhozením *doménové výjimky*.
 
 Praktická heuristika:
 
@@ -428,7 +428,7 @@ Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník
 
 ## 11.06 Field-level – read model filtrace {#field-level}
 
-Nejjemnější vrstva. Až dosud jsme řešili *akce* (smí udělat) a *existenci* operace (dá se vůbec); field-level řeší **viditelnost konkrétního pole** během jinak povoleného čtení. Klasický příklad: detail orderu vidí customer i admin, ale sloupec `audit_log` (kdo a kdy editoval) má vidět jen admin.
+Nejjemnější vrstva. Předchozí tři vrstvy řešily *akce* a *existenci* operace; field-level řeší **viditelnost konkrétního pole** během jinak povoleného čtení. Klasický příklad: detail orderu vidí customer i admin, ale sloupec `audit_log` (kdo a kdy editoval) má vidět jen admin.
 
 Existují dva přístupy s odlišnými kompromisy:
 
@@ -507,7 +507,7 @@ Pro necitlivá data Twig if stačí a šetří čas. Pro citlivá data vždy que
 
 ## 11.07 Policy-based přístup (ABAC) {#policy-based}
 
-Když počet pravidel naroste a vrstvení do Voterů přestane být udržitelné (typicky 5+ rolí × 10+ entit × 3+ atributy = 150+ pravidel), je čas přejít z **RBAC** (Role-Based Access Control) na **ABAC** (Attribute-Based Access Control). RBAC říká „role X smí Y“. ABAC vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno.
+Když počet pravidel naroste a vrstvení do Voterů přestane být udržitelné (typicky 5+ rolí × 10+ entit × 3+ atributy = 150+ pravidel), je čas přejít z **RBAC** (Role-Based Access Control) na **ABAC** (Attribute-Based Access Control). RBAC se ptá na roli; ABAC vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno.
 
 V čisté Symfony aplikaci si stačí napsat tenkou vrstvu nad Voter API: `Policy` jako kolekce `Rule` objektů, které se vyhodnotí proti subject/user/context trojici. Pro velké organizace se vyplatí externí policy engine (OPA – Open Policy Agent), který umí policy verzovat, distribuovat a auditovat nezávisle na aplikaci.
 
@@ -584,7 +584,7 @@ final class CancelOrderPolicy implements Policy
 }
 :::
 
-Poznámka: pravidla `subject.status == "PLACED"` a časové okno 24 h jsou v politice pro ilustraci ABAC zápisu. Jak popisuje sekce 12.05, tyto doménové invarianty patří primárně do agregátu. Politika je ověřuje jako pre-check před dosažením domény (obrana do hloubky). Agregát ale musí být zdrojem pravdy a nepřijmout neplatný příkaz ani bez autorizační vrstvy.
+Poznámka: pravidla `subject.status == "PLACED"` a časové okno 24 h jsou v politice pro ilustraci ABAC zápisu. Jak popisuje sekce 11.05, tyto doménové invarianty patří primárně do agregátu. Politika je ověřuje jako pre-check před dosažením domény (obrana do hloubky). Agregát ale musí být zdrojem pravdy a nepřijmout neplatný příkaz ani bez autorizační vrstvy.
 
 Jednoduchý `PolicyEvaluator` používá Symfony ExpressionLanguage komponentu a vyhodnocuje pravidla v daném kontextu:
 
@@ -902,11 +902,11 @@ Tabulkový test má dvě hodnoty navíc oproti klasickému test-per-method pří
 
 ## 11.10 Anti-vzory {#antivzory}
 
-Čtyři opakující se anti-vzory, které se v projektech objevují nejčastěji. Každý je pojmenován, doložen konkrétním příkladem a doplněn náhradou.
+Čtyři anti-vzory následují strukturu „symptom – důsledek – náprava“. Pořadí odpovídá četnosti, s jakou se objevují v projektech, kde rámec ze sekce [11.02](#ctyri-vrstvy) chybí.
 
 ### Anti-vzor 1: Autorizace v controlleru {#anti-controller-heading}
 
-Probrali jsme v sekci [12.01](#tri-chyby). Vyplatí se to zdůraznit znovu, protože jde o nejčastější chybu. Symptom: stejná autorizační podmínka opakovaná v 3+ controllerech, neexistující ve verzích volaných z konzolového commandu nebo Messenger handleru. Náprava: přesun do Voteru + volání `AuthorizationCheckerInterface` v Application Service. Souvisí: [obecné anti-vzory v DDD](/anti-vzory).
+Probrali jsme v sekci [11.01](#tri-chyby). Symptom: stejná autorizační podmínka opakovaná v 3+ controllerech, neexistující ve verzích volaných z konzolového commandu nebo Messenger handleru. Náprava: přesun do Voteru + volání `AuthorizationCheckerInterface` v Application Service. Souvisí: [obecné anti-vzory v DDD](/anti-vzory).
 
 ### Anti-vzor 2: Voter, který načte aggregate z databáze {#anti-fetching-voter-heading}
 
@@ -963,7 +963,7 @@ Doména teď závisí na `Symfony\Component\Security`. Pokud byste chtěli stejn
 :::callout{type="warn"}
 ### Společný jmenovatel anti-vzorů {#anti-summary-heading}
 
-Všechny čtyři anti-vzory vznikají z jediné chyby: *autorizační rozhodnutí se umístilo do nesprávné vrstvy*. Když máte čtyřvrstvý rámec z [12.02](#ctyri-vrstvy) na zřeteli, code review takové chyby odhalí na první pohled.
+Všechny čtyři anti-vzory vznikají z jediné chyby: *autorizační rozhodnutí se umístilo do nesprávné vrstvy*. Když máte čtyřvrstvý rámec z [11.02](#ctyri-vrstvy) na zřeteli, code review takové chyby odhalí na první pohled.
 :::
 
 ## 11.11 Shrnutí {#summary}
@@ -1006,15 +1006,15 @@ Regulované domény (zdravotnictví, finance, GDPR čl. 30) vyžadují audit log
 - question: Mám psát jeden Voter na entitu, nebo víc?
   answer: 'Jeden Voter na entitu, který pokrývá N atributů (VIEW, CANCEL, REFUND, …). V <code>supports()</code> se filtruje podle <code>$subject instanceof Order</code> a podle whitelistu atributů; v <code>voteOnAttribute()</code> se atributy mapují přes <code>match</code> expression na privátní metody. Více Voterů na jednu entitu se vyplatí jen tehdy, když permissions využívají úplně jiný subset závislostí (typicky owner-based vs. role-based) a chcete je nezávisle testovat. Detail v <a href="#use-case-voter">sekci o Voteru</a>.'
 - question: Smí Voter načítat aggregate z databáze?
-  answer: 'Ne. Voter dostává <code>$subject</code> jako parametr; handler ho už načetl a předává v paměti. Voterové fetchování je anti-vzor (<a href="#anti-fetching-voter-heading">12.10</a>) – vede k duplicate query, race condition a pomalé testovací sadě. Pokud Voter potřebuje další data, předajte je přes konstruktor (např. config) nebo přes obohacený DTO subject, ne přes repository.'
+  answer: 'Ne. Voter dostává <code>$subject</code> jako parametr; handler ho už načetl a předává v paměti. Voterové fetchování je anti-vzor (<a href="#anti-fetching-voter-heading">11.10</a>) – vede k duplicate query, race condition a pomalé testovací sadě. Pokud Voter potřebuje další data, předajte je přes konstruktor (např. config) nebo přes obohacený DTO subject, ne přes repository.'
 - question: Kdy stačí ROLE_USER a kdy je třeba attribute-based přístup?
-  answer: 'RBAC (role) stačí, dokud platí „role popisuje permissions sama o sobě“ – ROLE_ADMIN smí všechno, ROLE_REFUND_AGENT smí refundy bez ohledu na konkrétní entitu. Jakmile permissions závisí na vztazích (vlastnictví, tenant, časové okno, stav agregátu), RBAC explodne – vznikají hyper-specific role typu ROLE_TENANT_42_ORDER_AGENT. Tehdy přejít na ABAC (<a href="#policy-based">12.07</a>): permissions vyhodnocují atributy subjektu, uživatele a kontextu proti policy.'
+  answer: 'RBAC (role) stačí, dokud platí „role popisuje permissions sama o sobě“ – ROLE_ADMIN smí všechno, ROLE_REFUND_AGENT smí refundy bez ohledu na konkrétní entitu. Jakmile permissions závisí na vztazích (vlastnictví, tenant, časové okno, stav agregátu), RBAC explodne – vznikají hyper-specific role typu ROLE_TENANT_42_ORDER_AGENT. Tehdy přejít na ABAC (<a href="#policy-based">11.07</a>): permissions vyhodnocují atributy subjektu, uživatele a kontextu proti policy.'
 - question: Co když máme 100 různých rolí?
   answer: 'To je obvykle příznak, že role replikují data, která patří do entit. Místo ROLE_TENANT_42_ADMIN, ROLE_TENANT_43_ADMIN, … zaveďte atribut <code>user.tenantId</code> + jednu generickou roli ROLE_TENANT_ADMIN a v Voteru ověřte, že <code>user.tenantId == subject.tenantId</code>. Drasticky to zjednoduší správu uživatelů, audit a delegaci. Detail v <a href="#multi-tenancy">sekci o multi-tenancy</a>.'
 - question: Smí doménový Aggregate záviset na Symfony Security komponentě?
-  answer: 'Ne. Doména musí být framework-agnostic – bez ní nelze unit-testovat bez Kernel, nelze sdílet kód mezi web a CLI, nelze migrovat na jiný framework. Pokud potřebuje aggregate „znát“ uživatele, dostane <em>vlastní</em> doménový typ (<code>CustomerId</code>, doménový <code>AppUser</code>). Aplikační handler překládá Symfony <code>UserInterface</code> na doménový typ. Detail v anti-vzoru 4 v <a href="#anti-symfony-user-domain-heading">12.10</a>.'
+  answer: 'Ne. Doména musí být framework-agnostic – bez ní nelze unit-testovat bez Kernel, nelze sdílet kód mezi web a CLI, nelze migrovat na jiný framework. Pokud potřebuje aggregate „znát“ uživatele, dostane <em>vlastní</em> doménový typ (<code>CustomerId</code>, doménový <code>AppUser</code>). Aplikační handler překládá Symfony <code>UserInterface</code> na doménový typ. Detail v anti-vzoru 4 v <a href="#anti-symfony-user-domain-heading">11.10</a>.'
 - question: Kam ukládat audit log autorizačních rozhodnutí?
-  answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně doporučuji decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz sekci o testování v <a href="#testing">12.09</a>.'
+  answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně doporučuji decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz sekci o testování v <a href="#testing">11.09</a>.'
 :::
 
 ## 11.12 Další četba {#further-reading}
