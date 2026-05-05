@@ -44,7 +44,7 @@ event logu; žádná informace se nikdy nepřepisuje ani nemaže.
 | Vlastnost | CRUD (tradiční) | Event Sourcing |
 |---|---|---|
 | Co se ukládá | Aktuální stav entity | Sekvence událostí (změn) |
-| Auditní log | Vyžaduje extra implementaci | Zabudován ve struktuře |
+| Auditní log | Vyžaduje další implementaci | Zabudován ve struktuře |
 | Obnova stavu | Přímé čtení z tabulky | Replay event streamu |
 | Temporální dotazy | Obtížné / nemožné | Přirozené (replay do libovolného bodu) |
 | Složitost implementace | Nízká až střední | Vysoká |
@@ -1705,7 +1705,7 @@ zvážit, zda přínosy pro daný kontext převažují nad náklady na implement
 
 ### Vhodné případy užití
 
-- **Auditní log jako doménový požadavek** – Finanční systémy, zdravotnické záznamy nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log poskytuje přirozeně a bez nutnosti extra implementace.
+- **Auditní log jako doménový požadavek** – Finanční systémy, zdravotnické záznamy nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. ES auditní log poskytuje přirozeně a bez nutnosti další implementace.
 - **Komplexní doménová logika s bohatými stavovými přechody** – Agregáty procházejí mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové systémy, workflow enginy, bankovní transakce.
 - **Temporální dotazy** – Potřeba „přehrát“ stav systému k libovolnému bodu v minulosti (debugging, analýza, „what-if“ scénáře). U ES stačí replay eventů do daného timestampu.
 - **Event-driven integrace** – Systém produkuje události, které konzumují jiné bounded contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena – Event Store je zdrojem pravdy pro integraci.
