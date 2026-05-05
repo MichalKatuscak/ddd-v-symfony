@@ -1719,7 +1719,7 @@ přínosy převažují nad náklady na implementaci a provoz.
 :::callout{type="warn"}
 ### Varování: Event Sourcing výrazně zvyšuje složitost systému {#es-warning-heading}
 
-Event Sourcing není „lepší CRUD“. Cenu zaplatíte na všech úrovních:
+Event Sourcing CRUD nenahrazuje. Cenu zaplatíte na všech úrovních:
 **infrastruktura** (Event Store, event bus, snapshot store),
 **doménový model** (apply metody, immutabilita událostí, verzování schémat),
 **testování** ([given/when/then scénáře](/testovani-ddd) s event streamy) a
