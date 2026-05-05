@@ -67,7 +67,7 @@ nevhodný z několika důvodů:
   nasazení a vývoje jednotlivých kontextů.
 :::
 
-Pro ilustraci uvažujme o scénáři selhání: systém úspěšně strhne platbu zákazníkovi
+Příklad selhání: systém úspěšně strhne platbu zákazníkovi
 (krok 2), ale při rezervaci skladu zjistí, že zboží není dostupné (krok 3 selže).
 Zákazník přišel o peníze, zboží nemá a systém je v **nekonzistentním stavu**.
 Bez mechanismu, který by tento stav detekoval a napravil, zůstane zákazník bez peněz
@@ -315,7 +315,7 @@ Hlavní výhodou choreografie je **volné provázání** (loose coupling) mezi
 kontexty. Každý reaguje pouze na události, které mu přicházejí, a o ostatních nic
 neví. Přidání nového kontextu (například Loyalty, který přidělí body za objednávku)
 je triviální: stačí vytvořit nový handler naslouchající `OrderPlaced`. Pro
-jednoduché procesy se dvěma až třemi kroky je choreografie přímočaré řešení.
+procesy o dvou až třech krocích vystačí s choreografií.
 
 ## 14.04 Limity choreografie {#limity-choreografie}
 
@@ -371,8 +371,8 @@ a spouští kompenzace. Tímto centrálním místem je [orchestrátor
 
 Choreografie je stále legitimním řešením pro jednoduché procesy se dvěma až třemi
 kroky, kde je tok lineární a selhání řeší jediná kompenzace. Pokud proces zahrnuje
-pouze „vytvoření objednávky → stržení platby → potvrzení“, choreografie zůstává
-přímočařejší než plnohodnotný Process Manager. Orchestrace má smysl až ve chvíli,
+pouze „vytvoření objednávky → stržení platby → potvrzení“, choreografie ušetří
+kód oproti plnohodnotnému Process Manageru. Orchestrace má smysl až ve chvíli,
 kdy se objeví výše popsané problémy.
 :::
 
@@ -561,9 +561,9 @@ final class OrderProcessManager
 :::
 :::
 
-Orchestrace přináší oproti choreografii několik praktických výhod: celý doménový proces
+Orchestrace přináší oproti choreografii několik výhod: celý doménový proces
 je popsán na **jediném místě**, takže vývojář okamžitě vidí kompletní tok
-od objednávky po potvrzení. Debugování je přímočařejší – stačí zkontrolovat stav
+od objednávky po potvrzení. Při debugování stačí zkontrolovat stav
 ságy v databázi a hned je jasné, ve kterém kroku proces stojí. Rozšíření procesu
 o nový krok (například Fraud Detection mezi platbu a sklad) znamená doplnit jednu
 metodu do Process Manageru a jeden nový stav do enumu. Existující kontexty se nemění.
