@@ -107,7 +107,7 @@ Společným jmenovatelem všech tří chyb je absence rozhodovacího rámce. Vý
 
 ## 11.02 Čtyři vrstvy autorizace {#ctyri-vrstvy}
 
-Autorizační rozhodnutí v DDD aplikaci nikdy nepadá na jednom místě – padá ve čtyřech postupných vrstvách, každá s vlastní otázkou, vlastním Symfony nástrojem a vlastní granularitou. Vrstvy fungují jako *filtry*: každá další odpovídá jemnější otázku a předpokládá, že předchozí vrstva už řekla „ano“.
+Autorizační rozhodnutí padá ve čtyřech postupných vrstvách. Každá vrstva má vlastní otázku, Symfony nástroj i granularitu. Vrstvy fungují jako *filtry*: každá další odpovídá jemnější otázku a předpokládá, že předchozí vrstva už řekla „ano“.
 
 :::diagram{fig="12.2-A" title="4 vrstvy autorizace v DDD aplikaci" src="images/diagrams/19_authorization/policy_layers.svg"}
 :::
@@ -125,7 +125,7 @@ Pravidlo: každé autorizační rozhodnutí patří do *právě jedné* vrstvy. 
 
 ## 11.03 Edge – Symfony firewall a access_control {#edge}
 
-Edge je nejhrubší vrstva a leží mimo doménový kód. Odpovídá pouze na otázku **„kdo je vůbec na druhém konci socketu?“** – anonymous, authenticated, případně role-based pro hrubě dělené sekce (`/admin/*`, `/api/v1/*`). Doménová pravidla typu „zákazník X smí na tuto objednávku“ sem *nepatří* – to je use-case-level.
+Edge je nejhrubší vrstva a leží mimo doménový kód. Odpovídá pouze na otázku **„kdo je vůbec na druhém konci socketu?“** – anonymous, authenticated, případně role-based pro hrubě dělené sekce (`/admin/*`, `/api/v1/*`). Doménová pravidla typu „zákazník X smí na tuto objednávku“ patří o vrstvu výš (use case).
 
 :::code{language="yaml" filename="config/packages/security.yaml"}
 # config/packages/security.yaml
@@ -403,7 +403,7 @@ Vlastnosti tohoto kódu:
 - **Idempotentní pomocná metoda `isCancellable()`.** Voter ani Twig ji nevolají; používá ji UI pro skrytí tlačítka (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita.
 - **Domain Events.** Po úspěšné operaci se do `$releasedEvents` přidá `OrderCancelled`. Aplikační handler je po `repository->save()` publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
 
-Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [předchozí sekci](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a obě jsou potřeba.
+Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [předchozí sekci](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a nutné.
 
 ### End-to-end trace: cancellation request {#aggregate-trace-heading}
 
@@ -418,7 +418,7 @@ Pro úplnost si projděme, co se konkrétně stane, když zákazník Petr klikne
 7. **Persistence + outbox.** Handler zavolá `$repo->save($order)`; v jedné transakci se uloží stav agregátu i OrderCancelled event do outbox tabulky.
 8. **Field-level (response).** Controller vrátí 200 OK. Pokud by Petr nebyl admin a v response figuroval `audit_log`, read model by ho vyfiltroval – na svém vlastním orderu vidí status, ale ne kdo a kdy ho editoval.
 
-Několik vrstev kontroly v jediné cestě požadavku – a každá vrstva selže *jiným* způsobem, s *jiným* HTTP statusem, s *jinou* chybovou hláškou. To je rozdíl mezi doménově navrženou autorizací a generickým „Access denied“.
+Každá z těchto vrstev selže po svém: jiný HTTP status, jiná chybová hláška, jiné logy. Generické „Access denied“ tu nestačí.
 
 :::callout{type="note"}
 ### 403 vs. 409: která chyba kdy? {#aggregate-403-vs-409-heading}
