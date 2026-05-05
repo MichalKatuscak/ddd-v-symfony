@@ -331,9 +331,9 @@ org chart vrátí každý refaktor.
 :::callout{type="note"}
 ### Reálný příběh: Amazon, 2002 {#inverse-real-world-heading}
 
-Klasická case study Inverse Conway Maneuver: Jeff Bezos v roce 2002 vydal interní
+Klasická případová studie Inverse Conway Maneuver: Jeff Bezos v roce 2002 vydal interní
 nařízení, že *všechny týmy budou komunikovat výhradně přes API* – žádné
-sdílené databáze, žádné funkční volání napříč týmy, žádné back-channel komunikace.
+sdílené databáze, žádné funkční volání napříč týmy, žádné neformální komunikační kanály.
 Týmy, které to nedodrží, budou propuštěny.
 
 Bezos nepředepsal architekturu mikroservis – předepsal **komunikační režim

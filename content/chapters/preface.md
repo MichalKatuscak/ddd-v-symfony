@@ -97,7 +97,7 @@ Tři kapitoly s odlišným úhlem na to, co se v DDD pokazí. **Kapitola 20** po
 
 ### Část 8 – Praktické příklady (kap. 23–24) {#cast-8}
 
-Tři krátké příklady (e-shop, blog, správa uživatelů) jako shrnující průřez. Závěrečná case study popisuje implementaci systému pro správu projektů krok za krokem – od doménové analýzy přes architekturu, agregáty, CQRS až po read modely s reconciliation.
+Tři krátké příklady (e-shop, blog, správa uživatelů) jako shrnující průřez. Závěrečná případová studie popisuje implementaci systému pro správu projektů krok za krokem – od doménové analýzy přes architekturu, agregáty, CQRS až po read modely s reconciliation.
 
 > **Pozn.:** Mimo hlavní řadu kapitol existuje na webu ještě [DDD a umělá inteligence](/ddd-a-umela-inteligence) – přehled toho, co o vztahu DDD a AI říkají Eric Evans, Martin Fowler, Kent Beck a další. V tištěné a EPUB verzi knihy tato kapitola není, protože téma se v posledních letech intenzivně vyvíjí a aktualizace na webu jsou pružnější.
 
