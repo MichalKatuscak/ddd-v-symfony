@@ -27,7 +27,7 @@ zápisem do databáze a dispatchem do Messenger transportu je síťový skok a d
 systémy – a každý z nich může selhat samostatně. Důsledkem je *dual-write problem*,
 jeden z nejčastějších zdrojů tichých nekonzistencí v event-driven architekturách.
 
-**Transactional Outbox Pattern** je kanonické řešení dual-write problému;
+**Transactional Outbox Pattern** je standardní řešení dual-write problému;
 jeho symetrický protějšek **Idempotent Inbox Pattern** zajišťuje deduplikaci
 na straně subscriberů. V dalších sekcích si projdeme původ vzoru v práci Pata Hellanda
 *Life Beyond Distributed Transactions* (2007), schéma outbox tabulky s povinným
@@ -139,7 +139,7 @@ Praxe je ale jiná:
   i [mikroslužeb](/ddd-a-microservices).
 
 Outbox Pattern obchází tato omezení tím, že **nepotřebuje globálního koordinátora ani
-XA transport**: vystačí si s jednou ACID transakcí v té DB, kterou stejně používáte
+XA transport**: vystačí si s jednou ACID transakcí v DB, kterou už máte
 pro persistenci agregátu.
 :::
 
@@ -734,7 +734,7 @@ funguje jako logický replikační odběratel databáze.
 Tok je následující: aplikace zapíše do `outbox` jako obvykle (žádný kód se
 nemění). Debezium vidí `INSERT` v WAL, vytvoří Kafka record a pošle do
 odpovídajícího topicu (typicky `outbox.event.OrderPlaced`). Outbox řádek
-v DB *není ničím* updatován – je čistě immutable log a kompakce probíhá řízeně
+v DB se neupdatuje, zůstává jako čistě immutable log. Kompakce probíhá řízeně
 cron jobem.
 
 | Aspekt | Polling worker (A) | Debezium / CDC (B) |
@@ -1428,7 +1428,7 @@ Standardní vzor:
   na disk a vacuum.
 - **Zvážit sampling pro low-priority eventy** – některé eventy (audit, metrics)
   jsou tolerantní ke ztrátě. Při sustained backpressure můžete řízeně dropnout.
-  Doménové eventy (`OrderPlaced`) ale **nikdy** – ty musí dorazit.
+  Doménové eventy (`OrderPlaced`) zahodit nelze – ty musí dorazit.
 
 ## 15.09 Anti-vzory {#antivzory}
 
@@ -1492,7 +1492,7 @@ Pravidlo: *jeden relay singleton, nebo SKIP LOCKED.*
 :::callout{type="warn"}
 ### Publish před commitem, ne v doctrine_transaction middleware {#anti-publish-before-commit-heading}
 
-Volání `messenger:dispatch` před tím, než `EntityManager::flush()` opravdu zapíše do DB, je učebnicový dual-write. Pokud nemáte v
+Volání `messenger:dispatch` před tím, než `EntityManager::flush()` opravdu zapíše do DB, je dual-write přímo z učebnice. Pokud nemáte v
 `messenger.yaml` aktivní middleware `doctrine_transaction`,
 **vždy** obalujte handler explicitně do `wrapInTransaction`.
 Výchozí bus chování v Symfony 8 je *auto-commit per dispatch*, ne per
