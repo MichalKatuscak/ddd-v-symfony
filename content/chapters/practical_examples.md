@@ -19,18 +19,17 @@ difficulty: 3
 ---
 
 Tato kapitola je **shrnující průřez** předchozími kapitolami. Tři krátké příklady ukazují,
-jak se vzory z taktického DDD, CQRS a Implementace v Symfony skládají do funkční aplikace.
-Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Pro detailní implementace
-(plné Doctrine mapování, testy, okrajové případy) odkazuje na předchozí kapitoly.
+jak vzory z taktického DDD, CQRS a Implementace v Symfony drží pohromadě jako funkční aplikace.
+Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Detailní implementace
+(plné Doctrine mapování, testy, okrajové případy) najdete v předchozích kapitolách.
 
-Pro hluboký ponor do reálného projektu pokračujte v navazující [Případové studii](/pripadova-studie),
-která pokrývá systém pro správu projektů krok za krokem.
+Reálný projekt rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
 E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart** (rozpracovaný nákup)
-a **Order** (potvrzená transakce). Komunikace mezi nimi probíhá přes doménovou událost
-`CartCheckedOut`, která spustí vytvoření `Order` agregátu.
+a **Order** (potvrzená transakce). Mezi nimi přechází doménová událost `CartCheckedOut`,
+která vytvoří `Order` agregát.
 
 :::diagram{fig="24.1-A" title="E-shop: bounded contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
 :::
@@ -59,8 +58,8 @@ src/
 
 ### Klíčový agregát: Cart {#cart-aggregate}
 
-Agregát `Cart` chrání invariant „položka s týmž `productId` se nepřidává duplicitně, ale
-zvyšuje se její quantity“. Skeleton:
+Agregát `Cart` hlídá pravidlo: stejný `productId` se nepřidává jako nová položka, ale navyšuje
+quantity stávající. Skeleton:
 
 :::code{language="php" filename="src/Cart/Domain/Model/Cart.php (skeleton)"}
 final class Cart extends AggregateRoot
@@ -113,13 +112,13 @@ final class AddItemToCartHandler
 }
 :::
 
-Plné CQRS implementaci s validací, autorizací a outbox patternem ukazuje [CQRS](/cqrs) a
+Plnou CQRS implementaci s validací, autorizací a outbox patternem najdete v [CQRS](/cqrs) a
 [Outbox Pattern](/outbox-pattern).
 
 ## 23.02 Příklad: Blog {#blog}
 
-Blogová aplikace s jedním Bounded Contextem (Blog), dvěma agregáty (`Post`, `Comment`) a
-sekcemi pro vytvoření příspěvku, výpis a detail.
+Blog drží jeden Bounded Context se dvěma agregáty (`Post`, `Comment`) a sekcemi pro vytvoření
+příspěvku, výpis a detail.
 
 :::diagram{fig="24.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
@@ -144,7 +143,7 @@ src/
 ### Klíčový agregát: Post {#post-aggregate}
 
 Agregát `Post` se vytváří přes named constructor `create()`, který emituje `PostCreated` event.
-Vlastní invarianty (titul má 3–255 znaků, autor není prázdný) jsou vynucené v konstruktoru.
+Konstruktor vynucuje invarianty: titul 3–255 znaků, neprázdný autor.
 
 :::code{language="php" filename="src/Blog/Domain/Model/Post.php (skeleton)"}
 final class Post extends AggregateRoot
@@ -199,9 +198,8 @@ z eventů) viz [CQRS – ViewModely a Read Modely](/cqrs#view-models) a [Výkonn
 
 ## 23.03 Příklad: Správa uživatelů {#user-management}
 
-Bounded Context **UserManagement** s jediným agregátem `User` a třemi sub-features: registrace,
-autentizace, profil. Integruje se se Symfony Security komponentou (implementuje
-`UserInterface`).
+Bounded Context **UserManagement** drží jediný agregát `User` a tři sub-features: registraci,
+autentizaci, profil. Agregát se integruje se Symfony Security (implementuje `UserInterface`).
 
 :::diagram{fig="24.3-A" title="Správa uživatelů: feature slices" src="images/diagrams/7_examples/users/diagram.svg"}
 :::
@@ -294,23 +292,22 @@ viz [Autorizace v DDD](/autorizace-v-ddd).
 
 ## Závěr
 
-Tři příklady ukazují stejný vzor: kontroler → command bus → handler → agregát → repozitář →
-event. Drobné variace (počet Bounded Contexts, počet agregátů, integrace se Symfony Security)
-nemění základní strukturu. Doménové invarianty jsou v agregátu, aplikační orchestrace v handleru,
-infrastruktura v repozitáři.
+Všechny tři příklady jedou stejný řetězec: kontroler → command bus → handler → agregát →
+repozitář → event. Variace v počtu Bounded Contexts, počtu agregátů a integraci se Symfony
+Security tu kostru nemění. Doménové invarianty patří do agregátu, aplikační orchestraci nese
+handler, infrastrukturu drží repozitář.
 
-Pro hluboký ponor do reálného projektu (s plnou doménovou analýzou, kontextovou mapou, read
-modely, reconciliation a důsledky pro konzistenci) pokračujte v navazující [Případové
-studii](/pripadova-studie). Pokrývá systém pro správu projektů krok za krokem od event stormingu
-po deployment.
+Reálný projekt s plnou doménovou analýzou, kontextovou mapou, read modely, reconciliation a
+důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Vede
+systémem pro správu projektů krok za krokem od event stormingu po deployment.
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
   answer: 'Vertikální slice určuje, jak kód organizovat (podle feature), CQRS určuje, jak oddělit čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
-  answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Strukturu adresářů je vhodné použít jako výchozí šablonu a postupně ji rozšiřovat podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
+  answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Adresářová struktura slouží jako výchozí šablona; rozšiřuje se podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
 - question: Kde najdu plnou implementaci agregátu se všemi metodami?
   answer: 'V kapitolách <a href="/navrh-agregatu">Návrh agregátu</a> (kompletní agregát Order s invariantami, optimistickým zámkem, doménovými událostmi a Doctrine mappingem) a <a href="/implementace-v-symfony">Implementace v Symfony 8</a> (User agregát s Symfony Security, custom typy pro hodnotové objekty, repozitář s outbox patternem).'
 - question: Proč je v každém příkladu jen jeden Bounded Context kromě e-shopu?
-  answer: 'Pro shrnující příklady jsou jednodušší případy s jedním kontextem srozumitelnější. E-shop má dva kontexty (Cart a Order), aby ilustroval cross-context komunikaci přes doménovou událost <code>CartCheckedOut</code>. V reálném projektu by každý ze tří příkladů měl pravděpodobně více kontextů (Identity, Billing, Notifications), ale to už je doména <a href="/pripadova-studie">Případové studie</a>.'
+  answer: 'Pro shrnující kapitolu fungují srozumitelněji jednodušší případy s jedním kontextem. E-shop má dva kontexty (Cart a Order), aby ilustroval cross-context komunikaci přes doménovou událost <code>CartCheckedOut</code>. V reálném projektu by každý ze tří příkladů měl pravděpodobně více kontextů (Identity, Billing, Notifications), ale to už je doména <a href="/pripadova-studie">Případové studie</a>.'
 :::
