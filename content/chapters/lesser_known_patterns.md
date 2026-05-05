@@ -688,8 +688,8 @@ výrazně dražší.
 
 ### Domain Service vs. Application Service vs. Infrastructure Service {#ds-srovnani}
 
-V kódu se *nějaká* „Service“ třída vyskytne téměř vždy. Otázkou je,
-kterou ze tří odlišných rolí daná Service hraje. Následující srovnávací tabulka shrnuje
+V kódu se třída se sufixem `Service` vyskytne téměř vždy.
+Liší se jen v tom, kterou ze tří rolí hraje. Následující srovnávací tabulka shrnuje
 rozdíly, na které se v code review ptáme:
 
 | Aspekt | Domain Service | Application Service | Infrastructure Service |
@@ -1337,7 +1337,7 @@ doménovou strukturu.
   mapováním na adresáře. Vynucení hranic patří do CI přes phparkitect/deptrac.
 
 Společně drží agregát v rozumné velikosti, doménu oddělenou od infrastruktury
-a projekt čitelný po roce vývoje. Nasazení je iterativní – ne najednou.
+a projekt čitelný po roce vývoje. Nasazují se postupně, po jednom.
 První iterace stačí: *1 modul = 1 BC*, named constructor pro 2–3 hlavní
 agregáty, Domain Service tam, kde jste dosud měli „*Service“ bez
 vlastníka. Specifications nasazujte tehdy, když vidíte druhou nebo třetí kombinaci
