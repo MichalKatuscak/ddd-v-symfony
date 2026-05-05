@@ -24,7 +24,7 @@ DDD se nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí 
 
 Standardní reakce vývojářského týmu, který má zahájit nový projekt nebo přepsat existující, je *„dejte nám specifikaci a my to naprogramujeme“*. Specifikace ale typicky neexistuje ve formě, která by stačila. Existují wiki stránky staré tři roky, e-mailová vlákna, ticketovací systém s 1 800 issues, a čtyři lidé, kteří „to vědí“. Žádný z těchto zdrojů není autoritativní – každý zachycuje doménu z jiného úhlu, v jiné době a často si protiřečí.
 
-To je v pořádku. Doména není *knihovna*, kterou lze přečíst; je to *znalostní síť*, která žije v hlavách doménových expertů. Když se vás obchodní ředitel a šéf logistiky liší v tom, co znamená „odeslaná objednávka“, není to bug, ale signál. Existují dva pohledy, dva kontexty, a tudíž – pravděpodobně – i dva [Bounded Contexty](/zakladni-koncepty#bounded-contexts). Workshop je formát, ve kterém tyto kontradikce **vidíte v reálném čase** a řešíte je společně. Wiki vám je nikdy neukáže; vždy zachytí pohled toho, kdo ji psal.
+To je v pořádku. Doména žije v hlavách doménových expertů jako *znalostní síť*; přečíst ji jako knihovnu nelze. Když se vás obchodní ředitel a šéf logistiky rozcházejí v tom, co znamená „odeslaná objednávka“, je to signál. Existují dva pohledy, dva kontexty, a tudíž – pravděpodobně – i dva [Bounded Contexty](/zakladni-koncepty#bounded-contexts). Workshop je formát, ve kterém tyto kontradikce **vidíte v reálném čase** a řešíte je společně. Wiki vám je nikdy neukáže; vždy zachytí pohled toho, kdo ji psal.
 
 Eric Evans v *Domain-Driven Design* (2003) píše, že [Ubiquitous Language](/co-je-ddd#strategic-design) nelze odvodit z dokumentů; vzniká pouze v dialogu. Brandolini, Hofer a Schwentner přidávají k tomuto pozorování praktickou metodologii: konkrétní notaci, konkrétní harmonogram, konkrétní role v místnosti.
 
@@ -180,7 +180,7 @@ Customer (actor)
                     → PaymentReceived (event)
 :::
 
-Tato sekvence není kód – je to mapa. Ale je z ní **okamžitě vidět**, že budete potřebovat:
+Sekvence ještě není kód, slouží jako mapa pro implementaci. Ale je z ní **okamžitě vidět**, že budete potřebovat:
 
 - Application Service `PlaceOrderHandler` v Ordering BC.
 - [Process Manager](/sagy-a-process-managery), který koordinuje `OrderPlaced → ReserveStock → ChargeCard` přes BC hranice.
@@ -392,7 +392,7 @@ Workshop, který je špatně připravený nebo špatně řízený, je horší ne
 :::callout{type="warn"}
 ### „Doménoví experti nemají čas, uděláme to bez nich.“ {#anti-no-experts-heading}
 
-**Bez doménových expertů to není workshop, ale brainstorming vývojářů**, kteří si vymýšlí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný – chybí mu validní kontradikce a hot spoty.
+**Bez doménových expertů jde jen o brainstorming vývojářů**, kteří si vymýšlí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný – chybí mu validní kontradikce a hot spoty.
 
 **Řešení:** nepřesvědčujte experty na 4 hodiny. Domluvte si *90 minut Big Picture*. Téměř vždy se to dá v kalendáři vyargumentovat. A pokud opravdu nikdo z expertů nemůže, workshop odložte – neudělejte ho jen proto, že máte rezervovanou místnost.
 :::
@@ -668,7 +668,7 @@ Event Storming a Domain Storytelling jsou dvě konkrétní, prověřené technik
 
 - **Event Storming** ve třech úrovních (Big Picture / Process Level / Design Level) je nástrojem pro *širokoúhlé* mapování domény. Big Picture objevuje Bounded Contexty a pivotal events. Process Level zhušťuje jeden BC do Command-Event-Policy sekvencí. Design Level dodává agregáty s invarianty.
 - **Domain Storytelling** je *úzkoúhlý teleobjektiv* pro hloubkovou diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity je intuitivní a vhodná pro kontexty, kde Event Storming je „příliš velký“.
-- **Vychází se ven, ne dovnitř.** Workshop začíná u doménového experta, ne u datového modelu. Eventy se píšou v minulém čase, agregáty se objevují až nakonec.
+- **Workshop začíná u doménového experta, ne u datového modelu.** Eventy se píšou v minulém čase, agregáty se objevují až nakonec.
 - **Workshop bez follow-upu je promarněný.** Foto, eventy, hot spoty a Context Map musí jít do repa do 24 hodin a do kódu do 1-2 sprintů.
 - **Re-stormujte pravidelně.** Doména se vyvíjí; mapa zastará. 1× za 6-12 měsíců nebo po každém velkém produktovém rozhodnutí.
 
