@@ -19,16 +19,15 @@ reading_time: 20
 difficulty: 1
 ---
 
-Umělá inteligence mění způsob, jakým navrhujeme, píšeme a provozujeme software. To přirozeně
-vyvolává otázku: jsou některé architektonické přístupy pro éru AI vhodnější než jiné? Nabízí
-Domain-Driven Design výhody, které s příchodem LLM nabývají na váze – nebo naopak přidává
-zbytečnou komplexitu v době, kdy AI dokáže generovat kód z jednoduchého popisu?
+Umělá inteligence mění způsob, jakým navrhujeme, píšeme a provozujeme software. Otázka stojí takto:
+jsou některé architektonické přístupy pro éru AI vhodnější než jiné? Nabízí Domain-Driven Design
+výhody, které s příchodem LLM nabývají na váze – nebo naopak přidává zbytečnou komplexitu v době,
+kdy AI dokáže generovat kód z krátkého popisu?
 
-Tento článek mapuje, co o vztahu DDD a umělé inteligence říkají přední autority softwarového
+Kapitola mapuje, co o vztahu DDD a umělé inteligence říkají přední autority softwarového
 inženýrství – Eric Evans, Martin Fowler, Kent Beck, Vaughn Vernon, Nick Tune, Alberto Brandolini
-a DHH. Cílem je objektivní přehled jejich pozic, argumentů a dat, nikoli obhajoba ani kritika
-konkrétního přístupu. Článek není srovnání ani návod krok za krokem – je to průřez tím, co víme a čeho
-se ještě teprve učíme.
+a DHH. Jde o přehled jejich pozic, argumentů a dat, nikoli obhajobu ani kritiku
+konkrétního přístupu. Text je průřez tím, co o tématu zatím víme a kde stále tápeme.
 
 ## ai.01 Ubiquitous language jako rozhraní pro LLM {#ubiquitous-language}
 
@@ -57,11 +56,11 @@ nikoli jako průřezovou vrstvou přes celý systém.
 
 Martin Fowler na toto téma navazuje z jiného úhlu. Ve svých poznámkách o přípravě na
 nedeterministické výpočty zmiňuje DSL a doménově specifický jazyk jako nástroj pro rigorózní
-promptování LLM. Argument je jednoduchý: čím precizněji definujeme pojmy a vztahy v ubiquitous
-language, tím menší je prostor pro ambiguitu v promptu, tím předvídatelnější jsou výstupy
-modelu. Precizní jazyk redukuje entropii na vstupu a tím i rozptyl na výstupu.
+promptování LLM. Logika za tím: precizně definované pojmy a vztahy v ubiquitous language
+zužují prostor pro ambiguitu v promptu, a tím i rozptyl výstupů modelu. Pevný jazyk
+na vstupu znamená méně entropie na výstupu.
 
-Protiváhu k tomuto nadšení tvoří David Heinemeier Hansson (DHH). Na konferenci Rails World 2025
+Opačný pól drží David Heinemeier Hansson (DHH). Na konferenci Rails World 2025
 a v rozhovorech pro The New Stack DHH argumentoval, že Ruby je dostatečně čitelné na to,
 aby LLM chápal kód bez speciální terminologie. Preferovaným formátem pro AI je podle něj Markdown,
 nikoli doménový jazyk definovaný formálními pravidly. DHH poukazuje na to, že Rails 8.1 přidal
@@ -70,11 +69,11 @@ Z jeho pohledu je ubiquitous language užitečná myšlenka pro komplexní enter
 Pro většinu webových aplikací je ale konvence nad konfigurací – prostá angličtina nebo čeština
 v komentářích a názvech – dostatečně výmluvná.
 
-Pro úplnost: velké jazykové modely pracují s přirozeným jazykem jako svým primárním médiem.
+Velké jazykové modely pracují s přirozeným jazykem jako svým primárním médiem.
 Ubiquitous language v DDD je precizní podmnožina přirozeného jazyka – terminologie domény
-zbavená nejednoznačností a obohacená o doménová pravidla. To z ní dělá přirozený most mezi
-doménovými experty a LLM: pojmy, které jsou jasné lidem, jsou jasné i modelu. Otázka zní,
-zda náklady na vybudování a udržení ubiquitous language jsou proporcionální k výhodám –
+zbavená nejednoznačností a obohacená o doménová pravidla. Funguje proto jako most mezi
+doménovými experty a LLM: pojmy srozumitelné lidem jsou srozumitelné i modelu. Otázka zní,
+zda náklady na vybudování a udržení ubiquitous language odpovídají získaným výhodám –
 a odpověď se liší projekt od projektu. Definici a roli ubiquitous language v DDD popisuje
 kapitola [Základní koncepty DDD](/zakladni-koncepty#ubiquitous-language).
 
@@ -140,14 +139,14 @@ terminologii a omezení pro konkrétní kontext – přesně to, co DDD nazývá
 s ubiquitous language. Tím, že vývojáři tyto soubory píší, provádějí implicitně DDD
 modelování, aniž by to tak nutně nazývali.
 
-Protiváhu tvoří data z GitClear z roku 2024, analyzovaná Visual Studio Magazine. Code churn
-je podíl řádků přepsaných nebo smazaných do dvou týdnů od vytvoření. Podle tohoto výzkumu
-se u AI generovaného kódu v roce 2024 přibližně zdvojnásobil oproti stavu
-z roku 2021 před nástupem AI. GitClear hovoří o kódu, který je „lokálně koherentní,
+Druhý pohled přinášejí data z GitClear z roku 2024, analyzovaná Visual Studio Magazine. Code
+churn je podíl řádků přepsaných nebo smazaných do dvou týdnů od vytvoření. Podle tohoto výzkumu
+se u AI generovaného kódu v roce 2024 přibližně zdvojnásobil oproti stavu z roku 2021,
+před nástupem AI. GitClear popisuje výsledek jako kód „lokálně koherentní,
 ale architektonicky nekonzistentní“. Každý soubor nebo funkce může být syntakticky správná
 a pro svůj bezprostřední účel funkční. Větší architektonické vzory – hranice
-mezi moduly, zachování invariantů nebo konzistentní pojmenování napříč kódovou bází – jsou
-ale porušeny. Bounded contexts jsou právě odpovědí na tento problém, ale je otázka, zda samotná
+mezi moduly, zachování invariantů nebo konzistentní pojmenování napříč kódovou bází – ale
+drhnou. Bounded contexts řeší přesně tento problém. Otevřená zůstává otázka, zda samotná
 existence bounded contextu stačí, nebo zda AI agent potřebuje explicitní instruktáž o každém
 pravidle uvnitř kontextu.
 
@@ -166,13 +165,13 @@ bez porozumění a bez verifikace.
 >
 > – Kent Beck, Augmented Coding: Beyond the Vibes (Substack, 2024)
 
-Beckův argument je, že testy jsou jediným mechanismem, který AI nemůže zfalšovat. Předpokládejme,
+Beckův argument zní: testy jsou jediným mechanismem, který AI nemůže zfalšovat. Předpokládejme,
 že AI generuje kód a existuje sada testů specifikující chování z pohledu domény –
-nikoli implementační detaily, ale doménová pravidla. Selhání testu je pak objektivním
-signálem, že AI se odchýlila od záměru. TDD tak ve spolupráci s AI plní roli, která
-v tradičním vývoji náleží code review: průběžná verifikace toho, zda kód dělá to,
-co má. Beck přiznává, že sám testuje méně věcí než dříve. Testy, které píše, jsou
-ale úmyslnější – zaměřené na doménová pravidla a hraniční případy, nikoli na hlavní scénář.
+ne implementační detaily, ale doménová pravidla. Selhání testu je pak objektivním
+signálem, že AI se odchýlila od záměru. TDD ve spolupráci s AI přebírá roli code review –
+průběžnou verifikaci toho, zda kód dělá, co má. Beck přiznává, že sám testuje méně věcí než
+dříve. Testy, které píše, jsou ale úmyslnější – zaměřené na doménová pravidla a hraniční případy,
+nikoli na hlavní scénář.
 
 Martin Fowler přichází s podobným, ale méně optimistickým rámcem. V rozhovoru pro
 The New Stack Fowler přirovnává AI k „pochybnému kolegovi“ – kolaborátorovi, jehož
@@ -190,7 +189,7 @@ systém: stejný vstup, stejný výstup, vždy. Pro AI komponenty to neplatí. F
 po nových metrikách a nových přístupech, ale přiznává, že komunita je teprve na začátku
 tohoto hledání.
 
-Protiváhou k tomuto techno-optimismu je DHH, jehož vyjádření jsou záměrně provokativní.
+Třetí hlas patří DHH a jeho vyjádření jsou záměrně provokativní.
 V sérii článků a přednášek DHH popisuje vlastní zkušenost s intenzivním používáním
 AI asistentů a vyvozuje z ní znepokojivý závěr:
 
@@ -199,11 +198,10 @@ AI asistentů a vyvozuje z ní znepokojivý závěr:
 > – DHH, The New Stack, 2025
 
 DHH varuje před nebezpečím, kdy vývojář přestane rozumět kódu, který provozuje – stane
-se manažerem projektu AI místo inženýrem. Tento argument není anti-AI – DHH AI používá –
-ale je to varování, že nekritické přijetí AI výstupu degraduje schopnost rozpoznat,
-kdy AI dělá chybu. Bez doménového porozumění nejsou testy dostatečné: vývojář, který
-nechápe doménu, nepíše správné testy, a AI pak plní testy generováním falešně pozitivního
-kódu.
+se manažerem projektu AI místo inženýrem. Sám DHH přitom AI používá. Jde mu o varování,
+že nekritické přijetí AI výstupu degraduje schopnost rozpoznat, kdy AI dělá chybu.
+Bez doménového porozumění nejsou testy dostatečné: vývojář, který nechápe doménu, nepíše
+správné testy, a AI pak plní testy generováním falešně pozitivního kódu.
 
 Kontext pro DDD komunitu: TDD a code review nejsou specifické pro DDD, ale DDD komunita
 je s nimi historicky propojena. Taktické DDD vzory – agregáty s invarianty, doménové
@@ -243,9 +241,9 @@ neměnné.
 Referenční implementace Microsoftu – eShopOnContainers – ilustruje toto rozlišení
 na praktickém příkladu. Modul `Ordering` používá plné taktické DDD:
 agregáty, doménové události, CQRS. Modul `Catalog` je prostý CRUD
-s Entity Framework. Toto rozlišení není historická nehoda – je to záměrné rozhodnutí
-přiřadit komplexitu tam, kde leží doménová komplexita. S příchodem AI toto rozhodnutí
-nabývá nové dimenze: kde leží hranice mezi tím, co AI může autonomně rozhodovat,
+s Entity Framework. Rozdělení vzniklo záměrně, ne historickou nehodou: komplexitu
+implementace má nést tam, kde leží doménová komplexita. S příchodem AI se k této úvaze
+přidává nová otázka: kde leží hranice mezi tím, co AI může autonomně rozhodovat,
 a kde musí platit explicitní doménová pravidla?
 
 DHH nabízí radikální protiváhu:
@@ -270,10 +268,10 @@ Pro praktické rozhraničení toho, kdy DDD nasazovat a kdy ne, viz kapitolu
 
 ## ai.05 Architektonické nástroje a kontext pro AI {#nastroje}
 
-Jedním z nejzajímavějších trendů posledních dvou let je konvergence AI nástrojů
-k de facto implementaci DDD konceptů na úrovni konfigurace. Cursor IDE používá
-soubory v adresáři `.cursor/rules/` s příponou `.mdc`:
-každý soubor definuje pravidla pro konkrétní část projektu, terminologii a omezení.
+AI nástroje za poslední dva roky konvergovaly k de facto implementaci DDD konceptů
+na úrovni konfigurace. Cursor IDE používá soubory v adresáři `.cursor/rules/`
+s příponou `.mdc`: každý soubor definuje pravidla pro konkrétní část projektu,
+terminologii a omezení.
 GitHub Copilot přidal podporu pro `.github/copilot-instructions.md`:
 globální instrukce pro všechny konverzace v daném repozitáři. Claude Code používá
 `CLAUDE.md` na úrovni projektu i adresáře – přesně tato stránka,
@@ -290,23 +288,23 @@ dokumenty, čímž propojují formální DDD terminologii s praktickými AI nás
 Akademický výzkum tuto praxi začíná zkoumat systematicky. Preprint na arXiv
 z roku 2026 (Wiegand et al.) zkoumá automatizaci tvorby doménových metamodelů v DDD
 pomocí generativní AI – konkrétně generování doménově specifických
-JSON objektů. Výsledky jsou předběžné, ale naznačují, že strukturovaný, explicitní
-kontext vede k lepším výsledkům než nestrukturovaný nebo implicitní.
+JSON objektů. Předběžné výsledky ukazují, že explicitní strukturovaný kontext
+vede k přesnějším výstupům než nestrukturovaný nebo implicitní.
 
 ThoughtWorks Technology Radar vol. 33 (duben 2025) sice přímo nezmiňuje DDD
 v kontextu AI, ale obsahuje několik relevantních blipů. V kategorii Adopt je „Using GenAI
 to understand legacy codebases“. V kategorii Assess je „Context engineering“
-a „Anchoring coding agents to a reference application“. Tyto
-techniky sdílejí společný princip: čím přesnější kontext AI dostane, tím lepší
-jsou její výstupy – princip, který je DDD bounded contextům vlastní.
+a „Anchoring coding agents to a reference application“. Všechny tyto techniky
+stojí na stejném principu: přesnější kontext znamená přesnější výstupy AI –
+a přesně toto DDD bounded contexty zajišťují.
 
-Pro vyváženost dodejme: tyto nástroje fungují i bez DDD. Jednoduchý kód s jasnými
-konvencemi – convention over configuration v Rails stylu – může být pro AI stejně
+Druhá strana mince: ty samé nástroje fungují i bez DDD. Konzistentně psaný kód
+s jasnými konvencemi – convention over configuration v Rails stylu – bývá pro AI stejně
 čitelný jako explicitně modelovaný bounded context. Pokud projekt dodržuje konzistentní
 pojmenování, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
 i bez formálního DDD modelu. Proslulý článek „DHH Is Wrong“ a série na toto téma
-ilustrují, že konvence může být stejně účinná jako explicitní modelování. Otázkou
-zůstává, co se stane, když projekt vyroste za hranice, kde konvence stačí.
+ukazují, že konvence dovede být stejně účinná jako explicitní modelování. Otevřená
+zůstává otázka, co se stane, když projekt vyroste za hranice, kde konvence stačí.
 
 ## ai.06 Otevřené otázky a limity {#otevrene-otazky}
 
@@ -413,22 +411,21 @@ mezi DDD principy a praktickým využitím AI. Evans a Tune jsou nejkonkrétněj
 sdílejí praktické vzory a data. Fowler a Beck jsou opatrně optimističtí a zdůrazňují
 potřebu nových nástrojů a metrik. Brandolini zachovává lidský prvek v centru.
 
-DHH tvoří důležitou protiváhu: připomíná, že velká část softwarového průmyslu
-je stále CRUD, že jednoduchost má svou hodnotu a že AI může být účinná i bez
-formálního doménového modelování. Tato pozice není špatná – je to připomínka,
-že DDD není odpověď na každou otázku.
+DHH tvoří důležitý opačný hlas: připomíná, že velká část softwarového průmyslu
+je stále CRUD, že jednoduchost má svou hodnotu a že AI dovede být účinná i bez
+formálního doménového modelování. Pozice není v rozporu s DDD – je to připomínka,
+že DDD nemá odpověď na každou otázku.
 
-Konvergence, kterou vidíme v roce 2026, je tato: struktura pomáhá. Ať už jde o
+Konvergenci roku 2026 lze shrnout jednou větou: struktura pomáhá. Ať už jde o
 DDD bounded contexts, Cursor rules nebo CLAUDE.md – explicitní, sdílený kontext
 zlepšuje výsledky AI. DDD přináší bohatou tradici myšlení o tom, jak takový
-kontext definovat. Není to jediná cesta – konvence, dobré testy a čistý kód
-mohou dosáhnout podobného efektu – ale je to vyzkoušená a dobře zdokumentovaná
-cesta.
+kontext definovat. Existují i další cesty – konvence, dobré testy a čistý kód
+zvládnou podobný efekt – ale DDD je cesta vyzkoušená a dobře zdokumentovaná.
 
 Rozhodovat se má smysl podle domény, týmu a projektu. Kde leží doménová
 komplexita? Kde jsou náklady na chybu vysoké? Kde bude systém žít pět let?
-Tyto otázky – ne přítomnost nebo nepřítomnost AI v toolchainu – by měly řídit
-architektonické rozhodnutí.
+Architektonické rozhodnutí by mělo vyplývat z těchto otázek, ne z přítomnosti
+nebo nepřítomnosti AI v toolchainu.
 
 :::callout{type="note"}
 **Hlavní závěry:**
