@@ -397,14 +397,14 @@ Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existu
 
 ### Synchronní volání – kdy {#sync-kdy-heading}
 
-- **Query (read), kde caller potřebuje odpověď během request flow.** Frontend potřebuje detail produktu pro vykreslení stránky; `catalog-svc` ho vrátí přes REST. Bez odpovědi nemůže pokračovat.
+- **Query (read), kde volající potřebuje odpověď během request flow.** Frontend potřebuje detail produktu pro vykreslení stránky; `catalog-svc` ho vrátí přes REST. Bez odpovědi nemůže pokračovat.
 - **Validace, která blokuje další krok.** Před uložením objednávky musí `ordering-svc` ověřit u `catalog-svc`, že produkt existuje a je dostupný. Volání musí být sync, jinak riskujete, že uložíte objednávku na neexistující produkt.
 - **Latence-sensitive operace.** Detekce podvodů v reálném čase, autorizace platby, rate limit check.
 - **Idempotentní lookup.** Neměnné nebo zřídka měnící se data, kde latence sítě je akceptovatelná a kde je možné použít cache.
 
 ### Asynchronní eventy – kdy {#async-kdy-heading}
 
-- **State changes (write), kde caller nepotřebuje vědět, co dál.** Po uložení objednávky publikuje `ordering-svc` event `OrderPlaced`. `billing-svc`, `shipping-svc` a `notification-svc` ho zpracují, kdy mohou. Caller čeká jen na lokální commit.
+- **State changes (write), kde volající nepotřebuje vědět, co dál.** Po uložení objednávky publikuje `ordering-svc` event `OrderPlaced`. `billing-svc`, `shipping-svc` a `notification-svc` ho zpracují, kdy mohou. Volající čeká jen na lokální commit.
 - **Cross-BC reakce, kde jednotlivé BC nemají závislost na výsledku.** Saga zpracovává krok po kroku přes eventy + commands; každý krok je nezávislý.
 - **Operace, která může bezpečně probíhat se zpožděním.** Generování faktury, odeslání e-mailu, aktualizace search indexu, generování sitemapy.
 - **Multi-subscriber broadcast.** Jeden event konzumuje N nezávislých subscriberů; publisher o nich nemusí vědět.
@@ -413,8 +413,8 @@ Jakmile máte dvě servisy, musíte se rozhodnout, jak spolu komunikují. Existu
 
 Chris Richardson v *Microservices Patterns* (kap. 3) formuluje doporučení: **preferujte asynchronní messaging**, sync použijte jen tam, kde je to objektivně nutné. Důvody:
 
-- Asynchronní subscriber lze restartovat, opakovat, rozdělit do replik. Sync caller čeká a buď dostane odpověď, nebo timeout – bez zotavení.
-- Asynchronní messaging má lepší časové oddělení: subscriber může být dočasně nedostupný a publisher to neví. Při sync volání je publisher přímo závislý na uptime callee.
+- Asynchronní subscriber lze restartovat, opakovat, rozdělit do replik. Sync volající čeká a buď dostane odpověď, nebo timeout – bez zotavení.
+- Asynchronní messaging má lepší časové oddělení: subscriber může být dočasně nedostupný a publisher to neví. Při sync volání je publisher přímo závislý na uptime volaného.
 - Asynchronní toky lépe škálují: fronta zpráv se hromadí a worker ji konzumuje vlastním tempem; sync flow se musí škálovat synchronně a end-to-end.
 - Asynchronní tok přirozeněji zapadá do [Event Storming](/event-storming) modelu – doménové eventy jsou stejně jednotkou domény.
 
@@ -422,11 +422,11 @@ Praktická implementace asynchronní komunikace mezi servisami v Symfony probíh
 
 | Aspekt | Sync (REST/gRPC) | Async (eventy) |
 |---|---|---|
-| Coupling v čase | Tight – caller čeká | Loose – subscriber může být offline |
+| Coupling v čase | Tight – volající čeká | Loose – subscriber může být offline |
 | Latence vnímaná uživatelem | Součet všech sync volání | Latence lokálního zápisu |
-| Availability | Součin uptime všech callee | Jen lokální uptime + broker |
+| Availability | Součin uptime všech volaných | Jen lokální uptime + broker |
 | Backpressure | Caller dostane HTTP 503 | Fronta se hromadí, worker dotahuje |
-| Refactoring API | Coordinated release callera + callee | Subscriber má vlastní integration event DTO |
+| Refactoring API | Coordinated release volajícího + volaného | Subscriber má vlastní integration event DTO |
 | Testovatelnost | Vyžaduje WireMock / Pact / mock | Stačí dispatch eventu do test handleru |
 
 ## 19.06 Distribuované transakce – Saga, ne 2PC {#distribuovane-transakce}
