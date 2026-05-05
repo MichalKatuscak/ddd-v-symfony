@@ -289,7 +289,7 @@ class OutboxMessage
 | `occurred_at` | TIMESTAMPTZ | Čas vzniku události v doménové transakci. Slouží pro řazení v relayi (FIFO uvnitř jedné DB) a pro výpočet outbox lagu. |
 | `attempts` | INT | Počet neúspěšných pokusů o publish. Po překročení prahu (typicky 5) řádek přechází do `failed` a opouští hot path. |
 | `sent_at` | TIMESTAMPTZ NULL | Vyplněno při přechodu do `sent`. Používá se pro kompakci (mazání starších `sent` řádků). |
-| `last_error` | TEXT NULL | Poslední chyba publishe – důležité pro postmortem. |
+| `last_error` | TEXT NULL | Poslední chyba publishe – důležité pro rozbor incidentu. |
 
 :::callout{type="warn"}
 ### Povinný index `(status, occurred_at)` {#index-status-time-heading}
