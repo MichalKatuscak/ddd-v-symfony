@@ -242,7 +242,7 @@ výchozí stav uživatele a vedlejší efekt registrace (uvítací e-mail jako D
 ## 18.04 Krok 2: Extrakce doménové vrstvy {#extrakce-domainove-vrstvy}
 
 Extrakce doménové vrstvy přesouvá doménová pravidla z kontrolerů a service tříd do doménových
-objektů. Cíl: doménové objekty si svá invarianty hlídají samy. Nikdo zvenčí je nemůže obejít.
+objektů. Cíl: doménové objekty si své invarianty hlídají samy. Nikdo zvenčí je nemůže obejít.
 
 ### Přesunutí doménových pravidel do doménových objektů
 
@@ -567,7 +567,7 @@ kde je typovaná závislost na doménovém rozhraní `UserRepository`.
 
 ## 18.06 Krok 4: Postupné zavedení CQRS {#cqrs-postupne}
 
-Command Query Responsibility Segregation (CQRS) navazuje na DDD logicky, ale má se zavést
+Command Query Responsibility Segregation (CQRS) na DDD navazuje, ale má se zavést
 až po tom, co se doménový model usadí. Když přijde dřív, přesune komplexitu z domény do handleru,
 kde je neviditelná a hůř se testuje.
 
