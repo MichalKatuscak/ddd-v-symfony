@@ -310,7 +310,7 @@ Bez těchto rituálů sklouzne Customer/Supplier do [Conformistu](#conformist): 
 
 ## 03.06 Conformist {#conformist}
 
-**Conformist** je asymetrický vztah, ve kterém downstream *vědomě rezignuje* na vlastní model a přijímá upstream model 1:1. Žádný překlad, žádná validace, žádné mapování. Není to ostuda – je to **strategické rozhodnutí**, že *boj o vlastní model nestojí za to*.
+**Conformist** je asymetrický vztah, ve kterém downstream *vědomě rezignuje* na vlastní model a přijímá upstream model 1:1. Žádný překlad, žádná validace, žádné mapování. Conformist znamená vědomou úsporu na hranici, kde *boj o vlastní model nestojí za to*.
 
 Evans (2003, str. 360): „*When two development teams have an upstream/downstream relationship in which the upstream has no motivation to provide for the downstream team's needs, the downstream team is helpless. […] Eliminate the complexity of translation between bounded contexts by slavishly adhering to the model of the upstream team. […] In some cases, the upstream design is good or compatible enough that this won't cause much trouble.*“
 
@@ -544,7 +544,7 @@ Nejčastější selhání ACL: **cizí pojmy začnou prosakovat do domény**. Sy
 - Application Service kontroluje `$soapResponse->status === 'PAID'`.
 - ACL třída se rozrůstá do 1000 řádků s mnoha veřejnými metodami a sdíleným stavem.
 
-Pravidlo: **ACL je single-purpose třída**, ne vrstva s desítkami metod sdílejících stav. Jeden upstream koncept = jeden translator. Výstup translátoru je *vždy* doménový VO/entity/event, nikdy raw DTO. Pokud translátor začíná obsahovat doménovou logiku, je to signál, že máte *Application Service* schovanou v ACL – vyčleňte ji.
+Pravidlo: **ACL drží jednu odpovědnost.** Vrstva s desítkami metod a sdíleným stavem už ACL není. Jeden upstream koncept = jeden translator. Výstup translátoru je *vždy* doménový VO/entity/event, nikdy raw DTO. Pokud translátor začíná obsahovat doménovou logiku, je to signál, že máte *Application Service* schovanou v ACL – vyčleňte ji.
 
 ### ACL a Strangler Fig pattern
 
@@ -782,7 +782,7 @@ Marketingový tým si spočítá: 50 kampaní ročně, integrace stojí 200 hodi
 - Při odhlášení v hlavičce mailu (CAN-SPAM compliance) SendGrid zákazníka odhlásí lokálně.
 - Když se zákazník odhlásí v Identity, Marketing pořád může poslat kampaň, ale bude tam legal opt-out v patičce a SendGrid honoruje globální unsubscribe.
 
-Řešení má své ústupky – mohou nastat krátká okna, kdy odhlášený zákazník dostane jednu kampaň navíc – ale je to **levné** a **legal-compliant**. A hlavně: je to *vědomé rozhodnutí*, ne opomenutí.
+Řešení má své ústupky – mohou nastat krátká okna, kdy odhlášený zákazník dostane jednu kampaň navíc – ale je to **levné** a **legal-compliant**. A hlavně: rozhodnutí padlo vědomě.
 
 ### Kdy Separate Ways zvážit
 
@@ -872,14 +872,14 @@ Big Ball of Mud se nedá „opravit“ rewriteem. Jediný funkční postup je **
 Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Tato kapitola pokrývá konkrétní symptomy v PHP/Symfony technologii a strategie jejich nápravy.
 
 :::callout{type="warn"}
-**Big Ball of Mud je *výsledek*, ne *příčina*.** Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem refaktoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
+**Big Ball of Mud je výsledek absence Context Mappingu.** Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem refaktoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
 :::
 
 ## 03.13 Shrnutí {#summary}
 
 Context Mapping je strategická disciplína, která dává smysl Bounded Contextům tím, že popisuje, co se na jejich hranicích děje. Hlavní body:
 
-- **Context Map = mapa vztahů.** Vizuální + textová dokumentace všech BC v systému a všech vazeb mezi nimi. Není to UML class diagram, je to organizační a politická mapa.
+- **Context Map = mapa vztahů.** Vizuální + textová dokumentace všech BC v systému a všech vazeb mezi nimi. Místo struktury tříd zachycuje organizační a politickou realitu.
 - **Osm pojmenovaných vztahů.** Partnership, Shared Kernel, Customer/Supplier, Conformist, ACL, OHS, Published Language, Separate Ways. Každý má svůj kompromis (coupling vs. flexibilita) a každý odpovídá jiné organizační situaci.
 - **ACL je nejčastěji potřebný vztah.** Skoro každá netriviální integrace s legacy nebo externím systémem chce ACL. Tři odpovědnosti: schema mapping, concept translation, anti-corruption.
 - **OHS + PL = stabilní veřejná integrace.** Open Host Service je kanál, Published Language je formát. Bez versioningu nejde o OHS.
