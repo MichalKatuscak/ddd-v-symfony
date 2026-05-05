@@ -500,7 +500,7 @@ Volba mezi přístupy:
 | Data leak | Ano (data v paměti, response, dev tools) | Ne |
 | Implementační složitost | Triviální | Vyžaduje různé DTO / read modely |
 | Vhodné pro | UI hidden, neostrá ochrana | PII, finance, audit log, GDPR |
-| Testování | Twig integration test | Unit + integration test read modelu |
+| Testování | Twig integrační test | Unit + integrační test read modelu |
 | OWASP A01:2021 compliance | Insufficient – viz [[5]](https://owasp.org/Top10/A01_2021-Broken_Access_Control/) | Splňuje (server-side enforcement) |
 
 Pro necitlivá data Twig if stačí a šetří čas. Pro citlivá data vždy query filter – OWASP Top 10 v kategorii „A01 Broken Access Control“ výslovně varuje před UI-only kontrolou jako jedinou bariérou.
@@ -737,7 +737,7 @@ Doctrine SQLFilter modifikuje pouze `QueryBuilder` a `EntityManager::find`. Poku
 
 ## 11.09 Test pyramida pro autorizaci {#testing}
 
-Každá ze 4 vrstev se testuje jiným druhem testu – a snaha pokrýt vše end-to-end vede k pomalé, křehké test suitě. Dělení odpovídá klasické *test pyramidě*: hodně rychlých unit testů, méně integration, pár end-to-end.
+Každá ze 4 vrstev se testuje jiným druhem testu – a snaha pokrýt vše end-to-end vede k pomalé, křehké testovací sadě. Dělení odpovídá klasické *test pyramidě*: hodně rychlých unit testů, méně integration, pár end-to-end.
 
 ### Aggregate-level: čistý unit test {#testing-aggregate-heading}
 
@@ -834,7 +834,7 @@ final class OrderVoterTest extends TestCase
 
 ### End-to-end: WebTestCase {#testing-e2e-heading}
 
-Pro pokrytí celé pipeline (firewall → controller → handler → voter → aggregate) slouží Symfony `WebTestCase`. Zde už je to integration test, který používá kernel a databázi. Doporučená míra: *1 e2e test na use case*, pokrývající hlavní scénář + 1-2 nejdůležitější chybové stavy. Detailní pokrytí okrajových případů patří do unit testů na nižších vrstvách.
+Pro pokrytí celé pipeline (firewall → controller → handler → voter → aggregate) slouží Symfony `WebTestCase`. Zde už je to integrační test, který používá kernel a databázi. Doporučená míra: *1 e2e test na use case*, pokrývající hlavní scénář + 1-2 nejdůležitější chybové stavy. Detailní pokrytí okrajových případů patří do unit testů na nižších vrstvách.
 
 Detail pyramidy + příklady fixture builderů v [samostatné kapitole o testování](/testovani-ddd).
 
@@ -1006,7 +1006,7 @@ Regulované domény (zdravotnictví, finance, GDPR čl. 30) vyžadují audit log
 - question: Mám psát jeden Voter na entitu, nebo víc?
   answer: 'Jeden Voter na entitu, který pokrývá N atributů (VIEW, CANCEL, REFUND, …). V <code>supports()</code> se filtruje podle <code>$subject instanceof Order</code> a podle whitelistu atributů; v <code>voteOnAttribute()</code> se atributy mapují přes <code>match</code> expression na privátní metody. Více Voterů na jednu entitu se vyplatí jen tehdy, když permissions využívají úplně jiný subset závislostí (typicky owner-based vs. role-based) a chcete je nezávisle testovat. Detail v <a href="#use-case-voter">sekci o Voteru</a>.'
 - question: Smí Voter načítat aggregate z databáze?
-  answer: 'Ne. Voter dostává <code>$subject</code> jako parametr; handler ho už načetl a předává v paměti. Voterové fetchování je anti-vzor (<a href="#anti-fetching-voter-heading">12.10</a>) – vede k duplicate query, race condition a pomalé test suitě. Pokud Voter potřebuje další data, předajte je přes konstruktor (např. config) nebo přes obohacený DTO subject, ne přes repository.'
+  answer: 'Ne. Voter dostává <code>$subject</code> jako parametr; handler ho už načetl a předává v paměti. Voterové fetchování je anti-vzor (<a href="#anti-fetching-voter-heading">12.10</a>) – vede k duplicate query, race condition a pomalé testovací sadě. Pokud Voter potřebuje další data, předajte je přes konstruktor (např. config) nebo přes obohacený DTO subject, ne přes repository.'
 - question: Kdy stačí ROLE_USER a kdy je třeba attribute-based přístup?
   answer: 'RBAC (role) stačí, dokud platí „role popisuje permissions sama o sobě“ – ROLE_ADMIN smí všechno, ROLE_REFUND_AGENT smí refundy bez ohledu na konkrétní entitu. Jakmile permissions závisí na vztazích (vlastnictví, tenant, časové okno, stav agregátu), RBAC explodne – vznikají hyper-specific role typu ROLE_TENANT_42_ORDER_AGENT. Tehdy přejít na ABAC (<a href="#policy-based">12.07</a>): permissions vyhodnocují atributy subjektu, uživatele a kontextu proti policy.'
 - question: Co když máme 100 různých rolí?
