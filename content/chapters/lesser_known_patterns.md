@@ -22,9 +22,9 @@ github_examples: Chapter12_LesserPatterns
 V kapitole [Základní koncepty DDD](/zakladni-koncepty) jsme prošli
 čtyři pilíře taktického designu: **Entity**, **Value Object**,
 **Aggregate** a stručně i **Domain Service** a **Factory**.
-Eric Evans jim věnuje v částech II a III desítky stran. V průvodcích je vývojáři přeskakují
-nebo si je pletou s jinými vzory. Cílem této kapitoly je vrátit jim plný význam: kdy jsou skutečně užitečné,
-jak je zapsat v PHP 8.4 a jaká rizika přinášejí, pokud je použijeme špatně.
+Eric Evans jim věnuje v částech II a III desítky stran. Vývojáři je v průvodcích přeskakují
+nebo si je pletou s jinými vzory. Tato kapitola jim vrací plný význam: kdy jsou užitečné,
+jak je zapsat v PHP 8.4 a jaká rizika přinášejí při špatném použití.
 
 Čtyři vzory, každý s vlastní kapitolou v Evansově knize:
 **Specification Pattern** (kap. 9) – kompozice doménových predikátů jako prvotřídních objektů.
@@ -34,18 +34,16 @@ jak je zapsat v PHP 8.4 a jaká rizika přinášejí, pokud je použijeme špatn
 
 ## 08.01 Proč tyto vzory přehlížíme {#proc-prehlizime}
 
-Většina online průvodců o DDD končí někde u Aggregate. Programátor, který se právě naučil
+Většina online průvodců o DDD končí někde u Aggregate. Vývojář, který se právě naučil
 odlišovat Entity od Value Objektu a chápe význam invariantů, má pocit, že už ovládá
 „taktický design“. Specification, Domain Service, Factory a Module se mu pak jeví jako
-„nadbytečnou abstrakci“. Vždyť to, co dělají, lze napsat i jinak: *if*-em,
-statickou metodou nebo prostým balíčkem v `src/`. Tato intuice je klamná
-a kapitola ukáže proč.
+„nadbytečná abstrakce“. To, co dělají, lze přece napsat i jinak: `if`-em,
+statickou metodou nebo prostým balíčkem v `src/`. Intuice je to chybná.
 
-V malých projektech opravdu bez těchto vzorů přežijete. Jenže tam, kde je doména
+V malých projektech bez těchto vzorů přežijete. Jenže tam, kde je doména
 netriviální – tedy přesně tam, kde DDD platí – chybějící vzory způsobují bobtnání agregátů,
 anémii modelu a duplikaci pravidel. Kód přestává odrážet doménovou strukturu projektu.
-Evans těmto vzorům věnuje desítky stran z dobrého důvodu: jsou součástí ucelené sady, která drží
-pohromadě.
+Evansovy čtyři vzory tvoří provázanou sadu. Vyřazením jednoho oslabíte ostatní.
 
 :::callout{type="note"}
 ### Co od kapitoly očekávat {#prehled-heading}
@@ -77,8 +75,8 @@ interface Specification
 }
 :::
 
-Zdánlivě banální. Právě tato banalita je síla. Každé pravidlo doménového jazyka
-– *„zákazník je premium“*, *„objednávka má nárok na dopravu zdarma“*,
+Rozhraní vypadá triviálně, ale stojí za ním celá architektonická volba. Každé pravidlo
+doménového jazyka – *„zákazník je premium“*, *„objednávka má nárok na dopravu zdarma“*,
 *„faktura je po splatnosti“* – dostane vlastní třídu s mluvícím jménem. Pravidlo
 přestává být kombinací `if`-ů uvnitř service vrstvy a stává se
 **jmenovaným prvkem ubiquitous language**.
@@ -305,9 +303,8 @@ final class NotSpecification extends CompositeSpecification
 
 ### Doménová specifikace {#spec-domain}
 
-S kostrou hotovou ukážeme konkrétní doménové specifikace. Jedná se o skutečná doménová
-pravidla z Ordering kontextu – všimněte si, že každá z nich nese mluvící doménové jméno
-a dědí kombinátory `and`/`or`/`not` automaticky:
+Na kostře postavíme tři konkrétní pravidla z Ordering kontextu. Každé nese mluvící doménové
+jméno a kombinátory `and`/`or`/`not` dědí automaticky:
 
 :::code{language="php" filename="src/Ordering/Domain/Specification/EligibleForFreeShipping.php"}
 <?php
@@ -407,9 +404,8 @@ final class NotInBlacklist extends CompositeSpecification
 
 ### Kompozice v aplikační vrstvě {#spec-compose}
 
-Zde se ukazuje skutečná hodnota vzoru. Komplexní marketingová akce
-*„doprava zdarma pro nákupy nad 1000 Kč v EU, kromě zákazníků na blacklistu“*
-je trojice atomických specifikací spojená kombinátorem `and`. Vznikne
+Marketingová akce *„doprava zdarma pro nákupy nad 1000 Kč v EU, kromě zákazníků
+na blacklistu“* je trojice atomických specifikací spojená kombinátorem `and`. Vznikne
 jedna čitelná řádka místo trojnásobně vnořeného `if`-u:
 
 :::code{language="php" filename="src/Ordering/Application/CommandHandler/ApplyFreeShippingHandler.php"}
@@ -551,10 +547,9 @@ final class DoctrineOrderRepository implements OrderRepository
 }
 :::
 
-Tímto způsobem vyřešíte klasický problém *„jak se má pravidlo aplikovat jen jednou –
-v PHP nebo v SQL?“*. Specifikace je **zdroj pravdy**. Obě její role
-(in-memory predikát i query překladač) sedí v jedné třídě a nelze
-je oddělit.
+Pravidlo se tím napíše jednou. Obě role specifikace (in-memory predikát i překladač
+do query) sedí v jedné třídě a nelze je oddělit – PHP a DQL verze pravidla
+se nemohou rozjít.
 
 Pro hluboký teoretický základ vzoru: Evans, E., *Domain-Driven Design* (2003),
 kapitola 9 *Making Implicit Concepts Explicit*; Evans & Fowler, pracovní
@@ -573,8 +568,8 @@ kritérium do tří bodů: operace se týká doménového konceptu, ale (1) nepa
 Entity ani Value Objektu jako její přirozená metoda, (2) operuje nad více doménovými
 objekty a (3) nemá vlastní stav.
 
-Jinak řečeno: existuje operace *X*, ale žádná Entita ji nemůže vlastnit, aniž by
-musela znát příliš mnoho o druhé. To je signál pro Domain Service.
+Existuje tedy operace *X*, ale žádná Entita ji nemůže vlastnit, aniž by musela
+znát příliš mnoho o druhé. To je signál pro Domain Service.
 
 ### Kdy použít {#ds-kdy}
 
@@ -594,8 +589,8 @@ Klasické příklady, na kterých Evans i Vernon vzor demonstrují:
 
 ### Kdy NE {#ds-kdy-ne}
 
-Domain Service je zároveň **nejvíce zneužívaný taktický vzor v DDD**.
-Programátoři navyklí na klasickou layered architecture mají sklon vytvořit
+Domain Service je v DDD vzor, který se zneužívá nejčastěji.
+Vývojáři navyklí na klasickou layered architecture vytvoří
 `OrderService`, `CustomerService`, `InvoiceService` jako
 první reflex – a všechnu logiku z Entit přesunou tam, čímž si vyrobí
 [anémický doménový model](/anti-vzory).
@@ -709,11 +704,10 @@ rozdíly, na které se v code review ptáme:
 | Test | Pure unit, bez Symfony kernel | Unit s mockovanými repozitáři | Integrační (kontrakt s reálným systémem) |
 | Sufix v PHP | `*Service` (volitelně) | `*Handler`, `*UseCase` | `*Gateway`, `*Adapter`, `*Client` |
 
-Tabulka ukazuje, proč je problematické pojmenovat vše na `*Service` –
-a proč se v současném DDD upouští od sufixu *Service*
-u Application vrstvy ve prospěch *Handler* nebo *UseCase*. Doménová
+Pojmenování všech tříd sufixem `*Service` smaže rozdíl mezi třemi rolemi z tabulky.
+V Application vrstvě se proto v praxi přechází na `*Handler` nebo `*UseCase`. Doménová
 Service má sufix *Service* jen tehdy, když pomáhá zdůraznit „operace bez vlastníka“.
-V mnoha doménách dokonce i u Domain Service zvolíme přímo doménové jméno
+V mnoha doménách i u Domain Service zvolíme přímo doménové jméno
 (`FundsTransfer`, `PricingEngine`) bez sufixu.
 
 :::callout{type="pattern"}
@@ -1282,8 +1276,9 @@ dokumentace, [phparkitect.com](https://phparkitect.com/).
 
 ## 08.06 Vztah těchto vzorů ke zbytku DDD {#vztahy}
 
-Čtyři vzory této kapitoly nejsou izolované; **vzájemně se podporují**
-a skládají s ostatními taktickými vzory do soudržného celku. Mind-mapa vztahů:
+Čtyři vzory této kapitoly se prolínají s ostatními taktickými vzory.
+Tabulka shrnuje, jak každý z nich sedí do triády Aggregate / Domain Event /
+Bounded Context:
 
 | Vzor | Vztah k Aggregate | Vztah k Domain Event | Vztah k Bounded Context |
 |---|---|---|---|
@@ -1295,9 +1290,8 @@ a skládají s ostatními taktickými vzory do soudržného celku. Mind-mapa vzt
 Hlavní vztah: **Agregát uvnitř používá Specifications** pro invarianty,
 **vzniká přes Factory** (named constructor), **spolupracuje s 2+ jinými
 agregáty přes Domain Service**, a celá ta skupina **žije v jednom
-Module**, který odpovídá Bounded Contextu. To je vzájemně provázaný design,
-který nelze správně používat po jednom – proto Evans věnuje všem čtyřem vzorům
-samostatné kapitoly.
+Module**, který odpovídá Bounded Contextu. Vzory se vzájemně předpokládají.
+Když jeden vyřežete a zbytek používáte samostatně, přínos všech klesne.
 
 ## 08.07 Anti-vzory souhrn {#antivzory}
 
@@ -1322,10 +1316,10 @@ Ball of Mud“ – najdete v kapitole
 
 ## 08.08 Shrnutí {#summary}
 
-Čtyři vzory této kapitoly – Specifications, Domain Services, Factories, Modules –
-bývají v praktických průvodcích přehlíženy. Evans jim věnuje desítky stran z dobrého důvodu.
-Jsou součástí ucelené sady taktického DDD. Bez nich agregáty bobtnají, doménový model
-anemizuje a organizace projektu zatemňuje doménovou strukturu.
+Specifications, Domain Services, Factories a Modules tvoří druhou polovinu
+Evansova taktického katalogu. Praktické průvodce je vynechávají, ale bez nich
+agregáty bobtnají, doménový model anemizuje a organizace projektu zatemňuje
+doménovou strukturu.
 
 - **Specification Pattern** proměňuje booleovská doménová pravidla
   v prvotřídní objekty s mluvícími jmény. Kombinátory `and`,
@@ -1342,8 +1336,8 @@ anemizuje a organizace projektu zatemňuje doménovou strukturu.
   technických vrstev. V Symfony 8 se realizují PSR-4 namespace + `composer.json`
   mapováním na adresáře. Vynucení hranic patří do CI přes phparkitect/deptrac.
 
-Tyto čtyři vzory dohromady udrží agregát štíhlý, doménu výraznou a projekt
-čitelný i po roce vývoje. Neimplementují se najednou – nasazení je iterativní.
+Společně drží agregát v rozumné velikosti, doménu oddělenou od infrastruktury
+a projekt čitelný po roce vývoje. Nasazení je iterativní – ne najednou.
 První iterace stačí: *1 modul = 1 BC*, named constructor pro 2–3 hlavní
 agregáty, Domain Service tam, kde jste dosud měli „*Service“ bez
 vlastníka. Specifications nasazujte tehdy, když vidíte druhou nebo třetí kombinaci
