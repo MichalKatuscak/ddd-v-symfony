@@ -1,0 +1,38 @@
+{# Mapa knihy — tok hubů v doporučeném pořadí. Pomáhá čtenáři rozhodnout,
+   kde začít a co případně přeskočit. Počty kapitol jdou z katalogu. #}
+{%- set _map = [
+    { step: '01', label: 'Úvod a strategie', route: 'hub_basics',       group: 'basics',       tag: 'Hranice, subdomény, kontextové mapy' },
+    { step: '02', label: 'Taktika',          route: 'hub_tactics',      group: 'tactics',      tag: 'Entity, value objekty, agregáty' },
+    { step: '03', label: 'Architektura',     route: 'hub_architecture', group: 'architecture', tag: 'Hexagonal, Symfony, autorizace' },
+    { step: '04', label: 'Vzory',            route: 'hub_patterns',     group: 'patterns',     tag: 'CQRS, Event Sourcing, ságy, outbox' },
+    { step: '05', label: 'Praxe',            route: 'hub_practice',     group: 'practice',     tag: 'Testy, migrace, microservices' },
+    { step: '06', label: 'Syntéza',          route: 'hub_synthesis',    group: 'synthesis',    tag: 'Příklady a případová studie' }
+] -%}
+<section class="bookmap" aria-labelledby="bookmap-h">
+    <header class="bookmap-head">
+        <span class="bookmap-eyebrow">MAPA KNIHY</span>
+        <h2 id="bookmap-h" class="bookmap-h">Jak číst tuto knihu</h2>
+        <p class="bookmap-deck">
+            Linka ukazuje doporučené pořadí. Kdo zná strategický design, může začít rovnou
+            u <em>Architektury</em> nebo <em>Vzorů</em>. <em>Reference</em> slouží průběžně.
+        </p>
+    </header>
+
+    <div class="bookmap-track">
+        {% for n in _map %}
+            {% if not loop.first %}<span class="bookmap-arrow" aria-hidden="true">→</span>{% endif %}
+            <a class="bookmap-node" href="{{ path(n.route) }}">
+                <span class="bookmap-node-step">{{ n.step }}</span>
+                <span class="bookmap-node-title">{{ n.label }}</span>
+                <span class="bookmap-node-tag">{{ n.tag }}</span>
+                <span class="bookmap-node-count">{{ ddd_chapters_by_group(n.group)|length }} kap.</span>
+            </a>
+        {% endfor %}
+    </div>
+
+    <a class="bookmap-aside" href="{{ path('hub_reference') }}">
+        <span class="bookmap-aside-k">REFERENCE</span>
+        <span class="bookmap-aside-t">Glosář, cheat sheet, zdroje a AI – k nahlédnutí kdykoli</span>
+        <span class="bookmap-aside-arr" aria-hidden="true">→</span>
+    </a>
+</section>
