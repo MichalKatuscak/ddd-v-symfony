@@ -188,6 +188,49 @@
   .toc-m-chev { transition: none; }
 }
 
+/* TOC plovoucí tlačítko — jen mobil, dostupné během čtení */
+.toc-fab { display: none; }
+.toc-fab-btn {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-2);
+  color: var(--fg);
+  border: 1px solid var(--stroke-strong);
+  border-radius: var(--r-3);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+.toc-fab-btn svg { width: 20px; height: 20px; }
+.toc-fab.is-open .toc-fab-btn { color: var(--accent); border-color: var(--accent); }
+.toc-fab-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.toc-fab-panel {
+  position: absolute;
+  bottom: calc(100% + var(--s-2));
+  right: 0;
+  width: min(82vw, 360px);
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--bg-1);
+  border: 1px solid var(--stroke-strong);
+  border-radius: var(--r-3);
+  box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.7);
+  padding: var(--s-4);
+  scrollbar-color: var(--stroke) transparent;
+  scrollbar-width: thin;
+}
+.toc-fab-head {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  margin-bottom: var(--s-3);
+}
+.toc-fab-list { gap: var(--s-4); }
+@media (max-width: 900px) {
+  .toc-fab { display: block; position: fixed; right: var(--s-4); bottom: var(--s-4); z-index: 28; }
+}
+
 /* Article body */
 .art-body {
   max-width: 700px;
@@ -309,6 +352,42 @@
   overflow-wrap: anywhere;
 }
 .h-section .h-num { flex-shrink: 0; }
+/* Kotvící odkaz – decentní „#", objeví se při hoveru nad nadpisem. */
+.h-anchor {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-lg);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--fg-faint);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity var(--motion-fast) ease, color var(--motion-fast) ease;
+  position: relative;
+}
+.h-section:hover .h-anchor,
+.h-anchor:focus-visible { opacity: 1; }
+.h-anchor:hover { color: var(--accent); }
+.h-anchor:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.h-anchor.is-copied { color: var(--state-ok); opacity: 1; }
+.h-anchor.is-copied::after {
+  content: "Zkopírováno";
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 4px);
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--state-ok);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Na dotykových zařízeních bez hoveru drž odkaz lehce viditelný. */
+@media (hover: none) {
+  .h-anchor { opacity: 0.45; }
+}
 .h-section:first-child,
 .art-body h3:first-child,
 .art-body h4:first-child,
@@ -508,6 +587,52 @@ section > h4:first-child { margin-top: 0; }
 }
 .art-body .note p { margin: 0; }
 .art-body .note p + p { margin-top: var(--s-3); }
+
+/* ── Filtr glosáře (našeptávač pojmů) ──────────────────────────────────── */
+.glossary-filter {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  position: sticky;
+  top: calc(56px + var(--s-3));
+  z-index: 10;
+  margin: 0 0 var(--s-5);
+  padding: 0 var(--s-3);
+  height: 44px;
+  background: var(--bg-2);
+  border: 1px solid var(--stroke-strong);
+  border-radius: var(--r-2);
+}
+.glossary-filter-icon { width: 16px; height: 16px; color: var(--fg-dim); flex-shrink: 0; }
+.glossary-filter-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--t-sm);
+}
+.glossary-filter-input::placeholder { color: var(--fg-dim); }
+.glossary-filter-input:focus { outline: none; }
+.glossary-filter-input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.glossary-filter-count {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  letter-spacing: var(--tracking-mono);
+  color: var(--fg-dim);
+  flex-shrink: 0;
+}
+.glossary-filter-empty {
+  margin: var(--s-5) 0;
+  padding: var(--s-5);
+  text-align: center;
+  font-size: var(--t-sm);
+  color: var(--fg-dim);
+  border: 1px dashed var(--stroke-strong);
+  border-radius: var(--r-2);
+}
 
 .glossary-list {
   margin: var(--s-5) 0 var(--s-7);

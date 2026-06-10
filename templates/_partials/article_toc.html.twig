@@ -20,3 +20,21 @@
         {# Naplní article-toc.js #}
     </ol>
 </details>
+
+{# Plovoucí tlačítko „Obsah kapitoly" – dostupné během čtení na mobilu. #}
+<div class="toc-fab" data-toc-fab>
+    <button class="toc-fab-btn" type="button" data-toc-fab-toggle aria-expanded="false" aria-controls="toc-fab-panel" aria-label="Obsah kapitoly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <line x1="8" y1="7" x2="20" y2="7"/>
+            <line x1="8" y1="12" x2="20" y2="12"/>
+            <line x1="8" y1="17" x2="20" y2="17"/>
+            <circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/>
+        </svg>
+    </button>
+    <div class="toc-fab-panel" id="toc-fab-panel" data-toc-fab-panel hidden>
+        <div class="toc-fab-head">Obsah kapitoly</div>
+        <ol class="toc-list toc-fab-list" data-toc-list>
+            {# Naplní article-toc.js #}
+        </ol>
+    </div>
+</div>

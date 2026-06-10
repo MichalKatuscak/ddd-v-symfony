@@ -37,7 +37,12 @@ final class ChapterHeadingRenderer implements NodeRendererInterface
             $text = '<span class="h-num">' . $m[1] . '</span> ' . $m[2];
         }
 
-        return '<h2 id="' . $headingId . '" class="h-section">' . $text . "</h2>\n";
+        // Kotvící odkaz míří na id obalující <section> (kanonická kotva pro
+        // odkazy mezi kapitolami), ne na -heading. JS na kliknutí zkopíruje URL.
+        $anchor = '<a class="h-anchor" href="#' . htmlspecialchars($sectionId)
+            . '" aria-label="Kopírovat odkaz na tuto sekci">#</a>';
+
+        return '<h2 id="' . $headingId . '" class="h-section">' . $text . $anchor . "</h2>\n";
     }
 
     private function renderAttrs(array $attrs): string

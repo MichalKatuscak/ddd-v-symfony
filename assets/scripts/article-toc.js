@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const headings = Array.from(body.querySelectorAll('h2'));
   if (headings.length < 2) {
-    document.querySelectorAll('[data-toc-target], [data-toc-mobile]').forEach(function (el) {
+    document.querySelectorAll('[data-toc-target], [data-toc-mobile], [data-toc-fab]').forEach(function (el) {
       el.style.display = 'none';
     });
     return;
@@ -48,10 +48,10 @@ document.addEventListener('DOMContentLoaded', function () {
       ? chapterNum + '.' + String(i + 1).padStart(2, '0')
       : String(i + 1).padStart(2, '0');
 
-    const numSpan = h.querySelector('.h-num');
-    const titleText = numSpan
-      ? h.textContent.replace(numSpan.textContent, '').trim()
-      : h.textContent.trim();
+    // Titul bez čísla sekce (.h-num) a bez kotvícího „#" (.h-anchor).
+    const clone = h.cloneNode(true);
+    clone.querySelectorAll('.h-num, .h-anchor').forEach(function (n) { n.remove(); });
+    const titleText = clone.textContent.trim();
 
     return { id: h.id, num: num, title: titleText };
   });
@@ -116,4 +116,30 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   headings.forEach(function (h) { observer.observe(h); });
+
+  // Plovoucí TOC (mobil): otevření/zavření panelu se seznamem sekcí.
+  const fab = document.querySelector('[data-toc-fab]');
+  if (fab) {
+    const toggle = fab.querySelector('[data-toc-fab-toggle]');
+    const panel = fab.querySelector('[data-toc-fab-panel]');
+    if (toggle && panel) {
+      const setFab = function (open) {
+        toggle.setAttribute('aria-expanded', String(open));
+        panel.hidden = !open;
+        fab.classList.toggle('is-open', open);
+      };
+      toggle.addEventListener('click', function () {
+        setFab(panel.hidden);
+      });
+      panel.addEventListener('click', function (e) {
+        if (e.target.closest('a[href^="#"]')) setFab(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !panel.hidden) { setFab(false); toggle.focus(); }
+      });
+      document.addEventListener('click', function (e) {
+        if (!panel.hidden && !fab.contains(e.target)) setFab(false);
+      });
+    }
+  }
 });

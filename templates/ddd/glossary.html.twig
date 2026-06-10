@@ -58,7 +58,17 @@
 
     {% include '_partials/article_toc.html.twig' %}
 
-    <div class="art-body">
+    <div class="art-body" data-glossary>
+        <div class="glossary-filter" data-glossary-filter>
+            <svg class="glossary-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <circle cx="11" cy="11" r="6"/>
+                <line x1="20" y1="20" x2="15.5" y2="15.5"/>
+            </svg>
+            <input type="search" class="glossary-filter-input" data-glossary-input placeholder="Filtrovat pojmy…" aria-label="Filtrovat pojmy v glosáři" autocomplete="off" spellcheck="false">
+            <span class="glossary-filter-count" data-glossary-count aria-live="polite"></span>
+        </div>
+        <p class="glossary-filter-empty" data-glossary-empty hidden>Žádný pojem neodpovídá. Zkuste jiné slovo.</p>
+
         {# ==================== SECTION 1 ==================== #}
         <section id="strategicke-vzory" aria-labelledby="strategicke-vzory-heading">
             <h2 id="strategicke-vzory-heading" class="h-section"><span class="h-num">01</span> Strategické vzory DDD</h2>
