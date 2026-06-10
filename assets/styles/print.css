@@ -20,7 +20,10 @@
   }
 
   /* ── Skrýt veškeré navigační a interaktivní chrome ───────────────────── */
-  header,
+  /* Jen hlavička webu (přímý potomek body) – holé „header" by schovalo
+     i <header> uvnitř obsahu: art-head (titulek kapitoly), code-head,
+     diagram-head, hlavičky hubů a TOC na homepage. */
+  body > header,
   .nav-drawer,
   .nav-drawer-backdrop,
   .reading-bar,
@@ -91,7 +94,9 @@
   }
 
   /* ── Inline kód světlý ───────────────────────────────────────────────── */
-  .ic, .art-body code, .faq-answer code {
+  /* Jen inline kód (:not(pre) > code) – blokový kód v <pre> zůstává tmavá
+     figura se syntax highlightem, tahle pravidla by mu rozbila barvy. */
+  .ic, .art-body :not(pre) > code, .faq-answer :not(pre) > code {
     background: #f1f2f4 !important;
     border: 1px solid #d4d6db !important;
     color: #16181d !important;
@@ -112,7 +117,9 @@
   /* Bez horizontálního scrollu na papíře: tabulka se vejde na šířku stránky
      a buňky se zalomí, ať se žádný sloupec neořízne za okrajem. */
   .art-body table { width: 100% !important; min-width: 0 !important; table-layout: auto !important; }
-  .art-body table th, .art-body table td { white-space: normal !important; overflow-wrap: anywhere; }
+  /* break-word místo anywhere: slovo se zalomí jen když se nevejde, takže
+     sloupec drží šířku nejdelšího slova a hlavičky se nelámou uprostřed. */
+  .art-body table th, .art-body table td { white-space: normal !important; overflow-wrap: break-word; }
   .art-body table code, .art-body table .ic { white-space: normal !important; }
   .art-body table th { background: #eef0f2 !important; color: #000 !important; border-color: #ccc !important; }
   .art-body table td { border-color: #ddd !important; }
@@ -173,4 +180,15 @@
   .land-eyebrow-rule, .land-toc-rule { background: #ccc !important; }
   .land-toc-bar i, .diff-bar i { background: #ccc !important; }
   .land-toc-bar i.on, .diff-bar i.on { background: #555 !important; }
+
+  /* ── Hub (rozcestník): zesvětlit stejně jako zbytek ──────────────────── */
+  .hub-a, .hub-a-shell { background: #fff !important; }
+  .hub-a-h, .hub-a-h em, .hub-a-sect-title, .hub-a-card-t { color: #000 !important; }
+  .hub-a-deck, .hub-a-card-d { color: #2a2d35 !important; }
+  .hub-a-eyebrow, .hub-a-meta-k, .hub-a-meta-v, .hub-a-sect-num,
+  .hub-a-sect-sub, .hub-a-card-n, .hub-a-card-meta, .hub-a-card-time { color: #555 !important; }
+  .hub-a-card-arr { display: none !important; }
+  .hub-a-head, .hub-a-meta, .hub-a-meta-row, .hub-a-sect-head,
+  .hub-a-grid, .hub-a-card { border-color: #ddd !important; }
+  .hub-a-card { break-inside: avoid; }
 }
