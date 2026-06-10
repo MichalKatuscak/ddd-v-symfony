@@ -41,6 +41,7 @@
   }
 
   function search(q) {
+    if (!index) return []; // index se ještě načítá – render se zopakuje po jeho dokončení
     const query = norm(q).trim();
     if (!query) return [];
     const tokens = query.split(/\s+/).filter(Boolean);

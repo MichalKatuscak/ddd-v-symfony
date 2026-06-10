@@ -78,15 +78,20 @@
 
     let marked = set.has(route);
     let ticking = false;
+    let lastPct = -1;
 
     function update() {
       ticking = false;
       const p = articleProgress(article);
       if (bar) bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
 
-      // Poslední pozice (procenta zaokrouhlená, ať se zápis nespouští pořád).
+      // Poslední pozice – zápis do localStorage jen při změně celého procenta,
+      // ne v každém scroll snímku (synchronní I/O by zbytečně zatěžoval scroll).
       const pct = Math.round(p * 100);
-      saveLast({ route: meta.route, url: meta.url, title: meta.title, num: meta.num, pct: pct });
+      if (pct !== lastPct) {
+        lastPct = pct;
+        saveLast({ route: meta.route, url: meta.url, title: meta.title, num: meta.num, pct: pct });
+      }
 
       if (!marked && p >= 0.9) {
         marked = true;
