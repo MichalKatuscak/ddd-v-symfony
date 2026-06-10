@@ -200,6 +200,22 @@
 .art-body p, .art-body li { overflow-wrap: break-word; }
 .art-body code, .art-body .ic { overflow-wrap: anywhere; }
 
+/* Čtecí sloupec: souvislý text drží míru ~68 znaků (--measure-prose), zatímco
+   strukturní bloky (kód, tabulky, diagramy, callouty) využijí plnou šířku .art-body.
+   Záměrně asymetrické — delší řádek textu zhoršuje čitelnost, kód naopak prostor ocení. */
+.art-body > p,
+.art-body > ul,
+.art-body > ol,
+.art-body > h3,
+.art-body > h4,
+.art-body > section > p,
+.art-body > section > ul,
+.art-body > section > ol,
+.art-body > section > h3,
+.art-body > section > h4 {
+  max-width: 62ch;
+}
+
 /* Tables — wrap in .table-responsive for horizontal scroll on narrow screens */
 .art-body .table-responsive {
   overflow-x: auto;

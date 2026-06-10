@@ -21,6 +21,7 @@ import bash from 'highlight.js/lib/languages/bash';
 import json from 'highlight.js/lib/languages/json';
 import javascript from 'highlight.js/lib/languages/javascript';
 import sql from 'highlight.js/lib/languages/sql';
+import markdown from 'highlight.js/lib/languages/markdown';
 import plaintext from 'highlight.js/lib/languages/plaintext';
 
 hljs.registerLanguage('php', php);
@@ -33,7 +34,10 @@ hljs.registerLanguage('shell', bash);
 hljs.registerLanguage('json', json);
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('sql', sql);
+hljs.registerLanguage('markdown', markdown);
 hljs.registerLanguage('plaintext', plaintext);
+// „text" je v obsahu použité jako synonymum pro plaintext (žádné zvýraznění).
+hljs.registerLanguage('text', plaintext);
 
 // App scripts
 import './scripts/topnav.js';

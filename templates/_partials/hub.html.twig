@@ -19,6 +19,7 @@
             </dl>
         </header>
 
+        {% if hub_chapters|length > 0 %}
         <section class="hub-a-section">
             <header class="hub-a-sect-head">
                 <span class="hub-a-sect-num">{{ hub_part }}</span>
@@ -44,6 +45,7 @@
                 {% endfor %}
             </div>
         </section>
+        {% endif %}
 
         {% if hub_extras is defined and hub_extras|length > 0 %}
             <section class="hub-a-section">

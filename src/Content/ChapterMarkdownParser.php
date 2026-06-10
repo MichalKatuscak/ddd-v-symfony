@@ -12,6 +12,7 @@ use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\CommonMark\Node\Block\Heading;
+use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 use League\CommonMark\Extension\Table\TableExtension;
 use League\CommonMark\MarkdownConverter;
 use Symfony\Component\Yaml\Yaml;
@@ -26,10 +27,26 @@ final class ChapterMarkdownParser
         private readonly CodeBlockRenderer $code,
         private readonly FaqRenderer $faq,
     ) {
-        $env = new Environment();
+        // Externí odkazy sjednotí ExternalLinkExtension: každý odkaz mimo vlastní
+        // doménu (relativní interní odkazy jsou vždy „internal") dostane shodně
+        // target="_blank" a rel="noopener noreferrer" plus třídu .ext-link pro vizuální
+        // indikátor. Surové <a> v obsahu (citace) si target/rel drží samy.
+        $config = [
+            'external_link' => [
+                'internal_hosts'     => 'ddd-v-symfony.katuscak.cz',
+                'open_in_new_window' => true,
+                'html_class'         => 'ext-link',
+                'nofollow'           => '',
+                'noopener'           => 'external',
+                'noreferrer'         => 'external',
+            ],
+        ];
+
+        $env = new Environment($config);
         $env->addExtension(new CommonMarkCoreExtension());
         $env->addExtension(new AttributesExtension());
         $env->addExtension(new TableExtension());
+        $env->addExtension(new ExternalLinkExtension());
         $env->addRenderer(Heading::class, new ChapterHeadingRenderer());
         $this->converter = new MarkdownConverter($env);
     }
