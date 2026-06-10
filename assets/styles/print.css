@@ -1,0 +1,165 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Print — tiskový / PDF styl.
+   Web je „blueprint v tmavém editoru"; papír chce opak. Text a chrome proto
+   převedeme na světlou variantu (černá na bílé). Výjimka jsou kód a diagramy:
+   jejich obsah je světlý na tmavém (syntax highlight, PlantUML SVG), takže je
+   necháme jako tmavé „figury" a vynutíme tisk pozadí (print-color-adjust).
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  /* Okraje stránky a základní sazba */
+  @page { margin: 18mm; }
+
+  html, body {
+    background: #fff !important;
+    color: #16181d !important;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Skrýt veškeré navigační a interaktivní chrome ───────────────────── */
+  header,
+  .nav-drawer,
+  .nav-drawer-backdrop,
+  .reading-bar,
+  .search-overlay,
+  .skip-link,
+  .toc,
+  .toc-m,
+  .toc-fab,
+  .art-nav,
+  .resume-card,
+  .bookmap,
+  .land-marq,
+  .land-cta,
+  .land-skip,
+  .code-copy,
+  .diagram-toolbar,
+  .diagram-modal,
+  .h-anchor,
+  .glossary-filter,
+  .glossary-filter-empty,
+  footer.foot-a {
+    display: none !important;
+  }
+
+  /* ── Jednosloupcový tok bez sticky/gridu ─────────────────────────────── */
+  main { display: block !important; }
+  .article {
+    display: block !important;
+    max-width: none !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .art-body {
+    max-width: none !important;
+    color: #16181d !important;
+  }
+  /* Zruš zúžení čtecího sloupce – na papíře využij celou šířku stránky */
+  .art-body > p, .art-body > ul, .art-body > ol,
+  .art-body > section > p, .art-body > section > ul, .art-body > section > ol {
+    max-width: none !important;
+  }
+
+  /* ── Typografie světlá ───────────────────────────────────────────────── */
+  .art-title, .art-body h2, .art-body h3, .art-body h4,
+  .h-section, .bio-name { color: #000 !important; }
+  .art-deck, .art-body table td, .callout-body, .faq-answer { color: #2a2d35 !important; }
+  .art-meta-k, .art-crumb, .h-num, .term-en, .res-meta { color: #555 !important; }
+  .art-body em, .art-body strong, .glossary-entry dt { color: #000 !important; }
+  .art-meta { border-color: #ccc !important; }
+
+  /* Nadpis nemá osiřet na konci stránky */
+  .art-title, .h-section, .art-body h2, .art-body h3, .art-body h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* ── Odkazy: podtržené černé, externí ukáží URL ──────────────────────── */
+  .art-body a, .faq-answer a, .callout-body a, .glossary-entry dd a {
+    color: #000 !important;
+    text-decoration: underline;
+  }
+  .art-body a[href^="http"]::after,
+  .faq-answer a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.82em;
+    color: #555;
+    word-break: break-all;
+  }
+
+  /* ── Inline kód světlý ───────────────────────────────────────────────── */
+  .ic, .art-body code, .faq-answer code {
+    background: #f1f2f4 !important;
+    border: 1px solid #d4d6db !important;
+    color: #16181d !important;
+  }
+  .art-body em code { color: #000 !important; }
+
+  /* ── Callout, tabulka, glosář na světlém ─────────────────────────────── */
+  .callout { background: #fff !important; border: 1px solid #b8bcc4 !important; }
+  .callout-rail { background: #f1f2f4 !important; border-right: 1px solid #d4d6db !important; }
+  .callout-label { color: #555 !important; }
+  .note { background: #fff !important; border-color: #b8bcc4 !important; color: #2a2d35 !important; }
+
+  .table-responsive {
+    overflow: visible !important;
+    background: none !important;
+    border: 1px solid #ccc !important;
+  }
+  .art-body table th { background: #eef0f2 !important; color: #000 !important; border-color: #ccc !important; }
+  .art-body table td { border-color: #ddd !important; }
+
+  .glossary-entry { background: #fff !important; border: 1px solid #c9ccd2 !important; }
+  .glossary-entry dd { color: #2a2d35 !important; }
+  /* Pojistka: kdyby uživatel tiskl s aktivním filtrem, ukaž vše */
+  .glossary-entry[hidden], .art-body section[hidden] { display: block !important; }
+
+  /* ── Kód a diagramy: ponech tmavé figury, vynuť tisk pozadí ──────────── */
+  .code, .code-head, .code-body,
+  .diagram, .diagram-head, .diagram-caption {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Dlouhé řádky kódu raději zalom, ať se nic neořízne za okrajem stránky.
+     code{min-width:max-content} drží blok na šířku nejdelšího řádku → bez
+     min-width:0 a shrinknutelného gridu by pre-wrap nezabral a text se ořízl. */
+  .code-body { overflow: visible !important; background-image: none !important; }
+  .code-body code { min-width: 0 !important; }
+  .ln { grid-template-columns: 2.5em minmax(0, 1fr) !important; }
+  .ln-text { white-space: pre-wrap !important; overflow-wrap: anywhere; }
+  .diagram-stage { overflow: visible !important; }
+  .diagram-stage > svg, .diagram-stage > img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Nezalamuj uvnitř soudržných bloků ───────────────────────────────── */
+  figure.code, .diagram, .callout, .art-body table,
+  .faq-item, .glossary-entry, .bio-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── Homepage: zesvětlit a zploštit (TOC funguje jako tištěný obsah) ──── */
+  .land { background: #fff !important; }
+  .land-hero { display: block !important; padding: 0 !important; border: 0 !important; color: #16181d !important; }
+  .land-left { position: static !important; padding: 0 !important; }
+  .land-title, .land-em { color: #000 !important; }
+  .land-title { font-size: 30pt !important; line-height: 1.1 !important; }
+  .land-deck { color: #2a2d35 !important; }
+  .land-eyebrow-num { color: #555 !important; }
+  .land-eyebrow-meta, .land-toc-meta, .land-toc-desc, .land-toc-tag,
+  .land-toc-time, .land-author-role { color: #555 !important; }
+  .land-toc-title, .land-author-name { color: #000 !important; }
+  .land-toc-n { color: #555 !important; }
+  .land-toc-head, .land-toc li, .land-toc-item, .land-author { border-color: #ddd !important; }
+  /* Žádné zbytkové stavové pozadí (hover / přečteno) na papíře */
+  .land-toc-item, .land-toc li, .hub-a-card { background: transparent !important; }
+  .land-toc-item { break-inside: avoid; }
+  .land-eyebrow-rule, .land-toc-rule { background: #ccc !important; }
+  .land-toc-bar i, .diff-bar i { background: #ccc !important; }
+  .land-toc-bar i.on, .diff-bar i.on { background: #555 !important; }
+}

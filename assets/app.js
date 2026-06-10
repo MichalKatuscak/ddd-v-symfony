@@ -11,6 +11,7 @@ import './styles/chrome.css';
 import './styles/article.css';
 import './styles/landing.css';
 import './styles/hub.css';
+import './styles/print.css'; // @media print — poslední, ať přebíjí v tiskovém kontextu
 
 // highlight.js — registrace pouze potřebných jazyků
 import hljs from 'highlight.js/lib/core';
