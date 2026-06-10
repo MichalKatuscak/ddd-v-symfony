@@ -87,6 +87,14 @@
                 <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a>
             </div>
             <div class="topnav-right">
+                <button class="nav-search" type="button" data-search-open aria-label="Hledat v knize" aria-keyshortcuts="Control+K">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6"/>
+                        <line x1="20" y1="20" x2="15.5" y2="15.5"/>
+                    </svg>
+                    <span class="nav-search-label">Hledat</span>
+                    <kbd class="nav-search-kbd" aria-hidden="true">⌘K</kbd>
+                </button>
                 <button class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <line x1="4" y1="7" x2="20" y2="7"/>
@@ -97,6 +105,9 @@
             </div>
         </nav>
     </header>
+
+    {# Tenký indikátor postupu čtení — vyplňuje ho reading-progress.js jen na kapitolách. #}
+    <div class="reading-bar" data-reading-bar aria-hidden="true"></div>
 
     <div class="nav-drawer-backdrop" aria-hidden="true"></div>
     <aside class="nav-drawer" aria-label="Mobilní navigace">
@@ -111,6 +122,33 @@
             <li><a href="{{ path('about') }}"{% if _route == 'about' %} aria-current="page"{% endif %}>O autorovi</a></li>
         </ul>
     </aside>
+
+    <div class="search-overlay" data-search-overlay data-open="false">
+        <div class="search-backdrop" data-search-backdrop aria-hidden="true"></div>
+        <div class="search-panel" role="dialog" aria-modal="true" aria-label="Hledat v knize">
+            <div class="search-field">
+                <svg class="search-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <circle cx="11" cy="11" r="6"/>
+                    <line x1="20" y1="20" x2="15.5" y2="15.5"/>
+                </svg>
+                <input
+                    type="search"
+                    class="search-input"
+                    data-search-input
+                    placeholder="Hledat kapitolu, sekci nebo pojem…"
+                    aria-label="Hledat v knize"
+                    role="combobox"
+                    aria-expanded="true"
+                    aria-controls="search-results"
+                    aria-autocomplete="list"
+                    autocomplete="off"
+                    spellcheck="false">
+                <kbd class="search-esc" aria-hidden="true">Esc</kbd>
+            </div>
+            <div class="search-results" id="search-results" data-search-results role="listbox" aria-label="Výsledky hledání"></div>
+            <p class="search-empty" data-search-empty></p>
+        </div>
+    </div>
 
     <main id="content" tabindex="-1">
         {% block body %}{% endblock %}

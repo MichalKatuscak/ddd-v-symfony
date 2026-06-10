@@ -41,6 +41,7 @@ hljs.registerLanguage('text', plaintext);
 
 // App scripts
 import './scripts/topnav.js';
+import './scripts/search.js';
 import './scripts/code-block.js';
 import './scripts/article-toc.js';
 import './scripts/diagram-viewer.js';
