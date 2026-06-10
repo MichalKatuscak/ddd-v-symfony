@@ -7,7 +7,7 @@ meta_description: "Praktický průvodce návrhem agregátu v Domain-Driven Desig
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: "2026-04-30"
+modified: "2026-06-09"
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"
@@ -87,9 +87,10 @@ buď chybí hranice (mají to být dva commandy), nebo chybí sága (má to být
 
 Hranici agregátu nelze odvodit z databázového schématu, ER diagramu ani z existujícího kódu.
 Začíná se identifikací invariantů – pravidel, která musí platit v každý okamžik, jinak je
-doménový model nekonzistentní. Cockburn ve své práci *Use Cases, Ten Years Later* (2002)
-ukázal, že invarianty jsou predikáty na vstupech a výstupech operací. V DDD se přesouvají
-z dokumentace do typového systému jazyka. Typické zdroje invariantů:
+doménový model nekonzistentní. Pojetí invariantu jako predikátu pochází z Design by
+Contract: Bertrand Meyer ho v *Object-Oriented Software Construction* definuje jako
+podmínku, která platí před každou veřejnou operací objektu i po ní. V DDD se invarianty
+přesouvají z dokumentace do typového systému jazyka. Typické zdroje:
 
 - **Sumační pravidla.** Součet položek odpovídá celkové ceně. Počet
   rezervovaných míst nepřekračuje kapacitu. Bilance debetů a kreditů je nulová.
@@ -322,7 +323,7 @@ use Symfony\Component\Uid\Ulid;
 final readonly class OrderId
 {
     public function __construct(
-        private string $value,
+        public string $value,
     ) {
         if (!Ulid::isValid($value)) {
             throw new \InvalidArgumentException('OrderId must be a valid ULID');
@@ -339,7 +340,7 @@ final readonly class OrderId
         return new self($value);
     }
 
-    public function toString(): string
+    public function __toString(): string
     {
         return $this->value;
     }
@@ -351,7 +352,7 @@ final readonly class OrderId
 }
 :::
 
-:::code{language="php" filename="src/Ordering/Domain/Order/Order.php" highlights="21,56,57,58,59,60,73,74,75,76,77,78,79,80"}
+:::code{language="php" filename="src/Ordering/Domain/Order/Order.php" highlights="22,57,58,59,60,61,82,83,84,85,86,87,88,89"}
 <?php
 
 declare(strict_types=1);
@@ -359,15 +360,16 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Order;
 
 use App\Customers\Domain\Customer\CustomerId;
-use App\Shared\Domain\AggregateRoot;
 use App\Shared\Domain\Money;
+use App\SharedKernel\Domain\AggregateRoot;
 
-final class Order extends AggregateRoot
+class Order extends AggregateRoot
 {
     /** @var list<OrderItem> */
     private array $items = [];
 
     private OrderStatus $status;
+    private ShippingAddress $shippingAddress;
 
     private function __construct(
         public readonly OrderId $id,
@@ -417,11 +419,19 @@ final class Order extends AggregateRoot
 
     public function totalAmount(): Money
     {
-        return array_reduce(
-            $this->items,
-            static fn(Money $sum, OrderItem $item) => $sum->add($item->subtotal()),
-            Money::zero(Currency::CZK),
-        );
+        // place() prázdnou objednávku nepustí; guard kryje budoucí refaktoring,
+        // aby součet nikdy nevracel tichou nulu v natvrdo zvolené měně.
+        if ($this->items === []) {
+            throw new EmptyOrderException();
+        }
+
+        $total = $this->items[0]->subtotal(); // měnu určuje první položka
+
+        foreach (array_slice($this->items, 1) as $item) {
+            $total = $total->add($item->subtotal());
+        }
+
+        return $total;
     }
 
     private function addItem(OrderItemDraft $draft): void
@@ -443,7 +453,29 @@ Konstruktor je `private`: vznik agregátu řídí
 statická factory metoda `place()`, která vymáhá invariant „objednávka musí mít
 alespoň jednu položku“. `customerId` je hodnotový objekt, ne reference na entitu.
 Stavový přechod `ship()` je jediný způsob, jak změnit `status`;
-`OrderStatus` se nikdy nenastavuje setterem zvenčí.
+`OrderStatus` se nikdy nenastavuje setterem zvenčí. Volání `record()` ukládá
+událost do interní fronty bázové třídy `AggregateRoot`; vyzvednutí přes
+`releaseEvents()` po flushi popisuje
+[lifecycle sekce v Základních konceptech](/zakladni-koncepty#aggregate-root-lifecycle).
+
+Zapouzdření stavu od PHP 8.4 podporuje i jazyk sám – asymetrickou viditelností:
+
+:::code{language="php" filename="src/Ordering/Domain/Order/Order.php (výřez)"}
+class Order extends AggregateRoot
+{
+    public private(set) OrderStatus $status;
+
+    public function ship(ShipmentId $shipmentId): void
+    {
+        // ... kontrola stavu ...
+        $this->status = OrderStatus::Shipped; // zápis jen uvnitř třídy
+    }
+}
+:::
+
+Vlastnost `public private(set)` přečte kdokoli bez getteru (`$order->status`),
+zapsat ji smí jen kód uvnitř třídy. Getter `status()` tím odpadá a stavové
+přechody zůstávají jediným místem zápisu.
 
 Stavové přechody tvoří uzavřený graf, který musí být explicitně vymodelovaný. Každá
 doménová operace odpovídá hraně grafu; cesty, které v grafu chybí, nejsou jen „ještě
@@ -489,8 +521,6 @@ use Doctrine\DBAL\Types\Type;
 
 final class OrderIdType extends Type
 {
-    public const NAME = 'order_id';
-
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
         return $platform->getStringTypeDeclarationSQL(['length' => 26, 'fixed' => true]);
@@ -503,15 +533,14 @@ final class OrderIdType extends Type
 
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
-        return $value instanceof OrderId ? $value->toString() : null;
-    }
-
-    public function getName(): string
-    {
-        return self::NAME;
+        return $value instanceof OrderId ? $value->value : null;
     }
 }
 :::
+
+Třída záměrně nemá metodu `getName()` – DBAL 4 ji odstranil. Jméno typu
+(`order_id`) určuje výhradně klíč v konfiguraci `doctrine.dbal.types` níže
+a pod stejným jménem na typ odkazuje atribut `#[ORM\Column(type: 'order_id')]`.
 
 :::code{language="php" filename="src/Ordering/Domain/Order/Order.php (mapování)" highlights="22,32,33,34,35,36,37,38,39,41,42,43,44,45"}
 <?php
@@ -521,7 +550,7 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Order;
 
 use App\Customers\Domain\Customer\CustomerId;
-use App\Shared\Domain\AggregateRoot;
+use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -563,6 +592,20 @@ class Order extends AggregateRoot
 
     // ... factory metody, doménové operace ...
 }
+:::
+
+:::callout{type="warn"}
+**Proč entita mapovaná Doctrine není `final`**
+
+Doctrine ORM 3 s `enable_lazy_ghost_objects` generuje pro lazy loading proxy
+třídu, která z entity *dědí*. Jakmile na entitu míří asociace nebo ji načtete
+přes `getReference()`, `final` skončí chybou při generování proxy. Proto třída
+`Order` výše není `final`, přestože dědičnost agregátů nechceme. Hodnotové
+objekty se naproti tomu mapují jako embeddables nebo custom typy, Doctrine je
+neproxuje – u nich `final` zůstává namístě. Nativní lazy objekty z PHP 8.4
+(Doctrine ORM 3.4+ s `enable_native_lazy_objects`) toto omezení ruší, ghost je
+instancí téže třídy; dokud na nich projekt neběží, entity mapované Doctrine
+zůstávají ne-final.
 :::
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php" highlights="33,34,35,36,37,38,39"}
@@ -751,8 +794,9 @@ vychází z Vernonovy metodiky a praktických zkušeností:
    provozu? Více než 5–10 transakcí za sekundu na jednu instanci agregátu = hot aggregate,
    potřebujete jednu z technik z 07.09.
 6. **Definujte commandy a eventy.** Pro každý use case napište command (vstup),
-   doménovou metodu na agregátu (chování) a event (výstup). Eventy publikujte explicitně
-   metodou `record()`.
+   doménovou metodu na agregátu (chování) a event (výstup). Eventy nahrávejte explicitně
+   metodou `record()`; celý cyklus record/release popisuje
+   [lifecycle sekce v Základních konceptech](/zakladni-koncepty#aggregate-root-lifecycle).
 7. **Code review proti checklistu.** Sekce 07.12 níže má checklist s 12 body.
    Pokud agregát na jakýkoli odpoví „ne“, návrh není hotový.
 

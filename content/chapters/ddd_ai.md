@@ -159,11 +159,11 @@ je TDD při práci s AI agenty obzvlášť cenné. Beck rozlišuje mezi dvěma m
 za rozhodnutí. *Vibe coding* znamená, že vývojář přijímá vše, co AI vygeneruje,
 bez porozumění a bez verifikace.
 
-> „In vibe coding you don't care about the code, just the behavior of the system.
+> „In vibe coding you don't care about the code, just the behavior of the system. […]
 > In augmented coding you care about the code, its complexity, the tests,
 > & their coverage.“
 >
-> – Kent Beck, Augmented Coding: Beyond the Vibes (Substack, 2024)
+> – Kent Beck, Augmented Coding: Beyond the Vibes (Substack, 2025)
 
 Beckův argument zní: testy jsou jediným mechanismem, který AI nemůže zfalšovat. Předpokládejme,
 že AI generuje kód a existuje sada testů specifikující chování z pohledu domény –

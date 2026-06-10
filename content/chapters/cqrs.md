@@ -7,7 +7,7 @@ meta_description: "CQRS v Symfony 8: oddělení command a query strany přes Mes
 meta_keywords: "CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 8, read model, eventual consistency, ViewModel, projekce, dead letter queue"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: CQRS
 schema_type: TechArticle
 schema_headline: "CQRS v Symfony 8"
@@ -163,7 +163,7 @@ Pro CQRS je podstatná schopnost definovat **více message busů** – jeden pro
 (command bus) a jeden pro dotazy (query bus). Každý bus může mít vlastní sadu middleware,
 vlastní transport a vlastní strategii zpracování.
 
-:::diagram{fig="13.1-A" title="Symfony Messenger jako CQRS bus" src="images/diagrams/6_cqrs/diagram.svg"}
+:::diagram{fig="12.1-A" title="Symfony Messenger jako CQRS bus" src="images/diagrams/6_cqrs/diagram.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -629,6 +629,7 @@ use App\UserManagement\Registration\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -660,8 +661,21 @@ final class RegistrationController extends AbstractController
                 $this->addFlash('success', 'Váš účet byl vytvořen. Nyní se můžete přihlásit.');
 
                 return $this->redirectToRoute('app_login');
-            } catch (\DomainException $e) {
-                $this->addFlash('error', $e->getMessage());
+            } catch (HandlerFailedException $e) {
+                $domainError = null;
+
+                foreach ($e->getWrappedExceptions() as $wrapped) {
+                    if ($wrapped instanceof \DomainException) {
+                        $domainError = $wrapped;
+                        break;
+                    }
+                }
+
+                if ($domainError === null) {
+                    throw $e; // neznámou chybu nemaskovat
+                }
+
+                $this->addFlash('error', $domainError->getMessage());
             }
         }
 
@@ -671,6 +685,17 @@ final class RegistrationController extends AbstractController
     }
 }
 :::
+:::
+
+:::callout{type="warn"}
+### Messenger balí výjimky {#messenger-bali-vyjimky-heading}
+
+Synchronní Messenger nepropaguje výjimku z handleru přímo – balí ji do
+`HandlerFailedException`. Blok `catch (\DomainException $e)` kolem `dispatch()`
+by proto nikdy nic nechytil. Controller chytá obálku, zabalené výjimky projde
+přes `getWrappedExceptions()` a neznámé typy posílá dál. Podrobnější rozbor
+včetně dekorátoru busu, který rozbalování centralizuje, obsahuje kapitola
+[Implementace v Symfony](/implementace-v-symfony#handler-failed-exception-heading).
 :::
 
 :::callout{type="pattern"}
@@ -861,6 +886,20 @@ Podrobněji o idempotenci projektorů a dalších praktických problémech pojed
 [Event Sourcing – Praktické problémy projekcí](/event-sourcing#prakticke-problemy-projekci).
 :::
 
+### Kdo doménové události odešle
+
+Projektor výše předpokládá, že mu události `OrderPlaced` či `OrderShipped` někdo
+doručí. V nejjednodušší podobě je po `flush()` vyzvedne aplikační vrstva z agregátu
+metodou `releaseEvents()` a dispatchne je na event bus – celý mechanismus popisuje
+sekce [Agregát a doménové události: lifecycle](/zakladni-koncepty#aggregate-root-lifecycle).
+Pro vývoj a méně kritické projekce tato synchronní cesta stačí.
+
+Má ale slabé místo: dispatch po flushi není atomický. Spadne-li proces mezi commitem
+transakce a odesláním do fronty, událost se ztratí a projekce tiše diverguje od write
+modelu. Produkční řešení ukládá události do outbox tabulky ve stejné transakci jako
+agregát a do fronty je publikuje samostatný relay proces – podrobně v kapitole
+[Outbox Pattern](/outbox-pattern).
+
 ### Rebuild projekcí
 
 CQRS s asynchronními projekcemi umožňuje **kompletní rebuild read modelu**.
@@ -888,13 +927,13 @@ Eventual consistency je **vlastnost distribuované architektury**, ne bug.
 Následující diagram zachycuje celý datový tok – od zápisu přes asynchronní propagaci
 až po čtení – a zvýrazňuje okno, ve kterém k eventual consistency dochází:
 
-:::diagram{fig="13.2-A" title="Eventual consistency v CQRS toku" src="images/diagrams/6_cqrs/eventual_consistency.svg"}
+:::diagram{fig="12.2-A" title="Eventual consistency v CQRS toku" src="images/diagrams/6_cqrs/eventual_consistency.svg"}
 :::
 
 Konkrétnější časový pohled na to, kdy uživatel vidí 404 navzdory tomu, že command
 proběhl úspěšně, je v následující sekvenci:
 
-:::diagram{fig="13.12-A" title="Okno zastaralosti – kdy GET vrátí 404 po úspěšném POST" src="images/diagrams/6_cqrs/staleness_window.svg"}
+:::diagram{fig="12.12-A" title="Okno zastaralosti – kdy GET vrátí 404 po úspěšném POST" src="images/diagrams/6_cqrs/staleness_window.svg"}
 :::
 
 Existuje několik osvědčených vzorů, jak eventual consistency v UI řešit:
@@ -970,6 +1009,39 @@ final class PlaceOrderController extends AbstractController
 :::
 :::
 
+### Read-your-writes na úrovni HTTP {#read-your-writes-http}
+
+Strategie z tabulky výše řeší vnímání uživatele v prohlížeči. API klienti potřebují
+tvrdší záruku: „přečti si, co jsi právě zapsal“ (read-your-writes). Docílit jí lze
+předáním pozice zápisu – odpověď na command nese číslo verze agregátu nebo offset,
+na který se projekce musí dostat. Klient hodnotu pošle s následujícím dotazem,
+typicky v hlavičce.
+
+Čtecí endpoint porovná aktuální pozici projekce s požadovanou. Pokud projekce
+ještě zaostává, krátce počká (desítky až stovky milisekund) a porovnání zopakuje.
+Po vypršení limitu vrátí klientovi signál k opakování – `202 Accepted`
+s hlavičkou `Retry-After`, načež klient data po uvedené pauze načte znovu (refetch).
+Stavový kód 304 se k tomu nehodí: znamená „vaše cache je platná“, ne „data ještě nejsou“.
+
+:::callout{type="pattern"}
+### Náznak: předání pozice zápisu přes HTTP hlavičky {#ryw-http-heading}
+
+:::code{language="php" filename="snippet.php"}
+<?php
+// POST /orders - odpověď nese verzi zápisu
+return new JsonResponse(['orderId' => $orderId], 201, ['X-Write-Version' => '17']);
+
+// GET /orders/{id} s hlavičkou X-Expected-Version: 17
+if ($projectionVersion < $expectedVersion) {
+    // Projekce ještě nedoběhla - klient GET zopakuje po uvedené pauze.
+    return new Response(status: 202, headers: ['Retry-After' => '1']);
+}
+:::
+:::
+
+Vzor se vyplatí jen na cestách, kde klient bezprostředně po zápisu čte tatáž data.
+Plošné nasazení by čtecí stranu zatížilo čekáním, které většina dotazů nepotřebuje.
+
 :::callout{type="warn"}
 ### Kdy eventual consistency NENÍ přijatelná {#ec-warning-heading}
 
@@ -1034,6 +1106,8 @@ Tato konfigurace směruje příkazy pro odesílání e-mailů a generování rep
 transport s retry strategií (3 pokusy s exponenciálním backoffem). Pro kritické události
 definuje samostatný transport `async_priority_high` s vlastní frontou – Messenger worker
 pro tuto frontu může běžet s vyšší prioritou nebo na dedikovaném serveru.
+Spolehlivé předání doménových událostí do fronty, atomické se zápisem agregátu,
+zajišťuje [Outbox Pattern](/outbox-pattern).
 
 :::callout{type="pattern"}
 ### Spuštění Messenger workerů {#worker-heading}

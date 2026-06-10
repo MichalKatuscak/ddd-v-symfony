@@ -7,12 +7,12 @@ meta_description: "Srovnání architektonických stylů (Layered, Hexagonal, Oni
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Architektonické styly
 schema_type: TechArticle
 schema_headline: "Architektonické styly: Hexagonal, Onion, Clean – co si vybrat"
 chapter_number: "09"
-category: Základy
+category: Architektura
 deck: "DDD vám říká <em>co</em> modelovat. Architektonický styl říká <em>kam</em> to modelované strčit. Čtyři školy – klasická vrstvená, Hexagonální (Cockburn), Onion (Palermo), Clean (Martin) – a Vertical Slice jako pátá. Kapitola srovnává jejich odlišnosti, podobnosti a co vybrat v Symfony 8 projektu."
 reading_time: 22
 difficulty: 3
@@ -325,7 +325,7 @@ Doménová třída `Order` nemá žádné Doctrine anotace – je to čisté PHP
 
 ### Příklad: Inbound port a jeho HTTP adapter {#hexagonal-inbound-heading}
 
-Driving (inbound) port definuje, co aplikace umí. V DDD termínech je to kontrakt Application Service. V Symfony 8 se zpravidla mapuje na CQRS Command/Query handler dispatchovaný přes Messenger Bus. Port lze také definovat explicitně jako interface, který má jediný handler jako implementaci.
+Driving (inbound) port definuje, co aplikace umí. V DDD termínech je to kontrakt Application Service. V Symfony 8 se zpravidla mapuje na CQRS Command/Query handler (podrobně v kapitole [CQRS](/cqrs)) dispatchovaný přes Messenger Bus. Port lze také definovat explicitně jako interface, který má jediný handler jako implementaci.
 
 :::code{language="php" filename="src/Ordering/Application/UseCase/PlaceOrder.php"}
 <?php
@@ -348,7 +348,7 @@ interface PlaceOrder
 }
 :::
 
-HTTP adapter pak nezná konkrétní třídu handleru – zná jen rozhraní portu, a Symfony DI ho automaticky napojí na implementaci. Tím získáte schopnost handler v testech vyměnit za fake bez celé aplikační vrstvy.
+HTTP adapter pak nezná konkrétní třídu handleru – zná jen rozhraní portu. Na implementaci ho naváže alias v konfiguraci kontejneru (viz [sekci o Service Containeru](#hexagonal-symfony-di-heading) níže). Tím získáte schopnost handler v testech vyměnit za fake bez celé aplikační vrstvy.
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php" highlights="13,14,15,16"}
 <?php
@@ -392,7 +392,7 @@ final class PlaceOrderController
 
 ### Symfony Service Container a auto-wiring {#hexagonal-symfony-di-heading}
 
-Symfony Dependency Injection automaticky binduje rozhraní na implementaci, pokud je *jen jedna* implementace daného rozhraní. Pokud je víc (např. `InMemoryOrderRepository` pro testy a `DoctrineOrderRepository` pro produkci), explicitně určíte mapování v `config/services.yaml`:
+Symfony autowiring doplňuje závislosti podle typu. U konkrétní třídy to funguje samo; u rozhraní nikoliv – kontejner neví, kterou službu má za typ `OrderRepository` dosadit, a to ani tehdy, když existuje jediná implementace. Port proto potřebuje **alias** na vybraný adaptér. První možnost je zápis v `config/services.yaml`:
 
 :::code{language="yaml" filename="config/services.yaml" highlights="10,11"}
 services:
@@ -410,7 +410,26 @@ services:
     # Pro testy lze přepsat v config/services_test.yaml
 :::
 
-Alternativa s atributem `#[Autowire]` přímo v konstruktoru use casu:
+Druhá možnost je atribut `#[AsAlias]` přímo na implementaci – alias pak žije ve vrstvě Infrastructure, kam patří:
+
+:::code{language="php" filename="src/Ordering/Infrastructure/Persistence/DoctrineOrderRepository.php (s AsAlias)"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Infrastructure\Persistence;
+
+use App\Ordering\Domain\Port\OrderRepository;
+use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+
+#[AsAlias(id: OrderRepository::class)]
+final class DoctrineOrderRepository implements OrderRepository
+{
+    // ... viz implementace výše
+}
+:::
+
+Use case v Application vrstvě pak deklaruje závislost prostým type-hintem na doménové rozhraní a o existenci Doctrine adaptéru neví:
 
 :::code{language="php" filename="src/Ordering/Application/UseCase/PlaceOrderHandler.php"}
 <?php
@@ -420,18 +439,19 @@ declare(strict_types=1);
 namespace App\Ordering\Application\UseCase;
 
 use App\Ordering\Domain\Port\OrderRepository;
-use App\Ordering\Infrastructure\Persistence\DoctrineOrderRepository;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class PlaceOrderHandler implements PlaceOrder
 {
     public function __construct(
-        #[Autowire(service: DoctrineOrderRepository::class)]
         private readonly OrderRepository $orders,
     ) {
     }
 }
 :::
+
+Nabízel by se i atribut `#[Autowire(service: DoctrineOrderRepository::class)]` přímo v konstruktoru handleru. To je v Application vrstvě anti-vzor: vyžaduje import Infrastructure třídy, čímž porušuje Dependency Rule, kterou celá struktura chrání. Use case by znal konkrétní adaptér a záměna implementace (testovací `InMemoryOrderRepository`) by znamenala zásah do aplikačního kódu místo do konfigurace. Alias patří do `services.yaml` nebo na implementaci, nikdy do vnitřních vrstev.
+
+Pokud implementací portu existuje víc (např. `InMemoryOrderRepository` pro testy vedle `DoctrineOrderRepository` pro produkci), alias zároveň určuje výchozí adaptér; testovací prostředí ho přepíše v `config/services_test.yaml`.
 
 ### Druhý port: publisher doménových událostí {#hexagonal-event-port-heading}
 
@@ -1246,11 +1266,11 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 - question: Jak migrovat z Layered na Hexagonal v existujícím Symfony projektu?
   answer: 'Strangler Fig pattern: nezačínejte velký rewrite, ale postupně. Vyberte jeden Bounded Context (ideálně Core Domain) a v něm jednu feature. Pro tu feature zaveďte port (interface v Domain/Port/) a adapter (implementace v Infrastructure/), původní Doctrine entitu rozdělte na čistou doménovou třídu + persistenční OrmEntity + Mapper. Otestujte. Iterujte na další feature. Pokud Core Domain doženete celý, druhý BC možná stačí ponechat v Layered (hybridní přístup). Nikdy nemigrujte všechno najednou – riziko regresí je vysoké. Detail strangler fig v kapitole <a href="/migrace-z-crud">Migrace z CRUD</a>.'
 - question: Co je „Port“ přesně a jak se liší od běžného PHP interface?
-  answer: 'Port je interface s explicitní architektonickou rolí: definuje hranici mezi doménou a vnějším světem. Technicky je to běžný PHP <code>interface</code>, ale konvenčně žije v adresáři <code>Domain/Port/</code>, nemá framework závislosti a má smysluplné jméno z domain language (<code>OrderRepository</code>, ne <code>OrderRepositoryInterface</code>). Cockburn rozlišuje driving porty (vnější svět volá doménu) a driven porty (doména volá vnější svět). V Symfony auto-wiringu je port automaticky napojen na svou jedinou implementaci, nebo můžete explicitně mapovat v services.yaml. Detail v <a href="#hexagonal">sekci o Hexagonal</a>.'
+  answer: 'Port je interface s explicitní architektonickou rolí: definuje hranici mezi doménou a vnějším světem. Technicky je to běžný PHP <code>interface</code>, ale konvenčně žije v adresáři <code>Domain/Port/</code>, nemá framework závislosti a má smysluplné jméno z domain language (<code>OrderRepository</code>, ne <code>OrderRepositoryInterface</code>). Cockburn rozlišuje driving porty (vnější svět volá doménu) a driven porty (doména volá vnější svět). V Symfony se port na implementaci napojuje aliasem – buď v services.yaml, nebo atributem <code>#[AsAlias]</code> na implementaci; samotný autowiring rozhraní na adaptér nenaváže. Detail v <a href="#hexagonal">sekci o Hexagonal</a>.'
 - question: Vyplatí se Clean Architecture v malé Symfony aplikaci?
   answer: 'Spíše ne. Clean Architecture vyžaduje DTO ping-pong (Request DTO → Use Case → Response DTO → Adapter překládá zpět), je významný overhead – pro každou funkci tři až čtyři další třídy. V malé aplikaci s 20–30 endpointy je to čistá ztráta. Vyplatí se až v aplikacích s explicitním seznamem use casů (200+ schopností), kde je důležitá auditability „co aplikace umí“ a kde je víc vstupních kanálů (HTTP + CLI + Messenger + GraphQL). Pro malou Symfony aplikaci stačí Layered nebo Hexagonal s méně rituálem. Detail v <a href="#srovnani">rozhodovací matici</a>.'
 - question: Jak Vertical Slice zapadá mezi Hexagonal/Onion/Clean?
-  answer: 'Vertical Slice je ortogonální k vrstvovým stylům. Hexagonal/Onion/Clean popisují <em>jak strukturovat závislosti uvnitř jedné feature</em>; Vertical Slice popisuje <em>jak organizovat feature mezi sebou</em>. Tyto dvě dimenze lze kombinovat: každý vertikální slice může uvnitř používat Hexagonal port-adapter strukturu, nebo nemusí. V současných Symfony projektech je rozšířená kombinace <strong>Hexagonal + Vertical Slice + CQRS přes Symfony Messenger</strong> – Bounded Context má sdílený doménový model, ale aplikační vrstva je rozdělená do feature slice. Detail Vertical Slice v <a href="/vertikalni-slice">samostatné kapitole</a>.'
+  answer: 'Vertical Slice je ortogonální k vrstvovým stylům. Hexagonal/Onion/Clean popisují <em>jak strukturovat závislosti uvnitř jedné feature</em>; Vertical Slice popisuje <em>jak organizovat feature mezi sebou</em>. Tyto dvě dimenze lze kombinovat: každý vertikální slice může uvnitř používat Hexagonal port-adapter strukturu, nebo nemusí. V současných Symfony projektech je rozšířená kombinace <strong>Hexagonal + Vertical Slice + CQRS přes Symfony Messenger</strong> – Bounded Context má sdílený doménový model, ale aplikační vrstva je rozdělená do feature slice. Detail v <a href="#vertical-slice">sekci 09.06 výše</a>.'
 :::
 
 ## 09.12 Další četba a citace {#further-reading}

@@ -7,7 +7,7 @@ meta_description: "Transactional Outbox + Idempotent Inbox v Symfony 8 a Doctrin
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
@@ -121,13 +121,13 @@ Distribuované databáze a některé brokery nabízejí protokol
 bychom mohli RabbitMQ a PostgreSQL zapojit do jedné XA transakce a problém by zmizel.
 Praxe je ale jiná:
 
-- **Většina dnešních brokerů XA nepodporuje.** RabbitMQ má částečnou
-  podporu přes plugin, Kafka nemá XA vůbec, Redis Streams ani neuvažuje. Jakmile
+- **Běžné brokery XA nepodporují.** RabbitMQ distribuované XA transakce
+  neimplementuje, Kafka nemá XA vůbec, Redis Streams ani neuvažuje. Jakmile
   použijete cloudovou verzi (AWS SNS/SQS, Google Pub/Sub), XA je definitivně mimo
-  hru. Závazek na XA-only brokery vážně omezuje volbu infrastruktury.
+  hru. Závazek na XA-only infrastrukturu vážně omezuje volbu technologií.
 - **XA je drahé.** Účastníci drží zámky po celou dobu obou fází –
-  propustnost klesá řádově. Helland v citovaném paperu shrnuje: „*2PC je
-  daň z každé operace, kterou platíte, i když se nikdy nic nerozbije*“.
+  propustnost klesá řádově. Helland v citovaném paperu odmítá 2PC kvůli
+  nákladům a křehkosti – blokuje při nedostupnosti uzlů a neškáluje.
 - **Single point of failure.** Koordinátor 2PC je kritické místo;
   jeho selhání mezi fázemi prepare a commit zanechá účastníky v *in-doubt*
   stavu, kdy ani nelze rollbacknout, ani commitnout. Je třeba manuální zásah –
@@ -279,7 +279,7 @@ class OutboxMessage
 
 | Sloupec | Typ | Účel |
 |---|---|---|
-| `id` | ULID (16 B) | Unikátní identifikátor řádku – slouží zároveň jako **event_id** pro deduplikaci na straně subscribera (viz Inbox). |
+| `id` | ULID (16 B) | Primární klíč a pořadí řádků pro polling. Deduplikaci nenese – tu zajišťuje `eventId` v payloadu události (viz Inbox). |
 | `message_type` | VARCHAR(255) | FQCN doménové události (např. `App\Ordering\Domain\Event\OrderPlaced`). Relay podle něj namapuje payload zpět na PHP třídu. |
 | `payload` | JSON / JSONB | Serializovaný stav události. JSONB v Postgresu je preferovaný – umožňuje indexovat jednotlivá pole pro debugging. |
 | `status` | VARCHAR(16) | Stavový enum: `pending` (čeká na publish), `sent` (úspěšně publikováno), `failed` (po N pokusech vzdáno, vyžaduje manuální resolve). |
@@ -353,6 +353,10 @@ final class Version20260429120000 extends AbstractMigration
 }
 :::
 :::
+
+Migrace cílí na MySQL/MariaDB. PostgreSQL varianta nahradí `BINARY(16)`
+typem `UUID`, `DATETIME(6)` typem `TIMESTAMPTZ` a `JSON` typem `JSONB`;
+klauzule `ENGINE` a `CHARSET` odpadají.
 
 Po migraci spusťte `php bin/console doctrine:migrations:migrate` a ověřte,
 že index existuje:
@@ -604,10 +608,13 @@ Debezium** mimo aplikaci, kam sahá smysl až s masivní škálou nebo polyglot 
 
 ### Varianta A: Polling worker (Symfony Console command) {#relay-polling-heading}
 
-Polling worker je obyčejný Symfony Console command, který v nekonečné smyčce volá
+Polling worker je obyčejný Symfony Console command, který ve vnitřní smyčce volá
 `fetchPending()`, publikuje řádky a označí je jako `sent`.
-Spouští se z `supervisord`, `systemd` timeru nebo Kubernetes
-Deploymentu jako trvale běžící proces.
+Spouští se ze `supervisord`, `systemd` nebo Kubernetes
+Deploymentu jako trvale běžící proces. Smyčka má časový limit – po jeho
+doběhnutí se proces čistě ukončí a process manager ho nastartuje znovu.
+Stejný vzor používá `messenger:consume --time-limit`; periodický restart
+drží pod kontrolou paměť dlouho běžícího PHP procesu.
 
 :::callout{type="pattern"}
 ### PHP: OutboxDispatchCommand {#dispatch-command-heading}
@@ -624,10 +631,10 @@ use App\Outbox\Application\OutboxMessageFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
-use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 
 #[AsCommand(
     name: 'app:outbox:dispatch',
@@ -643,43 +650,57 @@ final class OutboxDispatchCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption(
+            'time-limit',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Po kolika sekundách se proces ukončí (process manager ho nastartuje znovu).',
+            3600,
+        );
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $batch = $this->outbox->fetchPending(limit: 100);
+        $deadline = time() + (int) $input->getOption('time-limit');
 
-        if ($batch === []) {
-            return Command::SUCCESS;
-        }
+        while (time() < $deadline) {
+            $batch = $this->outbox->fetchPending(limit: 100);
 
-        foreach ($batch as $row) {
-            try {
-                $message = $this->factory->reconstitute($row);
+            if ($batch === []) {
+                usleep(100_000); // 100 ms polling interval
 
-                $this->bus->dispatch(
-                    $message,
-                    [
-                        new TransportNamesStamp(['async']),
-                        // event_id propagujeme do brokera –
-                        // subscriber ho použije pro Inbox dedup.
-                        new TransportMessageIdStamp((string) $row->id),
-                    ],
-                );
-
-                $this->outbox->markSent($row->id);
-            } catch (\Throwable $e) {
-                $this->outbox->markFailed($row->id, $e->getMessage());
-
-                $output->writeln(sprintf(
-                    '<error>[outbox] %s – %s</error>',
-                    $row->id,
-                    $e->getMessage(),
-                ));
+                continue;
             }
+
+            foreach ($batch as $row) {
+                try {
+                    $message = $this->factory->reconstitute($row);
+
+                    // event_id pro Inbox dedup cestuje v payloadu události
+                    // (OrderPlaced::$eventId) – žádný stamp není potřeba.
+                    $this->bus->dispatch(
+                        $message,
+                        [new TransportNamesStamp(['async'])],
+                    );
+
+                    $this->outbox->markSent($row->id);
+                } catch (\Throwable $e) {
+                    $this->outbox->markFailed($row->id, $e->getMessage());
+
+                    $output->writeln(sprintf(
+                        '<error>[outbox] %s – %s</error>',
+                        $row->id,
+                        $e->getMessage(),
+                    ));
+                }
+            }
+
+            $output->writeln(sprintf('[outbox] dispatched %d messages', count($batch)));
         }
 
-        $output->writeln(sprintf('[outbox] dispatched %d messages', count($batch)));
-
-        return Command::SUCCESS;
+        return Command::SUCCESS; // čistý exit – supervisord startuje znovu
     }
 }
 :::
@@ -691,10 +712,10 @@ final class OutboxDispatchCommand extends Command
 :::code{language="bash" filename="/etc/supervisor/conf.d/outbox-dispatch.conf"}
 ; /etc/supervisor/conf.d/outbox-dispatch.conf
 [program:outbox-dispatch]
-command=php /var/www/app/bin/console app:outbox:dispatch
+command=php /var/www/app/bin/console app:outbox:dispatch --time-limit=3600
 autostart=true
 autorestart=true
-startsecs=2
+startsecs=2                 ; proces běží hodinu, start je tedy vždy "úspěšný"
 stopwaitsecs=10
 stdout_logfile=/var/log/outbox-dispatch.log
 stderr_logfile=/var/log/outbox-dispatch.err
@@ -702,9 +723,9 @@ user=www-data
 numprocs=1                  ; jediný worker – vyhneme se duplicitnímu pollingu
 process_name=%(program_name)s
 
-; Loop: command běží 1× za invocation, supervisord ho restartuje
-; cca každých 100 ms díky autorestart=true a startsecs=2.
-; Alternativně použijte vnitřní while(true) + sleep(0.1) v commandu.
+; Command polluje ve vnitřní smyčce (100 ms interval) a po hodině
+; (--time-limit=3600) se sám čistě ukončí. autorestart=true ho pak
+; nastartuje znovu – stejný vzor jako u messenger:consume --time-limit.
 :::
 :::
 
@@ -751,68 +772,60 @@ projekt vyváží spolehlivost a operační režii v poměru, který nepřidáv�
 jen kvůli outboxu. Debezium se vyplatí teprve tehdy, když máte už *pět produkčních
 Kafka konzumentů* a outbox lag začíná být úzkým hrdlem.
 
-Pro úplnost ukázka, jak vypadá konfigurace Debezium konektoru pro Postgres outbox
-tabulku. Nasazuje se do Kafka Connectu jako JSON přes REST API, ekvivalentní YAML
-pro deklarativní deploy (Strimzi operator, ArgoCD) je:
-
-:::callout{type="pattern"}
-### YAML: Debezium konektor pro outbox tabulku {#debezium-config-heading}
-
-:::code{language="yaml" filename="kafka-connect/debezium-outbox-connector.yaml" highlights="25,30,31,32"}
-# kafka-connect/debezium-outbox-connector.yaml
-# Strimzi KafkaConnector custom resource pro Debezium 2.x.
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaConnector
-metadata:
-  name: ordering-outbox-connector
-  labels:
-    strimzi.io/cluster: kafka-connect
-spec:
-  class: io.debezium.connector.postgresql.PostgresConnector
-  tasksMax: 1
-  config:
-    # Připojení k Postgres (logická replikace zapnutá v postgresql.conf:
-    # wal_level=logical, max_replication_slots=4).
-    database.hostname: pg-primary.internal
-    database.port: 5432
-    database.user: debezium
-    database.password: ${secrets:debezium-pg-pwd}
-    database.dbname: ordering
-    database.server.name: ordering
-    plugin.name: pgoutput
-    slot.name: debezium_outbox
-
-    # Snímat pouze tabulku outbox – ne celou DB.
-    table.include.list: public.outbox
-
-    # Outbox Event Router transformace: čte řádky outboxu a routuje je
-    # do Kafka topiců podle sloupce message_type. Hlavní rys Debezia
-    # pro outbox use-case (DBZ-1063+).
-    transforms: outbox
-    transforms.outbox.type: io.debezium.transforms.outbox.EventRouter
-    transforms.outbox.table.field.event.id: id
-    transforms.outbox.table.field.event.key: aggregate_id
-    transforms.outbox.table.field.event.type: message_type
-    transforms.outbox.table.field.event.payload: payload
-    transforms.outbox.route.by.field: message_type
-    transforms.outbox.route.topic.replacement: outbox.${routedByValue}
-
-    # Po přečtení řádku Debezium ho NEUPDATUJE. Outbox tabulka je
-    # immutable log; mazání starých řádků řeší samostatný cron job.
-    tombstones.on.delete: false
-:::
-:::
-
-Hlavní části jsou `transforms.outbox` (Debezium Outbox Event Router,
-[DBZ-1063](https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html)),
-která čte řádky outbox tabulky a směruje je do Kafka topiců podle `message_type`,
-a `plugin.name: pgoutput` pro Postgres logickou replikaci. Žádný kód na
-aplikační straně se proti variantě A nemění – handler dál zapisuje do outbox tabulky
-v DB transakci, jen dispatcher je nahrazen Debezium konektorem.
+Konfiguračně jde o Kafka Connect konektor (REST API, nebo deklarativně přes
+Strimzi operator). Jádrem je transformace **Outbox Event Router**, která čte
+řádky outbox tabulky a směruje je do Kafka topiců podle sloupce `message_type`;
+pro Postgres se k tomu přidá logická replikace přes `pgoutput`. Žádný kód na
+aplikační straně se proti variantě A nemění – handler dál zapisuje do outbox
+tabulky v DB transakci, jen dispatcher je nahrazen Debezium konektorem.
 
 *Citace: Debezium dokumentace –
 [Outbox Event Router](https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html)
 (Red Hat, 2019+).*
+
+### Doctrine transport jako outbox bez vlastní tabulky {#doctrine-transport-outbox-heading}
+
+Symfony Messenger nabízí třetí cestu, která nevyžaduje vlastní outbox tabulku
+ani relay command. Transport `doctrine://default` ukládá zprávy do tabulky
+`messenger_messages` ve **stejné databázi**, kde žije doménový stav. Atomicitu
+zajišťuje middleware `doctrine_transaction` na **command busu**: transakce,
+kterou middleware otevře kolem command handleru, obalí uložení agregátu
+i dispatch eventu na doctrine transport. Podmínkou je, že transport používá
+totéž DB spojení jako doménový stav – tedy `default` entity manager. Dual-write
+problém tím mizí – buď se commitne order i zpráva, nebo nic. Worker
+`messenger:consume async` pak zprávu vyzvedne a zpracuje, případně přepošle dál.
+
+:::callout{type="pattern"}
+### YAML: Routing eventu na Doctrine transport {#doctrine-transport-routing-heading}
+
+:::code{language="yaml" filename="config/packages/messenger.yaml" highlights="6,10,13"}
+framework:
+    messenger:
+        buses:
+            command.bus:
+                middleware:
+                    - doctrine_transaction   # transakce handleru obalí agregát i dispatch eventu
+
+        transports:
+            async:
+                dsn: 'doctrine://default'    # totéž spojení jako doménový stav (default EM)
+
+        routing:
+            App\Ordering\Domain\Event\OrderPlaced: async
+:::
+:::
+
+Daň za pohodlí je trojí. Formát uložené zprávy je svázaný s Messengerem – payload
+serializuje envelope i se stampy, takže ho mimo Symfony nikdo rozumně nepřečte.
+Auditovatelnost a retence jsou horší než u vlastní outbox tabulky: zpracované
+řádky worker maže, žádný stav `sent`, žádné `last_error`, žádná historie pro
+rozbor incidentu. A nad schématem tabulky nemáte kontrolu – definuje ho
+Messenger, ne vaše migrace.
+
+Pro menší systémy je to přesto nejjednodušší správná volba: dual-write je
+vyřešený, kód se omezí na konfiguraci a jeden worker. Vlastní outbox tabulka
+se vyplatí, až když potřebujete auditní stopu, řízenou retenci nebo publish
+do brokera mimo Messenger.
 
 ## 15.06 Idempotent Inbox – strana subscribera {#inbox}
 
@@ -823,11 +836,11 @@ chybný stav read modelu – zákazník vidí 200 Kč na účtě místo 100 Kč,
 je dvojnásobný, e-mail dorazí 2×.
 
 **Idempotent Inbox Pattern** řeší tuto situaci doplňkem k outboxu – tabulkou
-`inbox` v databázi subscribera se sloupcem `event_id` a UNIQUE
-constraintem. Před zpracováním eventu handler zkontroluje, zda je daný event_id už
-v inboxu; pokud ano, ackne brokerovi a skončí. Pokud ne, zpracuje doménovou logiku
-a v *téže transakci* vloží nový řádek do inboxu. UNIQUE constraint je pojistka
-proti race condition.
+`inbox` v databázi subscribera s kompozitním UNIQUE constraintem na dvojici
+`(event_id, consumer)`. Před zpracováním eventu handler zkontroluje, zda je
+daná dvojice už v inboxu; pokud ano, ackne brokerovi a skončí. Pokud ne,
+zpracuje doménovou logiku a v *téže transakci* vloží nový řádek do inboxu.
+UNIQUE constraint je pojistka proti race condition.
 
 :::diagram{fig="15.6-A" title="Idempotent Inbox – deduplikace na straně subscribera" src="images/diagrams/14_outbox/inbox_idempotency.svg"}
 :::
@@ -847,12 +860,16 @@ use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'inbox')]
-#[ORM\UniqueConstraint(name: 'uniq_inbox_event_id', columns: ['event_id'])]
+#[ORM\UniqueConstraint(name: 'uniq_inbox_event_consumer', columns: ['event_id', 'consumer'])]
 class InboxMessage
 {
     public function __construct(
+        /** Surrogate PK – deduplikaci nese kompozitní UNIQUE výše. */
         #[ORM\Id]
         #[ORM\Column(type: 'ulid', unique: true)]
+        public Ulid $id,
+
+        #[ORM\Column(type: 'ulid')]
         public Ulid $eventId,
 
         #[ORM\Column(type: 'string', length: 64)]
@@ -861,6 +878,11 @@ class InboxMessage
         #[ORM\Column(type: 'datetime_immutable')]
         public \DateTimeImmutable $processedAt = new \DateTimeImmutable(),
     ) {}
+
+    public static function record(Ulid $eventId, string $consumer): self
+    {
+        return new self(id: new Ulid(), eventId: $eventId, consumer: $consumer);
+    }
 }
 :::
 :::
@@ -958,135 +980,24 @@ poskytují, je *exactly-once efekt na straně subscribera*. Zpráva může do
 brokera dorazit a opustit ho víckrát, ale vedlejší efekt (úprava read modelu, odeslání
 e-mailu, strhnutí platby) proběhne *právě jednou*.
 
-Helland v paperu z roku 2007 to formuluje úsporně: *„The world is at-least-once;
-the application makes it look like exactly-once.“*
+Helland v paperu z roku 2007 tutéž myšlenku shrnuje stručně: svět doručuje
+at-least-once a teprve aplikace vytváří dojem exactly-once.
 :::
 
-## 15.07 Idempotency Key v HTTP API {#idempotency-api}
+:::callout{type="note"}
+### Idempotence na hranici HTTP API {#idempotency-api}
 
-Outbox řeší idempotenci uvnitř systému (broker → subscriber); ale stejný problém vzniká
-i o úroveň výš, na hranici HTTP API. Klient (mobilní aplikace, JS frontend, partnerská
-integrace) může request retry-ovat při timeoutu – a server tak může dostat dva identické
-`POST /orders` a vytvořit dvě objednávky.
-
-[Stripe](https://docs.stripe.com/api/idempotent_requests)
-popularizoval **Idempotency Key** jako standardní řešení a jeho
-[specifikace](https://docs.stripe.com/api/idempotent_requests)
-je dnes de-facto referencí pro REST API (převzala ji např. PayPal, Shopify, Square,
-IETF draft [draft-ietf-httpapi-idempotency-key-header](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/)).
-Klient pošle v hlavičce `Idempotency-Key` UUID a server si první request uloží
-do cache (Redis nebo DB tabulka `http_idempotency`) spolu s odpovědí. Všechny
-další requesty se stejným klíčem vrátí cached response – bez znovuvytvoření objednávky.
-
-:::callout{type="pattern"}
-### PHP: IdempotencyKeyListener (Symfony Kernel listener) {#idempotency-listener-heading}
-
-:::code{language="php" filename="src/Http/Idempotency/IdempotencyKeyListener.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\Http\Idempotency;
-
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
-
-final readonly class IdempotencyKeyListener
-{
-    private const string HEADER = 'Idempotency-Key';
-    private const int TTL_SECONDS = 86_400; // 24 hodin
-
-    public function __construct(
-        private CacheInterface $cache,
-    ) {}
-
-    #[AsEventListener(event: RequestEvent::class, priority: 32)]
-    public function onRequest(RequestEvent $event): void
-    {
-        $request = $event->getRequest();
-        $key = $request->headers->get(self::HEADER);
-
-        if ($key === null || !$this->isMutating($request->getMethod())) {
-            return;
-        }
-
-        $cacheKey = $this->cacheKey($key, $request->getPathInfo());
-
-        $cached = $this->cache->get($cacheKey, function (ItemInterface $item): null {
-            $item->expiresAfter(self::TTL_SECONDS);
-
-            return null;
-        });
-
-        if ($cached instanceof Response) {
-            $event->setResponse($cached);
-        }
-    }
-
-    #[AsEventListener(event: ResponseEvent::class)]
-    public function onResponse(ResponseEvent $event): void
-    {
-        $request = $event->getRequest();
-        $key = $request->headers->get(self::HEADER);
-
-        if ($key === null || !$this->isMutating($request->getMethod())) {
-            return;
-        }
-
-        $response = $event->getResponse();
-
-        if ($response->getStatusCode() >= 500) {
-            return; // 5xx necachujeme – klient ať retry-uje.
-        }
-
-        $cacheKey = $this->cacheKey($key, $request->getPathInfo());
-
-        $this->cache->delete($cacheKey);
-        $this->cache->get($cacheKey, function (ItemInterface $item) use ($response): Response {
-            $item->expiresAfter(self::TTL_SECONDS);
-
-            return $response;
-        });
-    }
-
-    private function isMutating(string $method): bool
-    {
-        return in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], strict: true);
-    }
-
-    private function cacheKey(string $key, string $path): string
-    {
-        return 'idem.' . hash('xxh128', $path . '|' . $key);
-    }
-}
-:::
+Duplicitní zápisy vznikají i o vrstvu výš, mimo broker: klient při timeoutu
+zopakuje `POST /orders` a server vytvoří dvě objednávky. To už není práce
+pro outbox ani inbox, ale pro HTTP vrstvu. Standardním řešením je hlavička
+`Idempotency-Key` podle [specifikace Stripe](https://docs.stripe.com/api/idempotent_requests),
+kterou přebírá i IETF draft
+[draft-ietf-httpapi-idempotency-key-header](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/).
+Deduplikaci na úrovni Messenger handlerů rozebírá kapitola
+[DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli#b3-idempotence).
 :::
 
-Detaily, které v review zachytí jen někdo, kdo už takový listener viděl spadnout v produkci:
-
-- **TTL idempotency klíče typicky 24–48 h.** Delší okno znamená větší
-  riziko, že klient po náhodné kolizi UUID dostane jinou response, než čeká.
-  Stripe používá 24 h.
-- **Cache key nesmí být jen klíč sám** – kombinujeme ho s cestou
-  (`$path . '|' . $key`), aby tentýž klient s tímtéž klíčem na různých
-  endpointech (`/orders` vs. `/refunds`) nesdílel cache.
-- **5xx odpovědi necachujeme.** 500 znamená server-side chybu, klient
-  má právo zkusit znovu. Caching 500 by zablokoval recovery na 24 hodin.
-- **Hash z payloadu** (volitelně). Striktní implementace porovnává
-  ještě body requestu – pokud klient pošle stejný klíč s jiným tělem, je to
-  programátorská chyba a server vrací 422. Pro většinu projektů stačí klíč + cesta.
-
-*Citace:
-[Stripe API Reference – Idempotent Requests](https://docs.stripe.com/api/idempotent_requests)
-(kanonická specifikace);
-[IETF draft-ietf-httpapi-idempotency-key-header](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/)
-(probíhající standardizace HTTP header).*
-
-## 15.08 Provozní aspekty {#provoz}
+## 15.07 Provozní aspekty {#provoz}
 
 Outbox ve *vývojovém* prostředí funguje, jak má. V produkci ale narazíte na čtyři
 operační otázky: jak měřit lag, jak držet tabulku malou, co s permanentně failovanými
@@ -1138,7 +1049,7 @@ ve stavu `sent` a starší než N dní** – kde N je obvykle 7 až 30
 podle compliance požadavků.
 
 :::callout{type="pattern"}
-### PHP: Kompakce outbox tabulky (Symfony command) {#cleanup-command-heading}
+### PHP: Kompakce outbox tabulky – MySQL (Symfony command) {#cleanup-command-heading}
 
 :::code{language="php" filename="src/Outbox/Infrastructure/Console/OutboxCleanupCommand.php"}
 <?php
@@ -1186,6 +1097,11 @@ final class OutboxCleanupCommand extends Command
 outbox` jediným SQL příkazem. Velký delete drží zámky na celé tabulce, což
 blokuje produkční INSERT z handlerů. Cron ho spouští každých 5 minut – 10 000 řádků
 za běh stačí na realistické workloady (cca 3 mil. eventů/den).
+
+PostgreSQL: syntaxe `DELETE ... LIMIT` (i `INTERVAL 30 DAY`) je MySQL/MariaDB
+specifikum, Postgres ji nezná. Batch se vymezí poddotazem nad `id`, případně
+`ctid`: `DELETE FROM outbox WHERE id IN (SELECT id FROM outbox WHERE
+status = 'sent' AND sent_at < now() - interval '30 days' LIMIT 10000)`.
 
 ### Dead-letter queue pro permanentní selhání {#dlq-heading}
 
@@ -1255,7 +1171,7 @@ REINDEX INDEX CONCURRENTLY outbox_status_occurred_at_idx;
 :::
 :::
 
-### Partitioning při vysokém objemu {#partitioning-heading}
+### Partitioning při vysokém objemu (PostgreSQL) {#partitioning-heading}
 
 Při sustained 5k+ events/s je single-table outbox provozní úzké hrdlo. PostgreSQL
 declarative partitioning podle `occurred_at` umožňuje:
@@ -1430,7 +1346,7 @@ Standardní vzor:
   jsou tolerantní ke ztrátě. Při sustained backpressure můžete řízeně dropnout.
   Doménové eventy (`OrderPlaced`) zahodit nelze – ty musí dorazit.
 
-## 15.09 Anti-vzory {#antivzory}
+## 15.08 Anti-vzory {#antivzory}
 
 Outbox má jednoduché schéma, a právě proto kolem něj v code review padají stejné
 chyby, které ruší jeho garance a vrací systém k dual-write problému. Seznam níže
@@ -1499,7 +1415,7 @@ Výchozí bus chování v Symfony 8 je *auto-commit per dispatch*, ne per
 handler – častý zdroj chyb.
 :::
 
-## 15.10 Migrace existujícího projektu – krok za krokem {#migrace}
+## 15.09 Migrace existujícího projektu – krok za krokem {#migrace}
 
 Jak na Outbox, když máte 18 měsíců starý Symfony projekt, sto handlerů a publish-after-flush
 už běží někde v útrobách? Postup je inkrementální, ne big-bang refaktor.
@@ -1562,7 +1478,7 @@ produkčního DB), a ověřte:
   (proveďte na staging a porovnejte read model před a po).
 :::
 
-## 15.11 Shrnutí {#summary}
+## 15.10 Shrnutí {#summary}
 
 Outbox Pattern stojí na tabulce navíc, jednom Symfony commandu a úpravě jednoho
 application handleru. Výměnou vyřadí celou třídu chyb (ztracené eventy, fantom eventy),

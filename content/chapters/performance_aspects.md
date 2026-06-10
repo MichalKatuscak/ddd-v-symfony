@@ -1,19 +1,19 @@
 ---
 route: performance_aspects
 path: /vykonnostni-aspekty
-title: Výkonnostní aspekty DDD v Symfony
-page_title: "Výkonnostní aspekty DDD v Symfony a Doctrine | DDD Symfony"
-meta_description: "Výkonnostní aspekty DDD v Symfony a Doctrine: N+1 problém, hranice agregátů, čtecí modely přes CQRS, snapshoty, UUID/ULID a cachování doménových objektů."
+title: Read modely, projekce a výkon
+page_title: "Read modely, projekce a výkon | DDD Symfony"
+meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N+1 problém, hranice agregátů, projekce přes CQRS, snapshoty a cachování read modelů."
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
-schema_headline: "Výkonnostní aspekty DDD v Symfony a Doctrine"
+schema_headline: "Read modely, projekce a výkon"
 chapter_number: "16"
 category: Vzory
-deck: "Výkonnostní aspekty Domain-Driven Design v Symfony s Doctrine ORM – řešení N+1 problému, optimalizace agregátů, implementace read modelu přes CQRS, správné používání UUID a cachování doménových objektů."
+deck: "Read modely, projekce a výkon v Domain-Driven Design se Symfony a Doctrine ORM – řešení N+1 problému, hranice agregátů, budování projekcí přes CQRS, snapshoty a cache read modelů."
 reading_time: 30
 difficulty: 4
 ---
@@ -572,29 +572,30 @@ namespace App\Order\Domain\Model;
 use App\Shared\Domain\ValueObject\OrderId;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UlidType;
-use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
 final class Order
 {
     #[ORM\Id]
-    // Symfony Bridge registruje 'ulid' typ - ukládá jako BINARY(16) nebo UUID v PostgreSQL
+    // Symfony Bridge registruje 'ulid' typ - ukládá jako BINARY(16) nebo UUID v PostgreSQL.
+    // Při načtení z DB typ hydratuje objekt Ulid, property proto musí mít typ Ulid.
     #[ORM\Column(type: UlidType::NAME, unique: true)]
-    private readonly string $id;
+    private readonly Ulid $id;
 
     #[ORM\Column(type: 'string', length: 50)]
     private readonly string $orderNumber;
 
     public function __construct(OrderId $id, string $orderNumber)
     {
-        $this->id          = $id->value();
+        $this->id          = Ulid::fromString($id->value());
         $this->orderNumber = $orderNumber;
     }
 
     public function id(): OrderId
     {
-        return OrderId::fromString($this->id);
+        return OrderId::fromString((string) $this->id);
     }
 }
 :::
@@ -710,86 +711,83 @@ Doctrine nabízí dvě úrovně cachování SQL dotazů:
 - **Result cache:** cachuje výsledky SQL dotazu. Musí být explicitně nakonfigurován a invalidován při změnách dat. Vhodný pro read-heavy dotazy s řízenou dobou platnosti.
 
 :::callout{type="pattern"}
-### Příklad: CachedUserRepository (Decorator pattern)
+### Příklad: cache read modelu v query handleru
 
-:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/CachedUserRepository.php"}
+:::code{language="php" filename="src/UserManagement/Application/Query/GetUserProfileHandler.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\UserManagement\Infrastructure\Repository;
+namespace App\UserManagement\Application\Query;
 
-use App\UserManagement\Domain\Model\User;
-use App\UserManagement\Domain\Repository\UserRepository;
-use App\UserManagement\Domain\ValueObject\UserId;
-use App\UserManagement\Domain\ValueObject\Email;
+use Doctrine\DBAL\Connection;
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Dekorátor pro UserRepository přidávající aplikační vrstvu cache.
- * Doménový kontrakt (interface UserRepository) je zachován beze změny.
+ * Read model profilu - immutabilní DTO se skalárními hodnotami.
+ * Bezpečně serializovatelný do PSR-6 cache.
  */
-final class CachedUserRepository implements UserRepository
+final readonly class UserProfileView
+{
+    public function __construct(
+        public string $userId,
+        public string $name,
+        public string $email,
+        public int    $orderCount,
+    ) {}
+}
+
+#[AsMessageHandler]
+final class GetUserProfileHandler
 {
     private const TTL = 300; // 5 minut
 
     public function __construct(
-        private UserRepository         $inner,  // dekorovaný repozitář (Doctrine implementace)
-        private CacheItemPoolInterface $cache
+        private Connection             $connection,
+        private CacheItemPoolInterface $cache,
     ) {}
 
-    public function findById(UserId $id): ?User
+    public function __invoke(GetUserProfile $query): ?UserProfileView
     {
-        $cacheKey = 'user_' . $id->value();
-        $item     = $this->cache->getItem($cacheKey);
+        $item = $this->cache->getItem('user_profile_' . $query->userId);
 
         if ($item->isHit()) {
             return $item->get();
         }
 
-        $user = $this->inner->findById($id);
+        $row = $this->connection->fetchAssociative(
+            'SELECT u.id, u.name, u.email, COUNT(o.id) AS order_count
+               FROM users u
+          LEFT JOIN orders o ON o.customer_id = u.id
+              WHERE u.id = :id
+           GROUP BY u.id',
+            ['id' => $query->userId],
+        );
 
-        $item->set($user)->expiresAfter(self::TTL);
+        $view = $row
+            ? new UserProfileView(
+                userId: $row['id'],
+                name: $row['name'],
+                email: $row['email'],
+                orderCount: (int) $row['order_count'],
+            )
+            : null;
+
+        $item->set($view)->expiresAfter(self::TTL);
         $this->cache->save($item);
 
-        return $user;
-    }
-
-    public function findByEmail(Email $email): ?User
-    {
-        // Email lookup cachujeme kratší dobu - email se může změnit
-        $cacheKey = 'user_email_' . md5($email->value());
-        $item     = $this->cache->getItem($cacheKey);
-
-        if ($item->isHit()) {
-            return $item->get();
-        }
-
-        $user = $this->inner->findByEmail($email);
-
-        $item->set($user)->expiresAfter(60);
-        $this->cache->save($item);
-
-        return $user;
-    }
-
-    public function save(User $user): void
-    {
-        // Po uložení invalidujeme cache pro daného uživatele
-        $this->inner->save($user);
-        $this->cache->deleteItem('user_' . $user->id()->value());
-        $this->cache->deleteItem('user_email_' . md5($user->email()->value()));
-    }
-
-    public function remove(User $user): void
-    {
-        $this->inner->remove($user);
-        $this->cache->deleteItem('user_' . $user->id()->value());
-        $this->cache->deleteItem('user_email_' . md5($user->email()->value()));
+        return $view;
     }
 }
 :::
 :::
+
+Cache drží hotový ViewModel, ne doménový agregát. Serializace agregátu do PSR-6
+je křehká: po deserializaci vznikne objekt odpojený od Unit of Work (detached),
+lazy proxy asociací přestanou fungovat a obejde se Identity Map. DTO se skalárními
+hodnotami tyto problémy nemá – přesně podle zásady z calloutu výše: do cache patří
+výsledky read modelu, ne stav agregátů.
 
 ### Cache invalidace při doménových událostech
 
@@ -820,9 +818,8 @@ final class InvalidateUserCacheOnEmailChanged
 
     public function __invoke(UserEmailChanged $event): void
     {
-        $this->cache->deleteItem('user_' . $event->userId->value());
-        $this->cache->deleteItem('user_email_' . md5($event->oldEmail->value()));
-        $this->cache->deleteItem('user_email_' . md5($event->newEmail->value()));
+        // Invalidace cachovaného read modelu - klíč z příkladu výše
+        $this->cache->deleteItem('user_profile_' . $event->userId->value());
     }
 }
 :::
@@ -982,7 +979,7 @@ příklady: globální `Inventory` jednoho produktu při rozjezdu kampaně, `Tou
 agregát s 1000 účastníky, kteří všichni paralelně potvrdí účast, nebo `BankAccount`
 firmy s tisíci transakcí denně.
 
-:::diagram{fig="17.9-A" title="Optimistic lock thrash: 3 souběžné modifikace, 2 retry" src="images/diagrams/17_performance/hot_aggregate_thrash.svg"}
+:::diagram{fig="16.9-A" title="Optimistic lock thrash: 3 souběžné modifikace, 2 retry" src="images/diagrams/17_performance/hot_aggregate_thrash.svg"}
 :::
 
 S `#[ORM\Version]` (optimistický zámek) souběžná modifikace vyhází
@@ -1053,7 +1050,7 @@ V CQRS architektuře bývají read modely vhodný kandidát pro **read replicy**
 samostatná databáze (nebo Postgres streaming replica), na kterou jdou všechny
 queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
 
-:::diagram{fig="17.9-B" title="Routing: write na primary, read na replicu, replikační lag" src="images/diagrams/17_performance/read_replica_routing.svg"}
+:::diagram{fig="16.9-B" title="Routing: write na primary, read na replicu, replikační lag" src="images/diagrams/17_performance/read_replica_routing.svg"}
 :::
 
 - **Repozitář write strany** drží `EntityManagerInterface` namapovaný na primary.
@@ -1235,14 +1232,13 @@ a pravidelně vede k regresi v jiných částech systému.
 Tři páky výkonu v DDD: hranice agregátů, read model a profiling. Pořadí, ve kterém je řešit,
 je opačné – nejdřív měřit, pak oddělit read od write přes CQRS, pak doladit hranice agregátů
 a eliminovat N+1. Pokračováním je kapitola
-[CQRS v Symfony 8](/cqrs) a
-[praktické příklady implementace DDD](/prakticke-priklady).
+[Testování DDD](/testovani-ddd).
 
 :::faq{}
 - question: Zpomaluje DDD aplikaci oproti CRUD?
   answer: 'Samotné DDD výkon nesnižuje – doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte víc dat, než je třeba). Další příčinou je chybějící read model v CQRS nebo nesprávné použití Doctrine lazy loadingu, které vede k N+1 dotazům. Při správném návrhu je DDD aplikace srovnatelná s CRUD a lépe optimalizovatelná díky explicitním hranicím. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
 - question: Jak v DDD řešit N+1 problém s agregáty?
-  answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch="EAGER"</code> u mapování, <code>fetchJoin()</code> v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
+  answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch="EAGER"</code> u mapování, fetch join v DQL (<code>SELECT o, i FROM Order o JOIN o.items i</code>) v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
   answer: 'Ano, zásadně. Příliš velký agregát vede k načítání desítek vnitřních entit při každé operaci a k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty – to zvyšuje paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?

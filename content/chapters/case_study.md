@@ -7,7 +7,7 @@ meta_description: "Případová studie systému pro správu projektů v DDD arch
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
@@ -133,7 +133,7 @@ protože obě věci žijí v různých slicích a komunikují přes explicitní 
 
 ### Strategický design: Bounded Contexts a Context Map
 
-Identifikace bounded contexts vychází z doménové analýzy v [sekci 25.03](#discovery).
+Identifikace bounded contexts vychází z doménové analýzy v [sekci 24.03](#discovery).
 Systém je rozdělen do následujících kontextů:
 
 - **UserManagement** – identita, registrace, autentizace; vlastník přístupových práv uživatelů.
@@ -142,7 +142,7 @@ Systém je rozdělen do následujících kontextů:
 - **CommentManagement** – komentáře a zpětná vazba k úkolům.
 - **ActivityTracking** – auditní stopa nad událostmi z ostatních kontextů.
 
-:::diagram{fig="25.4-A" title="Kontextová mapa: vztahy mezi pěti bounded contexts" src="images/diagrams/15_case_study/context_map.svg"}
+:::diagram{fig="24.4-A" title="Kontextová mapa: vztahy mezi pěti bounded contexts" src="images/diagrams/15_case_study/context_map.svg"}
 :::
 
 Vztahy zachycené v kontextové mapě:
@@ -159,7 +159,7 @@ Vztahy zachycené v kontextové mapě:
   ActivityTracking je čistě downstream konzument, který nemá vliv zpět.
 - **Shared Kernel** – `UserId`, `ProjectId`, `TaskId`
   jsou sdílené hodnotové objekty napříč kontexty. Volba a její cena jsou rozebrány
-  v [sekci 25.07.2](#trade-off-shared-kernel-heading).
+  v [sekci 24.07.2](#trade-off-shared-kernel-heading).
 
 **Anti-Corruption Layer (ACL)** v této studii nabývá zjednodušené podoby. Mezi
 TaskManagement a ProjectManagement není potřeba sémantická translace – Shared Kernel
@@ -168,11 +168,11 @@ vrstvy přímo volat infrastrukturu jiného kontextu. Hranici proto tvoří port
 `ProjectChecker` definovaný v doméně TaskManagement; jeho infrastrukturní implementace
 je adaptér do ProjectManagement. Port plní funkci ACL i tam, kde se nepřekládají typy: chrání
 TaskManagement před přímým provázáním s interním modelem upstream kontextu. Synchronní vs.
-asynchronní volba je popsaná v [sekci 25.07.3](#trade-off-sync-acl-heading).
+asynchronní volba je popsaná v [sekci 24.07.3](#trade-off-sync-acl-heading).
 
 Pro asynchronní integraci mezi kontexty slouží doménové události publikované přes Symfony Messenger.
 Konkrétní ukázka projekce, která naslouchá událostem ze tří kontextů, je v
-[sekci 25.06](#read-model).
+[sekci 24.06](#read-model).
 
 ### Taktický design a struktura projektu
 
@@ -361,8 +361,9 @@ s produkťákem i v ticketech. Hlavní pojmy:
 ### Doménový model: Projekt (kořen agregátu) {#project-model-heading}
 
 Agregát používá Doctrine atributy přímo na doménové třídě – jako pragmatickou výchozí volbu,
-v souladu s [kapitolou 11](/implementace-v-symfony#mapping-volba-heading). Třída je `final`,
-dědí z `AggregateRoot` (sdílené chování pro `record` a `releaseDomainEvents`),
+v souladu s [kapitolou 10](/implementace-v-symfony#mapping-volba-heading). Třída je `final`,
+dědí z `AggregateRoot` (sdílené chování pro `record` a `releaseEvents`, viz
+[lifecycle agregátu](/zakladni-koncepty#aggregate-root-lifecycle)),
 konstruktor je `private` a vznik agregátu probíhá přes statickou factory metodu `create()`.
 
 :::code{language="php" filename="src/ProjectManagement/Domain/Model/Project.php"}
@@ -377,7 +378,7 @@ use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\Shared\Domain\AggregateRoot;
-// UserId je sdílený v Shared Kernelu (viz sekci 25.07.2)
+// UserId je sdílený v Shared Kernelu (viz sekci 24.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -506,7 +507,7 @@ final class Project extends AggregateRoot
 :::callout{type="note"}
 `UserId` je v této studii sdílen mezi kontexty přes Shared Kernel –
 jeho cena a alternativa (samostatný primitiv v každém kontextu) jsou rozebrány
-v [sekci 25.07.2](#trade-off-shared-kernel-heading). V kontextech, kde
+v [sekci 24.07.2](#trade-off-shared-kernel-heading). V kontextech, kde
 by se model musel rozejít (jiná validace, jiná sériová reprezentace), by sdílení
 přes Shared Kernel nestačilo a kontext by si držel vlastní kopii.
 :::
@@ -525,11 +526,12 @@ use App\TaskManagement\Domain\Event\TaskAssigned;
 use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
-// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekci 25.07.2)
+use App\Shared\Domain\AggregateRoot;
+// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekci 24.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
 
-class Task
+final class Task extends AggregateRoot
 {
     private readonly TaskId $id;
     private string $title;
@@ -540,8 +542,6 @@ class Task
     private readonly \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt = null;
 
-    private array $domainEvents = [];
-
     private function __construct(TaskId $id, string $title, ?string $description, ProjectId $projectId)
     {
         $this->id = $id;
@@ -551,7 +551,7 @@ class Task
         $this->status = TaskStatus::TODO;
         $this->createdAt = new \DateTimeImmutable();
 
-        $this->recordEvent(new TaskCreated($id, $title, $projectId));
+        $this->record(new TaskCreated($id, $title, $projectId));
     }
 
     public static function create(TaskId $id, string $title, ?string $description, ProjectId $projectId): self
@@ -594,7 +594,7 @@ class Task
         $this->assigneeId = $assigneeId;
         $this->updatedAt = new \DateTimeImmutable();
 
-        $this->recordEvent(new TaskAssigned($this->id, $assigneeId));
+        $this->record(new TaskAssigned($this->id, $assigneeId));
     }
 
     public function unassign(): void
@@ -609,7 +609,7 @@ class Task
         $this->status = $status;
         $this->updatedAt = new \DateTimeImmutable();
 
-        $this->recordEvent(new TaskStatusChanged($this->id, $oldStatus, $status));
+        $this->record(new TaskStatusChanged($this->id, $oldStatus, $status));
     }
 
     public function updateTitle(string $title): void
@@ -632,19 +632,6 @@ class Task
     public function updatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    private function recordEvent(object $event): void
-    {
-        $this->domainEvents[] = $event;
-    }
-
-    public function releaseDomainEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-
-        return $events;
     }
 }
 :::
@@ -836,7 +823,7 @@ Konstruktor `new ProjectId()` bez argumentů generuje UUID v7 (časově řazené
 vhodné jako primární klíč). `new ProjectId($uuid)` hydratuje existující identifikátor
 z databáze nebo z příchozího příkazu. `TaskId` a `UserId` následují
 stejnou konvenci. Diskuse o sdílení těchto VO mezi kontexty (Shared Kernel vs. duplikace)
-je v [sekci 25.07.2](#trade-off-shared-kernel-heading).
+je v [sekci 24.07.2](#trade-off-shared-kernel-heading).
 :::
 
 ### Command: Vytvoření projektu (Command Pattern) {#create-project-command-heading}
@@ -1213,7 +1200,7 @@ class ProjectListProjection
         $view = $this->em->find(ProjectListView::class, $event->projectId->value());
         if ($view === null) {
             // Out-of-order delivery: MemberAdded přišlo dřív než ProjectCreated.
-            // Reconciler (sekce 25.06.5) dohledá zaostalou view a obnoví ji
+            // Reconciler (sekce 24.06.4) dohledá zaostalou view a obnoví ji
             // ze zdrojových agregátů.
             return;
         }
@@ -1257,7 +1244,7 @@ class ProjectListProjection
 
 ### Query handler nad read modelem (revize `GetProjectsHandler`) {#read-model-query-heading}
 
-Naivní verze ze [sekce 25.05](#get-projects-handler-heading) hydratovala doménové agregáty
+Naivní verze ze [sekce 24.05](#get-projects-handler-heading) hydratovala doménové agregáty
 jen kvůli zobrazení. Po zavedení projekce se třída `GetProjectsHandler` přepsala na čistý
 DBAL dotaz nad read tabulkou. Žádné agregáty, žádná doménová logika – jen výběr sloupců a mapování
 na `ProjectViewModel`. Stejný název třídy, stejný command, jiná implementace; volající
@@ -1558,7 +1545,7 @@ designu, tři z provozu read modelů a vědomého řízení kompromisů.
 - question: Jak spolu bounded contexty komunikují?
   answer: 'Primárním prostředkem integrace jsou doménové události: po dokončení operace agregát publikuje událost (např. <code>TaskCreated</code>), na kterou reagují jiné kontexty asynchronně přes Messenger. Synchronní dotazy mezi kontexty se řeší přes porty (rozhraní) s implementací v infrastruktuře cílového kontextu – volající kontext nezávisí na detailech implementace. Konkrétní ukázka v <a href="#implementation">sekci Implementace</a>.'
 - question: Jaký přínos měla vertikální slice architektura?
-  answer: 'Každá feature (CreateProject, AssignTask, AddComment) vznikla jako samostatný balíček s vlastním commandem, handlerem, kontrolerem a view modelem. Změny ve feature nezasahovaly do ostatních slicí, což zkrátilo cyklus vývoj–test–nasazení a usnadnilo onboarding. Problém tradičního horizontálního členění – šíření změn napříč vrstvami – se v projektu prakticky nevyskytoval. Detailní srovnání v kapitole <a href="/vertikalni-slice">Vertikální slice architektura</a>.'
+  answer: 'Každá feature (CreateProject, AssignTask, AddComment) vznikla jako samostatný balíček s vlastním commandem, handlerem, kontrolerem a view modelem. Změny ve feature nezasahovaly do ostatních slicí, což zkrátilo cyklus vývoj–test–nasazení a usnadnilo onboarding. Problém tradičního horizontálního členění – šíření změn napříč vrstvami – se v projektu prakticky nevyskytoval. Detailní srovnání v kapitole <a href="/architektonicke-styly#vertical-slice">Architektonické styly</a>.'
 - question: Proč má smysl oddělit read model od doménového modelu?
   answer: 'Doménový model existuje pro vynucování invariantů a reprezentaci doménových pravidel; výpis projektů žádné invarianty nepotřebuje. Hydratace agregátu jen kvůli zobrazení názvu a počtu členů je drahá – při růstu datasetu rozhoduje rozdíl mezi 5 ms a 200 ms odezvy. Denormalizovaný read model aktualizovaný přes projekce umožní oddělit tempo zápisu a čtení a optimalizovat každou stranu zvlášť. Cenou je eventual consistency. Konkrétní implementace v <a href="#read-model">sekci Read modely a projekce</a>.'
 - question: Jaká jsou tři nejdůležitější ponaučení z projektu?

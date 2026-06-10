@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -64,7 +64,7 @@ a CRUD jsou legitimní volbou pro aplikace s jednoduchými doménovými pravidly
 
 ### Realistické zhodnocení nákladů migrace
 
-Migrace z CRUD na DDD trvá měsíce až roky podle velikosti kódové základny — jde o dlouhý
+Migrace z CRUD na DDD trvá měsíce až roky podle velikosti kódové základny – jde o dlouhý
 proces, ne jednorázovou akci. Sama o sobě nepřináší zákazníkovi okamžitou hodnotu –
 hodnota přijde s tím, jak tým začne přidávat funkce rychleji a s menším rizikem regresí.
 Management přijme migraci snáz, když probíhá inkrementálně souběžně s vývojem nových funkcí,
@@ -77,7 +77,7 @@ Strangler Fig Pattern (vzor fíkovníku škrtiče) pojmenoval Martin Fowler
 Vzor nahrazuje starý systém po částech, bez „big bang“ přepisu. Název pochází
 od tropického fíkovníku, který roste kolem hostitelského stromu a postupně ho zardousí.
 
-:::diagram{fig="19.2-A" title="Strangler Fig: čtyři fáze migrace CRUD → DDD" src="images/diagrams/19_migration_from_crud/strangler_fig.svg"}
+:::diagram{fig="18.2-A" title="Strangler Fig: čtyři fáze migrace CRUD → DDD" src="images/diagrams/19_migration_from_crud/strangler_fig.svg"}
 :::
 
 :::callout{type="note"}
@@ -141,6 +141,61 @@ Strangler Fig Pattern oproti tomu:
 - Poskytuje možnost rollbacku: pokud nová implementace selhává, stará stále funguje.
 - Umožňuje týmu učit se DDD postupně, na reálném produkčním kódu.
 - Refaktoring lze zastavit kdykoli – systém zůstává v konzistentním, funkčním stavu.
+
+### Datová migrace při Strangler Fig {#datova-migrace-strangler-heading}
+
+Kód se dá nahrazovat po částech, data ne – tabulka má v každém okamžiku jeden tvar.
+Strangler Fig proto potřebuje plán, jak data převést do nového modelu bez výpadku
+a s možností návratu. Osvědčený postup má čtyři fáze.
+
+**1. Dual-write s porovnáním.** Aplikace začne zapisovat do starého i nového modelu současně.
+Primární zůstává starý zápis; ten nový se provádí navíc a jeho chyba nesmí shodit požadavek.
+Asynchronní job oba zdroje porovnává a rozdíly loguje. Každý nalezený rozdíl znamená chybu
+v mapování, kterou je nutné opravit ještě před přepnutím.
+
+**2. Backfill.** Teprve po zapnutí dual-write naplní jednorázový skript nové tabulky historickými
+daty. Obrácené pořadí je vadné: UPDATE legacy řádku, který backfill už zpracoval, by se před
+zapnutím dual-write ztratil – checkpoint `WHERE id > checkpoint` ho podruhé nenačte. Skript musí
+být idempotentní: opakované spuštění nesmí vytvořit duplicity ani přepsat novější záznam, který
+mezitím zapsal dual-write. Běží po dávkách podle `id` nebo `updated_at`, při konfliktu vyhrává
+novější záznam, a ukládá si checkpoint posledního zpracovaného řádku, takže po pádu naváže tam,
+kde skončil.
+
+:::callout{type="pattern"}
+### Příklad: Idempotentní backfill po dávkách (pseudokód)
+
+:::code{language="php" filename="src/UserManagement/Infrastructure/Migration/BackfillUsersCommand.php"}
+// Dual-write už běží – skript jen doplňuje historická data.
+$lastId = $checkpoint->load() ?? 0;
+
+do {
+    $rows = $legacyDb->fetchAllAssociative(
+        'SELECT * FROM users WHERE id > ? ORDER BY id LIMIT 500',
+        [$lastId]
+    );
+
+    foreach ($rows as $row) {
+        // UPSERT: existující záznam se aktualizuje, nikdy neduplikuje;
+        // novější zápis z dual-write má přednost (porovnání updated_at)
+        $newWriteModel->upsertFromLegacyIfOlder($row);
+        $lastId = $row['id'];
+    }
+
+    $checkpoint->save($lastId); // po pádu skript naváže zde
+} while (count($rows) === 500);
+:::
+:::
+
+**3. Shadow reads.** Čtení probíhá z obou zdrojů: odpověď uživateli sestavuje starý model,
+výsledek toho nového se pouze porovná a neshoda zvedne alert. Teprve nulová míra rozdílů
+po dnech až týdnech provozu dává jistotu, že nový model je úplný a správný.
+
+**4. Cutover.** Přepnutí na nový model řídí feature flag, ne deploy. Provoz se převádí
+postupně – 1 %, 10 %, 50 %, vše – a metriky z fáze shadow reads zůstávají zapnuté.
+Rollback znamená přepnout flag zpět; starý model je díky dual-write stále aktuální.
+To platí jen tehdy, když po přepnutí primáru dual-write pokračuje v obráceném směru –
+nový model zapisuje zpět do starého. Starý zápis se vypíná jako úplně poslední krok,
+po několika týdnech klidného provozu.
 
 ## 18.03 Krok 1: Analýza existující domény {#analyza-domeny}
 
@@ -525,7 +580,7 @@ final class DoctrineUserRepository implements UserRepository
     public function findByEmail(Email $email): ?User
     {
         return $this->em->getRepository(User::class)
-            ->findOneBy(['email.value' => $email->value()]);
+            ->findOneBy(['email' => $email]);
     }
 
     public function findActiveUsers(): array
@@ -549,13 +604,14 @@ final class DoctrineUserRepository implements UserRepository
 Doménová vrstva závisí pouze na rozhraní `UserRepository`. Symfony DI container
 injektuje do doménových služeb `DoctrineUserRepository`. Díky
 tomu lze implementaci repozitáře vyměnit v konfiguračním souboru bez změny doménového kódu.
+Pole `email` je mapované custom Doctrine typem `email_vo`, proto `findOneBy` dostává přímo
+Value Object – převod na databázovou hodnotu zajistí typ, žádná cesta `email.value` neexistuje.
 :::
 
 :::callout{type="note"}
 ### Konfigurace Dependency Injection v Symfony {#di-config-heading}
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
-# config/services.yaml
+:::code{language="yaml" filename="config/services.yaml"}
 services:
     App\UserManagement\Domain\Repository\UserRepository:
         alias: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository
@@ -644,7 +700,7 @@ final class RegisterUserHandler
     public function __invoke(RegisterUser $command): void
     {
         $email = new Email($command->email);
-        $password = HashedPassword::fromPlaintext($command->password);
+        $password = HashedPassword::fromPlainText($command->password);
 
         // Doménová politika ověřuje pravidla přes repozitář
         $this->policy->assertEmailIsUnique($email);
@@ -658,7 +714,7 @@ final class RegisterUserHandler
         $this->users->save($user);
 
         // Domain Events jsou zpracovány Symfony Messengerem
-        foreach ($user->releaseDomainEvents() as $event) {
+        foreach ($user->releaseEvents() as $event) {
             // event dispatch je řešen infrastrukturní vrstvou
         }
     }
@@ -710,6 +766,10 @@ Code“
 Charakterizační test nepopisuje, jaké *by mělo být* správné chování systému, ale zachycuje
 jaké chování systém *aktuálně má*. Slouží jako síť, která zachytí nechtěné změny chování
 při refaktoringu.
+
+Při extrakci logiky z legacy kódu pomáhají i jazykové modely: vygenerují první sadu
+charakterizačních testů nebo popíší, co nepřehledná metoda dělá. Možnosti a limity tohoto
+přístupu rozebírá kapitola [DDD a umělá inteligence](/ddd-a-umela-inteligence).
 
 :::callout{type="pattern"}
 ### Příklad: Charakterizační test pro CRUD kontroler {#char-test-heading}
@@ -814,7 +874,7 @@ final class UserTest extends TestCase
         $user = User::register(
             UserId::generate(),
             new Email('jan@firma.cz'),
-            HashedPassword::fromPlaintext('SecurePass123')
+            HashedPassword::fromPlainText('SecurePass123')
         );
 
         self::assertTrue($user->status()->isPendingVerification());
@@ -825,10 +885,10 @@ final class UserTest extends TestCase
         $user = User::register(
             UserId::generate(),
             new Email('jan@firma.cz'),
-            HashedPassword::fromPlaintext('SecurePass123')
+            HashedPassword::fromPlainText('SecurePass123')
         );
 
-        $events = $user->releaseDomainEvents();
+        $events = $user->releaseEvents();
         self::assertCount(1, $events);
         self::assertInstanceOf(UserRegistered::class, $events[0]);
     }
@@ -852,7 +912,7 @@ final class UserTest extends TestCase
 
 - **Anémický doménový model** – Nejčastější past. Vývojáři vytvoří třídy s názvem jako v DDD (`User`, `Order`), ale tyto třídy obsahují pouze gettery a settery bez doménové logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie s CRUD implementací.
 - **Přílišná granularita Bounded Contexts** – Rozdělení domény na příliš mnoho malých kontextů vede k distribuované komplexitě. Každá integrace mezi kontexty přidává overhead. Začněte s většími kontexty a rozdělujte je až tehdy, když je důvod k tomu jasný.
-- **Doctrine entity jako doménové entity** – Přímé přidávání DDD logiky do Doctrine entit je anti-vzor. Doctrine mapování (anotace, atributy) svazuje doménový objekt s infrastrukturní technologií. Oddělte doménové entity od persistence mapování.
+- **ORM diktující tvar modelu** – Anti-vzorem není atributové mapování samo o sobě; [sekce 18.04](#extrakce-domainove-vrstvy) i Recept 2 ho přijímají jako pragmatickou volbu. Problém začíná, když ORM určuje tvar modelu: public settery kvůli hydrataci, anemická entita, `flush()` volaný z kontroleru. Projekty, které potřebují striktní oddělení domény od persistence, řeší tutéž potřebu přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern).
 - **CQRS bez doménového modelu** – Zavedení CommandBusu a QueryBusu bez refaktorovaného doménového modelu přidá vrstvy komplexity bez přínosu. CQRS je amplifikátor – zesílí jak výhody, tak problémy stávající architektury.
 - **Ignorování Anti-Corruption Layer** – Při integraci nové DDD vrstvy se starým CRUD kódem je nutné vytvořit překladovou vrstvu. Bez ní pronikají koncepty starého modelu do nového a kontaminují ho.
 

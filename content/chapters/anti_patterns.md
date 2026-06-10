@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-04"
+modified: "2026-06-09"
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -44,7 +44,7 @@ Chyby při implementaci DDD lze rozdělit do tří kategorií:
 
 Anémický model je nejrozšířenější anti-vzor objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
 
-:::diagram{fig="22.2-A" title="Anémický vs. bohatý doménový model – kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
+:::diagram{fig="21.2-A" title="Anémický vs. bohatý doménový model – kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
 :::
 
 :::callout{type="note"}
@@ -257,7 +257,7 @@ class User
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
 
-    public function releaseDomainEvents(): array
+    public function releaseEvents(): array
     {
         $events = $this->domainEvents;
         $this->domainEvents = [];
@@ -354,6 +354,8 @@ declare(strict_types=1);
 
 namespace App\OrderManagement\Domain\ValueObject;
 
+use Symfony\Component\Uid\Uuid;
+
 final class Email
 {
     private readonly string $value;
@@ -422,7 +424,10 @@ final class OrderId
 {
     public function __construct(private readonly string $value)
     {
-        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $value)) {
+        // Uuid::isValid ze symfony/uid přijímá všechny verze UUID -
+        // identifikátory v této knize vznikají přes Uuid::v7(), kterou
+        // by regex omezený na verzi 4 odmítl.
+        if (!Uuid::isValid($value)) {
             throw new \InvalidArgumentException('Neplatný formát UUID pro OrderId.');
         }
     }
@@ -439,8 +444,8 @@ final class UserId
 // Nyní typový systém PHP odhalí záměnu:
 function processOrder(OrderId $orderId, UserId $userId): void { /* ... */ }
 
-$orderId = new OrderId('a1b2c3d4-...');
-$userId  = new UserId('e5f6g7h8-...');
+$orderId = new OrderId('018f4d2e-...');
+$userId  = new UserId('02b5e8c1-...');
 processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type OrderId
 :::
 :::
@@ -449,7 +454,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 
 Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, kterou je třeba měnit společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže.
 
-:::diagram{fig="22.4-A" title="God Aggregate vs. správně rozdělené agregáty propojené přes ID" src="images/diagrams/22_anti_patterns/god_aggregate.svg"}
+:::diagram{fig="21.4-A" title="God Aggregate vs. správně rozdělené agregáty propojené přes ID" src="images/diagrams/22_anti_patterns/god_aggregate.svg"}
 :::
 
 :::callout{type="note"}
@@ -843,26 +848,6 @@ final class OrderPlacedEvent
     public function totalAmount(): Money { return $this->totalAmount; }
     public function occurredAt(): \DateTimeImmutable { return $this->occurredAt; }
 }
-
-// Alternativa pro starší PHP: final class s private properties a bez setterů
-final class OrderCancelledEvent
-{
-    private readonly OrderId $orderId;
-    private readonly string $reason;
-    private readonly \DateTimeImmutable $occurredAt;
-
-    public function __construct(OrderId $orderId, string $reason)
-    {
-        $this->orderId = $orderId;
-        $this->reason = $reason;
-        $this->occurredAt = new \DateTimeImmutable();
-        // Žádné settery - zapouzdření zajišťuje immutabilitu
-    }
-
-    public function orderId(): OrderId { return $this->orderId; }
-    public function reason(): string { return $this->reason; }
-    public function occurredAt(): \DateTimeImmutable { return $this->occurredAt; }
-}
 :::
 :::
 
@@ -1006,7 +991,7 @@ class ActivateUserHandler
 
         $this->em->flush(); // Flush patří do aplikační vrstvy
 
-        foreach ($user->releaseDomainEvents() as $event) {
+        foreach ($user->releaseEvents() as $event) {
             $this->eventBus->dispatch($event);
         }
     }
@@ -1030,44 +1015,9 @@ class UserController extends AbstractController
 
 ## 21.08 Anti-vzor: Over-engineering u jednoduchých aplikací {#over-engineering}
 
-DDD není vhodné pro každý projekt. Eric Evans upozorňuje, že největší přínos má u **komplexních domén se složitou doménovou logikou**. Pro CRUD aplikace, administrativní nástroje nebo prototypy je plnohodnotné DDD překombinované: přináší vysokou počáteční složitost bez odpovídajícího efektu.
+Anti-vzorem zde není samotné DDD, ale jeho ceremonie bez komplexní domény. Agregáty, Value Objects a doménové události obalují prosté řádky v databázi, pro které stačí formulář a tabulka. Typické příznaky: tým tráví více času architekturou než obchodní hodnotou a triviální změna prochází desítkami souborů napříč vrstvami.
 
-:::callout{type="note"}
-### Příznaky over-engineeringu v DDD kontextu {#overeng-příznaky-heading}
-
-- Agregáty, Value Objects a Events pro doménu, kde skutečně stačí jednoduchý formulář a databázová tabulka (CRUD).
-- Více než 5 architekturních vrstev pro aplikaci, jejíž doménová logika se vejde na jednu stránku A4.
-- CQRS s event sourcingem pro systém, který nemá požadavky na auditní logy ani na komplexní reporting.
-- Tým tráví více času navrhováním architektury než implementací obchodní hodnoty.
-- Přidání nové funkce vyžaduje úpravu desítek souborů v různých vrstvách, i když jde o triviální změnu.
-:::
-
-:::callout{type="warn"}
-### Začněte minimálně, složitost přidávejte podle potřeby {#overeng-warning-heading}
-
-Začněte s minimálním přístupem – aktivní záznamy, service třídy nebo MVC bez DDD. DDD prvky přidávejte inkrementálně, jakmile se doménová složitost začne projevovat. Refaktoring od menšího ke složitějšímu je mnohem méně nákladný než odstraňování zbytečné složitosti z přenavržené architektury.
-
-Vhodné indikátory pro zavedení DDD: *složitá doménová pravidla, která se neustále mění*; *více doménových expertů s odlišnými pohledy na problém*; *systém, u nějž se předpokládá dlouhodobý vývoj a vysoká míra změn v doménové logice*.
-:::
-
-:::callout{type="pattern"}
-### Příklad: Kdy použít DDD a kdy ne
-
-:::code{language="bash" filename="snippet.sh"}
-# DDD je vhodné pro:
-✔ E-commerce platforma s komplexními pravidly pro slevy, zásoby, dopravu
-✔ Bankovní systém s regulatorními požadavky a složitou finanční logikou
-✔ ERP systém se vzájemně propojenými doménovými procesy
-✔ Pojišťovací systém s komplexními výpočty pojistného
-
-# DDD je překombinované pro:
-✗ Blog nebo CMS (kategorie, příspěvky, komentáře - čistý CRUD)
-✗ Jednoduchý e-shop s desítkami produktů a základními objednávkami
-✗ Interní admin panel pro správu číselníků
-✗ Prototyp nebo MVP s nejistou doménovou logikou
-✗ Microservice s jednou jasnou a stabilní odpovědností
-:::
-:::
+Méně nákladná cesta začíná minimálním přístupem a přidává DDD prvky, až když se doménová složitost skutečně projeví. Celý rozhodovací rámec – sedm situací, kdy DDD vynechat, alternativy a rozhodovací strom – rozebírá kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 ## 21.09 Anti-vzor: Ignorování Ubiquitous Language {#missing-ubiquitous-language}
 

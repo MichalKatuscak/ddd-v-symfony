@@ -7,7 +7,7 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-04"
+modified: "2026-06-09"
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
@@ -23,7 +23,8 @@ jak vzory z taktického DDD, CQRS a Implementace v Symfony drží pohromadě jak
 Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Detailní implementace
 (plné Doctrine mapování, testy, okrajové případy) najdete v předchozích kapitolách.
 
-Reálný projekt rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
+Plný end-to-end příklad – od doménové analýzy přes kontextovou mapu po read modely –
+rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
@@ -31,7 +32,7 @@ E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart**
 a **Order** (potvrzená transakce). Mezi nimi přechází doménová událost `CartCheckedOut`,
 která vytvoří `Order` agregát.
 
-:::diagram{fig="24.1-A" title="E-shop: bounded contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
+:::diagram{fig="23.1-A" title="E-shop: bounded contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
 :::
 
 ### Struktura projektu {#e-commerce-structure}
@@ -120,7 +121,7 @@ Plnou CQRS implementaci s validací, autorizací a outbox patternem najdete v [C
 Blog drží jeden Bounded Context se dvěma agregáty (`Post`, `Comment`) a sekcemi pro vytvoření
 příspěvku, výpis a detail.
 
-:::diagram{fig="24.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
+:::diagram{fig="23.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
 
 ### Struktura projektu {#blog-structure}
@@ -201,7 +202,7 @@ z eventů) viz [CQRS – ViewModely a Read Modely](/cqrs#view-models) a [Výkonn
 Bounded Context **UserManagement** drží jediný agregát `User` a tři sub-features: registraci,
 autentizaci, profil. Agregát se integruje se Symfony Security (implementuje `UserInterface`).
 
-:::diagram{fig="24.3-A" title="Správa uživatelů: feature slices" src="images/diagrams/7_examples/users/diagram.svg"}
+:::diagram{fig="23.3-A" title="Správa uživatelů: feature slices" src="images/diagrams/7_examples/users/diagram.svg"}
 :::
 
 ### Struktura projektu {#user-mgmt-structure}
@@ -270,7 +271,7 @@ final class RegisterUserHandler
         $email = new Email($command->email);
 
         // Invariant na úrovni handleru: email musí být unikátní (DB unique constraint
-        // je pojistka pro race condition, viz Implementace v Symfony, sekce 11.13).
+        // je pojistka pro race condition, viz Implementace v Symfony, sekce 10.13).
         if ($this->users->findByEmail($email) !== null) {
             throw new \DomainException('User with this email already exists.');
         }
@@ -290,6 +291,36 @@ final class RegisterUserHandler
 Pro autorizaci uživatele po přihlášení (čtyři vrstvy přístupu, Voter, doménové invarianty)
 viz [Autorizace v DDD](/autorizace-v-ddd).
 
+## 23.04 Tři projekty vedle sebe {#tri-projekty-vedle-sebe}
+
+Tři příklady pokrývají tři různé úrovně doménové komplexity. Srovnání ukazuje, co která
+úroveň vyžaduje a kde zvolená struktura narazí na strop:
+
+| | E-shop | Blog | Správa uživatelů |
+|---|---|---|---|
+| **Komplexita domény** | Střední: invarianty v košíku, přechod stavu checkout → objednávka | Nízká: pár validačních pravidel na titulku a obsahu | Nízká až střední: unikátní e-mail, hash hesla, integrace se Security |
+| **Počet Bounded Contexts** | 2 (Cart, Order) | 1 | 1 |
+| **Použité vzory** | Agregáty, hodnotové objekty, doménová událost mezi kontexty, CQRS, repository | Agregát s named constructorem, CQRS slices, repository | Agregát s `UserInterface`, hodnotové objekty `Email` a `HashedPassword`, repository |
+| **Co se změní při růstu** | Přibudou kontexty Payment, Inventory, Shipping; checkout se stane procesem přes [ságu](/sagy-a-process-managery); publikace událostí dostane [outbox](/outbox-pattern) | Moderace a verzování obsahu si vyžádají oddělený Comment kontext a read model pro výpisy | Role, oprávnění a SSO oddělí Identity od Profile; autorizační pravidla se přesunou do [voterů](/autorizace-v-ddd) |
+| **Kdy struktura přestane stačit** | Když synchronní komunikace mezi kontexty začne vytvářet řetězy závislostí – pak nastupuje plně asynchronní integrace | Jakmile přibude workflow redakce a schvalování, přestane stačit jediný kontext s CRUD jádrem | Když počet pravidel „kdo smí co“ přeroste agregát – pravidla patří do samostatné autorizační vrstvy |
+
+Rozhodnutí o hloubce stacku se odvíjí od domény, ne od technologie. Plný strategický
+i taktický DDD (více kontextů, CQRS, doménové události, outbox) se vyplatí tam, kde
+doména nese netriviální invarianty, na systému pracuje více týmů a jednotlivé části
+se vyvíjejí různým tempem. E-shop z této kapitoly k tomu směřuje: dva kontexty
+a událost mezi nimi jsou první krok, zbytek přijde s růstem.
+
+Střední cesta – agregát s repository, bez oddělených read modelů a bez více kontextů –
+pokrývá projekty typu blog nebo správa uživatelů. Doménová pravidla existují
+a zaslouží si zapouzdření, ale čtení zůstává triviální a tým malý. Vyplatí se hlídat
+jeden signál: jakmile výpisy začnou hydratovat agregáty jen kvůli zobrazení,
+je čas na oddělený read model.
+
+Kde pravidla nejsou žádná a aplikace jen přesouvá data mezi formulářem a tabulkou,
+DDD nepřináší hodnotu a stojí čas. Symfony formuláře, Doctrine entity a generické
+CRUD kontrolery takový případ řeší levněji. Hranici mezi oběma světy rozebírá
+kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
+
 ## Závěr
 
 Všechny tři příklady sledují stejný řetězec: kontroler → command bus → handler → agregát →
@@ -299,7 +330,7 @@ handler, infrastrukturu drží repozitář.
 
 Reálný projekt s plnou doménovou analýzou, kontextovou mapou, read modely, reconciliation a
 důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Provází
-systém pro správu projektů krok za krokem od event stormingu po deployment.
+systém pro správu projektů krok za krokem od event stormingu po read modely s reconciliation.
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?

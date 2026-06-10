@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: "2026-05-04"
+modified: "2026-06-09"
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -33,7 +33,7 @@ literatura – soustředěná na to, kdy vzor použít – zpravidla nerozvádí
 Než projdete jednotlivé situace, odpovězte si pět otázek. Pokud na kteroukoli odpovíte
 „ne“, DDD pravděpodobně není správná volba – nebo ještě ne.
 
-:::diagram{fig="23.1-A" title="Rozhodovací strom: pět bran k DDD" src="images/diagrams/9_when_not_to_use_ddd/diagram.svg"}
+:::diagram{fig="22.1-A" title="Rozhodovací strom: pět bran k DDD" src="images/diagrams/9_when_not_to_use_ddd/diagram.svg"}
 :::
 
 Každá brána odpovídá jedné nebo více sekcím níže.
@@ -121,9 +121,11 @@ class ArticleCrudController extends AbstractCrudController
 - **Symfony Forms + Doctrine Entity přímo v controlleru** – pro jednoduchý CRUD bez doménové logiky.
 
 Doménový model zavádíte tehdy, když máte doménu. CRUD admin doménu nemá.
-Martin Fowler tento anti-vzor pojmenoval
+Pozor na záměnu s pojmem
 <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Anemic Domain Model</a>
-- model, který vypadá jako DDD, ale neobsahuje žádné chování.
+od Martina Fowlera: ten popisuje doménovou logiku přesunutou do servisní vrstvy
+místo do modelu. Over-engineering CRUDu je jiný problém – DDD ceremonie nad
+doménou, která žádnou logiku nemá.
 :::
 
 ## 22.03 2. Startup – doména se mění každý sprint {#startup}
@@ -258,7 +260,9 @@ Vernon v *Domain-Driven Design Distilled* doporučuje zvážit
 DDD vyžaduje, aby tým rozuměl konceptům –
 [aggregates, bounded contexts, domain events, repositories](/zakladni-koncepty).
 Špatně pochopené DDD je horší než žádné DDD: produkuje pseudo-DDD kód,
-který má přidanou komplexitu bez architektonických výhod.
+který má přidanou komplexitu bez architektonických výhod. Jak takový kód
+vypadá v detailu, ukazuje katalog
+[Anti-vzory](/anti-vzory#anemicky-domenovy-model).
 
 „Naučíme se za pochodu“ na produkčním projektu s deadlinem je recept na technický dluh,
 který bude bolet roky.
@@ -463,5 +467,5 @@ Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte
 - <a href="https://martinfowler.com/bliki/BoundedContext.html" target="_blank" rel="noopener">Martin Fowler: BoundedContext</a>
   (2014) – srozumitelné vysvětlení jednoho z hlavních DDD konceptů.
 - <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Martin Fowler: AnemicDomainModel</a>
-  (2003) – proč „DDD bez chování“ je anti-vzor.
+  (2003) – proč je doménový model bez chování, s logikou v servisní vrstvě, anti-vzor.
 :::

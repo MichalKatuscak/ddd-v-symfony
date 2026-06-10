@@ -7,12 +7,12 @@ meta_description: "Čtyři doplňující taktické vzory DDD: Specification Patt
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: "2026-05-04"
+modified: "2026-06-09"
 breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
 schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
 chapter_number: "08"
-category: Vzory
+category: Taktika
 deck: 'Vedle entit, value objektů a agregátů obsahuje Evansova kniha čtyři další taktické vzory, které programátoři často přeskočí: <strong>Specifications</strong> jako prvotřídní booleovská logika, <strong>Domain Services</strong> pro chování bez přirozeného vlastníka, <strong>Factories</strong> pro komplexní vznik agregátů a <strong>Modules</strong> jako vědomá organizace kódu. Tato kapitola je jejich detailní průvodce v Symfony 8 a PHP 8.4 – s ukázkami kódu, anti-vzory a srovnávacími tabulkami.'
 reading_time: 28
 difficulty: 3
@@ -99,8 +99,8 @@ opakovaně, si zaslouží vlastní jméno a vlastní typ.
    specifikace musí umět odpovědět na otázku „*splňuje tento konkrétní objekt
    pravidlo?*“ (in-memory predikát) i „*vrať mi z databáze všechny objekty,
    které pravidlo splňují?*“ (query). Tomuto se říká
-   **double-dispatch** a vyhnete se tím duplikaci pravidla mezi PHP
-   kódem a SQL/Doctrine DQL.
+   **double-dispatch** – obě podoby pravidla (PHP i SQL/Doctrine DQL)
+   drží pohromadě v jedné třídě.
 3. **Pravidla, která se skládají za běhu.** Promo kód, který má v admin UI
    podmínky *„platí pro nákupy > 1000 Kč v ČR a SK, kromě výprodejového zboží“*,
    se v doméně reprezentuje jako instance `AndSpecification` složená z N pod-pravidel
@@ -344,24 +344,32 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Specification;
 
 use App\Ordering\Domain\Order;
-use App\SharedKernel\Domain\Country;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 
 /**
- * Doručovací adresa objednávky se nachází v zemi EU.
+ * Doručovací adresa objednávky se nachází v členské zemi EU.
+ * Seznam zemí je součástí pravidla – specifikace nepotřebuje
+ * žádný vstup zvenčí.
  *
  * @extends CompositeSpecification<Order>
  */
 final class InEUCountry extends CompositeSpecification
 {
-    public function __construct(private readonly Country $country) {}
+    private const array EU_COUNTRIES = [
+        'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
+        'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
+        'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+    ];
 
     public function isSatisfiedBy(mixed $candidate): bool
     {
         assert($candidate instanceof Order);
 
-        return $this->country->isInEU()
-            && $candidate->shippingAddress()->country()->equals($this->country);
+        return in_array(
+            $candidate->shippingAddress()->country()->code(),
+            self::EU_COUNTRIES,
+            true,
+        );
     }
 }
 :::
@@ -419,7 +427,6 @@ use App\Ordering\Domain\Order;
 use App\Ordering\Domain\Specification\EligibleForFreeShipping;
 use App\Ordering\Domain\Specification\InEUCountry;
 use App\Ordering\Domain\Specification\NotInBlacklist;
-use App\SharedKernel\Domain\Country;
 use App\SharedKernel\Domain\Money;
 
 final class ApplyFreeShippingHandler
@@ -429,7 +436,7 @@ final class ApplyFreeShippingHandler
     public function __invoke(Order $order): void
     {
         $promo = (new EligibleForFreeShipping(Money::czk(100_000))) // 1000 Kč v haléřích
-            ->and(new InEUCountry($order->shippingAddress()->country()))
+            ->and(new InEUCountry())
             ->and(new NotInBlacklist($this->blacklist->all()));
 
         if ($promo->isSatisfiedBy($order)) {
@@ -547,9 +554,68 @@ final class DoctrineOrderRepository implements OrderRepository
 }
 :::
 
-Pravidlo se tím napíše jednou. Obě role specifikace (in-memory predikát i překladač
-do query) sedí v jedné třídě a nelze je oddělit – PHP a DQL verze pravidla
-se nemohou rozjít.
+Obě role specifikace (in-memory predikát i překladač do query) sedí v jedné třídě,
+takže případný rozjezd PHP a DQL podoby je při code review vidět na jedné obrazovce.
+Nic ho ale nevynucuje – jde o dvě nezávislé implementace téhož pravidla. Pojistkou
+je kontraktní test: nad stejnou sadou testovacích dat ověří, že `isSatisfiedBy()`
+označí tytéž objekty, jaké `match()` vrátí z databáze. Když se obě verze rozejdou,
+test selže dřív než produkce.
+
+### Limity skládání: kombinátory a DQL {#spec-query-kombinatory}
+
+Kombinátory `and`/`or`/`not` z úvodu sekce implementují jen `Specification`,
+ne `QuerySpecification`. Složená specifikace proto do DQL přeložit nejde –
+`match()` ji odmítne už typovou kontrolou. Nabízejí se dvě cesty. Buď skládání
+omezíte na in-memory použití a repozitáři předáváte pouze atomické specifikace.
+Nebo překlad doplníte i pro kombinátory; u `AndSpecification` stačí přeložit obě
+strany, protože `andWhere()` připojuje podmínky konjunkcí:
+
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/AndSpecification.php (s překladem do DQL)"}
+final class AndSpecification extends CompositeSpecification implements QuerySpecification
+{
+    /**
+     * @param Specification<T> $left
+     * @param Specification<T> $right
+     */
+    public function __construct(
+        private readonly Specification $left,
+        private readonly Specification $right,
+    ) {}
+
+    public function isSatisfiedBy(mixed $candidate): bool
+    {
+        return $this->left->isSatisfiedBy($candidate)
+            && $this->right->isSatisfiedBy($candidate);
+    }
+
+    public function asDoctrineCriteria(QueryBuilder $qb, string $alias): void
+    {
+        if (!$this->left instanceof QuerySpecification
+            || !$this->right instanceof QuerySpecification
+        ) {
+            throw new \LogicException(
+                'Do DQL lze přeložit jen kompozici QuerySpecification.',
+            );
+        }
+
+        $this->left->asDoctrineCriteria($qb, $alias);
+        $this->right->asDoctrineCriteria($qb, $alias);
+    }
+}
+:::
+
+Jedna past zůstává i u konjunkce: názvy parametrů. Dvě pod-specifikace, které
+obě zavolají `setParameter('threshold', ...)`, se tiše přepíšou – vyhraje
+poslední hodnota a dotaz vrátí špatné výsledky bez jediné chyby. Atomické
+specifikace proto parametry pojmenovávají s unikátním prefixem nebo suffixem
+(`largeOrder_threshold`), ne generickým jménem.
+
+U `OrSpecification` a `NotSpecification` už tak levně nevyjdete. Podmínky nelze
+jen řadit za sebe – musíte skládat výrazové fragmenty přes
+`$qb->expr()`. V tom bodě se generický překlad
+přestává vyplácet: pro složitější dotaz je čitelnější vlastní query metoda
+repozitáře (`findOrdersEligibleForPromo()`), která pravidlo zapíše v DQL přímo
+a kontraktním testem se sváže s in-memory specifikací.
 
 Pro hluboký teoretický základ vzoru: Evans, E., *Domain-Driven Design* (2003),
 kapitola 9 *Making Implicit Concepts Explicit*; Evans & Fowler, pracovní
@@ -794,7 +860,8 @@ final class Order extends AggregateRoot
         private readonly \DateTimeImmutable $placedAt,
     ) {
         $this->items = $items;
-        $this->recordEvent(new OrderPlaced($id, $customerId, $placedAt));
+        // Konstruktor jen plní stav. Eventy zaznamenávají factory metody –
+        // konstruktorem prochází i reconstitute(), která žádný event vyvolat nesmí.
     }
 
     /**
@@ -811,13 +878,16 @@ final class Order extends AggregateRoot
             throw EmptyOrder::cannotBePlaced();
         }
 
-        return new self(
+        $order = new self(
             id: OrderId::generate(),
             customerId: $customerId,
             items: $items,
             type: OrderType::Physical,
             placedAt: $placedAt,
         );
+        $order->record(new OrderPlaced($order->id, $customerId, $placedAt));
+
+        return $order;
     }
 
     /**
@@ -835,13 +905,16 @@ final class Order extends AggregateRoot
             throw EmptyOrder::cannotBePlaced();
         }
 
-        return new self(
+        $order = new self(
             id: OrderId::generate(),
             customerId: $customerId,
             items: array_map(static fn (DigitalItem $i): OrderItem => $i->toOrderItem(), $items),
             type: OrderType::Digital,
             placedAt: $placedAt,
         );
+        $order->record(new OrderPlaced($order->id, $customerId, $placedAt));
+
+        return $order;
     }
 
     /**
@@ -975,6 +1048,12 @@ public static function reconstitute(
 }
 :::
 
+Proto také `OrderPlaced` zaznamenává factory metoda `::place()`, ne konstruktor.
+Rekonstituce nesmí mít vedlejší efekty: obnovuje stav, žádná doménová událost se
+nestala. Kdyby event zaznamenával konstruktor, každé načtení agregátu z databáze
+by znovu vyprodukovalo `OrderPlaced` a odběratelé by tutéž objednávku „umístili“
+při každém čtení.
+
 Pojmenování `::reconstitute()` a PHPDoc `@internal` jasně
 signalizují, že tato cesta vzniku je vyhrazena pro infrastrukturu. Doménový handler,
 který by ji volal místo `::place()`, by porušil invariant agregátu.
@@ -995,10 +1074,10 @@ do balíčků pojmenovaných podle ubiquitous language**. Není to PHP feature, 
 to namespace – je to *princip*, který říká: *„rozhraní balíčků vašeho kódu má
 odrážet doménový jazyk, ne technické vrstvy a ne použité knihovny.“*
 
-Evans věnoval Modules celou samostatnou pasáž v kapitole 5 *Domain-Driven
-Design* (2003). Citace: *„Modules in DDD are a way of expressing the higher-level
-structure of a model ... Modules should reflect the domain language, not the technical
-organization of code.“*
+Evans věnoval Modules samostatnou pasáž v kapitole 5 *Domain-Driven
+Design* (2003). Moduly chápe jako vyjádření hrubší struktury modelu:
+členění balíčků má vycházet z doménového jazyka, ne z technické
+organizace kódu.
 
 V Symfony 8 a PHP 8.4 to konkrétně znamená:
 
@@ -1073,8 +1152,8 @@ src/
         QuerySpecification.php
 :::
 
-Této organizaci se v komunitě říká také *vertical slicing* – viz kapitolu
-[Horizontální vs. vertikální dělení](/vertikalni-slice),
+Této organizaci se v komunitě říká také *vertical slicing* – viz sekci
+[Vertical Slice Architecture](/architektonicke-styly#vertical-slice),
 která jí věnuje detailní rozbor. Pro účely této kapitoly stačí pozorování: *shora
 vidíte doménovou mapu projektu* (Ordering, Billing, SharedKernel), a ne technický
 chaos složek Twig/Doctrine/Service.
@@ -1166,90 +1245,39 @@ services:
         tags: ['controller.service_arguments']
 :::
 
-### Architecture testing s phparkitect {#mod-phparkitect}
+### Architecture testing: hranice vynucené v CI {#mod-phparkitect}
 
 Konvence sama o sobě nestačí – vývojáři pod tlakem zapomenou, že
 `App\Billing\` nesmí volat `App\Ordering\`. Řešení: **vynutit
-pravidlo testem**. Pro PHP existuje knihovna
-[phparkitect](https://github.com/phparkitect/arkitect),
-která spouští architektonické asercie v CI:
+pravidlo testem**, který běží v CI a při porušení shodí build. Princip
+je u všech nástrojů stejný: pravidla závislostí zapíšete jako definice
+verzované vedle kódu a pipeline je kontroluje při každém commitu.
+Pro modulový projekt z této kapitoly jde typicky o tři pravidla:
 
-:::code{language="bash" filename="Instalace"}
+1. `App\Ordering` nesmí záviset na `App\Billing`, `App\Inventory` ani
+   `App\Shipping` – integrace mezi BC probíhá výhradně přes domain events
+   ([Outbox](/outbox-pattern)).
+2. `App\Ordering\Domain` nesmí importovat nic z `Doctrine`, `Symfony`
+   ani z vlastní Application a Infrastructure vrstvy – doména zůstává
+   framework-agnostic.
+3. `App\Ordering\Application` nesmí znát `App\Ordering\Infrastructure` –
+   orchestrace závisí na rozhraní z Domain, ne na adaptéru.
+
+Pro PHP existují dva zavedené nástroje.
+[phparkitect](https://github.com/phparkitect/arkitect) zapisuje pravidla
+jako PHP definice (fluent API nad množinou tříd) v souboru
+`phparkitect.php` v kořeni projektu:
+
+:::code{language="bash" filename="Instalace a spuštění"}
 composer require --dev phparkitect/phparkitect
+vendor/bin/phparkitect check
 :::
 
-:::code{language="php" filename="phparkitect.php"}
-<?php
-
-declare(strict_types=1);
-
-use Arkitect\ClassSet;
-use Arkitect\CLI\Config;
-use Arkitect\Expression\ForClasses\NotDependsOnAnyOfTheseNamespaces;
-use Arkitect\Expression\ForClasses\NotDependsOnTheseNamespaces;
-use Arkitect\Expression\ForClasses\ResideInOneOfTheseNamespaces;
-use Arkitect\Rules\Rule;
-
-return static function (Config $config): void {
-    $classSet = ClassSet::fromDir(__DIR__ . '/src');
-
-    // Pravidlo 1: Ordering BC nesmí přímo závisět na Billing BC.
-    // Integrace musí probíhat přes events (publish/subscribe),
-    // nikdy přímým voláním třídy z druhého modulu.
-    $orderingIsolated = Rule::allClasses()
-        ->that(new ResideInOneOfTheseNamespaces('App\\Ordering'))
-        ->should(new NotDependsOnAnyOfTheseNamespaces([
-            'App\\Billing',
-            'App\\Inventory',
-            'App\\Shipping',
-        ]))
-        ->because(
-            'Ordering BC je autonomní – integrace s ostatními BC '
-          . 'probíhá výhradně přes domain events (Outbox).',
-        );
-
-    // Pravidlo 2: Doménová vrstva nesmí znát infrastrukturu.
-    // Žádný import z Doctrine, Symfony HTTP, Mailer, Messenger atd.
-    $domainPure = Rule::allClasses()
-        ->that(new ResideInOneOfTheseNamespaces('App\\Ordering\\Domain'))
-        ->should(new NotDependsOnAnyOfTheseNamespaces([
-            'Doctrine',
-            'Symfony',
-            'App\\Ordering\\Infrastructure',
-            'App\\Ordering\\Application',
-        ]))
-        ->because(
-            'Domain layer musí být framework-agnostic; '
-          . 'porty se definují jako interface a implementují v Infrastructure.',
-        );
-
-    // Pravidlo 3: Application vrstva nesmí znát Infrastructure detaily.
-    $applicationCleanArch = Rule::allClasses()
-        ->that(new ResideInOneOfTheseNamespaces('App\\Ordering\\Application'))
-        ->should(new NotDependsOnTheseNamespaces([
-            'App\\Ordering\\Infrastructure',
-            'Doctrine\\ORM',
-        ]))
-        ->because(
-            'Application orchestrace závisí na port (interface) z Domain, '
-          . 'ne na adapteru z Infrastructure.',
-        );
-
-    $config
-        ->add($classSet, $orderingIsolated, $domainPure, $applicationCleanArch);
-};
-:::
-
-:::code{language="bash" filename="CI run"}
-# CI runner spustí pravidla a selže build, pokud došlo k porušení.
-vendor/bin/phparkitect check --config=phparkitect.php
-
-# Doporučujeme zařadit do CI workflow před fázi "tests":
-#   - composer install
-#   - vendor/bin/phparkitect check
-#   - vendor/bin/phpstan analyse
-#   - vendor/bin/phpunit
-:::
+Druhou možností je [Deptrac](https://github.com/deptrac/deptrac), který
+vrstvy a povolené závislosti popisuje v YAML souboru. Kompletní Deptrac
+konfiguraci pro DDD projekt včetně zapojení do CI najdete v kapitole
+[Testování DDD](/testovani-ddd#architektonicke-testy). Zápis pravidel se
+mezi nástroji liší, tři pravidla výše vyjádří oba.
 
 :::callout{type="pattern"}
 ### Bez architektonických testů je Modules jen přání {#phparkitect-tip-heading}
@@ -1261,11 +1289,11 @@ refaktoring zpět je pak týdenní práce. Doporučujeme **od prvního commitu**
 i když do projektu přijde pátý nový vývojář, který Evansův text nikdy nečetl.
 
 Dokumentace: [phparkitect.com](https://phparkitect.com/);
-alternativa [qossmic/deptrac](https://github.com/qossmic/deptrac).
+alternativa [deptrac/deptrac](https://github.com/deptrac/deptrac).
 :::
 
 Souvisí: [Horizontální vs. vertikální
-dělení](/vertikalni-slice), [Context Mapping](/context-mapping),
+dělení](/architektonicke-styly#vertical-slice), [Context Mapping](/context-mapping),
 [Implementace v Symfony](/implementace-v-symfony),
 [Outbox Pattern](/outbox-pattern) (komunikace mezi moduly přes events).
 
@@ -1324,7 +1352,7 @@ doménovou strukturu.
 - **Specification Pattern** proměňuje booleovská doménová pravidla
   v prvotřídní objekty s mluvícími jmény. Kombinátory `and`,
   `or`, `not` umožňují skládání bez vnořených `if`-ů,
-  double-dispatch eliminuje duplikaci pravidla mezi PHP a Doctrine.
+  double-dispatch drží PHP i DQL podobu pravidla v jedné třídě.
 - **Domain Services** zachytávají doménovou logiku, která nepatří
   do žádné Entity ani Value Objektu. Jsou stateless, žijí v Domain vrstvě a nesmí
   volat perzistenci. Jejich častá záměna s Application a Infrastructure
@@ -1357,7 +1385,7 @@ u anémického modelu, který v sekci 08.03 padl jen krátce.
 - question: 'Factory metoda nebo Factory class – jak se rozhodnout?'
   answer: 'Defaultně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) ho výslovně preferuje. K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
 - question: 'Jak vynutit hranice mezi Moduly v PHP projektu?'
-  answer: 'Konvence sama o sobě se rozpadá – vývojáři pod tlakem „udělej rychle“ přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://phparkitect.com/" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/qossmic/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu „App\\Ordering nesmí závisět na App\\Billing“, „App\\Ordering\\Domain nesmí znát Doctrine“, a CI build selže při porušení. Náklad je jeden konfigurační soubor, zisk je výrazná záruka, že modulární organizace přežije i pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
+  answer: 'Konvence sama o sobě se rozpadá – vývojáři pod tlakem „udělej rychle“ přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://phparkitect.com/" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu „App\\Ordering nesmí závisět na App\\Billing“, „App\\Ordering\\Domain nesmí znát Doctrine“, a CI build selže při porušení. Náklad je jeden konfigurační soubor, zisk je výrazná záruka, že modulární organizace přežije i pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
 - question: 'Jak má vypadat namespace třídy, která sedí na hranici dvou Bounded Contextů?'
   answer: 'V čistém DDD <strong>žádná třída na hranici dvou BC nesedí</strong>. Pokud objevíte takový případ, je to signál, že hranice je špatně nakreslená nebo že potřebujete <a href="/context-mapping">Anti-Corruption Layer</a> (ACL). Konkrétní řešení: v každém BC žije <em>vlastní</em> typ s vlastním namespace. <code>App\\Ordering\\Domain\\CustomerId</code> v Ordering kontextu, <code>App\\Billing\\Domain\\CustomerId</code> v Billing kontextu, případně mapování přes events. Pokud opravdu existuje univerzální koncept (<code>Money</code>, <code>Currency</code>, <code>Country</code>), patří do <strong>SharedKernel</strong> – ale tento balíček musí být explicitně malý, stabilní a s dohodou všech týmů. Souvisí <a href="#mod-bc">Modul jako Bounded Context</a>.'
 - question: 'Můžu Specification a Domain Service kombinovat?'

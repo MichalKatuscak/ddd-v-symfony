@@ -40,15 +40,15 @@ final class Chapters
             ['n' => '16', 'route' => 'performance_aspects',       't' => 'Read modely, projekce a výkon', 'd' => 'Snapshoty, projekce, cache, read-model optimalizace',     'time' => 30, 'lvl' => 4, 'tag' => 'Vzory',       'group' => 'patterns'],
 
             // Hub 5 – Praxe a provoz
-            ['n' => '17', 'route' => 'testing_ddd',               't' => 'Testování DDD',                  'd' => 'Unit · Integration · BDD · contract testy agregátů',      'time' => 30, 'lvl' => 3, 'tag' => 'Praxe',       'group' => 'practice'],
+            ['n' => '17', 'route' => 'testing_ddd',               't' => 'Testování DDD',                  'd' => 'Unit · integrační · async Messenger · architektonické testy',      'time' => 30, 'lvl' => 3, 'tag' => 'Praxe',       'group' => 'practice'],
             ['n' => '18', 'route' => 'migration_from_crud',       't' => 'Migrace z CRUD',                 'd' => 'Strangler Fig Pattern – postupný přechod bez stopy',      'time' => 25, 'lvl' => 3, 'tag' => 'Praxe',       'group' => 'practice'],
             ['n' => '19', 'route' => 'microservices_and_ddd',     't' => 'DDD a microservices',            'd' => 'BC jako service boundary · modular monolith · distributed monolith', 'time' => 30, 'lvl' => 4, 'tag' => 'Praxe',       'group' => 'practice'],
             ['n' => '20', 'route' => 'ddd_pain_points',           't' => 'DDD v praxi – kde to bolí',      'd' => '20 reálných problémů: Doctrine, ACL, strangler fig…',     'time' => 35, 'lvl' => 4, 'tag' => 'Praxe',       'group' => 'practice'],
-            ['n' => '21', 'route' => 'anti_patterns',             't' => 'Anti-vzory a typické chyby',     'd' => 'Anemic model, smart UI, leaky abstractions',              'time' => 35, 'lvl' => 2, 'tag' => 'Praxe',       'group' => 'practice'],
+            ['n' => '21', 'route' => 'anti_patterns',             't' => 'Anti-vzory a typické chyby',     'd' => 'Anemic model, God Aggregate, primitive obsession…',              'time' => 35, 'lvl' => 2, 'tag' => 'Praxe',       'group' => 'practice'],
             ['n' => '22', 'route' => 'when_not_to_use_ddd',       't' => 'Kdy DDD nepoužívat',             'd' => '7 situací, kdy DDD přinese víc škody než užitku',         'time' => 14, 'lvl' => 2, 'tag' => 'Praxe',       'group' => 'practice'],
 
             // Hub 6 – Syntéza
-            ['n' => '23', 'route' => 'practical_examples',        't' => 'Praktické příklady',             'd' => 'E-shop, fakturace, inventory – minimal end-to-end',       'time' => 12, 'lvl' => 3, 'tag' => 'Syntéza',     'group' => 'synthesis'],
+            ['n' => '23', 'route' => 'practical_examples',        't' => 'Praktické příklady',             'd' => 'E-shop, blog a správa uživatelů – tři minimální průřezy',       'time' => 12, 'lvl' => 3, 'tag' => 'Syntéza',     'group' => 'synthesis'],
             ['n' => '24', 'route' => 'case_study',                't' => 'Případová studie',               'd' => 'Systém pro správu projektů v DDD a CQRS, krok za krokem', 'time' => 50, 'lvl' => 4, 'tag' => 'Syntéza',     'group' => 'synthesis'],
         ];
     }

@@ -7,7 +7,7 @@ meta_description: "Jak číst tuto knihu o Domain-Driven Design v Symfony 8 – 
 meta_keywords: "předmluva, DDD, Symfony, jak číst, doporučená cesta čtení"
 og_type: article
 published: "2026-05-04"
-modified: "2026-05-04"
+modified: "2026-06-09"
 breadcrumb_name: Předmluva
 schema_type: TechArticle
 schema_headline: "Předmluva: Domain-Driven Design v Symfony 8"
@@ -63,7 +63,7 @@ Kniha je rozdělená do osmi tematických částí. Pořadí kapitol je promyšl
 
 Strategický design rozhoduje, *kde* DDD vůbec aplikovat. Pokrývá filozofii DDD, Ubiquitous Language, identifikaci subdomén (Core, Supporting, Generic), Bounded Contexts a Context Mapping. Doplňují ho dvě praktické techniky: Event Storming Alberta Brandoliniho a Team Topologies (Skelton & Pais, 2019), bez kterých strategický design nefunguje v reálné organizaci.
 
-Zde se rozhoduje, jestli má smysl pokračovat. Pokud z kapitoly 1 a 2 vyjde, že váš projekt nemá dost komplexní doménu pro DDD, ostatní kapitoly nejsou potřeba.
+Zde se rozhoduje, jestli má smysl pokračovat. Kapitoly 1 a 2 dají první signál – jestli má váš projekt dost komplexní doménu a kde leží jeho Core. Úplný rámec s rozhodovacím stromem obsahuje kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Signál „ne“ si zaslouží ověření právě tam, než odložíte zbytek knihy.
 
 ### Část 2 – Taktický design (kap. 6–9) {#cast-2}
 
@@ -207,7 +207,7 @@ Knihy a referenční články jsou citované přímo v textu (např. „Vernon, 
 
 ## P.05 Co dál {#co-dal}
 
-Pokud jste tu poprvé, otevřete [kapitolu 1: Co je DDD](/co-je-ddd). Po přečtení byste měli mít jasno, jestli má smysl pokračovat.
+Pokud jste tu poprvé, otevřete [kapitolu 1: Co je DDD](/co-je-ddd). Po přečtení byste měli mít jasno, jestli má smysl pokračovat. Rozhodovací rámec pro opačný závěr nabízí kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 Pokud DDD už znáte a hledáte konkrétní téma, projděte si [Cheat Sheet](/cheat-sheet) – jednostránkový přehled vzorů s odkazy na příslušné kapitoly. Pro definice termínů slouží [Glosář](/glosar).
 

@@ -4,10 +4,10 @@ path: /testovani-ddd
 title: Testování DDD kódu v Symfony
 page_title: "Testování DDD kódu v Symfony | DDD Symfony"
 meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integrace přes Doctrine, in-memory repozitáře, testy doménových událostí a architektonické testy (Deptrac)."
-meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, PHP-Arkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage"
+meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -27,7 +27,7 @@ kde jsou unit testy svázané s kontejnerem a kde běh tisíce testů trvá minu
 v sekundách. Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje
 kapitola [Základní koncepty DDD](/zakladni-koncepty).
 
-:::diagram{fig="18.1-A" title="Testovací pyramida pro DDD aplikaci - poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
+:::diagram{fig="17.1-A" title="Testovací pyramida pro DDD aplikaci - poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
 :::
 
 :::callout{type="note"}
@@ -234,7 +234,7 @@ final class UserTest extends TestCase
         $user->changeEmail(new Email('jan@example.com'));
 
         // Žádná událost by neměla být vydána, email je stále stejný
-        $this->assertCount(0, $user->releaseDomainEvents());
+        $this->assertCount(0, $user->releaseEvents());
     }
 }
 :::
@@ -321,7 +321,7 @@ final class OrderTest extends TestCase
         $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
         $order->place();
 
-        $events = $order->releaseDomainEvents();
+        $events = $order->releaseEvents();
 
         $this->assertCount(2, $events); // OrderItemAdded + OrderPlaced
         $this->assertInstanceOf(OrderItemAdded::class, $events[0]);
@@ -343,7 +343,7 @@ najdete v kapitole [Event Sourcing](/event-sourcing).
 ### Pattern „Record and Verify Events“:
 
 Agregáty sbírají vydané události interně v privátním poli (viz bázová třída `AggregateRoot` nebo trait).
-Metoda `releaseDomainEvents()` vrátí všechny nashromážděné události a pole vymaže. Tento přístup nevyžaduje
+Metoda `releaseEvents()` vrátí všechny nashromážděné události a pole vymaže. Tento přístup nevyžaduje
 v unit testech žádný event dispatcher ani bus. Testovací kód zavolá doménovou operaci a ověří
 obsah vrácených událostí.
 :::
@@ -440,7 +440,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $order->addItem('Produkt A', new Money(25000, Currency::CZK), 3);
         $order->place();
 
-        $events      = $order->releaseDomainEvents();
+        $events      = $order->releaseEvents();
         $placedEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
 
         // Ověření dat události
@@ -454,7 +454,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $order = Order::create(OrderId::generate(), CustomerId::generate());
         $order->addItem('Produkt B', new Money(10000, Currency::CZK), 1);
 
-        $events = $order->releaseDomainEvents();
+        $events = $order->releaseEvents();
 
         $this->assertNoEventOfType(OrderPlaced::class, $events);
     }
@@ -642,6 +642,11 @@ Integrační testy odpovídají na otázku, kterou unit testy pokrýt nemohou: z
 repozitářů a transakce skutečně dělají to, co jejich rozhraní slibuje. Spouští se proti reálné databázi –
 typicky SQLite in-memory pro rychlost, nebo testovací PostgreSQL/MySQL instance pro shodu s produkcí.
 
+Obě implementace přitom plní tutéž smlouvu rozhraní: `findById(UserId $id): ?User` vrací při
+nenalezení `null`, stejně jako InMemory varianta ze [sekce o test doubles](#test-doubles).
+Druhou běžnou konvencí je metoda `getById()`, která místo `null` vyhazuje `UserNotFoundException` –
+projekt si vybere jednu konvenci a drží ji ve všech implementacích i testech.
+
 :::callout{type="note"}
 ### KernelTestCase vs WebTestCase:
 
@@ -655,9 +660,10 @@ typicky SQLite in-memory pro rychlost, nebo testovací PostgreSQL/MySQL instance
 ### Transakce a rollback po každém testu:
 
 Nejpřímočařejší způsob, jak zajistit izolaci integračních testů, je zabalit každý test do databázové transakce
-a po jeho dokončení provést rollback. Symfony poskytuje `DoctrineTestHelper` a bundle
-`dama/doctrine-test-bundle`, který toto chování implementuje automaticky pomocí dekorátoru
-nad `Connection`. Bez toho by každý test zanechával data v databázi a testy by se navzájem ovlivňovaly.
+a po jeho dokončení provést rollback. Toto chování dodá bundle
+`dama/doctrine-test-bundle`: zaregistruje PHPUnit extension a obalí každý test transakcí pomocí
+dekorátoru nad `Connection`, bez zásahu do testovacího kódu. Bez transakční izolace by každý test
+zanechával data v databázi a testy by se navzájem ovlivňovaly.
 :::
 
 :::callout{type="pattern"}
@@ -675,7 +681,6 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
-use App\UserManagement\Domain\Exception\UserNotFoundException;
 use App\UserManagement\Infrastructure\Repository\DoctrineUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -693,8 +698,8 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
-        $this->repository    = static::getContainer()->get(DoctrineUserRepository::class);
+        $this->entityManager = self::getContainer()->get('doctrine')->getManager();
+        $this->repository    = self::getContainer()->get(DoctrineUserRepository::class);
     }
 
     public function testPersistsAndRetrievesUser(): void
@@ -708,15 +713,14 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
 
         $retrieved = $this->repository->findById($userId);
 
+        $this->assertNotNull($retrieved);
         $this->assertTrue($userId->equals($retrieved->id()));
         $this->assertTrue($email->equals($retrieved->email()));
     }
 
-    public function testThrowsExceptionForNonExistentUser(): void
+    public function testReturnsNullForNonExistentUser(): void
     {
-        $this->expectException(UserNotFoundException::class);
-
-        $this->repository->findById(UserId::generate());
+        $this->assertNull($this->repository->findById(UserId::generate()));
     }
 
     public function testFindsByEmailAddress(): void
@@ -880,7 +884,153 @@ Vše ostatní (okrajové případy, validace, doménová pravidla) pokryjte unit
 Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů spouštět testy lokálně.
 :::
 
-## 17.07 Architektonické testy {#architektonicke-testy}
+## 17.07 Testování asynchronních toků {#testovani-asynchronnich-toku}
+
+Asynchronní zpracování přes Messenger rozděluje tok na dvě poloviny: odeslání zprávy a její zpracování
+workerem. Test musí pokrýt obě, každou zvlášť. Architekturu busů popisuje kapitola
+[CQRS](/cqrs#symfony-messenger), transakční předávání zpráv kapitola [Outbox Pattern](/outbox-pattern).
+
+### In-memory transport
+
+V testovacím prostředí nahradí reálný broker transport `in-memory://`. Zprávy nikam neodcházejí,
+zůstávají v paměti procesu a test si je vyzvedne přímo z kontejneru. Stačí přepsat DSN
+pro prostředí `test`:
+
+:::callout{type="pattern"}
+### Příklad: In-memory transport pro testy
+
+:::code{language="yaml" filename="config/packages/test/messenger.yaml"}
+framework:
+    messenger:
+        transports:
+            async: 'in-memory://'
+:::
+:::
+
+Funkční test pak ověří, že endpoint zprávu skutečně odeslal – aniž by čekal na workera:
+
+:::callout{type="pattern"}
+### Příklad: Assertions nad odeslanými zprávami
+
+:::code{language="php" filename="Tests/UserManagement/Functional/RegisterUserDispatchTest.php"}
+public function testRegistrationDispatchesWelcomeEmail(): void
+{
+    $client = static::createClient();
+
+    $client->request(
+        method: 'POST',
+        uri: '/api/users/register',
+        server: ['CONTENT_TYPE' => 'application/json'],
+        content: json_encode(['name' => 'Jan Novák', 'email' => 'jan@example.com', 'password' => 'SilneHeslo123!'])
+    );
+
+    $transport = self::getContainer()->get('messenger.transport.async');
+    $sent      = $transport->getSent();
+
+    $this->assertCount(1, $sent);
+    $this->assertInstanceOf(SendWelcomeEmail::class, $sent[0]->getMessage());
+}
+:::
+:::
+
+### zenstruck/messenger-test
+
+Holé assertions nad transportem fungují, ale v každém testu se opakují. Balíček
+**zenstruck/messenger-test** je zabalí do čitelného API: trait `InteractsWithMessenger` zpřístupní
+frontu transportu a metoda `process()` zpracuje zařazené zprávy přímo v testu, bez spouštění workera.
+
+:::callout{type="pattern"}
+### Příklad: Test celého asynchronního toku se zenstruck/messenger-test
+
+:::code{language="php" filename="Tests/UserManagement/Functional/RegisterUserFlowTest.php"}
+use Zenstruck\Messenger\Test\InteractsWithMessenger;
+
+final class RegisterUserFlowTest extends WebTestCase
+{
+    use InteractsWithMessenger;
+
+    public function testRegistrationQueuesAndProcessesWelcomeEmail(): void
+    {
+        $client = static::createClient();
+        $client->request(/* ... registrace jako výše ... */);
+
+        $this->transport('async')->queue()->assertCount(1);
+        $this->transport('async')->queue()->assertContains(SendWelcomeEmail::class);
+
+        $this->transport('async')->process();      // zpracuje frontu v testu
+        $this->transport('async')->queue()->assertEmpty();
+    }
+}
+:::
+:::
+
+### Test idempotence handleru
+
+Asynchronní transport doručuje zprávy v režimu at-least-once: po pádu workera dorazí tatáž
+zpráva podruhé. Handler proto musí být idempotentní – dvojí zpracování smí vyvolat jeden efekt.
+Deduplikační mechanismus popisuje [Idempotent Inbox](/outbox-pattern#inbox) – záznam se ukládá
+pod dvojicí `eventId` (ULID) a `consumer`. Test je krátký: zavolat handler dvakrát se stejnou
+zprávou a spočítat efekty.
+
+:::callout{type="pattern"}
+### Příklad: Test idempotence handleru
+
+:::code{language="php" filename="Tests/UserManagement/Application/SendWelcomeEmailHandlerTest.php"}
+public function testHandlesDuplicateDeliveryOnce(): void
+{
+    $mailer  = new SpyMailer();
+    $handler = new SendWelcomeEmailHandler($mailer, new InMemoryInboxRepository());
+
+    $message = new SendWelcomeEmail(eventId: '01J0E2Q4Z3V9K5T7N8M2R6W1X0', email: 'jan@example.com');
+
+    ($handler)($message);
+    ($handler)($message); // opakované doručení téže zprávy
+
+    $this->assertSame(1, $mailer->sentCount());
+}
+:::
+:::
+
+### Test outboxu
+
+Outbox dává dvě garance a každá potřebuje vlastní integrační test. První: po `flush()` leží
+událost v outbox tabulce, zapsaná ve stejné transakci jako agregát. Druhá: relay ji publikuje
+do transportu a označí jako zpracovanou. Obě varianty relay procesu rozebírá
+[kapitola o Outbox Pattern](/outbox-pattern#relay).
+
+:::callout{type="pattern"}
+### Příklad: Integrační testy outboxu (KernelTestCase)
+
+:::code{language="php" filename="Tests/Ordering/Infrastructure/OutboxFlowTest.php"}
+public function testFlushWritesEventToOutbox(): void
+{
+    ($this->placeOrderHandler)(new PlaceOrder(/* ... */));
+
+    $pending = $this->outboxRepository->fetchPending(limit: 10);
+
+    $this->assertCount(1, $pending);
+    $this->assertSame('order.placed', $pending[0]->messageType());
+}
+
+public function testRelayPublishesPendingEvents(): void
+{
+    ($this->placeOrderHandler)(new PlaceOrder(/* ... */));
+
+    $tester = new CommandTester($this->outboxDispatchCommand);
+    $tester->execute([]);
+
+    $transport = self::getContainer()->get('messenger.transport.async');
+
+    $this->assertCount(1, $transport->getSent());
+    $this->assertCount(0, $this->outboxRepository->fetchPending(limit: 10));
+}
+:::
+:::
+
+Druhý test záměrně končí dvojicí assertions: zpráva odešla a fronta pending záznamů je prázdná.
+Pokud by relay publikoval, ale neoznačil záznam jako zpracovaný, příští běh by událost poslal znovu.
+
+## 17.08 Architektonické testy {#architektonicke-testy}
 
 Pravidlo, že doménová vrstva nesmí záviset na infrastruktuře ani na aplikační vrstvě, drží jen do první
 spěchající code review, ve které někdo přidá `use Doctrine\ORM\Mapping` do entity. Architektonické testy
@@ -964,7 +1114,7 @@ deptrac:
 
 :::code{language="bash" filename="snippet.sh"}
 # Instalace (dev závislost)
-composer require --dev qossmic/deptrac-shim
+composer require --dev deptrac/deptrac
 
 # Spuštění analýzy
 ./vendor/bin/deptrac analyze --config-file=deptrac.yaml
@@ -976,53 +1126,32 @@ composer require --dev qossmic/deptrac-shim
 :::
 :::
 
-### PHP-Arkitect jako alternativa
+### phparkitect jako alternativa
 
-**PHP-Arkitect** (phparkitect/phparkitect) je alternativní nástroj pro architektonické testy napsaný v PHP.
-Na rozdíl od Deptrac s YAML konfigurací používá PHP API pro definici pravidel. To umožňuje
-typově bezpečnou konfiguraci s podporou IDE. Pravidla se definují jako PHPUnit test,
-takže výsledky se integrují přímo do testovací sady.
+Pravidla závislostí umí vynutit i **phparkitect** (phparkitect/phparkitect). Na rozdíl od Deptrac
+s YAML konfigurací používá PHP API: pravidla se zapisují do souboru `phparkitect.php` jako typovaný
+kód s podporou IDE. Nástroj má vlastní CLI a nespouští se přes PHPUnit – v CI běží jako samostatný
+krok vedle testovací sady. Instalaci a přehled pravidel uvádí kapitola
+[Méně známé vzory](/mene-zname-vzory#mod-phparkitect); plnou konfiguraci pro modular monolith
+ukazuje kapitola [DDD a microservices](/ddd-a-microservices#phparkitect-rules-heading).
+Zde stačí zapojení do pipeline:
 
 :::callout{type="pattern"}
-### Příklad: PHP-Arkitect pravidla
+### Příklad: Spuštění phparkitect v CI
 
-:::code{language="php" filename="phparkitect.php"}
-<?php
+:::code{language="bash" filename="snippet.sh"}
+composer require --dev phparkitect/phparkitect
 
-// phparkitect.php
-use Arkitect\ClassSet;
-use Arkitect\CLI\Config;
-use Arkitect\Expression\ForClasses\HaveNameMatching;
-use Arkitect\Expression\ForClasses\NotDependsOnTheseNamespaces;
-use Arkitect\Expression\ForClasses\ResideInOneOfTheseNamespaces;
-use Arkitect\Rules\Rule;
-
-return static function (Config $config): void {
-    $srcSet = ClassSet::fromDir(__DIR__ . '/src');
-
-    $config->add(
-        $srcSet,
-
-        // Doménová vrstva nesmí záviset na Symfony ani Doctrine
-        Rule::allClasses()
-            ->that(new ResideInOneOfTheseNamespaces('App\UserManagement\Domain'))
-            ->should(new NotDependsOnTheseNamespaces(
-                'Symfony',
-                'Doctrine',
-            ))
-            ->because('Doménová vrstva musí být nezávislá na frameworku a infrastruktuře.'),
-
-        // Všechny třídy v Command namespace musí mít suffix Command nebo Handler
-        Rule::allClasses()
-            ->that(new ResideInOneOfTheseNamespaces('App\UserManagement\Application\Command'))
-            ->should(new HaveNameMatching('*Command|*Handler'))
-            ->because('Command namespace smí obsahovat pouze Command a Handler třídy (konvence projektu).'),
-    );
-};
+# Samostatný krok CI pipeline vedle PHPUnit a Deptrac
+vendor/bin/phparkitect check
 :::
 :::
 
-## 17.08 Code coverage a doporučené postupy {#pokryti-a-best-practices}
+Volba mezi oběma nástroji je věcí preferencí týmu. Deptrac popisuje vrstvy deklarativně v YAML
+a hodí se pro plošná pravidla mezi vrstvami; phparkitect dovolí jemnější pravidla nad jednotlivými
+třídami (suffixy názvů, konkrétní namespace). Oba selžou v CI stejně – jako spadlý build.
+
+## 17.09 Code coverage a doporučené postupy {#pokryti-a-best-practices}
 
 Code coverage měří, jaké procento řádků kódu se při běhu testů provede. Sama metrika nic neříká
 o kvalitě testů – 100% pokrytí lze dosáhnout testy, které jen volají metody bez assertů. Užitečná
@@ -1069,7 +1198,7 @@ pokud všechny společně ověřují jeden konzistentní scénář.
 - **Sdílený stav mezi testy** – Každý test musí být nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
 - **Mockování value objects** – Value objekty jsou datové třídy bez závislostí. Není důvod je mockovat – vždy vytvořte skutečnou instanci.
 - **Ignorování doménových výjimek v testech** – Každá doménová výjimka (`InvalidEmailException`, `OrderAlreadyPlacedException` apod.) musí mít test ověřující, že je vyhozena za správných podmínek.
-- **Chybějící test pro releaseDomainEvents() po operaci** – Pokud agregát vydává doménové události, každá veřejná operace, která má událost vydat, musí mít test ověřující typ, počet a obsah vydaných událostí.
+- **Chybějící test pro releaseEvents() po operaci** – Pokud agregát vydává doménové události, každá veřejná operace, která má událost vydat, musí mít test ověřující typ, počet a obsah vydaných událostí.
 :::
 
 :::callout{type="pattern"}
@@ -1103,7 +1232,7 @@ infrastruktura, a architektonické testy hlídají, aby tato izolace nezmizela p
 - question: K čemu slouží InMemory repozitář a kdy ho preferovat před mockem?
   answer: 'InMemory repozitář je plnohodnotná implementace rozhraní repozitáře, která drží agregáty v poli v paměti. Oproti mocku simuluje reálné chování (najít, uložit, počítat), takže testy aplikačních služeb procházejí celý use case věrohodněji. Mock se hodí tam, kde je potřeba ověřit konkrétní interakci – kolikrát byla metoda volána a s jakými argumenty. InMemory repozitář naopak slouží pro ověření výsledku, ne volání. Rozbor variant v <a href="#test-doubles">sekci Test doubles a InMemory repozitáře</a>.'
 - question: Jak ověřit, že agregát publikuje správné doménové události?
-  answer: 'Po vykonání metody se z agregátu vyčte seznam zaznamenaných událostí (typicky přes <code>releaseDomainEvents()</code>) a testem se ověří jejich typ, pořadí i obsah. Kontroluje se, že agregát vyvolal přesně ty události, které má, a nevyvolal žádné navíc. Pro funkční test lze stejné události zachytávat přes Messenger event bus a ověřit reakce dalších částí systému. Praktický příklad v <a href="#testovani-domain-events">sekci Testování doménových událostí</a>.'
+  answer: 'Po vykonání metody se z agregátu vyčte seznam zaznamenaných událostí (typicky přes <code>releaseEvents()</code>) a testem se ověří jejich typ, pořadí i obsah. Kontroluje se, že agregát vyvolal přesně ty události, které má, a nevyvolal žádné navíc. Pro funkční test lze stejné události zachytávat přes Messenger event bus a ověřit reakce dalších částí systému. Praktický příklad v <a href="#testovani-domain-events">sekci Testování doménových událostí</a>.'
 - question: Mají se testovat privátní invarianty agregátu, nebo jen veřejné rozhraní?
   answer: 'Testuje se pouze veřejné rozhraní – chování agregátu přes metody, které se reálně volají z aplikační vrstvy. Privátní invarianty jsou detailem implementace a jejich přímé testování sváže test s konkrétní strukturou kódu, což brání refaktoringu. Dobře navržený test ověřuje, že po sérii veřejných volání je agregát ve validním stavu, vyvolal očekávané události a při porušení pravidla vyhodil konkrétní doménovou výjimku. Detailní rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
 - question: Co jsou architektonické testy a co kontrolují?

@@ -7,7 +7,7 @@ meta_description: "Bounded Context není jen architektonický artefakt – je to
 meta_keywords: "Conway's Law, Team Topologies, Inverse Conway Maneuver, Skelton, Pais, stream-aligned team, platform team, enabling team, complicated subsystem team, Bounded Context, DDD, kognitivní zátěž, Westrum, Vernon, organizační struktura, microservices"
 og_type: article
 published: "2026-04-29"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Team Topologies
 schema_type: TechArticle
 schema_headline: "Conway's Law a Team Topologies – týmová struktura v DDD"
@@ -30,13 +30,15 @@ V dubnu 1968 vyšel v časopise *Datamation* krátký esej Melvina Conwaye s ná
 *How Do Committees Invent?* [[1]](http://www.melconway.com/Home/Committees_Paper.html).
 Conway v něm formuloval pozorování, které se později stalo známé jako **Conway's Law**:
 
-> „Any organization that designs a system (defined broadly) will produce a design whose
-> structure is a copy of the organization's communication structure.“
+> „Organizations which design systems (in the broad sense used here) are constrained
+> to produce designs which are copies of the communication structures of these
+> organizations.“
 >
 > – Melvin E. Conway, 1968
 
-V překladu: **jakákoli organizace, která navrhuje systém, vytvoří takový design,
-jehož struktura kopíruje komunikační strukturu této organizace.**
+V překladu: **organizace navrhující systémy jsou nuceny vytvářet designy,
+které kopírují komunikační struktury těchto organizací.** Conway sám tezi
+později shrnul volněji – design systému kopíruje komunikační strukturu organizace.
 Není to architektonická preskripce, ale *empirické pozorování*. A je vysoce
 spolehlivé. Oddělený frontend a backend tým? Dostanete oddělený frontend a backend
 v kódu. Oddělený DBA tým? V kódu se objeví vrstva, která jen obsluhuje databázi.
@@ -83,11 +85,9 @@ sekce 05.05).
 Vaughn Vernon v knize *Implementing Domain-Driven Design* (2013, kap. 2)
 [[2]](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577)
 formuluje pravidlo, které je možná nejdůležitějším praktickým výstupem celého DDD:
-
-> „A Bounded Context should be owned by a single team. The reverse – multiple Bounded
-> Contexts owned by a single team – is sometimes acceptable.“
->
-> – Vaughn Vernon, *Implementing DDD* (2013)
+Bounded Context má vlastnit jediný tým. Obrácená situace – jeden tým vlastnící více
+Bounded Contexts – podle Vernona může být přijatelná. Pravidlo zopakoval
+v *Domain-Driven Design Distilled* (2016, kap. 2): více týmů nesmí sdílet jeden kontext.
 
 Pravidlo má dvě části, které se často chybně čtou jako jedno:
 
@@ -219,15 +219,15 @@ týmů.
 
 ### Mapování DDD subdomén na typy týmů {#subdomain-mapping}
 
-Klasifikace subdomén z kapitoly o
-[subdoménách](/subdomeny)
-(Core / Supporting / Generic) přirozeně mapuje na typy týmů:
+Klasifikace subdomén (Core / Supporting / Generic) přirozeně mapuje na typy týmů.
+Co jednotlivé kategorie znamenají a jak je rozpoznat, rozebírá kapitola o
+[subdoménách](/subdomeny#tri-kategorie); zde zůstává jen týmový pohled:
 
-| Subdoména | Typ týmu | Důvod |
+| Subdoména | Typ týmu | Týmový důsledek |
 |---|---|---|
-| **Core** (konkurenční výhoda) | Stream-aligned (1 tým per BC) nebo Complicated-subsystem (pokud je algoritmicky náročná) | Zde leží konkurenční výhoda firmy. Plná kontrola nad designem, deploymentem i operací; nejlepší lidé. |
-| **Supporting** (potřebné, ale nediferencuje) | Stream-aligned (často sdílí tým s jiným supporting BC) | Stačí udržovat na úrovni „good enough“; standardní vzory, žádný over-engineering. |
-| **Generic** (komodita: identity, fakturace, e-mail) | Žádný vlastní tým – Platform team integruje SaaS / hotové řešení | Nepřináší konkurenční výhodu; psát si to znamená plýtvat. Auth0 / Stripe / SendGrid. |
+| **Core** | Stream-aligned (1 tým per BC); Complicated-subsystem, jen pokud je doména algoritmicky náročná | Plná kontrola nad designem, deploymentem i provozem; nejsilnější obsazení. |
+| **Supporting** | Stream-aligned | Často sdílí tým s dalším supporting BC. Standardní vzory, žádný over-engineering. |
+| **Generic** | Žádný vlastní tým | Platform team integruje SaaS nebo hotové řešení. |
 
 :::callout{type="pattern"}
 ### Core domain dostane nejlepší tým {#core-stream-heading}
@@ -510,7 +510,7 @@ organizace.
 monolit). Žádný Platform team, žádný Enabling team.
 
 - **Architektura:** jeden Symfony monolit; BC jsou složky/moduly s explicitními rozhraními (kapitola o [architektonických stylech](/architektonicke-styly)).
-- **Generic subdomény:** SaaS – Auth0 nebo Clerk pro identity, Stripe pro fakturaci, SendGrid pro e-mail. Žádná vlastní implementace.
+- **Generic subdomény:** nakoupit jako SaaS, žádná vlastní implementace – argumenty a sourcing strategii build/buy rozebírá kapitola o [subdoménách](/subdomeny#sourcing).
 - **Hosting:** Heroku, Vercel, Railway, Fly.io – managed services nahrazují Platform team.
 - **Čeho se vyvarovat:** nepouštět se do Kubernetes, vlastní observability stack, mikroservisy. Předčasné.
 
@@ -542,15 +542,15 @@ výbor“), který se stane bottleneckem.
 - **1–2 Complicated-subsystem teamy** – jen pro objektivně specializované domény (např. risk engine v bance, video transcoder v médiích, ML scoring v ad-techu).
 - **Topology design:** Skelton a Pais doporučují, aby v této velikosti existoval malý *topology team* (1–2 lidi, není to Center of Excellence). Sleduje cognitive load týmů a navrhuje reorganizace. Často je to staff engineer + manažer.
 
-Důležité: i v 200-členné firmě by mělo být **aspoň 75 % lidí ve stream-aligned týmech**.
-Pokud máte 200 lidí a 100 z nich je v Platform/Enabling/CoE/architekti, máte problém –
+I v 200-členné firmě mají stream-aligned týmy **výrazně převažovat** – orientačně
+tři čtvrtiny lidí. Pokud máte 200 lidí a 100 z nich je v Platform/Enabling/CoE/architekti, máte problém –
 stream-aligned týmy nesou doménovou hodnotu, ostatní jsou multiplikátory. Multiplikátorů
 nemá být víc než multiplicandů.
 
 :::callout{type="pattern"}
-### Pravidlo proporcí (75/15/10) {#scenare-summary-heading}
+### Orientační proporce (75/15/10) {#scenare-summary-heading}
 
-Hrubá Skelton-Paisova heuristika pro zralou organizaci:
+Orientační poměr pro zralou organizaci. Skelton a Pais konkrétní procenta neuvádějí; trvají jen na tom, aby stream-aligned týmy v organizaci jasně dominovaly:
 
 - **≈ 75 %** lidí ve stream-aligned týmech (delivery hodnoty)
 - **≈ 15 %** v Platform teamu(ech)
@@ -745,8 +745,9 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
   pak postavit týmy tak, aby ji přirozeně vyprodukovaly. Bez podpory CTO neuspěje.
 - **Cognitive load:** ≤ 2 BC na 5–9 lidí. 4+ BC na tým = signál pro rozdělení.
   Měřte kvartálně.
-- **Proporce:** 75 % stream-aligned, 15 % platform, 10 % enabling
-  + complicated-subsystem.
+- **Proporce:** orientačně 75 % stream-aligned, 15 % platform, 10 % enabling
+  + complicated-subsystem. Poměr je zobecněním z praxe; podstatná je převaha
+  stream-aligned týmů.
 - **Komunikace s managementem:** DORA metriky, ne DDD filozofie.
   Westrumova generative kultura je předpoklad, ne výstup.
 

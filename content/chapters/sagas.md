@@ -7,7 +7,7 @@ meta_description: "Ságy a Process Managery v DDD a Symfony Messenger: kompenzac
 meta_keywords: "saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce"
 og_type: article
 published: "2026-03-26"
-modified: "2026-05-03"
+modified: "2026-06-09"
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
@@ -50,21 +50,11 @@ Komunikují asynchronně přes frontu zpráv. Koncept atomické transakce se zde
 :::callout{type="note"}
 ### Proč ne Two-Phase Commit (2PC)? {#2pc-heading}
 
-Distribuované databáze nabízejí protokol **Two-Phase Commit** (2PC), který
-koordinuje commit napříč více databázemi. V první fázi (*prepare*) se všichni
-účastníci ptají, zda mohou commitnout; ve druhé fázi (*commit*) koordinátor
-rozhodne o globálním commitu nebo rollbacku. Tento přístup je však pro DDD systémy
-nevhodný z několika důvodů:
-
-- **Výkonnostní overhead** – všichni účastníci drží zámky po celou dobu
-  obou fází, což dramaticky snižuje propustnost systému.
-- **Tight coupling** – všechny kontexty musí být dostupné současně;
-  výpadek jediného účastníka zablokuje celou transakci.
-- **Single point of failure** – koordinátor 2PC je kritické místo;
-  jeho selhání mezi fázemi zanechá účastníky v nejistém stavu.
-- **Nekompatibilita s autonomií Bounded Contexts** – 2PC vyžaduje, aby
-  všechny kontexty sdílely transakční protokol, čímž porušuje princip nezávislého
-  nasazení a vývoje jednotlivých kontextů.
+Protokol **Two-Phase Commit** (2PC) koordinuje commit napříč více databázemi,
+ale za cenu zámků držených po obě fáze a koordinátora jako single point of failure.
+Pro autonomní Bounded Contexts se nehodí – všichni účastníci musí být dostupní
+současně a sdílet transakční protokol. Podrobný rozbor obsahuje kapitola
+[Outbox Pattern](/outbox-pattern#2pc-heading).
 :::
 
 Příklad selhání: systém úspěšně strhne platbu zákazníkovi
@@ -82,6 +72,12 @@ pod názvy **Saga** a **Process Manager**.
 
 *Citace: Garcia-Molina, H. & Salem, K., **Sagas**, ACM SIGMOD (1987);
 Vernon, V., **Implementing Domain-Driven Design** (2013), kap. 8.*
+
+Část literatury oba pojmy rozlišuje: sága koordinuje proces čistě událostmi a kompenzacemi,
+process manager je stavová komponenta, která události překládá na příkazy. V praxi
+toto rozlišení splývá. Kniha proto používá „ságu“ jako zastřešující termín pro
+koordinátor dlouhotrvajícího procesu s perzistentním stavem a „Process Manager“
+pro jeho orchestrovanou podobu ze [sekce 5](#orchestrace).
 
 V následujících sekcích si ukážeme dva základní přístupy ke koordinaci ság –
 [choreografii](#choreografie) a [orchestraci](#orchestrace) –
@@ -185,7 +181,7 @@ koordinátor**. Každý Bounded Context reaguje na události publikované jiným
 kontexty a na jejich základě provádí svůj krok procesu. Žádná služba neví o celém
 toku – každá zná pouze svou část a ví, na které události má reagovat.
 
-:::diagram{fig="15.3-A" title="Choreografie vs. orchestrace - kdo koordinuje ságu" src="images/diagrams/8_sagas/choreography_vs_orchestration.svg"}
+:::diagram{fig="14.3-A" title="Choreografie vs. orchestrace - kdo koordinuje ságu" src="images/diagrams/8_sagas/choreography_vs_orchestration.svg"}
 :::
 
 V našem e-shop scénáři probíhá choreografická sága následovně: kontext Ordering
@@ -388,7 +384,7 @@ třídy. Na jednom místě je viditelný kompletní tok od `OrderPlaced` po `Con
 Následující diagram zobrazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
 přechody, červené selhání a oranžová cesta vede přes kompenzaci:
 
-:::diagram{fig="15.1-A" title="Stavový automat OrderProcessManager" src="images/diagrams/8_sagas/saga_state_machine.svg"}
+:::diagram{fig="14.1-A" title="Stavový automat OrderProcessManager" src="images/diagrams/8_sagas/saga_state_machine.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -447,7 +443,7 @@ final class OrderProcessManager
 {
     public function __construct(
         private readonly MessageBusInterface $commandBus,
-        private readonly SagaStateRepositoryInterface $sagaStateRepository,
+        private readonly OrderSagaRepositoryInterface $sagaRepository,
     ) {}
 
     public function __invoke(
@@ -465,7 +461,7 @@ final class OrderProcessManager
 
     private function onOrderPlaced(OrderPlaced $event): void
     {
-        $state = SagaState::start(
+        $state = OrderSaga::start(
             sagaType: 'order_process',
             correlationId: $event->orderId,
             status: OrderSagaStatus::AwaitingPayment,
@@ -475,7 +471,7 @@ final class OrderProcessManager
                 'completedSteps' => [],
             ],
         );
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new ChargeCustomer(
             orderId: $event->orderId,
@@ -486,22 +482,22 @@ final class OrderProcessManager
 
     private function onPaymentSucceeded(PaymentSucceeded $event): void
     {
-        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
         $state->transitionTo(OrderSagaStatus::AwaitingStockReservation);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'payment_charged',
         ]);
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
     }
 
     private function onPaymentFailed(PaymentFailed $event): void
     {
-        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
         $state->transitionTo(OrderSagaStatus::Failed);
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new CancelOrder(
             orderId: $event->orderId,
@@ -511,49 +507,43 @@ final class OrderProcessManager
 
     private function onStockReserved(StockReserved $event): void
     {
-        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
         $state->transitionTo(OrderSagaStatus::AwaitingShipment);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'stock_reserved',
         ]);
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new CreateShipment(orderId: $event->orderId));
     }
 
     private function onStockReservationFailed(StockReservationFailed $event): void
     {
-        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
         $state->transitionTo(OrderSagaStatus::Compensating);
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
-        // Kompenzace: vrátit platbu
+        // Kompenzace: vrátit platbu. RefundCustomer je asynchronní příkaz -
+        // sága zůstává ve stavu Compensating a do Failed přejde až po
+        // potvrzení RefundSucceeded (viz sekci 9, Když selže kompenzace).
         $this->commandBus->dispatch(new RefundCustomer(
             orderId: $event->orderId,
             customerId: $state->context()['customerId'],
             amountCents: $state->context()['amountCents'],
             reason: 'Zboží není skladem',
         ));
-
-        $this->commandBus->dispatch(new CancelOrder(
-            orderId: $event->orderId,
-            reason: 'Zboží není skladem',
-        ));
-
-        $state->transitionTo(OrderSagaStatus::Failed);
-        $this->sagaStateRepository->save($state);
     }
 
     private function onShipmentCreated(ShipmentCreated $event): void
     {
-        $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
         $state->transitionTo(OrderSagaStatus::Completed);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'shipment_created',
         ]);
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new ConfirmOrder(orderId: $event->orderId));
     }
@@ -564,18 +554,21 @@ final class OrderProcessManager
 Orchestrace přináší oproti choreografii několik výhod: celý doménový proces
 je popsán na **jediném místě**, takže vývojář okamžitě vidí kompletní tok
 od objednávky po potvrzení. Při debugování stačí zkontrolovat stav
-ságy v databázi a hned je jasné, ve kterém kroku proces stojí. Rozšíření procesu
-o nový krok (například Fraud Detection mezi platbu a sklad) znamená doplnit jednu
-metodu do Process Manageru a jeden nový stav do enumu. Existující kontexty se nemění.
+ságy v databázi a hned je jasné, ve kterém kroku proces stojí. Rozšíření o nový
+krok (například Fraud Detection mezi platbu a sklad) znamená nový stav v enumu,
+novou metodu pro `FraudCheckPassed` a úpravu `onPaymentSucceeded`, která místo
+rezervace skladu nově vydá příkaz pro kontrolu podvodů. Celá změna zůstává
+v jediné třídě – kontexty Warehouse ani Payment se neupravují.
 
 :::callout{type="note"}
 ### Každá metoda = jeden krok stavového automatu {#step-method-heading}
 
 Každá privátní metoda v `OrderProcessManager` reprezentuje jeden krok
-stavového automatu. Přidání nového kroku do procesu znamená přidání jedné metody
-a jedné události – stávající metody ani stávající kontexty se nemění. Tím je splněn
-**Open-Closed Principle**: Process Manager je otevřený pro rozšíření
-(nové kroky), ale uzavřený pro modifikaci (existující kroky zůstávají beze změny).
+stavového automatu. Vložení kroku doprostřed procesu znamená přidat metodu pro
+novou událost a upravit metodu předchozího kroku – ta nyní vydává jiný příkaz.
+Úprava ale zůstává lokální, uvnitř jediné třídy. Bounded Contexts kolem ságy
+se nemění; v tom spočívá rozdíl oproti choreografii, kde stejné rozšíření
+vyžaduje zásah do cizího kontextu.
 :::
 
 ## 14.06 Perzistence stavu ságy {#perzistence-stavu}
@@ -588,9 +581,9 @@ Sága by zůstala navždy „viset“ bez možnosti dokončení nebo kompenzace.
 ukládáme do databáze jako Doctrine entitu.
 
 :::callout{type="pattern"}
-### PHP: SagaState – Doctrine entita {#saga-state-entity-heading}
+### PHP: OrderSaga – Doctrine entita {#saga-state-entity-heading}
 
-:::code{language="php" filename="src/Ordering/Application/Saga/SagaState.php"}
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderSaga.php"}
 <?php
 
 declare(strict_types=1);
@@ -600,10 +593,10 @@ namespace App\Ordering\Application\Saga;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'saga_state')]
-#[ORM\Index(fields: ['correlationId'], name: 'idx_saga_correlation')]
+#[ORM\Table(name: 'order_saga')]
+#[ORM\UniqueConstraint(name: 'uniq_saga_correlation', columns: ['saga_type', 'correlation_id'])]
 #[ORM\Index(fields: ['status'], name: 'idx_saga_status')]
-class SagaState
+class OrderSaga
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -622,6 +615,14 @@ class SagaState
     /** @var array<string, mixed> */
     #[ORM\Column(type: 'json')]
     private array $context = [];
+
+    /** @var list<string> */
+    #[ORM\Column(type: 'json')]
+    private array $processedEventIds = [];
+
+    #[ORM\Version]
+    #[ORM\Column(type: 'integer')]
+    private int $version = 1;
 
     #[ORM\Column]
     private \DateTimeImmutable $startedAt;
@@ -678,6 +679,16 @@ class SagaState
         $this->updatedAt = new \DateTimeImmutable();
     }
 
+    public function hasProcessed(string $eventId): bool
+    {
+        return in_array($eventId, $this->processedEventIds, true);
+    }
+
+    public function markProcessed(string $eventId): void
+    {
+        $this->processedEventIds[] = $eventId;
+    }
+
     public function correlationId(): string
     {
         return $this->correlationId;
@@ -702,9 +713,9 @@ class SagaState
 :::
 
 :::callout{type="pattern"}
-### PHP: Rozhraní SagaStateRepositoryInterface {#saga-state-repo-interface-heading}
+### PHP: Rozhraní OrderSagaRepositoryInterface {#saga-state-repo-interface-heading}
 
-:::code{language="php" filename="src/Ordering/Application/Saga/SagaStateRepositoryInterface.php"}
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderSagaRepositoryInterface.php"}
 <?php
 
 declare(strict_types=1);
@@ -715,22 +726,22 @@ namespace App\Ordering\Application\Saga;
  * Rozhraní repozitáře stavu ságy - umožňuje snadnou záměnu
  * implementace (Doctrine v produkci, in-memory v testech).
  */
-interface SagaStateRepositoryInterface
+interface OrderSagaRepositoryInterface
 {
-    public function save(SagaState $state): void;
+    public function save(OrderSaga $state): void;
 
-    public function findByCorrelationId(string $correlationId): SagaState;
+    public function findByCorrelationId(string $correlationId): OrderSaga;
 
-    /** @return list<SagaState> */
+    /** @return list<OrderSaga> */
     public function findStale(\DateTimeImmutable $olderThan): array;
 }
 :::
 :::
 
 :::callout{type="pattern"}
-### PHP: Doctrine implementace SagaStateRepository {#saga-state-repository-heading}
+### PHP: Doctrine implementace OrderSagaRepository {#saga-state-repository-heading}
 
-:::code{language="php" filename="src/Ordering/Application/Saga/SagaStateRepository.php"}
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderSagaRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -739,21 +750,21 @@ namespace App\Ordering\Application\Saga;
 
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class SagaStateRepository implements SagaStateRepositoryInterface
+final readonly class OrderSagaRepository implements OrderSagaRepositoryInterface
 {
     public function __construct(
         private EntityManagerInterface $em,
     ) {}
 
-    public function save(SagaState $state): void
+    public function save(OrderSaga $state): void
     {
         $this->em->persist($state);
         $this->em->flush();
     }
 
-    public function findByCorrelationId(string $correlationId): SagaState
+    public function findByCorrelationId(string $correlationId): OrderSaga
     {
-        $state = $this->em->getRepository(SagaState::class)
+        $state = $this->em->getRepository(OrderSaga::class)
             ->findOneBy(['correlationId' => $correlationId]);
 
         if ($state === null) {
@@ -765,12 +776,12 @@ final readonly class SagaStateRepository implements SagaStateRepositoryInterface
         return $state;
     }
 
-    /** @return list<SagaState> */
+    /** @return list<OrderSaga> */
     public function findStale(\DateTimeImmutable $olderThan): array
     {
         return $this->em->createQueryBuilder()
             ->select('s')
-            ->from(SagaState::class, 's')
+            ->from(OrderSaga::class, 's')
             ->where('s.completedAt IS NULL')
             ->andWhere('s.updatedAt < :threshold')
             ->setParameter('threshold', $olderThan)
@@ -792,11 +803,11 @@ eskalaci.
 :::callout{type="note"}
 ### Optimistické zamykání v produkci {#optimistic-locking-heading}
 
-V produkčním prostředí s více workery má smysl přidat sloupec pro optimistické
-zamykání (`#[ORM\Version]`). Bez něj by dva workery zpracovávající události pro
-stejnou objednávku mohly současně načíst stejný stav ságy a přepsat si navzájem
-změny. Optimistický zámek zajistí, že druhý worker dostane výjimku
-`OptimisticLockException` a Messenger zprávu automaticky zopakuje.
+Entita `OrderSaga` proto nese sloupec `version` s atributem `#[ORM\Version]`.
+Bez něj by dva workery zpracovávající události pro stejnou objednávku mohly
+současně načíst stejný stav ságy a přepsat si navzájem změny. Optimistický zámek
+zajistí, že druhý worker dostane výjimku `OptimisticLockException` a Messenger
+zprávu automaticky zopakuje.
 :::
 
 ### Multi-worker Process Manager – co se rozpadne {#multi-worker-heading}
@@ -826,58 +837,36 @@ Standardní obrana proti všem třem:
 :::callout{type="pattern"}
 ### Vzor: idempotentní state transitions + UNIQUE constraint {#idempotent-saga-transitions-heading}
 
-:::code{language="php" filename="src/OrderSaga/Domain/OrderSaga.php"}
-<?php
+Metoda doplněná do entity `OrderSaga` z předchozí ukázky. Využívá sloupce
+`processedEventIds` a guard stavového automatu:
 
-declare(strict_types=1);
-
-namespace App\OrderSaga\Domain;
-
-use App\Shared\Domain\AggregateRoot;
-use Doctrine\ORM\Mapping as ORM;
-
-#[ORM\Entity]
-#[ORM\Table(name: 'order_sagas', uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uniq_order_id', columns: ['order_id']),
-])]
-final class OrderSaga extends AggregateRoot
+:::code{language="php" filename="snippet.php"}
+// Doplnění do entity OrderSaga (viz výše v této sekci)
+public function applyPaymentSucceeded(string $eventId): void
 {
-    #[ORM\Column(enumType: OrderSagaStatus::class)]
-    private OrderSagaStatus $status;
-
-    #[ORM\Column(type: 'json')]
-    private array $processedEventIds = [];
-
-    #[ORM\Version]
-    #[ORM\Column(type: 'integer')]
-    private int $version = 1;
-
-    public function applyPaymentCompleted(string $eventId): void
-    {
-        // 1) Idempotence: stejný event už zpracován? Skip.
-        if (in_array($eventId, $this->processedEventIds, true)) {
-            return;
-        }
-
-        // 2) Stav-stroje guard: smí ten přechod nastat?
-        if (!$this->status->canTransitionTo(OrderSagaStatus::Paid)) {
-            // Out-of-order: událost dorazila ve stavu, kde ji nečekáme.
-            // Buď: zaloguj a zahoď (idempotentní), nebo zařaď do pending fronty.
-            return;
-        }
-
-        $this->status = OrderSagaStatus::Paid;
-        $this->processedEventIds[] = $eventId;
+    // 1) Idempotence: stejný event už zpracován? Skip.
+    if ($this->hasProcessed($eventId)) {
+        return;
     }
+
+    // 2) Guard stavového automatu: smí přechod nastat?
+    if ($this->status() !== OrderSagaStatus::AwaitingPayment) {
+        // Out-of-order: událost dorazila ve stavu, kde ji nečekáme.
+        // Buď: zalogovat a zahodit (idempotentní), nebo zařadit do pending fronty.
+        return;
+    }
+
+    $this->transitionTo(OrderSagaStatus::AwaitingStockReservation);
+    $this->markProcessed($eventId);
 }
 :::
 :::
 
 Tři stavební prvky, které zde fungují společně:
 
-- **UNIQUE constraint na `order_id`** zabrání duplicitnímu vzniku ságy.
-  Druhý INSERT vyhodí `UniqueConstraintViolationException`, handler ji zachytí
-  a načte existující ságu místo vytvoření nové.
+- **UNIQUE constraint na `(saga_type, correlation_id)`** zabrání duplicitnímu
+  vzniku ságy. Druhý INSERT vyhodí `UniqueConstraintViolationException`, handler
+  ji zachytí a načte existující ságu místo vytvoření nové.
 - **`processedEventIds` v entitě** drží seznam již zpracovaných event ID.
   Stejný event přijde dvakrát → druhé volání skončí na guardu. To je „inbox
   per saga“ – paralela [Idempotent Inbox z Outbox kapitoly](/outbox-pattern#inbox).
@@ -936,6 +925,61 @@ změnila tvar `state` JSONu. Operátor potřebuje nástroje:
   výše), smazání saga state + replay všech jejích eventů z outbox/event store
   obnoví správný stav. Vyžaduje tracking správného starting eventu (typicky
   `OrderPlaced` event ID).
+
+### Izolace ság: ACD bez I {#izolace-sag}
+
+Databázová transakce dává ACID. Sága jen ACD – atomicitu přes kompenzace,
+konzistenci a trvanlivost. Izolace chybí: každý commitnutý krok je okamžitě
+viditelný všem souběžným procesům, dlouho předtím, než celá sága skončí.
+Jiný proces nad stejnou objednávkou nebo skladem může rozpracovaný stav přečíst
+i přepsat. Vznikají anomálie známé z databází – *lost update* (storno
+ságy přepíše změnu, kterou objednávková sága právě provádí) a *dirty read*
+(proces si přečte platbu, kterou kompenzace vzápětí vrátí).
+
+Richardson pro tyto anomálie popisuje sadu protiopatření (*countermeasures*):
+
+- **Semantic lock** – aplikační zámek. Záznam, na kterém sága pracuje, nese
+  stav s příznakem `*_PENDING`; ostatní procesy ho musí respektovat.
+- **Commutative updates** – operace navržené tak, aby na pořadí nezáleželo.
+  Připsání a odepsání částky komutuje, nastavení absolutního zůstatku ne.
+- **Pessimistic view** – přeuspořádání kroků ságy. Změna, jejíž dirty read
+  napáchá největší škodu (třeba připsání kreditu), se přesune za pivot
+  transakci (viz [Když selže kompenzace](#selhani-kompenzace)).
+- **Reread value** – krok si před zápisem hodnotu znovu načte a ověří, že se
+  od prvního čtení nezměnila; jinak ságu zastaví nebo opakuje.
+
+Semantic lock je z nich nejčastější:
+
+:::callout{type="pattern"}
+### PHP: Semantic lock přes stav *_PENDING {#semantic-lock-heading}
+
+:::code{language="php" filename="snippet.php"}
+// Agregát Order: sága ho při startu uzamkne stavem APPROVAL_PENDING
+public function place(): void
+{
+    $this->status = OrderStatus::ApprovalPending; // semantic lock
+}
+
+// Jiný use case musí zámek respektovat
+public function changeShippingAddress(Address $newAddress): void
+{
+    if ($this->status === OrderStatus::ApprovalPending) {
+        throw new OrderLockedBySagaException($this->id);
+    }
+
+    $this->shippingAddress = $newAddress;
+}
+
+// Zámek uvolňuje výhradně sága - úspěchem, nebo kompenzací
+public function approve(): void { $this->status = OrderStatus::Approved; }
+public function reject(): void  { $this->status = OrderStatus::Rejected; }
+:::
+:::
+
+Kolizní požadavky lze místo výjimky také frontovat a provést po uvolnění zámku;
+pro většinu domén ale stačí odmítnutí výjimkou a opakování na straně klienta.
+
+*Citace: Richardson, C., **Microservices Patterns** (2018), kap. 4.*
 
 ## 14.07 Implementace v Symfony Messenger {#messenger-implementace}
 
@@ -1050,10 +1094,9 @@ a sága, která se nikdy nespustí.
 `outbox` v téže databázové transakci jako doménová změna. Samostatný
 proces (relay/poller) pak události z outbox tabulky přenáší do message brokeru a po
 úspěšném odeslání je označí jako zpracované. Tím je zaručeno, že žádná událost se
-neztratí – a to i při selhání mezi kroky. Podrobněji viz sekci
-[Outbox a transakční doručování událostí](/event-sourcing#outbox)
-v kapitole Event Sourcing, kde je vzor popsán v kontextu event store, včetně relay workeru
-a checkpoint tabulky.
+neztratí – a to i při selhání mezi kroky. Podrobně vzor rozebírá kapitola
+[Outbox Pattern](/outbox-pattern), včetně relay workeru, idempotentního
+inboxu a napojení na Symfony Messenger.
 :::
 
 Podrobnější informace o asynchronním zpracování zpráv, konfiguraci transportů a retry
@@ -1067,7 +1110,8 @@ nedostupnost platební brány, ztráta zprávy ve frontě – v distribuovaném 
 vždy počítat s tím, že odpověď nepřijde. Bez explicitního timeout mechanismu sága zůstane
 navždy ve stavu `AwaitingPayment` a objednávka se nikdy nedokončí ani nezruší.
 Proto potřebujeme **timeout check** – odložený příkaz, který po uplynutí
-stanovené doby zkontroluje, zda se sága posunula dál, a pokud ne, spustí kompenzaci.
+stanovené doby zkontroluje, zda se sága posunula dál. Pokud ne, ságu ukončí,
+nebo spustí kompenzaci – podle toho, zda už proběhl krok, který je co vracet.
 
 :::callout{type="pattern"}
 ### PHP: CheckSagaTimeout command {#check-saga-timeout-heading}
@@ -1101,8 +1145,9 @@ namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\CheckSagaTimeout;
 use App\Ordering\Application\Command\CancelOrder;
+use App\Ordering\Application\Saga\OrderSaga;
 use App\Ordering\Application\Saga\OrderSagaStatus;
-use App\Ordering\Application\Saga\SagaStateRepository;
+use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
 use App\Payment\Application\Command\RefundCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -1111,36 +1156,44 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class CheckSagaTimeoutHandler
 {
     public function __construct(
-        private SagaStateRepositoryInterface $sagaStateRepository,
+        private OrderSagaRepositoryInterface $sagaRepository,
         private MessageBusInterface $commandBus,
     ) {}
 
     public function __invoke(CheckSagaTimeout $command): void
     {
-        $state = $this->sagaStateRepository->findByCorrelationId($command->orderId);
+        $state = $this->sagaRepository->findByCorrelationId($command->orderId);
 
         // Saga se od posledního kroku posunula - timeout neplatí
         if ($state->status()->value !== $command->expectedStatus) {
             return;
         }
 
-        // Zapamatovat původní stav před přechodem
-        $originalStatus = OrderSagaStatus::from($command->expectedStatus);
-
-        $state->transitionTo(OrderSagaStatus::Compensating);
-        $this->sagaStateRepository->save($state);
-
-        match ($originalStatus) {
-            OrderSagaStatus::AwaitingPayment => $this->commandBus->dispatch(
-                new CancelOrder(orderId: $command->orderId, reason: 'Payment timeout'),
-            ),
+        match (OrderSagaStatus::from($command->expectedStatus)) {
+            OrderSagaStatus::AwaitingPayment => $this->failWithoutCompensation($state),
             OrderSagaStatus::AwaitingStockReservation => $this->compensatePayment($state),
             default => null,
         };
     }
 
-    private function compensatePayment(/* SagaState */ $state): void
+    private function failWithoutCompensation(OrderSaga $state): void
     {
+        // Platba nikdy neproběhla - není co kompenzovat.
+        // Sága přechází rovnou do terminálního Failed.
+        $state->transitionTo(OrderSagaStatus::Failed);
+        $this->sagaRepository->save($state);
+
+        $this->commandBus->dispatch(new CancelOrder(
+            orderId: $state->correlationId(),
+            reason: 'Payment timeout',
+        ));
+    }
+
+    private function compensatePayment(OrderSaga $state): void
+    {
+        $state->transitionTo(OrderSagaStatus::Compensating);
+        $this->sagaRepository->save($state);
+
         $this->commandBus->dispatch(new RefundCustomer(
             orderId: $state->correlationId(),
             customerId: $state->context()['customerId'],
@@ -1148,10 +1201,8 @@ final readonly class CheckSagaTimeoutHandler
             reason: 'Timeout: stock reservation not received',
         ));
 
-        $this->commandBus->dispatch(new CancelOrder(
-            orderId: $state->correlationId(),
-            reason: 'Timeout waiting for stock reservation',
-        ));
+        // CancelOrder zde nedispatchujeme. Objednávku zruší
+        // onRefundSucceeded až po potvrzení refundu (viz sekci 9).
     }
 }
 :::
@@ -1169,7 +1220,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 private function onOrderPlaced(OrderPlaced $event): void
 {
-    // ... (vytvoření SagaState a dispatch ChargeCustomer - viz sekci 5)
+    // ... (vytvoření OrderSaga a dispatch ChargeCustomer - viz sekci 5)
 
     // Naplánovat timeout check za 5 minut
     $this->commandBus->dispatch(
@@ -1198,10 +1249,11 @@ Timeouty proto patří do konfigurace – ideálně jako parametry v
 ### Požadavky na transport {#delay-stamp-warning-heading}
 
 `DelayStamp` vyžaduje asynchronní transport, který podporuje odložené
-doručování zpráv. **Doctrine transport** tuto funkcionalitu podporuje
-nativně (používá sloupec `available_at`). Pokud používáte
-**RabbitMQ**, potřebujete plugin
-`rabbitmq-delayed-message-exchange`. Synchronní transport
+doručování zpráv. **Doctrine transport** odklad řeší sloupcem
+`available_at`. **AMQP transport** (RabbitMQ) ho podporuje nativně:
+Symfony založí pomocnou frontu s TTL zprávy a dead-letter exchange, přes
+který se zpráva po vypršení vrátí do cílové fronty – plugin
+`rabbitmq-delayed-message-exchange` není potřeba. Synchronní transport
 (`sync://`) `DelayStamp` ignoruje a zprávu doručí okamžitě.
 :::
 
@@ -1231,7 +1283,7 @@ vrátit systém do konzistentního stavu provedením kompenzačních akcí v
 `RefundCustomer`, který vytvoří novou transakci (refund). Každá kompenzační
 akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
 
-:::diagram{fig="15.9-A" title="Kompenzační flow - rollback ságy v opačném pořadí" src="images/diagrams/8_sagas/compensation_flow.svg"}
+:::diagram{fig="14.9-A" title="Kompenzační flow - rollback ságy v opačném pořadí" src="images/diagrams/8_sagas/compensation_flow.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -1242,7 +1294,7 @@ akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
  * Kompenzace: spouštěna při selhání libovolného kroku.
  * Provádí kompenzační akce v opačném pořadí dokončených kroků.
  */
-private function compensate(SagaState $state): void
+private function compensate(OrderSaga $state): void
 {
     $completedSteps = $state->context()['completedSteps'] ?? [];
 
@@ -1268,8 +1320,11 @@ private function compensate(SagaState $state): void
         };
     }
 
-    $state->transitionTo(OrderSagaStatus::Failed);
-    $this->sagaStateRepository->save($state);
+    // Sága zůstává ve stavu Compensating. Do terminálního Failed
+    // přejde až po potvrzení kompenzace (viz následující podsekci).
+    // Více souběžných kompenzací vyžaduje evidenci, které ještě čekají.
+    $state->transitionTo(OrderSagaStatus::Compensating);
+    $this->sagaRepository->save($state);
 }
 :::
 :::
@@ -1282,6 +1337,67 @@ doručena vícekrát (at-least-once delivery), a proto handler musí bezpečně 
 opakované volání. Například `RefundCustomerHandler` by měl před vytvořením
 refundu ověřit, zda refund pro danou objednávku již neexistuje.
 :::
+
+### Když selže kompenzace {#selhani-kompenzace}
+
+Metoda `onStockReservationFailed` ze [sekce 5](#orchestrace) dispatchuje
+`RefundCustomer` a převede ságu do stavu `Compensating`. Tam sága zůstává.
+Refund je asynchronní příkaz – do terminálního `Failed` smí přejít až poté,
+co dorazí potvrzení `RefundSucceeded`. Přechod do `Failed` hned po dispatchi
+by ságu uzavřel dřív, než refund proběhl; při jeho selhání by se po penězích
+zákazníka nikdo nesháněl. Stav „kompenzace odeslána, čeká se na potvrzení“
+se v literatuře označuje jako *compensation pending*.
+
+:::callout{type="pattern"}
+### PHP: Potvrzení kompenzace v OrderProcessManager {#refund-confirmation-heading}
+
+:::code{language="php" filename="snippet.php"}
+// Doplnění do OrderProcessManager (RefundSucceeded a RefundFailed
+// přibudou i do union typu v __invoke a do routingu eventů)
+private function onRefundSucceeded(RefundSucceeded $event): void
+{
+    $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+    $state->transitionTo(OrderSagaStatus::Failed); // teprve teď je sága uzavřená
+    $this->sagaRepository->save($state);
+
+    $this->commandBus->dispatch(new CancelOrder(
+        orderId: $event->orderId,
+        reason: 'Zboží není skladem, platba vrácena',
+    ));
+}
+
+private function onRefundFailed(RefundFailed $event): void
+{
+    // Sem se řízení dostane až poté, co Messenger vyčerpal
+    // retry strategii s backoffem (viz sekci 7).
+    $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+    $state->updateContext('manualInterventionReason', $event->failureReason);
+    $this->sagaRepository->save($state);
+
+    // Alert (PagerDuty, Slack) + zařazení do fronty ručních zásahů.
+    // Sága zůstává v Compensating, dokud ji operátor neuzavře.
+}
+:::
+:::
+
+Richardson (Microservices Patterns, 2018, kap. 4) dělí kroky ságy do tří skupin:
+
+- **Compensatable transactions** – kroky před pivotem; každý má definovanou
+  kompenzaci (`ChargeCustomer` ↔ `RefundCustomer`).
+- **Pivot transaction** – bod rozhodnutí. Jakmile commitne, sága už necouvá
+  a poběží dopředu až do konce. V našem procesu je pivotem rezervace skladu.
+- **Retryable transactions** – kroky po pivotu (`CreateShipment`,
+  `ConfirmOrder`). Kompenzaci nemají, nesmí selhat z doménových důvodů
+  a opakují se až do úspěchu.
+
+Kompenzace samy patří do třetí kategorie. `RefundCustomer` nemá legitimní
+doménový důvod selhat – peníze, které systém strhl, musí umět vrátit. Selhání
+je vždy technické: nedostupná platební brána, timeout, chyba sítě. Odpovídá
+tomu strategie: retry s exponenciálním backoffem (`retry_strategy` ze
+[sekce 7](#messenger-implementace)), po vyčerpání pokusů zpráva končí ve
+failure transportu, systém odešle alert a objednávka putuje do fronty ručních
+zásahů. Ságu visící v `Compensating` zachytí i detekce zaseklých ság ze
+[sekce 11](#monitoring).
 
 Podrobnější informace o Dead Letter Queue, retry strategiích a zpracování chyb v Messenger
 najdete v kapitole [CQRS – zpracování chyb](/cqrs#error-handling).
@@ -1306,11 +1422,11 @@ jako splněné, sága pokračuje dalším krokem – vytvořením zásilky. Tomu
 :::code{language="php" filename="snippet.php"}
 private function onPaymentSucceeded(PaymentSucceeded $event): void
 {
-    $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+    $state = $this->sagaRepository->findByCorrelationId($event->orderId);
     $state->transitionTo(OrderSagaStatus::AwaitingStockAndInvoice);
     $state->updateContext('stockReserved', false);
     $state->updateContext('invoiceCreated', false);
-    $this->sagaStateRepository->save($state);
+    $this->sagaRepository->save($state);
 
     $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
     $this->commandBus->dispatch(new CreateInvoice(orderId: $event->orderId));
@@ -1318,35 +1434,35 @@ private function onPaymentSucceeded(PaymentSucceeded $event): void
 
 private function onStockReserved(StockReserved $event): void
 {
-    $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+    $state = $this->sagaRepository->findByCorrelationId($event->orderId);
     $state->updateContext('stockReserved', true);
     $state->updateContext('completedSteps', [
         ...$state->context()['completedSteps'] ?? [],
         'stock_reserved',
     ]);
-    $this->sagaStateRepository->save($state);
+    $this->sagaRepository->save($state);
 
     $this->proceedIfParallelStepsCompleted($state);
 }
 
 private function onInvoiceCreated(InvoiceCreated $event): void
 {
-    $state = $this->sagaStateRepository->findByCorrelationId($event->orderId);
+    $state = $this->sagaRepository->findByCorrelationId($event->orderId);
     $state->updateContext('invoiceCreated', true);
     $state->updateContext('completedSteps', [
         ...$state->context()['completedSteps'] ?? [],
         'invoice_created',
     ]);
-    $this->sagaStateRepository->save($state);
+    $this->sagaRepository->save($state);
 
     $this->proceedIfParallelStepsCompleted($state);
 }
 
-private function proceedIfParallelStepsCompleted(SagaState $state): void
+private function proceedIfParallelStepsCompleted(OrderSaga $state): void
 {
     if ($state->context()['stockReserved'] && $state->context()['invoiceCreated']) {
         $state->transitionTo(OrderSagaStatus::AwaitingShipment);
-        $this->sagaStateRepository->save($state);
+        $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new CreateShipment(
             orderId: $state->correlationId(),
@@ -1371,9 +1487,9 @@ co skutečně proběhlo.
 
 Při paralelních krocích mohou dvě události (`StockReserved` a
 `InvoiceCreated`) dorazit téměř současně a oba handlery se pokusí
-aktualizovat stejný `SagaState` záznam. Bez ochrany hrozí ztráta dat
+aktualizovat stejný `OrderSaga` záznam. Bez ochrany hrozí ztráta dat
 (lost update). Řešením je **optimistické zamykání** – entita
-`SagaState` obsahuje sloupec `version` (viz
+`OrderSaga` obsahuje sloupec `version` (viz
 [sekce 6](#perzistence-stavu)) a při uložení Doctrine ověří, že verze
 nebyla mezitím změněna. Pokud ano, vyhodí
 `OptimisticLockException` a Messenger zprávu automaticky zopakuje.
@@ -1394,55 +1510,10 @@ ke konkrétní objednávce a sledovat celý průběh procesu od začátku do kon
 Více o korelačních identifikátorech najdete v
 [glosáři](/glosar#term-korelacni-id).
 
-:::callout{type="pattern"}
-### SagaLoggingMiddleware {#saga-logging-middleware-heading}
-
-Middleware pro Symfony Messenger, který loguje každou zprávu procházející ságou.
-Zaregistrujte ho v `messenger.yaml` a všechny zprávy se automaticky
-zaznamenají s korelačním ID:
-
-:::code{language="php" filename="src/SharedKernel/Infrastructure/Middleware/SagaLoggingMiddleware.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\SharedKernel\Infrastructure\Middleware;
-
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
-use Symfony\Component\Messenger\Middleware\StackInterface;
-use Symfony\Component\Messenger\Stamp\HandledStamp;
-
-final readonly class SagaLoggingMiddleware implements MiddlewareInterface
-{
-    public function __construct(
-        private LoggerInterface $logger,
-    ) {}
-
-    public function handle(Envelope $envelope, StackInterface $stack): Envelope
-    {
-        $message = $envelope->getMessage();
-        $messageName = (new \ReflectionClass($message))->getShortName();
-
-        $this->logger->info('Saga: zpracovávám zprávu', [
-            'message' => $messageName,
-            'correlationId' => $message->orderId ?? 'unknown',
-        ]);
-
-        $envelope = $stack->next()->handle($envelope, $stack);
-
-        $handledStamp = $envelope->last(HandledStamp::class);
-        $this->logger->info('Saga: zpráva zpracována', [
-            'message' => $messageName,
-            'handler' => $handledStamp?->getHandlerName(),
-        ]);
-
-        return $envelope;
-    }
-}
-:::
-:::
+Technicky se korelace řeší vlastním stampem (např. `CorrelationIdStamp`),
+který sága připojí na envelope při dispatchi a logovací middleware ho čte
+ze stampu místo spoléhání na konkrétní pole zprávy. Envelope tak nese
+korelaci i pro zprávy, které žádné `orderId` nemají.
 
 ### Detekce zaseklých ság {#detekce-zaseklych-heading}
 
@@ -1460,7 +1531,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Command;
 
-use App\Ordering\Application\Saga\SagaStateRepository;
+use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -1471,7 +1542,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class CheckStaleSagasCommand extends Command
 {
     public function __construct(
-        private readonly SagaStateRepositoryInterface $sagaStateRepository,
+        private readonly OrderSagaRepositoryInterface $sagaRepository,
     ) {
         parent::__construct();
     }
@@ -1480,7 +1551,7 @@ final class CheckStaleSagasCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $threshold = new \DateTimeImmutable('-30 minutes');
-        $staleSagas = $this->sagaStateRepository->findStale($threshold);
+        $staleSagas = $this->sagaRepository->findStale($threshold);
 
         if (count($staleSagas) === 0) {
             $io->success('Žádné zaseklé ságy.');
@@ -1542,8 +1613,7 @@ namespace App\Tests\Ordering\Application\Saga;
 
 use App\Ordering\Application\Saga\OrderProcessManager;
 use App\Ordering\Application\Saga\OrderSagaStatus;
-use App\Ordering\Application\Saga\SagaState;
-use App\Ordering\Application\Saga\SagaStateRepository;
+use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Payment\Application\Command\ChargeCustomer;
 use App\Payment\Domain\Event\PaymentFailed;
@@ -1556,7 +1626,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final class OrderProcessManagerTest extends TestCase
 {
     private MessageBusInterface $commandBus;
-    private SagaStateRepository $repository;
+    private OrderSagaRepositoryInterface $repository;
     private OrderProcessManager $saga;
     /** @var list<object> */
     private array $dispatchedCommands = [];
@@ -1565,9 +1635,17 @@ final class OrderProcessManagerTest extends TestCase
     {
         $this->dispatchedCommands = [];
 
+        // Pozor: promoted property nelze deklarovat by-reference,
+        // referenci je nutné navázat v těle konstruktoru.
         $this->commandBus = new class($this->dispatchedCommands) implements MessageBusInterface {
+            /** @var list<object> */
+            private array $commands;
+
             /** @param list<object> $commands */
-            public function __construct(private array &$commands) {}
+            public function __construct(array &$commands)
+            {
+                $this->commands = &$commands;
+            }
 
             public function dispatch(object $message, array $stamps = []): Envelope
             {
@@ -1576,7 +1654,7 @@ final class OrderProcessManagerTest extends TestCase
             }
         };
 
-        $this->repository = new InMemorySagaStateRepository();
+        $this->repository = new InMemoryOrderSagaRepository();
         $this->saga = new OrderProcessManager($this->commandBus, $this->repository);
     }
 
@@ -1628,36 +1706,45 @@ final class OrderProcessManagerTest extends TestCase
 :::
 
 :::callout{type="note"}
-### InMemorySagaStateRepository {#in-memory-repo-heading}
+### InMemoryOrderSagaRepository {#in-memory-repo-heading}
 
 Testovací in-memory implementace repozitáře, kterou používáme místo Doctrine:
 
-:::code{language="php" filename="src/Tests/Ordering/Application/Saga/InMemorySagaStateRepository.php"}
+:::code{language="php" filename="src/Tests/Ordering/Application/Saga/InMemoryOrderSagaRepository.php"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\Tests\Ordering\Application\Saga;
 
-use App\Ordering\Application\Saga\SagaState;
-use App\Ordering\Application\Saga\SagaStateRepositoryInterface;
+use App\Ordering\Application\Saga\OrderSaga;
+use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
 
-final class InMemorySagaStateRepository implements SagaStateRepositoryInterface
+final class InMemoryOrderSagaRepository implements OrderSagaRepositoryInterface
 {
-    /** @var array<string, SagaState> */
+    /** @var array<string, OrderSaga> */
     private array $states = [];
 
-    public function save(SagaState $state): void
+    public function save(OrderSaga $state): void
     {
         $this->states[$state->correlationId()] = $state;
     }
 
-    public function findByCorrelationId(string $correlationId): SagaState
+    public function findByCorrelationId(string $correlationId): OrderSaga
     {
         return $this->states[$correlationId]
             ?? throw new \RuntimeException(
                 sprintf('Saga state not found for "%s"', $correlationId),
             );
+    }
+
+    /** @return list<OrderSaga> */
+    public function findStale(\DateTimeImmutable $olderThan): array
+    {
+        return array_values(array_filter(
+            $this->states,
+            fn (OrderSaga $s): bool => !$s->isTerminated() && $s->updatedAt() < $olderThan,
+        ));
     }
 }
 :::

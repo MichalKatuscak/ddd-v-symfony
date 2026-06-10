@@ -7,7 +7,7 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: "2026-05-04"
+modified: "2026-06-09"
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
@@ -59,7 +59,7 @@ záměrnou změnou.
 
 **Řešení:** Application Service funguje jako explicitní transakční hranice.
 Pokud váš use case vyžaduje změnu dvou agregátů atomicky a nemůžete použít
-[Outbox](/event-sourcing#outbox) + [Sagu](/sagy-a-process-managery), zavolejte
+[Outbox Pattern](/outbox-pattern) + [Sagu](/sagy-a-process-managery), zavolejte
 explicitně `beginTransaction()` / `commit()` v Application Service. Oba repozitáře
 volejte v téže transakci. Toto je **přijatelná výjimka z pravidla jeden agregát =
 jedna transakce** za předpokladu, že oba agregáty leží ve stejném Bounded Context
@@ -113,7 +113,7 @@ final class ConfirmTransferService
 :::callout{type="note"}
 Pokud oba agregáty nesdílejí databázi (nebo jsou v různých Bounded Contexts),
 použijte místo transakce
-[Outbox pattern](/event-sourcing#outbox) nebo Sagu.
+[Outbox Pattern](/outbox-pattern) nebo Sagu.
 Atomická cross-context transakce je architektonický zápach.
 :::
 
@@ -427,7 +427,7 @@ final class OutboxEventListener
 {
     public function onFlush(OnFlushEventArgs $args): void
     {
-        $em  = $args->getEntityManager(); // getObjectManager() odstraněno v ORM 3.x
+        $em  = $args->getObjectManager(); // getEntityManager() bylo v ORM 3.x odstraněno
         $uow = $em->getUnitOfWork();
 
         // Projdeme nové i změněné entity a sebereme doménové události
@@ -435,7 +435,7 @@ final class OutboxEventListener
             if (!$entity instanceof HasDomainEvents) {
                 continue;
             }
-            foreach ($entity->releaseDomainEvents() as $event) {
+            foreach ($entity->releaseEvents() as $event) {
                 $outbox = new OutboxEvent(get_class($event), $this->serializer->normalize($event));
                 $em->persist($outbox);
                 // Outbox entitu musíme ručně přidat do Unit of Work - jsme uvnitř onFlush
@@ -484,7 +484,7 @@ v logu podle ID.
 :::callout{type="pattern"}
 #### PHP: Middleware pro Correlation ID logging {#b2-code-heading}
 
-:::code{language="bash" filename="snippet.sh"}
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/CorrelationIdMiddleware.php"}
 <?php
 
 declare(strict_types=1);
@@ -528,7 +528,7 @@ final class CorrelationIdMiddleware implements MiddlewareInterface
 
 Zaregistrujte middleware v `config/packages/messenger.yaml`:
 
-:::code{language="bash" filename="snippet.sh"}
+:::code{language="yaml" filename="config/packages/messenger.yaml"}
 framework:
     messenger:
         buses:
@@ -552,7 +552,7 @@ databázovou tabulku – pokud klíč existuje, zprávu přeskočí.
 :::callout{type="pattern"}
 #### PHP: IdempotencyMiddleware {#b3-code-heading}
 
-:::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/CorrelationIdStamp.php"}
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/IdempotencyMiddleware.php"}
 <?php
 
 declare(strict_types=1);
@@ -625,7 +625,7 @@ Bezpečné řešení: proveďte zpracování a INSERT do deduplikační tabulky
 **v téže databázové transakci**. Při selhání handleru transakce
 selže celá (klíč se nevloží) a Messenger zprávu zopakuje:
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="php" filename="snippet.php"}
 $this->connection->beginTransaction();
 try {
     // Unique constraint na idempotency_key zabrání duplicitě na DB úrovni
@@ -704,9 +704,10 @@ a bez kontroly, jestli přechod dává smysl. Doména ztrácí pravidla, která 
 
 Explicitní metoda pro každý přechod tento problém zavírá. Ověří, jestli je přechod
 validní, provede změnu stavu a zaregistruje doménovou událost. Tři kroky v jedné
-metodě, žádný setter navenek.
+metodě, žádný setter navenek. Holý setter je typickým projevem anémického modelu –
+jeho obecný rozbor najdete v [Anti-vzorech](/anti-vzory#anemicky-domenovy-model).
 
-:::code{language="php" filename="src/SharedKernel/Infrastructure/Messenger/IdempotencyStamp.php"}
+:::code{language="php" filename="snippet.php"}
 final class Order
 {
     private OrderStatus $status = OrderStatus::Draft;
@@ -753,7 +754,7 @@ od externího systému – v doménových pojmech. Infrastrukturní vrstva imple
 :::callout{type="pattern"}
 #### PHP: Port v doméně + Adapter v infrastruktuře {#c3-code-heading}
 
-:::code{language="php" filename="src/PaymentGateway.php"}
+:::code{language="php" filename="snippet.php"}
 <?php
 
 // Port - v doméně (App\Payment\Domain\Port)
@@ -844,7 +845,7 @@ aby `FormInterface` pronikl do aplikační vrstvy.
 (formulářový objekt), Application Service pak sestaví immutable Command.
 Žádná ze dvou vrstev neví o existenci té druhé.
 
-:::code{language="php" filename="src/PlaceOrderFormData.php"}
+:::code{language="php" filename="snippet.php"}
 // 1. Formulářový objekt - mutable, kompatibilní s frameworkem
 final class PlaceOrderFormData
 {
@@ -953,7 +954,7 @@ který deleguje rozhodnutí na doménovou metodu agregátu. Doménová metoda je
 :::callout{type="pattern"}
 #### PHP: Voter jako tenký adaptér + doménová metoda {#d3-code-heading}
 
-:::code{language="php" filename="src/Order.php"}
+:::code{language="php" filename="snippet.php"}
 <?php
 
 declare(strict_types=1);
@@ -1021,33 +1022,20 @@ a vždy způsobí regression v objednávkovém modulu. Níže je uvedena příč
 
 ### E2. Postupné zavedení – strangler fig pattern {#e2-strangler}
 
-**Problém:** Big-bang rewrite – přepsání celé aplikace do DDD najednou –
-selže ve většině týmů. Trvá déle než odhadnuto, tým ztrácí motivaci, byznys se nedočká
-nových funkcí. A přitom původní aplikace musí dál žít.
+**Problém:** Přepsání celé aplikace do DDD najednou selže ve většině týmů:
+trvá déle, než se odhadovalo, tým ztrácí motivaci a byznys se nedočká nových funkcí.
+Původní aplikace přitom musí dál žít. Proč big-bang rewrite končí špatně, rozebírá
+[varování v kapitole Migrace z CRUD](/migrace-z-crud#big-bang-warning-heading).
 
-**Řešení – strangler fig pattern:** Identifikujte jeden modul
-s nejvyšší změnovou frekvencí (highest-churn), nejčastějšími bugy nebo největší
-obchodní hodnotou. Implementujte právě ten modul v DDD. Zbytek aplikace zůstane
-beze změny.
+**Řešení – strangler fig pattern:** Vyberte jeden modul s nejvyšší změnovou
+frekvencí (highest-churn), nejčastějšími bugy nebo největší obchodní hodnotou
+a implementujte v DDD právě ten. Zbytek aplikace zůstává beze změny – s novým kódem
+komunikuje přes fasádu (ACL vzor) a feature flag umožňuje okamžitý rollback na legacy.
+Po stabilizaci se postup opakuje s dalším modulem, dokud legacy nevyschne.
 
-**Postup v Symfony projektu:**
-
-1. **Identifikujte modul:** `git log --stat | grep "files changed" | sort -rn | head -20`
-   – soubory s nejvíce změnami za posledních 6 měsíců jsou nejlepší kandidáti.
-
-2. **Vytvořte fasádu** přes legacy kód: nový DDD kód volá legacy
-   přes interface (ACL vzor). Legacy kód o novém DDD ví co nejméně.
-
-3. **Feature flag:** Pro každý nový modul zapněte DDD implementaci
-   pomocí feature flagu. Při problémech okamžitě rollback na legacy.
-
-4. **Opakujte** pro další modul, dokud legacy nevyschne.
-
-:::callout{type="note"}
-Strangler fig neznamená, že legacy kód a DDD kód sdílejí databázové tabulky.
-Nový modul má vlastní tabulky; data z legacy se migrují postupně,
-případně se synchronizují přes events nebo cron job.
-:::
+Kompletní postup – analýzu domény, extrakci doménové vrstvy, charakterizační
+testy i realistické odhady náročnosti – popisuje kapitola
+[Migrace z CRUD](/migrace-z-crud).
 
 ### E3. Knowledge silos a bus factor {#e3-silos}
 
