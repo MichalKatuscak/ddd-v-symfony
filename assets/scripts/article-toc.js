@@ -117,6 +117,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
   headings.forEach(function (h) { observer.observe(h); });
 
+  // Pojistka pro skokové přesuny (tažení scrollbarem, skok na #kotvu): velký
+  // okamžitý posun přeskočí pásmo observeru a žádný callback nepřijde.
+  // Throttlovaný scroll listener drží zvýraznění aktuální i v těchto případech.
+  let spyTicking = false;
+  window.addEventListener('scroll', function () {
+    if (spyTicking) return;
+    spyTicking = true;
+    window.requestAnimationFrame(function () {
+      spyTicking = false;
+      updateCurrent();
+    });
+  }, { passive: true });
+
   // Plovoucí TOC (mobil): otevření/zavření panelu se seznamem sekcí.
   const fab = document.querySelector('[data-toc-fab]');
   if (fab) {

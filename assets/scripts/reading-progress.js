@@ -120,7 +120,8 @@
     // Přečtené (≥90 %) kapitoly už nenabízíme jako „pokračovat“.
     if (set.has(last.route) || (last.pct || 0) >= 95) return;
 
-    const link = card.querySelector('[data-resume-link]');
+    // [data-resume-link] bývá samotná karta (<a>), querySelector hledá jen potomky.
+    const link = card.matches('[data-resume-link]') ? card : card.querySelector('[data-resume-link]');
     const titleEl = card.querySelector('[data-resume-title]');
     const numEl = card.querySelector('[data-resume-num]');
     const pctEl = card.querySelector('[data-resume-pct]');

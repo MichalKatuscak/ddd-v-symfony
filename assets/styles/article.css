@@ -243,7 +243,7 @@
 .art-body p, .art-body li { overflow-wrap: break-word; }
 .art-body code, .art-body .ic { overflow-wrap: anywhere; }
 
-/* Čtecí sloupec: souvislý text drží míru ~68 znaků (--measure-prose), zatímco
+/* Čtecí sloupec: souvislý text drží míru 62ch, zatímco
    strukturní bloky (kód, tabulky, diagramy, callouty) využijí plnou šířku .art-body.
    Záměrně asymetrické — delší řádek textu zhoršuje čitelnost, kód naopak prostor ocení. */
 .art-body > p,

@@ -193,7 +193,24 @@
     if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
     else if (e.key === 'Enter') { e.preventDefault(); go(); }
-    else if (e.key === 'Escape') { e.preventDefault(); close(); }
+  });
+
+  // Esc zavře dialog odkudkoli (i z výsledků) a Tab neopustí otevřený dialog:
+  // fokus cykluje mezi inputem a odkazy výsledků.
+  overlay.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusables = [input].concat(Array.from(resultsEl.querySelectorAll('.search-hit')));
+      const i = focusables.indexOf(document.activeElement);
+      e.preventDefault();
+      if (i === -1) { input.focus(); return; }
+      const next = (i + (e.shiftKey ? -1 : 1) + focusables.length) % focusables.length;
+      focusables[next].focus();
+    }
   });
 
   // Klik na výsledek myší = nech proběhnout navigaci (href).
