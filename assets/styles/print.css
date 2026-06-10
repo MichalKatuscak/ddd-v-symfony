@@ -65,7 +65,7 @@
 
   /* ── Typografie světlá ───────────────────────────────────────────────── */
   .art-title, .art-body h2, .art-body h3, .art-body h4,
-  .h-section, .bio-name { color: #000 !important; }
+  .h-section, .bio-name, .faq-item > summary { color: #000 !important; }
   .art-deck, .art-body table td, .callout-body, .faq-answer { color: #2a2d35 !important; }
   .art-meta-k, .art-crumb, .h-num, .term-en, .res-meta { color: #555 !important; }
   .art-body em, .art-body strong, .glossary-entry dt { color: #000 !important; }
@@ -109,8 +109,19 @@
     background: none !important;
     border: 1px solid #ccc !important;
   }
+  /* Bez horizontálního scrollu na papíře: tabulka se vejde na šířku stránky
+     a buňky se zalomí, ať se žádný sloupec neořízne za okrajem. */
+  .art-body table { width: 100% !important; min-width: 0 !important; table-layout: auto !important; }
+  .art-body table th, .art-body table td { white-space: normal !important; overflow-wrap: anywhere; }
+  .art-body table code, .art-body table .ic { white-space: normal !important; }
   .art-body table th { background: #eef0f2 !important; color: #000 !important; border-color: #ccc !important; }
   .art-body table td { border-color: #ddd !important; }
+
+  /* ── FAQ: ukázat odpovědi (details otevírá print.js; CSS je záloha) a skrýt
+     rozbalovací „+/−" glyf, na papíře nemá smysl. ──────────────────────── */
+  details.faq-item:not([open]) > .faq-answer { display: block !important; }
+  .faq-item > summary::after { content: none !important; }
+  .faq-item > summary { cursor: auto; }
 
   .glossary-entry { background: #fff !important; border: 1px solid #c9ccd2 !important; }
   .glossary-entry dd { color: #2a2d35 !important; }
