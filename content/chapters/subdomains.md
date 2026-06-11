@@ -12,7 +12,7 @@ breadcrumb_name: Subdomény
 schema_type: TechArticle
 schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat modelovací úsilí"
 chapter_number: "02"
-category: Strategie
+category: Základy
 deck: "Než vytvoříte první Aggregate, rozhodněte, kde to vůbec dává smysl. Subdomény jsou strategický filtr DDD: tři kategorie, které určují, kolik úsilí, jakou seniority a jaký technologický stack si konkrétní část aplikace zaslouží."
 reading_time: 18
 difficulty: 2
@@ -309,8 +309,8 @@ namespace App\Core\Pricing\Domain\Aggregate;
 use App\Core\Pricing\Domain\Event\PricelistChanged;
 use App\Core\Pricing\Domain\ValueObject\Money;
 use App\Core\Pricing\Domain\ValueObject\PriceRule;
-use App\Shared\Domain\AggregateRoot;
-use App\Shared\Domain\Uuid;
+use App\SharedKernel\Domain\AggregateRoot;
+use Symfony\Component\Uid\Uuid;
 
 final class Pricelist extends AggregateRoot
 {

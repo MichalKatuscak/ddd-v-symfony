@@ -396,7 +396,7 @@ Praktická heuristika:
 - Pokud pravidlo vyžaduje *stav agregátu + doménové pravidlo* („order musí být ve stavu PLACED a ne starší než 24 h“), patří do **Aggregate**.
 - Pokud pravidlo kombinuje obojí, rozdělte ho: část do Voteru, část do Aggregate, a každá vrstva ověří svou polovinu.
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php" highlights="25,26,27,28,29,30,31,32,33,35,36,37,38,39,40,41,42"}
+:::code{language="php" filename="src/Ordering/Domain/Order.php" highlights="23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,40"}
 // src/Ordering/Domain/Order.php
 declare(strict_types=1);
 
@@ -405,13 +405,11 @@ namespace App\Ordering\Domain;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
 use App\Ordering\Domain\Exception\InvalidOrderStateException;
+use App\SharedKernel\Domain\AggregateRoot;
 
-final class Order
+final class Order extends AggregateRoot
 {
     private const CANCELLATION_WINDOW_SECONDS = 86_400; // 24 h
-
-    /** @var list<object> */
-    private array $releasedEvents = [];
 
     public function __construct(
         private readonly OrderId $id,
@@ -441,12 +439,12 @@ final class Order
         }
 
         $this->status = OrderStatus::CANCELLED;
-        $this->releasedEvents[] = new OrderCancelled(
+        $this->record(new OrderCancelled(
             orderId:    $this->id,
             customerId: $this->customerId,
             reason:     $reason,
             cancelledAt: $when,
-        );
+        ));
     }
 
     public function isCancellable(\DateTimeImmutable $now): bool
@@ -465,7 +463,7 @@ Vlastnosti tohoto kódu:
 - **Žádná závislost na Symfony.** Aggregate používá pouze PHP standardní typy a vlastní doménové třídy. Žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze testovat unit testem bez Symfony Kernel.
 - **Doménové výjimky.** `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – *není to autorizační selhání, je to doménový stav*).
 - **Idempotentní pomocná metoda `isCancellable()`.** Voter ani Twig ji nevolají; používá ji UI pro skrytí tlačítka (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita.
-- **Domain Events.** Po úspěšné operaci se do `$releasedEvents` přidá `OrderCancelled`. Aplikační handler je po `repository->save()` publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
+- **Domain Events.** Po úspěšné operaci agregát zaznamená `OrderCancelled` voláním `record()`. Aplikační handler eventy po `repository->save()` vyzvedne přes `releaseEvents()` a publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
 
 Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [sekci 11.04](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a nutné.
 

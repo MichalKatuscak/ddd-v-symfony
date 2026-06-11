@@ -12,7 +12,7 @@ breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
 chapter_number: "04"
-category: Praxe
+category: Základy
 deck: "Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě nejprověřenější workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Průvodce, který v Symfony projektu funguje."
 reading_time: 25
 difficulty: 2
@@ -240,11 +240,10 @@ final readonly class PlaceOrderCommand
 // Domain/Order.php
 namespace App\Ordering\Domain;
 
-final class Order
-{
-    /** @var DomainEvent[] */
-    private array $releasedEvents = [];
+use App\SharedKernel\Domain\AggregateRoot;
 
+final class Order extends AggregateRoot
+{
     private function __construct(
         private readonly OrderId $id,
         private readonly CustomerId $customerId,
@@ -262,7 +261,7 @@ final class Order
             throw new EmptyOrderNotAllowed();
         }
         $order = new self($id, $customer, $items, OrderStatus::Pending);
-        $order->releasedEvents[] = new OrderPlaced($id, $customer);
+        $order->record(new OrderPlaced($id, $customer));
         return $order;
     }
 
@@ -273,15 +272,7 @@ final class Order
             throw new CannotConfirmFromStatus($this->status);
         }
         $this->status = OrderStatus::Confirmed;
-        $this->releasedEvents[] = new OrderConfirmed($this->id);
-    }
-
-    /** @return DomainEvent[] */
-    public function releaseEvents(): array
-    {
-        $events = $this->releasedEvents;
-        $this->releasedEvents = [];
-        return $events;
+        $this->record(new OrderConfirmed($this->id));
     }
 }
 
@@ -610,13 +601,13 @@ final class OrderTest extends TestCase
     public function place_throws_when_no_items(): void
     {
         $this->expectException(EmptyOrderNotAllowed::class);
-        Order::place(OrderId::new(), new CustomerId('c1'), []);
+        Order::place(OrderId::generate(), new CustomerId('c1'), []);
     }
 
     /** @test Inv-2 (workshop 2026-04-29) */
     public function cannot_confirm_after_cancellation(): void
     {
-        $order = Order::place(OrderId::new(), new CustomerId('c1'), [$this->item()]);
+        $order = Order::place(OrderId::generate(), new CustomerId('c1'), [$this->item()]);
         $order->cancel('customer request');
         $this->expectException(CannotConfirmFromStatus::class);
         $order->confirm();
@@ -626,11 +617,11 @@ final class OrderTest extends TestCase
     public function total_equals_sum_of_line_subtotals(): void
     {
         $order = Order::place(
-            OrderId::new(),
+            OrderId::generate(),
             new CustomerId('c1'),
             [$this->item(qty: 2, price: 100), $this->item(qty: 1, price: 50)],
         );
-        self::assertSame(250, $order->total()->amount());
+        self::assertSame(250, $order->total()->amount);
     }
 }
 :::

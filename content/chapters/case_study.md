@@ -12,7 +12,7 @@ breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
 chapter_number: "24"
-category: Praxe
+category: Syntéza
 deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu – celý proces od analýzy domény, identifikace bounded contexts a strategického i taktického designu až po implementaci s využitím DDD principů a CQRS.'
 reading_time: 50
 difficulty: 4
@@ -377,14 +377,14 @@ use App\ProjectManagement\Domain\Event\MemberAdded;
 use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
-use App\Shared\Domain\AggregateRoot;
+use App\SharedKernel\Domain\AggregateRoot;
 // UserId je sdílený v Shared Kernelu (viz sekci 24.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'projects')]
-final class Project extends AggregateRoot
+class Project extends AggregateRoot // ne final – Doctrine proxy z entity dědí
 {
     #[ORM\Id]
     #[ORM\Column(type: 'project_id')]
@@ -526,7 +526,7 @@ use App\TaskManagement\Domain\Event\TaskAssigned;
 use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
-use App\Shared\Domain\AggregateRoot;
+use App\SharedKernel\Domain\AggregateRoot;
 // ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekci 24.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
@@ -770,7 +770,7 @@ use Symfony\Component\Uid\Uuid;
 
 final class ProjectId
 {
-    private readonly string $value;
+    public readonly string $value;
 
     public function __construct(string $value = '')
     {
@@ -779,11 +779,6 @@ final class ProjectId
             throw new \InvalidArgumentException('ProjectId must be a valid UUID');
         }
         $this->value = $resolved;
-    }
-
-    public function value(): string
-    {
-        return $this->value;
     }
 
     public function equals(self $other): bool
@@ -890,7 +885,7 @@ class CreateProjectHandler
 
         $this->projectRepository->save($project);
 
-        return $projectId->value();
+        return $projectId->value;
     }
 }
 :::
@@ -1039,10 +1034,10 @@ class GetProjectsHandler
 
         foreach ($projects as $project) {
             $result[] = new ProjectViewModel(
-                $project->id()->value(),
+                $project->id->value,
                 $project->name(),
                 $project->description(),
-                $project->ownerId()->value(),
+                $project->ownerId->value,
                 count($project->memberIds()),
                 $project->createdAt()
             );
@@ -1183,10 +1178,10 @@ class ProjectListProjection
     {
         $now = new \DateTimeImmutable();
         $view = new ProjectListView();
-        $view->projectId = $event->projectId->value();
+        $view->projectId = $event->projectId->value;
         $view->name = $event->name;
-        $view->ownerId = $event->ownerId->value();
-        $view->memberIds = [$event->ownerId->value()];
+        $view->ownerId = $event->ownerId->value;
+        $view->memberIds = [$event->ownerId->value];
         $view->memberCount = 1;
         $view->taskCount = 0;
         $view->createdAt = $now;
@@ -1197,14 +1192,14 @@ class ProjectListProjection
 
     private function onMemberAdded(MemberAdded $event): void
     {
-        $view = $this->em->find(ProjectListView::class, $event->projectId->value());
+        $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
             // Out-of-order delivery: MemberAdded přišlo dřív než ProjectCreated.
             // Reconciler (sekce 24.06.4) dohledá zaostalou view a obnoví ji
             // ze zdrojových agregátů.
             return;
         }
-        $userId = $event->userId->value();
+        $userId = $event->userId->value;
         if (!in_array($userId, $view->memberIds, strict: true)) {
             $view->memberIds[] = $userId;
             $view->memberCount++;
@@ -1215,11 +1210,11 @@ class ProjectListProjection
 
     private function onMemberRemoved(MemberRemoved $event): void
     {
-        $view = $this->em->find(ProjectListView::class, $event->projectId->value());
+        $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
             return;
         }
-        $userId = $event->userId->value();
+        $userId = $event->userId->value;
         $view->memberIds = array_values(array_filter(
             $view->memberIds,
             static fn(string $id): bool => $id !== $userId
@@ -1231,7 +1226,7 @@ class ProjectListProjection
 
     private function onTaskCreated(TaskCreated $event): void
     {
-        $view = $this->em->find(ProjectListView::class, $event->projectId->value());
+        $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
             return;
         }
@@ -1348,16 +1343,16 @@ final class ReconcileProjectListView extends Command
         $repaired = 0;
 
         foreach ($this->projects->all() as $project) {
-            $view = $this->em->find(ProjectListView::class, $project->id()->value());
+            $view = $this->em->find(ProjectListView::class, $project->id->value);
             $expectedMembers = array_map(
-                static fn($id) => $id->value(),
+                static fn($id) => $id->value,
                 $project->memberIds(),
             );
 
             if ($view === null) {
                 $view = new ProjectListView();
-                $view->projectId  = $project->id()->value();
-                $view->ownerId    = $project->ownerId()->value();
+                $view->projectId  = $project->id->value;
+                $view->ownerId    = $project->ownerId->value;
                 $view->createdAt  = $project->createdAt();
                 $this->em->persist($view);
             }

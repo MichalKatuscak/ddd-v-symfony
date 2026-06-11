@@ -1021,7 +1021,7 @@ Kombinace **Hexagonal + Vertical Slice** je v současných Symfony projektech ro
 
 Žádný styl není univerzálně lepší. Volba závisí na velikosti aplikace, zkušenosti týmu, plánovaném horizontu produktu a tom, kolik se vyplatí investovat do izolace. Následující rozhodovací matice shrnuje typická kritéria a směruje na vhodný styl.
 
-:::diagram{fig="09.7-A" title="Layered vs. Hexagonal vs. Onion vs. Clean - vrstvy a směr závislostí" src="images/diagrams/13_architectural_styles/styles_comparison.svg"}
+:::diagram{fig="09.7-A" title="Layered vs. Hexagonal vs. Onion vs. Clean – vrstvy a směr závislostí" src="images/diagrams/13_architectural_styles/styles_comparison.svg"}
 :::
 
 | Faktor | Layered | Hexagonal | Onion | Clean | Vertical Slice |

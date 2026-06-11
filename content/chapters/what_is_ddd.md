@@ -111,7 +111,7 @@ Glosář nemá ambici být úplný. Zachycuje termíny, u kterých hrozí zámě
 
 ## 01.04 Strategický design (Strategic Design) {#strategic-design}
 
-:::diagram{fig="01.4-A" title="Strategický vs. taktický design - dvě úrovně rozhodování v DDD" src="images/diagrams/1_layers/strategic_vs_tactical.svg"}
+:::diagram{fig="01.4-A" title="Strategický vs. taktický design – dvě úrovně rozhodování v DDD" src="images/diagrams/1_layers/strategic_vs_tactical.svg"}
 :::
 
 Strategický design rozhoduje, jak rozdělit systém na samostatné části a jak tyto části spolu komunikují. Hlavní koncepty:

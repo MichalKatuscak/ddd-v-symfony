@@ -27,7 +27,7 @@ kde jsou unit testy svázané s kontejnerem a kde běh tisíce testů trvá minu
 v sekundách. Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje
 kapitola [Základní koncepty DDD](/zakladni-koncepty).
 
-:::diagram{fig="17.1-A" title="Testovací pyramida pro DDD aplikaci - poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
+:::diagram{fig="17.1-A" title="Testovací pyramida pro DDD aplikaci – poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
 :::
 
 :::callout{type="note"}
@@ -95,7 +95,6 @@ namespace Tests\UserManagement\Domain\ValueObject;
 
 use PHPUnit\Framework\TestCase;
 use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\Exception\InvalidEmailException;
 
 final class EmailTest extends TestCase
 {
@@ -103,27 +102,27 @@ final class EmailTest extends TestCase
     {
         $email = new Email('jan.novak@example.com');
 
-        $this->assertSame('jan.novak@example.com', $email->value());
+        $this->assertSame('jan.novak@example.com', $email->value);
     }
 
     public function testNormalizesToLowercase(): void
     {
-        $email = new Email('Jan.Novak@EXAMPLE.COM');
+        // Normalizaci dělá pojmenovaná factory, ne konstruktor
+        $email = Email::fromUserInput('Jan.Novak@EXAMPLE.COM');
 
-        $this->assertSame('jan.novak@example.com', $email->value());
+        $this->assertSame('jan.novak@example.com', $email->value);
     }
 
     public function testThrowsExceptionForInvalidFormat(): void
     {
-        $this->expectException(InvalidEmailException::class);
-        $this->expectExceptionMessage('Neplatná e-mailová adresa: "not-an-email"');
+        $this->expectException(\InvalidArgumentException::class);
 
         new Email('not-an-email');
     }
 
     public function testThrowsExceptionForEmptyString(): void
     {
-        $this->expectException(InvalidEmailException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
         new Email('');
     }
@@ -150,8 +149,8 @@ final class EmailTest extends TestCase
         // Hodnotové objekty jsou immutabilní - změna vyžaduje vytvoření nové instance
         $different = new Email('petr@example.com');
 
-        $this->assertSame('jan@example.com', $original->value());
-        $this->assertSame('petr@example.com', $different->value());
+        $this->assertSame('jan@example.com', $original->value);
+        $this->assertSame('petr@example.com', $different->value);
         $this->assertFalse($original->equals($different));
     }
 }

@@ -588,7 +588,7 @@ class Order extends AggregateRoot
     #[ORM\Column(type: 'integer')]
     private int $version = 1;
 
-    private function __construct(...) { /* ... */ }
+    private function __construct(/* ... */) { /* ... */ }
 
     // ... factory metody, doménové operace ...
 }

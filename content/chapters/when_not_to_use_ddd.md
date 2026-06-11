@@ -59,13 +59,13 @@ jsou to operace nad daty bez doménových pravidel.
 // -- 6 tříd pro jednu operaci --
 
 final class ArticleTitle {                          // Value Object
-    public function __construct(private string $value) {
+    public function __construct(public readonly string $value) {
         if (strlen($value) === 0) throw new \InvalidArgumentException('...');
     }
-    public function value(): string { return $this->value; }
 }
 
 final class Article {                               // Aggregate Root
+    private string $id;
     private ArticleTitle $title;
     private array $domainEvents = [];
 
@@ -296,12 +296,10 @@ final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agre
 <?php
 // ✅ Správné DDD - agregát chrání invarianty
 
-final class Order
+final class Order extends AggregateRoot
 {
     private OrderId $id;
     private OrderStatus $status;
-    /** @var DomainEvent[] */
-    private array $domainEvents = [];
 
     public function cancel(Clock $clock): void
     {
@@ -313,7 +311,7 @@ final class Order
         }
 
         $this->status = OrderStatus::CANCELLED;
-        $this->domainEvents[] = new OrderCancelled($this->id, $clock->now());
+        $this->record(new OrderCancelled($this->id, $clock->now()));
     }
     // Žádné settery - stav se mění jen přes explicitní doménové operace
 }

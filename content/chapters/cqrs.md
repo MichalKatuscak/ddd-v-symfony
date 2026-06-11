@@ -163,7 +163,7 @@ Pro CQRS je podstatná schopnost definovat **více message busů** – jeden pro
 (command bus) a jeden pro dotazy (query bus). Každý bus může mít vlastní sadu middleware,
 vlastní transport a vlastní strategii zpracování.
 
-:::diagram{fig="12.1-A" title="Symfony Messenger jako CQRS bus" src="images/diagrams/6_cqrs/diagram.svg"}
+:::diagram{fig="12.5-A" title="Symfony Messenger jako CQRS bus" src="images/diagrams/6_cqrs/diagram.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -927,13 +927,13 @@ Eventual consistency je **vlastnost distribuované architektury**, ne bug.
 Následující diagram zachycuje celý datový tok – od zápisu přes asynchronní propagaci
 až po čtení – a zvýrazňuje okno, ve kterém k eventual consistency dochází:
 
-:::diagram{fig="12.2-A" title="Eventual consistency v CQRS toku" src="images/diagrams/6_cqrs/eventual_consistency.svg"}
+:::diagram{fig="12.12-A" title="Eventual consistency v CQRS toku" src="images/diagrams/6_cqrs/eventual_consistency.svg"}
 :::
 
 Konkrétnější časový pohled na to, kdy uživatel vidí 404 navzdory tomu, že command
 proběhl úspěšně, je v následující sekvenci:
 
-:::diagram{fig="12.12-A" title="Okno zastaralosti – kdy GET vrátí 404 po úspěšném POST" src="images/diagrams/6_cqrs/staleness_window.svg"}
+:::diagram{fig="12.12-B" title="Okno zastaralosti – kdy GET vrátí 404 po úspěšném POST" src="images/diagrams/6_cqrs/staleness_window.svg"}
 :::
 
 Existuje několik osvědčených vzorů, jak eventual consistency v UI řešit:
@@ -969,7 +969,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 final class PlaceOrderController extends AbstractController
 {
@@ -988,7 +988,7 @@ final class PlaceOrderController extends AbstractController
         }
 
         // ID generováno na straně klienta - command nemusí vracet hodnotu
-        $orderId = Uuid::uuid4()->toString();
+        $orderId = (string) Uuid::v7();
         $data = $form->getData();
 
         $command = new PlaceOrder(

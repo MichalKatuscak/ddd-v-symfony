@@ -226,7 +226,7 @@ namespace App\Identity\Domain\Event;
 
 use App\Shared\Domain\Event\DomainEvent;
 use DateTimeImmutable;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Událost emitovaná po úspěšné registraci uživatele.
@@ -249,7 +249,7 @@ final class UserRegistered implements DomainEvent
     public static function create(string $userId, string $email, string $fullName): self
     {
         return new self(
-            eventId:    Uuid::uuid4()->toString(),
+            eventId:    (string) Uuid::v7(),
             occurredOn: new DateTimeImmutable('now', new \DateTimeZone('UTC')),
             userId:     $userId,
             email:      $email,

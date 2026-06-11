@@ -384,13 +384,11 @@ declare(strict_types=1);
 namespace App\Ordering\Domain;
 
 use App\Ordering\Domain\Event\OrderPlaced;
+use App\SharedKernel\Domain\AggregateRoot;
 use Symfony\Component\Uid\Ulid;
 
-final class Order
+final class Order extends AggregateRoot
 {
-    /** @var list<object> */
-    private array $releasedEvents = [];
-
     private function __construct(
         public readonly OrderId $id,
         public readonly CustomerId $customerId,
@@ -404,29 +402,20 @@ final class Order
     public static function place(CustomerId $customerId, array $items): self
     {
         $order = new self(
-            id: new OrderId(new Ulid()),
+            id: new OrderId((string) new Ulid()),
             customerId: $customerId,
             items: $items,
         );
 
-        $order->releasedEvents[] = new OrderPlaced(
+        $order->record(new OrderPlaced(
             eventId: new Ulid(),
-            orderId: $order->id->value(),
-            customerId: $customerId->value(),
+            orderId: $order->id->value,
+            customerId: $customerId->value,
             items: array_map(fn (OrderItem $i) => $i->toArray(), $items),
             occurredAt: new \DateTimeImmutable(),
-        );
+        ));
 
         return $order;
-    }
-
-    /** @return list<object> */
-    public function releaseEvents(): array
-    {
-        $events = $this->releasedEvents;
-        $this->releasedEvents = [];
-
-        return $events;
     }
 }
 :::
@@ -1292,7 +1281,7 @@ nový leader → double publish.
 si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure,
 škáluje se lineárně s počtem worker replik.
 
-:::diagram{fig="15.8-A" title="Distributed relay - 4 workery paralelně přes SKIP LOCKED" src="images/diagrams/14_outbox/distributed_relay.svg"}
+:::diagram{fig="15.7-A" title="Distributed relay – 4 workery paralelně přes SKIP LOCKED" src="images/diagrams/14_outbox/distributed_relay.svg"}
 :::
 
 :::callout{type="pattern"}

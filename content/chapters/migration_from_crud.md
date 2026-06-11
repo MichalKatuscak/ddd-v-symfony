@@ -356,17 +356,19 @@ declare(strict_types=1);
 // PO: Doménová entita s vlastními invarianty
 namespace App\UserManagement\Domain\Model;
 
-use App\Shared\Domain\AggregateRoot;
+use App\SharedKernel\Domain\AggregateRoot;
 use App\UserManagement\Domain\Event\UserActivated;
 use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserStatus;
+use App\UserManagement\Domain\ValueObject\VerificationToken;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-final class User extends AggregateRoot
+class User extends AggregateRoot // ne final – Doctrine proxy z entity dědí
 {
     #[ORM\Id]
     #[ORM\Column(type: 'user_id')]
@@ -438,6 +440,8 @@ primitiv objektem, který drží validaci i chování pohromadě.
 <?php
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
+namespace App\Controller;
+
 class UserController {
     public function register(Request $request): Response {
         $email = $request->request->get('email'); // string, nic negarantuje
@@ -447,14 +451,13 @@ class UserController {
 }
 
 // --- Soubor: Email.php ---
-declare(strict_types=1);
 
 // PO: Email jako Value Object – validace je na jednom místě
 namespace App\UserManagement\Domain\ValueObject;
 
 final class Email
 {
-    private readonly string $value;
+    public readonly string $value;
 
     public function __construct(string $value)
     {
@@ -475,11 +478,6 @@ final class Email
         }
 
         $this->value = $normalized;
-    }
-
-    public function value(): string
-    {
-        return $this->value;
     }
 
     public function domain(): string
@@ -574,7 +572,7 @@ final class DoctrineUserRepository implements UserRepository
 
     public function findById(UserId $id): ?User
     {
-        return $this->em->find(User::class, $id->value());
+        return $this->em->find(User::class, $id->value);
     }
 
     public function findByEmail(Email $email): ?User
@@ -1019,7 +1017,7 @@ core doména s vysokou hodnotou), postup je:
 
 **Symptomy:** Aggregate volá Symfony `EventDispatcher` přímo.
 
-1. Aggregate uchová eventy v `private array $releasedEvents`.
+1. Aggregate dědí z `AggregateRoot` a eventy zaznamenává voláním `record($event)`.
 2. Aplikační handler po `repository->save()` volá `$order->releaseEvents()` a publikuje (přes outbox).
 3. Doména ztratí závislost na Symfony EventDispatcheru. Test je čistý.
 4. Souvisí: [Outbox – Aggregate publikuje](/outbox-pattern#aggregate-publishes).

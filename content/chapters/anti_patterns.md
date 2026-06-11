@@ -160,7 +160,7 @@ enum UserStatus: string
 final class VerificationToken
 {
     private function __construct(
-        private readonly string $value,
+        public readonly string $value,
     ) {}
 
     public static function generate(): self
@@ -176,11 +176,6 @@ final class VerificationToken
     public function equals(self $other): bool
     {
         return hash_equals($this->value, $other->value);
-    }
-
-    public function value(): string
-    {
-        return $this->value;
     }
 }
 :::
@@ -201,15 +196,15 @@ use App\UserManagement\Domain\ValueObject\VerificationToken;
 use App\UserManagement\Domain\Event\UserRegisteredEvent;
 use App\UserManagement\Domain\Event\UserActivatedEvent;
 use App\UserManagement\Domain\Event\UserDeactivatedEvent;
+use App\SharedKernel\Domain\AggregateRoot;
 
-class User
+class User extends AggregateRoot
 {
     private readonly UserId $id;
     private readonly Email $email;
     private UserStatus $status;
     private ?VerificationToken $verificationToken;
     private readonly \DateTimeImmutable $createdAt;
-    private array $domainEvents = [];
 
     private function __construct(
         UserId $id,
@@ -227,7 +222,7 @@ class User
     {
         $token = VerificationToken::generate();
         $user = new self($id, $email, $token);
-        $user->domainEvents[] = new UserRegisteredEvent($id, $email);
+        $user->record(new UserRegisteredEvent($id, $email));
         return $user;
     }
 
@@ -241,7 +236,7 @@ class User
         }
         $this->status = UserStatus::ACTIVE;
         $this->verificationToken = null;
-        $this->domainEvents[] = new UserActivatedEvent($this->id);
+        $this->record(new UserActivatedEvent($this->id));
     }
 
     public function deactivate(): void
@@ -250,19 +245,12 @@ class User
             throw new \DomainException('Lze deaktivovat pouze aktivního uživatele.');
         }
         $this->status = UserStatus::INACTIVE;
-        $this->domainEvents[] = new UserDeactivatedEvent($this->id);
+        $this->record(new UserDeactivatedEvent($this->id));
     }
 
     public function id(): UserId { return $this->id; }
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
-
-    public function releaseEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-        return $events;
-    }
 }
 :::
 :::
@@ -358,7 +346,7 @@ use Symfony\Component\Uid\Uuid;
 
 final class Email
 {
-    private readonly string $value;
+    public readonly string $value;
 
     public function __construct(string $value)
     {
@@ -371,7 +359,6 @@ final class Email
         $this->value = $normalized;
     }
 
-    public function value(): string { return $this->value; }
     public function equals(self $other): bool { return $this->value === $other->value; }
     public function __toString(): string { return $this->value; }
 }
@@ -390,8 +377,8 @@ enum Currency: string
 
 final class Money
 {
-    private readonly int $amountInCents; // Celé číslo - žádné problémy s plovoucí desetinnou čárkou
-    private readonly Currency $currency;
+    public readonly int $amountInCents; // Celé číslo - žádné problémy s plovoucí desetinnou čárkou
+    public readonly Currency $currency;
 
     public function __construct(int $amountInCents, Currency $currency)
     {
@@ -414,15 +401,12 @@ final class Money
         }
         return new self($this->amountInCents + $other->amountInCents, $this->currency);
     }
-
-    public function amountInCents(): int { return $this->amountInCents; }
-    public function currency(): Currency { return $this->currency; }
 }
 
 // Silně typované identifikátory - záměna je odhalena typovým systémem
 final class OrderId
 {
-    public function __construct(private readonly string $value)
+    public function __construct(public readonly string $value)
     {
         // Uuid::isValid ze symfony/uid přijímá všechny verze UUID -
         // identifikátory v této knize vznikají přes Uuid::v7(), kterou
@@ -431,14 +415,12 @@ final class OrderId
             throw new \InvalidArgumentException('Neplatný formát UUID pro OrderId.');
         }
     }
-    public function value(): string { return $this->value; }
     public function equals(self $other): bool { return $this->value === $other->value; }
 }
 
 final class UserId
 {
-    public function __construct(private readonly string $value) { /* stejná validace */ }
-    public function value(): string { return $this->value; }
+    public function __construct(public readonly string $value) { /* stejná validace */ }
 }
 
 // Nyní typový systém PHP odhalí záměnu:
@@ -538,6 +520,7 @@ use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\ValueObject\Email;
 use App\OrderManagement\Domain\ValueObject\WishlistId;
 use App\OrderManagement\Domain\Event\OrderPlacedEvent;
+use App\SharedKernel\Domain\AggregateRoot;
 
 // Agregát 1: Customer - pouze identita a kontaktní údaje
 class Customer
@@ -551,7 +534,7 @@ class Customer
 }
 
 // Agregát 2: Order - transakční hranice pro jednu objednávku
-final class Order
+final class Order extends AggregateRoot
 {
     private readonly OrderId $id;
     private readonly CustomerId $customerId; // Pouze reference - ne celý Customer objekt!
@@ -561,7 +544,6 @@ final class Order
     /** @var OrderItem[] */
     private array $items = [];
     private readonly \DateTimeImmutable $placedAt;
-    private array $domainEvents = [];
 
     public function __construct(
         OrderId $id,
@@ -589,7 +571,7 @@ final class Order
             throw new \DomainException('Nelze potvrdit prázdnou objednávku.');
         }
         $this->status = OrderStatus::PLACED;
-        $this->domainEvents[] = new OrderPlacedEvent($this->id, $this->customerId);
+        $this->record(new OrderPlacedEvent($this->id, $this->customerId));
     }
 
     public function totalAmount(): Money
@@ -653,7 +635,7 @@ class DoctrineOrderRepository
              FROM orders o
              JOIN users u ON o.user_id = u.id   -- tabulka patří do UserManagement kontextu!
              WHERE o.customer_id = :id',
-            ['id' => $customerId->value()]
+            ['id' => $customerId->value]
         )->fetchAllAssociative();
     }
 }
@@ -663,6 +645,8 @@ namespace App\Billing\Infrastructure;
 
 class InvoiceGenerator
 {
+    public function __construct(private Connection $db) {}
+
     public function generate(OrderId $orderId): Invoice
     {
         // Opět přímý přístup k tabulce orders z OrderManagement kontextu!
@@ -670,7 +654,7 @@ class InvoiceGenerator
             'SELECT o.total, u.billing_address, u.vat_number
              FROM orders o JOIN users u ON o.user_id = u.id
              WHERE o.id = :id',
-            ['id' => $orderId->value()]
+            ['id' => $orderId->value]
         );
         // ...
     }
@@ -737,7 +721,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
     {
         $response = $this->httpClient->request(
             'GET',
-            "/internal/users/{$customerId->value()}/billing"
+            "/internal/users/{$customerId->value}/billing"
         );
         $data = $response->toArray();
 
@@ -957,7 +941,7 @@ class DoctrineUserRepository implements UserRepositoryInterface
 
     public function findById(UserId $id): ?User
     {
-        return $this->em->find(User::class, $id->value());
+        return $this->em->find(User::class, $id->value);
     }
 }
 
@@ -1000,6 +984,8 @@ class ActivateUserHandler
 // SPRÁVNĚ: Tenký Symfony kontroler
 class UserController extends AbstractController
 {
+    public function __construct(private readonly MessageBusInterface $commandBus) {}
+
     public function activate(Request $request, string $userId): Response
     {
         $this->commandBus->dispatch(new ActivateUserCommand(

@@ -188,7 +188,7 @@ final class MoneyType extends Type
             return null;
         }
         /** @var Money $value */
-        return $value->amountInCents() . '_' . $value->currency()->code();
+        return $value->amountInCents . '_' . $value->currency->code;
     }
 }
 :::
@@ -267,7 +267,7 @@ use Symfony\Component\Uid\Uuid;
 
 final class OrderId
 {
-    private function __construct(private readonly string $value) {}
+    private function __construct(public readonly string $value) {}
 
     public static function generate(): self
     {
@@ -280,11 +280,6 @@ final class OrderId
             throw new \InvalidArgumentException("Invalid OrderId: {$value}");
         }
         return new self($value);
-    }
-
-    public function toString(): string
-    {
-        return $this->value;
     }
 
     public function equals(self $other): bool
@@ -776,9 +771,9 @@ final class StripePaymentGateway implements PaymentGateway
     {
         try {
             $charge = $this->stripe->charges->create([
-                'amount'   => $amount->amountInCents(),
-                'currency' => strtolower($amount->currency()->code()),
-                'source'   => $token->value(),
+                'amount'   => $amount->amountInCents,
+                'currency' => strtolower($amount->currency->code),
+                'source'   => $token->value,
             ]);
             return PaymentId::fromString($charge->id);
         } catch (\Stripe\Exception\CardException $e) {
@@ -789,8 +784,8 @@ final class StripePaymentGateway implements PaymentGateway
     public function refund(PaymentId $id, Money $amount): void
     {
         $this->stripe->refunds->create([
-            'charge' => $id->toString(),
-            'amount' => $amount->amountInCents(),
+            'charge' => $id->value,
+            'amount' => $amount->amountInCents,
         ]);
     }
 }
@@ -933,7 +928,7 @@ final class PlaceOrderProcessor implements ProcessorInterface
 
         $this->commandBus->dispatch($command);
 
-        return new OrderResponse($orderId->toString());
+        return new OrderResponse($orderId->value);
     }
 }
 :::

@@ -12,7 +12,7 @@ breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
 chapter_number: "23"
-category: Praxe
+category: Syntéza
 deck: "Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury."
 reading_time: 12
 difficulty: 3
@@ -189,7 +189,7 @@ final class CreatePostHandler
 
         $this->posts->save($post);
 
-        return $post->id->value();
+        return $post->id->value;
     }
 }
 :::
@@ -247,11 +247,10 @@ final class User extends AggregateRoot implements UserInterface, PasswordAuthent
     public function changeEmail(Email $newEmail): void { /* invariant: nový != starý */ }
     public function changeName(string $newName): void { /* ... */ }
 
-    // UserInterface
+    // UserInterface – eraseCredentials() Symfony 8 z rozhraní odstranilo
     public function getRoles(): array { return ['ROLE_USER']; }
-    public function getUserIdentifier(): string { return $this->email->value(); }
-    public function getPassword(): ?string { return $this->password->hash(); }
-    public function eraseCredentials(): void {}
+    public function getUserIdentifier(): string { return $this->email->value; }
+    public function getPassword(): ?string { return $this->password->hash; }
 }
 :::
 

@@ -109,7 +109,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-final class Order
+class Order // ne final – Doctrine proxy z entity dědí
 {
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36, unique: true)]
@@ -281,7 +281,7 @@ final class DoctrineOrderRepository
     {
         // Tato metoda vrátí Order, jehož kolekce items zůstane neinicializovaná,
         // dokud k ní explicitně nepřistoupíme.
-        return $this->em->find(Order::class, $id->value());
+        return $this->em->find(Order::class, $id->value);
     }
 
     /**
@@ -294,7 +294,7 @@ final class DoctrineOrderRepository
              JOIN FETCH o.items i
              WHERE o.id = :id'
         )
-            ->setParameter('id', $id->value())
+            ->setParameter('id', $id->value)
             ->getOneOrNullResult();
     }
 }
@@ -502,7 +502,7 @@ use Symfony\Component\Uid\Uuid;
 final class OrderId
 {
     private function __construct(
-        private readonly string $value
+        public readonly string $value
     ) {}
 
     public static function generate(): self
@@ -520,11 +520,6 @@ final class OrderId
         return new self($value);
     }
 
-    public function value(): string
-    {
-        return $this->value;
-    }
-
     public function equals(self $other): bool
     {
         return $this->value === $other->value;
@@ -535,7 +530,7 @@ final class OrderId
 final class UserId
 {
     private function __construct(
-        private readonly string $value
+        public readonly string $value
     ) {}
 
     public static function generate(): self
@@ -547,11 +542,6 @@ final class UserId
     public static function fromString(string $value): self
     {
         return new self($value);
-    }
-
-    public function value(): string
-    {
-        return $this->value;
     }
 }
 :::
@@ -576,7 +566,7 @@ use Symfony\Component\Uid\Ulid;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-final class Order
+class Order // ne final – Doctrine proxy z entity dědí
 {
     #[ORM\Id]
     // Symfony Bridge registruje 'ulid' typ - ukládá jako BINARY(16) nebo UUID v PostgreSQL.
@@ -589,7 +579,7 @@ final class Order
 
     public function __construct(OrderId $id, string $orderNumber)
     {
-        $this->id          = Ulid::fromString($id->value());
+        $this->id          = Ulid::fromString($id->value);
         $this->orderNumber = $orderNumber;
     }
 
@@ -819,7 +809,7 @@ final class InvalidateUserCacheOnEmailChanged
     public function __invoke(UserEmailChanged $event): void
     {
         // Invalidace cachovaného read modelu - klíč z příkladu výše
-        $this->cache->deleteItem('user_profile_' . $event->userId->value());
+        $this->cache->deleteItem('user_profile_' . $event->userId->value);
     }
 }
 :::

@@ -513,7 +513,7 @@ final class EligibleForFreeShipping extends CompositeSpecification implements Qu
     public function asDoctrineCriteria(QueryBuilder $qb, string $alias): void
     {
         $qb->andWhere(sprintf('%s.totalAmount >= :threshold', $alias))
-           ->setParameter('threshold', $this->threshold->amount());
+           ->setParameter('threshold', $this->threshold->amount);
     }
 }
 :::

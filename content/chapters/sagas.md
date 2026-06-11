@@ -181,7 +181,7 @@ koordinátor**. Každý Bounded Context reaguje na události publikované jiným
 kontexty a na jejich základě provádí svůj krok procesu. Žádná služba neví o celém
 toku – každá zná pouze svou část a ví, na které události má reagovat.
 
-:::diagram{fig="14.3-A" title="Choreografie vs. orchestrace - kdo koordinuje ságu" src="images/diagrams/8_sagas/choreography_vs_orchestration.svg"}
+:::diagram{fig="14.3-A" title="Choreografie vs. orchestrace – kdo koordinuje ságu" src="images/diagrams/8_sagas/choreography_vs_orchestration.svg"}
 :::
 
 V našem e-shop scénáři probíhá choreografická sága následovně: kontext Ordering
@@ -384,7 +384,7 @@ třídy. Na jednom místě je viditelný kompletní tok od `OrderPlaced` po `Con
 Následující diagram zobrazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
 přechody, červené selhání a oranžová cesta vede přes kompenzaci:
 
-:::diagram{fig="14.1-A" title="Stavový automat OrderProcessManager" src="images/diagrams/8_sagas/saga_state_machine.svg"}
+:::diagram{fig="14.5-A" title="Stavový automat OrderProcessManager" src="images/diagrams/8_sagas/saga_state_machine.svg"}
 :::
 
 :::callout{type="pattern"}
@@ -1283,7 +1283,7 @@ vrátit systém do konzistentního stavu provedením kompenzačních akcí v
 `RefundCustomer`, který vytvoří novou transakci (refund). Každá kompenzační
 akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
 
-:::diagram{fig="14.9-A" title="Kompenzační flow - rollback ságy v opačném pořadí" src="images/diagrams/8_sagas/compensation_flow.svg"}
+:::diagram{fig="14.9-A" title="Kompenzační flow – rollback ságy v opačném pořadí" src="images/diagrams/8_sagas/compensation_flow.svg"}
 :::
 
 :::callout{type="pattern"}
