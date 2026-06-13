@@ -401,6 +401,15 @@ section > h4:first-child { margin-top: 0; }
   letter-spacing: var(--tracking-mono);
   font-weight: 400;
 }
+/* Na mobilu číslo sekce na vlastní řádek nad titulkem. Místo flexu blokový
+   tok: číslo je blok (vlastní řádek), kotva je inline a plyne za textem
+   titulku. Tím kotva drží na konci posledního řádku titulku a nespadne sama
+   na samostatný řádek (což by u dlouhých titulků flex dělal). */
+@media (max-width: 540px) {
+  .h-section { display: block; }
+  .h-section .h-num { display: block; margin-bottom: var(--s-1); }
+  .h-section .h-anchor { display: inline; margin-left: var(--s-2); }
+}
 .art-body h3 {
   font-size: var(--t-lg);
   font-weight: 600;
