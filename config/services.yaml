@@ -36,3 +36,7 @@ services:
             $projectDir: '%kernel.project_dir%'
         tags:
             - { name: routing.loader }
+
+    App\Twig\ChaptersExtension:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
