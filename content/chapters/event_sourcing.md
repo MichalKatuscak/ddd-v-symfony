@@ -179,7 +179,7 @@ use DateTimeImmutable;
  */
 interface DomainEvent
 {
-    /** Unikátní identifikátor události (UUID v4). */
+    /** Unikátní identifikátor události (UUID v7). */
     public function eventId(): string;
 
     /** Čas vzniku události - vždy UTC. */
@@ -354,7 +354,7 @@ nastala. Záznamy se **nikdy nepřepisují ani nemažou**.
 :::code{language="sql" filename="migrations/snippet.sql"}
 CREATE TABLE event_store (
     id            BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    event_id      CHAR(36)         NOT NULL COMMENT 'UUID v4 události - globálně unikátní',
+    event_id      CHAR(36)         NOT NULL COMMENT 'UUID v7 události - globálně unikátní',
     aggregate_id  CHAR(36)         NOT NULL COMMENT 'UUID agregátu (vlastníka streamu)',
     aggregate_type VARCHAR(255)    NOT NULL COMMENT 'FQCN nebo slug agregátu, napr. ordering.order',
     event_type    VARCHAR(255)     NOT NULL COMMENT 'Typ události, napr. ordering.order_placed',

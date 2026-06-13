@@ -247,7 +247,8 @@ Aby autoload fungoval, musí `composer.json` deklarovat odpovídající PSR-4 ma
             "App\\Core\\": "src/Core/",
             "App\\Supporting\\": "src/Supporting/",
             "App\\Generic\\": "src/Generic/",
-            "App\\Shared\\": "src/Shared/"
+            "App\\Shared\\": "src/Shared/",
+            "App\\SharedKernel\\": "src/SharedKernel/"
         }
     },
     "autoload-dev": {

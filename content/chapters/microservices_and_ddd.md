@@ -740,7 +740,7 @@ final readonly class OrderPlacedReceivedHandler
     public function __invoke(OrderPlacedReceived $event): void
     {
         // Idempotence – pokud už jsme tento eventId zpracovali, no-op.
-        // Detail v outbox_pattern#inbox-idempotency
+        // Detail v /outbox-pattern#inbox
         if ($this->inbox->wasProcessed($event->eventId)) {
             return;
         }

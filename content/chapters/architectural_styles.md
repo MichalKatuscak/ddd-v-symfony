@@ -961,7 +961,7 @@ src/
 └── Shared/Domain/Exception/DomainException.php
 :::
 
-Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje soudržnost uvnitř funkce [[7]](https://www.youtube.com/watch?v=SUiWfhAhgQw). Zároveň zachovává principy DDD – respektuje Bounded Contexts a sdílený doménový model.
+Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje soudržnost uvnitř funkce [[6]](https://www.jimmybogard.com/vertical-slice-architecture/). Zároveň zachovává principy DDD – respektuje Bounded Contexts a sdílený doménový model.
 
 :::callout{type="note"}
 ### Konvence struktury v této knize {#konvence-heading}
@@ -991,7 +991,7 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 | **Testovatelnost** | Vyžaduje více mocků (vrstvy mezi sebou) | Méně mocků, závislosti jsou lokální |
 | **Škálovatelnost na microservices** | Vyžaduje přeorganizování všech vrstev | Feature lze přesunout jako celek |
 | **Pochopení na začátku** | Jednodušší (tradičnější) | Vyžaduje pochopení slice jako jednotky |
-| **Vhodnost pro CQRS** | CQRS vyžaduje dodatečnou práci | Přirozeně podporuje CQRS [[8]](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
+| **Vhodnost pro CQRS** | CQRS vyžaduje dodatečnou práci | Přirozeně podporuje CQRS [[10]](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
 
 ### Kdy zvolit který přístup {#kdy-vs}
 
@@ -1282,3 +1282,4 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 7. Vaughn Vernon – [*Implementing Domain-Driven Design*](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577) (2013). Praktický průvodce DDD s ukázkami architektonických stylů.
 8. Herberto Graça – [*DDD, Hexagonal, Onion, Clean, CQRS, … How I put it all together*](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/) (2017). Hybridní pohled na kombinaci stylů.
 9. Martin Fowler – [*Anemic Domain Model*](https://martinfowler.com/bliki/AnemicDomainModel.html) (2003). Klasický článek popisující anti-vzor anémického modelu.
+10. Microsoft – [*Apply simplified CQRS and DDD patterns in a microservice*](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) (.NET microservices architecture guide). Jak feature-orientovaná struktura přirozeně podporuje CQRS.

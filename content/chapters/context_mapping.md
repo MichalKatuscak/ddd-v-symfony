@@ -453,7 +453,7 @@ final class LegacyBillingTranslator
         return new InvoicePaidEvent(
             invoiceId: InvoiceId::fromLegacy($r->invoiceNumber),
             paidAt:    new \DateTimeImmutable($r->paidAtIso),
-            amount:    Money::ofCents($r->amountCents, Currency::EUR),
+            amount:    new Money($r->amountCents, Currency::EUR),
         );
     }
 }

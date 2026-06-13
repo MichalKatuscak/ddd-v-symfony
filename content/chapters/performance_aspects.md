@@ -1169,6 +1169,7 @@ final class QueryCountingMiddleware implements Middleware
                     public function rollBack(): void { $this->inner->rollBack(); }
                     public function getNativeConnection(): mixed { return $this->inner->getNativeConnection(); }
                     public function getServerVersion(): string { return $this->inner->getServerVersion(); }
+                    public function quote(string $value): string { return $this->inner->quote($value); }
                 };
             }
         };

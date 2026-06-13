@@ -185,7 +185,7 @@ Na taktické úrovni implementace pokrývá tyto DDD vzory. Základ tvoří enti
 - **Repositories** – zapouzdřují přístup k persistenci agregátů, takže doménový kód o databázi neví (ProjectRepository, TaskRepository).
 - **Domain Services** – nesou doménovou logiku, která nepatří do žádné entity ani hodnotového objektu (např. TaskAssignmentService).
 
-Struktura adresářů odráží oba designy zároveň. Každý bounded context má vlastní doménovou vrstvu, infrastrukturu i feature slice; sdílené komponenty žijí v `Shared/`:
+Struktura adresářů odráží oba designy zároveň. Každý bounded context má vlastní doménovou vrstvu, infrastrukturu i feature slice; sdílené komponenty žijí v `SharedKernel/`:
 
 :::code{language="bash" filename="snippet.sh"}
 src/
@@ -326,8 +326,9 @@ src/
 │       │   └── RecordActivityHandler.php  # Handler příkazu
 │       └── Controller/        # Kontrolery
 │           └── ActivityController.php  # Kontroler pro aktivity
-└── Shared/                    # Sdílené komponenty
+└── SharedKernel/              # Sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
+    │   ├── AggregateRoot.php  # Bázová třída agregátu (record/releaseEvents)
     │   ├── Exception/         # Výjimky
     │   │   └── DomainException.php  # Základní doménová výjimka
     │   └── Bus/               # Rozhraní pro message bus
