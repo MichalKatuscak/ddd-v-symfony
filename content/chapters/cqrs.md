@@ -821,12 +821,12 @@ final class OrderDashboardProjector
              ON DUPLICATE KEY UPDATE
                 status = VALUES(status), updated_at = VALUES(updated_at)',
             [
-                'orderId'      => $event->orderId(),
-                'customerName' => $event->customerName(),
-                'totalAmount'  => $event->totalAmount(),
+                'orderId'      => $event->orderId,
+                'customerName' => $event->customerName,
+                'totalAmount'  => $event->totalAmount,
                 'status'       => 'placed',
-                'placedAt'     => $event->occurredOn()->format('Y-m-d H:i:s'),
-                'updatedAt'    => $event->occurredOn()->format('Y-m-d H:i:s'),
+                'placedAt'     => $event->occurredAt->format('Y-m-d H:i:s'),
+                'updatedAt'    => $event->occurredAt->format('Y-m-d H:i:s'),
             ],
         );
     }
@@ -840,10 +840,10 @@ final class OrderDashboardProjector
                     updated_at = :updatedAt
               WHERE order_id = :orderId',
             [
-                'orderId'        => $event->orderId(),
+                'orderId'        => $event->orderId,
                 'status'         => 'shipped',
-                'trackingNumber' => $event->trackingNumber(),
-                'updatedAt'      => $event->occurredOn()->format('Y-m-d H:i:s'),
+                'trackingNumber' => $event->trackingNumber,
+                'updatedAt'      => $event->occurredAt->format('Y-m-d H:i:s'),
             ],
         );
     }
@@ -855,9 +855,9 @@ final class OrderDashboardProjector
                 SET status = :status, updated_at = :updatedAt
               WHERE order_id = :orderId',
             [
-                'orderId'   => $event->orderId(),
+                'orderId'   => $event->orderId,
                 'status'    => 'cancelled',
-                'updatedAt' => $event->occurredOn()->format('Y-m-d H:i:s'),
+                'updatedAt' => $event->occurredAt->format('Y-m-d H:i:s'),
             ],
         );
     }

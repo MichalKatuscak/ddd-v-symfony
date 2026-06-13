@@ -305,7 +305,8 @@ final class DoctrineOrderRepository implements OrderRepository
     {
         $orm = $this->mapper->toOrm($order);
         $this->em->persist($orm);
-        $this->em->flush();
+        // flush a commit řídí doctrine_transaction middleware command busu;
+        // repozitář transakci neotevírá ani nevlastní
     }
 
     /**

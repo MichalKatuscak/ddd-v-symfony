@@ -443,9 +443,9 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $placedEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
 
         // Ověření dat události
-        $this->assertTrue($customerId->equals($placedEvent->customerId()));
-        $this->assertEquals(new Money(75000, Currency::CZK), $placedEvent->total());
-        $this->assertNotNull($placedEvent->occurredOn());
+        $this->assertTrue($customerId->equals($placedEvent->customerId));
+        $this->assertEquals(new Money(75000, Currency::CZK), $placedEvent->total);
+        $this->assertNotNull($placedEvent->occurredAt);
     }
 
     public function testNoOrderPlacedEventWhenOrderNotPlaced(): void

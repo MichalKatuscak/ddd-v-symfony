@@ -162,7 +162,7 @@ i přísnější požadavky na jejich tvar:
 - **Dostatečná granularita dat** – Událost musí obsahovat veškerá data potřebná k tomu, aby z ní bylo možné rekonstruovat stav, aniž by byl nutný přístup k externím zdrojům.
 
 :::callout{type="pattern"}
-### PHP: Interface DomainEvent a konkrétní třída UserRegistered {#domain-event-php-heading}
+### PHP: Bázová třída DomainEvent a konkrétní třída UserRegistered {#domain-event-php-heading}
 
 :::code{language="php" filename="src/Shared/Domain/Event/DomainEvent.php"}
 <?php
@@ -174,37 +174,40 @@ namespace App\Shared\Domain\Event;
 use DateTimeImmutable;
 
 /**
- * Společný interface pro všechny doménové události.
- * Všechny implementace musí být immutabilní value objekty.
+ * Společná bázová třída pro doménové události. Identita a čas jsou
+ * public readonly vlastnosti (přímý přístup `$event->eventId`,
+ * `$event->occurredAt`); serializaci do Event Store a zpět řeší metody.
+ * Všechny potomky jsou immutabilní value objekty.
  */
-interface DomainEvent
+abstract class DomainEvent
 {
-    /** Unikátní identifikátor události (UUID v7). */
-    public function eventId(): string;
-
-    /** Čas vzniku události - vždy UTC. */
-    public function occurredOn(): DateTimeImmutable;
+    public function __construct(
+        /** Unikátní identifikátor události (UUID v7). */
+        public readonly string $eventId,
+        /** Čas vzniku události - vždy UTC. */
+        public readonly DateTimeImmutable $occurredAt,
+    ) {}
 
     /**
      * Název události sloužící k jejímu uložení a vyhledání v Event Store.
      * Konvence: FQCN nebo krátký slug ve tvaru "user.registered".
      */
-    public function eventType(): string;
+    abstract public function eventType(): string;
 
     /**
      * Verze schématu payloadu - klíčová pro upcasting starých událostí.
      * Nové verze události inkrementují toto číslo.
      */
-    public function schemaVersion(): int;
+    abstract public function schemaVersion(): int;
 
     /**
      * Serializace do pole pro uložení do Event Store.
      * Musí obsahovat všechna data potřebná k rekonstrukci stavu
-     * VČETNĚ eventId a occurredOn - identita události je součástí payloadu.
+     * VČETNĚ eventId a occurredAt - identita události je součástí payloadu.
      *
      * @return array<string, mixed>
      */
-    public function toPayload(): array;
+    abstract public function toPayload(): array;
 
     /**
      * Rekonstrukce události z payloadu načteného z Event Store.
@@ -212,7 +215,7 @@ interface DomainEvent
      *
      * @param array<string, mixed> $payload
      */
-    public static function fromPayload(array $payload): static;
+    abstract public static function fromPayload(array $payload): static;
 }
 :::
 *src/Shared/Domain/Event/DomainEvent.php*
@@ -232,15 +235,17 @@ use Symfony\Component\Uid\Uuid;
  * Událost emitovaná po úspěšné registraci uživatele.
  * Immutabilní - všechny properties jsou readonly.
  */
-final class UserRegistered implements DomainEvent
+final class UserRegistered extends DomainEvent
 {
     private function __construct(
-        private readonly string $eventId,
-        private readonly DateTimeImmutable $occurredOn,
-        private readonly string $userId,
-        private readonly string $email,
-        private readonly string $fullName,
-    ) {}
+        string $eventId,
+        DateTimeImmutable $occurredAt,
+        public readonly string $userId,
+        public readonly string $email,
+        public readonly string $fullName,
+    ) {
+        parent::__construct($eventId, $occurredAt);
+    }
 
     /**
      * Named constructor pro PRVNÍ vytvoření události v doménovém kódu.
@@ -250,7 +255,7 @@ final class UserRegistered implements DomainEvent
     {
         return new self(
             eventId:    (string) Uuid::v7(),
-            occurredOn: new DateTimeImmutable('now', new \DateTimeZone('UTC')),
+            occurredAt: new DateTimeImmutable('now', new \DateTimeZone('UTC')),
             userId:     $userId,
             email:      $email,
             fullName:   $fullName,
@@ -269,21 +274,11 @@ final class UserRegistered implements DomainEvent
             eventId:    $payload['eventId'],
             // Payload nenese offset, proto UTC uvádíme explicitně -
             // jinak by čas převzal default timezone serveru.
-            occurredOn: new DateTimeImmutable($payload['occurredOn'], new \DateTimeZone('UTC')),
+            occurredAt: new DateTimeImmutable($payload['occurredAt'], new \DateTimeZone('UTC')),
             userId:     $payload['userId'],
             email:      $payload['email'],
             fullName:   $payload['fullName'],
         );
-    }
-
-    public function eventId(): string
-    {
-        return $this->eventId;
-    }
-
-    public function occurredOn(): DateTimeImmutable
-    {
-        return $this->occurredOn;
     }
 
     public function eventType(): string
@@ -301,25 +296,19 @@ final class UserRegistered implements DomainEvent
     {
         return [
             'eventId'    => $this->eventId,
-            'occurredOn' => $this->occurredOn->format('Y-m-d H:i:s.u'), // vždy UTC (viz create())
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s.u'), // vždy UTC (viz create())
             'userId'     => $this->userId,
             'email'      => $this->email,
             'fullName'   => $this->fullName,
         ];
     }
-
-    // --- Gettery (pro použití v aplikační vrstvě) ---
-
-    public function userId(): string  { return $this->userId; }
-    public function email(): string   { return $this->email; }
-    public function fullName(): string { return $this->fullName; }
 }
 :::
 *src/Identity/Domain/Event/UserRegistered.php*
 :::
 
 Na rozdělení `create()` / `fromPayload()` stojí celá idempotence systému. Kdyby konstruktor
-generoval `eventId` a `occurredOn` při každém vytvoření instance, dostala by tatáž uložená
+generoval `eventId` a `occurredAt` při každém vytvoření instance, dostala by tatáž uložená
 událost po deserializaci nové UUID a nový čas. Tracking tabulka zpracovaných událostí by
 duplicitní doručení nepoznala a rebuild projekcí by pracoval s jinými časy, než jaké platily
 při zápisu. Identita události proto vzniká právě jednou – v `create()` – a payload ji nese
@@ -473,7 +462,7 @@ final class DoctrineEventStore implements EventStore
                 $version++;
 
                 $this->connection->insert('event_store', [
-                    'event_id'       => $event->eventId(),
+                    'event_id'       => $event->eventId,
                     'aggregate_id'   => $aggregateId,
                     'aggregate_type' => $aggregateType,
                     'event_type'     => $event->eventType(),
@@ -481,7 +470,7 @@ final class DoctrineEventStore implements EventStore
                     'metadata'       => '{}',
                     'schema_version' => $event->schemaVersion(),
                     'version'        => $version,
-                    'occurred_on'    => $event->occurredOn()->format('Y-m-d H:i:s.u'),
+                    'occurred_on'    => $event->occurredAt->format('Y-m-d H:i:s.u'),
                 ]);
             }
 
@@ -735,15 +724,15 @@ final class Order extends EventSourcedAggregate
 
     protected function applyOrderCreated(OrderCreated $event): void
     {
-        $this->orderId    = $event->orderId();
-        $this->customerId = $event->customerId();
+        $this->orderId    = $event->orderId;
+        $this->customerId = $event->customerId;
         $this->items      = [];
         $this->status     = OrderStatus::Draft;
     }
 
     protected function applyOrderItemAdded(OrderItemAdded $event): void
     {
-        $this->items[] = $event->item();
+        $this->items[] = $event->item;
     }
 
     protected function applyOrderConfirmed(OrderConfirmed $event): void
@@ -754,7 +743,7 @@ final class Order extends EventSourcedAggregate
     protected function applyOrderShipped(OrderShipped $event): void
     {
         $this->status         = OrderStatus::Shipped;
-        $this->trackingNumber = $event->trackingNumber();
+        $this->trackingNumber = $event->trackingNumber;
     }
 
     // Gettery pro aplikační vrstvu
@@ -884,12 +873,12 @@ final class OrderSummaryProjector
     public function __invoke(OrderCreated $event): void
     {
         $this->connection->insert('order_summary', [
-            'order_id'      => $event->orderId(),
-            'customer_id'   => $event->customerId(),
+            'order_id'      => $event->orderId,
+            'customer_id'   => $event->customerId,
             'status'        => 'draft',
             'item_count'    => 0,
             'total_amount'  => 0,
-            'placed_at'     => $event->occurredOn()->format('Y-m-d H:i:s'),
+            'placed_at'     => $event->occurredAt->format('Y-m-d H:i:s'),
             'shipped_at'    => null,
             'tracking_no'   => null,
         ]);
@@ -903,7 +892,7 @@ final class OrderSummaryProjector
                 SET item_count   = item_count + 1,
                     total_amount = total_amount + :price
               WHERE order_id = :orderId',
-            ['price' => $event->item()->unitPrice(), 'orderId' => $event->orderId()],
+            ['price' => $event->item->unitPrice(), 'orderId' => $event->orderId],
         );
     }
 
@@ -912,7 +901,7 @@ final class OrderSummaryProjector
     {
         $this->connection->executeStatement(
             'UPDATE order_summary SET status = :status WHERE order_id = :orderId',
-            ['status' => 'confirmed', 'orderId' => $event->orderId()],
+            ['status' => 'confirmed', 'orderId' => $event->orderId],
         );
     }
 
@@ -927,9 +916,9 @@ final class OrderSummaryProjector
               WHERE order_id = :orderId',
             [
                 'status'     => 'shipped',
-                'shippedAt'  => $event->occurredOn()->format('Y-m-d H:i:s'),
-                'trackingNo' => $event->trackingNumber(),
-                'orderId'    => $event->orderId(),
+                'shippedAt'  => $event->occurredAt->format('Y-m-d H:i:s'),
+                'trackingNo' => $event->trackingNumber,
+                'orderId'    => $event->orderId,
             ],
         );
     }
@@ -1064,7 +1053,7 @@ final class IdempotentOrderProjector
         $affected = $this->connection->executeStatement(
             'INSERT IGNORE INTO projection_checkpoint (event_id, projection_name, processed_at)
              VALUES (:eventId, :projection, NOW(6))',
-            ['eventId' => $event->eventId(), 'projection' => 'order_summary'],
+            ['eventId' => $event->eventId, 'projection' => 'order_summary'],
         );
 
         if ($affected === 0) {
@@ -1073,12 +1062,12 @@ final class IdempotentOrderProjector
 
         // Vlastní projekční logika
         $this->connection->insert('order_summary', [
-            'order_id'     => $event->orderId(),
-            'customer_id'  => $event->customerId(),
+            'order_id'     => $event->orderId,
+            'customer_id'  => $event->customerId,
             'status'       => 'draft',
             'item_count'   => 0,
             'total_amount' => 0,
-            'placed_at'    => $event->occurredOn()->format('Y-m-d H:i:s'),
+            'placed_at'    => $event->occurredAt->format('Y-m-d H:i:s'),
         ]);
     }
 }

@@ -554,25 +554,20 @@ use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
 
 final class DoctrineUserRepository implements UserRepository
 {
     public function __construct(
         private readonly EntityManagerInterface $em,
-        private readonly EventDispatcherInterface $eventDispatcher,
     ) {}
 
     public function save(User $user): void
     {
+        // Jen persist. Flush a commit vlastní doctrine_transaction middleware
+        // command busu – repozitář transakci neřídí. Publikaci doménových
+        // událostí (releaseEvents()) zajišťuje aplikační vrstva až po commitu;
+        // spolehlivý mechanismus je Outbox Pattern (viz callouty níže).
         $this->em->persist($user);
-        $this->em->flush();
-
-        // Doménové eventy publikujeme až po flushi – listenery už vidí
-        // uložený stav. Limity tohoto vzoru popisuje callout níže.
-        foreach ($user->releaseEvents() as $event) {
-            $this->eventDispatcher->dispatch($event);
-        }
     }
 
     public function findById(UserId $id): ?User
@@ -590,21 +585,22 @@ final class DoctrineUserRepository implements UserRepository
 :::
 
 `DoctrineUserRepository` implementuje doménové rozhraní `UserRepository` přes Doctrine ORM.
-`save()` uloží agregát a hned poté vypustí nashromážděné doménové události –
-`releaseEvents()` frontu zároveň vyprázdní, takže opakované volání nic
-nedoručí dvakrát. Místo `EventDispatcher` může události přebírat Messenger;
-mechanika zůstává stejná.
+`save()` jen zařadí agregát k uložení přes `persist()`; flush a commit provede
+transakční middleware na command busu, takže jeden use case odpovídá jedné transakci.
+Publikace doménových událostí je samostatný krok aplikační vrstvy – proběhne až po
+commitu, aby příjemci viděli uložený stav.
 
 :::callout{type="warn"}
-### Limit vzoru „dispatch po flushi“ {#event-dispatch-heading}
+### Limit naivní publikace událostí {#event-dispatch-heading}
 
-Mezi `flush()` a `dispatch()` může proces spadnout: OOM kill, deploy restart,
-výpadek brokera. Agregát pak v databázi je, ale událost se nikdy nedoručí –
-z pohledu ostatních kontextů se registrace neudála. Pro vývoj a méně důležité
-události je tento vzor přijatelný. Jakmile na události závisí jiný Bounded
-Context nebo platební tok, produkčním řešením je Outbox Pattern: událost se
-zapíše do stejné DB transakce jako agregát a samostatný worker ji doručí
-s retry. Detail v kapitole [Outbox Pattern](/outbox-pattern).
+Nabízí se vypustit události hned po uložení agregátu: `releaseEvents()` a synchronní
+`dispatch()` v handleru. Mezi commitem a dispatchem ale může proces spadnout: OOM kill,
+deploy restart, výpadek brokera. Agregát pak v databázi je, ale událost se nikdy
+nedoručí – z pohledu ostatních kontextů se registrace neudála. Pro vývoj a méně
+důležité události je to přijatelné. Jakmile na události závisí jiný Bounded Context
+nebo platební tok, produkčním řešením je Outbox Pattern: událost se zapíše do stejné
+DB transakce jako agregát a samostatný worker ji doručí s retry. Detail v kapitole
+[Outbox Pattern](/outbox-pattern).
 :::
 
 :::callout{type="warn"}
@@ -616,15 +612,14 @@ používá `doctrine_transaction` middleware (viz [aplikační služby](#applica
 vzniknou dvě vrstvy transakcí: middleware otevře vnější, repozitář vnitřní
 přes savepoint. Commit point přestane být zřejmý a rollback vnitřní vrstvy
 nezruší vnější zápisy. Transakci má vlastnit jedna vrstva – doporučená volba
-je middleware na command busu, který obalí celý handler. Repozitář pak jen
-volá `persist()` a `flush()`, vlastní transakce neotevírá.
+je middleware na command busu, který obalí celý handler, zavolá `flush()`
+a commitne. Repozitář pak jen volá `persist()`, transakci ani flush neřídí.
 
-S middlewarem se ale mění význam „dispatch po flushi“ výše: `flush()` zapíše
-SQL, commit provede až middleware po doběhnutí handleru. Synchronní dispatch
-za flushem tedy běží uvnitř otevřené transakce – a pokud se po něm transakce
-odvolá, listenery už reagovaly na událost, která se nikdy nestala. Spolehlivé
-řešení je opět [Outbox Pattern](/outbox-pattern): událost se commituje spolu
-s agregátem.
+S middlewarem se mění i okamžik commitu: `flush()` zapíše SQL, commit provede
+až middleware po doběhnutí handleru. Synchronní dispatch v handleru tedy běží
+uvnitř otevřené transakce – a pokud se po něm transakce odvolá, listenery už
+reagovaly na událost, která se nikdy nestala. Spolehlivé řešení je opět
+[Outbox Pattern](/outbox-pattern): událost se commituje spolu s agregátem.
 :::
 
 ## 10.06 Persisted Object Pattern – čistá DDD varianta {#persisted-object-pattern}

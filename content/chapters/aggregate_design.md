@@ -641,9 +641,9 @@ final class DoctrineOrderRepository implements OrderRepository
     public function save(Order $order): void
     {
         $this->em->persist($order);
-        $this->em->flush();
-        // Flush() uloží kořen + vnitřní entity (OrderItem)
-        // díky cascade={"persist"} a Doctrine vyhodí OptimisticLockException,
+        // flush a commit řídí doctrine_transaction middleware command busu.
+        // Při flushi se uloží kořen + vnitřní entity (OrderItem) díky
+        // cascade={"persist"}; Doctrine vyhodí OptimisticLockException,
         // pokud se @Version mezitím změnila.
     }
 

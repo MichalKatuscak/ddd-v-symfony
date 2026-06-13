@@ -600,7 +600,9 @@ a teprve potom vyzvedne nahrané události přes `releaseEvents()`:
 :::code{language="php" filename="src/OrderManagement/Application/Command/CreateOrderHandler.php (výřez)"}
 $order = Order::create(OrderId::generate(), $userId);
 
-$this->orders->save($order); // flush proběhne uvnitř repozitáře
+$this->orders->save($order); // jen persist agregátu
+$this->em->flush();          // commit – transakci vlastní aplikační vrstva
+                             // (v produkci ji obvykle řídí doctrine_transaction middleware)
 
 foreach ($order->releaseEvents() as $event) {
     $this->eventBus->dispatch($event);
