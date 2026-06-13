@@ -781,7 +781,7 @@ výsledky read modelu, ne stav agregátů.
 
 ### Cache invalidace při doménových událostech
 
-Účinným přístupem pro invalidaci cache v DDD je naslouchání doménovým událostem. Když agregát
+Cache se v DDD nejlépe invaliduje nasloucháním doménovým událostem. Když agregát
 změní stav (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
 Cache invalidace se tím stává součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
 
@@ -916,8 +916,8 @@ final class BatchProductImportHandler
 
 ### Symfony Messenger pro asynchronní hromadné zpracování
 
-Namísto synchronního zpracování tisíců záznamů v jednom PHP procesu je doporučeným přístupem
-rozdělit práci na menší úlohy zasílané přes Symfony Messenger na asynchronní transport
+Tisíce záznamů se v jednom PHP procesu synchronně nezpracovávají. Práci je vhodné rozdělit
+na menší úlohy zasílané přes Symfony Messenger na asynchronní transport
 (RabbitMQ, Redis Streams, Amazon SQS). Každá zpráva zpracuje jeden nebo malý batch agregátů.
 Paměťové nároky a doba zpracování jedné zprávy jsou pak předvídatelné.
 

@@ -19,10 +19,10 @@ difficulty: 4
 ---
 
 Agregát je nejnáročnější taktický vzor v DDD, protože jeho hranice je kompromis mezi
-konzistencí, výkonem a škálovatelností. Eric Evans mu věnoval šestou kapitolu své knihy z roku
-2003 [[1]](https://www.dddcommunity.org/book/evans_2003/),
-Vaughn Vernon třídílnou esej z roku 2011 [[2]](https://www.dddcommunity.org/library/vernon_2011/)
-a celou desátou kapitolu *Implementing Domain-Driven Design* z roku 2013
+konzistencí, výkonem a škálovatelností. Eric Evans ho popsal v šesté kapitole své knihy z roku
+2003 [[1]](https://www.dddcommunity.org/book/evans_2003/).
+Vaughn Vernon mu věnoval třídílnou esej (2011) [[2]](https://www.dddcommunity.org/library/vernon_2011/)
+a celou desátou kapitolu *Implementing Domain-Driven Design* (2013)
 [[3]](https://www.informit.com/store/implementing-domain-driven-design-9780321834577).
 Vlad Khononov v knize *Learning Domain-Driven Design* (2021) shrnuje praktická vodítka
 z dalšího desetiletí provozu [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
@@ -79,7 +79,7 @@ výkon a kde příliš malé rozbily invarianty. Čtyři pravidla, která doporu
    Tak se napříč agregáty koordinuje stav.
 
 Khononov v *Learning DDD* (2021) dodává páté pravidlo, které z Vernonových implicitně
-plyne, ale stojí za výslovné formulování: **jeden command modifikuje právě jeden agregát.**
+plyne, ale vyplatí se ho formulovat výslovně: **jeden command modifikuje právě jeden agregát.**
 Pokud se v jednom command handleru objeví dvě volání `save()` na různé repozitáře,
 buď chybí hranice (mají to být dva commandy), nebo chybí sága (má to být dvoufázový proces).
 
@@ -105,7 +105,7 @@ přesouvají z dokumentace do typového systému jazyka. Typické zdroje:
   `renewalDate` nesmí být null. Pokud je `shippingMethod = PICKUP`,
   `address` může být null.
 
-Pro každý invariant odpovězte na otázku: *musí být porušení nemožné v každý okamžik,
+Pro každý invariant rozhoduje jedna otázka: *musí být porušení nemožné v každý okamžik,
 nebo stačí, aby bylo opraveno do několika sekund?* První kategorie definuje hranici
 agregátu. Druhá patří mimo ni a řeší ji sága nebo process manager (kapitola
 [Ságy a Process Managery](/sagy-a-process-managery)).
@@ -114,14 +114,14 @@ agregátu. Druhá patří mimo ni a řeší ji sága nebo process manager (kapit
 **Postup objevení invariantů**
 
 1. Z [Event Stormingu](/event-storming) vyberte všechny
-   červené sticky (Hot Spots) a žluté sticky (pravidla).
+   Hot Spot sticky (purpurové/červené) a policy sticky (lila).
 2. Pro každé pravidlo zformulujte větu „v každý okamžik musí platit, že …“.
    Pokud věta nedává smysl bez slova „eventuálně“, je to kandidát na ságu.
 3. Nakreslete předběžný graf entit. Spojte invarianty s entitami, kterých se týkají.
 4. Hranicí agregátu obkreslete shluky entit, které sdílejí jeden invariant.
    Shluky bez sdíleného invariantu jsou samostatné agregáty.
 5. Otestujte hranici otázkou „kolik dotazů musí proběhnout pro načtení agregátu
-   v nejhorším případě?“. Více než stovky řádků z DB znamená příliš velký agregát.
+   v nejhorším případě?“. Stovky řádků z DB znamenají příliš velký agregát.
 :::
 
 ## 07.04 Velikost agregátu a její dopady {#aggregate-size}
@@ -135,7 +135,7 @@ ale platí opak. Tři důvody:
   jednu objednávku v rozpracovaném stavu, takže `Order` jako agregát s desítkami
   `OrderItem` je v pořádku. Naproti tomu `Project` s tisícem
   `Task` dává každému členovi týmu šanci na konflikt s každým jiným.
-- **Paměť a IO.** Při načtení agregátu se vyhydrátuje celá hranice.
+- **Paměť a IO.** Při načtení agregátu se hydratuje celá hranice.
   `Project` s tisícem úkolů znamená tisíc řádků v každé operaci, i když
   měníme jediný úkol. V Doctrine to navíc zhoršují asociace s lazy loadingem, které
   generují N+1 dotazů.
@@ -292,8 +292,8 @@ Tři osvědčené přístupy:
 Klasickým příkladem je e-commerce checkout. Místo „v jedné transakci uložit objednávku,
 srazit zásoby a poslat e-mail“ se proces rozdělí na tři kroky. Agregát `Order` uloží
 objednávku a publikuje `OrderPlaced` event. Sága `InventoryReservationSaga` ve své
-transakci sníží zásoby v agregátu `InventoryItem`. Další sága `OrderConfirmationEmailSaga`
-v separátní transakci vystaví e-mail. Pokud rezervace zásob selže (zboží mezitím vyprodáno),
+transakci sníží zásoby v agregátu `InventoryItem`. Potvrzovací e-mail pak vystaví
+`OrderConfirmationEmailSaga`, opět v samostatné transakci. Pokud rezervace zásob selže (zboží mezitím vyprodáno),
 `OrderCanceledDueToOutOfStock` event spustí kompenzaci a stornuje objednávku.
 
 ## 07.07 Reference přes identitu, ne přes objekty {#references-by-id}
@@ -477,7 +477,7 @@ Vlastnost `public private(set)` přečte kdokoli bez getteru (`$order->status`),
 zapsat ji smí jen kód uvnitř třídy. Getter `status()` tím odpadá a stavové
 přechody zůstávají jediným místem zápisu.
 
-Stavové přechody tvoří uzavřený graf, který musí být explicitně vymodelovaný. Každá
+Stavové přechody tvoří uzavřený graf a ten musí být vymodelovaný celý. Každá
 doménová operace odpovídá hraně grafu; cesty, které v grafu chybí, nejsou jen „ještě
 neimplementované“ – jsou explicitně zakázané. Životní cyklus agregátu `Order`
 ilustruje následující diagram:
@@ -498,7 +498,7 @@ celou kapitolu 12. Pravidla pro Doctrine ORM 3:
   pouze kořen, nikdy vnitřní entity. `get()`, `save()`, případně
   několik specializovaných metod – ne obecné `findBy` z `EntityRepository`.
 - **Optimistický zámek na kořeni.** `#[ORM\Version]` sloupec na kořeni
-  agregátu. Concurrent modification vyhází `OptimisticLockException`, kterou
+  agregátu. Souběžná změna skončí výjimkou `OptimisticLockException`, kterou
   aplikační vrstva překládá na retry nebo na uživatelskou chybu.
 - **Doménové eventy přes outbox.** Eventy publikované agregátem se ve stejné
   transakci ukládají do outbox tabulky. Samostatný worker je odesílá do Messenger transportu
@@ -681,7 +681,7 @@ doctrine:
 ### Large-collection problem {#large-collection}
 
 Klasický anti-vzor: agregát `Project` drží `OneToMany` kolekci úkolů.
-S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každé načtení agregátu vyhydrátuje
+S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každé načtení agregátu hydratuje
 celou kolekci, každé přidání položky způsobí flush všech úkolů. Khononov pro tento případ definuje
 tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/):
 
@@ -736,13 +736,11 @@ Detaily implementace:
 V multi-tenant prostředí se agregát typicky partitionuje podle `tenantId` – každý
 tenant má své instance agregátů a operace přes tenanty jsou zakázány. Implementace:
 
-- **Filtr na tabulkové úrovni.** Doctrine `SQLFilter` vynucuje
-  `tenant_id = :current_tenant` v každém dotazu. Bezpečné, ale lze obejít
-  native SQL.
-- **Schema per tenant.** Každý tenant má vlastní DB schema. Bezpečnější,
-  ale operace přes tenanty (např. agregátní reporty) vyžadují cross-schema dotazy.
-- **DB per tenant.** Maximální izolace, ale operativně náročné. Vhodné pro
-  regulované obory (zdravotnictví, finance).
+Nejlehčí je filtr na tabulkové úrovni: Doctrine `SQLFilter` vynucuje
+`tenant_id = :current_tenant` v každém dotazu, jde ale obejít native SQL.
+Bezpečnější je vlastní DB schema pro každého tenanta; cross-tenant reporty pak
+vyžadují cross-schema dotazy. Maximální izolaci dává DB per tenant – operativně
+náročné, namístě v regulovaných oborech (zdravotnictví, finance).
 
 U všech tří přístupů platí: `tenantId` je součást identity agregátu. Repozitář
 přijímá `(tenantId, aggregateId)` a operace jednoho tenantu nikdy neovlivní jiného.
@@ -769,9 +767,9 @@ Reference přes ID je jasné pravidlo, ale typů ID je víc a každý má dopad 
 :::callout{type="pattern"}
 **Doporučení**
 
-Pro nové Symfony projekty zvolte ULID jako výchozí volbu. Časově řazená, kompatibilní
-s MySQL/PostgreSQL primary keys, krátký zápis (26 znaků vs. 36 u UUID), Symfony to umí
-z krabice. Komplikované referenční schéma typu „tenantId + naturalId“ zaveďte teprve
+Pro nové Symfony projekty je výchozí volbou ULID. Je časově řazená, kompatibilní
+s primárními klíči MySQL i PostgreSQL, má kratší zápis (26 znaků vs. 36 u UUID) a Symfony
+ji podporuje v základu balíčku `symfony/uid`. Komplikované referenční schéma typu „tenantId + naturalId“ zaveďte teprve
 tehdy, když máte konkrétní multi-tenancy požadavek.
 :::
 
@@ -784,12 +782,12 @@ vychází z Vernonovy metodiky a praktických zkušeností:
    rozhovorů s experty vytáhněte všechna pravidla. Každé zformulujte jako větu „v každý
    okamžik musí platit, že …“. Pravidla, která neprojdou („eventuálně musí platit“), odložte
    – budou to ságy.
-2. **Skupinujte invarianty.** Pravidla, která sdílejí stejné entity, jsou
-   kandidáti na společný agregát. Pravidla, která spolu nemají nic společného, patří jinam.
+2. **Seskupte invarianty.** Pravidla, která sdílejí stejné entity, jsou
+   kandidáti na společný agregát. Co spolu věcně nesouvisí, patří jinam.
 3. **Identifikujte kořen.** Pro každou skupinu invariantů vyberte jednu entitu,
    která je „vstupní branou“. Typicky ta s nejvyšší doménovou autoritou („Order“ vs. „OrderItem“).
 4. **Otestujte velikost.** Spočítejte: kolik řádků DB se načte při `get()`?
-   Více než stovky – příliš velké. Pokud načítáte *desítky*, jste v pořádku.
+   Stovky a více – příliš velké. Pokud načítáte *desítky*, jste v pořádku.
 5. **Otestujte konkurenci.** Kolik souběžných změn agregátu očekáváte v peak
    provozu? Více než 5–10 transakcí za sekundu na jednu instanci agregátu = hot aggregate,
    potřebujete jednu z technik z 07.09.
@@ -797,7 +795,7 @@ vychází z Vernonovy metodiky a praktických zkušeností:
    doménovou metodu na agregátu (chování) a event (výstup). Eventy nahrávejte explicitně
    metodou `record()`; celý cyklus record/release popisuje
    [lifecycle sekce v Základních konceptech](/zakladni-koncepty#aggregate-root-lifecycle).
-7. **Code review proti checklistu.** Sekce 07.12 níže má checklist s 12 body.
+7. **Code review proti checklistu.** Sekce 07.13 níže má checklist s 12 body.
    Pokud agregát na jakýkoli odpoví „ne“, návrh není hotový.
 
 Reálný příklad postupu na agregátech `Project` a `Task` najdete v kapitole
@@ -850,7 +848,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - Vaughn Vernon, *Effective Aggregate Design*, Part I–III (2011) [[2]](https://www.dddcommunity.org/library/vernon_2011/) – kanonický text o pravidlech návrhu agregátu, na který odkazuje téměř každá pozdější DDD kniha.
 - Vaughn Vernon, *Implementing Domain-Driven Design*, kap. 10 „Aggregates“ a kap. 12 „Repositories“ (Addison-Wesley, 2013) [[3]](https://www.informit.com/store/implementing-domain-driven-design-9780321834577).
 - Vlad Khononov, *Learning Domain-Driven Design*, kap. 6 „Tackling Complex Business Logic“ a kap. 7 „Modeling the Dimension of Time“ (O'Reilly, 2021) [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
-- Pat Helland, *Life Beyond Distributed Transactions: an Apostate's Opinion*, ACM Queue (2007, reprint 2017) [[5]](https://queue.acm.org/detail.cfm?id=3025012).
+- Pat Helland, *Life Beyond Distributed Transactions: an Apostate's Opinion*, ACM Queue (2007, reprint 2016) [[5]](https://queue.acm.org/detail.cfm?id=3025012).
 - Martin Fowler, *DDD_Aggregate* (bliki) [[6]](https://martinfowler.com/bliki/DDD_Aggregate.html).
 - Greg Young, *CQRS Documents* (2010) [[7]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf) – relevantní především kapitoly o Event Sourcingu a snapshotech.
 - V této příručce navazují kapitoly [CQRS](/cqrs), [Event Sourcing](/event-sourcing), [Ságy a Process Managery](/sagy-a-process-managery), [Outbox Pattern](/outbox-pattern) a [Případová studie](/pripadova-studie), kde uvidíte aplikaci postupu na konkrétní doméně.
@@ -865,7 +863,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Jak v Doctrine ORM 3 namapovat referenci na jiný agregát?
   answer: 'Jako jednoduchý sloupec s vlastním Doctrine typem (<code>order_id</code>, <code>customer_id</code>), který konvertuje mezi databázovou hodnotou a Value Objectem (<code>OrderId</code>, <code>CustomerId</code>). Žádná <code>ManyToOne</code> asociace mezi agregáty. Doctrine asociace ponechte jen pro entity uvnitř stejného agregátu (typicky <code>OneToMany</code> z kořene na vnitřní entity s <code>cascade=["persist", "remove"]</code> a <code>orphanRemoval=true</code>). Hodnotové objekty s více poli (Money, Address) mapujte přes <code>#[ORM\\Embedded]</code>. Detail v <a href="#symfony-doctrine">sekci Mapování v Doctrine ORM 3</a>.'
 - question: Co je hot aggregate a jak poznat, že ho mám?
-  answer: 'Hot aggregate je agregát, na který se souběžně sahá z mnoha transakcí (nákupní košík během Black Friday, sportovní výsledek, hra v reálném čase, čítač lajků na virálním příspěvku). Příznak v provozu: většina commandů selže s <code>OptimisticLockException</code>, retry trvá vteřiny, latence stoupá, uživatelská zkušenost se hroutí. Diagnosticky: pokud peak provoz překročí ~5 souběžných změn za sekundu na jednu instanci agregátu, jste v ohrožení. Detail příznaků a rozhodovací logika v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
+  answer: 'Hot aggregate je agregát, na který se souběžně sahá z mnoha transakcí (nákupní košík během Black Friday, sportovní výsledek, hra v reálném čase, čítač lajků na virálním příspěvku). Příznak v provozu: většina commandů selže s <code>OptimisticLockException</code>, retry trvá sekundy, latence stoupá, uživatelská zkušenost se hroutí. Diagnosticky: pokud peak provoz překročí ~5–10 souběžných změn za sekundu na jednu instanci agregátu, jste v ohrožení. Detail příznaků a rozhodovací logika v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jak hot aggregate vyřešit?
   answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger s deduplikací konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?

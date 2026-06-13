@@ -36,8 +36,8 @@ výjimkami, factory metodami a plnou validací invariantů.
 
 Tento průvodce používá **Doctrine atributy přímo na doménových třídách**
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
-*Dependency Inversion* – doména „ví“ o Doctrine. V praxi je ten import metadata,
-ne chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
+*Dependency Inversion* – doména „ví“ o Doctrine. V praxi jde o metadata,
+ne o chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
 oficiální dokumentace i drtivá většina open-source Symfony projektů používá atributy.
 
 Pokud chcete striktně oddělenou doménu, korektní cesta není XML mapping (taky
@@ -148,7 +148,7 @@ src/
 :::
 :::
 
-Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a funkcí (features). Každý ohraničený kontext má vlastní doménovou vrstvu s modely, hodnotovými objekty, událostmi a repozitáři. Závislosti mezi kontexty procházejí přes Application vrstvu nebo události – nikdy přes přímý import doménových tříd cizího kontextu.
+Závislosti mezi kontexty procházejí přes Application vrstvu nebo události – nikdy přes přímý import doménových tříd cizího kontextu.
 
 :::diagram{fig="10.2-A" title="Struktura projektu s Bounded Contexts" src="images/diagrams/3_implementation_in_symfony/diagram.svg"}
 :::
@@ -157,7 +157,7 @@ Struktura organizuje kód podle ohraničených kontextů (Bounded Contexts) a fu
 ### Hlavní principy správné struktury DDD projektu:
 
 - **Izolace domén** – Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.
-- **Ubiquitous Language** – Každá doména může mít svůj vlastní jazyk, který tým konzistentně používá v kódu.
+- **Ubiquitous Language** – Jazyk kontextu se promítá do kódu; tým ho používá konzistentně od názvů tříd po dokumentaci.
 - **Jasné hranice** – Definované hranice mezi doménami pomáhají vývojářům pochopit, kde končí jedna doména a začíná druhá.
 - **Minimalizace závislostí** – Kontexty drží své modely odděleně. Změna v jednom by neměla nutit úpravu druhého.
 :::
@@ -322,8 +322,8 @@ Detaily implementace:
 - **VO uloženy přímo, ne jako primitivy.** `UserId`, `Email`, `UserName`
   a `HashedPassword` jsou typy vlastností. Doctrine je hydratuje přes custom typy
   (`user_id`, `email_vo`) nebo `#[ORM\Embedded]`. Žádné re-validace v getterech.
-- **`#[ORM\Version]` pro optimistický zámek.** Souběžné modifikace agregátu
-  vyhází `OptimisticLockException`, kterou aplikační vrstva přeloží na retry.
+- **`#[ORM\Version]` pro optimistický zámek.** Souběžná modifikace agregátu
+  skončí výjimkou `OptimisticLockException`, kterou aplikační vrstva přeloží na retry.
 - **Názvy metod z Ubiquitous Language.** `rename()` místo `setName()`,
   `changeEmail()` místo `updateEmail()`. Doménový jazyk, ne CRUD slovník.
 
@@ -398,13 +398,13 @@ final readonly class Email
 PHP `FILTER_VALIDATE_EMAIL` ověřuje syntaxi podle zjednodušeného RFC 5322.
 Drobnosti, které je dobré znát:
 
-- **Akceptuje technicky platné, ale podivné adresy** – `a@b` (bez TLD)
-  s `FILTER_FLAG_EMAIL_UNICODE` nepustí, ale s defaultním nastavením ano.
+- **Odmítá i některé technicky platné adresy** – `a@b` (doména bez tečky,
+  např. `user@localhost`) neprojde, přestože RFC ji připouští.
 - **Nepouští IDN domény** (`uživatel@české-domény.cz`)
   bez explicitního převodu přes `idn_to_ascii()`.
 - **Neověřuje existenci schránky.** Validní syntaxe ≠ doručitelná adresa.
 
-V doménové vrstvě tedy validujeme **syntakticky**. Pravdivost ověří až
+V doménové vrstvě tedy validujeme **syntakticky**. Pravdivost potvrdí až
 e-mail s ověřovacím odkazem (out-of-band proces), který v doméně modeluje
 agregát `EmailVerification` nebo událost `EmailVerificationRequested`.
 Pro pokročilejší syntaktickou validaci existuje knihovna
@@ -631,8 +631,8 @@ s agregátem.
 
 Pokud trváte na tom, že doménová vrstva nesmí obsahovat ani metadata
 o persistenci, korektní cesta není XML mapping (také „znečištěné“, jen jiným
-formátem), ale **Persisted Object Pattern** – varianta vzoru *Data Mapper* (Fowler, *PoEAA*, 2002),
-kterou v DDD kontextu rozebírá Vlad Khorikov v sérii blogpostů „Persistence model“ a Vaughn Vernon v *IDDD*, kap. 6.
+formátem), ale **Persisted Object Pattern**. Jde o variantu vzoru *Data Mapper* (Fowler, *PoEAA*, 2002);
+v DDD kontextu ji rozebírá Vladimir Khorikov v sérii blogpostů „Persistence model“ a Vaughn Vernon v *IDDD*, kap. 12.
 
 Idea: doménová třída zůstane POPO bez atributů. Vedle ní v infrastrukturní
 vrstvě existuje samostatná persistence třída se všemi Doctrine atributy.
@@ -764,13 +764,13 @@ Persisted Object Pattern drží doménu úplně mimo ORM. Žádný atribut, žá
 Doctrine\…`, žádná stopa po infrastruktuře. Cena:
 
 - **2× kód.** Doménová třída + persistence model + mapper. Pro každý agregát.
-- **Mapování VO ručně.** Custom typy z hlavní cesty zde nepoužiješ – musí to dělat
+- **Mapování VO ručně.** Custom typy z hlavní cesty zde nepoužijete – musí to dělat
   mapper. U 5+ VO se kód mapperu rozrůstá.
 - **Riziko driftu.** Když přibude pole v doméně, musí přibýt v persistence modelu
   i v mapperech. Žádný compiler to nehlídá.
 - **Optimistický zámek je řešení navíc.** `#[ORM\Version]` je v persistence modelu;
-  doména `User` musí přijmout `version` jako parametr `reconstitute()` nebo
-  spoléhat na infrastruktuře, že verzi sleduje sama.
+  doména `User` musí přijmout `version` jako parametr `reconstitute()`, nebo
+  se spolehnout na infrastrukturu, že verzi sleduje sama.
 
 Doporučení: použít Persisted Object **jen v kontextech, kde je oddělení
 opravdu důležité** (Core Domain s vysokou hodnotou, dlouhodobá údržba, plán
@@ -866,9 +866,8 @@ nebo první kontakt s DDD; s rostoucím počtem VO se vyplatí přejít na custo
 
 ## 10.08 PHP 8.1+ Enums pro stavové typy {#php-enums}
 
-Od PHP 8.1 jsou k dispozici nativní výčtové typy (enums). V DDD se hodí pro stavové hodnotové objekty
-s konečnou množinou hodnot – například stav objednávky, stav úkolu nebo roli uživatele. Dříve se tyto stavy modelovaly jako konstanty ve třídách
-nebo jako plnohodnotné hodnotové objekty. Nativní enums nabízejí typovou bezpečnost přímo na úrovni jazyka.
+Stav objednávky, role uživatele, priorita úkolu – konečné množiny hodnot, které se dřív modelovaly konstantami ve třídě,
+mají od PHP 8.1 nativní typ: enum. Překlep ani neznámý stav neprojde už při kompilaci.
 
 :::callout{type="pattern"}
 ### Příklad: Backed enum pro stav objednávky {#enum-example-heading}
@@ -1002,7 +1001,7 @@ final class Order
 - **Enum** – pro jednoduché konečné stavy, kde hodnota je jedna z pevně daných variant: `OrderStatus`, `UserRole`, `TaskPriority`, `Currency`. Enums podporují metody, takže lze zapouzdřit i přechodovou logiku (viz `allowedTransitions()`).
 - **Plnohodnotný hodnotový objekt (Value Object)** – pro komplexní typy, které vyžadují validaci, formátování nebo aritmetiku: `Money` (částka + měna + zaokrouhlování), `Email` (validace formátu), `Address` (více polí), `DateRange` (interval s logikou překrývání).
 
-Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepotřebuje složitou vnitřní logiku, je enum správná volba. Pokud typ obsahuje libovolné hodnoty, validaci nebo výpočty, použijte hodnotový objekt.
+Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepotřebuje složitou vnitřní logiku, je enum správná volba. Pokud typ obsahuje libovolné hodnoty, validaci nebo výpočty, je namístě hodnotový objekt.
 :::
 
 :::callout{type="warn"}
@@ -1033,7 +1032,7 @@ ani hodnotovému objektu** – typicky operaci nad dvěma a více agregáty
 (`MoneyTransferService` mezi dvěma účty) nebo bezstavový výpočet vyžadující
 externí zdroj (kurzovní převod, kalkulace daně podle jurisdikce).
 
-**Než sáhnete po doménové službě, ptejte se nejdřív: nepatří to do agregátu?**
+**Před sáhnutím po doménové službě stojí vždy jedna otázka: nepatří to do agregátu?**
 Pravidlo „lze platit jen confirmed objednávku“ je čistý invariant agregátu `Order` –
 jen `Order` zná svůj stav a jen on smí ten stav měnit. Domain service na to
 je anti-vzor, který oslabuje agregát a vede k anemickému modelu.
@@ -1247,7 +1246,7 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
   paměťovém prostoru. Bez serializace, bez síťové cesty tam a zpět.
 - **Messenger** (`MessageBusInterface`) – může být synchronní i asynchronní.
   Podporuje transporty (RabbitMQ, Redis, Doctrine outbox), retry strategii
-  a sériovou serializaci zprávy. Příjemce může běžet v jiném procesu, jiném serveru.
+  a serializaci zprávy. Příjemce může běžet v jiném procesu, jiném serveru.
 
 **Volba podle role příjemce:**
 
@@ -1261,7 +1260,7 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
 
 **Anti-vzor:** používat Messenger jako náhradu za EventDispatcher uvnitř téhož
 kontextu, protože „je to flexibilnější“. Cena: každá zpráva projde JSON serializací,
-ztráta typů, ztráta transakční koheze, nutnost správy transportů. Zvolte mechanismus
+ztráta typů, ztráta transakční koheze, nutnost správy transportů. Mechanismus se volí
 podle hranice, kterou událost překračuje – ne podle hypotetické budoucí potřeby.
 :::
 
@@ -1317,7 +1316,7 @@ final class InvalidOrderStateTransitionException extends \DomainException
 ### Doporučení pro výjimky v DDD
 
 - Doménové výjimky by měly **dědit z `\DomainException`** – tím signalizují, že jde o porušení doménového pravidla, ne o technickou chybu.
-- Používejte **statické factory metody** (`cannotTransition()`) pro čitelné a konzistentní vytváření výjimek.
+- **Statické factory metody** (`cannotTransition()`) drží vytváření výjimek čitelné a konzistentní.
 - **Nepropagujte infrastrukturní výjimky** do doménové vrstvy – repozitáře by je měly zachytit a přeložit na doménové výjimky.
 - Kontrolery by měly zachytávat doménové výjimky a **překládat je na HTTP odpovědi** (400, 404, 409).
 :::
@@ -1533,8 +1532,8 @@ V DDD existují dva druhy validace, každý na jiné vrstvě:
 
 - **Symfony Validator (aplikační vrstva)** – validace vstupních dat
   na úrovni Commands a Queries: formát e-mailu, délka jména, povinná pole.
-  Používejte atributy `#[Assert\Email]`, `#[Assert\NotBlank]`
-  přímo na command třídách. Tato validace chrání doménovou vrstvu před neplatnými vstupy.
+  Atributy `#[Assert\Email]`, `#[Assert\NotBlank]` patří přímo
+  na command třídy. Tato validace chrání doménovou vrstvu před neplatnými vstupy.
 - **Doménová validace (doménová vrstva)** – doménová pravidla, která vynucují
   entity, agregáty a value objects: „uživatel s tímto e-mailem již existuje“,
   „objednávku nelze potvrdit bez položek“. Tato validace je součástí doménového modelu
@@ -1551,7 +1550,7 @@ transformovat ho na command/query, dispatchovat, přeložit doménovou výjimku
 na HTTP odpověď. Nesmí: nést doménová pravidla, volat repozitáře přímo,
 manipulovat s agregáty.
 
-Symfony 7+ nabízí `#[MapRequestPayload]`, který deserializuje a validuje
+Symfony nabízí od verze 6.3 `#[MapRequestPayload]`, který deserializuje a validuje
 JSON požadavek přímo do typového commandu. Pro klasické HTML formuláře pak existuje
 varianta `#[MapRequestPayload(acceptFormat: 'form')]` nebo Symfony Form.
 
@@ -1729,7 +1728,7 @@ Drobný rozdíl v syntaxi `services.yaml`, dramatický rozdíl v chování:
   Kontejner použije existující službu pod druhým jménem. Jedna instance, dvě jména.
 - `App\…\UserRepository: { class: App\…\DoctrineUserRepository }` – **nová služba**
   pod klíčem rozhraní. Vznikne *druhá* instance `DoctrineUserRepository` – dva
-  EntityManagery, dva sady listenerů, dva separátní stavy. Při autowiringu
+  EntityManagery, dvě sady listenerů, dva separátní stavy. Při autowiringu
   může vznikat zmatek, kterou instanci `MessageBus` injektuje.
 
 V Symfony 6.3+ je idiomatičtější forma atribut `#[AsAlias]` přímo na implementaci –
@@ -1743,8 +1742,8 @@ a události z auto-registrace vylučujeme – nejsou to služby, ale data.
 
 ### Autowiring s oddělenými Bounded Contexts {#autowiring-bounded-contexts}
 
-Ve větších projektech s více Bounded Contexts konfigurujte autowiring pro každý kontext samostatně.
-Každý kontext dostane vlastní blok v `services.yaml`, čímž ohraničíme kontext i na úrovni service containeru.
+Ve větších projektech s více Bounded Contexts se autowiring konfiguruje pro každý kontext samostatně.
+Každý kontext dostane vlastní blok v `services.yaml` – hranice se tak promítne i do service containeru.
 
 :::callout{type="pattern"}
 ### Příklad: Samostatný autowiring pro každý Bounded Context {#autowiring-bc-example-heading}
@@ -1793,10 +1792,7 @@ services:
 :::callout{type="note"}
 ### Výhody odděleného autowiringu pro Bounded Contexts
 
-- **Explicitní hranice** – každý bounded context má svůj vlastní blok konfigurace, což jasně dokumentuje hranice kontextů i na úrovni infrastruktury.
-- **Granulární exclude pravidla** – můžete pro každý kontext vyloučit jiné adresáře (např. jeden kontext může mít doménové služby, jiný ne).
-- **Snazší refaktoring** – při přesunu bounded contextu do samostatného balíčku (bundle) nebo microservice stačí odebrat příslušný blok z `services.yaml`.
-- **Prevence nechtěných závislostí** – pokud kontext A omylem importuje třídu z kontextu B, lze to odhalit v konfiguraci.
+Každý kontext má vlastní blok konfigurace, takže hranice jsou čitelné i na úrovni infrastruktury. Exclude pravidla se dají nastavit pro každý kontext zvlášť – jeden má doménové služby, jiný ne. Při přesunu kontextu do samostatného balíčku nebo microservice stačí odebrat příslušný blok z `services.yaml`, a nechtěný import třídy z cizího kontextu se pozná přímo v konfiguraci.
 :::
 
 :::callout{type="note"}
@@ -1816,7 +1812,7 @@ Doménové modely, hodnotové objekty a repozitáře patří do svých Bounded C
 - question: Kam v Symfony projektu patří doménová vrstva a proč ji držet odděleně?
   answer: 'Doménová vrstva se umisťuje do samostatného adresáře – typicky <code>src/Domain/</code> s podsložkami pro jednotlivé Bounded Contexty – odděleně od kontrolerů, Doctrine mapování a infrastruktury. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
 - question: Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?
-  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu – jsou to metadata, ne chování. Pokud trváte na čisté doméně bez stop ORM, korektní řešení je <strong>Persisted Object Pattern</strong> (Khononov, <em>Learning DDD</em>): doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern – čistá DDD varianta</a>.'
+  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu – jsou to metadata, ne chování. Pokud trváte na čisté doméně bez stop ORM, korektní řešení je <strong>Persisted Object Pattern</strong> (Vladimir Khorikov; Vernon, <em>IDDD</em>, kap. 12): doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern – čistá DDD varianta</a>.'
 - question: Jak odlišit Aplikační službu od Doménové služby?
   answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Podrobný rozbor v <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
 - question: Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?

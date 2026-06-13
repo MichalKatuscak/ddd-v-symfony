@@ -445,7 +445,8 @@ Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší sku
 - **Výkonnostní problémy** – načtení celého agregátu z databáze je pomalé, pokud obsahuje stovky nebo tisíce podřízených entit (např. všechny položky objednávky zákazníka za celý rok).
 - **Problémy s konkurencí (concurrency)** – agregát je zamčen jako celek při každé změně. Velký agregát znamená větší pravděpodobnost konfliktů při souběžném přístupu.
 - **Těsné provázání (tight coupling)** – příliš mnoho entit uvnitř jednoho agregátu ztěžuje nezávislý vývoj a testování.
-- **Narušení Bounded Context hranic** – god agregát bývá příznakem špatně definovaných hranic kontextů.
+
+A nakonec hranice. God agregát bývá příznakem špatně definovaných hranic kontextů – tam, kde do jednoho celku spadne víc, než kam sahá jeden Bounded Context.
 :::
 
 :::callout{type="warn"}
@@ -1050,7 +1051,7 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
 :::callout{type="note"}
 ### Správně: Konzistentní jazyk napříč všemi vrstvami {#ubiq-spravne-heading}
 
-Ubiquitous Language vyžaduje investici: vývojáři musí naslouchat doménovým expertům, porozumět jejich terminologii a tu pak konzistentně přenést do kódu. Výsledkem je kód, který doménový expert může číst a rozumět mu.
+Ubiquitous Language vyžaduje investici: vývojáři musí naslouchat doménovým expertům, porozumět jejich terminologii a tu pak konzistentně přenést do kódu. Výsledný kód pak doménový expert přečte a rozumí mu.
 :::
 
 :::callout{type="pattern"}
@@ -1117,7 +1118,7 @@ class InsurancePolicy
 :::callout{type="note"}
 ### Doménový slovník jako živý artefakt {#ubiq-mapa-heading}
 
-Udržujte živý glosář (tzv. *doménový slovník*), který mapuje pojmy z doménového jazyka na odpovídající třídy, metody a databázové struktury v kódu. Slovník musí být dostupný všem členům týmu a pravidelně aktualizovaný.
+Živý glosář (tzv. *doménový slovník*) mapuje pojmy z doménového jazyka na odpovídající třídy, metody a databázové struktury v kódu. Dostupnost všem členům týmu a pravidelná aktualizace jsou podmínkou, aby slovník plnil svůj účel.
 
 - **Pojistník** → třída `PolicyHolder`, tabulka `policy_holders`
 - **Pojistná smlouva** → třída `InsurancePolicy`, tabulka `insurance_policies`

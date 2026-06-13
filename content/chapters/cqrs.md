@@ -37,15 +37,15 @@ nese vlastní úkol a vlastní optimalizační profil.
 ### Základní principy CQRS: {#zakladni-principy-heading}
 
 - **Commands** – Příkazy, které mění stav systému. Ve striktním pojetí CQS nevracejí žádná data; v praxi CQRS mohou vracet identifikátor vytvořeného záznamu.
-- **Queries** – Dotazy, které vrací data, ale nemění stav systému.
+- **Queries** – Dotazy, které vracejí data, ale nemění stav systému.
 - **Oddělené modely** – Write model (bohatý doménový model s doménovou logikou) a Read model (jednoduchá denormalizovaná datová struktura optimalizovaná pro dotazy).
 - **Oddělené databáze** – V pokročilých implementacích lze čtení a zápis rozdělit do oddělených databází a nezávisle škálovat zátěž.
 :::
 
 CQRS se často kombinuje s [Event Sourcing](/event-sourcing),
-což je vzor, který ukládá změny stavu jako sekvenci událostí místo aktuálního stavu.
-Tyto dva vzory jsou však **nezávislé** – lze plnohodnotně implementovat CQRS
-s klasickou Doctrine ORM persistencí na write straně a denormalizovanými tabulkami na read straně,
+což je vzor, který místo aktuálního stavu ukládá historii změn jako sekvenci událostí.
+Tyto dva vzory jsou však **nezávislé**. CQRS lze plnohodnotně implementovat
+s klasickou Doctrine ORM persistencí na write straně a denormalizovanými tabulkami na straně čtení,
 aniž by se sahalo po Event Sourcingu.
 
 ## 12.02 CQS vs. CQRS – kde je hranice? {#cqs-vs-cqrs}
@@ -73,15 +73,15 @@ optimalizačním profilem.
 :::
 
 V praxi se CQS přirozeně stává výchozím bodem pro CQRS. Pokud dodržujete CQS na úrovni metod,
-zjistíte, že metody měnící stav (command methods) mají výrazně odlišné požadavky na data než metody,
-které stav čtou (query methods). CQRS toto pozorování formalizuje rozdělením do dvou explicitních modelů.
+zjistíte, že metody měnící stav (command methods) potřebují výrazně jiná data než ty,
+které jej čtou (query methods). CQRS toto pozorování formalizuje rozdělením do dvou explicitních modelů.
 
 :::callout{type="note"}
 ### Úrovně zavedení CQRS {#cqrs-urovne-heading}
 
 CQRS lze zavést v několika úrovních hloubky, od nejjednodušší po nejpokročilejší:
 
-1. **Oddělené handlery** – Command handlers a query handlers jako samostatné třídy, ale sdílí tutéž databázi a ORM entity. Nejjednodušší forma CQRS, vhodná pro většinu aplikací.
+1. **Oddělené handlery** – Command handlers a query handlers jako samostatné třídy, ale sdílejí tutéž databázi a ORM entity. Nejjednodušší forma CQRS, vhodná pro většinu aplikací.
 2. **Oddělené modely** – Write model staví na doménových entitách (Doctrine ORM), read strana využívá vlastní DTO/ViewModely plněné přímým SQL nebo Doctrine DBAL. Sdílená databáze, ale oddělené PHP třídy.
 3. **Oddělená úložiště** – Write databáze (PostgreSQL) a read databáze (Elasticsearch, Redis, denormalizované tabulky). Změny se propagují asynchronně přes události.
 4. **CQRS + Event Sourcing** – Write side ukládá události do [Event Store](/event-sourcing), read side buduje projekce z event streamu. Nejvyšší složitost, ale i nejvyšší flexibilita.
@@ -105,13 +105,13 @@ s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
   a konzistenci dat. Read straně zbývá jediný úkol: dostat data v podobě, kterou potřebuje
   obrazovka. Každý model obsahuje jen to, co ke své práci potřebuje.
 - **Nezávislá optimalizace** – Write model může používat normalizované relační schéma
-  a Doctrine ORM entity s bohatou doménovou logikou. Read model může být denormalizovaná tabulka,
-  Elasticsearch index, nebo Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům.
+  a Doctrine ORM entity s bohatou doménovou logikou. Na straně čtení poslouží denormalizovaná tabulka,
+  Elasticsearch index nebo Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům.
 - **Škálovatelnost** – Ve většině aplikací výrazně převažuje čtení nad zápisem
   (poměr 10:1 až 100:1). CQRS umožňuje nezávisle škálovat read stranu (repliky, cache, CDN)
   bez dopadu na write stranu.
 - **Testovatelnost** – Command handlers se testují jako čistě doménová logika
-  (given state → when command → then events/state). Query handlers se testují na správnost
+  (given state → when command → then events/state). U query handlerů se ověřuje jen správnost
   vrácených dat. Žádné propletení obou odpovědností v jedné testovací sadě.
   Viz kapitola [Testování DDD kódu](/testovani-ddd).
 - **Flexibilita evoluce** – Read model lze kdykoli přebudovat (rebuild projekcí),
@@ -120,22 +120,21 @@ s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
 
 ## 12.04 Výzvy a omezení CQRS {#challenges}
 
-CQRS má své limity. Jako každý architektonický vzor přináší kompromisy,
-které je nutné pečlivě zvážit ještě před zavedením:
+CQRS má své limity. Kompromisy, které přináší, je lepší znát ještě před zavedením.
 
-- **Zvýšená složitost kódu** – Místo jednoho modelu existují dva (nebo více).
-  Každý command a query vyžaduje vlastní třídu, handler, a často i vlastní datovou strukturu.
-  Pro jednoduchou CRUD operaci to může znamenat 4–6 tříd místo jedné.
-- **Eventual consistency** – Při asynchronní propagaci změn z write strany na read stranu
-  existuje časové okno, kdy read model neodráží poslední zápis. Uživatel může po odeslání
-  formuláře vidět „starou“ verzi dat. Tento problém řeší konkrétní vzory v UI –
-  viz [sekce Eventual Consistency](#eventual-consistency).
-- **Synchronizace modelů** – Při oddělených úložištích je nutné zajistit,
-  že read model bude vždy aktualizován po každé změně write modelu. Selhání propagace
-  (výpadek fronty, chyba projektoru) vede k divergenci modelů.
-- **Učební křivka** – CQRS vyžaduje změnu myšlení oproti tradičnímu přístupu,
-  kde jeden model pokrývá všechny operace. Vývojáři musejí porozumět konceptům jako message bus,
-  eventual consistency, idempotence handlerů a read model projekce.
+Místo jednoho modelu existují dva (nebo více) a každý command či query vyžaduje vlastní
+třídu, handler a často i vlastní datovou strukturu – pro jednoduchou CRUD operaci 4–6 tříd
+místo jedné. Při oddělených úložištích se přidává synchronizace: read model se musí aktualizovat
+po každé změně write modelu, aby se nedostal mimo. Selhání propagace (výpadek fronty, chyba
+projektoru) vede k divergenci modelů.
+
+Sem patří i eventual consistency. Mezi zápisem a aktualizací read modelu vzniká okno,
+kdy uživatel po odeslání formuláře vidí „starou“ verzi dat. Vzory pro UI popisuje
+[sekce Eventual Consistency](#eventual-consistency).
+
+Poslední cenou je učební křivka. CQRS vyžaduje změnu myšlení oproti tradičnímu přístupu,
+kde jeden model pokrývá všechny operace. Vývojáři musejí porozumět konceptům jako message bus,
+eventual consistency, idempotence handlerů a read model projekce.
 
 :::callout{type="warn"}
 ### Kdy nepoužívat CQRS {#when-not-to-use-cqrs-heading}
@@ -158,10 +157,9 @@ a rozšiřovat postupně. Viz také
 
 ## 12.05 Symfony Messenger jako základ CQRS {#symfony-messenger}
 
-Symfony Messenger je komponenta, která poskytuje infrastrukturu pro odesílání a zpracování zpráv.
-Pro CQRS je podstatná schopnost definovat **více message busů** – jeden pro příkazy
-(command bus) a jeden pro dotazy (query bus). Každý bus může mít vlastní sadu middleware,
-vlastní transport a vlastní strategii zpracování.
+Pro CQRS je na komponentě Symfony Messenger podstatná jedna schopnost: definovat
+**více message busů** – jeden pro příkazy (command bus) a jeden pro dotazy (query bus).
+Každý bus může mít vlastní sadu middleware, vlastní transport a vlastní strategii zpracování.
 
 :::diagram{fig="12.5-A" title="Symfony Messenger jako CQRS bus" src="images/diagrams/6_cqrs/diagram.svg"}
 :::
@@ -205,7 +203,7 @@ framework:
 :::
 :::
 
-Konfigurace definuje dva transporty: `async` pro asynchronní zpracování a `sync` pro synchronní zpracování.
+Konfigurace definuje dva transporty: `async` pro zpracování přes frontu a `sync` pro okamžité vykonání v témže procesu.
 Dva message busy: `command.bus` pro příkazy s `doctrine_transaction`
 middleware (automatická transakce kolem handleru) a `query.bus` pro dotazy pouze s validací.
 
@@ -237,7 +235,7 @@ do code review.
 :::callout{type="note"}
 ### Proč dva oddělené busy? {#proc-dva-busy-heading}
 
-Oddělení command busu a query busu není jen formální gesto. Má konkrétní praktické důsledky:
+Oddělení command busu a query busu má konkrétní praktické důsledky:
 
 - **Různý middleware** – Command bus potřebuje `doctrine_transaction` jako pojistku,
   query bus ne (jen čte data).
@@ -327,7 +325,7 @@ scénáře, kdy je užitečné vrátit alespoň identifikátor nově vytvořené
 
 ## 12.07 Implementace Queries {#queries}
 
-Queries v CQRS jsou dotazy, které vrací data bez změny stavu systému. Podobně jako commands
+Queries v CQRS jsou dotazy, které vracejí data bez změny stavu systému. Podobně jako commands
 se implementují jako immutabilní DTO třídy, ale na rozdíl od commands **vždy vracejí
 hodnotu** – handler vrací data přes `HandledStamp`.
 
@@ -355,8 +353,8 @@ final class GetUserProfile
 :::
 :::
 
-V tomto příkladu je `GetUserProfile` dotaz, který obsahuje ID uživatele, jehož profil chceme získat.
-Dotaz používá atributy pro validaci dat – nevalidní UUID bude odmítnuto ještě před zpracováním.
+Dotaz nese jediné pole: ID uživatele, jehož profil chceme získat. Nevalidní UUID odmítne
+`validation` middleware ještě před zpracováním.
 
 :::callout{type="note"}
 ### Queries s filtrováním a stránkováním {#query-slozitejsi-heading}
@@ -398,8 +396,8 @@ final class ListOrders
 
 ## 12.08 Implementace Handlers {#handlers}
 
-Handlers v CQRS jsou objekty, které zpracovávají příkazy a dotazy. V Symfony 8 se implementují
-jako PHP třídy s atributem `AsMessageHandler` a metodou `__invoke()`.
+Handler je místo, kde se zpráva potká s logikou. V Symfony 8 jde o třídu s atributem
+`AsMessageHandler` a metodou `__invoke()`.
 Symfony Messenger automaticky spojí handler s jeho command/query podle type-hintu parametru.
 
 Command handler a query handler mají odlišnou odpovědnost:
@@ -498,8 +496,8 @@ final class GetUserProfileHandler
 :::
 :::
 
-Všimněte si rozdílu: command handler pracuje s doménovým modelem (`UserRepository`,
-`User` entita, value objects), zatímco query handler pracuje s **read repozitářem**
+Rozdíl je vidět přímo v závislostech: command handler pracuje s doménovým modelem (`UserRepository`,
+`User` entita, value objects), zatímco query handler sahá do **read repozitáře**
 (`UserProfileReadRepository`), který vrací přímo ViewModel – jednoduchou datovou strukturu
 optimalizovanou pro prezentaci. Query handler neprochází přes doménový model.
 
@@ -541,7 +539,7 @@ final readonly class UserProfileViewModel
 :::
 
 ViewModel často obsahuje **data z více agregátů** – v příkladu výše kombinuje
-údaje o uživateli s počtem objednávek a členskou úrovní. Zápis přes doménový model by vyžadoval
+údaje o uživateli s počtem objednávek a členskou úrovní. Sestavení téhož pohledu přes doménový model by vyžadovalo
 načtení uživatele, jeho objednávek a propočet úrovně – pomalé a porušující hranice
 [agregátů](/zakladni-koncepty#aggregates). Read model tato data drží
 připravená v denormalizované podobě.
@@ -610,9 +608,9 @@ kapitola [Výkonnostní aspekty](/vykonnostni-aspekty).
 
 ## 12.10 Implementace Command a Query Buses {#buses}
 
-Command a Query Buses v CQRS jsou objekty, které směrují příkazy a dotazy na příslušné handlery.
-V Symfony 8 se pro injektování správného busu používá named autowiring – názvy parametrů
-v konstruktoru musejí odpovídat konfiguraci v `messenger.yaml`:
+Zbývá dopravit příkazy a dotazy ke správnému handleru. V Symfony 8 se pro injektování busu
+používá named autowiring – názvy parametrů v konstruktoru musejí odpovídat konfiguraci
+v `messenger.yaml`:
 
 :::callout{type="pattern"}
 ### PHP: Použití command busu v controlleru {#buses-example-heading}
@@ -743,9 +741,8 @@ final class ProfileController extends AbstractController
 :::
 :::
 
-V těchto příkladech Symfony injektuje `commandBus` a `queryBus` pomocí named autowiring –
-přiřadí bus podle názvu parametru v konstruktoru (musí odpovídat klíči v konfiguraci
-`buses` v `messenger.yaml`, kde `command.bus` se namapuje na `$commandBus`).
+V těchto příkladech Symfony přiřadí bus podle názvu parametru v konstruktoru: klíč
+`command.bus` z konfigurace `buses` se namapuje na `$commandBus`.
 
 Tím končí popis základní infrastruktury CQRS – příkazů, dotazů, handlerů a busů.
 Následující sekce se věnují pokročilejším aspektům: optimalizaci read strany
@@ -775,7 +772,7 @@ nebo API endpoint očekává.
 ### Denormalizované tabulky jako read model
 
 Nejrozšířenější strategií v praxi je **denormalizovaná tabulka**,
-která obsahuje přesně ta data, jež potřebuje konkrétní obrazovka nebo API endpoint.
+která drží data předpočítaná pro jedinou obrazovku či endpoint.
 Tabulka se aktualizuje asynchronně přes doménové události.
 
 :::callout{type="pattern"}
@@ -1146,7 +1143,7 @@ Messenger workery jsou dlouhodobě běžící procesy. V produkci je nutné zaji
 
 ## 12.14 Zpracování chyb a Dead Letter Queue {#error-handling}
 
-V asynchronním prostředí je zpracování chyb podstatně odlišné od synchronního zpracování.
+Zpracování chyb se v asynchronním prostředí podstatně liší od synchronního světa.
 Při synchronním dispatchi výjimka probublá přímo do controlleru a uživatel vidí chybovou
 hlášku. Při asynchronním dispatchi je zpráva ve frontě – pokud handler selže, uživatel
 o tom neví a zpráva musí být zpracována znovu.
@@ -1302,7 +1299,7 @@ transakce) a nakonec `doctrine_transaction` (obalí handler do DB transakce).
 
 CQRS usnadňuje testování. Command handlers, query handlers a projektory jsou izolované
 komponenty s jasně definovanými vstupy a výstupy. Testovací strategie se liší
-podle testovaného komponentu:
+podle testované komponenty:
 
 ### Testování command handlerů
 
@@ -1528,9 +1525,9 @@ value objects a doménových služeb – najdete v kapitole
 
 Při použití CQRS s více [Bounded Contexts](/zakladni-koncepty#bounded-contexts)
 vzniká potřeba koordinovat dlouhotrvající procesy napříč kontexty.
-Vzor **Saga** (neboli **Process Manager**) naslouchá doménovým událostem
-a na základě nich odesílá příkazy, čímž propojuje command a event stranu CQRS do ucelených
-doménových procesů.
+Vzor **Saga** – v orchestrované podobě označovaný **Process Manager** – naslouchá
+doménovým událostem a podle nich odesílá příkazy, čímž propojuje command a event stranu CQRS
+do ucelených doménových procesů.
 
 Podrobný výklad ság – včetně implementace v Symfony Messenger,
 kompenzačních strategií a testování – najdete v kapitole

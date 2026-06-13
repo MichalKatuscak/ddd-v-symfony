@@ -333,7 +333,7 @@ systém pro správu projektů krok za krokem od event stormingu po read modely s
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
-  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature), CQRS určuje, jak oddělit čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8.'
+  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
   answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Adresářová struktura slouží jako výchozí šablona; rozšiřuje se podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
 - question: Kde najdu plnou implementaci agregátu se všemi metodami?

@@ -1039,24 +1039,19 @@ mu rozumí dobře jen jeden člověk. Pokud tento člověk onemocní, odejde neb
 je přetížen, tým stojí. Onboarding nového vývojáře trvá měsíce.
 Bus factor = 1 je pro projekt kritické riziko.
 
-**Opatření – čtyři praktiky:**
+**Opatření:** Proti bus factoru pomáhají dvě praktiky cílené přímo na sdílení vlastnictví:
 
-1. **Living documentation přes testy:** Pojmenování testů ve stylu
-   `it_cannot_ship_order_that_is_not_paid()` tvoří čitelný katalog
-   doménových pravidel. Kdo čte testy, pochopí doménový model bez vývojáře.
+1. **Párové programování nad doménovým modelem:** Změny v agregátech
+   a doménových pravidlech procházejí ve dvojici. Znalost se přenáší průběžně,
+   ne až při odchodu autora.
 
-2. **Architecture Decision Records (ADR):** Každé netriviální
-   rozhodnutí (proč Saga místo 2PC, proč Value Object místo entity, proč
-   tento Bounded Context takto ohraničený) zapište do `docs/adr/`.
-   Budoucí vývojář pochopí kontext bez „senior kolegy“.
+2. **Rotace vlastnictví modulů:** Žádný Bounded Context nemá trvale jen
+   jednoho správce. Periodická rotace nutí tým rozumět více částem systému.
 
-3. **Event Storming jako týmová aktivita:** Modelování domény
-   musí probíhat v celém týmu, ne v hlavě jednoho architekta. Pravidelné
-   (čtvrtletní) Event Storming sessions sdílejí znalosti a odhalují nekonzistence.
-
-4. **Doménový glosář v repozitáři:** Živý dokument,
-   kde každý vývojář může hledat, co `FulfillmentContext` znamená,
-   jaké jsou jeho agregáty a na jaké Bounded Contexts navazuje.
+Zbytek nástrojů sdílíte s prevencí Ubiquitous Language driftu – doménový glosář
+v repozitáři, ADR u netriviálních rozhodnutí, pravidelný Event Storming a living
+documentation přes testy. Detaily viz sekci
+[Ubiquitous Language drift](#c4-language).
 
 :::faq{}
 - question: Proč tradiční Doctrine mapování komplikuje čistý doménový model?

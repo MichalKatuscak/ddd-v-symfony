@@ -125,8 +125,8 @@ všechny vlastnosti najednou. Tentýž uživatel načtený dvakrát z databáze 
 projde, ale jakmile jedna z instancí změní e-mail, `==` ji označí za jinou
 entitu – identita se přitom nezměnila. Operátor `===` zase porovnává
 identitu instance v paměti. Stejný agregát načtený ve dvou různých kontextech
-(dva requesty, deserializace ze zprávy) jsou dvě instance, a `===` tedy vrátí
-`false`, i když jde o tutéž doménovou entitu.
+(dva requesty, deserializace ze zprávy) existuje jako dvě instance. `===` proto
+vrátí `false`, i když jde o tutéž doménovou entitu.
 
 ## 06.04 Hodnotové objekty (Value Objects) {#value-objects}
 
@@ -345,8 +345,8 @@ class OrderItem
 `Order` v ukázce je kořen agregátu a drží kolekci `OrderItem` objektů. Vnější
 volání jdou výhradně přes metody na `Order`; vlastní `OrderItem` zvenku
 nikdo neinstancuje ani nemění. Výpočet `totalAmount()` přebírá měnu z položek:
-sčítání začíná u první z nich a `Money::add()` při nesouladu měn vyhodí výjimku,
-takže objednávka se smíšenými měnami neprojde tiše. `OrderItem` je zde záměrně
+sčítání začíná u první z nich a `Money::add()` při nesouladu vyhodí výjimku.
+Objednávka kombinující dvě měny tak neprojde tiše. `OrderItem` je zde záměrně
 zjednodušený na neměnný záznam. Plnou verzi s chováním – metodou
 `increaseQuantity()` pro invariant „jedna položka na produkt“ – ukazuje kapitola
 [Návrh agregátu](/navrh-agregatu#references-by-id).
@@ -415,8 +415,8 @@ in-memory varianta pro testy. Praktickou implementaci v Symfony 8 popisuje kapit
 ## 06.07 Doménové služby (Domain Services) {#domain-services}
 
 Některá pravidla nepatří jednomu agregátu ani jednomu hodnotovému objektu –
-koordinují více objektů nebo zachycují proces, který nemá vlastníka. Doménová
-služba je bezstavové místo, kam takovou logiku umístit. Nedrží stav, nemá
+koordinují více objektů nebo zachycují proces, který nemá vlastníka. Takovou
+logiku přebírá doménová služba. Nedrží stav, nemá
 životní cyklus, jen pracuje s entitami a hodnotovými objekty.
 
 :::code{language="php" filename="src/OrderManagement/Domain/Service/ShippingFeeService.php"}
@@ -521,7 +521,7 @@ final readonly class OrderCreatedEvent
 `OrderCreatedEvent` v ukázce nese tři údaje: které objednávky se týká, kterého
 uživatele a kdy k vytvoření došlo. Tolik stačí příjemcům, aby na změnu mohli
 reagovat bez dalšího dotazu zpět do `OrderManagement`. Vlastnosti jsou veřejné
-a `readonly` – událost je neměnný záznam, gettery by jen přidávaly šum.
+a `readonly` – událost je neměnný záznam a příjemci ji jen čtou.
 Domain Events tvoří základ
 pro dvě architektonické techniky: oddělení čtení a zápisu v [CQRS](/cqrs) a uložení
 stavu jako sekvence událostí v [Event Sourcingu](/event-sourcing).
@@ -616,7 +616,7 @@ publikování přes transakční outbox řeší [Outbox Pattern](/outbox-pattern
 
 :::faq{}
 - question: Jaký je rozdíl mezi Entitou a Value Objectem?
-  answer: 'Entita má jednoznačnou identitu (ID), která ji odlišuje od ostatních instancí i tehdy, sdílejí-li stejné atributy – dva uživatelé se stejným jménem a e-mailem jsou stále dvě různé entity. Value Object identitu nemá a porovnává se podle hodnot všech svých atributů – typické příklady jsou <code>Money</code>, <code>Address</code>, <code>Email</code>. Entitu lze v čase měnit, Value Object je zpravidla neměnný. Srovnání obou konceptů v <a href="#entities">sekci o Entitách</a> a <a href="#value-objects">sekci o Value Objects</a>.'
+  answer: 'Entita má jednoznačnou identitu (ID), která ji odlišuje od ostatních instancí i tehdy, sdílejí-li stejné atributy. Dva uživatelé se stejným jménem a e-mailem jsou stále dvě různé entity. Value Object identitu nemá a porovnává se podle hodnot všech svých atributů – typické příklady jsou <code>Money</code>, <code>Address</code>, <code>Email</code>. Entitu lze v čase měnit, Value Object je zpravidla neměnný. Srovnání obou konceptů v <a href="#entities">sekci o Entitách</a> a <a href="#value-objects">sekci o Value Objects</a>.'
 - question: K čemu slouží Hodnotový objekt (Value Object)?
   answer: 'Hodnotový objekt zapouzdřuje doménový koncept, který je definován pouze svými hodnotami, nikoli identitou – například peněžní částka s měnou, rozsah kalendářních dní nebo e-mailová adresa. Umožňuje přesunout pravidla platnosti a doménové chování blízko dat, která popisují, a eliminuje tzv. Primitive Obsession (používání primitivních typů tam, kde patří doménový pojem). Neměnnost Value Objectu zjednodušuje uvažování o kódu i paralelním přístupu. Více v <a href="#value-objects">sekci o Hodnotových objektech</a>.'
 - question: Co je Agregát a proč je jeho hranice důležitá?

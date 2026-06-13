@@ -130,8 +130,8 @@ doménou, která žádnou logiku nemá.
 
 ## 22.03 2. Startup – doména se mění každý sprint {#startup}
 
-Hledáte product-market fit. Co dnes je objednávka, zítra je subscription. Co dnes je
-zákazník, zítra je partner. Ubiquitous Language nelze vybudovat, pokud doménový model
+Hledáte product-market fit. Co dnes je objednávka, zítra je subscription. Zákazník se přes
+noc změní v partnera. Ubiquitous Language nelze vybudovat, pokud doménový model
 ještě neexistuje.
 
 DDD předpokládá, že doméně rozumíte dost dobře na to, abyste ji modelovali. Ve fázi hledání
@@ -323,7 +323,7 @@ final class Order extends AggregateRoot
 
 - Klasická architektura, kterou tým zná dobře – srozumitelný kód je vždy lepší než „správná“ architektura, které nikdo nerozumí.
 - DDD zaveďte na vedlejším projektu nebo v části systému jako experiment, pak přenášejte zkušenosti postupně.
-- Jako odrazový můstek se osvědčil Vernon: *Domain-Driven Design Distilled* – nejrychlejší cesta k pochopení DDD konceptů.
+- Jako odrazový můstek se osvědčil Vernon: *Domain-Driven Design Distilled* – nejstručnější úvod do DDD konceptů.
 :::
 
 ## 22.08 7. Doména je nejasná, experti nejsou k dispozici {#unclear-domain}
@@ -349,8 +349,7 @@ přepíšete stejně všechno.
 
 ## 22.09 Hybrid podle typu subdomény – DDD tam, kde dává smysl {#hybrid-subdomain}
 
-V reálných projektech odpověď „celé DDD ano, nebo celé ne“ málokdy odpovídá
-realitě. Khononov v *Learning DDD* (2021) prosazuje architekturu **podle typu subdomény**:
+V reálných projektech volba „celé DDD ano, nebo celé ne“ málokdy sedí na realitu. Khononov v *Learning DDD* (2021) prosazuje architekturu **podle typu subdomény**:
 DDD se aplikuje per Bounded Context podle toho, o jakou subdoménu jde:
 
 | Typ subdomény | Architektonický styl | Důvod |
@@ -384,18 +383,18 @@ ale migrace celého kódu na DDD je nereálná. Nastává **migration cost parad
 
 Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaná životnost
 po migraci > 3× cena migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
-je migrace marketing decision, ne technická.
+je migrace obchodní rozhodnutí, ne technické.
 
 Khononov uvádí příklad telco, který strávil 3 roky migrací na DDD jen aby
 zjistil, že platforma byla po té době nahrazena jinou při akvizici.
-3 roky engineering kapacity vyhozeno.
+3 roky inženýrské kapacity vyhozeny.
 :::
 
 ### Pseudo-DDD – varování před cargo cultem {#pseudo-ddd-cargo-cult-heading}
 
 Nejhorší výsledek není „nepoužít DDD“. Je to **pseudo-DDD**: tým má adresářovou
 strukturu DDD (`Domain/`, `Application/`, `Infrastructure/`), používá slovník
-DDD ve standupech, ale doménový model je anémický CRUD. Symptomy:
+DDD ve standupech, ale doménový model je anemický CRUD. Symptomy:
 
 - Agregáty mají gettery, settery a žádné chování.
 - Doménové eventy se publikují, ale žádný handler na ně neposlouchá ve smyslu
@@ -405,7 +404,7 @@ DDD ve standupech, ale doménový model je anémický CRUD. Symptomy:
 - Code review diskuse jsou o „je toto správné DDD“ místo „chrání tato změna
   invariant“.
 
-Pseudo-DDD má všechny náklady DDD (víc kódu, learning curve) a žádný přínos
+Pseudo-DDD má všechny náklady DDD (víc kódu, učební křivka) a žádný přínos
 (invarianty nejsou chráněné, doména není modelovaná). V tomto stavu je **honest
 CRUD lepší volba** – přiznejte si, že doména komplexní logiku nemá, a zjednodušte.
 
@@ -455,7 +454,7 @@ Pokud jste se rozhodli DDD zavést postupně v existujícím projektu, začněte
   Praktická implementace DDD s důrazem na spolupráci s doménovými experty.
 - **Vaughn Vernon: Domain-Driven Design Distilled**
   (Addison-Wesley, 2016, ISBN 978-0-134-43442-1).
-  Nejrychlejší úvod do DDD – vhodný pro týmy, které teprve zvažují, zda DDD zavést.
+  Stručný úvod do DDD – vhodný pro týmy, které teprve zvažují, zda DDD zavést.
 - **Scott Millett, Nick Tune: Patterns, Principles, and Practices of Domain-Driven Design**
   (Wrox/Wiley, 2015, ISBN 978-1-118-71470-6).
   Podrobný průvodce s praktickými vzory, včetně kapitol o tom, kdy DDD nedává smysl.

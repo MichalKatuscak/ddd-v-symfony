@@ -1123,7 +1123,7 @@ přepne do stavu `failed`. Tyto řádky chceme:
 
 Outbox má specifický I/O profil: vysoký INSERT rate, krátký životní cyklus (řádek vznikne →
 během sekund se UPDATE na `sent` → po N dnech DELETE), nikdy se nečte historie.
-PostgreSQL standardní autovacuum tunning na takový profil **není dimenzovaný**
+PostgreSQL standardní autovacuum tuning na takový profil **není dimenzovaný**
 a po několika dnech provozu narážíte na index bloat:
 
 - INSERT vytváří mrtvé řádky v tabulce i v indexech (kvůli MVCC).
@@ -1337,9 +1337,9 @@ Standardní vzor:
 
 ## 15.08 Anti-vzory {#antivzory}
 
-Outbox má jednoduché schéma, a právě proto kolem něj v code review padají stejné
-chyby, které ruší jeho garance a vrací systém k dual-write problému. Seznam níže
-zachycuje vzory, které se vracejí nejčastěji.
+Outbox má jednoduché schéma, a právě proto kolem něj v code review padají stále
+stejné chyby, které ruší jeho garance a vrací systém k dual-write problému. Níže
+jsou ty nejčastější.
 
 :::callout{type="warn"}
 ### Publish napřímo z metody agregátu {#anti-direct-publish-heading}

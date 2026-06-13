@@ -25,14 +25,14 @@ Strategický design v DDD má dvě stránky. **Bounded Context** definuje *hrani
 
 ## 03.01 Co je Context Map a proč ji nakreslit {#co-je-context-map}
 
-Eric Evans Context Map vymezuje jako přehled všech modelů ve hře: každý model na projektu dostane jméno a ohraničený kontext a u každého bodu dotyku mezi modely se popíše explicitní překlad i všechno, co se sdílí [[1]](https://www.domainlanguage.com/ddd/). Context Map není UML diagram tříd. Je to **organizační a politická mapa**, která zachycuje, kdo s kým mluví, jakým jazykem a kdo rozhoduje, když se jazyk musí změnit.
+Eric Evans Context Map vymezuje jako přehled všech modelů ve hře. Každý model na projektu dostane jméno a ohraničený kontext. U každého bodu dotyku mezi modely se popíše explicitní překlad i všechno, co se sdílí [[1]](https://www.domainlanguage.com/ddd/). Context Map není UML diagram tříd. Je to **organizační a politická mapa**, která zachycuje, kdo s kým mluví, jakým jazykem a kdo rozhoduje, když se jazyk musí změnit.
 
 Context Map má dvě složky:
 
 - **Vizuální složka** – diagram s krabičkami (Bounded Contexts) a šipkami (vztahy) opatřenými stereotypy (`<<ACL>>`, `<<OHS>>`, `U/D` pro upstream/downstream).
 - **Textová složka** – krátký dokument popisující každý vztah: odpovědné týmy, kontrakt, frekvenci změn, eskalační kontakt. Tato část je důležitější než obrázek; obrázek zastarává rychleji, než se stačí aktualizovat.
 
-Proč tu mapu nakreslit? Protože alternativou je **implicitní vztahový graf**. Tým A ví, že volá tým B – ale nikdo neřekl jakým způsobem, kdo kontrakt vlastní a co se stane, když ho někdo jednostranně změní. Implicitní vztahy vedou k integračním bugům, plíživému sdílení modelů a nakonec k *Big Ball of Mud* (viz [03.12](#big-ball-of-mud)).
+Proč tu mapu nakreslit? Protože alternativou je **implicitní vztahový graf**. Tým A ví, že volá tým B – ale nikdo neřekl, jakým způsobem, kdo kontrakt vlastní a co se stane, když ho někdo jednostranně změní. Implicitní vztahy vedou k integračním bugům, plíživému sdílení modelů a nakonec k *Big Ball of Mud* (viz [03.12](#big-ball-of-mud)).
 
 :::diagram{fig="03.1-A" title="Context Map: 5 Bounded Contexts a všech 8 typů vztahů" src="images/diagrams/12_context_mapping/context_map_patterns.svg"}
 :::
@@ -50,7 +50,7 @@ Proč tu mapu nakreslit? Protože alternativou je **implicitní vztahový graf**
 
 Kapitola pracuje s **osmi pojmenovanými vztahy**, kterými mohou Bounded Contexts spolu vyjít. Sedm z nich popsal Eric Evans v *Domain-Driven Design* (2003); Partnership doplnil později v *Domain-Driven Design Reference* (volně dostupná edice 2015). Vaughn Vernon v IDDD (2013) katalog rozšířil o nuance a kombinace, jádro pojmenování ale zůstalo. Tato osmičlenná taxonomie je užitečná ze dvou důvodů. **(1)** Dává nám sdílený slovník („zde je to Customer/Supplier, ne Conformist“). **(2)** Zviditelňuje cenu vztahu – některé jsou dražší než jiné a volba mezi nimi je strategická.
 
-*Pozn.:* Evans v *Domain-Driven Design Reference* (2015) uvádí vedle osmi vztahů ještě devátý vzor – **Big Ball of Mud**, převzatý od Foota a Yodera. Probíráme jej samostatně v sekci [03.12 Anti-vzor: Big Ball of Mud](#big-ball-of-mud). Nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu, kterému se aktivně bráníme. Osm vztahů níže jsou tedy *navržitelné* volby; Big Ball of Mud je to, co se stane, když žádnou volbu neuděláte.
+*Pozn.:* Evans v *Domain-Driven Design Reference* (2015) uvádí vedle osmi vztahů ještě devátý vzor – **Big Ball of Mud**, převzatý od Foota a Yodera. Probíráme jej samostatně v sekci [03.12 Anti-vzor: Big Ball of Mud](#big-ball-of-mud). Nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu, kterému se aktivně bráníme. Osm vztahů níže tedy představuje volby, které lze vědomě navrhnout; Big Ball of Mud je to, co se stane, když žádnou volbu neuděláte.
 
 | Vztah | Symetrický? | Coupling | Použití | Kdo o něm rozhoduje |
 |---|---|---|---|---|
@@ -80,7 +80,7 @@ Tabulka ukazuje, že vztahy nejsou nezávislé varianty – některé se kombinu
 
 **Partnership** je symetrický vztah mezi dvěma Bounded Contexts, jejichž týmy *společně uspějí, nebo společně padnou*. Sdílí doménový cíl, koordinují plánování a typicky se nasazují společným release procesem. Není to „náhodná spolupráce“ – Partnership je **vědomé strategické rozhodnutí**. Integrační náklady (synchronní porady, společný roadmap, časté merge konflikty) jsou nižší než cena, kterou by oba týmy zaplatily, kdyby pracovaly nezávisle.
 
-Eric Evans vzor zachytil v *Domain-Driven Design Reference* (2015): pokud by selhání vývoje v kterémkoli ze dvou kontextů znamenalo selhání dodávky pro oba, mají odpovědné týmy navázat partnerství – s procesem koordinovaného plánování vývoje a společným řízením integrace.
+Eric Evans vzor zachytil v *Domain-Driven Design Reference* (2015): pokud by selhání vývoje v kterémkoli ze dvou kontextů znamenalo selhání dodávky pro oba, mají odpovědné týmy navázat partnerství. Součástí je koordinované plánování vývoje a společné řízení integrace.
 
 ### Příklad: Catalog BC + Pricing BC v early-stage startupu
 
@@ -107,7 +107,7 @@ Když se týmy rozhodnou pro Partnership **aniž by si tu otázku položily**, v
 
 ### Indikátory, že Partnership přestává fungovat
 
-- Týmy začínají odložit své vlastní featury, aby čekaly na druhý tým – celková rychlost klesá.
+- Týmy začínají odkládat vlastní featury, protože čekají na druhý tým – celková rychlost klesá.
 - Retrospektivy se opakovaně točí kolem stejných „mezi-týmových“ napětí.
 - Release proces se prodlužuje, protože koordinace dvou roadmap je příliš nákladná.
 - Jeden tým získá silně odlišnou prioritu (např. Catalog SEO sprint, zatímco Pricing dělá compliance) – společné nasazení přestává mít smysl.
@@ -201,7 +201,7 @@ Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balí
 
 Nejčastější selhání Shared Kernelu je **jeho růst**. Tým si řekne: „máme tu `Money`, přidáme `Address` – vždyť adresa je taky všude stejná“. Pak `PhoneNumber`, pak `Customer`, pak `Order`… a najednou má SK 200 tříd a každá změna trvá týdny, protože vyžaduje souhlas tří týmů. V tu chvíli SK přestal být kernel a stal se *Big Ball of Shared Mud*.
 
-Pravidlo: **SK musí být malý, neměnný a recenzovaný oběma týmy**. Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých BC ve skutečnosti *odlišné*. Jen vypadají podobně a měly by se modelovat samostatně. Pokud koncept do SK skutečně patří, ale je velký, patří do samostatného BC s [Open Host Service](#ohs).
+Pravidlo: **SK musí být malý, stabilní a recenzovaný oběma týmy**. Pokud roste, znamená to, že koncepty, které do něj přidáváme, jsou v jednotlivých BC ve skutečnosti *odlišné*. Jen vypadají podobně a měly by se modelovat samostatně. Pokud koncept do SK skutečně patří, ale je velký, patří do samostatného BC s [Open Host Service](#ohs).
 
 :::callout{type="note"}
 **Shared Kernel vs. sdílená utility knihovna.** Sdílená logger knihovna nebo HTTP klient *nejsou* Shared Kernel – jsou to běžné technické závislosti. Shared Kernel obsahuje výhradně **doménový model**: VO, doménové eventy, doménové výjimky. Pokud váš „SK“ obsahuje `HttpClient`, `Cache` nebo `EventDispatcher`, není to Shared Kernel.
@@ -211,7 +211,7 @@ Pravidlo: **SK musí být malý, neměnný a recenzovaný oběma týmy**. Pokud 
 
 **Customer/Supplier** je asymetrický vztah, ve kterém upstream (*supplier*) poskytuje data nebo službu a downstream (*customer*) je konzumuje. Hlavní rozdíl proti Conformist (viz dále): downstream **má hlas**. Může od supplieru explicitně požadovat featury, supplier je do svého backlogu přijme a dohodne se na termínu. *Supplier ale rozhoduje, kdy a jak feature dodá.*
 
-Evans (2003) varuje, že volný vývoj upstream týmu může ochromit downstream s právem veta i příliš těžkopádné procedury žádostí o změny. Řešením je jasný vztah zákazník–dodavatel: downstream hraje v plánovacích schůzkách roli zákazníka upstreamu, požadavky se vyjednávají a rozpočtují, takže obě strany rozumí závazkům i termínům.
+Evans (2003) varuje na obě strany. Právo veta downstream týmu nebo těžkopádné procedury žádostí o změny ochromí volný vývoj upstreamu; downstream bez vlivu je zase vydán na milost prioritám upstreamu. Řešením je jasný vztah zákazník–dodavatel: downstream hraje v plánovacích schůzkách roli zákazníka upstreamu, požadavky se vyjednávají a rozpočtují, takže obě strany rozumí závazkům i termínům.
 
 ### Příklad: Catalog (supplier) → Ordering (customer)
 
@@ -377,7 +377,7 @@ Conformist *zaplatí*:
 - Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá doménová logika kopíruje Stripe).
 
 :::callout{type="warn"}
-**Conformist je krátkodobá úleva s dlouhodobou cenou.** Když upstream provede neslučitelnou změnu, láme se s ním downstream. Pokud má downstream *jakoukoliv* doménovou logiku, která je závislá na konzumovaných datech (a vy plánujete s tou logikou žít déle než upstream), **postavte ACL**. Conformist použijte jen tam, kde downstream je opravdu jen průchozí transformací (reporting, log forwarder, jednoduchý webhook handler).
+**Conformist je krátkodobá úleva s dlouhodobou cenou.** Když upstream provede neslučitelnou změnu, rozbije se i downstream. Pokud má downstream *jakoukoliv* doménovou logiku, která je závislá na konzumovaných datech (a vy plánujete s tou logikou žít déle než upstream), **postavte ACL**. Conformist použijte jen tam, kde downstream je opravdu jen průchozí transformací (reporting, log forwarder, jednoduchý webhook handler).
 :::
 
 ### Conformist jako přechodný stav
@@ -459,7 +459,7 @@ final class LegacyBillingTranslator
 }
 :::
 
-Translator je **jediná veřejná metoda**, `final` třída, bez stavu. Žádný stav, žádná cache, žádný vedlejší efekt. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
+Translator je `final` třída s jedinou veřejnou metodou. Žádný stav, žádná cache, žádný vedlejší efekt. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
 
 ### Test ACL: snadný a důležitý
 
@@ -624,12 +624,12 @@ Tři běžné přístupy k verzování OHS:
 OHS musí mít explicitní politiku zastarávání. Příklad pro veřejné API:
 
 - Při zveřejnění nové majoritní verze (v3) se starší verze (v1) označí jako *zastaralá* v dokumentaci.
-- Hlavička `Deprecation: true` a `Sunset: Sat, 31 Dec 2025 23:59:59 GMT` se posílá v každé odpovědi v1.
-- Minimálně 6 měsíců před odstraněním v1 jsou všichni známí klienti notifikováni.
+- Hlavička `Deprecation: true` a `Sunset: Wed, 31 Dec 2025 23:59:59 GMT` se posílá v každé odpovědi v1.
+- Minimálně 6 měsíců před odstraněním v1 dostanou všichni známí klienti oznámení.
 - Po odstranění v1 vrací `410 Gone` s odkazem na migrační průvodce.
 
 :::callout{type="pattern"}
-**OHS bez verzování není OHS.** Je to neoznačený REST endpoint. Pokud nedokážete vyjmenovat všechny neslučitelné změny za poslední rok, zveřejnit kalendář zastarávání a ukázat průvodce pro onboarding downstream konzumentů, vaše API není Open Host Service – ani když tak vypadá.
+**OHS bez verzování není OHS.** Je to neoznačený REST endpoint. Pokud nedokážete vyjmenovat neslučitelné změny za poslední rok, zveřejnit kalendář zastarávání a ukázat onboarding průvodce pro downstream konzumenty, vaše API není Open Host Service. Ani když tak vypadá.
 :::
 
 ## 03.09 Published Language (PL) {#published-language}
@@ -754,7 +754,7 @@ Pro skutečně veřejné OHS je schema-first bezpečnější. Pro interní integ
 
 ## 03.10 Separate Ways {#separate-ways}
 
-**Separate Ways** je strategické rozhodnutí, že dva Bounded Contexts *nebudou integrovány vůbec*. Přijímáme duplicitu dat nebo paralelní procesy místo integrace, protože integrační náklady by byly vyšší než hodnota integrace. Separate Ways je jediný „vztah“, který znamená „žádný vztah“.
+**Separate Ways** je strategické rozhodnutí, že dva Bounded Contexts *nebudou integrovány vůbec*. Přijímáme duplicitu dat nebo paralelní procesy, protože náklady na propojení by převýšily jeho hodnotu. Separate Ways je jediný „vztah“, který znamená „žádný vztah“.
 
 Evans (2003) připomíná, že integrace je vždy drahá a přínos bývá někdy malý. Bounded Context lze proto prohlásit za nepropojený s ostatními – vývojáři pak v takto malém rozsahu najdou specializovaná řešení bez ohledu na zbytek systému.
 
@@ -771,12 +771,12 @@ Marketingový tým si spočítá: 50 kampaní ročně, integrace stojí 200 hodi
 - Při odhlášení v hlavičce mailu (CAN-SPAM compliance) SendGrid zákazníka odhlásí lokálně.
 - Když se zákazník odhlásí v Identity, Marketing pořád může poslat kampaň, ale bude tam legal opt-out v patičce a SendGrid honoruje globální unsubscribe.
 
-Řešení má své ústupky – mohou nastat krátká okna, kdy odhlášený zákazník dostane jednu kampaň navíc – ale je to **levné** a **legal-compliant**. A hlavně: rozhodnutí padlo vědomě.
+Řešení má své ústupky – mohou nastat krátká okna, kdy odhlášený zákazník dostane jednu kampaň navíc – ale je to **levné** a **v souladu s legislativou**. A hlavně: rozhodnutí padlo vědomě.
 
 ### Kdy Separate Ways zvážit
 
 - **Low-value integrace** – synchronizovaná data nepřinesou výrazné UX zlepšení.
-- **High-effort sync** – integrace by vyžadovala distribuovaný konsensus, eventually consistent projekce, complex retry logiku.
+- **High-effort sync** – integrace by vyžadovala distribuovaný konsensus, eventually consistent projekce, složitou retry logiku.
 - **Krátká životnost jednoho z BC** – Marketing kampaňový engine se mění každé 2 roky; investice do hluboké integrace se nevyplatí.
 - **Externí SaaS** bez kvalitního API – integrace by stejně byla nestabilní.
 
@@ -858,10 +858,10 @@ Foote & Yoder upozorňují, že Big Ball of Mud je v praxi de facto standardní 
 
 Big Ball of Mud se nedá „opravit“ rewriteem. Jediný funkční postup je **Strangler Fig**: postupně vyčleňovat čisté BC, každý obklopit ACL a přesouvat funkčnost ze staré spaghetti vrstvy do nového čistého modelu. Detail viz [Migrace z CRUD do DDD](/migrace-z-crud).
 
-Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Tato kapitola pokrývá konkrétní symptomy v PHP/Symfony technologii a strategie jejich nápravy.
+Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Ta pokrývá konkrétní symptomy v PHP/Symfony technologii a strategie jejich nápravy.
 
 :::callout{type="warn"}
-**Big Ball of Mud je výsledek absence Context Mappingu.** Příčina je absence Context Mappingu. Pokud máte BBoM, prvním krokem refaktoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
+**Big Ball of Mud je výsledek absence Context Mappingu.** Pokud máte BBoM, prvním krokem refaktoringu *není* psaní kódu – je to nakreslení (čistě deskriptivní) Context Mapy popisující současný stav. Teprve s mapou v ruce se dá plánovat cesta ven.
 :::
 
 ## 03.13 Shrnutí {#summary}
@@ -874,7 +874,7 @@ Context Mapping je strategická disciplína, která dává smysl Bounded Context
 - **OHS + PL = stabilní veřejná integrace.** Open Host Service je kanál, Published Language je formát. Bez versioningu nejde o OHS.
 - **Big Ball of Mud = „ještě jsme nedělali Context Map“.** Pokud nedokážete nakreslit Context Map, máte BBoM. Cesta ven začíná deskriptivní mapou současného stavu, ne kódem.
 
-Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu](/event-storming) jako discovery workshop – odhalí jak hranice BC, tak vztahy mezi nimi v jediném sezení. Pro propojení s organizačním designem viz [Team Topologies](/team-topologies). Conway's Law říká, že Context Map a org chart musí korespondovat. Jinak jeden z nich vyhraje a ten druhý se rozsype.
+Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu](/event-storming) jako discovery workshop – odhalí jak hranice BC, tak vztahy mezi nimi v jediném sezení. Pro propojení s organizačním designem viz [Team Topologies](/team-topologies). Podle Conway's Law architektura kopíruje komunikační strukturu organizace – Context Map a org chart proto musí korespondovat. Jinak jeden z nich vyhraje a ten druhý se rozsype.
 
 :::faq{}
 - question: Jak často aktualizovat Context Map?
@@ -884,7 +884,7 @@ Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu]
 - question: ACL vs. Adapter – jaký je rozdíl?
   answer: 'Adapter (z Hexagonal Architecture / GoF) je technický vzor: třída, která implementuje port a překládá volání na konkrétní knihovnu (Doctrine, HTTP klient, Redis). ACL je strategický vzor: vrstva, která chrání váš doménový model před modelem cizího Bounded Contextu. ACL je <em>typicky implementován pomocí Adapterů</em>, ale ne každý Adapter je ACL. ACL má navíc tři specifické odpovědnosti – schema mapping, concept translation a anti-corruption (filtraci) – které „obyčejný“ Adapter nemá. Detail v <a href="#acl">sekci 03.07</a>.'
 - question: Co dělat, když si všimnu Conformist vztahu, který tam neměl být?
-  answer: 'Tři kroky. (1) Ověřte, že je to opravdu nechtěný Conformist – někdy je to vědomé strategické rozhodnutí, které tým zapomněl zdokumentovat. (2) Pokud je nechtěný, vyčíslete cenu jeho opravy: kolik domén pojmů upstreamu prosáklo do downstream modelu, kolik testů by bylo třeba přepsat, jak často upstream dělá breaking changes. (3) Otevřete ADR (Architecture Decision Record) s návrhem migrace na ACL – typicky inkrementálně, jeden translator za sprintem. Dokud není ADR schválené, držte si Conformist jako známý technický dluh v backlogu, ne jako překvapení v produkci.'
+  answer: 'Tři kroky. (1) Ověřte, že je to opravdu nechtěný Conformist – někdy je to vědomé strategické rozhodnutí, které tým zapomněl zdokumentovat. (2) Pokud je nechtěný, vyčíslete cenu jeho opravy: kolik doménových pojmů upstreamu prosáklo do downstream modelu, kolik testů by bylo třeba přepsat, jak často upstream dělá breaking changes. (3) Otevřete ADR (Architecture Decision Record) s návrhem migrace na ACL – typicky inkrementálně, jeden translator za sprint. Dokud není ADR schválené, držte si Conformist jako známý technický dluh v backlogu, ne jako překvapení v produkci.'
 - question: Je Context Map součást Architecture Decision Record (ADR)?
   answer: 'Context Map sama o sobě není ADR – je to <em>průběžně udržovaný stav</em>, zatímco ADR popisuje konkrétní rozhodnutí v čase. Ale <strong>každá změna Context Mapy by měla mít ADR</strong>: „Změnili jsme vztah Catalog ↔ Pricing z Partnership na Customer/Supplier, protože…“. ADR pak slouží jako historie změn Context Mapy a dává budoucím inženýrům kontext, proč je mapa taková, jaká je. V repu typicky drží mapa <code>docs/context-map.md</code>, ADR <code>docs/adr/0023-rozdeleni-catalog-pricing.md</code>.'
 - question: Jak Context Map kreslit v textu, ne nástrojem?
@@ -898,6 +898,5 @@ Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu]
 - Vaughn Vernon, *Implementing Domain-Driven Design*, kap. 3 „Context Maps“ (Addison-Wesley, 2013) [[2]](https://kalele.io/books/).
 - Brian Foote & Joseph Yoder, *Big Ball of Mud*, PLoP 1997 [[3]](http://www.laputan.org/mud/).
 - Martin Fowler, *Bounded Context* (bliki) [[4]](https://martinfowler.com/bliki/BoundedContext.html).
-- Martin Fowler, *Context Map* (bliki) [[5]](https://martinfowler.com/bliki/ContextMap.html).
 - Vaughn Vernon, *Domain-Driven Design Distilled* (Addison-Wesley, 2016) – zkrácená přístupnější verze pro úvod do strategického designu.
 - DDD Crew, *Context Mapping* shareable resources [[6]](https://github.com/ddd-crew/context-mapping) – komunitní vizuální notace pro Context Mapping.

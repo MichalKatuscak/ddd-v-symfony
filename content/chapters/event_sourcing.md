@@ -23,7 +23,7 @@ github_examples: Chapter06_EventSourcing
 
 Tradiční CRUD persistence má slepou skvrnu: při každé změně přepíše předchozí stav a veškerá
 historie se nenávratně ztrácí. Event Sourcing (ES) ukládá stav systému jako **sekvenci
-neměnných událostí**, jež k danému stavu
+neměnných událostí**, jež k němu
 vedly [[1]](https://martinfowler.com/eaaDev/EventSourcing.html).
 Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty.
 Aktuální stav agregátu pak vzniká *přehráním* (replay) těchto událostí od počátku.
@@ -97,7 +97,7 @@ vstupem pro aktualizaci projekcí.
 ## 13.03 Kdy použít Event Sourcing {#kdy-pouzit}
 
 Event Sourcing přidává konkrétní možnosti – auditní log, replay, temporální dotazy – výměnou
-za vyšší složitost infrastruktury i kódu. Rozhodnutí o jeho zavedení předchází úvaha,
+za vyšší složitost infrastruktury i kódu. Před zavedením stojí úvaha,
 zda v daném kontextu přínosy převažují nad náklady na implementaci a provoz. Tato sekce dává rozhodovací rámec;
 zbytek kapitoly rozebírá implementaci.
 
@@ -1009,7 +1009,7 @@ Outbox dává **at-least-once** doručení uvnitř jednoho kanálu. Konkrétně:
 
 - **At-least-once:** pokud relay spadne mezi dispatchem a updatem checkpointu, stejná událost se po restartu publikuje znovu. Konzumenti musí být idempotentní – přesně tak, jak ukazuje následující sekce u projektorů.
 - **Pořadí:** relay publikuje vzestupně podle `id`. Uvnitř streamu jednoho agregátu to odpovídá pořadí verzí, takže projektor uvidí `OrderCreated` před `OrderShipped`. Napříč agregáty pořadí zajištěno není a kvůli gap problému popsanému výše nejde o spolehlivé globální pořadí commitů.
-- **Latence:** mezi commitem události a jejím doručením k projektoru vzniká okno odpovídající polling intervalu relay. V praxi 100 ms až 1 s; pro nižší latenci přepněte na výstupní transport, který umí push (např. PostgreSQL `LISTEN/NOTIFY` nebo Debezium).
+- **Latence:** mezi commitem události a jejím doručením k projektoru vzniká okno odpovídající polling intervalu relay. V praxi 100 ms až 1 s; nižší latenci dává výstupní transport, který umí push (např. PostgreSQL `LISTEN/NOTIFY` nebo Debezium).
 
 ## 13.09 Praktické problémy projekcí {#prakticke-problemy-projekci}
 
@@ -1293,8 +1293,8 @@ událostí zvažte dávkové zpracování s `--batch-size` a monitoring paměti.
 
 ### Eventual consistency a uživatelské rozhraní
 
-Asynchronní projekce vytváří časové okno (typicky milisekundy až jednotky sekund), kdy uživatel
-akci provedl, ale read model ji ještě nezobrazuje – po kliknutí na „Potvrdit“ svítí na výpisu
+Asynchronní projekce vytváří časové okno, typicky milisekundy až jednotky sekund, kdy uživatel
+akci provedl, ale read model ji ještě nezobrazuje. Po kliknutí na „Potvrdit“ svítí na výpisu
 stále „Draft“. Nejde o bug, nýbrž o vlastnost architektury. Strategie pro UI – optimistickou
 aktualizaci, potvrzovací stránku, polling či SSE – rozebírá sekce
 [Eventual Consistency v praxi](/cqrs#eventual-consistency) v kapitole CQRS.
@@ -1311,8 +1311,8 @@ s eventual consistency v raných fázích projektu.
 ## 13.10 Snapshotting {#snapshotting}
 
 Se stárnutím systému rostou event streamy agregátů. Agregát s tisíci událostmi vyžaduje
-při každém command handleru načtení a přehrání tisíce řádků z databáze. Výkonnostní problém
-se v provozu objeví dřív, než tým čeká.
+při každém zpracování commandu načíst a přehrát celý ten objem řádků z databáze. Výkonnostní problém
+se v provozu objeví dřív, než tým očekává.
 
 Vzor **snapshotting** uchová aktuální stav agregátu v pravidelných intervalech – po každých
 N událostech nebo časově. Při příštím načtení repozitář vyhledá poslední snapshot a z Event
@@ -1452,8 +1452,7 @@ final class SnapshottingOrderRepository
 Aby byl snapshotting funkční, musí agregát implementovat metody `toSnapshot(): array`
 (serializace aktuálního stavu) a statickou `reconstituteFromSnapshot(array $state): static`
 (deserializace). Na rozdíl od `reconstituteFromEvents()` tato metoda nevytváří apply*()
-volání – přímo nastaví properties z uloženého snímku. Je proto nezbytné zajistit, aby se formát
-snapshotu vyvíjel v souladu se změnami doménového modelu.
+volání – přímo nastaví properties z uloženého snímku. Formát snapshotu se proto musí vyvíjet spolu s doménovým modelem.
 
 :::callout{type="warn"}
 ### Invalidace snapshotů při změně schématu {#snapshot-invalidation-heading}
@@ -1722,10 +1721,10 @@ během přechodného období (aplikace zapisuje do obou streamů, dokud migrace 
 :::callout{type="pattern"}
 ### Strategie 2: Multi-version event store {#multi-version-heading}
 
-V Event Store fyzicky koexistují **obě verze** schémat. Repozitář při hydration
-vybere podle `aggregate_version` mark, který stream číst. Nově vzniklé agregáty
-zapisují v3, staré dál ve v1. Přepnutí na nový tvar nastane teprve při příští
-domain operation (lazy migration).
+V Event Store fyzicky koexistují **obě verze** schémat. Repozitář při rekonstrukci agregátu
+rozhodne podle značky `aggregate_version`, který stream číst. Nově vzniklé agregáty
+zapisují v3, staré dál ve v1. Na nový tvar se agregát přepne teprve při příští
+doménové operaci (lazy migration).
 
 Cena: doménový kód musí umět obsloužit obě verze (větvení v factory metodách).
 Vhodné pokud breaking change ovlivňuje jen malou část streamů.
@@ -1748,34 +1747,34 @@ hodnotu. Audit trail je explicitní – stará data jsou zachována, oprava je
 samostatný fakt.
 
 Cena: doménový model získává „šum“ event typů, které řeší minulé bugy.
-Po pár letech provozu je 5–10 % event types historických oprav.
+Po pár letech provozu tvoří historické opravy znatelnou část event typů.
 :::
 
 ### Stream archivation a storage tiering {#archivation-heading}
 
-Long-lived agregáty (`UserAccount`, `Subscription`, `LedgerAccount`) generují
-po letech provozu desítky až stovky tisíc eventů. Aktivní Event Store tabulka
-roste, queries pomalují, snapshots musí být časté.
+Agregáty s dlouhým životním cyklem (`UserAccount`, `Subscription`, `LedgerAccount`) nasbírají
+za roky provozu desítky až stovky tisíc událostí. Aktivní Event Store tabulka
+roste, dotazy se zpomalují a snapshoty musí vznikat častěji.
 
 Standardní řešení: **storage tiering** podle stáří streamu.
 
 - **Hot tier** (PostgreSQL master) – události za posledních 90 dní, dotazy < 10 ms.
-- **Warm tier** (Postgres replica nebo Doctrine on slow disk) – události 90 dní – 2 roky.
-  Hydration sahá sem jen pro forensické dotazy nebo plný replay projekce.
+- **Warm tier** (Postgres replika nebo tatáž databáze na pomalejším disku) – události 90 dní – 2 roky.
+  Hydration sahá sem jen pro forenzní dotazy nebo plný replay projekce.
 - **Cold tier** (S3, Glacier, on-prem object storage) – události starší než 2 roky.
-  Read-only, accessed jen pro auditní reporty a compliance.
+  Pouze pro čtení; přístup k němu vyžadují jen auditní reporty a compliance.
 
 Implementace: každou noc se spustí job, který
 přesune `event_store` řádky starší než N dní do `event_store_archive` tabulky
-(nebo přímo do S3 jako Parquet). Repozitář při hydration **ve výchozím nastavení cold tier nečte** – pokud agregát potřebuje plný replay, operátor explicitně rehydratuje
-ze snapshotu novějšího než cold cutoff. Pro audit dotazy funguje zvlášť query
+(nebo přímo do S3 jako Parquet). Repozitář při hydration **ve výchozím nastavení cold tier nečte** – pokud agregát potřebuje plný replay, operátor jej explicitně obnoví
+ze snapshotu novějšího, než je hranice cold tieru. Pro audit dotazy funguje zvlášť query
 service, který umí číst všechny tři tiers.
 
 :::callout{type="warn"}
 ### GDPR a immutable Event Store {#gdpr-event-store-heading}
 
-Event Store je per definitionem append-only, ale GDPR požaduje právo na výmaz
-(article 17). Konflikt řeší **crypto shredding**: osobní údaje v eventech
+Event Store je z definice append-only, ale GDPR požaduje právo na výmaz
+(čl. 17). Konflikt řeší **crypto shredding**: osobní údaje v eventech
 jsou zašifrovány klíčem per-subject. Po žádosti o výmaz se zničí klíč,
 události zůstávají, ale jsou nečitelné.
 
@@ -1796,7 +1795,7 @@ leží v separátní tabulce s možností DELETE.
 - question: Jaký je vztah mezi Event Sourcingem a CQRS?
   answer: 'Event Sourcing a CQRS jsou dva nezávislé vzory, které se často kombinují. Každý z nich lze zavést samostatně: CQRS funguje i s klasickou ORM persistencí, ES lze implementovat i bez rozdělení na write a read modely. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů) – což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
 - question: Co je Event Store a k čemu slouží?
-  answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (EventStoreDB), o PHP knihovnu nad relační databází (EventSauce, Broadway, prooph), nebo o vlastní minimalistickou nadstavbu, jakou staví tato kapitola. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
+  answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (KurrentDB, dříve EventStoreDB), o PHP knihovnu nad relační databází (EventSauce, Broadway, prooph), nebo o vlastní minimalistickou nadstavbu, jakou staví tato kapitola. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
 - question: Co jsou projekce v Event Sourcingu?
   answer: 'Projekce je proces, který naslouchá událostem z event store a buduje z nich read modely – denormalizované datové struktury určené pro rychlé dotazy. Projekce bývá jednoúčelová: každý read model má obvykle vlastní projekci, která ho od začátku nebo od posledního zpracovaného offsetu udržuje aktuální. Projekce lze kdykoli přebudovat (rebuild) přehráním událostí od počátku, čímž se bezpečně opravují chyby v read modelech. Praktický příklad v <a href="#projekce">sekci Projekce</a>.'
 - question: K čemu slouží snapshotting v Event Sourcingu?

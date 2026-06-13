@@ -20,6 +20,8 @@ difficulty: 4
 
 ## 24.01 Úvod {#introduction}
 
+Ilustrativní scénář: tým, čísla i rozhodnutí v této kapitole jsou smyšlené. Slouží jako souvislá ukázka, jak DDD a CQRS drží pohromadě napříč jedním projektem.
+
 Tým dostal zadání postavit systém pro správu projektů. Uživatelé zakládají projekty, přidávají úkoly, přiřazují
 je členům týmu, mění jejich stav a komentují je. Triviální zadání. První instinkt vývojáře je tabulka `projects`,
 tabulka `tasks` s cizím klíčem, tabulka `comments` a `UserService`, který vše obslouží. Za tři měsíce má `TaskService`
@@ -126,7 +128,7 @@ v kódu odpovídá slovníku v týmu.
 
 ## 24.04 Architektura {#architecture}
 
-Strategická úroveň drží pět bounded contexts a kontextovou mapu jejich vztahů. Taktická úroveň drží
+Strategická úroveň drží pět bounded contexts a kontextovou mapu jejich vztahů. Na taktické úrovni žijí
 agregáty, hodnotové objekty, doménové události a doménové služby. Kód je organizovaný do vertikálních sliců:
 každá feature obsahuje vše od příkazu po view model. Změna v přiřazování úkolů se neprojeví v reportování,
 protože obě věci žijí v různých slicích a komunikují přes explicitní kontrakty.
@@ -176,14 +178,12 @@ Konkrétní ukázka projekce, která naslouchá událostem ze tří kontextů, j
 
 ### Taktický design a struktura projektu
 
-Na taktické úrovni implementace pokrývá tyto DDD vzory:
+Na taktické úrovni implementace pokrývá tyto DDD vzory. Základ tvoří entity – objekty s identitou, které se v čase mění (User, Project, Task) – a hodnotové objekty, neměnné nositele konceptů domény bez vlastní identity (UserId, ProjectId, TaskStatus). Nad nimi stojí čtyři další stavební kameny:
 
-- **Entity** – Objekty s identitou, které se v čase mění (např. User, Project, Task).
-- **Value Objects** – Neměnné objekty bez identity, které reprezentují koncepty v doméně (např. UserId, ProjectId, TaskStatus).
-- **Aggregates** – Skupiny objektů, které doména považuje za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).
-- **Domain Events** – Události, které nastávají v doméně a mají význam pro doménové experty (např. ProjectCreated, TaskAssigned).
-- **Repositories** – Objekty, které zapouzdřují přístup k persistenci agregátů (např. ProjectRepository, TaskRepository).
-- **Domain Services** – Služby, které implementují doménovou logiku, která nepatří do žádné entity nebo hodnotového objektu (např. TaskAssignmentService).
+- **Aggregates** – skupiny objektů, které doména považuje za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).
+- **Domain Events** – co se v doméně stalo a má význam pro doménové experty (ProjectCreated, TaskAssigned).
+- **Repositories** – zapouzdřují přístup k persistenci agregátů, takže doménový kód o databázi neví (ProjectRepository, TaskRepository).
+- **Domain Services** – nesou doménovou logiku, která nepatří do žádné entity ani hodnotového objektu (např. TaskAssignmentService).
 
 Struktura adresářů odráží oba designy zároveň. Každý bounded context má vlastní doménovou vrstvu, infrastrukturu i feature slice; sdílené komponenty žijí v `Shared/`:
 
@@ -754,7 +754,7 @@ k nekonzistentnímu stavu, pokud se mezitím agregát změnil.
 
 Identifikátory `ProjectId`, `TaskId` a `UserId` sdílí společné
 rozhraní: konstruktor bez argumentů vygeneruje nové UUID, konstruktor se stringem ho ověří
-a uloží. Metoda `value()` vrací surový string pro persistenci, `equals()`
+a uloží. Property `$value` nese surový string pro persistenci, `equals()`
 srovnává podle hodnoty. `TaskStatus` je výčtový typ s explicitním doménovým jazykem.
 Plný rozbor Value Objektů je v kapitole
 [Základní koncepty DDD](/zakladni-koncepty#value-objects).

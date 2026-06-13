@@ -48,7 +48,7 @@ a CRUD jsou legitimní volbou pro aplikace s jednoduchými doménovými pravidly
 :::callout{type="note"}
 ### Kdy DDD přináší hodnotu {#kdy-ddd-heading}
 
-- Doména obsahuje komplexní doménová pravidla, která se často mění.
+- Doména obsahuje komplexní pravidla, která se často mění.
 - Existují přechody stavů entit (objednávka: vytvořena → potvrzena → odeslána → doručena).
 - Tým komunikuje s doménovými experty a potřebuje sdílený jazyk.
 - Aplikace je dlouhodobě rozvíjena a musí být udržovatelná v horizontu let.
@@ -296,8 +296,8 @@ výchozí stav uživatele a vedlejší efekt registrace (uvítací e-mail jako D
 
 ## 18.04 Krok 2: Extrakce doménové vrstvy {#extrakce-domainove-vrstvy}
 
-Extrakce doménové vrstvy přesouvá doménová pravidla z kontrolerů a service tříd do doménových
-objektů. Cíl: doménové objekty si své invarianty hlídají samy. Nikdo zvenčí je nemůže obejít.
+Extrakce doménové vrstvy přesouvá doménová pravidla z kontrolerů a service tříd do objektů,
+které je vlastní. Cíl: tyto objekty si své invarianty hlídají samy. Nikdo zvenčí je nemůže obejít.
 
 ### Přesunutí doménových pravidel do doménových objektů
 

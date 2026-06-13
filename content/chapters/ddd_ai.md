@@ -140,8 +140,8 @@ s ubiquitous language. Tím, že vývojáři tyto soubory píší, provádějí 
 modelování, aniž by to tak nutně nazývali.
 
 Druhý pohled přinášejí data z GitClear z roku 2024, analyzovaná Visual Studio Magazine. Code
-churn je podíl řádků přepsaných nebo smazaných do dvou týdnů od vytvoření. Podle tohoto výzkumu
-se u AI generovaného kódu v roce 2024 přibližně zdvojnásobil oproti stavu z roku 2021,
+churn je podíl řádků přepsaných nebo smazaných do dvou týdnů od vytvoření. Podle projekce GitClear
+se měl u AI generovaného kódu v roce 2024 přibližně zdvojnásobit oproti stavu z roku 2021,
 před nástupem AI. GitClear popisuje výsledek jako kód „lokálně koherentní,
 ale architektonicky nekonzistentní“. Každý soubor nebo funkce může být syntakticky správná
 a pro svůj bezprostřední účel funkční. Větší architektonické vzory – hranice
@@ -291,7 +291,7 @@ pomocí generativní AI – konkrétně generování doménově specifických
 JSON objektů. Předběžné výsledky ukazují, že explicitní strukturovaný kontext
 vede k přesnějším výstupům než nestrukturovaný nebo implicitní.
 
-ThoughtWorks Technology Radar vol. 33 (duben 2025) sice přímo nezmiňuje DDD
+ThoughtWorks Technology Radar vol. 33 (listopad 2025) sice přímo nezmiňuje DDD
 v kontextu AI, ale obsahuje několik relevantních blipů. V kategorii Adopt je „Using GenAI
 to understand legacy codebases“. V kategorii Assess je „Context engineering“
 a „Anchoring coding agents to a reference application“. Všechny tyto techniky
