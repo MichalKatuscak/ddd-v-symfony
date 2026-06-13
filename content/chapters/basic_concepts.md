@@ -7,7 +7,7 @@ meta_description: "Základní stavební kameny taktického DDD: entity, hodnotov
 meta_keywords: "DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-09"
+modified: "2026-06-13"
 breadcrumb_name: Základní koncepty
 schema_type: TechArticle
 schema_headline: "Základní koncepty Domain-Driven Design"

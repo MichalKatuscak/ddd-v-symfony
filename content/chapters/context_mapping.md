@@ -7,7 +7,7 @@ meta_description: "Strategický DDD: Context Map a 8 vztahů mezi Bounded Contex
 meta_keywords: "Context Map, Context Mapping, Bounded Context, Anti-Corruption Layer, ACL, Open Host Service, Published Language, Shared Kernel, Customer Supplier, Conformist, Partnership, Separate Ways, Symfony Messenger"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-09"
+modified: "2026-06-13"
 breadcrumb_name: Context Mapping
 schema_type: TechArticle
 schema_headline: "Bounded Context a Context Mapping – 8 vztahů mezi Bounded Contexts"

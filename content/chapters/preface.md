@@ -7,7 +7,7 @@ meta_description: "Jak číst tuto knihu o Domain-Driven Design v Symfony 8 – 
 meta_keywords: "předmluva, DDD, Symfony, jak číst, doporučená cesta čtení"
 og_type: article
 published: "2026-05-04"
-modified: "2026-06-09"
+modified: "2026-06-13"
 breadcrumb_name: Předmluva
 schema_type: TechArticle
 schema_headline: "Předmluva: Domain-Driven Design v Symfony 8"

@@ -7,7 +7,7 @@ meta_description: "Mapování DDD Bounded Context na microservice. Kdy BC = serv
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-09"
+modified: "2026-06-13"
 breadcrumb_name: DDD a microservices
 schema_type: TechArticle
 schema_headline: "DDD a microservices – Bounded Context jako service boundary"

@@ -7,7 +7,7 @@ meta_description: "Strategický DDD: identifikace Core, Supporting a Generic sub
 meta_keywords: "Core Domain, Supporting Subdomain, Generic Subdomain, strategický DDD, subdoména, Eric Evans, business strategy, build vs buy, Symfony"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-09"
+modified: "2026-06-13"
 breadcrumb_name: Subdomény
 schema_type: TechArticle
 schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat modelovací úsilí"

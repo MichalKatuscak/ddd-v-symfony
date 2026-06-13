@@ -40,3 +40,7 @@ services:
     App\Twig\ChaptersExtension:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Command\StampModifiedCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
