@@ -812,7 +812,7 @@ zprávu automaticky zopakuje.
 ### Multi-worker Process Manager – co se rozpadne {#multi-worker-heading}
 
 Optimistic lock řeší konflikt na *jedné* instanci ságy. V produkci se stane
-něco složitějšího: stejná zpráva (např. `PaymentCompleted` z téže objednávky)
+něco složitějšího: stejná zpráva (např. `PaymentSucceeded` z téže objednávky)
 dorazí do více worker instancí současně (Messenger `numprocs > 1`),
 nebo *různé* eventy z téže ságy dorazí ve špatném pořadí (Kafka partition
 balancing, RabbitMQ multiple consumers). Důsledky:
@@ -822,14 +822,14 @@ balancing, RabbitMQ multiple consumers). Důsledky:
   oba vidí prázdný stav, oba vytvoří `OrderSaga`. UNIQUE constraint na
   `order_id` jednoho z nich zabije, druhý zůstane. Bez constraintu vzniknou dvě paralelní
   ságy téže objednávky a soupeří o stav.
-- **Out-of-order events.** `PaymentCompleted` dorazí dřív než
-  `OrderConfirmed`, sága zatím není ve stavu „čeká na platbu“. Process Manager
+- **Out-of-order events.** `PaymentSucceeded` dorazí dřív než
+  `OrderPlaced`, sága ještě není ve stavu `AwaitingPayment`. Process Manager
   netuší, co s ní – buď event zahodí (bug v doméně), nebo ho zařadí do
   *pending* fronty pro pozdější zpracování (komplexní stavový automat).
-- **Kompenzační závody.** Sága rozhodne `Compensate`, vyšle `RefundPayment`,
-  a *zároveň* dorazí pomalá `PaymentCompleted` z jiného workeru. Druhá
-  zpráva může resetovat stav ságy zpět na `Confirmed`, ale `Refund` už
-  běží – peníze odešly i přijdou.
+- **Kompenzační závody.** Sága rozhodne `Compensate`, vyšle `RefundCustomer`,
+  a *zároveň* dorazí pomalá `PaymentSucceeded` z jiného workeru. Druhá
+  zpráva může resetovat stav ságy z `Compensating` zpět na `AwaitingShipment`,
+  ale `RefundCustomer` už běží – peníze odešly i přijdou.
 
 Standardní obrana proti všem třem:
 
@@ -1599,7 +1599,7 @@ příkazy, a místo databáze in-memory repozitář:
 :::callout{type="pattern"}
 ### PHPUnit test ságy {#saga-unit-test-heading}
 
-:::code{language="php" filename="src/Tests/Ordering/Application/Saga/OrderProcessManagerTest.php"}
+:::code{language="php" filename="tests/Ordering/Application/Saga/OrderProcessManagerTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -1705,7 +1705,7 @@ final class OrderProcessManagerTest extends TestCase
 
 Testovací in-memory implementace repozitáře, kterou používáme místo Doctrine:
 
-:::code{language="php" filename="src/Tests/Ordering/Application/Saga/InMemoryOrderSagaRepository.php"}
+:::code{language="php" filename="tests/Ordering/Application/Saga/InMemoryOrderSagaRepository.php"}
 <?php
 
 declare(strict_types=1);

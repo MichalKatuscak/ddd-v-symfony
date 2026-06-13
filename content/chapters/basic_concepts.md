@@ -332,7 +332,7 @@ class OrderItem
         private readonly Money $unitPrice,
     ) {
         if ($quantity <= 0) {
-            throw new \DomainException('Množství musí být kladné.');
+            throw new \InvalidArgumentException('Množství musí být kladné.');
         }
     }
 

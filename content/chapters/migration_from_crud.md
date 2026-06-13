@@ -35,7 +35,7 @@ na nevhodná místa.
 - **Doménová logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
 - **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
 - **Nízká testovatelnost** – Doménová logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlé mockování.
-- **Komunikační propast** – Vývojáři a doménoví experti používají jiný slovník. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
+- Vývojáři a doménoví experti používají jiný slovník – **komunikační propast**. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
 :::
 
 ### Kdy DDD přináší hodnotu a kdy je CRUD dostačující

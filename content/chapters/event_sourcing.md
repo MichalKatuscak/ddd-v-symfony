@@ -89,7 +89,7 @@ read side ji přečte a aktualizuje projekci.
 ### Zásadní rozdíl mezi ES a CQRS {#es-cqrs-rozdil-heading}
 
 **CQRS** odděluje zápis od čtení – jde o organizační vzor zodpovědností.
-**Event Sourcing** je vzor persistence: říká, jak ukládat stav.
+**Event Sourcing** řeší něco jiného: jak stav fyzicky ukládat.
 Při jejich kombinaci ES zásobuje CQRS read side daty – každá událost o změně je současně
 vstupem pro aktualizaci projekcí.
 :::

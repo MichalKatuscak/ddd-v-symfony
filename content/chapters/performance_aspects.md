@@ -1057,7 +1057,7 @@ Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP 
 Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
 pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**
 (Doctrine používá), takže potřebujete buď session pooling (méně efektivní),
-nebo PgBouncer ve verzi 1.21+ s `prepared_statements = true`.
+nebo PgBouncer ve verzi 1.21+ s `max_prepared_statements` > 0 (LRU cache prepared statements v transaction módu; volba `prepared_statements = true` neexistuje).
 
 ### Snapshotting v Event Sourcingu (přehled) {#snapshotting-prehled-heading}
 

@@ -13,7 +13,7 @@ schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
 chapter_number: "04"
 category: Základy
-deck: "Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě nejprověřenější workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Průvodce, který v Symfony projektu funguje."
+deck: "Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě prověřené workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Průvodce, který v Symfony projektu funguje."
 reading_time: 25
 difficulty: 2
 ---

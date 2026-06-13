@@ -123,7 +123,7 @@ Strategický design rozhoduje, jak rozdělit systém na samostatné části a ja
 - **Conformist** – Vztah, kde jeden kontext přijímá model jiného kontextu bez možnosti jej ovlivnit.
 - **Anti-Corruption Layer** – Vrstva, která překládá mezi dvěma bounded contexts s různými modely, aby chránila integritu cílového modelu.
 - **Open Host Service** – Služba, která definuje protokol pro přístup k bounded contextu, aby usnadnila integraci s mnoha jinými kontexty.
-- **Published Language** – Dobře dokumentovaný jazyk, který usnadňuje komunikaci mezi různými bounded contexts.
+- Komunikaci mezi kontexty usnadňuje dobře dokumentovaný **Published Language**.
 
 ### Bounded Context: hranice platnosti modelu {#bounded-context}
 
@@ -147,7 +147,7 @@ Taktický design řeší konkrétní implementaci doménového modelu uvnitř je
 - **Domain Event** – Doménová událost reprezentuje něco, co se stalo v doméně a má význam pro doménové experty. Slouží mimo jiné ke komunikaci mezi různými bounded contexts.
 - **Service** – Doménová služba implementuje doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu. Služby jsou bezstavové a jejich názvy by měly být odvozeny z Ubiquitous Language.
 - **Repository** – Repozitář zapouzdřuje logiku pro přístup k persistenci agregátů. Poskytuje abstrakci nad datovým úložištěm a umožňuje pracovat s agregáty jako s objekty v paměti.
-- **Factory** – Továrna zapouzdřuje vytváření složitých objektů a agregátů. Hodí se, když konstrukce vyžaduje víc kroků nebo když nově vzniklý objekt musí od počátku splňovat invarianty.
+- Vytváření složitých objektů a agregátů zapouzdřuje **Factory** (továrna). Hodí se, když konstrukce vyžaduje víc kroků nebo když nově vzniklý objekt musí od počátku splňovat invarianty.
 
 :::callout{type="pattern"}
 ### Příklad: Agregát v e-commerce doméně {#aggregate-example-heading}

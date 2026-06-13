@@ -32,7 +32,7 @@ Kniha je psaná pro pět typických rolí:
 - **Symfony developer**, který si všiml, že větší projekty „rostou“ jinak než malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
 - **Architekt**, který stojí před rozhodnutím, jaký přístup k modelování doménové logiky zvolit – DDD, klasické CRUD, modulární monolit, nebo microservices.
 - **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management v termínech DORA metrik a obchodní hodnoty.
-- **Vývojář migrující z CRUD aplikace na DDD**, který má v produkci spaghetti kód a hledá inkrementální cestu ven.
+- Poslední je **vývojář migrující z CRUD aplikace na DDD** – v produkci má spaghetti kód a hledá inkrementální cestu ven.
 
 Pro každou roli kniha nabízí jinou doporučenou cestu čtení – viz [P.03 Jak číst tuto knihu](#jak-cist).
 

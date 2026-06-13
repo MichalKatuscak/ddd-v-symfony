@@ -927,10 +927,10 @@ namespace App\UserManagement\Infrastructure\Repository;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
-use App\UserManagement\Domain\Repository\UserRepositoryInterface;
+use App\UserManagement\Domain\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class DoctrineUserRepository implements UserRepositoryInterface
+class DoctrineUserRepository implements UserRepository
 {
     public function __construct(private readonly EntityManagerInterface $em) {}
 
@@ -949,7 +949,7 @@ class DoctrineUserRepository implements UserRepositoryInterface
 // SPRÁVNĚ: Aplikační vrstva (Command Handler) orkestruje, doména rozhoduje
 namespace App\UserManagement\Application\Command;
 
-use App\UserManagement\Domain\Repository\UserRepositoryInterface;
+use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\Exception\UserNotFoundException;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
@@ -959,7 +959,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 class ActivateUserHandler
 {
     public function __construct(
-        private readonly UserRepositoryInterface $users,
+        private readonly UserRepository $users,
         private readonly EntityManagerInterface $em,
         private readonly MessageBusInterface $eventBus
     ) {}
@@ -1008,7 +1008,7 @@ Méně nákladná cesta začíná minimálním přístupem a přidává DDD prvk
 
 ## 21.09 Anti-vzor: Ignorování Ubiquitous Language {#missing-ubiquitous-language}
 
-Ubiquitous Language je společný jazyk vývojářů, doménových expertů a dalších zainteresovaných stran. Používá se konzistentně v kódu, dokumentaci, testech i v komunikaci. Když tento princip selhává, tatáž doménová entita nese různé názvy na různých místech. Výsledkem jsou nedorozumění, chyby a ztráta doménového vhledu v kódu.
+Když selže Ubiquitous Language, tatáž doménová entita nese různé názvy na různých místech. Společný jazyk vývojářů a doménových expertů přestane platit a vývojář víc překládá mezi vrstvami, než modeluje doménu. Výsledkem jsou nedorozumění, chyby a ztráta doménového vhledu v kódu.
 
 :::callout{type="warn"}
 ### Špatně: Různé názvy pro stejný koncept {#ubiq-spatne-heading}

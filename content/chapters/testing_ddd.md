@@ -473,7 +473,7 @@ odolnosti vůči refaktoringu.
 - **Stub** – Vrací předpřipravené odpovědi bez logiky. Vhodný, když potřebujeme, aby závislost vrátila konkrétní hodnotu, ale nezajímá nás, zda a kolikrát byla volána. Příklad: `$stub->method('findById')->willReturn($user)`.
 - **Mock** – Stub s ověřením volání. Ověřuje, že byla zavolána konkrétní metoda s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: `$mock->expects($this->once())->method('save')`.
 - **Fake** – Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá databázovou závislost, ale chová se jako skutečná implementace. **Doporučený přístup pro DDD repozitáře** – umožňuje psát čitelné testy bez konfigurování mocků.
-- **Spy** – Podobný mocku, ale ověření probíhá až po akci (post-assertion style). Méně časté v PHP.
+- Méně častý je **spy** – podobný mocku, ale ověření probíhá až po akci (post-assertion style).
 :::
 
 :::callout{type="note"}
