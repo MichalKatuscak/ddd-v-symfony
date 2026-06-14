@@ -71,7 +71,7 @@
   .art-title, .art-body h2, .art-body h3, .art-body h4,
   .h-section, .bio-name, .faq-item > summary { color: #000 !important; }
   .art-deck, .art-body table td, .callout-body, .faq-answer { color: #2a2d35 !important; }
-  .art-meta-k, .art-crumb, .h-num, .term-en, .res-meta { color: #555 !important; }
+  .art-meta-k, .art-crumb, .h-num, .term-en, .res-meta, .res-num { color: #555 !important; }
   /* Aktuální drobeček nese accent (oklch) – na papíře by se vytiskl oranžově.
      Zčerni ho, ať drží černobílou linii zbytku breadcrumbu. */
   .art-crumb-current { color: #000 !important; }
@@ -107,6 +107,20 @@
   }
   .art-body em code { color: #000 !important; }
 
+  /* Holé ``` bloky (plaintext ASCII diagramy psané přímo v markdownu, mimo
+     :::code, tedy ne .code-body) dědí tmavý styl inline kódu z .art-body code,
+     ale pravidlo výše je :not(pre), takže propadnou a tisknou se jako tmavý
+     flek ve světlém calloutu. Sjednotíme je do světlého bloku. Bezpečné:
+     v celé knize jsou jen tři, všechny language-text bez zvýraznění. */
+  .art-body pre:not(.code-body) > code,
+  .callout-body pre:not(.code-body) > code {
+    display: block;
+    background: #f1f2f4 !important;
+    border: 1px solid #d4d6db !important;
+    color: #16181d !important;
+    padding: 8px 10px;
+  }
+
   /* ── Callout, tabulka, glosář na světlém ─────────────────────────────── */
   .callout { background: #fff !important; border: 1px solid #b8bcc4 !important; }
   .callout-rail { background: #f1f2f4 !important; border-right: 1px solid #d4d6db !important; }
@@ -136,6 +150,10 @@
 
   .glossary-entry { background: #fff !important; border: 1px solid #c9ccd2 !important; }
   .glossary-entry dd { color: #2a2d35 !important; }
+  /* Bio karta autora (/o-autorovi): tmavé pozadí + accent rámeček na světlé.
+     Foto v .bio-photo je <img>, to neřešíme. */
+  .bio-card { background: #fff !important; border-color: #c9ccd2 !important; border-left-color: #b8bcc4 !important; }
+  .bio-role, .bio-card p { color: #2a2d35 !important; }
   /* Pojistka: kdyby uživatel tiskl s aktivním filtrem, ukaž vše */
   .glossary-entry[hidden], .art-body section[hidden] { display: block !important; }
 
@@ -179,7 +197,7 @@
   .land-eyebrow-meta, .land-toc-meta, .land-toc-desc, .land-toc-tag,
   .land-toc-time, .land-author-role { color: #555 !important; }
   .land-toc-title, .land-author-name { color: #000 !important; }
-  .land-toc-n { color: #555 !important; }
+  .land-toc-n, .land-toc-num { color: #555 !important; }
   .land-toc-head, .land-toc li, .land-toc-item, .land-author { border-color: #ddd !important; }
   /* Žádné zbytkové stavové pozadí (hover / přečteno) na papíře */
   .land-toc-item, .land-toc li, .hub-a-card { background: transparent !important; }
