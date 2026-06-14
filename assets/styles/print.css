@@ -38,6 +38,7 @@
   .land-marq,
   .land-cta,
   .land-skip,
+  .land-featured,
   .code-copy,
   .diagram-toolbar,
   .diagram-modal,
@@ -71,6 +72,9 @@
   .h-section, .bio-name, .faq-item > summary { color: #000 !important; }
   .art-deck, .art-body table td, .callout-body, .faq-answer { color: #2a2d35 !important; }
   .art-meta-k, .art-crumb, .h-num, .term-en, .res-meta { color: #555 !important; }
+  /* Aktuální drobeček nese accent (oklch) – na papíře by se vytiskl oranžově.
+     Zčerni ho, ať drží černobílou linii zbytku breadcrumbu. */
+  .art-crumb-current { color: #000 !important; }
   .art-body em, .art-body strong, .glossary-entry dt { color: #000 !important; }
   .art-meta { border-color: #ccc !important; }
 
@@ -168,6 +172,9 @@
   .land-title, .land-em { color: #000 !important; }
   .land-title { font-size: 30pt !important; line-height: 1.1 !important; }
   .land-deck { color: #2a2d35 !important; }
+  /* Zvýrazněné termíny v decku (.land-deck em → accent) zčerni, ať nezůstanou
+     oranžové na bílém. */
+  .land-deck em { color: #000 !important; }
   .land-eyebrow-num { color: #555 !important; }
   .land-eyebrow-meta, .land-toc-meta, .land-toc-desc, .land-toc-tag,
   .land-toc-time, .land-author-role { color: #555 !important; }
