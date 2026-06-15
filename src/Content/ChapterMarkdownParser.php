@@ -58,6 +58,12 @@ final class ChapterMarkdownParser
             throw new \RuntimeException("Cannot read: {$filePath}");
         }
 
+        // Normalizace konců řádků: na Windows checkoutu (git core.autocrlf=true)
+        // přijdou soubory jako CRLF. Block parser (:::code, :::callout, …) i
+        // splitFrontmatter předpokládají LF; zbylé \r jinak rozbije regex
+        // `^:::...$` a bloky se vykreslí jako surový text.
+        $raw = str_replace(["\r\n", "\r"], "\n", $raw);
+
         [$yamlStr, $markdown] = $this->splitFrontmatter($raw);
         $frontmatter = ChapterFrontmatter::fromArray(Yaml::parse($yamlStr));
 

@@ -1,0 +1,23 @@
+# Stabilní LF konce řádků napříč OS. Bez tohoto git core.autocrlf=true na
+# Windows checkoutu převede zdroje na CRLF, což rozbíjelo block parser
+# (:::code / :::callout / …) v ChapterMarkdownParser. Parser teď CRLF toleruje,
+# ale obsah a šablony držíme na LF, aby se to neopakovalo.
+* text=auto eol=lf
+
+*.md   text eol=lf
+*.twig text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.php  text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.json text eol=lf
+
+# Binární soubory – bez normalizace.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.svg  text eol=lf
+*.woff2 binary
+*.ico  binary

@@ -909,6 +909,14 @@ section > h4:first-child { margin-top: 0; }
   display: block;
   min-width: max-content;
 }
+
+/* Holé fenced bloky (``` … ``` v markdownu) renderuje commonmark jako prosté
+   <pre> bez .code-body wrapperu, tedy bez vlastního scroll-kontejneru. Dlouhý
+   řádek by jinak roztáhl layout na úzkém displeji (viz .table-responsive). */
+.art-body pre:not(.code-body) {
+  overflow-x: auto;
+  max-width: 100%;
+}
 .ln {
   display: grid;
   grid-template-columns: 44px 1fr;
