@@ -2,8 +2,8 @@
 route: team_topologies
 path: /team-topologies
 title: Conway's Law a Team Topologies
-page_title: "Conway's Law a Team Topologies – týmová struktura v DDD | DDD Symfony"
-meta_description: "Bounded Context není jen architektonický artefakt – je to týmová hranice. Conway's Law, Team Topologies (Skelton & Pais), Inverse Conway Maneuver a praktické tipy pro rozdělení týmů kolem DDD."
+page_title: "Conway's Law a Team Topologies v DDD | DDD Symfony"
+meta_description: "Bounded Context jako týmová hranice. Conway's Law, Team Topologies (Skelton & Pais) a Inverse Conway Maneuver – jak rozdělit týmy kolem DDD."
 meta_keywords: "Conway's Law, Team Topologies, Inverse Conway Maneuver, Skelton, Pais, stream-aligned team, platform team, enabling team, complicated subsystem team, Bounded Context, DDD, kognitivní zátěž, Westrum, Vernon, organizační struktura, microservices"
 og_type: article
 published: "2026-04-29"

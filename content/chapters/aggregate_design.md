@@ -2,8 +2,8 @@
 route: aggregate_design
 path: /navrh-agregatu
 title: Návrh agregátu
-page_title: "Návrh agregátu v DDD: hranice, invarianty, transakce | DDD Symfony"
-meta_description: "Praktický průvodce návrhem agregátu v Domain-Driven Design: kde vést hranici, jak velký agregát skutečně potřebujete, jeden agregát na transakci, eventual consistency, optimistický zámek, mapování v Doctrine ORM, large-collection problem a hot aggregates."
+page_title: "Návrh agregátu v DDD: hranice a transakce | DDD Symfony"
+meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. Pravidla z Vernonovy Effective Aggregate Design, mapování v Doctrine ORM a problém hot aggregates."
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"

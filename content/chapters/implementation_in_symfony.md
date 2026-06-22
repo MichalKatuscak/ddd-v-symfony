@@ -59,6 +59,8 @@ definované doménou (repository interface, event dispatch) a zajišťuje HTTP, 
 Směr závislostí je určující: Symfony závisí na DDD (implementuje jeho rozhraní), nikdy naopak.
 Doménová vrstva neimportuje žádný Symfony namespace. Díky tomu lze Doctrine nahradit
 jiným ORM nebo Messenger jiným bus systémem, aniž by se dotklo doménové logiky.
+Tento směr závislostí formalizuje hexagonální, onion i clean architektura – jejich
+srovnání rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
 
 ## 10.02 Struktura projektu {#project-structure}
 

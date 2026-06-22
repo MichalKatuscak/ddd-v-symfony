@@ -2,8 +2,8 @@
 route: lesser_known_patterns
 path: /mene-zname-vzory
 title: 'Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules'
-page_title: "Specifications, Domain Services, Factories, Modules – kompletně | DDD Symfony"
-meta_description: "Čtyři doplňující taktické vzory DDD: Specification Pattern (kompozice doménových pravidel), Domain Services (logika mimo entity), Factories (komplexní vznik aggregate), Modules (Eric Evans organization). Praktická implementace v Symfony 8 a PHP 8.4."
+page_title: "Specification, Factory, Domain Service, Module | DDD Symfony"
+meta_description: "Čtyři doplňkové taktické vzory DDD: Specification pro kompozici pravidel, Domain Service, Factory pro složitý vznik agregátu a Module. S ukázkami v Symfony 8."
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"

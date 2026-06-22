@@ -2,8 +2,8 @@
 route: context_mapping
 path: /context-mapping
 title: Bounded Context a Context Mapping
-page_title: "Bounded Context a Context Mapping – 8 vztahů mezi Bounded Contexts | DDD Symfony"
-meta_description: "Strategický DDD: Context Map a 8 vztahů mezi Bounded Contexts (Partnership, Customer/Supplier, Conformist, ACL, OHS, PL, Shared Kernel, Separate Ways) s ukázkami v Symfony 8."
+page_title: "Context Mapping a 8 vztahů Bounded Contextů | DDD Symfony"
+meta_description: "Context Map a 8 vztahů mezi Bounded Contexts: Partnership, Customer/Supplier, Conformist, ACL, Shared Kernel, Separate Ways a další, s ukázkami v Symfony."
 meta_keywords: "Context Map, Context Mapping, Bounded Context, Anti-Corruption Layer, ACL, Open Host Service, Published Language, Shared Kernel, Customer Supplier, Conformist, Partnership, Separate Ways, Symfony Messenger"
 og_type: article
 published: "2026-04-29"

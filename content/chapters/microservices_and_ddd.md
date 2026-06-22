@@ -2,8 +2,8 @@
 route: microservices_and_ddd
 path: /ddd-a-microservices
 title: DDD a microservices – Bounded Context jako service boundary
-page_title: "DDD a microservices – Bounded Context jako service boundary | DDD Symfony"
-meta_description: "Mapování DDD Bounded Context na microservice. Kdy BC = service, kdy modular monolith, jak se vyhnout distributed monolithu. Sam Newman, Chris Richardson, Symfony 8 a Messenger."
+page_title: "DDD a microservices: hranice Bounded Contextu | DDD Symfony"
+meta_description: "Kdy Bounded Context = microservice a kdy stačí modular monolith. Jak se vyhnout distributed monolithu – podle Sama Newmana a Chrise Richardsona."
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"

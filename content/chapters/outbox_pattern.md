@@ -2,8 +2,8 @@
 route: outbox_pattern
 path: /outbox-pattern
 title: 'Outbox Pattern – spolehlivé publikování doménových eventů'
-page_title: "Outbox Pattern – spolehlivé publikování doménových eventů v Symfony | DDD Symfony"
-meta_description: "Transactional Outbox + Idempotent Inbox v Symfony 8 a Doctrine: jak zajistit at-least-once delivery doménových eventů, eliminovat dual-write problém a co o tom říká Pat Helland a Chris Richardson."
+page_title: "Outbox Pattern: spolehlivé doručení eventů | DDD Symfony"
+meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrine: spolehlivé doručení doménových eventů a konec dual-write problému. Podle Pata Hellanda."
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"

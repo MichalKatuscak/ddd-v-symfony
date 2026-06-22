@@ -2,8 +2,8 @@
 route: architectural_styles
 path: /architektonicke-styly
 title: Architektonické styly – Hexagonal, Onion, Clean
-page_title: "Hexagonal, Onion, Clean Architecture – co si vybrat | DDD Symfony"
-meta_description: "Srovnání architektonických stylů (Layered, Hexagonal, Onion, Clean) v kontextu DDD a Symfony. Praktický návod, kdy který volit a jaký dopad to má na strukturu Symfony projektu."
+page_title: "Hexagonal vs. Onion vs. Clean Architecture | DDD Symfony"
+meta_description: "Layered, Hexagonal, Onion nebo Clean Architecture? Kdy který styl volit v DDD se Symfony a jaký to má dopad na strukturu projektu."
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"

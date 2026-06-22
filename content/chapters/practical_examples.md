@@ -3,7 +3,7 @@ route: practical_examples
 path: /prakticke-priklady
 title: Praktické příklady
 page_title: "Praktické příklady DDD v Symfony 8 | DDD Symfony"
-meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a správa uživatelů v PHP 8.4+. Bounded Contexts, agregáty a vertikální slice na třech minimálních projektech."
+meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a správa uživatelů v PHP 8.4+. Bounded Contexts, agregáty a vertikální slice na třech projektech."
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"

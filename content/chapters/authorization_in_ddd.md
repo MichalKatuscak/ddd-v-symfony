@@ -2,8 +2,8 @@
 route: authorization_in_ddd
 path: /autorizace-v-ddd
 title: Autorizace v DDD na Symfony
-page_title: "Autorizace v DDD na Symfony – Voters, ACL na agregátu, policy-based | DDD Symfony"
-meta_description: "Kde má sedět autorizační logika v DDD aplikaci v Symfony 8? Edge, use case, aggregate, field – 4 vrstvy s konkrétními ukázkami Voterů, doménových výjimek a policy-based přístupu."
+page_title: "Autorizace v DDD: Voters a ACL na agregátu | DDD Symfony"
+meta_description: "Kde má v DDD aplikaci sedět autorizace: edge, use case, agregát, field. Čtyři vrstvy s ukázkami Symfony Voterů a policy-based přístupu."
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
