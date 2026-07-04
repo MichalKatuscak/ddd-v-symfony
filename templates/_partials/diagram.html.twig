@@ -32,7 +32,11 @@
                 |replace({' style="width:': ' data-orig-style="width:'}) %}
             {{ _safe_svg|raw }}
         {% elseif src is defined and src %}
-            <img src="{{ asset(src) }}" alt="{{ alt|default(title|default('Diagram')) }}" loading="lazy">
+            {# SVG diagramy mají světlou variantu (<název>-light.svg, generuje
+               scripts/generate-light-diagrams.mjs); src přepíná diagram-theme.js
+               podle aktivního tématu. #}
+            {%- set _light_src = src ends with '.svg' ? src|slice(0, -4) ~ '-light.svg' : null -%}
+            <img src="{{ asset(src) }}" alt="{{ alt|default(title|default('Diagram')) }}" loading="lazy"{% if _light_src %} data-light-src="{{ asset(_light_src) }}"{% endif %}>
         {% endif %}
     </div>
     {% if caption is defined and caption %}

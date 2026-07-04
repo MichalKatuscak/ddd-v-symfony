@@ -18,6 +18,7 @@ import './styles/print.css'; // @media print — poslední, ať přebíjí v tis
 
 // App scripts
 import './scripts/theme-toggle.js';
+import './scripts/diagram-theme.js';
 import './scripts/topnav.js';
 import './scripts/search.js';
 import './scripts/code-block.js';
