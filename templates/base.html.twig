@@ -39,7 +39,7 @@
     <meta property="og:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}">
     <meta property="og:title" content="{% block og_title %}{{ title ?? 'Architektura DDD v Symfony 8' }}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
-    <meta property="og:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
+    <meta property="og:image" content="{% block og_image %}{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}{% endblock %}">
     <meta property="og:locale" content="cs_CZ">
     {%- set _pub %}{% block article_published_time %}{% endblock %}{% endset -%}
     {%- set _mod %}{% block article_modified_time %}{% endblock %}{% endset -%}
@@ -53,7 +53,7 @@
     <meta property="twitter:url" content="{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}">
     <meta property="twitter:title" content="{% block twitter_title %}{{ block('og_title') }}{% endblock %}">
     <meta property="twitter:description" content="{% block twitter_description %}{{ block('og_description') }}{% endblock %}">
-    <meta property="twitter:image" content="{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}">
+    <meta property="twitter:image" content="{{ block('og_image') }}">
 
     <title>{% block title %}{{ title ?? 'Architektura DDD v Symfony 8' }} | DDD Symfony{% endblock %}</title>
 

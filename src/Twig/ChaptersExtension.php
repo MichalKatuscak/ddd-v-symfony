@@ -29,7 +29,23 @@ final class ChaptersExtension extends AbstractExtension
             new TwigFunction('ddd_chapters_by_group', static fn(string $group): array => Chapters::byGroup($group)),
             new TwigFunction('ddd_chapter_neighbors', static fn(string $route): array => Chapters::neighbors($route)),
             new TwigFunction('ddd_last_modified',     fn(): string => $this->lastModified()),
+            new TwigFunction('ddd_og_image',          fn(string $path): ?string => $this->ogImage($path)),
         ];
+    }
+
+    /**
+     * Relativní cesta k vygenerovanému OG obrázku kapitoly (scripts/
+     * generate-og-images.mjs), nebo null když obrázek neexistuje – šablona
+     * pak spadne na sdílený images/social.png.
+     */
+    private function ogImage(string $path): ?string
+    {
+        $slug = trim($path, '/');
+        if ($slug === '' || !is_file($this->projectDir . '/public/images/og/' . $slug . '.png')) {
+            return null;
+        }
+
+        return 'images/og/' . $slug . '.png';
     }
 
     /**

@@ -1,7 +1,9 @@
 {% extends 'base.html.twig' %}
 {% set fm = chapter.frontmatter %}
+{% set og_image_path = ddd_og_image(fm.path) ?? 'images/social.png' %}
 
 {% block title %}{{ fm.pageTitle|raw }}{% endblock %}
+{% block og_image %}{{ app.request.schemeAndHttpHost }}{{ asset(og_image_path) }}{% endblock %}
 {% block og_title %}{{ fm.title|raw }}{% endblock %}
 {% block meta_description %}{{ fm.metaDescription|raw }}{% endblock %}
 {% block meta_keywords %}{{ fm.metaKeywords|raw }}{% endblock %}
@@ -33,7 +35,7 @@
       }
       {% if fm.published %},"datePublished": {{ fm.published|json_encode|raw }}{% endif %}
       {% if fm.modified %},"dateModified": {{ fm.modified|json_encode|raw }}{% endif %}
-      ,"image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/social.png') }}"
+      ,"image": "{{ app.request.schemeAndHttpHost }}{{ asset(og_image_path) }}"
       ,"mainEntityOfPage": {
         "@type": "WebPage",
         "@id": "{{ app.request.schemeAndHttpHost }}{{ app.request.pathInfo }}"
