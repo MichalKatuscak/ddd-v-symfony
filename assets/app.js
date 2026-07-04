@@ -13,32 +13,8 @@ import './styles/landing.css';
 import './styles/hub.css';
 import './styles/print.css'; // @media print — poslední, ať přebíjí v tiskovém kontextu
 
-// highlight.js — registrace pouze potřebných jazyků
-import hljs from 'highlight.js/lib/core';
-import php from 'highlight.js/lib/languages/php';
-import yaml from 'highlight.js/lib/languages/yaml';
-import xml from 'highlight.js/lib/languages/xml';
-import bash from 'highlight.js/lib/languages/bash';
-import json from 'highlight.js/lib/languages/json';
-import javascript from 'highlight.js/lib/languages/javascript';
-import sql from 'highlight.js/lib/languages/sql';
-import markdown from 'highlight.js/lib/languages/markdown';
-import plaintext from 'highlight.js/lib/languages/plaintext';
-
-hljs.registerLanguage('php', php);
-hljs.registerLanguage('yaml', yaml);
-hljs.registerLanguage('xml', xml);
-hljs.registerLanguage('html', xml);
-hljs.registerLanguage('twig', xml);
-hljs.registerLanguage('bash', bash);
-hljs.registerLanguage('shell', bash);
-hljs.registerLanguage('json', json);
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('sql', sql);
-hljs.registerLanguage('markdown', markdown);
-hljs.registerLanguage('plaintext', plaintext);
-// „text" je v obsahu použité jako synonymum pro plaintext (žádné zvýraznění).
-hljs.registerLanguage('text', plaintext);
+// Zvýraznění syntaxe probíhá na serveru (App\Content\CodeHighlighter) —
+// hljs-theme.css stylizuje hotové hljs-* spany, klient nic nedopočítává.
 
 // App scripts
 import './scripts/topnav.js';
@@ -50,12 +26,3 @@ import './scripts/glossary-filter.js';
 import './scripts/print.js';
 import './scripts/diagram-viewer.js';
 import './scripts/reading-progress.js';
-
-// Init na DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function () {
-  // Syntax highlighting + line wrapping pro každý code block
-  document.querySelectorAll('figure.code pre code').forEach(function (codeEl) {
-    hljs.highlightElement(codeEl);
-    if (window.__enhanceCodeBlock) window.__enhanceCodeBlock(codeEl);
-  });
-});

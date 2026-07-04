@@ -17,7 +17,6 @@
         highlights: [3]
     } %}
 #}
-{%- set _hl = (highlights is defined ? highlights|join(',') : '') -%}
 <figure class="code">
     <header class="code-head">
         <span class="code-dot" data-lang="{{ language }}">{{ language }}</span>
@@ -32,5 +31,6 @@
         </button>
     </header>
     {# tabindex="0" činí scrollable code container fokusovatelný klávesnicí (axe a11y). #}
-    <pre class="code-body" data-highlight="{{ _hl }}" tabindex="0"><code class="language-{{ language }}">{{- code|trim('\n') -}}</code></pre>
+    {# Zvýraznění + dělení na řádky probíhá na serveru (CodeHighlighter), klient nic nedopočítává. #}
+    <pre class="code-body" tabindex="0"><code class="hljs language-{{ language }}">{{- code|trim('\n')|code_lines(language, highlights|default([])) -}}</code></pre>
 </figure>
