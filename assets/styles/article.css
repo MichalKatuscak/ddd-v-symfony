@@ -197,7 +197,7 @@
   color: var(--fg);
   border: 1px solid var(--stroke-strong);
   border-radius: var(--r-3);
-  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px -8px var(--shadow-float-color);
   cursor: pointer;
 }
 .toc-fab-btn svg { width: 20px; height: 20px; }
@@ -213,7 +213,7 @@
   background: var(--bg-1);
   border: 1px solid var(--stroke-strong);
   border-radius: var(--r-3);
-  box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 16px 48px -12px var(--shadow-panel-color);
   padding: var(--s-4);
   scrollbar-color: var(--stroke) transparent;
   scrollbar-width: thin;
@@ -271,8 +271,8 @@
   background-image:
     linear-gradient(to right, var(--bg-1), var(--bg-1)),
     linear-gradient(to right, var(--bg-1), var(--bg-1)),
-    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)),
-    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow-color), transparent),
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow-color), transparent);
   background-position: 0 0, 100% 0, 0 0, 100% 0;
   background-repeat: no-repeat;
   background-size: 24px 100%, 24px 100%, 14px 100%, 14px 100%;
@@ -894,8 +894,8 @@ section > h4:first-child { margin-top: 0; }
   background-image:
     linear-gradient(to right, var(--bg-2), var(--bg-2)),
     linear-gradient(to right, var(--bg-2), var(--bg-2)),
-    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)),
-    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow-color), transparent),
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow-color), transparent);
   background-position: 0 0, 100% 0, 0 0, 100% 0;
   background-repeat: no-repeat;
   background-size: 24px 100%, 24px 100%, 14px 100%, 14px 100%;

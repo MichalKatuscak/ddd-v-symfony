@@ -4,6 +4,8 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
+  color-scheme: dark;
+
   /* ── Surface (4 vrstvy hloubky, žádné gradienty) ─────────────────────── */
   --bg-0: #0B0D10;
   --bg-1: #11141A;
@@ -27,6 +29,13 @@
   --accent-dim:    oklch(0.78 0.13 65 / 0.18);
   --accent-faint:  oklch(0.78 0.13 65 / 0.08);
   --accent-ink:    #0B0D10;
+  --accent-hover:  oklch(0.82 0.13 65);
+
+  /* ── Stíny a scrimy (tmavé pozadí unese těžší černou než světlé) ─────── */
+  --shadow-panel-color:  rgba(0, 0, 0, 0.7);
+  --shadow-float-color:  rgba(0, 0, 0, 0.6);
+  --scroll-shadow-color: rgba(0, 0, 0, 0.5);
+  --scrim:               rgba(0, 0, 0, 0.5);
 
   /* ── Sémantika (jen v kódu a stavech, NIKDY v UI chrome) ─────────────── */
   --syn-keyword:  oklch(0.72 0.16 290);
@@ -110,4 +119,60 @@
      - 1080 px: wide tablet/laptop — footer cols 4 → 2
      CSS @media nelze tokenizovat (CSS Vars nejsou v media queries platné),
      hodnoty žijí inline v jednotlivých souborech, ale jsou sjednocené. */
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Světlé téma — „blueprint na papíře"
+   Atribut data-theme nastavuje inline skript v <head> (localStorage →
+   prefers-color-scheme). Bez JS zůstává tmavá varianta. Rozměrové a typové
+   tokeny se nemění, přepisují se jen barvy.
+   ────────────────────────────────────────────────────────────────────────── */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surface — elevace roste směrem k bílé kartě na teplém papíru */
+  --bg-0: #F5F4F0;
+  --bg-1: #FCFBF9;
+  --bg-2: #EDEBE6;
+  --bg-3: #E4E1DB;
+  --bg-inset: #E9E7E1;
+
+  /* Foreground */
+  --fg:        #1C1F26;
+  --fg-muted:  #4A5160;
+  --fg-dim:    #6E7583;
+  --fg-faint:  #C4C7CE;
+
+  /* Stroke — inkoust místo světla, vyšší alfa (na světlé je hůř vidět) */
+  --stroke:        rgba(28, 31, 38, 0.12);
+  --stroke-strong: rgba(28, 31, 38, 0.22);
+  --stroke-faint:  rgba(28, 31, 38, 0.06);
+
+  /* Akcent — tmavší jantar kvůli kontrastu na světlém podkladu */
+  --accent:        oklch(0.52 0.13 65);
+  --accent-dim:    oklch(0.52 0.13 65 / 0.16);
+  --accent-faint:  oklch(0.52 0.13 65 / 0.08);
+  --accent-ink:    #FFFFFF;
+  --accent-hover:  oklch(0.45 0.13 65);
+
+  /* Stíny a scrimy — na světlém podkladu výrazně lehčí */
+  --shadow-panel-color:  rgba(15, 18, 24, 0.22);
+  --shadow-float-color:  rgba(15, 18, 24, 0.18);
+  --scroll-shadow-color: rgba(15, 18, 24, 0.16);
+  --scrim:               rgba(15, 18, 24, 0.35);
+
+  /* Syntax — stejné odstíny, snížená světlost pro kontrast na světlém kódu */
+  --syn-keyword:  oklch(0.45 0.18 290);
+  --syn-string:   oklch(0.45 0.14 145);
+  --syn-number:   oklch(0.50 0.13 80);
+  --syn-type:     oklch(0.45 0.11 220);
+  --syn-property: oklch(0.47 0.10 30);
+  --syn-comment:  oklch(0.52 0.02 250);
+  --syn-tag:      oklch(0.48 0.15 25);
+  --syn-fn:       oklch(0.47 0.11 195);
+
+  --state-ok:     oklch(0.50 0.14 145);
+  --state-warn:   oklch(0.55 0.13 80);
+  --state-err:    oklch(0.50 0.18 25);
+  --state-info:   oklch(0.48 0.10 220);
 }

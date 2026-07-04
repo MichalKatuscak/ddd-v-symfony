@@ -17,6 +17,7 @@ import './styles/print.css'; // @media print — poslední, ať přebíjí v tis
 // hljs-theme.css stylizuje hotové hljs-* spany, klient nic nedopočítává.
 
 // App scripts
+import './scripts/theme-toggle.js';
 import './scripts/topnav.js';
 import './scripts/search.js';
 import './scripts/code-block.js';

@@ -302,7 +302,7 @@
 }
 .land-skip-tar { color: var(--accent); border-bottom: 1px dashed var(--accent); }
 .land-skip:hover { color: var(--fg-muted); }
-.land-skip:hover .land-skip-tar { color: oklch(0.82 0.13 65); border-bottom-color: oklch(0.82 0.13 65); }
+.land-skip:hover .land-skip-tar { color: var(--accent-hover); border-bottom-color: var(--accent-hover); }
 
 
 /* TOC right side */

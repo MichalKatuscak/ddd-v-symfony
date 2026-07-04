@@ -55,6 +55,27 @@ body > header {
   line-height: 1.4;
 }
 
+/* ── Přepínač tématu (slunce v tmavém, měsíc ve světlém) ───────────────── */
+.nav-theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: var(--bg-2);
+  border: 1px solid var(--stroke-strong);
+  border-radius: var(--r-2);
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+.nav-theme:hover { color: var(--fg); border-color: var(--fg-faint); background: var(--bg-3); }
+.nav-theme:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nav-theme svg { width: 16px; height: 16px; }
+.nav-theme-moon { display: none; }
+:root[data-theme="light"] .nav-theme-sun { display: none; }
+:root[data-theme="light"] .nav-theme-moon { display: block; }
+
 /* ── Progress bar čtení (1px jantarová linka pod hlavičkou) ────────────── */
 .reading-bar {
   position: fixed;
@@ -97,7 +118,7 @@ body > header {
   background: var(--bg-1);
   border: 1px solid var(--stroke-strong);
   border-radius: var(--r-3);
-  box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 24px 64px -16px var(--shadow-panel-color);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -280,7 +301,7 @@ body > header {
 .nav-drawer-backdrop {
   display: none;
   position: fixed; inset: 56px 0 0 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--scrim);
   z-index: 24;
 }
 .nav-drawer-backdrop[data-open="true"] { display: block; }

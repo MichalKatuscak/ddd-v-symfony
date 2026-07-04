@@ -3,10 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# Téma se musí nastavit před prvním paintem, jinak stránka blikne tmavou.
+       Bez JS zůstává tmavá varianta (historické výchozí chování webu). #}
+    <script>
+    (function () {
+        var t = null;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+    })();
+    </script>
     <meta name="description" content="{% block meta_description %}Podrobný průvodce Domain-Driven Design v Symfony 8. Naučte se implementovat DDD architekturu ve svých Symfony projektech.{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}Domain-Driven Design, DDD, Symfony, PHP, architektura, vývoj, CQRS, Event Sourcing{% endblock %}">
     <meta name="author" content="Michal Katuščák">
     <meta name="robots" content="index, follow">
+    {# content přepisuje theme-toggle.js podle aktivního tématu #}
     <meta name="theme-color" content="#0B0D10">
     <meta name="generator" content="Symfony 8">
 
@@ -94,6 +107,20 @@
                     </svg>
                     <span class="nav-search-label">Hledat</span>
                     <kbd class="nav-search-kbd" aria-hidden="true">⌘K</kbd>
+                </button>
+                <button class="nav-theme" type="button" data-theme-toggle aria-label="Přepnout na světlý motiv">
+                    {# Slunce — zobrazené v tmavém motivu (nabízí přepnutí na světlý) #}
+                    <svg class="nav-theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"/>
+                        <line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/>
+                        <line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/>
+                        <line x1="5.3" y1="5.3" x2="7" y2="7"/><line x1="17" y1="17" x2="18.7" y2="18.7"/>
+                        <line x1="5.3" y1="18.7" x2="7" y2="17"/><line x1="17" y1="7" x2="18.7" y2="5.3"/>
+                    </svg>
+                    {# Měsíc — zobrazený ve světlém motivu #}
+                    <svg class="nav-theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/>
+                    </svg>
                 </button>
                 <button class="nav-toggle" aria-label="Otevřít navigaci" aria-expanded="false">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
