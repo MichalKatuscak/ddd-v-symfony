@@ -24,3 +24,8 @@ screenshots/
 # Ebook build artefakty
 /ebook/output/
 /ebook/chapters/
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

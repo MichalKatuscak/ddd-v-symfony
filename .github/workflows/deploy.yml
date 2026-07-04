@@ -1,14 +1,66 @@
-name: Deploy to FTP
+name: CI & Deploy
 
 on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
+  test:
+    name: Lint & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, mbstring, dom, xml, xmlwriter, curl
+
+      - name: Install PHP dependencies (with dev)
+        run: composer install --no-interaction
+
+      - name: Lint Twig templates
+        run: php bin/console lint:twig templates/
+
+      - name: Lint YAML config
+        run: php bin/console lint:yaml config
+
+      - name: Lint DI container
+        run: php bin/console lint:container
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      # Assets musí být zbuildované před PHPUnit — smoke testy renderují
+      # stránky a vite_entry_link_tags čte manifest z public/build/.
+      - name: Build assets
+        run: npm ci && npx vite build
+
+      - name: Run PHPUnit
+        run: php bin/phpunit
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Axe accessibility check (dark + light)
+        run: |
+          php -S 127.0.0.1:8765 -t public scripts/dev-router.php &
+          sleep 2
+          node scripts/axe-check.mjs
+
   deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
@@ -52,6 +104,7 @@ jobs:
             screenshots/**
             docs/**
             tests/**
+            scripts/**
             assets/**
             node_modules/**
             vite.config.js
@@ -59,4 +112,7 @@ jobs:
             package-lock.json
             .env.local
             .env.*.local
+            .env.test
+            phpunit.dist.xml
+            bin/phpunit
             CLAUDE.md

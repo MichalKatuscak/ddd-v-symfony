@@ -39,7 +39,7 @@ class ErrorController extends AbstractController
         return $this->show($request, $exception);
     }
 
-    public function show(Request $request, FlattenException $exception, DebugLoggerInterface $logger = null): Response
+    public function show(Request $request, FlattenException $exception, ?DebugLoggerInterface $logger = null): Response
     {
         $statusCode = $exception->getStatusCode();
         $statusText = Response::$statusTexts[$statusCode] ?? 'Unknown Error';
