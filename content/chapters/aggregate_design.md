@@ -318,21 +318,21 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Order;
 
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class OrderId
 {
     public function __construct(
         public string $value,
     ) {
-        if (!Ulid::isValid($value)) {
-            throw new \InvalidArgumentException('OrderId must be a valid ULID');
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException('OrderId must be a valid UUID');
         }
     }
 
     public static function generate(): self
     {
-        return new self((new Ulid())->toString());
+        return new self(Uuid::v7()->toRfc4122());
     }
 
     public static function fromString(string $value): self
@@ -754,10 +754,10 @@ Reference přes ID je jasné pravidlo, ale typů ID je víc a každý má dopad 
 
 - **UUID v4 (random).** Náhodná, distribuovaně generovatelná, neuhodnutelná.
   Nevýhoda: insertion order není seřazen, což zhoršuje I/O pattern u clustered indexů (MySQL/InnoDB).
-- **ULID nebo UUID v7.** Time-ordered, distribuovaně generovatelná, řadí
-  se podle času vzniku. **Doporučená volba** pro většinu nových projektů.
-  Symfony 5.1+ nabízí `Symfony\Component\Uid\Ulid` prostřednictvím balíčku
-  `symfony/uid`; `Uuid::v7()` přibylo v Symfony 6.2.
+- **UUID v7 (případně ULID).** Časově řazené, generovatelné distribuovaně bez
+  koordinace, řadí se podle času vzniku. **Doporučená volba** pro většinu nových projektů.
+  `Uuid::v7()` přibylo v balíčku `symfony/uid` v Symfony 6.2; ULID
+  (`Symfony\Component\Uid\Ulid`) nabízí tentýž balíček od Symfony 5.1.
 - **Sekvenční integer.** Krátký, lidsky čitelný, rychlý. Nevýhody: vyžaduje
   centrální generátor (DB sekvence), prozrazuje řád a počet entit, špatně se merguje
   z více DB (microservices).
@@ -770,9 +770,11 @@ Reference přes ID je jasné pravidlo, ale typů ID je víc a každý má dopad 
 :::callout{type="pattern"}
 **Doporučení**
 
-Pro nové Symfony projekty je výchozí volbou ULID. Je časově řazená, kompatibilní
-s primárními klíči MySQL i PostgreSQL, má kratší zápis (26 znaků vs. 36 u UUID) a Symfony
-ji podporuje v základu balíčku `symfony/uid`. Komplikované referenční schéma typu „tenantId + naturalId“ zaveďte teprve
+Pro nové Symfony projekty je výchozí volbou UUID v7. Je časově řazené, standardizované
+(RFC 9562), kompatibilní s primárními klíči MySQL i PostgreSQL a Symfony
+ho podporuje v základu balíčku `symfony/uid` (`Uuid::v7()`). ULID zůstává alternativou,
+když je žádoucí kratší Crockford base32 zápis (26 znaků vs. 36).
+Komplikované referenční schéma typu „tenantId + naturalId“ zaveďte teprve
 tehdy, když máte konkrétní multi-tenancy požadavek.
 :::
 
@@ -870,7 +872,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Jak hot aggregate vyřešit?
   answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger se směrováním konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?
-  answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code>, balíček <code>symfony/uid</code> dostupný od Symfony 5.1). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
+  answer: 'Pro nové Symfony projekty doporučujeme UUID v7 (<code>Uuid::v7()</code>, balíček <code>symfony/uid</code> od Symfony 6.2). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru a formát je standardizovaný v RFC 9562. ULID (<code>Symfony\\Component\\Uid\\Ulid</code>) je alternativa se srovnatelnými vlastnostmi a kratším zápisem (26 znaků vs. 36). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
 - question: Jak rychle ověřit, že hranice agregátu je správně?
   answer: 'Tři rychlé kontroly. (1) <strong>Test invariantu</strong>: existuje pravidlo, které by se porušilo, kdybyste agregát rozdělili na dva? (2) <strong>Test velikosti</strong>: načtení z DB vrací desítky, ne stovky řádků? (3) <strong>Test reference</strong>: ven z agregátu se odkazujete jen přes ID, ne přes objektovou referenci? Pokud na všechny tři odpovídáte „ano“, hranice je nejspíš správná. Plný checklist s 12 body v <a href="#checklist">sekci Checklist</a>, sedmikrokový postup návrhu v <a href="#workflow">sekci Postup návrhu</a>.'
 :::

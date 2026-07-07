@@ -141,10 +141,10 @@ use InvalidArgumentException;
 final readonly class Money
 {
     public function __construct(
-        public int $amountCents,
+        public int $amountInCents,
         public Currency $currency,
     ) {
-        if ($amountCents < 0) {
+        if ($amountInCents < 0) {
             throw new InvalidArgumentException(
                 'Money cannot be negative; use SignedMoney for credits/debits.'
             );
@@ -153,23 +153,23 @@ final readonly class Money
 
     public function add(self $other): self
     {
-        if (!$this->currency->equals($other->currency)) {
+        if ($this->currency !== $other->currency) {
             throw new InvalidArgumentException(
-                "Cannot add {$this->currency->code} and {$other->currency->code}."
+                "Cannot add {$this->currency->value} and {$other->currency->value}."
             );
         }
-        return new self($this->amountCents + $other->amountCents, $this->currency);
+        return new self($this->amountInCents + $other->amountInCents, $this->currency);
     }
 
     public function multiply(int $factor): self
     {
-        return new self($this->amountCents * $factor, $this->currency);
+        return new self($this->amountInCents * $factor, $this->currency);
     }
 
     public function equals(self $other): bool
     {
-        return $this->amountCents === $other->amountCents
-            && $this->currency->equals($other->currency);
+        return $this->amountInCents === $other->amountInCents
+            && $this->currency === $other->currency;
     }
 }
 :::
@@ -430,7 +430,7 @@ final class LegacyBillingTranslator
     public function translateInvoicePaid(InvoicePaidSoapResponse $r): InvoicePaidEvent
     {
         // (3) Anti-corruption: legacy umí poslat negativní amount jako "credit"
-        if ($r->amountCents < 0) {
+        if ($r->amountInCents < 0) {
             throw new UnrecoverableMessageHandlingException(
                 'Negative amount from legacy; credits are not supported in Ordering BC.'
             );
@@ -452,7 +452,7 @@ final class LegacyBillingTranslator
         return new InvoicePaidEvent(
             invoiceId: InvoiceId::fromLegacy($r->invoiceNumber),
             paidAt:    new \DateTimeImmutable($r->paidAtIso),
-            amount:    new Money($r->amountCents, Currency::EUR),
+            amount:    new Money($r->amountInCents, Currency::EUR),
         );
     }
 }
@@ -484,13 +484,13 @@ final class LegacyBillingTranslatorTest extends TestCase
 
         $event = $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-2025-00042',
-            amountCents:   12_345,
+            amountInCents: 12_345,
             status:        'PAID',
             paidAtIso:     '2025-04-29T10:00:00Z',
         ));
 
-        $this->assertSame(12_345, $event->amount->amountCents);
-        $this->assertSame('EUR', $event->amount->currency->code);
+        $this->assertSame(12_345, $event->amount->amountInCents);
+        $this->assertSame('EUR', $event->amount->currency->value);
     }
 
     public function testRejectsNegativeAmount(): void
@@ -500,7 +500,7 @@ final class LegacyBillingTranslatorTest extends TestCase
         $this->expectException(UnrecoverableMessageHandlingException::class);
         $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-1',
-            amountCents:   -100,
+            amountInCents: -100,
             status:        'PAID',
             paidAtIso:     '2025-04-29T10:00:00Z',
         ));
@@ -513,7 +513,7 @@ final class LegacyBillingTranslatorTest extends TestCase
         $this->expectException(UnrecoverableMessageHandlingException::class);
         $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-2',
-            amountCents:   100,
+            amountInCents: 100,
             status:        'CANCELLED', // legacy občas takhle pošle
             paidAtIso:     '2025-04-29T10:00:00Z',
         ));

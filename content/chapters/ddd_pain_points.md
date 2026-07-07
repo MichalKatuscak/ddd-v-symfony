@@ -180,7 +180,7 @@ final class MoneyType extends Type
         }
         [$amount, $currencyCode] = explode('_', (string) $value, 2);
 
-        return new Money((int) $amount, new Currency($currencyCode));
+        return new Money((int) $amount, Currency::from($currencyCode));
     }
 
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
@@ -189,7 +189,7 @@ final class MoneyType extends Type
             return null;
         }
         /** @var Money $value */
-        return $value->amountInCents . '_' . $value->currency->code;
+        return $value->amountInCents . '_' . $value->currency->value;
     }
 }
 :::
@@ -779,7 +779,7 @@ final class StripePaymentGateway implements PaymentGateway
         try {
             $charge = $this->stripe->charges->create([
                 'amount'   => $amount->amountInCents,
-                'currency' => strtolower($amount->currency->code),
+                'currency' => strtolower($amount->currency->value),
                 'source'   => $token->value,
             ]);
             return PaymentId::fromString($charge->id);

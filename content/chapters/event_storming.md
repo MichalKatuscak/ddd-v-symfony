@@ -625,7 +625,7 @@ final class OrderTest extends TestCase
             new CustomerId('c1'),
             [$this->item(qty: 2, price: 100), $this->item(qty: 1, price: 50)],
         );
-        self::assertSame(250, $order->total()->amount);
+        self::assertSame(250, $order->total()->amountInCents);
     }
 }
 :::

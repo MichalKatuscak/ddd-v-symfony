@@ -205,10 +205,11 @@ declare(strict_types=1);
 
 namespace App\OrderManagement\Domain\Model;
 
+use App\OrderManagement\Domain\Exception\InvalidOrderStateTransitionException;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\ProductId;
-use App\OrderManagement\Domain\ValueObject\UserId;
 
 class Order
 {
@@ -220,7 +221,7 @@ class Order
 
     public function __construct(
         private readonly OrderId $id,
-        private readonly UserId $userId,
+        private readonly CustomerId $customerId,
     ) {
         $this->status = OrderStatus::Created;
         $this->createdAt = new \DateTimeImmutable();
@@ -231,9 +232,9 @@ class Order
         return $this->id;
     }
 
-    public function userId(): UserId
+    public function customerId(): CustomerId
     {
-        return $this->userId;
+        return $this->customerId;
     }
 
     public function addItem(ProductId $productId, int $quantity, Money $price): void
@@ -260,7 +261,7 @@ class Order
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Created) {
-            throw new \DomainException('Cannot confirm a non-created order');
+            throw new InvalidOrderStateTransitionException('Cannot confirm a non-created order');
         }
 
         if ($this->items === []) {
@@ -344,7 +345,8 @@ class OrderItem
 
 `Order` v ukázce je kořen agregátu a drží kolekci `OrderItem` objektů. Vnější
 volání jdou výhradně přes metody na `Order`; vlastní `OrderItem` zvenku
-nikdo neinstancuje ani nemění. Výpočet `totalAmount()` přebírá měnu z položek:
+nikdo neinstancuje ani nemění. Pojmenovanou výjimku dostal jen přechod stavu
+v `confirm()`; ostatní pravidla ukázka zkracuje na holou `\DomainException`. Výpočet `totalAmount()` přebírá měnu z položek:
 sčítání začíná u první z nich a `Money::add()` při nesouladu vyhodí výjimku.
 Objednávka kombinující dvě měny tak neprojde tiše. `OrderItem` je zde záměrně
 zjednodušený na neměnný záznam. Plnou verzi s chováním – metodou
@@ -394,8 +396,8 @@ declare(strict_types=1);
 namespace App\OrderManagement\Domain\Repository;
 
 use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\UserId;
 
 interface OrderRepository
 {
@@ -403,7 +405,7 @@ interface OrderRepository
 
     public function findById(OrderId $id): ?Order;
 
-    public function findByUserId(UserId $userId): array;
+    public function findByCustomerId(CustomerId $customerId): array;
 }
 :::
 
@@ -495,31 +497,31 @@ neměnný záznam o věci, která se v doméně stala a o které doménoví expe
 vědět. Název je vždy v minulém čase. Událost obsahuje všechna data potřebná k popisu
 změny – nespoléhá na pozdější dotazování zdrojového agregátu.
 
-:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderCreatedEvent.php"}
+:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderCreated.php"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\OrderManagement\Domain\Event;
 
+use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\UserId;
 
-final readonly class OrderCreatedEvent
+final readonly class OrderCreated
 {
     public \DateTimeImmutable $occurredAt;
 
     public function __construct(
         public OrderId $orderId,
-        public UserId $userId,
+        public CustomerId $customerId,
     ) {
         $this->occurredAt = new \DateTimeImmutable();
     }
 }
 :::
 
-`OrderCreatedEvent` v ukázce nese tři údaje: které objednávky se týká, kterého
-uživatele a kdy k vytvoření došlo. Tolik stačí příjemcům, aby na změnu mohli
+`OrderCreated` v ukázce nese tři údaje: které objednávky se týká, kterého
+zákazníka a kdy k vytvoření došlo. Tolik stačí příjemcům, aby na změnu mohli
 reagovat bez dalšího dotazu zpět do `OrderManagement`. Vlastnosti jsou veřejné
 a `readonly` – událost je neměnný záznam a příjemci ji jen čtou.
 Domain Events tvoří základ
@@ -569,10 +571,10 @@ class Order extends AggregateRoot
 {
     // ... vlastnosti a metody ze sekce 06.05 ...
 
-    public static function create(OrderId $id, UserId $userId): self
+    public static function place(OrderId $id, CustomerId $customerId): self
     {
-        $order = new self($id, $userId);
-        $order->record(new OrderCreatedEvent($id, $userId));
+        $order = new self($id, $customerId);
+        $order->record(new OrderCreated($id, $customerId));
 
         return $order;
     }
@@ -580,7 +582,7 @@ class Order extends AggregateRoot
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Created) {
-            throw new \DomainException('Cannot confirm a non-created order');
+            throw new InvalidOrderStateTransitionException('Cannot confirm a non-created order');
         }
 
         if ($this->items === []) {
@@ -588,17 +590,17 @@ class Order extends AggregateRoot
         }
 
         $this->status = OrderStatus::Confirmed;
-        $this->record(new OrderConfirmedEvent($this->id));
+        $this->record(new OrderConfirmed($this->id));
     }
 }
 :::
 
-`OrderConfirmedEvent` je analogická událost k `OrderCreatedEvent` z předchozí
+`OrderConfirmed` je analogická událost k `OrderCreated` z předchozí
 sekce. Druhou polovinu životního cyklu obstará command handler: uloží agregát
 a teprve potom vyzvedne nahrané události přes `releaseEvents()`:
 
 :::code{language="php" filename="src/OrderManagement/Application/Command/CreateOrderHandler.php (výřez)"}
-$order = Order::create(OrderId::generate(), $userId);
+$order = Order::place(OrderId::generate(), $customerId);
 
 $this->orders->save($order); // jen persist agregátu
 $this->em->flush();          // commit – transakci vlastní aplikační vrstva

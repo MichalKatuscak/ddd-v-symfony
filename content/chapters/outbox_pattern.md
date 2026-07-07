@@ -201,6 +201,11 @@ a o to se postará [Idempotent Inbox](#inbox).
 Outbox tabulka má osm sloupců; každý řeší konkrétní provozní problém, který se
 bez něj projeví až pod produkční zátěží.
 
+Entita níže nese Doctrine atributy a sedí v namespace `App\Outbox\Domain` –
+pragmatická volba. Outbox je infrastrukturní vzor; kdo drží přísné vrstvení
+podle kapitoly [Architektonické styly](/architektonicke-styly#hexagonal),
+umístí tabulkovou entitu do `Infrastructure`.
+
 :::callout{type="pattern"}
 ### PHP: Doctrine entita OutboxMessage {#outbox-message-entity-heading}
 
@@ -212,7 +217,7 @@ declare(strict_types=1);
 namespace App\Outbox\Domain;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'outbox')]
@@ -221,8 +226,8 @@ class OutboxMessage
 {
     public function __construct(
         #[ORM\Id]
-        #[ORM\Column(type: 'ulid', unique: true)]
-        public Ulid $id,
+        #[ORM\Column(type: 'uuid', unique: true)]
+        public Uuid $id,
 
         /** Plně kvalifikovaný název třídy doménové události. */
         #[ORM\Column(type: 'string', length: 255)]
@@ -266,7 +271,7 @@ class OutboxMessage
     public static function fromDomainEvent(object $event, callable $serializer): self
     {
         return new self(
-            id: new Ulid(),
+            id: Uuid::v7(),
             messageType: $event::class,
             payload: $serializer($event),
         );
@@ -279,7 +284,7 @@ class OutboxMessage
 
 | Sloupec | Typ | Účel |
 |---|---|---|
-| `id` | ULID (16 B) | Primární klíč a pořadí řádků pro polling. Deduplikaci nenese – tu zajišťuje `eventId` v payloadu události (viz Inbox). |
+| `id` | UUID v7 (16 B) | Primární klíč a pořadí řádků pro polling. Deduplikaci nenese – tu zajišťuje `eventId` v payloadu události (viz Inbox). |
 | `message_type` | VARCHAR(255) | FQCN doménové události (např. `App\Ordering\Domain\Event\OrderPlaced`). Relay podle něj namapuje payload zpět na PHP třídu. |
 | `payload` | JSON / JSONB | Serializovaný stav události. JSONB v Postgresu je preferovaný – umožňuje indexovat jednotlivá pole pro debugging. |
 | `status` | VARCHAR(16) | Stavový enum: `pending` (čeká na publish), `sent` (úspěšně publikováno), `failed` (po N pokusech vzdáno, vyžaduje manuální resolve). |
@@ -385,7 +390,7 @@ namespace App\Ordering\Domain;
 
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\SharedKernel\Domain\AggregateRoot;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 final class Order extends AggregateRoot
 {
@@ -402,13 +407,13 @@ final class Order extends AggregateRoot
     public static function place(CustomerId $customerId, array $items): self
     {
         $order = new self(
-            id: new OrderId((string) new Ulid()),
+            id: new OrderId((string) Uuid::v7()),
             customerId: $customerId,
             items: $items,
         );
 
         $order->record(new OrderPlaced(
-            eventId: new Ulid(),
+            eventId: Uuid::v7(),
             orderId: $order->id->value,
             customerId: $customerId->value,
             items: array_map(fn (OrderItem $i) => $i->toArray(), $items),
@@ -431,7 +436,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Event;
 
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Doménová událost – neměnná, serializovatelná, nese pouze
@@ -441,7 +446,7 @@ use Symfony\Component\Uid\Ulid;
 final readonly class OrderPlaced
 {
     public function __construct(
-        public Ulid $eventId,
+        public Uuid $eventId,
         public string $orderId,
         public string $customerId,
         /** @var list<array{sku: string, quantity: int, priceCents: int}> */
@@ -563,7 +568,7 @@ declare(strict_types=1);
 namespace App\Outbox\Application;
 
 use App\Outbox\Domain\OutboxMessage;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 interface OutboxRepository
 {
@@ -572,9 +577,9 @@ interface OutboxRepository
     /** @return list<OutboxMessage> */
     public function fetchPending(int $limit = 100): array;
 
-    public function markSent(Ulid $id): void;
+    public function markSent(Uuid $id): void;
 
-    public function markFailed(Ulid $id, string $error): void;
+    public function markFailed(Uuid $id, string $error): void;
 }
 :::
 :::
@@ -852,7 +857,7 @@ declare(strict_types=1);
 namespace App\Inbox\Domain;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'inbox')]
@@ -862,11 +867,11 @@ class InboxMessage
     public function __construct(
         /** Surrogate PK – deduplikaci nese kompozitní UNIQUE výše. */
         #[ORM\Id]
-        #[ORM\Column(type: 'ulid', unique: true)]
-        public Ulid $id,
+        #[ORM\Column(type: 'uuid', unique: true)]
+        public Uuid $id,
 
-        #[ORM\Column(type: 'ulid')]
-        public Ulid $eventId,
+        #[ORM\Column(type: 'uuid')]
+        public Uuid $eventId,
 
         #[ORM\Column(type: 'string', length: 64)]
         public string $consumer,
@@ -875,9 +880,9 @@ class InboxMessage
         public \DateTimeImmutable $processedAt = new \DateTimeImmutable(),
     ) {}
 
-    public static function record(Ulid $eventId, string $consumer): self
+    public static function record(Uuid $eventId, string $consumer): self
     {
-        return new self(id: new Ulid(), eventId: $eventId, consumer: $consumer);
+        return new self(id: Uuid::v7(), eventId: $eventId, consumer: $consumer);
     }
 }
 :::
@@ -893,13 +898,13 @@ declare(strict_types=1);
 
 namespace App\Inbox\Application;
 
-use Symfony\Component\Uid\Ulid;
+use Symfony\Component\Uid\Uuid;
 
 interface InboxRepository
 {
-    public function isProcessed(Ulid $eventId, string $consumer): bool;
+    public function isProcessed(Uuid $eventId, string $consumer): bool;
 
-    public function markProcessed(Ulid $eventId, string $consumer): void;
+    public function markProcessed(Uuid $eventId, string $consumer): void;
 }
 :::
 :::
@@ -1530,5 +1535,5 @@ kap. 11 (Stream Processing);
 - question: 'Co dělat při dlouhodobém výpadku brokera?'
   answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál zapisují doménové eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém – řádky jsou malé), (c) kompakce ne-mazat pending stará než N dní, jen sent. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
 - question: 'Musím použít UUID/ULID, nebo stačí AUTO_INCREMENT?'
-  answer: 'Použijte ULID (nebo UUIDv7), ne AUTO_INCREMENT. Důvody: (1) ULID je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) ULID nese časový komponent, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) ULID je předvídatelný klientem, který může poslat event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region nastavení. Symfony Uid komponenta poskytuje pohodlné API: <code>new Ulid()</code> v entitě stačí.'
+  answer: 'Použijte UUID v7 (případně ULID), ne AUTO_INCREMENT. Důvody: (1) UUID v7 je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) Nese časový komponent, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) Klient ho může vygenerovat předem a poslat jako event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region nastavení. Symfony Uid komponenta poskytuje pohodlné API: <code>Uuid::v7()</code> v entitě stačí.'
 :::

@@ -346,17 +346,19 @@ use Symfony\Component\Uid\Uuid;
 
 final class Email
 {
-    public readonly string $value;
-
-    public function __construct(string $value)
+    public function __construct(public readonly string $value)
     {
-        $normalized = mb_strtolower(trim($value));
-        if (!filter_var($normalized, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException(
                 sprintf('"%s" není platná e-mailová adresa.', $value)
             );
         }
-        $this->value = $normalized;
+    }
+
+    public static function fromUserInput(string $raw): self
+    {
+        // Normalizace (lowercase, trim) patří sem, ne do konstruktoru.
+        return new self(mb_strtolower(trim($raw)));
     }
 
     public function equals(self $other): bool { return $this->value === $other->value; }
@@ -520,7 +522,7 @@ use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\ValueObject\Email;
 use App\OrderManagement\Domain\ValueObject\WishlistId;
-use App\OrderManagement\Domain\Event\OrderPlacedEvent;
+use App\OrderManagement\Domain\Event\OrderPlaced;
 use App\SharedKernel\Domain\AggregateRoot;
 
 // Agregát 1: Customer - pouze identita a kontaktní údaje
@@ -572,7 +574,7 @@ final class Order extends AggregateRoot
             throw new \DomainException('Nelze potvrdit prázdnou objednávku.');
         }
         $this->status = OrderStatus::PLACED;
-        $this->record(new OrderPlacedEvent(
+        $this->record(new OrderPlaced(
             $this->id,
             $this->customerId,
             $this->totalAmount(),
@@ -759,14 +761,14 @@ Veřejné settery a chybějící `readonly` semantika umožňují modifikaci ud�
 :::callout{type="anti"}
 ### Příklad: Mutovatelná událost (špatně)
 
-:::code{language="php" filename="src/OrderPlacedEvent.php"}
+:::code{language="php" filename="src/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
 
 // ŠPATNĚ: Mutovatelná doménová událost
 
-class OrderPlacedEvent
+class OrderPlaced
 {
     private string $orderId;
     private string $customerId;
@@ -799,18 +801,18 @@ class OrderPlacedEvent
 :::callout{type="note"}
 ### Správně: Immutable událost s readonly properties {#udalosti-spravne-heading}
 
-Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a poté nelze žádnou její vlastnost změnit. PHP 8.1+ `readonly` properties jsou pro to přesně určeným nástrojem.
+Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a poté nelze žádnou její vlastnost změnit. `readonly` properties jsou pro to přesně určeným nástrojem.
 :::
 
 :::callout{type="pattern"}
 ### Příklad: Immutable doménová událost (správně)
 
-:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderPlacedEvent.php"}
+:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
 
-// SPRÁVNĚ: Immutable doménová událost s readonly properties (PHP 8.1+)
+// SPRÁVNĚ: Immutable doménová událost s readonly properties
 
 namespace App\OrderManagement\Domain\Event;
 
@@ -818,7 +820,7 @@ use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 
-final class OrderPlacedEvent
+final class OrderPlaced
 {
     public readonly \DateTimeImmutable $occurredAt;
 

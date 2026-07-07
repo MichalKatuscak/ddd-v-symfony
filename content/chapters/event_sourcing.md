@@ -663,6 +663,11 @@ abstract class EventSourcedAggregate
 *src/Shared/Domain/EventSourcedAggregate.php*
 :::
 
+U event-sourced agregátu se stav rekonstruuje replayem a vnitřní properties zůstávají
+privátní – metody `apply*` je opakovaně přepisují. Gettery na konci třídy proto
+nahrazují `public private(set)` z kapitoly [Návrh agregátu](/navrh-agregatu); jde
+o záměrnou odchylku od konvence zbytku knihy.
+
 :::callout{type="pattern"}
 ### PHP: Order agregát s Event Sourcingem {#es-order-aggregate-heading}
 

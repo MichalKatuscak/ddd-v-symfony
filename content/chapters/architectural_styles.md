@@ -296,7 +296,7 @@ final class DoctrineOrderRepository implements OrderRepository
 
     public function get(OrderId $id): ?Order
     {
-        $orm = $this->em->find(OrderOrmEntity::class, $id->toString());
+        $orm = $this->em->find(OrderOrmEntity::class, $id->value);
 
         return $orm === null ? null : $this->mapper->toDomain($orm);
     }
@@ -819,7 +819,7 @@ final class PlaceOrderUseCase
 
         $order = Order::place(
             OrderId::generate(),
-            $customer,
+            $customer->id(), // reference na jiný agregát vede přes ID
             $request->items,
             $request->shippingAddress,
         );
@@ -831,7 +831,7 @@ final class PlaceOrderUseCase
         }
 
         return new PlaceOrderResponse(
-            orderId: $order->id()->toString(),
+            orderId: $order->id()->value,
             status: $order->status(),
             totalAmount: $order->totalAmount()->toMinorUnits(),
         );

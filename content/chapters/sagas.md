@@ -579,6 +579,11 @@ Bez perzistence by pád workeru mezi kroky `OrderPlaced` a
 Sága by zůstala navždy „viset“ bez možnosti dokončení nebo kompenzace. Stav ságy proto
 ukládáme do databáze jako Doctrine entitu.
 
+Entita leží v Application vrstvě, přestože Doctrine mapování jinak patří do
+Infrastructure ([Hexagonal Architecture](/architektonicke-styly#hexagonal)). Stav
+procesu je aplikační starost a mapování přímo na entitu šetří jednu vrstvu; kdo
+trvá na přísném vrstvení, přesune Doctrine část do Infrastructure.
+
 :::callout{type="pattern"}
 ### PHP: OrderSaga – Doctrine entita {#saga-state-entity-heading}
 
@@ -597,6 +602,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(fields: ['status'], name: 'idx_saga_status')]
 class OrderSaga
 {
+    // Auto-increment místo Uuid::v7() je záměr: jde o interní klíč
+    // infrastrukturního stavu. Business identitou ságy je correlation_id.
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

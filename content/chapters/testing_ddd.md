@@ -266,66 +266,69 @@ use PHPUnit\Framework\TestCase;
 use App\OrderManagement\Domain\Model\Order;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\ProductId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\Event\OrderPlaced;
+use App\OrderManagement\Domain\Event\OrderCreated;
+use App\OrderManagement\Domain\Event\OrderConfirmed;
 use App\OrderManagement\Domain\Event\OrderItemAdded;
 use App\OrderManagement\Domain\Exception\EmptyOrderException;
-use App\OrderManagement\Domain\Exception\OrderAlreadyPlacedException;
+use App\OrderManagement\Domain\Exception\InvalidOrderStateTransitionException;
 
 final class OrderTest extends TestCase
 {
     public function testAddsItemToOrder(): void
     {
-        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
 
-        $order->addItem('Kniha o DDD', new Money(49900, Currency::CZK), 2);
+        $order->addItem(ProductId::generate(), 2, new Money(49900, Currency::CZK));
 
         $this->assertSame(1, $order->itemCount());          // 1 řádek objednávky
         $this->assertEquals(new Money(99800, Currency::CZK), $order->total()); // 49 900 × 2
     }
 
-    public function testThrowsExceptionWhenPlacingEmptyOrder(): void
+    public function testThrowsExceptionWhenConfirmingEmptyOrder(): void
     {
-        $order = Order::create(OrderId::generate(), CustomerId::generate());
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
 
         $this->expectException(EmptyOrderException::class);
 
-        $order->place();
+        $order->confirm();
     }
 
-    public function testPlacesOrderSuccessfully(): void
+    public function testConfirmsOrderSuccessfully(): void
     {
-        $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
+        $order->addItem(ProductId::generate(), 1, new Money(10000, Currency::CZK));
 
-        $order->place();
+        $order->confirm();
 
-        $this->assertTrue($order->isPlaced());
+        $this->assertTrue($order->isConfirmed());
     }
 
-    public function testThrowsExceptionWhenPlacingAlreadyPlacedOrder(): void
+    public function testThrowsExceptionWhenConfirmingAlreadyConfirmedOrder(): void
     {
-        $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
-        $order->place();
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
+        $order->addItem(ProductId::generate(), 1, new Money(10000, Currency::CZK));
+        $order->confirm();
 
-        $this->expectException(OrderAlreadyPlacedException::class);
+        $this->expectException(InvalidOrderStateTransitionException::class);
 
-        $order->place();
+        $order->confirm();
     }
 
-    public function testReleasesOrderPlacedEvent(): void
+    public function testReleasesRecordedEventsInOrder(): void
     {
-        $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt A', new Money(10000, Currency::CZK), 1);
-        $order->place();
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
+        $order->addItem(ProductId::generate(), 1, new Money(10000, Currency::CZK));
+        $order->confirm();
 
         $events = $order->releaseEvents();
 
-        $this->assertCount(2, $events); // OrderItemAdded + OrderPlaced
-        $this->assertInstanceOf(OrderItemAdded::class, $events[0]);
-        $this->assertInstanceOf(OrderPlaced::class, $events[1]);
+        $this->assertCount(3, $events); // OrderCreated + OrderItemAdded + OrderConfirmed
+        $this->assertInstanceOf(OrderCreated::class, $events[0]);
+        $this->assertInstanceOf(OrderItemAdded::class, $events[1]);
+        $this->assertInstanceOf(OrderConfirmed::class, $events[2]);
     }
 }
 :::
@@ -425,39 +428,41 @@ namespace Tests\OrderManagement\Domain\Model;
 use App\OrderManagement\Domain\Model\Order;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\ProductId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\Event\OrderPlaced;
+use App\OrderManagement\Domain\Event\OrderCreated;
+use App\OrderManagement\Domain\Event\OrderConfirmed;
 use Tests\Shared\Domain\DomainEventAssertions;
 
 final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 {
     use DomainEventAssertions;
 
-    public function testOrderPlacedEventContainsCorrectData(): void
+    public function testOrderCreatedEventContainsCorrectData(): void
     {
+        $orderId    = OrderId::generate();
         $customerId = CustomerId::generate();
-        $order      = Order::create(OrderId::generate(), $customerId);
-        $order->addItem('Produkt A', new Money(25000, Currency::CZK), 3);
-        $order->place();
+        $order      = Order::place($orderId, $customerId);
+        $order->addItem(ProductId::generate(), 3, new Money(25000, Currency::CZK));
 
-        $events      = $order->releaseEvents();
-        $placedEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
+        $events       = $order->releaseEvents();
+        $createdEvent = $this->assertSingleEventOfType(OrderCreated::class, $events);
 
         // Ověření dat události
-        $this->assertTrue($customerId->equals($placedEvent->customerId));
-        $this->assertEquals(new Money(75000, Currency::CZK), $placedEvent->total);
-        $this->assertNotNull($placedEvent->occurredAt);
+        $this->assertTrue($orderId->equals($createdEvent->orderId));
+        $this->assertTrue($customerId->equals($createdEvent->customerId));
+        $this->assertNotNull($createdEvent->occurredAt);
     }
 
-    public function testNoOrderPlacedEventWhenOrderNotPlaced(): void
+    public function testNoOrderConfirmedEventWhenOrderNotConfirmed(): void
     {
-        $order = Order::create(OrderId::generate(), CustomerId::generate());
-        $order->addItem('Produkt B', new Money(10000, Currency::CZK), 1);
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
+        $order->addItem(ProductId::generate(), 1, new Money(10000, Currency::CZK));
 
         $events = $order->releaseEvents();
 
-        $this->assertNoEventOfType(OrderPlaced::class, $events);
+        $this->assertNoEventOfType(OrderConfirmed::class, $events);
     }
 }
 :::
@@ -1209,7 +1214,7 @@ pokud všechny společně ověřují jeden konzistentní scénář.
 - **Bootstrapování celého Symfony kernelu v unit testech** – Unit testy doménové vrstvy nesmí volat `self::bootKernel()`. Bootstrap kernelu patří do integračních testů. Zpomaluje sadu testů.
 - **Sdílený stav mezi testy** – Každý test musí být nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
 - **Mockování value objects** – Value objekty jsou datové třídy bez závislostí. Není důvod je mockovat – vždy vytvořte skutečnou instanci.
-- **Ignorování doménových výjimek v testech** – Každá doménová výjimka (`InvalidEmailException`, `OrderAlreadyPlacedException` apod.) musí mít test ověřující, že je vyhozena za správných podmínek.
+- **Ignorování doménových výjimek v testech** – Každá doménová výjimka (`InvalidEmailException`, `InvalidOrderStateTransitionException` apod.) musí mít test ověřující, že je vyhozena za správných podmínek.
 - **Chybějící test pro releaseEvents() po operaci** – Pokud agregát vydává doménové události, každá veřejná operace, která má událost vydat, musí mít test ověřující typ, počet a obsah vydaných událostí.
 :::
 

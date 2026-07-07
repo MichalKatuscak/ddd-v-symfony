@@ -333,6 +333,8 @@ namespace App\Order\Application\Query;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+// DTO a handler v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
+
 final class OrderSummaryDTO
 {
     public function __construct(
@@ -481,9 +483,11 @@ ULID (Universally Unique Lexicographically Sortable Identifier) a UUID verze 6/7
 řeší problém fragmentace indexů tím, že jsou **monotónně rostoucí**. Nové hodnoty
 jsou vždy větší než předchozí a vkládají se na konec B-tree indexu. Chování je stejné
 jako u auto-increment integeru, ale se zachováním globální unikátnosti bez centrálního generátoru.
+Tento průvodce používá UUID v7; ULID je alternativa s kratším Crockford base32 zápisem
+(26 znaků vs. 36).
 
 :::callout{type="pattern"}
-### Příklad: Použití symfony/uid (ULID a UUID v7)
+### Příklad: Použití symfony/uid (UUID v7)
 
 :::code{language="php" filename="src/Shared/Domain/ValueObject/OrderId.php"}
 <?php
@@ -492,12 +496,13 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\ValueObject;
 
-use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
 
+// Dvě třídy v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
+
 /**
- * Hodnotový objekt pro identitu objednávky - používá ULID pro výkon.
- * ULID je lexikograficky řaditelný a monotónně rostoucí - přátelský k B-tree indexům.
+ * Hodnotový objekt pro identitu objednávky - používá UUID v7 pro výkon.
+ * UUID v7 je časově řazené a monotónně rostoucí - přátelské k B-tree indexům.
  */
 final class OrderId
 {
@@ -507,14 +512,14 @@ final class OrderId
 
     public static function generate(): self
     {
-        return new self((string) new Ulid());
+        return new self((string) Uuid::v7());
     }
 
     public static function fromString(string $value): self
     {
-        if (!Ulid::isValid($value)) {
+        if (!Uuid::isValid($value)) {
             throw new \InvalidArgumentException(
-                sprintf('"%s" is not a valid ULID.', $value)
+                sprintf('"%s" is not a valid UUID.', $value)
             );
         }
         return new self($value);
@@ -526,7 +531,7 @@ final class OrderId
     }
 }
 
-// Pro UUID v7 (ordered) - alternativa k ULID
+// Stejná strategie pro identitu uživatele
 final class UserId
 {
     private function __construct(
@@ -548,9 +553,9 @@ final class UserId
 :::
 
 :::callout{type="pattern"}
-### Doctrine mapování pro ULID a UUID
+### Doctrine mapování pro UUID
 
-*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper. Ukázka níže je jiná varianta mapování `Order` než v [sekci N+1](#n-plus-1-problem): ID zde má nativní typ `Ulid`, nikoli `string`.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper. Ukázka níže je jiná varianta mapování `Order` než v [sekci N+1](#n-plus-1-problem): ID zde má nativní typ `Uuid`, nikoli `string`.*
 
 :::code{language="php" filename="src/Order/Domain/Model/Order.php"}
 <?php
@@ -561,25 +566,25 @@ namespace App\Order\Domain\Model;
 
 use App\Shared\Domain\ValueObject\OrderId;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Types\UlidType;
-use Symfony\Component\Uid\Ulid;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
 class Order // ne final – Doctrine proxy z entity dědí
 {
     #[ORM\Id]
-    // Symfony Bridge registruje 'ulid' typ - ukládá jako BINARY(16) nebo UUID v PostgreSQL.
-    // Při načtení z DB typ hydratuje objekt Ulid, property proto musí mít typ Ulid.
-    #[ORM\Column(type: UlidType::NAME, unique: true)]
-    private readonly Ulid $id;
+    // Symfony Bridge registruje 'uuid' typ - ukládá jako BINARY(16) nebo nativní uuid v PostgreSQL.
+    // Při načtení z DB typ hydratuje objekt Uuid, property proto musí mít typ Uuid.
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    private readonly Uuid $id;
 
     #[ORM\Column(type: 'string', length: 50)]
     private readonly string $orderNumber;
 
     public function __construct(OrderId $id, string $orderNumber)
     {
-        $this->id          = Ulid::fromString($id->value);
+        $this->id          = Uuid::fromString($id->value);
         $this->orderNumber = $orderNumber;
     }
 
@@ -714,6 +719,8 @@ namespace App\UserManagement\Application\Query;
 use Doctrine\DBAL\Connection;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+// View a handler v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
 
 /**
  * Read model profilu - immutabilní DTO se skalárními hodnotami.

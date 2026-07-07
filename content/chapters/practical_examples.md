@@ -239,12 +239,14 @@ final class User extends AggregateRoot implements UserInterface, PasswordAuthent
         private HashedPassword $password,
         public readonly \DateTimeImmutable $createdAt,
     ) {
-        $this->record(new UserRegistered($id, $email));
     }
 
     public static function register(UserId $id, string $name, Email $email, HashedPassword $password): self
     {
-        return new self($id, $name, $email, $password, new \DateTimeImmutable());
+        $user = new self($id, $name, $email, $password, new \DateTimeImmutable());
+        $user->record(new UserRegistered($id, $email, $user->createdAt));
+
+        return $user;
     }
 
     public function changeEmail(Email $newEmail): void { /* invariant: nový != starý */ }
@@ -256,6 +258,14 @@ final class User extends AggregateRoot implements UserInterface, PasswordAuthent
     public function getPassword(): ?string { return $this->password->hash; }
 }
 :::
+
+Jde o zjednodušenou variantu referenční implementace z kapitoly
+[Implementace v Symfony 8](/implementace-v-symfony#entities) – událost `UserRegistered`
+se nahrává ve factory `register()`, nikdy v konstruktoru. Dva kompromisy malého
+příkladu: `UserInterface` implementuje přímo agregát, zatímco v plné architektuře
+patří na security adapter v infrastrukturní vrstvě (viz
+[Autorizace v DDD](/autorizace-v-ddd)). A `final` se u entit mapovaných Doctrine
+vynechává, protože lazy proxy z entity dědí.
 
 ### Command Handler: RegisterUser {#register-user-handler}
 
@@ -273,9 +283,9 @@ final class RegisterUserHandler
         $email = new Email($command->email);
 
         // Invariant na úrovni handleru: email musí být unikátní (DB unique constraint
-        // je pojistka pro race condition, viz Implementace v Symfony, sekce 10.13).
+        // je pojistka pro race condition, viz /implementace-v-symfony#register-race-heading).
         if ($this->users->findByEmail($email) !== null) {
-            throw new \DomainException('User with this email already exists.');
+            throw DuplicateEmailException::with($email);
         }
 
         $user = User::register(

@@ -397,15 +397,17 @@ class User extends AggregateRoot // ne final – Doctrine proxy z entity dědí
         $this->password = $password;
         $this->status = UserStatus::PENDING_VERIFICATION;
         $this->registeredAt = new \DateTimeImmutable();
-
-        // Doménová událost – vedlejší efekt registrace je nyní explicitní
-        $this->record(new UserRegistered($id, $email));
     }
 
     // Named constructor vyjadřuje záměr lépe než new User()
     public static function register(UserId $id, Email $email, HashedPassword $password): self
     {
-        return new self($id, $email, $password);
+        $user = new self($id, $email, $password);
+        // Doménová událost – vedlejší efekt registrace je nyní explicitní.
+        // Nahrává ji named constructor, ne __construct: rekonstituce událost nevyvolá.
+        $user->record(new UserRegistered($id, $email, $user->registeredAt));
+
+        return $user;
     }
 
     public function activate(VerificationToken $token): void
@@ -461,23 +463,27 @@ final class Email
 
     public function __construct(string $value)
     {
-        $normalized = mb_strtolower(trim($value));
-
-        if (!filter_var($normalized, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException(
                 sprintf('"%s" není platná e-mailová adresa.', $value)
             );
         }
 
         // Zakázané domény (doménové pravidlo)
-        $domain = substr($normalized, strpos($normalized, '@') + 1);
+        $domain = substr($value, strpos($value, '@') + 1);
         if (in_array($domain, ['example.com', 'test.com'], true)) {
             throw new \DomainException(
                 'Registrace z testovacích domén není povolena.'
             );
         }
 
-        $this->value = $normalized;
+        $this->value = $value;
+    }
+
+    // Normalizace vstupu (lowercase, trim) patří sem, ne do konstruktoru
+    public static function fromUserInput(string $input): self
+    {
+        return new self(mb_strtolower(trim($input)));
     }
 
     public function domain(): string
@@ -697,7 +703,7 @@ final class RegisterUserHandler
 
     public function __invoke(RegisterUser $command): void
     {
-        $email = new Email($command->email);
+        $email = Email::fromUserInput($command->email);
         $password = HashedPassword::fromPlainText($command->password);
 
         // Doménová politika ověřuje pravidla přes repozitář
@@ -985,7 +991,7 @@ core doména s vysokou hodnotou), postup je:
 
 **Symptomy:** `Order::$id: string`, kdekoli se předává jen `string`.
 
-1. Zaveďte VO `OrderId` (`final readonly class OrderId { public function __construct(public Ulid $value) {} }`).
+1. Zaveďte VO `OrderId` (`final readonly class OrderId { public function __construct(public Uuid $value) {} }`, generování přes `Uuid::v7()`).
 2. Doctrine custom type pro `OrderId` (mapping z DB string ↔ VO).
 3. Postupně refaktorujte signature napříč handlery. PHPStan na úrovni 8 odhalí každý zapomenutý `string`.
 

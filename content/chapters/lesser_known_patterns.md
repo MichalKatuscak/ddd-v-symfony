@@ -363,7 +363,7 @@ final class InEUCountry extends CompositeSpecification
         assert($candidate instanceof Order);
 
         return in_array(
-            $candidate->shippingAddress()->country()->code(),
+            $candidate->shippingAddress->country->code,
             self::EU_COUNTRIES,
             true,
         );
