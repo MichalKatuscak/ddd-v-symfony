@@ -40,7 +40,7 @@ Pro každou roli kniha nabízí jinou doporučenou cestu čtení – viz [P.03 J
 
 - **Ne úvod do PHP nebo Symfony.** Pokud Symfony vidíte poprvé, projděte nejprve [oficiální Symfony dokumentaci](https://symfony.com/doc/current/index.html).
 - **Ne kuchařka „kopíruj-vlož“.** Kód v knize ilustruje vzory v kontextu, ne hotová řešení pro váš konkrétní projekt. DDD vyžaduje úsudek nad doménou, ne mechanickou aplikaci šablon.
-- **Ne kompletní reference DDD.** Pro hlubší teoretický základ čtěte Evanse (2003), Vernona (2013) a Khononova (2021) – odkazy na konkrétní pasáže najdete na konci každé kapitoly.
+- **Ne kompletní reference DDD.** Pro hlubší teoretický základ čtěte Evanse (2003), Vernona (2013) a Khononova (2021) – odkazy na konkrétní pasáže jsou přímo v textu kapitol a v [přehledu zdrojů](/zdroje).
 - **Ne návod, jak prosadit DDD u nepřesvědčeného managementu.** Argumenty pro DDD jsou v knize, ale rozhodnutí závisí na konkrétním kontextu organizace.
 
 ### Předpoklady {#predpoklady}
