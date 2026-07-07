@@ -139,7 +139,7 @@ Strangler Fig Pattern oproti tomu:
 - Umožňuje kontinuální dodávku nové hodnoty zákazníkovi i během migrace.
 - Snižuje riziko – systém nikdy není kompletně „rozbitý“.
 - Poskytuje možnost rollbacku: pokud nová implementace selhává, stará stále funguje.
-- Umožňuje týmu učit se DDD postupně, na reálném produkčním kódu.
+- Tým se učí DDD postupně, na reálném produkčním kódu.
 - Refaktoring lze zastavit kdykoli – systém zůstává v konzistentním, funkčním stavu.
 
 ### Datová migrace při Strangler Fig {#datova-migrace-strangler-heading}
@@ -215,12 +215,10 @@ Bounded Contexts lze v existující CRUD aplikaci identifikovat sledováním př
 
 Event Storming vymyslel Alberto Brandolini
 [[4]](https://www.eventstorming.com/). Workshopová technika modeluje doménu
-přes doménové události a zapojí do návrhu i lidi mimo tým vývoje. Při migraci z CRUD pomáhá:
-
-- Odkrytí implicitní doménové logiky skryté v kontrolerech a service třídách.
-- Identifikaci přechodů stavů entit (z pohledu domény, nikoli databáze).
-- Nalezení přirozených hranic Bounded Contexts.
-- Zapojení doménových expertů do návrhu nové architektury.
+přes doménové události a zapojuje do návrhu i lidi mimo tým vývoje. Při migraci z CRUD pomáhá
+odkrýt implicitní doménovou logiku skrytou v kontrolerech a service třídách, identifikovat
+přechody stavů entit (z pohledu domény, nikoli databáze), najít přirozené hranice
+Bounded Contexts a přizvat doménové experty k návrhu nové architektury.
 
 :::callout{type="pattern"}
 ### Příklad: Identifikace doménové logiky v CRUD kontroleru {#crud-before-heading}
@@ -628,14 +626,14 @@ kde je typovaná závislost na doménovém rozhraní `UserRepository`.
 ## 18.06 Krok 4: Postupné zavedení CQRS {#cqrs-postupne}
 
 Command Query Responsibility Segregation (CQRS) na DDD navazuje, ale má se zavést
-až po tom, co se doménový model usadí. Když přijde dřív, přesune komplexitu z domény do handleru,
+až poté, co se doménový model usadí. Když přijde dřív, přesune komplexitu z domény do handleru,
 kde je neviditelná a hůř se testuje.
 
 ### Začít s Command stranou (write side)
 
 Nejpřirozenějším místem pro zavedení CQRS je write side – operace, které mění stav systému.
 Query side (čtení) lze zpočátku ponechat s přímými Doctrine dotazy a refaktorovat ji samostatně,
-nebo ji ponechat jako optimalizované SQL dotazy i v DDD systému (read modely).
+nebo ji natrvalo provozovat jako optimalizované SQL dotazy i v DDD systému (read modely).
 
 :::callout{type="pattern"}
 ### Příklad: Extrakce RegisterUserCommand z UserController {#command-extraction-heading}
@@ -753,7 +751,7 @@ Command `RegisterUser` je prosté DTO (Data Transfer Object) bez závislostí. H
 `RegisterUserHandler` orchestruje doménový model. `UserRegistrationPolicy` je doménová
 služba: nese pravidlo unikátní e-mailové adresy, které nelze ověřit uvnitř jediného
 agregátu, a proto smí použít repozitář. Kontroler se zužuje na HTTP
-vrstvu, která pouze přeloží HTTP požadavek na Command. Vrstvy oddělené takto
+vrstvu, která pouze přeloží HTTP požadavek na Command. Takto oddělené vrstvy
 se dají testovat každá zvlášť.
 :::
 
@@ -768,13 +766,13 @@ stávajícího chování a unit testy pro nově vznikající doménovou vrstvu.
 Pojem „charakterizační testy“ pochází z knihy Michaela Featherse „Working Effectively with Legacy
 Code“
 [[5]](https://www.oreilly.com/library/view/working-effectively-with/0131177052/).
-Charakterizační test nepopisuje, jaké *by mělo být* správné chování systému, ale zachycuje
+Charakterizační test nepopisuje, jaké *by mělo být* správné chování systému, ale zachycuje,
 jaké chování systém *aktuálně má*. Slouží jako síť, která zachytí nechtěné změny chování
 při refaktoringu.
 
 Při extrakci logiky z legacy kódu pomáhají i jazykové modely: vygenerují první sadu
-charakterizačních testů nebo popíší, co nepřehledná metoda dělá. Možnosti a limity tohoto
-přístupu rozebírá kapitola [DDD a umělá inteligence](/ddd-a-umela-inteligence).
+charakterizačních testů nebo popíší, co nepřehledná metoda dělá. Souvislosti tohoto
+přístupu přibližuje kapitola [DDD a umělá inteligence](/ddd-a-umela-inteligence).
 
 :::callout{type="pattern"}
 ### Příklad: Charakterizační test pro CRUD kontroler {#char-test-heading}
@@ -939,7 +937,7 @@ a nemá dedikovaný tým na plný úvazek. Co dobu prodlužuje: špatná testova
 ### Varování před Big Bang Rewrites {#big-bang-warning-heading}
 
 **Nikdy nezačínejte migraci na DDD kompletním přepisem systému.** Big Bang Rewrite
-je architektonicky nejrizikovější rozhodnutí, které tým může učinit. Typický scénář:
+je jedno z nejrizikovějších architektonických rozhodnutí, které tým může učinit. Typický scénář:
 tým začne „přepis na zelenou louku“. Po 6 měsících zjistí, že nový systém nesplňuje všechny
 okrajové případy původního systému (které nikdo nezdokumentoval). Původní systém mezitím dostává
 nové funkcionality a nový systém za ním nestíhá. Výsledkem je buď zrušení projektu přepisu,

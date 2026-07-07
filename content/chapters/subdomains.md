@@ -47,7 +47,7 @@ Rozdělení je záměrně hrubé – tři škatulky, žádný odstín. Důvod je
 
 Část domény, která tvoří **konkurenční výhodu organizace** – to, kvůli čemu zákazníci platí právě vám a ne někomu jinému. Test: *„pokud z toho zítra ustoupíme, ztratíme zákazníky.“* Nebo formulováno opačně: pokud byste si stejnou funkcionalitu mohli stejně levně koupit od dodavatele, není to Core, je to Generic.
 
-Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíce automatizovaných testů, nejvíce code review a nejvíce diskusí s doménovými experty. Khononov uvádí jako příklady [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) ridesharing a matching jezdců u Uberu nebo ranking algoritmus vyhledávání u Googlu. Každý z nich je pro svou firmu Core – to, čím se liší od trhu.
+Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíc automatizovaných testů, nejpřísnější code review a nejčastější diskuse s doménovými experty. Khononov uvádí jako příklady [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) ridesharing a matching jezdců u Uberu nebo ranking algoritmus vyhledávání u Googlu. Každý z nich je pro svou firmu Core – to, čím se liší od trhu.
 
 **Supporting Subdomain** *(podpůrná subdoména)*
 
@@ -291,7 +291,7 @@ services:
 :::callout{type="pattern"}
 ### Adresářová struktura jako strategický nástroj {#forced-strategy-heading}
 
-Tato struktura není kosmetická – **vynucuje strategické rozhodnutí**. Jakmile máte `src/Core/` a `src/Supporting/` jako oddělené namespacy, code review automaticky kontroluje, do kterého patří nově přidaná funkcionalita. Junior nemůže „omylem“ přidat custom `UserAggregate.php` do `src/Generic/Auth/`, protože tam doménové vrstvy ani neexistují. Strategie se zhmotnila v adresáři.
+Tato struktura není kosmetická – **vynucuje strategické rozhodnutí**. Jakmile máte `src/Core/` a `src/Supporting/` jako oddělené namespacy, code review automaticky kontroluje, do kterého patří nově přidaná funkcionalita. Strategie se zhmotnila v adresáři.
 
 Související: implementační detail uvnitř jedné subdomény je rozebrán v [kapitole o implementaci v Symfony](/implementace-v-symfony).
 :::
@@ -326,7 +326,7 @@ final class Pricelist extends AggregateRoot
     {
         if ($this->hasConflictingRule($rule)) {
             throw new \DomainException(
-                "Pravidlo $rule->code koliduje s existujícím pravidlem."
+                "Rule $rule->code conflicts with an existing rule."
             );
         }
 
@@ -464,7 +464,7 @@ Klasifikace subdomén nemá smysl, pokud z ní neplynou rozhodnutí. Přímé ma
 | Supporting | **BUILD lehce** nebo **BUY hotové řešení**, pokud existuje s ≥80% pokrytím | Medior, junior pod dohledem | Order mgmt (build), Helpdesk (buy – Zendesk) |
 | Generic | **BUY / RENT / OPEN-SOURCE** | Junior, integrátor | Auth (Auth0/Keycloak), Email (SES), Payments (Stripe) |
 
-Často přehlížený detail: **klasifikace závisí na perspektivě firmy**. Pro běžnou B2C firmu je „CRM“ Generic – koupí Salesforce nebo HubSpot. Pro startup, který staví CRM jako svůj hlavní produkt, je „CRM“ Core. Stejně tak: „autentizace“ je Generic pro 99 % organizací, ale pro Auth0 / Okta je to jejich Core. **Subdoménová klasifikace je vždy relativní k vašemu obchodnímu modelu, ne absolutní**.
+Klasifikace je relativní k obchodnímu modelu, ne absolutní – co je pro vás Generic, je pro vendora jeho Core, jak ukázaly příklady Mailgunu a autentizace výše.
 
 Praktický důsledek pro rozhodování o nákupu: před podpisem SaaS smlouvy si tým odpoví na otázku – *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup – odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
 
@@ -490,7 +490,7 @@ Tři typické posuny:
 
 ### Z Generic do Core – komodita se stane diferenciátorem {#shift-generic-to-core}
 
-Příklad: **online platby v roce 2010 byly pro většinu firem Generic** – koupíte si bránu, integrujete, hotovo. Pro Stripe, který tehdy začínal, to byl ale Core: investovali do API, do podpory pro vývojáře, do globálního pokrytí. Dnes je Stripe víceméně oborový standard a Core mu zůstává stále u plateb, jen s posunutou hladinou (fraud detection, tax compliance, finanční produkty pro startupy). Pokud vaše firma identifikuje, že se v určité dosud-Generic oblasti dá hrát o trh, posuňte ji do Core a zvyšte investici. Riziko: pokud se mýlíte, utratíte peníze v subdoméně, kterou trh vůbec neoceňuje.
+Příklad: **online platby v roce 2010 byly pro většinu firem Generic** – koupíte si bránu, integrujete, hotovo. Pro Stripe, který tehdy začínal, to byl ale Core: investovali do API, do podpory pro vývojáře, do globálního pokrytí. Dnes je Stripe víceméně oborový standard a jádro jeho byznysu zůstává u plateb, jen se posunula laťka (fraud detection, tax compliance, finanční produkty pro startupy). Pokud vaše firma identifikuje, že se v určité dosud-Generic oblasti dá hrát o trh, je namístě ji posunout do Core a zvýšit investici. Riziko: pokud se mýlíte, utratíte peníze v subdoméně, kterou trh vůbec neoceňuje.
 
 ### Z Core do Supporting – komoditizace {#shift-core-to-supporting}
 
@@ -503,7 +503,7 @@ Příklad: **helpdesk / ticketing**. V roce 2005 většina středních firem imp
 Praktická obrana proti zastarávání klasifikace:
 
 1. Naplánujte **strategický audit subdomén každých 12–18 měsíců**. Workshop na půl dne s product managementem a architekty.
-2. Po každém audit cyklu projděte pětibodový test (sekce 02.03) na všech subdoménách znovu – i na těch, kterými „jste si jistí“.
+2. Po každém auditním cyklu projděte pětibodový test (sekce 02.03) na všech subdoménách znovu – i na těch, kterými „jste si jistí“.
 3. Srovnávejte s konkurencí: pokud váš největší konkurent neutralizuje vaši Core subdoménu (např. tím, že koupil hotové řešení, které je 80 % vašeho rozsahu), je to varovný signál.
 4. Sledujte SaaS landscape v Generic subdoménách – co bylo loni „kupte si“, může být letos „má to každý a stojí to dvacetinu“.
 
@@ -537,7 +537,7 @@ Pětikrokový postup pro první klasifikaci subdomén vlastního produktu. Dopor
 
 5. **Zapsat do Domain Vision Statement (1 stránka A4) – kdo, co, proč, kdy.**
 
-   Pro každou Core subdoménu vytvořte 1-stránkový dokument (markdown nebo Notion / Confluence). Pro Supporting stačí jedna věta v interním wiki. Pro Generic stačí poznámka „kupujeme X od vendora Y, smlouva platí do Z“. Tento dokument je jediný legitimní výstup workshopu – bez něj se klasifikace ztratí.
+   Pro každou Core subdoménu vytvořte jednostránkový dokument (markdown nebo Notion / Confluence). Pro Supporting stačí jedna věta v interním wiki. Pro Generic stačí poznámka „kupujeme X od vendora Y, smlouva platí do Z“. Tento dokument je jediný legitimní výstup workshopu – bez něj se klasifikace ztratí.
 
 ### Šablona Domain Vision Statementu {#dvs-template}
 

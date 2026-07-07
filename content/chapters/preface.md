@@ -20,7 +20,7 @@ difficulty: 1
 
 Tato kniha vznikla z opakované zkušenosti: vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran teorie a zavře knihu se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi originálním textem z roku 2003 a praktickým PHP projektem v roce 2026 leží silná vrstva implementačních detailů, kterou Evans nemohl pokrýt. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) zaplnil pro Javu a C#. Pro PHP a Symfony zatím podobně systematická kniha nebyla.
 
-Cílem této knihy je tu mezeru zaplnit. Začínáme tím, kdy DDD vůbec dává smysl. Pokračujeme přes strategický a taktický design až po konkrétní Symfony 8 kód s Doctrine ORM, Symfony Messenger a PHP 8.4. Každá kapitola obsahuje funkční ukázky, které můžete převzít do svého projektu, ne jen pseudokód.
+Cílem této knihy je tu mezeru uzavřít. Začínáme tím, kdy DDD vůbec dává smysl. Pokračujeme přes strategický a taktický design až po konkrétní Symfony 8 kód s Doctrine ORM, Symfony Messenger a PHP 8.4. Každá kapitola obsahuje funkční ukázky, které můžete převzít do svého projektu, ne jen pseudokód.
 
 ## P.01 Pro koho je tato kniha {#pro-koho}
 
@@ -31,7 +31,7 @@ Kniha je psaná pro pět typických rolí:
 - **Senior PHP developer**, který v projektu narazil na limity klasické vrstvené architektury – `OrderService` má 1500 řádků, každá nová feature způsobí regresi v jiné oblasti, onboarding nového kolegy trvá měsíce.
 - **Junior/mid Symfony developer**, který si všiml, že větší projekty „rostou“ jinak než malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
 - **Architekt**, který stojí před rozhodnutím, jaký přístup k modelování doménové logiky zvolit – DDD, klasické CRUD, modulární monolit, nebo microservices.
-- **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management v termínech DORA metrik a obchodní hodnoty.
+- **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management opřené o DORA metriky a obchodní hodnotu.
 - Poslední je **vývojář migrující z CRUD aplikace na DDD** – v produkci má spaghetti kód a hledá inkrementální cestu ven.
 
 Pro každou roli kniha nabízí jinou doporučenou cestu čtení – viz [P.03 Jak číst tuto knihu](#jak-cist).
@@ -57,13 +57,13 @@ Pokud některý z bodů „nesedí“, neznamená to, že knihu nemůžete čís
 
 ## P.02 Co kniha pokrývá {#co-pokryva}
 
-Kniha je rozdělená do osmi tematických částí. Pořadí kapitol je promyšlené – každá staví na předchozích – ale pro většinu rolí dává smysl číst selektivně podle vlastních potřeb.
+Kniha je rozdělená do osmi tematických částí – pořadí kapitol je promyšlené a každá staví na předchozích.
 
 ### Část 1 – Strategický design (kap. 1–5) {#cast-1}
 
 Strategický design rozhoduje, *kde* DDD vůbec aplikovat. Pokrývá filozofii DDD, Ubiquitous Language, identifikaci subdomén (Core, Supporting, Generic), Bounded Contexts a Context Mapping. Doplňují ho dvě praktické techniky: Event Storming Alberta Brandoliniho a Team Topologies (Skelton & Pais, 2019), bez kterých strategický design nefunguje v reálné organizaci.
 
-Zde se rozhoduje, jestli má smysl pokračovat. Kapitoly 1 a 2 dají první signál – jestli má váš projekt dost komplexní doménu a kde leží jeho Core. Úplný rámec s rozhodovacím stromem obsahuje kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Signál „ne“ si zaslouží ověření právě tam, než odložíte zbytek knihy.
+Zde se rozhoduje, jestli má smysl pokračovat. Kapitoly 1 a 2 dají první signál – jestli má váš projekt dost komplexní doménu a kde leží jeho Core. Úplný rámec s rozhodovacím stromem obsahuje kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Než kvůli signálu „ne“ odložíte zbytek knihy, ověřte ho právě tam.
 
 ### Část 2 – Taktický design (kap. 6–9) {#cast-2}
 
@@ -168,17 +168,17 @@ Konvence v této sekci platí napříč všemi kapitolami.
 
 ### Hlas a tón
 
-Kniha používá vykání. Věty jsou krátké a jedna věta říká jednu věc. Žádný marketingový jazyk – místo „mocný framework“ stojí v textu konkrétně, co Symfony Messenger umí a co ne. Žádné osobní komentáře autora, žádné nadsázky.
+Kniha používá vykání. Věty jsou krátké a každá říká jednu věc. Žádný marketingový jazyk – místo „mocný framework“ stojí v textu konkrétně, co Symfony Messenger umí a co ne. Žádné osobní komentáře autora, žádné nadsázky.
 
 ### Styl kódu
 
-Kód cílí na PHP 8.4 a Symfony 8 s Doctrine ORM 3. Některé příklady používají rysy z PHP 8.4 (asymmetric visibility, property hooks). Pokud váš projekt běží na starší verzi, princip zůstává platný, jen syntaxe je jiná.
+Kód cílí na PHP 8.4 a Symfony 8 s Doctrine ORM 3. Které rysy jazyka příklady předpokládají, shrnuje sekce [Předpoklady](#predpoklady). Pokud váš projekt běží na starší verzi, princip zůstává platný, jen syntaxe je jiná.
 
 Atributy Doctrine (`#[ORM\Entity]`) jsou na doménových třídách jako pragmatická výchozí volba. Pro striktní oddělení doménové vrstvy od ORM existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatná persistence třída plus mapper. Většina příkladů v knize používá první variantu, protože v reálných Symfony projektech je rozšířenější.
 
 ### Callouty
 
-Kniha používá čtyři typy callout boxů. Modrý **note** přidává kontext nebo odkaz na hlubší zdroj. Zelený **pattern** doporučuje vzor s konkrétním kódem, oranžový **warn** upozorňuje na riziko nebo častou chybu. Červený **anti** označuje anti-vzor, kterému se vyhnout.
+Kniha používá čtyři typy callout boxů. Modrý **note** přidává kontext nebo odkaz na hlubší zdroj. Zelený **pattern** doporučuje vzor s konkrétním kódem, oranžový **warn** upozorňuje na riziko nebo častou chybu. Červený **anti** označuje anti-vzor, kterému je lépe se vyhnout.
 
 ### Diagramy
 

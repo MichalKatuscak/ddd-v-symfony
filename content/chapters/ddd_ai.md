@@ -19,9 +19,8 @@ reading_time: 20
 difficulty: 1
 ---
 
-Umělá inteligence mění způsob, jakým navrhujeme, píšeme a provozujeme software. Otázka stojí takto:
-jsou některé architektonické přístupy pro éru AI vhodnější než jiné? Nabízí Domain-Driven Design
-výhody, které s příchodem LLM nabývají na váze – nebo naopak přidává zbytečnou komplexitu v době,
+Jsou některé architektonické přístupy s nástupem LLM vhodnější než jiné? Nabízí Domain-Driven Design
+výhody, které teď nabývají na váze – nebo naopak přidává zbytečnou komplexitu v době,
 kdy AI dokáže generovat kód z krátkého popisu?
 
 Kapitola mapuje, co o vztahu DDD a umělé inteligence říkají přední autority softwarového
@@ -50,8 +49,8 @@ lze chápat jako bounded context. V téže přednášce předpověděl, že NLP 
 klasifikace záměrů, extrakce entit, shrnutí dokumentů – se stanou
 plnohodnotnými subdoménami v DDD modelu. Stejně jako dnes
 máme samostatné bounded contexty pro platby, notifikace nebo inventory, budeme mít bounded
-context pro „rozumění textu“ nebo „extrakci strukturovaných dat“. Tato předpověď rezonuje
-s tím, jak velké firmy dnes budují AI platformy – jako interní služby se svými API hranicemi,
+context pro „rozumění textu“ nebo „extrakci strukturovaných dat“. Tato předpověď odpovídá
+tomu, jak velké firmy dnes budují AI platformy – jako interní služby se svými API hranicemi,
 nikoli jako průřezovou vrstvou přes celý systém.
 
 Martin Fowler na toto téma navazuje z jiného úhlu. Ve svých poznámkách o přípravě na
@@ -66,8 +65,8 @@ aby LLM chápal kód bez speciální terminologie. Preferovaným formátem pro A
 nikoli doménový jazyk definovaný formálními pravidly. DHH poukazuje na to, že Rails 8.1 přidal
 nativní Markdown rendering právě proto, že to je formát, ve kterém AI přirozeně komunikuje.
 Z jeho pohledu je ubiquitous language užitečná myšlenka pro komplexní enterprise systémy.
-Pro většinu webových aplikací je ale konvence nad konfigurací – prostá angličtina nebo čeština
-v komentářích a názvech – dostatečně výmluvná.
+Pro většinu webových aplikací ale stačí konvence nad konfigurací a prostá angličtina
+či čeština v názvech a komentářích.
 
 Velké jazykové modely pracují s přirozeným jazykem jako svým primárním médiem.
 Ubiquitous language v DDD je precizní podmnožina přirozeného jazyka – terminologie domény
@@ -79,7 +78,7 @@ kapitola [Základní koncepty DDD](/zakladni-koncepty#ubiquitous-language).
 
 ## ai.02 Bounded contexts a kvalita generovaného kódu {#bounded-contexts}
 
-Existují data. Ne rozsáhlé akademické studie s tisíci vzorků, ale praktické měření z reálných
+Existují data. Ne rozsáhlé akademické studie s tisíci vzorků, ale praktická měření z reálných
 projektů, která začínají ukazovat konzistentní obraz. Přehled dostupných zdrojů – od příspěvků
 praktiků přes konferenční záznamy po preprint na arXiv – naznačuje, že hranice bounded contextu
 mají měřitelný dopad na kvalitu kódu generovaného LLM.
@@ -122,7 +121,7 @@ mají měřitelný dopad na kvalitu kódu generovaného LLM.
 </p>
 :::
 
-Nick Tune je jedním z nejvíce aktivních praktiků na průsečíku DDD a AI. V článku pro O'Reilly
+Nick Tune je jedním z nejaktivnějších praktiků na průsečíku DDD a AI. V článku pro O'Reilly
 Radar (2026) popisuje, jak použil Claude Code k reverznímu inženýrství softwarové architektury –
 automatickému mapování end-to-end toků, závislostí a hranic v existující kódové bázi.
 V návazném článku pak ukazuje, jak lze pomocí knihovny ts-morph deterministicky extrahovat
@@ -261,29 +260,25 @@ aplikací je DDD přeceňované – a AI, která generuje CRUD kód z jednoduch�
 je přirozeným řešením bez potřeby doménového modelu. Hlavní otázka, na kterou
 DHH odpovídá jinak než Evans, je: jak velký podíl softwarového průmyslu tvoří
 skutečně komplexní domény versus CRUD monkeying? A mění AI tuto hranici? Buď tím,
-že CRUD kód zlevní natolik, že zbyde čas na komplexní doménu, nebo tím,
+že CRUD kód zlevní natolik, že zbude čas na komplexní doménu, nebo tím,
 že komplexní doménové problémy de facto „zjednoduší“ na LLM-supported decisions.
 Pro praktické rozhraničení toho, kdy DDD nasazovat a kdy ne, viz kapitolu
 [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 ## ai.05 Architektonické nástroje a kontext pro AI {#nastroje}
 
-AI nástroje za poslední dva roky konvergovaly k de facto implementaci DDD konceptů
-na úrovni konfigurace. Cursor IDE používá soubory v adresáři `.cursor/rules/`
-s příponou `.mdc`: každý soubor definuje pravidla pro konkrétní část projektu,
-terminologii a omezení.
-GitHub Copilot přidal podporu pro `.github/copilot-instructions.md`:
+Konvergenci AI nástrojů k bounded contextům na úrovni konfigurace rozebírá
+[sekce ai.02](#bounded-contexts). Zde zbývají detaily formátů. Cursor IDE čte
+soubory v adresáři `.cursor/rules/` s příponou `.mdc`: každý definuje pravidla
+pro konkrétní část projektu, terminologii a omezení.
+GitHub Copilot přidal podporu pro `.github/copilot-instructions.md` –
 globální instrukce pro všechny konverzace v daném repozitáři. Claude Code používá
-`CLAUDE.md` na úrovni projektu i adresáře – přesně tato stránka,
-na které čtete tento článek, se řídí `CLAUDE.md` v kořenovém adresáři
-repozitáře.
+`CLAUDE.md` na úrovni projektu i adresáře – i tento web má vlastní `CLAUDE.md`
+v kořenovém adresáři repozitáře.
 
-Všechny tyto soubory sdílejí strukturu nápadně podobnou tomu, co DDD
-nazývá bounded context s ubiquitous language. Definují terminologii (jak se jmenují
-věci v projektu), pravidla (co smí a nesmí), kontext (co AI ví o projektu)
-a omezení (co AI dělat nebude). Nick Tune a další DDD praktici tuto paralelu
-aktivně využívají. Cursor rules a CLAUDE.md píší jako explicitní bounded context
-dokumenty, čímž propojují formální DDD terminologii s praktickými AI nástroji.
+Nick Tune a další DDD praktici píší Cursor rules a CLAUDE.md jako explicitní
+bounded context dokumenty, čímž propojují formální DDD terminologii s praktickými
+AI nástroji.
 
 Akademický výzkum tuto praxi začíná zkoumat systematicky. Preprint na arXiv
 z roku 2026 (Wiegand et al.) zkoumá automatizaci tvorby doménových metamodelů v DDD
@@ -296,14 +291,14 @@ v kontextu AI, ale obsahuje několik relevantních blipů. V kategorii Adopt je 
 to understand legacy codebases“. V kategorii Assess je „Context engineering“
 a „Anchoring coding agents to a reference application“. Všechny tyto techniky
 stojí na stejném principu: přesnější kontext znamená přesnější výstupy AI –
-a přesně toto DDD bounded contexty zajišťují.
+a právě to bounded contexty dodávají.
 
 Druhá strana mince: ty samé nástroje fungují i bez DDD. Konzistentně psaný kód
 s jasnými konvencemi – convention over configuration v Rails stylu – bývá pro AI stejně
 čitelný jako explicitně modelovaný bounded context. Pokud projekt dodržuje konzistentní
 pojmenování, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
-i bez formálního DDD modelu. Proslulý článek „DHH Is Wrong“ a série na toto téma
-ukazují, že konvence dovede být stejně účinná jako explicitní modelování. Otevřená
+i bez formálního DDD modelu. Článek „DHH Is Wrong“ a série na toto téma
+ukazují, že disciplinované konvence obstojí i bez explicitního modelování. Otevřená
 zůstává otázka, co se stane, když projekt vyroste za hranice, kde konvence stačí.
 
 ## ai.06 Otevřené otázky a limity {#otevrene-otazky}
@@ -328,12 +323,12 @@ Developer Workshop“), ale ty nejsou přímo zaměřené na kombinaci DDD a AI.
 EventStorming zůstává v Brandoliniho pojetí fundamentálně lidskou aktivitou –
 sdílené pochopení domény se buduje v konverzaci, nikoliv v promptu.
 
-Sam Newman – autor Building Microservices – se k AI zatím jasně nevyjádřil
-v kontextu DDD. Jeho pozice k distribuovaným systémům je dlouhodobě konzervativní:
-mikroservisy jako poslední možnost, nikoli jako výchozí architektura. Tato konzervativní
-pozice pravděpodobně platí i pro AI: nasadit LLM do produkčního systému je distribuovaná
-závislost se všemi problémy distribuovaných systémů – latencí, spolehlivostí, verzováním,
-monitoringem.
+Sam Newman – autor Building Microservices – se k AI v kontextu DDD zatím jasně
+nevyjádřil. Jeho pozice k distribuovaným systémům je dlouhodobě konzervativní:
+mikroservisy jako poslední možnost, nikoli jako výchozí architektura. Zda tato
+zdrženlivost platí i pro AI, je autorský odhad, nikoli referovaná pozice. Nasazení LLM
+do produkčního systému je nicméně distribuovaná závislost se všemi problémy
+distribuovaných systémů – latencí, spolehlivostí, verzováním, monitoringem.
 
 Otevřené otázky, na které obor zatím nemá odpověď:
 
@@ -413,14 +408,14 @@ potřebu nových nástrojů a metrik. Brandolini zachovává lidský prvek v cen
 
 DHH tvoří důležitý opačný hlas: připomíná, že velká část softwarového průmyslu
 je stále CRUD, že jednoduchost má svou hodnotu a že AI dovede být účinná i bez
-formálního doménového modelování. Pozice není v rozporu s DDD – je to připomínka,
+formálního doménového modelování. Pozice DDD neodporuje. Připomíná,
 že DDD nemá odpověď na každou otázku.
 
 Konvergence roku 2026 stojí na jediné věci: struktura pomáhá. Ať už jde o
 DDD bounded contexts, Cursor rules nebo CLAUDE.md – explicitní, sdílený kontext
 zlepšuje výsledky AI. DDD přináší bohatou tradici myšlení o tom, jak takový
 kontext definovat. Existují i další cesty – konvence, dobré testy a čistý kód
-zvládnou podobný efekt – ale DDD je cesta vyzkoušená a dobře zdokumentovaná.
+dosáhnou podobného účinku – ale DDD je postup vyzkoušený a dobře zdokumentovaný.
 
 Rozhodovat se má smysl podle domény, týmu a projektu. Kde leží doménová
 komplexita? Kde jsou náklady na chybu vysoké? Kde bude systém žít pět let?

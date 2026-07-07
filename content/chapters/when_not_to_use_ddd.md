@@ -25,12 +25,11 @@ infrastruktura bolí, viz [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-bol
 
 DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
 zpomaluje vývoj a frustruje tým – aniž by přinesla cokoliv hodnotného.
-Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít. Je to pohled, který DDD
-literatura – soustředěná na to, kdy vzor použít – zpravidla nerozvádí dostatečně.
+Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít.
 
 ## 22.01 Rozhodovací strom: Mám použít DDD? {#rozhodovaci-strom}
 
-Než projdete jednotlivé situace, odpovězte si pět otázek. Pokud na kteroukoli odpovíte
+Než projdete jednotlivé situace, odpovězte si na pět otázek. Pokud na kteroukoli odpovíte
 „ne“, DDD pravděpodobně není správná volba – nebo ještě ne.
 
 :::diagram{fig="22.1-A" title="Rozhodovací strom: pět bran k DDD" src="images/diagrams/9_when_not_to_use_ddd/diagram.svg"}
@@ -48,7 +47,7 @@ které jsou přirozeně jen řádky v databázi. Výsledek: 5× více kódu, ž�
 
 Eric Evans to v *Domain-Driven Design* říká explicitně: DDD má smysl pro
 **komplexní doménovou logiku**. CRUD operace komplexní doménovou logiku nemají –
-jsou to operace nad daty bez doménových pravidel.
+jsou to čtení a zápisy dat bez doménových pravidel.
 
 :::callout{type="pattern"}
 #### Srovnání: DDD vs. jednoduchý přístup pro CRUD admin {#crud-compare-heading}
@@ -138,7 +137,7 @@ DDD předpokládá, že doméně rozumíte dost dobře na to, abyste ji modelova
 to neplatí. Každý refaktoring agregátů a [bounded contextů](/zakladni-koncepty)
 vás zpomaluje a vývojové iterace se soustředí na architekturu místo na hodnotu pro zákazníka.
 
-**Důležitá nuance:** Strategické DDD nástroje – zejména
+Strategické DDD nástroje – zejména
 [Event Storming](/event-storming) a [Context Mapping](/context-mapping) – ve fázi hledání
 naopak pomáhají. Dávají jména tomu, čemu ještě nerozumíte.
 Co nedává smysl, je taktické DDD (agregáty, doménové události, repozitáře) pro model,
@@ -190,7 +189,7 @@ class Order {
 **Doporučené alternativy:**
 
 - **Flat MVC s Doctrine Entities** – rychlé iterace, změny jsou levné.
-- Až doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně – viz [Migrace z CRUD na DDD](/migrace-z-crud).
+- Až se doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně – viz [Migrace z CRUD na DDD](/migrace-z-crud).
 - Strategické nástroje DDD (Event Storming, Context Mapping) je vhodné zavést od začátku – pomáhají rychleji porozumět doméně.
 :::
 
@@ -244,7 +243,7 @@ výhody (udržovatelnost, schopnost rozvíjet se).
 založený na praxi. DDD vyžaduje počáteční investici: modelování domény, budování
 Ubiquitous Language, návrh agregátů a bounded contextů. Tato investice se typicky začíná
 vracet po 6–12 měsících, kdy projekt roste a tým profituje z čistých doménových hranic.
-U projektů kratších než rok tuto návratnost nedosáhnete.
+U projektů kratších než rok této návratnosti nedosáhnete.
 Vernon v *Domain-Driven Design Distilled* doporučuje zvážit
 „strategickou hodnotu“ projektu – pokud je nízká, DDD se nevyplatí.
 
@@ -272,8 +271,8 @@ který bude bolet roky.
 
 :::code{language="php" filename="src/OrderAggregate.php"}
 <?php
-// ❌ Pseudo-DDD - tým „zavedl DDD" bez pochopení
-// Výsledek: Doctrine entity přejmenovaná na „Aggregate", setter zůstal
+// ❌ Pseudo-DDD - tým „zavedl DDD“ bez pochopení
+// Výsledek: Doctrine entity přejmenovaná na „Aggregate“, setter zůstal
 
 final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agregát
 {
@@ -286,9 +285,9 @@ final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agre
         $this->status = $status;  // žádná validace, žádná doménová pravidla
     }
 
-    // „Repository" je jen přejmenovaný EntityRepository
-    // „Command" je jen přejmenovaný DTO bez handleru
-    // „Domain Event" se dispatchuje, ale nikdo ho neposlouchá
+    // „Repository“ je jen přejmenovaný EntityRepository
+    // „Command“ je jen přejmenovaný DTO bez handleru
+    // „Domain Event“ se dispatchuje, ale nikdo ho neposlouchá
 }
 :::
 
@@ -349,7 +348,7 @@ přepíšete stejně všechno.
 
 ## 22.09 Hybrid podle typu subdomény – DDD tam, kde dává smysl {#hybrid-subdomain}
 
-V reálných projektech volba „celé DDD ano, nebo celé ne“ málokdy sedí na realitu. Khononov v *Learning DDD* (2021) prosazuje architekturu **podle typu subdomény**:
+Volba „celé DDD ano, nebo celé ne“ málokdy odpovídá realitě projektu. Khononov v *Learning DDD* (2021) prosazuje architekturu **podle typu subdomény**:
 DDD se aplikuje per Bounded Context podle toho, o jakou subdoménu jde:
 
 | Typ subdomény | Architektonický styl | Důvod |
@@ -360,8 +359,8 @@ DDD se aplikuje per Bounded Context podle toho, o jakou subdoménu jde:
 
 Konkrétně: pojišťovna má **Core** Underwriting (DDD ano), **Supporting** Customer
 Management (lehké DDD), **Generic** Notifikace (CRUD nebo SaaS jako Twilio).
-Plné DDD ve všech třech kontextech znamená 3× kód a 3× operační dluh, ze kterých
-2 nepřináší úměrnou hodnotu.
+Plné DDD ve všech třech kontextech znamená 3× kód a 3× operační dluh, přičemž
+ve dvou ze tří kontextů se investice nevrací.
 
 V Symfony projektu se to projevuje strukturou monolitu, kde
 `src/Underwriting/` má plnou DDD strukturu (Domain/Application/Infrastructure
@@ -385,9 +384,9 @@ Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaný přínos za
 zbývající životnost systému převýší trojnásobek ceny migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
 je migrace obchodní rozhodnutí, ne technické.
 
-Khononov uvádí příklad telco, který strávil 3 roky migrací na DDD jen aby
-zjistil, že platforma byla po té době nahrazena jinou při akvizici.
-3 roky inženýrské kapacity vyhozeny.
+Khononov uvádí příklad telco, které tři roky migrovalo na DDD; platformu
+pak při akvizici nahradilo jiné řešení. Tři roky inženýrské kapacity přišly
+vniveč.
 :::
 
 ### Pseudo-DDD – varování před cargo cultem {#pseudo-ddd-cargo-cult-heading}
@@ -421,7 +420,7 @@ DDD se hodí na specifický kontext, ne na každý projekt. Smysl má, když pla
 | Projekt bude žít a růst roky | Investice do architektury se vrátí jen při dostatečném horizontu | Core banking systém, ERP, zdravotnický informační systém |
 | Přístup k doménovým expertům | Ubiquitous Language a model se tvoří ve spolupráci – ne ze vzduchoprázdna | Pojistný matematik, zkušený účetní, vedoucí skladu – lidé, kteří žijí doménou denně |
 | Tým rozumí DDD nebo má čas se učit | Špatně implementované DDD je horší než žádné DDD | Tým prošel školením, má za sebou alespoň jeden DDD projekt, nebo má 2–3 měsíce na rozjezd |
-| Více bounded contexts nebo mikroservisy | DDD dává přirozené hranice pro dekompozici systému | E-commerce s oddělenými kontexty: katalog, objednávky, platby, logistika |
+| Více bounded contextů nebo mikroservisy | DDD dává přirozené hranice pro dekompozici systému | E-commerce s oddělenými kontexty: katalog, objednávky, platby, logistika |
 
 Pokud váš projekt splňuje většinu z nich, DDD se vyplatí. Pokud ne – použijte jednodušší
 přístup a ušetřete si bolest.

@@ -55,7 +55,7 @@ předchozí je pryč. Event Sourcing zapisuje každou změnu jako nový řádek 
 ### Pojmy Event Sourcingu: {#es-pojmy-heading}
 
 - **Event (Událost)** – Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený v minulém čase (např. `OrderPlaced`, `PaymentReceived`). Obsahuje všechna data potřebná k rekonstrukci změny stavu.
-- **Event Store** – Specializované append-only úložiště pro události. Události se do něj pouze přidávají; nikdy se neupravují ani nemažou. Každá událost patří do event streamu konkrétního agregátu.
+- **Event Store** – Specializované append-only úložiště pro události. Události se do něj pouze přidávají. Každá událost patří do event streamu konkrétního agregátu.
 - **Aggregate ([Agregát](/zakladni-koncepty#aggregates))** – V kontextu ES je agregát rekonstruován přehráním všech událostí ze svého event streamu. Každá mutace stavu agregátu produkuje novou událost místo přímé modifikace atributů.
 - **Projection (Projekce)** – Read model sestavený z událostí. Projekce transformují event stream do podoby vhodné pro konkrétní dotazy (query) – například denormalizovaná tabulka pro přehled objednávek.
 - **Snapshot** – Periodicky ukládaný snímek aktuálního stavu agregátu, který slouží jako zkratka při replay. Umožňuje přehrát pouze události novější než poslední snapshot místo celého event streamu od počátku.
@@ -97,7 +97,7 @@ vstupem pro aktualizaci projekcí.
 ## 13.03 Kdy použít Event Sourcing {#kdy-pouzit}
 
 Event Sourcing přidává konkrétní možnosti – auditní log, replay, temporální dotazy – výměnou
-za vyšší složitost infrastruktury i kódu. Před zavedením stojí úvaha,
+za vyšší složitost infrastruktury i kódu. Před zavedením stojí za úvahu,
 zda v daném kontextu přínosy převažují nad náklady na implementaci a provoz. Tato sekce dává rozhodovací rámec;
 zbytek kapitoly rozebírá implementaci.
 
@@ -324,8 +324,7 @@ rodná čísla) v otevřené podobě. Jak právo na výmaz řeší crypto-shredd
 přístup, rozebírá sekce [GDPR a immutable Event Store](#gdpr-event-store-heading).
 :::
 
-Konvence pojmenování událostí by měla být konzistentní napříč celým projektem. Doporučený formát pro
-`eventType()` je `<bounded_context>.<past_tense_verb_noun>`, například
+Pro `eventType()` se osvědčil formát `<bounded_context>.<past_tense_verb_noun>`, například
 `ordering.order_placed` nebo `payment.payment_received`. Tato konvence usnadňuje
 routing událostí v Symfony Messenger a jejich filtrování v Event Store.
 
@@ -853,10 +852,10 @@ denormalizované read modely budované z event streamu specificky pro tvar dotaz
 ### Synchronní vs. asynchronní projekce
 
 - **Synchronní projekce** – Projekce se aktualizuje přímo v téže transakci jako zápis události. Garantuje konzistenci dat v okamžiku odpovědi na command, ale zvyšuje latenci zápisu a zavádí těsnou vazbu mezi write a read stranou.
-- **Asynchronní projekce** – Události jsou po uložení do Event Store zařazeny do fronty (Symfony Messenger + transport jako RabbitMQ nebo Redis). Projector je konzument, který zpracovává zprávy nezávisle. Read model je v krátkém časovém okně nekonzistentní (eventual consistency), ale write side je rychlejší a oddělená.
+- **Asynchronní projekce** – Události jsou po uložení do Event Store zařazeny do fronty (Symfony Messenger + transport jako RabbitMQ nebo Redis). Projektor je konzument, který zpracovává zprávy nezávisle. Read model je v krátkém časovém okně nekonzistentní (eventual consistency), ale write side je rychlejší a oddělená.
 
 :::callout{type="pattern"}
-### PHP: OrderSummaryProjection a asynchronní Projector {#projekce-php-heading}
+### PHP: OrderSummaryProjection a asynchronní projektor {#projekce-php-heading}
 
 :::code{language="php" filename="src/Infrastructure/Ordering/Projection/OrderSummaryProjector.php"}
 <?php
@@ -985,8 +984,8 @@ druhá tabulka není potřeba.
 ### Relay čte přímo z event_store {#es-outbox-heading}
 
 Tabulka `event_store` splňuje vlastnosti outbox tabulky sama o sobě. Je to append-only
-log a každý záznam vzniká ve stejné transakci jako odpovídající doménová změna. Stačí
-přidat **relay worker**, který čte nové řádky podle `id` a posílá je do Messengeru.
+log a každý záznam vzniká ve stejné transakci jako odpovídající doménová změna. Přidává
+se **relay worker**, který čte nové řádky podle `id` a posílá je do Messengeru.
 Pozici posledního publikovaného řádku si ukládá do checkpoint tabulky, takže po restartu
 pokračuje tam, kde skončil. Samotný checkpoint ovšem nestačí: kvůli gap problému
 popsanému v následujícím calloutu se musí kombinovat s některou z mitigací – překryvem
@@ -1490,7 +1489,7 @@ Více o výkonnostních dopadech viz [Výkonnostní aspekty](/vykonnostni-aspekt
 
 ## 13.11 Verzování událostí (Event Versioning) {#verzovani-udalosti}
 
-Události v Event Store jsou **permanentní** – jednou uložené se nemažou ani nepřepisují.
+Události v Event Store jsou **permanentní** – jednou uložené zůstávají ve své podobě natrvalo.
 Doménový model se přitom v čase vyvíjí: přibývají atributy, mění se struktura dat, původní
 pole se rozdělují nebo slučují. Otázka tedy zní: **jak přečíst starou událost novým kódem?**
 
@@ -1737,7 +1736,7 @@ order_v2 (active)
 ```
 
 Cena: doba běhu migrace (může to být hodiny u velkých streamů), nutnost double-write
-během přechodného období (aplikace zapisuje do obou streamů, dokud migrace nedokončí).
+během přechodného období (aplikace zapisuje do obou streamů, dokud migrace neskončí).
 :::
 
 :::callout{type="pattern"}
@@ -1813,7 +1812,7 @@ leží v separátní tabulce s možností DELETE.
 
 :::faq{}
 - question: Co je Event Sourcing?
-  answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: nic se v event logu nikdy nepřepisuje ani nemaže. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
+  answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: event log se pouze rozšiřuje o nové záznamy. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
 - question: Jaký je vztah mezi Event Sourcingem a CQRS?
   answer: 'Event Sourcing a CQRS jsou dva nezávislé vzory, které se často kombinují. Každý z nich lze zavést samostatně: CQRS funguje i s klasickou ORM persistencí, ES lze implementovat i bez rozdělení na write a read modely. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů) – což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
 - question: Co je Event Store a k čemu slouží?

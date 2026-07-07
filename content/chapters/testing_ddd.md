@@ -66,7 +66,7 @@ rozděluje testovací sadu do tří vrstev. Liší se rychlostí, mírou izolace
 ### Testovací strategie – co testovat na každé vrstvě:
 
 - **Doménová vrstva:** Validační logika value objects, invarianty entit, transakční konzistence agregátů, vydávání doménových událostí, doménové výjimky.
-- **Aplikační vrstva:** Command handlery a query handlery – s použitím fake (InMemory) repozitářů, ověření, že správné metody repozitáře jsou volány s očekávanými argumenty.
+- **Aplikační vrstva:** Command handlery a query handlery – s použitím fake (InMemory) repozitářů, ověření, že handler volá správné metody repozitáře s očekávanými argumenty.
 - **Infrastrukturní vrstva:** Správné Doctrine mapování, dotazy repozitářů, transakce, volání externích API.
 - **Prezentační vrstva:** Správné HTTP status kódy, formát odpovědi, autentizace a autorizace.
 :::
@@ -80,8 +80,8 @@ kernelu, žádná databáze, žádné fixtures.
 ### Testování Value Objects
 
 Test value objektu ověřuje tři věci: že neplatný vstup vyhodí odpovídající výjimku, že dvě instance
-se stejnou hodnotou jsou si rovny přes `equals()`, a že každá operace vrací novou instanci místo
-modifikace stávající. Tím je hodnotový objekt pokrytý.
+se stejnou hodnotou jsou si rovny přes `equals()`, a že objekt zůstává neměnný – jiná hodnota
+znamená novou instanci. Tím je hodnotový objekt pokrytý.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro Email value object (PHPUnit)
@@ -250,7 +250,7 @@ Plnou implementaci s `VerificationToken` naleznete v kapitole
 
 Agregát chrání konzistenci skupiny entit a vydává doménové události. Test agregátu má proto dvě role:
 ověřit transakční invarianty (pravidla platná pro celý agregát po každé operaci) a zkontrolovat, že
-správné události byly vydány ve správném pořadí jako vedlejší efekt doménových operací.
+operace vydala očekávané události ve správném pořadí.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro Order agregát
@@ -643,20 +643,20 @@ Test ověřuje chování handleru, ne řešení souběhu.
 
 Nadměrné použití mocků (mockování každé závislosti) vede k tzv. *nadměrné specifikaci* testů.
 Takové testy ověřují implementační detaily, nikoli chování. Při každém refaktoringu přestanou procházet,
-i když se chování systému nezměnilo. Preferujte InMemory Fake implementace pro repozitáře a mocky používejte
-pouze tam, kde ověřujete vedlejší efekty (odeslání e-mailu, volání externího API).
+i když se chování systému nezměnilo. Pro repozitáře se osvědčily InMemory Fake implementace; mocky mají
+místo jen tam, kde se ověřují vedlejší efekty (odeslání e-mailu, volání externího API).
 :::
 
 ## 17.05 Integrační testy s Doctrine {#integracni-testy}
 
 Integrační testy odpovídají na otázku, kterou unit testy pokrýt nemohou: zda Doctrine mapování, dotazy
 repozitářů a transakce skutečně dělají to, co jejich rozhraní slibuje. Spouští se proti reálné databázi –
-typicky SQLite in-memory pro rychlost, nebo testovací PostgreSQL/MySQL instance pro shodu s produkcí.
+typicky SQLite in-memory pro rychlost, nebo testovací instanci PostgreSQL/MySQL pro shodu s produkcí.
 
 Obě implementace přitom plní tutéž smlouvu rozhraní: `findById(UserId $id): ?User` vrací při
 nenalezení `null`, stejně jako InMemory varianta ze [sekce o test doubles](#test-doubles).
 Druhou běžnou konvencí je metoda `getById()`, která místo `null` vyhazuje `UserNotFoundException` –
-projekt si vybere jednu konvenci a drží ji ve všech implementacích i testech.
+projekt si vybere jednu variantu a drží ji ve všech implementacích i testech.
 
 :::callout{type="note"}
 ### KernelTestCase vs WebTestCase:
@@ -892,8 +892,8 @@ final class RegistrationControllerTest extends WebTestCase
 :::callout{type="warn"}
 ### Rozsah funkčních testů
 
-Funkční testy jsou nejpomalejší a nejkřehčí. Testujte pouze hlavní scénář a hlavní chybové scénáře.
-Vše ostatní (okrajové případy, validace, doménová pravidla) pokryjte unit testy doménové vrstvy.
+Funkční testy jsou nejpomalejší a nejkřehčí. Pokrývají jen hlavní scénář a nejdůležitější chybové cesty.
+Vše ostatní (okrajové případy, validace, doménová pravidla) patří do unit testů doménové vrstvy.
 Příliš mnoho funkčních testů prodlužuje dobu CI/CD pipeline a snižuje motivaci vývojářů spouštět testy lokálně.
 :::
 
@@ -980,7 +980,7 @@ final class RegisterUserFlowTest extends WebTestCase
 ### Test idempotence handleru
 
 Asynchronní transport doručuje zprávy v režimu at-least-once: po pádu workera dorazí tatáž
-zpráva podruhé. Handler proto musí být idempotentní – dvojí zpracování smí vyvolat jeden efekt.
+zpráva podruhé. Handler proto musí být idempotentní – dvojí zpracování smí vyvolat jen jeden efekt.
 Deduplikační mechanismus popisuje [Idempotent Inbox](/outbox-pattern#inbox) – záznam se ukládá
 pod dvojicí `eventId` (ULID) a `consumer`. Test je krátký: zavolat handler dvakrát se stejnou
 zprávou a spočítat efekty.
@@ -1046,7 +1046,7 @@ Pokud by relay publikoval, ale neoznačil záznam jako zpracovaný, příští b
 ## 17.08 Architektonické testy {#architektonicke-testy}
 
 Pravidlo, že doménová vrstva nesmí záviset na infrastruktuře ani na aplikační vrstvě, drží jen do první
-spěchající code review, ve které někdo přidá `use Doctrine\ORM\Mapping` do entity. Architektonické testy
+uspěchané code review, ve které někdo přidá `use Doctrine\ORM\Mapping` do entity. Architektonické testy
 tomu zabraňují technicky: pravidla závislostí jsou popsána deklarativně a porušení padne v CI jako
 spadlý test, ne až v review.
 
@@ -1245,7 +1245,7 @@ infrastruktura, a architektonické testy hlídají, aby tato izolace nezmizela p
 
 :::faq{}
 - question: Jak testovat agregát – unit test s mock repozitářem, nebo integrační test?
-  answer: 'Agregát se testuje primárně unit testem – je to čistý PHP bez závislostí na frameworku nebo databázi. Test instancuje agregát, volá jeho metody a ověřuje výsledný stav i vyvolané doménové události. Mock repozitáře se přitom nepotřebuje, protože samotný agregát repozitář nevolá. Integrační test doplňuje pokrytí až na úrovni, kde vstupuje persistence – tedy při ukládání a načítání agregátu. Podrobný rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
+  answer: 'Agregát se testuje primárně unit testem – je to čistý PHP bez závislostí na frameworku nebo databázi. Test instancuje agregát, volá jeho metody a ověřuje výsledný stav i vyvolané doménové události. Mock repozitáře přitom není potřeba, protože samotný agregát repozitář nevolá. Integrační test doplňuje pokrytí až na úrovni, kde vstupuje persistence – tedy při ukládání a načítání agregátu. Podrobný rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
 - question: K čemu slouží InMemory repozitář a kdy ho preferovat před mockem?
   answer: 'InMemory repozitář je plnohodnotná implementace rozhraní repozitáře, která drží agregáty v poli v paměti. Oproti mocku simuluje reálné chování (najít, uložit, počítat), takže testy aplikačních služeb procházejí celý use case věrohodněji. Mock se hodí tam, kde je potřeba ověřit konkrétní interakci – kolikrát byla metoda volána a s jakými argumenty. InMemory repozitář naopak slouží pro ověření výsledku, ne volání. Rozbor variant v <a href="#test-doubles">sekci Test doubles a InMemory repozitáře</a>.'
 - question: Jak ověřit, že agregát publikuje správné doménové události?

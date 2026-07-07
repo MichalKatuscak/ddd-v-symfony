@@ -23,7 +23,7 @@ V kapitole [Základní koncepty DDD](/zakladni-koncepty) jsme prošli
 čtyři pilíře taktického designu: **Entity**, **Value Object**,
 **Aggregate** a stručně i **Domain Service** a **Factory**.
 Eric Evans jim věnuje v částech II a III desítky stran. Vývojáři je v průvodcích přeskakují
-nebo si je pletou s jinými vzory. Tato kapitola jim vrací plný význam: kdy jsou užitečné,
+nebo si je pletou s jinými vzory. Tato kapitola vzorům vrací plný význam: kdy jsou užitečné,
 jak je zapsat v PHP 8.4 a jaká rizika přinášejí při špatném použití.
 
 Čtyři vzory, všechny ukotvené přímo v Evansově knize: **Specification Pattern** (kap. 9) – kompozice doménových predikátů jako prvotřídních objektů. **Domain Services** (kap. 5) zachytávají logiku bez přirozeného vlastníka mezi Entitami a Value Objekty. **Factories** zapouzdřují vznik agregátů se složitými invarianty (kap. 6; u Vernona kap. 11). A **Modules** (rovněž kap. 5) – vědomá organizace kódu podle Ubiquitous Language.
@@ -556,7 +556,7 @@ final class DoctrineOrderRepository implements OrderRepository
 
 Obě role specifikace (in-memory predikát i překladač do query) sedí v jedné třídě,
 takže když se PHP a DQL podoba začnou rozcházet, je to při code review vidět na jedné obrazovce.
-Nic ho ale nevynucuje – jde o dvě nezávislé implementace téhož pravidla. Pojistkou
+Nic tento soulad ale nevynucuje – jde o dvě nezávislé implementace téhož pravidla. Pojistkou
 je kontraktní test: nad stejnou sadou testovacích dat ověří, že `isSatisfiedBy()`
 označí tytéž objekty, jaké `match()` vrátí z databáze. Když se obě verze rozejdou,
 test selže dřív než produkce.
@@ -1023,7 +1023,7 @@ nebo doménovou službu.
 Třetí typ factory, s nímž se setkáte, je **reconstitution** –
 rekonstrukce agregátu z perzistence. Doctrine to dělá za vás (přes hydrator), ale pokud
 máte Event Sourcing nebo custom mapper, potřebujete factory, která **nevolá
-invarianty** (rekonstruovaný agregát už invariant prošel kdysi v minulosti):
+invarianty** (rekonstruovaný stav už validací prošel při vzniku):
 
 :::code{language="php" filename="src/Ordering/Domain/Order.php (fragment)"}
 /**
@@ -1281,8 +1281,8 @@ mezi nástroji liší, tři pravidla výše vyjádří oba.
 ### Bez architektonických testů je Modules jen přání {#phparkitect-tip-heading}
 
 Modulární organizace bez vynucení v CI se rozpadá. Stačí 6 měsíců a hot-fix tlak –
-refaktoring zpět je pak týdenní práce. Doporučujeme **od prvního commitu** nasadit phparkitect (nebo
-`deptrac`, alternativa) a udržovat zelený build. Náklad je nízký
+refaktoring zpět je pak týdenní práce. Doporučujeme **od prvního commitu** nasadit phparkitect,
+případně `deptrac`, a udržovat zelený build. Náklad je nízký
 (jeden YAML/PHP soubor v repu), přínos vysoký – modul zůstává modulem,
 i když do projektu přijde pátý nový vývojář, který Evansův text nikdy nečetl.
 
@@ -1316,8 +1316,8 @@ Bounded Context:
 Hlavní vztah: **Agregát uvnitř používá Specifications** pro invarianty,
 **vzniká přes Factory** (named constructor), **spolupracuje s 2+ jinými
 agregáty přes Domain Service**, a celá ta skupina **žije v jednom
-Module**, který odpovídá Bounded Contextu. Vzory se vzájemně předpokládají.
-Když jeden vyřežete a zbytek používáte samostatně, přínos všech klesne.
+Module**, který odpovídá Bounded Contextu. Provázanost celé sady popsala
+už sekce [08.01](#proc-prehlizime).
 
 ## 08.07 Anti-vzory souhrn {#antivzory}
 
@@ -1381,7 +1381,7 @@ u anémického modelu, který v sekci 08.03 padl jen krátce.
 - question: 'Má Domain Service mít stav?'
   answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables, žádný interní cache, žádný čítač. Pokud by Domain Service držela stav, ztratí se idempotence a souběžnost. Jediné, co Domain Service smí mít v konstruktoru, jsou jiné stateless služby (typicky další Domain Service nebo immutable hodnota). Vše ostatní (repozitáře, ClockInterface, Mailer) ji posouvá do Application nebo Infrastructure vrstvy. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
 - question: 'Factory metoda nebo Factory class – jak se rozhodnout?'
-  answer: 'Defaultně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) ho výslovně preferuje. K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
+  answer: 'Standardně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) ho výslovně preferuje. K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
 - question: 'Jak vynutit hranice mezi Moduly v PHP projektu?'
   answer: 'Konvence sama o sobě se rozpadá – vývojáři pod tlakem „udělej rychle“ přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://github.com/phparkitect/arkitect" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu „App\\Ordering nesmí závisět na App\\Billing“, „App\\Ordering\\Domain nesmí znát Doctrine“, a CI build selže při porušení. Náklad je jeden konfigurační soubor, zisk je jistota, že modulární organizace přežije i pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
 - question: 'Jak má vypadat namespace třídy, která sedí na hranici dvou Bounded Contextů?'

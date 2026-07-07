@@ -38,7 +38,7 @@ Tento průvodce používá **Doctrine atributy přímo na doménových třídác
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
 *Dependency Inversion* – doména „ví“ o Doctrine. V praxi jde o metadata,
 ne o chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
-oficiální dokumentace i drtivá většina open-source Symfony projektů používá atributy.
+oficiální dokumentace i drtivá většina open-source projektů používá atributy.
 
 Pokud chcete striktně oddělenou doménu, korektní cesta není XML mapping (taky
 „znečištěné“, jen jiným formátem), ale **Persisted Object Pattern** – samostatná
@@ -69,7 +69,7 @@ Vertikální slice architektura v Symfony 8 organizuje strukturu projektu podle 
 :::callout{type="pattern"}
 ### Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8
 
-:::code{language="bash" filename="snippet.sh"}
+:::code{language="bash" filename="src/ (vertikální slice struktura)"}
 src/
 ├── UserManagement/             # Bounded Context: Správa uživatelů
 │   ├── Domain/                 # Doménová vrstva pro UserManagement
@@ -160,17 +160,17 @@ Závislosti mezi kontexty procházejí přes Application vrstvu nebo události �
 
 - **Izolace domén** – Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.
 - **Ubiquitous Language** – Jazyk kontextu se promítá do kódu; tým ho používá konzistentně od názvů tříd po dokumentaci.
-- **Jasné hranice** – Definované hranice mezi doménami pomáhají vývojářům pochopit, kde končí jedna doména a začíná druhá.
+- **Jasné hranice** – Čtenář kódu pozná, kde končí jedna doména a začíná druhá.
 - **Minimalizace závislostí** – Kontexty drží své modely odděleně. Změna v jednom by neměla nutit úpravu druhého.
 :::
 
 :::callout{type="warn"}
 ### Časté chyby při implementaci DDD
 
-- **Umístění všech doménových modelů do sdílené složky** – Každá doména patří do svého kontextu, ne do `Shared/`.
-- **Sdílení doménových modelů mezi doménami** – Cesta k datům z cizího kontextu vede přes Anti-Corruption Layer nebo Domain Events.
+- **Umístění všech doménových modelů do sdílené složky** – Model v `Shared/` ztrácí vazbu na kontext, kterému patří.
+- **Sdílení doménových modelů mezi doménami** – Přímý přístup k datům cizího kontextu obchází Anti-Corruption Layer i Domain Events.
 - **Příliš mnoho závislostí mezi doménami** – Cross-context import doménových tříd je signál chybějící Anti-Corruption Layer.
-- **Ignorování Ubiquitous Language** – Kód, dokumentace i komunikace v týmu používají stejné výrazy.
+- **Ignorování Ubiquitous Language** – Kód, dokumentace a komunikace v týmu se rozcházejí v pojmech.
 :::
 
 ## 10.03 Implementace entit {#entities}
@@ -617,7 +617,7 @@ a commitne. Repozitář pak jen volá `persist()`, transakci ani flush neřídí
 
 S middlewarem se mění i okamžik commitu: `flush()` zapíše SQL, commit provede
 až middleware po doběhnutí handleru. Synchronní dispatch v handleru tedy běží
-uvnitř otevřené transakce – a pokud se po něm transakce odvolá, listenery už
+uvnitř otevřené transakce – a pokud se transakce poté vrátí zpět (rollback), listenery už
 reagovaly na událost, která se nikdy nestala. Spolehlivé řešení je opět
 [Outbox Pattern](/outbox-pattern): událost se commituje spolu s agregátem.
 :::
@@ -1397,7 +1397,7 @@ final readonly class RegisterUserHandler
         } catch (UniqueConstraintViolationException $e) {
             // Spoléháme na DB unique constraint na sloupci `email`. Aplikační check
             // přes findByEmail() je vůči souběžným registracím nedostatečný (TOCTOU
-            // race – dvě paralelní volání oba projdou check a oba uloží).
+            // race – dvě paralelní volání obě projdou check a obě uloží).
             throw DuplicateEmailException::with($email, $e);
         }
     }
@@ -1410,8 +1410,8 @@ final readonly class RegisterUserHandler
 
 V dřívějších verzích tohoto průvodce handler zjišťoval unikátnost přes
 `findByEmail()` před `save()`. To je **TOCTOU race**: dvě paralelní
-registrace se stejným e-mailem oba projdou checkem (databáze ještě neviděla zápis
-toho druhého) a oba úspěšně uloží. Výsledek: dva uživatelé se stejným e-mailem.
+registrace se stejným e-mailem obě projdou checkem (databáze ještě neviděla zápis
+té druhé) a obě se úspěšně uloží. Výsledek: dva uživatelé se stejným e-mailem.
 
 Bezpečné řešení má dvě vrstvy:
 
@@ -1721,7 +1721,7 @@ Drobný rozdíl v syntaxi `services.yaml`, dramatický rozdíl v chování:
 - `App\…\UserRepository: { class: App\…\DoctrineUserRepository }` – **nová služba**
   pod klíčem rozhraní. Vznikne *druhá* instance `DoctrineUserRepository` – dva
   EntityManagery, dvě sady listenerů, dva separátní stavy. Při autowiringu
-  může vznikat zmatek, kterou instanci `MessageBus` injektuje.
+  může vznikat zmatek, kterou instanci kontejner injektuje do závislých služeb.
 
 V Symfony 6.3+ je idiomatičtější forma atribut `#[AsAlias]` přímo na implementaci –
 viz [Symfony idiomy: `#[AsAlias]`](#symfony-idiomy-asalias). Konfigurace v YAML

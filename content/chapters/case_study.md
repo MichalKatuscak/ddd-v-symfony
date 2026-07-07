@@ -79,7 +79,7 @@ zjištění je zárodkem rozdělení do bounded contexts.
 ### Krok 2: Seskupení událostí do subdomén {#discovery-grouping-heading}
 
 Tým druhý den shlukoval události podle významu. Otázka pro každou skupinu zněla: kdo z byznysu za toto odpovídá?
-Skupina, které rozumí jediný expert, je kandidát na subdoménu. Výsledkem byla mapa události na subdoménu:
+Skupina, které rozumí jediný expert, je kandidát na subdoménu. Výsledkem byla mapa událostí na subdomény:
 
 | Subdoména | Událost | Doménový expert |
 |---|---|---|
@@ -120,7 +120,7 @@ Hlubší teoretický základ pro identifikaci kontextů poskytují kapitoly
 [Základní koncepty DDD](/zakladni-koncepty).
 
 :::callout{type="note"}
-Event storming není jednorázový workshop. Po prvním nasazení se ukazují události, které tým neuvažoval
+Event storming není jednorázový workshop. Po prvním nasazení se ukazují události, se kterými tým nepočítal
 (`InvitationExpired`, `TaskBlocked`) i události, které se v praxi nepoužívají.
 Doménový model je *živý dokument* – při každém větším incrementu se vyplatí ověřit, že slovník
 v kódu odpovídá slovníku v týmu.
@@ -180,7 +180,7 @@ Konkrétní ukázka projekce, která naslouchá událostem ze tří kontextů, j
 
 ### Taktický design a struktura projektu
 
-Na taktické úrovni implementace pokrývá tyto DDD vzory. Základ tvoří entity – objekty s identitou, které se v čase mění (User, Project, Task) – a hodnotové objekty, neměnné nositele konceptů domény bez vlastní identity (UserId, ProjectId, TaskStatus). Nad nimi stojí čtyři další stavební kameny:
+Implementace na taktické úrovni stojí na těchto vzorech. Základ tvoří entity – objekty s identitou, které se v čase mění (User, Project, Task) – a hodnotové objekty, neměnné nositele konceptů domény bez vlastní identity (UserId, ProjectId, TaskStatus). Nad nimi stojí čtyři další stavební kameny:
 
 - **Aggregates** – skupiny objektů, které doména považuje za jednu jednotku z hlediska změn dat (např. Project s TaskCollection).
 - **Domain Events** – co se v doméně stalo a má význam pro doménové experty (ProjectCreated, TaskAssigned).
@@ -351,8 +351,8 @@ Sekce prochází jádro systému – od slovníku přes agregáty a doménové u
 
 ### Ubiquitous Language {#ubiquitous-language-heading}
 
-Slovník vznikl s doménovými experty ještě před prvním řádkem kódu. Tytéž pojmy najdete v třídách, v rozhovoru
-s produkťákem i v ticketech. Hlavní pojmy:
+Slovník vznikl s doménovými experty ještě před prvním řádkem kódu. Tytéž pojmy najdete ve třídách, v rozhovoru
+s produktovým manažerem i v ticketech. Hlavní pojmy:
 
 - **Project** – Organizační jednotka, která sdružuje související úkoly a členy týmu.
 - **Task** – Jednotka práce, která má být dokončena v projektu.
@@ -655,8 +655,9 @@ final class Task extends AggregateRoot
 ### Doménové události {#domain-events-heading}
 
 Agregáty publikují skutečnosti, které pro doménu mají význam. Událost je neměnný záznam minulého
-děje – proto jsou všechny třídy `final readonly` s veřejnými promovanými parametry. Atribut
-`occurredAt` nese okamžik vzniku v UTC; payload obsahuje minimální množinu identifikátorů
+děje – proto jsou všechny třídy `final readonly` s veřejnými promovanými parametry. Vlastnost
+`occurredAt` nese okamžik vzniku – výchozí `new \DateTimeImmutable()` ovšem přebírá časovou zónu
+serveru, garance UTC vyžaduje explicitní předání hodnoty. Payload obsahuje minimální množinu identifikátorů
 a hodnot potřebnou k rekonstrukci kontextu. Teoretický základ doménových událostí je v kapitole
 [Základní koncepty DDD](/zakladni-koncepty#domain-events); návaznost na Event
 Sourcing v kapitole [Event Sourcing](/event-sourcing).
@@ -792,7 +793,7 @@ final class ProjectId
     {
         $resolved = $value === '' ? Uuid::v7()->toRfc4122() : $value;
         if (!Uuid::isValid($resolved)) {
-            throw new \InvalidArgumentException('ProjectId must be a valid UUID');
+            throw new \InvalidArgumentException('ProjectId musí být platné UUID.');
         }
         $this->value = $resolved;
     }
@@ -975,18 +976,18 @@ class AssignTaskHandler
         $task = $this->taskRepository->findById(new TaskId($command->taskId));
 
         if (!$task) {
-            throw new \DomainException('Task not found');
+            throw new \DomainException('Úkol nebyl nalezen.');
         }
 
         $assigneeId = new UserId($command->assigneeId);
 
         // Ověření přes port - bez přímé závislosti na ProjectManagement
         if (!$this->projectChecker->exists($task->projectId())) {
-            throw new \DomainException('Project not found');
+            throw new \DomainException('Projekt nebyl nalezen.');
         }
 
         if (!$this->projectChecker->isMember($task->projectId(), $assigneeId)) {
-            throw new \DomainException('Assignee is not a member of the project');
+            throw new \DomainException('Řešitel není členem projektu.');
         }
 
         // Použití doménové služby pro přiřazení úkolu
@@ -1546,7 +1547,7 @@ Z provozu vyplynulo deset bodů, které drží i mimo tuto studii. Většina vyc
 designu, zbytek z provozu read modelů a vědomého řízení kompromisů.
 
 1. **Strategický design rozhoduje o výsledku** – Identifikace pěti bounded contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel“ znamená v každém kontextu něco jiného. Bez kontextové mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
-2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produkťák mluví o `TaskAssigned`, ne každý o něčem jiném.
+2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produktový manažer mluví o `TaskAssigned`, ne každý o něčem jiném.
 3. **Agregáty a hranice transakcí** – Vymezené agregáty udržely data konzistentní. Každý agregát si hlídal vnitřní konzistenci a měnil se v jedné transakci.
 4. **Doménové události pro integraci** – Doménové události odvázaly bounded contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval agregát událost `TaskCreated`; ActivityTracking i ProjectListProjection na ni reagovaly samostatně, aniž by o sobě věděly.
 5. **CQRS pro oddělení zodpovědností** – Příkazy mění stav, dotazy čtou bez vedlejších efektů. Každá strana má vlastní handler, vlastní model a vlastní testy. Roli message busu obstaral Symfony Messenger.

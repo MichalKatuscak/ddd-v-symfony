@@ -102,8 +102,8 @@ Pro náš e-shop scénář vypadá mapa akcí a jejich kompenzací následovně:
 | `CreateShipment` | `CancelShipment` | Pouze do okamžiku odeslání |
 
 Kompenzace **není přesný inverzní příkaz**. Zatímco
-`ChargeCustomer` strhne peníze, kompenzační `RefundCustomer` nejenže
-vrátí peníze, ale navíc odešle zákazníkovi notifikaci o vrácení platby, zapíše záznam
+`ChargeCustomer` strhne peníze, kompenzační `RefundCustomer` peníze
+vrátí a k tomu odešle zákazníkovi notifikaci, zapíše záznam
 do auditního logu a může aktualizovat interní metriky. Každá kompenzace je samostatný
 příkaz s vlastní logikou, validací a vedlejšími efekty.
 
@@ -317,13 +317,13 @@ o dvou až třech krocích si s choreografií vystačí.
 
 U procesů s pěti a více kontexty nebo s podmíněným větvením narazí choreografie na
 čtyři problémy, které se v menším měřítku skrývají. V produkci se projeví
-ve chvíli, kdy do toku přibude šestý kontext nebo větvení podle stavu.
+ve chvíli, kdy do toku přibude pátý kontext nebo větvení podle stavu.
 
 ### 1. Neviditelný tok procesu {#neviditelny-tok-heading}
 
 Při choreografii neexistuje žádné jedno místo, kde by byl celý doménový proces popsán.
-Tok procesu je rozdrobený do desítek handlerů v různých kontextech. S pěti a více
-kontexty není možné vizualizovat kompletní tok. Nikdo nemá přehled o tom, které
+Tok procesu je rozdrobený do desítek handlerů v různých kontextech. Při takovém
+rozsahu už kompletní tok nejde vizualizovat. Nikdo nemá přehled o tom, které
 kroky po sobě následují, kde se proces větví a jaké jsou alternativní cesty při
 selhání. Vzniká fenomén, který se někdy označuje jako
 **„distribuované špagety“** (*distributed spaghetti*) – analogie
@@ -358,7 +358,7 @@ timeoutu – nikdo nehlídá, že celý proces od `OrderPlaced` po
 
 Všechny tyto problémy poukazují na jednu věc: u komplexních procesů potřebujeme
 **centrální místo**, které zná celý tok, řídí kroky, detekuje selhání
-a spouští kompenzace. Tímto centrálním místem je [orchestrátor
+a spouští kompenzace. Tuto roli plní [orchestrátor
 – Process Manager](#orchestrace).
 
 :::callout{type="note"}
@@ -809,7 +809,7 @@ eskalaci.
 :::callout{type="note"}
 ### Optimistické zamykání v produkci {#optimistic-locking-heading}
 
-Entita `OrderSaga` proto nese sloupec `version` s atributem `#[ORM\Version]`.
+Entita `OrderSaga` nese sloupec `version` s atributem `#[ORM\Version]`.
 Bez něj by dva workery zpracovávající události pro stejnou objednávku mohly
 současně načíst stejný stav ságy a přepsat si navzájem změny. Optimistický zámek
 zajistí, že druhý worker dostane výjimku `OptimisticLockException` a Messenger
@@ -836,7 +836,8 @@ balancing, RabbitMQ multiple consumers). Důsledky:
 - **Kompenzační závody.** Sága rozhodne `Compensate`, vyšle `RefundCustomer`,
   a *zároveň* dorazí pomalá `PaymentSucceeded` z jiného workeru. Druhá
   zpráva může resetovat stav ságy z `Compensating` zpět na `AwaitingShipment`,
-  ale `RefundCustomer` už běží – peníze odešly i přijdou.
+  ale `RefundCustomer` už běží – zákazník dostane refund, a přesto proces
+  pokračuje k expedici.
 
 Standardní obrana proti všem třem:
 
@@ -919,13 +920,13 @@ Optimistic lock to nezachytí – obě ságy mají rozdílná ID a vlastní slou
 
 Sága může skončit v nekonzistentním stavu z legitimních příčin: deployment
 během transakce, OOM kill v polovině compensation kroku, schema migration
-změnila tvar `state` JSONu. Operátor potřebuje tři nástroje. Read-only inspekci –
-CLI command `app:saga:show <id>` vypíše aktuální stav, čekající události,
+změnila tvar `state` JSONu. Operátor potřebuje tři nástroje. Prvním je read-only
+inspekce: CLI command `app:saga:show <id>` vypíše aktuální stav, čekající události,
 zpracovaná event ID a počet pokusů, plus odkaz na ságu v Grafaně. Druhým je
 manuální přechod: `app:saga:force-transition <id> <to>` s povinným
 `--reason="..."` aktualizuje status, zapíše audit log a invaliduje čekající
 události; je určen výhradně operátorům – jeho použití signalizuje bug v sáze
-nebo neošetřený doménový scénář. A konečně replay od checkpointu: u idempotentní
+nebo neošetřený doménový scénář. Třetím je replay od checkpointu: u idempotentní
 ságy (a taková by měla být – viz výše) smazání stavu a přehrání všech jejích
 eventů z outbox/event store obnoví správný stav. Vyžaduje sledování správného
 počátečního eventu (typicky `OrderPlaced` event ID).

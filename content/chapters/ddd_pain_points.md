@@ -23,14 +23,14 @@ Předchozí kapitoly pokryly teorii i pokročilé vzory: od
 [CQRS](/cqrs) a
 [Event Sourcing](/event-sourcing) až po
 [Ságy a Process Managery](/sagy-a-process-managery).
-V praxi se implementace DDD střetává s řadou problémů, na které standardní DDD literatura
-většinou neupozorňuje. Architektonické principy narážejí na realitu frameworku, databáze,
+V praxi se implementace DDD střetává s řadou problémů, které učebnicová literatura
+zpravidla nechává stranou. Architektonické principy narážejí na realitu frameworku, databáze,
 asynchronní infrastruktury i týmové dynamiky.
 
 Tato kapitola je **katalog 20 reálných provozních problémů**, se kterými se setkávají týmy
 implementující DDD v PHP a Symfony. Zaměřuje se na třenice s konkrétní technologií: Doctrine
-Unit of Work, Symfony Messenger, Outbox pattern, autorizace, race conditions. Pro každý problém
-najdete: popis situace, analýzu příčiny a doporučené řešení – tam kde je to výmluvné, s ukázkou kódu.
+Unit of Work, Symfony Messenger, Outbox pattern, autorizace, race conditions. U většiny problémů
+najdete popis situace, analýzu příčiny a doporučené řešení – tam, kde je to užitečné, s ukázkou kódu.
 
 Pro úhel **kódových a modelovacích anti-vzorů** (anémický model, Primitive Obsession, God
 Aggregate, sdílená databáze napříč BC) viz [Anti-vzory](/anti-vzory). Pro **rozhodovací rámec**,
@@ -666,8 +666,8 @@ stavu).
 
 :::callout{type="note"}
 **Pozor:** Pro ordering problémy *nepoužívejte*
-`UnrecoverableMessageHandlingException` – ta zprávu
-**přeskočí retry strategii** a zprávu okamžitě přesune do failed transport.
+`UnrecoverableMessageHandlingException` – ta
+**obchází retry strategii** a zprávu okamžitě přesune do failed transportu.
 Správný přístup je hodit **standardní výjimku**; Messenger zprávu
 odloží do retry fronty s exponential backoff. Pokud po vyčerpání všech retries
 stále selhává, teprve pak skončí v failed transport – kde ji lze prozkoumat
@@ -677,7 +677,7 @@ a znovu odeslat.
 ## 20.03 C – Modelování {#modelovani}
 
 Modelovací rozhodnutí se zdají triviální, dokud nezpůsobí problém v produkci.
-Čtyři pasti, které se vrací nejčastěji.
+Čtyři pasti, které se vracejí nejčastěji.
 
 ### C1. Kde žije validace {#c1-validace}
 
@@ -1055,7 +1055,7 @@ Bus factor = 1 je pro projekt kritické riziko.
 2. **Rotace vlastnictví modulů:** Žádný Bounded Context nemá trvale jen
    jednoho správce. Periodická rotace nutí tým rozumět více částem systému.
 
-Zbytek nástrojů sdílíte s prevencí Ubiquitous Language driftu – doménový glosář
+Zbývající nástroje se překrývají s prevencí Ubiquitous Language driftu – doménový glosář
 v repozitáři, ADR u netriviálních rozhodnutí, pravidelný Event Storming a living
 documentation přes testy. Detaily viz sekci
 [Ubiquitous Language drift](#c4-language).
@@ -1066,7 +1066,7 @@ documentation přes testy. Detaily viz sekci
 - question: Jak řešit Outbox Pattern pro spolehlivé doručení doménových událostí?
   answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Praktický příklad v <a href="#b1-outbox">sekci Outbox Pattern</a>.'
 - question: Jak vysvětlit přínos DDD managementu, když první iterace zpomaluje?
-  answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových funkcí po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který doručí první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Management</a>.'
+  answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových funkcí po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem, který přinese první výsledky za 3–6 měsíců. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Management</a>.'
 - question: Jak udržet Ubiquitous Language, aby časem neutrpěl drift?
   answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet – v kódu je „Invoice“, zákazník říká „faktura“. Prevence vyžaduje pravidelný review kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová funkce zavádí pojem, který doménový expert nezná – v ten moment je nutné buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
 - question: Jak přežít paralelní existenci staré CRUD části a nové DDD vrstvy?

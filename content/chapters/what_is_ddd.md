@@ -25,17 +25,17 @@ Po třech letech provozu vypadá doména jinak. Stavů objednávky je dvanáct: 
 
 Tým má teď pět lidí, kód má 80 000 řádků a přidání nové platební metody (Bitcoin přes BitPay) trvá tři týdny. Ne proto, že integrace s BitPay je složitá – ta je hotová za den. Ale protože každá změna v `OrderService` rozbije něco jiného. Když přidáte větev pro Bitcoin v metodě `processPayment`, rozbije se refund logika v `cancelOrder`. Když opravíte refund, rozbije se reporting v `MonthlyRevenueService`. Po třech týdnech ladění a regresních testů je BitPay v produkci, ale tým má dvouměsíční technický dluh v backlogu.
 
-Senior vývojář si všiml, že kód odráží něco jiného než to, co produktový manažer popisuje. PM mluví o „závazné objednávce po kliknutí na platbu“ a o „rezervaci, která propadne za 24 hodin“. V kódu je `Order::status = 'awaiting_payment'` a TTL kontrola se schovává v týdenním cronu, do kterého nikdo nekouká. Když tester nahlásí bug v rezervační logice, je třeba přečíst `OrderService::checkExpiration`, `WeeklyCleanupCommand`, `OrderEventSubscriber` a `OrderRepository::findExpiredAwaitingPayment`, abychom našli celé chování. Doménová pravidla žijí roztroušená napříč pěti soubory bez společného slovníku.
+Senior vývojář si všiml, že kód odráží něco jiného než to, co produktový manažer popisuje. PM mluví o „závazné objednávce po kliknutí na platbu“ a o „rezervaci, která propadne za 24 hodin“. V kódu je `Order::status = 'awaiting_payment'` a TTL kontrola se schovává v týdenním cronu, do kterého nikdo nekouká. Když tester nahlásí bug v rezervační logice, je třeba přečíst `OrderService::checkExpiration`, `WeeklyCleanupCommand`, `OrderEventSubscriber` a `OrderRepository::findExpiredAwaitingPayment`, než je celé chování pohromadě. Doménová pravidla žijí roztroušená napříč pěti soubory bez společného slovníku.
 
 Onboarding nového kolegy trvá dva měsíce, než začne dělat smysluplné PR. Ne proto, že by Symfony bylo komplikované – Symfony zná po týdnu. Ale doménová pravidla jsou v hlavách dvou seniorů a v kódu jsou jen jejich důsledky. Junior se ptá: „proč při refundaci nezapočítáváme dopravu, ale při dispute ano?“ Odpověď zní: „protože kdysi to chtěl účetní“. Není to nikde dokumentované.
 
 Ředitel se ptá CTO: proč nedokážeme přidat novou platební metodu rychleji než za tři týdny? Konkurence to umí za týden. CTO ví, že problém není v nástrojích – problém je v tom, jak je modelovaná doména. Kód neodráží reálné rozhodování byznysu. Každá feature musí znovu dohledávat, co kde sedí, jaké pravidlo platí v jakém stavu, kdo má autoritu rozhodnout, že refund jde, a kdy ne.
 
-Komplexita domény přerostla model – přesně na tento stav DDD odpovídá. Nabízí konkrétní odpověď: místo `OrderService::cancelOrder($order, $reason)` mít doménový model `Order` s explicitními metodami `confirm()`, `cancel()`, `dispute()`, `refund()`. Místo textového statusu mít stavový automat s explicitními přechody. Místo čtyř typů zákazníka v jednom modelu mít čtyři Bounded Contexts, kde každý má svého `Customer` s vlastními atributy a vlastními pravidly. Místo měsíců regresí mít hranice agregátů, které drží refaktoring v rozumných mezích.
+Komplexita domény přerostla model – právě tento stav DDD řeší. Nabízí konkrétní odpověď: místo `OrderService::cancelOrder($order, $reason)` mít doménový model `Order` s explicitními metodami `confirm()`, `cancel()`, `dispute()`, `refund()`. Místo textového statusu mít stavový automat s explicitními přechody. Místo čtyř typů zákazníka v jednom modelu mít čtyři Bounded Contexts, kde každý má svého `Customer` s vlastními atributy a vlastními pravidly. Místo měsíců regresí mít hranice agregátů, které drží refaktoring v rozumných mezích.
 
 Hlavní přínos DDD: kód odráží jazyk, kterým mluví doménoví experti. Když produktový manažer řekne „tohle není reklamace, je to dispute s odlišným procesem“ – kód to umí říct stejně. Když účetní rozhoduje, jestli refund započítává dopravu, doménová třída `Refund` má metodu `excludeShipping()` nebo `includeShipping()`, která to říká. Když tester píše scénář, používá stejný slovník jako PM. Slovník je jeden, žije v hlavě týmu i v kódu, a když se mění, mění se na obou místech najednou.
 
-DDD má svou cenu. Vyžaduje vyšší počáteční složitost, učební křivku týmu a opakovanou spolupráci s doménovými experty. Pro CRUD aplikaci nad jednou tabulkou se nevyplatí – tam je `OrderService` se setterem správná volba a investice do agregátu by byla zbytečně přebujelá. Pro komplexní doménu s rostoucí pravidlovou složitostí, kterou tým udržuje déle než rok, se DDD vrací v horizontu šesti až dvanácti měsíců.
+DDD má svou cenu. Vyžaduje vyšší počáteční složitost, učební křivku týmu a opakovanou spolupráci s doménovými experty. Pro CRUD aplikaci nad jednou tabulkou se nevyplatí – tam je `OrderService` se setterem správná volba a investice do agregátu by byla nepřiměřená. Pro komplexní doménu s rostoucí pravidlovou složitostí, kterou tým udržuje déle než rok, se DDD vrací v horizontu šesti až dvanácti měsíců.
 
 V této knize se naučíte, jak rozhodnout, jestli DDD ve vašem projektu dává smysl (kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) je o tom, kdy odpověď zní „ne“). Jak modelovat doménu, identifikovat agregáty, oddělit zápis od čtení. Jak to konkrétně implementovat v Symfony 8 – bez teoretických odboček, s funkčním kódem, který lze převzít.
 
@@ -71,7 +71,7 @@ Hlavní milníky ve vývoji DDD [[6]](https://dddcommunity.org/):
 
 Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací – v plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“. Dokument je až záznam této konverzace. Pokud tým začne dokumentem, vznikne slovník, kterým nikdo nemluví.
 
-Praktická forma záznamu: glosář jako markdown soubor v repozitáři, vedle kódu. Ne wiki stránka, ne sdílený dokument v cloudu. Důvod je provozní – glosář v repu prochází code review, má historii v gitu a změna termínu se dá svázat s commitem, který přejmenovává třídy. Glosář udržuje celý tým: kdo termín do kódu zavádí nebo mění, otevírá zároveň PR do glosáře. Doménový expert recenzuje význam; zápis a údržba zůstávají na vývojářích.
+Praktická forma záznamu: glosář jako markdown soubor v repozitáři, vedle kódu. Ne wiki stránka, ne sdílený dokument v cloudu. Důvod je provozní – glosář v repozitáři prochází code review, má historii v gitu a změna termínu se dá svázat s commitem, který přejmenovává třídy. Glosář udržuje celý tým: kdo termín do kódu zavádí nebo mění, otevírá zároveň PR do glosáře. Doménový expert recenzuje význam; zápis a údržba zůstávají na vývojářích.
 
 ### Čeština v konverzaci, angličtina v kódu {#cestina-v-kodu}
 
@@ -114,7 +114,7 @@ Glosář nemá ambici být úplný. Zachycuje termíny, u kterých hrozí zámě
 :::diagram{fig="01.4-A" title="Strategický vs. taktický design – dvě úrovně rozhodování v DDD" src="images/diagrams/1_layers/strategic_vs_tactical.svg"}
 :::
 
-Strategický design rozhoduje, jak rozdělit systém na samostatné části a jak tyto části spolu komunikují. Hlavní koncepty:
+Strategický design rozhoduje, jak rozdělit systém na samostatné části a jak spolu komunikují. Hlavní koncepty:
 
 - **Bounded Context** – Ohraničený kontext je explicitně vymezená oblast, uvnitř které platí jeden doménový model. Plná definice s příkladem následuje v [podsekci níže](#bounded-context).
 - **Context Map** – Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto vztahy mohou být různého typu, například Partnership, Customer-Supplier, Conformist nebo Anti-Corruption Layer.
@@ -238,9 +238,9 @@ Lekce: **DDD bez doménového experta v týmu nefunguje.** Pravidla, která dom�
 
 ## 01.09 DDD vs. jiné přístupy {#ddd-vs-other}
 
-DDD se v praxi nejčastěji srovnává se čtyřmi jinými přístupy. Žádný z nich není přímý konkurent. Některé řeší jinou vrstvu problému, pro jednodušší domény stačí jejich vlastní nástroje:
+DDD se v praxi nejčastěji srovnává se čtyřmi jinými přístupy. Žádný z nich není přímý konkurent. Některé řeší jinou vrstvu problému; jiné pro jednodušší domény stačí samy o sobě:
 
-- **DDD vs. Transaction Script** – Transaction Script (Martin Fowler, *PoEAA*) organizuje logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla a ukládá výsledek. **Rozdíl:** Transaction Script nemá doménový model – logika je v procedurách, ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí však dochází k duplicitě pravidel a těžko udržovatelnému kódu. DDD je vhodnější, jakmile stejná doménová pravidla sdílí více use cases.
+- **DDD vs. Transaction Script** – Transaction Script (Martin Fowler, *PoEAA*) organizuje logiku kolem případů užití: každý use case je jedna procedura, která čte data, aplikuje pravidla a ukládá výsledek. **Rozdíl:** Transaction Script nemá doménový model – logika je v procedurách, ne v objektech. Pro jednoduché domény je to přímočařejší; s rostoucí složitostí se pravidla duplikují a kód se hůř udržuje. DDD je vhodnější, jakmile stejná doménová pravidla sdílí více use cases.
 - **DDD vs. CRUD** – CRUD (Create, Read, Update, Delete) je datově orientovaný přístup: aplikace je v podstatě editor databázových tabulek. **Rozdíl:** CRUD nerozlišuje mezi doménovým chováním a datovými operacemi – každá akce je variací na čtení/zápis řádku. DDD naproti tomu modeluje chování domény (objednávku nelze jen „updatovat“, ale „potvrdit“, „zrušit“ nebo „odeslat“). Pro jednoduchou správu dat CRUD postačí.
 - **DDD vs. Hexagonální architektura** – Hexagonální architektura (Ports and Adapters, Alistair Cockburn) řeší *jak strukturovat závislosti*: doménové jádro komunikuje s vnějším světem přes porty (rozhraní) a adaptéry (implementace). **Rozdíl:** DDD řeší *jak modelovat doménu* (Entity, Value Objects, Aggregates), hexagonální architektura řeší *jak oddělit doménu od infrastruktury*. Doplňují se: DDD nabízí vzory pro doménové jádro, hexagonální architektura ho izoluje od infrastruktury. Volbu mezi hexagonální, onion a clean architekturou rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
 - **DDD vs. Mikroservisy** – Mikroservisy jsou architektonický styl zaměřený na *jak nasazovat a škálovat* části systému nezávisle. **Rozdíl:** DDD řeší logické hranice domény (Bounded Contexts), mikroservisy řeší fyzické hranice nasazení. Bounded Context z DDD je přirozeným kandidátem pro hranici mikroservisy, ale neplatí to automaticky – jeden Bounded Context lze implementovat jako více mikroservis a naopak. DDD lze nasadit i v monolitické architektuře.
@@ -248,7 +248,7 @@ DDD se v praxi nejčastěji srovnává se čtyřmi jinými přístupy. Žádný 
 :::callout{type="warn"}
 ### Kdy nepoužívat DDD {#when-not-to-use-heading}
 
-DDD nemusí být vhodný pro všechny projekty. Nepoužívejte DDD, pokud:
+DDD nemusí být vhodný pro všechny projekty. Nevyplatí se, pokud:
 
 - Vyvíjíte jednoduchou aplikaci s minimální doménovou logikou.
 - Nemáte přístup k doménovým expertům.
@@ -299,6 +299,6 @@ Pro detailní cesty čtení podle role (junior/mid Symfony developer, senior PHP
 - **Pokročilé vzory** (kap. 12–15) obsahují CQRS, Event Sourcing, Ságy a Outbox Pattern. Tyto vzory nejsou pro každý projekt – kapitoly začínají rozhodovacím rámcem, kdy ano a kdy ne.
 - **Výkon a testování** (kap. 16–17), **migrace a microservices** (kap. 18–19), **provozní problémy, anti-vzory a kdy DDD nepoužívat** (kap. 20–22), **praktické příklady** (kap. 23–24) uzavírají knihu.
 
-Pokud váháte, jestli má vůbec smysl pokračovat, doporučuji následující postup. Přečtěte si tuto kapitolu (1) a kapitolu [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Pokud po obou kapitolách máte pocit, že DDD ve vašem projektu dává smysl, pokračujte na kapitolu 2 [Subdomény](/subdomeny). Pokud váháte, projděte ještě [Cheat Sheet](/cheat-sheet) – jednostránkový přehled pro rychlou orientaci.
+Pokud váháte, jestli má vůbec smysl pokračovat, nabízí se tento postup. Přečtěte si tuto kapitolu (1) a kapitolu [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Pokud po obou kapitolách máte pocit, že DDD ve vašem projektu dává smysl, pokračujte na kapitolu 2 [Subdomény](/subdomeny). Pokud váháte, projděte ještě [Cheat Sheet](/cheat-sheet) – jednostránkový přehled pro rychlou orientaci.
 
 Pro definice termínů slouží [Glosář](/glosar). Pro citace knih a článků v každé kapitole je sekce „Další četba“ (jako tato).

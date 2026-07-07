@@ -30,7 +30,7 @@ Eric Evans Context Map vymezuje jako přehled všech modelů ve hře. Každý mo
 Context Map má dvě složky:
 
 - **Vizuální složka** – diagram s krabičkami (Bounded Contexts) a šipkami (vztahy) opatřenými stereotypy (`<<ACL>>`, `<<OHS>>`, `U/D` pro upstream/downstream).
-- **Textová složka** – krátký dokument popisující každý vztah: odpovědné týmy, kontrakt, frekvenci změn, eskalační kontakt. Tato část je důležitější než obrázek; obrázek zastarává rychleji, než se stačí aktualizovat.
+- **Textová složka** – krátký dokument popisující každý vztah: odpovědné týmy, kontrakt, frekvenci změn, eskalační kontakt. Tato část je důležitější než obrázek – ten zastarává rychleji, než se stačí aktualizovat.
 
 Proč tu mapu nakreslit? Protože alternativou je **implicitní vztahový graf**. Tým A ví, že volá tým B – ale nikdo neřekl, jakým způsobem, kdo kontrakt vlastní a co se stane, když ho někdo jednostranně změní. Implicitní vztahy vedou k integračním bugům, plíživému sdílení modelů a nakonec k *Big Ball of Mud* (viz [03.12](#big-ball-of-mud)).
 
@@ -50,7 +50,7 @@ Proč tu mapu nakreslit? Protože alternativou je **implicitní vztahový graf**
 
 Kapitola pracuje s **osmi pojmenovanými vztahy**, kterými mohou Bounded Contexts spolu vyjít. Sedm z nich popsal Eric Evans v *Domain-Driven Design* (2003); Partnership doplnil později v *Domain-Driven Design Reference* (volně dostupná edice 2015). Vaughn Vernon v IDDD (2013) katalog rozšířil o nuance a kombinace, jádro pojmenování ale zůstalo. Tato osmičlenná taxonomie je užitečná ze dvou důvodů. **(1)** Dává nám sdílený slovník („zde je to Customer/Supplier, ne Conformist“). **(2)** Zviditelňuje cenu vztahu – některé jsou dražší než jiné a volba mezi nimi je strategická.
 
-*Pozn.:* Evans v *Domain-Driven Design Reference* (2015) uvádí vedle osmi vztahů ještě devátý vzor – **Big Ball of Mud**, převzatý od Foota a Yodera. Probíráme jej samostatně v sekci [03.12 Anti-vzor: Big Ball of Mud](#big-ball-of-mud). Nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu, kterému se aktivně bráníme. Osm vztahů níže tedy představuje volby, které lze vědomě navrhnout; Big Ball of Mud je to, co se stane, když žádnou volbu neuděláte.
+*Pozn.:* Evans v *Domain-Driven Design Reference* (2015) uvádí vedle osmi vztahů ještě devátý vzor – **Big Ball of Mud**, převzatý od Foota a Yodera. Probíráme jej samostatně v sekci [03.12 Anti-vzor: Big Ball of Mud](#big-ball-of-mud). Nejde o cílový vztah, který by si někdo vědomě volil, ale o stav rozpadu, kterému se aktivně bráníme. Osm vztahů níže se tedy dá navrhnout záměrně; Big Ball of Mud je to, co se stane, když žádnou volbu neuděláte.
 
 | Vztah | Symetrický? | Coupling | Použití | Kdo o něm rozhoduje |
 |---|---|---|---|---|
@@ -211,7 +211,7 @@ Pravidlo: **SK musí být malý, stabilní a recenzovaný oběma týmy**. Pokud 
 
 **Customer/Supplier** je asymetrický vztah, ve kterém upstream (*supplier*) poskytuje data nebo službu a downstream (*customer*) je konzumuje. Hlavní rozdíl proti Conformist (viz dále): downstream **má hlas**. Může od supplieru explicitně požadovat featury, supplier je do svého backlogu přijme a dohodne se na termínu. *Supplier ale rozhoduje, kdy a jak feature dodá.*
 
-Evans (2003) varuje na obě strany. Právo veta downstream týmu nebo těžkopádné procedury žádostí o změny ochromí volný vývoj upstreamu; downstream bez vlivu je zase vydán na milost prioritám upstreamu. Řešením je jasný vztah zákazník–dodavatel: downstream hraje v plánovacích schůzkách roli zákazníka upstreamu, požadavky se vyjednávají a rozpočtují, takže obě strany rozumí závazkům i termínům.
+Evans (2003) varuje před oběma extrémy. Právo veta downstream týmu nebo těžkopádné procedury žádostí o změny ochromí volný vývoj upstreamu; downstream bez vlivu je zase vydán na milost prioritám upstreamu. Řešením je jasný vztah zákazník–dodavatel: downstream hraje v plánovacích schůzkách roli zákazníka upstreamu, požadavky se vyjednávají a rozpočtují, takže obě strany rozumí závazkům i termínům.
 
 ### Příklad: Catalog (supplier) → Ordering (customer)
 
@@ -284,7 +284,7 @@ final class ProductPriceChangedHandler
 
 ### Stabilní kontrakt jako základ
 
-Customer/Supplier vyžaduje **stabilní kontrakt**. Bez něj je každá změna upstream modelu breaking change pro všechny downstream konzumenty. V praxi se Customer/Supplier *kombinuje* s [Open Host Service](#ohs) jako kanálem a [Published Language](#published-language) jako formátem zpráv. Detail viz sekci 03.08 a 03.09.
+Customer/Supplier vyžaduje **stabilní kontrakt**. Bez něj je každá změna upstream modelu breaking change pro všechny downstream konzumenty. V praxi se Customer/Supplier *kombinuje* s [Open Host Service](#ohs) jako kanálem a [Published Language](#published-language) jako formátem zpráv. Detail viz sekce 03.08 a 03.09.
 
 ### Plánovací rituály mezi týmy
 
@@ -320,7 +320,6 @@ namespace App\Reporting\Application;
 
 // Conformist: žádné vlastní VO, používáme přímo Stripe SDK objekty
 use Stripe\PaymentIntent;
-use Stripe\Charge;
 
 final class StripePaymentReportRepository
 {
@@ -345,7 +344,7 @@ final class StripePaymentReportRepository
 
         return array_map(
             // Reporting prostě používá Stripe pole jak jsou – currency, amount,
-            // status. Žádný překlad na Money VO, žádná Czech terminologie.
+            // status. Žádný překlad na Money VO, žádné české doménové pojmy.
             fn(PaymentIntent $p) => [
                 'id'       => $p->id,
                 'amount'   => $p->amount,        // Stripe používá centy
@@ -385,7 +384,7 @@ Conformist *zaplatí*:
 
 ## 03.07 Anti-Corruption Layer (ACL) {#acl}
 
-**Anti-Corruption Layer** (ACL) je izolační vrstva mezi downstream doménovým modelem a cizím (legacy, externím, neupřímným) protějškem. Překládá oběma směry, validuje vstupní data a *filtruje neplatné stavy* ještě předtím, než dorazí do domény. ACL je nejčastěji používaný vztah – a nejčastěji špatně implementovaný.
+**Anti-Corruption Layer** (ACL) je izolační vrstva mezi downstream doménovým modelem a cizím (legacy, externím, nevstřícným) protějškem. Překládá oběma směry, validuje vstupní data a *filtruje neplatné stavy* ještě předtím, než dorazí do domény. ACL je nejčastěji používaný vztah – a nejčastěji špatně implementovaný.
 
 Evans (2003) rozlišuje dvě situace. Mezi dobře navrženými kontexty se spolupracujícími týmy může být překladová vrstva prostá. Když ale chybí kontrola nebo komunikace potřebná pro Shared Kernel, Partnership či Customer/Supplier, překlad nabývá obranného tónu. Doporučení zní: downstream klient si vytvoří izolační vrstvu, která mu funkčnost upstream systému zpřístupní v pojmech jeho vlastního doménového modelu.
 
@@ -423,10 +422,6 @@ use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
  */
 final class LegacyBillingTranslator
 {
-    public function __construct(
-        private readonly LegacyBillingClient $soap,
-    ) {}
-
     public function translateInvoicePaid(InvoicePaidSoapResponse $r): InvoicePaidEvent
     {
         // (3) Anti-corruption: legacy umí poslat negativní amount jako "credit"
@@ -470,7 +465,6 @@ declare(strict_types=1);
 namespace App\Tests\Ordering\Infrastructure\Acl;
 
 use App\Ordering\Infrastructure\Acl\InvoicePaidSoapResponse;
-use App\Ordering\Infrastructure\Acl\LegacyBillingClient;
 use App\Ordering\Infrastructure\Acl\LegacyBillingTranslator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
@@ -479,8 +473,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 {
     public function testTranslatesPaidInvoice(): void
     {
-        $soap = $this->createMock(LegacyBillingClient::class);
-        $translator = new LegacyBillingTranslator($soap);
+        $translator = new LegacyBillingTranslator();
 
         $event = $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
             invoiceNumber: 'INV-2025-00042',
@@ -495,7 +488,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 
     public function testRejectsNegativeAmount(): void
     {
-        $translator = new LegacyBillingTranslator($this->createMock(LegacyBillingClient::class));
+        $translator = new LegacyBillingTranslator();
 
         $this->expectException(UnrecoverableMessageHandlingException::class);
         $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
@@ -508,7 +501,7 @@ final class LegacyBillingTranslatorTest extends TestCase
 
     public function testRejectsUnknownStatus(): void
     {
-        $translator = new LegacyBillingTranslator($this->createMock(LegacyBillingClient::class));
+        $translator = new LegacyBillingTranslator();
 
         $this->expectException(UnrecoverableMessageHandlingException::class);
         $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
@@ -546,7 +539,7 @@ Evans (2003) vychází z pozorování, že úprava translátoru pro každého z 
 
 ### Kdy zvolit OHS
 
-- **3+ downstream konzumentů**. S 1 konzumentem je OHS overkill – stačí Customer/Supplier ad hoc.
+- **3+ downstream konzumentů**. S 1 konzumentem se OHS nevyplatí – stačí Customer/Supplier ad hoc.
 - **Stabilní doména**. Upstream model se mění zřídka, takže investice do veřejného protokolu má návratnost.
 - **Otevřená integrace**, kde konzument může být i třetí strana (partneři, white-label klienti, mobilní aplikace).
 
@@ -693,7 +686,7 @@ Můžete mít OHS bez PL (REST endpoint vracející ad-hoc JSON) – a je to šp
     "occurredAt": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO 8601 timestamp v UTC, kdy bylo event vyvoláno upstreamem."
+      "description": "ISO 8601 timestamp v UTC, kdy upstream event vyvolal."
     }
   },
   "additionalProperties": false

@@ -211,7 +211,7 @@ final class TransferMoneyHandler
             // Vypadá to bezpečně, ale ve skutečnosti:
             //   1) zámek napříč dvěma agregáty zabíjí škálování,
             //   2) deadlock při souběžných transferech (A→B vs. B→A),
-            //   3) tato třída nelze rozdělit na microservices,
+            //   3) tuto třídu nelze rozdělit na microservices,
             //   4) chybí auditní stopa o pokusu o převod (selhání = nic se nestalo).
         });
     }
@@ -267,7 +267,7 @@ V praxi nahrazuje transakci napříč agregáty čtyřmi explicitními kroky:
 4. Pokud krok 3 selže, sága vykoná kompenzaci nebo retry; doména je explicitně připravena
    na chvilkovou nekonzistenci.
 
-Klíčová otázka: *jak dlouho smí nekonzistence trvat?* Většina byznys procesů snese
+Rozhodující otázka: *jak dlouho smí nekonzistence trvat?* Většina byznys procesů snese
 řádově sekundy (vystavení faktury po dokončení objednávky, propagace změny adresy do druhotných
 kontextů). Procesy, které sekundy nesnesou, jsou kandidáty na *jeden* agregát, ne na ságu.
 
@@ -292,7 +292,7 @@ Tři osvědčené přístupy:
 Klasickým příkladem je e-commerce checkout. Místo „v jedné transakci uložit objednávku,
 srazit zásoby a poslat e-mail“ se proces rozdělí na tři kroky. Agregát `Order` uloží
 objednávku a publikuje `OrderPlaced` event. Sága `InventoryReservationSaga` ve své
-transakci sníží zásoby v agregátu `InventoryItem`. Potvrzovací e-mail pak vystaví
+transakci sníží zásoby v agregátu `InventoryItem`. Potvrzovací e-mail pak odešle
 `OrderConfirmationEmailSaga`, opět v samostatné transakci. Pokud rezervace zásob selže (zboží mezitím vyprodáno),
 `OrderCanceledDueToOutOfStock` event spustí kompenzaci a stornuje objednávku.
 
@@ -727,10 +727,10 @@ N eventech (typicky 50–100); při načtení se stav rekonstruuje od posledníh
 a navrch se aplikuje zbývající ocas streamu.
 Detaily implementace:
 
-- Snapshot není autoritativní stav – jen optimalizace. Pokud serializace selže, sestavte znovu
-  od začátku streamu.
+- Snapshot není autoritativní stav – jen optimalizace. Pokud serializace selže, stav se
+  sestaví znovu od začátku streamu.
 - Versioning snapshotu musí být kompatibilní s versioningem eventů; při změně schématu
-  stavu invalidujte staré snapshoty.
+  stavu je nutné staré snapshoty invalidovat.
 - Snapshot store je oddělený od event store – agregát si snapshot „pamatuje“ přes vlastní
   `SnapshotRepository`.
 
@@ -740,7 +740,7 @@ V multi-tenant prostředí se agregát typicky partitionuje podle `tenantId` –
 tenant má své instance agregátů a operace přes tenanty jsou zakázány. Implementace:
 
 Nejlehčí je filtr na tabulkové úrovni: Doctrine `SQLFilter` vynucuje
-`tenant_id = :current_tenant` v každém dotazu, jde ale obejít native SQL.
+`tenant_id = :current_tenant` v každém dotazu, jde ale obejít nativním SQL.
 Bezpečnější je vlastní DB schema pro každého tenanta; cross-tenant reporty pak
 vyžadují cross-schema dotazy. Maximální izolaci dává DB per tenant – operativně
 náročné, namístě v regulovaných oborech (zdravotnictví, finance).
@@ -804,8 +804,8 @@ vychází z Vernonovy metodiky a praktických zkušeností:
    Pokud agregát na jakýkoli odpoví „ne“, návrh není hotový.
 
 Reálný příklad postupu na agregátech `Project` a `Task` najdete v kapitole
-[Případová studie](/pripadova-studie). Konkrétně v sekcích o Project agregátu a Task
-agregátu, kde stejný postup aplikujeme na netriviální doménu správy projektů.
+[Případová studie](/pripadova-studie). Konkrétně v sekcích, kde stejný postup
+aplikujeme na netriviální doménu správy projektů.
 
 ## 07.12 Typické chyby {#anti-patterns}
 

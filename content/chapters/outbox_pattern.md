@@ -40,7 +40,7 @@ s alternativami.
 
 Nejjednodušší implementace publikování doménové události vypadá nevinně: po dokončení
 doménové operace zapíšeme stav do databáze a pak rovnou dispatchneme událost na message
-bus. Code review takový kód projde bez poznámek – dokud se v produkci nezačnou hromadit
+bus. Takový kód projde code review bez poznámek – dokud se v produkci nezačnou hromadit
 ztracené události a stížnosti subscriberů typu „*vidím v API objednávku
 12345, ale event `OrderPlaced` mi nikdy nedorazil*“.
 
@@ -173,7 +173,8 @@ nebo *dispatcher*) tabulku asynchronně polluje. Vybírá řádky se stavem
 3. **Fáze 3 – publish do brokeru.** Pro každý řádek relay publikuje event
    do brokera a po obdržení ACK řádek označí jako `sent`. Obě operace nejsou
    v jedné transakci – pokud spadne mezi nimi, řádek zůstane `pending`
-   a po restartu se publikace zopakuje. Z toho plyne základní garance:
+   a po restartu se publikace zopakuje. Z toho plyne garance at-least-once
+   delivery, rozebraná níže.
 4. **Fáze 4 – konzumace subscriberem.** Subscriber dostane delivery,
    zpracuje ji idempotentně (typicky přes [Inbox Pattern](#inbox)) a
    ackne brokerovi.
@@ -598,7 +599,7 @@ respektive `$m->markFailed()` a následně flushnou. Plný výpis vynecháváme
 
 Outbox tabulka sama o sobě nic nepublikuje – potřebuje relay proces, který v určité
 kadenci vybírá pending řádky a posílá je do brokera. V praxi se používají dvě varianty:
-**polling worker** přímo v aplikačním procesu, který pokryje 99 % projektů, a **CDC /
+**polling worker** přímo v aplikačním procesu, který pokryje naprostou většinu projektů, a **CDC /
 Debezium** mimo aplikaci, kam sahá smysl až s masivní škálou nebo polyglot infrastrukturou.
 
 ### Varianta A: Polling worker (Symfony Console command) {#relay-polling-heading}
@@ -736,7 +737,7 @@ Polling worker spouštějte vždy jako **singleton** (`numprocs=1`
 v supervisoru, `replicas: 1` v Kubernetes Deploymentu, případně leader
 election přes Redis lock). Dva paralelní workery, kteří selectují stejnou outbox tabulku,
 způsobí **double publish** – každý event se odešle dvakrát ve stejnou chvíli,
-kapacita brokera roste lineárně s počtem replik a Inbox musí vybalancovat víc duplicit.
+zátěž brokera roste lineárně s počtem replik a Inbox musí vybalancovat víc duplicit.
 
 Pokud potřebujete horizontální škálování dispatchu (>10k events/s), použijte
 `SELECT ... FOR UPDATE SKIP LOCKED` v Postgresu nebo MySQL 8 a každý
@@ -748,7 +749,7 @@ instanci narazí na limit databázové vrstvy.
 ### Varianta B: CDC / Debezium {#relay-cdc-heading}
 
 **Change Data Capture** (CDC) je výrazně odlišné řešení: místo aplikačního
-polleru číst Postgres WAL (*Write-Ahead Log*) nebo MySQL binlog a streamovat
+polleru čte Postgres WAL (*Write-Ahead Log*) nebo MySQL binlog a streamuje
 každý `INSERT` do outbox tabulky přímo do Kafky. Standardním nástrojem je
 [Debezium](https://debezium.io) – Kafka Connect plugin, který
 funguje jako logický replikační odběratel databáze.
@@ -833,7 +834,7 @@ do brokera mimo Messenger.
 Outbox dává at-least-once delivery, takže subscriber **musí** počítat s tím,
 že stejný event dostane víckrát. Pokud je vedlejší efekt handleru ne-idempotentní (typicky
 `UPDATE counter SET value = value + 1`), duplicita se okamžitě projeví jako
-chybný stav read modelu – zákazník vidí 200 Kč na účtě místo 100 Kč, počet objednávek
+chybný stav read modelu – zákazník vidí 200 Kč na účtu místo 100 Kč, počet objednávek
 je dvojnásobný, e-mail dorazí 2×.
 
 **Idempotent Inbox Pattern** řeší tuto situaci doplňkem k outboxu – tabulkou
@@ -974,7 +975,7 @@ ne jen `event_id`.
 :::callout{type="note"}
 ### Exactly-once efekt vs. exactly-once delivery {#exactly-once-effect-heading}
 
-Marketing materiály brokerů občas slibují „exactly-once delivery“. **Tato
+Marketingové materiály brokerů občas slibují „exactly-once delivery“. **Tato
 garance neexistuje v žádném distribuovaném systému** – viz Two Generals'
 Problem nebo papery Lamporta a Lynchové. Co Outbox+Inbox dohromady
 poskytují, je *exactly-once efekt na straně subscribera*. Zpráva může do
@@ -1116,7 +1117,7 @@ přepne do stavu `failed`. Tyto řádky chceme:
 - **Mít na ně CLI nástroj** – `app:outbox:retry-failed` nebo
   ruční SQL update statusu zpět na `pending` po opravě subscribera.
 - **Nikdy nemazat automaticky** – failed řádek je důkaz nedoručeného
-  doménového eventu a chce ho mít evidovaný i po týdnu.
+  doménového eventu a chcete ho mít evidovaný i po týdnu.
 
 :::callout{type="note"}
 ### Monitorovací checklist (Prometheus + Grafana) {#monitoring-heading}
@@ -1225,7 +1226,7 @@ správa je manuální.
 
 Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší konfigurace, ale
 má dvě slabiny: **single point of failure** (worker spadne → lag roste, dokud
-`livenessProbe` ho nerestartuje) a **omezenou propustnost** (jeden PHP proces
+ho `livenessProbe` nerestartuje) a **omezenou propustnost** (jeden PHP proces
 zvládne ~5k events/s na běžném hardwaru).
 
 Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízí dvě cesty:
@@ -1342,7 +1343,7 @@ Standardní vzor:
 - **Alert na rychlost růstu pending** – `delta(outbox_pending_count[5m]) > 10000`
   signalizuje, že produce > consume → broker nestíhá.
 - **Capacity planning na DB** – outbox musí umět absorbovat 30 minut
-  brokerového výpadku. Při 1k events/s to je 1.8M řádků navíc – rozpočet
+  brokerového výpadku. Při 1k events/s to je 1,8 mil. řádků navíc – rozpočet
   na disk a vacuum.
 - **Zvážit sampling pro low-priority eventy** – některé eventy (audit, metrics)
   jsou tolerantní ke ztrátě. Při sustained backpressure můžete řízeně dropnout.
@@ -1456,8 +1457,8 @@ ale paralelizovatelný napříč týmy – každý kontext si Inbox přidává n
 
 Až mají všichni subscribery inbox, smažete v handleru původní `$bus->dispatch()`
 a doručení doménových eventů zůstává jen na outboxu. **Jde o riskantní krok** – během
-prvních dnů sledujte outbox lag a inbox dedupy. Pokud něco selhává, pull-request
-reverter má návrat zpět během 5 minut.
+prvních dnů sledujte outbox lag a inbox dedupy. Pokud něco selhává, revert pull requestu
+vrátí změnu během pěti minut.
 
 ### Krok 6: Měřit a tunit {#migrace-krok-6-heading}
 
@@ -1490,7 +1491,7 @@ bez závislosti na XA, bez 2PC, bez speciální cloud služby.
 
 Idempotent Inbox je nutný protějšek na straně subscribera. Bez něj se duplikace
 z outboxu propíše do read modelů a side-effectů, čímž ztratíme to, co jsme outboxem
-získali. Kombinace Outbox + Inbox dohromady poskytují *exactly-once efekt* –
+získali. Kombinace Outbox + Inbox dohromady poskytuje *exactly-once efekt* –
 každý event se v read modelu projeví právě jednou, i když broker dodá zprávu vícekrát.
 
 Hlavní body pro praxi:
@@ -1500,7 +1501,7 @@ Hlavní body pro praxi:
   bez něj relay dělá full table scan při každém pollingu.
 - `$em->wrapInTransaction(...)` v handleru garantuje atomicitu order +
   outbox řádky.
-- Polling worker pod supervisorem stačí pro 99 % Symfony projektů; CDC/Debezium
+- Polling worker pod supervisorem stačí pro téměř každý Symfony projekt; CDC/Debezium
   pouze pro Kafka-native systémy s vysokým objemem.
 - Inbox tabulka má UNIQUE `(event_id, consumer)` – sloupec consumer je
   klíč pro multi-subscriber scénáře.
@@ -1533,7 +1534,7 @@ kap. 11 (Stream Processing);
 - question: 'Vyplatí se Outbox v monolitu?'
   answer: 'Ano, vyplatí – protože dual-write problem nevzniká až mezi mikroservisami, ale mezi <em>libovolnými dvěma transakčními systémy</em>. Monolitická aplikace publikující eventy do RabbitMQ/Redis Streams má přesně stejný problém jako mikroservis: DB ACID je oddělený od ACK message brokera. Pokud váš monolit už má event-driven kontexty (Symfony Messenger s async transportem, Spatie Laravel events, ...), Outbox se vyplatí stejně jako v mikroservisách. Jediný případ, kdy ho nepotřebujete, je <em>striktně synchronní</em> monolit, kde publish neexistuje a všechno teče v jedné HTTP transakci.'
 - question: 'Co dělat při dlouhodobém výpadku brokera?'
-  answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál zapisují doménové eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém – řádky jsou malé), (c) kompakce ne-mazat pending stará než N dní, jen sent. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
+  answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál zapisují doménové eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém – řádky jsou malé), (c) kompakce nesmí mazat <code>pending</code> řádky – mazat lze jen <code>sent</code> starší než N dní. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
 - question: 'Musím použít UUID/ULID, nebo stačí AUTO_INCREMENT?'
   answer: 'Použijte UUID v7 (případně ULID), ne AUTO_INCREMENT. Důvody: (1) UUID v7 je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) Nese časový komponent, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) Klient ho může vygenerovat předem a poslat jako event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region nastavení. Symfony Uid komponenta poskytuje pohodlné API: <code>Uuid::v7()</code> v entitě stačí.'
 :::

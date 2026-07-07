@@ -49,8 +49,8 @@ Donald Knuth to vyjádřil takto: *„Premature optimization is the root of all 
 ## 16.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
 
 N+1 je typický anti-vzor, který produkuje každý ORM bez explicitní fetch strategie. Aplikace provede
-1 dotaz pro načtení seznamu entit a poté pro každou entitu další dotaz pro načtení asociovaných dat.
-Celkem tedy N+1 SQL dotazů místo 1–2 dotazů.
+jeden dotaz pro seznam entit a poté pro každou z nich načte asociovaná data zvlášť.
+Celkem tedy N+1 SQL příkazů místo jednoho či dvou.
 
 :::callout{type="note"}
 ### Přesná definice N+1 problému
@@ -608,7 +608,7 @@ vrátí existující instanci z Identity Map, nikoli novou kopii.
 ### Identity Map a Unit of Work – co to znamená pro DDD
 
 - **Konzistence v requestu:** Všechny části kódu vidí tentýž stav agregátu – žádné nekonzistentní kopie.
-- **Jedno místo změn:** Změny agregátu jsou sledovány Unit of Work a při `flush()` jsou synchronizovány do databáze. Není třeba explicitně volat `save()` pro každou změnu.
+- **Jedno místo změn:** Změny agregátu sleduje Unit of Work a při `flush()` je synchronizuje do databáze. Není třeba explicitně volat `save()` pro každou změnu.
 - **Automatická detekce změn (dirty checking):** Doctrine porovnává aktuální stav entit s jejich původním stavem (snapshot) a generuje UPDATE pouze pro skutečně změněné atributy.
 :::
 
@@ -703,7 +703,7 @@ Doménová logika do cache klíče nepatří – cache slouží infrastruktuře,
 
 Doctrine nabízí dvě úrovně cachování SQL dotazů:
 
-- **Query cache:** cachuje přeložený DQL → SQL. DQL parsing je relativně nákladný; query cache eliminuje opakované parsování pro identické DQL dotazy. Výsledky se nemění.
+- **Query cache:** cachuje přeložený DQL → SQL. DQL parsing je relativně nákladný; query cache eliminuje opakované parsování pro identické DQL dotazy. Překlad DQL na SQL se v čase nemění, takže tuto cache není třeba invalidovat.
 - **Result cache:** cachuje výsledky SQL dotazu. Musí být explicitně nakonfigurován a invalidován při změnách dat. Vhodný pro read-heavy dotazy s řízenou dobou platnosti.
 
 :::callout{type="pattern"}
@@ -980,7 +980,7 @@ firmy s tisíci transakcí denně.
 :::diagram{fig="16.9-A" title="Optimistic lock thrash: 3 souběžné modifikace, 2 retry" src="images/diagrams/17_performance/hot_aggregate_thrash.svg"}
 :::
 
-S `#[ORM\Version]` (optimistický zámek) souběžná modifikace vyhází
+S `#[ORM\Version]` (optimistický zámek) vede souběžná modifikace k výjimkám
 `OptimisticLockException`. Při nízké souběžnosti (5 % konfliktů) je retry levný.
 Při hot aggregate (50–80 % konfliktů) systém **degraduje na sériový provoz**:
 worker dělá retry → load → modify → save → conflict → retry. Throughput klesne
@@ -997,8 +997,8 @@ Tři strategie, podle pořadí preference:
   asynchronně přes ságu. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
 - **CRDT / counter-only agregáty.** Pokud doménová operace je čistý increment
   (`view_count`, `like_count`), nepotřebujete celý agregát – stačí
-  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. To není „obvykle DDD“,
-  ale je to validní u skutečně commutative operací.
+  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. Není to typické DDD,
+  ale u skutečně komutativních operací je to legitimní řešení.
 
 :::callout{type="warn"}
 ### Anti-vzor: pessimistic lock místo redesignu {#anti-pessimistic-lock-heading}
@@ -1015,19 +1015,19 @@ Pessimistic lock zakryje příznak, ne příčinu. Pokud je agregát hot,
 ### Partitioning velkých tabulek {#partitioning-heading}
 
 PostgreSQL declarative partitioning je standardní řešení pro tabulky s 50M+ řádky,
-kde aktivně se mění jen poslední část (typicky podle `created_at`):
+kde se aktivně mění jen poslední část (typicky podle `created_at`):
 
-- **`orders` partitioned po měsících** – aktivní partition za poslední měsíc
-  drží 1M řádků, vlézá do RAM, indexy malé. Staré partitions (read-only) můžou
+- **`orders` dělená po měsících** – aktivní partition za poslední měsíc
+  drží 1M řádků, vejde se do RAM, indexy malé. Staré partitions (read-only) mohou
   být na pomalejším disku nebo v archivu.
-- **`audit_log` partitioned po dnech** – `DROP PARTITION` po retention period
+- **`audit_log` dělená po dnech** – `DROP PARTITION` po retention period
   je atomický a nezamyká aktivní tabulku.
 - **`projection_*` tabulky** s vysokým write rate.
 
 Pro DDD má partitioning jeden důsledek navíc: **agregátní reference přes ID
 musí být kompozitní** (id + partition key, např. `created_at`). Pokud doména
 zná jen `OrderId`, partition lookup vyžaduje plný scan napříč partitions
-(slow). Standardní řešení: zahrnout `created_at` (nebo derivovaný měsíc)
+(pomalé). Standardní řešení: zahrnout `created_at` (nebo derivovaný měsíc)
 do hodnotového objektu `OrderId`, aby ho repozitář uměl použít pro partition pruning.
 
 :::callout{type="note"}
@@ -1063,14 +1063,15 @@ Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP 
 = 1 DB connection“ se nasčítá: 4 aplikační pody × 100 PHP-FPM workerů
 = 400 spojení na primary, což překročí výchozí `max_connections = 100` v Postgresu.
 Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
-pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**
-(Doctrine používá), takže potřebujete buď session pooling (méně efektivní),
-nebo PgBouncer ve verzi 1.21+ s `max_prepared_statements` > 0 (LRU cache prepared statements v transaction módu; volba `prepared_statements = true` neexistuje).
+pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**,
+které Doctrine používá. Řešením je buď session pooling (méně efektivní),
+nebo PgBouncer ve verzi 1.21+ s `max_prepared_statements` > 0. Ten drží LRU cache
+prepared statements i v transaction módu; volba `prepared_statements = true` neexistuje.
 
 ### Snapshotting v Event Sourcingu (přehled) {#snapshotting-prehled-heading}
 
 Při Event Sourcingu (kapitola [Event Sourcing](/event-sourcing)) je rebuild stavu
-agregátu lineární s počtem eventů. Pro agregát s 100 eventy je to instant; pro
+agregátu lineární s počtem eventů. Pro agregát s 100 eventy je to okamžité; pro
 1000 eventů to začíná být znát; pro 100k+ eventů (long-lived agregát jako
 `UserAccount` po letech provozu) je hydration nepoužitelná.
 
@@ -1090,7 +1091,7 @@ nepotřebuje.
 
 ## 16.10 Profiling DDD aplikací {#profiling}
 
-Úzké místo nepoznáte bez měření. Pro PHP/Symfony jsou v ruce tři vrstvy nástrojů:
+Úzké místo nepoznáte bez měření. Pro PHP/Symfony jsou po ruce tři vrstvy nástrojů:
 vývojový profiler, produkční profiling a programatický logger SQL dotazů.
 
 ### Symfony Profiler (Web Debug Toolbar)
@@ -1243,5 +1244,5 @@ a eliminovat N+1. Pokračováním je kapitola
 - question: Jak optimalizovat read model v CQRS?
   answer: 'Read model se navrhuje přímo pro daný dotaz – denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
 - question: Je lepší UUID, nebo integer primární klíč z pohledu výkonu?
-  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což DDD vyžaduje – agregát dostane ID před persistencí. Výkonový rozdíl je v řádu jednotek procent a v praxi je pohlcen vyšší přehledností doménového kódu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
+  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což DDD vyžaduje – agregát dostane ID před persistencí. Výkonový rozdíl je v řádu jednotek procent a v praxi ho vyváží přehlednost doménového kódu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
 :::

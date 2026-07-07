@@ -20,7 +20,7 @@ difficulty: 3
 
 Tato kapitola je **shrnující průřez** předchozími kapitolami. Tři krátké příklady ukazují,
 jak vzory z taktického DDD, CQRS a Implementace v Symfony drží pohromadě jako funkční aplikace.
-Každý příklad obsahuje strukturu projektu a kostru klíčových tříd. Detailní implementace
+Každý příklad obsahuje strukturu projektu a kostru hlavních tříd. Detailní implementace
 (plné Doctrine mapování, testy, okrajové případy) najdete v předchozích kapitolách.
 
 Plný end-to-end příklad – od doménové analýzy přes kontextovou mapu po read modely –
@@ -30,7 +30,7 @@ rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
 
 E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart** (rozpracovaný nákup)
 a **Order** (potvrzená transakce). Mezi nimi přechází doménová událost `CartCheckedOut`,
-která vytvoří `Order` agregát.
+na kterou kontext Order reaguje vytvořením agregátu `Order`.
 
 :::diagram{fig="23.1-A" title="E-shop: bounded contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
 :::
@@ -57,7 +57,7 @@ src/
 └── Shared/Domain/Exception/DomainException.php
 :::
 
-### Klíčový agregát: Cart {#cart-aggregate}
+### Agregát Cart {#cart-aggregate}
 
 Agregát `Cart` hlídá pravidlo: u stejného `productId` navyšuje quantity stávající
 položky místo přidání nové. Skeleton:
@@ -144,7 +144,7 @@ src/
     └── GetPosts/{Query, Controller, ViewModel}/
 :::
 
-### Klíčový agregát: Post {#post-aggregate}
+### Agregát Post {#post-aggregate}
 
 Agregát `Post` se vytváří přes named constructor `create()`. Ten vynucuje invarianty
 (titul 3–255 znaků, neprázdný obsah) a nová instance zaznamená `PostCreated`.
@@ -224,7 +224,7 @@ src/
     └── Profile/{GetUserProfile, GetUserProfileHandler, ProfileController}.php
 :::
 
-### Klíčový agregát: User {#user-aggregate}
+### Agregát User {#user-aggregate}
 
 Agregát `User` implementuje Symfony `UserInterface` pro Security komponentu. Hodnotový
 objekt `Email` validuje formát v konstruktoru, `HashedPassword` zapouzdřuje hash logiku.

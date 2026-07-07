@@ -84,7 +84,7 @@ CQRS lze zavést v několika úrovních hloubky, od nejjednodušší po nejpokro
 1. **Oddělené handlery** – Command handlers a query handlers jako samostatné třídy, ale sdílejí tutéž databázi a ORM entity. Nejjednodušší forma CQRS, vhodná pro většinu aplikací.
 2. **Oddělené modely** – Write model staví na doménových entitách (Doctrine ORM), read strana využívá vlastní DTO/ViewModely plněné přímým SQL nebo Doctrine DBAL. Sdílená databáze, ale oddělené PHP třídy.
 3. **Oddělená úložiště** – Write databáze (PostgreSQL) a read databáze (Elasticsearch, Redis, denormalizované tabulky). Změny se propagují asynchronně přes události.
-4. **CQRS + Event Sourcing** – Write side ukládá události do [Event Store](/event-sourcing), read side buduje projekce z event streamu. Nejvyšší složitost, ale i nejvyšší flexibilita.
+4. **CQRS + Event Sourcing** – Write side ukládá události do [Event Store](/event-sourcing), read side buduje projekce z event streamu. Nejvyšší složitost, ale také největší volnost.
 
 Doporučený přístup: začněte na úrovni 1 nebo 2. Na úroveň 3 a 4 přejděte teprve tehdy,
 když to vyžadují konkrétní škálovací nebo doménové požadavky. Pokud máte existující
@@ -125,21 +125,21 @@ CQRS má své limity. Kompromisy, které přináší, je lepší znát ještě p
 Místo jednoho modelu existují dva (nebo více) a každý command či query vyžaduje vlastní
 třídu, handler a často i vlastní datovou strukturu – pro jednoduchou CRUD operaci 4–6 tříd
 místo jedné. Při oddělených úložištích se přidává synchronizace: read model se musí aktualizovat
-po každé změně write modelu, aby se nedostal mimo. Selhání propagace (výpadek fronty, chyba
+po každé změně write modelu, aby se s ním nerozešel. Selhání propagace (výpadek fronty, chyba
 projektoru) vede k divergenci modelů.
 
 Sem patří i eventual consistency. Mezi zápisem a aktualizací read modelu vzniká okno,
 kdy uživatel po odeslání formuláře vidí „starou“ verzi dat. Vzory pro UI popisuje
 [sekce Eventual Consistency](#eventual-consistency).
 
-Poslední cenou je učební křivka. CQRS vyžaduje změnu myšlení oproti tradičnímu přístupu,
+Poslední cenou jsou nároky na zaučení týmu. CQRS vyžaduje změnu myšlení oproti tradičnímu přístupu,
 kde jeden model pokrývá všechny operace. Vývojáři musejí porozumět konceptům jako message bus,
 eventual consistency, idempotence handlerů a read model projekce.
 
 :::callout{type="warn"}
 ### Kdy nepoužívat CQRS {#when-not-to-use-cqrs-heading}
 
-CQRS nemusí být vhodný pro všechny projekty. Nepoužívejte CQRS, pokud:
+CQRS se nevyplatí, pokud:
 
 - Vyvíjíte jednoduchou aplikaci s minimální doménovou logikou – klasický CRUD
   s Doctrine ORM má méně tříd a kratší cestu od formuláře k databázi.
@@ -306,10 +306,6 @@ final class RegisterUser
 :::
 :::
 
-V tomto příkladu je `RegisterUser` příkaz, který obsahuje data potřebná pro registraci uživatele.
-Příkaz používá PHP atributy pro validaci dat – ta proběhne automaticky díky `validation` middleware
-na command busu, ještě než se command dostane k handleru.
-
 :::callout{type="warn"}
 ### Mají commands vracet hodnotu? {#command-navratova-hodnota-heading}
 
@@ -325,9 +321,9 @@ scénáře, kdy je užitečné vrátit alespoň identifikátor nově vytvořené
 
 ## 12.07 Implementace Queries {#queries}
 
-Queries v CQRS jsou dotazy, které vracejí data bez změny stavu systému. Podobně jako commands
-se implementují jako immutabilní DTO třídy, ale na rozdíl od commands **vždy vracejí
-hodnotu** – handler vrací data přes `HandledStamp`.
+Query se od commandu liší směrem toku dat: nemění stav systému, jen čte. Implementace
+vypadá podobně – immutabilní DTO třída – s jedním rozdílem: query **vždy vrací
+hodnotu**, kterou handler předá přes `HandledStamp`.
 
 :::callout{type="pattern"}
 ### PHP: Implementace dotazu v Symfony 8 {#query-example-heading}
@@ -430,8 +426,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class RegisterUserHandler
 {
     public function __construct(
-        private UserRepository $userRepository,
-        private PasswordHasher $passwordHasher
+        private readonly UserRepository $userRepository,
+        private readonly PasswordHasher $passwordHasher
     ) {
     }
 
@@ -922,7 +918,7 @@ milisekundy až jednotky sekund), kdy read model ještě neodráží poslední z
 odešle formulář, dostane potvrzení o úspěchu, ale seznam na další stránce ještě nezobrazuje
 nový záznam.
 
-Eventual consistency je **vlastnost distribuované architektury**, ne bug.
+Nejde o bug, ale o **vlastnost distribuované architektury**.
 Následující diagram zachycuje celý datový tok – od zápisu přes asynchronní propagaci
 až po čtení – a zvýrazňuje okno, ve kterém k eventual consistency dochází:
 
@@ -1152,7 +1148,7 @@ o tom neví a zpráva musí být zpracována znovu.
 
 ### Retry strategie
 
-Symfony Messenger podporuje automatické opakování selhalých zpráv. Konfigurace
+Symfony Messenger podporuje automatické opakování zpráv, které selhaly. Konfigurace
 `retry_strategy` na transportu definuje, kolikrát a s jakým zpožděním
 se handler znovu zavolá:
 
@@ -1182,7 +1178,7 @@ framework:
 :::
 
 :::code{language="bash" filename="snippet.sh"}
-# Zobrazení selhalých zpráv
+# Zobrazení neúspěšných zpráv
 $ php bin/console messenger:failed:show
 
 # Detail konkrétní selhalé zprávy (včetně výjimky)
@@ -1191,7 +1187,7 @@ $ php bin/console messenger:failed:show 42
 # Opakované zpracování selhalé zprávy
 $ php bin/console messenger:failed:retry 42
 
-# Opakování všech selhalých zpráv
+# Opakování všech neúspěšných zpráv
 $ php bin/console messenger:failed:retry
 
 # Trvalé odstranění selhalé zprávy (po analýze)
@@ -1200,7 +1196,7 @@ $ php bin/console messenger:failed:remove 42
 :::
 
 :::callout{type="warn"}
-### Monitoring selhalých zpráv {#failed-monitoring-heading}
+### Monitoring neúspěšných zpráv {#failed-monitoring-heading}
 
 Dead letter queue není odkladiště. Patří do ní zprávy, které **vyžadují pozornost**.
 V produkčním systému musíte monitorovat počet zpráv na failed transportu

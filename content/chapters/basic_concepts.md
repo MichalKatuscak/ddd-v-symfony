@@ -114,7 +114,7 @@ class User
 }
 :::
 
-`User` je v ukázce entita definovaná `UserId`. Uživatel může změnit jméno
+`User` je v ukázce entita, jejíž identitu určuje `UserId`. Uživatel může změnit jméno
 i e-mail, identifikátor zůstává stejný.
 
 ### Rovnost entit {#entity-equality}
@@ -376,7 +376,7 @@ enum OrderStatus: string
 }
 :::
 
-**Kdy enum, kdy plný Value Object?** Enum stačí pro konečnou množinu stavů
+**Kdy enum, kdy plný Value Object?** Enum stačí pro uzavřený výčet stavů
 bez další logiky. Vlastní třída je lepší tam, kde typ nese validaci, výpočty
 nebo kompozici více hodnot – `Money`, `Email`, `DateRange`.
 :::

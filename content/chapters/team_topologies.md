@@ -22,7 +22,7 @@ Většina knih o DDD končí Bounded Contextem a Context Mapem – jako kdyby ar
 Realita je jiná: jakmile máte víc než jeden tým, organizační struktura začne tlačit architekturu
 do svého obrazu. Tato kapitola je o tomto *gravitačním poli*. Probereme Conway's Law z roku 1968
 a Team Topologies (Skelton & Pais 2019) jako rámec pro vědomý návrh týmů. A důvod, proč je
-**jeden Bounded Context = jeden tým** to první DDD pravidlo, které vám management zlomí.
+**jeden Bounded Context = jeden tým** první DDD pravidlo, které vám management poruší.
 
 ## 05.01 Conway's Law – gravitační zákon softwarové architektury {#conway-law}
 
@@ -60,8 +60,8 @@ A jeden tým bez sub-hranic vyrobí Big Ball of Mud.
    Conway's Law funguje, jen dostala jiné vstupy.
 
 3. **Tým bez interních hranic → Big Ball of Mud.**
-   8 vývojářů, kteří všichni sahají do všeho, nevyprodukují žádné Bounded Contexts.
-   Vyprodukují jeden monolit, ve kterém *Customer* ve fakturaci je tatáž třída jako
+   8 vývojářů, kteří všichni sahají do všeho, nevyprodukuje žádné Bounded Contexts.
+   Vyprodukuje jeden monolit, ve kterém *Customer* ve fakturaci je tatáž třída jako
    *Customer* v marketingu, jen s víc atributy. Klasický důsledek: po 18 měsících
    si nikdo netroufne změnit nic, protože „to může mít vliv kdekoli“.
 
@@ -112,7 +112,7 @@ jednoho vlastníka – jeden tým s explicitním závazkem ho vyvíjet, nasazova
 a opravovat v noci.** Bez takového vlastníka BC neexistuje
 architektonicky. Je to jen složka v repu.
 
-Test: ukažte si org chart a ukažte si Context Map. Pokud na org chart neumíte ukázat
+Test: položte vedle sebe org chart a Context Map. Pokud v org chartu neumíte najít
 jméno týmu pro každý BC, váš BC je fikce.
 :::
 
@@ -150,7 +150,7 @@ V roce 2019 vydali Matthew Skelton a Manuel Pais knihu
 [[3]](https://teamtopologies.com/book). Poprvé systematicky popsali, **jaké typy
 týmů má organizace mít** a **jak mezi sebou mají komunikovat**. Team Topologies dodává *slovník* pro organizační návrh,
 nepředepisuje proces jako SAFe nebo LeSS.
-A pro DDD je to chybějící doplněk Vernona.
+A DDD tak získává to, co u Vernona chybí.
 
 Skelton a Pais identifikovali 4 typy týmů. Cokoliv jiného (klasický „enterprise architecture
 team“, „QA tým“, „Center of Excellence“) je buď maskovaná varianta jednoho ze 4 typů,
@@ -195,14 +195,14 @@ techniku nebo technologii.** Klasické úkoly: „naučte je TDD“, „zaveďte
 „pomozte s migrací na K8s“, „rozjeďte s nimi event sourcing“. Enabling team se po předání
 rozpustí, typicky po 3–6 měsících. Žádný permanentní útvar.
 
-Enabling team se často zamění s Center of Excellence. Rozdíl je podstatný:
+Enabling team se často zaměňuje s Center of Excellence. Rozdíl je podstatný:
 
 | Aspekt | Enabling team | Center of Excellence (anti-vzor) |
 |---|---|---|
 | Doba existence | Time-boxed (3–6 měsíců) | Permanentní útvar |
 | Cíl | Předat dovednost, rozpustit se | Držet kontrolní bod, schvalovat |
 | Vztah k stream-aligned týmu | Mentor, peer | Recenzent, autorita |
-| Měření úspěchu | Stream-aligned tým to umí sám | Kolik tiketů jsme schválili |
+| Měření úspěchu | Stream-aligned tým to umí sám | Kolik ticketů jsme schválili |
 
 ### Complicated-subsystem team {#complicated-subsystem-team}
 
@@ -284,12 +284,12 @@ Facilitating nemá přímý ekvivalent v Context Mapu – ten řeší vztahy mez
 Hlavní pravidlo Team Topologies: **každá interakce mezi dvěma týmy MUSÍ být
 explicitně jeden ze 3 módů**. Žádné „neformální“ vztahy. Důvod je čistě
 Conwayovský: neformální vztahy nemají kontrakt. Vznikne ad hoc kontrakt v kódu
-(sdílená třída, sdílené DB schéma, „prostě se tomu nedotýkej“), který později nikdo
+(sdílená třída, sdílené DB schéma, „toho se prostě nedotýkej“), který později nikdo
 nedokáže refaktorovat.
 
 Při onboardingu nového týmu napište explicitně: „*S týmem A jsme v X-as-a-Service,
-s týmem B jsme ve 4měsíční Collaboration na bootstrap nového BC, s Enabling teamem
-máme kontrakt na 3-měsíční facilitaci CQRS.*“ Pokud to nedokážete napsat, vztah
+s týmem B jsme ve čtyřměsíční Collaboration na bootstrap nového BC, s Enabling teamem
+máme kontrakt na tříměsíční facilitaci CQRS.*“ Pokud to nedokážete napsat, vztah
 je neformální = v ohrožení.
 :::
 
@@ -336,11 +336,11 @@ Týmy, které to nedodrží, budou propuštěny.
 
 Bezos nepředepsal mikroservisní architekturu. Předepsal **komunikační režim
 týmů**. Mikroservisy přišly automaticky, protože to byl jediný způsob, jak
-Bezosův mandát splnit. Tato klasická studie je ukázka Inverse Conway Maneuver
+Bezosův mandát splnit. Tato studie je ukázka Inverse Conway Maneuver
 v měřítku celé firmy.
 :::
 
-Praktická past: reorganizace je bolestivá. Lidé ztrácejí seniority, manažeři ztrácejí pravomoci,
+Praktická past: reorganizace je bolestivá. Lidé ztrácejí senioritu, manažeři pravomoci,
 domácí kultury týmů (frontend kávovar, backend stand-up) se rozbijí. Pokud jste team-lead
 a zvažujete Inverse Conway Maneuver bez výslovného zadání od CTO, raději se nejdřív
 zeptejte. Detail komunikace s managementem je v sekci 05.09.
@@ -348,7 +348,7 @@ zeptejte. Detail komunikace s managementem je v sekci 05.09.
 ### Praktický checklist před spuštěním Inverse Conway Maneuver {#inverse-checklist}
 
 Než zahájíte reorganizaci, projděte následující seznam. Pokud na *kterýkoli* bod
-odpovíte „ne“, Inverse Conway je předčasný a v 90 % případů selže:
+odpovíte „ne“, Inverse Conway je předčasný a zpravidla selže:
 
 1. **Existuje kanonická Context Map?** Bez ní není definovaná cílová
    architektura. Krok 1 selhal a kroky 2–4 nemají kam směřovat. Pokud nemáte Context Map,
@@ -408,10 +408,10 @@ Praktická heuristika odvozená z Team Topologies:
 
 | Velikost týmu | Doporučený počet BC | Komentář |
 |---|---|---|
-| 5 lidí | 1 BC (max 2 malé) | Limit bližšího vědomí; každý zná každý kus kódu. |
+| 5 lidí | 1 BC (max 2 malé) | Hranice, kdy má každý přehled o všem; každý zná každou část kódu. |
 | 7–9 lidí | 1–2 BC (výjimečně 3) | Zdravé optimum stream-aligned týmu. |
 | 10+ lidí | Tým je už příliš velký – rozdělit | Dunbar number (familiarity ≈ 15). Komunikační režie roste kvadraticky s počtem lidí. |
-| Tým s 4+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
+| Tým se 4+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
 
 ### Jak změřit cognitive load (jednoduchá rubrika) {#cognitive-load-rubric}
 
@@ -483,7 +483,7 @@ Bod 5 (germane prostor):         __
 
 Rubrika záměrně měří *vnímání* členů týmu. Cognitive load je psychologická kategorie – tvrdá metrika z Grafany ji nezachytí.
 Skelton a Pais (2019, kap. 3 „Team-First Thinking“) výslovně varují před snahou cognitive load „objektivizovat“
-přes počet řádků kódu, count of services, nebo ticket throughput. Tyto proxy metriky
+přes počet řádků kódu, počet služeb nebo průtok ticketů. Tyto proxy metriky
 nemají korelaci s tím, jak se tým reálně cítí.
 
 :::callout{type="warn"}
@@ -513,7 +513,7 @@ monolit). Žádný Platform team, žádný Enabling team.
 - **Čeho se vyvarovat:** nepouštět se do Kubernetes, vlastní observability stack, mikroservisy. Předčasné.
 
 *Chyba startupů:* kopírovat enterprise architekturu „aby to bylo připraveno na budoucnost“.
-Cognitive load 5-členného týmu nemá kapacitu na 6 mikroservisů. Modulární monolit je správná
+Cognitive load pětičlenného týmu nemá kapacitu na 6 mikroservisů. Modulární monolit je správná
 volba.
 
 ### Scénář B – Scale-up, 20 lidí, 1 produkt s rostoucí komplexitou {#scenar-scaleup}
@@ -540,8 +540,8 @@ výbor“), který se stane bottleneckem.
 - **1–2 Complicated-subsystem teamy** – jen pro objektivně specializované domény (např. risk engine v bance, video transcoder v médiích, ML scoring v ad-techu).
 - **Topology design:** osvědčený postup je v této velikosti udržovat malý *topology team* (1–2 lidi, není to Center of Excellence). Sleduje cognitive load týmů a navrhuje reorganizace. Často je to staff engineer + manažer.
 
-I v 200-členné firmě mají stream-aligned týmy **výrazně převažovat** – orientačně
-tři čtvrtiny lidí. Pokud máte 200 lidí a 100 z nich je v Platform/Enabling/CoE/architekti, máte problém –
+I ve dvousetčlenné firmě mají stream-aligned týmy **výrazně převažovat** – orientačně
+tři čtvrtiny lidí. Pokud máte 200 lidí a 100 z nich připadá na Platform/Enabling/CoE týmy a architekty, máte problém –
 stream-aligned týmy nesou doménovou hodnotu, ostatní jsou multiplikátory. Multiplikátorů
 nemá být víc než multiplicandů.
 
@@ -560,7 +560,7 @@ inflation“ – moc lidí v multiplikátorech, málo lidí, co reálně doruču
 
 ## 05.08 Anti-vzory {#antivzory}
 
-Následujících pět anti-vzorů je ze zkušenosti autorů Team Topologies nejčastějších a nejdražších.
+Následujících pět anti-vzorů patří v praxi k nejčastějším a nejdražším.
 Detailní katalog DDD anti-vzorů je v samostatné kapitole o
 [anti-vzorech](/anti-vzory).
 
@@ -586,8 +586,8 @@ vertikální stream-aligned týmy. Každý tým má *všechny* potřebné role
 zásadní část produktu, ne vedlejší kanál, mobile vývojáři patří do stream-aligned týmů,
 ne do separátního „mobile týmu“.
 
-Výjimka: při jediném mobilním vývojáři na celou organizaci má dočasná „mobile guild“
-smysl. Ne jako tým s vlastním backlog, ale jako komunita pro sdílení znalostí.
+Výjimka: při jednom či dvou mobilních vývojářích na celou organizaci má dočasná „mobile guild“
+smysl. Ne jako tým s vlastním backlogem, ale jako komunita pro sdílení znalostí.
 
 ### 3. „Center of Excellence“ místo Enabling teamu {#antivzor-coe}
 
@@ -611,11 +611,11 @@ vytvoří ticket, čeká týden. Reálně se z Platform teamu stalo úzké hrdlo
 organizaci.
 
 **Řešení:** Platform team má povinnost dodávat *self-service* rozhraní
-(CLI, portál, IaC moduly). Pokud stream-aligned tým musí zadávat tikety, je to chyba designu
+(CLI, portál, IaC moduly). Pokud stream-aligned tým musí zadávat tickety, je to chyba designu
 platformy, ne chyba zadávajícího týmu.
 
 Hlavní metrika: **time-to-first-deploy pro nový BC**. Ve zdravé organizaci
-pod 1 den. V nezdravé organizaci „ozkoušíme to za měsíc, jakmile platform team má kapacitu“.
+pod 1 den. V nezdravé organizaci „ozkoušíme to za měsíc, jakmile bude mít Platform team kapacitu“.
 
 ### 5. „Sdílený Bounded Context mezi 2 týmy“ {#antivzor-shared-bc}
 
@@ -637,7 +637,7 @@ doména nejde rozdělit.
 4. Když stream-aligned tým chce nový Postgres, klikne na něj, nebo ticketuje?
 5. Je každá interakce mezi 2 týmy explicitně Collaboration / X-as-a-Service / Facilitating?
 
-Pokud na 2+ otázky odpovídáte „ne“ / „ano (CoE)“ / „zadává tiket“, máte před sebou práci.
+Pokud na 2+ otázky odpovídáte „ne“ / „ano (CoE)“ / „zadává ticket“, máte před sebou práci.
 :::
 
 ## 05.09 Komunikace s managementem – jak prodat reorganizaci {#management}
@@ -664,7 +664,7 @@ korelují* s obchodními výsledky (zisk, růst, customer satisfaction):
 - **Mean time to restore (MTTR)** – čas zotavení z incidentu. Stream-aligned: hodina. Horizontální: dny.
 
 **Před reorganizací změřte 4 DORA metriky. Po reorganizaci změřte znovu po 6 měsících.**
-Pokud Inverse Conway funguje, lead time se zkrátí o 30–80 %, change failure rate se sníží
+Pokud Inverse Conway funguje, lead time se orientačně zkrátí o 30–80 %, change failure rate se sníží
 o 30–50 %. Tato čísla CTO chápe.
 
 ### Argumenty, které nefungují {#argumenty-nefunguji}
@@ -691,7 +691,7 @@ transformací. Westrum rozlišuje 3 typy:
 
 **Team Topologies funguje jen v generative kultuře.** V pathological kultuře
 (manažer trestá za chyby, hierarchie je vše) stream-aligned týmy nedostanou autonomii.
-Manažer chce mít kontrolní bod, takže Platform team se stane gatekeeper. V bureaucratic
+Manažer chce mít kontrolní bod, takže Platform team se stane gatekeeperem. V bureaucratic
 kultuře (přesné role, formální procesy) reorganizace projde, ale provozní vztahy
 zůstanou. Conway's Law přijde zpět přes formální schvalování.
 
