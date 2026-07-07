@@ -113,13 +113,16 @@ final class AddItemToCartHandler
 }
 :::
 
+`ProductRepository` ve struktuře projektu výše nefiguruje záměrně: v Cart kontextu existuje
+jen jako rozhraní (port), implementaci dodává kontext Catalog, který ukázka vynechává.
+
 Plnou CQRS implementaci s validací, autorizací a outbox patternem najdete v [CQRS](/cqrs) a
 [Outbox Pattern](/outbox-pattern).
 
 ## 23.02 Příklad: Blog {#blog}
 
-Blog drží jeden Bounded Context se dvěma agregáty (`Post`, `Comment`) a sekcemi pro vytvoření
-příspěvku, výpis a detail.
+Blog drží jeden Bounded Context s jediným agregátem `Post` – `Comment` je entita uvnitř něj –
+a sekcemi pro vytvoření příspěvku, výpis a detail.
 
 :::diagram{fig="23.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
@@ -143,8 +146,8 @@ src/
 
 ### Klíčový agregát: Post {#post-aggregate}
 
-Agregát `Post` se vytváří přes named constructor `create()`, který emituje `PostCreated` event.
-Konstruktor vynucuje invarianty: titul 3–255 znaků, neprázdný autor.
+Agregát `Post` se vytváří přes named constructor `create()`. Ten vynucuje invarianty
+(titul 3–255 znaků, neprázdný obsah) a nová instance zaznamená `PostCreated`.
 
 :::code{language="php" filename="src/Blog/Domain/Model/Post.php (skeleton)"}
 final class Post extends AggregateRoot
@@ -320,7 +323,7 @@ DDD nepřináší hodnotu a stojí čas. Symfony formuláře, Doctrine entity a 
 CRUD kontrolery takový případ řeší levněji. Hranici mezi oběma světy rozebírá
 kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
-## Závěr
+## 23.05 Závěr {#zaver}
 
 Všechny tři příklady sledují stejný řetězec: kontroler → command bus → handler → agregát →
 repozitář → event. Variace v počtu Bounded Contexts, počtu agregátů a integraci se Symfony
@@ -328,8 +331,8 @@ Security tu kostru nemění. Doménové invarianty patří do agregátu, aplika�
 handler, infrastrukturu drží repozitář.
 
 Reálný projekt s plnou doménovou analýzou, kontextovou mapou, read modely, reconciliation a
-důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Provází
-systém pro správu projektů krok za krokem od event stormingu po read modely s reconciliation.
+důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Provede
+vás systémem pro správu projektů krok za krokem – od event stormingu po hotové read modely.
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?

@@ -93,9 +93,10 @@ opakovaně, si zaslouží vlastní jméno a vlastní typ.
 2. **Pravidla použitelná jak v doméně, tak v repozitáři.** Jedna a tatáž
    specifikace musí umět odpovědět na otázku „*splňuje tento konkrétní objekt
    pravidlo?*“ (in-memory predikát) i „*vrať mi z databáze všechny objekty,
-   které pravidlo splňují?*“ (query). Tomuto se říká
-   **double-dispatch** – obě podoby pravidla (PHP i SQL/Doctrine DQL)
-   drží pohromadě v jedné třídě.
+   které pravidlo splňují?*“ (query). Obě podoby pravidla (PHP i SQL/Doctrine
+   DQL) drží pohromadě v jedné třídě; **double-dispatch** přijde ke slovu
+   při předání specifikace repozitáři (viz
+   [Double-dispatch do Doctrine](#spec-doctrine)).
 3. **Pravidla, která se skládají za běhu.** Promo kód má v admin UI
    podmínky *„platí pro nákupy > 1000 Kč v ČR a SK, kromě výprodejového zboží“*.
    V doméně se reprezentuje jako instance `AndSpecification` složená z N pod-pravidel
@@ -140,8 +141,9 @@ výraz nad pojmenovanými atomy. Třídní hierarchie vypadá následovně:
 
 ### Interface a abstraktní kompozit {#spec-interface}
 
-Začneme rozhraním, které vystaví všechny tři kombinátory, a abstraktní třídou, která je
-implementuje pomocí AndSpecification, OrSpecification, NotSpecification:
+Začneme rozhraním, které vystaví všechny tři kombinátory – rozšiřuje tak minimální
+jednometodovou verzi z úvodu sekce a dále v kapitole ji nahrazuje. Abstraktní třída
+pak kombinátory implementuje pomocí AndSpecification, OrSpecification, NotSpecification:
 
 :::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php"}
 <?php
@@ -411,24 +413,27 @@ Marketingová akce *„doprava zdarma pro nákupy nad 1000 Kč v EU, kromě zák
 na blacklistu“* je trojice atomických specifikací spojená kombinátorem `and`. Vznikne
 jedna čitelná řádka místo trojnásobně vnořeného `if`-u:
 
-:::code{language="php" filename="src/Ordering/Application/CommandHandler/ApplyFreeShippingHandler.php"}
+:::code{language="php" filename="src/Ordering/Application/Service/FreeShippingPolicy.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Application\CommandHandler;
+namespace App\Ordering\Application\Service;
 
+// BlacklistRegistry je port vracející CustomerId zákazníků na blacklistu;
+// implementaci dodává Infrastructure vrstva.
+use App\Ordering\Application\BlacklistRegistry;
 use App\Ordering\Domain\Order;
 use App\Ordering\Domain\Specification\EligibleForFreeShipping;
 use App\Ordering\Domain\Specification\InEUCountry;
 use App\Ordering\Domain\Specification\NotInBlacklist;
 use App\SharedKernel\Domain\Money;
 
-final class ApplyFreeShippingHandler
+final class FreeShippingPolicy
 {
     public function __construct(private readonly BlacklistRegistry $blacklist) {}
 
-    public function __invoke(Order $order): void
+    public function applyTo(Order $order): void
     {
         $promo = (new EligibleForFreeShipping(Money::czk(100_000))) // 1000 Kč v haléřích
             ->and(new InEUCountry())
@@ -1322,7 +1327,7 @@ v týmu uvidíte. Každý z nich má protilék uvedený v příslušné sekci v�
 | Anti-vzor | Symptom | Náprava |
 |---|---|---|
 | Specification jako 1-line if | `OrderTotalGreaterThanSpecification` s jediným porovnáním | Inlinujte podmínku; Specification má reprezentovat celou doménovou otázku |
-| Specification reimplementující SQL | Specifikace má dvě **nezávislé** verze pravidla – jedno v PHP, druhé v DQL | Použijte double-dispatch (`QuerySpecification`); jedno pravidlo, dva výklady |
+| Specification reimplementující SQL | Specifikace má dvě **nezávislé** verze pravidla – jedno v PHP, druhé v DQL, každé jinde | Držte obě podoby v jedné třídě (`QuerySpecification`) a jistěte je kontraktním testem |
 | „*Service“ všude | `OrderService`, `CustomerService` obsahuje doménovou logiku, kterou by měla obsahovat Entity | Přesuňte logiku do Entity; Domain Service jen pro operace bez vlastníka |
 | Application Service vydávaný za Domain Service | Doménová Service má v konstruktoru `EntityManager` a volá `flush()` | Rozdělte na Domain Service (logika) + Application Handler (orchestrace) |
 | Factory pro každý objekt | U každé třídy v doméně existuje samostatná Factory class | Static method (named constructor) v agregátu; Factory class jen pokud nutně potřebujete DI |
@@ -1364,9 +1369,9 @@ agregáty, Domain Service tam, kde jste dosud měli „*Service“ bez
 vlastníka. Specifications dávají smysl ve chvíli, kdy se objeví druhá nebo třetí kombinace
 téhož pravidla.
 
-V další kapitole se podíváme na [výkonové
-aspekty DDD](/vykonnostni-aspekty): jak se agregáty chovají při tisících transakcí za sekundu, kde má
-DDD overhead a jak ho minimalizovat. Kapitola
+Jak se agregáty chovají při tisících transakcí za sekundu, kde má DDD overhead
+a jak ho minimalizovat, ukazuje kapitola
+[Read modely, projekce a výkon](/vykonnostni-aspekty). Kapitola
 [Anti-vzory v DDD](/anti-vzory) doplňuje detail
 u anémického modelu, který v sekci 08.03 padl jen krátce.
 

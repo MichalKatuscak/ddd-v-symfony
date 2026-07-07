@@ -24,7 +24,7 @@ DDD se nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí 
 
 Standardní reakce vývojářského týmu, který má zahájit nový projekt nebo přepsat existující, je *„dejte nám specifikaci a my to naprogramujeme“*. Specifikace ale typicky neexistuje ve formě, která by stačila. Existují wiki stránky staré tři roky, e-mailová vlákna, ticketovací systém s 1 800 issues a čtyři lidé, kteří „to vědí“. Žádný z těchto zdrojů není autoritativní – každý zachycuje doménu z jiného úhlu, v jiné době a často si protiřečí.
 
-To je v pořádku. Doména žije v hlavách doménových expertů jako *znalostní síť*; přečíst ji jako knihovnu nelze. Když se obchodní ředitel a šéf logistiky rozcházejí v tom, co znamená „odeslaná objednávka“, je to signál. Existují dva pohledy, dva kontexty, a tudíž – pravděpodobně – i dva [Bounded Contexty](/zakladni-koncepty#bounded-contexts). Workshop je formát, ve kterém tyto kontradikce **vidíte v reálném čase** a řešíte je společně. Wiki vám je nikdy neukáže; vždy zachytí pohled toho, kdo ji psal.
+To je v pořádku. Doména žije v hlavách doménových expertů jako *znalostní síť*; přečíst ji jako knihu nelze. Když se obchodní ředitel a šéf logistiky rozcházejí v tom, co znamená „odeslaná objednávka“, je to signál. Existují dva pohledy, dva kontexty, a tudíž – pravděpodobně – i dva [Bounded Contexty](/zakladni-koncepty#bounded-contexts). Workshop je formát, ve kterém tyto kontradikce **vidíte v reálném čase** a řešíte je společně. Wiki vám je nikdy neukáže; vždy zachytí pohled toho, kdo ji psal.
 
 Eric Evans v *Domain-Driven Design* (2003) píše, že [Ubiquitous Language](/co-je-ddd#ubiquitous-language-v-praxi) nelze odvodit z dokumentů; vzniká pouze v dialogu. Brandolini, Hofer a Schwentner přidávají k tomuto pozorování praktickou metodologii: konkrétní notaci, konkrétní harmonogram, konkrétní role v místnosti.
 
@@ -88,7 +88,7 @@ Big Picture je první workshop, který tým s novou doménou (nebo s migrací z 
 
 Před workshopem se nelze vyhnout přípravě:
 
-- **Místnost a stěna.** 4-8 m dlouhá rovná stěna, nejlépe bez oken (světlo odlepuje stickies). Pokud je workshop online, založte v Miro nebo Mural *frame* minimálně 6000×3000 px.
+- **Místnost a stěna.** 4-8 m dlouhá rovná stěna, nejlépe bez oken (světlo odlepuje stickies). Pokud je workshop online, založte v Miro nebo Mural *frame* 12 000 × 4 000 px.
 - **Účastníci.** 6-12 lidí. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany: 3-5 vývojářů včetně tech leada. Plus jeden facilitátor (viz níže).
 - **Materiál.** 5-10 balíčků oranžových stickies (3M Post-It, 76×76 mm), 2 balíčky růžových, 2 modrých, 1 žlutý, 1 šedý, 1 zelený, 1 lila (světle fialový), 1 tmavě fialový. Černé fixy Sharpie pro každého (žádné kuličkové pera – text nebude čitelný z 2 m).
 - **Catering.** Káva, voda, ovoce, oběd. Workshop unaví – bez cateringu padá energie po 90 minutách.
@@ -259,6 +259,11 @@ final class Order extends AggregateRoot
         $order = new self($id, $customer, $items, OrderStatus::Pending);
         $order->record(new OrderPlaced($id, $customer));
         return $order;
+    }
+
+    public function id(): OrderId
+    {
+        return $this->id;
     }
 
     public function confirm(): void
@@ -525,7 +530,7 @@ my-symfony-app/
 
 Adresář `docs/discovery/` je **append-only** – staré workshopy nemažete, jen přidáváte nové (s novým datem). Tým tak má historii, jak se mapa domény vyvíjela, a re-storming porovná `docs/discovery/2026-04-29-big-picture/events.md` s `docs/discovery/2026-10-15-re-storming/events.md`.
 
-Adresáře `src/Ordering`, `src/Payment`, `src/Shipment` přímo zrcadlí 3 fialové stickies z workshopu – Bounded Contexty; jejich vnitřní členění podle vrstev popisuje [struktura podle subdomén](/subdomeny#symfony-implications). Když nový vývojář otevře projekt, vidí strukturu odpovídající tomu, co viděl na fotce ze workshopu. Tato vazba mezi *artefaktem v repu* a *artefaktem ze stěny* chrání jazyk workshopu před tím, aby se po půl roce vytratil z kódu.
+Adresáře `src/Ordering`, `src/Payment`, `src/Shipment` zrcadlí tři z pěti fialových stickies z workshopu – ty Bounded Contexty, které dostaly vlastní kód; jejich vnitřní členění podle vrstev popisuje [struktura podle subdomén](/subdomeny#symfony-implications). Když nový vývojář otevře projekt, vidí strukturu odpovídající tomu, co viděl na fotce ze workshopu. Tato vazba mezi *artefaktem v repu* a *artefaktem ze stěny* chrání jazyk workshopu před tím, aby se po půl roce vytratil z kódu.
 
 ### 04.09.6 První PR po workshopu {#post-6-prvni-pr}
 
@@ -585,7 +590,7 @@ Order Aggregate
 - Inv-1: nemůže být confirmed bez aspoň jedné položky
 - Inv-2: po cancelled už nelze confirm
 - Inv-3: součet item.quantity * item.price = total
-- Inv-4: confirm vyžaduje, aby payment byl Settled (hot spot Order-7)
+- Inv-4: confirm vyžaduje, aby payment byl Settled (hot spot Order-9)
 :::
 
 Přímý překlad do testů:
@@ -593,14 +598,16 @@ Přímý překlad do testů:
 :::code{language="php" filename="tests/Ordering/OrderTest.php"}
 final class OrderTest extends TestCase
 {
-    /** @test Inv-1 (workshop 2026-04-29) */
+    // Inv-1 (workshop 2026-04-29)
+    #[Test]
     public function place_throws_when_no_items(): void
     {
         $this->expectException(EmptyOrderNotAllowed::class);
         Order::place(OrderId::generate(), new CustomerId('c1'), []);
     }
 
-    /** @test Inv-2 (workshop 2026-04-29) */
+    // Inv-2 (workshop 2026-04-29)
+    #[Test]
     public function cannot_confirm_after_cancellation(): void
     {
         $order = Order::place(OrderId::generate(), new CustomerId('c1'), [$this->item()]);
@@ -609,7 +616,8 @@ final class OrderTest extends TestCase
         $order->confirm();
     }
 
-    /** @test Inv-3 (workshop 2026-04-29) */
+    // Inv-3 (workshop 2026-04-29)
+    #[Test]
     public function total_equals_sum_of_line_subtotals(): void
     {
         $order = Order::place(
@@ -631,7 +639,8 @@ Z Process Levelu máte sekvenci `Command → Event → Policy → Command`. Tato
 :::code{language="php" filename="tests/Ordering/PlaceOrderHandlerTest.php"}
 final class PlaceOrderHandlerTest extends KernelTestCase
 {
-    /** @test Workshop scenario "Customer places an order" (2026-04-29) */
+    // Workshop scenario "Customer places an order" (2026-04-29)
+    #[Test]
     public function place_order_emits_OrderPlaced_and_triggers_payment(): void
     {
         $bus = self::getContainer()->get(MessageBusInterface::class);
@@ -673,7 +682,7 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 - question: Jak vést hot spoty během workshopu?
   answer: 'Pravidlo zní: <strong>nediskutuje se, jen se zaznamenává</strong>. Když během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět, facilitátor ji okamžitě napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla, a workshop pokračuje dál. Pokus o vyřešení hot spotu hned vždy konzumuje 15-30 minut a typicky se nedořeší – protože odpověď leží mimo místnost. Po workshopu se každý hot spot stane ticketem přiřazeným doménovému expertovi, ne vývojáři.'
 - question: Kdo platí workshop – produkt nebo vývoj?
-  answer: 'Vývoj. Argument je jednoduchý: bez workshopu vývoj vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů. V praxi by produkt a vývoj měly platit společně – workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně.'
+  answer: 'Ideálně oba společně – workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně. Pokud přesto platí jen jeden, pak vývoj: bez workshopu vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů.'
 - question: Co když doménoví experti používají hovorovou češtinu a slang („chronický neplatič nás zase odbil“)?
   answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky v češtině s vlastním slangem. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „chronický neplatič“, napište to na sticky tak, jak to řekl. V kódu pak modelujte koncept s tímto jménem (např. <code>ChronicLatePayer</code>); synonymum používané v týmu doplňte jako PHPDoc komentář. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
 - question: Když máme jen sólo vývojáře a PM, dá se Event Storming dělat ve dvou?

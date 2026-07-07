@@ -618,6 +618,16 @@ abstract class EventSourcedAggregate
     }
 
     /**
+     * Obnoví verzi streamu při rekonstrukci ze snapshotu.
+     * Bez obnovení by verze začínala na nule a optimistic locking
+     * by při prvním uložení selhal na konfliktu.
+     */
+    protected function restoreVersion(int $version): void
+    {
+        $this->version = $version;
+    }
+
+    /**
      * Dynamické dispatchování na apply*() metody podle třídy události.
      * Konvence: apply + ShortClassName, napr. applyOrderCreated().
      * apply*() metody v podtřídách MUSÍ být protected (ne private),
@@ -870,7 +880,7 @@ final class OrderSummaryProjector
     ) {}
 
     #[AsMessageHandler]
-    public function __invoke(OrderCreated $event): void
+    public function handleOrderCreated(OrderCreated $event): void
     {
         $this->connection->insert('order_summary', [
             'order_id'      => $event->orderId,
@@ -1016,6 +1026,9 @@ zpracování způsobí poškozená data: duplicitní řádky, zdvojené částky
 
 Idempotenci lze zajistit dvěma způsoby: **upsert** (INSERT … ON DUPLICATE KEY UPDATE)
 místo prostého INSERT, nebo **tracking tabulka** již zpracovaných událostí.
+U tracking tabulky musí záznam checkpointu a zápis projekce proběhnout v jedné
+databázové transakci – atomicita obou zápisů je podstatou idempotence. Pád workeru
+mezi nimi by jinak událost tiše ztratil.
 
 :::callout{type="pattern"}
 ### PHP: Idempotentní projektor s tracking tabulkou {#idempotent-projector-heading}
@@ -1048,27 +1061,32 @@ final class IdempotentOrderProjector
 
     public function __invoke(OrderCreated $event): void
     {
-        // Atomická kontrola + záznam: INSERT IGNORE vrátí 0 affected rows
-        // pokud eventId již existuje → událost byla již zpracována.
-        $affected = $this->connection->executeStatement(
-            'INSERT IGNORE INTO projection_checkpoint (event_id, projection_name, processed_at)
-             VALUES (:eventId, :projection, NOW(6))',
-            ['eventId' => $event->eventId, 'projection' => 'order_summary'],
-        );
+        // Checkpoint i projekce běží v jedné transakci. Pád workeru mezi
+        // oběma zápisy by jinak zanechal checkpoint bez projekce
+        // a opakované doručení by událost tiše přeskočilo.
+        $this->connection->transactional(function () use ($event): void {
+            // Atomická kontrola + záznam: INSERT IGNORE vrátí 0 affected rows
+            // pokud eventId již existuje → událost byla již zpracována.
+            $affected = $this->connection->executeStatement(
+                'INSERT IGNORE INTO projection_checkpoint (event_id, projection_name, processed_at)
+                 VALUES (:eventId, :projection, NOW(6))',
+                ['eventId' => $event->eventId, 'projection' => 'order_summary'],
+            );
 
-        if ($affected === 0) {
-            return; // Duplicitní doručení - přeskočíme
-        }
+            if ($affected === 0) {
+                return; // Duplicitní doručení - přeskočíme
+            }
 
-        // Vlastní projekční logika
-        $this->connection->insert('order_summary', [
-            'order_id'     => $event->orderId,
-            'customer_id'  => $event->customerId,
-            'status'       => 'draft',
-            'item_count'   => 0,
-            'total_amount' => 0,
-            'placed_at'    => $event->occurredAt->format('Y-m-d H:i:s'),
-        ]);
+            // Vlastní projekční logika
+            $this->connection->insert('order_summary', [
+                'order_id'     => $event->orderId,
+                'customer_id'  => $event->customerId,
+                'status'       => 'draft',
+                'item_count'   => 0,
+                'total_amount' => 0,
+                'placed_at'    => $event->occurredAt->format('Y-m-d H:i:s'),
+            ]);
+        });
     }
 }
 :::
@@ -1197,8 +1215,8 @@ final class RebuildProjectionCommand extends Command
     private array $projectors;
 
     /**
-     * @param iterable<string, callable> $projectors Symfony tagged_iterator
-     * @param array<string, string>      $projectionTables Mapa: název projekce → název tabulky
+     * @param iterable<string, object> $projectors Symfony tagged_iterator
+     * @param array<string, string>    $projectionTables Mapa: název projekce → název tabulky
      */
     public function __construct(
         private readonly Connection $connection,
@@ -1248,14 +1266,22 @@ final class RebuildProjectionCommand extends Command
             ['name' => $name],
         );
 
-        // 3. Přehrát všechny události z Event Store
+        // 3. Přehrát všechny události z Event Store. Dispatch podle konvence
+        //    handle{NázevUdálosti}() - události, pro které projektor
+        //    handler nemá, se přeskočí.
         $projector = $config['projector'];
         $count = 0;
         $batchSize = 500;
 
         foreach ($this->eventStore->loadAll($batchSize) as $envelope) {
-            $event = $this->serializer->toEvent($envelope);
-            $projector($event);
+            $event  = $this->serializer->toEvent($envelope);
+            $method = 'handle' . (new \ReflectionClass($event))->getShortName();
+
+            if (!method_exists($projector, $method)) {
+                continue;
+            }
+
+            $projector->$method($event);
             $count++;
 
             if ($count % $batchSize === 0) {
@@ -1277,7 +1303,7 @@ final class RebuildProjectionCommand extends Command
 Před spuštěním rebuildu v produkci **zastavte asynchronní workery**
 (`messenger:consume`), jinak worker a rebuild příkaz souběžně zapisují
 do stejné projekce. Po dokončení rebuildu workery opět spusťte. U projekcí s miliony
-událostí zvažte dávkové zpracování s `--batch-size` a monitoring paměti.
+událostí zvažte zpracování po menších dávkách a monitoring paměti.
 :::
 
 ### Eventual consistency a uživatelské rozhraní
@@ -1376,7 +1402,7 @@ final class SnapshottingOrderRepository
         if ($snapshot !== null) {
             // 2a. Máme snapshot - přehrajeme pouze události novější než snapshot
             $fromVersion = $snapshot->version + 1;
-            $aggregate   = Order::reconstituteFromSnapshot($snapshot->state);
+            $aggregate   = Order::reconstituteFromSnapshot($snapshot->state, $snapshot->version);
         } else {
             // 2b. Nemáme snapshot - přehrajeme celý event stream od začátku
             $fromVersion = 1;
@@ -1439,9 +1465,11 @@ final class SnapshottingOrderRepository
 :::
 
 Aby byl snapshotting funkční, musí agregát implementovat metody `toSnapshot(): array`
-(serializace aktuálního stavu) a statickou `reconstituteFromSnapshot(array $state): static`
+(serializace aktuálního stavu) a statickou `reconstituteFromSnapshot(array $state, int $version): static`
 (deserializace). Na rozdíl od `reconstituteFromEvents()` tato metoda nevytváří apply*()
-volání – přímo nastaví properties z uloženého snímku. Formát snapshotu se proto musí vyvíjet spolu s doménovým modelem.
+volání – přímo nastaví properties z uloženého snímku a přes `restoreVersion()`
+z base class obnoví verzi streamu. Bez obnovené verze by optimistic locking při
+prvním uložení selhal. Formát snapshotu se proto musí vyvíjet spolu s doménovým modelem.
 
 :::callout{type="warn"}
 ### Invalidace snapshotů při změně schématu {#snapshot-invalidation-heading}
@@ -1711,8 +1739,8 @@ během přechodného období (aplikace zapisuje do obou streamů, dokud migrace 
 ### Strategie 2: Multi-version event store {#multi-version-heading}
 
 V Event Store fyzicky koexistují **obě verze** schémat. Repozitář při rekonstrukci agregátu
-rozhodne podle značky `aggregate_version`, který stream číst. Nově vzniklé agregáty
-zapisují v3, staré dál ve v1. Na nový tvar se agregát přepne teprve při příští
+rozhodne podle sloupce `schema_version`, který stream číst. Nově vzniklé agregáty
+zapisují v2, staré dál ve v1. Na nový tvar se agregát přepne teprve při příští
 doménové operaci (lazy migration).
 
 Cena: doménový kód musí umět obsloužit obě verze (větvení v factory metodách).

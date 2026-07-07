@@ -200,11 +200,11 @@ V úvodním příběhu jsme popsali e-shop, kde přidání BitPay trvalo tři t�
 4. Otestovat regrese v `WeeklyCleanupCommand` (TTL rezervací).
 5. Smířit se s tím, že některý z těchto kroků pravděpodobně něco rozbije.
 
-V DDD architektuře s explicitním agregátem `Payment` a doménovým eventem `PaymentMethodAdded` přidání nové metody znamená:
+V DDD architektuře s explicitním agregátem `Payment` přidání nové metody znamená:
 
 1. Implementovat adapter `BitPayGateway` v Anti-Corruption Layer (jednorázová práce).
 2. Zaregistrovat novou metodu v `PaymentMethodRegistry`.
-3. Existující agregáty `Order`, `Refund` a `Payment` zachovají chování beze změny – pravidla refundace, reportingu a TTL nesahají do CRUD service vrstvy.
+3. Existující agregáty `Order`, `Refund` a `Payment` zůstávají nedotčené – pravidla refundace, reportingu a TTL se nemění, změna se odehrává jen v adapteru a registru.
 
 Rozdíl: tři týdny vs. tři dny. Důvod: hranice agregátů drží refaktor v omezeném prostoru a doménová pravidla jsou na jednom místě, ne rozteklá napříč pěti soubory.
 :::
@@ -231,7 +231,7 @@ Scénář skládá dohromady typické rysy projektů, které DDD zavedly bez dom
 
 Po šesti měsících má tým 40 agregátů, 80 doménových událostí a 200 commandů. Kód vypadá jako z učebnice. Ale skutečná pravidla skladu v modelu nikdy nebyla: kdy smí být zboží rezervováno na dvou místech současně, jak se rozhoduje o přesunu mezi sklady, jaký je vztah mezi rezervací a fyzickým výdejem. Tým modeluje vlastní představu domény; realita skladu zůstává mimo model.
 
-Když logistický ředitel po dvou měsících provozu zjistí, že systém umožňuje dvojí rezervaci (a tím způsobuje časté reklamace), vyžaduje okamžitou opravu. Refaktor 40 agregátů a 80 událostí trvá čtyři měsíce. Po čtrnácti měsících vývoje pokrývá projekt 30 % funkcionality, kterou původní CRUD aplikace zvládala.
+Když logistický ředitel po dvou měsících provozu zjistí, že systém umožňuje dvojí rezervaci (a tím způsobuje časté reklamace), vyžaduje okamžitou opravu. Refaktor 40 agregátů a 80 událostí trvá čtyři měsíce. Po roce vývoje a provozu pokrývá projekt 30 % funkcionality, kterou původní CRUD aplikace zvládala.
 
 Lekce: **DDD bez doménového experta v týmu nefunguje.** Pravidla, která doménový expert nezná, nemůže nikdo modelovat. Žádný senior vývojář nedokáže odvodit, jak skutečně funguje sklad, jen z wireframů business analytika. Pokud nemáte přístup k expertovi, kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) doporučuje začít s jednodušší architekturou a investici do doménového modelování odložit.
 :::
@@ -291,7 +291,7 @@ Hlavní zdroje:
 
 Tato kapitola je první v sekvenci 24 kapitol. Pořadí kapitol je promyšlené – každá staví na předchozích – ale málokdo potřebuje lineární čtení od první do poslední. Většina čtenářů má konkrétní bolest a kniha je připravená na selektivní čtení.
 
-Pro detailní cesty čtení podle role (junior PHP developer, senior, architekt, tech lead, vývojář migrující z CRUD) projděte [Předmluvu, sekci 'Jak číst tuto knihu'](/predmluva#jak-cist). Stručný přehled částí knihy:
+Pro detailní cesty čtení podle role (junior/mid Symfony developer, senior PHP developer, architekt, tech lead, vývojář migrující z CRUD) projděte [Předmluvu, sekci 'Jak číst tuto knihu'](/predmluva#jak-cist). Stručný přehled částí knihy:
 
 - **Strategický design** (kap. 2–5) odpovídá na otázku *kde* DDD aplikovat. Subdomény, Bounded Contexts, [Event Storming](/event-storming), Team Topologies. Pokud z této kapitoly odejdete s pocitem, že DDD ve vašem projektu nedává smysl, kapitoly 2–5 vám potvrdí proč. Pokud má smysl, dají vám nástroj, jak začít.
 - **Taktický design** (kap. 6–9) pokrývá konkrétní stavební bloky: entity, hodnotové objekty, agregáty, [doplňující vzory](/mene-zname-vzory), [architektonické styly](/architektonicke-styly). Nejdůležitější je [návrh agregátu](/navrh-agregatu) – nejtěžší rozhodnutí v taktickém DDD.

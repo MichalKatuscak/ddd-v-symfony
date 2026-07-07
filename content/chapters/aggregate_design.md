@@ -140,7 +140,7 @@ ale platí opak. Tři důvody:
   měníme jediný úkol. V Doctrine to navíc zhoršují asociace s lazy loadingem, které
   generují N+1 dotazů.
 - **Kompozitní invarianty.** Velký agregát obsahuje pravidla, která spolu věcně
-  nesouvisejí. Každá změna musí projít validací všech naráz a režie roste kvadraticky
+  nesouvisejí. Každá změna musí projít validací všech naráz a režie roste
   s počtem chráněných invariantů.
 
 Praktická heuristika: pokud nemáte konkrétní invariant, který by si *vynutil* vzájemnou
@@ -246,7 +246,7 @@ final class InitiateTransferHandler
 
         $this->accounts->save($source);
         // Optimistický zámek na $source brání souběžným withdraw.
-        // Pokud by paralelně přišel jiný TransferMoney, druhý dostane
+        // Pokud by paralelně přišel jiný InitiateTransfer, druhý dostane
         // OptimisticLockException a celá operace se může zopakovat.
     }
 }
@@ -572,6 +572,8 @@ class Order extends AggregateRoot
     #[ORM\Embedded(class: ShippingAddress::class)]
     private ShippingAddress $shippingAddress;
 
+    // Mapování mění typ kolekce: místo pole list<OrderItem>
+    // z čisté doménové varianty vyžaduje Doctrine Collection.
     /** @var Collection<int, OrderItem> */
     #[ORM\OneToMany(
         mappedBy: 'order',
@@ -710,7 +712,7 @@ zkušenost se hroutí. Přístupy:
   event je append-only. Konflikty řeší stream version (kapitola
   [Event Sourcing](/event-sourcing)).
 - **Single-writer pattern.** Agregát existuje v paměti jediného procesu (actor
-  model, Akka, Orleans). Symfony to nativně neumí; alternativou je Messenger s deduplikací
+  model, Akka, Orleans). Symfony to nativně neumí; alternativou je Messenger se směrováním
   přes konzistentní hash a single consumer per aggregate ID.
 - **Přijmout eventual consistency uvnitř.** Například u čítačů
   (*like count*) je přesný stav nedůležitý – stačí zpožděná replikace s nepřesností
@@ -718,9 +720,10 @@ zkušenost se hroutí. Přístupy:
 
 ### Snapshoty v Event Sourcingu {#es-snapshots}
 
-U Event-Sourced agregátů má rebuild stavu z eventů složitost O(N). Při historii nad
-10 000 záznamů je to neúnosné. Snapshot ukládá serializovaný stav agregátu po každých
-N eventech (typicky 100); při načtení se stav rekonstruuje od posledního snapshotu
+U Event-Sourced agregátů má rebuild stavu z eventů složitost O(N). Práh, kdy replay
+měřitelně zpomaluje, závisí na velikosti eventů – typicky stovky až tisíce záznamů.
+Snapshot ukládá serializovaný stav agregátu po každých
+N eventech (typicky 50–100); při načtení se stav rekonstruuje od posledního snapshotu
 a navrch se aplikuje zbývající ocas streamu.
 Detaily implementace:
 
@@ -865,7 +868,7 @@ agregátu, kde stejný postup aplikujeme na netriviální doménu správy projek
 - question: Co je hot aggregate a jak poznat, že ho mám?
   answer: 'Hot aggregate je agregát, na který se souběžně sahá z mnoha transakcí (nákupní košík během Black Friday, sportovní výsledek, hra v reálném čase, čítač lajků na virálním příspěvku). Příznak v provozu: většina commandů selže s <code>OptimisticLockException</code>, retry trvá sekundy, latence stoupá, uživatelská zkušenost se hroutí. Diagnosticky: pokud peak provoz překročí ~5–10 souběžných změn za sekundu na jednu instanci agregátu, jste v ohrožení. Detail příznaků a rozhodovací logika v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jak hot aggregate vyřešit?
-  answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger s deduplikací konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
+  answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček modelujte <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – append-only operace eliminují konflikt na update, konflikty řeší stream version (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger se směrováním konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) periodicky replikujte. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?
   answer: 'Pro nové Symfony projekty doporučujeme ULID (<code>Symfony\\Component\\Uid\\Ulid</code>, balíček <code>symfony/uid</code> dostupný od Symfony 5.1). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru, zápis je kratší (26 znaků vs. 36 u UUID), formát je čitelný v lidských logech. UUID v7 má srovnatelné vlastnosti a stává se standardem (RFC 9562). Sekvenční integery volte jen pro specifický důvod (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong> – domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
 - question: Jak rychle ověřit, že hranice agregátu je správně?

@@ -65,7 +65,7 @@ Konkrétní podmínky, které mluví pro vlastní nasazovací jednotku:
 
 - **Vlastní stream-aligned tým** – kontext má dedikovaný tým, který má autonomii nad backlogem, release cyklem a operačními rozhodnutími. Bez toho je vlastní service jen administrativní zátěž navíc. Detail v [Team Topologies](/team-topologies) (Skelton & Pais 2019).
 - **Vlastní data** – kontext drží svá data v oddělené databázi (nebo alespoň v oddělených tabulkách s vlastním schema ownerem). Ostatní kontexty na ně nesahají přímo, ale jen přes API nebo události. Sdílená databáze napříč servisy je určujícím znakem *distributed monolithu* – viz sekci 19.04.
-- **Nezávislý release cyklus** – kontext lze nasadit bez současného nasazení jiných kontextů. Pokud změna v service A vyžaduje současnou změnu v service B, lepšími hranicemi se to neřeší. Tým má jednu nasazovací jednotku a jen si ji rozdělil na dvě procesní role.
+- **Nezávislý release cyklus** – kontext lze nasadit bez současného nasazení jiných kontextů. Pokud změna v service A vyžaduje současnou změnu v service B, nejde o dvě služby – tým má jednu nasazovací jednotku rozdělenou do dvou procesů.
 - **Rozdílné potřeby škálování** – kontext má řádově jiný objem zpracování (např. catalog s velkým read trafficem vs. ordering s nízkým, ale transakčně náročným) nebo jiné latency požadavky. Rozdělení umožní horizontálně škálovat jen ten, který to potřebuje.
 - **Rozdílný stack nebo runtime** – kontext potřebuje jiné runtime parametry (jiná PHP verze, jiné dependencies, jiné memory limity) nebo dokonce jiný jazyk. Vzácné, ale legitimní.
 - **Rozdílný compliance režim** – kontext zpracovává citlivá data (PCI DSS, GDPR speciální kategorie), která mají striktní oddělení od ostatního systému. Network isolation a samostatný audit trail jsou přirozenějším řešením, když kontext žije ve vlastní service.
@@ -86,9 +86,9 @@ Zopakujme podstatné slovo z předchozího odstavce: **obhajitelné**. Microserv
 :::callout{type="pattern"}
 ### Heuristika 1:1 – kdy ji uplatnit {#bc-1-1-heuristika-heading}
 
-Pokud z předchozího seznamu zaškrtnete **všech šest** bodů (vlastní tým, vlastní data, nezávislý release, různé škálování, různý stack, odlišný compliance režim), je 1:1 mapování silně doporučitelné.
+Pokud z předchozího seznamu zaškrtnete **čtyři a více** bodů, je kontext kandidátem na vlastní service – e-shop výše splnil u každého kontextu čtyři, Payment pět. Body „rozdílný stack“ a „compliance režim“ jsou přitom vzácné; na plných šest nečekejte.
 
-Pokud zaškrtnete **tři až pět**, zvažte, zda dvě sousední kontexty raději neudržet v jednom deployu jako moduly – rozdělení vás bude stát víc, než ušetří. Pokud zaškrtnete **méně než tři**, zůstaňte v [modular monolithu](#modular-monolith). Microservices nejsou cílem, ale nástrojem.
+Při **třech a méně** zůstaňte v [modular monolithu](#modular-monolith) – rozdělení vás bude stát víc, než ušetří. Microservices nejsou cílem, ale nástrojem.
 :::
 
 ## 19.03 Kdy zvolit modular monolith {#modular-monolith}
@@ -271,7 +271,7 @@ Vzniká dvěma cestami, které jsou často nerozlišitelné. **První cesta**: t
 
 Pokud vám sedí dva a více těchto bodů, máte distributed monolith:
 
-1. **Sdílená databáze napříč servisami.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Toto je nejjasnější příznak – Newman ho označuje za *„the single greatest cause of distributed monolith“*. Kanonický rozbor tohoto anti-vzoru včetně opravy přes Anti-Corruption Layer je v [Anti-vzorech](/anti-vzory#sdilena-databaze).
+1. **Sdílená databáze napříč servisami.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Toto je nejjasnější příznak – Newman ho označuje za nejčastější příčinu distributed monolithu. Kanonický rozbor tohoto anti-vzoru včetně opravy přes Anti-Corruption Layer je v [Anti-vzorech](/anti-vzory#sdilena-databaze).
 2. **Synchronní HTTP/gRPC volání mezi servisami v každém request flow.** Vyřízení jednoho user requestu vyžaduje 5–10 vnořených volání. Latence je součet všech volání; availability je součin všech availabilities; failure jednoho znamená failure celého řetězce.
 3. **Coupled deployment.** Změnu API service A nelze nasadit, dokud současně nenasadíte service B, která konzumuje to API. „Release je atomický“, „máme deployment train“ – to jsou eufemizmy pro coupled deploy. Sam Newman: pokud nelze service nasadit samostatně, není to microservice.
 4. **End-to-end test vyžaduje všechny servisy.** Test jednoho user flow nelze spustit bez toho, abyste měli runtime všech N servis (lokálně přes docker-compose, v CI přes test environment). Žádná service není testovatelná v izolaci.
@@ -282,7 +282,7 @@ Pokud vám sedí dva a více těchto bodů, máte distributed monolith:
 
 Pokud máte coupling jako monolith a operační režii jako microservices, dostáváte to nejhorší z obou světů. Konkrétně:
 
-- **Latence.** Vnitřní volání monolithu je volání funkce (~µs); volání mezi servisami je síťová cesta tam a zpět (~ms) plus serializace, deserializace a validace. Při 10 vnořených voláních je rozdíl 4 řády.
+- **Latence.** Vnitřní volání monolithu je volání funkce (~µs); volání mezi servisami je síťová cesta tam a zpět (~ms) plus serializace, deserializace a validace. Rozdíl tří řádů na každé volání – při 10 vnořených voláních narostou mikrosekundy na desítky milisekund.
 - **Availability.** Pokud každá service má 99,9% uptime, řetězec deseti servis má 99,0 % – desetinásobně větší nedostupnost.
 - **Debugging.** Trace jednoho requestu prochází N servisami. Bez distributed tracing je incident skoro nedohledatelný. S ním je drahý.
 - **Refaktoring.** Přesunutí pole z jedné entity do jiné je v monolithu refaktoring v IDE. Mezi servisami je to migrace dat, change API smluv, koordinovaný deploy a období dual-write.
@@ -572,7 +572,7 @@ Subscriber service má zrcadlovou konfiguraci – AMQP transport pro příchozí
 :::callout{type="pattern"}
 ### YAML: Messenger config – subscriber (billing-svc) {#messenger-subscriber-heading}
 
-:::code{language="yaml" filename="billing-svc/config/packages/messenger.yaml" highlights="38,39,40,41"}
+:::code{language="yaml" filename="billing-svc/config/packages/messenger.yaml" highlights="35,36,37,38,39"}
 # config/packages/messenger.yaml v billing-svc
 framework:
     messenger:
@@ -607,12 +607,11 @@ framework:
                     - validation
                     - doctrine_transaction
 
-        routing:
-            # CRITICAL: routujeme NA NAŠI vlastní třídu IntegrationEvent,
-            # ne na App\Ordering\Domain\Event\OrderPlaced
-            # Vlastní DTO = vlastní lifecycle, vlastní validace, vlastní version compat.
-            'App\Billing\Application\IntegrationEvent\OrderPlacedReceived': events_in
-            'App\Billing\Application\IntegrationEvent\OrderCancelledReceived': events_in
+        # Žádný routing blok: routing určuje, kam se zprávy ODESÍLAJÍ.
+        # Příjem řeší worker `php bin/console messenger:consume events_in`;
+        # serializer výše mapuje payload na NAŠE vlastní integration event DTO,
+        # ne na App\Ordering\Domain\Event\OrderPlaced.
+        # Vlastní DTO = vlastní lifecycle, vlastní validace, vlastní version compat.
 :::
 :::
 
@@ -689,17 +688,25 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
 
         $payload = json_decode($encodedEnvelope['body'], true, flags: JSON_THROW_ON_ERROR);
 
-        // Mapping payloadu z publishera (App\Ordering\Domain\Event\OrderPlaced)
-        // na náš subscriber-side DTO. Defenzivní – žádná pole z payloadu,
-        // která bychom nepoužívali.
-        $message = new $targetClass(
-            eventId: $payload['eventId'],
-            occurredAt: $payload['occurredAt'],
-            orderId: $payload['orderId'],
-            customerId: $payload['customerId'],
-            totalAmountCents: $payload['totalAmountCents'],
-            currency: $payload['currency'] ?? 'EUR',
-        );
+        // Mapping payloadu z publishera na náš subscriber-side DTO.
+        // Každý typ eventu nese jiná pole, proto se tu větví. Defenzivní –
+        // žádná pole z payloadu, která bychom nepoužívali.
+        $message = match ($targetClass) {
+            OrderPlacedReceived::class => new OrderPlacedReceived(
+                eventId: $payload['eventId'],
+                occurredAt: $payload['occurredAt'],
+                orderId: $payload['orderId'],
+                customerId: $payload['customerId'],
+                totalAmountCents: $payload['totalAmountCents'],
+                currency: $payload['currency'] ?? 'EUR',
+            ),
+            OrderCancelledReceived::class => new OrderCancelledReceived(
+                eventId: $payload['eventId'],
+                occurredAt: $payload['occurredAt'],
+                orderId: $payload['orderId'],
+                reason: $payload['reason'] ?? null,
+            ),
+        };
 
         return new Envelope($message);
     }
@@ -766,7 +773,7 @@ Tímto vzorem dosáhneme čtyř důležitých vlastností:
 
 ## 19.09 Postupná migrace monolit → microservices {#migrace}
 
-Tato sekce je pro týmy, které dnes mají monolit a uvažují, kam dál. Většinu reálných systémů nepostavíte jako microservices na zelené louce. Postavíte je jako monolit, ten doroste do bolesti, a pak se zeptáte, kterou část máte rozdělit. Mottem sekce je heslo Sama Newmana z *Building Microservices, 2nd ed.*: **„don't do a big-bang rewrite“**. Velká přepisovací migrace v 9 z 10 případů selže.
+Tato sekce je pro týmy, které dnes mají monolit a uvažují, kam dál. Většinu reálných systémů nepostavíte jako microservices na zelené louce. Postavíte je jako monolit, ten doroste do bolesti, a pak se zeptáte, kterou část máte rozdělit. Mottem sekce je heslo Sama Newmana z *Building Microservices, 2nd ed.*: **„don't do a big-bang rewrite“**. Velká přepisovací migrace selhává mnohem častěji, než se plánuje.
 
 ### Strangler Fig pattern {#strangler-fig-heading}
 
@@ -870,7 +877,7 @@ Hlavní doporučení této kapitoly:
 - **Sync vs. async – async-first** – sync jen pro queries v request flow a pro blokující validace; všechno ostatní eventy přes broker. Tight temporal coupling je největší ztráta hodnoty microservices.
 - **Distribuované transakce – saga, ne 2PC** – 2PC nepoužitelné v microservices stacku. Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace. Detail v [kapitole 14](/sagy-a-process-managery).
 - **Symfony Messenger umí obojí** – sync transport pro modular monolith, AMQP transport s Outbox patternem pro eventy mezi servisami. Publisher a subscriber *nesdílejí* PHP třídu eventu; subscriber má vlastní integration event DTO. Bez tohoto pravidla po rozdělení monolithu vznikne sdílená library = distributed monolith.
-- **Migrace přes Strangler Fig, ne big-bang** – postupně, jeden BC v čase, s fasádou a obdobím dual-write. Big-bang rewrite v 9 z 10 případů selže.
+- **Migrace přes Strangler Fig, ne big-bang** – postupně, jeden BC v čase, s fasádou a obdobím dual-write. Big-bang rewrite zpravidla selže.
 - **Microservices jsou primárně operační problém** – bez orchestrátoru, distributed tracingu, service discovery a CI/CD per service je modular monolith rozumnější.
 
 Stručně: nezačínejte microservices. Začněte modular monolithem s explicitními BC a vynucenými hranicemi. Microservice je optimalizace, kterou si zasloužíte, až když ji potřebujete.

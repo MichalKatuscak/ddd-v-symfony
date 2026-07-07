@@ -229,6 +229,7 @@ final class UserTest extends TestCase
     public function testEmailRemainsUnchangedWhenSameValueProvided(): void
     {
         $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user->releaseEvents(); // vyprázdní buffer - registrace vydala UserRegistered
 
         $user->changeEmail(new Email('jan@example.com'));
 
@@ -427,6 +428,7 @@ use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\Event\OrderPlaced;
+use Tests\Shared\Domain\DomainEventAssertions;
 
 final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 {
@@ -568,7 +570,7 @@ namespace Tests\UserManagement\Application\Command;
 use PHPUnit\Framework\TestCase;
 use App\UserManagement\Registration\Command\RegisterUser;
 use App\UserManagement\Registration\Command\RegisterUserHandler;
-use App\UserManagement\Domain\Exception\EmailAlreadyTakenException;
+use App\UserManagement\Domain\Exception\DuplicateEmailException;
 use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
 
 final class RegisterUserHandlerTest extends TestCase
@@ -604,7 +606,7 @@ final class RegisterUserHandlerTest extends TestCase
         $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
         ($this->handler)($command); // první registrace
 
-        $this->expectException(EmailAlreadyTakenException::class);
+        $this->expectException(DuplicateEmailException::class);
 
         ($this->handler)($command); // duplicitní registrace
     }
@@ -616,7 +618,7 @@ final class RegisterUserHandlerTest extends TestCase
 
         try {
             ($this->handler)($command);
-        } catch (EmailAlreadyTakenException) {
+        } catch (DuplicateEmailException) {
             // očekáváno
         }
 
@@ -625,6 +627,11 @@ final class RegisterUserHandlerTest extends TestCase
 }
 :::
 :::
+
+InMemory repozitář zde unikátnost e-mailu jen aproximuje. Finální záruku dává unikátní
+constraint v databázi – kanonický handler překládá jeho porušení na `DuplicateEmailException`
+(viz [race condition v naivní variantě](/implementace-v-symfony#register-race-heading)).
+Test ověřuje chování handleru, ne řešení souběhu.
 
 :::callout{type="warn"}
 ### Varování: Přílišné používání mocků
@@ -802,6 +809,7 @@ final class RegistrationControllerTest extends WebTestCase
             uri: '/api/users/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
+                'name'     => 'Jan Novák',
                 'email'    => 'novy@example.com',
                 'password' => 'SilneHeslo123!',
             ])
@@ -825,6 +833,7 @@ final class RegistrationControllerTest extends WebTestCase
             uri: '/api/users/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
+                'name'     => 'Jan Novák',
                 'email'    => 'not-valid-email',
                 'password' => 'Heslo123!',
             ])
@@ -842,7 +851,7 @@ final class RegistrationControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $payload = json_encode(['email' => 'existujici@example.com', 'password' => 'Heslo123!']);
+        $payload = json_encode(['name' => 'Jan Novák', 'email' => 'existujici@example.com', 'password' => 'Heslo123!']);
 
         $client->request('POST', '/api/users/register',
             server: ['CONTENT_TYPE' => 'application/json'],
@@ -1060,6 +1069,10 @@ deptrac:
       collectors:
         - type: directory
           value: src/.*/Application/.*
+        # use-case slice mimo Application/ - handlery typu
+        # App\UserManagement\Registration\Command\RegisterUserHandler
+        - type: directory
+          value: src/.*/Registration/Command/.*
 
     - name: Infrastructure
       collectors:

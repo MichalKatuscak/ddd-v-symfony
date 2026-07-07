@@ -24,7 +24,7 @@ Ilustrativní scénář: tým, čísla i rozhodnutí v této kapitole jsou smyš
 
 Tým dostal zadání postavit systém pro správu projektů. Uživatelé zakládají projekty, přidávají úkoly, přiřazují
 je členům týmu, mění jejich stav a komentují je. Triviální zadání. První instinkt vývojáře je tabulka `projects`,
-tabulka `tasks` s cizím klíčem, tabulka `comments` a `UserService`, který vše obslouží. Za tři měsíce má `TaskService`
+tabulka `tasks` s cizím klíčem, tabulka `comments` a `TaskService`, který vše obslouží. Za tři měsíce má `TaskService`
 osm set řádků a každá změna v přiřazování úkolů rozbije reportování. Tato studie ukazuje druhou cestu –
 strategický a taktický DDD s CQRS v Symfony 8 od prvního workshopu po projekce s reconciliation.
 
@@ -159,13 +159,15 @@ Vztahy zachycené v kontextové mapě:
 - **Všechny kontexty → ActivityTracking** – *Open Host Service / Published Language*.
   Vydávající kontexty publikují doménové události veřejným kontraktem (Published Language);
   ActivityTracking je čistě downstream konzument, který nemá vliv zpět.
-- **Shared Kernel** – `UserId`, `ProjectId`, `TaskId`
-  jsou sdílené hodnotové objekty napříč kontexty. Volba a její cena jsou rozebrány
+- **Sdílené identifikátory** – `UserId`, `ProjectId`, `TaskId`
+  žijí ve vlastnických kontextech a ostatní kontexty tyto hodnotové objekty importují.
+  Volba a její cena jsou rozebrány
   v [sekci 24.07.2](#trade-off-shared-kernel-heading).
 
 **Anti-Corruption Layer (ACL)** v této studii nabývá zjednodušené podoby. Mezi
-TaskManagement a ProjectManagement není potřeba sémantická translace – Shared Kernel
-sdílí `ProjectId` i `UserId` –, přesto TaskManagement nesmí ze své doménové
+TaskManagement a ProjectManagement není potřeba sémantická translace – oba kontexty
+pracují s týmiž třídami `ProjectId` a `UserId` importovanými z vlastnických
+kontextů –, přesto TaskManagement nesmí ze své doménové
 vrstvy přímo volat infrastrukturu jiného kontextu. Hranici proto tvoří port
 `ProjectChecker` definovaný v doméně TaskManagement; jeho infrastrukturní implementace
 je adaptér do ProjectManagement. Port plní funkci ACL i tam, kde se nepřekládají typy: chrání
@@ -362,10 +364,11 @@ s produkťákem i v ticketech. Hlavní pojmy:
 ### Doménový model: Projekt (kořen agregátu) {#project-model-heading}
 
 Agregát používá Doctrine atributy přímo na doménové třídě – jako pragmatickou výchozí volbu,
-v souladu s [kapitolou 10](/implementace-v-symfony#mapping-volba-heading). Třída je `final`,
-dědí z `AggregateRoot` (sdílené chování pro `record` a `releaseEvents`, viz
-[lifecycle agregátu](/zakladni-koncepty#aggregate-root-lifecycle)),
-konstruktor je `private` a vznik agregátu probíhá přes statickou factory metodu `create()`.
+v souladu s [kapitolou 10](/implementace-v-symfony#mapping-volba-heading). Třída dědí
+z `AggregateRoot` (sdílené chování pro `record` a `releaseEvents`, viz
+[lifecycle agregátu](/zakladni-koncepty#aggregate-root-lifecycle)) a není `final`,
+protože Doctrine generuje proxy děděním z entity. Konstruktor je `private`
+a vznik agregátu probíhá přes statickou factory metodu `create()`.
 
 :::code{language="php" filename="src/ProjectManagement/Domain/Model/Project.php"}
 <?php
@@ -379,7 +382,7 @@ use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\SharedKernel\Domain\AggregateRoot;
-// UserId je sdílený v Shared Kernelu (viz sekci 24.07.2)
+// UserId žije v UserManagement; ostatní kontexty ho importují (viz sekci 24.07.2)
 use App\UserManagement\Domain\ValueObject\UserId;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -505,12 +508,16 @@ class Project extends AggregateRoot // ne final – Doctrine proxy z entity děd
 }
 :::
 
+`rename()` a `changeDescription()` žádnou událost neemitují. Projekce ze
+[sekce 24.06](#read-model) se o změně nedozví a read model zůstává zastaralý až do běhu
+reconcileru – drift jména patří k rozdílům, které reconciler dorovnává právě proto.
+
 :::callout{type="note"}
-`UserId` je v této studii sdílen mezi kontexty přes Shared Kernel –
-jeho cena a alternativa (samostatný primitiv v každém kontextu) jsou rozebrány
-v [sekci 24.07.2](#trade-off-shared-kernel-heading). V kontextech, kde
-by se model musel rozejít (jiná validace, jiná sériová reprezentace), by sdílení
-přes Shared Kernel nestačilo a kontext by si držel vlastní kopii.
+`UserId` žije ve vlastnickém kontextu UserManagement; ostatní kontexty
+třídu importují. Cena této volby a alternativa (samostatný primitiv v každém kontextu)
+jsou rozebrány v [sekci 24.07.2](#trade-off-shared-kernel-heading). V kontextech, kde
+by se model musel rozejít (jiná validace, jiná sériová reprezentace), by sdílená
+třída nestačila a kontext by si držel vlastní kopii.
 :::
 
 ### Doménový model: Úkol (kořen agregátu) {#task-model-heading}
@@ -528,7 +535,7 @@ use App\TaskManagement\Domain\Event\TaskStatusChanged;
 use App\TaskManagement\Domain\ValueObject\TaskId;
 use App\TaskManagement\Domain\ValueObject\TaskStatus;
 use App\SharedKernel\Domain\AggregateRoot;
-// ProjectId a UserId jsou sdílené v Shared Kernelu (viz sekci 24.07.2)
+// ProjectId a UserId se importují z vlastnických kontextů (viz sekci 24.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
 
@@ -606,6 +613,14 @@ final class Task extends AggregateRoot
 
     public function changeStatus(TaskStatus $status): void
     {
+        if (!$this->status->canTransitionTo($status)) {
+            throw new \DomainException(sprintf(
+                'Přechod stavu úkolu z %s na %s není povolen.',
+                $this->status->value,
+                $status->value,
+            ));
+        }
+
         $oldStatus = $this->status;
         $this->status = $status;
         $this->updatedAt = new \DateTimeImmutable();
@@ -818,7 +833,7 @@ enum TaskStatus: string
 Konstruktor `new ProjectId()` bez argumentů generuje UUID v7 (časově řazené,
 vhodné jako primární klíč). `new ProjectId($uuid)` hydratuje existující identifikátor
 z databáze nebo z příchozího příkazu. `TaskId` a `UserId` následují
-stejnou konvenci. Diskuse o sdílení těchto VO mezi kontexty (Shared Kernel vs. duplikace)
+stejnou konvenci. Diskuse o sdílení těchto VO mezi kontexty (sdílená třída vs. duplikace)
 je v [sekci 24.07.2](#trade-off-shared-kernel-heading).
 :::
 
@@ -1040,7 +1055,8 @@ class GetProjectsHandler
                 $project->description(),
                 $project->ownerId->value,
                 count($project->memberIds()),
-                $project->createdAt()
+                0, // počet úkolů naivní verze nezná – Task je samostatný agregát (viz sekci 24.06)
+                $project->createdAt
             );
         }
 
@@ -1088,8 +1104,7 @@ hydratace doménových objektů. Hlubší teoretický základ je v kapitolách
 
 Tabulka `project_list_view` drží tvar potřebný pro výpis projektů uživatele. Není normalizovaná –
 obsahuje vypočítané hodnoty (`member_count`, `task_count`) a denormalizované pole
-`member_ids` jako JSON. Tato tabulka není zdrojem pravdy; lze ji kdykoli znovu sestavit z událostí
-nebo z primárních tabulek.
+`member_ids` jako JSON. Tato tabulka není zdrojem pravdy; lze ji kdykoli znovu sestavit z primárních tabulek.
 
 :::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListView.php"}
 <?php
@@ -1351,14 +1366,23 @@ final class ReconcileProjectListView extends Command
             );
 
             if ($view === null) {
+                // Chybějící view: založit a rovnou naplnit všechna pole.
                 $view = new ProjectListView();
-                $view->projectId  = $project->id->value;
-                $view->ownerId    = $project->ownerId->value;
-                $view->createdAt  = $project->createdAt();
+                $view->projectId   = $project->id->value;
+                $view->ownerId     = $project->ownerId->value;
+                $view->createdAt   = $project->createdAt;
+                $view->name        = $project->name();
+                $view->description = $project->description();
+                $view->memberIds   = $expectedMembers;
+                $view->memberCount = count($expectedMembers);
+                $view->updatedAt   = $now;
                 $this->em->persist($view);
+                $repaired++;
+                continue;
             }
 
             $needsRepair = $view->name !== $project->name()
+                || $view->description !== $project->description()
                 || $view->memberIds !== $expectedMembers
                 || $view->memberCount !== count($expectedMembers);
 
@@ -1417,7 +1441,7 @@ publikace události na transport selhat – read model zůstane navždy nesynchr
 ## 24.07 Výzvy a rozhodnutí {#trade-offs}
 
 Žádný projekt v DDD nezačíná hotový. Pět níže uvedených rozhodnutí ukazuje místa, kde tým váhal mezi
-dvěma legitimními možnostmi. Místo „správné" odpovědi existuje kontext, který volbu určil, a cena, kterou
+dvěma legitimními možnostmi. Místo „správné“ odpovědi existuje kontext, který volbu určil, a cena, kterou
 za ni tým platí. Stejná otázka v jiném projektu by mohla dopadnout jinak.
 
 ### 1. Eventual consistency napříč kontexty {#trade-off-consistency-heading}
@@ -1433,22 +1457,24 @@ dokončí; aktivita se zaznamená později při replay z outbox tabulky.
 není stejný uživatel jako autor akce, je toto zpoždění přijatelné. Pro notifikace v reálném čase by tento
 kompromis nestačil – tam pomůže synchronní integrace nebo websocket push z projekce.
 
-### 2. Shared Kernel vs. duplikace identifikátorů {#trade-off-shared-kernel-heading}
+### 2. Sdílené identifikátory vs. duplikace {#trade-off-shared-kernel-heading}
 
 **Otázka:** `UserId` se objevuje ve všech kontextech (vlastník projektu, přiřazený
-řešitel, autor komentáře). Bude jedna sdílená třída ve *Shared Kernel*, nebo si každý kontext drží
+řešitel, autor komentáře). Bude jedna sdílená třída, kterou ostatní kontexty importují, nebo si každý kontext drží
 vlastní reprezentaci jako primitivní string?
 
-**Volba:** Shared Kernel pro `UserId`, `ProjectId`, `TaskId`.
+**Volba:** jedna třída ve vlastnickém kontextu, importovaná ostatními. `UserId` žije
+v UserManagement, `ProjectId` v ProjectManagement, `TaskId` v TaskManagement; downstream
+kontexty tyto value objecty používají přímo.
 Tým je jeden, deploy je jeden, riziko, že se UUID formát mezi kontexty rozejde, je zanedbatelné. Sdílená třída
 navíc zajistí konzistentní validaci.
 
-**Cena:** sdílený package mezi kontexty. Když jeden kontext rozšíří `UserId` o novou
-validaci, dotkne se to všech ostatních. Refaktor napříč Shared Kernelem je v praxi koordinovaný release.
+**Cena:** závislost na doménové vrstvě cizího kontextu. Když vlastnický kontext rozšíří `UserId` o novou
+validaci, dotkne se to všech ostatních. Refaktor takto sdílené třídy je v praxi koordinovaný release.
 
 **Alternativa:** Pokud by se tým štěpil nebo se kontexty oddělovaly do samostatných služeb,
 primitivní string by byl bezpečnější (každý kontext si validuje sám) za cenu duplikace. Pro monolit
-s jedním deploy pipeline je Shared Kernel pragmatičtější.
+s jedním deploy pipeline je sdílená třída pragmatičtější.
 
 ### 3. Synchronní ACL přes port vs. asynchronní reakce na event {#trade-off-sync-acl-heading}
 
@@ -1516,10 +1542,10 @@ v kapitole [Anti-vzory a typické chyby](/anti-vzory).
 
 ## 24.08 Ponaučení {#lessons}
 
-Z provozu vyplynulo deset bodů, které drží i mimo tuto studii. Sedm z nich vychází ze strategického a taktického
-designu, tři z provozu read modelů a vědomého řízení kompromisů.
+Z provozu vyplynulo deset bodů, které drží i mimo tuto studii. Většina vychází ze strategického a taktického
+designu, zbytek z provozu read modelů a vědomého řízení kompromisů.
 
-1. **Strategický design rozhoduje o výsledku** – Identifikace pěti bounded contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel" znamená v každém kontextu něco jiného. Bez kontextové mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
+1. **Strategický design rozhoduje o výsledku** – Identifikace pěti bounded contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel“ znamená v každém kontextu něco jiného. Bez kontextové mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
 2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produkťák mluví o `TaskAssigned`, ne každý o něčem jiném.
 3. **Agregáty a hranice transakcí** – Vymezené agregáty udržely data konzistentní. Každý agregát si hlídal vnitřní konzistenci a měnil se v jedné transakci.
 4. **Doménové události pro integraci** – Doménové události odvázaly bounded contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval agregát událost `TaskCreated`; ActivityTracking i ProjectListProjection na ni reagovaly samostatně, aniž by o sobě věděly.
@@ -1529,9 +1555,9 @@ designu, tři z provozu read modelů a vědomého řízení kompromisů.
    Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.
    Podrobná strategie pro DDD projekty je v kapitole
    [Testování DDD aplikací](/testovani-ddd).
-8. **Read modely jako samostatný artefakt** – Oddělení write a read strany přes projekce ukázalo svou hodnotu, jakmile dataset překročil několik tisíc projektů. Hydratace agregátů pro účely výpisu je drahá; denormalizovaný read model umožnil držet odezvu výpisu pod 50 ms i při tisícovkách projektů na uživatele. Cenou byla eventual consistency, kterou tým ošetřil optimistickou aktualizací UI v kombinaci s read-your-writes pro kritické scénáře.
+8. **Read modely jako samostatný artefakt** – Oddělení write a read strany přes projekce ukázalo svou hodnotu, jakmile dataset překročil několik tisíc projektů. Hydratace agregátů pro účely výpisu je drahá; denormalizovaný read model umožnil držet odezvu výpisu pod 50 ms i při tisícovkách projektů v datasetu. Cenou byla eventual consistency, kterou tým ošetřil optimistickou aktualizací UI v kombinaci s read-your-writes pro kritické scénáře.
 9. **Doménová analýza předchází kódu** – Tři kroky event stormingu (sběr událostí, seskupení do subdomén, definice hranic) zafungovaly jako filtr proti předčasné technické dekompozici. Bez tohoto kroku by hranice kontextů kopírovaly databázové tabulky nebo obrazovkový tok, ne sémantické bloky domény. Workshop trval dva dny; následný refaktor by trval řády déle.
-10. **Trade-offy dokumentovat, ne řešit** – Ne každé rozhodnutí má jednu správnou odpověď. Sdílený kernel pro identifikátory, eventual consistency u auditu, synchronní ACL přes port – každá z těchto voleb má cenu, kterou tým přijal s vědomím alternativy. Záznam těchto rozhodnutí v dokumentaci (ADR) zachoval kontext pro pozdější refaktor; bez něj by se za půl roku diskuse opakovala znovu.
+10. **Trade-offy dokumentovat, ne řešit** – Ne každé rozhodnutí má jednu správnou odpověď. Sdílené třídy identifikátorů napříč kontexty, eventual consistency u auditu, synchronní ACL přes port – každá z těchto voleb má cenu, kterou tým přijal s vědomím alternativy. Záznam těchto rozhodnutí v dokumentaci (ADR) zachoval kontext pro pozdější refaktor; bez něj by se za půl roku diskuse opakovala znovu.
 
 :::faq{}
 - question: Jakou doménu případová studie popisuje?

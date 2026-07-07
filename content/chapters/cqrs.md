@@ -568,13 +568,15 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     {
         $row = $this->connection->fetchAssociative(
             'SELECT u.id, u.name, u.email, u.registered_at,
-                    COUNT(o.id) AS total_orders,
-                    COALESCE(m.tier, :defaultTier) AS membership_tier
+                    (SELECT COUNT(*) FROM orders o
+                      WHERE o.customer_id = u.id) AS total_orders,
+                    COALESCE(
+                        (SELECT MAX(m.tier) FROM memberships m
+                          WHERE m.user_id = u.id),
+                        :defaultTier
+                    ) AS membership_tier
                FROM users u
-          LEFT JOIN orders o ON o.customer_id = u.id
-          LEFT JOIN memberships m ON m.user_id = u.id
-              WHERE u.id = :userId
-           GROUP BY u.id',
+              WHERE u.id = :userId',
             ['userId' => $userId, 'defaultTier' => 'standard'],
         );
 
@@ -1474,12 +1476,14 @@ final class OrderDashboardProjectorTest extends KernelTestCase
             orderId: 'order-1',
             customerName: 'Jan Novák',
             totalAmount: 1500,
+            occurredAt: new \DateTimeImmutable('2026-03-01 10:00:00'),
         ));
 
         // When: objednávka byla odeslána
         ($this->projector)(new OrderShipped(
             orderId: 'order-1',
             trackingNumber: 'CZ123456789',
+            occurredAt: new \DateTimeImmutable('2026-03-02 08:30:00'),
         ));
 
         // Then: read model obsahuje aktuální stav
@@ -1499,6 +1503,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
             orderId: 'order-2',
             customerName: 'Eva Černá',
             totalAmount: 800,
+            occurredAt: new \DateTimeImmutable('2026-03-01 12:00:00'),
         );
 
         // Zpracovat stejnou událost dvakrát (at-least-once delivery)

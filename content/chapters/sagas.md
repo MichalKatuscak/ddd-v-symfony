@@ -791,9 +791,9 @@ final readonly class OrderSagaRepository implements OrderSagaRepositoryInterface
 :::
 :::
 
-Díky perzistenci stavu je obnova po selhání přímočará. Worker spadne mezi zpracováním
-`OrderPlaced` a příchodem `PaymentSucceeded`. Po restartu Messenger znovu doručí
-nedokončenou událost a Process Manager načte stav ságy z databáze. Okamžitě ví, že
+Díky perzistenci stavu je obnova po selhání přímočará. Worker spadne uprostřed
+zpracování zprávy `PaymentSucceeded` – dřív, než ji stihne potvrdit. Po restartu
+Messenger tutéž zprávu doručí znovu a Process Manager načte stav ságy z databáze. Okamžitě ví, že
 sága čeká na platbu (`AwaitingPayment`), a pokračuje od správného kroku. Metoda
 `findStale()` v repository navíc umožňuje periodicky detekovat zaseklé ságy, které
 se déle než stanovený práh neposunuly kupředu, a spustit pro ně kompenzaci nebo
@@ -818,10 +818,10 @@ nebo *různé* eventy z téže ságy dorazí ve špatném pořadí (Kafka partit
 balancing, RabbitMQ multiple consumers). Důsledky:
 
 - **Race na vznik ságy.** První `OrderPlaced` pro stejné `orderId`
-  dorazí do dvou workerů současně. Oba volají `findOrCreateSaga(orderId)`,
-  oba vidí prázdný stav, oba vytvoří `OrderSaga`. UNIQUE constraint na
-  `order_id` jednoho z nich zabije, druhý zůstane. Bez constraintu vzniknou dvě paralelní
-  ságy téže objednávky a soupeří o stav.
+  dorazí do dvou workerů současně. Oba vidí, že sága ještě neexistuje, a oba
+  zavolají `OrderSaga::start`. UNIQUE constraint na
+  `(saga_type, correlation_id)` jednoho z nich zabije, druhý zůstane. Bez constraintu
+  vzniknou dvě paralelní ságy téže objednávky a soupeří o stav.
 - **Out-of-order events.** `PaymentSucceeded` dorazí dřív než
   `OrderPlaced`, sága ještě není ve stavu `AwaitingPayment`. Process Manager
   netuší, co s ní – buď event zahodí (bug v doméně), nebo ho zařadí do
@@ -837,7 +837,9 @@ Standardní obrana proti všem třem:
 ### Vzor: idempotentní state transitions + UNIQUE constraint {#idempotent-saga-transitions-heading}
 
 Metoda doplněná do entity `OrderSaga` z předchozí ukázky. Využívá sloupce
-`processedEventIds` a guard stavového automatu:
+`processedEventIds` a guard stavového automatu. Parametr `$eventId` nenese
+samotná událost – Process Manager ho čte z obálky zprávy (message id
+Messengeru, např. `TransportMessageIdStamp`):
 
 :::code{language="php" filename="snippet.php"}
 // Doplnění do entity OrderSaga (viz výše v této sekci)
@@ -1072,8 +1074,9 @@ pro další krok procesu.
 V produkci běží pro každý transport oddělené workery:
 `php bin/console messenger:consume async_events async_commands --time-limit=3600`.
 Parametr `--time-limit` zajistí, že se worker po hodině automaticky restartuje
-(a uvolní paměť). Pro vysokou dostupnost běží více instancí workeru – Messenger
-zajistí, že každou zprávu zpracuje právě jeden worker.
+(a uvolní paměť). Pro vysokou dostupnost běží více instancí workeru – každou
+zprávu vyzvedne v danou chvíli jediný z nich. Doručení ale zůstává at-least-once:
+při pádu workeru uprostřed zpracování se zpráva doručí znovu.
 :::
 
 :::callout{type="warn"}
@@ -1409,7 +1412,9 @@ Princip: sága dispatchuje oba příkazy současně a přejde do stavu
 `AwaitingStockAndInvoice`. V kontextu si uchovává dva příznaky
 (`stockReserved` a `invoiceCreated`). Teprve když oba dorazí
 jako splněné, sága pokračuje dalším krokem – vytvořením zásilky. Tomuto vzoru se říká
-**synchronizační bariéra** (synchronization barrier).
+**synchronizační bariéra** (synchronization barrier). Stav `AwaitingStockAndInvoice`
+v enumu `OrderSagaStatus` ze [sekce 5](#orchestrace) zatím chybí – paralelní varianta
+vyžaduje doplnit nový case.
 
 :::callout{type="pattern"}
 ### PHP: Paralelní zpracování kroků se synchronizační bariérou {#parallel-steps-heading}

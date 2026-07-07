@@ -91,15 +91,15 @@ Klasifikace Core / Supporting / Generic je první krok Evansovy destilace, ne ce
 
 ## 02.03 Jak rozpoznat Core Domain – pětibodový test {#rozpoznat-core}
 
-Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) a Core Domain Charts komunity ddd-crew [[5]](https://github.com/ddd-crew/core-domain-charts). Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain. Při třech a více NE je to Supporting nebo Generic.
+Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) a Core Domain Charts komunity ddd-crew [[5]](https://github.com/ddd-crew/core-domain-charts). Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain; v opačném případě jde o Supporting nebo Generic.
 
-1. **„Pokud bychom to outsourcovali, můžeme i tak prodávat hlavní produkt?“**
+1. **„Pokud bychom to outsourcovali, přijdeme o hlavní produkt?“**
 
-   Pokud ANO → není to Core. Pokud NE (= bez té funkcionality nemáme co prodávat) → jde o kandidáta na Core. Příklad: e-shop může outsourcovat platby (NE Core), ale nemůže outsourcovat svůj sortiment a způsob jeho doporučování (kandidát na Core).
+   Pokud ANO (= bez té funkcionality nemáme co prodávat) → jde o kandidáta na Core. Pokud NE → není to Core. Příklad: e-shop může outsourcovat platby (není Core), ale nemůže outsourcovat svůj sortiment a způsob jeho doporučování (kandidát na Core).
 
-2. **„Existuje tržní benchmark / standard?“**
+2. **„Chybí pro tuto oblast tržní benchmark / standard?“**
 
-   Pokud ANO → s vysokou pravděpodobností Generic. Standard znamená, že problém už někdo vyřešil a trh se shodl, jak má řešení vypadat. Příklad: OAuth 2.1 / OpenID Connect pro autentizaci, ISO 8583 pro karetní platby, RFC 5321 pro SMTP. Pokud NE, výsledek je neutrální – může jít o Core i Supporting.
+   Pokud NE (standard existuje) → s vysokou pravděpodobností Generic. Standard znamená, že problém už někdo vyřešil a trh se shodl, jak má řešení vypadat. Příklad: OAuth 2.1 / OpenID Connect pro autentizaci, ISO 8583 pro karetní platby, RFC 5321 pro SMTP. Pokud ANO, výsledek je neutrální – může jít o Core i Supporting.
 
 3. **„Píšeme to už podruhé jinak než konkurence?“**
 
@@ -367,6 +367,7 @@ declare(strict_types=1);
 namespace App\Supporting\Ordering\Domain;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: "orders")]
@@ -374,7 +375,7 @@ class Order
 {
     #[ORM\Id]
     #[ORM\Column(type: "uuid")]
-    private string $id;
+    private Uuid $id;
 
     #[ORM\Column(length: 32)]
     private string $status = "pending";
@@ -382,7 +383,7 @@ class Order
     #[ORM\Column(type: "decimal", precision: 12, scale: 2)]
     private string $total;
 
-    public function __construct(string $id, string $total)
+    public function __construct(Uuid $id, string $total)
     {
         $this->id = $id;
         $this->total = $total;
@@ -612,7 +613,7 @@ Subdoménová klasifikace slouží k rozhodování o investici, ne k estetickém
 - question: Jak poznám, že je subdoména Generic?
   answer: 'Generic subdoména je komoditizovaná: řešení existuje roky, prodává se jako SaaS, knihovna nebo open-source a tržní standard určuje, jak má vypadat. Typické příklady vedle autentizace: generování PDF faktur (hotové knihovny a fakturační služby) a rozesílání transakčních e-mailů (SMTP je standardizovaný protokol, doručitelnost řeší vendor). Vlastní kód v takové oblasti ubírá rozpočet Core Doméně – standardní řešení je nákup plus tenký Anti-Corruption Layer na hranici. Detail v <a href="#tri-kategorie">sekci 02.02 Tři kategorie subdomén</a>.'
 - question: Kolik subdomén je „normální“ počet?
-  answer: 'U středního produktu očekávejte <strong>8–15 subdomén</strong>, u velkého enterprise systému 20–40. Pokud máte méně než 8, typicky se Supporting subdomény schovávají uvnitř Core; pokud máte víc než 40, neagregujete capability dostatečně a pracujete v příliš jemné granularitě. Distribuce by měla být přibližně 1–2 Core, 60 % Supporting, 20 % Generic – pokud máte 5+ Core, jde téměř jistě o tzv. syndrom hrdiny a je nutná re-klasifikace.'
+  answer: 'U středního produktu očekávejte <strong>8–15 subdomén</strong>, u velkého enterprise systému 20–40. Pokud máte méně než 8, typicky se Supporting subdomény schovávají uvnitř Core; pokud máte víc než 40, neagregujete capability dostatečně a pracujete v příliš jemné granularitě. Rozdělení vývojové kapacity by mělo odpovídat přibližně 20–30 % Core, 50–60 % Supporting a 10–20 % Generic – pokud máte 5+ Core subdomén, jde téměř jistě o tzv. syndrom hrdiny a je nutná re-klasifikace.'
 - question: Co když vyjde, že nemáme žádnou Core Domain?
   answer: 'Je to legitimní výsledek a často signál, že <strong>plné DDD nestojí za náklady</strong>. Pokud po pětibodovém testu (sekce 02.03) nezůstane ani jedna subdoména s 3+ ANO, váš produkt je zřejmě „lepší CRUD“ – kombinace komoditizovaných řešení (Generic) a interní administrativy (Supporting) bez skutečného diferenciátoru. V takovém případě zvažte CRUD architekturu se servisní vrstvou, anemic model a Doctrine ORM; investice do plného taktického DDD by se nevrátila. Detailní rozbor v kapitole <a href="/kdy-nepouzivat-ddd">Kdy DDD nepoužívat</a>.'
 - question: Musí každá Core subdoména mít vlastní Bounded Context?

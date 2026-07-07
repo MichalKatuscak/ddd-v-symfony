@@ -139,14 +139,14 @@ class Order // ne final – Doctrine proxy z entity dědí
 :::
 :::
 
-### Řešení 2: JOIN FETCH v DQL pro eager loading
+### Řešení 2: Fetch join v DQL pro eager loading
 
-Pokud víme předem, že budeme iterovat přes kolekce, je efektivnější použít DQL s klauzulí
-`JOIN FETCH`. Doctrine pak načte agregát včetně asociovaných objektů v jediném SQL
-dotazu s LEFT JOIN nebo INNER JOIN.
+Pokud víme předem, že budeme iterovat přes kolekce, je efektivnější fetch join v DQL:
+alias joinované asociace se přidá do klauzule SELECT (`SELECT o, i`). Doctrine pak načte
+agregát včetně asociovaných objektů v jediném SQL dotazu s LEFT JOIN nebo INNER JOIN.
 
 :::callout{type="pattern"}
-### Příklad: JOIN FETCH v DQL a Query Builderu
+### Příklad: fetch join v DQL a Query Builderu
 
 :::code{language="php" filename="src/Order/Infrastructure/Repository/DoctrineOrderRepository.php"}
 <?php
@@ -166,18 +166,18 @@ final class DoctrineOrderRepository implements OrderRepository
     ) {}
 
     /**
-     * Načte objednávky včetně položek v jediném SQL dotazu (JOIN FETCH).
+     * Načte objednávky včetně položek v jediném SQL dotazu (fetch join).
      * Vhodné pro iteraci a export - eliminuje N+1 problém.
      *
      * @return Order[]
      */
     public function findAllWithItems(): array
     {
-        // DQL s JOIN FETCH - Doctrine provede LEFT JOIN a hydratuje kolekci
+        // Fetch join: alias i je v SELECT, Doctrine hydratuje kolekci v jednom dotazu
         return $this->em->createQuery(
             'SELECT o, i
              FROM App\Order\Domain\Model\Order o
-             JOIN FETCH o.items i
+             JOIN o.items i
              WHERE o.status = :status'
         )
             ->setParameter('status', 'confirmed')
@@ -208,7 +208,7 @@ final class DoctrineOrderRepository implements OrderRepository
 :::
 :::
 
-Při použití `JOIN FETCH` s paginací (`setMaxResults()`, `setFirstResult()`)
+Při použití fetch joinu s paginací (`setMaxResults()`, `setFirstResult()`)
 Doctrine vypíše varování a provede paginaci v paměti (in-memory pagination), ne na úrovni SQL.
 Řešením je stránkovat přes identifikátory a teprve pak načíst data, nebo použít nativní SQL
 s vlastním mapováním výsledků.
@@ -291,7 +291,7 @@ final class DoctrineOrderRepository
     {
         return $this->em->createQuery(
             'SELECT o, i FROM App\Order\Domain\Model\Order o
-             JOIN FETCH o.items i
+             JOIN o.items i
              WHERE o.id = :id'
         )
             ->setParameter('id', $id->value)
@@ -550,7 +550,7 @@ final class UserId
 :::callout{type="pattern"}
 ### Doctrine mapování pro ULID a UUID
 
-*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern) – samostatný persistence model a mapper. Ukázka níže je jiná varianta mapování `Order` než v [sekci N+1](#n-plus-1-problem): ID zde má nativní typ `Ulid`, nikoli `string`.*
 
 :::code{language="php" filename="src/Order/Domain/Model/Order.php"}
 <?php
@@ -595,8 +595,9 @@ class Order // ne final – Doctrine proxy z entity dědí
 
 Doctrine ORM implementuje vzor Identity Map (Martin Fowler, *Patterns of Enterprise Application Architecture*).
 Každý spravovaný objekt (managed entity) je v jednom `EntityManager`u uložen v paměti pod svým
-identifikátorem. Pokud načtete tentýž agregát dvakrát, Doctrine vrátí tentýž PHP objekt z paměti
-bez opakovaného SQL dotazu.
+identifikátorem. Pokud načtete tentýž agregát dvakrát přes `find()` podle ID, Doctrine podruhé
+vrátí objekt z paměti bez SQL dotazu. Opakovaný DQL dotaz SQL provede, ale při hydrataci
+vrátí existující instanci z Identity Map, nikoli novou kopii.
 
 :::callout{type="note"}
 ### Identity Map a Unit of Work – co to znamená pro DDD
@@ -643,7 +644,7 @@ final class ImportProductsHandler
         $i = 0;
 
         foreach ($command->productRows as $row) {
-            $product = new Product(
+            $product = Product::create(
                 ProductId::generate(),
                 $row['name'],
                 $row['sku'],
@@ -817,11 +818,11 @@ final class InvalidateUserCacheOnEmailChanged
 
 ## 16.08 Bulk operace a hromadné zpracování {#bulk-operace}
 
-Standardní DDD postup – načti agregát, aplikuj doménovou logiku, zavolej `flush()`
+Standardní DDD postup – načíst agregát, aplikovat doménovou logiku, zavolat `flush()`
 – funguje pro zpracování jednotlivých agregátů. Pro hromadné operace (import tisíců záznamů,
-hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní. Každý cyklus načítá
-a spravuje jeden agregát, dirty checking zpracovává celou Identity Map. Celkový čas zpracování
-roste lineárně s počtem záznamů.
+hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní. Každý cyklus přidá
+agregát do Identity Map a dirty checking při `flush()` prochází všechny spravované objekty.
+Bez průběžného `clear()` proto celkový čas zpracování roste s počtem záznamů superlineárně.
 
 ### DQL bulk UPDATE a DELETE – bypass Identity Map
 
@@ -985,8 +986,8 @@ Tři strategie, podle pořadí preference:
   Jeden agregát na region/sku/sklad. Konflikty pak nejsou „mezi všemi klienty“,
   ale „mezi klienty stejné lokace“.
 - **Eventual consistency místo strong.** Místo „strhni 1 ks z `Inventory` synchronně“
-  publikuj `ItemReserved(productId, qty)` event a agregát ho zpracuje
-  asynchronně přes saga. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
+  se publikuje event `ItemReserved(productId, qty)` a agregát ho zpracuje
+  asynchronně přes ságu. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
 - **CRDT / counter-only agregáty.** Pokud doménová operace je čistý increment
   (`view_count`, `like_count`), nepotřebujete celý agregát – stačí
   Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. To není „obvykle DDD“,
@@ -995,8 +996,8 @@ Tři strategie, podle pořadí preference:
 :::callout{type="warn"}
 ### Anti-vzor: pessimistic lock místo redesignu {#anti-pessimistic-lock-heading}
 
-Když optimistic lock generuje konflikty, lákavé řešení je
-`#[ORM\Lock(LockMode::PESSIMISTIC_WRITE)]` – databáze drží `SELECT FOR UPDATE`
+Když optimistic lock generuje konflikty, lákavé řešení je runtime zámek
+`$em->find(Order::class, $id, LockMode::PESSIMISTIC_WRITE)` – databáze drží `SELECT FOR UPDATE`
 zámek a další klient čeká. Konflikty zmizí, ale výsledek je horší: klienti se
 serializují na úrovni databáze místo aplikace, zámky drží přes celou transakci
 (včetně síťové komunikace s app serverem), pravděpodobnost deadlocku roste.
@@ -1027,7 +1028,7 @@ do hodnotového objektu `OrderId`, aby ho repozitář uměl použít pro partiti
 
 - Tabulka roste lineárně s časem (audit, outbox, orders, eventy).
 - 90 % dotazů se týká poslední X dní/měsíců.
-- Drop staré dat je vyžadovaný (compliance, GDPR, retention).
+- Mazání starých dat bývá vyžadováno (compliance, GDPR, retence).
 - Velikost tabulky překročí 50 mil. řádků nebo 50 GB.
 
 **Nepoužívejte** pro malé tabulky (< 10 mil.) – přidává operační složitost
@@ -1052,8 +1053,8 @@ queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
   [CQRS – eventual consistency v UI](/cqrs#eventual-consistency).
 
 Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP proces
-= 1 DB connection“ se nasčítá: 100 PHP-FPM workerů × 4 DB pody × 10 read replicas
-= 4000 connections, což překročí výchozí `max_connections = 100` v Postgresu.
+= 1 DB connection“ se nasčítá: 4 aplikační pody × 100 PHP-FPM workerů
+= 400 spojení na primary, což překročí výchozí `max_connections = 100` v Postgresu.
 Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
 pooling mode. Pozor: transaction pooling **nepodporuje prepared statements**
 (Doctrine používá), takže potřebujete buď session pooling (méně efektivní),
@@ -1207,7 +1208,7 @@ doby trvání, počtu volání a paměťové stopy pro každou funkci. Umožňuj
 2. Dotazy trvající déle než 100 ms jsou kandidáty pro optimalizaci – zkopírujte SQL a spusťte `EXPLAIN ANALYZE` v databázi.
 3. Hledejte `Seq Scan` (PostgreSQL) nebo `Full Table Scan` (MySQL/MariaDB) – signalizují chybějící index.
 4. Zkontrolujte, zda se opakují strukturálně stejné dotazy lišící se pouze parametrem – typický příznak N+1 problému.
-5. Pro N+1 přidejte `JOIN FETCH` do příslušného repozitáře nebo přepište dotaz na read model (DTO).
+5. Pro N+1 přidejte fetch join (alias asociace v SELECT) do příslušného repozitáře nebo přepište dotaz na read model (DTO).
 :::
 
 :::callout{type="warn"}
@@ -1229,7 +1230,7 @@ a eliminovat N+1. Pokračováním je kapitola
 - question: Zpomaluje DDD aplikaci oproti CRUD?
   answer: 'Samotné DDD výkon nesnižuje – doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte víc dat, než je třeba). Další příčinou je chybějící read model v CQRS nebo nesprávné použití Doctrine lazy loadingu, které vede k N+1 dotazům. Při správném návrhu je DDD aplikace srovnatelná s CRUD a lépe optimalizovatelná díky explicitním hranicím. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
 - question: Jak v DDD řešit N+1 problém s agregáty?
-  answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch="EAGER"</code> u mapování, fetch join v DQL (<code>SELECT o, i FROM Order o JOIN o.items i</code>) v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
+  answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. Řešení v Doctrine má tři úrovně: <code>fetch: ''EAGER''</code> u mapování, fetch join v DQL (<code>SELECT o, i FROM Order o JOIN o.items i</code>) v repository metodě, nebo denormalizovaný read model v CQRS. Pro čtení dat do UI bývá read model nejpřímočařejší – eliminuje ORM lazy loading úplně. Pro write operace stačí správný fetch join při načtení agregátu. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
   answer: 'Ano, zásadně. Příliš velký agregát vede k načítání desítek vnitřních entit při každé operaci a k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty – to zvyšuje paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?

@@ -39,7 +39,7 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 ## 20.01 A – Doctrine vs. doménový model {#doctrine}
 
 Doctrine ORM má interní model (Unit of Work, Identity Map, lazy loading) stavěný pro jednoduchý
-CRUD. Doménový model s neměnnými konstruktory, privátními settery a invarianty na něj naráží
+CRUD. Doménový model s neměnnými objekty, privátními konstruktory a invarianty na něj naráží
 na šesti místech, která následují.
 
 ### A1. Transakce přes agregáty a Doctrine Unit of Work {#a1-transakce}
@@ -100,6 +100,7 @@ final class ConfirmTransferService
             $this->orders->save($order);
             $this->reservations->save($reservation);
 
+            $this->em->flush();
             $this->em->commit();
         } catch (\Throwable $e) {
             $this->em->rollback();
@@ -302,7 +303,9 @@ final class Order
 :::
 :::
 
-Doctrine mapping pro UUID ID:
+Doctrine mapping pro UUID ID. Ukázka mapuje primitivní string; hodnotový objekt
+`OrderId` se na sloupec převádí custom Doctrine typem, viz
+[sekci A3](#a3-value-objects):
 
 :::code{language="php" filename="snippet.php"}
 #[ORM\Id]
@@ -320,7 +323,7 @@ Doctrine nabízí `InheritanceType::SINGLE_TABLE` nebo
 úpravu anotace na *rodičovské* třídě, a discriminator map je zapsána v kódu
 jako statický seznam – narušuje Open/Closed Principle.
 
-**Řešení – dvě alternativy:**
+**Řešení – dvě alternativy k výchozí discriminator map:**
 
 | Přístup | Kdy použít | Nevýhoda |
 |---|---|---|
@@ -413,13 +416,17 @@ transakce a tedy mimo ni. Použití `postFlush` s voláním dalšího
 `flush()` by navíc způsobilo nekonečnou rekurzi.
 
 :::code{language="php" filename="src/OutboxEventListener.php"}
+use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[AsDoctrineListener(event: Events::onFlush)]
 final class OutboxEventListener
 {
+    public function __construct(private readonly NormalizerInterface $serializer) {}
+
     public function onFlush(OnFlushEventArgs $args): void
     {
         $em  = $args->getObjectManager(); // getEntityManager() bylo v ORM 3.x odstraněno
@@ -427,7 +434,7 @@ final class OutboxEventListener
 
         // Projdeme nové i změněné entity a sebereme doménové události
         foreach ([...$uow->getScheduledEntityInsertions(), ...$uow->getScheduledEntityUpdates()] as $entity) {
-            if (!$entity instanceof HasDomainEvents) {
+            if (!$entity instanceof AggregateRoot) {
                 continue;
             }
             foreach ($entity->releaseEvents() as $event) {
@@ -703,7 +710,7 @@ metodě, žádný setter navenek. Holý setter je typickým projevem anémickéh
 jeho obecný rozbor najdete v [Anti-vzorech](/anti-vzory#anemicky-domenovy-model).
 
 :::code{language="php" filename="snippet.php"}
-final class Order
+final class Order extends AggregateRoot
 {
     private OrderStatus $status = OrderStatus::Draft;
 
@@ -837,7 +844,7 @@ DTO sestaven z validovaných dat. Tyto dva světy se obtížně kombinují bez t
 aby `FormInterface` pronikl do aplikační vrstvy.
 
 **Řešení:** Form mapuje na **plain mutable DTO**
-(formulářový objekt), Application Service pak sestaví immutable Command.
+(formulářový objekt), controller pak z validovaných dat sestaví immutable Command.
 Žádná ze dvou vrstev neví o existenci té druhé.
 
 :::code{language="php" filename="snippet.php"}
@@ -937,7 +944,7 @@ final class PlaceOrderProcessor implements ProcessorInterface
 ### D3. Security Voter vs. doménová oprávnění {#d3-voter}
 
 **Problém:** Business pravidla přístupu jsou součástí domény.
-Příklad: „objednávku může zrušit zákazník nebo admin, ale pouze do 24 hodin
+Příklad: „objednávku může zrušit zákazník, ale pouze do 24 hodin
 od vytvoření a pouze pokud ještě nebyla expedována“. Symfony Security Voter
 žije v infrastrukturní vrstvě a závisí na frameworku. Pokud logiku napíšete
 přímo ve Voteru, stane se netestovatelnou bez Symfony kontejneru.

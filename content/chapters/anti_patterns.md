@@ -572,11 +572,17 @@ final class Order extends AggregateRoot
             throw new \DomainException('Nelze potvrdit prázdnou objednávku.');
         }
         $this->status = OrderStatus::PLACED;
-        $this->record(new OrderPlacedEvent($this->id, $this->customerId));
+        $this->record(new OrderPlacedEvent(
+            $this->id,
+            $this->customerId,
+            $this->totalAmount(),
+            count($this->items),
+        ));
     }
 
     public function totalAmount(): Money
     {
+        // Předpoklad: všechny položky ve stejné měně - jinak Money::add() vyhodí výjimku
         return array_reduce(
             $this->items,
             fn(Money $carry, OrderItem $item) => $carry->add($item->subtotal()),
@@ -825,13 +831,8 @@ final class OrderPlacedEvent
         $this->occurredAt = new \DateTimeImmutable();
         // Všechny hodnoty jsou nastaveny jednou v konstruktoru.
         // Neexistují žádné settery - událost je neměnná.
+        // Čte se přímo přes readonly properties ($event->orderId), accessory nejsou potřeba.
     }
-
-    // Jediné metody jsou readonly accessory (nebo přímý přístup k readonly properties)
-    public function orderId(): OrderId { return $this->orderId; }
-    public function customerId(): CustomerId { return $this->customerId; }
-    public function totalAmount(): Money { return $this->totalAmount; }
-    public function occurredAt(): \DateTimeImmutable { return $this->occurredAt; }
 }
 :::
 :::
@@ -1025,6 +1026,7 @@ Doménový expert mluví o *Pojistníkovi*, databáze má tabulku `clients`, bac
 declare(strict_types=1);
 
 // ŠPATNĚ: Tatáž doménová entita má různé názvy na různých místech
+// Pozn.: koláž ukázek z různých míst projektu, ne jeden skutečný soubor
 
 // Databázová tabulka: "clients"
 // Doménový expert: "Pojistník" (PolicyHolder)

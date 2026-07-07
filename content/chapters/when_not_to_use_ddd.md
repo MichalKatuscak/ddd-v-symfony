@@ -381,8 +381,8 @@ ale migrace celého kódu na DDD je nereálná. Nastává **migration cost parad
 - Cena postupné migrace přes [Strangler Fig](/migrace-z-crud) = 3–4X (rozprostřená)
   + ztráta produktivity během migrace.
 
-Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaná životnost
-po migraci > 3× cena migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
+Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaný přínos za
+zbývající životnost systému převýší trojnásobek ceny migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
 je migrace obchodní rozhodnutí, ne technické.
 
 Khononov uvádí příklad telco, který strávil 3 roky migrací na DDD jen aby
@@ -423,7 +423,7 @@ DDD se hodí na specifický kontext, ne na každý projekt. Smysl má, když pla
 | Tým rozumí DDD nebo má čas se učit | Špatně implementované DDD je horší než žádné DDD | Tým prošel školením, má za sebou alespoň jeden DDD projekt, nebo má 2–3 měsíce na rozjezd |
 | Více bounded contexts nebo mikroservisy | DDD dává přirozené hranice pro dekompozici systému | E-commerce s oddělenými kontexty: katalog, objednávky, platby, logistika |
 
-Pokud váš projekt splňuje tyto podmínky, DDD se vyplatí. Pokud ne – použijte jednodušší
+Pokud váš projekt splňuje většinu z nich, DDD se vyplatí. Pokud ne – použijte jednodušší
 přístup a ušetřete si bolest.
 
 Detailní implementaci DDD v Symfony najdete v [implementační kapitole](/implementace-v-symfony).

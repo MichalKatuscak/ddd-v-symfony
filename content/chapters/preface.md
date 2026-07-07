@@ -29,7 +29,7 @@ Kniha předpokládá zkušenost s PHP a Symfony, objektově orientovaným progra
 Kniha je psaná pro pět typických rolí:
 
 - **Senior PHP developer**, který v projektu narazil na limity klasické vrstvené architektury – `OrderService` má 1500 řádků, každá nová feature způsobí regresi v jiné oblasti, onboarding nového kolegy trvá měsíce.
-- **Symfony developer**, který si všiml, že větší projekty „rostou“ jinak než malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
+- **Junior/mid Symfony developer**, který si všiml, že větší projekty „rostou“ jinak než malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
 - **Architekt**, který stojí před rozhodnutím, jaký přístup k modelování doménové logiky zvolit – DDD, klasické CRUD, modulární monolit, nebo microservices.
 - **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management v termínech DORA metrik a obchodní hodnoty.
 - Poslední je **vývojář migrující z CRUD aplikace na DDD** – v produkci má spaghetti kód a hledá inkrementální cestu ven.
@@ -105,7 +105,7 @@ Tři krátké příklady (e-shop, blog, správa uživatelů) jako shrnující pr
 
 Lineární čtení od první do poslední kapitoly funguje, ale málokdo ho potřebuje. Většina čtenářů má konkrétní bolest, kvůli které knihu otevřela. Pět doporučených cest podle role:
 
-### Pro junior PHP developera {#cesta-junior}
+### Pro junior/mid Symfony developera {#cesta-junior}
 
 Cíl: pochopit, co DDD je, a naučit se ho rozeznat v cizím kódu. Na implementaci si zatím netroufnete – ta přijde až s druhým a třetím projektem. Doporučená cesta v pořadí čtení:
 

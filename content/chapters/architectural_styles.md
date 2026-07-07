@@ -303,6 +303,9 @@ final class DoctrineOrderRepository implements OrderRepository
 
     public function save(Order $order): void
     {
+        // Ukázka pokrývá insert. Reálná implementace při update nejprve
+        // najde existující OrderOrmEntity přes find() a přepíše její pole –
+        // persist() nové instance by skončil kolizí primárního klíče.
         $orm = $this->mapper->toOrm($order);
         $this->em->persist($orm);
         // flush a commit řídí doctrine_transaction middleware command busu;
@@ -608,7 +611,7 @@ namespace App\Pricing\Domain\Service;
 use App\Pricing\Domain\Model\Cart;
 use App\Pricing\Domain\Model\Customer;
 use App\Pricing\Domain\Model\DiscountPolicy;
-use App\Pricing\Domain\Model\Money;
+use App\Shared\Domain\Money;
 
 /**
  * Domain Service – výpočet ceny vyžaduje data z více agregátů
@@ -912,7 +915,7 @@ V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte
 
 ## 09.06 Vertical Slice Architecture (a horizontální vs. vertikální dělení) {#vertical-slice}
 
-Vrstvové architektury mají skrytou daň: jeden běžný use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy ve všech sedmi. Na tuto bolest reaguje *Vertical Slice Architecture* od Jimmyho Bogarda z roku 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/).
+Vrstvové architektury mají skrytou daň: jeden běžný use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy v každém z nich. Na tuto bolest reaguje *Vertical Slice Architecture* od Jimmyho Bogarda z roku 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/).
 
 Vertical Slice Architecture organizuje kód **podle feature, ne podle vrstvy**. Každá feature dostane svůj adresář, ve kterém žije všechno potřebné: Command/Query, Handler, Validátor, Read Model, Controller. Slice je kompletní vertikální „sloupec“ přes všechny technické vrstvy aplikace. Tradiční vrstvený (horizontální) přístup naopak člení kód podle technické odpovědnosti (Controller / Service / Repository / Entity). Jeden use case se pak rozprostírá napříč všemi vrstvami.
 
@@ -1160,13 +1163,13 @@ Klasický Layered problém přenesený do Hexagonal: tým má `Domain/Port/Order
 
 ### Anti-vzor 3: Anemic Hexagonal / Anemic Clean {#anti-3-heading}
 
-Strukturálně dokonalý Hexagonal, ale doménové třídy jsou anémické – getry, setry, žádná logika. Veškerá logika sedí v handlerech a service vrstvě. Hexagonal/Clean bez DDD modelování jsou jen vrstvení rituálu kolem prázdné domény.
+Strukturálně dokonalý Hexagonal nad anémickou doménou – getry, setry, logika v handlerech. Podrobný popis je v calloutu [Anti-vzor: Anemic Hexagonal](#hexagonal-anti-heading) v sekci 09.03; totéž platí pro Clean.
 
 **Náprava:** Před zavedením architektonického stylu zkontrolujte, zda váš doménový model má skutečné chování. Pokud ne, vyřešte nejprve modelování – zavedení Hexagonal nad anémickým modelem nepřinese izolaci, jen zkomplikuje code review.
 
 ### Anti-vzor 4: Port jen pro Repository {#anti-4-heading}
 
-Tým definuje jen `OrderRepository` jako port (interface v doméně, implementace v infrastructure). Ostatní výstupní závislosti – e-mail mailer, externí HTTP klient, publisher událostí – žijí v `App\Service\` bez rozhraní. Doména pak má závislost na *konkrétní* implementaci e-mailového maileru, což porušuje princip Hexagonal stejně jako Doctrine anotace.
+Druhý vzor z [téhož calloutu](#hexagonal-anti-heading): port dostane jen `OrderRepository`, zatímco ostatní výstupní závislosti domény zůstávají bez rozhraní.
 
 **Náprava:** Každá výstupní závislost domény dostane port. `EmailSender`, `EventPublisher`, `PaymentGateway` – všechno jsou interfaces v `Domain/Port/`, a infrastructure je implementuje.
 
@@ -1221,7 +1224,7 @@ Doménové modely **vylučte z auto-registrace v Service Containeru**. Doménov�
 
 ### Symfony Messenger jako Command Bus {#symfony-messenger-heading}
 
-Pro všechny styly kromě Layered je Symfony Messenger vhodný nástroj pro implementaci Command Bus a Event Bus pattern. V Hexagonal a Clean Architecture každý use case dispatchujete jako Command, handler je váš inbound adaptér nebo přímo use case. Konfigurace per-bus:
+Pro všechny styly kromě Layered – kde se aplikační služba typicky volá přímo z controlleru – je Symfony Messenger vhodný nástroj pro implementaci Command Bus a Event Bus pattern. V Hexagonal a Clean Architecture každý use case dispatchujete jako Command, handler je váš inbound adaptér nebo přímo use case. Konfigurace per-bus:
 
 :::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml

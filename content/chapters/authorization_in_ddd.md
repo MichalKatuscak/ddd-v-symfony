@@ -13,7 +13,7 @@ schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
 chapter_number: "11"
 category: Architektura
-deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá jinou otázku a používá jiný Symfony nástroj.'
+deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá na jinou otázku a používá jiný Symfony nástroj.'
 reading_time: 25
 difficulty: 3
 ---
@@ -289,7 +289,7 @@ Po této kontrole zavolá handler doménovou operaci `$order->cancel(...)`, kter
 
 ### Voter v Twig template {#voter-twig-heading}
 
-Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Cancel order“ pro ne-vlastníka). V Twigu funkce `is_granted()` volá tentýž `AuthorizationCheckerInterface`:
+Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Cancel order“ pro ne-vlastníka). V Twigu funkce `is_granted()` volá tentýž `AuthorizationCheckerInterface`. Proměnnou `now` (`\DateTimeImmutable`) předává do šablony controller – doménová metoda `isCancellable()` si aktuální čas nezískává sama:
 
 :::code{language="twig" filename="templates/order/detail.html.twig" highlights="4,12,18"}
 {# templates/order/detail.html.twig #}
@@ -303,7 +303,7 @@ Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Cancel or
     </dl>
 {% endif %}
 
-{% if is_granted('order.cancel', order) and order.isCancellable %}
+{% if is_granted('order.cancel', order) and order.isCancellable(now) %}
     <form method="post" action="{{ path('order_cancel', {id: order.id}) }}">
         <button type="submit">Cancel order</button>
     </form>
@@ -462,7 +462,7 @@ Vlastnosti tohoto kódu:
 
 - **Žádná závislost na Symfony.** Aggregate používá pouze PHP standardní typy a vlastní doménové třídy. Žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze testovat unit testem bez Symfony Kernel.
 - **Doménové výjimky.** `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – *není to autorizační selhání, je to doménový stav*).
-- **Idempotentní pomocná metoda `isCancellable()`.** Voter ani Twig ji nevolají; používá ji UI pro skrytí tlačítka (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita.
+- **Pomocná metoda `isCancellable()` je dotaz bez vedlejších efektů.** Používá ji UI vrstva pro skrytí tlačítka: Twig šablona ji volá s proměnnou `now` předanou z controlleru (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita.
 - **Domain Events.** Po úspěšné operaci agregát zaznamená `OrderCancelled` voláním `record()`. Aplikační handler eventy po `repository->save()` vyzvedne přes `releaseEvents()` a publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
 
 Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [sekci 11.04](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a nutné.
@@ -473,7 +473,7 @@ Pro úplnost si projděme, co se konkrétně stane, když zákazník Petr klikne
 
 1. **Edge (firewall).** Symfony ověří JWT/session token. Bez ověření → 401. Petr je přihlášený, pokračuje.
 2. **Edge (access_control).** URL `/order/42/cancel` spadá pod `IS_AUTHENTICATED_FULLY`. Petr je přihlášený, pokračuje.
-3. **Controller** validuje vstup (CSRF token, request body), vytvoří `CancelOrderCommand(orderId: 42, reason: 'changed mind')` a předá ho na message bus.
+3. **Controller** validuje vstup (CSRF token, request body), vytvoří `CancelOrderCommand(orderId: 42, reason: 'changed mind', actorId: <Petrovo CustomerId>)` a předá ho na message bus.
 4. **Application Handler** (CancelOrderHandler) načte agregát z repository: `$order = $repo->getOrFail(42)`.
 5. **Use Case Voter.** Handler volá `$auth->isGranted('order.cancel', $order)`. OrderVoter porovná `$order->customerId()` s `$user->customerId()`. Petr je vlastník → ACCESS_GRANTED, pokračuje. *Kdyby nebyl vlastník → AccessDeniedDomainException → HTTP 403.*
 6. **Aggregate.** Handler volá `$order->cancel('changed mind', $now)`. Aggregate ověří `status === PLACED` a `age <= 24h`. Order je placed před 30 min → ok, status se změní na CANCELLED, vznikne OrderCancelled event. *Kdyby byl už shipped → InvalidOrderStateException → HTTP 409.*
@@ -537,13 +537,13 @@ final readonly class OrderDetailReadModel
 
     public function forUser(string $orderId, AppUser $user): OrderDetailDto
     {
-        $base = 'SELECT id, customer_id, total_cents, status, placed_at FROM orders WHERE id = :id';
+        $columns = 'id, customer_id, total_cents, status, placed_at';
 
         if ($user->hasRole('ROLE_ADMIN')) {
-            $sql = $base . ', audit_log';
-        } else {
-            $sql = $base;
+            $columns .= ', audit_log';
         }
+
+        $sql = "SELECT {$columns} FROM orders WHERE id = :id";
 
         $row = $this->db->fetchAssociative($sql, ['id' => $orderId]);
         if ($row === false) {
@@ -569,7 +569,7 @@ Pro necitlivá data Twig if stačí a šetří čas. Pro citlivá data vždy que
 
 ## 11.08 Policy-based přístup (ABAC) {#policy-based}
 
-Když počet pravidel naroste a vrstvení do Voterů přestane být udržitelné (typicky 5+ rolí × 10+ entit × 3+ atributy = 150+ pravidel), je čas přejít z **RBAC** (Role-Based Access Control) na **ABAC** (Attribute-Based Access Control). RBAC se ptá na roli; ABAC vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno.
+Když počet pravidel naroste a vrstvení do Voterů přestane být udržitelné (zhruba od stovky pravidel, např. 5+ rolí × 10+ entit × 3+ atributy), je čas přejít z **RBAC** (Role-Based Access Control) na **ABAC** (Attribute-Based Access Control). RBAC se ptá na roli; ABAC vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno.
 
 V čisté Symfony aplikaci si stačí napsat tenkou vrstvu nad Voter API: `Policy` jako kolekce `Rule` objektů, které se vyhodnotí proti subject/user/context trojici. Pro velké organizace se vyplatí externí policy engine (OPA – Open Policy Agent), který umí policy verzovat, distribuovat a auditovat nezávisle na aplikaci.
 
@@ -821,10 +821,10 @@ declare(strict_types=1);
 
 namespace Tests\Ordering\Domain;
 
+use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
 use App\Ordering\Domain\Exception\InvalidOrderStateException;
 use App\Ordering\Domain\Order;
-use App\Ordering\Domain\OrderStatus;
 use PHPUnit\Framework\TestCase;
 
 final class OrderCancelTest extends TestCase
@@ -832,10 +832,14 @@ final class OrderCancelTest extends TestCase
     public function testCancelWithinWindowSucceeds(): void
     {
         $order = OrderFactory::placed(at: '2026-04-29 10:00:00');
+        $order->releaseEvents(); // vyprázdní eventy z fáze vytvoření
 
         $order->cancel('changed mind', new \DateTimeImmutable('2026-04-29 12:00:00'));
 
-        self::assertSame(OrderStatus::CANCELLED, $order->status());
+        // Stav se ověří přes chování: úspěšný cancel zaznamená OrderCancelled
+        $events = $order->releaseEvents();
+        self::assertCount(1, $events);
+        self::assertInstanceOf(OrderCancelled::class, $events[0]);
     }
 
     public function testCancelOfShippedOrderThrows(): void
@@ -872,6 +876,7 @@ use App\Ordering\Domain\Order;
 use App\Ordering\Infrastructure\Security\OrderVoter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 final class OrderVoterTest extends TestCase
 {
@@ -883,8 +888,9 @@ final class OrderVoterTest extends TestCase
         $token   = $this->createMock(TokenInterface::class);
         $token->method('getUser')->willReturn($owner);
 
-        self::assertTrue(
-            $voter->vote($token, $order, [OrderVoter::CANCEL]) === Voter::ACCESS_GRANTED
+        self::assertSame(
+            Voter::ACCESS_GRANTED,
+            $voter->vote($token, $order, [OrderVoter::CANCEL])
         );
     }
 
@@ -1005,7 +1011,7 @@ Důsledek: handler načte order, pak voter načte order podruhé, mezi tím se m
 
 Symptom: cancellation window pravidlo („order ne starší než 24 h“) je zapsané *jak* ve Voteru, *tak* v `Order::cancel()`. Když se doménové pravidlo změní (např. window se prodlouží na 48 h), obě místa se musí upravit – a typicky se zapomene jedno.
 
-Náprava: pravidlo patří do aggregate (je to doménový invariant). Voter **nesmí** ověřovat doménový stav agregátu – odpovídá jen na identitu/role uživatele a vlastnictví subjektu. Pro view-level skrytí tlačítka se v Twigu kombinuje `{% if is_granted(...) and order.isCancellable %}` – voter pro permission, doménová metoda pro stavovou kontrolu.
+Náprava: pravidlo patří do aggregate (je to doménový invariant). Voter **nesmí** ověřovat doménový stav agregátu – odpovídá jen na identitu/role uživatele a vlastnictví subjektu. Pro view-level skrytí tlačítka se v Twigu kombinuje `{% if is_granted(...) and order.isCancellable(now) %}` – voter pro permission, doménová metoda pro stavovou kontrolu.
 
 ### Anti-vzor 4: Symfony User natažený do doménového Aggregate {#anti-symfony-user-domain-heading}
 
@@ -1051,7 +1057,7 @@ Kde co řešit:
 
 Hrubé permissions pokryje RBAC. Jakmile pravidla závisí na vztazích mezi entitami, nastupuje ABAC či policy-based přístup. Vícenájemnost řeší Doctrine SQLFilter s kernel listenerem, nastavené fail-closed – globálně zapnutý filter a povinný parametr. Doménové stavové pravidlo patří do agregátu, ne do Voteru.
 
-Kdy zvážit externí policy engine: 100+ pravidel, multi-tenant SaaS s individuálními policy per tenant, regulovaná doména s nutností auditovat policy nezávisle na aplikačním kódu. Pro většinu Symfony aplikací stačí Voter + (volitelně) tenké policy-evaluator vrstvení nad Voter API.
+Škála zůstává stejná v celé kapitole: do desítek pravidel stačí Voter, od zhruba stovky se vyplatí interní policy vrstva nad Voter API ([11.08](#policy-based)). Externí policy engine přichází na řadu až u výrazně větších systémů: stovky pravidel či policy sdílené více aplikacemi, multi-tenant SaaS s individuálními policy per tenant, regulovaná doména s nutností auditovat policy nezávisle na aplikačním kódu.
 
 ### Praktický checklist před deploy {#summary-checklist-heading}
 
@@ -1083,7 +1089,7 @@ Regulované domény (zdravotnictví, finance, GDPR čl. 30) vyžadují audit log
 - question: Smí doménový Aggregate záviset na Symfony Security komponentě?
   answer: 'Ne. Doména musí být framework-agnostic – bez ní nelze unit-testovat bez Kernel, nelze sdílet kód mezi web a CLI, nelze migrovat na jiný framework. Pokud potřebuje aggregate „znát“ uživatele, dostane <em>vlastní</em> doménový typ (<code>CustomerId</code>, doménový <code>AppUser</code>). Aplikační handler překládá Symfony <code>UserInterface</code> na doménový typ. Detail v anti-vzoru 4 v <a href="#anti-symfony-user-domain-heading">11.11</a>.'
 - question: Kam ukládat audit log autorizačních rozhodnutí?
-  answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně se osvědčil decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz sekci o testování v <a href="#testing">11.10</a>.'
+  answer: 'Tři možnosti, podle compliance požadavků: (1) Symfony Monolog s vlastním channelem <code>authorization</code> – stačí pro většinu aplikací, log do souboru / ELK / Loki; (2) doménová tabulka <code>authorization_decisions</code> s parametry (user_id, attribute, subject_id, decision, policy_version) – vhodné pro regulaci (PCI-DSS, GDPR Article 30); (3) externí audit služba (AWS CloudTrail, Datadog) pro multi-tenant SaaS. Implementačně se osvědčil decorator nad <code>AuthorizationCheckerInterface</code>, který každé volání zaloguje. Pro detail viz <a href="#audit-log-heading">Audit log autorizačních rozhodnutí</a>.'
 :::
 
 ## 11.13 Další četba {#further-reading}

@@ -690,7 +690,7 @@ use Doctrine\ORM\Mapping as ORM;
 class UserPersistenceModel
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 26)]
+    #[ORM\Column(type: 'string', length: 36)]
     public string $id;
 
     #[ORM\Column(type: 'string', length: 100)]
@@ -766,6 +766,10 @@ Doctrine\…`, žádná stopa po infrastruktuře. Cena:
 - **Optimistický zámek je řešení navíc.** `#[ORM\Version]` je v persistence modelu;
   doména `User` musí přijmout `version` jako parametr `reconstitute()`, nebo
   se spolehnout na infrastrukturu, že verzi sleduje sama.
+- **Update vyžaduje find-and-copy.** `toPersistence()` výše vytváří novou instanci
+  s `version = 1` – to stačí pro insert. Při update musí repozitář nejprve načíst
+  existující `UserPersistenceModel` a přepsat její pole; nová instance by
+  kolidovala s primárním klíčem a vynulovala optimistický zámek.
 
 Doporučení: použít Persisted Object **jen v kontextech, kde je oddělení
 opravdu důležité** (Core Domain s vysokou hodnotou, dlouhodobá údržba, plán
@@ -862,7 +866,7 @@ nebo první kontakt s DDD; s rostoucím počtem VO se vyplatí přejít na custo
 ## 10.08 PHP 8.1+ Enums pro stavové typy {#php-enums}
 
 Stav objednávky, role uživatele, priorita úkolu – konečné množiny hodnot, které se dřív modelovaly konstantami ve třídě,
-mají od PHP 8.1 nativní typ: enum. Překlep ani neznámý stav neprojde už při kompilaci.
+mají od PHP 8.1 nativní typ: enum. Překlep v názvu case odhalí statická analýza, neznámou hodnotu odmítne typová kontrola za běhu.
 
 :::callout{type="pattern"}
 ### Příklad: Backed enum pro stav objednávky {#enum-example-heading}
@@ -922,28 +926,26 @@ use App\OrderManagement\Domain\Event\OrderCreated;
 use App\OrderManagement\Domain\Event\OrderStatusChanged;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\OrderStatus;
+use App\SharedKernel\Domain\AggregateRoot;
 
-final class Order
+final class Order extends AggregateRoot
 {
-    private readonly string $id;
     private OrderStatus $status;
     private readonly \DateTimeImmutable $createdAt;
 
-    /** @var object[] */
-    private array $domainEvents = [];
-
-    public function __construct(OrderId $id)
-    {
-        $this->id = $id->value;
+    private function __construct(
+        public readonly OrderId $id,
+    ) {
         $this->status = OrderStatus::DRAFT;
         $this->createdAt = new \DateTimeImmutable();
-
-        $this->record(new OrderCreated($id));
     }
 
-    public function id(): OrderId
+    public static function place(OrderId $id): self
     {
-        return new OrderId($this->id);
+        $order = new self($id);
+        $order->record(new OrderCreated($id));
+
+        return $order;
     }
 
     public function status(): OrderStatus
@@ -964,27 +966,7 @@ final class Order
         $oldStatus = $this->status;
         $this->status = $newStatus;
 
-        $this->record(new OrderStatusChanged(
-            new OrderId($this->id),
-            $oldStatus,
-            $newStatus
-        ));
-    }
-
-    private function record(object $event): void
-    {
-        $this->domainEvents[] = $event;
-    }
-
-    /**
-     * @return object[]
-     */
-    public function releaseEvents(): array
-    {
-        $events = $this->domainEvents;
-        $this->domainEvents = [];
-
-        return $events;
+        $this->record(new OrderStatusChanged($this->id, $oldStatus, $newStatus));
     }
 }
 :::
@@ -1090,7 +1072,7 @@ final class Order extends AggregateRoot
         if ($this->status !== OrderStatus::CONFIRMED) {
             throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,
-                'PAID',
+                OrderStatus::PAID->value,
             );
         }
 
@@ -1383,6 +1365,7 @@ use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\UserName;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -1390,6 +1373,7 @@ final readonly class RegisterUserHandler
 {
     public function __construct(
         private UserRepository $userRepository,
+        private EntityManagerInterface $em,
     ) {}
 
     public function __invoke(RegisterUser $command): void
@@ -1405,6 +1389,11 @@ final readonly class RegisterUserHandler
 
         try {
             $this->userRepository->save($user);
+            // Výjimečně explicitní flush. Middleware doctrine_transaction
+            // flushuje až po návratu handleru – porušení unique constraintu
+            // by tak vybublalo mimo tento try/catch. Překlad na doménovou
+            // výjimku ale musí proběhnout zde, proto flush voláme ručně.
+            $this->em->flush();
         } catch (UniqueConstraintViolationException $e) {
             // Spoléháme na DB unique constraint na sloupci `email`. Aplikační check
             // přes findByEmail() je vůči souběžným registracím nedostatečný (TOCTOU
@@ -1431,6 +1420,12 @@ Bezpečné řešení má dvě vrstvy:
   garance napříč souběžnými requesty.
 - **Překlad na doménovou výjimku** v command handleru (nebo lépe v repozitáři),
   aby aplikační vrstva nemusela znát infrastrukturní typy.
+
+Explicitní `flush()` v handleru je záměrná odchylka od pravidla „flush vlastní
+middleware“ (viz [dvojí transakce](#double-transaction-heading)): databáze
+constraint vyhodnocuje až při flushi, a má-li se infrastrukturní výjimka přeložit
+na doménovou ještě v handleru, musí flush proběhnout v jeho `try` bloku.
+Middleware pak při commitu už jen potvrdí zapsané SQL.
 
 Aplikační check přes `findByEmail()` můžete ponechat *navíc* pro hezčí
 chybovou hlášku v běžném (ne-souběžném) případu – ale **nikdy jako jedinou ochranu**.
@@ -1534,8 +1529,10 @@ V DDD existují dva druhy validace, každý na jiné vrstvě:
   „objednávku nelze potvrdit bez položek“. Tato validace je součástí doménového modelu
   a Symfony Validator na ní nesmí záviset.
 
-**Pravidlo:** Symfony Validator řeší *syntaktickou* validaci (formát),
-doménová vrstva řeší *sémantickou* validaci (doménová pravidla).
+**Pravidlo:** formát vynucuje hodnotový objekt vždy – je to jeho invariant.
+Symfony Validator tutéž kontrolu opakuje na hraně aplikace, aby neplatný vstup
+skončil srozumitelnou chybovou zprávou, ne doménovou výjimkou. Sémantická
+pravidla („uživatel s tímto e-mailem již existuje“) patří výhradně doménové vrstvě.
 :::
 
 ## 10.14 Implementace kontrolerů {#controllers}
@@ -1805,7 +1802,7 @@ Doménové modely, hodnotové objekty a repozitáře patří do svých Bounded C
 
 :::faq{}
 - question: Kam v Symfony projektu patří doménová vrstva a proč ji držet odděleně?
-  answer: 'Doménová vrstva se umisťuje do samostatného adresáře – typicky <code>src/Domain/</code> s podsložkami pro jednotlivé Bounded Contexty – odděleně od kontrolerů, Doctrine mapování a infrastruktury. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
+  answer: 'Doménová vrstva se umisťuje do samostatného adresáře – v tomto průvodci <code>src/&lt;BoundedContext&gt;/Domain/</code>, například <code>src/UserManagement/Domain/</code> – odděleně od kontrolerů, Doctrine mapování a infrastruktury. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
 - question: Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?
   answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu – jsou to metadata, ne chování. Pokud trváte na čisté doméně bez stop ORM, korektní řešení je <strong>Persisted Object Pattern</strong> (Vladimir Khorikov; Vernon, <em>IDDD</em>, kap. 12): doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern – čistá DDD varianta</a>.'
 - question: Jak odlišit Aplikační službu od Doménové služby?

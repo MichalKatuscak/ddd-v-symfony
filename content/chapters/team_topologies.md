@@ -94,13 +94,13 @@ Pravidlo má dvě části, které se často chybně čtou jako jedno:
 - **Jeden Bounded Context = jeden tým (vždy).**
   Pokud dva týmy sdílejí jeden BC, Conway's Law okamžitě vstoupí do hry. Buď vznikne neoficiální
   sub-hranice – fakticky dva BC, jen to nikdo nepřiznal. Nebo *sdílené
-  vlastnictví*: BC nikdo nevlastní a degraduje na Big Ball of Mud
-  s režií [Shared Kernelu](/context-mapping#shared-kernel).
-  *Pravidlo:* nikdy nesdílejte BC mezi týmy bez explicitního Shared Kernel
-  vztahu – a Shared Kernel sám je drahý vztah, ne výchozí volba.
+  vlastnictví*: BC nikdo nevlastní a degraduje na Big Ball of Mud.
+  *Pravidlo:* nikdy nesdílejte BC mezi týmy. Pokud dva týmy skutečně potřebují
+  společný kód, vyčleňte ho jako malý [Shared Kernel](/context-mapping#shared-kernel)
+  mezi dva oddělené BC – i ten je ale drahý vztah, ne výchozí volba.
 
 - **Jeden tým = jeden nebo více Bounded Contexts (povoleno).**
-  Malý tým (5–9 lidí) může vlastnit 2–3 menší BC. Důvodem k limitu je
+  Malý tým (5–9 lidí) může vlastnit 1–2 menší BC, výjimečně 3. Důvodem k limitu je
   [kognitivní zátěž](#cognitive-load) – viz sekci 05.06. Velký tým, který by
   vlastnil 5+ BC, je signál, že tým má být rozdělen.
 
@@ -409,7 +409,7 @@ Praktická heuristika odvozená z Team Topologies:
 | Velikost týmu | Doporučený počet BC | Komentář |
 |---|---|---|
 | 5 lidí | 1 BC (max 2 malé) | Limit bližšího vědomí; každý zná každý kus kódu. |
-| 7–9 lidí | 1–2 BC | Zdravé optimum stream-aligned týmu. |
+| 7–9 lidí | 1–2 BC (výjimečně 3) | Zdravé optimum stream-aligned týmu. |
 | 10+ lidí | Tým je už příliš velký – rozdělit | Dunbar number (familiarity ≈ 15). Komunikační režie roste kvadraticky s počtem lidí. |
 | Tým s 4+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
 
@@ -733,14 +733,14 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
   (objektivně specializovaná doména).
 - **3 interakční módy:** Collaboration (drahá, časově omezená),
   X-as-a-Service (výchozí vyspělý vztah), Facilitating (mentoring time-boxed).
-- **Vernonovo pravidlo:** 1 BC = 1 tým. 1 tým může vlastnit 1–3 BC,
-  ale BC sdílený mezi týmy = porucha.
+- **Vernonovo pravidlo:** 1 BC = 1 tým. 1 tým může vlastnit 1–2 BC,
+  výjimečně 3; BC sdílený mezi týmy = porucha.
 - **Subdomény → typy týmů:** Core → stream-aligned (nejlepší tým) /
   complicated-subsystem; Supporting → stream-aligned (sdílí tým s jiným supporting BC);
   Generic → SaaS, Platform team integruje.
 - **Inverse Conway Maneuver:** nejdřív definovat cílovou architekturu,
   pak postavit týmy tak, aby ji přirozeně vyprodukovaly. Bez podpory CTO neuspěje.
-- **Cognitive load:** ≤ 2 BC na 5–9 lidí. 4+ BC na tým = signál pro rozdělení.
+- **Cognitive load:** 1–2 BC (výjimečně 3) na 5–9 lidí. 4+ BC na tým = signál pro rozdělení.
   Měřte kvartálně.
 - **Proporce:** orientačně 75 % stream-aligned, 15 % platform, 10 % enabling
   + complicated-subsystem. Poměr je zobecněním z praxe; podstatná je převaha
@@ -766,7 +766,7 @@ pro DORA metriky a Westrumovu typologii. Originální Conwayův esej z roku 1968
 - question: Co když máme jediný tým? Platí Team Topologies i pro nás?
   answer: 'Ano, ale v zjednodušené podobě. Jediný stream-aligned tým (5–9 lidí) je legitimní organizační struktura – typický startup. Nemáte Platform team (využijete managed services jako Heroku/Vercel/Stripe/Auth0), nemáte Enabling team (najmete externího konzultanta na 3 měsíce, pokud potřebujete). Jediné, co řeší Team Topologies pro vás, je interní rozdělení týmu – nepoužívejte „mini-frontend / mini-backend“ rozdělení uvnitř 6 lidí. Detail v <a href="#scenar-startup">scénáři A</a>.'
 - question: Můžu mít 1 tým, který vlastní 5 Bounded Contexts?
-  answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – typicky 2, ojediněle 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">05.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte rozdělení na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
+  answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – v praxi 1–2, výjimečně 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">05.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte rozdělení na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
 - question: Jak Team Topologies souvisí se Spotify Modelem?
   answer: 'Spotify Model (squads, tribes, chapters, guilds, popsaný 2012) byl jeden z prvních pokusů popsat organizační strukturu pro software v poměrech velké internetové firmy. Stream-aligned tým ≈ Spotify squad. Tribe (kolekce squadů kolem doménové oblasti) v Team Topologies žádný přímý ekvivalent nemá. Skelton a Pais se jí vyhnuli, protože zkušenosti ukazují, že tribes se stávají Conway-stylové „divize“, které brzdí toky napříč. Chapters a guilds (komunity sdílení znalostí, např. „všichni iOS devs“) fungují i v Team Topologies – typicky jako neformální komunity nad rámec hlavní topologie. Hlavní rozdíl: Spotify Model byl popisem jednoho úspěšného podniku v určitém období; Team Topologies je obecný rámec s explicitními typy a interakcemi.'
 - question: Vyplatí se Team Topologies v padesátičlenné firmě?

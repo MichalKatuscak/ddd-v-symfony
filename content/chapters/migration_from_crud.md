@@ -711,10 +711,9 @@ final class RegisterUserHandler
 
         $this->users->save($user);
 
-        // Domain Events jsou zpracovány Symfony Messengerem
-        foreach ($user->releaseEvents() as $event) {
-            // event dispatch je řešen infrastrukturní vrstvou
-        }
+        // Doménové události handler nepublikuje: po flushi je z agregátu
+        // sebere infrastruktura (outbox listener) přes releaseEvents()
+        // a předá Messengeru – viz Recept 7 a kapitolu DDD v praxi.
     }
 }
 
@@ -745,7 +744,9 @@ class UserController extends AbstractController
 :::
 
 Command `RegisterUser` je prosté DTO (Data Transfer Object) bez závislostí. Handler
-`RegisterUserHandler` orchestruje doménový model. Kontroler se zužuje na HTTP
+`RegisterUserHandler` orchestruje doménový model. `UserRegistrationPolicy` je doménová
+služba: nese pravidlo unikátní e-mailové adresy, které nelze ověřit uvnitř jediného
+agregátu, a proto smí použít repozitář. Kontroler se zužuje na HTTP
 vrstvu, která pouze přeloží HTTP požadavek na Command. Vrstvy oddělené takto
 se dají testovat každá zvlášť.
 :::

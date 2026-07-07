@@ -63,7 +63,7 @@ Kapitola pracuje s **osmi pojmenovanými vztahy**, kterými mohou Bounded Contex
 | [**Published Language**](#published-language) | Asymetrický | Nízký | Stabilizovaný formát zpráv (schema) | Upstream + standardy |
 | [**Separate Ways**](#separate-ways) | – | Žádný | Žádná integrace, vědomá duplicita | Strategické rozhodnutí |
 
-Tabulka ukazuje, že vztahy nejsou nezávislé varianty – některé se kombinují. Customer/Supplier typicky *používá* Open Host Service jako kanál a Published Language jako formát zpráv. Anti-Corruption Layer je technika, kterou downstream *aplikuje*, když je v Customer/Supplier nebo Conformist pozici vůči nevstřícnému (legacy) modelu.
+Tabulka ukazuje, že vztahy nejsou nezávislé varianty – některé se kombinují. Customer/Supplier typicky *používá* Open Host Service jako kanál a Published Language jako formát zpráv. Anti-Corruption Layer je technika downstream strany, která se před nevstřícným (legacy) upstream modelem chrání překladem – v téže pozici je alternativou ke Conformistu: Conformist cizí model přijímá bez překladu, ACL ho překládá.
 
 :::callout{type="pattern"}
 ### Rychlé rozhodovací pravidlo
@@ -241,13 +241,12 @@ framework:
                     max_retries: 3
                     delay: 1000
                     multiplier: 2
-        routing:
-            'App\Ordering\Application\ExternalEvent\ProductPriceChanged': from_catalog
-            'App\Ordering\Application\ExternalEvent\ProductDiscontinued': from_catalog
+
+# Příjem zajišťuje worker: php bin/console messenger:consume from_catalog
 :::
 
 :::callout{type="note"}
-**Sekce `routing` konfiguruje odesílání, ne příjem.** Říká, na který transport Messenger zprávu pošle při dispatchi – konzumaci cizích zpráv neřídí. Aby worker dokázal event z fronty `ordering.from_catalog` přečíst, potřebuje transport vlastní serializer (volba `serializer` v konfiguraci transportu), který JSON payload od Catalogu namapuje na lokální třídu `ProductPriceChanged`. Výchozí serializer Messengeru totiž očekává zprávy, které odeslal sám. Implementaci konzumní strany včetně serializeru a deduplikace rozebírá kapitola [Outbox Pattern](/outbox-pattern).
+**Konzument sekci `routing` nepotřebuje.** Ta konfiguruje odesílání, ne příjem – říká, na který transport Messenger zprávu pošle při dispatchi, konzumaci cizích zpráv neřídí. Aby worker dokázal event z fronty `ordering.from_catalog` přečíst, potřebuje transport vlastní serializer (volba `serializer` v konfiguraci transportu), který JSON payload od Catalogu namapuje na lokální třídu `ProductPriceChanged`. Výchozí serializer Messengeru totiž očekává zprávy, které odeslal sám. Implementaci konzumní strany včetně serializeru a deduplikace rozebírá kapitola [Outbox Pattern](/outbox-pattern).
 :::
 
 A handler v Orderingu:
@@ -359,7 +358,7 @@ final class StripePaymentReportRepository
 }
 :::
 
-Reporting je vědomě Conformist vůči Stripe. Žádný převod na `Money` VO, žádný překlad `'usd'` → `Currency::USD`. Když Stripe přejmenuje pole nebo přidá nový status, Reporting musí změnu přijmout. Cena za to je **nulová investice do ACL**; cena, kterou platíme, je **křehkost vůči neslučitelným změnám upstreamu**.
+Reporting je vědomě Conformist vůči Stripe. Žádný převod na `Money` VO, žádný překlad `'usd'` → `Currency::USD`. Když Stripe přejmenuje pole nebo přidá nový status, Reporting musí změnu přijmout. Zisk je **nulová investice do ACL**; cena je **křehkost vůči neslučitelným změnám upstreamu**.
 
 ### Kompromis Conformistu
 
@@ -373,7 +372,7 @@ Conformist *zaplatí*:
 
 - Při každé neslučitelné změně upstreamu se downstream musí přepsat.
 - Doménová logika downstreamu používá pojmy upstreamu, což zhoršuje srozumitelnost.
-- Pokud se upstream rozhodne odejít (Stripe zavře službu), je downstream odkázán na vendora.
+- Pokud upstream službu ukončí (Stripe ji zavře), musí downstream přepsat všechno, co z jeho modelu přejal.
 - Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe – celá doménová logika kopíruje Stripe).
 
 :::callout{type="warn"}
@@ -624,7 +623,7 @@ Tři běžné přístupy k verzování OHS:
 OHS musí mít explicitní politiku zastarávání. Příklad pro veřejné API:
 
 - Při zveřejnění nové majoritní verze (v3) se starší verze (v1) označí jako *zastaralá* v dokumentaci.
-- Hlavička `Deprecation: true` a `Sunset: Wed, 31 Dec 2025 23:59:59 GMT` se posílá v každé odpovědi v1.
+- Hlavička `Deprecation: true` a `Sunset: Fri, 31 Dec 2027 23:59:59 GMT` se posílá v každé odpovědi v1.
 - Minimálně 6 měsíců před odstraněním v1 dostanou všichni známí klienti oznámení.
 - Po odstranění v1 vrací `410 Gone` s odkazem na migrační průvodce.
 
@@ -880,7 +879,7 @@ Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu]
 - question: Jak často aktualizovat Context Map?
   answer: 'Při každé větší architektonické změně (nový BC, zánik BC, změna typu vztahu) okamžitě, plus plánovaná revize minimálně 1× za 6 měsíců. Pokud nemáte čas vizuální složku udržovat aktualně, ponechte si alespoň textový popis (<code>docs/context-map.md</code>) – ten zastará pomaleji než obrázek. Datum poslední aktualizace v patičce je povinné. Detail v <a href="#postup">sekci 03.11 Praktický postup</a>.'
 - question: Můžu mít více než 1 typ vztahu mezi 2 BC?
-  answer: 'Ano, je to běžné a často nutné. Customer/Supplier popisuje organizační vztah (kdo rozhoduje, kdo prosí), Open Host Service popisuje technický kanál a Published Language popisuje formát. Tyto tři se typicky kombinují do jednoho komplexního vztahu. Anti-Corruption Layer je technika, kterou downstream aplikuje uvnitř Customer/Supplier nebo Conformist vztahu. Při kreslení mapy stačí na šipku napsat všechny relevantní stereotypy: <code>&lt;&lt;Customer/Supplier&gt;&gt; &lt;&lt;OHS&gt;&gt; &lt;&lt;PL&gt;&gt;</code>.'
+  answer: 'Ano, je to běžné a často nutné. Customer/Supplier popisuje organizační vztah (kdo rozhoduje, kdo prosí), Open Host Service popisuje technický kanál a Published Language popisuje formát. Tyto tři se typicky kombinují do jednoho komplexního vztahu. Anti-Corruption Layer je technika downstream strany, která se před upstream modelem chrání překladem – v téže pozici je alternativou ke Conformistu, který cizí model přijímá bez překladu. Při kreslení mapy stačí na šipku napsat všechny relevantní stereotypy: <code>&lt;&lt;Customer/Supplier&gt;&gt; &lt;&lt;OHS&gt;&gt; &lt;&lt;PL&gt;&gt;</code>.'
 - question: ACL vs. Adapter – jaký je rozdíl?
   answer: 'Adapter (z Hexagonal Architecture / GoF) je technický vzor: třída, která implementuje port a překládá volání na konkrétní knihovnu (Doctrine, HTTP klient, Redis). ACL je strategický vzor: vrstva, která chrání váš doménový model před modelem cizího Bounded Contextu. ACL je <em>typicky implementován pomocí Adapterů</em>, ale ne každý Adapter je ACL. ACL má navíc tři specifické odpovědnosti – schema mapping, concept translation a anti-corruption (filtraci) – které „obyčejný“ Adapter nemá. Detail v <a href="#acl">sekci 03.07</a>.'
 - question: Co dělat, když si všimnu Conformist vztahu, který tam neměl být?

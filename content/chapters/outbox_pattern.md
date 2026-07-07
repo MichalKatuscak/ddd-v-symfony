@@ -284,7 +284,7 @@ class OutboxMessage
 | `payload` | JSON / JSONB | Serializovaný stav události. JSONB v Postgresu je preferovaný – umožňuje indexovat jednotlivá pole pro debugging. |
 | `status` | VARCHAR(16) | Stavový enum: `pending` (čeká na publish), `sent` (úspěšně publikováno), `failed` (po N pokusech vzdáno, vyžaduje manuální resolve). |
 | `occurred_at` | TIMESTAMPTZ | Čas vzniku události v doménové transakci. Slouží pro řazení v relayi (FIFO uvnitř jedné DB) a pro výpočet outbox lagu. |
-| `attempts` | INT | Počet neúspěšných pokusů o publish. Po překročení prahu (typicky 5) řádek přechází do `failed` a opouští hot path. |
+| `attempts` | INT | Počet neúspěšných pokusů o publish. Po dosažení prahu (typicky 5) řádek přechází do `failed` a opouští hot path. |
 | `sent_at` | TIMESTAMPTZ NULL | Vyplněno při přechodu do `sent`. Používá se pro kompakci (mazání starších `sent` řádků). |
 | `last_error` | TEXT NULL | Poslední chyba publishe – důležité pro rozbor incidentu. |
 
@@ -466,6 +466,7 @@ use App\Ordering\Application\Command\PlaceOrder;
 use App\Ordering\Domain\Order;
 use App\Ordering\Domain\OrderId;
 use App\Ordering\Domain\OrderRepository;
+use App\Outbox\Application\DomainEventSerializer;
 use App\Outbox\Application\OutboxRepository;
 use App\Outbox\Domain\OutboxMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -695,6 +696,11 @@ final class OutboxDispatchCommand extends Command
 :::
 :::
 
+Třída `OutboxMessageFactory` je protějšek serializeru: metoda `reconstitute()`
+podle `messageType` namapuje JSON payload z outbox řádku zpět na instanci
+doménové události. Plný výpis vynecháváme – jde o mechanický opak
+`DomainEventSerializer`.
+
 :::callout{type="pattern"}
 ### Konfigurace supervisord pro outbox dispatch {#supervisor-heading}
 
@@ -729,8 +735,9 @@ kapacita brokera roste lineárně s počtem replik a Inbox musí vybalancovat v�
 
 Pokud potřebujete horizontální škálování dispatchu (>10k events/s), použijte
 `SELECT ... FOR UPDATE SKIP LOCKED` v Postgresu nebo MySQL 8 a každý
-worker si zarezervuje vlastní batch řádků. Limit při LIMITu 100 a SKIP LOCKED
-zvládne až ~30k events/s na běžné DB instanci.
+worker si zarezervuje vlastní batch řádků. Jeden PHP worker zvládne ~5k events/s;
+se SKIP LOCKED a více workery roste propustnost až k ~30k events/s, kde na běžné
+instanci narazí na limit databázové vrstvy.
 :::
 
 ### Varianta B: CDC / Debezium {#relay-cdc-heading}
@@ -752,7 +759,7 @@ cron jobem.
 | Latence | 50–500 ms (polling interval) | 1–50 ms (push z WAL) |
 | Operační složitost | 1× console command + supervisor | Kafka + Kafka Connect + Debezium konektor + monitoring 4 procesů |
 | Volba brokera | Libovolný (RabbitMQ, SQS, Redis, Doctrine async) | Pouze Kafka (resp. Pulsar, Kinesis přes adaptér) |
-| Scale-out | Až ~30k events/s (1 worker, SKIP LOCKED) | Statisíce events/s (dáno Kafkou) |
+| Scale-out | ~5k events/s na worker; se SKIP LOCKED a více workery až ~30k events/s (limit DB vrstvy) | Statisíce events/s (dáno Kafkou) |
 | Garance pořadí | Per-tabulka (ORDER BY occurred_at) | Per-partition (Debezium routuje podle PK) |
 | Doporučeno pro | 99 % Symfony projektů | Multi-tenant SaaS, finanční systémy, IoT |
 
@@ -1156,7 +1163,7 @@ JOIN pg_class ON pg_class.oid = indexrelid
 WHERE schemaname = 'public' AND tablename = 'outbox';
 
 -- REINDEX CONCURRENTLY když index naroste přes 2× očekávané velikosti:
-REINDEX INDEX CONCURRENTLY outbox_status_occurred_at_idx;
+REINDEX INDEX CONCURRENTLY idx_outbox_status_time;
 :::
 :::
 
@@ -1179,7 +1186,7 @@ declarative partitioning podle `occurred_at` umožňuje:
 -- Hlavní tabulka jako partitioned parent.
 CREATE TABLE outbox (
     id           UUID NOT NULL,
-    event_type   VARCHAR(255) NOT NULL,
+    message_type VARCHAR(255) NOT NULL,
     payload      JSONB NOT NULL,
     status       VARCHAR(20) NOT NULL DEFAULT 'pending',
     occurred_at  TIMESTAMPTZ NOT NULL,
@@ -1273,9 +1280,10 @@ final class LeaderElection
 
 Worker volá `acquireOrRenew()` každé 3 sekundy (TTL 10 s dává buffer pro síťové
 zpoždění). Když vrátí `false`, worker stojí. Když ji při následujícím tiku vrátí `true`,
-začne dispatchovat – nový leader. Pozor: lease musí mít **kratší TTL než
-processing batch**, jinak by leader mohl dokončit batch, který už dispatchuje
-nový leader → double publish.
+začne dispatchovat – nový leader. Pozor: processing batch musí **doběhnout dřív,
+než TTL lease vyprší** – nebo si worker musí lease během batche průběžně obnovovat.
+Jinak lease převezme nový leader a začne dispatchovat řádky, které starý worker
+ještě publikuje → double publish.
 
 **Cesta 2 – `SELECT … FOR UPDATE SKIP LOCKED`.** Více workerů paralelně, každý
 si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure,
@@ -1292,7 +1300,7 @@ BEGIN;
 
 -- Worker si zarezervuje 100 pending řádků. Ostatní workery uvidí jen ty,
 -- které tento worker NEzamknul.
-SELECT id, event_type, payload, occurred_at
+SELECT id, message_type, payload, occurred_at
 FROM outbox
 WHERE status = 'pending'
 ORDER BY occurred_at
@@ -1397,7 +1405,7 @@ Pravidlo: *jeden relay singleton, nebo SKIP LOCKED.*
 :::callout{type="warn"}
 ### Publish před commitem, ne v doctrine_transaction middleware {#anti-publish-before-commit-heading}
 
-Volání `messenger:dispatch` před tím, než `EntityManager::flush()` opravdu zapíše do DB, je dual-write přímo z učebnice. Pokud nemáte v
+Volání `$bus->dispatch()` před tím, než `EntityManager::flush()` opravdu zapíše do DB, je dual-write přímo z učebnice. Pokud nemáte v
 `messenger.yaml` aktivní middleware `doctrine_transaction`,
 **vždy** obalujte handler explicitně do `wrapInTransaction`.
 Výchozí bus chování v Symfony 8 je *auto-commit per dispatch*, ne per
