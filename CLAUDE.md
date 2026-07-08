@@ -47,9 +47,15 @@ Frontend assets go through Vite (`vite-plugin-symfony`, see `package.json`); `hi
 
 ## Conventions established in the book
 
-- Aggregate base class: `AggregateRoot` with `record(object $event)` / `releaseEvents(): array` (defined in `/zakladni-koncepty#aggregate-root-lifecycle`). All examples use this API.
+- Aggregate base class: `AggregateRoot` with `record(object $event)` / `releaseEvents(): array` (defined in `/zakladni-koncepty#aggregate-root-lifecycle`). All examples use this API. Events are recorded in named constructors / domain methods, never in `__construct` (reconstitution must not emit events).
+- Domain events are named in past tense **without an "Event" suffix**: `OrderCreated`, not `OrderCreatedEvent`.
 - Value objects expose `public readonly` properties (e.g. `$email->value`), not `value()` methods.
-- IDs are generated via `symfony/uid` `Uuid::v7()`.
+- `Email` VO: the constructor only validates; input normalization (trim, lowercase) belongs to `Email::fromUserInput()`.
+- `Money` has `public readonly int $amountInCents` and `public readonly Currency $currency`; `Currency` is a string-backed enum (read via `->value`, never `->code`).
+- Canonical `Order` example: factory `Order::place()` (not `create()`), owner is `CustomerId`, items via `addItem(ProductId $productId, int $quantity, Money $unitPrice)`.
+- Aggregates reference each other by ID only — never pass a whole aggregate into another aggregate's method.
+- IDs are generated via `symfony/uid` `Uuid::v7()`. ULID may be mentioned only as an alternative, never as the default recommendation.
+- Domain rules throw named exceptions (`InvalidOrderStateTransitionException`, `DuplicateEmailException`); bare `\DomainException` only as an acknowledged shortcut.
 - Code targets PHP 8.4, Symfony 8, Doctrine ORM 3.
 - Citations: no page numbers; unverifiable direct quotes are paraphrased. Partnership and Big Ball of Mud are attributed to Evans's *DDD Reference* (2015); "Supporting Subdomain" to Vernon (2013). Fictional case studies are labeled "Ilustrativní scénář".
 
