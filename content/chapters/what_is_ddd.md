@@ -7,7 +7,7 @@ meta_description: "Domain-Driven Design srozumitelně: filozofie Erica Evanse, U
 meta_keywords: "Domain-Driven Design, DDD, Eric Evans, Ubiquitous Language, Bounded Context, doménový model, doménová logika, strategický design, taktický design"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Co je DDD
 schema_type: TechArticle
 schema_headline: "Co je Domain-Driven Design? Podrobné vysvětlení DDD"
@@ -43,7 +43,7 @@ A teď k definicím.
 
 ## 01.01 Definice DDD {#definition}
 
-Softwarové projekty selhávají častěji kvůli neporozumění problémové oblasti než kvůli technickým chybám.
+Softwarové projekty podle rozšířené zkušenosti selhávají častěji kvůli neporozumění problémové oblasti než kvůli technickým chybám.
 Domain-Driven Design (DDD) na to odpovídá tím, že modelování domény staví do středu celého návrhu.
 Systematicky jej popsal Eric Evans v knize *Domain-Driven Design: Tackling
 Complexity in the Heart of Software* z roku 2003 [[1]](https://www.domainlanguage.com/ddd/).

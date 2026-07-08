@@ -7,7 +7,7 @@ meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrin
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
@@ -29,8 +29,8 @@ jeden z nejčastějších zdrojů tichých nekonzistencí v event-driven archite
 
 **Transactional Outbox Pattern** je standardní řešení dual-write problému;
 jeho symetrický protějšek **Idempotent Inbox Pattern** zajišťuje deduplikaci
-na straně subscriberů. V dalších sekcích si projdeme původ vzoru v práci Pata Hellanda
-*Life Beyond Distributed Transactions* (2007), schéma outbox tabulky s povinným
+na straně subscriberů. V dalších sekcích si projdeme ideový základ vzoru v práci
+Pata Hellanda *Life Beyond Distributed Transactions* (2007), schéma outbox tabulky s povinným
 indexem, kompletní implementaci s Doctrine ORM a Symfony Messenger, dvě varianty relay
 procesu (polling worker vs. CDC / Debezium) a operační aspekty – outbox lag, kompakce,
 dead-letter queue. V závěru přidáme migrační postup pro existující projekt a srovnání
@@ -107,9 +107,9 @@ architekturách jsou pravidlem, ne výjimkou. Pat Helland v práci
 *Life Beyond Distributed Transactions: An Apostate's Opinion* (2007) tento
 problém formuloval explicitně. Jakmile transakce přesahuje hranici jednoho úložiště,
 atomicita je iluze. Aplikační logika ji musí explicitně obnovit.
-Chris Richardson na něj navázal v knize *Microservices Patterns* (2018, kapitola 3),
-kde Outbox Pattern popisuje jako *jediné* doporučované řešení dual-write problému
-v mikroslužbách bez nadbytečné distribuované transakce.
+Chris Richardson na něj navázal v knize *Microservices Patterns* (2018, kapitola 3)
+a v katalogu microservices.io, kde Outbox Pattern popisuje jako doporučované řešení
+dual-write problému bez distribuované transakce; jako alternativu uvádí event sourcing.
 
 :::callout{type="note"}
 ### Proč ne Two-Phase Commit (2PC / XA)? {#2pc-heading}
@@ -1267,7 +1267,8 @@ final class LeaderElection
             self::LEASE_TTL_SECONDS,
             'NX',
         );
-        if ($result === 'OK') {
+        // Predis vrací objekt Response\Status, ne řetězec - porovnává se přes cast.
+        if ((string) $result === 'OK') {
             return true; // získán nový lease
         }
 

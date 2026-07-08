@@ -7,7 +7,7 @@ meta_description: "Mapování DDD konceptů na Symfony 8: adresářová struktur
 meta_keywords: "DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
@@ -1612,8 +1612,9 @@ zpráva může mít víc handlerů. Kontroler proto chytá obálku, projde zabal
 výjimky a na známé doménové typy reaguje HTTP odpovědí. Vše ostatní pošle dál –
 ticho po neznámé chybě by maskovalo skutečné selhání. Kdo nechce iteraci
 opakovat v každém kontroleru, napíše dekorátor command busu, který první
-zabalenou výjimku rozbalí a vyhodí znovu. Ani `HandleTrait` rozbalení
-neprovádí – obálku vrací stejně jako přímý dispatch.
+zabalenou výjimku rozbalí a vyhodí znovu. Ani `HandleTrait` výjimky
+nerozbaluje – vrací sice návratovou hodnotu handleru (z `HandledStamp`),
+ale `HandlerFailedException` propouští zabalenou stejně jako přímý dispatch.
 :::
 
 :::callout{type="note"}

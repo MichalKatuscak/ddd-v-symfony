@@ -7,7 +7,7 @@ meta_description: "Kam soustředit modelovací úsilí: rozlišení Core, Suppor
 meta_keywords: "Core Domain, Supporting Subdomain, Generic Subdomain, strategický DDD, subdoména, Eric Evans, business strategy, build vs buy, Symfony"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Subdomény
 schema_type: TechArticle
 schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat modelovací úsilí"
@@ -494,7 +494,7 @@ Příklad: **online platby v roce 2010 byly pro většinu firem Generic** – ko
 
 ### Z Core do Supporting – komoditizace {#shift-core-to-supporting}
 
-Příklad: **cloud storage**. Dropbox v roce 2008 měl Core v synchronizaci souborů – nepříjemný problém s race conditions, latencemi a binární diff propagací, který nikdo jiný neuměl. Dnes je „cloud storage“ komoditizován cloud providerem (AWS S3, Azure Blob, GCS) a Dropbox musel posunout Core jinam – do produktivních nástrojů (Paper, integrace), aby zůstal odlišený. Jakmile je Core Doména dostupná jako služba u tří velkých vendorů, je čas snížit investici, refaktorovat model na lehčí a hledat nový diferenciátor.
+Příklad: **cloud storage**. Dropbox v roce 2008 měl Core v synchronizaci souborů – nepříjemný problém s race conditions, latencemi a binární diff propagací, který tehdy nikdo neřešil dobře. Dnes je „cloud storage“ komoditizován cloud providerem (AWS S3, Azure Blob, GCS) a Dropbox musel posunout Core jinam – do produktivních nástrojů (Paper, integrace), aby zůstal odlišený. Jakmile je Core Doména dostupná jako služba u tří velkých vendorů, je čas snížit investici, refaktorovat model na lehčí a hledat nový diferenciátor.
 
 ### Ze Supporting do Generic – když dorazí kvalitní SaaS {#shift-supporting-to-generic}
 

@@ -7,7 +7,7 @@ meta_description: "CQRS v Symfony 8: oddělení command a query strany přes Mes
 meta_keywords: "CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 8, read model, eventual consistency, ViewModel, projekce, dead letter queue"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: CQRS
 schema_type: TechArticle
 schema_headline: "CQRS v Symfony 8"
@@ -113,7 +113,7 @@ nebo změnit strukturu dotazu – bez jakéhokoli dopadu na write model a domén
 Dvě další výhody:
 
 - **Škálovatelnost** – Ve většině aplikací výrazně převažuje čtení nad zápisem
-  (poměr 10:1 až 100:1). CQRS umožňuje nezávisle škálovat read stranu (repliky, cache, CDN)
+  (řádově 10:1 až 100:1; zkušenostní heuristika, ne měřený standard). CQRS umožňuje nezávisle škálovat read stranu (repliky, cache, CDN)
   bez dopadu na write stranu.
 - **Testovatelnost** – Command handlers se testují jako čistě doménová logika
   (given state → when command → then events/state). U query handlerů se ověřuje jen správnost

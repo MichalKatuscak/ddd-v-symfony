@@ -7,7 +7,7 @@ meta_description: "Layered, Hexagonal, Onion nebo Clean Architecture? Kdy který
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Architektonické styly
 schema_type: TechArticle
 schema_headline: "Architektonické styly: Hexagonal, Onion, Clean – co si vybrat"
@@ -576,7 +576,7 @@ Druhý častý anti-vzor: **port = repository, ostatní jsou jen služby**. Tým
 
 ## 09.04 Onion Architecture (Palermo 2008) {#onion}
 
-Onion Architecture představil Jeffrey Palermo v roce 2008 v blogové sérii [[4]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) – první tři díly vyšly v roce 2008, čtvrtý s odstupem čtyř let. Je to vylepšení vrstvené architektury, které explicitně staví doménový model do středu a zavádí **Dependency Rule**: závislosti smí směřovat pouze *dovnitř*, nikdy ven. Geometrickou metaforou je cibule (onion) s koncentrickými prstenci.
+Onion Architecture představil Jeffrey Palermo v roce 2008 v blogové sérii [[4]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) – první tři díly vyšly v roce 2008, čtvrtý (*Part 4 – After Four Years*) následoval v roce 2013. Je to vylepšení vrstvené architektury, které explicitně staví doménový model do středu a zavádí **Dependency Rule**: závislosti smí směřovat pouze *dovnitř*, nikdy ven. Geometrickou metaforou je cibule (onion) s koncentrickými prstenci.
 
 ### Čtyři koncentrické vrstvy Onion {#onion-vrstvy-heading}
 

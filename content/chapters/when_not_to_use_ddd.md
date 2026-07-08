@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -45,9 +45,10 @@ Aplikace, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuj
 DDD zde přidá agregáty, repozitáře, doménové události a value objekty pro věci,
 které jsou přirozeně jen řádky v databázi. Výsledek: 5× více kódu, žádná přidaná hodnota.
 
-Eric Evans to v *Domain-Driven Design* říká explicitně: DDD má smysl pro
-**komplexní doménovou logiku**. CRUD operace komplexní doménovou logiku nemají –
-jsou to čtení a zápisy dat bez doménových pravidel.
+Eric Evans to ve svých přednáškách o strategickém designu říká explicitně:
+ne celý velký systém bude dobře navržený. Propracovaný model patří tam, kde je
+**komplexní doménová logika**. CRUD operace ji nemají – jsou to čtení a zápisy
+dat bez doménových pravidel.
 
 :::callout{type="pattern"}
 #### Srovnání: DDD vs. jednoduchý přístup pro CRUD admin {#crud-compare-heading}

@@ -7,7 +7,7 @@ meta_description: "Vztah DDD a AI nástrojů očima Erica Evanse, Martina Fowler
 meta_keywords: "DDD AI, domain-driven design umělá inteligence, DDD LLM, Eric Evans AI, Martin Fowler AI, Kent Beck AI, DDD bounded context AI, ubiquitous language LLM"
 og_type: article
 published: "2026-03-27"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: DDD a AI
 schema_type: TechArticle
 schema_headline: "DDD a umělá inteligence – co říkají autority"
@@ -229,13 +229,12 @@ hodnotu, ale kde je AI nejnebezpečnější, pokud není správně ohraničena. 
 decisions existují i zde – například kategorizace dokumentů nebo návrh odpovědi zákaznickému
 servisu – ale musí být jasně odděleny od hard-coded logiky.
 
-Vaughn Vernon přidává konkrétní technický vzor: LLM jako „fix suggester“. Vernon
-navrhuje, aby LLM v produkčním systému navrhoval opravy pro selhání. Tyto opravy
-musí projít verifikací – ať už automatizovanou nebo lidskou – před aplikací. Hovoří
-o konceptu *self-healing software*: systém, který detekuje anomálie, požádá LLM
-o návrh opravy, verifikuje ji testy a teprve pak ji aplikuje. DDD bounded context
-v tomto scénáři definuje pravidla verifikace: co smí LLM změnit a co musí zůstat
-neměnné.
+Vaughn Vernon přidává konkrétní technický vzor: LLM jako „fix suggester“
+(Explore DDD 2024, via InfoQ). Ve Vernonově vizi *self-healing software* reaguje
+nástroj typu ChatGPT na runtime výjimky a navrhne opravu ve formě pull requestu.
+Návrh projde revizí – lidskou nebo automatizovanou – a teprve pak se aplikuje.
+DDD bounded context v tomto scénáři definuje pravidla verifikace: co smí LLM
+změnit a co musí zůstat neměnné.
 
 Referenční implementace Microsoftu – eShopOnContainers – ilustruje toto rozlišení
 na praktickém příkladu. Modul `Ordering` používá plné taktické DDD:
@@ -297,9 +296,9 @@ Druhá strana mince: ty samé nástroje fungují i bez DDD. Konzistentně psaný
 s jasnými konvencemi – convention over configuration v Rails stylu – bývá pro AI stejně
 čitelný jako explicitně modelovaný bounded context. Pokud projekt dodržuje konzistentní
 pojmenování, má dobré testy a je dobře rozčleněn do adresářů, AI agent se v něm orientuje
-i bez formálního DDD modelu. Článek „DHH Is Wrong“ a série na toto téma
-ukazují, že disciplinované konvence obstojí i bez explicitního modelování. Otevřená
-zůstává otázka, co se stane, když projekt vyroste za hranice, kde konvence stačí.
+i bez formálního DDD modelu. Disciplinované konvence tak do jisté míry plní stejnou
+roli jako explicitní model. Otevřená zůstává otázka, co se stane, když projekt
+vyroste za hranice, kde konvence stačí.
 
 ## ai.06 Otevřené otázky a limity {#otevrene-otazky}
 
@@ -461,6 +460,7 @@ nebo nepřítomnosti AI v toolchainu.
   <a href="https://www.infoq.com/news/2024/03/Evans-ddd-experiment-llm/" target="_blank" rel="noopener noreferrer">DDD and Experiment With LLM – InfoQ, 2024</a>.
   Stěžejní přednáška, ve které Evans popisuje fine-tuning LLM na ubiquitous language
   a navrhuje taxonomii hard-coded / human-handled / LLM-supported decisions.
+  Článek zachycuje i reakce dalších praktiků včetně Vernonova konceptu „fix suggester“.
 - **Fowler, M. – The New Stack:**
   <a href="https://thenewstack.io/martin-fowler-on-preparing-for-ais-nondeterministic-computing/" target="_blank" rel="noopener noreferrer">Martin Fowler on Preparing for AI's Nondeterministic Computing</a>.
   Fowlerovy úvahy o nedeterminismu AI a potřebě nových metrik a přístupů k testování.

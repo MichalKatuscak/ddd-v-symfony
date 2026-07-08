@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -42,7 +42,7 @@ Chyby při implementaci DDD lze rozdělit do tří kategorií:
 
 ## 21.02 Anti-vzor: Anémický doménový model (Anemic Domain Model) {#anemicky-domenovy-model}
 
-Anémický model je nejrozšířenější anti-vzor objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
+Anémický model patří k nejčastějším anti-vzorům objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
 
 :::diagram{fig="21.2-A" title="Anémický vs. bohatý doménový model – kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
 :::

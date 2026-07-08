@@ -7,7 +7,7 @@ meta_description: "Event Sourcing v DDD a Symfony 8: Event Store, projekce, snap
 meta_keywords: "Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Outbox pattern, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild, dual-write problem"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Event Sourcing
 schema_type: TechArticle
 schema_headline: "Event Sourcing v DDD a Symfony"
@@ -349,6 +349,8 @@ CREATE TABLE event_store (
     aggregate_type VARCHAR(255)    NOT NULL COMMENT 'FQCN nebo slug agregátu, napr. ordering.order',
     event_type    VARCHAR(255)     NOT NULL COMMENT 'Typ události, napr. ordering.order_placed',
     payload       JSON             NOT NULL COMMENT 'Serializovaná data události',
+    -- DEFAULT jako výraz v závorkách vyžaduje MySQL 8.0.13+.
+    -- MariaDB mapuje JSON na LONGTEXT s kontrolou JSON_VALID; default zvládá od 10.2.
     metadata      JSON             NOT NULL DEFAULT ('{}') COMMENT 'Korelační ID, causation ID, user ID…',
     schema_version SMALLINT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Verze schématu payloadu - pro upcasting',
     version       INT UNSIGNED     NOT NULL COMMENT 'Pořadové číslo ve streamu agregátu (od 1)',

@@ -7,7 +7,7 @@ meta_description: "Bounded Context jako týmová hranice. Conway's Law, Team Top
 meta_keywords: "Conway's Law, Team Topologies, Inverse Conway Maneuver, Skelton, Pais, stream-aligned team, platform team, enabling team, complicated subsystem team, Bounded Context, DDD, kognitivní zátěž, Westrum, Vernon, organizační struktura, microservices"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Team Topologies
 schema_type: TechArticle
 schema_headline: "Conway's Law a Team Topologies – týmová struktura v DDD"
@@ -299,7 +299,8 @@ Conway's Law říká „struktura kopíruje organizaci“. **Inverse Conway Mane
 obrací směr: *pokud chceme jinou strukturu, MUSÍME nejdřív změnit organizaci.*
 Místo bojování s Conway's Law ji použijeme jako nástroj.
 
-Termín Inverse Conway Maneuver zavedli Jonny LeRoy a Matt Simons (ThoughtWorks, 2010);
+Termín Inverse Conway Maneuver zavedli konzultanti ThoughtWorks Jonny LeRoy
+a Matt Simons v článku pro Cutter IT Journal (prosinec 2010);
 Skelton a Pais (2019, kap. 2) ho rozpracovali s odkazem na výzkum Forsgren, Humble a Kim
 v *Accelerate* (2018). Postup lze shrnout do 4 kroků:
 
@@ -329,10 +330,12 @@ refaktoru vrátí architekturu k původnímu org chartu.
 :::callout{type="note"}
 ### Reálný příběh: Amazon, 2002 {#inverse-real-world-heading}
 
-Klasická případová studie Inverse Conway Maneuver: Jeff Bezos v roce 2002 vydal interní
-nařízení, že *všechny týmy budou komunikovat výhradně přes API*. Žádné sdílené databáze,
-žádné funkční volání napříč týmy, žádné neformální komunikační kanály.
-Týmy, které to nedodrží, budou propuštěny.
+Klasická případová studie Inverse Conway Maneuver: Jeff Bezos kolem roku 2002 vydal
+interní nařízení, že *všechny týmy budou komunikovat výhradně přes API*. Žádné sdílené
+databáze, žádné funkční volání napříč týmy, žádné neformální komunikační kanály.
+Primární dokument nikdy nebyl zveřejněn – mandát je znám z podání bývalého inženýra
+Amazonu Steva Yeggeho („Google Platforms Rant“, 2011), včetně dovětku, že kdo se
+nepodřídí, bude propuštěn.
 
 Bezos nepředepsal mikroservisní architekturu. Předepsal **komunikační režim
 týmů**. Mikroservisy přišly automaticky, protože to byl jediný způsob, jak
@@ -795,3 +798,6 @@ pro DORA metriky a Westrumovu typologii. Originální Conwayův esej z roku 1968
 7. **Evans, E.** (2003). *Domain-Driven Design: Tackling Complexity in the Heart of Software.* Addison-Wesley.
 
 8. Související kapitoly: [subdomény](/subdomeny), [context mapping](/context-mapping), [architektonické styly](/architektonicke-styly), [anti-vzory](/anti-vzory).
+
+9. **Yegge, S.** (2011). *Stevey's Google Platforms Rant.* Zdroj podání Bezosova API mandátu z roku 2002.
+   [gist.github.com](https://gist.github.com/chitchcock/1281611)

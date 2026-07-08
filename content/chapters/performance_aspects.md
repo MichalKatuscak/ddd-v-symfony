@@ -7,7 +7,7 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
@@ -209,8 +209,10 @@ final class DoctrineOrderRepository implements OrderRepository
 :::
 
 Při použití fetch joinu s paginací (`setMaxResults()`, `setFirstResult()`)
-Doctrine vypíše varování a provede paginaci v paměti (in-memory pagination), ne na úrovni SQL.
-Řešením je stránkovat přes identifikátory a teprve pak načíst data, nebo použít nativní SQL
+Doctrine žádné varování nevypíše. LIMIT se aplikuje na řádky SQL výsledku, ve kterých se
+kořenová entita kvůli joinu opakuje – hydratace pak tiše vrátí méně entit nebo oříznuté kolekce.
+Řešením je `Doctrine\ORM\Tools\Pagination\Paginator`, který nejdřív vybere identifikátory
+kořenových entit pro danou stránku a teprve pak k nim načte data, případně nativní SQL
 s vlastním mapováním výsledků.
 
 ## 16.03 Agregát a výkon: správné určení hranic {#agregat-hranice}
@@ -680,9 +682,11 @@ final class ImportProductsHandler
 ### Pozor na clear() a detached entity
 
 Po zavolání `$this->em->clear()` jsou **všechny** spravované entity odpojeny
-(stav *detached*). Jakýkoli pokus o přístup k jejich lazy-loaded asociacím vyvolá výjimku
-`LazyInitializationException`. Ujistěte se, že po `clear()` nepracujete
-s referencemi na dříve spravované objekty.
+(stav *detached*). Doctrine při přístupu k nim žádnou výjimku nevyhazuje – lazy proxy
+se v případě potřeby doinicializuje dalším dotazem do databáze. Nebezpečí je tišší:
+změny na odpojených objektech `flush()` mlčky ignoruje a odpojená entita nalezená
+v asociaci nově persistovaného objektu shodí flush s `ORMInvalidArgumentException`.
+Ujistěte se, že po `clear()` nepracujete s referencemi na dříve spravované objekty.
 :::
 
 ## 16.07 Caching v DDD architektuře {#cachovani}
@@ -894,9 +898,9 @@ final class BatchProductImportHandler
     public function __invoke(BatchImportProducts $command): void
     {
         $counter = 0;
-        // Poznámka: Doctrine DBAL 3+ odstranil setSQLLogger() - debug logging
-        // se vypíná konfigurací (doctrine.dbal.logging: false) nebo odebráním
-        // logovacího middleware z services.yaml, ne programaticky.
+        // Poznámka: setSQLLogger() je od DBAL 3.2 deprecated a DBAL 4 ho odstranil.
+        // Debug logging se vypíná konfigurací (doctrine.dbal.logging: false)
+        // nebo odebráním logovacího middleware z services.yaml, ne programaticky.
 
         foreach ($command->rows as $row) {
             $product = Product::create(
@@ -1105,14 +1109,14 @@ Ve vývojovém prostředí odhaluje N+1 a pomalé dotazy nejdřív Symfony Profi
 ### Doctrine query logging
 
 Pro programatické zachycení SQL dotazů (např. v integračních testech nebo při ladění batch operací)
-lze Doctrine konfigurovat s vlastním SQL loggerem.
+lze Doctrine konfigurovat s vlastním logovacím middleware.
 
 :::callout{type="pattern"}
 ### Programatické zachycení SQL dotazů přes Doctrine Middleware
 
 :::code{language="php" filename="src/Shared/Infrastructure/Doctrine/QueryCountingMiddleware.php"}
 <?php
-// V Doctrine DBAL 3+ se logging provádí přes Middleware (ne SQLLogger)
+// Od DBAL 3.2 se logging provádí přes Middleware (SQLLogger je deprecated, DBAL 4 ho odstranil)
 // config/packages/doctrine.yaml
 
 // doctrine:

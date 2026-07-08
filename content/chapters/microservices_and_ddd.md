@@ -7,7 +7,7 @@ meta_description: "Kdy Bounded Context = microservice a kdy stačí modular mono
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: DDD a microservices
 schema_type: TechArticle
 schema_headline: "DDD a microservices – Bounded Context jako service boundary"
@@ -105,7 +105,7 @@ Konkrétní indikátory, podle kterých modular monolith poráží microservices
 - **Nestabilní hranice** – produkt je v rané fázi a Bounded Contexty ještě procházejí iteracemi. Refaktor hranice uvnitř monolithu je triviální (přesun souborů a tříd); refaktor přes síťovou hranici dvou services je migrace dat, koordinovaný release a Anti-Corruption Layer.
 - **Podobné potřeby škálování všech kontextů** – pokud catalog, ordering i shipping mají podobný objem a profil, není co odděleně škálovat. Horizontální škálování celého monolithu je operačně levnější než škálování čtyř services.
 - **Nemáte operační platformu pro N services** – žádný Kubernetes, žádný service mesh, žádné centralizované logging a tracing. Bez nich budou microservices fungovat technicky, ale ladění incidentů bude noční můra. Více v [sekci o provozu](#ops).
-- **Operační kapacita < 30 % vývojové kapacity** – Newman radí, že přechod na microservices má smysl jen tehdy, když organizace investuje výraznou část kapacity do platformy (CI/CD, observability, deployments, incident response). Pokud na to nemáte lidi, modular monolith vás chrání před zhoršením produktivity.
+- **Nízká operační kapacita** – orientační práh: do platformy (CI/CD, observability, deployments, incident response) jde méně než ~30 % vývojové kapacity. Newman opakovaně připomíná, že microservices přesouvají komplexitu do provozu. Pokud na provoz nemáte lidi, modular monolith vás chrání před zhoršením produktivity.
 
 ### Modular monolith v Symfony 8 {#modular-monolith-symfony-heading}
 
@@ -174,7 +174,7 @@ declare(strict_types=1);
 
 use Arkitect\ClassSet;
 use Arkitect\CLI\Config;
-use Arkitect\Expression\ForClasses\NotDependsOnAnyOfTheseNamespaces;
+use Arkitect\Expression\ForClasses\NotDependsOnTheseNamespaces;
 use Arkitect\Expression\ForClasses\ResideInOneOfTheseNamespaces;
 use Arkitect\Rules\Rule;
 
@@ -185,7 +185,7 @@ return static function (Config $config): void {
     // Komunikace probíhá přes Application interface nebo events.
     $orderingIsolation = Rule::allClasses()
         ->that(new ResideInOneOfTheseNamespaces('App\Ordering'))
-        ->should(new NotDependsOnAnyOfTheseNamespaces([
+        ->should(new NotDependsOnTheseNamespaces([
             'App\Billing\Infrastructure',
             'App\Catalog\Infrastructure',
             'App\Shipping\Infrastructure',
@@ -199,7 +199,7 @@ return static function (Config $config): void {
     // Ani jeho Application – Domain je nejvíc izolovaná.
     $domainIsolation = Rule::allClasses()
         ->that(new ResideInOneOfTheseNamespaces('App\Ordering\Domain'))
-        ->should(new NotDependsOnAnyOfTheseNamespaces([
+        ->should(new NotDependsOnTheseNamespaces([
             'App\Billing',
             'App\Catalog',
             'App\Shipping',
@@ -213,7 +213,7 @@ return static function (Config $config): void {
     // Subscriber v jiném BC má vlastní IntegrationEvent DTO.
     $eventsArePrivate = Rule::allClasses()
         ->that(new ResideInOneOfTheseNamespaces('App\Billing'))
-        ->should(new NotDependsOnAnyOfTheseNamespaces([
+        ->should(new NotDependsOnTheseNamespaces([
             'App\Ordering\Domain\Event',
         ]))
         ->because(
@@ -331,11 +331,14 @@ Důvody, proč zůstat hybridní dlouhodobě:
 ### De-microservicing – návrat k monolitu {#de-microservicing-heading}
 
 Trend „microservices za každou cenu“ z let 2014–2018 se po dekádě provozu obrátil.
-Adrian Cockcroft (Cloud Architect v Netflixu, který microservices zpopularizoval, později VP Cloud Architecture v AWS)
-v rozhovorech od roku 2022 explicitně varuje před předčasným rozdělením.
+Adrian Cockcroft (Cloud Architect v Netflixu, který microservices zpopularizoval,
+v letech 2016–2022 VP v AWS, od roku 2022 nezávislý poradce) v roce 2023 přiznal,
+že microservices byly „prodávány jako odpověď na všechno“.
 Případ **Amazon Prime Video** (2023, oficiální článek na Amazon engineering blog)
 popsal, jak tým vrátil video monitoring stack z microservices do monolitu –
-ušetřil **90 % infrastrukturních nákladů** a zlepšil škálování.
+ušetřil **90 % infrastrukturních nákladů** a zlepšil škálování. Sám Cockcroft
+ovšem tento případ čte jinak: jako refaktoring serverless prototypu, ne jako
+návrat od microservices.
 
 Symptomy, které mluví pro de-microservicing:
 
@@ -546,6 +549,9 @@ framework:
                     exchange:
                         name: 'domain_events'
                         type: 'topic'
+                        # Fallback pro zprávy bez explicitního klíče. Relay nastavuje
+                        # skutečný routing key per zpráva přes AmqpStamp
+                        # (např. new AmqpStamp('ordering.cancelled')).
                         default_publish_routing_key: 'ordering.placed'
 
         buses:

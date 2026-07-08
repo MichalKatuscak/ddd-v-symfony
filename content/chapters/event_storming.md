@@ -7,7 +7,7 @@ meta_description: "Jak připravit, vést a vyhodnotit workshop Event Storming a 
 meta_keywords: "Event Storming, Domain Storytelling, Alberto Brandolini, Stefan Hofer, Henning Schwentner, Domain Discovery, DDD workshop, Big Picture, Process Level, Design Level, Pivotal Event, Hot Spot, Bounded Context"
 og_type: article
 published: "2026-04-29"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
@@ -88,7 +88,7 @@ Big Picture je první workshop, který tým s novou doménou (nebo s migrací z 
 
 Před workshopem se nelze vyhnout přípravě:
 
-- **Místnost a stěna.** 4–8 m dlouhá rovná stěna, nejlépe bez oken (světlo odlepuje stickies). Pokud je workshop online, založte v Miro nebo Mural *frame* 12 000 × 4 000 px.
+- **Místnost a stěna.** 4–8 m dlouhá rovná stěna bez oken, dveří a nábytku v cestě – Brandolini požaduje *unlimited modeling surface*, souvislou plochu, kterou workshop nesmí vyčerpat. Pokud je workshop online, založte v Miro nebo Mural *frame* 12 000 × 4 000 px.
 - **Účastníci.** 6–12 lidí. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany: 3–5 vývojářů včetně tech leada. Plus jeden facilitátor (viz níže).
 - **Materiál.** 5–10 balíčků oranžových stickies (3M Post-It, 76×76 mm), 2 balíčky růžových, 2 modrých, 1 žlutý, 1 šedý, 1 zelený, 1 lila (světle fialový), 1 tmavě fialový. Černé fixy Sharpie pro každého (žádné kuličkové pera – text nebude čitelný z 2 m).
 - **Catering.** Káva, voda, ovoce, oběd. Workshop unaví – bez cateringu padá energie po 90 minutách.
@@ -98,7 +98,7 @@ Před workshopem se nelze vyhnout přípravě:
 
 1. **(10 min) Brief a startovací event.** Facilitátor v 5 minutách vysvětlí pravidla: oranžová = co se stalo, minulý čas, lepit kamkoliv. Pak workshop odstartuje tím, že napíše první event, o kterém ví, že nastává v doméně, a nalepí ho doprostřed stěny – např. `OrderPlaced`.
 2. **(20–30 min) Chaotic exploration.** Všichni dostanou stejně oranžových stickies (~15 každý) a píší události, které je napadnou. **Lepí kamkoliv** bez pořadí. Jde o záměrný chaos – chcete, aby si lidé vzpomněli na vše, ne aby okamžitě strukturovali. Facilitátor sbírá poznámky a tlačí lidi: „a co se stane potom? a předtím?“.
-3. **(30 min) Time enforcement.** Facilitátor začne přesouvat eventy doleva (dříve) a doprava (později). Vznikne časová osa. Účastníci do toho mluví – „ne, refund je až po reklamaci, posuň to“. Duplicitní eventy se slučují, ale jen se souhlasem účastníků.
+3. **(30 min) Enforcing the timeline.** Facilitátor začne přesouvat eventy doleva (dříve) a doprava (později). Vznikne časová osa. Účastníci do toho mluví – „ne, refund je až po reklamaci, posuň to“. Duplicitní eventy se slučují, ale jen se souhlasem účastníků.
 4. **(30–45 min) Pivotal Events.** Facilitátor identifikuje *zlomové body* – eventy, kolem kterých se přirozeně sdružuje skupina ostatních. V e-shopu typicky: `CustomerRegistered`, `OrderPlaced`, `PaymentSettled`, `ShipmentDispatched`, `OrderClosed`. Označí je velkou červenou šipkou nebo vodorovnou čarou pod osu. Typicky 3–7 pivotal events.
 5. **(30–45 min) Hot Spots.** Kdykoliv během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?“), **nediskutuje se**. Místo toho se napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla. Po 45 minutách máte typicky 8–15 hot spotů. To je *nejcennější výstup* Big Picture.
 6. **(20–30 min) Bounded Context boundaries.** Facilitátor s týmem hledá místa, kde se mění slovník – kde *tentýž* pojem znamená něco jiného, kde končí jeden příběh a začíná jiný. Označí je fialovými stickies nebo silnými fialovými čarami. Typicky 3–7 BC.

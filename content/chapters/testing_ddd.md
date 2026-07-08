@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-11"
+modified: "2026-07-08"
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -467,9 +467,10 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 
 ## 17.04 Test doubles a InMemory repozitáře {#test-doubles}
 
-Test double je obecný název pro náhradu reálné závislosti v testu. PHPUnit a literatura rozlišují čtyři
-varianty (stub, mock, fake, spy) a v DDD má každá z nich jiný dopad: vede k jinému stylu testu a k jiné
-odolnosti vůči refaktoringu.
+Test double je obecný název pro náhradu reálné závislosti v testu. Meszarosova taxonomie
+z *xUnit Test Patterns* rozlišuje pět typů: dummy, stub, spy, mock a fake. V praxi s PHPUnit
+se pracuje hlavně se čtyřmi z nich (stub, mock, fake, spy) a v DDD má každý jiný dopad: vede
+k jinému stylu testu a k jiné odolnosti vůči refaktoringu.
 
 :::callout{type="note"}
 ### Typy test doubles a jejich použití v DDD:

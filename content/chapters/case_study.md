@@ -7,7 +7,7 @@ meta_description: "Systém pro správu projektů v DDD krok za krokem: bounded c
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
@@ -1106,6 +1106,9 @@ hydratace doménových objektů. Hlubší teoretický základ je v kapitolách
 Tabulka `project_list_view` drží tvar potřebný pro výpis projektů uživatele. Není normalizovaná –
 obsahuje vypočítané hodnoty (`member_count`, `task_count`) a denormalizované pole
 `member_ids` jako JSON. Tato tabulka není zdrojem pravdy; lze ji kdykoli znovu sestavit z primárních tabulek.
+Dotaz operátorem `@>` i GIN index níže předpokládají PostgreSQL sloupec typu `jsonb` –
+Doctrine `Types::JSON` sám o sobě vytvoří `json`, proto sloupec nese option `jsonb: true`
+(novější DBAL nabízí přímo typ `Types::JSONB`).
 
 :::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListView.php"}
 <?php
@@ -1136,7 +1139,9 @@ class ProjectListView
     #[ORM\Column(type: Types::GUID)]
     public string $ownerId;
 
-    #[ORM\Column(type: Types::JSON)]
+    // PostgreSQL: nutné jsonb (options), samotné Types::JSON vytvoří sloupec json,
+    // nad kterým operátor @> ani GIN index nefungují.
+    #[ORM\Column(type: Types::JSON, options: ['jsonb' => true])]
     public array $memberIds = [];
 
     #[ORM\Column(type: Types::INTEGER)]
@@ -1157,6 +1162,8 @@ class ProjectListView
 
 Projekce naslouchá doménovým událostem ze všech kontextů, které mají vliv na podobu výpisu projektů.
 Běží jako asynchronní message handler – mimo originální transakci, takže ji nemůže shodit.
+Každou událost obsluhuje samostatná metoda s atributem `#[AsMessageHandler]`; Messenger
+routuje podle type-hintu parametru, obecný type-hint `object` proto použít nelze.
 
 :::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListProjection.php"}
 <?php
@@ -1172,7 +1179,6 @@ use App\TaskManagement\Domain\Event\TaskCreated;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
 class ProjectListProjection
 {
     public function __construct(
@@ -1180,18 +1186,8 @@ class ProjectListProjection
     ) {
     }
 
-    public function __invoke(object $event): void
-    {
-        match (true) {
-            $event instanceof ProjectCreated => $this->onProjectCreated($event),
-            $event instanceof MemberAdded    => $this->onMemberAdded($event),
-            $event instanceof MemberRemoved  => $this->onMemberRemoved($event),
-            $event instanceof TaskCreated    => $this->onTaskCreated($event),
-            default                          => null,
-        };
-    }
-
-    private function onProjectCreated(ProjectCreated $event): void
+    #[AsMessageHandler]
+    public function onProjectCreated(ProjectCreated $event): void
     {
         $now = new \DateTimeImmutable();
         $view = new ProjectListView();
@@ -1207,7 +1203,8 @@ class ProjectListProjection
         $this->em->flush();
     }
 
-    private function onMemberAdded(MemberAdded $event): void
+    #[AsMessageHandler]
+    public function onMemberAdded(MemberAdded $event): void
     {
         $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
@@ -1225,7 +1222,8 @@ class ProjectListProjection
         }
     }
 
-    private function onMemberRemoved(MemberRemoved $event): void
+    #[AsMessageHandler]
+    public function onMemberRemoved(MemberRemoved $event): void
     {
         $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
@@ -1241,7 +1239,8 @@ class ProjectListProjection
         $this->em->flush();
     }
 
-    private function onTaskCreated(TaskCreated $event): void
+    #[AsMessageHandler]
+    public function onTaskCreated(TaskCreated $event): void
     {
         $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
@@ -1318,8 +1317,10 @@ téhož projektu. Projekce na to musí být připravená dvěma vlastnostmi.
 výše to zajišťují tři detaily: `onMemberAdded` nepřidá uživatele dvakrát díky kontrole
 `in_array(..., strict: true)`; `onMemberRemoved` přepočítává
 `memberCount` z aktuální délky pole, ne inkrementem; `onProjectCreated`
-při kolizi PK skončí výjimkou, kterou Messenger zaloguje a dál se nepokouší (po prvním zpracování
-už view existuje). Pro silnější záruku lze do `project_list_view` přidat sloupec
+při kolizi PK skončí výjimkou – tu Messenger podle retry strategie několikrát zopakuje
+(výchozí tři pokusy) a zprávu pak odloží na failure transport, případně zahodí.
+View po prvním zpracování už existuje, duplicitní událost tedy stav nepoškodí.
+Pro silnější záruku lze do `project_list_view` přidat sloupec
 `last_event_id` a každou událost zpracovat jen tehdy, pokud její ID je novější.
 
 **Reconciler.** Pokud událost přijde mimo pořadí (handler vrátí `return` bez zápisu, protože `$view === null`) nebo se ztratí, projekce zůstává zastaralá. Reconciler je samostatný proces, který

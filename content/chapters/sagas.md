@@ -7,7 +7,7 @@ meta_description: "Ságy a Process Managery v DDD a Symfony Messenger: kompenzac
 meta_keywords: "saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce"
 og_type: article
 published: "2026-03-26"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
@@ -1353,7 +1353,7 @@ Refund je asynchronní příkaz – do terminálního `Failed` smí přejít až
 co dorazí potvrzení `RefundSucceeded`. Přechod do `Failed` hned po dispatchi
 by ságu uzavřel dřív, než refund proběhl; při jeho selhání by se po penězích
 zákazníka nikdo nesháněl. Stav „kompenzace odeslána, čeká se na potvrzení“
-se v literatuře označuje jako *compensation pending*.
+se označuje jako *compensation pending*.
 
 :::callout{type="pattern"}
 ### PHP: Potvrzení kompenzace v OrderProcessManager {#refund-confirmation-heading}

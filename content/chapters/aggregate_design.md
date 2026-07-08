@@ -7,7 +7,7 @@ meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. P
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: "2026-06-13"
+modified: "2026-07-08"
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"
@@ -666,7 +666,7 @@ doctrine:
 
     orm:
         auto_generate_proxy_classes: '%kernel.debug%'
-        enable_lazy_ghost_objects: true   # Doctrine ORM 3: výchozí pro nové projekty
+        enable_lazy_ghost_objects: true   # v ORM 3 jediný podporovaný režim; vypnout jde jen s ORM 2
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         mappings:
@@ -756,7 +756,8 @@ Reference přes ID je jasné pravidlo, ale typů ID je víc a každý má dopad 
 - **UUID v7 (případně ULID).** Časově řazené, generovatelné distribuovaně bez
   koordinace, řadí se podle času vzniku. **Doporučená volba** pro většinu nových projektů.
   `Uuid::v7()` přibylo v balíčku `symfony/uid` v Symfony 6.2; ULID
-  (`Symfony\Component\Uid\Ulid`) nabízí tentýž balíček od Symfony 5.1.
+  (`Symfony\Component\Uid\Ulid`) nabízí tentýž balíček od Symfony 5.1
+  (experimentálně, stabilní od 5.3).
 - **Sekvenční integer.** Krátký, lidsky čitelný, rychlý. Nevýhody: vyžaduje
   centrální generátor (DB sekvence), prozrazuje řád a počet entit, špatně se merguje
   z více DB (microservices).
