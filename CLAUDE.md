@@ -20,6 +20,9 @@ php bin/console cache:clear
 
 # Lint templates
 php bin/console lint:twig templates/
+
+# Syntax-check all PHP code samples in chapters (php -l per block)
+php scripts/lint-php-snippets.php            # add -v for per-block output, or chapter filenames to limit scope
 ```
 
 Frontend assets go through Vite (`vite-plugin-symfony`, see `package.json`); `highlight.js` for code blocks. There is no test suite.

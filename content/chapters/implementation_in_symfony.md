@@ -842,8 +842,6 @@ doctrine:
 :::
 
 :::code{language="php" filename="src/UserManagement/Domain/Model/User.php (použití typu)"}
-<?php
-
 // Atribut odkazuje na registrovaný typ jménem:
 #[ORM\Column(type: 'email_vo', unique: true)]
 private Email $email;
