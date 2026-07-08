@@ -941,17 +941,18 @@ i přepsat. Vznikají anomálie známé z databází – *lost update* (storno
 ságy přepíše změnu, kterou objednávková sága právě provádí) a *dirty read*
 (proces si přečte platbu, kterou kompenzace vzápětí vrátí).
 
-Richardson pro tyto anomálie popisuje sadu protiopatření (*countermeasures*):
+Richardson pro tyto anomálie popisuje sadu protiopatření (*countermeasures*).
+První dvě pracují s daty. *Semantic lock* je aplikační zámek: záznam, na kterém
+sága pracuje, nese stav s příznakem `*_PENDING` a ostatní procesy ho musí
+respektovat. *Commutative updates* jsou operace navržené tak, aby na pořadí
+nezáleželo – připsání a odepsání částky komutuje, nastavení absolutního
+zůstatku ne.
 
-- **Semantic lock** – aplikační zámek. Záznam, na kterém sága pracuje, nese
-  stav s příznakem `*_PENDING`; ostatní procesy ho musí respektovat.
-- **Commutative updates** – operace navržené tak, aby na pořadí nezáleželo.
-  Připsání a odepsání částky komutuje, nastavení absolutního zůstatku ne.
-- **Pessimistic view** – přeuspořádání kroků ságy. Změna, jejíž dirty read
-  napáchá největší škodu (třeba připsání kreditu), se přesune za pivot
-  transakci (viz [Když selže kompenzace](#selhani-kompenzace)).
-- **Reread value** – krok si před zápisem hodnotu znovu načte a ověří, že se
-  od prvního čtení nezměnila; jinak ságu zastaví nebo opakuje.
+Zbylá dvě pracují s průběhem ságy. *Pessimistic view* přeuspořádává kroky:
+změna, jejíž dirty read napáchá největší škodu (třeba připsání kreditu), se
+přesune za pivot transakci (viz [Když selže kompenzace](#selhani-kompenzace)).
+Při *reread value* si krok před zápisem hodnotu znovu načte a ověří, že se od
+prvního čtení nezměnila; jinak ságu zastaví nebo opakuje.
 
 Semantic lock je z nich nejčastější:
 

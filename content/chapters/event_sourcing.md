@@ -155,11 +155,13 @@ V Event Sourcingu jsou doménové události (Domain Events) zdrojem pravdy o sta
 notifikací o vedlejších efektech, jako je tomu u událostí v Doctrine ORM aplikaci. Tomu odpovídají
 i přísnější požadavky na jejich tvar:
 
-- **Immutabilita** – Po vytvoření nelze událost měnit. Veškeré její properties jsou read-only, nastavené v konstruktoru.
-- **Serializovatelnost** – Událost musí být serializovatelná do trvalého formátu (JSON, MessagePack…) a deserializovatelná zpět bez ztráty informace.
-- **Verzování** – Schéma události se v čase může vyvíjet. Stará data v Event Store je třeba udržet čitelná, typicky pomocí upcastingu (transformace starých verzí na aktuální).
-- **Pojmenování v minulém čase** – Události vyjadřují fakta, která již nastala: `UserRegistered`, `OrderPlaced`, `PaymentFailed`.
-- **Dostatečná granularita dat** – Událost musí obsahovat veškerá data potřebná k tomu, aby z ní bylo možné rekonstruovat stav, aniž by byl nutný přístup k externím zdrojům.
+První dva požadavky se týkají tvaru samotné třídy. Událost je po vytvoření neměnná – veškeré properties jsou read-only, nastavené v konstruktoru. A musí jít serializovat do trvalého formátu (JSON, MessagePack…) a deserializovat zpět bez ztráty informace.
+
+Zbylé tři míří na obsah a životní cyklus:
+
+- schéma události se v čase vyvíjí – stará data v Event Store je třeba udržet čitelná, typicky upcastingem (transformací starých verzí na aktuální),
+- název vyjadřuje fakt v minulém čase: `UserRegistered`, `OrderPlaced`, `PaymentFailed`,
+- data musí být dost granulární na to, aby z události šel rekonstruovat stav bez přístupu k externím zdrojům.
 
 :::callout{type="pattern"}
 ### PHP: Bázová třída DomainEvent a konkrétní třída UserRegistered {#domain-event-php-heading}

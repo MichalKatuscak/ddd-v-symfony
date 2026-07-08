@@ -1336,18 +1336,15 @@ leader election), relay worker dostává timeout/error na publish. Outbox řádk
 zůstávají `pending`, kupí se. **Nezasahujte do produkčních INSERTů** – jakmile
 začnete blokovat aplikační vrstvu, šíříte výpadek brokera do core domény.
 
-Standardní vzor:
-
-- **Worker exponential backoff** – po failed publish čeká 1 s, 2 s, 4 s,
-  max 30 s. Mezitím loguje `outbox_publish_errors_total`.
-- **Alert na rychlost růstu pending** – `delta(outbox_pending_count[5m]) > 10000`
-  signalizuje, že produce > consume → broker nestíhá.
-- **Capacity planning na DB** – outbox musí umět absorbovat 30 minut
-  brokerového výpadku. Při 1k events/s to je 1,8 mil. řádků navíc – rozpočet
-  na disk a vacuum.
-- **Zvážit sampling pro low-priority eventy** – některé eventy (audit, metrics)
-  jsou tolerantní ke ztrátě. Při sustained backpressure můžete řízeně dropnout.
-  Doménové eventy (`OrderPlaced`) zahodit nelze – ty musí dorazit.
+Standardní vzor má čtyři složky. Worker po failed publish přechází na
+exponential backoff – čeká 1 s, 2 s, 4 s, maximálně 30 s – a mezitím loguje
+`outbox_publish_errors_total`. Alert hlídá rychlost růstu pending:
+`delta(outbox_pending_count[5m]) > 10000` signalizuje, že produce převyšuje
+consume a broker nestíhá. Kapacitně musí databáze absorbovat 30 minut
+brokerového výpadku; při 1k events/s to je 1,8 mil. řádků navíc, tedy rozpočet
+na disk a vacuum. A u low-priority eventů (audit, metrics), které jsou
+tolerantní ke ztrátě, lze při sustained backpressure zvážit řízený sampling –
+doménové eventy (`OrderPlaced`) ale zahodit nelze, ty musí dorazit.
 
 ## 15.08 Anti-vzory {#antivzory}
 

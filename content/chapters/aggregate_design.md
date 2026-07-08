@@ -687,17 +687,16 @@ S desítkami úkolů je to v pořádku, s tisíci je to neúnosné – každé n
 celou kolekci, každé přidání položky způsobí flush všech úkolů. Khononov pro tento případ definuje
 tři strategie [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/):
 
-- **Rozdělit agregát.** `Project` a `Task` jsou samostatné
-  agregáty. `Task` obsahuje `ProjectId`. Invariant „úkol patří
-  k existujícímu projektu“ se vymáhá v command handleru přes `ProjectExistsSpecification`,
-  ne přes referenci v Doctrine.
+- **Rozdělit agregát.** `Project` a `Task` se stanou samostatnými agregáty
+  a `Task` nese jen `ProjectId` jako referenci. Invariant „úkol patří
+  k existujícímu projektu“ pak nevymáhá Doctrine asociace, ale command handler přes
+  `ProjectExistsSpecification` – před založením úkolu ověří, že projekt existuje.
 - **Doctrine extra-lazy collection.** `fetch: 'EXTRA_LAZY'` umožní
   `$project->getTasks()->count()` bez načtení kolekce, případně
   `$project->getTasks()->matching($criteria)`. Použitelné, pokud agregát
   kolekci skutečně potřebuje pro invarianty (např. limit počtu úkolů na projekt).
-- **Agregát jako hranice služby.** Vnitřní kolekci nahradit službou pracující
-  s agregátem, která dotazem v repozitáři ověřuje invariant. Funguje, ale je to znamení, že
-  hranice je špatně.
+- **Agregát jako hranice služby.** Kolekci nahradí služba pracující s agregátem,
+  která invariant ověří dotazem v repozitáři. Funguje, ale signalizuje špatnou hranici.
 
 ### Hot aggregate {#hot-aggregate}
 
@@ -814,23 +813,24 @@ aplikujeme na netriviální doménu správy projektů.
 - **Sága tam, kde má být agregát.** Pokud invariant musí platit okamžitě, sága
   ho neudržuje. Pravidlo „pojistka nikdy nesmí být zaplacena bez podepsané smlouvy“
   nesnese několik sekund čekání – patří do agregátu.
-- **Vystavený mutátor uvnitř agregátu.** `$order->getItems()->add(...)`
-  obchází kořen. Kolekce by měla být immutable z pohledu vnějšku; přidávání položky jde
-  výhradně metodou na kořeni.
-- **Sdílený stav přes službu.** Pomocná „`OrderService`“, která
-  zasahuje do dvou agregátů, je skrytá transakce. Pokud služba vykoná
-  `$em->flush()`, jste v anti-vzoru.
 - **Doménová logika v read modelu.** Read model je projekce, ne místo, kde
   žijí invarianty. Pravidla patří do write modelu, projekce jen reaguje.
-- **Anemic aggregate s public settery.** Pokud má agregát pro každou vlastnost
-  `get/set`, je to data structure, ne agregát. Stavové přechody musí být metody
-  vyjadřující doménový záměr (`place()`, `ship()`, `cancel()`).
-- **Repozitář vracející vnitřní entity.** `OrderItemRepository::get(itemId)`
-  je porušení hranice. Vnitřní entity jsou dosažitelné jen přes kořen; jejich „samostatná“
-  identita patří do read modelu, ne do write modelu.
 - **Domain Event jako notifikace mezi vrstvami.** Event není mechanismus
   pro „když se agregát změní, smaž cache“. Eventy jsou doménová fakta, ne infrastrukturní
   signály. Cache invalidaci řešte v projekci, která event konzumuje.
+
+Několik dalších chyb má společného jmenovatele: obcházení kořene.
+`$order->getItems()->add(...)` mění kolekci mimo agregát – z pohledu vnějšku má být
+immutable a přidání položky jde výhradně metodou na kořeni. Totéž porušení hranice
+předvádí `OrderItemRepository::get(itemId)`: vnitřní entity jsou dosažitelné jen přes
+kořen a jejich „samostatná“ identita patří do read modelu, ne do write modelu. Příbuzným
+vzorem je anemic aggregate s public settery – pokud má agregát pro každou vlastnost
+`get/set`, je to data structure, ne agregát, a stavové přechody musí být metody
+vyjadřující doménový záměr (`place()`, `ship()`, `cancel()`).
+
+Variantou téhož na vyšší úrovni je sdílený stav přes službu. Pomocná „`OrderService`“,
+která zasahuje do dvou agregátů, je skrytá transakce; pokud služba vykoná
+`$em->flush()`, jste v anti-vzoru.
 
 ## 07.13 Checklist návrhu agregátu {#checklist}
 

@@ -59,7 +59,7 @@ Anémický model je nejrozšířenější anti-vzor objektově orientovaného v�
 :::callout{type="warn"}
 ### Špatně: Anémická entita User a servisní vrstva s logikou {#anemicky-spatny-heading}
 
-V tomto příkladu entita `User` neobsahuje žádnou doménovou logiku – pouze gettery a settery. Veškerá logika je přesunuta do `UserService`, což vede k anémickému modelu.
+Entita `User` nese jen gettery a settery; veškerá doménová logika sedí v `UserService`.
 :::
 
 :::callout{type="anti"}
@@ -264,10 +264,7 @@ Primitive Obsession nastává, když vývojáři používají primitivní datov�
 :::callout{type="note"}
 ### Problémy způsobené Primitive Obsession {#primitive-problemy-heading}
 
-- **Ztráta validace** – primitivní `string` může obsahovat jakoukoliv hodnotu, zatímco hodnotový objekt `Email` garantuje, že vždy obsahuje platnou e-mailovou adresu.
-- **Chybějící sémantika** – typ `string` neříká nic o tom, co hodnota reprezentuje. `Email`, `PhoneNumber` nebo `PostalCode` jsou sémanticky bohaté.
-- **Záměna identifikátorů** – používání `int` pro všechna ID vede k tomu, že typový systém PHP ani IDE nemohou odhalit záměnu `$orderId` a `$userId` – obě jsou jen `int`.
-- **Rozptýlená validační logika** – bez hodnotových objektů se validace opakuje na každém místě, kde se s hodnotou pracuje.
+Primitivní `string` může obsahovat jakoukoliv hodnotu; hodnotový objekt `Email` garantuje platnou e-mailovou adresu. Primitivům navíc chybí sémantika – typ `string` neříká nic o tom, co hodnota reprezentuje, zatímco `Email`, `PhoneNumber` nebo `PostalCode` sémantiku nesou. Používání `int` pro všechna ID vede k záměnám: typový systém PHP ani IDE neodhalí prohozené `$orderId` a `$userId`, obojí je jen `int`. A bez hodnotových objektů se validace opakuje na každém místě, kde se s hodnotou pracuje.
 :::
 
 :::callout{type="warn"}

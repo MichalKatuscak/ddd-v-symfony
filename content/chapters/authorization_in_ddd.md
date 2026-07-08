@@ -458,12 +458,9 @@ final class Order extends AggregateRoot
 }
 :::
 
-Vlastnosti tohoto kódu:
+Aggregate nemá žádnou závislost na Symfony. Používá pouze PHP standardní typy a vlastní doménové třídy – žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze proto testovat unit testem bez Symfony Kernel. Selhání hlásí doménovými výjimkami: `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status – typicky 409 Conflict, ne 403 Forbidden, protože *není to autorizační selhání, je to doménový stav*.
 
-- **Žádná závislost na Symfony.** Aggregate používá pouze PHP standardní typy a vlastní doménové třídy. Žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze testovat unit testem bez Symfony Kernel.
-- **Doménové výjimky.** `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status (typicky 409 Conflict, ne 403 Forbidden – *není to autorizační selhání, je to doménový stav*).
-- **Pomocná metoda `isCancellable()` je dotaz bez vedlejších efektů.** Používá ji UI vrstva pro skrytí tlačítka: Twig šablona ji volá s proměnnou `now` předanou z controlleru (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita.
-- **Domain Events.** Po úspěšné operaci agregát zaznamená `OrderCancelled` voláním `record()`. Aplikační handler eventy po `repository->save()` vyzvedne přes `releaseEvents()` a publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
+Pomocná metoda `isCancellable()` je dotaz bez vedlejších efektů. Používá ji UI vrstva pro skrytí tlačítka: Twig šablona ji volá s proměnnou `now` předanou z controlleru (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita. Zbývají domain events: po úspěšné operaci agregát zaznamená `OrderCancelled` voláním `record()`, aplikační handler eventy po `repository->save()` vyzvedne přes `releaseEvents()` a publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
 
 Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [sekci 11.04](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a nutné.
 

@@ -139,14 +139,7 @@ Strategie a velký obraz. Méně kódu, víc rozhodnutí.
 
 ### Pro tech leada {#cesta-techlead}
 
-Kombinace organizační optiky a praktických problémů.
-
-- [Conway's Law a Team Topologies](/team-topologies) – jak týmovou strukturou ovlivnit architekturu.
-- [Event Storming a Domain Storytelling](/event-storming) – workshop, který zavedete do týmu.
-- [Migrace z CRUD](/migrace-z-crud) – jak postupně přejít bez zastavení vývoje.
-- [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli) – co očekávat a jak s tím pracovat.
-- [Anti-vzory](/anti-vzory) – kódové signály, které v code review hledat.
-- [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) – kdy říct ne.
+Kombinace organizační optiky a praktických problémů. Cesta začíná u kapitoly [Conway's Law a Team Topologies](/team-topologies), tedy u otázky, jak týmovou strukturou ovlivnit architekturu. Navazuje [Event Storming a Domain Storytelling](/event-storming) – workshop, který zavedete do týmu – a [Migrace z CRUD](/migrace-z-crud) s postupným přechodem bez zastavení vývoje. Realistická očekávání dodá [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli). Zbývají dvě kapitoly: [Anti-vzory](/anti-vzory) jako přehled kódových signálů, které v code review hledat, a [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) pro chvíle, kdy je namístě říct ne.
 
 ### Pro vývojáře migrujícího z CRUD {#cesta-migrace}
 

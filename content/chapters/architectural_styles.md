@@ -981,9 +981,9 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 ### Co Vertical Slice mění {#vs-rozdil-heading}
 
 - **Adresářová struktura** – místo `Controller/, Service/, Domain/, Infrastructure/` máte `Ordering/PlaceOrder/, Ordering/CancelOrder/, Ordering/GetOrderHistory/`.
-- **Závislosti mezi feature** jsou minimální – každá feature je téměř samostatná. Sdílí se jen agregáty, hodnotové objekty a sběrnice (event bus, command bus).
-- **Diff jedné feature** sedí v jednom adresáři. Code review se zjednoduší – recenzent vidí celý use case na jednom místě.
-- **Akceptační test** může pokrýt celý slice najednou (HTTP request → response), aniž by bylo nutné mockovat sedm vrstev.
+- Závislosti mezi feature klesají na minimum. Každá feature je téměř samostatná; sdílí se jen agregáty, hodnotové objekty a sběrnice (event bus, command bus).
+- Diff jedné feature sedí v jednom adresáři, takže recenzent vidí při code review celý use case na jednom místě.
+- Akceptační test pokryje celý slice najednou (HTTP request → response) bez mockování sedmi vrstev.
 
 ### Srovnání horizontálního a vertikálního dělení {#srovnani-deleni}
 
@@ -999,12 +999,7 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 
 ### Kdy zvolit který přístup {#kdy-vs}
 
-**Horizontální (vrstvený) přístup** se vyplatí, když:
-
-- Tým má dlouhou zkušenost s vrstvenou architekturou a CQRS není v plánu.
-- Aplikace má 10–30 endpointů a malou doménovou složitost.
-- Doménový model má silně sdílené invarianty napříč více funkcemi, které je třeba jednotně vymáhat.
-- Preference týmu je explicitní oddělení technických vrstev před organizací podle funkcí.
+**Horizontální (vrstvený) přístup** se vyplatí týmu, který má dlouhou zkušenost s vrstvenou architekturou a CQRS neplánuje. Sedí aplikaci s 10–30 endpointy a malou doménovou složitostí. Dává smysl i tam, kde doménový model nese silně sdílené invarianty napříč více funkcemi a je třeba je jednotně vymáhat – nebo kde tým preferuje explicitní oddělení technických vrstev před organizací podle funkcí.
 
 **Vertikální slice** se vyplatí, když:
 

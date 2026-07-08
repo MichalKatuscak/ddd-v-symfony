@@ -196,138 +196,138 @@ src/
 │   │   ├── Model/             # Doménové modely
 │   │   │   └── User.php        # Entita uživatele (Aggregate Root)
 │   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   ├── UserId.php      # Identifikátor uživatele
-│   │   │   └── Email.php       # Email uživatele
+│   │   │   ├── UserId.php
+│   │   │   └── Email.php
 │   │   ├── Event/             # Doménové události
-│   │   │   └── UserRegistered.php  # Událost registrace uživatele
+│   │   │   └── UserRegistered.php
 │   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── UserRepository.php  # Rozhraní pro práci s uživateli
+│   │       └── UserRepository.php
 │   ├── Infrastructure/        # Infrastrukturní vrstva
 │   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineUserRepository.php  # Doctrine implementace
+│   │       └── DoctrineUserRepository.php
 │   ├── Registration/          # Feature: Registrace uživatele
 │   │   ├── Command/           # Příkazy
-│   │   │   ├── RegisterUser.php  # Příkaz pro registraci uživatele
-│   │   │   └── RegisterUserHandler.php  # Handler příkazu
+│   │   │   ├── RegisterUser.php
+│   │   │   └── RegisterUserHandler.php
 │   │   └── Controller/        # Kontrolery
-│   │       └── RegistrationController.php  # Kontroler pro registraci
+│   │       └── RegistrationController.php
 │   ├── Authentication/        # Feature: Autentizace
 │   │   └── Controller/        # Kontrolery
-│   │       └── SecurityController.php  # Kontroler pro autentizaci
+│   │       └── SecurityController.php
 │   └── GetUser/               # Feature: Získání uživatele
 │       ├── Query/             # Dotazy
-│       │   ├── GetUser.php      # Dotaz pro získání uživatele
-│       │   └── GetUserHandler.php  # Handler dotazu
+│       │   ├── GetUser.php
+│       │   └── GetUserHandler.php
 │       └── ViewModel/         # View modely
-│           └── UserViewModel.php  # View model uživatele
+│           └── UserViewModel.php
 ├── ProjectManagement/         # Bounded Context: Správa projektů
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
+│   ├── Domain/
+│   │   ├── Model/
 │   │   │   ├── Project.php     # Entita projektu (Aggregate Root)
-│   │   │   └── ProjectMember.php  # Entita člena projektu
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   ├── ProjectId.php    # Identifikátor projektu
-│   │   │   └── ProjectStatus.php  # Status projektu
-│   │   ├── Event/             # Doménové události
-│   │   │   ├── ProjectCreated.php  # Událost vytvoření projektu
-│   │   │   └── MemberAdded.php  # Událost přidání člena
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── ProjectRepository.php  # Rozhraní pro práci s projekty
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineProjectRepository.php  # Doctrine implementace
+│   │   │   └── ProjectMember.php
+│   │   ├── ValueObject/
+│   │   │   ├── ProjectId.php
+│   │   │   └── ProjectStatus.php
+│   │   ├── Event/
+│   │   │   ├── ProjectCreated.php
+│   │   │   └── MemberAdded.php
+│   │   └── Repository/
+│   │       └── ProjectRepository.php
+│   ├── Infrastructure/
+│   │   └── Repository/
+│   │       └── DoctrineProjectRepository.php
 │   ├── CreateProject/         # Feature: Vytvoření projektu
-│   │   ├── Command/           # Příkazy
-│   │   │   ├── CreateProject.php  # Příkaz pro vytvoření projektu
-│   │   │   └── CreateProjectHandler.php  # Handler příkazu
-│   │   └── Controller/        # Kontrolery
-│   │       └── ProjectController.php  # Kontroler pro vytvoření projektu
+│   │   ├── Command/
+│   │   │   ├── CreateProject.php
+│   │   │   └── CreateProjectHandler.php
+│   │   └── Controller/
+│   │       └── ProjectController.php
 │   └── GetProjects/           # Feature: Seznam projektů
-│       ├── Query/             # Dotazy
-│       │   ├── GetProjects.php  # Dotaz pro získání projektů
-│       │   └── GetProjectsHandler.php  # Handler dotazu
-│       ├── Controller/        # Kontrolery
-│       │   └── ProjectsController.php  # Kontroler pro seznam projektů
-│       └── ViewModel/         # View modely
-│           └── ProjectViewModel.php  # View model projektu
+│       ├── Query/
+│       │   ├── GetProjects.php
+│       │   └── GetProjectsHandler.php
+│       ├── Controller/
+│       │   └── ProjectsController.php
+│       └── ViewModel/
+│           └── ProjectViewModel.php
 ├── TaskManagement/            # Bounded Context: Správa úkolů
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
+│   ├── Domain/
+│   │   ├── Model/
 │   │   │   └── Task.php        # Entita úkolu (Aggregate Root)
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   ├── TaskId.php      # Identifikátor úkolu
-│   │   │   └── TaskStatus.php  # Status úkolu
-│   │   ├── Event/             # Doménové události
-│   │   │   ├── TaskCreated.php  # Událost vytvoření úkolu
-│   │   │   ├── TaskAssigned.php  # Událost přiřazení úkolu
-│   │   │   └── TaskStatusChanged.php  # Událost změny stavu
+│   │   ├── ValueObject/
+│   │   │   ├── TaskId.php
+│   │   │   └── TaskStatus.php
+│   │   ├── Event/
+│   │   │   ├── TaskCreated.php
+│   │   │   ├── TaskAssigned.php
+│   │   │   └── TaskStatusChanged.php
 │   │   ├── Service/           # Doménové služby
-│   │   │   └── TaskAssignmentService.php  # Služba pro přiřazení úkolu
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── TaskRepository.php  # Rozhraní pro práci s úkoly
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineTaskRepository.php  # Doctrine implementace
+│   │   │   └── TaskAssignmentService.php
+│   │   └── Repository/
+│   │       └── TaskRepository.php
+│   ├── Infrastructure/
+│   │   └── Repository/
+│   │       └── DoctrineTaskRepository.php
 │   ├── CreateTask/            # Feature: Vytvoření úkolu
-│   │   ├── Command/           # Příkazy
-│   │   │   ├── CreateTask.php   # Příkaz pro vytvoření úkolu
-│   │   │   └── CreateTaskHandler.php  # Handler příkazu
-│   │   └── Controller/        # Kontrolery
-│   │       └── TaskController.php  # Kontroler pro úkoly
+│   │   ├── Command/
+│   │   │   ├── CreateTask.php
+│   │   │   └── CreateTaskHandler.php
+│   │   └── Controller/
+│   │       └── TaskController.php
 │   ├── AssignTask/            # Feature: Přiřazení úkolu
-│   │   ├── Command/           # Příkazy
-│   │   │   ├── AssignTask.php   # Příkaz pro přiřazení úkolu
-│   │   │   └── AssignTaskHandler.php  # Handler příkazu
-│   │   └── Controller/        # Kontrolery
-│   │       └── AssignController.php  # Kontroler pro přiřazení
+│   │   ├── Command/
+│   │   │   ├── AssignTask.php
+│   │   │   └── AssignTaskHandler.php
+│   │   └── Controller/
+│   │       └── AssignController.php
 │   ├── ChangeStatus/          # Feature: Změna stavu úkolu
-│   │   ├── Command/           # Příkazy
-│   │   │   ├── ChangeTaskStatus.php  # Příkaz pro změnu stavu
-│   │   │   └── ChangeTaskStatusHandler.php  # Handler příkazu
-│   │   └── Controller/        # Kontrolery
-│   │       └── StatusController.php  # Kontroler pro změnu stavu
+│   │   ├── Command/
+│   │   │   ├── ChangeTaskStatus.php
+│   │   │   └── ChangeTaskStatusHandler.php
+│   │   └── Controller/
+│   │       └── StatusController.php
 │   └── GetTask/               # Feature: Získání úkolu
-│       ├── Query/             # Dotazy
-│       │   ├── GetTask.php      # Dotaz pro získání úkolu
-│       │   └── GetTaskHandler.php  # Handler dotazu
-│       └── ViewModel/         # View modely
-│           └── TaskViewModel.php  # View model úkolu
+│       ├── Query/
+│       │   ├── GetTask.php
+│       │   └── GetTaskHandler.php
+│       └── ViewModel/
+│           └── TaskViewModel.php
 ├── CommentManagement/         # Bounded Context: Správa komentářů
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
-│   │   │   └── Comment.php     # Entita komentáře
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   └── CommentId.php   # Identifikátor komentáře
-│   │   ├── Event/             # Doménové události
-│   │   │   └── CommentAdded.php  # Událost přidání komentáře
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── CommentRepository.php  # Rozhraní pro práci s komentáři
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineCommentRepository.php  # Doctrine implementace
+│   ├── Domain/
+│   │   ├── Model/
+│   │   │   └── Comment.php
+│   │   ├── ValueObject/
+│   │   │   └── CommentId.php
+│   │   ├── Event/
+│   │   │   └── CommentAdded.php
+│   │   └── Repository/
+│   │       └── CommentRepository.php
+│   ├── Infrastructure/
+│   │   └── Repository/
+│   │       └── DoctrineCommentRepository.php
 │   └── AddComment/            # Feature: Přidání komentáře
-│       ├── Command/           # Příkazy
-│       │   ├── AddComment.php   # Příkaz pro přidání komentáře
-│       │   └── AddCommentHandler.php  # Handler příkazu
-│       └── Controller/        # Kontrolery
-│           └── CommentController.php  # Kontroler pro komentáře
+│       ├── Command/
+│       │   ├── AddComment.php
+│       │   └── AddCommentHandler.php
+│       └── Controller/
+│           └── CommentController.php
 ├── ActivityTracking/          # Bounded Context: Sledování aktivity
-│   ├── Domain/                # Doménová vrstva
-│   │   ├── Model/             # Doménové modely
-│   │   │   └── Activity.php    # Entita aktivity
-│   │   ├── ValueObject/       # Hodnotové objekty
-│   │   │   └── ActivityId.php  # Identifikátor aktivity
-│   │   └── Repository/        # Repozitáře (rozhraní)
-│   │       └── ActivityRepository.php  # Rozhraní pro práci s aktivitami
-│   ├── Infrastructure/        # Infrastrukturní vrstva
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineActivityRepository.php  # Doctrine implementace
+│   ├── Domain/
+│   │   ├── Model/
+│   │   │   └── Activity.php
+│   │   ├── ValueObject/
+│   │   │   └── ActivityId.php
+│   │   └── Repository/
+│   │       └── ActivityRepository.php
+│   ├── Infrastructure/
+│   │   └── Repository/
+│   │       └── DoctrineActivityRepository.php
 │   └── RecordActivity/        # Feature: Zaznamenání aktivity
-│       ├── Command/           # Příkazy
-│       │   ├── RecordActivity.php  # Příkaz pro zaznamenání aktivity
-│       │   └── RecordActivityHandler.php  # Handler příkazu
-│       └── Controller/        # Kontrolery
-│           └── ActivityController.php  # Kontroler pro aktivity
+│       ├── Command/
+│       │   ├── RecordActivity.php
+│       │   └── RecordActivityHandler.php
+│       └── Controller/
+│           └── ActivityController.php
 └── SharedKernel/              # Sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
     │   ├── AggregateRoot.php  # Bázová třída agregátu (record/releaseEvents)

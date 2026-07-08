@@ -31,12 +31,9 @@ kapitola [Základní koncepty DDD](/zakladni-koncepty).
 :::
 
 :::callout{type="note"}
-### Proč je DDD dobře testovatelný:
+### Proč je DDD dobře testovatelný
 
-- **Žádné závislosti na frameworku** – Doménové třídy (entity, value objects, agregáty) jsou čisté PHP objekty. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack.
-- **Explicitní závislosti** – Závislosti se vždy předávají přes konstruktor (constructor injection), nikoli ze statických globálních objektů. To umožňuje jejich záměnu za test doubles.
-- **Bohaté doménové modely** – Doménová logika je soustředěna v doménových objektech, nikoli roztroušena v kontrolerech nebo šablonách. Testy pokrývají chování, na kterém záleží.
-- **Invarianty se vynucují při konstrukci** – Value objekty a agregáty ověřují svá invariantní pravidla v konstruktoru nebo v továrních metodách. To usnadňuje testování správného i nesprávného stavu.
+Doménové třídy – entity, value objects, agregáty – jsou čisté PHP objekty bez závislosti na frameworku. Nepotřebují Symfony kontejner, Doctrine ani HTTP stack. Závislosti dostávají výhradně přes konstruktor (constructor injection), nikoli ze statických globálních objektů, takže je test může zaměnit za test doubles. Logika je přitom soustředěna v doménových objektech, ne roztroušena po kontrolerech a šablonách – testy proto pokrývají chování, na kterém záleží. A protože value objekty a agregáty ověřují svá invariantní pravidla už v konstruktoru nebo v továrních metodách, dá se testovat správný i nesprávný stav.
 :::
 
 ### Testovací pyramida pro DDD
@@ -1177,10 +1174,11 @@ je ale opačně: tam, kde je pokrytí nízké, leží kód, který nikdo netestu
 :::callout{type="pattern"}
 ### Doporučené pokrytí pro DDD vrstvy:
 
-- **Doménová vrstva (Domain)** – 90–100 %. Tato vrstva obsahuje veškerou doménovou logiku. Každý invariant, každá validace a každé doménové pravidlo musí mít test.
-- **Aplikační vrstva (Application)** – 80–90 %. Command a query handlery pokryjte unit testy s InMemory repozitáři.
-- **Infrastrukturní vrstva (Infrastructure)** – 60–80 %. Repozitáře pokryjte integračními testy. Generovaný kód (Doctrine mappings) testovat nemusíte.
-- **Prezentační vrstva (Presentation)** – 50–70 %. Kontrolery pokryjte funkčními testy pro hlavní scénáře.
+- **Doménová vrstva (Domain)** – 90–100 %. Zde leží veškerá doménová logika; každý invariant, každá validace a každé doménové pravidlo musí mít test.
+- **Aplikační vrstva (Application)** – 80–90 %: command a query handlery pokryté unit testy s InMemory repozitáři.
+- **Infrastrukturní vrstva (Infrastructure)** – 60–80 %. Repozitáře pokryjte integračními testy; generovaný kód (Doctrine mappings) testovat nemusíte.
+
+Prezentační vrstvě (Presentation) stačí 50–70 % – funkční testy hlavních scénářů kontrolerů.
 :::
 
 :::callout{type="note"}

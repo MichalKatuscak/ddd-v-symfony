@@ -416,13 +416,9 @@ Praktická heuristika odvozená z Team Topologies:
 ### Jak změřit cognitive load (jednoduchá rubrika) {#cognitive-load-rubric}
 
 Osvědčený postup je jednou za kvartál spustit s týmem 30minutový workshop,
-kde každý člen ohodnotí na škále 1–5 následující:
-
-1. **Doménová komplexita** (intrinsic) – „Rozumím kompletně doméně, kterou náš tým vlastní?“
-2. **Technická komplexita** (intrinsic) – „Rozumím všem technologiím, které používáme?“
-3. **Stabilita platformy** (extraneous, inverze) – „Můžu se spolehnout na CI/CD, observability, deploy?“
-4. **Kvalita dokumentace** (extraneous, inverze) – „Najdu potřebné info do 5 minut?“
-5. **Prostor na učení** (germane) – „Mám každý sprint 1–2 hodiny na zlepšení/learning?“
+kde každý člen ohodnotí na škále 1–5 pět oblastí: doménovou a technickou
+komplexitu (intrinsic), stabilitu platformy a kvalitu dokumentace (extraneous,
+inverzně) a prostor na učení (germane). Přesné znění otázek obsahuje rubrika níže.
 
 Body 1+2 vysoké = tým má pod kontrolou intrinsic. Body 3+4 vysoké = Platform team funguje
 a extraneous load je nízký. Bod 5 vysoký = tým má kapacitu na germane.

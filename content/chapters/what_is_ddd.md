@@ -215,14 +215,13 @@ Praktické příklady Ubiquitous Language a dalších konceptů naleznete v kapi
 
 DDD má reálné náklady, se kterými rozhodnutí o nasazení musí počítat:
 
-- **Složitost** – DDD vyžaduje hluboké pochopení domény i architektonických principů. Pro vývojáře bez zkušenosti s objektovým modelováním je to skok.
+- **Složitost** – hluboké pochopení domény i architektonických principů; pro vývojáře bez zkušenosti s objektovým modelováním velký skok.
 - **Časová náročnost** – V počátku projektu se modelování domény a budování Ubiquitous Language nevrací rychle. Investice se vrátí až s rostoucí složitostí pravidel.
 - **Nevhodnost pro jednoduché aplikace** – U CRUD aplikací s minimální doménovou logikou DDD přidává režii bez návratnosti.
-- **Potřeba doménových expertů** – Bez přístupu k expertovi nemá kdo říct, jaká pravidla skutečně platí.
-- **Organizace týmu** – Spolupráce vývojářů a doménových expertů znamená pravidelné workshopy a sdílený jazyk. Některé organizace na to nejsou nastavené.
 - **Integrace s legacy systémy** – Napojení DDD modelu na starý systém typicky vyžaduje Anti-Corruption Layer, který má vlastní cenu.
-- **Výkonnost** – Agregáty a repozitáře mají při špatné implementaci dopad na výkon (problém N+1, načítání zbytečně velkých grafů).
-- **Učební křivka** – Tým potřebuje měsíce, než získá rutinu. První projekt v DDD bývá pomalejší než stejný projekt v CRUD.
+- **Výkonnost** – Při špatné implementaci hrozí problém N+1 a načítání zbytečně velkých grafů.
+
+K tomu se přidává lidská stránka. Bez přístupu k doménovému expertovi nemá kdo říct, jaká pravidla skutečně platí. Spolupráce vývojářů s experty navíc znamená pravidelné workshopy a sdílený jazyk – a některé organizace na to nejsou nastavené. Tým sám potřebuje měsíce, než získá rutinu; první projekt v DDD bývá pomalejší než stejný projekt v CRUD.
 
 :::callout{type="warn"}
 ### Ilustrativní scénář: DDD bez doménového experta {#priklad-selhani-heading}

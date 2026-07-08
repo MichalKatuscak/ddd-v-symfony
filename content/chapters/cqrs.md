@@ -99,14 +99,19 @@ CRUD – viz [Bounded Contexts](/zakladni-koncepty#bounded-contexts).
 ## 12.03 Výhody CQRS {#benefits}
 
 CQRS přináší architektonické výhody zejména u aplikací
-s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
+s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis.
 
-- **Oddělení odpovědností** – Write model nese doménovou logiku, validaci invariantů
-  a konzistenci dat. Read straně zbývá jediný úkol: dostat data v podobě, kterou potřebuje
-  obrazovka. Každý model obsahuje jen to, co ke své práci potřebuje.
-- **Nezávislá optimalizace** – Write model může používat normalizované relační schéma
-  a Doctrine ORM entity s bohatou doménovou logikou. Na straně čtení poslouží denormalizovaná tabulka,
-  Elasticsearch index nebo Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům.
+První výhodou je oddělení odpovědností. Write model nese doménovou logiku, validaci invariantů
+a konzistenci dat; read straně zbývá jediný úkol – dostat data v podobě, jakou vyžaduje obrazovka.
+Každý model obsahuje jen to, co ke své práci potřebuje, a lze ho optimalizovat nezávisle:
+na straně zápisu normalizované relační schéma a Doctrine ORM entity s bohatou doménovou logikou,
+na straně čtení denormalizovaná tabulka, Elasticsearch index nebo Redis cache – cokoli,
+co nejlépe vyhovuje konkrétním dotazům. Z téhož oddělení plyne i volnost při evoluci:
+read model jde kdykoli přebudovat (rebuild projekcí), doplnit o nový read model pro nový use case
+nebo změnit strukturu dotazu – bez jakéhokoli dopadu na write model a doménovou logiku.
+
+Dvě další výhody:
+
 - **Škálovatelnost** – Ve většině aplikací výrazně převažuje čtení nad zápisem
   (poměr 10:1 až 100:1). CQRS umožňuje nezávisle škálovat read stranu (repliky, cache, CDN)
   bez dopadu na write stranu.
@@ -114,9 +119,6 @@ s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis:
   (given state → when command → then events/state). U query handlerů se ověřuje jen správnost
   vrácených dat. Žádné propletení obou odpovědností v jedné testovací sadě.
   Viz kapitola [Testování DDD kódu](/testovani-ddd).
-- **Flexibilita evoluce** – Read model lze kdykoli přebudovat (rebuild projekcí),
-  přidat nový read model pro nový use case nebo změnit strukturu dotazu – bez jakéhokoli
-  dopadu na write model a doménovou logiku.
 
 ## 12.04 Výzvy a omezení CQRS {#challenges}
 

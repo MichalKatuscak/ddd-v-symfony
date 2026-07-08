@@ -694,9 +694,7 @@ Doménová logika do cache klíče nepatří – cache slouží infrastruktuře,
 :::callout{type="note"}
 ### Co cachovat a co ne
 
-- **Vhodné pro cache:** výsledky read modelu (DTO), výsledky reportovacích dotazů, výsledky volání externích API, výpočetně náročné projekce.
-- **Nevhodné pro cache:** aktuální stav agregátů, které jsou právě modifikovány (způsobí dirty reads), výsledky, jejichž neaktuálnost by způsobila doménové nekonzistence.
-- **Nikdy:** nezahrnujte výsledek doménové logiky do cache klíče (např. nevypočítávejte slevu při sestavování cache klíče).
+Do cache patří výsledky read modelu (DTO), reportovací dotazy, odpovědi externích API a výpočetně náročné projekce. Nepatří tam aktuální stav agregátů, které jsou právě modifikovány (způsobí dirty reads), ani výsledky, jejichž neaktuálnost by vyvolala doménové nekonzistence. Výsledek doménové logiky nepatří nikdy ani do cache klíče – například sleva se při sestavování klíče nevypočítává.
 :::
 
 ### Query cache a result cache v Doctrine
