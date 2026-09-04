@@ -430,10 +430,40 @@ HTML strojově zbaveno značek. Datum přístupu u všech webových zdrojů: 202
 
 ### Neověřené / nedohledané
 
+- **Původ věty „Not all of a large system will be well designed“ – VYSVĚTLENO 2026-09-04.
+  Není to Evansova formulace, ale Khononovova parafráze Evanse, kterou kniha převzala jako
+  citát.** Khononov ji používá dvakrát a pokaždé ji Evansovi výslovně připisuje: *„As Eric Evans
+  says, not all of a large system will be well designed“* (kap. 13) a *„As Eric Evans put it,
+  not all of a large system will be well designed“* (Appendix A).
+
+  V Evansově knize z roku 2003 ale tato věta v této podobě **není** – ověřeno proti výtisku.
+  Evansovo znění je *„The harsh reality is that not all parts of the design are going to be
+  equally refined. Priorities must be set.“*
+
+  **Řetězec je tedy tento:** Evans napsal jedno, Khononov to parafrázoval a připsal Evansovi,
+  naše kniha převzala Khononovovu parafrázi jako Evansův citát. **Doporučení: citovat Evanse
+  doslovně z knihy 2003.** Pokud se má zachovat kratší formulace, uvést ji jako parafrázi
+  s odkazem na Khononova, ne jako Evansův výrok.
+
+  Khononovův kontext je přitom pro kapitolu použitelný sám o sobě: větu používá jako argument
+  pro postupnou modernizaci – *„A safer approach to improving the design of existing systems is
+  to think big but start small.“*
+
 - **Multiplikátory X / 5–10X / 3–4X** (`when_not_to_use_ddd.md:379–381`). Žádný primární
   zdroj s těmito čísly nenalezen. Nutné dohledat ručně, nebo označit jako autorský odhad.
-- **Telco příklad připsaný Khononovovi** (`:388–390`). Ve veřejně dostupných textech
-  (vladikk.com, ukázkové kapitoly) není. Nutné ověřit přímo v *Learning DDD* (2021).
+- **Telco příklad připsaný Khononovovi (`:388–390`) – OVĚŘENO 2026-09-04 z knihy. V knize není
+  a jediná zmínka o akvizici vyznívá opačně.** Kontrola plného textu: „telco“ 0 výskytů,
+  „telecom“ 1 výskyt (a ten se týká Nokie jako příkladu firmy měnící obchodní domény),
+  „acquisition“ 1, „acquired“ 6 – žádný v souvislosti s neúspěšnou migrací.
+
+  Naopak: jediné místo, kde Khononov spojuje akvizici s osudem DDD projektu, je závěr jeho
+  případové studie a vyznívá pozitivně – *„The company became profitable very quickly, and
+  eventually it was acquired by its biggest client.“*
+
+  Příběh o telcu, které tři roky migrovalo na DDD a přišlo o to při akvizici, je tedy autorská
+  konstrukce připsaná jmenovanému autorovi. **Doporučení: odstranit.** Teze „migrace je obchodní
+  rozhodnutí, ne technické“, kterou má ilustrovat, obstojí i bez ní; pokud má zůstat příklad,
+  musí být označený jako „Ilustrativní scénář“ podle konvence knihy.
 - **Vernonova formulace o „strategické hodnotě“ (`:248–249`) – OVĚŘENO 2026-09-04 proti plnému
   textu *DDD Distilled* (vlastní výtisk). Formulace tam není a Vernonův argument míří jinam.**
   Řetězec „strategic value“ se v knize nevyskytuje **ani jednou**. Co Vernon skutečně píše:

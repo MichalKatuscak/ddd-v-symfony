@@ -303,10 +303,35 @@ v pěti ukázkách odstranit spolu s tím.
 
   **Doporučení: citovat CIDR 2007 s odkazem na volné PDF, ne reprint na queue.acm.org.**`. Existenci a autorství eseje potvrzuje Vernonův seznam referencí v Part II [4], který odkazuje na původní CIDR 2007 verzi (`ics.uci.edu/~cs223/papers/cidr07p15.pdf`). Samotný text ale v této rešerši ověřen nebyl, takže tvrzení kapitoly na `:174-177` („jediná životaschopná cesta je one entity per transaction“) zůstává neověřené. **Dohledat ručně** – je to jeden ze dvou pilířů argumentace v 07.05.
 
-- **Khononovo „páté pravidlo" (`:81-84`).** Tvrzení, že Khononov v *Learning DDD* formuluje „jeden command modifikuje právě jeden agregát", se nepodařilo potvrdit z žádného dostupného zdroje. Ověřit v knize, kap. 6.
+- **Khononovo „páté pravidlo“ (`:81-84`) – OVĚŘENO 2026-09-04 z knihy (vlastní výtisk).
+  Jádro platí, formulace je posunutá.** Khononov píše:
 
-- **Khononovy „tři strategie" pro large-collection problem (`:687-699`).** Atribuce Khononovovi je v kapitole explicitní, ale zdroj se nepodařilo ověřit. Navíc druhá strategie (Doctrine `EXTRA_LAZY`) je zjevně autorský doplněk, ne Khononovův text – kniha není o PHP. Ověřit v knize a atribuci rozdělit.
+  > *„No system operation can assume a multi-aggregate transaction. A change to an aggregate’s
+  > state can only be committed individually, **one aggregate per database transaction**. The one
+  > aggregate instance per transaction forces us to carefully design an aggregate’s boundaries,
+  > ensuring that the design addresses the business domain’s invariants and rules. The need to
+  > commit changes in multiple aggregates signals a wrong transaction boundary.“*
 
+  Hranicí je u něj **databázová transakce**, ne command. Kapitola to formuluje jako „jeden command
+  modifikuje právě jeden agregát“, což je silnější tvrzení – jeden command může legitimně otevřít
+  víc transakcí za sebou (typicky právě v sáze, kterou kapitola vzápětí zmiňuje).
+
+  **Doporučení: přepsat na „jedna transakce = jeden agregát“** a Khononovovu pointu o špatné
+  hranici („The need to commit changes in multiple aggregates signals a wrong transaction
+  boundary“) uvést jako diagnostiku. Dvě volání `save()` v jednom handleru pak nejsou porušením
+  pravidla samy o sobě, ale signálem k prověření hranic.
+- **Khononovy „tři strategie“ pro large-collection problem (`:687-699`) – OVĚŘENO 2026-09-04
+  z knihy. V knize nejsou; atribuce je vymyšlená.** Kontrola plného textu: „large collection“
+  0 výskytů, „three strategies“ 0, „collection“ celkem jen 6 výskytů v celé knize, a žádný se
+  netýká strategií pro velké kolekce v agregátu.
+
+  Druhá z uvedených strategií to potvrzuje i nepřímo: opírá se o Doctrine `fetch: 'EXTRA_LAZY'`,
+  což je PHP-specifický mechanismus. **Khononov píše příklady v C#** a Doctrine v knize nefiguruje.
+
+  **Věcně jsou přitom všechny tři strategie správné** a pro kapitolu užitečné – jen je nelze
+  připsat Khononovovi. **Doporučení: atribuci odstranit a nechat je jako autorské řešení.**
+  Pokud je potřeba opora, Khononovovo pravidlo „one aggregate per database transaction“ je
+  doložitelné a vede ke stejnému závěru (rozdělit agregát).
 - **Práh snapshotu – DOHLEDÁNO 2026-09-04, tradované doporučení je doložené.** Greg Young to
   říká v přednášce **Code on the Beach 2014** (přepis je na blogu Kurrentu): o snapshotu neuvažovat
   dřív než zhruba **u tisíce událostí, možná i víc**.

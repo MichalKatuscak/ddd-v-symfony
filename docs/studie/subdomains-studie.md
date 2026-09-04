@@ -424,8 +424,35 @@ kapitolu o DDD a AI.*
 
 ### Neověřené / nedohledané
 
-- **Khononovovy příklady Core Domain (Uber ridesharing/matching, Google ranking)** uváděné na `subdomains.md:50`. Nepodařilo se potvrdit, že právě tyto příklady v *Learning DDD* jsou. Vyžaduje kontrolu v knize.
-- **Khononovovo tvrzení, že u Core subdomén je 1:N mapování nevyhnutelné kvůli čtenářskému vs. zápisovému kontextu** (`:158`). Nedohledáno.
+- **Khononovovy příklady Core Domain (`subdomains.md:50`) – POTVRZENO 2026-09-04 z knihy
+  (vlastní výtisk). Oba sedí doslovně.** Uber: *„A core subdomain is what a company does
+  differently from its competitors. […] Let’s take Uber as an example. Initially, the company
+  provided a novel form of transportation: ridesharing. As its competitors caught up, Uber found
+  ways to optimize and evolve its core business: for example, reducing costs by matching riders
+  heading in the same direction.“* Google: *„Consider another example: Google Search’s ranking
+  algorithm. […] So, for Google, the ranking algorithm is a core subdomain.“*
+
+  **Detail, který kapitole chybí a stojí za doplnění:** Khononov k Uberu dodává kritérium
+  složitosti – *„A core subdomain that is simple to implement can only provide a short-lived
+  competitive advantage. Therefore, core subdomains are naturally complex.“* To je test, který
+  kapitola v této sekci nemá, a doplňuje její vlastní kritérium konkurenční výhody.
+- **Khononovovo tvrzení o 1:N mapování u Core subdomén (`:158`) – OVĚŘENO 2026-09-04 z knihy.
+  Khononov říká opak: před rozdělením koherentní funkcionality varuje.** Doslova:
+
+  > *„One thing to beware of is splitting a coherent functionality into multiple bounded contexts.
+  > Such division will hinder the ability to evolve each context independently. Instead, the same
+  > business requirements and changes will simultaneously affect the bounded contexts and require
+  > simultaneous deployment of the changes. To avoid such ineffective decomposition, use the rule
+  > of thumb we discussed in Chapter 1 to find subdomains: identify sets of coherent use cases
+  > that operate on the same data.“*
+
+  Rozdělení jedné subdomény do více kontextů u něj tedy není „u Core často nevyhnutelné“, nýbrž
+  **neefektivní dekompozice, které se má tým vyhnout**. Důvody, kdy je extrakce přesto namístě,
+  uvádí jiné než kapitola: oddělení vývojových cyklů komponent a možnost škálovat funkcionalitu
+  nezávisle – tedy provozní důvody, ne „čtenářský vs. zápisový kontext“.
+
+  **Doporučení: pasáž přepsat.** Vztah 1:N v přehledu ponechat jako popis možnosti, ale
+  Khononovovu pozici uvést správně – jako varování s výčtem legitimních výjimek.
 - **Vernonovo doporučení k Supporting subdoméně (`:56`) – OVĚŘENO 2026-09-04 v *IDDD*.
   Kapitola mu připisuje opak toho, co píše.** Vernonovo znění:
 
