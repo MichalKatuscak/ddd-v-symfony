@@ -253,11 +253,37 @@ První matchující pravidlo vyhrává a nespecifikovaný matcher odpovídá če
   **Zbývající výhrada je k formulaci, ne k existenci zdroje.** Kapitola 11 na ř. 124 slibuje „praktický pohled na **vrstvení** autorizace v doménové aplikaci“. Vernon ale v kap. 14 autorizaci umisťuje do **jedné** vrstvy (Application Services); vícevrstvý model, který je nosnou myšlenkou kapitoly 11, u něj nepochází odtud. Jeho vlastní strukturální odpověď je samostatný Identity & Access kontext (viz sekce 2 této studie).
 
   **Doporučení:** citaci ponechat, ale přeformulovat na to, co Vernon skutečně říká – že autorizační kontrola patří do Application Services. Tvrzení o „vrstvení“ nechat jako autorské, nebo je opřít o [1] a [2], které vícevrstvý přístup dokládají.
-- **Chování Doctrine SQLFilteru u one-to-one asociací na neowning straně.** V komunitě se traduje, že se filtr neuplatní. V aktuální dokumentaci [19] ani v sekci limitations-and-known-issues se tato výjimka neuvádí. Chce ověřit experimentem proti Doctrine ORM 3 dřív, než se do kapitoly cokoli takového napíše.
+- **Doctrine SQLFilter u one-to-one na neowning straně – ČÁSTEČNĚ, zbytek chce test, ne rešerši.**
+  Ověřen je kontrakt: `Doctrine\ORM\Query\Filter\SQLFilter` (ORM 3.6.x) má jedinou abstraktní
+  metodu `abstract public function addFilterConstraint(ClassMetadata $targetEntity, string
+  $targetTableAlias): string` s dokumentovaným chováním „The constraint SQL if there is available,
+  empty string otherwise“. Filtr tedy pracuje nad tabulkou cílové entity a jejím aliasem.
+
+  Zda se uplatní i při načítání neowning strany one-to-one, se z podpisu ani z dokumentace
+  vyčíst nedá – rozhoduje to, jestli persister danou asociaci načítá filtrovaným SELECTem, nebo
+  ji řeší mimo. **Toto je otázka pro reprodukční test nad ORM 3, ne pro rešerši; doporučuji ji
+  z „neověřených“ přesunout mezi úkoly a ověřit spuštěním, protože na tvrzení stojí bezpečnostní
+  doporučení kapitoly.**
+
 - **Přesné znění funkční dekompozice PEP / PDP / PIP / PAP v NIST SP 800-162.** Landing page publikace [2] tyto komponenty neuvádí; jsou v plném PDF (`nvlpubs.nist.gov/nistpubs/specialpublications/NIST.SP.800-162.pdf`), které se v rámci studie nepodařilo načíst. Před použitím slovníku v kapitole ověřit v PDF.
 - **Statistiky adopce OPA / Cerbos v PHP projektech.** Nedohledáno; k dispozici jsou jen počty stažení z Packagistu [25], které o produkčním nasazení nevypovídají.
 - **Existence sekce o autorizaci v kapitole 12 (CQRS).** Úvod kapitoly 11 (řádek 21) slibuje, že integraci do Command Handleru ukáže kapitola o CQRS. V osnově `content/chapters/cqrs.md` se odpovídající sekce nenašla – ověřit ručně a případně slib upravit.
 - **Dekorace privátní služby `security.authorization_checker` v Symfony 8.** Že je služba od 6.0 privátní, je ověřeno z CHANGELOGu SecurityBundle [9]. Že `#[AsDecorator]` na ni bez dalšího zásahu funguje, ověřeno nebylo – vyžaduje test na živé aplikaci se Symfony 8.1 (viz G23).
-- **`Vote::getReasons()` a veřejné API třídy `Vote`.** Načtení zdroje vrátilo jen část třídy: potvrzeny jsou vlastnosti `$voter`, `$result`, `$reasons`, `$extraData` a metoda `addReason(string): void` [8][9]. Konstruktor, statické tovární metody a getter pro reasons se ověřit nepodařilo. Před psaním ukázky do kapitoly ověřit proti nainstalované verzi.
+- **Třída `Vote` – OVĚŘENO 2026-09-04 z celého zdroje. `getReasons()` neexistuje.**
+  `Symfony\Component\Security\Core\Authorization\Voter\Vote` ve větvi 8.1 má přesně toto veřejné
+  API a nic víc:
+
+  ```php
+  public string $voter;      // class-string<VoterInterface>|string
+  public int $result;        // VoterInterface::ACCESS_*
+  public array $reasons = [];    // list<string>
+  public array $extraData = [];  // array<string, mixed>
+  public function addReason(string $reason): void;
+  ```
+
+  Důvody se tedy čtou přímo z veřejné vlastnosti `$vote->reasons`, ne getterem. Třída není
+  `final` a nemá konstruktor. **Pro kapitolu:** pokud se `Vote` do textu doplní (dnes ho
+  nepoužívá), psát `$vote->reasons`; zápis `$vote->getReasons()` by spadl.
+
 - **Chování `Symfony\Component\Security\Http\Attribute\IsGranted` s asynchronním busem.** Zda a jak se `#[IsGranted]` snese s controllerem, který jen odešle command na bus, není v dokumentaci řešeno. Pro doporučení P1-1 je to podstatná otázka – ověřit experimentem.
 - **Tvrzení kapitoly o četnosti tří chyb (řádky 27–29) a o typických volbách multi-tenancy strategie podle velikosti firmy (řádek 705).** Obojí jsou zkušenostní tvrzení bez dohledatelných dat. Buď je označit jako autorský odhad, nebo najít oporu (např. průzkum mezi Symfony týmy) – v rámci studie se nic použitelného nenašlo.

@@ -261,8 +261,18 @@ Knižní zdroje bez URL (uvedeny pro atribuce v sekci 2, ověřeny z knihovny kn
   statementy emulované na straně klienta. Zdroj:
   https://www.postgresql.org/about/news/pgbouncer-1210-released-now-with-prepared-statements-2735/
 
-- **`Doctrine\DBAL\Connections\PrimaryReadReplicaConnection`.** Konfigurační stránka DBAL o wrapperu pro primary/replica nemluví. Existenci a chování (kdy se přepíná na primary, `ensureConnectedToPrimary()`) je třeba ověřit v dedikované dokumentaci nebo ve zdrojovém kódu. Pokud existuje, patří do sekce 16.09 jako alternativa k ručně konfigurovanému druhému entity manageru.
-- **Verze ORM, ve které přibyl `setEagerFetchBatchSize()`.** Dokumentace [6] metodu popisuje, verzi neuvádí.
+- **`PrimaryReadReplicaConnection` – OVĚŘENO 2026-09-04 v kódu.** Třída
+  `Doctrine\DBAL\Connections\PrimaryReadReplicaConnection` existuje ve větvi 4.4.x na cestě
+  `src/Connections/PrimaryReadReplicaConnection.php`. Existence tedy sporná není; nedoložené
+  zůstává jen to, jak se konfiguruje ze Symfony, protože konfigurační stránka DBAL o wrapperu
+  mlčí. **Doporučení: doložit odkazem na zdrojový soubor, ne na konfigurační dokumentaci.**
+
+- **`setEagerFetchBatchSize()` – OVĚŘENO 2026-09-04 v kódu ORM 3.6.x.** V `src/Configuration.php`
+  na řádku 717: `public function setEagerFetchBatchSize(int $batchSize = 100): void`, uvnitř
+  nastavuje atribut `fetchModeSubselectBatchSize`. **Výchozí hodnota je 100**, což je pro nález G4
+  (doplnit metodu jako třetí řešení N+1) užitečnější údaj než verze: čtenář se dozví, že mechanismus
+  běží i bez explicitního nastavení. Verzi zavedení se z `UPGRADE.md` vyčíst nedá a GitHub Search
+  API vyžaduje autentizaci; pro knihu cílící na ORM 3 to ale není podstatné.
 - **Blackfire Builds jako součást CI/CD** (`:1211`). Tvrzení nebylo ověřeno na blackfire.io; pokud zůstane, chce odkaz na dokumentaci produktu.
 - **Konkrétní čísla replikačního lagu, konfliktů optimistického zámku a prahů pro partitioning.** Bez měřicí metodiky je nelze doložit; buď najít publikované měření, nebo je v kapitole označit jako řádový odhad.
 - **Omezení „entita nesmí být `final`“ – OVĚŘENO 2026-09-04: na Symfony 8 už neplatí.**
@@ -271,8 +281,20 @@ Knižní zdroje bez URL (uvedeny pro atribuce v sekci 2, ověřeny z knihovny kn
   enabled“. Nativní lazy objekty nedědí z entity, takže `final` projde. Komentáře na `:112`
   a `:576` je nutné odstranit. Plný rozbor včetně dalších pěti kapitol a odstraněných
   konfiguračních voleb je v `aggregate_design-studie.md`, sekce „Doověřeno druhým průchodem“.
-- **DBAL API pro streamované čtení read modelu** (`iterateAssociative` a příbuzné). Nebylo ověřeno fetchem; pokud se do kapitoly doplní protějšek `toIterable()` pro DBAL, je nutné podpis a chování ověřit v referenci DBAL.
-- **Chování `Query::HINT_ENABLE_DISTINCT`** v ORM 3 – dokumentace stránkování [13] hint zmiňuje, ale neuvádí verzi ani přesnou konstantu; před použitím v knize ověřit ve zdrojovém kódu.
+- **DBAL API pro streamované čtení – OVĚŘENO 2026-09-04 v kódu DBAL 4.4.x.**
+  `src/Connection.php` nabízí pětici metod, všechny vracejí `Traversable` a mají shodný podpis
+  `(string $query, array $params = [], array $types = [])`: `iterateNumeric` (681),
+  **`iterateAssociative` (697)**, `iterateKeyValue` (713), `iterateAssociativeIndexed` (730)
+  a `iterateColumn` (745). Protějšek k ORM `toIterable()` tedy existuje a lze ho do kapitoly
+  doplnit s doloženým podpisem.
+
+- **`HINT_ENABLE_DISTINCT` – OVĚŘENO 2026-09-04: konstanta je jinde, než studie hledala.**
+  Nepatří třídě `Query`, ale **`Doctrine\ORM\Tools\Pagination\Paginator`**: v ORM 3.6.x je to
+  `Paginator.php:36`, `public const HINT_ENABLE_DISTINCT = 'paginator.distinct.enable'`.
+  Paginator si vedle toho drží vlastní logiku kolem `CountWalker::HINT_DISTINCT`, který si při
+  počítání nastavuje sám, pokud ho dotaz nemá. **Doporučení: v kapitole psát plně kvalifikovaně
+  `Paginator::HINT_ENABLE_DISTINCT`; zápis `Query::HINT_ENABLE_DISTINCT` by nefungoval.**
+
 - **`EXTRA_LAZY` – OVĚŘENO 2026-09-04, platí beze změny.** V `UPGRADE.md` ORM (větev 3.6.x,
   108 kB) se řetězec `EXTRA_LAZY` nevyskytuje ani jednou, takže strategie nebyla odstraněna ani
   deprecated. Nativní lazy objekty na ni nemají vliv: mění způsob, jakým se vytváří lazy instance
