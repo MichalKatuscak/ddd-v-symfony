@@ -221,6 +221,21 @@ Jedna položka se přesunula mezi úkoly: **chování Doctrine SQLFilteru u neow
 one-to-one** se z dokumentace vyčíst nedá, rozhoduje persister. Chce reprodukční test, ne rešerši
 – a stojí na tom bezpečnostní doporučení kapitoly 11.
 
+### Čtvrtá dávka a stav ke konci
+
+Doplněny verze a datace: podepisování Messenger zpráv per handler je ze **Symfony 7.4**, ne z 8;
+**Symfony 8.1.0 vyšlo 29. 5. 2026**; Kévin Gomez publikoval *On Taming Repository Classes*
+**7. 2. 2015** (pozor na záměnu se stejnojmenným Eberleiho textem z 2013); Fowlerův
+*Strangler Application* je z **29. 6. 2004** a na *Strangler Fig* se přejmenoval **29. 4. 2019**,
+takže datace „(Martin Fowler, 2004)“ v knize je správná. Symfony Workflow oficiální stanovisko
+k doménovému modelu nemá, ale téma je vedeno jako otevřené issue symfony-docs#10819.
+
+**Stav po druhém kole: ze 171 položek je 44 uzavřených, 127 otevřených.** Otevřené se dělí na
+37 technických, 51 knižních, 15 „data neexistují“ a 24 ostatních. Technické zbytky jsou
+jednotlivosti bez průřezového dopadu – chování `@>` bez `::jsonb` castu, dekorace privátní služby
+`security.authorization_checker`, `#[IsGranted]` s asynchronním busem, `EntityManager::clear()`
+v ORM 3, referenční DDD projekt na Symfony 8, adopce OPA/Cerbos v PHP.
+
 ### Co z technických položek zbývá
 
 Kategorie A měla 67 položek; ověřené jsou hlavní skupiny (Doctrine, Symfony verze, balíčky,

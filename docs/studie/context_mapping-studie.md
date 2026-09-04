@@ -277,4 +277,9 @@ Vztah nese i atribut `downstreamRights` s hodnotami `INFLUENCER`, `OPINION_LEADE
   a vyvrátila v dataci. **Doporučení: funkci zmiňovat s verzí 7.4 a nepodávat ji jako novinku
   Symfony 8.** Pro knihu cílící na Symfony 8 je použitelná bez výhrad, jen to není novinka.
 - **JSON Schema knihovna v ukázce na ř. 700–733.** Ukázka `OrderPlacedValidator` nejmenuje konkrétní PHP knihovnu. Před přepisem rozhodnout mezi `opis/json-schema` a `justinrainbow/json-schema` a ověřit aktuální API.
-- **Fowler, StranglerFigApplication.** Datace se nepodařilo spolehlivě určit (fetch vrátil rozporné údaje o roce původního článku a o datu poslední aktualizace). Pro kapitolu 03 to není podstatné, ale kapitola `/migrace-z-crud` to bude potřebovat.
+- **Fowler, StranglerFigApplication – DATOVÁNO 2026-09-04.** Původní *Strangler Application*
+  vyšel **29. 6. 2004**, přejmenování na *Strangler Fig Application* proběhlo **29. 4. 2019**
+  (revizní poznámka: „Changed URL and name to Strangler Fig Application April 29 2019“). Rozporné
+  údaje z prvního průchodu vznikly tím, že stránka nese datum poslední revize, ne původního
+  vydání; původní znění je zachované na `OriginalStranglerFigApplication.html`.
+

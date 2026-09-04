@@ -451,7 +451,7 @@ HTML strojově zbaveno značek. Datum přístupu u všech webových zdrojů: 202
   nebude ověřena z tištěného vydání.
 - **Khononovova kapitola o architektuře per subdoménu v *Learning DDD* (2021).** Ověřena je
   jen její blogová předloha z roku 2018 `[5]`. Formulace v knize se může lišit.
-- **Doctrine ORM 3 a Active Record – DOVĚŘOVÁNO 2026-09-04, původní závěr potvrzen.** Stránka
+- **Doctrine ORM 3 a Active Record – OVĚŘENO 2026-09-04, původní závěr potvrzen.** Stránka
   *Architecture* v dokumentaci ORM `current` ani jinde vzory jménem neporovnává; nejblíž je věta
   „Doctrine ORM aims to simplify the translation between database rows and the PHP object model.“
   Explicitní vymezení vůči Active Record v oficiální dokumentaci **není**. **Doporučení: tvrzení

@@ -439,8 +439,17 @@ datum přístupu u všech 2026-09-03.
 
 ### Neověřené / nedohledané
 
-- **Přesné datum původního zápisu „Strangler Application“.** Kniha jinde uvádí „(Martin Fowler, 2004)“ (`microservices_and_ddd.md:786`). Současná stránka na martinfowler.com nese datum 22. 8. 2024 a původní datum neuvádí; `web.archive.org` je pro použitý nástroj nedostupné. Dohledat ručně přes archiv martinfowler.com nebo přes tištěné citace.
-- **Datum přejmenování na „Strangler Fig Application“.** Fowler uvádí důvod, ne datum.
+- **Strangler Fig – DATOVÁNO 2026-09-04, obě data přesně.** Původní text se jmenoval
+  *Strangler Application* a vyšel **29. 6. 2004**; Fowler ho k **29. 4. 2019** přejmenoval na
+  *Strangler Fig Application* a změnil URL. Revizní poznámka na stránce zní doslova
+  „Changed URL and name to Strangler Fig Application April 29 2019“. Důvodem bylo, že se termín
+  odtrhl od botanické metafory a začal vyznívat násilně. Původní znění je zachované na
+  `martinfowler.com/bliki/OriginalStranglerFigApplication.html`, dnešní verze na
+  `.../StranglerFigApplication.html`.
+
+  **Dopad:** datace „(Martin Fowler, 2004)“ na `microservices_and_ddd.md:786` je **správná**.
+  Při citaci stačí rozlišit, že vzor je z roku 2004 a dnešní název je z roku 2019.
+
 - **Standish Group, „50 % nepoužívaných funkcí“ – DOHLEDÁNO 2026-09-04. Tvrzení má chybnou dataci,
   chybné číslo i zamlčený vzorek. Doporučuji je z kapitoly vyškrtnout.**
 

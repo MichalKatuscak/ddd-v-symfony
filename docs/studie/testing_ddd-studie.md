@@ -460,6 +460,5 @@ Všechny položky získány **přímým fetchem URL** (WebFetch nebo curl na Git
   `symfony/framework-bundle ^6.4 || ^7.3 || ^8.0`. Bundle je se Symfony 8 a DoctrineBundle 3
   plně kompatibilní.
 
-- **PŮVODNÍ:** Zdroj [18] uvádí `use_savepoints: true`
   jako nutné pro DBAL < 4; co přesně platí pro DBAL 4 a Doctrine ORM 3, nebylo z README
   jednoznačné.
