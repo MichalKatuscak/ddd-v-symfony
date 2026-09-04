@@ -659,7 +659,7 @@ korelují* s obchodními výsledky (zisk, růst, customer satisfaction):
 
 - **Lead time for changes** – čas od commitu do produkce. Stream-aligned týmy: hodiny. Horizontální týmy: dny–týdny.
 - **Deployment frequency** – kolikrát za den/týden deploy. Stream-aligned: víckrát denně. Horizontální: 1× za sprint.
-- **Change failure rate** – % deploymentů, které způsobí incident. Stream-aligned: pod 15 %. Horizontální: 30–60 %.
+- **Change failure rate** – % deploymentů, které způsobí incident. Stream-aligned: jednotky procent. Horizontální: desítky.
 - **Mean time to restore (MTTR)** – čas zotavení z incidentu. Stream-aligned: hodina. Horizontální: dny.
 
 **Před reorganizací změřte 4 DORA metriky. Po reorganizaci změřte znovu po 6 měsících.**
@@ -703,7 +703,7 @@ To je smutná, ale realistická diagnóza.
 
 1. „*Naše současné DORA metriky: lead time 18 dní, deployment frequency 1×/sprint,
 change failure rate 35 %. Benchmark high-performers (Google, Amazon, Netflix):
-lead time hodiny, deploy víckrát denně, change failure rate pod 15 %.*“
+lead time hodiny, deploy víckrát denně, change failure rate v jednotkách procent.*“
 
 2. „*Hlavní příčina: rozdělení týmů podle vrstev (frontend/backend/DBA), které způsobuje
 předávky a koordinační režii. Conway's Law nám brání rychlejšímu doručování.*“

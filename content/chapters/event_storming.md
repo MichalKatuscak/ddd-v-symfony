@@ -68,6 +68,10 @@ Brandolini paletu barev postupně ustálil v knize *Introducing EventStorming* a
 | **Fialová** | velká sticky / čára | Bounded Context | „Ordering BC“ | Hranice mezi modely. Kreslí se až ke konci Big Picture. |
 | **Žlutooranžová (gold)** | velká sticky | Aggregate | `Order` | Konzistenční hranice. Objevuje se až na Design Level. |
 
+Barevné konvence se mezi facilitátory liší. Brandolini ve své knize značí hot spoty fialovou;
+tabulka výše používá růžovou a fialovou vyhrazuje pro hranice kontextů. Před workshopem se proto
+vyplatí legendu vyvěsit na stěnu, ať se skupina nedohaduje o významu barvy místo o doméně.
+
 :::callout{type="pattern"}
 ### Pravidlo minulého času {#past-tense-rule-heading}
 

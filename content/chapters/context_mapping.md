@@ -118,7 +118,9 @@ V tu chvíli je čas *Partnership rozpustit* a přejít na [Customer/Supplier](#
 
 **Shared Kernel** je *malý* modul kódu fyzicky sdílený mezi dvěma a více Bounded Contexts. Sdílení je oboustranně závazné: žádný vlastník nemůže Shared Kernel jednostranně změnit, protože to by porušilo invarianty v ostatních BC. Změna SK vyžaduje **souhlas všech vlastníků**, což je nákladný proces a důvod, proč musí SK zůstat malý.
 
-Evans v *Domain-Driven Design* (2003) doporučuje explicitní hranicí vyznačit podmnožinu doménového modelu, na jejímž sdílení se týmy dohodly. Kernel má být menší než přirozený průnik obou modelů a zahrnuje i příslušný kód či návrh databáze. Takto sdílený materiál má zvláštní status: nemění se bez konzultace s druhým týmem.
+Evans v *Domain-Driven Design* (2003) doporučuje explicitní hranicí vyznačit podmnožinu doménového modelu, na jejímž sdílení se týmy dohodly. Kritériem není geometrický vztah k oběma modelům, ale náklady: synchronizovat celý model a kódovou bázi bývá příliš drahé, kdežto pečlivě vybraná podmnožina přinese většinu užitku za zlomek ceny. Kernel zahrnuje i příslušný kód či návrh databáze a takto sdílený materiál má zvláštní status: nemění se bez konzultace s druhým týmem.
+
+K vzoru patří i provozní režim, na který se snadno zapomene. Týmy integrují společný systém pravidelně, byť řidčeji než uvnitř vlastního kontextu, a při každé integraci projdou testy obou týmů. Změny se obvykle dělají na oddělených kopiích kernelu a slučují v intervalech: kde tým integruje denně, sloučení kernelu proběhne jednou týdně. Cílem není duplicitu vymýtit, nýbrž zmenšit ji a udržet integraci obou podsystémů snadnou.
 
 ### Kdy Shared Kernel zvolit
 

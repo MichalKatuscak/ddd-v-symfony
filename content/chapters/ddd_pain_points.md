@@ -235,7 +235,7 @@ konkrétní query.
 
 | Situace | Řešení |
 |---|---|
-| Kolekce vždy potřebná s agregátem | `fetch: 'EAGER'` na asociaci – načte v jednom JOIN |
+| Kolekce vždy potřebná s agregátem | `fetch: 'EAGER'` na asociaci – kolekci načte druhým dotazem pro všechny rodiče najednou, ne v JOIN |
 | Kolekce potřebná jen někdy | Repozitář nabídne dvě metody: `get()` (lazy) a `getWithItems()` (EAGER JOIN) |
 | Serializace / JSON response | Nikdy neserializujte agregát přímo – sestavte DTO z načtených dat uvnitř transakce |
 

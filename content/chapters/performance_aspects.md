@@ -42,7 +42,10 @@ a požadavky na odezvu v desítkách milisekund.
 **Nikdy neoptimalizujte naslepo.** Každá optimalizace musí být podložena měřením.
 Předčasná optimalizace (premature optimization) vede k zbytečně složitému kódu, který řeší neexistující
 problémy. Nejprve profilujte, identifikujte skutečné úzké místo a teprve potom optimalizujte.
-Donald Knuth to vyjádřil takto: *„Premature optimization is the root of all evil.“*
+Donald Knuth to vyjádřil takto: *„We should forget about small efficiencies, say about 97% of
+the time: premature optimization is the root of all evil. Yet we should not pass up our
+opportunities in that critical 3%.“* Zkracuje se obvykle na prostřední větu, čímž se ztratí
+obojí – podmínka i pointa. Knuth optimalizaci nezakazuje, vymezuje, kde má smysl.
 [[1]](https://dl.acm.org/doi/10.1145/356635.356640)
 :::
 
