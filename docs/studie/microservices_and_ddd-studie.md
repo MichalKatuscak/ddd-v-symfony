@@ -523,8 +523,21 @@ byl vyčerpán (200/200) při prvním pokusu.
   z QCon London 2016 [22], a to jen z metadat, ne ze záznamu.
 - **Vaughn Vernon k microservices** (*DDD Distilled*, 2016; *IDDD*, 2013). Nedohledáno online.
   Kapitola Vernona cituje na řádku 42 – tvrzení je věrohodné, ale neověřené.
-- **Čísla kapitol Newmanovy *Building Microservices, 2nd ed.*** – **OVĚŘENO 2026-09-04** proti
-  autorovu vlastnímu rozpisu obsahu na samnewman.io [13]. Výsledek u nálezu G23 níže.
+- **Newmanovo *Building Microservices* – DOPLNĚNO 2026-09-04. Na share je jen 1. vydání (2015),
+  a právě to potvrzuje, že kniha musí citovat druhé.** Výtisk prvního vydání (únor 2015, 280 stran)
+  má jinou strukturu: kap. 1 *Microservices*, 2 *The Evolutionary Architect*, 3 *How to Model
+  Services*, 4 *Integration*, 5 *Splitting the Monolith*, 10 *Conway’s Law*, 11 *Microservices at
+  Scale*, 12 *Bringing It All Together*. Čísla kapitol tedy mezi vydáními nelze zaměňovat.
+
+  **Klíčové zjištění k `microservices_and_ddd.md:60`:** řetězec **„information hiding“ se v prvním
+  vydání nevyskytuje ani jednou**, zatímco anotace 2. vydání ho u kapitoly 2 uvádí výslovně
+  („the importance of concepts like information hiding, coupling, cohesion, and domain-driven
+  design“). Pojem je tedy novinkou druhého vydání a citace kapitoly je v tomto bodě správná –
+  jen ji nelze ověřit proti staršímu výtisku. Pojem „autonomy“ je naproti tomu i v prvním vydání
+  (22 výskytů).
+
+  Nález G23 (chybná čísla kapitol na `:870` a `:893`) tím zůstává v platnosti tak, jak byl ověřen
+  proti autorovu rozpisu 2. vydání na samnewman.io.
 - **phparkitect – OVĚŘENO 2026-09-04 z Packagistu.** `phparkitect/phparkitect` **1.3.0
   (31. 7. 2026)**, vyžaduje `php ^8.0`. Projekt je aktivní. Pro srovnání: alternativa
   `phpat/phpat` je na 0.12.4 (17. 3. 2026), `php ^8.1` – tedy stále série 0.x.

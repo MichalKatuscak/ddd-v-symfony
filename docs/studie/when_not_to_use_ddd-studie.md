@@ -434,8 +434,23 @@ HTML strojově zbaveno značek. Datum přístupu u všech webových zdrojů: 202
   zdroj s těmito čísly nenalezen. Nutné dohledat ručně, nebo označit jako autorský odhad.
 - **Telco příklad připsaný Khononovovi** (`:388–390`). Ve veřejně dostupných textech
   (vladikk.com, ukázkové kapitoly) není. Nutné ověřit přímo v *Learning DDD* (2021).
-- **Vernonova formulace o „strategické hodnotě"** (`:248–249`). Ověřená kapitola 1 ani rejstřík
-  *DDD Distilled* ji neobsahují. Zbývá ověřit kapitolu 3 (*Dealing with Complexity*).
+- **Vernonova formulace o „strategické hodnotě“ (`:248–249`) – OVĚŘENO 2026-09-04 proti plnému
+  textu *DDD Distilled* (vlastní výtisk). Formulace tam není a Vernonův argument míří jinam.**
+  Řetězec „strategic value“ se v knize nevyskytuje **ani jednou**. Co Vernon skutečně píše:
+
+  > *„DDD is a set of tools that assist you in designing and implementing software that delivers
+  > high value, both strategically and tactically. Your organization can’t be the best at
+  > everything, so it had better choose carefully at what it must excel. […] Your organization
+  > will benefit most from software models that explicitly reflect its core competencies.“*
+
+  To je argument o tom, **kam uvnitř systému investovat modelovací úsilí** – organizace nemůže
+  vynikat ve všem, tak ať vybere Core Domain a tam soustředí síly. Kapitola z toho ale dělá
+  kritérium, **zda vůbec DDD nasadit** („pokud je strategická hodnota nízká, DDD se nevyplatí“).
+  To Vernon neříká; jeho věta předpokládá, že DDD už používáte, a radí, kde ho použít naplno.
+
+  **Doporučení: citaci přepsat.** Vernonovu větu lze v kapitole použít, ale jako argument pro
+  diferencovanou investici, ne pro odmítnutí DDD. Kritérium „kdy DDD nenasazovat“ je nutné opřít
+  o něco jiného, nebo je podat jako autorské.
 - **Obsah Evansova QCon 2009 vystoupení.** Ověřen jen abstrakt; veřejný přepis neexistuje.
   Pokud má kapitola citovat Evansovy „přednášky", je nutné citovat *DDD Reference*.
 - **Evansova věta „Not all of a large system will be well designed“ – OVĚŘENO 2026-09-04 proti

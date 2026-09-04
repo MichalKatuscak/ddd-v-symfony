@@ -260,6 +260,22 @@ Vztah nese i atribut `downstreamRights` s hodnotami `INFLUENCER`, `OPINION_LEADE
 
 `[20]` IETF — RFC 9745 *The Deprecation HTTP Response Header Field*, Standards Track, březen 2025; navazuje na RFC 8594 (`Sunset`). https://www.rfc-editor.org/rfc/rfc9745.html (přístup 2026-09-03)
 
+### Doplňkový nález z *DDD Distilled* (2026-09-04, vlastní výtisk)
+
+Vernon má k Published Language konkrétní implementační pravidlo, které se do kapitoly hodí
+a kapitola ho nemá:
+
+> *„As recommended in Implementing Domain-Driven Design [IDDD], and specifically in Chapter 13,
+> ‚Integrating Bounded Contexts‘, consumers should not use the event types (e.g., classes) of an
+> event publisher. Rather, they should depend only on the schema of the events, that is, their
+> Published Language. This generally means that if the events are published as JSON […] the
+> consumer should consume the events by parsing them.“*
+
+Je to konkrétní odpověď na otázku, kterou si čtenář položí u každé integrace přes události: smím
+sdílet třídy událostí mezi kontexty? Vernon říká ne – závislost má být na schématu, ne na typu.
+**Doporučení: doplnit do sekce o Published Language;** podpírá to i pravidlo z `CLAUDE.md`, že
+agregáty se odkazují jen přes ID, a rozšiřuje je na hranice bounded contextů.
+
 ### Neověřené / nedohledané
 
 - **Shared Kernel – OVĚŘENO 2026-09-04 proti tištěné knize Evans 2003, s. 229 (vlastní výtisk).**
