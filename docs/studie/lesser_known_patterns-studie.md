@@ -397,7 +397,18 @@ vrstva a odkázat, kde se jí kniha věnuje.
 - **Zpracování Specification a Factory u Khononova (*Learning DDD*, 2021) a Milletta & Tuneho
   (*Patterns, Principles and Practices of DDD*, 2015).** Nekontrolováno; obě knihy jsou v pořadí
   důvěryhodnosti šablony a mohou nabídnout novější formulaci pravidel pro Domain Service.
-- **Kévin Gomez — *On Taming Repository Classes in Doctrine… Among other things* (2015).** Server vrací
+- **Kévin Gomez – *On Taming Repository Classes in Doctrine… Among other things* – DOHLEDÁNO
+  2026-09-04.** Vyšel **7. 2. 2015** na
+  `blog.kevingomez.fr/2015/02/07/on-taming-repository-classes-in-doctrine-among-other-things/`.
+  Téma sedí na tuto kapitolu přesněji, než první průchod předpokládal: text staví na vzoru
+  **Specification**, ukazuje problém repozitáře s příliš mnoha zodpovědnostmi a řeší ho přes
+  Doctrine `Criteria` (dostupné od Doctrine 2.4), které fungují jak nad `QueryBuilder`em, tak
+  nad kolekcemi. Gomez na to navázal textem *RulerZ, specifications and Symfony are in a boat*
+  (14. 3. 2015).
+
+  **Pozor na záměnu:** článek téhož názvu má i Benjamin Eberlei (beberlei.de, 4. 3. 2013).
+  Gomezův text je pozdější a je to ten se Specification; při citaci uvádět autora i rok.
+
   403, obsah se nepodařilo ověřit. Článek bývá citován jako zdroj pro Criteria jako mezireprezentaci
   specifikace.
 - **Případná oficiální doporučení Symfony k modulové struktuře projektu.** Symfony *Best Practices*

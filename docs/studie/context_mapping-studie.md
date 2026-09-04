@@ -271,6 +271,10 @@ Vztah nese i atribut `downstreamRights` s hodnotami `INFLUENCER`, `OPINION_LEADE
 - **Khononov 2021.** Tvrzení o Shared Kernelu, o kategorizaci vzorů a o kritériu duplicita vs. koordinace pochází ze sekundárních shrnutí a recenzí knihy. Před citací v knize ověřit proti originálu (kap. 4 „Integrating Bounded Contexts“).
 - **Autorství cheat sheetu DDD Crew.** Repozitář [7] uvádí Kacpera Gunię a Nicka Tuneho; profil Michaela Plöda na DDD Europe 2020 uvádí, že cheat sheet a Miro šablonu publikoval on. Rozpor nevyřešen.
 - **Plödovy slidy „Combining Team Topologies with Context Maps“.** PDF na res.cloudinary.com se nepodařilo převést na text (obrázkové slidy). Tvrzení o osách „hodně kódu / hodně konverzace“ pochází z textového shrnutí přednášky, ne ze slidů samotných.
-- **Kryptografické podpisy Messenger payloadů v Symfony 8.** Zmínka pochází z blogu třetí strany, nepodařilo se ji potvrdit v oficiálním changelogu ani v dokumentaci Symfony.
+- **Podepisování Messenger payloadů – OVĚŘENO 2026-09-04: funkce existuje, ale je ze Symfony 7.4,
+  ne z 8.** V CHANGELOGu `symfony/messenger` stojí pod hlavičkou **7.4** záznam
+  „Support signing messages per handler“. Zmínka z blogu třetí strany se tedy potvrdila věcně
+  a vyvrátila v dataci. **Doporučení: funkci zmiňovat s verzí 7.4 a nepodávat ji jako novinku
+  Symfony 8.** Pro knihu cílící na Symfony 8 je použitelná bez výhrad, jen to není novinka.
 - **JSON Schema knihovna v ukázce na ř. 700–733.** Ukázka `OrderPlacedValidator` nejmenuje konkrétní PHP knihovnu. Před přepisem rozhodnout mezi `opis/json-schema` a `justinrainbow/json-schema` a ověřit aktuální API.
 - **Fowler, StranglerFigApplication.** Datace se nepodařilo spolehlivě určit (fetch vrátil rozporné údaje o roce původního článku a o datu poslední aktualizace). Pro kapitolu 03 to není podstatné, ale kapitola `/migrace-z-crud` to bude potřebovat.

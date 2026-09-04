@@ -458,6 +458,17 @@ Zdroj: https://www.doctrine-project.org/projects/doctrine-orm/en/current/referen
   ověřit experimentem, ne odhadem.
 - **Retence deduplikační tabulky (`:613`).** Číslo 7–30 dní se nepodařilo navázat na žádnou
   konfigurační výchozí hodnotu Messengeru ani brokeru.
-- **Symfony Workflow a doménový model (`:739`).** Tvrzení kapitoly je rozumné, ale oficiální
+- **Symfony Workflow a doménový model – DOVĚŘENO 2026-09-04: oficiální stanovisko neexistuje,
+  ale existuje otevřená diskuse.** Dokumentace komponenty se k DDD přímo nevyjadřuje; nejblíž je
+  věta, že definování workflow „will keep your domain logic in one place and not spread all over
+  your application“, což tvrzení kapitoly spíš podpírá. Otázka je ale v Symfony vedena jako
+  otevřená: issue **symfony/symfony-docs#10819 „[Workflow] How workflows makes sense with DDD“**
+  přesně tento rozpor řeší, s argumentem, že v DDD má model vědět všechno sám o sobě, takže místa
+  a přechody patří do entity, ne do konfigurace vedle ní.
+
+  **Doporučení: tvrzení na `:739` ponechat, ale neopírat je o oficiální doporučení Symfony,
+  které neexistuje.** Odkaz na issue je poctivější a zároveň užitečnější – ukazuje, že napětí
+  mezi konfiguračním workflow a doménovým modelem je známé a nedořešené.
+
   dokumentace Symfony Workflow nebyla v této rešerši ověřena; před přepisem C2 doporučuji
   ověřit, co Workflow vyžaduje od objektu (marking store, property vs. metoda).

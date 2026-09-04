@@ -301,4 +301,8 @@ Sekce 01.12 zmiňuje glosář a cheat sheet, ale ne `/ddd-a-umela-inteligence` a
   která by ji unesla, se najít nepodařilo a Standish tou oporou není.
 
 - **Kvantifikace návratnosti investice do DDD.** Žádný prošlý zdroj neuvádí časový horizont návratnosti. Tvrzení na `what_is_ddd.md:38` je nedoložitelné.
-- **Datum a rozsah Symfony 8.1.** Údaje pocházejí ze stránky `symfony.com/releases` v době přístupu; před vydáním knihy ověřit znovu, protože se mění každých šest měsíců.
+- **Datum vydání Symfony 8.1 – OVĚŘENO 2026-09-04 z GitHub API: 29. 5. 2026** (tag `v8.1.0`).
+  Datum je fixní a dál se měnit nebude. Výhrada k *rozsahu* verze zůstává v platnosti: seznam
+  novinek se v knize odkazuje na `symfony.com/releases`, a ten se u podporované větve doplňuje.
+  **Doporučení: datum uvádět bez výhrady, výčet funkcí před vydáním knihy překontrolovat.**
+
