@@ -14,15 +14,19 @@ schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat model
 chapter_number: "02"
 category: Základy
 deck: "Než vytvoříte první Aggregate, rozhodněte, kde to vůbec dává smysl. Subdomény jsou strategický filtr DDD: tři kategorie, které určují, kolik úsilí, jakou seniority a jaký technologický stack si konkrétní část aplikace zaslouží."
-reading_time: 18
+reading_time: 21
 difficulty: 2
 ---
 
 ## 02.01 Proč subdomény předcházejí všemu ostatnímu {#proc-subdomeny}
 
-Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a u většiny produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování. Pokus modelovat *všechno* stejně pečlivě patří mezi nejspolehlivější cesty, jak vyčerpat rozpočet dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Evans v *Domain-Driven Design* (2003), kapitola „Distillation“, zavádí pro celou doménu strategický filtr a dva jeho pojmy: **Core Domain** a **Generic Subdomains** [[1]](https://www.domainlanguage.com/ddd/). Vaughn Vernon v *Implementing Domain-Driven Design* (2013) trojici dokončil pojmem **Supporting Subdomain** [[2]](https://kalele.io/books/). Než napíšete první Aggregate nebo Value Object, potřebujete odpověď na otázku: **která část domény je vaše konkurenční výhoda, která nutné zlo a kterou nedává smysl vůbec psát**. Tomuto filtru se dnes říká rozdělení domény na **Core**, **Supporting** a **Generic** subdomény.
+Vývojářský reflex „naimplementuju to celé pořádně“ je drahý a u většiny produktů marný. Ne každá část aplikace si zaslouží stejnou hloubku modelování. Pokus modelovat *všechno* stejně pečlivě patří mezi nejspolehlivější cesty, jak vyčerpat rozpočet dřív, než tým dojde k tomu, co zákazníka skutečně zajímá. Evans v *Domain-Driven Design* (2003), kapitola „Distillation“, zavádí pro celou doménu strategický filtr a dva jeho pojmy: **Core Domain** a **Generic Subdomains** [[1]](https://www.domainlanguage.com/ddd/). Vaughn Vernon v *Implementing Domain-Driven Design* (2013) trojici dokončil pojmem **Supporting Subdomain** [[2]](https://kalele.io/books/). Evans slovo „supporting“ v roce 2003 používá, ale jen popisně; jako pojmenovaný vzor v knize ani v *DDD Reference* (2015) nefiguruje. Než napíšete první Aggregate nebo Value Object, potřebujete odpověď na otázku: **která část domény je vaše konkurenční výhoda, která nutné zlo a kterou nedává smysl vůbec psát**. Tomuto filtru se dnes říká rozdělení domény na **Core**, **Supporting** a **Generic** subdomény.
+
+Obchodní myšlenka je přitom starší než DDD. Geoffrey Moore v *Dealing with Darwin* (2005) dělí činnosti firmy na *core*, které vytváří odlišení, a *context*, tedy všechno ostatní, co musíte dělat, abyste zůstali v byznysu. Jeho pravidlo zní: context minimalizovat, automatizovat nebo outsourcovat. Evansova destilace říká totéž jazykem modelu.
 
 Subdoména není totéž co [Bounded Context](/zakladni-koncepty#bounded-contexts), ačkoliv se oba pojmy v rozhovorech běžně zaměňují. Bounded Context je *implementační* hranice – místo, kde platí jeden Ubiquitous Language, jeden konzistentní model a typicky jeden tým s jednou nasazovací jednotkou. Subdoména je naproti tomu *obchodní* hranice – kus problému, který organizace řeší jako jednu ucelenou kapitolu. Vztah mezi nimi není 1:1. Jedna subdoména („Pricing“) může být rozdělena do více BC – Catalog počítá indikativní cenu, Checkout závaznou cenu se slevami. Naopak jeden BC může pokrývat více malých subdomén, například Backoffice zpravidla sdruží kousky reportingu, fakturace i správy uživatelů.
+
+Dělicí čára mezi obojím není ostrá. Zkratka „subdomény objevuje byznys, kontexty navrhují inženýři“ se dobře pamatuje, ale realita ji nectí – hranice subdomény se v praxi vyjasní často až ve chvíli, kdy tým začne modelovat.
 
 Vernon to v kapitole 2 *Implementing Domain-Driven Design* (2013) formuluje pragmaticky [[2]](https://kalele.io/books/): *doména* je celý problémový prostor organizace; *subdoména* je jeho logická část; *Bounded Context* je řešení, které pro ni navrhujete. Vlad Khononov v *Learning Domain-Driven Design* (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“, k tomu doplňuje: **klasifikace subdomén je první nástroj DDD a zároveň nejlevnější**. Stojí jediný workshop a změní distribuci milionů korun rozpočtu [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
@@ -47,7 +51,7 @@ Rozdělení je záměrně hrubé – tři škatulky, žádný odstín. Důvod je
 
 Část domény, která tvoří **konkurenční výhodu organizace** – to, kvůli čemu zákazníci platí právě vám a ne někomu jinému. Test: *„pokud z toho zítra ustoupíme, ztratíme zákazníky.“* Nebo formulováno opačně: pokud byste si stejnou funkcionalitu mohli stejně levně koupit od dodavatele, není to Core, je to Generic.
 
-Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíc automatizovaných testů, nejpřísnější code review a nejčastější diskuse s doménovými experty. Khononov uvádí jako příklady [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) ridesharing a matching jezdců u Uberu nebo ranking algoritmus vyhledávání u Googlu. Každý z nich je pro svou firmu Core – to, čím se liší od trhu.
+Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object, Domain Event), seniorní tým, vlastní IP, nízká tolerance k externím závislostem v jádře. Sem patří i nejvíc automatizovaných testů, nejpřísnější code review a nejčastější diskuse s doménovými experty. Khononov uvádí jako příklady [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) ridesharing a matching jezdců u Uberu nebo ranking algoritmus vyhledávání u Googlu. Každý z nich je pro svou firmu Core – to, čím se liší od trhu. Tentýž autor přidává druhé kritérium, které samotná konkurenční výhoda neobsáhne: Core subdoména, kterou lze implementovat jednoduše, poskytne jen krátkodobou výhodu, protože ji konkurence dorovná. Core subdomény jsou proto z podstaty složité.
 
 **Supporting Subdomain** *(podpůrná subdoména)*
 
@@ -57,12 +61,28 @@ Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžký
 
 **Generic Subdomain** *(generická subdoména)*
 
-Část domény, která je **komoditizovaná**. Test: *„řešení existuje 30 let, prodává se v krabici nebo v cloudu, koupíme.“* Klasické příklady: autentizace uživatelů, posílání transakčních e-mailů, integrace platební brány, generování PDF faktur, fulltext, antispam. V Generic subdoméně je **vlastní kód anti-vzor** – důkaz, že tým v té oblasti znovuobjevuje kolo a ubírá z rozpočtu Core Domény.
+Část domény, která je **komoditizovaná**. Test: *„řešení existuje 30 let, prodává se v krabici nebo v cloudu, koupíme.“* Klasické příklady: autentizace uživatelů, posílání transakčních e-mailů, integrace platební brány, generování PDF faktur, fulltext, antispam. **Výchozí volbou je koupit, ne psát.** Evans je v tomto opatrnější, než se mu obvykle přisuzuje: in-house implementaci uvádí mezi čtyřmi legitimními variantami sourcingu a o hotových řešeních píše, že se obvykle nevyplatí, ale stojí za prozkoumání [[1]](https://www.domainlanguage.com/ddd/). Vlastní kód je tedy obhajitelný tam, kde integrační náklad převýší ten implementační. Kde takový důvod chybí, znamená znovuobjevování kola na účet Core Domény.
 
-Důsledky pro tým a stack: SaaS, open-source knihovna, externí API, případně tenký bridge / Anti-Corruption Layer mezi naším modelem a komoditním řešením. Sem patří integrace na Auth0 / Keycloak, Stripe, Mailgun, AWS SES, Algolia. **Velikostní pravidlo:** pokud na konkrétní Generic subdoméně sedíte víc než 5–10 % vývojové kapacity, něco je špatně – buď jste zvolili nevhodný produkt, nebo jste subdoménu klasifikovali nesprávně.
+Důsledky pro tým a stack: SaaS, open-source knihovna, externí API, případně tenký bridge / Anti-Corruption Layer mezi naším modelem a komoditním řešením. Sem patří integrace na Auth0 / Keycloak, Stripe, Mailgun, AWS SES, Algolia. **Velikostní pravidlo palce** (autorské, žádný primární zdroj ho neuvádí – stejně jako u ostatních procentních čísel v této kapitole): pokud na konkrétní Generic subdoméně sedíte víc než 5–10 % vývojové kapacity, něco je špatně. Buď jste zvolili nevhodný produkt, nebo jste subdoménu klasifikovali nesprávně.
 
 :::diagram{fig="02.2-A" title="E-shop: subdoménové členění a investice" src="images/diagrams/11_subdomains/core_supporting_generic.svg"}
 :::
+
+### Tři osy, ne jedna {#tri-osy}
+
+Konkurenční výhoda je jen první osa. Khononov přidává další dvě, komplexitu a volatilitu, a teprve celá trojice odliší Generic od Supporting jinak než větou „existuje na to SaaS“ [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+
+| Typ | Konkurenční výhoda | Komplexita | Volatilita | Sourcing |
+|---|---|---|---|---|
+| Core | ano | vysoká | vysoká | build in-house |
+| Supporting | ne | nízká | nízká | build in-house nebo outsource |
+| Generic | ne | vysoká | nízká | koupit / převzít hotové |
+
+Core i Generic jsou složité. Rozdíl je v tom, že Generic je složitý *vyřešený* problém, který se nemění: kryptografie, OAuth, doručitelnost e-mailů. Supporting je naproti tomu jednoduchý z podstaty – formuláře, seznamy, dva tři stavy. Khononovovo označení „glorified CRUD“ sedí.
+
+Z tabulky plyne diagnostická otázka, kterou klasifikace podle jediné osy položit neumí: **složitost ve Supporting subdoméně je signál**. Buď se v ní skrývá nerozpoznaná Core subdoména, nebo jde o nahodilou složitost, kterou tam nikdo nechtěl. Nick Tune pro kombinaci vysoké složitosti a nulového odlišení používá název *Suspect Supporting* [[6]](https://nicktune.substack.com/p/core-domain-patterns-941f89446af5). V legacy projektech bývá nejčastějším nálezem celého cvičení.
+
+Volatilita je třetí osa a rozhoduje o architektuře. Pravidla, která se mění každý sprint, potřebují model, jenž změnu unese; pravidla, která se nezměnila deset let, si vystačí s tabulkou a jedním servisním objektem. Khononovův rozhodovací řetězec (typ subdomény → vzor obchodní logiky → architektonický styl) rozvádí [kapitola o tom, kdy DDD nepoužívat](/kdy-nepouzivat-ddd#hybrid-subdomain).
 
 :::callout{type="pattern"}
 ### Investiční matice Core / Supporting / Generic {#invest-matrix-heading}
@@ -81,7 +101,7 @@ Tabulka, kterou by měl mít na zdi každý tech-lead i CTO podepisující rozpo
 
 ### Distillation nad rámec klasifikace {#distillation-beyond}
 
-Klasifikace Core / Supporting / Generic je první krok Evansovy destilace, ne celý postup. Část IV *Domain-Driven Design* popisuje mimo jiné tři navazující techniky pro situace, kdy škatulky samy nestačí:
+Klasifikace Core / Supporting / Generic je první krok Evansovy destilace, ne celý postup. Kapitola 15 „Distillation“ v *Domain-Driven Design* obsahuje sedm vzorů: `CORE DOMAIN`, `GENERIC SUBDOMAINS`, `DOMAIN VISION STATEMENT`, `HIGHLIGHTED CORE`, `COHESIVE MECHANISMS`, `SEGREGATED CORE` a `ABSTRACT CORE`. Domain Vision Statement rozebírá [sekce 02.09](#dvs-template), Abstract Core je nejdražší z celé sady – vytažení nejobecnějších doménových konceptů do samostatného modulu, které dává smysl až u modelu, jenž tým čtvrtým rokem nestíhá číst. Zbývající tři techniky jsou ty, po kterých sáhnete nejdřív:
 
 **Highlighted Core.** Označení jádrových prvků přímo v existujícím modelu – krátký destilační dokument (pár stran) nebo zvýraznění v dokumentaci a kódu, bez jakéhokoliv refaktoringu. Nejlevnější technika destilace. Hodí se, když tým potřebuje sdílené vědomí o tom, co je jádro, ale na strukturální změny nemá čas ani mandát.
 
@@ -91,7 +111,9 @@ Klasifikace Core / Supporting / Generic je první krok Evansovy destilace, ne ce
 
 ## 02.03 Jak rozpoznat Core Domain – pětibodový test {#rozpoznat-core}
 
-Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek. Následující pětibodový test vznikl jako kombinace heuristik z Khononova [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) a Core Domain Charts komunity ddd-crew [[5]](https://github.com/ddd-crew/core-domain-charts). Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain; v opačném případě jde o Supporting nebo Generic.
+Nejtěžším krokem je rozpoznat Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek.
+
+Následující pětibodový test je autorská konstrukce této knihy, ne heuristika převzatá z primárního zdroje. Khononov pracuje s trojicí komplexita / volatilita / diferenciace a s otázkou, zda by se daný kus dal prodat jako samostatný byznys [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/); ddd-crew nabízí ke svým dvěma osám katalog devíti otázek [[5]](https://github.com/ddd-crew/core-domain-charts). Test níže obojí zjednodušuje do rychlého filtru, který zvládne jednotlivec u kávy. Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain; v opačném případě jde o Supporting nebo Generic.
 
 1. **„Pokud bychom to outsourcovali, přijdeme o hlavní produkt?“**
 
@@ -115,16 +137,24 @@ Nejtěžším krokem je rozpoznat *právě tu jednu* Core Domain. Týmy mají sk
 
 Test má jeden užitečný vedlejší efekt: **nutí formulovat obchodní důvody před technickými**. Pokud na otázku 4 („mluví o tom CEO?“) tým odpoví „nevím, neptali jsme se“, je to znamení, že strategický rozhovor musí proběhnout ještě před začátkem implementace.
 
+### Core Domain Charts – tři škatulky jako souvislá rovina {#core-domain-charts}
+
+Pětibodový test dá odpověď ANO/NE. Core Domain Charts komunity ddd-crew místo toho kreslí graf o dvou osách: svislá je komplexita, vodorovná obchodní diferenciace [[5]](https://github.com/ddd-crew/core-domain-charts). Subdomény se do něj umisťují jako body, ne jako položky ve třech přihrádkách. Core, Supporting a Generic pak nejsou škatulky, ale oblasti v jedné rovině – a subdoména, která leží mezi nimi, přestane být problémem klasifikace a stane se tématem k rozhovoru.
+
+Právě v tom rozhovoru leží podle autorů hlavní přínos techniky. Komplexitu umí odhadnout inženýři, diferenciaci dodává produkt nebo byznys; graf je jediné místo, kde obě skupiny musí své odhady postavit vedle sebe. Šablona k tomu nabízí katalog otázek pro obě osy – u komplexity odděluje esenciální doménovou od nahodilé technické a operační, u diferenciace se ptá zvlášť na obtížnost pro nováčka na trhu a pro stávajícího konkurenta.
+
+Praktické rozdělení rolí: test v předchozí sekci jako rychlý filtr pro jednotlivce, chart jako výstup workshopu, který si tým pověsí na zeď a za rok do něj překreslí posuny.
+
 :::callout{type="note"}
 ### Když test říká, že máte 5 Core domén {#too-many-cores-heading}
 
-Pokud z testu vyjde, že máte pět nebo víc Core domén, něco je špatně. Core je z definice *vzácné* – typická organizace má jednu, výjimečně dvě Core Domény. Pokud jich vidíte víc, pravděpodobně si pletete pojmy „důležité pro nás“ a „diferencujeme se tím“:
+Pokud z testu vyjde pět nebo víc Core domén, berte to jako varovný signál, ne jako verdikt. **Core je vzácné, ne většinové** – Evansovo „make the core small“ omezuje velikost jádra, ne jeho počet. Khononov výslovně připouští, že organizace může mít víc Core subdomén, pokud soutěží na několika osách zároveň, a že celý podnik může být poskládaný jen ze Supporting a Generic [[7]](https://vladikk.com/2018/01/26/revisiting-the-basics-of-ddd/). Číselné pravidlo tedy neexistuje. Existuje jen podezření, že si pletete pojmy „důležité pro nás“ a „diferencujeme se tím“:
 
 - Logistika je v Amazonu Core. V e-shopu, který používá DPD, je to Generic (DPD má vyřešeno).
 - Reporting je v BI startupu Core. V e-shopu je to Supporting (potřebujeme to, ale neutrhneme se tím).
 - Transakční e-maily jsou pro Mailgun Core byznys. U vás jsou Generic – transport se konfiguruje, nepíše.
 
-Empirické pravidlo: **jedna Core Doména na produkt**. Pokud máte víc, zvažte, zda nejsou některé z nich ve skutečnosti Supporting subdomény, kterým marketing přidělil heroickou nálepku.
+Kontrolní otázka místo limitu: dokážete u každé z těch pěti pojmenovat, co konkrétně děláte na trhu jinak než konkurence a jak to zákazník pozná? Co touto otázkou neprojde, je Supporting subdoména s heroickou nálepkou.
 :::
 
 ## 02.04 Anti-vzor: „všechno je Core“ {#vsechno-core-antipattern}
@@ -151,7 +181,7 @@ Lekce: autentizace je **Generic subdoména** u 99 % organizací. Pokud nestavít
 Související diskuse: [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) – pokud po klasifikaci subdomén vyjde, že nemáte Core Domain, plné DDD pravděpodobně nestojí za náklady.
 :::
 
-Obrana proti anti-vzoru „všechno je Core“ je přímočará: **vynuťte si rozpočet**. Před začátkem každého kvartálu (nebo OKR cyklu) si nakreslete tři škatulky – Core / Supporting / Generic. Do každé napište procentní podíl celkové vývojové kapacity. Pokud vám do Core spadne 80 %, není to 80 % Core, ale 80 % iluze. Realistická distribuce u průměrné B2B SaaS firmy: **20–30 % Core, 50–60 % Supporting, 10–20 % Generic**. Poslední číslo bývá nejnižší – Generic se z definice *nepíše*, jen integruje.
+Obrana proti anti-vzoru „všechno je Core“ je přímočará: **vynuťte si rozpočet**. Před začátkem každého kvartálu (nebo OKR cyklu) si nakreslete tři škatulky – Core / Supporting / Generic. Do každé napište procentní podíl celkové vývojové kapacity. Pokud vám do Core spadne 80 %, není to 80 % Core, ale 80 % iluze. Distribuce, se kterou u průměrné B2B SaaS firmy počítá tato kniha: **20–30 % Core, 50–60 % Supporting, 10–20 % Generic**. Jde o pravidlo palce zkalibrované na středně velkých produktech, ne o měřená data. Poslední číslo bývá nejnižší – Generic se z definice *nepíše*, jen integruje.
 
 ## 02.05 Mapování subdomén na Bounded Contexts {#subdomeny-na-bc}
 
@@ -161,7 +191,7 @@ Pro názornost mapujme imaginární e-shop střední velikosti (3–4 týmy, 25 
 
 | Subdoména | Klasifikace | Bounded Context(s) | Vztah | Poznámka |
 |---|---|---|---|---|
-| Pricing & Promotions | Core | Catalog BC, Checkout BC | 1:N | Sdílené pravidlo „cena“ se aplikuje na čtení (katalog) i zápis (checkout) odlišně. |
+| Pricing & Promotions | Core | Catalog BC, Checkout BC | 1:N | Rozdělené kvůli provozu: listing a checkout se škálují i nasazují jiným tempem. |
 | Personalized Recommendations | Core | Recommendation BC | 1:1 | Vlastní ML model + read-only projekce nákupů z ostatních BC. |
 | Order Management | Supporting | Ordering BC | 1:1 | Jednoznačná hranice, lehký DDD. |
 | Inventory | Supporting | Warehouse BC | 1:1 | Stav skladu, rezervace, příjemky. |
@@ -171,7 +201,7 @@ Pro názornost mapujme imaginární e-shop střední velikosti (3–4 týmy, 25 
 | Email Delivery | Generic | External (AWS SES / Mailgun) | 1:1 přes ACL | Symfony Mailer + transport bundle. |
 | Reporting / Analytics | Supporting | Analytics BC | N:1 | Více malých subdomén (Sales, Stock, Marketing) sdílí jeden BC s read modely. |
 
-Tabulka ilustruje typický rozklad: Core má vlastní silně modelované BC, Supporting má 1:1 BC s lehčím designem, Generic přebírá cizí BC (externího providera) přes [Anti-Corruption Layer](/co-je-ddd#strategic-design). Pokud by ve vašem produktu vyšlo radikálně jiné rozložení (např. 5 Core BC + žádný Generic), je to signál pro re-validaci klasifikace.
+Tabulka ilustruje typický rozklad: Core má vlastní silně modelované BC, Supporting má 1:1 BC s lehčím designem, Generic přebírá cizí BC (externího providera) přes [Anti-Corruption Layer](/context-mapping#acl). Pokud by ve vašem produktu vyšlo radikálně jiné rozložení (např. 5 Core BC + žádný Generic), je to signál pro re-validaci klasifikace. Kdo hranice teprve hledá, začne u [Big Picture EventStormingu](/event-storming#big-picture); komu už hranice sedí a řeší, který tým co dostane, pokračuje [kapitolou o Team Topologies](/team-topologies).
 
 :::callout{type="note"}
 ### Vztahy mezi BC v context mappingu {#forward-context-mapping-heading}
@@ -230,6 +260,23 @@ src/
 
 Strukturální rozdíl odráží rozdíl strategický: **Core má tři vrstvy (Domain / Application / Infrastructure), Supporting také tři, ale tenčí, a Generic jen jednu – Adapter**. Junior, který se rozhodne přidat `SomeBusinessRule.php` do `src/Generic/Auth/`, narazí na chybějící `Domain/` adresář a dostane signál, že kód tam nepatří. Naopak Aggregate v `src/Core/Pricing/Domain/` má kolem sebe celou doménovou infrastrukturu a tým u něj pracuje s invarianty do hloubky.
 
+Tato struktura má ovšem cenu, kterou je poctivé přiznat. Sekce 02.08 tvrdí, že klasifikace stárne a re-evaluuje se každý rok až dva. Jenže překlasifikace Pricing ze Core na Supporting v této struktuře znamená přejmenovat namespace napříč celým projektem – tedy přesně tu změnu, kterou tým odloží. Klasifikace zapsaná do cesty je pedagogicky nejsilnější a provozně nejkřehčí varianta.
+
+Druhá varianta dává na první úroveň doménové jméno a klasifikaci nechává v dokumentaci:
+
+:::code{language="text" filename="src/ (varianta podle subdomény)"}
+src/
+├── Pricing/          ← Core (viz docs/domain/pricing.md)
+│   ├── Domain/
+│   ├── Application/
+│   └── Infrastructure/
+├── Ordering/         ← Supporting
+├── Inventory/        ← Supporting
+└── Auth/             ← Generic, jen Adapter/
+:::
+
+Matthias Noback doporučuje právě ji: na první úrovni Bounded Context nebo subdoména, uvnitř vrstvy. Přeřazení Pricing mezi Supporting pak znamená smazat pár tříd, ne přepsat `use` v celém projektu. Cenu za to zaplatíte jinde – ze stromu adresářů už nikdo klasifikaci nevyčte a ta musí žít v Core Domain Chartu a v Domain Vision Statementech. V knize dál pracujeme s variantou podle klasifikace, protože zviditelňuje téma kapitoly; ve větším produktu, který jednou za rok překlasifikovává, je rozumnější druhá.
+
 Aby autoload fungoval, musí `composer.json` deklarovat odpovídající PSR-4 mapování:
 
 :::code{language="json" filename="composer.json"}
@@ -247,7 +294,6 @@ Aby autoload fungoval, musí `composer.json` deklarovat odpovídající PSR-4 ma
             "App\\Core\\": "src/Core/",
             "App\\Supporting\\": "src/Supporting/",
             "App\\Generic\\": "src/Generic/",
-            "App\\Shared\\": "src/Shared/",
             "App\\SharedKernel\\": "src/SharedKernel/"
         }
     },
@@ -259,7 +305,7 @@ Aby autoload fungoval, musí `composer.json` deklarovat odpovídající PSR-4 ma
 }
 :::
 
-Volitelný `App\Shared\` namespace slouží na opravdu sdílené primitivy – `Money`, `Uuid`, `DomainEvent` base třída – které se používají napříč subdoménami a nepatří do žádné z nich. Shared má ovšem sklon rozrůstat se do anti-vzoru „shared kernel everywhere“; rizika a pravidla rozebírá [sekce o Shared Kernelu](/context-mapping#shared-kernel) v kapitole o Context Mappingu.
+Namespace `App\SharedKernel\` slouží na opravdu sdílené primitivy – základní třídu `AggregateRoot`, `DomainEvent`, obecné identifikátory – které se používají napříč subdoménami a nepatří do žádné z nich. Kniha ho takto používá i v dalších kapitolách. Shared kernel má ovšem sklon rozrůstat se do anti-vzoru „všechno je sdílené“; rizika a pravidla rozebírá [sekce o Shared Kernelu](/context-mapping#shared-kernel) v kapitole o Context Mappingu.
 
 Symfony konfigurace pak obvykle vypadá tak, že `config/services.yaml` autowire-uje každou subdoménu jako `resource` blok, což izoluje DI definice na úrovni subdomény:
 
@@ -291,9 +337,16 @@ services:
 :::callout{type="pattern"}
 ### Adresářová struktura jako strategický nástroj {#forced-strategy-heading}
 
-Tato struktura není kosmetická – **vynucuje strategické rozhodnutí**. Jakmile máte `src/Core/` a `src/Supporting/` jako oddělené namespacy, code review automaticky kontroluje, do kterého patří nově přidaná funkcionalita. Strategie se zhmotnila v adresáři.
+Tato struktura není kosmetická – **vynucuje strategické rozhodnutí**. Jakmile máte `src/Core/` a `src/Supporting/` jako oddělené namespacy, každý pull request odpovídá na otázku, do které kategorie nová funkcionalita patří. Strategie se zhmotnila v adresáři.
 
-Související: implementační detail uvnitř jedné subdomény je rozebrán v [kapitole o implementaci v Symfony](/implementace-v-symfony).
+Spoléhat přitom na samotné code review je slabé. Hranice mezi subdoménami se v PHP vynutí strojově a v CI:
+
+- **Deptrac** definuje vrstvy nad třídami a povolené závislosti mezi nimi. Pravidlo „`Core` nesmí záviset na `Supporting` ani na `Generic`“ je pár řádků v `deptrac.yaml` a poruší-li ho někdo, build spadne. Dokumentace projektu použití pro bounded contexty uvnitř jednoho projektu zmiňuje explicitně.
+- **PHPArkitect** píše totéž jako PHP kód, který se spouští stejně jako testy. Vhodné tam, kde tým nechce další konfigurační formát.
+
+Použijte jeden z nich, jakmile struktura přežije první čtvrtletí. Do té doby se hranice ještě posouvají a strojové pravidlo by jen překáželo.
+
+Související: implementační detail uvnitř jedné subdomény je rozebrán v [kapitole o implementaci v Symfony](/implementace-v-symfony); volbu architektonického stylu podle typu subdomény rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
 :::
 
 Příklad konkrétního Aggregate v Core subdoméně, který demonstruje očekávanou hloubku modelování:
@@ -306,6 +359,8 @@ declare(strict_types=1);
 namespace App\Core\Pricing\Domain\Aggregate;
 
 use App\Core\Pricing\Domain\Event\PricelistChanged;
+use App\Core\Pricing\Domain\Event\PricelistCreated;
+use App\Core\Pricing\Domain\Exception\ConflictingPriceRuleException;
 use App\Core\Pricing\Domain\ValueObject\Money;
 use App\Core\Pricing\Domain\ValueObject\PriceRule;
 use App\SharedKernel\Domain\AggregateRoot;
@@ -316,18 +371,24 @@ final class Pricelist extends AggregateRoot
     /** @var list<PriceRule> */
     private array $rules = [];
 
-    public function __construct(
+    private function __construct(
         private readonly Uuid $id,
         private readonly string $name,
     ) {
     }
 
+    public static function create(string $name): self
+    {
+        $pricelist = new self(Uuid::v7(), $name);
+        $pricelist->record(new PricelistCreated($pricelist->id, $name));
+
+        return $pricelist;
+    }
+
     public function applyRule(PriceRule $rule): void
     {
         if ($this->hasConflictingRule($rule)) {
-            throw new \DomainException(
-                "Rule $rule->code conflicts with an existing rule."
-            );
+            throw ConflictingPriceRuleException::forCode($rule->code);
         }
 
         $this->rules[] = $rule;
@@ -357,7 +418,7 @@ final class Pricelist extends AggregateRoot
 }
 :::
 
-Pro srovnání: ekvivalent v **Supporting subdoméně** (Order Management) by byl podstatně lehčí – typicky Doctrine entita s pár metodami a bez separátních Value Objektů, protože invarianty jsou triviální:
+Pro srovnání: ekvivalent v **Supporting subdoméně** (Order Management) je podstatně lehčí – Doctrine entita s pár metodami a bez separátních Value Objektů, protože invarianty jsou triviální. Jde vědomě o tentýž `Order`, který [kapitola o návrhu agregátů](/navrh-agregatu) modeluje jako plný Aggregate s `Order::place()`, `CustomerId` a `Money`. Rozdíl mezi oběma ukázkami není v tom, že by jedna byla správná; rozdíl je v klasifikaci. Objednávky jsou v e-shopu s vlastním pricing enginem Supporting, v logistické firmě jsou Core – a model se tomu přizpůsobí. Ve stejném duchu je i holá `\DomainException` níže přiznanou zkratkou: pojmenované výjimky patří tam, kde na nich někdo staví reakci, ne do třístavového workflow.
 
 :::code{language="php" filename="src/Supporting/Ordering/Domain/Order.php"}
 <?php
@@ -405,13 +466,37 @@ class Order
         $this->status = "cancelled";
     }
 
-    public function getId(): string { return $this->id; }
+    public function getId(): Uuid { return $this->id; }
     public function getStatus(): string { return $this->status; }
     public function getTotal(): string { return $this->total; }
 }
 :::
 
-A v **Generic subdoméně** (Auth0 integrace) není entita ani Aggregate – jen adaptér, který implementuje rozhraní z Symfony Security:
+Jeden detail, na kterém ukázka bez konfigurace spadne: Doctrine typ `uuid` není součástí ORM 3. Dodává ho most na `symfony/uid` a musíte ho zaregistrovat, jinak mapování `#[ORM\Column(type: "uuid")]` skončí výjimkou o neznámém typu.
+
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+doctrine:
+    dbal:
+        types:
+            uuid: Symfony\Bridge\Doctrine\Types\UuidType
+:::
+
+A v **Generic subdoméně** (Auth0 integrace) není entita ani Aggregate. Při troše štěstí není ani vlastní adaptér: balíček `auth0/symfony` dodává hotový `Auth0\Symfony\Security\UserProvider` a authenticator, takže celá subdoména se smrskne na konfiguraci. Přesně tak má Generic vypadat.
+
+:::code{language="yaml" filename="config/packages/security.yaml"}
+security:
+    providers:
+        auth0_provider:
+            id: Auth0\Symfony\Security\UserProvider
+
+    firewalls:
+        main:
+            provider: auth0_provider
+            custom_authenticators:
+                - auth0.authenticator
+:::
+
+Vlastní `UserProvider` píšete až tehdy, když hotový nestačí – typicky proto, že profil z Auth0 potřebujete obohatit o interní data. I pak zůstane u tenkého adaptéru, který implementuje rozhraní ze Symfony Security a nic nemodeluje:
 
 :::code{language="php" filename="src/Generic/Auth/Adapter/Auth0UserProvider.php"}
 <?php
@@ -468,6 +553,15 @@ Klasifikace subdomén nemá smysl, pokud z ní neplynou rozhodnutí. Přímé ma
 
 Klasifikace je relativní k obchodnímu modelu, ne absolutní – co je pro vás Generic, je pro vendora jeho Core, jak ukázaly příklady Mailgunu a autentizace výše.
 
+U Generic subdomény má „koupit“ čtyři podoby, které Evans rozlišil už v roce 2003 a které se v praxi pletou do jedné [[1]](https://www.domainlanguage.com/ddd/):
+
+1. **Hotové řešení.** Nejrychlejší cesta, ale platí se integrací a tím, že cizí model vnutí slovník. Evansův verdikt zní opatrně: obvykle se to nevyplatí, prozkoumat to ale stojí za to.
+2. **Publikovaný design nebo model.** Cizí je návrh, kód je váš. Evans odkazuje na Fowlerovy *Analysis Patterns*; dnešní ekvivalent jsou standardy typu OpenID Connect nebo ISO 20022.
+3. **Outsourcovaná implementace.** Zadání ven, integrace a údržba doma. Šetří kapacitu seniorního týmu, přidává komunikační režii a náklad na code review.
+4. **Vlastní implementace.** Dostanete přesně to, co chcete, nic navíc, a integrace odpadá. Cenou je údržba navždy.
+
+Sourcing podle strategické hodnoty ostatně není objev DDD. Niel Nickolaisen popsal v *Stand Back and Deliver* (2009) **Purpose Alignment Model** se dvěma osami, mission critical a market differentiating [[8]](https://insideproduct.co/purpose-based-alignment-model/). Jeho čtyři kvadranty mapují na tabulku výše skoro doslova: *Differentiating* (excelovat) odpovídá Core, *Parity* (zjednodušit a standardizovat) pokrývá Supporting i Generic, *Partner* je varianta popsaná níže a *Who cares* je práce, kterou má tým dělat co nejlevněji, nebo vůbec.
+
 Praktický důsledek pro rozhodování o nákupu: před podpisem SaaS smlouvy si tým odpoví na otázku – *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup – odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
 
 Třetí varianta sourcingu – **partnerství** – je vhodná pro Supporting subdomény, kde existuje hotové řešení, ale potřebujete větší míru přizpůsobení, než dovolí standardní SaaS. Příklad: e-shop integruje fakturaci přes API jiné fintech firmy, která za měsíční poplatek provádí daňové výpočty pro 30 jurisdikcí. Není to BUY (žádná krabice), není to BUILD (cizí tým), je to partnerství s rizikem dlouhodobé závislosti. Vyžaduje smluvní jistoty (vlastnictví dat, exit clause, SLA) a Anti-Corruption Layer na hranici.
@@ -488,7 +582,9 @@ Pravidlo: chraňte se před lock-inem v Core (vlastní IP, vlastní data), nikol
 
 Klasifikace subdomén není jednorázové cvičení. Trh i technologie se za pár let posunou natolik, že to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD* a varuje, že **opomenutá re-evaluace stojí stejně jako špatná první klasifikace** [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
-Tři typické posuny:
+Posuny mají svá jména. Nick Tune je sepsal jako *Core Domain Patterns* a jeho slovník poslouží lépe než tři statické kategorie [[6]](https://nicktune.substack.com/p/core-domain-patterns-941f89446af5). Bývalou inovaci, která dnes neodlišuje, ale pořád ji potřebujete, označuje jako *Table Stakes / Former Core*. Jádro, ze kterého se stala schopnost dostupná komukoliv, nazývá *Commoditised Core*. Opačný pohyb dostal jméno *Black Swan Core*: stane se něco nečekaného a zdánlivá komodita se přes noc promění v jádro. A *Hidden Core* je ta, kterou tým přehlédl právě proto, že vypadá jednoduše – vysoké odlišení při nízké složitosti.
+
+Mechanismus za těmito posuny popsala Susanne Kaiser napojením klasifikace na Wardleyho evoluční osu genesis → custom-built → product → commodity [[9]](https://www.informit.com/articles/article.aspx?p=3222355&seqNum=3). Core začíná v genesis nebo custom-built, Supporting bývá custom-built či product, Generic sedí v product až commodity. Pohyb po ose jde jedním směrem a rovnou předepisuje metodu: co je v genesis, se staví doma; co dorazilo do product, se kupuje; co je commodity, se pronajímá. Tři posuny níže jsou tři různá místa na téže ose.
 
 ### Z Generic do Core – komodita se stane diferenciátorem {#shift-generic-to-core}
 
@@ -501,6 +597,12 @@ Příklad: **cloud storage**. Dropbox v roce 2008 měl Core v synchronizaci soub
 ### Ze Supporting do Generic – když dorazí kvalitní SaaS {#shift-supporting-to-generic}
 
 Příklad: **helpdesk / ticketing**. V roce 2005 většina středních firem implementovala vlastní helpdesk modul – Supporting subdoména. Dnes je Zendesk / Freshdesk / Intercom dost dobrý, aby pokryl 90 % požadavků, a vlastní implementace je nesmyslná. Subdoména se posunula z Supporting do Generic, a tým, který ji nadále udržuje sám, plýtvá rozpočtem.
+
+### Kam hranici Generic posunuly jazykové modely {#shift-llm}
+
+Poslední posun je čerstvý a stojí za samostatnou zmínku, protože zasáhl celou třídu úloh naráz. Klasifikace textu, extrakce dat z nestrukturovaných dokumentů, sumarizace, jazyková normalizace vstupů: ještě v roce 2020 to byly Supporting subdomény, na kterých seděl vlastní tým s vlastním modelem. Dnes jde o volání API. Ekonomika rozhodnutí se otočila – kde dřív jediná cesta vedla přes vlastní implementaci, existuje teď hotové řešení, jehož kvalita se rok od roku mění rychleji, než stihnete napsat vlastní.
+
+Tvrdá čísla k tomuto posunu žádný primární DDD zdroj zatím nenabízí, takže s ním pracujte jako s pozorováním, ne jako s doloženým trendem. Praktický dopad je ale jednoznačný: subdomény, kolem kterých se točí zpracování textu, patří do nejbližšího auditu jako první. Souvislosti rozvádí [kapitola o DDD a umělé inteligenci](/ddd-a-umela-inteligence).
 
 Praktická obrana proti zastarávání klasifikace:
 
@@ -525,13 +627,15 @@ Pětikrokový postup pro první klasifikaci subdomén vlastního produktu. Dopor
 
    Použijte obchodní slovník, ne IT žargon. Příklady: „objednat zboží“, „sledovat zásilku“, „získat doporučení produktu“, „přihlásit se“, „obdržet účtenku e-mailem“, „reklamovat“. Cíl: 20–40 položek u středně velkého produktu. Pokud máte víc, agregujte; méně – buďte ostražití, pravděpodobně vám něco uniklo.
 
+   Brainstorm nad prázdnou tabulí je nejhorší způsob, jak k seznamu dojít. Komunitní praxe (DDD Starter Modelling Process) klasifikaci zařazuje až za [Big Picture EventStorming](/event-storming#big-picture): capability se odečtou z časové osy událostí, kterou tým právě nakreslil. Kde hranice zůstávají sporné, pomůže sada *Independent Service Heuristics* od autorů Team Topologies – otázky typu „dala by se tato část provozovat jako samostatný SaaS produkt s vlastní cenovkou?“, kterým rozumí i netechnický účastník workshopu.
+
 2. **U každé položky odpovědět na pětibodový test (sekce 02.03).**
 
    Tabulka 6 sloupců: capability + 5 otázek. Každý účastník odpovídá nezávisle (anonymně, Post-it nebo Miro), pak shrnete medián. Pozor na syndrom hrdiny – pokud se týmový advokát konkrétní oblasti účastní hlasování, přiřaďte jeho hlasu nižší váhu. Jinak hlasování ratifikuje stávající advokacii místo toho, aby ji testovalo.
 
 3. **Seskupit do subdomén.**
 
-   Capability, které sdílejí obchodní slovník a klasifikaci, patří do jedné subdomény. Příklad: „nabídnout slevu“, „aplikovat kupon“, „spočítat finální cenu“ → subdoména Pricing. Cílový počet subdomén: 8–15 u středního produktu, 20–40 u velkého enterprise systému. Pokud jich máte 5, je to podezřele málo (Supporting subdomény se typicky schovávají uvnitř Core); pokud 60, je to moc (typicky neagregujete capability).
+   Capability, které sdílejí obchodní slovník a klasifikaci, patří do jedné subdomény. Příklad: „nabídnout slevu“, „aplikovat kupon“, „spočítat finální cenu“ → subdoména Pricing. Orientační počet subdomén, opět pravidlo palce bez opory v primárním zdroji: 8–15 u středního produktu, 20–40 u velkého enterprise systému. Pokud jich máte 5, je to podezřele málo (Supporting subdomény se typicky schovávají uvnitř Core); pokud 60, je to moc (typicky neagregujete capability).
 
 4. **Pro každou subdoménu rozhodnout sourcing.**
 
@@ -540,6 +644,8 @@ Pětikrokový postup pro první klasifikaci subdomén vlastního produktu. Dopor
 5. **Zapsat do Domain Vision Statement (1 stránka A4) – kdo, co, proč, kdy.**
 
    Pro každou Core subdoménu vytvořte jednostránkový dokument (markdown nebo Notion / Confluence). Pro Supporting stačí jedna věta v interním wiki. Pro Generic stačí poznámka „kupujeme X od vendora Y, smlouva platí do Z“. Tento dokument je jediný legitimní výstup workshopu – bez něj se klasifikace ztratí.
+
+Postup výše počítá s tím, že hranice teprve vznikají. V existujícím monolitu, kde je pricing rozprostřený přes čtyřicet tříd a tři kontrolery, krok 3 selže: capability se nedají seskupit podle kódu, protože kód žádné skupiny nemá. Klasifikujte proto podle obchodních schopností a teprve pak hledejte, kudy jimi vede řez v existujícím kódu. Core Domain Charts na to mají variantu *Architecture Migration*, která do grafu kreslí současný a cílový stav. Postup extrakce popisuje [kapitola o migraci z CRUD](/migrace-z-crud).
 
 ### Šablona Domain Vision Statementu {#dvs-template}
 
@@ -599,27 +705,27 @@ Bez subdoménové klasifikace nemá smysl řešit Bounded Contexts, Aggregaty an
 
 Hlavní pravidla na zapamatování:
 
-1. **Core Domain je vzácné** – typická organizace má jednu, výjimečně dvě. Pokud jich vidíte víc, nemáte pět Core domén, máte iluze. Sem směřuje organizace většinu modelovacího úsilí, sem patří senior tým a vlastní IP.
-2. **Supporting subdomén je většina** – přibližně 60 % objemu kódu. Lehký DDD nebo Doctrine ORM CRUD, mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cíl: fungovat spolehlivě s minimální údržbou.
-3. **Generic se kupuje, ne píše** – autentizace, e-maily, platby, fulltext. Custom kód v Generic subdoméně je anti-vzor a ubírá z rozpočtu Core. Tenký Anti-Corruption Layer chrání naše modely před cizím slovníkem.
-4. **Mapování subdomén na Bounded Contexts není 1:1** – Core typicky 1:N (sdílené pravidlo v různých BC), Supporting 1:1, Generic přebírá cizí BC přes ACL. Subdoména je obchodní hranice, BC je implementační hranice; nezaměňujte je.
+1. **Core Domain je vzácné, ne jediné** – žádné číselné pravidlo neexistuje, firma soutěžící na několika osách může mít Core subdomén víc. Platí ale, že Core je z podstaty složité a mění se; jednoduchá subdoména dá jen krátkodobou výhodu. Sem směřuje většina modelovacího úsilí, senior tým a vlastní IP.
+2. **Supporting subdomén je většina** – řádově kolem 60 % objemu kódu (pravidlo palce, ne měřená data). Lehký DDD nebo Doctrine ORM CRUD, mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cíl: fungovat spolehlivě s minimální údržbou. Vysoká složitost ve Supporting je signál k re-klasifikaci.
+3. **Generic se výchozím rozhodnutím kupuje** – autentizace, e-maily, platby, fulltext. Vlastní implementaci obhájíte jen tehdy, když integrační náklad převýší ten implementační. Tenký Anti-Corruption Layer chrání naše modely před cizím slovníkem.
+4. **Mapování subdomén na Bounded Contexty není automaticky 1:1** – ideál je 1:1, časté je N:1 u drobných Supporting a Generic. Rozdělit souvislou funkcionalitu do víc kontextů se vyplatí jen z provozních důvodů (oddělené vývojové cykly, nezávislé škálování). Subdoména je obchodní hranice, BC je implementační hranice; nezaměňujte je.
 5. **Klasifikace stárne** – re-evaluujte každých 12–18 měsíců. Generic se může stát Core (Stripe), Core se může stát Supporting (cloud storage), Supporting se může stát Generic (helpdesk). Tým, který nemá aktuální klasifikaci, neumí prioritizovat.
 
 Subdoménová klasifikace slouží k rozhodování o investici, ne k estetickému dělení kódu. Kapitola splní účel, jakmile z ní vznikne konkrétní seznam subdomén vlastního produktu a u každé z nich rozhodnutí o sourcing strategii. Pouhý dojem „takto by se to dalo kategorizovat“ znamená, že kapitola zůstala teorií – projděte ji znovu s konkrétním projektem v ruce.
 
 :::faq{}
 - question: Jaký je rozdíl mezi subdoménou a Bounded Contextem?
-  answer: 'Subdoména je <strong>obchodní</strong> hranice – kus problému, který se v organizaci řeší jako jedna kapitola. Existovala obvykle dříve, než vznikl IT systém („prodej“, „logistika“, „personalistika“). Bounded Context je <strong>implementační</strong> hranice – místo, kde platí jeden Ubiquitous Language a jeden konzistentní model, typicky jeden tým a jeden deployment. Vztah není 1:1: jedna subdoména může být rozdělena do více BC (Core často 1:N), nebo více subdomén může žít v jednom BC (typické pro Supporting / Generic). Detail v <a href="#subdomeny-na-bc">sekci 02.05 Mapování subdomén na BC</a>.'
+  answer: 'Subdoména je <strong>obchodní</strong> hranice – kus problému, který se v organizaci řeší jako jedna kapitola. Existovala obvykle dříve, než vznikl IT systém („prodej“, „logistika“, „personalistika“). Bounded Context je <strong>implementační</strong> hranice – místo, kde platí jeden Ubiquitous Language a jeden konzistentní model, typicky jeden tým a jeden deployment. Vztah nemusí být 1:1: jedna subdoména může být rozdělena do více BC, nebo více subdomén může žít v jednom BC (typické pro drobné Supporting a Generic). Detail v <a href="#subdomeny-na-bc">sekci 02.05 Mapování subdomén na BC</a>.'
 - question: Můžu změnit klasifikaci subdomény v průběhu života produktu?
   answer: 'Ano – klasifikace stárne a re-evaluace každých 12–18 měsíců je nutnou součástí strategického DDD. Typické posuny: Generic se stává Core (online platby pro Stripe v roce 2010), Core se stává Supporting (cloud storage pro Dropbox po nástupu S3), Supporting se stává Generic (helpdesk po nástupu Zendesk). Re-klasifikace má praktický důsledek: jiná investice, jiný tým, jiná sourcing strategie. Detail v <a href="#evoluce">sekci 02.08 Evoluce subdomén v čase</a>.'
 - question: Jak poznám, že je subdoména Generic?
-  answer: 'Generic subdoména je komoditizovaná: řešení existuje roky, prodává se jako SaaS, knihovna nebo open-source a tržní standard určuje, jak má vypadat. Typické příklady vedle autentizace: generování PDF faktur (hotové knihovny a fakturační služby) a rozesílání transakčních e-mailů (SMTP je standardizovaný protokol, doručitelnost řeší vendor). Vlastní kód v takové oblasti ubírá rozpočet Core Doméně – standardní řešení je nákup plus tenký Anti-Corruption Layer na hranici. Detail v <a href="#tri-kategorie">sekci 02.02 Tři kategorie subdomén</a>.'
+  answer: 'Generic subdoména je komoditizovaná: řešení existuje roky, prodává se jako SaaS, knihovna nebo open-source a tržní standard určuje, jak má vypadat. Typické příklady vedle autentizace: generování PDF faktur (hotové knihovny a fakturační služby) a rozesílání transakčních e-mailů (SMTP je standardizovaný protokol, doručitelnost řeší vendor). Od Supporting ji odlišuje složitost: Generic je složitý, ale už vyřešený problém, který se nemění, zatímco Supporting bývá jednoduchý. Výchozím rozhodnutím je nákup plus tenký Anti-Corruption Layer na hranici; vlastní implementaci obhájíte jen tehdy, když integrace vyjde dráž než napsání. Detail v <a href="#tri-osy">sekci 02.02 Tři osy, ne jedna</a>.'
 - question: Kolik subdomén je „normální“ počet?
-  answer: 'U středního produktu očekávejte <strong>8–15 subdomén</strong>, u velkého enterprise systému 20–40. Pokud máte méně než 8, typicky se Supporting subdomény schovávají uvnitř Core; pokud máte víc než 40, neagregujete capability dostatečně a pracujete v příliš jemné granularitě. Rozdělení vývojové kapacity by mělo odpovídat přibližně 20–30 % Core, 50–60 % Supporting a 10–20 % Generic – pokud máte 5+ Core subdomén, jde téměř jistě o tzv. syndrom hrdiny a je nutná re-klasifikace.'
+  answer: 'Orientačně u středního produktu <strong>8–15 subdomén</strong>, u velkého enterprise systému 20–40. Jde o pravidla palce této knihy, ne o měřená data. Pokud máte méně než 8, typicky se Supporting subdomény schovávají uvnitř Core; pokud máte víc než 40, neagregujete capability dostatečně a pracujete v příliš jemné granularitě. Rozdělení vývojové kapacity vychází přibližně na 20–30 % Core, 50–60 % Supporting a 10–20 % Generic. Pět a víc Core subdomén není samo o sobě chyba, protože firma soutěžící na několika osách jich může mít víc. Zaslouží si ale kontrolní otázku: čím konkrétně se každá z nich odlišuje na trhu?'
 - question: Co když vyjde, že nemáme žádnou Core Domain?
   answer: 'Je to legitimní výsledek a často signál, že <strong>plné DDD nestojí za náklady</strong>. Pokud po pětibodovém testu (sekce 02.03) nezůstane ani jedna subdoména s 3+ ANO, váš produkt je zřejmě „lepší CRUD“ – kombinace komoditizovaných řešení (Generic) a interní administrativy (Supporting) bez skutečného diferenciátoru. V takovém případě zvažte CRUD architekturu se servisní vrstvou, anemic model a Doctrine ORM; investice do plného taktického DDD by se nevrátila. Detailní rozbor v kapitole <a href="/kdy-nepouzivat-ddd">Kdy DDD nepoužívat</a>.'
 - question: Musí každá Core subdoména mít vlastní Bounded Context?
-  answer: 'Ne nutně – Core subdoména bývá rozdělena do více BC, ne sloučena. Příklad: Pricing (Core) v e-shopu žije souběžně v Catalog BC (read model – indikativní cena pro listing) a v Checkout BC (write model – finální cena, validace, invariants). Důvod: čtenářský a zápisový kontext mají odlišné výkonnostní a konzistenční nároky a sloučení by vedlo k modelu, který nesedí ani jednomu. Naopak Supporting / Generic subdomény mají s BC obvykle 1:1 vztah pro jednoduchost.'
+  answer: 'Cílem je 1:1 a rozdělení souvislé funkcionality do víc kontextů je spíš varovný signál – tatáž změna požadavků pak zasáhne oba kontexty a vynutí si současné nasazení. Legitimní důvody k rozdělení jsou provozní: potřeba oddělit vývojové cykly komponent nebo škálovat část nezávisle na zbytku. Příklad z e-shopu: Pricing (Core) žije v Catalog BC i v Checkout BC, protože listing a checkout mají odlišné výkonnostní nároky a nasazují se různým tempem. Bez takového důvodu subdoménu nedělte.'
 :::
 
 ## 02.11 Další četba {#further-reading}
@@ -631,4 +737,9 @@ Pro další studium strategického DDD a klasifikace subdomén poslouží násle
 - [Learning Domain-Driven Design](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/) – Vlad Khononov (O'Reilly 2021), kapitola 1 „Analyzing Business Domains“ je nejaktuálnější výklad subdoménové klasifikace.
 - [EventStorming](https://www.eventstorming.com/) – Alberto Brandolini, workshopová technika pro identifikaci subdomén ve velkém měřítku (Big Picture EventStorming).
 - [Martin Fowler – Bounded Context](https://martinfowler.com/bliki/BoundedContext.html) – krátká, ale výstižná definice BC, která pomáhá odlišit ho od subdomény.
-- [Core Domain Charts (DDD Crew)](https://github.com/ddd-crew/core-domain-charts) – open-source šablony pro vizualizaci subdoménové klasifikace.
+- [Core Domain Charts (DDD Crew)](https://github.com/ddd-crew/core-domain-charts) – open-source šablony pro vizualizaci subdoménové klasifikace, včetně katalogu otázek k oběma osám a varianty Architecture Migration.
+- [Core Domain Patterns](https://nicktune.substack.com/p/core-domain-patterns-941f89446af5) – Nick Tune, slovník osmi vzorů (Decisive Core, Commoditised Core, Black Swan Core, Suspect Supporting a další) pro popis posunů v čase.
+- [Revisiting the Basics of DDD](https://vladikk.com/2018/01/26/revisiting-the-basics-of-ddd/) – Vlad Khononov, kratší předloha první kapitoly *Learning DDD*: tři osy klasifikace a otázka, zda by se subdoména dala prodat jako samostatný byznys.
+- [Patterns, Principles and Practices of DDD](https://www.wiley.com/Patterns,+Principles,+and+Practices+of+Domain+Driven+Design-p-9781118714706) – Scott Millett a Nick Tune, kapitola 3 „Focusing on the Core Domain“ a heuristika „code for replacement rather than reuse“ pro Supporting subdomény.
+- [Architecture for Flow](https://www.informit.com/articles/article.aspx?p=3222355&seqNum=3) – Susanne Kaiser propojuje klasifikaci subdomén s Wardleyho mapami a Team Topologies.
+- [Independent Service Heuristics](https://github.com/TeamTopologies/Independent-Service-Heuristics) – sada otázek pro hledání hranic subdomén, srozumitelná i netechnickým účastníkům workshopu.
