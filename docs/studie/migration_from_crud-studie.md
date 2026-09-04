@@ -441,9 +441,33 @@ datum přístupu u všech 2026-09-03.
 
 - **Přesné datum původního zápisu „Strangler Application“.** Kniha jinde uvádí „(Martin Fowler, 2004)“ (`microservices_and_ddd.md:786`). Současná stránka na martinfowler.com nese datum 22. 8. 2024 a původní datum neuvádí; `web.archive.org` je pro použitý nástroj nedostupné. Dohledat ručně přes archiv martinfowler.com nebo přes tištěné citace.
 - **Datum přejmenování na „Strangler Fig Application“.** Fowler uvádí důvod, ne datum.
-- **Standish Group report 2014, 50 % nepoužívaných funkcí.** Znám pouze zprostředkovaně z `[11]`. Primární zdroj nedohledán; často se cituje i starší číslo (45 %, 2002), takže před převzetím do knihy ověřit.
+- **Standish Group, „50 % nepoužívaných funkcí“ – DOHLEDÁNO 2026-09-04. Tvrzení má chybnou dataci,
+  chybné číslo i zamlčený vzorek. Doporučuji je z kapitoly vyškrtnout.**
+
+  Původ: keynote **Jima Johnsona** (předsedy Standish Group) na konferenci **XP 2002 v Sardinii**,
+  nikoli report z roku 2014. Původní čísla znějí **45 % funkcí nikdy použitých a 19 % zřídka**,
+  dohromady 64 % – ne 50 %.
+
+  Zásadní je ale vzorek. Mike Cohn to rozebírá v *Are 64% of Features Really Rarely or Never
+  Used?*: *„The results Jim Johnson presented at XP 2002 and that have been repeated so often were
+  based on a study of four internal applications.“* A dodává: *„Yes, four applications. And, yes,
+  all internal-use applications. No commercial products.“* Vyzývá, aby každý, kdo číslo cituje,
+  uvedl, že *„the study was of four internally developed projects at four companies“*.
+
+  K tomu obecná metodologická kritika CHAOS reportů: *The Rise and Fall of the Chaos Report
+  Figures* (IEEE, 2010) ukazuje systematické zkreslení ve prospěch agilních metod.
+
+  **Doporučení:** číslo neuvádět vůbec. Teze „velká část funkcí se nepoužívá“ je v kapitole
+  užitečná, ale unese ji i bez falešné statistické opory – stačí ji podat jako pozorování.
+  Pokud má číslo zůstat, musí být uvedeno jako „45 % ze čtyř interních aplikací, XP 2002“,
+  což je formulace, která samu tezi spíš oslabí.tarší číslo (45 %, 2002), takže před převzetím do knihy ověřit.
 - **Doctrine ORM a PHP 8.4 native lazy objects.** Od které verze ORM 3.x se používají místo proxy podtříd a zda pak entity mohou být `final`. Release blog doctrine-project.org nebyl na zkoušených URL dostupný. Ověřit v CHANGELOG repozitáře `doctrine/orm`.
 - **Doctrine a readonly properties v kombinaci s lazy loadingem.** RFC `[25]` potvrzuje bezpečnost hydratace bez konstruktoru, ale nic neříká o proxy, který identifikátor nastaví dopředu a poté je hydratován znovu. Ověřit v issue trackeru `doctrine/orm`.
-- **Feature-flag řešení v Symfony ekosystému pro fázi cutover.** Kapitola cutover přes feature flag doporučuje (192–195), Symfony core komponentu nemá. Dohledat, který bundle kniha může doporučit.
+- **Feature flags v Symfony – OVĚŘENO 2026-09-04: core komponenta neexistuje.** Balíček
+  `symfony/feature-flags` na Packagistu není. Dostupné a živé jsou dvě knihovny třetích stran:
+  **`flagception/flagception-bundle`** 6.1.1 (1. 6. 2026), integrace přímo do Symfony,
+  a **`unleash/client`** v2.11 (19. 8. 2026), PHP klient pro Unleash. **Doporučení: doporučení
+  na ř. 192–195 ponechat, ale nepsat ani nenaznačovat, že jde o funkci Symfony; jmenovat konkrétní
+  balíček s poznámkou, že jde o třetí stranu.**nemá. Dohledat, který bundle kniha může doporučit.
 - **Michael Feathers – aktuální texty.** Na `michaelfeathers.silvrback.com` byl přímým fetchem ověřen seznam příspěvků (nejnovější 2023); k seams ani k definici legacy code tam nic není. Primárním zdrojem zůstává kniha.
 - **Kacper Gunia / Symfony Con přednášky o migraci legacy Symfony aplikací na DDD.** Bez `WebSearch` se nepodařilo dohledat konkrétní záznam.

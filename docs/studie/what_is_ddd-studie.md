@@ -288,6 +288,17 @@ Sekce 01.12 zmiňuje glosář a cheat sheet, ale ne `/ddd-a-umela-inteligence` a
   ale samotné datum a autorství sporné nejsou. **Doporučení: rok 2013 uvádět bez výhrady,
   odkazovat ale na `eventstorming.com` nebo na knihu, ne na mrtvý blogspot.**ěřený je až repost z 12. 2. 2014 [30]. Údaj „2013“ v kapitole (`:66`) je tedy pravděpodobně správný, ale doložený jen nepřímo.
 - **Vernonovo užití termínu „Supporting Subdomain".** Ověřeno negativně u Evanse (*DDD Reference* zná jen Core Domain a Generic Subdomains) a pozitivně u Khononova (2021). Přímé doložení z *IDDD* (2013) se nepodařilo; atribuce Vernonovi podle `CLAUDE.md` zůstává nepotvrzená z primárního zdroje.
-- **Statistiky o příčinách selhání softwarových projektů.** Standish CHAOS je dostupný jen v druhotných citacích a jeho metodika je dlouhodobě kritizovaná. Pro tvrzení na `what_is_ddd.md:46` se nenašel zdroj, který by ho podpořil v uvedené síle.
+- **Statistiky o příčinách selhání projektů (Standish CHAOS) – DOVĚŘENO 2026-09-04. Závěr:
+  nepoužívat.** Metodologická kritika je doložená: *The Rise and Fall of the Chaos Report Figures*
+  (IEEE, 2010) ukazuje systematické zkreslení, protože reporty byly stavěny tak, aby vyzněly ve
+  prospěch agilních metod. Nejcitovanější číslo z tohoto okruhu („45 % funkcí nikdy použitých,
+  19 % zřídka“) navíc nepochází z žádného reportu, ale z keynote Jima Johnsona na XP 2002,
+  a stojí podle rozboru Mikea Cohna na vzorku **čtyř interních aplikací**. Podrobný rozbor je
+  v `migration_from_crud-studie.md`, kde totéž číslo kapitola používá.
+
+  **Doporučení: tvrzení na `what_is_ddd.md:46` neopírat o Standish.** Teze „projekty selhávají
+  spíš kvůli neporozumění doméně“ je obhajitelná jako autorské pozorování; statistickou oporu,
+  která by ji unesla, se najít nepodařilo a Standish tou oporou není.
+
 - **Kvantifikace návratnosti investice do DDD.** Žádný prošlý zdroj neuvádí časový horizont návratnosti. Tvrzení na `what_is_ddd.md:38` je nedoložitelné.
 - **Datum a rozsah Symfony 8.1.** Údaje pocházejí ze stránky `symfony.com/releases` v době přístupu; před vydáním knihy ověřit znovu, protože se mění každých šest měsíců.

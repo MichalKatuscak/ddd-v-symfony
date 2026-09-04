@@ -237,7 +237,24 @@ Knižní zdroje bez URL (uvedeny pro atribuce v sekci 2, ověřeny z knihovny kn
 
 ### Neověřené / nedohledané
 
-- **Znění Knuthovy citace.** DOI odpovídá článku, plný text je za paywallem ACM. Formulaci „premature optimization is the root of all evil“ i podmínku „97 % of the time“ je třeba ověřit z tištěného zdroje nebo z veřejné kopie článku.
+- **Znění Knuthovy citace – DOHLEDÁNO 2026-09-04. Plné znění pasáže:**
+
+  > *„There is no doubt that the grail of efficiency leads to abuse. Programmers waste enormous
+  > amounts of time thinking about, or worrying about, the speed of noncritical parts of their
+  > programs, and these attempts at efficiency actually have a strong negative impact when debugging
+  > and maintenance are considered. **We should forget about small efficiencies, say about 97% of
+  > the time: premature optimization is the root of all evil. Yet we should not pass up our
+  > opportunities in that critical 3%.**“*
+
+  Zdroj: *Structured Programming with go to Statements*, Computing Surveys 6:4 (prosinec 1974),
+  s. 261–301. Plný text zůstává za paywallem ACM, ale znění je konzistentně doložené napříč
+  nezávislými zdroji včetně Wikiquote.
+
+  **Potvrzuje nález G3 a zpřesňuje ho.** Kapitola cituje jen prostřední větu. Chybí obojí:
+  podmínka „97 % of the time“ i pointa „Yet we should not pass up our opportunities in that
+  critical 3%“. Knuth optimalizaci nezakazuje – vymezuje, kde má smysl. **Doporučení: citovat
+  celé souvětí od „We should forget“ po „critical 3%“.** Stojí za zmínku i to, že článek není
+  o optimalizaci, ale o oprávněném použití `goto`; citace je z odbočky. je třeba ověřit z tištěného zdroje nebo z veřejné kopie článku.
 - **`PARTIAL` – OVĚŘENO 2026-09-04, rozpor je zdánlivý a vysvětlený.** `UPGRADE.md` ORM to říká
   sám v poznámce nad seznamem: *„WARNING: This was relaxed in ORM 3.2 when partial was re-allowed
   for array-hydration.“* Jednotlivé body pak nesou závorku „(reintroduced in ORM 3.2)“. Kontrola

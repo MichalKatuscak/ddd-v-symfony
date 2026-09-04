@@ -425,5 +425,14 @@ Datum přístupu u všech webových zdrojů: 2026-09-03.
 - **Přesné znění definic v modré knize (2003).** Studie pracuje s Reference (2015), která je autorem redigovaná a volně dostupná. Formulace v původní knize se místy liší; pro citaci vydání z roku 2003 je nutné ověřit v tištěném textu.
 - **Vernon, IDDD (2013), kap. 5 a 12.** Čtyři strategie vzniku identity a rozdíl collection-/persistence-oriented jsou doloženy sekundárně (výtahy a ukázkové kapitoly na ptgmedia.pearsoncmg.com). Přímý text nebyl ověřen.
 - **Khononov, *Learning DDD* (2021).** K definicím Entity/VO/Aggregate byly nalezeny jen sekundární výtahy. Před citací ověřit v originále.
-- **Symfony Messenger — `dispatch_after_current_bus`.** Existence funkce je doložena, ale úplné znění doporučení Symfony k doménovým událostem se ze stránky nepodařilo získat. Ověřit ručně.
+- **`dispatch_after_current_bus` – OVĚŘENO 2026-09-04 ve zdroji.**
+  `Symfony\Component\Messenger\Middleware\DispatchAfterCurrentBusMiddleware` existuje ve větvi 8.1
+  a jeho vlastní docblock říká: *„Allow to configure messages to be handled after the current bus
+  is finished.“* Doplňující detail z CHANGELOGu: od **5.3** už dispatch se stampem
+  `DispatchAfterCurrentBusStamp` mimo kontext jiného dispatche nevyhazuje výjimku, takže se stamp
+  dá použít i tam, kde si kód není jistý, jestli běží uvnitř handleru.
+
+  Nedoloženo zůstává, že by Symfony tento middleware **doporučovalo** právě pro doménové události –
+  dokumentace ho popisuje obecně. **Doporučení: mechanismus popsat jako dostupný nástroj
+  s doloženým chováním, ne jako doporučený postup Symfony.**se ze stránky nepodařilo získat. Ověřit ručně.
 - **Millett & Tune (2015).** K tématu nebyl v této rešerši použit žádný ověřený úryvek.
