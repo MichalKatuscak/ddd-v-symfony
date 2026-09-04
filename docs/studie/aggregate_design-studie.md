@@ -288,18 +288,69 @@ v pěti ukázkách odstranit spolu s tím.
 
 ### Neověřené / nedohledané
 
-- **`[10]` Pat Helland — *Life Beyond Distributed Transactions: an Apostate's Opinion*.** Kapitola cituje reprint na `queue.acm.org/detail.cfm?id=3025012`. Existenci a autorství eseje potvrzuje Vernonův seznam referencí v Part II [4], který odkazuje na původní CIDR 2007 verzi (`ics.uci.edu/~cs223/papers/cidr07p15.pdf`). Samotný text ale v této rešerši ověřen nebyl, takže tvrzení kapitoly na `:174-177` („jediná životaschopná cesta je one entity per transaction") zůstává neověřené. **Dohledat ručně** – je to jeden ze dvou pilířů argumentace v 07.05.
+- **Pat Helland – *Life beyond Distributed Transactions: an Apostate's Opinion* – DOHLEDÁNO
+  2026-09-04.** Původní publikace: **CIDR 2007, s. 132–141** (3. bienální Conference on Innovative
+  Data Systems Research, 7.–10. 1. 2007, Asilomar). Volně dostupné PDF je na
+  `ics.uci.edu/~cs223/papers/cidr07p15.pdf`, záznam v dblp `conf/cidr/Helland07`.
+
+  **Věta, která patří přímo do této kapitoly:** Helland zavádí abstrakci *entity* a *activities*
+  a entity vymezuje takto – jsou to kolekce pojmenovaných dat, která *„may be atomically updated
+  within the entity but never atomically updated across entities“*. To je hranice transakce
+  formulovaná nezávisle na DDD a o šest let dřív než Vernonovy *Effective Aggregate Design*;
+  jako opora pro pravidlo „jedna transakce = jeden agregát“ je silnější než cokoli, co kapitola
+  dnes cituje. Helland sám o svém obratu píše, že dřív byl zastáncem globální serializovatelnosti
+  a přirovnává tyto platformy k Maginotově linii.
+
+  **Doporučení: citovat CIDR 2007 s odkazem na volné PDF, ne reprint na queue.acm.org.**`. Existenci a autorství eseje potvrzuje Vernonův seznam referencí v Part II [4], který odkazuje na původní CIDR 2007 verzi (`ics.uci.edu/~cs223/papers/cidr07p15.pdf`). Samotný text ale v této rešerši ověřen nebyl, takže tvrzení kapitoly na `:174-177` („jediná životaschopná cesta je one entity per transaction“) zůstává neověřené. **Dohledat ručně** – je to jeden ze dvou pilířů argumentace v 07.05.
 
 - **Khononovo „páté pravidlo" (`:81-84`).** Tvrzení, že Khononov v *Learning DDD* formuluje „jeden command modifikuje právě jeden agregát", se nepodařilo potvrdit z žádného dostupného zdroje. Ověřit v knize, kap. 6.
 
 - **Khononovy „tři strategie" pro large-collection problem (`:687-699`).** Atribuce Khononovovi je v kapitole explicitní, ale zdroj se nepodařilo ověřit. Navíc druhá strategie (Doctrine `EXTRA_LAZY`) je zjevně autorský doplněk, ne Khononovův text – kniha není o PHP. Ověřit v knize a atribuci rozdělit.
 
-- **Práh snapshotu.** Komunitně se traduje doporučení Grega Younga „neuvažovat o snapshotech dřív než zhruba u tisíce eventů". Přímý zdroj se v této rešerši dohledat nepodařilo (odkazovaný článek na codeopinion.com téma snapshotů neobsahuje). Číslo „50–100" z kapitoly (`:724-725`) nemá zdroj žádný. **Dohledat ručně** v Youngových materiálech nebo v dokumentaci Kurrent/EventStoreDB.
+- **Práh snapshotu – DOHLEDÁNO 2026-09-04, tradované doporučení je doložené.** Greg Young to
+  říká v přednášce **Code on the Beach 2014** (přepis je na blogu Kurrentu): o snapshotu neuvažovat
+  dřív než zhruba **u tisíce událostí, možná i víc**.
 
-- **Udi Dahan — *Don't Create Aggregate Roots* (29. 6. 2009), https://udidahan.com/2009/06/29/dont-create-aggregate-roots/.** Existence a datum ověřeny, obsah pouze z výňatku. Relevantní pro sekci o factory metodách (`:452-454`), ale bez přečtení celého textu ho nelze citovat.
+  Užitečnější než samotné číslo je ale jeho argument o *umístění*: snapshoty patří do samostatné
+  tabulky klíčované agregátem a verzí, kterou plní asynchronní proces na pozadí. Snapshot vložený
+  přímo do event logu je vždy nucen být na poslední verzi, což u vytížených agregátů vyrábí smyčku
+  konfliktů optimistického zámku; oddělená tabulka nechá snapshot platný ve verzi, ve které vznikl.
+  **Doporučení: číslo uvést s tímto zdrojem a přidat argument o oddělené tabulce – ten je pro
+  čtenáře cennější než práh.**e v této rešerši dohledat nepodařilo (odkazovaný článek na codeopinion.com téma snapshotů neobsahuje). Číslo „50–100“ z kapitoly (`:724-725`) nemá zdroj žádný. **Dohledat ručně** v Youngových materiálech nebo v dokumentaci Kurrent/EventStoreDB.
+
+- **Udi Dahan – *Don't Create Aggregate Roots* – OBSAH OVĚŘEN 2026-09-04, text je čitelný celý.**
+  Datum 29. 6. 2009 potvrzeno. Teze: agregát se nemá vytvářet přímo v aplikační vrstvě, ale
+  vzniká z jiné existující perzistentní entity. Doslova: *„if your service layer is newing up some
+  entity and saving it – that entity isn't an aggregate root **in that use case**.“* a
+  *„don't go saving entities in your service layer – let the domain model manage its own state.“*
+  Praktické pravidlo, které z toho plyne: *„Always get an entity. At least one.“*
+
+  V příkladu vytváří `Referrer` entitu `Visitor` svou metodou a nová entita se uloží skrz
+  *persistence by reachability* při commitu rodičovské transakce. Argument shrnuje větou, že
+  *„Customers don't just appear out of thin air“* – vždy existuje obchodní kontext, který vznik
+  spouští, a ten je třeba najít.
+
+  **Dopad na sekci o factory metodách (`:452-454`):** text lze citovat. Je ale v napětí s kanonickým
+  `Order::place()` z `CLAUDE.md`, což je statická factory na samotném agregátu. Dahanův postoj
+  stojí za zmínku jako protihlas, ne jako pravidlo k převzetí – jinak by se rozpadla konvence
+  napříč knihou.
 
 - **Matthias Noback — *DDD entities and ORM entities* (2022), https://matthiasnoback.nl/2022/04/ddd-entities-and-orm-entities/.** Nalezeno v listingu, nefetchováno. Pravděpodobně nejrelevantnější existující text k nálezu G20.
 
 - **Mathias Verraes — modelovací heuristiky pro hranice agregátu.** Existence workshopů a přednášek ověřena (verraes.net, dddeurope.academy), ale žádný konkrétní citovatelný text s dohledatelným záznamem se najít nepodařilo. Pokud se má kniha na Verraese v této kapitole odvolat, je potřeba najít konkrétní přednášku se záznamem.
 
-- **Doctrine ORM 3 a `public readonly` vlastnosti u mapovaných entit (`:564`, `:567`).** Ukázka mapuje `#[ORM\Id] public readonly OrderId $id`. Zda to Doctrine ORM 3 spolehlivě podporuje včetně `refresh()` a hydratace, se v této rešerši ověřit nepodařilo. **Ověřit prakticky** proti Doctrine ORM 3.6 před přepisem.
+- **`public readonly` u mapovaných entit (`:564`, `:567`) – DOVĚŘENO 2026-09-04. Podpora existuje,
+  ale právě u `#[ORM\Id]` jsou hlášené problémy.** `readonly` vlastnosti Doctrine podporuje od
+  **ORM 2.11** (leden 2022) bez zvláštních mapovacích voleb. Hlášené výjimky se ale týkají přesně
+  toho, co ukázka dělá:
+
+  - `doctrine/orm#10032` – při mazání entity s `readonly` ID a při inicializaci proxy přístupem
+    k nenačtené vlastnosti padá `LogicException: Attempting to change readonly property`.
+  - `doctrine/orm#10660` – Doctrine nedokáže u `readonly` vlastnosti nahradit `ArrayCollection`
+    za `PersistentCollection`, takže `readonly` kolekce nefunguje.
+
+  **Zbývá otevřená otázka, kterou rešerše neuzavře:** obě hlášení pocházejí z éry ORM 2 s proxy
+  třídami. S nativními lazy objekty (ORM 3.4+, na Symfony 8 vždy zapnuté) důvod pro první z nich
+  odpadá, protože ghost je instancí téže třídy a nemusí přepisovat vlastnost. Zda to platí i pro
+  mazání a pro kolekce, je nutné **ověřit spuštěním na ORM 3**, ne dohledáním. Do té doby ukázku
+  s `#[ORM\Id] public readonly` nepovažovat za bezpečnou.ctrine ORM 3 spolehlivě podporuje včetně `refresh()` a hydratace, se v této rešerši ověřit nepodařilo. **Ověřit prakticky** proti Doctrine ORM 3.6 před přepisem.

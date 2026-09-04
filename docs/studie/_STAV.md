@@ -236,6 +236,43 @@ jednotlivosti bez průřezového dopadu – chování `@>` bez `::jsonb` castu, 
 `security.authorization_checker`, `#[IsGranted]` s asynchronním busem, `EntityManager::clear()`
 v ORM 3, referenční DDD projekt na Symfony 8, adopce OPA/Cerbos v PHP.
 
+### Kolik z otevřených položek skutečně blokuje přepis
+
+Počet otevřených položek sám o sobě neříká, jestli lze přepisovat kapitoly. Rozhodující je, kolik
+z nich nese tvrzení, na kterém kniha staví. Po roztřídění podle toho, zda položka odkazuje na
+konkrétní řádek kapitoly:
+
+**Blokujících je 25, neblokujících 97.** Zbylých 97 jsou podněty na doplnění, alternativní zdroje
+nebo věci mimo text kapitol – ty přepis nezdrží.
+
+Z těch 25 blokujících ale rešerše vyřeší jen část. Dělí se takto:
+
+- **Knižní citace** (Vernon *IDDD*, Khononov *Learning DDD*, Richardson *Microservices Patterns*).
+  Potřebují výtisk, ne hledání. Týká se to `aggregate_design`, `anti_patterns`, `context_mapping`,
+  `sagas`, `subdomains`, `when_not_to_use_ddd` a `architectural_styles`.
+- **Čísla bez zdroje**: multiplikátory 5–10X (`when_not_to_use_ddd.md:379-381`), retence 7–30 dní
+  (`ddd_pain_points.md:613`), „4–6 tříd místo jedné“ (`cqrs.md:127`), poměr 80/20 u Vernona,
+  návratnost investice do DDD. **Tyto se nedohledají, protože ta data neexistují.** Rozhodnutí je
+  autorské: vyškrtnout, nebo označit za autorský odhad.
+- **Technické**, které rešerše zvládne – vyřešeno v páté dávce (níže).
+
+### Pátá dávka: blokující technické položky
+
+- **Pat Helland, *Life beyond Distributed Transactions*** – CIDR 2007, s. 132–141, volné PDF na
+  `ics.uci.edu`. Nese větu, která patří přímo do kapitoly o agregátech: entity *„may be atomically
+  updated within the entity but never atomically updated across entities“*. Hranice transakce
+  formulovaná nezávisle na DDD a o šest let dřív než Vernonův *Effective Aggregate Design*.
+- **Práh snapshotu** – Youngovo „zhruba tisíc událostí, možná víc“ je doložené (Code on the Beach
+  2014). Cennější než číslo je jeho argument, proč snapshoty patří do oddělené tabulky: snapshot
+  v event logu je nucen být na poslední verzi a u vytížených agregátů vyrábí smyčku konfliktů.
+- **Dahan, *Don’t Create Aggregate Roots*** – obsah ověřen, text je citovatelný. Je ale v napětí
+  s kanonickým `Order::place()`; patří do knihy jako protihlas, ne jako pravidlo k převzetí.
+- **`public readonly` u `#[ORM\Id]`** (`aggregate_design.md:564`, `:567`) – podpora je od ORM 2.11,
+  jenže hlášení `doctrine/orm#10032` a `#10660` popisují `LogicException` právě u readonly ID
+  a readonly kolekcí. Obě pocházejí z éry proxy tříd a s nativními lazy objekty důvod pro první
+  z nich odpadá. **Zda to platí i pro mazání a kolekce, ukáže jen test na ORM 3** – do té doby
+  ukázku nepovažovat za bezpečnou.
+
 ### Co z technických položek zbývá
 
 Kategorie A měla 67 položek; ověřené jsou hlavní skupiny (Doctrine, Symfony verze, balíčky,
