@@ -14,7 +14,7 @@ schema_headline: "DDD v praxi – kde to bolí"
 chapter_number: "20"
 category: Praxe
 deck: "Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další."
-reading_time: 35
+reading_time: 31
 difficulty: 4
 ---
 
@@ -349,111 +349,20 @@ ale před tím, než stihnete odeslat doménovou událost do Messengeru, server 
 Událost se ztratí – databáze je konzistentní, ale žádný subscriber ji nikdy
 nezpracuje. Platba proběhla, ale sklad nebyl upozorněn.
 
-**Příčina:** `flush()` a `$bus->dispatch()` jsou dvě separátní operace bez atomické záruky.
-Neexistuje způsob, jak je zabalit do jedné transakce – databáze a message broker jsou různé systémy.
+**Příčina:** `flush()` a `$bus->dispatch()` jsou dvě separátní operace bez atomické
+záruky. Zabalit je do jedné transakce nelze, databáze a message broker jsou různé systémy.
 
-**Řešení – Outbox pattern:** Místo přímého odeslání do brokeru
-uložte událost do `outbox` tabulky *ve stejné databázové transakci*
-jako agregát. Separátní worker pak z tabulky čte a odešle zprávy do Messengeru.
-Atomicita je garantována databázovou transakcí; at-least-once doručení zajišťuje worker.
+**Řešení:** událost uložit do `outbox` tabulky ve stejné transakci jako agregát
+a odeslání nechat na odděleném procesu. Atomicitu pak drží databázová transakce.
 
-:::callout{type="pattern"}
-#### PHP: OutboxEvent entita a OutboxPublisher service {#b1-code-heading}
-
-:::code{language="php" filename="src/SharedKernel/Infrastructure/Outbox/OutboxEvent.php"}
-<?php
-
-declare(strict_types=1);
-
-namespace App\SharedKernel\Infrastructure\Outbox;
-
-use Doctrine\ORM\Mapping as ORM;
-
-#[ORM\Entity]
-#[ORM\Table(name: 'outbox_events')]
-final class OutboxEvent
-{
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private int $id;
-
-    #[ORM\Column(length: 255)]
-    private string $eventType;
-
-    #[ORM\Column(type: 'json')]
-    private array $payload;
-
-    #[ORM\Column]
-    private \DateTimeImmutable $createdAt;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $publishedAt = null;
-
-    public function __construct(string $eventType, array $payload)
-    {
-        $this->eventType = $eventType;
-        $this->payload   = $payload;
-        $this->createdAt = new \DateTimeImmutable();
-    }
-
-    public function markAsPublished(): void
-    {
-        $this->publishedAt = new \DateTimeImmutable();
-    }
-
-    public function isPublished(): bool { return $this->publishedAt !== null; }
-    public function eventType(): string  { return $this->eventType; }
-    public function payload(): array     { return $this->payload; }
-}
-:::
-:::
-
-Důležitý detail: outbox záznamy musí být persistovány *uvnitř* téže transakce
-jako agregát. Listener musí reagovat na událost `onFlush` (ještě před
-commitem) – nikoliv na `postFlush`, který se volá *po* commitu
-transakce a tedy mimo ni. Použití `postFlush` s voláním dalšího
-`flush()` by navíc způsobilo nekonečnou rekurzi.
-
-:::code{language="php" filename="src/OutboxEventListener.php"}
-use App\SharedKernel\Domain\AggregateRoot;
-use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Events;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-
-#[AsDoctrineListener(event: Events::onFlush)]
-final class OutboxEventListener
-{
-    public function __construct(private readonly NormalizerInterface $serializer) {}
-
-    public function onFlush(OnFlushEventArgs $args): void
-    {
-        $em  = $args->getObjectManager(); // getEntityManager() bylo v ORM 3.x odstraněno
-        $uow = $em->getUnitOfWork();
-
-        // Projdeme nové i změněné entity a sebereme doménové události
-        foreach ([...$uow->getScheduledEntityInsertions(), ...$uow->getScheduledEntityUpdates()] as $entity) {
-            if (!$entity instanceof AggregateRoot) {
-                continue;
-            }
-            foreach ($entity->releaseEvents() as $event) {
-                $outbox = new OutboxEvent(get_class($event), $this->serializer->normalize($event));
-                $em->persist($outbox);
-                // Outbox entitu musíme ručně přidat do Unit of Work - jsme uvnitř onFlush
-                $uow->computeChangeSet($em->getClassMetadata(OutboxEvent::class), $outbox);
-            }
-        }
-        // Žádný další flush() - outbox záznamy jsou součástí probíhající transakce
-    }
-}
-:::
+Vzor má vlastní kapitolu, protože podrobností je víc, než se sem vejde: schéma tabulky,
+dvě varianty relay procesu, idempotentní inbox na straně příjemce, provozní metriky
+i postup migrace existujícího projektu. Celý výklad je v kapitole
+[Outbox pattern](/outbox-pattern).
 
 :::callout{type="note"}
-Symfony Messenger nabízí vlastní **Doctrine Transport**,
-který ukládá zprávy do databáze a garantuje at-least-once doručení bez nutnosti
-vlastního Outbox kódu. Zvažte jeho použití jako alternativu před implementací
-vlastního Outbox patternu.
+Než sáhnete po vlastní implementaci, zvažte **Doctrine Transport** v Symfony Messengeru.
+Ukládá zprávy do databáze a garantuje at-least-once doručení bez vlastního kódu.
 :::
 
 ### B2. Debugging ztracené zprávy v Messengeru {#b2-debugging}
@@ -951,54 +860,12 @@ od vytvoření a pouze pokud ještě nebyla expedována“. Symfony Security Vot
 žije v infrastrukturní vrstvě a závisí na frameworku. Pokud logiku napíšete
 přímo ve Voteru, stane se netestovatelnou bez Symfony kontejneru.
 
-**Řešení:** Voter funguje jako **tenký adaptér**,
-který deleguje rozhodnutí na doménovou metodu agregátu. Doménová metoda je
-čistá funkce – testovatelná bez frameworku.
+**Řešení:** Voter funguje jako tenký adaptér, který deleguje rozhodnutí na doménovou
+metodu agregátu. Doménová metoda je čistá funkce, testovatelná bez frameworku.
 
-:::callout{type="pattern"}
-#### PHP: Voter jako tenký adaptér + doménová metoda {#d3-code-heading}
-
-:::code{language="php" filename="snippet.php"}
-<?php
-
-declare(strict_types=1);
-
-// Doménová metoda v agregátu - testovatelná bez frameworku
-// Aktuální čas je parametr (ne wall-clock) - metoda je deterministická a snadno testovatelná
-final class Order
-{
-    public function canBeCancelledBy(UserId $userId, \DateTimeImmutable $now): bool
-    {
-        if ($this->status === OrderStatus::Shipped || $this->status === OrderStatus::Delivered) {
-            return false;
-        }
-        $withinWindow = $this->placedAt > $now->modify('-24 hours');
-
-        return $withinWindow && $this->customerId->equals($userId);
-    }
-}
-
-// Voter - pouze adaptér, žádná doménová logika
-final class OrderVoter extends Voter
-{
-    protected function supports(string $attribute, mixed $subject): bool
-    {
-        return $attribute === 'ORDER_CANCEL' && $subject instanceof Order;
-    }
-
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
-    {
-        $user = $token->getUser();
-        if (!$user instanceof SecurityUser) {
-            return false;
-        }
-
-        /** @var Order $subject */
-        return $subject->canBeCancelledBy(UserId::fromString($user->getId()), new \DateTimeImmutable());
-    }
-}
-:::
-:::
+Kde přesně která kontrola leží, rozebírá kapitola
+[Autorizace v DDD](/autorizace-v-ddd) – včetně toho, proč Voter nestačí sám o sobě
+a co patří přímo do agregátu.
 
 ## 20.05 E – Organizace a tým {#tym}
 
