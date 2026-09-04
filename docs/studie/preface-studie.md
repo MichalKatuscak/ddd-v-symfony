@@ -412,8 +412,16 @@ https://www.php.net/releases/8.4/en.php (přístup 2026-09-03)
 - **Druhé vydání *Learning Domain-Driven Design*.** Jeden katalogový záznam naznačuje
   e-book s datem 14. 7. 2025, ale žádný zdroj neuvádí explicitně „2nd Edition" ani nové
   ISBN. Před citací v knize ověřit přímo u O'Reilly.
-- **Introduction knihy Millett & Tune (2015), sekce „Who This Book Is For".** Existence
-  sekce nepotvrzena; ověřeno jen obecné vymezení cílové skupiny z popisu knihy.
+- **Introduction Milletta & Tuneho, sekce „Who This Book Is For“ – OVĚŘENO 2026-09-04 ze
+  zakoupeného výtisku (Wrox, 2015, 795 stran). Sekce toho jména v knize není.** Prohledán plný
+  text: „Who This Book Is For“ 0 výskytů, stejně jako „This book is for“ a „intended audience“.
+  Obsah uvádí Introduction na straně XXXV, ale členění na podsekce s vymezením čtenáře nemá.
+
+  **Doporučení: na tuto sekci se neodkazovat.** Pokud je v předmluvě potřeba doložit, komu je
+  kniha určena, lze vyjít z jejího vlastního členění (Part I *The Principles and Practices of
+  Domain-Driven Design*, kapitoly 1 *What Is Domain-Driven Design?*, 2 *Distilling the Problem
+  Domain*, 3 *Focusing on the Core Domain*, 4 *Model-Driven Design*), které naznačuje záběr
+  od základů po implementaci.
 - **Doslovné znění Evansovy kritiky z DDD Europe 2016.** Ověřeno jen zprostředkovaně
   přes [10]; záznam keynote se nepodařilo dohledat. Pokud kniha bude citovat přímo,
   je třeba dohledat video nebo přepis.

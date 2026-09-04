@@ -523,21 +523,22 @@ byl vyčerpán (200/200) při prvním pokusu.
   z QCon London 2016 [22], a to jen z metadat, ne ze záznamu.
 - **Vaughn Vernon k microservices** (*DDD Distilled*, 2016; *IDDD*, 2013). Nedohledáno online.
   Kapitola Vernona cituje na řádku 42 – tvrzení je věrohodné, ale neověřené.
-- **Newmanovo *Building Microservices* – DOPLNĚNO 2026-09-04. Na share je jen 1. vydání (2015),
-  a právě to potvrzuje, že kniha musí citovat druhé.** Výtisk prvního vydání (únor 2015, 280 stran)
-  má jinou strukturu: kap. 1 *Microservices*, 2 *The Evolutionary Architect*, 3 *How to Model
-  Services*, 4 *Integration*, 5 *Splitting the Monolith*, 10 *Conway’s Law*, 11 *Microservices at
-  Scale*, 12 *Bringing It All Together*. Čísla kapitol tedy mezi vydáními nelze zaměňovat.
+- **Newman, *Building Microservices*, 2. vydání – DOPLNĚNO 2026-09-04 ze zakoupeného výtisku.**
+  Struktura kapitol odpovídá tomu, co bylo dříve ověřeno z autorova rozpisu obsahu na
+  samnewman.io: 1 *What Are Microservices?*, 2 *How to Model Microservices*, 3 *Splitting the
+  Monolith*, 4 *Microservice Communication Styles*, 5 *Implementing Microservice Communication*,
+  6 *Workflow*. **Nález G23 tím je potvrzený z primárního zdroje**, ne jen z webu vydavatele.
 
-  **Klíčové zjištění k `microservices_and_ddd.md:60`:** řetězec **„information hiding“ se v prvním
-  vydání nevyskytuje ani jednou**, zatímco anotace 2. vydání ho u kapitoly 2 uvádí výslovně
-  („the importance of concepts like information hiding, coupling, cohesion, and domain-driven
-  design“). Pojem je tedy novinkou druhého vydání a citace kapitoly je v tomto bodě správná –
-  jen ji nelze ověřit proti staršímu výtisku. Pojem „autonomy“ je naproti tomu i v prvním vydání
-  (22 výskytů).
+  K `microservices_and_ddd.md:60`: pojem *information hiding* je ve druhém vydání doložený
+  a Newman ho definuje hned v kapitole 1 – *„Microservices embrace the concept of information
+  hiding. Information hiding means hiding as much information as possible inside a component and
+  exposing as little as possible via external interfaces.“* Tvrzení kapitoly je správné; jen
+  pozor, že pojem zavádí kapitola 1, i když s ním kapitola 2 dál pracuje.
 
-  Nález G23 (chybná čísla kapitol na `:870` a `:893`) tím zůstává v platnosti tak, jak byl ověřen
-  proti autorovu rozpisu 2. vydání na samnewman.io.
+  Bonus k anti-vzoru sdílené databáze (`:274`): Newmanovo vlastní znění je ostré a citovatelné –
+  *„Don’t share databases unless you really need to. And even then do everything you can to avoid
+  it. In my opinion, sharing databases is one of the worst things you can do if you’re trying
+  to achieve independent deployability.“*
 - **phparkitect – OVĚŘENO 2026-09-04 z Packagistu.** `phparkitect/phparkitect` **1.3.0
   (31. 7. 2026)**, vyžaduje `php ^8.0`. Projekt je aktivní. Pro srovnání: alternativa
   `phpat/phpat` je na 0.12.4 (17. 3. 2026), `php ^8.1` – tedy stále série 0.x.

@@ -378,6 +378,61 @@ mít u sebe zdroj, nebo být přepsán jako autorské tvrzení.** Naopak věcné
 obhajitelné z praxe, může v knize zůstat i bez citace – jen se nesmí tvářit, že za ním stojí
 někdo jiný.
 
+## Sedmé kolo: zakoupené knihy (2026-09-04)
+
+Michal koupil šest chybějících titulů a dal je na share do `Knihy/DDD`. Ověřeno proti plnému textu
+**Khononov *Learning DDD*** (1. vyd. 2021), **Richardson *Microservices Patterns*** (1. vyd. 2018),
+**Skelton & Pais *Team Topologies*** (1. vyd. 2019), **Millett & Tune** (2015),
+**Brandolini *Introducing EventStorming*** a **Newman *Building Microservices*** (2. vyd.).
+
+### Khononov: tři z pěti tvrzení v knize nejsou
+
+- **„Tři strategie“ pro large-collection problem** (`aggregate_design.md:687-699`) – v knize
+  nejsou. „large collection“ 0 výskytů, „three strategies“ 0, „collection“ celkem 6× v celé knize.
+  Druhá strategie se navíc opírá o Doctrine `EXTRA_LAZY`; Khononov píše v C#. Strategie jsou věcně
+  správné, jen nejsou jeho – **atribuci odstranit**.
+- **Telco příklad** (`when_not_to_use_ddd.md:388–390`) – neexistuje. „telco“ 0, „telecom“ 1 (Nokia
+  jako příklad firmy měnící domény). Jediná zmínka o akvizici u Khononova vyznívá **opačně**:
+  *„The company became profitable very quickly, and eventually it was acquired by its biggest
+  client.“*
+- **1:N mapování u Core subdomén** (`subdomains.md:158`) – Khononov říká opak. Varuje:
+  *„One thing to beware of is splitting a coherent functionality into multiple bounded contexts.
+  Such division will hinder the ability to evolve each context independently.“* Legitimní důvody
+  pro extrakci uvádí jiné než kapitola – oddělení vývojových cyklů a nezávislé škálování.
+- **„Páté pravidlo“** (`:81-84`) – jádro platí, formulace je silnější. Khononovovou hranicí je
+  **databázová transakce**, ne command: *„one aggregate per database transaction“*.
+- **Uber a Google** (`subdomains.md:50`) – potvrzeno doslovně, včetně matchingu jezdců
+  a ranking algoritmu.
+
+**Vysvětlen původ jedné citace napříč knihou.** Věta „Not all of a large system will be well
+designed“, kterou kapitola připisuje Evansovi, je **Khononovova parafráze** – používá ji dvakrát
+a pokaždé ji Evansovi připisuje. V Evansově knize 2003 v této podobě není; Evans má *„The harsh
+reality is that not all parts of the design are going to be equally refined.“* Naše kniha tedy
+převzala parafrázi jako citát.
+
+### Ostatní knihy
+
+- **Richardson** – kapitola 4 je skutečně o sagách, citace sedí. Všechna countermeasures v knize
+  jsou (semantic lock 15×, commutative updates, pessimistic view, reread value), stejně jako
+  compensatable a pivot transaction. Jediná oprava: on píše **„retriable“** (18×), kapitola
+  „Retryable“ – ten tvar se v knize nevyskytuje ani jednou.
+- **Team Topologies** – poměr **6:1 až 9:1** v knize je, ale jako **TIP** opřený o to, co
+  organizace samy hlásí. Kapitola tu výhradu musí zachovat, jinak dělá z doporučení naměřenou
+  hodnotu. Varování před měřením cognitive load přes LOC je doslovné a ostřejší, než kapitola
+  naznačuje – *„misguided“* – včetně odkazu na výzkum Graylina Jaye (2009).
+- **Brandolini** – čtyři barvy legendy sedí doslovně (oranžová, modrá, lila, žlutá), jedna je
+  v rozporu: **Hot Spot je u něj fialový** (čtyři různé formulace v knize), zatímco kapitola má
+  růžovou pro Hot Spot a fialovou pro Bounded Context, pro který Brandolini žádnou barvu nezavádí.
+- **Newman 2. vyd.** – struktura kapitol potvrzena z primárního zdroje, nález G23 tím doložen.
+  Pojem *information hiding* zavádí kapitola 1, ne 2.
+- **Millett & Tune** – sekce „Who This Book Is For“ v knize **není** (0 výskytů); neodkazovat na ni.
+
+### Co zůstává
+
+Nekoupen zůstal jen **Hohpe & Woolf, *Enterprise Integration Patterns*** (2003) – jedna
+neblokující položka. Zbývající otevřené položky se knihami nevyřeší: čtyři čísla bez zdroje,
+tvrzení o rozšíření atributů v open source a Vernonův neexistující text k DDD a AI.
+
 ## Knihy, které chybí k dokončení ověření
 
 Stav k 2026-09-04. Bibliografické údaje ověřené, ne psané z paměti. Seřazeno podle toho, kolik
