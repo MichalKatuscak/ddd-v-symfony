@@ -391,16 +391,21 @@ vrstva a odkázat, kde se jí kniha věnuje.
 - **Publikace papíru *Specifications* v proceedings PLoP '97.** Vyhledávání to tvrdí, ale samotný PDF
   soubor ani Fowlerova stránka to nepotvrzují – Fowler uvádí jen „Sep 1997“. Před citací v knize
   dohledat proceedings ručně.
-- **Vernonovo doporučení k Factory class vs. factory metodě – OVĚŘENO 2026-09-04 z plného textu
-  *IDDD* (vlastní výtisk).** Kapitola 11 se jmenuje *Factories* a člení se takto: *Factories in the
-  Domain Model*, **Factory Method on Aggregate Root** (s příklady *Creating CalendarEntry
-  Instances* a *Creating Discussion Instances*) a **Factory on Service**.
+- **Vernonovo doporučení k Factory class vs. factory metodě – OVĚŘENO 2026-09-04, s korekcí
+  dřívějšího zápisu.** Kapitola 11 se jmenuje *Factories* a člení se na *Factories in the Domain
+  Model*, **Factory Method on Aggregate Root** (s příklady *Creating CalendarEntry Instances*
+  a *Creating Discussion Instances*) a **Factory on Service**.
 
-  Vernon tedy staví do popředí **factory metodu na agregátním kořeni** a samostatnou factory řeší
-  až jako druhou možnost, na úrovni service. To podpírá kanonickou konvenci této knihy
-  (`Order::place()` jako factory metoda na agregátu, viz `CLAUDE.md`) a zároveň dává doložený
-  důvod, proč nezavádět zvláštní třídu `OrderFactory`, dokud si to nevynutí spolupráce více
-  agregátů.
+  **Pozor na výklad, dřívější verze této položky ho měla nepřesně.** Vernonova *Factory Method on
+  Aggregate Root* není statická factory na téže třídě. Je to **instanční metoda na jednom agregátu,
+  která vytváří jiný agregát**: *„The Factory we are considering now has its site on Calendar and
+  is used to create CalendarEntry instances."* Totéž platí pro druhý příklad, kde `Forum` vytváří
+  `Discussion`.
+
+  Kanonické `Order::place()` je tedy **named constructor**, ne Vernonova Factory Method. Vzor
+  privátního konstruktoru s pojmenovanou statickou metodou popsal Mathias Verraes (2014); Vernonovu
+  kapitolu lze citovat jako oporu pro to, že vytváření patří do domény, ne pro konkrétní tvar
+  `Order::place()`.
 - **Zpracování Specification a Factory u Khononova (*Learning DDD*, 2021) a Milletta & Tuneho
   (*Patterns, Principles and Practices of DDD*, 2015).** Nekontrolováno; obě knihy jsou v pořadí
   důvěryhodnosti šablony a mohou nabídnout novější formulaci pravidel pro Domain Service.
