@@ -1,138 +1,53 @@
 @startuml diagram
 !include ../../theme.iuml
 
-!define RECTANGLE class
-!define COMPONENT component
+title Blog: agregát Post a feature slices
+
 package "Blog Bounded Context" as Blog {
-  package "Domain" as BlogDomain {
-    package "Model" as BlogModel {
-      RECTANGLE "Post" as PostEntity {
-        - id: string
-        - title: string
-        - content: string
-        - author: string
-        - createdAt: \DateTimeImmutable
-        - updatedAt: ?\DateTimeImmutable
-        - events: array
-        + id(): PostId
-        + title(): string
-        + content(): string
-        + author(): string
-        + updateTitle(string): void
-        + updateContent(string): void
-        + createdAt(): \DateTimeImmutable
-        + updatedAt(): ?\DateTimeImmutable
-      }
-      
-      RECTANGLE "Comment" as CommentEntity {
-      }
-    }
-    
-    package "ValueObject" as BlogValueObject {
-      RECTANGLE "PostId" as PostIdVO
-      RECTANGLE "CommentId" as CommentIdVO
-    }
-    
-    package "Event" as BlogEvent {
-      RECTANGLE "PostCreated" as PostCreatedEvent
-    }
-    
-    package "Repository" as BlogRepository {
-      RECTANGLE "PostRepository" as PostRepositoryInterface {
-        + findById(PostId): ?Post
-        + save(Post): void
-      }
-    }
+
+  package "Domain" as Domain {
+    rectangle "**Post**\n<size:12>agregátní kořen</size>" as Post
+    note right of Post
+      create(PostId, title, content, AuthorId): self
+      addComment(CommentId, AuthorId, text): void
+      closeComments(): void
+      updateTitle(string): void
+      updateContent(string): void
+    end note
+
+    rectangle "Comment\n<size:12>entita uvnitř agregátu</size>" as Comment
+    rectangle "PostCreated\nCommentAdded\n<size:12>doménové události</size>" as Events #1B202A
+    rectangle "CommentsClosedException" as Ex
+    rectangle "PostRepository\n<size:12>rozhraní</size>" as Repo
   }
-  
-  package "Infrastructure" as BlogInfrastructure {
-    package "Repository" as BlogInfraRepo {
-      RECTANGLE "DoctrinePostRepository" as DoctrinePostRepo {
-        + findById(PostId): ?Post
-        + save(Post): void
-      }
-    }
+
+  package "Infrastructure" as Infra {
+    rectangle "DoctrinePostRepository" as DoctrineRepo
   }
-  
-  package "Application" as BlogApplication {
-    package "Command" as BlogCommand {
-      RECTANGLE "CreatePost" as CreatePostCommand {
-        + title: string
-        + content: string
-        + author: string
-      }
-      
-      RECTANGLE "CreatePostHandler" as CreatePostHandler {
-        + __invoke(CreatePost): string
-      }
-    }
-    
-    package "Query" as BlogQuery {
-      RECTANGLE "GetPost" as GetPostQuery {
-        + postId: string
-      }
-      
-      RECTANGLE "GetPostHandler" as GetPostHandler {
-        + __invoke(GetPost): ?PostViewModel
-      }
-      
-      RECTANGLE "GetPosts" as GetPostsQuery
-      
-      RECTANGLE "GetPostsHandler" as GetPostsHandler {
-        + __invoke(GetPosts): PostListViewModel
-      }
-    }
-  }
-  
-  package "Presentation" as BlogPresentation {
-    package "Controller" as BlogController {
-      RECTANGLE "CreatePostController" as CreatePostController
-      RECTANGLE "PostsController" as PostsController
-      RECTANGLE "PostController" as PostController
-    }
-    
-    package "ViewModel" as BlogViewModel {
-      RECTANGLE "PostViewModel" as PostViewModelClass
-      RECTANGLE "PostListViewModel" as PostListViewModelClass
-    }
+
+  package "Feature slices" as Slices {
+    rectangle "CreatePost\n<size:11>Command + Controller</size>" as S1
+    rectangle "AddComment\n<size:11>Command + Controller</size>" as S2
+    rectangle "GetPost\n<size:11>Query + Controller + ViewModel</size>" as S3
+    rectangle "GetPosts\n<size:11>Query + Controller + ViewModel</size>" as S4
   }
 }
 
-package "Shared" as Shared {
-  package "Infrastructure" as SharedInfra {
-    package "Bus" as SharedBus {
-      RECTANGLE "MessengerCommandBus" as CommandBus
-      RECTANGLE "MessengerQueryBus" as QueryBus
-    }
-  }
-}
+Post "1" *-- "0..*" Comment
+Post ..> Events : nahraje ve factory\na v doménových metodách
+Post ..> Ex : addComment() po closeComments()
 
-' Vztahy
-PostEntity "1" *-- "many" CommentEntity : contains
-PostEntity ..> PostIdVO : uses
-PostEntity ..> PostCreatedEvent : publishes
+Repo <|.. DoctrineRepo
 
-PostRepositoryInterface <|.. DoctrinePostRepo : implements
+S1 ..> Repo
+S2 ..> Repo
+S3 ..> Repo
+S4 ..> Repo
 
-CreatePostHandler ..> PostRepositoryInterface : uses
-CreatePostHandler ..> PostEntity : creates
-CreatePostHandler ..> CreatePostCommand : handles
-
-GetPostHandler ..> PostRepositoryInterface : uses
-GetPostHandler ..> PostViewModelClass : creates
-GetPostHandler ..> GetPostQuery : handles
-
-GetPostsHandler ..> PostRepositoryInterface : uses
-GetPostsHandler ..> PostListViewModelClass : creates
-GetPostsHandler ..> GetPostsQuery : handles
-
-CreatePostController ..> CreatePostCommand : creates
-CreatePostController ..> CommandBus : dispatches
-
-PostController ..> GetPostQuery : creates
-PostController ..> QueryBus : dispatches
-
-PostsController ..> GetPostsQuery : creates
-PostsController ..> QueryBus : dispatches
+note bottom of Slices
+  Řez podle případu užití, ne podle vrstvy.
+  Každý slice drží svůj command nebo query
+  pohromadě s controllerem.
+end note
 
 @enduml

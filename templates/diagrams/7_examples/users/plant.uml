@@ -1,130 +1,52 @@
 @startuml diagram
 !include ../../theme.iuml
 
-!define RECTANGLE class
-!define COMPONENT component
+title Správa uživatelů: agregát User a feature slices
 
-package "UserManagement" as UserManagement {
-  package "Registration" as Registration {
-    RECTANGLE "RegisterUser" as RegisterUserCommand {
-      + name: string
-      + email: string
-      + password: string
-    }
-    
-    RECTANGLE "RegisterUserHandler" as RegisterUserHandler {
-      + __invoke(RegisterUser): void
-    }
-    
-    RECTANGLE "RegistrationController" as RegistrationController {
-      + register(Request): Response
-    }
+package "UserManagement Bounded Context" as UM {
+
+  package "Domain" as Domain {
+    rectangle "**User**\n<size:12>agregátní kořen</size>" as User
+    note right of User
+      register(UserId, name, Email, HashedPassword): self
+      changeEmail(Email): void
+      changeName(string): void
+      --
+      implements UserInterface,
+      PasswordAuthenticatedUserInterface
+    end note
+
+    rectangle "UserId\nEmail\nHashedPassword\n<size:12>hodnotové objekty</size>" as VOs
+    rectangle "UserRegistered\n<size:12>doménová událost</size>" as Event #1B202A
+    rectangle "DuplicateEmailException" as Ex
+    rectangle "UserRepository\n<size:12>rozhraní</size>" as Repo
   }
-  
-  package "Authentication" as Authentication {
-    RECTANGLE "SecurityController" as SecurityController {
-      + login(Request): Response
-      + logout(): Response
-    }
+
+  package "Infrastructure" as Infra {
+    rectangle "DoctrineUserRepository" as DoctrineRepo
   }
-  
-  package "Profile" as Profile {
-    RECTANGLE "GetUserProfile" as GetUserProfileQuery {
-      + userId: string
-    }
-    
-    RECTANGLE "GetUserProfileHandler" as GetUserProfileHandler {
-      + __invoke(GetUserProfile): UserProfileViewModel
-    }
-    
-    RECTANGLE "ProfileController" as ProfileController {
-      + show(Request): Response
-      + edit(Request): Response
-      + update(Request): Response
-    }
+
+  package "Feature slices" as Slices {
+    rectangle "Registration\n<size:11>Command + Controller</size>" as S1
+    rectangle "Authentication\n<size:11>Controller</size>" as S2
+    rectangle "Profile\n<size:11>Query + Controller</size>" as S3
   }
 }
 
-package "Shared" as Shared {
-  package "Domain" as SharedDomain {
-    package "Model" as SharedModel {
-      RECTANGLE "User" as UserEntity {
-        - id: string
-        - name: string
-        - email: string
-        - password: string
-        - roles: array
-        - createdAt: \DateTimeImmutable
-        - events: array
-        + id(): UserId
-        + name(): string
-        + email(): Email
-        + setPassword(string): void
-        + changeName(string): void
-        + changeEmail(Email): void
-        + createdAt(): \DateTimeImmutable
-        + getRoles(): array
-        + eraseCredentials(): void
-        + getUserIdentifier(): string
-        + getPassword(): string
-      }
-    }
+User ..> VOs : skládá se z
+User ..> Event : register() nahraje
+User ..> Ex : při kolizi e-mailu
 
-    package "ValueObject" as SharedValueObject {
-      RECTANGLE "UserId" as UserIdVO
-      RECTANGLE "Email" as EmailVO
-    }
+Repo <|.. DoctrineRepo
 
-    package "Event" as SharedEvent {
-      RECTANGLE "UserRegistered" as UserRegisteredEvent
-    }
+S1 ..> Repo
+S2 ..> Repo
+S3 ..> Repo
 
-    package "Repository" as SharedRepository {
-      RECTANGLE "UserRepository" as UserRepositoryInterface {
-        + findById(UserId): ?User
-        + findByEmail(Email): ?User
-        + save(User): void
-      }
-    }
-  }
-
-  package "Infrastructure" as SharedInfrastructure {
-    package "Repository" as SharedInfraRepo {
-      RECTANGLE "DoctrineUserRepository" as DoctrineUserRepo {
-        + findById(UserId): ?User
-        + findByEmail(Email): ?User
-        + save(User): void
-      }
-    }
-
-    package "Bus" as SharedBus {
-      RECTANGLE "MessengerCommandBus" as CommandBus
-      RECTANGLE "MessengerQueryBus" as QueryBus
-    }
-  }
-}
-
-' Vztahy
-UserEntity ..> UserIdVO : uses
-UserEntity ..> EmailVO : uses
-UserEntity ..> UserRegisteredEvent : publishes
-
-UserRepositoryInterface <|.. DoctrineUserRepo : implements
-
-RegisterUserHandler ..> UserRepositoryInterface : uses
-RegisterUserHandler ..> UserEntity : creates
-RegisterUserHandler ..> RegisterUserCommand : handles
-
-GetUserProfileHandler ..> UserRepositoryInterface : uses
-GetUserProfileHandler ..> GetUserProfileQuery : handles
-
-RegistrationController ..> RegisterUserCommand : creates
-RegistrationController ..> CommandBus : dispatches
-
-ProfileController ..> GetUserProfileQuery : creates
-ProfileController ..> CommandBus : dispatches
-ProfileController ..> QueryBus : dispatches
-
-SecurityController ..> UserRepositoryInterface : uses
+note bottom of User
+  Agregát zde implementuje rozhraní Symfony Security.
+  Je to kompromis malého příkladu – v plné architektuře
+  patří na security adaptér v infrastruktuře.
+end note
 
 @enduml

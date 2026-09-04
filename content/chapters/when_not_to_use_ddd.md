@@ -27,25 +27,29 @@ DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přid
 zpomaluje vývoj a frustruje tým – aniž by přinesla cokoliv hodnotného.
 Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít.
 
-## 22.01 Rozhodovací strom: Mám použít DDD? {#rozhodovaci-strom}
+## 22.01 Rozhodovací strom: kolik DDD dát které části systému? {#rozhodovaci-strom}
 
-Než projdete jednotlivé situace, odpovězte si na pět otázek:
+Otázka „mám použít DDD?“ je špatně položená. Jeden systém běžně obsahuje část, která rozhoduje
+o konkurenceschopnosti, část, bez které to nejede, ale nikoho nezajímá, a část, která se dá koupit.
+Každá si zaslouží jinou odpověď. Strom níže se proto ptá na **jednu subdoménu**, ne na projekt,
+a prochází se za každou zvlášť.
 
-1. Má projekt komplexní doménovou logiku, ne jen CRUD?
-2. Bude systém žít déle než rok?
-3. Máte přístup k doménovým expertům?
-4. Zná tým DDD, nebo dostane čas se ho naučit?
-5. Je doména stabilní, tedy bez pivotu každý sprint?
+Postupuje ve třech krocích:
 
-Strom je řetěz a první „ne“ ho ukončuje – s doporučením jednodušší architektury.
+1. **Dá se subdoména pořídit hotová?** Účetnictví, rozesílání e-mailů, platební brána. Pokud ano,
+   je to Generic – kupte ji. DDD tu řeší jen integraci, typicky Anti-Corruption Layer na hranici.
+2. **Odlišuje vás od konkurence?** Pokud ne, je to Supporting. Plný taktický návrh se vyplatí jen
+   při splnění tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Jinak stačí
+   lehký model nebo rovnou CRUD – hlavně to pojmenujte nahlas a nevydávejte adresář `Domain/`
+   za doménový model.
+3. **Je to Core Domain?** Pak zbývají dvě brány, které rozhodují o načasování, ne o vhodnosti:
+   přístup k doménovým expertům a stabilita domény.
 
-:::diagram{fig="22.1-A" title="Rozhodovací strom: pět bran k DDD" src="images/diagrams/9_when_not_to_use_ddd/diagram.svg"}
+:::diagram{fig="22.1-A" title="Rozhodovací strom: kolik DDD dát této subdoméně" src="images/diagrams/9_when_not_to_use_ddd/diagram.svg"}
 :::
 
-Každá brána odpovídá jedné nebo více sekcím níže. Jedno omezení stromu je ale nutné říct
-hned: ptá se na celý projekt. Reálné rozhodnutí zřídka platí pro celý systém stejně, dělá se
-per bounded context – viz [hybridní přístup podle typu subdomény](#hybrid-subdomain).
-Strom tedy funguje jako první filtr, ne jako poslední slovo.
+Klasifikaci subdomén rozvádí [kapitola o subdoménách](/subdomeny#tri-kategorie), hybridní přístup
+uvnitř jednoho systému pak [sekce 22.09](#hybrid-subdomain).
 
 Napříč kapitolou platí ještě jedno rozlišení. „Nepoužít DDD“ znamená v praxi téměř vždy
 „nesahat po taktických vzorech“: agregátech, doménových událostech, repozitářích.

@@ -1,42 +1,58 @@
 @startuml diagram
 !include ../theme.iuml
 
-title Rozhodovací strom: Mám použít DDD?
+title Rozhodovací strom: kolik DDD dát této subdoméně?
 
 start
-:Nový projekt / architektonické rozhodnutí;
+:Vyber **jednu subdoménu**\n(ne celý projekt);
 
-if (Komplexní doménová logika?\n(ne jen CRUD)) then (ne)
-  #1B202A:DDD nepotřebuješ\n-> EasyAdmin / Flat MVC;
+if (Dá se pořídit hotová?\nÚčetnictví, e-maily, platby…) then (ano)
+  #1B202A:**Generic**\nKoupit nebo použít knihovnu.\nDDD řeší jen integraci – ACL na hranici;
+  stop
+else (ne)
+endif
+
+if (Odlišuje vás od konkurence?\nKvůli tomuhle u vás zákazníci jsou) then (ne)
+  ' ── Supporting ────────────────────────────────────────────
+  #1B202A:**Supporting**;
+  if (Tým taktický návrh zvládá,\nmodel je inovativní\na má vydržet roky?) then (ne)
+    #1B202A:**Lehký model nebo CRUD**\nTransaction Script, Doctrine entity,\nEasyAdmin. Pojmenovat to nahlas;
+    stop
+  else (ano)
+    #1B202A:**Plné taktické DDD**\nVernonovy tři podmínky splněny –\ninvestice se vyplatí;
+    stop
+  endif
+else (ano)
+endif
+
+' ── Core ──────────────────────────────────────────────────
+:**Core Domain**;
+
+if (Máte přístup\nk doménovým expertům?) then (ne)
+  #1B202A:**Nejdřív sežeňte experty**\nDDD bez nich je hádání.\nZatím vrstvená architektura;
   stop
 else (ano)
 endif
 
-if (Projekt bude žít > 1 rok?) then (ne)
-  #1B202A:DDD se nevyplatí\n-> Symfony Controller + Doctrine;
+if (Je doména stabilní?\nBez pivotu každý sprint) then (ne)
+  #1B202A:**Počkejte na stabilizaci**\nStrategická část ano –\nUbiquitous Language, hranice kontextů.\nTaktické vzory později;
   stop
 else (ano)
 endif
 
-if (Přístup k doménovým\nexpertům?) then (ne)
-  #1B202A:DDD bez expertů = hádání\n-> Vrstvená architektura;
-  stop
-else (ano)
-endif
-
-if (Tým zná DDD\nnebo má čas se učit?) then (ne)
-  #1B202A:Pseudo-DDD je horší\nnež žádné DDD\n-> Architektura, kterou tým zná;
-  stop
-else (ano)
-endif
-
-if (Doména je stabilní?\n(ne pivot každý sprint)) then (ne)
-  #1B202A:Počkej na stabilizaci\n-> Flat MVC, DDD později;
-  stop
-else (ano)
-endif
-
-#F0A456:DDD dává smysl\n-> Strategický i taktický design;
+#F0A456:**Plné taktické DDD**\nAgregáty, doménové události,\nrepozitáře, strategický i taktický design;
 stop
+
+note right
+  Strom se ptá na subdoménu, ne na projekt.
+  Jeden systém běžně obsahuje všechny tři
+  odpovědi současně – proto se prochází
+  za každou subdoménu zvlášť.
+
+  „Nepoužít DDD“ přitom skoro vždy znamená
+  „nesahat po taktických vzorech“. Ubiquitous
+  Language a hranice kontextů se vyplatí
+  i tam, kde plný doménový model ne.
+end note
 
 @enduml
