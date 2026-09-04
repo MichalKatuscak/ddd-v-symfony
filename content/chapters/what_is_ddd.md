@@ -35,7 +35,7 @@ Komplexita domény přerostla model – právě tento stav DDD řeší. Nabízí
 
 Hlavní přínos DDD: kód odráží jazyk, kterým mluví doménoví experti. Když produktový manažer řekne „tohle není reklamace, je to dispute s odlišným procesem“ – kód to umí říct stejně. Když účetní rozhoduje, jestli refund započítává dopravu, doménová třída `Refund` má metodu `excludeShipping()` nebo `includeShipping()`, která to říká. Když tester píše scénář, používá stejný slovník jako PM. Slovník je jeden, žije v hlavě týmu i v kódu, a když se mění, mění se na obou místech najednou.
 
-DDD má svou cenu. Vyžaduje vyšší počáteční složitost, učební křivku týmu a opakovanou spolupráci s doménovými experty. Pro CRUD aplikaci nad jednou tabulkou se nevyplatí – tam je `OrderService` se setterem správná volba a investice do agregátu by byla nepřiměřená. Pro komplexní doménu s rostoucí pravidlovou složitostí, kterou tým udržuje léta, se investice vrátí – jen na to potřebuje čas a spolehlivý odhad, za jak dlouho, neexistuje.
+DDD má svou cenu. Vyžaduje vyšší počáteční složitost, učební křivku týmu a opakovanou spolupráci s doménovými experty. Pro CRUD aplikaci nad jednou tabulkou se nevyplatí – tam je `OrderService` se setterem správná volba a investice do agregátu by byla nepřiměřená. Pro komplexní doménu s rostoucí pravidlovou složitostí, kterou tým udržuje léta, se investice vrátí. Potřebuje na to ale čas a spolehlivý odhad, za jak dlouho, neexistuje.
 
 V této knize se naučíte, jak rozhodnout, jestli DDD ve vašem projektu dává smysl (kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) je o tom, kdy odpověď zní „ne“). Jak modelovat doménu, identifikovat agregáty, oddělit zápis od čtení. Jak to konkrétně implementovat v Symfony 8 – bez teoretických odboček, s funkčním kódem, který lze převzít.
 
@@ -43,33 +43,43 @@ A teď k definicím.
 
 ## 01.01 Definice DDD {#definition}
 
-Softwarové projekty podle rozšířené zkušenosti selhávají častěji kvůli neporozumění problémové oblasti než kvůli technickým chybám.
-Domain-Driven Design (DDD) na to odpovídá tím, že modelování domény staví do středu celého návrhu.
-Systematicky jej popsal Eric Evans v knize *Domain-Driven Design: Tackling
+Eric Evans staví DDD na předpokladu, že hlavním rizikem složitého softwaru není technologie, ale neporozumění problémové oblasti.
+Odpovědí je posunout modelování domény do středu celého návrhu.
+Systematicky to rozpracoval v knize *Domain-Driven Design: Tackling
 Complexity in the Heart of Software* z roku 2003 [[1]](https://www.domainlanguage.com/ddd/).
 
-:::callout{type="note"}
-### Základní aspekty DDD: {#key-aspects-heading}
+Vlastní stručnou definici DDD ale publikoval až o dvanáct let později, v úvodu volně dostupné *DDD Reference* [[2]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf). Shrnuje ji do tří bodů, v tomto pořadí:
 
-- **Doména (Domain)** – Oblast znalostí, problémů a aktivit, na kterou se aplikace zaměřuje [[2]](https://martinfowler.com/bliki/DomainDrivenDesign.html).
-- **Ubiquitous Language** – Společný jazyk používaný vývojáři a doménovými experty [[3]](https://martinfowler.com/bliki/UbiquitousLanguage.html). Eliminuje nedorozumění tím, že stejné pojmy se používají v kódu, dokumentaci i v komunikaci s doménovými experty.
-- **Bounded Context** – Jasně definovaná hranice, ve které je model platný [[4]](https://martinfowler.com/bliki/BoundedContext.html). Pomáhá rozdělit složité domény do menších, lépe zvládnutelných částí.
-- **Model-Driven Design** – Návrh softwaru založený na modelu domény [[5]](https://www.infoq.com/articles/ddd-in-practice/). Model je zjednodušenou reprezentací domény, která zachycuje její podstatné aspekty.
+:::callout{type="note"}
+### Evansovo shrnutí DDD ve třech bodech {#key-aspects-heading}
+
+- **Zaměření na Core Domain** – Modelovací úsilí patří tam, kde firma soutěží. Zbytek domény se kupuje, generuje nebo řeší nejkratší cestou. Rozlišení rozvádí [kapitola o subdoménách](/subdomeny#tri-kategorie).
+- **Průzkum modelů v tvůrčí spolupráci** – Model nevzniká z analýzy předané zadavatelem. Vzniká společnou prací doménových praktiků a vývojářů, kteří projdou několik konkurenčních variant, než jednu zvolí.
+- **Ubiquitous Language uvnitř explicitně ohraničeného kontextu** – Jeden jazyk, jeden model, jedna hranice platnosti. Hranice je součástí definice, ne dodatkem k ní.
 :::
+
+Pojmy z těchto tří bodů kniha dál používá v Evansově původním významu. **Doména** je oblast znalostí, vlivu a činností, ke které se software vztahuje. **Model** je systém abstrakcí popisující vybrané aspekty domény. **Ubiquitous Language** je jazyk vystavěný kolem doménového modelu a používaný všemi členy týmu – ovšem uvnitř jednoho bounded contextu, ne napříč celou firmou. **Bounded Context** je popis hranice, typicky subsystému nebo záběru jednoho týmu, uvnitř které je model definován a platí.
+
+Vazba jazyka na hranici bývá první věcí, která se z definice ztratí. Martin Fowler ji formuluje z druhé strany: jakmile se mění jazyk, potřebujete jiný model [[3]](https://martinfowler.com/bliki/BoundedContext.html). Pokus o jeden firemní slovník napříč všemi odděleními proto skončí buď u kompromisních jmen, kterými nemluví nikdo, nebo u zamrzlého glosáře. Konkrétní podobu tohoto konfliktu ukazuje [podsekce o Bounded Contextu](#bounded-context).
 
 ## 01.02 Historie a vývoj DDD {#history}
 
-Hlavní milníky ve vývoji DDD [[6]](https://dddcommunity.org/):
+Hlavní milníky ve vývoji DDD [[4]](https://dddcommunity.org/):
 
 - **2003** – Eric Evans vydává knihu *Domain-Driven Design: Tackling Complexity in the Heart of Software*, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický/taktický design.
+- **2009** – Na QCon London Evans shrnuje, co by po pěti letech napsal jinak [[5]](https://www.dddcommunity.org/library/evans_2009_1/). Stavební bloky – entity, hodnotové objekty, továrny a repozitáře – označuje za přeceněné. Do centra staví Ubiquitous Language, Context Mapping a Core Domain.
 - **2013** – Vaughn Vernon vydává *Implementing Domain-Driven Design*, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.
 - **2013** – Alberto Brandolini představuje *Event Storming* – workshopovou techniku pro kolaborativní modelování domény s doménovými experty.
-- **2016** – Vaughn Vernon vydává *Domain-Driven Design Distilled*, zkrácenou a přístupnější verzi pro rychlé pochopení hlavních konceptů.
-- **Po roce 2015** – DDD si nachází přirozené uplatnění v mikroservisové architektuře: Bounded Context se stává standardním vodítkem pro určení hranic jednotlivých služeb [[7]](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/).
+- **2015** – Evans vydává *Domain-Driven Design Reference* pod licencí CC-BY: shrnutí všech vzorů zdarma. Bounded Context v něm stojí na prvním místě vzorového jazyka, zatímco v knize z roku 2003 přišel na řadu až ve čtrnácté kapitole.
+- **2016** – Vernon vydává *Domain-Driven Design Distilled*. Pořadí výkladu je obrácené: nejdřív bounded contexts, subdomény a Context Mapping, teprve pak agregáty a doménové události. Ve stejném roce se v Bruselu koná první ročník konference DDD Europe.
+- **Po roce 2015** – Mikroservisová vlna dělá z Bounded Contextu nejcitovanější vodítko pro určení hranic služeb [[6]](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/). Rovnici „mikroslužba = bounded context“ ale sám Evans v roce 2019 označil za zjednodušení a rozlišil několik odlišných situací [[7]](https://www.infoq.com/news/2019/06/bounded-context-eric-evans).
+- **2021** – Vlad Khononov vydává *Learning Domain-Driven Design* s podtitulem *Aligning Software Architecture and Business Strategy*. Těžiště se posouvá od kódu k obchodní strategii.
 
 ## 01.03 Ubiquitous Language v praxi {#ubiquitous-language-v-praxi}
 
-Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací – v plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“. Dokument je až záznam této konverzace. Pokud tým začne dokumentem, vznikne slovník, kterým nikdo nemluví.
+Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací – v plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“. Dokument je až záznam této konverzace. Pokud tým začne dokumentem, vznikne slovník, kterým nikdo nemluví [[8]](https://martinfowler.com/bliki/UbiquitousLanguage.html).
+
+Evans k tomu přidává pravidlo, které se v praxi přehlíží: změna jazyka je změnou modelu. Vazba platí oběma směry. Nový termín od experta si vynutí úpravu kódu, ale i opačně – když se při modelování ukáže, že dva stavy jsou ve skutečnosti tři, patří to nové rozlišení zpátky do konverzace s expertem, ne jen do enumu.
 
 Praktická forma záznamu: glosář jako markdown soubor v repozitáři, vedle kódu. Ne wiki stránka, ne sdílený dokument v cloudu. Důvod je provozní – glosář v repozitáři prochází code review, má historii v gitu a změna termínu se dá svázat s commitem, který přejmenovává třídy. Glosář udržuje celý tým: kdo termín do kódu zavádí nebo mění, otevírá zároveň PR do glosáře. Doménový expert recenzuje význam; zápis a údržba zůstávají na vývojářích.
 
@@ -79,6 +89,8 @@ Praktická forma záznamu: glosář jako markdown soubor v repozitáři, vedle k
 
 Čeština přímo v identifikátorech dává smysl u čistě české domény, pro kterou angličtina nemá ustálený termín. DPH není totéž co VAT v jiné jurisdikci, „datová schránka“ nemá anglický ekvivalent vůbec a překlad `DataBox` význam spíš zamlžuje. Třída `DatovaSchranka` nebo `DphSazba` je v takovém kódu přesnější než vymyšlený anglicismus. Hranici si tým stanoví v glosáři: termíny označené jako nepřeložitelné zůstávají česky.
 
+Logika je stejná jako u překladu mezi kontexty. Uvnitř hranice platí jeden slovník, překládá se až na ní. Glosář je překladovou tabulkou pro dvojici konverzace/kód, [Published Language](/context-mapping#published-language) hraje tutéž roli mezi dvěma bounded contexty.
+
 ### Signály eroze jazyka {#eroze-jazyka}
 
 Jazyk eroduje tiše. Tři signály, které erozi prozradí dřív než produkční incident:
@@ -87,7 +99,7 @@ Jazyk eroduje tiše. Tři signály, které erozi prozradí dřív než produkčn
 - Na schůzce se překládá. Jakmile vývojář větu experta v duchu převádí („tím myslí náš `PendingOrder`“), model a doména se už rozešly.
 - Nový kolega se zeptá, co znamená termín z glosáře, a dostane odpověď „to už se nepoužívá“. Mrtvý glosář je horší než žádný – dokumentuje neexistující jazyk.
 
-Odpověď na erozi je vždy stejná: srovnat kód s jazykem expertů, ne naopak. Přejmenování třídy je levné. Tým, který rok mluví jiným jazykem než jeho kód, platí překladem při každé konverzaci.
+Odpověď na erozi je vždy stejná: srovnat kód s jazykem expertů. Tento směr platí pro erozi, ne obecně – při modelování se nový termín často rodí v modelu a do slovníku expertů vstupuje až potom. Přejmenování třídy je levné. Tým, který rok mluví jiným jazykem než jeho kód, platí překladem při každé konverzaci.
 
 ### Ukázka glosáře {#ukazka-glosare}
 
@@ -114,16 +126,17 @@ Glosář nemá ambici být úplný. Zachycuje termíny, u kterých hrozí zámě
 :::diagram{fig="01.4-A" title="Strategický vs. taktický design – dvě úrovně rozhodování v DDD" src="images/diagrams/1_layers/strategic_vs_tactical.svg"}
 :::
 
-Strategický design rozhoduje, jak rozdělit systém na samostatné části a jak spolu komunikují. Hlavní koncepty:
+Strategický design rozhoduje, jak rozdělit systém na samostatné části a jak spolu komunikují.
 
+Pořadí sekcí v této kapitole není náhodné. Evans v roce 2009 označil taktické stavební bloky za přeceněné a do centra postavil jazyk, mapování kontextů a Core Domain [[5]](https://www.dddcommunity.org/library/evans_2009_1/). Vernon o sedm let později obrátil pořadí výkladu ve své knize. Fowler považuje strategickou část za Evansův hlavní přínos: problém, jak rozdělit velkou doménu do propojených ohraničených kontextů, před ním nikdo přesvědčivě neřešil [[9]](https://martinfowler.com/bliki/DomainDrivenDesign.html). Kdo si z DDD odnese jen entity a agregáty, dostane objektový návrh s doménovým slovníkem. Strategickou částí se zabývají kapitoly 2 až 5.
+
+Hlavní koncepty:
+
+- **Core Domain** – Ta část domény, kvůli které firma vyhrává nad konkurencí. Evans ji uvádí jako první bod definice DDD a modelovací úsilí patří především sem. Jak ji rozeznat od podpůrných a generických částí, rozvádí [kapitola o subdoménách](/subdomeny#rozpoznat-core).
 - **Bounded Context** – Ohraničený kontext je explicitně vymezená oblast, uvnitř které platí jeden doménový model. Plná definice s příkladem následuje v [podsekci níže](#bounded-context).
-- **Context Map** – Mapa kontextů zobrazuje vztahy mezi různými bounded contexts. Tyto vztahy mohou být různého typu, například Partnership, Customer-Supplier, Conformist nebo Anti-Corruption Layer.
-- **Shared Kernel** – Část modelu společná dvěma nebo více bounded contexts. Vyžaduje úzkou spolupráci mezi týmy.
-- **Customer-Supplier** – Vztah zákazník-dodavatel mezi dvěma bounded contexts, kde jeden kontext (dodavatel) poskytuje služby druhému kontextu (zákazník).
-- **Conformist** – Vztah, kde jeden kontext přijímá model jiného kontextu bez možnosti jej ovlivnit.
-- **Anti-Corruption Layer** – Vrstva, která překládá mezi dvěma bounded contexts s různými modely, aby chránila integritu cílového modelu.
-- **Open Host Service** – Služba, která definuje protokol pro přístup k bounded contextu, aby usnadnila integraci s mnoha jinými kontexty.
-- Komunikaci mezi kontexty usnadňuje dobře dokumentovaný **Published Language**.
+- **Context Map** – Mapa vztahů mezi kontexty. Zachycuje, kdo komu dodává model, kdo se komu přizpůsobuje a kde se překládá.
+
+Typů vztahu na mapě je osm. **Partnership** znamená dva týmy, které stojí a padají společně a koordinují releasy. **Shared Kernel** je sdílený kus modelu, za který ručí obě strany, a stojí ze všech vztahů nejvíc koordinace. **Customer-Supplier** ukládá dodavateli povinnost brát požadavky odběratele do plánu, zatímco u **Conformist** odběratel převezme cizí model tak, jak je. **Anti-Corruption Layer** cizí model překládá a chrání tím vlastní jazyk. **Open Host Service** naopak nabízí jednotný protokol všem konzumentům a **Published Language** k němu dodává sdílený formát dat. Osmý vztah, **Separate Ways**, je rozhodnutí neintegrovat vůbec – a bývá to správná volba častěji, než se týmy odváží připustit. Devátým, nechtěným stavem je **Big Ball of Mud**: oblast bez rozeznatelných hranic, kterou Evans doplnil až v *DDD Reference*. Užitečné je ji na mapě přiznat a hlavně neexportovat její model ven. Všechny vztahy s rozhodovacími kritérii rozebírá [kapitola o Context Mappingu](/context-mapping#osm-typu-prehled).
 
 ### Bounded Context: hranice platnosti modelu {#bounded-context}
 
@@ -133,43 +146,40 @@ Tentýž pojem označuje v různých kontextech jiný model. V e-shopu existuje 
 
 Pokus oba pohledy sloučit do jedné třídy `Customer` vede ke známému výsledku: objekt s třiceti atributy, z nichž každý use case používá pět, a s pravidly, která si vzájemně překáží. Jedna změna pro podporu rozbije fakturaci. Oddělené modely v oddělených kontextech tento konflikt odstraňují – každý model je malý, úplný a vnitřně konzistentní.
 
-Explicitní hranice znamená explicitní překlad. Když Ordering potřebuje data ze Support (nebo naopak), komunikace jde přes definované rozhraní a pojmy se na hranici překládají – třeba přes Anti-Corruption Layer z předchozího seznamu. Překlad není režie navíc; je to zviditelnění práce, která jinak probíhá skrytě a chybově uvnitř sdíleného modelu.
+Hranice ale není jen sémantická. Evans ji předepisuje současně ve třech rozměrech: v týmové organizaci, v tom, kterých částí aplikace se model týká, a ve fyzických artefaktech – kódových bázích a databázových schématech. Kontext, který sdílí tabulky s jiným kontextem, hranici nemá, ať je v dokumentaci nakreslená jakkoli. Týmový rozměr rozvádí [kapitola o Conwayově zákonu](/team-topologies), fyzický [kapitola o mikroservisách](/ddd-a-microservices).
+
+Bounded Context se také nerovná subdoméně. Subdoména je část problému, bounded context je rozhodnutí o řešení. V nově navrhovaném systému se obojí většinou kryje, ve zděděném skoro nikdy. Rozdíl rozebírá [kapitola o subdoménách](/subdomeny#subdomena-vs-bc-heading).
+
+Explicitní hranice znamená explicitní překlad. Když Ordering potřebuje data ze Support (nebo naopak), komunikace jde přes definované rozhraní a pojmy se na hranici překládají – třeba přes Anti-Corruption Layer zmíněný výše. Překlad není režie navíc; je to zviditelnění práce, která jinak probíhá skrytě a chybově uvnitř sdíleného modelu.
 
 Bounded Context je proto i hranicí jazyka. „Rezervace“ může v kontextu Ordering znamenat blokaci zboží, v kontextu Logistics časové okno doručení. Oba významy jsou správně – každý ve svém kontextu. Implementaci Bounded Contexts rozvádí [kapitola o základních konceptech](/zakladni-koncepty#bounded-contexts), vztahy mezi kontexty pak [kapitola o Context Mappingu](/context-mapping).
 
 ## 01.05 Taktický design (Tactical Design) {#tactical-design}
 
-Taktický design řeší konkrétní implementaci doménového modelu uvnitř jednoho bounded contextu. Hlavní vzory:
+Taktický design řeší konkrétní implementaci doménového modelu uvnitř jednoho bounded contextu. Stavebních bloků je sedm a tato kapitola je jen pojmenuje. Definice, kód a hraniční případy patří do [kapitoly o základních konceptech](/zakladni-koncepty).
 
-- **Entity** – Objekty s identitou a kontinuitou v čase. Definuje je identita, nikoli atributy. Například zákazník v e-shopu je entita, protože má unikátní identifikátor (CustomerId), i když se jeho ostatní atributy (jméno, e-mail, adresa) v průběhu času mění.
-- **Value Object** – Hodnotové objekty jsou definovány svými atributy, nikoli identitou. Jsou neměnné (immutable) a používají se k popisu aspektů domény. Typickým příkladem hodnotového objektu je adresa nebo peněžní částka.
-- **Aggregate** – Agregát je skupina objektů, která tvoří jednu jednotku konzistence při zápisu dat. Každý agregát má kořen agregátu (Aggregate Root), který je jediným vstupním bodem pro veškeré vnější interakce s agregátem.
-- **Domain Event** – Doménová událost reprezentuje něco, co se stalo v doméně a má význam pro doménové experty. Slouží mimo jiné ke komunikaci mezi různými bounded contexts.
-- **Service** – Doménová služba implementuje doménovou logiku, která nepatří přirozeně do žádné entity nebo hodnotového objektu. Služby jsou bezstavové a jejich názvy by měly být odvozeny z Ubiquitous Language.
-- **Repository** – Repozitář zapouzdřuje logiku pro přístup k persistenci agregátů. Poskytuje abstrakci nad datovým úložištěm a umožňuje pracovat s agregáty jako s objekty v paměti.
-- Vytváření složitých objektů a agregátů zapouzdřuje **Factory** (továrna). Hodí se, když konstrukce vyžaduje víc kroků nebo když nově vzniklý objekt musí od počátku splňovat invarianty.
+- **[Entity](/zakladni-koncepty#entities)** – objekt s identitou, která přetrvává změnu atributů. Zákazník zůstává týmž zákazníkem po změně jména, e-mailu i adresy.
+- **[Value Object](/zakladni-koncepty#value-objects)** – objekt definovaný svými hodnotami, neměnný. Peněžní částka, adresa, e-mail.
+- **[Aggregate](/zakladni-koncepty#aggregates)** – skupina objektů tvořící jednu jednotku konzistence při zápisu. Vstup zvenčí vede vždy přes kořen agregátu. Je to nejtěžší rozhodnutí taktického DDD a celou kapitolu mu věnuje [Návrh agregátu](/navrh-agregatu).
+- **[Domain Event](/zakladni-koncepty#domain-events)** – záznam toho, co se v doméně stalo a co zajímá doménové experty. V knize z roku 2003 tento vzor ještě není; Evans jej doplnil až dodatečně.
+- **[Repository](/zakladni-koncepty#repositories)** – kolekcové rozhraní nad persistencí agregátů.
+- **[Domain Service](/zakladni-koncepty#domain-services)** – bezstavová operace, která nepatří přirozeně do žádné entity ani hodnotového objektu.
+- **Factory** – zapouzdřuje složené vytvoření agregátu tak, aby vznikl už platný. Podrobněji mezi [doplňujícími vzory](/mene-zname-vzory).
 
 :::callout{type="pattern"}
 ### Příklad: Agregát v e-commerce doméně {#aggregate-example-heading}
 
-V e-commerce doméně by objednávka (Order) mohla být agregátem s následujícími částmi:
-
-- **Order** – Kořen agregátu (Aggregate Root)
-- **OrderLine** – Entity reprezentující položky objednávky
-- **Money** – Hodnotový objekt reprezentující peněžní částku
-- **Address** – Hodnotový objekt reprezentující dodací adresu
-
-Přístup k OrderLine entitám je možný pouze přes Order entitu, což zajišťuje konzistenci celého agregátu.
+Objednávka v e-shopu je agregát: kořenem je `Order`, položky `OrderItem` jsou jeho vnitřní entity a `Money` s `Address` hodnotové objekty. Zvenčí je dosažitelný jen `Order` – volající nepřidá položku přímo, ale požádá o to kořen. Tím drží agregát své invarianty na jednom místě.
 :::
 
-:::diagram{fig="01.5-A" title="Agregát v e-commerce doméně" src="images/diagrams/2_basic_concepts/diagram.svg"}
+:::diagram{fig="01.5-A" title="Stavební bloky taktického designu a vztahy mezi nimi" src="images/diagrams/2_basic_concepts/diagram.svg"}
 :::
 
 ## 01.06 Implementace DDD v praxi {#implementation}
 
 Typický postup zavedení DDD má osm kroků. První čtyři patří strategickému designu (kontexty, jazyk), zbytek taktickému designu a iteraci modelu.
 
-1. **Pochopení domény** – Začíná rozhovory s experty, workshopy, modelováním na tabuli. Bez této fáze model padá hned na začátku.
+1. **Pochopení domény** – Rozhovory s experty, workshopy, modelování na tabuli. Cílem není najít správný model, ale projít několik konkurenčních variant a vybrat tu, která na daný problém padne nejlépe. Bez této fáze model padá hned na začátku.
 2. **Ubiquitous Language** – Společný slovník vývojářů a doménových expertů, zapsaný a průběžně aktualizovaný. Stejné pojmy v kódu, dokumentaci i mailu od PM.
 3. **Identifikace Bounded Contexts** – Doména se rozděluje na menší kontexty s explicitními hranicemi. Každý kontext má vlastní model.
 4. **Context Map** – Vztahy mezi kontexty (Customer-Supplier, Conformist, Anti-Corruption Layer) jsou popsané a mají odpovědné týmy.
@@ -177,6 +187,8 @@ Typický postup zavedení DDD má osm kroků. První čtyři patří strategick�
 6. **Implementace** – Vrstvená nebo hexagonální architektura odděluje doménový model od infrastrukturní vrstvy.
 7. **Testování** – Doménový model má pokrytí unit testy, hraniční scénáře integrační testy.
 8. **Iterace** – Model se průběžně upravuje, jak roste pochopení domény. DDD není jednorázová investice.
+
+Podobný postup udržuje i skupina ddd-crew. DDD Starter Modelling Process rozepisuje totéž do osmi kroků, od porozumění doméně po kód, a je dostupný pod licencí CC-BY [[10]](https://github.com/ddd-crew/ddd-starter-modelling-process).
 
 ## 01.07 Výhody používání DDD {#benefits}
 
@@ -186,7 +198,7 @@ První přínos je v komunikaci. Ubiquitous Language odstraňuje nedorozumění 
 
 - **Modularita** – Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.
 - **Testovatelnost** – Doménové objekty bez infrastrukturních závislostí lze testovat v izolaci bez mockování (viz [kapitola o testování](/testovani-ddd)).
-- **Snížení technického dluhu** – Explicitní doménový model slouží jako živá dokumentace systému, která zůstává aktuální s kódem.
+- **Živá dokumentace** – Explicitní doménový model nese pravidla přímo v kódu, takže nestárne odděleně od implementace. Technický dluh tím nezmizí, jen se hůř schová.
 - **Zaměření na hodnotu** – DDD rozlišuje Core Domain (zdroj konkurenční výhody) od podpůrných domén. Investice se pak soustředí tam, kde přinášejí největší obchodní hodnotu.
 
 :::callout{type="pattern"}
@@ -206,7 +218,7 @@ V DDD architektuře s explicitním agregátem `Payment` přidání nové metody 
 2. Zaregistrovat novou metodu v `PaymentMethodRegistry`.
 3. Existující agregáty `Order`, `Refund` a `Payment` zůstávají nedotčené – pravidla refundace, reportingu a TTL se nemění, změna se odehrává jen v adapteru a registru.
 
-Rozdíl: tři týdny vs. tři dny. Důvod: hranice agregátů drží refaktor v omezeném prostoru a doménová pravidla jsou na jednom místě, ne rozteklá napříč pěti soubory.
+Rozdíl není v počtu odpracovaných hodin, ale v tom, kam změna sahá. V prvním případě do pravidel objednávky, refundace i reportingu, ve druhém do adaptéru a registru. Hranice agregátů drží refaktor v omezeném prostoru a doménová pravidla zůstávají na jednom místě, ne rozteklá napříč pěti soubory.
 :::
 
 Praktické příklady Ubiquitous Language a dalších konceptů naleznete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
@@ -222,6 +234,14 @@ DDD má reálné náklady, se kterými rozhodnutí o nasazení musí počítat:
 - **Výkonnost** – Při špatné implementaci hrozí problém N+1 a načítání zbytečně velkých grafů.
 
 K tomu se přidává lidská stránka. Bez přístupu k doménovému expertovi nemá kdo říct, jaká pravidla skutečně platí. Spolupráce vývojářů s experty navíc znamená pravidelné workshopy a sdílený jazyk – a některé organizace na to nejsou nastavené. Tým sám potřebuje měsíce, než získá rutinu; první projekt v DDD bývá pomalejší než stejný projekt v CRUD.
+
+### DDD-Lite: taktika bez strategie {#ddd-lite}
+
+Nejběžnější selhání nespočívá v tom, že tým DDD nezavede. Zavede jeho polovinu. Seznámí se s hodnotovými objekty, entitami, agregáty a repozitáři, prohlásí to za DDD a strategickou část přeskočí. Vernon pro tuto praxi používá název DDD-Lite, ale míní ho jako varování, ne jako odlehčenou variantu pro menší projekty: bez Ubiquitous Language, Bounded Contextu a Context Mappingu podle něj vzniká podřadný doménový model. Výsledkem bývá jeden model pro celou firmu, obalený vzory, které měly řešit něco jiného.
+
+### Kritika a stav evidence {#kritika}
+
+Námitky přicházejí i zvenčí komunity. Stefan Tilkov se ohrazuje proti reflexu volat DDD experty pokaždé, když padne otázka hranic služeb; DDD je podle něj užitečný prostředek, ne cíl [[11]](https://www.innoq.com/en/blog/2021/03/is-domain-driven-design-overrated/). Systematický přehled 36 recenzovaných studií z roku 2023 přidává střízlivější pohled na data. Zkoumané systémy se po nasazení DDD zlepšily, zejména v kombinaci s mikroservisami. Části studií ale chybí empirická validace a hlavní bariérou adopce zůstávají nároky na expertízu a onboarding [[12]](https://arxiv.org/abs/2310.01905). Přínosy z předchozí sekce jsou tedy zkušenostní, ne změřené – a tak s nimi zachází i tato kniha.
 
 :::callout{type="warn"}
 ### Ilustrativní scénář: DDD bez doménového experta {#priklad-selhani-heading}
@@ -269,9 +289,9 @@ DDD se osvědčuje v aplikacích s bohatou doménou, kde přesné modelování o
 - question: Co je Domain-Driven Design?
   answer: 'Domain-Driven Design (DDD) je přístup k vývoji softwaru, který staví modelování domény do středu celého návrhu. Systematicky jej popsal Eric Evans v knize z roku 2003. Cílem je, aby software co nejpřesněji odrážel způsob, jakým v dané oblasti uvažují doménoví experti, a aby tento soulad vydržel i při růstu aplikace. Podrobnosti v <a href="#definition">sekci Definice DDD</a>.'
 - question: Co je Ubiquitous Language v DDD?
-  answer: 'Ubiquitous Language (všudypřítomný jazyk) je společný slovník používaný vývojáři i doménovými experty při návrhu, diskuzi i implementaci systému. Stejné pojmy se objevují v doménové dokumentaci, v rozhovorech nad modelem i přímo v kódu. Tím se eliminují nedorozumění a snižuje se riziko, že kód bude modelovat něco jiného, než doména skutečně potřebuje. Více v <a href="#ubiquitous-language-v-praxi">sekci Ubiquitous Language v praxi</a>.'
+  answer: 'Ubiquitous Language (všudypřítomný jazyk) je společný slovník používaný vývojáři i doménovými experty při návrhu, diskuzi i implementaci systému. Platí vždy uvnitř jednoho bounded contextu, ne napříč celou firmou – hranice je součástí Evansovy definice. Stejné pojmy se objevují v doménové dokumentaci, v rozhovorech nad modelem i přímo v kódu, takže kód nemodeluje něco jiného, než doména potřebuje. Více v <a href="#ubiquitous-language-v-praxi">sekci Ubiquitous Language v praxi</a>.'
 - question: Co je Bounded Context a k čemu slouží?
-  answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer“ ve fakturaci a „Customer“ v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části a bývají přirozenými hranicemi pro mikroservisy. Viz <a href="#bounded-context">podsekce o Bounded Contextu</a>.'
+  answer: 'Bounded Context (ohraničený kontext) je explicitně definovaná hranice, uvnitř které platí jeden konzistentní doménový model a jeden Ubiquitous Language. Mimo tuto hranici mohou stejné pojmy znamenat něco jiného – například „Customer“ ve fakturaci a „Customer“ v podpoře jsou různé modely s různými atributy. Bounded Contexts pomáhají rozdělit složitou doménu na menší zvládnutelné části. Jsou přirozeným kandidátem na hranici mikroservisy, ale neplatí to automaticky: jeden bounded context lze nasadit jako několik služeb i jako modul v monolitu. Viz <a href="#bounded-context">podsekce o Bounded Contextu</a>.'
 - question: Kdy se DDD nevyplatí použít?
   answer: 'Stručně: DDD nepřináší odpovídající hodnotu u projektů s triviální doménovou logikou, v týmech bez přístupu k doménovým expertům a při krátkém horizontu produktu. Detailní rozbor podmínek, příznaků a alternativ obsahuje samostatná kapitola <a href="/kdy-nepouzivat-ddd">Kdy DDD nepoužívat</a>.'
 :::
@@ -281,10 +301,12 @@ DDD se osvědčuje v aplikacích s bohatou doménou, kde přesné modelování o
 Hlavní zdroje:
 
 - [Domain Language – oficiální stránky Erica Evanse a DDD komunity](https://www.domainlanguage.com/ddd/)
+- [Domain-Driven Design Reference (PDF, CC-BY) – Eric Evans, 2015](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf) – definice a shrnutí všech vzorů na 50 stranách zdarma; nejlevnější vstup do tématu
 - [Domain-Driven Design: Tackling Complexity in the Heart of Software – Eric Evans](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215)
 - [Implementing Domain-Driven Design – Vaughn Vernon](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577)
 - [Domain-Driven Design Distilled – Vaughn Vernon](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420)
 - [DDD Community](https://dddcommunity.org/)
+- [DDD Starter Modelling Process – ddd-crew](https://github.com/ddd-crew/ddd-starter-modelling-process) – udržovaný postup zavedení DDD v osmi krocích, CC-BY
 
 ## 01.12 Jak číst tuto knihu {#jak-cist}
 
@@ -300,4 +322,4 @@ Pro detailní cesty čtení podle role (junior/mid Symfony developer, senior PHP
 
 Pokud váháte, jestli má vůbec smysl pokračovat, nabízí se tento postup. Přečtěte si tuto kapitolu (1) a kapitolu [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Pokud po obou kapitolách máte pocit, že DDD ve vašem projektu dává smysl, pokračujte na kapitolu 2 [Subdomény](/subdomeny). Pokud váháte, projděte ještě [Cheat Sheet](/cheat-sheet) – jednostránkový přehled pro rychlou orientaci.
 
-Pro definice termínů slouží [Glosář](/glosar). Pro citace knih a článků v každé kapitole je sekce „Další četba“ (jako tato).
+Pro definice termínů slouží [Glosář](/glosar). Pro citace knih a článků v každé kapitole je sekce „Další četba“ (jako tato). Souhrnný seznam knih, konferencí a nástrojů najdete na stránce [Zdroje](/zdroje). Co s doménovým modelováním dělá práce s jazykovými modely, shrnuje samostatná stránka [DDD a umělá inteligence](/ddd-a-umela-inteligence).
