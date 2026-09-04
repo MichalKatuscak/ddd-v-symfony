@@ -311,7 +311,7 @@ final class Order extends AggregateRoot
             throw new OrderAlreadyCancelled($this->id);
         }
 
-        $this->status = OrderStatus::CANCELLED;
+        $this->status = OrderStatus::Cancelled;
         $this->record(new OrderCancelled($this->id, $clock->now()));
     }
     // Žádné settery - stav se mění jen přes explicitní doménové operace

@@ -714,13 +714,15 @@ final class Order extends AggregateRoot
 {
     private OrderStatus $status = OrderStatus::Draft;
 
-    public function place(): void
+    public function confirm(): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException("Objednávku lze odeslat pouze ve stavu Draft.");
+            throw new InvalidOrderStateTransitionException(
+                "Objednávku lze potvrdit pouze ve stavu Draft."
+            );
         }
-        $this->status = OrderStatus::Placed;
-        $this->record(new OrderPlaced($this->id));
+        $this->status = OrderStatus::Confirmed;
+        $this->record(new OrderConfirmed($this->id));
     }
 
     public function ship(TrackingNumber $trackingNumber): void

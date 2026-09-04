@@ -142,7 +142,7 @@ namespace App\UserManagement\Domain\ValueObject;
 
 enum UserStatus: string
 {
-    case PENDING = 'pending';
+    case Pending = 'pending';
     case ACTIVE = 'active';
     case INACTIVE = 'inactive';
 
@@ -519,7 +519,7 @@ use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\ValueObject\Email;
 use App\OrderManagement\Domain\ValueObject\WishlistId;
-use App\OrderManagement\Domain\Event\OrderPlaced;
+use App\OrderManagement\Domain\Event\OrderConfirmed;
 use App\SharedKernel\Domain\AggregateRoot;
 
 // Agregát 1: Customer - pouze identita a kontaktní údaje
@@ -545,7 +545,7 @@ final class Order extends AggregateRoot
     private array $items = [];
     private readonly \DateTimeImmutable $placedAt;
 
-    public function __construct(
+    private function __construct(
         OrderId $id,
         CustomerId $customerId,
         Address $shippingAddress
@@ -553,25 +553,27 @@ final class Order extends AggregateRoot
         $this->id = $id;
         $this->customerId = $customerId;
         $this->shippingAddress = $shippingAddress;
-        $this->status = OrderStatus::DRAFT;
+        $this->status = OrderStatus::Draft;
         $this->placedAt = new \DateTimeImmutable();
     }
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
-        if ($this->status !== OrderStatus::DRAFT) {
-            throw new \DomainException('Položky lze přidat pouze k objednávce ve stavu Draft.');
+        if ($this->status !== OrderStatus::Draft) {
+            throw new InvalidOrderStateTransitionException(
+                'Položky lze přidat pouze k objednávce ve stavu Draft.'
+            );
         }
         $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
     }
 
-    public function place(): void
+    public function confirm(): void
     {
-        if (empty($this->items)) {
-            throw new \DomainException('Nelze potvrdit prázdnou objednávku.');
+        if ($this->items === []) {
+            throw new EmptyOrderException();
         }
-        $this->status = OrderStatus::PLACED;
-        $this->record(new OrderPlaced(
+        $this->status = OrderStatus::Confirmed;
+        $this->record(new OrderConfirmed(
             $this->id,
             $this->customerId,
             $this->totalAmount(),

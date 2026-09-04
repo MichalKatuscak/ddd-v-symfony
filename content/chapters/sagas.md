@@ -960,8 +960,8 @@ Semantic lock je z nich nejčastější:
 ### PHP: Semantic lock přes stav *_PENDING {#semantic-lock-heading}
 
 :::code{language="php" filename="snippet.php"}
-// Agregát Order: sága ho při startu uzamkne stavem APPROVAL_PENDING
-public function place(): void
+// Agregát Order: sága ho při startu uzamkne stavem ApprovalPending
+public function submitForApproval(): void
 {
     $this->status = OrderStatus::ApprovalPending; // semantic lock
 }

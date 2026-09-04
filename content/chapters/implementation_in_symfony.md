@@ -878,12 +878,12 @@ namespace App\OrderManagement\Domain\ValueObject;
 
 enum OrderStatus: string
 {
-    case DRAFT = 'draft';
-    case CONFIRMED = 'confirmed';
-    case PAID = 'paid';
-    case SHIPPED = 'shipped';
-    case DELIVERED = 'delivered';
-    case CANCELLED = 'cancelled';
+    case Draft = 'draft';
+    case Confirmed = 'confirmed';
+    case Paid = 'paid';
+    case Shipped = 'shipped';
+    case Delivered = 'delivered';
+    case Cancelled = 'cancelled';
 
     /**
      * Vrátí stavy, do kterých je možné z aktuálního stavu přejít.
@@ -934,7 +934,7 @@ final class Order extends AggregateRoot
     private function __construct(
         public readonly OrderId $id,
     ) {
-        $this->status = OrderStatus::DRAFT;
+        $this->status = OrderStatus::Draft;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -1024,7 +1024,7 @@ final class PaymentService
 {
     public function processPayment(Order $order, Money $amount, PaymentMethod $pm): Payment
     {
-        if ($order->status() !== OrderStatus::CONFIRMED) {
+        if ($order->status() !== OrderStatus::Confirmed) {
             throw new \DomainException('Cannot process payment for a non-confirmed order');
         }
 
@@ -1067,10 +1067,10 @@ final class Order extends AggregateRoot
 
     public function recordPayment(Money $amount, PaymentMethod $method): Payment
     {
-        if ($this->status !== OrderStatus::CONFIRMED) {
+        if ($this->status !== OrderStatus::Confirmed) {
             throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,
-                OrderStatus::PAID->value,
+                OrderStatus::Paid->value,
             );
         }
 
@@ -1078,7 +1078,7 @@ final class Order extends AggregateRoot
             throw new \DomainException('Payment amount does not match order total.');
         }
 
-        $this->status = OrderStatus::PAID;
+        $this->status = OrderStatus::Paid;
 
         $payment = Payment::record(PaymentId::generate(), $this->id, $amount, $method);
 

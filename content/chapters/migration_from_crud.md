@@ -1032,7 +1032,7 @@ core doména s vysokou hodnotou), postup je:
 **Symptomy:** `Order::$status: string`, podmínky všude `if ($order->status === 'PLACED')`.
 
 1. Zaveďte enum: `enum OrderStatus: string { case PLACED = 'placed'; case CANCELLED = 'cancelled'; }`.
-2. Aggregate metody dělají transitions: `$this->status = OrderStatus::CANCELLED`.
+2. Aggregate metody dělají transitions: `$this->status = OrderStatus::Cancelled`.
 3. Pro komplexní transition rules zvažte State Machine (Symfony Workflow component nebo doménová reprezentace).
 
 :::faq{}

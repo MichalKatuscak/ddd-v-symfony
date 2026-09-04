@@ -89,7 +89,7 @@ final class OrderVoter extends Voter
 }
 :::
 
-Co je špatně: Aggregate `Order::setStatus(OrderStatus::CANCELLED)` stále existuje a je veřejné. Stačí, aby kdokoli (test, fixture, migration script, jiný vývojář) zavolal setter mimo Voter – a invariant „24h cancellation window“ je porušen. Voter je jen *volitelný* filtr před vstupem; doména nemá žádnou pojistku. Pravidlo „cancellation window“ je doménové, ne use-case-level.
+Co je špatně: Aggregate `Order::setStatus(OrderStatus::Cancelled)` stále existuje a je veřejné. Stačí, aby kdokoli (test, fixture, migration script, jiný vývojář) zavolal setter mimo Voter – a invariant „24h cancellation window“ je porušen. Voter je jen *volitelný* filtr před vstupem; doména nemá žádnou pojistku. Pravidlo „cancellation window“ je doménové, ne use-case-level.
 
 ### Chyba 3: Autorizace na úrovni databázových řádků {#tri-chyby-doctrine-heading}
 
@@ -423,7 +423,7 @@ final class Order extends AggregateRoot
 
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {
-        if ($this->status !== OrderStatus::PLACED) {
+        if ($this->status !== OrderStatus::Placed) {
             throw new InvalidOrderStateException(
                 sprintf(
                     'Cancel allowed only for PLACED orders, got %s',
@@ -441,7 +441,7 @@ final class Order extends AggregateRoot
             );
         }
 
-        $this->status = OrderStatus::CANCELLED;
+        $this->status = OrderStatus::Cancelled;
         $this->record(new OrderCancelled(
             orderId:    $this->id,
             customerId: $this->customerId,
@@ -452,7 +452,7 @@ final class Order extends AggregateRoot
 
     public function isCancellable(\DateTimeImmutable $now): bool
     {
-        if ($this->status !== OrderStatus::PLACED) {
+        if ($this->status !== OrderStatus::Placed) {
             return false;
         }
         return $now->getTimestamp() - $this->placedAt->getTimestamp()

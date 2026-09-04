@@ -545,18 +545,18 @@ namespace App\SharedKernel\Domain;
 abstract class AggregateRoot
 {
     /** @var list<object> */
-    private array $recordedEvents = [];
+    private array $domainEvents = [];
 
-    protected function record(object $event): void
+    final protected function record(object $event): void
     {
-        $this->recordedEvents[] = $event;
+        $this->domainEvents[] = $event;
     }
 
     /** @return list<object> */
-    public function releaseEvents(): array
+    final public function releaseEvents(): array
     {
-        $events = $this->recordedEvents;
-        $this->recordedEvents = [];
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
 
         return $events;
     }
