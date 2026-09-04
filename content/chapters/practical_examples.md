@@ -14,17 +14,22 @@ schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
 chapter_number: "23"
 category: Syntéza
 deck: "Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury."
-reading_time: 12
+reading_time: 16
 difficulty: 3
 ---
 
 Tato kapitola je **shrnující průřez** předchozími kapitolami. Tři krátké příklady ukazují,
 jak vzory z taktického DDD, CQRS a Implementace v Symfony drží pohromadě jako funkční aplikace.
-Každý příklad obsahuje strukturu projektu a kostru hlavních tříd. Detailní implementace
-(plné Doctrine mapování, testy, okrajové případy) najdete v předchozích kapitolách.
+Každý příklad obsahuje strukturu projektu a kostru hlavních tříd; plné tělo dostávají
+jen metody, které nesou doménový invariant. Detailní implementace (Doctrine mapování,
+kontrolery, testy, okrajové případy) najdete v předchozích kapitolách.
 
 Plný end-to-end příklad – od doménové analýzy přes kontextovou mapu po read modely –
 rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
+
+Výchozím bodem je prázdný projekt: `composer create-project symfony/skeleton`
+a k němu `symfony/uid` na identifikátory, `symfony/messenger` na command bus
+a `doctrine/orm` na persistenci. Ukázky cílí na PHP 8.4, Symfony 8 a Doctrine ORM 3.
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
@@ -43,8 +48,9 @@ src/
 │   ├── Domain/
 │   │   ├── Model/Cart.php          # Aggregate Root
 │   │   ├── Model/CartItem.php
-│   │   ├── ValueObject/CartId.php, ProductId.php, Quantity.php, Money.php
-│   │   ├── Event/ItemAddedToCart.php, CartCheckedOut.php
+│   │   ├── ValueObject/CartId.php, ProductId.php, UserId.php
+│   │   ├── Event/ItemAddedToCart.php, CartCheckedOut.php, CheckedOutItem.php
+│   │   ├── Exception/EmptyCartException.php
 │   │   └── Repository/CartRepository.php
 │   ├── Infrastructure/Repository/DoctrineCartRepository.php
 │   ├── AddItem/{Command, Controller}/  # Feature slice
@@ -52,15 +58,17 @@ src/
 │   └── Checkout/Controller/             # Feature slice
 ├── Order/                     # Bounded Context: Objednávky
 │   ├── Domain/Model/Order.php          # Aggregate Root
-│   ├── Domain/Event/OrderCreated.php
-│   └── CreateOrder/{Command, Controller}/
-└── Shared/Domain/Exception/DomainException.php
+│   ├── Domain/ValueObject/OrderId.php, CustomerId.php
+│   ├── Domain/Event/OrderPlaced.php
+│   └── PlaceOrder/{Command, Controller, Listener}/
+└── Shared/Domain/{Money.php, Exception/DomainException.php}
 :::
 
 ### Agregát Cart {#cart-aggregate}
 
-Agregát `Cart` hlídá pravidlo: u stejného `productId` navyšuje quantity stávající
-položky místo přidání nové. Skeleton:
+Agregát `Cart` hlídá pravidlo: u stejného `productId` navyšuje množství stávající
+položky místo přidání nové. Obě metody nesoucí invariant mají plné tělo, zbytek
+zůstává kostrou:
 
 :::code{language="php" filename="src/Cart/Domain/Model/Cart.php (skeleton)"}
 final class Cart extends AggregateRoot
@@ -72,15 +80,38 @@ final class Cart extends AggregateRoot
 
     public static function open(CartId $id, UserId $userId): self { /* ... */ }
 
-    public function addItem(ProductId $productId, Quantity $quantity, Money $price): void
+    public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
-        // Invariant: pokud productId existuje, zvyš quantity; jinak přidej nový item.
-        // Vyemituje ItemAddedToCart event.
+        // INVARIANT: jedna položka na produkt – množství se sčítá, řádek se neduplikuje.
+        $existing = $this->findItem($productId);
+
+        if ($existing !== null) {
+            $existing->increaseQuantity($quantity);
+        } else {
+            $this->items->add(new CartItem($this->id, $productId, $quantity, $unitPrice));
+        }
+
+        $this->record(new ItemAddedToCart($this->id, $productId, $quantity));
+    }
+
+    public function checkout(): void
+    {
+        // INVARIANT: z prázdného košíku objednávka nevznikne.
+        if ($this->items->isEmpty()) {
+            throw EmptyCartException::withId($this->id);
+        }
+
+        $this->record(new CartCheckedOut(
+            $this->id,
+            $this->userId,
+            array_map(CheckedOutItem::fromCartItem(...), $this->items->toArray()),
+            new \DateTimeImmutable(),
+        ));
     }
 
     public function removeItem(ProductId $productId): void { /* ... */ }
     public function totalAmount(): Money { /* sumace přes items */ }
-    public function checkout(): void { /* invariant: cart nesmí být prázdný */ }
+    private function findItem(ProductId $productId): ?CartItem { /* ... */ }
 }
 :::
 
@@ -94,21 +125,21 @@ Tenký aplikační handler: načte agregát, deleguje doménovou logiku, uloží
 
 :::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCartHandler.php (skeleton)"}
 #[AsMessageHandler]
-final class AddItemToCartHandler
+final readonly class AddItemToCartHandler
 {
     public function __construct(
-        private CartRepository $cartRepository,
-        private ProductRepository $productRepository,
+        private CartRepository $carts,
+        private ProductRepository $products,
     ) {}
 
     public function __invoke(AddItemToCart $command): void
     {
-        $cart = $this->cartRepository->findByIdOrFail(new CartId($command->cartId));
-        $product = $this->productRepository->findByIdOrFail(new ProductId($command->productId));
+        $cart = $this->carts->getOrFail(new CartId($command->cartId));
+        $product = $this->products->getOrFail(new ProductId($command->productId));
 
-        $cart->addItem($product->id(), new Quantity($command->quantity), $product->price());
+        $cart->addItem($product->id, $command->quantity, $product->price);
 
-        $this->cartRepository->save($cart);
+        $this->carts->save($cart);
     }
 }
 :::
@@ -118,6 +149,53 @@ jen jako rozhraní (port), implementaci dodává kontext Catalog, který ukázka
 
 Plnou CQRS implementaci s validací, autorizací a outbox patternem najdete v [CQRS](/cqrs) a
 [Outbox Pattern](/outbox-pattern).
+
+### Přechod z košíku do objednávky {#cart-checkout-to-order}
+
+Checkout je jediné místo, kde se oba kontexty potkávají. Cart o objednávkách nic neví;
+zaznamená událost a tím pro něj práce končí. Payload události nese kopii dat, ne entity
+košíku – kontexty se znají jen přes identifikátory a hodnoty.
+
+:::code{language="php" filename="src/Cart/Domain/Event/CartCheckedOut.php"}
+final readonly class CartCheckedOut
+{
+    /** @param list<CheckedOutItem> $items */
+    public function __construct(
+        public CartId $cartId,
+        public UserId $userId,
+        public array $items,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
+}
+:::
+
+Na druhé straně hranice stojí handler kontextu Order. Ten si cizí slovník překládá na svůj:
+`UserId` z košíku se stává `CustomerId` objednávky.
+
+:::code{language="php" filename="src/Order/PlaceOrder/Listener/PlaceOrderOnCartCheckedOut.php"}
+#[AsMessageHandler]
+final readonly class PlaceOrderOnCartCheckedOut
+{
+    public function __construct(private OrderRepository $orders) {}
+
+    public function __invoke(CartCheckedOut $event): void
+    {
+        // Překlad mezi kontexty na hranici: UserId košíku → CustomerId objednávky.
+        $order = Order::place(OrderId::generate(), new CustomerId($event->userId->value));
+
+        foreach ($event->items as $item) {
+            $order->addItem($item->productId, $item->quantity, $item->unitPrice);
+        }
+
+        $this->orders->save($order);
+    }
+}
+:::
+
+V monolitu handler odebírá doménovou událost přímo. Jakmile se kontext Order osamostatní,
+potřebuje vlastní integrační DTO naplněné z payloadu zprávy – důvody rozebírá
+[DDD a mikroslužby](/ddd-a-microservices). Spolehlivé doručení mezi kontexty přitom
+nezajistí sběrnice sama, ale [Outbox Pattern](/outbox-pattern).
 
 ## 23.02 Příklad: Blog {#blog}
 
@@ -137,9 +215,11 @@ src/
     │   ├── Model/Comment.php
     │   ├── ValueObject/PostId.php, CommentId.php, AuthorId.php
     │   ├── Event/PostCreated.php, CommentAdded.php
+    │   ├── Exception/CommentsClosedException.php
     │   └── Repository/PostRepository.php
     ├── Infrastructure/Repository/DoctrinePostRepository.php
     ├── CreatePost/{Command, Controller}/
+    ├── AddComment/{Command, Controller}/
     ├── GetPost/{Query, Controller, ViewModel}/
     └── GetPosts/{Query, Controller, ViewModel}/
 :::
@@ -147,11 +227,17 @@ src/
 ### Agregát Post {#post-aggregate}
 
 Agregát `Post` se vytváří přes named constructor `create()`. Ten vynucuje invarianty
-(titul 3–255 znaků, neprázdný obsah) a nová instance zaznamená `PostCreated`.
+(titul 3–255 znaků, neprázdný obsah) a nová instance zaznamená `PostCreated`. Konstruktor
+zůstává privátní a událost nenahrává – rekonstituce z databáze by jinak emitovala
+události znovu.
 
 :::code{language="php" filename="src/Blog/Domain/Model/Post.php (skeleton)"}
 final class Post extends AggregateRoot
 {
+    /** @var Collection<int, Comment> */
+    private Collection $comments;
+    private bool $commentsClosed = false;
+
     private function __construct(
         public readonly PostId $id,
         private string $title,
@@ -159,6 +245,7 @@ final class Post extends AggregateRoot
         public readonly AuthorId $authorId,
         public readonly \DateTimeImmutable $createdAt,
     ) {
+        $this->comments = new ArrayCollection();
     }
 
     public static function create(PostId $id, string $title, string $content, AuthorId $authorId): self
@@ -170,37 +257,57 @@ final class Post extends AggregateRoot
         return $post;
     }
 
+    public function addComment(CommentId $id, AuthorId $authorId, string $text): void
+    {
+        // INVARIANT: do uzavřené diskuse komentář nepřibude.
+        if ($this->commentsClosed) {
+            throw CommentsClosedException::forPost($this->id);
+        }
+
+        $this->comments->add(new Comment($id, $this->id, $authorId, $text));
+        $this->record(new CommentAdded($this->id, $id, $authorId));
+    }
+
+    public function closeComments(): void { /* ... */ }
     public function updateTitle(string $newTitle): void { /* ... */ }
     public function updateContent(string $newContent): void { /* ... */ }
 }
 :::
 
+`Comment` je entita uvnitř agregátu, ne samostatný Aggregate Root. Vzniká jen přes
+`Post::addComment()`, takže invariant „uzavřená diskuse“ nelze obejít. Hranici agregátu
+a důsledky pro souběžné zápisy rozebírá [Návrh agregátu](/navrh-agregatu).
+
 ### Command Handler: CreatePost {#create-post-handler}
 
 :::code{language="php" filename="src/Blog/CreatePost/Command/CreatePostHandler.php (skeleton)"}
 #[AsMessageHandler]
-final class CreatePostHandler
+final readonly class CreatePostHandler
 {
     public function __construct(private PostRepository $posts) {}
 
-    public function __invoke(CreatePost $command): string
+    public function __invoke(CreatePost $command): void
     {
         $post = Post::create(
-            PostId::generate(),
+            new PostId($command->postId),
             $command->title,
             $command->content,
             new AuthorId($command->authorId),
         );
 
         $this->posts->save($post);
-
-        return $post->id->value;
     }
 }
 :::
 
-Pro implementaci read modelu pro výpis příspěvků (paginace, řazení podle data, projekce
-z eventů) viz [CQRS – ViewModely a Read Modely](/cqrs#view-models) a [Výkonnostní aspekty](/vykonnostni-aspekty).
+Handler nic nevrací a identifikátor příspěvku přichází v commandu – kontroler ho
+vygeneruje přes `PostId::generate()` ještě před dispatchem. Návrat ID z handleru přes
+`HandledStamp` je druhá možnost, ale u asynchronního transportu se výsledek k volajícímu
+nedostane; srovnání obou variant je v [CQRS](/cqrs#command-navratova-hodnota-heading).
+
+Read model pro výpis příspěvků – paginace, řazení podle data, projekce z událostí –
+patří mimo zápisový repozitář. Rozebírá ho [CQRS – ViewModely a Read Modely](/cqrs#view-models)
+a [Výkonnostní aspekty](/vykonnostni-aspekty).
 
 ## 23.03 Příklad: Správa uživatelů {#user-management}
 
@@ -219,11 +326,12 @@ src/
     │   ├── Model/User.php           # Aggregate Root
     │   ├── ValueObject/UserId.php, Email.php, HashedPassword.php
     │   ├── Event/UserRegistered.php
+    │   ├── Exception/DuplicateEmailException.php
     │   └── Repository/UserRepository.php
     ├── Infrastructure/Repository/DoctrineUserRepository.php
-    ├── Registration/{RegisterUser, RegisterUserHandler, RegistrationController}.php
-    ├── Authentication/SecurityController.php
-    └── Profile/{GetUserProfile, GetUserProfileHandler, ProfileController}.php
+    ├── Registration/{Command, Controller}/
+    ├── Authentication/Controller/
+    └── Profile/{Query, Controller}/
 :::
 
 ### Agregát User {#user-aggregate}
@@ -269,52 +377,63 @@ patří na security adapter v infrastrukturní vrstvě (viz
 [Autorizace v DDD](/autorizace-v-ddd)). A `final` u entit mapovaných Doctrine projde – nativní lazy objekty
 z entity nedědí.
 
+Hash hesla nemá putovat do session. `PasswordAuthenticatedUserInterface` k tomu
+doporučuje `__serialize()` a `__unserialize()` na entitě, které citlivé pole vynechají.
+
 ### Command Handler: RegisterUser {#register-user-handler}
 
-:::code{language="php" filename="src/UserManagement/Registration/RegisterUserHandler.php (skeleton)"}
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php (skeleton)"}
 #[AsMessageHandler]
-final class RegisterUserHandler
+final readonly class RegisterUserHandler
 {
     public function __construct(
         private UserRepository $users,
-        private UserPasswordHasherInterface $passwordHasher,
+        private EntityManagerInterface $em,
     ) {}
 
     public function __invoke(RegisterUser $command): void
     {
-        $email = new Email($command->email);
-
-        // Invariant na úrovni handleru: email musí být unikátní (DB unique constraint
-        // je pojistka pro race condition, viz /implementace-v-symfony#register-race-heading).
-        if ($this->users->findByEmail($email) !== null) {
-            throw DuplicateEmailException::with($email);
-        }
+        // Normalizace vstupu (trim, lowercase) patří do fromUserInput(),
+        // konstruktor Email jen validuje.
+        $email = Email::fromUserInput($command->email);
 
         $user = User::register(
             UserId::generate(),
             $command->name,
             $email,
-            HashedPassword::fromHasher($this->passwordHasher, $command->password),
+            HashedPassword::fromPlainText($command->password),
         );
 
-        $this->users->save($user);
+        try {
+            $this->users->save($user);
+            // Flush ručně: unique constraint se vyhodnotí až zde a překlad
+            // na doménovou výjimku musí proběhnout uvnitř try bloku.
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw DuplicateEmailException::with($email, $e);
+        }
     }
 }
 :::
 
-Pro autorizaci uživatele po přihlášení (čtyři vrstvy přístupu, Voter, doménové invarianty)
-viz [Autorizace v DDD](/autorizace-v-ddd).
+Unikátnost e-mailu garantuje databázový constraint, ne kontrola přes `findByEmail()`
+před zápisem. Ta je vůči souběžným registracím nedostatečná – rozbor race condition
+a obou vrstev ochrany je v
+[Implementaci v Symfony](/implementace-v-symfony#register-race-heading).
+
+Autorizaci uživatele po přihlášení – čtyři vrstvy přístupu, Voter, doménové invarianty –
+rozebírá [Autorizace v DDD](/autorizace-v-ddd).
 
 ## 23.04 Tři projekty vedle sebe {#tri-projekty-vedle-sebe}
 
-Tři příklady pokrývají tři různé úrovně doménové komplexity. Srovnání ukazuje, co která
-úroveň vyžaduje a kde zvolená struktura narazí na strop:
+Příklady se liší doménovou komplexitou i počtem kontextů. Srovnání ukazuje, co která
+varianta vyžaduje a kde zvolená struktura narazí na strop:
 
 | | E-shop | Blog | Správa uživatelů |
 |---|---|---|---|
-| **Komplexita domény** | Střední: invarianty v košíku, přechod stavu checkout → objednávka | Nízká: pár validačních pravidel na titulku a obsahu | Nízká až střední: unikátní e-mail, hash hesla, integrace se Security |
+| **Komplexita domény** | Střední: invarianty v košíku, přechod stavu checkout → objednávka | Nízká: validace titulku a obsahu, uzavírání diskuse pod příspěvkem | Nízká až střední: unikátní e-mail, hash hesla, integrace se Security |
 | **Počet Bounded Contexts** | 2 (Cart, Order) | 1 | 1 |
-| **Použité vzory** | Agregáty, hodnotové objekty, doménová událost mezi kontexty, CQRS, repository | Agregát s named constructorem, CQRS slices, repository | Agregát s `UserInterface`, hodnotové objekty `Email` a `HashedPassword`, repository |
+| **Použité vzory** | Agregáty, hodnotové objekty, doménová událost mezi kontexty, CQRS, repository | Agregát s entitou uvnitř, named constructor, CQRS slices, repository | Agregát s `UserInterface`, hodnotové objekty `Email` a `HashedPassword`, repository |
 | **Co se změní při růstu** | Přibudou kontexty Payment, Inventory, Shipping; checkout se stane procesem přes [ságu](/sagy-a-process-managery); publikace událostí dostane [outbox](/outbox-pattern) | Moderace a verzování obsahu si vyžádají oddělený Comment kontext a read model pro výpisy | Role, oprávnění a SSO oddělí Identity od Profile; autorizační pravidla se přesunou do [voterů](/autorizace-v-ddd) |
 | **Kdy struktura přestane stačit** | Když synchronní komunikace mezi kontexty začne vytvářet řetězy závislostí – pak nastupuje plně asynchronní integrace | Jakmile přibude workflow redakce a schvalování, přestane stačit jediný kontext s CRUD jádrem | Když počet pravidel „kdo smí co“ přeroste agregát – pravidla patří do samostatné autorizační vrstvy |
 
@@ -338,9 +457,12 @@ kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 ## 23.05 Závěr {#zaver}
 
 Všechny tři příklady sledují stejný řetězec: kontroler → command bus → handler → agregát →
-repozitář → event. Variace v počtu Bounded Contexts, počtu agregátů a integraci se Symfony
+repozitář → událost. Variace v počtu Bounded Contexts, počtu agregátů a integraci se Symfony
 Security tu kostru nemění. Doménové invarianty patří do agregátu, aplikační orchestraci nese
 handler, infrastrukturu drží repozitář.
+
+Ukázky zabírají střed toho řetězce. Kontrolery, Doctrine mapování a implementace repozitářů
+zůstávají v [Implementaci v Symfony](/implementace-v-symfony), kde mají prostor na detail.
 
 Reálný projekt s plnou doménovou analýzou, kontextovou mapou, read modely, reconciliation a
 důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Provede
@@ -348,7 +470,7 @@ vás systémem pro správu projektů krok za krokem – od event stormingu po ho
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
-  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Tato kombinace se v ukázkách opakuje záměrně – odpovídá typickému tvaru produkčního DDD projektu v Symfony 8.'
+  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Kombinace se v ukázkách opakuje záměrně; stejné členění drží i veřejné referenční projekty, například <code>CodelyTV/php-ddd-example</code>.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
   answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Adresářová struktura slouží jako výchozí šablona; rozšiřuje se podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
 - question: Kde najdu plnou implementaci agregátu se všemi metodami?
