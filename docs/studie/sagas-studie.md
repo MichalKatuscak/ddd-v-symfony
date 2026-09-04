@@ -429,12 +429,18 @@ Rozpočet na fulltextové vyhledávání byl v této session vyčerpán; **žád
   odkaz neobsahuje a Dahana nejmenuje, takže **není co opravovat**. Nález je relevantní pro přepis:
   je-li potřeba doložit, že saga není workflow engine, tohle je citovatelný primární zdroj.
 
-- **Vernon, V. — *Implementing Domain-Driven Design*, Addison-Wesley, 2013.** Kapitola cituje
-  „kap. 4" (`sagas.md:79`). Obsah knihy se podařilo ověřit jen na úrovni názvů kapitol (kap. 4 =
-  *Architecture*); podsekci *Long-Running Processes, aka Sagas* se online potvrdit nepodařilo
-  (oreilly.com vrací 403, informit.com neuvádí podsekce). **Ověřit proti tištěné knize** – pokud je
-  téma i v kap. 13 *Integrating Bounded Contexts*, citaci doplnit.
+- **Vernon, *IDDD* (2013), kap. 4 – POTVRZENO 2026-09-04 z plného textu knihy
+  (vlastní výtisk).** Citace na `sagas.md:79` sedí. Kapitola 4 se jmenuje *Architecture* a mezi
+  jejími podsekcemi je doslova **„Long-Running Processes, aka Sagas“**, zařazená pod
+  Event-Driven Architecture vedle *Pipes and Filters* a *Event Sourcing*. Vernon sám shrnuje záběr
+  kapitoly jako styly „Hexagonal (Ports and Adapters), Service-Oriented, REST, CQRS, Event-Driven
+  (Pipes and Filters, Long-Running Processes or Sagas, Event Sourcing), and Data Fabric/Grid-Based“.
 
+  **Navíc: téma je i v kapitole 13** *Integrating Bounded Contexts*, kde má podsekce
+  „Long-Running Processes, and Avoiding Responsibility“, „Process State Machines and Time-out
+  Trackers“ a „Designing a More Sophisticated Process“. Pro kapitolu o sagách je tahle druhá
+  pasáž praktičtější než kap. 4, protože řeší stavové automaty a timeouty. **Doporučení: citovat
+  obě, kap. 4 pro zařazení vzoru a kap. 13 pro implementační detaily.**
 - **Richardson, C. — *Microservices Patterns*, Manning, 2018.** Kapitola cituje „kap. 4" pro
   countermeasures (semantic lock, commutative updates, pessimistic view, reread value) a pro trojici
   compensatable / pivot / retryable (`sagas.md:989`, `sagas.md:1400`). Stránka microservices.io [2]

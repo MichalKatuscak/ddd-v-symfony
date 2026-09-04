@@ -300,7 +300,17 @@ Je to dnes nejúplnější zpracování kombinace strategického DDD a Team Topo
 ### Neověřené / nedohledané
 
 - **Přesný název článku LeRoye a Simonse** v Cutter IT Journal 12/2010. Fowler [9] uvádí jen autory, časopis a datum. Číslo Cutter IT Journal není volně dostupné. Kapitola název neuvádí, což je zatím správné řešení.
-- **Vernonova doslovná formulace pravidla „1 BC = 1 tým"** v *IDDD* (2013) a *DDD Distilled* (2016). Kapitola na řádcích 85–90 pravidlo parafrázuje; doslovné znění se z veřejných zdrojů ověřit nepodařilo. Před přepisem ověřit proti knize, zejména zda Vernon skutečně říká „nikdy", nebo mírnější formulaci.
+- **Pravidlo „1 BC = 1 tým“ – OVĚŘENO 2026-09-04 v *IDDD*. Vernon ho formuluje jako preferenci
+  a výslovně varuje před rigidním čtením.** Doslova: *„a single Bounded Context is not an attempt
+  to limit flexibility to team organization. It’s not as if teams can’t be arranged as needed,
+  or that individual members of one team cannot be used on one or more other projects. A company
+  should use people in the way that best fits its needs. This is simply stating that it is best
+  for one well-defined, cohesive team […]“*
+
+  **Dopad na řádky 85–90:** parafráze „1 BC = 1 tým“ jako pravidlo jde dál než Vernon. On říká
+  „it is best for“, a hned k tomu přidává výhradu, že organizaci týmů to omezovat nemá.
+  **Doporučení: doplnit tu výhradu.** Kapitola tím získá přesnější tvrzení a zároveň odpověď na
+  námitku, kterou si čtenář položí sám.je; doslovné znění se z veřejných zdrojů ověřit nepodařilo. Před přepisem ověřit proti knize, zejména zda Vernon skutečně říká „nikdy“, nebo mírnější formulaci.
 - **Tvrzení kapitoly na řádcích 484–486**, že Skelton a Pais „výslovně varují" před objektivizací cognitive load přes LOC, počet služeb nebo průtok ticketů. V žádném dohledatelném zdroji potvrzeno nebylo.
 - **Poměr stream-aligned ku ostatním týmům 6:1 až 9:1.** Doložen jen sekundárně [15]. Nutné ověřit proti tištěné knize (kap. 5), protože kapitola dnes tvrdí opak („autoři procenta neuvádějí").
 - **Přesné znění otázek v šabloně Team Cognitive Load Assessment.** Veřejný repozitář [10] obsahuje jen odkaz na Google Form; sekce „Overview", „How to use" a „Template" jsou prázdné.

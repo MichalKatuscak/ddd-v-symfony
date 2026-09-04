@@ -426,7 +426,26 @@ kapitolu o DDD a AI.*
 
 - **Khononovovy příklady Core Domain (Uber ridesharing/matching, Google ranking)** uváděné na `subdomains.md:50`. Nepodařilo se potvrdit, že právě tyto příklady v *Learning DDD* jsou. Vyžaduje kontrolu v knize.
 - **Khononovovo tvrzení, že u Core subdomén je 1:N mapování nevyhnutelné kvůli čtenářskému vs. zápisovému kontextu** (`:158`). Nedohledáno.
-- **Vernonovo doporučení „pro Supporting používat lehčí variantu DDD"** (`:56`). Že Vernon nabádá k soustředění úsilí na Core, je jisté; explicitní doporučení lehčího taktického designu pro Supporting jsem z veřejných zdrojů nepotvrdil. Kontrola v IDDD, kapitola 2.
+- **Vernonovo doporučení k Supporting subdoméně (`:56`) – OVĚŘENO 2026-09-04 v *IDDD*.
+  Kapitola mu připisuje opak toho, co píše.** Vernonovo znění:
+
+  > *„If you are developing a Supporting Subdomain that, for various reasons, cannot be acquired
+  > as a third-party Generic Subdomain, it is possible that the tactical patterns would benefit
+  > your efforts. In this case consider the skill level of the team and whether or not the model
+  > is new and innovative. […] If the team is capable of properly applying tactical design, and
+  > the Supporting Subdomain is innovative and must endure for years in the future, this is
+  > a good opportunity to invest in your software using tactical design. However, this does not
+  > make this model the Core Domain.“*
+
+  Vernon tedy u Supporting subdomény, kterou nelze pořídit jako hotovou Generic, taktické vzory
+  **nezakazuje ani neředí** – naopak je označuje za dobrou příležitost k investici, pokud jsou
+  splněné tři podmínky: tým to umí, model je inovativní (přidává konkrétní obchodní hodnotu
+  a zachycuje zvláštní znalost, ne jen technicky zajímavou) a má vydržet roky. Zároveň dodává,
+  že to z modelu nedělá Core Domain.
+
+  **Doporučení: tvrzení na `:56` přepsat.** Místo „pro Supporting stačí lehčí varianta DDD“
+  formulovat Vernonovo podmíněné kritérium. Je to použitelnější – dává čtenáři rozhodovací test
+  místo paušálu.xplicitní doporučení lehčího taktického designu pro Supporting jsem z veřejných zdrojů nepotvrdil. Kontrola v IDDD, kapitola 2.
 - **Přesné znění Khononovovy rozhodovací tabulky typ subdomény → vzor obchodní logiky.** Existence doložena recenzemi [6], [7]; přesné znění ne.
 - **Plný text Nicka Tuna [11] – DOHLEDÁNO 2026-09-04, Substack je čitelný.** *Core Domain Patterns*,
   19. 1. 2020, definuje osm vzorů, ne jen dělení Core/Supporting/Generic: **Decisive Core**

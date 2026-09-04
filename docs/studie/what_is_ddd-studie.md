@@ -279,7 +279,17 @@ Sekce 01.12 zmiňuje glosář a cheat sheet, ale ne `/ddd-a-umela-inteligence` a
 
 ### Neověřené / nedohledané
 
-- **Přesné znění „DDD-Lite" u Vernona.** Termín je v komunitě konzistentně připisován Vernonovi (*IDDD*, 2013), ale doslovné znění se nepodařilo ověřit z primárního textu – jen z druhotných shrnutí. Před citací v knize ověřit v knize samotné.
+- **„DDD-Lite“ u Vernona – OVĚŘENO 2026-09-04 v *IDDD*. Termín používá, ale jako varování.**
+  Vymezuje ho takto: *„Some refer to this approach to DDD as DDD-Lite. We may have homed in on
+  Entities, Services, possibly made a brave attempt at designing Aggregates, and tried to manage
+  their persistence using Repositories.“* – tedy převzetí taktických vzorů bez strategické části.
+
+  Jeho hodnocení je ale jednoznačně odmítavé: *„Simply stated, practicing DDD-Lite leads to the
+  construction of inferior domain models. That’s because the Ubiquitous Language, Bounded Context,
+  and Context Mapping have so much to offer.“*
+
+  **Dopad na kapitolu:** termín lze citovat s doslovným zněním. Podstatné je nepodávat DDD-Lite
+  jako legitimní odlehčenou variantu – Vernon ho uvádí jako chybu, které se má čtenář vyhnout.řilo ověřit z primárního textu – jen z druhotných shrnutí. Před citací v knize ověřit v knize samotné.
 - **Původní datum Brandoliniho blogpostu – POTVRZENO 2026-09-04: 18. 11. 2013.** Datum sedí
   a je doložené nezávisle na sobě: citací na anglické Wikipedii (heslo *Event storming*),
   Brandoliniho vlastním rozhovorem pro Avanscopertu (*Da ziobrando a EventStorming*, 21. 3. 2016)
@@ -287,7 +297,11 @@ Sekce 01.12 zmiňuje glosář a cheat sheet, ale ne `/ddd-a-umela-inteligence` a
   `ziobrando.blogspot.de/2013/11/introducing-event-storming.html`; doména dnes neodpovídá,
   ale samotné datum a autorství sporné nejsou. **Doporučení: rok 2013 uvádět bez výhrady,
   odkazovat ale na `eventstorming.com` nebo na knihu, ne na mrtvý blogspot.**ěřený je až repost z 12. 2. 2014 [30]. Údaj „2013“ v kapitole (`:66`) je tedy pravděpodobně správný, ale doložený jen nepřímo.
-- **Vernonovo užití termínu „Supporting Subdomain".** Ověřeno negativně u Evanse (*DDD Reference* zná jen Core Domain a Generic Subdomains) a pozitivně u Khononova (2021). Přímé doložení z *IDDD* (2013) se nepodařilo; atribuce Vernonovi podle `CLAUDE.md` zůstává nepotvrzená z primárního zdroje.
+- **Vernonovo užití termínu „Supporting Subdomain“ – POTVRZENO 2026-09-04 přímo v *IDDD*.**
+  Termín v knize skutečně používá, například: *„A domain that may become a Generic Subdomain (2)
+  or Supporting Subdomain to its consumers may actually be a Core Domain to your business.“*
+  Konvence z `CLAUDE.md` (Supporting Subdomain připisovat Vernonovi 2013, ne Evansovi) je tím
+  doložená z primárního zdroje, ne jen ze sekundárních shrnutí.tivně u Khononova (2021). Přímé doložení z *IDDD* (2013) se nepodařilo; atribuce Vernonovi podle `CLAUDE.md` zůstává nepotvrzená z primárního zdroje.
 - **Statistiky o příčinách selhání projektů (Standish CHAOS) – DOVĚŘENO 2026-09-04. Závěr:
   nepoužívat.** Metodologická kritika je doložená: *The Rise and Fall of the Chaos Report Figures*
   (IEEE, 2010) ukazuje systematické zkreslení, protože reporty byly stavěny tak, aby vyzněly ve

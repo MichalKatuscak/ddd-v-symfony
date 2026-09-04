@@ -439,16 +439,24 @@ HTML strojově zbaveno značek. Datum přístupu u všech webových zdrojů: 202
 - **Obsah Evansova QCon 2009 vystoupení.** Ověřen jen abstrakt; veřejný přepis neexistuje.
   Pokud má kapitola citovat Evansovy „přednášky", je nutné citovat *DDD Reference*.
 - **Evansova věta „Not all of a large system will be well designed“ – OVĚŘENO 2026-09-04 proti
-  plnému textu *DDD Reference* (2015).** V Reference tato věta není. Doslovné znění, které tam je,
-  zní s celým kontextem takto: *„It is harsh reality that not all parts of the design are going to
-  be equally refined. Priorities must be set. To make the domain model an asset, the critical core
-  of that model has to be sleek and fully leveraged to create application functionality.“*
-  Pasáž pokračuje pozorováním, že vzácní zkušení vývojáři inklinují k technické infrastruktuře
-  místo k jádru domény.
+  tištěné knize (vlastní výtisk). V této podobě v knize není.** Skutečné znění z roku 2003:
 
-  **Doporučení:** citovat tuto formulaci z Reference (2015) – je silnější než parafráze v kapitole,
-  protože nekončí u konstatování, ale vede k prioritizaci jádra. Větu z knihy 2003 neuvádět, dokud
-  nebude ověřena z tištěného vydání.
+  > *„The harsh reality is that not all parts of the design are going to be equally refined.
+  > Priorities must be set. To make the domain model an asset, the model’s critical core has to be
+  > sleek and fully leveraged to create application functionality. But scarce, highly skilled
+  > developers tend to gravitate to technical infrastructure or neatly definable domain problems
+  > that can be understood without specialized domain knowledge.“*
+
+  Evans pokračuje pozorováním, že specializované jádro – ta část modelu, která aplikaci odlišuje
+  a dělá z ní obchodní aktivum – pak obvykle skládají méně zkušení vývojáři feature po feature,
+  bez využití konceptuální síly modelu.
+
+  Pro úplnost: *DDD Reference* (2015) má tutéž větu s drobně jiným úvodem („It is harsh reality
+  that…“). Rozdíl je zanedbatelný, ale při citaci je třeba vybrat jeden zdroj.
+
+  **Doporučení: citovat doslovné znění z knihy 2003 a zachovat pokračování o prioritách.** Věta
+  samotná zní jako rezignace; teprve s druhou půlkou je z ní argument pro soustředění na jádro,
+  což je přesně to, co kapitola potřebuje.
 - **Khononovova kapitola o architektuře per subdoménu v *Learning DDD* (2021).** Ověřena je
   jen její blogová předloha z roku 2018 `[5]`. Formulace v knize se může lišit.
 - **Doctrine ORM 3 a Active Record – OVĚŘENO 2026-09-04, původní závěr potvrzen.** Stránka

@@ -411,8 +411,20 @@ https://symfony.com/blog/clean-software-architecture-with-deptrac (přístup 202
   Necitovat, dokud se nedohledá původní formulace.
 - **Simon Brown, „The Missing Chapter"** (kap. 34 v [7]). Existence kapitoly je doložená, ale studie
   pracuje jen se sekundárními shrnutími, ne s textem.
-- **Poměr „80 % investice do 20 % kódu" u Vaughna Vernona** (`architectural_styles.md:1138`). Kvalitativní
-  doporučení diferencované investice je u Vernona i Evanse doložené, konkrétní poměr se nepodařilo dohledat.
+- **Poměr „80 % investice do 20 % kódu“ (`architectural_styles.md:1141`) – OVĚŘENO 2026-09-04
+  proti plnému textu *IDDD* i *DDD Distilled*. Vernon toto číslo neuvádí; je vymyšlené.**
+  V *IDDD* je řetězec „80 percent“ **jediný výskyt v celé knize** a týká se něčeho jiného –
+  návrhu doménových událostí: *„A Domain Event rule of thumb says to design them with enough
+  information to satisfy 80 percent of subscribers.“* Řetězec „20 percent“ se v knize nevyskytuje
+  vůbec, v *DDD Distilled* ani jedno z nich.
+
+  **Věcné jádro tvrzení je přitom správné.** Vernon diferencovanou investici doporučuje a má pro
+  ni kritéria: Core Domain si zaslouží nejlepší vývojáře, u Supporting subdomény se taktické vzory
+  vyplatí tehdy, když ji nelze koupit, tým je umí a model je inovativní a dlouhověký. Chybný je
+  jen ten kvantifikovaný poměr.
+
+  **Doporučení: číslo vyškrtnout a nahradit Vernonovými kritérii.** Doporučení tím nic neztratí –
+  naopak dá čtenáři rozhodovací test místo poměru, který si nemá jak ověřit.
 - **Evansova formulace o komunikaci směrem nahoru** (observery, callbacky) ve vrstvené architektuře.
   Kapitola tvrdí jen „nikdy nahoru"; přesná Evansova formulace vyžaduje kontrolu v knize.
 - **`#[AsAlias]` s parametrem `target` – OVĚŘENO 2026-09-04 proti CHANGELOGu

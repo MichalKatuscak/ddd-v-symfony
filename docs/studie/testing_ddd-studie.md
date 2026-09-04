@@ -427,19 +427,29 @@ Všechny položky získány **přímým fetchem URL** (WebFetch nebo curl na Git
 
 ### Neověřené / nedohledané
 
-- **Nat Pryce – *Test Data Builders: an alternative to the Object Mother pattern*,
-  `natpryce.com/articles/000714.html` – ČÁSTEČNĚ DOVĚŘENO 2026-09-04.** Doména odmítá spojení
-  i podruhé (ECONNREFUSED na 80.68.93.102:443), takže původní znění zůstává nedostupné. Existence,
-  autorství, přesný název a URL jsou ale doložené nezávisle: Mark Seemann článek cituje v *Test Data
-  Builders in C#* (blog.ploeh.dk, 15. 8. 2017) větou „In 2007 Nat Pryce described the Test Data
-  Builder design pattern“ a odkazuje na tutéž adresu. **Rok 2007 tím je potvrzený.**
+- **Test Data Builder – OVĚŘENO 2026-09-04 z tištěného GOOS, s. 258 (vlastní výtisk). Vzor lze
+  citovat doslovně a nemusí se opírat o nedostupný blogpost.** Freeman a Pryce ho popisují takto:
 
-  **Doporučení pro přepis:** vzor citovat primárně z knihy [30] (Freeman & Pryce, *GOOS*, 2009),
-  která ho rozpracovává systematicky a je trvale dostupná; blogpost uvést jako první publikaci
-  s rokem 2007, ale nestavět na něm žádnou doslovnou citaci, dokud je doména nedostupná.
-- **Peter Schuh, Stephanie Punke — publikace o Object Mother pro XP Universe.** Existence potvrzena
-  Fowlerem [4], ale přesný název, rok (pravděpodobně 2001) a místo vydání se nepodařilo ověřit
-  z primárního zdroje.
+  > *„For a class that requires complex setup, we create a test data builder that has a field for
+  > each constructor parameter, initialized to a safe value. The builder has ‚chainable‘ public
+  > methods for overwriting the values in its fields and, by convention, a build() method that is
+  > called last to create a new instance of the target object from the field values.“*
+
+  Volitelné rozšíření: statická factory metoda samotného builderu, aby bylo v testu zřetelnější,
+  co se staví. **Ukázka v knize je `OrderBuilder` s metodou `anOrder()`** – tedy přesně ten
+  příklad, na kterém stojí kanonické ukázky této knihy, takže se dá převzít bez překladu do jiné
+  domény.
+
+  Autoři uvádějí tři důvody, proč builder použít: obalí syntaktický šum při vytváření objektů,
+  udrží výchozí případ jednoduchý a zvláštní případy jen o málo složitější, a ochrání test před
+  změnou struktury objektu – po přidání parametru konstruktoru se mění jen builder.
+
+  **Doporučení: citovat GOOS, s. 258.** Pryceův blogpost z roku 2007 uvádět jen jako první
+  publikaci vzoru; jeho doména je nedostupná a pro obsah ho není potřeba.
+- **Schuh & Punke, Object Mother – DOHLEDÁNO 2026-09-04 v bibliografii GOOS (vlastní výtisk).**
+  Přesný záznam zní: *„[Schuh01] Schuh, Peter and Stephanie Punke. ObjectMother: Easing Test
+  Object Creation In XP. XP Universe, 2001.“* Rok 2001 se tedy potvrdil, stejně jako místo vydání
+  (konference XP Universe); doplněn je přesný název včetně podtitulu. Citace je tím uzavřená.
 - **Symfony 8 a testovací API.** Dokumentace na symfony.com/doc/current byla v době rešerše
   označena jako Symfony 8.1. Nepodařilo se ověřit, zda mezi Symfony 7 a 8 došlo k BC změnám
   v `KernelTestCase` / `WebTestCase` — před přepisem kapitoly by to chtělo projít UPGRADE-8.0.md

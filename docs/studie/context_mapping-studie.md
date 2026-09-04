@@ -262,11 +262,41 @@ Vztah nese i atribut `downstreamRights` s hodnotami `INFLUENCER`, `OPINION_LEADE
 
 ### Neověřené / nedohledané
 
-- **Shared Kernel a „přirozený průnik“ – DOVĚŘENO 2026-09-04 proti plnému textu DDD Reference (2015).** Formulace tam není. Evansovo znění vzoru je celé toto: „Therefore: Designate with an explicit boundary some subset of the domain model that the teams agree to share. **Keep this kernel small.** Within this boundary, include, along with this subset of the model, the subset of code or of the database design associated with that part of the model. This explicitly shared stuff has special status, and shouldn’t be changed without consultation with the other team. **Define a continuous integration process that will keep the kernel model tight and align the ubiquitous language of the teams.** Integrate a functional system frequently, though somewhat less often than the pace of continuous integration within the teams.“
+- **Shared Kernel – OVĚŘENO 2026-09-04 proti tištěné knize Evans 2003, s. 229 (vlastní výtisk).**
+  Formulace „menší než přirozený průnik obou modelů“ v knize **není**. Slovo „intersection“ se
+  v souvislosti se Shared Kernelem nevyskytuje vůbec (jediné výskyty jsou „intersection of jargons“
+  a „intersections with other technologies“). Není tam ani „Keep this kernel small“ – ta věta
+  přibyla až v *DDD Reference* (2015). Evansovo znění z roku 2003 je toto:
 
-  Z toho plynou dva dílčí nálezy k ř. 121. Za prvé, „menší než přirozený průnik obou modelů“ je tvrzení silnější než Evansovo a v primárním zdroji nemá oporu – nahradit doslovným „kernel držte malý“. Za druhé, kapitola vynechává druhou polovinu vzoru: proces continuous integration, který má kernel držet těsný a **sladit ubiquitous language obou týmů**. To je u Evanse součást vzoru, ne provozní detail, a v kapitole chybí. Zbytek odstavce na ř. 121 (explicitní hranice, zahrnutí kódu a návrhu databáze, zákaz jednostranné změny) sedí.
+  > *„Therefore: Designate some subset of the domain model that the two teams agree to share.
+  > Of course this includes, along with this subset of the model, the subset of code or of the
+  > database design associated with that part of the model. This explicitly shared stuff has
+  > special status, and shouldn’t be changed without consultation with the other team.
+  > Integrate a functional system frequently, but somewhat less often than the pace of CONTINUOUS
+  > INTEGRATION within the teams. At these integrations, run the tests of both teams.“*
 
-  Zbývá jediná otevřená otázka: kapitola tvrzení připisuje knize *Domain-Driven Design* (2003), ověřený text je z *DDD Reference* (2015). Podle konvence knihy (viz `CLAUDE.md`, Partnership a Big Ball of Mud) patří atribuce k Reference. Doporučení: **připsat Reference (2015)** a otázku tištěného vydání z 2003 tím uzavřít.
+  **Tři věci, které kapitola vynechává nebo posouvá.**
+
+  Za prvé, velikost. Evans neargumentuje průnikem, ale náklady: *„It may be too much overhead to
+  fully synchronize the entire model and code base, but a carefully selected subset can provide
+  much of the benefit for less cost.“* Kritérium je tedy „pečlivě vybraná podmnožina“, ne
+  geometrický vztah ke sjednocení modelů.
+
+  Za druhé, provozní režim. Kapitola končí u zákazu jednostranné změny, Evans pokračuje: testy obou
+  týmů musí projít při každé změně, týmy pracují na oddělených kopiích kernelu a slučují je
+  v intervalech – *„on a team that CONTINUOUSLY INTEGRATES daily or better, the KERNEL merger
+  might be weekly“*. To je to, co ze Shared Kernelu dělá použitelný vzor, a v kapitole to chybí.
+
+  Za třetí, a to je nejdůležitější: **Evans a kapitola doporučují do Shared Kernelu opačné věci.**
+  Evans píše *„The SHARED KERNEL is often the CORE DOMAIN, some set of GENERIC SUBDOMAINS, or
+  both“*, kdežto kapitola na `context_mapping.md:126` doporučuje elementární hodnotové objekty
+  (`Money`, `Currency`, `EmailAddress`, `UserId`). Evansův cíl je přitom explicitní: *„The goal is
+  to reduce duplication (but not to eliminate it […]) and make integration between the two
+  subsystems relatively easy.“*
+
+  **Doporučení:** formulaci o průniku vyškrtnout, doplnit režim společné integrace a testů,
+  a rozhodnout se u obsahu kernelu. Doporučení sdílet elementární VO je obhajitelné, ale je to
+  autorský posun proti Evansovi – nemá se podávat jako jeho pozice.
 - **Vernon, IDDD kap. 3.** Ověřen jen obsah kapitoly a názvy podsekcí. Konkrétní tvrzení kapitoly o tom, co Vernon k Published Language a ke katalogu vztahů přidal (ř. 51, ř. 631), nebylo možné ověřit proti textu.
 - **Khononov 2021.** Tvrzení o Shared Kernelu, o kategorizaci vzorů a o kritériu duplicita vs. koordinace pochází ze sekundárních shrnutí a recenzí knihy. Před citací v knize ověřit proti originálu (kap. 4 „Integrating Bounded Contexts“).
 - **Autorství cheat sheetu DDD Crew.** Repozitář [7] uvádí Kacpera Gunię a Nicka Tuneho; profil Michaela Plöda na DDD Europe 2020 uvádí, že cheat sheet a Miro šablonu publikoval on. Rozpor nevyřešen.

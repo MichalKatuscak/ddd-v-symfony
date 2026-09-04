@@ -248,11 +248,23 @@ První matchující pravidlo vyhrává a nespecifikovaný matcher odpovídá če
 
 ### Neověřené / nedohledané
 
-- **Vernon V., *IDDD* (2013), kap. 14 „Application“ – ČÁSTEČNĚ DOVĚŘENO 2026-09-04.** Název i téma kapitoly sedí: kap. 14 se jmenuje *Application* a obsahuje sekce *User Interface* (s. 512), *Rendering Domain Objects* (s. 512) a *Application Services* (s. 521). Autorizace tam je – Vernon Application Services popisuje jako místo, které koordinuje úlohy use case, řídí transakce a **prosazuje potřebná bezpečnostní oprávnění**. Plný text kapitoly zůstává za paywallem (oreilly.com vrací 403), takže doslovné znění neověřeno.
+- **Vernon V., *IDDD* (2013), kap. 14 „Application“ – OVĚŘENO 2026-09-04 z plného textu knihy.**
+  Kapitola se skutečně jmenuje *Application* a obsahuje sekce *User Interface*, *Rendering Domain
+  Objects* a *Application Services*. Autorizace v ní je: Vernon ji umisťuje do aplikační služby
+  a na příkladu `ForumApplicationService` píše, že „The Application Service took care of security
+  and object translation“.
 
-  **Zbývající výhrada je k formulaci, ne k existenci zdroje.** Kapitola 11 na ř. 124 slibuje „praktický pohled na **vrstvení** autorizace v doménové aplikaci“. Vernon ale v kap. 14 autorizaci umisťuje do **jedné** vrstvy (Application Services); vícevrstvý model, který je nosnou myšlenkou kapitoly 11, u něj nepochází odtud. Jeho vlastní strukturální odpověď je samostatný Identity & Access kontext (viz sekce 2 této studie).
+  **Výhrada k formulaci trvá a je teď doložená.** Kapitola 11 na ř. 124 slibuje „praktický pohled
+  na **vrstvení** autorizace v doménové aplikaci“. Vernon ale autorizaci umisťuje do **jedné**
+  vrstvy (Application Services) a jeho strukturální odpovědí je samostatný **Identity and Access
+  Context**: „Most enterprise applications today need to have some form of security and permissions
+  components in place to ensure that people who try to use the system are authentic users and are
+  authorized to do what they attempt to do.“ Vícevrstvý model, který je nosnou myšlenkou
+  kapitoly 11, u Vernona nevzniká.
 
-  **Doporučení:** citaci ponechat, ale přeformulovat na to, co Vernon skutečně říká – že autorizační kontrola patří do Application Services. Tvrzení o „vrstvení“ nechat jako autorské, nebo je opřít o [1] a [2], které vícevrstvý přístup dokládají.
+  **Doporučení: citaci ponechat, ale přeformulovat na to, co Vernon říká** – že autorizační
+  kontrola patří do Application Services. Tvrzení o „vrstvení“ nechat jako autorské, nebo je
+  opřít o [1] a [2].
 - **Doctrine SQLFilter u one-to-one na neowning straně – ČÁSTEČNĚ, zbytek chce test, ne rešerši.**
   Ověřen je kontrakt: `Doctrine\ORM\Query\Filter\SQLFilter` (ORM 3.6.x) má jedinou abstraktní
   metodu `abstract public function addFilterConstraint(ClassMetadata $targetEntity, string
