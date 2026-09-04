@@ -378,6 +378,51 @@ mít u sebe zdroj, nebo být přepsán jako autorské tvrzení.** Naopak věcné
 obhajitelné z praxe, může v knize zůstat i bez citace – jen se nesmí tvářit, že za ním stojí
 někdo jiný.
 
+## Knihy, které chybí k dokončení ověření
+
+Stav k 2026-09-04. Bibliografické údaje ověřené, ne psané z paměti. Seřazeno podle toho, kolik
+otevřených položek každá kniha zavře.
+
+| # | Kniha | Vydání | ISBN-13 | Položek |
+|---|---|---|---|---:|
+| 1 | **Vlad Khononov – *Learning Domain-Driven Design: Aligning Software Architecture and Business Strategy*** | O'Reilly, 1. vydání, 2021 | 9781098100131 | **19** (5 blokujících) |
+| 2 | **Alberto Brandolini – *Introducing EventStorming*** | Leanpub, průběžné vydávání | bez ISBN | 4 |
+| 3 | **Chris Richardson – *Microservices Patterns: With examples in Java*** | Manning, **1. vydání**, 2018 | 9781617294549 | 3 (1 blokující) |
+| 4 | **Scott Millett, Nick Tune – *Patterns, Principles, and Practices of Domain-Driven Design*** | Wrox, 2015 | 9781118714706 | 3 |
+| 5 | **Matthew Skelton, Manuel Pais – *Team Topologies: Organizing Business and Technology Teams for Fast Flow*** | IT Revolution, 1. vydání, 2019 | 9781942788812 | 3 |
+| 6 | **Sam Newman – *Building Microservices: Designing Fine-Grained Systems*** | O'Reilly, **2. vydání**, 2021 | 9781492034025 | 1 |
+| 7 | **Gregor Hohpe, Bobby Woolf – *Enterprise Integration Patterns*** | Addison-Wesley, 2003 | 9780321200686 | 1 |
+
+### Na co si dát pozor při nákupu
+
+**Khononov** má jen jedno vydání. Copyright uvádí „October 2021: First Edition“ a k tomu
+„2024-03-22: Second Release“ – to je dotisk, ne druhé vydání. Nehledat novější.
+
+**Richardson** má od roku 2018 i druhé vydání, ale kniha cituje **první (2018)**, a to na třech
+místech výslovně. Kupovat první; druhé by čísla kapitol posunulo a nic by neověřilo.
+
+**Newman** je opačný případ: kniha cituje **druhé vydání (2021)** a na share je jen první (2015).
+Struktura kapitol se mezi vydáními zásadně liší a pojem „information hiding“ je novinkou druhého.
+Nález G23 je ale už ověřený z autorova rozpisu obsahu na samnewman.io, takže kniha zavře jen
+jednu drobnost – nejnižší priorita ze všech.
+
+**Team Topologies** vyšlo v roce 2025 ve druhém vydání (ISBN 9781966280002). Otevřené položky se
+vztahují k prvnímu, ale jedna z nich zní právě „co se ve druhém vydání změnilo“. Pokud se kupuje
+jen jedno, praktičtější je **první (2019)**, protože proti němu se ověřují konkrétní tvrzení
+kapitoly; druhé vydání je bonus.
+
+**Brandolini** je na Leanpubu za dobrovolnou cenu (minimum ~10 USD) a kniha je dlouhodobě
+nedokončená (~70 %). To není překážka – potřebné pasáže jsou v hotové části.
+
+### Co se nekoupí
+
+Zbylé otevřené položky knihami nevyřeší nic:
+
+- **Čtyři čísla bez zdroje** – multiplikátory 5–10X, retence 7–30 dní, „4–6 tříd místo jedné“,
+  návratnost investice do DDD. Ta data neexistují; rozhodnutí je autorské.
+- **„Drtivá většina open-source projektů používá atributy“** – nikdo to neměřil.
+- **Vernonův text k DDD a AI** – neexistuje; kapitola cituje jen jeho poznámku z InfoQ.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
