@@ -47,11 +47,18 @@ Pro každou roli kniha nabízí jinou doporučenou cestu čtení – viz [P.03 J
 
 Kniha předpokládá tyto výchozí znalosti:
 
-- **PHP 8.1+:** atributy (`#[Attribute]`), enums, readonly properties, named arguments, `match`. Některé příklady používají PHP 8.4 (asymmetric visibility, property hooks).
+- **PHP 8.1+:** atributy (`#[Attribute]`), enums, readonly properties, named arguments, `match`. Některé příklady používají PHP 8.4 (asymmetric visibility, property hooks); na novějším PHP běží beze změny.
 - **Symfony 6+:** Service Container, Dependency Injection, Doctrine ORM, Symfony Messenger, atributy `#[Route]`, `#[AsMessageHandler]`. Většina kódu cílí na Symfony 8.
 - **Objektově orientované programování:** dědičnost vs. kompozice, polymorfismus, zapouzdření, SOLID principy.
 - **Designové vzory:** Repository, Factory, Strategy, Observer. Není nutné je znát formálně, ale měli byste je v kódu poznat.
 - **Relační databáze:** ACID, transakce, indexy, JOIN, optimistický a pesimistický zámek.
+
+Ke stacku ještě poznámka, která se hodí při zakládání projektu. Symfony vydává minor verze
+každých šest měsíců a udržuje je krátce; dlouhou podporu má vždy až poslední minor v major
+řadě. V praxi to znamená volbu mezi čerstvostí a klidem: kdo chce roky bez nucených upgradů,
+sáhne po aktuálním LTS, kdo chce nejnovější komponenty, počítá s upgradem přibližně jednou
+za půl roku. Kód v této knize je na tomhle rozhodnutí nezávislý – vzory ani API se mezi
+minor verzemi nemění.
 
 Pokud některý z bodů „nesedí“, neznamená to, že knihu nemůžete číst – jen u některých kapitol budete potřebovat víc soustředění. Kapitoly o Event Sourcingu, Ságách a microservices jsou nejnáročnější.
 
