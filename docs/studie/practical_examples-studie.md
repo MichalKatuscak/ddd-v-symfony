@@ -388,10 +388,18 @@ komplexity“ (G21). Rozsah: `přepis sekce 23.03`.
   k tématu „sample application“ / „example project“ v načtené části nefiguruje. Konkrétní URL
   z jiných studií (`/2018/06/hexagonal-architecture-and-ddd/`) vrací 404. Ověřit ručně přes archiv
   blogu, případně z knihy *Advanced Web Application Architecture* (2020).
-- **Kdy a proč vznikly `plant.uml` v `templates/diagrams/7_examples/`.** Soubory nesou datum
-  27. 4. 2025, text kapitoly byl naposledy měněn později. Zda šlo o vědomé rozhodnutí diagramy
-  neaktualizovat, nebo o opomenutí, se z repozitáře určit nedá.
-- **Zda kapitola měla `github_examples` a klíč byl odstraněn.** Historie frontmatteru nebyla
-  procházena; ověřit `git log -p -- content/chapters/practical_examples.md`.
-- **Millett & Tune, *Patterns, Principles and Practices of DDD* (2015)** a jejich doprovodný kód –
-  nedohledáno v čase rešerše bez `WebSearch`.
+- **Diagramy `templates/diagrams/7_examples/` – OVĚŘENO 2026-09-04 z historie gitu.** Datum
+  27. 4. 2025 sedí a je to jediný obsahový commit (`dc2c6b2` „Diagramy ukázek“). Po něm se
+  adresáře dotkly už jen dva technické commity: `a94ff69` publikační audit (28. 4. 2026)
+  a `fd050e3` sjednocení PUML→SVG pipeline (3. 5. 2026). Text kapitoly mezitím prošel deseti
+  obsahovými commity, poslední 8. 7. 2026. **Nešlo tedy o vědomé rozhodnutí diagramy nechat být** –
+  neexistuje commit, který by je při revizích kapitoly otevřel. Je to opomenutí a diagramy je
+  před přepisem nutné projít proti aktuálnímu textu.
+- **Klíč `github_examples` – OVĚŘENO 2026-09-04: v kapitole nikdy nebyl.** `git log --all -S`
+  nad `content/chapters/practical_examples.md` nevrací žádný commit, který by ten řetězec přidal
+  nebo odebral. Hypotéza o odstraněném klíči je vyvrácená, otázka uzavřená.
+- **Millett & Tune, *Patterns, Principles and Practices of DDD* (2015), doprovodný kód –
+  hledáno 2026-09-04, nedohledáno.** Oficiální repozitář ke knize se najít nepodařilo: autoři
+  žádný veřejně nevedou a vydavatel (Wrox) svoje download stránky ke knize už neprovozuje.
+  Kniha sama je dostupná (O'Reilly, Google Books), doprovodný kód ne. **Doporučení: nepracovat
+  s předpokladem, že k této knize existuje veřejné code companion.**

@@ -314,7 +314,7 @@ kanonické doménové value objecty knihy.
 | G20 | mělké | `microservices_and_ddd.md:776` | Verzování integračních událostí odbyto jednou větou. Chybí tolerant reader, expand-contract, postup pro breaking change. | Rozšířit v 19.08, ~15 řádků |
 | G21 | nepodložené | `microservices_and_ddd.md:265` | „Sam Newman ho označuje za jednu z nejhorších architektur" – bez dohledatelné lokace. | Doplnit lokaci, nebo přeformulovat bez atribuce |
 | G22 | sporné | `microservices_and_ddd.md:53` | Tabulka uvádí jako zdroj definice microservice „Newman 2021, Richardson 2018". Definice pochází z Lewis & Fowler 2014, Newman 1. vyd. 2015. | Opravit atribuci |
-| G23 | sporné | `microservices_and_ddd.md:870`, `98`, `893` | Konkrétní čísla kapitol Newmanovy knihy (kap. 3 = monolith-first, kap. 4 = velikost service) neodpovídají obsahu podle stránky knihy [13]: kap. 3 je *Splitting the Monolith*, kap. 4 *Microservice Communication Styles*. | Ověřit proti knize a opravit |
+| G23 | **chyba, ověřeno** | `microservices_and_ddd.md:870`, `893` | Ověřeno proti autorovu rozpisu obsahu [13]. Kap. 1 *What Are Microservices?*, 2 *How to Model Microservices*, 3 *Splitting the Monolith*, 4 *Microservice Communication Styles*, 5 *Implementing Microservice Communication*, 6 *Workflow*, 7 *Build*, 14 *User Interfaces*. Dva odkazy nesedí: **ř. 870** připisuje kap. 4 doporučení, aby velikost service vznikala z domény – kap. 4 je ale o komunikačních stylech, tohle téma patří do kap. 2, jejíž anotace zní „the importance of information hiding, coupling, cohesion, and domain-driven design in helping find the right boundaries“. **Ř. 893** uvádí „kapitola 14 pro migraci“ – kap. 14 jsou *User Interfaces*, migrace je kap. 3. Odkazy na ř. 32 (kap. 2), 60 a 98 (kap. 3) naopak sedí. | Ř. 870: kap. 4 → **kap. 2**. Ř. 893: „kapitola 14 pro migraci“ → **„kapitola 3 pro migraci“**, a rozsah „kapitoly 5–7 pro integraci“ → **4–6** (kap. 7 je *Build*) |
 | G24 | nadbytečné | `microservices_and_ddd.md:828–872` | Anti-vzory 1–4 z 19.10 z velké části opakují 19.04 (5 příznaků) a kapitolu 21. | Zkrátit na křížové odkazy, ponechat jen nano-services jako nový obsah |
 | G25 | sporné | `microservices_and_ddd.md:913` | FAQ tvrdí „Tomu se říká polysemic concept v Context Mappingu" a odkazuje na `/context-mapping`, kde se termín nevyskytuje. | Doplnit termín do kap. 3, nebo citovat Fowlera [3] přímo zde |
 | G26 | zastaralé | `microservices_and_ddd.md:786`, `897` | Strangler Fig datován 2004; současná stránka je přepis z 2024 s jiným obsahem (transitional architecture, čtyři aktivity). | Uvést oba údaje, nebo citovat současnou verzi |
@@ -493,7 +493,13 @@ byl vyčerpán (200/200) při prvním pokusu.
 - **Adrian Cockcroft — *So many bad takes — what is there to learn from the Prime Video
   microservices to monolith story*, Medium, 2023.** HTTP 403. Citace na řádcích 334–336 kapitoly
   („prodávány jako odpověď na všechno") tedy zůstává neověřená. Dohledat ručně v prohlížeči.
-- **Simon Brown — *Distributed big balls of mud*, 2014.** Původní URL na codingthearchitecture.com
+- **Simon Brown – *Distributed big balls of mud* – DATOVÁNO 2026-09-04: 6. 7. 2014.** Původní
+  URL na codingthearchitecture.com je mrtvá, text ale existuje v několika reprintech (DZone,
+  paradox1x.org) a je doložitelný i diskusí na Hacker News z téhož období. Podtitul zní
+  „If you can't build a monolith, what makes you think microservices are the answer?“ a hlavní teze
+  je, že návrhové myšlení potřebné pro dobré microservices je totéž jako pro dobře strukturovaný
+  monolit. **Doporučení: citovat s rokem 2014 a odkazovat na reprint, ne na mrtvou doménu.**
+  Původní URL:
   přesměrovává na simonbrown.je, kde článek není. Známý citát („If you can't build a
   well-structured monolith…") by byl silnou oporou pro sekci 19.04 – dohledat aktuální umístění.
 - **Eric Evans, vystoupení na Explore DDD / DDD Europe 2017–2019 k rovnici BC = microservice.**
@@ -501,7 +507,8 @@ byl vyčerpán (200/200) při prvním pokusu.
   z QCon London 2016 [22], a to jen z metadat, ne ze záznamu.
 - **Vaughn Vernon k microservices** (*DDD Distilled*, 2016; *IDDD*, 2013). Nedohledáno online.
   Kapitola Vernona cituje na řádku 42 – tvrzení je věrohodné, ale neověřené.
-- **Přesná čísla kapitol Newmanovy *Building Microservices, 2nd ed.***, na která kapitola odkazuje
-  (kap. 1 „Microservice Pain Points", kap. 2, kap. 3 monolith-first, kap. 4 velikost service).
-  Stránka knihy [13] naznačuje jiné rozvržení. Ověřit proti výtisku – týká se nálezů G23 a G5.
-- **Verze a minimální PHP pro phparkitect.** Ze stránky projektu [32] se nepodařilo vyčíst.
+- **Čísla kapitol Newmanovy *Building Microservices, 2nd ed.*** – **OVĚŘENO 2026-09-04** proti
+  autorovu vlastnímu rozpisu obsahu na samnewman.io [13]. Výsledek u nálezu G23 níže.
+- **phparkitect – OVĚŘENO 2026-09-04 z Packagistu.** `phparkitect/phparkitect` **1.3.0
+  (31. 7. 2026)**, vyžaduje `php ^8.0`. Projekt je aktivní. Pro srovnání: alternativa
+  `phpat/phpat` je na 0.12.4 (17. 3. 2026), `php ^8.1` – tedy stále série 0.x.

@@ -428,6 +428,30 @@ kapitolu o DDD a AI.*
 - **Khononovovo tvrzení, že u Core subdomén je 1:N mapování nevyhnutelné kvůli čtenářskému vs. zápisovému kontextu** (`:158`). Nedohledáno.
 - **Vernonovo doporučení „pro Supporting používat lehčí variantu DDD"** (`:56`). Že Vernon nabádá k soustředění úsilí na Core, je jisté; explicitní doporučení lehčího taktického designu pro Supporting jsem z veřejných zdrojů nepotvrdil. Kontrola v IDDD, kapitola 2.
 - **Přesné znění Khononovovy rozhodovací tabulky typ subdomény → vzor obchodní logiky.** Existence doložena recenzemi [6], [7]; přesné znění ne.
-- **Plný text Nicka Tuna** [11], [22] – Medium vrací HTTP 403, obsah znám zprostředkovaně.
+- **Plný text Nicka Tuna [11] – DOHLEDÁNO 2026-09-04, Substack je čitelný.** *Core Domain Patterns*,
+  19. 1. 2020, definuje osm vzorů, ne jen dělení Core/Supporting/Generic: **Decisive Core**
+  („extremely complex and offers maximum business differentiation potential“), **Short-term Core**
+  (vysoký potenciál odlišení, nízká složitost), **Hidden Core** (nízká složitost, vysoké odlišení),
+  **Table Stakes / Former Core** (kdysi inovace, dnes „no longer differentiate but still needed“),
+  **Commoditised Core** (bývalé jádro se mění v „generic capability which any company can easily
+  utilise“), **Black Swan Core** („completely unexpected happens and an apparent commodity becomes
+  a core domain“), **Big Bet / Disruptive Core** (vysoký potenciál, neznámá návratnost)
+  a **Suspect Supporting** (vysoká složitost v Supporting jako signál nahodilé složitosti).
+
+  **Dopad na kapitolu.** Tuneův přínos není jen ilustrace tří kategorií, ale to, že kategorie jsou
+  **pohyblivé v čase** – Core se komoditizuje, komodita se může stát Core. To je argument, který
+  kapitola nemá a který přímo podpírá její pasáž o posunu hranice Generic. **Doporučení: nahradit
+  zprostředkované převyprávění přímou citací [11] a doplnit alespoň Commoditised Core a Black Swan
+  Core.** Text [22] na Mediu zůstává za HTTP 403; jeho téma (vymezení pojmů) pokrývají jiné zdroje.
 - **Kvantitativní data k posunu hranice Generic vlivem LLM (2023–2026).** Žádný primární DDD zdroj s čísly; případný odstavec musí zůstat kvalitativní.
-- **Návratový typ `$auth0->management()->users()->get()` v Auth0 PHP SDK v8.** Neověřeno (vyčerpaný rozpočet vyhledávání). Podezření, že ukázka na `:436–439` porovnává s `null` PSR-7 response. Kontrola proti dokumentaci SDK.
+- **Auth0 PHP SDK v8 – OVĚŘENO 2026-09-04, podezření potvrzeno. Ukázka na `subdomains.md:436–439`
+  nefunguje.** Oficiální API dokumentace SDK uvádí signaturu
+  `public get(string $id[, RequestOptions|null $options = null ]) : ResponseInterface`. Metoda
+  vrací PSR-7 `ResponseInterface` a **null vrátit nemůže** – v8 přešla na PSR-18/PSR-17 factories
+  a PSR-7 odpovědi. Podmínka `if ($profile === null) { throw new UserNotFoundException(); }`
+  proto nikdy neplatí; neexistujícího uživatele ukázka zamlčí a předá do `new Auth0User($profile)`
+  celou HTTP odpověď.
+
+  **Oprava:** kontrolovat stavový kód odpovědi (404) a tělo dekódovat, ne porovnávat s `null`.
+  Nález patří mezi faktické chyby kódu, ne mezi stylistické – je to ukázka, kterou čtenář zkopíruje.
+  Zdroj: https://auth0.github.io/auth0-PHP/classes/Auth0-SDK-Contract-API-Management-UsersInterface.html

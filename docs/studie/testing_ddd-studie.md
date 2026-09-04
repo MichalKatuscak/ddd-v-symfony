@@ -427,10 +427,16 @@ Všechny položky získány **přímým fetchem URL** (WebFetch nebo curl na Git
 
 ### Neověřené / nedohledané
 
-- **Nat Pryce — *Test Data Builders: an alternative to the Object Mother pattern* (blogpost,
-  cca 2007), `natpryce.com/articles/000714.html`.** Server odmítl spojení (ECONNREFUSED) při dvou
-  pokusech přes HTTP i HTTPS. Vzor je v této studii doložen jen knihou [30]; přesné datum a znění
-  původního článku je třeba dohledat ručně (případně přes web.archive.org).
+- **Nat Pryce – *Test Data Builders: an alternative to the Object Mother pattern*,
+  `natpryce.com/articles/000714.html` – ČÁSTEČNĚ DOVĚŘENO 2026-09-04.** Doména odmítá spojení
+  i podruhé (ECONNREFUSED na 80.68.93.102:443), takže původní znění zůstává nedostupné. Existence,
+  autorství, přesný název a URL jsou ale doložené nezávisle: Mark Seemann článek cituje v *Test Data
+  Builders in C#* (blog.ploeh.dk, 15. 8. 2017) větou „In 2007 Nat Pryce described the Test Data
+  Builder design pattern“ a odkazuje na tutéž adresu. **Rok 2007 tím je potvrzený.**
+
+  **Doporučení pro přepis:** vzor citovat primárně z knihy [30] (Freeman & Pryce, *GOOS*, 2009),
+  která ho rozpracovává systematicky a je trvale dostupná; blogpost uvést jako první publikaci
+  s rokem 2007, ale nestavět na něm žádnou doslovnou citaci, dokud je doména nedostupná.
 - **Peter Schuh, Stephanie Punke — publikace o Object Mother pro XP Universe.** Existence potvrzena
   Fowlerem [4], ale přesný název, rok (pravděpodobně 2001) a místo vydání se nepodařilo ověřit
   z primárního zdroje.
@@ -443,6 +449,17 @@ Všechny položky získány **přímým fetchem URL** (WebFetch nebo curl na Git
   uvést, musí ho změřit na vlastním referenčním projektu.
 - **Doctrine ORM 3 a testování.** Nebylo ověřeno, zda ORM 3 mění chování `EntityManager::clear()`
   popsané v sekci 17.05 (řádky 765–771). Před přepisem projít dokumentaci ORM 3.
-- **Konfigurace `dama/doctrine-test-bundle` pro DBAL 4.** Zdroj [18] uvádí `use_savepoints: true`
+- **`dama/doctrine-test-bundle` a DBAL 4 – OVĚŘENO 2026-09-04: `use_savepoints` se na DBAL 4
+  nastavovat nemá.** README bundlu to říká přímo: *„Starting from version 8 **and only when using
+  DBAL < 4** you need to make sure you have `use_savepoints` enabled on your doctrine DBAL
+  configuration for all relevant connections.“* Kniha cílí na Doctrine ORM 3 s DBAL 4, takže
+  ta volba je pro její stack zbytečná a v ukázce konfigurace nemá co dělat.
+
+  Kompatibilita ověřena z `composer.json` verze **v8.6.0 (21. 1. 2026)**: PHP >= 8.2,
+  `doctrine/dbal ^3.3 || ^4.0`, `doctrine/doctrine-bundle ^2.11.0 || ^3.0`,
+  `symfony/framework-bundle ^6.4 || ^7.3 || ^8.0`. Bundle je se Symfony 8 a DoctrineBundle 3
+  plně kompatibilní.
+
+- **PŮVODNÍ:** Zdroj [18] uvádí `use_savepoints: true`
   jako nutné pro DBAL < 4; co přesně platí pro DBAL 4 a Doctrine ORM 3, nebylo z README
   jednoznačné.

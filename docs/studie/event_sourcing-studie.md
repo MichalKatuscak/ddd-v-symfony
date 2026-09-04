@@ -160,13 +160,18 @@ Novinky relevantní pro ES, které kapitola nezná:
 
 - **`#[AsMessage('async')]`** – routing přímo na třídě eventu místo YAML seznamu (ř. 963–972).
   Pro ES, kde typů eventů rychle přibývá, je to podstatná úspora údržby konfigurace.
+  **Atribut je v Symfony od 7.2** (ověřeno 2026-09-04 [23]), takže jde o zavedenou věc, ne novinku.
 - **Doctrine transport s PostgreSQL `LISTEN/NOTIFY`** (`options: use_notify: true`, výchozí
   zapnuto). Kapitola na ř. 1019 doporučuje `LISTEN/NOTIFY` jako cestu ke snížení latence
-  relay, ale netuší, že Messenger to už umí sám.
-- **`messenger:consume --keepalive`** (Symfony 8.1) – zabraňuje předčasnému redelivery
+  relay, ale netuší, že Messenger to už umí sám. **Funkce je v Symfony od 7.1**, ne od 8.1
+  (ověřeno 2026-09-04 [23]); v 8.1 k ní přibyl jen `PostgreSqlNotifyOnIdleListener` pro
+  správnou funkci s multi-queue workery.
+- **`messenger:consume --keepalive`** (Symfony **7.3**, ne 8.1 – ověřeno 2026-09-04 v CHANGELOZÍCH
+  `symfony/doctrine-messenger` a `symfony/redis-messenger` [23]) – zabraňuje předčasnému redelivery
   dlouhých zpráv; relevantní pro rebuild a pro projektory nad velkými dávkami.
-- **`--fetch-size=N`** a **`--no-reset=N`** (Symfony 8.1) – snižují režii při vysokém průtoku
-  eventů, přesně scénář projekcí.
+- **`--fetch-size=N`** (Symfony **8.1**, ověřeno [23]) – snižuje režii při vysokém průtoku
+  eventů, přesně scénář projekcí. Spolu s ním přibyl v 8.1 `AmqpPriorityStamp` pro prioritu
+  jednotlivé zprávy – pozor, je specifický pro AMQP transport, ne obecný stamp.
 - **`messenger:failed:show --stats`, `--class-filter`, `messenger:failed:remove --all`** –
   kapitola na ř. 1183–1187 uvádí jen tři holé příkazy bez užitečných přepínačů.
 
@@ -315,9 +320,15 @@ Fowlerovy gateways [1]: při replay se nesmí volat ven. Kapitola replay použí
 místech (rekonstituce agregátu, rebuild projekce, snapshot) a nikde na to neupozorní.
 Odhad: callout ~15 řádků.
 
-**P3-1 — Zmínit Symfony 8 novinky v Messengeru.**
-`#[AsMessage]` místo YAML routingu, `use_notify` v Doctrine transportu, `--keepalive`,
-`--fetch-size` [19]. Odhad: dvě až tři věty a jedna úprava YAML ukázky.
+**P3-1 – Zmínit funkce Messengeru, které kapitola obchází.**
+`#[AsMessage]` místo YAML routingu (7.2), `use_notify` v Doctrine transportu (7.1),
+`--keepalive` (7.3), `--fetch-size` (8.1) [19][23]. Odhad: dvě až tři věty a jedna úprava
+YAML ukázky.
+
+> **Pozor na verze.** První průchod všechny čtyři funkce označil za novinky Symfony 8.1 podle
+> dokumentace `current`. Ověření proti CHANGELOGům 2026-09-04 ukázalo, že tři z nich jsou starší
+> (7.1, 7.2, 7.3) a jen `--fetch-size` je skutečně z 8.1. Kapitola cílí na Symfony 8, takže
+> věcně jsou použitelné všechny – ale **neoznačovat je za novinky 8.1**, to by byla faktická chyba.
 
 **P3-2 — Doplnit Migration Events / Ghost Context.**
 Import legacy dat bez historie je situace, do které se dostane každý, kdo ES nasazuje na
@@ -413,11 +424,14 @@ https://raw.githubusercontent.com/kurrent-io/KurrentDB/master/README.md (přím�
 
 ### Neověřené / nedohledané
 
-- **`WebSearch` byl v této session nedostupný** (vyčerpaný rozpočet 200/200). Rešerše proto
-  nemohla otevřeně hledat; pokrývá jen URL, které bylo možné odhadnout nebo dohledat z indexů.
-  Před přepisem kapitoly doporučuji doplňkové hledání k bodům níže.
-- **Datum přejmenování Event Store → Kurrent.** README [22] rebranding potvrzuje doslovně,
-  ale bez data. Blog na kurrent.io ani docs.kurrent.io datum na dohledaných stránkách neuvádí.
+> **Doplňkové hledání proběhlo 2026-09-04.** První průchod běžel bez `WebSearch` (vyčerpaný
+> rozpočet 200/200) a pokryl jen URL, které šlo odhadnout nebo dohledat z indexů. Druhý průchod
+> body níže prošel; vyřešené jsou označené a přesunuté na konec sekce.
+
+- **Datum přejmenování Event Store → Kurrent – DOHLEDÁNO, viz [24].** Tisková zpráva je
+  datovaná **24. 12. 2024** (aktualizace 12. 2. 2025): „Event Store, a startup that aims to unify
+  streaming data systems and databases, today announced today that it has changed its name to
+  Kurrent to better reflect its goals.“ Produkt **EventStoreDB se přejmenoval na KurrentDB**.
 - **Přesné znění citací z *CQRS Documents* [4] pro optimistic concurrency a rebuild projekcí.**
   Ověřeny a doslovně přepsány jsou pasáže „CQRS and Event Sourcing", „There is no Delete",
   „Rolling Snapshots" a „Building an Event Storage / Structure / Operations". Pasáže
@@ -435,5 +449,33 @@ https://raw.githubusercontent.com/kurrent-io/KurrentDB/master/README.md (přím�
   Kvantifikovaný, citovatelný zdroj se nepodařilo najít; jediný dohledaný údaj o adopci
   je odkaz na InfoQ Architecture Trends 2022 zprostředkovaný přes [14], samotná zpráva
   ověřena nebyla.
-- **Symfony verze, ve které byly zavedeny `--keepalive`, `--fetch-size`, `PriorityStamp`
-  a `use_notify`.** Dokumentace [19] je označuje jako 8.1; příslušné changelogy nebyly ověřeny.
+- **Symfony verze funkcí Messengeru – OVĚŘENO proti CHANGELOGům [23]; tři ze čtyř byly špatně.**
+  `use_notify` (LISTEN/NOTIFY) je od **7.1**, `#[AsMessage]` od **7.2**, `keepalive` od **7.3**;
+  jen `--fetch-size` je skutečně z **8.1**, spolu s `AmqpPriorityStamp` (AMQP-specifický, ne
+  obecný „PriorityStamp“). Promítnuto do sekce 4 a do doporučení P3-1.
+
+### Doověřeno druhým průchodem (2026-09-04)
+
+`[23]` CHANGELOGy Symfony komponent, přímé HTTP na `raw.githubusercontent.com`, větev 8.1:
+`symfony/messenger`, `symfony/doctrine-messenger`, `symfony/redis-messenger`, `symfony/amqp-messenger`.
+Verze funkcí odečtené z hlaviček verzí v CHANGELOGu, ne z dokumentace `current`.
+
+`[24]` Kurrent – tisková zpráva *Event Store Changes Name to Kurrent, Raises $12M*, 24. 12. 2024.
+https://kurrentdb.kurrent.io/press/event-store-changes-name-to-kurrent-raises-12m-to-unify-streams-and-databases
+
+`[25]` Packagist a GitHub API, stav PHP knihoven pro Event Sourcing k 2026-09-04:
+
+| Balíček | Poslední vydání | Stav |
+|---|---|---|
+| `eventsauce/eventsauce` | 3.9.1 (3. 5. 2026) | aktivní, 870 hvězd |
+| `broadway/broadway` | 3.0.1 (9. 8. 2026) | **abandoned** na Packagistu, repozitář **archivovaný** |
+| `prooph/event-store` | v7.12.3 (21. 4. 2025) | aktivní, poslední push 3. 5. 2026, 548 hvězd |
+| `ecotone/ecotone` | 2.0.0-beta.1 (28. 8. 2026) | aktivní, řada 2.0 zatím v beta |
+| `patchlevel/event-sourcing` | 3.21.0 (26. 8. 2026) | aktivní, 215 hvězd; kapitola ji nezmiňuje |
+
+**Dopad na kapitolu (ř. 138–150).** Nález G1 potvrzen a zpřesněn: Broadway není „funguje, ale
+tempo vývoje zvolnilo“ – je archivovaná a označená jako opuštěná. Tvrzení o proophu je naopak
+v pořádku: řada 7.x žije (v p2 feedu ji zakrývá starší `v8.0.0-RC-1` z roku 2019, což svádí
+k opačnému závěru). U Ecotone stojí za zmínku, že řada 2.0 je zatím beta. Jako podnět, ne
+povinnost: `patchlevel/event-sourcing` je aktivní knihovna s nativní integrací do Symfony,
+kterou přehled vynechává.

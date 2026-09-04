@@ -280,7 +280,13 @@ Sekce 01.12 zmiňuje glosář a cheat sheet, ale ne `/ddd-a-umela-inteligence` a
 ### Neověřené / nedohledané
 
 - **Přesné znění „DDD-Lite" u Vernona.** Termín je v komunitě konzistentně připisován Vernonovi (*IDDD*, 2013), ale doslovné znění se nepodařilo ověřit z primárního textu – jen z druhotných shrnutí. Před citací v knize ověřit v knize samotné.
-- **Původní datum Brandoliniho blogpostu.** Sekundární zdroje uvádějí 18. 11. 2013 na `ziobrando.blogspot.de`; původní URL už není dostupné. Ověřený je až repost z 12. 2. 2014 [30]. Údaj „2013" v kapitole (`:66`) je tedy pravděpodobně správný, ale doložený jen nepřímo.
+- **Původní datum Brandoliniho blogpostu – POTVRZENO 2026-09-04: 18. 11. 2013.** Datum sedí
+  a je doložené nezávisle na sobě: citací na anglické Wikipedii (heslo *Event storming*),
+  Brandoliniho vlastním rozhovorem pro Avanscopertu (*Da ziobrando a EventStorming*, 21. 3. 2016)
+  a jeho materiály na SlideShare. Text *Introducing Event Storming* vyšel na
+  `ziobrando.blogspot.de/2013/11/introducing-event-storming.html`; doména dnes neodpovídá,
+  ale samotné datum a autorství sporné nejsou. **Doporučení: rok 2013 uvádět bez výhrady,
+  odkazovat ale na `eventstorming.com` nebo na knihu, ne na mrtvý blogspot.**ěřený je až repost z 12. 2. 2014 [30]. Údaj „2013“ v kapitole (`:66`) je tedy pravděpodobně správný, ale doložený jen nepřímo.
 - **Vernonovo užití termínu „Supporting Subdomain".** Ověřeno negativně u Evanse (*DDD Reference* zná jen Core Domain a Generic Subdomains) a pozitivně u Khononova (2021). Přímé doložení z *IDDD* (2013) se nepodařilo; atribuce Vernonovi podle `CLAUDE.md` zůstává nepotvrzená z primárního zdroje.
 - **Statistiky o příčinách selhání softwarových projektů.** Standish CHAOS je dostupný jen v druhotných citacích a jeho metodika je dlouhodobě kritizovaná. Pro tvrzení na `what_is_ddd.md:46` se nenašel zdroj, který by ho podpořil v uvedené síle.
 - **Kvantifikace návratnosti investice do DDD.** Žádný prošlý zdroj neuvádí časový horizont návratnosti. Tvrzení na `what_is_ddd.md:38` je nedoložitelné.

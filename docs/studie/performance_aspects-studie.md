@@ -238,13 +238,43 @@ Knižní zdroje bez URL (uvedeny pro atribuce v sekci 2, ověřeny z knihovny kn
 ### Neověřené / nedohledané
 
 - **Znění Knuthovy citace.** DOI odpovídá článku, plný text je za paywallem ACM. Formulaci „premature optimization is the root of all evil“ i podmínku „97 % of the time“ je třeba ověřit z tištěného zdroje nebo z veřejné kopie článku.
-- **Rozpor v dokumentaci Doctrine ohledně `PARTIAL`.** UPGRADE.md [4] uvádí odstranění v 3.0, stránka `partial-objects.html` pod „current“ [5] funkci stále popisuje. Chce ověřit v kódu (`doctrine/orm`, grep na `PartialObjectExpression`) nebo v issue trackeru.
-- **PgBouncer 1.21 jako verze, od které funguje `max_prepared_statements` v transaction poolingu.** Konfigurační reference [17] verzi neuvádí; ověřit v CHANGELOG projektu.
+- **`PARTIAL` – OVĚŘENO 2026-09-04, rozpor je zdánlivý a vysvětlený.** `UPGRADE.md` ORM to říká
+  sám v poznámce nad seznamem: *„WARNING: This was relaxed in ORM 3.2 when partial was re-allowed
+  for array-hydration.“* Jednotlivé body pak nesou závorku „(reintroduced in ORM 3.2)“. Kontrola
+  kódu větve 3.6.x potvrzuje, že funkce žije: `src/Query/Parser.php` má pravidlo
+  `PartialObjectExpression ::= "PARTIAL" IdentificationVariable "." PartialFieldSet` a token
+  `T_PARTIAL`, `src/Query/SqlWalker.php` konstantu `HINT_PARTIAL` („Used to mark a query as
+  containing a PARTIAL expression, which needs to be known by SLC“). Stránka `partial-objects.html`
+  tedy **není v rozporu** – popisuje stav po 3.2, kdežto `UPGRADE.md` popisuje krok 2.x → 3.0.
+  Drobnost navíc: `Query::HINT_FORCE_PARTIAL_LOAD` je v `UPGRADE.md` uvedena jako odstraněná,
+  ale v `src/Query.php` 3.6.x na řádku 83 stále existuje a SqlWalker ji používá.
+  **Doporučení: nepsat, že partial objects byly odstraněny. Přesné znění je „v 3.0 odstraněny,
+  v 3.2 vráceny pro array hydration“.**
+
+- **PgBouncer 1.21 – OVĚŘENO 2026-09-04, verze sedí.** Oznámení na postgresql.org
+  (*PgBouncer 1.21.0 released – Now with prepared statements!*) potvrzuje, že podpora pojmenovaných
+  prepared statements v transaction mode přišla právě v **1.21.0** a zapíná se nastavením
+  `max_prepared_statements` na hodnotu větší než 0. PgBouncer si prepare od klienta zachytí, přiřadí
+  mu interní jméno a na cílovém backendu ho v případě potřeby připraví za běhu.
+  **Omezení, které stojí za zmínku v kapitole:** funguje to jen pro prepared statements vedené
+  protokolem databáze (libpq `PQprepare`/`PQexecPrepared`, JDBC `PreparedStatement`), ne pro
+  statementy emulované na straně klienta. Zdroj:
+  https://www.postgresql.org/about/news/pgbouncer-1210-released-now-with-prepared-statements-2735/
+
 - **`Doctrine\DBAL\Connections\PrimaryReadReplicaConnection`.** Konfigurační stránka DBAL o wrapperu pro primary/replica nemluví. Existenci a chování (kdy se přepíná na primary, `ensureConnectedToPrimary()`) je třeba ověřit v dedikované dokumentaci nebo ve zdrojovém kódu. Pokud existuje, patří do sekce 16.09 jako alternativa k ručně konfigurovanému druhému entity manageru.
 - **Verze ORM, ve které přibyl `setEagerFetchBatchSize()`.** Dokumentace [6] metodu popisuje, verzi neuvádí.
 - **Blackfire Builds jako součást CI/CD** (`:1211`). Tvrzení nebylo ověřeno na blackfire.io; pokud zůstane, chce odkaz na dokumentaci produktu.
 - **Konkrétní čísla replikačního lagu, konfliktů optimistického zámku a prahů pro partitioning.** Bez měřicí metodiky je nelze doložit; buď najít publikované měření, nebo je v kapitole označit jako řádový odhad.
-- **Platnost omezení „entita nesmí být `final`“** v ORM 3 s povinnými lazy ghost proxy a s nativními lazy objekty PHP 8.4. Komentář se v kapitole objevuje dvakrát (`:112`, `:576`) a je vázaný na implementaci proxy, kterou ORM 3 změnila. Ověřit v dokumentaci ORM k proxy objektům nebo ve zdrojovém kódu `ProxyFactory`.
+- **Omezení „entita nesmí být `final`“ – OVĚŘENO 2026-09-04: na Symfony 8 už neplatí.**
+  DoctrineBundle 3 má `enable_native_lazy_objects` s `defaultTrue()` a volbu nelze vypnout
+  (validace `thenInvalid`); od 3.1 je deprecated s odůvodněním „native lazy objects are now always
+  enabled“. Nativní lazy objekty nedědí z entity, takže `final` projde. Komentáře na `:112`
+  a `:576` je nutné odstranit. Plný rozbor včetně dalších pěti kapitol a odstraněných
+  konfiguračních voleb je v `aggregate_design-studie.md`, sekce „Doověřeno druhým průchodem“.
 - **DBAL API pro streamované čtení read modelu** (`iterateAssociative` a příbuzné). Nebylo ověřeno fetchem; pokud se do kapitoly doplní protějšek `toIterable()` pro DBAL, je nutné podpis a chování ověřit v referenci DBAL.
 - **Chování `Query::HINT_ENABLE_DISTINCT`** v ORM 3 – dokumentace stránkování [13] hint zmiňuje, ale neuvádí verzi ani přesnou konstantu; před použitím v knize ověřit ve zdrojovém kódu.
-- **Doctrine ORM 3 a `EXTRA_LAZY`.** Dokumentace [8] strategii stále doporučuje, UPGRADE.md [4] ji mezi odstraněnými prvky neuvádí, takže platí. Přesto stojí za ověření, zda se s povinnými lazy ghost proxy nezměnilo chování `count()` a `slice()`.
+- **`EXTRA_LAZY` – OVĚŘENO 2026-09-04, platí beze změny.** V `UPGRADE.md` ORM (větev 3.6.x,
+  108 kB) se řetězec `EXTRA_LAZY` nevyskytuje ani jednou, takže strategie nebyla odstraněna ani
+  deprecated. Nativní lazy objekty na ni nemají vliv: mění způsob, jakým se vytváří lazy instance
+  entity, ne strategii načítání kolekce. Sekce 16.02 tedy zůstává v platnosti.
+

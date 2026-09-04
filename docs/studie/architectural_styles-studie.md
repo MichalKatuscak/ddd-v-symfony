@@ -415,7 +415,13 @@ https://symfony.com/blog/clean-software-architecture-with-deptrac (přístup 202
   doporučení diferencované investice je u Vernona i Evanse doložené, konkrétní poměr se nepodařilo dohledat.
 - **Evansova formulace o komunikaci směrem nahoru** (observery, callbacky) ve vrstvené architektuře.
   Kapitola tvrdí jen „nikdy nahoru"; přesná Evansova formulace vyžaduje kontrolu v knize.
-- **Symfony 8.1 novinky** (`#[AsAlias]` s parametrem `target`, deprecation párování podle jména parametru).
+- **`#[AsAlias]` s parametrem `target` – OVĚŘENO 2026-09-04 proti CHANGELOGu
+  `symfony/dependency-injection` (větev 8.1): tvrzení sedí.** Záznam pod hlavičkou 8.1 zní
+  „Add `target` parameter to `#[AsAlias]` to create target-specific autowiring aliases“.
+  Pro kontext je užitečná i historie atributu, protože kapitola pracuje s víc implementacemi
+  téhož portu: `#[AsAlias]` existuje od **6.3**, argument `when` přibyl v **7.3**, možnost atribut
+  rozšířit v **7.4** a `target` až v **8.1**. Jako novinku 8.1 lze tedy označit `target`, ne atribut
+  jako takový. Deprecation párování podle jména parametru zůstává neověřená.
   Dokumentace na `symfony.com/doc/current` je uvádí jako 8.1; kniha cílí na 8.0, takže je do textu nezahrnovat
   bez rozhodnutí autora, na kterou minor verzi kniha míří.
 - **Kniha „Explicit Architecture: Just Enough Structure to Survive"** připisovaná Herbertu Graçovi.

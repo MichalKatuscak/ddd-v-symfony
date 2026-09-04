@@ -420,6 +420,25 @@ https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_3
 - [32] Symfony — *Using empty_data to Configure the Underlying Data*. https://symfony.com/doc/current/form/use_empty_data.html — WebFetch, 2026-09-04.
 - [33] EasyAdmin — *Symfony Backends with EasyAdmin*, verze 5.x. https://symfony.com/bundles/EasyAdminBundle/current/index.html — WebFetch, 2026-09-04. Ověřen požadavek na Doctrine ORM entity; požadavky na gettery/settery a práci s ne-Doctrine daty se z indexové stránky ověřit nepodařilo.
 
+### Doověřeno druhým průchodem (2026-09-04)
+
+**Nový nález (fakt. chyba) – `ddd_pain_points.md:238`.** Tabulka tvrdí: „Kolekce vždy potřebná
+s agregátem | `fetch: ’EAGER’` na asociaci – načte v jednom JOIN“. Doctrine to u kolekcí takto
+nedělá. Dokumentace *Working with Objects* rozlišuje podle typu asociace: „Eager loading for
+many-to-one and one-to-one associations is using either a LEFT JOIN or a second query for fetching
+the related entity eagerly“, zatímco „Eager loading for many-to-one associations uses a second
+query to load the collections for several entities at the same time“ a „For eagerly loaded
+Many-To-Many associations one query has to be made for each collection“.
+
+Řádek 238 mluví výslovně o **kolekci**, tedy o to-many asociaci – a tam `EAGER` JOIN negeneruje,
+nýbrž pouští druhý dotaz. Slib „v jednom JOIN“ je nesplněný a čtenář, který podle něj řeší N+1,
+dostane jiné chování, než čeká. Navazující řádek 239 je naopak v pořádku: `getWithItems()`
+s ručním fetch joinem v DQL JOIN skutečně udělá.
+
+**Oprava:** u to-many psát „druhý dotaz pro všechny kolekce najednou (ne N+1, ale ani JOIN)“;
+JOIN slibovat jen u to-one asociací, a i tam s výhradou „LEFT JOIN nebo druhý dotaz“.
+Zdroj: https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/working-with-objects.html
+
 ### Neověřené / nedohledané
 
 - **Případové studie týmů, které DDD opustily.** Nenalezen žádný podepsaný, dohledatelný

@@ -442,10 +442,21 @@ s `get()` / `save()`); **[30]** studie `cqrs-studie.md` (G9, G11, G19), `basic_c
 
 ### Neověřené / nedohledané
 
-- **Přesná verze ORM, ve které přibylo `enableNativeLazyObjects()`.** Doložené je chování „3.5
-  a výše" z `UPGRADE.md`; `doctrine/orm` nemá kořenový `CHANGELOG.md`. Před opravou G19 dohledat.
-- **Verzování veřejných událostí jako kontraktu.** Verraes [12] doporučuje explicitní veřejné
-  události, jejich verzování v tomto textu neřeší. Pro P1-5 by pomohl přímý zdroj.
+- **Verze ORM s `enableNativeLazyObjects()` – DOHLEDÁNO 2026-09-04. Je to 3.4.0, ne 3.5.**
+  Metoda přibyla v PR [#11853](https://github.com/doctrine/orm/pull/11853) *Add support for PHP 8.4
+  Lazy Objects RFC with configuration flag* (commit 29. 3. 2025) a vyšla v **ORM 3.4.0 dne
+  14. 6. 2025**, kde je i v release notes. V **3.5.0** k tomu přibyla deprecace: nepoužívat nativní
+  lazy objekty na PHP 8.4+ je od té verze zastaralé. `UPGRADE.md` mluví o „3.5 a výše“ proto, že
+  popisuje ten deprecation krok, ne zavedení metody. **Oprava G19: psát „ORM 3.4+“ pro dostupnost
+  a „od 3.5 je starý režim deprecated“ jako samostatnou větu.**
+- **Verzování veřejných událostí jako kontraktu – DOVĚŘENO 2026-09-04, původní závěr platí.**
+  Verraesův katalog *DDD and Messaging Architectures* (verraes.net/2019/05/ddd-msg-arch/) prošel
+  celý: verzování, zpětnou kompatibilitu ani „událost jako kontrakt“ neřeší nikde. Dva jeho vzory
+  jsou ale pro P1-5 použitelné a doložitelné: **Explicit Public Events** (malá podmnožina událostí
+  je vědomě veřejná, zbytek je privátní by default) a **Segregated Event Layers**. Ty pokrývají
+  *oddělení* veřejného kontraktu; samotné *verzování* u Verraese není a je nutné je opřít o Younga
+  (*Versioning in an Event Sourced System*). **Doporučení: v P1-5 tyto dva zdroje rozdělit podle
+  role, ne citovat Verraese na verzování.**
 - **Chování `@>` s parametrem bez `::jsonb` castu napříč PDO režimy** – tvrzení v sekci 4 stojí na
   obecné znalosti typové inference PostgreSQL. A **zda `flags: ['gin']` neinterpretuje nějaká
   nadstavba** (custom platform, third-party balíček) – ověřeno bylo jen jádro DBAL, G17 tedy platí

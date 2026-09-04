@@ -426,18 +426,33 @@ kapitola dnes používá oba zápisy vedle sebe. Rozsah: `~12 řádků v 12.05 +
   `Command/ConsumeMessagesCommand.php`, `CHANGELOG.md`. Nejspolehlivější zdroj pro všechna
   Symfony tvrzení v sekci 4.
 
+### Doověřeno druhým průchodem (2026-09-04)
+
+`[33]` Greg Young – *CQRS is not an Architecture*, 9. 9. 2012.
+https://gregfyoung.wordpress.com/2012/09/09/cqrs-is-not-an-architecture/ (mirror původního
+codebetter.com, který už nerezolvuje). Doslovně: „CQRS can be called an architectural pattern.
+Just like Transaction Script is an architectural pattern.“ – „CQRS and Event Sourcing are not
+architectural styles.“ – „CQRS and Event Sourcing describe something **inside a single system
+or component**.“
+
+**Nový nález (G-A1, sporné) – `cqrs.md:57` a `cqrs.md:26`.** Kapitola tvrdí opak Youngova
+vlastního vymezení. Na ř. 57 stojí: „Greg Young posunul tuto myšlenku na **architektonickou
+úroveň**: CQRS není pravidlo pro jednotlivé metody, ale **rozhodnutí o struktuře celé
+aplikace**“, tabulka pod tím uvádí úroveň „Architektura celé aplikace“ a ř. 26 mluví o přenesení
+principu „na úroveň architektury“. Young [33] přitom explicitně říká, že CQRS popisuje něco
+uvnitř jediného systému nebo komponenty, a že architekturou není. FAQ na ř. 1541 formuluje totéž
+správně („architektonický vzor“).
+
+**Doporučení:** sjednotit na Youngovu terminologii. „Architektonický vzor“ ano, „rozhodnutí
+o struktuře celé aplikace“ a řádek tabulky „Architektura celé aplikace“ přepsat. Rozdíl není
+slovíčkaření: kapitola tím čtenáři sděluje, že CQRS je celosystémové rozhodnutí, zatímco Young
+i Dahan [6] shodně varují před nasazením CQRS jako vzoru nejvyšší úrovně.
+
 ### Neověřené / nedohledané
 
-- **Greg Young, „CQRS is not an architecture".** Cíl ověření dle zadání. **Nepodařilo se dohledat**
-  – 404 na `gregyoung.wordpress.com/2012/09/09/cqrs-is-not-an-architecture{,-2}/` i na
-  `…/2010/02/16/cqrs-task-based-uis-event-sourcing-agh/`; doména `www.codebetter.com` už
-  nerezolvuje (`ENOTFOUND`), `web.archive.org` je pro použitý nástroj nedostupné.
-  **Doporučení: neuvádět tuto formulaci jako citaci, dokud nebude dohledána.** Věcně totéž ale
-  říká ověřitelně sám Young v [1] („The pattern although not very interesting in and of itself
-  becomes extremely interesting when viewed from an architectural point of view.") a Dahan v [6]
-  („CQRS should not be your top-level architectural pattern") – pro přepis doporučuji tyto dvě
-  doložené pasáže. Totéž platí pro široce citovaný text „CQRS, Task Based UIs, Event Sourcing
-  agh!" (2010), jehož obsah pokrývá ověřená kapitola „Task Based User Interface" v [1].
+- **Greg Young, „CQRS is not an architecture“ – DOHLEDÁNO 2026-09-04, viz [33].** První průchod
+  hledal na `gregyoung.wordpress.com`; správná doména Youngova blogu je **`gregfyoung`** s „f“.
+  Text je živý a citovatelný.
 - **Vernon, *Implementing Domain-Driven Design* (2013)** a **Khononov, *Learning Domain-Driven
   Design* (2021)** — oba mají k CQRS relevantní kapitoly, ale jde o knihy a v této session je
   nebylo možné ověřit. Před přepisem sekce 12.04 by stálo za to dohledat, jak kritéria nasazení

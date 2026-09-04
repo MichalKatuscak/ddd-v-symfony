@@ -131,36 +131,45 @@ zdroji chybí · **?** = nedohledáno tímto průchodem.
 | A10 | Fowler | citát „dodgy collaborator" (179–183) | TNS [2] | **OK\*** | citát doslova; kapitola datuje 2024, článek je z 28. 12. 2025 |
 | A11 | Fowler | „stále se učíme" (309) | TNS [2] | **OK** | „We're still learning how to do this." |
 | A12 | Fowler | „ve svých poznámkách zmiňuje DSL … pro rigorózní promptování" (56–58) | TNS [2] | **OK\*** | nejde o Fowlerovy poznámky, ale o referát podcastu; zdroj jmenuje **i DDD**, což kapitola vypustila |
-| A13 | Fowler | „Pevný jazyk na vstupu znamená méně entropie na výstupu" (58–60) | – | **?** | vlastní dedukce knihy podaná jako Fowlerova logika |
+| A13 | Fowler | „Pevný jazyk na vstupu znamená méně entropie na výstupu“ (58–60) | – | **OK\*** | jádro doloženo [20]: „A general-purpose language like Java offers lots of valid ways to express the same intent. A DSL strips the variation away.“ Autorem textu je ale **Unmesh Joshi**, host na martinfowler.com, ne Fowler |
 | A14 | Beck | citát „In vibe coding…" (161–165) | Substack [3] | **OK** | doslova, 25. 6. 2025 |
 | A15 | Beck | TDD obzvlášť cenné s AI agenty (155–156) | Pragmatic Engineer [4] | **OK** | „TDD is a 'superpower' when working with AI agents" |
 | A16 | Beck | „testy jsou jediným mechanismem, který AI nemůže zfalšovat" (167) | – | **NE** | týž Substack: agent testy vypínal a mazal [3] |
-| A17 | Beck | sám testuje méně věcí, testy jsou úmyslnější (171–173) | – | **?** | v obou citovaných zdrojích nenalezeno |
-| A18 | Beck | „od začátku roku 2024 se intenzivně věnuje" (154–155) | – | **?** | datace bez opory; ověřené texty jsou z r. 2025 |
+| A17 | Beck | sám testuje méně věcí, testy jsou úmyslnější (171–173) | – | **NE** | Beckova vlastní esej [3] tvrdí opak: „In augmented coding you care about the code, its complexity, the tests, & their coverage“; jeho systémový prompt zní „Always follow the TDD cycle: Red → Green → Refactor“ a „Write the simplest failing test first“ |
+| A18 | Beck | „od začátku roku 2024 se intenzivně věnuje“ (154–155) | – | **NE** | datace bez opory. Všechny dohledané Beckovy texty k AI jsou z r. 2025 a novější; [3] popisuje projekt jako čtyřtýdenní práci publikovanou 6/2025 |
 | A19 | DHH | citát „competence draining out of my fingers" (195–197) | TNS [5] | **OK\*** | citát ano; kontext ne – DHH mluví o odmítnutí Cursoru/Windsurfu, ne o intenzivním používání |
 | A20 | DHH | citát „crud monkeys" (249–254) | Lex Fridman [6] | **OK** | doslova |
-| A21 | DHH | Rails World 2025 + TNS: Ruby čitelné pro LLM bez terminologie (62–64) | TNS [5] | **?** | v citovaném zdroji není ani slovo |
-| A22 | DHH | Markdown jako preferovaný formát pro AI (64–65) | TNS [5] | **?** | v citovaném zdroji není |
-| A23 | DHH | ubiquitous language užitečná pro enterprise, jinde stačí konvence (67–69) | – | **?** | DHH se k UL v dostupných zdrojích nevyjadřuje |
+| A21 | DHH | Rails World 2025 + TNS: Ruby čitelné pro LLM bez terminologie (62–64) | TNS [5] | **OK\*** | v TNS [5] ani v abstraktu keynote [21] není nic; doloženo ale v [6]: „Ruby has a much higher bandwidth of communication […] conveys so much more concept per character than most other programming languages do“, v kontextu práce s AI. **Opravit zdroj na [6] a formulaci na „hustota významu na znak“** |
+| A22 | DHH | Markdown jako preferovaný formát pro AI (64–65) | TNS [5] | **NE** | není v [5], v [6] ani v abstraktu keynote [21]. Doložit lze jen Rails 8.1 (viz A24), ne DHH osobně |
+| A23 | DHH | ubiquitous language užitečná pro enterprise, jinde stačí konvence (67–69) | – | **NE** | prohledány [5], [6] a [21]: „ubiquitous language“ ani „domain-driven design“ se u DHH nevyskytuje. Výrok je autorská konstrukce |
 | A24 | – | Rails 8.1 přidal nativní Markdown rendering kvůli AI (65–66) | – | **OK** | ověřeno, ale jiným zdrojem: Rails 8.1 Release Notes [7] |
 | A25 | Tune | Claude Code k reverznímu inženýrství architektury (124–126) | O'Reilly [8] | **OK** | článek z 6. 2. 2026 |
 | A26 | Tune | ts-morph pro deterministickou extrakci vzorů (126–128) | O'Reilly [8] | **OK** | odkaz na navazující post |
 | A27 | Tune | vidí bounded contexts jako rámec pro AI agenty, každý kontext má CLAUDE.md/Cursor rules (128–131) | O'Reilly [8] | **NE** | v článku 0× „bounded context", 0× CLAUDE.md, 0× Cursor; jediné výskyty „Domain-Driven Design" jsou v navigaci webu O'Reilly |
-| A28 | Tune | AI nástroje si vybudovaly vlastní verzi bounded contextu (133–139) | – | **?** | bez zdroje |
-| A29 | Tune | praktici píší Cursor rules a CLAUDE.md jako BC dokumenty (278–280) | – | **?** | Medium článek [9] vrací HTTP 403, neověřitelné |
+| A28 | Tune | AI nástroje si vybudovaly vlastní verzi bounded contextu (133–139) | – | **NE** | Tuneův vlastní blog tvrdí opak. Článek *Enforced application architecture for agents and humans* [22] má podtitul „Enforcing application architecture instead of relying on markdown files“ a otevírá větou: „One of the most frustrating parts of AI-generated code is that it does not follow architectural guidelines that are written in skill files, ADRs, and various other places in the repo.“ |
+| A29 | Tune | praktici píší Cursor rules a CLAUDE.md jako BC dokumenty (278–280) | – | **NE** | zdrojový text dohledán na autorově webu [23] (Medium [9] je jeho reprint). Neobsahuje „bounded context“, „CLAUDE.md“ ani „Cursor“; jeho téma je extrakce DDD informací z kódu jako living documentation. Spolu s [22] jde proti tvrzení kapitoly |
 | A30 | Tune | *(chybí)* jeho vlastní varování o nepřesnostech AI výstupu | O'Reilly [8] | **OK** | „there have been significant inaccuracies that I had to spot and correct" |
 | A31 | GitClear | definice code churn + projekce zdvojnásobení 2024 vs. 2021 (141–146) | VSM [10] | **OK\*** | ve zdroji doslova, ale jde o **projekci** celorepozitářového churnu korelovaného s Copilotem, ne o měření „u AI generovaného kódu" |
 | A32 | GitClear | citát „lokálně koherentní, ale architektonicky nekonzistentní" (146–147) | VSM [10] | **NE** | ve zdroji se nevyskytuje; zdroj mluví o porušování DRY, copy/paste a „itinerant contributor" |
 | A33 | Phoenix | tabulka 55/88 %, 35/<5 %, 100/15–25 % (99–116) | understandingdata [14] | **OK\*** | čísla ve zdroji jsou; „~55 %/~88 %" tam ale znamená **accuracy**, ne „produkčně použitelný kód bez úprav" |
 | A34 | Wiegand et al. | „preprint na arXiv z roku 2026" (282–284) | arXiv [15] | **OK\*** | na arXiv 28. 1. 2026, ale text je součástí sborníku Upper-Rhine AI Symposium **2024** |
-| A35 | Wiegand et al. | „strukturovaný kontext vede k přesnějším výstupům než nestrukturovaný" (284–286) | arXiv [15] | **?** | abstrakt to netvrdí; tvrdí, že fine-tune Code Llama (4-bit, LoRA) generuje syntakticky správné JSON objekty |
+| A35 | Wiegand et al. | „strukturovaný kontext vede k přesnějším výstupům než nestrukturovaný“ (284–286) | arXiv [15] | **NE** | práce takové srovnání vůbec nedělá. Hodnotí jediný postup – fine-tune Code Llama (4-bit, LoRA) na datech z reálných DDD projektů – a měří syntaktickou správnost generovaných JSON objektů. Kontrolní skupina s nestrukturovaným kontextem chybí |
 | A36 | ThoughtWorks | vol. 33: legacy=Adopt, Context engineering=Assess, Anchoring=Assess (288–293) | Radar [16] | **OK\*** | k vol. 33 sedí; Context engineering je od vol. 34 (15. 4. 2026) v **Adopt** |
 | A37 | Brandolini | vyjadřuje se zdrženlivě; Avanscoperta nemá workshop na DDD+AI (318–322) | – | **NE** | Avanscoperta nabízí „AI-powered Domain-Driven Design **with Alberto Brandolini**", Berlín 1.–4. 12. 2026 [17] |
-| A38 | Brandolini | „EventStorming zůstává fundamentálně lidskou aktivitou" (322–323) | – | **?** | eventstorming.com neobsahuje k AI nic |
+| A38 | Brandolini | „EventStorming zůstává fundamentálně lidskou aktivitou“ (322–323) | – | **?** | eventstorming.com k AI nic neobsahuje; jeho veřejné vyjádření se nepodařilo dohledat ani tímto průchodem. Nepřímo: anotace workshopu [17] slibuje „combine the power of modern AI tools where they have the most impact, while still maximizing learning through hands-on activities“ a „balancing lo-fi, hands-on, and AI-powered approaches“ – tedy kombinaci, ne obranu lidské exkluzivity |
 | A39 | Newman | nevyjádřil se; konzervativní k mikroservisům (325–330) | – | **?** | kapitola sama označuje za autorský odhad – to je korektní řešení |
 | A40 | Microsoft | eShopOnContainers, moduly Ordering a Catalog (239–245) | – | **NE** | repozitář archivován 17. 11. 2023 a přesunut na `dotnet/eShop` [18] |
 
-**Souhrn:** OK 13 · OK\* 10 · NE 6 · ? 11.
+**Souhrn po doověření 2026-09-04:** OK 13 · OK\* 12 · NE 13 · ? 2.
+
+Původní průchod skončil na OK 13 · OK\* 10 · NE 6 · ? 11. Druhý průchod s funkčním fulltextovým
+hledáním rozhodl devět z jedenácti nedohledaných výroků: dva se potvrdily (A13, A21, oba s posunem
+zdroje), sedm se vyvrátilo (A17, A18, A22, A23, A28, A29, A35). Nedohledané zůstávají dva – A38
+(Brandolini) a A39 (Newman), přičemž A39 kapitola sama poctivě označuje za autorský odhad.
+
+Třináct vyvrácených výroků ze čtyřiceti je pro kapitolu, jejímž tématem je „co říkají autority“,
+zásadní nález. Tři z nich (A28, A29, A17) nejsou jen nedoložené – dohledané primární zdroje tvrdí
+opak toho, co jim kapitola připisuje.
 
 ## 3. Stav praxe a posuny
 
@@ -332,27 +341,50 @@ za zvážení odkaz z `/context-mapping` sem. *Odhad: 4–6 odkazů.*
 
 ## 8. Otevřené otázky pro autora
 
-**Výroky, které je nutné doověřit v session s dostupným fulltextovým hledáním.** Bez něj je
-nelze potvrdit ani vyvrátit a v kapitole s titulem „co říkají autority" nemají zůstat nedoložené.
+**Doověřeno 2026-09-04 v session s funkčním fulltextovým hledáním.** Původní seznam osmi bodů je
+vyřízen, jeden zůstává otevřený. Verdikty jsou promítnuté do tabulky 2.6, zdroje do sekce 9.
 
-1. **A21–A23 (DHH):** existuje záznam, kde DHH říká, že Ruby je pro LLM dostatečně čitelné, že
-   preferuje Markdown a že ubiquitous language je jen pro enterprise? Hledat v keynote Rails
-   World 2025, na world.hey.com/dhh a v jeho podcastech z 2. poloviny 2025.
-2. **A17–A18 (Beck):** kde Beck říká, že testuje méně věcí, ale úmyslněji? A odkud je datace
-   „od začátku roku 2024"? Hledat v archivu tidyfirst.substack.com.
-3. **A28–A29 (Tune):** Medium článek [9] vrací HTTP 403. Ověřit, zda skutečně tvrdí, že CLAUDE.md
-   a Cursor rules jsou bounded context dokumenty. Zkusit nicktune.uk nebo jeho sérii na O'Reilly.
-4. **A35 (Wiegand et al.):** stáhnout plný text arXiv:2601.20909 a ověřit, zda porovnává
-   strukturovaný a nestrukturovaný kontext. Abstrakt to netvrdí.
-5. **A38 (Brandolini):** existuje jeho veřejné vyjádření k AI a EventStormingu? Vzhledem k A37 je
-   pravděpodobné, že ano a že je jiné, než kapitola tvrdí.
-6. **A13 (Fowler):** je „méně entropie na výstupu" Fowlerova formulace, nebo dedukce knihy?
-   Prověřit záznam podcastu Pragmatic Engineer, na který TNS odkazuje.
-7. **GitClear (G11):** vydal GitClear data za 2024/2025, která projekci z ledna 2024 potvrzují,
-   nebo vyvracejí?
-8. **Symfony ekosystém (sekce 4):** ověřit stav `symfony/ai` a `php-llm/llm-chain` — verze,
-   stabilita, zda patří do knihy.
-
+1. **A21–A23 (DHH) – rozhodnuto.** Ruby a LLM: doloženo, ale jinde a jinak. V Lex Fridmanově
+   podcastu [6] DHH říká „Ruby has a much higher bandwidth of communication […] conveys so much
+   more concept per character than most other programming languages do“ a spojuje to s prací s AI.
+   Argument je o hustotě významu na znak, ne o „čitelnosti bez terminologie“. Markdown (A22)
+   a ubiquitous language (A23) nejsou v [5], [6] ani v anotaci keynote [21]. **Opravit A21 na
+   citaci z [6], A22 a A23 vyřezat.**
+2. **A17–A18 (Beck) – rozhodnuto, oba vyvráceny.** Beckova esej [3] říká opak: „In augmented coding
+   you care about the code, its complexity, the tests, & their coverage“; jeho systémový prompt
+   trvá na plném TDD cyklu. Datace „od začátku roku 2024“ nemá oporu – všechny dohledané texty jsou
+   z roku 2025 a novější. **Obě pasáže přepsat.**
+3. **A28–A29 (Tune) – rozhodnuto, oba vyvráceny, a je to nejtvrdší nález kapitoly.** Tuneova doména
+   je nick-tune.me, ne nicktune.uk. Jeho článek [22] se jmenuje *Enforced application architecture
+   for agents and humans* s podtitulem „Enforcing application architecture instead of relying on
+   markdown files“ a otevírá konstatováním, že AI generovaný kód architektonická pravidla ze skill
+   souborů a ADR prostě nedodržuje. Původní text za [9] je dohledatelný jako [23] a je o extrakci
+   DDD informací z kódu, ne o CLAUDE.md jako bounded-context dokumentu. **Kapitola staví Tuneho do
+   role zastánce teze, proti které argumentuje. Pasáž přepsat, nebo Tuneho použít jako protihlas.**
+4. **A35 (Wiegand et al.) – rozhodnuto, vyvráceno.** Práce žádné srovnání strukturovaného
+   a nestrukturovaného kontextu nedělá. Hodnotí jediný postup (fine-tune Code Llama, 4-bit, LoRA)
+   a měří syntaktickou správnost generovaných JSON objektů. **Tvrzení odstranit.**
+5. **A38 (Brandolini) – zůstává otevřené.** Vlastní vyjádření k AI a EventStormingu se nedohledalo
+   ani podruhé. Nepřímý doklad je anotace jeho workshopu *AI-Powered Domain-Driven Design* [17]
+   (Berlín, 1.–4. 12. 2026): „combine the power of modern AI tools where they have the most impact,
+   while still maximizing learning through hands-on activities“. To je pozice kombinace, ne obrany
+   lidské exkluzivity. **Doporučení: citovat anotaci workshopu a nedoplňovat vlastní odhad.**
+6. **A13 (Fowler) – rozhodnuto, potvrzeno s posunem atribuce.** Myšlenka je doložená článkem
+   *DSLs Enable Reliable Use of LLMs* [20]: „A general-purpose language like Java offers lots of
+   valid ways to express the same intent. A DSL strips the variation away.“ Text staví na DDD
+   a ubiquitous language, což je pro kapitolu použitelnější než dnešní formulace. **Autorem je ale
+   Unmesh Joshi, ne Fowler** – článek jen vychází na martinfowler.com. **Přepsat atribuci a citovat [20].**
+7. **GitClear – rozhodnuto.** Novější data existují a trend potvrzují. Report za 2025 [25]: podíl
+   řádků spojených s refaktoringem klesl z 25 % (2021) pod 10 % (2024), klonované řádky 8,3 % →
+   12,3 %, „copy/paste“ poprvé překonalo „moved“ kód. Report za 2026 [24] na 623 mil. změn: duplicita
+   bloků +81 % proti roku 2023, copy/paste 15,7 % proti 3,8 % přesunutých řádků. **Nahradit projekci
+   z ledna 2024 měřenými daty; kapitola tím získá silnější a čerstvější oporu.**
+8. **Symfony ekosystém – rozhodnuto.** `php-llm/llm-chain` je na Packagistu označen jako
+   **abandoned** s náhradou `symfony/ai-agent`; poslední vydání 0.25.0 je z 16. 7. 2025 [26].
+   Symfony AI dnes existuje jako sada balíčků (`symfony/ai-platform`, `-agent`, `-bundle`, `-store`
+   plus bridge balíčky pro OpenAI, Gemini, Ollama, Meta); samostatný balíček `symfony/ai` neexistuje.
+   Shodná verze v0.13.0 z 30. 8. 2026 [27] – aktivní vývoj, ale stále série 0.x. **Do knihy patří
+   jako zmínka s uvedením verze a poznámkou o 0.x, ne jako doporučená závislost.**
 **Rozhodnutí, která rešerše udělat nemůže:**
 
 9. **Má kapitola zůstat přehledem pozic, nebo se stát kapitolou o modelování?** Přehled stárne
@@ -427,24 +459,64 @@ Všechny níže uvedené byly staženy přímým fetchem 2026-09-04.
 - `[19]` *Explore DDD 2026*, Denver, 21.–25. 9. 2026. https://exploreddd.com/ — mezi cíli konference „Examine how
   AI reshapes software design, modeling, and architecture".
 
+Doplněno druhým průchodem 2026-09-04 (fulltextové hledání):
+
+- `[20]` Unmesh Joshi – *DSLs Enable Reliable Use of LLMs*, martinfowler.com, 14. 7. 2026.
+  https://martinfowler.com/articles/llm-and-dsls.html – „A general-purpose language like Java offers lots of valid
+  ways to express the same intent. A DSL strips the variation away. Giving the model a few examples is enough to
+  reliably generate the correct syntax.“ Text explicitně staví na DDD a ubiquitous language. **Autorem je Joshi,
+  ne Fowler** – článek vychází na Fowlerově webu jako hostovaný.
+- `[21]` *Rails World 2025 – Opening Keynote*, rubyonrails.org.
+  https://rubyonrails.org/world/2025/day-1/david-hansson – anotace zní celá takto: „DHH will kick off the third
+  edition of Rails World in Amsterdam with an Opening Keynote highlighting what is new in Rails today, and where
+  the framework is headed tomorrow.“ Žádná zmínka o LLM, Markdownu ani ubiquitous language.
+- `[22]` Nick Tune – *Enforced application architecture for agents and humans*, nick-tune.me, 13. 8. 2026.
+  https://nick-tune.me/blog/2026-08-13-enforced-application-architecture-for-agents-and-humans/ – podtitul
+  „Enforcing application architecture instead of relying on markdown files“; tagy „ai ddd architecture typescript“.
+  Celý text 0× „bounded context“, 0× „CLAUDE.md“, 0× „Cursor“.
+- `[23]` Nick Tune – *Enterprise-wide Software Architecture as DDD Living Documentation*, nick-tune.me, 26. 10. 2025.
+  https://nick-tune.me/blog/2025-10-26-enterprise-wide-software-architecture-as-ddd-living-document/ – původní
+  vydání textu, jehož reprint je [9]. Téma: agregace `architecture.json` napříč doménami do jednoho modelu systému
+  (princip „one model, many views“ ze Structurizru). 0× „bounded context“, 0× „CLAUDE.md“.
+- `[24]` GitClear – *The Maintainability Gap: AI Code Quality in 2026*, 1/2026.
+  https://www.gitclear.com/the_ai_code_quality_maintainability_gap – 623 mil. analyzovaných změn 2023–2026;
+  duplicita bloků 40,3 → 73,0 na milion změněných řádků (+81 %); copy/paste 15,7 % vs. přesunuté řádky 3,8 %
+  za 1. pol. 2026.
+- `[25]` GitClear – *AI Copilot Code Quality: 2025 Look Back at 12 Months of Data*, 2/2025.
+  https://www.gitclear.com/ai_assistant_code_quality_2025_research – podíl řádků spojených s refaktoringem klesl
+  z 25 % (2021) pod 10 % (2024); klonované řádky 8,3 % → 12,3 %; „copy/paste“ poprvé v historii měření překonalo
+  „moved“ kód.
+- `[26]` Packagist – `php-llm/llm-chain`. https://packagist.org/packages/php-llm/llm-chain – balíček je označen
+  jako **abandoned** s náhradou `symfony/ai-agent`; poslední vydání 0.25.0 z 16. 7. 2025.
+- `[27]` Packagist – komponenty Symfony AI (`symfony/ai-platform`, `-agent`, `-bundle`, `-store` a bridge balíčky).
+  Shodná verze v0.13.0 z 30. 8. 2026; samostatný balíček `symfony/ai` neexistuje. Aktivní vývoj, ale stále
+  série 0.x, tedy bez záruky zpětné kompatibility.
+
 ### Neověřené / nedohledané
 
-- `[9]` Nick Tune — *Enterprise-Wide Software Architecture as DDD Living Documentation*, Medium.
-  https://medium.com/nick-tune-tech-strategy-blog/enterprise-wide-software-architecture-as-ddd-living-documentation-33f3d8b4ddfc
-  — **HTTP 403**, obsah neověřen. Kapitola na něm staví tvrzení A29. Doověřit ručně.
-- **nicktune.uk** — spojení se tomuto průchodu nepodařilo navázat. Ověřit, zda tam Tune publikuje k DDD a AI.
-- **Vlastní publikovaný text Vaughna Vernona k DDD a AI** — nedohledán; kapitola cituje jen jeho poznámku z [1].
-- **Alberto Brandolini k AI a EventStormingu** — eventstorming.com k tématu nic neobsahuje. Vzhledem k [17] je
-  pravděpodobné, že jeho pozice existuje a je jiná, než kapitola tvrdí. Tvrzení A38 zůstává nedoloženo.
-- **Sam Newman k AI** — nedohledáno. Kapitola to sama uvádí jako autorský odhad, což je korektní.
-- **Vlad Khononov, Mathias Verraes, Matthias Noback, Kevlin Henney k DDD a AI** — nedohledáno. verraes.net
-  k tématu nic neobsahuje, github.com/ddd-crew nemá k AI dedikovaný repozitář. Absence těchto jmen v kapitole
-  tedy zatím není nález.
-- **GitClear data za 2024/2025** — nedohledáno; kapitola pracuje s projekcí z ledna 2024.
-- **`symfony/ai`, `php-llm/llm-chain`** — neověřeno, v sekci 4 uvedeno jako podnět, ne jako doložený fakt.
+Po druhém průchodu zbývají tři položky.
 
-> **Metodická poznámka.** Skupina „nedohledáno" není seznam nepravd. Bez fulltextového hledání nelze najít výrok,
-> jehož URL neznáme. Jedenáct výroků v tabulce 2.6 je v tomto stavu (A13, A17, A18, A21, A22, A23, A28, A29, A35,
-> A38, A39). Šest z nich je připsáno jmenovaným osobám v kapitole, která slibuje „co říkají autority" — a to je
-> problém i tehdy, když se nakonec ukáže, že to řekli. Čtenář ani autor si to dnes nemá jak ověřit, protože
-> kapitola u nich neuvádí zdroj.
+- **Alberto Brandolini k AI a EventStormingu** – vlastní vyjádření se nedohledalo ani podruhé. eventstorming.com
+  k tématu mlčí, jeho workshop na DDD Europe 2026 je klasický *EventStorming Master Class* bez AI. Nepřímý doklad
+  je anotace workshopu [17] (Berlín, 1.–4. 12. 2026), která mluví o kombinaci lo-fi a AI přístupů. Tvrzení A38
+  zůstává nedoloženo a doporučení studie je nenahrazovat je jiným odhadem, ale citovat anotaci workshopu.
+- **Vlastní publikovaný text Vaughna Vernona k DDD a AI** — nedohledán; kapitola cituje jen jeho poznámku z [1].
+- **Sam Newman k AI** – nedohledáno. Kapitola to sama uvádí jako autorský odhad, což je korektní řešení.
+
+Vyřešeno druhým průchodem, ponecháno pro dohledatelnost:
+
+- `[9]` Medium reprint Tuneova textu vracel HTTP 403. Původní vydání je na autorově webu jako [23] a je čitelné.
+  Doména **nicktune.uk** z prvního průchodu neexistuje; správná je **nick-tune.me**.
+- **GitClear za 2024/2025** – dohledáno, viz [24] a [25].
+- **`symfony/ai`, `php-llm/llm-chain`** – dohledáno, viz [26] a [27].
+- **Vlad Khononov, Mathias Verraes, Matthias Noback, Kevlin Henney k DDD a AI** – nedohledáno ani podruhé.
+  Absence těchto jmen v kapitole tedy není nález.
+
+> **Metodická poznámka po druhém průchodu.** První průchod nechal jedenáct výroků nedohledaných, protože bez
+> fulltextového hledání nelze najít výrok, jehož URL neznáme. Druhý průchod devět z nich rozhodl a poměr dopadl
+> nepříznivě: sedm vyvráceno, dvě potvrzena. To potvrzuje, že „nedohledáno“ nebyl neutrální stav – u výroků bez
+> uvedeného zdroje šlo většinou o autorskou konstrukci, ne o citaci.
+>
+> Tři případy jsou horší než nedoložené tvrzení, protože dohledaný zdroj říká opak: Beck o testování (A17), Tune
+> o markdown souborech jako nositelích architektury (A28, A29). Kapitola tyto autory používá jako oporu pro tezi,
+> proti níž oni sami argumentují.

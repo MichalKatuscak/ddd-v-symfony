@@ -248,7 +248,11 @@ První matchující pravidlo vyhrává a nespecifikovaný matcher odpovídá če
 
 ### Neověřené / nedohledané
 
-- **Vernon V., *Implementing Domain-Driven Design* (Addison-Wesley, 2013), kap. 14 „Application".** Kapitola 11 se na ni odvolává na řádku 124 v souvislosti s „vrstvením autorizace v doménové aplikaci". Obsah kapitoly 14 se nepodařilo ověřit z primárního zdroje – dostupná byla jen struktura doprovodného repozitáře [12]. Doporučeno ověřit v knize, zda tvrzení o vrstvení autorizace skutečně obsahuje; pokud ne, citaci na řádku 124 vypustit nebo nahradit.
+- **Vernon V., *IDDD* (2013), kap. 14 „Application“ – ČÁSTEČNĚ DOVĚŘENO 2026-09-04.** Název i téma kapitoly sedí: kap. 14 se jmenuje *Application* a obsahuje sekce *User Interface* (s. 512), *Rendering Domain Objects* (s. 512) a *Application Services* (s. 521). Autorizace tam je – Vernon Application Services popisuje jako místo, které koordinuje úlohy use case, řídí transakce a **prosazuje potřebná bezpečnostní oprávnění**. Plný text kapitoly zůstává za paywallem (oreilly.com vrací 403), takže doslovné znění neověřeno.
+
+  **Zbývající výhrada je k formulaci, ne k existenci zdroje.** Kapitola 11 na ř. 124 slibuje „praktický pohled na **vrstvení** autorizace v doménové aplikaci“. Vernon ale v kap. 14 autorizaci umisťuje do **jedné** vrstvy (Application Services); vícevrstvý model, který je nosnou myšlenkou kapitoly 11, u něj nepochází odtud. Jeho vlastní strukturální odpověď je samostatný Identity & Access kontext (viz sekce 2 této studie).
+
+  **Doporučení:** citaci ponechat, ale přeformulovat na to, co Vernon skutečně říká – že autorizační kontrola patří do Application Services. Tvrzení o „vrstvení“ nechat jako autorské, nebo je opřít o [1] a [2], které vícevrstvý přístup dokládají.
 - **Chování Doctrine SQLFilteru u one-to-one asociací na neowning straně.** V komunitě se traduje, že se filtr neuplatní. V aktuální dokumentaci [19] ani v sekci limitations-and-known-issues se tato výjimka neuvádí. Chce ověřit experimentem proti Doctrine ORM 3 dřív, než se do kapitoly cokoli takového napíše.
 - **Přesné znění funkční dekompozice PEP / PDP / PIP / PAP v NIST SP 800-162.** Landing page publikace [2] tyto komponenty neuvádí; jsou v plném PDF (`nvlpubs.nist.gov/nistpubs/specialpublications/NIST.SP.800-162.pdf`), které se v rámci studie nepodařilo načíst. Před použitím slovníku v kapitole ověřit v PDF.
 - **Statistiky adopce OPA / Cerbos v PHP projektech.** Nedohledáno; k dispozici jsou jen počty stažení z Packagistu [25], které o produkčním nasazení nevypovídají.

@@ -411,11 +411,23 @@ Rozpočet na fulltextové vyhledávání byl v této session vyčerpán; **žád
 [20] Dahan, U. — seznam článků o ságách (výsledky vyhledávání na vlastním webu). https://udidahan.com/?s=sagas — přímý fetch
 ### Neověřené / nedohledané
 
-- **Dahan, U. — *Sagas: not just for workflows*.** Titul, na který se v komunitě běžně odkazuje.
-  URL `https://udidahan.com/2007/04/15/sagas-not-just-for-workflows/` vrací **404**, článek se
-  neobjevuje v archivu `udidahan.com/2007/04/` ani ve výsledcích `udidahan.com/?s=sagas` [20].
-  `web.archive.org` je pro použitý nástroj nedostupný. **Nepoužívat, dokud se nepodaří ověřit
-  ručně** – ani jako parafrázi. Dostupnou náhradou jsou [11][12][13][14].
+- **Dahan, U. – *Sagas: not just for workflows* – VYŘEŠENO 2026-09-04. Článek toho jména
+  neexistuje.** Druhý průchod s fulltextovým hledáním nenašel na `udidahan.com` ani jinde nic
+  s tímto titulem. Titul koluje komunitou jako zkomolenina.
+
+  **Skutečný text, který tuto myšlenku nese, je dohledaný a živý:** Udi Dahan – *No more workflow
+  for nServiceBus – please welcome the Saga*, 17. 12. 2007,
+  https://udidahan.com/2007/12/17/no-more-workflow-for-nservicebus-please-welcome-the-saga/.
+  Dahan v něm termín „workflow“ pro nServiceBus výslovně opouští: „nServiceBus doesn’t really need
+  workflow in the general sense of the term. An older term that’s been used in the DBMS community
+  might make more sense – **‚long-lived transactions‘**.“ Sagu vymezuje proti workflow enginům
+  („Bigger than a WCF/WF, smaller than a breadbox Biztalk“) a popisuje ji jako koordinaci
+  distribuovaných služeb přes zprávy: „Each service runs its own ‚mini-workflow‘, and coordinates
+  its actions with other services via messages.“
+
+  **Poznámka k rozsahu nálezu:** kapitola 14 (`sagas.md`) ve své současné podobě žádný externí
+  odkaz neobsahuje a Dahana nejmenuje, takže **není co opravovat**. Nález je relevantní pro přepis:
+  je-li potřeba doložit, že saga není workflow engine, tohle je citovatelný primární zdroj.
 
 - **Vernon, V. — *Implementing Domain-Driven Design*, Addison-Wesley, 2013.** Kapitola cituje
   „kap. 4" (`sagas.md:79`). Obsah knihy se podařilo ověřit jen na úrovni názvů kapitol (kap. 4 =
@@ -437,5 +449,10 @@ Rozpočet na fulltextové vyhledávání byl v této session vyčerpán; **žád
   webové verze vzorů [3][4]. Knižní znění se může lišit; pokud kniha cituje EIP doslovně, ověřit
   proti tisku.
 
-- **Temporal PHP SDK a Camunda 8 v PHP** — existenci a stav SDK se v této session ověřit nepodařilo.
+- **Temporal PHP SDK – OVĚŘENO 2026-09-04 z Packagistu.** `temporal/sdk` je na **v2.18
+  (17. 8. 2026)**, vyžaduje `php >=8.1`. SDK existuje, je aktivně vydávané a ve stabilní řadě 2.x,
+  takže zmínka v kapitole je podložená. **Camunda 8 v PHP** se nedohledalo ani podruhé: oficiální
+  PHP klient pro Zeebe/Camunda 8 neexistuje, dostupné jsou jen komunitní gRPC obálky bez vydané
+  stabilní verze. **Doporučení: Temporal zmiňovat s verzí, Camundu 8 pro PHP neuvádět jako
+  reálnou volbu, nebo výslovně napsat, že oficiální PHP klient chybí.**
   Pokud se P2-1 přijme, ověřit před psaním (`temporal.io/sdk` / `github.com/temporalio/sdk-php`).

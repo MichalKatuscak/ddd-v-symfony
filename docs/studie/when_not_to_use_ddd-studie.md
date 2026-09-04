@@ -438,10 +438,22 @@ HTML strojově zbaveno značek. Datum přístupu u všech webových zdrojů: 202
   *DDD Distilled* ji neobsahují. Zbývá ověřit kapitolu 3 (*Dealing with Complexity*).
 - **Obsah Evansova QCon 2009 vystoupení.** Ověřen jen abstrakt; veřejný přepis neexistuje.
   Pokud má kapitola citovat Evansovy „přednášky", je nutné citovat *DDD Reference*.
-- **Evansova věta „Not all of a large system will be well designed"** v doslovné podobě
-  z knihy 2003. Doložitelná je formulace z *DDD Reference*: *„It is harsh reality that not all
-  parts of the design are going to be equally refined."*
+- **Evansova věta „Not all of a large system will be well designed“ – OVĚŘENO 2026-09-04 proti
+  plnému textu *DDD Reference* (2015).** V Reference tato věta není. Doslovné znění, které tam je,
+  zní s celým kontextem takto: *„It is harsh reality that not all parts of the design are going to
+  be equally refined. Priorities must be set. To make the domain model an asset, the critical core
+  of that model has to be sleek and fully leveraged to create application functionality.“*
+  Pasáž pokračuje pozorováním, že vzácní zkušení vývojáři inklinují k technické infrastruktuře
+  místo k jádru domény.
+
+  **Doporučení:** citovat tuto formulaci z Reference (2015) – je silnější než parafráze v kapitole,
+  protože nekončí u konstatování, ale vede k prioritizaci jádra. Větu z knihy 2003 neuvádět, dokud
+  nebude ověřena z tištěného vydání.
 - **Khononovova kapitola o architektuře per subdoménu v *Learning DDD* (2021).** Ověřena je
   jen její blogová předloha z roku 2018 `[5]`. Formulace v knize se může lišit.
-- **Doctrine ORM 3 a Active Record.** Tvrzení, že Doctrine nemá podobu Active Record, vychází
-  z povahy Data Mapperu; explicitní vyjádření v dokumentaci Doctrine jsem nedohledal.
+- **Doctrine ORM 3 a Active Record – DOVĚŘOVÁNO 2026-09-04, původní závěr potvrzen.** Stránka
+  *Architecture* v dokumentaci ORM `current` ani jinde vzory jménem neporovnává; nejblíž je věta
+  „Doctrine ORM aims to simplify the translation between database rows and the PHP object model.“
+  Explicitní vymezení vůči Active Record v oficiální dokumentaci **není**. **Doporučení: tvrzení
+  ponechat jako věcné (Doctrine je Data Mapper a Active Record nenabízí), ale neopírat je
+  o citaci dokumentace, protože ta citace neexistuje.**

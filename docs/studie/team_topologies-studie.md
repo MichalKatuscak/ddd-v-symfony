@@ -306,4 +306,16 @@ Je to dnes nejúplnější zpracování kombinace strategického DDD a Team Topo
 - **Přesné znění otázek v šabloně Team Cognitive Load Assessment.** Veřejný repozitář [10] obsahuje jen odkaz na Google Form; sekce „Overview", „How to use" a „Template" jsou prázdné.
 - **Obsahové změny 2. vydání Team Topologies mimo předmluvu a případové studie.** Zda byly upraveny definice čtyř typů nebo tří módů, se z veřejných materiálů zjistit nepodařilo. Nutné porovnat výtisky.
 - **Helfand, H. — *Dynamic Reteaming* (O'Reilly)** jako protiváha k jednorázové reorganizaci. Kniha existuje, ale rok vydání 2. edice ani konkrétní tvrzení jsem neověřoval; pokud se má do bibliografie dostat, dohledat ručně.
-- **Číselné benchmarky DORA pro rok 2025/2026** (hranice pro elite/high performers). Kapitola používá „pod 15 %" pro change failure rate; současné prahy je potřeba vzít z posledního State of DevOps reportu, ne z *Accelerate*.
+- **DORA 2025/2026 – OVĚŘENO 2026-09-04. Nález je větší než čísla: klasifikace zanikla.**
+  Report *State of DevOps 2025* opustil čtyřstupňové dělení Elite / High / Medium / Low, které kniha
+  používá, a nahradil je **sedmi týmovými profily**, které vedle výkonu doručování hodnotí i kulturní
+  a lidské signály. Zároveň se zpřísnila hranice change failure rate: ideál pro špičkový výkon je
+  podle reportu 2025 **0–2 %** (dosahuje ho 16,7 % respondentů), zatímco starší benchmark „elite“
+  pracoval s pásmem 0–15 %.
+
+  **Dopad na kapitolu:** hodnota „pod 15 %“ na řádcích, kde kapitola benchmark uvádí, je
+  z předchozí metodiky a dnes odpovídá spíš průměru než špičce. Horší je ale odkaz na kategorii
+  „elite performers“ jako takovou – ta v aktuálním reportu neexistuje. **Doporučení: buď citovat
+  konkrétní číslo s uvedením roku reportu („podle DORA 2025 …“), nebo benchmark vypustit
+  a nechat jen kvalitativní tvrzení. Odkazovat na „elite“ bez ročníku je od 2025 zavádějící.**
+

@@ -239,6 +239,53 @@ Kapitola cituje Evanse jen přes knihu z roku 2003 a přes katalogovou stránku.
 
 `[22]` Symfony — *Messenger: Sync & Queued Message Handling* (middleware `doctrine_transaction`). https://symfony.com/doc/current/messenger.html (ověřeno přes výňatek + zdrojový kód `symfony/doctrine-bridge`, `Messenger/DoctrineTransactionMiddleware.php`, větev 8.1)
 
+### Doověřeno druhým průchodem (2026-09-04) – Doctrine, `final` a odstraněné konfigurační volby
+
+Ověřeno proti primárním zdrojům: `UPGRADE-3.0.md` a `src/DependencyInjection/Configuration.php`
+ve větvi 3.3.x repozitáře `doctrine/DoctrineBundle` (výchozí větev, poslední push 17. 8. 2026),
+release notes ORM 3.4.0 a dokumentace Symfony k lazy services.
+
+**1. Dvě konfigurační volby, které kniha používá, v DoctrineBundle 3 neexistují.**
+`UPGRADE-3.0.md` je vypisuje mezi odstraněnými:
+
+> `doctrine.orm.enable_lazy_ghost_objects`
+> Also, the 3 following options were no-ops when enabling native lazy objects and have been
+> removed as well: `doctrine.orm.auto_generate_proxy_classes`, `doctrine.orm.proxy_dir`,
+> `doctrine.orm.proxy_namespace`
+
+DoctrineBundle 3 přitom vyžaduje PHP 8.4+, ORM 3 a DBAL 4 – tedy přesně cíl knihy. YAML ukázka
+v `aggregate_design.md:668–669` obě odstraněné volby nastavuje, takže na Symfony 8 neprojde
+kompilací kontejneru. Komentář na ř. 669 („v ORM 3 jediný podporovaný režim; vypnout jde jen
+s ORM 2“) popisuje stav, který skončil.
+
+**2. Nativní lazy objekty nelze vypnout, takže entita mapovaná Doctrine `final` být může.**
+V `Configuration.php` 3.3.x je `enable_native_lazy_objects` s `defaultTrue()` a validací
+`thenInvalid('The setting "enable_native_lazy_objects" can no longer be disabled and should not
+be set')`. Od DoctrineBundle 3.1 je volba navíc deprecated s odůvodněním „native lazy objects are
+now always enabled“ a v 4.0 zmizí. Nativní lazy objekty nevytvářejí podtřídu (jsou instancí téže
+třídy přes `ReflectionClass::newLazyGhost`), takže důvod pro ne-final mizí. Symfony to pro lazy
+services formuluje přímo: „when using PHP 8.4 or later, lazy services rely on native lazy objects,
+so final and readonly classes are fully supported.“
+
+**3. Rozsah v knize.** Tvrzení „ne final – Doctrine proxy z entity dědí“ je průřezové a stojí
+v šesti kapitolách:
+
+| Soubor | Řádky |
+|---|---|
+| `aggregate_design.md` | 599–610 (callout), 668–669 (YAML) |
+| `case_study.md` | 369–370, 391 |
+| `implementation_in_symfony.md` | 315 |
+| `migration_from_crud.md` | 369 |
+| `performance_aspects.md` | 112, 576 |
+| `practical_examples.md` | 268 |
+
+**Doporučení.** Opravit jako jeden průřezový zásah, ne po kapitolách. Z YAML ukázky obě odstraněné
+volby vyškrtnout a `enable_native_lazy_objects` **nenastavovat** (je deprecated a výchozí).
+Callout „Proč entita mapovaná Doctrine není `final`“ přepsat na opačné sdělení: na Symfony 8 jsou
+nativní lazy objekty vždy zapnuté, takže entity `final` být mohou; historický důvod zmínit nejvýš
+jednou větou pro čtenáře na starším stacku. Komentáře „// ne final – Doctrine proxy z entity dědí“
+v pěti ukázkách odstranit spolu s tím.
+
 ### Neověřené / nedohledané
 
 - **`[10]` Pat Helland — *Life Beyond Distributed Transactions: an Apostate's Opinion*.** Kapitola cituje reprint na `queue.acm.org/detail.cfm?id=3025012`. Existenci a autorství eseje potvrzuje Vernonův seznam referencí v Part II [4], který odkazuje na původní CIDR 2007 verzi (`ics.uci.edu/~cs223/papers/cidr07p15.pdf`). Samotný text ale v této rešerši ověřen nebyl, takže tvrzení kapitoly na `:174-177` („jediná životaschopná cesta je one entity per transaction") zůstává neověřené. **Dohledat ručně** – je to jeden ze dvou pilířů argumentace v 07.05.
