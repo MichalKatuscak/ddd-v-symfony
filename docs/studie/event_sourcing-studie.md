@@ -152,7 +152,7 @@ takže na Symfony 8 prooph fakticky nedosáhne bez vlastní integrace.
 ## 4. Symfony / PHP specifika
 
 **Symfony Messenger** [19]. Kapitola uvádí výchozí retry hodnoty jako „3 pokusy s násobičem 2"
-(ř. 1147) – to sedí. Doplnit lze, že výchozí `max_delay` je 10000 ms (kapitola v ukázce
+(ř. 1147) – to sedí. Pozor: výchozí `max_delay` **není** 10000 ms, ale **0** (bez stropu), `jitter` je 0.1 – ověřeno 2026-09-04 v `Configuration.php` FrameworkBundle. Dřívější znění této věty bylo chybné (kapitola v ukázce
 nastavuje 60000, což je legitimní, ale nejde o default) a že Messenger má výchozí `jitter: 0.1`,
 o kterém se kapitola nezmiňuje.
 
