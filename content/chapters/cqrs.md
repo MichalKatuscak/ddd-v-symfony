@@ -1510,7 +1510,11 @@ final class RegisterUserHandlerTest extends TestCase
     {
         $repository = $this->createMock(UserRepository::class);
         $repository->method('findByEmail')
-            ->willReturn($this->createMock(User::class)); // uživatel existuje
+            ->willReturn(User::register(   // skutečný agregát, ne mock
+                UserId::generate(),
+                Email::fromUserInput('jan@example.com'),
+                new HashedPassword('irrelevant'),
+            ));
 
         $hasher = $this->createMock(PasswordHasher::class);
 
