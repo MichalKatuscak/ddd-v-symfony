@@ -374,10 +374,10 @@ enum Currency: string
     }
 }
 
-final class Money
+final readonly class Money
 {
-    public readonly int $amountInCents; // Celé číslo - žádné problémy s plovoucí desetinnou čárkou
-    public readonly Currency $currency;
+    public int $amountInCents; // Celé číslo - žádné problémy s plovoucí desetinnou čárkou
+    public Currency $currency;
 
     public function __construct(int $amountInCents, Currency $currency)
     {

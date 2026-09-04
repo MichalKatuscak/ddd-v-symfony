@@ -153,6 +153,11 @@ final readonly class Money
         }
     }
 
+    public static function zero(Currency $currency): self
+    {
+        return new self(0, $currency);
+    }
+
     public function add(self $other): self
     {
         if ($this->currency !== $other->currency) {
