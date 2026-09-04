@@ -366,7 +366,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-class User extends AggregateRoot // ne final – Doctrine proxy z entity dědí
+final class User extends AggregateRoot
 {
     #[ORM\Id]
     #[ORM\Column(type: 'user_id')]

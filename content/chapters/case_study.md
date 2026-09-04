@@ -366,8 +366,8 @@ s produktovým manažerem i v ticketech. Hlavní pojmy:
 Agregát používá Doctrine atributy přímo na doménové třídě – jako pragmatickou výchozí volbu,
 v souladu s [kapitolou 10](/implementace-v-symfony#mapping-volba-heading). Třída dědí
 z `AggregateRoot` (sdílené chování pro `record` a `releaseEvents`, viz
-[lifecycle agregátu](/zakladni-koncepty#aggregate-root-lifecycle)) a není `final`,
-protože Doctrine generuje proxy děděním z entity. Konstruktor je `private`
+[lifecycle agregátu](/zakladni-koncepty#aggregate-root-lifecycle)) a je `final`,
+protože dědit z agregátu nechceme. Konstruktor je `private`
 a vznik agregátu probíhá přes statickou factory metodu `create()`.
 
 :::code{language="php" filename="src/ProjectManagement/Domain/Model/Project.php"}
@@ -388,7 +388,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'projects')]
-class Project extends AggregateRoot // ne final – Doctrine proxy z entity dědí
+final class Project extends AggregateRoot
 {
     #[ORM\Id]
     #[ORM\Column(type: 'project_id')]

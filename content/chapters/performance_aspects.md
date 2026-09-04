@@ -109,7 +109,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-class Order // ne final – Doctrine proxy z entity dědí
+final class Order
 {
     #[ORM\Id]
     #[ORM\Column(type: 'string', length: 36, unique: true)]
@@ -573,7 +573,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-class Order // ne final – Doctrine proxy z entity dědí
+final class Order
 {
     #[ORM\Id]
     // Symfony Bridge registruje 'uuid' typ - ukládá jako BINARY(16) nebo nativní uuid v PostgreSQL.

@@ -433,10 +433,12 @@ final class Auth0UserProvider implements UserProviderInterface
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        $profile = $this->auth0->management()->users()->get($identifier);
-        if ($profile === null) {
+        $response = $this->auth0->management()->users()->get($identifier);
+        if ($response->getStatusCode() === 404) {
             throw new UserNotFoundException();
         }
+        $profile = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+
         return new Auth0User($profile);
     }
 

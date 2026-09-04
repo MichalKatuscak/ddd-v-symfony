@@ -596,18 +596,17 @@ class Order extends AggregateRoot
 }
 :::
 
-:::callout{type="warn"}
-**Proč entita mapovaná Doctrine není `final`**
+:::callout{type="note"}
+**Entita mapovaná Doctrine může být `final`**
 
-Doctrine ORM 3 s `enable_lazy_ghost_objects` generuje pro lazy loading proxy
-třídu, která z entity *dědí*. Jakmile na entitu míří asociace nebo ji načtete
-přes `getReference()`, `final` skončí chybou při generování proxy. Proto třída
-`Order` výše není `final`, přestože dědičnost agregátů nechceme. Hodnotové
-objekty se naproti tomu mapují jako embeddables nebo custom typy, Doctrine je
-neproxuje – u nich `final` zůstává namístě. Nativní lazy objekty z PHP 8.4
-(Doctrine ORM 3.4+ s `enable_native_lazy_objects`) toto omezení ruší, ghost je
-instancí téže třídy; dokud na nich projekt neběží, entity mapované Doctrine
-zůstávají ne-final.
+Na starším stacku to neplatilo: Doctrine generovala proxy třídu, která z entity
+dědila, takže `final` skončil chybou při jejím vytvoření. Od PHP 8.4 a Doctrine
+ORM 3.4 se pro lazy loading používají nativní lazy objekty a ty žádnou podtřídu
+nevytvářejí – ghost je instancí téže třídy. V DoctrineBundle 3, který jde se
+Symfony 8, jsou nativní lazy objekty zapnuté vždy a vypnout je nelze.
+
+Omezení tedy padlo a `final` u entity projde. Kdo udržuje projekt na starším
+Symfony, počítá s ním dál.
 :::
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php" highlights="33,34,35,36,37,38,39"}
@@ -665,8 +664,6 @@ doctrine:
             money:       App\Shared\Infrastructure\Doctrine\Type\MoneyType
 
     orm:
-        auto_generate_proxy_classes: '%kernel.debug%'
-        enable_lazy_ghost_objects: true   # v ORM 3 jediný podporovaný režim; vypnout jde jen s ORM 2
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         mappings:

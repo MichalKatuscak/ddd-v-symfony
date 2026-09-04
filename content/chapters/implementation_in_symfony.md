@@ -311,8 +311,8 @@ Detaily implementace:
 
 - **`extends AggregateRoot`, bez `final`.** Bázová třída poskytuje `record()`
   a `releaseEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
-  kopii v každé entitě. `final` patří hodnotovým objektům; entity mapované
-  Doctrine zůstávají ne-final, protože lazy ghost proxy z entity dědí
+  kopii v každé entitě. `final` patří hodnotovým objektům i entitám – nativní lazy
+  objekty žádnou podtřídu nevytvářejí, takže Doctrine `final` nevadí
   (rozbor v kapitole [Návrh agregátu](/navrh-agregatu)).
 - **Privátní konstruktor + factory `register()`.** Jediná legální cesta vytvoření.
   Kdyby přibyla další kategorie (importovaný uživatel z LDAP), přidá se další

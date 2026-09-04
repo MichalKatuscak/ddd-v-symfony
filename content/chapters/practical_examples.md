@@ -264,8 +264,8 @@ Jde o zjednodušenou variantu referenční implementace z kapitoly
 se nahrává ve factory `register()`, nikdy v konstruktoru. Dva kompromisy malého
 příkladu: `UserInterface` implementuje přímo agregát, zatímco v plné architektuře
 patří na security adapter v infrastrukturní vrstvě (viz
-[Autorizace v DDD](/autorizace-v-ddd)). A `final` se u entit mapovaných Doctrine
-vynechává, protože lazy proxy z entity dědí.
+[Autorizace v DDD](/autorizace-v-ddd)). A `final` u entit mapovaných Doctrine projde – nativní lazy objekty
+z entity nedědí.
 
 ### Command Handler: RegisterUser {#register-user-handler}
 
