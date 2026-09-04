@@ -78,12 +78,23 @@ přestává být kombinací `if`-ů uvnitř service vrstvy a stává se
 **jmenovaným prvkem Ubiquitous Language**.
 
 Vzor formálně popsali Evans a Fowler v pracovním papíru *Specifications*
-[[martinfowler.com]](https://martinfowler.com/apsupp/spec.pdf); Evans ho později zařadil do
-*Domain-Driven Design* (2003), kapitoly 9 *Making Implicit Concepts Explicit*.
+[[martinfowler.com]](https://martinfowler.com/apsupp/spec.pdf) z roku 1997; Evans ho později
+zařadil do *Domain-Driven Design* (2003), kapitoly 9 *Making Implicit Concepts Explicit*.
 Společný motiv: pravidla, která se v doméně objevují
 opakovaně, si zaslouží vlastní jméno a vlastní typ.
 
+Jedna poznámka ke zdrojům. V destilovaném *DDD Reference* (2015) už Specification není.
+Evans do něj z taktických stavebních bloků zařadil Entities, Value Objects, Domain Events,
+Services, Modules, Aggregates, Repositories a Factories. Vzor tedy nepřeskakuje jen praxe,
+vypadl i z autorova vlastního souhrnu – o důvod víc ho projít pořádně.
+
 ### Kdy použít {#spec-kdy}
+
+Původní papír pojmenovává tři použití vzoru. **Selection** vybírá podmnožinu objektů podle
+kritéria a umí výběr kdykoliv obnovit. **Validation** ověřuje, že objekt je pro daný účel
+vhodný. **Construction-to-order** popisuje, jak má objekt vypadat, aniž řeší, jak takový
+objekt vyrobit; z popisu se dá kandidát sestavit na zakázku. V Symfony projektu se ta
+trojice potkává ve čtyřech typických situacích:
 
 1. **Komplexní doménová pravidla, která se mají skládat.** Pokud máte
    v různých částech aplikace rekombinace téhož motivu – někde
@@ -101,9 +112,18 @@ opakovaně, si zaslouží vlastní jméno a vlastní typ.
    podmínky *„platí pro nákupy > 1000 Kč v ČR a SK, kromě výprodejového zboží“*.
    V doméně se reprezentuje jako instance `AndSpecification` složená z N pod-pravidel
    čitelných z databáze.
-4. **Pravidla validace agregátu.** Místo aby Aggregate sám kontroloval
+4. **Pravidlo validace agregátu.** Místo aby Aggregate sám kontroloval
    všechny invarianty v setterech, deleguje na specifikaci, která je čitelná samostatně
    i testovatelná v izolaci.
+
+Papír k tomu přidává tři implementační strategie a vyplatí se je odlišit, protože každá
+stojí jinak. *Hard Coded Specification* je jedna třída na jedno pravidlo, bez parametrů –
+levná, ale roste s počtem pravidel. *Parameterized Specification* skládá pravidlo za běhu
+z hodnot; přesně to dělá bod 3 s promo kódem čteným z databáze. *Composite Specification*
+přidává uzly `and`, `or`, `not` a čte pravidlo jako výraz. Evans s Fowlerem u ní uvádějí
+i cenu: kompozit je pružný, aniž byste psali spoustu specializovaných tříd, ale musíte
+investovat do frameworku. Zbytek této sekce ukazuje právě ten framework, aby bylo vidět,
+co ta investice obnáší.
 
 ### Kdy NE {#spec-kdy-ne}
 
@@ -111,12 +131,19 @@ Specification je vzor s nezanedbatelnou cenou: každé pravidlo = nová třída,
 nový test. Nehodí se pro:
 
 - Triviální podmínky, které se vyskytují **jednou** a obsahují
-  **jeden if**: `if ($order->total()->amount > 1000)`
+  **jeden if**: `if ($order->total()->amountInCents > 100_000)`
   nepotřebuje vlastní třídu.
 - Pravidla, která jsou ve skutečnosti **součástí invariantu Aggregate**
   (a tedy patří přímo do něj jako privátní metoda).
 - Konfigurační a technické příznaky – Specification má reprezentovat
   *doménové* pravidlo, ne podmínku *„má feature flag enabled“*.
+
+Papír Evanse a Fowlera má vlastní sekci *When Not to Use Specification* a její kritérium je
+ostřejší než výčet výše. Jestliže objekt reprezentuje skutečnou entitu domény místo toho,
+aby kladl podmínky na jinou, případně jen hypotetickou entitu, vzor tam nepatří. Autoři to
+ilustrují dvojicí *Route* a *Route Specification*: trasa je věc, kterou doména zná a která
+má identitu. Specifikace trasy jen popisuje, jaká trasa by vyhovovala – žádná taková zatím
+existovat nemusí.
 
 :::callout{type="warn"}
 ### Anti-vzor: Specification pro každé porovnání {#spec-anti-heading}
@@ -125,8 +152,13 @@ Začátečníci po objevení vzoru často propadnou „efektu kladiva“ a vytvo
 třídy `OrderTotalGreaterThanSpecification`, `OrderTotalLessThanSpecification`,
 `OrderTotalEqualsSpecification` – každá obsahuje jeden řádek kódu.
 To je over-engineering: ztrácíte čitelnost domény, protože jména přestanou být
-doménová a stanou se z nich obecné predikáty. Specification má reprezentovat
-*celou doménovou otázku*, ne jednotlivý operátor.
+doménová a stanou se z nich obecné predikáty.
+
+Rozdíl je v rovině, ve které třída stojí. Doménové jméno má nést *výsledná* specifikace –
+ta, kterou předáváte dál a která odpovídá na celou otázku. Generické parametrizované listy
+uvnitř kompozitu legitimní jsou; Evans s Fowlerem u *Composite Specification* přesně takové
+uzly předpokládají a jejich vlastní ukázkou je `MaximumTemperatureSpecification`. Problém
+nastane, až generický predikát vyleze ven a stane se rozhraním, kterým se doména ptá.
 :::
 
 ### Skladba pomocí kombinátorů {#spec-diagram}
@@ -328,7 +360,10 @@ final class EligibleForFreeShipping extends CompositeSpecification
     {
         assert($candidate instanceof Order);
 
-        return $candidate->total()->isGreaterThanOrEqual($this->threshold);
+        $total = $candidate->total();
+
+        return $total->currency === $this->threshold->currency
+            && $total->amountInCents >= $this->threshold->amountInCents;
     }
 }
 :::
@@ -407,6 +442,11 @@ final class NotInBlacklist extends CompositeSpecification
 }
 :::
 
+Volání `assert($candidate instanceof Order)` v ukázkách zužuje typ pro statickou analýzu,
+ne pro běh. S `zend.assertions=-1` se v produkci vůbec nezkompiluje, takže runtime pojistka
+to není. Skutečnou kontrolu dělá typový parametr `@template T` spolu s PHPStan nebo Psalm,
+které kompozici hlídají staticky.
+
 ### Kompozice v aplikační vrstvě {#spec-compose}
 
 Marketingová akce *„doprava zdarma pro nákupy nad 1000 Kč v EU, kromě zákazníků
@@ -427,6 +467,7 @@ use App\Ordering\Domain\Order;
 use App\Ordering\Domain\Specification\EligibleForFreeShipping;
 use App\Ordering\Domain\Specification\InEUCountry;
 use App\Ordering\Domain\Specification\NotInBlacklist;
+use App\SharedKernel\Domain\Currency;
 use App\SharedKernel\Domain\Money;
 
 final class FreeShippingPolicy
@@ -435,7 +476,8 @@ final class FreeShippingPolicy
 
     public function applyTo(Order $order): void
     {
-        $promo = (new EligibleForFreeShipping(Money::czk(100_000))) // 1000 Kč v haléřích
+        // 1000 Kč v haléřích – Money drží částku jako celé číslo.
+        $promo = (new EligibleForFreeShipping(new Money(100_000, Currency::CZK)))
             ->and(new InEUCountry())
             ->and(new NotInBlacklist($this->blacklist->all()));
 
@@ -450,14 +492,67 @@ Pravidlo lze v testu rozložit na atomy a ověřit každý zvlášť. Když prod
 rozhodne, že na blacklist se nově dívat nemá, smažete jeden řádek z kompozice – bez
 nutnosti pročítat sevřený `if` uvnitř komplexní service vrstvy.
 
+### Dva vzory z papíru, které se neujaly {#spec-subsumption}
+
+Papír *Specifications* obsahuje dva navazující vzory, které se do knih ani do PHP praxe
+nedostaly. Oba přitom řeší otázku, na kterou `isSatisfiedBy()` odpovědět neumí.
+
+**Subsumption** srovnává specifikace mezi sebou místo specifikace s kandidátem. Metoda
+`isGeneralizationOf()` odpoví, zda je jedno pravidlo obecnější než druhé. Používá se
+u párování nabídky s poptávkou, kde obě strany popisujete specifikací a konkrétní objekt
+zatím neexistuje.
+
+**Partially Satisfied Specification** přidává `remainderUnsatisfiedBy()`, která vrátí
+zbytkovou specifikaci – tedy to, co ještě zbývá splnit. Uživatel místo `false` dostane
+odpověď „chybí doručovací adresa v EU“:
+
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/CompositeSpecification.php (doplněk)"}
+/**
+ * Vrátí specifikaci popisující, co kandidát ještě nesplnil,
+ * nebo null, pokud splnil všechno.
+ *
+ * @param T $candidate
+ * @return Specification<T>|null
+ */
+public function remainderUnsatisfiedBy(mixed $candidate): ?Specification
+{
+    return $this->isSatisfiedBy($candidate) ? null : $this;
+}
+:::
+
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/AndSpecification.php (doplněk)"}
+public function remainderUnsatisfiedBy(mixed $candidate): ?Specification
+{
+    $left = $this->left->remainderUnsatisfiedBy($candidate);
+    $right = $this->right->remainderUnsatisfiedBy($candidate);
+
+    if ($left !== null && $right !== null) {
+        return new self($left, $right);
+    }
+
+    return $left ?? $right;
+}
+:::
+
+Cena je zřejmá: metodu musí implementovat každý kombinátor a u `or` a `not` už odpověď
+není jednoznačná. Přínos taky: formulář nebo API vrátí důvod zamítnutí odvozený z téhož
+pravidla, které rozhodlo, místo ručně psané hlášky, která se rozejde s logikou.
+
 ### Double-dispatch do Doctrine {#spec-doctrine}
 
 Specifikace je užitečná i ve **druhé roli** – jako parametr query do
 repozitáře. Místo metody `findEligibleForFreeShippingInEU(): array`, kterou
 byste pro každou novou kombinaci pravidel přidávali, dostane repozitář *jakoukoliv*
-specifikaci, převede ji na DQL/SQL kritérium a vrátí výsledek. Tomuto přístupu se
+specifikaci, převede ji na dotaz a vrátí výsledek. Tomuto přístupu se
 říká **double-dispatch**: specifikace nese pravidlo, repozitář ví, jak ho
 přeložit do persistence.
+
+Rozhoduje se tu jedna věc: co přesně specifikace vrací. Mutovat předaný `QueryBuilder` se nabízí,
+ale je to slepá ulička: metoda s návratovým typem `void` nejde skládat, takže `or` a `not`
+se přeložit nedají. Doctrine na to má vlastní mezireprezentaci. `Doctrine\Common\Collections\Criteria`
+staví výrazy přes `Criteria::expr()` a nabízí `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `in`,
+`notIn`, `contains`, `startsWith`, `endsWith`, `isNull`, `memberOf` a kombinátory
+`andX`, `orX`, `not`. Specifikace tedy vrací **výraz**, ne vedlejší efekt:
 
 :::code{language="php" filename="src/SharedKernel/Domain/Specification/QuerySpecification.php"}
 <?php
@@ -466,19 +561,19 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Domain\Specification;
 
-use Doctrine\ORM\QueryBuilder;
+use Doctrine\Common\Collections\Expr\Expression;
 
 /**
- * Specifikace, která ví, jak se převést na Doctrine kritérium.
- * Implementuje double-dispatch: specifikace zná své pravidlo,
- * repozitář ví, jak ho aplikovat na QueryBuilder.
+ * Specifikace, která umí své pravidlo vyjádřit jako Doctrine výraz.
+ * Implementuje double-dispatch: specifikace zná pravidlo,
+ * repozitář ví, jak výraz spustit nad databází.
  *
  * @template T
  * @extends Specification<T>
  */
 interface QuerySpecification extends Specification
 {
-    public function asDoctrineCriteria(QueryBuilder $qb, string $alias): void;
+    public function toExpression(): Expression;
 }
 :::
 
@@ -493,7 +588,8 @@ use App\Ordering\Domain\Order;
 use App\SharedKernel\Domain\Money;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 use App\SharedKernel\Domain\Specification\QuerySpecification;
-use Doctrine\ORM\QueryBuilder;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Expr\Expression;
 
 /**
  * @extends CompositeSpecification<Order>
@@ -507,19 +603,24 @@ final class EligibleForFreeShipping extends CompositeSpecification implements Qu
     {
         assert($candidate instanceof Order);
 
-        return $candidate->total()->isGreaterThanOrEqual($this->threshold);
+        $total = $candidate->total();
+
+        return $total->currency === $this->threshold->currency
+            && $total->amountInCents >= $this->threshold->amountInCents;
     }
 
-    public function asDoctrineCriteria(QueryBuilder $qb, string $alias): void
+    public function toExpression(): Expression
     {
-        $qb->andWhere(sprintf('%s.totalAmount >= :threshold', $alias))
-           ->setParameter('threshold', $this->threshold->amount);
+        return Criteria::expr()->andX(
+            Criteria::expr()->eq('totalCurrency', $this->threshold->currency->value),
+            Criteria::expr()->gte('totalAmount', $this->threshold->amountInCents),
+        );
     }
 }
 :::
 
-Repozitář pak vystaví obecnou metodu `match()`, která přijme jakoukoliv
-`QuerySpecification` a přeloží ji na DQL:
+Repozitář pak vystaví obecnou metodu `match()`. `Doctrine\ORM\EntityRepository` implementuje
+rozhraní `Selectable`, takže `Criteria` umí spustit přímo:
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php"}
 <?php
@@ -531,6 +632,7 @@ namespace App\Ordering\Infrastructure\Doctrine;
 use App\Ordering\Domain\Order;
 use App\Ordering\Domain\OrderRepository;
 use App\SharedKernel\Domain\Specification\QuerySpecification;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineOrderRepository implements OrderRepository
@@ -543,87 +645,106 @@ final class DoctrineOrderRepository implements OrderRepository
      */
     public function match(QuerySpecification $spec): array
     {
-        $qb = $this->em->createQueryBuilder()
-            ->select('o')
-            ->from(Order::class, 'o');
+        $criteria = new Criteria($spec->toExpression());
 
-        $spec->asDoctrineCriteria($qb, 'o');
-
-        return $qb->getQuery()->getResult();
+        return array_values(
+            $this->em->getRepository(Order::class)->matching($criteria)->toArray(),
+        );
     }
 }
 :::
 
-Obě role specifikace (in-memory predikát i překladač do query) sedí v jedné třídě,
-takže když se PHP a DQL podoba začnou rozcházet, je to při code review vidět na jedné obrazovce.
+Tatáž `Criteria` funguje i nad `ArrayCollection` v paměti, protože rozhraní `Selectable`
+implementuje kolekce stejně jako repozitář. Když dotaz potřebuje join nebo řazení přes vazbu, výraz se vloží do `QueryBuilder`u
+přes `addCriteria()` a zbytek dotazu zůstane ruční:
+
+:::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php (fragment)"}
+/**
+ * @param QuerySpecification<Order> $spec
+ * @return list<Order>
+ */
+public function matchWithCustomer(QuerySpecification $spec): array
+{
+    return $this->em->createQueryBuilder()
+        ->select('o', 'c')
+        ->from(Order::class, 'o')
+        ->join('o.customer', 'c')
+        ->addCriteria(new Criteria($spec->toExpression()))
+        ->getQuery()
+        ->getResult();
+}
+:::
+
+Obě role specifikace (in-memory predikát i překlad do dotazu) sedí v jedné třídě,
+takže když se PHP a databázová podoba začnou rozcházet, je to při code review vidět na jedné obrazovce.
 Nic tento soulad ale nevynucuje – jde o dvě nezávislé implementace téhož pravidla. Pojistkou
 je kontraktní test: nad stejnou sadou testovacích dat ověří, že `isSatisfiedBy()`
 označí tytéž objekty, jaké `match()` vrátí z databáze. Když se obě verze rozejdou,
 test selže dřív než produkce.
 
-### Limity skládání: kombinátory a DQL {#spec-query-kombinatory}
+Cestu od repozitáře s příliš mnoha metodami přes Doctrine `Criteria` ke specifikacím popsal
+Kévin Gomez v textu *On Taming Repository Classes in Doctrine… Among other things*
+(7. 2. 2015). Pozor na záměnu se stejnojmenným článkem Benjamina Eberleie z roku 2013;
+ten se Specification zabývá jen okrajově.
 
-Kombinátory `and`/`or`/`not` z úvodu sekce implementují jen `Specification`,
-ne `QuerySpecification`. Složená specifikace proto do DQL přeložit nejde –
-`match()` ji odmítne už typovou kontrolou. Nabízejí se dvě cesty. Buď skládání
-omezíte na in-memory použití a repozitáři předáváte pouze atomické specifikace.
-Nebo překlad doplníte i pro kombinátory; u `AndSpecification` stačí přeložit obě
-strany, protože `andWhere()` připojuje podmínky konjunkcí:
+### Limity: co Criteria unese a co ne {#spec-query-kombinatory}
 
-:::code{language="php" filename="src/SharedKernel/Domain/Specification/AndSpecification.php (s překladem do DQL)"}
-final class AndSpecification extends CompositeSpecification implements QuerySpecification
+Protože specifikace vrací výraz, kombinátory se přeloží stejně přímočaře jako predikát.
+`AndSpecification` složí `andX`, `OrSpecification` `orX`, `NotSpecification` `not`:
+
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/AndSpecification.php (doplněk)"}
+public function toExpression(): Expression
 {
-    /**
-     * @param Specification<T> $left
-     * @param Specification<T> $right
-     */
-    public function __construct(
-        private readonly Specification $left,
-        private readonly Specification $right,
-    ) {}
-
-    public function isSatisfiedBy(mixed $candidate): bool
-    {
-        return $this->left->isSatisfiedBy($candidate)
-            && $this->right->isSatisfiedBy($candidate);
+    if (!$this->left instanceof QuerySpecification
+        || !$this->right instanceof QuerySpecification
+    ) {
+        throw new \LogicException(
+            'Do dotazu lze přeložit jen kompozici QuerySpecification.',
+        );
     }
 
-    public function asDoctrineCriteria(QueryBuilder $qb, string $alias): void
-    {
-        if (!$this->left instanceof QuerySpecification
-            || !$this->right instanceof QuerySpecification
-        ) {
-            throw new \LogicException(
-                'Do DQL lze přeložit jen kompozici QuerySpecification.',
-            );
-        }
-
-        $this->left->asDoctrineCriteria($qb, $alias);
-        $this->right->asDoctrineCriteria($qb, $alias);
-    }
+    return Criteria::expr()->andX(
+        $this->left->toExpression(),
+        $this->right->toExpression(),
+    );
 }
 :::
 
-Jedna past zůstává i u konjunkce: názvy parametrů. Dvě pod-specifikace, které
-obě zavolají `setParameter('threshold', ...)`, se tiše přepíšou – vyhraje
-poslední hodnota a dotaz vrátí špatné výsledky bez jediné chyby. Atomické
-specifikace proto parametry pojmenovávají s unikátním prefixem nebo suffixem
-(`largeOrder_threshold`), ne generickým jménem.
+Kombinátor implementuje `QuerySpecification`, ale jeho operandy být query specifikacemi
+nemusí. Typová kontrola na vstupu `match()` proto neprojde až do listů a rozpor se ozve
+až běhovou výjimkou. Za tu cenu dostanete skládání, které dřív končilo u konjunkce.
 
-U `OrSpecification` a `NotSpecification` už tak levně nevyjdete. Podmínky nelze
-jen řadit za sebe – musíte skládat výrazové fragmenty přes
-`$qb->expr()`. V tom bodě se generický překlad
-přestává vyplácet: pro složitější dotaz je čitelnější vlastní query metoda
-repozitáře (`findOrdersEligibleForPromo()`), která pravidlo zapíše v DQL přímo
-a kontraktním testem se sváže s in-memory specifikací.
+Zmizí i past s názvy parametrů: `Criteria` si placeholdery generuje sama, takže dvě
+pod-specifikace se stejnou hodnotou prahu se navzájem nepřepíšou.
+
+Limity leží jinde a jsou reálné. `Criteria` porovnává v `eq` a `neq` striktně, takže
+srovnání instancí `DateTimeImmutable` se chová jinak než v SQL. Vlastní DQL funkce, joiny,
+agregace ani poddotazy vyjádřit nejdou. Pole ve výrazu odkazují na vlastnosti entity, ne na
+sloupce, takže pravidlo nad vazbou se do výrazu nedostane bez `addCriteria()` a ručního
+joinu. Pro takový dotaz zůstává správnou volbou vlastní repozitářová metoda
+(`findOrdersEligibleForPromo()`), která pravidlo zapíše v DQL přímo a kontraktním testem
+se sváže s in-memory specifikací.
+
+Poslední poznámka k rozsahu. Celý framework z této sekce existuje i hotový.
+`happyr/doctrine-specification` má přes 900 tisíc instalací, podporuje Doctrine ORM 3
+a repozitář rozšiřuje o `match()`; pravidla se skládají přes `Spec::andX()` a `Spec::orX()`.
+Filtrování navíc odděluje od modifikátorů výsledku (řazení, hydratace), což ruční kostra
+z této kapitoly nemá. Ukázky výše jsou tu proto, aby bylo vidět, co balíček uvnitř dělá.
+V projektu, kde specifikace nejsou předmětem výuky, je balíček levnější volbou.
 
 Pro hluboký teoretický základ vzoru: Evans, E., *Domain-Driven Design* (2003),
 kapitola 9 *Making Implicit Concepts Explicit*; Evans & Fowler, pracovní
 papír *Specifications* (1997), dostupný na martinfowler.com.
 Praktická aplikace na agregátech: Vernon, V., *Implementing Domain-Driven Design*
-(2013).
+(2013). K Doctrine části: Gomez, K., *On Taming Repository Classes in Doctrine… Among
+other things* (2015) a dokumentace `doctrine/collections` k `Criteria` a `Selectable`.
 
 ## 08.03 Domain Services {#domain-services}
+
+Doménovou službu zmiňují [Základní koncepty](/zakladni-koncepty#domain-services) jako jeden
+ze stavebních bloků a [Implementace v Symfony](/implementace-v-symfony) ukazuje, jak ji
+zaregistrovat v containeru. Zde jde o rozhodovací kritéria: kdy služba vzniknout má, kdy je
+to jen přesunutá logika z entity a kudy vede hranice vůči Application vrstvě.
 
 ### Co to je {#ds-definice}
 
@@ -726,9 +847,8 @@ final class MoneyTransferService
 
 Všimněte si tří rysů, podle kterých poznáte „opravdovou“ Domain Service:
 
-1. **Žádný stav** – třída nemá konstruktorové závislosti na repozitářích
-   ani `EntityManager`. Pracuje pouze s objekty, které dostane
-   v parametrech.
+1. **Žádný stav** – třída nedrží mezi voláními nic vlastního. Pracuje s objekty,
+   které dostane v parametrech.
 2. **Žádné perzistenční volání** – `$from->withdraw()` a
    `$to->deposit()` mutují stav agregátů, ale ukládat je bude až
    Application Service nebo command handler. Domain Service nikdy nevolá
@@ -736,6 +856,20 @@ Všimněte si tří rysů, podle kterých poznáte „opravdovou“ Domain Servi
 3. **Vyhazuje doménové výjimky** – `InsufficientFunds`,
    `\DomainException` – ne `\RuntimeException` nebo HTTP
    status kódy.
+
+První bod se často zpřísňuje na „doménová služba nesmí mít v konstruktoru repozitář“.
+Jako pravidlo to neobstojí a zdroje se rozcházejí. Vladimir Khorikov rozlišuje *pure*
+a *impure* doménovou službu: druhá sáhne do vnějšího systému, protože bez toho doménové
+rozhodnutí nepadne. Matthias Noback umísťuje rozhraní repozitáře do Domain vrstvy právě
+proto, že s ním doménový kód pracovat má. Vernonova námitka, na kterou se v této debatě
+odkazuje nejčastěji, navíc míří na injektování repozitáře do **agregátu**, ne do služby.
+
+Praktické vodítko zní jinak než zákaz. Než služba dostane repozitář, stojí za zvážení,
+jestli jí data nemá dodat volající. Když si je služba načítá sama, přebírá kus orchestrace a její test
+přestane být čistě jednotkový. Když je ale jinak nezískáte – typicky u pravidla, které
+potřebuje odpověď nad celou kolekcí – je závislost na doménovém rozhraní přijatelná
+a služba zůstává doménová. Rozhoduje, jestli třída obsahuje doménové pravidlo, ne počet
+jejích konstruktorových parametrů.
 
 :::callout{type="warn"}
 ### Anti-vzor: Application Service vydávaný za Domain Service {#ds-anti-heading}
@@ -760,7 +894,7 @@ rozdíly, na které se v code review ptáme:
 |---|---|---|---|
 | Účel | Doménová logika bez přirozeného vlastníka | Koordinace use case (transakce, autorizace, eventy) | Technická integrace (DB, e-mail, externí API) |
 | Vrstva | Domain | Application | Infrastructure |
-| Závislosti | Pouze doménové typy (Entity, VO, jiné Domain Services) | Repozitáře, Event Bus, Domain Services, Authorization | HTTP klienti, knihovny (Mailer, Stripe SDK), filesystem |
+| Závislosti | Doménové typy a doménová rozhraní (Entity, VO, jiné Domain Services) | Repozitáře, Event Bus, Domain Services, Authorization | HTTP klienti, knihovny (Mailer, Stripe SDK), filesystem |
 | Stav | Stateless | Stateless (jednorázový handler) | Často stateless, ale může držet connection pool |
 | Volá perzistenci? | Ne | Ano (přes repozitář) | Ano (sama je perzistencí) |
 | Vyhazuje výjimky | Doménové (`InsufficientFunds`) | Aplikační (`UnauthorizedException`, validation) | Infrastrukturní (`ConnectionException`) |
@@ -792,6 +926,10 @@ Citace: Evans, E., *Domain-Driven Design* (2003), kapitola 5
 Design* (2013), kapitola 7.
 
 ## 08.04 Factories {#factories}
+
+Named constructor a rekonstituci potkáte i v [Základních konceptech](/zakladni-koncepty#aggregates),
+tam jako součást výkladu agregátu. Tato sekce je bere jako samostatný vzor: kdy stačí
+statická metoda, kdy je potřeba zvláštní třída a kam taková třída patří ve struktuře modulu.
 
 ### Co to je {#fac-definice}
 
@@ -932,6 +1070,12 @@ final class Order extends AggregateRoot
 }
 :::
 
+Signatura `place()` zde přebírá rovnou seznam položek, aby šlo ukázat invariant „objednávka
+bez položky nevznikne“ vynucený už při vzniku. Kanonický `Order` v této knize položky
+přidává metodou `addItem(ProductId $productId, int $quantity, Money $unitPrice)` a prázdnou
+objednávku dovolí; invariant pak hlídá `confirm()`. Obě varianty jsou obhajitelné a volba
+mezi nimi je rozhodnutí o tom, kde smí agregát existovat v rozpracovaném stavu.
+
 Tři výhody static method factory oproti samostatné Factory class:
 
 1. **Doménové jméno**. `Order::place()` nebo
@@ -1001,21 +1145,35 @@ Všimněte si, že Factory class **uvnitř volá** `Order::place()` –
 nepřebírá zodpovědnost za invariant „aspoň 1 položka“, ten zůstává v named
 constructor agregátu. Factory řeší pouze *orchestraci vstupních dat*.
 
-:::callout{type="pattern"}
-### Pravidlo (Vernon 2013): static method preferred {#vernon-rule-heading}
+Trojice `CartRepository`, `PricingService` a `ClockInterface` v konstruktoru vypadá jako
+rozpor se sekcí 08.03, kde repozitář posouval třídu blíž k Application vrstvě. Rozřešení
+dává *DDD Reference*: factory sama nemusí mít v modelu žádnou odpovědnost, a přesto je
+součástí doménového návrhu. Nemodeluje doménový pojem, jen sestavuje agregát podle
+doménových pravidel. Proto smí sáhnout po repozitáři a zůstat přitom v `Domain/Factory/`.
+Hranice se posune jinam: jakmile by factory začala výsledek ukládat nebo publikovat
+událost, je z ní command handler.
 
-Vaughn Vernon v kapitole 11 *Implementing Domain-Driven Design* (2013) preferuje
-factory metodu na samotném agregátu; samostatnou Factory class doporučuje až tehdy,
-když vznik nutně potřebuje závislosti, které nelze poskytnout parametrem. Důvod je
-prostý: statická metoda na agregátu
-drží invarianty pohromadě s kódem agregátu. Samostatná Factory je rozdělí na dva
-soubory a vystavuje agregát public konstruktoru, což oslabuje invariant „nelze vytvořit
-nevalidní stav“.
+:::callout{type="pattern"}
+### Atribuce: co říká Vernon a co Verraes {#vernon-rule-heading}
+
+Vaughn Vernon věnuje factories kapitolu 11 *Implementing Domain-Driven Design* (2013)
+a člení ji na *Factories in the Domain Model*, *Factory Method on Aggregate Root*
+a *Factory on Service*. Pořadí je samo o sobě doporučení: factory metoda na agregátním
+kořeni stojí v popředí, samostatná factory přichází až jako druhá možnost na úrovni
+service. To je opora pro konvenci této knihy, tedy `Order::place()` místo zvláštní
+třídy `OrderFactory`, dokud si ji nevynutí spolupráce více agregátů.
+
+Jednu věc si ale Vernonovi nepřipisujte. Jeho *Factory Method on Aggregate Root* je
+instanční metoda existujícího agregátu, která vyrábí **jiný** agregát – `Forum` vytvoří
+`Discussion`, `Product` vytvoří `BacklogItem`. Vzor „privátní konstruktor plus statická
+`::place()`“ je konvence PHP komunity a jejím nejcitovanějším zdrojem je Mathias Verraes,
+*Named Constructors in PHP* (2014). Verraes vychází z toho, že PHP dovolí jediný
+konstruktor na třídu, a privátní konstruktor doporučuje kvůli volnosti refaktorovat
+vnitřek třídy, aniž se dotknete volajících.
 
 Aplikováno na PHP 8.4: privátní konstruktor + statické `::place()`,
-`::resume()`, `::fromImport()`. Factory class jen tehdy, když
-potřebujete `EntityManager`, `HttpClient`, `Clock`
-nebo doménovou službu.
+`::placeDigital()`, `::fromImport()`. Factory class až tehdy, když
+vznik potřebuje `HttpClient`, `Clock`, repozitář nebo doménovou službu.
 :::
 
 ### Reconstitution: zvláštní případ Factory {#fac-reconstitute}
@@ -1058,7 +1216,8 @@ který by ji volal místo `::place()`, by porušil invariant agregátu.
 
 Pro detail: Evans, E., *Domain-Driven Design* (2003), kapitola 6
 *The Life Cycle of a Domain Object*; Vernon, V., *Implementing Domain-Driven
-Design* (2013), kapitola 11 *Factories*. Souvisejí kapitoly:
+Design* (2013), kapitola 11 *Factories*; Verraes, M., *Named Constructors in PHP*
+(2014). Souvisejí kapitoly:
 [Základní koncepty – Agregáty](/zakladni-koncepty#aggregates),
 [Event Sourcing](/event-sourcing) (reconstitution z event
 streamu).
@@ -1077,13 +1236,19 @@ Design* (2003). Moduly chápe jako vyjádření hrubší struktury modelu:
 členění balíčků má vycházet z doménového jazyka, ne z technické
 organizace kódu.
 
+*DDD Reference* to formuluje ostřeji. Modul je součástí modelu, jeho jméno patří do
+Ubiquitous Language a má obsahovat kohezní sadu pojmů. Z toho plyne důsledek, který se
+v praxi přeskakuje: pokud modularita nevede k nízké provázanosti mezi moduly, řešením je
+změnit model, ne přitvrdit pravidla v phparkitectu. Vysoký coupling mezi moduly je nález
+o doméně, ne o konfiguraci nástroje.
+
 V Symfony 8 a PHP 8.4 to konkrétně znamená:
 
 - **PSR-4 namespace + uspořádání složek** podle
-  [Bounded Contextů](/zakladni-koncepty#bounded-contexts).
-- **`composer.json` autoload sekce**, která mapuje namespace
-  `App\Ordering\` na `src/Ordering/` – ne na
-  `src/` jako ve výchozím Symfony skeletu.
+  [Bounded Contextů](/zakladni-koncepty#bounded-contexts). Výchozí mapování
+  `App\` na `src/` na to stačí, viz [PSR-4, autoload a services.yaml](#mod-composer).
+- **Publikované rozhraní modulu**, tedy úzká množina typů, přes kterou do něj
+  vstupuje okolí.
 - **Architecture testing**, který zkontroluje, že žádný kód
   v `App\Billing\` přímo nedotahuje do `App\Ordering\`.
 
@@ -1180,43 +1345,40 @@ pro výuku jednotlivých Symfony komponent. V doménově bohaté aplikaci je tř
 vyhnout.
 :::
 
-### composer.json autoload {#mod-composer}
+### PSR-4, autoload a services.yaml {#mod-composer}
 
-Aby PSR-4 namespace odpovídala adresářové struktuře, upravte
-`composer.json`. Výchozí Symfony nastavení mapuje `App\` na
-`src/`, ale chceme každý modul s vlastním kořenem:
+Rozšířená představa je, že modulová struktura vyžaduje vlastní PSR-4 kořen pro každý modul.
+Nevyžaduje. PSR-4 mapuje *prefix* namespace na *základní adresář* a zbytek namespace překládá
+na podadresáře. Při výchozím symfonním mapování `"App\\": "src/"` se tedy třída
+`App\Ordering\Domain\Order` hledá v `src/Ordering/Domain/Order.php` – přesně tam, kam ji
+modulová struktura klade. Do `composer.json` sahat nemusíte a struktura z předchozí ukázky
+funguje bez jediné změny.
 
-:::code{language="json" filename="composer.json (fragment)"}
+Vlastní kořen na modul má smysl ve dvou situacích. Buď moduly nesedí pod `src/`, nebo se
+z modulu má časem stát samostatný composer balíček s vlastním `composer.json`. Zápis pak
+vypadá takto:
+
+:::code{language="json" filename="composer.json (fragment) – jen pro moduly mimo src/"}
 {
-    "name": "your-org/your-app",
-    "type": "project",
-    "require": {
-        "php": ">=8.4",
-        "symfony/framework-bundle": "^8.0",
-        "doctrine/orm": "^3.0"
-    },
     "autoload": {
         "psr-4": {
-            "App\\Ordering\\":     "src/Ordering/",
-            "App\\Billing\\":      "src/Billing/",
-            "App\\Inventory\\":    "src/Inventory/",
-            "App\\Shipping\\":     "src/Shipping/",
+            "App\\Ordering\\":     "modules/ordering/src/",
+            "App\\Billing\\":      "modules/billing/src/",
             "App\\SharedKernel\\": "src/SharedKernel/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "App\\Tests\\Ordering\\":  "tests/Ordering/",
-            "App\\Tests\\Billing\\":   "tests/Billing/"
         }
     }
 }
 :::
 
-Po úpravě spusťte `composer dump-autoload`. Symfony skeleton očekává
-controllery v `App\Controller\`. Pro modulové uspořádání přesuňte
-controllery do `App\Ordering\Infrastructure\Http\` a upravte
-`config/services.yaml`:
+Po takové úpravě je potřeba spustit `composer dump-autoload`.
+
+Podobný mýtus se drží u `config/services.yaml`. Výchozí konfigurace registruje `App\`
+s `resource: '../src/'`, takže služby uvnitř modulů se autoregistrují samy. Controller
+dědící `AbstractController` dostane tag `controller.service_arguments` od `autoconfigure: true`,
+takže ani ten se vypisovat nemusí. Výčet per modul je tedy volba, ne nutnost.
+
+Vyplatí se ve chvíli, kdy modulům nastavujete jiná `_defaults`, nebo když chcete doménovou
+vrstvu z containeru vyloučit:
 
 :::code{language="yaml" filename="config/services.yaml (fragment)"}
 services:
@@ -1224,24 +1386,39 @@ services:
         autowire: true
         autoconfigure: true
 
-    # Auto-registrace všech služeb v každém modulu, v jejich Infrastructure
-    # a Application vrstvách. Doménová vrstva je bez auto-konfigurace
-    # – doménové objekty žijí mimo container.
-    App\Ordering\Application\:
-        resource: '../src/Ordering/Application/'
-    App\Ordering\Infrastructure\:
-        resource: '../src/Ordering/Infrastructure/'
-    App\Billing\Application\:
-        resource: '../src/Billing/Application/'
-    App\Billing\Infrastructure\:
-        resource: '../src/Billing/Infrastructure/'
-    # ...
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/*/Domain/'
+            - '../src/SharedKernel/Domain/'
 
-    # Controllery z modulů – Symfony je standardně hledá v App\Controller\
-    App\Ordering\Infrastructure\Http\:
-        resource: '../src/Ordering/Infrastructure/Http/'
-        tags: ['controller.service_arguments']
+    # Doménové služby do containeru patří, zbytek doménové vrstvy ne.
+    App\Ordering\Domain\Service\:
+        resource: '../src/Ordering/Domain/Service/'
 :::
+
+Výluka drží agregáty, value objekty a specifikace mimo container. Nikdo je neinjektuje,
+takže jejich přítomnost v definicích služeb by jen svědčila o tom, že se s nimi zachází
+špatně. Doménové služby se registrují zvlášť, protože ty injektovat chcete.
+
+### Kontrakt modulu {#mod-kontrakt}
+
+Evansův Module z roku 2003 stojí na kohezi pojmů a na tom, že moduly nekoukají do sebe
+navzájem. Dnešní praxe pod hlavičkou *modulárního monolitu* přidává třetí požadavek.
+Kamil Grzybek popisuje modul jako vertikální řez byznysem se třemi vlastnostmi:
+nezávislost a zaměnitelnost, úplnost (obsahuje vše potřebné k dodání funkce) a dobře
+definované rozhraní, přes které se do něj vstupuje.
+
+Ta třetí vlastnost je posun oproti roku 2003. Nestačí zakázat cizí import; modul má
+vystavit úzkou množinu typů, které smí volat okolí, a zbytek nechat interní. Prakticky
+to znamená složku `Ordering/PublicApi/` s command a query rozhraními plus publikované
+události, a architektonické pravidlo, že z jiného modulu se smí importovat jedině odtud.
+Rozdíl proti pouhému zákazu importu: refaktoring uvnitř modulu pak nikoho nezajímá,
+protože se nedotkne ničeho, co soused vidí.
+
+Modulární monolit jako celek – kdy se vyplatí, jak z něj později odejít a jaká pravidla
+mu nastavit – rozebírá kapitola
+[DDD a microservices](/ddd-a-microservices#modular-monolith).
 
 ### Architecture testing: hranice vynucené v CI {#mod-phparkitect}
 
@@ -1271,6 +1448,10 @@ composer require --dev phparkitect/phparkitect
 vendor/bin/phparkitect check
 :::
 
+Do zavedeného projektu se nástroj nasazuje přes *baseline*. Vygenerovaný seznam existujících
+porušení build neshodí, takže pravidla mohou začít platit hned a starý dluh se odbourává
+postupně. Bez baseline skončí první spuštění stovkami chyb a tým nástroj vypne.
+
 Druhou možností je [Deptrac](https://github.com/deptrac/deptrac), který
 vrstvy a povolené závislosti popisuje v YAML souboru. Kompletní Deptrac
 konfiguraci pro DDD projekt včetně zapojení do CI najdete v kapitole
@@ -1280,9 +1461,10 @@ mezi nástroji liší, tři pravidla výše vyjádří oba.
 :::callout{type="pattern"}
 ### Bez architektonických testů je Modules jen přání {#phparkitect-tip-heading}
 
-Modulární organizace bez vynucení v CI se rozpadá. Stačí 6 měsíců a hot-fix tlak –
-refaktoring zpět je pak týdenní práce. Doporučujeme **od prvního commitu** nasadit phparkitect,
-případně `deptrac`, a udržovat zelený build. Náklad je nízký
+Modulární organizace bez vynucení v CI se rozpadá. Stačí pár sprintů pod hot-fix tlakem
+a z modulů je zase klubko; návrat je pak samostatný refaktoring, ne úprava jednoho
+souboru. Nasaďte **od prvního commitu** phparkitect nebo `deptrac`
+a udržujte zelený build. Náklad je nízký
 (jeden YAML/PHP soubor v repu), přínos vysoký – modul zůstává modulem,
 i když do projektu přijde pátý nový vývojář, který Evansův text nikdy nečetl.
 
@@ -1308,10 +1490,15 @@ Bounded Context:
 
 | Vzor | Vztah k Aggregate | Vztah k Domain Event | Vztah k Bounded Context |
 |---|---|---|---|
-| Specification | Validuje invariant agregátu nebo filtruje seznam agregátů | Pravidlo, které spustí event (např. *OrderEligibleForFreeShipping*) | Žije uvnitř BC; obvykle se nesdílí mezi BC |
+| Specification | Validuje invariant agregátu nebo filtruje seznam agregátů | Pravidlo, které spustí event (např. *OrderEligibleForFreeShipping*) | Pravidlo žije uvnitř BC; sdílí se jen kostra vzoru v SharedKernelu |
 | Domain Service | Koordinuje 2+ agregáty bez toho, aby je propojila závislostí | Volá agregáty, které pak emitují events | Žije uvnitř BC; cross-BC koordinace patří do Application Service / Saga |
 | Factory | Tvoří agregát s validovaným počátečním stavem | Při vzniku obvykle emituje first event (*OrderPlaced*) | Žije uvnitř BC; Factory pro cross-BC objekty neexistuje |
 | Module | Seskupuje všechny agregáty BC do jednoho balíčku | Definuje hranici, přes kterou putují events (Outbox) | 1 modul = 1 BC (preferovaná aplikace) |
+
+Poslední sloupec u Specification stojí za rozvedení. Kostra vzoru – rozhraní,
+`CompositeSpecification` a tři kombinátory – leží v `SharedKernel` a používají ji všechny
+kontexty. Konkrétní pravidlo `EligibleForFreeShipping` naopak patří jednomu kontextu a jinde
+by nedávalo smysl. Sdílí se mechanismus, ne pravidlo.
 
 Hlavní vztah: **Agregát uvnitř používá Specifications** pro invarianty,
 **vzniká přes Factory** (named constructor), **spolupracuje s 2+ jinými
@@ -1333,7 +1520,7 @@ v týmu uvidíte. Každý z nich má protilék uvedený v příslušné sekci v�
 | Factory pro každý objekt | U každé třídy v doméně existuje samostatná Factory class | Static method (named constructor) v agregátu; Factory class jen pokud nutně potřebujete DI |
 | Veřejný konstruktor agregátu | Vně agregátu lze volat `new Order(...)` a obejít validaci | Privátní konstruktor + `::place()` / `::reconstitute()` |
 | Type packaging (`src/Entity/`, `src/Service/`) | Adresářová struktura ukazuje technologii, ne doménu | Přejděte na 1 modul = 1 BC; vynuťte phparkitect |
-| Modules bez architektury testů | Konvence existují, ale nikdo je nekontroluje – eroze za 6 měsíců | Nasaďte phparkitect/deptrac do CI od prvního commitu |
+| Modules bez architektury testů | Konvence existují, ale nikdo je nekontroluje – eroze při prvním hot-fix tlaku | Nasaďte phparkitect/deptrac do CI od prvního commitu |
 | Cross-BC import bez ACL | `App\Billing\Invoice` přímo importuje `App\Ordering\Order` | Integrace přes domain events (Outbox); v cílovém BC mapper na lokální typ |
 
 Detailní rozbor doménových anti-vzorů – anémický model, transaction script, „Big
@@ -1342,10 +1529,9 @@ Ball of Mud“ – najdete v kapitole
 
 ## 08.08 Shrnutí {#summary}
 
-Specifications, Domain Services, Factories a Modules tvoří druhou polovinu
-Evansova taktického katalogu. Praktické průvodce je vynechávají, ale bez nich
-agregáty bobtnají, doménový model upadá do anémie a organizace projektu zatemňuje
-doménovou strukturu.
+Specifications, Domain Services, Factories a Modules jsou čtyři vzory z Evansova
+taktického katalogu, které praktické průvodce vynechávají. Bez nich agregáty bobtnají,
+doménový model upadá do anémie a organizace projektu zatemňuje doménovou strukturu.
 
 - **Specification Pattern** proměňuje booleovská doménová pravidla
   v prvotřídní objekty s mluvícími jmény. Kombinátory `and`,
@@ -1359,8 +1545,16 @@ doménovou strukturu.
   named constructor (statická metoda na agregátu) s privátním konstruktorem.
   Samostatná Factory class přichází na řadu, jen když potřebujete DI závislosti.
 - **Modules** organizují kód podle Ubiquitous Language, ne podle
-  technických vrstev. V Symfony 8 se realizují PSR-4 namespace + `composer.json`
-  mapováním na adresáře. Vynucení hranic patří do CI přes phparkitect/deptrac.
+  technických vrstev. V Symfony 8 na to stačí výchozí PSR-4 mapování `App\` na `src/`.
+  Skutečnou cenu má až publikované rozhraní modulu a vynucení hranic v CI
+  přes phparkitect nebo deptrac.
+
+Přeskočená vrstva tím ale nekončí. Evansova část III, *Supple Design*, obsahuje dalších
+osm vzorů: Intention-Revealing Interfaces, Side-Effect-Free Functions, Assertions,
+Standalone Classes, Closure of Operations, Declarative Design, Drawing on Established
+Formalisms a Conceptual Contours. Tato kniha je systematicky nepokrývá – jde o vzory na
+úrovni jednotlivých metod a podpisů, ne na úrovni stavebních bloků modelu. Kdo chce
+v taktickém designu pokračovat dál, má je jako další čtení.
 
 Společně drží agregát v rozumné velikosti, doménu oddělenou od infrastruktury
 a projekt čitelný po roce vývoje. Nasazují se postupně, po jednom.
@@ -1379,9 +1573,9 @@ u anémického modelu, který v sekci 08.03 padl jen krátce.
 - question: 'Kdy přesně se vyplatí Specification Pattern?'
   answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho uplatňujete v doméně i v repozitáři přes double-dispatch. Pokud pravidlo používáte jednou a obsahuje jeden řádek kódu, je samostatná třída over-engineering – inlinujte ho. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification jeho jménu dá kód. Pokud byste třídu pojmenovali <code>OrderTotalGreaterThanSpec</code>, je to jen operátor – vraťte se k inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
 - question: 'Má Domain Service mít stav?'
-  answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables, žádný interní cache, žádný čítač. Pokud by Domain Service držela stav, ztratí se idempotence a souběžnost. Jediné, co Domain Service smí mít v konstruktoru, jsou jiné stateless služby (typicky další Domain Service nebo immutable hodnota). Vše ostatní (repozitáře, ClockInterface, Mailer) ji posouvá do Application nebo Infrastructure vrstvy. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
+  answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables měnící se mezi voláními, žádný interní cache, žádný čítač. Se stavem se ztrácí idempotence a bezpečnost při souběhu. Závislosti jsou ale jiné téma než stav a odpověď na ně kategorická není: <code>Mailer</code> nebo HTTP klient službu skutečně posouvají do Application či Infrastructure vrstvy, u repozitáře se zdroje rozcházejí. Khorikov připouští <em>impure</em> doménovou službu, Noback umísťuje rozhraní repozitáře přímo do Domain vrstvy. Vodítko: nejdřív zvažte, jestli data nemá dodat volající; když je jinak nezískáte, závislost na doménovém rozhraní je přijatelná. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
 - question: 'Factory metoda nebo Factory class – jak se rozhodnout?'
-  answer: 'Standardně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) ho výslovně preferuje. K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
+  answer: 'Standardně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) staví v kapitole 11 <em>Factories</em> do popředí factory metodu na agregátním kořeni a samostatnou factory řeší až jako druhou možnost na úrovni service; PHP podobu s privátním konstruktorem popsal Mathias Verraes v textu <em>Named Constructors in PHP</em> (2014). K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
 - question: 'Jak vynutit hranice mezi Moduly v PHP projektu?'
   answer: 'Konvence sama o sobě se rozpadá – vývojáři pod tlakem „udělej rychle“ přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://github.com/phparkitect/arkitect" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu „App\\Ordering nesmí závisět na App\\Billing“, „App\\Ordering\\Domain nesmí znát Doctrine“, a CI build selže při porušení. Náklad je jeden konfigurační soubor, zisk je jistota, že modulární organizace přežije i pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
 - question: 'Jak má vypadat namespace třídy, která sedí na hranici dvou Bounded Contextů?'

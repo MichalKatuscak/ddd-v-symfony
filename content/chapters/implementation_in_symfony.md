@@ -37,13 +37,15 @@ výjimkami, factory metodami a plnou validací invariantů.
 Tento průvodce používá **Doctrine atributy přímo na doménových třídách**
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
 *Dependency Inversion* – doména „ví“ o Doctrine. V praxi jde o metadata,
-ne o chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
-oficiální dokumentace používá atributy a komunita je následuje.
+ne o chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Best
+Practices doporučují atributy výslovně („Use Attributes to Define the Doctrine
+Entity Mapping“) [[1]](https://symfony.com/doc/current/best_practices.html)
+a Symfony Maker jiný formát negeneruje.
 
-Pokud chcete striktně oddělenou doménu, korektní cesta není XML mapping (taky
-„znečištěné“, jen jiným formátem), ale **Persisted Object Pattern** – samostatná
-persistence třída + mapper na doménový agregát. Detail v sekci
-[Persisted Object Pattern – čistá DDD varianta](#persisted-object-pattern).
+XML mapping doménu od ORM neoddělí, jen přesune metadata do jiného souboru.
+Skutečné oddělení nabízí **Persisted Object Pattern**: samostatná persistence
+třída a mapper na doménový agregát. Je to menšinová volba s doloženou cenou,
+kterou rozebírá sekce [Persisted Object Pattern](#persisted-object-pattern).
 :::
 
 ## 10.01 Kde končí DDD a kde začíná Symfony {#ddd-vs-symfony-boundary}
@@ -64,7 +66,7 @@ srovnání rozvádí [kapitola o architektonických stylech](/architektonicke-st
 
 ## 10.02 Struktura projektu {#project-structure}
 
-Vertikální slice architektura v Symfony 8 organizuje strukturu projektu podle Bounded Contexts (ohraničených kontextů). Každý kontext drží svou doménu, infrastrukturu i feature složky pohromadě. Příklad:
+Výchozí struktura Symfony (`src/Controller`, `src/Entity`, `src/Repository`) řadí soubory podle technické role. Vertikální slice je řadí podle Bounded Contextu: každý kontext drží svou doménu, infrastrukturu i feature složky pohromadě. Odchylku připouštějí i Symfony Best Practices – doporučení výchozí struktury má dovětek „Unless your project follows a development practice that imposes a certain directory structure“ [[1]](https://symfony.com/doc/current/best_practices.html). Příklad:
 
 :::callout{type="pattern"}
 ### Příklad: Správná struktura projektu pro DDD s vertikální slice architekturou v Symfony 8
@@ -138,7 +140,7 @@ src/
 │       │   └── OrderHistoryController.php
 │       └── View/              # Views
 │           └── order_history.html.twig
-└── Shared/                    # Skutečně sdílené komponenty
+└── SharedKernel/              # Skutečně sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
     │   └── ValueObject/       # Sdílené hodnotové objekty
     │       └── Id.php         # Abstraktní ID
@@ -156,21 +158,20 @@ Závislosti mezi kontexty procházejí přes Application vrstvu nebo události �
 :::
 
 :::callout{type="note"}
-### Hlavní principy správné struktury DDD projektu:
+### Hlavní principy struktury
 
-- **Izolace domén** – Každá doména (Bounded Context) má svůj vlastní model, který odráží její specifické potřeby a jazyk.
-- **Ubiquitous Language** – Jazyk kontextu se promítá do kódu; tým ho používá konzistentně od názvů tříd po dokumentaci.
-- **Jasné hranice** – Čtenář kódu pozná, kde končí jedna doména a začíná druhá.
-- **Minimalizace závislostí** – Kontexty drží své modely odděleně. Změna v jednom by neměla nutit úpravu druhého.
+Strom stojí na čtyřech pravidlech. Každý kontext má vlastní model, který odráží jeho potřeby a jeho jazyk – žádný sdílený `User` napříč kontexty. Jazyk kontextu se promítá do názvů tříd, adresářů i commitů. Hranici pozná čtenář z cesty souboru, ne z dokumentace.
+
+Čtvrté pravidlo je nejtěžší: kontexty drží své modely odděleně, takže změna v jednom nenutí sáhnout do druhého.
 :::
 
 :::callout{type="warn"}
 ### Časté chyby při implementaci DDD
 
-- **Umístění všech doménových modelů do sdílené složky** – Model v `Shared/` ztrácí vazbu na kontext, kterému patří.
-- **Sdílení doménových modelů mezi doménami** – Přímý přístup k datům cizího kontextu obchází Anti-Corruption Layer i Domain Events.
-- **Příliš mnoho závislostí mezi doménami** – Cross-context import doménových tříd je signál chybějící Anti-Corruption Layer.
-- **Ignorování Ubiquitous Language** – Kód, dokumentace a komunikace v týmu se rozcházejí v pojmech.
+- **Doménové modely ve sdílené složce** – model v `SharedKernel/` ztrácí vazbu na kontext, kterému patří.
+- **Sdílení doménových modelů mezi kontexty** – přímý přístup k datům cizího kontextu obchází Anti-Corruption Layer i doménové události.
+- **Příliš mnoho závislostí mezi kontexty** – cross-context import doménových tříd je signál chybějící Anti-Corruption Layer.
+- **Ignorování Ubiquitous Language** – kód, dokumentace a řeč v týmu se rozcházejí v pojmech.
 :::
 
 ## 10.03 Implementace entit {#entities}
@@ -229,7 +230,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
-class User extends AggregateRoot
+final class User extends AggregateRoot
 {
     #[ORM\Id]
     #[ORM\Column(type: 'user_id')]
@@ -309,11 +310,12 @@ class User extends AggregateRoot
 
 Detaily implementace:
 
-- **`extends AggregateRoot`, bez `final`.** Bázová třída poskytuje `record()`
-  a `releaseEvents()` – sdílené chování pro všechny agregáty, ne duplicitní
-  kopii v každé entitě. `final` patří hodnotovým objektům i entitám – nativní lazy
-  objekty žádnou podtřídu nevytvářejí, takže Doctrine `final` nevadí
-  (rozbor v kapitole [Návrh agregátu](/navrh-agregatu)).
+- **`final class User extends AggregateRoot`.** Bázová třída poskytuje `record()`
+  a `releaseEvents()` – sdílené chování pro všechny agregáty, ne duplicitní kopii
+  v každé entitě. `final` mapované entitě nevadí: nativní lazy objekty z PHP 8.4
+  pracují nad původní třídou a žádnou podtřídu nevytvářejí
+  [[2]](https://www.php.net/manual/en/language.oop5.lazy-objects.php), a DoctrineBundle 3
+  je už neumožňuje vypnout (rozbor v kapitole [Návrh agregátu](/navrh-agregatu)).
 - **Privátní konstruktor + factory `register()`.** Jediná legální cesta vytvoření.
   Kdyby přibyla další kategorie (importovaný uživatel z LDAP), přidá se další
   factory, ne přepínač uvnitř konstruktoru. Událost `UserRegistered` se nahrává
@@ -463,8 +465,8 @@ final class UserName
 :::
 :::
 
-`UserName` ukazuje plnou cenu hodnotového objektu: invariant „jméno není prázdné
-a má rozumnou délku“ je vynucen typem. Volající kód nemá šanci vložit prázdný
+`UserName` ukazuje, co hodnotový objekt přináší: invariant „jméno není prázdné
+a má rozumnou délku“ vynucuje typ. Volající kód nemá šanci vložit prázdný
 string – pokud by to zkusil, dostane výjimku v konstruktoru, ne až v repozitáři.
 `#[ORM\Embeddable]` říká Doctrine, že VO se ukládá jako sloupec ve stejné tabulce
 jako vlastník (žádná samostatná tabulka pro VO).
@@ -513,6 +515,34 @@ final readonly class UserId
 jako primární klíč (sekvenční zápisy nedrobí B-tree index). Stejný vzor platí
 pro `OrderId` nebo `PaymentId`; hodnotu vždy zpřístupňuje public readonly
 property `$value`, žádná metoda `value()`.
+
+### Property hooks a asymetrická viditelnost {#php84-vo-zapis}
+
+Symfony 8 vyžaduje PHP 8.4, takže hodnotový objekt lze zapsat i jinak než přes
+`readonly`. Průvodce u něj přesto zůstává, a to ze dvou důvodů.
+
+Asymetrická viditelnost (`public private(set) string $value`) nahrazuje dvojici
+privátní vlastnost plus getter. Hodí se objektům s wither metodami, které si
+uvnitř třídy potřebují hodnotu po `clone` přepsat. Pro hodnotový objekt je
+`readonly` přísnější: zakazuje zápis i zevnitř třídy, takže neměnnost nestojí
+na disciplíně autora. Proto VO v celém průvodci zůstávají `final readonly`.
+
+Property hooks svádějí přesunout validaci z konstruktoru do `set` hooku.
+V doménovém modelu je to past. Hook se spustí při každém zápisu včetně hydratace
+z databáze, kdežto konstruktor Doctrine obchází. Validace by se tedy spouštěla
+právě tam, kde je zbytečná, a mlčela tam, kde na ní záleží.
+
+:::callout{type="warn"}
+### Property hooks a Doctrine ORM {#property-hooks-orm-heading}
+
+Doctrine ORM hooked properties podporuje od verze 3.4, se dvěma omezeními:
+vlastnost musí mít backing property a nesmí být virtuální
+[[3]](https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/basic-mapping.html).
+Zůstává past na dotazování – DQL i `findBy()` pracují s hodnotou uloženou ve
+sloupci, ne s výstupem `get` hooku. Dotaz proto musí použít tvar, který
+v databázi reálně leží. ORM 3.0 hooky ještě odmítalo úplně, takže na starším
+minoru se stejný kód nerozběhne.
+:::
 
 ## 10.05 Implementace repozitářů {#repositories}
 
@@ -598,7 +628,7 @@ Nabízí se vypustit události hned po uložení agregátu: `releaseEvents()` a 
 deploy restart, výpadek brokera. Agregát pak v databázi je, ale událost se nikdy
 nedoručí – z pohledu ostatních kontextů se registrace neudála. Pro vývoj a méně
 důležité události je to přijatelné. Jakmile na události závisí jiný Bounded Context
-nebo platební tok, produkčním řešením je Outbox Pattern: událost se zapíše do stejné
+nebo platební tok, produkčním řešením je Outbox Pattern. Událost se zapíše do stejné
 DB transakce jako agregát a samostatný worker ji doručí s retry. Detail v kapitole
 [Outbox Pattern](/outbox-pattern).
 :::
@@ -622,16 +652,31 @@ reagovaly na událost, která se nikdy nestala. Spolehlivé řešení je opět
 [Outbox Pattern](/outbox-pattern): událost se commituje spolu s agregátem.
 :::
 
-## 10.06 Persisted Object Pattern – čistá DDD varianta {#persisted-object-pattern}
+## 10.06 Persisted Object Pattern – oddělený persistence model {#persisted-object-pattern}
 
-Pokud trváte na tom, že doménová vrstva nesmí obsahovat ani metadata
-o persistenci, korektní cesta není XML mapping (také „znečištěné“, jen jiným
-formátem), ale **Persisted Object Pattern**. Jde o variantu vzoru *Data Mapper* (Fowler, *PoEAA*, 2002);
-v DDD kontextu ji rozebírá Vladimir Khorikov v sérii blogpostů „Persistence model“ a Vaughn Vernon v *IDDD*, kap. 12.
+Doménová vrstva bez jediného kusu metadat o persistenci vyžaduje druhý objektový
+model.
+Doménová třída zůstane POPO bez atributů, vedle ní v infrastrukturní vrstvě žije
+samostatná persistence třída se všemi Doctrine atributy a dva jednosměrné mappery
+překládají mezi nimi. Průvodce pro tuto konstrukci používá název **Persisted
+Object Pattern**; v literatuře se pro ni vžilo označení *persistence model*
+a obecným rodičovským vzorem je Fowlerův *Data Mapper* (*PoEAA*, 2002)
+[[4]](https://martinfowler.com/eaaCatalog/dataMapper.html).
 
-Idea: doménová třída zůstane POPO bez atributů. Vedle ní v infrastrukturní
-vrstvě existuje samostatná persistence třída se všemi Doctrine atributy.
-Dva mappery (one-way každým směrem) překládají mezi nimi.
+Dva nejčastěji citovaní obhájci čisté domény jsou přitom proti. Vladimir Khorikov
+označuje plnohodnotný persistence model za příliš drahý: složitost roste s každou
+asociací typu one-to-many a many-to-many a ztrácí se ORM change tracking, o který
+se opírají spolehlivé doménové události
+[[5]](https://enterprisecraftsmanship.com/posts/having-the-domain-model-separate-from-the-persistence-model/).
+Matthias Noback nazývá oddělené entity „expensive and unnecessary form of
+decoupling“ a doporučuje místo nich ORM entitu obohacenou o doménové metody,
+invarianty a vlastní výjimky
+[[6]](https://matthiasnoback.nl/2022/04/ddd-entities-and-orm-entities/). Jediný
+scénář, který uznává, je vývoj hranic agregátu nezávisle na schématu databáze –
+a dodává, že většina projektů, které se toho dovolávají, to nepotřebuje.
+
+Sekce v průvodci zůstává proto, že ukazuje, co taková separace stojí. Ukázka je
+úplná, ať si tu cenu můžete spočítat sami.
 
 :::callout{type="pattern"}
 ### Příklad: doména POPO + persistence model + mapper {#persisted-object-example-heading}
@@ -776,6 +821,15 @@ opravdu důležité** (Core Domain s vysokou hodnotou, dlouhodobá údržba, pl�
 na výměnu persistence). Pro většinu Bounded Contextů jsou atributy přijatelný kompromis.
 :::
 
+Ruční mapper je největší nákladová položka vzoru a od Symfony 7.4 na něj existuje
+stabilní komponenta `symfony/object-mapper`
+[[7]](https://symfony.com/doc/current/object_mapper.html). Atribut
+`#[Map(target: UserPersistenceModel::class)]` popíše převod deklarativně,
+`ObjectMapperInterface::map()` ho provede. Ruční kód pak zbude jen tam, kde se
+tvar obou modelů rozchází – typicky u hodnotových objektů složených z více
+sloupců. Riziko driftu tím ale nezmizí: komponenta přemapuje to, co jí popíšete,
+a chybějící pole nenahlásí.
+
 V dalších příkladech v tomto průvodci pokračujeme s atributy přímo na agregátech.
 Persisted Object Pattern dále nerozvíjíme – principy jsou identické, jen vyžadují
 explicitní mapper na každý agregát.
@@ -823,6 +877,11 @@ final class EmailType extends StringType
         return $value instanceof Email ? $value->value : (string) $value;
     }
 
+    /** @param array<string, mixed> $column */
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $platform->getStringTypeDeclarationSQL(['length' => 255]);
+    }
 }
 :::
 :::
@@ -848,9 +907,17 @@ private Email $email;
 :::
 :::
 
+Třída záměrně nemá metodu `getName()` – DBAL 4 ji odstranil. Jméno typu určuje
+výhradně klíč v `doctrine.dbal.types`; konstanta `NAME` slouží jen jako
+pojmenovaná reference pro atributy `#[ORM\Column]`. Bez `getSQLDeclaration()` by
+délku sloupce diktoval rodičovský `StringType`.
+
 XML mapping (`User.orm.xml`) dokáže totéž bez atributů ve třídě, doménu od ORM
-ale neoddělí – jen přesune metadata do jiného formátu. Kdo chce striktní oddělení,
-najde řešení v sekci [Persisted Object Pattern](#persisted-object-pattern).
+ale neoddělí – jen přesune metadata do jiného formátu. Po odstranění annotation
+a YAML driveru v ORM 3 je navíc jedinou neatributovou variantou
+[[8]](https://github.com/doctrine/orm/blob/3.7.x/UPGRADE.md) a nástroje kolem
+Doctrine ji obsluhují hůř než atributy. Kdo chce striktní oddělení, najde řešení
+v sekci [Persisted Object Pattern](#persisted-object-pattern).
 
 :::callout{type="note"}
 ### Kdy se bez custom type obejdete
@@ -893,12 +960,12 @@ enum OrderStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::DRAFT => [self::CONFIRMED, self::CANCELLED],
-            self::CONFIRMED => [self::PAID, self::CANCELLED],
-            self::PAID => [self::SHIPPED, self::CANCELLED],
-            self::SHIPPED => [self::DELIVERED],
-            self::DELIVERED => [],
-            self::CANCELLED => [],
+            self::Draft => [self::Confirmed, self::Cancelled],
+            self::Confirmed => [self::Paid, self::Cancelled],
+            self::Paid => [self::Shipped, self::Cancelled],
+            self::Shipped => [self::Delivered],
+            self::Delivered => [],
+            self::Cancelled => [],
         };
     }
 
@@ -982,7 +1049,7 @@ Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepot
 :::callout{type="warn"}
 ### Doctrine a PHP enums
 
-Doctrine ORM 2.11+ a 3.x nativně podporují PHP enums. Stačí atribut
+Doctrine ORM podporuje PHP enums nativně. Stačí atribut
 `#[ORM\Column(enumType: OrderStatus::class)]` na vlastnosti – Doctrine
 konvertuje hodnotu mezi enumem a databázovým sloupcem automaticky.
 Pro backed enums se ukládá backing value (`string` nebo `int`).
@@ -1003,14 +1070,14 @@ drží pravidla tam, kde je vynucuje typový systém.
 ## 10.09 Doménové služby (a kdy je *nepoužít*) {#domain-services}
 
 Doménová služba zapouzdřuje pravidlo, které **přirozeně nepatří žádnému agregátu
-ani hodnotovému objektu** – typicky operaci nad dvěma a více agregáty
-(`MoneyTransferService` mezi dvěma účty) nebo bezstavový výpočet vyžadující
-externí zdroj (kurzovní převod, kalkulace daně podle jurisdikce).
+ani hodnotovému objektu**. Typicky jde o operaci nad dvěma a více agregáty
+(`MoneyTransferService` mezi dvěma účty) nebo o bezstavový výpočet s externím
+vstupem – kurzovní převod, kalkulace daně podle jurisdikce.
 
 **Před sáhnutím po doménové službě stojí vždy jedna otázka: nepatří to do agregátu?**
-Pravidlo „lze platit jen confirmed objednávku“ je čistý invariant agregátu `Order` –
-jen `Order` zná svůj stav a jen on smí ten stav měnit. Domain service na to
-je anti-vzor, který oslabuje agregát a vede k anemickému modelu.
+Pravidlo „lze platit jen confirmed objednávku“ je čistý invariant agregátu `Order`.
+Jen `Order` zná svůj stav a jen on ho smí měnit. Doménová služba na tomtéž místě
+je anti-vzor: oslabuje agregát a vede k anemickému modelu.
 
 :::callout{type="anti"}
 ### Anti-vzor: doménová služba pro invariant jednoho agregátu {#anti-payment-service-heading}
@@ -1036,10 +1103,9 @@ final class PaymentService
 Co se tu pokazilo:
 
 - **Invariant uniká agregátu.** `Order` neví, že někdo kontroluje jeho stav
-  zvenčí. Když přibude nový stav (`REFUNDED`), musíte sáhnout do servicu,
-  ne do agregátu.
-- **Anemický model.** `Order` má getter `status()` jako veřejné API,
-  což je signál, že vnitřní stav je manipulovatelný zvenčí.
+  zvenčí. Přibude-li stav `Refunded`, oprava míří do služby, ne do agregátu.
+- **Anemický model.** Getter `status()` tu neslouží čtenáři, ale cizí třídě,
+  která za `Order` rozhoduje o jeho vlastním přechodu.
 - **Otevřená cesta k inkonzistenci.** Nikdo nezabrání druhé službě, aby
   obešla pravidlo a vytvořila `Payment` přímo.
 :::
@@ -1091,10 +1157,10 @@ final class Order extends AggregateRoot
 :::
 
 `Order::recordPayment()` zapouzdřuje **pravidlo i přechod stavu** uvnitř agregátu.
-Jediný způsob, jak vytvořit `Payment` pro danou objednávku, vede přes tuto metodu –
-což znamená, že invariant „platit lze jen confirmed objednávku“ je vynucen
-typovým systémem, ne nadějí, že někdo zavolá správnou službu. Aplikační handler
-pak má triviální koordinační roli. Pojmy command a handler vysvětluje
+Jediný způsob, jak pro objednávku vytvořit `Payment`, vede přes tuto metodu.
+Invariant „platit lze jen confirmed objednávku“ tedy vynucuje typový systém,
+ne naděje, že někdo zavolá správnou službu. Aplikační handler pak má jen
+koordinační roli. Pojmy command a handler vysvětluje
 [sekce o aplikačních službách](#application-services), podrobně kapitola [CQRS](/cqrs):
 
 :::callout{type="pattern"}
@@ -1137,6 +1203,14 @@ final class RecordPaymentHandler
 }
 :::
 :::
+
+Handler zapisuje dva agregáty v jedné transakci, což je odchylka od pravidla
+[jeden agregát na transakci](/navrh-agregatu#transactional-consistency). Držíme ji
+vědomě: přechod `Order` do stavu `Paid` a vznik odpovídajícího `Payment` tvoří
+jediný invariant a rozpad na dvě transakce by připustil zaplacenou objednávku
+bez platby. Alternativou je eventual consistency – `Order` publikuje
+`PaymentRecorded` a `Payment` vzniká až v reakci na událost. Cena je okno, kdy
+platba ještě neexistuje, a nutnost kompenzace při selhání.
 
 :::callout{type="note"}
 ### Kdy doménová služba *opravdu* dává smysl {#kdy-domain-service-heading}
@@ -1222,6 +1296,10 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
 - **Messenger** (`MessageBusInterface`) – může být synchronní i asynchronní.
   Podporuje transporty (RabbitMQ, Redis, Doctrine outbox), retry strategii
   a serializaci zprávy. Příjemce může běžet v jiném procesu, jiném serveru.
+  Transport lze určit atributem `#[AsMessage(transport: 'async')]` přímo na třídě
+  zprávy; konfigurace `framework.messenger.routing` má nad atributem přednost,
+  takže per-environment override zůstává možný
+  [[9]](https://symfony.com/doc/current/messenger.html).
 
 **Volba podle role příjemce:**
 
@@ -1237,6 +1315,26 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
 kontextu, protože „je to flexibilnější“. Cena: každá zpráva projde JSON serializací,
 ztráta typů, ztráta transakční koheze, nutnost správy transportů. Mechanismus se volí
 podle hranice, kterou událost překračuje – ne podle hypotetické budoucí potřeby.
+:::
+
+:::callout{type="warn"}
+### Proč ne Doctrine lifecycle listener {#doctrine-listener-heading}
+
+Třetí cesta, kterou v Symfony projektech potkáte často: Doctrine listener
+(`#[AsDoctrineListener]`) na `onFlush` nebo `postFlush`, který si sám vybere
+agregáty a vypustí jejich události. Vypadá to jako úspora – aplikační vrstva o publikaci nemusí vědět.
+Obě události ale mají omezení, která se projeví až v provozu.
+
+V `onFlush` už Doctrine spočítal changesety, takže samotný `persist()` nového
+objektu se do právě probíhajícího flushe nepromítne; je nutné dovolat
+`UnitOfWork::computeChangeSet()`, respektive `recomputeSingleEntityChangeSet()`.
+V `postFlush` zase nelze bezpečně zavolat `flush()` – rekurze do právě
+dokončeného flushe končí nedefinovaným chováním. Publikace událostí se tak
+ocitá v kódu, který má nejtěsnější vazbu na vnitřnosti ORM a nejhůř se testuje.
+Obě omezení popisuje dokumentace Doctrine
+[[10]](https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/events.html).
+Explicitní dispatch v aplikační vrstvě (nebo Outbox) je proto v tomto průvodci
+výchozí volba.
 :::
 
 ## 10.12 Strategie zpracování chyb v DDD {#error-handling}
@@ -1290,10 +1388,10 @@ final class InvalidOrderStateTransitionException extends \DomainException
 :::callout{type="warn"}
 ### Doporučení pro výjimky v DDD
 
-- Doménové výjimky by měly **dědit z `\DomainException`** – tím signalizují, že jde o porušení doménového pravidla, ne o technickou chybu.
+- **Vlastní bázová třída nebo marker interface na kontext** (`UserManagementException`) umožní chytit „všechny doménové chyby tohoto kontextu“ jedním `catch`. SPL `\DomainException` je potomek `\LogicException`, tedy podle sémantiky SPL chyba programátora, ne očekávaný běhový stav; ukázky v tomto průvodci z něj dědí jako přiznanou zkratku.
 - **Statické factory metody** (`cannotTransition()`) drží vytváření výjimek čitelné a konzistentní.
 - **Nepropagujte infrastrukturní výjimky** do doménové vrstvy – repozitáře by je měly zachytit a přeložit na doménové výjimky.
-- Kontrolery by měly zachytávat doménové výjimky a **překládat je na HTTP odpovědi** (400, 404, 409).
+- Překlad doménové výjimky na HTTP odpověď (400, 404, 409) patří na jedno místo. Kontroler ho zvládne u jednoho use case; napříč aplikací se vyplatí `ExceptionListener` nebo atribut `#[WithHttpStatus]` na doménové výjimce. Rozbor v [sekci o kontrolerech](#controllers).
 :::
 
 ## 10.13 Implementace aplikačních služeb {#application-services}
@@ -1420,9 +1518,9 @@ Bezpečné řešení má dvě vrstvy:
   aby aplikační vrstva nemusela znát infrastrukturní typy.
 
 Explicitní `flush()` v handleru je záměrná odchylka od pravidla „flush vlastní
-middleware“ (viz [dvojí transakce](#double-transaction-heading)): databáze
-constraint vyhodnocuje až při flushi, a má-li se infrastrukturní výjimka přeložit
-na doménovou ještě v handleru, musí flush proběhnout v jeho `try` bloku.
+middleware“ (viz [dvojí transakce](#double-transaction-heading)). Databázový
+constraint se vyhodnotí až při flushi. Má-li se infrastrukturní výjimka přeložit
+na doménovou ještě v handleru, musí flush proběhnout uvnitř jeho `try` bloku.
 Middleware pak při commitu už jen potvrdí zapsané SQL.
 
 Aplikační check přes `findByEmail()` můžete ponechat *navíc* pro hezčí
@@ -1464,12 +1562,11 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Profile\Query;
 
-class GetUserProfile
+final readonly class GetUserProfile
 {
     public function __construct(
-        public readonly string $userId
-    ) {
-    }
+        public string $userId,
+    ) {}
 }
 :::
 
@@ -1531,6 +1628,19 @@ V DDD existují dva druhy validace, každý na jiné vrstvě:
 Symfony Validator tutéž kontrolu opakuje na hraně aplikace, aby neplatný vstup
 skončil srozumitelnou chybovou zprávou, ne doménovou výjimkou. Sémantická
 pravidla („uživatel s tímto e-mailem již existuje“) patří výhradně doménové vrstvě.
+
+Dvojí kontrola formátu není redundance zadarmo: obě strany musí být zajedno.
+`Assert\Email` má výchozí režim `html5`, který je volnější než `strict`; režim
+`strict` vyžaduje balíček `egulias/email-validator`. Command s `html5` a VO
+s `FILTER_VALIDATE_EMAIL` proto propustí jinou množinu adres a rozdíl se projeví
+až doménovou výjimkou místo validační hlášky. Command `RegisterUser` výše volí
+`strict` právě proto.
+
+Kolik validace patří na hranu aplikace, je zároveň otevřený spor. Zastánci
+always-valid modelu argumentují, že agregát nesmí existovat v neplatném stavu
+a validace na hraně je jen lepší UX. Druhý tábor připouští dočasně neplatný
+model a validaci soustřeďuje do jednoho kroku před uložením. Průvodce drží
+první variantu.
 :::
 
 ## 10.14 Implementace kontrolerů {#controllers}
@@ -1540,8 +1650,8 @@ transformovat ho na command/query, dispatchovat, přeložit doménovou výjimku
 na HTTP odpověď. Nesmí: nést doménová pravidla, volat repozitáře přímo,
 manipulovat s agregáty.
 
-Symfony nabízí od verze 6.3 `#[MapRequestPayload]`, který deserializuje a validuje
-JSON požadavek přímo do typového commandu. Pro klasické HTML formuláře pak existuje
+Symfony k tomu nabízí `#[MapRequestPayload]`: deserializuje a validuje JSON
+požadavek přímo do typového commandu. Pro klasické HTML formuláře existuje
 varianta `#[MapRequestPayload(acceptFormat: 'form')]` nebo Symfony Form.
 
 :::callout{type="pattern"}
@@ -1696,9 +1806,12 @@ services:
     App\UserManagement\Domain\Repository\UserRepository: '@App\UserManagement\Infrastructure\Repository\DoctrineUserRepository'
     App\OrderManagement\Domain\Repository\OrderRepository: '@App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository'
 
-    # Messenger busy se konfigurují v config/packages/messenger.yaml, nikoli zde:
+    # Messenger busy se konfigurují v config/packages/messenger.yaml, nikoli zde.
+    # Při dvou a více busech je default_bus povinný, jinak FrameworkBundle
+    # kompilaci kontejneru odmítne:
     # framework:
     #     messenger:
+    #         default_bus: command.bus
     #         buses:
     #             command.bus:
     #                 middleware:
@@ -1729,7 +1842,10 @@ se hodí, když implementace patří do jiného balíčku, který nemůžete upr
 
 Alias zajistí, že Symfony DI Container injektuje stejnou instanci `DoctrineUserRepository`
 všude, kde závislost typuje na `UserRepository`. Doménové modely, hodnotové objekty
-a události z auto-registrace vylučujeme – nejsou to služby, ale data.
+a události z auto-registrace vylučujeme – nejsou to služby, ale data. Kdo nechce
+udržovat glob vzory v `services.yaml`, označí takovou třídu atributem
+`#[Exclude]` ze `Symfony\Component\DependencyInjection\Attribute`; kontejner ji
+pak přeskočí bez ohledu na `resource:`.
 
 ### Autowiring s oddělenými Bounded Contexts {#autowiring-bounded-contexts}
 
@@ -1771,12 +1887,12 @@ services:
     App\OrderManagement\Domain\Repository\OrderRepository: '@App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository'
 
     # ──────────────────────────────────────────────────
-    # Shared: sdílené komponenty napříč kontexty
+    # SharedKernel: sdílené komponenty napříč kontexty
     # ──────────────────────────────────────────────────
-    App\Shared\:
-        resource: '../src/Shared/'
+    App\SharedKernel\:
+        resource: '../src/SharedKernel/'
         exclude:
-            - '../src/Shared/Domain/ValueObject/'
+            - '../src/SharedKernel/Domain/ValueObject/'
 :::
 :::
 
@@ -1787,23 +1903,39 @@ Každý kontext má vlastní blok konfigurace, takže hranice jsou čitelné i n
 :::
 
 :::callout{type="note"}
-### Co patří do sdílené složky (Shared)? {#shared-folder-heading}
+### Co patří do sdílené složky (SharedKernel)? {#shared-folder-heading}
 
-Do sdílené složky by měly patřit pouze skutečně sdílené komponenty, které nemají specifický doménový význam:
+Do sdílené složky patří pouze skutečně sdílené komponenty bez specifického doménového významu:
 
 - Abstraktní třídy pro ID, Entity, ValueObject
 - Utility pro práci s datem a časem
 - Obecné výjimky
 - Infrastrukturní komponenty používané napříč doménami
 
-Doménové modely, hodnotové objekty a repozitáře patří do svých Bounded Contextů, ne do `Shared/`.
+Doménové modely, hodnotové objekty a repozitáře patří do svých Bounded Contextů, ne do `SharedKernel/`.
 :::
+
+## 10.16 Další četba a citace {#further-reading}
+
+1. Symfony – [*The Symfony Framework Best Practices*](https://symfony.com/doc/current/best_practices.html). Doporučení atributového mapování Doctrine a dovětek, který připouští odchylku od výchozí adresářové struktury.
+2. PHP Manual – [*Lazy Objects*](https://www.php.net/manual/en/language.oop5.lazy-objects.php) (PHP 8.4). Nativní lazy ghost a lazy proxy bez generované podtřídy.
+3. Doctrine ORM – [*Basic Mapping*](https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/basic-mapping.html). Podpora property hooks od ORM 3.4 a chování DQL nad hodnotou uloženou ve sloupci.
+4. Martin Fowler – [*Data Mapper*](https://martinfowler.com/eaaCatalog/dataMapper.html), *Patterns of Enterprise Application Architecture* (2002). Rodičovský vzor odděleného persistence modelu.
+5. Vladimir Khorikov – [*Having the domain model separate from the persistence model*](https://enterprisecraftsmanship.com/posts/having-the-domain-model-separate-from-the-persistence-model/) (2016). Argumentace proti plnohodnotnému persistence modelu.
+6. Matthias Noback – [*DDD entities and ORM entities*](https://matthiasnoback.nl/2022/04/ddd-entities-and-orm-entities/) (2022). „80% decoupling“ jako alternativa k oddělenému modelu; navazuje na [*DDD and your database*](https://matthiasnoback.nl/2020/05/ddd-and-your-database/) (2020).
+7. Symfony – [*Object Mapper*](https://symfony.com/doc/current/object_mapper.html). Deklarativní mapování objektu na objekt přes atribut `#[Map]`.
+8. Doctrine ORM – [*UPGRADE.md*](https://github.com/doctrine/orm/blob/3.7.x/UPGRADE.md). Odstranění annotation a YAML driveru v ORM 3 a stav nativních lazy objektů.
+9. Symfony – [*Messenger*](https://symfony.com/doc/current/messenger.html). Routing zpráv, atribut `#[AsMessage]` a přednost konfigurace `framework.messenger.routing`.
+10. Doctrine ORM – [*Events*](https://www.doctrine-project.org/projects/doctrine-orm/en/current/reference/events.html). Omezení `onFlush` a `postFlush`, kvůli kterým se lifecycle listener nehodí na publikaci doménových událostí.
+11. Matthias Noback – [*Does it belong in the application or domain layer?*](https://matthiasnoback.nl/2021/02/does-it-belong-in-the-application-or-domain-layer/) (2021). Heuristika pro dělbu mezi aplikační a doménovou vrstvou.
+12. Vladimir Khorikov – [*Domain events: simple and reliable solution*](https://enterprisecraftsmanship.com/posts/domain-events-simple-reliable-solution/) (2017). Sběr událostí v agregátu a publikace až po commitu.
+13. V tomto průvodci navazují kapitoly [Návrh agregátu](/navrh-agregatu), [CQRS](/cqrs), [Outbox Pattern](/outbox-pattern) a [Testování DDD](/testovani-ddd).
 
 :::faq{}
 - question: Kam v Symfony projektu patří doménová vrstva a proč ji držet odděleně?
   answer: 'Doménová vrstva se umisťuje do samostatného adresáře – v tomto průvodci <code>src/&lt;BoundedContext&gt;/Domain/</code>, například <code>src/UserManagement/Domain/</code> – odděleně od kontrolerů, Doctrine mapování a infrastruktury. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
 - question: Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?
-  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu – jsou to metadata, ne chování. Pokud trváte na čisté doméně bez stop ORM, korektní řešení je <strong>Persisted Object Pattern</strong> (Vladimir Khorikov; Vernon, <em>IDDD</em>, kap. 12): doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern – čistá DDD varianta</a>.'
+  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu – jsou to metadata, ne chování. Doménu bez jediné stopy ORM zajistí oddělený persistence model, v tomto průvodci nazývaný <strong>Persisted Object Pattern</strong>: doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Rodičovským vzorem je Fowlerův <em>Data Mapper</em>. Khorikov i Noback tuto separaci označují za drahou a ve většině projektů zbytečnou, takže jde o menšinovou volbu, ne o výchozí doporučení. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern</a>.'
 - question: Jak odlišit Aplikační službu od Doménové služby?
   answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu – je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Podrobný rozbor v <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
 - question: Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?
