@@ -193,9 +193,9 @@ use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
-use App\UserManagement\Domain\Event\UserRegisteredEvent;
-use App\UserManagement\Domain\Event\UserActivatedEvent;
-use App\UserManagement\Domain\Event\UserDeactivatedEvent;
+use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\Event\UserActivated;
+use App\UserManagement\Domain\Event\UserDeactivated;
 use App\SharedKernel\Domain\AggregateRoot;
 
 class User extends AggregateRoot
@@ -222,7 +222,7 @@ class User extends AggregateRoot
     {
         $token = VerificationToken::generate();
         $user = new self($id, $email, $token);
-        $user->record(new UserRegisteredEvent($id, $email));
+        $user->record(new UserRegistered($id, $email));
         return $user;
     }
 
@@ -236,7 +236,7 @@ class User extends AggregateRoot
         }
         $this->status = UserStatus::ACTIVE;
         $this->verificationToken = null;
-        $this->record(new UserActivatedEvent($this->id));
+        $this->record(new UserActivated($this->id));
     }
 
     public function deactivate(): void
@@ -245,7 +245,7 @@ class User extends AggregateRoot
             throw new \DomainException('Lze deaktivovat pouze aktivního uživatele.');
         }
         $this->status = UserStatus::INACTIVE;
-        $this->record(new UserDeactivatedEvent($this->id));
+        $this->record(new UserDeactivated($this->id));
     }
 
     public function id(): UserId { return $this->id; }

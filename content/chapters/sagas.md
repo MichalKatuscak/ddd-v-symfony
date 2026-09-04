@@ -845,9 +845,14 @@ Standardní obrana proti všem třem:
 ### Vzor: idempotentní state transitions + UNIQUE constraint {#idempotent-saga-transitions-heading}
 
 Metoda doplněná do entity `OrderSaga` z předchozí ukázky. Využívá sloupce
-`processedEventIds` a guard stavového automatu. Parametr `$eventId` nenese
-samotná událost – Process Manager ho čte z obálky zprávy (message id
-Messengeru, např. `TransportMessageIdStamp`):
+`processedEventIds` a guard stavového automatu. Parametr `$eventId` musí nést
+**sama událost** – identifikátor přidělený při jejím vzniku, typicky `Uuid::v7()`.
+
+Transportní identifikátory se k tomu nehodí. `TransportMessageIdStamp` je podle
+vlastní dokumentace *„id of this message in that transport"*, tedy hodnota vázaná
+na konkrétní transport a přidělená až při odeslání či příjmu. Po redelivery nebo
+při průchodu jiným transportem se změní, takže by táž událost prošla dvakrát –
+přesně to, čemu má idempotence zabránit.
 
 :::code{language="php" filename="snippet.php"}
 // Doplnění do entity OrderSaga (viz výše v této sekci)

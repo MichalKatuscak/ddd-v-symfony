@@ -413,7 +413,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Acl;
 
-use App\Ordering\Domain\Event\InvoicePaidEvent;
+use App\Ordering\Domain\Event\InvoicePaid;
 use App\Ordering\Domain\ValueObject\InvoiceId;
 use App\SharedKernel\Money\Currency;
 use App\SharedKernel\Money\Money;
@@ -423,13 +423,13 @@ use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
  * ACL mezi legacy Billing systémem (SOAP) a Ordering BC.
  *
  * Tři odpovědnosti:
- *   1. Schema mapping  – InvoicePaidSoapResponse => InvoicePaidEvent
+ *   1. Schema mapping  – InvoicePaidSoapResponse => InvoicePaid
  *   2. Concept translation – invoiceNumber (int) => InvoiceId (UUID)
  *   3. Anti-corruption – odmítá neplatné stavy z legacy
  */
 final class LegacyBillingTranslator
 {
-    public function translateInvoicePaid(InvoicePaidSoapResponse $r): InvoicePaidEvent
+    public function translateInvoicePaid(InvoicePaidSoapResponse $r): InvoicePaid
     {
         // (3) Anti-corruption: legacy umí poslat negativní amount jako "credit"
         if ($r->amountInCents < 0) {
@@ -451,7 +451,7 @@ final class LegacyBillingTranslator
         }
 
         // (1) Schema mapping + (2) Concept translation
-        return new InvoicePaidEvent(
+        return new InvoicePaid(
             invoiceId: InvoiceId::fromLegacy($r->invoiceNumber),
             paidAt:    new \DateTimeImmutable($r->paidAtIso),
             amount:    new Money($r->amountInCents, Currency::EUR),

@@ -425,13 +425,14 @@ final class Project extends AggregateRoot
         $this->ownerId = $ownerId;
         $this->memberIds = [$ownerId];
         $this->createdAt = new \DateTimeImmutable();
-
-        $this->record(new ProjectCreated($id, $name, $ownerId));
     }
 
     public static function create(ProjectId $id, string $name, ?string $description, UserId $ownerId): self
     {
-        return new self($id, $name, $description, $ownerId);
+        $project = new self($id, $name, $description, $ownerId);
+        $project->record(new ProjectCreated($id, $name, $ownerId));
+
+        return $project;
     }
 
     public function name(): string
@@ -558,13 +559,14 @@ final class Task extends AggregateRoot
         $this->projectId = $projectId;
         $this->status = TaskStatus::TODO;
         $this->createdAt = new \DateTimeImmutable();
-
-        $this->record(new TaskCreated($id, $title, $projectId));
     }
 
     public static function create(TaskId $id, string $title, ?string $description, ProjectId $projectId): self
     {
-        return new self($id, $title, $description, $projectId);
+        $task = new self($id, $title, $description, $projectId);
+        $task->record(new TaskCreated($id, $title, $projectId));
+
+        return $task;
     }
 
     public function id(): TaskId

@@ -159,13 +159,15 @@ final class Post extends AggregateRoot
         public readonly AuthorId $authorId,
         public readonly \DateTimeImmutable $createdAt,
     ) {
-        $this->record(new PostCreated($id, $title, $authorId));
     }
 
     public static function create(PostId $id, string $title, string $content, AuthorId $authorId): self
     {
         // Invarianty: title 3–255 znaků, content nesmí být prázdný
-        return new self($id, $title, $content, $authorId, new \DateTimeImmutable());
+        $post = new self($id, $title, $content, $authorId, new \DateTimeImmutable());
+        $post->record(new PostCreated($id, $title, $authorId));
+
+        return $post;
     }
 
     public function updateTitle(string $newTitle): void { /* ... */ }
