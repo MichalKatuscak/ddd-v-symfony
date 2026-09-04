@@ -441,16 +441,24 @@ Rozpočet na fulltextové vyhledávání byl v této session vyčerpán; **žád
   Trackers“ a „Designing a More Sophisticated Process“. Pro kapitolu o sagách je tahle druhá
   pasáž praktičtější než kap. 4, protože řeší stavové automaty a timeouty. **Doporučení: citovat
   obě, kap. 4 pro zařazení vzoru a kap. 13 pro implementační detaily.**
-- **Richardson, C. — *Microservices Patterns*, Manning, 2018.** Kapitola cituje „kap. 4" pro
-  countermeasures (semantic lock, commutative updates, pessimistic view, reread value) a pro trojici
-  compensatable / pivot / retryable (`sagas.md:989`, `sagas.md:1400`). Stránka microservices.io [2]
-  existenci countermeasures potvrzuje („requires developers to implement countermeasures"), ale
-  **jednotlivé countermeasures ani trojici transakcí nedefinuje**. Odkazy
-  `chrisrichardson.net/post/sagas/2019/08/15/developing-sagas-part-4.html` a
-  `microservices.io/post/sagas/2019/08/04/developing-sagas-part-2.html` buď vrací 404, nebo obsah
-  neobsahují. **Ověřit proti knize** – seznam countermeasures i pojem *pivot transaction* jsou
-  v kapitole podány jako Richardsonovy a měly by být přesné.
+- **Richardson, C. – *Microservices Patterns*, Manning, 2018 – OVĚŘENO 2026-09-04 ze zakoupeného
+  výtisku (1. vydání). Citace „kap. 4“ sedí, všechny pojmy v knize jsou. Jedna terminologická
+  nepřesnost.**
 
+  Kapitola 4 je skutečně o sagách – kniha ji sama anotuje jako *„Chapter 4 explains how to
+  maintain data consistency across services by using the Saga pattern“*, dále *„introduces the
+  saga concept“*, *„discusses how they can implement choreography-based sagas“* a *„discusses how
+  to implement an RDBMS-based saga orchestrator“*. Odkazy na `sagas.md:989` a `:1400` jsou tedy
+  správné.
+
+  Všechna čtyři countermeasures jsou doložená: **semantic lock** (15 výskytů),
+  **commutative updates** (2), **pessimistic view** (4), **reread value** (4); slovo
+  „countermeasure“ se v knize objevuje 57×. Doložená je i trojice typů transakcí:
+  **compensatable** (25) a **pivot transaction** (19).
+
+  **Nepřesnost k opravě (`sagas.md:1396`):** kapitola píše „**Retryable** transactions“.
+  Richardson používá tvar **„retriable“** – 18 výskytů, zatímco „retryable“ se v knize
+  nevyskytuje ani jednou. Obojí je anglicky správně, ale při citaci autora se má držet jeho tvar.
 - **Hohpe, G., Woolf, B. — *Enterprise Integration Patterns*, Addison-Wesley, 2003.** Ověřeny jsou
   webové verze vzorů [3][4]. Knižní znění se může lišit; pokud kniha cituje EIP doslovně, ověřit
   proti tisku.

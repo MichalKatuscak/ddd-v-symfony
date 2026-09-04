@@ -433,9 +433,28 @@ Baas-Schwegler *Collaborative Software Design*, Tune *Architecture Modernization
 
 ### Neověřené / nedohledané
 
-- **Přesná barevná legenda přímo z *Introducing EventStorming*.** Kniha je za paywallem na Leanpubu.
-  Legenda v sekci 2 pochází z ddd-crew glossary [9][10], který se na knihu odvolává a barvy označuje
-  jako „official", ale primární zdroj to není. Před přepisem sekce 04.03 knihu koupit a legendu ověřit.
+- **Barevná legenda z *Introducing EventStorming* – OVĚŘENO 2026-09-04 ze zakoupeného výtisku.
+  Čtyři barvy sedí, jedna je v rozporu.**
+
+  Potvrzeno doslovně: **oranžová** = doménová událost (*„orange sticky note, in a verb at past
+  tense, and place them along a timeline“*), **modrá** = command (*„a user decision which will
+  involve both logical and emotional thinking“*), **lila** = policy (*„a lilac sticky note,
+  sitting in between an orange event and a blue command“*), **žlutá** = aktér (*„yellow sticky
+  note to every event in the flow. Adding significant people adds more clarity“*).
+
+  **Rozpor – Hot Spot.** Brandolini pro hot spoty používá **fialovou**; v knize se to opakuje ve
+  čtyřech formulacích: „purple for Hot Spot“, „hot spots in purple“, „hot spot purple“,
+  „hot spots with purple“. Příklad z jeho workshopu: fialová sticky s textem *„Training Class
+  Description Sucks!“* umístěná k odpovídající události.
+
+  Kapitola `event_storming.md:65-66` má ale **růžovou pro Hot Spot a fialovou pro Bounded
+  Context**. Pro Bounded Context přitom Brandolini žádnou barvu nezavádí – hranice kreslí, ne
+  lepí.
+
+  **Doporučení: legendu sjednotit s primárním zdrojem, nebo v kapitole výslovně napsat, že jde
+  o variantu.** Barevné konvence se v komunitě liší a to je legitimní; problém je jen v tom, že
+  kapitola legendu podává jako danou, aniž by odchylku od Brandoliniho zmínila. Nejmenší zásah:
+  poznámka pod tabulkou.
 - **Brandoliniho esej *Discovering Bounded Contexts with EventStorming*** ve sborníku
   *Domain-Driven Design: The First 15 Years* (Leanpub, 2017). Existenci i autorství potvrzuje [9],
   plný text ověřen nebyl; značení pivotal events svislými čarami pochází z obrázků citovaných v [9].

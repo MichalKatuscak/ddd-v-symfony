@@ -311,8 +311,35 @@ Je to dnes nejúplnější zpracování kombinace strategického DDD a Team Topo
   „it is best for“, a hned k tomu přidává výhradu, že organizaci týmů to omezovat nemá.
   **Doporučení: doplnit tu výhradu.** Kapitola tím získá přesnější tvrzení a zároveň odpověď na
   námitku, kterou si čtenář položí sám.je; doslovné znění se z veřejných zdrojů ověřit nepodařilo. Před přepisem ověřit proti knize, zejména zda Vernon skutečně říká „nikdy“, nebo mírnější formulaci.
-- **Tvrzení kapitoly na řádcích 484–486**, že Skelton a Pais „výslovně varují" před objektivizací cognitive load přes LOC, počet služeb nebo průtok ticketů. V žádném dohledatelném zdroji potvrzeno nebylo.
-- **Poměr stream-aligned ku ostatním týmům 6:1 až 9:1.** Doložen jen sekundárně [15]. Nutné ověřit proti tištěné knize (kap. 5), protože kapitola dnes tvrdí opak („autoři procenta neuvádějí").
+- **Varování před měřením cognitive load přes LOC (`:484–486`) – POTVRZENO 2026-09-04 ze
+  zakoupeného výtisku. Skelton a Pais to říkají výslovně a ostřeji, než kapitola naznačuje:**
+
+  > *„Trying to determine the cognitive load of software using simple measures such as lines of
+  > code, number of modules, classes, or methods is **misguided**.“*
+
+  Argument doplňují odkazem na výzkum: Graylin Jay a kolegové v roce 2009 ukázali, že jazyky se
+  liší v upovídanosti, a s nástupem microservices se polyglotní systémy staly běžnými – takže
+  LOC nesrovnává srovnatelné.
+
+  Na jiném místě to zpřesňují: jistá korelace mezi velikostí systému v řádcích kódu a zátěží sice
+  existuje, ale rozhodující je *„the limit on cognitive capacity to handle changes to the system
+  in an effective way“*. **Doporučení: citovat slovo „misguided“ i odkaz na Jaye;** kapitola tím
+  získá doložené varování místo obecné výhrady.
+- **Poměr stream-aligned týmů 6:1 až 9:1 – OVĚŘENO 2026-09-04 ze zakoupeného výtisku
+  (1. vydání, 2019). Čísla sedí, ale mají u sebe výhradu, kterou kapitola vynechává.** Znění:
+
+  > *„TIP: For organizations that are successful at delivering software rapidly and safely, most
+  > teams are stream aligned, with only around one in seven to one in ten teams not stream
+  > aligned. That is, **based on what successful organizations report**, the ratio of
+  > stream-aligned teams to other kinds of teams should be between about 6:1 and 9:1.“*
+
+  Dvě věci k zachování při citaci. Za prvé, je to označeno jako **TIP**, ne jako výsledek měření.
+  Za druhé, opírá se o to, co organizace **samy hlásí** – tedy sebehodnocení, ne nezávislá data.
+  Kapitola má poměr uvádět s touto výhradou, jinak z doporučení dělá naměřenou hodnotu.
+
+  Autoři hned dodávají příklad převodu: DBA týmy se často dají změnit na enabling teams, pokud
+  přestanou pracovat na úrovni aplikace a začnou šířit povědomí o výkonu a monitoringu databází
+  ke stream-aligned týmům. To je konkrétní, do kapitoly použitelné.
 - **Přesné znění otázek v šabloně Team Cognitive Load Assessment.** Veřejný repozitář [10] obsahuje jen odkaz na Google Form; sekce „Overview", „How to use" a „Template" jsou prázdné.
 - **Obsahové změny 2. vydání Team Topologies mimo předmluvu a případové studie.** Zda byly upraveny definice čtyř typů nebo tří módů, se z veřejných materiálů zjistit nepodařilo. Nutné porovnat výtisky.
 - **Helfand, H. — *Dynamic Reteaming* (O'Reilly)** jako protiváha k jednorázové reorganizaci. Kniha existuje, ale rok vydání 2. edice ani konkrétní tvrzení jsem neověřoval; pokud se má do bibliografie dostat, dohledat ručně.
