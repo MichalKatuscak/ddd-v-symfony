@@ -35,7 +35,7 @@ Komplexita domény přerostla model – právě tento stav DDD řeší. Nabízí
 
 Hlavní přínos DDD: kód odráží jazyk, kterým mluví doménoví experti. Když produktový manažer řekne „tohle není reklamace, je to dispute s odlišným procesem“ – kód to umí říct stejně. Když účetní rozhoduje, jestli refund započítává dopravu, doménová třída `Refund` má metodu `excludeShipping()` nebo `includeShipping()`, která to říká. Když tester píše scénář, používá stejný slovník jako PM. Slovník je jeden, žije v hlavě týmu i v kódu, a když se mění, mění se na obou místech najednou.
 
-DDD má svou cenu. Vyžaduje vyšší počáteční složitost, učební křivku týmu a opakovanou spolupráci s doménovými experty. Pro CRUD aplikaci nad jednou tabulkou se nevyplatí – tam je `OrderService` se setterem správná volba a investice do agregátu by byla nepřiměřená. Pro komplexní doménu s rostoucí pravidlovou složitostí, kterou tým udržuje déle než rok, se DDD vrací v horizontu šesti až dvanácti měsíců.
+DDD má svou cenu. Vyžaduje vyšší počáteční složitost, učební křivku týmu a opakovanou spolupráci s doménovými experty. Pro CRUD aplikaci nad jednou tabulkou se nevyplatí – tam je `OrderService` se setterem správná volba a investice do agregátu by byla nepřiměřená. Pro komplexní doménu s rostoucí pravidlovou složitostí, kterou tým udržuje léta, se investice vrátí – jen na to potřebuje čas a spolehlivý odhad, za jak dlouho, neexistuje.
 
 V této knize se naučíte, jak rozhodnout, jestli DDD ve vašem projektu dává smysl (kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) je o tom, kdy odpověď zní „ne“). Jak modelovat doménu, identifikovat agregáty, oddělit zápis od čtení. Jak to konkrétně implementovat v Symfony 8 – bez teoretických odboček, s funkčním kódem, který lze převzít.
 

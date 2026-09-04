@@ -610,8 +610,8 @@ final class IdempotencyMiddleware implements MiddlewareInterface
 :::callout{type="note"}
 Tabulka `processed_messages` poroste bez omezení. Přidejte
 pravidelný úklid (cron) nebo `TTL` index pro automatické mazání
-starých záznamů. Obvyklá retence je 7–30 dní – doba, po které broker
-přestane doručovat retries.
+starých záznamů. Retenci odvoďte od brokeru: záznam musí přežít nejdelší dobu, po kterou
+může dorazit opakované doručení téže zprávy.
 :::
 
 :::callout{type="warn"}

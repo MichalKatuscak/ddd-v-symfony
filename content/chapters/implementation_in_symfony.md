@@ -38,7 +38,7 @@ Tento průvodce používá **Doctrine atributy přímo na doménových třídác
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
 *Dependency Inversion* – doména „ví“ o Doctrine. V praxi jde o metadata,
 ne o chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Maker,
-oficiální dokumentace i drtivá většina open-source projektů používá atributy.
+oficiální dokumentace používá atributy a komunita je následuje.
 
 Pokud chcete striktně oddělenou doménu, korektní cesta není XML mapping (taky
 „znečištěné“, jen jiným formátem), ale **Persisted Object Pattern** – samostatná

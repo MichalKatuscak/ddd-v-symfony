@@ -243,8 +243,8 @@ výhody (udržovatelnost, schopnost rozvíjet se).
 **Proč zrovna rok?** Hranice „jeden rok“ není absolutní – je to orientační bod
 založený na praxi. DDD vyžaduje počáteční investici: modelování domény, budování
 Ubiquitous Language, návrh agregátů a bounded contextů. Tato investice se typicky začíná
-vracet po 6–12 měsících, kdy projekt roste a tým profituje z čistých doménových hranic.
-U projektů kratších než rok této návratnosti nedosáhnete.
+vracet ve chvíli, kdy projekt povyroste a tým začne těžit z čistých doménových hranic.
+U projektů, které skončí do roka, se to nestihne.
 Vernon v *Domain-Driven Design Distilled* to obrací k volbě, kam úsilí namířit: žádná
 organizace nemůže vynikat ve všem, takže si musí pečlivě vybrat, v čem vyniknout chce.
 Kde tahle volba nepadne na váš projekt, nevyplatí se do něj investovat plný taktický návrh.
@@ -377,13 +377,13 @@ Standardní rozhodnutí je „nový projekt → DDD od začátku, legacy → nec
 Reálný kontext bývá složitější: legacy CRUD kód přerůstá v komplexní doménu,
 ale migrace celého kódu na DDD je nereálná. Nastává **migration cost paradox**:
 
-- Cena udržovat anemický legacy = X / rok (rostoucí s časem).
-- Cena big-bang rewrite na DDD = 5–10X (jednorázová) + riziko regrese.
-- Cena postupné migrace přes [Strangler Fig](/migrace-z-crud) = 3–4X (rozprostřená)
-  + ztráta produktivity během migrace.
+- Udržovat anemický legacy stojí každý rok určitou částku a ta s časem roste.
+- Big-bang rewrite na DDD stojí násobek ročních nákladů najednou a nese riziko regrese.
+- Postupná migrace přes [Strangler Fig](/migrace-z-crud) vyjde levněji než rewrite a rozloží
+  se v čase, zato po celou dobu ubírá produktivitu.
 
 Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaný přínos za
-zbývající životnost systému převýší trojnásobek ceny migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
+zbývající životnost systému převýší cenu migrace s dostatečnou rezervou. Pro projekt s ETA 1–2 roky před koncem životnosti
 je migrace obchodní rozhodnutí, ne technické.
 
 Rozhodnutí navíc nedrží jen technické faktory. Systém může být během migrace

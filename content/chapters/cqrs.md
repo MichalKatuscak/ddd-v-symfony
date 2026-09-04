@@ -127,8 +127,8 @@ Dvě další výhody:
 CQRS má své limity. Kompromisy, které přináší, je lepší znát ještě před zavedením.
 
 Místo jednoho modelu existují dva (nebo více) a každý command či query vyžaduje vlastní
-třídu, handler a často i vlastní datovou strukturu – pro jednoduchou CRUD operaci 4–6 tříd
-místo jedné. Při oddělených úložištích se přidává synchronizace: read model se musí aktualizovat
+třídu, handler a často i vlastní datovou strukturu – tam, kde by v CRUD stačila jedna třída,
+jich vznikne několik. Při oddělených úložištích se přidává synchronizace: read model se musí aktualizovat
 po každé změně write modelu, aby se s ním nerozešel. Selhání propagace (výpadek fronty, chyba
 projektoru) vede k divergenci modelů.
 
