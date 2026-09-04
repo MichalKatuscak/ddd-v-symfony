@@ -1,6 +1,6 @@
 # Stav prací na studiích + jak navázat
 
-Poslední aktualizace: 2026-09-04 – **všech 26 studií hotovo, doověřovací backlog uzavřen**
+Poslední aktualizace: 2026-09-04 — **studie hotové, ověřování uzavřeno, všech 26 kapitol zrevidováno**
 
 ## Co to je
 
@@ -507,6 +507,61 @@ Zbylé otevřené položky knihami nevyřeší nic:
   návratnost investice do DDD. Ta data neexistují; rozhodnutí je autorské.
 - **„Drtivá většina open-source projektů používá atributy“** – nikdo to neměřil.
 - **Vernonův text k DDD a AI** – neexistuje; kapitola cituje jen jeho poznámku z InfoQ.
+
+## Revize všech 26 kapitol dokončena (2026-09-04)
+
+Každá kapitola prošla revizí podle `docs/prompts/review-chapter.md` s příslušnou studií jako
+podkladem. Revize běžely po jedné kapitole v odděleném kontextu; výsledek jsem u každé ověřil
+proti primárním zdrojům a commitoval zvlášť.
+
+**Rozsah:** 26 souborů, +6266 / −2345 řádků (26 930 → 30 877 řádků, +15 %).
+
+### Co se opravilo v kódu
+
+Ukázky, které by nefungovaly:
+
+- `subdomains` – Auth0 SDK v8 vrací PSR-7 odpověď, ne `null`; ošetření chybějícího uživatele
+  nikdy neproběhlo.
+- `practical_examples` – `HashedPassword::fromHasher()` nemohl fungovat, protože Symfony
+  `hashPassword()` vyžaduje instanci uživatele. Kontrola duplicity přes `findByEmail()` měla
+  TOCTOU mezeru.
+- `anti_patterns` – enum `UserStatus` měl casy v PascalCase, ale kód je volal jako `self::PENDING`.
+- `aggregate_design` – YAML nastavoval `enable_lazy_ghost_objects` a `auto_generate_proxy_classes`,
+  obě v DoctrineBundle 3 odstraněné.
+- `case_study` – `readOnly: true` na read modelu vypíná sledování změn, takže by každý `UPDATE`
+  z projekce tiše zmizel; `flags: ['gin']` Doctrine ignoruje.
+- `architectural_styles` – `allow_no_senders: false` na query busu by rozbil každý synchronní dotaz.
+- `microservices_and_ddd` – decode-only serializer by při retry spadl na `encode()`.
+- `cqrs` – `--format=json` má `messenger:stats`, ne `messenger:failed:show`.
+
+### Co se opravilo ve faktech
+
+Vyvrácené atribuce: Beck, Tune a DHH v kapitole o AI (třináct výroků ze čtyřiceti), Young a povaha
+CQRS, poměr 80/20 připsaný Vernonovi, Khononovův telco příklad a jeho údajné doporučení 1:N
+mapování, Vernonova „strategická hodnota“, Seemann jako obhájce anemického modelu.
+
+Čísla bez zdroje zmizela napříč knihou: multiplikátory nákladů, návratnost investice, retence
+deduplikační tabulky, „4–6 tříd“, podíl konfliktů zámku, replikační lag, prahy pro partitioning,
+Standishova statistika. Kde to šlo, nahradil je nástroj místo tvrzení – například měření lagu přes
+`pg_last_xact_replay_timestamp()`.
+
+Zastaralý stav: Broadway je archivovaná, `qossmic/deptrac` opuštěný, DORA zrušila škálu
+Elite/High/Medium/Low, Event Store se přejmenoval na Kurrent, Team Topologies vyšlo podruhé.
+
+### Průřezová konzistence
+
+`AggregateRoot` je bajt po bajtu shodný mezi kapitolami 6 a 10 (kontrolováno hashem). `place()`
+je všude statická factory, stavové přechody se jmenují `confirm()` nebo `submitForApproval()`.
+Enum casy jsou PascalCase, události bez sufixu `Event`, události se nenahrávají v konstruktoru,
+`Money` má napříč třemi definicemi kompatibilní API.
+
+### Stav kontrol
+
+- `php -l`: **300 bloků, 0 chyb**
+- `lint:twig`: 30 souborů OK
+- interní odkazy: **563, 0 rozbitých**; žádná duplicitní kotva uvnitř kapitoly
+- typografie: 0 em dash, 0 anglických uvozovek, 0 výskytů „Tady“
+- `reading_time` přepočítán u všech kapitol, které změnily délku
 
 ## Jak zadat studii (šablona promptu pro agenta)
 
