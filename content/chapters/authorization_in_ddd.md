@@ -97,6 +97,9 @@ Tým objeví Doctrine SQLFilter a rozhodne, že autorizaci vyřeší v perzisten
 
 - Když handler dostane `$orderId` a entita se nenajde, neví, jestli neexistuje, nebo jen není dostupná pro daného uživatele. Chybová hláška „Order not found“ je matoucí.
 - Doctrine filtry se nevztahují na entity už načtené v identity map, na nativní SQL ani na Redis cache.
+- Filtr se neuplatní ani při načtení **neowning strany asociace one-to-one**. Ověřeno na ORM 3.6:
+  `find()` i DQL cizí záznam skryjí, ale průchod z entity na druhý konec vztahu ho vrátí. Kdo staví
+  oddělení tenantů jen na filtru, má tudy díru.
 - Doménová pravidla typu „order patří customerovi“ ztrácejí jedno závazné místo: zapsaná jsou v SQL filtru, ve Voteru se na ně zapomíná a v aggregate chybí – při volání mimo HTTP vrstvu se nevynutí.
 
 :::callout{type="warn"}
@@ -744,6 +747,11 @@ doctrine:
 :::
 
 Pozor na sémantiku výchozího stavu. Vypnutý nebo nenakonfigurovaný filter nepřidá do SQL žádné WHERE – dotaz vrátí data všech tenantů. SQLFilter je tedy ze své podstaty *fail-open* a to je hlavní riziko celého přístupu. Proto konfigurace výše filter zapíná globálně (`enabled: true`): běží pro každý dotaz a chybějící `tenant_id` skončí výjimkou, ne únikem dat. Hodnotu parametru dodává kernel event listener po autentizaci:
+
+Jedna mezera zůstane i pak. Filtr nepokrývá načtení **neowning strany asociace one-to-one** –
+měřeno na ORM 3.6 vrátí druhý konec vztahu i záznam cizího tenanta, přestože týž záznam přes
+`find()` nebo DQL nedostanete. Tam, kde na oddělení tenantů závisí bezpečnost, patří kontrola
+tenanta i do doménové vrstvy, ne jen do filtru.
 
 :::code{language="php" filename="src/SharedKernel/Infrastructure/Http/TenantContextListener.php" highlights="13,22,23,24,25,26,27,28,29,30,31,32,33,34"}
 // src/SharedKernel/Infrastructure/Http/TenantContextListener.php
