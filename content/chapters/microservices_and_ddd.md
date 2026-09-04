@@ -867,7 +867,7 @@ Pět nejčastějších anti-vzorů, na které tým narazí při kombinaci DDD a 
 
 **Důsledek:** operační režie 100x. Každá service potřebuje monitoring, alerty, CI/CD, runtime, znalostní bázi, pohotovostní rotaci. Tým 30 lidí má na service 0,3 inženýra. Nikdo nemá hluboké vlastnictví, všichni „udržují“.
 
-**Oprava:** agregovat blízce příbuzné services do jedné – typicky sloučit do BC, do kterého patří. „Microservice“ znamená *samostatně nasazovatelnou jednotku*, ne „malou service“. Velikost je vedlejší. Sam Newman v *Building Microservices, 2nd ed.* kapitole 4 explicitně doporučuje, aby velikost service vznikala z domény, ne z technické gymnastiky.
+**Oprava:** agregovat blízce příbuzné services do jedné – typicky sloučit do BC, do kterého patří. „Microservice“ znamená *samostatně nasazovatelnou jednotku*, ne „malou service“. Velikost je vedlejší. Sam Newman v *Building Microservices, 2nd ed.* staví hranice services na information hidingu, provázanosti a soudržnosti – tedy na doméně, ne na technické gymnastice.
 
 Obecnější rozbor anti-vzorů v DDD (nejen microservices) najdete v [kapitole 21 – Anti-vzory](/anti-vzory).
 
@@ -890,7 +890,7 @@ Stručně: nezačínejte microservices. Začněte modular monolithem s explicitn
 
 ## 19.12 Další četba {#further-reading}
 
-- [Sam Newman – *Building Microservices, 2nd ed.* (O'Reilly, 2021)](https://samnewman.io/books/building_microservices_2nd_edition/). Kanonická kniha o microservices. Kapitoly 1–4 pro hranice services, kapitola 3 pro monolith-first strategii, kapitoly 5–7 pro integraci, kapitola 14 pro migraci.
+- [Sam Newman – *Building Microservices, 2nd ed.* (O'Reilly, 2021)](https://samnewman.io/books/building_microservices_2nd_edition/). Kanonická kniha o microservices. Kapitoly 1–2 pro hranice services, kapitola 3 pro monolith-first strategii i pro migraci, kapitoly 4–6 pro integraci.
 - [Chris Richardson – *Microservices Patterns* (Manning, 2018)](https://microservices.io/book). Praktická kniha plná konkrétních patternů. Kapitola 2 (decomposition by business capability), kapitola 3 (interprocess communication), kapitola 4 (sagas), kapitola 13 (refaktoring monolithu).
 - [Vaughn Vernon – *Implementing Domain-Driven Design* (Addison-Wesley, 2013)](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577). Kapitola 2 pro Bounded Context jako jazykovou hranici, kapitola 3 pro Context Maps, kapitola 8 pro Domain Events napříč BC.
 - [Martin Fowler – *MonolithFirst* (2015)](https://martinfowler.com/bliki/MonolithFirst.html). Krátký esej, který formuloval doporučení nezačínat na zelené louce s microservices.

@@ -23,7 +23,7 @@ github_examples: Chapter05_CQRS
 
 CQRS vychází z prostého pozorování: **model, který slouží k zápisu dat, nemusí být tentýž model,
 který slouží k jejich čtení**. CQRS (Command Query Responsibility Segregation) tento princip
-přenáší na úroveň architektury – popsal jej Greg Young
+přenáší z jednotlivé metody na celý model – popsal jej Greg Young
 [[1]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf)
 jako rozšíření Command-Query Separation (CQS) od Bertranda Meyera
 [[2]](https://martinfowler.com/bliki/CommandQuerySeparation.html).
@@ -54,17 +54,19 @@ Bertrand Meyer formuloval princip **Command-Query Separation (CQS)** jako pravid
 na úrovni metod: každá metoda by měla buď měnit stav (command), nebo vracet hodnotu (query),
 ale nikdy obojí. CQS je návrhové pravidlo pro rozhraní tříd.
 
-Greg Young posunul tuto myšlenku na **architektonickou úroveň**: CQRS není pravidlo
-pro jednotlivé metody, ale rozhodnutí o struktuře celé aplikace. Místo jednoho doménového modelu
-vznikají dva oddělené modely – každý s vlastní sadou tříd, vlastním úložištěm a vlastním
-optimalizačním profilem.
+Greg Young tutéž myšlenku posunul z jednotlivé metody na **model**: CQRS není pravidlo
+pro metody, ale rozdělení jednoho doménového modelu na dva. Každý má vlastní sadu tříd,
+vlastní úložiště a vlastní optimalizační profil. Sám Young přitom zdůrazňuje, že CQRS
+**není architektura**, nýbrž architektonický vzor, a že popisuje něco uvnitř jediného
+systému nebo komponenty – ne uspořádání celé aplikace
+[[3]](https://gregfyoung.wordpress.com/2012/09/09/cqrs-is-not-an-architecture/).
 
 :::callout{type="pattern"}
 ### CQS vs. CQRS – přehled {#cqs-vs-cqrs-tabulka-heading}
 
 | Aspekt | CQS | CQRS |
 |---|---|---|
-| Úroveň | Metoda / třída | Architektura celé aplikace |
+| Úroveň | Metoda / třída | Doménový model uvnitř systému |
 | Pravidlo | Metoda buď mění stav, nebo vrací data | Oddělený write model a read model |
 | Počet modelů | Jeden sdílený model | Dva (nebo více) oddělených modelů |
 | Databáze | Sdílená | Může být oddělená (write DB + read DB) |

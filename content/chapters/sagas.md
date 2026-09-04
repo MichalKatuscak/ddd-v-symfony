@@ -1393,7 +1393,7 @@ Richardson (Microservices Patterns, 2018, kap. 4) dělí kroky ságy do tří sk
   kompenzaci (`ChargeCustomer` ↔ `RefundCustomer`).
 - **Pivot transaction** – bod rozhodnutí. Jakmile commitne, sága už necouvá
   a poběží dopředu až do konce. V našem procesu je pivotem rezervace skladu.
-- **Retryable transactions** – kroky po pivotu (`CreateShipment`,
+- **Retriable transactions** – kroky po pivotu (`CreateShipment`,
   `ConfirmOrder`). Kompenzaci nemají, nesmí selhat z doménových důvodů
   a opakují se až do úspěchu.
 

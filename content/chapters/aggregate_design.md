@@ -79,9 +79,11 @@ výkon a kde příliš malé rozbily invarianty. Čtyři pravidla, která doporu
    Tak se napříč agregáty koordinuje stav.
 
 Khononov v *Learning DDD* (2021) dodává páté pravidlo, které z Vernonových implicitně
-plyne, ale vyplatí se ho formulovat výslovně: **jeden command modifikuje právě jeden agregát.**
-Pokud se v jednom command handleru objeví dvě volání `save()` na různé repozitáře,
-buď chybí hranice (mají to být dva commandy), nebo chybí sága (má to být dvoufázový proces).
+plyne, ale vyplatí se ho formulovat výslovně: **jedna databázová transakce mění právě jeden
+agregát.** Potřeba commitnout změny ve více agregátech je podle něj signálem špatně vedené
+hranice. Objeví-li se v jednom command handleru dvě volání `save()` na různé repozitáře,
+stojí za to hranice prověřit: buď mají vzniknout dva commandy, nebo jde o ságu, tedy
+o dvoufázový proces s vlastní transakcí pro každý krok.
 
 ## 07.03 Invarianty jako východisko návrhu {#invariants}
 

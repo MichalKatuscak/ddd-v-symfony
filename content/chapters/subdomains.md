@@ -53,7 +53,7 @@ Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object,
 
 Část domény, která je **nezbytná pro provoz, ale nediferencuje vás**. Test: *„potřebujeme to, ale nikdo nás kvůli tomu nenajme.“* Klasické příklady: správa objednávek v e-shopu, evidence skladu, fakturace, reporting pro management. Kdyby Supporting fungoval „stejně jako u konkurence“, nikdo by si toho nevšiml – ale kdyby vůbec nefungoval, provoz by stál.
 
-Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžkým [Doctrine ORM](/implementace-v-symfony)), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je **fungovat spolehlivě s minimálními náklady na údržbu**, ne mít nejhezčí model. Vernon doporučuje pro Supporting subdomény používat lehčí variantu DDD. Při plném taktickém designu organizace zbytečně vynaloží seniorní čas na něco, co nikoho nezajímá [[2]](https://kalele.io/books/).
+Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžkým [Doctrine ORM](/implementace-v-symfony)), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je **fungovat spolehlivě s minimálními náklady na údržbu**, ne mít nejhezčí model. Vernon k tomu dává test místo paušálu: u Supporting subdomény, kterou nelze pořídit hotovou jako Generic, se taktický návrh vyplatí tehdy, když ho tým zvládá, model je inovativní a má vydržet roky. Kde tyto podmínky neplatí, vynaloží organizace seniorní čas na něco, co nikoho nezajímá [[2]](https://kalele.io/books/).
 
 **Generic Subdomain** *(generická subdoména)*
 
@@ -155,7 +155,7 @@ Obrana proti anti-vzoru „všechno je Core“ je přímočará: **vynuťte si r
 
 ## 02.05 Mapování subdomén na Bounded Contexts {#subdomeny-na-bc}
 
-Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména je rozdělená do více BC, typické pro Core), a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov upozorňuje, že u Core Domén je 1:N často nevyhnutelné, protože stejné doménové pravidlo se uplatňuje v různých kontextech (čtenářském vs. zápisovém) [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména je rozdělená do více BC), a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov jde dál a před rozdělováním souvislé funkcionality varuje: kontexty pak nelze rozvíjet nezávisle, protože tatáž změna požadavků zasáhne oba a vynutí si současné nasazení. Za legitimní důvod k rozdělení považuje potřebu oddělit vývojové cykly nebo škálovat část nezávisle na zbytku [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
 Pro názornost mapujme imaginární e-shop střední velikosti (3–4 týmy, 25 vývojářů) na subdomény a Bounded Contexts:
 

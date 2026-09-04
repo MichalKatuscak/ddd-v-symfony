@@ -245,8 +245,9 @@ založený na praxi. DDD vyžaduje počáteční investici: modelování domény
 Ubiquitous Language, návrh agregátů a bounded contextů. Tato investice se typicky začíná
 vracet po 6–12 měsících, kdy projekt roste a tým profituje z čistých doménových hranic.
 U projektů kratších než rok této návratnosti nedosáhnete.
-Vernon v *Domain-Driven Design Distilled* doporučuje zvážit
-„strategickou hodnotu“ projektu – pokud je nízká, DDD se nevyplatí.
+Vernon v *Domain-Driven Design Distilled* to obrací k volbě, kam úsilí namířit: žádná
+organizace nemůže vynikat ve všem, takže si musí pečlivě vybrat, v čem vyniknout chce.
+Kde tahle volba nepadne na váš projekt, nevyplatí se do něj investovat plný taktický návrh.
 
 :::callout{type="note"}
 **Doporučené alternativy:**
@@ -385,9 +386,9 @@ Kdy je migrace na DDD ekonomicky výhodná: pouze když očekávaný přínos za
 zbývající životnost systému převýší trojnásobek ceny migrace. Pro projekt s ETA 1–2 roky před koncem životnosti
 je migrace obchodní rozhodnutí, ne technické.
 
-Khononov uvádí příklad telco, které tři roky migrovalo na DDD; platformu
-pak při akvizici nahradilo jiné řešení. Tři roky inženýrské kapacity přišly
-vniveč.
+Rozhodnutí navíc nedrží jen technické faktory. Systém může být během migrace
+nahrazen po akvizici, sloučen s platformou kupujícího nebo odstaven při změně
+strategie – a odvedená práce padne bez ohledu na to, jak dobře byla udělaná.
 :::
 
 ### Pseudo-DDD – varování před cargo cultem {#pseudo-ddd-cargo-cult-heading}
