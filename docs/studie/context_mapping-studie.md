@@ -297,7 +297,19 @@ Vztah nese i atribut `downstreamRights` s hodnotami `INFLUENCER`, `OPINION_LEADE
   **Doporučení:** formulaci o průniku vyškrtnout, doplnit režim společné integrace a testů,
   a rozhodnout se u obsahu kernelu. Doporučení sdílet elementární VO je obhajitelné, ale je to
   autorský posun proti Evansovi – nemá se podávat jako jeho pozice.
-- **Vernon, IDDD kap. 3.** Ověřen jen obsah kapitoly a názvy podsekcí. Konkrétní tvrzení kapitoly o tom, co Vernon k Published Language a ke katalogu vztahů přidal (ř. 51, ř. 631), nebylo možné ověřit proti textu.
+- **Vernon, *IDDD* kap. 3 – OVĚŘENO 2026-09-04 z plného textu (vlastní výtisk). Tvrzení
+  na ř. 51 a 631 sedí.** Kapitola 3 se jmenuje *Context Maps* a člení se na *Why Context Maps Are
+  So Essential*, *Drawing Context Maps*, *Projects and Organizational Relationships* a *Mapping the
+  Three Contexts*. Katalog vztahů v ní je, včetně Published Language: *„Published Language: The
+  translation between the models of two Bounded Contexts requires a common language. Use
+  a well-documented shared language that can express the necessary domain information.“*
+
+  **Detail, který se do kapitoly hodí:** Vernon zavádí pro kreslení map ustálené zkratky –
+  *„ACL for Anticorruption Layer, OHS for Open Host Service, PL for Published Language“*. Pokud
+  kapitola diagramy kontextových map obsahuje, stojí za to je použít; jsou v komunitě zavedené.
+
+  Zajímavá je i jeho poznámka, že Open Host Service a Published Language se v praxi kombinují
+  s Anticorruption Layer, a že to *„is not a contradiction“* – vzory se nevylučují.
 - **Khononov 2021.** Tvrzení o Shared Kernelu, o kategorizaci vzorů a o kritériu duplicita vs. koordinace pochází ze sekundárních shrnutí a recenzí knihy. Před citací v knize ověřit proti originálu (kap. 4 „Integrating Bounded Contexts“).
 - **Autorství cheat sheetu DDD Crew.** Repozitář [7] uvádí Kacpera Gunię a Nicka Tuneho; profil Michaela Plöda na DDD Europe 2020 uvádí, že cheat sheet a Miro šablonu publikoval on. Rozpor nevyřešen.
 - **Plödovy slidy „Combining Team Topologies with Context Maps“.** PDF na res.cloudinary.com se nepodařilo převést na text (obrázkové slidy). Tvrzení o osách „hodně kódu / hodně konverzace“ pochází z textového shrnutí přednášky, ne ze slidů samotných.

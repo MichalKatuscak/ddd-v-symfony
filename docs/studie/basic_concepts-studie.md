@@ -423,7 +423,22 @@ Datum přístupu u všech webových zdrojů: 2026-09-03.
 ### Neověřené / nedohledané
 
 - **Přesné znění definic v modré knize (2003).** Studie pracuje s Reference (2015), která je autorem redigovaná a volně dostupná. Formulace v původní knize se místy liší; pro citaci vydání z roku 2003 je nutné ověřit v tištěném textu.
-- **Vernon, IDDD (2013), kap. 5 a 12.** Čtyři strategie vzniku identity a rozdíl collection-/persistence-oriented jsou doloženy sekundárně (výtahy a ukázkové kapitoly na ptgmedia.pearsoncmg.com). Přímý text nebyl ověřen.
+- **Vernon, *IDDD* (2013), kap. 5 a 12 – OVĚŘENO 2026-09-04 z plného textu (vlastní výtisk).
+  Obě tvrzení sedí.** Kapitola 5 (*Entities*) vypisuje pod nadpisem *Unique Identity* přesně čtyři
+  strategie vzniku identity, a to v tomto pořadí: **User Provides Identity**, **Application
+  Generates Identity**, **Persistence Mechanism Generates Identity** a **Another Bounded Context
+  Assigns Identity**. Následují podsekce *When the Timing of Identity Generation Matters*,
+  *Surrogate Identity* a *Identity Stability* – druhá jmenovaná je pro kapitolu užitečná, protože
+  řeší přesně ten rozpor mezi doménovým ID a technickým klíčem ORM.
+
+  Kapitola 12 (*Repositories*) rozdíl collection-oriented vs. persistence-oriented skutečně vede
+  a Vernon ho vymezuje takto: *„For times when a collection-oriented style doesn’t work, you will
+  need to employ a persistence-oriented, save-based Repository. This will be the case when your
+  persistence mechanism doesn’t implicitly track changes.“* Kapitola má i podsekci *Repository
+  versus Data Access Object*, která se do knihy hodí.
+
+  **Doporučení: obě citace ponechat a doplnit čísla stran až podle výtisku; obsahově jsou
+  doložené.**
 - **Khononov, *Learning DDD* (2021).** K definicím Entity/VO/Aggregate byly nalezeny jen sekundární výtahy. Před citací ověřit v originále.
 - **`dispatch_after_current_bus` – OVĚŘENO 2026-09-04 ve zdroji.**
   `Symfony\Component\Messenger\Middleware\DispatchAfterCurrentBusMiddleware` existuje ve větvi 8.1

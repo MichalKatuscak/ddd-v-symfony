@@ -285,6 +285,65 @@ Kategorie B (47 knižních citací – Vernon, Khononov, Millett & Tune, Team To
 Richardson) je vyhledáním neřešitelná; ověřit lze obsahy a výtahy, ne doslovná znění. Kategorie C
 (16 položek – ROI DDD, učící křivka, bug rate, benchmarky PHP relay workeru) jsou data, která
 neexistují; ta tvrzení je nutné z knihy vyškrtnout, ne dohledat.
+## Šesté kolo: knižní citace ověřené proti vlastním výtiskům (2026-09-04)
+
+Knižní kategorie, kterou rešerše uzavřít nemohla, se otevřela – Michal zpřístupnil své zakoupené
+knihy přes síťový share. Ověřeno proti plnému textu **Evans 2003**, **Vernon *IDDD***,
+**Vernon *DDD Distilled***, **Freeman & Pryce *GOOS*** a **Kleppmann *DDIA***.
+
+### Tři tvrzení padla
+
+**1. Shared Kernel (`context_mapping.md:121`).** Formulace „menší než přirozený průnik obou
+modelů“ v Evansovi 2003 není; slovo „intersection“ se u vzoru nevyskytuje vůbec. Není tam ani
+„Keep this kernel small“ – ta věta přibyla až v *DDD Reference* (2015). Závažnější je obsahový
+rozpor: Evans píše *„The SHARED KERNEL is often the CORE DOMAIN, some set of GENERIC SUBDOMAINS,
+or both“*, kdežto kapitola doporučuje sdílet elementární hodnotové objekty. To je autorský posun,
+ne Evansova pozice. Kapitola navíc vynechává celý provozní režim vzoru – společnou integraci,
+běh testů obou týmů a slučování oddělených kopií kernelu.
+
+**2. Poměr „80 % investice do 20 % kódu“ (`architectural_styles.md:1141`).** Vernon toto číslo
+neuvádí. V *IDDD* je „80 percent“ **jediný výskyt v celé knize** a týká se návrhu doménových
+událostí; „20 percent“ tam není vůbec, v *DDD Distilled* ani jedno. Věcné jádro (diferencovaná
+investice) přitom správné je – vyškrtnout stačí to číslo a nahradit je Vernonovými kritérii.
+
+**3. Supporting subdomény (`subdomains.md:56`).** Kapitola tvrdí, že Vernon doporučuje „lehčí
+variantu DDD“. Vernon říká opak: u Supporting subdomény, kterou nelze pořídit jako hotovou
+Generic, jsou taktické vzory *„a good opportunity to invest“*, pokud tým je umí, model je
+inovativní a má vydržet roky.
+
+### Co se potvrdilo a získalo doslovné znění
+
+- **Evansovo „harsh reality“** – věta, kterou kapitola cituje jako „Not all of a large system will
+  be well designed“, v knize v této podobě není. Skutečné znění: *„The harsh reality is that not
+  all parts of the design are going to be equally refined. Priorities must be set.“*
+- **DDD-Lite** – Vernon termín používá, ale jako varování: *„practicing DDD-Lite leads to the
+  construction of inferior domain models.“* Nepodávat ho jako legitimní odlehčenou variantu.
+- **Supporting Subdomain** – termín u Vernona doložen z primárního zdroje, konvence z `CLAUDE.md`
+  je tím potvrzená.
+- **1 BC = 1 tým** – Vernon to formuluje jako preferenci („it is best for“) a výslovně varuje:
+  *„a single Bounded Context is not an attempt to limit flexibility to team organization.“*
+- **Autorizace** – Vernon ji umisťuje do Application Services (*„The Application Service took care
+  of security and object translation“*), ne do vrstev. Výhrada k formulaci „vrstvení“ trvá.
+- **Kap. 4 *Architecture*** obsahuje sekci „Long-Running Processes, aka Sagas“; kap. 13 k tomu
+  přidává stavové automaty a timeouty – pro kapitolu o sagách praktičtější.
+- **Kap. 5** vypisuje čtyři strategie identity, **kap. 11** staví do popředí factory metodu na
+  agregátním kořeni (opora pro kanonické `Order::place()`), **kap. 12** vede rozdíl
+  collection-oriented vs. persistence-oriented, **kap. 3** obsahuje katalog vztahů i zkratky
+  ACL/OHS/PL pro kreslení map.
+- **Anemický model** – Vernon má diagnostický test dvou otázek; převzít formu testu je pro
+  kapitolu cennější než citát.
+- **Test Data Builder** – nově citovatelný z *GOOS*, s. 258, včetně příkladu `OrderBuilder`, takže
+  nedostupný Pryceův blogpost není potřeba. Bibliografie *GOOS* zároveň dala přesný záznam
+  Schuh & Punke: *ObjectMother: Easing Test Object Creation In XP*, XP Universe, 2001.
+
+### Co ze share chybí
+
+**Khononov *Learning Domain-Driven Design*, Richardson *Microservices Patterns*, Team Topologies
+a Millett & Tune** na share nejsou. Blokující položky, které na nich stojí, tedy zůstávají
+otevřené – týká se to hlavně `subdomains`, `when_not_to_use_ddd`, `anti_patterns` a `sagas`.
+Newmanovo *Building Microservices* je k dispozici jen v **1. vydání (2015)**, zatímco kniha cituje
+2. vydání (2021); čísla kapitol z něj ověřit nelze.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.

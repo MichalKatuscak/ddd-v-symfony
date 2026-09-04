@@ -391,9 +391,16 @@ vrstva a odkázat, kde se jí kniha věnuje.
 - **Publikace papíru *Specifications* v proceedings PLoP '97.** Vyhledávání to tvrdí, ale samotný PDF
   soubor ani Fowlerova stránka to nepotvrzují – Fowler uvádí jen „Sep 1997“. Před citací v knize
   dohledat proceedings ručně.
-- **Přesná formulace Vernonova doporučení k Factory class vs. factory metoda.** Ověřen je jen obsah
-  kapitoly 11 a příklad `Forum.startDiscussion()`. Plný text je za paywallem; před přepisem calloutu
-  ověřit v tištěném vydání.
+- **Vernonovo doporučení k Factory class vs. factory metodě – OVĚŘENO 2026-09-04 z plného textu
+  *IDDD* (vlastní výtisk).** Kapitola 11 se jmenuje *Factories* a člení se takto: *Factories in the
+  Domain Model*, **Factory Method on Aggregate Root** (s příklady *Creating CalendarEntry
+  Instances* a *Creating Discussion Instances*) a **Factory on Service**.
+
+  Vernon tedy staví do popředí **factory metodu na agregátním kořeni** a samostatnou factory řeší
+  až jako druhou možnost, na úrovni service. To podpírá kanonickou konvenci této knihy
+  (`Order::place()` jako factory metoda na agregátu, viz `CLAUDE.md`) a zároveň dává doložený
+  důvod, proč nezavádět zvláštní třídu `OrderFactory`, dokud si to nevynutí spolupráce více
+  agregátů.
 - **Zpracování Specification a Factory u Khononova (*Learning DDD*, 2021) a Milletta & Tuneho
   (*Patterns, Principles and Practices of DDD*, 2015).** Nekontrolováno; obě knihy jsou v pořadí
   důvěryhodnosti šablony a mohou nabídnout novější formulaci pravidel pro Domain Service.

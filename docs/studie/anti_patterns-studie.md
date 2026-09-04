@@ -243,7 +243,17 @@ Evans tuto polohu přebírá bez ironie. V *DDD Reference* (2015) [4] má Big Ba
 ### Neověřené / nedohledané
 
 - **Vladimir Khononov, *Learning Domain-Driven Design*, O'Reilly, 2021** — tvrzení v sekci 3, že kniha staví Transaction Script a Active Record vedle Domain Modelu jako rovnocenné vzory podle typu subdomény, se nepodařilo ověřit z primárního zdroje: `oreilly.com` vrací HTTP 403 (Access Denied). Kniha je v repozitáři už citována (`when_not_to_use_ddd.md`), takže autor má patrně přístup k textu; před použitím tvrzení ověřit názvy kapitol.
-- **Vaughn Vernon, *Implementing Domain-Driven Design*, Addison-Wesley, 2013** — kapitola tvrdí na ř. 1133, že se kniha „anti-vzorům věnuje podrobně na praktických příkladech". Konkrétní kapitolu ani sekci se nepodařilo ověřit online. Buď doplnit konkrétní odkaz, nebo tvrzení zobecnit.
+- **Vernon, *IDDD* (2013) a anti-vzory (`anti_patterns.md:1133`) – OVĚŘENO 2026-09-04 z plného
+  textu (vlastní výtisk). Tvrzení sedí.** Anemickému doménovému modelu se Vernon věnuje obšírně
+  a ostře: *„Strangely enough, Anemic Domain Models have popped up left and right in our industry.
+  The trouble is that most developers seem to think this is quite normal and would not even
+  acknowledge that a serious condition exists when employed in their systems.“*
+
+  Zajímavější než samotné odsouzení je jeho **diagnostický test**: dvojice otázek, po nichž
+  následuje vyhodnocení – *„If you answered ‚Yes‘ to both questions, your ‚domain model‘ is very,
+  very ill. It’s anemic.“* **Doporučení: převzít formu testu, ne citát.** Kapitola dnes anemický
+  model popisuje; rozhodovací otázky by z popisu udělaly nástroj, který čtenář použije na vlastní
+  kód.
 - **Mark Seemann jako zastánce anemického modelu** — zadání studie tuto atribuci předpokládalo. Rešerše ji nepotvrdila: Seemann zapouzdření naopak hájí [10][11]. Jeho příspěvek do sporu je jiný a jemnější (zapouzdření lze dosáhnout typy a smart constructory místo metod na objektu). V kapitole ho nelze uvést jako obhájce anemického modelu.
 - **`Money::zero()` „jinde v knize není"** — zadání studie to uvádělo jako hypotézu. Ověřeno jako nepřesné: `Money::zero()` se používá i v `basic_concepts.md:447`, definován je ale jen v `anti_patterns.md:391`. Kanonická definice `Money` chybí úplně; ch03 (`context_mapping.md:141`) má variantu bez `zero()`.
 - **Verraes o rozdělování Bounded Contexts** — Fowler v [5] odkazuje na „Verraes and Wirfs-Brock". Původní odkazovaný text se nepodařilo najít na `verraes.net` (URL `/2021/06/split-bounded-contexts/` vrací 404); existuje `/2021/06/split-domain-across-bounded-contexts/`, obsah neověřen.
