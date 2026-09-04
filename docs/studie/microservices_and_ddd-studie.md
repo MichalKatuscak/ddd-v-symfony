@@ -485,14 +485,30 @@ byl vyčerpán (200/200) při prvním pokusu.
 
 ### Neověřené / nedohledané
 
-- **Marcin Kolny (Prime Video) — *Scaling up the Prime Video audio/video monitoring service and
-  reducing costs by 90%*, březen 2023.** Původní URL na primevideotech.com vrací HTTP 301 na
-  aboutamazon.com; blog byl zrušen. Popis architektury v sekci 3 této studie je rekonstruovaný
-  z [28] a [27]. Před citací v knize dohledat archivovanou kopii (web.archive.org je pro použitý
-  nástroj nedostupný) nebo citovat jen přes Vogelse [27].
-- **Adrian Cockcroft — *So many bad takes — what is there to learn from the Prime Video
-  microservices to monolith story*, Medium, 2023.** HTTP 403. Citace na řádcích 334–336 kapitoly
-  („prodávány jako odpověď na všechno") tedy zůstává neověřená. Dohledat ručně v prohlížeči.
+- **Prime Video – DOHLEDÁNO 2026-09-04, oba texty existují a jsou citovatelné.**
+  Původní článek *Scaling up the Prime Video audio/video monitoring service and reducing costs
+  by 90%* vyšel na **primevideotech.com v květnu 2023**. Věcné jádro: tým Video Quality Analysis
+  narazil na náklady orchestrace přes AWS Step Functions a na Tier-1 volání do S3, které sloužilo
+  jako mezisklad videosnímků. Sloučením komponent do jednoho procesu odpadl mezisklad (data tečou
+  v paměti) a infrastrukturní náklady klesly o více než 90 %.
+
+  Protiváha je rovněž dohledatelná: **Adrian Cockcroft – *So many bad takes – What is there to
+  learn from the Prime Video microservices to monolith story*** na `adrianco.medium.com`.
+
+  **Doporučení pro kapitolu:** citovat oba a hlídat rozsah tvrzení. Nejde o opuštění microservices
+  napříč Prime Videem, ale o **jednu komponentu jednoho týmu**, kde se distribuovaný návrh
+  nevyplatil. Podávat to jako obecný argument proti microservices je přesně ta chyba, kterou
+  Cockcroft rozebírá.
+
+  **Pozor na URL a dataci.** Původní adresa na primevideotech.com vrací HTTP 301 na
+  aboutamazon.com, blog byl zrušen; citovat je tedy nutné přes archivovanou kopii nebo přes
+  reprinty. Datum je **květen 2023** (první průchod uváděl březen).
+- **Adrian Cockcroft – *So many bad takes…* – ČÁSTEČNĚ, 2026-09-04.** Existence, autorství,
+  přesný název i URL (`adrianco.medium.com`) jsou potvrzené. Doslovné znění ne: Medium vrací
+  HTTP 403 i na přímý `curl` s běžnou hlavičkou User-Agent a odpovídá stránkou „Enable JavaScript
+  and cookies to continue“. Citace na řádcích 334–336 kapitoly zůstává neověřená.
+  **Doporučení: parafrázovat Cockcroftovu tezi místo přímé citace, dokud text nepřečte člověk
+  v prohlížeči.**
 - **Simon Brown – *Distributed big balls of mud* – DATOVÁNO 2026-09-04: 6. 7. 2014.** Původní
   URL na codingthearchitecture.com je mrtvá, text ale existuje v několika reprintech (DZone,
   paradox1x.org) a je doložitelný i diskusí na Hacker News z téhož období. Podtitul zní

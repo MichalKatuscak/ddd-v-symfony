@@ -190,6 +190,37 @@ tvrdí, že `fetch: 'EAGER'` na kolekci „načte v jednom JOIN“ – Doctrine 
 | Simon Brown, *Distributed big balls of mud* | 6. 7. 2014; původní doména mrtvá, reprinty žijí |
 | Brandolini, *Introducing Event Storming* | 18. 11. 2013 potvrzeno |
 
+### Třetí dávka: API z kódu, původ čísel, mrtvé odkazy
+
+Ověřeno čtením zdrojáků místo dokumentace – u tří položek se ukázalo, že dokumentace vedla jinam:
+**`HINT_ENABLE_DISTINCT`** patří `Paginator`u, ne `Query` (zápis, který studie předpokládala, by
+spadl); **`Vote::getReasons()` neexistuje**, důvody se čtou z veřejné vlastnosti `$reasons`;
+`setEagerFetchBatchSize()` má **výchozí hodnotu 100**, takže mechanismus běží i bez nastavení.
+Doloženy jsou i `PrimaryReadReplicaConnection` a pětice `iterate*` metod v DBAL 4.4.x.
+
+Původ tří často citovaných čísel:
+
+- **Standish Group / „50 % nepoužívaných funkcí“** (`migration_from_crud`, `what_is_ddd`)
+  nepochází z reportu 2014, ale z keynote Jima Johnsona na **XP 2002**. Původní čísla jsou 45 %
+  nikdy a 19 % zřídka. Podle rozboru Mikea Cohna stál celý výzkum na **čtyřech interních
+  aplikacích**: „Yes, four applications. And, yes, all internal-use applications.“
+  **Doporučení: číslo z knihy vyškrtnout.**
+- **Knuth** (`performance_aspects`): doloženo plné znění pasáže. Kapitola cituje jen prostřední
+  větu a vynechává podmínku „97 % of the time“ i pointu „Yet we should not pass up our
+  opportunities in that critical 3%“. Knuth optimalizaci nezakazuje, vymezuje ji.
+- **Prime Video**: článek z **května 2023** (ne března), původní URL vrací 301, blog byl zrušen.
+  Jde o jednu komponentu jednoho týmu, ne o obrat celého Prime Videa – podávat to jako obecný
+  argument proti microservices je přesně chyba, kterou rozebírá Cockcroft.
+
+Dále: **`symfony/feature-flags` neexistuje** (živé jsou `flagception/flagception-bundle` 6.1.1
+a `unleash/client` v2.11, obojí třetí strana), `DispatchAfterCurrentBusMiddleware` existuje
+a od 5.3 nevyhazuje výjimku mimo kontext dispatche, Blackfire Builds jsou zdokumentované
+a tvrzení kapitoly o blokování merge platí.
+
+Jedna položka se přesunula mezi úkoly: **chování Doctrine SQLFilteru u neowning strany
+one-to-one** se z dokumentace vyčíst nedá, rozhoduje persister. Chce reprodukční test, ne rešerši
+– a stojí na tom bezpečnostní doporučení kapitoly 11.
+
 ### Co z technických položek zbývá
 
 Kategorie A měla 67 položek; ověřené jsou hlavní skupiny (Doctrine, Symfony verze, balíčky,

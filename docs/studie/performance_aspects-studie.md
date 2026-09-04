@@ -290,7 +290,12 @@ Knižní zdroje bez URL (uvedeny pro atribuce v sekci 2, ověřeny z knihovny kn
   (doplnit metodu jako třetí řešení N+1) užitečnější údaj než verze: čtenář se dozví, že mechanismus
   běží i bez explicitního nastavení. Verzi zavedení se z `UPGRADE.md` vyčíst nedá a GitHub Search
   API vyžaduje autentizaci; pro knihu cílící na ORM 3 to ale není podstatné.
-- **Blackfire Builds jako součást CI/CD** (`:1211`). Tvrzení nebylo ověřeno na blackfire.io; pokud zůstane, chce odkaz na dokumentaci produktu.
+- **Blackfire Builds – OVĚŘENO 2026-09-04, tvrzení na `:1211` platí.** Funkce je zdokumentovaná
+  na `docs.blackfire.io/academy/testing/builds`. Builds se spouštějí příkazem
+  `blackfire build-trigger`, přes cURL, nebo nativní integrací s běžnými CI/CD platformami;
+  reporty chodí do e-mailu, Slacku, GitHubu, Bitbucketu i GitLabu. Dokumentace popisuje i to,
+  co kapitola tvrdí – že build může zablokovat merge pull requestu nebo nasazení, pokud změna
+  zhorší výkon aplikace. **Doporučení: doplnit odkaz na dokumentaci; věcně je pasáž v pořádku.**dkaz na dokumentaci produktu.
 - **Konkrétní čísla replikačního lagu, konfliktů optimistického zámku a prahů pro partitioning.** Bez měřicí metodiky je nelze doložit; buď najít publikované měření, nebo je v kapitole označit jako řádový odhad.
 - **Omezení „entita nesmí být `final`“ – OVĚŘENO 2026-09-04: na Symfony 8 už neplatí.**
   DoctrineBundle 3 má `enable_native_lazy_objects` s `defaultTrue()` a volbu nelze vypnout
