@@ -32,6 +32,13 @@ Princip lze vyjádřit větou: ***current state is derived from the history of e
 Namísto jediného řádku v databázové tabulce, který je při každé změně přepisován, existuje append-only log
 všech událostí, jež kdy na agregátu nastaly.
 
+Fowlerova formulace z roku 2005 je široká. Sedne na ni auditní log i stream processing.
+Verraes ji o čtrnáct let později zúžil [[3]](https://verraes.net/2019/08/eventsourcing-state-from-events-vs-events-as-state/).
+Systém je podle něj event-sourced tehdy, když jediným zdrojem pravdy je uložená historie
+událostí. A k tomu přidává podmínku, kterou Fowler nemá: z téže historie se musí vynucovat
+pravidla pro nové události. Tím se Event Sourcing odděluje od pouhého logování změn – log,
+ze kterého se nikdo nerozhoduje, je archiv, ne zdroj pravdy.
+
 ### Porovnání s tradiční CRUD persistencí
 
 V klasickém CRUD přístupu drží tabulka pouze aktuální stav entity – jakmile se hodnota změní,
@@ -73,6 +80,13 @@ persistence a CQRS potřebuje způsob, jak aktualizovat read modely při každé
 Události tuto propagaci pokrývají bez další infrastruktury – write side uloží událost do Event Store,
 read side ji přečte a aktualizuje projekci.
 
+Symetrie mezi oběma vzory ale neplatí. CQRS nad klasickou ORM persistencí je běžná
+konfigurace bez zvláštních nároků. Event Sourcing bez CQRS možný je, jenže write model
+se pak nedá dotazovat ničím jiným než čtením streamu podle ID. Dotaz „vypiš všechny
+uživatele se jménem Greg“ nad event streamem nesestavíte, jak upozorňuje už Young
+[[2]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf). Read stranu proto
+postavíte tak jako tak – a tím se dostáváte ke CQRS oklikou.
+
 :::callout{type="note"}
 ### Datový tok v architektuře ES + CQRS: {#es-cqrs-tok-heading}
 
@@ -106,7 +120,7 @@ zbytek kapitoly rozebírá implementaci.
 - **Auditní log jako doménový požadavek** – Finanční systémy, zdravotnické záznamy nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. Auditní log v ES vychází přímo z formátu úložiště – nepotřebuje samostatnou implementaci.
 - **Komplexní doménová logika s bohatými stavovými přechody** – Agregáty procházejí mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové systémy, workflow enginy, bankovní transakce.
 - **Temporální dotazy** – Potřeba „přehrát“ stav systému k libovolnému bodu v minulosti (debugging, analýza, „what-if“ scénáře). U ES stačí replay eventů do daného timestampu.
-- **Event-driven integrace** – Systém produkuje události, které konzumují jiné bounded contexts nebo externí systémy. ES zajišťuje, že žádná událost nebude ztracena – Event Store je zdrojem pravdy pro integraci.
+- **Event-driven integrace** – Systém produkuje události, které konzumují jiné bounded contexts nebo externí systémy. ES zajišťuje, že se žádná událost neztratí. Ven se ale publikuje jen vybraná podmnožina událostí, ne interní stream agregátu – viz [Interní a publikované události](#interni-a-publikovane-udalosti).
 - **CQRS s vysokou čtecí zátěží** – ES umožňuje vybudovat libovolný počet optimalizovaných read modelů z jednoho event streamu, aniž by bylo nutné měnit write model.
 
 ### Nevhodné případy užití
@@ -133,19 +147,39 @@ s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klas
 Časté chyby při zavádění ES shrnuje kapitola [Anti-vzory](/anti-vzory).
 :::
 
+### Broker není Event Store {#broker-neni-event-store}
+
+Kafka, RabbitMQ ani Redis Streams roli Event Store nezastanou, i když se v nich události
+také objevují v pořadí. Dudycz uvádí tři technické důvody
+[[4]](https://event-driven.io/en/event_streaming_is_not_event_sourcing/). Brokery neumí
+optimistic concurrency na úrovni streamu, takže nemají čím ochránit invariant agregátu
+proti souběžnému zápisu. Čtení jednoho streamu za účelem rekonstrukce agregátu je v nich
+buď nespolehlivé, nebo drahé. A retenční model je stavěný na průtok, ne na trvalé uložení –
+data po nastavené době mizí, což je u zdroje pravdy nepřijatelné.
+
+Rozdělení rolí je tedy jednoznačné: Event Store drží historii a vynucuje nad ní pravidla,
+broker ji rozváží konzumentům. Zbytek kapitoly proto používá Symfony Messenger a RabbitMQ
+výhradně jako přepravu, nikdy jako úložiště.
+
 ### Hotové knihovny, nebo vlastní store? {#hotove-knihovny-heading}
 
 Padne-li rozhodnutí pro Event Sourcing, zbývá volba implementace. PHP ekosystém nabízí
-několik knihoven s odlišnou váhou i filozofií:
+několik knihoven s odlišnou váhou i filozofií. Následující přehled popisuje stav k září
+2026 a stárne rychleji než zbytek kapitoly – aktuální kondici balíčku si před volbou
+ověřte na Packagistu.
 
-- **EventSauce** – doporučený výchozí bod. Malé jádro, srozumitelná dokumentace a žádná vazba na konkrétní framework; integraci do Symfony si napíšete sami v řádu desítek řádků.
-- **Broadway** – starší knihovna s historicky silnou vazbou na Symfony. Funguje, ale tempo vývoje za poslední roky zvolnilo.
-- **prooph** – dlouho platil za standard PHP Event Sourcingu, dnes jej udržuje komunita. Pro nové projekty bývá první volbou spíš EventSauce.
-- **Ecotone** – ne knihovna, ale celý framework s ES, CQRS a Sagami. Má výraznou filozofii postavenou na message-driven architektuře; přijímáte ji vcelku, ne po částech.
+- **EventSauce** – malé jádro, srozumitelná dokumentace, žádná vazba na framework. Doctrine repozitář zpráv i outbox dodává v samostatných balíčcích, takže vlastní kód píšete hlavně kolem DI a Messengeru.
+- **patchlevel/event-sourcing** – jediná z uvedených knihoven s bundlem, který deklaruje podporu Symfony 8. Přináší hotové subscriptions, snapshoty, upcasting i crypto-shredding. Při preferenci hotového řešení pro Symfony je to dnes první, na co se podívat.
+- **Ecotone** – ne knihovna, ale celý framework s ES, CQRS a ságami. Má výraznou filozofii postavenou na message-driven architektuře; přijímáte ji vcelku, ne po částech. Řada 2.0 je zatím v beta verzi.
+- **prooph** – řada 7.x je udržovaná a používaná, doprovodný Symfony bundle se ale od roku 2024 nehnul a končí u Symfony 7. Integraci pro Symfony 8 si napíšete sami.
 
-Vlastní minimalistický store má smysl ve třech situacích: při učení, kdy chcete vidět
-principy bez vrstvy cizích abstrakcí, při požadavku na plnou kontrolu nad schématem
-a serializací, a u malé domény s několika typy událostí, kde by knihovna byla větší než
+Broadway do tohoto seznamu už nepatří. V srpnu 2026 vyšla verze 3.0.1 označená jako
+`abandoned` a repozitář byl archivován. Pro nové projekty odpadá; v existujících kódových
+základnách zůstává jako zátěž k odstranění.
+
+Vlastní minimalistický store má smysl ve třech situacích. Při učení, kdy chcete vidět
+principy bez vrstvy cizích abstrakcí. Při požadavku na plnou kontrolu nad schématem
+a serializací. A u malé domény s několika typy událostí, kde by knihovna byla větší než
 problém. Tato kniha staví vlastní store z prvního důvodu – ukázky slouží k výuce principů,
 nikoli jako náhrada prověřené knihovny v produkci.
 
@@ -318,17 +352,55 @@ s sebou; sloupce `event_id` a `occurred_on` v tabulce slouží už jen jako inde
 Čas události se ukládá i parsuje v UTC explicitně. Formát payloadu offset nenese,
 takže by jinak deserializace na serveru s odlišnou default timezone časy posunula.
 
+:::callout{type="note"}
+### Jeden čas nestačí {#cas-udalosti-heading}
+
+`occurredAt` v bázové třídě je čas zápisu do systému. Doménový fakt ale mohl nastat jindy.
+Fowler oba časy pojmenovává *record time* a *actual time*
+[[5]](https://martinfowler.com/eaaDev/timeNarrative.html), Verraes totéž rozvádí pod
+názvem multi-temporal events [[6]](https://verraes.net/2022/03/multi-temporal-events/).
+Dokud událost vzniká přímo z uživatelské akce, oba časy splývají a rozdíl nikoho netrápí.
+
+Rozejdou se ve chvíli, kdy fakt nastal jinde a k vám dorazil později: noční import
+bankovních transakcí z předchozího dne, zpětné zadání havárie, integrace s pomalým
+externím systémem. Doménový čas pak patří do payloadu pod vlastním jménem
+(`depositedAt`, `crashedAt`, `placedAt`) a z `occurredAt` zbývá infrastrukturní údaj.
+Projekce v následující sekci plní sloupce `placed_at` a `shipped_at` z `occurredAt` –
+u objednávek zadaných online to sedí, u importovaných dat by šlo o chybu.
+:::
+
 :::callout{type="warn"}
 ### GDPR a osobní údaje v Event Store {#gdpr-es-heading}
 
 Event Store je append-only, a proto do event payloadu nepatří citlivé údaje (hesla, tokeny,
-rodná čísla) v otevřené podobě. Jak právo na výmaz řeší crypto-shredding a referenční
-přístup, rozebírá sekce [GDPR a immutable Event Store](#gdpr-event-store-heading).
+rodná čísla) v otevřené podobě. Jak právo na výmaz řeší referenční přístup a crypto-shredding,
+rozebírá sekce [GDPR a immutable Event Store](#gdpr-event-store-heading).
 :::
 
 Pro `eventType()` se osvědčil formát `<bounded_context>.<past_tense_verb_noun>`, například
 `ordering.order_placed` nebo `payment.payment_received`. Tato konvence usnadňuje
 routing událostí v Symfony Messenger a jejich filtrování v Event Store.
+
+### Interní a publikované události {#interni-a-publikovane-udalosti}
+
+Události v Event Store slouží dvěma různým účelům a smíchat je stojí draho. Interní událost
+je jednotka stavu agregátu. Její tvar se mění spolu s doménovým modelem a nikdo mimo
+bounded context o něm nemá vědět. Publikovaná (integrační) událost je naopak veřejné
+rozhraní kontextu – smlouva, na které staví cizí týmy.
+
+Verraes k tomu formuluje pravidlo: veřejná je malá vybraná podmnožina událostí,
+všechno ostatní zůstává ve výchozím stavu privátní
+[[7]](https://verraes.net/2019/05/patterns-for-decoupling-distsys-explicit-public-events/).
+Bez tohoto rozdělení se vnitřní struktura kontextu stává jeho API. Každé přejmenování pole
+v agregátu je pak breaking change pro konzumenty a refaktoring interního modelu přestává
+být možný. Většina bolesti, kterou řeší sekce [Verzování událostí](#verzovani-udalosti), má
+původ právě zde.
+
+Prakticky to znamená dvě sady tříd. Interní události zůstávají v `Domain\Event` a čtou
+je pouze agregát a vlastní projekce. Publikované události žijí v samostatném namespace
+(typicky `Application\IntegrationEvent`), mají stabilní `eventType`, vlastní verzování
+a překlad z interní události do publikované obstará explicitní mapper. Cena je jedna
+vrstva navíc; protihodnotou je možnost měnit doménový model bez koordinace s okolím.
 
 ## 13.05 Implementace Event Store {#event-store}
 
@@ -376,6 +448,15 @@ Sloupec `version` nese **optimistic locking**. Před zápisem nové události co
 přečte poslední verzi streamu agregátu. Pokud mezitím jiný proces zapsal událost se stejnou
 verzí, databáze při insertu vyvolá výjimku z porušení unikátního indexu `uq_aggregate_version`.
 Souběžné zápisy se tak detekují bez pesimistického zamykání řádků.
+
+Existuje i druhá varianta. Young pracuje vedle tabulky událostí ještě s tabulkou agregátů,
+která nese aktuální verzi streamu denormalizovaně
+[[2]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf). Konflikt se pak
+kontroluje předem, proti uložené hodnotě, a chybová hláška vzniká v aplikačním kódu.
+Cenou je jeden zápis navíc při každém commitu a nutnost udržet obě tabulky v jedné
+transakci. Unikátní index žádný další zápis nepotřebuje, zato konflikt zjistí až
+z výjimky, kterou je nutné přeložit na `ConcurrencyException` – přesně to dělá
+následující implementace.
 
 :::callout{type="pattern"}
 ### PHP: Interface EventStore a Doctrine implementace {#event-store-php-heading}
@@ -779,6 +860,21 @@ Repozitář pro event-sourcovaný agregát neprovádí SELECT do tabulky entit. 
 event stream z Event Store a předá jej statické tovární metodě `reconstituteFromEvents()`.
 Výsledný agregát má přesně takový stav, jaký odpovídá historii jeho událostí.
 
+:::callout{type="warn"}
+### Replay nesmí volat ven {#replay-gateways-heading}
+
+Metody `apply*()` mění výhradně interní stav. Jakmile by kterákoli z nich odeslala e-mail,
+strhla platbu nebo zavolala externí API, každá rekonstrukce agregátu by tu akci provedla
+znovu. Na stejné riziko upozorňuje už Fowler u gateways k okolním systémům
+[[1]](https://martinfowler.com/eaaDev/EventSourcing.html): brána musí vědět, že běží
+replay, a v tom režimu ven nesmí sáhnout.
+
+Replay v této kapitole probíhá na třech místech – při rekonstituci agregátu, při rebuildu
+projekce a při načtení ze snapshotu. Obrana je organizační: vedlejší efekty patří do
+handlerů nad publikovanými událostmi, nikdy do `apply*()` metod a nikdy do projektorů,
+které rebuild spouští znovu.
+:::
+
 :::diagram{fig="13.6-A" title="Replay agregátu z event streamu" src="images/diagrams/14_event_sourcing/event_store_replay.svg"}
 :::
 
@@ -857,6 +953,21 @@ denormalizované read modely budované z event streamu specificky pro tvar dotaz
 
 - **Synchronní projekce** – Projekce se aktualizuje přímo v téže transakci jako zápis události. Garantuje konzistenci dat v okamžiku odpovědi na command, ale zvyšuje latenci zápisu a zavádí těsnou vazbu mezi write a read stranou.
 - **Asynchronní projekce** – Události jsou po uložení do Event Store zařazeny do fronty (Symfony Messenger + transport jako RabbitMQ nebo Redis). Projektor je konzument, který zpracovává zprávy nezávisle. Read model je v krátkém časovém okně nekonzistentní (eventual consistency), ale write side je rychlejší a oddělená.
+
+### Projekce jako pozice ve streamu {#pozice-projekce}
+
+Užitečnější model asynchronní projekce než „handler, kterému chodí zprávy“ je
+*catch-up subscription*: projekce si drží **pozici** (checkpoint) ve streamu a od ní
+čte dál. Odsud plynou tři provozní vlastnosti. Restart projektoru není událost –
+pokračuje se od uložené pozice. Rebuild znamená nastavit pozici na nulu a nechat projekci
+dojet historii. A rozdíl mezi poslední zapsanou událostí a pozicí projekce je *lag*,
+jediné číslo, které o zdraví read strany opravdu vypovídá; patří do monitoringu.
+
+Sekce [Praktické problémy projekcí](#prakticke-problemy-projekci) používá checkpoint
+tabulku k idempotenci, tedy k odpovědi na otázku „zpracoval jsem už tuhle událost?“.
+Jde o odvozenou roli téhož záznamu. Primární je pozice. Stejný model pozice ve streamu
+používají i [process managery a ságy](/sagy-a-process-managery), které nad event streamem
+neudržují read model, ale rozpracovaný proces.
 
 :::callout{type="pattern"}
 ### PHP: OrderSummaryProjection a asynchronní projektor {#projekce-php-heading}
@@ -970,9 +1081,18 @@ framework:
 *config/packages/messenger.yaml*
 :::
 
+Výčet tříd v `routing` je u Event Sourcingu položka, na kterou se zapomíná. Typů událostí
+rychle přibývá a chybějící řádek se projeví až tím, že projekce mlčí. Od Symfony 7.2 lze
+routing připsat rovnou k události atributem `#[AsMessage('async')]` a YAML seznam zrušit.
+Konfigurace se pak nemůže rozejít s doménovým modelem, protože žije v téže třídě.
+
 Projekce lze **přebudovat** (rebuild) přehráním celého Event Store od začátku. Při změně
 doménových požadavků stačí vytvořit novou projekci a přehrát historii. CRUD systémy tuto
 možnost nemají – historická data v nich už nejsou k dispozici.
+
+Odkud se berou samotné typy událostí, je otázka pro doménu, ne pro infrastrukturu.
+Nejrychleji je odhalí workshop popsaný v kapitole [Event Storming](/event-storming) –
+oranžové lístky s doménovými událostmi jsou přímými kandidáty na obsah event streamu.
 
 ## 13.08 Event Store jako outbox {#outbox}
 
@@ -991,9 +1111,9 @@ Tabulka `event_store` splňuje vlastnosti outbox tabulky sama o sobě. Je to app
 log a každý záznam vzniká ve stejné transakci jako odpovídající doménová změna. Přidává
 se **relay worker**, který čte nové řádky podle `id` a posílá je do Messengeru.
 Pozici posledního publikovaného řádku si ukládá do checkpoint tabulky, takže po restartu
-pokračuje tam, kde skončil. Samotný checkpoint ovšem nestačí: kvůli gap problému
-popsanému v následujícím calloutu se musí kombinovat s některou z mitigací – překryvem
-s deduplikací, výběrem přes `FOR UPDATE SKIP LOCKED`, nebo CDC.
+pokračuje tam, kde skončil. Samotný checkpoint ovšem nestačí. Kvůli gap problému
+popsanému v následujícím calloutu ho musíte doplnit o některou z mitigací: překryv
+s deduplikací, výběr přes `FOR UPDATE SKIP LOCKED`, nebo CDC.
 Implementace relay – polling worker pod supervisord, nebo
 varianta s CDC – je shodná s běžným outboxem, viz
 [Relay process – dvě varianty](/outbox-pattern#relay).
@@ -1004,10 +1124,10 @@ varianta s CDC – je shodná s běžným outboxem, viz
 Hodnota `id` se přiděluje při INSERTu, ne při commitu. Transakce s nižším `id` proto
 může commitnout později než souběžná transakce s vyšším. Relay, který mezitím posunul
 checkpoint za vyšší `id`, opožděný řádek už nikdy nepřečte a událost se tiše ztratí.
-Mitigace: polling s překryvem (číst i kus historie za checkpointem) v kombinaci
-s deduplikací u konzumentů, výběr nepublikovaných řádků přes `FOR UPDATE SKIP LOCKED`
-místo checkpointu, nebo logical decoding nad transakčním logem (Debezium), který
-události čte v pořadí commitů.
+Mitigace jsou tři. Polling s překryvem, tedy čtení i kusu historie za checkpointem,
+v kombinaci s deduplikací u konzumentů. Výběr nepublikovaných řádků přes
+`FOR UPDATE SKIP LOCKED` místo checkpointu. Nebo logical decoding nad transakčním logem
+(Debezium), který události čte v pořadí commitů.
 :::
 
 ### Záruky doručení a jejich důsledky {#outbox-zaruky-heading}
@@ -1017,6 +1137,12 @@ Outbox dává **at-least-once** doručení uvnitř jednoho kanálu. Konkrétně:
 - **At-least-once:** pokud relay spadne mezi dispatchem a updatem checkpointu, stejná událost se po restartu publikuje znovu. Konzumenti musí být idempotentní – přesně tak, jak ukazuje následující sekce u projektorů.
 - **Pořadí:** relay publikuje vzestupně podle `id`. Uvnitř streamu jednoho agregátu to odpovídá pořadí verzí, takže projektor uvidí `OrderCreated` před `OrderShipped`. Napříč agregáty pořadí zajištěno není a kvůli gap problému popsanému výše nejde o spolehlivé globální pořadí commitů.
 - **Latence:** mezi commitem události a jejím doručením k projektoru vzniká okno odpovídající polling intervalu relay. V praxi 100 ms až 1 s; nižší latenci dává výstupní transport, který umí push (např. PostgreSQL `LISTEN/NOTIFY` nebo Debezium).
+
+Push variantu nad PostgreSQL nemusíte psát sami. Doctrine transport Symfony Messengeru
+používá `LISTEN/NOTIFY` sám od verze 7.1 a ovládá se volbou `use_notify` v konfiguraci
+transportu. Relay pak nečeká na tik pollingu, ale probudí ho notifikace z databáze.
+Vlastní implementace má smysl jen tam, kde relay čte přímo `event_store` a Messenger
+v této roli nefiguruje.
 
 ## 13.09 Praktické problémy projekcí {#prakticke-problemy-projekci}
 
@@ -1144,7 +1270,7 @@ Projektor může selhat z mnoha důvodů: dočasná nedostupnost databáze, nepl
 u staré události bez upcasteru, nebo bug v projekční logice. Symfony Messenger nabízí
 dvě hlavní mechaniky pro řešení:
 
-- **Retry transport** – zpráva se po selhání automaticky vrátí do fronty s exponenciálním backoffem (výchozí: 3 pokusy s násobičem 2).
+- **Retry transport** – zpráva se po selhání automaticky vrátí do fronty s exponenciálním backoffem (výchozí: 3 pokusy s násobičem 2, `max_delay` 0, tedy bez stropu, a jitter 0,1, který opakování rozprostře v čase).
 - **Failed transport (dead letter queue)** – po vyčerpání retry pokusů se zpráva přesune do samostatné fronty, kde čeká na manuální zásah. Nedojde ke ztrátě události ani k zablokování zbytku fronty.
 
 :::callout{type="pattern"}
@@ -1185,6 +1311,15 @@ Pro diagnostiku a opětovné zpracování selhalých zpráv slouží příkazy S
 - `bin/console messenger:failed:show` – zobrazí zprávy v dead letter queue
 - `bin/console messenger:failed:retry` – pokusí se zprávy znovu zpracovat
 - `bin/console messenger:failed:remove {id}` – odstraní neplatnou zprávu
+
+Při běžném provozu se hodí přepínače, které z těchto příkazů udělají nástroj pro triáž.
+`messenger:failed:show --stats` vypíše počty podle tříd zpráv, takže jedna vadná projekce
+je vidět na první pohled; `--class-filter` pak omezí výpis i retry na jediný typ události.
+Hromadný úklid po opravené chybě zvládne `messenger:failed:remove --all`. Pro projektory
+s dlouho běžícími dávkami existuje od Symfony 7.3 `messenger:consume --keepalive`, který
+transportu průběžně hlásí, že se na zprávě pracuje, a zabrání předčasnému redelivery.
+Při vysokém průtoku událostí snižuje režii `--fetch-size` (Symfony 8.1), který si z transportu
+bere zprávy po dávkách místo po jedné.
 
 ### Rebuild projekcí
 
@@ -1312,6 +1447,13 @@ Před spuštěním rebuildu v produkci **zastavte asynchronní workery**
 (`messenger:consume`), jinak worker a rebuild příkaz souběžně zapisují
 do stejné projekce. Po dokončení rebuildu workery opět spusťte. U projekcí s miliony
 událostí zvažte zpracování po menších dávkách a monitoring paměti.
+
+Odstávka projekce je ale pro systém s SLA těžko obhajitelná. Provozní alternativou je
+**blue/green rebuild**: nová projekce se staví do stínové tabulky (`order_summary_new`),
+zatímco původní dál obsluhuje dotazy. Rebuild dojede historii, pak už jen dobírá živé
+události, a jakmile je lag prakticky nulový, přepne se čtení na novou tabulku –
+přejmenováním, přepnutím pohledu nebo změnou konfigurace. Stará tabulka zůstane pár dní
+jako pojistka pro rollback. Cena je dvojnásobek místa po dobu přepnutí.
 :::
 
 ### Eventual consistency a uživatelské rozhraní
@@ -1325,10 +1467,10 @@ aktualizaci, potvrzovací stránku, polling či SSE – rozebírá sekce
 :::callout{type="note"}
 ### Synchronní projekce jako pragmatický kompromis {#ec-note-heading}
 
-Pokud vaše aplikace nemá vysokou zátěž na write straně a latence zápisu je přijatelná,
-je legitimní začít se **synchronními projekcemi** a na asynchronní přejít
-až ve chvíli, kdy se synchronní aktualizace stane úzkým hrdlem. Vyhýbáte se tak problémům
-s eventual consistency v raných fázích projektu.
+Nemá-li aplikace vysokou zátěž na write straně a je-li latence zápisu přijatelná, je
+legitimní začít se **synchronními projekcemi**. Na asynchronní se přejde teprve ve chvíli,
+kdy se aktualizace v transakci stane úzkým hrdlem. V raných fázích projektu tak odpadnou
+problémy s eventual consistency.
 :::
 
 ## 13.10 Snapshotting {#snapshotting}
@@ -1339,7 +1481,11 @@ se v provozu objeví dřív, než tým očekává.
 
 Vzor **snapshotting** uchová aktuální stav agregátu v pravidelných intervalech – po každých
 N událostech nebo časově. Při příštím načtení repozitář vyhledá poslední snapshot a z Event
-Store dotáhne jen události novější než tento snapshot.
+Store dotáhne jen události novější než tento snapshot. Young pro tuto konstrukci používá
+název *Rolling Snapshot* a zdůrazňuje její povahu
+[[2]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf): jde o denormalizaci
+stavu agregátu k danému okamžiku, tedy o výkonnostní heuristiku, nikoli o zdroj pravdy.
+Zdrojem pravdy zůstává event stream a snapshot lze kdykoli zahodit a postavit znovu.
 
 :::diagram{fig="13.10-A" title="Snapshot strategie: zhuštěný stav místo plného replay" src="images/diagrams/14_event_sourcing/snapshot_strategy.svg"}
 :::
@@ -1500,7 +1646,14 @@ pole se rozdělují nebo slučují. Otázka tedy zní: **jak přečíst starou u
 Odpověď je **event versioning** – strategie, která zachovává zpětnou čitelnost starých
 událostí i po změně jejich schématu. Nejrozšířenějším vzorem je **upcasting**: při
 deserializaci se starší verze payloadu transformuje na aktuální formát, takže doménový model
-pracuje pouze s nejnovější verzí.
+pracuje pouze s nejnovější verzí. Nejpodrobněji téma zpracovává Young v knize *Versioning
+in an Event Sourced System* [[8]](https://leanpub.com/esversioning), odkud pochází i většina
+dnes používané terminologie – weak schema, copy and replace, double write.
+
+O tom, kolik práce verzování obnáší, rozhoduje z velké části rozdělení popsané v sekci
+[Interní a publikované události](#interni-a-publikovane-udalosti). U interní události
+jste jediným konzumentem a stačí upcaster. U publikované měníte smlouvu s cizími týmy
+a bez přechodného období se neobejdete.
 
 ### Proč je verzování nezbytné
 
@@ -1684,9 +1837,9 @@ final readonly class UpcasterChain
 *src/Infrastructure/EventSourcing/Versioning/UpcasterChain.php*
 :::
 
-V praxi se `UpcasterChain` integruje do `EventSerializer`: při deserializaci
-se z uloženého záznamu přečte `event_type` a `schema_version`, payload projde
-řetězem upcasterů a teprve výsledná transformovaná data se předají konstruktoru aktuální třídy události.
+V praxi se `UpcasterChain` integruje do `EventSerializer`. Při deserializaci se
+z uloženého záznamu přečte `event_type` a `schema_version` a payload projde řetězem
+upcasterů. Konstruktor aktuální třídy události pak dostane už jen transformovaná data.
 
 :::callout{type="note"}
 ### Weak vs. strong schema strategie {#schema-strategie-heading}
@@ -1696,9 +1849,9 @@ Pro tvar payloadu existují dva přístupy, které se v praxi míchají:
 - **Weak schema (slabé schéma)** – Payload je uložen jako volný JSON bez formální definice. Upcasters transformují data ad-hoc. Výhodou je flexibilita a rychlost vývoje; nevýhodou je, že chyby v transformaci se projeví až za běhu a je obtížné ověřit konzistenci napříč verzemi.
 - **Strong schema (silné schéma)** – Každá verze události má explicitně definované schéma (např. pomocí JSON Schema nebo PHP třídy s validací). Upcaster pak transformuje mezi dvěma dobře definovanými strukturami. Výhodou je vyšší bezpečnost a možnost automatického testování kompatibility; nevýhodou je vyšší režie při každé změně schématu.
 
-Pro většinu projektů je rozumným kompromisem **kombinace obou přístupů**: silné schéma
-pro kritické události v Core Doméně (finanční transakce, stavy objednávek) a slabé schéma
-pro méně kritické události v podpůrných kontextech (notifikace, logy aktivit).
+Pro většinu projektů se osvědčí **kombinace obou přístupů**. Silné schéma dostanou
+kritické události v Core Doméně: finanční transakce, stavy objednávek. Slabé schéma stačí
+pro notifikace, logy aktivit a další události v podpůrných kontextech.
 :::
 
 ### Změny, které upcasting neřeší {#breaking-changes-heading}
@@ -1722,7 +1875,7 @@ Některé změny tuto vlastnost nemají:
   starého modelu, ale ten model byl chybný. Replay přes opravený kód
   vyhodí výjimky.
 
-Tři možné cesty, podle závažnosti:
+Čtyři možné cesty, podle závažnosti:
 
 :::callout{type="pattern"}
 ### Strategie 1: Copy-and-replace stream {#copy-replace-heading}
@@ -1773,6 +1926,49 @@ samostatný fakt.
 
 Cena: doménový model získává „šum“ event typů, které řeší minulé bugy.
 Po pár letech provozu tvoří historické opravy znatelnou část event typů.
+
+Vzor má i starší jméno. Young jej vede jako *Reversal Transaction*
+a odvozuje ho z pravidla, že v event-sourced systému neexistuje operace delete
+[[2]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf). Zrušení se modeluje
+jako další transakce, která stav vrátí zpět, ale stopu po původním faktu ponechá.
+:::
+
+:::callout{type="pattern"}
+### Strategie 4: Double write {#double-write-heading}
+
+Nejméně invazivní cesta u publikovaných událostí. Po přechodné období zapisuje aplikace
+obě verze schématu vedle sebe: starou pro stávající konzumenty, novou pro ty, kdo už
+migrovali. Konzumenti se stěhují svým tempem, žádná koordinovaná odstávka není potřeba.
+Když poslední z nich přejde na novou verzi, zápis staré se vypne a upcaster pro historii
+zůstane.
+
+```text
+t0:  OrderPlaced v1  ──▶ konzumenti A, B, C
+t1:  OrderPlaced v1 + v2 (double write)
+t2:  konzument C migrován ──▶ v2
+t3:  OrderPlaced v2  ──▶ konzumenti A, B, C
+```
+
+Cena: po dobu přechodu dvojnásobný objem zápisů a riziko, že se obě verze rozejdou.
+Zápis obou variant proto patří do jednoho místa – do mapperu z interní události na
+publikovanou, ne do doménového kódu. Strategii popisuje Young v samostatné kapitole
+knihy o verzování [[8]](https://leanpub.com/esversioning).
+:::
+
+:::callout{type="note"}
+### Import legacy dat: migrační události {#migracni-udalosti-heading}
+
+Kdo nasazuje Event Sourcing na existující systém, řeší tutéž otázku: co s daty, u kterých
+historie neexistuje? Zákazník v databázi je, ale událost, která ho založila, nikdy nevznikla.
+Pokušení je dopsat chybějící historii zpětně a tvářit se, že tam vždycky byla. Tím se ovšem
+do streamu dostanou vymyšlené fakty a auditní hodnota logu padá.
+
+Verraes pro tuto situaci zavádí *migration events* v takzvaném ghost contextu
+[[9]](https://verraes.net/2019/06/eventsourcing-patterns-migration-events-ghost-context/).
+Import se modeluje jako samostatná událost pojmenovaná terminologií starého systému –
+`LegacyCustomerWasImported`, ne `CustomerRegistered`. Stream pak čestně říká, co se
+skutečně stalo: k tomuto dni jsme převzali stav odjinud. Postup migrace po kontextech
+rozebírá kapitola [Migrace z CRUD](/migrace-z-crud).
 :::
 
 ### Stream archivation a storage tiering {#archivation-heading}
@@ -1783,8 +1979,8 @@ roste, dotazy se zpomalují a snapshoty musí vznikat častěji.
 
 Standardní řešení: **storage tiering** podle stáří streamu.
 
-- **Hot tier** (PostgreSQL master) – události za posledních 90 dní, dotazy < 10 ms.
-- **Warm tier** (Postgres replika nebo tatáž databáze na pomalejším disku) – události 90 dní – 2 roky.
+- **Hot tier** (primární databáze, ať už MySQL nebo PostgreSQL) – události za posledních 90 dní, dotazy < 10 ms.
+- **Warm tier** (čtecí replika nebo tatáž databáze na pomalejším disku) – události 90 dní – 2 roky.
   Hydration sahá sem jen pro forenzní dotazy nebo plný replay projekce.
 - **Cold tier** (S3, Glacier, on-prem object storage) – události starší než 2 roky.
   Pouze pro čtení; přístup k němu vyžadují jen auditní reporty a compliance.
@@ -1798,29 +1994,36 @@ service, který umí číst všechny tři tiers.
 :::callout{type="warn"}
 ### GDPR a immutable Event Store {#gdpr-event-store-heading}
 
-Event Store je z definice append-only, ale GDPR požaduje právo na výmaz
-(čl. 17). Konflikt řeší **crypto shredding**: osobní údaje v eventech
-jsou zašifrovány klíčem per-subject. Po žádosti o výmaz se zničí klíč,
-události zůstávají, ale jsou nečitelné.
+Event Store je z definice append-only, ale GDPR požaduje právo na výmaz (čl. 17).
+Pro osobní údaje je bezpečnější cestou **referenční přístup**, u Verraese vedený jako
+*forgettable payloads*
+[[10]](https://verraes.net/2019/05/eventsourcing-patterns-forgettable-payloads/).
+Event nese jen identifikátor subjektu. Samotná PII leží v odděleném úložišti mimo event
+stream a maže se běžným DELETE. Struktura ani auditní hodnota streamu tím neutrpí
+a smazaný údaj je opravdu pryč.
 
-Implementace v PHP: každý subject (uživatel) má v separátní tabulce
-`subject_keys` symetrický klíč. Doménová událost při serializaci
-zašifruje PII pole (`email`, `name`, `address`) tímto klíčem; zbytek
-payloadu zůstává čitelný (audit trail funguje). Smazání klíče = právo na
-zapomnění, audit zachycen na úrovni „uživatel #42 učinil akci v čase T“,
-ale identifikace uživatele není možná.
+Druhou možností je **crypto-shredding**
+[[11]](https://verraes.net/2019/05/eventsourcing-patterns-throw-away-the-key/). Každý
+subjekt má v separátní tabulce `subject_keys` symetrický klíč, kterým se při serializaci
+zašifrují PII pole (`email`, `name`, `address`); zbytek payloadu zůstává čitelný. Po žádosti
+o výmaz se klíč zničí a z auditu zbude „uživatel #42 provedl akci v čase T“ bez možnosti
+identifikace. Verraes k tomu ale uvádí námitku právníka Harrisona J. Browna: zašifrovaný
+osobní údaj je pořád osobní údaj, bez ohledu na to, kdo drží klíč. Přidává i technickou
+výhradu – šifra, která je dnes neprolomitelná, jí za deset let být nemusí.
 
-Alternativou je referenční přístup: event nese jen ID subjektu a osobní údaje
-leží v separátní tabulce s možností DELETE.
+Doporučení tedy zní: pro osobní údaje sáhněte nejdřív po referenčním přístupu,
+crypto-shredding si nechte pro obchodně citlivá data, kde zákonná povinnost výmazu
+nehrozí. Kapitola popisuje technické možnosti, nikoli právní stav – posouzení konkrétního
+zpracování patří právníkovi, ne architektovi.
 :::
 
 :::faq{}
 - question: Co je Event Sourcing?
   answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: event log se pouze rozšiřuje o nové záznamy. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
 - question: Jaký je vztah mezi Event Sourcingem a CQRS?
-  answer: 'Event Sourcing a CQRS jsou dva nezávislé vzory, které se často kombinují. Každý z nich lze zavést samostatně: CQRS funguje i s klasickou ORM persistencí, ES lze implementovat i bez rozdělení na write a read modely. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů) – což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
+  answer: 'Event Sourcing a CQRS jsou dva samostatné vzory, které se často kombinují. CQRS funguje i s klasickou ORM persistencí a ES lze zavést i bez formálního rozdělení na write a read modely. Symetrie ale neplatí: write model event-sourced systému se nedá dotazovat jinak než podle ID, takže read stranu postavíte tak jako tak. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů) – což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
 - question: Co je Event Store a k čemu slouží?
-  answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (KurrentDB, dříve EventStoreDB), o PHP knihovnu nad relační databází (EventSauce, Broadway, prooph), nebo o vlastní minimalistickou nadstavbu, jakou staví tato kapitola. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
+  answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (KurrentDB, který se do prosince 2024 jmenoval EventStoreDB), o PHP knihovnu nad relační databází (EventSauce, patchlevel/event-sourcing, prooph), nebo o vlastní minimalistickou nadstavbu, jakou staví tato kapitola. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
 - question: Co jsou projekce v Event Sourcingu?
   answer: 'Projekce je proces, který naslouchá událostem z event store a buduje z nich read modely – denormalizované datové struktury určené pro rychlé dotazy. Projekce bývá jednoúčelová: každý read model má obvykle vlastní projekci, která ho od začátku nebo od posledního zpracovaného offsetu udržuje aktuální. Projekce lze kdykoli přebudovat (rebuild) přehráním událostí od počátku, čímž se bezpečně opravují chyby v read modelech. Praktický příklad v <a href="#projekce">sekci Projekce</a>.'
 - question: K čemu slouží snapshotting v Event Sourcingu?
