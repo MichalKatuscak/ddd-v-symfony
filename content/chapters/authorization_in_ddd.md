@@ -244,7 +244,7 @@ final class OrderVoter extends Voter
 Tři implementační detaily:
 
 - **Konstanty atributů s prefixem entity** (`order.cancel`, ne jen `CANCEL`). Vyhne se kolizi s atributy jiných Voterů (`invoice.cancel`, `shipment.cancel`) a v audit logu je hned jasné, kterého subjektu se rozhodnutí týkalo.
-- **Match expression** (PHP 8.0+) místo if-else stromu. Bez default větve PHPStan ohlásí nepokrytý case; `default => false` naopak volí tiché zamítnutí (fail-closed) výměnou za ztrátu této kontroly.
+- **Match expression** místo if-else stromu. Bez default větve PHPStan ohlásí nepokrytý case; `default => false` naopak volí tiché zamítnutí (fail-closed) výměnou za ztrátu této kontroly.
 - **Privátní metody `canView`, `canCancel`**. Každý use case má vlastní privátní metodu – testy umí mockovat token a subjekt, asserce na výsledek metody je explicitní. Bez extrakce by se voter rozrostl do nečitelného switch-case.
 
 ### Použití ve Command Handleru {#voter-handler-heading}

@@ -861,10 +861,10 @@ vrací `new Email($this->email)`) ušetří jednu třídu na typ. Hodí se pro p
 nebo první kontakt s DDD; s rostoucím počtem VO se vyplatí přejít na custom typy.
 :::
 
-## 10.08 PHP 8.1+ Enums pro stavové typy {#php-enums}
+## 10.08 Enums pro stavové typy {#php-enums}
 
 Stav objednávky, role uživatele, priorita úkolu – konečné množiny hodnot, které se dřív modelovaly konstantami ve třídě,
-mají od PHP 8.1 nativní typ: enum. Překlep v názvu case odhalí statická analýza, neznámou hodnotu odmítne typová kontrola za běhu.
+mají nativní typ: enum. Překlep v názvu case odhalí statická analýza, neznámou hodnotu odmítne typová kontrola za běhu.
 
 :::callout{type="pattern"}
 ### Příklad: Backed enum pro stav objednávky {#enum-example-heading}
@@ -1632,7 +1632,7 @@ callback, který instanci složí z odeslaných polí. Validace zůstává na
 :::callout{type="note"}
 ### Symfony idiomy: `#[AsAlias]` pro repozitáře {#symfony-idiomy-asalias}
 
-Místo aliasování v `services.yaml` můžete od Symfony 6.3+ použít atribut
+Místo aliasování v `services.yaml` můžete použít atribut
 `#[AsAlias]` přímo na implementaci:
 
 :::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php (s AsAlias)"}
@@ -1722,7 +1722,7 @@ Drobný rozdíl v syntaxi `services.yaml`, dramatický rozdíl v chování:
   EntityManagery, dvě sady listenerů, dva separátní stavy. Při autowiringu
   může vznikat zmatek, kterou instanci kontejner injektuje do závislých služeb.
 
-V Symfony 6.3+ je idiomatičtější forma atribut `#[AsAlias]` přímo na implementaci –
+Idiomatičtější forma je atribut `#[AsAlias]` přímo na implementaci –
 viz [Symfony idiomy: `#[AsAlias]`](#symfony-idiomy-asalias). Konfigurace v YAML
 se hodí, když implementace patří do jiného balíčku, který nemůžete upravit.
 :::

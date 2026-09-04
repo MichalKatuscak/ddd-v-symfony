@@ -354,9 +354,9 @@ zjednodušený na neměnný záznam. Plnou verzi s chováním – metodou
 [Návrh agregátu](/navrh-agregatu#references-by-id).
 
 :::callout{type="note"}
-### PHP 8.1+ Enum pro stavové typy {#enum-poznamka-heading}
+### Enum pro stavové typy {#enum-poznamka-heading}
 
-Pro konečnou množinu stavů typu `OrderStatus` se od PHP 8.1 obvykle volí nativní
+Pro konečnou množinu stavů typu `OrderStatus` se obvykle volí nativní
 `enum` místo plnohodnotného hodnotového objektu:
 
 :::code{language="php" filename="src/OrderManagement/Domain/Model/OrderStatus.php"}

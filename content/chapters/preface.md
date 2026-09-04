@@ -47,8 +47,8 @@ Pro každou roli kniha nabízí jinou doporučenou cestu čtení – viz [P.03 J
 
 Kniha předpokládá tyto výchozí znalosti:
 
-- **PHP 8.1+:** atributy (`#[Attribute]`), enums, readonly properties, named arguments, `match`. Některé příklady používají PHP 8.4 (asymmetric visibility, property hooks); na novějším PHP běží beze změny.
-- **Symfony 6+:** Service Container, Dependency Injection, Doctrine ORM, Symfony Messenger, atributy `#[Route]`, `#[AsMessageHandler]`. Většina kódu cílí na Symfony 8.
+- **PHP 8.4+:** atributy (`#[Attribute]`), enums, readonly properties, named arguments, `match`, asymmetric visibility a property hooks. Na novějším PHP kód běží beze změny.
+- **Symfony 8+:** Service Container, Dependency Injection, Doctrine ORM 3, Symfony Messenger, atributy `#[Route]`, `#[AsMessageHandler]`.
 - **Objektově orientované programování:** dědičnost vs. kompozice, polymorfismus, zapouzdření, SOLID principy.
 - **Designové vzory:** Repository, Factory, Strategy, Observer. Není nutné je znát formálně, ale měli byste je v kódu poznat.
 - **Relační databáze:** ACID, transakce, indexy, JOIN, optimistický a pesimistický zámek.
