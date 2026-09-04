@@ -344,6 +344,36 @@ otevřené – týká se to hlavně `subdomains`, `when_not_to_use_ddd`, `anti_p
 Newmanovo *Building Microservices* je k dispozici jen v **1. vydání (2015)**, zatímco kniha cituje
 2. vydání (2021); čísla kapitol z něj ověřit nelze.
 
+### Výsledky reprodukčních testů (2026-09-04)
+
+Otázky, které rešerše nemohla uzavřít, ověřeny spuštěním na **Doctrine ORM 3.6.8, DBAL 4.4.4,
+PHP 8.4.16**, SQLite in-memory, s `enableNativeLazyObjects(true)`.
+
+**1. `final` + `public readonly` u `#[ORM\Id]` + `readonly` embedded — funguje.** Prošlo všech
+šest scénářů: persist, hydratace přes `find()`, `getReference()` (vrací lazy objekt **téže třídy**,
+ne podtřídu), inicializace lazy objektu přístupem k vlastnosti, update i **remove**. Poslední
+jmenovaný je přesně případ z `doctrine/orm#10032`; na ORM 3 s nativními lazy objekty už nepadá.
+Úpravy kapitol jsou tím podložené měřením, ne jen dokumentací.
+
+**2. `readonly` u kolekce — stále nefunguje.** `doctrine/orm#10660` platí i v 3.6.8: persist
+agregátu s `private readonly Collection $items` skončí `LogicException: Attempting to change
+readonly property`. Zajímavé je, že *hydratace* z databáze projde – selhává až zápis, protože
+Doctrine potřebuje `ArrayCollection` nahradit `PersistentCollection`. **Kniha readonly kolekce
+nikde nemapuje, takže se jí to netýká**; poznámka je tu pro případ, že by to někdo doplnil.
+
+**3. SQLFilter u neowning strany one-to-one — díra potvrzena.** Test se dvěma tenanty, filtr
+nastavený na tenant A:
+
+| Přístup | Výsledek |
+|---|---|
+| DQL `SELECT p FROM Profile p` | vrátí jen tenanta A – filtr aplikován |
+| `find(Profile::class, 'p2')` (tenant B) | `null` – filtr aplikován |
+| `$profileB->account` (neowning one-to-one) | **vrátí Account cizího tenanta – filtr NEaplikován** |
+
+Bezpečnostní doporučení kapitoly 11 tím stojí na měření. Promítnuto do textu na dvě místa:
+mezi omezení SQLFilteru a jako varování do sekce o multi-tenancy.
+
+
 ## Pravidlo: co dělat s tím, co se nepodařilo ověřit
 
 Otázka „když to neověříme, musí citace pryč?“ má čtyři různé odpovědi podle toho, o jaký případ
