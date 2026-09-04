@@ -14,7 +14,7 @@ schema_headline: "DDD a microservices – Bounded Context jako service boundary"
 chapter_number: "19"
 category: Praxe
 deck: "Slogan BC = microservice je polopravda. Bounded Context je logická hranice modelu; microservice je fyzická hranice deploymentu. Kapitola o tom, kdy mapování 1:1 dává smysl, kdy modular monolith poráží microservices a jak rozeznat distributed monolith včas."
-reading_time: 30
+reading_time: 34
 difficulty: 4
 github_examples: null
 ---
@@ -25,11 +25,13 @@ Tato kapitola odpovídá na otázku, kterou si dříve nebo později položí ka
 
 ## 19.01 Mýtus „microservice = Bounded Context“ {#mytus}
 
-V komunitě DDD a microservices koluje v různých variantách slogan: *„Each microservice should be one Bounded Context.“* Zní logicky a má historické opodstatnění. DDD vymezuje hranici modelu, microservices hranici nasazení; přirozeným zjednodušením je obojí ztotožnit. Praxe ale tento závěr nepotvrzuje. Slogan je **polopravda**, která vede k chybným architektonickým rozhodnutím častěji než ke správným.
+V komunitě DDD a microservices koluje v různých variantách slogan: *„Each microservice should be one Bounded Context.“* Kořen má v článku Jamese Lewise a Martina Fowlera *Microservices* (2014), kde se mluví o *přirozené korelaci* mezi hranicí služby a hranicí kontextu. Korelace se cestou ztvrdla v rovnici. Zní to logicky: DDD vymezuje hranici modelu, microservices hranici nasazení, přirozeným zjednodušením je obojí ztotožnit. Praxe ale tento závěr nepotvrzuje. Slogan je **polopravda**, která vede k chybným architektonickým rozhodnutím častěji než ke správným.
 
 Podstatné je rozlišit dvě úrovně, které slogan slévá do jedné. Bounded Context je **logická hranice modelu**: vymezuje území, kde platí jeden konzistentní výklad pojmů, jeden Ubiquitous Language a jedna sada invariantů. Microservice je naproti tomu **fyzická hranice deploymentu** – jeden sestavovaný artefakt, jeden běžící proces, jedna databáze, jeden odpovědný tým. Tyto dvě úrovně se mohou, ale nemusí překrývat.
 
 Sam Newman v knize *Building Microservices, 2nd ed.* (2021) tuto distinkci zdůrazňuje opakovaně. V kapitole 2 píše, že Bounded Context představuje silný kandidát pro service boundary. Rozhodnutí, zda kontext skutečně dostane vlastní nasazovací jednotku, závisí na faktorech jako velikost týmu, rozdílné potřeby škálování, různý release cyklus a operační kapacita organizace. Chris Richardson v knize *Microservices Patterns* (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
+
+Eric Evans, autor pojmu Bounded Context, se na věc dívá z opačné strany. V přednášce *DDD & Microservices: At Last, Some Boundaries!* (QCon London 2016) tvrdí, že logické rozdělení uvnitř jednoho procesu v praxi neobstojí – nic ho nevynucuje a hranice se postupně rozpouští. Samostatná nasazovací jednotka dodá hranici fyzickou vynutitelnost, kterou modul sám o sobě nemá. Vztah je tedy podle Evanse **umožnění, ne rovnost**: microservice je jeden ze způsobů, jak hranici kontextu ubránit, ne její definice. Tato kapitola s Evansovou diagnózou souhlasí a odpovídá na ni jinak – hranice jde vynutit i uvnitř monolitu, [statickou kontrolou v CI](#phparkitect-heading).
 
 :::callout{type="note"}
 ### Pravda místo sloganu {#mytus-pravda-heading}
@@ -50,14 +52,14 @@ Tabulka níže shrnuje, čím se Bounded Context a microservice liší a v jaké
 | Aspekt | Bounded Context | Microservice |
 |---|---|---|
 | Hranice | Logická – model a jazyk | Fyzická – proces, deploy, DB |
-| Definice z knihy | Evans 2003, Vernon 2013 | Newman 2021, Richardson 2018 |
+| Definici zavedli | Evans 2003, Vernon 2013 | Lewis & Fowler 2014, Newman 2015 |
 | Vlastník | Tým doménových expertů + vývojářů | Stream-aligned team (Skelton & Pais 2019) |
 | Mění se kvůli | Změně doménového modelu | Škálování, release cyklu, provoz |
 | Existuje i v monolitu | Ano, vždy – jako modul | Ne, monolit je jeden deployment |
 
 ## 19.02 Kdy 1 BC = 1 service (cílový stav) {#bc-jedna-service}
 
-Mapování 1:1 mezi Bounded Contextem a microservice je v komunitě často prezentováno jako defaultní cíl a v určitých situacích dává smysl. Není to ale automatické pravidlo – platí jen tam, kde jsou splněny konkrétní organizační a technické předpoklady. Sam Newman tyto předpoklady v knize *Building Microservices, 2nd ed.* shrnuje pod hlavičkou „information hiding“ a „autonomy“: service má smysl tehdy, když ji lze měnit, nasazovat a škálovat nezávisle na zbytku systému.
+Mapování 1:1 mezi Bounded Contextem a microservice je v komunitě často prezentováno jako defaultní cíl a v určitých situacích dává smysl. Není to ale automatické pravidlo – platí jen tam, kde jsou splněny konkrétní organizační a technické předpoklady. Sam Newman tyto předpoklady v knize *Building Microservices, 2nd ed.* shrnuje pod hlavičkou „information hiding“ a „autonomy“: service má smysl tehdy, když ji lze měnit, nasazovat a škálovat nezávisle na zbytku systému. Pojem *information hiding* zavádí hned v kapitole 1 a definuje ho prostě – skrýt uvnitř komponenty co nejvíc a vystavit navenek co nejmíň. Na hledání hranic ho aplikuje v kapitole 2.
 
 ### Kdy rozdělit BC do vlastní service {#kdy-rozdelit-heading}
 
@@ -83,10 +85,16 @@ Každý z těchto kontextů má vlastní tým, vlastní DB schema, vlastní rele
 
 Zopakujme podstatné slovo z předchozího odstavce: **obhajitelné**. Microservices nejsou jen „lepší architektura“. Jsou architektonickým rozhodnutím s kompromisy – vyšší operační složitost, potřeba distributed tracing, eventual consistency všude, kde dříve byla ACID transakce. Tato kapitola tyto kompromisy probírá v dalších sekcích.
 
+### Jak velká má být jedna service {#velikost-service-heading}
+
+Na otázku po velikosti dává použitelnou odpověď Zhamak Dehghani v článku *How to break a Monolith into Microservices* (2018) heslem **„macro first, then micro“**: začít u větších služeb postavených kolem jednoho doménového konceptu a dělit je dál teprve tehdy, až je na to tým provozně připravený. Pořadí je podstatné. Sloučit dvě předimenzované služby je refaktoring; rozpletení sítě dvaceti nano-services je projekt na čtvrtletí.
+
+Druhá polovina odpovědi je Newmanovo information hiding. Dobře zvolená hranice skrývá hodně a vystavuje málo – poznáte ji podle toho, že běžná změna se odehraje uvnitř jedné služby a nikoho jiného se nedotkne. Počet řádků kódu o kvalitě hranice neříká nic.
+
 :::callout{type="pattern"}
 ### Heuristika 1:1 – kdy ji uplatnit {#bc-1-1-heuristika-heading}
 
-Pokud z předchozího seznamu zaškrtnete **čtyři a více** bodů, je kontext kandidátem na vlastní service – e-shop výše splnil u každého kontextu čtyři, Payment pět. Body „rozdílný stack“ a „compliance režim“ jsou přitom vzácné; na plných šest nečekejte.
+Pokud z předchozího seznamu zaškrtnete **čtyři a více** bodů, je kontext kandidátem na vlastní service – e-shop výše splnil u každého kontextu čtyři, Payment pět. Body „rozdílný stack“ a „compliance režim“ jsou přitom vzácné; na plných šest nečekejte. Práh čtyř bodů je heuristika této knihy, ne údaj převzatý ze zdroje.
 
 Při **třech a méně** zůstaňte v [modular monolithu](#modular-monolith) – rozdělení vás bude stát víc, než ušetří. Microservices nejsou cílem, ale nástrojem.
 :::
@@ -96,6 +104,10 @@ Při **třech a méně** zůstaňte v [modular monolithu](#modular-monolith) –
 Modular monolith je jeden nasazovaný celek (jedna Symfony aplikace, jedna databáze, jeden proces), uvnitř kterého žije **více Bounded Contexts jako modulů** s vynucenými hranicemi. Zvenku vypadá jako klasický monolit; uvnitř má disciplínu, kterou byste jinak vynucovali přes service boundary.
 
 Proč o něm mluvit v kapitole o microservices? Pro většinu týmů, které začínají s DDD, je to rozumný výchozí bod. Martin Fowler v článku *MonolithFirst* (2015) argumentuje, že microservices předčasně rozdělují systém, jehož hranice ještě nejsou ustálené. Tím vznikají technické dluhy, které se těžce rozplétají. Sam Newman v *Building Microservices, 2nd ed.* (kap. 3) tento postoj přejímá a explicitně jako výchozí strategii doporučuje monolith-first nebo modular monolith-first.
+
+Konsensus to ale není, a je poctivé to říct. Fowler sám u *MonolithFirst* přiznává, že pro pevný závěr nemá dost doložených případů. Šest dní po vydání textu publikoval na svém webu opačný názor Stefana Tilkova (*Don't start with a monolith*, 2015): rozdělit existující monolit je podle něj extrémně těžké, protože si jeho části mezitím vytvoří závislosti přes sdílené knihovny, databázi a doménové objekty. Kdo tedy ví, že cílí na microservices, měl by podle Tilkova začít rovnou u nich.
+
+Spor rozhoduje jedna proměnná: zda se hranice uvnitř monolitu vynucují, nebo jen doporučují. Tilkovova námitka popisuje monolit bez kontroly hranic a tam platí do puntíku. S pravidly v CI, která zabrání tomu, aby jeden kontext sáhl do vnitřností druhého, monolit tuto vlastnost neztrácí – a přesně proto na následujících stránkách stojí sekce o phparkitectu.
 
 ### Kdy zvolit modular monolith {#kdy-modular-heading}
 
@@ -150,7 +162,7 @@ src/
 │   │       └── OrderPlacedReceived.php
 │   └── Infrastructure/
 │
-└── SharedKernel/                 # Sdílené technické typy (NE doménové)
+└── SharedKernel/                 # Malá sdílená podmnožina doménového modelu
     ├── Domain/
     │   └── ValueObject/
     │       ├── Money.php
@@ -158,7 +170,7 @@ src/
     └── Application/
 :::
 
-Všimněte si dvou důležitých detailů. Za prvé: `SharedKernel` obsahuje pouze technické typy (Money, UUID, Result), **nikdy doménové entity**. Sdílení doménových entit napříč BC porušuje samotnou definici Bounded Contextu. Za druhé: každý BC má vlastní `Application/IntegrationEvent/`, kam mapuje příchozí události z jiných kontextů – stejný princip, který v sekci 19.08 použijeme i mezi separátními services.
+Všimněte si dvou detailů. Za prvé: `SharedKernel` drží **malou sdílenou podmnožinu doménového modelu** – hodnotové objekty jako `Money` a `Currency`, na jejichž výkladu se všechny kontexty shodly. Nepatří sem agregáty ani doménové eventy jednotlivých kontextů; jejich sdílení porušuje definici Bounded Contextu. Změna Shared Kernelu vyžaduje souhlas všech vlastníků, což je drahé, a proto musí zůstat malý – celý vzor rozebírá [Context Mapping](/context-mapping#shared-kernel). Za druhé: každý BC má vlastní `Application/IntegrationEvent/`, kam mapuje příchozí události z jiných kontextů – stejný princip, který v sekci 19.08 použijeme i mezi separátními services.
 
 ### Vynucení hranic přes phparkitect {#phparkitect-heading}
 
@@ -227,6 +239,8 @@ return static function (Config $config): void {
 :::
 :::
 
+Výčet zakázaných namespaců se s každým novým kontextem prodlužuje. Jakmile jich máte víc než tři, vyplatí se otočit polaritu a použít `DependsOnlyOnTheseNamespaces` – whitelist, který nové kontexty odmítne automaticky, aniž byste pravidlo museli rozšiřovat.
+
 Pravidlo se spouští v CI jako součást běžné kontroly kvality:
 
 :::code{language="json" filename="composer.json (výřez)"}
@@ -262,7 +276,7 @@ Postup migrace probíráme detailně v [sekci 19.09 (Strangler Fig)](#migrace).
 
 ## 19.04 Distributed Monolith – anti-vzor {#distributed-monolith}
 
-Distributed monolith má **vnější tvar microservices** (N samostatných services, N deploymentů, N repozitářů, N týmů), ale **vnitřní coupling monolithu** (sdílená databáze, synchronní volání všude, coordinated release, sdílená library s doménovými typy). Sam Newman ho označuje za jednu z nejhorších architektur – platíte všechny náklady microservices a nedostáváte žádnou z jejich výhod.
+Distributed monolith má **vnější tvar microservices** (N samostatných services, N deploymentů, N repozitářů, N týmů), ale **vnitřní coupling monolithu** (sdílená databáze, synchronní volání všude, coordinated release, sdílená library s doménovými typy). Platíte všechny náklady microservices a nedostáváte žádnou z jejich výhod. Je to nejdražší známý způsob, jak provozovat monolit.
 
 Vzniká dvěma cestami, které jsou často nerozlišitelné. **První cesta**: tým rozdělil monolit do services dříve, než identifikoval Bounded Contexty. Hranice mezi services jsou tedy náhodné (typicky podle technické vrstvy nebo podle CRUD entit), ne podle domény. Services musí mezi sebou komunikovat o všem a coupling je vrstevně rozprostřený. **Druhá cesta**: tým rozdělil správně podle BC, ale neověřil, že každá service má skutečnou autonomii – sdílela databázi „pro jednoduchost“, sdílela library s doménovými typy „aby se neopakoval kód“, sdílela deployment pipeline „aby release byl atomický“.
 
@@ -271,7 +285,7 @@ Vzniká dvěma cestami, které jsou často nerozlišitelné. **První cesta**: t
 
 Pokud vám sedí dva a více těchto bodů, máte distributed monolith:
 
-1. **Sdílená databáze napříč services.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Toto je nejjasnější příznak – Newman ho označuje za nejčastější příčinu distributed monolithu. Kanonický rozbor tohoto anti-vzoru včetně opravy přes Anti-Corruption Layer je v [Anti-vzorech](/anti-vzory#sdilena-databaze).
+1. **Sdílené databázové schéma napříč services.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Newman je v tomto bodě z celé knihy nejostřejší: sdílení databází je podle něj to nejhorší, co pro nezávislou nasazovatelnost můžete udělat. Rozlišujte přitom sdílenou *instanci* od sdíleného *schématu*. Jeden databázový server s oddělenými schématy a jediným vlastníkem u každého z nich je legitimní a levný mezikrok; jedno schéma se dvěma zapisovateli není. Kanonický rozbor anti-vzoru včetně opravy přes Anti-Corruption Layer je v [Anti-vzorech](/anti-vzory#sdilena-databaze).
 2. **Synchronní HTTP/gRPC volání mezi services v každém request flow.** Vyřízení jednoho user requestu vyžaduje 5–10 vnořených volání. Latence je součet všech volání; dostupnost je součinem dostupností všech volaných služeb; failure jednoho znamená failure celého řetězce.
 3. **Coupled deployment.** Změnu API service A nelze nasadit, dokud současně nenasadíte service B, která konzumuje to API. „Release je atomický“, „máme deployment train“ – to jsou eufemizmy pro coupled deploy. Sam Newman: pokud nelze service nasadit samostatně, není to microservice.
 4. **End-to-end test vyžaduje všechny services.** Test jednoho user flow nelze spustit bez toho, abyste měli runtime všech N services (lokálně přes docker-compose, v CI přes test environment). Žádná service není testovatelná v izolaci.
@@ -330,15 +344,36 @@ Důvody, proč zůstat hybridní dlouhodobě:
 
 ### De-microservicing – návrat k monolitu {#de-microservicing-heading}
 
-Trend „microservices za každou cenu“ z let 2014–2018 se po dekádě provozu obrátil.
-Adrian Cockcroft (Cloud Architect v Netflixu, který microservices zpopularizoval,
-v letech 2016–2022 VP v AWS, od roku 2022 nezávislý poradce) v roce 2023 přiznal,
-že microservices byly „prodávány jako odpověď na všechno“.
-Případ **Amazon Prime Video** (2023, oficiální článek na Amazon engineering blog)
-popsal, jak tým vrátil video monitoring stack z microservices do monolitu –
-ušetřil **90 % infrastrukturních nákladů** a zlepšil škálování. Sám Cockcroft
-ovšem tento případ čte jinak: jako refaktoring serverless prototypu, ne jako
-návrat od microservices.
+Návrat od několika služeb k jednomu procesu není kacířství. Protipozice vůči
+dělení za každou cenu existuje po celou dobu trvání trendu: Fowler ji formuloval
+v *MonolithFirst* už v roce 2015, Newman ve stejném roce v textu *Microservices
+For Greenfield?* a DHH v *The Majestic Monolith* (2016). Nové není přesvědčení,
+ale počet týmů, které mají za sebou dekádu provozu a mohou rozhodnutí
+revidovat s vlastními daty.
+
+Nejcitovanějším příkladem je **Amazon Prime Video** (květen 2023). Kolem něj se
+ale nabalila historka, která s původním textem souhlasí jen zčásti:
+
+- **Co tým skutečně popsal.** Komponenta Video Quality Analysis běžela jako
+  serverless pipeline – orchestrace přes AWS Step Functions, výpočet v Lambda
+  funkcích, mezisklad videosnímků v S3. Účet rostl na orchestraci a na Tier-1
+  voláních do S3. Sloučením komponent do jednoho procesu na ECS mezisklad odpadl,
+  data tečou v paměti a infrastrukturní náklady klesly o více než 90 %.
+- **Jaký to mělo rozsah.** Jedna komponenta jednoho týmu. Ne Prime Video jako
+  produkt a rozhodně ne obrat architektonické strategie Amazonu. Článek vyšel na
+  blogu Prime Video Tech, který mezitím zanikl – původní adresa dnes přesměrovává
+  na aboutamazon.com, takže se cituje přes archiv a reprinty.
+- **Jak to čte ten, kdo microservices zpopularizoval.** Adrian Cockcroft
+  (Netflix, později VP v AWS) na vlnu reakcí odpověděl textem *So many bad takes*.
+  Jeho námitka je jednoduchá: šlo o dotažení serverless prototypu do produkční
+  podoby, tedy o běžný krok ve vývoji jedné služby, ne o důkaz proti
+  microservices obecně.
+
+Použitelný závěr z případu vyvodil Werner Vogels v článku *Monoliths are not
+dinosaurs* (2023): jedno řešení pro všechno neexistuje a architekturu je třeba
+revidovat pokaždé, když se změní zátěžový profil. Prime Video u sebe provozuje
+obojí – live sports streaming jako distribuovaný workflow a monitoring jako jeden
+proces. To je něco jiného než „microservices selhaly“.
 
 Symptomy, které mluví pro de-microservicing:
 
@@ -370,33 +405,44 @@ Postup de-microservicingu je opačný k extraction patternu z 19.09:
 5. **Vyřazení service.** Po N týdnech souběžného běhu se původní service odstaví,
    smazat lze až po čas pro forenzní kontrolu (typicky 90 dní).
 
-Klíčový princip: **de-microservicing je legitimní architektonická volba**, ne selhání.
+Záleží i na tom, jak se rozhodnutí pojmenuje: **de-microservicing je legitimní architektonická volba**, ne selhání.
 Reaguje na změnu kontextu (tým se zmenšil, profil zátěže se vyrovnal,
 operační kapacita klesla). Poctivé pojmenování pomáhá – nekomunikujte to jako „regression“
 ale jako „consolidation“.
 :::
 
-### Náklady microservices – realistický rozpočet {#naklady-heading}
+### Náklady microservices – co se vlastně platí {#naklady-heading}
 
 Sam Newman v *Building Microservices, 2nd ed.* (kap. 1, sekce „Microservice Pain Points“) shrnuje nákladové oblasti,
-které se v rozhodování o microservices často přehlíží. Pro středně velký projekt
-(10–20 services) jsou tyto nákladové položky **každoročně se opakující**:
+které se v rozhodování o microservices často přehlíží. Kategorie níže jsou jeho.
+Konkrétní čísla nikoli – ta závisí na cloudu, regionu, mzdové hladině a na tom,
+kolik si tým provozuje sám. Tabulka proto říká, *co* platíte a *čím* to roste,
+ne kolik to stojí:
 
-| Kategorie | Rozsah ročně | Poznámka |
+| Kategorie | Co se v ní platí | Čím roste |
 |---|---|---|
-| Platform team | 2–4 FTE | Provoz Kubernetes, service mesh, observability stack |
-| Cloud infrastruktura navíc | +30–80 % vs. monolit | Více DB, message broker, load balancery, NAT |
-| Observability tools | $20k–$200k | Datadog/NewRelic licence rostou s počtem hostů a metrik |
-| CI/CD navíc | +50 % build minutes | N pipelines místo jedné, integration testy přes docker-compose |
-| Onboarding nových inženýrů | +1–2 týdny | Pochopit topologii, deployment, ladění napříč services |
-| Incident response | +30 % MTTR | Distributed tracing zjednodušuje, ale 5 services ≠ 1 service |
+| Platformní tým | Provoz orchestrátoru, service mesh, observability stacku | Počtem services a prostředí |
+| Cloud infrastruktura | Více databází, message broker, load balancery, NAT | Počtem services |
+| Observability | Licence APM nástrojů, retence logů a trace | Počtem hostů, metrik a spanů |
+| CI/CD | N pipeline místo jedné, integrační testy přes docker-compose | Počtem services a frekvencí releasů |
+| Onboarding | Pochopit topologii, deployment a ladění napříč services | Složitostí topologie |
+| Incident response | Delší cesta ke kořenové příčině napříč services | Hloubkou volacích řetězců |
 
-Kalkulace pro start-up s 30 inženýry: vlastní platform tým (3 FTE × 80 000 USD/rok
-= 240k) + observability stack (60k) + cloud overhead (40k vs. monolit) ≈ **340k USD/rok**
-operačního dluhu navíc proti modulárnímu monolithu. To je rozhodovací číslo, které
-patří do diskuse, ne „microservices jsou prostě lepší“.
+:::callout{type="note"}
+### Ilustrativní scénář: co rozpočet unese {#naklady-scenar-heading}
 
-## 19.05 Kontrakt mezi services – sync vs. async {#kontrakt}
+Modelový start-up s 30 inženýry. Vlastní platformní tým o třech lidech,
+observability stack na komerční licenci a cloud overhead proti jedné aplikaci
+dohromady vycházejí řádově na jednotky milionů korun ročně navíc oproti
+modulárnímu monolitu. Číslo je odhad této knihy, ne zjištění z měření – dosaďte
+si vlastní mzdové náklady a ceník poskytovatele.
+
+Jestli vyjde pět milionů nebo deset, není to hlavní. Rozhoduje, že položka
+existuje, opakuje se každý rok a někdo ji zaplatí. Argument „microservices jsou
+prostě lepší“ na ni odpověď nemá.
+:::
+
+## 19.05 Kontrakt mezi services – komunikace a data {#kontrakt}
 
 Jakmile máte dvě services, musíte se rozhodnout, jak spolu komunikují. Existují dva základní interakční vzory – **synchronní** (REST, gRPC, SOAP) a **asynchronní** (events přes message broker – RabbitMQ, Kafka, NATS, AWS SNS/SQS). Většina reálných systémů kombinuje obojí. Volba mezi nimi určuje výsledné coupling, latenci a availability.
 
@@ -434,6 +480,28 @@ Praktická implementace asynchronní komunikace mezi services v Symfony probíh�
 | Refactoring API | Coordinated release volajícího + volaného | Subscriber má vlastní integration event DTO |
 | Testovatelnost | Vyžaduje WireMock / Pact / mock | Stačí dispatch eventu do test handleru |
 
+### Kolik dat nese událost {#kolik-dat-heading}
+
+Osa sync/async je jen polovina rozhodnutí. Druhá polovina zní: co se do události vejde. Martin Fowler v článku *What do you mean by „Event-Driven“?* (2017) rozlišuje dva režimy, které se v praxi pletou.
+
+**Event notification** oznamuje, že se něco stalo, a nic víc. Zpráva nese identifikátor a čas; kdo chce detaily, musí si je dotáhnout zpětným voláním. Publisher zůstává hubený a smlouva mezi službami je minimální, ale příjemce má znovu synchronní závislost na tom, kdo událost poslal – jen posunutou o krok dál.
+
+**Event-carried state transfer** nese v události všechna data, která příjemce potřebuje. Zpětné volání odpadá, subscriber si z proudu událostí staví vlastní kopii dat a přežije výpadek publishera. Platí se za to duplikací dat a širší smlouvou: každé pole v payloadu je závazek, který někdo konzumuje.
+
+Ukázka v sekci 19.08 patří do druhé kategorie. `OrderPlacedReceived` nese `orderId`, `customerId`, částku i měnu, takže `billing-svc` vystaví fakturu bez jediného dotazu zpět do `ordering-svc`. Volba mezi oběma režimy patří udělat vědomě a pro jeden směr integrace pak držet jeden z nich. Míchání obou v jednom toku končí tím, že nikdo neví, která data jsou autoritativní.
+
+### Vlastnictví dat – database per service {#data-ownership-heading}
+
+Rozdělit kód je ta snadnější polovina. Těžší je rozdělit data. Chris Richardson vede *Database per Service* jako samostatný vzor: každá service vlastní své schéma a nikdo jiný do něj nesahá, ani na čtení. Vlastnictví tu znamená právo měnit schéma bez koordinace s kýmkoli dalším. Jakmile do tabulky čte druhá service, právo zaniká a s ním i nezávislý deploy.
+
+Cena vzoru se ukáže ve chvíli, kdy potřebujete data ze dvou services najednou. `JOIN` přes hranici neexistuje a nahrazují ho tři možnosti:
+
+1. **API composition.** Volající si vyžádá kus dat z každé service a složí je v paměti. Funguje pro malé výsledky. Na stránkování a řazení přes hranici se rozpadá – setřídit dvě stránky ze dvou zdrojů znamená stáhnout obě celé.
+2. **Read model plněný událostmi.** Service si z příchozích integračních událostí staví vlastní denormalizovaný pohled a čte výhradně ze svého. Dotazy jsou rychlé, cenou je eventual consistency a duplikace. Mechanismus i jeho úskalí rozebírá [kapitola o CQRS](/cqrs).
+3. **Samostatný analytický sklad.** Reporting a exporty do provozní databáze nepatří. Data se replikují do skladu, který vlastní reporting a který nikdo z provozních služeb nedotazuje.
+
+Duplikovaná data potřebují pravidlo, jinak se z nich stane druhý zdroj pravdy. Kopie v cizí službě je projekce s jasným vlastníkem: jeden kontext data vytváří a publikuje, ostatní si drží read-only pohled a nikdy ho nemění za zády vlastníka. Pokud dvě services tvrdí, že vlastní totéž pole, hranice mezi nimi je špatně vedená – a žádný integrační vzor to nespraví.
+
 ## 19.06 Distribuované transakce – Saga, ne 2PC {#distribuovane-transakce}
 
 Jakmile doménový proces překročí hranici jednoho Bounded Contextu (a v microservices architektuře tedy hranici jedné service), musíte řešit otázku **konzistence napříč services**. ACID transakce, na kterou jste zvyklí v jedné databázi, v distribuovaném prostředí přestává platit. Klasickou odpovědí kdysi býval *Two-Phase Commit* (2PC, XA transactions). V microservices architektuře je 2PC **prakticky nepoužitelný**.
@@ -463,6 +531,8 @@ Detailní implementaci ság v Symfony 8 (kompenzace, idempotence, choreografie v
 
 Microservices nejsou primárně programátorský problém – jsou **operační problém**. Tým, který přejde z monolithu na deset services, najednou řeší věci, které dříve obstarával operační systém a Symfony framework. Routing mezi procesy, retry, circuit breaking, mTLS, distribuovaný debug, service discovery, centralizované logy, rate limiting. Každá z těchto věcí má svůj nástroj a svou cenu. Dohromady tvoří stack, který někdo musí provozovat.
 
+Minimum pojmenoval Martin Fowler už v roce 2014 v textu *MicroservicePrerequisites*: rychlé provisionování prostředí, základní monitoring a rychlý deployment aplikace, k tomu organizační posun směrem k DevOps. Jeho doporučení je jednoznačné – kdo tyto schopnosti nemá, má si je vybudovat dřív, než pustí microservices do produkce. Zbytek této sekce Fowlerovo minimum jen rozepisuje do dnešních nástrojů.
+
 ### Service mesh {#service-mesh-heading}
 
 Service mesh (Istio, Linkerd, Consul Connect, AWS App Mesh) je infrastrukturní vrstva, která řeší cross-cutting concerns mezi services. Konkrétně jde o tyto oblasti:
@@ -491,6 +561,12 @@ V monolithu stačila kombinace strukturovaných logů a metrik. V microservices 
 - **Container orchestration** – Kubernetes je de facto standard. Bez něj (nebo bez ekvivalentu jako Nomad, ECS) nelze realisticky provozovat víc než pár services. Kubernetes sám je netriviální – jeho provoz je vlastní specializace.
 - **CI/CD per service** – každá service má vlastní pipeline, vlastní release schedule, vlastní rollback. Sdílená pipeline = coordinated release = distributed monolith.
 - **Schema registry** – pro events přes broker (zejména Kafka) potřebujete schema registry (Confluent, AWS Glue), který verzuje schéma eventů a kontroluje kompatibilitu.
+
+### Contract testing {#contract-testing-heading}
+
+Příznak číslo 4 z předchozí sekce – end-to-end test vyžaduje všechny services – má kanonickou odpověď: **consumer-driven contracts**. Konzument zapíše, co od poskytovatele očekává (jaká pole, jaké typy, jaké stavové kódy), a z toho vznikne kontrakt. Poskytovatel ho pak ověřuje ve své vlastní pipeline, bez běžícího konzumenta. Testovací sada přestane potřebovat runtime všech N services a rozpadne se na N nezávislých sad.
+
+Nejznámější nástroj je Pact. Jeho podpora v PHP je slabší než v Javě nebo JavaScriptu, takže si připravte víc práce s napojením než v jazycích, ze kterých vzor pochází. Alternativa dostupná hned: udržovat schéma integračních událostí jako verzovaný artefakt a v CI kontrolovat, že payload z publishera projde deserializací u každého subscribera. Pokrytí je užší, ale zachytí přesně tu chybu, která v provozu bolí nejvíc. Obecnou strategii testování rozebírá [kapitola o testování](/testovani-ddd).
 
 :::callout{type="warn"}
 ### Operační pravidlo {#ops-pravidlo-heading}
@@ -578,11 +654,15 @@ Subscriber service má zrcadlovou konfiguraci – AMQP transport pro příchozí
 :::callout{type="pattern"}
 ### YAML: Messenger config – subscriber (billing-svc) {#messenger-subscriber-heading}
 
-:::code{language="yaml" filename="billing-svc/config/packages/messenger.yaml" highlights="35,36,37,38,39"}
+:::code{language="yaml" filename="billing-svc/config/packages/messenger.yaml" highlights="25,26,27,28,29"}
 # config/packages/messenger.yaml v billing-svc
 framework:
     messenger:
         default_bus: command.bus
+
+        # Selhané zprávy nezahazujeme. Jdou do vlastního transportu
+        # s výchozím serializerem, odkud je lze prohlédnout a přehrát.
+        failure_transport: failed_events
 
         transports:
             # AMQP transport pro INPUT eventy
@@ -599,9 +679,14 @@ framework:
                                 - 'ordering.placed'
                                 - 'ordering.cancelled'
                 serializer: 'App\Billing\Infrastructure\Messaging\IntegrationEventSerializer'
+                # Serializer výše je decode-only. Retry na tomto transportu by
+                # envelope odeslal znovu přes týž sender, tedy přes encode(),
+                # a spadl by. Proto nula pokusů a rovnou failure transport.
                 retry_strategy:
-                    max_retries: 5
-                    multiplier: 2
+                    max_retries: 0
+
+            failed_events:
+                dsn: 'doctrine://default?queue_name=failed_events'
 
             # lokální async pro vnitřní commands
             async:
@@ -658,6 +743,15 @@ final readonly class OrderPlacedReceived
 :::
 
 Custom serializer dělá překlad mezi binárním AMQP payloadem a konkrétní integration event třídou podle `event_type` hlavičky. Toto je jediné místo v subscriberu, kde se „dotýkáte“ formátu publishera. Změny v doménovém eventu publishera vás zasáhnou jen zde – zbytek kódu pracuje s vaší vlastní třídou.
+
+Vzor má jméno. Dvojice „vlastní DTO plus překladová vrstva na hranici“ je [Anti-Corruption Layer](/context-mapping#acl) z Context Mappingu, jen realizovaný přes serializer místo přes klientskou třídu. Ostatní vztahy z Context Map mají v microservices architektuře stejně přímočarý protějšek:
+
+| Vztah z Context Map | Mechanismus mezi services |
+|---|---|
+| Anti-Corruption Layer | Vlastní integration event DTO a serializer, který na něj překládá cizí payload |
+| Open Host Service + Published Language | Veřejné API nebo publikované schéma událostí se zpětnou kompatibilitou |
+| Conformist | Přebírání schématu publishera beze změny, typicky u externí služby |
+| Separate Ways | Žádná integrace – data se pořizují znovu, protože překlad by stál víc |
 
 :::code{language="php" filename="billing-svc/src/Infrastructure/Messaging/IntegrationEventSerializer.php" highlights="22,23,24,25"}
 <?php
@@ -720,6 +814,9 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
     public function encode(Envelope $envelope): array
     {
         // Subscriber encode neprovádí – to dělá publisher na své straně.
+        // Důsledek pro konfiguraci: transport s tímto serializerem nesmí mít
+        // retry_strategy, protože retry posílá envelope zpět přes encode().
+        // Selhání proto řeší failure_transport s výchozím serializerem.
         throw new \LogicException('IntegrationEventSerializer is decode-only.');
     }
 }
@@ -752,20 +849,24 @@ final readonly class OrderPlacedReceivedHandler
 
     public function __invoke(OrderPlacedReceived $event): void
     {
-        // Idempotence – pokud už jsme tento eventId zpracovali, no-op.
+        // Rychlá zkratka pro zjevné duplikáty. Autoritativní není –
+        // mezi kontrolou a zápisem může projít paralelní doručení.
         // Detail v /outbox-pattern#inbox
         if ($this->inbox->wasProcessed($event->eventId)) {
             return;
         }
 
+        // eventId putuje do commandu. Handler commandu zapíše záznam do inboxu
+        // ve stejné transakci jako fakturu; o transakci se stará
+        // doctrine_transaction middleware na command.bus. Unikátní index nad
+        // eventId duplikát odmítne a celá transakce se vrátí zpět.
         $this->commandBus->dispatch(new CreateInvoiceForOrder(
+            eventId: $event->eventId,
             orderId: $event->orderId,
             customerId: $event->customerId,
             amountCents: $event->totalAmountCents,
             currency: $event->currency,
         ));
-
-        $this->inbox->markProcessed($event->eventId);
     }
 }
 :::
@@ -774,8 +875,25 @@ Tímto vzorem dosáhneme čtyř důležitých vlastností:
 
 - **Žádný shared code mezi services** – billing-svc nemá ve svém `composer.json` žádný balíček, který by definoval třídy ordering-svc.
 - **Verzování payloadu** – publisher přidá pole, subscriber pole zatím nezná, no-op. Žádný coordinated release.
-- **Idempotence** – duplicitní doručení (failover broker, restart workera) se neprojeví. *Inbox* tabulka v billing-svc drží zpracované `eventId`; check a `markProcessed` přitom musí běžet v jedné transakci se zpracováním, jinak mezi ně proklouzne paralelní duplikát.
+- **Idempotence** – duplicitní doručení (failover brokeru, restart workera) se neprojeví. *Inbox* tabulka v billing-svc drží zpracované `eventId`. Kontrola v handleru integrační události je jen zkratka pro zjevné duplikáty; autoritativní je unikátní index nad `eventId` a zápis do inboxu ve stejné transakci jako doménová změna. Kontrola oddělená od zápisu paralelní duplikát nezastaví.
 - **Testovatelnost** – handler se testuje s `new OrderPlacedReceived(...)`, bez síťového stacku.
+
+### Ekonomika microservices v PHP {#php-ekonomika-heading}
+
+Literatura o microservices vznikla v prostředí dlouhoběžících runtime – JVM, .NET, Node. PHP v klasickém režimu php-fpm počítá jinak a několik doporučení tím posouvá. Ta část kalkulace v knihách o microservices chybí, protože ji jejich autoři nepotřebovali.
+
+Aplikace je *shared-nothing*: bootstrapuje se při každém requestu a mezi requesty si nedrží ani in-process cache, ani connection pool. Každá extrahovaná služba tedy platí vlastní bootstrap na vlastním requestu. Samo o sobě je to drobnost, která se ale násobí počtem skoků v řetězci.
+
+Podstatnější je chování synchronního volání. Node nebo Go čekají na odpověď neblokujícím I/O prakticky zadarmo. Naproti tomu php-fpm child zůstává po celou dobu round-tripu obsazený a nikoho jiného neobslouží. Počet childů je pevný, takže fan-out do tří služeb spotřebuje trojnásobek konkurenční kapacity volajícího. Anti-vzor „synchronní orchestrace všeho přes REST“ ze sekce 19.10 je proto v PHP dražší než v prostředí, ze kterého pochází zdrojová literatura.
+
+Dvě mitigace:
+
+- **Souběžné requesty přes `HttpClient`.** Symfony `HttpClient` streamuje odpovědi, takže tři volání lze poslat najednou a čekat na ně současně. Sériové `->getContent()` třikrát za sebou sčítá latence zbytečně.
+- **Worker módy.** FrankenPHP, RoadRunner nebo Swoole drží aplikaci v paměti mezi requesty. Bootstrap odpadá a cena synchronního volání klesá. Daň: služby s request-scoped stavem musí implementovat `Symfony\Contracts\Service\ResetInterface`, jinak stav prosákne do dalšího requestu.
+
+Opačným směrem působí to, že nasazovací jednotka je v PHP levná. Není co kompilovat, není warm-up JVM, image se sestaví za minuty. Technicky extrahovat službu je v PHP snazší než v Javě. Celý náklad tedy leží v provozu – což hlavní tezi této kapitoly spíš posiluje.
+
+A provoz má v Symfony konkrétní podobu. Každá služba, která konzumuje zprávy, potřebuje vlastní sadu workerů: `messenger:consume` pod Supervisorem nebo systemd, `--memory-limit` a `--time-limit` proti narůstající spotřebě paměti a `messenger:stop-workers` v každém deploy skriptu. Pět služeb znamená pět takových konfigurací a pět míst, kde se dá na restart workerů po deployi zapomenout. Messenger na provoz nabízí i dva novější přepínače: `--keepalive` brání předčasnému redelivery u dlouho běžících handlerů a `--fetch-size` snižuje počet dotazů do transportu při dávkovém zpracování.
 
 ## 19.09 Postupná migrace monolit → microservices {#migrace}
 
@@ -783,7 +901,9 @@ Tato sekce je pro týmy, které dnes mají monolit a uvažují, kam dál. Větš
 
 ### Strangler Fig pattern {#strangler-fig-heading}
 
-Strangler Fig (Martin Fowler, 2004) nahrazuje systém po částech místo najednou. Před monolit se postaví fasáda (proxy, edge gateway), která postupně přesměrovává provoz jednotlivých Bounded Contextů na nově extrahované services. Funkcionalita během přechodu existuje dvakrát a přepíná se na úrovni routingu, takže rollback zůstává kdykoli možný. Po stabilizaci se mrtvý kód v monolithu smaže a iteruje se dalším kontextem.
+Strangler Fig (Martin Fowler, 2004; pod tímto názvem od roku 2019) nahrazuje systém po částech místo najednou. Před monolit se postaví fasáda (proxy, edge gateway), která postupně přesměrovává provoz jednotlivých Bounded Contextů na nově extrahované services. Funkcionalita během přechodu existuje dvakrát a přepíná se na úrovni routingu, takže rollback zůstává kdykoli možný. Po stabilizaci se mrtvý kód v monolithu smaže a iteruje se dalším kontextem.
+
+Fowlerova současná verze textu přidává pojem *transitional architecture*: fasáda, dvojí zápis a routovací vrstva jsou dočasné lešení, které do cílového stavu nepatří a je nutné ho po migraci zbourat. Kdo si ho ponechá „pro jistotu“, zůstane s trvale složitější topologií, než jakou potřebuje.
 
 Plný výklad vzoru – princip koexistence staré a nové části, struktura projektu, srovnání s přímým přepisem – je v kapitole [Migrace z CRUD](/migrace-z-crud#strangler-fig). Tato sekce se soustředí na to, co je specifické pro extrakci do samostatných services: pořadí fází a kritéria, kdy zastavit.
 
@@ -807,7 +927,7 @@ Doporučená postupná cesta pro Symfony tým, který dnes má monolit bez expli
 
 - Postavte fasádu (Symfony API gateway, nginx routing, AWS API Gateway) před monolit.
 - Postavte nový Symfony projekt jako samostatnou service. Zkopírujte (nikdy ne `git mv`) kód cílového BC z monolithu.
-- Migrace dat: postupně replikovat tabulky cílového BC do nové DB. Období dual-write – monolit i nová service obě píší. Postupně přepnout čtecí provoz.
+- Migrace dat: postupně replikovat tabulky cílového BC do nové DB. Období dual-write – monolit i nová service obě píší. Postupně přepnout čtecí provoz. Dual-write je zde vědomá výjimka: [kapitola o Outboxu](/outbox-pattern#dual-write) ho popisuje jako problém, protože zápis do dvou úložišť není atomický. Při migraci je únosný jako řízený a časově omezený stav – s jedním úložištěm jako zdrojem pravdy a s pravidelnou rekonciliací, která rozdíly najde a srovná. Trvalé řešení z něj nedělejte.
 - Cross-BC eventy nahradit AMQP transportem v Messenger. Subscriber side má vlastní integration event DTO (sekce 19.08).
 - Po stabilizaci smažte zbytky cílového BC z monolithu.
 
@@ -881,6 +1001,7 @@ Hlavní doporučení této kapitoly:
 - **1 BC = 1 service jen tehdy, když má smysl** – vlastní stream-aligned tým, vlastní data, nezávislý release cyklus, různé potřeby škálování, případně compliance isolation. Pokud zaškrtnete tři a méně z těchto bodů, zůstaňte v monolithu.
 - **Distributed monolith je horší než monolith** – sdílená DB, synchronní volání všude, coupled deploy, sdílená library s doménovými typy. Pět příznaků, dva a víc znamená, že máte distributed monolith. Nejdražší architektonická chyba v microservices architektuře.
 - **Sync vs. async – async-first** – sync jen pro queries v request flow a pro blokující validace; všechno ostatní eventy přes broker. Tight temporal coupling je největší ztráta hodnoty microservices.
+- **Data má vlastníka, ne spolubydlící** – každá service vlastní své schéma a smí ho měnit bez koordinace. Sdílená instance s oddělenými schématy je únosná, jedno schéma se dvěma zapisovateli není. Dotaz přes hranici řeší API composition, read model plněný událostmi nebo samostatný analytický sklad.
 - **Distribuované transakce – saga, ne 2PC** – 2PC nepoužitelné v microservices stacku. Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace. Detail v [kapitole 14](/sagy-a-process-managery).
 - **Symfony Messenger umí obojí** – sync transport pro modular monolith, AMQP transport s Outbox patternem pro eventy mezi services. Publisher a subscriber *nesdílejí* PHP třídu eventu; subscriber má vlastní integration event DTO. Bez tohoto pravidla po rozdělení monolithu vznikne sdílená library = distributed monolith.
 - **Migrace přes Strangler Fig, ne big-bang** – postupně, jeden BC v čase, s fasádou a obdobím dual-write. Big-bang rewrite zpravidla selže.
@@ -893,8 +1014,13 @@ Stručně: nezačínejte microservices. Začněte modular monolithem s explicitn
 - [Sam Newman – *Building Microservices, 2nd ed.* (O'Reilly, 2021)](https://samnewman.io/books/building_microservices_2nd_edition/). Kanonická kniha o microservices. Kapitoly 1–2 pro hranice services, kapitola 3 pro monolith-first strategii i pro migraci, kapitoly 4–6 pro integraci.
 - [Chris Richardson – *Microservices Patterns* (Manning, 2018)](https://microservices.io/book). Praktická kniha plná konkrétních patternů. Kapitola 2 (decomposition by business capability), kapitola 3 (interprocess communication), kapitola 4 (sagas), kapitola 13 (refaktoring monolithu).
 - [Vaughn Vernon – *Implementing Domain-Driven Design* (Addison-Wesley, 2013)](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577). Kapitola 2 pro Bounded Context jako jazykovou hranici, kapitola 3 pro Context Maps, kapitola 8 pro Domain Events napříč BC.
+- [James Lewis & Martin Fowler – *Microservices* (2014)](https://martinfowler.com/articles/microservices.html). Text, který pojem ustavil. Devět charakteristik architektury a formulace o „přirozené korelaci“ mezi hranicí služby a hranicí kontextu, ze které vznikl slogan rozebíraný v sekci 19.01.
 - [Martin Fowler – *MonolithFirst* (2015)](https://martinfowler.com/bliki/MonolithFirst.html). Krátký esej, který formuloval doporučení nezačínat na zelené louce s microservices.
-- [Martin Fowler – *Strangler Fig Application* (2004)](https://martinfowler.com/bliki/StranglerFigApplication.html). Originální popis migrační strategie použitelný pro každý legacy systém.
+- [Stefan Tilkov – *Don't start with a monolith* (2015)](https://martinfowler.com/articles/dont-start-monolith.html). Protipozice publikovaná na Fowlerově vlastním webu šest dní po *MonolithFirst*. Čtěte obojí, ne jen jedno.
+- [Zhamak Dehghani – *How to break a Monolith into Microservices* (2018)](https://martinfowler.com/articles/break-monolith-into-microservices.html). Heslo „macro first, then micro“ a nejčastější chyba migrace: postavit novou službu a nezrušit původní cestu v monolitu.
+- [Martin Fowler – *What do you mean by „Event-Driven“?* (2017)](https://martinfowler.com/articles/201701-event-driven.html). Event notification, event-carried state transfer, event sourcing a CQRS jako čtyři různé věci pod jedním názvem.
+- [Werner Vogels – *Monoliths are not dinosaurs* (2023)](https://www.allthingsdistributed.com/2023/05/monoliths-are-not-dinosaurs.html). Rámec k případu Prime Video: architektura se reviduje, když se změní zátěžový profil.
+- [Martin Fowler – *Strangler Fig Application* (2004, přejmenováno 2019)](https://martinfowler.com/bliki/StranglerFigApplication.html). Originální popis migrační strategie použitelný pro každý legacy systém. Současná verze textu přidává *transitional architecture* – dočasné lešení, které je po migraci nutné zbourat.
 - [Matthew Skelton & Manuel Pais – *Team Topologies* (IT Revolution, 2019)](https://www.amazon.com/Team-Topologies-Organizing-Business-Technology/dp/1942788819). Stream-aligned teams, enabling teams, complicated subsystem teams, platform teams. Klíč k tomu, aby microservices měly smysl organizačně.
 - [Martin Fowler – *Microservice Trade-Offs* (2015)](https://martinfowler.com/articles/microservice-trade-offs.html). Co získáte a co ztrácíte.
 
@@ -910,5 +1036,5 @@ Stručně: nezačínejte microservices. Začněte modular monolithem s explicitn
 - question: GraphQL Federation jako náhrada microservices integrace?
   answer: 'GraphQL Federation umožňuje, aby více services vystavilo svou část schématu a aby gateway (Apollo Router) je sloučila do jednoho schema z pohledu klienta. Pro <em>read</em> operace přes microservices odstíní klienta od fyzického rozdělení. Pro <em>write</em> operace federation neřeší distribuované transakce; pořád potřebujete <a href="/sagy-a-process-managery">ságu</a>. Doporučení: federation jako read fasáda, nikoli jako náhrada eventem řízené architektury.'
 - question: Které service vlastní data o customerovi napříč BC?
-  answer: 'Žádná „centrální“ Customer service. Každý Bounded Context má vlastní pohled na customer, který odpovídá jeho jazyku a kontextu – Ordering vidí <code>Customer</code> jako adresu pro doručení a platební preferenci, Billing jako fakturačního partnera s VAT IDs, Support jako entitu s historií ticketů. Stejné <code>customerId</code>, různé modely. Tomu se říká <em>polysemic concept</em> v Context Mappingu. Pokud se rozhodnete jeden BC označit za „source of truth“ pro identitu zákazníka, ostatní BC od něj přebírají jen <code>customerId</code> a vlastní atributy si modelují samy. Detail v <a href="/context-mapping">Context Mappingu</a>.'
+  answer: 'Žádná „centrální“ Customer service. Každý Bounded Context má vlastní pohled na customer, který odpovídá jeho jazyku a kontextu – Ordering vidí <code>Customer</code> jako adresu pro doručení a platební preferenci, Billing jako fakturačního partnera s VAT IDs, Support jako entitu s historií ticketů. Stejné <code>customerId</code>, různé modely. Martin Fowler pro tuto situaci v bliki <em>BoundedContext</em> (2014) používá označení <em>polysemic concept</em> – jeden pojem s odlišným významem v každém kontextu a s explicitním mapováním mezi nimi. Pokud se rozhodnete jeden BC označit za „source of truth“ pro identitu zákazníka, ostatní BC od něj přebírají jen <code>customerId</code> a vlastní atributy si modelují samy. Detail v <a href="/context-mapping">Context Mappingu</a>.'
 :::
