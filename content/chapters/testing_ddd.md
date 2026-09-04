@@ -14,7 +14,7 @@ schema_headline: "Testování DDD kódu v Symfony"
 chapter_number: "17"
 category: Praxe
 deck: "Testování Domain-Driven Design kódu v Symfony v praxi. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac."
-reading_time: 30
+reading_time: 40
 difficulty: 3
 github_examples: Chapter08_Testing
 ---
@@ -23,9 +23,10 @@ github_examples: Chapter08_Testing
 
 Doménová vrstva v DDD nezávisí na frameworku ani na databázi, takže ji lze testovat přímo z PHPUnitu bez
 bootstrappingu Symfony kernelu. To je hlavní praktický rozdíl proti tradičním vrstveným architekturám,
-kde jsou unit testy svázané s kontejnerem a kde běh tisíce testů trvá minuty. V DDD běží stejný počet testů
-v sekundách. Stavební kameny doménové vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje
-kapitola [Základní koncepty DDD](/zakladni-koncepty).
+kde unit testy potřebují kontejner a každý z nich zaplatí bootstrap. Bez kernelu je jeden test řádově
+rychlejší a celou doménovou sadu má smysl spouštět po každé změně, ne jen v CI. Stavební kameny doménové
+vrstvy – entity, hodnotové objekty, agregáty, doménové události – popisuje kapitola
+[Základní koncepty DDD](/zakladni-koncepty).
 
 :::diagram{fig="17.1-A" title="Testovací pyramida pro DDD aplikaci – poměr a obsah jednotlivých vrstev" src="images/diagrams/18_testing_ddd/test_pyramid.svg"}
 :::
@@ -59,6 +60,22 @@ rozděluje testovací sadu do tří vrstev. Liší se rychlostí, mírou izolace
   Cíl: ověřit integraci všech vrstev v hlavních scénářích.
 :::
 
+### Poměr vrstev není konstanta
+
+Pyramida říká, že pomalých testů má být méně než rychlých. V jakém poměru, neříká. Fowler k ní proto
+staví protipól **ice-cream cone**: sadu, ve které převažují pomalé testy přes UI. Rozpadá se ze tří
+důvodů – build trvá dlouho, drobná změna systému rozbije mnoho testů naráz a headless běh v pipeline
+je problematický [[2]](https://martinfowler.com/bliki/TestPyramid.html). Ham Vocke jde ještě dál
+a Cohnovo pojmenování vrstev označuje za zjednodušující; místo poměru se ptá, kolik integračních
+bodů jeden test skutečně ověřuje [[3]](https://martinfowler.com/articles/practical-test-pyramid.html).
+
+Pro DDD projekt z toho plyne vodítko: těžiště sady kopíruje tloušťku doménové logiky. Bounded context
+s bohatým modelem unese širokou základnu unit testů. Kontext, který jen překládá HTTP požadavky
+na dotazy do databáze, takovou základnu nemá a jeho záruku nesou integrační testy. Kent C. Dodds na téže
+úvaze staví alternativu **Testing Trophy** s největší investicí do integrační vrstvy
+[[4]](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Formulovaná je
+pro JavaScript, ale otázku klade dobře: kolik logiky vlastně testujete v izolaci?
+
 :::callout{type="note"}
 ### Testovací strategie – co testovat na každé vrstvě:
 
@@ -73,6 +90,13 @@ rozděluje testovací sadu do tří vrstev. Liší se rychlostí, mírou izolace
 Unit testy doménové vrstvy tvoří základ testovací sady DDD aplikace. Pokrývají největší podíl kódu, běží
 v řádu milisekund a nepotřebují nic jiného než PHPUnit a samotné doménové třídy. Žádný bootstrap Symfony
 kernelu, žádná databáze, žádné fixtures.
+
+Ukázky v této kapitole cílí na PHPUnit 13 a PHP 8.4. Na verzi tentokrát záleží víc než obvykle. PHPUnit 12
+odstranil podporu metadat v doc-komentářích, takže `@dataProvider`, `@covers`, `@test` ani `@group` už
+nejsou pokyny pro framework – zůstávají obyčejným komentářem. Metadata se zapisují atributy z namespace
+`PHPUnit\Framework\Attributes`: `#[DataProvider]`, `#[TestWith]`, `#[CoversClass]`, `#[Group]`, `#[Test]`
+[[5]](https://docs.phpunit.de/en/12.4/attributes.html). Test přenesený z návodu psaného pro PHPUnit 9
+skončí chybou o chybějícím argumentu metody, ne tichou změnou chování.
 
 ### Testování Value Objects
 
@@ -90,6 +114,7 @@ declare(strict_types=1);
 
 namespace Tests\UserManagement\Domain\ValueObject;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use App\UserManagement\Domain\ValueObject\Email;
 
@@ -110,18 +135,25 @@ final class EmailTest extends TestCase
         $this->assertSame('jan.novak@example.com', $email->value);
     }
 
-    public function testThrowsExceptionForInvalidFormat(): void
+    #[DataProvider('invalidInputs')]
+    public function testThrowsExceptionForInvalidInput(string $input): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        new Email('not-an-email');
+        new Email($input);
     }
 
-    public function testThrowsExceptionForEmptyString(): void
+    /**
+     * Data provider musí být od PHPUnit 11 statický a veřejný.
+     *
+     * @return iterable<string, array{string}>
+     */
+    public static function invalidInputs(): iterable
     {
-        $this->expectException(\InvalidArgumentException::class);
-
-        new Email('');
+        yield 'bez zavináče'    => ['not-an-email'];
+        yield 'prázdný řetězec' => [''];
+        yield 'chybí doména'    => ['jan@'];
+        yield 'mezera uvnitř'   => ['jan novak@example.com'];
     }
 
     public function testEqualityBySameValue(): void
@@ -153,6 +185,11 @@ final class EmailTest extends TestCase
 }
 :::
 :::
+
+Pojmenované klíče v data provideru se objeví ve výstupu PHPUnitu, takže spadlý případ je vidět
+bez čtení testu: `EmailTest::testThrowsExceptionForInvalidInput with data set „chybí doména“`.
+Pro jeden nebo dva vstupy se vyplatí atribut `#[TestWith([''])]` přímo nad metodou; samostatný
+provider dává smysl od tří případů výš.
 
 ### Testování entit
 
@@ -465,12 +502,105 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 :::
 :::
 
+### Given-when-then nad event streamem
+
+U event-sourced agregátu je stav odvozený z historie, takže se test píše jinak. Vstupem není
+konstruktor, ale stream událostí: **given** je historie, **when** volání doménové metody a **then**
+události nahrané právě touto operací. Bázovou třídu `EventSourcedAggregate` s metodami `recordEvent()`
+a `reconstituteFromEvents()` definuje kapitola
+[Event Sourcing](/event-sourcing#es-aggregate-base-heading).
+
+Rekonstrukce z historie stav aplikuje, ale nic nenahrává – `releaseEvents()` po ní vrátí prázdné pole.
+Assertion se tedy vztahuje výhradně k tomu, co přidala testovaná operace.
+
+:::callout{type="pattern"}
+### Příklad: Given-when-then test event-sourced agregátu
+
+:::code{language="php" filename="Tests/Ordering/Domain/OrderEventSourcingTest.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Ordering\Domain;
+
+use PHPUnit\Framework\TestCase;
+use App\Ordering\Domain\Order;
+use App\Ordering\Domain\OrderItem;
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderCreated;
+use App\Ordering\Domain\Event\OrderItemAdded;
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Shared\Domain\Event\DomainEvent;
+
+final class OrderEventSourcingTest extends TestCase
+{
+    public function testConfirmingOrderWithItemRecordsOrderConfirmed(): void
+    {
+        // given
+        $order = $this->given(
+            OrderCreated::create('order-1', 'customer-1'),
+            OrderItemAdded::create('order-1', new OrderItem(
+                productId: 'product-1',
+                quantity: 2,
+                unitPriceInCents: 49900,
+            )),
+        );
+
+        // when
+        $order->confirm();
+
+        // then
+        $this->assertRecorded([OrderConfirmed::class], $order);
+        $this->assertSame(3, $order->version()); // dvě historické události + jedna nová
+    }
+
+    public function testConfirmingEmptyOrderRecordsNothing(): void
+    {
+        $order = $this->given(OrderCreated::create('order-1', 'customer-1'));
+
+        try {
+            $order->confirm();
+            $this->fail('Očekávána EmptyOrderException.');
+        } catch (EmptyOrderException) {
+            // očekáváno
+        }
+
+        $this->assertRecorded([], $order);
+    }
+
+    /** given: historie streamu, ze které se agregát rekonstruuje. */
+    private function given(DomainEvent ...$history): Order
+    {
+        return Order::reconstituteFromEvents($history);
+    }
+
+    /**
+     * then: typy událostí nahraných až testovanou operací.
+     *
+     * @param array<class-string> $expected
+     */
+    private function assertRecorded(array $expected, Order $order): void
+    {
+        $actual = array_map(fn (DomainEvent $event) => $event::class, $order->releaseEvents());
+
+        $this->assertSame($expected, $actual);
+    }
+}
+:::
+:::
+
+Druhý test hlídá pravidlo, které stavově ukládaný agregát nemá jak porušit: neúspěšná operace nesmí
+nechat v bufferu událost. Kdyby `confirm()` nahrál `OrderConfirmed` ještě před kontrolou invariantu,
+repozitář by událost při nejbližším uložení zapsal do streamu a historie by tvrdila něco, co se nestalo.
+
 ## 17.04 Test doubles a InMemory repozitáře {#test-doubles}
 
-Test double je obecný název pro náhradu reálné závislosti v testu. Meszarosova taxonomie
-z *xUnit Test Patterns* rozlišuje pět typů: dummy, stub, spy, mock a fake. V praxi s PHPUnit
-se pracuje hlavně se čtyřmi z nich (stub, mock, fake, spy) a v DDD má každý jiný dopad: vede
-k jinému stylu testu a k jiné odolnosti vůči refaktoringu.
+Test double je obecný název pro náhradu reálné závislosti v testu. Taxonomii pěti typů – dummy, stub,
+spy, mock a fake – zavedl Gerard Meszaros v knize *xUnit Test Patterns: Refactoring Test Code*
+(Addison-Wesley, 2007) [[6]](http://xunitpatterns.com/); do širšího povědomí ji dostal Fowler článkem
+*Mocks Aren't Stubs* [[7]](https://martinfowler.com/articles/mocksArentStubs.html). V praxi s PHPUnit se pracuje
+hlavně se čtyřmi z nich (stub, mock, fake, spy) a v DDD má každý jiný dopad: vede k jinému stylu testu
+a k jiné odolnosti vůči refaktoringu.
 
 :::callout{type="note"}
 ### Typy test doubles a jejich použití v DDD:
@@ -489,6 +619,12 @@ k jinému stylu testu a k jiné odolnosti vůči refaktoringu.
 - Při změně signatury rozhraní IDE a statická analýza okamžitě upozorní, na rozdíl od string-based konfigurace mocků.
 - Mocky testují implementační detail (které metody jsou volány), Fake testuje chování (co se stane s daty).
 :::
+
+Za tímto doporučením stojí Fowlerovo rozlišení dvou způsobů ověření. *State verification* kontroluje
+stav systému po akci, *behavior verification* kontroluje, že proběhla očekávaná volání spolupracovníků.
+Z pěti typů doubles trvá na behavior verification jedině mock – ostatní se s kontrolou stavu spokojí.
+Volba fake repozitáře tedy není jen otázkou pohodlí; je to přihlášení ke stylu, kterému Fowler říká
+classical TDD, tedy reálné objekty všude, kde to jde, a doubles jen na hranicích systému.
 
 :::callout{type="pattern"}
 ### Příklad: InMemoryUserRepository implementace
@@ -645,11 +781,143 @@ i když se chování systému nezměnilo. Pro repozitáře se osvědčily InMemo
 místo jen tam, kde se ověřují vedlejší efekty (odeslání e-mailu, volání externího API).
 :::
 
+### Testovací data: builder místo opakovaného konstruktoru
+
+Testy v předchozích ukázkách opakují v každé metodě totéž volání
+`User::register($id, 'Jan Novák', $email, HashedPassword::fromPlainText('secret123'))`. Pro test
+je z něj podstatný jeden argument, zbytek je tam proto, že ho vyžaduje konstruktor. Až přibude pátý
+parametr, mění se všechny testy naráz.
+
+Odpovědí je **Test Data Builder** od Steva Freemana a Nata Pryce z knihy *Growing Object-Oriented
+Software, Guided by Tests* (Addison-Wesley, 2009)
+[[8]](http://www.growing-object-oriented-software.com/). Builder má pole pro každý parametr
+konstruktoru, inicializované bezpečnou hodnotou, řetězitelné metody pro přepsání těchto polí
+a metodu `build()`, která z nich složí cílový objekt. Volitelně přidá statickou tovární metodu,
+aby bylo v testu na první pohled zřejmé, co se staví – autoři ji ukazují právě na `OrderBuilder`
+s metodou `anOrder()`. Přínos shrnují do tří bodů: builder obalí syntaktický šum kolem vytváření
+objektů, udrží výchozí případ jednoduchý a zvláštní případ jen o málo složitější, a odstíní testy
+od změny struktury objektu – po přidání parametru se mění jediné místo.
+
+:::callout{type="pattern"}
+### Příklad: Test Data Builder pro Order agregát
+
+:::code{language="php" filename="Tests/OrderManagement/Domain/Builder/OrderBuilder.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\OrderManagement\Domain\Builder;
+
+use App\OrderManagement\Domain\Model\Order;
+use App\OrderManagement\Domain\ValueObject\Currency;
+use App\OrderManagement\Domain\ValueObject\CustomerId;
+use App\OrderManagement\Domain\ValueObject\Money;
+use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\OrderManagement\Domain\ValueObject\ProductId;
+
+final class OrderBuilder
+{
+    private OrderId $orderId;
+    private CustomerId $customerId;
+
+    /** @var list<array{ProductId, int, Money}> */
+    private array $items = [];
+
+    private bool $confirmed = false;
+
+    private function __construct()
+    {
+        // Bezpečné výchozí hodnoty - test nastavuje jen to, na čem mu skutečně záleží
+        $this->orderId    = OrderId::generate();
+        $this->customerId = CustomerId::generate();
+    }
+
+    public static function anOrder(): self
+    {
+        return new self();
+    }
+
+    public function forCustomer(CustomerId $customerId): self
+    {
+        $this->customerId = $customerId;
+
+        return $this;
+    }
+
+    public function withItem(int $quantity = 1, ?Money $unitPrice = null): self
+    {
+        $this->items[] = [
+            ProductId::generate(),
+            $quantity,
+            $unitPrice ?? new Money(49900, Currency::CZK),
+        ];
+
+        return $this;
+    }
+
+    public function confirmed(): self
+    {
+        $this->confirmed = true;
+
+        return $this;
+    }
+
+    public function build(): Order
+    {
+        $order = Order::place($this->orderId, $this->customerId);
+
+        // Objednávka bez položek nejde potvrdit, výchozí položka je proto bezpečná hodnota
+        $items = $this->items !== []
+            ? $this->items
+            : [[ProductId::generate(), 1, new Money(49900, Currency::CZK)]];
+
+        foreach ($items as [$productId, $quantity, $unitPrice]) {
+            $order->addItem($productId, $quantity, $unitPrice);
+        }
+
+        if ($this->confirmed) {
+            $order->confirm();
+        }
+
+        return $order;
+    }
+}
+
+// --- Použití v testu ---
+
+$order = OrderBuilder::anOrder()
+    ->forCustomer($customerId)
+    ->withItem(quantity: 3, unitPrice: new Money(25000, Currency::CZK))
+    ->confirmed()
+    ->build();
+
+$order->releaseEvents(); // stavba agregátu vydala události, test si buffer vyprázdní
+:::
+:::
+
+Builder je mutabilní, takže každý test si volá `anOrder()` znovu; sdílená instance mezi testy je
+zdrojem těžko dohledatelných závislostí na pořadí.
+
+Starší příbuzný vzor je **Object Mother** (Peter Schuh, Stephanie Punke, *ObjectMother: Easing Test
+Object Creation In XP*, XP Universe, 2001): pojmenovaná tovární metoda vrátí hotovou fixturu,
+například `OrderMother::confirmedOrder()`. Čte se dobře, dokud variant nepřibývá. Fowler mu vyčítá
+dvě věci [[9]](https://martinfowler.com/bliki/ObjectMother.html): mnoho testů se váže na přesná data
+jedné fixtury a po změně tříd je potřeba migrovat všechny mothers najednou. Builder tento tlak
+rozpouští tím, že variantu skládá volající.
+
+Fixtury, které mají skončit v databázi, řeší v Symfony `zenstruck/foundry`
+[[10]](https://github.com/zenstruck/foundry). Zápis `OrderFactory::new()->confirmed()->create()`
+je týž vzor obalený integrací na Doctrine. Doménové unit testy persistenci nepotřebují a vystačí
+si s builderem; factory patří do integračních a funkčních testů z následujících dvou sekcí.
+
 ## 17.05 Integrační testy s Doctrine {#integracni-testy}
 
 Integrační testy odpovídají na otázku, kterou unit testy pokrýt nemohou: zda Doctrine mapování, dotazy
-repozitářů a transakce skutečně dělají to, co jejich rozhraní slibuje. Spouští se proti reálné databázi –
-typicky SQLite in-memory pro rychlost, nebo testovací instanci PostgreSQL/MySQL pro shodu s produkcí.
+repozitářů a transakce skutečně dělají to, co jejich rozhraní slibuje. Výchozí volbou je stejný
+databázový engine jako v produkci, spuštěný v kontejneru. SQLite in-memory je rychlejší, ale liší se
+typovým systémem, chováním unikátních constraintů i transakční sémantikou – tedy přesně v těch věcech,
+které má integrační test ověřit. Zůstává vědomou zkratkou pro rychlou zpětnou vazbu při lokálním vývoji,
+ne konfigurací, na které stojí CI.
 
 Obě implementace přitom plní tutéž smlouvu rozhraní: `findById(UserId $id): ?User` vrací při
 nenalezení `null`, stejně jako InMemory varianta ze [sekce o test doubles](#test-doubles).
@@ -670,9 +938,34 @@ projekt si vybere jednu variantu a drží ji ve všech implementacích i testech
 
 Nejpřímočařejší způsob, jak zajistit izolaci integračních testů, je zabalit každý test do databázové transakce
 a po jeho dokončení provést rollback. Toto chování dodá bundle
-`dama/doctrine-test-bundle`: zaregistruje PHPUnit extension a obalí každý test transakcí pomocí
-dekorátoru nad `Connection`, bez zásahu do testovacího kódu. Bez transakční izolace by každý test
-zanechával data v databázi a testy by se navzájem ovlivňovaly.
+`dama/doctrine-test-bundle` [[11]](https://github.com/dmaicher/doctrine-test-bundle): zaregistruje
+PHPUnit extension a obalí každý test transakcí pomocí dekorátoru nad `Connection`, bez zásahu
+do testovacího kódu. Bez transakční izolace by každý test zanechával data v databázi a testy by se
+navzájem ovlivňovaly.
+:::
+
+Bundle se nezapíná v konfiguraci Symfony, ale v konfiguraci PHPUnitu – jako bootstrap extension:
+
+:::callout{type="pattern"}
+### Příklad: Registrace DAMA extension v phpunit.dist.xml
+
+:::code{language="xml" filename="phpunit.dist.xml"}
+<extensions>
+    <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
+</extensions>
+:::
+:::
+
+:::callout{type="warn"}
+### Kde transakční izolace přestává fungovat
+
+Bundle drží jedno statické DBAL spojení po celý běh procesu a po každém testu provede rollback.
+Z toho plyne jeho jediné vážné omezení: **DDL dotazy** (`ALTER TABLE`, `DROP TABLE`) transakci
+implicitně commitnou, takže následný rollback selže hláškou o neexistujícím savepointu. Testy,
+které mění schéma, patří mimo tuto sadu – schéma se připraví před během testů, ne v nich.
+
+Volbu `use_savepoints` bundle vyžaduje jen na DBAL nižším než 4. Kniha cílí na Doctrine ORM 3
+s DBAL 4, kde se nenastavuje.
 :::
 
 :::callout{type="pattern"}
@@ -783,6 +1076,12 @@ spolu skutečně mluví správně.
 `Symfony\Bundle\FrameworkBundle\Test\WebTestCase` poskytuje metodu `createClient()`,
 která vrátí HTTP klienta simulujícího prohlížeč. Klient odesílá requesty GET, POST, PUT, PATCH a DELETE.
 Response obsahuje status kód, tělo a hlavičky – vše přímo assertovatelné.
+
+Vedle obecného `assertResponseStatusCodeSame()` nabízí framework desítky pojmenovaných assertů
+(`assertResponseIsSuccessful()`, `assertResponseIsUnprocessable()`, `assertResponseRedirects()`,
+asserty nad odeslanými e-maily a zprávami Messengeru). Jejich úplný seznam je v dokumentaci
+Symfony [[12]](https://symfony.com/doc/current/testing.html). Pojmenovaný assert navíc vypíše
+při selhání celou odpověď, takže se ladí bez dodatečného `dump()`.
 :::
 
 :::callout{type="pattern"}
@@ -842,7 +1141,7 @@ final class RegistrationControllerTest extends WebTestCase
             ])
         );
 
-        $this->assertResponseStatusCodeSame(422);
+        $this->assertResponseIsUnprocessable();
 
         $responseData = json_decode($client->getResponse()->getContent(), true);
 
@@ -918,6 +1217,11 @@ framework:
 :::
 :::
 
+Transport vystavuje `getSent()`, `getAcknowledged()` a `reset()`. O úklid se přitom starat nemusíte:
+v testech dědících z `KernelTestCase` nebo `WebTestCase` se všechny in-memory transporty po každém
+testu resetují samy [[13]](https://symfony.com/doc/current/messenger.html). Volba `serialize: true`
+navíc zprávy protáhne serializační vrstvou, takže se otestuje i to, co se v produkci posílá po drátě.
+
 Funkční test pak ověří, že endpoint zprávu skutečně odeslal – aniž by čekal na workera:
 
 :::callout{type="pattern"}
@@ -949,6 +1253,27 @@ public function testRegistrationDispatchesWelcomeEmail(): void
 Holé assertions nad transportem fungují, ale v každém testu se opakují. Balíček
 **zenstruck/messenger-test** je zabalí do čitelného API: trait `InteractsWithMessenger` zpřístupní
 frontu transportu a metoda `process()` zpracuje zařazené zprávy přímo v testu, bez spouštění workera.
+
+Balíček přináší vlastní transport a trvá na svém DSN. Nad `in-memory://` trait nefunguje, konfigurace
+z předchozí ukázky se proto pro tento styl testů přepíše na `test://`
+[[14]](https://github.com/zenstruck/messenger-test):
+
+:::callout{type="pattern"}
+### Příklad: Transport pro zenstruck/messenger-test
+
+:::code{language="yaml" filename="config/packages/test/messenger.yaml"}
+framework:
+    messenger:
+        transports:
+            # DSN test:// vyžaduje trait InteractsWithMessenger; volitelné parametry
+            # se předávají v query stringu, například test://?catch_exceptions=false
+            async: 'test://'
+:::
+:::
+
+Obě konfigurace jsou alternativy, ne vrstvy: transport má v daném prostředí jedno DSN. Sada, která
+zůstane u `in-memory://`, si vystačí s `getSent()`; sada postavená na zenstruck jde na `test://`
+a assertions píše přes trait.
 
 :::callout{type="pattern"}
 ### Příklad: Test celého asynchronního toku se zenstruck/messenger-test
@@ -1050,79 +1375,74 @@ spadlý test, ne až v review.
 
 ### Deptrac
 
-**Deptrac** je nástroj od QOSSMIC (dříve sensiolabs-de) pro statickou analýzu závislostí v PHP projektech.
-Definujete vrstvy (layers) a povolená pravidla závislostí (ruleset). Deptrac analyzuje závislosti
-v kódu a nahlásí porušení. Spouští se v CI jako součást statické analýzy.
+**Deptrac** analyzuje závislosti staticky. Popíšete vrstvy (layers) a povolená pravidla mezi nimi
+(ruleset), nástroj projde kód a vypíše porušení. V CI běží jako samostatný krok vedle statické analýzy.
+
+Historie balíčku stojí za jednu větu, protože podle ní čtenář hledá dokumentaci. Projekt vznikl
+v sensiolabs-de, pokračoval pod hlavičkou QOSSMIC a dnes má vlastní organizaci. Balíček
+`qossmic/deptrac` je od listopadu 2024 na Packagistu označený jako abandoned a nahradil ho
+`deptrac/deptrac` [[15]](https://github.com/deptrac/deptrac). Řada 4.x drží konfiguraci ve výchozím
+souboru `deptrac.php` s typovaným API; YAML zůstává podporovaný, ale `vendor/bin/deptrac init`
+generuje PHP.
 
 :::callout{type="pattern"}
-### Příklad: deptrac.yaml konfigurace pro DDD projekt
+### Příklad: deptrac.php konfigurace pro DDD projekt
 
-:::code{language="yaml" filename="deptrac.yaml"}
-deptrac:
-  paths:
-    - ./src
+:::code{language="php" filename="deptrac.php"}
+<?php
 
-  layers:
-    - name: Domain
-      collectors:
-        - type: directory
-          value: src/.*/Domain/.*
+declare(strict_types=1);
 
-    - name: Application
-      collectors:
-        - type: directory
-          value: src/.*/Application/.*
-        # use-case slice mimo Application/ - handlery typu
-        # App\UserManagement\Registration\Command\RegisterUserHandler
-        - type: directory
-          value: src/.*/Registration/Command/.*
+use Deptrac\Deptrac\Contract\Config\Collector\DirectoryConfig;
+use Deptrac\Deptrac\Contract\Config\DeptracConfig;
+use Deptrac\Deptrac\Contract\Config\Layer;
+use Deptrac\Deptrac\Contract\Config\Ruleset;
 
-    - name: Infrastructure
-      collectors:
-        - type: directory
-          value: src/.*/Infrastructure/.*
-
-    - name: Presentation
-      collectors:
-        - type: directory
-          value: src/.*/Controller/.*
-
-    - name: Shared
-      collectors:
-        - type: directory
-          value: src/Shared/.*
-
-  ruleset:
-    Domain:
-      # Doménová vrstva nesmí záviset na ničem jiném než na Shared
-      - Shared
-
-    Application:
-      # Aplikační vrstva závisí na doméně a sdílených komponentách
-      - Domain
-      - Shared
-
-    Infrastructure:
-      # Infrastruktura implementuje doménová rozhraní - závisí na doméně
-      - Domain
-      - Application
-      - Shared
-
-    Presentation:
-      # Kontrolery závisí na aplikační vrstvě (Commands, Queries)
-      - Application
-      - Shared
-
-    Shared:
-      # Sdílené komponenty nezávisí na ničem projektovém
-      []
-
-  skip_violations:
-    # Dočasné výjimky - měly by být minimalizovány
-    # UserManagement\Domain\Model\User:
-    #   - Symfony\Component\Security\Core\User\UserInterface  # Symfony interface v doméně - anti-vzor
+return static function (DeptracConfig $config): void {
+    $config
+        ->paths('./src')
+        ->baseline('deptrac.baseline.yaml')
+        ->layers(
+            $domain = Layer::withName('Domain')->collectors(
+                DirectoryConfig::create('src/.*/Domain/.*')
+            ),
+            $application = Layer::withName('Application')->collectors(
+                DirectoryConfig::create('src/.*/Application/.*'),
+                // use-case slice mimo Application/ - handlery typu
+                // App\UserManagement\Registration\Command\RegisterUserHandler
+                DirectoryConfig::create('src/.*/Registration/Command/.*')
+            ),
+            $infrastructure = Layer::withName('Infrastructure')->collectors(
+                DirectoryConfig::create('src/.*/Infrastructure/.*')
+            ),
+            $presentation = Layer::withName('Presentation')->collectors(
+                DirectoryConfig::create('src/.*/Controller/.*')
+            ),
+            $shared = Layer::withName('Shared')->collectors(
+                DirectoryConfig::create('src/Shared/.*')
+            ),
+        )
+        ->rulesets(
+            // Doménová vrstva sahá jen na Shared
+            Ruleset::forLayer($domain)->accesses($shared),
+            // Aplikační vrstva stojí na doméně a sdílených komponentách
+            Ruleset::forLayer($application)->accesses($domain, $shared),
+            // Infrastruktura implementuje doménová rozhraní
+            Ruleset::forLayer($infrastructure)->accesses($domain, $application, $shared),
+            // Kontrolery mluví s aplikační vrstvou (commands, queries)
+            Ruleset::forLayer($presentation)->accesses($application, $shared),
+            // Shared nezávisí na ničem projektovém - ruleset bez accesses()
+            Ruleset::forLayer($shared),
+        )
+    ;
+};
 :::
 :::
+
+V novém projektu drží pravidlo od prvního commitu. Do existující kódové báze se dostane jen přes
+**baseline**: `analyse --formatter=baseline` zapíše současná porušení do `deptrac.baseline.yaml`,
+konfigurace ho načte a build zůstane zelený. Nová porušení pak selžou, stará se odbourávají postupně.
+Bez baseline skončí první spuštění stovkou chyb a pravidlo se z CI zase vyhodí.
 
 :::callout{type="pattern"}
 ### Příklad: Spuštění Deptrac v CI
@@ -1131,8 +1451,14 @@ deptrac:
 # Instalace (dev závislost)
 composer require --dev deptrac/deptrac
 
-# Spuštění analýzy
-./vendor/bin/deptrac analyze --config-file=deptrac.yaml
+# Vygenerování šablony konfigurace
+vendor/bin/deptrac init
+
+# Spuštění analýzy nad výchozím deptrac.php
+vendor/bin/deptrac analyse
+
+# Jednorázově při zavádění: zapsat současná porušení do baseline
+vendor/bin/deptrac analyse --formatter=baseline
 
 # Výstup v případě porušení:
 # [ERROR] Found 1 Violation
@@ -1143,9 +1469,10 @@ composer require --dev deptrac/deptrac
 
 ### phparkitect jako alternativa
 
-Pravidla závislostí umí vynutit i **phparkitect** (phparkitect/phparkitect). Na rozdíl od Deptrac
-s YAML konfigurací používá PHP API: pravidla se zapisují do souboru `phparkitect.php` jako typovaný
-kód s podporou IDE. Nástroj má vlastní CLI a nespouští se přes PHPUnit – v CI běží jako samostatný
+Pravidla závislostí umí vynutit i **phparkitect** (phparkitect/phparkitect)
+[[16]](https://github.com/phparkitect/arkitect). Pracuje na jiné úrovni než Deptrac: místo vrstev
+popisuje pravidla nad jednotlivými třídami, jejich namespace a názvy. Zapisují se do souboru
+`phparkitect.php`. Nástroj má vlastní CLI a nespouští se přes PHPUnit – v CI běží jako samostatný
 krok vedle testovací sady. Instalaci a přehled pravidel uvádí kapitola
 [Méně známé vzory](/mene-zname-vzory#mod-phparkitect); plnou konfiguraci pro modular monolith
 ukazuje kapitola [DDD a microservices](/ddd-a-microservices#phparkitect-rules-heading).
@@ -1159,12 +1486,19 @@ composer require --dev phparkitect/phparkitect
 
 # Samostatný krok CI pipeline vedle PHPUnit a Deptrac
 vendor/bin/phparkitect check
+
+# Zavádění do existujícího projektu: zmrazit současná porušení
+vendor/bin/phparkitect generate-baseline   # zapíše phparkitect-baseline.json
+vendor/bin/phparkitect prune-baseline      # odstraní z baseline už opravená porušení
 :::
 :::
 
-Volba mezi oběma nástroji je věcí preferencí týmu. Deptrac popisuje vrstvy deklarativně v YAML
-a hodí se pro plošná pravidla mezi vrstvami; phparkitect dovolí jemnější pravidla nad jednotlivými
-třídami (suffixy názvů, konkrétní namespace). Oba selžou v CI stejně – jako spadlý build.
+Volba mezi oběma nástroji je věcí preferencí týmu. Deptrac popisuje vrstvy a hodí se pro plošná
+pravidla mezi nimi; phparkitect dovolí jemnější pravidla nad jednotlivými třídami (suffixy názvů,
+konkrétní namespace). Oba selžou v CI stejně – jako spadlý build. Projekty, které používají Pest,
+mají třetí možnost: vestavěné `arch()` API zapisuje totéž pravidlo jako
+`arch('domain')->expect('App\Domain')->not->toUse('App\Infrastructure')` a běží rovnou uvnitř
+testovací sady [[17]](https://pestphp.com/docs/arch-testing).
 
 ## 17.09 Code coverage a doporučené postupy {#pokryti-a-best-practices}
 
@@ -1172,14 +1506,17 @@ Code coverage měří, jaké procento řádků kódu se při běhu testů proved
 o kvalitě testů – 100% pokrytí lze dosáhnout testy, které jen volají metody bez assertů. Užitečná
 je ale opačně: tam, kde je pokrytí nízké, leží kód, který nikdo netestuje. Tam stojí za to se podívat.
 
-:::callout{type="pattern"}
-### Doporučené pokrytí pro DDD vrstvy:
+:::callout{type="note"}
+### Pokrytí po vrstvách – co kde testovat:
 
-- **Doménová vrstva (Domain)** – 90–100 %. Zde leží veškerá doménová logika; každý invariant, každá validace a každé doménové pravidlo musí mít test.
-- **Aplikační vrstva (Application)** – 80–90 %: command a query handlery pokryté unit testy s InMemory repozitáři.
-- **Infrastrukturní vrstva (Infrastructure)** – 60–80 %. Repozitáře pokryjte integračními testy; generovaný kód (Doctrine mappings) testovat nemusíte.
+- **Doménová vrstva (Domain)** – testuje se beze zbytku. Leží tu veškerá doménová logika a každý invariant, každá validace i každé pravidlo má mít vlastní test. Nepokrytý řádek v doméně je otázka, ne statistika.
+- **Aplikační vrstva (Application)** – unit testy handlerů s InMemory repozitáři. Nepokryté zůstávají hlavně technické větve: logování, mapování výjimek na HTTP kódy.
+- **Infrastrukturní vrstva (Infrastructure)** – integrační testy tam, kde je vlastní kód. Dotazy repozitářů, konverze typů a klienti externích API test potřebují; vygenerované Doctrine mapování ne.
+- **Prezentační vrstva (Presentation)** – funkční testy hlavního scénáře a nejdůležitějších chybových cest.
 
-Prezentační vrstvě (Presentation) stačí 50–70 % – funkční testy hlavních scénářů kontrolerů.
+Konkrétní cílové procento tato kniha nedoporučuje. Žádný z kanonických zdrojů takové číslo nestanovuje
+a metrika sama o kvalitě testů nevypovídá. Užitečný je trend: propad pokrytí domény mezi dvěma sprinty
+znamená, že do ní něco přibylo bez testu.
 :::
 
 :::callout{type="note"}
@@ -1188,7 +1525,7 @@ Prezentační vrstvě (Presentation) stačí 50–70 % – funkční testy hlavn
 - Testovací třída odpovídá testované třídě: `Email` → `EmailTest`, `RegisterUserHandler` → `RegisterUserHandlerTest`.
 - Testovací metody popisují chování anglicky nebo česky: `testThrowsExceptionForInvalidEmail()`, `testRegistersNewUser()`.
 - Struktura testovacích souborů zrcadlí strukturu produkčního kódu: `src/UserManagement/Domain/` → `tests/UserManagement/Domain/`.
-- Suffix `Test` pro PHPUnit testovací třídy je nutný (PHPUnit třídu bez suffixu nespustí).
+- Testy hledá PHPUnit podle suffixu **souboru**, výchozí hodnota je `Test.php`. Suffix se dá změnit (volbou `--test-suffix` nebo atributem `suffix` u `<directory>` v XML konfiguraci), odchylka od konvence ale nikomu nepomůže.
 :::
 
 :::callout{type="note"}
@@ -1217,30 +1554,103 @@ pokud všechny společně ověřují jeden konzistentní scénář.
 - **Chybějící test pro releaseEvents() po operaci** – Pokud agregát vydává doménové události, každá veřejná operace, která má událost vydat, musí mít test ověřující typ, počet a obsah vydaných událostí.
 :::
 
+### Mutation testing
+
+Coverage říká, které řádky test spustil. Neříká, jestli by si všiml, kdyby se změnily. Na tuto otázku
+odpovídá mutation testing: nástroj zanese do kódu drobné změny (obrátí podmínku, posune mez, smaže
+volání) a spustí testy. Mutace, kterou nikdo nezachytil, ukazuje na řádek, který má pokrytí, ale
+nemá assert. Podíl zachycených mutací je mutation score.
+
+V PHP mutace generuje Infection [[18]](https://infection.github.io/). Nejvíc se vyplatí nad doménovou
+vrstvou: logika je tam hustá, testy rychlé a mutace mají co porušit. Nad infrastrukturou běh trvá
+dlouho a nálezy bývají technické.
+
+:::callout{type="pattern"}
+### Příklad: Spuštění Infection nad doménovou vrstvou
+
+:::code{language="bash" filename="snippet.sh"}
+composer require --dev infection/infection
+
+# Zdrojové adresáře se nastavují v infection.json5, práh se hlídá v CI
+vendor/bin/infection --threads=max --min-msi=80
+:::
+:::
+
+### Konfigurace a spouštění
+
+Tři testovací sady z předchozích sekcí definuje `phpunit.dist.xml`. Od PHPUnit 10 se soubor jmenuje
+takto, ne `phpunit.xml.dist`. Ve stejném souboru se registruje i extension pro transakční izolaci
+z [sekce o integračních testech](#integracni-testy):
+
+:::callout{type="pattern"}
+### Příklad: phpunit.dist.xml se třemi testsuitami
+
+:::code{language="xml" filename="phpunit.dist.xml"}
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         failOnWarning="true"
+         failOnDeprecation="true"
+>
+    <php>
+        <server name="APP_ENV" value="test" force="true"/>
+        <server name="KERNEL_CLASS" value="App\Kernel"/>
+    </php>
+
+    <testsuites>
+        <!-- Doména běží bez kernelu - tuto sadu lze spouštět po každé změně -->
+        <testsuite name="Domain">
+            <directory>tests/*/Domain</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/*/Infrastructure</directory>
+        </testsuite>
+        <testsuite name="Functional">
+            <directory>tests/*/Functional</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+
+    <!-- Transakční izolace integračních a funkčních testů -->
+    <extensions>
+        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
+    </extensions>
+</phpunit>
+:::
+:::
+
 :::callout{type="pattern"}
 ### Příklad: Spuštění testových sad pro DDD projekt
 
 :::code{language="bash" filename="snippet.sh"}
 # Spuštění unit testů doménové vrstvy (rychlé, bez kernelu)
-./vendor/bin/phpunit --testsuite=Domain
+vendor/bin/phpunit --testsuite=Domain
 
 # Spuštění integračních testů (vyžaduje databázi)
-./vendor/bin/phpunit --testsuite=Integration
+vendor/bin/phpunit --testsuite=Integration
 
 # Spuštění funkčních testů
-./vendor/bin/phpunit --testsuite=Functional
+vendor/bin/phpunit --testsuite=Functional
 
 # Generování HTML coverage reportu (vyžaduje Xdebug nebo PCOV)
-XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html=coverage/
 
 # Spuštění architektonických testů s Deptrac
-./vendor/bin/deptrac analyze
+vendor/bin/deptrac analyse
 :::
 :::
 
 Testovací pyramida v DDD funguje díky tomu, že doménová vrstva je čistý PHP bez závislostí na frameworku.
-Tisíce unit testů proto běží v sekundách. Integrační a funkční testy doplňují pokrytí tam, kde vstupuje
-infrastruktura, a architektonické testy hlídají, aby tato izolace nezmizela při dalším refaktoringu.
+Doménová sada se proto dá spustit po každé změně, ne jen na konci dne. Integrační a funkční testy doplňují
+pokrytí tam, kde vstupuje infrastruktura, a architektonické testy hlídají, aby izolace domény nezmizela
+při dalším refaktoringu.
 
 :::faq{}
 - question: Jak testovat agregát – unit test s mock repozitářem, nebo integrační test?
@@ -1252,5 +1662,5 @@ infrastruktura, a architektonické testy hlídají, aby tato izolace nezmizela p
 - question: Mají se testovat privátní invarianty agregátu, nebo jen veřejné rozhraní?
   answer: 'Testuje se pouze veřejné rozhraní – chování agregátu přes metody, které se reálně volají z aplikační vrstvy. Privátní invarianty jsou detailem implementace a jejich přímé testování sváže test s konkrétní strukturou kódu, což brání refaktoringu. Dobře navržený test ověřuje, že po sérii veřejných volání je agregát ve validním stavu, vyvolal očekávané události a při porušení pravidla vyhodil konkrétní doménovou výjimku. Detailní rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
 - question: Co jsou architektonické testy a co kontrolují?
-  answer: 'Architektonické testy automaticky ověřují, že kód dodržuje zvolená pravidla struktury – například že doménová vrstva nezávisí na Doctrine, že agregáty nevolají repozitáře přímo, nebo že kontrolery nekomunikují s infrastrukturou. V Symfony se používá nástroj Deptrac, který pravidla popisuje deklarativně v YAML a spouští se jako další testovací sada. Porušení pravidla se projeví jako spadlý test, nikoli až při code review. Rozbor nástrojů a pravidel v <a href="#architektonicke-testy">sekci Architektonické testy</a>.'
+  answer: 'Architektonické testy automaticky ověřují, že kód dodržuje zvolená pravidla struktury – například že doménová vrstva nezávisí na Doctrine, že agregáty nevolají repozitáře přímo, nebo že kontrolery nekomunikují s infrastrukturou. V Symfony se používá nástroj Deptrac (balíček <code>deptrac/deptrac</code>), který pravidla popisuje deklarativně v souboru <code>deptrac.php</code> a spouští se v CI jako samostatný krok vedle testovací sady. Porušení pravidla se projeví jako spadlý build, nikoli až při code review. Rozbor nástrojů a pravidel v <a href="#architektonicke-testy">sekci Architektonické testy</a>.'
 :::
