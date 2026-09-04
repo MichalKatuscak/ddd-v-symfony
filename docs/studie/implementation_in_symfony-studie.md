@@ -398,6 +398,15 @@ Dvě idiomatické zkratky, které Symfony přineslo po vzniku kapitoly. `dvě od
 - **Chování `EntityManager::find()` s VO jako identifikátorem u custom typu.** Ověřeno jen z kódu
   `ReadonlyAccessor` a dokumentace typů, ne testem. Doporučuje se ověřit lokálně, než se sjednotí
   příklady mezi kapitolami 07 a 10 (nález G11).
-- **Kompatibilita `#[ORM\Embedded]` s `readonly` vlastností** (`:244` – `private readonly HashedPassword`).
-  Dokumentace embeddables to neřeší; `ReadonlyAccessor` naznačuje, že jednorázová hydratace projde,
-  ale kombinace s embeddable nebyla ověřena.
+- **`#[ORM\Embedded]` s `readonly` (`:244`) – DOVĚŘENO 2026-09-04. Spadá pod stejné riziko jako
+  `readonly` u `#[ORM\Id]`.** Ukázka mapuje `#[ORM\Embedded(class: HashedPassword::class)]
+  private readonly HashedPassword $hashedPassword;` a o pár řádků výš `public readonly UserId $id`
+  (`:236`). Doctrine `readonly` vlastnosti podporuje od ORM 2.11, jenže hlášení `doctrine/orm#10032`
+  a `#10660` popisují `LogicException: Attempting to change readonly property` právě při hydrataci
+  a při operacích, kde Doctrine potřebuje vlastnost přepsat.
+
+  U embeddable je situace potenciálně jiná než u ID – hodnota se skládá z několika sloupců při
+  hydrataci, takže záleží na tom, zda Doctrine zapisuje do vlastnosti přímo, nebo přes reflexi
+  s obejitím `readonly`. **To rešerše nerozhodne; chce test na ORM 3.** Do té doby platí totéž
+  co pro `#[ORM\Id]`: ukázku nepovažovat za ověřenou. Souvislost je popsaná
+  v `aggregate_design-studie.md`, sekce „Doověřeno druhým průchodem“.

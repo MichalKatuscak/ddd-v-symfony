@@ -344,6 +344,40 @@ otevřené – týká se to hlavně `subdomains`, `when_not_to_use_ddd`, `anti_p
 Newmanovo *Building Microservices* je k dispozici jen v **1. vydání (2015)**, zatímco kniha cituje
 2. vydání (2021); čísla kapitol z něj ověřit nelze.
 
+## Pravidlo: co dělat s tím, co se nepodařilo ověřit
+
+Otázka „když to neověříme, musí citace pryč?“ má čtyři různé odpovědi podle toho, o jaký případ
+jde. Plošné mazání by z knihy odstranilo i tvrzení, která jsou správná – jen neozdrojovaná.
+Plošné ponechání by naopak nechalo stát atribuce, za kterými nikdo nestojí.
+
+**1. Vyvrácené tvrzení – pryč celé, nestačí sundat jméno.**
+Tam, kde dohledaný zdroj říká opak, nepomůže přeformulovat na autorský názor: tvrzení samo je
+špatně. Sem patří Beckovo „testuje méně věcí“, Tuneovo CLAUDE.md jako bounded-context dokument,
+poměr „80 % investice do 20 % kódu“, Standishových „50 % nepoužívaných funkcí“, Youngovo povýšení
+CQRS na architekturu, Shared Kernel „menší než přirozený průnik“.
+
+**2. Číslo bez zdroje – číslo pryč, teze zůstává.**
+Číslo předstírá přesnost, kterou čtenář nemá jak ověřit. Ve všech případech ale teze přežije bez
+něj: „4–6 tříd místo jedné“ → „CQRS znamená víc tříd“; retence „7–30 dní“ → „retenci nastavte
+podle objemu a doby, po kterou může dorazit duplikát“. Alternativa k vyškrtnutí je označit hodnotu
+jako ilustrativní, ale jen tam, kde slouží jako příklad, ne jako doporučení.
+
+**3. Zdroj existuje a je věrohodný, jen jsme ho nečetli – pryč jde citace, ne tvrzení.**
+Knihy, které nemáme (Khononov, Richardson, Team Topologies, Millett & Tune), a texty za paywallem.
+Vyškrtnout věcné tvrzení by knihu poškodilo. Co musí pryč: **doslovné citace** textů, které jsme
+nečetli, a **čísla kapitol nebo stran**, která jsme neověřili. Parafráze věcného tvrzení
+s uvedením autora a knihy zůstává – to je běžná odborná praxe.
+
+**4. Nedostupné doslovné znění, ale doložená existence – parafrázovat.**
+Cockcroftův článek: autor, název i URL potvrzené, jen Medium blokuje čtení. Parafráze je legitimní,
+uvozovky ne.
+
+**Řídící princip.** Nedoložená atribuce jmenované osobě je horší než žádná citace, protože čtenáři
+sugeruje autoritu, která za tvrzením nestojí. Proto: **každý výrok připsaný jmenované osobě musí
+mít u sebe zdroj, nebo být přepsán jako autorské tvrzení.** Naopak věcné tvrzení, které je
+obhajitelné z praxe, může v knize zůstat i bez citace – jen se nesmí tvářit, že za ním stojí
+někdo jiný.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.

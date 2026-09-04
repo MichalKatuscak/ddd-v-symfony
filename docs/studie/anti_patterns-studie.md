@@ -255,6 +255,17 @@ Evans tuto polohu přebírá bez ironie. V *DDD Reference* (2015) [4] má Big Ba
   model popisuje; rozhodovací otázky by z popisu udělaly nástroj, který čtenář použije na vlastní
   kód.
 - **Mark Seemann jako zastánce anemického modelu** — zadání studie tuto atribuci předpokládalo. Rešerše ji nepotvrdila: Seemann zapouzdření naopak hájí [10][11]. Jeho příspěvek do sporu je jiný a jemnější (zapouzdření lze dosáhnout typy a smart constructory místo metod na objektu). V kapitole ho nelze uvést jako obhájce anemického modelu.
-- **`Money::zero()` „jinde v knize není"** — zadání studie to uvádělo jako hypotézu. Ověřeno jako nepřesné: `Money::zero()` se používá i v `basic_concepts.md:447`, definován je ale jen v `anti_patterns.md:391`. Kanonická definice `Money` chybí úplně; ch03 (`context_mapping.md:141`) má variantu bez `zero()`.
+- **`Money::zero()` – OVĚŘENO 2026-09-04 v repozitáři. Hypotéza „jinde v knize není“ je vyvrácená,
+  ale skutečný problém je horší.** Metoda je definovaná v `anti_patterns.md:391`
+  (`public static function zero(Currency $currency): self`) a používá se na dvou místech:
+  `anti_patterns.md:588` a `basic_concepts.md:447`.
+
+  Potíž je v pořadí. Podle `src/Catalog/Chapters.php` je `basic_concepts` kapitola **06**
+  a `anti_patterns` kapitola **21**. Čtenář tedy narazí na `Money::zero(Currency::CZK)` v šesté
+  kapitole a definici najde až o patnáct kapitol dál – pokud ji vůbec hledá.
+
+  **Doporučení: `Money::zero()` definovat tam, kde se objeví poprvé** (kapitola 06, spolu se
+  zbytkem kanonického `Money`), a v kapitole 21 už jen používat. Patří to k průřezové opravě
+  kanonického API, ne k anti-vzorům.
 - **Verraes o rozdělování Bounded Contexts** — Fowler v [5] odkazuje na „Verraes and Wirfs-Brock". Původní odkazovaný text se nepodařilo najít na `verraes.net` (URL `/2021/06/split-bounded-contexts/` vrací 404); existuje `/2021/06/split-domain-across-bounded-contexts/`, obsah neověřen.
 - **Původní tweet Roberta Waltmana o „lasagna code"** citovaný v [13] — nedohledán na primárním zdroji, uveden pouze v Nobackově přepisu.

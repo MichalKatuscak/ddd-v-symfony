@@ -417,5 +417,11 @@ https://www.php.net/releases/8.4/en.php (přístup 2026-09-03)
 - **Doslovné znění Evansovy kritiky z DDD Europe 2016.** Ověřeno jen zprostředkovaně
   přes [10]; záznam keynote se nepodařilo dohledat. Pokud kniha bude citovat přímo,
   je třeba dohledat video nebo přepis.
-- **Existence tištěné a EPUB verze knihy.** V repozitáři není žádný build ani konfigurace;
-  tvrzení v `preface.md:102` nelze potvrdit ani vyvrátit z kódu.
+- **Tištěná a EPUB verze – OVĚŘENO 2026-09-04 v repozitáři. Build existuje, tvrzení studie bylo
+  nepřesné.** Adresář `ebook/` obsahuje kompletní pipeline: `book.yaml`, `build.sh`,
+  `preprocess.php`, `epub.css`, plus adresáře `filters`, `chapters` a `output`. Konfigurace tedy
+  v repozitáři je, jen není navázaná na `composer.json` ani `package.json`.
+
+  Doplňující zjištění: frontmatter klíč `ebook: false` nese **jediná kapitola** – `ddd_ai.md:16`,
+  a předmluva to zdůvodňuje rychlým vývojem tématu. Po přepisu podle P1-3 (těžiště k modelování)
+  by se to mělo přehodnotit, protože přepsaná kapitola by stárla pomaleji.
