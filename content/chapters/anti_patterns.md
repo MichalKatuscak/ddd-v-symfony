@@ -14,7 +14,7 @@ schema_headline: "Anti-vzory a typické chyby v DDD"
 chapter_number: "21"
 category: Praxe
 deck: "Přehled nejčastějších anti-vzorů a typických chyb při implementaci Domain-Driven Design: anémický doménový model, Primitive Obsession, příliš velký agregát, sdílená databáze napříč Bounded Contexts, mutovatelné události a over-engineering."
-reading_time: 35
+reading_time: 38
 difficulty: 2
 github_examples: null
 ---
@@ -28,21 +28,27 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 DDD nabízí strukturu pro modelování domény, ale s tou strukturou přicházejí specifická úskalí. Týmy začínající s DDD opakovaně narážejí na stejné chyby, i když teorii rozumějí. Anti-vzory je proto potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 
-Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon.
+Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon. Každá sekce níže proto nese rozpoznávací znak – větu, podle které zjistíte, jestli se problém týká vašeho kódu – a hranici, za kterou už kritizovaný postup chybou není.
+
+Nejznámější anti-vzor DDD zde nenajdete. Big Ball of Mud, tedy oblast bez rozeznatelných hranic, patří ke Context Mappingu, protože se dá vědomě ohraničit a nechat být; rozebírá jej [sekce 03.12](/context-mapping#big-ball-of-mud).
 
 :::callout{type="note"}
 ### Klasifikace typických chyb v DDD {#klasifikace-heading}
 
-Chyby při implementaci DDD lze rozdělit do tří kategorií:
+Chyby při implementaci DDD spadají do tří kategorií podle toho, kde vznikají a kolik stojí jejich náprava. Sekce této kapitoly jsou k nim přiřazeny níže.
 
-- **Strategické chyby** – špatně definované Bounded Contexts, ignorování Ubiquitous Language, sdílená databáze napříč kontexty. Dopad je nejzávažnější, protože strategické chyby ovlivňují celkovou architekturu systému.
-- **Taktické chyby** – anémický doménový model, příliš velké agregáty, Primitive Obsession. Projevují se na úrovni doménového modelu a narušují objektově orientované principy.
-- **Implementační chyby** – doménová logika v infrastrukturní vrstvě, mutovatelné události, over-engineering. Vznikají při konkrétní implementaci a obvykle se opravují nejsnáz.
+- **Strategické chyby** – špatně definované Bounded Contexts, ignorování Ubiquitous Language, sdílená databáze napříč kontexty (21.05, 21.09). Dopad je nejzávažnější, protože strategické chyby ovlivňují celkovou architekturu systému.
+- **Taktické chyby** – anémický doménový model (21.02), Primitive Obsession (21.03), příliš velké agregáty (21.04). Projevují se na úrovni doménového modelu a narušují objektově orientované principy.
+- **Implementační chyby** – mutovatelné události (21.06), doménová logika v infrastrukturní vrstvě (21.07), over-engineering (21.08). Vznikají při konkrétní implementaci a obvykle se opravují nejsnáz.
 :::
 
 ## 21.02 Anti-vzor: Anémický doménový model (Anemic Domain Model) {#anemicky-domenovy-model}
 
 Anémický model patří k nejčastějším anti-vzorům objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
+
+Fowler považoval argument „porušuje se zapouzdření“ za příliš slabý a připojil druhý, nákladový: anémický model nese veškeré náklady doménového modelu, aniž by přinášel jeho užitek. Zaplatíte mapování na databázi, obalování hodnot a rozpad kódu do vrstev, a dostanete datovou strukturu, kterou by obsloužil obyčejný `SELECT`. Účet bez protihodnoty je jádro problému, ne nedodržená poučka o OOP.
+
+**Rozpoznávací znak.** Vaughn Vernon k tomu v *Implementing Domain-Driven Design* (2013) nabízí diagnostický test dvou otázek. Volně přeloženo: má vaše entita jen gettery a settery, a žije pravidlo, které s jejími daty pracuje, v cizí třídě? Dvě „ano“ znamenají anémii. Test je použitelnější než definice, protože ho pustíte na konkrétní soubor.
 
 :::diagram{fig="21.2-A" title="Anémický vs. bohatý doménový model – kde sedí logika" src="images/diagrams/22_anti_patterns/anemic_vs_rich.svg"}
 :::
@@ -53,8 +59,14 @@ Anémický model patří k nejčastějším anti-vzorům objektově orientované
 - **Porušení zapouzdření (encapsulation)** – základní princip OOP říká, že data a chování, které na nich operuje, by měly být společně. Anémický model toto porušuje tím, že data jsou v entitě, ale logika je jinde.
 - **Ztráta modelu jako abstrakce domény** – pokud entity obsahují pouze data, model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla, pouze strukturu dat – model tak ztrácí svůj komunikační a dokumentační přínos.
 - **Duplicita logiky** – doménová pravidla rozptýlená do service tříd vedou k jejich kopírování na více místech, protože není jasné kanonické místo pro logiku.
-- **Obtížná testovatelnost** – testování logiky v servisní vrstvě vyžaduje mockování závislostí, zatímco doménová logika v entitě je testovatelná izolovaně bez jakýchkoli závislostí.
+- **Testy potřebují víc lešení** – pravidlo přesunuté do služby se testuje přes celou tuto službu a přes všechno, co má v konstruktoru. Entita bez závislostí se otestuje jedním `new` a jedním voláním. Výhoda ale není bezpodmínečná: dobře navržená aplikační služba se testuje bez potíží a agregát, který ke svému rozhodnutí potřebuje kolaboranty, ji ztrácí také.
 :::
+
+Anti-vzorem není servisní vrstva jako taková. Fowler v témže článku Service Layer výslovně obhajuje a odmítá jen to, aby v ní žila *veškerá* doménová logika. Rozlišit je proto potřeba tři věci, které se v projektech jmenují stejně:
+
+1. **Aplikační služba** orkestruje: načte agregát, zavolá na něm jednu metodu, uloží výsledek, odešle události. Vlastní doménové pravidlo neobsahuje a je legitimní.
+2. **Doménová služba** nese pravidlo, které nepatří jedinému agregátu – výpočet přes několik agregátů nebo politiku s externím vstupem. Je to řádný stavební blok, viz [doménové služby](/zakladni-koncepty#domain-services).
+3. **„God service“** drží pravidla patřící entitám, které samy nemají žádné chování. Teprve to je anémický model.
 
 :::callout{type="warn"}
 ### Špatně: Anémická entita User a servisní vrstva s logikou {#anemicky-spatny-heading}
@@ -98,7 +110,7 @@ class User
     public function setCreatedAt(\DateTimeImmutable $dt): void { $this->createdAt = $dt; }
 }
 
-// ŠPATNĚ: Doménová logika v servisní třídě
+// ŠPATNĚ: Veškerá doménová logika v servisní třídě
 class UserService
 {
     public function activateUser(User $user, string $token): void
@@ -143,17 +155,17 @@ namespace App\UserManagement\Domain\ValueObject;
 enum UserStatus: string
 {
     case Pending = 'pending';
-    case ACTIVE = 'active';
-    case INACTIVE = 'inactive';
+    case Active = 'active';
+    case Inactive = 'inactive';
 
     public function isPending(): bool
     {
-        return $this === self::PENDING;
+        return $this === self::Pending;
     }
 
     public function isActive(): bool
     {
-        return $this === self::ACTIVE;
+        return $this === self::Active;
     }
 }
 
@@ -196,9 +208,12 @@ use App\UserManagement\Domain\ValueObject\VerificationToken;
 use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\Event\UserActivated;
 use App\UserManagement\Domain\Event\UserDeactivated;
+use App\UserManagement\Domain\Exception\InvalidVerificationTokenException;
+use App\UserManagement\Domain\Exception\UserAlreadyActivatedException;
+use App\UserManagement\Domain\Exception\UserNotActiveException;
 use App\SharedKernel\Domain\AggregateRoot;
 
-class User extends AggregateRoot
+final class User extends AggregateRoot
 {
     private readonly UserId $id;
     private readonly Email $email;
@@ -213,7 +228,7 @@ class User extends AggregateRoot
     ) {
         $this->id = $id;
         $this->email = $email;
-        $this->status = UserStatus::PENDING;
+        $this->status = UserStatus::Pending;
         $this->verificationToken = $verificationToken;
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -229,12 +244,12 @@ class User extends AggregateRoot
     public function activate(VerificationToken $token): void
     {
         if (!$this->status->isPending()) {
-            throw new \DomainException('Uživatel není ve stavu čekající na aktivaci.');
+            throw UserAlreadyActivatedException::forUser($this->id);
         }
         if (!$this->verificationToken->equals($token)) {
-            throw new \DomainException('Neplatný ověřovací token.');
+            throw InvalidVerificationTokenException::forUser($this->id);
         }
-        $this->status = UserStatus::ACTIVE;
+        $this->status = UserStatus::Active;
         $this->verificationToken = null;
         $this->record(new UserActivated($this->id));
     }
@@ -242,9 +257,9 @@ class User extends AggregateRoot
     public function deactivate(): void
     {
         if (!$this->status->isActive()) {
-            throw new \DomainException('Lze deaktivovat pouze aktivního uživatele.');
+            throw UserNotActiveException::forUser($this->id);
         }
-        $this->status = UserStatus::INACTIVE;
+        $this->status = UserStatus::Inactive;
         $this->record(new UserDeactivated($this->id));
     }
 
@@ -257,9 +272,27 @@ class User extends AggregateRoot
 
 Rozdíl je v tom, že správná entita vystavuje doménově orientované metody (`activate()`, `deactivate()`, `register()`) místo generických setterů. Entita sama garantuje své invarianty – nikdo zvenčí ji nedostane do nekonzistentního stavu.
 
+:::callout{type="note"}
+### Getter a setter už nejsou spolehlivý příznak {#php84-priznaky-heading}
+
+Fowlerova diagnóza z roku 2003 se opírala o tvar kódu: dvojice `getX()` / `setX()` znamenala datový kontejner. PHP 8.4 tento signál oslabuje. Asymetrická viditelnost `public private(set) UserStatus $status` [[4]](https://wiki.php.net/rfc/asymmetric-visibility-v2) vystaví vlastnost ke čtení a zápis nechá jen uvnitř třídy; property hooks [[5]](https://www.php.net/manual/en/language.oop5.property-hooks.php) odstraní většinu ručně psaných přístupových metod. Entita bez jediného getteru proto může být stejně anémická jako ta s dvaceti.
+
+Příznakem zůstává **veřejný zápis stavu bez doménového jména**. Řádek `$user->status = UserStatus::Active;` v aplikační vrstvě je totéž co `setStatus('active')`, jen kratší. Hodnotové objekty této knihy hooky nepoužijí: s `readonly` vlastnostmi je zkombinovat nelze [[5]](https://www.php.net/manual/en/language.oop5.property-hooks.php).
+:::
+
+### Kdy anémický model chyba není {#anemicky-kdy-nevadi}
+
+Fowler sám připouští, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script [[2]](https://martinfowler.com/eaaCatalog/transactionScript.html) – řádný vzor z *Patterns of Enterprise Application Architecture*, který organizuje logiku po procedurách, jednu na požadavek. V doméně s pěti pravidly bývá procedura čitelnější než šest tříd okolo ní. Volba mezi vzory patří k rozhodnutí o typu subdomény, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd#hybrid-subdomain).
+
+Druhou výhradu přináší funkcionální škola. Mark Seemann ukazuje, že zapouzdření není totéž co metoda na objektu: stejnou garanci dá typ, který nelze zkonstruovat do neplatného stavu, plus modul funkcí nad ním [[3]](https://blog.ploeh.dk/2022/10/24/encapsulation-in-functional-programming/). Data od chování oddělit lze. Co oddělit nelze, je validace od dat – záznam s veřejnými poli, který kdokoli naplní čímkoli, je anémický v tom škodlivém smyslu, i kdyby funkce nad ním byly sebelépe napsané.
+
+**Hranice pravidla.** Anémický model je chyba tehdy, když platíte cenu doménového modelu bez jeho přínosu. Rozhodli jste se pro doménový model? Pak v něm mají být pravidla. Rozhodli jste se pro Transaction Script? Pak žádnou anémii neřešíte, jen to rozhodnutí musíte umět pojmenovat a nevydávat adresář `Domain/` za doménový model.
+
 ## 21.03 Anti-vzor: Primitive Obsession (posedlost primitivy) {#primitive-obsession}
 
 Primitive Obsession nastává, když vývojáři používají primitivní datové typy (`string`, `int`, `float`) tam, kam patří hodnotové objekty (Value Objects). Primitiva působí na první pohled přímočaře, ale vedou k závažným problémům.
+
+**Rozpoznávací znak.** Najděte si validaci e-mailu ve svém projektu a spočítejte, na kolika místech stojí. Tři výskyty téhož `filter_var()` nad toutéž hodnotou znamenají, že hodnota chce vlastní typ.
 
 :::callout{type="note"}
 ### Problémy způsobené Primitive Obsession {#primitive-problemy-heading}
@@ -367,37 +400,31 @@ enum Currency: string
     case CZK = 'CZK';
     case EUR = 'EUR';
     case USD = 'USD';
-
-    public function equals(self $other): bool
-    {
-        return $this === $other;
-    }
 }
 
+// Kanonická podoba Money i s metodou zero() je v kapitole Základní koncepty.
+// Zde slouží jen jako protipól k float + string výše.
 final readonly class Money
 {
-    public int $amountInCents; // Celé číslo - žádné problémy s plovoucí desetinnou čárkou
-    public Currency $currency;
-
-    public function __construct(int $amountInCents, Currency $currency)
-    {
+    public function __construct(
+        public int $amountInCents, // Celé číslo - žádná plovoucí desetinná čárka
+        public Currency $currency,
+    ) {
         if ($amountInCents < 0) {
-            throw new \InvalidArgumentException('Částka nemůže být záporná.');
+            throw new \InvalidArgumentException(
+                'Money cannot be negative; use SignedMoney for credits/debits.'
+            );
         }
-        $this->amountInCents = $amountInCents;
-        $this->currency = $currency;
-    }
-
-    public static function zero(Currency $currency): self
-    {
-        return new self(0, $currency);
     }
 
     public function add(self $other): self
     {
-        if (!$this->currency->equals($other->currency)) {
-            throw new \DomainException('Nelze sčítat částky v různých měnách.');
+        if ($this->currency !== $other->currency) {
+            throw new \DomainException(
+                "Cannot add {$this->currency->value} and {$other->currency->value}"
+            );
         }
+
         return new self($this->amountInCents + $other->amountInCents, $this->currency);
     }
 }
@@ -431,9 +458,17 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 :::
 :::
 
+`Money` odmítá zápornou částku záměrně: pro dobropisy a odpisy má kniha samostatný typ `SignedMoney`, aby se nemohla ztratit informace o směru pohybu. Plnou definici obou hodnotových objektů uvádí [sekce 06.04](/zakladni-koncepty#value-objects); ukázka výše je zkrácená na to, co odlišuje hodnotový objekt od `float` a `string`.
+
+Hodnotový objekt má i svou cenu. Vyplatí se tam, kde hodnota splní alespoň jednu ze tří podmínek: nese vlastní pravidla platnosti (`Email`, `BirthNumber`), má vlastní operace (`Money::add()`), nebo hrozí její záměna s jinou hodnotou téhož primitivního typu (`OrderId` proti `UserId`). Evans totéž říká obráceně – jako hodnotový objekt klasifikujte prvek modelu, u kterého vás zajímají pouze jeho atributy a logika [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
+
+**Hranice pravidla.** Pole `note`, `description` nebo `internalComment` žádnou z podmínek nesplňuje. Třída `Note` obalující `string` bez jediného pravidla je přesně ta ceremonie, před kterou varuje [sekce 21.08](#over-engineering). Kritériem tedy není počet primitiv v kódu, ale duplikovaná validace a riziko záměny.
+
 ## 21.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
 
-Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, kterou je třeba měnit společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže.
+Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, kterou je třeba měnit společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže. Vernon pro tentýž jev používá střízlivější název *large-cluster aggregate*; komunita se drží dramatičtějšího „God“.
+
+**Rozpoznávací znak.** Podívejte se na poslední přidání položky do kolekce uvnitř agregátu. Pokud kvůli jednomu novému řádku načítáte tisíc existujících, je hranice agregátu vedená podle asociací, ne podle invariantů.
 
 :::diagram{fig="21.4-A" title="God Aggregate vs. správně rozdělené agregáty propojené přes ID" src="images/diagrams/22_anti_patterns/god_aggregate.svg"}
 :::
@@ -516,14 +551,13 @@ use App\OrderManagement\Domain\ValueObject\ProductId;
 use App\OrderManagement\Domain\ValueObject\Address;
 use App\OrderManagement\Domain\ValueObject\OrderStatus;
 use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\Currency;
 use App\OrderManagement\Domain\ValueObject\Email;
 use App\OrderManagement\Domain\ValueObject\WishlistId;
 use App\OrderManagement\Domain\Event\OrderConfirmed;
 use App\SharedKernel\Domain\AggregateRoot;
 
 // Agregát 1: Customer - pouze identita a kontaktní údaje
-class Customer
+final class Customer
 {
     private readonly CustomerId $id;
     private string $name;
@@ -531,6 +565,14 @@ class Customer
 
     // Zákazník obsahuje jen to, co je součástí jeho identity.
     // Adresa pro doručení je součástí objednávky, ne zákazníka.
+
+    public function changeEmail(Email $newEmail): void
+    {
+        if ($this->email->equals($newEmail)) {
+            return; // Idempotentní změna, žádný přechod stavu
+        }
+        $this->email = $newEmail;
+    }
 }
 
 // Agregát 2: Order - transakční hranice pro jednu objednávku
@@ -583,31 +625,56 @@ final class Order extends AggregateRoot
 
     public function totalAmount(): Money
     {
-        // Předpoklad: všechny položky ve stejné měně - jinak Money::add() vyhodí výjimku
+        // Měna plyne z položek objednávky, ne z konstanty zapsané v agregátu.
+        // Pokud se položky v měně rozejdou, ohlásí to Money::add().
+        $rest = $this->items;
+        $first = array_shift($rest);
+        if ($first === null) {
+            throw new EmptyOrderException();
+        }
+
         return array_reduce(
-            $this->items,
+            $rest,
             fn(Money $carry, OrderItem $item) => $carry->add($item->subtotal()),
-            Money::zero(Currency::CZK)
+            $first->subtotal(),
         );
     }
 }
 
 // Agregát 3: Wishlist - zcela oddělená doménová odpovědnost
-class Wishlist
+final class Wishlist
 {
     private readonly WishlistId $id;
     private readonly CustomerId $customerId;
     /** @var WishlistItem[] */
     private array $items = [];
+
+    public function add(ProductId $productId): void
+    {
+        foreach ($this->items as $item) {
+            if ($item->productId()->equals($productId)) {
+                return; // Invariant: každý produkt je v seznamu nejvýš jednou
+            }
+        }
+        $this->items[] = new WishlistItem($productId);
+    }
 }
 :::
 :::
 
-Pravidlo pro navrhování agregátů zní: *agregát by měl být co nejmenší, aby zachoval invarianty (doménová pravidla) platné v jedné transakci*. Pokud změna jednoho objektu nevyžaduje konzistentní změnu druhého ve stejné transakci, patří do různých agregátů.
+Pravidlo pochází z Vernonovy série *Effective Aggregate Design* [[7]](https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_1.pdf): agregát drží kořen a nezbytné minimum atributů a hodnotových vlastností, nic víc. Vernon k němu dodává větu, kterou katalogy anti-vzorů obvykle vynechávají – agregáty jsou hranice konzistence, ne výsledek snahy navrhnout graf objektů. Pokud změna jednoho objektu nevyžaduje konzistentní změnu druhého ve stejné transakci, patří do různých agregátů.
+
+**Hranice pravidla.** Zmenšovat lze i příliš. Vernon pojmenovává obě selhání: agregát složený pro pohodlí kompozice je moc velký, agregát rozebraný na jednotlivé entity zase přestane chránit skutečné invarianty. Druhá chyba se hledá hůř, protože se neprojeví na výkonu, ale až nekonzistentními daty.
+
+V Doctrine bývá nejčastější příčinou velkého agregátu samotné mapování. Asociace `OneToMany` popisuje vztah v databázi, ne transakční hranici: z toho, že objednávka *má* položky, neplyne, že zákazník má vlastnit svou historii objednávek. Vodítkem je invariant, který musí platit po každém commitu, nikoli tvar schématu.
 
 ## 21.05 Anti-vzor: Sdílená databáze napříč Bounded Contexts {#sdilena-databaze}
 
 Sdílená databáze napříč Bounded Contexts patří mezi nejzávažnější strategické anti-vzory. Nastává, když různé kontexty sdílejí stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. Na počátku to vypadá pragmaticky, ale vede k těsnému provázání, které blokuje nezávislý vývoj a nasazení jednotlivých kontextů.
+
+**Rozpoznávací znak.** Projděte migrace jednoho kontextu a hledejte tabulku, kterou vlastní jiný tým. Druhý příznak je provozní: nasazení kontextu A vyžaduje koordinaci s týmem kontextu B, přestože se jejich kód nikde nepotkává.
+
+**Hranice pravidla.** Chybou není jedna databázová instance, ale sdílené schéma a dotaz vedený přes hranici. Modulární monolit běžně běží nad jednou databází s oddělenými schématy a vlastnictvím tabulek na úrovni modulu, a to je v pořádku. Legitimní zůstávají i další případy: Shared Kernel s explicitně dohodnutým vlastníkem, read-only replika pro reporting a analytický kontext, který čte data mimo doménový model. Anti-vzor začíná ve chvíli, kdy jeden kontext čte zápisový model druhého a spoléhá se na jeho tvar.
 
 :::callout{type="warn"}
 ### Špatně: Přímý přístup ke sdíleným tabulkám {#sdilena-db-spatne-heading}
@@ -658,12 +725,12 @@ class InvoiceGenerator
     public function generate(OrderId $orderId): Invoice
     {
         // Opět přímý přístup k tabulce orders z OrderManagement kontextu!
-        $data = $this->db->query(
+        $data = $this->db->executeQuery(
             'SELECT o.total, u.billing_address, u.vat_number
              FROM orders o JOIN users u ON o.user_id = u.id
              WHERE o.id = :id',
             ['id' => $orderId->value]
-        );
+        )->fetchAssociative();
         // ...
     }
 }
@@ -743,13 +810,21 @@ class HttpUserManagementAdapter implements CustomerDataProvider
 :::
 :::
 
-Alternativou k synchronnímu HTTP volání je asynchronní komunikace přes doménové události. Billing kontext může naslouchat události `CustomerBillingDataUpdated` a lokálně si ukládat kopii potřebných dat (tzv. *Read Model projection*). Tím odstraníme synchronní závislost za cenu eventuální konzistence.
+Synchronní HTTP adaptér z ukázky výše není jediná možnost a pro modulární monolit bývá tou nejdražší. V úvahu připadají tři cesty a každá má svou cenu.
+
+1. **Volání přes rozhraní v procesu.** Kontext B vystaví port, kontext A ho volá přímo, bez sítě. Hranice zůstane zachovaná, latence žádná nepřibude. Cenou je společné nasazení a disciplína, aby se z portu nestal průchod do cizího modelu.
+2. **Synchronní HTTP nebo gRPC.** Nutnost, jakmile kontexty běží odděleně. Zaplatíte latencí, nedostupností upstreamu ve chvíli vlastního provozu a nutností řešit timeouty i náhradní chování.
+3. **Asynchronní replikace přes události.** Billing naslouchá události `CustomerBillingDataUpdated` a drží si lokální kopii potřebných dat (*read model projection*). Synchronní závislost mizí a čtení má ze všech tří variant nejnižší latenci. Cenou je eventuální konzistence a kód pro doplnění dat konzumentovi, který se připojí později. Spolehlivé publikování řeší [Outbox Pattern](/outbox-pattern).
 
 ## 21.06 Anti-vzor: Mutovatelné doménové události {#mutovatelne-udalosti}
 
-Doménová událost popisuje fakt, který se v minulosti stal. Minulost nelze měnit, a tak musí být událost striktně **immutable** (neměnná). Mutovatelná událost je konceptuální rozpor: pokud lze událost po vytvoření změnit, ztrácí svou sémantickou hodnotu jako historický záznam.
+Doménová událost popisuje fakt, který se v minulosti stal. Evans ji proto označuje za zpravidla **neměnnou** (immutable), protože jde o záznam něčeho minulého [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf). Ono „zpravidla“ je na místě: doplnit metadata při publikování zprávy je běžné, změnit částku v `OrderPlaced` je konceptuální rozpor. Událost, kterou lze po vytvoření přepsat, ztrácí hodnotu historického záznamu.
 
 Mutovatelné události navíc způsobují praktické problémy při event sourcingu, auditních logách a při komunikaci mezi Bounded Contexts. Přijímající kontext totiž předpokládá, že obdrží konzistentní a neměnná data.
+
+**Rozpoznávací znak.** Otevřete třídu události a hledejte setter nebo `\DateTime` bez `Immutable`. Obojí znamená, že minulost lze v tomto systému přepsat.
+
+Praxe pracuje se dvěma časovými razítky. `occurredAt` říká, kdy se věc stala v doméně; `recordedAt`, kdy ji systém zapsal. U události vzniklé z uživatelské akce obě hodnoty splývají, u importu historických dat nebo u zpětného storna se rozejdou třeba o týdny. Jedno razítko generované v konstruktoru na takový případ nestačí.
 
 :::callout{type="warn"}
 ### Špatně: Mutovatelná událost s veřejnými settery {#udalosti-spatne-heading}
@@ -819,17 +894,20 @@ use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 
-final class OrderPlaced
+final readonly class OrderPlaced
 {
-    public readonly \DateTimeImmutable $occurredAt;
+    public \DateTimeImmutable $recordedAt;
 
     public function __construct(
-        public readonly OrderId $orderId,
-        public readonly CustomerId $customerId,
-        public readonly Money $totalAmount,
-        public readonly int $itemCount,
+        public OrderId $orderId,
+        public CustomerId $customerId,
+        public Money $totalAmount,
+        public int $itemCount,
+        // Kdy se to stalo v doméně. U běžné akce je to teď, u importu historie ne.
+        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {
-        $this->occurredAt = new \DateTimeImmutable();
+        // Kdy to zapsal systém - údaj patří infrastruktuře, ne doméně.
+        $this->recordedAt = new \DateTimeImmutable();
         // Všechny hodnoty jsou nastaveny jednou v konstruktoru.
         // Neexistují žádné settery - událost je neměnná.
         // Čte se přímo přes readonly properties ($event->orderId), accessory nejsou potřeba.
@@ -838,14 +916,20 @@ final class OrderPlaced
 :::
 :::
 
+Neměnnost instance přitom neřeší verzování schématu. Jakmile událost přežije nasazení, které jí přidá pole, potřebujete upcasting nebo verzovaný název typu; obojí rozebírá kapitola [Event Sourcing](/event-sourcing).
+
+**Příbuzný anti-vzor: událost jako aplikační hook.** Názvy `CacheShouldBeInvalidated` nebo `EmailNeedsToBeSent` nepopisují fakt, ale příkaz převlečený do minulého času. Verraes třídí zprávy na příkazy, dotazy a informace [[8]](https://verraes.net/2015/01/messaging-flavours/) a záměna kategorií je jádrem problému. Doménová událost říká, co se v doméně stalo, a nezajímá se, kdo na ni zareaguje. Jakmile její jméno obsahuje instrukci pro infrastrukturu, jde o příkaz, ne o událost.
+
 ## 21.07 Anti-vzor: Doménová logika v infrastrukturní vrstvě {#logika-v-infrastrukture}
 
-DDD striktně odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře, Symfony Forms, kontrolery, event listenery) by měla být tenká a delegovat veškerou doménovou logiku do doménové vrstvy. Doménová pravidla v infrastrukturních třídách narušují hranice vrstev a vytvářejí skrytou, těžko testovatelnou logiku.
+DDD odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Doctrine repozitáře, Symfony Forms, kontrolery, event listenery) má být tenká a delegovat veškerou doménovou logiku do doménové vrstvy. Doménová pravidla v infrastrukturních třídách narušují hranice vrstev a vytvářejí skrytou, těžko testovatelnou logiku.
+
+**Rozpoznávací znak.** Otevřete libovolnou třídu v adresáři `Infrastructure/` a hledejte podmínku, která se ptá na doménový stav. Řádek `if ($user->getStatus() !== 'pending')` v repozitáři je pravidlo, ne persistence.
 
 :::callout{type="warn"}
 ### Špatně: Doménová logika v Doctrine repozitáři {#infra-spatne-heading}
 
-Repozitář by měl pouze ukládat a načítat agregáty. Jakákoliv doménová logika (výpočty, aplikace doménových pravidel, stavové přechody) v repozitáři je anti-vzor.
+Repozitář má agregáty pouze ukládat a načítat. Jakákoliv doménová logika (výpočty, aplikace doménových pravidel, stavové přechody) v repozitáři je anti-vzor. Ukázka níže vychází z třídy, kterou vygeneruje MakerBundle: `ServiceEntityRepository` je v Symfony výchozí volba, a tak do ní pravidla zabloudí nejčastěji. Doctrine ORM 3 navíc vyžaduje, aby repozitář registrovaný přes `repositoryClass` dědil od `EntityRepository` – tím spíš se vyplatí doménové rozhraní od Doctrine oddělit, jak ukazuje následující dvojice.
 :::
 
 :::callout{type="anti"}
@@ -860,10 +944,17 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Infrastructure\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use App\UserManagement\Domain\Model\User;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
-class DoctrineUserRepository extends EntityRepository
+class DoctrineUserRepository extends ServiceEntityRepository
 {
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, User::class);
+    }
+
     public function activateUser(string $userId, string $token): void
     {
         $user = $this->find($userId);
@@ -1002,15 +1093,23 @@ class UserController extends AbstractController
 :::
 :::
 
+Handler odesílá doménové události rovnou na `MessageBusInterface`, a právě zde vede hranice, kterou lze přehlédnout. Doménová událost je vnitřní věc kontextu, integrační událost je veřejný kontrakt vůči okolí. Jakmile obojí sdílí jednu sběrnici, kdokoli si na doménovou událost pověsí handler a její tvar se tím stane veřejným API, které už nelze měnit. Oddělení obou vrstev i spolehlivé publikování ven rozebírá kapitola [Outbox Pattern](/outbox-pattern).
+
+Hranice vrstev se navíc dají vynutit nástrojem, ne jen dohodou v code review. Nástroje `deptrac` [[9]](https://packagist.org/packages/deptrac/deptrac) a PHPArkitect [[10]](https://packagist.org/packages/phparkitect/phparkitect) čtou statickou strukturu kódu a v CI zastaví build, který ji poruší. Užitečné minimum je jediné pravidlo: `App\*\Domain` nesmí odkazovat na `Doctrine\*` ani `Symfony\*`. Jeden řádek konfigurace nahradí opakovanou diskusi u každého pull requestu. Pozor jen na název balíčku, původní `qossmic/deptrac` je opuštěný ve prospěch `deptrac/deptrac`.
+
 ## 21.08 Anti-vzor: Over-engineering u jednoduchých aplikací {#over-engineering}
 
 Anti-vzorem zde není samotné DDD, ale jeho ceremonie bez komplexní domény. Agregáty, Value Objects a doménové události obalují prosté řádky v databázi, pro které stačí formulář a tabulka. Typické příznaky: tým tráví více času architekturou než obchodní hodnotou a triviální změna prochází desítkami souborů napříč vrstvami.
 
 Méně nákladná cesta začíná minimálním přístupem a přidává DDD prvky, až když se doménová složitost skutečně projeví. Celý rozhodovací rámec – sedm situací, kdy DDD vynechat, alternativy a rozhodovací strom – rozebírá kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
+**Hranice pravidla.** Ceremonie sama o sobě chyba není. V jádrové subdoméně je to investice, která se vrátí při každé změně pravidel. Chybou je stejná ceremonie v podpůrné subdoméně, kde se za rok nezmění nic než sazba DPH.
+
 ## 21.09 Anti-vzor: Ignorování Ubiquitous Language {#missing-ubiquitous-language}
 
 Když selže Ubiquitous Language, tatáž doménová entita nese různé názvy na různých místech. Společný jazyk vývojářů a doménových expertů přestane platit a vývojář víc překládá mezi vrstvami, než modeluje doménu. Výsledkem jsou nedorozumění, chyby a ztráta doménového vhledu v kódu.
+
+**Rozpoznávací znak.** Nechte doménového experta popsat jeden běžný případ a poznamenejte si každé slovo, které v kódu nenajdete nebo které tam znamená něco jiného. Délka seznamu je mírou driftu.
 
 :::callout{type="warn"}
 ### Špatně: Různé názvy pro stejný koncept {#ubiq-spatne-heading}
@@ -1121,22 +1220,33 @@ class InsurancePolicy
 :::callout{type="note"}
 ### Doménový slovník jako živý artefakt {#ubiq-mapa-heading}
 
-Živý glosář (tzv. *doménový slovník*) mapuje pojmy z doménového jazyka na odpovídající třídy, metody a databázové struktury v kódu. Dostupnost všem členům týmu a pravidelná aktualizace jsou podmínkou, aby slovník plnil svůj účel.
+Glosář mapuje pojmy doménového jazyka na třídy, metody a databázové struktury. V pojišťovací doméně vypadá takto: **Pojistník** → `PolicyHolder` a tabulka `policy_holders`, **Pojistná smlouva** → `InsurancePolicy` a `insurance_policies`, **Pojistná událost** → `InsuredEvent` a událost `InsuredEventOccurred`, **Pojistné plnění** → `Claim` a `claims`.
 
-- **Pojistník** → třída `PolicyHolder`, tabulka `policy_holders`
-- **Pojistná smlouva** → třída `InsurancePolicy`, tabulka `insurance_policies`
-- **Pojistná událost** → třída `InsuredEvent`, event `InsuredEventOccurred`
-- **Pojistné plnění** → třída `Claim`, tabulka `claims`
-- **Pojistné (částka)** → Value Object `Premium`
-
-Ubiquitous Language není jen o pojmenování tříd – zahrnuje také pojmenování metod, proměnných, databázových sloupců, API endpointů, chybových zpráv a testovacích scénářů. Čím konzistentnější jazyk, tím přímočařejší mapování mezi požadavky doménového experta a implementací.
+Jazyk nekončí u jmen tříd. Patří do něj i metody, sloupce v databázi, API endpointy, chybové hlášky a názvy testů. Jak takový slovník udržet živý a jaké další praktiky brání driftu jazyka, rozebírá sekce [Ubiquitous Language drift](/ddd-v-praxi-kde-to-boli#c4-language).
 :::
 
-Znalost těchto anti-vzorů pomáhá udržet kvalitu doménového modelu po celý životní cyklus projektu. Vaughn Vernonova kniha *Implementing Domain-Driven Design* se anti-vzorům věnuje podrobně na praktických příkladech – viz [doporučené zdroje](/zdroje).
+## 21.10 Shrnutí: anti-vzor, znak, alternativa {#shrnuti}
+
+| Anti-vzor | Podle čeho ho poznáte | Realistická alternativa | Víc v knize |
+|---|---|---|---|
+| Anémický model | Entita má jen gettery a settery, pravidlo nad nimi žije v cizí třídě | Pravidla do entity, nebo přiznaný Transaction Script v jednoduché subdoméně | [22.09](/kdy-nepouzivat-ddd#hybrid-subdomain) |
+| Primitive Obsession | Tatáž validace téže hodnoty na třech místech | Hodnotový objekt tam, kde má hodnota pravidla, operace nebo hrozí záměna | [06.04](/zakladni-koncepty#value-objects) |
+| Příliš velký agregát | Kolekci načítáte jen kvůli přidání jedné položky | Rozdělit podle invariantů, reference přes ID | [07.04](/navrh-agregatu#aggregate-size) |
+| Sdílená databáze | Migrace jednoho kontextu sahá na tabulku jiného týmu | Port a adaptér, replikace přes události, oddělená schémata v monolitu | [03](/context-mapping) |
+| Mutovatelná událost | Událost má setter nebo mutovatelný `DateTime` | `readonly` vlastnosti, `occurredAt` i `recordedAt` | [15](/outbox-pattern) |
+| Logika v infrastruktuře | Podmínka nad doménovým stavem v adresáři `Infrastructure/` | Pravidlo do entity, orchestrace do handleru, hranice do CI | [20.01](/ddd-v-praxi-kde-to-boli#doctrine) |
+| Over-engineering | Triviální změna prochází desítkami souborů | Míru DDD volit podle typu subdomény | [22](/kdy-nepouzivat-ddd) |
+| Drift jazyka | Expert použije slovo, které v kódu není | Glosář v repozitáři, revize jmen u každé nové funkce | [20.03](/ddd-v-praxi-kde-to-boli#modelovani) |
+
+Tabulka má jedno společné čtení. Žádný z uvedených anti-vzorů nevzniká z neznalosti vzorů, ale z pohodlí: každý je krok, který v daném týdnu ušetří práci a účet za něj přijde o rok později. Proto je užitečnější znát rozpoznávací znak než definici.
+
+Anémickému doménovému modelu se obšírně věnuje Vaughn Vernon v *Implementing Domain-Driven Design* (2013), odkud pochází i test dvou otázek z [úvodu sekce 21.02](#anemicky-domenovy-model). Další tituly uvádějí [doporučené zdroje](/zdroje).
 
 :::faq{}
 - question: Co je anémický doménový model a jak ho poznat?
   answer: 'Anémický model vypadá na první pohled jako DDD – obsahuje třídy s názvy agregátů, entit a hodnotových objektů. Veškerá logika je ale přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Doménová logika končí ve „Service“ třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Detailní rozbor v <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
+- question: Je anémický model vždy chyba?
+  answer: 'Ne. Fowler sám v článku o anémickém modelu píše, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script. V doméně s několika málo pravidly je procedura na jeden případ užití čitelnější než vrstva tříd okolo ní. Anémický model je chyba tehdy, když platíte cenu doménového modelu – mapování, obalování hodnot, rozpad do vrstev – a nedostáváte za ni žádný přínos. Rozbor obou stran sporu v <a href="#anemicky-kdy-nevadi">sekci Kdy anémický model chyba není</a>.'
 - question: Proč je Primitive Obsession problém?
   answer: 'Primitive Obsession znamená používání primitivních typů (<code>string</code>, <code>int</code>, <code>float</code>) tam, kde patří doménový pojem. Místo typu <code>Email</code> se předává <code>string</code>, místo <code>Money</code> dvojice <code>float</code>. Důsledkem je, že validace a pravidla se opakují v každém místě volání, nebo se zapomínají. Hodnotový objekt s jedním místem validace tyto duplicity odstraňuje a typ dává kontext, co daná hodnota reprezentuje. Rozbor a příklady v <a href="#primitive-obsession">sekci Primitive Obsession</a>.'
 - question: Jak poznat, že je agregát příliš velký?
