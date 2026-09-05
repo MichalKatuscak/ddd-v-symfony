@@ -756,19 +756,19 @@ o záměrnou odchylku od konvence zbytku knihy.
 :::callout{type="pattern"}
 ### PHP: Order agregát s Event Sourcingem {#es-order-aggregate-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php"}
+:::code{language="php" filename="src/Ordering/EventSourced/Order.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain;
+namespace App\Ordering\EventSourced;
 
-use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderPlaced;
-use App\Ordering\Domain\Event\OrderItemAdded;
-use App\Ordering\Domain\Event\OrderShipped;
-use App\Ordering\Domain\Exception\EmptyOrderException;
-use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\EventSourced\Event\OrderConfirmed;
+use App\Ordering\EventSourced\Event\OrderPlaced;
+use App\Ordering\EventSourced\Event\OrderItemAdded;
+use App\Ordering\EventSourced\Event\OrderShipped;
+use App\Ordering\EventSourced\Exception\EmptyOrderException;
+use App\Ordering\EventSourced\Exception\InvalidOrderStateTransitionException;
 use App\SharedKernel\Domain\EventSourcedAggregate;
 
 final class Order extends EventSourcedAggregate
@@ -854,18 +854,18 @@ final class Order extends EventSourcedAggregate
     public function trackingNumber(): ?string { return $this->trackingNumber; }
 }
 :::
-*src/Ordering/Domain/Order.php*
+*src/Ordering/EventSourced/Order.php*
 :::
 
 Položku agregát drží jako neměnný záznam. Musí být serializovatelná, protože cestuje
 uvnitř události do Event Store a zpátky:
 
-:::code{language="php" filename="src/Ordering/Domain/OrderItem.php"}
+:::code{language="php" filename="src/Ordering/EventSourced/OrderItem.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain;
+namespace App\Ordering\EventSourced;
 
 final readonly class OrderItem
 {
@@ -876,6 +876,11 @@ final readonly class OrderItem
     ) {}
 }
 :::
+
+Model má vlastní namespace `App\Ordering\EventSourced`, ne `App\Ordering\Domain\Model`.
+Není to kosmetika: event-sourced `Order` je jiný model téhož konceptu než stavově ukládaný
+agregát z ostatních kapitol. Sdílet jméno i namespace by znamenalo dvě neslučitelné třídy
+na jednom místě.
 
 Identifikátory jsou zde primitivní řetězce, ne hodnotové objekty jako ve zbytku knihy.
 Je to druhá záměrná odchylka této kapitoly: událost se serializuje do Event Store
@@ -1007,10 +1012,10 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering\Projection;
 
-use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderPlaced;
-use App\Ordering\Domain\Event\OrderItemAdded;
-use App\Ordering\Domain\Event\OrderShipped;
+use App\Ordering\EventSourced\Event\OrderConfirmed;
+use App\Ordering\EventSourced\Event\OrderPlaced;
+use App\Ordering\EventSourced\Event\OrderItemAdded;
+use App\Ordering\EventSourced\Event\OrderShipped;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -1101,10 +1106,10 @@ framework:
 
         routing:
             # Všechny doménové události routujeme na async transport
-            'App\Ordering\Domain\Event\OrderPlaced':    async
-            'App\Ordering\Domain\Event\OrderItemAdded': async
-            'App\Ordering\Domain\Event\OrderConfirmed': async
-            'App\Ordering\Domain\Event\OrderShipped':   async
+            'App\Ordering\EventSourced\Event\OrderPlaced':    async
+            'App\Ordering\EventSourced\Event\OrderItemAdded': async
+            'App\Ordering\EventSourced\Event\OrderConfirmed': async
+            'App\Ordering\EventSourced\Event\OrderShipped':   async
 :::
 *config/packages/messenger.yaml*
 :::
@@ -1202,7 +1207,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering\Projection;
 
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\EventSourced\Event\OrderPlaced;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -1326,10 +1331,10 @@ framework:
                 dsn: 'doctrine://default?queue_name=failed'
 
         routing:
-            'App\Ordering\Domain\Event\OrderPlaced':    async
-            'App\Ordering\Domain\Event\OrderItemAdded': async
-            'App\Ordering\Domain\Event\OrderConfirmed': async
-            'App\Ordering\Domain\Event\OrderShipped':   async
+            'App\Ordering\EventSourced\Event\OrderPlaced':    async
+            'App\Ordering\EventSourced\Event\OrderItemAdded': async
+            'App\Ordering\EventSourced\Event\OrderConfirmed': async
+            'App\Ordering\EventSourced\Event\OrderShipped':   async
 :::
 *config/packages/messenger.yaml*
 :::

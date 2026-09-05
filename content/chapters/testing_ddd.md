@@ -525,12 +525,12 @@ declare(strict_types=1);
 namespace Tests\Ordering\Domain;
 
 use PHPUnit\Framework\TestCase;
-use App\Ordering\Domain\Order;
-use App\Ordering\Domain\OrderItem;
-use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderPlaced;
-use App\Ordering\Domain\Event\OrderItemAdded;
-use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\EventSourced\Order;
+use App\Ordering\EventSourced\OrderItem;
+use App\Ordering\EventSourced\Event\OrderConfirmed;
+use App\Ordering\EventSourced\Event\OrderPlaced;
+use App\Ordering\EventSourced\Event\OrderItemAdded;
+use App\Ordering\EventSourced\Exception\EmptyOrderException;
 use App\SharedKernel\Domain\Event\DomainEvent;
 
 final class OrderEventSourcingTest extends TestCase
