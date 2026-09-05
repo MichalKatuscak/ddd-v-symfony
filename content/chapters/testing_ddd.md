@@ -903,7 +903,7 @@ final class OrderBuilder
 // --- Použití v testu ---
 
 $order = OrderBuilder::anOrder()
-    ->forCustomer($customerId)
+    ->forCustomer(CustomerId::generate())
     ->withItem(quantity: 3, unitPrice: new Money(25000, Currency::CZK))
     ->confirmed()
     ->build();
