@@ -374,9 +374,9 @@ namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
-final class Email
+final readonly class Email
 {
-    public function __construct(public readonly string $value)
+    public function __construct(public string $value)
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException(
@@ -430,9 +430,9 @@ final readonly class Money
 }
 
 // Silně typované identifikátory - záměna je odhalena typovým systémem
-final class OrderId
+final readonly class OrderId
 {
-    public function __construct(public readonly string $value)
+    public function __construct(public string $value)
     {
         // Uuid::isValid ze symfony/uid přijímá všechny verze UUID -
         // identifikátory v této knize vznikají přes Uuid::v7(), kterou
@@ -444,9 +444,9 @@ final class OrderId
     public function equals(self $other): bool { return $this->value === $other->value; }
 }
 
-final class UserId
+final readonly class UserId
 {
-    public function __construct(public readonly string $value) { /* stejná validace */ }
+    public function __construct(public string $value) { /* stejná validace */ }
 }
 
 // Nyní typový systém PHP odhalí záměnu:
