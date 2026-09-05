@@ -290,7 +290,7 @@ declare(strict_types=1);
 
 namespace App\Payment\Application\Handler;
 
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Payment\Application\Command\ChargeCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -302,7 +302,7 @@ final readonly class InitiatePaymentOnOrderPlaced
         private MessageBusInterface $commandBus,
     ) {}
 
-    public function __invoke(OrderPlaced $event): void
+    public function __invoke(OrderPlacedIntegrationEvent $event): void
     {
         $this->commandBus->dispatch(new ChargeCustomer(
             orderId: $event->orderId,
@@ -386,7 +386,7 @@ framework:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
-            'App\Ordering\Domain\Event\OrderPlaced': async
+            'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async
             'App\Payment\Domain\Event\PaymentSucceeded': async
             'App\Warehouse\Domain\Event\StockReserved': async
 :::
@@ -505,7 +505,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\Saga;
 
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Payment\Domain\Event\PaymentSucceeded;
 use App\Payment\Domain\Event\PaymentFailed;
 use App\Warehouse\Domain\Event\StockReserved;
@@ -516,7 +516,7 @@ use App\Payment\Application\Command\RefundCustomer;
 use App\Warehouse\Application\Command\ReserveStock;
 use App\Shipping\Application\Command\CreateShipment;
 use App\Ordering\Application\Command\ConfirmOrder;
-use App\Ordering\Application\Command\CancelOrder;
+use App\Ordering\Application\Command\CancelOrderCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -533,10 +533,10 @@ final class OrderProcessManager
     ) {}
 
     public function __invoke(
-        OrderPlaced|PaymentSucceeded|PaymentFailed|StockReserved|StockReservationFailed|ShipmentCreated $event,
+        OrderPlacedIntegrationEvent|PaymentSucceeded|PaymentFailed|StockReserved|StockReservationFailed|ShipmentCreated $event,
     ): void {
         match (true) {
-            $event instanceof OrderPlaced => $this->onOrderPlaced($event),
+            $event instanceof OrderPlacedIntegrationEvent => $this->onOrderPlaced($event),
             $event instanceof PaymentSucceeded => $this->onPaymentSucceeded($event),
             $event instanceof PaymentFailed => $this->onPaymentFailed($event),
             $event instanceof StockReserved => $this->onStockReserved($event),
@@ -545,7 +545,7 @@ final class OrderProcessManager
         };
     }
 
-    private function onOrderPlaced(OrderPlaced $event): void
+    private function onOrderPlaced(OrderPlacedIntegrationEvent $event): void
     {
         $state = OrderSaga::start(
             sagaType: 'order_process',
@@ -1155,7 +1155,7 @@ framework:
                     multiplier: 2
 
         routing:
-            'App\Ordering\Domain\Event\OrderPlaced': async_events
+            'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async_events
             'App\Payment\Domain\Event\PaymentSucceeded': async_events
             'App\Payment\Domain\Event\PaymentFailed': async_events
             'App\Warehouse\Domain\Event\StockReserved': async_events
@@ -1178,22 +1178,24 @@ framework:
 :::
 
 :::callout{type="pattern"}
-### PHP: Doménová událost OrderPlaced {#order-placed-event-heading}
+### Kterou událost sága konzumuje {#order-placed-event-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
-<?php
+Sága překračuje hranici kontextu – z Orderingu volá Payment, Warehouse i Shipping.
+Konzumuje proto **integrační** událost z [Outboxu](/outbox-pattern#domain-event-heading),
+ne doménovou `OrderPlaced` ze [Základních konceptů](/zakladni-koncepty#domain-events).
+Ta nese hodnotové objekty a zůstává uvnitř kontextu; přes hranici jdou primitivy:
 
-declare(strict_types=1);
-
-namespace App\Ordering\Domain\Event;
-
-final readonly class OrderPlaced
+:::code{language="php" filename="src/Ordering/Application/IntegrationEvent/OrderPlacedIntegrationEvent.php (výřez)"}
+final readonly class OrderPlacedIntegrationEvent
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $customerId,
+        /** @var list<array{productId: string, quantity: int, unitPriceInCents: int}> */
+        public array $items,
         public int $totalAmountCents,
-        public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
+        public \DateTimeImmutable $occurredAt,
     ) {}
 }
 :::
@@ -1283,7 +1285,7 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\CheckSagaTimeout;
-use App\Ordering\Application\Command\CancelOrder;
+use App\Ordering\Application\Command\CancelOrderCommand;
 use App\Ordering\Application\Saga\OrderSaga;
 use App\Ordering\Application\Saga\OrderSagaStatus;
 use App\Ordering\Application\Saga\OrderSagaRepository;
@@ -1382,7 +1384,7 @@ private function scheduleTimeout(string $orderId, OrderSagaStatus $status): void
     );
 }
 
-private function onOrderPlaced(OrderPlaced $event): void
+private function onOrderPlaced(OrderPlacedIntegrationEvent $event): void
 {
     // ... (vytvoření OrderSaga a dispatch ChargeCustomer - viz sekci 14.05)
 
@@ -1795,7 +1797,7 @@ namespace App\Tests\Ordering\Application\Saga;
 use App\Ordering\Application\Saga\OrderProcessManager;
 use App\Ordering\Application\Saga\OrderSagaStatus;
 use App\Ordering\Application\Saga\OrderSagaRepository;
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Payment\Application\Command\ChargeCustomer;
 use App\Payment\Domain\Event\PaymentFailed;
 use App\Payment\Domain\Event\PaymentSucceeded;
@@ -1839,9 +1841,25 @@ final class OrderProcessManagerTest extends TestCase
         $this->saga = new OrderProcessManager($this->commandBus, $this->repository);
     }
 
+    /** Zkratka – integrační událost má pět polí, testy z nich mění dvě. */
+    private function orderPlaced(
+        string $orderId = 'order-1',
+        string $customerId = 'cust-1',
+        int $totalAmountCents = 10000,
+    ): OrderPlacedIntegrationEvent {
+        return new OrderPlacedIntegrationEvent(
+            eventId: Uuid::v7(),
+            orderId: $orderId,
+            customerId: $customerId,
+            items: [],
+            totalAmountCents: $totalAmountCents,
+            occurredAt: new \DateTimeImmutable(),
+        );
+    }
+
     public function testOrderPlacedInitiatesPayment(): void
     {
-        ($this->saga)(new OrderPlaced(
+        ($this->saga)($this->orderPlaced(
             orderId: 'order-1',
             customerId: 'cust-1',
             totalAmountCents: 10000,
@@ -1857,7 +1875,7 @@ final class OrderProcessManagerTest extends TestCase
 
     public function testPaymentSucceededReservesStock(): void
     {
-        ($this->saga)(new OrderPlaced('order-1', 'cust-1', 10000));
+        ($this->saga)($this->orderPlaced());
         $this->dispatchedCommands = [];
 
         ($this->saga)(new PaymentSucceeded(orderId: 'order-1'));
@@ -1871,7 +1889,7 @@ final class OrderProcessManagerTest extends TestCase
 
     public function testPaymentFailedCancelsOrder(): void
     {
-        ($this->saga)(new OrderPlaced('order-1', 'cust-1', 10000));
+        ($this->saga)($this->orderPlaced());
         $this->dispatchedCommands = [];
 
         ($this->saga)(new PaymentFailed(

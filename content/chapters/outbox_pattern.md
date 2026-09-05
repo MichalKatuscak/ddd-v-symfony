@@ -298,7 +298,7 @@ class OutboxMessage
         $this->lastError = $error;
     }
 
-    public static function fromDomainEvent(
+    public static function fromIntegrationEvent(
         object $event,
         string $aggregateType,
         string $aggregateId,
@@ -486,7 +486,7 @@ namespace App\Ordering\Application\IntegrationEvent;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Doménová událost – neměnná, serializovatelná, nese pouze
+ * Integrační událost – neměnná, serializovatelná, nese pouze
  * data nutná pro subscribery. Včetně vlastního event_id pro
  * deduplikaci v Inboxu.
  */
@@ -498,6 +498,7 @@ final readonly class OrderPlacedIntegrationEvent
         public string $customerId,
         /** @var list<array{sku: string, quantity: int, priceCents: int}> */
         public array $items,
+        public int $totalAmountCents,
         public \DateTimeImmutable $occurredAt,
     ) {}
 }
@@ -543,10 +544,34 @@ final readonly class PlaceOrderHandler
 
             $this->orders->save($order);
 
+            // Doménová událost se do outboxu nedává přímo: nese hodnotové
+            // objekty, které by se serializovaly jako {"value":"01a0…"}.
+            // Na hranici kontextu se překládá na integrační tvar.
             foreach ($order->releaseEvents() as $event) {
+                $integrationEvent = match (true) {
+                    $event instanceof OrderPlaced => new OrderPlacedIntegrationEvent(
+                        eventId: Uuid::v7(),
+                        orderId: $event->orderId->value,
+                        customerId: $event->customerId->value,
+                        items: array_map(
+                            static fn (OrderItem $i): array => [
+                                'productId' => $i->productId->value,
+                                'quantity' => $i->quantity,
+                                'unitPriceInCents' => $i->unitPrice->amountInCents,
+                            ],
+                            $order->items(),
+                        ),
+                        totalAmountCents: $order->totalAmount()->amountInCents,
+                        occurredAt: $event->occurredAt,
+                    ),
+                    default => throw new \LogicException(
+                        'Chybí překlad pro ' . $event::class,
+                    ),
+                };
+
                 $this->outbox->store(
-                    OutboxMessage::fromDomainEvent(
-                        $event,
+                    OutboxMessage::fromIntegrationEvent(
+                        $integrationEvent,
                         aggregateType: 'Order',
                         aggregateId: $order->id->value,
                         serializer: $this->serializer->serialize(...),
@@ -1595,7 +1620,7 @@ vytvořila kompozitní index `idx_outbox_status_time`, ne jen single-column.
 
 Vyberte jeden hlavní handler – typicky `PlaceOrderHandler` nebo cokoli,
 kde dual-write nejvíc bolí. Přidejte do něj `wrapInTransaction` a místo
-`$bus->dispatch($event)` volejte `$outbox->store(OutboxMessage::fromDomainEvent($event))`.
+`$bus->dispatch($event)` volejte `$outbox->store(OutboxMessage::fromIntegrationEvent($integrationEvent))`.
 *Nemažte* ještě staré `$bus->dispatch()` – pokud máte legacy subscribery,
 kteří poslouchají na sync transportu, ti by přestali fungovat.
 
