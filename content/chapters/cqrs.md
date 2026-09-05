@@ -973,7 +973,54 @@ doctrine:
 
 Nejrozšířenější strategií v praxi je **denormalizovaná tabulka**,
 která drží data předpočítaná pro jedinou obrazovku či endpoint.
-Tabulka se aktualizuje asynchronně přes doménové události.
+Tabulka se aktualizuje asynchronně přes doménové události. Vzniká migrací, ne přes
+`schema:update` – Doctrine o ní neví a bez `schema_filter` výše by ji navrhla zahodit:
+
+:::code{language="php" filename="migrations/Version20260906090000.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+final class Version20260906090000 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return 'Read model: order_dashboard';
+    }
+
+    public function up(Schema $schema): void
+    {
+        // DDL pro MySQL/MariaDB. Read model není entita, takže tuhle
+        // tabulku nevygeneruje diff – píše se ručně.
+        $this->addSql(<<<'SQL'
+            CREATE TABLE order_dashboard (
+                order_id        CHAR(36)      NOT NULL,
+                customer_id     CHAR(36)      NOT NULL,
+                total_amount    INT           NOT NULL,
+                status          VARCHAR(32)   NOT NULL,
+                tracking_number VARCHAR(64)   DEFAULT NULL,
+                placed_at       DATETIME      NOT NULL,
+                updated_at      DATETIME      NOT NULL,
+                PRIMARY KEY (order_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        SQL);
+
+        // Dashboard se řadí podle data a filtruje podle stavu.
+        $this->addSql('CREATE INDEX idx_dashboard_status_placed
+            ON order_dashboard (status, placed_at)');
+    }
+
+    public function down(Schema $schema): void
+    {
+        $this->addSql('DROP TABLE order_dashboard');
+    }
+}
+:::
 
 :::callout{type="pattern"}
 ### PHP: Projektor aktualizující denormalizovanou tabulku {#denorm-projekce-heading}
