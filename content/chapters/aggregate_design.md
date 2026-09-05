@@ -444,9 +444,8 @@ class Order extends AggregateRoot
     }
 
     // Invariant „objednávka má alespoň jednu položku“ vymáhá signatura:
-    // bez první položky objednávka nevznikne. Jméno se liší od kanonického
-    // Order::place(OrderId, CustomerId) záměrně – jsou to dvě různé továrny
-    // na téže třídě, ne dvě verze jedné.
+    // bez první položky objednávka nevznikne. Vedle kanonického
+    // Order::place(OrderId, CustomerId) je to druhá továrna, ne jeho náhrada.
     public static function placeWithFirstItem(
         CustomerId $customerId,
         ShippingAddress $shippingAddress,
@@ -614,6 +613,11 @@ final class OrderIdType extends Type
     }
 }
 :::
+
+`Order` v této kapitole nese navíc doručovací adresu, kterou verze ze
+[Základních konceptů](/zakladni-koncepty#aggregates) nemá – kapitola potřebuje agregát
+s bohatším stavem, aby šlo ukázat, kde vede hranice. Zbytek knihy pracuje s tou jednodušší
+podobou a s dvouparametrovým `place()`.
 
 Třída záměrně nemá metodu `getName()` – DBAL 4 ji odstranil. Jméno typu
 (`order_id`) určuje výhradně klíč v konfiguraci `doctrine.dbal.types` níže

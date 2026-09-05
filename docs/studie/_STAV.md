@@ -815,6 +815,55 @@ což plodí falešné „Cannot use X as X".
 dědí z neexistujícího předka nebo používá nedefinovaný typ. Skutečné načtení proti vendoru
 je jediné, co tohle chytí.
 
+### Jedenácté kolo: spuštění testů, které si kniha sama píše (2026-09-05)
+
+Navázal jsem na desáté kolo: místo pouhého načítání tříd jsem **pustil PHPUnit 12 na testy,
+které kniha obsahuje**, proti modelu vytaženému z jejích vlastních ukázek. Ze 24 doménových
+testů jich napoprvé 15 skončilo chybou.
+
+**Opraveno:**
+
+| Kapitola | Nález |
+|---|---|
+| `authorization_in_ddd` | `OrderFactory` se v testech volá 5×, definovaný nebyl; doplněn a srovnán s API agregátu té kapitoly (konstruktor, ne `place()`) |
+| `authorization_in_ddd` | `CustomerId::fromString('cus_1')` na validujícím VO vyhodí výjimku dřív, než test cokoli ověří → platná UUID v konstantách |
+| `event_sourcing` | kapitola importuje `OrderPlaced`, `OrderItemAdded`, `OrderConfirmed`, `OrderShipped` devětkrát a `apply*` metody z nich čtou konkrétní pole, **ani jedna třída v kapitole nebyla** |
+| `event_sourcing` + `testing_ddd` | `Event::create()` (7×) sjednoceno na konstruktor – kniha jinde 13× `new OrderPlaced(` |
+| napříč | `CustomerId` byl v pěti namespace, z toho tři v témže kontextu → `App\Ordering\Domain\ValueObject` |
+| napříč | agregát `Order` byl ve čtyřech kapitolách přímo v `App\Ordering\Domain` → `Domain\Model` |
+| `testing_ddd` | builder volal `->forCustomer($customerId)` s nedefinovanou proměnnou |
+
+**Strukturální nález, který stojí za pozornost:** event-sourced `Order` a jeho události
+sdílely FQN s kanonickým stavově ukládaným agregátem, ale mají jiný tvar (primitivní řetězce
+místo VO). Dvě neslučitelné třídy na jednom místě – čtenář, který staví projekt podle knihy,
+je nemá kam dát. Přesunuto do `App\Ordering\EventSourced` a zdůvodněno v textu. Právě tenhle
+přesun pak odhalil, že kapitola své události vůbec nedefinuje – předtím se to schovalo za
+kanonické třídy stejného jména.
+
+### Otevřená editorská otázka (nemechanická)
+
+Zbylých 15 chyb má **jedinou příčinu: kniha ukazuje tutéž třídu ve více kapitolách
+s odlišným tvarem a nikde neříká, která kterou nahrazuje.**
+
+- `App\Ordering\Domain\Model\Order` – v `basic_concepts` má `place(OrderId, CustomerId)`,
+  v `aggregate_design` navíc doručovací adresu a `placeWithFirstItem()`. Konstruktory se liší
+  o jeden povinný parametr, takže ani jedna verze není nadmnožinou druhé.
+- `App\UserManagement\Domain\Model\User` – definovaný v pěti kapitolách, mimo jiné
+  v `anti_patterns` jako anemický anti-vzor. Anti-vzorová a správná verze sdílejí jméno
+  i namespace.
+
+Pro knihu je to legitimní didaktický postup (ukázat model nejdřív jednoduše, pak bohatěji,
+a vedle toho jeho zkažené varianty). Pro čtenáře, který staví projekt podle knihy, je to
+místo, kde musí ručně rozhodnout, co s čím sloučit. **Doplnil jsem věty, které vztah
+pojmenovávají** (v `aggregate_design` a `ddd_pain_points`), ale plné řešení by znamenalo
+rozhodnout, jestli kniha model verzuje explicitně (např. „doplňte do třídy z kapitoly 6")
+nebo drží varianty v oddělených namespace jako teď Event Sourcing. **To je rozhodnutí autora,
+ne mechanická oprava.**
+
+**Reprodukce:** `scratchpad/phpunit.xml` + `extract2.php` + `loader.php`, projekt `sfproj/`
+s PHPUnit 12. Harness načte první definici daného FQN, takže u kolidujících tříd záleží
+na pořadí kapitol – to je jeho limit, ne chyba knihy.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
