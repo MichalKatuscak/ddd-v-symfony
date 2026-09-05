@@ -143,8 +143,8 @@ final readonly class AddItemToCartHandler
 
     public function __invoke(AddItemToCart $command): void
     {
-        $cart = $this->carts->getOrFail(new CartId($command->cartId));
-        $product = $this->products->getOrFail(new ProductId($command->productId));
+        $cart = $this->carts->get(new CartId($command->cartId));
+        $product = $this->products->get(new ProductId($command->productId));
 
         $cart->addItem($product->id, $command->quantity, $product->price);
 
