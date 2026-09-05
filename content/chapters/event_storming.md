@@ -154,9 +154,9 @@ Přesto se online Big Picture dělá, protože doménoví experti sedí ve třec
 
 ### 04.04.6 Kdy Big Picture *nedělat* {#bp-when-again}
 
-- **Zralý produkt s ustáleným modelem.** Když tým pracuje v jedné doméně tři roky a má aktuální Context Map, nový Big Picture typicky neodhalí nic nového. Investujte raději do Process Modellingu nad konkrétním bolavým BC.
-- **Tým není ochotný diskutovat.** Big Picture stojí na otevřené debatě. Pokud je v týmu strach z konfrontace nebo silně hierarchická kultura, nejdřív tu bariéru zlomte – jinak workshop produkuje falešný konsenzus.
-- **Doménoví experti jsou v různých časových pásmech bez přesahu.** Big Picture musí proběhnout najednou. Pokud nemůžete najít 3–4 hodinové okno, kdy všichni hlavní hráči jsou online, udělejte místo toho sérii Domain Storytelling sessionů 1:1 a výstupy slijte.
+- **Zralý produkt s ustáleným modelem.** Když tým pracuje v jedné doméně tři roky a má aktuální Context Map, nový Big Picture typicky neodhalí nic nového. Víc přinese Process Modelling nad konkrétním bolavým BC.
+- **Tým není ochotný diskutovat.** Big Picture stojí na otevřené debatě. Pokud je v týmu strach z konfrontace nebo silně hierarchická kultura, musí nejdřív padnout tato bariéra – jinak workshop produkuje falešný konsenzus.
+- **Doménoví experti jsou v různých časových pásmech bez přesahu.** Big Picture musí proběhnout najednou. Když se nenajde 3–4hodinové okno, kdy jsou všichni hlavní hráči online, náhradou je série Domain Storytelling sezení 1:1 se sloučenými výstupy.
 
 :::callout{type="warn"}
 ### Facilitátor musí být neutrální {#facilitator-rule-heading}

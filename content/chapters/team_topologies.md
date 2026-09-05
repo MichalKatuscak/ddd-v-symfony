@@ -119,8 +119,8 @@ Doporučení má dvě části, které se často chybně čtou jako jedno:
   vlastnictví*: BC nikdo nevlastní a degraduje na Big Ball of Mud.
   *Praktické čtení:* sdílený BC je dočasný stav s koncovým datem, ne cílová podoba.
   Pokud dva týmy skutečně potřebují
-  společný kód, vyčleňte ho jako malý [Shared Kernel](/context-mapping#shared-kernel)
-  mezi dva oddělené BC – i ten je ale drahý vztah, ne výchozí volba.
+  společný kód, patří do malého [Shared Kernelu](/context-mapping#shared-kernel)
+  mezi dvěma oddělenými BC – i ten je ale drahý vztah, ne výchozí volba.
 
 - **Jeden tým = jeden nebo více Bounded Contexts (povoleno).**
   Malý tým (5–9 lidí) může vlastnit 1–2 menší BC, výjimečně 3. Důvodem k limitu je
@@ -308,7 +308,7 @@ rozmazává odpovědnost, zvyšuje cognitive load obou týmů. Proto je explicit
 - **Kdy:** při objevu nového problému (discovery), při zásadním refaktoringu, při bootstrapu nového BC.
 - **Kdy ukončit:** jakmile je interface jasný – přejít na X-as-a-Service.
 - **Mapování na DDD:** Partnership / Shared Kernel z Context Mapu.
-- **Past:** permanentní Collaboration → tyto dva týmy mají být *jeden tým*. Spojte je.
+- **Past:** permanentní Collaboration → tyto dva týmy jsou fakticky *jeden tým* a sloučení to jen přizná.
 
 ### X-as-a-Service {#x-as-a-service}
 
@@ -411,9 +411,9 @@ v měřítku celé firmy.
 :::
 
 Praktická past: reorganizace je bolestivá. Lidé ztrácejí senioritu, manažeři pravomoci,
-domácí kultury týmů (frontend kávovar, backend stand-up) se rozbijí. Pokud jste team-lead
-a zvažujete Inverse Conway Maneuver bez výslovného zadání od CTO, raději se nejdřív
-zeptejte. Detail komunikace s managementem je v sekci 05.09.
+domácí kultury týmů (frontend kávovar, backend stand-up) se rozbijí. Team-lead, který
+zvažuje Inverse Conway Maneuver bez výslovného zadání od CTO, si ho nejdřív vyžádá.
+Detail komunikace s managementem je v sekci 05.09.
 
 ### Kdy Inverse Conway nefunguje {#inverse-conway-limity}
 
@@ -435,7 +435,7 @@ dlouho propad potrvá a kdo ho bude vysvětlovat směrem k vedení.
 
 ### Praktický checklist před spuštěním Inverse Conway Maneuver {#inverse-checklist}
 
-Než zahájíte reorganizaci, projděte následující seznam. Pokud na *kterýkoli* bod
+Před zahájením reorganizace slouží následující seznam jako kontrola. Pokud na *kterýkoli* bod
 odpovíte „ne“, Inverse Conway je předčasný a zpravidla selže:
 
 1. **Existuje kanonická Context Map?** Bez ní není definovaná cílová
@@ -633,7 +633,7 @@ volba.
 
 - **Stream-aligned týmy:** rozdělené podle hlavních value streamů. Např. Catalog tým (5 lidí), Ordering tým (6 lidí), Identity+Billing tým (4 lidi, sdílí 2 supporting BC).
 - **Platform team:** 4 lidi, vlastní CI pipeline šablonu, K8s cluster, Grafana/Sentry, šablonu pro nový BC. Self-service.
-- **Enabling team:** ne na trvalo. Pokud potřebujete zavést CQRS, najměte si externího konzultanta na 3 měsíce.
+- **Enabling team:** ne na trvalo. Zavedení CQRS pokryje externí konzultant na 3 měsíce.
 - **Interakční módy:** Stream-aligned týmy mezi sebou X-as-a-Service. Platform team se všemi v X-as-a-Service. Příležitostná Collaboration při bootstrapu nového BC.
 
 Tato fáze je nejrizikovější – organizace už není malá, ale ještě nemá kapacitu na plný
@@ -870,7 +870,7 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
 - **Inverse Conway Maneuver:** nejdřív definovat cílovou architekturu,
   pak postavit týmy tak, aby ji přirozeně vyprodukovaly. Bez podpory CTO neuspěje.
 - **Cognitive load:** 1–2 BC (výjimečně 3) na 5–9 lidí. 4+ BC na tým = signál pro rozdělení.
-  Měřte kvartálně.
+  Měří se kvartálně.
 - **Proporce:** orientačně 75 % stream-aligned, 15 % platform, 10 % enabling
   + complicated-subsystem. Procenta jsou autorské zobecnění; kniha uvádí poměr
   stream-aligned týmů k ostatním 6:1 až 9:1 jako tip, ne jako naměřenou hodnotu.
