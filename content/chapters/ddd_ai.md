@@ -261,8 +261,9 @@ materiál k opačnému směru – jak modelovat systém, ve kterém je jazykový
 z komponent. Na rozdíl od keynote z roku 2024 jde o jeho vlastní texty a o vzory, které kniha
 učí jinde.
 
-V článku *AI Components for a Deterministic System* (srpen 2025) Evans popisuje aplikaci
-Domain Navigator, která pomocí LLM klasifikuje domény v cizí kódové bázi. Odnáší si z ní
+V článku *AI Components for a Deterministic System* (srpen 2025) Evans popisuje aplikaci,
+která pomocí LLM klasifikuje domény v cizí kódové bázi; jméno *Domain Navigator* jí dává
+až navazující text z ledna 2026. Odnáší si z ní
 rozlišení, které stojí za převzetí: klasifikační úloha není modelovací úloha.
 Klasifikace je opakovatelná, má správnou odpověď a model v ní vyniká. Modelování opakovatelné
 není a správnou odpověď nemá. Smíchané do jednoho promptu vracejí výstupy, které nejde mezi

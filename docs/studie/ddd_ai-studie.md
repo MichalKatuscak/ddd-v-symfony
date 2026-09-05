@@ -520,3 +520,32 @@ Vyřešeno druhým průchodem, ponecháno pro dohledatelnost:
 > Tři případy jsou horší než nedoložené tvrzení, protože dohledaný zdroj říká opak: Beck o testování (A17), Tune
 > o markdown souborech jako nositelích architektury (A28, A29). Kapitola tyto autory používá jako oporu pro tezi,
 > proti níž oni sami argumentují.
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**Pozor na tuto kapitolu při automatických kontrolách.** Jako jediná v knize používá
+odkazy ve tvaru `<a href="…">` místo markdownu, takže **vypadává ze všech skriptů**, které
+hledají `](http` nebo `[[N]](url)`. Devatenáct jejích odkazů se poprvé prověřilo až zvlášť
+(všechny vracejí 200). Kdo bude psát další kontrolu, musí zahrnout i `href="…"`.
+
+**Ověřeno proti primárním zdrojům — obě Evansovy články existují a tvrzení sedí:**
+
+| Tvrzení kapitoly | Výsledek |
+|---|---|
+| *AI Components for a Deterministic System*, srpen 2025 | článek existuje, datum **24. 8. 2025** |
+| aplikace klasifikuje domény v cizí kódové bázi pomocí LLM | ano, na příkladu OpenEMR |
+| rozlišení klasifikační vs. modelovací úloha | ano (*„mixed a classification task … with a modeling task"*) |
+| taxonomie NAICS | ano, v obou článcích |
+| *Context Mapping with an AI-based Component*, leden 2026 | článek existuje, datum **6. 1. 2026** |
+| LLM jako bounded context, ACL, pojmenování konkrétním modelem, Published Language | všechny čtyři body v článku jsou |
+| hranice mezi ACL a Conformistem je šedá | ano — *„This is more like Conformist behavior. The Domain Navigator is adopting Claude's language and concepts, not translating away from them."* |
+
+**OPRAVENO — jméno aplikace připsáno špatnému článku.** Kapitola psala, že Evans v srpnovém
+článku „popisuje aplikaci Domain Navigator". Srpnový text aplikaci popisuje, ale **jméno
+*Domain Navigator* v něm není ani jednou** — dává jí ho až navazující článek z ledna 2026
+(*„The application, »Domain Navigator«, identifies the business domains being addressed in
+a code-base."*). Přeformulováno.
+
+**Poznámka k dohledávání:** správná URL druhého článku je
+`/articles/context-mapping-an-ai-based-component/` — bez slova „with", ačkoli titulek ho má.
+Odhad podle titulku vrací 404.
