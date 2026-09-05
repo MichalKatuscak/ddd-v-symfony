@@ -1578,8 +1578,9 @@ vendor/bin/infection --threads=max --min-msi=80
 
 ### Konfigurace a spouštění
 
-Tři testovací sady z předchozích sekcí definuje `phpunit.dist.xml`. Od PHPUnit 10 se soubor jmenuje
-takto, ne `phpunit.xml.dist`. Ve stejném souboru se registruje i extension pro transakční izolaci
+Tři testovací sady z předchozích sekcí definuje `phpunit.dist.xml`. PHPUnit hledá konfiguraci
+v pořadí `phpunit.xml`, `phpunit.dist.xml`, `phpunit.xml.dist` – starší název tedy dál funguje,
+jen má nejnižší prioritu. Ve stejném souboru se registruje i extension pro transakční izolaci
 z [sekce o integračních testech](#integracni-testy):
 
 :::callout{type="pattern"}

@@ -770,7 +770,14 @@ final class OrderPlacedValidator
 {
     public function __construct(
         private readonly Validator $validator,
-    ) {}
+    ) {
+        // URI schématu je identifikátor, ne adresa ke stažení.
+        // Opis po síti nesahá – soubor je nutné zaregistrovat.
+        $this->validator->resolver()?->registerFile(
+            'https://example.com/events/order-placed-v1.json',
+            __DIR__ . '/schema/order-placed-v1.json',
+        );
+    }
 
     public function validate(string $json): void
     {
@@ -791,7 +798,7 @@ final class OrderPlacedValidator
 }
 :::
 
-Ukázka staví na knihovně `opis/json-schema`, která umí schémata načíst z URL a vrátit strukturovaný popis chyby; alternativou je `justinrainbow/json-schema`. Schema validation je první krok ACL na konzumující straně. Pokud payload neprojde schema validací, vrací se `UnrecoverableMessageHandlingException` a zpráva se přesouvá do dead letter queue. Bez schema validace se downstream BC vystavuje všem chybám upstreamu.
+Ukázka staví na knihovně `opis/json-schema`, která vrací strukturovaný popis chyby; alternativou je `justinrainbow/json-schema`. URI v `validate()` slouží jen jako identifikátor schématu – knihovna ho po síti nenačte, dokud ho nezaregistrujete přes `registerFile()`, `registerRaw()` nebo `registerPrefix()`. Schéma tak zůstává verzovaným souborem v repozitáři, ne vzdálenou závislostí za běhu. Schema validation je první krok ACL na konzumující straně. Pokud payload neprojde schema validací, vrací se `UnrecoverableMessageHandlingException` a zpráva se přesouvá do dead letter queue. Bez schema validace se downstream BC vystavuje všem chybám upstreamu.
 
 :::callout{type="note"}
 ### Nástroje: schema-first vs. code-first

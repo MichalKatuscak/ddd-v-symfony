@@ -616,9 +616,12 @@ Třída záměrně nemá metodu `getName()` – DBAL 4 ji odstranil. Jméno typu
 (`order_id`) určuje výhradně klíč v konfiguraci `doctrine.dbal.types` níže
 a pod stejným jménem na typ odkazuje atribut `#[ORM\Column(type: 'order_id')]`.
 Spolu s `getName()` zmizela i metoda `requiresSQLCommentHint()`, takže DBAL už
-u vlastního typu nezanechá ve schématu komentář. Doctrine Migrations pak sloupec
-při každém `diff` považuje za změněný a generuje prázdné migrace; obchází se to
-explicitním `columnDefinition`, nebo srovnávacím filtrem v konfiguraci migrací.
+u vlastního typu nezanechá ve schématu komentář. Na porovnávání schématu to nemá
+vliv: `AbstractPlatform::columnsEqual()` srovnává vygenerovanou SQL deklaraci, ne
+PHP typ, a `CHAR(36)` z `OrderIdType` odpovídá introspektovanému sloupci. Prázdné
+migrace z toho nevznikají. Cenu za zmizelý komentář zaplatíte jinde: dva vlastní
+typy nad stejnou SQL deklarací už od sebe schema diff nerozezná, takže záměnu
+`order_id` za `customer_id` v mapování migrace neodhalí.
 
 :::code{language="php" filename="src/Ordering/Domain/Order/Order.php (mapování)" highlights="22,32,33,34,35,36,37,38,39,41,42,43,44,45"}
 <?php
@@ -800,9 +803,11 @@ seřazená od nejčistšího po nejvíc kompromisní:
   `$project->getTasks()->count()` bez načtení kolekce, případně
   `$project->getTasks()->matching($criteria)`. Použitelné, pokud agregát
   kolekci skutečně potřebuje pro invarianty (např. limit počtu úkolů na projekt).
-  Jedna past: nad neinicializovanou kolekcí `matching()` nekonvertuje hodnoty
-  na databázové typy, takže kritérium s backed enumem se chová jinak podle toho,
-  zda už kolekce načtená je. Filtrování přes enum patří raději do repozitáře.
+  Jedna past: neinicializovaná kolekce kritérium přeloží do SQL, načtená ho
+  vyhodnotí v paměti nad už zhydratovanými objekty. S backed enumem v kritériu
+  vyjdou obě cesty stejně, se surovou databázovou hodnotou (`'open'` místo
+  `TaskStatus::Open`) ne – nad načtenou kolekcí neprojde porovnání s enumem
+  a výsledek je prázdný. Do kritéria patří enum, ne řetězec.
 - **Agregát jako hranice služby.** Kolekci nahradí služba pracující s agregátem,
   která invariant ověří dotazem v repozitáři. Funguje, ale signalizuje špatnou hranici.
 

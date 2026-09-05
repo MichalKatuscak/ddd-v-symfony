@@ -145,9 +145,11 @@ načtení (*change tracking*). Volání getterů, které interně modifikují st
 | Komplexní read queries | Použijte `HYDRATE_ARRAY` nebo raw SQL přes `$em->getConnection()` – EM nehydratuje objekty |
 | Celý controller je read-only | Injektujte separátní `EntityManager` nakonfigurovaný jako read-only (second EM v Symfony) |
 
-ORM 3 přitom zrušil obvyklý únikový manévr. Argument `flush($entity)` i `clear($entityName)`
-jsou pryč: první se ignoruje, druhý vyvolá chybu. „Uložím jen tenhle agregát“ dnes nejde
-vyjádřit, `flush()` vždy commituje celý Unit of Work a `clear()` vždy odpojí všechno.
+ORM 3 přitom zrušil obvyklý únikový manévr. Argumenty `flush($entity)` a `clear($entityName)`
+jsou pryč a obě metody je tiše ignorují – PHP přebytečný argument uživatelské metody
+nehlásí. To je horší než chyba: `clear('Order')` vypadá jako cílené odpojení, ale odpojí
+celou Identity Map. „Uložím jen tenhle agregát“ dnes vyjádřit nelze, `flush()` vždy
+commituje celý Unit of Work.
 Tím roste cena každé nechtěně sledované entity.
 
 ### A3. Mapping složitých Value Objects {#a3-value-objects}
