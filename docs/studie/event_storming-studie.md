@@ -481,3 +481,15 @@ a `$order->totalAmount()`, které agregát v kapitole neměl. Doplněny včetně
 **Hlas:** kapitola je žánrově návod a imperativ v ní prostupoval i prózu. Převedeny ty, které
 nesly soud; čtyři workshopová „Řešení:" ve `warn` calloutech převedena do oznamovacího tvaru
 (dvě ze šesti už deklarativní byly).
+
+### Doověřeno z vlastní knihovny (2026-09-05, druhý průchod)
+
+**OPRAVENO — termín, který Brandolini nepoužívá.** Kapitola psala „Brandolini to popisuje jako
+součást gramatiky notace (*color grammar*)". **Slovo „grammar" se v *Introducing EventStorming*
+nevyskytuje ani jednou.** Podstata je přitom správná — kniha má samostatnou sekci *Notation*,
+události se píší oranžově v minulém čase, lila je barva pro policy. Přeformulováno na to,
+co v knize skutečně je.
+
+**Ověřeno proti *Introducing EventStorming* (vlastní výtisk):** *unlimited modeling surface*,
+minulý čas u událostí, *Italian Agile Day*, pivotal events, přednáška *50.000 Orange Stickies
+Later*. Všechno sedí.

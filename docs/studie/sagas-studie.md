@@ -481,3 +481,9 @@ a přesunuta do `Infrastructure` (byla v `Application` se stejným názvem soubo
 Odkaz „[sekce 5]" sjednocen na dvouciferný tvar „[sekce 14.05]" jako ve zbytku knihy.
 Tři stavy schvalování (`ApprovalPending`, `Approved`, `Rejected`) rozšiřují kanonický
 `OrderStatus` — nově přiznáno v komentáři.
+
+### Doověřeno z vlastní knihovny (2026-09-05, druhý průchod)
+
+Ověřeno proti Richardsonovým *Microservices Patterns* (vlastní výtisk): *countermeasures*
+pro anomálie ság, *semantic lock* i *commutative updates* jsou v knize pojmenované vzory.
+Kapitola je cituje správně.

@@ -371,3 +371,17 @@ je Y" (05.01), paralelismus „Před reorganizací změřte / Po reorganizaci zm
 dvojí „odpovídá" ve větě (05.01), „Zdravé optimum" bez zdůvodnění (tabulka 05.06),
 vokalizace „v zjednodušené" → „ve zjednodušené", hovorové „Můžu" → „Mohu" ve FAQ.
 Číslování citací přečíslováno (chyběla 6–9).
+
+### Doověřeno z vlastní knihovny (2026-09-05, druhý průchod)
+
+**POZOR — nevracet zpět.** Kapitola původně psala „z teorie učení Johna Swellera (1988).
+Sweller rozlišuje 3 typy zátěže". Devátým kolem jsem to opravil na historicky přesné znění
+(trojici doplnili Sweller, van Merriënboer a Paas až 1998). **Team Topologies přitom samy
+píší tu původní, zkrácenou verzi:** *„Cognitive load was characterized in 1988 by psychologist
+John Sweller… Sweller defines three different kinds of cognitive load"* — jejich bibliografie
+ale uvádí i Swellera 1994. Kniha tedy věrně reprodukovala svůj zdroj; oprava je vůči Skeltonovi
+a Paisovi zpřesněním, ne opravou chyby v citaci. **Nechat opravené znění.**
+
+**Ověřeno proti *Team Topologies* (vlastní výtisk):** stream-aligned team, enabling team,
+complicated-subsystem team, X-as-a-Service — všechny čtyři typy i názvy interakčních módů
+v knize jsou. Conwayova formulace i pojem kognitivní zátěže sedí.

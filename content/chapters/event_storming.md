@@ -87,7 +87,7 @@ zůstává, protože ho čtenář potřebuje pro kód; na cizí mapě se tentý�
 
 Hlavní jazykové pravidlo Event Stormingu: **doménové eventy se píšou v minulém čase**. Píšete `OrderPlaced`, ne `PlaceOrder`. `PaymentReceived`, ne `ReceivePayment`. `ShipmentDispatched`, ne `DispatchShipment`.
 
-Důvod není kosmetický. Minulý čas vás *jazykově nutí* mluvit o tom, co už nastalo (a tedy o doménové realitě), místo toho, co bychom rádi (záměru či featuře). Tento posun perspektivy je rozhodující – zabraňuje workshopu sklouznout do diskuse o tom, co bude umět formulář, a drží ho u toho, jak doména opravdu funguje. Brandolini to popisuje jako součást gramatiky notace (*color grammar*) – každá barva i slovesný čas má pevně daný význam.
+Důvod není kosmetický. Minulý čas vás *jazykově nutí* mluvit o tom, co už nastalo (a tedy o doménové realitě), místo toho, co bychom rádi (záměru či featuře). Tento posun perspektivy je rozhodující – zabraňuje workshopu sklouznout do diskuse o tom, co bude umět formulář, a drží ho u toho, jak doména opravdu funguje. Brandolini tomu věnuje v knize samostatnou sekci o notaci – každá barva i slovesný čas má pevně daný význam.
 
 Když si nejste jistí, zda je sticky event, command, nebo policy: zkuste si ji přečíst nahlas. Zní v minulém čase? Event. V imperativu? Command. „Když se stane X, dělej Y“? Policy.
 :::

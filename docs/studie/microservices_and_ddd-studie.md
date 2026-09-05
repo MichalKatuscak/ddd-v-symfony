@@ -558,3 +558,9 @@ uvádí jako komunitní zkratku, ne citaci.
 (worker by spadl a zpráva se vracela v smyčce — potvrzeno CHANGELOGem Messengeru 8.1);
 inbox handler nepotvrzoval legitimní duplikát; devítipoložkové shrnutí kapitoly přepsáno
 na syntézu.
+
+### Doověřeno z vlastní knihovny (2026-09-05, druhý průchod)
+
+Ověřeno proti vlastním výtiskům Newmana (*Building Microservices*) a Richardsona
+(*Microservices Patterns*): „Microservice Pain Points" jako sekce Newmanovy kapitoly 1,
+*information hiding*, „decomposition by business capability" u Richardsona — všechno sedí.
