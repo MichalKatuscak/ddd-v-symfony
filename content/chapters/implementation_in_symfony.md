@@ -503,6 +503,11 @@ final readonly class UserId
         return new self((string) Uuid::v7());
     }
 
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
     public function equals(self $other): bool
     {
         return $this->value === $other->value;

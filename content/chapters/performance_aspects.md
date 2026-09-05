@@ -622,11 +622,17 @@ use Symfony\Component\Uid\Uuid;
  * Hodnotový objekt pro identitu objednávky - používá UUID v7 pro výkon.
  * UUID v7 je časově řazené a monotónně rostoucí - přátelské k B-tree indexům.
  */
-final class OrderId
+final readonly class OrderId
 {
-    private function __construct(
-        public readonly string $value
-    ) {}
+    public function __construct(
+        public string $value,
+    ) {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException(
+                sprintf('"%s" is not a valid UUID.', $value)
+            );
+        }
+    }
 
     public static function generate(): self
     {
@@ -635,11 +641,6 @@ final class OrderId
 
     public static function fromString(string $value): self
     {
-        if (!Uuid::isValid($value)) {
-            throw new \InvalidArgumentException(
-                sprintf('"%s" is not a valid UUID.', $value)
-            );
-        }
         return new self($value);
     }
 
@@ -650,11 +651,17 @@ final class OrderId
 }
 
 // Stejná strategie pro identitu uživatele
-final class UserId
+final readonly class UserId
 {
-    private function __construct(
-        public readonly string $value
-    ) {}
+    public function __construct(
+        public string $value,
+    ) {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException(
+                sprintf('"%s" is not a valid UUID.', $value)
+            );
+        }
+    }
 
     public static function generate(): self
     {

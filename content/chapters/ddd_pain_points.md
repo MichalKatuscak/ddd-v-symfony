@@ -304,9 +304,14 @@ namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
-final class OrderId
+final readonly class OrderId
 {
-    private function __construct(public readonly string $value) {}
+    public function __construct(public string $value)
+    {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException("Invalid OrderId: {$value}");
+        }
+    }
 
     public static function generate(): self
     {
@@ -315,9 +320,6 @@ final class OrderId
 
     public static function fromString(string $value): self
     {
-        if (!Uuid::isValid($value)) {
-            throw new \InvalidArgumentException("Invalid OrderId: {$value}");
-        }
         return new self($value);
     }
 
