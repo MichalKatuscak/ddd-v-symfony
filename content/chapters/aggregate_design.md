@@ -443,16 +443,28 @@ class Order extends AggregateRoot
     private Collection $items;
 
     private OrderStatus $status;
-    private ShippingAddress $shippingAddress;
+    // Adresa se doplňuje při checkoutu, ne při vzniku objednávky – proto
+    // nullable. Konstruktor tak má v celé knize jediný tvar
+    // (OrderId, CustomerId) a všechny továrny z něj mohou vycházet.
+    private ?ShippingAddress $shippingAddress = null;
 
     private function __construct(
         public readonly OrderId $id,
         public readonly CustomerId $customerId, // POZOR: ID, ne objekt Customer
-        ShippingAddress $shippingAddress,
     ) {
         $this->status = OrderStatus::Draft;
-        $this->shippingAddress = $shippingAddress;
         $this->items = new ArrayCollection();
+    }
+
+    public function shipTo(ShippingAddress $address): void
+    {
+        if ($this->status !== OrderStatus::Draft) {
+            throw new InvalidOrderStateTransitionException(
+                'Adresu lze měnit jen u rozpracované objednávky.',
+            );
+        }
+
+        $this->shippingAddress = $address;
     }
 
     // Invariant „objednávka má alespoň jednu položku“ vymáhá signatura:
@@ -465,7 +477,8 @@ class Order extends AggregateRoot
         int $quantity,
         Money $unitPrice,
     ): self {
-        $order = new self(OrderId::generate(), $customerId, $shippingAddress);
+        $order = new self(OrderId::generate(), $customerId);
+        $order->shipTo($shippingAddress);
         $order->addItem($productId, $quantity, $unitPrice);
 
         // Kanonická OrderPlaced (06.08) nese identitu objednávky a zákazníka;
@@ -674,8 +687,9 @@ class Order extends AggregateRoot
     #[ORM\Column(enumType: OrderStatus::class)]
     private OrderStatus $status;
 
+    // nullable: adresa přibývá při checkoutu
     #[ORM\Embedded(class: ShippingAddress::class)]
-    private ShippingAddress $shippingAddress;
+    private ?ShippingAddress $shippingAddress = null;
 
     // Mapování mění typ kolekce: místo pole list<OrderItem>
     // z čisté doménové varianty vyžaduje Doctrine Collection.

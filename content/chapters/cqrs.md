@@ -1055,13 +1055,13 @@ final class OrderDashboardProjector
     ): void
     {
         match (true) {
-            $event instanceof OrderPlaced => $this->onOrderPlaced($event),
+            $event instanceof OrderPlacedIntegrationEvent => $this->onOrderPlaced($event),
             $event instanceof OrderShipped => $this->onOrderShipped($event),
             $event instanceof OrderCancelled => $this->onOrderCancelled($event),
         };
     }
 
-    private function onOrderPlaced(OrderPlaced $event): void
+    private function onOrderPlaced(OrderPlacedIntegrationEvent $event): void
     {
         $this->connection->executeStatement(
             'INSERT INTO order_dashboard
@@ -1323,16 +1323,16 @@ vyzvedne a předá handleru.
 :::callout{type="pattern"}
 ### Konfigurace asynchronního zpracování v Symfony 8 {#async-example-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
-# config/packages/messenger.yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez – doplňuje konfiguraci z 12.05)"}
+# Doplněk ke konfiguraci z 12.05, ne náhrada: jména transportů
+# i queue_name zůstávají stejná, přibývá jen retry a druhá fronta.
 framework:
     messenger:
-        # Konfigurace transportů
         transports:
             async_events:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
-                    queue_name: commands
+                    queue_name: events
                 retry_strategy:
                     max_retries: 3
                     delay: 1000
@@ -1352,12 +1352,10 @@ framework:
         # configuration: class or interface … not found". Nechte tu jen zprávy,
         # které ve svém projektu opravdu máte.
         routing:
-            # Příkazy vhodné pro asynchronní zpracování:
-            # odesílání notifikací, generování reportů, aktualizace read modelů
-            App\Notification\Application\Command\SendWelcomeEmail: async_commands
-            App\Reporting\Application\Command\GenerateMonthlyReport: async_commands
-
-            # Vysoká priorita - aktualizace read modelů pro kritické obrazovky
+            # Vysoká priorita - aktualizace read modelů pro kritické obrazovky.
+            # Pozor: relay z kapitoly o Outboxu si transport vynucuje
+            # přes TransportNamesStamp, a ten routing přebije. Prioritní
+            # frontu má proto smysl nastavit až na straně relaye.
             App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_priority_high
 :::
 :::

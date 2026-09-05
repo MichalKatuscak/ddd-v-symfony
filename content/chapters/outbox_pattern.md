@@ -60,8 +60,8 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\PlaceOrder;
-use App\Ordering\Domain\Order;
-use App\Ordering\Domain\OrderRepository;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -447,12 +447,16 @@ use Symfony\Component\Uid\Uuid;
 
 final class Order extends AggregateRoot
 {
+    /** @var Collection<int, OrderItem> */
+    private Collection $items;
+
+    // Stejný konstruktor jako ve zbytku knihy; položky přibývají metodou.
     private function __construct(
         public readonly OrderId $id,
         public readonly CustomerId $customerId,
-        /** @var list<OrderItem> */
-        private array $items,
-    ) {}
+    ) {
+        $this->items = new ArrayCollection();
+    }
 
     /**
      * @param list<OrderItem> $items
@@ -461,11 +465,11 @@ final class Order extends AggregateRoot
     // Seznam položek potřebuje integrační událost.
     public static function placeWithItems(CustomerId $customerId, array $items): self
     {
-        $order = new self(
-            id: new OrderId((string) Uuid::v7()),
-            customerId: $customerId,
-            items: $items,
-        );
+        $order = new self(OrderId::generate(), $customerId);
+
+        foreach ($items as $item) {
+            $order->addItem($item->productId, $item->quantity, $item->unitPrice);
+        }
 
         // Agregát nahrává doménovou událost s hodnotovými objekty.
         // Na integrační tvar ji přeloží až handler na hranici kontextu.
@@ -526,9 +530,9 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\PlaceOrder;
-use App\Ordering\Domain\Order;
-use App\Ordering\Domain\OrderId;
-use App\Ordering\Domain\OrderRepository;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\Repository\OrderRepository;
 use App\Outbox\Application\DomainEventSerializer;
 use App\Outbox\Application\OutboxRepository;
 use App\Outbox\Domain\OutboxMessage;
