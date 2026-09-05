@@ -564,7 +564,7 @@ final class OrderProcessManager
         $state->transitionTo(OrderSagaStatus::Failed);
         $this->sagaRepository->save($state);
 
-        $this->commandBus->dispatch(new CancelOrder(
+        $this->commandBus->dispatch(new CancelOrderCommand(
             orderId: $event->orderId,
             reason: 'Platba selhala: ' . $event->failureReason,
         ));
@@ -1301,7 +1301,7 @@ final readonly class CheckSagaTimeoutHandler
         $state->transitionTo(OrderSagaStatus::Failed);
         $this->sagaRepository->save($state);
 
-        $this->commandBus->dispatch(new CancelOrder(
+        $this->commandBus->dispatch(new CancelOrderCommand(
             orderId: $state->correlationId(),
             reason: 'Payment timeout',
         ));
@@ -1510,7 +1510,7 @@ private function onRefundSucceeded(RefundSucceeded $event): void
     $state->transitionTo(OrderSagaStatus::Failed); // teprve teď je sága uzavřená
     $this->sagaRepository->save($state);
 
-    $this->commandBus->dispatch(new CancelOrder(
+    $this->commandBus->dispatch(new CancelOrderCommand(
         orderId: $event->orderId,
         reason: 'Zboží není skladem, platba vrácena',
     ));

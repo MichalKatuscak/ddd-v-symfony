@@ -1123,7 +1123,7 @@ final class PlaceOrderController extends AbstractController
         $orderId = (string) Uuid::v7();
         $data = $form->getData();
 
-        $command = new PlaceOrder(
+        $command = new PlaceOrderCommand(
             orderId: $orderId,
             customerId: $this->getUser()->getUserIdentifier(),
             items: $data['items'],

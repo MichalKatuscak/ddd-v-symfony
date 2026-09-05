@@ -194,6 +194,8 @@ Ukázky navíc sdílejí jeden slovník, se kterým se poprvé potkáte v [Zákl
 - Hodnotové objekty vystavují `public readonly` vlastnosti, čtou se jako `$email->value`.
 - Identifikátory vznikají přes `symfony/uid` a `Uuid::v7()`.
 - Agregáty se odkazují jen přes ID. Celá instance jednoho agregátu se nikdy nepředává do metody jiného.
+- Zprávy pro command bus nesou sufix `Command` (`PlaceOrderCommand`), jejich obsluha sufix `Handler`.
+- Peníze a další sdílené hodnotové objekty žijí v `App\SharedKernel\Domain`, stejně jako `AggregateRoot`.
 
 Průběžným příkladem je objednávka. Vzniká přes `Order::place()`, položky přijímá metodou `addItem()` a částky drží v hodnotovém objektu `Money`. Stejná trojice `Order`, `Money`, `Email` se objevuje napříč kapitolami, takže si při čtení nemusíte pamatovat novou doménu ke každému vzoru.
 

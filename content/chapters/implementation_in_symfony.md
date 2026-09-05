@@ -1358,7 +1358,7 @@ má jiné odpovědnosti a jiný typ chyb:
 
 - **Doménové výjimky** – porušení doménových pravidel a invariantů.
   Vyhazuje je doménový model (entity, agregáty, value objects).
-  Příklady: `OrderCannotBeConfirmedException`,
+  Příklady: `InvalidOrderStateTransitionException`,
   `InsufficientFundsException`, `InvalidEmailException`.
 - **Aplikační výjimky** – chyby na úrovni use case.
   Vyhazují je command/query handlery.

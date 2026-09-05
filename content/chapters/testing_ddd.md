@@ -1340,7 +1340,7 @@ do transportu a označí jako zpracovanou. Obě varianty relay procesu rozebír�
 :::code{language="php" filename="Tests/Ordering/Infrastructure/OutboxFlowTest.php"}
 public function testFlushWritesEventToOutbox(): void
 {
-    ($this->placeOrderHandler)(new PlaceOrder(/* ... */));
+    ($this->placeOrderHandler)(new PlaceOrderCommand(/* ... */));
 
     $pending = $this->outboxRepository->fetchPending(limit: 10);
 
@@ -1350,7 +1350,7 @@ public function testFlushWritesEventToOutbox(): void
 
 public function testRelayPublishesPendingEvents(): void
 {
-    ($this->placeOrderHandler)(new PlaceOrder(/* ... */));
+    ($this->placeOrderHandler)(new PlaceOrderCommand(/* ... */));
 
     $tester = new CommandTester($this->outboxDispatchCommand);
     $tester->execute([]);
