@@ -847,7 +847,9 @@ namespace App\Billing\Application\Handler;
 use App\Billing\Application\Command\CreateInvoiceForOrder;
 use App\Billing\Application\IntegrationEvent\OrderPlacedReceived;
 use App\Billing\Infrastructure\Idempotency\InboxRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
@@ -871,13 +873,23 @@ final readonly class OrderPlacedReceivedHandler
         // ve stejné transakci jako fakturu; o transakci se stará
         // doctrine_transaction middleware na command.bus. Unikátní index nad
         // eventId duplikát odmítne a celá transakce se vrátí zpět.
-        $this->commandBus->dispatch(new CreateInvoiceForOrder(
-            eventId: $event->eventId,
-            orderId: $event->orderId,
-            customerId: $event->customerId,
-            amountCents: $event->totalAmountCents,
-            currency: $event->currency,
-        ));
+        try {
+            $this->commandBus->dispatch(new CreateInvoiceForOrder(
+                eventId: $event->eventId,
+                orderId: $event->orderId,
+                customerId: $event->customerId,
+                amountCents: $event->totalAmountCents,
+                currency: $event->currency,
+            ));
+        } catch (HandlerFailedException $e) {
+            // Bez tohohle catche skončí legitimní duplikát ve failed transportu.
+            // Rollback je správný, ale zprávu je potřeba potvrdit, ne opakovat.
+            foreach ($e->getWrappedExceptions() as $wrapped) {
+                if (!$wrapped instanceof UniqueConstraintViolationException) {
+                    throw $e;
+                }
+            }
+        }
     }
 }
 :::
@@ -886,7 +898,7 @@ Tímto vzorem dosáhneme čtyř důležitých vlastností:
 
 - **Žádný shared code mezi services** – billing-svc nemá ve svém `composer.json` žádný balíček, který by definoval třídy ordering-svc.
 - **Verzování payloadu** – publisher přidá pole, subscriber pole zatím nezná, no-op. Žádný coordinated release.
-- **Idempotence** – duplicitní doručení (failover brokeru, restart workera) se neprojeví. *Inbox* tabulka v billing-svc drží zpracované `eventId`. Kontrola v handleru integrační události je jen zkratka pro zjevné duplikáty; autoritativní je unikátní index nad `eventId` a zápis do inboxu ve stejné transakci jako doménová změna. Kontrola oddělená od zápisu paralelní duplikát nezastaví.
+- **Idempotence** – duplicitní doručení (failover brokeru, restart workera) se neprojeví. *Inbox* tabulka v billing-svc drží zpracované `eventId`. Kontrola v handleru integrační události je jen zkratka pro zjevné duplikáty; autoritativní je unikátní index nad `eventId` a zápis do inboxu ve stejné transakci jako doménová změna. Kontrola oddělená od zápisu paralelní duplikát nezastaví. Odmítnutý duplikát ale handler musí zachytit a zprávu potvrdit; jinak skončí ve failure transportu, přestože se systém zachoval správně.
 - **Testovatelnost** – handler se testuje s `new OrderPlacedReceived(...)`, bez síťového stacku.
 
 ### Ekonomika microservices v PHP {#php-ekonomika-heading}
