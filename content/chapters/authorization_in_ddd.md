@@ -192,7 +192,7 @@ declare(strict_types=1);
 
 namespace App\Identity\Infrastructure\Security;
 
-use App\Identity\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Identity\Domain\TenantId;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -499,7 +499,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\Command;
 
-use App\Identity\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\OrderId;
 
 final readonly class CancelOrderCommand
@@ -614,7 +614,7 @@ Prostřední bod je ten, na kterém se týmy nejčastěji rozejdou. „Zrušit s
 // src/Ordering/Domain/Order.php
 declare(strict_types=1);
 
-namespace App\Ordering\Domain;
+namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
@@ -826,7 +826,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\ReadModel;
 
-use App\Identity\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use Doctrine\DBAL\Connection;
 
 final readonly class OrderListReadModel
@@ -1202,6 +1202,50 @@ Každá ze 4 vrstev se testuje jiným druhem testu – a snaha pokrýt vše end-
 
 Doménová pravidla v aggregate jsou plain PHP – žádný framework, žádná databáze. Test je rychlý a deterministický:
 
+Testy sahají po `OrderFactory` – jednoduchém test-data builderu, který drží sestavení
+agregátu na jednom místě. Vyplatí se, jakmile ho potřebuje víc než jeden testovací soubor:
+
+:::code{language="php" filename="tests/Ordering/Domain/OrderFactory.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Ordering\Domain;
+
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+
+final class OrderFactory
+{
+    public static function placed(string $at = '2026-04-29 10:00:00'): Order
+    {
+        return self::inState(OrderStatus::Confirmed, CustomerId::generate(), $at);
+    }
+
+    public static function placedFor(CustomerId $customerId): Order
+    {
+        return self::inState(OrderStatus::Confirmed, $customerId, '2026-04-29 10:00:00');
+    }
+
+    public static function shipped(): Order
+    {
+        return self::inState(OrderStatus::Shipped, CustomerId::generate(), '2026-04-29 10:00:00');
+    }
+
+    private static function inState(OrderStatus $status, CustomerId $customerId, string $at): Order
+    {
+        return new Order(
+            OrderId::generate(),
+            $customerId,
+            $status,
+            new \DateTimeImmutable($at),
+        );
+    }
+}
+:::
+
 :::code{language="php" filename="tests/Ordering/Domain/OrderCancelTest.php"}
 // tests/Ordering/Domain/OrderCancelTest.php
 declare(strict_types=1);
@@ -1257,7 +1301,7 @@ declare(strict_types=1);
 
 namespace Tests\Ordering\Infrastructure\Security;
 
-use App\Identity\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Ordering\Infrastructure\Security\OrderVoter;
 use PHPUnit\Framework\TestCase;
@@ -1268,27 +1312,31 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 final class OrderVoterTest extends TestCase
 {
+    // Identifikátory jsou UUID – CustomerId jinou hodnotu nepřijme.
+    private const OWNER    = '018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03';
+    private const STRANGER = '02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746';
+
     public function testOwnerCanCancelOwnOrder(): void
     {
-        $order = OrderFactory::placedFor(CustomerId::fromString('cus_1'));
+        $order = OrderFactory::placedFor(CustomerId::fromString(self::OWNER));
 
         self::assertSame(
             Voter::ACCESS_GRANTED,
-            $this->voteCancel($order, ownedBy: 'cus_1', actor: 'cus_1')
+            $this->voteCancel($order, actor: self::OWNER)
         );
     }
 
     public function testStrangerCannotCancelOrder(): void
     {
-        $order = OrderFactory::placedFor(CustomerId::fromString('cus_1'));
+        $order = OrderFactory::placedFor(CustomerId::fromString(self::OWNER));
 
         self::assertSame(
             Voter::ACCESS_DENIED,
-            $this->voteCancel($order, ownedBy: 'cus_1', actor: 'cus_2')
+            $this->voteCancel($order, actor: self::STRANGER)
         );
     }
 
-    private function voteCancel(object $order, string $ownedBy, string $actor): int
+    private function voteCancel(object $order, string $actor): int
     {
         $decisions = $this->createMock(AccessDecisionManagerInterface::class);
         $decisions->method('decide')->willReturn(false); // aktér nemá žádnou roli navíc
@@ -1435,7 +1483,7 @@ Symptom:
 
 :::code{language="php" filename="src/Ordering/Domain/Order.php (anti-vzor)" highlights="5,10,11,12"}
 // src/Ordering/Domain/Order.php (anti-vzor)
-namespace App\Ordering\Domain;
+namespace App\Ordering\Domain\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 

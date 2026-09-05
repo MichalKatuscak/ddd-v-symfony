@@ -539,8 +539,8 @@ final class OrderEventSourcingTest extends TestCase
     {
         // given
         $order = $this->given(
-            OrderPlaced::create('order-1', 'customer-1'),
-            OrderItemAdded::create('order-1', new OrderItem(
+            new OrderPlaced('order-1', 'customer-1'),
+            new OrderItemAdded('order-1', new OrderItem(
                 productId: 'product-1',
                 quantity: 2,
                 unitPriceInCents: 49900,
@@ -557,7 +557,7 @@ final class OrderEventSourcingTest extends TestCase
 
     public function testConfirmingEmptyOrderRecordsNothing(): void
     {
-        $order = $this->given(OrderPlaced::create('order-1', 'customer-1'));
+        $order = $this->given(new OrderPlaced('order-1', 'customer-1'));
 
         try {
             $order->confirm();

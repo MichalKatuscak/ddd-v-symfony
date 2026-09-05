@@ -421,7 +421,7 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Model;
 
 use App\Catalog\Domain\ValueObject\ProductId;
-use App\Customers\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\SharedKernel\Domain\AggregateRoot;
 use App\SharedKernel\Domain\Money;
@@ -631,7 +631,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
-use App\Customers\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

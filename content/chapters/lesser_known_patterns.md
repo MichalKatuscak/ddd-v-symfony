@@ -414,7 +414,7 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Specification;
 
 use App\Ordering\Domain\Order;
-use App\SharedKernel\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 
 /**
@@ -995,12 +995,12 @@ publikujete pouze pojmenované entry pointy s doménovou sémantikou:
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain;
+namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\SharedKernel\Domain\AggregateRoot;
-use App\SharedKernel\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 
 final class Order extends AggregateRoot
 {
@@ -1126,7 +1126,7 @@ use App\Ordering\Domain\Cart\CartId;
 use App\Ordering\Domain\Cart\CartRepository;
 use App\Ordering\Domain\Order;
 use App\Ordering\Domain\Pricing\PricingService;
-use App\SharedKernel\Domain\CustomerId;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use Psr\Clock\ClockInterface;
 
 /**

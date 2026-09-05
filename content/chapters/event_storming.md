@@ -251,7 +251,7 @@ final readonly class PlaceOrderCommand
 }
 
 // Domain/Order.php
-namespace App\Ordering\Domain;
+namespace App\Ordering\Domain\Model;
 
 use App\SharedKernel\Domain\AggregateRoot;
 

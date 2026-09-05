@@ -786,7 +786,7 @@ final class Order extends EventSourcedAggregate
     public static function place(string $orderId, string $customerId): self
     {
         $order = new self();
-        $order->recordEvent(OrderPlaced::create($orderId, $customerId));
+        $order->recordEvent(new OrderPlaced($orderId, $customerId));
 
         return $order;
     }
@@ -797,7 +797,7 @@ final class Order extends EventSourcedAggregate
             throw new InvalidOrderStateTransitionException('Items can only be added to draft orders.');
         }
 
-        $this->recordEvent(OrderItemAdded::create($this->orderId, $item));
+        $this->recordEvent(new OrderItemAdded($this->orderId, $item));
     }
 
     public function confirm(): void
@@ -809,7 +809,7 @@ final class Order extends EventSourcedAggregate
             throw new EmptyOrderException('Cannot confirm an empty order.');
         }
 
-        $this->recordEvent(OrderConfirmed::create($this->orderId));
+        $this->recordEvent(new OrderConfirmed($this->orderId));
     }
 
     public function ship(string $trackingNumber): void
@@ -818,7 +818,7 @@ final class Order extends EventSourcedAggregate
             throw new InvalidOrderStateTransitionException('Only confirmed orders can be shipped.');
         }
 
-        $this->recordEvent(OrderShipped::create($this->orderId, $trackingNumber));
+        $this->recordEvent(new OrderShipped($this->orderId, $trackingNumber));
     }
 
     // --- apply* metody - MUSÍ být protected (ne private), aby je base class mohla volat dynamicky ---

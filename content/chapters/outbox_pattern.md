@@ -417,7 +417,7 @@ transakci*, ve které ukládá samotný agregát.
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain;
+namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\SharedKernel\Domain\AggregateRoot;
