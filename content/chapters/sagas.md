@@ -684,6 +684,84 @@ se nemění; v tom spočívá rozdíl oproti choreografii, kde stejné rozšíř
 vyžaduje zásah do cizího kontextu.
 :::
 
+### Události kroků {#step-events-heading}
+
+Každý krok ohlásí výsledek událostí. Jsou to neměnné záznamy s primitivy – cestují
+mezi kontexty, takže hodnotové objekty by se přes serializaci nepřenesly:
+
+:::code{language="php" filename="src/Payment/Domain/Event/ + Warehouse/ + Shipping/ (obdobně)"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Domain\Event;
+
+final readonly class PaymentSucceeded
+{
+    public function __construct(
+        public string $orderId,
+        public string $transactionId = '',
+    ) {}
+}
+
+final readonly class PaymentFailed
+{
+    public function __construct(
+        public string $orderId,
+        public string $failureReason,
+    ) {}
+}
+
+final readonly class RefundSucceeded
+{
+    public function __construct(
+        public string $orderId,
+        public string $refundId = '',
+    ) {}
+}
+
+final readonly class RefundFailed
+{
+    public function __construct(
+        public string $orderId,
+        public string $failureReason,
+    ) {}
+}
+
+// --- src/Warehouse/Domain/Event/ ---
+namespace App\Warehouse\Domain\Event;
+
+final readonly class StockReserved
+{
+    public function __construct(
+        public string $orderId,
+        public string $reservationId = '',
+    ) {}
+}
+
+final readonly class StockReservationFailed
+{
+    public function __construct(
+        public string $orderId,
+        public string $failureReason,
+    ) {}
+}
+
+// --- src/Shipping/Domain/Event/ ---
+namespace App\Shipping\Domain\Event;
+
+final readonly class ShipmentCreated
+{
+    public function __construct(
+        public string $orderId,
+        public string $shipmentId = '',
+    ) {}
+}
+:::
+
+Všechny nesou `orderId` – to je korelační klíč, podle kterého si Process Manager
+najde svou ságu. Bez něj by událost nešlo přiřadit k běžícímu procesu.
+
 ### Handlery kroků žijí v cizích kontextech {#step-handlers-heading}
 
 Process Manager příkazy jen rozesílá. Vykonává je vždy handler v tom kontextu, kterému
@@ -743,6 +821,33 @@ final readonly class ChargeCustomerHandler
 Selhání se hlásí událostí, ne výjimkou. Výjimka by skončila v retry smyčce Messengeru
 a sága by se o neúspěchu nedozvěděla – zůstala by viset ve stavu `AwaitingPayment`,
 dokud ji nevypne timeout.
+
+`PaymentGateway` je port do platební brány; pro ostatní kroky platí totéž se `StockService`
+a `ShippingService`. Doména zná jen rozhraní, konkrétní adaptér přijde z infrastruktury:
+
+:::code{language="php" filename="src/Payment/Domain/PaymentGateway.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Domain;
+
+interface PaymentGateway
+{
+    /**
+     * @return string identifikátor transakce
+     * @throws \RuntimeException když platba neprojde
+     */
+    public function charge(string $customerId, int $amountCents): string;
+
+    public function refund(string $transactionId, int $amountCents): string;
+}
+:::
+
+**Zbylé handlery** – `ReserveStockHandler`, `CreateShipmentHandler`, `RefundCustomerHandler`,
+`ConfirmOrderHandler` a `CancelOrderHandler` – mají stejnou stavbu: vykonají krok a vydají
+událost. Bez posledních dvou skončí sága ve stavu `Completed`, ale objednávka zůstane
+v `Draft` – právě proto, že Process Manager stav objednávky nemění, jen posílá příkazy.
 
 ### Kolik logiky smí Process Manager mít {#logika-v-process-manageru}
 

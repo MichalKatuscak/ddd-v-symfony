@@ -75,7 +75,10 @@ final readonly class PlaceOrderHandlerNaive
 
     public function __invoke(PlaceOrder $command): void
     {
-        $order = Order::placeWithItems($command->customerId, $command->items);
+        $order = Order::placeWithItems(
+                CustomerId::fromString($command->customerId),
+                $command->items,
+            );
 
         // 1) Zápis do DB (commit Doctrine).
         $this->orders->save($order);
@@ -444,7 +447,10 @@ namespace App\Ordering\Domain\Model;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
 use App\SharedKernel\Domain\AggregateRoot;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
@@ -463,7 +469,10 @@ final class Order extends AggregateRoot
     }
 
     /**
-     * @param list<OrderItem> $items
+     * Přebírá primitivní řádky z commandu, ne hotové OrderItem: ty vzniknout
+     * zvenčí nemohou, protože jejich konstruktor vyžaduje už existující Order.
+     *
+     * @param list<array{productId: string, quantity: int, unitPriceInCents: int}> $items
      */
     // Druhá továrna vedle kanonického Order::place(OrderId, CustomerId).
     // Seznam položek potřebuje integrační událost.
@@ -472,7 +481,11 @@ final class Order extends AggregateRoot
         $order = new self(OrderId::generate(), $customerId);
 
         foreach ($items as $item) {
-            $order->addItem($item->productId, $item->quantity, $item->unitPrice);
+            $order->addItem(
+                ProductId::fromString($item['productId']),
+                $item['quantity'],
+                new Money($item['unitPriceInCents'], Currency::CZK),
+            );
         }
 
         // Agregát nahrává doménovou událost s hodnotovými objekty.
@@ -480,6 +493,15 @@ final class Order extends AggregateRoot
         $order->record(new OrderPlaced($order->id, $customerId));
 
         return $order;
+    }
+
+    // addItem(), totalAmount() a items() viz kapitola
+    // [Návrh agregátu](/navrh-agregatu); handler je potřebuje k sestavení
+    // payloadu integrační události.
+    /** @return list<OrderItem> */
+    public function items(): array
+    {
+        return $this->items->toArray();
     }
 }
 :::
@@ -526,6 +548,29 @@ final readonly class OrderPlacedIntegrationEvent
 :::callout{type="pattern"}
 ### PHP: PlaceOrderHandler – atomický zápis order + outbox {#place-order-handler-heading}
 
+Command je prosté DTO s primitivy – přichází z HTTP vrstvy, kde hodnotové objekty
+ještě neexistují:
+
+:::code{language="php" filename="src/Ordering/Application/Command/PlaceOrder.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Command;
+
+final readonly class PlaceOrder
+{
+    /**
+     * @param list<array{productId: string, quantity: int, unitPriceInCents: int}> $items
+     */
+    public function __construct(
+        public string $customerId,
+        public array $items,
+    ) {}
+}
+:::
+
+
 :::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandler.php" highlights="29,30,36,37,38,39,40,41,42,43,44,45"}
 <?php
 
@@ -558,7 +603,10 @@ final readonly class PlaceOrderHandler
         // wrapInTransaction garantuje atomicitu:
         // buď se zapíše order i všechny outbox řádky, nebo nic.
         return $this->em->wrapInTransaction(function () use ($command): OrderId {
-            $order = Order::placeWithItems($command->customerId, $command->items);
+            $order = Order::placeWithItems(
+                CustomerId::fromString($command->customerId),
+                $command->items,
+            );
 
             $this->orders->save($order);
 
@@ -1199,6 +1247,31 @@ final readonly class DbalInboxRepository implements InboxRepository
 
 :::callout{type="pattern"}
 ### PHP: OrderPlacedReadModelUpdater s inbox checkem {#read-model-updater-heading}
+
+Port do read modelu je úzký – subscriber jím jen zapisuje, nikdy nečte:
+
+:::code{language="php" filename="src/Reporting/Application/ReadModelStore.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Reporting\Application;
+
+interface ReadModelStore
+{
+    /**
+     * Upsert – zpracování téže události podruhé nesmí nic pokazit.
+     *
+     * @param list<array{productId: string, quantity: int, unitPriceInCents: int}> $items
+     */
+    public function upsertOrderRow(
+        string $orderId,
+        string $customerId,
+        array $items,
+        \DateTimeImmutable $placedAt,
+    ): void;
+}
+:::
 
 :::code{language="php" filename="src/Reporting/Application/Subscriber/OrderPlacedReadModelUpdater.php" highlights="27,28,29,30,44"}
 <?php
