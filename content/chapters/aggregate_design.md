@@ -704,6 +704,102 @@ Omezení tedy padlo a `final` u entity projde. Kdo udržuje projekt na starším
 Symfony, počítá s ním dál.
 :::
 
+Mapování výše odkazuje na tři třídy, které bez vlastních atributů nefungují.
+`Money` a `ShippingAddress` jsou embeddable hodnotové objekty; `OrderItem` je
+plnohodnotná entita uvnitř hranice agregátu a potřebuje vlastní identitu i zpětnou
+referenci, jinak `mappedBy: 'order'` nemá protistranu a mapování skončí chybou:
+
+:::code{language="php" filename="src/SharedKernel/Domain/Money.php + Ordering/Domain/ValueObject/ShippingAddress.php + Model/OrderItem.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Domain;
+
+use Doctrine\ORM\Mapping as ORM;
+
+// Money je embeddable, jinak #[ORM\Embedded] v Order ani OrderItem neprojde.
+// Doménová definice ze Základních konceptů zůstává, přibývají jen atributy.
+#[ORM\Embeddable]
+final readonly class Money
+{
+    public function __construct(
+        #[ORM\Column]
+        public int $amountInCents,
+        #[ORM\Column(enumType: Currency::class)]
+        public Currency $currency,
+    ) {
+        if ($amountInCents < 0) {
+            throw new \InvalidArgumentException('Money cannot be negative');
+        }
+    }
+
+    // add(), subtract(), multiply(), percentage(), equals() – viz 06.04
+}
+
+// --- src/Ordering/Domain/ValueObject/ShippingAddress.php ---
+namespace App\Ordering\Domain\ValueObject;
+
+#[ORM\Embeddable]
+final readonly class ShippingAddress
+{
+    public function __construct(
+        #[ORM\Column]
+        public string $street,
+        #[ORM\Column]
+        public string $city,
+        #[ORM\Column(length: 16)]
+        public string $postalCode,
+        #[ORM\Column(length: 2)]
+        public string $countryCode,
+    ) {
+        if (strlen($countryCode) !== 2) {
+            throw new \InvalidArgumentException('Country code must be ISO 3166-1 alpha-2');
+        }
+    }
+}
+
+// --- src/Ordering/Domain/Model/OrderItem.php ---
+namespace App\Ordering\Domain\Model;
+
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\SharedKernel\Domain\Money;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'order_items')]
+final class OrderItem
+{
+    // Náhradní identita. Položka nemá doménové ID – zvenčí se na ni
+    // neodkazuje, přistupuje se k ní výhradně přes kořen.
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    public function __construct(
+        #[ORM\ManyToOne(inversedBy: 'items')]
+        #[ORM\JoinColumn(nullable: false)]
+        private Order $order,
+        #[ORM\Column(type: 'product_id')]
+        public readonly ProductId $productId,
+        #[ORM\Column]
+        public readonly int $quantity,
+        #[ORM\Embedded(class: Money::class)]
+        public readonly Money $unitPrice,
+    ) {}
+
+    public function subtotal(): Money
+    {
+        return $this->unitPrice->multiply($this->quantity);
+    }
+}
+:::
+
+Náhradní `int` identita je vědomé rozhodnutí, ne nedbalost. `OrderItem` nemá doménovou
+identitu – zvenčí agregátu se na položku nikdo neodkazuje, takže UUID by tu jen zabíralo
+místo. Kdyby se odkazoval, byl by to signál, že položka patří do vlastního agregátu.
+
 :::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php" highlights="33,34,35,36,37,38,39"}
 <?php
 
@@ -757,7 +853,8 @@ doctrine:
             order_id:    App\SharedKernel\Infrastructure\Doctrine\Type\OrderIdType
             customer_id: App\SharedKernel\Infrastructure\Doctrine\Type\CustomerIdType
             product_id:  App\SharedKernel\Infrastructure\Doctrine\Type\ProductIdType
-            money:       App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType
+            # Money se sem nepřidává – mapuje se přes #[ORM\Embedded] podle
+            # pravidla výše. Jednosloupcový custom typ by zabil SUM() i ORDER BY.
 
     orm:
         # Bez underscore strategie vzniknou sloupce occurredAt, createdAt…
