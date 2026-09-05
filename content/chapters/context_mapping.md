@@ -269,6 +269,10 @@ framework:
                     queues:
                         ordering.from_catalog:
                             binding_keys: ['product.price_changed', 'product.discontinued']
+                # Retry posílá zprávu zpět přes sender téhož transportu,
+                # tedy přes encode() vlastního serializeru. Serializer
+                # konzumenta proto musí umět i encode(), jinak sem patří
+                # max_retries: 0 a spoléhá se na failure transport.
                 retry_strategy:
                     max_retries: 3
                     delay: 1000
@@ -280,7 +284,7 @@ framework:
 :::callout{type="note"}
 **Konzument sekci `routing` nepotřebuje.** Ta konfiguruje odesílání, ne příjem – říká, na který transport Messenger zprávu pošle při dispatchi, konzumaci cizích zpráv neřídí. Aby worker dokázal event z fronty `ordering.from_catalog` přečíst, potřebuje transport vlastní serializer (volba `serializer` v konfiguraci transportu), který JSON payload od Catalogu namapuje na lokální třídu `ProductPriceChanged`. Výchozí serializer Messengeru totiž očekává zprávy, které odeslal sám. Implementaci konzumní strany včetně serializeru a deduplikace rozebírá kapitola [Outbox Pattern](/outbox-pattern).
 
-Symfony 8.1 přidalo k tomu dva nástroje. Atribut `#[AsMessage(serializedTypeName: 'catalog.product.price_changed')]` nahradí PHP FQCN v hlavičce `type` vlastní hodnotou – jméno zprávy se tím stává součástí publikovaného kontraktu místo interního detailu namespace producenta. A selhání dekódování už neputuje tiše pryč: `MessageDecodingFailedException` prochází standardní failure pipeline, takže nečitelný payload skončí ve failure transportu.
+Symfony 8.1 přidalo k tomu dva nástroje. Atribut `#[AsMessage(serializedTypeName: 'catalog.product.price_changed')]` nahradí PHP FQCN v hlavičce `type` vlastní hodnotou – jméno zprávy se tím stává součástí publikovaného kontraktu místo interního detailu namespace producenta. A selhání dekódování už neputuje tiše pryč: receiver zprávu při chybě dekódování nesmaže a pošle ji běžnou retry/failure cestou, takže nečitelný payload skončí ve failure transportu. Platí to ale jen pro `MessageDecodingFailedException` – jiná výjimka ze serializeru shodí worker a zpráva se po restartu vrátí znovu.
 :::
 
 A handler v Orderingu:

@@ -763,6 +763,7 @@ namespace App\Billing\Infrastructure\Messaging;
 use App\Billing\Application\IntegrationEvent\OrderCancelledReceived;
 use App\Billing\Application\IntegrationEvent\OrderPlacedReceived;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 final readonly class IntegrationEventSerializer implements SerializerInterface
@@ -771,6 +772,11 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
      * Mapping event_type hlavičky -> integration event třída.
      * Když publisher přidá nový event_type, doplníme tu řádek;
      * dokud nedoplníme, zpráva spadne do dead-letter exchange.
+     *
+     * Selhání dekódování MUSÍ být MessageDecodingFailedException.
+     * Jen tu receiver zachytí a pošle do failure pipeline; jiná výjimka
+     * shodí worker, zpráva zůstane neackovaná a po restartu se vrátí
+     * znovu - nekonečná smyčka nad jedinou vadnou zprávou.
      */
     private const TYPE_MAP = [
         'ordering.placed' => OrderPlacedReceived::class,
@@ -780,13 +786,18 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
     public function decode(array $encodedEnvelope): Envelope
     {
         $headers = $encodedEnvelope['headers'] ?? [];
-        $eventType = $headers['event_type'] ?? throw new \RuntimeException('Missing event_type header');
+        $eventType = $headers['event_type']
+            ?? throw new MessageDecodingFailedException('Missing event_type header');
 
-        $targetClass = self::TYPE_MAP[$eventType] ?? throw new \RuntimeException(
+        $targetClass = self::TYPE_MAP[$eventType] ?? throw new MessageDecodingFailedException(
             sprintf('Unknown event_type: %s', $eventType)
         );
 
-        $payload = json_decode($encodedEnvelope['body'], true, flags: JSON_THROW_ON_ERROR);
+        try {
+            $payload = json_decode($encodedEnvelope['body'], true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new MessageDecodingFailedException('Body is not valid JSON', 0, $e);
+        }
 
         // Mapping payloadu z publishera na náš subscriber-side DTO.
         // Každý typ eventu nese jiná pole, proto se tu větví. Defenzivní –
