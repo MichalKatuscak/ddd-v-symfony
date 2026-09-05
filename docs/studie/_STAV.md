@@ -735,13 +735,42 @@ ASCII uvozovku místo české. Všechno odhalila kontrola po sobě, ne test.
 **Poučení: po každé dávkové náhradě si přečíst výsledný odstavec, ne jen ověřit,
 že se řetězec našel.**
 
+### Oprava: knihovna byla k dispozici celou dobu
+
+Tenhle odstavec původně tvrdil, že Millett & Tune a Khononova „nemám k dispozici".
+**Byla to chyba — obě knihy, a s nimi Brandolini, Newman, Richardson, Skelton & Pais,
+Hohpe & Woolf, Fowlerův PoEAA a plný *DDD Distilled*, leží na sdílení
+`//katuscakovi/Work/Knihy/DDD/` a `/software-development/`.** Prohlásil jsem je za
+nedostupné, aniž bych se tam podíval, ačkoli autor sdílení dřív sám nabídl.
+
+**Poučení: než označím tvrzení za neověřitelné, projít sdílenou knihovnu.**
+
+Po doověření proti primárním textům:
+
+| Tvrzení | Výsledek |
+|---|---|
+| Millett & Tune, kapitola 3 „Focusing on the Core Domain" | sedí (str. 31) |
+| „code for replacement rather than reuse" pro Supporting subdomény | sedí — kniha píše „coding for replacement rather than reuse" |
+| Khononov, kapitola 1 „Analyzing Business Domains" | sedí |
+| Khononov: tři osy klasifikace | sedí — Table 1-1 (competitive advantage / complexity / volatility) |
+| **Khononov: „dal by se prodat jako samostatný byznys?"** | **NESEDÍ — v knize ani v jeho článku není; opraveno** |
+| **Brandolini: „color grammar"** | **NESEDÍ — slovo „grammar" v knize není ani jednou; opraveno** |
+| Vernon *Distilled*: „consumers should not use the event types" | sedí (plná kniha) |
+| Newman: „Microservice Pain Points", *information hiding* | sedí |
+| Richardson: *countermeasures*, *semantic lock*, *commutative updates* | sedí |
+| Skelton & Pais: čtyři typy týmů, X-as-a-Service, kognitivní zátěž | sedí |
+| Brandolini: *unlimited modeling surface*, Italian Agile Day, pivotal events | sedí |
+
+**Nuance u Swellera, aby se oprava nevracela zpět:** *Team Topologies* samy píší
+„characterized in 1988 by John Sweller… Sweller defines three different kinds", tedy tu
+zkrácenou verzi, kterou kniha převzala. Oprava na historicky přesné znění (trojici doplnili
+Sweller, van Merriënboer a Paas 1998) je zpřesněním vůči Skeltonovi a Paisovi, ne opravou
+chybné citace. Zaznamenáno i ve studii kapitoly.
+
 ### Co zůstává neověřené
 
-- Millett & Tune, *Patterns, Principles and Practices of DDD* – název kapitoly 3
-  („Focusing on the Core Domain") a heuristika „code for replacement rather than
-  reuse". Knihu nemám, v Evansovi ani Vernonovi to není.
-- Khononov, *Learning DDD* – názvy kapitol. Totéž.
-- Tvrzení opřená o placené zdroje bez volně dostupného textu.
+- Tvrzení opřená o placené zdroje bez volně dostupného textu a bez výtisku v knihovně.
+- Přednášky a konferenční keynote, u nichž existuje jen novinový referát.
 
 ## Jak zadat studii (šablona promptu pro agenta)
 

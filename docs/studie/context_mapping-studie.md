@@ -356,3 +356,11 @@ Lokální kopie PDF je 38stránkový výňatek, na ověření nestačí.
 **Opraveno:** `Money::add()` nyní hází `\DomainException` jako kanonická definice; `opis/json-schema`
 schémata z URL nestahuje (doplněna registrace přes `registerFile()`); docblock uváděl
 `invoiceNumber (int)`, kód i test pracují s řetězcem. Číslování citací přečíslováno (chyběla 5).
+
+### Doověřeno z vlastní knihovny (2026-09-05, druhý průchod)
+
+Předchozí zápis uváděl, že lokální kopie *DDD Distilled* je 38stránkový výňatek a na ověření
+nestačí. **Plná kniha je na sdílení** (`//katuscakovi/Work/Knihy/software-development/`).
+Ověřeno proti ní: Vernonova věta *„consumers should not use the event types (e.g., classes)
+of an event publisher"* v knize **je**. Tvrzení kapitoly „Konzument závisí na schématu,
+ne na třídě" je tedy doloženo přímo, ne jen zápisem ze šestého kola.
