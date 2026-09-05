@@ -597,22 +597,23 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Repository;
 
+use App\Ordering\Domain\Exception\OrderNotFoundException;
 use App\Ordering\Domain\Model\Order;
-use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 
 interface OrderRepository
 {
     public function save(Order $order): void;
 
-    public function findById(OrderId $id): ?Order;
-
-    /** @return list<Order> */
-    public function findByCustomerId(CustomerId $customerId): array;
+    /** @throws OrderNotFoundException když objednávka neexistuje */
+    public function get(OrderId $id): Order;
 }
 :::
 
-`OrderRepository` v ukázce definuje metody pro ukládání a načítání objednávek.
+`OrderRepository` je záměrně úzký: uložit agregát a načíst ho podle identity. Dotazy typu
+„všechny objednávky zákazníka" do něj nepatří – ty obsluhuje read model, jak rozvádí kapitola
+[CQRS](/cqrs). Chybějící objednávka je chyba volajícího, ne prázdný výsledek, proto `get()`
+vrací `Order` a hází výjimku místo `null`.
 Implementaci si volí infrastruktura – nejčastěji Doctrine ORM, ale stejně dobře
 in-memory varianta pro testy. Praktickou implementaci v Symfony 8 popisuje kapitola
 [Implementace v Symfony 8](/implementace-v-symfony).

@@ -365,6 +365,33 @@ interface PlaceOrder
 }
 :::
 
+Oba DTO jsou obyčejné neměnné struktury bez chování – port jimi vymezuje, co dovnitř vstupuje
+a co ven vystupuje:
+
+:::code{language="php" filename="src/Ordering/Application/Dto/PlaceOrderInput.php + PlaceOrderOutput.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Dto;
+
+final readonly class PlaceOrderInput
+{
+    /** @param list<array{productId: string, quantity: int, unitPriceInCents: int}> $items */
+    public function __construct(
+        public string $customerId,
+        public array $items,
+    ) {}
+}
+
+final readonly class PlaceOrderOutput
+{
+    public function __construct(
+        public string $orderId,
+    ) {}
+}
+:::
+
 HTTP adapter pak nezná konkrétní třídu handleru – zná jen rozhraní portu. Na implementaci ho naváže alias v konfiguraci kontejneru (viz [sekci o Service Containeru](#hexagonal-symfony-di-heading) níže). Tím získáte schopnost handler v testech vyměnit za fake bez celé aplikační vrstvy.
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php" highlights="13,14,15,16"}
