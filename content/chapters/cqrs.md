@@ -579,6 +579,23 @@ Rozdíl je vidět přímo v závislostech: command handler pracuje s doménovým
 (`UserProfileReadRepository`), který vrací přímo ViewModel – jednoduchou datovou strukturu
 optimalizovanou pro prezentaci. Query handler neprochází přes doménový model.
 
+Rozhraní read repozitáře patří do read strany, ne do domény, a je záměrně úzké:
+
+:::code{language="php" filename="src/UserManagement/Profile/ReadModel/UserProfileReadRepository.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Profile\ReadModel;
+
+use App\UserManagement\Profile\ViewModel\UserProfileViewModel;
+
+interface UserProfileReadRepository
+{
+    public function findById(string $userId): ?UserProfileViewModel;
+}
+:::
+
 ## 12.09 ViewModely a Read Modely {#view-models}
 
 ViewModel (nebo Read Model) je datová struktura navržená výhradně pro potřeby konkrétního dotazu

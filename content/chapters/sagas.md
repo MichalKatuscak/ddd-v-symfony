@@ -194,6 +194,27 @@ final readonly class ChargeCustomer implements CompensatableCommand
     }
 }
 :::
+
+Kompenzační příkaz je obyčejné DTO. Bez něj se `ChargeCustomer` ani nenačte – návratový
+typ `compensation()` je kovariantní zúžení `object` z rozhraní, takže PHP potřebuje třídu znát:
+
+:::code{language="php" filename="src/Payment/Application/Command/RefundCustomer.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Application\Command;
+
+final readonly class RefundCustomer
+{
+    public function __construct(
+        public string $orderId,
+        public string $customerId,
+        public int $amountCents,
+        public string $reason,
+    ) {}
+}
+:::
 :::
 
 :::callout{type="warn"}

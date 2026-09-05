@@ -457,13 +457,23 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\UseCase;
 
+use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Port\OrderRepository;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 final class PlaceOrderHandler implements PlaceOrder
 {
     public function __construct(
         private readonly OrderRepository $orders,
     ) {
+    }
+
+    public function handle(PlaceOrderInput $input): PlaceOrderOutput
+    {
+        $order = Order::place(OrderId::generate(), $input->customerId);
+        $this->orders->save($order);
+
+        return new PlaceOrderOutput($order->id()->value);
     }
 }
 :::
