@@ -563,6 +563,98 @@ Enum casy jsou PascalCase, události bez sufixu `Event`, události se nenahráva
 - typografie: 0 em dash, 0 anglických uvozovek, 0 výskytů „Tady“
 - `reading_time` přepočítán u všech kapitol, které změnily délku
 
+## Osmé kolo: nezávislá kontrola celé knihy (2026-09-05)
+
+Knihu prošlo pět nezávislých agentů, kteří dostali zadání **nálezy hlásit, ne opravovat**,
+a záměrně nedostali seznam už provedených oprav – měli hledat čerstvýma očima. Čtyři
+audity kódu (po skupinách kapitol), jeden audit konzistence napříč knihou a jeden audit
+hlasu a jazyka. Každý nález jsem ověřoval sám, než jsem podle něj cokoli změnil.
+
+### Nálezy, které vyvrátily tvrzení knihy (ověřeno spuštěním)
+
+| Kapitola | Tvrzení knihy | Skutečnost |
+|---|---|---|
+| `aggregate_design` | zmizelý `requiresSQLCommentHint()` v DBAL 4 generuje prázdné migrace | `columnsEqual()` srovnává SQL deklaraci, ne PHP typ; `getUpdateSchemaSql()` vrací prázdné pole |
+| `aggregate_design` | nad neinicializovanou kolekcí `matching()` nekonvertuje enum | opačně: s enumem vyjdou obě cesty stejně (2 = 2), rozchází se surová DB hodnota (2 vs. 0) |
+| `ddd_pain_points` | `clear($entityName)` vyvolá chybu | PHP přebytečný argument ignoruje – metoda tiše odpojí celou Identity Map, což je horší |
+| `context_mapping` | `opis/json-schema` umí schéma načíst z URL | žádný HTTP fetch nemá; bez `registerFile()` skončí `RuntimeException: Schema not found` |
+| `performance_aspects` | `max_prepared_statements` má v PgBouncer 1.21 výchozí 200 | 1.21 volbu zavedla s výchozí **0**; hodnota 200 je výchozí až od **1.24** (NEWS.md) |
+| `testing_ddd` | od PHPUnit 10 se soubor jmenuje `phpunit.dist.xml`, ne `phpunit.xml.dist` | hledá se v pořadí `phpunit.xml`, `phpunit.dist.xml`, `phpunit.xml.dist` – starý název funguje dál |
+
+Agent u PgBounceru tipoval verzi 1.22; správná je 1.24 podle changelogu. Reprodukční
+skripty zůstaly ve scratchpadu (`ormtest/e_difftype.php`, `e_extralazy.php`, `d_clear.php`,
+`a_idvo.php`).
+
+### Kód, který by v Symfony 8 spadl
+
+- `Voter::voteOnAttribute()` bez čtvrtého parametru `?Vote $vote = null` – fatal error
+  „Declaration must be compatible" (ověřeno ve zdrojáku security-core 8.0 i spuštěním).
+- `AccessDecision::isGranted()` – je to veřejná vlastnost, ne metoda.
+- `Request::get()` – v 8.0 odstraněna.
+- `UserInterface::eraseCredentials()` – v 8.0 odstraněna.
+- `Currency::equals()` – `Currency` je string-backed enum bez metod.
+- `Money::multiply(0.21)` na `multiply(int)` – `TypeError`; `subtract()`, `toMinorUnits()`
+  a `fromAmount()` v knize nikdy definované nebyly.
+- VO jako `#[ORM\Id]` bez `__toString()` – `persist()` padne na
+  `UnitOfWork::getIdHashByIdentifier` (ověřeno spuštěním na ORM 3.6.8).
+
+### Věcné chyby v logice ukázek
+
+- `migration_from_crud`: `activate()` token neporovnával s tím, který entita vydala –
+  libovolný platný token aktivoval libovolný účet.
+- `ddd_pain_points`: `catch (UniqueConstraintViolationException)` obepínal i handler,
+  takže unique violation z domény se vydávala za duplicitní zprávu a Messenger ji potvrdil.
+- `case_study`: projekce byla TOCTOU – dva workery vidí `null`, druhý flush padne na PK.
+- `microservices_and_ddd`: serializer házel `\RuntimeException`; jen
+  `MessageDecodingFailedException` receiver rozpozná, jiná výjimka shodí worker
+  a zpráva se po restartu vrátí (potvrzeno CHANGELOGem Messengeru 8.1).
+- `practical_examples`: `Cart::checkout()` neměnil stav, takže dvojklik vyrobil dvě objednávky.
+- `performance_aspects`: `ORDER BY` nad `::text` aliasem řadil lexikograficky;
+  `BETWEEN` nad timestampem uřízl poslední den; `INNER JOIN o.items` vynechal
+  objednávky bez položek.
+
+### Sjednocení napříč knihou
+
+Audit konzistence našel dvanáct rozporů v API. Rozhodnutí a poměry:
+
+| Věc | Bylo | Je |
+|---|---|---|
+| Událost z `place()` | `OrderCreated` (5 kapitol) vs. `OrderPlaced` (15) | `OrderPlaced` |
+| Namespace BC | `App\Ordering` (231) / `App\OrderManagement` (89) / `App\Order` (17) | `App\Ordering` |
+| Sdílené jádro | `App\Shared` (22) vs. `App\SharedKernel` (62) | `App\SharedKernel` |
+| `Money` a `Currency` | čtyři různé namespace | `App\SharedKernel\Domain` |
+| `OrderStatus` | `{Created,…}` vs. `{Draft,…}`, plus nedefinovaný `Placed` | `{Draft, Confirmed, Paid, Shipped, Delivered, Cancelled}` |
+| Součet objednávky | `totalAmount()` (6) / `total()` (3) / `getTotal()` (1) | `totalAmount()` |
+| Konstrukce ID | veřejný konstruktor (5) vs. privátní + `fromString()` (2) | veřejný validující konstruktor + `fromString()` alias |
+| Zápis VO | tři styly `Email` | `final readonly class` s promoted property |
+| Prázdná objednávka | `EmptyOrderNotAllowedException` / `EmptyOrder` / `EmptyOrderException` | `EmptyOrderException` |
+| Sufix commandu | 6 bez sufixu vs. 24 se sufixem | sufix `Command`, konvence doplněna do předmluvy |
+| Rozhraní repozitáře | `OrderSagaRepositoryInterface` (jediné se sufixem) | `OrderSagaRepository` + `DoctrineOrderSagaRepository` |
+| Zápis UUID | `Uuid::v7()->toRfc4122()` vs. `(string) Uuid::v7()` | `(string) Uuid::v7()` |
+
+`SignedMoney` byl slibovaný, ale nikde nedefinovaný typ – odkaz i zmínka odstraněny.
+
+### Co jsem po ověření nezměnil
+
+- **Terminologie „kořen agregátu" vs. „aggregate root".** Glosář uvádí český termín jako
+  hlavní a anglický v závorce; kapitoly to dodržují. Není to rozpor.
+- **14 z 15 nálezů skriptu `check_tonality.php`.** „Klíčová doména" je překlad Core Domain;
+  „mocný framework" a „Je to elegantnější" jsou citované protipříklady; „snadno zapomene"
+  a „vypadá jednoduše" nejsou marketing. Keyword matcher tyto kontexty nerozliší.
+- **Rozšířené signatury `Order::place()`** ve třech kapitolách. Bez nich by nešlo ukázat
+  jejich téma (invariant vymáhaný signaturou, payload události). Odchylka je nově
+  přiznaná v textu, ne zamlčená.
+- **Holá `\DomainException` v Layered ukázce.** Zkratka je záměrná a nově přiznaná.
+- **`recordEvent()` v Event Sourcingu.** Odchylka od `record()` byla přiznaná už dřív.
+
+### Stav po tomto kole
+
+`php -l` 301 bloků / 0 chyb, `lint:twig` 30 souborů OK, kotvy a interní odkazy
+1088 kotev / 0 rozbitých, 0 em dashů, 0 anglických uvozovek, 0 „Tady" v kapitolách.
+
+Dva agenti (kontrola faktů a citací, kontrola kódu) padli na limitu API dřív, než
+stihli odevzdat report. Jejich záběr částečně pokryly čtyři skupinové audity kódu.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
