@@ -82,7 +82,7 @@ poruší. Čtyři vodítka, která doporučuje aplikovat v pořadí:
    podkládá číslem z projektu, který analyzoval: zhruba 70 % agregátů tvořil samotný
    kořen s několika hodnotovými objekty, zbývajících 30 % mělo dvě až tři entity celkem.
 3. **Reference mezi agregáty pouze přes identitu.** Místo objektové reference
-   uložte `OrderId`, `CustomerId`. Doctrine asociace mezi agregáty
+   se drží `OrderId`, `CustomerId`. Doctrine asociace mezi agregáty
    je signál, že někde chybí hranice nebo že eventual consistency čeká na zavedení.
 4. **Eventual consistency mimo hranici – po otázce, čí je to práce.** Změnu napříč
    agregáty řešte doménovou událostí a samostatnou transakcí. „Když se X stane v agregátu A,

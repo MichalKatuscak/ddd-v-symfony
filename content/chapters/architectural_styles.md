@@ -1094,7 +1094,7 @@ Pro středně velký projekt vychází jako výchozí volba:
 
 **Hexagonal + Vertical Slice s CQRS přes Symfony Messenger.**
 
-Konkrétně: Bounded Context má vlastní adresář (`src/Ordering/`). Uvnitř `Domain/` obsahuje agregáty, hodnotové objekty a repository *interfaces* (porty); `Infrastructure/` obsahuje Doctrine adaptéry. Každá feature má svůj slice (`PlaceOrder/`, `CancelOrder/`) s Command/Query, Handler (= Clean Use Case) a HTTP Controller. Tato kombinace nabízí:
+Konkrétně: Bounded Context má vlastní adresář (`src/Ordering/`). Uvnitř `Domain/` leží agregáty, hodnotové objekty a repository *interfaces* (porty); `Infrastructure/` obsahuje Doctrine adaptéry. Každá feature má svůj slice (`PlaceOrder/`, `CancelOrder/`) s Command/Query, Handler (= Clean Use Case) a HTTP Controller. Tato kombinace nabízí:
 
 - **Doménové testy bez databáze** – agregáty jsou čisté PHP, mockují se jen porty.
 - **Jednoduché code review** – diff jedné feature je v jednom adresáři.

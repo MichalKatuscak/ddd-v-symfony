@@ -1295,7 +1295,7 @@ pooling mode. Pozor: transaction pooling sám o sobě prepared statements nepodp
 a Doctrine je používá. Řešením je buď session pooling (méně efektivní), nebo PgBouncer
 od verze 1.21 s `max_prepared_statements` > 0. Volbu zavedla právě 1.21 s výchozí
 hodnotou 0, tedy vypnuto; zapnutá ve výchozím stavu (200) je až od 1.24. Na starším
-PgBouncerovi ji proto nastavte explicitně. Ten si prepare
+PgBounceru je proto nutné ji nastavit explicitně. Ten si prepare
 od klienta zachytí, přidělí mu interní jméno a na backendu ho v případě potřeby připraví
 znovu. Podmínka: musí jít o prepared statements vedené protokolem databáze, tedy
 `PQprepare`/`PQexecPrepared` v libpq. Statementy emulované na straně klienta se do LRU cache
