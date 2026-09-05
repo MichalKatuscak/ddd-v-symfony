@@ -812,7 +812,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
 :::
 :::
 
-Synchronní HTTP adaptér z ukázky výše není jediná možnost a pro modulární monolit bývá tou nejdražší. V úvahu připadají tři cesty a každá má svou cenu.
+Synchronní HTTP adaptér z ukázky výše není jediná možnost a pro [modulární monolit](/ddd-a-microservices) bývá tou nejdražší. V úvahu připadají tři cesty a každá má svou cenu.
 
 1. **Volání přes rozhraní v procesu.** Kontext B vystaví port, kontext A ho volá přímo, bez sítě. Hranice zůstane zachovaná, latence žádná nepřibude. Cenou je společné nasazení a disciplína, aby se z portu nestal průchod do cizího modelu.
 2. **Synchronní HTTP nebo gRPC.** Nutnost, jakmile kontexty běží odděleně. Zaplatíte latencí, nedostupností upstreamu ve chvíli vlastního provozu a nutností řešit timeouty i náhradní chování.

@@ -130,7 +130,7 @@ class Order
 }
 :::
 
-Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty – to je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes atributy `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku“ je definováno v doménovém kódu, ale zároveň ten kód *ví*, že se ukládá přes Doctrine. Z pohledu **Hexagonal/Onion architektury** je to *domain leak* – doménová vrstva potřebuje knihovnu z Infrastructure, aby se vůbec dala zkompilovat. Pragmatický pohled (Layered, který tu rozebíráme) tento kompromis přijímá; Hexagonal trvá na separaci přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Ve stejném duchu tu stojí i holá `\DomainException`: zbytek knihy používá pojmenované výjimky jako `InvalidOrderStateTransitionException`, Layered ukázka zůstává u zkratky, aby bylo vidět, co styl skutečně vyžaduje a co ne.
+Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty – to je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes atributy `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku“ je definováno v doménovém kódu, ale zároveň ten kód *ví*, že se ukládá přes Doctrine. Z pohledu **Hexagonal/Onion architektury** je to *domain leak* – doménová vrstva potřebuje knihovnu z Infrastructure, aby se vůbec dala zkompilovat. Pragmatický pohled (Layered, který tu rozebíráme) tento kompromis přijímá – a je to i výchozí volba knihy, jak rozebírá [Implementace v Symfony](/implementace-v-symfony); Hexagonal trvá na separaci přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Ve stejném duchu tu stojí i holá `\DomainException`: zbytek knihy používá pojmenované výjimky jako `InvalidOrderStateTransitionException`, Layered ukázka zůstává u zkratky, aby bylo vidět, co styl skutečně vyžaduje a co ne.
 
 ### Kdy se Layered hodí {#layered-kdy-heading}
 
@@ -858,6 +858,8 @@ final class PlaceOrderUseCase
 
         $this->orders->save($order);
 
+        // Synchronní publikace stačí pro vývoj. Produkčně sem patří
+        // Outbox, jinak se událost ztratí při pádu mezi zápisem a publikací.
         foreach ($order->releaseEvents() as $event) {
             $this->events->publish($event);
         }

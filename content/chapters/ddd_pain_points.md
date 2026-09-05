@@ -780,6 +780,8 @@ otázka (`symfony/symfony-docs#10819`).
 **Problém:** Stripe vrací `\Stripe\Charge`, Ares vrací
 XML nebo pole, Fakturoid vrací vlastní DTO. Pokud tato data z externích systémů
 prosakují přímo do doménového kódu, změna externího API = změna doménového modelu.
+Vzor jako takový, včetně jeho místa na kontextové mapě, rozebírá
+[Anti-Corruption Layer](/context-mapping#acl); tady jde o jeho podobu v PHP.
 
 **Řešení – Port & Adapter (Hexagonální architektura):**
 Doménový model definuje **Port** (interface) popisující, co potřebuje

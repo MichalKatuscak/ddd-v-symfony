@@ -104,7 +104,7 @@ na příkazy.
 Kniha vychází z třetího dělení, protože je v praxi nejrozšířenější, a bere ho volněji:
 „sága“ je zastřešující termín pro koordinátor dlouhotrvajícího procesu s perzistentním
 stavem, „Process Manager“ označuje jeho orchestrovanou podobu ze
-[sekce 5](#orchestrace). U cizího zdroje se vyplatí ověřit, kterou z konvencí používá.
+[sekce 14.05](#orchestrace). U cizího zdroje se vyplatí ověřit, kterou z konvencí používá.
 
 *Citace: Garcia-Molina, H. & Salem, K., **Sagas**, ACM SIGMOD (1987);
 Hohpe, G. & Woolf, B., **Enterprise Integration Patterns** (2003);
@@ -1363,7 +1363,7 @@ private function scheduleTimeout(string $orderId, OrderSagaStatus $status): void
 
 private function onOrderPlaced(OrderPlaced $event): void
 {
-    // ... (vytvoření OrderSaga a dispatch ChargeCustomer - viz sekci 5)
+    // ... (vytvoření OrderSaga a dispatch ChargeCustomer - viz sekci 14.05)
 
     $this->scheduleTimeout($event->orderId, OrderSagaStatus::AwaitingPayment);
 }
@@ -1490,7 +1490,7 @@ refundu ověřit, zda refund pro danou objednávku již neexistuje.
 
 ### Když selže kompenzace {#selhani-kompenzace}
 
-Metoda `onStockReservationFailed` ze [sekce 5](#orchestrace) dispatchuje
+Metoda `onStockReservationFailed` ze [sekce 14.05](#orchestrace) dispatchuje
 `RefundCustomer` a převede ságu do stavu `Compensating`. Tam sága zůstává.
 Refund je asynchronní příkaz – do terminálního `Failed` smí přejít až poté,
 co dorazí potvrzení `RefundSucceeded`. Přechod do `Failed` hned po dispatchi
@@ -1565,7 +1565,7 @@ Princip: sága dispatchuje oba příkazy současně a přejde do stavu
 (`stockReserved` a `invoiceCreated`). Teprve když oba dorazí
 jako splněné, sága pokračuje dalším krokem – vytvořením zásilky. Tomuto vzoru se říká
 **synchronizační bariéra** (synchronization barrier). Stav `AwaitingStockAndInvoice`
-v enumu `OrderSagaStatus` ze [sekce 5](#orchestrace) zatím chybí – paralelní varianta
+v enumu `OrderSagaStatus` ze [sekce 14.05](#orchestrace) zatím chybí – paralelní varianta
 vyžaduje doplnit nový case.
 
 :::callout{type="pattern"}
