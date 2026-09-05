@@ -121,7 +121,7 @@ Lineární čtení od první do poslední kapitoly funguje, ale málokdo ho pot�
 
 Cíl: pochopit, co DDD je, a naučit se ho rozeznat v cizím kódu. Na implementaci si zatím netroufnete – ta přijde až s druhým a třetím projektem. Doporučená cesta v pořadí čtení:
 
-- [Co je DDD](/co-je-ddd) – filozofie, klíčové pojmy, kdy DDD pomůže.
+- [Co je DDD](/co-je-ddd) – filozofie, základní pojmy, kdy DDD pomůže.
 - [Základní koncepty DDD](/zakladni-koncepty) – entity, hodnotové objekty, agregáty, repozitáře. Nejdůležitější mentální model celé knihy.
 - [Návrh agregátu](/navrh-agregatu) – jak agregát udělat dobře. Nejtěžší kapitola taktického designu, ale stojí to za to.
 - [Implementace v Symfony](/implementace-v-symfony) – konkrétní kód, který můžete dnes použít.
