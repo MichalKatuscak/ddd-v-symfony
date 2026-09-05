@@ -354,7 +354,7 @@ Conwayovský: neformální vztahy nemají kontrakt. Vznikne ad hoc kontrakt v k�
 (sdílená třída, sdílené DB schéma, „toho se prostě nedotýkej“), který později nikdo
 nedokáže refaktorovat.
 
-Při onboardingu nového týmu napište explicitně: „*S týmem A jsme v X-as-a-Service,
+Při onboardingu nového týmu má být vztah zapsaný explicitně: „*S týmem A jsme v X-as-a-Service,
 s týmem B jsme ve čtyřměsíční Collaboration na bootstrap nového BC, s Enabling teamem
 máme kontrakt na tříměsíční facilitaci CQRS.*“ Pokud to nedokážete napsat, vztah
 je neformální = v ohrožení.

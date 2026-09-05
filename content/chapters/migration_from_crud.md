@@ -1217,12 +1217,14 @@ final class UserTest extends TestCase
 - **CQRS bez doménového modelu** – Zavedení CommandBusu a QueryBusu bez refaktorovaného doménového modelu přidá vrstvy komplexity bez přínosu. CQRS je amplifikátor – zesílí jak výhody, tak problémy stávající architektury.
 - **Ignorování Anti-Corruption Layer** – Při integraci nové DDD vrstvy se starým CRUD kódem je nutné vytvořit překladovou vrstvu. Bez ní pronikají koncepty starého modelu do nového a kontaminují ho.
 
+:::callout{type="pattern"}
 ### Tipy pro týmovou komunikaci
 
 - Vytvořte **glosář pojmů** (Ubiquitous Language) a udržujte ho aktuální. Vyvěste ho na wiki nebo přímo v repozitáři jako součást dokumentace.
 - Pravidelně pořádejte **krátká Event Storming sezení** (30–60 minut) pro nové funkcionality před jejich implementací.
 - Nastavte **code review pravidla**: doménová logika nesmí být v kontrolerech, doménové objekty nesmějí záviset na infrastruktuře.
 - Komunikujte s managementem v pojmech **obchodní hodnoty**, nikoli technické architektury. Migrace na DDD = schopnost rychleji a bezpečněji přidávat nové funkce.
+:::
 
 ### Proč migrace selhávají
 
@@ -1246,7 +1248,7 @@ skončila tím, že přibyla třetí architektura vedle dvou původních.
 :::callout{type="warn"}
 ### Varování před Big Bang Rewrites {#big-bang-warning-heading}
 
-**Migraci na DDD nezačínejte kompletním přepisem produkčního systému, který je v aktivním
+**Migrace na DDD nezačíná kompletním přepisem produkčního systému, který je v aktivním
 vývoji.** Big Bang Rewrite patří k nejrizikovějším architektonickým rozhodnutím, jaké tým
 může udělat. Výjimky existují a popisuje je sekce
 [Kdy migraci nezačínat](#kdy-nezacinat) – systém bez produkčních dat, kód menší než náklad
@@ -1257,8 +1259,8 @@ nesplňuje okrajové případy toho původního, které nikdo nezdokumentoval. S
 dostává nové funkce a nový za ním nestíhá. Výsledkem je buď zrušení přepisu, nebo spuštění
 nedokončeného systému s fatálními chybami.
 
-Vždy preferujte **inkrementální migraci pomocí Strangler Fig Patternu**:
-zachovejte funkční systém v produkci, přidávejte DDD vrstvu po vrstvě a nahrazujte CRUD kód
+Alternativou je **inkrementální migrace pomocí Strangler Fig Patternu**:
+funkční systém zůstává v produkci, DDD vrstva přibývá po vrstvě a CRUD kód mizí
 postupně při každém sprintu.
 :::
 

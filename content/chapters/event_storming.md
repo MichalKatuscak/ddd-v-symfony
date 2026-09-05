@@ -467,7 +467,7 @@ Workshop bez přípravy a pevného vedení je horší než žádný. Vytvoří z
 
 **Bez doménových expertů jde jen o brainstorming vývojářů**, kteří si vymýšlejí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný – chybí mu validní kontradikce a hot spoty.
 
-**Řešení:** nepřesvědčujte experty na 4 hodiny. Domluvte si *90 minut Big Picture*. Téměř vždy se to dá v kalendáři vyargumentovat. A pokud opravdu nikdo z expertů nemůže, workshop odložte – neudělejte ho jen proto, že máte rezervovanou místnost.
+**Řešení:** místo čtyř hodin stačí *90 minut Big Picture*. Téměř vždy se to dá v kalendáři vyargumentovat. A pokud opravdu nikdo z expertů nemůže, workshop se odkládá – rezervovaná místnost není důvod ho konat.
 :::
 
 :::callout{type="warn"}
@@ -475,7 +475,7 @@ Workshop bez přípravy a pevného vedení je horší než žádný. Vytvoří z
 
 Kanonicky *Rush to the goal*. Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém Bounded Contextu leží. Výsledek: *God Aggregate* typu `Order`, který obsahuje payment status, shipping data, fakturační adresu a kupóny – protože nikdo neoznačil, že tyto pojmy patří do různých BC.
 
-**Řešení:** i kdyby Big Picture mělo být jen 90 minut, udělejte ho. Bez něj vede Software Design skoro vždy k nesprávnému rozdělení agregátů.
+**Řešení:** Big Picture proběhne, i kdyby mělo trvat jen 90 minut. Bez něj vede Software Design skoro vždy k nesprávnému rozdělení agregátů.
 :::
 
 :::callout{type="warn"}
@@ -499,7 +499,7 @@ Když převedete vizuální workshop do lineárního textu, ztratíte 80 % infor
 
 Workshop, který skončí slávou, fotkou stěny a sdílením ve Slacku, ale jehož výstup se nepromítne do kódu, je za 3 měsíce zapomenutý. Slovník, který v místnosti vznikl, se v kódu nepoužije, a Ubiquitous Language opět degeneruje.
 
-**Řešení:** v prvním PR po workshopu pojmenujte třídy přesně podle workshopu (`OrderPlaced`, ne `OrderSavedEvent`). Doplňte komentáře s odkazem na hot spoty. Jeden hot spot z workshopu = jeden ticket v issue trackeru.
+**Řešení:** první PR po workshopu pojmenuje třídy přesně podle workshopu (`OrderPlaced`, ne `OrderSavedEvent`) a doplní komentáře s odkazem na hot spoty. Jeden hot spot z workshopu = jeden ticket v issue trackeru.
 :::
 
 :::callout{type="warn"}
@@ -507,7 +507,7 @@ Workshop, který skončí slávou, fotkou stěny a sdílením ve Slacku, ale jeh
 
 Kanonicky *Deliverable Obsession*. Big Picture nemá být dokonalý; je to první mapa neznámého území. Pokud na něm strávíte 8 hodin a budete debatovat o tom, zda `OrderShipped` je `ShipmentDispatched` nebo `OrderDispatched`, ztrácíte čas. Rozhodnutí padne až v Process Modellingu, kde uvidíte kontext.
 
-**Řešení:** stanovte si 4hodinový timebox. Pak workshop skončete, i kdyby polovina hot spotů byla nevyřešená – to je v pořádku. Hot spoty *mají* zůstat otevřené.
+**Řešení:** timebox jsou čtyři hodiny. Pak workshop končí, i kdyby polovina hot spotů byla nevyřešená – to je v pořádku. Hot spoty *mají* zůstat otevřené.
 :::
 
 ## 04.09 Co Event Storming neumí {#co-neumi}
