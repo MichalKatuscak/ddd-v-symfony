@@ -441,8 +441,10 @@ zprávy pro command bus nesou sufix `Command`, obsluha sufix `Handler`; peníze 
 hodnotové objekty žijí v `App\SharedKernel\Domain` stejně jako `AggregateRoot`.
 Příklad pojmenování události srovnán na `OrderPlaced` (kniha používá factory `place()`).
 
-**NEVYŘEŠENO — mrtvý odkaz.** Předmluva posílá čtenáře na `https://ddd-v-symfony.cz`
-(„Aktuální verzi textu najdete vždy na…"). **Doména se nedá přeložit na IP** — ověřeno
-přes https, http i s www. Ze 200 URL v knize je to jediný skutečně nefunkční odkaz
-(dalších šest vrací 403, ale to je blokování robotů u ACM, O'Reilly a BMJ).
-Rozhodnutí je na autorovi: doménu zaregistrovat, nebo odkaz změnit.
+**VYŘEŠENO — špatná doména.** Předmluva posílala čtenáře na `https://ddd-v-symfony.cz`,
+která se nedá přeložit na IP. **Správná adresa je `https://ddd-v-symfony.katuscak.cz`**
+(ověřeno: vrací 200 a servíruje knihu, `/predmluva` také). Opraveno v předmluvě,
+v šabloně `security_policy.html.twig` i v `ebook/book.yaml`.
+
+Tím je z 222 prověřených odkazů v knize funkčních všech 222; šest vrací 403, ale to je
+blokování robotů u ACM, O'Reilly a BMJ, ne mrtvý odkaz.

@@ -692,10 +692,13 @@ srovnalo a text by paradoxně vypadal generovaněji. Rozděleny jen tři věty p
 
 ### Citace
 
-200 URL prověřeno na dostupnost: 193 vrací 200, šest je 403 od vydavatelů
-blokujících roboty (ACM, O'Reilly, BMJ, kalele.io) a jeden reálně nefunguje –
-**`https://ddd-v-symfony.cz` se nedá přeložit na IP**. Kniha na něj v předmluvě
-posílá čtenáře. Doména buď ještě neexistuje, nebo je jiná; rozhodnutí je na autorovi.
+222 URL prověřeno na dostupnost (200 v markdownu + 22 v HTML odkazech kapitoly `ddd_ai`,
+která jako jediná nepoužívá markdown a ze skriptů proto vypadávala). Šest vrací 403 od
+vydavatelů blokujících roboty (ACM, O'Reilly, BMJ, kalele.io), zbytek 200.
+
+Jeden odkaz byl mrtvý a **je opraven**: předmluva posílala čtenáře na
+`https://ddd-v-symfony.cz`, správná adresa je **`https://ddd-v-symfony.katuscak.cz`**.
+Opraveno i v `security_policy.html.twig` a `ebook/book.yaml`.
 
 Ověřeno proti primárním zdrojům (Evans 2003, DDD Reference 2015, IDDD, Distilled,
 martinfowler.com):

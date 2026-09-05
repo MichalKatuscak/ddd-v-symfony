@@ -235,7 +235,7 @@ Pokud jste tu poprvé, otevřete [kapitolu 1: Co je DDD](/co-je-ddd). Po přečt
 
 Pokud DDD už znáte a hledáte konkrétní téma, projděte si [Cheat Sheet](/cheat-sheet) – jednostránkový přehled vzorů s odkazy na příslušné kapitoly. Pro definice termínů slouží [Glosář](/glosar).
 
-Kniha je živý dokument. Aktuální verzi textu najdete vždy na [ddd-v-symfony.cz](https://ddd-v-symfony.cz), kontakt pro opravy a připomínky je na stránce [O autorovi](/o-autorovi).
+Kniha je živý dokument. Aktuální verzi textu najdete vždy na [ddd-v-symfony.katuscak.cz](https://ddd-v-symfony.katuscak.cz), kontakt pro opravy a připomínky je na stránce [O autorovi](/o-autorovi).
 
 :::faq{}
 - question: Musím knihu číst lineárně od první kapitoly?

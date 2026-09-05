@@ -4,7 +4,7 @@ subtitle: 'Průvodce architekturou'
 author: 'Michal Katuščák'
 language: cs-CZ
 rights: 'Copyright © 2025 Michal Katuščák. Všechna práva vyhrazena.'
-publisher: 'ddd-v-symfony.cz'
+publisher: 'ddd-v-symfony.katuscak.cz'
 date: '2025'
 description: |
   Praktický průvodce implementací Domain-Driven Design v Symfony 8.
