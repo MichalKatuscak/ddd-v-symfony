@@ -123,10 +123,10 @@ s netriviální doménovou logikou a odlišnými požadavky na čtení a zápis.
 
 První výhodou je oddělení odpovědností. Write model nese doménovou logiku, validaci invariantů
 a konzistenci dat; read straně zbývá jediný úkol – dostat data v podobě, jakou vyžaduje obrazovka.
-Každý model obsahuje jen to, co ke své práci potřebuje, a lze ho optimalizovat nezávisle:
-na straně zápisu normalizované relační schéma a Doctrine ORM entity s bohatou doménovou logikou,
-na straně čtení denormalizovaná tabulka, Elasticsearch index nebo Redis cache – cokoli,
-co nejlépe vyhovuje konkrétním dotazům. Z téhož oddělení plyne i volnost při evoluci:
+Každý model obsahuje jen to, co ke své práci potřebuje, a optimalizuje se nezávisle.
+Na straně zápisu stojí normalizované relační schéma a Doctrine ORM entity s bohatou
+doménovou logikou. Na straně čtení denormalizovaná tabulka, Elasticsearch index nebo
+Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům. Z téhož oddělení plyne i volnost při evoluci:
 read model jde kdykoli přebudovat (rebuild projekcí), doplnit o nový read model pro nový use case
 nebo změnit strukturu dotazu – bez jakéhokoli dopadu na write model a doménovou logiku.
 

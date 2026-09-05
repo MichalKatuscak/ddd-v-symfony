@@ -676,8 +676,8 @@ a obecným rodičovským vzorem je Fowlerův *Data Mapper* (*PoEAA*, 2002)
 [[4]](https://martinfowler.com/eaaCatalog/dataMapper.html).
 
 Dva nejčastěji citovaní obhájci čisté domény jsou přitom proti. Vladimir Khorikov
-označuje plnohodnotný persistence model za příliš drahý: složitost roste s každou
-asociací typu one-to-many a many-to-many a ztrácí se ORM change tracking, o který
+označuje plnohodnotný persistence model za příliš drahý. Složitost roste s každou
+asociací typu one-to-many a many-to-many. Navíc se ztrácí ORM change tracking, o který
 se opírají spolehlivé doménové události
 [[5]](https://enterprisecraftsmanship.com/posts/having-the-domain-model-separate-from-the-persistence-model/).
 Matthias Noback nazývá oddělené entity „expensive and unnecessary form of

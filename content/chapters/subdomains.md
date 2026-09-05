@@ -113,7 +113,7 @@ Klasifikace Core / Supporting / Generic je první krok Evansovy destilace, ne ce
 
 Nejtěžším krokem je rozpoznat Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek.
 
-Následující pětibodový test je autorská konstrukce této knihy, ne heuristika převzatá z primárního zdroje. Khononov pracuje s trojicí komplexita / volatilita / diferenciace a s otázkou, zda by se daný kus dal prodat jako samostatný byznys [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/); ddd-crew nabízí ke svým dvěma osám katalog devíti otázek [[5]](https://github.com/ddd-crew/core-domain-charts). Test níže obojí zjednodušuje do rychlého filtru, který zvládne jednotlivec u kávy. Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain; v opačném případě jde o Supporting nebo Generic.
+Následující pětibodový test je autorská konstrukce této knihy, ne heuristika převzatá z primárního zdroje. Khononov pracuje s trojicí komplexita / volatilita / diferenciace a ptá se, zda by se daný kus dal prodat jako samostatný byznys [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/). Ke svým dvěma osám nabízí ddd-crew katalog devíti otázek [[5]](https://github.com/ddd-crew/core-domain-charts). Test níže obojí zjednodušuje do rychlého filtru, který zvládne jednotlivec u kávy. Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain; v opačném případě jde o Supporting nebo Generic.
 
 1. **„Pokud bychom to outsourcovali, přijdeme o hlavní produkt?“**
 
