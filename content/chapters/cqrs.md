@@ -218,13 +218,21 @@ podmínku splňuje – command bus obaluje handler do transakce, query bus ne.
 # config/packages/messenger.yaml
 framework:
     messenger:
-        # Výchozí bus - použitý, když není specifikovaný jiný
+        # Tohle je kanonická konfigurace celé knihy. Kapitoly o Outboxu
+        # a ságách z ní ukazují jen výřezy – jména transportů a busů
+        # jsou všude stejná, aby šly poskládat do jednoho projektu.
         default_bus: command.bus
 
-        # Konfigurace transportů
+        # Konfigurace transportů. Příkazy a události mají vlastní frontu:
+        # zahlcený report tak nebrzdí projekce a naopak. Nad doctrine://
+        # frontu rozlišuje queue_name, bez něj by šlo o jednu a tutéž.
         transports:
-            async:
+            async_commands:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options: { queue_name: commands }
+            async_events:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options: { queue_name: events }
             sync: 'sync://'
 
         # Konfigurace busů
@@ -252,15 +260,15 @@ framework:
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # operace, kde uživatel nemusí čekat na výsledek
-            App\Notification\Application\Command\SendWelcomeEmail: async
-            App\Reporting\Application\Command\GenerateMonthlyReport: async
+            App\Notification\Application\Command\SendWelcomeEmail: async_commands
+            App\Reporting\Application\Command\GenerateMonthlyReport: async_commands
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
             # App\UserManagement\Profile\Query\GetUserProfile: sync
 :::
 :::
 
-Konfigurace definuje dva transporty: `async` pro zpracování přes frontu a `sync` pro okamžité
+Konfigurace definuje tři transporty: `async_commands` a `async_events` pro zpracování přes frontu a `sync` pro okamžité
 vykonání v témže procesu. Busy jsou tři. `command.bus` pro příkazy má `doctrine_transaction`
 middleware, tedy automatickou transakci kolem handleru. `query.bus` obsahuje pouze validaci.
 Transport `doctrine://default` dodává balíček `symfony/doctrine-messenger`; bez něj
@@ -1274,7 +1282,7 @@ framework:
     messenger:
         # Konfigurace transportů
         transports:
-            async:
+            async_events:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 options:
                     queue_name: commands
@@ -1299,11 +1307,11 @@ framework:
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # odesílání notifikací, generování reportů, aktualizace read modelů
-            App\Notification\Application\Command\SendWelcomeEmail: async
-            App\Reporting\Application\Command\GenerateMonthlyReport: async
+            App\Notification\Application\Command\SendWelcomeEmail: async_commands
+            App\Reporting\Application\Command\GenerateMonthlyReport: async_commands
 
             # Vysoká priorita - aktualizace read modelů pro kritické obrazovky
-            App\Ordering\Domain\Event\OrderPlaced: async_priority_high
+            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_priority_high
 :::
 :::
 
@@ -1318,7 +1326,7 @@ frontu může běžet s vyšší prioritou nebo na dedikovaném serveru.
 Spolehlivé předání doménových událostí do fronty, atomické se zápisem agregátu,
 zajišťuje [Outbox Pattern](/outbox-pattern).
 
-Transport si zpráva může nést i sama: atribut `#[AsMessage(transport: 'async')]` nad třídou
+Transport si zpráva může nést i sama: atribut `#[AsMessage(transport: 'async_events')]` nad třídou
 příkazu nebo události nahradí odpovídající řádek v sekci `routing:`. Volba je věcí zvyku.
 YAML drží směrování na jednom místě, atribut ho má u zprávy.
 
@@ -1327,12 +1335,12 @@ YAML drží směrování na jednom místě, atribut ho má u zprávy.
 
 :::code{language="bash" filename="snippet.sh"}
 # Konzumace zpráv z obou front - high_priority má přednost
-$ php bin/console messenger:consume async_priority_high async
+$ php bin/console messenger:consume async_priority_high async_events async_commands
 
 # V produkci: Supervisor nebo systemd pro automatický restart
 # /etc/supervisor/conf.d/messenger-worker.conf
 [program:messenger-consume]
-command=php /var/www/app/bin/console messenger:consume async_priority_high async --time-limit=3600 --memory-limit=128M
+command=php /var/www/app/bin/console messenger:consume async_priority_high async_events async_commands --time-limit=3600 --memory-limit=128M
 numprocs=2
 autostart=true
 autorestart=true

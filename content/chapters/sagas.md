@@ -378,18 +378,18 @@ final readonly class CreateShipmentOnStockReserved
 :::callout{type="pattern"}
 ### YAML: Konfigurace Messenger pro choreografii {#choreografie-messenger-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez – plná konfigurace v kapitole o CQRS)"}
 # config/packages/messenger.yaml
 framework:
     messenger:
         transports:
-            async:
+            async_events:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
-            'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async
-            'App\Payment\Domain\Event\PaymentSucceeded': async
-            'App\Warehouse\Domain\Event\StockReserved': async
+            'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async_events
+            'App\Payment\Domain\Event\PaymentSucceeded': async_events
+            'App\Warehouse\Domain\Event\StockReserved': async_events
 :::
 :::
 
@@ -1204,7 +1204,7 @@ ztrácejí zprávy při běžných výpadcích.
 :::callout{type="pattern"}
 ### YAML: Kompletní konfigurace Messenger {#messenger-yaml-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez – plná konfigurace v kapitole o CQRS)"}
 # config/packages/messenger.yaml
 framework:
     messenger:

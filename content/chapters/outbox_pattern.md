@@ -768,10 +768,10 @@ final class OutboxDispatchCommand extends Command
                     $this->bus->dispatch(
                         $message,
                         // Jméno transportu musí odpovídat messenger.yaml.
-                        // Kapitola o ságách používá async_events – neplatné
-                        // jméno skončí „sender is not in the senders locator"
+                        // Jméno musí existovat v messenger.yaml; neplatné skončí
+                        // hláškou „sender is not in the senders locator"
                         // a řádek se označí failed až po vyčerpání pokusů.
-                        [new TransportNamesStamp(['async'])],
+                        [new TransportNamesStamp(['async_events'])],
                     );
 
                     $this->outbox->markSent($row->id);
@@ -973,7 +973,7 @@ kterou middleware otevře kolem command handleru, obalí uložení agregátu
 i dispatch eventu na doctrine transport. Podmínkou je, že transport používá
 totéž DB spojení jako doménový stav – tedy `default` entity manager. Dual-write
 problém tím mizí – buď se commitne order i zpráva, nebo nic. Worker
-`messenger:consume async` pak zprávu vyzvedne a zpracuje, případně přepošle dál.
+`messenger:consume async_events` pak zprávu vyzvedne a zpracuje, případně přepošle dál.
 
 :::callout{type="pattern"}
 ### YAML: Routing eventu na Doctrine transport {#doctrine-transport-routing-heading}
@@ -987,12 +987,12 @@ framework:
                     - doctrine_transaction   # transakce handleru obalí agregát i dispatch eventu
 
         transports:
-            async:
+            async_events:
                 dsn: 'doctrine://default'    # totéž spojení jako doménový stav (default EM)
 
         routing:
             # Relay posílá integrační tvar, ne doménovou událost.
-            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async
+            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_events
 :::
 :::
 
