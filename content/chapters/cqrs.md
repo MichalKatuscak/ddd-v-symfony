@@ -838,12 +838,12 @@ a controller spadne na volání metody nad `null`. Messenger na to má `HandleTr
 metoda `handle()` výsledek vrátí a počet obsloužení ověří: nula i více než jeden handler
 skončí `LogicException` s výmluvnou hláškou.
 
-:::code{language="php" filename="src/Shared/Application/Query/QueryBus.php"}
+:::code{language="php" filename="src/SharedKernel/Application/Query/QueryBus.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Shared\Application\Query;
+namespace App\SharedKernel\Application\Query;
 
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\HandleTrait;

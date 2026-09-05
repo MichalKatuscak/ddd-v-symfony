@@ -641,7 +641,7 @@ namespace App\Pricing\Domain\Service;
 use App\Pricing\Domain\Model\Cart;
 use App\Pricing\Domain\Model\Customer;
 use App\Pricing\Domain\Model\DiscountPolicy;
-use App\Shared\Domain\Money;
+use App\SharedKernel\Domain\Money;
 
 /**
  * Domain Service – výpočet ceny vyžaduje data z více agregátů
@@ -675,7 +675,7 @@ use App\Pricing\Domain\Port\CartRepository;
 use App\Pricing\Domain\Port\CustomerRepository;
 use App\Pricing\Domain\Port\DiscountPolicyRepository;
 use App\Pricing\Domain\Service\PriceCalculator;
-use App\Shared\Domain\Money;
+use App\SharedKernel\Domain\Money;
 
 /**
  * Application Service – orchestrace use casu „Spočítej cenu košíku“.

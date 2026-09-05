@@ -200,12 +200,12 @@ Zbylé tři míří na obsah a životní cyklus:
 :::callout{type="pattern"}
 ### PHP: Bázová třída DomainEvent a konkrétní třída UserRegistered {#domain-event-php-heading}
 
-:::code{language="php" filename="src/Shared/Domain/Event/DomainEvent.php"}
+:::code{language="php" filename="src/SharedKernel/Domain/Event/DomainEvent.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Shared\Domain\Event;
+namespace App\SharedKernel\Domain\Event;
 
 use DateTimeImmutable;
 
@@ -254,7 +254,7 @@ abstract class DomainEvent
     abstract public static function fromPayload(array $payload): static;
 }
 :::
-*src/Shared/Domain/Event/DomainEvent.php*
+*src/SharedKernel/Domain/Event/DomainEvent.php*
 
 :::code{language="php" filename="src/Identity/Domain/Event/UserRegistered.php"}
 <?php
@@ -263,7 +263,7 @@ declare(strict_types=1);
 
 namespace App\Identity\Domain\Event;
 
-use App\Shared\Domain\Event\DomainEvent;
+use App\SharedKernel\Domain\Event\DomainEvent;
 use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
@@ -468,7 +468,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventSourcing;
 
-use App\Shared\Domain\Event\DomainEvent;
+use App\SharedKernel\Domain\Event\DomainEvent;
 
 interface EventStore
 {
@@ -516,7 +516,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventSourcing;
 
-use App\Shared\Domain\Event\DomainEvent;
+use App\SharedKernel\Domain\Event\DomainEvent;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\ParameterType;
@@ -644,14 +644,14 @@ volání metody na agregátu, then jsou nově emitované události. Podrobně v 
 :::callout{type="pattern"}
 ### PHP: Base class EventSourcedAggregate {#es-aggregate-base-heading}
 
-:::code{language="php" filename="src/Shared/Domain/EventSourcedAggregate.php"}
+:::code{language="php" filename="src/SharedKernel/Domain/EventSourcedAggregate.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Shared\Domain;
+namespace App\SharedKernel\Domain;
 
-use App\Shared\Domain\Event\DomainEvent;
+use App\SharedKernel\Domain\Event\DomainEvent;
 
 abstract class EventSourcedAggregate
 {
@@ -744,7 +744,7 @@ abstract class EventSourcedAggregate
     }
 }
 :::
-*src/Shared/Domain/EventSourcedAggregate.php*
+*src/SharedKernel/Domain/EventSourcedAggregate.php*
 :::
 
 U event-sourced agregátu se stav rekonstruuje replayem a vnitřní properties zůstávají

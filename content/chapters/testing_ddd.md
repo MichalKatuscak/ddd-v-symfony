@@ -289,25 +289,25 @@ operace vydala očekávané události ve správném pořadí.
 :::callout{type="pattern"}
 ### Příklad: Test pro Order agregát
 
-:::code{language="php" filename="Tests/OrderManagement/Domain/Model/OrderTest.php"}
+:::code{language="php" filename="Tests/Ordering/Domain/Model/OrderTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\OrderManagement\Domain\Model;
+namespace Tests\Ordering\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use App\OrderManagement\Domain\Model\Order;
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\ProductId;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\Event\OrderPlaced;
-use App\OrderManagement\Domain\Event\OrderConfirmed;
-use App\OrderManagement\Domain\Event\OrderItemAdded;
-use App\OrderManagement\Domain\Exception\EmptyOrderException;
-use App\OrderManagement\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\Currency;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderItemAdded;
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 
 final class OrderTest extends TestCase
 {
@@ -395,7 +395,7 @@ declare(strict_types=1);
 
 namespace Tests\Shared\Domain;
 
-use App\Shared\Domain\Event\DomainEvent;
+use App\SharedKernel\Domain\Event\DomainEvent;
 
 /**
  * Reusable trait pro ověřování doménových událostí v unit testech.
@@ -457,16 +457,16 @@ trait DomainEventAssertions
 
 // --- Příklad použití traitu v testu ---
 
-namespace Tests\OrderManagement\Domain\Model;
+namespace Tests\Ordering\Domain\Model;
 
-use App\OrderManagement\Domain\Model\Order;
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\ProductId;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\Event\OrderPlaced;
-use App\OrderManagement\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\Currency;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderConfirmed;
 use Tests\Shared\Domain\DomainEventAssertions;
 
 final class OrderEventsTest extends \PHPUnit\Framework\TestCase
@@ -530,7 +530,7 @@ use App\Ordering\Domain\Event\OrderConfirmed;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderItemAdded;
 use App\Ordering\Domain\Exception\EmptyOrderException;
-use App\Shared\Domain\Event\DomainEvent;
+use App\SharedKernel\Domain\Event\DomainEvent;
 
 final class OrderEventSourcingTest extends TestCase
 {
@@ -801,19 +801,19 @@ od změny struktury objektu – po přidání parametru se mění jediné místo
 :::callout{type="pattern"}
 ### Příklad: Test Data Builder pro Order agregát
 
-:::code{language="php" filename="Tests/OrderManagement/Domain/Builder/OrderBuilder.php"}
+:::code{language="php" filename="Tests/Ordering/Domain/Builder/OrderBuilder.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\OrderManagement\Domain\Builder;
+namespace Tests\Ordering\Domain\Builder;
 
-use App\OrderManagement\Domain\Model\Order;
-use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\Currency;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
 
 final class OrderBuilder
 {
@@ -1419,7 +1419,7 @@ return static function (DeptracConfig $config): void {
                 DirectoryConfig::create('src/.*/Controller/.*')
             ),
             $shared = Layer::withName('Shared')->collectors(
-                DirectoryConfig::create('src/Shared/.*')
+                DirectoryConfig::create('src/SharedKernel/.*')
             ),
         )
         ->rulesets(

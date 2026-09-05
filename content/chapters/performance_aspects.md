@@ -110,7 +110,7 @@ bez načtení celé kolekce do paměti.
 
 declare(strict_types=1);
 
-namespace App\Order\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -162,10 +162,10 @@ agregát včetně asociovaných objektů v jediném SQL dotazu s LEFT JOIN nebo 
 
 declare(strict_types=1);
 
-namespace App\Order\Infrastructure\Repository;
+namespace App\Ordering\Infrastructure\Repository;
 
-use App\Order\Domain\Model\Order;
-use App\Order\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineOrderRepository implements OrderRepository
@@ -185,7 +185,7 @@ final class DoctrineOrderRepository implements OrderRepository
         // Fetch join: alias i je v SELECT, Doctrine hydratuje kolekci v jednom dotazu
         return $this->em->createQuery(
             'SELECT o, i
-             FROM App\Order\Domain\Model\Order o
+             FROM App\Ordering\Domain\Model\Order o
              JOIN o.items i
              WHERE o.status = :status'
         )
@@ -347,10 +347,10 @@ ne přesun pravidla mimo agregát. Podrobně rozebírá velikost agregátu sekce
 
 declare(strict_types=1);
 
-namespace App\Order\Infrastructure\Repository;
+namespace App\Ordering\Infrastructure\Repository;
 
-use App\Order\Domain\Model\Order;
-use App\Order\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineOrderRepository
@@ -376,7 +376,7 @@ final class DoctrineOrderRepository
     public function findWithItemsById(OrderId $id): ?Order
     {
         return $this->em->createQuery(
-            'SELECT o, i FROM App\Order\Domain\Model\Order o
+            'SELECT o, i FROM App\Ordering\Domain\Model\Order o
              JOIN o.items i
              WHERE o.id = :id'
         )
@@ -433,7 +433,7 @@ vyplatí se projít levnější stupně.
 
 declare(strict_types=1);
 
-namespace App\Order\Application\Query;
+namespace App\Ordering\Application\Query;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -469,7 +469,7 @@ final class GetOrderSummaryListHandler
         // DQL NEW expression - Doctrine hydratuje přímo do DTO
         // bez vytváření spravovaných doménových entit
         $dtos = $this->em->createQuery(
-            'SELECT NEW App\Order\Application\Query\OrderSummaryDTO(
+            'SELECT NEW App\Ordering\Application\Query\OrderSummaryDTO(
                 o.id,
                 o.orderNumber,
                 o.customerId,
@@ -479,7 +479,7 @@ final class GetOrderSummaryListHandler
                 o.totalAmount.currency,
                 o.createdAt
              )
-             FROM App\Order\Domain\Model\Order o
+             FROM App\Ordering\Domain\Model\Order o
              LEFT JOIN o.items i
              WHERE o.status IN (:statuses)
              GROUP BY o.id, o.orderNumber, o.customerId, o.status,
@@ -601,12 +601,12 @@ Tento průvodce používá UUID v7; ULID je alternativa s kratším Crockford ba
 :::callout{type="pattern"}
 ### Příklad: Použití symfony/uid (UUID v7)
 
-:::code{language="php" filename="src/Shared/Domain/ValueObject/OrderId.php"}
+:::code{language="php" filename="src/SharedKernel/Domain/ValueObject/OrderId.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Shared\Domain\ValueObject;
+namespace App\SharedKernel\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
@@ -674,9 +674,9 @@ final class UserId
 
 declare(strict_types=1);
 
-namespace App\Order\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
-use App\Shared\Domain\ValueObject\OrderId;
+use App\SharedKernel\Domain\ValueObject\OrderId;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -745,8 +745,8 @@ namespace App\Import\Application\Command;
 
 use App\Product\Domain\Model\Product;
 use App\Product\Domain\ValueObject\ProductId;
-use App\Shared\Domain\ValueObject\Currency;
-use App\Shared\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\ValueObject\Currency;
+use App\SharedKernel\Domain\ValueObject\Money;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -1016,7 +1016,7 @@ vyhrazeným pro údržbové úlohy. `clear()` na konci handleru je pak pojistka,
 
 declare(strict_types=1);
 
-namespace App\Order\Infrastructure\Command;
+namespace App\Ordering\Infrastructure\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -1035,7 +1035,7 @@ final class BulkUpdateOrderStatusHandler
     public function __invoke(BulkUpdateOrderStatus $command): int
     {
         $affectedRows = $this->em->createQuery(
-            'UPDATE App\Order\Domain\Model\Order o
+            'UPDATE App\Ordering\Domain\Model\Order o
              SET o.status = :newStatus
              WHERE o.status = :oldStatus
                AND o.createdAt < :before'
@@ -1257,14 +1257,14 @@ doctrine:
                     Order:
                         type: attribute
                         dir: '%kernel.project_dir%/src/Order/Domain/Model'
-                        prefix: 'App\Order\Domain\Model'
+                        prefix: 'App\Ordering\Domain\Model'
             read:
                 connection: read
                 mappings:
                     ReadModel:
                         type: attribute
                         dir: '%kernel.project_dir%/src/Order/Infrastructure/ReadModel'
-                        prefix: 'App\Order\Infrastructure\ReadModel'
+                        prefix: 'App\Ordering\Infrastructure\ReadModel'
 
 # Query handler pak vezme repliku podle jména parametru:
 # public function __construct(private EntityManagerInterface $readEntityManager) {}
@@ -1366,14 +1366,14 @@ nebo při ladění dávky, která v Profileru vůbec neskončí.
 :::callout{type="pattern"}
 ### Kostra middleware pro počítání dotazů
 
-:::code{language="php" filename="src/Shared/Infrastructure/Doctrine/QueryCountingMiddleware.php"}
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/QueryCountingMiddleware.php"}
 <?php
 
 declare(strict_types=1);
 
 // Od DBAL 3.2 se logging provádí přes Middleware; SQLLogger je deprecated a DBAL 4 ho odstranil.
 
-namespace App\Shared\Infrastructure\Doctrine;
+namespace App\SharedKernel\Infrastructure\Doctrine;
 
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Middleware;

@@ -363,14 +363,14 @@ Hodnotové objekty zapouzdřují validaci, zabraňují záměně ID různých en
 :::callout{type="pattern"}
 ### Příklad: Value Objects (správně)
 
-:::code{language="php" filename="src/OrderManagement/Domain/ValueObject/Email.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/Email.php"}
 <?php
 
 declare(strict_types=1);
 
 // SPRÁVNĚ: Hodnotové objekty s validací a sémantikou
 
-namespace App\OrderManagement\Domain\ValueObject;
+namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
@@ -536,24 +536,24 @@ Agregáty by měly být navrhovány kolem skutečné transakční potřeby. Zák
 :::callout{type="pattern"}
 ### Příklad: Správně rozdělené agregáty
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/Customer.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Customer.php"}
 <?php
 
 declare(strict_types=1);
 
 // SPRÁVNĚ: Malé agregáty s jednoznačnou odpovědností
 
-namespace App\OrderManagement\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\ProductId;
-use App\OrderManagement\Domain\ValueObject\Address;
-use App\OrderManagement\Domain\ValueObject\OrderStatus;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\Email;
-use App\OrderManagement\Domain\ValueObject\WishlistId;
-use App\OrderManagement\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\ValueObject\Address;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\Email;
+use App\Ordering\Domain\ValueObject\WishlistId;
+use App\Ordering\Domain\Event\OrderConfirmed;
 use App\SharedKernel\Domain\AggregateRoot;
 
 // Agregát 1: Customer - pouze identita a kontaktní údaje
@@ -679,23 +679,23 @@ Sdílená databáze napříč Bounded Contexts patří mezi nejzávažnější s
 :::callout{type="warn"}
 ### Špatně: Přímý přístup ke sdíleným tabulkám {#sdilena-db-spatne-heading}
 
-Kontexty *OrderManagement* a *Billing* přímo přistupují ke stejné tabulce `users`. Změna schématu tabulky v jednom kontextu okamžitě ovlivní druhý.
+Kontexty *Ordering* a *Billing* přímo přistupují ke stejné tabulce `users`. Změna schématu tabulky v jednom kontextu okamžitě ovlivní druhý.
 :::
 
 :::callout{type="anti"}
 ### Příklad: Sdílená databáze (špatně)
 
-:::code{language="php" filename="src/OrderManagement/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
 <?php
 
 declare(strict_types=1);
 
-// ŠPATNĚ: OrderManagement context přímo dotazuje tabulku users z UserManagement kontextu
+// ŠPATNĚ: Ordering context přímo dotazuje tabulku users z UserManagement kontextu
 
-namespace App\OrderManagement\Infrastructure\Repository;
+namespace App\Ordering\Infrastructure\Repository;
 
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Connection;
 
 class DoctrineOrderRepository
@@ -724,7 +724,7 @@ class InvoiceGenerator
 
     public function generate(OrderId $orderId): Invoice
     {
-        // Opět přímý přístup k tabulce orders z OrderManagement kontextu!
+        // Opět přímý přístup k tabulce orders z Ordering kontextu!
         $data = $this->db->executeQuery(
             'SELECT o.total, u.billing_address, u.vat_number
              FROM orders o JOIN users u ON o.user_id = u.id
@@ -753,7 +753,7 @@ declare(strict_types=1);
 
 // SPRÁVNĚ: Každý kontext vlastní svá data a komunikuje přes definované rozhraní
 
-// OrderManagement kontext si ukládá pouze to, co potřebuje pro svou logiku.
+// Ordering kontext si ukládá pouze to, co potřebuje pro svou logiku.
 // Billing údaje zákazníka získává přes Anti-Corruption Layer.
 
 namespace App\Billing\Domain\Port;
@@ -881,18 +881,18 @@ Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a p
 :::callout{type="pattern"}
 ### Příklad: Immutable doménová událost (správně)
 
-:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderPlaced.php"}
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
 
 // SPRÁVNĚ: Immutable doménová událost s readonly properties
 
-namespace App\OrderManagement\Domain\Event;
+namespace App\Ordering\Domain\Event;
 
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 final readonly class OrderPlaced
 {

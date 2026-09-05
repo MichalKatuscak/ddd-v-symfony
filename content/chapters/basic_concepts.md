@@ -258,12 +258,12 @@ v hooku a `readonly` se tedy vylučují a tato kniha volí `readonly`.
 kapitolami, jich skládá víc: `Money` spojuje částku a měnu do pojmu, který nejde
 rozpojit.
 
-:::code{language="php" filename="src/OrderManagement/Domain/ValueObject/Money.php + Currency.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/Money.php + Currency.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\ValueObject;
+namespace App\Ordering\Domain\ValueObject;
 
 enum Currency: string
 {
@@ -352,18 +352,18 @@ agregát na transakci“ z toho odvozuje kapitola
 patří mezi nejčastější chyby v DDD; přerostlé „God Aggregates“ rozebírá kapitola
 [Anti-vzory a typické chyby](/anti-vzory).
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
-use App\OrderManagement\Domain\Exception\InvalidOrderStateTransitionException;
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
 
 class Order
 {
@@ -472,15 +472,15 @@ class Order
 }
 :::
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/OrderItem.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/OrderItem.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\ProductId;
 
 class OrderItem
 {
@@ -521,12 +521,12 @@ agregátu stačí dát produkt. Plnou verzi s chováním – metodou
 Pro konečnou množinu stavů typu `OrderStatus` se obvykle volí nativní
 `enum` místo plnohodnotného hodnotového objektu:
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/OrderStatus.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/OrderStatus.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
 enum OrderStatus: string
 {
@@ -553,16 +553,16 @@ Architecture*, kde ho Edward Hieatt a Rob Mee popsali jako prostředníka mezi d
 a mapováním dat, který se navenek tváří jako kolekce
 [[11]](https://martinfowler.com/eaaCatalog/repository.html).
 
-:::code{language="php" filename="src/OrderManagement/Domain/Repository/OrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Domain/Repository/OrderRepository.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Repository;
+namespace App\Ordering\Domain\Repository;
 
-use App\OrderManagement\Domain\Model\Order;
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 interface OrderRepository
 {
@@ -604,17 +604,17 @@ koordinují více objektů nebo zachycují proces, který nemá vlastníka. Tako
 logiku přebírá doménová služba. Nedrží stav, nemá
 životní cyklus, jen pracuje s entitami a hodnotovými objekty.
 
-:::code{language="php" filename="src/OrderManagement/Domain/Service/ShippingFeeService.php"}
+:::code{language="php" filename="src/Ordering/Domain/Service/ShippingFeeService.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Service;
+namespace App\Ordering\Domain\Service;
 
-use App\OrderManagement\Domain\Model\Customer;
-use App\OrderManagement\Domain\Model\Order;
-use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\ValueObject\Money;
+use App\Ordering\Domain\Model\Customer;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\Currency;
+use App\Ordering\Domain\ValueObject\Money;
 
 final class ShippingFeeService
 {
@@ -666,7 +666,7 @@ nepatří. Kontrola „platit lze jen potvrzenou objednávku“ je invariant agr
 A samotná tvorba `Payment` z dat objednávky je Factory – nejčastěji statická
 factory metoda:
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/Payment.php (výřez)"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Payment.php (výřez)"}
 public static function forOrder(Order $order, PaymentMethod $method): self
 {
     return new self(PaymentId::generate(), $order->id(), $order->totalAmount(), $method);
@@ -686,15 +686,15 @@ Evans k tomu dodává, že událost obvykle nese časové razítko a identitu z�
 entit [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 Název je proto vždy v minulém čase – popisuje hotovou věc, ne příkaz.
 
-:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderPlaced.php"}
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Event;
+namespace App\Ordering\Domain\Event;
 
-use App\OrderManagement\Domain\ValueObject\CustomerId;
-use App\OrderManagement\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 final readonly class OrderPlaced
 {
@@ -723,7 +723,7 @@ kontextu se osvědčí tenká varianta, jakou ukazuje `OrderPlaced`: příjemce 
 k agregátu přístup a duplikovaná data by se dřív nebo později rozešla.
 
 Hranice kontextu rozděluje události na doménové a integrační. Doménová událost mluví
-jazykem `OrderManagement` a zůstává uvnitř. Integrační je kontrakt pro cizí kontexty
+jazykem `Ordering` a zůstává uvnitř. Integrační je kontrakt pro cizí kontexty
 a mění se jen tak rychle, jak její příjemci snesou
 [[13]](https://devblogs.microsoft.com/cesardelatorre/domain-events-vs-integration-events-in-domain-driven-design-and-microservices-architectures/).
 Poslat `OrderPlaced` ven proto znamená zveřejnit vnitřní model se vším, co z toho
@@ -774,7 +774,7 @@ abstract class AggregateRoot
 Agregát `Order` ze [sekce o agregátech](#aggregates) z této třídy dědí. Výřez ukazuje
 jeho `place()` a `confirm()` doplněné o volání `record()`:
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php (výřez)"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
 class Order extends AggregateRoot
 {
     // ... vlastnosti a metody ze sekce 06.05 ...
@@ -814,7 +814,7 @@ Reconstitution jako zvláštní typ factory rozebírají
 Druhou polovinu životního cyklu obstará command handler: uloží agregát
 a teprve potom vyzvedne nahrané události přes `releaseEvents()`:
 
-:::code{language="php" filename="src/OrderManagement/Application/Command/CreateOrderHandler.php (výřez)"}
+:::code{language="php" filename="src/Ordering/Application/Command/CreateOrderHandler.php (výřez)"}
 $order = Order::place(OrderId::generate(), $customerId);
 
 $this->orders->save($order); // jen persist agregátu

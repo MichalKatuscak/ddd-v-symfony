@@ -103,7 +103,7 @@ note right of Entity
   Bounded Contexts:
   - UserManagement
     - Domain/Model/User.php
-  - OrderManagement
+  - Ordering
     - Domain/Model/Order.php
     - Domain/Model/OrderItem.php
 end note
@@ -134,7 +134,7 @@ note as ProjectStructure
   │   ├── Infrastructure/
   │   ├── Registration/
   │   └── Profile/
-  ├── OrderManagement/
+  ├── Ordering/
   │   ├── Domain/
   │   ├── Infrastructure/
   │   ├── Checkout/

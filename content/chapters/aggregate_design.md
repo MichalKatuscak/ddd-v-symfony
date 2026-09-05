@@ -422,7 +422,7 @@ namespace App\Ordering\Domain\Order;
 
 use App\Catalog\Domain\Product\ProductId;
 use App\Customers\Domain\Customer\CustomerId;
-use App\Shared\Domain\Money;
+use App\SharedKernel\Domain\Money;
 use App\SharedKernel\Domain\AggregateRoot;
 
 class Order extends AggregateRoot
@@ -581,12 +581,12 @@ ORM 3, na která pak navazuje výčet toho, co za vás Doctrine nevymůže:
 - **Embedded value objects.** Hodnotové objekty s více poli (Money, Address)
   mapujte přes `#[ORM\Embedded]`. Žádné samostatné tabulky pro VO.
 
-:::code{language="php" filename="src/Shared/Infrastructure/Doctrine/Type/OrderIdType.php"}
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/Type/OrderIdType.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Doctrine\Type;
+namespace App\SharedKernel\Infrastructure\Doctrine\Type;
 
 use App\Ordering\Domain\Order\OrderId;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -739,10 +739,10 @@ final class DoctrineOrderRepository implements OrderRepository
 doctrine:
     dbal:
         types:
-            order_id:    App\Shared\Infrastructure\Doctrine\Type\OrderIdType
-            customer_id: App\Shared\Infrastructure\Doctrine\Type\CustomerIdType
-            product_id:  App\Shared\Infrastructure\Doctrine\Type\ProductIdType
-            money:       App\Shared\Infrastructure\Doctrine\Type\MoneyType
+            order_id:    App\SharedKernel\Infrastructure\Doctrine\Type\OrderIdType
+            customer_id: App\SharedKernel\Infrastructure\Doctrine\Type\CustomerIdType
+            product_id:  App\SharedKernel\Infrastructure\Doctrine\Type\ProductIdType
+            money:       App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType
 
     orm:
         identity_generation_preferences:

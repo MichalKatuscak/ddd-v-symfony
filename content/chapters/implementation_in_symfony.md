@@ -107,8 +107,8 @@ src/
 │       │   └── ProfileFormType.php
 │       └── View/               # Views
 │           └── profile.html.twig
-├── OrderManagement/           # Bounded Context: Správa objednávek
-│   ├── Domain/                # Doménová vrstva pro OrderManagement
+├── Ordering/           # Bounded Context: Správa objednávek
+│   ├── Domain/                # Doménová vrstva pro Ordering
 │   │   ├── Model/             # Doménové modely
 │   │   │   ├── Order.php
 │   │   │   └── OrderItem.php
@@ -119,7 +119,7 @@ src/
 │   │   │   └── OrderPlaced.php
 │   │   └── Repository/        # Repozitáře (rozhraní)
 │   │       └── OrderRepository.php
-│   ├── Infrastructure/        # Infrastruktura pro OrderManagement
+│   ├── Infrastructure/        # Infrastruktura pro Ordering
 │   │   └── Repository/        # Implementace repozitářů
 │   │       └── DoctrineOrderRepository.php
 │   ├── Checkout/              # Feature: Pokladna
@@ -943,12 +943,12 @@ mají nativní typ: enum. Překlep v názvu case odhalí statická analýza, nez
 :::callout{type="pattern"}
 ### Příklad: Backed enum pro stav objednávky {#enum-example-heading}
 
-:::code{language="php" filename="src/OrderManagement/Domain/ValueObject/OrderStatus.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderStatus.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\ValueObject;
+namespace App\Ordering\Domain\ValueObject;
 
 enum OrderStatus: string
 {
@@ -987,17 +987,17 @@ enum OrderStatus: string
 :::callout{type="pattern"}
 ### Příklad: Použití enum v doménové entitě {#enum-usage-heading}
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
-use App\OrderManagement\Domain\Event\OrderPlaced;
-use App\OrderManagement\Domain\Event\OrderStatusChanged;
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\OrderStatus;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderStatusChanged;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\SharedKernel\Domain\AggregateRoot;
 
 final class Order extends AggregateRoot
@@ -1089,7 +1089,7 @@ je anti-vzor: oslabuje agregát a vede k anemickému modelu.
 :::callout{type="anti"}
 ### Anti-vzor: doménová služba pro invariant jednoho agregátu {#anti-payment-service-heading}
 
-:::code{language="php" filename="src/OrderManagement/Domain/Service/PaymentService.php (ANTI-VZOR)"}
+:::code{language="php" filename="src/Ordering/Domain/Service/PaymentService.php (ANTI-VZOR)"}
 <?php
 
 // ANTI-VZOR: pravidlo „lze platit jen confirmed objednávku" je invariant
@@ -1120,19 +1120,19 @@ Co se tu pokazilo:
 :::callout{type="pattern"}
 ### Správně: invariant uvnitř agregátu, factory metoda na výsledek {#payment-aggregate-heading}
 
-:::code{language="php" filename="src/OrderManagement/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Model;
+namespace App\Ordering\Domain\Model;
 
-use App\OrderManagement\Domain\Event\PaymentRecorded;
-use App\OrderManagement\Domain\Exception\InvalidOrderStateTransitionException;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\OrderStatus;
-use App\OrderManagement\Domain\ValueObject\PaymentId;
-use App\OrderManagement\Domain\ValueObject\PaymentMethod;
+use App\Ordering\Domain\Event\PaymentRecorded;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+use App\Ordering\Domain\ValueObject\PaymentId;
+use App\Ordering\Domain\ValueObject\PaymentMethod;
 
 final class Order extends AggregateRoot
 {
@@ -1173,18 +1173,18 @@ koordinační roli. Pojmy command a handler vysvětluje
 :::callout{type="pattern"}
 ### Aplikační handler nad agregátem {#payment-handler-heading}
 
-:::code{language="php" filename="src/OrderManagement/Application/Command/RecordPaymentHandler.php"}
+:::code{language="php" filename="src/Ordering/Application/Command/RecordPaymentHandler.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Application\Command;
+namespace App\Ordering\Application\Command;
 
-use App\OrderManagement\Domain\Repository\OrderRepository;
-use App\OrderManagement\Domain\Repository\PaymentRepository;
-use App\OrderManagement\Domain\ValueObject\Money;
-use App\OrderManagement\Domain\ValueObject\OrderId;
-use App\OrderManagement\Domain\ValueObject\PaymentMethod;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\Repository\PaymentRepository;
+use App\Ordering\Domain\ValueObject\Money;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\PaymentMethod;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -1368,12 +1368,12 @@ má jiné odpovědnosti a jiný typ chyb:
 :::callout{type="pattern"}
 ### Příklad: Vlastní doménová výjimka {#custom-exception-heading}
 
-:::code{language="php" filename="src/OrderManagement/Domain/Exception/InvalidOrderStateTransitionException.php"}
+:::code{language="php" filename="src/Ordering/Domain/Exception/InvalidOrderStateTransitionException.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\OrderManagement\Domain\Exception;
+namespace App\Ordering\Domain\Exception;
 
 /**
  * Výjimka vyhazovaná při porušení pravidel přechodu stavu objednávky.
@@ -1811,7 +1811,7 @@ services:
     # na existující službu (Symfony si DoctrineUserRepository zaregistruje sama
     # přes autowiring výše). Tím vznikne JEDNA instance, na kterou se odkazují obě jména.
     App\UserManagement\Domain\Repository\UserRepository: '@App\UserManagement\Infrastructure\Repository\DoctrineUserRepository'
-    App\OrderManagement\Domain\Repository\OrderRepository: '@App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository'
+    App\Ordering\Domain\Repository\OrderRepository: '@App\Ordering\Infrastructure\Repository\DoctrineOrderRepository'
 
     # Messenger busy se konfigurují v config/packages/messenger.yaml, nikoli zde.
     # Při dvou a více busech je default_bus povinný, jinak FrameworkBundle
@@ -1882,16 +1882,16 @@ services:
     App\UserManagement\Domain\Repository\UserRepository: '@App\UserManagement\Infrastructure\Repository\DoctrineUserRepository'
 
     # ──────────────────────────────────────────────────
-    # Bounded Context: OrderManagement
+    # Bounded Context: Ordering
     # ──────────────────────────────────────────────────
-    App\OrderManagement\:
-        resource: '../src/OrderManagement/'
+    App\Ordering\:
+        resource: '../src/Ordering/'
         exclude:
-            - '../src/OrderManagement/Domain/Model/'
-            - '../src/OrderManagement/Domain/ValueObject/'
-            - '../src/OrderManagement/Domain/Event/'
+            - '../src/Ordering/Domain/Model/'
+            - '../src/Ordering/Domain/ValueObject/'
+            - '../src/Ordering/Domain/Event/'
 
-    App\OrderManagement\Domain\Repository\OrderRepository: '@App\OrderManagement\Infrastructure\Repository\DoctrineOrderRepository'
+    App\Ordering\Domain\Repository\OrderRepository: '@App\Ordering\Infrastructure\Repository\DoctrineOrderRepository'
 
     # ──────────────────────────────────────────────────
     # SharedKernel: sdílené komponenty napříč kontexty
