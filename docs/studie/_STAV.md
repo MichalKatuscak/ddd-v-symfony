@@ -655,6 +655,94 @@ Audit konzistence našel dvanáct rozporů v API. Rozhodnutí a poměry:
 Dva agenti (kontrola faktů a citací, kontrola kódu) padli na limitu API dřív, než
 stihli odevzdat report. Jejich záběr částečně pokryly čtyři skupinové audity kódu.
 
+## Deváté kolo: hlas, strukturní signály a citace (2026-09-05)
+
+Kolo mělo tři části: dokončit jazykovou revizi, zbavit text signálů generovaného
+obsahu a doověřit citace proti primárním zdrojům. Většinu jsem odpracoval sám –
+agenti na Fable opakovaně padali na limitu API.
+
+### Hlas a jazyk
+
+Jednoznačná porušení: tykání v AAA calloutu (`testing_ddd`) – jediné v celé knize;
+klišé „není jen X, je Y"; paralelismus sousedních vět; dvojí sloveso ve větě;
+„Zdravé optimum" bez zdůvodnění; redundantní věta opakující předchozí odstavec.
+
+**Imperativ (78 míst)** jsem rozhodoval případ od případu. Převedeno 14 tam, kde
+nesl *soud* nebo srovnání („Nepoužívejte Event Sourcing paušálně" → „Event Sourcing
+se nenasazuje paušálně"). Ponecháno 61 tam, kde nese *krok* – nápravy, rollout
+Outboxu, workshop postupy, navigace. Pravidlo v `CLAUDE.md` tenhle rozdíl
+nepopisovalo, proto bylo zpřesněno a doplněno o test „krok, nebo soud?".
+
+### Strukturní signály generovaného textu
+
+| Signál | Nález | Zásah |
+|---|---|---|
+| Rytmus seznamů | `microservices` 8 tučných listů, `what_is_ddd` 8, `architectural_styles` 6 | čtyři seznamy přepsány do prózy, včetně dvou shrnutí kapitol, která kopírovala osnovu místo syntézy |
+| Mřížka sekcí | `architectural_styles` měla u všech čtyř stylů „Kdy se X hodí" / „Kdy X nedává smysl" | první převedena na prózu |
+| Formulka „V praxi" | 81× ve 21 kapitolách, z toho 21× na začátku věty | sentence-initial výskyty 21 → 6 |
+| Wikipedijní úvody | 10 nálezů | 2 opraveny, zbytek je legitimní zavedení termínu |
+
+**Měření, které změnilo plán.** Chystal jsem se krátit 409 vět nad 25 slov podle
+pravidla v `CLAUDE.md`. První skript ale dělil věty na koncích řádků, takže měřil
+zalomení, ne délku – vycházel průměr 7,8 slova u hard-wrapped kapitol. Po opravě
+(spojení odstavců před dělením): **průměr 13,9 slova, variační koeficient 0,53**.
+To je lidské pásmo; generovaný text bývá pod 0,40. Plošné krácení by rytmus
+srovnalo a text by paradoxně vypadal generovaněji. Rozděleny jen tři věty přes
+45 slov. **Je to vědomá odchylka od pravidla „do ~25 slov" ve prospěch čtenáře.**
+
+### Citace
+
+200 URL prověřeno na dostupnost: 193 vrací 200, šest je 403 od vydavatelů
+blokujících roboty (ACM, O'Reilly, BMJ, kalele.io) a jeden reálně nefunguje –
+**`https://ddd-v-symfony.cz` se nedá přeložit na IP**. Kniha na něj v předmluvě
+posílá čtenáře. Doména buď ještě neexistuje, nebo je jiná; rozhodnutí je na autorovi.
+
+Ověřeno proti primárním zdrojům (Evans 2003, DDD Reference 2015, IDDD, Distilled,
+martinfowler.com):
+
+| Tvrzení | Výsledek |
+|---|---|
+| „Transient references to internal members can be passed out for use within a single operation only" | doslova v Evans 2003 |
+| Vernonův „generous number of seconds, minutes, hours, or even days" | doslova v IDDD |
+| „four primary ways to generate Entity unique identities" | doslova v IDDD |
+| Big Ball of Mud a Partnership jako vzory v *DDD Reference* | oba tam jsou (str. 30 a 37) |
+| Evans 2003 slovo „supporting subdomain" nepoužívá jako vzor | potvrzeno – jen popisně malými písmeny |
+| „Give the MODULES names that become part of the UBIQUITOUS LANGUAGE" | doslova v Evans 2003 |
+| Douglas Martin „alternative to good design is bad design" | doslova v *DDD Distilled* |
+| „natural correlation between service and context boundaries" | doslova u Lewise a Fowlera |
+| IDDD kapitoly 2, 10, 12, 13 a jejich názvy | všechny sedí |
+
+**Dvě opravy:**
+
+1. `event_sourcing` uváděl kurzívou *„current state is derived from the history of
+   events"* jako formulaci principu. Ta věta není z Fowlerova článku ani odjinud –
+   vypadala jako citace bez zdroje. Nahrazena Fowlerovou skutečnou definicí.
+2. `team_topologies` tvrdil, že Sweller (1988) rozlišuje tři typy kognitivní zátěže.
+   Studie z roku 1988 teorii zavedla, ale trojici intrinsic / extraneous / germane
+   doplnili až Sweller, van Merriënboer a Paas v roce **1998**; termín intrinsic
+   zavedli Chandler a Sweller na začátku 90. let.
+
+**Číslování citací:** tři kapitoly měly po dřívějším odstraňování neověřitelných
+zdrojů díry (`architectural_styles` [[1]]..[[16]] bez 8, 9, 12, 14). Přečíslováno.
+Ověřeno, že žádné číslo neukazuje na dvě URL a žádná URL nemá dvě čísla.
+
+### Vlastní chyby v tomto kole
+
+Zaznamenávám je, protože se opakují: dvakrát mi dílčí záměna slova rozbila větnou
+stavbu (`CQRS se přitom nasazuje legitimní scénáře`), jednou se náhrada duplikovala
+s existujícím textem, jednou jsem vložil metodu do špatné třídy a jednou použil
+ASCII uvozovku místo české. Všechno odhalila kontrola po sobě, ne test.
+**Poučení: po každé dávkové náhradě si přečíst výsledný odstavec, ne jen ověřit,
+že se řetězec našel.**
+
+### Co zůstává neověřené
+
+- Millett & Tune, *Patterns, Principles and Practices of DDD* – název kapitoly 3
+  („Focusing on the Core Domain") a heuristika „code for replacement rather than
+  reuse". Knihu nemám, v Evansovi ani Vernonovi to není.
+- Khononov, *Learning DDD* – názvy kapitol. Totéž.
+- Tvrzení opřená o placené zdroje bez volně dostupného textu.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
