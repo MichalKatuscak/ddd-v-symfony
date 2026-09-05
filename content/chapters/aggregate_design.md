@@ -372,12 +372,12 @@ doménová metoda cizího agregátu, transakce se rozlezla přes hranici a výho
 Evans ve stejném duchu připouští předání reference na vnitřní člen agregátu ven, ale jen
 pro jedinou operaci – tedy bez uchování a bez zápisu.
 
-:::code{language="php" filename="src/Ordering/Domain/Order/OrderId.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\Order;
+namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
@@ -413,17 +413,18 @@ final readonly class OrderId
 }
 :::
 
-:::code{language="php" filename="src/Ordering/Domain/Order/Order.php" highlights="22,29,30,34,35,36,59,60,61,62,63,64,65"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php" highlights="22,29,30,34,35,36,59,60,61,62,63,64,65"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\Order;
+namespace App\Ordering\Domain\Model;
 
-use App\Catalog\Domain\Product\ProductId;
-use App\Customers\Domain\Customer\CustomerId;
-use App\SharedKernel\Domain\Money;
+use App\Catalog\Domain\ValueObject\ProductId;
+use App\Customers\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use App\SharedKernel\Domain\AggregateRoot;
+use App\SharedKernel\Domain\Money;
 
 class Order extends AggregateRoot
 {
@@ -531,7 +532,7 @@ událost do interní fronty bázové třídy `AggregateRoot`; vyzvednutí přes
 
 Zapouzdření stavu od PHP 8.4 podporuje i jazyk sám – asymetrickou viditelností:
 
-:::code{language="php" filename="src/Ordering/Domain/Order/Order.php (výřez)"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
 class Order extends AggregateRoot
 {
     public private(set) OrderStatus $status;
@@ -588,7 +589,7 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Infrastructure\Doctrine\Type;
 
-use App\Ordering\Domain\Order\OrderId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 
@@ -623,14 +624,14 @@ migrace z toho nevznikají. Cenu za zmizelý komentář zaplatíte jinde: dva vl
 typy nad stejnou SQL deklarací už od sebe schema diff nerozezná, takže záměnu
 `order_id` za `customer_id` v mapování migrace neodhalí.
 
-:::code{language="php" filename="src/Ordering/Domain/Order/Order.php (mapování)" highlights="22,32,33,34,35,36,37,38,39,41,42,43,44,45"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (mapování)" highlights="22,32,33,34,35,36,37,38,39,41,42,43,44,45"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\Order;
+namespace App\Ordering\Domain\Model;
 
-use App\Customers\Domain\Customer\CustomerId;
+use App\Customers\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -697,10 +698,10 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Doctrine;
 
-use App\Ordering\Domain\Order\Order;
-use App\Ordering\Domain\Order\OrderId;
-use App\Ordering\Domain\Order\OrderNotFoundException;
-use App\Ordering\Domain\Order\OrderRepository;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\Exception\OrderNotFoundException;
+use App\Ordering\Domain\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineOrderRepository implements OrderRepository
