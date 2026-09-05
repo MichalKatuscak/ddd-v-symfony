@@ -174,8 +174,8 @@ declare(strict_types=1);
 
 namespace App\SharedKernel\Infrastructure\Doctrine\Type;
 
-use App\SharedKernel\Domain\ValueObject\Money;
-use App\SharedKernel\Domain\ValueObject\Currency;
+use App\SharedKernel\Domain\Money;
+use App\SharedKernel\Domain\Currency;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 

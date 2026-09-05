@@ -450,8 +450,8 @@ namespace App\Ordering\Infrastructure\Acl;
 
 use App\Ordering\Domain\Event\InvoicePaid;
 use App\Ordering\Domain\ValueObject\InvoiceId;
-use App\SharedKernel\Money\Currency;
-use App\SharedKernel\Money\Money;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 
 /**

@@ -745,8 +745,8 @@ namespace App\Import\Application\Command;
 
 use App\Product\Domain\Model\Product;
 use App\Product\Domain\ValueObject\ProductId;
-use App\SharedKernel\Domain\ValueObject\Currency;
-use App\SharedKernel\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 

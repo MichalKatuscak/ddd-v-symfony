@@ -1131,10 +1131,11 @@ namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\PaymentRecorded;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
-use App\Ordering\Domain\ValueObject\Money;
 use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\Ordering\Domain\ValueObject\PaymentId;
 use App\Ordering\Domain\ValueObject\PaymentMethod;
+use App\SharedKernel\Domain\AggregateRoot;
+use App\SharedKernel\Domain\Money;
 
 final class Order extends AggregateRoot
 {
@@ -1155,7 +1156,7 @@ final class Order extends AggregateRoot
 
         $this->status = OrderStatus::Paid;
 
-        $payment = Payment::record(PaymentId::generate(), $this->id, $amount, $method);
+        $payment = Payment::forOrder($this->id, $amount, $method);
 
         $this->record(new PaymentRecorded($this->id, $payment->id(), $amount));
 
@@ -1184,7 +1185,8 @@ namespace App\Ordering\Application\Command;
 
 use App\Ordering\Domain\Repository\OrderRepository;
 use App\Ordering\Domain\Repository\PaymentRepository;
-use App\Ordering\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\PaymentMethod;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -1202,7 +1204,7 @@ final class RecordPaymentHandler
         $order = $this->orders->get(OrderId::fromString($cmd->orderId));
 
         $payment = $order->recordPayment(
-            Money::fromAmount($cmd->amount, $cmd->currency),
+            new Money($cmd->amountInCents, Currency::from($cmd->currency)),
             PaymentMethod::from($cmd->method),
         );
 

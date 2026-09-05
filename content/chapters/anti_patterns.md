@@ -550,7 +550,7 @@ use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\ProductId;
 use App\Ordering\Domain\ValueObject\Address;
 use App\Ordering\Domain\ValueObject\OrderStatus;
-use App\Ordering\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Money;
 use App\Ordering\Domain\ValueObject\Email;
 use App\Ordering\Domain\ValueObject\WishlistId;
 use App\Ordering\Domain\Event\OrderConfirmed;
@@ -891,7 +891,7 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Event;
 
 use App\Ordering\Domain\ValueObject\CustomerId;
-use App\Ordering\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Money;
 use App\Ordering\Domain\ValueObject\OrderId;
 
 final readonly class OrderPlaced

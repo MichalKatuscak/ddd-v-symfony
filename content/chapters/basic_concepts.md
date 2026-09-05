@@ -258,12 +258,14 @@ v hooku a `readonly` se tedy vylučují a tato kniha volí `readonly`.
 kapitolami, jich skládá víc: `Money` spojuje částku a měnu do pojmu, který nejde
 rozpojit.
 
-:::code{language="php" filename="src/Ordering/Domain/ValueObject/Money.php + Currency.php"}
+:::code{language="php" filename="src/SharedKernel/Domain/Money.php + Currency.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\ValueObject;
+// Peníze používá Ordering, Billing i Pricing – proto Shared Kernel,
+// stejně jako AggregateRoot, ne doménová složka jednoho kontextu.
+namespace App\SharedKernel\Domain;
 
 enum Currency: string
 {
@@ -299,9 +301,26 @@ final readonly class Money
         return new self($this->amountInCents + $other->amountInCents, $this->currency);
     }
 
+    public function subtract(self $other): self
+    {
+        if ($this->currency !== $other->currency) {
+            throw new \DomainException(
+                "Cannot subtract {$other->currency->value} from {$this->currency->value}"
+            );
+        }
+
+        return new self($this->amountInCents - $other->amountInCents, $this->currency);
+    }
+
     public function multiply(int $factor): self
     {
         return new self($this->amountInCents * $factor, $this->currency);
+    }
+
+    /** Procentní podíl. Sazby jsou celá procenta, dělení zaokrouhluje nahoru. */
+    public function percentage(int $percent): self
+    {
+        return new self(intdiv($this->amountInCents * $percent + 99, 100), $this->currency);
     }
 
     public function equals(self $other): bool
@@ -361,7 +380,7 @@ namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
-use App\Ordering\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Money;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\ProductId;
 
@@ -479,7 +498,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
-use App\Ordering\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Money;
 use App\Ordering\Domain\ValueObject\ProductId;
 
 class OrderItem
@@ -614,8 +633,8 @@ namespace App\Ordering\Domain\Service;
 
 use App\Ordering\Domain\Model\Customer;
 use App\Ordering\Domain\Model\Order;
-use App\Ordering\Domain\ValueObject\Currency;
-use App\Ordering\Domain\ValueObject\Money;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 
 final class ShippingFeeService
 {
@@ -665,12 +684,13 @@ nepatří. Kontrola „platit lze jen potvrzenou objednávku“ je invariant agr
 `Order` (rozbor v kapitole
 [Implementace v Symfony 8](/implementace-v-symfony#domain-services)).
 A samotná tvorba `Payment` z dat objednávky je Factory – nejčastěji statická
-factory metoda:
+factory metoda. Přebírá identifikátor a částku, ne celý agregát `Order`:
+mezi agregáty putují identifikátory a hodnotové objekty, nikdy reference.
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Payment.php (výřez)"}
-public static function forOrder(Order $order, PaymentMethod $method): self
+public static function forOrder(OrderId $orderId, Money $amount, PaymentMethod $method): self
 {
-    return new self(PaymentId::generate(), $order->id(), $order->totalAmount(), $method);
+    return new self(PaymentId::generate(), $orderId, $amount, $method);
 }
 :::
 

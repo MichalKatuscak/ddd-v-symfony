@@ -657,9 +657,10 @@ final class PriceCalculator
     ): Money {
         $subtotal = $cart->subtotal();
         $discount = $policy->applyTo($subtotal, $customer->loyaltyTier());
-        $vat = $subtotal->subtract($discount)->multiply(0.21);
+        $net = $subtotal->subtract($discount);
+        $vat = $net->percentage(21);
 
-        return $subtotal->subtract($discount)->add($vat);
+        return $net->add($vat);
     }
 }
 :::
@@ -864,7 +865,7 @@ final class PlaceOrderUseCase
         return new PlaceOrderResponse(
             orderId: $order->id()->value,
             status: $order->status(),
-            totalAmount: $order->totalAmount()->toMinorUnits(),
+            totalAmount: $order->totalAmount()->amountInCents,
         );
     }
 }
