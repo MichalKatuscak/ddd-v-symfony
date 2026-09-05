@@ -1479,6 +1479,45 @@ final class InvalidOrderStateTransitionException extends \DomainException
     }
 }
 :::
+
+Ve stejném duchu vznikají ostatní doménové výjimky, které kniha používá. Všechny dědí
+z `\DomainException` a pojmenovaná továrna nese formulaci chyby, aby se text hlášky
+neopakoval na každém `throw`:
+
+:::code{language="php" filename="src/Ordering/Domain/Exception/ (a UserManagement obdobně)"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain\Exception;
+
+use App\Ordering\Domain\ValueObject\OrderId;
+
+final class EmptyOrderException extends \DomainException
+{
+    public static function cannotConfirm(): self
+    {
+        return new self('Objednávku bez položek nelze potvrdit.');
+    }
+
+    public static function cannotBePlaced(): self
+    {
+        return new self('Objednávka musí mít alespoň jednu položku.');
+    }
+}
+
+final class OrderNotFoundException extends \DomainException
+{
+    public static function withId(OrderId $id): self
+    {
+        return new self(sprintf('Objednávka "%s" neexistuje.', $id->value));
+    }
+}
+:::
+
+`UserManagement` má vlastní rodinu se stejnou stavbou: `DuplicateEmailException`,
+`UserAlreadyActivatedException` a `InvalidVerificationTokenException`, každá
+s továrnou `forEmail()`, respektive `forUser(UserId $id)`.
 :::
 
 :::callout{type="warn"}

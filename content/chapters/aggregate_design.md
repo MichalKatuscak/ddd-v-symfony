@@ -423,6 +423,9 @@ namespace App\Ordering\Domain\Model;
 use App\Catalog\Domain\ValueObject\ProductId;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
+// ShipmentId patří cizímu kontextu – přes hranici jde jen identita,
+// stejný tvar jako OrderId (final readonly class s validovaným UUID).
+use App\Shipping\Domain\ValueObject\ShipmentId;
 use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
