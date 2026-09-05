@@ -88,7 +88,13 @@ Průvodce mluví jako zkušený praktik, který věci dobře zná a nebojí se �
 - Věta říká jednu věc. Pokud říká dvě, rozdělit.
 - Žádný odstavec nezačíná „Je důležité...", „V rámci...", „Je třeba poznamenat...".
 - Mezi dvěma sousedními větami nikdy neopakovat stejné podstatné jméno v podmětu, pokud to nemá explicitní důvod (kontrastní porovnání). Použít synonymum nebo zájmeno, nebo věty spojit.
-- Tón průvodce je deklarativní (autor popisuje), ne imperativní (autor velí). Imperativní formy („Použijte", „Definujte", „Rozdělte") jsou vyhrazeny pro callout typu `pattern` nebo numerované postupy v sekci „Implementace v praxi", nikdy pro definiční nebo srovnávací pasáže.
+- Tón průvodce je deklarativní (autor popisuje), ne imperativní (autor velí). Imperativní formy („Použijte", „Definujte", „Rozdělte") patří tam, kde text čtenáře vede krokem, který má provést:
+  - callout typu `pattern`,
+  - numerované i prózou psané postupy (zavádění, migrace, workshop),
+  - nápravy a diagnostiku („Náprava:", „Řešení:", „Rozpoznávací znak."),
+  - navigaci mezi kapitolami („projděte si Cheat Sheet").
+
+  Nikdy nepatří do definičních, srovnávacích a doporučujících pasáží. Test: nese věta **krok**, nebo **soud**? „Tabulku vytvořte migrací" je krok. „Nepoužívejte Event Sourcing paušálně" je soud, a ten se píše oznamovací větou – „Event Sourcing se nenasazuje paušálně". Totéž platí pro srovnání „kdy ano / kdy ne" a pro shrnutí kapitoly.
 - „Lze + infinitiv" je standardní český registr v odborné próze. Substituce „lze" → „jde" / „jdou" se provádí pouze tehdy, když výsledná věta zní přirozeněji.
 
 ### Zakázáno — marketing a hype
