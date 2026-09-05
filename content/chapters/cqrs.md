@@ -693,7 +693,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
     public function findById(string $userId): ?UserProfileViewModel
     {
         $row = $this->connection->fetchAssociative(
-            'SELECT u.id, u.name, u.email, u.registered_at,
+            'SELECT u.id, u.name_value AS name, u.email, u.created_at,
                     (SELECT COUNT(*) FROM orders o
                       WHERE o.customer_id = u.id) AS total_orders,
                     COALESCE(
@@ -714,7 +714,7 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
             userId: $row['id'],
             name: $row['name'],
             email: $row['email'],
-            registeredAt: new \DateTimeImmutable($row['registered_at']),
+            registeredAt: new \DateTimeImmutable($row['created_at']),
             totalOrders: (int) $row['total_orders'],
             membershipTier: $row['membership_tier'],
         );
@@ -940,7 +940,7 @@ schématu se vyřadí filtrem:
 doctrine:
     dbal:
         # Tabulky read modelů spravují migrace, ne ORM.
-        schema_filter: '~^(?!order_history|user_profile_view)~'
+        schema_filter: '~^(?!order_dashboard|user_profile_view)~'
 :::
 
 ### Strategie optimalizace read modelů
@@ -1007,8 +1007,10 @@ final class OrderDashboardProjector
             'INSERT INTO order_dashboard
                 (order_id, customer_name, total_amount, status, placed_at, updated_at)
              VALUES (:orderId, :customerName, :totalAmount, :status, :placedAt, :updatedAt)
-             ON DUPLICATE KEY UPDATE
-                status = VALUES(status), updated_at = VALUES(updated_at)',
+             -- ON CONFLICT je PostgreSQL i SQLite; MySQL má
+             -- ON DUPLICATE KEY UPDATE … = VALUES(…). Upsert není přenositelný.
+             ON CONFLICT (order_id) DO UPDATE SET
+                status = excluded.status, updated_at = excluded.updated_at',
             [
                 'orderId'      => $event->orderId,
                 'customerName' => $event->customerName,

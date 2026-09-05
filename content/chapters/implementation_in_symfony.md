@@ -392,6 +392,44 @@ final readonly class Email
     }
 }
 :::
+
+`HashedPassword` má stejnou stavbu, jen jiný invariant – hodnotou je hash, ne heslo:
+
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/HashedPassword.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Domain\ValueObject;
+
+final readonly class HashedPassword
+{
+    private function __construct(public string $value) {}
+
+    public static function fromPlainText(string $plain): self
+    {
+        if (strlen($plain) < 12) {
+            throw new \InvalidArgumentException('Password must be at least 12 characters');
+        }
+
+        return new self(password_hash($plain, PASSWORD_DEFAULT));
+    }
+
+    /** Rekonstituce z databáze – hash se znovu nehashuje. */
+    public static function fromHash(string $hash): self
+    {
+        return new self($hash);
+    }
+
+    public function matches(string $plain): bool
+    {
+        return password_verify($plain, $this->value);
+    }
+}
+:::
+
+Konstruktor je tu privátní záměrně. `new HashedPassword($plain)` by uložil heslo
+v otevřené podobě a nic by se nestalo – dvě pojmenované továrny ten omyl vylučují.
 :::
 
 :::callout{type="warn"}
