@@ -48,7 +48,7 @@ Proč tu mapu nakreslit? Protože alternativou je **implicitní vztahový graf**
 
 ### Jak velký je jeden Bounded Context {#bc-modul-deployment}
 
-Evans popisuje Bounded Context jako hranici, uvnitř které platí jeden model – typicky podsystém nebo práce jednoho týmu [[1]](https://www.domainlanguage.com/ddd/). O nasazení tam není ani slovo. Fowler jde stejným směrem: hranici určuje lidská kultura a jazyk, technická reprezentace je až důsledek. Připouští proto i dva kontexty uvnitř jediné aplikace [[4]](https://martinfowler.com/bliki/BoundedContext.html).
+Evans popisuje Bounded Context jako hranici, uvnitř které platí jeden model – typicky podsystém nebo práce jednoho týmu [[1]](https://www.domainlanguage.com/ddd/). O nasazení tam není ani slovo. Fowler jde stejným směrem: hranici určuje lidská kultura a jazyk, technická reprezentace je až důsledek. Připouští proto i dva kontexty uvnitř jediné aplikace [[3]](https://martinfowler.com/bliki/BoundedContext.html).
 
 Prakticky jde o tři úrovně, které se v diskusi rády slévají do jedné:
 
@@ -338,7 +338,7 @@ Bez těchto rituálů sklouzne Customer/Supplier do [Conformistu](#conformist): 
 
 Rituály pokrývají organizační polovinu vzoru. Evans (2003) k ní přidává technickou: společně vyvinuté automatizované akceptační testy ověřují očekávané rozhraní upstreamu. Přidají se do testovací sady upstream týmu a běží v jeho continuous integration. Upstream pak může měnit implementaci beze strachu z vedlejších efektů dole – rozbitý downstream kontrakt shodí build u něj, ne až v produkci u zákazníka.
 
-Dnes má tento mechanismus jméno a nástroje. Ian Robinson jej v roce 2006 popsal jako *consumer-driven contracts* [[10]](https://martinfowler.com/articles/consumerDrivenContracts.html): konzument formuluje očekávání, poskytovatel je drží zelené ve svém pipeline. V PHP se k tomu používá Pact přes `pact-foundation/pact-php`. Vyplatí se všude, kde je downstream konzumentů víc než jeden a breaking change se dá odhalit dřív než telefonátem.
+Dnes má tento mechanismus jméno a nástroje. Ian Robinson jej v roce 2006 popsal jako *consumer-driven contracts* [[4]](https://martinfowler.com/articles/consumerDrivenContracts.html): konzument formuluje očekávání, poskytovatel je drží zelené ve svém pipeline. V PHP se k tomu používá Pact přes `pact-foundation/pact-php`. Vyplatí se všude, kde je downstream konzumentů víc než jeden a breaking change se dá odhalit dřív než telefonátem.
 
 ## 03.06 Conformist {#conformist}
 
@@ -577,7 +577,7 @@ Pravidlo: **ACL drží jednu odpovědnost.** Vrstva s desítkami metod a sdílen
 
 ACL dostává v této kapitole nejvíc prostoru, což svádí brát ho jako výchozí volbu. Není. Vrstva má svou cenu a ve třech situacích ji nezaplatíte zpět.
 
-Prvním případem je zanedbatelný sémantický rozdíl. Když upstream i downstream používají stejné pojmy ve stejném významu, zbude z ACL prázdná mapovací vrstva, která kopíruje pole z DTO do VO se stejnými jmény. Microsoft Azure Architecture Center pro tuto situaci doporučuje soustředit vrstvu na překlad a nedávat do ní obchodní pravidla ani orchestraci [[7]](https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer). Bez čeho překládat, není co stavět.
+Prvním případem je zanedbatelný sémantický rozdíl. Když upstream i downstream používají stejné pojmy ve stejném významu, zbude z ACL prázdná mapovací vrstva, která kopíruje pole z DTO do VO se stejnými jmény. Microsoft Azure Architecture Center pro tuto situaci doporučuje soustředit vrstvu na překlad a nedávat do ní obchodní pravidla ani orchestraci [[5]](https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer). Bez čeho překládat, není co stavět.
 
 Druhým případem je latence a provoz. ACL nasazený jako samostatná služba přidává síťový skok, další proces k monitorování a další místo, kde se škáluje. Při vysoké propustnosti se z něj stane bottleneck a ladí se dvakrát: jednou doména, jednou překlad.
 
@@ -676,7 +676,7 @@ OHS musí mít explicitní politiku zastarávání. Příklad pro veřejné API:
 - Minimálně 6 měsíců před odstraněním v1 dostanou všichni známí klienti oznámení.
 - Po odstranění v1 vrací `410 Gone` s odkazem na migrační průvodce.
 
-Formát obou hlaviček předepisují dvě různá RFC, která se v praxi často zaměňují. `Deprecation` definuje RFC 9745 (Standards Track, březen 2025) jako strukturované pole typu Date, tedy unixový timestamp se zavináčem [[8]](https://www.rfc-editor.org/rfc/rfc9745.html). Starší návrhy povolovaly hodnotu `true`; ta dnes platná není. `Sunset` pochází z RFC 8594 a používá datum v HTTP formátu [[9]](https://www.rfc-editor.org/rfc/rfc8594.html). Časový bod v `Sunset` nesmí předcházet ten v `Deprecation`.
+Formát obou hlaviček předepisují dvě různá RFC, která se v praxi často zaměňují. `Deprecation` definuje RFC 9745 (Standards Track, březen 2025) jako strukturované pole typu Date, tedy unixový timestamp se zavináčem [[6]](https://www.rfc-editor.org/rfc/rfc9745.html). Starší návrhy povolovaly hodnotu `true`; ta dnes platná není. `Sunset` pochází z RFC 8594 a používá datum v HTTP formátu [[7]](https://www.rfc-editor.org/rfc/rfc8594.html). Časový bod v `Sunset` nesmí předcházet ten v `Deprecation`.
 
 :::callout{type="pattern"}
 **Bez politiky verzování je OHS deklarace bez závazku.** Evansova definice verzování nepředepisuje, mluví o publikovaném protokolu a jeho rozšiřování. Praxe veřejných API k tomu ale vede: jakmile kontrakt konzumuje víc týmů, potřebujete umět vyjmenovat neslučitelné změny za poslední rok, zveřejnit kalendář zastarávání a nabídnout onboarding průvodce. Bez toho máte REST endpoint, o kterém tvrdíte, že je stabilní.
@@ -891,7 +891,7 @@ Context Map je **živý dokument**. Doporučení:
 
 Mapu lze držet i jako zdrojový kód. [Context Mapper](https://contextmapper.org/docs/context-map/) k tomu má DSL, které odděluje typ vztahu od role na jeho konci a diagram generuje při CI. Zápis `VoyagePlanning [D,ACL] <- [U,OHS,PL] Location` říká totéž co dvě tabulky v sekci 03.02, ale dá se reviewovat v pull requestu.
 
-Jedna velká mapa celého systému stárne nejrychleji. Komunitní praxe DDD Crew doporučuje opak: víc menších map, každou ke konkrétní otázce („jak se dostaneme z Conformistu vůči billingu?“), a u každé mapy vysvětlit použité vzory lidem, kteří o nich rozhodují [[6]](https://github.com/ddd-crew/context-mapping).
+Jedna velká mapa celého systému stárne nejrychleji. Komunitní praxe DDD Crew doporučuje opak: víc menších map, každou ke konkrétní otázce („jak se dostaneme z Conformistu vůči billingu?“), a u každé mapy vysvětlit použité vzory lidem, kteří o nich rozhodují [[8]](https://github.com/ddd-crew/context-mapping).
 
 :::callout{type="warn"}
 **Context Map zastarává.** Přepište ji při každé větší architektonické změně. Datum + verze v patičce povinné. Mapa, která je rok stará, je horší než žádná mapa – uvádí v omyl. Pokud nemáte čas Context Map pravidelně udržovat, ponechte si jen textovou složku (`docs/context-map.md`) – ta zastará pomaleji.
@@ -899,7 +899,7 @@ Jedna velká mapa celého systému stárne nejrychleji. Komunitní praxe DDD Cre
 
 ## 03.12 Anti-vzor: Big Ball of Mud {#big-ball-of-mud}
 
-**Big Ball of Mud** popsali Brian Foote a Joseph Yoder v roce 1997 v eseji *Big Ball of Mud* [[3]](http://www.laputan.org/mud/): „*A Big Ball of Mud is haphazardly structured, sprawling, sloppy, duct-tape and bailing wire, spaghetti code jungle.*“ V jazyce Context Mappingu: systém, kde každý BC „nějak“ mluví s každým, sdílí databázové tabulky, sdílí entity, sdílí ad-hoc service vrstvy – a nikdo nedokáže nakreslit Context Map, protože vztahy nejsou pojmenované.
+**Big Ball of Mud** popsali Brian Foote a Joseph Yoder v roce 1997 v eseji *Big Ball of Mud* [[9]](http://www.laputan.org/mud/): „*A Big Ball of Mud is haphazardly structured, sprawling, sloppy, duct-tape and bailing wire, spaghetti code jungle.*“ V jazyce Context Mappingu: systém, kde každý BC „nějak“ mluví s každým, sdílí databázové tabulky, sdílí entity, sdílí ad-hoc service vrstvy – a nikdo nedokáže nakreslit Context Map, protože vztahy nejsou pojmenované.
 
 ### Symptomy
 
@@ -925,7 +925,7 @@ Evansova první rada zní překvapivě pasivně: obtáhnout kolem celého nepoř
 
 Nejčastěji funkčním postupem zevnitř ven je **Strangler Fig**: postupně vyčleňovat čisté BC, každý obklopit ACL a přesouvat funkčnost ze staré spaghetti vrstvy do nového čistého modelu. Detail viz [Migrace z CRUD do DDD](/migrace-z-crud).
 
-Rewrite přitom není tabu. Foote a Yoder mají mezi svými sedmi vzory i *Reconstruction* – zahodit systém a postavit ho znovu je u původních autorů legitimní volba, ne selhání [[3]](http://www.laputan.org/mud/). Rozhodnutí mezi postupným škrcením a rekonstrukcí je rozpočtová a riziková úvaha, ne otázka víry.
+Rewrite přitom není tabu. Foote a Yoder mají mezi svými sedmi vzory i *Reconstruction* – zahodit systém a postavit ho znovu je u původních autorů legitimní volba, ne selhání [[9]](http://www.laputan.org/mud/). Rozhodnutí mezi postupným škrcením a rekonstrukcí je rozpočtová a riziková úvaha, ne otázka víry.
 
 Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory v DDD](/anti-vzory). Ta pokrývá konkrétní symptomy v PHP/Symfony technologii a strategie jejich nápravy.
 
@@ -976,13 +976,13 @@ Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu]
 - Eric Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*, kap. 14 „Maintaining Model Integrity“ (Addison-Wesley, 2003) [[1]](https://www.domainlanguage.com/ddd/).
 - Eric Evans, *Domain-Driven Design Reference: Definitions and Pattern Summaries* (2015) – stručné definice všech vzorů včetně Partnership a Big Ball of Mud; volně dostupná na [domainlanguage.com](https://www.domainlanguage.com/ddd/reference/).
 - Vaughn Vernon, *Implementing Domain-Driven Design*, kap. 3 „Context Maps“ (Addison-Wesley, 2013) [[2]](https://kalele.io/books/).
-- Brian Foote & Joseph Yoder, *Big Ball of Mud*, PLoP 1997 [[3]](http://www.laputan.org/mud/).
-- Martin Fowler, *Bounded Context* (bliki) [[4]](https://martinfowler.com/bliki/BoundedContext.html).
+- Brian Foote & Joseph Yoder, *Big Ball of Mud*, PLoP 1997 [[9]](http://www.laputan.org/mud/).
+- Martin Fowler, *Bounded Context* (bliki) [[3]](https://martinfowler.com/bliki/BoundedContext.html).
 - Vaughn Vernon, *Domain-Driven Design Distilled* (Addison-Wesley, 2016) – zkrácená přístupnější verze pro úvod do strategického designu.
-- DDD Crew, *Context Mapping* shareable resources [[6]](https://github.com/ddd-crew/context-mapping) – komunitní vizuální notace pro Context Mapping.
-- Microsoft Azure Architecture Center, *Anti-Corruption Layer pattern* [[7]](https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer) – náklady vrstvy a situace, kdy ji nestavět.
-- IETF, RFC 9745 *The Deprecation HTTP Response Header Field* (2025) [[8]](https://www.rfc-editor.org/rfc/rfc9745.html) a RFC 8594 *The Sunset HTTP Header Field* (2019) [[9]](https://www.rfc-editor.org/rfc/rfc8594.html).
+- DDD Crew, *Context Mapping* shareable resources [[8]](https://github.com/ddd-crew/context-mapping) – komunitní vizuální notace pro Context Mapping.
+- Microsoft Azure Architecture Center, *Anti-Corruption Layer pattern* [[5]](https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer) – náklady vrstvy a situace, kdy ji nestavět.
+- IETF, RFC 9745 *The Deprecation HTTP Response Header Field* (2025) [[6]](https://www.rfc-editor.org/rfc/rfc9745.html) a RFC 8594 *The Sunset HTTP Header Field* (2019) [[7]](https://www.rfc-editor.org/rfc/rfc8594.html).
 - Vlad Khononov, *Learning Domain-Driven Design* (O'Reilly, 2021), kap. 4 „Integrating Bounded Contexts“ – novější pohled na volbu vzoru podle poměru nákladů na duplicitu a na koordinaci.
-- Ian Robinson, *Consumer-Driven Contracts: A Service Evolution Pattern* [[10]](https://martinfowler.com/articles/consumerDrivenContracts.html) – technická podoba Customer/Supplier vztahu.
+- Ian Robinson, *Consumer-Driven Contracts: A Service Evolution Pattern* [[4]](https://martinfowler.com/articles/consumerDrivenContracts.html) – technická podoba Customer/Supplier vztahu.
 - [Context Mapper](https://contextmapper.org/docs/context-map/) – DSL a generátor map, který odděluje typ vztahu od role a mapu drží v gitu.
 - DDD Crew, [*DDD Starter Modelling Process*](https://ddd-crew.github.io/ddd-starter-modelling-process/) – zasazení Context Mappingu mezi ostatní strategické artefakty.

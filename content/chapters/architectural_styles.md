@@ -215,9 +215,9 @@ Port není v originále synonymum pro rozhraní jedné závislosti. Cockburn ho 
 
 PHP praxe jde jinudy. Repozitáře, mailery a publishery událostí dostávají vlastní rozhraní jedna ku jedné, protože to odpovídá tomu, jak se v Symfony píše autowiring i testovací double. Tuto jemnější granularitu používá i zbytek průvodce. Není to ale Cockburnova definice a ten rozdíl stojí za pojmenování: co kapitola nazývá portem, je u něj spíš jeden adaptér uvnitř širší konverzace.
 
-Jedna hranice platí v obou výkladech. V rozhovoru z roku 2020 označuje Cockburn za hlavní chybu praxe „jednu technologii na port, nebo port na technologii“ [[11]](https://jmgarridopaz.github.io/content/interviewalistair.html). Tím se ztrácí smysl portu, tedy záměna technologie beze změny jádra. Rozhraní `RedisOrderCache` je porušením vzoru; `OrderCache` s Redis adaptérem a in-memory adaptérem pro testy není.
+Jedna hranice platí v obou výkladech. V rozhovoru z roku 2020 označuje Cockburn za hlavní chybu praxe „jednu technologii na port, nebo port na technologii“ [[4]](https://jmgarridopaz.github.io/content/interviewalistair.html). Tím se ztrácí smysl portu, tedy záměna technologie beze změny jádra. Rozhraní `RedisOrderCache` je porušením vzoru; `OrderCache` s Redis adaptérem a in-memory adaptérem pro testy není.
 
-Mechanismus pod porty pojmenoval Gerard Meszaros v roce 2011 jako **Configurable Dependency** – závislost, jejíž konkrétní implementaci určuje až sestavení aplikace zvenčí [[11]](https://jmgarridopaz.github.io/content/interviewalistair.html). V Symfony tu roli plní Service Container.
+Mechanismus pod porty pojmenoval Gerard Meszaros v roce 2011 jako **Configurable Dependency** – závislost, jejíž konkrétní implementaci určuje až sestavení aplikace zvenčí [[4]](https://jmgarridopaz.github.io/content/interviewalistair.html). V Symfony tu roli plní Service Container.
 
 ### Symfony struktura podle Hexagonal {#hexagonal-symfony-heading}
 
@@ -260,7 +260,7 @@ Z této struktury plyne několik věcí:
 - Doménová entita (`Order`) **není Doctrine entita**. K mapování slouží samostatná `OrderOrmEntity` + mapper (vzor [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern)) – doména zůstává čistá. *Pozn.: Hexagonal Architecture trvá na této separaci. Pragmatičtější přístup, který zbytek průvodce používá jako výchozí, atributy přímo na agregátu připouští – viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading).*
 - Vstup do aplikace prochází přes *inbound port* (`PlaceOrder`). HTTP Controller a CLI Command nezávisí na doméně přímo, ale na tomto portu.
 
-Dělení jádra na `Domain/` a `Application/` v originále nenajdete. Cockburn popisuje jen vnitřek a vnějšek hexagonu; rozdělení na aplikační a doménovou vrstvu je podle Garrida de Paz téma DDD, ne hexagonální architektury [[11]](https://jmgarridopaz.github.io/content/interviewalistair.html). Struktura výše je tedy skladba dvou vzorů, ne jednoho.
+Dělení jádra na `Domain/` a `Application/` v originále nenajdete. Cockburn popisuje jen vnitřek a vnějšek hexagonu; rozdělení na aplikační a doménovou vrstvu je podle Garrida de Paz téma DDD, ne hexagonální architektury [[4]](https://jmgarridopaz.github.io/content/interviewalistair.html). Struktura výše je tedy skladba dvou vzorů, ne jednoho.
 
 ### Příklad: Outbound port a jeho adaptér {#hexagonal-priklad-heading}
 
@@ -601,7 +601,7 @@ Druhý častý anti-vzor: **port = repository, ostatní jsou jen služby**. Tým
 
 ## 09.04 Onion Architecture (Palermo 2008) {#onion}
 
-Onion Architecture představil Jeffrey Palermo v roce 2008 v blogové sérii [[4]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) – první tři díly vyšly v roce 2008, čtvrtý (*Part 4 – After Four Years*) následoval v roce 2013. Je to vylepšení vrstvené architektury, které explicitně staví doménový model do středu a zavádí **Dependency Rule**: závislosti smí směřovat pouze *dovnitř*, nikdy ven. Geometrickou metaforou je cibule (onion) s koncentrickými prstenci.
+Onion Architecture představil Jeffrey Palermo v roce 2008 v blogové sérii [[5]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) – první tři díly vyšly v roce 2008, čtvrtý (*Part 4 – After Four Years*) následoval v roce 2013. Je to vylepšení vrstvené architektury, které explicitně staví doménový model do středu a zavádí **Dependency Rule**: závislosti smí směřovat pouze *dovnitř*, nikdy ven. Geometrickou metaforou je cibule (onion) s koncentrickými prstenci.
 
 ### Čtyři koncentrické vrstvy Onion {#onion-vrstvy-heading}
 
@@ -612,7 +612,7 @@ Onion Architecture představil Jeffrey Palermo v roce 2008 v blogové sérii [[4
 
 Podstatné je slovo **koncentrické**. Vrstvy nejsou vertikálně poskládané (nahoře UI, dole DB), ale soustředné – jádro uprostřed, vnější svět kolem. To řeší jeden problém klasické vrstvené architektury: ve vrstvené struktuře může Domain záviset na Infrastructure (čte z databáze), v Onion to není dovoleno. Repozitáře jsou definovány jako rozhraní v jádře a implementovány v UI/Infrastructure vrstvě.
 
-V dílu *After Four Years* shrnul Palermo vzor do čtyř tezí [[13]](https://jeffreypalermo.com/2013/08/onion-architecture-part-4-after-four-years/). Aplikace stojí kolem nezávislého objektového modelu. Vnitřní vrstvy definují rozhraní, vnější je implementují. Každá vazba míří do středu. A jádro se dá zkompilovat a spustit bez infrastruktury. Tamtéž odmítá běžné čtení, že jde o „DDD architekturu“. Onion podle něj nezávisí na DDD, na CQRS ani na IoC kontejneru. Výklad přes agregáty a doménové služby, který používá tato kapitola, je tedy jedno z možných čtení, ne definice vzoru.
+V dílu *After Four Years* shrnul Palermo vzor do čtyř tezí [[6]](https://jeffreypalermo.com/2013/08/onion-architecture-part-4-after-four-years/). Aplikace stojí kolem nezávislého objektového modelu. Vnitřní vrstvy definují rozhraní, vnější je implementují. Každá vazba míří do středu. A jádro se dá zkompilovat a spustit bez infrastruktury. Tamtéž odmítá běžné čtení, že jde o „DDD architekturu“. Onion podle něj nezávisí na DDD, na CQRS ani na IoC kontejneru. Výklad přes agregáty a doménové služby, který používá tato kapitola, je tedy jedno z možných čtení, ne definice vzoru.
 
 ### Rozdíl proti Hexagonal {#onion-vs-hexagonal-heading}
 
@@ -751,7 +751,7 @@ Doména s hrstkou doménových služeb dvě vrstvy služeb neuživí; Hexagonal 
 
 ## 09.05 Clean Architecture (Robert C. Martin 2012) {#clean}
 
-Robert C. Martin (známý pod přezdívkou „Uncle Bob“) chtěl zobecnit společné rysy Hexagonal, Onion, DCI a BCE (Boundary-Control-Entity od Ivara Jacobsona) do jednoho srozumitelného modelu. Výsledkem byl blogový post *Clean Architecture* z roku 2012 [[5]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). O pět let později ho rozvedl do knihy *Clean Architecture: A Craftsman's Guide to Software Structure and Design* (Prentice Hall, 2017). Ta vzor doplňuje o kapitoly k hranicím komponent a k organizaci balíčků.
+Robert C. Martin (známý pod přezdívkou „Uncle Bob“) chtěl zobecnit společné rysy Hexagonal, Onion, DCI a BCE (Boundary-Control-Entity od Ivara Jacobsona) do jednoho srozumitelného modelu. Výsledkem byl blogový post *Clean Architecture* z roku 2012 [[7]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). O pět let později ho rozvedl do knihy *Clean Architecture: A Craftsman's Guide to Software Structure and Design* (Prentice Hall, 2017). Ta vzor doplňuje o kapitoly k hranicím komponent a k organizaci balíčků.
 
 ### Čtyři prsteny Clean Architecture {#clean-prsteny-heading}
 
@@ -762,7 +762,7 @@ Robert C. Martin (známý pod přezdívkou „Uncle Bob“) chtěl zobecnit spol
 
 **Dependency Rule**: zdrojový kód směřuje jen směrem dovnitř. Vnější vrstva smí odkazovat na třídy vnitřní vrstvy, ale nikdy naopak. Pokud vnitřní vrstva potřebuje něco z vnější (např. uložit objednávku), použije *Dependency Inversion* – definuje rozhraní v sobě, které vnější vrstva implementuje.
 
-Počet čtyři přitom není závazný. Martin sám píše, že prstence jsou schéma a aplikace jich může potřebovat víc [[5]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). Druhé pravidlo se týká toho, co hranici překračuje: jednoduché datové struktury, nikdy ORM entity ani databázové řádky. Request a Response DTO v ukázkách níže jsou přesně tím.
+Počet čtyři přitom není závazný. Martin sám píše, že prstence jsou schéma a aplikace jich může potřebovat víc [[7]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). Druhé pravidlo se týká toho, co hranici překračuje: jednoduché datové struktury, nikdy ORM entity ani databázové řádky. Request a Response DTO v ukázkách níže jsou přesně tím.
 
 ### Co Clean přidává proti Onion a Hexagonal {#clean-co-pridava-heading}
 
@@ -952,7 +952,7 @@ V Symfony 8 projektu, kde používáte Symfony Messenger jako Command Bus, máte
 
 ## 09.06 Vertical Slice Architecture (a horizontální vs. vertikální dělení) {#vertical-slice}
 
-Vrstvové architektury mají skrytou daň: jeden běžný use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy v každém z nich. Na tuto bolest reaguje *Vertical Slice Architecture* od Jimmyho Bogarda z roku 2018 [[6]](https://www.jimmybogard.com/vertical-slice-architecture/).
+Vrstvové architektury mají skrytou daň: jeden běžný use case se rozprostírá přes 5–7 souborů (Controller, Service, Domain Service, Repository interface, Repository impl, DTO, Mapper). Změna jediné funkce vyžaduje úpravy v každém z nich. Na tuto bolest reaguje *Vertical Slice Architecture* od Jimmyho Bogarda z roku 2018 [[8]](https://www.jimmybogard.com/vertical-slice-architecture/).
 
 Vertical Slice Architecture organizuje kód **podle feature, ne podle vrstvy**. Každá feature dostane svůj adresář, ve kterém žije všechno potřebné: Command/Query, Handler, Validátor, Read Model, Controller. Slice je kompletní vertikální „sloupec“ přes všechny technické vrstvy aplikace. Tradiční vrstvený (horizontální) přístup naopak člení kód podle technické odpovědnosti (Controller / Service / Repository / Entity). Jeden use case se pak rozprostírá napříč všemi vrstvami.
 
@@ -1002,9 +1002,9 @@ src/
 └── Shared/Domain/Exception/DomainException.php
 :::
 
-Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje soudržnost uvnitř každé z nich [[6]](https://www.jimmybogard.com/vertical-slice-architecture/). Zároveň zachovává principy DDD – respektuje Bounded Contexts a sdílený doménový model.
+Tento přístup minimalizuje vazby mezi jednotlivými funkcemi a maximalizuje soudržnost uvnitř každé z nich [[8]](https://www.jimmybogard.com/vertical-slice-architecture/). Zároveň zachovává principy DDD – respektuje Bounded Contexts a sdílený doménový model.
 
-Bogard jde ve svém článku dál, než tato struktura ukazuje. Vadí mu povinný řetěz „controller musí volat službu, která musí použít repozitář“, a tvrdí, že uvnitř slice většina abstrakcí odpadá. Vzor doménové logiky se podle něj volí per slice: triviální slice může být Transaction Script, složitý bohatý model [[6]](https://www.jimmybogard.com/vertical-slice-architecture/).
+Bogard jde ve svém článku dál, než tato struktura ukazuje. Vadí mu povinný řetěz „controller musí volat službu, která musí použít repozitář“, a tvrdí, že uvnitř slice většina abstrakcí odpadá. Vzor doménové logiky se podle něj volí per slice: triviální slice může být Transaction Script, složitý bohatý model [[8]](https://www.jimmybogard.com/vertical-slice-architecture/).
 
 Konvence této knihy je vědomě měkčí. Doménový model zůstává sdílený uvnitř Bounded Contextu a slice krájí jen aplikační, prezentační a část infrastrukturní vrstvy. Důvod jsou invarianty. Agregát, který si každý slice modeluje po svém, přestane být jediným místem, kde doménová pravidla platí.
 
@@ -1036,7 +1036,7 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 | **Testovatelnost** | Vyžaduje více mocků (vrstvy mezi sebou) | Méně mocků, závislosti jsou lokální |
 | **Škálovatelnost na microservices** | Vyžaduje přeorganizování všech vrstev | Feature lze přesunout jako celek |
 | **Pochopení na začátku** | Jednodušší (tradičnější) | Vyžaduje pochopení slice jako jednotky |
-| **Vhodnost pro CQRS** | CQRS vyžaduje dodatečnou práci | Přirozeně podporuje CQRS [[10]](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
+| **Vhodnost pro CQRS** | CQRS vyžaduje dodatečnou práci | Přirozeně podporuje CQRS [[9]](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/apply-simplified-microservice-cqrs-ddd-patterns) |
 
 ### Kdy zvolit který přístup {#kdy-vs}
 
@@ -1051,9 +1051,9 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 
 ### Třetí osa dělení: modul {#modul-osa}
 
-Vrstva a slice nejsou jediné jednotky členění. Martin Fowler píše, že jakmile některá vrstva naroste, patří nejvyšší úroveň rozdělit na doménově orientované moduly a vrstvit až uvnitř nich [[15]](https://martinfowler.com/bliki/PresentationDomainDataLayering.html). Vrstvení tedy podle něj není správná dekompozice nejvyšší úrovně. Ve stejném textu varuje před organizací týmů podle vrstev.
+Vrstva a slice nejsou jediné jednotky členění. Martin Fowler píše, že jakmile některá vrstva naroste, patří nejvyšší úroveň rozdělit na doménově orientované moduly a vrstvit až uvnitř nich [[10]](https://martinfowler.com/bliki/PresentationDomainDataLayering.html). Vrstvení tedy podle něj není správná dekompozice nejvyšší úrovně. Ve stejném textu varuje před organizací týmů podle vrstev.
 
-Modulární monolit tu myšlenku dotahuje na úroveň nasazení. Kamil Grzybek popisuje modul třemi vlastnostmi [[16]](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer). Je nezávislý a zaměnitelný. Pokrývá kompletní business funkčnost, tedy moduly jako vertikální slice, ne technické vrstvy. A má definované rozhraní: všechno, co ven sdílí, se stává jeho veřejným API. Simon Brown jde na totéž ze strany balíčkování a v [package by component](https://simonbrown.je/modular-monolith/) doporučuje spoléhat na překladač, ne na disciplínu týmu.
+Modulární monolit tu myšlenku dotahuje na úroveň nasazení. Kamil Grzybek popisuje modul třemi vlastnostmi [[11]](https://www.kamilgrzybek.com/blog/posts/modular-monolith-primer). Je nezávislý a zaměnitelný. Pokrývá kompletní business funkčnost, tedy moduly jako vertikální slice, ne technické vrstvy. A má definované rozhraní: všechno, co ven sdílí, se stává jeho veřejným API. Simon Brown jde na totéž ze strany balíčkování a v [package by component](https://simonbrown.je/modular-monolith/) doporučuje spoléhat na překladač, ne na disciplínu týmu.
 
 PHP takovou oporu nedá, hranice modulu proto hlídá statická analýza a code review. Prakticky to znamená jeden adresář na modul, sadu command a query zpráv jako veřejné API a zákaz importů do vnitřku cizího modulu. Detail v kapitole [Kdy zvolit modular monolith](/ddd-a-microservices#modular-monolith).
 
@@ -1187,7 +1187,7 @@ Zisk: nejvyšší ROI z modelovacího úsilí. V Core Domain (kde projekt vyhrá
 :::callout{type="pattern"}
 ### Vzor: Diferencovaná investice {#hybrid-pattern-heading}
 
-Vaughn Vernon v *Implementing Domain-Driven Design* (2013) [[7]](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577) doporučuje investici diferencovat: největší modelovací úsilí patří Core Domain, Supporting a Generic subdomény si zaslouží méně. U Supporting subdomény přitom uvádí tři podmínky, za kterých se plný taktický návrh vyplatí – tým ho zvládá, model je inovativní a má vydržet roky. Kde neplatí, vystačí pragmatická struktura.
+Vaughn Vernon v *Implementing Domain-Driven Design* (2013) [[12]](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577) doporučuje investici diferencovat: největší modelovací úsilí patří Core Domain, Supporting a Generic subdomény si zaslouží méně. U Supporting subdomény přitom uvádí tři podmínky, za kterých se plný taktický návrh vyplatí – tým ho zvládá, model je inovativní a má vydržet roky. Kde neplatí, vystačí pragmatická struktura.
 
 Hybridní přístup je pragmatický a zároveň ho DDD literatura doporučuje. Tlak na „jednotnou architekturu všude“ jde proti tomuto principu – ne každá část projektu si zaslouží stejnou investici.
 :::
@@ -1216,7 +1216,7 @@ Strukturálně dokonalý Hexagonal nad anémickou doménou – getry, setry, log
 
 ### Anti-vzor 4: Port na technologii {#anti-4-heading}
 
-Port se jmenuje `RedisOrderCache`, `SendGridMailer` nebo `RabbitMqPublisher`. Rozhraní kopíruje jméno knihovny, kterou obaluje, a často i tvar jejího API. Cockburn to označuje za hlavní chybu, kterou u svého vzoru v praxi vidí [[11]](https://jmgarridopaz.github.io/content/interviewalistair.html). Jedna technologie na port ruší celý smysl portu, tedy záměnu technologie beze změny jádra. Opačný extrém popisuje [callout o Anemic Hexagonal](#hexagonal-anti-heading) – portem je jen repozitář a ostatní výstupní závislosti domény žádné rozhraní nemají.
+Port se jmenuje `RedisOrderCache`, `SendGridMailer` nebo `RabbitMqPublisher`. Rozhraní kopíruje jméno knihovny, kterou obaluje, a často i tvar jejího API. Cockburn to označuje za hlavní chybu, kterou u svého vzoru v praxi vidí [[4]](https://jmgarridopaz.github.io/content/interviewalistair.html). Jedna technologie na port ruší celý smysl portu, tedy záměnu technologie beze změny jádra. Opačný extrém popisuje [callout o Anemic Hexagonal](#hexagonal-anti-heading) – portem je jen repozitář a ostatní výstupní závislosti domény žádné rozhraní nemají.
 
 **Náprava:** Port pojmenujte podle konverzace, kterou doména vede, ne podle technologie na druhém konci. `OrderCache`, `Mailer`, `EventPublisher` – a pod každým z nich může viset víc adaptérů včetně in-memory varianty pro testy. Rozhraní dostanou i zbylé výstupní závislosti (`PaymentGateway`, `EmailSender`), ne jen repozitář.
 

@@ -178,7 +178,7 @@ týmů má organizace mít** a **jak mezi sebou mají komunikovat**. Team Topolo
 nepředepisuje proces jako SAFe nebo LeSS.
 A DDD tak získává to, co u Vernona chybí.
 
-Druhé vydání vyšlo 23. září 2025 [[10]](https://itrevolution.com/product/team-topologies-second-edition/).
+Druhé vydání vyšlo 23. září 2025 [[4]](https://itrevolution.com/product/team-topologies-second-edition/).
 Podtitul se změnil z „business and technology teams“ na „business and technology“ – rámec
 se rozšiřuje mimo IT. Kognitivní zátěž v něm autoři povýšili na hlavní designový princip
 a spolu s Dr. Laurou Weis k ní publikovali model s více než dvaceti drivery ve čtyřech
@@ -335,7 +335,7 @@ Facilitating nemá přímý ekvivalent v Context Mapu – ten řeší vztahy mez
 ### Mapování na Context Map má hranice {#mody-vs-context-map}
 
 Překryv mezi interakčními módy a vzory z Context Mapu je užitečná zkratka, ne rovnítko.
-Alberto Brandolini [[11]](https://blog.avanscoperta.it/2021/04/22/about-team-topologies-and-context-mapping/)
+Alberto Brandolini [[5]](https://blog.avanscoperta.it/2021/04/22/about-team-topologies-and-context-mapping/)
 rozdíl formuluje takto: Team Topologies popisují žádoucí cílový stav, zatímco Context
 Mapping nabízí jemnější vzory pro posouzení stavu současného. Context Map proto umí
 pojmenovat i patologie jako Big Ball of Mud nebo Conformist, pro které v Team Topologies
@@ -418,7 +418,7 @@ Detail komunikace s managementem je v sekci 05.09.
 ### Kdy Inverse Conway nefunguje {#inverse-conway-limity}
 
 Manévr funguje jako změna směru, ne jako jednorázový zásah. Martin Fowler
-[[12]](https://martinfowler.com/bliki/ConwaysLaw.html) k němu dodává výhradu: reorganizace
+[[6]](https://martinfowler.com/bliki/ConwaysLaw.html) k němu dodává výhradu: reorganizace
 neopraví zabetonovanou architekturu, přesune jen lidi kolem ní. Vzniká období, kdy nové
 týmy vlastní kód, který nepsaly. Fowler proto doporučuje malé inkrementální kroky
 s vyhodnocováním zpětné vazby a shrnuje to větou, že vývoj architektury a reorganizace
@@ -770,11 +770,11 @@ Umí ocenit metriky.
 ### Argumenty, které fungují (DORA metriky) {#dora-metriky}
 
 Nicole Forsgren, Jez Humble a Gene Kim v knize *Accelerate* (2018)
-[[4]](https://itrevolution.com/product/accelerate/)
+[[7]](https://itrevolution.com/product/accelerate/)
 zveřejnili 4 metriky (DORA). Ty měří efektivitu doručování softwaru a *silně
 korelují* s obchodními výsledky (zisk, růst, customer satisfaction).
 
-Sada se od roku 2018 posunula [[13]](https://dora.dev/insights/dora-metrics-history/).
+Sada se od roku 2018 posunula [[8]](https://dora.dev/insights/dora-metrics-history/).
 V roce 2023 byla MTTR přejmenována a předefinována na *failed deployment recovery time* –
 měří zotavení po selhání způsobeném změnou v produkci, ne po libovolném výpadku. V roce
 2024 přibyla pátá metrika. Aktuální podoba vypadá takto:
@@ -804,7 +804,7 @@ a rozhodnutí podle výsledku.
 ### Westrumova kultura organizace {#westrum}
 
 Sociolog Ron Westrum v roce 2004 publikoval typologii organizačních kultur
-[[5]](https://qualitysafety.bmj.com/content/13/suppl_2/ii22),
+[[9]](https://qualitysafety.bmj.com/content/13/suppl_2/ii22),
 kterou později použila Forsgren v *Accelerate* jako hlavní prediktor úspěchu DevOps
 transformací. Westrum rozlišuje 3 typy:
 
@@ -887,7 +887,7 @@ Pro hlubší studium doporučujeme Skelton & Pais – *Team Topologies*
 Vernon – *Implementing Domain-Driven Design*, kap. 2 a 3
 [[2]](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577),
 a Forsgren et al. – *Accelerate*
-[[4]](https://itrevolution.com/product/accelerate/)
+[[7]](https://itrevolution.com/product/accelerate/)
 pro DORA metriky a Westrumovu typologii. Originální Conwayův esej z roku 1968 je krátký
 (4 strany) a stojí za přečtení
 [[1]](http://www.melconway.com/Home/Committees_Paper.html).
