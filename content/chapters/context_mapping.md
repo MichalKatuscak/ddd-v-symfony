@@ -497,7 +497,7 @@ final class LegacyBillingTranslator
 
 Translator je `final` třída s jedinou veřejnou metodou. Žádný stav, žádná cache, žádný vedlejší efekt. Vstup je upstream DTO, výstup je doménová událost. Toto je důvod, proč je ACL tak silný – a tak křehký, když ho implementujete jinak.
 
-### Test ACL: snadný a důležitý
+### Test ACL
 
 :::code{language="php" filename="tests/Ordering/Infrastructure/Acl/LegacyBillingTranslatorTest.php"}
 <?php

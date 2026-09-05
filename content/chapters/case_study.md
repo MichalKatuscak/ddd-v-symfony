@@ -197,7 +197,7 @@ Vztahy zachycené v kontextové mapě:
 - **Sdílené identifikátory** – `UserId`, `ProjectId` a `TaskId` tvoří minimální
   [Shared Kernel](/context-mapping#shared-kernel). V diagramu stojí ve vlastním balíčku, v kódu žijí
   ve vlastnickém kontextu a ostatní je importují. Evansova podmínka vzoru je závazek koordinovat
-  každou změnu; tady ho drží jediná okolnost – tým je jeden. Cena a alternativa jsou
+  každou změnu; zde ho drží jediná okolnost – tým je jeden. Cena a alternativa jsou
   v [sekci 24.07.2](#trade-off-shared-kernel-heading).
 
 **Hranici mezi TaskManagement a ProjectManagement drží port, ne Anti-Corruption Layer.** Oba

@@ -500,7 +500,7 @@ final class GetOrderSummaryListHandler
 Dotaz se drží jednoho agregátu a zákazníka nese jen jako `customerId`. Jméno zákazníka leží
 v jiném agregátu, a DQL by pro něj potřebovala mapovanou asociaci `Order` → `Customer`, kterou
 kniha na write straně zakazuje (viz [Reference přes identitu](/navrh-agregatu#references-by-id)).
-Na read straně je spojení obou tabulek naprosto v pořádku – jen se dělá o patro níž, v SQL nad
+Na read straně je spojení obou tabulek v pořádku – jen se dělá o patro níž, v SQL nad
 tabulkami, ne přes namapovaný objektový graf. Následující ukázka to předvádí.
 
 ### Doctrine NativeQuery pro komplexní reportovací dotazy

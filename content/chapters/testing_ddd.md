@@ -623,7 +623,7 @@ a k jiné odolnosti vůči refaktoringu.
 Za tímto doporučením stojí Fowlerovo rozlišení dvou způsobů ověření. *State verification* kontroluje
 stav systému po akci, *behavior verification* kontroluje, že proběhla očekávaná volání spolupracovníků.
 Z pěti typů doubles trvá na behavior verification jedině mock – ostatní se s kontrolou stavu spokojí.
-Volba fake repozitáře tedy není jen otázkou pohodlí; je to přihlášení ke stylu, kterému Fowler říká
+Volba fake repozitáře je přihlášením ke stylu, kterému Fowler říká
 classical TDD, tedy reálné objekty všude, kde to jde, a doubles jen na hranicích systému.
 
 :::callout{type="pattern"}

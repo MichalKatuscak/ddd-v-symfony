@@ -818,7 +818,7 @@ v transakčním logu, vytvoří Kafka record a pošle ho do odpovídajícího to
 | Scale-out | jednotky tisíc zpráv/s na worker, lineárně s replikami přes SKIP LOCKED | dáno Kafkou, o dva řády výš |
 | Garance pořadí | Best-effort podle `occurred_at` | Per-partition podle `aggregate_id` |
 | Provozní riziko | Zaseknutý worker = rostoucí lag | Zaseknutý konektor drží replikační slot a WAL se hromadí na disku primární databáze |
-| Doporučeno pro | Naprostou většinu Symfony projektů | Multi-tenant SaaS, finanční systémy, IoT |
+| Doporučeno pro | Běžný Symfony projekt | Multi-tenant SaaS, finanční systémy, IoT |
 
 V této knize budeme dál pracovat s variantou A – pro typický Symfony projekt
 vyváží spolehlivost a operační režii v poměru, který nepřidává Kafka stack
@@ -1679,7 +1679,7 @@ kap. 11 (Stream Processing);
 
 :::faq{}
 - question: 'Outbox vs. CDC / Debezium – co kdy?'
-  answer: 'Pro naprostou většinu Symfony projektů zvolte Polling Publisher (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 15.05</a>.'
+  answer: 'Pro běžný Symfony projekt zvolte Polling Publisher (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 15.05</a>.'
 - question: 'Co když používáme NoSQL databázi (MongoDB, Cassandra, DynamoDB)?'
   answer: 'Pokud váš agregát žije v NoSQL bez ACID transakcí napříč více dokumenty (Cassandra, raná verze MongoDB), klasický Outbox Pattern nefunguje – atomicita zápisu order + event mezi dvěma collections není garantovaná. Možnosti: (1) MongoDB 4.0+ má multi-document transakce, takže Outbox lze, (2) DynamoDB nabízí TransactWriteItems, takže Outbox jde, (3) Cassandra nemá multi-row atomicitu – používá se Change Data Capture nebo jednodokumentové event sourcing s eventy embedded v agregátu. Volba úložiště pro doménový stav rozhoduje, zda lze Outbox vůbec implementovat.'
 - question: 'Jak velký dělat batch v relayi?'
