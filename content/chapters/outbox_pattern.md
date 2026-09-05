@@ -664,6 +664,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\TransportNamesStamp;
 
@@ -675,6 +676,10 @@ final class OutboxDispatchCommand extends Command
 {
     public function __construct(
         private readonly OutboxRepository $outbox,
+        // #[Target] vybírá konkrétní sběrnici. Bez něj přijde default_bus,
+        // tedy command.bus – doménová událost tam nemá handler, Messenger ji
+        // po vyčerpání retry zahodí a outbox tím ztratí smysl.
+        #[Target('event.bus')]
         private readonly MessageBusInterface $bus,
         private readonly OutboxMessageFactory $factory,
     ) {

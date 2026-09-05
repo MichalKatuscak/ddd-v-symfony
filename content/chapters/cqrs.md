@@ -267,6 +267,29 @@ middleware, tedy automatickou transakci kolem handleru. `query.bus` obsahuje pou
 je chyba, událost bez posluchače legitimní stav. Proto `allow_no_handlers: true` – bez něj
 Messenger vyhodí `NoHandlerForMessageException` u každé události, kterou zatím nikdo neodebírá.
 
+Jakmile máte víc než jednu sběrnici, přestane stačit prostý type-hint na `MessageBusInterface`
+a holý `#[AsMessageHandler]`. Type-hint dostane `default_bus`, handler se zaregistruje na
+**všechny** sběrnice. Obojí se řeší explicitně:
+
+:::code{language="php" filename="snippet.php"}
+final readonly class OrderPlacedProjectorRegistration
+{
+    // Injektáž konkrétní sběrnice
+    public function __construct(
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
+    ) {}
+}
+
+// Handler patřící na jednu sběrnici
+#[AsMessageHandler(bus: 'event.bus')]
+final readonly class OrderPlacedProjector { /* … */ }
+:::
+
+Že to není kosmetika, je vidět na Outboxu: relay, který dispatchne doménovou událost
+na `command.bus`, narazí na chybějící handler, vyčerpá retry a událost zahodí – tedy
+přesně to, čemu má Outbox bránit. Dostupné aliasy vypíše `debug:autowiring MessageBus`.
+
 :::callout{type="warn"}
 ### `doctrine_transaction` middleware vs. „jeden agregát = jedna transakce“ {#doctrine-transaction-konflikt-heading}
 
