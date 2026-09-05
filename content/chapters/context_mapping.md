@@ -7,7 +7,7 @@ meta_description: "Context Map a 8 vztahů mezi Bounded Contexts: Partnership, C
 meta_keywords: "Context Map, Context Mapping, Bounded Context, Anti-Corruption Layer, ACL, Open Host Service, Published Language, Shared Kernel, Customer Supplier, Conformist, Partnership, Separate Ways, Symfony Messenger"
 og_type: article
 published: "2026-04-29"
-modified: "2026-07-08"
+modified: "2026-09-05"
 breadcrumb_name: Context Mapping
 schema_type: TechArticle
 schema_headline: "Bounded Context a Context Mapping – 8 vztahů mezi Bounded Contexts"

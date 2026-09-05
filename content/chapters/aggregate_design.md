@@ -7,7 +7,7 @@ meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. P
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: "2026-07-08"
+modified: "2026-09-05"
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"

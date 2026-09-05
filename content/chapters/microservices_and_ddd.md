@@ -7,7 +7,7 @@ meta_description: "Kdy Bounded Context = microservice a kdy stačí modular mono
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"
-modified: "2026-07-08"
+modified: "2026-09-05"
 breadcrumb_name: DDD a microservices
 schema_type: TechArticle
 schema_headline: "DDD a microservices – Bounded Context jako service boundary"

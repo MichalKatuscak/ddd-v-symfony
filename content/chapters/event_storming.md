@@ -7,7 +7,7 @@ meta_description: "Jak připravit, vést a vyhodnotit workshop Event Storming a 
 meta_keywords: "Event Storming, Domain Storytelling, Alberto Brandolini, Stefan Hofer, Henning Schwentner, Domain Discovery, DDD workshop, Big Picture, Process Level, Design Level, Pivotal Event, Hot Spot, Bounded Context"
 og_type: article
 published: "2026-04-29"
-modified: "2026-07-08"
+modified: "2026-09-05"
 breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"

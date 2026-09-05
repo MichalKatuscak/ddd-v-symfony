@@ -7,7 +7,7 @@ meta_description: "Kde má v DDD aplikaci sedět autorizace: edge, use case, agr
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
-modified: "2026-07-08"
+modified: "2026-09-05"
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"

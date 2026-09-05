@@ -7,7 +7,7 @@ meta_description: "Čtyři doplňkové taktické vzory DDD: Specification pro ko
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: "2026-07-08"
+modified: "2026-09-05"
 breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
 schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
