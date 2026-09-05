@@ -295,14 +295,13 @@ a vlastník vznikají mimo agregát a vstupují do továrny.
 :::callout{type="pattern"}
 #### PHP: identita předaná do továrny (PHP 8.4 + Symfony Uid) {#a5-code-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php + Model/Order.php"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\Ordering\Domain\ValueObject;
 
-use App\SharedKernel\Domain\AggregateRoot;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class OrderId
@@ -330,7 +329,14 @@ final readonly class OrderId
     }
 }
 
-// V agregátu:
+// src/Ordering/Domain/Model/Order.php – agregát žije v Model, ne ve ValueObject
+namespace App\Ordering\Domain\Model;
+
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\SharedKernel\Domain\AggregateRoot;
+
 final class Order extends AggregateRoot
 {
     private function __construct(
@@ -348,8 +354,9 @@ final class Order extends AggregateRoot
 }
 
 // Volající drží identitu ještě před uložením:
-$orderId = OrderId::generate();
-$order   = Order::place($orderId, $customerId);
+$orderId    = OrderId::generate();
+$customerId = CustomerId::fromString($command->customerId);
+$order      = Order::place($orderId, $customerId);
 :::
 :::
 
