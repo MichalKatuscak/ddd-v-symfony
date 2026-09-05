@@ -302,6 +302,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\ValueObject;
 
+use App\SharedKernel\Domain\AggregateRoot;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class OrderId

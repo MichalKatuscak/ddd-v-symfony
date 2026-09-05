@@ -183,6 +183,56 @@ final readonly class UserId
 }
 :::
 
+Ostatní identifikátory v knize mají stejný tvar – liší se jen jménem a chybovou hláškou.
+Kniha je používá průběžně, proto je uvádíme pohromadě:
+
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php + CustomerId.php + ProductId.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain\ValueObject;
+
+use Symfony\Component\Uid\Uuid;
+
+final readonly class CustomerId
+{
+    public function __construct(public string $value)
+    {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException('CustomerId must be a valid UUID');
+        }
+    }
+
+    public static function generate(): self { return new self((string) Uuid::v7()); }
+
+    public static function fromString(string $value): self { return new self($value); }
+
+    public function equals(self $other): bool { return $this->value === $other->value; }
+}
+
+final readonly class ProductId
+{
+    public function __construct(public string $value)
+    {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException('ProductId must be a valid UUID');
+        }
+    }
+
+    public static function generate(): self { return new self((string) Uuid::v7()); }
+
+    public static function fromString(string $value): self { return new self($value); }
+
+    public function equals(self $other): bool { return $this->value === $other->value; }
+}
+:::
+
+Opakování je záměrné. Sdílený předek by sice ušetřil řádky, ale zároveň by dovolil předat
+`ProductId` tam, kde se čeká `CustomerId` – a právě tomu mají typované identifikátory
+zabránit. `OrderId` má identický tvar, plnou verzi ukazuje kapitola
+[Návrh agregátu](/navrh-agregatu#references-by-id).
+
 Přirozený identifikátor je legitimní alternativa. Evans obě možnosti výslovně připouští:
 identita může přijít zvenčí, nebo jde o umělou hodnotu vytvořenou systémem pro systém
 [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
