@@ -612,7 +612,7 @@ Pro konečnou množinu stavů typu `OrderStatus` se obvykle volí nativní
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\Model;
+namespace App\Ordering\Domain\ValueObject;
 
 enum OrderStatus: string
 {

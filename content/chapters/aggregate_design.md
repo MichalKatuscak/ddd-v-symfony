@@ -591,12 +591,14 @@ ORM 3, na která pak navazuje výčet toho, co za vás Doctrine nevymůže:
 - **Embedded value objects.** Hodnotové objekty s více poli (Money, Address)
   mapujte přes `#[ORM\Embedded]`. Žádné samostatné tabulky pro VO.
 
-:::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/Type/OrderIdType.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/Type/OrderIdType.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Infrastructure\Doctrine\Type;
+// Typ patří kontextu, jehož identitu převádí. Ve SharedKernelu by
+// znamenal závislost sdíleného jádra na Bounded Contextu.
+namespace App\Ordering\Infrastructure\Doctrine\Type;
 
 use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -869,9 +871,9 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         types:
-            order_id:    App\SharedKernel\Infrastructure\Doctrine\Type\OrderIdType
-            customer_id: App\SharedKernel\Infrastructure\Doctrine\Type\CustomerIdType
-            product_id:  App\SharedKernel\Infrastructure\Doctrine\Type\ProductIdType
+            order_id:    App\Ordering\Infrastructure\Doctrine\Type\OrderIdType
+            customer_id: App\Ordering\Infrastructure\Doctrine\Type\CustomerIdType
+            product_id:  App\Ordering\Infrastructure\Doctrine\Type\ProductIdType
             # Money se sem nepřidává – mapuje se přes #[ORM\Embedded] podle
             # pravidla výše. Jednosloupcový custom typ by zabil SUM() i ORDER BY.
 

@@ -75,7 +75,7 @@ final readonly class PlaceOrderHandlerNaive
 
     public function __invoke(PlaceOrder $command): void
     {
-        $order = Order::place($command->customerId, $command->items);
+        $order = Order::placeWithItems($command->customerId, $command->items);
 
         // 1) Zápis do DB (commit Doctrine).
         $this->orders->save($order);
@@ -457,7 +457,9 @@ final class Order extends AggregateRoot
     /**
      * @param list<OrderItem> $items
      */
-    public static function place(CustomerId $customerId, array $items): self
+    // Druhá továrna vedle kanonického Order::place(OrderId, CustomerId).
+    // Seznam položek potřebuje integrační událost.
+    public static function placeWithItems(CustomerId $customerId, array $items): self
     {
         $order = new self(
             id: new OrderId((string) Uuid::v7()),
@@ -548,7 +550,7 @@ final readonly class PlaceOrderHandler
         // wrapInTransaction garantuje atomicitu:
         // buď se zapíše order i všechny outbox řádky, nebo nic.
         return $this->em->wrapInTransaction(function () use ($command): OrderId {
-            $order = Order::place($command->customerId, $command->items);
+            $order = Order::placeWithItems($command->customerId, $command->items);
 
             $this->orders->save($order);
 

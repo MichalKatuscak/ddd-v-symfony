@@ -285,13 +285,13 @@ patří do domény.
 **Řešení:** Identitu vyrobte dřív, než agregát vznikne, a předejte ji do továrny.
 Kniha používá tvar `Order::place(OrderId $id, CustomerId $customerId)`: `OrderId` si
 generuje UUID sám, agregát ho jen přijme. Doctrine se nakonfiguruje bez generátoru,
-ID mu předáváte hotové. Dvě kapitoly k němu přidávají druhou továrnu na téže třídě, protože bez ní
-by nešlo ukázat jejich téma: [Návrh agregátu](/navrh-agregatu) má
+ID mu předáváte hotové. Tři kapitoly k němu přidávají druhou továrnu na téže třídě, protože bez ní
+by nešlo ukázat jejich téma. [Návrh agregátu](/navrh-agregatu) má
 `placeWithFirstItem()`, kde invariant „objednávka má aspoň jednu položku“ vymáhá už
-signatura, [Outbox](/outbox-pattern) a [Doplňující vzory](/mene-zname-vzory) přebírají
-seznam položek, protože ho potřebují v payloadu události. Jsou to jiná jména, ne jiné
-verze `place()` – dvě neslučitelné signatury jedné metody by v reálném projektu
-nemohly existovat vedle sebe. Základ zůstává stejný: identita
+signatura. [Outbox](/outbox-pattern) a [Doplňující vzory](/mene-zname-vzory) mají
+`placeWithItems()`, protože seznam položek potřebují v payloadu události. Vždycky jde
+o jiné jméno, ne o jinou verzi `place()` – dvě neslučitelné signatury jedné metody
+by v reálném projektu vedle sebe existovat nemohly. Základ zůstává stejný: identita
 a vlastník vznikají mimo agregát a vstupují do továrny.
 
 :::callout{type="pattern"}

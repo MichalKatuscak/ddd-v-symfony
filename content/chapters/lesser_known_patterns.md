@@ -1025,7 +1025,9 @@ final class Order extends AggregateRoot
      *
      * @param list<OrderItem> $items
      */
-    public static function place(
+    // Druhá továrna vedle kanonického Order::place(OrderId, CustomerId).
+    // Přebírá rovnou seznam položek, protože ho potřebuje v payloadu události.
+    public static function placeWithItems(
         CustomerId $customerId,
         array $items,
         \DateTimeImmutable $placedAt,
@@ -1152,7 +1154,7 @@ final class OrderFromCartFactory
 
         $pricedItems = $this->pricing->priceItems($cart->items(), $customer);
 
-        return Order::place(
+        return Order::placeWithItems(
             customerId: $customer,
             items: $pricedItems,
             placedAt: $this->clock->now(),
