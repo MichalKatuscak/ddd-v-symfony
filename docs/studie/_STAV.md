@@ -952,6 +952,62 @@ kolekci neinicializoval) a doplněn překlad doménová → integrační událos
   `UniqueConstraintViolationException`, `onOrderPlaced()` ho nemá.
 - `Order::place()` má pořád čtyři podoby napříč kapitolami.
 
+### Čtrnácté kolo: třetí ověřovací stavba (2026-09-06)
+
+Třetí projekt postavený **načisto** podle opravené knihy. Běží kompletně: `schema:create`,
+`schema:validate` bez chyby, `lint:container`, outbox relay od `PlaceOrder` po projekci,
+a **celá sága včetně kompenzace** (`stock reservation failed → RefundCustomer →
+RefundSucceeded → CancelOrderCommand`, sága v `failed`, dashboard `cancelled`).
+
+### Čtyři regrese, které jsem si vyrobil sám
+
+| Co jsem opravil minule | Co to rozbilo |
+|---|---|
+| „přenositelná" outbox migrace | `#[ORM\Column(type: 'uuid')]` se mapuje na `BINARY(16)` / `BLOB` / nativní `UUID` podle platformy, **ne** na `VARCHAR(36)`. Přenositelně to napsat nejde; vráceno MySQL DDL + odkaz na `migrations:diff` |
+| tatáž migrace | odstavec 30 řádků pod ní dál popisoval `BINARY(16)` a `ENGINE`, které jsem odstranil — dvě protichůdná tvrzení o téže migraci |
+| guard v sáze | **chyběl import** `UniqueConstraintViolationException` → `catch` nikdy nezabral → peníze se strhly podruhé. Navíc Doctrine po neúspěšném flushi zavírá EM, což kniha popisuje v Outboxu, ale na guard jsem to neaplikoval → doplněn `resetManager()` |
+| přejmenování na `OrderPlacedIntegrationEvent` | subscriber i routing zůstaly na doménové události, přestože relay umí vyrobit jen integrační |
+
+**Poučení potvrzené potřetí: opravu zavedenou bez ověření během je nutné považovat
+za nedokončenou.** Poměry regresí: 3/12, 4/12, 4/10.
+
+### Další opravené nálezy
+
+`HashedPassword` se mapuje přes `#[ORM\Embedded]`, ale neměl ORM atributy →
+`schema:create` spadl. `DbalInboxRepository::markProcessed()` neuváděl primární klíč
+(entita nemá `#[ORM\GeneratedValue]`) → inbox neproběhl ani jednou. `OrderDashboardProjector`
+četl `$event->customerName` a `->totalAmount`, které kanonická událost nemá a kapitola 06.08
+to sama obhajuje. Blok `Order` v kap. 07 používal **sedm typů bez importu** (`php -l` to
+nechytí). `ProductId` se bral z kontextu `Catalog`, který v knize neexistuje. Poddotaz nad
+tabulkou `memberships`, která se v knize vyskytuje na jediné řádce.
+
+### Sjednocená konfigurace Messengeru
+
+Kniha měla **tři neslučitelné `messenger.yaml`** a všechny se tvářily jako celý soubor.
+Kanonická je teď ta v CQRS (tři busy, `async_commands` a `async_events` s odlišeným
+`queue_name`); Outbox a Ságy z ní ukazují výřezy, což říká i `filename` bloku. Kapitola
+o ságách navíc slibovala „oddělené transporty", ale oba měly identický DSN bez
+`queue_name` — nad `doctrine://` šlo o jednu a tutéž frontu.
+
+### Co protizkouška potvrdila jako správné
+
+Mapping blok `SharedKernel` (po odstranění: „class `Money` was not found in the chain"),
+`addItem()` s `private(set)` a `increaseQuantity()` včetně invariantu, `Collection` přes
+`ArrayCollection`, `OutboxMessageFactory` s whitelistem, `UserIdType`, read SQL
+s `u.name_value` a `u.created_at`, `schema_filter`, `ON CONFLICT`, `readonly` VO
+s custom typy. **A seznam balíčků stačil** — šest kapitol bez jediného dalšího
+`composer require`.
+
+### Zbývá
+
+- Kap. 15.04 má vlastní `Order::place(CustomerId, array $items)` a `PSR-4` nesedící
+  s namespace; `Order::place()` má napříč knihou čtyři podoby.
+- `OrderStatus` je ve dvou namespace (`Domain\Model` vs. `Domain\ValueObject`).
+- `OrderIdType` leží v `SharedKernel\Infrastructure`, ale importuje
+  `App\Ordering\Domain\ValueObject\OrderId` — SharedKernel závisí na Bounded Contextu,
+  což kap. 10.15 zakazuje.
+- Migrace pro `order_dashboard` a `memberships` v knize nejsou.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.

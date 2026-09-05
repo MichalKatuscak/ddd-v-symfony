@@ -978,7 +978,7 @@ problém tím mizí – buď se commitne order i zpráva, nebo nic. Worker
 :::callout{type="pattern"}
 ### YAML: Routing eventu na Doctrine transport {#doctrine-transport-routing-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml" highlights="6,10,13"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez – plná konfigurace v kapitole o CQRS)" highlights="6,10,13"}
 framework:
     messenger:
         buses:
