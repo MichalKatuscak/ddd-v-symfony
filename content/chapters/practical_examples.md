@@ -27,9 +27,25 @@ kontrolery, testy, okrajové případy) najdete v předchozích kapitolách.
 Plný end-to-end příklad – od doménové analýzy přes kontextovou mapu po read modely –
 rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
 
-Výchozím bodem je prázdný projekt: `composer create-project symfony/skeleton`
-a k němu `symfony/uid` na identifikátory, `symfony/messenger` na command bus
-a `doctrine/orm` na persistenci. Ukázky cílí na PHP 8.4, Symfony 8 a Doctrine ORM 3.
+Výchozím bodem je prázdný projekt: `composer create-project symfony/skeleton`.
+Ukázky v knize cílí na PHP 8.4, Symfony 8 a Doctrine ORM 3 a potřebují tyhle balíčky:
+
+:::code{language="bash" filename="terminál"}
+composer require \
+    symfony/uid \
+    symfony/messenger \
+    symfony/doctrine-messenger \
+    symfony/serializer symfony/property-access symfony/property-info \
+    symfony/validator egulias/email-validator \
+    symfony/security-bundle \
+    doctrine/orm doctrine/doctrine-bundle doctrine/doctrine-migrations-bundle
+:::
+
+Seznam nevypadá minimalisticky, ale každá položka odpovídá jedné kapitole:
+`doctrine-messenger` dodává transport `doctrine://default`, bez `serializer`
+a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
+`#[Assert\Email(mode: 'strict')]` každý dispatch a bez `migrations-bundle`
+nejde spustit ani jedna migrace z kapitoly o Outboxu.
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 

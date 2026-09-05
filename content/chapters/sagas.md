@@ -291,6 +291,7 @@ declare(strict_types=1);
 namespace App\Payment\Application\Handler;
 
 use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use App\Payment\Application\Command\ChargeCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -557,7 +558,15 @@ final class OrderProcessManager
                 'completedSteps' => [],
             ],
         );
-        $this->sagaRepository->save($state);
+
+        try {
+            $this->sagaRepository->save($state);
+        } catch (UniqueConstraintViolationException) {
+            // Souběžné doručení téže události. Unikátní index
+            // (saga_type, correlation_id) druhý zápis odmítl – sága už
+            // běží a druhý command by strhl peníze podruhé.
+            return;
+        }
 
         $this->commandBus->dispatch(new ChargeCustomer(
             orderId: $event->orderId,
@@ -656,6 +665,66 @@ novou událost a upravit metodu předchozího kroku – ta nyní vydává jiný 
 se nemění; v tom spočívá rozdíl oproti choreografii, kde stejné rozšíření
 vyžaduje zásah do cizího kontextu.
 :::
+
+### Handlery kroků žijí v cizích kontextech {#step-handlers-heading}
+
+Process Manager příkazy jen rozesílá. Vykonává je vždy handler v tom kontextu, kterému
+krok patří – a ten o existenci ságy nic neví. Ukazujeme jeden; `ReserveStockHandler`
+i `CreateShipmentHandler` mají stejný tvar, jen jiný agregát a jinou výslednou událost:
+
+:::code{language="php" filename="src/Payment/Application/Handler/ChargeCustomerHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Application\Handler;
+
+use App\Payment\Application\Command\ChargeCustomer;
+use App\Payment\Domain\Event\PaymentFailed;
+use App\Payment\Domain\Event\PaymentSucceeded;
+use App\Payment\Domain\PaymentGateway;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler(bus: 'command.bus')]
+final readonly class ChargeCustomerHandler
+{
+    public function __construct(
+        private PaymentGateway $gateway,
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
+    ) {}
+
+    public function __invoke(ChargeCustomer $command): void
+    {
+        // Handler o sáze neví. Jen vykoná krok a oznámí výsledek;
+        // co bude dál, rozhodne Process Manager.
+        try {
+            $transactionId = $this->gateway->charge(
+                $command->customerId,
+                $command->amountCents,
+            );
+        } catch (\RuntimeException $e) {
+            $this->eventBus->dispatch(new PaymentFailed(
+                orderId: $command->orderId,
+                reason: $e->getMessage(),
+            ));
+
+            return;
+        }
+
+        $this->eventBus->dispatch(new PaymentSucceeded(
+            orderId: $command->orderId,
+            transactionId: $transactionId,
+        ));
+    }
+}
+:::
+
+Selhání se hlásí událostí, ne výjimkou. Výjimka by skončila v retry smyčce Messengeru
+a sága by se o neúspěchu nedozvěděla – zůstala by viset ve stavu `AwaitingPayment`,
+dokud ji nevypne timeout.
 
 ### Kolik logiky smí Process Manager mít {#logika-v-process-manageru}
 
