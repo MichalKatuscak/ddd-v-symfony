@@ -592,6 +592,7 @@ namespace App\SharedKernel\Infrastructure\Doctrine\Type;
 
 use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
 
 final class OrderIdType extends Type
@@ -609,7 +610,13 @@ final class OrderIdType extends Type
 
     public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
     {
-        return $value instanceof OrderId ? $value->value : null;
+        if ($value === null || $value instanceof OrderId) {
+            return $value?->value;
+        }
+
+        // Bez téhle větve by řetězec skončil jako NULL a dotaz by tiše
+        // nenašel nic – nejhorší druh chyby, protože nikde nespadne.
+        throw InvalidType::new($value, self::class, ['null', OrderId::class]);
     }
 }
 :::
@@ -745,6 +752,7 @@ final class DoctrineOrderRepository implements OrderRepository
 # config/packages/doctrine.yaml
 doctrine:
     dbal:
+        url: '%env(resolve:DATABASE_URL)%'
         types:
             order_id:    App\SharedKernel\Infrastructure\Doctrine\Type\OrderIdType
             customer_id: App\SharedKernel\Infrastructure\Doctrine\Type\CustomerIdType
@@ -752,6 +760,9 @@ doctrine:
             money:       App\SharedKernel\Infrastructure\Doctrine\Type\MoneyType
 
     orm:
+        # Bez underscore strategie vzniknou sloupce occurredAt, createdAt…
+        # a rozejdou se s indexy i raw SQL, které kniha píše se snake_case.
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         mappings:

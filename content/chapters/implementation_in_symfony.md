@@ -614,13 +614,16 @@ final class DoctrineUserRepository implements UserRepository
 
     public function findById(UserId $id): ?User
     {
-        return $this->em->find(User::class, $id->value);
+        // Identifikátor se předává jako hodnotový objekt, ne jako řetězec:
+        // custom typ převádí jen instanci UserId, na string vrátí null
+        // a dotaz pak tiše nenajde nic.
+        return $this->em->find(User::class, $id);
     }
 
     public function findByEmail(Email $email): ?User
     {
         return $this->em->getRepository(User::class)
-            ->findOneBy(['email' => $email->value]);
+            ->findOneBy(['email' => $email]);
     }
 }
 :::

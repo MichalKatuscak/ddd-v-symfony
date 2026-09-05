@@ -245,6 +245,10 @@ framework:
                     allow_no_handlers: true
 
         # Směrování zpráv - mapuje konkrétní třídy nebo rozhraní na transport
+        # POZOR: Messenger třídy ověřuje při kompilaci kontejneru. Neexistující
+        # jméno shodí každý příkaz hláškou „Invalid Messenger routing
+        # configuration: class or interface … not found". Nechte tu jen zprávy,
+        # které ve svém projektu opravdu máte.
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # operace, kde uživatel nemusí čekat na výsledek
@@ -1242,6 +1246,10 @@ framework:
                     queue_name: high_priority
 
         # Směrování zpráv - mapuje konkrétní třídy nebo rozhraní na transport
+        # POZOR: Messenger třídy ověřuje při kompilaci kontejneru. Neexistující
+        # jméno shodí každý příkaz hláškou „Invalid Messenger routing
+        # configuration: class or interface … not found". Nechte tu jen zprávy,
+        # které ve svém projektu opravdu máte.
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # odesílání notifikací, generování reportů, aktualizace read modelů
