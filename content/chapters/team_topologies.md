@@ -759,7 +759,7 @@ Pokud na 2+ otázky odpovídáte „ne“ / „ano (CoE)“ / „zadává ticket
 
 Inverse Conway Maneuver je hluboká organizační změna. Týmy bude třeba rozdělit, manažery
 přealokovat, lidé možná ztratí senioritu nebo „svůj koutek“. Bez pochopení a podpory
-managementu (CTO / VP Engineering / People Ops) Inverse Conway selže. Reorganizace
+managementu (CTO / VP Engineering / People Ops) Inverse Conway selže – reorganizace
 bez podpory shora se v praxi neudělá vůbec.
 
 Podstatné je **mluvit jazykem, kterému management rozumí** – ne jazykem DDD.
@@ -893,8 +893,8 @@ pro DORA metriky a Westrumovu typologii. Originální Conwayův esej z roku 1968
 
 :::faq{}
 - question: Co když máme jediný tým? Platí Team Topologies i pro nás?
-  answer: 'Ano, ale v zjednodušené podobě. Jediný stream-aligned tým (5–9 lidí) je legitimní organizační struktura – typický startup. Nemáte Platform team (využijete managed services jako Heroku/Vercel/Stripe/Auth0), nemáte Enabling team (najmete externího konzultanta na 3 měsíce, pokud potřebujete). Jediné, co řeší Team Topologies pro vás, je interní rozdělení týmu – nepoužívejte „mini-frontend / mini-backend“ rozdělení uvnitř 6 lidí. Detail v <a href="#scenar-startup">scénáři A</a>.'
-- question: Můžu mít 1 tým, který vlastní 5 Bounded Contexts?
+  answer: 'Ano, ale ve zjednodušené podobě. Jediný stream-aligned tým (5–9 lidí) je legitimní organizační struktura – typický startup. Nemáte Platform team (využijete managed services jako Heroku/Vercel/Stripe/Auth0), nemáte Enabling team (najmete externího konzultanta na 3 měsíce, pokud potřebujete). Jediné, co řeší Team Topologies pro vás, je interní rozdělení týmu – nepoužívejte „mini-frontend / mini-backend“ rozdělení uvnitř 6 lidí. Detail v <a href="#scenar-startup">scénáři A</a>.'
+- question: Mohu mít 1 tým, který vlastní 5 Bounded Contexts?
   answer: 'Krátkodobě možná, dlouhodobě ne. Vernon (2013) sám připouští, že 1 tým může vlastnit více BC – v praxi 1–2, výjimečně 3. Při 5 BC narážíte na cognitive load (sekce <a href="#cognitive-load">05.06</a>): tým ztratí přehled o detailech každého BC, kvalita kódu klesá, lead time roste. Praktická heuristika: pokud máte 5 BC na jeden tým, plánujte rozdělení na 2 týmy do 6 měsíců. Pokud nemáte na 2 týmy lidi, redukujte počet BC (sloučení do supersetu, nebo přesun na SaaS u Generic subdomén).'
 - question: Jak Team Topologies souvisí se Spotify Modelem?
   answer: 'Spotify Model (squads, tribes, chapters, guilds) popsali Henrik Kniberg a Anders Ivarsson v roce 2012 s výslovnou poznámkou, že jde o snapshot tehdejšího způsobu práce, ne o předpis. Přesto se z něj předpis stal. Jeremiah Lee, bývalý produktový manažer Spotify, v roce 2020 v eseji <em>Spotify''s Failed #SquadGoals</em> tvrdí, že model byl z velké části aspirativní a firma uspěla spíš navzdory němu. Paralely existují: stream-aligned tým ≈ squad, chapters a guilds odpovídají komunitám sdílení znalostí nad rámec topologie. Tribe (kolekce squadů kolem doménové oblasti) sedí velikostí na Dunbarovy hranice 50 a 150, se kterými Team Topologies pracují. Hlavní rozdíl je v povaze obojího: Spotify Model popisuje jednu firmu v jednom období, Team Topologies dávají rámec s explicitními typy týmů a interakcemi.'

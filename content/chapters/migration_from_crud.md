@@ -666,7 +666,7 @@ final class User extends AggregateRoot
 :::
 
 Doménová entita `User` nyní sama vynucuje svá pravidla: výchozí stav, přechod stavu
-při aktivaci, emituje Domain Event při registraci. Kontroler ani service nemůže tyto invarianty
+při aktivaci a vydání Domain Eventu při registraci. Kontroler ani service nemůže tyto invarianty
 obejít.
 :::
 

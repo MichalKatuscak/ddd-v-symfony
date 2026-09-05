@@ -483,7 +483,7 @@ Kanonicky *Rush to the goal*. Když přeskočíte Big Picture, modelujete agreg�
 
 Senior vývojář při facilitaci podsouvá technický pohled – automaticky strukturuje eventy podle toho, co se dá hezky implementovat, místo podle toho, jak doména reálně funguje. Doménoví experti to vycítí a začnou potlačovat svůj jazyk ve prospěch toho „technicky čistého“.
 
-**Řešení:** rozhodující není role, ale neutralita. Nejsnáz ji udrží PM, agile coach, designer nebo externí konzultant, přičemž externista se silným názorem na architekturu škodí úplně stejně jako tech lead. Když jinou možnost nemáte, domluvte se předem, že facilitátor obsah nenavrhuje a promluví, jen když se ho někdo přímo zeptá. Brandolini k tomu přidává pattern *Time-boxed Leadership*: styl vedení se během workshopu mění, obsah ale zůstává skupině.
+**Řešení:** rozhodující není role, ale neutralita. Nejsnáz ji udrží PM, agile coach, designer nebo externí konzultant, přičemž externista se silným názorem na architekturu škodí stejně jako tech lead. Když jinou možnost nemáte, domluvte se předem, že facilitátor obsah nenavrhuje a promluví, jen když se ho někdo přímo zeptá. Brandolini k tomu přidává pattern *Time-boxed Leadership*: styl vedení se během workshopu mění, obsah ale zůstává skupině.
 :::
 
 :::callout{type="warn"}
@@ -759,7 +759,7 @@ Podrobně viz kapitolu [Testování v DDD](/testovani-ddd) – testovací strate
 Event Storming a Domain Storytelling jsou dvě konkrétní, prověřené techniky, jak před první řádkou kódu dostat doménu na společný papír. Obě stojí na stejném předpokladu: doménové znalosti nelze přečíst – musí se v dialogu objevit.
 
 - **Event Storming** ve třech formátech (Big Picture / Process Modelling / Software Design) je nástroj pro *širokoúhlé* mapování domény. Big Picture objevuje Bounded Contexty a pivotní události. Process Modelling zhušťuje jeden BC do sekvencí Command-Event-Policy. Software Design z nich dodá agregáty s invarianty.
-- **Domain Storytelling** je *úzkoúhlý teleobjektiv* pro hloubkovou diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity je intuitivní a vhodná pro kontexty, kde Event Storming je „příliš velký“.
+- **Domain Storytelling** je *úzkoúhlý teleobjektiv* pro hloubkovou diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity se čte bez zaškolení a hodí se pro kontexty, kde Event Storming je „příliš velký“.
 - **Workshop začíná u doménového experta, ne u datového modelu.** Eventy se píšou v minulém čase, agregáty se objevují až nakonec.
 - **Workshop bez follow-upu je promarněný.** Foto, eventy, hot spoty a Context Map musí jít do repa do 24 hodin a do kódu do 1–2 sprintů.
 - **Re-storming je pravidelná činnost.** Doména se vyvíjí; mapa zastará. 1× za 6–12 měsíců nebo po každém velkém produktovém rozhodnutí.
