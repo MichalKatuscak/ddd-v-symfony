@@ -603,6 +603,9 @@ final class User extends AggregateRoot
     #[ORM\Column(type: 'datetime_immutable')]
     public readonly \DateTimeImmutable $registeredAt;
 
+    #[ORM\Column(type: 'verification_token', nullable: true)]
+    private ?VerificationToken $verificationToken;
+
     #[ORM\Version]
     #[ORM\Column(type: 'integer')]
     private int $version = 1;
@@ -614,6 +617,7 @@ final class User extends AggregateRoot
         $this->password = $password;
         $this->status = UserStatus::PendingVerification;
         $this->registeredAt = new \DateTimeImmutable();
+        $this->verificationToken = VerificationToken::generate();
     }
 
     // Named constructor vyjadřuje záměr lépe než new User()
@@ -646,8 +650,13 @@ final class User extends AggregateRoot
         if ($this->status !== UserStatus::PendingVerification) {
             throw UserAlreadyActivatedException::forUser($this->id);
         }
-        $token->validate(); // Token si validuje sám sebe
+        // Token musí odpovídat tomu, který entita vydala. Bez tohoto
+        // porovnání aktivuje libovolný platný token libovolný účet.
+        if (!$this->verificationToken->equals($token)) {
+            throw InvalidVerificationTokenException::forUser($this->id);
+        }
         $this->status = UserStatus::Active;
+        $this->verificationToken = null;
         $this->record(new UserActivated($this->id));
     }
 

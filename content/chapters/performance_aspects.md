@@ -182,11 +182,12 @@ final class DoctrineOrderRepository implements OrderRepository
      */
     public function findAllWithItems(): array
     {
-        // Fetch join: alias i je v SELECT, Doctrine hydratuje kolekci v jednom dotazu
+        // Fetch join: alias i je v SELECT, Doctrine hydratuje kolekci v jednom dotazu.
+        // LEFT, ne INNER: vnitřní join by objednávky bez položek ze seznamu vypustil.
         return $this->em->createQuery(
             'SELECT o, i
              FROM App\Ordering\Domain\Model\Order o
-             JOIN o.items i
+             LEFT JOIN o.items i
              WHERE o.status = :status'
         )
             ->setParameter('status', 'confirmed')
@@ -377,7 +378,7 @@ final class DoctrineOrderRepository
     {
         return $this->em->createQuery(
             'SELECT o, i FROM App\Ordering\Domain\Model\Order o
-             JOIN o.items i
+             LEFT JOIN o.items i
              WHERE o.id = :id'
         )
             ->setParameter('id', $id->value)
@@ -553,15 +554,20 @@ final class SalesReportQueryService
             JOIN customer c  ON c.id = o.customer_id
             JOIN order_item oi ON oi.order_id = o.id
             WHERE o.status = 'completed'
-              AND o.created_at BETWEEN :from AND :to
+              -- Polouzavřený interval. BETWEEN nad timestamp sloupcem s datem
+              -- bez času by uřízl celý poslední den.
+              AND o.created_at >= :from
+              AND o.created_at <  :to
             GROUP BY c.id, c.first_name, c.last_name, TO_CHAR(o.created_at, 'YYYY-MM')
-            ORDER BY month DESC, revenue DESC
+            -- Řadí se podle výrazu, ne podle aliasu: ten je ::text,
+            -- takže by se '999' seřadilo za '10000'.
+            ORDER BY month DESC, SUM(oi.unit_price_amount * oi.quantity) DESC
         ";
 
         return $this->em
             ->createNativeQuery($sql, $rsm)
-            ->setParameter('from', $from->format('Y-m-d'))
-            ->setParameter('to',   $to->format('Y-m-d'))
+            ->setParameter('from', $from->format('Y-m-d H:i:s'))
+            ->setParameter('to',   $to->format('Y-m-d H:i:s'))
             ->getScalarResult();
     }
 }

@@ -628,18 +628,25 @@ selže celá (klíč se nevloží) a Messenger zprávu zopakuje:
 
 :::code{language="php" filename="snippet.php"}
 $this->connection->beginTransaction();
+
+// Catch kryje POUZE insert. Kdyby obepínal i handler, unique violation
+// zevnitř domény (duplicitní e-mail) by se vydávala za duplicitní zprávu
+// a Messenger by ji potvrdil - zpráva by zmizela.
 try {
     // Unique constraint na idempotency_key zabrání duplicitě na DB úrovni
     $this->connection->insert('processed_messages', [
         'idempotency_key' => $stamp->key,
         'processed_at'    => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
     ]);
-    $result = $stack->next()->handle($envelope, $stack);
-    $this->connection->commit();
-    return $result;
 } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
     $this->connection->rollBack();
     return $envelope; // duplicitní zpráva - přeskočit
+}
+
+try {
+    $result = $stack->next()->handle($envelope, $stack);
+    $this->connection->commit();
+    return $result;
 } catch (\Throwable $e) {
     $this->connection->rollBack(); // handler selhal - klíč se nezapíše, Messenger zopakuje
     throw $e;
