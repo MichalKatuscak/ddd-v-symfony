@@ -388,7 +388,7 @@ obsah vrácených událostí.
 :::callout{type="pattern"}
 ### Příklad: Trait pro testování doménových událostí
 
-:::code{language="php" filename="Tests/Shared/Domain/DomainEventAssertions.php"}
+:::code{language="php" filename="Tests/Shared/Domain/DomainEventAssertions.php + Tests/Ordering/Domain/Model/OrderEventsTest.php"}
 <?php
 
 declare(strict_types=1);
@@ -455,7 +455,8 @@ trait DomainEventAssertions
     }
 }
 
-// --- Příklad použití traitu v testu ---
+// --- Druhý soubor: příklad použití traitu v testu ---
+// PHPUnit hledá testy podle sufixu Test.php, proto v praxi vlastní soubor.
 
 namespace Tests\Ordering\Domain\Model;
 

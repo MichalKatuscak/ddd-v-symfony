@@ -506,17 +506,34 @@ zatím neexistuje.
 zbytkovou specifikaci – tedy to, co ještě zbývá splnit. Uživatel místo `false` dostane
 odpověď „chybí doručovací adresa v EU“:
 
-:::code{language="php" filename="src/SharedKernel/Domain/Specification/CompositeSpecification.php (doplněk)"}
-/**
- * Vrátí specifikaci popisující, co kandidát ještě nesplnil,
- * nebo null, pokud splnil všechno.
- *
- * @param T $candidate
- * @return Specification<T>|null
- */
-public function remainderUnsatisfiedBy(mixed $candidate): ?Specification
+Metoda patří do rozhraní `Specification`, ne jen do kompozitu: `AndSpecification`
+ji volá na svých potomcích, které zná jen jako `Specification`. `CompositeSpecification`
+dodá výchozí tělo, takže listové specifikace nic dopisovat nemusí.
+
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php + CompositeSpecification.php (doplněk)"}
+interface Specification
 {
-    return $this->isSatisfiedBy($candidate) ? null : $this;
+    /** @param T $candidate */
+    public function isSatisfiedBy(mixed $candidate): bool;
+
+    /**
+     * Vrátí specifikaci popisující, co kandidát ještě nesplnil,
+     * nebo null, pokud splnil všechno.
+     *
+     * @param T $candidate
+     * @return Specification<T>|null
+     */
+    public function remainderUnsatisfiedBy(mixed $candidate): ?Specification;
+}
+
+
+abstract class CompositeSpecification implements Specification
+{
+    // Výchozí implementace pro listy i kompozity
+    public function remainderUnsatisfiedBy(mixed $candidate): ?Specification
+    {
+        return $this->isSatisfiedBy($candidate) ? null : $this;
+    }
 }
 :::
 
@@ -693,6 +710,9 @@ Protože specifikace vrací výraz, kombinátory se přeloží stejně přímoč
 `AndSpecification` složí `andX`, `OrSpecification` `orX`, `NotSpecification` `not`:
 
 :::code{language="php" filename="src/SharedKernel/Domain/Specification/AndSpecification.php (doplněk)"}
+// Deklarace třídy se rozšíří o rozhraní, jinak ji match() na vstupu odmítne:
+// final class AndSpecification extends CompositeSpecification implements QuerySpecification
+
 public function toExpression(): Expression
 {
     if (!$this->left instanceof QuerySpecification
