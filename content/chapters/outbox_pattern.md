@@ -268,6 +268,10 @@ class OutboxMessage
         #[ORM\Column(type: 'integer')]
         public int $attempts = 0,
 
+        // Nejdřívější čas dalšího pokusu. Bez něj relay opakuje okamžitě.
+        #[ORM\Column(type: 'datetime_immutable')]
+        public \DateTimeImmutable $availableAt = new \DateTimeImmutable(),
+
         #[ORM\Column(type: 'datetime_immutable', nullable: true)]
         public ?\DateTimeImmutable $sentAt = null,
 
@@ -286,6 +290,11 @@ class OutboxMessage
     {
         $this->attempts += 1;
         $this->status = $this->attempts >= 5 ? 'failed' : 'pending';
+        // Bez odkladu vezme další iterace relaye řádek okamžitě znovu
+        // a všech pět pokusů se vyčerpá během jediné vteřiny.
+        $this->availableAt = new \DateTimeImmutable(
+            sprintf('+%d seconds', 2 ** $this->attempts),
+        );
         $this->lastError = $error;
     }
 
@@ -370,6 +379,7 @@ final class Version20260429120000 extends AbstractMigration
                 status            VARCHAR(16)   NOT NULL DEFAULT 'pending',
                 occurred_at       DATETIME(6)   NOT NULL,
                 attempts          INT           NOT NULL DEFAULT 0,
+                available_at      DATETIME(6)   NOT NULL,
                 sent_at           DATETIME(6)   DEFAULT NULL,
                 last_error        TEXT          DEFAULT NULL,
                 PRIMARY KEY (id)
@@ -621,7 +631,7 @@ Doctrine adapter rozhraní je mechanický – konstruktor přijímá
 `EntityManagerInterface`, `store()` volá `persist()`
 (NIKOLI `flush()` – flush patří aplikačnímu transakčnímu wrapperu),
 `fetchPending()` sestaví DQL `SELECT m FROM OutboxMessage m WHERE
-m.status = 'pending' ORDER BY m.occurredAt ASC` a omezí výsledek voláním
+m.status = 'pending' AND m.availableAt <= :now ORDER BY m.occurredAt ASC` a omezí výsledek voláním
 `$query->setMaxResults($limit)`; `markSent()`
 a `markFailed()` volají `$m->markSent()`,
 respektive `$m->markFailed()` a následně flushnou. Plný výpis vynecháváme
@@ -1341,6 +1351,7 @@ CREATE TABLE outbox (
     occurred_at  TIMESTAMPTZ NOT NULL,
     sent_at      TIMESTAMPTZ,
     attempts     INT NOT NULL DEFAULT 0,
+    available_at TIMESTAMPTZ NOT NULL,
     last_error   TEXT,
     PRIMARY KEY (id, occurred_at)
 ) PARTITION BY RANGE (occurred_at);

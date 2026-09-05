@@ -263,6 +263,10 @@ framework:
 Konfigurace definuje dva transporty: `async` pro zpracování přes frontu a `sync` pro okamžité
 vykonání v témže procesu. Busy jsou tři. `command.bus` pro příkazy má `doctrine_transaction`
 middleware, tedy automatickou transakci kolem handleru. `query.bus` obsahuje pouze validaci.
+Transport `doctrine://default` dodává balíček `symfony/doctrine-messenger`; bez něj
+Messenger hlásí „No transport supports Messenger DSN". Pro AMQP je to obdobně
+`symfony/amqp-messenger`.
+
 `event.bus` slouží doménovým událostem a liší se v jednom podstatném bodě: příkaz bez handleru
 je chyba, událost bez posluchače legitimní stav. Proto `allow_no_handlers: true` – bez něj
 Messenger vyhodí `NoHandlerForMessageException` u každé události, kterou zatím nikdo neodebírá.
@@ -926,6 +930,18 @@ v asynchronním prostředí.
 Read strana má volnou ruku ve výběru struktury. Write model drží normalizaci kvůli konzistenci dat;
 read model může jít opačným směrem – denormalizovat data přesně do tvaru, který obrazovka
 nebo API endpoint očekává.
+
+Jeden provozní detail rozhodne dřív než volba strategie: **denormalizované tabulky nejsou
+ORM entity.** Doctrine o nich neví, takže je `doctrine:schema:update` navrhne zahodit
+a `doctrine:schema:validate` hlásí rozejité schéma. Vytvářejí se migrací a z porovnávání
+schématu se vyřadí filtrem:
+
+:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+doctrine:
+    dbal:
+        # Tabulky read modelů spravují migrace, ne ORM.
+        schema_filter: '~^(?!order_history|user_profile_view)~'
+:::
 
 ### Strategie optimalizace read modelů
 

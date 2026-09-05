@@ -1911,7 +1911,9 @@ services:
     App\SharedKernel\:
         resource: '../src/SharedKernel/'
         exclude:
-            - '../src/SharedKernel/Domain/ValueObject/'
+            # Celé Domain/, ne jen Domain/ValueObject/: Money a Currency
+            # leží přímo v Domain/ a jinak se zaregistrují jako služby.
+            - '../src/SharedKernel/Domain/'
 :::
 :::
 
