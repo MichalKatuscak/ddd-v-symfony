@@ -995,15 +995,17 @@ final class Version20260906090000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // DDL pro MySQL/MariaDB. Read model není entita, takže tuhle
-        // tabulku nevygeneruje diff – píše se ručně.
+        // DDL pro MySQL/MariaDB. Read model není entita, takže ho
+        // `migrations:diff` nevygeneruje – tahle migrace se píše ručně
+        // a pro jinou platformu se ručně i přepisuje: na SQLite vypustit
+        // ENGINE a CHARSET, na PostgreSQLu nahradit CHAR(36) typem UUID.
         $this->addSql(<<<'SQL'
             CREATE TABLE order_dashboard (
                 order_id        CHAR(36)      NOT NULL,
                 customer_id     CHAR(36)      NOT NULL,
                 total_amount    INT           NOT NULL,
                 status          VARCHAR(32)   NOT NULL,
-                tracking_number VARCHAR(64)   DEFAULT NULL,
+                shipment_id     CHAR(36)      DEFAULT NULL,
                 placed_at       DATETIME      NOT NULL,
                 updated_at      DATETIME      NOT NULL,
                 PRIMARY KEY (order_id)
@@ -1087,13 +1089,13 @@ final class OrderDashboardProjector
         $this->connection->executeStatement(
             'UPDATE order_dashboard
                 SET status = :status,
-                    tracking_number = :trackingNumber,
+                    shipment_id = :shipmentId,
                     updated_at = :updatedAt
               WHERE order_id = :orderId',
             [
                 'orderId'        => $event->orderId,
                 'status'         => 'shipped',
-                'trackingNumber' => $event->trackingNumber,
+                'shipmentId' => $event->shipmentId->value,
                 'updatedAt'      => $event->occurredAt->format('Y-m-d H:i:s'),
             ],
         );
@@ -1122,7 +1124,7 @@ final class OrderDashboardProjector
 Při asynchronním zpracování může být událost doručena **více než jednou**
 (at-least-once delivery). Projektor proto musí být **idempotentní** – opakované
 zpracování téže události nesmí vést k nesprávným datům. V příkladu výše je idempotence
-zajištěna konstrukcí `ON DUPLICATE KEY UPDATE`, která při opakovaném insertu
+zajištěna upsertem (`ON CONFLICT … DO UPDATE`), která při opakovaném insertu
 provede pouze update. Alternativní přístupy:
 
 - **Sledování pozice** – projektor si ukládá pozici posledního zpracovaného
@@ -1765,7 +1767,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         // When: objednávka byla odeslána
         ($this->projector)(new OrderShipped(
             orderId: 'order-1',
-            trackingNumber: 'CZ123456789',
+            shipmentId: ShipmentId::generate(),
             occurredAt: new \DateTimeImmutable('2026-03-02 08:30:00'),
         ));
 

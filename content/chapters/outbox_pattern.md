@@ -514,7 +514,7 @@ final readonly class OrderPlacedIntegrationEvent
         public Uuid $eventId,
         public string $orderId,
         public string $customerId,
-        /** @var list<array{sku: string, quantity: int, priceCents: int}> */
+        /** @var list<array{productId: string, quantity: int, unitPriceInCents: int}> */
         public array $items,
         public int $totalAmountCents,
         public \DateTimeImmutable $occurredAt,

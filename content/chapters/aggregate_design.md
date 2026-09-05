@@ -911,10 +911,29 @@ doctrine:
                 dir: '%kernel.project_dir%/src/SharedKernel/Domain'
                 prefix: 'App\SharedKernel\Domain'
                 is_bundle: false
-            # Entity mimo doménové složky (OrderSaga, OutboxMessage, InboxMessage)
-            # potřebují vlastní blok. Bez něj Doctrine na schema:update mlčí
-            # („Nothing to update") a tabulka prostě nevznikne.
-            # ... další BC ...
+            # Entity mimo doménové složky potřebují vlastní blok. Bez něj
+            # Doctrine na schema:update mlčí („Nothing to update") a tabulka
+            # prostě nevznikne – proto je tu vypisujeme, ne jen zmiňujeme.
+            OrderingSaga:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Ordering/Application/Saga'
+                prefix: 'App\Ordering\Application\Saga'
+                is_bundle: false
+            Outbox:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Outbox/Domain'
+                prefix: 'App\Outbox\Domain'
+                is_bundle: false
+            Inbox:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Inbox/Domain'
+                prefix: 'App\Inbox\Domain'
+                is_bundle: false
+            UserManagement:
+                type: attribute
+                dir: '%kernel.project_dir%/src/UserManagement/Domain'
+                prefix: 'App\UserManagement\Domain'
+                is_bundle: false
 :::
 
 ### Co Doctrine nevymůže {#doctrine-limits}

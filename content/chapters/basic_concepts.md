@@ -607,7 +607,7 @@ agregátu stačí dát produkt. Plnou verzi s chováním – metodou
 Pro konečnou množinu stavů typu `OrderStatus` se obvykle volí nativní
 `enum` místo plnohodnotného hodnotového objektu:
 
-:::code{language="php" filename="src/Ordering/Domain/Model/OrderStatus.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderStatus.php"}
 <?php
 
 declare(strict_types=1);
