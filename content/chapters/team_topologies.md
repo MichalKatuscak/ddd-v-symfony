@@ -471,8 +471,9 @@ Pokud máte všech 7 bodů „ano“, máte vyšší šanci než průměr. Zbýv
 ## 05.06 Cognitive Load – limit pro velikost týmu/BC {#cognitive-load}
 
 Pojem **kognitivní zátěž** (cognitive load) převzali Skelton a Pais
-z teorie učení Johna Swellera (1988). Sweller rozlišuje 3 typy zátěže, které se vážou
-i na softwarové týmy:
+z teorie učení Johna Swellera. Ten ji zavedl v roce 1988 studií o řešení problémů;
+trojici typů, kterou dnes teorie používá, doplnili Sweller, van Merriënboer a Paas
+až v roce 1998. Na softwarové týmy se vážou všechny tři:
 
 - **Intrinsic load** (přirozená) – komplexita samotné domény. „Bankovní risk
   engine“ má vyšší intrinsic load než „katalog produktů“. Toto se nedá snížit, jen rozdělit
