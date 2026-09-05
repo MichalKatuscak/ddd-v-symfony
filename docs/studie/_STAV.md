@@ -898,6 +898,60 @@ konverzích custom typů. **Statická kontrola má strop; teprve běžící apli
 
 Projekt zůstal v `scratchpad/bookapp/`.
 
+### Třinácté kolo: ověřovací stavba načisto (2026-09-05)
+
+Druhý agent postavil projekt **od nuly podle opravené knihy**, se zákazem dívat se do
+předchozího projektu, a s výslovným úkolem hlásit **regrese** — místa, kde oprava
+z dvanáctého kola něco rozbila. Aplikace nakonec běží včetně ságy (šťastná cesta
+i kompenzace), outboxu, projekce a registrace uživatele od HTTP po DB.
+
+### Regrese, které způsobily mé vlastní opravy
+
+Tohle je hlavní poučení celého kola: **oprava zavedená bez ověření během si vyrobí novou vadu.**
+
+| Co jsem opravil | Co to rozbilo |
+|---|---|
+| `Money` dostal `#[ORM\Embeddable]` | `doctrine.yaml` mapuje jen `src/Ordering/Domain` → „class `App\SharedKernel\Domain\Money` was not found in the chain" hned na prvním příkazu, který čtenář spustí |
+| namapoval jsem `OrderItem` s konstruktorem `(Order, ProductId, int, Money)` | `addItem()` ho dál stavěl starým tvarem přes `OrderItemId::generate()` — typ, který se v knize vyskytoval jednou a nikdy nebyl definován |
+| `OrderItem::$quantity` jsem dal `readonly` | agregát volá `increaseQuantity()`, která navíc nikde neexistovala |
+| přejmenoval jsem outboxovou událost na `OrderPlacedIntegrationEvent` | zůstala definovaná a **nikdy nepoužitá** — handler dál ukládal doménové události, takže do outboxu šlo `{"orderId":{"value":"01a0…"}}` |
+
+Opraveno: mapping blok `SharedKernel` (+ poznámka o entitách mimo doménové složky),
+`addItem()` staví namapovaný `OrderItem`, `quantity` je `public private(set)` s doplněnou
+`increaseQuantity()`, sjednocen typ kolekce (`array` vs. `Collection`, ani jeden konstruktor
+kolekci neinicializoval) a doplněn překlad doménová → integrační událost na hranici.
+
+### Co opravy z minulého kola naopak potvrdily
+
+`url:` v dbal; `naming_strategy` (bez ní `There is no column with name "saga_type"`);
+`OrderIdType` → `InvalidType`; VO do `find()`/`findOneBy()`; `ShippingAddress`;
+`available_at` s exponenciálním odkladem (ověřeno: attempts=1 → +2 s, attempts=2 → +4 s);
+`#[Target('event.bus')]`; `exclude` na `SharedKernel/Domain/`.
+
+### Nové nálezy mimo regrese
+
+| Kapitola | Nález |
+|---|---|
+| `sagas` | `OrderPlaced` má napříč knihou **pět neslučitelných tvarů pod jedním FQN**; kapitola si definovala vlastní s `totalAmountCents` a `OrderProcessManager` na kanonické verzi padá. Sága překračuje hranici kontextu → konzumuje teď integrační událost |
+| `sagas` | import `CancelOrder`, volání `new CancelOrderCommand()` — 3×. `lint:container` to nechytí, spadne až za běhu ve větvi selhání platby |
+| `implementation_in_symfony` | **`HashedPassword`: 46 použití, 0 definic** |
+| `cqrs` | `schema_filter` jmenoval `order_history`, ale kapitola staví `order_dashboard` — filtr neřešil ani vlastní příklad |
+| `cqrs` | projektor používá `ON DUPLICATE KEY UPDATE` (MySQL-only), zatímco `doctrine.yaml` cílí na PostgreSQL |
+| `cqrs` | read SQL čte `u.name` a `u.registered_at`, entita mapuje `name_value` a `created_at` |
+
+### Co zůstává otevřené
+
+- **Migrace outboxu je čisté MySQL DDL** (`BINARY(16)`, `ENGINE=InnoDB`) a rozchází se
+  s entitou v `DEFAULT` klauzulích — `schema:validate` po ní hlásí rozejité schéma.
+- **Chybí handlery kroků ságy** (Payment / Warehouse / Shipping), `InboxRepository`,
+  `UserIdType`, `OutboxMessageFactory::reconstitute()`.
+- **Kniha nemá seznam balíčků.** Bez `symfony/serializer`, `symfony/doctrine-messenger`,
+  `egulias/email-validator` a `doctrine/doctrine-migrations-bundle` to nejede;
+  jediná instalační věta uvádí tři balíčky.
+- **Guard slíbený v textu ságy v kódu není** — 14.06 popisuje `try/catch` na
+  `UniqueConstraintViolationException`, `onOrderPlaced()` ho nemá.
+- `Order::place()` má pořád čtyři podoby napříč kapitolami.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
