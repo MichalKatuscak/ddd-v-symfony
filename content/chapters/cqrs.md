@@ -696,6 +696,9 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
             'SELECT u.id, u.name_value AS name, u.email, u.created_at,
                     (SELECT COUNT(*) FROM orders o
                       WHERE o.customer_id = u.id) AS total_orders,
+                    -- Tabulka memberships patří jinému kontextu; kdo ji nemá,
+                    -- řádek vypustí. Ukázka je tu kvůli tvaru dotazu, ne kvůli
+                    -- konkrétnímu schématu.
                     COALESCE(
                         (SELECT MAX(m.tier) FROM memberships m
                           WHERE m.user_id = u.id),
@@ -974,7 +977,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Projection;
 
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Ordering\Domain\Event\OrderShipped;
 use App\Ordering\Domain\Event\OrderCancelled;
 use Doctrine\DBAL\Connection;
@@ -992,7 +995,9 @@ final class OrderDashboardProjector
         private readonly Connection $connection,
     ) {}
 
-    public function __invoke(OrderPlaced|OrderShipped|OrderCancelled $event): void
+    public function __invoke(
+        OrderPlacedIntegrationEvent|OrderShipped|OrderCancelled $event,
+    ): void
     {
         match (true) {
             $event instanceof OrderPlaced => $this->onOrderPlaced($event),
@@ -1005,16 +1010,16 @@ final class OrderDashboardProjector
     {
         $this->connection->executeStatement(
             'INSERT INTO order_dashboard
-                (order_id, customer_name, total_amount, status, placed_at, updated_at)
-             VALUES (:orderId, :customerName, :totalAmount, :status, :placedAt, :updatedAt)
+                (order_id, customer_id, total_amount, status, placed_at, updated_at)
+             VALUES (:orderId, :customerId, :totalAmount, :status, :placedAt, :updatedAt)
              -- ON CONFLICT je PostgreSQL i SQLite; MySQL má
              -- ON DUPLICATE KEY UPDATE … = VALUES(…). Upsert není přenositelný.
              ON CONFLICT (order_id) DO UPDATE SET
                 status = excluded.status, updated_at = excluded.updated_at',
             [
                 'orderId'      => $event->orderId,
-                'customerName' => $event->customerName,
-                'totalAmount'  => $event->totalAmount,
+                'customerId'   => $event->customerId,
+                'totalAmount'  => $event->totalAmountCents,
                 'status'       => 'placed',
                 'placedAt'     => $event->occurredAt->format('Y-m-d H:i:s'),
                 'updatedAt'    => $event->occurredAt->format('Y-m-d H:i:s'),
@@ -1674,7 +1679,7 @@ declare(strict_types=1);
 
 namespace Tests\Ordering\Infrastructure\Projection;
 
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Ordering\Domain\Event\OrderShipped;
 use App\Ordering\Infrastructure\Projection\OrderDashboardProjector;
 use Doctrine\DBAL\Connection;

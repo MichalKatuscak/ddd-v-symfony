@@ -41,11 +41,11 @@ composer require \
     doctrine/orm doctrine/doctrine-bundle doctrine/doctrine-migrations-bundle
 :::
 
-Seznam nevypadá minimalisticky, ale každá položka odpovídá jedné kapitole:
-`doctrine-messenger` dodává transport `doctrine://default`, bez `serializer`
+Seznam nevypadá minimalisticky, každá položka ale odpovídá jedné kapitole.
+`doctrine-messenger` dodává transport `doctrine://default`. Bez `serializer`
 a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
-`#[Assert\Email(mode: 'strict')]` každý dispatch a bez `migrations-bundle`
-nejde spustit ani jedna migrace z kapitoly o Outboxu.
+`Assert\Email` s `VALIDATION_MODE_STRICT` každý dispatch. A bez
+`migrations-bundle` nespustíte ani jednu migraci z kapitoly o Outboxu.
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 

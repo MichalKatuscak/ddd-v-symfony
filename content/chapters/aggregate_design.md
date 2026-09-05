@@ -420,9 +420,15 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
-use App\Catalog\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Event\OrderShipped;
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\Ordering\Domain\ValueObject\ShippingAddress;
 // ShipmentId patří cizímu kontextu – přes hranici jde jen identita,
 // stejný tvar jako OrderId (final readonly class s validovaným UUID).
 use App\Shipping\Domain\ValueObject\ShipmentId;

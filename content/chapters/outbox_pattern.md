@@ -668,7 +668,7 @@ interface OutboxRepository
 
 Doctrine adapter rozhraní je mechanický – konstruktor přijímá
 `EntityManagerInterface`, `store()` volá `persist()`
-(NIKOLI `flush()` – flush patří aplikačnímu transakčnímu wrapperu),
+(nikoli `flush()` – ten patří aplikačnímu transakčnímu wrapperu),
 `fetchPending()` sestaví DQL `SELECT m FROM OutboxMessage m WHERE
 m.status = 'pending' AND m.availableAt <= :now ORDER BY m.occurredAt ASC` a omezí výsledek voláním
 `$query->setMaxResults($limit)`; `markSent()`
@@ -767,6 +767,10 @@ final class OutboxDispatchCommand extends Command
                     // (OrderPlaced::$eventId) – žádný stamp není potřeba.
                     $this->bus->dispatch(
                         $message,
+                        // Jméno transportu musí odpovídat messenger.yaml.
+                        // Kapitola o ságách používá async_events – neplatné
+                        // jméno skončí „sender is not in the senders locator"
+                        // a řádek se označí failed až po vyčerpání pokusů.
                         [new TransportNamesStamp(['async'])],
                     );
 
