@@ -942,6 +942,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
 use App\Ordering\Application\Command\PlaceOrderCommand;
+use App\Ordering\Application\Dto\OrderResponse;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 // API resource DTO - nikdy agregát

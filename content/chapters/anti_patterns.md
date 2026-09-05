@@ -554,6 +554,8 @@ use App\SharedKernel\Domain\Money;
 use App\Ordering\Domain\ValueObject\Email;
 use App\Ordering\Domain\ValueObject\WishlistId;
 use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\SharedKernel\Domain\AggregateRoot;
 
 // Agregát 1: Customer - pouze identita a kontaktní údaje

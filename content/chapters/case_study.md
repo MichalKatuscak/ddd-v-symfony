@@ -1298,6 +1298,7 @@ use App\ProjectManagement\Domain\Event\MemberAdded;
 use App\ProjectManagement\Domain\Event\MemberRemoved;
 use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\TaskManagement\Domain\Event\TaskCreated;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -1326,7 +1327,14 @@ class ProjectListProjection
         $view->createdAt = $now;
         $view->updatedAt = $now;
         $this->em->persist($view);
-        $this->em->flush();
+
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException) {
+            // Souběh: mezi find() a flush() stihl řádek vložit jiný worker.
+            // Výsledek je stejný, jaký jsme chtěli, takže zprávu potvrdíme.
+            $this->em->clear();
+        }
     }
 
     #[AsMessageHandler]
@@ -1441,7 +1449,8 @@ téhož projektu. Projekce na to musí být připravená dvěma vlastnostmi.
 
 **Idempotence.** Opakované zpracování téže události nesmí změnit výsledek. V ukázce výše to
 zajišťují tři detaily: `onProjectCreated` nejdřív hledá existující view a při druhém doručení
-skončí bez zápisu; `onMemberAdded` nepřidá uživatele dvakrát díky kontrole
+skončí bez zápisu – samotné `find()` ale nestačí, protože mezi ním a `flush()` může řádek
+vložit jiný worker, takže se zároveň odchytává porušení primárního klíče; `onMemberAdded` nepřidá uživatele dvakrát díky kontrole
 `in_array(..., strict: true)`; `onMemberRemoved` přepočítává `memberCount` z aktuální délky
 pole, ne inkrementem.
 
