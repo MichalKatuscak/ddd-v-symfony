@@ -367,23 +367,27 @@ final class Version20260429120000 extends AbstractMigration
         return 'Outbox table for Transactional Outbox Pattern';
     }
 
+    // DDL je psané přenositelně: bez ENGINE, bez BINARY(16), bez DEFAULT.
+    // Výchozí hodnoty drží entita, ne schéma – jinak se obojí rozejde
+    // a doctrine:schema:validate hlásí rozpor. Pro MySQL lze doplnit
+    // ENGINE=InnoDB, pro PostgreSQL nahradit JSON za JSONB.
     public function up(Schema $schema): void
     {
         $this->addSql(<<<'SQL'
             CREATE TABLE outbox (
-                id                BINARY(16)    NOT NULL,
+                id                VARCHAR(36)   NOT NULL,
                 message_type      VARCHAR(255)  NOT NULL,
                 aggregate_type    VARCHAR(255)  NOT NULL,
                 aggregate_id      VARCHAR(64)   NOT NULL,
                 payload           JSON          NOT NULL,
-                status            VARCHAR(16)   NOT NULL DEFAULT 'pending',
-                occurred_at       DATETIME(6)   NOT NULL,
-                attempts          INT           NOT NULL DEFAULT 0,
-                available_at      DATETIME(6)   NOT NULL,
-                sent_at           DATETIME(6)   DEFAULT NULL,
+                status            VARCHAR(16)   NOT NULL,
+                occurred_at       TIMESTAMP     NOT NULL,
+                attempts          INT           NOT NULL,
+                available_at      TIMESTAMP     NOT NULL,
+                sent_at           TIMESTAMP     DEFAULT NULL,
                 last_error        TEXT          DEFAULT NULL,
                 PRIMARY KEY (id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            )
         SQL);
 
         $this->addSql(<<<'SQL'
@@ -783,10 +787,58 @@ final class OutboxDispatchCommand extends Command
 :::
 :::
 
-Třída `OutboxMessageFactory` je protějšek serializeru: metoda `reconstitute()`
-podle `messageType` namapuje JSON payload z outbox řádku zpět na instanci
-doménové události. Plný výpis vynecháváme – jde o mechanický opak
-`DomainEventSerializer`.
+Zpětný převod obstará `OutboxMessageFactory`. Není to čistě mechanický opak
+serializeru: denormalizace potřebuje znát cílovou třídu, a proto se opírá o whitelist.
+Ten je zároveň bezpečnostní opatření – bez něj by `message_type` z databáze rozhodoval,
+jakou třídu aplikace vytvoří:
+
+:::code{language="php" filename="src/Outbox/Application/OutboxMessageFactory.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Outbox\Application;
+
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
+use App\Outbox\Domain\OutboxMessage;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+
+final readonly class OutboxMessageFactory
+{
+    /**
+     * Whitelist typů, které smí relay vytvořit. Nový integrační event
+     * znamená nový řádek tady – jinak skončí v dead-letter, ne v aplikaci.
+     *
+     * @var array<string, class-string>
+     */
+    private const ALLOWED = [
+        OrderPlacedIntegrationEvent::class => OrderPlacedIntegrationEvent::class,
+    ];
+
+    public function __construct(
+        private DenormalizerInterface $denormalizer,
+    ) {}
+
+    public function reconstitute(OutboxMessage $message): object
+    {
+        $class = self::ALLOWED[$message->messageType] ?? null;
+
+        if ($class === null) {
+            throw new \RuntimeException(
+                sprintf('Neznámý message_type "%s" v outboxu.', $message->messageType),
+            );
+        }
+
+        return $this->denormalizer->denormalize($message->payload, $class, 'json');
+    }
+}
+:::
+
+Integrační událost se denormalizuje bez potíží právě proto, že nese samé primitivy.
+Doménová událost s hodnotovými objekty by tu skončila hláškou
+*„Cannot create an instance of `OrderId` from serialized data because its constructor
+requires the following parameters to be present: `$value`"* – další důvod, proč se přes
+hranici posílá integrační tvar.
 
 :::callout{type="warn"}
 ### Po Doctrine výjimce je EntityManager zavřený {#closed-em-heading}
@@ -1074,6 +1126,51 @@ interface InboxRepository
     public function isProcessed(Uuid $eventId, string $consumer): bool;
 
     public function markProcessed(Uuid $eventId, string $consumer): void;
+}
+:::
+
+Implementace je záměrně na DBAL, ne na ORM. Inbox není doménová entita a jeho jediný
+úkol je atomický zápis dvojice `(eventId, consumer)` s unikátním indexem:
+
+:::code{language="php" filename="src/Inbox/Infrastructure/DbalInboxRepository.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Inbox\Infrastructure;
+
+use App\Inbox\Application\InboxRepository;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Symfony\Component\Uid\Uuid;
+
+final readonly class DbalInboxRepository implements InboxRepository
+{
+    public function __construct(
+        private Connection $connection,
+    ) {}
+
+    public function isProcessed(Uuid $eventId, string $consumer): bool
+    {
+        return (bool) $this->connection->fetchOne(
+            'SELECT 1 FROM inbox WHERE event_id = :id AND consumer = :consumer',
+            ['id' => (string) $eventId, 'consumer' => $consumer],
+        );
+    }
+
+    public function markProcessed(Uuid $eventId, string $consumer): void
+    {
+        try {
+            $this->connection->insert('inbox', [
+                'event_id'     => (string) $eventId,
+                'consumer'     => $consumer,
+                'processed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            // Souběh: jiný worker byl rychlejší. Výsledek je stejný,
+            // jaký jsme chtěli, takže se nic neděje.
+        }
+    }
 }
 :::
 :::

@@ -937,6 +937,45 @@ final class EmailType extends StringType
     }
 }
 :::
+
+`UserIdType` je registrovaný ve stejné konfiguraci a liší se jen typem a délkou.
+Uvádíme ho celý, protože jeden detail je snadné přehlédnout – převod **musí selhat
+hlasitě**. Kdyby na neočekávaný vstup vracel `null`, dotaz by tiše nic nenašel:
+
+:::code{language="php" filename="src/UserManagement/Infrastructure/Doctrine/Type/UserIdType.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Infrastructure\Doctrine\Type;
+
+use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Exception\InvalidType;
+use Doctrine\DBAL\Types\StringType;
+
+final class UserIdType extends StringType
+{
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?UserId
+    {
+        return $value === null ? null : UserId::fromString((string) $value);
+    }
+
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
+    {
+        if ($value === null || $value instanceof UserId) {
+            return $value?->value;
+        }
+
+        throw InvalidType::new($value, self::class, ['null', UserId::class]);
+    }
+
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $platform->getStringTypeDeclarationSQL(['length' => 36, 'fixed' => true]);
+    }
+}
+:::
 :::
 
 :::callout{type="pattern"}
