@@ -321,7 +321,7 @@ class OutboxMessage
 | Sloupec | Typ | Účel |
 |---|---|---|
 | `id` | UUID v7 (16 B) | Primární klíč a pořadí řádků pro polling. Deduplikaci nenese – tu zajišťuje `eventId` v payloadu události (viz Inbox). |
-| `message_type` | VARCHAR(255) | FQCN doménové události (např. `App\Ordering\Domain\Event\OrderPlaced`). Relay podle něj namapuje payload zpět na PHP třídu. |
+| `message_type` | VARCHAR(255) | FQCN integrační události (např. `App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent`). Relay podle něj namapuje payload zpět na PHP třídu. |
 | `aggregate_type` | VARCHAR(255) | Typ agregátu, který událost vydal (`Order`, `Invoice`). Debezium podle tohoto sloupce routuje do Kafka topiců, viz [15.05](#relay-cdc-heading). |
 | `aggregate_id` | VARCHAR(64) | ID konkrétní instance agregátu. Slouží jako klíč zprávy: události jednoho agregátu skončí ve stejné partition, a tím ve správném pořadí. |
 | `payload` | JSON / JSONB | Serializovaný stav události. JSONB v Postgresu je preferovaný – umožňuje indexovat jednotlivá pole pro debugging. |
@@ -367,27 +367,30 @@ final class Version20260429120000 extends AbstractMigration
         return 'Outbox table for Transactional Outbox Pattern';
     }
 
-    // DDL je psané přenositelně: bez ENGINE, bez BINARY(16), bez DEFAULT.
-    // Výchozí hodnoty drží entita, ne schéma – jinak se obojí rozejde
-    // a doctrine:schema:validate hlásí rozpor. Pro MySQL lze doplnit
-    // ENGINE=InnoDB, pro PostgreSQL nahradit JSON za JSONB.
+    // DDL níž je pro MySQL/MariaDB. Přenositelně ho napsat nejde:
+    // #[ORM\Column(type: 'uuid')] se mapuje na BINARY(16) v MySQL,
+    // BLOB v SQLite a nativní UUID v PostgreSQLu. Ruční migrace se proto
+    // musí psát pro cílovou platformu – nebo, spolehlivěji, nechat
+    // vygenerovat přes `doctrine:migrations:diff` z namapované entity.
+    // Výchozí hodnoty (status, attempts) drží entita, ne DEFAULT klauzule;
+    // jinak se schéma a mapování rozejdou a schema:validate hlásí rozpor.
     public function up(Schema $schema): void
     {
         $this->addSql(<<<'SQL'
             CREATE TABLE outbox (
-                id                VARCHAR(36)   NOT NULL,
+                id                BINARY(16)    NOT NULL,
                 message_type      VARCHAR(255)  NOT NULL,
                 aggregate_type    VARCHAR(255)  NOT NULL,
                 aggregate_id      VARCHAR(64)   NOT NULL,
                 payload           JSON          NOT NULL,
                 status            VARCHAR(16)   NOT NULL,
-                occurred_at       TIMESTAMP     NOT NULL,
+                occurred_at       DATETIME(6)   NOT NULL,
                 attempts          INT           NOT NULL,
-                available_at      TIMESTAMP     NOT NULL,
-                sent_at           TIMESTAMP     DEFAULT NULL,
+                available_at      DATETIME(6)   NOT NULL,
+                sent_at           DATETIME(6)   DEFAULT NULL,
                 last_error        TEXT          DEFAULT NULL,
                 PRIMARY KEY (id)
-            )
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL);
 
         $this->addSql(<<<'SQL'
@@ -406,7 +409,12 @@ final class Version20260429120000 extends AbstractMigration
 
 Migrace cílí na MySQL/MariaDB. PostgreSQL varianta nahradí `BINARY(16)`
 typem `UUID`, `DATETIME(6)` typem `TIMESTAMPTZ` a `JSON` typem `JSONB`;
-klauzule `ENGINE` a `CHARSET` odpadají.
+klauzule `ENGINE` a `CHARSET` odpadají. Na SQLite jde `BINARY(16)` na `BLOB`
+a `JSON` na `CLOB`. Ruční přepisování je přesně ten druh práce, kterou
+`doctrine:migrations:diff` udělá spolehlivěji – ukázka slouží k pochopení
+struktury, ne ke kopírování napříč platformami. Pozor také na SQL komentáře
+uvnitř `CREATE TABLE`: introspekci SQLite rozhodí a schéma se pak hlásí
+jako rozejité.
 
 Po migraci spusťte `php bin/console doctrine:migrations:migrate` a ověřte,
 že index existuje:
@@ -457,13 +465,9 @@ final class Order extends AggregateRoot
             items: $items,
         );
 
-        $order->record(new OrderPlaced(
-            eventId: Uuid::v7(),
-            orderId: $order->id->value,
-            customerId: $customerId->value,
-            items: array_map(fn (OrderItem $i) => $i->toArray(), $items),
-            occurredAt: new \DateTimeImmutable(),
-        ));
+        // Agregát nahrává doménovou událost s hodnotovými objekty.
+        // Na integrační tvar ji přeloží až handler na hranici kontextu.
+        $order->record(new OrderPlaced($order->id, $customerId));
 
         return $order;
     }
@@ -983,7 +987,8 @@ framework:
                 dsn: 'doctrine://default'    # totéž spojení jako doménový stav (default EM)
 
         routing:
-            App\Ordering\Domain\Event\OrderPlaced: async
+            # Relay posílá integrační tvar, ne doménovou událost.
+            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async
 :::
 :::
 
@@ -1162,6 +1167,9 @@ final readonly class DbalInboxRepository implements InboxRepository
     {
         try {
             $this->connection->insert('inbox', [
+                // InboxMessage má vlastní PK bez #[ORM\GeneratedValue],
+                // takže ho musí dodat zapisující strana.
+                'id'           => (string) Uuid::v7(),
                 'event_id'     => (string) $eventId,
                 'consumer'     => $consumer,
                 'processed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
@@ -1186,7 +1194,7 @@ declare(strict_types=1);
 namespace App\Reporting\Application\Subscriber;
 
 use App\Inbox\Application\InboxRepository;
-use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Reporting\Application\ReadModelStore;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -1202,7 +1210,7 @@ final readonly class OrderPlacedReadModelUpdater
         private EntityManagerInterface $em,
     ) {}
 
-    public function __invoke(OrderPlaced $event): void
+    public function __invoke(OrderPlacedIntegrationEvent $event): void
     {
         $this->em->wrapInTransaction(function () use ($event): void {
             // 1) Idempotency check – duplikát ackneme bez side-effectu.

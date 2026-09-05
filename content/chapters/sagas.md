@@ -518,6 +518,8 @@ use App\Warehouse\Application\Command\ReserveStock;
 use App\Shipping\Application\Command\CreateShipment;
 use App\Ordering\Application\Command\ConfirmOrder;
 use App\Ordering\Application\Command\CancelOrderCommand;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -531,6 +533,7 @@ final class OrderProcessManager
     public function __construct(
         private readonly MessageBusInterface $commandBus,
         private readonly OrderSagaRepository $sagaRepository,
+        private readonly ManagerRegistry $managerRegistry,
     ) {}
 
     public function __invoke(
@@ -565,6 +568,13 @@ final class OrderProcessManager
             // Souběžné doručení téže události. Unikátní index
             // (saga_type, correlation_id) druhý zápis odmítl – sága už
             // běží a druhý command by strhl peníze podruhé.
+            //
+            // Doctrine po neúspěšném flushi EntityManager zavře, takže
+            // samotné spolknutí výjimky nestačí: bez resetu spadne další
+            // handler téže zprávy na „The EntityManager is closed".
+            // Detail v kapitole o Outboxu.
+            $this->managerRegistry->resetManager();
+
             return;
         }
 

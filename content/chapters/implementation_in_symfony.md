@@ -402,9 +402,17 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Domain\ValueObject;
 
+use Doctrine\ORM\Mapping as ORM;
+
+// Mapuje se přes #[ORM\Embedded], takže potřebuje atributy –
+// stejně jako UserName o kus výš.
+#[ORM\Embeddable]
 final readonly class HashedPassword
 {
-    private function __construct(public string $value) {}
+    private function __construct(
+        #[ORM\Column(length: 255)]
+        public string $value,
+    ) {}
 
     public static function fromPlainText(string $plain): self
     {
