@@ -28,7 +28,8 @@ vedly [[1]](https://martinfowler.com/eaaDev/EventSourcing.html).
 Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty.
 Aktuální stav agregátu pak vzniká *přehráním* (replay) těchto událostí od počátku.
 
-Princip lze vyjádřit větou: ***current state is derived from the history of events***.
+Fowler sám princip formuluje jako *„Event Sourcing ensures that all changes to application
+state are stored as a sequence of events“* [[1]](https://martinfowler.com/eaaDev/EventSourcing.html).
 Namísto jediného řádku v databázové tabulce, který je při každé změně přepisován, existuje append-only log
 všech událostí, jež kdy na agregátu nastaly.
 
