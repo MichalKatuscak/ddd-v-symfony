@@ -228,7 +228,7 @@ Software Design je nejtaktičtější formát Event Stormingu a první, který s
 
 1. Vezměte mapu z předchozí úrovně a pro každý **command** položte velkou žlutou sticky agregátu, který ho obsluhuje. Stejný agregát pro více commandů je v pořádku – znamená to jen, že třída bude mít víc metod.
 2. Pod každý agregát vypište jeho **invarianty**. „Order: nemůže být confirmed bez aspoň jedné položky“, „Order: po cancelled už nelze confirm“, „Order: součet item.quantity * item.price = total“.
-3. Pro každý command vyznačte **pre-conditions**: „`ConfirmOrder` vyžaduje, aby `Order` byl ve stavu `Pending` a měl alespoň jeden item“.
+3. Pro každý command vyznačte **pre-conditions**: „`ConfirmOrder` vyžaduje, aby `Order` byl ve stavu `Draft` a měl alespoň jeden item“.
 4. Označte hot spoty, které vám chybí pro úplnou specifikaci agregátu („Co když má položka nulovou cenu? Jde o legitimní freebie nebo chybu?“).
 
 ### 04.06.3 Mapping z workshopu do Symfony {#dl-mapping}
@@ -297,11 +297,37 @@ final class Order extends AggregateRoot
 
         // Invariant z workshopu: objednávka musí mít aspoň jednu položku
         if ($this->items === []) {
-            throw new EmptyOrderNotAllowedException();
+            throw new EmptyOrderException();
         }
 
         $this->status = OrderStatus::Confirmed;
         $this->record(new OrderConfirmed($this->id));
+    }
+
+    public function cancel(string $reason): void
+    {
+        // Invariant z workshopu: zrušit lze draft i potvrzenou objednávku
+        if ($this->status !== OrderStatus::Draft && $this->status !== OrderStatus::Confirmed) {
+            throw new InvalidOrderStateTransitionException('Cannot cancel a shipped order');
+        }
+
+        $this->status = OrderStatus::Cancelled;
+        $this->record(new OrderCancelled($this->id, $reason));
+    }
+
+    public function totalAmount(): Money
+    {
+        if ($this->items === []) {
+            throw new EmptyOrderException('Cannot calculate total of an empty order');
+        }
+
+        $total = Money::zero($this->items[0]->unitPrice()->currency);
+
+        foreach ($this->items as $item) {
+            $total = $total->add($item->unitPrice()->multiply($item->quantity()));
+        }
+
+        return $total;
     }
 }
 
@@ -349,7 +375,7 @@ Když píšete invariantní check v doménové třídě, dejte k němu komentá�
 // "Order nemůže být confirmed bez aspoň jedné položky."
 // Hot spot Order-7 (otevřený): co když je položka backorder?
 if ($this->items === []) {
-    throw new EmptyOrderNotAllowedException();
+    throw new EmptyOrderException();
 }
 :::
 
@@ -668,7 +694,7 @@ final class OrderTest extends TestCase
     {
         $order = Order::place(OrderId::generate(), CustomerId::generate());
 
-        $this->expectException(EmptyOrderNotAllowedException::class);
+        $this->expectException(EmptyOrderException::class);
         $order->confirm();
     }
 

@@ -182,7 +182,7 @@ final class OrderController extends AbstractController
 
         $this->service->confirm($order);
 
-        return new JsonResponse(['status' => $order->getStatus()]);
+        return new JsonResponse(['status' => $order->status()]);
     }
 }
 :::

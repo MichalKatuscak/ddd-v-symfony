@@ -833,7 +833,7 @@ final class MoneyTransferService
             throw InsufficientFunds::onAccount($from->id(), $amount);
         }
 
-        if (!$from->currency()->equals($to->currency())) {
+        if ($from->currency() !== $to->currency()) {
             throw new \DomainException(
                 'Currency mismatch – use FxTransferService for cross-currency transfers.',
             );
@@ -978,7 +978,7 @@ declare(strict_types=1);
 namespace App\Ordering\Domain;
 
 use App\Ordering\Domain\Event\OrderPlaced;
-use App\Ordering\Domain\Exception\EmptyOrder;
+use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\SharedKernel\Domain\AggregateRoot;
 use App\SharedKernel\Domain\CustomerId;
 
@@ -1011,7 +1011,7 @@ final class Order extends AggregateRoot
         \DateTimeImmutable $placedAt,
     ): self {
         if (count($items) === 0) {
-            throw EmptyOrder::cannotBePlaced();
+            throw EmptyOrderException::cannotBePlaced();
         }
 
         $order = new self(
@@ -1038,7 +1038,7 @@ final class Order extends AggregateRoot
         \DateTimeImmutable $placedAt,
     ): self {
         if (count($items) === 0) {
-            throw EmptyOrder::cannotBePlaced();
+            throw EmptyOrderException::cannotBePlaced();
         }
 
         $order = new self(
@@ -1274,7 +1274,7 @@ src/
       Event/
         OrderPlaced.php
       Exception/
-        EmptyOrder.php
+        EmptyOrderException.php
     Application/
       Command/
         PlaceOrderCommand.php
