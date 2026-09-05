@@ -442,7 +442,11 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use App\SharedKernel\Domain\AggregateRoot;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
 final class Order extends AggregateRoot

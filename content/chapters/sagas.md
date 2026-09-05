@@ -509,6 +509,8 @@ namespace App\Ordering\Application\Saga;
 use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Payment\Domain\Event\PaymentSucceeded;
 use App\Payment\Domain\Event\PaymentFailed;
+use App\Payment\Domain\Event\RefundFailed;
+use App\Payment\Domain\Event\RefundSucceeded;
 use App\Warehouse\Domain\Event\StockReserved;
 use App\Warehouse\Domain\Event\StockReservationFailed;
 use App\Shipping\Domain\Event\ShipmentCreated;
@@ -537,7 +539,8 @@ final class OrderProcessManager
     ) {}
 
     public function __invoke(
-        OrderPlacedIntegrationEvent|PaymentSucceeded|PaymentFailed|StockReserved|StockReservationFailed|ShipmentCreated $event,
+        OrderPlacedIntegrationEvent|PaymentSucceeded|PaymentFailed|StockReserved
+        |StockReservationFailed|ShipmentCreated|RefundSucceeded|RefundFailed $event,
     ): void {
         match (true) {
             $event instanceof OrderPlacedIntegrationEvent => $this->onOrderPlaced($event),
@@ -546,6 +549,11 @@ final class OrderProcessManager
             $event instanceof StockReserved => $this->onStockReserved($event),
             $event instanceof StockReservationFailed => $this->onStockReservationFailed($event),
             $event instanceof ShipmentCreated => $this->onShipmentCreated($event),
+            // Bez těchhle dvou větví uvázne sága navždy ve stavu Compensating:
+            // event.bus má allow_no_handlers, takže se událost tiše ackne
+            // a v logu po ní nezůstane ani řádek.
+            $event instanceof RefundSucceeded => $this->onRefundSucceeded($event),
+            $event instanceof RefundFailed => $this->onRefundFailed($event),
         };
     }
 
@@ -718,7 +726,7 @@ final readonly class ChargeCustomerHandler
         } catch (\RuntimeException $e) {
             $this->eventBus->dispatch(new PaymentFailed(
                 orderId: $command->orderId,
-                reason: $e->getMessage(),
+                failureReason: $e->getMessage(),
             ));
 
             return;
@@ -1249,7 +1257,7 @@ framework:
             'App\Shipping\Application\Command\CreateShipment': async_commands
             'App\Shipping\Application\Command\CancelShipment': async_commands
             'App\Ordering\Application\Command\ConfirmOrder': async_commands
-            'App\Ordering\Application\Command\CancelOrder': async_commands
+            'App\Ordering\Application\Command\CancelOrderCommand': async_commands
             # Bez tohoto routingu by se CheckSagaTimeout zpracoval synchronně
             # a DelayStamp by neměl žádný efekt.
             'App\Ordering\Application\Command\CheckSagaTimeout': async_commands
@@ -1604,8 +1612,8 @@ se označuje jako *compensation pending*.
 ### PHP: Potvrzení kompenzace v OrderProcessManager {#refund-confirmation-heading}
 
 :::code{language="php" filename="snippet.php"}
-// Doplnění do OrderProcessManager (RefundSucceeded a RefundFailed
-// přibudou i do union typu v __invoke a do routingu eventů)
+// Doplnění do OrderProcessManager. Union typ v __invoke i routing
+// událostí už obě třídy znají – viz sekce 14.05.
 private function onRefundSucceeded(RefundSucceeded $event): void
 {
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
