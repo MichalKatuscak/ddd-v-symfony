@@ -652,6 +652,14 @@ final class InMemoryUserRepository implements UserRepository
 
     public function save(User $user): void
     {
+        // Aproximace unikátního indexu na sloupci `email`. V produkci ho
+        // vymáhá databáze a handler překládá UniqueConstraintViolationException;
+        // fake ho vymáhá sám, aby test nepotřeboval běžící DB.
+        $existing = $this->findByEmail($user->email());
+        if ($existing !== null && !$existing->id()->equals($user->id())) {
+            throw DuplicateEmailException::forEmail($user->email());
+        }
+
         $this->storage[(string) $user->id()] = $user;
     }
 
@@ -706,10 +714,12 @@ declare(strict_types=1);
 
 namespace Tests\UserManagement\Application\Command;
 
+use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use App\UserManagement\Registration\Command\RegisterUser;
 use App\UserManagement\Registration\Command\RegisterUserHandler;
 use App\UserManagement\Domain\Exception\DuplicateEmailException;
+use App\UserManagement\Domain\ValueObject\Email;
 use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
 
 final class RegisterUserHandlerTest extends TestCase
@@ -720,7 +730,12 @@ final class RegisterUserHandlerTest extends TestCase
     protected function setUp(): void
     {
         $this->userRepository = new InMemoryUserRepository();
-        $this->handler        = new RegisterUserHandler($this->userRepository);
+        // Handler volá flush() kvůli překladu unique violation. Fake repozitář
+        // ho neřeší, takže EntityManager stačí jako stub, který nedělá nic.
+        $this->handler        = new RegisterUserHandler(
+            $this->userRepository,
+            $this->createStub(EntityManagerInterface::class),
+        );
     }
 
     public function testRegistersNewUser(): void
@@ -735,7 +750,7 @@ final class RegisterUserHandlerTest extends TestCase
 
         $this->assertSame(1, $this->userRepository->count());
 
-        $user = $this->userRepository->findByEmail(new \App\UserManagement\Domain\ValueObject\Email('jan@example.com'));
+        $user = $this->userRepository->findByEmail(new Email('jan@example.com'));
         $this->assertNotNull($user);
         $this->assertFalse($user->isActive()); // nový uživatel je neaktivní
     }
@@ -767,10 +782,11 @@ final class RegisterUserHandlerTest extends TestCase
 :::
 :::
 
-InMemory repozitář zde unikátnost e-mailu jen aproximuje. Finální záruku dává unikátní
-constraint v databázi – kanonický handler překládá jeho porušení na `DuplicateEmailException`
+InMemory repozitář zde unikátnost e-mailu jen aproximuje: kontroluje ji v paměti a rovnou
+hází `DuplicateEmailException`. Finální záruku dává unikátní constraint v databázi –
+kanonický handler překládá jeho porušení na tutéž výjimku
 (viz [race condition v naivní variantě](/implementace-v-symfony#register-race-heading)).
-Test ověřuje chování handleru, ne řešení souběhu.
+Test ověřuje chování handleru, ne řešení souběhu, proto `EntityManager` stačí jako stub.
 
 :::callout{type="warn"}
 ### Varování: Přílišné používání mocků

@@ -378,6 +378,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
+use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\Money;
@@ -418,7 +419,7 @@ class Order
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException('Cannot add items to a non-created order');
+            throw new InvalidOrderStateTransitionException('Cannot add items to a draft order only');
         }
 
         $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
@@ -427,7 +428,7 @@ class Order
     public function removeItem(ProductId $productId): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException('Cannot remove items from a non-created order');
+            throw new InvalidOrderStateTransitionException('Cannot remove items from a draft order only');
         }
 
         $this->items = array_values(array_filter(
@@ -443,7 +444,7 @@ class Order
         }
 
         if ($this->items === []) {
-            throw new \DomainException('Cannot confirm an empty order');
+            throw new EmptyOrderException('Cannot confirm an empty order');
         }
 
         $this->status = OrderStatus::Confirmed;
@@ -452,7 +453,7 @@ class Order
     public function cancel(): void
     {
         if ($this->status !== OrderStatus::Draft && $this->status !== OrderStatus::Confirmed) {
-            throw new \DomainException('Cannot cancel a non-created or non-confirmed order');
+            throw new InvalidOrderStateTransitionException('Cannot cancel a shipped or cancelled order');
         }
 
         $this->status = OrderStatus::Cancelled;
@@ -461,7 +462,7 @@ class Order
     public function totalAmount(): Money
     {
         if ($this->items === []) {
-            throw new \DomainException('Cannot calculate total of an empty order');
+            throw new EmptyOrderException('Cannot calculate total of an empty order');
         }
 
         $total = $this->items[0]->unitPrice()->multiply($this->items[0]->quantity());
@@ -479,9 +480,19 @@ class Order
         return $this->items;
     }
 
+    public function itemCount(): int
+    {
+        return count($this->items);
+    }
+
     public function status(): OrderStatus
     {
         return $this->status;
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->status === OrderStatus::Confirmed;
     }
 
     public function createdAt(): \DateTimeImmutable
@@ -523,8 +534,9 @@ class OrderItem
 privátní a instance vzniká pojmenovanou factory `Order::place()`; nikdo tak nevyrobí
 objednávku bez zákazníka a bez počátečního stavu. Vnější volání jdou výhradně přes
 metody na `Order`, vlastní `OrderItem` zvenku nikdo neinstancuje ani nemění.
-Pojmenovanou výjimku dostal jen přechod stavu v `confirm()`; ostatní pravidla ukázka
-zkracuje na holou `\DomainException`. Výpočet `totalAmount()` přebírá měnu z položek:
+Každé porušené pravidlo hlásí pojmenovaná výjimka – `InvalidOrderStateTransitionException`
+pro nepovolený přechod stavu, `EmptyOrderException` pro prázdnou objednávku. Volající se
+tak může rozhodnout podle typu, ne podle textu zprávy. Výpočet `totalAmount()` přebírá měnu z položek:
 sčítání začíná u první z nich a `Money::add()` při nesouladu vyhodí výjimku.
 Objednávka kombinující dvě měny tak neprojde tiše. Události agregát zatím
 nezaznamenává – předka `AggregateRoot` a volání `record()` doplní
@@ -793,7 +805,7 @@ abstract class AggregateRoot
 :::
 
 Agregát `Order` ze [sekce o agregátech](#aggregates) z této třídy dědí. Výřez ukazuje
-jeho `place()` a `confirm()` doplněné o volání `record()`:
+jeho `place()`, `addItem()` a `confirm()` doplněné o volání `record()`:
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
 class Order extends AggregateRoot
@@ -808,6 +820,13 @@ class Order extends AggregateRoot
         return $order;
     }
 
+    public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
+    {
+        // ... kontrola stavu ze sekce 06.05 ...
+        $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
+        $this->record(new OrderItemAdded($this->id, $productId, $quantity));
+    }
+
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Draft) {
@@ -815,7 +834,7 @@ class Order extends AggregateRoot
         }
 
         if ($this->items === []) {
-            throw new \DomainException('Cannot confirm an empty order');
+            throw new EmptyOrderException('Cannot confirm an empty order');
         }
 
         $this->status = OrderStatus::Confirmed;
