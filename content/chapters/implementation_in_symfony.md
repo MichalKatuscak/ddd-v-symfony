@@ -36,7 +36,7 @@ výjimkami, factory metodami a plnou validací invariantů.
 
 Tento průvodce používá **Doctrine atributy přímo na doménových třídách**
 (`#[ORM\Entity]`, `#[ORM\Column]`). Argumentem proti je porušení
-*Dependency Inversion* – doména „ví“ o Doctrine. V praxi jde o metadata,
+*Dependency Inversion* – doména „ví“ o Doctrine. Jde přitom o metadata,
 ne o chování: třída se chová stejně, pouze nese popisek pro mapper. Symfony Best
 Practices doporučují atributy výslovně („Use Attributes to Define the Doctrine
 Entity Mapping“) [[1]](https://symfony.com/doc/current/best_practices.html)

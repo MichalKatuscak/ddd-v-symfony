@@ -72,7 +72,7 @@ předchozí je pryč. Event Sourcing zapisuje každou změnu jako nový řádek 
 
 Event Sourcing a [CQRS](/cqrs) jsou dva samostatné
 vzory [[2]](https://cqrs.files.wordpress.com/2010/11/cqrs_documents.pdf).
-**Nejsou totéž** – lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS. V praxi DDD
+**Nejsou totéž** – lze aplikovat CQRS bez Event Sourcingu a naopak ES bez CQRS. V doménově orientovaných systémech
 aplikací se ale obvykle objevují společně.
 
 Důvod je technický: Event Sourcing produkuje události jako základní artefakt
@@ -1864,7 +1864,7 @@ final readonly class UpcasterChain
 *src/Infrastructure/EventSourcing/Versioning/UpcasterChain.php*
 :::
 
-V praxi se `UpcasterChain` integruje do `EventSerializer`. Při deserializaci se
+`UpcasterChain` se integruje do `EventSerializer`. Při deserializaci se
 z uloženého záznamu přečte `event_type` a `schema_version` a payload projde řetězem
 upcasterů. Konstruktor aktuální třídy události pak dostane už jen transformovaná data.
 

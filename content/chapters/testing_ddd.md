@@ -599,7 +599,7 @@ repozitář by událost při nejbližším uložení zapsal do streamu a histori
 Test double je obecný název pro náhradu reálné závislosti v testu. Taxonomii pěti typů – dummy, stub,
 spy, mock a fake – zavedl Gerard Meszaros v knize *xUnit Test Patterns: Refactoring Test Code*
 (Addison-Wesley, 2007) [[6]](http://xunitpatterns.com/); do širšího povědomí ji dostal Fowler článkem
-*Mocks Aren't Stubs* [[7]](https://martinfowler.com/articles/mocksArentStubs.html). V praxi s PHPUnit se pracuje
+*Mocks Aren't Stubs* [[7]](https://martinfowler.com/articles/mocksArentStubs.html). S PHPUnit se pracuje
 hlavně se čtyřmi z nich (stub, mock, fake, spy) a v DDD má každý jiný dopad: vede k jinému stylu testu
 a k jiné odolnosti vůči refaktoringu.
 

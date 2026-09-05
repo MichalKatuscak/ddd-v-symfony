@@ -58,7 +58,7 @@ Kniha předpokládá tyto výchozí znalosti:
 
 Ke stacku ještě poznámka, která se hodí při zakládání projektu. Symfony vydává minor verze
 každých šest měsíců a udržuje je krátce; dlouhou podporu má vždy až poslední minor v major
-řadě. V praxi to znamená volbu mezi čerstvostí a klidem: kdo chce roky bez nucených upgradů,
+řadě. Je to volba mezi čerstvostí a klidem: kdo chce roky bez nucených upgradů,
 sáhne po aktuálním LTS, kdo chce nejnovější komponenty, počítá s upgradem přibližně jednou
 za půl roku. Kód v této knize je na tomhle rozhodnutí nezávislý – vzory ani API se mezi
 minor verzemi nemění.

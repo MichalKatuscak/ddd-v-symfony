@@ -23,7 +23,7 @@ Předchozí kapitoly pokryly teorii i pokročilé vzory: od
 [CQRS](/cqrs) a
 [Event Sourcing](/event-sourcing) až po
 [Ságy a Process Managery](/sagy-a-process-managery).
-V praxi se implementace DDD střetává s řadou problémů, které učebnicová literatura
+Implementace DDD se střetává s řadou problémů, které učebnicová literatura
 zpravidla nechává stranou. Architektonické principy narážejí na realitu frameworku, databáze,
 asynchronní infrastruktury i týmové dynamiky.
 

@@ -310,7 +310,7 @@ porušení vodítek nehledají výmluvy.
 ## 07.06 Eventual consistency mezi agregáty {#eventual-consistency}
 
 Eventual consistency vyvolává obavy v týmech, které přicházejí z monolitické CRUD aplikace.
-V praxi nahrazuje transakci napříč agregáty čtyřmi explicitními kroky:
+Transakci napříč agregáty nahrazují čtyři explicitní kroky:
 
 1. Kořen agregátu A vykoná operaci a publikuje doménovou událost (např. `OrderPlaced`).
 2. Outbox Pattern (kapitola [Outbox](/outbox-pattern)) zajistí, že

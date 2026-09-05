@@ -634,7 +634,7 @@ kadenci vybírá pending řádky a posílá je do brokera. Katalog microservices
 zná dva pojmenované vzory. **Polling Publisher** čte outbox tabulku dotazem
 a jeho jediná, zato podstatná přednost zní: funguje nad libovolnou SQL databází.
 **Transaction Log Tailing** místo dotazu čte transakční log databáze, tedy Postgres WAL
-nebo MySQL binlog. V praxi se první realizuje jako Symfony Console command, druhý jako
+nebo MySQL binlog. První se realizuje jako Symfony Console command, druhý jako
 Debezium konektor nad Kafkou.
 
 ### Varianta A: Polling Publisher (Symfony Console command) {#relay-polling-heading}
@@ -752,7 +752,7 @@ je EM po rollbacku zavřený a `markFailed()` skončí na
 selže databáze – přitom kód vypadá, že chyby ošetřuje.
 
 Dokumentace ORM k tomu říká jasně: další unit of work po výjimce patří novému
-EntityManageru. V praxi to znamená v `catch` bloku nejdřív zavolat
+EntityManageru. Znamená to v `catch` bloku nejdřív zavolat
 `$this->registry->resetManager()` a teprve pak zapsat stav řádku, nebo si
 pro stavové updaty držet oddělené DBAL spojení mimo ORM.
 :::
@@ -1130,7 +1130,7 @@ největší tabulka v databázi subscribera.
 
 Horní hranici retence určuje doba, po kterou může broker zprávu ještě doručit:
 maximální TTL zprávy plus nejdelší retry okno relay procesu. Řádek starší než
-tento součet už nemá co deduplikovat. V praxi se drží 30 dní, což je bezpečně
+tento součet už nemá co deduplikovat. Obvykle se drží 30 dní, což je bezpečně
 nad běžnou konfigurací obojího, a maže se stejným batch cronem jako outbox.
 Kdo retenci zvolí kratší než reálné retry okno, otevře si díru: opožděná zpráva
 projde jako nová.

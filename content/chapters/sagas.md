@@ -1203,7 +1203,7 @@ při pádu workeru uprostřed zpracování se zpráva doručí znovu.
 ### Pozor na ztrátu zpráv: Outbox pattern {#outbox-pattern-heading}
 
 Výše uvedená konfigurace předpokládá, že doménová událost se spolehlivě dostane do
-message brokeru. V praxi to však není samozřejmé. Agregát uloží změny do databáze
+message brokeru. Samozřejmé to ale není. Agregát uloží změny do databáze
 (Doctrine flush), ale dispatch události do fronty může selhat – síťový výpadek,
 pád workeru mezi flush a dispatch, restart aplikace. Výsledkem je „ztracená“ událost
 a sága, která se nikdy nespustí.
@@ -1554,7 +1554,7 @@ najdete v kapitole [CQRS – zpracování chyb](/cqrs#error-handling).
 
 ## 14.10 Paralelní kroky {#paralelni-kroky}
 
-Dosud jsme uvažovali sériové provádění kroků – jeden po druhém. V praxi však některé
+Dosud jsme uvažovali sériové provádění kroků – jeden po druhém. Některé
 kroky na sobě nezávisí a mohou běžet **současně**. Například po úspěšné
 platbě chceme zároveň **rezervovat zboží na skladě** a
 **vygenerovat fakturu**. Obě operace jsou nezávislé – výsledek jedné

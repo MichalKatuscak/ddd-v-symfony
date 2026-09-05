@@ -153,7 +153,7 @@ organizační struktury, kterou nikdo neaktualizoval. Zde přichází Inverse Co
 
 ### Co dělat, když Context Map a Team Map nesedí {#bc-team-mismatch}
 
-V praxi narazíte na 4 typy nesouladu mezi Context Mapem a Team Mapem. Každý vyžaduje
+Nesoulad mezi Context Mapem a Team Mapem má čtyři podoby. Každá vyžaduje
 jiný typ akce:
 
 | Symptom | Příčina | Akce |

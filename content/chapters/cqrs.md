@@ -92,7 +92,7 @@ systému nebo komponenty – ne uspořádání celé aplikace
 | Příklad | `getBalance()` nemodifikuje účet | `RegisterUserHandler` a `GetUserProfileHandler` pracují s různými datovými strukturami |
 :::
 
-V praxi se CQS přirozeně stává výchozím bodem pro CQRS. Pokud dodržujete CQS na úrovni metod,
+CQS se přirozeně stává výchozím bodem pro CQRS. Pokud dodržujete CQS na úrovni metod,
 zjistíte, že metody měnící stav (command methods) potřebují výrazně jiná data než ty,
 které jej čtou (query methods). CQRS toto pozorování formalizuje rozdělením do dvou explicitních modelů.
 
@@ -386,7 +386,7 @@ které nedávají smysl ani po formální stránce.
 Ve striktním CQS pojetí commands nevracejí žádná data. Vědomé porušení pravidla ale připouští
 i Fowler: `pop()` na zásobníku mění stav a zároveň vrací hodnotu. Sám k tomu píše, že principu
 se drží, dokud může, ale kvůli použitelnému `pop()` ho poruší
-[[2]](https://martinfowler.com/bliki/CommandQuerySeparation.html). V praxi CQRS existují
+[[2]](https://martinfowler.com/bliki/CommandQuerySeparation.html). V CQRS ovšem existují
 legitimní scénáře, kdy je užitečné vrátit alespoň identifikátor nově vytvořeného záznamu.
 Dva běžné přístupy:
 
