@@ -468,14 +468,20 @@ final class Order extends AggregateRoot
 :::
 
 :::callout{type="pattern"}
-### PHP: Doménová událost OrderPlaced {#domain-event-heading}
+### PHP: Integrační událost OrderPlacedIntegrationEvent {#domain-event-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
+Není to táž třída jako doménová `OrderPlaced` ze [Základních konceptů](/zakladni-koncepty#domain-events).
+Ta nese hodnotové objekty a zůstává uvnitř kontextu. Do outboxu jde **integrační** událost:
+samé primitivy, aby přežila serializaci, plus `eventId` pro deduplikaci na straně příjemce.
+Sdílet pro obojí jednu třídu nejde – doménový tvar se serializovat nedá bez převodních typů
+a integrační tvar by do domény zatáhl `array` místo `OrderItem`.
+
+:::code{language="php" filename="src/Ordering/Application/IntegrationEvent/OrderPlacedIntegrationEvent.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\Event;
+namespace App\Ordering\Application\IntegrationEvent;
 
 use Symfony\Component\Uid\Uuid;
 
@@ -484,7 +490,7 @@ use Symfony\Component\Uid\Uuid;
  * data nutná pro subscribery. Včetně vlastního event_id pro
  * deduplikaci v Inboxu.
  */
-final readonly class OrderPlaced
+final readonly class OrderPlacedIntegrationEvent
 {
     public function __construct(
         public Uuid $eventId,

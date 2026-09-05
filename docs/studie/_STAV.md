@@ -864,6 +864,40 @@ ne mechanická oprava.**
 s PHPUnit 12. Harness načte první definici daného FQN, takže u kolidujících tříd záleží
 na pořadí kapitol – to je jeho limit, ne chyba knihy.
 
+### Dvanácté kolo: stavba projektu podle knihy (2026-09-05)
+
+Agent dostal knihu a zadání **postavit podle ní funkční Symfony 8 aplikaci** se SQLite —
+s instrukcí chovat se jako čtenář, ne korektor: co nefunguje, hlásit, ne opravovat.
+Projekt nakonec běží (`doctrine:schema:create`, `lint:container`, `messenger:consume`,
+outbox relay, Voter, rollback test, optimistický zámek). Cesta k tomu odhalila patnáct míst.
+
+**Opraveno (ověřeno proti knize před zásahem):**
+
+| Kapitola | Nález |
+|---|---|
+| `aggregate_design` | `doctrine.yaml` se tváří jako celý soubor, ale chybí `url:` — a `naming_strategy` **nebyla v knize ani jednou**. Bez ní vzniknou sloupce `occurredAt`, rozejdou se s indexem outboxu a `doctrine:schema:create` selže na „There is no column with name occurred_at" — nevznikne vůbec nic |
+| `cqrs` | `routing` odkazuje na `SendWelcomeEmail` a `GenerateMonthlyReport`, které kniha nedefinuje. Messenger třídy ověřuje při kompilaci kontejneru → po zkopírování nejede žádný příkaz |
+| `implementation_in_symfony` | repozitář volal `find($id->value)`, ale ID je mapované custom typem, který na string vrací `null`. Dotaz tiše nenajde nic a **nikde nespadne** |
+| `aggregate_design` | `OrderIdType::convertToDatabaseValue()` vracel `null` místo výjimky → doplněno `InvalidType` |
+| `aggregate_design` | `ShippingAddress` (5 použití, 0 definic) a `OrderItem` bez ORM mapování — `mappedBy: 'order'` bez protistrany je fatální mapping error |
+| `aggregate_design` | `Money`: pravidlo v téže sekci velí `#[ORM\Embedded]`, konfigurace o 90 řádků níž registruje jednosloupcový custom typ, nad kterým nejde `SUM()` |
+| `outbox_pattern` + `cqrs` | relay injektoval prostý `MessageBusInterface` → dostal `default_bus` (command.bus) → doménová událost bez handleru → retry → **zahozena**, tedy přesně to, čemu outbox brání. Kniha nikde neukazovala `#[Target]` ani `#[AsMessageHandler(bus:)]` |
+| `outbox_pattern` | `markFailed()` vracel řádek rovnou do `pending` — všech pět pokusů se vyčerpalo za vteřinu. Doplněn `available_at` s exponenciálním odkladem do entity, DQL i obou DDL |
+| `outbox_pattern` | `OrderPlaced` existovala ve dvou neslučitelných tvarech pod jedním FQN (doménový s VO, outboxový s primitivy) a `aggregate_design` ji volalo čtyřmi argumenty, což neodpovídalo ani jednomu. Outboxová verze přejmenována na `OrderPlacedIntegrationEvent` do vlastního namespace |
+| `cqrs` | read modely nejsou ORM entity → `schema:update` je navrhne zahodit. Doplněn `schema_filter` |
+| `cqrs` | chybělo, který balíček dodává transport `doctrine://default` |
+| `implementation_in_symfony` | `exclude` v `services.yaml` mířil na `Domain/ValueObject/`, ale `Money` leží přímo v `Domain/` |
+
+**Prověřeno a zamítnuto:** agent hlásil, že autorizace v CLI/workeru selže tiše fail-closed
+a kniha to „odbude půlvětou". **Neplatí** — sekce 11.05 problém řeší celý: command nese
+`actorId` a handler autorizuje proti němu. Kapitola na ni v místě problému odkazuje.
+
+**Poučení:** tohle kolo našlo věci, které nenajde ani načtení tříd, ani spuštění doménových
+testů — chyby v konfiguraci, v naming strategy, v routování mezi sběrnicemi a v tichých
+konverzích custom typů. **Statická kontrola má strop; teprve běžící aplikace ho překročí.**
+
+Projekt zůstal v `scratchpad/bookapp/`.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.

@@ -456,12 +456,10 @@ class Order extends AggregateRoot
         $order = new self(OrderId::generate(), $customerId, $shippingAddress);
         $order->addItem($productId, $quantity, $unitPrice);
 
-        $order->record(new OrderPlaced(
-            $order->id,
-            $order->customerId,
-            $order->totalAmount(),
-            new \DateTimeImmutable(),
-        ));
+        // Kanonická OrderPlaced (06.08) nese identitu objednávky a zákazníka;
+        // čas si doplní sama. Částka do doménové události nepatří – odvodí
+        // si ji příjemce z agregátu, nebo patří do integrační události.
+        $order->record(new OrderPlaced($order->id, $order->customerId));
 
         return $order;
     }
