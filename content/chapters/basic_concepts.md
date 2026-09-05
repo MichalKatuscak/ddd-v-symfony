@@ -686,7 +686,7 @@ Evans k tomu dodává, že událost obvykle nese časové razítko a identitu z�
 entit [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 Název je proto vždy v minulém čase – popisuje hotovou věc, ne příkaz.
 
-:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderCreated.php"}
+:::code{language="php" filename="src/OrderManagement/Domain/Event/OrderPlaced.php"}
 <?php
 
 declare(strict_types=1);
@@ -696,7 +696,7 @@ namespace App\OrderManagement\Domain\Event;
 use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 
-final readonly class OrderCreated
+final readonly class OrderPlaced
 {
     public \DateTimeImmutable $occurredAt;
 
@@ -709,7 +709,7 @@ final readonly class OrderCreated
 }
 :::
 
-`OrderCreated` v ukázce nese tři údaje: které objednávky se týká, kterého zákazníka
+`OrderPlaced` v ukázce nese tři údaje: které objednávky se týká, kterého zákazníka
 a kdy k vytvoření došlo. Vlastnosti jsou veřejné a `readonly` – událost je neměnný
 záznam a příjemci ji jen čtou.
 
@@ -719,14 +719,14 @@ už na nic ptát nemusí. Druhou podobu Fowler pojmenoval Event-Carried State Tr
 a řadí ji vedle prosté notifikace, Event Sourcingu a CQRS jako jednu ze čtyř variant
 event-driven architektury
 [[12]](https://martinfowler.com/articles/201701-event-driven.html). Uvnitř jednoho
-kontextu se osvědčí tenká varianta, jakou ukazuje `OrderCreated`: příjemce má
+kontextu se osvědčí tenká varianta, jakou ukazuje `OrderPlaced`: příjemce má
 k agregátu přístup a duplikovaná data by se dřív nebo později rozešla.
 
 Hranice kontextu rozděluje události na doménové a integrační. Doménová událost mluví
 jazykem `OrderManagement` a zůstává uvnitř. Integrační je kontrakt pro cizí kontexty
 a mění se jen tak rychle, jak její příjemci snesou
 [[13]](https://devblogs.microsoft.com/cesardelatorre/domain-events-vs-integration-events-in-domain-driven-design-and-microservices-architectures/).
-Poslat `OrderCreated` ven proto znamená zveřejnit vnitřní model se vším, co z toho
+Poslat `OrderPlaced` ven proto znamená zveřejnit vnitřní model se vším, co z toho
 plyne. Překlad na stabilní kontrakt řeší
 [Published Language](/context-mapping#published-language); spolehlivé doručení
 a idempotenci na straně příjemce – Messenger doručuje at-least-once – řeší
@@ -782,7 +782,7 @@ class Order extends AggregateRoot
     public static function place(OrderId $id, CustomerId $customerId): self
     {
         $order = new self($id, $customerId);
-        $order->record(new OrderCreated($id, $customerId));
+        $order->record(new OrderPlaced($id, $customerId));
 
         return $order;
     }
@@ -803,7 +803,7 @@ class Order extends AggregateRoot
 }
 :::
 
-`OrderConfirmed` je analogická událost k `OrderCreated` z předchozí sekce. Volání
+`OrderConfirmed` je analogická událost k `OrderPlaced` z předchozí sekce. Volání
 `record()` stojí v named constructoru a v doménových metodách, nikdy v `__construct`.
 Na vině je reconstitution, tedy sestavení agregátu z uložených dat. Doctrine při
 hydrataci konstruktor obchází, ruční `Order::reconstitute()` ho ale volá – a kdyby
@@ -818,13 +818,17 @@ a teprve potom vyzvedne nahrané události přes `releaseEvents()`:
 $order = Order::place(OrderId::generate(), $customerId);
 
 $this->orders->save($order); // jen persist agregátu
-$this->em->flush();          // commit – transakci vlastní aplikační vrstva
-                             // (v produkci ji obvykle řídí doctrine_transaction middleware)
+$this->em->flush();          // zápis do DB; transakci vlastní aplikační vrstva
 
 foreach ($order->releaseEvents() as $event) {
     $this->eventBus->dispatch($event);
 }
 :::
+
+Pod middlewarem `doctrine_transaction` je situace jiná: ten otevře transakci před
+handlerem a commituje až po jeho návratu, takže `flush()` sám nic nepotvrzuje
+a dispatch běží uvnitř otevřené transakce. Nasazení middlewaru proto vyžaduje
+[Outbox](/outbox-pattern), ne dispatch přímo z handleru.
 
 Toto pořadí volí kniha záměrně, není to jediná možnost. Publikace před flushem by
 příjemcům oznámila změnu, kterou databáze mohla odmítnout. Dispatch po flushi zase

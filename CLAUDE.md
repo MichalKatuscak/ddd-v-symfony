@@ -51,7 +51,7 @@ Frontend assets go through Vite (`vite-plugin-symfony`, see `package.json`); `hi
 ## Conventions established in the book
 
 - Aggregate base class: `AggregateRoot` with `record(object $event)` / `releaseEvents(): array` (defined in `/zakladni-koncepty#aggregate-root-lifecycle`). All examples use this API. Events are recorded in named constructors / domain methods, never in `__construct` (reconstitution must not emit events).
-- Domain events are named in past tense **without an "Event" suffix**: `OrderCreated`, not `OrderCreatedEvent`.
+- Domain events are named in past tense **without an "Event" suffix**: `OrderPlaced`, not `OrderPlacedEvent`.
 - Value objects expose `public readonly` properties (e.g. `$email->value`), not `value()` methods.
 - `Email` VO: the constructor only validates; input normalization (trim, lowercase) belongs to `Email::fromUserInput()`.
 - `Money` has `public readonly int $amountInCents` and `public readonly Currency $currency`; `Currency` is a string-backed enum (read via `->value`, never `->code`).

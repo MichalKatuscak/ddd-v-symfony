@@ -303,7 +303,7 @@ use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\ProductId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\Event\OrderCreated;
+use App\OrderManagement\Domain\Event\OrderPlaced;
 use App\OrderManagement\Domain\Event\OrderConfirmed;
 use App\OrderManagement\Domain\Event\OrderItemAdded;
 use App\OrderManagement\Domain\Exception\EmptyOrderException;
@@ -359,8 +359,8 @@ final class OrderTest extends TestCase
 
         $events = $order->releaseEvents();
 
-        $this->assertCount(3, $events); // OrderCreated + OrderItemAdded + OrderConfirmed
-        $this->assertInstanceOf(OrderCreated::class, $events[0]);
+        $this->assertCount(3, $events); // OrderPlaced + OrderItemAdded + OrderConfirmed
+        $this->assertInstanceOf(OrderPlaced::class, $events[0]);
         $this->assertInstanceOf(OrderItemAdded::class, $events[1]);
         $this->assertInstanceOf(OrderConfirmed::class, $events[2]);
     }
@@ -465,7 +465,7 @@ use App\OrderManagement\Domain\ValueObject\CustomerId;
 use App\OrderManagement\Domain\ValueObject\ProductId;
 use App\OrderManagement\Domain\ValueObject\Money;
 use App\OrderManagement\Domain\ValueObject\Currency;
-use App\OrderManagement\Domain\Event\OrderCreated;
+use App\OrderManagement\Domain\Event\OrderPlaced;
 use App\OrderManagement\Domain\Event\OrderConfirmed;
 use Tests\Shared\Domain\DomainEventAssertions;
 
@@ -473,7 +473,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 {
     use DomainEventAssertions;
 
-    public function testOrderCreatedEventContainsCorrectData(): void
+    public function testOrderPlacedEventContainsCorrectData(): void
     {
         $orderId    = OrderId::generate();
         $customerId = CustomerId::generate();
@@ -481,7 +481,7 @@ final class OrderEventsTest extends \PHPUnit\Framework\TestCase
         $order->addItem(ProductId::generate(), 3, new Money(25000, Currency::CZK));
 
         $events       = $order->releaseEvents();
-        $createdEvent = $this->assertSingleEventOfType(OrderCreated::class, $events);
+        $createdEvent = $this->assertSingleEventOfType(OrderPlaced::class, $events);
 
         // Ověření dat události
         $this->assertTrue($orderId->equals($createdEvent->orderId));
@@ -527,7 +527,7 @@ use PHPUnit\Framework\TestCase;
 use App\Ordering\Domain\Order;
 use App\Ordering\Domain\OrderItem;
 use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderCreated;
+use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderItemAdded;
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\Shared\Domain\Event\DomainEvent;
@@ -538,7 +538,7 @@ final class OrderEventSourcingTest extends TestCase
     {
         // given
         $order = $this->given(
-            OrderCreated::create('order-1', 'customer-1'),
+            OrderPlaced::create('order-1', 'customer-1'),
             OrderItemAdded::create('order-1', new OrderItem(
                 productId: 'product-1',
                 quantity: 2,
@@ -556,7 +556,7 @@ final class OrderEventSourcingTest extends TestCase
 
     public function testConfirmingEmptyOrderRecordsNothing(): void
     {
-        $order = $this->given(OrderCreated::create('order-1', 'customer-1'));
+        $order = $this->given(OrderPlaced::create('order-1', 'customer-1'));
 
         try {
             $order->confirm();

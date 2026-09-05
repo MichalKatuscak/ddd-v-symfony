@@ -713,7 +713,7 @@ abstract class EventSourcedAggregate
 
     /**
      * Dynamické dispatchování na apply*() metody podle třídy události.
-     * Konvence: apply + ShortClassName, napr. applyOrderCreated().
+     * Konvence: apply + ShortClassName, napr. applyOrderPlaced().
      * apply*() metody v podtřídách MUSÍ být protected (ne private),
      * jinak je PHP nemůže volat z kontextu této nadtřídy.
      */
@@ -763,10 +763,12 @@ declare(strict_types=1);
 namespace App\Ordering\Domain;
 
 use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderCreated;
+use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderItemAdded;
 use App\Ordering\Domain\Event\OrderShipped;
-use App\Shared\Domain\EventSourcedAggregate;
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\SharedKernel\Domain\EventSourcedAggregate;
 
 final class Order extends EventSourcedAggregate
 {
@@ -780,10 +782,10 @@ final class Order extends EventSourcedAggregate
     private ?string $trackingNumber = null;
 
     // Statická továrna - vytvoří objednávku ve stavu Draft
-    public static function create(string $orderId, string $customerId): self
+    public static function place(string $orderId, string $customerId): self
     {
         $order = new self();
-        $order->recordEvent(OrderCreated::create($orderId, $customerId));
+        $order->recordEvent(OrderPlaced::create($orderId, $customerId));
 
         return $order;
     }
@@ -791,7 +793,7 @@ final class Order extends EventSourcedAggregate
     public function addItem(OrderItem $item): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException('Items can only be added to draft orders.');
+            throw new InvalidOrderStateTransitionException('Items can only be added to draft orders.');
         }
 
         $this->recordEvent(OrderItemAdded::create($this->orderId, $item));
@@ -800,10 +802,10 @@ final class Order extends EventSourcedAggregate
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new \DomainException('Only draft orders can be confirmed.');
+            throw new InvalidOrderStateTransitionException('Only draft orders can be confirmed.');
         }
         if (empty($this->items)) {
-            throw new \DomainException('Cannot confirm an empty order.');
+            throw new EmptyOrderException('Cannot confirm an empty order.');
         }
 
         $this->recordEvent(OrderConfirmed::create($this->orderId));
@@ -812,7 +814,7 @@ final class Order extends EventSourcedAggregate
     public function ship(string $trackingNumber): void
     {
         if ($this->status !== OrderStatus::Confirmed) {
-            throw new \DomainException('Only confirmed orders can be shipped.');
+            throw new InvalidOrderStateTransitionException('Only confirmed orders can be shipped.');
         }
 
         $this->recordEvent(OrderShipped::create($this->orderId, $trackingNumber));
@@ -821,7 +823,7 @@ final class Order extends EventSourcedAggregate
     // --- apply* metody - MUSÍ být protected (ne private), aby je base class mohla volat dynamicky ---
     // --- Obsahují POUZE změnu interního stavu, žádnou doménovou logiku ---
 
-    protected function applyOrderCreated(OrderCreated $event): void
+    protected function applyOrderPlaced(OrderPlaced $event): void
     {
         $this->orderId    = $event->orderId;
         $this->customerId = $event->customerId;
@@ -853,6 +855,31 @@ final class Order extends EventSourcedAggregate
 :::
 *src/Ordering/Domain/Order.php*
 :::
+
+Položku agregát drží jako neměnný záznam. Musí být serializovatelná, protože cestuje
+uvnitř události do Event Store a zpátky:
+
+:::code{language="php" filename="src/Ordering/Domain/OrderItem.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain;
+
+final readonly class OrderItem
+{
+    public function __construct(
+        public string $productId,
+        public int $quantity,
+        public int $unitPriceInCents,
+    ) {}
+}
+:::
+
+Identifikátory jsou zde primitivní řetězce, ne hodnotové objekty jako ve zbytku knihy.
+Je to druhá záměrná odchylka této kapitoly: událost se serializuje do Event Store
+a zpět, takže primitivní tvar drží ukázku čitelnou bez vrstvy převodních typů.
+V produkci hodnotové objekty zůstávají, převod obstará serializer.
 
 ### Načítání agregátu z event streamu (replay)
 
@@ -980,7 +1007,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Ordering\Projection;
 
 use App\Ordering\Domain\Event\OrderConfirmed;
-use App\Ordering\Domain\Event\OrderCreated;
+use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderItemAdded;
 use App\Ordering\Domain\Event\OrderShipped;
 use Doctrine\DBAL\Connection;
@@ -999,7 +1026,7 @@ final class OrderSummaryProjector
     ) {}
 
     #[AsMessageHandler]
-    public function handleOrderCreated(OrderCreated $event): void
+    public function handleOrderPlaced(OrderPlaced $event): void
     {
         $this->connection->insert('order_summary', [
             'order_id'      => $event->orderId,
@@ -1073,7 +1100,7 @@ framework:
 
         routing:
             # Všechny doménové události routujeme na async transport
-            'App\Ordering\Domain\Event\OrderCreated':    async
+            'App\Ordering\Domain\Event\OrderPlaced':    async
             'App\Ordering\Domain\Event\OrderItemAdded': async
             'App\Ordering\Domain\Event\OrderConfirmed': async
             'App\Ordering\Domain\Event\OrderShipped':   async
@@ -1135,7 +1162,7 @@ v kombinaci s deduplikací u konzumentů. Výběr nepublikovaných řádků pře
 Outbox dává **at-least-once** doručení uvnitř jednoho kanálu. Konkrétně:
 
 - **At-least-once:** pokud relay spadne mezi dispatchem a updatem checkpointu, stejná událost se po restartu publikuje znovu. Konzumenti musí být idempotentní – přesně tak, jak ukazuje následující sekce u projektorů.
-- **Pořadí:** relay publikuje vzestupně podle `id`. Uvnitř streamu jednoho agregátu to odpovídá pořadí verzí, takže projektor uvidí `OrderCreated` před `OrderShipped`. Napříč agregáty pořadí zajištěno není a kvůli gap problému popsanému výše nejde o spolehlivé globální pořadí commitů.
+- **Pořadí:** relay publikuje vzestupně podle `id`. Uvnitř streamu jednoho agregátu to odpovídá pořadí verzí, takže projektor uvidí `OrderPlaced` před `OrderShipped`. Napříč agregáty pořadí zajištěno není a kvůli gap problému popsanému výše nejde o spolehlivé globální pořadí commitů.
 - **Latence:** mezi commitem události a jejím doručením k projektoru vzniká okno odpovídající polling intervalu relay. V praxi 100 ms až 1 s; nižší latenci dává výstupní transport, který umí push (např. PostgreSQL `LISTEN/NOTIFY` nebo Debezium).
 
 Push variantu nad PostgreSQL nemusíte psát sami. Doctrine transport Symfony Messengeru
@@ -1174,7 +1201,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering\Projection;
 
-use App\Ordering\Domain\Event\OrderCreated;
+use App\Ordering\Domain\Event\OrderPlaced;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -1193,7 +1220,7 @@ final class IdempotentOrderProjector
         private readonly Connection $connection,
     ) {}
 
-    public function __invoke(OrderCreated $event): void
+    public function __invoke(OrderPlaced $event): void
     {
         // Checkpoint i projekce běží v jedné transakci. Pád workeru mezi
         // oběma zápisy by jinak zanechal checkpoint bez projekce
@@ -1258,7 +1285,7 @@ právě jednou.
 ### Out-of-order doručení: UPDATE bez řádku se tiše ztratí {#out-of-order-heading}
 
 At-least-once transport negarantuje ani pořadí. Dorazí-li `OrderItemAdded` dřív než
-`OrderCreated`, projektor provede UPDATE na řádek, který ještě neexistuje – příkaz projde,
+`OrderPlaced`, projektor provede UPDATE na řádek, který ještě neexistuje – příkaz projde,
 ovlivní nula řádků a událost zmizí bez jediné chyby v logu. Obranou je upsert, který chybějící
 řádek založí, nebo sloupec s verzí v read modelu: projektor událost aplikuje jen tehdy, když
 její verze navazuje na uloženou, jinak ji vrátí do fronty k pozdějšímu zpracování.
@@ -1298,7 +1325,7 @@ framework:
                 dsn: 'doctrine://default?queue_name=failed'
 
         routing:
-            'App\Ordering\Domain\Event\OrderCreated':    async
+            'App\Ordering\Domain\Event\OrderPlaced':    async
             'App\Ordering\Domain\Event\OrderItemAdded': async
             'App\Ordering\Domain\Event\OrderConfirmed': async
             'App\Ordering\Domain\Event\OrderShipped':   async

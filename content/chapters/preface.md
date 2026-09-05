@@ -190,7 +190,7 @@ Atributy Doctrine (`#[ORM\Entity]`) jsou na doménových třídách jako pragmat
 Ukázky navíc sdílejí jeden slovník, se kterým se poprvé potkáte v [Základních konceptech](/zakladni-koncepty):
 
 - Agregáty dědí z bázové třídy `AggregateRoot` s metodami `record()` a `releaseEvents()`.
-- Doménové události nesou jména v minulém čase bez sufixu `Event`, tedy `OrderCreated`, ne `OrderCreatedEvent`.
+- Doménové události nesou jména v minulém čase bez sufixu `Event`, tedy `OrderPlaced`, ne `OrderPlacedEvent`.
 - Hodnotové objekty vystavují `public readonly` vlastnosti, čtou se jako `$email->value`.
 - Identifikátory vznikají přes `symfony/uid` a `Uuid::v7()`.
 - Agregáty se odkazují jen přes ID. Celá instance jednoho agregátu se nikdy nepředává do metody jiného.

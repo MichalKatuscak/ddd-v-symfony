@@ -116,7 +116,7 @@ src/
 │   │   │   ├── OrderId.php
 │   │   │   └── Money.php
 │   │   ├── Event/             # Doménové události
-│   │   │   └── OrderCreated.php
+│   │   │   └── OrderPlaced.php
 │   │   └── Repository/        # Repozitáře (rozhraní)
 │   │       └── OrderRepository.php
 │   ├── Infrastructure/        # Infrastruktura pro OrderManagement
@@ -994,7 +994,7 @@ declare(strict_types=1);
 
 namespace App\OrderManagement\Domain\Model;
 
-use App\OrderManagement\Domain\Event\OrderCreated;
+use App\OrderManagement\Domain\Event\OrderPlaced;
 use App\OrderManagement\Domain\Event\OrderStatusChanged;
 use App\OrderManagement\Domain\ValueObject\OrderId;
 use App\OrderManagement\Domain\ValueObject\OrderStatus;
@@ -1015,7 +1015,7 @@ final class Order extends AggregateRoot
     public static function place(OrderId $id): self
     {
         $order = new self($id);
-        $order->record(new OrderCreated($id));
+        $order->record(new OrderPlaced($id));
 
         return $order;
     }
