@@ -920,7 +920,7 @@ A provoz má v Symfony konkrétní podobu. Každá služba, která konzumuje zpr
 
 ## 19.09 Postupná migrace monolit → microservices {#migrace}
 
-Tato sekce je pro týmy, které dnes mají monolit a uvažují, kam dál. Většinu reálných systémů nepostavíte jako microservices na zelené louce. Postavíte je jako monolit, ten doroste do bolesti, a pak se zeptáte, kterou část máte rozdělit. Mottem sekce je heslo Sama Newmana z *Building Microservices, 2nd ed.*: **„don't do a big-bang rewrite“**. Velká přepisovací migrace selhává mnohem častěji, než se plánuje.
+Většinu reálných systémů nepostavíte jako microservices na zelené louce. Postavíte je jako monolit, ten doroste do bolesti, a pak se zeptáte, kterou část máte rozdělit. Mottem sekce je heslo Sama Newmana z *Building Microservices, 2nd ed.*: **„don't do a big-bang rewrite“**. Velká přepisovací migrace selhává mnohem častěji, než se plánuje.
 
 ### Strangler Fig pattern {#strangler-fig-heading}
 

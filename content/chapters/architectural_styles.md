@@ -134,10 +134,7 @@ Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje inv
 
 ### Kdy se Layered hodí {#layered-kdy-heading}
 
-- **Junior tým a rychlý start** – Symfony skeleton, `make:*` commandy, předvídatelná struktura.
-- **Aplikace s 10–50 endpointy** – kde investice do izolace nepřinese měřitelný přínos.
-- **Krátký horizont produktu** (MVP, prototyp, interní nástroj) – kde Doctrine vendor lock-in není riziko, protože migrace nikdy nepřijde.
-- **Tým, který Symfony ovládá plynně** – kde dodatečná složitost by jen brzdila, aniž by řešila reálný problém.
+Layered se vyplatí tam, kde je předvídatelnost cennější než izolace. Juniornímu týmu dá Symfony skeleton a `make:*` commandy strukturu, kterou nemusí vymýšlet. U aplikace s deseti až padesáti endpointy se investice do portů a adaptérů nevrátí – není co amortizovat. A má-li produkt krátký horizont (MVP, prototyp, interní nástroj), je Doctrine vendor lock-in teoretické riziko, protože migrace nikdy nepřijde. Týmu, který Symfony ovládá plynně, by dodatečná vrstva jen brzdila práci, aniž by řešila problém, který skutečně má.
 
 ### Kdy Layered přestává stačit {#layered-kdy-ne-heading}
 

@@ -935,13 +935,24 @@ Detail anti-vzorů a jejich projevů v Symfony 8 najdete v kapitole [Anti-vzory 
 
 ## 03.13 Shrnutí {#summary}
 
-Context Mapping je strategická disciplína, která dává smysl Bounded Contextům tím, že popisuje, co se na jejich hranicích děje. Hlavní body:
+Context Map není diagram tříd. Je to vizuální a textová dokumentace všech Bounded
+Contextů v systému a vazeb mezi nimi, a co zachycuje především, je organizační a
+politická realita – kdo na koho čeká, kdo komu diktuje formát, kdo s kým vůbec mluví.
 
-- **Context Map = mapa vztahů.** Vizuální + textová dokumentace všech BC v systému a všech vazeb mezi nimi. Místo struktury tříd zachycuje organizační a politickou realitu.
-- **Osm vzorů ve dvou úrovních.** Vztah dvou kontextů popisují Partnership, Shared Kernel, Customer/Supplier a Separate Ways. Roli jednoho konce popisují OHS a Published Language nahoře, Conformist a ACL dole. Nevybírá se jedna z osmi možností; vybírá se vztah a k němu role na obou koncích.
-- **ACL je nejčastěji potřebný vztah.** Skoro každá netriviální integrace s legacy nebo externím systémem chce ACL. Tři odpovědnosti: schema mapping, concept translation, anti-corruption.
-- **OHS + PL = stabilní veřejná integrace.** Open Host Service je kanál, Published Language je formát. Bez politiky verzování zůstává z publikovaného kontraktu jen deklarace.
-- **Big Ball of Mud = „ještě jsme nedělali Context Map“.** Pokud nedokážete nakreslit Context Map, máte BBoM. Cesta ven začíná deskriptivní mapou současného stavu, ne kódem.
+Osm vzorů, které kapitola prošla, se nevybírá jako osm možností z jednoho seznamu. Leží
+ve dvou rovinách. Vztah dvou kontextů popisují Partnership, Shared Kernel,
+Customer/Supplier a Separate Ways; roli jednoho konce toho vztahu pak Open Host Service
+a Published Language nahoře, Conformist a Anti-Corruption Layer dole. Vybírá se tedy
+vztah a k němu role na obou koncích.
+
+Z těch rolí je v praxi nejčastěji potřeba ACL: skoro každá netriviální integrace s legacy
+nebo externím systémem si ho vyžádá a nese tři odpovědnosti – schema mapping, concept
+translation a vlastní anti-corruption. Na opačné straně stojí dvojice OHS a Published
+Language, kde OHS je kanál a PL formát. Bez politiky verzování z publikovaného kontraktu
+ovšem zbude jen deklarace.
+
+Zbývá otázka, co znamená, když mapa nejde nakreslit. Odpověď je Big Ball of Mud, a cesta
+ven z něj nezačíná v kódu, ale deskriptivní mapou toho, jak systém vypadá dnes.
 
 Pro praktické nakreslení Context Mapy doporučujeme techniku [Event Stormingu](/event-storming) jako discovery workshop – odhalí jak hranice BC, tak vztahy mezi nimi v jediném sezení. Pro propojení s organizačním designem viz [Team Topologies](/team-topologies). Podle Conway's Law architektura kopíruje komunikační strukturu organizace – Context Map a org chart proto musí korespondovat. Jinak jeden z nich vyhraje a ten druhý se rozsype.
 
