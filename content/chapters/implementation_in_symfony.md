@@ -507,6 +507,13 @@ final readonly class UserId
     {
         return $this->value === $other->value;
     }
+
+    // Doctrine skládá klíč identity mapy přes implode() nad identifikátorem.
+    // Bez __toString() padne už persist().
+    public function __toString(): string
+    {
+        return $this->value;
+    }
 }
 :::
 :::
