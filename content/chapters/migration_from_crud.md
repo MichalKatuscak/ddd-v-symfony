@@ -752,8 +752,7 @@ o Doctrine ani SQL nic neví a implementace se dá vyměnit bez jeho úprav.
 
 ### Vytvoření doménového rozhraní repozitáře
 
-Doménové rozhraní repozitáře žije v doménové vrstvě. Popisuje operace tak, jak je potřebuje doména.
-O Doctrine, SQL ani jiné infrastruktuře nepadne ani zmínka.
+Rozhraní repozitáře patří do doménové vrstvy a popisuje operace tak, jak je potřebuje doména.
 
 :::callout{type="pattern"}
 ### Příklad: Doménové rozhraní vs. Doctrine implementace {#repository-interface-heading}
@@ -994,8 +993,7 @@ class UserController extends AbstractController
 Command `RegisterUser` je prosté DTO (Data Transfer Object) bez závislostí. Handler
 `RegisterUserHandler` orchestruje doménový model. `UserRegistrationPolicy` je doménová
 služba: nese pravidlo unikátní e-mailové adresy, které nelze ověřit uvnitř jediného
-agregátu, a proto smí použít repozitář. Kontroler se zužuje na HTTP
-vrstvu, která pouze přeloží HTTP požadavek na Command. Takto oddělené vrstvy
+agregátu, a proto smí použít repozitář. Kontroler se zužuje na adaptér, který pouze přeloží HTTP požadavek na Command. Takto oddělené vrstvy
 se dají testovat každá zvlášť.
 :::
 
@@ -1213,8 +1211,8 @@ final class UserTest extends TestCase
 
 ### Nejčastější chyby při migraci
 
-- **Anémický doménový model** – Nejčastější past. Vývojáři vytvoří třídy s názvem jako v DDD (`User`, `Order`), ale tyto třídy obsahují pouze gettery a settery bez doménové logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie s CRUD implementací.
-- **Přílišná granularita Bounded Contexts** – Rozdělení domény na příliš mnoho malých kontextů vede k distribuované komplexitě. Každá integrace mezi kontexty přidává overhead. Začněte s většími kontexty a rozdělujte je až tehdy, když je důvod k tomu jasný.
+- **Anémický doménový model** – Nejčastější past. Vývojáři vytvoří třídy s názvy jako v DDD (`User`, `Order`), ty ale obsahují pouze gettery a settery bez doménové logiky. Logika zůstane v service třídách. Výsledek je DDD terminologie s CRUD implementací.
+- **Přílišná granularita Bounded Contexts** – Rozdělení domény na příliš mnoho malých kontextů vede k distribuované komplexitě. Každá integrace mezi kontexty přidává overhead. Bezpečnější start jsou větší kontexty; dělí se až tehdy, když je důvod jasný.
 - **ORM diktující tvar modelu** – Anti-vzorem není atributové mapování samo o sobě; [sekce 18.06](#extrakce-domainove-vrstvy) i Recept 2 ho přijímají jako pragmatickou volbu. Problém začíná, když ORM určuje tvar modelu: public settery kvůli hydrataci, anemická entita, `flush()` volaný z kontroleru. Projekty, které potřebují striktní oddělení domény od persistence, řeší tutéž potřebu přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern).
 - **CQRS bez doménového modelu** – Zavedení CommandBusu a QueryBusu bez refaktorovaného doménového modelu přidá vrstvy komplexity bez přínosu. CQRS je amplifikátor – zesílí jak výhody, tak problémy stávající architektury.
 - **Ignorování Anti-Corruption Layer** – Při integraci nové DDD vrstvy se starým CRUD kódem je nutné vytvořit překladovou vrstvu. Bez ní pronikají koncepty starého modelu do nového a kontaminují ho.
@@ -1274,7 +1272,7 @@ Doctrine, asynchronní infrastruktura, tým – shrnuje kapitola
 
 Strangler Fig je strategický pohled na celou migraci. V denní praxi narazíte na opakující se mikrosituace.
 Tato kuchařka obsahuje 9 nejčastějších, každá ve formátu *„symptomy → krok 1, 2, 3“*.
-Recepty jsou záměrně krátké – když potřebujete kontext nebo důkladnější rozbor, projděte odkazované kapitoly.
+Recepty jsou záměrně krátké – kontext a důkladnější rozbor nesou odkazované kapitoly.
 
 ### Recept 1: Anémická Doctrine entita {#recept-anemic-entita-heading}
 

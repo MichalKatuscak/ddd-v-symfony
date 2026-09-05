@@ -792,7 +792,7 @@ Test ověřuje chování handleru, ne řešení souběhu, proto `EntityManager` 
 :::callout{type="warn"}
 ### Varování: Přílišné používání mocků
 
-Nadměrné použití mocků (mockování každé závislosti) vede k tzv. *nadměrné specifikaci* testů.
+Mockování každé závislosti vede k tzv. *nadměrné specifikaci* testů.
 Takové testy ověřují implementační detaily, nikoli chování. Při každém refaktoringu přestanou procházet,
 i když se chování systému nezměnilo. Pro repozitáře se osvědčily InMemory Fake implementace; mocky mají
 místo jen tam, kde se ověřují vedlejší efekty (odeslání e-mailu, volání externího API).
@@ -1550,9 +1550,9 @@ znamená, že do ní něco přibylo bez testu.
 
 Každý test má tři oddělené fáze:
 
-1. **Arrange (připrav)** – Nastav počáteční stav: vytvoř objekty, nakonfiguruj závislosti, nastav data.
-2. **Act (proveď)** – Proveď jednu testovanou akci: zavolej metodu, odešli command.
-3. **Assert (ověř)** – Ověř výsledek: assertuj výstup, zkontroluj stav objektu, ověř vydané události.
+1. **Arrange (připrav)** – počáteční stav: objekty, konfigurace závislostí, data.
+2. **Act (proveď)** – jedna testovaná akce: volání metody nebo odeslání commandu.
+3. **Assert (ověř)** – výsledek: výstup, stav objektu, vydané události.
 
 Každý test by měl ověřovat právě jednu věc (jeden logický assertion). Více assertů v jednom testu je přijatelné,
 pokud všechny společně ověřují jeden konzistentní scénář.
@@ -1566,7 +1566,7 @@ pokud všechny společně ověřují jeden konzistentní scénář.
 - **Přímý přístup k privátním fieldům přes reflexi** – Porušuje zapouzdření. Pokud potřebujete přistupovat k privátnímu stavu v testu, je to příznak špatného návrhu API třídy.
 - **Bootstrapování celého Symfony kernelu v unit testech** – Unit testy doménové vrstvy nesmí volat `self::bootKernel()`. Bootstrap kernelu patří do integračních testů. Zpomaluje sadu testů.
 - **Sdílený stav mezi testy** – Každý test musí být nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
-- **Mockování value objects** – Value objekty jsou datové třídy bez závislostí. Není důvod je mockovat – vždy vytvořte skutečnou instanci.
+- **Mockování value objects** – Value objekty jsou datové třídy bez závislostí. Není důvod je mockovat; test pracuje se skutečnou instancí.
 - **Ignorování doménových výjimek v testech** – Každá doménová výjimka (`InvalidEmailException`, `InvalidOrderStateTransitionException` apod.) musí mít test ověřující, že je vyhozena za správných podmínek.
 - **Chybějící test pro releaseEvents() po operaci** – Pokud agregát vydává doménové události, každá veřejná operace, která má událost vydat, musí mít test ověřující typ, počet a obsah vydaných událostí.
 :::

@@ -45,10 +45,9 @@ V kódu se objeví vrstva, která jen obsluhuje databázi. A jeden tým bez sub-
 vyrobí Big Ball of Mud.
 
 Conway tezi nepodává jako slogan, ale dokládá ji strukturně. Každému uzlu návrhu
-odpovídá jedna návrhová skupina, každé větvi mezi uzly odpovídá dohodnuté rozhraní
+odpovídá jedna návrhová skupina a každé větvi mezi uzly dohodnuté rozhraní
 mezi dvěma skupinami. Sám to v eseji formuluje jako matematik: mezi grafem systému
-a grafem navrhující organizace existuje homomorfismus. Rozhraní v kódu tedy není
-jen technickým rozhodnutím. Je zápisem dohody dvou skupin lidí.
+a grafem navrhující organizace existuje homomorfismus. Rozhraní v kódu tedy zapisuje dohodu dvou skupin lidí.
 
 ### Komunikační struktura není organizační diagram {#komunikacni-struktura}
 
@@ -516,7 +515,7 @@ uvedena není. Počítá kontexty místo domén a přidává druhý rozměr, vel
 | Velikost týmu | Doporučený počet BC | Komentář |
 |---|---|---|
 | 5 lidí | 1 BC (max 2 malé) | Hranice, kdy má každý přehled o všem; každý zná každou část kódu. |
-| 7–9 lidí | 1–2 BC (výjimečně 3) | Zdravé optimum stream-aligned týmu. |
+| 7–9 lidí | 1–2 BC (výjimečně 3) | Běžná velikost stream-aligned týmu; každý ještě zná každého. |
 | 10+ lidí | Tým je už příliš velký – rozdělit | Dunbar number (familiarity ≈ 15). Komunikační režie roste kvadraticky s počtem lidí. |
 | Tým se 4+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
 
@@ -788,7 +787,7 @@ měří zotavení po selhání způsobeném změnou v produkci, ne po libovolné
 První tři metriky popisují průtok, poslední dvě nestabilitu. Který ročník sady použijete,
 je vedlejší. Podstatné je měřit před reorganizací i po ní stejně definovaná čísla.
 
-**Před reorganizací sadu změřte. Po reorganizaci ji změřte znovu po 6 měsících.**
+**Sada se měří dvakrát: před reorganizací a šest měsíců po ní.**
 O kolik se čísla posunou, dopředu neví nikdo. Slíbit CTO konkrétní procento zlepšení
 znamená vyrobit si za půl roku problém. Slíbit lze baseline, termín druhého měření
 a rozhodnutí podle výsledku.

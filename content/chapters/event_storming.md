@@ -80,7 +80,7 @@ Dvě položky v tabulce potřebují komentář. Zelená nese ve dvou formátech 
 v Big Picture a Query Model v Process Modellingu; v jednom workshopu se oba prvky nepotkají, takže
 záměna nehrozí. A velká žlutá lepka se v glosáři ddd-crew jmenuje **Constraint**, ne Aggregate – posun
 je jazykový, protože slovo *agregát* doménovému expertovi nic neříká. Tato kniha u pojmu agregát
-zůstává, protože ho čtenář potřebuje pro kód; na cizí mapě ale hledejte Constraint.
+zůstává, protože ho čtenář potřebuje pro kód; na cizí mapě se tentýž prvek jmenuje Constraint.
 
 :::callout{type="pattern"}
 ### Pravidlo minulého času {#past-tense-rule-heading}
@@ -92,7 +92,7 @@ Důvod není kosmetický. Minulý čas vás *jazykově nutí* mluvit o tom, co u
 Když si nejste jistí, zda je sticky event, command, nebo policy: zkuste si ji přečíst nahlas. Zní v minulém čase? Event. V imperativu? Command. „Když se stane X, dělej Y“? Policy.
 :::
 
-Pro online workshopy má Brandolini na Miroverse dvě vlastní šablony, [Process Modelling](https://miro.com/templates/eventstorming-process-modelling/) a [Software Design](https://miro.com/miroverse/eventstorming-software-design-template/). Komunitních šablon je v Miru víc, barvy v nich ale nemusí odpovídat legendě výše. Pro offline workshop si stejné barvy nakupte v balení Post-It 3M (oranžová má kód *Vital Orange*, růžová *Power Pink*) a mějte zásobu – workshop spotřebuje stovky sticky notes.
+Pro online workshopy má Brandolini na Miroverse dvě vlastní šablony, [Process Modelling](https://miro.com/templates/eventstorming-process-modelling/) a [Software Design](https://miro.com/miroverse/eventstorming-software-design-template/). Komunitních šablon je v Miru víc, barvy v nich ale nemusí odpovídat legendě výše. Pro offline workshop odpovídají stejné barvy balení Post-It 3M (oranžová má kód *Vital Orange*, růžová *Power Pink*). Zásoba musí být velká – workshop spotřebuje stovky sticky notes.
 
 ## 04.04 Big Picture workshop – návod krok za krokem {#big-picture}
 
@@ -102,11 +102,11 @@ Big Picture je první workshop, který tým s novou doménou (nebo s migrací z 
 
 Před workshopem se nelze vyhnout přípravě:
 
-- **Místnost a stěna.** 6–8 m dlouhá rovná stěna bez dveří a nábytku v cestě – Brandolini požaduje *unlimited modeling surface*, souvislou plochu, kterou workshop nesmí vyčerpat. Místnost naopak vybírejte takovou, kde jde otevřít okno; skupina dvaceti lidí vydýchá vzduch dřív, než čekáte. Pokud je workshop online, založte v Miro nebo Mural *frame* 12 000 × 4 000 px.
+- **Místnost a stěna.** 6–8 m dlouhá rovná stěna bez dveří a nábytku v cestě – Brandolini požaduje *unlimited modeling surface*, souvislou plochu, kterou workshop nesmí vyčerpat. Místnost naopak potřebuje otevíratelné okno; skupina dvaceti lidí vydýchá vzduch dřív, než se čeká. Online varianta stojí na *frame* 12 000 × 4 000 px v Miro nebo Mural.
 - **Účastníci.** Primární zdroje uvádějí pro Big Picture 15–30 lidí, typicky 25–30; ddd-crew mluví o 10 až 30 a více u jednoho papírového rolu. Velká skupina se neřeší redukcí lidí, ale tím, že se u stěny sama rozpadne na hloučky, které pracují paralelně. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany 3–5 vývojářů včetně tech leada, plus jeden facilitátor (viz níže). Sestava kolem deseti lidí se uřídí snadněji, je to ale vědomý kompromis: část pohledů na doménu v místnosti chybí.
 - **Materiál.** 5–10 balíčků oranžových stickies (3M Post-It, 76×76 mm), 2 balíčky růžových, 2 modrých, 1 malý žlutý, 1 velký žlutý (Constraint), 1 šedý, 1 zelený, 1 lila (světle fialový), 1 tmavě fialový. Černé fixy Sharpie pro každého (žádné kuličkové pera – text nebude čitelný z 2 m).
 - **Catering.** Káva, voda, ovoce, oběd. Workshop unaví – bez cateringu padá energie po 90 minutách.
-- **Pozvánka.** Pošlete účastníkům 1-stránkovou agendu předem. Doménové experty upozorněte, že *nebudou prezentovat slidy*, ale budou „vyprávět příběh“.
+- **Pozvánka.** Účastníci dostanou předem jednostránkovou agendu. Doménoví experti se z ní dozvědí, že *nebudou prezentovat slidy*, ale budou „vyprávět příběh“.
 
 ### 04.04.2 Postup workshopu (2–4 hodiny) {#bp-postup}
 
@@ -143,7 +143,7 @@ Co **nemáte** a ani by nemělo být cílem: kompletní model, schéma databáze
 
 Kolik se online ztratí, záleží na tom, který ze tří formátů děláte. Brandolini to rozepsal v textu *Remote EventStorming* (březen 2020). Software Design online snese nejvíc – malý rozsah, 90 minut, technické publikum. Process Modelling jde podmínečně: půlden, 5–15 lidí, tým už formát zná z prezenční verze a každá třetí session je naživo. K Big Picture má jedinou větu: *„Don't even try.“* Vlastní pokus označil za dysfunkční i s expertními účastníky, protože online mizí paralelní konverzace u části stěny, řeč těla i celodenní ponoření. Doporučuje také remote sezení vůbec nenazývat EventStormingem, aby si tým se jménem techniky nespojil špatnou zkušenost.
 
-Přesto se online Big Picture dělá, protože doménoví experti sedí ve třech městech a alternativou nebývá offline workshop, ale žádný workshop. Berte následující postup jako vědomý kompromis se známou cenou. Co se dodržet dá:
+Přesto se online Big Picture dělá, protože doménoví experti sedí ve třech městech a alternativou nebývá offline workshop, ale žádný workshop. Následující postup je vědomý kompromis se známou cenou. Co se dodržet dá:
 
 1. **Frame 12 000 × 4 000 px.** Týmy často podcení velikost plátna. Big Picture na 50+ eventů potřebuje hodně horizontálního prostoru, jinak se účastníci začnou navzájem překrývat. V Miro založte nový board a první frame udělejte explicitně s těmito rozměry – parametr *Frame size*.
 2. **Předpřipravená paleta.** Vlevo na boardu položte 7–9 zdrojových stickies (jednu od každé barvy) a kolem nich rámeček s popiskem „*Kopírujte odsud (Ctrl+D duplikuje)*“. Účastníci si stickies kopírují, místo aby pracně otevírali sticky picker.
@@ -220,7 +220,7 @@ Software Design je nejtaktičtější formát Event Stormingu a první, který s
 
 ### 04.06.1 Co Software Design přidává {#dl-co-pridava}
 
-- **Constraints**, v této knize agregáty (velké žluté lepky) – konzistenční hranice. Pro každý command identifikujte agregát, který ho obsluhuje.
+- **Constraints**, v této knize agregáty (velké žluté lepky) – konzistenční hranice. Každý command má jeden agregát, který ho obsluhuje.
 - **Invariants** – pravidla, která agregát musí dodržet. Píšou se jako bullet pointy na sticky agregátu.
 - **Pre-conditions** – co musí být splněno, aby command směl projít.
 
@@ -514,7 +514,7 @@ Kanonicky *Deliverable Obsession*. Big Picture nemá být dokonalý; je to prvn�
 
 Předchozí sekce je o tom, jak workshop pokazí lidé. Následuje seznam toho, co technika neumí ani ve chvíli, kdy ji vedete správně.
 
-**Happy path vytlačí zbytek.** Časová osa se staví jako příběh a příběhy se vyprávějí od začátku do úspěšného konce. Storna, částečné refundy, ruční zásahy podpory a timeouty externích systémů se na stěnu dostanou jen tehdy, když se na ně někdo cíleně zeptá. Obrana stojí jednu otázku: po dokončení osy projděte každou pivotní událost znovu s dotazem „co se stane, když tohle selže?“.
+**Happy path vytlačí zbytek.** Časová osa se staví jako příběh a příběhy se vyprávějí od začátku do úspěšného konce. Storna, částečné refundy, ruční zásahy podpory a timeouty externích systémů se na stěnu dostanou jen tehdy, když se na ně někdo cíleně zeptá. Obrana stojí jednu otázku, položenou po dokončení osy u každé pivotní události: „co se stane, když tohle selže?“.
 
 **Nefunkční požadavky nemají kam sednout.** Latence, dostupnost, retenční lhůty, GDPR, objem dat, cena provozu. Žádná barva pro ně v notaci není a workshop je systematicky přehlíží. Pokud na nich stojí architektura, patří do samostatného sezení; Event Storming je nenahradí.
 
@@ -663,13 +663,13 @@ Doména se vyvíjí. Pivotní událost, která dnes platí (`OrderPlaced`), mů�
 
 ### 04.11.2 Diff jako priorita refaktoringu {#re-diff}
 
-Po re-stormingu porovnejte novou mapu se starou (uloženou v `docs/discovery/<starý-datum>/`). Místa, kde se mapa změnila **nejvíc**, jsou **kandidáti na refaktoring** – tam doména reálně dopředu „utekla“ kódu. Naopak místa, kde se mapa změnila málo, jsou stabilní a kód v nich je pravděpodobně v pořádku.
+Po re-stormingu se nová mapa porovná se starou (uloženou v `docs/discovery/<starý-datum>/`). Místa, kde se mapa změnila **nejvíc**, jsou **kandidáti na refaktoring** – tam doména reálně dopředu „utekla“ kódu. Naopak místa, kde se mapa změnila málo, jsou stabilní a kód v nich je pravděpodobně v pořádku.
 
 Re-storming typicky dělá menší skupina (3–5 lidí z původního workshopu) a trvá kratší dobu, protože hodně mapy se zachová.
 
 ## 04.12 Most z workshopu do testů {#workshop-to-tdd}
 
-Software Design EventStorming přirozeně ústí v test-driven development. Každý invariant napsaný na sticky agregátu je **jeden test case**. Každý hot spot, který se za běhu workshopu vyřešil, je **jeden další test case**. Tým, který z workshopu odejde a nezačne psát testy podle invariantů, ztrácí polovinu jeho hodnoty.
+Software Design EventStorming přirozeně ústí v test-driven development. Každý invariant napsaný na sticky agregátu je **jeden test case**. Totéž platí pro hot spot, který se během workshopu vyřešil. Tým, který z workshopu odejde a nezačne psát testy podle invariantů, ztrácí polovinu jeho hodnoty.
 
 ### 04.12.1 Mapping invariantů na PHPUnit testy {#tdd-mapping}
 
@@ -762,7 +762,7 @@ Event Storming a Domain Storytelling jsou dvě konkrétní, prověřené technik
 - **Domain Storytelling** je *úzkoúhlý teleobjektiv* pro hloubkovou diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity je intuitivní a vhodná pro kontexty, kde Event Storming je „příliš velký“.
 - **Workshop začíná u doménového experta, ne u datového modelu.** Eventy se píšou v minulém čase, agregáty se objevují až nakonec.
 - **Workshop bez follow-upu je promarněný.** Foto, eventy, hot spoty a Context Map musí jít do repa do 24 hodin a do kódu do 1–2 sprintů.
-- **Re-stormujte pravidelně.** Doména se vyvíjí; mapa zastará. 1× za 6–12 měsíců nebo po každém velkém produktovém rozhodnutí.
+- **Re-storming je pravidelná činnost.** Doména se vyvíjí; mapa zastará. 1× za 6–12 měsíců nebo po každém velkém produktovém rozhodnutí.
 
 Po prvním Event Stormingu typicky následuje implementace prvního Bounded Contextu – viz kapitoly o [základních konceptech DDD](/zakladni-koncepty), [CQRS](/cqrs), [Event Sourcingu](/event-sourcing) a [ságách](/sagy-a-process-managery). Pokud migrujete z legacy CRUD systému, pokračujte kapitolou [Migrace z CRUD na DDD](/migrace-z-crud).
 
