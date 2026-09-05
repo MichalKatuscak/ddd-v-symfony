@@ -424,12 +424,14 @@ use App\Catalog\Domain\ValueObject\ProductId;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\SharedKernel\Domain\AggregateRoot;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use App\SharedKernel\Domain\Money;
 
 class Order extends AggregateRoot
 {
-    /** @var list<OrderItem> */
-    private array $items = [];
+    /** @var Collection<int, OrderItem> */
+    private Collection $items;
 
     private OrderStatus $status;
     private ShippingAddress $shippingAddress;
@@ -441,6 +443,7 @@ class Order extends AggregateRoot
     ) {
         $this->status = OrderStatus::Draft;
         $this->shippingAddress = $shippingAddress;
+        $this->items = new ArrayCollection();
     }
 
     // Invariant „objednávka má alespoň jednu položku“ vymáhá signatura:
@@ -480,12 +483,9 @@ class Order extends AggregateRoot
             }
         }
 
-        $this->items[] = new OrderItem(
-            OrderItemId::generate(),
-            $productId,
-            $quantity,
-            $unitPrice,
-        );
+        // Položka dostane referenci na kořen – ta drží ManyToOne protistranu
+        // kolekce. Vlastní doménové ID nemá, viz mapování níž.
+        $this->items->add(new OrderItem($this, $productId, $quantity, $unitPrice));
     }
 
     public function ship(ShipmentId $shipmentId): void
@@ -504,13 +504,14 @@ class Order extends AggregateRoot
     {
         // place() prázdnou objednávku nepustí; guard kryje budoucí refaktoring,
         // aby součet nikdy nevracel tichou nulu v natvrdo zvolené měně.
-        if ($this->items === []) {
+        if ($this->items->isEmpty()) {
             throw new EmptyOrderException();
         }
 
-        $total = $this->items[0]->subtotal(); // měnu určuje první položka
+        $items = $this->items->toArray();
+        $total = $items[0]->subtotal(); // měnu určuje první položka
 
-        foreach (array_slice($this->items, 1) as $item) {
+        foreach (array_slice($items, 1) as $item) {
             $total = $total->add($item->subtotal());
         }
 
@@ -781,11 +782,22 @@ final class OrderItem
         private Order $order,
         #[ORM\Column(type: 'product_id')]
         public readonly ProductId $productId,
+        // private(set): zvenčí čitelné, měnit smí jen položka sama.
+        // readonly by nešlo – increaseQuantity() hodnotu mění.
         #[ORM\Column]
-        public readonly int $quantity,
+        public private(set) int $quantity,
         #[ORM\Embedded(class: Money::class)]
         public readonly Money $unitPrice,
     ) {}
+
+    public function increaseQuantity(int $by): void
+    {
+        if ($by < 1) {
+            throw new \InvalidArgumentException('Quantity increment must be positive');
+        }
+
+        $this->quantity += $by;
+    }
 
     public function subtotal(): Money
     {
@@ -866,6 +878,17 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Ordering/Domain'
                 prefix: 'App\Ordering\Domain'
                 is_bundle: false
+            # Embeddable hodnotové objekty sdíleného jádra (Money) musí být
+            # v mapping chainu taky, jinak Doctrine hlásí
+            # „class … was not found in the chain configured namespaces".
+            SharedKernel:
+                type: attribute
+                dir: '%kernel.project_dir%/src/SharedKernel/Domain'
+                prefix: 'App\SharedKernel\Domain'
+                is_bundle: false
+            # Entity mimo doménové složky (OrderSaga, OutboxMessage, InboxMessage)
+            # potřebují vlastní blok. Bez něj Doctrine na schema:update mlčí
+            # („Nothing to update") a tabulka prostě nevznikne.
             # ... další BC ...
 :::
 
