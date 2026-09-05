@@ -72,7 +72,12 @@ namespace App\Security;
 
 final class OrderVoter extends Voter
 {
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(
+        string $attribute,
+        mixed $subject,
+        TokenInterface $token,
+        ?Vote $vote = null,
+    ): bool
     {
         $user = $token->getUser();
 
@@ -149,6 +154,8 @@ security:
 
     firewalls:
         # Stateless API – JWT
+        # Klíč `jwt` registruje lexik/jwt-authentication-bundle.
+        # Bez toho balíčku je nativní ekvivalent `access_token`.
         api:
             pattern: ^/api/
             stateless: true
@@ -215,8 +222,6 @@ class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
     /** @return list<string> */
     public function getRoles(): array { return $this->roles; }
 
-    public function eraseCredentials(): void {}
-
     // Most do domény – Voter i handler pracují s doménovým typem
     public function customerId(): CustomerId { return CustomerId::fromString($this->customerId); }
     public function tenantId(): TenantId { return TenantId::fromString($this->tenantId); }
@@ -260,6 +265,7 @@ use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Ordering\Domain\Order;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 final class OrderVoter extends Voter
@@ -288,7 +294,12 @@ final class OrderVoter extends Voter
         return $subjectType === Order::class;
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(
+        string $attribute,
+        mixed $subject,
+        TokenInterface $token,
+        ?Vote $vote = null,
+    ): bool
     {
         $user = $token->getUser();
         if (!$user instanceof SecurityUser) {
@@ -383,7 +394,7 @@ final class OrderController extends AbstractController
             actorId: $this->getUser()->customerId(),
         ));
 
-        return $this->redirectToRoute('order_detail', ['id' => $request->get('id')]);
+        return $this->redirectToRoute('order_detail', ['id' => (string) $order->id()->value]);
     }
 }
 :::
@@ -423,11 +434,11 @@ final readonly class CancelOrderHandler
 
     public function __invoke(CancelOrderCommand $command): void
     {
-        $order = $this->orders->getOrFail($command->orderId);
+        $order = $this->orders->get($command->orderId);
 
         if (!$this->auth->isGranted(OrderVoter::CANCEL, $order)) {
             throw new AccessDeniedDomainException(
-                sprintf('Cancel not allowed for order %s', $command->orderId->toString())
+                sprintf('Cancel not allowed for order %s', $command->orderId->value)
             );
         }
 
@@ -519,12 +530,12 @@ final readonly class CancelOrderHandler
 
     public function __invoke(CancelOrderCommand $command): void
     {
-        $order = $this->orders->getOrFail($command->orderId);
+        $order = $this->orders->get($command->orderId);
 
         // Autorizace proti identitě v commandu – token ve workeru neexistuje
         if (!$order->isOwnedBy($command->actorId)) {
             throw new AccessDeniedDomainException(
-                sprintf('Cancel not allowed for order %s', $command->orderId->toString())
+                sprintf('Cancel not allowed for order %s', $command->orderId->value)
             );
         }
 
@@ -565,13 +576,13 @@ final readonly class RefundOrderHandler
 
     public function __invoke(RefundOrderCommand $command): void
     {
-        $order = $this->orders->getOrFail($command->orderId);
+        $order = $this->orders->get($command->orderId);
         // Aktér se načte podle identity v commandu, ne ze snapshotu rolí
         $actor = $this->users->byCustomerId($command->actorId);
 
         if (!$this->auth->isGrantedForUser($actor, OrderVoter::REFUND, $order)) {
             throw new AccessDeniedDomainException(
-                sprintf('Refund not allowed for order %s', $command->orderId->toString())
+                sprintf('Refund not allowed for order %s', $command->orderId->value)
             );
         }
 
@@ -665,6 +676,11 @@ final class Order extends AggregateRoot
         return $this->customerId->equals($customerId);
     }
 
+    public function id(): OrderId
+    {
+        return $this->id;
+    }
+
     public function customerId(): CustomerId
     {
         return $this->customerId;
@@ -685,7 +701,7 @@ Pro úplnost si projděme, co se konkrétně stane, když zákazník Petr klikne
 1. **Edge (firewall).** Symfony ověří JWT/session token. Bez ověření → 401. Petr je přihlášený, pokračuje.
 2. **Edge (access_control).** URL `/order/42/cancel` spadá pod `IS_AUTHENTICATED_FULLY`. Petr je přihlášený, pokračuje.
 3. **Controller** validuje vstup (CSRF token, request body), vytvoří `CancelOrderCommand(orderId: 42, reason: 'changed mind', actorId: <Petrovo CustomerId>)` a předá ho na message bus.
-4. **Application Handler** (CancelOrderHandler) načte agregát z repository: `$order = $repo->getOrFail(42)`.
+4. **Application Handler** (CancelOrderHandler) načte agregát z repository: `$order = $repo->get($orderId)`.
 5. **Use Case Voter.** Handler volá `$auth->isGranted('order.cancel', $order)`. OrderVoter se zeptá agregátu přes `$order->isOwnedBy($user->customerId())`. Petr je vlastník → ACCESS_GRANTED, pokračuje. *Kdyby nebyl vlastník → AccessDeniedDomainException → HTTP 403.*
 6. **Aggregate.** Handler volá `$order->cancel('changed mind', $now)`. Aggregate ověří `status === PLACED` a `age <= 24h`. Order je placed před 30 min → ok, status se změní na CANCELLED, vznikne OrderCancelled event. *Kdyby byl už shipped → InvalidOrderStateException → HTTP 409.*
 7. **Persistence + outbox.** Handler zavolá `$repo->save($order)`; v jedné transakci se uloží stav agregátu i OrderCancelled event do outbox tabulky.
@@ -826,7 +842,7 @@ final readonly class OrderListReadModel
         // Autorizace je součástí dotazu, ne postprocessingu
         if (!$isAdmin) {
             $sql .= ' WHERE customer_id = :actor';
-            $params['actor'] = $actor->toString();
+            $params['actor'] = $actor->value;
         }
 
         $sql .= ' ORDER BY placed_at DESC LIMIT :limit OFFSET :offset';
@@ -1003,13 +1019,13 @@ protected function voteOnAttribute(
 }
 :::
 
-Důvody se čtou z veřejné vlastnosti `$vote->reasons` (pole stringů); getter třída `Vote` nemá. Aplikační vrstva je vytáhne z `AccessDecision` a předá do chybové odpovědi:
+Důvody se čtou z veřejné vlastnosti `$vote->reasons` (pole stringů); getter třída `Vote` nemá. Stejně je na tom `AccessDecision`, kde je výsledek vlastnost `$decision->isGranted`. Aplikační vrstva je vytáhne z `AccessDecision` a předá do chybové odpovědi:
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Http/ExplainedAccessDenied.php"}
 // src/Ordering/Infrastructure/Http/ExplainedAccessDenied.php
 $decision = $this->security->getAccessDecision(OrderVoter::CANCEL, $order);
 
-if (!$decision->isGranted()) {
+if (!$decision->isGranted) {
     $reasons = [];
     foreach ($decision->votes as $vote) {
         // Vote::$reasons je veřejná vlastnost, ne getter
@@ -1132,7 +1148,7 @@ final readonly class TenantContextListener
             return; // public endpoint, anonymous request
         }
 
-        $tenantId = $user->tenantId()->toString();
+        $tenantId = $user->tenantId()->value;
         $filter   = $this->em->getFilters()->enable('tenant');
         $filter->setParameter('tenant_id', $tenantId);
     }
@@ -1247,6 +1263,7 @@ use App\Ordering\Infrastructure\Security\OrderVoter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 final class OrderVoterTest extends TestCase
