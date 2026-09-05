@@ -775,6 +775,46 @@ chybné citace. Zaznamenáno i ve studii kapitoly.
 - Tvrzení opřená o placené zdroje bez volně dostupného textu a bez výtisku v knihovně.
 - Přednášky a konferenční keynote, u nichž existuje jen novinový referát.
 
+### Doověřeno spuštěním proti reálnému Symfony 8 (2026-09-05)
+
+Postavil jsem samostatný projekt (`symfony/security-bundle` 8.1.6, `symfony/messenger` 8.1.6,
+`doctrine/orm` 3.6.8, `doctrine/dbal` 4.4.4, `symfony/uid`, `symfony/validator`, PHPUnit 12),
+z kapitol vytáhl bloky, které se tváří jako úplné soubory, a **každý načetl v odděleném
+procesu s reflexí na signatury**. To odhalí věci, které `php -l` ani čtení nenajde:
+nekompatibilní signatury vůči vendoru, chybějící importy, nesplněné rozhraní, neexistující typy.
+
+Výsledek: **170 z 201 tříd se napoprvé nenačetlo správně; po opravách 213 z 232.**
+
+Nalezeno a opraveno (žádnou z těchto věcí nenašla předchozí kola):
+
+| Kapitola | Nález |
+|---|---|
+| `sagas` | `RefundCustomer` se používá 20× včetně kovariantního návratového typu, ale nebyl nikde definován → PHP nenačte ani `ChargeCustomer` |
+| `architectural_styles` | `PlaceOrderHandler implements PlaceOrder` bez metody `handle()` → fatal „contains 1 abstract method" |
+| `architectural_styles` | `PlaceOrderInput` a `PlaceOrderOutput` v signatuře portu, nikde nedefinované |
+| `cqrs` | rozhraní `UserProfileReadRepository` se implementuje a mockuje na třech místech, definované nebylo |
+| `basic_concepts` | **`CustomerId` (103 použití) a `ProductId` nebyly v knize nikde definované** – přitom jsou to typy v signatuře kanonické `Order::place()` a `addItem()` |
+| `basic_concepts` | kanonické `OrderRepository` deklarovalo `findById`/`findByCustomerId`, které se nikdy nevolají; implementace v Návrhu agregátu ho proto nesplňovala |
+| `ddd_pain_points` | blok deklaroval `final class Order extends AggregateRoot` uvnitř `namespace …\Domain\ValueObject` – agregát ve složce pro hodnotové objekty |
+| `ddd_pain_points` | chybějící `use AggregateRoot`; volací pasáž používala `$customerId` z ničeho |
+| `anti_patterns` | ukázka záměny argumentů měla zkrácená UUID (`'018f4d2e-...'`), takže spadla na validaci místo slibovaného `TypeError` |
+| `anti_patterns` | dva bloky `class UserController extends AbstractController` bez importu předka |
+| `aggregate_design` | jediná kapitola s per-aggregate namespace `Domain\Order\*` proti `Domain\Model`/`ValueObject`/`Repository` ve zbytku |
+| `testing_ddd` | ukázka builderu volala `->forCustomer($customerId)` s nedefinovanou proměnnou |
+
+**Co zůstává nenačtené a proč to není chyba knihy:** bloky používající `api-platform/core`
+a `EasyAdminBundle` (balíčky jsem neinstaloval) a zkrácený anti-vzorový blok
+`authorization_in_ddd:69`, který záměrně nemá `use` sekci.
+
+**Nástroje zůstaly ve scratchpadu:** `extract2.php` (rozdělí bloky podle `namespace`),
+`loader.php`, `check_one.php`, projekt `sfproj/`. Pozor na dvě věci: blok může nést víc
+souborů (sedm takových v knize) a extraktor injektuje `use` z celého bloku do každé části,
+což plodí falešné „Cannot use X as X".
+
+**Poučení: `php -l` je slabá kontrola.** Projde jí i třída, která nesplňuje rozhraní,
+dědí z neexistujícího předka nebo používá nedefinovaný typ. Skutečné načtení proti vendoru
+je jediné, co tohle chytí.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
