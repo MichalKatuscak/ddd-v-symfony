@@ -515,3 +515,29 @@ s odkazovou notací vzoru** — atribuce Vernonovi je tedy správná.
 **Neověřitelné lokálně:** Millett & Tune, *Patterns, Principles and Practices of DDD* — název
 kapitoly 3 („Focusing on the Core Domain") a heuristika „code for replacement rather than reuse".
 Ani jedno není v Evansovi, Vernonovi ani v *DDD Reference*; knihu nemám k dispozici.
+
+### Doověřeno z vlastní knihovny (2026-09-05, druhý průchod)
+
+Předchozí zápis tvrdil, že Millett & Tune a Khononov „nemám k dispozici". **To byla chyba —
+obě knihy jsou na sdílení `//katuscakovi/Work/Knihy/DDD/` spolu s Brandolinim, Newmanem,
+Richardsonem, Skeltonem & Paisem a Hohpe & Woolfem.** Ověřeno tedy proti primárním textům:
+
+| Tvrzení kapitoly | Výsledek |
+|---|---|
+| Millett & Tune, kapitola 3 „Focusing on the Core Domain" | **sedí** — kap. 3, str. 31 |
+| heuristika „code for replacement rather than reuse" pro Supporting | **sedí** — sekce „Build Subdomains for Replacement Rather Than Reuse", v textu *„By coding for replacement rather than reuse you can create good enough supporting subdomains…"* |
+| Khononov, kapitola 1 „Analyzing Business Domains" | **sedí** |
+| Khononov rozlišuje subdomény podle tří os | **sedí** — Table 1-1: Competitive advantage / Complexity / Volatility |
+| Khononov „ptá se, zda by se daný kus dal prodat jako samostatný byznys" | **NESEDÍ — opraveno** |
+
+**OPRAVENO — neopodstatněná atribuce.** Otázka „dal by se ten kus prodat jako samostatný
+byznys?" **není ani v *Learning DDD*, ani v Khononovově článku *Revisiting the Basics of DDD***
+(prohledáno na „standalone", „sell", „separate business" — nula výskytů v obou). Nejblíž je
+příklad Google Ads, který je ale o něčem jiném (*„not a subdomain, but rather a separate
+business domain"*). Věta přeformulována na to, co Khononov skutečně má: tři osy z Table 1-1.
+
+Je to přesně ten vzor, na který upozorňuje `_STAV.md`: tvrzení připsané autoritě, které
+v uvedeném zdroji není.
+
+**Poznámka k hledání:** exact-match na „code for replacement" selže, kniha píše „coding for
+replacement". Při ověřování hledat kmen, ne celou frázi.
