@@ -691,7 +691,7 @@ final class OrderTest extends TestCase
         $order->addItem(new ProductId('SKU-1'), 2, new Money(100, Currency::CZK));
         $order->addItem(new ProductId('SKU-2'), 1, new Money(50, Currency::CZK));
 
-        self::assertSame(250, $order->total()->amountInCents);
+        self::assertSame(250, $order->totalAmount()->amountInCents);
     }
 }
 :::

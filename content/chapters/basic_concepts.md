@@ -377,7 +377,7 @@ class Order
         private readonly OrderId $id,
         private readonly CustomerId $customerId,
     ) {
-        $this->status = OrderStatus::Created;
+        $this->status = OrderStatus::Draft;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -398,7 +398,7 @@ class Order
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
-        if ($this->status !== OrderStatus::Created) {
+        if ($this->status !== OrderStatus::Draft) {
             throw new \DomainException('Cannot add items to a non-created order');
         }
 
@@ -407,7 +407,7 @@ class Order
 
     public function removeItem(ProductId $productId): void
     {
-        if ($this->status !== OrderStatus::Created) {
+        if ($this->status !== OrderStatus::Draft) {
             throw new \DomainException('Cannot remove items from a non-created order');
         }
 
@@ -419,7 +419,7 @@ class Order
 
     public function confirm(): void
     {
-        if ($this->status !== OrderStatus::Created) {
+        if ($this->status !== OrderStatus::Draft) {
             throw new InvalidOrderStateTransitionException('Cannot confirm a non-created order');
         }
 
@@ -432,7 +432,7 @@ class Order
 
     public function cancel(): void
     {
-        if ($this->status !== OrderStatus::Created && $this->status !== OrderStatus::Confirmed) {
+        if ($this->status !== OrderStatus::Draft && $this->status !== OrderStatus::Confirmed) {
             throw new \DomainException('Cannot cancel a non-created or non-confirmed order');
         }
 
@@ -530,8 +530,9 @@ namespace App\Ordering\Domain\Model;
 
 enum OrderStatus: string
 {
-    case Created   = 'created';
+    case Draft     = 'draft';
     case Confirmed = 'confirmed';
+    case Paid      = 'paid';
     case Shipped   = 'shipped';
     case Delivered = 'delivered';
     case Cancelled = 'cancelled';
@@ -789,7 +790,7 @@ class Order extends AggregateRoot
 
     public function confirm(): void
     {
-        if ($this->status !== OrderStatus::Created) {
+        if ($this->status !== OrderStatus::Draft) {
             throw new InvalidOrderStateTransitionException('Cannot confirm a non-created order');
         }
 

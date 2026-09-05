@@ -996,6 +996,7 @@ namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderStatusChanged;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\SharedKernel\Domain\AggregateRoot;
@@ -1007,15 +1008,16 @@ final class Order extends AggregateRoot
 
     private function __construct(
         public readonly OrderId $id,
+        public readonly CustomerId $customerId,
     ) {
         $this->status = OrderStatus::Draft;
         $this->createdAt = new \DateTimeImmutable();
     }
 
-    public static function place(OrderId $id): self
+    public static function place(OrderId $id, CustomerId $customerId): self
     {
-        $order = new self($id);
-        $order->record(new OrderPlaced($id));
+        $order = new self($id, $customerId);
+        $order->record(new OrderPlaced($id, $customerId));
 
         return $order;
     }

@@ -131,7 +131,7 @@ Specification je vzor s nezanedbatelnou cenou: každé pravidlo = nová třída,
 nový test. Nehodí se pro:
 
 - Triviální podmínky, které se vyskytují **jednou** a obsahují
-  **jeden if**: `if ($order->total()->amountInCents > 100_000)`
+  **jeden if**: `if ($order->totalAmount()->amountInCents > 100_000)`
   nepotřebuje vlastní třídu.
 - Pravidla, která jsou ve skutečnosti **součástí invariantu Aggregate**
   (a tedy patří přímo do něj jako privátní metoda).
@@ -360,7 +360,7 @@ final class EligibleForFreeShipping extends CompositeSpecification
     {
         assert($candidate instanceof Order);
 
-        $total = $candidate->total();
+        $total = $candidate->totalAmount();
 
         return $total->currency === $this->threshold->currency
             && $total->amountInCents >= $this->threshold->amountInCents;
@@ -603,7 +603,7 @@ final class EligibleForFreeShipping extends CompositeSpecification implements Qu
     {
         assert($candidate instanceof Order);
 
-        $total = $candidate->total();
+        $total = $candidate->totalAmount();
 
         return $total->currency === $this->threshold->currency
             && $total->amountInCents >= $this->threshold->amountInCents;

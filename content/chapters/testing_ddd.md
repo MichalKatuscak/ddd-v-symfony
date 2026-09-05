@@ -318,7 +318,7 @@ final class OrderTest extends TestCase
         $order->addItem(ProductId::generate(), 2, new Money(49900, Currency::CZK));
 
         $this->assertSame(1, $order->itemCount());          // 1 řádek objednávky
-        $this->assertEquals(new Money(99800, Currency::CZK), $order->total()); // 49 900 × 2
+        $this->assertEquals(new Money(99800, Currency::CZK), $order->totalAmount()); // 49 900 × 2
     }
 
     public function testThrowsExceptionWhenConfirmingEmptyOrder(): void

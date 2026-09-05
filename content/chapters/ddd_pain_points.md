@@ -285,7 +285,12 @@ patří do domény.
 **Řešení:** Identitu vyrobte dřív, než agregát vznikne, a předejte ji do továrny.
 Kniha používá tvar `Order::place(OrderId $id, CustomerId $customerId)`: `OrderId` si
 generuje UUID sám, agregát ho jen přijme. Doctrine se nakonfiguruje bez generátoru,
-ID mu předáváte hotové.
+ID mu předáváte hotové. Tři kapitoly signaturu záměrně rozšiřují, protože bez toho
+by nešlo ukázat jejich téma: [Návrh agregátu](/navrh-agregatu) přidává první položku,
+aby invariant „objednávka má aspoň jednu položku“ vymáhala už signatura,
+[Outbox](/outbox-pattern) a [Doplňující vzory](/mene-zname-vzory) přebírají seznam
+položek, protože ho potřebují v payloadu události. Základ zůstává stejný: identita
+a vlastník vznikají mimo agregát a vstupují do továrny.
 
 :::callout{type="pattern"}
 #### PHP: identita předaná do továrny (PHP 8.4 + Symfony Uid) {#a5-code-heading}

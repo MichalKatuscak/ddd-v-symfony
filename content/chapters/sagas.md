@@ -1060,7 +1060,8 @@ Semantic lock je z nich nejčastější:
 ### PHP: Semantic lock přes stav *_PENDING {#semantic-lock-heading}
 
 :::code{language="php" filename="snippet.php"}
-// Agregát Order: sága ho při startu uzamkne stavem ApprovalPending
+// Agregát Order: sága ho při startu uzamkne stavem ApprovalPending.
+// Tři stavy níž rozšiřují kanonický OrderStatus jen pro schvalovací scénář.
 public function submitForApproval(): void
 {
     $this->status = OrderStatus::ApprovalPending; // semantic lock

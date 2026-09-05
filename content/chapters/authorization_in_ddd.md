@@ -634,7 +634,7 @@ final class Order extends AggregateRoot
 
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {
-        if ($this->status !== OrderStatus::Placed) {
+        if ($this->status !== OrderStatus::Confirmed) {
             throw new InvalidOrderStateException(
                 sprintf(
                     'Cancel allowed only for PLACED orders, got %s',
@@ -663,7 +663,7 @@ final class Order extends AggregateRoot
 
     public function isCancellable(\DateTimeImmutable $now): bool
     {
-        if ($this->status !== OrderStatus::Placed) {
+        if ($this->status !== OrderStatus::Confirmed) {
             return false;
         }
         return $now->getTimestamp() - $this->placedAt->getTimestamp()
