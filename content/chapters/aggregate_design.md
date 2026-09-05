@@ -444,8 +444,10 @@ class Order extends AggregateRoot
     }
 
     // Invariant „objednávka má alespoň jednu položku“ vymáhá signatura:
-    // bez první položky objednávka nevznikne.
-    public static function place(
+    // bez první položky objednávka nevznikne. Jméno se liší od kanonického
+    // Order::place(OrderId, CustomerId) záměrně – jsou to dvě různé továrny
+    // na téže třídě, ne dvě verze jedné.
+    public static function placeWithFirstItem(
         CustomerId $customerId,
         ShippingAddress $shippingAddress,
         ProductId $productId,
