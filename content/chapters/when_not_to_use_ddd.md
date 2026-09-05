@@ -212,7 +212,7 @@ class Order {
 **Doporučené alternativy:**
 
 - **Flat MVC s Doctrine Entities** – rychlé iterace, změny jsou levné.
-- Až se doména stabilizuje (3–6 měsíců provozu), teprve pak zvažte zavedení DDD vzorů selektivně – viz [Migrace z CRUD na DDD](/migrace-z-crud).
+- Až se doména stabilizuje (3–6 měsíců provozu), teprve pak přichází na řadu selektivní zavedení DDD vzorů – viz [Migrace z CRUD na DDD](/migrace-z-crud).
 - Strategické nástroje DDD (Event Storming, Context Mapping) je vhodné zavést od začátku – pomáhají rychleji porozumět doméně.
 :::
 
@@ -232,7 +232,7 @@ dělají všechno). V bodě 7 experti existují, ale doména samotná je nejasn�
 :::callout{type="note"}
 **Doporučené alternativy:**
 
-Vrstvená architektura (Controller → Service → Repository) drží kód strukturovaný bez přílišné abstrakce. DDD zaveďte až ve chvíli, kdy máte přístup k doménovým expertům a čas na [Event Storming](/event-storming).
+Vrstvená architektura (Controller → Service → Repository) drží kód strukturovaný bez přílišné abstrakce. DDD přichází až ve chvíli, kdy je přístup k doménovým expertům a čas na [Event Storming](/event-storming).
 :::
 
 ## 22.05 4. Data pipeline, ETL a reportovací systémy {#data-pipeline}
@@ -355,7 +355,7 @@ final class Order extends AggregateRoot
 **Doporučené alternativy:**
 
 - Klasická architektura, kterou tým zná dobře – srozumitelný kód je vždy lepší než „správná“ architektura, které nikdo nerozumí.
-- DDD zaveďte na vedlejším projektu nebo v ohraničené části systému jako experiment, pak přenášejte zkušenosti postupně. Evans pro to má jméno: **Bubble Context** – malý kontext oddělený Anticorruption Layerem, který nevyžaduje velký závazek k DDD (*Getting Started with DDD When Surrounded by Legacy Systems*, 2013).
+- DDD snese experiment na vedlejším projektu nebo v ohraničené části systému, odkud se zkušenosti přenášejí postupně. Evans pro to má jméno: **Bubble Context** – malý kontext oddělený Anticorruption Layerem, který nevyžaduje velký závazek k DDD (*Getting Started with DDD When Surrounded by Legacy Systems*, 2013).
 - Jako odrazový můstek se osvědčil Vernon: *Domain-Driven Design Distilled* – nejstručnější úvod do DDD konceptů.
 :::
 
@@ -377,7 +377,7 @@ přepíšete stejně všechno.
 **Doporučené alternativy:**
 
 - **Event Storming napřed** – než napíšete první řádek kódu, zmapujte doménu se stakeholdery. Bez toho DDD nemá co modelovat. Více o Event Stormingu v kapitole [Event Storming](/event-storming).
-- Pokud Event Storming není možný, začněte s jednoduchým kódem a DDD zaveďte retrospektivně, až doménu pochopíte – viz [Migrace z CRUD na DDD](/migrace-z-crud).
+- Pokud Event Storming není možný, nastupuje jednoduchý kód a DDD se doplní retrospektivně, až je doména pochopená – viz [Migrace z CRUD na DDD](/migrace-z-crud).
 :::
 
 ## 22.09 Hybrid podle typu subdomény – DDD tam, kde dává smysl {#hybrid-subdomain}

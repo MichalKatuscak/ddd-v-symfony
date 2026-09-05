@@ -684,7 +684,7 @@ Zdravější cesta je pořadí nepotřebovat – handler, který snese zprávy v
 nemá co rozbít.
 
 :::callout{type="note"}
-**Pozor:** Pro ordering problémy *nepoužívejte*
+**Pozor:** Na ordering problémy se *nehodí*
 `UnrecoverableMessageHandlingException` – ta
 **obchází retry strategii** a zprávu okamžitě přesune do failed transportu.
 Zpráva, která přišla brzy, přitom není nezpracovatelná. Patří sem **standardní výjimka**

@@ -148,7 +148,7 @@ Praktické rozdělení rolí: test v předchozí sekci jako rychlý filtr pro je
 :::callout{type="note"}
 ### Když test říká, že máte 5 Core domén {#too-many-cores-heading}
 
-Pokud z testu vyjde pět nebo víc Core domén, berte to jako varovný signál, ne jako verdikt. **Core je vzácné, ne většinové** – Evansovo „make the core small“ omezuje velikost jádra, ne jeho počet. Khononov výslovně připouští, že organizace může mít víc Core subdomén, pokud soutěží na několika osách zároveň, a že celý podnik může být poskládaný jen ze Supporting a Generic [[7]](https://vladikk.com/2018/01/26/revisiting-the-basics-of-ddd/). Číselné pravidlo tedy neexistuje. Existuje jen podezření, že si pletete pojmy „důležité pro nás“ a „diferencujeme se tím“:
+Pokud z testu vyjde pět nebo víc Core domén, je to varovný signál, ne verdikt. **Core je vzácné, ne většinové** – Evansovo „make the core small“ omezuje velikost jádra, ne jeho počet. Khononov výslovně připouští, že organizace může mít víc Core subdomén, pokud soutěží na několika osách zároveň, a že celý podnik může být poskládaný jen ze Supporting a Generic [[7]](https://vladikk.com/2018/01/26/revisiting-the-basics-of-ddd/). Číselné pravidlo tedy neexistuje. Existuje jen podezření, že si pletete pojmy „důležité pro nás“ a „diferencujeme se tím“:
 
 - Logistika je v Amazonu Core. V e-shopu, který používá DPD, je to Generic (DPD má vyřešeno).
 - Reporting je v BI startupu Core. V e-shopu je to Supporting (potřebujeme to, ale neutrhneme se tím).

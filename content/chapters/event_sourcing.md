@@ -141,7 +141,7 @@ Event Sourcing CRUD nenahrazuje. Cenu zaplatíte na všech úrovních:
 projektorů). Podrobněji o výkonnostních dopadech pojednává kapitola
 [Výkonnostní aspekty](/vykonnostni-aspekty).
 
-Nepoužívejte Event Sourcing paušálně pro celou aplikaci. V DDD se ES nasazuje
+Event Sourcing se nenasazuje paušálně na celou aplikaci. V DDD se ES nasazuje
 **selektivně na bounded contexts**, kde se vrátí investice – typicky Core Domain
 s komplexní doménovou logikou. Ostatní kontexty mohou nadále používat klasickou CRUD persistenci.
 Časté chyby při zavádění ES shrnuje kapitola [Anti-vzory](/anti-vzory).
@@ -2039,7 +2039,7 @@ osobní údaj je pořád osobní údaj, bez ohledu na to, kdo drží klíč. Př
 výhradu – šifra, která je dnes neprolomitelná, jí za deset let být nemusí.
 
 Doporučení tedy zní: pro osobní údaje sáhněte nejdřív po referenčním přístupu,
-crypto-shredding si nechte pro obchodně citlivá data, kde zákonná povinnost výmazu
+crypto-shredding zůstává pro obchodně citlivá data, kde zákonná povinnost výmazu
 nehrozí. Kapitola popisuje technické možnosti, nikoli právní stav – posouzení konkrétního
 zpracování patří právníkovi, ne architektovi.
 :::

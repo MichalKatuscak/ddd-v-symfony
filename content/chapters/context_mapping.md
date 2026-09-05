@@ -421,7 +421,7 @@ Conformist *zaplatí*:
 U integrace s proprietárním dodavatelem je bilance jednoznačně záporná: přejímáte cizí model, který se mění podle cizího roadmapu. U integrace se standardem se obrací. ISO 20022, iCalendar nebo CloudEvents definují pojmy, které jsou stabilní, veřejně popsané a čte je celý obor. Conformita vůči standardu není ústupek, ale zisk sdíleného jazyka s každým dalším účastníkem trhu.
 
 :::callout{type="warn"}
-**Conformist je krátkodobá úleva s dlouhodobou cenou.** Když upstream provede neslučitelnou změnu, rozbije se i downstream. Pokud má downstream *jakoukoliv* doménovou logiku, která je závislá na konzumovaných datech (a vy plánujete s tou logikou žít déle než upstream), **postavte ACL**. Conformist použijte jen tam, kde downstream je opravdu jen průchozí transformací (reporting, log forwarder, jednoduchý webhook handler).
+**Conformist je krátkodobá úleva s dlouhodobou cenou.** Když upstream provede neslučitelnou změnu, rozbije se i downstream. Pokud má downstream *jakoukoliv* doménovou logiku, která je závislá na konzumovaných datech (a vy plánujete s tou logikou žít déle než upstream), **patří sem ACL**. Conformist obstojí jen tam, kde downstream je opravdu jen průchozí transformací (reporting, log forwarder, jednoduchý webhook handler).
 :::
 
 ### Conformist jako přechodný stav

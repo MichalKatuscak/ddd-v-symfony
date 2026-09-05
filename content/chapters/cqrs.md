@@ -106,7 +106,7 @@ CQRS lze zavést v několika úrovních hloubky, od nejjednodušší po nejpokro
 3. **Oddělená úložiště** – Write databáze (PostgreSQL) a read databáze (Elasticsearch, Redis, denormalizované tabulky). Změny se propagují asynchronně přes události.
 4. **CQRS + Event Sourcing** – Write side ukládá události do [Event Store](/event-sourcing), read side buduje projekce z event streamu. Nejvyšší složitost, ale také největší volnost.
 
-Doporučený přístup: začněte na úrovni 1 nebo 2. Na úroveň 3 a 4 přejděte teprve tehdy,
+Doporučený přístup vede přes úroveň 1 nebo 2. Na úroveň 3 a 4 se přechází teprve tehdy,
 když to vyžadují konkrétní škálovací nebo doménové požadavky. Pokud máte existující
 CRUD aplikaci, postup migrace popisuje kapitola [Migrace z CRUD](/migrace-z-crud).
 

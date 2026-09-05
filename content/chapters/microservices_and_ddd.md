@@ -462,7 +462,7 @@ Jakmile máte dvě services, musíte se rozhodnout, jak spolu komunikují. Exist
 
 ### Pravidlo „async-first“ {#async-first-pravidlo-heading}
 
-Chris Richardson v *Microservices Patterns* (kap. 3) formuluje doporučení: **preferujte asynchronní messaging**, sync použijte jen tam, kde je to objektivně nutné. Důvody:
+Chris Richardson v *Microservices Patterns* (kap. 3) formuluje doporučení: **přednost má asynchronní messaging**, sync jen tam, kde je to objektivně nutné. Důvody:
 
 - Asynchronní subscriber lze restartovat, opakovat, rozdělit do replik. Sync volající čeká a buď dostane odpověď, nebo timeout – bez zotavení.
 - Asynchronní messaging má lepší časové oddělení: subscriber může být dočasně nedostupný a publisher to neví. Při sync volání je publisher přímo závislý na uptime volaného.
@@ -1030,7 +1030,7 @@ Hlavní doporučení této kapitoly:
 - **Migrace přes Strangler Fig, ne big-bang** – postupně, jeden BC v čase, s fasádou a obdobím dual-write. Big-bang rewrite zpravidla selže.
 - **Microservices jsou primárně operační problém** – bez orchestrátoru, distributed tracingu, service discovery a CI/CD per service je modular monolith rozumnější.
 
-Stručně: nezačínejte microservices. Začněte modular monolithem s explicitními BC a vynucenými hranicemi. Microservice je optimalizace, kterou si zasloužíte, až když ji potřebujete.
+Stručně: microservices nejsou výchozí bod. Tím je modular monolith s explicitními BC a vynucenými hranicemi. Microservice je optimalizace, kterou si zasloužíte, až když ji potřebujete.
 
 ## 19.12 Další četba {#further-reading}
 

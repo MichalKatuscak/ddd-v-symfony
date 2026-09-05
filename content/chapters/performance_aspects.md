@@ -1217,7 +1217,7 @@ do hodnotového objektu `OrderId`, aby ho repozitář uměl použít pro partiti
 - Mazání starých dat bývá vyžadováno (compliance, GDPR, retence).
 - Aktivní část tabulky se přestala vejít do cache databáze a index nad celou tabulkou už zpomaluje zápis.
 
-**Nepoužívejte** pro tabulky, které se celé vejdou do paměti – partitioning přidá operační
+**Nehodí se** pro tabulky, které se celé vejdou do paměti – partitioning přidá operační
 složitost bez měřitelného přínosu. Konkrétní práh v řádcích ani gigabajtech nemá smysl
 uvádět: rozhoduje poměr velikosti aktivní části k dostupné paměti, ne absolutní číslo.
 :::

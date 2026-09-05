@@ -1389,7 +1389,7 @@ proběhnout do **30 sekund** (interní synchronní operace). Potvrzení
 zásilky může trvat i **24 hodin** (závisí na externím dopravci).
 Timeouty proto patří do konfigurace – typicky jako parametry v
 `services.yaml`, aby je bylo možné upravit bez změny kódu. Konstanta v ukázce výše je
-zkratka pro čitelnost. Se změnou hodnoty přitom počítejte i u ság, které už běží:
+zkratka pro čitelnost. Změna hodnoty se přitom dotkne i ság, které už běží:
 jejich naplánované kontroly nesou původní čas a nová konfigurace je zpětně nepřepíše.
 :::
 
