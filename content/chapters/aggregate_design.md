@@ -393,7 +393,7 @@ final readonly class OrderId
 
     public static function generate(): self
     {
-        return new self(Uuid::v7()->toRfc4122());
+        return new self((string) Uuid::v7());
     }
 
     public static function fromString(string $value): self

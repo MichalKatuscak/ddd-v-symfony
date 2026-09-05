@@ -168,7 +168,7 @@ final readonly class UserId
 
     public static function generate(): self
     {
-        return new self(Uuid::v7()->toRfc4122());
+        return new self((string) Uuid::v7());
     }
 
     public function equals(self $other): bool

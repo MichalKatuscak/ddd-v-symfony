@@ -173,7 +173,7 @@ final readonly class Money
     ) {
         if ($amountInCents < 0) {
             throw new InvalidArgumentException(
-                'Money cannot be negative; use SignedMoney for credits/debits.'
+                'Money cannot be negative; direction belongs to the operation.'
             );
         }
     }
@@ -186,7 +186,7 @@ final readonly class Money
     public function add(self $other): self
     {
         if ($this->currency !== $other->currency) {
-            throw new InvalidArgumentException(
+            throw new \DomainException(
                 "Cannot add {$this->currency->value} and {$other->currency->value}."
             );
         }

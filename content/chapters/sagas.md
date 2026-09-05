@@ -508,7 +508,7 @@ final class OrderProcessManager
 {
     public function __construct(
         private readonly MessageBusInterface $commandBus,
-        private readonly OrderSagaRepositoryInterface $sagaRepository,
+        private readonly OrderSagaRepository $sagaRepository,
     ) {}
 
     public function __invoke(
@@ -800,9 +800,9 @@ class OrderSaga
 :::
 
 :::callout{type="pattern"}
-### PHP: Rozhraní OrderSagaRepositoryInterface {#saga-state-repo-interface-heading}
+### PHP: Rozhraní OrderSagaRepository {#saga-state-repo-interface-heading}
 
-:::code{language="php" filename="src/Ordering/Application/Saga/OrderSagaRepositoryInterface.php"}
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderSagaRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -813,7 +813,7 @@ namespace App\Ordering\Application\Saga;
  * Rozhraní repozitáře stavu ságy - umožňuje snadnou záměnu
  * implementace (Doctrine v produkci, in-memory v testech).
  */
-interface OrderSagaRepositoryInterface
+interface OrderSagaRepository
 {
     public function save(OrderSaga $state): void;
 
@@ -828,16 +828,18 @@ interface OrderSagaRepositoryInterface
 :::callout{type="pattern"}
 ### PHP: Doctrine implementace OrderSagaRepository {#saga-state-repository-heading}
 
-:::code{language="php" filename="src/Ordering/Application/Saga/OrderSagaRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Saga/DoctrineOrderSagaRepository.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Application\Saga;
+namespace App\Ordering\Infrastructure\Saga;
 
+use App\Ordering\Application\Saga\OrderSaga;
+use App\Ordering\Application\Saga\OrderSagaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class OrderSagaRepository implements OrderSagaRepositoryInterface
+final readonly class DoctrineOrderSagaRepository implements OrderSagaRepository
 {
     public function __construct(
         private EntityManagerInterface $em,
@@ -1263,7 +1265,7 @@ use App\Ordering\Application\Command\CheckSagaTimeout;
 use App\Ordering\Application\Command\CancelOrder;
 use App\Ordering\Application\Saga\OrderSaga;
 use App\Ordering\Application\Saga\OrderSagaStatus;
-use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
+use App\Ordering\Application\Saga\OrderSagaRepository;
 use App\Payment\Application\Command\RefundCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -1272,7 +1274,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class CheckSagaTimeoutHandler
 {
     public function __construct(
-        private OrderSagaRepositoryInterface $sagaRepository,
+        private OrderSagaRepository $sagaRepository,
         private MessageBusInterface $commandBus,
     ) {}
 
@@ -1687,7 +1689,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Command;
 
-use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
+use App\Ordering\Application\Saga\OrderSagaRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -1698,7 +1700,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class CheckStaleSagasCommand extends Command
 {
     public function __construct(
-        private readonly OrderSagaRepositoryInterface $sagaRepository,
+        private readonly OrderSagaRepository $sagaRepository,
     ) {
         parent::__construct();
     }
@@ -1771,7 +1773,7 @@ namespace App\Tests\Ordering\Application\Saga;
 
 use App\Ordering\Application\Saga\OrderProcessManager;
 use App\Ordering\Application\Saga\OrderSagaStatus;
-use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
+use App\Ordering\Application\Saga\OrderSagaRepository;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Payment\Application\Command\ChargeCustomer;
 use App\Payment\Domain\Event\PaymentFailed;
@@ -1784,7 +1786,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final class OrderProcessManagerTest extends TestCase
 {
     private MessageBusInterface $commandBus;
-    private OrderSagaRepositoryInterface $repository;
+    private OrderSagaRepository $repository;
     private OrderProcessManager $saga;
     /** @var list<object> */
     private array $dispatchedCommands = [];
@@ -1876,9 +1878,9 @@ declare(strict_types=1);
 namespace App\Tests\Ordering\Application\Saga;
 
 use App\Ordering\Application\Saga\OrderSaga;
-use App\Ordering\Application\Saga\OrderSagaRepositoryInterface;
+use App\Ordering\Application\Saga\OrderSagaRepository;
 
-final class InMemoryOrderSagaRepository implements OrderSagaRepositoryInterface
+final class InMemoryOrderSagaRepository implements OrderSagaRepository
 {
     /** @var array<string, OrderSaga> */
     private array $states = [];

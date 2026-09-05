@@ -666,7 +666,7 @@ final class OrderTest extends TestCase
     #[Test]
     public function confirm_throws_when_order_has_no_items(): void
     {
-        $order = Order::place(OrderId::generate(), new CustomerId('c1'));
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
 
         $this->expectException(EmptyOrderNotAllowedException::class);
         $order->confirm();
@@ -687,9 +687,9 @@ final class OrderTest extends TestCase
     #[Test]
     public function total_equals_sum_of_line_subtotals(): void
     {
-        $order = Order::place(OrderId::generate(), new CustomerId('c1'));
-        $order->addItem(new ProductId('SKU-1'), 2, new Money(100, Currency::CZK));
-        $order->addItem(new ProductId('SKU-2'), 1, new Money(50, Currency::CZK));
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
+        $order->addItem(ProductId::generate(), 2, new Money(100, Currency::CZK));
+        $order->addItem(ProductId::generate(), 1, new Money(50, Currency::CZK));
 
         self::assertSame(250, $order->totalAmount()->amountInCents);
     }
@@ -713,8 +713,8 @@ final class PlaceOrderHandlerTest extends KernelTestCase
         $events = $this->collectEvents();
 
         $bus->dispatch(new PlaceOrderCommand(
-            new CustomerId('c1'),
-            [new OrderItemDto(new ProductId('SKU-1'), 1, new Money(100, Currency::CZK))],
+            CustomerId::generate(),
+            [new OrderItemDto(ProductId::generate(), 1, new Money(100, Currency::CZK))],
         ));
 
         self::assertCount(1, $events->ofType(OrderPlaced::class));

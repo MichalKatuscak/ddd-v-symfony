@@ -412,7 +412,7 @@ final readonly class Money
     ) {
         if ($amountInCents < 0) {
             throw new \InvalidArgumentException(
-                'Money cannot be negative; use SignedMoney for credits/debits.'
+                'Money cannot be negative; direction belongs to the operation.'
             );
         }
     }
@@ -458,7 +458,7 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 :::
 :::
 
-`Money` odmítá zápornou částku záměrně: pro dobropisy a odpisy má kniha samostatný typ `SignedMoney`, aby se nemohla ztratit informace o směru pohybu. Plnou definici obou hodnotových objektů uvádí [sekce 06.04](/zakladni-koncepty#value-objects); ukázka výše je zkrácená na to, co odlišuje hodnotový objekt od `float` a `string`.
+`Money` odmítá zápornou částku záměrně. Směr pohybu nese operace, ne částka: dobropis je `refund()`, ne záporná suma, takže se znaménko nemůže cestou ztratit. Plnou definici uvádí [sekce 06.04](/zakladni-koncepty#value-objects); ukázka výše je zkrácená na to, co odlišuje hodnotový objekt od `float` a `string`.
 
 Hodnotový objekt má i svou cenu. Vyplatí se tam, kde hodnota splní alespoň jednu ze tří podmínek: nese vlastní pravidla platnosti (`Email`, `BirthNumber`), má vlastní operace (`Money::add()`), nebo hrozí její záměna s jinou hodnotou téhož primitivního typu (`OrderId` proti `UserId`). Evans totéž říká obráceně – jako hodnotový objekt klasifikujte prvek modelu, u kterého vás zajímají pouze jeho atributy a logika [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 
