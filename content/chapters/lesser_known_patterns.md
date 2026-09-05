@@ -1401,6 +1401,10 @@ Výluka drží agregáty, value objekty a specifikace mimo container. Nikdo je n
 takže jejich přítomnost v definicích služeb by jen svědčila o tom, že se s nimi zachází
 špatně. Doménové služby se registrují zvlášť, protože ty injektovat chcete.
 
+Vyloučený adresář ale vypadne i z automatického aliasování rozhraní. Porty jako
+`OrderRepository` leží právě tam, takže jejich alias na implementaci je nutné zapsat
+ručně – rozebírá to [kapitola o architektonických stylech](/architektonicke-styly#hexagonal-symfony-di-heading).
+
 ### Kontrakt modulu {#mod-kontrakt}
 
 Evansův Module z roku 2003 stojí na kohezi pojmů a na tom, že moduly nekoukají do sebe

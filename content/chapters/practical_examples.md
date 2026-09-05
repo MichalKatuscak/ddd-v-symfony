@@ -77,6 +77,7 @@ final class Cart extends AggregateRoot
     public readonly UserId $userId;
     /** @var Collection<int, CartItem> */
     private Collection $items;
+    private bool $checkedOut = false;
 
     public static function open(CartId $id, UserId $userId): self { /* ... */ }
 
@@ -100,6 +101,14 @@ final class Cart extends AggregateRoot
         if ($this->items->isEmpty()) {
             throw EmptyCartException::withId($this->id);
         }
+
+        // INVARIANT: košík se odbaví jednou. Bez toho by dvojklik nebo
+        // retry vyrobil dvě události, a tím dvě objednávky.
+        if ($this->checkedOut) {
+            throw CartAlreadyCheckedOutException::withId($this->id);
+        }
+
+        $this->checkedOut = true;
 
         $this->record(new CartCheckedOut(
             $this->id,
