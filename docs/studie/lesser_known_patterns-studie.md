@@ -426,3 +426,15 @@ vrstva a odkázat, kde se jí kniha věnuje.
 - **Případná oficiální doporučení Symfony k modulové struktuře projektu.** Symfony *Best Practices*
   nebyly v této rešerši ověřeny; před tvrzením „Symfony skeleton očekává controllery v `App\Controller\`“
   dohledat aktuální znění pro verzi 8.
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — Module podle Evanse.** Tvrzení „vědomá organizace kódu do balíčků pojmenovaných
+podle Ubiquitous Language" sedí: *„Give the MODULES names that become part of the UBIQUITOUS
+LANGUAGE."* a *„The name of the MODULE conveys its meaning. These names enter the UBIQUITOUS
+LANGUAGE."* (Evans 2003).
+
+**Opraveno:** `Currency` je string-backed enum bez metod, `->equals()` byl fatal error → `!==`;
+`remainderUnsatisfiedBy()` přesunuta do rozhraní `Specification` (volala se na operandech
+typovaných rozhraním); doplněna poznámka, že `AndSpecification` musí deklarovat
+`implements QuerySpecification`; `EmptyOrder` → `EmptyOrderException`.

@@ -480,3 +480,14 @@ datum přístupu u všech 2026-09-03.
   balíček s poznámkou, že jde o třetí stranu.**nemá. Dohledat, který bundle kniha může doporučit.
 - **Michael Feathers – aktuální texty.** Na `michaelfeathers.silvrback.com` byl přímým fetchem ověřen seznam příspěvků (nejnovější 2023); k seams ani k definici legacy code tam nic není. Primárním zdrojem zůstává kniha.
 - **Kacper Gunia / Symfony Con přednášky o migraci legacy Symfony aplikací na DDD.** Bez `WebSearch` se nepodařilo dohledat konkrétní záznam.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — bezpečnostní díra v `activate()`.** Metoda volala jen `$token->validate()` a
+uložený token nikde neporovnávala. **Libovolný formálně platný token aktivoval libovolný účet.**
+Kapitola `anti_patterns` tutéž metodu píše správně (`$this->verificationToken->equals($token)`).
+Doplněno porovnání i chybějící property `verificationToken`.
+
+**Hlas:** „Tipy pro týmovou komunikaci" zabaleny do `pattern` calloutu, kde `CLAUDE.md`
+imperativ povoluje (sekce je návod); imperativ ve `warn` calloutu o Big Bang Rewrites převeden;
+`Email` sjednocen na `final readonly class` s promoted property.

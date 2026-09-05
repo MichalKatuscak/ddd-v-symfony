@@ -510,3 +510,14 @@ HTML strojově zbaveno značek. Datum přístupu u všech webových zdrojů: 202
   Explicitní vymezení vůči Active Record v oficiální dokumentaci **není**. **Doporučení: tvrzení
   ponechat jako věcné (Doctrine je Data Mapper a Active Record nenabízí), ale neopírat je
   o citaci dokumentace, protože ta citace neexistuje.**
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — dvě přímé citace.** *„The harsh reality is that not all parts of the design are going
+to be equally refined. Priorities must be set."* je doslova v Evans 2003. *„cluster of associated
+objects that we treat as a unit for the purpose of data changes"* rovněž.
+
+**OVĚŘENO — Douglas Martin přes Vernona.** *DDD Distilled* skutečně cituje: *„Questions about
+whether design is necessary or affordable are quite beside the point: design is inevitable.
+The alternative to good design is bad design, not no design at all. —Book Design: A Practical
+Introduction by Douglas Martin"*. Kapitola parafrázuje správně.

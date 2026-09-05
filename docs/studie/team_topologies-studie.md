@@ -356,3 +356,18 @@ Je to dnes nejúplnější zpracování kombinace strategického DDD a Team Topo
   konkrétní číslo s uvedením roku reportu („podle DORA 2025 …“), nebo benchmark vypustit
   a nechat jen kvalitativní tvrzení. Odkazovat na „elite“ bez ročníku je od 2025 zavádějící.**
 
+### Doověřeno devátým kolem (2026-09-05)
+
+**OPRAVENO — datace Swellerovy teorie.** Kapitola tvrdila „z teorie učení Johna Swellera
+(1988). Sweller rozlišuje 3 typy zátěže". Studie z roku 1988 (*Cognitive Load During Problem
+Solving: Effects on Learning*, Cognitive Science 12(2)) teorii zavedla, ale **trojici
+intrinsic / extraneous / germane doplnili až Sweller, van Merriënboer a Paas v roce 1998**
+(*Cognitive Architecture and Instructional Design*, Educational Psychology Review 10(3));
+termín *intrinsic* zavedli Chandler a Sweller na začátku 90. let. Text opraven.
+Zdroj ověření: en.wikipedia.org/wiki/Cognitive_load, sekce Theory a References.
+
+**Hlas:** převedeny imperativy nesoucí soud (05.04, 05.05, 05.07, 05.10), klišé „není jen X,
+je Y" (05.01), paralelismus „Před reorganizací změřte / Po reorganizaci změřte" (05.09),
+dvojí „odpovídá" ve větě (05.01), „Zdravé optimum" bez zdůvodnění (tabulka 05.06),
+vokalizace „v zjednodušené" → „ve zjednodušené", hovorové „Můžu" → „Mohu" ve FAQ.
+Číslování citací přečíslováno (chyběla 6–9).

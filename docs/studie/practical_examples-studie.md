@@ -403,3 +403,11 @@ komplexity“ (G21). Rozsah: `přepis sekce 23.03`.
   žádný veřejně nevedou a vydavatel (Wrox) svoje download stránky ke knize už neprovozuje.
   Kniha sama je dostupná (O'Reilly, Google Books), doprovodný kód ne. **Doporučení: nepracovat
   s předpokladem, že k této knize existuje veřejné code companion.**
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — `Cart::checkout()` neměnil stav košíku.** Dvojklik nebo retry vyrobil dvě události
+`CartCheckedOut` a přes `PlaceOrderOnCartCheckedOut` **dvě objednávky**. Doplněn invariant
+jednorázového checkoutu (`$checkedOut` + `CartAlreadyCheckedOutException`).
+
+`getOrFail()` → kanonické `get()`.

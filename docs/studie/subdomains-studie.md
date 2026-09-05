@@ -501,3 +501,17 @@ kapitolu o DDD a AI.*
   **Oprava:** kontrolovat stavový kód odpovědi (404) a tělo dekódovat, ne porovnávat s `null`.
   Nález patří mezi faktické chyby kódu, ne mezi stylistické – je to ukázka, kterou čtenář zkopíruje.
   Zdroj: https://auth0.github.io/auth0-PHP/classes/Auth0-SDK-Contract-API-Management-UsersInterface.html
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — Evans a slovo „supporting".** Kapitola tvrdí: „Evans slovo *supporting* v roce 2003
+používá, ale jen popisně; jako pojmenovaný vzor v knize ani v *DDD Reference* (2015) nefiguruje."
+**Potvrzeno.** Evans 2003 má jediný výskyt v souvětí *„…on purifying supporting subdomains to be
+GENERIC"* — malými písmeny, zatímco své vzory píše kapitálkami (CORE DOMAIN, GENERIC SUBDOMAINS).
+V *DDD Reference* se „supporting" objevuje jen ve spojení „supporting model and code" a
+„supporting roles". Naproti tomu **IDDD (Vernon 2013) používá „Supporting Subdomain (2)"
+s odkazovou notací vzoru** — atribuce Vernonovi je tedy správná.
+
+**Neověřitelné lokálně:** Millett & Tune, *Patterns, Principles and Practices of DDD* — název
+kapitoly 3 („Focusing on the Core Domain") a heuristika „code for replacement rather than reuse".
+Ani jedno není v Evansovi, Vernonovi ani v *DDD Reference*; knihu nemám k dispozici.

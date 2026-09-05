@@ -463,3 +463,12 @@ i Dahan [6] shodně varují před nasazením CQRS jako vzoru nejvyšší úrovn�
 - **Tvrzení „4–6 tříd místo jedné"** (`cqrs.md:127`) — nepodařilo se dohledat zdroj. Jde
   pravděpodobně o autorský odhad; pokud zůstane, měl by být označen stejně jako poměr 10:1
   („zkušenostní heuristika").
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — dlouhé souvětí a formulka.** Věta o oddělení modelů měla 45 slov, rozdělena na tři.
+„V praxi se CQS…" a „V praxi CQRS existují…" nahrazeny konkrétní vazbou (formulka „V praxi"
+se v knize vyskytovala 81×, z toho 21× na začátku věty).
+
+**Ověřeno bez nálezu:** Greg Young a povaha CQRS, Fowlerovo CQS, `pop()` jako přiznané porušení,
+konfigurace per-bus v Messengeru.

@@ -472,3 +472,18 @@ Zdroj: https://www.doctrine-project.org/projects/doctrine-orm/en/current/referen
 
   dokumentace Symfony Workflow nebyla v této rešerši ověřena; před přepisem C2 doporučuji
   ověřit, co Workflow vyžaduje od objektu (marking store, property vs. metoda).
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — `clear($entityName)` chybu nevyvolá.** Kapitola tvrdila, že argument „vyvolá chybu".
+PHP přebytečný argument uživatelské metody ignoruje: `$em->clear('Order')` v ORM 3.6.8 **tiše
+odpojí celou Identity Map**. To je horší past než chyba. Ověřeno spuštěním (`ormtest/d_clear.php`).
+
+**OPRAVENO — příliš široký catch v IdempotencyMiddleware.** `catch (UniqueConstraintViolationException)`
+obepínal i `$stack->next()->handle()`. Unique violation vzniklá **uvnitř handleru** (duplicitní
+e-mail při flushi) se tak vydávala za duplicitní zprávu, Messenger ji potvrdil a zpráva se
+ztratila — přesně scénář, před kterým callout varuje. Catch nyní kryje jen INSERT.
+
+**OVĚŘENO — Evans v *DDD Reference* o projektech bez výsledku.** Tvrzení sedí.
+
+Doplněny chybějící importy v bloku s plnou `use` sekcí (`OrderId`, `CustomerId`, `OrderResponse`).

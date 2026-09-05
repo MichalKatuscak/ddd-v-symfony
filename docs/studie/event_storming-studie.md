@@ -467,3 +467,17 @@ Baas-Schwegler *Collaborative Software Design*, Tune *Architecture Modernization
   struktura kroků ne — obsah je za paywallem O'Reilly.
 - **Paul Rayner — *The EventStorming Handbook*.** Uvedena mezi zdroji na eventstorming.com [4];
   vydavatel, rok ani stav vydání nebyly ověřeny.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — rozpor text vs. kód.** Text uváděl „`ConfirmOrder` vyžaduje, aby `Order` byl
+ve stavu `Pending`", kód testuje `OrderStatus::Draft`. Stav `Pending` v enumu vůbec není.
+
+**OPRAVENO — testy proti neexistujícím metodám.** Testy volaly `$order->cancel('customer request')`
+a `$order->totalAmount()`, které agregát v kapitole neměl. Doplněny včetně invariantu z workshopu.
+`new CustomerId('c1')` by na kanonickém VO neprošlo validací UUID → `::generate()`.
+`EmptyOrderNotAllowedException` → `EmptyOrderException`.
+
+**Hlas:** kapitola je žánrově návod a imperativ v ní prostupoval i prózu. Převedeny ty, které
+nesly soud; čtyři workshopová „Řešení:" ve `warn` calloutech převedena do oznamovacího tvaru
+(dvě ze šesti už deklarativní byly).

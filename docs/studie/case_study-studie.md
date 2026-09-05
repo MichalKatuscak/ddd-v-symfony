@@ -461,3 +461,15 @@ s `get()` / `save()`); **[30]** studie `cqrs-studie.md` (G9, G11, G19), `basic_c
   obecné znalosti typové inference PostgreSQL. A **zda `flags: ['gin']` neinterpretuje nějaká
   nadstavba** (custom platform, third-party balíček) – ověřeno bylo jen jádro DBAL, G17 tedy platí
   pro čistou instalaci.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — projekce nebyla idempotentní.** `onProjectCreated` dělal `find() !== null` →
+`persist()` → `flush()`. Při souběžném doručení oba workery vidí `null`, druhý flush padne
+na primární klíč a zpráva jde do `failed` místo tichého přeskočení — text přitom idempotenci
+tvrdil. Doplněn catch na `UniqueConstraintViolationException`.
+
+**OPRAVENO — `ProjectId` bez `__toString()`.** Použit jako `#[ORM\Id]` s vlastním typem.
+Doctrine skládá klíč identity mapy přes `implode(' ', $identifier)`
+(`UnitOfWork::getIdHashByIdentifier`, ORM 3.6.8), takže bez `__toString()` **padne už `persist()`**.
+Ověřeno spuštěním. Kniha to sama vyžaduje v `migration_from_crud`, ale definice to neměla.

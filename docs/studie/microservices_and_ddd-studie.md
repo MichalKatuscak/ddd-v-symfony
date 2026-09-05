@@ -542,3 +542,19 @@ byl vyčerpán (200/200) při prvním pokusu.
 - **phparkitect – OVĚŘENO 2026-09-04 z Packagistu.** `phparkitect/phparkitect` **1.3.0
   (31. 7. 2026)**, vyžaduje `php ^8.0`. Projekt je aktivní. Pro srovnání: alternativa
   `phpat/phpat` je na 0.12.4 (17. 3. 2026), `php ^8.1` – tedy stále série 0.x.
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — Lewis a Fowler o korelaci hranic.** Kapitola tvrdí, že článek *Microservices* (2014)
+mluví o „přirozené korelaci" mezi hranicí služby a hranicí kontextu. **Potvrzeno doslova:**
+*„there is a natural correlation between service and context boundaries that helps clarify,
+and as we describe in the section on business capabilities, reinforce the separations."*
+Slogan „Each microservice should be one Bounded Context" v článku není a kapitola to správně
+uvádí jako komunitní zkratku, ne citaci.
+
+**OVĚŘENO — odkaz na IDDD kapitolu 2** = *Domains, Subdomains, and Bounded Contexts*. Sedí.
+
+**Opraveno:** serializer házel `\RuntimeException` místo `MessageDecodingFailedException`
+(worker by spadl a zpráva se vracela v smyčce — potvrzeno CHANGELOGem Messengeru 8.1);
+inbox handler nepotvrzoval legitimní duplikát; devítipoložkové shrnutí kapitoly přepsáno
+na syntézu.

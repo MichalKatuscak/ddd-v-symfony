@@ -425,3 +425,11 @@ https://docs.confluent.io/kafka-connectors/transforms/current/eventrouter.html
 - **Debezium PostgreSQL: chování replikačního slotu při zaseknutém konektoru** (růst WAL, riziko
   zaplnění disku). Dokumentace [8] to zmiňuje v jiných sekcích, než které byly stažené; před
   zapracováním doporučení G20 je vhodné ověřit přesnou formulaci.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**Hlas a slovník:** „Naprostou většinu" / „Pro naprostou většinu" (zakázané zesílení) nahrazeno.
+
+**Ověřeno bez nálezu:** konfigurace transportů, retry strategie, `TransportMessageIdStamp`,
+schéma outbox tabulky. Imperativ v rollout plánu (sekce 15.11) ponechán záměrně — je to
+postup, ne definiční pasáž; viz zpřesněné pravidlo v `CLAUDE.md`.

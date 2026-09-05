@@ -410,3 +410,15 @@ Dvě idiomatické zkratky, které Symfony přineslo po vzniku kapitoly. `dvě od
   s obejitím `readonly`. **To rešerše nerozhodne; chce test na ORM 3.** Do té doby platí totéž
   co pro `#[ORM\Id]`: ukázku nepovažovat za ověřenou. Souvislost je popsaná
   v `aggregate_design-studie.md`, sekce „Doověřeno druhým průchodem“.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — `UserId` bez `__toString()`** použitý jako `#[ORM\Id]`. Doctrine skládá klíč
+identity mapy přes `implode()`, takže `persist()` padne na
+`Error: Object of class UserId could not be converted to string`. Ověřeno spuštěním na ORM 3.6.8.
+
+**OPRAVENO — `Money::fromAmount()` neexistuje** (kanonické `Money` má jen konstruktor a `zero()`);
+`Payment::record()` → `Payment::forOrder()`, factory už nepřebírá celý agregát `Order`, což bylo
+proti vlastnímu pravidlu knihy; `place()` postrádalo `CustomerId`; chyběl import `AggregateRoot`
+v bloku s plnou `use` sekcí; příklad pojmenování výjimky (`OrderCannotBeConfirmedException`)
+srovnán s tou, kterou kapitola opravdu používá.

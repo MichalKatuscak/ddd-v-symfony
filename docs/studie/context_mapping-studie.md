@@ -341,3 +341,18 @@ agregáty se odkazují jen přes ID, a rozšiřuje je na hranice bounded context
   údaje z prvního průchodu vznikly tím, že stránka nese datum poslední revize, ne původního
   vydání; původní znění je zachované na `OriginalStranglerFigApplication.html`.
 
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — Big Ball of Mud v *DDD Reference*.** Kapitola tvrdí, že Evans uvádí vedle osmi
+vzorů ještě devátý, Big Ball of Mud. **Potvrzeno: str. 37 reference, vzor je označen hvězdičkou
+jako ostatní** (Partnership je str. 30). Pozor při vlastním ověřování: `pdftotext` vkládá mezi
+slova tabulátory, takže hledání ve zploštělém textu selže, pokud se odstraní jen mezery.
+
+**OVĚŘENO — pravidlo o typech událostí.** Vernonova věta z *DDD Distilled* („consumers should
+not use the event types … Rather, they should depend only on the schema") byla dohledána
+v šestém kole proti vlastnímu výtisku; zde jen potvrzeno, že kapitola cituje správně.
+Lokální kopie PDF je 38stránkový výňatek, na ověření nestačí.
+
+**Opraveno:** `Money::add()` nyní hází `\DomainException` jako kanonická definice; `opis/json-schema`
+schémata z URL nestahuje (doplněna registrace přes `registerFile()`); docblock uváděl
+`invoiceNumber (int)`, kód i test pracují s řetězcem. Číslování citací přečíslováno (chyběla 5).

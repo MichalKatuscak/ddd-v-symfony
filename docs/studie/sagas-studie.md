@@ -470,3 +470,14 @@ Rozpočet na fulltextové vyhledávání byl v této session vyčerpán; **žád
   stabilní verze. **Doporučení: Temporal zmiňovat s verzí, Camundu 8 pro PHP neuvádět jako
   reálnou volbu, nebo výslovně napsat, že oficiální PHP klient chybí.**
   Pokud se P2-1 přijme, ověřit před psaním (`temporal.io/sdk` / `github.com/temporalio/sdk-php`).
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — pojmenování rozhraní.** `OrderSagaRepositoryInterface` bylo **jediné rozhraní
+se sufixem `Interface`** v celé knize (jinde `OrderRepository`, `UserRepository`).
+Přejmenováno na `OrderSagaRepository`, Doctrine implementace na `DoctrineOrderSagaRepository`
+a přesunuta do `Infrastructure` (byla v `Application` se stejným názvem souboru jako rozhraní).
+
+Odkaz „[sekce 5]" sjednocen na dvouciferný tvar „[sekce 14.05]" jako ve zbytku knihy.
+Tři stavy schvalování (`ApprovalPending`, `Approved`, `Rejected`) rozšiřují kanonický
+`OrderStatus` — nově přiznáno v komentáři.

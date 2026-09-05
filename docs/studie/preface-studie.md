@@ -433,3 +433,16 @@ https://www.php.net/releases/8.4/en.php (přístup 2026-09-03)
   Doplňující zjištění: frontmatter klíč `ebook: false` nese **jediná kapitola** – `ddd_ai.md:16`,
   a předmluva to zdůvodňuje rychlým vývojem tématu. Po přepisu podle P1-3 (těžiště k modelování)
   by se to mělo přehodnotit, protože přepsaná kapitola by stárla pomaleji.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**Doplněny dvě konvence, které kniha už používá, ale předmluva je neuváděla:**
+zprávy pro command bus nesou sufix `Command`, obsluha sufix `Handler`; peníze a další sdílené
+hodnotové objekty žijí v `App\SharedKernel\Domain` stejně jako `AggregateRoot`.
+Příklad pojmenování události srovnán na `OrderPlaced` (kniha používá factory `place()`).
+
+**NEVYŘEŠENO — mrtvý odkaz.** Předmluva posílá čtenáře na `https://ddd-v-symfony.cz`
+(„Aktuální verzi textu najdete vždy na…"). **Doména se nedá přeložit na IP** — ověřeno
+přes https, http i s www. Ze 200 URL v knize je to jediný skutečně nefunkční odkaz
+(dalších šest vrací 403, ale to je blokování robotů u ACM, O'Reilly a BMJ).
+Rozhodnutí je na autorovi: doménu zaregistrovat, nebo odkaz změnit.

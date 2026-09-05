@@ -322,3 +322,19 @@ Knižní zdroje bez URL (uvedeny pro atribuce v sekci 2, ověřeny z knihovny kn
   deprecated. Nativní lazy objekty na ni nemají vliv: mění způsob, jakým se vytváří lazy instance
   entity, ne strategii načítání kolekce. Sekce 16.02 tedy zůstává v platnosti.
 
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — tři chyby v SQL a jedna datace:**
+
+1. `ORDER BY month DESC, revenue DESC` řadilo podle **výstupního aliasu**, který je `::text` —
+   tedy lexikograficky („999" za „10000"). Řadí se nyní podle výrazu.
+2. `o.created_at BETWEEN :from AND :to` s parametry ve tvaru `Y-m-d` nad timestamp sloupcem
+   **uřízlo celý poslední den** intervalu. Nahrazeno polouzavřeným intervalem.
+3. `JOIN o.items i` (vnitřní) **vynechával objednávky bez položek**, ačkoli text slibuje
+   „načte objednávku s položkami". → `LEFT JOIN`.
+4. `max_prepared_statements` v PgBounceru: kapitola tvrdila výchozí 200 od verze 1.21.
+   **Volbu zavedla 1.21 s výchozí hodnotou 0** (vypnuto), hodnota 200 je výchozí až od **1.24**.
+   Ověřeno v NEWS.md projektu pgbouncer. (Agent tipoval 1.22 — také špatně.)
+
+Identifikátorové VO sjednoceny na kanonický tvar: `UserId::fromString()` tu nevalidoval vůbec,
+zatímco `OrderId` o dvacet řádků výš validoval.

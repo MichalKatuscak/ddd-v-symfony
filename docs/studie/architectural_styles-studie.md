@@ -438,3 +438,16 @@ https://symfony.com/blog/clean-software-architecture-with-deptrac (přístup 202
   bez rozhodnutí autora, na kterou minor verzi kniha míří.
 - **Kniha „Explicit Architecture: Just Enough Structure to Survive"** připisovaná Herbertu Graçovi.
   Titul koluje v AI generovaných shrnutích; Graça na svém webu uvádí, že žádnou knihu nenapsal. Necitovat.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — `Money` API.** `multiply(0.21)` na `multiply(int)` je se `strict_types=1` `TypeError`;
+`subtract()` a `toMinorUnits()` v knize nikdy definované nebyly. Kanonické `Money` doplněno
+o `subtract()` a `percentage(int)`, `toMinorUnits()` → `->amountInCents`.
+`$order->getStatus()` — entita v téže sekci getter nemá → `status()`.
+Not-found výjimky pojmenovány (`CartNotFoundException`, `CustomerNotFoundException`).
+
+**Strukturní signál:** kapitola měla u všech čtyř stylů stejnou mřížku „Kdy se X hodí" /
+„Kdy X nedává smysl", obojí odrážkami. První převedena na prózu. U Layered ukázky přiznána
+zkratka s holou `\DomainException` a doplněn odkaz na kapitolu, kde jsou Doctrine atributy
+výchozí volbou. Číslování citací přečíslováno (chyběla 8, 9, 12, 14).

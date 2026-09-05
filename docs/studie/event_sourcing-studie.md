@@ -479,3 +479,16 @@ v pořádku: řada 7.x žije (v p2 feedu ji zakrývá starší `v8.0.0-RC-1` z r
 k opačnému závěru). U Ecotone stojí za zmínku, že řada 2.0 je zatím beta. Jako podnět, ne
 povinnost: `patchlevel/event-sourcing` je aktivní knihovna s nativní integrací do Symfony,
 kterou přehled vynechává.
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OPRAVENO — nedoložená citace.** Kapitola uváděla kurzívou *„current state is derived from
+the history of events"* jako formulaci principu. Věta **není z Fowlerova článku ani odjinud** —
+ověřeno proti plnému textu martinfowler.com/eaaDev/EventSourcing.html. Nahrazena Fowlerovou
+skutečnou definicí: *„Event Sourcing ensures that all changes to application state are stored
+as a sequence of events."*
+
+**Kód:** ES agregát dostal chybějící definici `OrderItem` (testy v `testing_ddd` ji používají),
+factory `create()` → `place()`, holá `\DomainException` → `EmptyOrderException` /
+`InvalidOrderStateTransitionException`, namespace `App\Shared` → `App\SharedKernel`,
+přiznána odchylka s primitivními identifikátory.

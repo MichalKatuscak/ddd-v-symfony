@@ -472,3 +472,23 @@ Všechny položky získány **přímým fetchem URL** (WebFetch nebo curl na Git
 
   jako nutné pro DBAL < 4; co přesně platí pro DBAL 4 a Doctrine ORM 3, nebylo z README
   jednoznačné.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — testy, které nemohly projít:**
+
+1. `new RegisterUserHandler($this->userRepository)` — kanonický handler vyžaduje i
+   `EntityManagerInterface` → `ArgumentCountError`. Doplněn stub.
+2. `InMemoryUserRepository::save()` nikdy nevyhodil `DuplicateEmailException`, takže dva testy
+   na duplicitu nemohly projít. Fake nyní unikátnost vymáhá sám.
+3. `OrderTest` volal `itemCount()`, `total()` a `isConfirmed()` a očekával tři události včetně
+   `OrderItemAdded` — kanonický `Order` nic z toho neměl. Doplněno **do modelu**, ne do testu.
+4. Blok `DomainEventAssertions.php` obsahuje dva soubory ve dvou namespacech; PHPUnit by třídu
+   podle sufixu nenašel. Doplněno do `filename` i do komentáře.
+
+**OPRAVENO — tvrzení o PHPUnit.** Kapitola tvrdila „Od PHPUnit 10 se soubor jmenuje
+`phpunit.dist.xml`, ne `phpunit.xml.dist`". PHPUnit hledá v pořadí `phpunit.xml`,
+`phpunit.dist.xml`, `phpunit.xml.dist` — **starý název funguje dál**, jen má nejnižší prioritu.
+Ověřeno ve zdrojáku `XmlConfigurationFileFinder.php` (PHPUnit 12.5).
+
+**Hlas:** tykání v AAA calloutu („Nastav", „zavolej", „assertuj") — **jediné tykání v celé knize**.

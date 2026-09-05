@@ -320,3 +320,11 @@ Sekce 01.12 zmiňuje glosář a cheat sheet, ale ne `/ddd-a-umela-inteligence` a
   novinek se v knize odkazuje na `symfony.com/releases`, a ten se u podporované větve doplňuje.
   **Doporučení: datum uvádět bez výhrady, výčet funkcí před vydáním knihy překontrolovat.**
 
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**Strukturní signál:** kapitola měla osm seznamů ve tvaru `**Pojem** – věta`. Seznam přínosů
+DDD navazoval na dva odstavce prózy a rozbíjel argument na uniformní odrážky — převeden
+na pokračující prózu.
+
+**Ověřeno bez nálezu:** datace milníků DDD (2003 Evans, 2013 Vernon, 2016 Distilled,
+2021 Khononov), definice Core Domain, atribuce Ubiquitous Language.

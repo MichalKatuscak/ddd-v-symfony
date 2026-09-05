@@ -451,3 +451,15 @@ Datum přístupu u všech webových zdrojů: 2026-09-03.
   dokumentace ho popisuje obecně. **Doporučení: mechanismus popsat jako dostupný nástroj
   s doloženým chováním, ne jako doporučený postup Symfony.**se ze stránky nepodařilo získat. Ověřit ručně.
 - **Millett & Tune (2015).** K tématu nebyl v této rešerši použit žádný ověřený úryvek.
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — Vernon o vzniku identity.** Tvrzení „Vernon vypisuje čtyři cesty, kterými identita
+vzniká" sedí: *„You've covered four primary ways to generate Entity unique identities."* (IDDD,
+shrnutí kapitoly o entitách).
+
+**Opraveno:** kanonický `Order` dostal `itemCount()` a `isConfirmed()` a `addItem()` nahrává
+`OrderItemAdded` — testy v `testing_ddd` to očekávaly, ale model to neměl; holá
+`\DomainException` nahrazena pojmenovanými výjimkami; `Money` doplněno o `subtract()`
+a `percentage(int)`, které kapitoly volaly, ale definice je neměla; `Money` a `Currency`
+přesunuty do `App\SharedKernel\Domain`; `Payment::forOrder()` už nepřebírá celý agregát.

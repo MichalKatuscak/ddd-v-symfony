@@ -269,3 +269,12 @@ Evans tuto polohu přebírá bez ironie. V *DDD Reference* (2015) [4] má Big Ba
   kanonického API, ne k anti-vzorům.
 - **Verraes o rozdělování Bounded Contexts** — Fowler v [5] odkazuje na „Verraes and Wirfs-Brock". Původní odkazovaný text se nepodařilo najít na `verraes.net` (URL `/2021/06/split-bounded-contexts/` vrací 404); existuje `/2021/06/split-domain-across-bounded-contexts/`, obsah neověřen.
 - **Původní tweet Roberta Waltmana o „lasagna code"** citovaný v [13] — nedohledán na primárním zdroji, uveden pouze v Nobackově přepisu.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**OPRAVENO — `SignedMoney` byl slibovaný, ale nikde nedefinovaný typ.** Text sliboval
+„Plnou definici obou hodnotových objektů uvádí sekce 06.04", ale `SignedMoney` se v knize
+nevyskytuje. Přeformulováno: směr pohybu nese operace (`refund()`), ne záporná částka.
+
+Doplněny chybějící importy výjimek v bloku s plnou `use` sekcí; `Email`, `OrderId` a `UserId`
+sjednoceny na `final readonly class` s promoted property.

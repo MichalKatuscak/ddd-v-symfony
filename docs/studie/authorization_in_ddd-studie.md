@@ -299,3 +299,20 @@ První matchující pravidlo vyhrává a nespecifikovaný matcher odpovídá če
 
 - **Chování `Symfony\Component\Security\Http\Attribute\IsGranted` s asynchronním busem.** Zda a jak se `#[IsGranted]` snese s controllerem, který jen odešle command na bus, není v dokumentaci řešeno. Pro doporučení P1-1 je to podstatná otázka – ověřit experimentem.
 - **Tvrzení kapitoly o četnosti tří chyb (řádky 27–29) a o typických volbách multi-tenancy strategie podle velikosti firmy (řádek 705).** Obojí jsou zkušenostní tvrzení bez dohledatelných dat. Buď je označit jako autorský odhad, nebo najít oporu (např. průzkum mezi Symfony týmy) – v rámci studie se nic použitelného nenašlo.
+
+### Doověřeno osmým a devátým kolem (2026-09-04 až 05)
+
+**Symfony 8 API — pět chyb, které by ukázky shodily** (ověřeno proti zdrojáku security-core 8.0
+a http-foundation 8.0.7, u první i spuštěním):
+
+1. `Voter::voteOnAttribute()` bez čtvrtého parametru `?Vote $vote = null` → fatal error
+   „Declaration must be compatible" (UPGRADE-8.0). Hlavní ukázka ho neměla, varianta „s důvody" ano.
+2. `AccessDecision::isGranted()` — je to **veřejná vlastnost**, ne metoda.
+3. `UserInterface::eraseCredentials()` — v 8.0 odstraněna, rozhraní má jen `getRoles()`
+   a `getUserIdentifier()`.
+4. `Request::get()` — v 8.0 odstraněna.
+5. `Order` neměl accessor `id()`, který controller i šablona volaly.
+
+Dále: `getOrFail()` → kanonické `get()`, `->toString()` → `->value` (kniha `toString()` nikde
+nedefinuje), `OrderStatus::Placed` v kanonickém enumu neexistuje → `Confirmed`, u firewallu
+`jwt: ~` doplněna poznámka, že klíč registruje `lexik/jwt-authentication-bundle`.

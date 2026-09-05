@@ -379,3 +379,22 @@ v pěti ukázkách odstranit spolu s tím.
   odpadá, protože ghost je instancí téže třídy a nemusí přepisovat vlastnost. Zda to platí i pro
   mazání a pro kolekce, je nutné **ověřit spuštěním na ORM 3**, ne dohledáním. Do té doby ukázku
   s `#[ORM\Id] public readonly` nepovažovat za bezpečnou.ctrine ORM 3 spolehlivě podporuje včetně `refresh()` a hydratace, se v této rešerši ověřit nepodařilo. **Ověřit prakticky** proti Doctrine ORM 3.6 před přepisem.
+
+### Doověřeno devátým kolem (2026-09-05)
+
+**OVĚŘENO — Evans o referencích ven z agregátu.** Tvrzení „Evans připouští předání reference
+na vnitřní člen agregátu ven, ale jen pro jedinou operaci" sedí doslova: *„Transient references
+to internal members can be passed out for use within a single operation only."* (Evans 2003,
+kapitola Aggregates). Ověřeno proti plnému textu.
+
+**OVĚŘENO — Vernon o toleranci nekonzistence.** „Experti běžně připustí štědrý počet sekund,
+minut, hodin, někdy i dnů" = *„domain experts are often willing to allow for reasonable
+delays—a generous number of seconds, minutes, hours, or even days—before consistency occurs."*
+(IDDD). Doslovná shoda včetně „štědrý" = „generous".
+
+**OVĚŘENO — odkazy na IDDD.** Kapitola 10 = *Aggregates*, kapitola 12 = *Repositories*.
+Obojí sedí (ověřeno proti obsahu IDDD).
+
+**OPRAVENO dřívějším kolem, zde potvrzeno testem:** tvrzení o prázdných migracích po zmizení
+`requiresSQLCommentHint()` a o chování `matching()` nad EXTRA_LAZY kolekcí (obojí bylo
+obráceně, viz osmé kolo).
