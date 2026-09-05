@@ -753,6 +753,52 @@ privátní – metody `apply*` je opakovaně přepisují. Gettery na konci tří
 nahrazují `public private(set)` z kapitoly [Návrh agregátu](/navrh-agregatu); jde
 o záměrnou odchylku od konvence zbytku knihy.
 
+### PHP: události event-sourced agregátu {#es-events-heading}
+
+Události jsou neměnné záznamy s primitivními poli – právě proto, že cestují do Event Store
+a zpět přes serializer:
+
+:::code{language="php" filename="src/Ordering/EventSourced/Event/OrderPlaced.php + OrderItemAdded.php + OrderConfirmed.php + OrderShipped.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\EventSourced\Event;
+
+use App\Ordering\EventSourced\OrderItem;
+
+final readonly class OrderPlaced
+{
+    public function __construct(
+        public string $orderId,
+        public string $customerId,
+    ) {}
+}
+
+final readonly class OrderItemAdded
+{
+    public function __construct(
+        public string $orderId,
+        public OrderItem $item,
+    ) {}
+}
+
+final readonly class OrderConfirmed
+{
+    public function __construct(
+        public string $orderId,
+    ) {}
+}
+
+final readonly class OrderShipped
+{
+    public function __construct(
+        public string $orderId,
+        public string $trackingNumber,
+    ) {}
+}
+:::
+
 :::callout{type="pattern"}
 ### PHP: Order agregát s Event Sourcingem {#es-order-aggregate-heading}
 
