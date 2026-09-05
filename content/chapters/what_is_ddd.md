@@ -196,10 +196,7 @@ Co konkrétně tým získá, když DDD nasadí správně:
 
 První přínos je v komunikaci. Ubiquitous Language odstraňuje nedorozumění mezi vývojáři a doménovými experty, protože všichni používají stejné pojmy v kódu i v konverzaci. S tím souvisí odolnost vůči změnám: model orientovaný na doménu je stabilnější než model orientovaný na databázové schéma a změny v obchodních požadavcích se do něj promítají přirozeněji.
 
-- **Modularita** – Bounded Contexts umožňují nezávislý vývoj, nasazení a škálování jednotlivých částí systému.
-- **Testovatelnost** – Doménové objekty bez infrastrukturních závislostí lze testovat v izolaci bez mockování (viz [kapitola o testování](/testovani-ddd)).
-- **Živá dokumentace** – Explicitní doménový model nese pravidla přímo v kódu, takže nestárne odděleně od implementace. Technický dluh tím nezmizí, jen se hůř schová.
-- **Zaměření na hodnotu** – DDD rozlišuje Core Domain (zdroj konkurenční výhody) od podpůrných domén. Investice se pak soustředí tam, kde přinášejí největší obchodní hodnotu.
+Bounded Contexty pak dovolí vyvíjet, nasazovat a škálovat části systému nezávisle na sobě. Doménové objekty bez infrastrukturních závislostí se testují v izolaci, bez mockování ([kapitola o testování](/testovani-ddd)). Explicitní model navíc nese pravidla přímo v kódu, takže dokumentace nestárne odděleně od implementace – technický dluh tím nezmizí, jen se hůř schová. A protože DDD odděluje Core Domain od podpůrných domén, je vidět, kam modelovací úsilí investovat a kam ne.
 
 :::callout{type="pattern"}
 ### Konkrétní přínos: přidání nové platební metody {#priklad-platba-heading}

@@ -1018,19 +1018,33 @@ Obecnější rozbor anti-vzorů v DDD (nejen microservices) najdete v [kapitole 
 
 Vztah mezi Bounded Contextem a microservice nelze redukovat na jednu rovnici. Bounded Context je **logická hranice modelu**, microservice je **fyzická hranice deploymentu**; mapování mezi nimi je 1:1, 1:N nebo N:1, a každá varianta má svůj kontext, ve kterém je správná. Slogan „BC = microservice“ je užitečný jako výchozí hypotéza, ne jako architektonický příkaz.
 
-Hlavní doporučení této kapitoly:
+Rozhodnutí, které tato kapitola nese, je jediné: kde vede hranice mezi procesy.
+Pro tým do třiceti lidí ji nejlevněji uhlídá modular monolith – hranice mezi BC jsou
+vynucené stejně tvrdě přes phparkitect, jen za zlomek operační složitosti. Samostatnou
+service si BC zaslouží tehdy, když má vlastní stream-aligned tým, vlastní data,
+nezávislý release cyklus, jiné potřeby škálování nebo compliance isolation; tři a méně
+zaškrtnutých bodů znamená zůstat v monolitu.
 
-- **Modular monolith jako výchozí volba** – pro většinu týmů (≤30 lidí) je modular monolith s vynucenými hranicemi přes phparkitect rozumnější výchozí stav než microservices na zelené louce. Hranice mezi BC tam jsou vynucené stejně tvrdě, ale platíte za ně řádově méně operační složitosti.
-- **1 BC = 1 service jen tehdy, když má smysl** – vlastní stream-aligned tým, vlastní data, nezávislý release cyklus, různé potřeby škálování, případně compliance isolation. Pokud zaškrtnete tři a méně z těchto bodů, zůstaňte v monolithu.
-- **Distributed monolith je horší než monolith** – sdílená DB, synchronní volání všude, coupled deploy, sdílená library s doménovými typy. Pět příznaků, dva a víc znamená, že máte distributed monolith. Nejdražší architektonická chyba v microservices architektuře.
-- **Sync vs. async – async-first** – sync jen pro queries v request flow a pro blokující validace; všechno ostatní eventy přes broker. Tight temporal coupling je největší ztráta hodnoty microservices.
-- **Data má vlastníka, ne spolubydlící** – každá service vlastní své schéma a smí ho měnit bez koordinace. Sdílená instance s oddělenými schématy je únosná, jedno schéma se dvěma zapisovateli není. Dotaz přes hranici řeší API composition, read model plněný událostmi nebo samostatný analytický sklad.
-- **Distribuované transakce – saga, ne 2PC** – 2PC nepoužitelné v microservices stacku. Saga (choreografie pro jednoduché, orchestrace pro komplexní) plus kompenzace. Detail v [kapitole 14](/sagy-a-process-managery).
-- **Symfony Messenger umí obojí** – sync transport pro modular monolith, AMQP transport s Outbox patternem pro eventy mezi services. Publisher a subscriber *nesdílejí* PHP třídu eventu; subscriber má vlastní integration event DTO. Bez tohoto pravidla po rozdělení monolithu vznikne sdílená library = distributed monolith.
-- **Migrace přes Strangler Fig, ne big-bang** – postupně, jeden BC v čase, s fasádou a obdobím dual-write. Big-bang rewrite zpravidla selže.
-- **Microservices jsou primárně operační problém** – bez orchestrátoru, distributed tracingu, service discovery a CI/CD per service je modular monolith rozumnější.
+Když už hranice vede přes síť, drží ji tři pravidla. Data mají vlastníka, ne
+spolubydlícího: jedno schéma se dvěma zapisovateli je porucha, dotaz přes hranici řeší
+API composition, read model plněný událostmi nebo analytický sklad. Komunikace je
+async-first – sync zůstává jen pro queries v request flow a blokující validace, protože
+tight temporal coupling ubere z microservices přesně to, kvůli čemu vznikly. A konzistenci
+napříč službami zajišťuje [saga s kompenzacemi](/sagy-a-process-managery), ne 2PC, které
+v tomhle stacku není použitelné.
 
-Stručně: microservices nejsou výchozí bod. Tím je modular monolith s explicitními BC a vynucenými hranicemi. Microservice je optimalizace, kterou si zasloužíte, až když ji potřebujete.
+Symfony Messenger obojí svět obslouží: sync transport uvnitř monolitu, AMQP transport
+s Outboxem mezi službami. Jedno pravidlo je přitom nepřekročitelné – publisher a subscriber
+nesdílejí PHP třídu události, subscriber má vlastní integration event DTO. Sdílená knihovna
+s doménovými typy je totiž první ze tří příznaků distributed monolithu, vedle sdílené
+databáze a synchronních volání všude. Ten je horší než monolit, se kterým jste začínali.
+
+Cesta ven proto vede přes Strangler Fig: jeden BC v čase, s fasádou a obdobím dual-write.
+Big-bang rewrite zpravidla selže. A pokud nemáte orchestrátor, distributed tracing, service
+discovery a CI/CD per service, je odpověď na otázku po hranici stejně modular monolith –
+microservices jsou především operační problém.
+
+Microservice je optimalizace, kterou si zasloužíte, až když ji potřebujete.
 
 ## 19.12 Další četba {#further-reading}
 
