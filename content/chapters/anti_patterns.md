@@ -452,8 +452,8 @@ final readonly class UserId
 // Nyní typový systém PHP odhalí záměnu:
 function processOrder(OrderId $orderId, UserId $userId): void { /* ... */ }
 
-$orderId = new OrderId('018f4d2e-...');
-$userId  = new UserId('02b5e8c1-...');
+$orderId = new OrderId('018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03');
+$userId  = new UserId('02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746');
 processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type OrderId
 :::
 :::
@@ -978,6 +978,8 @@ class DoctrineUserRepository extends ServiceEntityRepository
 }
 
 // ŠPATNĚ: Doménová logika v Symfony kontroleru
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 class UserController extends AbstractController
 {
     public function activate(Request $request, string $userId): Response
@@ -1078,6 +1080,8 @@ class ActivateUserHandler
 }
 
 // SPRÁVNĚ: Tenký Symfony kontroler
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 class UserController extends AbstractController
 {
     public function __construct(private readonly MessageBusInterface $commandBus) {}
