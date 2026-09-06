@@ -7,7 +7,7 @@ meta_description: "Kam soustředit modelovací úsilí: rozlišení Core, Suppor
 meta_keywords: "Core Domain, Supporting Subdomain, Generic Subdomain, strategický DDD, subdoména, Eric Evans, business strategy, build vs buy, Symfony"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Subdomény
 schema_type: TechArticle
 schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat modelovací úsilí"
@@ -58,13 +58,13 @@ Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object,
 
 Část domény, která je **nezbytná pro provoz, ale nediferencuje vás**. Test: *„potřebujeme to, ale nikdo nás kvůli tomu nenajme.“* Klasické příklady: správa objednávek v e-shopu, evidence skladu, fakturace, reporting pro management. Kdyby Supporting fungoval „stejně jako u konkurence“, nikdo by si toho nevšiml. Kdyby ale vůbec nefungoval, provoz by stál.
 
-Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžkým [Doctrine ORM](/implementace-v-symfony)), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je **fungovat spolehlivě s minimálními náklady na údržbu**, ne mít nejhezčí model. Vernon k tomu dává test místo paušálu: u Supporting subdomény, kterou nelze pořídit hotovou jako Generic, se taktický návrh vyplatí tehdy, když ho tým zvládá, model je inovativní a má vydržet roky. Kde tyto podmínky neplatí, vynaloží organizace seniorní čas na něco, co nikoho nezajímá [[2]](https://kalele.io/books/).
+Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžkým [Doctrine ORM](/implementace-v-symfony)), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je **fungovat spolehlivě s minimálními náklady na údržbu**, ne mít nejhezčí model. Vernon k tomu dává test místo paušálu. U Supporting subdomény, kterou nelze pořídit hotovou jako Generic, se taktický návrh vyplatí za tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Kde tyto podmínky neplatí, vynaloží organizace seniorní čas na něco, co nikoho nezajímá [[2]](https://kalele.io/books/).
 
 **Generic Subdomain** *(generická subdoména)*
 
 Část domény, která je **komoditizovaná**. Test: *„řešení existuje 30 let, prodává se v krabici nebo v cloudu, koupíme.“* Klasické příklady: autentizace uživatelů, posílání transakčních e-mailů, integrace platební brány, generování PDF faktur, fulltext, antispam. **Výchozí volbou je koupit, ne psát.** Evans je v tomto opatrnější, než se mu obvykle přisuzuje: in-house implementaci uvádí mezi čtyřmi legitimními variantami sourcingu a o hotových řešeních píše, že se obvykle nevyplatí, ale stojí za prozkoumání [[1]](https://www.domainlanguage.com/ddd/). Vlastní kód je tedy obhajitelný tam, kde integrační náklad převýší ten implementační. Kde takový důvod chybí, znamená znovuobjevování kola na účet Core Domény.
 
-Důsledky pro tým a stack: SaaS, open-source knihovna, externí API, případně tenký bridge / Anti-Corruption Layer mezi naším modelem a komoditním řešením. Sem patří integrace na Auth0 / Keycloak, Stripe, Mailgun, AWS SES, Algolia. **Velikostní pravidlo palce** (autorské, žádný primární zdroj ho neuvádí, stejně jako u ostatních procentních čísel v této kapitole): pokud na konkrétní Generic subdoméně sedíte víc než 5–10 % vývojové kapacity, něco je špatně. Buď jste zvolili nevhodný produkt, nebo jste subdoménu klasifikovali nesprávně.
+Důsledky pro tým a stack: SaaS, open-source knihovna, externí API, případně tenký bridge / Anti-Corruption Layer mezi naším modelem a komoditním řešením. Sem patří integrace na Auth0 / Keycloak, Stripe, Mailgun, AWS SES, Algolia. **Velikostní pravidlo palce**: pokud na konkrétní Generic subdoméně sedíte víc než 5–10 % vývojové kapacity, něco je špatně. Číslo je autorské, žádný primární zdroj ho neuvádí – stejně jako ostatní procenta v této kapitole. Buď jste zvolili nevhodný produkt, nebo jste subdoménu klasifikovali nesprávně.
 
 :::diagram{fig="02.2-A" title="E-shop: subdoménové členění a investice" src="images/diagrams/11_subdomains/core_supporting_generic.svg"}
 :::
@@ -112,7 +112,7 @@ Klasifikace Core / Supporting / Generic je první krok Evansovy destilace, ne ce
 
 ## 02.03 Jak rozpoznat Core Domain – pětibodový test {#rozpoznat-core}
 
-Nejtěžším krokem je rozpoznat Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“, což pojem Core Domain devalvuje na bezvýznamný štítek.
+Nejtěžším krokem je rozpoznat Core Domain. Týmy mají sklon o všem prohlašovat, že je to „strategicky důležité“. Pojem Core Domain tím klesne na bezvýznamný štítek.
 
 Následující pětibodový test je autorská konstrukce této knihy, ne heuristika převzatá z primárního zdroje. Khononov odlišuje typy subdomén třemi osami: konkurenční výhoda, složitost byznys logiky a volatilita [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/). Ke svým dvěma osám nabízí ddd-crew katalog devíti otázek [[5]](https://github.com/ddd-crew/core-domain-charts). Test níže obojí zjednodušuje do rychlého filtru, který zvládne jednotlivec u kávy. Každou položku ohodnoťte ANO/NE. Tři a více ANO znamená kandidáta na Core Domain; v opačném případě jde o Supporting nebo Generic.
 
@@ -186,7 +186,7 @@ Obrana proti anti-vzoru „všechno je Core“ je přímočará: **vynuťte si r
 
 ## 02.05 Mapování subdomén na Bounded Contexts {#subdomeny-na-bc}
 
-Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména je rozdělená do více BC), a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov jde dál a před rozdělováním souvislé funkcionality varuje: kontexty pak nelze rozvíjet nezávisle, protože tatáž změna požadavků zasáhne oba a vynutí si současné nasazení. Za legitimní důvod k rozdělení považuje potřebu oddělit vývojové cykly nebo škálovat část nezávisle na zbytku [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména se dělí do více BC) a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov jde dál a před rozdělováním souvislé funkcionality varuje: kontexty pak nelze rozvíjet nezávisle, protože tatáž změna požadavků zasáhne oba a vynutí si současné nasazení. Za legitimní důvod k rozdělení považuje potřebu oddělit vývojové cykly nebo škálovat část nezávisle na zbytku [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
 Pro názornost mapujme imaginární e-shop střední velikosti (3–4 týmy, 25 vývojářů) na subdomény a Bounded Contexts:
 
@@ -347,7 +347,7 @@ Spoléhat přitom na samotné code review je slabé. Hranice mezi subdoménami s
 
 Použijte jeden z nich, jakmile struktura přežije první čtvrtletí. Do té doby se hranice ještě posouvají a strojové pravidlo by jen překáželo.
 
-Související: implementační detail uvnitř jedné subdomény je rozebrán v [kapitole o implementaci v Symfony](/implementace-v-symfony); volbu architektonického stylu podle typu subdomény rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
+Související: implementační detail uvnitř jedné subdomény rozebírá [kapitola o implementaci v Symfony](/implementace-v-symfony); volbu architektonického stylu podle typu subdomény rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
 :::
 
 Příklad konkrétního Aggregate v Core subdoméně, který demonstruje očekávanou hloubku modelování:
@@ -561,9 +561,9 @@ U Generic subdomény má „koupit“ čtyři podoby, které Evans rozlišil už
 3. **Outsourcovaná implementace.** Zadání ven, integrace a údržba doma. Šetří kapacitu seniorního týmu, přidává komunikační režii a náklad na code review.
 4. **Vlastní implementace.** Dostanete přesně to, co chcete, nic navíc, a integrace odpadá. Cenou je údržba navždy.
 
-Sourcing podle strategické hodnoty ostatně není objev DDD. Niel Nickolaisen popsal v *Stand Back and Deliver* (2009) **Purpose Alignment Model** se dvěma osami, mission critical a market differentiating [[8]](https://insideproduct.co/purpose-based-alignment-model/). Jeho čtyři kvadranty mapují na tabulku výše skoro doslova: *Differentiating* (excelovat) odpovídá Core, *Parity* (zjednodušit a standardizovat) pokrývá Supporting i Generic, *Partner* je varianta popsaná níže a *Who cares* je práce, kterou má tým dělat co nejlevněji, nebo vůbec.
+Sourcing podle strategické hodnoty ostatně není objev DDD. Niel Nickolaisen popsal v *Stand Back and Deliver* (2009) **Purpose Alignment Model** se dvěma osami, mission critical a market differentiating [[8]](https://insideproduct.co/purpose-based-alignment-model/). Jeho čtyři kvadranty mapují na tabulku výše skoro doslova. *Differentiating* (excelovat) odpovídá Core, *Parity* (zjednodušit a standardizovat) pokrývá Supporting i Generic. *Partner* je varianta popsaná níže a *Who cares* je práce, kterou má tým dělat co nejlevněji, nebo vůbec.
 
-Praktický důsledek pro rozhodování o nákupu: před podpisem SaaS smlouvy si tým odpoví na otázku: *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup: odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
+Praktický důsledek pro rozhodování o nákupu je jedna otázka před podpisem SaaS smlouvy: *„kupujeme Generic, nebo si snižujeme Core?“* Pokud SaaS pokryje Generic, je to čistý zisk: ušetříme čas, koupíme zkušenosti vendora, soustředíme se na Core. Pokud by SaaS pokryl Core, je to strategický ústup: odevzdáváme konkurenční výhodu třetí straně. Stejné rozhodnutí, ale opačné znaménko.
 
 Třetí variantou sourcingu je **partnerství**. Hodí se pro Supporting subdomény, kde hotové řešení existuje, ale potřebujete větší míru přizpůsobení, než dovolí standardní SaaS. Příklad: e-shop integruje fakturaci přes API jiné fintech firmy, která za měsíční poplatek počítá daně pro 30 jurisdikcí. Není to BUY (žádná krabice), není to BUILD (cizí tým), je to partnerství s rizikem dlouhodobé závislosti. Vyžaduje smluvní jistoty (vlastnictví dat, exit clause, SLA) a Anti-Corruption Layer na hranici.
 
