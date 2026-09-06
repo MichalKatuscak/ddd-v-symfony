@@ -309,6 +309,7 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
 use App\UserManagement\Infrastructure\Legacy\Exception\UnmappableLegacyStatusException;
@@ -336,6 +337,7 @@ final class LegacyUserTranslator
         // i o platný aktivační odkaz.
         return User::reconstitute(
             new UserId(Uuid::fromString((string) $row['uuid'])),
+            new UserName((string) $row['name']),
             new Email((string) $row['email']),
             HashedPassword::fromHash((string) $row['password']),
             $status,
@@ -592,6 +594,7 @@ use App\UserManagement\Domain\Exception\UserAlreadyActivatedException;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
 use Doctrine\ORM\Mapping as ORM;
@@ -607,6 +610,12 @@ final class User extends AggregateRoot
     #[ORM\Id]
     #[ORM\Column(type: 'user_id')]
     public readonly UserId $id;
+
+    // Legacy tabulka sloupec `name` má a RegisterUser ho nese. Bez něj
+    // by migrace jméno tiše zahodila - a zpětný dual-write by ho neměl
+    // odkud vzít.
+    #[ORM\Column(type: 'string', length: 255)]
+    private UserName $name;
 
     #[ORM\Column(type: 'email_vo', unique: true)]
     private Email $email;
@@ -632,12 +641,14 @@ final class User extends AggregateRoot
     // proto musí obojí předat rovnou sem.
     private function __construct(
         UserId $id,
+        UserName $name,
         Email $email,
         HashedPassword $password,
         ?\DateTimeImmutable $registeredAt = null,
         ?VerificationToken $verificationToken = null,
     ) {
         $this->id = $id;
+        $this->name = $name;
         $this->email = $email;
         $this->password = $password;
         $this->status = UserStatus::PendingVerification;
@@ -646,9 +657,13 @@ final class User extends AggregateRoot
     }
 
     // Named constructor vyjadřuje záměr lépe než new User()
-    public static function register(UserId $id, Email $email, HashedPassword $password): self
-    {
-        $user = new self($id, $email, $password);
+    public static function register(
+        UserId $id,
+        UserName $name,
+        Email $email,
+        HashedPassword $password,
+    ): self {
+        $user = new self($id, $name, $email, $password);
         // Doménová událost – vedlejší efekt registrace je nyní explicitní.
         // Nahrává ji named constructor, ne __construct: rekonstituce událost nevyvolá.
         $user->record(new UserRegistered($id, $email, $user->registeredAt));
@@ -660,6 +675,7 @@ final class User extends AggregateRoot
     // Nastavuje stav tak, jak byl uložen, a nezaznamenává žádnou událost.
     public static function reconstitute(
         UserId $id,
+        UserName $name,
         Email $email,
         HashedPassword $password,
         UserStatus $status,
@@ -669,7 +685,7 @@ final class User extends AggregateRoot
         // Bez předání původních hodnot dostane každý migrovaný uživatel
         // dnešní datum registrace a nový token - a aktivační odkaz,
         // který mu systém poslal, přestane platit.
-        $user = new self($id, $email, $password, $registeredAt, $verificationToken);
+        $user = new self($id, $name, $email, $password, $registeredAt, $verificationToken);
         $user->status = $status;
 
         return $user;
@@ -811,6 +827,7 @@ namespace App\UserManagement\Domain\Repository;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 
 interface UserRepository
 {
@@ -839,6 +856,7 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -978,6 +996,7 @@ namespace App\UserManagement\Application\Command;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
@@ -1214,6 +1233,7 @@ namespace App\Tests\UserManagement\Domain\Model;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserStatus;

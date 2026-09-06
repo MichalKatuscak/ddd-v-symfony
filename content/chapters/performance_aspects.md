@@ -1285,18 +1285,27 @@ doctrine:
         entity_managers:
             default:
                 connection: default
+                # Bez is_bundle: false hledá Doctrine bundle jménem Order
+                # a skončí na „Bundle "Order" does not exist“.
+                #
+                # Výřez ukazuje jen dva mapping bloky kvůli čitelnosti.
+                # Do projektu patří vedle nich celý mapping chain z kapitoly
+                # o návrhu agregátu; nahradit ho tímhle znamená přijít
+                # o Ordering, SharedKernel, UserManagement i custom typy.
                 mappings:
-                    Order:
+                    Ordering:
                         type: attribute
-                        dir: '%kernel.project_dir%/src/Order/Domain/Model'
-                        prefix: 'App\Ordering\Domain\Model'
+                        dir: '%kernel.project_dir%/src/Ordering/Domain'
+                        prefix: 'App\Ordering\Domain'
+                        is_bundle: false
             read:
                 connection: read
                 mappings:
                     ReadModel:
                         type: attribute
-                        dir: '%kernel.project_dir%/src/Order/Infrastructure/ReadModel'
+                        dir: '%kernel.project_dir%/src/Ordering/Infrastructure/ReadModel'
                         prefix: 'App\Ordering\Infrastructure\ReadModel'
+                        is_bundle: false
 
 # Query handler pak vezme repliku podle jména parametru:
 # public function __construct(private EntityManagerInterface $readEntityManager) {}
