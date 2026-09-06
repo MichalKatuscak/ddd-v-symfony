@@ -16,7 +16,7 @@ category: Architektura
 deck: 'V DDD aplikacích se opakovaně objevuje stejná otázka: <em>„smí to ten uživatel udělat?“</em> – patří do controlleru, do voteru, do aggregate, nebo někam jinam? Kapitola dává konkrétní čtyřvrstvý rámec: Edge, Use Case, Aggregate, Field. Každá vrstva odpovídá na jinou otázku a používá jiný Symfony nástroj.'
 reading_time: 34
 difficulty: 3
-github_examples: null
+github_examples: Chapter10_Authorization
 ---
 
 V předchozí kapitole jsme implementovali agregáty, repozitáře a Application Services v Symfony 8. Otevřená zůstala otázka, kterou projekty obvykle řeší případ od případu: **kdo smí který use case zavolat a za jakých podmínek**. V této kapitole zavedeme čtyřvrstvý rámec, který autorizační rozhodnutí umístí na správnou vrstvu – od HTTP firewallu přes Symfony Voter v aplikační vrstvě až po doménové invarianty v agregátu. Volání z Command Handleru ukazuje [sekce 11.04](#use-case-voter); kapitola o CQRS na to navazuje [middleware vrstvou](/cqrs#middleware), kterou lze autorizaci vytáhnout před handler.
