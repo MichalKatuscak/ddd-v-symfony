@@ -7,7 +7,7 @@ meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. P
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"
@@ -41,7 +41,7 @@ Druhá: *co se uloží v jedné transakci*. Vstupním bodem do agregátu je **ko
 
 Bez explicitní hranice doménový model degraduje dvěma směry. Buď se objektový graf rozroste
 a pokrývá celou doménu jediným transakčním kontextem (typicky přes obousměrné OneToMany
-relace v Doctrine), což přináší zámky a deadlocky. Nebo se naopak rozpadne na anemicky
+relace v Doctrine) a přináší zámky i deadlocky. Nebo se naopak rozpadne na anemicky
 tenké objekty, u nichž nikdo nevymáhá invarianty a logika se rozteče po službách. Agregát
 tyto dva extrémy řeší kompromisem: malá konzistentní jednotka plus jasné pravidlo, jak se mění.
 
@@ -90,12 +90,12 @@ poruší. Čtyři vodítka, která doporučuje aplikovat v pořadí:
    sága upraví agregát B.“ Dovětek o čí práci Vernon do formulace pravidla přidal ve třetím
    dílu série a rozebírá ho sekce [Invarianty](#invariants).
 
-Khononov v *Learning DDD* (2021) dodává páté pravidlo, které z Vernonových implicitně
-plyne, ale vyplatí se ho formulovat výslovně: **jedna databázová transakce mění právě jeden
-agregát.** Potřeba commitnout změny ve více agregátech je podle něj signálem špatně vedené
-hranice. Objeví-li se v jednom command handleru dvě volání `save()` na různé repozitáře,
-stojí za to hranice prověřit: buď mají vzniknout dva commandy, nebo jde o ságu, tedy
-o dvoufázový proces s vlastní transakcí pro každý krok.
+Khononov v *Learning DDD* (2021) dodává páté pravidlo. Z Vernonových implicitně plyne,
+ale vyplatí se ho říct nahlas: **jedna databázová transakce mění právě jeden agregát.**
+Potřeba commitnout změny ve více agregátech je podle něj signálem špatně vedené hranice.
+Objeví-li se v jednom command handleru dvě volání `save()` na různé repozitáře, prověřte
+hranici. Buď mají vzniknout dva commandy, nebo jde o ságu – dvoufázový proces s vlastní
+transakcí pro každý krok.
 
 ## 07.03 Invarianty jako východisko návrhu {#invariants}
 
@@ -104,9 +104,8 @@ Vychází se z invariantů, tedy z pravidel, která musí platit v každý okam�
 doménový model nekonzistentní. Pojetí invariantu jako predikátu pochází z Design by
 Contract: Bertrand Meyer ho v *Object-Oriented Software Construction* (1997)
 [[9]](https://www.informit.com/store/object-oriented-software-construction-9780136291558)
-definuje jako podmínku, která platí před každou veřejnou operací objektu i po ní. Vernon tomu dává užší doménové čtení:
-invariant je byznys pravidlo, které musí být konzistentní pořád, a když se o invariantech
-mluví v souvislosti s agregátem, myslí se konzistence transakční. Typické zdroje:
+definuje jako podmínku, která platí před každou veřejnou operací objektu i po ní. Vernon tomu dává užší doménové čtení. Invariant je byznys pravidlo, které platí pořád;
+u agregátu se přitom myslí konzistence transakční. Typické zdroje:
 
 - **Sumační pravidla.** Součet položek odpovídá celkové ceně. Počet
   rezervovaných míst nepřekračuje kapacitu. Bilance debetů a kreditů je nulová.
@@ -122,7 +121,7 @@ mluví v souvislosti s agregátem, myslí se konzistence transakční. Typické 
   `address` může být null.
 
 Pro každý invariant rozhoduje jedna otázka: *musí být porušení nemožné v každý okamžik,
-nebo stačí, aby bylo opraveno se zpožděním?* První kategorie definuje hranici
+nebo se stačí dorovnat se zpožděním?* První kategorie definuje hranici
 agregátu. Druhá patří mimo ni a řeší ji sága nebo process manager (kapitola
 [Ságy a Process Managery](/sagy-a-process-managery)).
 
@@ -1155,7 +1154,7 @@ se rovná celkové ceně“ se rozpadne, aniž kdokoli dostane `OptimisticLockEx
 Doctrine na to nemá ekvivalent JPA konstanty `OPTIMISTIC_FORCE_INCREMENT`; požadavek na ni
 je otevřený od roku 2013 [[10]](https://github.com/doctrine/orm/issues/3620). Obejít to lze
 třemi způsoby. Doménová metoda kořene se při každé změně potomka dotkne vlastního pole
-(přepočtená `totalAmount` nebo `updatedAt`), což je řešení, které navíc dává doménový smysl.
+(přepočtená `totalAmount` nebo `updatedAt`). To navíc dává doménový smysl.
 Druhá cesta je explicitní `$em->lock($order, LockMode::OPTIMISTIC, $expectedVersion)`
 s verzí, kterou drží klient. Třetí je pesimistický zámek, tedy `LockMode::PESSIMISTIC_WRITE`,
 za cenu propustnosti.
@@ -1167,7 +1166,7 @@ agregát a jen mu změní vlastnost, Doctrine ho uloží zároveň – bez varov
 kázeň, code review a architektonický test (kapitola
 [Testování DDD](/testovani-ddd#architektonicke-testy)). Kdo chce hranici doménového modelu
 oddělit od perzistentního úplně, sáhne po Persisted Object Pattern
-([Implementace v Symfony 8](/implementace-v-symfony#persisted-object-pattern)): doménová
+([Implementace v Symfony 8](/implementace-v-symfony#persisted-object-pattern)). Doménová
 třída zůstane bez ORM atributů a mapování obstará samostatná persistence třída s mapperem.
 Cenou je vrstva navíc, výhodou to, že Doctrine přestane ovlivňovat tvar agregátu.
 
@@ -1254,7 +1253,8 @@ ve všech třech případech stejná.
 Reference přes ID je jasné pravidlo, ale typů ID je víc a každý má dopad na schéma a výkon.
 
 - **UUID v4 (random).** Náhodná, distribuovaně generovatelná, neuhodnutelná.
-  Nevýhoda: insertion order není seřazen, což zhoršuje I/O pattern u clustered indexů (MySQL/InnoDB).
+  Nevýhoda: insertion order není seřazený a u clustered indexů (MySQL/InnoDB)
+  to zhoršuje I/O pattern.
 - **UUID v7 (případně ULID).** Časově řazené, generovatelné distribuovaně bez
   koordinace, řadí se podle času vzniku. **Doporučená volba** pro většinu nových projektů.
   `Uuid::v7()` i ULID (`Symfony\Component\Uid\Ulid`) nabízí balíček `symfony/uid`.
