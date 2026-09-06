@@ -1573,9 +1573,10 @@ final class OutboxCleanupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Poddotaz nad id je jediný tvar, který projde na MySQL, Postgresu
-        // i SQLite. Údržbový příkaz selže až po měsíci provozu, takže
-        // nepřenositelnou zkratku by nikdo neodhalil včas.
+        // Údržbový příkaz selže až po měsíci provozu, takže na přenositelnosti
+        // záleží víc než jinde. Postgres i SQLite tenhle tvar berou; MySQL
+        // odmítá LIMIT uvnitř IN (SELECT …), tam se batch omezí odvozenou
+        // tabulkou: IN (SELECT id FROM (SELECT id FROM outbox … LIMIT 10000) t).
         $threshold = new \DateTimeImmutable('-30 days');
 
         $deleted = $this->connection->executeStatement(

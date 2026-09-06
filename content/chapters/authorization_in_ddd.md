@@ -153,14 +153,15 @@ security:
                 property: email
 
     firewalls:
-        # Stateless API – JWT
-        # Klíč `jwt` registruje lexik/jwt-authentication-bundle.
-        # Bez toho balíčku je nativní ekvivalent `access_token`.
-        api:
-            pattern: ^/api/
-            stateless: true
-            jwt: ~
-            provider: app_user_provider
+        # Stateless API – JWT. Klíč `jwt` registruje
+        # lexik/jwt-authentication-bundle; bez něj konfigurace neprojde
+        # („Unrecognized option jwt"), takže celý blok nechte zakomentovaný,
+        # dokud balíček nemáte. Nativní ekvivalent je `access_token`.
+        # api:
+        #     pattern: ^/api/
+        #     stateless: true
+        #     jwt: ~
+        #     provider: app_user_provider
 
         # Web – session
         main:
@@ -182,6 +183,36 @@ security:
         - { path: ^/api/internal, roles: ROLE_SERVICE_ACCOUNT }
         # Vše ostatní za autentizací
         - { path: ^/,             roles: IS_AUTHENTICATED_FULLY }
+:::
+
+`form_login` odkazuje na routu `login`, kterou musí někdo vytvořit – firewall ji sám nezaloží
+a po prvním chráněném requestu jinak spadne na chybějící routě:
+
+:::code{language="php" filename="src/Identity/Infrastructure/Http/LoginController.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Identity\Infrastructure\Http;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+
+final class LoginController extends AbstractController
+{
+    // Přihlášení samo zpracovává firewall. Kontroler jen vykreslí
+    // formulář a poslední chybu – proto tu není žádná logika.
+    #[Route('/login', name: 'login', methods: ['GET', 'POST'])]
+    public function __invoke(AuthenticationUtils $utils): Response
+    {
+        return $this->render('security/login.html.twig', [
+            'last_username' => $utils->getLastUsername(),
+            'error'         => $utils->getLastAuthenticationError(),
+        ]);
+    }
+}
 :::
 
 Doprovodná třída `SecurityUser` drží most mezi Symfony a doménou. Kromě `UserInterface` vystavuje doménové identifikátory, které si z ní vezme aplikační vrstva:
@@ -396,6 +427,18 @@ final class OrderController extends AbstractController
 
         return $this->redirectToRoute('order_detail', ['id' => $order->id->value]);
     }
+
+    #[Route('/order/{id}', name: 'order_detail', methods: ['GET'])]
+    #[IsGranted('order.view', subject: 'order', statusCode: 404)]
+    public function detail(Order $order): Response
+    {
+        // isCancellable() si aktuální čas nebere sama, takže ho šablona
+        // musí dostat odsud – jinak Twig hlásí, že proměnná neexistuje.
+        return $this->render('order/detail.html.twig', [
+            'order' => $order,
+            'now'   => new \DateTimeImmutable(),
+        ]);
+    }
 }
 :::
 
@@ -493,13 +536,10 @@ final readonly class CancelOrderHandler
 
         $order->cancel(reason: $command->reason, when: new \DateTimeImmutable());
         $this->orders->save($order);
-        $this->em->flush();
 
-        // Bez tohohle kroku agregát skončí v cancelled, ale dashboard
-        // zůstane na placed. Nic nespadne – stavy se jen rozejdou.
-        foreach ($order->releaseEvents() as $event) {
-            $this->eventBus->dispatch($event);
-        }
+        // Publikaci událostí ukázka vynechává, aby zůstala čitelná otázka
+        // autorizace. V úplném tvaru ji doplňuje async varianta níže –
+        // a bez ní se agregát a read model rozejdou.
     }
 }
 :::
@@ -568,8 +608,10 @@ Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Zrušit o
     </form>
 {% endif %}
 
+{# Refund je operace pro obsluhu, ne pro zákazníka – atribut ji pustí
+   jen roli z Voteru. Routu k ní si doplňte podle vlastního use case. #}
 {% if is_granted('order.refund', order) %}
-    <a href="{{ path('order_refund', {id: order.id}) }}" class="btn-danger">Refund</a>
+    <a href="{{ path('order_refund', {id: order.id.value}) }}">Vrátit platbu</a>
 {% endif %}
 :::
 
@@ -650,9 +692,18 @@ final readonly class CancelOrderHandler
 
         $order->cancel(reason: $command->reason, when: new \DateTimeImmutable());
         $this->orders->save($order);
+        $this->em->flush();
+
+        // Bez tohohle kroku agregát skončí v cancelled, ale dashboard
+        // zůstane na placed. Nic nespadne – stavy se jen rozejdou.
+        foreach ($order->releaseEvents() as $event) {
+            $this->eventBus->dispatch($event);
+        }
     }
 }
 :::
+
+Tahle varianta je ta úplná – obě ukázky nesou stejné FQCN, takže do projektu jde jedna z nich, a je to tahle. Synchronní verze výše zůstává kvůli tomu, aby na ní byla vidět samotná otázka autorizace; ve workeru by neobstála, protože `AuthorizationCheckerInterface` tam nemá token.
 
 Owner-based pravidlo vystačí s porovnáním `actorId` proti vlastníkovi agregátu, jak ukazuje handler výše. Voter z HTTP vrstvy přitom nezaniká: controller před odesláním commandu volá `is_granted` jako rychlou zpětnou vazbu pro UI. Rozhodující kontrola ale sedí v handleru a v agregátu – běží při každém zpracování, synchronním i asynchronním.
 
@@ -1054,27 +1105,23 @@ final class CancelOrderPolicy implements Policy
                 description: 'Pouze vlastník objednávky',
             ),
             new Rule(
-                expression:  'subject.status.value == "placed"',
-                description: 'Order musí být ve stavu PLACED',
+                expression:  'subject.status.value == "confirmed"',
+                description: 'Objednávka musí být potvrzená',
             ),
             new Rule(
                 expression:  'subject.placedAt.getTimestamp() >= now - 86400',
-                description: 'Cancellation window 24 h ještě neuplynulo',
-            ),
-            new Rule(
-                expression:  'user.tenantId == subject.tenantId',
-                description: 'Stejný tenant',
+                description: 'Storno lhůta 24 h ještě neuplynula',
             ),
         ];
     }
 }
 :::
 
-Zápis výrazů má svá úskalí a chyba se projeví až za běhu. ExpressionLanguage čte veřejné properties a volá veřejné metody – gettery k privátním polím nedohledá, subjektem politiky proto bývá snapshot s veřejnými poli, ne agregát s privátním stavem. Odečíst `DateTimeImmutable` od čísla komponenta neumí: datum se převádí na unixový timestamp metodou objektu (`subject.placedAt.getTimestamp()`) a `now` přichází jako číslo z proměnných evaluatoru, ne jako objekt. Backed enum se neporovnává přímo – `subject.status == "placed"` selže, srovnává se hodnota přes `subject.status.value`. A protože výrazy jsou stringy, statická analýza je nevidí; každé pravidlo musí krýt test, viz [tabulkové testy policy](#testing-policy-heading).
+Zápis výrazů má svá úskalí a chyba se projeví až za běhu. ExpressionLanguage čte veřejné properties a volá veřejné metody – gettery k privátním polím nedohledá, subjektem politiky proto bývá snapshot s veřejnými poli, ne agregát s privátním stavem. Odečíst `DateTimeImmutable` od čísla komponenta neumí: datum se převádí na unixový timestamp metodou objektu (`subject.placedAt.getTimestamp()`) a `now` přichází jako číslo z proměnných evaluatoru, ne jako objekt. Backed enum se neporovnává přímo – `subject.status == "confirmed"` selže, srovnává se hodnota přes `subject.status.value`. A protože výrazy jsou stringy, statická analýza je nevidí; každé pravidlo musí krýt test, viz [tabulkové testy policy](#testing-policy-heading).
 
 Poznámka: pravidla `subject.status.value == "placed"` a časové okno 24 h jsou v politice pro ilustraci ABAC zápisu. Jak popisuje sekce 11.06, tyto doménové invarianty patří primárně do agregátu. Politika je ověřuje jako pre-check před dosažením domény (obrana do hloubky). Agregát ale musí být zdrojem pravdy a nepřijmout neplatný příkaz ani bez autorizační vrstvy.
 
-Jednoduchý `PolicyEvaluator` používá Symfony ExpressionLanguage komponentu a vyhodnocuje pravidla v daném kontextu:
+Jednoduchý `PolicyEvaluator` používá Symfony ExpressionLanguage komponentu a vyhodnocuje pravidla v daném kontextu. Balíček v základní instalaci není, takže `composer require symfony/expression-language` je první krok:
 
 :::code{language="php" filename="src/SharedKernel/Authorization/PolicyEvaluator.php"}
 // src/SharedKernel/Authorization/PolicyEvaluator.php
@@ -1546,22 +1593,42 @@ declare(strict_types=1);
 
 namespace App\Tests\Ordering\Http;
 
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Tests\Identity\SecurityUserFixture;
+use App\Tests\Ordering\Domain\OrderFactory;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class CancelOrderE2eTest extends WebTestCase
 {
+    private const OWNER    = '018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03';
+    private const STRANGER = '02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746';
+
     public function testStrangerGetsNotFound(): void
     {
-        $client   = static::createClient();
-        $stranger = static::getContainer()
-            ->get(SecurityUserRepository::class)
-            ->byEmail('petr@example.com');
+        $client = static::createClient();
+        $order  = $this->givenOrderOf(self::OWNER);
 
-        $client->loginUser($stranger);
-        $client->request('POST', '/order/' . self::FOREIGN_ORDER_ID . '/cancel');
+        // loginUser() vloží uživatele rovnou do session – žádná fixture
+        // v databázi, takže test nezávisí na podobě registrace.
+        $client->loginUser(SecurityUserFixture::for(self::STRANGER));
+        $client->request('POST', '/order/' . $order->id->value . '/cancel');
 
         // #[IsGranted(..., statusCode: 404)] brání enumeraci cizích ID
         self::assertResponseStatusCodeSame(404);
+    }
+
+    private function givenOrderOf(string $customerId): Order
+    {
+        $container = static::getContainer();
+        $order = OrderFactory::placedFor(CustomerId::fromString($customerId));
+
+        $container->get(OrderRepository::class)->save($order);
+        $container->get(EntityManagerInterface::class)->flush();
+
+        return $order;
     }
 }
 :::
@@ -1582,7 +1649,7 @@ Test běží v CI vedle unit testů a selže při prvním importu, ne až při r
 
 ### Policy: tabulkový unit test {#testing-policy-heading}
 
-Pokud používáte [policy-based přístup](#policy-based), každé pravidlo v policy je jeden test case. Tabulkový (data provider) test je nejlepší forma – jeden řádek = jeden scénář, čitelně i pro netechnického reviewera:
+Pokud používáte [policy-based přístup](#policy-based), každé pravidlo v policy je jeden test case. Vyhodnocení výrazů stojí na balíčku `symfony/expression-language`, který v základní instalaci není. Tabulkový (data provider) test je nejlepší forma – jeden řádek = jeden scénář, čitelně i pro netechnického reviewera:
 
 :::code{language="php" filename="tests/Ordering/Authorization/CancelOrderPolicyTest.php"}
 // tests/Ordering/Authorization/CancelOrderPolicyTest.php
@@ -1591,39 +1658,40 @@ declare(strict_types=1);
 namespace App\Tests\Ordering\Authorization;
 
 use App\Ordering\Authorization\CancelOrderPolicy;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Authorization\PolicyContext;
 use App\SharedKernel\Authorization\PolicyEvaluator;
+use App\Tests\Identity\SecurityUserFixture;
+use App\Tests\Ordering\Domain\OrderFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class CancelOrderPolicyTest extends TestCase
 {
+    private const OWNER    = '018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03';
+    private const STRANGER = '02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746';
+
     public static function scenarios(): iterable
     {
         yield 'happy path' => [
-            'subject'  => OrderFixture::placedFor('cus_1', 'tenant_a', minutesAgo: 30),
-            'user'     => UserFixture::for('cus_1', 'tenant_a'),
+            'subject'  => OrderFactory::placedFor(CustomerId::fromString(self::OWNER)),
+            'user'     => SecurityUserFixture::for(self::OWNER),
             'expected' => null,
         ];
         yield 'wrong customer' => [
-            'subject'  => OrderFixture::placedFor('cus_1', 'tenant_a', minutesAgo: 30),
-            'user'     => UserFixture::for('cus_2', 'tenant_a'),
+            'subject'  => OrderFactory::placedFor(CustomerId::fromString(self::OWNER)),
+            'user'     => SecurityUserFixture::for(self::STRANGER),
             'expected' => 'Pouze vlastník objednávky',
         ];
         yield 'shipped order' => [
-            'subject'  => OrderFixture::shippedFor('cus_1', 'tenant_a'),
-            'user'     => UserFixture::for('cus_1', 'tenant_a'),
-            'expected' => 'Order musí být ve stavu PLACED',
+            'subject'  => OrderFactory::shipped(),
+            'user'     => SecurityUserFixture::for(self::OWNER),
+            'expected' => 'Objednávka musí být potvrzená',
         ];
         yield 'window expired' => [
-            'subject'  => OrderFixture::placedFor('cus_1', 'tenant_a', minutesAgo: 1500),
-            'user'     => UserFixture::for('cus_1', 'tenant_a'),
-            'expected' => 'Cancellation window 24 h ještě neuplynulo',
-        ];
-        yield 'cross-tenant' => [
-            'subject'  => OrderFixture::placedFor('cus_1', 'tenant_a', minutesAgo: 30),
-            'user'     => UserFixture::for('cus_1', 'tenant_b'),
-            'expected' => 'Stejný tenant',
+            'subject'  => OrderFactory::placed(at: '2026-04-28 09:00:00'),
+            'user'     => SecurityUserFixture::for(self::OWNER),
+            'expected' => 'Storno lhůta 24 h ještě neuplynula',
         ];
     }
 
@@ -1631,7 +1699,9 @@ final class CancelOrderPolicyTest extends TestCase
     public function testEvaluate(object $subject, object $user, ?string $expected): void
     {
         $evaluator = new PolicyEvaluator();
-        $context   = new PolicyContext($subject, $user, new \DateTimeImmutable());
+        // Čas vyhodnocení je pevný, jinak by scénář se lhůtou po roce
+        // začal padat sám od sebe.
+        $context = new PolicyContext($subject, $user, new \DateTimeImmutable('2026-04-29 12:00:00'));
 
         $violation = $evaluator->evaluate(new CancelOrderPolicy(), $context);
 
@@ -1664,8 +1734,8 @@ Náprava: pravidlo patří do aggregate (je to doménový invariant). Voter **ne
 
 Symptom:
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php (anti-vzor)" highlights="5,10,11,12"}
-// src/Ordering/Domain/Order.php (anti-vzor)
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (anti-vzor)" highlights="5,10,11,12"}
+// src/Ordering/Domain/Model/Order.php (anti-vzor)
 namespace App\Ordering\Domain\Model;
 
 use Symfony\Component\Security\Core\User\UserInterface;

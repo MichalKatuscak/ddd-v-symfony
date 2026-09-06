@@ -535,51 +535,50 @@ namespace App\UserManagement\Registration\Command;
 use App\UserManagement\Domain\Exception\DuplicateEmailException;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
-use App\UserManagement\Domain\Service\PasswordHasher;
 use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(bus: 'command.bus')]
-final class RegisterUserHandler
+final readonly class RegisterUserHandler
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly PasswordHasher $passwordHasher
-    ) {
-    }
+        private UserRepository $userRepository,
+        private EntityManagerInterface $em,
+    ) {}
 
     public function __invoke(RegisterUser $command): void
     {
         $email = Email::fromUserInput($command->email);
 
-        if ($this->userRepository->findByEmail($email)) {
-            throw DuplicateEmailException::with($email);
-        }
-
-        $hashedPassword = $this->passwordHasher->hashPassword(
-            $command->password
-        );
-
         $user = User::register(
             UserId::generate(),
-            $command->name,
+            new UserName($command->name),
             $email,
-            $hashedPassword
+            HashedPassword::fromPlainText($command->password),
         );
 
-        $this->userRepository->save($user);
+        try {
+            $this->userRepository->save($user);
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw DuplicateEmailException::with($email, $e);
+        }
     }
 }
 :::
 :::
 
 :::callout{type="note"}
-**Pozn.:** Tato varianta používá `PasswordHasher` jako závislost handleru.
-Alternativní přístup s `HashedPassword` hodnotovým objektem ukazuje kapitola
-[Implementace v Symfony](/implementace-v-symfony). Kontrola duplicity přes `findByEmail()`
-navíc sama o sobě nestačí – proti souběžným registracím chrání až unique constraint
-v databázi, viz
+**Pozn.:** Handler je tentýž, jaký zavádí kapitola
+[Implementace v Symfony](/implementace-v-symfony) – CQRS na něm nic nemění, jen ho
+zařadí na `command.bus`. Za pozornost stojí, co v něm **není**: kontrola duplicity přes
+`findByEmail()`. Proti souběžným registracím nechrání, protože mezi dotazem a zápisem
+se vejde druhý požadavek. Vynucuje ji unique constraint, viz
 [Race condition v naivní variantě](/implementace-v-symfony#register-race-heading).
 :::
 
@@ -847,7 +846,6 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Registration\Form;
 
-use App\UserManagement\Registration\Command\RegisterUser;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -867,12 +865,11 @@ final class RegistrationFormType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        // Formulář plní rovnou command. Validační atributy na něm už jsou,
-        // takže se pravidla nepíšou podruhé.
-        $resolver->setDefaults([
-            'data_class' => RegisterUser::class,
-            'empty_data' => new RegisterUser(name: '', email: '', password: ''),
-        ]);
+        // Bez data_class vrací formulář pole, a to je tady záměr: command
+        // má promované readonly vlastnosti, do kterých PropertyAccess
+        // zapsat neumí („is a promoted readonly property"). Kontroler
+        // z pole postaví command sám.
+        $resolver->setDefaults(['data_class' => null]);
     }
 }
 :::
@@ -905,7 +902,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
+use App\Identity\Infrastructure\Security\SecurityUser;
 
 final class ProfileController extends AbstractController
 {
@@ -915,9 +912,12 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/profile', name: 'app_profile')]
-    public function profile(UserInterface $user): Response
+    public function profile(SecurityUser $user): Response
     {
-        $query = new GetUserProfile($user->getUserIdentifier());
+        // getUserIdentifier() vrací e-mail, kterým se uživatel přihlašuje –
+        // ne identitu agregátu. Read model se ptá po customerId, takže
+        // type-hint míří na konkrétní třídu, ne na UserInterface.
+        $query = new GetUserProfile($user->customerId()->value);
 
         $envelope = $this->queryBus->dispatch($query);
         $profile = $envelope->last(HandledStamp::class)->getResult();
@@ -1290,14 +1290,16 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\Controller;
 
+use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Ordering\Application\Command\PlaceOrder;
-use App\Ordering\Application\Form\PlaceOrderFormType;
+use App\Ordering\Domain\ValueObject\OrderId;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\Uuid;
 
 final class PlaceOrderController extends AbstractController
 {
@@ -1306,32 +1308,32 @@ final class PlaceOrderController extends AbstractController
     ) {}
 
     #[Route('/orders', name: 'place_order', methods: ['POST'])]
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, #[CurrentUser] SecurityUser $user): Response
     {
-        $form = $this->createForm(PlaceOrderFormType::class);
-        $form->handleRequest($request);
+        /** @var list<array{productId: string, quantity: int, unitPriceInCents: int}> $items */
+        $items = $request->request->all('items');
 
-        if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->redirectToRoute('cart');
+        // Prázdná objednávka je chyba vstupu, ne doménový stav – agregát
+        // ji stejně nepustí, ale 422 řekne klientovi víc než výjimka.
+        if ($items === []) {
+            return new Response('Objednávka musí mít alespoň jednu položku.', 422);
         }
 
-        // ID generováno na straně klienta - command nemusí vracet hodnotu
-        $orderId = (string) Uuid::v7();
-        $data = $form->getData();
+        // PlaceOrderHandler vrací OrderId – identitu generuje agregát,
+        // ne kontroler. Kdyby ji určoval klient, obešel by tím továrnu.
+        $envelope = $this->commandBus->dispatch(new PlaceOrder(
+            customerId: $user->customerId()->value,
+            items: $items,
+        ));
 
-        $command = new PlaceOrderCommand(
-            orderId: $orderId,
-            customerId: $this->getUser()->getUserIdentifier(),
-            items: $data['items'],
-        );
+        /** @var OrderId $orderId */
+        $orderId = $envelope->last(HandledStamp::class)->getResult();
 
-        $this->commandBus->dispatch($command);
-
-        // Redirect na detail objednávky - read model se může
-        // ještě aktualizovat, ale uživatel vidí potvrzení
+        // Redirect na detail objednávky – read model se může
+        // ještě aktualizovat, ale uživatel vidí potvrzení.
         $this->addFlash('success', 'Objednávka byla úspěšně vytvořena.');
 
-        return $this->redirectToRoute('order_detail', ['id' => $orderId]);
+        return $this->redirectToRoute('order_detail', ['id' => $orderId->value]);
     }
 }
 :::

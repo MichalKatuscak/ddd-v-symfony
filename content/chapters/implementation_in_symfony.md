@@ -2127,7 +2127,7 @@ services:
     App\Outbox\Application\OutboxRepository: '@App\Outbox\Infrastructure\DoctrineOutboxRepository'
     App\Inbox\Application\InboxRepository: '@App\Inbox\Infrastructure\DbalInboxRepository'
     App\Ordering\Application\Saga\OrderSagaRepository: '@App\Ordering\Infrastructure\Saga\DoctrineOrderSagaRepository'
-    App\Payment\Domain\PaymentGateway: '@App\Payment\Infrastructure\StripePaymentGateway'
+    App\Payment\Domain\PaymentGateway: '@App\Payment\Infrastructure\InMemoryPaymentGateway'
 :::
 :::
 

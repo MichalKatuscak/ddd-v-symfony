@@ -1205,7 +1205,7 @@ rekonstrukce agregátu z perzistence. Doctrine to dělá za vás (přes hydrator
 máte Event Sourcing nebo custom mapper, potřebujete factory, která **nevolá
 invarianty** (rekonstruovaný stav už validací prošel při vzniku):
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php (fragment)"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (fragment)"}
 /**
  * Rekonstituce ze stavu načteného z DB / event streamu.
  * Tento pojmenovaný konstruktor neaplikuje invarianty –
@@ -1372,7 +1372,7 @@ vyhnout.
 Rozšířená představa je, že modulová struktura vyžaduje vlastní PSR-4 kořen pro každý modul.
 Nevyžaduje. PSR-4 mapuje *prefix* namespace na *základní adresář* a zbytek namespace překládá
 na podadresáře. Při výchozím symfonním mapování `"App\\": "src/"` se tedy třída
-`App\Ordering\Domain\Order` hledá v `src/Ordering/Domain/Order.php` – přesně tam, kam ji
+`App\Ordering\Domain\Model\Order` hledá v `src/Ordering/Domain/Model/Order.php` – přesně tam, kam ji
 modulová struktura klade. Do `composer.json` sahat nemusíte a struktura z předchozí ukázky
 funguje bez jediné změny.
 

@@ -903,6 +903,46 @@ interface PaymentGateway
 }
 :::
 
+Adaptér je jediné místo, kde na knize nezáleží: za rozhraním může být HTTP klient
+platební brány, nebo v testech a při rozbíhání ukázek pár řádků v paměti. Právě proto
+rozhraní existuje.
+
+:::code{language="php" filename="src/Payment/Infrastructure/InMemoryPaymentGateway.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Payment\Infrastructure;
+
+use App\Payment\Domain\PaymentGateway;
+use Symfony\Component\Uid\Uuid;
+
+final class InMemoryPaymentGateway implements PaymentGateway
+{
+    // Přepínač pro ruční zkoušku kompenzační větve. V ostrém adaptéru
+    // ho nahradí odpověď brány.
+    public bool $alwaysFails = false;
+
+    public function charge(string $customerId, int $amountCents): string
+    {
+        if ($this->alwaysFails) {
+            throw new \RuntimeException('Platba zamítnuta.');
+        }
+
+        return (string) Uuid::v7();
+    }
+
+    public function refund(string $transactionId, int $amountCents): string
+    {
+        return (string) Uuid::v7();
+    }
+}
+
+// StockService a ShippingService mají stejnou stavbu: rezervovat a uvolnit,
+// vytvořit zásilku a zrušit ji. Bez jejich adaptérů se sága zastaví
+// po první platbě.
+:::
+
 Zbylé handlery kroků mají stejnou stavbu jako `ChargeCustomerHandler`: vykonají operaci
 a vydají událost. Ty, které jen mění stav agregátu, jsou ještě kratší:
 

@@ -442,12 +442,14 @@ class Order extends AggregateRoot
     /** @var Collection<int, OrderItem> */
     private Collection $items;
 
-    private OrderStatus $status;
+    // Asymetrická viditelnost: přečte kdokoli, zapíše jen kód uvnitř třídy.
+    // Getter tím odpadá a stavové přechody zůstávají jediným místem zápisu.
+    public private(set) OrderStatus $status;
 
     // Čas potvrzení drží agregát, protože na něm stojí doménové pravidlo:
     // storno lhůta v kapitole o autorizaci. Údaj čitelný jen z události
     // by k tomu agregát nutil sahat do vlastní historie.
-    private ?\DateTimeImmutable $placedAt = null;
+    public private(set) ?\DateTimeImmutable $placedAt = null;
 
     private function __construct(
         public readonly OrderId $id,
@@ -521,11 +523,6 @@ class Order extends AggregateRoot
 
         $this->status = OrderStatus::Confirmed;
         $this->placedAt = $at ?? new \DateTimeImmutable();
-    }
-
-    public function placedAt(): ?\DateTimeImmutable
-    {
-        return $this->placedAt;
     }
 
     // Bez tohohle přechodu je ship() nedosažitelná: do stavu Paid
@@ -826,10 +823,10 @@ use Doctrine\ORM\Mapping as ORM;
 class Order extends AggregateRoot
 {
     #[ORM\Column(enumType: OrderStatus::class)]
-    private OrderStatus $status;
+    public private(set) OrderStatus $status;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private ?\DateTimeImmutable $placedAt = null;
+    public private(set) ?\DateTimeImmutable $placedAt = null;
 
     // Mapování mění typ kolekce: místo pole list<OrderItem>
     // z čisté doménové varianty vyžaduje Doctrine Collection.
