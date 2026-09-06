@@ -638,6 +638,10 @@ final class OrderProcessManager
     private function onPaymentFailed(PaymentFailed $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+        if ($state->status()->isTerminal()) {
+            return;
+        }
+
         $state->transitionTo(OrderSagaStatus::Failed);
         $this->sagaRepository->save($state);
 
@@ -2139,6 +2143,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 use App\Ordering\Application\Command\MarkOrderPaid;
+use App\Ordering\Application\Command\CheckSagaTimeout;
 
 final class OrderProcessManagerTest extends TestCase
 {
@@ -2183,6 +2188,20 @@ final class OrderProcessManagerTest extends TestCase
         );
     }
 
+    /**
+     * Sága vedle příkazů rozesílá i vlastní odložené hlídače. Testy zajímají
+     * jen kroky procesu, jinak by se počty rozešly při každém přidaném timeoutu.
+     *
+     * @return list<object>
+     */
+    private function steps(): array
+    {
+        return array_values(array_filter(
+            $this->dispatchedCommands,
+            static fn (object $c): bool => !$c instanceof CheckSagaTimeout,
+        ));
+    }
+
     /** Zkratka – integrační událost má pět polí, testy z nich mění dvě. */
     private function orderPlaced(
         string $orderId = self::ORDER_ID,
@@ -2207,9 +2226,9 @@ final class OrderProcessManagerTest extends TestCase
             totalAmountCents: 10000,
         ));
 
-        self::assertCount(1, $this->dispatchedCommands);
-        self::assertInstanceOf(ChargeCustomer::class, $this->dispatchedCommands[0]);
-        self::assertSame(self::ORDER_ID, $this->dispatchedCommands[0]->orderId);
+        self::assertCount(1, $this->steps());
+        self::assertInstanceOf(ChargeCustomer::class, $this->steps()[0]);
+        self::assertSame(self::ORDER_ID, $this->steps()[0]->orderId);
 
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
         self::assertSame(OrderSagaStatus::AwaitingPayment, $state->status());
@@ -2222,10 +2241,11 @@ final class OrderProcessManagerTest extends TestCase
 
         ($this->saga)(new PaymentSucceeded(orderId: self::ORDER_ID));
 
-        // onPaymentSucceeded dispatchne dva příkazy: MarkOrderPaid a ReserveStock.
-        self::assertCount(2, $this->dispatchedCommands);
-        self::assertInstanceOf(MarkOrderPaid::class, $this->dispatchedCommands[0]);
-        self::assertInstanceOf(ReserveStock::class, $this->dispatchedCommands[1]);
+        // onPaymentSucceeded dispatchne dva kroky: MarkOrderPaid a ReserveStock.
+        // Timeout, který k nim sága přidá, testy počítat nechtějí.
+        self::assertCount(2, $this->steps());
+        self::assertInstanceOf(MarkOrderPaid::class, $this->steps()[0]);
+        self::assertInstanceOf(ReserveStock::class, $this->steps()[1]);
 
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
         self::assertSame(OrderSagaStatus::AwaitingStockReservation, $state->status());
@@ -2241,6 +2261,24 @@ final class OrderProcessManagerTest extends TestCase
             failureReason: 'Insufficient funds',
         ));
 
+        $state = $this->repository->findByCorrelationId(self::ORDER_ID);
+        self::assertSame(OrderSagaStatus::Failed, $state->status());
+    }
+
+    public function testLateEventDoesNotReviveFinishedSaga(): void
+    {
+        ($this->saga)($this->orderPlaced());
+        ($this->saga)(new PaymentFailed(
+            orderId: self::ORDER_ID,
+            failureReason: 'Insufficient funds',
+        ));
+        $this->dispatchedCommands = [];
+
+        // Platba dorazí až po timeoutu, kdy je sága ve Failed. Bez guardu
+        // by ságu přepnula zpět a poslala MarkOrderPaid na zrušenou objednávku.
+        ($this->saga)(new PaymentSucceeded(orderId: self::ORDER_ID));
+
+        self::assertSame([], $this->steps());
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
         self::assertSame(OrderSagaStatus::Failed, $state->status());
     }

@@ -1594,72 +1594,78 @@ podle testované komponenty:
 
 ### Testování command handlerů
 
-Command handler se testuje jako unit test s mocknutým repozitářem. Ověřujete, že handler
-správně validuje invarianty, volá doménový model a ukládá změny:
+Command handler se často testuje jako unit test s mocknutým repozitářem. `RegisterUserHandler`
+je ale výjimka, na které stojí za to se zastavit: unikátnost e-mailu vynucuje databázový
+index, ne podmínka v kódu. Mock repozitáře žádný index nemá, takže by test procházel
+i nad handlerem, který duplicity pouští dál. Proto běží proti skutečné databázi:
 
 :::callout{type="pattern"}
 ### PHP: Test command handleru {#test-command-handler-heading}
 
-:::code{language="php" filename="Tests/UserManagement/Registration/Command/RegisterUserHandlerTest.php"}
+:::code{language="php" filename="tests/UserManagement/Registration/Command/RegisterUserHandlerTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Registration\Command;
+namespace App\Tests\UserManagement\Registration\Command;
 
 use App\UserManagement\Domain\Exception\DuplicateEmailException;
-use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
-use App\UserManagement\Domain\Service\PasswordHasher;
 use App\UserManagement\Registration\Command\RegisterUser;
 use App\UserManagement\Registration\Command\RegisterUserHandler;
-use PHPUnit\Framework\TestCase;
+use App\UserManagement\Domain\ValueObject\Email;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class RegisterUserHandlerTest extends TestCase
+final class RegisterUserHandlerTest extends KernelTestCase
 {
+    private RegisterUserHandler $handler;
+    private UserRepository $users;
+
+    protected function setUp(): void
+    {
+        $container = self::getContainer();
+        $this->users = $container->get(UserRepository::class);
+        $this->handler = new RegisterUserHandler(
+            $this->users,
+            $container->get(EntityManagerInterface::class),
+        );
+
+        $container->get(EntityManagerInterface::class)
+            ->getConnection()
+            ->executeStatement('DELETE FROM users');
+    }
+
     public function testRegistersNewUser(): void
     {
-        $repository = $this->createMock(UserRepository::class);
-        $repository->expects($this->once())
-            ->method('findByEmail')
-            ->willReturn(null); // žádný existující uživatel
-
-        $repository->expects($this->once())
-            ->method('save')
-            ->with($this->isInstanceOf(User::class));
-
-        $hasher = $this->createMock(PasswordHasher::class);
-        $hasher->method('hashPassword')->willReturn('hashed_password');
-
-        $handler = new RegisterUserHandler($repository, $hasher);
-
-        $handler(new RegisterUser(
+        ($this->handler)(new RegisterUser(
             name: 'Jan Novák',
             email: 'jan@example.com',
             password: 'securepassword123',
         ));
+
+        $user = $this->users->findByEmail(Email::fromUserInput('jan@example.com'));
+
+        self::assertNotNull($user);
+        self::assertSame('Jan Novák', $user->name()->value);
     }
 
     public function testRejectsDuplicateEmail(): void
     {
-        $repository = $this->createMock(UserRepository::class);
-        $repository->method('findByEmail')
-            ->willReturn(User::register(   // skutečný agregát, ne mock
-                UserId::generate(),
-                Email::fromUserInput('jan@example.com'),
-                new HashedPassword('irrelevant'),
-            ));
-
-        $hasher = $this->createMock(PasswordHasher::class);
-
-        $handler = new RegisterUserHandler($repository, $hasher);
-
-        $this->expectException(DuplicateEmailException::class);
-
-        $handler(new RegisterUser(
+        ($this->handler)(new RegisterUser(
             name: 'Jan Novák',
             email: 'jan@example.com',
             password: 'securepassword123',
+        ));
+
+        $this->expectException(DuplicateEmailException::class);
+
+        // Velká písmena i mezery jdou pryč v Email::fromUserInput(),
+        // takže kolizi zachytí unique index, ne porovnání řetězců.
+        ($this->handler)(new RegisterUser(
+            name: 'Jan Jiný',
+            email: '  JAN@example.com ',
+            password: 'jineheslo456',
         ));
     }
 }
@@ -1674,12 +1680,12 @@ Pro integrační testy s reálnou databází můžete ověřit i správnost SQL 
 :::callout{type="pattern"}
 ### PHP: Test query handleru {#test-query-handler-heading}
 
-:::code{language="php" filename="Tests/UserManagement/Profile/Query/GetUserProfileHandlerTest.php"}
+:::code{language="php" filename="tests/UserManagement/Profile/Query/GetUserProfileHandlerTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Profile\Query;
+namespace App\Tests\UserManagement\Profile\Query;
 
 use App\UserManagement\Profile\Query\GetUserProfile;
 use App\UserManagement\Profile\Query\GetUserProfileHandler;
@@ -1701,7 +1707,9 @@ final class GetUserProfileHandlerTest extends TestCase
         );
 
         $readRepository = $this->createMock(UserProfileReadRepository::class);
-        $readRepository->method('findById')
+        // with() bez expects() je od PHPUnit 12 deprecated a ve 14 zmizí.
+        $readRepository->expects($this->once())
+            ->method('findById')
             ->with('550e8400-e29b-41d4-a716-446655440000')
             ->willReturn($expectedProfile);
 
@@ -1735,12 +1743,12 @@ Projektory se nejlépe testují jako integrační testy s reálnou databází. O
 :::callout{type="pattern"}
 ### PHP: Integrační test projektoru {#test-projektor-heading}
 
-:::code{language="php" filename="Tests/Ordering/Infrastructure/Projection/OrderDashboardProjectorTest.php"}
+:::code{language="php" filename="tests/Ordering/Infrastructure/Projection/OrderDashboardProjectorTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\Ordering\Infrastructure\Projection;
+namespace App\Tests\Ordering\Infrastructure\Projection;
 
 use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Ordering\Domain\Event\OrderShipped;
@@ -1753,6 +1761,11 @@ use Symfony\Component\Uid\Uuid;
 
 final class OrderDashboardProjectorTest extends KernelTestCase
 {
+    // OrderId hodnotu nevalidního tvaru nepřijme, proto skutečná UUID.
+    private const ORDER_ID       = '01a07424-28ff-7c31-9d40-6f2a1c8e5b05';
+    private const OTHER_ORDER_ID = '01a07424-28ff-7c31-9d40-6f2a1c8e5b06';
+    private const CUSTOMER_ID    = '01a07424-28ff-7c31-9d40-6f2a1c8e5b07';
+
     private Connection $connection;
     private OrderDashboardProjector $projector;
 
@@ -1819,6 +1832,37 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         );
 
         $this->assertSame(1, (int) $count);
+    }
+
+    public function testLateRedeliveryDoesNotRollBackStatus(): void
+    {
+        $placed = new OrderPlacedIntegrationEvent(
+            eventId: Uuid::v7(),
+            orderId: self::ORDER_ID,
+            customerId: self::CUSTOMER_ID,
+            items: [],
+            totalAmountCents: 1500,
+            occurredAt: new \DateTimeImmutable('2026-03-01 10:00:00'),
+        );
+
+        ($this->projector)($placed);
+        ($this->projector)(new OrderShipped(
+            orderId: OrderId::fromString(self::ORDER_ID),
+            shipmentId: ShipmentId::generate(),
+            occurredAt: new \DateTimeImmutable('2026-03-02 08:30:00'),
+        ));
+
+        // Tohle je ten případ, kvůli kterému upsert nese podmínku na updated_at:
+        // stará událost dorazí znovu až po novější. Bez ní by dashboard tvrdil,
+        // že odeslaná objednávka je zase jen přijatá.
+        ($this->projector)($placed);
+
+        $status = $this->connection->fetchOne(
+            'SELECT status FROM order_dashboard WHERE order_id = :id',
+            ['id' => self::ORDER_ID],
+        );
+
+        $this->assertSame('shipped', $status);
     }
 }
 :::
