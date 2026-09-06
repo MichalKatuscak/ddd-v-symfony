@@ -661,11 +661,11 @@ final class InMemoryUserRepository implements UserRepository
         // vymáhá databáze a handler překládá UniqueConstraintViolationException;
         // fake ho vymáhá sám, aby test nepotřeboval běžící DB.
         $existing = $this->findByEmail($user->email());
-        if ($existing !== null && !$existing->id()->equals($user->id())) {
+        if ($existing !== null && !$existing->id->equals($user->id)) {
             throw DuplicateEmailException::with($user->email());
         }
 
-        $this->storage[(string) $user->id()] = $user;
+        $this->storage[(string) $user->id] = $user;
     }
 
     public function findById(UserId $id): ?User

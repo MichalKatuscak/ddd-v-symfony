@@ -68,19 +68,17 @@ use App\UserManagement\Domain\ValueObject\UserId;
 
 class User
 {
-    private readonly \DateTimeImmutable $createdAt;
+    public readonly \DateTimeImmutable $createdAt;
 
     public function __construct(
-        private readonly UserId $id,
+        // Identita je veřejná readonly vlastnost, stejně jako v kanonickém
+        // User z kapitoly Implementace v Symfony. Zbytek knihy ji čte
+        // jako `$user->id`, ne přes getter.
+        public readonly UserId $id,
         private string $name,
         private Email $email,
     ) {
         $this->createdAt = new \DateTimeImmutable();
-    }
-
-    public function id(): UserId
-    {
-        return $this->id;
     }
 
     public function name(): string
@@ -101,11 +99,6 @@ class User
     public function changeEmail(Email $email): void
     {
         $this->email = $email;
-    }
-
-    public function createdAt(): \DateTimeImmutable
-    {
-        return $this->createdAt;
     }
 
     public function equals(self $other): bool
