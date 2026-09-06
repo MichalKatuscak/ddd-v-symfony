@@ -7,7 +7,7 @@ meta_description: "Vztah DDD a AI nástrojů očima Erica Evanse, Martina Fowler
 meta_keywords: "DDD AI, domain-driven design umělá inteligence, DDD LLM, Eric Evans AI, Martin Fowler AI, Kent Beck AI, DDD bounded context AI, ubiquitous language LLM"
 og_type: article
 published: "2026-03-27"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: DDD a AI
 schema_type: TechArticle
 schema_headline: "DDD a umělá inteligence – co říkají autority"
@@ -36,9 +36,9 @@ tématu mění po měsících, ne po letech. Část následujícího textu zest�
 ## ai.01 Ubiquitous language jako rozhraní pro LLM {#ubiquitous-language}
 
 Jeden z nejkonkrétnějších výroků o vztahu DDD a AI pochází přímo od Erica Evanse. Na konferenci
-Explore DDD 2024 navrhl doladit (fine-tuning) model na ubiquitous language jednoho bounded
-contextu, tedy na terminologii, pravidla a výrazy, které tým denně používá v diskusích
-s doménovými experty. Vytrénovaný model je podle něj sám o sobě bounded context a několik takových modelů
+Explore DDD 2024 navrhl doladit (fine-tuning) model na ubiquitous language jednoho
+bounded contextu. Tedy na terminologii, pravidla a výrazy, které tým denně používá
+v diskusích s doménovými experty. Vytrénovaný model je podle něj sám o sobě bounded context a několik takových modelů
 vedle sebe znamená silné oddělení zodpovědností. Fine-tuning navíc dělá levný model levnějším
 a rychlejším.
 
@@ -61,8 +61,8 @@ s vlastními API hranicemi, ne průřezová vrstva přes celý systém.
 Martin Fowler na to navazuje z jiného úhlu. V rozhovoru o přípravě na nedeterministické
 výpočty (2025) jmenuje domain-driven design a doménově specifické jazyky jako cestu
 k rigoróznějšímu promptování LLM. Rozpracovaný argument vyšel na jeho webu z pera Unmeshe
-Joshiho: obecný jazyk nabízí spoustu způsobů, jak vyjádřit tentýž záměr, kdežto DSL tu
-variabilitu odřízne, takže modelu stačí pár příkladů a syntaxi generuje spolehlivě. Pevný
+Joshiho. Obecný jazyk nabízí spoustu způsobů, jak vyjádřit tentýž záměr; DSL tu
+variabilitu odřízne. Modelu pak stačí pár příkladů a syntaxi generuje spolehlivě. Pevný
 jazyk na vstupu znamená méně entropie na výstupu.
 
 Opačný pól drží David Heinemeier Hansson (DHH). V rozhovoru pro Lex Fridman Podcast (2025)
@@ -90,14 +90,13 @@ praktiků, měření kvality kódu, která o DDD nemluví, a jeden preprint, kte
 Tomu odpovídá i jistota závěrů, které z toho v této sekci plynou.
 
 Jediná konkrétní čísla, která se k tématu dají dohledat, pocházejí z blogpostu Jamese
-Phoenixe: přesnost kolem 55 %
-bez explicitních hranic proti 88 % s nimi, porušení architektonických hranic v 35 % případů
-proti méně než pěti procentům. Autor je uvádí jako vlastní odhad bez metodologie i vzorku,
+Phoenixe. Přesnost kolem 55 % bez explicitních hranic proti 88 % s nimi. Porušení
+architektonických hranic v 35 % případů proti méně než pěti procentům. Autor je uvádí jako vlastní odhad bez metodologie i vzorku,
 takže kapitola na nich nic nestaví. Zůstávají jako ilustrace toho, co praktici pozorují.
 
 Nick Tune je jedním z nejaktivnějších praktiků na průsečíku DDD a AI. V článku pro O'Reilly
 Radar (únor 2026) popisuje, jak použil Claude Code k reverznímu inženýrství softwarové
-architektury, tedy k automatickému mapování end-to-end toků, závislostí a hranic
+architektury. Tedy k automatickému mapování end-to-end toků, závislostí a hranic
 v existující kódové bázi. V návazném článku ukazuje, jak lze pomocí knihovny ts-morph deterministicky
 extrahovat architektonické vzory, které slouží jako vstup pro AI agenty. K výsledku sám
 připojuje varování: v generovaném popisu architektury byly podstatné nepřesnosti, které
@@ -119,8 +118,8 @@ deterministicky, ne ji popsat a doufat.
 Druhý pohled přinášejí data z GitClear. Code churn je podíl řádků přepsaných nebo smazaných
 do dvou týdnů od vytvoření; jeho zdvojnásobení firma v lednu 2024 ohlásila jako projekci.
 Pozdější reporty už stojí na naměřených hodnotách. Podíl řádků spojených s refaktoringem klesl
-ze čtvrtiny v roce 2021 pod desetinu v roce 2024, klonované řádky vzrostly z 8,3 % na 12,3 %
-a kopírovaný kód poprvé překonal přesouvaný. Report za rok 2026 na vzorku 623 milionů změn
+ze čtvrtiny v roce 2021 pod desetinu v roce 2024. Klonované řádky vzrostly z 8,3 %
+na 12,3 % a kopírovaný kód poprvé překonal přesouvaný. Report za rok 2026 na vzorku 623 milionů změn
 ukazuje duplicitu bloků o 81 % vyšší než v roce 2023. Ani jedno měření o DDD nemluví a příčinu
 neprokazuje – ukazuje jen, kterým směrem se kvalita kódu za éry asistentů posunula.
 
@@ -247,8 +246,8 @@ aplikací je DDD přeceňované – a AI, která generuje CRUD kód z jednoduch�
 je přirozeným řešením bez potřeby doménového modelu. Hlavní otázka, na kterou
 DHH odpovídá jinak než Evans, zní: jak velký podíl softwarového průmyslu tvoří
 skutečně komplexní domény versus CRUD monkeying? A mění AI tuto hranici? Buď tím,
-že CRUD kód zlevní natolik, že zbude čas na komplexní doménu, nebo tím,
-že komplexní doménové problémy de facto „zjednoduší“ na LLM-supported decisions.
+že CRUD kód zlevní natolik, že na náročnou doménu zbude čas. Nebo tím, že se
+složité doménové problémy smrsknou na LLM-supported decisions.
 Pro praktické rozhraničení toho, kdy DDD nasazovat a kdy ne, viz kapitolu
 [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
@@ -260,9 +259,9 @@ jednou z komponent. Na rozdíl od keynote z roku 2024 jde o jeho vlastní texty 
 učí jinde.
 
 V článku *AI Components for a Deterministic System* (srpen 2025) Evans popisuje aplikaci,
-která pomocí LLM klasifikuje domény v cizí kódové bázi; jméno *Domain Navigator* jí dává
-až navazující text z ledna 2026. Odnáší si z ní
-rozlišení, které stojí za převzetí: klasifikační úloha není modelovací úloha.
+která pomocí LLM klasifikuje domény v cizí kódové bázi. Jméno *Domain Navigator*
+jí dává až navazující text z ledna 2026. Za převzetí stojí rozlišení, které z ní
+plyne: klasifikační úloha není modelovací úloha.
 Klasifikace je opakovatelná, má správnou odpověď a model v ní vyniká. Modelování opakovatelné
 není a správnou odpověď nemá. Smíchané do jednoho promptu vracejí výstupy, které nejde mezi
 běhy porovnat. Evansovo řešení: nejdřív ustavit kanonickou taxonomii, teprve pak podle ní
@@ -353,7 +352,7 @@ zmenšuje prostor pro chybu. Dodatečnou vrstvu verifikace mohou tvořit archite
 
 Alberto Brandolini, autor EventStormingu, stojí na straně kombinace. Jeho workshop
 *AI-Powered Domain-Driven Design* v Avanscopertě slibuje nasadit AI nástroje tam,
-kde mají největší dopad, a přitom zachovat učení skrz praktická cvičení; účastníci
+kde mají největší dopad, a přitom zachovat učení praktickými cvičeními. Účastníci
 mají vážit lo-fi, hands-on a AI postupy proti sobě a znát meze každého z nich.
 Vlastní vyjádření k tomu, nakolik EventStorming zůstává lidskou aktivitou, se nepodařilo
 dohledat – anotace workshopu je zatím jediný doklad jeho pozice.
@@ -366,15 +365,15 @@ distribuovaných systémů: s latencí, spolehlivostí, verzováním a monitorin
 
 Otevřené otázky, na které obor zatím nemá odpověď:
 
-- **Mění AI hranici, kde DDD dává smysl?** Pokud AI zlevní generování
-  CRUD kódu natolik, že vývojáři mají více kapacity na komplexní logiku, může
-  rozšířit množinu projektů, kde se DDD investice vyplatí.
+- **Mění AI hranici, kde DDD dává smysl?** Pokud AI zlevní generování CRUD kódu
+  natolik, že vývojářům zbude víc kapacity na složitou logiku, může se DDD
+  vyplatit i tam, kde se dnes nevyplatí.
 - **Stane se ubiquitous language standardem pro AI kontexty?**
   Cursor rules a CLAUDE.md jsou ad hoc řešení. Mohla by DDD komunita přispět
   formálnější strukturou pro definici AI kontextů?
 - **Jaká bude role architekta v AI-augmentovaném týmu?** Pokud AI
-  generuje implementaci, architekt se stává primárně autorem kontextů, pravidel
-  a verifikačních mechanismů, což je blíže k DDD modelování než k psaní kódu.
+  generuje implementaci, architekt se stává hlavně autorem kontextů, pravidel
+  a verifikačních mechanismů. To má blíž k DDD modelování než k psaní kódu.
 - **Co se stane s juniorními vývojáři?** DDD předpokládá, že tým
   rozumí doméně. Pokud AI generuje kód, kterému junioři nerozumí, jak se budují
   doménové znalosti pro příští generaci?
