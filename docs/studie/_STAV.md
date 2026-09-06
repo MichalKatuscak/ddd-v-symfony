@@ -1138,6 +1138,71 @@ handlery to dělají. Rozdíl, který knize chyběl: **dual-write je jen zápis 
 proces.** Synchronní `event.bus` uvnitř téže transakce jím není — posluchač běží nad
 stejným spojením a při rollbacku zmizí i jeho zápis. Rozhoduje cíl, ne okamžik.
 
+## Dvanácté kolo: devátá ověřovací stavba (2026-09-06)
+
+Devátý projekt načisto. 101 souborů v `src/`, 20 testů, vše zelené: obě migrace, oba
+`schema:validate` (dev i test), `lint:container`, relay, `messenger:consume`.
+Happy path prošel celý. **Kompenzační větev se rozbila** — a to byl nejcennější nález
+všech dvanácti kol, protože ho žádná statická kontrola najít nemohla.
+
+### Blocker: sága si sama zablokovala kompenzaci
+
+`CancelOrderHandler` (11.05) znal jediné pravidlo — vlastnictví. Sága posílá storno
+pod systémovou identitou, která vlastníkem není a nikdy nebude, takže příkaz po třech
+pokusech skončil v DLQ:
+
+```
+Error: "Cancel not allowed for order 01a0749a-…"
+[critical] Removing from transport after 3 retries.
+```
+
+Výsledný stav: `orders.status = paid`, `order_dashboard = placed`, `order_saga = failed`,
+peníze vráceny. **Objednávka zůstala zaplacená a nezrušená, aniž by cokoli spadlo** —
+ságu odmítnutí příkazu nezastaví, protože se o něm nedozví. Kapitola 11 přitom slibovala
+„explicitní systémovou identitu s vyhrazenými právy" a kód, který ta práva uděluje,
+neukazovala. `sagas.md` navíc tentýž handler popisovala prózou bez jakékoli autorizace —
+dvě neslučitelné implementace pod jedním FQCN.
+
+**Poučení: slib v próze („zavádí se identita s vyhrazenými právy") není implementace.
+Kde kniha řekne, že něco řeší, musí ukázat, čím.**
+
+### Kapitola 11 měla konkurenční agregát
+
+Vlastní konstruktor (čtyři parametry proti kanonickým dvěma), vlastnost `placedAt`,
+kterou kanonický agregát neměl, a guard `status !== Confirmed`. Tři nezávislé kolize:
+opsání třídy rozbije mapování i všechny tři továrny, a guard by kompenzaci zablokoval
+i po opravě handleru — **sága ruší objednávku zaplacenou, ne potvrzenou.**
+Vyřešeno tím, že 11.06 ukazuje výřez, který přidává jen storno lhůtu; `placedAt`
+doplněno do kanonického agregátu.
+
+### `Cannot redeclare Order::$id`
+
+07.07 má identitu promovanou v konstruktoru, 07.08 ji deklaruje znovu jako samostatnou
+vlastnost. Složení obou výpisů doslova je fatální chyba. Průchodná cesta — atributy
+na promovaných parametrech — v knize nebyla řečena.
+
+### Ostatní
+
+- `OutboxCleanupCommand` používal MySQL syntaxi (`DELETE … LIMIT`, `INTERVAL 30 DAY`),
+  kterou SQLite ani Postgres neznají. **Selže až po třiceti dnech provozu.**
+- `transitionTo()` byla mrtvá větev: nikdo ji nevolá a proti `markPaid()` zaznamenává
+  navíc `OrderStatusChanged`, takže projekce podle zvolené cesty jednou změnu vidí
+  a jednou ne.
+- Instalace nedovedla k běžícím testům — chyběl `migrations:migrate --env=test`.
+  Chyběly i `twig-bundle` a `form` pro kontrolery vracející HTML.
+- `bus:` chybělo u sedmi handlerů v kapitolách 11 a 23. `lint:container` to nezachytí;
+  `debug:messenger` ukázal handler na všech třech sběrnicích.
+
+### Co protizkouška potvrdila
+
+Mikrosekundová oprava z jedenáctého kola **drží**, ověřeno negativní kontrolou: po
+záměně `.u` zpět za sekundovou přesnost test spadl. Pozor ale — nese to **výhradně
+formát v PHP**; `DATETIME(6)` je na SQLite no-op (afinita typu), na MySQL platí obojí.
+
+Sedm z osmi tříd dopsaných podle prózy sedělo signaturami. Jediná výjimka byl
+`CancelOrderHandler` — tedy právě ta, kde próza v jedné kapitole odporovala výpisu
+v druhé.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
