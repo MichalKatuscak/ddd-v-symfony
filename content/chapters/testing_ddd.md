@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -212,6 +212,7 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\Exception\UserAlreadyActiveException;
 
 final class UserTest extends TestCase
@@ -227,14 +228,14 @@ final class UserTest extends TestCase
 
     public function testCreatesInactiveUserByDefault(): void
     {
-        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->assertFalse($user->isActive());
     }
 
     public function testActivatesUser(): void
     {
-        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
         $user->activate();
 
         $this->assertTrue($user->isActive());
@@ -242,7 +243,7 @@ final class UserTest extends TestCase
 
     public function testThrowsExceptionWhenActivatingAlreadyActiveUser(): void
     {
-        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
         $user->activate();
 
         $this->expectException(UserAlreadyActiveException::class);
@@ -252,7 +253,7 @@ final class UserTest extends TestCase
 
     public function testChangesEmailAddress(): void
     {
-        $user     = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user     = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
         $newEmail = new Email('novy@example.com');
 
         $user->changeEmail($newEmail);
@@ -262,7 +263,7 @@ final class UserTest extends TestCase
 
     public function testEmailRemainsUnchangedWhenSameValueProvided(): void
     {
-        $user = User::register($this->userId, 'Jan Novák', $this->email, HashedPassword::fromPlainText('secret123'));
+        $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
         $user->releaseEvents(); // vyprázdní buffer - registrace vydala UserRegistered
 
         $user->changeEmail(new Email('jan@example.com'));
@@ -300,6 +301,7 @@ use PHPUnit\Framework\TestCase;
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\Ordering\Domain\ValueObject\ProductId;
 use App\SharedKernel\Domain\Money;
 use App\SharedKernel\Domain\Currency;
@@ -337,7 +339,7 @@ final class OrderTest extends TestCase
 
         $order->confirm();
 
-        $this->assertTrue($order->isConfirmed());
+        $this->assertSame(OrderStatus::Confirmed, $order->status);
     }
 
     public function testThrowsExceptionWhenConfirmingAlreadyConfirmedOrder(): void
@@ -768,7 +770,7 @@ final class RegisterUserHandlerTest extends TestCase
 
     public function testThrowsExceptionWhenEmailAlreadyTaken(): void
     {
-        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
+        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'SilneHeslo123');
         ($this->handler)($command); // první registrace
 
         $this->expectException(DuplicateEmailException::class);
@@ -778,7 +780,7 @@ final class RegisterUserHandlerTest extends TestCase
 
     public function testDoesNotPersistUserWhenEmailAlreadyTaken(): void
     {
-        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'Heslo123!');
+        $command = new RegisterUser(name: 'Jan Novák', email: 'jan@example.com', password: 'SilneHeslo123');
         ($this->handler)($command);
 
         try {
@@ -811,7 +813,7 @@ místo jen tam, kde se ověřují vedlejší efekty (odeslání e-mailu, volán�
 ### Testovací data: builder místo opakovaného konstruktoru
 
 Testy v předchozích ukázkách opakují v každé metodě totéž volání
-`User::register($id, 'Jan Novák', $email, HashedPassword::fromPlainText('secret123'))`. Pro test
+`User::register($id, 'Jan Novák', $email, HashedPassword::fromPlainText('SilneHeslo123'))`. Pro test
 je z něj podstatný jeden argument, zbytek je tam proto, že ho vyžaduje konstruktor. Až přibude pátý
 parametr, mění se všechny testy naráz.
 
@@ -1044,7 +1046,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {
         $userId = UserId::generate();
         $email  = new Email('integrace@example.com');
-        $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
+        $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->repository->save($user);
         // save() jen persistuje; zápis do DB spouští až flush(). Vlastníkem
@@ -1067,7 +1069,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     public function testFindsByEmailAddress(): void
     {
         $email = new Email('hledat@example.com');
-        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
+        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->repository->save($user);
         $this->entityManager->flush();
@@ -1082,7 +1084,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     public function testExistsByEmail(): void
     {
         $email = new Email('exists@example.com');
-        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
+        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->assertFalse($this->repository->existsByEmail($email));
 
@@ -1196,7 +1198,7 @@ final class RegistrationControllerTest extends WebTestCase
             content: json_encode([
                 'name'     => 'Jan Novák',
                 'email'    => 'not-valid-email',
-                'password' => 'Heslo123!',
+                'password' => 'SilneHeslo123',
             ])
         );
 

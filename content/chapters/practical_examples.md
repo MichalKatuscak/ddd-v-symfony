@@ -7,7 +7,7 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
@@ -312,7 +312,7 @@ final readonly class CartCheckedOut
 Na druhé straně hranice stojí handler kontextu Order. Ten si cizí slovník překládá na svůj:
 `UserId` z košíku se stává `CustomerId` objednávky.
 
-:::code{language="php" filename="src/Order/PlaceOrder/Listener/PlaceOrderOnCartCheckedOut.php"}
+:::code{language="php" filename="src/Ordering/PlaceOrder/Listener/PlaceOrderOnCartCheckedOut.php"}
 #[AsMessageHandler(bus: 'event.bus')]
 final readonly class PlaceOrderOnCartCheckedOut
 {

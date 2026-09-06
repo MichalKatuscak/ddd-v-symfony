@@ -7,7 +7,7 @@ meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. P
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"
@@ -466,9 +466,19 @@ class Order extends AggregateRoot
         $this->items = new ArrayCollection();
     }
 
+    // Kanonická továrna knihy: identita a vlastník, nic víc. Volá ji deset
+    // dalších kapitol, takže se odsud nesmí ztratit.
+    public static function place(OrderId $id, CustomerId $customerId): self
+    {
+        $order = new self($id, $customerId);
+        $order->record(new OrderPlaced($id, $customerId));
+
+        return $order;
+    }
+
     // Invariant „objednávka má alespoň jednu položku“ vymáhá signatura:
-    // bez první položky objednávka nevznikne. Vedle kanonického
-    // Order::place(OrderId, CustomerId) je to druhá továrna, ne jeho náhrada.
+    // bez první položky objednávka nevznikne. Vedle place() je to druhá
+    // továrna, ne jeho náhrada.
     public static function placeWithFirstItem(
         CustomerId $customerId,
         ProductId $productId,
@@ -476,16 +486,11 @@ class Order extends AggregateRoot
         Money $unitPrice,
         ?\DateTimeImmutable $at = null,
     ): self {
-        $order = new self(OrderId::generate(), $customerId);
+        $order = self::place(OrderId::generate(), $customerId);
         $order->addItem($productId, $quantity, $unitPrice);
         // Objednávka přišla kompletní, takže rovnou opouští Draft.
         // Draft je stav rozpracovaného košíku, ne odeslané objednávky.
         $order->confirm($at);
-
-        // Kanonická OrderPlaced (06.08) nese identitu objednávky a zákazníka;
-        // čas si doplní sama. Částka do doménové události nepatří – odvodí
-        // si ji příjemce z agregátu, nebo patří do integrační události.
-        $order->record(new OrderPlaced($order->id, $order->customerId));
 
         return $order;
     }

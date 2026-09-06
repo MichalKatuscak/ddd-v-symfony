@@ -7,7 +7,7 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
@@ -105,7 +105,7 @@ nebo `slice()` přímými SQL dotazy a do paměti kolekci vůbec nenačte.
 
 *Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatný persistence model a mapper.*
 
-:::code{language="php" filename="src/Order/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez: mapování kolekce)"}
 <?php
 
 declare(strict_types=1);
@@ -438,7 +438,7 @@ vyplatí se projít levnější stupně.
 :::callout{type="pattern"}
 ### Příklad: QueryHandler vracející DTO přes DQL
 
-:::code{language="php" filename="src/Order/Application/Query/OrderSummaryDTO.php"}
+:::code{language="php" filename="src/Ordering/Application/Query/OrderSummaryDTO.php"}
 <?php
 
 declare(strict_types=1);
@@ -697,7 +697,7 @@ final readonly class UserId
 
 *Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatný persistence model a mapper. Ukázka níže je jiná varianta mapování `Order` než v [sekci N+1](#n-plus-1-problem): ID zde má nativní typ `Uuid`, nikoli `string`.*
 
-:::code{language="php" filename="src/Order/Domain/Model/Order.php (mapování pro čtecí stranu)"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (mapování pro čtecí stranu)"}
 <?php
 
 declare(strict_types=1);
@@ -1043,7 +1043,7 @@ vyhrazeným pro údržbové úlohy. `clear()` na konci handleru je pak pojistka,
 :::callout{type="pattern"}
 ### Příklad: hromadná změna stavu přes DQL UPDATE
 
-:::code{language="php" filename="src/Order/Infrastructure/Command/BulkUpdateOrderStatusHandler.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Command/BulkUpdateOrderStatusHandler.php"}
 <?php
 
 declare(strict_types=1);
