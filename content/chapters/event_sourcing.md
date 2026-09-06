@@ -25,7 +25,7 @@ Tradiční CRUD persistence má slepou skvrnu: při každé změně přepíše p
 historie se nenávratně ztrácí. Event Sourcing (ES) ukládá stav systému jako **sekvenci
 neměnných událostí**, jež k němu
 vedly [[1]](https://martinfowler.com/eaaDev/EventSourcing.html).
-Každá změna stavu domény je zaznamenána jako samostatná, pojmenovaná událost se svými daty.
+Každou změnu stavu domény zaznamenává samostatná pojmenovaná událost s vlastními daty.
 Aktuální stav agregátu pak vzniká *přehráním* (replay) těchto událostí od počátku.
 
 Fowler sám princip formuluje jako *„Event Sourcing ensures that all changes to application
@@ -64,7 +64,7 @@ předchozí je pryč. Event Sourcing zapisuje každou změnu jako nový řádek 
 
 - **Event (Událost)** – Neměnný záznam o tom, co se v doméně přihodilo, vyjádřený v minulém čase (např. `OrderPlaced`, `PaymentReceived`). Obsahuje všechna data potřebná k rekonstrukci změny stavu.
 - **Event Store** – Specializované append-only úložiště pro události. Události se do něj pouze přidávají. Každá událost patří do event streamu konkrétního agregátu.
-- **Aggregate ([Agregát](/zakladni-koncepty#aggregates))** – V kontextu ES je agregát rekonstruován přehráním všech událostí ze svého event streamu. Každá mutace stavu agregátu produkuje novou událost místo přímé modifikace atributů.
+- **Aggregate ([Agregát](/zakladni-koncepty#aggregates))** – V Event Sourcingu agregát vzniká přehráním všech událostí ze svého streamu. Každá mutace stavu agregátu produkuje novou událost místo přímé modifikace atributů.
 - **Projection (Projekce)** – Read model sestavený z událostí. Projekce transformují event stream do podoby vhodné pro konkrétní dotazy (query) – například denormalizovaná tabulka pro přehled objednávek.
 - **Snapshot** – Periodicky ukládaný snímek aktuálního stavu agregátu, který slouží jako zkratka při replay. Umožňuje přehrát pouze události novější než poslední snapshot místo celého event streamu od počátku.
 :::
@@ -94,7 +94,7 @@ postavíte tak jako tak – a tím se dostáváte ke CQRS oklikou.
 1. Uživatel odešle **Command** (např. `PlaceOrderCommand`).
 2. Command Handler načte agregát přehráním jeho event streamu z Event Store.
 3. Agregát validuje command a produkuje jednu nebo více **Domain Events**.
-4. Nové události jsou uloženy do **Event Store** (append).
+4. Nové události se ukládají do **Event Store** (append).
 5. **Event Bus** (Symfony Messenger) distribuuje události odběratelům.
 6. **Projectors** přijmou události a aktualizují **Read Models**.
 7. Uživatel následně dotazuje read model přes **Query** – čte z optimalizované projekce.
@@ -154,9 +154,9 @@ Kafka, RabbitMQ ani Redis Streams roli Event Store nezastanou, i když se v nich
 také objevují v pořadí. Dudycz uvádí tři technické důvody
 [[4]](https://event-driven.io/en/event_streaming_is_not_event_sourcing/). Brokery neumí
 optimistic concurrency na úrovni streamu, takže nemají čím ochránit invariant agregátu
-proti souběžnému zápisu. Čtení jednoho streamu za účelem rekonstrukce agregátu je v nich
+proti souběžnému zápisu. Přečíst jeden stream a poskládat z něj agregát je v nich
 buď nespolehlivé, nebo drahé. A retenční model je stavěný na průtok, ne na trvalé uložení:
-data po nastavené době mizí, což je u zdroje pravdy nepřijatelné.
+data po nastavené době mizí, a to je u zdroje pravdy nepřijatelné.
 
 Rozdělení rolí je tedy jednoznačné: Event Store drží historii a vynucuje nad ní pravidla,
 broker ji rozváží konzumentům. Zbytek kapitoly proto používá Symfony Messenger a RabbitMQ
@@ -175,7 +175,7 @@ ověřte na Packagistu.
 - **prooph** – řada 7.x je udržovaná a používaná, doprovodný Symfony bundle se ale od roku 2024 nehnul a končí u Symfony 7. Integraci pro Symfony 8 si napíšete sami.
 
 Broadway do tohoto seznamu už nepatří. V srpnu 2026 vyšla verze 3.0.1 označená jako
-`abandoned` a repozitář byl archivován. Pro nové projekty odpadá; v existujících kódových
+`abandoned` a repozitář skončil v archivu. Pro nové projekty odpadá; v existujících kódových
 základnách zůstává jako zátěž k odstranění.
 
 Vlastní minimalistický store má smysl ve třech situacích. Při učení, kdy chcete vidět
@@ -634,7 +634,7 @@ final class ConcurrencyException extends \RuntimeException
 :::
 *src/Infrastructure/EventSourcing/EventEnvelope.php*
 
-Mapu `typeMap` je nutné zaregistrovat, jinak deserializace skončí na neznámém typu:
+Mapa `typeMap` se musí zaregistrovat, jinak deserializace skončí na neznámém typu:
 
 :::code{language="yaml" filename="config/services.yaml"}
 services:
@@ -1761,9 +1761,9 @@ právě jednou.
 
 At-least-once transport negarantuje ani pořadí. Dorazí-li `OrderItemAdded` dřív než
 `OrderPlaced`, projektor provede UPDATE na řádek, který ještě neexistuje – příkaz projde,
-ovlivní nula řádků a událost zmizí bez jediné chyby v logu. Obranou je upsert, který chybějící
-řádek založí, nebo sloupec s verzí v read modelu: projektor událost aplikuje jen tehdy, když
-její verze navazuje na uloženou, jinak ji vrátí do fronty k pozdějšímu zpracování.
+ovlivní nula řádků a událost zmizí bez jediné chyby v logu. Obranou je upsert, který chybějící řádek založí, nebo sloupec s verzí v read modelu.
+Projektor pak událost aplikuje jen tehdy, když její verze navazuje na uloženou;
+jinak ji vrátí do fronty k pozdějšímu zpracování.
 :::
 
 ### Chybové stavy a retry strategie
@@ -2499,12 +2499,12 @@ Některé změny tuto vlastnost nemají:
 - **Sémantická změna pole.** `Order.shippingPrice` původně zahrnoval DPH,
   od v3 ho neobsahuje. Stará data nelze správně přeložit – DPH sazba
   v okamžiku vystavení objednávky není v eventu uložená. Upcaster může jen
-  *předpokládat* (např. konstantní 21 %), což je nepřesné a generuje
-  reporty s chybnými čísly.
+  *předpokládat* (např. konstantní 21 %). To je nepřesné a reporty pak nesou
+  chybná čísla.
 - **Event splitting.** Původní `OrderPlaced` obsahoval `customerData`
   inline. V nové verzi se rozděluje na `OrderPlaced` + `CustomerSnapshotted`
-  (samostatný event). Upcaster by musel vytvořit *druhý* event z prvního,
-  což porušuje princip „1 fyzický event v Event Store = 1 logický fakt“.
+  (samostatný event). Upcaster by musel z prvního eventu vytvořit *druhý*,
+  a to porušuje princip „1 fyzický event v Event Store = 1 logický fakt“.
 - **Event merging.** Dva eventy `ItemAdded` + `ItemQuantityChanged` se
   v nové doméně spojí do jednoho `ItemUpserted`. Upcasting jdoucí jednou
   cestou nestačí – potřebujete agregátní transformaci napříč streamem.
@@ -2656,11 +2656,11 @@ posoudí právník, ne architekt.
 
 :::faq{}
 - question: Co je Event Sourcing?
-  answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku, což poskytuje úplný audit trail a možnost zpětně rekonstruovat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: event log se pouze rozšiřuje o nové záznamy. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
+  answer: 'Event Sourcing je přístup k persistenci stavu, při kterém se neukládá aktuální snímek dat, ale append-only sekvence neměnných událostí, které k aktuálnímu stavu vedly. Aktuální stav agregátu vzniká přehráním těchto událostí od počátku. Tím systém získá úplný audit trail a dokáže zpětně poskládat jakýkoli stav v čase. Platí princip „current state is derived from the history of events“: event log se pouze rozšiřuje o nové záznamy. Viz <a href="#co-je-event-sourcing">úvodní sekci</a>.'
 - question: Jaký je vztah mezi Event Sourcingem a CQRS?
-  answer: 'Event Sourcing a CQRS jsou dva samostatné vzory, které se často kombinují. CQRS funguje i s klasickou ORM persistencí a ES lze zavést i bez formálního rozdělení na write a read modely. Symetrie ale neplatí: write model event-sourced systému se nedá dotazovat jinak než podle ID, takže read stranu postavíte tak jako tak. V praxi se však hodí dohromady, protože ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů), což je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
+  answer: 'Event Sourcing a CQRS jsou dva samostatné vzory, které se často kombinují. CQRS funguje i s klasickou ORM persistencí a ES lze zavést i bez formálního rozdělení na write a read modely. Symetrie ale neplatí: write model event-sourced systému se nedá dotazovat jinak než podle ID, takže read stranu postavíte tak jako tak. V praxi se však hodí dohromady. ES přirozeně vede k oddělení zápisu (event store) a čtení (projekce do read modelů), a to je přesně myšlenka CQRS. Více v <a href="#vztah-k-cqrs">sekci Vztah k CQRS</a>.'
 - question: Co je Event Store a k čemu slouží?
-  answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně může jít o specializovaný produkt (KurrentDB, který se do prosince 2024 jmenoval EventStoreDB), o PHP knihovnu nad relační databází (EventSauce, patchlevel/event-sourcing, prooph), nebo o vlastní minimalistickou nadstavbu, jakou staví tato kapitola. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
+  answer: 'Event Store je specializované append-only úložiště, které persistuje doménové události jednotlivých agregátů chronologicky seřazené. Typicky poskytuje dotazy na event stream konkrétního agregátu pro jeho rekonstrukci a globální dotaz pro čtení událostí všemi projekcemi. Základní metody jsou <code>append(streamId, events)</code> a <code>readStream(streamId)</code>; pokročilejší řešení zahrnují optimistické zamykání verzí a publikování událostí do event busu. Implementačně jde o tři možnosti. Specializovaný produkt (KurrentDB, který se do prosince 2024 jmenoval EventStoreDB), PHP knihovna nad relační databází (EventSauce, patchlevel/event-sourcing, prooph), nebo vlastní minimalistická nadstavba, jakou staví tato kapitola. Detailní rozbor v <a href="#event-store">sekci Implementace Event Store</a>.'
 - question: Co jsou projekce v Event Sourcingu?
   answer: 'Projekce je proces, který naslouchá událostem z event store a buduje z nich read modely – denormalizované datové struktury určené pro rychlé dotazy. Projekce bývá jednoúčelová: každý read model má obvykle vlastní projekci, která ho od začátku nebo od posledního zpracovaného offsetu udržuje aktuální. Projekce lze kdykoli přebudovat (rebuild) přehráním událostí od počátku, čímž se bezpečně opravují chyby v read modelech. Praktický příklad v <a href="#projekce">sekci Projekce</a>.'
 - question: K čemu slouží snapshotting v Event Sourcingu?
