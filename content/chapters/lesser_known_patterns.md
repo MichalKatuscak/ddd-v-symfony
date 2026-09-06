@@ -7,7 +7,7 @@ meta_description: "Čtyři doplňkové taktické vzory DDD: Specification pro ko
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
 schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
@@ -94,15 +94,15 @@ vhodný. **Construction-to-order** popisuje, jak má objekt vypadat, aniž řeš
 objekt vyrobit; z popisu se dá kandidát sestavit na zakázku. V Symfony projektu se ta
 trojice potkává ve čtyřech typických situacích:
 
-1. **Komplexní doménová pravidla, která se mají skládat.** Pokud máte
-   v různých částech aplikace rekombinace téhož motivu – někde
+1. **Komplexní doménová pravidla, která se mají skládat.** Pokud se
+   v různých částech aplikace vrací tentýž motiv v jiné kombinaci – někde
    „*premium AND v EU*“, jinde „*premium OR má slevový kód*“ –
    kompozice pomocí Specification ušetří duplikaci a udrží pravidla
    konzistentní.
 2. **Pravidla použitelná jak v doméně, tak v repozitáři.** Jedna a tatáž
-   specifikace musí umět odpovědět na otázku „*splňuje tento konkrétní objekt
-   pravidlo?*“ (in-memory predikát) i „*vrať mi z databáze všechny objekty,
-   které pravidlo splňují?*“ (query). Obě podoby pravidla (PHP i SQL/Doctrine
+   specifikace musí zvládnout obojí: odpovědět na „*splňuje tento konkrétní
+   objekt pravidlo?*“ (in-memory predikát) i vrátit z databáze všechny
+   objekty, které pravidlo splňují (query). Obě podoby pravidla (PHP i SQL/Doctrine
    DQL) drží pohromadě v jedné třídě; **double-dispatch** přijde ke slovu
    při předání specifikace repozitáři (viz
    [Double-dispatch do Doctrine](#spec-doctrine)).
@@ -690,8 +690,9 @@ public function matchWithCustomer(QuerySpecification $spec): array
 }
 :::
 
-Obě role specifikace (in-memory predikát i překlad do dotazu) sedí v jedné třídě,
-takže když se PHP a databázová podoba začnou rozcházet, je to při code review vidět na jedné obrazovce.
+Obě role specifikace (in-memory predikát i překlad do dotazu) sedí v jedné třídě.
+Když se PHP a databázová podoba začnou rozcházet, je to při code review vidět
+na jedné obrazovce.
 Nic tento soulad ale nevynucuje – jde o dvě nezávislé implementace téhož pravidla. Pojistkou
 je kontraktní test: nad stejnou sadou testovacích dat ověří, že `isSatisfiedBy()`
 označí tytéž objekty, jaké `match()` vrátí z databáze. Když se obě verze rozejdou,
@@ -746,8 +747,8 @@ se sváže s in-memory specifikací.
 Poslední poznámka k rozsahu. Celý framework z této sekce existuje i hotový.
 `happyr/doctrine-specification` má přes 900 tisíc instalací, podporuje Doctrine ORM 3
 a repozitář rozšiřuje o `match()`; pravidla se skládají přes `Spec::andX()` a `Spec::orX()`.
-Filtrování navíc odděluje od modifikátorů výsledku (řazení, hydratace), což ruční kostra
-z této kapitoly nemá. Ukázky výše jsou tu proto, aby bylo vidět, co balíček uvnitř dělá.
+Filtrování navíc odděluje od modifikátorů výsledku (řazení, hydratace). Ruční
+kostra z této kapitoly to neumí. Ukázky výše jsou tu proto, aby bylo vidět, co balíček uvnitř dělá.
 V projektu, kde specifikace nejsou předmětem výuky, je balíček levnější volbou.
 
 Pro hluboký teoretický základ vzoru: Evans, E., *Domain-Driven Design* (2003),
@@ -1429,8 +1430,8 @@ ručně – rozebírá to [kapitola o architektonických stylech](/architektonic
 Evansův Module z roku 2003 stojí na kohezi pojmů a na tom, že moduly nekoukají do sebe
 navzájem. Dnešní praxe pod hlavičkou *modulárního monolitu* přidává třetí požadavek.
 Kamil Grzybek popisuje modul jako vertikální řez byznysem se třemi vlastnostmi:
-nezávislost a zaměnitelnost, úplnost (obsahuje vše potřebné k dodání funkce) a dobře
-definované rozhraní, přes které se do něj vstupuje.
+nezávislost a zaměnitelnost, úplnost (obsahuje vše potřebné k dodání funkce)
+a dobře definované rozhraní, přes které se do modulu vstupuje.
 
 Ta třetí vlastnost je posun oproti roku 2003. Nestačí zakázat cizí import; modul má
 vystavit úzkou množinu typů, které smí volat okolí, a zbytek nechat interní. Prakticky
@@ -1522,10 +1523,10 @@ Poslední sloupec u Specification stojí za rozvedení. Kostra vzoru leží v `S
 `CompositeSpecification` a tři kombinátory. Konkrétní pravidlo `EligibleForFreeShipping` naopak patří jednomu kontextu a jinde
 by nedávalo smysl. Sdílí se mechanismus, ne pravidlo.
 
-Hlavní vztah: **Agregát uvnitř používá Specifications** pro invarianty,
-**vzniká přes Factory** (named constructor), **spolupracuje s 2+ jinými
-agregáty přes Domain Service**, a celá ta skupina **žije v jednom
-Module**, který odpovídá Bounded Contextu. Provázanost celé sady popsala
+Hlavní vztah: **agregát uvnitř používá Specifications** pro invarianty,
+**vzniká přes Factory** (named constructor) a **spolupracuje s 2+ jinými
+agregáty přes Domain Service**. Celá ta skupina pak **žije v jednom Module**,
+který odpovídá Bounded Contextu. Provázanost celé sady popsala
 už sekce [08.01](#proc-prehlizime).
 
 ## 08.07 Anti-vzory souhrn {#antivzory}
@@ -1597,11 +1598,11 @@ u anémického modelu, který v sekci 08.03 padl jen krátce.
 - question: 'Má Domain Service mít stav?'
   answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables měnící se mezi voláními, žádný interní cache, žádný čítač. Se stavem se ztrácí idempotence a bezpečnost při souběhu. Závislosti jsou ale jiné téma než stav a odpověď na ně kategorická není: <code>Mailer</code> nebo HTTP klient službu skutečně posouvají do Application či Infrastructure vrstvy, u repozitáře se zdroje rozcházejí. Khorikov připouští <em>impure</em> doménovou službu, Noback umísťuje rozhraní repozitáře přímo do Domain vrstvy. Vodítko: nejdřív zvažte, jestli data nemá dodat volající; když je jinak nezískáte, závislost na doménovém rozhraní je přijatelná. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
 - question: 'Factory metoda nebo Factory class – jak se rozhodnout?'
-  answer: 'Standardně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) staví v kapitole 11 <em>Factories</em> do popředí factory metodu na agregátním kořeni a samostatnou factory řeší až jako druhou možnost na úrovni service; PHP podobu s privátním konstruktorem popsal Mathias Verraes v textu <em>Named Constructors in PHP</em> (2014). K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
+  answer: 'Standardně volte <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) staví v kapitole 11 <em>Factories</em> do popředí factory metodu na agregátním kořeni a samostatnou factory řeší až jako druhou možnost na úrovni service. PHP podobu s privátním konstruktorem popsal Mathias Verraes v textu <em>Named Constructors in PHP</em> (2014). K samostatné Factory class přejděte teprve tehdy, když vznik agregátu nutně vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Statická metoda totiž tyto závislosti nemůže přijímat bez service locatoru, který je sám anti-vzor. Pokud Factory class neobsahuje žádnou DI závislost a jen volá <code>new Order(...)</code>, je to redundantní vrstva – smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
 - question: 'Jak vynutit hranice mezi Moduly v PHP projektu?'
   answer: 'Konvence sama o sobě se rozpadá – vývojáři pod tlakem „udělej rychle“ přepíšou cross-BC import za 5 minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://github.com/phparkitect/arkitect" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener">deptrac</a>. Definujete pravidla typu „App\\Ordering nesmí závisět na App\\Billing“, „App\\Ordering\\Domain nesmí znát Doctrine“, a CI build selže při porušení. Náklad je jeden konfigurační soubor, zisk je jistota, že modulární organizace přežije i pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
 - question: 'Jak má vypadat namespace třídy, která sedí na hranici dvou Bounded Contextů?'
   answer: 'V čistém DDD <strong>žádná třída na hranici dvou BC nesedí</strong>. Pokud objevíte takový případ, je to signál, že hranice je špatně nakreslená nebo že potřebujete <a href="/context-mapping">Anti-Corruption Layer</a> (ACL). Konkrétní řešení: v každém BC žije <em>vlastní</em> typ s vlastním namespace. <code>App\\Ordering\\Domain\\CustomerId</code> v Ordering kontextu, <code>App\\Billing\\Domain\\CustomerId</code> v Billing kontextu, případně mapování přes events. Pokud opravdu existuje univerzální koncept (<code>Money</code>, <code>Currency</code>, <code>Country</code>), patří do <strong>SharedKernel</strong> – ale tento balíček musí být explicitně malý, stabilní a s dohodou všech týmů. Souvisí <a href="#mod-bc">Modul jako Bounded Context</a>.'
 - question: 'Můžu Specification a Domain Service kombinovat?'
-  answer: 'Ano, a v praxi to často děláte. Domain Service obvykle koordinuje 2+ agregáty, kde jedno z rozhodnutí je vyjádřeno jako Specification – typicky „může tato objednávka projít k expedici?“ = kompozice <code>HasBeenPaid AND ItemsInStock AND NotInBlacklist</code>. Domain Service tu specifikaci instancuje a volá <code>isSatisfiedBy()</code>, podle výsledku zavolá metodu na agregátu. Vzory se vzájemně doplňují: Specification je <em>pravidlo</em>, Domain Service je <em>akce</em>, která pravidlo aplikuje na 2+ agregáty. Detail v <a href="#vztahy">sekci 08.06 Vztah těchto vzorů</a>.'
+  answer: 'Ano, a v praxi to často děláte. Domain Service obvykle koordinuje 2+ agregáty a jedno z rozhodnutí přitom nese Specification – typicky „může tato objednávka projít k expedici?“ = kompozice <code>HasBeenPaid AND ItemsInStock AND NotInBlacklist</code>. Domain Service tu specifikaci instancuje a volá <code>isSatisfiedBy()</code>, podle výsledku zavolá metodu na agregátu. Vzory se vzájemně doplňují: Specification je <em>pravidlo</em>, Domain Service je <em>akce</em>, která pravidlo aplikuje na 2+ agregáty. Detail v <a href="#vztahy">sekci 08.06 Vztah těchto vzorů</a>.'
 :::
