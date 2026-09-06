@@ -76,6 +76,15 @@ $ignoreInside = ['```', ':::code'];
 
 $results = [];
 
+/** Leží pozice uvnitř páru českých uvozovek „…“ na témže řádku? */
+function isInsideCzechQuotes(string $line, int $offset): bool
+{
+    $before = mb_substr($line, 0, $offset);
+
+    // Lichý počet otevíracích minus zavíracích znamená, že jsme uvnitř.
+    return substr_count($before, '„') > substr_count($before, '“');
+}
+
 foreach ($targets as $file) {
     $body = file_get_contents($file);
     $lines = explode("\n", $body);
@@ -127,7 +136,26 @@ foreach ($targets as $file) {
 
             if (preg_match_all('/' . $pattern . '/iu', $line, $m, PREG_OFFSET_CAPTURE)) {
                 foreach ($m[0] as $match) {
-                    [$matchText, $offset] = $match;
+                    [$matchText, $byteOffset] = $match;
+
+                    // PREG_OFFSET_CAPTURE vrací pozici v bajtech; s diakritikou
+                    // by se s ní mb_substr() netrefil.
+                    $offset = mb_strlen(substr($line, 0, $byteOffset));
+
+                    // Slovo, které kniha sama cituje a kritizuje, není
+                    // prohřešek: „mocný framework“ ve větě o tom, že se
+                    // tak psát nemá. Uvnitř českých uvozovek se nehlásí.
+                    if (isInsideCzechQuotes($line, $offset)) {
+                        continue;
+                    }
+
+                    // „Klíčová doména“ a „Klíčová subdoména“ jsou zavedené
+                    // české překlady Core Domain, ne vata.
+                    if (preg_match('/^Klíčov/iu', $matchText)
+                        && preg_match('/^\s*(sub)?dom(é|e)n/iu', mb_substr($line, $offset + mb_strlen($matchText)))
+                    ) {
+                        continue;
+                    }
                     $context = mb_substr($line, max(0, $offset - 20), 70);
                     $results[] = [
                         'file' => str_replace($root . '/', '', $file),
