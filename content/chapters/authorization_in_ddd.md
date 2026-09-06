@@ -178,6 +178,10 @@ security:
             form_login:
                 login_path: login
                 check_path: login
+                # Bez tohohle řádku míří Symfony po přihlášení na `/`,
+                # kterou kniha nikde nedefinuje – první proklik po loginu
+                # by skončil na 404.
+                default_target_path: app_profile
             logout: ~
 
     access_control:
@@ -1074,6 +1078,7 @@ namespace App\SharedKernel\Infrastructure\Http;
 use App\Ordering\Application\Exception\AccessDeniedDomainException;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\Exception\OrderNotFoundException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -1096,6 +1101,10 @@ final readonly class DomainExceptionListener
             $exception instanceof AccessDeniedDomainException => 403,
             $exception instanceof InvalidOrderStateTransitionException,
             $exception instanceof CancellationWindowExpiredException => 409,
+            // Bez téhle větve vrátí detail neexistující objednávky 500,
+            // zatímco sousední cesta s nevalidním tvarem ID vrací 404.
+            // Rozdíl se pozná až v produkčních logech.
+            $exception instanceof OrderNotFoundException => 404,
             default => null,
         };
 

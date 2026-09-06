@@ -574,13 +574,28 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\Command;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 final readonly class PlaceOrder
 {
     /**
      * @param list<array{productId: string, quantity: int, unitPriceInCents: int}> $items
      */
     public function __construct(
+        #[Assert\Uuid]
         public string $customerId,
+
+        // Bez těchhle pravidel dojde na kontrolu až v hodnotovém objektu
+        // uvnitř agregátu – tedy jako 500 místo 422. Validace na hranici
+        // odmítne nesmysl dřív, než se vůbec sestaví doménový model.
+        #[Assert\Count(min: 1)]
+        #[Assert\All([
+            new Assert\Collection([
+                'productId' => [new Assert\Uuid()],
+                'quantity' => [new Assert\Positive()],
+                'unitPriceInCents' => [new Assert\PositiveOrZero()],
+            ]),
+        ])]
         public array $items,
     ) {}
 }

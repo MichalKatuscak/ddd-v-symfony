@@ -860,8 +860,25 @@ final class RegistrationController extends AbstractController
 :::
 :::
 
-Šablona je běžný Twig formulář; `form_row` vykreslí i chyby, které do polí vložil
-kontroler z validace commandu:
+Profil vykresluje ViewModel, ne agregát – šablona proto nesahá na nic, co by musela
+dopočítávat:
+
+:::code{language="twig" filename="src/UserManagement/Profile/View/profile.html.twig"}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>{{ profile.name }}</h1>
+    <dl>
+        <dt>E-mail</dt>       <dd>{{ profile.email }}</dd>
+        <dt>Registrace</dt>   <dd>{{ profile.registeredAt|date('j. n. Y') }}</dd>
+        <dt>Objednávek</dt>   <dd>{{ profile.totalOrders }}</dd>
+        <dt>Úroveň</dt>       <dd>{{ profile.membershipTier }}</dd>
+    </dl>
+{% endblock %}
+:::
+
+Registrační šablona je běžný Twig formulář; `form_row` vykreslí i chyby, které do polí
+vložil kontroler z validace commandu:
 
 :::code{language="twig" filename="src/UserManagement/Registration/View/registration.html.twig"}
 {% extends 'base.html.twig' %}
@@ -909,15 +926,28 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class RegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // NotBlank tu není duplicita pravidla z commandu. Bez data_class
+        // formulář constrainty commandu nepřebírá a prázdné pole přijde
+        // do konstruktoru jako null – tedy 500 dřív, než se validace spustí.
         $builder
-            ->add('name', TextType::class, ['label' => 'Jméno'])
-            ->add('email', EmailType::class, ['label' => 'E-mail'])
-            ->add('password', PasswordType::class, ['label' => 'Heslo']);
+            ->add('name', TextType::class, [
+                'label' => 'Jméno',
+                'constraints' => [new NotBlank()],
+            ])
+            ->add('email', EmailType::class, [
+                'label' => 'E-mail',
+                'constraints' => [new NotBlank()],
+            ])
+            ->add('password', PasswordType::class, [
+                'label' => 'Heslo',
+                'constraints' => [new NotBlank()],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

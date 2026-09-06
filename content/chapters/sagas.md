@@ -1762,7 +1762,19 @@ a při stornu spustí kompenzaci hotových kroků. Obojí řeší jinou část t
 nad zrušenou objednávkou a rozdíl se pozná jedině čtením dead-letter fronty.
 
 Volba mezi zámkem a plnou reakcí je doménová: **smí zákazník zrušit objednávku, u které
-už běží platba?** Odpověď „ne, ať to zkusí za chvíli" je legitimní a levnější.
+už běží platba?** Odpověď „ne, ať to zkusí za chvíli“ je legitimní a levnější.
+
+Má to ale důsledek, který stojí za vyslovení. Složíte-li kapitoly téhle knihy dohromady,
+vzniká každá objednávka rovnou uzamčená – `placeWithItems()` volá `lockForSaga()` – a zámek
+uvolní až sága ve chvíli, kdy je objednávka `shipped` nebo `cancelled`. Zákazník se tak
+k vlastnímu stornu **nedostane nikdy**: dokud proces běží, tlačítko se nenabídne, a až
+doběhne, je pozdě. Celý tok z kapitoly o autorizaci pak v integrované aplikaci obsluhuje
+jen systémový aktér.
+
+Pro ukázkový e-shop je to obhajitelné, pro skutečný zpravidla ne. Kdo chce zákazníkovi
+storno umožnit, buď zámek nasadí až od kroku, který se špatně vrací (typicky vytvoření
+zásilky, ne strhnutí platby), nebo ho vynechá a spolehne se na reakci ságy
+na `OrderCancelled`.
 
 Kolizní požadavky lze místo výjimky také frontovat a provést po uvolnění zámku;
 pro většinu domén ale stačí odmítnutí výjimkou a opakování na straně klienta.

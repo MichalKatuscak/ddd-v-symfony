@@ -1983,9 +1983,17 @@ na command (DTO), nikdy na doménovou entitu. Form komponenta totiž nastavuje
 vlastnosti napřímo a obchází factory metody i invarianty agregátu – rozepsaný
 formulář by držel `User` v nekonzistentním stavu. Tok je stejný jako u JSON
 API: Form naplní `RegisterUser`, kontroler ho dispatchne, handler teprve
-vytvoří agregát. U readonly commandu s konstruktorem poslouží `empty_data`
-callback, který instanci složí z odeslaných polí. Validace zůstává na
-`#[Assert\…]` atributech commandu, formulář ji přebírá automaticky.
+vytvoří agregát. U readonly commandu s konstruktorem naráží `data_class`
+na promované `readonly` vlastnosti – PropertyAccess do nich zapsat neumí a formulář
+skončí na `NoSuchPropertyException`. Formulář proto vrací pole a command z něj skládá
+kontroler.
+
+Má to jeden důsledek, přes který se dá lehce přenést: **bez `data_class` formulář constrainty
+commandu nepřebírá.** Validace běží až na sběrnici, tedy po sestavení commandu – a prázdné
+pole, které `TextType` mapuje na `null`, tak shodí konstruktor dřív, než se k validaci
+dojde. V prohlížeči to zamaskuje HTML5 `required`, ale klient bez klientské validace
+dostane 500. Formulář proto potřebuje vlastní `NotBlank` na každém poli, i když totéž
+pravidlo nese command.
 :::
 
 :::callout{type="note"}
