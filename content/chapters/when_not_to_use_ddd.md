@@ -40,7 +40,8 @@ Postupuje ve třech krocích:
 1. **Dá se subdoména pořídit hotová?** Účetnictví, rozesílání e-mailů, platební brána. Pokud ano,
    je to Generic. Kupte ji. DDD tu řeší jen integraci, typicky Anti-Corruption Layer na hranici.
 2. **Odlišuje vás od konkurence?** Pokud ne, je to Supporting. Plný taktický návrh se vyplatí jen
-   při splnění tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Jinak stačí
+   při splnění tří podmínek (autorský test této knihy): tým ho zvládá, model je inovativní
+   a má vydržet roky. Jinak stačí
    lehký model nebo rovnou CRUD. Musí to ale zaznít nahlas a adresář `Domain/`
    se nevydává za doménový model.
 3. **Je to Core Domain?** Pak zbývají dvě brány, které rozhodují o načasování, ne o vhodnosti:

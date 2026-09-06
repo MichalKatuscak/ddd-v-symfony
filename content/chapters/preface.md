@@ -59,10 +59,13 @@ Kniha předpokládá tyto výchozí znalosti:
 
 Ke stacku ještě poznámka, která se hodí při zakládání projektu. Symfony vydává minor verze
 každých šest měsíců a udržuje je krátce; dlouhou podporu má vždy až poslední minor v major
-řadě. Je to volba mezi čerstvostí a klidem. Kdo chce roky bez nucených upgradů, sáhne
-po aktuálním LTS; kdo chce nejnovější komponenty, počítá s upgradem přibližně
-jednou za půl roku. Kód v této knize na tomhle rozhodnutí nezávisí. Vzory ani API se mezi
-minor verzemi nemění.
+řadě. Je to volba mezi čerstvostí a klidem, ale pro tuhle knihu ji nemáte.
+
+Aktuální LTS je v září 2026 **Symfony 7.4** s PHP 8.2, a tam část ukázek neběží:
+asymetrická viditelnost `public private(set)` vyžaduje PHP 8.4 a Doctrine ORM 3 se chová
+jinak než dvojka. První LTS v řadě 8 se čeká až koncem roku 2027. Do té doby platí, že
+kdo chce jít podle knihy, jde po aktuální stabilní verzi a počítá s upgradem přibližně
+jednou za půl roku. Vzory samotné se mezi minor verzemi nemění; mění se API kolem nich.
 
 Pokud některý z bodů „nesedí“, knihu i tak přečtete. Jen u některých kapitol budete potřebovat víc soustředění. Obtížnost nese v hlavičce každá kapitola. Nejvyšší stupeň má osm z nich, mimo jiné Návrh agregátu, Event Sourcing, Ságy, DDD a microservices a závěrečná případová studie.
 

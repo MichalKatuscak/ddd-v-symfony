@@ -19,7 +19,7 @@ if (Odlišuje vás od konkurence?\nKvůli tomuhle u vás zákazníci jsou) then 
     #1B202A:**Lehký model nebo CRUD**\nTransaction Script, Doctrine entity,\nEasyAdmin. Pojmenovat to nahlas;
     stop
   else (ano)
-    #1B202A:**Plné taktické DDD**\nVernonovy tři podmínky splněny –\ninvestice se vyplatí;
+    #1B202A:**Plné taktické DDD**\nVšechny tři podmínky splněny –\ninvestice se vyplatí;
     stop
   endif
 else (ano)

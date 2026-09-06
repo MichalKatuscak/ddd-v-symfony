@@ -58,7 +58,7 @@ Důsledky pro tým a stack: plný taktický DDD design (Aggregate, Value Object,
 
 Část domény, která je **nezbytná pro provoz, ale nediferencuje vás**. Test: *„potřebujeme to, ale nikdo nás kvůli tomu nenajme.“* Klasické příklady: správa objednávek v e-shopu, evidence skladu, fakturace, reporting pro management. Kdyby Supporting fungoval „stejně jako u konkurence“, nikdo by si toho nevšiml. Kdyby ale vůbec nefungoval, provoz by stál.
 
-Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžkým [Doctrine ORM](/implementace-v-symfony)), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je **fungovat spolehlivě s minimálními náklady na údržbu**, ne mít nejhezčí model. Vernon k tomu dává test místo paušálu. U Supporting subdomény, kterou nelze pořídit hotovou jako Generic, se taktický návrh vyplatí za tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Kde tyto podmínky neplatí, vynaloží organizace seniorní čas na něco, co nikoho nezajímá [[2]](https://kalele.io/books/).
+Důsledky pro tým a stack: lehký DDD (často stačí *anemic* model s těžkým [Doctrine ORM](/implementace-v-symfony)), juniorní až mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cílem je **fungovat spolehlivě s minimálními náklady na údržbu**, ne mít nejhezčí model. Místo paušálu se hodí test. U Supporting subdomény, kterou nelze pořídit hotovou jako Generic, se taktický návrh vyplatí za tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Kde tyto podmínky neplatí, vynaloží organizace seniorní čas na něco, co nikoho nezajímá. Test je autorská konstrukce této knihy; Vernon [[2]](https://kalele.io/books/) dává obecnější vodítko, že Supporting si zaslouží méně modelovacího úsilí než Core.
 
 **Generic Subdomain** *(generická subdoména)*
 
@@ -79,7 +79,7 @@ Konkurenční výhoda je jen první osa. Khononov přidává další dvě, kompl
 | Supporting | ne | nízká | nízká | build in-house nebo outsource |
 | Generic | ne | vysoká | nízká | koupit / převzít hotové |
 
-Core i Generic jsou složité. Rozdíl je v tom, že Generic je složitý *vyřešený* problém, který se nemění: kryptografie, OAuth, doručitelnost e-mailů. Supporting je naproti tomu jednoduchý z podstaty. Formuláře, seznamy, dva tři stavy. Khononovovo označení „glorified CRUD“ sedí.
+Core i Generic jsou složité. Rozdíl je v tom, že Generic je složitý *vyřešený* problém, který se nemění: kryptografie, OAuth, doručitelnost e-mailů. Supporting je naproti tomu jednoduchý z podstaty. Formuláře, seznamy, dva tři stavy. Označení „glorified CRUD“ na ni sedí.
 
 Z tabulky plyne diagnostická otázka, kterou klasifikace podle jediné osy položit neumí: **složitost ve Supporting subdoméně je signál**. Buď se v ní skrývá nerozpoznaná Core subdoména, nebo jde o nahodilou složitost, kterou tam nikdo nechtěl. Nick Tune pro kombinaci vysoké složitosti a nulového odlišení používá název *Suspect Supporting* [[6]](https://nicktune.substack.com/p/core-domain-patterns-941f89446af5). V legacy projektech bývá nejčastějším nálezem celého cvičení.
 
@@ -342,7 +342,7 @@ Tato struktura není kosmetická – **vynucuje strategické rozhodnutí**. Jakm
 
 Spoléhat přitom na samotné code review je slabé. Hranice mezi subdoménami se v PHP vynutí strojově a v CI:
 
-- **Deptrac** definuje vrstvy nad třídami a povolené závislosti mezi nimi. Pravidlo „`Core` nesmí záviset na `Supporting` ani na `Generic`“ je pár řádků v `deptrac.yaml` a poruší-li ho někdo, build spadne. Dokumentace projektu použití pro bounded contexty uvnitř jednoho projektu zmiňuje explicitně.
+- **Deptrac** definuje vrstvy nad třídami a povolené závislosti mezi nimi. Pravidlo „`Core` nesmí záviset na `Supporting` ani na `Generic`“ je pár řádků v `deptrac.yaml` a poruší-li ho někdo, build spadne. Bounded contexty uvnitř jednoho projektu jsou obvyklé komunitní použití; oficiální dokumentace je jmenovitě neuvádí.
 - **PHPArkitect** píše totéž jako PHP kód, který se spouští stejně jako testy. Vhodné tam, kde tým nechce další konfigurační formát.
 
 Použijte jeden z nich, jakmile struktura přežije první čtvrtletí. Do té doby se hranice ještě posouvají a strojové pravidlo by jen překáželo.
@@ -707,7 +707,7 @@ Bez subdoménové klasifikace nemá smysl řešit Bounded Contexts, Aggregaty an
 Hlavní pravidla na zapamatování:
 
 1. **Core Domain je vzácné, ne jediné** – žádné číselné pravidlo neexistuje, firma soutěžící na několika osách může mít Core subdomén víc. Platí ale, že Core je z podstaty složité a mění se; jednoduchá subdoména dá jen krátkodobou výhodu. Sem směřuje většina modelovacího úsilí, senior tým a vlastní IP.
-2. **Supporting subdomén je většina** – řádově kolem 60 % objemu kódu (pravidlo palce, ne měřená data). Lehký DDD nebo Doctrine ORM CRUD, mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cíl: fungovat spolehlivě s minimální údržbou. Vysoká složitost ve Supporting je signál k re-klasifikaci.
+2. **Supporting subdomén je většina** – řádově 50–60 % vývojové kapacity, stejná jednotka jako v [sekci 02.04](#vsechno-core-antipattern) (pravidlo palce, ne měřená data). Lehký DDD nebo Doctrine ORM CRUD, mediorní tým, ochota použít hotová řešení, kde dávají smysl. Cíl: fungovat spolehlivě s minimální údržbou. Vysoká složitost ve Supporting je signál k re-klasifikaci.
 3. **Generic se výchozím rozhodnutím kupuje** – autentizace, e-maily, platby, fulltext. Vlastní implementaci obhájíte jen tehdy, když integrační náklad převýší ten implementační. Tenký Anti-Corruption Layer chrání naše modely před cizím slovníkem.
 4. **Mapování subdomén na Bounded Contexty není automaticky 1:1** – ideál je 1:1, časté je N:1 u drobných Supporting a Generic. Rozdělit souvislou funkcionalitu do víc kontextů se vyplatí jen z provozních důvodů (oddělené vývojové cykly, nezávislé škálování). Subdoména je obchodní hranice, BC je implementační hranice; nezaměňujte je.
 5. **Klasifikace stárne** – re-evaluujte každých 12–18 měsíců. Generic se může stát Core (Stripe), Core se může stát Supporting (cloud storage), Supporting se může stát Generic (helpdesk). Tým, který nemá aktuální klasifikaci, neumí prioritizovat.

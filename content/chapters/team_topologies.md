@@ -520,7 +520,7 @@ uvedena není. Počítá kontexty místo domén a přidává druhý rozměr, vel
 | 5 lidí | 1 BC (max 2 malé) | Hranice, kdy má každý přehled o všem; každý zná každou část kódu. |
 | 7–9 lidí | 1–2 BC (výjimečně 3) | Běžná velikost stream-aligned týmu; každý ještě zná každého. |
 | 10+ lidí | Tým je už příliš velký – rozdělit | Dunbar number (familiarity ≈ 15). Komunikační režie roste kvadraticky s počtem lidí. |
-| Tým se 4+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
+| Tým s 5+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
 
 ### Jak změřit cognitive load (jednoduchá rubrika) {#cognitive-load-rubric}
 
@@ -594,9 +594,8 @@ Bod 5 (germane prostor):         __
 Rubrika záměrně měří *vnímání* členů týmu. Cognitive load je psychologická kategorie. Tvrdá metrika z Grafany ji nezachytí.
 Skelton a Pais (2019, kap. 3 „Team-First Thinking“) jdou dál: snahu určit kognitivní zátěž
 softwaru z jednoduchých měr, jako je počet řádků kódu, modulů, tříd nebo metod, označují
-doslova za *misguided*. Opírají se přitom o zjištění Graylina Jaye a kolegů z roku 2009,
-že jazyky se liší v upovídanosti. V polyglotním systému tak řádky kódu nesrovnávají
-srovnatelné. Rozhodující je podle autorů limit kognitivní kapacity týmu měnit systém
+doslova za *misguided*. Argumentují tím, že jazyky se liší v upovídanosti, takže v polyglotním systému
+řádky kódu nesrovnávají srovnatelné. Rozhodující je podle autorů limit kognitivní kapacity týmu měnit systém
 efektivně, ne velikost toho systému.
 
 :::callout{type="warn"}
@@ -865,14 +864,15 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
   spolupráce), Complicated-subsystem (objektivně specializovaná doména).
 - **3 interakční módy:** Collaboration (drahá, časově omezená),
   X-as-a-Service (výchozí vyspělý vztah), Facilitating (mentoring time-boxed).
-- **Vernonova preference:** 1 BC = 1 tým. 1 tým může vlastnit 1–2 BC,
-  výjimečně 3; BC sdílený mezi týmy je dočasný stav, ne cílový.
+- **Vernonova preference:** 1 BC = 1 tým; BC sdílený mezi týmy je dočasný stav,
+  ne cílový. Kolik kontextů jeden tým unese, Vernon nečísluje – rozmezí 1–2,
+  výjimečně 3, je autorské zobecnění této knihy.
 - **Subdomény → typy týmů:** Core → stream-aligned (nejlepší tým) /
   complicated-subsystem; Supporting → stream-aligned (sdílí tým s jiným supporting BC);
   Generic → SaaS, Platform team integruje.
 - **Inverse Conway Maneuver:** nejdřív definovat cílovou architekturu,
   pak postavit týmy tak, aby ji přirozeně vyprodukovaly. Bez podpory CTO neuspěje.
-- **Cognitive load:** 1–2 BC (výjimečně 3) na 5–9 lidí. 4+ BC na tým = signál pro rozdělení.
+- **Cognitive load:** 1–2 BC (výjimečně 3) na 5–9 lidí. 5+ BC na tým = signál pro rozdělení.
   Měří se kvartálně.
 - **Proporce:** orientačně 75 % stream-aligned, 15 % platform, 10 % enabling
   + complicated-subsystem. Procenta jsou autorské zobecnění; kniha uvádí poměr

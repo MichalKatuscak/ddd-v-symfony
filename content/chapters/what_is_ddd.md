@@ -77,7 +77,7 @@ Hlavní milníky ve vývoji DDD [[4]](https://dddcommunity.org/):
 
 ## 01.03 Ubiquitous Language v praxi {#ubiquitous-language-v-praxi}
 
-Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací v plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“. Dokument je až záznam této konverzace. Pokud tým začne dokumentem, vznikne slovník, kterým nikdo nemluví [[8]](https://martinfowler.com/bliki/UbiquitousLanguage.html).
+Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací v plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“ [[8]](https://martinfowler.com/bliki/UbiquitousLanguage.html). Dokument je až záznam této konverzace. Kdo začne dokumentem, dostane slovník, kterým nikdo nemluví.
 
 Evans k tomu přidává pravidlo, které se v praxi přehlíží: změna jazyka je změnou modelu. Vazba platí oběma směry. Nový termín od experta si vynutí úpravu kódu. Opačně to platí také. Když se při modelování ukáže, že dva stavy jsou ve skutečnosti tři, patří to nové rozlišení zpátky do konverzace s expertem, ne jen do enumu.
 
@@ -298,7 +298,7 @@ DDD se osvědčuje v aplikacích s bohatou doménou, kde přesné modelování o
 Hlavní zdroje:
 
 - [Domain Language – oficiální stránky Erica Evanse a DDD komunity](https://www.domainlanguage.com/ddd/)
-- [Domain-Driven Design Reference (PDF, CC-BY) – Eric Evans, 2015](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf) – definice a shrnutí všech vzorů na 50 stranách zdarma; nejlevnější vstup do tématu
+- [Domain-Driven Design Reference (PDF, CC-BY) – Eric Evans, 2015](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf) – definice a shrnutí všech vzorů na 52 stranách zdarma; nejlevnější vstup do tématu
 - [Domain-Driven Design: Tackling Complexity in the Heart of Software – Eric Evans](https://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215)
 - [Implementing Domain-Driven Design – Vaughn Vernon](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577)
 - [Domain-Driven Design Distilled – Vaughn Vernon](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420)

@@ -1285,7 +1285,7 @@ Zisk: nejvyšší ROI z modelovacího úsilí. V Core Domain (kde projekt vyhrá
 :::callout{type="pattern"}
 ### Vzor: Diferencovaná investice {#hybrid-pattern-heading}
 
-Vaughn Vernon v *Implementing Domain-Driven Design* (2013) [[12]](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577) doporučuje investici diferencovat. Největší modelovací úsilí patří Core Domain, Supporting a Generic subdomény si zaslouží méně. U Supporting subdomény přitom uvádí tři podmínky plného taktického návrhu. Tým ho zvládá, model je inovativní a má vydržet roky. Kde neplatí, vystačí pragmatická struktura.
+Vaughn Vernon v *Implementing Domain-Driven Design* (2013) [[12]](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577) doporučuje investici diferencovat. Největší modelovací úsilí patří Core Domain, Supporting a Generic subdomény si zaslouží méně. U Supporting subdomény se plný taktický návrh vyplatí jen za tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Kde neplatí, vystačí pragmatická struktura. Tenhle test je autorská konstrukce této knihy, ne pravidlo převzaté od Vernona.
 
 Hybridní přístup je pragmatický a zároveň ho DDD literatura doporučuje. Tlak na „jednotnou architekturu všude“ jde proti tomuto principu. Ne každá část projektu si zaslouží stejnou investici.
 :::
