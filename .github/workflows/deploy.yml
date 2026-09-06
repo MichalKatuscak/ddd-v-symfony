@@ -42,6 +42,9 @@ jobs:
       - name: Check for ambiguous duplicate listings
         run: php scripts/check_duplicate_listings.php
 
+      - name: Check named arguments against constructors
+        run: php scripts/check_named_arguments.php
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

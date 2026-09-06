@@ -945,6 +945,31 @@ a `StateProcessor`, které fungují jako adaptéry k Application Services.
 :::callout{type="pattern"}
 #### PHP: StateProcessor jako adapter k Application Service {#d2-code-heading}
 
+:::code{language="php" filename="src/Ordering/Application/Command/PlaceOrderCommand.php (varianta s vlastním orderId)"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Command;
+
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+
+/**
+ * Proti kanonickému PlaceOrder z kapitoly o Outboxu nese navíc orderId:
+ * identitu tu určuje volající ještě před dispatchem, protože dispatch()
+ * vrací Envelope, ne doménový objekt.
+ */
+final readonly class PlaceOrderCommand
+{
+    public function __construct(
+        public OrderId $orderId,
+        public CustomerId $customerId,
+        public array $items,
+    ) {}
+}
+:::
+
 :::code{language="php" filename="src/Ordering/Infrastructure/ApiPlatform/OrderResource.php"}
 <?php
 
@@ -982,9 +1007,9 @@ final class PlaceOrderProcessor implements ProcessorInterface
         // ID generujeme před dispatchem - dispatch() vrací Envelope, ne doménový objekt
         $orderId = OrderId::generate();
 
-        // Pozor: tahle varianta příkazu nese i orderId, protože identitu
-        // určuje volající. Kanonický PlaceOrder z kapitoly o Outboxu ji
-        // naopak generuje v agregátu a vrací ji přes HandledStamp.
+        // Příkaz nese i orderId, protože identitu tu určuje volající;
+        // kanonický PlaceOrder z kapitoly o Outboxu ji naopak generuje
+        // v agregátu a vrací přes HandledStamp.
         $command = new PlaceOrderCommand(
             orderId: $orderId,
             customerId: CustomerId::fromString($data->customerId),
