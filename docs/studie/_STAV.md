@@ -1490,6 +1490,67 @@ priorita nemá co přeuspořádat. Testy kapitol 12 a 14 zelené. `CancelOrderPo
 prošel všemi čtyřmi řádky. `#[CurrentUser]`, `OrderValueResolver` s prioritou 150,
 přetypování položek, stateless CSRF bez JS, `app:outbox:cleanup` na SQLite — vše funguje.
 
+## Sedmnácté kolo: čtrnáctá ověřovací stavba (2026-09-06)
+
+21 testů zeleně, **dvakrát po sobě**. Happy path i obě kompenzační větve
+(`PAYMENT_FAILS=1`, `STOCK_FAILS=1`) skončily se správnými stavy a **prázdnou DLQ**.
+Zásah do Process Manageru ani třetí závislost v `RegisterUserHandleru` nic nerozbily.
+
+### Moje větev `onOrderCancelled` byla rozbitá dvakrát
+
+1. **Chyběly importy** `ReleaseStock` a `CancelShipment`. Storno spadlo na
+   `Class "…\Saga\ReleaseStock" not found`, `doctrine_transaction` transakci rollbackl,
+   objednávka zůstala `paid` — a uživatel dostal 302, takže si myslel, že stornoval.
+2. **Ani po opravě importů to nefungovalo.** Guard hlídal jen `isTerminal()`, ale
+   `Compensating` terminální není. Opožděná `ShipmentCreated` ságu přepnula na `Completed`,
+   vydala `ShipOrder` → DLQ. V druhém časování sága doběhla dřív než storno, takže
+   `onOrderCancelled` narazil na terminální stav a **platba se nevrátila vůbec**.
+
+**Poučení: „sága reaguje na storno" zní jako jedna větev, ale je to tři mechanismy.**
+Zámek brání storna v okně, kdy proces běží; reakce na `OrderCancelled` pokrývá zbytek;
+guard na `Compensating` řeší opožděný úspěch. Chybí-li kterýkoli, rozdíl se pozná
+**jedině čtením dead-letter fronty**.
+
+### Nálezy, které by čtenáře stály nejvíc času
+
+Protizkouška je seřadila podle doby hledání — pro budoucí revize je to užitečnější
+metrika než závažnost:
+
+1. **Storno vs. sága** — nespadne nic viditelného, peníze se nevrátí, zjistitelné
+   jen z DLQ. *Prakticky nezjistitelné bez cíleného testu.*
+2. **Chybějící importy v Process Manageru** — cesta, kterou žádný test v knize
+   nepokrývá, a rollback nechá DB vypadat „skoro v pořádku". *Hodiny.*
+3. **`audit_log`** — projde vše kromě admina. *Objeví se až první admin.*
+4. **`STOCK_FAILS` bez implementace** — celý `Warehouse`/`Shipping` adaptér se musel
+   domyslet z jedné věty. *Hodina až dvě, spíš frustrace.*
+5. **`password_hashers`** — `security.yaml` vypadal jako celý soubor. Čtenář právě
+   podle knihy soubor přepsal a nebude podezírat svůj krok. *~30 min.*
+
+### Ostatní opravené
+
+- `PAYMENT_FAILS`/`STOCK_FAILS` jsem dal do `.env.local`, který se v `test` nenačítá —
+  **past, před kterou táž kapitola o odstavec výš varuje u `DATABASE_URL`.** A tvrzení
+  „tiše uvázne" neplatilo: hlásí `EnvNotFoundException`.
+- `CancelOrderE2eTest` neprošel ani jednou: `getContainer()` v `setUp()` nabootuje kernel
+  dřív, než ho `createClient()` smí nastartovat.
+- Wiring přepínačů byl jen v PHP komentáři, ne v `services.yaml`.
+- Chyběly aliasy `ReadModelStore` a `UserProfileReadRepository`, šablony pro login
+  a registraci (včetně jmen `_username`/`_password`, která si čtenář nevymyslí),
+  a routing v 12.05 jmenoval dvě neexistující třídy — což shodí i `cache:clear`.
+- `Order` v 15.04 nebyl označen jako výřez; vložení celého bloku končilo na
+  `Cannot redeclare Order::__construct()`.
+- `TenantAware` existuje, ale nikdo ho neimplementuje → filtr je no-op. Doplněno,
+  proč značka nepatří na `SecurityUser`: provider ho načítá **uvnitř** firewallu,
+  dřív než listener nastaví parametr.
+
+### Co protizkouška označila za hotové
+
+Skládání `doctrine.yaml` (mappings + types + schema_filter + filters bez konfliktu),
+`messenger.yaml` ze čtyř kapitol, `Order` z 07.07/07.08, `RegisterUserHandler` se třemi
+závislostmi, `.env.test.local`, poznámka o SQLite migraci `order_dashboard`,
+`#[Assert\Email(STRICT)]` s `egulias`, i to, že `migrations:diff` vygeneruje
+`messenger_messages` navzdory `auto_setup=0`.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
