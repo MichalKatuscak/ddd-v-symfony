@@ -202,6 +202,27 @@ namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
+// Identita kanonického agregátu Order. Doctrine ji při každém persist()
+// převádí na řetězec, takže __toString() tu není kosmetika - bez něj
+// skončí uložení hláškou "could not be converted to string".
+final readonly class OrderId
+{
+    public function __construct(public string $value)
+    {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException('OrderId must be a valid UUID');
+        }
+    }
+
+    public static function generate(): self { return new self((string) Uuid::v7()); }
+
+    public static function fromString(string $value): self { return new self($value); }
+
+    public function equals(self $other): bool { return $this->value === $other->value; }
+
+    public function __toString(): string { return $this->value; }
+}
+
 final readonly class CustomerId
 {
     public function __construct(public string $value)
@@ -216,6 +237,8 @@ final readonly class CustomerId
     public static function fromString(string $value): self { return new self($value); }
 
     public function equals(self $other): bool { return $this->value === $other->value; }
+
+    public function __toString(): string { return $this->value; }
 }
 
 final readonly class ProductId
@@ -232,6 +255,8 @@ final readonly class ProductId
     public static function fromString(string $value): self { return new self($value); }
 
     public function equals(self $other): bool { return $this->value === $other->value; }
+
+    public function __toString(): string { return $this->value; }
 }
 :::
 
@@ -457,8 +482,11 @@ class Order
     private readonly \DateTimeImmutable $createdAt;
 
     private function __construct(
-        private readonly OrderId $id,
-        private readonly CustomerId $customerId,
+        // Identita i vlastník jsou veřejné readonly vlastnosti, stejně jako
+        // v kanonickém agregátu z kapitoly Návrh agregátu. Zbytek knihy
+        // je čte jako `$order->id`, ne přes getter.
+        public readonly OrderId $id,
+        public readonly CustomerId $customerId,
     ) {
         $this->status = OrderStatus::Draft;
         $this->createdAt = new \DateTimeImmutable();
@@ -467,16 +495,6 @@ class Order
     public static function place(OrderId $id, CustomerId $customerId): self
     {
         return new self($id, $customerId);
-    }
-
-    public function id(): OrderId
-    {
-        return $this->id;
-    }
-
-    public function customerId(): CustomerId
-    {
-        return $this->customerId;
     }
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void

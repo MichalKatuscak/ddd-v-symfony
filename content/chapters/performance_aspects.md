@@ -82,8 +82,8 @@ $orders = $this->orderRepository->findAll();
 
 foreach ($orders as $order) {
     // Každá iterace způsobí 1 SELECT z order_item - celkem N dalších dotazů
-    foreach ($order->getItems() as $item) {
-        echo $item->getProductName() . ': ' . $item->getQuantity();
+    foreach ($order->items() as $item) {
+        echo $item->productId->value . ': ' . $item->quantity;
     }
 }
 :::
@@ -157,7 +157,7 @@ agregát včetně asociovaných objektů v jediném SQL dotazu s LEFT JOIN nebo 
 :::callout{type="pattern"}
 ### Příklad: fetch join v DQL a Query Builderu
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/OrderQueryRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -165,10 +165,15 @@ declare(strict_types=1);
 namespace App\Ordering\Infrastructure\Repository;
 
 use App\Ordering\Domain\Model\Order;
-use App\Ordering\Domain\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class DoctrineOrderRepository implements OrderRepository
+/**
+ * Čtecí strana. Rozhraní `OrderRepository` z kapitoly
+ * [Základní koncepty](/zakladni-koncepty#repositories) tahle třída záměrně
+ * neimplementuje: dotazy pro obrazovky do doménového rozhraní nepatří.
+ * Agregát načítá a ukládá `DoctrineOrderRepository` z téže kapitoly.
+ */
+final class OrderQueryRepository
 {
     public function __construct(
         private EntityManagerInterface $em
@@ -310,19 +315,23 @@ rozsáhlý objektový graf, i když potřebujete jen malou část dat.
 :::
 
 :::callout{type="pattern"}
-### Příklad: problematický Order agregát s 1000 OrderItems
+### Příklad: kdy velký agregát opravdu zabolí
 
 :::code{language="php" filename="snippet.php"}
 <?php
-// PROBLÉM: Každé načtení Order způsobí SELECT s 1000 řádky z order_item,
-// i když chceme jen zobrazit hlavičku objednávky (číslo, datum, zákazník).
+// find() sám o sobě položky nenačte - kolekce je lazy a zůstane
+// neinicializovaná. Cena přijde až ve chvíli, kdy na ni kdokoli sáhne:
+// jeden SELECT s 1000 řádky a skokový nárůst paměti. U hlavičky
+// objednávky je to zbytečná práce, kterou snadno vyvolá i šablona.
 
-$order = $this->orderRepository->findById($orderId);
+$order = $this->orders->get($orderId);
 
-// Pouze toto potřebujeme - ale agregát načetl 1000 položek zbytečně
-echo $order->getOrderNumber();
-echo $order->getCreatedAt()->format('d.m.Y');
-echo $order->getCustomerId()->value; // agregáty se odkazují přes ID, ne přes objekt
+echo $order->orderNumber;
+echo $order->createdAt->format('d.m.Y');
+echo $order->customerId->value; // agregáty se odkazují přes ID, ne přes objekt
+
+// Tohle je ten drahý řádek, ne find() výše:
+echo $order->itemCount();
 :::
 :::
 
@@ -343,7 +352,7 @@ ne přesun pravidla mimo agregát. Podrobně rozebírá velikost agregátu sekce
 :::callout{type="pattern"}
 ### Příklad: specializované repozitářní metody pro různé kontexty
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php (výřez: hlavička bez položek)"}
 <?php
 
 declare(strict_types=1);
@@ -437,6 +446,8 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Query;
 
 use Doctrine\ORM\EntityManagerInterface;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+use App\SharedKernel\Domain\Currency;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 // DTO a handler v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
@@ -447,10 +458,14 @@ final class OrderSummaryDTO
         public readonly string $orderId,
         public readonly string $orderNumber,
         public readonly string $customerId,
-        public readonly string $status,
+        // Stav i měna jsou v kanonickém modelu enumy, ne řetězce. DQL NEW
+        // předá to, co je namapované, takže `string` by tu skončilo na
+        // TypeError - a kdo si je namapuje jako prostý string, rozejde si
+        // čtecí stranu s hodnotovými objekty ze Základních konceptů.
+        public readonly OrderStatus $status,
         public readonly int    $itemCount,
         public readonly int    $totalAmountInCents,
-        public readonly string $currency,
+        public readonly Currency $currency,
         public readonly \DateTimeImmutable $createdAt,
     ) {}
 }
@@ -553,7 +568,7 @@ final class SalesReportQueryService
             FROM \"order\" o
             JOIN customer c  ON c.id = o.customer_id
             JOIN order_item oi ON oi.order_id = o.id
-            WHERE o.status = 'completed'
+            WHERE o.status = 'delivered'
               -- Polouzavřený interval. BETWEEN nad timestamp sloupcem s datem
               -- bez času by uřízl celý poslední den.
               AND o.created_at >= :from
@@ -682,7 +697,7 @@ final readonly class UserId
 
 *Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatný persistence model a mapper. Ukázka níže je jiná varianta mapování `Order` než v [sekci N+1](#n-plus-1-problem): ID zde má nativní typ `Uuid`, nikoli `string`.*
 
-:::code{language="php" filename="src/Order/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Order/Domain/Model/Order.php (mapování pro čtecí stranu)"}
 <?php
 
 declare(strict_types=1);
@@ -788,7 +803,10 @@ final class ImportProductsHandler
             $this->em->persist($product);
 
             if (++$i % self::BATCH_SIZE === 0) {
-                // flush() vydá batch INSERT/UPDATE do databáze
+                // flush() vydá nahromaděné INSERTy. Doctrine je neslučuje
+                // do jednoho víceřádkového příkazu - sto entit znamená sto
+                // INSERTů. Úspora je v paměti a v dirty checkingu, ne v počtu
+                // dotazů.
                 $this->em->flush();
                 // clear() uvolní Identity Map - PHP GC může objekty uvolnit z paměti
                 // POZOR: po clear() jsou dříve spravované objekty odpojeny (detached)
@@ -1381,7 +1399,7 @@ ladění dávky, která v Profileru vůbec neskončí.
 :::callout{type="pattern"}
 ### Kostra middleware pro počítání dotazů
 
-:::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/QueryCountingMiddleware.php"}
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/QueryCountingMiddleware.php + CountingConnection.php + CountingStatement.php"}
 <?php
 
 declare(strict_types=1);
@@ -1391,8 +1409,13 @@ declare(strict_types=1);
 namespace App\SharedKernel\Infrastructure\Doctrine;
 
 use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
 use Doctrine\DBAL\Driver\Middleware;
+use Doctrine\DBAL\Driver\Middleware\AbstractConnectionMiddleware;
 use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
+use Doctrine\DBAL\Driver\Middleware\AbstractStatementMiddleware;
+use Doctrine\DBAL\Driver\Result;
+use Doctrine\DBAL\Driver\Statement;
 
 final class QueryCountingMiddleware implements Middleware
 {
@@ -1400,13 +1423,16 @@ final class QueryCountingMiddleware implements Middleware
 
     public function wrap(Driver $driver): Driver
     {
-        // Vrácený driver obalí Connection a Statement; každé prepare(), query()
-        // a exec() zavolá $this->increment(). Plnou implementaci obalových tříd
-        // ukazuje dokumentace DBAL - je to mechanická delegace na vnitřní objekt.
         return new class ($driver, $this) extends AbstractDriverMiddleware {
-            public function __construct(Driver $driver, private QueryCountingMiddleware $counter)
+            public function __construct(Driver $driver, private readonly QueryCountingMiddleware $counter)
             {
                 parent::__construct($driver);
+            }
+
+            /** @param array<string, mixed> $params */
+            public function connect(array $params): DriverConnection
+            {
+                return new CountingConnection(parent::connect($params), $this->counter);
             }
         };
     }
@@ -1424,6 +1450,57 @@ final class QueryCountingMiddleware implements Middleware
     public function getQueryCount(): int
     {
         return $this->queryCount;
+    }
+}
+
+/**
+ * Obalové třídy jsou mechanická delegace; počítá se v nich jediné místo,
+ * kudy dotaz projde. Bez nich middleware nic nenapočítá a aserce na počet
+ * dotazů projde vždy - i po odstranění fetch joinu.
+ */
+final class CountingConnection extends AbstractConnectionMiddleware
+{
+    public function __construct(
+        DriverConnection $connection,
+        private readonly QueryCountingMiddleware $counter,
+    ) {
+        parent::__construct($connection);
+    }
+
+    public function prepare(string $sql): Statement
+    {
+        return new CountingStatement(parent::prepare($sql), $this->counter);
+    }
+
+    public function query(string $sql): Result
+    {
+        $this->counter->increment();
+
+        return parent::query($sql);
+    }
+
+    public function exec(string $sql): int|string
+    {
+        $this->counter->increment();
+
+        return parent::exec($sql);
+    }
+}
+
+final class CountingStatement extends AbstractStatementMiddleware
+{
+    public function __construct(
+        Statement $statement,
+        private readonly QueryCountingMiddleware $counter,
+    ) {
+        parent::__construct($statement);
+    }
+
+    public function execute(): Result
+    {
+        $this->counter->increment();
+
+        return parent::execute();
     }
 }
 :::

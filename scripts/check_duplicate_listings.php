@@ -30,6 +30,8 @@ const BUILDABLE = [
     'anti_patterns.md',
     'migration_from_crud.md',
     'case_study.md',
+    'performance_aspects.md',
+    'ddd_pain_points.md',
 ];
 
 /** Zástupné názvy, které neoznačují konkrétní soubor v projektu. */
