@@ -7,7 +7,7 @@ meta_description: "Kde má v DDD aplikaci sedět autorizace: edge, use case, agr
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
@@ -631,11 +631,11 @@ A jakmile controller command jen odešle na asynchronní bus, `#[IsGranted]` chr
 
 ### Proč ne Symfony ACL {#no-symfony-acl}
 
-Starší materiály nabízejí jako řešení per-objektových oprávnění komponentu ACL: tabulky `acl_entries`, `acl_object_identities` a `MaskBuilder`. Pro Symfony 8 už to není volba. ACL byla z jádra odstraněna ve verzi 6.0 a samostatný `symfony/acl-bundle` deklaruje ve svém posledním vydání podporu Symfony 4.4 až 7.0. Ani technicky by ale nešlo o dobrou náhradu: ACL ukládá rozhodnutí jako *data* v databázi, takže pravidlo „vlastník smí zrušit do 24 hodin“ se rozpadne na řádky, které někdo musí udržovat v synchronizaci se stavem agregátu. Voter tutéž věc počítá z aktuálního stavu a nic synchronizovat nemusí. Kde jsou potřeba explicitně přidělovaná oprávnění na jednotlivé objekty (sdílení dokumentu, delegace), sáhne se dnes po vlastní tabulce vazeb nebo po ReBAC modelu z [pozdější sekce](#rebac).
+Starší materiály nabízejí jako řešení per-objektových oprávnění komponentu ACL: tabulky `acl_entries`, `acl_object_identities` a `MaskBuilder`. Pro Symfony 8 už to není volba. ACL byla z jádra odstraněna ve verzi 6.0 a samostatný `symfony/acl-bundle` deklaruje ve svém posledním vydání podporu Symfony 4.4 až 7.0. Ani technicky by ale nešlo o dobrou náhradu. ACL ukládá rozhodnutí jako *data* v databázi, takže pravidlo „vlastník smí zrušit do 24 hodin“ se rozpadne na řádky. Ty pak musí někdo držet v synchronizaci se stavem agregátu. Voter tutéž věc počítá z aktuálního stavu a nic synchronizovat nemusí. Kde jsou potřeba explicitně přidělovaná oprávnění na jednotlivé objekty (sdílení dokumentu, delegace), sáhne se dnes po vlastní tabulce vazeb nebo po ReBAC modelu z [pozdější sekce](#rebac).
 
 ### Použití ve Command Handleru {#voter-handler-heading}
 
-Voter sám o sobě nestačí – někdo ho musí zavolat. Idiomatické místo je **Application Service / Command Handler**, kde se autorizace ověří *před* doménovou operací. Handler injektuje `AuthorizationCheckerInterface` (rozhraní Security komponenty), což je v aplikační vrstvě v pořádku. Doménová vrstva by tu závislost mít nesměla.
+Voter sám o sobě nestačí – někdo ho musí zavolat. Idiomatické místo je **Application Service / Command Handler**, kde se autorizace ověří *před* doménovou operací. Handler injektuje `AuthorizationCheckerInterface`, tedy rozhraní Security komponenty. V aplikační vrstvě je taková závislost v pořádku. Doménová vrstva by tu závislost mít nesměla.
 
 :::code{language="php" filename="src/Ordering/Application/Handler/CancelOrderHandler.php" highlights="18,19,25,26,27,28,29"}
 // src/Ordering/Application/Handler/CancelOrderHandler.php
@@ -720,7 +720,7 @@ Po této kontrole zavolá handler doménovou operaci `$order->cancel(...)`, kter
 
 ### Voter v Twig template {#voter-twig-heading}
 
-Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Zrušit objednávku“ pro ne-vlastníka). V Twigu funkce `is_granted()` volá tentýž `AuthorizationCheckerInterface`. Proměnnou `now` (`\DateTimeImmutable`) předává do šablony controller, protože doménová metoda `isCancellable()` si aktuální čas nezískává sama. Šablona přitom čte agregát přímo, což u detailu jedné objednávky stačí; jakmile obrazovka potřebuje jméno zákazníka nebo data z jiného kontextu, patří jí read model, ne getter navíc na agregátu:
+Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Zrušit objednávku“ pro ne-vlastníka). V Twigu funkce `is_granted()` volá tentýž `AuthorizationCheckerInterface`. Proměnnou `now` (`\DateTimeImmutable`) předává do šablony controller, protože doménová metoda `isCancellable()` si aktuální čas nezískává sama. Šablona přitom čte agregát přímo a u detailu jedné objednávky to stačí. Jakmile obrazovka potřebuje jméno zákazníka nebo data z jiného kontextu, patří jí read model, ne getter navíc na agregátu:
 
 :::code{language="twig" filename="templates/order/detail.html.twig" highlights="4,12,18"}
 {# templates/order/detail.html.twig #}
@@ -756,7 +756,7 @@ Pozor: `{% if is_granted(...) %}` v Twigu jen schová tlačítko. Neověří, ž
 :::callout{type="warn"}
 ### Voter nenačítá subjekt, o kterém rozhoduje {#voter-anti-fetching-heading}
 
-Pokud váš Voter dělá `$this->repository->find($id)` nad subjektem, který mu měl přijít jako parametr, je to anti-vzor. Voter dostává `$subject` v paměti; handler ho už načetl. Druhé načtení vede k *duplicate query* a v horším případě k *race condition*: mezi dotazem ve Voteru a operací v handleru se entita změní a rozhodnutí padne nad neaktuálním stavem.
+Pokud váš Voter dělá `$this->repository->find($id)` nad subjektem, který mu měl přijít jako parametr, je to anti-vzor. Voter dostává `$subject` v paměti; handler ho už načetl. Druhé načtení vede k *duplicate query*, v horším případě k *race condition*. Mezi dotazem ve Voteru a operací v handleru se entita změní a rozhodnutí padne nad neaktuálním stavem.
 
 Zákaz se ale netýká *doplňkových* dat, která na subjektu nejsou: členství v týmu, delegace, hierarchie tenantů. Ta si Voter načíst musí a dokumentace Symfony s injektovanými službami ve Voteru počítá [[7]](https://symfony.com/doc/current/security/voters.html). Dotazy tohoto typu patří za cache platnou po dobu requestu; jinak seznam s dvěma sty řádky vygeneruje dvě stě dotazů.
 :::
@@ -900,7 +900,7 @@ tenký repozitář nad `SecurityUser` s jedinou metodou `byCustomerId()`. Refund
 jako druhý use case pro srovnání dvou přístupů k autorizaci, ne jako součást
 objednávkového procesu; ten vrací platbu přes kompenzaci v ságe.
 
-Volba mezi oběma variantami se řídí povahou pravidla. Vlastnictví je vztah, který zná agregát sám, a porovnání `actorId` proti `customerId` nepotřebuje ani Security komponentu, ani dotaz navíc. Jakmile pravidlo závisí na rolích, hierarchii rolí nebo na atributech mimo agregát, vyplatí se sáhnout po `isGrantedForUser()` a mít pravidlo jen jednou – ve Voteru. Cenou je dotaz na aktéra a závislost aplikační vrstvy na Security komponentě, což je tatáž závislost, jakou už nese synchronní handler.
+Volba mezi oběma variantami se řídí povahou pravidla. Vlastnictví je vztah, který zná agregát sám, a porovnání `actorId` proti `customerId` nepotřebuje ani Security komponentu, ani dotaz navíc. Jakmile pravidlo závisí na rolích, hierarchii rolí nebo na atributech mimo agregát, vyplatí se sáhnout po `isGrantedForUser()` a mít pravidlo jen jednou – ve Voteru. Cenou je dotaz na aktéra a závislost aplikační vrstvy na Security komponentě. Tutéž závislost už nese synchronní handler.
 
 Vzor má jeden trade-off. Mezi zařazením do fronty a zpracováním uplyne čas a oprávnění se mezitím mohla změnit: aktér přišel o roli, účet někdo zablokoval. Snapshot rolí přibalený do commandu proto slouží nanejvýš auditu; autoritativní je stav v okamžiku zpracování. Handler tedy nečte oprávnění ze zprávy, ale ověřuje je proti aktuálním datům: načte aktéra, nebo porovná vlastnictví, které se na rozdíl od rolí nemění.
 
@@ -1331,13 +1331,13 @@ final readonly class OrderListReadModel
 }
 :::
 
-Podmínka v `WHERE` je ale *druhý zápis* téhož pravidla, které už zná `OrderVoter`. Jednu definici tu udržet nelze, protože SQL a PHP jsou různé jazyky. Pojmenovat tu vazbu explicitně ale lze. Osvědčuje se držet obojí v jedné třídě nebo alespoň v jednom adresáři, doplnit komentář s odkazem na Voter a hlavně přidat test, který ověří shodu: vyjmenuje objednávky vrácené read modelem a na každé z nich zkontroluje, že Voter řekne ano. Rozejdou-li se, test spadne.
+Podmínka v `WHERE` je ale *druhý zápis* téhož pravidla, které už zná `OrderVoter`. Jednu definici tu udržet nelze, protože SQL a PHP jsou různé jazyky. Pojmenovat tu vazbu explicitně ale lze. Osvědčuje se držet obojí v jedné třídě nebo aspoň v jednom adresáři a doplnit komentář s odkazem na Voter. Hlavní pojistkou je ale test: vyjmenuje objednávky vrácené read modelem a u každé ověří, že Voter řekne ano. Rozejdou-li se, test spadne.
 
 Modely vzniklé kolem Zanzibaru toto rozdělení pojmenovávají přímo: `Check` je otázka na jeden objekt, `ListObjects` vrací množinu. Symfony 8 nativní podporu pro druhou z nich nemá. Voter je dobrý *Policy Enforcement Point* a nic víc si nenárokuje. Detail v [sekci o ReBAC](#rebac).
 
 ## 11.08 Policy-based přístup (ABAC) {#policy-based}
 
-**RBAC** (Role-Based Access Control) se ptá na roli. **ABAC** (Attribute-Based Access Control) vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno. Přechod od prvního ke druhému nepohání počet pravidel, ale tři kvalitativní signály: policy musí být čitelná pro někoho mimo vývojový tým, mění se v jiném rytmu než kód, nebo ji sdílí víc než jedna aplikace. Dokud neplatí ani jeden z nich, Votery stačí a přidaná abstrakce je jen práce navíc.
+**RBAC** (Role-Based Access Control) se ptá na roli. **ABAC** (Attribute-Based Access Control) vyhodnocuje kombinaci atributů subjektu, akce, prostředku a kontextu proti policy a vrátí povoleno / zakázáno. Přechod od prvního ke druhému nepohání počet pravidel, ale tři kvalitativní signály. Policy musí být čitelná pro někoho mimo vývojový tým, mění se v jiném rytmu než kód, nebo ji sdílí víc než jedna aplikace. Dokud neplatí ani jeden z nich, Votery stačí a přidaná abstrakce je jen práce navíc.
 
 NIST SP 800-162 dává pro tuto vrstvu slovník, který se vyplatí znát, protože ho používají externí enginy [[2]](https://csrc.nist.gov/publications/detail/sp/800-162/final). **PEP** (Policy Enforcement Point) je místo, kde se rozhodnutí vynutí: v Symfony `access_control`, `#[IsGranted]` a volání `isGranted()` v handleru. Rozhodnutí samo padne v **PDP** (Policy Decision Point), u nás v rozhodovacím manažeru s Votery, případně ve vzdáleném enginu. **PIP** (Policy Information Point) dodává atributy, **PAP** (Policy Administration Point) policy spravuje. Rámec čtyř vrstev z [11.02](#ctyri-vrstvy) je tedy rozmístění PEP; PDP zůstává jeden.
 
@@ -1516,7 +1516,7 @@ if (!$decision->isGranted) {
 
 Ukázka záměrně kontroluje i stav agregátu, aby bylo vidět, co se získá. Pravidlo ale zůstává definované v `Order::isCancellable()`; Voter ho volá, neopisuje.
 
-Závěr pro Symfony 8: vlastní vrstvu `Policy`/`Rule` stavět nemá smysl. Dá tytéž odpovědi jako Votery, ale bez statické analýzy, bez rozhodovacích strategií a s modelem navíc. ABAC model z této sekce zůstává užitečný jako *způsob uvažování* o pravidlech, implementuje se ale z Voterů. Externí engine přichází na řadu až tehdy, když policy musí žít mimo aplikaci: sdílí ji víc služeb, spravuje ji jiný tým, nebo ji auditor kontroluje nezávisle na deploy cyklu. Tehdy dává smysl OPA s jazykem Rego nebo Cerbos, a Voter se stane tenkým PEP, který se ptá vzdáleného PDP. Rozhraní mezi nimi standardizuje AuthZEN Authorization API 1.0, schválené v lednu 2026 [[9]](https://openid.net/wg/authzen/).
+Závěr pro Symfony 8: vlastní vrstvu `Policy`/`Rule` stavět nemá smysl. Dá tytéž odpovědi jako Votery, ale bez statické analýzy, bez rozhodovacích strategií a s modelem navíc. ABAC model z této sekce zůstává užitečný jako *způsob uvažování* o pravidlech, implementuje se ale z Voterů. Externí engine přichází na řadu až tehdy, když policy musí žít mimo aplikaci. Sdílí ji víc služeb, spravuje ji jiný tým, nebo ji auditor kontroluje nezávisle na deploy cyklu. Tehdy dává smysl OPA s jazykem Rego nebo Cerbos, a Voter se stane tenkým PEP, který se ptá vzdáleného PDP. Rozhraní mezi nimi standardizuje AuthZEN Authorization API 1.0, schválené v lednu 2026 [[9]](https://openid.net/wg/authzen/).
 
 ### ReBAC: když je oprávnění vztah, ne atribut {#rebac}
 
@@ -1544,7 +1544,7 @@ Multi-tenancy (vícenájemnost) je speciální případ ABAC, kdy stejná aplika
 - **Schema-based** – sdílená databáze, samostatné schema per tenant (PostgreSQL `SET search_path`). Střední izolace, lepší performance než row-based.
 - **Database-based** – samostatná databáze per tenant. Nejvyšší izolace, nejnákladnější (DB connection per tenant, migrations × N).
 
-Volba mezi nimi jde ruku v ruce s velikostí instalace: row-based u SaaS s velkým počtem malých tenantů, schema-based tam, kde je potřeba oddělit zálohy a migrace per tenant, database-based v regulovaných doménách. Rozhodovací kritérium je pokaždé stejné: jak drahá je chyba, když se dva tenanty potkají v jedné odpovědi. Pro row-based v Symfony je idiomatický nástroj **Doctrine SQLFilter**.
+Volba mezi nimi jde ruku v ruce s velikostí instalace. Row-based u SaaS s velkým počtem malých tenantů, schema-based tam, kde se mají oddělit zálohy a migrace per tenant, database-based v regulovaných doménách. Rozhodovací kritérium je pokaždé stejné: jak drahá je chyba, když se dva tenanty potkají v jedné odpovědi. Pro row-based v Symfony je idiomatický nástroj **Doctrine SQLFilter**.
 
 Namístě je vrátit se k [chybě 3](#tri-chyby-doctrine-heading), kde jsme filtrování v perzistentní vrstvě označili za anti-vzor. Rozpor je zdánlivý a rozdíl je v tom, na co filtr odpovídá. Tenant je **kontext dotazu**, ne autorizační rozhodnutí o akci: dimenze, kterou má nést každý dotaz v požadavku, stejně jako jazyk nebo časová zóna. Autorizační rozhodnutí „Petr smí zrušit objednávku #42“ do SQL nepatří, protože handler pak nerozezná neexistující záznam od cizího. Otázka „ke kterému tenantovi tento request patří“ do SQL náleží, protože odpověď je pro celý request jediná a neměnná.
 
@@ -1664,7 +1664,7 @@ Tři detaily, které se vyplatí zachytit:
 :::callout{type="warn"}
 ### Fail-closed se musí vyrobit, samo nevznikne {#multi-tenancy-fail-open-heading}
 
-Častý omyl: „bez aktivního filtru se tenantní data prostě nevrátí“. Opak je pravdou: bez filtru se vrátí *všechna*, napříč tenanty. Fail-closed chování stojí na třech opatřeních. Filter běží globálně (`enabled: true`), ne až po aktivaci v listeneru; zapomenutá aktivace pak neznamená únik dat, ale výjimku. Parametr `tenant_id` je povinný, Doctrine ho při sestavování dotazu vyžaduje a bez něj selže. A požadavek bez známého tenanta (anonymní request, CLI command, Messenger worker) má skončit dřív, na firewallu nebo v listeneru; kde odmítnutí nedává smysl, poslouží nemožná hodnota `tenant_id`, které neodpovídá žádný řádek. CLI a worker procesy kernel listener neobslouží. Tenant context tam nastavuje Messenger middleware nebo samotný command, jinak první dotaz spadne.
+Častý omyl: „bez aktivního filtru se tenantní data prostě nevrátí“. Opak je pravdou: bez filtru se vrátí *všechna*, napříč tenanty. Fail-closed chování stojí na třech opatřeních. Filter běží globálně (`enabled: true`), ne až po aktivaci v listeneru; zapomenutá aktivace pak neznamená únik dat, ale výjimku. Parametr `tenant_id` je povinný, Doctrine ho při sestavování dotazu vyžaduje a bez něj selže. A požadavek bez známého tenanta (anonymní request, CLI command, Messenger worker) má skončit dřív, na firewallu nebo v listeneru. Kde odmítnutí nedává smysl, poslouží nemožná hodnota `tenant_id`, které neodpovídá žádný řádek. CLI a worker procesy kernel listener neobslouží. Tenant context tam nastavuje Messenger middleware nebo samotný command, jinak první dotaz spadne.
 :::
 
 :::callout{type="warn"}
