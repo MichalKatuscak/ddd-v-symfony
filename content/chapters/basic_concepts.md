@@ -132,8 +132,8 @@ vrátí `false`, i když jde o tutéž doménovou entitu.
 ### Vznik identity {#entity-identity}
 
 Ukázka `User` dostane `UserId` konstruktorem a neřeší, odkud se vzal. Vernon
-v *Implementing Domain-Driven Design* (2013) vypisuje čtyři cesty, kterými identita
-vzniká: hodnotu dodá uživatel (User Provides Identity), vygeneruje ji aplikace
+v *Implementing Domain-Driven Design* (2013) vypisuje čtyři cesty, kterými identita vzniká.
+Hodnotu dodá uživatel (User Provides Identity), vygeneruje ji aplikace
 (Application Generates Identity), vygeneruje ji persistence (Persistence Mechanism
 Generates Identity), nebo ji přiřadí jiný ohraničený kontext (Another Bounded Context
 Assigns Identity) [[4]](https://www.informit.com/store/implementing-domain-driven-design-9780321834577).

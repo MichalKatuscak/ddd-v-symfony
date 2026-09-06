@@ -7,7 +7,7 @@ meta_description: "Jak připravit, vést a vyhodnotit workshop Event Storming a 
 meta_keywords: "Event Storming, Domain Storytelling, Alberto Brandolini, Stefan Hofer, Henning Schwentner, Domain Discovery, DDD workshop, Big Picture, Process Level, Design Level, Pivotal Event, Hot Spot, Bounded Context"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
@@ -42,7 +42,7 @@ Eric Evans v *Domain-Driven Design* (2003) píše, že [Ubiquitous Language](/co
 
 **Event Storming** zavedl italský konzultant Alberto Brandolini v roce 2013. Princip je přímočarý: účastníci v reálném čase pokládají na dlouhou stěnu (nebo Miro/Mural board) **oranžové sticky notes s doménovými událostmi vyjádřenými v minulém čase**. Postupně z nich vzniká časová osa toho, co se v doméně děje. Jak osa roste, přidávají se další barvy: modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots. Obraz domény se postupně vyjasňuje.
 
-Vznik techniky byl pragmatický. V roce 2012 ji Brandolini předvedl na Italian Agile Day jako *event-based modelling workshop*, tedy jako zkratku místo kreslení přesného UML diagramu. Jméno *EventStorming* jí dal až v létě 2013 po experimentech v Belgii a Polsku; v listopadu téhož roku vyšel první blogový post. Původní účel byl taktický: rychle najít hranice agregátů a kontextů. Strategické použití přišlo později a v přednášce *50.000 Orange Stickies Later* (2017) autor tu trajektorii shrnuje sám: z náhrady za diagram se stala učební pomůcka a nakonec platforma pro kolaborativní modelování od byznysu po implementaci.
+Vznik techniky byl pragmatický. V roce 2012 ji Brandolini předvedl na Italian Agile Day jako *event-based modelling workshop*, tedy jako zkratku místo kreslení přesného UML diagramu. Jméno *EventStorming* jí dal až v létě 2013 po experimentech v Belgii a Polsku; v listopadu téhož roku vyšel první blogový post. Původní účel byl taktický: rychle najít hranice agregátů a kontextů. Strategické použití přišlo později. V přednášce *50.000 Orange Stickies Later* (2017) autor tu trajektorii shrnuje sám: z náhrady za diagram se stala učební pomůcka a nakonec platforma pro kolaborativní modelování od byznysu po implementaci.
 
 Dnes technika existuje ve třech formátech. Kanonické názvy uvádí web eventstorming.com i Brandoliniho firma Avanscoperta; pro druhý a třetí se v komunitě vžily kratší zkratky *Process Level* a *Design Level*.
 
@@ -484,7 +484,7 @@ Kanonicky *Rush to the goal*. Když přeskočíte Big Picture, modelujete agreg�
 
 Senior vývojář při facilitaci podsouvá technický pohled. Eventy strukturuje podle toho, co se dá hezky implementovat, ne podle toho, jak doména reálně funguje. Doménoví experti to vycítí a začnou potlačovat svůj jazyk ve prospěch toho „technicky čistého“.
 
-**Řešení:** rozhodující není role, ale neutralita. Nejsnáz ji udrží PM, agile coach, designer nebo externí konzultant, přičemž externista se silným názorem na architekturu škodí stejně jako tech lead. Když jinou možnost nemáte, domluvte se předem, že facilitátor obsah nenavrhuje a promluví, jen když se ho někdo přímo zeptá. Brandolini k tomu přidává pattern *Time-boxed Leadership*: styl vedení se během workshopu mění, obsah ale zůstává skupině.
+**Řešení:** rozhodující není role, ale neutralita. Nejsnáz ji udrží PM, agile coach, designer nebo externí konzultant. Externista se silným názorem na architekturu ale škodí stejně jako tech lead. Když jinou možnost nemáte, domluvte se předem, že facilitátor obsah nenavrhuje a promluví, jen když se ho někdo přímo zeptá. Brandolini k tomu přidává pattern *Time-boxed Leadership*: styl vedení se během workshopu mění, obsah ale zůstává skupině.
 :::
 
 :::callout{type="warn"}
@@ -775,7 +775,7 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 - question: Jak vést hot spoty během workshopu?
   answer: 'Pravidlo zní: <strong>nediskutuje se, jen se zaznamenává</strong>. Když během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět, facilitátor ji okamžitě napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla, a workshop pokračuje dál. Pokus o vyřešení hot spotu hned vždy konzumuje 15–30 minut a typicky se nedořeší, protože odpověď leží mimo místnost. Po workshopu se každý hot spot stane ticketem přiřazeným doménovému expertovi, ne vývojáři.'
 - question: 'Kdo platí workshop: produkt, nebo vývoj?'
-  answer: 'Nejlépe oba společně. Workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně. Pokud přesto platí jen jeden, pak vývoj: bez workshopu vyrobí špatný model, který bude refaktorovat tři sprinty, což stojí mnohonásobně víc než 4 hodiny doménových expertů.'
+  answer: 'Nejlépe oba společně. Workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně. Pokud přesto platí jen jeden, pak vývoj: bez workshopu vyrobí špatný model a bude ho refaktorovat tři sprinty. To stojí mnohonásobně víc než 4 hodiny doménových expertů.'
 - question: Co když doménoví experti používají hovorovou češtinu a slang („chronický neplatič nás zase odbil“)?
   answer: 'Workshop dělejte v jazyce, který experti používají v reálné práci – typicky v češtině s vlastním slangem. Slang se neopravuje; <em>je</em> Ubiquitous Language. Když expert říká „chronický neplatič“, napište to na sticky tak, jak to řekl. V kódu pak modelujte koncept s tímto jménem (např. <code>ChronicLatePayer</code>); synonymum používané v týmu doplňte jako PHPDoc komentář. Ztratit jazyk = ztratit slovník = za rok zase nikdo neví, o čem mluvíme.'
 - question: Když máme jen sólo vývojáře a PM, dá se Event Storming dělat ve dvou?

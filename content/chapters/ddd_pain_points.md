@@ -7,7 +7,7 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
@@ -268,7 +268,7 @@ konkrétní query.
 
 Pořadí řádků v tabulce není náhodné. Fetch join v DQL je první volba, protože platí jen
 pro konkrétní dotaz. `fetch: 'EAGER'` v mapování působí globálně a u to-many asociací
-nedělá to, co většina lidí čeká: JOIN vydává jen u to-one asociací, a i tam si Doctrine
+nedělá to, co většina lidí čeká. JOIN vydává jen u to-one asociací, a i tam si Doctrine
 vyhrazuje volbu mezi LEFT JOIN a druhým dotazem. Podrobněji k volbě strategie viz
 [Výkonnostní aspekty](/vykonnostni-aspekty).
 
@@ -436,7 +436,7 @@ záruky. Zabalit je do jedné transakce nelze, databáze a message broker jsou r
 **Řešení:** událost uložit do `outbox` tabulky ve stejné transakci jako agregát
 a odeslání nechat na odděleném procesu. Atomicitu pak drží databázová transakce.
 
-Vzor má vlastní kapitolu, protože podrobností je víc, než se sem vejde: schéma tabulky,
+Vzor má vlastní kapitolu, protože podrobností je víc, než se sem vejde. Schéma tabulky,
 dvě varianty relay procesu, idempotentní inbox na straně příjemce, provozní metriky
 i postup migrace existujícího projektu. Celý výklad je v kapitole
 [Outbox pattern](/outbox-pattern).
@@ -541,9 +541,9 @@ Každá zpráva nese `IdempotencyStamp` s klíčem odvozeným z byznys události
 `payment.capture:{orderId}`. Middleware před zpracováním zkontroluje
 databázovou tabulku. Když klíč existuje, zprávu přeskočí.
 
-Na slově „odvozeným“ celý mechanismus stojí. Dokumentace Symfony na to upozorňuje přímo:
-UUID vygenerované při odeslání se jako idempotency klíč nehodí, protože dvojí odeslání
-téže logické události vyrobí dva různé klíče a obě zpracování proběhnou. Klíč musí zůstat
+Na slově „odvozeným“ celý mechanismus stojí. Dokumentace Symfony na to upozorňuje přímo. UUID vygenerované při odeslání se jako
+idempotency klíč nehodí: dvojí odeslání téže logické události vyrobí dva různé klíče
+a obě zpracování proběhnou. Klíč musí zůstat
 stabilní napříč všemi odesláními téhož logického příkazu. Rozdíl je praktický. Náhodné UUID
 ošetří duplicitu z retry brokeru, ale ne dvojklik uživatele. A ten přijde častěji.
 
@@ -670,7 +670,7 @@ try {
 ### B4. Ordering zpráv – zpráva B dorazí před A {#b4-ordering}
 
 **Problém:** Máte dva workery zpracovávající stejnou frontu paralelně.
-Obě události `OrderPlaced` a `OrderShipped` jsou odeslány za sebou,
+Obě události `OrderPlaced` a `OrderShipped` odejdou za sebou,
 ale `OrderShipped` zpracuje jiný worker rychleji. Handler se pokusí označit
 objednávku jako odeslanou, jenže objednávka ještě neexistuje (nebo je ve špatném
 stavu).

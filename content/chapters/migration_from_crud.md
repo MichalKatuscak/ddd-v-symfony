@@ -34,7 +34,7 @@ na nevhodná místa.
 - **Fat Controllers (Tlusté kontrolery)** – Symfony kontrolery přestaly být tenkou vrstvou pro HTTP adaptaci. Místo toho přímo implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler má delegovat na doménový model, nikoli ho suplovat.
 - **Doménová logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
 - **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
-- **Nízká testovatelnost** – Doménová logika je neoddělitelně svázána s HTTP vrstvou nebo databází. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlé mockování.
+- **Nízká testovatelnost** – Doménová logika drží neoddělitelně na HTTP vrstvě nebo databázi. Napsání unit testu pro doménové pravidlo vyžaduje rozsáhlé mockování.
 - Vývojáři a doménoví experti používají jiný slovník: **komunikační propast**. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
 :::
 
@@ -180,8 +180,8 @@ Strangler Fig Pattern oproti tomu:
 
 ### Co vzor neřeší
 
-Ve verzi textu z roku 2024 Fowler popis rozšířil ze čtyř kroků v kódu na čtyři aktivity:
-ujasnit cílové výsledky, najít v systému švy a rozdělit problém na části, dodávat náhrady
+Ve verzi textu z roku 2024 Fowler popis rozšířil ze čtyř kroků v kódu na čtyři aktivity.
+Ujasnit cílové výsledky, najít v systému švy a rozdělit problém na části, dodávat náhrady
 inkrementálně a měnit organizační praktiky. Poslední bod týmy vynechávají nejčastěji.
 Bez něj vznikne systém stejně křehký jako ten nahrazený, jen postavený na novějším
 frameworku [[2]](https://martinfowler.com/bliki/StranglerFigApplication.html).
@@ -207,7 +207,7 @@ v mapování; opravit se musí ještě před přepnutím.
 Pozor na termín. „Dual-write“ zde znamená zápis do dvou datových modelů v jedné databázové
 transakci, tedy operaci, která buď proběhne celá, nebo vůbec. Kapitola
 [Outbox Pattern](/outbox-pattern) používá tentýž pojem pro zápis do databáze a do brokeru
-bez společné transakce, což je problém, který outbox řeší. Stejné slovo, dvě různé situace.
+bez společné transakce – tedy pro problém, který outbox řeší. Stejné slovo, dvě různé situace.
 
 Dual-write z aplikace předpokládá, že do zápisové cesty starého systému lze zasáhnout.
 U kódu, kterému nikdo nerozumí, nebo u zápisů obcházejících ORM to neplatí. Náhradou je
@@ -264,8 +264,8 @@ nebo klient `unleash/client`.
 
 **Schéma se mění stejným způsobem.** Sloupec ani tabulka se nepřejmenovává jedním
 `ALTER TABLE`. Pramod Sadalage a Martin Fowler pro to popisují přechodnou fázi
-[[9]](https://martinfowler.com/articles/evodb.html): nová struktura vznikne vedle staré,
-obě jsou po dobu migrace naplněné, a původní název zůstane dostupný jako pohled (view)
+[[9]](https://martinfowler.com/articles/evodb.html). Nová struktura vznikne vedle staré,
+po dobu migrace se plní obě a původní název zůstane dostupný jako pohled (view)
 nebo přes trigger. Závislé systémy tak migrují vlastním tempem a `DROP` přijde až na konci.
 V Symfony tuto posloupnost nese `DoctrineMigrationsBundle`: každá fáze je vlastní
 verzovaná migrace, ne ruční zásah do produkční databáze.
