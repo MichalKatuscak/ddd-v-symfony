@@ -587,6 +587,11 @@ use App\Outbox\Application\OutboxRepository;
 use App\Outbox\Domain\OutboxMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use App\Ordering\Domain\Model\OrderItem;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler]
 final readonly class PlaceOrderHandler

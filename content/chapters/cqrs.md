@@ -1756,18 +1756,22 @@ final class OrderDashboardProjectorTest extends KernelTestCase
 
     public function testProjectsOrderLifecycle(): void
     {
+        $shipmentId = ShipmentId::generate();
+
         // Given: objednávka byla vytvořena
-        ($this->projector)(new OrderPlaced(
+        ($this->projector)(new OrderPlacedIntegrationEvent(
+            eventId: Uuid::v7(),
             orderId: 'order-1',
-            customerName: 'Jan Novák',
-            totalAmount: 1500,
+            customerId: 'customer-1',
+            items: [],
+            totalAmountCents: 1500,
             occurredAt: new \DateTimeImmutable('2026-03-01 10:00:00'),
         ));
 
         // When: objednávka byla odeslána
         ($this->projector)(new OrderShipped(
             orderId: 'order-1',
-            shipmentId: ShipmentId::generate(),
+            shipmentId: $shipmentId,
             occurredAt: new \DateTimeImmutable('2026-03-02 08:30:00'),
         ));
 
@@ -1778,7 +1782,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         );
 
         $this->assertSame('shipped', $row['status']);
-        $this->assertSame('CZ123456789', $row['tracking_number']);
+        $this->assertSame($shipmentId->value, $row['shipment_id']);
         $this->assertSame(1500, (int) $row['total_amount']);
     }
 

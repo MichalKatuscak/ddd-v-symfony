@@ -2030,7 +2030,11 @@ final class OrderProcessManagerTest extends TestCase
         };
 
         $this->repository = new InMemoryOrderSagaRepository();
-        $this->saga = new OrderProcessManager($this->commandBus, $this->repository);
+        $this->saga = new OrderProcessManager(
+            $this->commandBus,
+            $this->repository,
+            $this->createStub(ManagerRegistry::class),
+        );
     }
 
     /** Zkratka – integrační událost má pět polí, testy z nich mění dvě. */
