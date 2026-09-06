@@ -262,8 +262,8 @@ final class Order extends AggregateRoot
     private array $items = [];
 
     private function __construct(
-        private readonly OrderId $id,
-        private readonly CustomerId $customerId,
+        public readonly OrderId $id,
+        public readonly CustomerId $customerId,
         private OrderStatus $status,
     ) {}
 
@@ -273,11 +273,6 @@ final class Order extends AggregateRoot
         $order->record(new OrderPlaced($id, $customerId));
 
         return $order;
-    }
-
-    public function id(): OrderId
-    {
-        return $this->id;
     }
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
@@ -353,7 +348,7 @@ final readonly class PlaceOrderHandler
 
         $this->orders->save($order);
 
-        return $order->id();
+        return $order->id;
     }
 }
 :::

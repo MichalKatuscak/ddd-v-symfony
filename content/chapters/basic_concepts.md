@@ -598,19 +598,17 @@ use App\Ordering\Domain\ValueObject\ProductId;
 
 class OrderItem
 {
+    // Veřejné readonly vlastnosti, ne gettery - stejně jako kanonický
+    // OrderItem v kapitole Návrh agregátu. Zbytek knihy je čte přímo.
     public function __construct(
-        private readonly ProductId $productId,
-        private readonly int $quantity,
-        private readonly Money $unitPrice,
+        public readonly ProductId $productId,
+        public readonly int $quantity,
+        public readonly Money $unitPrice,
     ) {
         if ($quantity <= 0) {
             throw new \InvalidArgumentException('Množství musí být kladné.');
         }
     }
-
-    public function productId(): ProductId { return $this->productId; }
-    public function quantity(): int { return $this->quantity; }
-    public function unitPrice(): Money { return $this->unitPrice; }
 }
 :::
 
