@@ -520,13 +520,14 @@ je řádek z Event Store převedený do objektu: nese payload jako pole, ne jako
 událost. Překlad na doménovou událost obstará `EventSerializer` až v okamžiku, kdy je
 potřeba – rebuild projekcí tak může obálky filtrovat, aniž by instancioval všechno.
 
-:::code{language="php" filename="src/Infrastructure/EventSourcing/EventEnvelope.php + EventSerializer.php + ConcurrencyException.php"}
+:::code{language="php" filename="src/Infrastructure/EventSourcing/EventEnvelope.php + EventSerializer.php + EventMetadataProvider.php + RequestEventMetadataProvider.php + ConcurrencyException.php"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\Infrastructure\EventSourcing;
 
+use App\Infrastructure\EventSourcing\Versioning\UpcasterChain;
 use App\SharedKernel\Domain\Event\DomainEvent;
 
 /** Řádek Event Store po načtení: payload ještě jako pole. */
@@ -637,6 +638,12 @@ Mapu `typeMap` je nutné zaregistrovat, jinak deserializace skončí na neznám�
 
 :::code{language="yaml" filename="config/services.yaml"}
 services:
+    # Pole upcasterů autowiring nesestaví, musí se vyjmenovat.
+    App\Infrastructure\EventSourcing\Versioning\UpcasterChain:
+        arguments:
+            $upcasters:
+                - '@App\Infrastructure\EventSourcing\Versioning\UserRegisteredV1ToV2Upcaster'
+
     App\Infrastructure\EventSourcing\EventSerializer:
         arguments:
             $typeMap:
@@ -1435,6 +1442,25 @@ Jde o odvozenou roli téhož záznamu. Primární je pozice. Stejný model pozic
 používají i [process managery a ságy](/sagy-a-process-managery), které nad event streamem
 neudržují read model, ale rozpracovaný proces.
 
+Read model má vlastní tabulku. Vzniká migrací jako každá jiná, jen se z ní dá kdykoli
+smazat a postavit znovu z Event Store:
+
+:::code{language="sql" filename="migrations/snippet.sql"}
+CREATE TABLE order_summary (
+    order_id     VARCHAR(36)  NOT NULL PRIMARY KEY,
+    customer_id  VARCHAR(36)  NOT NULL,
+    status       VARCHAR(20)  NOT NULL,
+    item_count   INT UNSIGNED NOT NULL DEFAULT 0,
+    -- Peníze v haléřích; sloupec drží součet za celou objednávku.
+    total_amount BIGINT       NOT NULL DEFAULT 0,
+    placed_at    DATETIME     NOT NULL,
+    shipped_at   DATETIME     NULL,
+    tracking_no  VARCHAR(100) NULL,
+
+    KEY idx_customer (customer_id, placed_at)
+) ENGINE=InnoDB;
+:::
+
 :::callout{type="pattern"}
 ### PHP: OrderSummaryProjection a asynchronní projektor {#projekce-php-heading}
 
@@ -1771,6 +1797,8 @@ framework:
                     max_delay: 60000   # max 60 sekund mezi pokusy
 
             failed:
+                # Doctrine transport je samostatný balíček:
+                # composer require symfony/doctrine-messenger
                 dsn: 'doctrine://default?queue_name=failed'
 
         routing:
@@ -2065,6 +2093,64 @@ interface SnapshotStore
 }
 :::
 *src/Infrastructure/EventSourcing/SnapshotStore.php*
+
+Implementace je krátká, jen jedno místo v ní stojí za pozornost: hledá se **nejvyšší
+verze**, ne poslední zapsaný řádek. Pořadí zápisu totiž nemusí odpovídat pořadí verzí:
+
+:::code{language="php" filename="src/Infrastructure/EventSourcing/DoctrineSnapshotStore.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing;
+
+use DateTimeImmutable;
+use Doctrine\DBAL\Connection;
+
+final readonly class DoctrineSnapshotStore implements SnapshotStore
+{
+    public function __construct(
+        private Connection $connection,
+    ) {}
+
+    public function findLatest(string $aggregateId, string $aggregateType): ?Snapshot
+    {
+        $row = $this->connection->fetchAssociative(
+            'SELECT aggregate_id, aggregate_type, version, state, taken_at
+               FROM aggregate_snapshot
+              WHERE aggregate_id = :aggregateId
+                AND aggregate_type = :aggregateType
+           ORDER BY version DESC
+              LIMIT 1',
+            ['aggregateId' => $aggregateId, 'aggregateType' => $aggregateType],
+        );
+
+        if ($row === false) {
+            return null;
+        }
+
+        return new Snapshot(
+            aggregateId:   $row['aggregate_id'],
+            aggregateType: $row['aggregate_type'],
+            version:       (int) $row['version'],
+            state:         json_decode($row['state'], true, 512, JSON_THROW_ON_ERROR),
+            takenAt:       new DateTimeImmutable($row['taken_at'], new \DateTimeZone('UTC')),
+        );
+    }
+
+    public function save(Snapshot $snapshot): void
+    {
+        $this->connection->insert('aggregate_snapshot', [
+            'aggregate_id'   => $snapshot->aggregateId,
+            'aggregate_type' => $snapshot->aggregateType,
+            'version'        => $snapshot->version,
+            'state'          => json_encode($snapshot->state, JSON_THROW_ON_ERROR),
+            'taken_at'       => $snapshot->takenAt->format('Y-m-d H:i:s.u'),
+        ]);
+    }
+}
+:::
+*src/Infrastructure/EventSourcing/DoctrineSnapshotStore.php*
 
 :::code{language="php" filename="src/Infrastructure/Ordering/SnapshottingOrderRepository.php"}
 <?php
