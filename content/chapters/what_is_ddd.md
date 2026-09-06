@@ -23,9 +23,9 @@ Než se ponoříme do definic, podíváme se na konkrétní situaci, ve které D
 
 Po třech letech provozu vypadá doména jinak. Stavů objednávky je dvanáct: `new`, `awaiting_payment`, `paid`, `partially_paid`, `held_for_review`, `confirmed`, `shipped`, `delivered`, `cancelled`, `refunded`, `disputed`, `returned`. Typů zákazníka jsou čtyři: B2C, B2B s fakturací, dealer s rabatem, partner s vlastním ceníkem. Platebních metod pět: karta přes Stripe, Apple Pay, bankovní převod, dobírka, faktura splatná do 30 dnů. Každý typ zákazníka má jiná pravidla pro slevy, jiné zacházení s DPH a jiný proces refundace.
 
-Tým má teď pět lidí, kód má 80 000 řádků a přidání nové platební metody (Bitcoin přes BitPay) trvá tři týdny. Ne proto, že integrace s BitPay je složitá – ta je hotová za den. Ale protože každá změna v `OrderService` rozbije něco jiného. Když přidáte větev pro Bitcoin v metodě `processPayment`, rozbije se refund logika v `cancelOrder`. Když opravíte refund, rozbije se reporting v `MonthlyRevenueService`. Po třech týdnech ladění a regresních testů je BitPay v produkci, ale tým má dvouměsíční technický dluh v backlogu.
+Tým má teď pět lidí, kód má 80 000 řádků a přidání nové platební metody (Bitcoin přes BitPay) trvá tři týdny. Ne proto, že integrace s BitPay je složitá. Ta je hotová za den. Ale protože každá změna v `OrderService` rozbije něco jiného. Když přidáte větev pro Bitcoin v metodě `processPayment`, rozbije se refund logika v `cancelOrder`. Když opravíte refund, rozbije se reporting v `MonthlyRevenueService`. Po třech týdnech ladění a regresních testů je BitPay v produkci, ale tým má dvouměsíční technický dluh v backlogu.
 
-Senior vývojář si všiml, že kód odráží něco jiného než to, co produktový manažer popisuje. PM mluví o „závazné objednávce po kliknutí na platbu“ a o „rezervaci, která propadne za 24 hodin“. V kódu je `Order::status = 'awaiting_payment'` a TTL kontrola se schovává v týdenním cronu, do kterého nikdo nekouká. Když tester nahlásí bug v rezervační logice, je třeba přečíst `OrderService::checkExpiration`, `WeeklyCleanupCommand`, `OrderEventSubscriber` a `OrderRepository::findExpiredAwaitingPayment`, než je celé chování pohromadě. Doménová pravidla žijí roztroušená napříč pěti soubory bez společného slovníku.
+Senior vývojář si všiml, že kód odráží něco jiného než to, co produktový manažer popisuje. PM mluví o „závazné objednávce po kliknutí na platbu“ a o „rezervaci, která propadne za 24 hodin“. V kódu je `Order::status = 'awaiting_payment'` a TTL kontrola se schovává v týdenním cronu, do kterého nikdo nekouká. Když tester nahlásí bug v rezervační logice, poskládá vývojář celé chování až ze čtyř míst: `OrderService::checkExpiration`, `WeeklyCleanupCommand`, `OrderEventSubscriber` a `OrderRepository::findExpiredAwaitingPayment`. Doménová pravidla žijí roztroušená napříč pěti soubory bez společného slovníku.
 
 Onboarding nového kolegy trvá dva měsíce, než začne dělat smysluplné PR. Ne proto, že by Symfony bylo komplikované. Framework zná po týdnu. Ale doménová pravidla jsou v hlavách dvou seniorů a v kódu jsou jen jejich důsledky. Junior se ptá: „proč při refundaci nezapočítáváme dopravu, ale při dispute ano?“ Odpověď zní: „protože kdysi to chtěl účetní“. Není to nikde dokumentované.
 
@@ -95,7 +95,7 @@ Logika je stejná jako u překladu mezi kontexty. Uvnitř hranice platí jeden s
 
 Jazyk eroduje tiše. Tři signály, které erozi prozradí dřív než produkční incident:
 
-- PM mluví o „rezervaci, která propadne za 24 hodin“, kód má `Order::status = 'awaiting_payment'` a cron job. Stejný koncept, dva slovníky – přesně situace z úvodu této kapitoly.
+- PM mluví o „rezervaci, která propadne za 24 hodin“, kód má `Order::status = 'awaiting_payment'` a cron job. Stejný koncept, dva slovníky: přesně situace z úvodu této kapitoly.
 - Na schůzce se překládá. Jakmile vývojář větu experta v duchu převádí („tím myslí náš `PendingOrder`“), model a doména se už rozešly.
 - Nový kolega se zeptá, co znamená termín z glosáře, a dostane odpověď „to už se nepoužívá“. Mrtvý glosář je horší než žádný, protože dokumentuje neexistující jazyk.
 
@@ -152,7 +152,7 @@ Bounded Context se také nerovná subdoméně. Subdoména je část problému, b
 
 Explicitní hranice znamená explicitní překlad. Když Ordering potřebuje data ze Support (nebo naopak), komunikace jde přes definované rozhraní a pojmy se na hranici překládají, třeba přes Anti-Corruption Layer zmíněný výše. Překlad není režie navíc; je to zviditelnění práce, která jinak probíhá skrytě a chybově uvnitř sdíleného modelu.
 
-Bounded Context je proto i hranicí jazyka. „Rezervace“ může v kontextu Ordering znamenat blokaci zboží, v kontextu Logistics časové okno doručení. Oba významy jsou správně – každý ve svém kontextu. Implementaci Bounded Contexts rozvádí [kapitola o základních konceptech](/zakladni-koncepty#bounded-contexts), vztahy mezi kontexty pak [kapitola o Context Mappingu](/context-mapping).
+Bounded Context je proto i hranicí jazyka. „Rezervace“ může v kontextu Ordering znamenat blokaci zboží, v kontextu Logistics časové okno doručení. Oba významy jsou správně, každý ve svém kontextu. Implementaci Bounded Contexts rozvádí [kapitola o základních konceptech](/zakladni-koncepty#bounded-contexts), vztahy mezi kontexty pak [kapitola o Context Mappingu](/context-mapping).
 
 ## 01.05 Taktický design (Tactical Design) {#tactical-design}
 
@@ -182,10 +182,10 @@ Typický postup zavedení DDD má osm kroků. První čtyři patří strategick�
 1. **Pochopení domény** – Rozhovory s experty, workshopy, modelování na tabuli. Cílem není najít správný model, ale projít několik konkurenčních variant a vybrat tu, která na daný problém padne nejlépe. Bez této fáze model padá hned na začátku.
 2. **Ubiquitous Language** – Společný slovník vývojářů a doménových expertů, zapsaný a průběžně aktualizovaný. Stejné pojmy v kódu, dokumentaci i mailu od PM.
 3. **Identifikace Bounded Contexts** – Doména se rozděluje na menší kontexty s explicitními hranicemi. Každý kontext má vlastní model.
-4. **Context Map** – Vztahy mezi kontexty (Customer-Supplier, Conformist, Anti-Corruption Layer) jsou popsané a mají odpovědné týmy.
+4. **Context Map** – Každý vztah mezi kontexty (Customer-Supplier, Conformist, Anti-Corruption Layer) je popsaný a má odpovědný tým.
 5. **Doménový model** – Entity, Value Objects, agregáty, doménové služby a události vznikají v každém kontextu samostatně.
 6. **Implementace** – Vrstvená nebo hexagonální architektura odděluje doménový model od infrastrukturní vrstvy.
-7. **Testování** – Doménový model má pokrytí unit testy, hraniční scénáře integrační testy.
+7. **Testování** – Doménový model pokrývají unit testy, hraniční scénáře integrační.
 8. **Iterace** – Model se průběžně upravuje, jak roste pochopení domény. DDD není jednorázová investice.
 
 Podobný postup udržuje i skupina ddd-crew. DDD Starter Modelling Process rozepisuje totéž do osmi kroků, od porozumění doméně po kód, a je dostupný pod licencí CC-BY [[10]](https://github.com/ddd-crew/ddd-starter-modelling-process).
@@ -247,7 +247,7 @@ Scénář skládá dohromady typické rysy projektů, které DDD zavedly bez dom
 
 Po šesti měsících má tým 40 agregátů, 80 doménových událostí a 200 commandů. Kód vypadá jako z učebnice. Ale skutečná pravidla skladu v modelu nikdy nebyla: kdy smí být zboží rezervováno na dvou místech současně, jak se rozhoduje o přesunu mezi sklady, jaký je vztah mezi rezervací a fyzickým výdejem. Tým modeluje vlastní představu domény; realita skladu zůstává mimo model.
 
-Když logistický ředitel po dvou měsících provozu zjistí, že systém umožňuje dvojí rezervaci (a tím způsobuje časté reklamace), vyžaduje okamžitou opravu. Refaktor 40 agregátů a 80 událostí trvá čtyři měsíce. Po roce vývoje a provozu pokrývá projekt 30 % funkcionality, kterou původní CRUD aplikace zvládala.
+Po dvou měsících provozu zjistí logistický ředitel, že systém umožňuje dvojí rezervaci a působí tím časté reklamace. Žádá okamžitou opravu. Refaktor 40 agregátů a 80 událostí trvá čtyři měsíce. Po roce vývoje a provozu pokrývá projekt 30 % funkcionality, kterou původní CRUD aplikace zvládala.
 
 Lekce: **DDD bez doménového experta v týmu nefunguje.** Pravidla, která doménový expert nezná, nemůže nikdo modelovat. Žádný senior vývojář nedokáže odvodit, jak skutečně funguje sklad, jen z wireframů business analytika. Pokud nemáte přístup k expertovi, kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) doporučuje začít s jednodušší architekturou a investici do doménového modelování odložit.
 :::
