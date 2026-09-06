@@ -466,7 +466,7 @@ Funguje jako stavový automat s definovanými stavy a přechody. V našem e-shop
 tuto roli plní `OrderProcessManager`. Přijímá události ze všech kontextů (Payment,
 Warehouse, Shipping) a na jejich základě rozhoduje, jaký příkaz vydat jako další krok.
 Tok není rozdrobený do desítek handlerů – celá logika procesu se soustředí do jedné
-třídy. Na jednom místě je viditelný kompletní tok od `OrderPlaced` po `ConfirmOrder`.
+třídy. Na jednom místě je viditelný kompletní tok od `OrderPlaced` po `ShipOrder`.
 
 Následující diagram zobrazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
 přechody, červené selhání a oranžová cesta vede přes kompenzaci:
@@ -518,7 +518,8 @@ use App\Payment\Application\Command\ChargeCustomer;
 use App\Payment\Application\Command\RefundCustomer;
 use App\Warehouse\Application\Command\ReserveStock;
 use App\Shipping\Application\Command\CreateShipment;
-use App\Ordering\Application\Command\ConfirmOrder;
+use App\Ordering\Application\Command\MarkOrderPaid;
+use App\Ordering\Application\Command\ShipOrder;
 use App\Ordering\Application\Command\CancelOrderCommand;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -603,6 +604,9 @@ final class OrderProcessManager
         ]);
         $this->sagaRepository->save($state);
 
+        // Stav agregátu mění příkaz, ne sága. Bez MarkOrderPaid by objednávka
+        // zůstala v Draft a Order::ship() by nešlo nikdy zavolat.
+        $this->commandBus->dispatch(new MarkOrderPaid(orderId: $event->orderId));
         $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
     }
 
@@ -658,11 +662,21 @@ final class OrderProcessManager
         ]);
         $this->sagaRepository->save($state);
 
-        $this->commandBus->dispatch(new ConfirmOrder(orderId: $event->orderId));
+        // Zásilka existuje, takže objednávka přechází do Shipped. ConfirmOrder
+        // by ji vrátil o krok zpět – potvrzení proběhlo už při platbě.
+        $this->commandBus->dispatch(new ShipOrder(
+            orderId: $event->orderId,
+            shipmentId: $event->shipmentId,
+        ));
     }
 }
 :::
 :::
+
+Objednávka projde během ságy čtyřmi stavy: `Draft` → `Confirmed` (potvrzení při
+zaplacení) → `Paid` (`MarkOrderPaid`) → `Shipped` (`ShipOrder`). Sága sama stav agregátu
+nemění – jen posílá příkazy a čeká na události. Kdyby některý příkaz chyběl, doběhne
+do `Completed` s objednávkou, která zůstala rozpracovaná.
 
 Orchestrace přináší oproti choreografii několik výhod: celý doménový proces
 je popsán na **jediném místě**, takže vývojář okamžitě vidí kompletní tok
@@ -845,9 +859,11 @@ interface PaymentGateway
 :::
 
 **Zbylé handlery** – `ReserveStockHandler`, `CreateShipmentHandler`, `RefundCustomerHandler`,
-`ConfirmOrderHandler` a `CancelOrderHandler` – mají stejnou stavbu: vykonají krok a vydají
-událost. Bez posledních dvou skončí sága ve stavu `Completed`, ale objednávka zůstane
-v `Draft` – právě proto, že Process Manager stav objednávky nemění, jen posílá příkazy.
+`MarkOrderPaidHandler`, `ShipOrderHandler` a `CancelOrderHandler` – mají stejnou stavbu:
+vykonají krok a vydají událost. Bez posledních tří skončí sága ve stavu `Completed`,
+ale objednávka zůstane v `Draft` – Process Manager stav agregátu nemění, jen posílá
+příkazy. Právě tady se pozná, jestli je proces domyšlený: sága může doběhnout do
+terminálního stavu a objednávka přesto zůstat rozpracovaná.
 
 ### Kolik logiky smí Process Manager mít {#logika-v-process-manageru}
 
@@ -1361,7 +1377,8 @@ framework:
             'App\Warehouse\Application\Command\ReleaseStock': async_commands
             'App\Shipping\Application\Command\CreateShipment': async_commands
             'App\Shipping\Application\Command\CancelShipment': async_commands
-            'App\Ordering\Application\Command\ConfirmOrder': async_commands
+            'App\Ordering\Application\Command\MarkOrderPaid': async_commands
+            'App\Ordering\Application\Command\ShipOrder': async_commands
             'App\Ordering\Application\Command\CancelOrderCommand': async_commands
             # Bez tohoto routingu by se CheckSagaTimeout zpracoval synchronně
             # a DelayStamp by neměl žádný efekt.
@@ -1752,7 +1769,7 @@ Richardson (Microservices Patterns, 2018, kap. 4) dělí kroky ságy do tří sk
 - **Pivot transaction** – bod rozhodnutí. Jakmile commitne, sága už necouvá
   a poběží dopředu až do konce. V našem procesu je pivotem rezervace skladu.
 - **Retriable transactions** – kroky po pivotu (`CreateShipment`,
-  `ConfirmOrder`). Kompenzaci nemají, nesmí selhat z doménových důvodů
+  `ShipOrder`). Kompenzaci nemají, nesmí selhat z doménových důvodů
   a opakují se až do úspěchu.
 
 Kompenzace samy patří do třetí kategorie. `RefundCustomer` nemá legitimní

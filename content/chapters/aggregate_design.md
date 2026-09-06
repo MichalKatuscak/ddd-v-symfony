@@ -491,6 +491,19 @@ class Order extends AggregateRoot
         $this->items->add(new OrderItem($this, $productId, $quantity, $unitPrice));
     }
 
+    // Bez tohohle přechodu je ship() nedosažitelná: do stavu Paid
+    // se objednávka jinak nedostane.
+    public function markPaid(): void
+    {
+        if ($this->status !== OrderStatus::Confirmed) {
+            throw new InvalidOrderStateTransitionException(
+                "only confirmed orders can be paid, current state: {$this->status->value}"
+            );
+        }
+
+        $this->status = OrderStatus::Paid;
+    }
+
     public function ship(ShipmentId $shipmentId): void
     {
         if ($this->status !== OrderStatus::Paid) {
