@@ -836,7 +836,7 @@ final class OutboxDispatchCommand extends Command
                         $message,
                         // Jméno transportu musí odpovídat messenger.yaml.
                         // Jméno musí existovat v messenger.yaml; neplatné skončí
-                        // hláškou „sender is not in the senders locator"
+                        // hláškou „sender is not in the senders locator“
                         // a řádek se označí failed až po vyčerpání pokusů.
                         [new TransportNamesStamp(['async_events'])],
                     );

@@ -657,7 +657,7 @@ final class Order extends AggregateRoot
             orderId:    $this->id,
             customerId: $this->customerId,
             reason:     $reason,
-            cancelledAt: $when,
+            occurredAt: $when,
         ));
     }
 

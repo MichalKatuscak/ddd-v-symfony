@@ -661,7 +661,7 @@ interface OrderRepository
 :::
 
 `OrderRepository` je záměrně úzký: uložit agregát a načíst ho podle identity. Dotazy typu
-„všechny objednávky zákazníka" do něj nepatří – ty obsluhuje read model, jak rozvádí kapitola
+„všechny objednávky zákazníka“ do něj nepatří – ty obsluhuje read model, jak rozvádí kapitola
 [CQRS](/cqrs). Chybějící objednávka je chyba volajícího, ne prázdný výsledek, proto `get()`
 vrací `Order` a hází výjimku místo `null`.
 Implementaci si volí infrastruktura – nejčastěji Doctrine ORM, ale stejně dobře

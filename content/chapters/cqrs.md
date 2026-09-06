@@ -272,7 +272,7 @@ Konfigurace definuje tři transporty: `async_commands` a `async_events` pro zpra
 vykonání v témže procesu. Busy jsou tři. `command.bus` pro příkazy má `doctrine_transaction`
 middleware, tedy automatickou transakci kolem handleru. `query.bus` obsahuje pouze validaci.
 Transport `doctrine://default` dodává balíček `symfony/doctrine-messenger`; bez něj
-Messenger hlásí „No transport supports Messenger DSN". Pro AMQP je to obdobně
+Messenger hlásí „No transport supports Messenger DSN“. Pro AMQP je to obdobně
 `symfony/amqp-messenger`.
 
 `event.bus` slouží doménovým událostem a liší se v jednom podstatném bodě: příkaz bez handleru
@@ -1072,7 +1072,7 @@ final class OrderDashboardProjector
              -- ON CONFLICT je PostgreSQL i SQLite; MySQL má
              -- ON DUPLICATE KEY UPDATE … = VALUES(…). Upsert není přenositelný.
              -- Bez podmínky by opakované doručení vrátilo odeslanou
-             -- objednávku zpět na „placed". Řádek se přepíše jen tehdy,
+             -- objednávku zpět na „placed“. Řádek se přepíše jen tehdy,
              -- když je nová událost novější než ta zapsaná.
              ON CONFLICT (order_id) DO UPDATE SET
                 status = excluded.status, updated_at = excluded.updated_at
@@ -1098,10 +1098,11 @@ final class OrderDashboardProjector
               WHERE order_id = :orderId
                 AND updated_at < :updatedAt',
             [
-                'orderId'        => $event->orderId,
-                'status'         => 'shipped',
+                // Událost nese OrderId, DBAL do dotazu potřebuje skalár.
+                'orderId'    => $event->orderId->value,
+                'status'     => 'shipped',
                 'shipmentId' => $event->shipmentId->value,
-                'updatedAt'      => $event->occurredAt->format('Y-m-d H:i:s'),
+                'updatedAt'  => $event->occurredAt->format('Y-m-d H:i:s'),
             ],
         );
     }
@@ -1114,7 +1115,7 @@ final class OrderDashboardProjector
               WHERE order_id = :orderId
                 AND updated_at < :updatedAt',
             [
-                'orderId'   => $event->orderId,
+                'orderId'   => $event->orderId->value,
                 'status'    => 'cancelled',
                 'updatedAt' => $event->occurredAt->format('Y-m-d H:i:s'),
             ],

@@ -545,8 +545,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler]
 final class OrderProcessManager
 {
-    // Systémová identita procesu – viz „Autorizace v asynchronním kontextu"
-    // v kapitole o autorizaci. Fail-open podmínka „když aktér chybí, povol vše"
+    // Systémová identita procesu – viz „Autorizace v asynchronním kontextu“
+    // v kapitole o autorizaci. Fail-open podmínka „když aktér chybí, povol vše“
     // je přesně to, čemu se tím vyhýbáme.
     private const SYSTEM_ACTOR = '01920000-0000-7000-8000-000000000001';
 
@@ -597,7 +597,7 @@ final class OrderProcessManager
             //
             // Doctrine po neúspěšném flushi EntityManager zavře, takže
             // samotné spolknutí výjimky nestačí: bez resetu spadne další
-            // handler téže zprávy na „The EntityManager is closed".
+            // handler téže zprávy na „The EntityManager is closed“.
             // Detail v kapitole o Outboxu.
             $this->managerRegistry->resetManager();
 

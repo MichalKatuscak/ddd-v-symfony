@@ -593,6 +593,82 @@ ilustruje následující diagram:
 :::diagram{fig="07.7-A" title="Stavový diagram agregátu Order" src="images/diagrams/21_aggregate_design/order_states.svg"}
 :::
 
+Události, které přechody nahrávají, mají jednotný tvar: identita agregátu jako hodnotový
+objekt a čas vzniku. Na `occurredAt` staví projekce i outbox, takže pole nese každá z nich
+a jmenuje se všude stejně.
+
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderShipped.php + OrderCancelled.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain\Event;
+
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Shipping\Domain\ValueObject\ShipmentId;
+
+final readonly class OrderShipped
+{
+    public function __construct(
+        public OrderId $orderId,
+        public ShipmentId $shipmentId,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
+}
+
+final readonly class OrderCancelled
+{
+    public function __construct(
+        public OrderId $orderId,
+        public CustomerId $customerId,
+        public string $reason,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
+}
+:::
+
+`ShipmentId` bydlí v kontextu `Shipping` a má stejnou stavbu jako `OrderId`:
+
+:::code{language="php" filename="src/Shipping/Domain/ValueObject/ShipmentId.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Shipping\Domain\ValueObject;
+
+use Symfony\Component\Uid\Uuid;
+
+final readonly class ShipmentId
+{
+    public string $value;
+
+    private function __construct(string $value)
+    {
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException("Neplatné ShipmentId: {$value}");
+        }
+
+        $this->value = $value;
+    }
+
+    public static function generate(): self
+    {
+        return new self((string) Uuid::v7());
+    }
+
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}
+:::
+
 ## 07.08 Mapování v Symfony 8 a Doctrine ORM 3 {#symfony-doctrine}
 
 Doctrine ORM je v Symfony projektech výchozí volba a v jeho konfiguraci se nejčastěji
@@ -923,14 +999,14 @@ doctrine:
                 is_bundle: false
             # Embeddable hodnotové objekty sdíleného jádra (Money) musí být
             # v mapping chainu taky, jinak Doctrine hlásí
-            # „class … was not found in the chain configured namespaces".
+            # „class … was not found in the chain configured namespaces“.
             SharedKernel:
                 type: attribute
                 dir: '%kernel.project_dir%/src/SharedKernel/Domain'
                 prefix: 'App\SharedKernel\Domain'
                 is_bundle: false
             # Entity mimo doménové složky potřebují vlastní blok. Bez něj
-            # Doctrine na schema:update mlčí („Nothing to update") a tabulka
+            # Doctrine na schema:update mlčí („Nothing to update“) a tabulka
             # prostě nevznikne – proto je tu vypisujeme, ne jen zmiňujeme.
             OrderingSaga:
                 type: attribute

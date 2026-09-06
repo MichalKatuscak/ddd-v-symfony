@@ -170,7 +170,10 @@ Strom stojí na čtyřech pravidlech. Každý kontext má vlastní model, který
 
 - **Doménové modely ve sdílené složce** – model v `SharedKernel/` ztrácí vazbu na kontext, kterému patří.
 - **Sdílení doménových modelů mezi kontexty** – přímý přístup k datům cizího kontextu obchází Anti-Corruption Layer i doménové události.
-- **Příliš mnoho závislostí mezi kontexty** – cross-context import doménových tříd je signál chybějící Anti-Corruption Layer.
+- **Příliš mnoho závislostí mezi kontexty** – cross-context import doménových tříd je signál
+  chybějící Anti-Corruption Layer. Výjimkou je identita: `ShipmentId` v `Ordering` nenese
+  žádné chování cizího modelu, jen odkaz. Import agregátu, jeho entit nebo doménové služby
+  je naproti tomu vždy podezřelý.
 - **Ignorování Ubiquitous Language** – kód, dokumentace a řeč v týmu se rozcházejí v pojmech.
 :::
 
@@ -1187,7 +1190,7 @@ je anti-vzor: oslabuje agregát a vede k anemickému modelu.
 :::code{language="php" filename="src/Ordering/Domain/Service/PaymentService.php (ANTI-VZOR)"}
 <?php
 
-// ANTI-VZOR: pravidlo „lze platit jen confirmed objednávku" je invariant
+// ANTI-VZOR: pravidlo „lze platit jen confirmed objednávku“ je invariant
 // agregátu Order, ne odpovědnost externí služby.
 final class PaymentService
 {
