@@ -193,53 +193,67 @@ use Arkitect\Rules\Rule;
 return static function (Config $config): void {
     $classSet = ClassSet::fromDir(__DIR__ . '/src');
 
-    // Pravidlo 1: Ordering nesmí znát Infrastructure jiných BC.
-    // Komunikace probíhá přes Application interface nebo events.
-    $orderingIsolation = Rule::allClasses()
-        ->that(new ResideInOneOfTheseNamespaces('App\Ordering'))
-        ->should(new NotDependsOnTheseNamespaces([
-            'App\Billing\Infrastructure',
-            'App\Catalog\Infrastructure',
-            'App\Shipping\Infrastructure',
-        ]))
-        ->because(
-            'Ordering komunikuje s ostatními BC jen přes events nebo Application interface, '
-            . 'ne přes Infrastructure. Sdílení Infrastructure = distributed monolith po rozdělení.'
-        );
+    // Kontexty se vyjmenují jednou; pravidla se z nich odvodí pro každý.
+    // Ruční výčet by jinak nechal nové kontexty bez subjektu - a pravidlo,
+    // které nemá subjekt, nehlásí nic.
+    $contexts = ['Ordering', 'Billing', 'Catalog', 'Shipping'];
+    $rules = [];
 
-    // Pravidlo 2: Domain vrstva nesmí znát žádný jiný BC.
-    // Ani jeho Application – Domain je nejvíc izolovaná.
-    $domainIsolation = Rule::allClasses()
-        ->that(new ResideInOneOfTheseNamespaces('App\Ordering\Domain'))
-        ->should(new NotDependsOnTheseNamespaces([
-            'App\Billing',
-            'App\Catalog',
-            'App\Shipping',
-        ]))
-        ->because(
-            'Doménová vrstva BC je čistá – nezná ostatní BC ani jejich Application vrstvu. '
-            . 'Cross-BC integrace patří do Application/IntegrationEvent.'
-        );
+    foreach ($contexts as $context) {
+        $foreign = array_values(array_diff($contexts, [$context]));
 
-    // Pravidlo 3: Doménové eventy zůstávají uvnitř svého BC.
-    // Subscriber v jiném BC má vlastní IntegrationEvent DTO.
-    $eventsArePrivate = Rule::allClasses()
-        ->that(new ResideInOneOfTheseNamespaces('App\Billing'))
-        ->should(new NotDependsOnTheseNamespaces([
-            'App\Ordering\Domain\Event',
-        ]))
-        ->because(
-            'Billing nesmí použít App\Ordering\Domain\Event\OrderPlaced přímo. '
-            . 'Místo toho má App\Billing\Application\IntegrationEvent\OrderPlacedReceived. '
-            . 'Bez tohoto pravidla po rozdělení monolithu vznikne sdílená library = distributed monolith.'
-        );
+        // Pravidlo 1: kontext nesmí znát Infrastructure jiných kontextů.
+        // Komunikace probíhá přes Application interface nebo events.
+        $rules[] = Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces("App\\{$context}"))
+            ->should(new NotDependsOnTheseNamespaces(
+                array_map(static fn (string $bc): string => "App\\{$bc}\\Infrastructure", $foreign),
+            ))
+            ->because(
+                'Kontexty spolu mluví přes events nebo Application interface, ne přes '
+                . 'Infrastructure. Sdílená Infrastructure = distributed monolith po rozdělení.'
+            );
 
-    $config->add($classSet, $orderingIsolation, $domainIsolation, $eventsArePrivate);
+        // Pravidlo 2: Domain vrstva nesmí znát žádný jiný kontext.
+        // Ani jeho Application - Domain je nejvíc izolovaná.
+        $rules[] = Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces("App\\{$context}\\Domain"))
+            ->should(new NotDependsOnTheseNamespaces(
+                array_map(static fn (string $bc): string => "App\\{$bc}", $foreign),
+            ))
+            ->because(
+                'Doménová vrstva je čistá - nezná ostatní kontexty ani jejich Application '
+                . 'vrstvu. Cross-BC integrace patří do Application/IntegrationEvent.'
+            );
+
+        // Pravidlo 3: doménové eventy zůstávají uvnitř svého kontextu.
+        // Subscriber v jiném kontextu má vlastní IntegrationEvent DTO.
+        $rules[] = Rule::allClasses()
+            ->that(new ResideInOneOfTheseNamespaces("App\\{$context}"))
+            ->should(new NotDependsOnTheseNamespaces(
+                array_map(static fn (string $bc): string => "App\\{$bc}\\Domain\\Event", $foreign),
+            ))
+            ->because(
+                'Billing nesmí použít App\Ordering\Domain\Event\OrderPlaced přímo. Místo toho '
+                . 'má App\Billing\Application\IntegrationEvent\OrderPlacedReceived. Bez tohoto '
+                . 'pravidla vznikne po rozdělení monolithu sdílená library = distributed monolith.'
+            );
+    }
+
+    // SharedKernel je pro všechny; nesmí ale záviset na žádném kontextu.
+    $rules[] = Rule::allClasses()
+        ->that(new ResideInOneOfTheseNamespaces('App\SharedKernel'))
+        ->should(new NotDependsOnTheseNamespaces(
+            array_map(static fn (string $bc): string => "App\\{$bc}", $contexts),
+        ))
+        ->because('Shared Kernel je společný základ, ne obousměrná závislost.');
+
+    $config->add($classSet, ...$rules);
 };
 :::
 :::
 
-Výčet zakázaných namespaců se s každým novým kontextem prodlužuje. Jakmile jich máte víc než tři, vyplatí se otočit polaritu a použít `DependsOnlyOnTheseNamespaces`, tedy whitelist, který nové kontexty odmítne automaticky, aniž byste pravidlo museli rozšiřovat.
+Podstatné je, že subjektem pravidla je **každý** kontext. Ručně psaná trojice pravidel jen pro dva kontexty nechá zbytek bez dozoru: průlom z Catalogu do Orderingu projde, protože Catalog není subjektem ničeho. Odvození ze seznamu tuhle díru zavře a nový kontext stačí přidat do pole. Kdo chce jít dál, otočí polaritu na `DependsOnlyOnTheseNamespaces`, tedy whitelist, který cizí závislost odmítne i bez výčtu.
 
 Pravidlo se spouští v CI jako součást běžné kontroly kvality:
 
@@ -614,7 +628,9 @@ framework:
             # používá Doctrine pro atomicitu zápisu eventu se zápisem domény
             events_out:
                 dsn: 'doctrine://default?queue_name=outbox_events'
-                serializer: 'messenger.transport.symfony_serializer'
+                # Vlastní serializer, ne symfony_serializer: wire formát je
+                # součástí kontraktu a nesmí kopírovat tvar doménové třídy.
+                serializer: 'App\Ordering\Infrastructure\Messaging\OutboundEventSerializer'
                 options:
                     queue_name: 'outbox_events'
 
@@ -740,6 +756,61 @@ final readonly class OrderPlacedReceived
     ) {}
 }
 :::
+:::
+
+Ten `event_type` musí ale někdo nastavit. Výchozí `messenger.transport.symfony_serializer`
+na straně vydavatele ho neposílá: do hlaviček dá `type` s plným jménem PHP třídy
+a doménovou událost serializuje tak, jak je — tedy `Money` jako vnořený objekt.
+Konzument z téhle sekce čeká ploché `totalAmountCents` a hlavičku `event_type`,
+takže na výchozím serializeru dostane `Missing event_type header`. Vydavatel proto
+potřebuje vlastní serializer, který doménovou událost přeloží do dohodnutého tvaru:
+
+:::code{language="php" filename="ordering-svc/src/Infrastructure/Messaging/OutboundEventSerializer.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Infrastructure\Messaging;
+
+use App\Ordering\Domain\Event\OrderPlaced;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
+
+/**
+ * Encode-only: převádí doménovou událost na dohodnutý wire formát.
+ * Tvar payloadu je součástí Published Language, ne detail implementace,
+ * takže se nesmí měnit spolu s doménovou třídou.
+ */
+final class OutboundEventSerializer implements SerializerInterface
+{
+    /** @param array<string, mixed> $encodedEnvelope */
+    public function decode(array $encodedEnvelope): Envelope
+    {
+        throw new \LogicException('OutboundEventSerializer is encode-only.');
+    }
+
+    /** @return array<string, mixed> */
+    public function encode(Envelope $envelope): array
+    {
+        $event = $envelope->getMessage();
+
+        if (!$event instanceof OrderPlaced) {
+            throw new \LogicException($event::class . ' nemá dohodnutý wire formát.');
+        }
+
+        return [
+            'body' => json_encode([
+                'eventId'          => $event->eventId,
+                'occurredAt'       => $event->occurredAt->format(\DateTimeInterface::ATOM),
+                'orderId'          => (string) $event->orderId,
+                'customerId'       => (string) $event->customerId,
+                'totalAmountCents' => $event->total->amountInCents,
+                'currency'         => $event->total->currency->value,
+            ], JSON_THROW_ON_ERROR),
+            'headers' => ['event_type' => 'ordering.order_placed'],
+        ];
+    }
+}
 :::
 
 Custom serializer dělá překlad mezi binárním AMQP payloadem a konkrétní integration event třídou podle `event_type` hlavičky. Toto je jediné místo v subscriberu, kde se „dotýkáte“ formátu publishera. Změny v doménovém eventu publishera vás zasáhnou jen zde. Zbytek kódu pracuje s vaší vlastní třídou.

@@ -155,13 +155,13 @@ K vzoru patří i provozní režim, na který se často zapomíná. Týmy integr
 
 ### Ukázka kódu: SharedKernel\Money modul
 
-:::code{language="php" filename="shared-kernel/src/Money/Money.php"}
+:::code{language="php" filename="shared-kernel/src/Domain/Money.php"}
 <?php
 
 declare(strict_types=1);
 
-// shared-kernel/src/Money/Money.php
-namespace App\SharedKernel\Money;
+// shared-kernel/src/Domain/Money.php
+namespace App\SharedKernel\Domain;
 
 use InvalidArgumentException;
 
@@ -186,6 +186,9 @@ final readonly class Money
     public function add(self $other): self
     {
         if ($this->currency !== $other->currency) {
+            // Vědomá zkratka: v Shared Kernelu, který sdílí víc kontextů,
+            // by pojmenovaná výjimka znamenala další sdílený typ. Uvnitř
+            // kontextu patří podle konvence knihy pojmenovaná třída.
             throw new \DomainException(
                 "Cannot add {$this->currency->value} and {$other->currency->value}."
             );
@@ -222,12 +225,12 @@ final readonly class Money
         }
     ],
     "require": {
-        "ddd/shared-kernel": "*"
+        "ddd/shared-kernel": "@dev"
     }
 }
 :::
 
-Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balíček v adresáři `shared-kernel/`. Verzuje se git tagy (`v1.0.0`, `v1.1.0`) a změny SK procházejí **společným code review** obou (či více) týmů. Pull request do SK by měl mít CODEOWNERS pravidlo, které automaticky přiřadí review obou týmů.
+Shared Kernel se v Symfony monorepu typicky drží jako lokální composer balíček v adresáři `shared-kernel/`. Constraint musí být `@dev`: path repository symlinkuje pracovní kopii a verzi bere z aktuální větve, ne z git tagů. `"*"` skončí hláškou *„found ddd/shared-kernel[dev-main] but it does not match your minimum-stability"*. Tagy dávají smysl teprve tehdy, když se balíček přestěhuje do vlastního repozitáře a přidá se přes `type: vcs`. Změny SK procházejí **společným code review** obou (či více) týmů. Pull request do SK by měl mít CODEOWNERS pravidlo, které automaticky přiřadí review obou týmů.
 
 ### Anti-vzor: „rozjetý“ Shared Kernel
 
@@ -269,14 +272,14 @@ framework:
                     queues:
                         ordering.from_catalog:
                             binding_keys: ['product.price_changed', 'product.discontinued']
-                # Retry posílá zprávu zpět přes sender téhož transportu,
-                # tedy přes encode() vlastního serializeru. Serializer
-                # konzumenta proto musí umět i encode(), jinak sem patří
-                # max_retries: 0 a spoléhá se na failure transport.
+                # Vlastní serializer konzumenta bývá decode-only. Retry ale
+                # posílá zprávu zpět přes sender téhož transportu, tedy přes
+                # encode() - a ten skončí výjimkou, která shodí workera.
+                # Proto nula pokusů a rovnou failure transport. Retry sem
+                # patří teprve tehdy, když serializer umí i encode().
+                # Rozbor v kapitole o mikroslužbách, sekce 19.08.
                 retry_strategy:
-                    max_retries: 3
-                    delay: 1000
-                    multiplier: 2
+                    max_retries: 0
 
 # Příjem zajišťuje worker: php bin/console messenger:consume from_catalog
 :::
@@ -384,7 +387,9 @@ final class StripePaymentReportRepository
 
     public function generateMonthlyRevenue(int $year, int $month): array
     {
-        $payments = $this->getRecentPayments(/* ... */);
+        $payments = $this->getRecentPayments(
+            new \DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month)),
+        );
 
         return array_map(
             // Reporting prostě používá Stripe pole jak jsou – currency, amount,
@@ -466,6 +471,22 @@ use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
  *   2. Concept translation – invoiceNumber (string, např. INV-2025-00042) => InvoiceId (UUID)
  *   3. Anti-corruption – odmítá neplatné stavy z legacy
  */
+/**
+ * DTO upstreamu: přesně to, co vrací legacy SOAP endpoint. Doména ho nikdy
+ * nevidí - je to vstup ACL, ne jeho výstup.
+ */
+final readonly class InvoicePaidSoapResponse
+{
+    public function __construct(
+        public string $invoiceNumber,
+        public int $amountInCents,
+        public string $status,
+        public string $paidAtIso,
+        public string $currencyCode = 'EUR',
+    ) {
+    }
+}
+
 final class LegacyBillingTranslator
 {
     public function translateInvoicePaid(InvoicePaidSoapResponse $r): InvoicePaid
@@ -478,7 +499,7 @@ final class LegacyBillingTranslator
         }
 
         // (3) Anti-corruption: chybějící identifikátor
-        if ($r->invoiceNumber === '' || $r->invoiceNumber === null) {
+        if ($r->invoiceNumber === '') {
             throw new UnrecoverableMessageHandlingException('Missing invoiceNumber in legacy payload.');
         }
 
@@ -489,11 +510,37 @@ final class LegacyBillingTranslator
             );
         }
 
+        // (3) Anti-corruption: chybějící datum. Bez téhle kontroly udělá
+        // `new \DateTimeImmutable('')` z prázdného řetězce aktuální čas
+        // a doména dostane „zaplaceno právě teď" místo chyby.
+        $paidAt = \DateTimeImmutable::createFromFormat(
+            \DateTimeInterface::ATOM,
+            $r->paidAtIso,
+        );
+
+        if ($paidAt === false) {
+            throw new UnrecoverableMessageHandlingException(
+                "Unparsable paidAt '{$r->paidAtIso}'; expected ISO 8601."
+            );
+        }
+
+        if ($paidAt > new \DateTimeImmutable()) {
+            throw new UnrecoverableMessageHandlingException('Legacy sent a future paidAt.');
+        }
+
+        // (3) Anti-corruption: měnu překládáme, ne přepisujeme. Natvrdo
+        // zapsané EUR by tiše změnilo částku na každé faktuře v jiné měně -
+        // vrstva proti korupci dat by data sama korumpovala.
+        $currency = Currency::tryFrom($r->currencyCode)
+            ?? throw new UnrecoverableMessageHandlingException(
+                "Unsupported legacy currency '{$r->currencyCode}'."
+            );
+
         // (1) Schema mapping + (2) Concept translation
         return new InvoicePaid(
             invoiceId: InvoiceId::fromLegacy($r->invoiceNumber),
-            paidAt:    new \DateTimeImmutable($r->paidAtIso),
-            amount:    new Money($r->amountInCents, Currency::EUR),
+            paidAt:    $paidAt,
+            amount:    new Money($r->amountInCents, $currency),
         );
     }
 }
@@ -530,6 +577,47 @@ final class LegacyBillingTranslatorTest extends TestCase
 
         $this->assertSame(12_345, $event->amount->amountInCents);
         $this->assertSame('EUR', $event->amount->currency->value);
+    }
+
+    public function testKeepsLegacyCurrency(): void
+    {
+        $translator = new LegacyBillingTranslator();
+
+        $event = $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
+            invoiceNumber: 'INV-3',
+            amountInCents: 100,
+            status:        'PAID',
+            paidAtIso:     '2025-04-29T10:00:00Z',
+            currencyCode:  'USD',
+        ));
+
+        $this->assertSame('USD', $event->amount->currency->value);
+    }
+
+    public function testRejectsMissingPaidAt(): void
+    {
+        $translator = new LegacyBillingTranslator();
+
+        $this->expectException(UnrecoverableMessageHandlingException::class);
+        $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
+            invoiceNumber: 'INV-4',
+            amountInCents: 100,
+            status:        'PAID',
+            paidAtIso:     '', // prázdné pole by se jinak přeložilo na "teď"
+        ));
+    }
+
+    public function testRejectsFuturePaidAt(): void
+    {
+        $translator = new LegacyBillingTranslator();
+
+        $this->expectException(UnrecoverableMessageHandlingException::class);
+        $translator->translateInvoicePaid(new InvoicePaidSoapResponse(
+            invoiceNumber: 'INV-5',
+            amountInCents: 100,
+            status:        'PAID',
+            paidAtIso:     '2099-01-01T00:00:00Z',
+        ));
     }
 
     public function testRejectsNegativeAmount(): void
@@ -653,6 +741,37 @@ final class ProductController extends AbstractController
         $product = $this->handle(new GetProductQuery($id));
 
         return $this->json($product, context: ['groups' => ['ohs.v1', 'ohs.v2']]);
+    }
+}
+:::
+
+Serializační skupiny fungují jen nad objektem s atributy `#[Groups]`. Když
+`GetProductQuery` vrátí prosté pole, jsou `groups` v kontextu **no-op** a obě
+verze odpovědí vrátí totéž – včetně polí, která v1 slibovala nemít. View model
+proto potřebuje atributy:
+
+:::code{language="php" filename="src/Catalog/Application/Query/ProductView.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Catalog\Application\Query;
+
+use Symfony\Component\Serializer\Attribute\Groups;
+
+final readonly class ProductView
+{
+    public function __construct(
+        #[Groups(['ohs.v1'])]
+        public string $id,
+        #[Groups(['ohs.v1'])]
+        public string $name,
+        #[Groups(['ohs.v1'])]
+        public int $priceCents,
+        // Přidáno ve v2; v1 odpověď ho neobsahuje.
+        #[Groups(['ohs.v2'])]
+        public int $availableStock,
+    ) {
     }
 }
 :::
