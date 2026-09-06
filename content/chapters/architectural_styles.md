@@ -7,7 +7,7 @@ meta_description: "Layered, Hexagonal, Onion nebo Clean Architecture? Kdy který
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Architektonické styly
 schema_type: TechArticle
 schema_headline: "Architektonické styly: Hexagonal, Onion, Clean – co si vybrat"
@@ -487,6 +487,8 @@ namespace App\Ordering\Application\UseCase;
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Port\OrderRepository;
 use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Application\Dto\PlaceOrderInput;
+use App\Ordering\Application\Dto\PlaceOrderOutput;
 
 final class PlaceOrderHandler implements PlaceOrder
 {

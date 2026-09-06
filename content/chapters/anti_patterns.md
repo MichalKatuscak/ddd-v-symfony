@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -720,6 +720,9 @@ class DoctrineOrderRepository
 // Billing context dělá totéž:
 namespace App\Billing\Infrastructure;
 
+use Doctrine\DBAL\Connection;
+use App\Ordering\Domain\ValueObject\OrderId;
+
 class InvoiceGenerator
 {
     public function __construct(private Connection $db) {}
@@ -979,6 +982,8 @@ class DoctrineUserRepository extends ServiceEntityRepository
 
 // ŠPATNĚ: Doménová logika v Symfony kontroleru
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends AbstractController
 {
@@ -1081,6 +1086,8 @@ class ActivateUserHandler
 
 // SPRÁVNĚ: Tenký Symfony kontroler
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends AbstractController
 {

@@ -999,6 +999,7 @@ use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\SharedKernel\Domain\AggregateRoot;
 use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 final class Order extends AggregateRoot
 {

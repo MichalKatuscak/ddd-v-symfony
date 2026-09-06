@@ -65,6 +65,7 @@ use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Repository\OrderRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use App\Ordering\Domain\ValueObject\CustomerId;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class PlaceOrderHandlerNaive

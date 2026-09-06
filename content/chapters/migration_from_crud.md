@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -456,6 +456,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\UserService;
 
 class UserController extends AbstractController
 {
@@ -529,6 +530,9 @@ logika přesune do entit a doménových služeb.
 // PŘED: God Service s přímou závislostí na Doctrine
 namespace App\Service;
 
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+
 class UserService
 {
     public function __construct(
@@ -582,6 +586,7 @@ use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
 use Doctrine\ORM\Mapping as ORM;
+use App\UserManagement\Domain\Exception\InvalidVerificationTokenException;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
@@ -683,6 +688,9 @@ primitiv objektem, který drží validaci i chování pohromadě.
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
 namespace App\Controller;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController {
     public function register(Request $request): Response {
@@ -887,6 +895,11 @@ optimalizované SQL jako read model je v DDD systému legitimní trvalý stav, n
 // PŘED: Logika přímo v kontroleru nebo service
 namespace App\Controller;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use App\Service\UserService;
+
 class UserController extends AbstractController
 {
     public function __construct(
@@ -970,6 +983,9 @@ namespace App\Controller;
 
 use App\UserManagement\Application\Command\RegisterUser;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends AbstractController
 {

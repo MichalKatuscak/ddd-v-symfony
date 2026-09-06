@@ -37,6 +37,10 @@ Nejčastější vzor. Controller přijme HTTP požadavek, načte entitu z reposi
 // src/Controller/OrderController.php (anti-vzor)
 namespace App\Controller;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use App\Ordering\Domain\Repository\OrderRepository;
+
 final class OrderController extends AbstractController
 {
     #[Route('/order/{id}/cancel', methods: ['POST'])]
@@ -70,6 +74,10 @@ Druhý extrém. Tým objeví Symfony Voter a přesune do něj *všechna* pravidl
 :::code{language="php" filename="src/Security/OrderVoter.php (anti-vzor)" highlights="13,14,15,16,17"}
 // src/Security/OrderVoter.php (anti-vzor)
 namespace App\Security;
+
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 final class OrderVoter extends Voter
 {
