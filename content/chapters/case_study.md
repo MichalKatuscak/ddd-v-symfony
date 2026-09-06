@@ -388,6 +388,26 @@ src/
 
 Sekce prochází jádro systému: od slovníku přes agregáty a doménové události až po command a query stranu CQRS.
 
+:::callout{type="note"}
+### Co kapitola ukazuje a co ne {#co-neukazuje-heading}
+
+Studie ukazuje **rozhodnutí**, ne kompletní repozitář k opsání. Kdo si ji chce
+postavit, dopíše zhruba stejný objem kódu, jaký tu vidí. Konkrétně:
+
+- **Doctrine custom typy** pro identifikátory (`project_id`, `user_id`, `task_id`)
+  a pro seznam členů (`user_id_list`). Mapování je používá, ukázku jednoho typu
+  má [Implementace v Symfony](/implementace-v-symfony#doctrine-custom-types).
+- **Repozitáře** obou agregátů. Jejich rozhraní jde odvodit z volajícího kódu:
+  `save()`, `findById()`, `findByMemberId()`, `all()`.
+- **Doménové výjimky** včetně pojmenovaných továren, na které se handlery odkazují.
+- **Controllery**. Strom je jmenuje, kapitola je neukazuje; návratovou hodnotu
+  handleru si controller vytáhne z `HandledStamp`.
+- **Slice `CreateTask`** a konfiguraci Messengeru s routingem událostí na transport.
+
+Bázová třída `AggregateRoot` a hodnotové objekty `UserId` i `TaskId` následují
+konvence ze [Základních konceptů](/zakladni-koncepty#aggregate-root-lifecycle).
+:::
+
 ### Ubiquitous Language {#ubiquitous-language-heading}
 
 Slovník vznikl s doménovými experty ještě před prvním řádkem kódu. Tytéž pojmy najdete ve třídách, v rozhovoru
