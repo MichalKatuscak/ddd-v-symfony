@@ -1593,6 +1593,54 @@ Kostra drží od patnáctého kola. Nálezy se posunuly od „nejde to postavit"
 má díry v okrajových cestách" — a poslední tři kola nenašla jedinou chybu v jádru
 objednávkového procesu. Poměr regresí z mých oprav klesl z ~40 % na jednu na kolo.
 
+## Devatenácté kolo: sedmnáctá ověřovací stavba (2026-09-06)
+
+**Verdikt protizkoušky: „Žádná chyba, která by čtenáře zastavila."** Projekt postaven
+od nuly bez jediného místa, kde by bylo nutné hádat autorův záměr. Všech šest oprav
+z minulého kola drží, happy path, obě kompenzační větve i timeout doběhly správně,
+**DLQ prázdná ve všech čtyřech scénářích**, 21 testů zeleně.
+
+### Chyba, kterou jsem udělal podruhé — a co s tím
+
+Do prioritního routingu jsem dosadil vymyšlenou třídu `InvoiceIssued`. Messenger třídy
+z `routing:` ověřuje při kompilaci kontejneru, takže by to shodilo `cache:clear` —
+**tentýž druh chyby, o kterém jsem si hodinu předtím zapisoval poučení.**
+
+Poučení očividně nestačí. Vznikl `scripts/check_messenger_routing.php`, který projde
+routing napříč kapitolami a ověří, že každou jmenovanou třídu kniha někde definuje.
+Ověřeno, že chybu opravdu chytá (návratový kód 1). Běží v CI. Zároveň odhalil druhý případ:
+`CreateShipment` a `CancelShipment` kniha jmenovala v routingu i v handleru, ale definovala
+jen komentářem.
+
+**Pravidlo: opakovaná chyba se neřeší poznámkou, ale kontrolou.**
+
+### Dvě vady, které spadnou až v provozu
+
+1. **Prázdný registrační formulář vracel 500.** Callout v kap. 10 tvrdil, že formulář
+   přebírá validační atributy commandu automaticky — pro dodanou konfiguraci to **neplatí**:
+   bez `data_class` je nepřebírá, validace běží až na sběrnici a prázdné pole (které
+   `TextType` mapuje na `null`) shodí konstruktor dřív. V prohlížeči to maskuje HTML5
+   `required`, takže vývojář to při ručním testu nikdy neuvidí.
+2. **Detail neexistující objednávky vracel 500** místo 404, protože `OrderNotFoundException`
+   chyběla ve `match` listeneru. Sousední cesta s nevalidním tvarem ID 404 vracela.
+
+### Ostatní opravené
+
+- `PlaceOrder` neměl jediný validační atribut, ačkoli `RegisterUser` i `GetUserProfile` je
+  mají – nesmyslné `productId` došlo až do hodnotového objektu, tedy 500 místo 422.
+- Chyběla šablona profilu a `default_target_path`: po přihlášení mířil firewall na `/`,
+  kterou žádná kapitola nedefinuje, takže **první proklik po loginu skončil na 404**.
+- **Zamlčený důsledek zámku.** Po složení všech kapitol vzniká objednávka rovnou uzamčená
+  a zámek uvolní až sága ve chvíli, kdy je objednávka `shipped` nebo `cancelled`. Zákazník
+  se tak k vlastnímu stornu nedostane nikdy a celý tok kapitoly 11 obsluhuje jen systémový
+  aktér. Doplněno, jak to změnit.
+
+### Stav po devatenácti kolech
+
+Poslední čtyři kola nenašla chybu v jádru objednávkového procesu. Nálezy se posunuly
+k okrajovým cestám HTTP vrstvy a k tvrzením, která kniha vyslovuje o vlastním kódu.
+Zbylé mezery protizkouška klasifikovala jako výřezy, ke kterým se kniha hlásí.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
