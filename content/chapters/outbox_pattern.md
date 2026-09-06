@@ -7,7 +7,7 @@ meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrin
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
@@ -21,8 +21,8 @@ github_examples: Chapter11_OutboxPattern
 
 V kapitolách o [CQRS](/cqrs), [Event Sourcingu](/event-sourcing)
 a [ságách](/sagy-a-process-managery) jsme opakovaně narazili na stejný předpoklad:
-když agregát po commitu publikuje doménovou událost, tato událost se **spolehlivě dostane
-do message brokeru** a odtud k subscriberům. Tento předpoklad je ovšem zrádný. Mezi
+když agregát po commitu publikuje doménovou událost, **spolehlivě dorazí
+do message brokeru** a odtud k subscriberům. Jenže ten předpoklad neplatí. Mezi
 zápisem do databáze a dispatchem do Messenger transportu stojí síťový skok a dva
 nezávislé systémy. Každý z nich může selhat samostatně. Důsledkem je *dual-write
 problem*, jeden z nejčastějších zdrojů tichých nekonzistencí v event-driven
@@ -36,10 +36,10 @@ straně subscriberů se v katalozích jmenuje **Idempotent Consumer**, starším
 názvem *Idempotent Receiver*; tato kapitola pro něj používá pracovní jméno
 **Idempotent Inbox**, protože stojí symetricky proti outboxu.
 
-Dál projdeme schéma outbox tabulky s povinným indexem, implementaci s Doctrine ORM
-a Symfony Messenger, dvě kanonické varianty relay procesu (Polling Publisher
-a Transaction Log Tailing) a operační aspekty: outbox lag, kompakci a dead-letter
-queue. Závěr patří migračnímu postupu pro existující projekt a srovnání
+Dál projdeme schéma outbox tabulky s povinným indexem a implementaci s Doctrine
+ORM a Symfony Messenger. Pak dvě kanonické varianty relay procesu, Polling
+Publisher a Transaction Log Tailing, a nakonec provozní stránku věci: outbox lag,
+kompakci a dead-letter queue. Závěr patří migračnímu postupu pro existující projekt a srovnání
 s alternativami.
 
 ## 15.01 Dual-write problem {#dual-write}
@@ -218,8 +218,8 @@ O ten se postará [Idempotent Inbox](#inbox).
 Outbox tabulka má deset sloupců; každý řeší konkrétní provozní problém, který se
 bez něj projeví až pod produkční zátěží.
 
-Entita níže nese Doctrine atributy a sedí v namespace `App\Outbox\Domain`, což je
-pragmatická volba. Outbox je infrastrukturní vzor; kdo drží přísné vrstvení
+Entita níže nese Doctrine atributy a sedí v namespace `App\Outbox\Domain`. Je to
+pragmatická zkratka. Outbox je infrastrukturní vzor; kdo drží přísné vrstvení
 podle kapitoly [Architektonické styly](/architektonicke-styly#hexagonal),
 umístí tabulkovou entitu do `Infrastructure`.
 
@@ -769,8 +769,8 @@ interface OutboxRepository
 :::
 :::
 
-Doctrine adapter je krátký a dvě místa v něm přehlédne skoro každý: `store()`
-nesmí flushovat, protože transakci drží aplikační wrapper, a `fetchPending()`
+Doctrine adapter je krátký, ale dvě místa v něm přehlédne skoro každý. `store()`
+nesmí flushovat, protože transakci drží aplikační wrapper. `fetchPending()`
 musí filtrovat i podle `availableAt`, jinak backoff z `markFailed()` nic neznamená.
 
 :::code{language="php" filename="src/Outbox/Infrastructure/DoctrineOutboxRepository.php"}
@@ -1040,14 +1040,14 @@ process_name=%(program_name)s
 Polling worker spouštějte vždy jako **singleton** (`numprocs=1`
 v supervisoru, `replicas: 1` v Kubernetes Deploymentu, případně leader
 election přes Redis lock). Dva paralelní workery, kteří selectují stejnou outbox tabulku,
-způsobí **double publish**: každý event se odešle dvakrát ve stejnou chvíli,
+způsobí **double publish**. Každý event se odešle dvakrát ve stejnou chvíli,
 zátěž brokera roste lineárně s počtem replik a Inbox musí vybalancovat víc duplicit.
 
 Jakmile jeden worker přestane stačit, sáhněte po
 `SELECT ... FOR UPDATE SKIP LOCKED` v Postgresu nebo MySQL 8. Každý
-worker si pak zarezervuje vlastní batch řádků. Řádově zvládne jeden PHP proces
-jednotky tisíc zpráv za sekundu; na každou dělá deserializaci, publish s čekáním
-na ACK a UPDATE řádku, takže výsledek určuje latence brokera a databáze, ne PHP.
+worker si pak zarezervuje vlastní batch řádků. Jeden PHP proces zvládne řádově jednotky tisíc zpráv za sekundu.
+Na každou dělá deserializaci, publish s čekáním na ACK a UPDATE řádku,
+takže výsledek určuje latence brokera a databáze, ne PHP.
 Konkrétní číslo změřte na vlastní konfiguraci, žádná univerzální hodnota
 neexistuje.
 :::
@@ -1205,8 +1205,8 @@ dokud ho relay nepublikuje. Opožděný commit se prostě objeví v některém d
 Outbox dává at-least-once delivery, takže subscriber **musí** počítat s tím,
 že stejný event dostane víckrát. Pokud je vedlejší efekt handleru ne-idempotentní (typicky
 `UPDATE counter SET value = value + 1`), duplicita se okamžitě projeví jako
-chybný stav read modelu: zákazník vidí 200 Kč na účtu místo 100 Kč, počet objednávek
-je dvojnásobný, e-mail dorazí 2×.
+chybný stav read modelu. Zákazník vidí 200 Kč na účtu místo 100 Kč, počet
+objednávek je dvojnásobný, e-mail dorazí 2×.
 
 Řešení má v katalozích dvě jména. microservices.io vede vzor jako **Idempotent
 Consumer** a doporučuje tabulku zpracovaných zpráv s kompozitním klíčem
@@ -1476,7 +1476,7 @@ final readonly class OrderPlacedReadModelUpdater
 :::
 :::
 
-Sloupec `consumer` v inbox tabulce není zanedbatelný: jeden a tentýž
+Sloupec `consumer` v inbox tabulce má svůj důvod: jeden a tentýž
 event_id mohou zpracovávat různí subscribery (Reporting, Notifications, Search index)
 a každý si potřebuje vést *vlastní* stav „už jsem to zpracoval“. Bez sloupce
 consumer by druhý subscriber narazil na UNIQUE constraint prvního a nikdy by event
@@ -1519,8 +1519,8 @@ největší tabulka v databázi subscribera.
 
 Horní hranici retence určuje doba, po kterou může broker zprávu ještě doručit:
 maximální TTL zprávy plus nejdelší retry okno relay procesu. Řádek starší než
-tento součet už nemá co deduplikovat. Obvykle se drží 30 dní, což je bezpečně
-nad běžnou konfigurací obojího, a maže se stejným batch cronem jako outbox.
+tento součet už nemá co deduplikovat. Obvykle se drží 30 dní – bezpečně nad běžným nastavením obou lhůt.
+Maže se stejným batch cronem jako outbox.
 Kdo retenci zvolí kratší než reálné retry okno, otevře si díru: opožděná zpráva
 projde jako nová.
 
@@ -1570,8 +1570,8 @@ je medián lagu pod 1 sekundou.
 ### Kompakce outbox tabulky {#kompakce-heading}
 
 Outbox tabulka roste lineárně s počtem doménových eventů. Bez kompakce po roce
-provozu obsahuje miliony historických řádků, což zpomaluje i indexované dotazy
-a zbytečně okupuje disk. Standardní strategie: **mažeme řádky, které jsou
+provozu obsahuje miliony historických řádků. Ty zpomalují i indexované dotazy
+a zbytečně okupují disk. Standardní strategie: **mažeme řádky, které jsou
 ve stavu `sent` a starší než N dní**, kde N je obvykle 7 až 30
 podle compliance požadavků.
 
@@ -1629,8 +1629,8 @@ final class OutboxCleanupCommand extends Command
 :::
 
 `LIMIT 10000` je tam záměrně: chceme batch delete, ne `DELETE FROM
-outbox` jediným SQL příkazem. Velký delete drží zámky na celé tabulce, což
-blokuje produkční INSERT z handlerů. Cron ho spouští každých 5 minut a 10 000 řádků
+outbox` jediným SQL příkazem. Velký delete drží zámky na celé tabulce a blokuje
+produkční INSERT z handlerů. Cron ho spouští každých 5 minut a 10 000 řádků
 za běh stačí na realistické workloady (cca 3 mil. eventů/den).
 
 Nabízející se zápis `DELETE … WHERE sent_at < NOW() - INTERVAL 30 DAY LIMIT 10000`
@@ -1669,14 +1669,14 @@ přepne do stavu `failed`. Tyto řádky chceme:
 
 Outbox má specifický I/O profil: vysoký INSERT rate, krátký životní cyklus (řádek vznikne →
 během sekund se UPDATE na `sent` → po N dnech DELETE), nikdy se nečte historie.
-PostgreSQL standardní autovacuum tuning na takový profil **není dimenzovaný**
+Standardní autovacuum tuning PostgreSQL na takový profil **není dimenzovaný**
 a po několika dnech provozu narážíte na index bloat:
 
 - INSERT vytváří mrtvé řádky v tabulce i v indexech (kvůli MVCC).
 - UPDATE statusu vytváří další verze řádku.
 - Standardní autovacuum threshold (`autovacuum_vacuum_scale_factor = 0.2`)
-  čeká, než se nasbírá 20 % mrtvých řádků, což je při tisících zápisů
-  za sekundu řád minut.
+  čeká, než se nasbírá 20 % mrtvých řádků. Při tisících zápisů za sekundu
+  je to řád minut.
 - Mezitím index `(status, occurred_at)` nabobtná na 10× původní velikost,
   selecty pomalují, lag stoupá.
 
@@ -1760,10 +1760,11 @@ správa je manuální.
 
 ### Distributed relay – multi-instance {#distributed-relay-heading}
 
-Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší konfigurace, ale
-má dvě slabiny: **single point of failure** (worker spadne → lag roste, dokud
-ho `livenessProbe` nerestartuje) a **omezenou propustnost** (jeden PHP proces
-odbaví řádově jednotky tisíc zpráv za sekundu).
+Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší
+konfigurace. Má ale dvě slabiny. První je **single point of failure**: worker
+spadne a lag roste, dokud ho `livenessProbe` nerestartuje. Druhá je **omezená
+propustnost**, protože jeden PHP proces odbaví řádově jednotky tisíc zpráv
+za sekundu.
 
 Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízí dvě cesty:
 
