@@ -624,8 +624,9 @@ final class OrderProcessManager
 
         // Opožděná událost nesmí vzkřísit ukončenou ságu. Bez téhle
         // podmínky by PaymentSucceeded doručený po timeoutu poslal
-        // MarkOrderPaid na už zrušenou objednávku.
-        if ($state->status()->isTerminal()) {
+        // MarkOrderPaid na už zrušenou objednávku. Chybějící sága
+        // znamená, že událost patří objednávce mimo tenhle proces.
+        if ($state === null || $state->status()->isTerminal()) {
             return;
         }
 
@@ -1690,9 +1691,41 @@ final class OrderLockedBySagaException extends \DomainException
 }
 :::
 
-`ReleaseOrderLockHandler` má stejnou stavbu jako `MarkOrderPaidHandler`, jen volá
-`releaseSagaLock()` a nevydává událost – uvolnění zámku není doménová změna, na kterou
-by někdo čekal.
+Handler je krátký, ale nosný: bez něj zůstane objednávka zamčená i po úspěšném
+doběhnutí procesu a zákazník ji nezruší nikdy.
+
+:::code{language="php" filename="src/Ordering/Application/Handler/ReleaseOrderLockHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Handler;
+
+use App\Ordering\Application\Command\ReleaseOrderLock;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\ValueObject\OrderId;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler(bus: 'command.bus')]
+final readonly class ReleaseOrderLockHandler
+{
+    public function __construct(
+        private OrderRepository $orders,
+        private EntityManagerInterface $em,
+    ) {}
+
+    public function __invoke(ReleaseOrderLock $command): void
+    {
+        $order = $this->orders->get(OrderId::fromString($command->orderId));
+        $order->releaseSagaLock();
+
+        // Žádná událost. Uvolnění zámku není doménová změna, na kterou
+        // by někdo čekal – jen konec výhradního přístupu procesu.
+        $this->em->flush();
+    }
+}
+:::
 
 Zámek má cenu jen tehdy, když ho někdo uvolní i při selhání – jinak zůstane objednávka
 zablokovaná navždy. Uvolnění proto patří do každé terminální větve ságy, ne jen
@@ -2180,6 +2213,11 @@ private function onRefundFailed(RefundFailed $event): void
     // Sem se řízení dostane až poté, co Messenger vyčerpal
     // retry strategii s backoffem (viz sekci 7).
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+    if ($state === null) {
+        return;
+    }
+
     $state->updateContext('manualInterventionReason', $event->failureReason);
     $this->sagaRepository->save($state);
 
@@ -2234,6 +2272,11 @@ vyžaduje doplnit nový case.
 private function onPaymentSucceeded(PaymentSucceeded $event): void
 {
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+    if ($state === null) {
+        return;
+    }
+
     $state->transitionTo(OrderSagaStatus::AwaitingStockAndInvoice);
     $state->updateContext('stockReserved', false);
     $state->updateContext('invoiceCreated', false);
@@ -2246,6 +2289,11 @@ private function onPaymentSucceeded(PaymentSucceeded $event): void
 private function onStockReserved(StockReserved $event): void
 {
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+    if ($state === null) {
+        return;
+    }
+
     $state->updateContext('stockReserved', true);
     $state->updateContext('completedSteps', [
         ...$state->context()['completedSteps'] ?? [],
@@ -2259,6 +2307,11 @@ private function onStockReserved(StockReserved $event): void
 private function onInvoiceCreated(InvoiceCreated $event): void
 {
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+    if ($state === null) {
+        return;
+    }
+
     $state->updateContext('invoiceCreated', true);
     $state->updateContext('completedSteps', [
         ...$state->context()['completedSteps'] ?? [],
@@ -2532,6 +2585,7 @@ final class OrderProcessManagerTest extends TestCase
         self::assertSame(self::ORDER_ID, $this->steps()[0]->orderId);
 
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
+        self::assertNotNull($state);
         self::assertSame(OrderSagaStatus::AwaitingPayment, $state->status());
     }
 
@@ -2549,6 +2603,7 @@ final class OrderProcessManagerTest extends TestCase
         self::assertInstanceOf(ReserveStock::class, $this->steps()[1]);
 
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
+        self::assertNotNull($state);
         self::assertSame(OrderSagaStatus::AwaitingStockReservation, $state->status());
     }
 
@@ -2563,6 +2618,7 @@ final class OrderProcessManagerTest extends TestCase
         ));
 
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
+        self::assertNotNull($state);
         self::assertSame(OrderSagaStatus::Failed, $state->status());
     }
 
@@ -2581,6 +2637,7 @@ final class OrderProcessManagerTest extends TestCase
 
         self::assertSame([], $this->steps());
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
+        self::assertNotNull($state);
         self::assertSame(OrderSagaStatus::Failed, $state->status());
     }
 }
