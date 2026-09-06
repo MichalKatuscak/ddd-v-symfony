@@ -543,7 +543,9 @@ use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\UserName;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class RegisterUserHandler
@@ -551,6 +553,8 @@ final readonly class RegisterUserHandler
     public function __construct(
         private UserRepository $userRepository,
         private EntityManagerInterface $em,
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
     ) {}
 
     public function __invoke(RegisterUser $command): void
@@ -569,6 +573,13 @@ final readonly class RegisterUserHandler
             $this->em->flush();
         } catch (UniqueConstraintViolationException $e) {
             throw DuplicateEmailException::with($email, $e);
+        }
+
+        // Bez tohohle kroku zůstane UserRegistered ležet v agregátu a nikdo
+        // se o registraci nedozví – ani posluchač, který zakládá přihlašovací
+        // záznam. Uživatel se pak nemůže přihlásit a nic přitom nespadne.
+        foreach ($user->releaseEvents() as $event) {
+            $this->eventBus->dispatch($event);
         }
     }
 }
@@ -779,7 +790,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
-use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Messenger\Exception\ValidationFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -824,16 +835,14 @@ final class RegistrationController extends AbstractController
                     return $this->render($template, ['form' => $form->createView()]);
                 }
 
-                // Validaci commandu dělá middleware na sběrnici, ne formulář.
-                // Bez tohohle bloku by krátké heslo skončilo jako 500 a uživatel
-                // by se u pole nedozvěděl nic.
-                $invalid = $e->getWrappedExceptions(ValidationFailedException::class);
-
-                if ($invalid === []) {
-                    throw $e; // neznámou chybu nemaskovat
-                }
-
-                foreach (reset($invalid)->getViolations() as $violation) {
+                throw $e; // neznámou chybu nemaskovat
+            } catch (ValidationFailedException $e) {
+                // Validaci commandu dělá middleware na sběrnici, ne formulář,
+                // a běží PŘED handlerem – výjimka proto nepřijde zabalená
+                // v HandlerFailedException a potřebuje vlastní větev.
+                // Pozor na jmenný prostor: middleware hází variantu
+                // z Messengeru, ne z Validatoru.
+                foreach ($e->getViolations() as $violation) {
                     $form->get($violation->getPropertyPath())->addError(
                         new FormError($violation->getMessage()),
                     );
@@ -1444,6 +1453,8 @@ vyzvedne a předá handleru.
 :::code{language="yaml" filename="config/packages/messenger.yaml (výřez – doplňuje konfiguraci z 12.05)"}
 # Doplněk ke konfiguraci z 12.05, ne náhrada: jména transportů
 # i queue_name zůstávají stejná, přibývá jen retry a druhá fronta.
+# Vložit místo původního bloku znamená přijít o default_bus,
+# event.bus s allow_no_handlers i o celý routing.
 framework:
     messenger:
         transports:
@@ -1566,8 +1577,8 @@ tak hromadné přehrání po opravě projektoru.
 :::callout{type="pattern"}
 ### Konfigurace failed transportu a diagnostické příkazy {#failed-transport-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
-# config/packages/messenger.yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez)"}
+# Výřez, ne celý soubor: klíče se přilévají ke konfiguraci z 12.05.
 framework:
     messenger:
         failure_transport: failed
@@ -1677,8 +1688,9 @@ final class CommandLoggingMiddleware implements MiddlewareInterface
 :::callout{type="pattern"}
 ### Registrace vlastního middleware {#middleware-registrace-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
-# config/packages/messenger.yaml
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez)"}
+# Nahrazuje jen seznam middleware u command.bus v konfiguraci z 12.05.
+# Vložit celý blok místo ní znamená přijít o transporty i routing.
 framework:
     messenger:
         buses:
@@ -1734,14 +1746,17 @@ final class RegisterUserHandlerTest extends KernelTestCase
     {
         $container = self::getContainer();
         $this->users = $container->get(UserRepository::class);
-        $this->handler = new RegisterUserHandler(
-            $this->users,
-            $container->get(EntityManagerInterface::class),
-        );
 
-        $container->get(EntityManagerInterface::class)
-            ->getConnection()
-            ->executeStatement('DELETE FROM users');
+        // Handler se bere z kontejneru, ne staví ručně. Ruční konstrukce
+        // se rozejde s každou novou závislostí – naposledy s event busem,
+        // bez kterého by se přihlašovací záznam nezaložil.
+        $this->handler = $container->get(RegisterUserHandler::class);
+
+        // Registrace zapisuje do dvou tabulek, takže se uklízejí obě.
+        // Jinak druhý běh testu spadne na unique indexu v app_user.
+        $connection = $container->get(EntityManagerInterface::class)->getConnection();
+        $connection->executeStatement('DELETE FROM app_user');
+        $connection->executeStatement('DELETE FROM users');
     }
 
     public function testRegistersNewUser(): void

@@ -176,7 +176,11 @@ security:
     access_control:
         # Veřejné endpointy
         - { path: ^/login,        roles: PUBLIC_ACCESS }
+        # Pozor na tvar cesty: ^/register nepokrývá /api/register.
+        # JSON endpoint by jinak skončil přesměrováním na login dřív,
+        # než se kontroler vůbec spustí.
         - { path: ^/register,     roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/health,       roles: PUBLIC_ACCESS }
         # Hrubá role-based separace
         - { path: ^/admin,        roles: ROLE_ADMIN }
@@ -472,6 +476,8 @@ Voterů bývá v aplikaci víc a jejich hlasy někdo skládá dohromady. Dělá 
 | `priority` | rozhodne první nezdržující se volič | explicitní pořadí přes `#[AsTaggedItem(priority: …)]` |
 
 Výchozí `affirmative` je pro rámec této kapitoly špatná volba. Kdo si vedle `OrderVoter` postaví `TenantVoter`, dostane opak toho, co čekal: `TenantVoter` cizí tenant zamítne, `OrderVoter` řekne ano na základě vlastnictví a přístup projde. Pro vrstvenou autorizaci proto:
+
+Blok patří do stejného `security.yaml` jako firewall výše, ne místo něj – YAML má jeden kořenový klíč `security:` a druhý dokument by ten první přepsal.
 
 :::code{language="yaml" filename="config/packages/security.yaml"}
 # config/packages/security.yaml
@@ -843,6 +849,12 @@ final readonly class RefundOrderHandler
 }
 :::
 
+Ukázka stojí na třech věcech, které kniha dál nerozvádí: `RefundOrderCommand`
+se stejnou stavbou jako `CancelOrderCommand`, `Order::refund()` a `SecurityUserProvider` –
+tenký repozitář nad `SecurityUser` s jedinou metodou `byCustomerId()`. Refundace je tu
+jako druhý use case pro srovnání dvou přístupů k autorizaci, ne jako součást
+objednávkového procesu; ten vrací platbu přes kompenzaci v ságe.
+
 Volba mezi oběma variantami se řídí povahou pravidla. Vlastnictví je vztah, který zná agregát sám, a porovnání `actorId` proti `customerId` nepotřebuje ani Security komponentu, ani dotaz navíc. Jakmile pravidlo závisí na rolích, hierarchii rolí nebo na atributech mimo agregát, vyplatí se sáhnout po `isGrantedForUser()` a mít pravidlo jen jednou – ve Voteru. Cenou je dotaz na aktéra a závislost aplikační vrstvy na Security komponentě, což je tatáž závislost, jakou už nese synchronní handler.
 
 Vzor má jeden trade-off. Mezi zařazením do fronty a zpracováním uplyne čas a oprávnění se mezitím mohla změnit – aktér přišel o roli, účet byl zablokován. Snapshot rolí přibalený do commandu proto slouží nanejvýš auditu; autoritativní je stav v okamžiku zpracování. Handler tedy nečte oprávnění ze zprávy, ale ověřuje je proti aktuálním datům – načtením aktéra, nebo porovnáním vlastnictví, které se na rozdíl od rolí nemění.
@@ -988,7 +1000,14 @@ Každá z těchto vrstev selže po svém: jiný HTTP status, jiná chybová hlá
 Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dva různé handlery výjimek: `AccessDeniedDomainException → 403`, `InvalidOrderStateTransitionException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
 
 Ten překlad ale nikdo neudělá sám. Bez posluchače vybublá doménová výjimka jako 500,
-a to i v případě, kdy uživatel udělal všechno správně a jen se netrefil do lhůty:
+a to i v případě, kdy uživatel udělal všechno správně a jen se netrefil do lhůty.
+
+Platí to jen pro **synchronní** zpracování. Jakmile se `CancelOrderCommand` v `messenger.yaml`
+nasměruje na `async_commands` – a kapitola o ságách to dělá – běží handler v jiném procesu.
+Uživatel dostane přesměrování, protože v okamžiku odpovědi ještě nikdo neví, jak to dopadne,
+a výjimka skončí ve failed transportu. Je to legitimní kompromis, ne chyba: pak ale musí
+odmítnutí zjistit dřív ten, kdo formulář vykresluje. Šablona proto volá `isCancellable()`
+a tlačítko vůbec nenabídne.
 
 :::code{language="php" filename="src/SharedKernel/Infrastructure/Http/DomainExceptionListener.php"}
 <?php
@@ -1050,10 +1069,10 @@ Existují dva přístupy s odlišnými kompromisy:
 
 Nejjednodušší, ale s *únikem dat*: data se z databáze načtou všechna, jen se ve view zahodí. Pro většinu UI to stačí; na citlivá data nepatří – unikají přes HTML komentáře, JSON serializaci v JS aplikaci nebo ETag hashing.
 
-:::code{language="twig" filename="templates/order/detail.html.twig" highlights="7,8,9,10,11,12,13,14,15,16"}
-{# templates/order/detail.html.twig #}
-{# Tady už jde o read model, ne o agregát: obrazovka potřebuje jméno
-   zákazníka a audit log, což jsou data z jiných kontextů. #}
+:::code{language="twig" filename="templates/order/detail.html.twig (varianta nad read modelem)" highlights="7,8,9,10,11,12,13,14,15,16"}
+{# Jiná varianta téže šablony než v 11.04. Tam čte agregát, tady read
+   model – obrazovka potřebuje jméno zákazníka a audit log, což jsou data
+   z jiných kontextů. Do projektu jde jedna z nich, ne obě. #}
 <dl>
     <dt>Zákazník</dt> <dd>{{ order.customerName }}</dd>
     <dt>Celkem</dt>   <dd>{{ order.totalFormatted }}</dd>
@@ -1083,6 +1102,8 @@ declare(strict_types=1);
 namespace App\Ordering\Application\ReadModel;
 
 use App\Identity\Infrastructure\Security\SecurityUser;
+use App\Ordering\Domain\Exception\OrderNotFoundException;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Security\Core\Authorization\UserAuthorizationCheckerInterface;
 
@@ -1095,21 +1116,64 @@ final readonly class OrderDetailReadModel
 
     public function forUser(string $orderId, SecurityUser $user): OrderDetailDto
     {
-        $columns   = 'id, customer_id, total_cents, status, placed_at';
+        // Read model čte projekci order_dashboard z kapitoly o CQRS, ne
+        // tabulku agregátu. Celková částka je tam předpočítaná; nad `orders`
+        // by se musela dopočítat joinem přes položky.
+        $columns   = 'order_id, customer_id, total_amount, status, placed_at';
         $seesAudit = $this->auth->isGrantedForUser($user, 'ROLE_ADMIN');
 
         if ($seesAudit) {
             $columns .= ', audit_log';
         }
 
-        $sql = "SELECT {$columns} FROM orders WHERE id = :id";
+        $sql = "SELECT {$columns} FROM order_dashboard WHERE order_id = :id";
 
         $row = $this->db->fetchAssociative($sql, ['id' => $orderId]);
         if ($row === false) {
-            throw new OrderNotFoundException($orderId);
+            throw OrderNotFoundException::withId(OrderId::fromString($orderId));
         }
 
         return OrderDetailDto::fromRow($row, includeAudit: $seesAudit);
+    }
+}
+:::
+
+DTO drží jen to, co obrazovka opravdu dostala. `auditLog` je `null`, pokud ho dotaz
+nevybral – a to je rozdíl proti prázdnému poli, který má význam: „neviděl jsi ho",
+ne „žádný není".
+
+:::code{language="php" filename="src/Ordering/Application/ReadModel/OrderDetailDto.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\ReadModel;
+
+final readonly class OrderDetailDto
+{
+    /** @param list<array<string, mixed>>|null $auditLog */
+    public function __construct(
+        public string $orderId,
+        public string $customerId,
+        public int $totalAmount,
+        public string $status,
+        public \DateTimeImmutable $placedAt,
+        public ?array $auditLog = null,
+    ) {}
+
+    /** @param array<string, mixed> $row */
+    public static function fromRow(array $row, bool $includeAudit): self
+    {
+        return new self(
+            orderId:     (string) $row['order_id'],
+            customerId:  (string) $row['customer_id'],
+            totalAmount: (int) $row['total_amount'],
+            status:      (string) $row['status'],
+            placedAt:    new \DateTimeImmutable((string) $row['placed_at']),
+            auditLog:    $includeAudit
+                ? json_decode((string) ($row['audit_log'] ?? '[]'), true, flags: JSON_THROW_ON_ERROR)
+                : null,
+        );
     }
 }
 :::
@@ -1161,7 +1225,7 @@ final readonly class OrderListReadModel
     /** @return list<array<string, mixed>> */
     public function visibleTo(CustomerId $actor, bool $isAdmin, int $limit, int $offset): array
     {
-        $sql = 'SELECT id, status, total_cents, placed_at FROM orders';
+        $sql = 'SELECT order_id, status, total_amount, placed_at FROM order_dashboard';
         $params = ['limit' => $limit, 'offset' => $offset];
 
         // Autorizace je součástí dotazu, ne postprocessingu
@@ -1418,6 +1482,26 @@ final class TenantFilter extends SQLFilter
             $this->getParameter('tenant_id'),
         );
     }
+}
+:::
+
+Marker rozhraní je prázdné – nese jen informaci „tahle entita patří tenantovi". Bez něj
+filtr spadne u prvního dotazu na `Interface … does not exist`, a protože je zapnutý
+globálně, shodí každý dotaz v aplikaci:
+
+:::code{language="php" filename="src/SharedKernel/Domain/TenantAware.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Domain;
+
+/**
+ * Značka pro entity, které patří konkrétnímu tenantovi. Metody nemá –
+ * filtr se ptá jen na to, jestli ji entita implementuje.
+ */
+interface TenantAware
+{
 }
 :::
 
@@ -1755,6 +1839,21 @@ final class CancelOrderE2eTest extends WebTestCase
 {
     private const OWNER    = '018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03';
     private const STRANGER = '02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746';
+
+    protected function setUp(): void
+    {
+        // Fixture se zapisuje do databáze, takže se musí uklidit – jinak
+        // druhý běh spadne na unique indexu, ne na testovaném chování.
+        // Pohodlnější alternativa je dama/doctrine-test-bundle, který
+        // každý test obalí transakcí a na konci ji vrátí zpět.
+        $connection = static::getContainer()
+            ->get(EntityManagerInterface::class)
+            ->getConnection();
+
+        foreach (['order_items', 'orders', 'app_user'] as $table) {
+            $connection->executeStatement('DELETE FROM ' . $table);
+        }
+    }
 
     public function testStrangerGetsNotFound(): void
     {

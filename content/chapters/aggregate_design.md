@@ -846,9 +846,6 @@ class Order extends AggregateRoot
     #[ORM\Column(type: 'integer')]
     private int $version = 1;
 
-    // Identita a vlastník zůstávají promované jako v 07.07 – atributy
-    // sedí na parametrech konstruktoru. Deklarovat je ještě jednou jako
-    // samostatné vlastnosti nejde: PHP hlásí „Cannot redeclare Order::$id".
     private function __construct(
         #[ORM\Id]
         #[ORM\Column(type: 'order_id')]
@@ -864,6 +861,12 @@ class Order extends AggregateRoot
     // ... factory metody, doménové operace ...
 }
 :::
+
+Výpis **nahrazuje** deklarace vlastností z 07.07, nepřidává se k nim. Kdo oba bloky
+slepí za sebe, dostane `Cannot redeclare Order::$status` – a stejně tak u `$placedAt`
+a `$items`. Identita a vlastník zůstávají promované v konstruktoru; atributy Doctriny
+sedí přímo na parametrech, takže i pro ně platí jedna deklarace, ne dvě. Metody
+a továrny se naopak berou z 07.07, ten je tady vynechává jen kvůli délce.
 
 :::callout{type="note"}
 **Entita mapovaná Doctrine může být `final`**

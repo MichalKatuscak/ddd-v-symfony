@@ -531,6 +531,7 @@ use App\Shipping\Application\Command\CreateShipment;
 use App\Ordering\Application\Command\MarkOrderPaid;
 use App\Ordering\Application\Command\ShipOrder;
 use App\Ordering\Application\Command\CancelOrderCommand;
+use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\SystemActor;
 use App\Ordering\Domain\ValueObject\OrderId;
@@ -555,7 +556,8 @@ final class OrderProcessManager
 
     public function __invoke(
         OrderPlacedIntegrationEvent|PaymentSucceeded|PaymentFailed|StockReserved
-        |StockReservationFailed|ShipmentCreated|RefundSucceeded|RefundFailed $event,
+        |StockReservationFailed|ShipmentCreated|RefundSucceeded|RefundFailed
+        |OrderCancelled $event,
     ): void {
         match (true) {
             $event instanceof OrderPlacedIntegrationEvent => $this->onOrderPlaced($event),
@@ -569,6 +571,11 @@ final class OrderProcessManager
             // a v logu po ní nezůstane ani řádek.
             $event instanceof RefundSucceeded => $this->onRefundSucceeded($event),
             $event instanceof RefundFailed => $this->onRefundFailed($event),
+            // Objednávku může zrušit i člověk, ne jen kompenzace. Bez téhle
+            // větve sága poběží dál, strhne platbu a vytvoří zásilku
+            // k objednávce, která už neexistuje – a příkazy pak jeden po
+            // druhém umřou v DLQ, aniž by kdokoli spadl.
+            $event instanceof OrderCancelled => $this->onOrderCancelled($event),
         };
     }
 
@@ -687,6 +694,41 @@ final class OrderProcessManager
             amountCents: $state->context()['amountCents'],
             reason: 'Zboží není skladem',
         ));
+    }
+
+    private function onOrderCancelled(OrderCancelled $event): void
+    {
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId->value);
+
+        // Vlastní kompenzace ságu takhle nevzkřísí: ta už je v Compensating
+        // nebo terminálním stavu.
+        if ($state === null || $state->status()->isTerminal()
+            || $state->status() === OrderSagaStatus::Compensating) {
+            return;
+        }
+
+        $state->transitionTo(OrderSagaStatus::Compensating);
+        $this->sagaRepository->save($state);
+
+        // Vrací se jen to, co už proběhlo. Seznam hotových kroků je přesně
+        // ten důvod, proč si sága vede stav.
+        foreach (array_reverse($state->context()['completedSteps']) as $step) {
+            match ($step) {
+                'shipment_created' => $this->commandBus->dispatch(
+                    new CancelShipment(orderId: $event->orderId->value),
+                ),
+                'stock_reserved' => $this->commandBus->dispatch(
+                    new ReleaseStock(orderId: $event->orderId->value),
+                ),
+                'payment_charged' => $this->commandBus->dispatch(new RefundCustomer(
+                    orderId: $event->orderId->value,
+                    customerId: $state->context()['customerId'],
+                    amountCents: $state->context()['amountCents'],
+                    reason: 'Objednávku zrušil zákazník',
+                )),
+                default => null,
+            };
+        }
     }
 
     private function onShipmentCreated(ShipmentCreated $event): void
@@ -1485,29 +1527,44 @@ Semantic lock je z nich nejčastější:
 :::callout{type="pattern"}
 ### PHP: Semantic lock přes stav *_PENDING {#semantic-lock-heading}
 
-:::code{language="php" filename="snippet.php"}
-// Agregát Order: sága ho při startu uzamkne stavem ApprovalPending.
-// Tři stavy níž rozšiřují kanonický OrderStatus jen pro schvalovací scénář.
-public function submitForApproval(): void
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
+// Příznak vedle stavu, ne nový stav. Stavový graf objednávky by se jinak
+// zdvojil o „pending" variantu ke každé hraně.
+private bool $sagaInProgress = false;
+
+public function lockForSaga(): void
 {
-    $this->status = OrderStatus::ApprovalPending; // semantic lock
+    $this->sagaInProgress = true;
 }
 
-// Jiný use case musí zámek respektovat
-public function changeShippingAddress(Address $newAddress): void
+public function unlockAfterSaga(): void
 {
-    if ($this->status === OrderStatus::ApprovalPending) {
+    $this->sagaInProgress = false;
+}
+
+public function cancel(string $reason, \DateTimeImmutable $when): void
+{
+    // Zámek drží proces, ne uživatel. Odmítnutí je tady lepší než tiché
+    // storno: sága by dál strhávala platbu a vytvářela zásilku
+    // k objednávce, která už neexistuje.
+    if ($this->sagaInProgress) {
         throw new OrderLockedBySagaException($this->id);
     }
 
-    $this->shippingAddress = $newAddress;
+    // ... zbytek podle kapitoly o autorizaci
 }
+:::
+:::
 
-// Zámek uvolňuje výhradně sága - úspěchem, nebo kompenzací
-public function approve(): void { $this->status = OrderStatus::Approved; }
-public function reject(): void  { $this->status = OrderStatus::Rejected; }
-:::
-:::
+Zámek má cenu jen tehdy, když ho někdo uvolní i při selhání – jinak zůstane objednávka
+zablokovaná navždy. Uvolnění proto patří do každé terminální větve ságy, ne jen
+do té úspěšné.
+
+Druhá cesta je zámek nemít a naopak ságu naučit, že objednávku může zrušit i člověk:
+`OrderProcessManager` z [14.05](#process-manager-heading) odebírá `OrderCancelled` a spustí
+kompenzaci sám. Vyjde to na stejný počet řádků, ale uživatel nedostane odmítnutí – jeho
+storno projde a proces se přizpůsobí. Volba mezi obojím je doménová: **smí zákazník zrušit
+objednávku, u které už běží platba?**
 
 Kolizní požadavky lze místo výjimky také frontovat a provést po uvolnění zámku;
 pro většinu domén ale stačí odmítnutí výjimkou a opakování na straně klienta.

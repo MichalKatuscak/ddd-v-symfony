@@ -1000,15 +1000,16 @@ final class UserIdType extends StringType
 :::callout{type="pattern"}
 ### Registrace custom type v Symfony {#custom-type-registration-heading}
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
-# config/packages/doctrine.yaml
+:::code{language="yaml" filename="config/packages/doctrine.yaml (výřez)"}
+# Klíče se přilévají k `types:` z kapitoly o agregátech, kde už leží
+# order_id, customer_id a product_id. Zápis `název: Třída` a
+# `název: { class: Třída }` znamená totéž; míchat je v jednom souboru
+# nevadí, nahradit jeden blok druhým ale znamená přijít o půlku typů.
 doctrine:
     dbal:
         types:
-            email_vo:
-                class: App\UserManagement\Infrastructure\Doctrine\Type\EmailType
-            user_id:
-                class: App\UserManagement\Infrastructure\Doctrine\Type\UserIdType
+            email_vo: App\UserManagement\Infrastructure\Doctrine\Type\EmailType
+            user_id:  App\UserManagement\Infrastructure\Doctrine\Type\UserIdType
 :::
 
 :::code{language="php" filename="src/UserManagement/Domain/Model/User.php (použití typu)"}
@@ -1312,6 +1313,13 @@ final class Order extends AggregateRoot
 
 `Order::recordPayment()` zapouzdřuje **pravidlo i přechod stavu** uvnitř agregátu.
 Jediný způsob, jak pro objednávku vytvořit `Payment`, vede přes tuto metodu.
+
+Ukázka je ilustrativní varianta k `markPaid()` z [Návrhu agregátu](/navrh-agregatu#references-by-id)
+a stojí na čtyřech třídách, které kniha dál nerozvádí – `Payment`, `PaymentId`,
+`PaymentMethod` a `PaymentRecorded`. Kanonický model platbu jako samostatný agregát
+nemodeluje; má ji v kontextu `Payment` za hranicí, kam se posílá příkaz. Do projektu
+podle knihy proto patří `markPaid()`, tenhle výpis ukazuje jen alternativu, kde platba
+vzniká uvnitř objednávky.
 Invariant „platit lze jen confirmed objednávku“ tedy vynucuje typový systém,
 ne naděje, že někdo zavolá správnou službu. Aplikační handler pak má jen
 koordinační roli. Pojmy command a handler vysvětluje
@@ -1553,7 +1561,7 @@ Ve stejném duchu vznikají ostatní doménové výjimky, které kniha použív�
 z `\DomainException` a pojmenovaná továrna nese formulaci chyby, aby se text hlášky
 neopakoval na každém `throw`:
 
-:::code{language="php" filename="src/Ordering/Domain/Exception/ (a UserManagement obdobně)"}
+:::code{language="php" filename="src/Ordering/Domain/Exception/EmptyOrderException.php + OrderNotFoundException.php"}
 <?php
 
 declare(strict_types=1);
@@ -1666,7 +1674,9 @@ use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\UserName;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class RegisterUserHandler
@@ -1674,6 +1684,8 @@ final readonly class RegisterUserHandler
     public function __construct(
         private UserRepository $userRepository,
         private EntityManagerInterface $em,
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
     ) {}
 
     public function __invoke(RegisterUser $command): void
@@ -1699,6 +1711,13 @@ final readonly class RegisterUserHandler
             // přes findByEmail() je vůči souběžným registracím nedostatečný (TOCTOU
             // race – dvě paralelní volání obě projdou check a obě uloží).
             throw DuplicateEmailException::with($email, $e);
+        }
+
+        // Bez tohohle kroku zůstane UserRegistered ležet v agregátu a nikdo
+        // se o registraci nedozví – ani posluchač, který zakládá přihlašovací
+        // záznam. Uživatel se pak nemůže přihlásit a nic přitom nespadne.
+        foreach ($user->releaseEvents() as $event) {
+            $this->eventBus->dispatch($event);
         }
     }
 }
@@ -1759,7 +1778,7 @@ final class DuplicateEmailException extends \DomainException
 :::callout{type="pattern"}
 ### Příklad: Implementace query handleru v Symfony 8 {#query-handler-example-heading}
 
-:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfile.php"}
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfile.php + UserProfile.php"}
 <?php
 
 declare(strict_types=1);
@@ -1773,7 +1792,8 @@ final readonly class GetUserProfile
     ) {}
 }
 
-// Odpověď dotazu. Hodnotové objekty ani agregát ven nepouštíme:
+// Vlastní soubor – PSR-4 by druhou třídu v GetUserProfile.php nenašel.
+// Odpověď dotazu: hodnotové objekty ani agregát ven nepouštíme,
 // šablona ani API by s nimi neuměly nic užitečného udělat.
 final readonly class UserProfile
 {
@@ -2080,6 +2100,10 @@ pak přeskočí bez ohledu na `resource:`.
 
 Ve větších projektech s více Bounded Contexts se autowiring konfiguruje pro každý kontext samostatně.
 Každý kontext dostane vlastní blok v `services.yaml` – hranice se tak promítne i do service containeru.
+Následující konfigurace **nahrazuje** blok `App\:` z předchozí ukázky, nedoplňuje ho. Rozdíl
+je citelný: souhrnný `App\:` zaregistruje i to, na co se zapomnělo, per-kontextový výčet nic
+takového nemá. Třída v adresáři, který ve výčtu chybí, prostě není službou – a chybu ohlásí
+až běh, ne `lint:container`.
 
 :::callout{type="pattern"}
 ### Příklad: Samostatný autowiring pro každý Bounded Context {#autowiring-bc-example-heading}
