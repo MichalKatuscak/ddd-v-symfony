@@ -7,7 +7,7 @@ meta_description: "Jak číst tuto knihu o Domain-Driven Design v Symfony 8 – 
 meta_keywords: "předmluva, DDD, Symfony, jak číst, doporučená cesta čtení"
 og_type: article
 published: "2026-05-04"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Předmluva
 schema_type: TechArticle
 schema_headline: "Předmluva: Domain-Driven Design v Symfony 8"
@@ -19,7 +19,7 @@ difficulty: 1
 github_examples: null
 ---
 
-Tato kniha vychází z opakované situace: vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran, na kterých nepadne jediný řádek PHP, a zavře ji se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi originálním textem z roku 2003 a praktickým PHP projektem v roce 2026 leží vrstva implementačních detailů, kterou Evans pokrýt nemohl. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) rozepsal na příkladech v Javě a C#.
+Tato kniha vychází z opakované situace. Vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran bez jediného řádku PHP a zavře ji se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi originálním textem z roku 2003 a praktickým PHP projektem v roce 2026 leží vrstva implementačních detailů, kterou Evans pokrýt nemohl. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) rozepsal na příkladech v Javě a C#.
 
 PHP literatura k DDD existuje a tento text ji nenahrazuje. *Domain-Driven Design in PHP* (Buenosvinos, Soronellas, Akbary) vyšlo v roce 2017 a druhé vydání žije dál na Leanpubu. Matthias Noback pokrývá v *Advanced Web Application Architecture* (2020) architekturu aplikace jako celek. Oba tituly míří jinam. První je podrobný v taktických vzorech a hexagonální architektuře, strategickému designu dává málo prostoru a nepracuje se Symfony 8 ani s Doctrine ORM 3. Noback řeší stavbu aplikace, ne DDD. Česky k tématu nevyšlo nic.
 
@@ -31,7 +31,7 @@ Kniha předpokládá zkušenost s PHP a Symfony, objektově orientovaným progra
 
 Kniha je psaná pro pět typických rolí:
 
-- **Senior PHP developer**, který v projektu narazil na limity klasické vrstvené architektury: `OrderService` má 1500 řádků, každá nová feature způsobí regresi v jiné oblasti, onboarding nového kolegy trvá měsíce.
+- **Senior PHP developer**, který v projektu narazil na limity klasické vrstvené architektury. `OrderService` má 1500 řádků, každá nová feature způsobí regresi jinde a onboarding nového kolegy trvá měsíce.
 - **Junior/mid Symfony developer**, který si všiml, že větší projekty „rostou“ jinak než malé, a hledá strukturovanější přístup než jen Controller-Service-Repository.
 - **Architekt**, který volí přístup k modelování doménové logiky: DDD, klasické CRUD, modulární monolit, nebo microservices.
 - **Tech lead**, který musí svému týmu vysvětlit, *proč* a *jak* DDD zavést, a hledá argumenty pro management opřené o DORA metriky a obchodní hodnotu.
@@ -59,9 +59,9 @@ Kniha předpokládá tyto výchozí znalosti:
 
 Ke stacku ještě poznámka, která se hodí při zakládání projektu. Symfony vydává minor verze
 každých šest měsíců a udržuje je krátce; dlouhou podporu má vždy až poslední minor v major
-řadě. Je to volba mezi čerstvostí a klidem: kdo chce roky bez nucených upgradů,
-sáhne po aktuálním LTS, kdo chce nejnovější komponenty, počítá s upgradem přibližně jednou
-za půl roku. Kód v této knize na tomhle rozhodnutí nezávisí. Vzory ani API se mezi
+řadě. Je to volba mezi čerstvostí a klidem. Kdo chce roky bez nucených upgradů, sáhne
+po aktuálním LTS; kdo chce nejnovější komponenty, počítá s upgradem přibližně
+jednou za půl roku. Kód v této knize na tomhle rozhodnutí nezávisí. Vzory ani API se mezi
 minor verzemi nemění.
 
 Pokud některý z bodů „nesedí“, knihu i tak přečtete. Jen u některých kapitol budete potřebovat víc soustředění. Obtížnost nese v hlavičce každá kapitola. Nejvyšší stupeň má osm z nich, mimo jiné Návrh agregátu, Event Sourcing, Ságy, DDD a microservices a závěrečná případová studie.

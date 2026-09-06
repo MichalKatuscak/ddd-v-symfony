@@ -7,7 +7,7 @@ meta_description: "Mapování DDD konceptů na Symfony 8: adresářová struktur
 meta_keywords: "DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
@@ -884,7 +884,7 @@ Doctrine\…`, žádná stopa po infrastruktuře. Cena:
   doména `User` musí přijmout `version` jako parametr `reconstitute()`, nebo
   se spolehnout na infrastrukturu, že verzi sleduje sama.
 - **Update vyžaduje find-and-copy.** `toPersistence()` výše vytváří novou instanci
-  s `version = 1`, což stačí pro insert. Při update musí repozitář nejprve načíst
+  s `version = 1`, a to pro insert stačí. Při update musí repozitář nejprve načíst
   existující `UserPersistenceModel` a přepsat její pole; nová instance by
   kolidovala s primárním klíčem a vynulovala optimistický zámek.
 
@@ -1195,7 +1195,7 @@ Objednávka mezi takové případy nepatří.
 ### Kdy použít enum a kdy plnohodnotný hodnotový objekt?
 
 - **Enum** – pro jednoduché konečné stavy, kde hodnota je jedna z pevně daných variant: `OrderStatus`, `UserRole`, `TaskPriority`, `Currency`. Enums podporují metody, takže lze zapouzdřit i přechodovou logiku (viz `allowedTransitions()`).
-- **Plnohodnotný hodnotový objekt (Value Object)** – pro komplexní typy, které vyžadují validaci, formátování nebo aritmetiku: `Money` (částka + měna + zaokrouhlování), `Email` (validace formátu), `Address` (více polí), `DateRange` (interval s logikou překrývání).
+- **Plnohodnotný hodnotový objekt (Value Object)** – pro typy s vlastní validací, formátováním nebo aritmetikou. Třeba `Money` (částka, měna, zaokrouhlování), `Email` (validace formátu), `Address` (více polí) nebo `DateRange` (interval s logikou překrývání).
 
 Obecné pravidlo: pokud typ má konečný, předem známý počet hodnot a nepotřebuje složitou vnitřní logiku, je enum správná volba. Pokud typ obsahuje libovolné hodnoty, validaci nebo výpočty, je namístě hodnotový objekt.
 :::
@@ -1367,7 +1367,7 @@ final class RecordPaymentHandler
 :::
 :::
 
-Handler zapisuje dva agregáty v jedné transakci, což je odchylka od pravidla
+Handler zapisuje dva agregáty v jedné transakci. Je to odchylka od pravidla
 [jeden agregát na transakci](/navrh-agregatu#transactional-consistency). Držíme ji
 vědomě: přechod `Order` do stavu `Paid` a vznik odpovídajícího `Payment` tvoří
 jediný invariant a rozpad na dvě transakce by připustil zaplacenou objednávku
@@ -1489,7 +1489,7 @@ agregáty a vypustí jejich události. Vypadá to jako úspora: aplikační vrst
 Obě události ale mají omezení, která se projeví až v provozu.
 
 V `onFlush` už Doctrine spočítal changesety, takže samotný `persist()` nového
-objektu se do právě probíhajícího flushe nepromítne; je nutné dovolat
+objektu se do právě probíhajícího flushe nepromítne; dovolat se musí
 `UnitOfWork::computeChangeSet()`, respektive `recomputeSingleEntityChangeSet()`.
 V `postFlush` zase nelze bezpečně zavolat `flush()`; rekurze do právě
 dokončeného flushe končí nedefinovaným chováním. Publikace událostí se tak
@@ -2231,7 +2231,7 @@ Doménové modely, hodnotové objekty a repozitáře patří do svých Bounded C
 - question: Kam v Symfony projektu patří doménová vrstva a proč ji držet odděleně?
   answer: 'Doménová vrstva patří do samostatného adresáře, odděleně od kontrolerů, Doctrine mapování a infrastruktury. V tomto průvodci je to <code>src/&lt;BoundedContext&gt;/Domain/</code>, například <code>src/UserManagement/Domain/</code>. Izolace umožňuje testovat a refaktorovat model bez závislosti na Symfony životním cyklu a dovoluje přenést doménu i do jiného technologického stacku. Viz <a href="#project-structure">sekci Struktura projektu</a>.'
 - question: Jak mapovat agregát v Doctrine bez toho, aby doména závisela na ORM?
-  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu: jsou to metadata, ne chování. Doménu bez jediné stopy ORM zajistí oddělený persistence model, v tomto průvodci nazývaný <strong>Persisted Object Pattern</strong>: doménová třída zůstane POPO, vedle ní v infrastruktuře existuje samostatná persistence třída s atributy a mapper mezi nimi. Rodičovským vzorem je Fowlerův <em>Data Mapper</em>. Khorikov i Noback tuto separaci označují za drahou a ve většině projektů zbytečnou, takže jde o menšinovou volbu, ne o výchozí doporučení. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern</a>.'
+  answer: 'V tomto průvodci používáme Doctrine atributy přímo na agregátu jako pragmatickou výchozí volbu: jsou to metadata, ne chování. Doménu bez jediné stopy ORM zajistí oddělený persistence model, v tomto průvodci nazývaný <strong>Persisted Object Pattern</strong>. Doménová třída zůstane POPO, vedle ní v infrastruktuře stojí samostatná persistence třída s atributy a mapper mezi nimi. Rodičovským vzorem je Fowlerův <em>Data Mapper</em>. Khorikov i Noback tuto separaci označují za drahou a ve většině projektů zbytečnou, takže jde o menšinovou volbu, ne o výchozí doporučení. Detail v <a href="#persisted-object-pattern">sekci Persisted Object Pattern</a>.'
 - question: Jak odlišit Aplikační službu od Doménové služby?
   answer: 'Doménová služba drží čistou doménovou logiku, která přirozeně nepatří žádnému agregátu ani hodnotovému objektu; je bezstavová a nekomunikuje s infrastrukturou. Aplikační služba naopak orchestruje use case: přijme vstup z kontroleru, načte agregáty přes repozitář, zavolá doménovou logiku a předá výsledek k persistenci. Aplikační služba nikdy neobsahuje doménová pravidla, pouze posloupnost kroků. Podrobný rozbor v <a href="#application-services">sekci Aplikační služby</a> a <a href="#domain-services">Doménové služby</a>.'
 - question: Mají doménové operace vyhazovat výjimky, nebo vracet Result typ?

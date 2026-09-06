@@ -395,7 +395,7 @@ final readonly class Money
 
 Částka je celé číslo v haléřích. `float` by do peněz vnesl chyby zaokrouhlení, které
 se projeví až na faktuře. Měnu drží string-backed enum, takže záměna `'czk'` za `'CZK'`
-nepřipadá v úvahu. Sčítání dvou různých měn skončí výjimkou, což je doménové pravidlo,
+nepřipadá v úvahu. Sčítání dvou různých měn skončí výjimkou. Je to doménové pravidlo,
 ne chyba volajícího. Jakmile tentýž pojem potřebuje víc kontextů, patří `Money` do
 Shared Kernelu (tuto variantu ukazuje [Context Mapping](/context-mapping#shared-kernel)).
 
@@ -653,7 +653,7 @@ Doménová vrstva by neměla vědět, jestli agregát žije v PostgreSQL, MongoD
 nebo v paměti. Repozitář je rozhraní, které tuto neznalost umožňuje. Pro doménu
 vypadá jako kolekce agregátů v paměti, skutečné uložení řeší implementace
 v infrastrukturní vrstvě. Vzor pochází z katalogu *Patterns of Enterprise Application
-Architecture*, kde ho Edward Hieatt a Rob Mee popsali jako prostředníka mezi doménou
+Architecture*. Edward Hieatt a Rob Mee ho tam popsali jako prostředníka mezi doménou
 a mapováním dat, který se navenek tváří jako kolekce
 [[11]](https://martinfowler.com/eaaCatalog/repository.html).
 

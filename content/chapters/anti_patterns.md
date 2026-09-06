@@ -284,7 +284,7 @@ Příznakem zůstává **veřejný zápis stavu bez doménového jména**. Řád
 
 Fowler sám připouští, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script [[2]](https://martinfowler.com/eaaCatalog/transactionScript.html). Jde o řádný vzor z *Patterns of Enterprise Application Architecture*, který organizuje logiku po procedurách, jednu na požadavek. V doméně s pěti pravidly bývá procedura čitelnější než šest tříd okolo ní. Volba mezi vzory patří k rozhodnutí o typu subdomény, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd#hybrid-subdomain).
 
-Druhou výhradu přináší funkcionální škola. Mark Seemann ukazuje, že zapouzdření není totéž co metoda na objektu. Stejnou garanci dá typ, který nelze zkonstruovat do neplatného stavu, plus modul funkcí nad ním [[3]](https://blog.ploeh.dk/2022/10/24/encapsulation-in-functional-programming/). Data od chování oddělit lze. Co oddělit nelze, je validace od dat – záznam s veřejnými poli, který kdokoli naplní čímkoli, je anémický v tom škodlivém smyslu, i kdyby funkce nad ním byly sebelépe napsané.
+Druhou výhradu přináší funkcionální škola. Mark Seemann ukazuje, že zapouzdření není totéž co metoda na objektu. Stejnou garanci dá typ, který nelze zkonstruovat do neplatného stavu, plus modul funkcí nad ním [[3]](https://blog.ploeh.dk/2022/10/24/encapsulation-in-functional-programming/). Data od chování oddělit lze. Co oddělit nelze, je validace od dat. Záznam s veřejnými poli, který kdokoli naplní čímkoli, je anémický v tom škodlivém smyslu, i kdyby funkce nad ním byly sebelépe napsané.
 
 **Hranice pravidla.** Anémický model je chyba tehdy, když platíte cenu doménového modelu bez jeho přínosu. Rozhodli jste se pro doménový model? Pak v něm mají být pravidla. Rozhodli jste se pro Transaction Script? Pak žádnou anémii neřešíte, jen to rozhodnutí musíte umět pojmenovat a nevydávat adresář `Domain/` za doménový model.
 
@@ -460,13 +460,13 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 
 `Money` odmítá zápornou částku záměrně. Směr pohybu nese operace, ne částka: dobropis je `refund()`, ne záporná suma, takže se znaménko nemůže cestou ztratit. Plnou definici uvádí [sekce 06.04](/zakladni-koncepty#value-objects); ukázka výše je zkrácená na to, co odlišuje hodnotový objekt od `float` a `string`.
 
-Hodnotový objekt má i svou cenu. Vyplatí se tam, kde hodnota splní alespoň jednu ze tří podmínek: nese vlastní pravidla platnosti (`Email`, `BirthNumber`), má vlastní operace (`Money::add()`), nebo hrozí její záměna s jinou hodnotou téhož primitivního typu (`OrderId` proti `UserId`). Evans totéž říká obráceně. Jako hodnotový objekt klasifikujte prvek modelu, u kterého vás zajímají pouze jeho atributy a logika [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
+Hodnotový objekt má i svou cenu. Vyplatí se tam, kde hodnota splní alespoň jednu ze tří podmínek. Nese vlastní pravidla platnosti (`Email`, `BirthNumber`), má vlastní operace (`Money::add()`), nebo hrozí její záměna s jinou hodnotou téhož primitivního typu (`OrderId` proti `UserId`). Evans totéž říká obráceně. Jako hodnotový objekt klasifikujte prvek modelu, u kterého vás zajímají pouze jeho atributy a logika [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 
 **Hranice pravidla.** Pole `note`, `description` nebo `internalComment` žádnou z podmínek nesplňuje. Třída `Note` obalující `string` bez jediného pravidla je přesně ta ceremonie, před kterou varuje [sekce 21.08](#over-engineering). Kritériem tedy není počet primitiv v kódu, ale duplikovaná validace a riziko záměny.
 
 ## 21.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
 
-Agregát navrhujeme kolem transakční konzistence, tedy kolem nejmenší skupiny objektů, kterou je třeba měnit společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže. Vernon pro tentýž jev používá střízlivější název *large-cluster aggregate*; komunita se drží dramatičtějšího „God“.
+Agregát navrhujeme kolem transakční konzistence, tedy kolem nejmenší skupiny objektů, které se mění společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže. Vernon pro tentýž jev používá střízlivější název *large-cluster aggregate*; komunita se drží dramatičtějšího „God“.
 
 **Rozpoznávací znak.** Podívejte se na poslední přidání položky do kolekce uvnitř agregátu. Pokud kvůli jednomu novému řádku načítáte tisíc existujících, je hranice agregátu vedená podle asociací, ne podle invariantů.
 
