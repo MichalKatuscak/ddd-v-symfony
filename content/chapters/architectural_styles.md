@@ -130,7 +130,7 @@ class Order
 }
 :::
 
-Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty, což je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes atributy `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku“ žije v doménovém kódu, jenže ten kód zároveň *ví*, že se ukládá přes Doctrine. Z pohledu **Hexagonal/Onion architektury** je to *domain leak*. Doménová vrstva potřebuje knihovnu z Infrastructure, aby se vůbec dala zkompilovat. Pragmatický pohled (Layered, který tu rozebíráme) tento kompromis přijímá a je to i výchozí volba knihy, jak rozebírá [Implementace v Symfony](/implementace-v-symfony). Hexagonal trvá na separaci přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Ve stejném duchu tu stojí i holá `\DomainException`. Zbytek knihy používá pojmenované výjimky jako `InvalidOrderStateTransitionException`; Layered ukázka zůstává u zkratky, aby bylo vidět, co styl skutečně vyžaduje a co ne.
+Třída `Order` má bohaté chování (`confirm()`, `cancel()`) a kontroluje invarianty, a to je kvalitní DDD modelování. Ale třída zároveň **závisí na Doctrine ORM** přes atributy `#[ORM\Entity]`, `#[ORM\Column]`. Doménové pravidlo „nelze potvrdit prázdnou objednávku“ žije v doménovém kódu, jenže ten kód zároveň *ví*, že se ukládá přes Doctrine. Z pohledu **Hexagonal/Onion architektury** je to *domain leak*. Doménová vrstva potřebuje knihovnu z Infrastructure, aby se vůbec dala zkompilovat. Pragmatický pohled (Layered, který tu rozebíráme) tento kompromis přijímá a je to i výchozí volba knihy, jak rozebírá [Implementace v Symfony](/implementace-v-symfony). Hexagonal trvá na separaci přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern). Ve stejném duchu tu stojí i holá `\DomainException`. Zbytek knihy používá pojmenované výjimky jako `InvalidOrderStateTransitionException`; Layered ukázka zůstává u zkratky, aby bylo vidět, co styl skutečně vyžaduje a co ne.
 
 ### Kdy se Layered hodí {#layered-kdy-heading}
 
@@ -635,7 +635,7 @@ Hexagonal nedává smysl u CRUDu nad několika tabulkami. Port, adaptér a mappe
 
 Tým přečte Cockburnův článek, vytvoří krásnou strukturu s `Domain/Port/`, `Application/UseCase/`, `Infrastructure/Adapter/` … ale doménová třída je pořád `$status: string` + setry, a všechna logika sedí v handleru. Hexagonal bez DDD modelování je jen hodně rituálu kolem prázdné domény.
 
-Druhý častý anti-vzor: **port = repository, ostatní jsou jen služby**. Tým definuje jen `OrderRepository` jako port, ale e-mailový mailer, externí HTTP klient a publisher událostí žijí v `App\Service\` bez rozhraní. Doména pak má závislost na *konkrétní* implementaci e-mailového maileru, což porušuje princip Hexagonal stejně jako Doctrine anotace na entitě.
+Druhý častý anti-vzor: **port = repository, ostatní jsou jen služby**. Tým definuje jen `OrderRepository` jako port, ale e-mailový mailer, externí HTTP klient a publisher událostí žijí v `App\Service\` bez rozhraní. Doména pak má závislost na *konkrétní* implementaci e-mailového maileru. Princip Hexagonal to porušuje stejně jako Doctrine anotace na entitě.
 :::
 
 ## 09.04 Onion Architecture (Palermo 2008) {#onion}
@@ -661,7 +661,7 @@ Onion a Hexagonal stojí na téže myšlence: izolovat doménu a obrátit závis
 - **Statický vs. dynamický pohled.** Onion popisuje vrstvy a kdo na koho závisí. Hexagonal se dívá dynamicky: porty, adaptéry a cesta dat skrz ně.
 - **Driving vs. driven porty.** V Onion je v UI vrstvě i HTTP controller (driving) i Doctrine repository (driven). Z pohledu Hexagonal je to nepřesné – driving adaptér *volá* aplikaci, driven adaptér *je volán* doménou.
 
-Pokud váš projekt používá Hexagonal slovník (port, adapter, driving, driven), ale uvnitř má dvě vrstvy služeb (Domain Service, Application Service), děláte de facto hybrid Hexagonal+Onion. To je v pořádku. Málokdo implementuje jeden styl „čistě“.
+Pokud váš projekt používá Hexagonal slovník (port, adapter, driving, driven), ale uvnitř má dvě vrstvy služeb (Domain Service, Application Service), děláte hybrid Hexagonal+Onion. To je v pořádku. Málokdo implementuje jeden styl „čistě“.
 
 ### Příklad: Domain Service vs. Application Service {#onion-priklad-heading}
 
@@ -807,7 +807,7 @@ Počet čtyři přitom není závazný. Martin sám píše, že prstence jsou sc
 
 Hexagonal a Onion nepojmenovávají jednotlivé use casy explicitně. Hexagonal mluví o „inbound portech“, Onion o „Application Services“. Clean Architecture povyšuje use case na **prvotřídní koncept**. Každý use case je jedna třída s jednou metodou a vlastním Request/Response DTO. Tím se aplikace stává explicitním seznamem schopností, které poskytuje.
 
-V DDD termínech: Use Case z Clean Architecture ≈ DDD Application Service ≈ CQRS Command Handler. Pokud používáte Symfony Messenger pro Command Bus (viz kapitolu [CQRS](/cqrs)), váš `PlaceOrderHandler` de facto plní roli Clean Use Case.
+V DDD termínech: Use Case z Clean Architecture ≈ DDD Application Service ≈ CQRS Command Handler. Pokud používáte Symfony Messenger pro Command Bus (viz kapitolu [CQRS](/cqrs)), váš `PlaceOrderHandler` plní roli Clean Use Case.
 
 ### Příklad: Use Case s Request/Response DTO {#clean-priklad-heading}
 
@@ -1135,7 +1135,7 @@ Konkrétně: Bounded Context má vlastní adresář (`src/Ordering/`). Uvnitř `
 - **Doménové testy bez databáze** – agregáty jsou čisté PHP, mockují se jen porty.
 - **Jednoduché code review** – diff jedné feature je v jednom adresáři.
 - **CLI/HTTP/Messenger paritu** – Symfony Messenger Bus dispatchuje stejný Command z libovolného adaptéru.
-- **Symfony idiomatičnost** – Messenger je prvotřídní komponenta, není nutné psát vlastní bus.
+- **Symfony idiomatičnost** – Messenger je prvotřídní komponenta, vlastní bus psát nemusíte.
 
 Tato volba není univerzální pravda. Má-li váš projekt 20 endpointů a jde o interní administrativní aplikaci s desetiletým horizontem, stačí obyčejná Layered struktura ze Symfony skeletu. Tým s ní pravděpodobně iteruje rychleji. Pokud je váš projekt enterprise CRM s 500+ use casy a 15 vývojáři, Clean Architecture s explicitním Use Case katalogem se vyplatí.
 
@@ -1219,7 +1219,7 @@ src/
 
 ### Cena vs. zisk hybridního přístupu {#hybrid-cena-zisk-heading}
 
-Cena: tým musí umět víc stylů a vědět, kdy který použít. Junior to nezvládne. Hybrid potřebuje aspoň jednoho seniora, který architekturu hlídá. Mezi BC jsou *nutně* rozdílné konvence, což může čtenáře kódu mást.
+Cena: tým musí umět víc stylů a vědět, kdy který použít. Junior to nezvládne. Hybrid potřebuje aspoň jednoho seniora, který architekturu hlídá. Mezi BC jsou *nutně* rozdílné konvence a čtenáře kódu to může mást.
 
 Zisk: nejvyšší ROI z modelovacího úsilí. V Core Domain (kde projekt vyhrává konkurenční bitvu) máte čistý model a rychlé testy. V Generic části (kde vendor lock-in není problém, protože SaaS si stejně neměníte každý měsíc) ušetříte stovky hodin nepotřebné izolace.
 
@@ -1349,7 +1349,7 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 
 :::faq{}
 - question: Hexagonal vs. Onion – jaký je praktický rozdíl?
-  answer: 'V běžné Symfony implementaci jsou téměř nerozlišitelné: oba mají interfaces v doméně, implementace v infrastruktuře, závislosti směřují dovnitř. Tři jemné odlišnosti: Hexagonal explicitně dělí driving (inbound) a driven (outbound) porty; Onion staví Domain Services a Application Services jako dvě samostatné vrstvy; Onion je „statický“ model závislostí, Hexagonal „dynamický“ model toku dat. Pokud váš projekt používá Hexagonal slovník (port, adapter), ale uvnitř má Domain Service i Application Service, děláte v podstatě hybrid, což je v pořádku. Detail v <a href="#onion">sekci o Onion Architecture</a>.'
+  answer: 'V běžné Symfony implementaci jsou téměř nerozlišitelné: oba mají interfaces v doméně, implementace v infrastruktuře, závislosti směřují dovnitř. Tři jemné odlišnosti: Hexagonal explicitně dělí driving (inbound) a driven (outbound) porty; Onion staví Domain Services a Application Services jako dvě samostatné vrstvy; Onion je „statický“ model závislostí, Hexagonal „dynamický“ model toku dat. Pokud váš projekt používá Hexagonal slovník (port, adapter), ale uvnitř má Domain Service i Application Service, děláte hybrid. To je v pořádku. Detail v <a href="#onion">sekci o Onion Architecture</a>.'
 - question: Můžu použít Hexagonal bez DDD?
   answer: 'Ano, technicky to funguje. Hexagonal řeší <em>jak strukturovat závislosti</em>, zatímco DDD popisuje <em>jak modelovat doménu</em>. Jde o ortogonální dimenze. Můžete mít Hexagonal nad anémickým CRUD modelem a žádné DDD principy nepoužívat. Praktický zisk je ale omezený. Bez bohatého doménového modelu uvnitř je Hexagonal jen vrstvení rituálu, které zhoršuje code review a zpomaluje vývoj. Anti-vzor „Anemic Hexagonal“ je v reálných projektech běžný. Detail v <a href="#anti-3-heading">anti-vzorech</a>.'
 - question: Jak migrovat z Layered na Hexagonal v existujícím Symfony projektu?
@@ -1357,7 +1357,7 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 - question: Co je „Port“ přesně a jak se liší od běžného PHP interface?
   answer: 'Port je interface s explicitní architektonickou rolí: definuje hranici mezi doménou a vnějším světem. Technicky je to běžný PHP <code>interface</code>, ale konvenčně žije v adresáři <code>Domain/Port/</code>, nemá framework závislosti a má smysluplné jméno z domain language (<code>OrderRepository</code>, ne <code>OrderRepositoryInterface</code>). Cockburn rozlišuje driving porty (vnější svět volá doménu) a driven porty (doména volá vnější svět). V Symfony se port na implementaci napojuje aliasem, ten ale u rozhraní s jedinou objevenou implementací vzniká automaticky. Ručně ho zapíšete (v <code>services.yaml</code> nebo atributem <code>#[AsAlias]</code>) až tehdy, když implementací je víc nebo když je adresář vyloučený z <code>resource</code>. Detail v <a href="#hexagonal">sekci o Hexagonal</a>.'
 - question: Vyplatí se Clean Architecture v malé Symfony aplikaci?
-  answer: 'Spíše ne. Clean Architecture vyžaduje DTO ping-pong (Request DTO → Use Case → Response DTO → Adapter překládá zpět), což je významná režie, pro každou funkci tři až čtyři další třídy. V malé aplikaci s 20–30 endpointy je to čistá ztráta. Vyplatí se až v aplikacích s explicitním seznamem use casů (200+ schopností), kde je důležitá auditovatelnost toho, „co aplikace umí“ a kde je víc vstupních kanálů (HTTP + CLI + Messenger + GraphQL). Pro malou Symfony aplikaci stačí Layered nebo Hexagonal s méně rituálem. Detail v <a href="#srovnani">rozhodovací matici</a>.'
+  answer: 'Spíše ne. Clean Architecture vyžaduje DTO ping-pong: Request DTO → Use Case → Response DTO → Adapter překládá zpět. Je to znatelná režie, pro každou funkci tři až čtyři další třídy. V malé aplikaci s 20–30 endpointy je to čistá ztráta. Vyplatí se až v aplikacích s explicitním seznamem use casů (200+ schopností). Tam je podstatné, aby šlo doložit, „co aplikace umí“, a vstupních kanálů bývá víc (HTTP, CLI, Messenger, GraphQL). Pro malou Symfony aplikaci stačí Layered nebo Hexagonal s méně rituálem. Detail v <a href="#srovnani">rozhodovací matici</a>.'
 - question: Jak Vertical Slice zapadá mezi Hexagonal/Onion/Clean?
   answer: 'Vertical Slice je ortogonální k vrstvovým stylům. Hexagonal/Onion/Clean popisují <em>jak strukturovat závislosti uvnitř jedné feature</em>; Vertical Slice popisuje <em>jak organizovat feature mezi sebou</em>. Tyto dvě dimenze lze kombinovat. Každý vertikální slice může uvnitř používat Hexagonal port-adapter strukturu, nebo nemusí. V Symfony projektech je rozšířená kombinace <strong>Hexagonal + Vertical Slice + CQRS přes Symfony Messenger</strong>. Bounded Context má sdílený doménový model, ale aplikační vrstva je rozdělená do feature slice. Detail v <a href="#vertical-slice">sekci 09.06 výše</a>.'
 :::

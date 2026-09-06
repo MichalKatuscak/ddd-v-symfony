@@ -7,7 +7,7 @@ meta_description: "Context Map a 8 vztahů mezi Bounded Contexts: Partnership, C
 meta_keywords: "Context Map, Context Mapping, Bounded Context, Anti-Corruption Layer, ACL, Open Host Service, Published Language, Shared Kernel, Customer Supplier, Conformist, Partnership, Separate Ways, Symfony Messenger"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Context Mapping
 schema_type: TechArticle
 schema_headline: "Bounded Context a Context Mapping – 8 vztahů mezi Bounded Contexts"
@@ -141,7 +141,7 @@ V tu chvíli je čas *Partnership rozpustit* a přejít na [Customer/Supplier](#
 
 ## 03.04 Shared Kernel {#shared-kernel}
 
-**Shared Kernel** je *malý* modul kódu fyzicky sdílený mezi dvěma a více Bounded Contexts. Sdílení je oboustranně závazné: žádný vlastník nemůže Shared Kernel jednostranně změnit, protože to by porušilo invarianty v ostatních BC. Změna SK vyžaduje **souhlas všech vlastníků**, což je nákladný proces a důvod, proč musí SK zůstat malý.
+**Shared Kernel** je *malý* modul kódu fyzicky sdílený mezi dvěma a více Bounded Contexts. Sdílení je oboustranně závazné: žádný vlastník nemůže Shared Kernel jednostranně změnit, protože to by porušilo invarianty v ostatních BC. Změna SK vyžaduje **souhlas všech vlastníků**. Je to nákladný proces a důvod, proč musí SK zůstat malý.
 
 Evans v *Domain-Driven Design* (2003) doporučuje explicitní hranicí vyznačit podmnožinu doménového modelu, na jejímž sdílení se týmy dohodly. Kritériem není geometrický vztah k oběma modelům, ale náklady: synchronizovat celý model a kódovou bázi bývá příliš drahé, kdežto pečlivě vybraná podmnožina přinese většinu užitku za zlomek ceny. Kernel zahrnuje i příslušný kód či návrh databáze a takto sdílený materiál má zvláštní status. Nemění se bez konzultace s druhým týmem.
 
@@ -414,7 +414,7 @@ Conformist *ušetří*:
 Conformist *zaplatí*:
 
 - Při každé neslučitelné změně upstreamu se downstream musí přepsat.
-- Doménová logika downstreamu používá pojmy upstreamu, což zhoršuje srozumitelnost.
+- Doménová logika downstreamu používá pojmy upstreamu a srozumitelnost tím trpí.
 - Pokud upstream službu ukončí (Stripe ji zavře), musí downstream přepsat všechno, co z jeho modelu přejal.
 - Není možné sdílet model napříč více upstreamy (např. přidat alternativu PayPal vedle Stripe; celá doménová logika kopíruje Stripe).
 
@@ -575,7 +575,7 @@ Pravidlo: **ACL drží jednu odpovědnost.** Vrstva s desítkami metod a sdílen
 
 ### Kdy ACL nestavět
 
-ACL dostává v této kapitole nejvíc prostoru, což svádí brát ho jako výchozí volbu. Není. Vrstva má svou cenu a ve třech situacích ji nezaplatíte zpět.
+ACL dostává v této kapitole nejvíc prostoru a to svádí brát ho jako výchozí volbu. Není. Vrstva má svou cenu a ve třech situacích ji nezaplatíte zpět.
 
 Prvním případem je zanedbatelný sémantický rozdíl. Když upstream i downstream používají stejné pojmy ve stejném významu, zbude z ACL prázdná mapovací vrstva, která kopíruje pole z DTO do VO se stejnými jmény. Microsoft Azure Architecture Center pro tuto situaci doporučuje soustředit vrstvu na překlad a nedávat do ní obchodní pravidla ani orchestraci [[5]](https://learn.microsoft.com/azure/architecture/patterns/anti-corruption-layer). Když není co překládat, není co stavět.
 
@@ -754,7 +754,7 @@ Můžete mít OHS bez PL, tedy REST endpoint vracející ad-hoc JSON. Je to špa
 Toto schema publikujeme na URL `https://example.com/events/order-placed-v1.json`, kde slouží jako **kanonický kontrakt**. Každý producer i konzument může proti němu validovat. Když Ordering BC chce přidat nové pole (například `shippingAddressId`), publikuje `order-placed-v2.json` a obě schémata koexistují minimálně po dobu okna zastarávání.
 
 :::callout{type="pattern"}
-**Konzument závisí na schématu, ne na třídě.** Vernon v *Domain-Driven Design Distilled* formuluje pravidlo přímo: konzumenti nemají používat typy událostí publikujícího kontextu, ale výhradně jejich schéma, tedy Published Language. Publikují-li se události jako JSON, konzument je parsuje a mapuje na vlastní typ. Sdílený composer balíček s třídami událostí je pohodlný a je to skrytý [Shared Kernel](#shared-kernel) se všemi jeho náklady. Pravidlo, že agregáty se odkazují jen přes ID, tu platí o úroveň výš: kontexty se odkazují jen přes kontrakt.
+**Konzument závisí na schématu, ne na třídě.** Vernon to v *Domain-Driven Design Distilled* formuluje přímo. Konzumenti nemají používat typy událostí publikujícího kontextu, ale výhradně jejich schéma, tedy Published Language. Publikují-li se události jako JSON, konzument je parsuje a mapuje na vlastní typ. Sdílený composer balíček s třídami událostí je pohodlný a je to skrytý [Shared Kernel](#shared-kernel) se všemi jeho náklady. Pravidlo, že agregáty se odkazují jen přes ID, tu platí o úroveň výš: kontexty se odkazují jen přes kontrakt.
 :::
 
 ### Validace proti schema v Symfony
@@ -807,7 +807,7 @@ Ukázka staví na knihovně `opis/json-schema`, která vrací strukturovaný pop
 :::callout{type="note"}
 ### Nástroje: schema-first vs. code-first
 
-- **Schema-first** – JSON Schema / OpenAPI je zdrojem pravdy, kód je generován (např. `jane-php/open-api`). Upstream nemůže omylem rozbít kontrakt, protože je to oddělený artefakt.
+- **Schema-first** – zdrojem pravdy je JSON Schema nebo OpenAPI, kód z něj vzniká generováním (např. `jane-php/open-api`). Upstream nemůže omylem rozbít kontrakt, protože je to oddělený artefakt.
 - **Code-first** – entity v kódu jsou zdrojem pravdy, schema se generuje (Symfony Serializer s `nelmio/api-doc-bundle`). Snadnější vývoj, ale riziko, že interní změna kódu projde do veřejného kontraktu nepozorovaně.
 
 Pro skutečně veřejné OHS je schema-first bezpečnější. Pro interní integraci mezi týmy stejné firmy je code-first často dostatečný (rychlost iterace).
@@ -912,7 +912,7 @@ Jedna velká mapa celého systému stárne nejrychleji. Komunitní praxe DDD Cre
 
 ### Proč k tomu dochází
 
-Foote & Yoder upozorňují, že Big Ball of Mud je v praxi de facto standardní architektura. Ne proto, že by ji někdo volil, ale protože vzniká sama, když:
+Foote & Yoder upozorňují, že Big Ball of Mud je v praxi nejrozšířenější architektura. Ne proto, že by ji někdo volil, ale protože vzniká sama, když:
 
 - Tým je pod tlakem dodat funkčnost rychle a nemá čas přemýšlet o hranicích.
 - Noví inženýři kopírují existující vzory, které jsou samy o sobě špatné.
@@ -945,9 +945,9 @@ Customer/Supplier a Separate Ways; roli jednoho konce toho vztahu pak Open Host 
 a Published Language nahoře, Conformist a Anti-Corruption Layer dole. Vybírá se tedy
 vztah a k němu role na obou koncích.
 
-Z těch rolí je v praxi nejčastěji potřeba ACL: skoro každá netriviální integrace s legacy
-nebo externím systémem si ho vyžádá a nese tři odpovědnosti – schema mapping, concept
-translation a vlastní anti-corruption. Na opačné straně stojí dvojice OHS a Published
+Z těch rolí je v praxi nejčastěji potřeba ACL. Vyžádá si ho skoro každá netriviální
+integrace s legacy nebo externím systémem a nese tři odpovědnosti: schema mapping,
+concept translation a vlastní anti-corruption. Na opačné straně stojí dvojice OHS a Published
 Language, kde OHS je kanál a PL formát. Bez politiky verzování z publikovaného kontraktu
 ovšem zbude jen deklarace.
 
