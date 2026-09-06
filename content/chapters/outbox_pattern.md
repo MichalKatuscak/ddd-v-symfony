@@ -737,7 +737,7 @@ interface OutboxRepository
 :::
 :::
 
-Doctrine adapter je krátký, ale dvě místa v něm se dají snadno minout: `store()`
+Doctrine adapter je krátký a dvě místa v něm přehlédne skoro každý: `store()`
 nesmí flushovat, protože transakci drží aplikační wrapper, a `fetchPending()`
 musí filtrovat i podle `availableAt`, jinak backoff z `markFailed()` nic neznamená.
 
