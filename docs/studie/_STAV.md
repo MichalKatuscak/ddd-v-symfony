@@ -1203,6 +1203,66 @@ Sedm z osmi tříd dopsaných podle prózy sedělo signaturami. Jediná výjimka
 `CancelOrderHandler` — tedy právě ta, kde próza v jedné kapitole odporovala výpisu
 v druhé.
 
+## Třinácté kolo: desátá ověřovací stavba (2026-09-06)
+
+První kolo, které stavělo i kapitolu 11 (autorizace) a HTML kontrolery, ne jen JSON.
+101 souborů, 18 testů. Happy path i kompenzační větev doběhly, ale **zásah do kapitoly 11
+z dvanáctého kola rozbil dvě ze tří ověřovaných věcí.**
+
+### Regrese z mé vlastní opravy
+
+1. **`CancelOrderHandler` nevypustil události.** Přidal jsem systémovou větev, ale výpis
+   zůstal bez `releaseEvents()`. Agregát skončil `cancelled`, `order_dashboard` zůstal
+   na `placed`. Nic nespadlo. `sagas.md` 14.05 přitom tentýž handler popisuje jako
+   „stejný jako `MarkOrderPaidHandler`", který události publikuje — dvě kapitoly, dvě
+   implementace, čtenář opíše tu s autorizací.
+2. **`OrderVoter` importoval `App\Ordering\Domain\Order`** místo `…\Domain\Model\Order`.
+   Import se nikdy nedereferencuje, takže **PHP nespadne** — `supports()` jen vrátí
+   `false`, voter abstenuje a s `allow_if_all_abstain: false` z téže sekce dostane
+   vlastník 404 bez jediného řádku v logu. Špatný namespace byl na 14 místech ve čtyřech
+   kapitolách.
+
+**Poučení: nedereferencovaný špatný import je horší než chybějící třída — ta spadne,
+tenhle mlčky změní chování.**
+
+### Test-data builder nešlo postavit přes veřejné API
+
+`OrderFactory` (11.10) volala `new Order()` se čtyřmi argumenty; kanonický konstruktor je
+privátní dvouparametrový. Horší: `confirm()` si `placedAt` bralo z `new \DateTimeImmutable()`
+a parametr nemělo, takže scénář „potvrzeno v 10:00, stornováno ve 12:00" nešel postavit
+jinak než reflexí. `placeWithFirstItem()` i `confirm()` teď čas přijímají.
+
+**Poučení: co má test ověřovat, musí jít nastavit přes veřejné API. Builder na reflexi
+přestane hlídat právě ta pravidla, kvůli kterým existuje.**
+
+### Ostatní
+
+- `#[IsGranted(subject:)]` nešel rozběhnout: `EntityValueResolver` předá `find()` řetězec
+  z URL, identita je ale namapovaná vlastním typem, který řetězec odmítne — a resolver
+  výjimku spolkne jako 404. Doplněn vlastní resolver s `priority: 150`.
+- Twig šablony volaly `order.customer.name`, `order.total` a `order.status.label`.
+  Ani jedno agregát nemá a `customer` mít nesmí.
+- Nedefinované: `CancellationWindowExpiredException`, `AccessDeniedDomainException`,
+  `SecurityUserFixture`, `RegistrationFormType`, mapping blok pro `App\Identity`,
+  `twig.paths` s namespace `UserManagement`.
+- Routa `app_login` proti `login` v `security.yaml` — po registraci pád, ale uživatel
+  už uložený, takže druhý pokus hlásí duplicitu.
+- **Testy měly dva namespace**: kapitoly 11, 17 a 22 psaly `Tests\`, kapitoly 12 a 14
+  `App\Tests\`. Skeleton mapuje jen ten druhý, takže polovina testů z knihy se
+  v `bin/phpunit` vůbec nenačetla. Sjednoceno na 36 místech.
+- `OutboxCleanupCommand` pořád nesl MySQL syntaxi v těle příkazu; varianty pod ním byly
+  jen jako text. Tělo je teď přenositelné.
+- Recept Symfony 8 zapíná bezstavový CSRF token doplňovaný JavaScriptem — HTML formuláře
+  z knihy bez frontendového buildu neprojdou.
+
+### Co protizkouška potvrdila
+
+Přejmenování `InvalidOrderStateException` → `InvalidOrderStateTransitionException` proběhlo
+konzistentně napříč kapitolami 6, 7, 10 i 11. `placedAt` v kanonickém agregátu drží,
+storno objednávky ve stavu `paid` prošlo přes HTTP. 07.07 a 07.08 jdou složit do jednoho
+souboru bez `Cannot redeclare`. `bus:` sedí — `debug:messenger` ukazuje každý aplikační
+handler právě na jedné sběrnici.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
