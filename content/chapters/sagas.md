@@ -862,9 +862,15 @@ declare(strict_types=1);
 
 namespace App\Payment\Domain\Event;
 
+use Symfony\Component\Uid\Uuid;
+
+// Každá kroková událost nese vlastní identitu. Bez ní nejde zapnout
+// idempotenci ságy ze sekce 14.06 – guard se nemá čeho chytit
+// a opakované doručení provede přechod podruhé.
 final readonly class PaymentSucceeded
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $transactionId = '',
     ) {}
@@ -873,6 +879,7 @@ final readonly class PaymentSucceeded
 final readonly class PaymentFailed
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $failureReason,
     ) {}
@@ -881,6 +888,7 @@ final readonly class PaymentFailed
 final readonly class RefundSucceeded
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $refundId = '',
     ) {}
@@ -889,6 +897,7 @@ final readonly class RefundSucceeded
 final readonly class RefundFailed
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $failureReason,
     ) {}
@@ -897,9 +906,12 @@ final readonly class RefundFailed
 // --- src/Warehouse/Domain/Event/ ---
 namespace App\Warehouse\Domain\Event;
 
+use Symfony\Component\Uid\Uuid;
+
 final readonly class StockReserved
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $reservationId = '',
     ) {}
@@ -908,6 +920,7 @@ final readonly class StockReserved
 final readonly class StockReservationFailed
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $failureReason,
     ) {}
@@ -916,9 +929,12 @@ final readonly class StockReservationFailed
 // --- src/Shipping/Domain/Event/ ---
 namespace App\Shipping\Domain\Event;
 
+use Symfony\Component\Uid\Uuid;
+
 final readonly class ShipmentCreated
 {
     public function __construct(
+        public Uuid $eventId,
         public string $orderId,
         public string $shipmentId = '',
     ) {}
@@ -1609,24 +1625,57 @@ na konkrétní transport a přidělená až při odeslání či příjmu. Po red
 při průchodu jiným transportem se změní, takže by táž událost prošla dvakrát –
 přesně to, čemu má idempotence zabránit.
 
-:::code{language="php" filename="snippet.php"}
-// Doplnění do entity OrderSaga (viz výše v této sekci)
-public function applyPaymentSucceeded(string $eventId): void
+Krokové události z [14.05](#process-manager-heading) proto nesou `eventId` – bez něj se
+guard nemá čeho chytit. Metoda patří do entity `OrderSaga` a Process Manager ji volá
+místo přímého `transitionTo()`:
+
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderSaga.php (výřez)"}
+/** @return bool zda se přechod opravdu odehrál */
+public function applyPaymentSucceeded(string $eventId): bool
 {
     // 1) Idempotence: stejný event už zpracován? Skip.
     if ($this->hasProcessed($eventId)) {
-        return;
+        return false;
     }
 
     // 2) Guard stavového automatu: smí přechod nastat?
     if ($this->status() !== OrderSagaStatus::AwaitingPayment) {
         // Out-of-order: událost dorazila ve stavu, kde ji nečekáme.
         // Buď: zalogovat a zahodit (idempotentní), nebo zařadit do pending fronty.
-        return;
+        return false;
     }
 
     $this->transitionTo(OrderSagaStatus::AwaitingStockReservation);
     $this->markProcessed($eventId);
+
+    return true;
+}
+:::
+
+Volání z Process Manageru pak vypadá takhle – návratová hodnota říká, jestli se přechod
+opravdu odehrál, takže se příkazy neodešlou podruhé:
+
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderProcessManager.php (výřez)"}
+private function onPaymentSucceeded(PaymentSucceeded $event): void
+{
+    $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+    if ($state === null || $state->status()->isTerminal()) {
+        return;
+    }
+
+    // Guard vrátí false u opakovaného doručení. Bez něj by se
+    // MarkOrderPaid i ReserveStock odeslaly znovu a v completedSteps
+    // by přibyl druhý „payment_charged“.
+    if (!$state->applyPaymentSucceeded((string) $event->eventId)) {
+        return;
+    }
+
+    $state->updateContext('transactionId', $event->transactionId);
+    $this->sagaRepository->save($state);
+
+    $this->commandBus->dispatch(new MarkOrderPaid(orderId: $event->orderId));
+    $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
 }
 :::
 :::

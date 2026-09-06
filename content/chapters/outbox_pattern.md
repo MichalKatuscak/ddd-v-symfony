@@ -594,7 +594,10 @@ final readonly class PlaceOrder
         #[Assert\Count(min: 1)]
         #[Assert\All([
             new Assert\Collection([
-                'productId' => [new Assert\Uuid()],
+                // NotBlank tu není navíc: Assert\Uuid prázdný řetězec
+                // propustí bez porušení, takže by chybějící productId
+                // spadlo až v hodnotovém objektu jako 500.
+                'productId' => [new Assert\NotBlank(), new Assert\Uuid()],
                 'quantity' => [new Assert\Positive()],
                 'unitPriceInCents' => [new Assert\PositiveOrZero()],
             ]),

@@ -1415,11 +1415,13 @@ final class PlaceOrderController extends AbstractController
         // doplňují prázdnou hodnotou schválně: chybějící pole má odmítnout
         // validátor commandu se srozumitelnou hláškou, ne PHP warningem.
         $items = array_map(
-            static fn (array $row): array => [
+            // Položka nemusí být pole: items[0]=foo projde přes ParameterBag
+            // jako řetězec a bez tohohle guardu by shodilo uzávěru na typu.
+            static fn (mixed $row): array => is_array($row) ? [
                 'productId'        => (string) ($row['productId'] ?? ''),
                 'quantity'         => (int) ($row['quantity'] ?? 0),
                 'unitPriceInCents' => (int) ($row['unitPriceInCents'] ?? -1),
-            ],
+            ] : ['productId' => '', 'quantity' => 0, 'unitPriceInCents' => -1],
             $request->request->all('items'),
         );
 

@@ -88,8 +88,18 @@ STOCK_FAILS=0
 # doctrine:database:create u SQLite není potřeba a skončí chybou
 # „getCreateDatabaseSQL is not supported by platform“ – soubor si
 # ovladač založí sám při prvním připojení.
+
+# Migrace nejdřív vzniknou z mapování. Bez tohohle kroku skončí migrate
+# hláškou „there are no registered migrations“.
+php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
 :::
+
+Tabulky read modelů `migrations:diff` nevygeneruje: ORM o nich neví a `schema_filter` je
+z porovnávání schématu záměrně vyřazuje. Migraci pro `order_dashboard`, `reporting_orders`
+a `order_audit_log` proto napíšete ručně podle DDL v kapitolách
+[o CQRS](/cqrs#read-model-optimalizace), [o Outboxu](/outbox-pattern) a
+[o autorizaci](/autorizace-v-ddd).
 
 Testy z kapitoly o CQRS běží proti skutečné databázi, takže potřebují dvě věci navíc.
 Ságový test z kapitoly 14 vystačí s in-memory repozitářem, ale PHPUnit chce taky. A ten
@@ -121,6 +131,36 @@ test spadne na `no such table: users`:
 :::code{language="bash" filename="terminál"}
 php bin/console doctrine:migrations:migrate --no-interaction --env=test
 :::
+
+## 23.00 Aplikace potřebuje dva běžící procesy {#workery}
+
+Tohle je krok, na kterém se dá nejsnáz naletět, protože se neprojeví chybou. Po instalaci
+a spuštění webserveru objednávka projde: `POST /orders` vrátí přesměrování, hláška oznámí
+úspěch, detail se vykreslí. A pak se nestane nic.
+
+:::code{language="bash" filename="terminál"}
+# stav po odeslání objednávky, když neběží workery
+order            confirmed  (saga_in_progress = 1)
+order_dashboard  0 řádků
+reporting_orders 0 řádků
+outbox           1 řádek ve stavu pending
+:::
+
+Objednávka zůstane zamčená procesem, který nikdy nezačal, takže ji nepůjde ani zrušit –
+`isCancellable()` vrací `false` a šablona tlačítko nenabídne. Nikde přitom nespadne
+výjimka a v logu nic není.
+
+Chybí dva **trvale běžící** procesy. Relay vybírá řádky z outboxu a posílá je na sběrnici;
+worker je zpracovává:
+
+:::code{language="bash" filename="terminál – dva samostatné terminály"}
+php bin/console app:outbox:dispatch --time-limit=3600
+php bin/console messenger:consume async_events async_commands --time-limit=3600
+:::
+
+V produkci je hlídá supervisord nebo systemd, jak popisuje
+[kapitola o Outboxu](/outbox-pattern#relay). Při vývoji stačí dvě okna terminálu –
+ale bez nich aplikace jen sbírá objednávky, které nikdo nezpracuje.
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
