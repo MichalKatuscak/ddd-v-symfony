@@ -46,8 +46,8 @@ s alternativami.
 
 Nejjednodušší implementace publikování doménové události vypadá nevinně: po dokončení
 doménové operace zapíšeme stav do databáze a pak rovnou dispatchneme událost na message
-bus. Takový kód projde code review bez poznámek – dokud se v produkci nezačnou hromadit
-ztracené události a stížnosti subscriberů typu „*vidím v API objednávku
+bus. Takový kód projde code review bez poznámek. Do chvíle, než se v produkci začnou
+hromadit ztracené události a stížnosti subscriberů typu „*vidím v API objednávku
 12345, ale event `OrderPlaced` mi nikdy nedorazil*“.
 
 :::callout{type="warn"}
@@ -1477,9 +1477,9 @@ final readonly class OrderPlacedReadModelUpdater
 :::
 :::
 
-Sloupec `consumer` v inbox tabulce má svůj důvod: jeden a tentýž
-event_id mohou zpracovávat různí subscribery (Reporting, Notifications, Search index)
-a každý si potřebuje vést *vlastní* stav „už jsem to zpracoval“. Bez sloupce
+Sloupec `consumer` v inbox tabulce má svůj důvod. Jeden a tentýž event_id mohou
+zpracovávat různí subscribery (Reporting, Notifications, Search index) a každý
+si potřebuje vést *vlastní* stav „už jsem to zpracoval“. Bez sloupce
 consumer by druhý subscriber narazil na UNIQUE constraint prvního a nikdy by event
 nezpracoval. UNIQUE proto definujeme jako kompozitní `(event_id, consumer)`,
 ne jen `event_id`.
