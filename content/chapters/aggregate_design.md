@@ -423,6 +423,8 @@ namespace App\Ordering\Domain\Model;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderShipped;
 use App\Ordering\Domain\Event\OrderCancelled;
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderItemAdded;
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\Ordering\Domain\Exception\OrderLockedBySagaException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
@@ -501,6 +503,8 @@ class Order extends AggregateRoot
         foreach ($this->items as $existing) {
             if ($existing->productId->equals($productId)) {
                 $existing->increaseQuantity($quantity);
+                $this->record(new OrderItemAdded($this->id, $productId, $quantity));
+
                 return;
             }
         }
@@ -508,6 +512,7 @@ class Order extends AggregateRoot
         // Položka dostane referenci na kořen – ta drží ManyToOne protistranu
         // kolekce. Vlastní doménové ID nemá, viz mapování níž.
         $this->items->add(new OrderItem($this, $productId, $quantity, $unitPrice));
+        $this->record(new OrderItemAdded($this->id, $productId, $quantity));
     }
 
     // Čas jde vložit zvenku ze stejného důvodu jako u cancel(): jinak
@@ -528,6 +533,7 @@ class Order extends AggregateRoot
 
         $this->status = OrderStatus::Confirmed;
         $this->placedAt = $at ?? new \DateTimeImmutable();
+        $this->record(new OrderConfirmed($this->id, $this->customerId, $this->placedAt));
     }
 
     // Bez tohohle přechodu je ship() nedosažitelná: do stavu Paid
@@ -683,7 +689,7 @@ Události, které přechody nahrávají, mají jednotný tvar: identita agregát
 objekt a čas vzniku. Na `occurredAt` staví projekce i outbox, takže pole nese každá z nich
 a jmenuje se všude stejně.
 
-:::code{language="php" filename="src/Ordering/Domain/Event/OrderShipped.php + OrderCancelled.php"}
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderItemAdded.php + OrderConfirmed.php + OrderShipped.php + OrderCancelled.php"}
 <?php
 
 declare(strict_types=1);
@@ -692,7 +698,26 @@ namespace App\Ordering\Domain\Event;
 
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
 use App\Shipping\Domain\ValueObject\ShipmentId;
+
+final readonly class OrderItemAdded
+{
+    public function __construct(
+        public OrderId $orderId,
+        public ProductId $productId,
+        public int $quantity,
+    ) {}
+}
+
+final readonly class OrderConfirmed
+{
+    public function __construct(
+        public OrderId $orderId,
+        public CustomerId $customerId,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
+}
 
 final readonly class OrderShipped
 {
@@ -713,6 +738,10 @@ final readonly class OrderCancelled
     ) {}
 }
 :::
+
+Události vydává i `addItem()` a `confirm()`. Bez nich by projekce a ságy o dvou
+z pěti přechodů agregátu nevěděly – a testy v kapitole
+[Testování DDD](/testovani-ddd#unit-testy-domeny) je očekávají.
 
 `ShipmentId` bydlí v kontextu `Shipping` a má stejnou stavbu jako `OrderId`:
 
