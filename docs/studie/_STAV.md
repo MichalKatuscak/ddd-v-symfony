@@ -1405,6 +1405,91 @@ z minulého kola ověřeno **z obou stran**: same-origin POST projde, cross-orig
 bez `Origin` neprojde (fail-closed). `InMemoryPaymentGateway` a alias fungují.
 `OrderCancelTest` 3/3, `OrderVoterTest` 2/2.
 
+## Šestnácté kolo: třináctá ověřovací stavba (2026-09-06)
+
+Poprvé prošla celá cesta **registrace → přihlášení → objednávka → detail → storno**
+v prohlížeči. 21 testů zeleně, všechny povinné příkazy OK — ale až po 5 zásazích.
+
+### Most z patnáctého kola byl mrtvý kód
+
+Doplnil jsem `CreateSecurityUserOnUserRegistered`, ale **žádná ze tří verzí
+`RegisterUserHandler` `releaseEvents()` nevolala**. Posluchač událost nikdy nedostal,
+`app_user` zůstal prázdný, uživatel se nemohl přihlásit.
+
+**Poučení: posluchač je půlka řešení. Když přidávám handler na událost, musím ověřit,
+že ji někdo vydává — jinak jsem přidal kód, který se nikdy nespustí.**
+
+### Nejzávažnější nález: storno závodí se ságou
+
+Cesta, kterou dosud nikdo neprošel celou. Při běžících workerech:
+
+```
+orders.status = cancelled     order_saga.status = completed
+completedSteps = ["payment_charged","stock_reserved","shipment_created"]
+DLQ: MarkOrderPaid → „Nelze přejít ze stavu cancelled do paid"
+     ShipOrder     → „Nelze přejít ze stavu cancelled do shipped"
+```
+
+Uživatelské storno (kap. 11) a sága (kap. 14) sahají na týž agregát bez koordinace.
+Storno commitne první, sága pak **strhne platbu, rezervuje zboží a vytvoří zásilku**
+k neexistující objednávce, prohlásí se za `Completed`, a dva příkazy tiše umřou v DLQ.
+Kniha problém pojmenovala v 14.06 (*semantic lock*), ale ukázka pracovala se stavy
+`ApprovalPending`/`Approved`/`Rejected`, které kanonický `OrderStatus` nemá — obrana
+zůstala nezapojená. Opraveno oběma směry: příznak `sagaInProgress` **a** větev
+`onOrderCancelled()` v Process Manageru, s doménovou otázkou, která z nich se hodí.
+
+### Moje oprava validace byla špatně dvakrát
+
+Blok pro zobrazení chyby u pole byl (a) importoval `ValidationFailedException`
+z `Validatoru`, zatímco middleware hází variantu z `Messengeru`, a (b) byl vnořený
+do `catch (HandlerFailedException)`, který se nespustí — **validace běží před handlerem**,
+takže se do obálky nikdy nezabalí.
+
+**Poučení: u výjimky ověřit obojí — třídu i to, kdo a kdy ji obaluje.**
+
+### Blocker: `TenantAware` neexistoval
+
+`TenantFilter` je v `doctrine.yaml` zapnutý globálně a ptá se na marker rozhraní,
+které kniha nikde nedeklaruje. `Interface … does not exist` u **prvního dotazu
+v aplikaci**.
+
+### Ostatní opravené
+
+- `/api/register` spadalo pod `^/` a končilo redirectem na login dřív, než se kontroler spustil.
+- Read modely kap. 11 četly `total_cents`, sloupec, který kanonické mapování nemá.
+- Varování u mapovacího výpisu 07.08 pokrývalo jen `$id`; blok redeklaruje i `$status`,
+  `$placedAt` a `$items`.
+- `DomainExceptionListener` vrací 409 jen synchronně; s routingem z kap. 14 běží handler
+  v jiném procesu a uživatel dostane 302. Kniha to neříkala.
+- `CancelOrderE2eTest` projde přesně jednou — fixture se ukládala a neuklízela.
+- `PAYMENT_FAILS`/`STOCK_FAILS` nikdo nezaložil; `cache:clear` i `lint:container` projdou,
+  sága tiše uvázne až ve workeru.
+- PSR-4 past ve dvou souborech (`GetUserProfile.php`, výjimky) — kniha ji jinde hlídá.
+
+### Konfigurace se skládá z víc bloků a kniha to říkala jen jednou
+
+`doctrine.yaml` 4×, `messenger.yaml` 4×, `security.yaml` 2×, `services.yaml` 2×.
+Jen kapitola 12 měla větu „blok patří do stejného souboru". Kdo vloží `security.yaml`
+z 11.04 místo přilepení, ztratí firewall; kdo totéž s `messenger.yaml` z 12.15, ztratí
+transporty i routing. Doplněno všude.
+
+### Klasifikace kolizí FQCN — uzavřeno
+
+Protizkouška prošla strojově 279 deklarací: **26 duplicitních FQCN**. Rozdělení pro
+osm stavěných kapitol: 6 neškodných (identické nebo nadmnožina), 5 legitimní progrese,
+kterou **kniha říká nahlas**, a 4 reálně zastavující — všechny čtyři opraveny
+(`Order` 07.07+07.08, `GetUserProfile.php`, `recordPayment()`, dvě verze
+`detail.html.twig`). Nejlépe ošetřený případ v celé knize je podle protizkoušky
+`CancelOrderHandler`: *„obě ukázky nesou stejné FQCN, takže do projektu jde jedna z nich,
+a je to tahle"*.
+
+### Co protizkouška potvrdila
+
+`priority: 10` nic nerozbila — každá další událost má právě jednoho posluchače, takže
+priorita nemá co přeuspořádat. Testy kapitol 12 a 14 zelené. `CancelOrderPolicyTest`
+prošel všemi čtyřmi řádky. `#[CurrentUser]`, `OrderValueResolver` s prioritou 150,
+přetypování položek, stateless CSRF bez JS, `app:outbox:cleanup` na SQLite — vše funguje.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
