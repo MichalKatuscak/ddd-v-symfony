@@ -45,6 +45,9 @@ jobs:
       - name: Check named arguments against constructors
         run: php scripts/check_named_arguments.php
 
+      - name: Check property access against declared types
+        run: php scripts/check_property_access.php
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

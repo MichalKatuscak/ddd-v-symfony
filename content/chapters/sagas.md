@@ -797,13 +797,13 @@ final class OrderProcessManager
         if ($state->status() === OrderSagaStatus::Compensating) {
             $this->commandBus->dispatch(new CancelShipment(
                 orderId: $event->orderId,
-                shipmentId: $event->shipmentId->value,
+                shipmentId: $event->shipmentId,
             ));
 
             return;
         }
 
-        $state->updateContext('shipmentId', $event->shipmentId->value);
+        $state->updateContext('shipmentId', $event->shipmentId);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'shipment_created',
