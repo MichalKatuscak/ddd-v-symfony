@@ -2156,7 +2156,9 @@ services:
     App\Outbox\:    { resource: '../src/Outbox/' }
     App\Inbox\:     { resource: '../src/Inbox/' }
     App\Reporting\: { resource: '../src/Reporting/' }
-    # Sběrnicové middleware z 12.15 sedí mimo kontexty.
+    # Sběrnicové middleware z 12.15 sedí mimo kontexty. Řádek přidejte
+    # až s ním – neexistující adresář shodí kompilaci kontejneru hláškou
+    # „The file ../src/Infrastructure/ does not exist“.
     App\Infrastructure\: { resource: '../src/Infrastructure/' }
     App\Payment\:   { resource: '../src/Payment/',   exclude: ['../src/Payment/Domain/Event/'] }
     App\Warehouse\: { resource: '../src/Warehouse/', exclude: ['../src/Warehouse/Domain/Event/'] }

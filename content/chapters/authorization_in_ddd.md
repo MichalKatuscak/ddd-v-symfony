@@ -937,6 +937,7 @@ namespace App\Ordering\Domain\Model;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\Exception\OrderLockedBySagaException;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\SharedKernel\Domain\AggregateRoot;
@@ -947,6 +948,13 @@ class Order extends AggregateRoot
 
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {
+        // Zámek drží proces – viz kapitola o ságách, sekce Izolace ság.
+        // Tahle podmínka je v kanonické verzi z Návrhu agregátu taky;
+        // tenhle výpis metodu nahrazuje celou, ne po částech.
+        if ($this->sagaInProgress) {
+            throw new OrderLockedBySagaException($this->id);
+        }
+
         // Odeslanou ani doručenou zásilku storno nevrátí – tam nastupuje
         // kompenzace v ságe.
         if (in_array($this->status, [OrderStatus::Shipped, OrderStatus::Delivered], true)) {
@@ -986,6 +994,12 @@ class Order extends AggregateRoot
 
     public function isCancellable(\DateTimeImmutable $now): bool
     {
+        // Šablona se ptá právě téhle metody, takže musí znát i zámek.
+        // Jinak nabídne tlačítko, jehož příkaz skončí v dead-letter frontě.
+        if ($this->sagaInProgress) {
+            return false;
+        }
+
         if (in_array($this->status, [
             OrderStatus::Shipped,
             OrderStatus::Delivered,
@@ -1013,7 +1027,9 @@ Pomocná metoda `isCancellable()` je dotaz bez vedlejších efektů. Používá 
 
 Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [sekci 11.04](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a nutné.
 
-Storno lhůta je jediné, co tahle kapitola k agregátu přidává; konstruktor, továrny i `markPaid()` zůstávají tak, jak je zavádí [Návrh agregátu](/navrh-agregatu#references-by-id). Stavová podmínka je proto stejná jako tam – blokuje odeslanou a doručenou objednávku, ne všechno kromě `Confirmed`. Zúžení na `Confirmed` by vypadalo přísněji a přitom by rozbilo kompenzaci: sága ruší objednávku **zaplacenou**, takže by jí handler storno odmítl a objednávka by zůstala viset.
+`cancel()` a `isCancellable()` výše **nahrazují** verze z Návrhu agregátu celé, ne po
+částech: nesou tytéž stavové podmínky i zámek a přidávají k nim lhůtu. Storno lhůta je
+jediné, co tahle kapitola k agregátu přidává; konstruktor, továrny i `markPaid()` zůstávají tak, jak je zavádí [Návrh agregátu](/navrh-agregatu#references-by-id). Stavová podmínka je proto stejná jako tam – blokuje odeslanou a doručenou objednávku, ne všechno kromě `Confirmed`. Zúžení na `Confirmed` by vypadalo přísněji a přitom by rozbilo kompenzaci: sága ruší objednávku **zaplacenou**, takže by jí handler storno odmítl a objednávka by zůstala viset.
 
 ### End-to-end trace: cancellation request {#aggregate-trace-heading}
 
@@ -1179,6 +1195,26 @@ final readonly class OrderDetailReadModel
     }
 }
 :::
+
+Tabulku zakládá migrace a do `schema_filter` z [kapitoly o CQRS](/cqrs#read-model-optimalizace)
+patří ze stejného důvodu jako ostatní projekce – jinak ji `migrations:diff` navrhne zahodit:
+
+:::code{language="sql" filename="migrations/Version20260906130000.php (výřez)"}
+CREATE TABLE order_audit_log (
+    id       INTEGER  PRIMARY KEY AUTOINCREMENT,
+    order_id CHAR(36) NOT NULL,
+    at       DATETIME NOT NULL,
+    action   VARCHAR(64)  NOT NULL,
+    actor    VARCHAR(255) NOT NULL
+);
+
+CREATE INDEX idx_audit_order ON order_audit_log (order_id, at);
+:::
+
+```yaml
+# config/packages/doctrine.yaml – výčet je nutné rozšířit
+schema_filter: '~^(?!order_dashboard|reporting_orders|order_audit_log)~'
+```
 
 DTO drží jen to, co obrazovka opravdu dostala. `auditLog` je `null`, pokud ho dotaz
 nevybral – a to je rozdíl proti prázdnému poli, který má význam: „neviděl jsi ho",

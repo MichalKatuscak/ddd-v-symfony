@@ -645,7 +645,10 @@ final class OrderProcessManager
     private function onPaymentFailed(PaymentFailed $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
-        if ($state->status()->isTerminal()) {
+
+        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // proces nezaložil.
+        if ($state === null || $state->status()->isTerminal()) {
             return;
         }
 
@@ -663,7 +666,10 @@ final class OrderProcessManager
     private function onStockReserved(StockReserved $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
-        if ($state->status()->isTerminal()) {
+
+        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // proces nezaložil.
+        if ($state === null || $state->status()->isTerminal()) {
             return;
         }
 
@@ -688,7 +694,10 @@ final class OrderProcessManager
     private function onStockReservationFailed(StockReservationFailed $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
-        if ($state->status()->isTerminal()) {
+
+        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // proces nezaložil.
+        if ($state === null || $state->status()->isTerminal()) {
             return;
         }
 
@@ -759,7 +768,10 @@ final class OrderProcessManager
     private function onShipmentCreated(ShipmentCreated $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
-        if ($state->status()->isTerminal()) {
+
+        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // proces nezaložil.
+        if ($state === null || $state->status()->isTerminal()) {
             return;
         }
 
@@ -1378,7 +1390,12 @@ interface OrderSagaRepository
 {
     public function save(OrderSaga $state): void;
 
-    public function findByCorrelationId(string $correlationId): OrderSaga;
+    /**
+     * Vrací null, když sága pro danou korelaci neexistuje. Objednávka mohla
+     * vzniknout jinou cestou nebo ještě před nasazením procesu – a to není
+     * chyba, kterou by měl hlásit repozitář.
+     */
+    public function findByCorrelationId(string $correlationId): ?OrderSaga;
 
     /** @return list<OrderSaga> */
     public function findStale(\DateTimeImmutable $olderThan): array;
@@ -1412,18 +1429,10 @@ final readonly class DoctrineOrderSagaRepository implements OrderSagaRepository
         $this->em->flush();
     }
 
-    public function findByCorrelationId(string $correlationId): OrderSaga
+    public function findByCorrelationId(string $correlationId): ?OrderSaga
     {
-        $state = $this->em->getRepository(OrderSaga::class)
+        return $this->em->getRepository(OrderSaga::class)
             ->findOneBy(['correlationId' => $correlationId]);
-
-        if ($state === null) {
-            throw new \RuntimeException(
-                sprintf('Saga state not found for correlation ID "%s"', $correlationId),
-            );
-        }
-
-        return $state;
     }
 
     /** @return list<OrderSaga> */
@@ -1632,7 +1641,7 @@ public function lockForSaga(): void
     $this->sagaInProgress = true;
 }
 
-public function unlockAfterSaga(): void
+public function releaseSagaLock(): void
 {
     $this->sagaInProgress = false;
 }
@@ -1914,8 +1923,9 @@ final readonly class CheckSagaTimeoutHandler
     {
         $state = $this->sagaRepository->findByCorrelationId($command->orderId);
 
-        // Saga se od posledního kroku posunula - timeout neplatí
-        if ($state->status()->value !== $command->expectedStatus) {
+        // Sága se od posledního kroku posunula, nebo pro tuhle objednávku
+        // vůbec neběží – timeout v obou případech neplatí.
+        if ($state === null || $state->status()->value !== $command->expectedStatus) {
             return;
         }
 
@@ -2008,6 +2018,10 @@ private function onOrderPlaced(OrderPlacedIntegrationEvent $event): void
 }
 :::
 :::
+
+Metoda v úplném výpisu `OrderProcessManager` v [14.05](#process-manager-heading) není –
+je to doplněk, ne jeho součást. Kdo ho vynechá, dostane ságu bez hlídačů; kdo ho doplní,
+musí počítat s tím, že unit test v 14.12 proto filtruje `CheckSagaTimeout` metodou `steps()`.
 
 Volání `scheduleTimeout()` patří do každé metody, která ságu převede do čekajícího
 stavu. Metoda `onPaymentSucceeded()` tak naplánuje kontrolu pro
@@ -2146,6 +2160,11 @@ se označuje jako *compensation pending*.
 private function onRefundSucceeded(RefundSucceeded $event): void
 {
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+    if ($state === null) {
+        return;
+    }
+
     $state->transitionTo(OrderSagaStatus::Failed); // teprve teď je sága uzavřená
     $this->sagaRepository->save($state);
 
@@ -2593,12 +2612,9 @@ final class InMemoryOrderSagaRepository implements OrderSagaRepository
         $this->states[$state->correlationId()] = $state;
     }
 
-    public function findByCorrelationId(string $correlationId): OrderSaga
+    public function findByCorrelationId(string $correlationId): ?OrderSaga
     {
-        return $this->states[$correlationId]
-            ?? throw new \RuntimeException(
-                sprintf('Saga state not found for "%s"', $correlationId),
-            );
+        return $this->states[$correlationId] ?? null;
     }
 
     /** @return list<OrderSaga> */
