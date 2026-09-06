@@ -492,6 +492,16 @@ enum OrderSagaStatus: string
     case Completed = 'completed';
     case Compensating = 'compensating';
     case Failed = 'failed';
+
+    /**
+     * Z terminálního stavu už sága nikam nepokračuje. Opožděná událost
+     * ji nesmí vzkřísit – proto se na tuhle otázku ptá každý handler
+     * hned na začátku.
+     */
+    public function isTerminal(): bool
+    {
+        return $this === self::Completed || $this === self::Failed;
+    }
 }
 :::
 :::
@@ -604,6 +614,14 @@ final class OrderProcessManager
     private function onPaymentSucceeded(PaymentSucceeded $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+        // Opožděná událost nesmí vzkřísit ukončenou ságu. Bez téhle
+        // podmínky by PaymentSucceeded doručený po timeoutu poslal
+        // MarkOrderPaid na už zrušenou objednávku.
+        if ($state->status()->isTerminal()) {
+            return;
+        }
+
         $state->transitionTo(OrderSagaStatus::AwaitingStockReservation);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
@@ -635,6 +653,10 @@ final class OrderProcessManager
     private function onStockReserved(StockReserved $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+        if ($state->status()->isTerminal()) {
+            return;
+        }
+
         $state->transitionTo(OrderSagaStatus::AwaitingShipment);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
@@ -648,6 +670,10 @@ final class OrderProcessManager
     private function onStockReservationFailed(StockReservationFailed $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+        if ($state->status()->isTerminal()) {
+            return;
+        }
+
         $state->transitionTo(OrderSagaStatus::Compensating);
         $this->sagaRepository->save($state);
 
@@ -665,6 +691,10 @@ final class OrderProcessManager
     private function onShipmentCreated(ShipmentCreated $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+        if ($state->status()->isTerminal()) {
+            return;
+        }
+
         $state->transitionTo(OrderSagaStatus::Completed);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
@@ -872,12 +902,82 @@ interface PaymentGateway
 }
 :::
 
-**Zbylé handlery** – `ReserveStockHandler`, `CreateShipmentHandler`, `RefundCustomerHandler`,
-`MarkOrderPaidHandler`, `ShipOrderHandler` a `CancelOrderHandler` – mají stejnou stavbu:
-vykonají krok a vydají událost. Bez posledních tří skončí sága ve stavu `Completed`,
-ale objednávka zůstane v `Draft` – Process Manager stav agregátu nemění, jen posílá
-příkazy. Právě tady se pozná, jestli je proces domyšlený: sága může doběhnout do
-terminálního stavu a objednávka přesto zůstat rozpracovaná.
+Zbylé handlery kroků mají stejnou stavbu jako `ChargeCustomerHandler`: vykonají operaci
+a vydají událost. Ty, které jen mění stav agregátu, jsou ještě kratší:
+
+:::code{language="php" filename="src/Ordering/Application/Handler/MarkOrderPaidHandler.php (+ ShipOrderHandler)"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Handler;
+
+use App\Ordering\Application\Command\MarkOrderPaid;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\ValueObject\OrderId;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler(bus: 'command.bus')]
+final readonly class MarkOrderPaidHandler
+{
+    public function __construct(
+        private OrderRepository $orders,
+        private EntityManagerInterface $em,
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
+    ) {}
+
+    public function __invoke(MarkOrderPaid $command): void
+    {
+        $order = $this->orders->get(OrderId::fromString($command->orderId));
+        $order->markPaid();
+        $this->em->flush();
+
+        // Bez tohohle kroku by se doménová událost nikam nedostala
+        // a projekce by o změně stavu nevěděla.
+        foreach ($order->releaseEvents() as $event) {
+            $this->eventBus->dispatch($event);
+        }
+    }
+}
+
+// ShipOrderHandler je totožný, jen volá
+// $order->ship(ShipmentId::fromString($command->shipmentId));
+:::
+
+Příkazy samotné jsou prosté DTO s primitivy – jdou přes asynchronní transport,
+takže hodnotové objekty do nich nepatří:
+
+:::code{language="php" filename="src/Ordering/Application/Command/MarkOrderPaid.php + ShipOrder.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Command;
+
+final readonly class MarkOrderPaid
+{
+    public function __construct(public string $orderId) {}
+}
+
+final readonly class ShipOrder
+{
+    public function __construct(
+        public string $orderId,
+        public string $shipmentId,
+    ) {}
+}
+:::
+
+`ReserveStockHandler`, `CreateShipmentHandler` a `RefundCustomerHandler` sedí ve svých
+kontextech a mají tvar `ChargeCustomerHandler`: zavolají službu a vydají událost
+o výsledku. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá `cancel()`.
+
+Právě tady se pozná, jestli je proces domyšlený: chybí-li jediný handler, sága doběhne
+do `Completed` a objednávka zůstane rozpracovaná. Nikde nespadne, jen se stavy rozejdou.
 
 ### Kolik logiky smí Process Manager mít {#logika-v-process-manageru}
 

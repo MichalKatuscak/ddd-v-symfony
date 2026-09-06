@@ -1071,8 +1071,12 @@ final class OrderDashboardProjector
              VALUES (:orderId, :customerId, :totalAmount, :status, :placedAt, :updatedAt)
              -- ON CONFLICT je PostgreSQL i SQLite; MySQL má
              -- ON DUPLICATE KEY UPDATE … = VALUES(…). Upsert není přenositelný.
+             -- Bez podmínky by opakované doručení vrátilo odeslanou
+             -- objednávku zpět na „placed". Řádek se přepíše jen tehdy,
+             -- když je nová událost novější než ta zapsaná.
              ON CONFLICT (order_id) DO UPDATE SET
-                status = excluded.status, updated_at = excluded.updated_at',
+                status = excluded.status, updated_at = excluded.updated_at
+             WHERE order_dashboard.updated_at < excluded.updated_at',
             [
                 'orderId'      => $event->orderId,
                 'customerId'   => $event->customerId,
@@ -1091,7 +1095,8 @@ final class OrderDashboardProjector
                 SET status = :status,
                     shipment_id = :shipmentId,
                     updated_at = :updatedAt
-              WHERE order_id = :orderId',
+              WHERE order_id = :orderId
+                AND updated_at < :updatedAt',
             [
                 'orderId'        => $event->orderId,
                 'status'         => 'shipped',
@@ -1106,7 +1111,8 @@ final class OrderDashboardProjector
         $this->connection->executeStatement(
             'UPDATE order_dashboard
                 SET status = :status, updated_at = :updatedAt
-              WHERE order_id = :orderId',
+              WHERE order_id = :orderId
+                AND updated_at < :updatedAt',
             [
                 'orderId'   => $event->orderId,
                 'status'    => 'cancelled',
@@ -1123,9 +1129,11 @@ final class OrderDashboardProjector
 
 Při asynchronním zpracování může být událost doručena **více než jednou**
 (at-least-once delivery). Projektor proto musí být **idempotentní** – opakované
-zpracování téže události nesmí vést k nesprávným datům. V příkladu výše je idempotence
-zajištěna upsertem (`ON CONFLICT … DO UPDATE`), která při opakovaném insertu
-provede pouze update. Alternativní přístupy:
+zpracování téže události nesmí vést k nesprávným datům. Samotný upsert nestačí:
+`ON CONFLICT … DO UPDATE` je last-write-wins, takže opakované doručení `OrderPlaced`
+po `OrderShipped` vrátí řádek zpět na `placed` a dashboard začne lhát. Proto obě věty
+v ukázce nesou podmínku `updated_at < :updatedAt` – zápis projde jen tehdy, když je
+událost novější než to, co v řádku už je. Alternativní přístupy:
 
 - **Sledování pozice** – projektor si ukládá pozici posledního zpracovaného
   eventu (event ID nebo sequence number) a ignoruje události se stejnou nebo nižší pozicí.
