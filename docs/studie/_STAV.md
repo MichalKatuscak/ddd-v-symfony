@@ -1641,6 +1641,58 @@ Poslední čtyři kola nenašla chybu v jádru objednávkového procesu. Nálezy
 k okrajovým cestám HTTP vrstvy a k tvrzením, která kniha vyslovuje o vlastním kódu.
 Zbylé mezery protizkouška klasifikovala jako výřezy, ke kterým se kniha hlásí.
 
+## Dvacáté kolo: osmnáctá ověřovací stavba — konvergence (2026-09-06)
+
+**Verdikt protizkoušky: „Kniha je průchozí. Čtenář ji dokáže postavit do funkční
+aplikace a nic ho nezastaví."** Sedm z osmi oprav drží, **žádná regrese**, DLQ prázdná
+ve všech čtyřech větvích, 21 testů zeleně, `cache:clear` prošel v dev, test i prod.
+
+### Odhad konvergence — proč tohle bylo poslední plošné kolo
+
+Protizkouška dostala výslovné svolení odpovědět „další kolo už nemá cenu" a odpověděla:
+
+> „Jsme pod hranicí, kdy se vyplatí knihu dál měnit… Nálezy se přestaly týkat toho, jestli
+> aplikace funguje, a začaly se týkat toho, jaký HTTP kód uvidíte, když do formuláře
+> pošlete zápornou cenu přes curl. To je hranice, za kterou revize začne měnit knihu kvůli
+> sobě samé, ne kvůli čtenáři."
+
+Doporučila jedno cílené kolo o rozsahu tří řádků. To proběhlo a je zapsané níž.
+
+### Cílené kolo
+
+- **`PlaceOrder` končil 500 místo 422.** Validace se spouštěla, ale `ValidationFailedException`
+  z Messengeru žádný HTTP status nenese a kontroler ji nechytal — **přestože o kus dál v téže
+  knize `RegistrationController` přesně tuhle větev má a vysvětluje proč.**
+- **Chybějící klíč v `items`** shodil request PHP warningem dřív, než se validátor spustil.
+- **Pět handlerů kroků ságy** kniha popisovala prózou a zároveň psala, že vynechat je nejde
+  a chybějící se projeví až tichým selháním v DLQ. Rozpor mezi varováním a nedodaným kódem
+  odstraněn.
+- **`RefundCustomer` neměl kam vzít `transactionId`** — kompenzace neměla čím zavolat bránu.
+  Sága si ho ukládá z `PaymentSucceeded`. U sebekompenzujícího příkazu je nově pojmenovaná
+  **mez vzoru**: příkaz identifikátor transakce znát nemůže, protože ho teprve vytvoří.
+- `logout` mířil na `/`, kterou kniha nedefinuje.
+
+### Dvě kontroly místo dvou poučení
+
+Dva druhy chyb se opakovaly natolik, že poznámka ve studii nestačila:
+
+- `scripts/check_messenger_routing.php` — ověří, že každou třídu z `routing:` kniha někde
+  definuje. Tuhle chybu jsem udělal **dvakrát**, podruhé hodinu po zapsání poučení.
+- `scripts/check_duplicate_listings.php` — hlídá, že dvě ukázky nesdílejí jméno souboru bez
+  rozlišujícího dovětku. Našel devět případů ve stavěných kapitolách.
+
+Obě běží v CI. **Pravidlo: opakovaná chyba patří do kontroly, ne do poznámky.**
+
+### Kde revize skončila
+
+Dvacet kol, osmnáct stavěných projektů. Nálezy se posunuly od „aplikace nejde postavit"
+přes „stavy se tiše rozejdou" až k HTTP kódům na okrajových cestách. Poslední čtyři kola
+nenašla chybu v jádru objednávkového procesu.
+
+**Co zbývá a proč se to nemění:** `tests/Architecture/DomainRules.php` je výřez pravidla,
+ne spustitelný soubor (kniha ho tak podává); konceptuální kapitoly nemají živé ukázky
+záměrně a `CLAUDE.md` říká kritérium. Další plošné kolo by měnilo knihu kvůli revizi samé.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
