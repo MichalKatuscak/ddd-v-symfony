@@ -662,7 +662,7 @@ final class InMemoryUserRepository implements UserRepository
         // fake ho vymáhá sám, aby test nepotřeboval běžící DB.
         $existing = $this->findByEmail($user->email());
         if ($existing !== null && !$existing->id()->equals($user->id())) {
-            throw DuplicateEmailException::forEmail($user->email());
+            throw DuplicateEmailException::with($user->email());
         }
 
         $this->storage[(string) $user->id()] = $user;

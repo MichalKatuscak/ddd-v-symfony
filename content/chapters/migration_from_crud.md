@@ -1213,7 +1213,7 @@ final class UserTest extends TestCase
             new Email('jan@firma.cz'),
             HashedPassword::fromPlainText('SecurePass123')
         );
-        $token = VerificationToken::valid('abc123');
+        $token = VerificationToken::fromString('abc123');
         $user->activate($token);
 
         $this->expectException(UserAlreadyActivatedException::class);

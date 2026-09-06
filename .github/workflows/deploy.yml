@@ -51,6 +51,9 @@ jobs:
       - name: Check class names resolve to an import
         run: php scripts/check_use_statements.php
 
+      - name: Check static calls against defined classes
+        run: php scripts/check_static_calls.php
+
       - name: Check FAQ blocks parse as YAML
         run: php scripts/check_faq_yaml.php
 

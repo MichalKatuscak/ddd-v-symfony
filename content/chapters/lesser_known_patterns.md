@@ -1083,7 +1083,7 @@ final class Order extends AggregateRoot
         CustomerLookup $lookup,
         \DateTimeImmutable $placedAt,
     ): self {
-        $customerId = $lookup->byEmail($row->customerEmail) ?? CustomerId::guest();
+        $customerId = $lookup->byEmail($row->customerEmail) ?? $lookup->guestId();
         $items = ImportedItems::map($row->items);
 
         return self::place($customerId, $items, $placedAt);
