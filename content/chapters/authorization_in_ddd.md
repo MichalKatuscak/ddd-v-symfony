@@ -737,10 +737,12 @@ Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Zrušit o
 {% endif %}
 
 {# Refund je operace pro obsluhu, ne pro zákazníka – atribut ji pustí
-   jen roli z Voteru. Routu k ní si doplňte podle vlastního use case. #}
-{% if is_granted('order.refund', order) %}
+   jen roli z Voteru. Odkaz vede na routu, kterou kniha nedodává, proto
+   je zakomentovaný: path() na neexistující routu shodí celou šablonu,
+   a to až ve chvíli, kdy se přihlásí první uživatel s tou rolí. #}
+{# {% if is_granted('order.refund', order) %}
     <a href="{{ path('order_refund', {id: order.id.value}) }}">Vrátit platbu</a>
-{% endif %}
+{% endif %} #}
 :::
 
 Pozor: `{% if is_granted(...) %}` v Twigu jen schová tlačítko – neověří, že request nebude poslán manuálně (curl, Postman, browser dev tools). View-level kontrola je *UX*, nikoli bezpečnostní bariéra. Bezpečnostní rozhodnutí padne v handleru.

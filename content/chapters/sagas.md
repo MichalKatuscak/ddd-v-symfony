@@ -1198,7 +1198,10 @@ final readonly class ReleaseStock
 
 `ReserveStockHandler`, `CreateShipmentHandler` a `RefundCustomerHandler` sedí ve svých
 kontextech a mají tvar `ChargeCustomerHandler`: zavolají službu a vydají událost
-o výsledku. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
+o výsledku. Kompenzační dvojice `ReleaseStockHandler` a `CancelShipmentHandler` je ještě
+kratší – zavolá port a nevydá nic, protože na uvolnění rezervace nikdo nečeká. Vynechat
+je ale nejde: sága je dispatchuje, a chybějící handler se projeví až jako
+`No handler for message` v dead-letter frontě, zatímco proces poběží dál. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
 `cancel($command->reason, new \DateTimeImmutable())`. Porty `StockService` a `ShippingService` mají stejnou
 stavbu jako `PaymentGateway` – rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
 

@@ -258,12 +258,12 @@ framework:
         # configuration: class or interface … not found". Nechte tu jen zprávy,
         # které ve svém projektu opravdu máte.
         routing:
-            # Příkazy vhodné pro asynchronní zpracování:
-            # operace, kde uživatel nemusí čekat na výsledek
-            # Zprávy, které v projektu opravdu jsou. Messenger třídy ověřuje
-            # při kompilaci kontejneru, takže neexistující jméno tady shodí
-            # každý příkaz – včetně cache:clear.
-            App\Ordering\Application\Command\PlaceOrder: async_commands
+            # Asynchronně patří operace, na jejichž výsledek volající nečeká.
+            # PlaceOrder mezi ně NEPATŘÍ: kontroler z 12.12 si z odpovědi
+            # bere OrderId přes HandledStamp, a ten z jiného procesu
+            # nedoputuje – požadavek by skončil na
+            # „Call to a member function getResult() on null“.
+            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_events
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
             # App\UserManagement\Profile\Query\GetUserProfile: sync
@@ -718,8 +718,10 @@ final class DbalUserProfileReadRepository implements UserProfileReadRepository
             'SELECT u.id, u.name_value AS name, u.email, u.created_at,
                     (SELECT COUNT(*) FROM orders o
                       WHERE o.customer_id = u.id) AS total_orders,
-                    -- Tabulka memberships patří jinému kontextu; kdo ji nemá,
-                    -- řádek vypustí. Ukázka je tu kvůli tvaru dotazu, ne kvůli
+                    -- Tabulka memberships patří jinému kontextu. Kdo ji nemá,
+                    -- nahradí celý COALESCE za `:defaultTier AS membership_tier`
+                    -- – sloupec musí zůstat, ViewModel ho v konstruktoru
+                    -- vyžaduje. Ukázka je tu kvůli tvaru dotazu, ne kvůli
                     -- konkrétnímu schématu.
                     COALESCE(
                         (SELECT MAX(m.tier) FROM memberships m
@@ -865,7 +867,15 @@ kontroler z validace commandu:
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    {# Bez tohohle bloku se uživatel o kolizi e-mailu nedozví: kontroler
+       ji hlásí flashem, ne chybou u pole. #}
+    {% for message in app.flashes('error') %}
+        <p class="error">{{ message }}</p>
+    {% endfor %}
+
     {{ form_start(form) }}
+        {# form_errors vypíše chyby na kořeni formuláře, typicky CSRF. #}
+        {{ form_errors(form) }}
         {{ form_row(form.name) }}
         {{ form_row(form.email) }}
         {{ form_row(form.password) }}
@@ -1503,7 +1513,13 @@ framework:
             # Pozor: relay z kapitoly o Outboxu si transport vynucuje
             # přes TransportNamesStamp, a ten routing přebije. Prioritní
             # frontu má proto smysl nastavit až na straně relaye.
-            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_priority_high
+            #
+            # Řádek je ilustrativní a do projektu podle knihy nepatří:
+            # OrderPlacedIntegrationEvent už na async_events směruje
+            # konfigurace ságy. Jedna třída na dvou transportech znamená
+            # duplicitní klíč v jednom mapování – druhý tiše přebije první
+            # a ságu pak nikdo neobslouží.
+            App\Notification\Application\Event\InvoiceIssued: async_priority_high
 :::
 :::
 
