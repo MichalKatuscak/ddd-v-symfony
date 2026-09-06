@@ -982,6 +982,9 @@ final class PlaceOrderProcessor implements ProcessorInterface
         // ID generujeme před dispatchem - dispatch() vrací Envelope, ne doménový objekt
         $orderId = OrderId::generate();
 
+        // Pozor: tahle varianta příkazu nese i orderId, protože identitu
+        // určuje volající. Kanonický PlaceOrder z kapitoly o Outboxu ji
+        // naopak generuje v agregátu a vrací ji přes HandledStamp.
         $command = new PlaceOrderCommand(
             orderId: $orderId,
             customerId: CustomerId::fromString($data->customerId),

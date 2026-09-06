@@ -746,9 +746,10 @@ final class OrderProcessManager
         // ten důvod, proč si sága vede stav.
         foreach (array_reverse($state->context()['completedSteps']) as $step) {
             match ($step) {
-                'shipment_created' => $this->commandBus->dispatch(
-                    new CancelShipment(orderId: $event->orderId->value),
-                ),
+                'shipment_created' => $this->commandBus->dispatch(new CancelShipment(
+                    orderId: $event->orderId->value,
+                    shipmentId: $state->context()['shipmentId'],
+                )),
                 'stock_reserved' => $this->commandBus->dispatch(
                     new ReleaseStock(orderId: $event->orderId->value),
                 ),
@@ -794,11 +795,15 @@ final class OrderProcessManager
         // není – a bez téhle větve by sága kompenzaci přeskočila a přešla
         // do Completed s objednávkou, kterou už někdo zrušil.
         if ($state->status() === OrderSagaStatus::Compensating) {
-            $this->commandBus->dispatch(new CancelShipment(orderId: $event->orderId));
+            $this->commandBus->dispatch(new CancelShipment(
+                orderId: $event->orderId,
+                shipmentId: $event->shipmentId->value,
+            ));
 
             return;
         }
 
+        $state->updateContext('shipmentId', $event->shipmentId->value);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'shipment_created',
@@ -1214,7 +1219,13 @@ final readonly class CreateShipment
 
 final readonly class CancelShipment
 {
-    public function __construct(public string $orderId) {}
+    // Zásilka se ruší podle vlastní identity, ne podle objednávky. Sága
+    // si shipmentId ukládá z ShipmentCreated – jinde ho v tu chvíli
+    // nemá kdo znát.
+    public function __construct(
+        public string $orderId,
+        public string $shipmentId,
+    ) {}
 }
 :::
 
@@ -1255,7 +1266,7 @@ final readonly class ReserveStockHandler
         } catch (\RuntimeException $e) {
             $this->eventBus->dispatch(new StockReservationFailed(
                 orderId: $command->orderId,
-                reason: $e->getMessage(),
+                failureReason: $e->getMessage(),
             ));
 
             return;
@@ -1278,9 +1289,11 @@ final readonly class ReleaseStockHandler
 }
 :::
 
-`CreateShipmentHandler` a `CancelShipmentHandler` v kontextu `Shipping` vypadají stejně,
-jen volají `ShippingService` a úspěch hlásí událostí `ShipmentCreated` se `ShipmentId`
-z brány. `RefundCustomerHandler` je protějšek `ChargeCustomerHandler`: zavolá
+`CreateShipmentHandler` v kontextu `Shipping` volá `ShippingService::create()` a úspěch
+hlásí událostí `ShipmentCreated` se `ShipmentId` z brány. `CancelShipmentHandler` je proti
+němu kratší: zavolá `cancel($command->shipmentId)` a **nevydá nic**. Kdyby vydal
+`ShipmentCreated`, Process Manager by na ni ve stavu `Compensating` odpověděl dalším
+`CancelShipment` a vznikla by nekonečná smyčka příkazu a události. `RefundCustomerHandler` je protějšek `ChargeCustomerHandler`: zavolá
 `PaymentGateway::refund()` a podle výsledku vydá `RefundSucceeded`, nebo `RefundFailed`. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
 `cancel($command->reason, new \DateTimeImmutable())`. Porty `StockService` a `ShippingService` mají stejnou
 stavbu jako `PaymentGateway`: rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
