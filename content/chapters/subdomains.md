@@ -186,7 +186,7 @@ Obrana proti anti-vzoru „všechno je Core“ je přímočará: **vynuťte si r
 
 ## 02.05 Mapování subdomén na Bounded Contexts {#subdomeny-na-bc}
 
-Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména se dělí do více BC) a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov jde dál a před rozdělováním souvislé funkcionality varuje: kontexty pak nelze rozvíjet nezávisle, protože tatáž změna požadavků zasáhne oba a vynutí si současné nasazení. Za legitimní důvod k rozdělení považuje potřebu oddělit vývojové cykly nebo škálovat část nezávisle na zbytku [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Subdoména a Bounded Context se mapují přes tři standardní vztahy: **1:1** (jedna subdoména = jeden BC, žádoucí stav), **1:N** (jedna subdoména se dělí do více BC) a **N:1** (více malých subdomén žije v jednom BC, obvyklé pro Supporting / Generic). Vernon doporučuje cílit na 1:1 všude, kde to jde. Khononov jde dál a před rozdělováním souvislé funkcionality varuje: kontexty pak nelze rozvíjet nezávisle, protože tatáž změna požadavků zasáhne oba a vynutí si současné nasazení. Legitimním důvodem k rozdělení zůstává potřeba oddělit vývojové cykly nebo škálovat část nezávisle na zbytku; to už je ale doporučení této knihy, ne jeho formulace [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
 
 Pro názornost mapujme imaginární e-shop střední velikosti (3–4 týmy, 25 vývojářů) na subdomény a Bounded Contexts:
 
@@ -581,7 +581,7 @@ Pravidlo: chraňte se před lock-inem v Core (vlastní IP, vlastní data), nikol
 
 ## 02.08 Evoluce subdomén v čase {#evoluce}
 
-Klasifikace subdomén není jednorázové cvičení. Trh i technologie se za pár let posunou natolik, že to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD* a varuje, že **opomenutá re-evaluace stojí stejně jako špatná první klasifikace** [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
+Klasifikace subdomén není jednorázové cvičení. Trh i technologie se za pár let posunou natolik, že to, co bylo Core před třemi lety, může být dnes Supporting. Khononov tomu věnuje samostatnou sekci v *Learning DDD*: popisuje, jak k posunu typu subdomény dochází, jak ho poznat a jak na něj reagovat [[3]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/). Formulace, že **opomenutá re-evaluace stojí stejně jako špatná první klasifikace**, je už závěr této knihy.
 
 Posuny mají svá jména. Nick Tune je sepsal jako *Core Domain Patterns* a jeho slovník poslouží lépe než tři statické kategorie [[6]](https://nicktune.substack.com/p/core-domain-patterns-941f89446af5). Bývalou inovaci, která dnes neodlišuje, ale pořád ji potřebujete, označuje jako *Table Stakes / Former Core*. Jádro, ze kterého se stala schopnost dostupná komukoliv, nazývá *Commoditised Core*. Opačný pohyb dostal jméno *Black Swan Core*: stane se něco nečekaného a zdánlivá komodita se přes noc promění v jádro. A *Hidden Core* je ta, kterou tým přehlédl právě proto, že vypadá nenápadně: vysoké odlišení při nízké složitosti.
 
