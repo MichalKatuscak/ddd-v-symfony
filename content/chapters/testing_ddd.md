@@ -1100,6 +1100,13 @@ sahá po konkrétní implementaci, si ji musí v test prostředí zveřejnit:
 
 :::code{language="yaml" filename="config/services_test.yaml"}
 services:
+    # _defaults se mezi soubory nedědí. Bez něj tahle definice nahradí tu
+    # ze services.yaml celou, služba se postaví bez argumentů a testy
+    # spadnou na ArgumentCountError místo na ServiceNotFoundException.
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
     # Jen pro testy. V produkci zůstává služba privátní a chodí se na ni
     # přes injektované rozhraní UserRepository.
     App\UserManagement\Infrastructure\Repository\DoctrineUserRepository:
@@ -1280,22 +1287,34 @@ Funkční test pak ověří, že endpoint zprávu skutečně odeslal, aniž by �
 ### Příklad: Assertions nad odeslanými zprávami
 
 :::code{language="php" filename="tests/UserManagement/Functional/RegisterUserDispatchTest.php"}
-public function testRegistrationDispatchesWelcomeEmail(): void
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\UserManagement\Functional;
+
+use App\UserManagement\Application\Message\SendWelcomeEmail;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+final class RegisterUserDispatchTest extends WebTestCase
 {
-    $client = static::createClient();
+    public function testRegistrationDispatchesWelcomeEmail(): void
+    {
+        $client = static::createClient();
 
-    $client->request(
-        method: 'POST',
-        uri: '/api/users/register',
-        server: ['CONTENT_TYPE' => 'application/json'],
-        content: json_encode(['name' => 'Jan Novák', 'email' => 'jan@example.com', 'password' => 'SilneHeslo123!'])
-    );
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode(['name' => 'Jan Novák', 'email' => 'jan@example.com', 'password' => 'SilneHeslo123!'])
+        );
 
-    $transport = self::getContainer()->get('messenger.transport.async');
-    $sent      = $transport->getSent();
+        $transport = self::getContainer()->get('messenger.transport.async');
+        $sent      = $transport->getSent();
 
-    $this->assertCount(1, $sent);
-    $this->assertInstanceOf(SendWelcomeEmail::class, $sent[0]->getMessage());
+        $this->assertCount(1, $sent);
+        $this->assertInstanceOf(SendWelcomeEmail::class, $sent[0]->getMessage());
+    }
 }
 :::
 :::
@@ -1331,6 +1350,14 @@ a assertions píše přes trait.
 ### Příklad: Test celého asynchronního toku se zenstruck/messenger-test
 
 :::code{language="php" filename="tests/UserManagement/Functional/RegisterUserFlowTest.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\UserManagement\Functional;
+
+use App\UserManagement\Application\Message\SendWelcomeEmail;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 final class RegisterUserFlowTest extends WebTestCase
@@ -1340,7 +1367,17 @@ final class RegisterUserFlowTest extends WebTestCase
     public function testRegistrationQueuesAndProcessesWelcomeEmail(): void
     {
         $client = static::createClient();
-        $client->request(/* ... registrace jako výše ... */);
+
+        $client->request(
+            method: 'POST',
+            uri: '/api/users/register',
+            server: ['CONTENT_TYPE' => 'application/json'],
+            content: json_encode([
+                'name'     => 'Jan Novák',
+                'email'    => 'jan@example.com',
+                'password' => 'SilneHeslo123!',
+            ], JSON_THROW_ON_ERROR),
+        );
 
         $this->transport('async')->queue()->assertCount(1);
         $this->transport('async')->queue()->assertContains(SendWelcomeEmail::class);
@@ -1364,17 +1401,32 @@ zprávou a spočítat efekty.
 ### Příklad: Test idempotence handleru
 
 :::code{language="php" filename="tests/UserManagement/Application/SendWelcomeEmailHandlerTest.php"}
-public function testHandlesDuplicateDeliveryOnce(): void
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\UserManagement\Application;
+
+use App\Tests\Double\InMemoryInboxRepository;
+use App\Tests\Double\SpyMailer;
+use App\UserManagement\Application\Message\SendWelcomeEmail;
+use App\UserManagement\Application\MessageHandler\SendWelcomeEmailHandler;
+use PHPUnit\Framework\TestCase;
+
+final class SendWelcomeEmailHandlerTest extends TestCase
 {
-    $mailer  = new SpyMailer();
-    $handler = new SendWelcomeEmailHandler($mailer, new InMemoryInboxRepository());
+    public function testHandlesDuplicateDeliveryOnce(): void
+    {
+        $mailer  = new SpyMailer();
+        $handler = new SendWelcomeEmailHandler($mailer, new InMemoryInboxRepository());
 
-    $message = new SendWelcomeEmail(eventId: '01J0E2Q4Z3V9K5T7N8M2R6W1X0', email: 'jan@example.com');
+        $message = new SendWelcomeEmail(eventId: '01J0E2Q4Z3V9K5T7N8M2R6W1X0', email: 'jan@example.com');
 
-    ($handler)($message);
-    ($handler)($message); // opakované doručení téže zprávy
+        ($handler)($message);
+        ($handler)($message); // opakované doručení téže zprávy
 
-    $this->assertSame(1, $mailer->sentCount());
+        $this->assertSame(1, $mailer->sentCount());
+    }
 }
 :::
 :::
@@ -1389,7 +1441,11 @@ do transportu a označí jako zpracovanou. Obě varianty relay procesu rozebír�
 :::callout{type="pattern"}
 ### Příklad: Integrační testy outboxu (KernelTestCase)
 
-:::code{language="php" filename="tests/Ordering/Infrastructure/OutboxFlowTest.php"}
+Test níže staví na Outboxu z kapitoly [Outbox Pattern](/outbox-pattern) – potřebuje
+`PlaceOrderHandler`, `OutboxRepository` a příkaz relaye odtud. Ukázka je proto výřez
+dvou metod, ne celý soubor; `setUp()` si služby vytáhne z kontejneru.
+
+:::code{language="php" filename="tests/Ordering/Infrastructure/OutboxFlowTest.php (dvě testovací metody)"}
 public function testFlushWritesEventToOutbox(): void
 {
     ($this->placeOrderHandler)(new PlaceOrderCommand(/* ... */));
