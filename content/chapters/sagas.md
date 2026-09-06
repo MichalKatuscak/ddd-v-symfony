@@ -532,6 +532,7 @@ use App\Ordering\Application\Command\MarkOrderPaid;
 use App\Ordering\Application\Command\ShipOrder;
 use App\Ordering\Application\Command\CancelOrderCommand;
 use App\Ordering\Domain\ValueObject\CustomerId;
+use App\SharedKernel\Domain\SystemActor;
 use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -545,10 +546,6 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler(bus: 'event.bus')]
 final class OrderProcessManager
 {
-    // Systémová identita procesu – viz „Autorizace v asynchronním kontextu“
-    // v kapitole o autorizaci. Fail-open podmínka „když aktér chybí, povol vše“
-    // je přesně to, čemu se tím vyhýbáme.
-    private const SYSTEM_ACTOR = '01920000-0000-7000-8000-000000000001';
 
     public function __construct(
         private readonly MessageBusInterface $commandBus,
@@ -650,7 +647,7 @@ final class OrderProcessManager
             reason: 'Platba selhala: ' . $event->failureReason,
             // Sága není člověk. Podle pravidla z kapitoly o autorizaci
             // dostává explicitní systémovou identitu, ne chybějícího aktéra.
-            actorId: CustomerId::fromString(self::SYSTEM_ACTOR),
+            actorId: CustomerId::fromString(SystemActor::ID),
         ));
     }
 
@@ -1656,15 +1653,12 @@ use App\Payment\Application\Command\RefundCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use App\Ordering\Domain\ValueObject\CustomerId;
+use App\SharedKernel\Domain\SystemActor;
 use App\Ordering\Domain\ValueObject\OrderId;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class CheckSagaTimeoutHandler
 {
-    // Táž systémová identita jako v OrderProcessManager – timeout ruší
-    // objednávku jménem procesu, ne jménem uživatele.
-    private const SYSTEM_ACTOR = '01920000-0000-7000-8000-000000000001';
-
     public function __construct(
         private OrderSagaRepository $sagaRepository,
         private MessageBusInterface $commandBus,
@@ -1696,7 +1690,7 @@ final readonly class CheckSagaTimeoutHandler
         $this->commandBus->dispatch(new CancelOrderCommand(
             orderId: OrderId::fromString($state->correlationId()),
             reason: 'Payment timeout',
-            actorId: CustomerId::fromString(self::SYSTEM_ACTOR),
+            actorId: CustomerId::fromString(SystemActor::ID),
         ));
     }
 
@@ -1906,7 +1900,7 @@ private function onRefundSucceeded(RefundSucceeded $event): void
     $this->commandBus->dispatch(new CancelOrderCommand(
         orderId: OrderId::fromString($event->orderId),
         reason: 'Zboží není skladem, platba vrácena',
-        actorId: CustomerId::fromString(self::SYSTEM_ACTOR),
+        actorId: CustomerId::fromString(SystemActor::ID),
     ));
 }
 

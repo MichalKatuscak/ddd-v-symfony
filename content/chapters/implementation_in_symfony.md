@@ -1066,6 +1066,8 @@ enum OrderStatus: string
             self::Draft => [self::Confirmed, self::Cancelled],
             self::Confirmed => [self::Paid, self::Cancelled],
             self::Paid => [self::Shipped, self::Cancelled],
+            // Odeslanou zásilku storno nevrátí; od tohohle bodu
+            // se rovná kompenzací v ságe, ne přechodem agregátu.
             self::Shipped => [self::Delivered],
             self::Delivered => [],
             self::Cancelled => [],
@@ -1168,6 +1170,18 @@ final readonly class OrderStatusChanged
 :::
 :::
 
+Ukázka stojí za jednu poznámku, aby se nedala opsat špatně. `transitionTo()` je
+**alternativa** k pojmenovaným přechodům, ne jejich doplněk. Kanonický agregát
+z [Návrhu agregátu](/navrh-agregatu#references-by-id) používá `markPaid()`, `ship()`
+a `cancel()`, protože každá operace nese vlastní invariant a vlastní událost –
+`OrderPaid` říká víc než `OrderStatusChanged(Confirmed, Paid)`. Kdo si nechá obojí,
+dostane dvě cesty do téhož stavu, které se liší v tom, co zaznamenají: `markPaid()`
+nevydá nic, `transitionTo()` vydá `OrderStatusChanged`. Projekce pak podle toho,
+kudy se šlo, jednou vidí změnu a jednou ne.
+
+Obecný přechod se vyplatí tam, kde je stavů hodně, přechody jsou jednotvárné
+a odlišné události by nic nepřinesly – workflow tiketu, stavy dokumentu ve schvalování.
+Objednávka mezi takové případy nepatří.
 :::callout{type="note"}
 ### Kdy použít enum a kdy plnohodnotný hodnotový objekt?
 

@@ -424,7 +424,7 @@ use App\Ordering\Infrastructure\Security\OrderVoter;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class CancelOrderHandler
 {
     public function __construct(
@@ -521,9 +521,10 @@ namespace App\Ordering\Application\Handler;
 use App\Ordering\Application\Command\CancelOrderCommand;
 use App\Ordering\Application\Exception\AccessDeniedDomainException;
 use App\Ordering\Domain\OrderRepository;
+use App\SharedKernel\Domain\SystemActor;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class CancelOrderHandler
 {
     public function __construct(private OrderRepository $orders) {}
@@ -532,8 +533,12 @@ final readonly class CancelOrderHandler
     {
         $order = $this->orders->get($command->orderId);
 
-        // Autorizace proti identitě v commandu – token ve workeru neexistuje
-        if (!$order->isOwnedBy($command->actorId)) {
+        // Autorizace proti identitě v commandu – token ve workeru neexistuje.
+        // Systémová identita vlastníkem není a nikdy nebude, proto stojí ve
+        // vlastní větvi. Bez ní handler odmítne vlastní kompenzaci ságy.
+        $isSystem = $command->actorId->value === SystemActor::ID;
+
+        if (!$isSystem && !$order->isOwnedBy($command->actorId)) {
             throw new AccessDeniedDomainException(
                 sprintf('Cancel not allowed for order %s', $command->orderId->value)
             );
@@ -565,7 +570,7 @@ use App\Ordering\Infrastructure\Security\OrderVoter;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Security\Core\Authorization\UserAuthorizationCheckerInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class RefundOrderHandler
 {
     public function __construct(
@@ -598,6 +603,24 @@ Vzor má jeden trade-off. Mezi zařazením do fronty a zpracováním uplyne čas
 
 Systémové procesy (cron, saga, batch) lidského aktéra nemají. Pro ně se zavádí explicitní systémová identita s vlastním `actorId` a vyhrazenými právy – nikoli obcházení kontroly podmínkou „když aktér chybí, povol vše“. Taková podmínka je přesně ten fail-open default, před kterým varuje [sekce o multi-tenancy](#multi-tenancy).
 
+Identita bydlí na jednom místě. Kdyby ji sága a handler držely každý zvlášť, rozejdou se při první změně a chyba se projeví až v produkci:
+
+:::code{language="php" filename="src/SharedKernel/Domain/SystemActor.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Domain;
+
+/** Aktér pro procesy bez člověka: ságy, cron, batch. */
+final class SystemActor
+{
+    public const ID = '01920000-0000-7000-8000-000000000001';
+}
+:::
+
+Právo se té identitě musí explicitně udělit, jinak vlastní kompenzace neprojde. Sága pošle storno, handler porovná `actorId` s vlastníkem, neshodne se a příkaz po vyčerpání pokusů skončí v DLQ. Objednávka pak zůstane zaplacená a nezrušená, aniž by cokoli spadlo – ságu to nezastaví, protože o odmítnutí příkazu neví. `CancelOrderHandler` výše proto testuje systémovou identitu ve vlastní větvi před kontrolou vlastnictví.
+
 ## 11.06 Aggregate-level – doména sama rozhoduje {#aggregate-level}
 
 Některá pravidla do Voteru nepatří. Vyžadují znalost *doménového stavu*, který Voter nemá natáhnout zvenku – typicky časové okno, předchozí status objednávky nebo invarianty napříč entitami uvnitř agregátu. Tato pravidla patří do **aggregate root** a vynucují se vyhozením *doménové výjimky*.
@@ -610,46 +633,52 @@ Praktická heuristika:
 
 Prostřední bod je ten, na kterém se týmy nejčastěji rozejdou. „Zrušit smí jen vlastník“ zní jako typické use-case pravidlo, ve skutečnosti je to invariant vztahu mezi `Order` a `CustomerId`. Agregát na něj proto odpovídá metodou `isOwnedBy()` a Voter i asynchronní handler ji volají místo vlastního porovnání. Definice zůstane jedna, vynucení může být na obou místech.
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php" highlights="23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,40"}
-// src/Ordering/Domain/Order.php
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
+// Výřez kanonického agregátu z kapitoly Návrh agregátu. Doplňuje jen to,
+// co přidává autorizace; konstruktor, továrny ani mapování se nemění.
 declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
-use App\Ordering\Domain\Exception\InvalidOrderStateException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\SharedKernel\Domain\AggregateRoot;
 
-final class Order extends AggregateRoot
+class Order extends AggregateRoot
 {
     private const CANCELLATION_WINDOW_SECONDS = 86_400; // 24 h
 
-    public function __construct(
-        private readonly OrderId $id,
-        private readonly CustomerId $customerId,
-        private OrderStatus $status,
-        private readonly \DateTimeImmutable $placedAt,
-    ) {}
-
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {
-        if ($this->status !== OrderStatus::Confirmed) {
-            throw new InvalidOrderStateException(
-                sprintf(
-                    'Cancel allowed only for PLACED orders, got %s',
-                    $this->status->value,
-                )
+        // Odeslanou ani doručenou zásilku storno nevrátí – tam nastupuje
+        // kompenzace v ságe.
+        if (in_array($this->status, [OrderStatus::Shipped, OrderStatus::Delivered], true)) {
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Cancelled->value,
             );
         }
 
-        $age = $when->getTimestamp() - $this->placedAt->getTimestamp();
-        if ($age > self::CANCELLATION_WINDOW_SECONDS) {
-            throw new CancellationWindowExpiredException(
-                $this->id,
-                $this->placedAt,
-                $when,
-            );
+        // Opakované storno není chyba volajícího, jen už není co dělat.
+        if ($this->status === OrderStatus::Cancelled) {
+            return;
+        }
+
+        // Lhůta běží od potvrzení. Draft ji ještě nemá a rozpracovaný
+        // košík taky nikdo neruší na čas.
+        if ($this->placedAt !== null) {
+            $age = $when->getTimestamp() - $this->placedAt->getTimestamp();
+
+            if ($age > self::CANCELLATION_WINDOW_SECONDS) {
+                throw new CancellationWindowExpiredException(
+                    $this->id,
+                    $this->placedAt,
+                    $when,
+                );
+            }
         }
 
         $this->status = OrderStatus::Cancelled;
@@ -663,11 +692,17 @@ final class Order extends AggregateRoot
 
     public function isCancellable(\DateTimeImmutable $now): bool
     {
-        if ($this->status !== OrderStatus::Confirmed) {
+        if (in_array($this->status, [
+            OrderStatus::Shipped,
+            OrderStatus::Delivered,
+            OrderStatus::Cancelled,
+        ], true)) {
             return false;
         }
-        return $now->getTimestamp() - $this->placedAt->getTimestamp()
-            <= self::CANCELLATION_WINDOW_SECONDS;
+
+        return $this->placedAt === null
+            || $now->getTimestamp() - $this->placedAt->getTimestamp()
+               <= self::CANCELLATION_WINDOW_SECONDS;
     }
 
     // Vztahový invariant: vlastnictví zná agregát, ne Voter
@@ -675,24 +710,16 @@ final class Order extends AggregateRoot
     {
         return $this->customerId->equals($customerId);
     }
-
-    public function id(): OrderId
-    {
-        return $this->id;
-    }
-
-    public function customerId(): CustomerId
-    {
-        return $this->customerId;
-    }
 }
 :::
 
-Aggregate nemá žádnou závislost na Symfony. Používá pouze PHP standardní typy a vlastní doménové třídy – žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze proto testovat unit testem bez Symfony Kernel. Selhání hlásí doménovými výjimkami: `InvalidOrderStateException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status – typicky 409 Conflict, ne 403 Forbidden, protože *není to autorizační selhání, je to doménový stav*.
+Aggregate nemá žádnou závislost na Symfony. Používá pouze PHP standardní typy a vlastní doménové třídy – žádný `TokenInterface`, žádný `AuthorizationChecker`, žádný `UserInterface`. Třídu lze proto testovat unit testem bez Symfony Kernel. Selhání hlásí doménovými výjimkami: `InvalidOrderStateTransitionException` a `CancellationWindowExpiredException` jsou doménové třídy v `App\Ordering\Domain\Exception`. Nesou doménový kontext (kdy byl order placed, kdy se zkouší cancel) a aplikační vrstva je překládá na HTTP status – typicky 409 Conflict, ne 403 Forbidden, protože *není to autorizační selhání, je to doménový stav*.
 
 Pomocná metoda `isCancellable()` je dotaz bez vedlejších efektů. Používá ji UI vrstva pro skrytí tlačítka: Twig šablona ji volá s proměnnou `now` předanou z controlleru (kombinováno s `is_granted`). Tatáž logika je sdílená s `cancel()` přes konstantu `CANCELLATION_WINDOW_SECONDS` – žádná duplicita. Zbývají domain events: po úspěšné operaci agregát zaznamená `OrderCancelled` voláním `record()`, aplikační handler eventy po `repository->save()` vyzvedne přes `releaseEvents()` a publikuje (typicky přes [Outbox](/outbox-pattern)). Aggregate sám nikdy nevolá `EventDispatcher`.
 
 Zde tedy **není** otázka „smí Petr“ – tu vyřešil Voter v [sekci 11.04](#use-case-voter). Zde je otázka *„dá se to vůbec teď udělat?“*. A odpověď „ne“ se sem dostane i v případě, že Voter řekl „ano“ (Petr je vlastník, ale order je už zaplacen a odeslán). Obě bariéry jsou nezávislé a nutné.
+
+Storno lhůta je jediné, co tahle kapitola k agregátu přidává; konstruktor, továrny i `markPaid()` zůstávají tak, jak je zavádí [Návrh agregátu](/navrh-agregatu#references-by-id). Stavová podmínka je proto stejná jako tam – blokuje odeslanou a doručenou objednávku, ne všechno kromě `Confirmed`. Zúžení na `Confirmed` by vypadalo přísněji a přitom by rozbilo kompenzaci: sága ruší objednávku **zaplacenou**, takže by jí handler storno odmítl a objednávka by zůstala viset.
 
 ### End-to-end trace: cancellation request {#aggregate-trace-heading}
 
@@ -703,7 +730,7 @@ Pro úplnost si projděme, co se konkrétně stane, když zákazník Petr klikne
 3. **Controller** validuje vstup (CSRF token, request body), vytvoří `CancelOrderCommand(orderId: 42, reason: 'changed mind', actorId: <Petrovo CustomerId>)` a předá ho na message bus.
 4. **Application Handler** (CancelOrderHandler) načte agregát z repository: `$order = $repo->get($orderId)`.
 5. **Use Case Voter.** Handler volá `$auth->isGranted('order.cancel', $order)`. OrderVoter se zeptá agregátu přes `$order->isOwnedBy($user->customerId())`. Petr je vlastník → ACCESS_GRANTED, pokračuje. *Kdyby nebyl vlastník → AccessDeniedDomainException → HTTP 403.*
-6. **Aggregate.** Handler volá `$order->cancel('changed mind', $now)`. Aggregate ověří `status === PLACED` a `age <= 24h`. Order je placed před 30 min → ok, status se změní na CANCELLED, vznikne OrderCancelled event. *Kdyby byl už shipped → InvalidOrderStateException → HTTP 409.*
+6. **Aggregate.** Handler volá `$order->cancel('changed mind', $now)`. Aggregate ověří `status === PLACED` a `age <= 24h`. Order je placed před 30 min → ok, status se změní na CANCELLED, vznikne OrderCancelled event. *Kdyby byl už shipped → InvalidOrderStateTransitionException → HTTP 409.*
 7. **Persistence + outbox.** Handler zavolá `$repo->save($order)`; v jedné transakci se uloží stav agregátu i OrderCancelled event do outbox tabulky.
 8. **Field-level (response).** Controller vrátí 200 OK. Pokud by Petr nebyl admin a v response figuroval `audit_log`, read model by ho vyfiltroval – na svém vlastním orderu vidí status, ale ne kdo a kdy ho editoval.
 
@@ -712,7 +739,7 @@ Každá z těchto vrstev selže po svém: jiný HTTP status, jiná chybová hlá
 :::callout{type="note"}
 ### 403 vs. 409: která chyba kdy? {#aggregate-403-vs-409-heading}
 
-Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dva různé handlery výjimek: `AccessDeniedDomainException → 403`, `InvalidOrderStateException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
+Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dva různé handlery výjimek: `AccessDeniedDomainException → 403`, `InvalidOrderStateTransitionException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
 
 Třetí volbou je **404 Not Found** místo 403. Odpověď 403 nad cizím identifikátorem totiž potvrdí, že takový záznam existuje, a útočníkovi stačí projít rozsah ID, aby zmapoval cizí data. Symfony na to má `#[IsGranted(..., statusCode: 404)]`. Trade-off je čitelnost chyby: uživatel, který přišel o oprávnění legitimně, uvidí „stránka neexistuje“ a nepozná proč. Rozumné dělení je 404 pro veřejně dostupné endpointy s uhodnutelnými identifikátory, 403 uvnitř administrace, kde jsou všichni aktéři důvěryhodní.
 :::
@@ -1254,7 +1281,7 @@ namespace Tests\Ordering\Domain;
 
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
-use App\Ordering\Domain\Exception\InvalidOrderStateException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\Order;
 use PHPUnit\Framework\TestCase;
 
@@ -1277,7 +1304,7 @@ final class OrderCancelTest extends TestCase
     {
         $order = OrderFactory::shipped();
 
-        $this->expectException(InvalidOrderStateException::class);
+        $this->expectException(InvalidOrderStateTransitionException::class);
         $order->cancel('changed mind', new \DateTimeImmutable());
     }
 
@@ -1516,7 +1543,7 @@ Autorizace v DDD aplikaci na Symfony 8 sedí na čtyřech vrstvách, každá s v
 
 - **Edge** – Symfony firewall + `access_control`. Anonymous vs. authenticated, role-based hrubá separace. Žádná doménová znalost.
 - **Use Case** – Symfony Voter. „Smí Petr cancelnout order #42?“ Aplikační handler volá `AuthorizationCheckerInterface::isGranted()`; doména to nesmí.
-- **Aggregate** – doménový invariant + doménová výjimka. „Order musí být PLACED a ne starší než 24 h.“ Aggregate vyhazuje `InvalidOrderStateException`; aplikační vrstva to mapuje na HTTP 409.
+- **Aggregate** – doménový invariant + doménová výjimka. „Order musí být PLACED a ne starší než 24 h.“ Aggregate vyhazuje `InvalidOrderStateTransitionException`; aplikační vrstva to mapuje na HTTP 409.
 - **Field** – Twig `is_granted` pro view-level (s rizikem data leaku) nebo query filter / read model pro citlivá data (PII, audit log). Seznamy potřebují filtr v dotazu, ne Voter nad každým řádkem.
 
 Kde co řešit:

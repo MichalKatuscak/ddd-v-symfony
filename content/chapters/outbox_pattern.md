@@ -391,6 +391,9 @@ final class Version20260429120000 extends AbstractMigration
                 occurred_at       DATETIME(6)   NOT NULL,
                 attempts          INT           NOT NULL,
                 available_at      DATETIME(6)   NOT NULL,
+                -- Pozor: migrations:diff vygeneruje z entity DATETIME bez (6).
+                -- Na MySQL by se tím z outboxu ztratilo subsekundové řazení,
+                -- takže přesnost patří do mapování: options: ['precision' => 6].
                 sent_at           DATETIME(6)   DEFAULT NULL,
                 last_error        TEXT          DEFAULT NULL,
                 PRIMARY KEY (id)
@@ -1590,10 +1593,25 @@ outbox` jediným SQL příkazem. Velký delete drží zámky na celé tabulce, c
 blokuje produkční INSERT z handlerů. Cron ho spouští každých 5 minut – 10 000 řádků
 za běh stačí na realistické workloady (cca 3 mil. eventů/den).
 
-PostgreSQL: syntaxe `DELETE ... LIMIT` (i `INTERVAL 30 DAY`) je MySQL/MariaDB
-specifikum, Postgres ji nezná. Batch se vymezí poddotazem nad `id`, případně
-`ctid`: `DELETE FROM outbox WHERE id IN (SELECT id FROM outbox WHERE
-status = 'sent' AND sent_at < now() - interval '30 days' LIMIT 10000)`.
+Dotaz ale přenositelný není a to je u údržbového příkazu snadné přehlédnout –
+selže až za třicet dní provozu. `DELETE … LIMIT` i `INTERVAL 30 DAY` jsou
+specifikum MySQL a MariaDB:
+
+:::code{language="sql" filename="varianty pro ostatní databáze"}
+-- PostgreSQL: batch se vymezí poddotazem nad id, případně ctid
+DELETE FROM outbox WHERE id IN (
+    SELECT id FROM outbox
+     WHERE status = 'sent' AND sent_at < now() - interval '30 days'
+     LIMIT 10000
+);
+
+-- SQLite: nezná ani INTERVAL, ani DELETE ... LIMIT
+DELETE FROM outbox WHERE id IN (
+    SELECT id FROM outbox
+     WHERE status = 'sent' AND sent_at < datetime('now', '-30 days')
+     LIMIT 10000
+);
+:::
 
 ### Dead-letter queue pro permanentní selhání {#dlq-heading}
 

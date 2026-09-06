@@ -38,6 +38,7 @@ composer require \
     symfony/serializer symfony/property-access symfony/property-info \
     symfony/validator egulias/email-validator \
     symfony/security-bundle \
+    symfony/twig-bundle symfony/form \
     doctrine/orm doctrine/doctrine-bundle doctrine/doctrine-migrations-bundle
 :::
 
@@ -46,6 +47,8 @@ Seznam nevypadá minimalisticky, každá položka ale odpovídá jedné kapitole
 a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
 `Assert\Email` s `VALIDATION_MODE_STRICT` každý dispatch. A bez
 `migrations-bundle` nespustíte ani jednu migraci z kapitoly o Outboxu.
+`twig-bundle` a `form` potřebují kontrolery, které vracejí HTML – ty z kapitoly o CQRS
+volají `createForm()` a `render()`. Kdo staví jen JSON API, obejde se bez nich.
 
 Instalace tím ale nekončí. Další dva kroky se přeskakují právě proto, že jejich
 vynechání nic neshodí. Recept `doctrine/doctrine-bundle` vygeneruje mapování na `src/Entity`
@@ -74,8 +77,9 @@ DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
 php bin/console doctrine:migrations:migrate
 :::
 
-Testy z kapitol o CQRS a ságách běží proti skutečné databázi, takže potřebují dvě věci
-navíc. Testovací balíček v seznamu výše záměrně není, protože ho nepotřebuje každý:
+Testy z kapitoly o CQRS běží proti skutečné databázi, takže potřebují dvě věci navíc.
+Ságový test z kapitoly 14 vystačí s in-memory repozitářem, ale PHPUnit chce taky – a ten
+v seznamu výše záměrně není, protože ho nepotřebuje každý:
 
 :::code{language="bash" filename="terminál"}
 composer require --dev symfony/test-pack
@@ -88,6 +92,13 @@ do `.env.test.local`:
 
 :::code{language="ini" filename=".env.test.local"}
 DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
+:::
+
+Testovací databáze je jiný soubor, takže migrace potřebuje taky – jinak první kernel
+test spadne na `no such table: users`:
+
+:::code{language="bash" filename="terminál"}
+php bin/console doctrine:migrations:migrate --no-interaction --env=test
 :::
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
@@ -192,7 +203,7 @@ optimistický zámek přes `#[ORM\Version]`) ukazuje [Návrh agregátu](/navrh-a
 Tenký aplikační handler: načte agregát, deleguje doménovou logiku, uloží.
 
 :::code{language="php" filename="src/Cart/AddItem/Command/AddItemToCartHandler.php (skeleton)"}
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class AddItemToCartHandler
 {
     public function __construct(
@@ -241,7 +252,7 @@ Na druhé straně hranice stojí handler kontextu Order. Ten si cizí slovník p
 `UserId` z košíku se stává `CustomerId` objednávky.
 
 :::code{language="php" filename="src/Order/PlaceOrder/Listener/PlaceOrderOnCartCheckedOut.php"}
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'event.bus')]
 final readonly class PlaceOrderOnCartCheckedOut
 {
     public function __construct(private OrderRepository $orders) {}
@@ -349,7 +360,7 @@ a důsledky pro souběžné zápisy rozebírá [Návrh agregátu](/navrh-agregat
 ### Command Handler: CreatePost {#create-post-handler}
 
 :::code{language="php" filename="src/Blog/CreatePost/Command/CreatePostHandler.php (skeleton)"}
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class CreatePostHandler
 {
     public function __construct(private PostRepository $posts) {}
@@ -451,7 +462,7 @@ doporučuje `__serialize()` a `__unserialize()` na entitě, které citlivé pole
 ### Command Handler: RegisterUser {#register-user-handler}
 
 :::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php (skeleton)"}
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class RegisterUserHandler
 {
     public function __construct(

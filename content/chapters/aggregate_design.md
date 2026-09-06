@@ -443,6 +443,12 @@ class Order extends AggregateRoot
     private Collection $items;
 
     private OrderStatus $status;
+
+    // Čas potvrzení drží agregát, protože na něm stojí doménové pravidlo:
+    // storno lhůta v kapitole o autorizaci. Údaj čitelný jen z události
+    // by k tomu agregát nutil sahat do vlastní historie.
+    private ?\DateTimeImmutable $placedAt = null;
+
     private function __construct(
         public readonly OrderId $id,
         public readonly CustomerId $customerId, // POZOR: ID, ne objekt Customer
@@ -510,6 +516,12 @@ class Order extends AggregateRoot
         }
 
         $this->status = OrderStatus::Confirmed;
+        $this->placedAt = new \DateTimeImmutable();
+    }
+
+    public function placedAt(): ?\DateTimeImmutable
+    {
+        return $this->placedAt;
     }
 
     // Bez tohohle přechodu je ship() nedosažitelná: do stavu Paid
@@ -807,15 +819,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'orders')]
 class Order extends AggregateRoot
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'order_id')]
-    public readonly OrderId $id;
-
-    #[ORM\Column(type: 'customer_id')]
-    public readonly CustomerId $customerId; // ID, ne ManyToOne na Customer entitu
-
     #[ORM\Column(enumType: OrderStatus::class)]
     private OrderStatus $status;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $placedAt = null;
 
     // Mapování mění typ kolekce: místo pole list<OrderItem>
     // z čisté doménové varianty vyžaduje Doctrine Collection.
@@ -835,7 +843,20 @@ class Order extends AggregateRoot
     #[ORM\Column(type: 'integer')]
     private int $version = 1;
 
-    private function __construct(/* ... */) { /* ... */ }
+    // Identita a vlastník zůstávají promované jako v 07.07 – atributy
+    // sedí na parametrech konstruktoru. Deklarovat je ještě jednou jako
+    // samostatné vlastnosti nejde: PHP hlásí „Cannot redeclare Order::$id".
+    private function __construct(
+        #[ORM\Id]
+        #[ORM\Column(type: 'order_id')]
+        public readonly OrderId $id,
+
+        #[ORM\Column(type: 'customer_id')]
+        public readonly CustomerId $customerId, // ID, ne ManyToOne na Customer
+    ) {
+        $this->status = OrderStatus::Draft;
+        $this->items = new ArrayCollection();
+    }
 
     // ... factory metody, doménové operace ...
 }
