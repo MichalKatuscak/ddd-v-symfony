@@ -16,6 +16,7 @@ category: Vzory
 deck: "Read modely, projekce a výkon v Domain-Driven Design se Symfony a Doctrine ORM – řešení N+1 problému, hranice agregátů, budování projekcí přes CQRS, snapshoty a cache read modelů."
 reading_time: 36
 difficulty: 4
+github_examples: null
 ---
 
 ## 16.01 Výkon v kontextu DDD {#uvodem}

@@ -16,6 +16,7 @@ category: Syntéza
 deck: "Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka bounded contexts, doménových modelů a vertikální slice architektury."
 reading_time: 16
 difficulty: 3
+github_examples: null
 ---
 
 Tato kapitola je **shrnující průřez** předchozími kapitolami. Tři krátké příklady ukazují,

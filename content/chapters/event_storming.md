@@ -16,6 +16,7 @@ category: Základy
 deck: "Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě prověřené workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Průvodce, který v Symfony projektu funguje."
 reading_time: 27
 difficulty: 2
+github_examples: null
 ---
 
 DDD nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí lidé, kteří kód píší, a lidé, kteří doménu reálně provozují. Tato kapitola popisuje dvě konkrétní techniky, jak takovou místnost zařídit. Cílem je strávit v ní dvě až čtyři hodiny smysluplně a odejít s něčím, co se dá zítra otevřít v IDE. Půjde o **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2021). Obě techniky řeší stejný problém – extrakci tacitních doménových znalostí – ale různými cestami. Po této kapitole budete vědět, kterou kdy zvolit a jak ji prakticky uřídit.

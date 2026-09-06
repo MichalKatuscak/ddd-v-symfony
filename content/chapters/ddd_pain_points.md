@@ -16,6 +16,7 @@ category: Praxe
 deck: "Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další."
 reading_time: 35
 difficulty: 4
+github_examples: null
 ---
 
 Předchozí kapitoly pokryly teorii i pokročilé vzory: od

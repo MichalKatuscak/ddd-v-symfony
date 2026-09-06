@@ -16,6 +16,7 @@ category: Úvod
 deck: "Co je tato kniha, pro koho je, jak je strukturovaná a jak ji číst podle role čtenáře."
 reading_time: 8
 difficulty: 1
+github_examples: null
 ---
 
 Tato kniha vychází z opakované situace: vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran, na kterých nepadne jediný řádek PHP, a zavře ji se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi originálním textem z roku 2003 a praktickým PHP projektem v roce 2026 leží vrstva implementačních detailů, kterou Evans pokrýt nemohl. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) rozepsal na příkladech v Javě a C#.

@@ -16,6 +16,7 @@ category: Základy
 deck: 'Když Conway v roce 1968 publikoval tezi, že „systém kopíruje komunikační strukturu organizace, která ho stvořila“, popisoval gravitační zákon softwarového designu. DDD Bounded Contexts dávají smysl jen tehdy, když mapují na týmy – jinak vznikají falešné hranice. Kapitola o tom, jak vědomě navrhnout týmy kolem domény.'
 reading_time: 26
 difficulty: 2
+github_examples: null
 ---
 
 Většina knih o DDD končí Bounded Contextem a Context Mapem – jako kdyby architektura žila ve vakuu.

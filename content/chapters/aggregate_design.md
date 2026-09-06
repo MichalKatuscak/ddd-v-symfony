@@ -16,6 +16,7 @@ category: Taktika
 deck: "Hranice agregátu rozhoduje o transakční konzistenci, velikosti zámků a o tom, zda projekt obstojí v provozu. Tato kapitola shrnuje pravidla z Vernonovy trilogie <em>Effective Aggregate Design</em>, ukazuje konkrétní mapování v Doctrine ORM a věnuje se obtížným tématům: large-collection problem, hot aggregates, snapshoty v Event Sourcingu, partitioning a strategie referencování napříč agregáty."
 reading_time: 35
 difficulty: 4
+github_examples: Chapter02_AggregateDesign
 ---
 
 Agregát je nejnáročnější taktický vzor v DDD, protože jeho hranice je kompromis mezi

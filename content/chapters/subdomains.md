@@ -16,6 +16,7 @@ category: Základy
 deck: "Než vytvoříte první Aggregate, rozhodněte, kde to vůbec dává smysl. Subdomény jsou strategický filtr DDD: tři kategorie, které určují, kolik úsilí, jakou seniority a jaký technologický stack si konkrétní část aplikace zaslouží."
 reading_time: 21
 difficulty: 2
+github_examples: null
 ---
 
 ## 02.01 Proč subdomény předcházejí všemu ostatnímu {#proc-subdomeny}

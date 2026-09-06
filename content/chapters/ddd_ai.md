@@ -17,6 +17,7 @@ ebook: false
 deck: "Přehled názorů předních autorit softwarového inženýrství na vztah Domain-Driven Designu a umělé inteligence – Eric Evans, Martin Fowler, Kent Beck, DHH a další. Jejich pozice, argumenty a data."
 reading_time: 20
 difficulty: 1
+github_examples: null
 ---
 
 Jsou některé architektonické přístupy s nástupem LLM vhodnější než jiné? Nabízí Domain-Driven Design

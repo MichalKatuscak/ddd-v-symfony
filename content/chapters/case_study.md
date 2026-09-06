@@ -16,6 +16,7 @@ category: Syntéza
 deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu – celý proces od analýzy domény, identifikace bounded contexts a strategického i taktického designu až po implementaci s využitím DDD principů a CQRS.'
 reading_time: 55
 difficulty: 4
+github_examples: null
 ---
 
 ## 24.01 Úvod {#introduction}

@@ -16,6 +16,7 @@ category: Praxe
 deck: "7 konkrétních situací, kdy DDD nepoužívat – s alternativami, ukázkami kódu a rozhodovacím stromem. Upřímný průvodce pro PHP vývojáře, kteří nechtějí zavádět zbytečnou komplexitu."
 reading_time: 14
 difficulty: 2
+github_examples: null
 ---
 
 Tato kapitola je **rozhodovací rámec**: kdy DDD nasadit a kdy ne. Pro **detailní katalog
