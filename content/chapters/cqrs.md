@@ -390,24 +390,26 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Příkaz pro registraci nového uživatele.
- * Immutabilní DTO - neslouží k doménové logice, pouze přenáší data.
+ * Immutabilní DTO – neslouží k doménové logice, pouze přenáší data.
  */
-final class RegisterUser
+final readonly class RegisterUser
 {
     public function __construct(
         #[Assert\NotBlank]
-        #[Assert\Length(min: 2, max: 255)]
-        public readonly string $name,
+        #[Assert\Length(min: 2, max: 100)]
+        public string $name,
 
         #[Assert\NotBlank]
-        #[Assert\Email]
-        public readonly string $email,
+        #[Assert\Email(mode: Assert\Email::VALIDATION_MODE_STRICT)]
+        public string $email,
 
+        // Hranice musí sedět s HashedPassword::fromPlainText(). Volnější
+        // pravidlo tady by pustilo heslo, které pak agregát odmítne –
+        // a uživatel by místo hlášky u pole dostal chybu z domény.
         #[Assert\NotBlank]
-        #[Assert\Length(min: 8)]
-        public readonly string $password
-    ) {
-    }
+        #[Assert\Length(min: 12)]
+        public string $password,
+    ) {}
 }
 :::
 :::
@@ -775,7 +777,9 @@ use App\UserManagement\Registration\Form\RegistrationFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Messenger\Exception\HandlerFailedException;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -786,9 +790,12 @@ final class RegistrationController extends AbstractController
     ) {
     }
 
+    private const TEMPLATE = '@UserManagement/Registration/View/registration.html.twig';
+
     #[Route('/register', name: 'app_register')]
     public function register(Request $request): Response
     {
+        $template = self::TEMPLATE;
         $form = $this->createForm(RegistrationFormType::class);
         $form->handleRequest($request);
 
@@ -811,17 +818,30 @@ final class RegistrationController extends AbstractController
                 // getWrappedExceptions() umí filtrovat podle typu výjimky
                 $duplicates = $e->getWrappedExceptions(DuplicateEmailException::class);
 
-                if ($duplicates === []) {
+                if ($duplicates !== []) {
+                    $this->addFlash('error', reset($duplicates)->getMessage());
+
+                    return $this->render($template, ['form' => $form->createView()]);
+                }
+
+                // Validaci commandu dělá middleware na sběrnici, ne formulář.
+                // Bez tohohle bloku by krátké heslo skončilo jako 500 a uživatel
+                // by se u pole nedozvěděl nic.
+                $invalid = $e->getWrappedExceptions(ValidationFailedException::class);
+
+                if ($invalid === []) {
                     throw $e; // neznámou chybu nemaskovat
                 }
 
-                $this->addFlash('error', reset($duplicates)->getMessage());
+                foreach (reset($invalid)->getViolations() as $violation) {
+                    $form->get($violation->getPropertyPath())->addError(
+                        new FormError($violation->getMessage()),
+                    );
+                }
             }
         }
 
-        return $this->render('@UserManagement/Registration/View/registration.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return $this->render($template, ['form' => $form->createView()]);
     }
 }
 :::
@@ -903,6 +923,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Identity\Infrastructure\Security\SecurityUser;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 final class ProfileController extends AbstractController
 {
@@ -912,11 +933,13 @@ final class ProfileController extends AbstractController
     }
 
     #[Route('/profile', name: 'app_profile')]
-    public function profile(SecurityUser $user): Response
+    public function profile(#[CurrentUser] SecurityUser $user): Response
     {
         // getUserIdentifier() vrací e-mail, kterým se uživatel přihlašuje –
         // ne identitu agregátu. Read model se ptá po customerId, takže
-        // type-hint míří na konkrétní třídu, ne na UserInterface.
+        // type-hint míří na konkrétní třídu. Atribut #[CurrentUser] je
+        // povinný: SecurityUser je Doctrine entita, takže bez něj se
+        // resolver nespustí a argument se nedá sestavit.
         $query = new GetUserProfile($user->customerId()->value);
 
         $envelope = $this->queryBus->dispatch($query);
@@ -1104,7 +1127,12 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * denormalizovanou tabulku order_dashboard, optimalizovanou pro
  * obrazovku "Přehled objednávek".
  */
-#[AsMessageHandler(bus: 'event.bus')]
+// Priorita není kosmetika. Na synchronní sběrnici běží posluchači v pořadí
+// registrace a Process Manager z kapitoly o ságách odebírá tutéž událost.
+// Bez přednosti by sága proběhla celá dřív, než projekce založí řádek,
+// a její UPDATE by pak netrefil nic. Nic nespadne – dashboard jen zamrzne
+// na „placed“.
+#[AsMessageHandler(bus: 'event.bus', priority: 10)]
 final class OrderDashboardProjector
 {
     public function __construct(
@@ -1197,7 +1225,13 @@ událost novější než to, co v řádku už je. Porovnává se řetězec, tak�
 `Y-m-d H:i:s` se sekundovou přesností podmínku obrátí proti vám. Dvě události téhož
 agregátu spadnou do jedné vteřiny běžně a `<` je pak nepravdivé i pro legitimní přechod –
 objednávka se odešle, ale dashboard mlčky zůstane na `placed`. Proto `.u` ve formátu
-a `DATETIME(6)` ve sloupci. Alternativní přístupy:
+a `DATETIME(6)` ve sloupci.
+
+Jedna výhrada k tomu patří. Událost, která projde outboxem, se serializuje přes
+`DateTimeNormalizer`, a ten ve výchozím nastavení píše RFC 3339 **bez** zlomků sekundy –
+mikrosekundy se cestou ztratí a řádek dostane `.000000`. Ochrana pak rozliší
+nejvýš vteřiny. Kdo ji potřebuje i za outboxem, nastaví normalizeru
+`DateTimeNormalizer::FORMAT_KEY` na `'Y-m-d\TH:i:s.uP'`. Alternativní přístupy:
 
 - **Sledování pozice** – projektor si ukládá pozici posledního zpracovaného
   eventu (event ID nebo sequence number) a ignoruje události se stejnou nebo nižší pozicí.
@@ -1310,8 +1344,16 @@ final class PlaceOrderController extends AbstractController
     #[Route('/orders', name: 'place_order', methods: ['POST'])]
     public function __invoke(Request $request, #[CurrentUser] SecurityUser $user): Response
     {
-        /** @var list<array{productId: string, quantity: int, unitPriceInCents: int}> $items */
-        $items = $request->request->all('items');
+        // Form-encoded POST nese všechno jako řetězec, agregát chce int.
+        // Bez přetypování spadne Money::__construct() na typu.
+        $items = array_map(
+            static fn (array $row): array => [
+                'productId'        => (string) $row['productId'],
+                'quantity'         => (int) $row['quantity'],
+                'unitPriceInCents' => (int) $row['unitPriceInCents'],
+            ],
+            $request->request->all('items'),
+        );
 
         // Prázdná objednávka je chyba vstupu, ne doménový stav – agregát
         // ji stejně nepustí, ale 422 řekne klientovi víc než výjimka.

@@ -1405,7 +1405,9 @@ use App\Reporting\Application\ReadModelStore;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(bus: 'event.bus')]
+// Projekce jde před ságou ze stejného důvodu jako dashboard v kapitole
+// o CQRS – na synchronní sběrnici rozhoduje pořadí.
+#[AsMessageHandler(bus: 'event.bus', priority: 10)]
 final readonly class OrderPlacedReadModelUpdater
 {
     private const string CONSUMER = 'reporting.order_placed';

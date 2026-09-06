@@ -39,6 +39,7 @@ composer require \
     symfony/validator egulias/email-validator \
     symfony/security-bundle \
     symfony/twig-bundle symfony/form \
+    symfony/expression-language \
     doctrine/orm doctrine/doctrine-bundle doctrine/doctrine-migrations-bundle
 :::
 
@@ -49,6 +50,9 @@ a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
 `migrations-bundle` nespustíte ani jednu migraci z kapitoly o Outboxu.
 `twig-bundle` a `form` potřebují kontrolery, které vracejí HTML – ty z kapitoly o CQRS
 volají `createForm()` a `render()`. Kdo staví jen JSON API, obejde se bez nich.
+`expression-language` je naopak povinný, jakmile v projektu leží `PolicyEvaluator`
+z kapitoly o autorizaci: komponentu bere jako výchozí hodnotu parametru, takže bez
+balíčku spadne už `cache:clear`, ne teprve vyhodnocení pravidla.
 
 Instalace tím ale nekončí. Další dva kroky se přeskakují právě proto, že jejich
 vynechání nic neshodí. Recept `doctrine/doctrine-bundle` vygeneruje mapování na `src/Entity`

@@ -92,7 +92,8 @@ src/
 │   │   │   ├── RegisterUser.php
 │   │   │   └── RegisterUserHandler.php
 │   │   ├── Controller/         # Controllers
-│   │   │   └── RegistrationController.php
+│   │   │   ├── RegistrationController.php      # HTML formulář
+│   │   │   └── RegistrationApiController.php   # JSON endpoint
 │   │   ├── Form/               # Forms
 │   │   │   └── RegistrationFormType.php
 │   │   └── View/               # Views
@@ -288,6 +289,13 @@ final class User extends AggregateRoot
     public function email(): Email
     {
         return $this->email;
+    }
+
+    // Hash čte security vrstva při zakládání přihlašovacího záznamu.
+    // Heslo v čitelné podobě agregát nezná a znát nemá.
+    public function hashedPassword(): HashedPassword
+    {
+        return $this->hashedPassword;
     }
 
     public function rename(UserName $newName): void
@@ -1875,7 +1883,10 @@ varianta `#[MapRequestPayload(acceptFormat: 'form')]` nebo Symfony Form.
 :::callout{type="pattern"}
 ### Příklad: kontroler s MapRequestPayload (JSON API) {#controller-example-heading}
 
-:::code{language="php" filename="src/UserManagement/Registration/Controller/RegistrationController.php"}
+Kontroler je JSON protějšek HTML formuláře z [kapitoly o CQRS](/cqrs#buses-example-heading). Oba posílají tentýž command, liší se jen tím, jak čtou vstup a co vracejí – proto mají různá jména a mohou v projektu existovat vedle sebe.
+
+
+:::code{language="php" filename="src/UserManagement/Registration/Controller/RegistrationApiController.php"}
 <?php
 
 declare(strict_types=1);
@@ -1891,7 +1902,7 @@ use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class RegistrationController
+final class RegistrationApiController
 {
     public function __construct(
         private readonly MessageBusInterface $commandBus,
@@ -2117,9 +2128,12 @@ services:
     # ──────────────────────────────────────────────────
     # Kontexty z kapitol o Outboxu a ságách
     # ──────────────────────────────────────────────────
+    App\Identity\: { resource: '../src/Identity/', exclude: ['../src/Identity/Domain/'] }
     App\Outbox\:    { resource: '../src/Outbox/' }
     App\Inbox\:     { resource: '../src/Inbox/' }
     App\Reporting\: { resource: '../src/Reporting/' }
+    # Sběrnicové middleware z 12.15 sedí mimo kontexty.
+    App\Infrastructure\: { resource: '../src/Infrastructure/' }
     App\Payment\:   { resource: '../src/Payment/',   exclude: ['../src/Payment/Domain/Event/'] }
     App\Warehouse\: { resource: '../src/Warehouse/', exclude: ['../src/Warehouse/Domain/Event/'] }
     App\Shipping\:  { resource: '../src/Shipping/',  exclude: ['../src/Shipping/Domain/ValueObject/'] }

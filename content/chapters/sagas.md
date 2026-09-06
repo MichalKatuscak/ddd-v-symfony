@@ -917,11 +917,15 @@ namespace App\Payment\Infrastructure;
 use App\Payment\Domain\PaymentGateway;
 use Symfony\Component\Uid\Uuid;
 
-final class InMemoryPaymentGateway implements PaymentGateway
+final readonly class InMemoryPaymentGateway implements PaymentGateway
 {
-    // Přepínač pro ruční zkoušku kompenzační větve. V ostrém adaptéru
-    // ho nahradí odpověď brány.
-    public bool $alwaysFails = false;
+    // Přepínač pro ruční zkoušku kompenzační větve. Hodnotu dodá kontejner:
+    //   App\Payment\Infrastructure\InMemoryPaymentGateway:
+    //       arguments: { $alwaysFails: '%env(bool:PAYMENT_FAILS)%' }
+    // V ostrém adaptéru ho nahradí odpověď brány.
+    public function __construct(
+        private bool $alwaysFails = false,
+    ) {}
 
     public function charge(string $customerId, int $amountCents): string
     {
@@ -1779,6 +1783,10 @@ private function scheduleTimeout(string $orderId, OrderSagaStatus $status): void
         return;
     }
 
+    // DelayStamp funguje jen na asynchronním transportu. Chybí-li
+    // CheckSagaTimeout v routingu messenger.yaml, zpracuje se hlídač
+    // okamžitě a odklad se tiše zahodí – kontrola pak proběhne dřív,
+    // než na co čeká.
     $this->commandBus->dispatch(
         new CheckSagaTimeout(
             orderId: $orderId,

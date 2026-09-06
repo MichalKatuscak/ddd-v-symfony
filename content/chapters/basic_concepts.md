@@ -176,6 +176,13 @@ final readonly class UserId
         return new self($value);
     }
 
+    // Doctrine převádí identitu na řetězec při každém persist().
+    // Bez __toString() spadne už uložení – viz kapitola o implementaci.
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+
     public function equals(self $other): bool
     {
         return $this->value === $other->value;

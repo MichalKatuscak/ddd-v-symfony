@@ -259,6 +259,97 @@ class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
 }
 :::
 
+`TenantId` je obyčejný hodnotový objekt stejného tvaru jako `OrderId`; bez něj `SecurityUser`
+neprojde ani autoloadem a firewall zůstane bez uživatelů:
+
+:::code{language="php" filename="src/Identity/Domain/TenantId.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Identity\Domain;
+
+final readonly class TenantId
+{
+    public function __construct(
+        public string $value,
+    ) {
+        if ($value === '') {
+            throw new \InvalidArgumentException('TenantId nesmí být prázdné.');
+        }
+    }
+
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}
+:::
+
+:::callout{type="warn"}
+### Registrace musí založit obojí {#registration-two-writes-heading}
+
+`SecurityUser` je samostatná tabulka, ne pohled na agregát `User`. Registrace proto zapisuje
+dvakrát: doménový agregát do `users` a přihlašovací záznam do `app_user`. Kdo krok vynechá,
+dostane uživatele, který se **nemůže přihlásit** – a nic přitom nespadne. Vazbu drží
+`customer_id`, na kterou se ptá read model profilu.
+
+:::code{language="php" filename="src/Identity/Application/CreateSecurityUserOnUserRegistered.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Identity\Application;
+
+use App\Identity\Infrastructure\Security\SecurityUser;
+use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\Repository\UserRepository;
+use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler(bus: 'event.bus')]
+final readonly class CreateSecurityUserOnUserRegistered
+{
+    public function __construct(
+        private UserRepository $users,
+        private EntityManagerInterface $em,
+    ) {}
+
+    public function __invoke(UserRegistered $event): void
+    {
+        $user = $this->users->findById(new UserId($event->userId));
+
+        if ($user === null) {
+            return;
+        }
+
+        // Hash hesla vzniká v agregátu, security vrstva ho jen přebírá.
+        // Druhé hashování by přihlášení rozbilo.
+        $this->em->persist(new SecurityUser(
+            email: $user->email()->value,
+            passwordHash: $user->hashedPassword()->value,
+            roles: ['ROLE_USER'],
+            customerId: $user->id->value,
+            tenantId: 'default',
+        ));
+
+        $this->em->flush();
+    }
+}
+:::
+
+Posluchač si hash dotáhne z agregátu, protože do doménové události nepatří – ta se může
+serializovat a otisk hesla v payloadu je zbytečné riziko. Cenou je závislost `Identity`
+na repozitáři `UserManagementu`; je to jednosměrná vazba na rozhraní, ne na model,
+a `Identity` je tu podpůrný kontext.
+:::
+
 Principy edge vrstvy:
 
 - **Žádná doménová znalost.** Edge nezná pojem „order“, „customer“, „cancellation window“. Pracuje jen s URL pattern + roles + autentizační stav.
@@ -896,6 +987,56 @@ Každá z těchto vrstev selže po svém: jiný HTTP status, jiná chybová hlá
 
 Drobnost s velkým UX dopadem. Když Voter řekne „ne“ (Petr není vlastník), aplikace má vrátit **HTTP 403 Forbidden** – autentizovaný uživatel, ale nedostatečné oprávnění. Když aggregate řekne „ne“ (order už není v PLACED), je to **HTTP 409 Conflict** – uživatel má právo, ale stav prostředku to neumožňuje. Aplikační vrstva má dva různé handlery výjimek: `AccessDeniedDomainException → 403`, `InvalidOrderStateTransitionException → 409`. UI tak může zobrazit smysluplnou hlášku („Tento order už nelze stornovat – byl odeslán“) místo generického „Access denied“.
 
+Ten překlad ale nikdo neudělá sám. Bez posluchače vybublá doménová výjimka jako 500,
+a to i v případě, kdy uživatel udělal všechno správně a jen se netrefil do lhůty:
+
+:::code{language="php" filename="src/SharedKernel/Infrastructure/Http/DomainExceptionListener.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\SharedKernel\Infrastructure\Http;
+
+use App\Ordering\Application\Exception\AccessDeniedDomainException;
+use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
+
+#[AsEventListener]
+final readonly class DomainExceptionListener
+{
+    public function __invoke(ExceptionEvent $event): void
+    {
+        $exception = $event->getThrowable();
+
+        // Synchronní sběrnice výjimku z handleru balí, takže se sem
+        // dostane obálka, ne doménová výjimka.
+        if ($exception instanceof HandlerFailedException) {
+            $exception = $exception->getPrevious() ?? $exception;
+        }
+
+        $status = match (true) {
+            $exception instanceof AccessDeniedDomainException => 403,
+            $exception instanceof InvalidOrderStateTransitionException,
+            $exception instanceof CancellationWindowExpiredException => 409,
+            default => null,
+        };
+
+        if ($status === null) {
+            return;
+        }
+
+        $event->setResponse(new JsonResponse(
+            ['error' => $exception->getMessage()],
+            $status,
+        ));
+    }
+}
+:::
+
 Třetí volbou je **404 Not Found** místo 403. Odpověď 403 nad cizím identifikátorem totiž potvrdí, že takový záznam existuje, a útočníkovi stačí projít rozsah ID, aby zmapoval cizí data. Symfony na to má `#[IsGranted(..., statusCode: 404)]`. Trade-off je čitelnost chyby: uživatel, který přišel o oprávnění legitimně, uvidí „stránka neexistuje“ a nepozná proč. Rozumné dělení je 404 pro veřejně dostupné endpointy s uhodnutelnými identifikátory, 403 uvnitř administrace, kde jsou všichni aktéři důvěryhodní.
 :::
 
@@ -1048,12 +1189,13 @@ NIST SP 800-162 dává pro tuto vrstvu slovník, který se vyplatí znát, proto
 
 Následující ukázka staví ABAC model explicitně: `Policy` jako kolekce `Rule` objektů, které se vyhodnotí proti trojici subject/user/context. Slouží k tomu, aby byl model vidět. Zda se takto psát vyplatí, řeší [závěr sekce](#abac-vlastni-vs-voter) – odpověď zní ve většině Symfony projektů „ne“.
 
-:::code{language="php" filename="src/SharedKernel/Authorization/Policy.php"}
+:::code{language="php" filename="src/SharedKernel/Authorization/Policy.php + Rule.php + PolicyContext.php"}
 // src/SharedKernel/Authorization/Policy.php
 declare(strict_types=1);
 
 namespace App\SharedKernel\Authorization;
 
+// Tři třídy, tři soubory – PSR-4 jinak najde jen tu první.
 interface Policy
 {
     public function name(): string;
@@ -1101,7 +1243,9 @@ final class CancelOrderPolicy implements Policy
     {
         return [
             new Rule(
-                expression:  'subject.customerId == user.customerId',
+                // user.customerId je privátní – ExpressionLanguage k němu
+                // getter nedohledá, volá se metoda.
+                expression:  'subject.customerId == user.customerId()',
                 description: 'Pouze vlastník objednávky',
             ),
             new Rule(
@@ -1403,9 +1547,11 @@ final class OrderFactory
 {
     private const AT = '2026-04-29 10:00:00';
 
-    public static function placed(string $at = self::AT): Order
-    {
-        return self::build(CustomerId::generate(), $at);
+    public static function placed(
+        string $at = self::AT,
+        ?CustomerId $customerId = null,
+    ): Order {
+        return self::build($customerId ?? CustomerId::generate(), $at);
     }
 
     public static function placedFor(CustomerId $customerId): Order
@@ -1413,9 +1559,11 @@ final class OrderFactory
         return self::build($customerId, self::AT);
     }
 
-    public static function shipped(): Order
+    // Vlastník je parametr i tady. Bez něj by testy policy hlásily
+    // porušení vlastnictví místo pravidla, které chtěly ověřit.
+    public static function shipped(?CustomerId $customerId = null): Order
     {
-        $order = self::build(CustomerId::generate(), self::AT);
+        $order = self::build($customerId ?? CustomerId::generate(), self::AT);
         $order->markPaid();
         $order->ship(ShipmentId::generate());
 
@@ -1568,8 +1716,10 @@ final class SecurityUserFixture
     /** Aktér pro test Voteru. Zajímá ho jen customerId, zbytek je výplň. */
     public static function for(string $customerId, string ...$roles): SecurityUser
     {
+        // E-mail je primární klíč, takže musí být pro každého aktéra jiný –
+        // dvě fixture se stejným by při ukládání kolidovaly.
         return new SecurityUser(
-            email: 'test@example.com',
+            email: $customerId . '@example.test',
             passwordHash: 'irrelevant',
             roles: $roles ?: ['ROLE_USER'],
             customerId: $customerId,
@@ -1585,7 +1735,7 @@ Mock `AccessDecisionManagerInterface` je tu záměrně nastavený na `false`. Te
 
 Pro pokrytí celé pipeline (firewall → controller → handler → voter → aggregate) slouží Symfony `WebTestCase`. Zde už je to integrační test, který používá kernel a databázi. Doporučená míra: *1 e2e test na use case*, pokrývající hlavní scénář + 1–2 nejdůležitější chybové stavy. Detailní pokrytí okrajových případů patří do unit testů na nižších vrstvách.
 
-Přihlášení se v takovém testu neprochází formulářem. `KernelBrowser::loginUser()` vloží uživatele rovnou do session a ušetří jeden request i závislost na podobě login stránky:
+Přihlášení se v takovém testu neprochází formulářem. `KernelBrowser::loginUser()` vloží uživatele rovnou do session a ušetří jeden request i závislost na podobě login stránky. Jednu vazbu ale neušetří: s `entity` providerem firewall při každém dalším requestu uživatele načítá znovu, takže fixture musí být v databázi. Jinak test skončí přesměrováním na `/login` a vypadá to jako chyba autorizace.
 
 :::code{language="php" filename="tests/Ordering/Http/CancelOrderE2eTest.php" highlights="12,13,14,17"}
 // tests/Ordering/Http/CancelOrderE2eTest.php
@@ -1611,9 +1761,15 @@ final class CancelOrderE2eTest extends WebTestCase
         $client = static::createClient();
         $order  = $this->givenOrderOf(self::OWNER);
 
-        // loginUser() vloží uživatele rovnou do session – žádná fixture
-        // v databázi, takže test nezávisí na podobě registrace.
-        $client->loginUser(SecurityUserFixture::for(self::STRANGER));
+        // loginUser() vloží uživatele do session, ale při dalším requestu
+        // ho firewall obnovuje přes entity provider – uživatel proto musí
+        // v databázi být, jinak se token zahodí a test skončí na /login.
+        $stranger = SecurityUserFixture::for(self::STRANGER);
+        $container = static::getContainer();
+        $container->get(EntityManagerInterface::class)->persist($stranger);
+        $container->get(EntityManagerInterface::class)->flush();
+
+        $client->loginUser($stranger);
         $client->request('POST', '/order/' . $order->id->value . '/cancel');
 
         // #[IsGranted(..., statusCode: 404)] brání enumeraci cizích ID
@@ -1684,12 +1840,12 @@ final class CancelOrderPolicyTest extends TestCase
             'expected' => 'Pouze vlastník objednávky',
         ];
         yield 'shipped order' => [
-            'subject'  => OrderFactory::shipped(),
+            'subject'  => OrderFactory::shipped(CustomerId::fromString(self::OWNER)),
             'user'     => SecurityUserFixture::for(self::OWNER),
             'expected' => 'Objednávka musí být potvrzená',
         ];
         yield 'window expired' => [
-            'subject'  => OrderFactory::placed(at: '2026-04-28 09:00:00'),
+            'subject'  => OrderFactory::placed('2026-04-28 09:00:00', CustomerId::fromString(self::OWNER)),
             'user'     => SecurityUserFixture::for(self::OWNER),
             'expected' => 'Storno lhůta 24 h ještě neuplynula',
         ];
