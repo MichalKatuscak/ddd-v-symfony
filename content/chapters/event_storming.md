@@ -7,7 +7,7 @@ meta_description: "Jak připravit, vést a vyhodnotit workshop Event Storming a 
 meta_keywords: "Event Storming, Domain Storytelling, Alberto Brandolini, Stefan Hofer, Henning Schwentner, Domain Discovery, DDD workshop, Big Picture, Process Level, Design Level, Pivotal Event, Hot Spot, Bounded Context"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
@@ -46,11 +46,11 @@ Vznik techniky byl pragmatický. V roce 2012 ji Brandolini předvedl na Italian 
 
 Dnes technika existuje ve třech formátech. Kanonické názvy uvádí web eventstorming.com i Brandoliniho firma Avanscoperta; pro druhý a třetí se v komunitě vžily kratší zkratky *Process Level* a *Design Level*.
 
-1. **Big Picture EventStorming** – strategická úroveň. Otázka: *„Co se v naší doméně vůbec děje?“* Cílem je objevit Bounded Contexty a hlavní procesy. Trvání 2–4 h, 15–30 účastníků.
+1. **Big Picture EventStorming** – strategická úroveň. Otázka: *„Co se v naší doméně vůbec děje?“* Cílem je objevit Bounded Contexty a hlavní procesy. Brandolini s ním počítá jako s **celodenním** formátem pro 20–30 lidí; 2–4 hodiny je zkrácená varianta této knihy pro menší doménu.
 2. **Process Modelling EventStorming** (komunitně *Process Level*) – operační úroveň. Otázka: *„Jak konkrétně běží jeden zvolený proces?“* Cílem je popsat jeden Bounded Context detailněji, včetně Commands, Actors, Policies a externích systémů. Zavádí přísnější gramatiku notace, do návrhu softwaru ale nevstupuje. Trvání 4–8 h.
 3. **Software Design EventStorming** (komunitně *Design Level*) – taktická úroveň. Otázka: *„Jak se tato část modelu přeloží do tříd?“* Cílem jsou kandidáti na [agregáty](/zakladni-koncepty#aggregates), invariantní pravidla a první draft API. Trvání 2–6 h, typicky per BC.
 
-Vaughn Vernon v *Domain-Driven Design Distilled* (Addison-Wesley, 2016, kap. 7) řadí Event Storming mezi nástroje, které urychlují učení a cestu k pracovnímu modelu domény. Doporučuje ho jako první techniku, kterou tým zavede, než se pustí do taktických DDD vzorů.
+Vaughn Vernon v *Domain-Driven Design Distilled* (Addison-Wesley, 2016, kap. 7) řadí Event Storming mezi nástroje, které urychlují učení a cestu k pracovnímu modelu domény. V *DDD Distilled* mu patří poslední kapitola, tedy až za agregáty a doménovými událostmi; jako první technika ho doporučuje tahle kniha, ne Vernon.
 
 :::diagram{fig="04.2-A" title="Tři úrovně Event Stormingu – od strategického přehledu k taktickému návrhu" src="images/diagrams/17_event_storming/big_picture_levels.svg"}
 :::
@@ -103,13 +103,13 @@ Big Picture je první workshop, který tým s novou doménou (nebo s migrací z 
 
 Přípravu nelze obejít:
 
-- **Místnost a stěna.** 6–8 m dlouhá rovná stěna bez dveří a nábytku v cestě. Brandolini požaduje *unlimited modeling surface*, souvislou plochu, kterou workshop nesmí vyčerpat. Místnost naopak potřebuje otevíratelné okno; skupina dvaceti lidí vydýchá vzduch dřív, než se čeká. Online varianta stojí na *frame* 12 000 × 4 000 px v Miro nebo Mural.
+- **Místnost a stěna.** 6–8 m dlouhá rovná stěna bez dveří a nábytku v cestě. Brandolini požaduje *Unlimited Modelling Space*, souvislou plochu, kterou workshop nesmí vyčerpat. Místnost naopak potřebuje otevíratelné okno; skupina dvaceti lidí vydýchá vzduch dřív, než se čeká. Online varianta stojí na *frame* 12 000 × 4 000 px v Miro nebo Mural.
 - **Účastníci.** Primární zdroje uvádějí pro Big Picture 15–30 lidí, typicky 25–30; ddd-crew mluví o 10 až 30 a více u jednoho papírového rolu. Velká skupina se neřeší redukcí lidí, ale tím, že se u stěny sama rozpadne na hloučky, které pracují paralelně. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany 3–5 vývojářů včetně tech leada, plus jeden facilitátor (viz níže). Sestava kolem deseti lidí se uřídí snadněji, je to ale vědomý kompromis: část pohledů na doménu v místnosti chybí.
 - **Materiál.** 5–10 balíčků oranžových stickies (3M Post-It, 76×76 mm), 2 balíčky růžových, 2 modrých, 1 malý žlutý, 1 velký žlutý (Constraint), 1 šedý, 1 zelený, 1 lila (světle fialový), 1 tmavě fialový. Černé fixy Sharpie pro každého (žádná kuličková pera, text nebude čitelný z 2 m).
 - **Catering.** Káva, voda, ovoce, oběd. Workshop unaví – bez cateringu padá energie po 90 minutách.
 - **Pozvánka.** Účastníci dostanou předem jednostránkovou agendu. Doménoví experti se z ní dozvědí, že *nebudou prezentovat slidy*, ale budou „vyprávět příběh“.
 
-### 04.04.2 Postup workshopu (2–4 hodiny) {#bp-postup}
+### 04.04.2 Postup workshopu (zkrácená varianta, 2–4 hodiny) {#bp-postup}
 
 1. **(10 min) Brief a startovací event.** Facilitátor v 5 minutách vysvětlí pravidla: oranžová = co se stalo, minulý čas, lepit kamkoliv. Pak workshop odstartuje tím, že napíše první event, o kterém ví, že nastává v doméně, a nalepí ho doprostřed stěny, například `OrderPlaced`.
 2. **(20–30 min) Chaotic exploration.** Všichni dostanou stejně oranžových stickies (~15 každý) a píší události, které je napadnou. **Lepí kamkoliv** bez pořadí. Jde o záměrný chaos – chcete, aby si lidé vzpomněli na vše, ne aby okamžitě strukturovali. Facilitátor sbírá poznámky a tlačí lidi: „a co se stane potom? a předtím?“.
@@ -128,7 +128,7 @@ Krok 6 stojí a padá na tom, zda hranici poznáte, když na ni narazíte. Čty�
 - **Hranice oddělení.** Levný první odhad. Tam, kde si firma předává práci (prodej → sklad → účtárna), se obvykle mění slovník i pravidla. Slepě se ale přebírat nedají; org chart bývá historický, ne doménový.
 - **Vlastnictví dat.** Otázka „kdo smí tohle pole změnit?“ má uvnitř jednoho kontextu jedinou odpověď. Pokud cenu produktu mění dva týmy podle dvou různých pravidel, nejde o jedno pole se dvěma editory, ale o dva koncepty ve dvou kontextech.
 
-Žádná z heuristik není sama o sobě rozhodující. Hledáte místa, kde se jich protne víc najednou – lingvistický šev na hranici oddělení s vlastním vlastnictvím dat je téměř jistá hranice BC. Vazbu mezi pivotními událostmi a hranicemi kontextů rozebírá Brandolini v eseji *Discovering Bounded Contexts with EventStorming* ve sborníku *Domain-Driven Design: The First 15 Years* (Leanpub, 2017). Pojmenované vztahy mezi nalezenými kontexty pak popisuje kapitola [Context Mapping](/context-mapping).
+Žádná z heuristik není sama o sobě rozhodující. Hledáte místa, kde se jich protne víc najednou – lingvistický šev na hranici oddělení s vlastním vlastnictvím dat je téměř jistá hranice BC. Vazbu mezi pivotními událostmi a hranicemi kontextů rozebírá Brandolini v eseji *Discovering Bounded Contexts with EventStorming* ve sborníku *Domain-Driven Design: The First 15 Years* (Leanpub, 2019). Pojmenované vztahy mezi nalezenými kontexty pak popisuje kapitola [Context Mapping](/context-mapping).
 
 ### 04.04.4 Co máte na konci Big Picture {#bp-vystup}
 
@@ -242,6 +242,8 @@ Symfony / PHP draft (toto je první draft, ne finální kód):
 // Application/Command/PlaceOrderCommand.php
 namespace App\Ordering\Application\Command;
 
+use App\Ordering\Domain\ValueObject\CustomerId;
+
 final readonly class PlaceOrderCommand
 {
     public function __construct(
@@ -254,7 +256,17 @@ final readonly class PlaceOrderCommand
 // Domain/Order.php
 namespace App\Ordering\Domain\Model;
 
+use App\Ordering\Domain\Event\OrderCancelled;
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+use App\Ordering\Domain\ValueObject\ProductId;
 use App\SharedKernel\Domain\AggregateRoot;
+use App\SharedKernel\Domain\Money;
 
 final class Order extends AggregateRoot
 {
@@ -293,11 +305,11 @@ final class Order extends AggregateRoot
 
         // Invariant z workshopu: objednávka musí mít aspoň jednu položku
         if ($this->items === []) {
-            throw new EmptyOrderException();
+            throw EmptyOrderException::cannotConfirm();
         }
 
         $this->status = OrderStatus::Confirmed;
-        $this->record(new OrderConfirmed($this->id));
+        $this->record(new OrderConfirmed($this->id, $this->customerId, new \DateTimeImmutable()));
     }
 
     public function cancel(string $reason): void
@@ -308,19 +320,19 @@ final class Order extends AggregateRoot
         }
 
         $this->status = OrderStatus::Cancelled;
-        $this->record(new OrderCancelled($this->id, $reason));
+        $this->record(new OrderCancelled($this->id, $this->customerId, $reason, new \DateTimeImmutable()));
     }
 
     public function totalAmount(): Money
     {
         if ($this->items === []) {
-            throw new EmptyOrderException('Cannot calculate total of an empty order');
+            throw EmptyOrderException::cannotBePlaced();
         }
 
-        $total = Money::zero($this->items[0]->unitPrice()->currency);
+        $total = Money::zero($this->items[0]->unitPrice->currency);
 
         foreach ($this->items as $item) {
-            $total = $total->add($item->unitPrice()->multiply($item->quantity()));
+            $total = $total->add($item->unitPrice->multiply($item->quantity));
         }
 
         return $total;
@@ -330,17 +342,23 @@ final class Order extends AggregateRoot
 // Application/Handler/PlaceOrderHandler.php
 namespace App\Ordering\Application\Handler;
 
+use App\Ordering\Application\Command\PlaceOrderCommand;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\ValueObject\OrderId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
 #[AsMessageHandler]
 final readonly class PlaceOrderHandler
 {
     public function __construct(
         private OrderRepository $orders,
-        private OrderIdGenerator $ids,
     ) {}
 
     public function __invoke(PlaceOrderCommand $cmd): OrderId
     {
-        $order = Order::place($this->ids->next(), $cmd->customerId);
+        // Identitu přiděluje aplikace, ne databáze - viz Základní koncepty.
+        $order = Order::place(OrderId::generate(), $cmd->customerId);
 
         foreach ($cmd->items as $item) {
             $order->addItem($item->productId, $item->quantity, $item->unitPrice);
@@ -390,7 +408,7 @@ Tato vazba má praktický dopad. Za půl roku nový vývojář ví, odkud pravid
 - **Annotation** – textová bublina s poznámkou: varianta, volitelný krok, možná chyba, doménový pojem.
 - **Group** – rámeček kolem skupiny aktivit. Ohraničuje opakovaný úsek, lokalitu, organizační hranici nebo subdoménu.
 
-Věta příběhu má pevnou gramatiku: **kdo** (actor) dělá **co** (activity) **s čím** (work object) **s kým** (jiný actor). Jeden příběh se drží v rozmezí deseti až dvaceti kroků. Delší se rozpadne na dva.
+Věta příběhu má pevnou gramatiku: **kdo** (actor) dělá **co** (activity) **s čím** (work object) **s kým** (jiný actor). Jeden příběh se drží v rozmezí pěti až patnácti kroků. Delší se rozpadne na dva.
 
 ### 04.07.2 Scope – jaký příběh vlastně kreslíte {#ds-scope}
 
@@ -420,7 +438,7 @@ Sedm vět, sedm čísel. Krok 3 se kreslí dvěma šipkami (od actora k work obj
 
 | Kritérium | Event Storming | Domain Storytelling |
 |---|---|---|
-| Velikost skupiny | 15–30 pro Big Picture, 5–15 pro Process Modelling | Malá: vypravěč, posluchači, moderátor s modelářem |
+| Velikost skupiny | 15–30 pro Big Picture, 4–8 pro Process Modelling | Malá: vypravěč, posluchači, moderátor s modelářem |
 | Doba trvání | 2–8 h | Jedno kratší sezení na příběh |
 | Šíře záběru | Celý systém / podstatná část | Jeden konkrétní proces |
 | Hloubka záběru | Mělčí, ale široký | Hluboká, úzká |
@@ -443,7 +461,7 @@ Knihu *Domain Storytelling* doplňuje volně přístupný web [domainstorytellin
 
 ### 04.07.5 Praktický egon.io walkthrough {#ds-egon-walkthrough}
 
-[egon.io](https://egon.io/) je open-source webová aplikace (postavená na bpmn-js), která Domain Storytelling notaci plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír, je to vhodný nástroj. Postup pro první sezení:
+[egon.io](https://egon.io/) je open-source webová aplikace (Angular nad diagram-js), která Domain Storytelling notaci plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír, je to vhodný nástroj. Postup pro první sezení:
 
 1. **Otevřete egon.io v prohlížeči** – nevyžaduje registraci. Vlevo nahoře je toolbar s ikonkami: actor (panáček), work object (obdélník), activity (šipka).
 2. **Začněte s actorem.** Přetáhněte ikonu „person“ na plátno a pojmenujte ji rolí, ne osobou: `Customer`, ne `Petr Novák`. Jméno se v exportu objeví u každé aktivity, takže na jeho volbě záleží.
@@ -469,7 +487,7 @@ Workshop bez přípravy a pevného vedení je horší než žádný. Vytvoří z
 :::callout{type="warn"}
 ### „Začneme rovnou u Software Designu, na Big Picture nemáme čas.“ {#anti-skip-bp-heading}
 
-Kanonicky *Rush to the goal*. Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém Bounded Contextu leží. Výsledek: *God Aggregate* typu `Order`, který obsahuje payment status, shipping data, fakturační adresu a kupóny, protože nikdo neoznačil, že tyto pojmy patří do různých BC.
+Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém Bounded Contextu leží. (Pozor na záměnu: *Rush to the goal* je na eventstorming.com **doporučený** vzor, tedy dojít rychle k základní kostře a odbočky odložit jako hot spoty. Přeskočení celého formátu to neospravedlňuje.) Výsledek: *God Aggregate* typu `Order`, který obsahuje payment status, shipping data, fakturační adresu a kupóny, protože nikdo neoznačil, že tyto pojmy patří do různých BC.
 
 **Řešení:** Big Picture proběhne, i kdyby mělo trvat jen 90 minut. Bez něj vede Software Design skoro vždy k nesprávnému rozdělení agregátů.
 :::
@@ -501,9 +519,9 @@ Workshop, který skončí slávou, fotkou stěny a sdílením ve Slacku, ale jeh
 :::callout{type="warn"}
 ### „Big Picture musíme dotáhnout k dokonalosti.“ {#anti-perfectionism-heading}
 
-Kanonicky *Deliverable Obsession*. Big Picture nemá být dokonalý; je to první mapa neznámého území. Pokud na něm strávíte 8 hodin a budete debatovat o tom, zda `OrderShipped` je `ShipmentDispatched` nebo `OrderDispatched`, ztrácíte čas. Rozhodnutí padne až v Process Modellingu, kde uvidíte kontext.
+Big Picture nemá být dokonalý; je to první mapa neznámého území. Brandoliniho *Deliverable Obsession* míří na příbuznou věc z druhé strany: na tlak sponzora, aby z discovery workshopu vypadl hmatatelný artefakt, ačkoli hlavním výstupem je společné porozumění. Pokud na něm strávíte 8 hodin a budete debatovat o tom, zda `OrderShipped` je `ShipmentDispatched` nebo `OrderDispatched`, ztrácíte čas. Rozhodnutí padne až v Process Modellingu, kde uvidíte kontext.
 
-**Řešení:** timebox jsou čtyři hodiny. Pak workshop končí, i kdyby polovina hot spotů byla nevyřešená – to je v pořádku. Hot spoty *mají* zůstat otevřené.
+**Řešení:** držte timebox, ať už je celodenní podle Brandoliniho, nebo čtyřhodinový podle zkrácené varianty výše. Pak workshop končí, i kdyby polovina hot spotů byla nevyřešená – to je v pořádku. Hot spoty *mají* zůstat otevřené.
 :::
 
 ## 04.09 Co Event Storming neumí {#co-neumi}
@@ -785,7 +803,7 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 - [egon.io](https://egon.io/) – open-source webový nástroj pro Domain Storytelling. Drag-and-drop editor, export do SVG.
 - [Vaughn Vernon – *Domain-Driven Design Distilled* (Addison-Wesley, 2016)](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420), kapitola 7 obsahuje stručný úvod do Event Stormingu jako součásti DDD strategie.
 - [Eric Evans – *Domain-Driven Design: Tackling Complexity in the Heart of Software* (Addison-Wesley, 2003)](https://www.domainlanguage.com/ddd/). Kniha, ze které DDD vychází; Ubiquitous Language a Bounded Context jsou základem všech workshopových technik.
-- [ddd-crew – *EventStorming Glossary & Cheat Sheet*](https://github.com/ddd-crew/eventstorming-glossary-cheat-sheet) – nejúplnější veřejná legenda notace včetně formátů, autor Kenny Baas-Schwegler, licence CC BY 4.0.
+- [ddd-crew – *EventStorming Glossary & Cheat Sheet*](https://github.com/ddd-crew/eventstorming-glossary-cheat-sheet) – nejúplnější veřejná legenda notace včetně formátů, z dílny ddd-crew, licence CC BY-SA 4.0.
 - [Alberto Brandolini – *Remote EventStorming*](https://blog.avanscoperta.it/2020/03/26/remote-eventstorming/) – stanovisko autora k online workshopům, odstupňované podle formátu.
 - [Vlad Khononov – *Learning Domain-Driven Design* (O'Reilly, 2021)](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/), kapitola 12 shrnuje Event Storming v deseti krocích z pohledu praktika, který techniku nasazuje u zákazníků.
 - [Evelyn van Kelle, Gien Verschatse, Kenny Baas-Schwegler – *Collaborative Software Design* (Manning, 2024)](https://www.manning.com/books/collaborative-software-design). O facilitační vrstvě, kterou Event Storming předpokládá, ale neučí: ranking v místnosti, kognitivní zkreslení, práce s odporem.

@@ -20,10 +20,15 @@ if ($files === []) {
     $files = glob(__DIR__ . '/../content/chapters/*.md') ?: [];
 }
 
-/** Bloky, které nejsou opsatelný soubor, ale náčrt nebo pseudokód. */
-const SKIP_FILENAMES = [
-    'Symfony / PHP draft Ordering BC',
-];
+/**
+ * Bloky, které nejsou opsatelný soubor, ale náčrt nebo pseudokód.
+ *
+ * Seznam je záměrně prázdný. Původně na něm stál návrh Ordering kontextu
+ * z kapitoly o Event Stormingu - a právě tam kontrola měla pravdu: tři
+ * soubory bez jediného importu, každý fatální při prvním spuštění.
+ * Výjimka umlčela kontrolu na jediném místě, kde něco našla.
+ */
+const SKIP_FILENAMES = [];
 
 /**
  * Vědomé výjimky ve tvaru "soubor|jméno".

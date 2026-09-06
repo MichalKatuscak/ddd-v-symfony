@@ -7,7 +7,7 @@ meta_description: "Základní stavební kameny taktického DDD: entity, hodnotov
 meta_keywords: "DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Základní koncepty
 schema_type: TechArticle
 schema_headline: "Základní koncepty Domain-Driven Design"
@@ -542,10 +542,10 @@ class Order
             throw EmptyOrderException::cannotBePlaced();
         }
 
-        $total = $this->items[0]->unitPrice()->multiply($this->items[0]->quantity());
+        $total = $this->items[0]->unitPrice->multiply($this->items[0]->quantity);
 
         foreach (array_slice($this->items, 1) as $item) {
-            $total = $total->add($item->unitPrice()->multiply($item->quantity()));
+            $total = $total->add($item->unitPrice->multiply($item->quantity));
         }
 
         return $total;
