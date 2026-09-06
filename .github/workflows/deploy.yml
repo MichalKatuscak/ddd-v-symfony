@@ -54,6 +54,9 @@ jobs:
       - name: Check static calls against defined classes
         run: php scripts/check_static_calls.php
 
+      - name: Check for executable code at file scope
+        run: php scripts/check_toplevel_code.php
+
       - name: Check FAQ blocks parse as YAML
         run: php scripts/check_faq_yaml.php
 
