@@ -1790,6 +1790,36 @@ a nic ho nezastaví."*
 ruční revize v ní teď působí víc škody než užitku. Nástupcem je CI: šest kontrol, které
 tuhle třídu chyb chytí za vteřiny a nezanechají po sobě regresi.
 
+## Závěrečné ověření (2026-09-06)
+
+Oprava `->value` ověřena samostatnou stavbou (`bookapp21`), zadanou **jako ověření, ne
+revize** — aby nemohla do knihy zanést nic nového. Všech pět bodů prošlo:
+
+| ověřováno | výsledek |
+|---|---|
+| happy path celý | `orders=shipped`, sága `completed`, zámek uvolněn, dashboard i reporting naplněné |
+| `shipmentId` v kontextu ságy | skutečné UUID zásilky, shodné s `order_dashboard.shipment_id`, různé od `correlation_id` |
+| opožděná `ShipmentCreated` při kompenzaci | právě jeden `CancelShipment`, opakované doručení nepřidá další — smyčka nevzniká |
+| `PAYMENT_FAILS`, `STOCK_FAILS`, obě timeout větve | všechny doběhly, objednávka `cancelled`, zámek uvolněn |
+| testy kapitol 11, 12, 14 | 21 testů, 38 asercí, OK |
+
+**DLQ prázdná ve všech pěti scénářích.** Regrese `Attempt to read property "value" on string`
+se neobjevila. Žádný nový nález.
+
+Je to **první kolo ze čtyř, po kterém oprava nepřinesla vlastní chybu** — a rozdíl proti
+předchozím není v pečlivosti, ale v tom, že šlo o smazání dvou výskytů `->value`, ne
+o psaní nového kódu, a že to předtím potvrdila strojová kontrola.
+
+### Odchylky, které si stavějící musel dovolit
+
+Všechny jsou takové, na které kniha sama upozorňuje: rozdělení vícetřídních bloků podle
+PSR-4, SQLite varianta DDL pro `order_dashboard`, `:defaultTier` místo `COALESCE` nad
+chybějící tabulkou `memberships`, doplnění `scheduleTimeout()` z 14.08. Vynechal kód,
+který kniha označuje za alternativu nebo neúplný (choreografické handlery, `RefundOrderHandler`,
+`DomainRules.php`, `ShippingFeeService`).
+
+**Tím revize končí.** Nástupcem je šest kontrol v CI.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
