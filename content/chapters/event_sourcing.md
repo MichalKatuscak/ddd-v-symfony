@@ -7,7 +7,7 @@ meta_description: "Event Sourcing v DDD a Symfony 8: Event Store, projekce, snap
 meta_keywords: "Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Outbox pattern, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild, dual-write problem"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Event Sourcing
 schema_type: TechArticle
 schema_headline: "Event Sourcing v DDD a Symfony"
@@ -411,6 +411,11 @@ nastala. Záznamy se **nikdy nepřepisují ani nemažou**.
 
 ### Struktura tabulky Event Store
 
+SQL v této kapitole cílí na **MySQL 8**: `AUTO_INCREMENT`, `INSERT IGNORE`, `NOW(6)`,
+`TRUNCATE TABLE` a `ENGINE=InnoDB`. Skeleton Symfony přitom ve výchozím stavu míří
+na PostgreSQL a lokální zkoušky často běží na SQLite. Na obojím se ukázky bez překladu
+neobejdou: `INSERT IGNORE` nezná ani jedna z těch databází, `TRUNCATE` nezná SQLite.
+
 :::callout{type="pattern"}
 ### SQL: Migrace tabulky `event_store` (MySQL/MariaDB) {#event-store-sql-heading}
 
@@ -510,6 +515,138 @@ interface EventStore
 :::
 *src/Infrastructure/EventSourcing/EventStore.php*
 
+Rozhraní pracuje se dvěma typy, které jinde v kapitole jen prosvítají. `EventEnvelope`
+je řádek z Event Store převedený do objektu: nese payload jako pole, ne jako hotovou
+událost. Překlad na doménovou událost obstará `EventSerializer` až v okamžiku, kdy je
+potřeba – rebuild projekcí tak může obálky filtrovat, aniž by instancioval všechno.
+
+:::code{language="php" filename="src/Infrastructure/EventSourcing/EventEnvelope.php + EventSerializer.php + ConcurrencyException.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing;
+
+use App\SharedKernel\Domain\Event\DomainEvent;
+
+/** Řádek Event Store po načtení: payload ještě jako pole. */
+final readonly class EventEnvelope
+{
+    /** @param array<string, mixed> $payload */
+    public function __construct(
+        public string $eventType,
+        public array $payload,
+        public int $schemaVersion,
+        public int $version,
+        public string $occurredOn,
+    ) {}
+}
+
+final readonly class EventSerializer
+{
+    /**
+     * @param array<string, class-string<DomainEvent>> $typeMap Mapa eventType na třídu,
+     *        napr. 'ordering.order_placed' => OrderPlaced::class. Konfiguruje se
+     *        v services.yaml; bez ní by deserializace neměla co instanciovat.
+     */
+    public function __construct(
+        private array $typeMap,
+        private UpcasterChain $upcasters,
+    ) {}
+
+    /** @param array<string, mixed> $row Řádek z tabulky event_store. */
+    public function deserialize(array $row): EventEnvelope
+    {
+        return new EventEnvelope(
+            eventType:     $row['event_type'],
+            payload:       json_decode($row['payload'], true, 512, JSON_THROW_ON_ERROR),
+            schemaVersion: (int) $row['schema_version'],
+            version:       (int) $row['version'],
+            occurredOn:    $row['occurred_on'],
+        );
+    }
+
+    /**
+     * Obálka na doménovou událost. Payload projde upcastery, takže
+     * fromPayload() vždy dostane schéma v aktuální verzi.
+     */
+    public function toEvent(EventEnvelope $envelope): DomainEvent
+    {
+        $class = $this->typeMap[$envelope->eventType]
+            ?? throw new \RuntimeException(
+                "Unknown event type {$envelope->eventType}. Chybí záznam v typeMap."
+            );
+
+        $payload = $this->upcasters->upcast(
+            $envelope->eventType,
+            $envelope->schemaVersion,
+            $envelope->payload,
+        );
+
+        return $class::fromPayload($payload);
+    }
+}
+
+/**
+ * Metadata k události: kdo ji vyvolal a v jaké souvislosti. Doménový model
+ * o requestu nic neví, proto je dodává infrastruktura až při zápisu.
+ */
+interface EventMetadataProvider
+{
+    /** @return array<string, mixed> */
+    public function forEvent(DomainEvent $event): array;
+}
+
+/**
+ * Výchozí implementace. Correlation ID drží celý request, causation ID
+ * ukazuje na událost, která tuhle vyvolala - bez nich se řetěz příčin
+ * v Event Store zpětně nedá poskládat.
+ */
+final class RequestEventMetadataProvider implements EventMetadataProvider
+{
+    private ?string $correlationId = null;
+    private ?string $causationId = null;
+    private ?string $userId = null;
+
+    public function bind(?string $correlationId, ?string $causationId, ?string $userId): void
+    {
+        $this->correlationId = $correlationId;
+        $this->causationId   = $causationId;
+        $this->userId        = $userId;
+    }
+
+    /** @return array<string, mixed> */
+    public function forEvent(DomainEvent $event): array
+    {
+        return [
+            'correlationId' => $this->correlationId ?? $event->eventId,
+            'causationId'   => $this->causationId,
+            'userId'        => $this->userId,
+        ];
+    }
+}
+
+/** Zápis narazil na cizí verzi streamu - agregát je nutné načíst znovu. */
+final class ConcurrencyException extends \RuntimeException
+{
+}
+:::
+*src/Infrastructure/EventSourcing/EventEnvelope.php*
+
+Mapu `typeMap` je nutné zaregistrovat, jinak deserializace skončí na neznámém typu:
+
+:::code{language="yaml" filename="config/services.yaml"}
+services:
+    App\Infrastructure\EventSourcing\EventSerializer:
+        arguments:
+            $typeMap:
+                ordering.order_placed:      'App\Ordering\EventSourced\Event\OrderPlaced'
+                ordering.order_item_added:  'App\Ordering\EventSourced\Event\OrderItemAdded'
+                ordering.order_confirmed:   'App\Ordering\EventSourced\Event\OrderConfirmed'
+                ordering.order_shipped:     'App\Ordering\EventSourced\Event\OrderShipped'
+                identity.user_registered:   'App\Identity\Domain\Event\UserRegistered'
+:::
+
 :::code{language="php" filename="src/Infrastructure/EventSourcing/DoctrineEventStore.php"}
 <?php
 
@@ -527,6 +664,7 @@ final class DoctrineEventStore implements EventStore
     public function __construct(
         private readonly Connection $connection,
         private readonly EventSerializer $serializer,
+        private readonly EventMetadataProvider $metadata,
     ) {}
 
     /**
@@ -552,7 +690,12 @@ final class DoctrineEventStore implements EventStore
                     'aggregate_type' => $aggregateType,
                     'event_type'     => $event->eventType(),
                     'payload'        => json_encode($event->toPayload(), JSON_THROW_ON_ERROR),
-                    'metadata'       => '{}',
+                    // Korelační a kauzální ID nese kontext requestu; bez nich
+                    // je sloupec metadata jen mrtvé místo v tabulce.
+                    'metadata'       => json_encode(
+                        $this->metadata->forEvent($event),
+                        JSON_THROW_ON_ERROR,
+                    ),
                     'schema_version' => $event->schemaVersion(),
                     'version'        => $version,
                     'occurred_on'    => $event->occurredAt->format('Y-m-d H:i:s.u'),
@@ -731,6 +874,18 @@ abstract class EventSourcedAggregate
         $this->$method($event);
     }
 
+    /**
+     * Nahrané události bez jejich vyjmutí. Repozitář je potřebuje vidět
+     * ještě před zápisem - kdyby je vyjmul předem a append() selhal
+     * na konfliktu verzí, byly by z agregátu nenávratně pryč.
+     *
+     * @return DomainEvent[]
+     */
+    public function recordedEvents(): array
+    {
+        return $this->recordedEvents;
+    }
+
     /** @return DomainEvent[] */
     public function releaseEvents(): array
     {
@@ -755,8 +910,10 @@ o záměrnou odchylku od konvence zbytku knihy.
 
 ### PHP: události event-sourced agregátu {#es-events-heading}
 
-Události jsou neměnné záznamy s primitivními poli – právě proto, že cestují do Event Store
-a zpět přes serializer:
+Události dědí z `DomainEvent`, takže nesou `eventId` i `occurredAt` a umí se přeložit
+do payloadu a zpět. Vlastní data drží v primitivních polích – právě proto, že cestují
+do Event Store a zpět přes serializer. Vzniká je pojmenovaný konstruktor `create()`,
+identitu a čas tedy dostanou právě jednou:
 
 :::code{language="php" filename="src/Ordering/EventSourced/Event/OrderPlaced.php + OrderItemAdded.php + OrderConfirmed.php + OrderShipped.php"}
 <?php
@@ -766,36 +923,206 @@ declare(strict_types=1);
 namespace App\Ordering\EventSourced\Event;
 
 use App\Ordering\EventSourced\OrderItem;
+use App\SharedKernel\Domain\Event\DomainEvent;
+use DateTimeImmutable;
+use Symfony\Component\Uid\Uuid;
 
-final readonly class OrderPlaced
+final class OrderPlaced extends DomainEvent
 {
-    public function __construct(
-        public string $orderId,
-        public string $customerId,
-    ) {}
+    private function __construct(
+        string $eventId,
+        DateTimeImmutable $occurredAt,
+        public readonly string $orderId,
+        public readonly string $customerId,
+    ) {
+        parent::__construct($eventId, $occurredAt);
+    }
+
+    public static function create(string $orderId, string $customerId): self
+    {
+        return new self(
+            eventId:    (string) Uuid::v7(),
+            occurredAt: new DateTimeImmutable('now', new \DateTimeZone('UTC')),
+            orderId:    $orderId,
+            customerId: $customerId,
+        );
+    }
+
+    /** @param array<string, mixed> $payload */
+    public static function fromPayload(array $payload): static
+    {
+        return new self(
+            eventId:    $payload['eventId'],
+            occurredAt: new DateTimeImmutable($payload['occurredAt'], new \DateTimeZone('UTC')),
+            orderId:    $payload['orderId'],
+            customerId: $payload['customerId'],
+        );
+    }
+
+    public function eventType(): string { return 'ordering.order_placed'; }
+
+    public function schemaVersion(): int { return 1; }
+
+    /** @return array<string, mixed> */
+    public function toPayload(): array
+    {
+        return [
+            'eventId'    => $this->eventId,
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s.u'),
+            'orderId'    => $this->orderId,
+            'customerId' => $this->customerId,
+        ];
+    }
 }
 
-final readonly class OrderItemAdded
+final class OrderItemAdded extends DomainEvent
 {
-    public function __construct(
-        public string $orderId,
-        public OrderItem $item,
-    ) {}
+    private function __construct(
+        string $eventId,
+        DateTimeImmutable $occurredAt,
+        public readonly string $orderId,
+        public readonly OrderItem $item,
+    ) {
+        parent::__construct($eventId, $occurredAt);
+    }
+
+    public static function create(string $orderId, OrderItem $item): self
+    {
+        return new self(
+            eventId:    (string) Uuid::v7(),
+            occurredAt: new DateTimeImmutable('now', new \DateTimeZone('UTC')),
+            orderId:    $orderId,
+            item:       $item,
+        );
+    }
+
+    /** @param array<string, mixed> $payload */
+    public static function fromPayload(array $payload): static
+    {
+        return new self(
+            eventId:    $payload['eventId'],
+            occurredAt: new DateTimeImmutable($payload['occurredAt'], new \DateTimeZone('UTC')),
+            orderId:    $payload['orderId'],
+            // Hodnotový objekt uvnitř události se skládá zpět ručně;
+            // serializer zná jen skalární payload.
+            item:       new OrderItem(
+                $payload['item']['productId'],
+                $payload['item']['quantity'],
+                $payload['item']['unitPriceInCents'],
+            ),
+        );
+    }
+
+    public function eventType(): string { return 'ordering.order_item_added'; }
+
+    public function schemaVersion(): int { return 1; }
+
+    /** @return array<string, mixed> */
+    public function toPayload(): array
+    {
+        return [
+            'eventId'    => $this->eventId,
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s.u'),
+            'orderId'    => $this->orderId,
+            'item'       => [
+                'productId'        => $this->item->productId,
+                'quantity'         => $this->item->quantity,
+                'unitPriceInCents' => $this->item->unitPriceInCents,
+            ],
+        ];
+    }
 }
 
-final readonly class OrderConfirmed
+final class OrderConfirmed extends DomainEvent
 {
-    public function __construct(
-        public string $orderId,
-    ) {}
+    private function __construct(
+        string $eventId,
+        DateTimeImmutable $occurredAt,
+        public readonly string $orderId,
+    ) {
+        parent::__construct($eventId, $occurredAt);
+    }
+
+    public static function create(string $orderId): self
+    {
+        return new self(
+            eventId:    (string) Uuid::v7(),
+            occurredAt: new DateTimeImmutable('now', new \DateTimeZone('UTC')),
+            orderId:    $orderId,
+        );
+    }
+
+    /** @param array<string, mixed> $payload */
+    public static function fromPayload(array $payload): static
+    {
+        return new self(
+            eventId:    $payload['eventId'],
+            occurredAt: new DateTimeImmutable($payload['occurredAt'], new \DateTimeZone('UTC')),
+            orderId:    $payload['orderId'],
+        );
+    }
+
+    public function eventType(): string { return 'ordering.order_confirmed'; }
+
+    public function schemaVersion(): int { return 1; }
+
+    /** @return array<string, mixed> */
+    public function toPayload(): array
+    {
+        return [
+            'eventId'    => $this->eventId,
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s.u'),
+            'orderId'    => $this->orderId,
+        ];
+    }
 }
 
-final readonly class OrderShipped
+final class OrderShipped extends DomainEvent
 {
-    public function __construct(
-        public string $orderId,
-        public string $trackingNumber,
-    ) {}
+    private function __construct(
+        string $eventId,
+        DateTimeImmutable $occurredAt,
+        public readonly string $orderId,
+        public readonly string $trackingNumber,
+    ) {
+        parent::__construct($eventId, $occurredAt);
+    }
+
+    public static function create(string $orderId, string $trackingNumber): self
+    {
+        return new self(
+            eventId:        (string) Uuid::v7(),
+            occurredAt:     new DateTimeImmutable('now', new \DateTimeZone('UTC')),
+            orderId:        $orderId,
+            trackingNumber: $trackingNumber,
+        );
+    }
+
+    /** @param array<string, mixed> $payload */
+    public static function fromPayload(array $payload): static
+    {
+        return new self(
+            eventId:        $payload['eventId'],
+            occurredAt:     new DateTimeImmutable($payload['occurredAt'], new \DateTimeZone('UTC')),
+            orderId:        $payload['orderId'],
+            trackingNumber: $payload['trackingNumber'],
+        );
+    }
+
+    public function eventType(): string { return 'ordering.order_shipped'; }
+
+    public function schemaVersion(): int { return 1; }
+
+    /** @return array<string, mixed> */
+    public function toPayload(): array
+    {
+        return [
+            'eventId'        => $this->eventId,
+            'occurredAt'     => $this->occurredAt->format('Y-m-d H:i:s.u'),
+            'orderId'        => $this->orderId,
+            'trackingNumber' => $this->trackingNumber,
+        ];
+    }
 }
 :::
 
@@ -813,6 +1140,7 @@ use App\Ordering\EventSourced\Event\OrderConfirmed;
 use App\Ordering\EventSourced\Event\OrderPlaced;
 use App\Ordering\EventSourced\Event\OrderItemAdded;
 use App\Ordering\EventSourced\Event\OrderShipped;
+use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\Ordering\EventSourced\Exception\EmptyOrderException;
 use App\Ordering\EventSourced\Exception\InvalidOrderStateTransitionException;
 use App\SharedKernel\Domain\EventSourcedAggregate;
@@ -832,7 +1160,7 @@ final class Order extends EventSourcedAggregate
     public static function place(string $orderId, string $customerId): self
     {
         $order = new self();
-        $order->recordEvent(new OrderPlaced($orderId, $customerId));
+        $order->recordEvent(OrderPlaced::create($orderId, $customerId));
 
         return $order;
     }
@@ -843,7 +1171,7 @@ final class Order extends EventSourcedAggregate
             throw new InvalidOrderStateTransitionException('Items can only be added to draft orders.');
         }
 
-        $this->recordEvent(new OrderItemAdded($this->orderId, $item));
+        $this->recordEvent(OrderItemAdded::create($this->orderId, $item));
     }
 
     public function confirm(): void
@@ -855,7 +1183,7 @@ final class Order extends EventSourcedAggregate
             throw new EmptyOrderException('Cannot confirm an empty order.');
         }
 
-        $this->recordEvent(new OrderConfirmed($this->orderId));
+        $this->recordEvent(OrderConfirmed::create($this->orderId));
     }
 
     public function ship(string $trackingNumber): void
@@ -864,7 +1192,7 @@ final class Order extends EventSourcedAggregate
             throw new InvalidOrderStateTransitionException('Only confirmed orders can be shipped.');
         }
 
-        $this->recordEvent(new OrderShipped($this->orderId, $trackingNumber));
+        $this->recordEvent(OrderShipped::create($this->orderId, $trackingNumber));
     }
 
     // --- apply* metody - MUSÍ být protected (ne private), aby je base class mohla volat dynamicky ---
@@ -892,6 +1220,61 @@ final class Order extends EventSourcedAggregate
     {
         $this->status         = OrderStatus::Shipped;
         $this->trackingNumber = $event->trackingNumber;
+    }
+
+    // --- Snapshot: obchází replay celého streamu u dlouhých agregátů ---
+
+    /**
+     * Serializace stavu do snímku. Musí pokrýt všechno, co nastavují
+     * apply* metody - co tu chybí, to se po načtení ze snapshotu tiše ztratí.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSnapshot(): array
+    {
+        return [
+            'orderId'        => $this->orderId,
+            'customerId'     => $this->customerId,
+            'status'         => $this->status->value,
+            'trackingNumber' => $this->trackingNumber,
+            'items'          => array_map(
+                fn(OrderItem $item) => [
+                    'productId'        => $item->productId,
+                    'quantity'         => $item->quantity,
+                    'unitPriceInCents' => $item->unitPriceInCents,
+                ],
+                $this->items,
+            ),
+        ];
+    }
+
+    /**
+     * Rekonstrukce ze snímku. Nevolá apply*(), stav nastavuje přímo -
+     * a přes restoreVersion() obnoví verzi streamu, bez které by
+     * optimistic locking při prvním uložení selhal.
+     *
+     * @param array<string, mixed> $state
+     */
+    public static function reconstituteFromSnapshot(array $state, int $version): self
+    {
+        $order = new self();
+
+        $order->orderId        = $state['orderId'];
+        $order->customerId     = $state['customerId'];
+        $order->status         = OrderStatus::from($state['status']);
+        $order->trackingNumber = $state['trackingNumber'];
+        $order->items          = array_map(
+            fn(array $item) => new OrderItem(
+                $item['productId'],
+                $item['quantity'],
+                $item['unitPriceInCents'],
+            ),
+            $state['items'],
+        );
+
+        $order->restoreVersion($version);
+
+        return $order;
     }
 
     // Gettery pro aplikační vrstvu
@@ -967,7 +1350,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering;
 
-use App\Ordering\Domain\Model\Order;
+use App\Ordering\EventSourced\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\EventSerializer;
 
@@ -998,7 +1381,7 @@ final class EventSourcedOrderRepository
 
     public function save(Order $order): void
     {
-        $newEvents = $order->releaseEvents();
+        $newEvents = $order->recordedEvents();
 
         if (empty($newEvents)) {
             return;
@@ -1013,6 +1396,10 @@ final class EventSourcedOrderRepository
             $newEvents,
             $expectedVersion,
         );
+
+        // Až teď je zápis jistý. Při ConcurrencyException zůstanou události
+        // v agregátu a volající může načíst čerstvý stav a zkusit to znovu.
+        $order->releaseEvents();
     }
 }
 :::
@@ -1095,12 +1482,17 @@ final class OrderSummaryProjector
     #[AsMessageHandler]
     public function handleOrderItemAdded(OrderItemAdded $event): void
     {
+        // item_count počítá řádky objednávky, total_amount haléře.
+        // Cena řádku je množství krát jednotková cena - bez násobení
+        // by read model u položky "3 kusy" ukázal cenu jednoho kusu.
+        $lineTotal = $event->item->quantity * $event->item->unitPriceInCents;
+
         $this->connection->executeStatement(
             'UPDATE order_summary
                 SET item_count   = item_count + 1,
-                    total_amount = total_amount + :price
+                    total_amount = total_amount + :lineTotal
               WHERE order_id = :orderId',
-            ['price' => $event->item->unitPrice(), 'orderId' => $event->orderId],
+            ['lineTotal' => $lineTotal, 'orderId' => $event->orderId],
         );
     }
 
@@ -1236,6 +1628,11 @@ Asynchronní transport (RabbitMQ, Redis Streams, Amazon SQS) garantuje doručen�
 **alespoň jednou** (at-least-once delivery). Zpráva se proto může doručit opakovaně – po
 timeoutu, restartu workeru nebo síťovém výpadku. Pokud projektor není idempotentní, opakované
 zpracování způsobí poškozená data: duplicitní řádky, zdvojené částky, nekonzistentní počty.
+
+Projektor níže je **varianta** `OrderSummaryProjector` z předchozí sekce, ne přídavek
+k němu. Kdo opíše obě třídy, dostane na `OrderPlaced` dva registrované handlery
+a druhý z nich skončí na `UniqueConstraintViolationException`. Do aplikace patří
+jeden z nich.
 
 Idempotenci lze zajistit dvěma způsoby: **upsert** (INSERT … ON DUPLICATE KEY UPDATE)
 místo prostého INSERT, nebo **tracking tabulka** již zpracovaných událostí.
@@ -1423,9 +1820,12 @@ use Doctrine\DBAL\Connection;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 #[AsCommand(
     name: 'app:projection:rebuild',
@@ -1433,8 +1833,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class RebuildProjectionCommand extends Command
 {
-    /** @var array<string, array{projector: callable, table: string}> Registr projektorů dle názvu */
-    private array $projectors;
+    /** @var array<string, array{projector: object, table: string}> Registr projektorů dle názvu */
+    private array $projectors = [];
 
     /**
      * @param iterable<string, object> $projectors Symfony tagged_iterator
@@ -1444,7 +1844,9 @@ final class RebuildProjectionCommand extends Command
         private readonly Connection $connection,
         private readonly EventStore $eventStore,
         private readonly EventSerializer $serializer,
+        #[AutowireIterator('app.projection', indexAttribute: 'key')]
         iterable $projectors,
+        #[Autowire(param: 'app.projection_tables')]
         array $projectionTables,
     ) {
         parent::__construct();
@@ -1461,6 +1863,7 @@ final class RebuildProjectionCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('projection', InputArgument::REQUIRED, 'Název projekce k přebudování');
+        $this->addOption('force', null, InputOption::VALUE_NONE, 'Přeskočí potvrzení (pro CI a skripty)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -1478,6 +1881,13 @@ final class RebuildProjectionCommand extends Command
 
         $io->warning("Rebuild smaže data projekce '{$name}' (tabulka '{$table}') a přehraje celý Event Store.");
 
+        // Příkaz maže produkční read model. Bez potvrzení se dá spustit omylem
+        // a chybu pozná až uživatel, kterému zmizí data z obrazovky.
+        if (!$input->getOption('force') && !$io->confirm('Pokračovat?', false)) {
+            $io->text('Zrušeno.');
+            return Command::SUCCESS;
+        }
+
         // 1. Smazat stávající data projekce - název tabulky pochází z whitelistu,
         //    nikoli z uživatelského vstupu, takže nehrozí SQL injection.
         $this->connection->executeStatement("TRUNCATE TABLE {$table}");
@@ -1490,7 +1900,10 @@ final class RebuildProjectionCommand extends Command
 
         // 3. Přehrát všechny události z Event Store. Dispatch podle konvence
         //    handle{NázevUdálosti}() - události, pro které projektor
-        //    handler nemá, se přeskočí.
+        //    handler nemá, se přeskočí. Projektor psaný jako __invoke()
+        //    tuhle konvenci nesplňuje: rebuild by mu smazal checkpointy
+        //    a pak nepřehrál nic. Buď mu metody handle*() dopište,
+        //    nebo ho pod tag 'app.projection' nedávejte.
         $projector = $config['projector'];
         $count = 0;
         $batchSize = 500;
@@ -1517,6 +1930,21 @@ final class RebuildProjectionCommand extends Command
 }
 :::
 *src/Infrastructure/EventSourcing/Console/RebuildProjectionCommand.php*
+:::
+
+Příkaz si projektory nenajde sám. `AutowireIterator` sbírá služby podle tagu
+a mapu tabulek bere z parametru, takže obojí musí být v konfiguraci:
+
+:::code{language="yaml" filename="config/services.yaml"}
+parameters:
+    app.projection_tables:
+        order_summary: 'order_summary'
+
+services:
+    App\Infrastructure\Ordering\Projection\OrderSummaryProjector:
+        tags:
+            # 'key' se stane jménem projekce, které příkaz čeká v argumentu
+            - { name: 'app.projection', key: 'order_summary' }
 :::
 
 :::callout{type="warn"}
@@ -1603,6 +2031,41 @@ final class Snapshot
 :::
 *src/Infrastructure/EventSourcing/Snapshot.php*
 
+Snímky drží vlastní tabulka. Poslední snímek na agregát stačí, starší se dají mazat:
+
+:::code{language="sql" filename="migrations/snippet.sql"}
+CREATE TABLE aggregate_snapshot (
+    id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    aggregate_id   VARCHAR(36)  NOT NULL,
+    aggregate_type VARCHAR(100) NOT NULL,
+    version        INT UNSIGNED NOT NULL,
+    state          JSON         NOT NULL,
+    taken_at       DATETIME(6)  NOT NULL,
+
+    -- Jeden snímek na agregát a verzi; opakovaný zápis téže verze je chyba.
+    UNIQUE KEY uniq_snapshot (aggregate_id, aggregate_type, version),
+    -- Načítání jde vždy po nejnovější verzi, proto sestupně.
+    KEY idx_latest (aggregate_id, aggregate_type, version DESC)
+) ENGINE=InnoDB;
+:::
+
+:::code{language="php" filename="src/Infrastructure/EventSourcing/SnapshotStore.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventSourcing;
+
+interface SnapshotStore
+{
+    /** Nejnovější snímek agregátu, nebo null, když žádný neexistuje. */
+    public function findLatest(string $aggregateId, string $aggregateType): ?Snapshot;
+
+    public function save(Snapshot $snapshot): void;
+}
+:::
+*src/Infrastructure/EventSourcing/SnapshotStore.php*
+
 :::code{language="php" filename="src/Infrastructure/Ordering/SnapshottingOrderRepository.php"}
 <?php
 
@@ -1610,7 +2073,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering;
 
-use App\Ordering\Domain\Model\Order;
+use App\Ordering\EventSourced\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\Snapshot;
 use App\Infrastructure\EventSourcing\SnapshotStore;
@@ -1666,7 +2129,7 @@ final class SnapshottingOrderRepository
 
     public function save(Order $order): void
     {
-        $newEvents = $order->releaseEvents();
+        $newEvents = $order->recordedEvents();
 
         if (empty($newEvents)) {
             return;
@@ -1681,8 +2144,16 @@ final class SnapshottingOrderRepository
             $expectedVersion,
         );
 
-        // Automatické snapshotování
-        if ($order->version() % self::SNAPSHOT_INTERVAL === 0) {
+        // Až teď je zápis jistý. Při ConcurrencyException zůstanou události
+        // v agregátu a volající může načíst čerstvý stav a zkusit to znovu.
+        $order->releaseEvents();
+
+        // Automatické snapshotování. Test na modulo by hranici přeskočil
+        // pokaždé, když jeden save() uloží víc událostí naráz - z verze 49
+        // na 51 se na padesátku nikdy netrefí. Rozhoduje proto překročení
+        // násobku, ne přesná shoda.
+        if (intdiv($order->version(), self::SNAPSHOT_INTERVAL)
+            > intdiv($expectedVersion, self::SNAPSHOT_INTERVAL)) {
             $this->snapshotStore->save(new Snapshot(
                 aggregateId:   $order->orderId(),
                 aggregateType: self::AGGREGATE_TYPE,
@@ -1697,9 +2168,10 @@ final class SnapshottingOrderRepository
 *src/Infrastructure/Ordering/SnapshottingOrderRepository.php*
 :::
 
-Aby byl snapshotting funkční, musí agregát implementovat metody `toSnapshot(): array`
-(serializace aktuálního stavu) a statickou `reconstituteFromSnapshot(array $state, int $version): static`
-(deserializace). Na rozdíl od `reconstituteFromEvents()` tato metoda nevytváří apply*()
+Snapshotting stojí na dvou metodách agregátu, které ukazuje sekce
+[Order agregát s Event Sourcingem](#es-order-aggregate-heading): `toSnapshot(): array`
+serializuje aktuální stav, statická `reconstituteFromSnapshot(array $state, int $version)`
+ho načte zpět. Na rozdíl od `reconstituteFromEvents()` tato metoda nevytváří apply*()
 volání; properties nastaví přímo z uloženého snímku a přes `restoreVersion()`
 z base class obnoví verzi streamu. Bez obnovené verze by optimistic locking při
 prvním uložení selhal. Formát snapshotu se proto musí vyvíjet spolu s doménovým modelem.
