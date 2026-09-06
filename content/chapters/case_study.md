@@ -409,10 +409,18 @@ z `AggregateRoot` (sdílené chování pro `record` a `releaseEvents`, viz
 protože dědit z agregátu nechceme. Konstruktor je `private`
 a vznik agregátu probíhá přes statickou factory metodu `create()`.
 
-`final` třída s `public readonly` vlastnostmi má na Doctrine entitě jednu podmínku: nativní lazy
-objekty. Zapíná je `$config->enableNativeLazyObjects(true)` na PHP 8.4; metoda přibyla v ORM 3.4.0
-a od 3.5 je starý režim generovaných proxy vedený jako zastaralý. Bez nich potřebuje Doctrine proxy
-odvozenou z entity a `final` ani `readonly` neprojdou.
+`final` třída na Doctrine entitě potřebuje nativní lazy objekty. Zapíná je
+`$config->enableNativeLazyObjects(true)` na PHP 8.4; metoda přibyla v ORM 3.4.0
+a od 3.5 je starý režim generovaných proxy vedený jako zastaralý. Bez nich potřebuje
+Doctrine proxy odvozenou z entity a `final` neprojde.
+
+`public readonly` identifikátor je ale samostatný problém, který nativní lazy objekty
+neřeší. `find()`, `persist()` i `flush()` fungují, jenže hydratace už existujícího
+objektu ne: `$em->refresh($project)` i první dotknutí reference z `$em->getReference()`
+skončí na `LogicException: Attempting to change readonly property`. Doctrine při
+rehydrataci vlastnost zapisuje znovu a PHP to u `readonly` odmítne. Kdo tyhle dvě
+cesty používá, dá identifikátoru běžnou `private` vlastnost s getterem, jako to dělá
+`Task` níže.
 
 :::code{language="php" filename="src/ProjectManagement/Domain/Model/Project.php"}
 <?php
@@ -475,7 +483,7 @@ final class Project extends AggregateRoot
     public static function create(ProjectId $id, string $name, ?string $description, UserId $ownerId): self
     {
         $project = new self($id, $name, $description, $ownerId);
-        $project->record(new ProjectCreated($id, $name, $ownerId));
+        $project->record(new ProjectCreated($id, $name, $description, $ownerId));
 
         return $project;
     }
@@ -593,16 +601,35 @@ use App\SharedKernel\Domain\AggregateRoot;
 // ProjectId a UserId se importují z vlastnických kontextů (viz sekci 24.07.2)
 use App\ProjectManagement\Domain\ValueObject\ProjectId;
 use App\UserManagement\Domain\ValueObject\UserId;
+use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
+#[ORM\Table(name: 'tasks')]
 final class Task extends AggregateRoot
 {
+    #[ORM\Id]
+    #[ORM\Column(type: 'task_id')]
     private readonly TaskId $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
     private string $title;
+
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description;
+
+    #[ORM\Column(type: 'project_id')]
     private readonly ProjectId $projectId;
+
+    #[ORM\Column(type: 'user_id', nullable: true)]
     private ?UserId $assigneeId = null;
+
+    #[ORM\Column(type: 'string', length: 20, enumType: TaskStatus::class)]
     private TaskStatus $status;
+
+    #[ORM\Column(type: 'datetime_immutable')]
     private readonly \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
     private function __construct(TaskId $id, string $title, ?string $description, ProjectId $projectId)
@@ -732,6 +759,10 @@ final readonly class ProjectCreated
     public function __construct(
         public ProjectId $projectId,
         public string $name,
+        // Popis patří do payloadu, i když ho žádný invariant nehlídá.
+        // Read model ho má ve sloupci, a co událost nenese, projekce
+        // nemá kde vzít - a nikdo si toho nevšimne, protože nic nespadne.
+        public ?string $description,
         public UserId $ownerId,
         public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {
@@ -739,7 +770,7 @@ final readonly class ProjectCreated
 }
 :::
 
-:::code{language="php" filename="src/ProjectManagement/Domain/Event/MemberAdded.php a MemberRemoved.php"}
+:::code{language="php" filename="src/ProjectManagement/Domain/Event/MemberAdded.php + MemberRemoved.php"}
 <?php
 
 declare(strict_types=1);
@@ -770,7 +801,7 @@ final readonly class MemberRemoved
 }
 :::
 
-:::code{language="php" filename="src/TaskManagement/Domain/Event/TaskCreated.php, TaskAssigned.php, TaskStatusChanged.php"}
+:::code{language="php" filename="src/TaskManagement/Domain/Event/TaskCreated.php + TaskAssigned.php + TaskStatusChanged.php"}
 <?php
 
 declare(strict_types=1);
@@ -1292,6 +1323,11 @@ Běží jako asynchronní message handler mimo originální transakci, takže ji
 Každou událost obsluhuje samostatná metoda s atributem `#[AsMessageHandler]`; Messenger
 routuje podle type-hintu parametru, obecný type-hint `object` proto použít nelze.
 
+Projekce obsluhuje čtyři události z šesti, které agregáty vydávají. `TaskAssigned`
+a `TaskStatusChanged` konzumenta nemají, a na asynchronním transportu proto skončí
+v retry a pak v dead-letter frontě. Sběrnice událostí kvůli tomu potřebuje
+`allow_no_handlers: true`, jak popisuje [kapitola o CQRS](/cqrs#symfony-messenger).
+
 :::code{language="php" filename="src/ProjectManagement/Infrastructure/ReadModel/ProjectListProjection.php"}
 <?php
 
@@ -1305,12 +1341,14 @@ use App\ProjectManagement\Domain\Event\ProjectCreated;
 use App\TaskManagement\Domain\Event\TaskCreated;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 class ProjectListProjection
 {
     public function __construct(
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
+        private readonly ManagerRegistry $registry,
     ) {
     }
 
@@ -1325,6 +1363,7 @@ class ProjectListProjection
         $view = new ProjectListView();
         $view->projectId = $event->projectId->value;
         $view->name = $event->name;
+        $view->description = $event->description;
         $view->ownerId = $event->ownerId->value;
         $view->memberIds = [$event->ownerId->value];
         $view->memberCount = 1;
@@ -1338,7 +1377,12 @@ class ProjectListProjection
         } catch (UniqueConstraintViolationException) {
             // Souběh: mezi find() a flush() stihl řádek vložit jiný worker.
             // Výsledek je stejný, jaký jsme chtěli, takže zprávu potvrdíme.
-            $this->em->clear();
+            //
+            // Neúspěšný flush ale EntityManager zavřel a clear() ho neotevře.
+            // Bez resetu by další handler v témže procesu skončil na
+            // EntityManagerClosed. Podrobněji kapitola
+            // [DDD v praxi](/ddd-v-praxi-kde-to-boli#a1-transakce).
+            $this->registry->resetManager();
         }
     }
 

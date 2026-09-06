@@ -356,10 +356,14 @@ final class Order extends AggregateRoot
     }
 }
 
-// Volající drží identitu ještě před uložením:
-$orderId    = OrderId::generate();
-$customerId = CustomerId::fromString($command->customerId);
-$order      = Order::place($orderId, $customerId);
+/*
+ * Volající drží identitu ještě před uložením. Řádky patří do handleru;
+ * na úrovni souboru by je PHP vykonalo při autoloadu třídy.
+ *
+ * $orderId    = OrderId::generate();
+ * $customerId = CustomerId::fromString($command->customerId);
+ * $order      = Order::place($orderId, $customerId);
+ */
 :::
 :::
 
@@ -594,7 +598,11 @@ final class IdempotencyMiddleware implements MiddlewareInterface
         );
 
         if ($alreadyProcessed) {
-            return $envelope; // duplikát - přeskočit bez zpracování
+            // Duplikát se přeskočí. Obálka se vrací bez HandledStamp,
+            // takže volající na synchronní sběrnici, který si výsledek
+            // vytahuje přes HandledStamp, dostane null. Middleware míří
+            // na asynchronní příkazy, kde návratovou hodnotu nikdo nečte.
+            return $envelope;
         }
 
         $result = $stack->next()->handle($envelope, $stack);
@@ -750,6 +758,12 @@ Jeho obecný rozbor najdete v [Anti-vzorech](/anti-vzory#anemicky-domenovy-model
 final class Order extends AggregateRoot
 {
     private OrderStatus $status = OrderStatus::Draft;
+    private ?TrackingNumber $trackingNumber = null;
+
+    public function __construct(
+        public readonly OrderId $id,
+    ) {
+    }
 
     public function confirm(): void
     {
@@ -917,6 +931,8 @@ if ($form->isSubmitted() && $form->isValid()) {
 
     // 3. Controller sestaví Command - immutable, doménově typovaný
     $command = new PlaceOrderCommand(
+        // Identitu přiděluje aplikace, ne databáze - viz sekce A5.
+        orderId: OrderId::generate(),
         customerId: CustomerId::fromString($data->customerId),
         items: array_map(
             fn($i) => new OrderItemDto($i['productId'], (int) $i['quantity']),
