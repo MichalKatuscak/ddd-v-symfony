@@ -62,12 +62,32 @@ podle [kapitoly o agregátech](/navrh-agregatu#symfony-doctrine) dřív, než vz
 migrace. Druhý krok je `DATABASE_URL` v `.env` – recept nastaví PostgreSQL, takže
 u SQLite nebo MySQL připojení do prázdna:
 
-:::code{language="bash" filename=".env.local"}
+:::code{language="ini" filename=".env.local"}
 # SQLite stačí na všechny ukázky v knize a nepotřebuje běžící server
 DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
+:::
 
-php bin/console doctrine:database:create
+:::code{language="bash" filename="terminál"}
+# doctrine:database:create u SQLite není potřeba a skončí chybou
+# „getCreateDatabaseSQL is not supported by platform“ – soubor si
+# ovladač založí sám při prvním připojení.
 php bin/console doctrine:migrations:migrate
+:::
+
+Testy z kapitol o CQRS a ságách běží proti skutečné databázi, takže potřebují dvě věci
+navíc. Testovací balíček v seznamu výše záměrně není, protože ho nepotřebuje každý:
+
+:::code{language="bash" filename="terminál"}
+composer require --dev symfony/test-pack
+:::
+
+Zbývá detail, který stojí půl hodiny hledání: **`.env.local` se v prostředí `test`
+nenačítá.** Kernel testy proto sáhnou po `DATABASE_URL` z `.env`,
+tedy po PostgreSQL z receptu, a spadnou na `Connection refused`. Hodnota patří
+do `.env.test.local`:
+
+:::code{language="ini" filename=".env.test.local"}
+DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
 :::
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}

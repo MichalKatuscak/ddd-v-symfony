@@ -2081,8 +2081,8 @@ services:
     App\Warehouse\: { resource: '../src/Warehouse/', exclude: ['../src/Warehouse/Domain/Event/'] }
     App\Shipping\:  { resource: '../src/Shipping/',  exclude: ['../src/Shipping/Domain/ValueObject/'] }
 
-    App\Outbox\Domain\OutboxRepository: '@App\Outbox\Infrastructure\DoctrineOutboxRepository'
-    App\Inbox\Domain\InboxRepository: '@App\Inbox\Infrastructure\DbalInboxRepository'
+    App\Outbox\Application\OutboxRepository: '@App\Outbox\Infrastructure\DoctrineOutboxRepository'
+    App\Inbox\Application\InboxRepository: '@App\Inbox\Infrastructure\DbalInboxRepository'
     App\Ordering\Application\Saga\OrderSagaRepository: '@App\Ordering\Infrastructure\Saga\DoctrineOrderSagaRepository'
     App\Payment\Domain\PaymentGateway: '@App\Payment\Infrastructure\StripePaymentGateway'
 :::

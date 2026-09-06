@@ -539,7 +539,9 @@ class Order extends AggregateRoot
         $this->record(new OrderShipped($this->id, $shipmentId, new \DateTimeImmutable()));
     }
 
-    public function cancel(string $reason): void
+    // Čas přebírá parametr, ne new \DateTimeImmutable() uvnitř: kapitola
+    // o autorizaci na něm staví storno lhůtu a testy potřebují zadat vlastní.
+    public function cancel(string $reason, \DateTimeImmutable $when): void
     {
         // Storno je hrana grafu jako každá jiná: odeslanou zásilku
         // už zpátky nevrátí, tam nastupuje kompenzace v ságe.
@@ -561,8 +563,15 @@ class Order extends AggregateRoot
             $this->id,
             $this->customerId,
             $reason,
-            new \DateTimeImmutable(),
+            $when,
         ));
+    }
+
+    // Vlastnictví patří agregátu, ne Voteru. Kapitola o autorizaci
+    // na tom staví celé rozhodování o přístupu.
+    public function isOwnedBy(CustomerId $customerId): bool
+    {
+        return $this->customerId->equals($customerId);
     }
 
     public function totalAmount(): Money

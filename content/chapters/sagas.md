@@ -1006,7 +1006,7 @@ final readonly class ReleaseStock
 `ReserveStockHandler`, `CreateShipmentHandler` a `RefundCustomerHandler` sedí ve svých
 kontextech a mají tvar `ChargeCustomerHandler`: zavolají službu a vydají událost
 o výsledku. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
-`cancel($command->reason)`. Porty `StockService` a `ShippingService` mají stejnou
+`cancel($command->reason, new \DateTimeImmutable())`. Porty `StockService` a `ShippingService` mají stejnou
 stavbu jako `PaymentGateway` – rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
 
 Adaptéry jsou jediné místo, kde na knize záleží nejmíň: za rozhraním může být HTTP klient

@@ -1014,7 +1014,10 @@ final class Version20260906090000 extends AbstractMigration
                 status          VARCHAR(32)   NOT NULL,
                 shipment_id     CHAR(36)      DEFAULT NULL,
                 placed_at       DATETIME      NOT NULL,
-                updated_at      DATETIME      NOT NULL,
+                -- Mikrosekundy nejsou kosmetika: na porovnání updated_at
+                -- stojí ochrana proti opožděné události a dvě události
+                -- jednoho agregátu běžně spadnou do téže vteřiny.
+                updated_at      DATETIME(6)   NOT NULL,
                 PRIMARY KEY (order_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         SQL);
@@ -1089,8 +1092,8 @@ final class OrderDashboardProjector
                 'customerId'   => $event->customerId,
                 'totalAmount'  => $event->totalAmountCents,
                 'status'       => 'placed',
-                'placedAt'     => $event->occurredAt->format('Y-m-d H:i:s'),
-                'updatedAt'    => $event->occurredAt->format('Y-m-d H:i:s'),
+                'placedAt'     => $event->occurredAt->format('Y-m-d H:i:s.u'),
+                'updatedAt'    => $event->occurredAt->format('Y-m-d H:i:s.u'),
             ],
         );
     }
@@ -1109,7 +1112,7 @@ final class OrderDashboardProjector
                 'orderId'    => $event->orderId->value,
                 'status'     => 'shipped',
                 'shipmentId' => $event->shipmentId->value,
-                'updatedAt'  => $event->occurredAt->format('Y-m-d H:i:s'),
+                'updatedAt'  => $event->occurredAt->format('Y-m-d H:i:s.u'),
             ],
         );
     }
@@ -1124,7 +1127,7 @@ final class OrderDashboardProjector
             [
                 'orderId'   => $event->orderId->value,
                 'status'    => 'cancelled',
-                'updatedAt' => $event->occurredAt->format('Y-m-d H:i:s'),
+                'updatedAt' => $event->occurredAt->format('Y-m-d H:i:s.u'),
             ],
         );
     }
@@ -1141,7 +1144,11 @@ zpracování téže události nesmí vést k nesprávným datům. Samotný upser
 `ON CONFLICT … DO UPDATE` je last-write-wins, takže opakované doručení `OrderPlaced`
 po `OrderShipped` vrátí řádek zpět na `placed` a dashboard začne lhát. Proto obě věty
 v ukázce nesou podmínku `updated_at < :updatedAt` – zápis projde jen tehdy, když je
-událost novější než to, co v řádku už je. Alternativní přístupy:
+událost novější než to, co v řádku už je. Porovnává se řetězec, takže na formátu záleží:
+`Y-m-d H:i:s` se sekundovou přesností podmínku obrátí proti vám. Dvě události téhož
+agregátu spadnou do jedné vteřiny běžně a `<` je pak nepravdivé i pro legitimní přechod –
+objednávka se odešle, ale dashboard mlčky zůstane na `placed`. Proto `.u` ve formátu
+a `DATETIME(6)` ve sloupci. Alternativní přístupy:
 
 - **Sledování pozice** – projektor si ukládá pozici posledního zpracovaného
   eventu (event ID nebo sequence number) a ignoruje události se stejnou nebo nižší pozicí.

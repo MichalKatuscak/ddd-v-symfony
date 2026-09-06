@@ -745,8 +745,8 @@ declare(strict_types=1);
 
 namespace App\Outbox\Infrastructure;
 
+use App\Outbox\Application\OutboxRepository;
 use App\Outbox\Domain\OutboxMessage;
-use App\Outbox\Domain\OutboxRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -775,7 +775,7 @@ final readonly class DoctrineOutboxRepository implements OutboxRepository
 
     public function markSent(Uuid $id): void
     {
-        $this->em->find(OutboxMessage::class, $id)?->markSent();
+        $this->em->find(OutboxMessage::class, $id)?->markSent(new \DateTimeImmutable());
         $this->em->flush();
     }
 
