@@ -7,7 +7,7 @@ meta_description: "Systém pro správu projektů v DDD krok za krokem: bounded c
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
@@ -26,8 +26,8 @@ Ilustrativní scénář: tým, čísla i rozhodnutí v této kapitole jsou smyš
 Tým dostal zadání postavit systém pro správu projektů. Uživatelé zakládají projekty, přidávají úkoly, přiřazují
 je členům týmu, mění jejich stav a komentují je. Triviální zadání. První instinkt vývojáře je tabulka `projects`,
 tabulka `tasks` s cizím klíčem, tabulka `comments` a `TaskService`, který vše obslouží. Za tři měsíce má `TaskService`
-osm set řádků a každá změna v přiřazování úkolů rozbije reportování. Tato studie ukazuje druhou cestu –
-strategický a taktický DDD s CQRS v Symfony 8 od prvního workshopu po projekce s reconciliation.
+osm set řádků a každá změna v přiřazování úkolů rozbije reportování. Tato studie ukazuje druhou cestu.
+Strategický a taktický DDD s CQRS v Symfony 8 vede od prvního workshopu po projekce s reconciliation.
 
 ## 24.02 Požadavky {#requirements}
 
@@ -46,7 +46,7 @@ Systém pro správu projektů má následující požadavky:
 
 Architektura začíná u rozhovoru s doménovými experty, ne u kódu. Než přijde rozhodnutí o tabulkách
 a třídách, musí tým vědět, co se v doméně děje a kde leží hranice. Pět bounded contexts z následující
-[sekce Architektura](#architecture) nevypadlo z hlavy architekta – vyplynulo ze tří kroků
+[sekce Architektura](#architecture) nevypadlo z hlavy architekta. Vyplynulo ze tří kroků
 *event stormingu*: sběru doménových událostí, jejich seskupení do subdomén a vykreslení
 kontextových hranic. Formát pochází od Alberta Brandoliniho; notaci, průběh workshopu i jeho
 anti-vzory rozebírá kapitola [Event Storming](/event-storming).
@@ -54,8 +54,8 @@ anti-vzory rozebírá kapitola [Event Storming](/event-storming).
 ### Krok 1: Sběr doménových událostí {#discovery-events-heading}
 
 První workshop směřoval k otázce „co se v systému děje“. Doménoví experti formulovali v chronologickém
-pořadí události, které pro ně mají význam. Seznam vznikl bez ohledu na strukturu kódu, frameworku nebo databáze –
-cílem je zachytit slovník ([Ubiquitous Language](/zakladni-koncepty#ubiquitous-language)),
+pořadí události, které pro ně mají význam. Seznam vznikl bez ohledu na strukturu kódu, frameworku nebo databáze.
+Cílem je zachytit slovník ([Ubiquitous Language](/zakladni-koncepty#ubiquitous-language)),
 ne implementaci.
 
 - Uživatel se zaregistroval.
@@ -80,7 +80,7 @@ zjištění je zárodkem rozdělení do bounded contexts.
 
 ### Krok 2: Seskupení událostí do subdomén {#discovery-grouping-heading}
 
-Tým druhý den shlukoval události podle významu. Otázka pro každou skupinu zněla: kdo z byznysu za toto odpovídá?
+Tým druhý den shlukoval události podle významu. Pro každou skupinu padla otázka, kdo z byznysu za ni odpovídá.
 Skupina, které rozumí jediný expert, je kandidát na subdoménu. Výsledkem byla mapa událostí na subdomény:
 
 | Subdoména | Událost | Doménový expert |
@@ -100,11 +100,11 @@ Skupina, které rozumí jediný expert, je kandidát na subdoménu. Výsledkem b
 Sloupec *Doménový expert* není dekorativní. Pomáhá ověřit, že se hranice kontextů skutečně kryjí
 s organizační realitou. Pokud by jeden kontext potřeboval čtyři různé experty, je to signál, že jde
 o agregaci nesouvisejících odpovědností. Pokud naopak dva kontexty řídí stejný expert, mohou být kandidáty
-na sloučení – nebo signálem, že expert pokrývá víc rolí, než je zdravé.
+na sloučení, případně signálem, že expert pokrývá víc rolí, než je zdravé.
 
 ### Klasifikace subdomén {#discovery-subdomain-types-heading}
 
-Pět subdomén neznamená pět stejně důležitých subdomén. Před převodem na kontexty zařadil tým každou
+Pět subdomén neznamená pět stejně důležitých částí systému. Před převodem na kontexty zařadil tým každou
 z nich do jedné ze tří kategorií podle kapitoly [Subdomény](/subdomeny#tri-kategorie). Zařazení
 rozhoduje o tom, kolik modelování si která část zaslouží.
 
@@ -118,7 +118,7 @@ rozhoduje o tom, kolik modelování si která část zaslouží.
 
 Zařazení **UserManagement** mezi Generic jde proti prvnímu instinktu postavit vlastní autentizaci.
 Kolik taková volba stojí, ukazuje [Subdomény](/subdomeny#custom-auth-warning-heading). Kontext ve
-studii zůstává, protože nese hranici a vztah v kontextové mapě, jeho model je ale tenký: identita,
+studii zůstává, protože nese hranici a vztah v kontextové mapě. Jeho model je ale tenký: identita,
 e-mail a delegace na Symfony Security, respektive na externího poskytovatele identity. Doménová
 práce se soustředí do dvou Core kontextů.
 
@@ -127,18 +127,18 @@ Bez tohoto kroku dostane každý kontext stejnou investici do modelu. Přesně t
 
 ### Krok 3: Definice kontextových hranic {#discovery-boundaries-heading}
 
-Třetí krok převedl subdomény na bounded contexts – jednotky, ve kterých má slovník jeden význam, model jedny
+Třetí krok převedl subdomény na bounded contexts, tedy jednotky, ve kterých má slovník jeden význam, model jedny
 invarianty a kód jednu modulovou hranici. Kritéria pro hranici byla tři:
 
-1. **Sémantická koherence** – slova uvnitř kontextu mají jeden význam. Pokud uvnitř téhož
-   kontextu znamená „status“ jednou stav úkolu a podruhé stav projektu, je to signál pro rozdělení.
+1. **Sémantická koherence** – slova uvnitř kontextu mají jeden význam. Pokud „status“ znamená
+   jednou stav úkolu a podruhé stav projektu, je to signál pro rozdělení.
 2. **Vlastnictví domény** – každý kontext má jednoho doménového experta odpovědného za pravidla
    a slovník. Bez identifikovatelného vlastníka jsou rozhodnutí o modelu náhodná.
 3. **Tempo změn** – části systému, které se mění společně, patří do téhož kontextu. Pokud změna
    v **TaskManagement** opakovaně vynucuje úpravu v **CommentManagement**, je hranice
    mezi nimi špatně vedená.
 
-Převod dopadl 1:1 – z každé subdomény vznikl právě jeden kontext. Pravidlo to není: Core subdoména
+Převod dopadl 1:1, z každé subdomény vznikl právě jeden kontext. Pravidlo to není. Core subdoména
 se běžně rozpadá do několika kontextů a několik Supporting subdomén se naopak vejde do jednoho
 ([Subdomény](/subdomeny#subdomeny-na-bc)).
 
@@ -151,7 +151,7 @@ Hlubší teoretický základ pro identifikaci kontextů poskytují kapitoly
 :::callout{type="note"}
 Event storming není jednorázový workshop. Po prvním nasazení se ukazují události, se kterými tým nepočítal
 (`InvitationExpired`, `TaskBlocked`) i události, které se v praxi nepoužívají.
-Doménový model je *živý dokument* – při každém větším incrementu se vyplatí ověřit, že slovník
+Doménový model je *živý dokument*. Při každém větším incrementu se vyplatí ověřit, že slovník
 v kódu odpovídá slovníku v týmu.
 :::
 

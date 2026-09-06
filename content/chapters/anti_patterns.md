@@ -28,7 +28,7 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 DDD nabízí strukturu pro modelování domény, ale s tou strukturou přicházejí specifická úskalí. Týmy začínající s DDD opakovaně narážejí na stejné chyby, i když teorii rozumějí. Anti-vzory je proto potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 
-Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon. Každá sekce níže proto nese dvě věci: rozpoznávací znak, tedy větu, podle které zjistíte, jestli se problém týká vašeho kódu, a hranici, za kterou už kritizovaný postup chybou není.
+Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon. Každá sekce níže proto nese dvě věci. Rozpoznávací znak je věta, podle které zjistíte, jestli se problém týká vašeho kódu. Hranice pak vymezuje, kde už kritizovaný postup chybou není.
 
 Nejznámější anti-vzor DDD zde nenajdete. Big Ball of Mud, tedy oblast bez rozeznatelných hranic, patří ke Context Mappingu, protože se dá vědomě ohraničit a nechat být; rozebírá jej [sekce 03.12](/context-mapping#big-ball-of-mud).
 
@@ -44,7 +44,7 @@ Chyby při implementaci DDD spadají do tří kategorií podle toho, kde vznikaj
 
 ## 21.02 Anti-vzor: Anémický doménový model (Anemic Domain Model) {#anemicky-domenovy-model}
 
-Anémický model patří k nejčastějším anti-vzorům objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika je přesunuta do servisní vrstvy.
+Anémický model patří k nejčastějším anti-vzorům objektově orientovaného vývoje a v DDD zvlášť bolí. Termín popularizoval Martin Fowler v článku z roku 2003 [[1]](https://martinfowler.com/bliki/AnemicDomainModel.html). Doménové třídy (entity, agregáty) v něm slouží pouze jako datové kontejnery. Obsahují výhradně gettery a settery a veškerá doménová logika sedí v servisní vrstvě.
 
 Fowler považoval argument „porušuje se zapouzdření“ za příliš slabý a připojil druhý, nákladový: anémický model nese veškeré náklady doménového modelu, aniž by přinášel jeho užitek. Zaplatíte mapování na databázi, obalování hodnot a rozpad kódu do vrstev, a dostanete datovou strukturu, kterou by obsloužil obyčejný `SELECT`. Účet bez protihodnoty je jádro problému, ne nedodržená poučka o OOP.
 
@@ -57,7 +57,7 @@ Fowler považoval argument „porušuje se zapouzdření“ za příliš slabý 
 ### Proč je anémický model problém? {#anemicky-definice-heading}
 
 - **Porušení zapouzdření (encapsulation)** – základní princip OOP říká, že data a chování, které na nich operuje, by měly být společně. Anémický model toto porušuje tím, že data jsou v entitě, ale logika je jinde.
-- **Ztráta modelu jako abstrakce domény** – pokud entity obsahují pouze data, model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla, pouze strukturu dat – model tak ztrácí svůj komunikační a dokumentační přínos.
+- **Ztráta modelu jako abstrakce domény** – pokud entity obsahují pouze data, model přestává vyjadřovat chování domény a stává se pouhým datovým schématem přeloženým do tříd. Doménový expert by v takovém modelu nerozeznal žádné doménové procesy ani pravidla, pouze strukturu dat. Model tím ztrácí svůj komunikační a dokumentační přínos.
 - **Duplicita logiky** – doménová pravidla rozptýlená do service tříd vedou k jejich kopírování na více místech, protože není jasné kanonické místo pro logiku.
 - **Testy potřebují víc lešení** – pravidlo přesunuté do služby se testuje přes celou tuto službu a přes všechno, co má v konstruktoru. Entita bez závislostí se otestuje jedním `new` a jedním voláním. Výhoda ale není bezpodmínečná: dobře navržená aplikační služba se testuje bez potíží a agregát, který ke svému rozhodnutí potřebuje kolaboranty, ji ztrácí také.
 :::
@@ -65,7 +65,7 @@ Fowler považoval argument „porušuje se zapouzdření“ za příliš slabý 
 Anti-vzorem není servisní vrstva jako taková. Fowler v témže článku Service Layer výslovně obhajuje a odmítá jen to, aby v ní žila *veškerá* doménová logika. Rozlišit je proto potřeba tři věci, které se v projektech jmenují stejně:
 
 1. **Aplikační služba** orkestruje: načte agregát, zavolá na něm jednu metodu, uloží výsledek, odešle události. Vlastní doménové pravidlo neobsahuje a je legitimní.
-2. **Doménová služba** nese pravidlo, které nepatří jedinému agregátu – výpočet přes několik agregátů nebo politiku s externím vstupem. Je to řádný stavební blok, viz [doménové služby](/zakladni-koncepty#domain-services).
+2. **Doménová služba** nese pravidlo, které nepatří jedinému agregátu. Takovým pravidlem je výpočet přes několik agregátů nebo politika s externím vstupem. Je to řádný stavební blok, viz [doménové služby](/zakladni-koncepty#domain-services).
 3. **„God service“** drží pravidla patřící entitám, které samy nemají žádné chování. Teprve to je anémický model.
 
 :::callout{type="warn"}
@@ -270,21 +270,21 @@ final class User extends AggregateRoot
 :::
 :::
 
-Rozdíl je v tom, že správná entita vystavuje doménově orientované metody (`activate()`, `deactivate()`, `register()`) místo generických setterů. Entita sama garantuje své invarianty – nikdo zvenčí ji nedostane do nekonzistentního stavu.
+Správná entita vystavuje doménově orientované metody (`activate()`, `deactivate()`, `register()`) místo generických setterů. Své invarianty si hlídá sama, takže ji nikdo zvenčí nedostane do nekonzistentního stavu.
 
 :::callout{type="note"}
 ### Getter a setter už nejsou spolehlivý příznak {#php84-priznaky-heading}
 
-Fowlerova diagnóza z roku 2003 se opírala o tvar kódu: dvojice `getX()` / `setX()` znamenala datový kontejner. PHP 8.4 tento signál oslabuje. Asymetrická viditelnost `public private(set) UserStatus $status` [[4]](https://wiki.php.net/rfc/asymmetric-visibility-v2) vystaví vlastnost ke čtení a zápis nechá jen uvnitř třídy; property hooks [[5]](https://www.php.net/manual/en/language.oop5.property-hooks.php) odstraní většinu ručně psaných přístupových metod. Entita bez jediného getteru proto může být stejně anémická jako ta s dvaceti.
+Fowlerova diagnóza z roku 2003 se opírala o tvar kódu. Dvojice `getX()` / `setX()` znamenala datový kontejner. PHP 8.4 tento signál oslabuje. Asymetrická viditelnost `public private(set) UserStatus $status` [[4]](https://wiki.php.net/rfc/asymmetric-visibility-v2) vystaví vlastnost ke čtení a zápis nechá jen uvnitř třídy; property hooks [[5]](https://www.php.net/manual/en/language.oop5.property-hooks.php) odstraní většinu ručně psaných přístupových metod. Entita bez jediného getteru proto může být stejně anémická jako ta s dvaceti.
 
-Příznakem zůstává **veřejný zápis stavu bez doménového jména**. Řádek `$user->status = UserStatus::Active;` v aplikační vrstvě je totéž co `setStatus('active')`, jen kratší. Hodnotové objekty této knihy hooky nepoužijí: s `readonly` vlastnostmi je zkombinovat nelze [[5]](https://www.php.net/manual/en/language.oop5.property-hooks.php).
+Příznakem zůstává **veřejný zápis stavu bez doménového jména**. Řádek `$user->status = UserStatus::Active;` v aplikační vrstvě je totéž co `setStatus('active')`, jen kratší. Hodnotové objekty této knihy hooky nepoužijí, protože s `readonly` vlastnostmi je zkombinovat nelze [[5]](https://www.php.net/manual/en/language.oop5.property-hooks.php).
 :::
 
 ### Kdy anémický model chyba není {#anemicky-kdy-nevadi}
 
-Fowler sám připouští, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script [[2]](https://martinfowler.com/eaaCatalog/transactionScript.html) – řádný vzor z *Patterns of Enterprise Application Architecture*, který organizuje logiku po procedurách, jednu na požadavek. V doméně s pěti pravidly bývá procedura čitelnější než šest tříd okolo ní. Volba mezi vzory patří k rozhodnutí o typu subdomény, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd#hybrid-subdomain).
+Fowler sám připouští, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script [[2]](https://martinfowler.com/eaaCatalog/transactionScript.html). Jde o řádný vzor z *Patterns of Enterprise Application Architecture*, který organizuje logiku po procedurách, jednu na požadavek. V doméně s pěti pravidly bývá procedura čitelnější než šest tříd okolo ní. Volba mezi vzory patří k rozhodnutí o typu subdomény, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd#hybrid-subdomain).
 
-Druhou výhradu přináší funkcionální škola. Mark Seemann ukazuje, že zapouzdření není totéž co metoda na objektu: stejnou garanci dá typ, který nelze zkonstruovat do neplatného stavu, plus modul funkcí nad ním [[3]](https://blog.ploeh.dk/2022/10/24/encapsulation-in-functional-programming/). Data od chování oddělit lze. Co oddělit nelze, je validace od dat – záznam s veřejnými poli, který kdokoli naplní čímkoli, je anémický v tom škodlivém smyslu, i kdyby funkce nad ním byly sebelépe napsané.
+Druhou výhradu přináší funkcionální škola. Mark Seemann ukazuje, že zapouzdření není totéž co metoda na objektu. Stejnou garanci dá typ, který nelze zkonstruovat do neplatného stavu, plus modul funkcí nad ním [[3]](https://blog.ploeh.dk/2022/10/24/encapsulation-in-functional-programming/). Data od chování oddělit lze. Co oddělit nelze, je validace od dat – záznam s veřejnými poli, který kdokoli naplní čímkoli, je anémický v tom škodlivém smyslu, i kdyby funkce nad ním byly sebelépe napsané.
 
 **Hranice pravidla.** Anémický model je chyba tehdy, když platíte cenu doménového modelu bez jeho přínosu. Rozhodli jste se pro doménový model? Pak v něm mají být pravidla. Rozhodli jste se pro Transaction Script? Pak žádnou anémii neřešíte, jen to rozhodnutí musíte umět pojmenovat a nevydávat adresář `Domain/` za doménový model.
 
@@ -297,7 +297,7 @@ Primitive Obsession nastává, když vývojáři používají primitivní datov�
 :::callout{type="note"}
 ### Problémy způsobené Primitive Obsession {#primitive-problemy-heading}
 
-Primitivní `string` může obsahovat jakoukoliv hodnotu; hodnotový objekt `Email` garantuje platnou e-mailovou adresu. Primitivům navíc chybí sémantika – typ `string` neříká nic o tom, co hodnota reprezentuje, zatímco `Email`, `PhoneNumber` nebo `PostalCode` sémantiku nesou. Používání `int` pro všechna ID vede k záměnám: typový systém PHP ani IDE neodhalí prohozené `$orderId` a `$userId`, obojí je jen `int`. A bez hodnotových objektů se validace opakuje na každém místě, kde se s hodnotou pracuje.
+Primitivní `string` může obsahovat jakoukoliv hodnotu; hodnotový objekt `Email` garantuje platnou e-mailovou adresu. Primitivům navíc chybí sémantika. Typ `string` neříká nic o tom, co hodnota reprezentuje, zatímco `Email`, `PhoneNumber` nebo `PostalCode` ji nesou. Jediný typ `int` pro všechna ID vede k záměnám: typový systém PHP ani IDE neodhalí prohozené `$orderId` a `$userId`, obojí je jen `int`. A bez hodnotových objektů se validace opakuje na každém místě, kde se s hodnotou pracuje.
 :::
 
 :::callout{type="warn"}
@@ -460,13 +460,13 @@ processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type O
 
 `Money` odmítá zápornou částku záměrně. Směr pohybu nese operace, ne částka: dobropis je `refund()`, ne záporná suma, takže se znaménko nemůže cestou ztratit. Plnou definici uvádí [sekce 06.04](/zakladni-koncepty#value-objects); ukázka výše je zkrácená na to, co odlišuje hodnotový objekt od `float` a `string`.
 
-Hodnotový objekt má i svou cenu. Vyplatí se tam, kde hodnota splní alespoň jednu ze tří podmínek: nese vlastní pravidla platnosti (`Email`, `BirthNumber`), má vlastní operace (`Money::add()`), nebo hrozí její záměna s jinou hodnotou téhož primitivního typu (`OrderId` proti `UserId`). Evans totéž říká obráceně – jako hodnotový objekt klasifikujte prvek modelu, u kterého vás zajímají pouze jeho atributy a logika [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
+Hodnotový objekt má i svou cenu. Vyplatí se tam, kde hodnota splní alespoň jednu ze tří podmínek: nese vlastní pravidla platnosti (`Email`, `BirthNumber`), má vlastní operace (`Money::add()`), nebo hrozí její záměna s jinou hodnotou téhož primitivního typu (`OrderId` proti `UserId`). Evans totéž říká obráceně. Jako hodnotový objekt klasifikujte prvek modelu, u kterého vás zajímají pouze jeho atributy a logika [[6]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 
 **Hranice pravidla.** Pole `note`, `description` nebo `internalComment` žádnou z podmínek nesplňuje. Třída `Note` obalující `string` bez jediného pravidla je přesně ta ceremonie, před kterou varuje [sekce 21.08](#over-engineering). Kritériem tedy není počet primitiv v kódu, ale duplikovaná validace a riziko záměny.
 
 ## 21.04 Anti-vzor: Příliš velký agregát (God Aggregate) {#prilis-velky-agregat}
 
-Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší skupiny objektů, kterou je třeba měnit společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže. Vernon pro tentýž jev používá střízlivější název *large-cluster aggregate*; komunita se drží dramatičtějšího „God“.
+Agregát navrhujeme kolem transakční konzistence, tedy kolem nejmenší skupiny objektů, kterou je třeba měnit společně v jedné transakci. Příliš velký agregát (tzv. „God Aggregate“) sdružuje pod jeden kořen entity a logiku, které k sobě transakčně nepatří. Tím porušuje princip jedné odpovědnosti a způsobuje problémy popsané níže. Vernon pro tentýž jev používá střízlivější název *large-cluster aggregate*; komunita se drží dramatičtějšího „God“.
 
 **Rozpoznávací znak.** Podívejte se na poslední přidání položky do kolekce uvnitř agregátu. Pokud kvůli jednomu novému řádku načítáte tisíc existujících, je hranice agregátu vedená podle asociací, ne podle invariantů.
 
@@ -477,16 +477,16 @@ Agregát navrhujeme kolem transakční konzistence – tedy kolem nejmenší sku
 ### Problémy způsobené příliš velkým agregátem {#agregat-problemy-heading}
 
 - **Výkonnostní problémy** – načtení celého agregátu z databáze je pomalé, pokud obsahuje stovky nebo tisíce podřízených entit (např. všechny položky objednávky zákazníka za celý rok).
-- **Problémy s konkurencí (concurrency)** – agregát je zamčen jako celek při každé změně. Velký agregát znamená větší pravděpodobnost konfliktů při souběžném přístupu.
+- **Problémy s konkurencí (concurrency)** – každá změna zamkne agregát jako celek. Velký agregát znamená větší pravděpodobnost konfliktů při souběžném přístupu.
 - **Těsné provázání (tight coupling)** – příliš mnoho entit uvnitř jednoho agregátu ztěžuje nezávislý vývoj a testování.
 
-A nakonec hranice. God agregát bývá příznakem špatně definovaných hranic kontextů – tam, kde do jednoho celku spadne víc, než kam sahá jeden Bounded Context.
+A nakonec hranice. God agregát bývá příznakem špatně definovaných hranic kontextů. Do jednoho celku spadne víc, než kam sahá jeden Bounded Context.
 :::
 
 :::callout{type="warn"}
 ### Špatně: God Aggregate obsahující příliš mnoho entit {#agregat-spatny-heading}
 
-Následující příklad ukazuje agregát `Customer`, který neúměrně sdružuje objednávky, adresy, platební karty i recenze – to vše jako přímé součásti jednoho agregátu.
+Následující příklad ukazuje agregát `Customer`, který neúměrně sdružuje objednávky, adresy, platební karty i recenze. Všechno visí přímo pod jedním kořenem.
 :::
 
 :::callout{type="anti"}
@@ -530,7 +530,7 @@ class Customer
 :::callout{type="note"}
 ### Správně: Malé agregáty s jasnou transakční hranicí {#agregat-spravny-heading}
 
-Agregáty by měly být navrhovány kolem skutečné transakční potřeby. Zákazník a jeho objednávky jsou samostatné agregáty – objednávku lze vytvořit, aniž by bylo nutné načíst celou historii zákazníka.
+Agregát se navrhuje kolem skutečné transakční potřeby. Zákazník a jeho objednávky proto tvoří samostatné agregáty. Objednávka vznikne, aniž by se musela načíst celá historie zákazníka.
 :::
 
 :::callout{type="pattern"}
@@ -664,17 +664,17 @@ final class Wishlist
 :::
 :::
 
-Pravidlo pochází z Vernonovy série *Effective Aggregate Design* [[7]](https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_1.pdf): agregát drží kořen a nezbytné minimum atributů a hodnotových vlastností, nic víc. Vernon k němu dodává větu, kterou katalogy anti-vzorů obvykle vynechávají – agregáty jsou hranice konzistence, ne výsledek snahy navrhnout graf objektů. Pokud změna jednoho objektu nevyžaduje konzistentní změnu druhého ve stejné transakci, patří do různých agregátů.
+Pravidlo pochází z Vernonovy série *Effective Aggregate Design* [[7]](https://www.dddcommunity.org/wp-content/uploads/files/pdf_articles/Vernon_2011_1.pdf). Agregát drží kořen a nezbytné minimum atributů a hodnotových vlastností, nic víc. Vernon k němu dodává větu, kterou katalogy anti-vzorů obvykle vynechávají: agregáty jsou hranice konzistence, ne výsledek snahy navrhnout graf objektů. Pokud změna jednoho objektu nevyžaduje konzistentní změnu druhého ve stejné transakci, patří do různých agregátů.
 
 **Hranice pravidla.** Zmenšovat lze i příliš. Vernon pojmenovává obě selhání: agregát složený pro pohodlí kompozice je moc velký, agregát rozebraný na jednotlivé entity zase přestane chránit skutečné invarianty. Druhá chyba se hledá hůř, protože se neprojeví na výkonu, ale až nekonzistentními daty.
 
-V Doctrine bývá nejčastější příčinou velkého agregátu samotné mapování. Asociace `OneToMany` popisuje vztah v databázi, ne transakční hranici: z toho, že objednávka *má* položky, neplyne, že zákazník má vlastnit svou historii objednávek. Vodítkem je invariant, který musí platit po každém commitu, nikoli tvar schématu.
+V Doctrine bývá nejčastější příčinou velkého agregátu samotné mapování. Asociace `OneToMany` popisuje vztah v databázi, ne transakční hranici. Z toho, že objednávka *má* položky, neplyne, že zákazník má vlastnit svou historii objednávek. Vodítkem je invariant, který musí platit po každém commitu, nikoli tvar schématu.
 
 ## 21.05 Anti-vzor: Sdílená databáze napříč Bounded Contexts {#sdilena-databaze}
 
 Sdílená databáze napříč Bounded Contexts patří mezi nejzávažnější strategické anti-vzory. Nastává, když různé kontexty sdílejí stejné databázové tabulky nebo přistupují přímo k datům jiného kontextu. Na počátku to vypadá pragmaticky, ale vede k těsnému provázání, které blokuje nezávislý vývoj a nasazení jednotlivých kontextů.
 
-**Rozpoznávací znak.** Projděte migrace jednoho kontextu a hledejte tabulku, kterou vlastní jiný tým. Druhý příznak je provozní: nasazení kontextu A vyžaduje koordinaci s týmem kontextu B, přestože se jejich kód nikde nepotkává.
+**Rozpoznávací znak.** Projděte migrace jednoho kontextu a hledejte tabulku, kterou vlastní jiný tým. Druhý příznak je provozní. Nasadit kontext A nejde bez koordinace s týmem kontextu B, přestože se jejich kód nikde nepotkává.
 
 **Hranice pravidla.** Chybou není jedna databázová instance, ale sdílené schéma a dotaz vedený přes hranici. Modulární monolit běžně běží nad jednou databází s oddělenými schématy a vlastnictvím tabulek na úrovni modulu, a to je v pořádku. Legitimní zůstávají i další případy: Shared Kernel s explicitně dohodnutým vlastníkem, read-only replika pro reporting a analytický kontext, který čte data mimo doménový model. Anti-vzor začíná ve chvíli, kdy jeden kontext čte zápisový model druhého a spoléhá se na jeho tvar.
 
@@ -742,7 +742,7 @@ class InvoiceGenerator
 :::callout{type="note"}
 ### Správně: Izolovaná data s Anti-Corruption Layer {#sdilena-db-spravne-heading}
 
-Každý Bounded Context vlastní svá data. Komunikace mezi kontexty probíhá přes definované rozhraní (Anti-Corruption Layer, doménové události nebo explicitní API), nikoliv přes přímý přístup do databáze.
+Každý Bounded Context vlastní svá data. Kontexty spolu mluví přes definované rozhraní (Anti-Corruption Layer, doménové události nebo explicitní API), ne přímým přístupem do databáze.
 :::
 
 :::callout{type="pattern"}
@@ -815,7 +815,7 @@ class HttpUserManagementAdapter implements CustomerDataProvider
 Synchronní HTTP adaptér z ukázky výše není jediná možnost a pro [modulární monolit](/ddd-a-microservices) bývá tou nejdražší. V úvahu připadají tři cesty a každá má svou cenu.
 
 1. **Volání přes rozhraní v procesu.** Kontext B vystaví port, kontext A ho volá přímo, bez sítě. Hranice zůstane zachovaná, latence žádná nepřibude. Cenou je společné nasazení a disciplína, aby se z portu nestal průchod do cizího modelu.
-2. **Synchronní HTTP nebo gRPC.** Nutnost, jakmile kontexty běží odděleně. Zaplatíte latencí, nedostupností upstreamu ve chvíli vlastního provozu a nutností řešit timeouty i náhradní chování.
+2. **Synchronní HTTP nebo gRPC.** Nutnost, jakmile kontexty běží odděleně. Zaplatíte latencí, nedostupností upstreamu ve chvíli vlastního provozu a prací navíc kolem timeoutů i náhradního chování.
 3. **Asynchronní replikace přes události.** Billing naslouchá události `CustomerBillingDataUpdated` a drží si lokální kopii potřebných dat (*read model projection*). Synchronní závislost mizí a čtení má ze všech tří variant nejnižší latenci. Cenou je eventuální konzistence a kód pro doplnění dat konzumentovi, který se připojí později. Spolehlivé publikování řeší [Outbox Pattern](/outbox-pattern).
 
 ## 21.06 Anti-vzor: Mutovatelné doménové události {#mutovatelne-udalosti}
@@ -831,7 +831,7 @@ Praxe pracuje se dvěma časovými razítky. `occurredAt` říká, kdy se věc s
 :::callout{type="warn"}
 ### Špatně: Mutovatelná událost s veřejnými settery {#udalosti-spatne-heading}
 
-Veřejné settery a chybějící `readonly` semantika umožňují modifikaci události po jejím vzniku, čímž narušují integritu historického záznamu.
+Veřejné settery a chybějící `readonly` semantika dovolí událost změnit i po jejím vzniku, a tím naruší integritu historického záznamu.
 :::
 
 :::callout{type="anti"}
@@ -877,7 +877,7 @@ class OrderPlaced
 :::callout{type="note"}
 ### Správně: Immutable událost s readonly properties {#udalosti-spravne-heading}
 
-Správná doménová událost je vytvořena jednou, nastavena v konstruktoru a poté nelze žádnou její vlastnost změnit. `readonly` properties jsou pro to přesně určeným nástrojem.
+Správná doménová událost vznikne jednou, hodnoty dostane v konstruktoru a poté už žádnou její vlastnost změnit nelze. `readonly` properties jsou pro to přesně určeným nástrojem.
 :::
 
 :::callout{type="pattern"}
@@ -931,7 +931,7 @@ DDD odděluje doménovou vrstvu od infrastrukturní. Infrastrukturní vrstva (Do
 :::callout{type="warn"}
 ### Špatně: Doménová logika v Doctrine repozitáři {#infra-spatne-heading}
 
-Repozitář má agregáty pouze ukládat a načítat. Jakákoliv doménová logika (výpočty, aplikace doménových pravidel, stavové přechody) v repozitáři je anti-vzor. Ukázka níže vychází z třídy, kterou vygeneruje MakerBundle: `ServiceEntityRepository` je v Symfony výchozí volba, a tak do ní pravidla zabloudí nejčastěji. Doctrine ORM 3 navíc vyžaduje, aby repozitář registrovaný přes `repositoryClass` dědil od `EntityRepository` – tím spíš se vyplatí doménové rozhraní od Doctrine oddělit, jak ukazuje následující dvojice.
+Repozitář má agregáty pouze ukládat a načítat. Jakákoliv doménová logika (výpočty, aplikace doménových pravidel, stavové přechody) v repozitáři je anti-vzor. Ukázka níže vychází z třídy, kterou vygeneruje MakerBundle. `ServiceEntityRepository` je v Symfony výchozí volba, a tak do ní pravidla zabloudí nejčastěji. Doctrine ORM 3 navíc vyžaduje, aby repozitář registrovaný přes `repositoryClass` dědil od `EntityRepository`. Tím spíš se vyplatí doménové rozhraní od Doctrine oddělit, jak ukazuje následující dvojice.
 :::
 
 :::callout{type="anti"}
@@ -1159,7 +1159,7 @@ function findUser(int $clientId): Customer { /* ... */ } // Bere client, vrací 
 :::callout{type="note"}
 ### Správně: Konzistentní jazyk napříč všemi vrstvami {#ubiq-spravne-heading}
 
-Ubiquitous Language vyžaduje investici: vývojáři musí naslouchat doménovým expertům, porozumět jejich terminologii a tu pak konzistentně přenést do kódu. Výsledný kód pak doménový expert přečte a rozumí mu.
+Ubiquitous Language vyžaduje investici. Vývojáři musí naslouchat doménovým expertům, porozumět jejich terminologii a tu konzistentně přenést do kódu. Výsledný kód pak doménový expert přečte a rozumí mu.
 :::
 
 :::callout{type="pattern"}
@@ -1250,7 +1250,7 @@ Anémickému doménovému modelu se obšírně věnuje Vaughn Vernon v *Implemen
 
 :::faq{}
 - question: Co je anémický doménový model a jak ho poznat?
-  answer: 'Anémický model vypadá na první pohled jako DDD – obsahuje třídy s názvy agregátů, entit a hodnotových objektů. Veškerá logika je ale přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Doménová logika končí ve „Service“ třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Detailní rozbor v <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
+  answer: 'Anémický model vypadá na první pohled jako DDD. Obsahuje třídy s názvy agregátů, entit a hodnotových objektů. Veškerá logika je ale přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Doménová logika končí ve „Service“ třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Detailní rozbor v <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
 - question: Je anémický model vždy chyba?
   answer: 'Ne. Fowler sám v článku o anémickém modelu píše, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script. V doméně s několika málo pravidly je procedura na jeden případ užití čitelnější než vrstva tříd okolo ní. Anémický model je chyba tehdy, když platíte cenu doménového modelu (mapování, obalování hodnot, rozpad do vrstev) a nedostáváte za ni žádný přínos. Rozbor obou stran sporu v <a href="#anemicky-kdy-nevadi">sekci Kdy anémický model chyba není</a>.'
 - question: Proč je Primitive Obsession problém?

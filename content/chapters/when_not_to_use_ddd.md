@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -25,7 +25,7 @@ Pro **provozní třenice** s Doctrine, Messenger a Symfony, kdy DDD je správně
 infrastruktura bolí, viz [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli).
 
 DDD není architektura pro každý projekt. Špatně zvolená aplikace DDD přidává vrstvy abstrakce,
-zpomaluje vývoj a frustruje tým – aniž by přinesla cokoliv hodnotného.
+zpomaluje vývoj a frustruje tým, aniž by přinesla cokoliv hodnotného.
 Tato kapitola říká přímo, kdy DDD vynechat a co místo toho použít.
 
 ## 22.01 Rozhodovací strom: kolik DDD dát které části systému? {#rozhodovaci-strom}
@@ -38,11 +38,11 @@ a prochází se za každou zvlášť.
 Postupuje ve třech krocích:
 
 1. **Dá se subdoména pořídit hotová?** Účetnictví, rozesílání e-mailů, platební brána. Pokud ano,
-   je to Generic – kupte ji. DDD tu řeší jen integraci, typicky Anti-Corruption Layer na hranici.
+   je to Generic. Kupte ji. DDD tu řeší jen integraci, typicky Anti-Corruption Layer na hranici.
 2. **Odlišuje vás od konkurence?** Pokud ne, je to Supporting. Plný taktický návrh se vyplatí jen
    při splnění tří podmínek: tým ho zvládá, model je inovativní a má vydržet roky. Jinak stačí
-   lehký model nebo rovnou CRUD – hlavně to musí zaznít nahlas a nevydávejte adresář `Domain/`
-   za doménový model.
+   lehký model nebo rovnou CRUD. Musí to ale zaznít nahlas a adresář `Domain/`
+   se nevydává za doménový model.
 3. **Je to Core Domain?** Pak zbývají dvě brány, které rozhodují o načasování, ne o vhodnosti:
    přístup k doménovým expertům a stabilita domény.
 
@@ -60,7 +60,7 @@ doménový model nevyplatí. Sedm situací níže mluví o taktické vrstvě, po
 ## 22.02 1. CRUD admin a jednoduchý backoffice {#crud-admin}
 
 Aplikace, kde uživatel vytvoří záznam, upraví ho a smaže. Formulář mapuje 1:1 na tabulku.
-Žádná doménová logika – jen persistence.
+Žádná doménová logika, jen persistence.
 
 DDD zde přidá agregáty, repozitáře, doménové události a value objekty pro věci,
 které jsou přirozeně jen řádky v databázi. Ukázka níže to vyčísluje: šest tříd místo
@@ -70,7 +70,7 @@ Eric Evans to u vzoru Core Domain říká bez obalu:
 *The harsh reality is that not all parts of the design are going to be equally refined.
 Priorities must be set.*
 Propracovaný model patří tam, kde je **komplexní doménová logika**. CRUD operace
-ji nemají – jsou to čtení a zápisy dat bez doménových pravidel.
+ji nemají. Jsou to čtení a zápisy dat bez doménových pravidel.
 
 :::callout{type="pattern"}
 #### Srovnání: DDD vs. jednoduchý přístup pro CRUD admin {#crud-compare-heading}
@@ -147,7 +147,7 @@ Doménový model zavádíte tehdy, když máte doménu. CRUD admin doménu nemá
 Pozor na záměnu s pojmem
 <a href="https://martinfowler.com/bliki/AnemicDomainModel.html" target="_blank" rel="noopener">Anemic Domain Model</a>
 od Martina Fowlera: ten popisuje doménovou logiku přesunutou do servisní vrstvy
-místo do modelu. Over-engineering CRUDu je jiný problém – DDD ceremonie nad
+místo do modelu. Over-engineering CRUDu je jiný problém. Je to DDD ceremonie nad
 doménou, která žádnou logiku nemá.
 :::
 
@@ -161,9 +161,9 @@ DDD předpokládá, že doméně rozumíte dost dobře na to, abyste ji modelova
 to neplatí. Každý refaktoring agregátů a [bounded contextů](/zakladni-koncepty)
 vás zpomaluje a vývojové iterace se soustředí na architekturu místo na hodnotu pro zákazníka.
 
-Strategické DDD nástroje – zejména
-[Event Storming](/event-storming) a [Context Mapping](/context-mapping) – ve fázi hledání
-naopak pomáhají. Dávají jména tomu, čemu ještě nerozumíte.
+Ve fázi hledání naopak pomáhají strategické nástroje DDD, zejména
+[Event Storming](/event-storming) a [Context Mapping](/context-mapping).
+Dávají jména tomu, čemu ještě nerozumíte.
 Co nedává smysl, je taktické DDD (agregáty, doménové události, repozitáře) pro model,
 který se příští týden změní od základů.
 
@@ -219,15 +219,15 @@ class Order {
 
 ## 22.04 3. Malý tým bez doménových expertů {#small-team}
 
-DDD stojí na spolupráci vývojářů s lidmi, kteří doméně rozumí – zákazníci, produktoví manažeři,
-analytici. Bez nich modelujete doménu sami, z hlavy, bez zpětné vazby.
+DDD stojí na spolupráci vývojářů se zákazníky, produktovými manažery a analytiky,
+tedy s lidmi, kteří doméně rozumí. Bez nich modelujete doménu sami, z hlavy, bez zpětné vazby.
 
 Vznikne model podle vývojářovy představy, ne podle toho, jak byznys skutečně běží.
 To je přesně opak toho, k čemu DDD slouží. Vaughn Vernon v *Implementing Domain-Driven Design*
 zdůrazňuje, že bez spolupráce s doménovými experty se Ubiquitous Language stává jen technickým žargonem.
 
 **Zásadní rozdíl oproti bodu 7:** Zde doménové experty nemáte v týmu (malý tým = vývojáři
-dělají všechno). V bodě 7 experti existují, ale doména samotná je nejasná – nikdo neví, co modelovat.
+dělají všechno). V bodě 7 experti existují, ale doména samotná je nejasná a nikdo neví, co modelovat.
 Řešení je odlišné: zde potřebujete lidi, tam potřebujete znalosti.
 
 :::callout{type="note"}
@@ -240,7 +240,7 @@ Vrstvená architektura (Controller → Service → Repository) drží kód struk
 
 Systém načítá data z externích zdrojů, transformuje je a ukládá nebo reportuje.
 Žádná doménová pravidla, žádné invarianty, žádná doménová logika.
-Jde o přesun a transformaci dat – ne o modelování domény.
+Jde o přesun a transformaci dat, ne o modelování domény.
 
 Agregáty chrání invarianty. Pokud žádné nemáte, zbude z agregátu prázdný obal a režie
 navíc. Evans definuje agregát jako *cluster of associated objects that we treat as a unit
@@ -265,15 +265,14 @@ DDD investice se vrátí na projektech, které žijí roky a rostou. Na krátkod
 tým zaplatí cenu DDD (čas, komplexita, učební křivka), aniž by kdy sklidil
 výhody (udržovatelnost, schopnost rozvíjet se).
 
-**Proč zrovna rok?** Hranice „jeden rok“ není absolutní – je to orientační bod
-založený na praxi. DDD vyžaduje počáteční investici: modelování domény, budování
+**Proč zrovna rok?** Hranice „jeden rok“ není absolutní. Je to orientační bod založený na praxi. DDD vyžaduje počáteční investici: modelování domény, budování
 Ubiquitous Language, návrh agregátů a bounded contextů. Tato investice se typicky začíná
 vracet ve chvíli, kdy projekt povyroste a tým začne těžit z čistých doménových hranic.
 U projektů, které skončí do roka, se to nestihne.
 
 Jde o autorský odhad, ne o měřenou veličinu. Fowler klade v
 <a href="https://martinfowler.com/bliki/DesignStaminaHypothesis.html" target="_blank" rel="noopener">Design Stamina Hypothesis</a>
-hranici návratnosti návrhu podstatně níž – spíš týdny než měsíce – a sám dodává, že jde
+hranici návratnosti návrhu podstatně níž (spíš týdny než měsíce) a sám dodává, že jde
 o hypotézu, protože produktivitu ani kvalitu návrhu měřit neumíme. Rozdíl je v předmětu.
 Fowler mluví o návrhu obecně, zde jde o plný taktický aparát DDD, který má vyšší učební
 křivku i vyšší vstupní režii.
@@ -365,9 +364,9 @@ final class Order extends AggregateRoot
 Zákazník neví, co chce. Požadavky jsou vágní. Doménový expert buď neexistuje, nebo
 nemá čas spolupracovat. Modelujete pak bez pevného základu.
 
-**Zásadní rozdíl oproti bodu 3:** V bodě 3 chybí lidé – máte malý tým bez přístupu
+**Zásadní rozdíl oproti bodu 3:** V bodě 3 chybí lidé. Máte malý tým bez přístupu
 k expertům, ale doména může být jasná (pojišťovnictví, e-commerce...). Zde je problém v tom,
-že **nikdo doménu nechápe** – ani potenciální experti. Požadavky se teprve formují,
+že **nikdo doménu nechápe**, ani potenciální experti. Požadavky se teprve formují,
 pojmy nejsou ustálené, doménová pravidla se mění s každou schůzkou.
 
 DDD bez znalosti domény je jen přejmenování tříd. „Order“, „Customer“, „Product“ –
@@ -394,8 +393,8 @@ každý Bounded Context dostane tolik DDD, kolik odpovídá jeho [kategorii subd
 
 Active Record v tabulce pochází z prostředí, kde ho framework nabízí. Doctrine ORM 3 je
 Data Mapper a Active Record nemá. Praktickým ekvivalentem je Doctrine entita s veřejnými
-settery, kterou obsluhuje tenká servisní třída – vědomě anemický model pro kontext, kde
-se doménový model nevyplatí. Volbě stylu podle kontextu se věnuje kapitola
+settery, kterou obsluhuje tenká servisní třída. Je to vědomě anemický model pro kontext,
+kde se doménový model nevyplatí. Volbě stylu podle kontextu se věnuje kapitola
 [Architektonické styly](/architektonicke-styly).
 
 Konkrétně: pojišťovna má **Core** Underwriting (DDD ano), **Supporting** Customer
@@ -442,7 +441,7 @@ je migrace obchodní rozhodnutí, ne technické.
 
 Odhad ceny je přitom nejslabší část rozvahy. Praktičtější jsou tři heuristiky.
 Verraes rozhoduje podle kvality původního návrhu: co bylo navrženo dobře, se opravuje;
-co špatně, se nahrazuje. Fowler přidává podmínku vlastnictví – o obětování
+co špatně, se nahrazuje. Fowler přidává podmínku vlastnictví. O obětování
 architektury rozhoduje tým, který ji napsal. A Spolsky připomíná, co se přepisem od nuly
 zahazuje: ne kód, ale roky nasbíraných oprav chyb.
 
@@ -459,7 +458,7 @@ DDD ve standupech, ale doménový model je anemický CRUD. Symptomy:
 
 - Agregáty mají gettery, settery a žádné chování.
 - Doménové eventy se publikují, ale žádný handler na ně neposlouchá ve smyslu
-  doménové logiky – jen logování nebo audit.
+  doménové logiky, jen logování nebo audit.
 - Bounded Contexts existují jako adresáře, ale tým je přejmenoval z původního
   technického dělení (`UserModule/` → `UserBoundedContext/`).
 - Code review diskuse jsou o „je toto správné DDD“ místo „chrání tato změna
@@ -469,7 +468,7 @@ Pseudo-DDD má všechny náklady DDD (víc kódu, učební křivka) a žádný p
 (invarianty nejsou chráněné, doména není modelovaná). Tuhle bilanci popsal Fowler už
 u anemického modelu: nese všechny náklady doménového modelu, aniž by přinesl jakýkoli
 z jeho užitků. Pseudo-DDD je jeho ceremoniální varianta. V tomto stavu je **honest
-CRUD lepší volba** – přiznejte si, že doména komplexní logiku nemá, a zjednodušte.
+CRUD lepší volba**. Přiznejte si, že doména komplexní logiku nemá, a zjednodušte.
 
 Evans má pro otázku „kde uvnitř systému nemodelovat“ vlastní pojmenované odpovědi.
 [Big Ball of Mud](/context-mapping#big-ball-of-mud) říká, že kolem nepořádku se nakreslí
@@ -499,7 +498,7 @@ do celého systému a rozhodnutí se přesouvá na jednotlivé kontexty podle
 [typu subdomény](#hybrid-subdomain). Tam, kde neplatí ani většina z pěti podmínek,
 je jednodušší architektura levnější i poctivější volba.
 
-Jedna věc na závěr, protože se z kapitoly dá snadno vyčíst opak. „Ne DDD“ neznamená „ne návrh“.
+Jedna věc na závěr, protože se z kapitoly dá vyčíst i opak. „Ne DDD“ neznamená „ne návrh“.
 Vernon v *Domain-Driven Design Distilled* cituje Douglase Martina: alternativou dobrého
 návrhu je špatný návrh, ne žádný návrh. Flat MVC, prostý controller i EasyAdmin potřebují
 moduly, hranice, pojmenování a testy. Fowler totéž říká o architektuře, kterou plánujete

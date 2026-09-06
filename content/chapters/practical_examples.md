@@ -25,8 +25,8 @@ Každý příklad obsahuje strukturu projektu a kostru hlavních tříd; plné t
 jen metody, které nesou doménový invariant. Detailní implementace (Doctrine mapování,
 kontrolery, testy, okrajové případy) najdete v předchozích kapitolách.
 
-Plný end-to-end příklad – od doménové analýzy přes kontextovou mapu po read modely –
-rozebírá krok za krokem navazující [Případová studie](/pripadova-studie).
+Plný end-to-end příklad rozebírá krok za krokem navazující [Případová studie](/pripadova-studie):
+od doménové analýzy přes kontextovou mapu po read modely.
 
 Výchozím bodem je prázdný projekt: `composer create-project symfony/skeleton`.
 Ukázky v knize cílí na PHP 8.4, Symfony 8 a Doctrine ORM 3 a potřebují tyhle balíčky:
@@ -49,7 +49,7 @@ Seznam nevypadá minimalisticky, každá položka ale odpovídá jedné kapitole
 a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
 `Assert\Email` s `VALIDATION_MODE_STRICT` každý dispatch. A bez
 `migrations-bundle` nespustíte ani jednu migraci z kapitoly o Outboxu.
-`twig-bundle` a `form` potřebují kontrolery, které vracejí HTML – ty z kapitoly o CQRS
+`twig-bundle` a `form` potřebují kontrolery, které vracejí HTML. Ty z kapitoly o CQRS
 volají `createForm()` a `render()`. Kdo staví jen JSON API, obejde se bez nich.
 `expression-language` je naopak povinný, jakmile v projektu leží `PolicyEvaluator`
 z kapitoly o autorizaci: komponentu bere jako výchozí hodnotu parametru, takže bez
@@ -57,7 +57,7 @@ balíčku spadne už `cache:clear`, ne teprve vyhodnocení pravidla.
 
 Instalace tím ale nekončí. Další dva kroky se přeskakují právě proto, že jejich
 vynechání nic neshodí. Recept `doctrine/doctrine-bundle` vygeneruje mapování na `src/Entity`
-s prefixem `App\Entity` – adresář, který ve vertikálním řezu neexistuje. Doctrine pak
+s prefixem `App\Entity`, tedy na adresář, který ve vertikálním řezu neexistuje. Doctrine pak
 mlčky nevidí žádnou entitu:
 
 :::code{language="bash" filename="terminál"}
@@ -67,7 +67,7 @@ php bin/console doctrine:schema:update --dump-sql
 
 Hláška vypadá jako úspěch. Znamená opak. Blok `mappings:` je proto potřeba přepsat
 podle [kapitoly o agregátech](/navrh-agregatu#symfony-doctrine) dřív, než vznikne první
-migrace. Druhý krok je `DATABASE_URL` v `.env` – recept nastaví PostgreSQL, takže
+migrace. Druhý krok je `DATABASE_URL` v `.env`. Recept nastaví PostgreSQL, takže
 u SQLite nebo MySQL připojení do prázdna:
 
 :::code{language="ini" filename=".env.local"}
@@ -92,7 +92,7 @@ php bin/console doctrine:migrations:migrate
 :::
 
 Testy z kapitoly o CQRS běží proti skutečné databázi, takže potřebují dvě věci navíc.
-Ságový test z kapitoly 14 vystačí s in-memory repozitářem, ale PHPUnit chce taky – a ten
+Ságový test z kapitoly 14 vystačí s in-memory repozitářem, ale PHPUnit chce taky. A ten
 v seznamu výše záměrně není, protože ho nepotřebuje každý:
 
 :::code{language="bash" filename="terminál"}
@@ -111,7 +111,7 @@ DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
 Recept Symfony 8 zapíná bezstavovou ochranu proti CSRF (`csrf_protection.stateless_token_ids`).
 Formuláře z knihy s ní projdou i bez řádku JavaScriptu: `SameOriginCsrfTokenManager` uzná
 požadavek, kterému sedí `Origin` nebo `Sec-Fetch-Site: same-origin`, a to prohlížeč u běžného
-odeslání formuláře posílá. Ochrana přitom funguje – cross-origin požadavek neprojde.
+odeslání formuláře posílá. Ochrana přitom funguje, cross-origin požadavek neprojde.
 Klasický režim s tokenem v session zapnete smazáním klíče `stateless_token_ids`
 z `config/packages/csrf.yaml`, potřeba to ale není.
 
@@ -293,14 +293,14 @@ final readonly class PlaceOrderOnCartCheckedOut
 :::
 
 V monolitu handler odebírá doménovou událost přímo. Jakmile se kontext Order osamostatní,
-potřebuje vlastní integrační DTO naplněné z payloadu zprávy – důvody rozebírá
+potřebuje vlastní integrační DTO naplněné z payloadu zprávy. Důvody rozebírá
 [DDD a mikroslužby](/ddd-a-microservices). Spolehlivé doručení mezi kontexty přitom
 nezajistí sběrnice sama, ale [Outbox Pattern](/outbox-pattern).
 
 ## 23.02 Příklad: Blog {#blog}
 
-Blog drží jeden Bounded Context s jediným agregátem `Post` – `Comment` je entita uvnitř něj –
-a sekcemi pro vytvoření příspěvku, výpis a detail.
+Blog drží jeden Bounded Context s jediným agregátem `Post` a sekcemi pro vytvoření
+příspěvku, výpis a detail. `Comment` je entita uvnitř agregátu.
 
 :::diagram{fig="23.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
@@ -328,7 +328,7 @@ src/
 
 Agregát `Post` se vytváří přes named constructor `create()`. Ten vynucuje invarianty
 (titul 3–255 znaků, neprázdný obsah) a nová instance zaznamená `PostCreated`. Konstruktor
-zůstává privátní a událost nenahrává – rekonstituce z databáze by jinak emitovala
+zůstává privátní a událost nenahrává. Rekonstituce z databáze by jinak emitovala
 události znovu.
 
 :::code{language="php" filename="src/Blog/Domain/Model/Post.php (skeleton)"}
@@ -400,13 +400,13 @@ final readonly class CreatePostHandler
 }
 :::
 
-Handler nic nevrací a identifikátor příspěvku přichází v commandu – kontroler ho
+Handler nic nevrací a identifikátor příspěvku přichází v commandu. Kontroler ho
 vygeneruje přes `PostId::generate()` ještě před dispatchem. Návrat ID z handleru přes
 `HandledStamp` je druhá možnost, ale u asynchronního transportu se výsledek k volajícímu
 nedostane; srovnání obou variant je v [CQRS](/cqrs#command-navratova-hodnota-heading).
 
-Read model pro výpis příspěvků – paginace, řazení podle data, projekce z událostí –
-patří mimo zápisový repozitář. Rozebírá ho [CQRS – ViewModely a Read Modely](/cqrs#view-models)
+Read model pro výpis příspěvků patří mimo zápisový repozitář: paginace, řazení
+podle data, projekce z událostí. Rozebírá ho [CQRS – ViewModely a Read Modely](/cqrs#view-models)
 a [Výkonnostní aspekty](/vykonnostni-aspekty).
 
 ## 23.03 Příklad: Správa uživatelů {#user-management}
@@ -474,7 +474,7 @@ Jde o zjednodušenou variantu referenční implementace z kapitoly
 se nahrává ve factory `register()`, nikdy v konstruktoru. Dva kompromisy malého
 příkladu: `UserInterface` implementuje přímo agregát, zatímco v plné architektuře
 patří na security adapter v infrastrukturní vrstvě (viz
-[Autorizace v DDD](/autorizace-v-ddd)). A `final` u entit mapovaných Doctrine projde – nativní lazy objekty
+[Autorizace v DDD](/autorizace-v-ddd)). A `final` u entit mapovaných Doctrine projde, protože nativní lazy objekty
 z entity nedědí.
 
 Hash hesla nemá putovat do session. `PasswordAuthenticatedUserInterface` k tomu
@@ -517,12 +517,12 @@ final readonly class RegisterUserHandler
 :::
 
 Unikátnost e-mailu garantuje databázový constraint, ne kontrola přes `findByEmail()`
-před zápisem. Ta je vůči souběžným registracím nedostatečná – rozbor race condition
+před zápisem. Ta je vůči souběžným registracím nedostatečná. Rozbor race condition
 a obou vrstev ochrany je v
 [Implementaci v Symfony](/implementace-v-symfony#register-race-heading).
 
-Autorizaci uživatele po přihlášení – čtyři vrstvy přístupu, Voter, doménové invarianty –
-rozebírá [Autorizace v DDD](/autorizace-v-ddd).
+Autorizaci uživatele po přihlášení rozebírá [Autorizace v DDD](/autorizace-v-ddd):
+čtyři vrstvy přístupu, Voter a doménové invarianty.
 
 ## 23.04 Tři projekty vedle sebe {#tri-projekty-vedle-sebe}
 
@@ -543,8 +543,8 @@ doména nese netriviální invarianty, na systému pracuje více týmů a jednot
 se vyvíjejí různým tempem. E-shop z této kapitoly k tomu směřuje: dva kontexty
 a událost mezi nimi jsou první krok, zbytek přijde s růstem.
 
-Střední cesta – agregát s repository, bez oddělených read modelů a bez více kontextů –
-pokrývá projekty typu blog nebo správa uživatelů. Doménová pravidla existují
+Střední cesta pokrývá projekty typu blog nebo správa uživatelů: agregát s repository,
+bez oddělených read modelů a bez více kontextů. Doménová pravidla existují
 a zaslouží si zapouzdření, ale čtení zůstává triviální a tým malý. Vyplatí se hlídat
 jeden signál: jakmile výpisy začnou hydratovat agregáty jen kvůli zobrazení,
 je čas na oddělený read model.
