@@ -1331,6 +1331,80 @@ staví agregát přes veřejné API **bez reflexe**, všechny tři testy z 11.10
 načtou najednou. `#[IsGranted(subject:)]` s vlastním resolverem dá vlastníkovi 200
 a cizímu 403.
 
+## Patnácté kolo: dvanáctá ověřovací stavba (2026-09-06)
+
+21 testů zeleně, ale až po **12 zásazích**. Kolo přineslo dva nálezy třídy „nic nespadne
+a stavy se rozejdou" a jeden systémový problém, který se táhne celou knihou.
+
+### Pořadí posluchačů na synchronní sběrnici
+
+`OrderDashboardProjector` i `OrderProcessManager` odebírají `OrderPlacedIntegrationEvent`
+na `event.bus`. Messenger je volá **v pořadí registrace**, takže sága proběhla celá
+(`ChargeCustomer → … → OrderShipped`) dřív, než projekce založila řádek. Projektorův
+`UPDATE … WHERE order_id = :orderId` netrefil nic a `INSERT` s `'placed'` přišel až potom:
+
+```
+orders: shipped   order_dashboard: placed   order_saga: completed
+```
+
+Po přidání `priority: 10` projektoru je obojí `shipped`. **Kniha ten scénář v 14.05
+popisuje jako varování a vlastní konfigurací ho vyráběla.**
+
+**Poučení: kde na jednu událost čeká víc posluchačů, je pořadí součást návrhu, ne detail.**
+
+### Registrace a přihlášení nemluvily o tomtéž uživateli
+
+`RegisterUserHandler` zapíše agregát do `users`, `security.yaml` má entity provider nad
+`app_user`. **Most mezi nimi kniha neměla.** Registrovaný uživatel se nemohl přihlásit
+a nic nespadlo. Doplněn posluchač `UserRegistered` + `TenantId`, bez kterého `SecurityUser`
+neprojde ani autoloadem.
+
+### Systémový problém: dvě ukázky pod jedním FQCN
+
+Protizkouška prošla všech 26 kapitol skriptem a našla **14 kolizí napříč kapitolami**
+plus osm uvnitř jedné kapitoly. Nejzávažnější opravené:
+
+| FQCN | Rozdíl |
+|---|---|
+| `RegistrationController` | JSON `/api/register` (ch10) vs. HTML `/register` (ch12) — obě `final class` |
+| `RegisterUser` | `min: 12` + `STRICT` (ch10) vs. `min: 8` + `html5` (ch12); osmiznakové heslo projde validací a spadne v agregátu |
+| `UserId` | ch06 nemá `__toString()`, který ch10 označuje za podmínku `persist()` |
+
+Zbytek (`Order` ve čtyřech variantách, `User`, `Email`, `OrderPlaced`, repozitáře) je
+v backlogu — část z nich je legitimní didaktická progrese, ale **žádná to neříká nahlas**.
+
+### Tvrzení, která kniha slibovala a nedodávala
+
+- Callout 11.06: „`AccessDeniedDomainException → 403`, `InvalidOrderStateTransitionException → 409`."
+  Žádný takový listener v knize nebyl; storno po lhůtě končilo jako 500. Doplněn.
+- `PolicyEvaluator` četl `user.customerId`, což je privátní vlastnost — a kapitola
+  **o dva odstavce níž sama píše**, že ExpressionLanguage getter nedohledá.
+- Komentář u e2e testu: „`loginUser()` … žádná fixture v databázi." S `entity` providerem
+  fixture potřebuje, jinak firewall token při dalším requestu zahodí.
+
+### Drobnosti s dopadem
+
+- `ProfileController` měl holý type-hint na `SecurityUser`; u Doctrine entity to nestačí,
+  resolver se bez `#[CurrentUser]` nespustí. Kontroler o dvě sekce dál atribut má.
+- `PlaceOrderController` bral položky z form-encoded POSTu jako `int`; `ParameterBag`
+  vrací řetězce a `Money::__construct()` na tom padal.
+- Neplatná registrace = 500. Validaci dělá middleware na sběrnici, kontroler chytal
+  jen duplicitu.
+- **Mikrosekundy se ztratí v outboxu.** `DateTimeNormalizer` píše RFC 3339 bez zlomků,
+  takže ochrana projekce, kterou 12.11 rozvádí, u outboxových událostí rozliší jen vteřiny.
+- `DelayStamp` bez asynchronního routingu odklad tiše zahodí.
+- `Policy.php` držel tři třídy bez značky v názvu — PSR-4 najde jen první.
+- `symfony/expression-language` chyběl v instalaci; `PolicyEvaluator` ho bere jako
+  výchozí hodnotu parametru, takže padá už `cache:clear`.
+
+### Co protizkouška potvrdila
+
+`public private(set)` na `Order::$status` a `$placedAt` **prošlo bez výhrad** — Doctrine
+mapování, hydratace, Twig i ExpressionLanguage. Zápis zvenčí blokován. CSRF tvrzení
+z minulého kola ověřeno **z obou stran**: same-origin POST projde, cross-origin i požadavek
+bez `Origin` neprojde (fail-closed). `InMemoryPaymentGateway` a alias fungují.
+`OrderCancelTest` 3/3, `OrderVoterTest` 2/2.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
