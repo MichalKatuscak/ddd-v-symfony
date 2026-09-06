@@ -1625,7 +1625,7 @@ na konkrétní transport a přidělená až při odeslání či příjmu. Po red
 při průchodu jiným transportem se změní, takže by táž událost prošla dvakrát –
 přesně to, čemu má idempotence zabránit.
 
-Krokové události z [14.05](#process-manager-heading) proto nesou `eventId` – bez něj se
+Krokové události z [14.05](#process-manager-heading) proto nesou `eventId`. Bez něj se
 guard nemá čeho chytit. Metoda patří do entity `OrderSaga` a Process Manager ji volá
 místo přímého `transitionTo()`:
 
@@ -1652,7 +1652,7 @@ public function applyPaymentSucceeded(string $eventId): bool
 }
 :::
 
-Volání z Process Manageru pak vypadá takhle – návratová hodnota říká, jestli se přechod
+Volání z Process Manageru pak vypadá takhle. Návratová hodnota říká, jestli se přechod
 opravdu odehrál, takže se příkazy neodešlou podruhé:
 
 :::code{language="php" filename="src/Ordering/Application/Saga/OrderProcessManager.php (výřez)"}
@@ -2856,7 +2856,8 @@ Další vzory pro testování doménové logiky, agregátů a event handlerů na
 - question: Jak implementovat kompenzační transakce v Symfony?
   answer: 'Kompenzace je samostatná operace nebo command handler, který vrací systém do stavu před selhaným krokem – například <code>CancelPayment</code> jako protějšek <code>AuthorizePayment</code>. V Messenger sáze se kompenzace spouští, když příchozí událost signalizuje selhání některého z pozdějších kroků. Kompenzační příkazy musí být idempotentní a tolerantní k situaci, že kompenzovaný krok nikdy neproběhl. Ne každou operaci lze technicky vrátit, proto se někdy kompenzuje jiným způsobem. Praktický příklad v <a href="#kompenzacni-strategie">sekci Kompenzační strategie v praxi</a>.'
 - question: Jak zajistit idempotenci ságy při opakovaném doručení událostí?
-  answer: 'Messenger může stejnou zprávu doručit vícekrát – při selhání workera nebo přebalení na retry queue – takže handler musí opakované zpracování bezpečně ignorovat. Standardní řešení jsou dvě: jedinečný identifikátor zprávy uložený do tabulky zpracovaných ID, nebo stavový automat ságy, který u každého kroku kontroluje, zda už není ve stavu „dokončeno“. Obě techniky brání duplicitnímu publikování příkazů i duplicitním kompenzacím. Podrobný rozbor v <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
+  answer: 'Messenger může stejnou zprávu doručit vícekrát, ať už při selhání workera, nebo při
+    přebalení na retry queue. Handler proto musí opakované zpracování bezpečně ignorovat. Standardní řešení jsou dvě: jedinečný identifikátor zprávy uložený do tabulky zpracovaných ID, nebo stavový automat ságy, který u každého kroku kontroluje, zda už není ve stavu „dokončeno“. Obě techniky brání duplicitnímu publikování příkazů i duplicitním kompenzacím. Podrobný rozbor v <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
 - question: Má se sága obsluhovat přes Command Bus, nebo Event Bus?
   answer: 'Obojí, s jasně rozdělenou rolí. Události na Event Busu spouštějí reakce ságy – informují, že se něco stalo, a sága na ně navazuje. Příkazy na Command Busu sága sama vydává, aby řídila další kroky. Typická smyčka má tvar: příchozí event → Process Manager → odchozí command → handler → nový event. Nikdy se nezaměňuje: event nic nepřikazuje, command nic neoznamuje. Viz <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
 :::

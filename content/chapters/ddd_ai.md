@@ -178,8 +178,8 @@ nejcitovanější věta k tématu:
 >
 > – DHH, The New Stack, 2025
 
-DHH varuje před nebezpečím, kdy vývojář přestane rozumět kódu, který provozuje – stane
-se manažerem projektu AI místo inženýrem. Sám přitom AI používá celý den, jen jinak.
+DHH varuje před nebezpečím, kdy vývojář přestane rozumět kódu, který provozuje a stane se z
+něj manažer projektu AI místo inženýra. Sám přitom AI používá celý den, jen jinak.
 Jde mu o to, že nekritické přijetí výstupu degraduje schopnost rozpoznat chybu.
 Bez doménového porozumění testy nestačí. Vývojář, který nechápe doménu, nepíše správné
 testy, a AI pak ty testy plní falešně pozitivním kódem.

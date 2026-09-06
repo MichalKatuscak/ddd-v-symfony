@@ -343,8 +343,8 @@ pojmenovat i patologie jako Big Ball of Mud nebo Conformist, pro které v Team T
 žádný mód neexistuje.
 
 Mód také není trvalý štítek. Collaboration při bootstrapu nového BC má přejít
-v X-as-a-Service, jakmile je rozhraní stabilní. Pohyb opačným směrem – z X-as-a-Service
-zpět do Collaboration – je signál, že hranice mezi kontexty nesedí.
+v X-as-a-Service, jakmile je rozhraní stabilní. Pohyb opačným směrem, tedy z X-as-a-Service zpět do Collaboration, je signál, že hranice
+mezi kontexty nesedí.
 
 :::callout{type="warn"}
 ### Žádné „volné vztahy“ {#modes-mandatory-heading}

@@ -48,6 +48,9 @@ jobs:
       - name: Check property access against declared types
         run: php scripts/check_property_access.php
 
+      - name: Check FAQ blocks parse as YAML
+        run: php scripts/check_faq_yaml.php
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

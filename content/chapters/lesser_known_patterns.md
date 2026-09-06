@@ -36,9 +36,8 @@ odlišovat Entity od Value Objektu a chápe význam invariantů, má pocit, že 
 „nadbytečná abstrakce“. To, co dělají, lze přece napsat i jinak: `if`-em,
 statickou metodou nebo prostým balíčkem v `src/`. Intuice je to chybná.
 
-V malých projektech bez těchto vzorů přežijete. Jenže tam, kde je doména
-netriviální – tedy přesně tam, kde DDD platí – chybějící vzory způsobují bobtnání agregátů,
-anémii modelu a duplikaci pravidel. Kód přestává odrážet doménovou strukturu projektu.
+V malých projektech bez těchto vzorů přežijete. Jenže tam, kde je doména netriviální, tedy přesně tam, kde DDD platí, způsobují chybějící
+vzory bobtnání agregátů, anémii modelu a duplikaci pravidel. Kód přestává odrážet doménovou strukturu projektu.
 Evansovy čtyři vzory tvoří provázanou sadu. Vyřazením jednoho oslabíte ostatní.
 
 :::callout{type="note"}
@@ -71,9 +70,8 @@ interface Specification
 }
 :::
 
-Rozhraní vypadá triviálně, ale stojí za ním celá architektonická volba. Každé pravidlo
-doménového jazyka – *„zákazník je premium“*, *„objednávka má nárok na dopravu zdarma“*,
-*„faktura je po splatnosti“* – dostane vlastní třídu s mluvícím jménem. Pravidlo
+Rozhraní vypadá triviálně, ale stojí za ním celá architektonická volba. Každé pravidlo doménového jazyka dostane vlastní třídu s mluvícím jménem: *„zákazník je
+premium“*, *„objednávka má nárok na dopravu zdarma“*, *„faktura je po splatnosti“*. Pravidlo
 přestává být kombinací `if`-ů uvnitř service vrstvy a stává se
 **jmenovaným prvkem Ubiquitous Language**.
 
@@ -886,9 +884,8 @@ odkazuje nejčastěji, navíc míří na injektování repozitáře do **agregá
 
 Praktické vodítko zní jinak než zákaz. Než služba dostane repozitář, stojí za zvážení,
 jestli jí data nemá dodat volající. Když si je služba načítá sama, přebírá kus orchestrace a její test
-přestane být čistě jednotkový. Když je ale jinak nezískáte – typicky u pravidla, které
-potřebuje odpověď nad celou kolekcí – je závislost na doménovém rozhraní přijatelná
-a služba zůstává doménová. Rozhoduje, jestli třída obsahuje doménové pravidlo, ne počet
+přestane být čistě jednotkový. Když je ale jinak nezískáte, typicky u pravidla, které potřebuje odpověď nad celou kolekcí,
+je závislost na doménovém rozhraní přijatelná a služba zůstává doménová. Rozhoduje, jestli třída obsahuje doménové pravidlo, ne počet
 jejích konstruktorových parametrů.
 
 :::callout{type="warn"}
@@ -1442,9 +1439,9 @@ události, a architektonické pravidlo, že z jiného modulu se smí importovat 
 Rozdíl proti pouhému zákazu importu: refaktoring uvnitř modulu pak nikoho nezajímá,
 protože se nedotkne ničeho, co soused vidí.
 
-Modulární monolit jako celek – kdy se vyplatí, jak z něj později odejít a jaká pravidla
-mu nastavit – rozebírá kapitola
-[DDD a microservices](/ddd-a-microservices#modular-monolith).
+Modulární monolit jako celek rozebírá kapitola [DDD a microservices](/ddd-a-
+microservices#modular-monolith): kdy se vyplatí, jak z něj později odejít a jaká pravidla mu
+nastavit.
 
 ### Architecture testing: hranice vynucené v CI {#mod-phparkitect}
 
@@ -1521,9 +1518,8 @@ Bounded Context:
 | Factory | Tvoří agregát s validovaným počátečním stavem | Při vzniku obvykle emituje first event (*OrderPlaced*) | Žije uvnitř BC; Factory pro cross-BC objekty neexistuje |
 | Module | Seskupuje všechny agregáty BC do jednoho balíčku | Definuje hranici, přes kterou putují events (Outbox) | 1 modul = 1 BC (preferovaná aplikace) |
 
-Poslední sloupec u Specification stojí za rozvedení. Kostra vzoru – rozhraní,
-`CompositeSpecification` a tři kombinátory – leží v `SharedKernel` a používají ji všechny
-kontexty. Konkrétní pravidlo `EligibleForFreeShipping` naopak patří jednomu kontextu a jinde
+Poslední sloupec u Specification stojí za rozvedení. Kostra vzoru leží v `SharedKernel` a používají ji všechny kontexty: rozhraní,
+`CompositeSpecification` a tři kombinátory. Konkrétní pravidlo `EligibleForFreeShipping` naopak patří jednomu kontextu a jinde
 by nedávalo smysl. Sdílí se mechanismus, ne pravidlo.
 
 Hlavní vztah: **Agregát uvnitř používá Specifications** pro invarianty,
