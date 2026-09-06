@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -388,29 +388,32 @@ obsah vrácených událostí.
 :::callout{type="pattern"}
 ### Příklad: Trait pro testování doménových událostí
 
-:::code{language="php" filename="tests/Shared/Domain/DomainEventAssertions.php + Tests/Ordering/Domain/Model/OrderEventsTest.php"}
+:::code{language="php" filename="tests/Shared/Domain/DomainEventAssertions.php + tests/Ordering/Domain/Model/OrderEventsTest.php"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\Tests\Shared\Domain;
 
-use App\SharedKernel\Domain\Event\DomainEvent;
-
 /**
  * Reusable trait pro ověřování doménových událostí v unit testech.
  * Použití: `use DomainEventAssertions;` ve třídě TestCase.
+ *
+ * Události se typují jako `object`, ne jako společná bázová třída.
+ * Kanonický `AggregateRoot::record(object $event)` žádného předka
+ * nevyžaduje, takže vázat aserce na `DomainEvent` by je omezilo
+ * na jedinou událost v celé knize, která ho dědí.
  */
 trait DomainEventAssertions
 {
     /**
      * Ověří, že kolekce událostí obsahuje právě jednu událost daného typu.
      *
-     * @param array<DomainEvent> $events
+     * @param array<object> $events
      */
-    protected function assertSingleEventOfType(string $expectedType, array $events): DomainEvent
+    protected function assertSingleEventOfType(string $expectedType, array $events): object
     {
-        $matching = array_filter($events, fn(DomainEvent $e) => $e instanceof $expectedType);
+        $matching = array_filter($events, fn(object $e) => $e instanceof $expectedType);
 
         $this->assertCount(
             1,
@@ -424,11 +427,11 @@ trait DomainEventAssertions
     /**
      * Ověří, že kolekce událostí neobsahuje žádnou událost daného typu.
      *
-     * @param array<DomainEvent> $events
+     * @param array<object> $events
      */
     protected function assertNoEventOfType(string $unexpectedType, array $events): void
     {
-        $matching = array_filter($events, fn(DomainEvent $e) => $e instanceof $unexpectedType);
+        $matching = array_filter($events, fn(object $e) => $e instanceof $unexpectedType);
 
         $this->assertCount(
             0,
@@ -441,11 +444,11 @@ trait DomainEventAssertions
      * Ověří přesné pořadí vydaných událostí.
      *
      * @param array<class-string>  $expectedTypes
-     * @param array<DomainEvent> $events
+     * @param array<object> $events
      */
     protected function assertEventSequence(array $expectedTypes, array $events): void
     {
-        $actualTypes = array_map(fn(DomainEvent $e) => $e::class, $events);
+        $actualTypes = array_map(fn(object $e) => $e::class, $events);
 
         $this->assertSame(
             $expectedTypes,
@@ -539,8 +542,8 @@ final class OrderEventSourcingTest extends TestCase
     {
         // given
         $order = $this->given(
-            new OrderPlaced('order-1', 'customer-1'),
-            new OrderItemAdded('order-1', new OrderItem(
+            OrderPlaced::create('order-1', 'customer-1'),
+            OrderItemAdded::create('order-1', new OrderItem(
                 productId: 'product-1',
                 quantity: 2,
                 unitPriceInCents: 49900,
@@ -557,7 +560,7 @@ final class OrderEventSourcingTest extends TestCase
 
     public function testConfirmingEmptyOrderRecordsNothing(): void
     {
-        $order = $this->given(new OrderPlaced('order-1', 'customer-1'));
+        $order = $this->given(OrderPlaced::create('order-1', 'customer-1'));
 
         try {
             $order->confirm();
@@ -637,6 +640,7 @@ declare(strict_types=1);
 
 namespace App\Tests\UserManagement\Infrastructure\Repository;
 
+use App\UserManagement\Domain\Exception\DuplicateEmailException;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
@@ -900,15 +904,20 @@ final class OrderBuilder
     }
 }
 
-// --- Použití v testu ---
-
-$order = OrderBuilder::anOrder()
-    ->forCustomer(CustomerId::generate())
-    ->withItem(quantity: 3, unitPrice: new Money(25000, Currency::CZK))
-    ->confirmed()
-    ->build();
-
-$order->releaseEvents(); // stavba agregátu vydala události, test si buffer vyprázdní
+/*
+ * Použití v testu - patří dovnitř testovací metody. Kdyby ty řádky
+ * zůstaly na úrovni souboru, PHP je vykoná při autoloadu třídy
+ * a každý test s builderem by navíc postavil jednu objednávku bokem.
+ *
+ * $order = OrderBuilder::anOrder()
+ *     ->forCustomer(CustomerId::generate())
+ *     ->withItem(quantity: 3, unitPrice: new Money(25000, Currency::CZK))
+ *     ->confirmed()
+ *     ->build();
+ *
+ * // stavba agregátu vydala události, test si buffer vyprázdní
+ * $order->releaseEvents();
+ */
 :::
 :::
 
@@ -1007,6 +1016,10 @@ use Doctrine\ORM\EntityManagerInterface;
  * Integrační test pro DoctrineUserRepository.
  * Vyžaduje běžící databázi (konfigurovanou přes DATABASE_URL v .env.test).
  * Transakční rollback zajišťuje dama/doctrine-test-bundle.
+ *
+ * Repozitář se tahá přímo z kontejneru, takže musí být v test prostředí
+ * public - viz services_test.yaml pod ukázkou. Symfony jinak privátní
+ * službu při kompilaci zahodí a get() skončí ServiceNotFoundException.
  */
 final class DoctrineUserRepositoryTest extends KernelTestCase
 {
@@ -1028,6 +1041,9 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
 
         $this->repository->save($user);
+        // save() jen persistuje; zápis do DB spouští až flush(). Vlastníkem
+        // flushe je v této knize handler, takže si ho test musí zavolat sám.
+        $this->entityManager->flush();
         $this->entityManager->clear(); // vyčistíme identity map - nutné pro skutečné čtení z DB
 
         $retrieved = $this->repository->findById($userId);
@@ -1048,6 +1064,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('Heslo123!'));
 
         $this->repository->save($user);
+        $this->entityManager->flush();
         $this->entityManager->clear();
 
         $found = $this->repository->findByEmail($email);
@@ -1064,11 +1081,23 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $this->assertFalse($this->repository->existsByEmail($email));
 
         $this->repository->save($user);
+        $this->entityManager->flush();
 
         $this->assertTrue($this->repository->existsByEmail($email));
     }
 }
 :::
+:::
+
+Privátní služby kontejner po kompilaci zahodí, takže `get()` na nich selže. Test, který
+sahá po konkrétní implementaci, si ji musí v test prostředí zveřejnit:
+
+:::code{language="yaml" filename="config/services_test.yaml"}
+services:
+    # Jen pro testy. V produkci zůstává služba privátní a chodí se na ni
+    # přes injektované rozhraní UserRepository.
+    App\UserManagement\Infrastructure\Repository\DoctrineUserRepository:
+        public: true
 :::
 
 :::callout{type="warn"}
@@ -1416,12 +1445,23 @@ use Deptrac\Deptrac\Contract\Config\Layer;
 use Deptrac\Deptrac\Contract\Config\Ruleset;
 
 return static function (DeptracConfig $config): void {
+    // Baseline se načte jen tehdy, když existuje. Bezpodmínečný zápis shodí
+    // i ten příkaz, kterým se baseline teprve vytváří - a čtenář uvízne
+    // hned na prvním spuštění.
+    if (file_exists(__DIR__ . '/deptrac.baseline.yaml')) {
+        $config->baseline('deptrac.baseline.yaml');
+    }
+
     $config
         ->paths('./src')
-        ->baseline('deptrac.baseline.yaml')
         ->layers(
+            // Negativní lookahead je nutný: 'src/.*/Domain/.*' pohltí
+            // i src/SharedKernel/Domain a Deptrac pak hlásí tytéž třídy
+            // ve dvou vrstvách zároveň.
             $domain = Layer::withName('Domain')->collectors(
-                DirectoryConfig::create('src/.*/Domain/.*')
+                DirectoryConfig::create('src/(?!SharedKernel)[^/]+/Domain/.*'),
+                // Event-sourced model má vlastní namespace, jinak zůstane nepokrytý
+                DirectoryConfig::create('src/[^/]+/EventSourced/.*')
             ),
             $application = Layer::withName('Application')->collectors(
                 DirectoryConfig::create('src/.*/Application/.*'),
@@ -1430,7 +1470,9 @@ return static function (DeptracConfig $config): void {
                 DirectoryConfig::create('src/.*/Registration/Command/.*')
             ),
             $infrastructure = Layer::withName('Infrastructure')->collectors(
-                DirectoryConfig::create('src/.*/Infrastructure/.*')
+                DirectoryConfig::create('src/.*/Infrastructure/.*'),
+                // Sdílená infrastruktura leží o úroveň výš než kontexty
+                DirectoryConfig::create('src/Infrastructure/.*')
             ),
             $presentation = Layer::withName('Presentation')->collectors(
                 DirectoryConfig::create('src/.*/Controller/.*')
@@ -1615,18 +1657,31 @@ z [sekce o integračních testech](#integracni-testy):
     <php>
         <server name="APP_ENV" value="test" force="true"/>
         <server name="KERNEL_CLASS" value="App\Kernel"/>
+        <!-- Bez ztlumení sypou funkční testy monolog do výstupu PHPUnitu -->
+        <server name="SHELL_VERBOSITY" value="-1"/>
     </php>
 
+    <!--
+        Sady musí dohromady pokrýt celý adresář tests/. Co do žádné z nich
+        nespadne, PHPUnit mlčky vynechá a CI zůstane zelené. Kontrolu udělá
+        porovnání `vendor/bin/phpunit` a `vendor/bin/phpunit tests` -
+        musí hlásit stejný počet testů.
+    -->
     <testsuites>
         <!-- Doména běží bez kernelu - tuto sadu lze spouštět po každé změně -->
         <testsuite name="Domain">
             <directory>tests/*/Domain</directory>
+        </testsuite>
+        <testsuite name="Application">
+            <directory>tests/*/Application</directory>
         </testsuite>
         <testsuite name="Integration">
             <directory>tests/*/Infrastructure</directory>
         </testsuite>
         <testsuite name="Functional">
             <directory>tests/*/Functional</directory>
+            <!-- Feature slice si drží testy u sebe, ne pod Functional/ -->
+            <directory>tests/*/*/Controller</directory>
         </testsuite>
     </testsuites>
 
@@ -1642,6 +1697,20 @@ z [sekce o integračních testech](#integracni-testy):
     </extensions>
 </phpunit>
 :::
+:::
+
+Samotný zápis v `<extensions>` nestačí. `dama/doctrine-test-bundle` je contrib balíček,
+takže ho Flex nezaregistruje a rozšíření sice nastartuje, ale **nic nevrací zpět**. Poznáte
+to podle toho, že testy projdou jednou a při druhém běhu spadnou na datech z toho prvního.
+Bundle proto patří do `config/bundles.php`:
+
+:::code{language="php" filename="config/bundles.php"}
+<?php
+
+return [
+    // …
+    DAMA\DoctrineTestBundle\DAMADoctrineTestBundle::class => ['test' => true],
+];
 :::
 
 :::callout{type="pattern"}
