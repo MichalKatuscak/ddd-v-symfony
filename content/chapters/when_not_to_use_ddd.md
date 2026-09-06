@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -244,7 +244,7 @@ Jde o přesun a transformaci dat, ne o modelování domény.
 
 Agregáty chrání invarianty. Pokud žádné nemáte, zbude z agregátu prázdný obal a režie
 navíc. Evans definuje agregát jako *cluster of associated objects that we treat as a unit
-for the purpose of data changes* a v *DDD Reference* k tomu doplňuje, že vlastnosti
+for the purpose of data changes*. V *DDD Reference* k tomu doplňuje, že vlastnosti
 a invarianty se definují pro celek a jejich vynucení patří kořeni. Pipeline nemá co
 vynucovat: pravidla žijí v transformačním kroku, ne ve stavu objektu.
 
@@ -272,8 +272,8 @@ U projektů, které skončí do roka, se to nestihne.
 
 Jde o autorský odhad, ne o měřenou veličinu. Fowler klade v
 <a href="https://martinfowler.com/bliki/DesignStaminaHypothesis.html" target="_blank" rel="noopener">Design Stamina Hypothesis</a>
-hranici návratnosti návrhu podstatně níž (spíš týdny než měsíce) a sám dodává, že jde
-o hypotézu, protože produktivitu ani kvalitu návrhu měřit neumíme. Rozdíl je v předmětu.
+hranici návratnosti návrhu podstatně níž, spíš týdny než měsíce. Sám k tomu dodává,
+že jde o hypotézu: produktivitu ani kvalitu návrhu měřit neumíme. Rozdíl je v předmětu.
 Fowler mluví o návrhu obecně, zde jde o plný taktický aparát DDD, který má vyšší učební
 křivku i vyšší vstupní režii.
 
@@ -355,7 +355,7 @@ final class Order extends AggregateRoot
 **Doporučené alternativy:**
 
 - Klasická architektura, kterou tým zná dobře – srozumitelný kód je vždy lepší než „správná“ architektura, které nikdo nerozumí.
-- DDD snese experiment na vedlejším projektu nebo v ohraničené části systému, odkud se zkušenosti přenášejí postupně. Evans pro to má jméno: **Bubble Context** – malý kontext oddělený Anticorruption Layerem, který nevyžaduje velký závazek k DDD (*Getting Started with DDD When Surrounded by Legacy Systems*, 2013).
+- DDD snese experiment na vedlejším projektu nebo v ohraničené části systému, odkud se zkušenosti přenášejí postupně. Evans pro to má jméno: **Bubble Context**. Malý kontext oddělený Anticorruption Layerem, který nevyžaduje velký závazek k DDD (*Getting Started with DDD When Surrounded by Legacy Systems*, 2013).
 - Jako odrazový můstek se osvědčil Vernon: *Domain-Driven Design Distilled* – nejstručnější úvod do DDD konceptů.
 :::
 
@@ -399,14 +399,13 @@ kde se doménový model nevyplatí. Volbě stylu podle kontextu se věnuje kapit
 
 Konkrétně: pojišťovna má **Core** Underwriting (DDD ano), **Supporting** Customer
 Management (lehké DDD), **Generic** Notifikace (CRUD nebo SaaS jako Twilio).
-Plné DDD ve všech třech kontextech znamená trojnásobnou režii, přičemž ve dvou ze tří
-se investice nevrátí.
+Plné DDD ve všech třech kontextech znamená trojnásobnou režii. Ve dvou ze tří
+se ta investice nevrátí.
 
-V Symfony projektu se to projevuje strukturou monolitu, kde
-`src/Underwriting/` má plnou DDD strukturu (Domain/Application/Infrastructure
-+ agregáty + eventy), `src/Customer/` má jednodušší rozdělení Entity + Repository,
-a `src/Notification/` je čistý EasyAdmin nad Doctrine entitami nebo dokonce
-externí service.
+V Symfony projektu se to projevuje strukturou monolitu. `src/Underwriting/` má plnou
+DDD strukturu: Domain, Application, Infrastructure, agregáty a eventy.
+`src/Customer/` vystačí s rozdělením Entity + Repository. A `src/Notification/`
+je čistý EasyAdmin nad Doctrine entitami, nebo rovnou externí služba.
 
 ### Pět otázek na složitost domény {#complexity-heuristics}
 
@@ -440,7 +439,7 @@ zbývající životnost systému převýší cenu migrace s dostatečnou rezervo
 je migrace obchodní rozhodnutí, ne technické.
 
 Odhad ceny je přitom nejslabší část rozvahy. Praktičtější jsou tři heuristiky.
-Verraes rozhoduje podle kvality původního návrhu: co bylo navrženo dobře, se opravuje;
+Verraes rozhoduje podle kvality původního návrhu: co někdo navrhl dobře, se opravuje;
 co špatně, se nahrazuje. Fowler přidává podmínku vlastnictví. O obětování
 architektury rozhoduje tým, který ji napsal. A Spolsky připomíná, co se přepisem od nuly
 zahazuje: ne kód, ale roky nasbíraných oprav chyb.

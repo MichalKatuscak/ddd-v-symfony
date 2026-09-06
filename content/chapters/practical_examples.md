@@ -7,7 +7,7 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
@@ -52,7 +52,7 @@ a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
 `twig-bundle` a `form` potřebují kontrolery, které vracejí HTML. Ty z kapitoly o CQRS
 volají `createForm()` a `render()`. Kdo staví jen JSON API, obejde se bez nich.
 `expression-language` je naopak povinný, jakmile v projektu leží `PolicyEvaluator`
-z kapitoly o autorizaci: komponentu bere jako výchozí hodnotu parametru, takže bez
+z kapitoly o autorizaci. Komponentu bere jako výchozí hodnotu parametru, takže bez
 balíčku spadne už `cache:clear`, ne teprve vyhodnocení pravidla.
 
 Instalace tím ale nekončí. Další dva kroky se přeskakují právě proto, že jejich
@@ -110,8 +110,8 @@ composer require --dev symfony/test-pack
 :::
 
 Zbývá detail, který stojí půl hodiny hledání: **`.env.local` se v prostředí `test`
-nenačítá.** Kernel testy proto sáhnou po `DATABASE_URL` z `.env`,
-tedy po PostgreSQL z receptu, a spadnou na `Connection refused`. Hodnota patří
+nenačítá.** Kernel testy proto sáhnou po `DATABASE_URL` z `.env`, tedy po PostgreSQL
+z receptu, a spadnou na `Connection refused`. Hodnota patří
 do `.env.test.local`:
 
 :::code{language="ini" filename=".env.test.local"}
