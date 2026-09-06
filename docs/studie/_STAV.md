@@ -1008,6 +1008,81 @@ s custom typy. **A seznam balíčků stačil** — šest kapitol bez jediného d
   což kap. 10.15 zakazuje.
 - Migrace pro `order_dashboard` a `memberships` v knize nejsou.
 
+## Desáté kolo: sedmá ověřovací stavba (2026-09-06)
+
+Sedmý projekt postavený načisto podle knihy (Symfony 8.1.6, PHP 8.4.16, Doctrine ORM 3.6,
+SQLite). Poprvé zadání znělo „napiš i to, co projde“ — předchozí kola hlásila jen rozbité
+věci a nebylo poznat, co drží.
+
+### Tři cílené testy — všechny prošly
+
+| Test | Výsledek |
+|---|---|
+| Celý životní cyklus objednávky | `orders.status = shipped`, `order_dashboard.shipment_id` vyplněné, sága `completed`. Rozejití „sága hotová / objednávka v Draft" je pryč. |
+| Idempotence projekce | Outbox vrácen na `pending`, relay znovu: dashboard zůstal `shipped`. `ON CONFLICT … DO UPDATE … WHERE` funguje i na SQLite. |
+| Guard proti opožděné události | `PaymentSucceeded` doručené sáze ve `Failed`: verze ani `updated_at` se nehnuly. |
+
+Vedle toho potvrzeno: `final class Order extends AggregateRoot` s ORM 3.6 hydratuje,
+`public private(set) int $quantity` se mapuje, `#[Target('event.bus')]` v relayi trefí
+správnou sběrnici, outbox je atomický přes `wrapInTransaction()`, druhý `migrations:diff`
+hlásí „No changes detected".
+
+### Co kolo odhalilo a co je opravené
+
+**Neúplnost vlastní opravy z devátého kola.** Guard `isTerminal()` dostaly čtyři handlery
+kroků z pěti; `onPaymentFailed()` zůstal bez něj. Opožděné `PaymentFailed` přepsalo
+dokončenou ságu na `Failed` a poslalo `CancelOrderCommand` na odeslanou objednávku.
+**Poučení: guard zaváděný do rodiny metod se musí ověřit výčtem, ne namátkou.**
+
+**Test knihy neprošel proti kódu knihy.** `OrderProcessManagerTest` počítal `assertCount(1)`,
+zatímco sekce 14.08 nařizuje `scheduleTimeout()` v každé metodě přecházející do čekajícího
+stavu — takže zpráv byly dvě. Test dostal helper `steps()`, který timeouty odfiltruje.
+
+**`RegisterUserHandlerTest` měl šest samostatných vad**: mockoval `PasswordHasher` (třída
+v knize neexistuje), předával handleru jiné argumenty, očekával volání `findByEmail()`,
+o kterém kapitola 10 sama píše, že se na něj handler záměrně nespoléhá, volal
+`User::register()` se třemi argumenty místo čtyř a privátní konstruktor `HashedPassword`.
+Mock repozitáře navíc nemá unique index, takže duplicitu nemohl ověřit principiálně.
+Přepsán na `KernelTestCase` proti SQLite.
+
+**`OrderDashboardProjectorTest`** používal šestkrát nedeklarované konstanty a ležel
+v namespace `Tests\…`, který composer nemapuje — v `bin/phpunit` se vůbec nenačetl.
+
+**Události, které kniha volala a nikde nedefinovala**: `OrderShipped` ve třech
+nekompatibilních tvarech (jediná definice v kapitole o event sourcingu má úplně jinou
+podobu), `OrderCancelled` s `cancelledAt` proti `occurredAt` v projektoru, `ShipmentId`
+popsaný jen komentářem. Projektor navíc předával DBAL rovnou `OrderId` místo skaláru.
+
+**Instalace nedojela k funkční databázi.** Recept `doctrine-bundle` mapuje `src/Entity`
+s prefixem `App\Entity`; ve vertikálním řezu takový adresář není a Doctrine mlčky odpoví
+`No Metadata Classes to process.` — hláška vypadá jako úspěch. Chyběl i krok s `DATABASE_URL`.
+
+**`services.yaml`** registroval tři kontexty, kapitoly 14 a 15 jich používají devět.
+Chybějící alias rozhraní se neprojeví při kompilaci kontejneru, ale až za běhu.
+
+**Jedno jméno pro dva read modely.** `UserProfileViewModel` měl v kapitole 10 čtyři pole
+z repozitáře agregátu, v kapitole 12 šest z read repozitáře. Kapitola 10 teď vrací vlastní
+`UserProfile`.
+
+**Prózou popsaný kód, který průchozí není.** `DoctrineOutboxRepository` kniha odbyla větou
+„plný výpis vynecháváme". Přitom `store()` nesmí flushovat a `fetchPending()` musí filtrovat
+podle `availableAt`, jinak je backoff k ničemu. Totéž `ReadModelStore` a čtyři příkazy
+cizích kontextů, které se objevovaly jen v routingu `messenger.yaml` — a Messenger
+neexistující třídu v routingu odmítne už při kompilaci.
+
+**Kanonický `Order` neměl `cancel()`**, přestože sága posílá `CancelOrderCommand` ve třech
+větvích. Doplněn včetně větve pro opakované storno.
+
+**Kniha si protiřečila**: kapitola 10 zakazovala cross-context import doménových tříd,
+kapitola 7 ho o pár stran dřív dělala u `ShipmentId`. Zákaz teď vyjímá identitu.
+
+### Metodická poznámka
+
+Šest kol mělo poměr regresí kolem 40 %. Sedmé kolo žádnou regresi z předchozích oprav
+nenašlo — jediným nálezem proti mé vlastní práci byla ta neúplnost guardu. Rozdíl proti
+dřívějšku: opravy devátého kola byly poprvé zaváděny až po tom, co je stavba doložila,
+ne dopředu podle úvahy.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.

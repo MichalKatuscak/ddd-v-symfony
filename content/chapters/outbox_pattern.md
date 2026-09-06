@@ -7,7 +7,7 @@ meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrin
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-05"
+modified: '2026-09-06'
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
