@@ -535,6 +535,12 @@ class Order extends AggregateRoot
     // se objednávka jinak nedostane.
     public function markPaid(): void
     {
+        // Příkaz jde přes asynchronní transport s garancí at-least-once,
+        // takže opakované doručení není chyba volajícího.
+        if ($this->status === OrderStatus::Paid) {
+            return;
+        }
+
         if ($this->status !== OrderStatus::Confirmed) {
             throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,
@@ -547,6 +553,10 @@ class Order extends AggregateRoot
 
     public function ship(ShipmentId $shipmentId): void
     {
+        if ($this->status === OrderStatus::Shipped) {
+            return;
+        }
+
         if ($this->status !== OrderStatus::Paid) {
             throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,

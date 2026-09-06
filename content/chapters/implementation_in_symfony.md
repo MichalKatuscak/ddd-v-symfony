@@ -1643,8 +1643,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 final readonly class RegisterUser
 {
     public function __construct(
-        #[Assert\NotBlank]
-        #[Assert\Length(min: 2, max: 100)]
+        // Trim je tu schválně: UserName si vstup ořízne, takže bez něj
+        // by „  a  “ prošlo délkovou kontrolou a spadlo až v hodnotovém
+        // objektu jako 500. HTML formulář to maskuje, protože TextType
+        // trimuje sám – JSON endpoint ne.
+        #[Assert\NotBlank(normalizer: 'trim')]
+        #[Assert\Length(min: 2, max: 100, normalizer: 'trim')]
         public string $name,
 
         #[Assert\NotBlank]

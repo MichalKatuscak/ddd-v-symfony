@@ -964,6 +964,7 @@ use App\Payment\Domain\PaymentGateway;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class ChargeCustomerHandler
@@ -985,6 +986,7 @@ final readonly class ChargeCustomerHandler
             );
         } catch (\RuntimeException $e) {
             $this->eventBus->dispatch(new PaymentFailed(
+                eventId: Uuid::v7(),
                 orderId: $command->orderId,
                 failureReason: $e->getMessage(),
             ));
@@ -993,6 +995,7 @@ final readonly class ChargeCustomerHandler
         }
 
         $this->eventBus->dispatch(new PaymentSucceeded(
+            eventId: Uuid::v7(),
             orderId: $command->orderId,
             transactionId: $transactionId,
         ));
@@ -1096,6 +1099,7 @@ interface ShippingService
 namespace App\Warehouse\Infrastructure;
 
 use App\Warehouse\Domain\StockService;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class InMemoryStockService implements StockService
 {
@@ -1246,9 +1250,11 @@ final readonly class CancelShipment
 :::
 
 Zbylých pět handlerů sedí ve svých kontextech a od `ChargeCustomerHandler` se liší jen
-tím, co volají. Vypisuji je celé, protože chybějící handler se projeví až jako
-`No handler for message` v dead-letter frontě, zatímco proces poběží dál – a to je
-druh chyby, kterou nikdo nehledá, dokud se stavy nerozejdou.
+tím, co volají. Vypsané jsou dva, na kterých je vidět obojí: krok, který hlásí výsledek
+událostí, i kompenzace, která nehlásí nic. Zbylé se od nich liší jen volanou službou
+a jménem události, ale **vynechat je nejde** – chybějící handler se projeví až jako
+`No handler for message` v dead-letter frontě, zatímco proces poběží dál. To je druh
+chyby, kterou nikdo nehledá, dokud se stavy nerozejdou.
 
 :::code{language="php" filename="src/Warehouse/Application/Handler/ReserveStockHandler.php + ReleaseStockHandler.php"}
 <?php
@@ -1265,6 +1271,7 @@ use App\Warehouse\Domain\StockService;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class ReserveStockHandler
@@ -1281,6 +1288,7 @@ final readonly class ReserveStockHandler
             $this->stock->reserve($command->orderId);
         } catch (\RuntimeException $e) {
             $this->eventBus->dispatch(new StockReservationFailed(
+                eventId: Uuid::v7(),
                 orderId: $command->orderId,
                 failureReason: $e->getMessage(),
             ));
@@ -1288,7 +1296,10 @@ final readonly class ReserveStockHandler
             return;
         }
 
-        $this->eventBus->dispatch(new StockReserved(orderId: $command->orderId));
+        $this->eventBus->dispatch(new StockReserved(
+            eventId: Uuid::v7(),
+            orderId: $command->orderId,
+        ));
     }
 }
 
@@ -1310,9 +1321,16 @@ hlásí událostí `ShipmentCreated` se `ShipmentId` z brány. `CancelShipmentHa
 němu kratší: zavolá `cancel($command->shipmentId)` a **nevydá nic**. Kdyby vydal
 `ShipmentCreated`, Process Manager by na ni ve stavu `Compensating` odpověděl dalším
 `CancelShipment` a vznikla by nekonečná smyčka příkazu a události. `RefundCustomerHandler` je protějšek `ChargeCustomerHandler`: zavolá
-`PaymentGateway::refund()` a podle výsledku vydá `RefundSucceeded`, nebo `RefundFailed`. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
-`cancel($command->reason, new \DateTimeImmutable())`. Porty `StockService` a `ShippingService` mají stejnou
-stavbu jako `PaymentGateway`: rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
+`PaymentGateway::refund()` a podle výsledku vydá `RefundSucceeded`, nebo `RefundFailed`.
+
+`CancelOrderHandler` má vlastní výpis v [kapitole o autorizaci](/autorizace-v-ddd#async-
+authorization) a je potřeba právě ten. Musí totiž rozpoznat systémovou identitu a uvolnit
+zámek – jinak kompenzace narazí na `OrderLockedBySagaException`, skončí v dead-letter frontě
+a objednávka zůstane zaplacená, nezrušená a zamčená navždy. Verze „jako
+`MarkOrderPaidHandler`, jen volá `cancel()`“ pro ságu nestačí.
+
+Porty `StockService` a `ShippingService` mají stejnou stavbu jako `PaymentGateway`:
+rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
 
 Adaptéry jsou jediné místo, kde na knize záleží nejmíň: za rozhraním může být HTTP klient
 cizí služby, tabulka v téže databázi nebo v testech pole v paměti. Právě proto rozhraní
@@ -1362,6 +1380,7 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Saga;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'order_saga')]
@@ -1653,7 +1672,8 @@ public function applyPaymentSucceeded(string $eventId): bool
 :::
 
 Volání z Process Manageru pak vypadá takhle. Návratová hodnota říká, jestli se přechod
-opravdu odehrál, takže se příkazy neodešlou podruhé:
+opravdu odehrál, takže se příkazy neodešlou podruhé. Výpis **nahrazuje celou metodu**
+z [14.05](#process-manager-heading), včetně zápisu do `completedSteps`:
 
 :::code{language="php" filename="src/Ordering/Application/Saga/OrderProcessManager.php (výřez)"}
 private function onPaymentSucceeded(PaymentSucceeded $event): void
@@ -1672,12 +1692,54 @@ private function onPaymentSucceeded(PaymentSucceeded $event): void
     }
 
     $state->updateContext('transactionId', $event->transactionId);
+
+    // Bez tohohle řádku nemá pozdější kompenzace podle čeho poznat, že
+    // platba proběhla, a RefundCustomer se nikdy neodešle. Objednávka
+    // skončí zrušená se strženými penězi a sága uvázne v Compensating.
+    $state->updateContext('completedSteps', [
+        ...$state->context()['completedSteps'],
+        'payment_charged',
+    ]);
     $this->sagaRepository->save($state);
 
     $this->commandBus->dispatch(new MarkOrderPaid(orderId: $event->orderId));
     $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
 }
 :::
+:::
+
+Guard patří **do každého kroku**, ne jen do platby. `OrderSaga` proto dostane obdobné
+`applyStockReserved()` a `applyShipmentCreated()`; liší se jen očekávaným stavem a cílem
+přechodu. Bez nich vyrobí opakovaně doručená `StockReserved` druhou i třetí zásilku,
+v kontextu přežije jen ta poslední a kompenzace zruší jednu ze tří. Objednávka přitom
+skončí `shipped` a dead-letter fronta zůstane prázdná – nikde se to nepozná.
+
+Druhá polovina obrany patří do agregátu. `Order::cancel()` je idempotentní záměrně;
+`markPaid()` a `ship()` ale ne, přestože jdou přes tentýž asynchronní transport.
+Opakované doručení `MarkOrderPaid` tak skončí po třech pokusech v DLQ s hláškou
+„Nelze přejít ze stavu paid do stavu paid". Data se nerozbijí, ale nikdo se o tom
+nedozví. Obě metody proto mají na začátku tutéž větev jako `cancel()`:
+
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
+public function markPaid(): void
+{
+    // Opakované doručení příkazu není chyba volajícího, jen už není
+    // co dělat. Transport garantuje at-least-once, ne exactly-once.
+    if ($this->status === OrderStatus::Paid) {
+        return;
+    }
+
+    if ($this->status !== OrderStatus::Confirmed) {
+        throw InvalidOrderStateTransitionException::cannotTransition(
+            $this->status->value,
+            OrderStatus::Paid->value,
+        );
+    }
+
+    $this->status = OrderStatus::Paid;
+}
+
+// ship() má tutéž větev pro OrderStatus::Shipped.
 :::
 
 Tři stavební prvky, které zde fungují společně:
@@ -2297,6 +2359,7 @@ private function compensate(OrderSaga $state): void
             'shipment_created' => $this->commandBus->dispatch(
                 new \App\Shipping\Application\Command\CancelShipment(
                     orderId: $state->correlationId(),
+                    shipmentId: $state->context()['shipmentId'],
                 ),
             ),
             'stock_reserved' => $this->commandBus->dispatch(
@@ -2753,7 +2816,7 @@ final class OrderProcessManagerTest extends TestCase
         ($this->saga)($this->orderPlaced());
         $this->dispatchedCommands = [];
 
-        ($this->saga)(new PaymentSucceeded(orderId: self::ORDER_ID));
+        ($this->saga)(new PaymentSucceeded(eventId: Uuid::v7(), orderId: self::ORDER_ID));
 
         // onPaymentSucceeded dispatchne dva kroky: MarkOrderPaid a ReserveStock.
         // Timeout, který k nim sága přidá, testy počítat nechtějí.
@@ -2772,6 +2835,7 @@ final class OrderProcessManagerTest extends TestCase
         $this->dispatchedCommands = [];
 
         ($this->saga)(new PaymentFailed(
+            eventId: Uuid::v7(),
             orderId: self::ORDER_ID,
             failureReason: 'Insufficient funds',
         ));
@@ -2785,6 +2849,7 @@ final class OrderProcessManagerTest extends TestCase
     {
         ($this->saga)($this->orderPlaced());
         ($this->saga)(new PaymentFailed(
+            eventId: Uuid::v7(),
             orderId: self::ORDER_ID,
             failureReason: 'Insufficient funds',
         ));
@@ -2792,7 +2857,7 @@ final class OrderProcessManagerTest extends TestCase
 
         // Platba dorazí až po timeoutu, kdy je sága ve Failed. Bez guardu
         // by ságu přepnula zpět a poslala MarkOrderPaid na zrušenou objednávku.
-        ($this->saga)(new PaymentSucceeded(orderId: self::ORDER_ID));
+        ($this->saga)(new PaymentSucceeded(eventId: Uuid::v7(), orderId: self::ORDER_ID));
 
         self::assertSame([], $this->steps());
         $state = $this->repository->findByCorrelationId(self::ORDER_ID);
