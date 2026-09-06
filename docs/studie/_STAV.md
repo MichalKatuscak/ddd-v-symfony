@@ -1083,6 +1083,61 @@ nenašlo — jediným nálezem proti mé vlastní práci byla ta neúplnost guar
 dřívějšku: opravy devátého kola byly poprvé zaváděny až po tom, co je stavba doložila,
 ne dopředu podle úvahy.
 
+## Jedenácté kolo: osmá ověřovací stavba (2026-09-06)
+
+Osmý projekt načisto (Symfony 8.1.6, PHP 8.4.16, ORM 3.6, SQLite, PHPUnit 13.3.2).
+Happy path prošel celý včetně kompenzační větve; všech 11 testů z knihy zeleně;
+`schema:validate` v sync, `migrations:diff` bez driftu.
+
+### Dvě regrese z desátého kola — poučení
+
+Obě v `DoctrineOutboxRepository`, který jsem v desátém kole dopisoval **bez stavby**:
+
+1. `markSent()` volaný bez povinného argumentu. Výjimku spolkne `catch (\Throwable)`
+   v relay commandu, takže se místo označení zavolal `markFailed()` — řádek zůstal
+   `pending`, relay ho poslal znovu a po pěti kolech skončil `failed`. Každá integrační
+   událost doručena 5×, outbox nikdy `sent`.
+2. Import rozhraní z `App\Outbox\Domain`, zatímco 15.04 ho definuje v `App\Outbox\Application`.
+   `cache:clear` spadl na autowiring. Stejná chyba ve dvou aliasech `services.yaml`.
+
+**Poučení: kód dopsaný „podle popisu v próze" se musí zkontrolovat proti signaturám tříd,
+na které sahá — próza je nekontroluje.** Obě chyby by odhalilo jediné spuštění.
+
+### Latentní chyba v mé vlastní opravě idempotence
+
+Podmínka `updated_at < :updatedAt` porovnávala řetězec `Y-m-d H:i:s`, tedy s přesností
+na vteřinu. Dvě události téhož agregátu spadnou do jedné vteřiny běžně, a `<` je pak
+nepravdivé i pro **legitimní** přechod: objednávka se odešle, dashboard mlčky zůstane
+na `placed`. Ve stavbě se to neprojevilo jen díky vteřinové prodlevě mezi relayem
+a workerem. Opraveno na `Y-m-d H:i:s.u` + `DATETIME(6)`.
+
+**Poučení: ochrana postavená na porovnání času potřebuje rozlišení jemnější, než je
+odstup událostí, které rozlišuje.**
+
+### Ostatní opravené nálezy
+
+- `Order::cancel()` bral jeden argument, kapitola 11 ho volá se dvěma a potřebuje
+  `isOwnedBy()`. Sjednoceno.
+- Test duplicitního e-mailu používal `'  JAN@example.com '`, což přes sběrnici neprojde
+  přes `#[Assert\Email]` — 422 místo 409. Test dokládal chování, které aplikace nemá.
+- `DoctrineOrderRepository` ve třech namespace; `services.yaml` mířil na ten, který
+  kapitola 7 nepoužívala.
+- `OrderStatusChanged` se importovala i nahrávala, definice nikde.
+- `reporting_orders` bez DDL.
+- Jedenáct handlerů s holým `#[AsMessageHandler]` — registrace na všech třech sběrnicích,
+  přesně to, co 12.05 popisuje jako chybu.
+- Kapitola 7 dovolovala stornovat doručenou objednávku, tabulka přechodů v kapitole 10 ne.
+- Instalace: `doctrine:database:create` na SQLite končí chybou; blok `.env.local` mísil
+  proměnné se shellovými příkazy; chyběl `symfony/test-pack`; a hlavně **`.env.local`
+  se v prostředí `test` nenačítá**, takže kernel testy padaly na PostgreSQL z receptu.
+
+### Rozpor, který se vyřešil upřesněním, ne přepsáním
+
+Kapitola 15.08 vede publikaci v `doctrine_transaction` jako anti-vzor, zatímco ságové
+handlery to dělají. Rozdíl, který knize chyběl: **dual-write je jen zápis opouštějící
+proces.** Synchronní `event.bus` uvnitř téže transakce jím není — posluchač běží nad
+stejným spojením a při rollbacku zmizí i jeho zápis. Rozhoduje cíl, ne okamžik.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
