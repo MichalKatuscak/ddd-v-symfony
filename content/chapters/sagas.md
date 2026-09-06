@@ -527,10 +527,13 @@ use App\Shipping\Domain\Event\ShipmentCreated;
 use App\Payment\Application\Command\ChargeCustomer;
 use App\Payment\Application\Command\RefundCustomer;
 use App\Warehouse\Application\Command\ReserveStock;
+use App\Warehouse\Application\Command\ReleaseStock;
 use App\Shipping\Application\Command\CreateShipment;
+use App\Shipping\Application\Command\CancelShipment;
 use App\Ordering\Application\Command\MarkOrderPaid;
 use App\Ordering\Application\Command\ShipOrder;
 use App\Ordering\Application\Command\CancelOrderCommand;
+use App\Ordering\Application\Command\ReleaseOrderLock;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\SystemActor;
@@ -646,8 +649,7 @@ final class OrderProcessManager
             return;
         }
 
-        $state->transitionTo(OrderSagaStatus::Failed);
-        $this->sagaRepository->save($state);
+        $this->finish($state, OrderSagaStatus::Failed);
 
         $this->commandBus->dispatch(new CancelOrderCommand(
             orderId: OrderId::fromString($event->orderId),
@@ -662,6 +664,14 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
         if ($state->status()->isTerminal()) {
+            return;
+        }
+
+        // Totéž co u zásilky: rezervace dorazila až po zahájení kompenzace,
+        // takže se rovnou uvolní místo toho, aby sága pokračovala dál.
+        if ($state->status() === OrderSagaStatus::Compensating) {
+            $this->commandBus->dispatch(new ReleaseStock(orderId: $event->orderId));
+
             return;
         }
 
@@ -731,6 +741,21 @@ final class OrderProcessManager
         }
     }
 
+    /** Zámek na objednávce uvolňuje sága, ať skončí jakkoli. */
+    private function finish(OrderSaga $state, OrderSagaStatus $status): void
+    {
+        $state->transitionTo($status);
+        $this->sagaRepository->save($state);
+
+        // Bez tohohle kroku zůstane objednávka zamčená navždy a zákazník
+        // ji nezruší ani po doručení. Ve větvích, které končí stornem,
+        // zámek uvolní rovnou CancelOrderHandler – přichází pod systémovou
+        // identitou, takže na pořadí zpráv ve frontě nezáleží.
+        $this->commandBus->dispatch(
+            new ReleaseOrderLock(orderId: $state->correlationId()),
+        );
+    }
+
     private function onShipmentCreated(ShipmentCreated $event): void
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
@@ -738,12 +763,21 @@ final class OrderProcessManager
             return;
         }
 
-        $state->transitionTo(OrderSagaStatus::Completed);
+        // Zásilka mohla vzniknout dřív, než dorazilo storno. Guard na
+        // terminální stav tenhle případ nechytí – Compensating terminální
+        // není – a bez téhle větve by sága kompenzaci přeskočila a přešla
+        // do Completed s objednávkou, kterou už někdo zrušil.
+        if ($state->status() === OrderSagaStatus::Compensating) {
+            $this->commandBus->dispatch(new CancelShipment(orderId: $event->orderId));
+
+            return;
+        }
+
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'shipment_created',
         ]);
-        $this->sagaRepository->save($state);
+        $this->finish($state, OrderSagaStatus::Completed);
 
         // Zásilka existuje, takže objednávka přechází do Shipped.
         // Potvrzení proběhlo už v továrně při vzniku objednávky.
@@ -961,10 +995,8 @@ use Symfony\Component\Uid\Uuid;
 
 final readonly class InMemoryPaymentGateway implements PaymentGateway
 {
-    // Přepínač pro ruční zkoušku kompenzační větve. Hodnotu dodá kontejner:
-    //   App\Payment\Infrastructure\InMemoryPaymentGateway:
-    //       arguments: { $alwaysFails: '%env(bool:PAYMENT_FAILS)%' }
-    // V ostrém adaptéru ho nahradí odpověď brány.
+    // Přepínač pro ruční zkoušku kompenzační větve; hodnotu dodá kontejner
+    // (wiring o kus níž). V ostrém adaptéru ho nahradí odpověď brány.
     public function __construct(
         private bool $alwaysFails = false,
     ) {}
@@ -984,9 +1016,72 @@ final readonly class InMemoryPaymentGateway implements PaymentGateway
     }
 }
 
-// StockService a ShippingService mají stejnou stavbu: rezervovat a uvolnit,
-// vytvořit zásilku a zrušit ji. Bez jejich adaptérů se sága zastaví
-// po první platbě.
+:::
+
+`StockService` a `ShippingService` mají stejnou stavbu. Uvádím je, protože bez nich se
+sága zastaví po první platbě a kompenzační větev `STOCK_FAILS=1` nejde vůbec spustit:
+
+:::code{language="php" filename="src/Warehouse/Domain/StockService.php + src/Shipping/Domain/ShippingService.php (+ adaptéry)"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Warehouse\Domain;
+
+interface StockService
+{
+    /** @throws \RuntimeException když zboží není skladem */
+    public function reserve(string $orderId): void;
+
+    public function release(string $orderId): void;
+}
+
+namespace App\Shipping\Domain;
+
+interface ShippingService
+{
+    /** @return string identifikátor zásilky */
+    public function create(string $orderId): string;
+
+    public function cancel(string $shipmentId): void;
+}
+
+namespace App\Warehouse\Infrastructure;
+
+use App\Warehouse\Domain\StockService;
+
+final readonly class InMemoryStockService implements StockService
+{
+    public function __construct(private bool $alwaysFails = false) {}
+
+    public function reserve(string $orderId): void
+    {
+        if ($this->alwaysFails) {
+            throw new \RuntimeException('Zboží není skladem.');
+        }
+    }
+
+    public function release(string $orderId): void
+    {
+    }
+}
+
+// InMemoryShippingService vypadá stejně: create() vrací Uuid::v7(),
+// cancel() nedělá nic.
+:::
+
+Zapojení do kontejneru patří do `services.yaml`; bez něj mají přepínače výchozí `false`
+a kompenzační větev se nespustí, ať do prostředí napíšete cokoli:
+
+:::code{language="yaml" filename="config/services.yaml (výřez)"}
+    App\Payment\Infrastructure\InMemoryPaymentGateway:
+        arguments: { $alwaysFails: '%env(bool:PAYMENT_FAILS)%' }
+
+    App\Warehouse\Infrastructure\InMemoryStockService:
+        arguments: { $alwaysFails: '%env(bool:STOCK_FAILS)%' }
+
+    App\Warehouse\Domain\StockService: '@App\Warehouse\Infrastructure\InMemoryStockService'
+    App\Shipping\Domain\ShippingService: '@App\Shipping\Infrastructure\InMemoryShippingService'
 :::
 
 Zbylé handlery kroků mají stejnou stavbu jako `ChargeCustomerHandler`: vykonají operaci
@@ -1556,15 +1651,64 @@ public function cancel(string $reason, \DateTimeImmutable $when): void
 :::
 :::
 
+Chybějící díly jsou dva prosté typy:
+
+:::code{language="php" filename="src/Ordering/Application/Command/ReleaseOrderLock.php + src/Ordering/Domain/Exception/OrderLockedBySagaException.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Command;
+
+final readonly class ReleaseOrderLock
+{
+    public function __construct(public string $orderId) {}
+}
+
+namespace App\Ordering\Domain\Exception;
+
+use App\Ordering\Domain\ValueObject\OrderId;
+
+final class OrderLockedBySagaException extends \DomainException
+{
+    public function __construct(public readonly OrderId $orderId)
+    {
+        parent::__construct(sprintf(
+            'Objednávku „%s“ právě zpracovává jiný proces.',
+            $orderId->value,
+        ));
+    }
+}
+:::
+
+`ReleaseOrderLockHandler` má stejnou stavbu jako `MarkOrderPaidHandler`, jen volá
+`releaseSagaLock()` a nevydává událost – uvolnění zámku není doménová změna, na kterou
+by někdo čekal.
+
 Zámek má cenu jen tehdy, když ho někdo uvolní i při selhání – jinak zůstane objednávka
 zablokovaná navždy. Uvolnění proto patří do každé terminální větve ságy, ne jen
-do té úspěšné.
+do té úspěšné. V ukázkách knihy to dělá metoda `finish()` v Process Manageru a u větví
+končících stornem sám `CancelOrderHandler`, protože příkaz přichází pod systémovou
+identitou.
 
-Druhá cesta je zámek nemít a naopak ságu naučit, že objednávku může zrušit i člověk:
-`OrderProcessManager` z [14.05](#process-manager-heading) odebírá `OrderCancelled` a spustí
-kompenzaci sám. Vyjde to na stejný počet řádků, ale uživatel nedostane odmítnutí – jeho
-storno projde a proces se přizpůsobí. Volba mezi obojím je doménová: **smí zákazník zrušit
-objednávku, u které už běží platba?**
+Samotný zámek ale nestačí. `OrderProcessManager` proto navíc odebírá `OrderCancelled`
+a při stornu spustí kompenzaci hotových kroků. Obojí řeší jinou část téhož problému:
+
+- **Zámek** brání storna v okně, kdy proces běží. Bez něj by uživatel zrušil objednávku
+  uprostřed ságy, ta by dál strhla platbu a vytvořila zásilku – a příkazy `MarkOrderPaid`
+  a `ShipOrder` by pak jeden po druhém umřely v DLQ, aniž by kdokoli spadl.
+- **Reakce na `OrderCancelled`** pokrývá storna mimo to okno a případ, kdy objednávku
+  zruší jiný proces.
+- **Guard na `Compensating`** v `onStockReserved()` a `onShipmentCreated()` ošetřuje
+  opožděný úspěch: rezervace nebo zásilka dorazí až po zahájení kompenzace, takže se
+  rovnou zase uvolní. Kontrola na terminální stav sama nestačí – `Compensating`
+  terminální není.
+
+Že jsou potřeba všechny tři, je vidět až za běhu. Sága bez nich doběhne do `Completed`
+nad zrušenou objednávkou a rozdíl se pozná jedině čtením dead-letter fronty.
+
+Volba mezi zámkem a plnou reakcí je doménová: **smí zákazník zrušit objednávku, u které
+už běží platba?** Odpověď „ne, ať to zkusí za chvíli" je legitimní a levnější.
 
 Kolizní požadavky lze místo výjimky také frontovat a provést po uvolnění zámku;
 pro většinu domén ale stačí odmítnutí výjimkou a opakování na straně klienta.
@@ -1632,6 +1776,7 @@ framework:
             'App\Ordering\Application\Command\MarkOrderPaid': async_commands
             'App\Ordering\Application\Command\ShipOrder': async_commands
             'App\Ordering\Application\Command\CancelOrderCommand': async_commands
+            'App\Ordering\Application\Command\ReleaseOrderLock': async_commands
             # Bez tohoto routingu by se CheckSagaTimeout zpracoval synchronně
             # a DelayStamp by neměl žádný efekt.
             'App\Ordering\Application\Command\CheckSagaTimeout': async_commands
@@ -1784,7 +1929,9 @@ final readonly class CheckSagaTimeoutHandler
     private function failWithoutCompensation(OrderSaga $state): void
     {
         // Platba nikdy neproběhla - není co kompenzovat.
-        // Sága přechází rovnou do terminálního Failed.
+        // Sága přechází rovnou do terminálního Failed. Zámek na objednávce
+        // uvolní CancelOrderCommand níž, protože přichází pod systémovou
+        // identitou.
         $state->transitionTo(OrderSagaStatus::Failed);
         $this->sagaRepository->save($state);
 

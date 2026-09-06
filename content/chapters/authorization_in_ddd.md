@@ -144,6 +144,12 @@ Uživatelský provider ukazuje na třídu `SecurityUser` z infrastruktury, ne na
 :::code{language="yaml" filename="config/packages/security.yaml"}
 # config/packages/security.yaml
 security:
+    # Recept security-bundle tenhle blok vygeneruje sám. Kdo výpis níž
+    # zkopíruje jako celý soubor, přijde o něj – a první přihlášení pak
+    # skončí na „No password hasher has been configured“.
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
     providers:
         app_user_provider:
             entity:
@@ -217,6 +223,30 @@ final class LoginController extends AbstractController
         ]);
     }
 }
+:::
+
+Šablona k němu je krátká, ale dvě jména v ní nejdou vymyslet: `_username` a `_password`
+očekává `form_login` autentikátor a přejmenovat je znamená přenastavit firewall.
+
+:::code{language="twig" filename="templates/security/login.html.twig"}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% if error %}
+        <p class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+    {% endif %}
+
+    <form method="post">
+        <label for="username">E-mail</label>
+        <input type="email" id="username" name="_username" value="{{ last_username }}" required>
+
+        <label for="password">Heslo</label>
+        <input type="password" id="password" name="_password" required>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit">Přihlásit</button>
+    </form>
+{% endblock %}
 :::
 
 Doprovodná třída `SecurityUser` drží most mezi Symfony a doménou. Kromě `UserInterface` vystavuje doménové identifikátory, které si z ní vezme aplikační vrstva:
@@ -787,6 +817,12 @@ final readonly class CancelOrderHandler
             );
         }
 
+        // Zámek patří procesu, takže si ho proces sám uvolní. Kdyby to
+        // dělal až samostatný příkaz, záleželo by na pořadí ve frontě.
+        if ($isSystem) {
+            $order->releaseSagaLock();
+        }
+
         $order->cancel(reason: $command->reason, when: new \DateTimeImmutable());
         $this->orders->save($order);
         $this->em->flush();
@@ -1122,16 +1158,22 @@ final readonly class OrderDetailReadModel
         $columns   = 'order_id, customer_id, total_amount, status, placed_at';
         $seesAudit = $this->auth->isGrantedForUser($user, 'ROLE_ADMIN');
 
-        if ($seesAudit) {
-            $columns .= ', audit_log';
-        }
-
         $sql = "SELECT {$columns} FROM order_dashboard WHERE order_id = :id";
 
         $row = $this->db->fetchAssociative($sql, ['id' => $orderId]);
         if ($row === false) {
             throw OrderNotFoundException::withId(OrderId::fromString($orderId));
         }
+
+        // Audit log je vlastní tabulka, ne sloupec projekce – dotaz se
+        // pro něj vůbec nepoloží, když ho aktér nesmí vidět.
+        $row['audit_log'] = $seesAudit
+            ? $this->db->fetchAllAssociative(
+                'SELECT at, action, actor FROM order_audit_log
+                  WHERE order_id = :id ORDER BY at',
+                ['id' => $orderId],
+            )
+            : null;
 
         return OrderDetailDto::fromRow($row, includeAudit: $seesAudit);
     }
@@ -1170,9 +1212,7 @@ final readonly class OrderDetailDto
             totalAmount: (int) $row['total_amount'],
             status:      (string) $row['status'],
             placedAt:    new \DateTimeImmutable((string) $row['placed_at']),
-            auditLog:    $includeAudit
-                ? json_decode((string) ($row['audit_log'] ?? '[]'), true, flags: JSON_THROW_ON_ERROR)
-                : null,
+            auditLog:    $includeAudit ? (array) ($row['audit_log'] ?? []) : null,
         );
     }
 }
@@ -1505,7 +1545,7 @@ interface TenantAware
 }
 :::
 
-Filter aplikuje WHERE klauzuli `tenant_id = ?` na každý dotaz nad entitou, která implementuje marker rozhraní `TenantAware`. Aktivace filtru v `config/packages/doctrine.yaml`:
+Filter aplikuje WHERE klauzuli `tenant_id = ?` na každý dotaz nad entitou, která implementuje marker rozhraní `TenantAware`. Dokud ho neimplementuje žádná, je filtr no-op – zapnutý, ale bez účinku. Značka nepatří na `SecurityUser`: toho načítá provider **uvnitř** firewallu, tedy dřív, než listener stihne parametr nastavit, a přihlášení pak spadne na `Parameter 'tenant_id' does not exist`. Tenantní jsou doménové entity za firewallem, ne třída, kterou firewall sám používá k autentizaci. Aktivace filtru v `config/packages/doctrine.yaml`:
 
 :::code{language="yaml" filename="config/packages/doctrine.yaml"}
 # config/packages/doctrine.yaml
@@ -1853,6 +1893,11 @@ final class CancelOrderE2eTest extends WebTestCase
         foreach (['order_items', 'orders', 'app_user'] as $table) {
             $connection->executeStatement('DELETE FROM ' . $table);
         }
+
+        // getContainer() kernel nabootuje, ale createClient() ho chce
+        // nastartovat znovu. Bez tohohle řádku test spadne na
+        // „Booting the kernel before calling createClient() is not supported“.
+        self::ensureKernelShutdown();
     }
 
     public function testStrangerGetsNotFound(): void

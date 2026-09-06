@@ -441,7 +441,7 @@ transakci*, ve které ukládá samotný agregát.
 :::callout{type="pattern"}
 ### PHP: Agregát Order produkuje doménové události {#order-aggregate-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez – továrna pro outbox)"}
 <?php
 
 declare(strict_types=1);
@@ -459,7 +459,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
-final class Order extends AggregateRoot
+// Výřez, ne celá třída: přibývá jen továrna placeWithItems() a getter
+// items(). Deklarace vlastností, konstruktor i ostatní metody zůstávají
+// z kapitoly o návrhu agregátu – vložení celého bloku by skončilo
+// na „Cannot redeclare Order::__construct()“.
+class Order extends AggregateRoot
 {
     /** @var Collection<int, OrderItem> */
     private Collection $items;
@@ -495,6 +499,10 @@ final class Order extends AggregateRoot
         // Objednávka přišla kompletní – opouští Draft hned, jinak by na ni
         // sága nemohla zavolat markPaid() a uvázla by v prvním kroku.
         $order->confirm();
+
+        // Od tohohle okamžiku nad objednávkou běží proces. Zámek uvolní
+        // až sága, ať skončí úspěchem nebo kompenzací.
+        $order->lockForSaga();
 
         // Agregát nahrává doménovou událost s hodnotovými objekty.
         // Na integrační tvar ji přeloží až handler na hranici kontextu.

@@ -2166,6 +2166,10 @@ services:
     App\Inbox\Application\InboxRepository: '@App\Inbox\Infrastructure\DbalInboxRepository'
     App\Ordering\Application\Saga\OrderSagaRepository: '@App\Ordering\Infrastructure\Saga\DoctrineOrderSagaRepository'
     App\Payment\Domain\PaymentGateway: '@App\Payment\Infrastructure\InMemoryPaymentGateway'
+    App\Warehouse\Domain\StockService: '@App\Warehouse\Infrastructure\InMemoryStockService'
+    App\Shipping\Domain\ShippingService: '@App\Shipping\Infrastructure\InMemoryShippingService'
+    App\Reporting\Application\ReadModelStore: '@App\Reporting\Infrastructure\DbalReadModelStore'
+    App\UserManagement\Profile\ReadModel\UserProfileReadRepository: '@App\UserManagement\Infrastructure\ReadModel\DbalUserProfileReadRepository'
 :::
 :::
 

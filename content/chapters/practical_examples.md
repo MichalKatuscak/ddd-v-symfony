@@ -72,10 +72,13 @@ u SQLite nebo MySQL připojení do prázdna:
 :::code{language="ini" filename=".env.local"}
 # SQLite stačí na všechny ukázky v knize a nepotřebuje běžící server
 DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
+:::
 
-# Přepínače testovacích adaptérů z kapitoly o ságách. Chybějící proměnná
-# se neprojeví při cache:clear ani lint:container – placeholder se řeší
-# až při sestavení služby, tedy ve workeru, kde sága tiše uvázne.
+Přepínače testovacích adaptérů z kapitoly o ságách patří naopak do verzovaného `.env`,
+ne do `.env.local`. Kernel testy `.env.local` nečtou, takže by první test sáhající
+na platební bránu spadl na `EnvNotFoundException`:
+
+:::code{language="ini" filename=".env"}
 PAYMENT_FAILS=0
 STOCK_FAILS=0
 :::

@@ -424,6 +424,7 @@ use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderShipped;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\OrderLockedBySagaException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
@@ -450,6 +451,10 @@ class Order extends AggregateRoot
     // storno lhůta v kapitole o autorizaci. Údaj čitelný jen z události
     // by k tomu agregát nutil sahat do vlastní historie.
     public private(set) ?\DateTimeImmutable $placedAt = null;
+
+    // Semantic lock: dokud nad objednávkou běží proces, nesmí do ní sáhnout
+    // uživatel. Podrobněji v kapitole o ságách, sekce Izolace ság.
+    private bool $sagaInProgress = false;
 
     private function __construct(
         public readonly OrderId $id,
@@ -554,8 +559,25 @@ class Order extends AggregateRoot
 
     // Čas přebírá parametr, ne new \DateTimeImmutable() uvnitř: kapitola
     // o autorizaci na něm staví storno lhůtu a testy potřebují zadat vlastní.
+    public function lockForSaga(): void
+    {
+        $this->sagaInProgress = true;
+    }
+
+    public function releaseSagaLock(): void
+    {
+        $this->sagaInProgress = false;
+    }
+
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {
+        // Zámek drží proces, ne uživatel. Bez téhle podmínky by storno
+        // prošlo uprostřed ságy, ta by dál strhla platbu a vytvořila
+        // zásilku k objednávce, která už neexistuje.
+        if ($this->sagaInProgress) {
+            throw new OrderLockedBySagaException($this->id);
+        }
+
         // Storno je hrana grafu jako každá jiná: odeslanou ani doručenou
         // zásilku zpátky nevrátí, tam nastupuje kompenzace v ságe.
         // Výčet sedí s tabulkou přechodů OrderStatus z kapitoly 10.
@@ -827,6 +849,9 @@ class Order extends AggregateRoot
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     public private(set) ?\DateTimeImmutable $placedAt = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $sagaInProgress = false;
 
     // Mapování mění typ kolekce: místo pole list<OrderItem>
     // z čisté doménové varianty vyžaduje Doctrine Collection.

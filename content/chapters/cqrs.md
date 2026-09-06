@@ -260,8 +260,10 @@ framework:
         routing:
             # Příkazy vhodné pro asynchronní zpracování:
             # operace, kde uživatel nemusí čekat na výsledek
-            App\Notification\Application\Command\SendWelcomeEmail: async_commands
-            App\Reporting\Application\Command\GenerateMonthlyReport: async_commands
+            # Zprávy, které v projektu opravdu jsou. Messenger třídy ověřuje
+            # při kompilaci kontejneru, takže neexistující jméno tady shodí
+            # každý příkaz – včetně cache:clear.
+            App\Ordering\Application\Command\PlaceOrder: async_commands
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
             # App\UserManagement\Profile\Query\GetUserProfile: sync
@@ -854,6 +856,22 @@ final class RegistrationController extends AbstractController
     }
 }
 :::
+:::
+
+Šablona je běžný Twig formulář; `form_row` vykreslí i chyby, které do polí vložil
+kontroler z validace commandu:
+
+:::code{language="twig" filename="src/UserManagement/Registration/View/registration.html.twig"}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {{ form_start(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.password) }}
+        <button type="submit">Registrovat</button>
+    {{ form_end(form) }}
+{% endblock %}
 :::
 
 Kontroler stojí na dvou věcech, které vertikální řez potřebuje navíc. Šablony leží
