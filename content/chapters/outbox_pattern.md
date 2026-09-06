@@ -1328,6 +1328,51 @@ interface ReadModelStore
 }
 :::
 
+Implementace portu je jedna DBAL věta. Stojí za povšimnutí, že tenhle read model
+patří `Reportingu` a je jiný než `order_dashboard` z kapitoly o CQRS: dashboard sleduje
+stav objednávky, reporting drží její položky. Oba odebírají `OrderPlacedIntegrationEvent`
+a to je v pořádku – jedna událost běžně živí několik projekcí, každou v jejím kontextu.
+
+:::code{language="php" filename="src/Reporting/Infrastructure/DbalReadModelStore.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Reporting\Infrastructure;
+
+use App\Reporting\Application\ReadModelStore;
+use Doctrine\DBAL\Connection;
+
+final readonly class DbalReadModelStore implements ReadModelStore
+{
+    public function __construct(private Connection $connection) {}
+
+    public function upsertOrderRow(
+        string $orderId,
+        string $customerId,
+        array $items,
+        \DateTimeImmutable $placedAt,
+    ): void {
+        $this->connection->executeStatement(
+            'INSERT INTO reporting_orders (order_id, customer_id, items, placed_at)
+             VALUES (:orderId, :customerId, :items, :placedAt)
+             ON CONFLICT (order_id) DO UPDATE SET
+                items = excluded.items, customer_id = excluded.customer_id',
+            [
+                'orderId'    => $orderId,
+                'customerId' => $customerId,
+                'items'      => json_encode($items, JSON_THROW_ON_ERROR),
+                'placedAt'   => $placedAt->format('Y-m-d H:i:s'),
+            ],
+        );
+    }
+}
+:::
+
+Tabulka `reporting_orders` vzniká migrací a do `schema_filter` patří ze stejného
+důvodu jako `order_dashboard`. Podmínku na `updated_at` tenhle upsert nepotřebuje:
+řádek plní jediná událost, takže se nemá s čím předběhnout.
+
 :::code{language="php" filename="src/Reporting/Application/Subscriber/OrderPlacedReadModelUpdater.php" highlights="27,28,29,30,44"}
 <?php
 

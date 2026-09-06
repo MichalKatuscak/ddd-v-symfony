@@ -1724,6 +1724,18 @@ final readonly class GetUserProfile
         public string $userId,
     ) {}
 }
+
+// Odpověď dotazu. Hodnotové objekty ani agregát ven nepouštíme:
+// šablona ani API by s nimi neuměly nic užitečného udělat.
+final readonly class UserProfile
+{
+    public function __construct(
+        public string $id,
+        public string $name,
+        public string $email,
+        public \DateTimeImmutable $createdAt,
+    ) {}
+}
 :::
 
 :::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php"}
@@ -1744,7 +1756,7 @@ final readonly class GetUserProfileHandler
         private UserRepository $userRepository,
     ) {}
 
-    public function __invoke(GetUserProfile $query): ?UserProfileViewModel
+    public function __invoke(GetUserProfile $query): ?UserProfile
     {
         $user = $this->userRepository->findById(new UserId($query->userId));
 
@@ -1752,9 +1764,9 @@ final readonly class GetUserProfileHandler
             return null;
         }
 
-        return new UserProfileViewModel(
+        return new UserProfile(
             id: $user->id->value,
-            name: (string) $user->name(),
+            name: $user->name()->value,
             email: $user->email()->value,
             createdAt: $user->createdAt,
         );
@@ -1765,6 +1777,13 @@ final readonly class GetUserProfileHandler
 
 `RegisterUserHandler` a `GetUserProfileHandler` jsou aplikační služby (command a query handlery).
 Koordinují use case a delegují doménovou logiku na entitu nebo doménovou službu.
+
+Čtení tady vede přes repozitář agregátu, tedy přes write model. Pro čtyři pole to stačí
+a zbytečnou vrstvu to nepřidává. Jakmile profil začne zobrazovat počet objednávek nebo
+úroveň členství, přestane to vycházet: data leží v jiných kontextech a agregát je nemá
+odkud vzít. Tou hranicí se zabývá [kapitola o CQRS](/cqrs#query-handler-example-heading),
+kde `GetUserProfileHandler` čte z vlastního read repozitáře a vrací bohatší
+`UserProfileViewModel`.
 
 :::callout{type="note"}
 ### Kde validovat: Symfony Validator vs. doménová validace {#validace-kde-heading}

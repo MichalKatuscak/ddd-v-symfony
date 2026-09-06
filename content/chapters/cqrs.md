@@ -953,7 +953,7 @@ doctrine:
         # Tabulky read modelů spravují migrace, ne ORM. Každou novou
         # projekci je nutné do výčtu doplnit, jinak ji Doctrine při
         # dalším diffu navrhne zahodit.
-        schema_filter: '~^(?!order_dashboard)~'
+        schema_filter: '~^(?!order_dashboard|reporting_orders)~'
 :::
 
 Blok patří do stejného `doctrine.yaml`, kde už leží `mappings`, `naming_strategy`
