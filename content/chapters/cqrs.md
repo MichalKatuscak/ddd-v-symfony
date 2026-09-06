@@ -7,7 +7,7 @@ meta_description: "CQRS v Symfony 8: oddělení command a query strany přes Mes
 meta_keywords: "CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 8, read model, eventual consistency, ViewModel, projekce, dead letter queue"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: CQRS
 schema_type: TechArticle
 schema_headline: "CQRS v Symfony 8"
@@ -45,8 +45,8 @@ nese vlastní úkol a vlastní optimalizační profil.
 - **Oddělené databáze** – V pokročilých implementacích lze čtení a zápis rozdělit do oddělených databází a nezávisle škálovat zátěž.
 :::
 
-CQRS se často kombinuje s [Event Sourcing](/event-sourcing),
-což je vzor, který místo aktuálního stavu ukládá historii změn jako sekvenci událostí.
+CQRS se často kombinuje s [Event Sourcingem](/event-sourcing). Ten místo aktuálního
+stavu ukládá historii změn jako sekvenci událostí.
 Tyto dva vzory jsou však **nezávislé**. CQRS lze plnohodnotně implementovat
 s klasickou Doctrine ORM persistencí na write straně a denormalizovanými tabulkami na straně čtení,
 aniž by se sahalo po Event Sourcingu.
@@ -126,9 +126,9 @@ a konzistenci dat; read straně zbývá jediný úkol – dostat data v podobě,
 Každý model obsahuje jen to, co ke své práci potřebuje, a optimalizuje se nezávisle.
 Na straně zápisu stojí normalizované relační schéma a Doctrine ORM entity s bohatou
 doménovou logikou. Na straně čtení denormalizovaná tabulka, Elasticsearch index nebo
-Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům. Z téhož oddělení plyne i volnost při evoluci:
-read model jde kdykoli přebudovat (rebuild projekcí), doplnit o nový read model pro nový use case
-nebo změnit strukturu dotazu, aniž to zasáhne write model a doménovou logiku.
+Redis cache – cokoli, co nejlépe vyhovuje konkrétním dotazům. Z téhož oddělení plyne i volnost při evoluci. Read model jde kdykoli přebudovat
+(rebuild projekcí), přidat další pro nový use case nebo mu změnit strukturu dotazu –
+write modelu ani doménové logiky se to nedotkne.
 
 Dvě další výhody:
 
@@ -145,9 +145,9 @@ Dvě další výhody:
 
 CQRS má své limity. Kompromisy, které přináší, je lepší znát dřív, než se do něj pustíte.
 
-Místo jednoho modelu existují dva (nebo více) a každý command či query vyžaduje vlastní
-třídu, handler a často i vlastní datovou strukturu – tam, kde by v CRUD stačila jedna třída,
-jich vznikne několik. Při oddělených úložištích se přidává synchronizace: read model se musí aktualizovat
+Místo jednoho modelu existují dva nebo víc. Každý command i query si žádá vlastní
+třídu, handler a často i vlastní datovou strukturu: kde by v CRUD stačila jedna
+třída, jich vznikne několik. Při oddělených úložištích se přidává synchronizace: read model se musí aktualizovat
 po každé změně write modelu, aby se s ním nerozešel. Selhání propagace (výpadek fronty, chyba
 projektoru) vede k divergenci modelů.
 
@@ -203,8 +203,8 @@ vrstvu nad kontejnerem.
 Pro CQRS je na Messengeru podstatná schopnost definovat **více message busů**: jeden pro
 příkazy, jeden pro dotazy a jeden pro doménové události. Každý bus má vlastní sadu middleware,
 vlastní transport a vlastní strategii zpracování. Dokumentace Symfony k tomu dodává podmínku,
-kterou se vyplatí brát vážně: jeden bus je dobrý výchozí stav a další se přidává tehdy, když
-potřebuje jiný middleware stack, ne proto, že to nějaký vzor doporučuje
+kterou se vyplatí brát vážně. Jeden bus je dobrý výchozí stav; další se přidává tehdy,
+když potřebuje jiný middleware stack, ne proto, že to nějaký vzor doporučuje
 [[8]](https://symfony.com/doc/current/messenger/multiple_buses.html). Konfigurace níže tuto
 podmínku splňuje – command bus obaluje handler do transakce, query bus ne.
 
@@ -300,8 +300,8 @@ final readonly class OrderPlacedProjectorRegistration
 final readonly class OrderPlacedProjector { /* … */ }
 :::
 
-Že to není kosmetika, je vidět na Outboxu: relay, který dispatchne doménovou událost
-na `command.bus`, narazí na chybějící handler, vyčerpá retry a událost zahodí – tedy
+Že to není kosmetika, je vidět na Outboxu. Relay, který dispatchne doménovou událost
+na `command.bus`, narazí na chybějící handler, vyčerpá retry a událost zahodí –
 přesně to, čemu má Outbox bránit. Dostupné aliasy vypíše `debug:autowiring MessageBus`.
 
 :::callout{type="warn"}
@@ -629,8 +629,8 @@ final class GetUserProfileHandler
 :::
 :::
 
-Rozdíl je vidět přímo v závislostech: command handler pracuje s doménovým modelem (`UserRepository`,
-`User` entita, value objects), zatímco query handler sahá do **read repozitáře**
+Rozdíl je vidět přímo v závislostech. Command handler pracuje s doménovým modelem
+(`UserRepository`, `User` entita, value objects). Query handler sahá do **read repozitáře**
 (`UserProfileReadRepository`), který vrací přímo ViewModel, tedy jednoduchou datovou strukturu
 optimalizovanou pro prezentaci. Query handler neprochází přes doménový model.
 
@@ -1653,9 +1653,8 @@ Když selžou všechny pokusy o retry, Messenger zprávu přesune na **failed tr
 (dead letter queue). Zprávy na failed transportu čekají na ruční zásah –
 vývojář je prozkoumá, opraví příčinu chyby a odešle znovu.
 
-Klíč `failure_transport` funguje globálně i u jednotlivého transportu. Projekce tak mohou
-mít vlastní dead letter frontu oddělenou od e-mailů a reportů, což usnadní jak monitoring,
-tak hromadné přehrání po opravě projektoru.
+Klíč `failure_transport` funguje globálně i u jednotlivého transportu. Projekce tak mohou mít vlastní dead letter frontu, oddělenou od e-mailů a reportů.
+Usnadní to monitoring i hromadné přehrání po opravě projektoru.
 
 :::callout{type="pattern"}
 ### Konfigurace failed transportu a diagnostické příkazy {#failed-transport-heading}
@@ -1785,9 +1784,9 @@ framework:
 :::
 :::
 
-Na pořadí middleware záleží: v příkladu výše se logování provede jako první (zachytí
-i validační chyby), následuje validace (odmítne nevalidní command ještě před zahájením
-transakce) a nakonec `doctrine_transaction` (obalí handler do DB transakce).
+Na pořadí middleware záleží. V příkladu výše jde první logování, takže zachytí
+i validační chyby. Následuje validace, která odmítne nevalidní command ještě před
+zahájením transakce, a nakonec `doctrine_transaction` (obalí handler do DB transakce).
 
 ## 12.16 Testování CQRS {#testovani-cqrs}
 
@@ -2104,5 +2103,5 @@ včetně implementace v Symfony Messenger, kompenzačních strategií a testová
 - question: Potřebuje CQRS frontu nebo druhou databázi?
   answer: 'Ne. Message bus, asynchronní transport i oddělené úložiště jsou volby, ne součást vzoru. Greg Young popisuje read stranu jako tenkou vrstvu nad toutéž databází, která promítá řádky rovnou do DTO; Azure Architecture Center uvádí, že posílání zpráv není pro CQRS podmínkou. Nejčastěji nasazovaná podoba CQRS je proto ta nejjednodušší: oddělené command a query handlery nad jednou databází. Viz <a href="#cqrs-myty-heading">Tři mýty o CQRS</a>.'
 - question: Jak se CQRS implementuje v Symfony?
-  answer: 'Základním stavebním kamenem je komponenta Symfony Messenger, která funguje jako sběrnice pro příkazy a dotazy. Pro CQRS se obvykle definují dvě až tři oddělené sběrnice (<code>command.bus</code>, <code>query.bus</code> a pro doménové události <code>event.bus</code>), každá s vlastní sadou handler tříd a middleware. Dokumentace Symfony přitom doporučuje přidávat další sběrnici jen tehdy, když potřebuje jiný middleware stack. Příkazy mění stav a nevracejí data; dotazy vracejí ViewModely (read modely) a stav nemění. Asynchronní zpracování lze zapnout přes transport, což umožňuje dlouhé operace vytáhnout z request-response cyklu. Více v <a href="#symfony-messenger">sekci Symfony Messenger jako základ CQRS</a>.'
+  answer: 'Základním stavebním kamenem je komponenta Symfony Messenger, která funguje jako sběrnice pro příkazy a dotazy. Pro CQRS se obvykle definují dvě až tři oddělené sběrnice (<code>command.bus</code>, <code>query.bus</code> a pro doménové události <code>event.bus</code>), každá s vlastní sadou handler tříd a middleware. Dokumentace Symfony přitom doporučuje přidávat další sběrnici jen tehdy, když potřebuje jiný middleware stack. Příkazy mění stav a nevracejí data; dotazy vracejí ViewModely (read modely) a stav nemění. Asynchronní zpracování se zapne přes transport a dlouhé operace pak jdou vytáhnout z request-response cyklu. Více v <a href="#symfony-messenger">sekci Symfony Messenger jako základ CQRS</a>.'
 :::
