@@ -7,7 +7,7 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
@@ -211,7 +211,7 @@ final class MoneyType extends Type
 
 Typ zaregistrujte v `config/packages/doctrine.yaml`:
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/packages/doctrine.yaml (výřez: custom typ)"}
 doctrine:
     dbal:
         types:
@@ -524,7 +524,7 @@ final class CorrelationIdMiddleware implements MiddlewareInterface
 
 Zaregistrujte middleware v `config/packages/messenger.yaml`:
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez: idempotence)"}
 framework:
     messenger:
         buses:

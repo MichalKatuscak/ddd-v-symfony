@@ -7,7 +7,7 @@ meta_description: "Layered, Hexagonal, Onion nebo Clean Architecture? Kdy který
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Architektonické styly
 schema_type: TechArticle
 schema_headline: "Architektonické styly: Hexagonal, Onion, Clean – co si vybrat"
@@ -464,7 +464,7 @@ Symfony autowiring doplňuje závislosti podle typu. U rozhraní si kontejner po
 
 Explicitní **alias** potřebujete ve dvou situacích. Buď je implementací víc než jedna, nebo adresář s rozhraním či s implementací nespadá do `resource`, typicky když ho vyloučíte (viz [Konfigurace per-context](#symfony-config-heading)). Psát alias i tam, kde by vznikl sám, není chyba. Dokumentuje volbu výchozího adaptéru. První možnost je zápis v `config/services.yaml`:
 
-:::code{language="yaml" filename="config/services.yaml" highlights="10,11"}
+:::code{language="yaml" filename="config/services.yaml (výřez: alias portu)" highlights="10,11"}
 services:
     _defaults:
         autowire: true
@@ -553,7 +553,7 @@ Nabízel by se i atribut `#[Autowire(service: DoctrineOrderRepository::class)]` 
 
 Jakmile portu odpovídá víc implementací, automatický alias zaniká a kontejner ohlásí nejednoznačnost. Výchozí adaptér pak určuje alias a druhá implementace se zpřístupní pojmenovaným autowiring aliasem:
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (výřez: pojmenovaný alias)"}
 services:
     # Výchozí adaptér portu
     App\Ordering\Domain\Port\OrderRepository:
@@ -1344,7 +1344,7 @@ Symfony historicky stavěl na bundlech jako jednotce modularity. Oficiální [Be
 
 Pokud máte víc Bounded Contexts (Ordering, Billing, Customer, …), můžete pro každý mít vlastní YAML konfiguraci v `config/packages/contexts/`. To je užitečné zejména v hybridním přístupu, kde různé BC mají různé úrovně izolace. Příklad: jen Core Domain BC má explicitní binding portů, ostatní BC spoléhají na auto-wiring.
 
-:::code{language="yaml" filename="config/services.yaml" highlights="13,14,15,16,17"}
+:::code{language="yaml" filename="config/services.yaml (výřez: sběrnice)" highlights="13,14,15,16,17"}
 # config/services.yaml
 imports:
     - { resource: 'packages/contexts/ordering.yaml' }
@@ -1373,7 +1373,7 @@ Jeden vedlejší efekt stojí za pozor. Vyloučený adresář vypadne i z automa
 
 Pro všechny styly kromě Layered je Symfony Messenger vhodný nástroj na Command Bus a Event Bus. V Layered se aplikační služba typicky volá přímo z controlleru, takže sběrnici nepotřebuje. V Hexagonal a Clean Architecture každý use case dispatchujete jako Command, handler je váš inbound adaptér nebo přímo use case. Konfigurace per-bus:
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez: sběrnice)"}
 # config/packages/messenger.yaml
 framework:
     messenger:

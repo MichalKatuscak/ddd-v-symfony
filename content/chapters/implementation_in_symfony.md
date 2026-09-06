@@ -7,7 +7,7 @@ meta_description: "Mapování DDD konceptů na Symfony 8: adresářová struktur
 meta_keywords: "DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
@@ -2045,7 +2045,7 @@ Konfigurace určuje, kterou třídu autowiring injektuje, když handler typuje n
 :::callout{type="pattern"}
 ### Příklad: Konfigurace služeb v Symfony 8 {#dependency-injection-example-heading}
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (výřez: doménové služby)"}
 # config/services.yaml
 services:
     _defaults:
@@ -2120,7 +2120,7 @@ až běh, ne `lint:container`.
 :::callout{type="pattern"}
 ### Příklad: Samostatný autowiring pro každý Bounded Context {#autowiring-bc-example-heading}
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (kanonická konfigurace knihy)"}
 # config/services.yaml
 services:
     _defaults:
@@ -2163,6 +2163,10 @@ services:
 
     # ──────────────────────────────────────────────────
     # Kontexty z kapitol o Outboxu a ságách
+    #
+    # POZOR: tyhle adresáře vzniknou až v kapitolách 11, 14 a 15. Kdo čte
+    # popořadě, přidá si každý řádek s jeho kapitolou – jinak kompilace
+    # kontejneru spadne na „The file ../src/Reporting/ does not exist“.
     # ──────────────────────────────────────────────────
     App\Identity\: { resource: '../src/Identity/', exclude: ['../src/Identity/Domain/'] }
     App\Outbox\:    { resource: '../src/Outbox/' }

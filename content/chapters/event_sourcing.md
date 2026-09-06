@@ -7,7 +7,7 @@ meta_description: "Event Sourcing v DDD a Symfony 8: Event Store, projekce, snap
 meta_keywords: "Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Outbox pattern, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild, dual-write problem"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Event Sourcing
 schema_type: TechArticle
 schema_headline: "Event Sourcing v DDD a Symfony"
@@ -636,7 +636,7 @@ final class ConcurrencyException extends \RuntimeException
 
 Mapa `typeMap` se musí zaregistrovat, jinak deserializace skončí na neznámém typu:
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (výřez: mapa typů událostí)"}
 services:
     # Pole upcasterů autowiring nesestaví, musí se vyjmenovat.
     App\Infrastructure\EventSourcing\Versioning\UpcasterChain:
@@ -1559,7 +1559,7 @@ transport a routing v `config/packages/messenger.yaml`:
 :::callout{type="pattern"}
 ### YAML: Konfigurace Symfony Messenger pro asynchronní projekce {#messenger-yaml-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez – plná konfigurace v kapitole o CQRS)"}
 framework:
     messenger:
         transports:
@@ -1781,7 +1781,7 @@ dvě hlavní mechaniky pro řešení:
 Následující konfigurace rozšiřuje [základní nastavení](#messenger-yaml-heading) z předchozí
 sekce o retry strategii a failed transport:
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (výřez: retry a dead letter)"}
 framework:
     messenger:
         # Failed transport - sem padají zprávy po vyčerpání retry pokusů
@@ -1963,7 +1963,7 @@ final class RebuildProjectionCommand extends Command
 Příkaz si projektory nenajde sám. `AutowireIterator` sbírá služby podle tagu
 a mapu tabulek bere z parametru, takže obojí musí být v konfiguraci:
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (výřez: registr projekcí)"}
 parameters:
     app.projection_tables:
         order_summary: 'order_summary'

@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -899,7 +899,7 @@ mapovaných na objekt vyžaduje, aby třída implementovala `__toString()`; bez 
 :::callout{type="note"}
 ### Konfigurace Dependency Injection v Symfony {#di-config-heading}
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (výřez: přechodné období)"}
 services:
     App\UserManagement\Domain\Repository\UserRepository:
         alias: App\UserManagement\Infrastructure\Repository\DoctrineUserRepository

@@ -7,7 +7,7 @@ meta_description: "Kam soustředit modelovací úsilí: rozlišení Core, Suppor
 meta_keywords: "Core Domain, Supporting Subdomain, Generic Subdomain, strategický DDD, subdoména, Eric Evans, business strategy, build vs buy, Symfony"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Subdomény
 schema_type: TechArticle
 schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat modelovací úsilí"
@@ -276,11 +276,11 @@ src/
 └── Auth/             ← Generic, jen Adapter/
 :::
 
-Matthias Noback doporučuje právě ji: na první úrovni Bounded Context nebo subdoména, uvnitř vrstvy. Přeřazení Pricing mezi Supporting pak znamená smazat pár tříd, ne přepsat `use` v celém projektu. Cenu za to zaplatíte jinde. Ze stromu adresářů už nikdo klasifikaci nevyčte, takže musí žít v Core Domain Chartu a v Domain Vision Statementech. V knize dál pracujeme s variantou podle klasifikace, protože zviditelňuje téma kapitoly; ve větším produktu, který jednou za rok překlasifikovává, je rozumnější druhá.
+Matthias Noback doporučuje právě ji: na první úrovni Bounded Context nebo subdoména, uvnitř vrstvy. Přeřazení Pricing mezi Supporting pak znamená smazat pár tříd, ne přepsat `use` v celém projektu. Cenu za to zaplatíte jinde. Ze stromu adresářů už nikdo klasifikaci nevyčte, takže musí žít v Core Domain Chartu a v Domain Vision Statementech. **Kniha dál používá právě tuhle druhou variantu**: od kapitoly o základních konceptech je všude `App\Ordering\`, `App\UserManagement\` a podobně, tedy kontext na první úrovni. Rozdělení podle klasifikace ukazuje tahle kapitola proto, že zviditelňuje své téma – jako kostru projektu ho ale nepřebírejte, rozešlo by se se zbytkem knihy.
 
 Aby autoload fungoval, musí `composer.json` deklarovat odpovídající PSR-4 mapování:
 
-:::code{language="json" filename="composer.json"}
+:::code{language="json" filename="composer.json (varianta podle klasifikace, kniha ji dál nepoužívá)"}
 {
     "name": "acme/eshop",
     "type": "project",
@@ -310,7 +310,7 @@ Namespace `App\SharedKernel\` slouží na opravdu sdílené primitivy: základn�
 
 V `config/services.yaml` pak obvykle stojí každá subdoména jako vlastní `resource` blok. DI definice tím zůstanou izolované na úrovni subdomény:
 
-:::code{language="yaml" filename="config/services.yaml"}
+:::code{language="yaml" filename="config/services.yaml (výřez: struktura podle klasifikace)"}
 services:
     _defaults:
         autowire: true
@@ -475,7 +475,7 @@ class Order
 
 Jeden detail, na kterém ukázka bez konfigurace spadne: Doctrine typ `uuid` není součástí ORM 3. Dodává ho most na `symfony/uid` a musíte ho zaregistrovat, jinak mapování `#[ORM\Column(type: "uuid")]` skončí výjimkou o neznámém typu.
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/packages/doctrine.yaml (výřez: mapping podle kontextů)"}
 doctrine:
     dbal:
         types:
@@ -484,7 +484,7 @@ doctrine:
 
 A v **Generic subdoméně** (Auth0 integrace) není entita ani Aggregate. Při troše štěstí není ani vlastní adaptér: balíček `auth0/symfony` dodává hotový `Auth0\Symfony\Security\UserProvider` a authenticator, takže celá subdoména se smrskne na konfiguraci. Přesně tak má Generic vypadat.
 
-:::code{language="yaml" filename="config/packages/security.yaml"}
+:::code{language="yaml" filename="config/packages/security.yaml (výřez: oddělený firewall)"}
 security:
     providers:
         auth0_provider:

@@ -7,7 +7,7 @@ meta_description: "CQRS v Symfony 8: oddělení command a query strany přes Mes
 meta_keywords: "CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 8, read model, eventual consistency, ViewModel, projekce, dead letter queue"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: CQRS
 schema_type: TechArticle
 schema_headline: "CQRS v Symfony 8"
@@ -214,7 +214,7 @@ podmínku splňuje – command bus obaluje handler do transakce, query bus ne.
 :::callout{type="pattern"}
 ### Konfigurace Symfony Messenger pro CQRS {#messenger-config-heading}
 
-:::code{language="yaml" filename="config/packages/messenger.yaml"}
+:::code{language="yaml" filename="config/packages/messenger.yaml (kanonická konfigurace knihy)"}
 # config/packages/messenger.yaml
 framework:
     messenger:
@@ -263,6 +263,10 @@ framework:
             # bere OrderId přes HandledStamp, a ten z jiného procesu
             # nedoputuje – požadavek by skončil na
             # „Call to a member function getResult() on null“.
+            # Třída vzniká až v kapitole 15 (Outbox). Kdo čte popořadě,
+            # přidá si tenhle řádek s ní – Messenger routing ověřuje při
+            # kompilaci kontejneru a jinak spadne na
+            # „class or interface … not found“.
             App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_events
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
@@ -1088,7 +1092,7 @@ ORM entity.** Doctrine o nich neví, takže je `doctrine:schema:update` navrhne 
 a `doctrine:schema:validate` hlásí rozejité schéma. Vytvářejí se migrací a z porovnávání
 schématu se vyřadí filtrem:
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/packages/doctrine.yaml (výřez: read model)"}
 doctrine:
     dbal:
         # Tabulky read modelů spravují migrace, ne ORM. Každou novou

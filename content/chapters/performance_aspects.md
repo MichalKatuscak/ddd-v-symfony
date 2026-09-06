@@ -1271,7 +1271,7 @@ tohoto jména nakonfigurovaný. Symfony pro každý manager vygeneruje službu
 :::callout{type="pattern"}
 ### Konfigurace druhého entity manageru pro read stranu
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/packages/doctrine.yaml (výřez: druhý entity manager)"}
 doctrine:
     dbal:
         default_connection: default

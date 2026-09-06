@@ -7,7 +7,7 @@ meta_description: "Kde má v DDD aplikaci sedět autorizace: edge, use case, agr
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-07
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
@@ -150,7 +150,7 @@ Edge je nejhrubší vrstva a leží mimo doménový kód. Odpovídá pouze na ot
 
 Uživatelský provider ukazuje na třídu `SecurityUser` z infrastruktury, ne na doménovou entitu. Důvod je zásadní pro celý zbytek kapitoly: provider vyžaduje implementaci `Symfony\Component\Security\Core\User\UserInterface`, a kdyby ji nesla doménová třída, doména by se svázala se Security komponentou. Přesně to zakazuje [anti-vzor 4](#anti-symfony-user-domain-heading). `SecurityUser` je navíc *read model* pro autentizaci: nese identifikátor, hash hesla, role a doménové ID (`CustomerId`, `TenantId`). Mění se z jiných důvodů než doménový model uživatele [[3]](https://matthiasnoback.nl/2022/07/decoupling-your-security-user-from-your-user-model/).
 
-:::code{language="yaml" filename="config/packages/security.yaml"}
+:::code{language="yaml" filename="config/packages/security.yaml (výřez: firewall)"}
 # config/packages/security.yaml
 security:
     # Recept security-bundle tenhle blok vygeneruje sám. Kdo výpis níž
@@ -524,7 +524,7 @@ Výchozí `affirmative` je pro rámec této kapitoly špatná volba. Kdo si vedl
 
 Blok patří do stejného `security.yaml` jako firewall výše, ne místo něj. YAML má jeden kořenový klíč `security:` a druhý dokument by ten první přepsal.
 
-:::code{language="yaml" filename="config/packages/security.yaml"}
+:::code{language="yaml" filename="config/packages/security.yaml (kanonická konfigurace knihy)"}
 # config/packages/security.yaml
 security:
     access_decision_manager:
@@ -1605,7 +1605,7 @@ interface TenantAware
 
 Filter aplikuje WHERE klauzuli `tenant_id = ?` na každý dotaz nad entitou, která implementuje marker rozhraní `TenantAware`. Dokud ho neimplementuje žádná, je filtr no-op: zapnutý, ale bez účinku. Značka nepatří na `SecurityUser`: toho načítá provider **uvnitř** firewallu, tedy dřív, než listener stihne parametr nastavit, a přihlášení pak spadne na `Parameter 'tenant_id' does not exist`. Tenantní jsou doménové entity za firewallem, ne třída, kterou firewall sám používá k autentizaci. Aktivace filtru v `config/packages/doctrine.yaml`:
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/packages/doctrine.yaml (výřez: mapování identity)"}
 # config/packages/doctrine.yaml
 doctrine:
     orm:

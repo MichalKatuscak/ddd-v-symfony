@@ -1109,7 +1109,7 @@ final class DoctrineOrderRepository implements OrderRepository
 }
 :::
 
-:::code{language="yaml" filename="config/packages/doctrine.yaml"}
+:::code{language="yaml" filename="config/packages/doctrine.yaml (cílový stav po kapitole 15)"}
 # config/packages/doctrine.yaml
 doctrine:
     dbal:
@@ -1144,6 +1144,12 @@ doctrine:
             # Entity mimo doménové složky potřebují vlastní blok. Bez něj
             # Doctrine na schema:update mlčí („Nothing to update“) a tabulka
             # prostě nevznikne – proto je tu vypisujeme, ne jen zmiňujeme.
+            #
+            # POZOR: následující bloky mapují adresáře, které vzniknou až
+            # v pozdějších kapitolách (ságy 14, outbox a inbox 15, identita 11).
+            # Kdo čte popořadě, přidá si je až s příslušnou kapitolou; jinak
+            # kontejner spadne na „Specified non-existing directory … as
+            # Doctrine mapping source“.
             OrderingSaga:
                 type: attribute
                 dir: '%kernel.project_dir%/src/Ordering/Application/Saga'
