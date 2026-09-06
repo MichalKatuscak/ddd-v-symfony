@@ -476,8 +476,9 @@ class Order extends AggregateRoot
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException(
-                "items can be added only to a draft order, current state: {$this->status->value}"
+            throw InvalidOrderStateTransitionException::notAllowedInState(
+                'přidání položky',
+                $this->status->value,
             );
         }
 
@@ -497,8 +498,9 @@ class Order extends AggregateRoot
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException(
-                "only draft orders can be confirmed, current state: {$this->status->value}"
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Confirmed->value,
             );
         }
 
@@ -514,8 +516,9 @@ class Order extends AggregateRoot
     public function markPaid(): void
     {
         if ($this->status !== OrderStatus::Confirmed) {
-            throw new InvalidOrderStateTransitionException(
-                "only confirmed orders can be paid, current state: {$this->status->value}"
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Paid->value,
             );
         }
 
@@ -525,8 +528,9 @@ class Order extends AggregateRoot
     public function ship(ShipmentId $shipmentId): void
     {
         if ($this->status !== OrderStatus::Paid) {
-            throw new InvalidOrderStateTransitionException(
-                "only paid orders can be shipped, current state: {$this->status->value}"
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Shipped->value,
             );
         }
 

@@ -47,6 +47,29 @@ a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
 `Assert\Email` s `VALIDATION_MODE_STRICT` každý dispatch. A bez
 `migrations-bundle` nespustíte ani jednu migraci z kapitoly o Outboxu.
 
+Instalace tím ale nekončí a další dva kroky se přeskakují obzvlášť snadno, protože
+nic nespadne. Recept `doctrine/doctrine-bundle` vygeneruje mapování na `src/Entity`
+s prefixem `App\Entity` – adresář, který ve vertikálním řezu neexistuje. Doctrine pak
+mlčky nevidí žádnou entitu:
+
+:::code{language="bash" filename="terminál"}
+php bin/console doctrine:schema:update --dump-sql
+# [OK] No Metadata Classes to process.
+:::
+
+Hláška vypadá jako úspěch. Znamená opak. Blok `mappings:` je proto potřeba přepsat
+podle [kapitoly o agregátech](/navrh-agregatu#symfony-doctrine) dřív, než vznikne první
+migrace. Druhý krok je `DATABASE_URL` v `.env` – recept nastaví PostgreSQL, takže
+u SQLite nebo MySQL připojení do prázdna:
+
+:::code{language="bash" filename=".env.local"}
+# SQLite stačí na všechny ukázky v knize a nepotřebuje běžící server
+DATABASE_URL="sqlite:///%kernel.project_dir%/var/data.db"
+
+php bin/console doctrine:database:create
+php bin/console doctrine:migrations:migrate
+:::
+
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
 E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart** (rozpracovaný nákup)

@@ -1483,9 +1483,19 @@ final class InvalidOrderStateTransitionException extends \DomainException
     public static function cannotTransition(string $from, string $to): self
     {
         return new self(sprintf(
-            'Nelze přejít ze stavu "%s" do stavu "%s".',
+            'Nelze přejít ze stavu „%s“ do stavu „%s“.',
             $from,
             $to,
+        ));
+    }
+
+    /** Ne každé porušení je přechod – přidání položky mimo Draft taky ne. */
+    public static function notAllowedInState(string $operation, string $state): self
+    {
+        return new self(sprintf(
+            'Operaci „%s“ nelze provést ve stavu „%s“.',
+            $operation,
+            $state,
         ));
     }
 }
@@ -2041,8 +2051,28 @@ services:
             # Celé Domain/, ne jen Domain/ValueObject/: Money a Currency
             # leží přímo v Domain/ a jinak se zaregistrují jako služby.
             - '../src/SharedKernel/Domain/'
+
+    # ──────────────────────────────────────────────────
+    # Kontexty z kapitol o Outboxu a ságách
+    # ──────────────────────────────────────────────────
+    App\Outbox\:    { resource: '../src/Outbox/' }
+    App\Inbox\:     { resource: '../src/Inbox/' }
+    App\Reporting\: { resource: '../src/Reporting/' }
+    App\Payment\:   { resource: '../src/Payment/',   exclude: ['../src/Payment/Domain/Event/'] }
+    App\Warehouse\: { resource: '../src/Warehouse/', exclude: ['../src/Warehouse/Domain/Event/'] }
+    App\Shipping\:  { resource: '../src/Shipping/',  exclude: ['../src/Shipping/Domain/ValueObject/'] }
+
+    App\Outbox\Domain\OutboxRepository: '@App\Outbox\Infrastructure\DoctrineOutboxRepository'
+    App\Inbox\Domain\InboxRepository: '@App\Inbox\Infrastructure\DbalInboxRepository'
+    App\Ordering\Application\Saga\OrderSagaRepository: '@App\Ordering\Infrastructure\Saga\DoctrineOrderSagaRepository'
+    App\Payment\Domain\PaymentGateway: '@App\Payment\Infrastructure\StripePaymentGateway'
 :::
 :::
+
+Poslední čtyři řádky jsou aliasy rozhraní na implementaci. Symfony je neuhodne: v jednom
+jmenném prostoru leží rozhraní, v druhém třída, která ho plní. Chybějící alias se přitom
+neprojeví při kompilaci kontejneru, ale až za běhu na `handler not found` – proto každý
+kontext, který má port a adaptér, potřebuje svůj řádek.
 
 :::callout{type="note"}
 ### Výhody odděleného autowiringu pro Bounded Contexts

@@ -950,9 +950,16 @@ schématu se vyřadí filtrem:
 :::code{language="yaml" filename="config/packages/doctrine.yaml"}
 doctrine:
     dbal:
-        # Tabulky read modelů spravují migrace, ne ORM.
-        schema_filter: '~^(?!order_dashboard|user_profile_view)~'
+        # Tabulky read modelů spravují migrace, ne ORM. Každou novou
+        # projekci je nutné do výčtu doplnit, jinak ji Doctrine při
+        # dalším diffu navrhne zahodit.
+        schema_filter: '~^(?!order_dashboard)~'
 :::
+
+Blok patří do stejného `doctrine.yaml`, kde už leží `mappings`, `naming_strategy`
+a vlastní typy z [kapitoly o agregátech](/navrh-agregatu#symfony-doctrine); `url`
+z receptu zůstává. Konfigurace Doctriny se v knize skládá postupně, ale v projektu
+je to jeden soubor.
 
 ### Strategie optimalizace read modelů
 

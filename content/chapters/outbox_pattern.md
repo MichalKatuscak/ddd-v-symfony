@@ -333,6 +333,7 @@ class OutboxMessage
 | `attempts` | INT | Počet neúspěšných pokusů o publish. Po dosažení prahu (typicky 5) řádek přechází do `failed` a opouští hot path. |
 | `sent_at` | TIMESTAMPTZ NULL | Vyplněno při přechodu do `sent`. Používá se pro kompakci (mazání starších `sent` řádků). |
 | `last_error` | TEXT NULL | Poslední chyba publishe – důležité pro rozbor incidentu. |
+| `available_at` | TIMESTAMPTZ | Čas, odkdy relay smí řádek znovu vzít. `markFailed()` ho posouvá exponenciálně, takže trvale selhávající zpráva nepálí pokusy v každém cyklu. |
 
 :::callout{type="warn"}
 ### Povinný index `(status, occurred_at)` {#index-status-time-heading}

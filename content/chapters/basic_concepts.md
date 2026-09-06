@@ -499,7 +499,7 @@ class Order
         }
 
         if ($this->items === []) {
-            throw new EmptyOrderException('Cannot confirm an empty order');
+            throw EmptyOrderException::cannotConfirm();
         }
 
         $this->status = OrderStatus::Confirmed;
@@ -517,7 +517,7 @@ class Order
     public function totalAmount(): Money
     {
         if ($this->items === []) {
-            throw new EmptyOrderException('Cannot calculate total of an empty order');
+            throw EmptyOrderException::cannotBePlaced();
         }
 
         $total = $this->items[0]->unitPrice()->multiply($this->items[0]->quantity());
@@ -890,7 +890,7 @@ class Order extends AggregateRoot
         }
 
         if ($this->items === []) {
-            throw new EmptyOrderException('Cannot confirm an empty order');
+            throw EmptyOrderException::cannotConfirm();
         }
 
         $this->status = OrderStatus::Confirmed;
