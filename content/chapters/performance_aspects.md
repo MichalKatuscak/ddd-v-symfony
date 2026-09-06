@@ -7,7 +7,7 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
@@ -33,9 +33,9 @@ absence read modelu. Doménový model rychlou aplikaci nevylučuje.
 - **Mýtus:** Doctrine ORM je pro DDD pomalý. **Realita:** Doctrine nabízí DQL, nativní dotazy, extra lazy loading, query cache i result cache. Úzké místo obvykle nevzniká v ORM, ale ve způsobu, jakým ho aplikace používá.
 :::
 
-Výkon se stává kritickým ve třech scénářích: aplikace s **desítkami propojených agregátů**,
-**velké agregáty** s kolekcemi tisíců položek a systémy s vysokou frekvencí čtení
-a požadavky na odezvu v desítkách milisekund.
+Výkon se stává kritickým ve třech scénářích: u aplikací s **desítkami propojených
+agregátů**, u **velkých agregátů** s kolekcemi tisíců položek a u systémů s vysokou
+frekvencí čtení. Poslední skupina navíc potřebuje odezvu v desítkách milisekund.
 
 :::callout{type="warn"}
 ### Zlaté pravidlo optimalizace
@@ -96,10 +96,9 @@ to ale plodí výše popsaný N+1 problém.
 
 ### Řešení 1: EXTRA_LAZY kolekce
 
-Doctrine nabízí strategii `EXTRA_LAZY` pro kolekce. Na rozdíl od standardního lazy loadingu,
-který načte celou kolekci při prvním přístupu, EXTRA_LAZY umožňuje provádět operace jako
-`count()`, `contains()` nebo `slice()` přímými SQL dotazy
-bez načtení celé kolekce do paměti.
+Doctrine nabízí strategii `EXTRA_LAZY` pro kolekce. Standardní lazy loading načte při prvním
+přístupu celou kolekci. EXTRA_LAZY místo toho vyřídí `count()`, `contains()`
+nebo `slice()` přímými SQL dotazy a do paměti kolekci vůbec nenačte.
 
 :::callout{type="pattern"}
 ### Konfigurace EXTRA_LAZY v PHP atributech (Doctrine)
@@ -331,9 +330,9 @@ echo $order->getCustomerId()->value; // agregáty se odkazují přes ID, ne pře
 
 Prvním krokem je kriticky přezkoumat, zda `OrderItem` skutečně musí být součástí
 agregátu `Order`, nebo zda jde o samostatný agregát s odkazem na `OrderId`.
-Rozhoduje invariant: pokud objednávka žádné pravidlo přes celou kolekci nedrží (limit
-počtu položek, minimální hodnota košíku), kolekce v agregátu nemá co dělat a její
-vyčlenění je oprava návrhu, ne výkonnostní trik.
+Rozhoduje invariant. Pokud objednávka nedrží žádné pravidlo přes celou kolekci
+(limit počtu položek, minimální hodnota košíku), kolekce v agregátu nemá co dělat.
+Její vyčlenění je pak oprava návrhu, ne výkonnostní trik.
 
 Rozdíl je v roli, kterou výkon hraje. Jako **signál** špatně vedené hranice je legitimním
 podnětem: pomalé načítání ukazuje na kolekci, která nikdy součástí invariantu nebyla.
@@ -401,8 +400,8 @@ páka na výkonnostní problémy v DDD. Read side doménové objekty nepotřebuj
 strukturu dat pro UI nebo API klienta.
 
 Zároveň je to páka s nejvyšší cenou. Martin Fowler o CQRS píše, že *„for most systems CQRS
-adds risky complexity“*, a případy, které viděl, popisuje spíš jako zdroj potíží než jako
-záchranu; nasazovat jej doporučuje na jednotlivý bounded context, nikdy plošně
+adds risky complexity“*. Případy, které viděl, popisuje spíš jako zdroj potíží než
+jako záchranu. Nasazovat jej doporučuje na jednotlivý bounded context, nikdy plošně
 [[2]](https://martinfowler.com/bliki/CQRS.html). Kompletní seznam kompromisů drží sekce
 [Výzvy a omezení CQRS](/cqrs#challenges). Než tedy dotaz skončí v samostatném read modelu,
 vyplatí se projít levnější stupně.
@@ -1134,9 +1133,9 @@ final class StartProductImportHandler
 Odesláním zpráv práce nekončí, jen se přesune k workerům. PHP proces, který běží hodiny,
 paměť postupně nasčítá, proto se worker spouští s limity a nechává se restartovat:
 `messenger:consume async --memory-limit=128M --time-limit=3600 --limit=1000`. Restart řídí
-supervisor nebo systemd, ne aplikace. Počet souběžných workerů má strop v databázi:
-každý drží vlastní spojení, takže deset workerů nad primary je deset dalších připojení –
-souvislost s poolingem rozebírá sekce [Read replicy a connection pooling](#replicy-pooling-heading).
+supervisor nebo systemd, ne aplikace. Počet souběžných workerů má strop v databázi.
+Každý drží vlastní spojení, takže deset workerů nad primary znamená deset dalších
+připojení. Souvislost s poolingem rozebírá sekce [Read replicy a connection pooling](#replicy-pooling-heading).
 
 ## 16.09 Provozní výkonové vzory {#provozni-vzory}
 
@@ -1147,7 +1146,7 @@ omezení Doctrine ve více procesech.
 
 ### Hot aggregates a optimistic lock thrash {#hot-aggregates-heading}
 
-**Hot aggregate** je agregát, který je modifikován mnoha klienty současně. Klasické
+**Hot aggregate** je agregát, který současně mění mnoho klientů. Klasické
 příklady: globální `Inventory` jednoho produktu při rozjezdu kampaně, `Tournament`
 agregát s 1000 účastníky, kteří všichni paralelně potvrdí účast, nebo `BankAccount`
 firmy s tisíci transakcí denně.
@@ -1225,9 +1224,9 @@ uvádět: rozhoduje poměr velikosti aktivní části k dostupné paměti, ne ab
 
 ### Read replicy a connection pooling {#replicy-pooling-heading}
 
-V CQRS architektuře bývají read modely vhodný kandidát pro **read replicy**, tedy
+V CQRS architektuře jsou read modely vhodný kandidát pro **read replicy**:
 samostatnou databázi (nebo Postgres streaming replicu), na kterou jdou všechny
-queries, zatímco write model zůstává na primary. Důsledky pro DDD kód:
+queries. Write model zůstává na primary. Důsledky pro DDD kód:
 
 :::diagram{fig="16.9-B" title="Routing: write na primary, read na replicu, replikační lag" src="images/diagrams/17_performance/read_replica_routing.svg"}
 :::
@@ -1290,7 +1289,8 @@ výhoda: donutí to psát dotazy nad tabulkami, ne nad objektovým grafem přes 
 
 Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP proces
 = 1 DB connection“ se nasčítá: 4 aplikační pody × 100 PHP-FPM workerů
-= 400 spojení na primary, což překročí výchozí `max_connections = 100` v Postgresu.
+= 400 spojení na primary, tedy čtyřnásobek výchozího `max_connections = 100`
+v Postgresu.
 Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
 pooling mode. Pozor: transaction pooling sám o sobě prepared statements nepodporuje,
 a Doctrine je používá. Řešením je buď session pooling (méně efektivní), nebo PgBouncer
@@ -1373,9 +1373,9 @@ Ve vývojovém prostředí odhaluje N+1 a pomalé dotazy nejdřív Symfony Profi
 ### Doctrine query logging
 
 V dev prostředí pokrývá počítání dotazů panel Doctrine v Profileru; zapíná ho
-`doctrine.dbal.logging: true`. Vlastní middleware má smysl jinde: v integračním testu, kde
-je počet dotazů předmětem aserce („načtení seznamu objednávek nesmí vydat víc než dva dotazy“),
-nebo při ladění dávky, která v Profileru vůbec neskončí.
+`doctrine.dbal.logging: true`. Vlastní middleware má smysl jinde. V integračním testu, kde na počet dotazů míří
+aserce („načtení seznamu objednávek nesmí vydat víc než dva dotazy“). Nebo při
+ladění dávky, která v Profileru vůbec neskončí.
 
 :::callout{type="pattern"}
 ### Kostra middleware pro počítání dotazů
@@ -1491,9 +1491,9 @@ a eliminovat N+1. Pokračováním je kapitola
 - question: Jak v DDD řešit N+1 problém s agregáty?
   answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. První volbou je fetch join v DQL (<code>SELECT o, i FROM Order o JOIN o.items i</code>) v metodě repozitáře. Pro čtení dat do UI bývá ještě přímočařejší denormalizovaný read model, který ORM lazy loading vynechá úplně. Až poslední volbou je <code>fetch: ''EAGER''</code> v mapování: u kolekcí nevydá JOIN, ale druhý dotaz po dávkách (výchozí velikost 100), a platí globálně i pro dotazy, které asociaci nepotřebují. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
-  answer: 'Ano, zásadně. Příliš velký agregát načítá při každé operaci desítky vnitřních entit a vede k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty, což zvyšuje paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
+  answer: 'Ano, zásadně. Příliš velký agregát načítá při každé operaci desítky vnitřních entit a vede k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty. Rozdělení zvýší paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?
   answer: 'Read model se navrhuje přímo pro daný dotaz. Denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
 - question: Je lepší UUID, nebo integer primární klíč z pohledu výkonu?
-  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, což DDD vyžaduje: agregát dostane ID před persistencí. Výkonový rozdíl závisí na databázovém stroji, šířce indexu a poměru zápisů ke čtení, takže obecné číslo neexistuje – u UUID v7 ale odpadá hlavní nevýhoda náhodných UUID, tedy fragmentace B-tree indexu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
+  answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, a přesně to DDD vyžaduje: agregát dostane ID před persistencí. Výkonový rozdíl závisí na databázovém stroji, šířce indexu a poměru zápisů ke čtení, takže obecné číslo neexistuje. U UUID v7 ale odpadá hlavní nevýhoda náhodných UUID, tedy fragmentace B-tree indexu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
 :::
