@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 /**
- * Pojmenovaný argument, který konstruktor nezná, PHP odmítne až za běhu
- * hláškou „Unknown named parameter". V ukázkách knihy se taková neshoda
- * pozná až tehdy, když čtenář spustí právě tu větev — a u kompenzací
- * ságy to znamená tichou zprávu v dead-letter frontě.
+ * Neshoda volání s konstruktorem se pozná až za běhu: cizí jméno hláškou
+ * „Unknown named parameter", vynechaný povinný parametr přes
+ * ArgumentCountError. V ukázkách knihy to praskne teprve tehdy, když
+ * čtenář spustí právě tu větev — a u kompenzací ságy to znamená tichou
+ * zprávu v dead-letter frontě.
  *
  * Kontrola porovnává `new Trida(jmeno: …)` s deklarací konstruktoru téže
  * třídy. Třídy stejného jména z různých kapitol se řeší zvlášť: hlásí se
@@ -17,6 +18,9 @@ $chapters = glob(__DIR__ . '/../content/chapters/*.md');
 
 /** @var array<string, list<array<string>>> $ctors */
 $ctors = [];
+
+/** @var array<string, list<array<string>>> $requiredByClass */
+$requiredByClass = [];
 
 foreach ($chapters as $file) {
     $source = file_get_contents($file);
@@ -35,6 +39,23 @@ foreach ($chapters as $file) {
 
         preg_match_all('/\$(\w+)/', $ctor[1], $params);
         $ctors[$name][] = $params[1];
+
+        // Povinné parametry jsou ty bez výchozí hodnoty. Vynechaný povinný
+        // argument PHP odmítne až za běhu (ArgumentCountError) a v ságové
+        // cestě to znamená zaseklý proces.
+        $required = [];
+
+        foreach (preg_split('/,(?![^(]*\))/', $ctor[1]) as $param) {
+            if (!preg_match('/\$(\w+)/', $param, $m)) {
+                continue;
+            }
+
+            if (!str_contains($param, '=') && !str_contains($param, '...')) {
+                $required[] = $m[1];
+            }
+        }
+
+        $requiredByClass[$name][] = $required;
     }
 }
 
@@ -65,7 +86,9 @@ foreach ($chapters as $file) {
         // aby se nepřipsaly vnější třídě.
         $ownArgs = preg_replace('/\bnew\s+\w+\s*\([^()]*\)/s', 'NESTED', $args);
 
-        preg_match_all('/(?m)^\s*(\w+):\s/', $ownArgs, $named);
+        // Pojmenovaný argument stojí za otevírací závorkou nebo za čárkou;
+        // vázat ho na začátek řádku by minulo jednořádková volání.
+        preg_match_all('/(?:^|,)\s*(\w+):\s/', $ownArgs, $named);
 
         foreach ($named[1] as $argument) {
             $known = false;
@@ -87,6 +110,36 @@ foreach ($chapters as $file) {
                 );
             }
         }
+
+        // Volání psané výhradně pojmenovanými argumenty jde zkontrolovat
+        // i na to, co v něm chybí. Poziční argumenty se přeskakují,
+        // protože jejich pořadí regulární výraz spolehlivě neurčí.
+        $positional = preg_replace('/(?:^|,)\s*\w+:\s*[^,]*/', '', $ownArgs);
+        $onlyNamed = trim($positional, " \t\n,") === '';
+
+        if (!$onlyNamed || $named[1] === []) {
+            continue;
+        }
+
+        foreach ($requiredByClass[$class] ?? [] as $variant) {
+            $missing = array_diff($variant, $named[1]);
+
+            if ($missing === []) {
+                continue 2; // některá varianta třídy volání pokrývá
+            }
+        }
+
+        $variant = ($requiredByClass[$class] ?? [[]])[0];
+        $missing = array_diff($variant, $named[1]);
+
+        if ($missing !== []) {
+            $problems[$class . '::missing:' . implode(',', $missing)] = sprintf(
+                '%s → new %s(…) bez povinného %s',
+                basename($file),
+                $class,
+                implode(', ', array_map(static fn (string $p): string => '$' . $p, $missing)),
+            );
+        }
     }
 }
 
@@ -95,10 +148,10 @@ if ($problems === []) {
     exit(0);
 }
 
-echo "CHYBA – volání pojmenuje parametr, který konstruktor nemá:\n";
+echo "CHYBA – volání nesedí s konstruktorem:\n";
 foreach ($problems as $problem) {
     echo "  - {$problem}\n";
 }
-echo "\nPHP to odmítne až za běhu: „Unknown named parameter\".\n";
+echo "\nPHP to odmítne až za běhu: „Unknown named parameter\" nebo ArgumentCountError.\n";
 
 exit(1);
