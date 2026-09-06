@@ -737,6 +737,12 @@ final class RegisterUserHandlerTest extends TestCase
         $this->userRepository = new InMemoryUserRepository();
         // Handler volá flush() kvůli překladu unique violation. Fake repozitář
         // ho neřeší, takže EntityManager stačí jako stub, který nedělá nic.
+        //
+        // Pozor na hranici toho testu: fake vyhazuje DuplicateEmailException
+        // rovnou ze save(), zatímco produkce ji dostane až z flush() jako
+        // UniqueConstraintViolationException a handler ji teprve překládá.
+        // Test tedy ověřuje reakci handleru na výjimku, ne ten překlad.
+        // Na překlad je potřeba integrační test proti skutečné databázi.
         $this->handler        = new RegisterUserHandler(
             $this->userRepository,
             $this->createStub(EntityManagerInterface::class),
