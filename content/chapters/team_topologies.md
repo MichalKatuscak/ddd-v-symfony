@@ -7,7 +7,7 @@ meta_description: "Bounded Context jako týmová hranice. Conway's Law, Team Top
 meta_keywords: "Conway's Law, Team Topologies, Inverse Conway Maneuver, Skelton, Pais, stream-aligned team, platform team, enabling team, complicated subsystem team, Bounded Context, DDD, kognitivní zátěž, Westrum, Vernon, organizační struktura, microservices"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Team Topologies
 schema_type: TechArticle
 schema_headline: "Conway's Law a Team Topologies – týmová struktura v DDD"
@@ -131,9 +131,9 @@ Doporučení má dvě části, které se často chybně čtou jako jedno:
 :::callout{type="pattern"}
 ### Vernon Rule: 1 BC = 1 tým {#vernon-rule-heading}
 
-Když to zkrátíme na jednu větu pro management: **každý Bounded Context má právě
-jednoho vlastníka: jeden tým s explicitním závazkem ho vyvíjet, nasazovat
-a opravovat v noci.** Bez takového vlastníka BC neexistuje
+Pro management to jde zkrátit na jednu větu. **Každý Bounded Context má právě
+jednoho vlastníka – tým, který se zavázal ho vyvíjet, nasazovat a opravovat
+v noci.** Bez takového vlastníka BC neexistuje
 architektonicky. Je to jen složka v repu.
 
 Test: položte vedle sebe Team Map a Context Map. Pokud pro některý BC neumíte pojmenovat
@@ -355,10 +355,10 @@ Conwayovský: neformální vztahy nemají kontrakt. Vznikne ad hoc kontrakt v k�
 (sdílená třída, sdílené DB schéma, „toho se prostě nedotýkej“), který později nikdo
 nedokáže refaktorovat.
 
-Při onboardingu nového týmu má být vztah zapsaný explicitně: „*S týmem A jsme v X-as-a-Service,
-s týmem B jsme ve čtyřměsíční Collaboration na bootstrap nového BC, s Enabling teamem
-máme kontrakt na tříměsíční facilitaci CQRS.*“ Pokud to nedokážete napsat, vztah
-je neformální = v ohrožení.
+Při onboardingu nového týmu vztah zapište explicitně: „*S týmem A jsme
+v X-as-a-Service, s týmem B ve čtyřměsíční Collaboration na bootstrap nového BC,
+s Enabling teamem máme kontrakt na tříměsíční facilitaci CQRS.*“ Co nedokážete
+napsat, je neformální vztah – a ten je v ohrožení.
 :::
 
 ## 05.05 Inverse Conway Maneuver {#inverse-conway}
@@ -421,13 +421,14 @@ Detail komunikace s managementem je v sekci 05.09.
 Manévr funguje jako změna směru, ne jako jednorázový zásah. Martin Fowler
 [[6]](https://martinfowler.com/bliki/ConwaysLaw.html) k němu dodává výhradu: reorganizace
 neopraví zabetonovanou architekturu, přesune jen lidi kolem ní. Vzniká období, kdy nové
-týmy vlastní kód, který nepsaly. Fowler proto doporučuje malé inkrementální kroky
-s vyhodnocováním zpětné vazby a shrnuje to větou, že vývoj architektury a reorganizace
-lidí musí jít ruku v ruce po celou dobu života firmy.
+týmy vlastní kód, který nepsaly. Fowler proto doporučuje malé inkrementální kroky a vyhodnocovat po každém z nich.
+Shrnuje to větou, že vývoj architektury a reorganizace lidí musí jít ruku v ruce
+po celou dobu života firmy.
 
 U existujících systémů jde kritika dál. Komunikační struktura se změní dnem reorganizace,
 kódová báze ne. Organizace tedy projde obdobím, kdy je měřitelně horší než před zásahem.
-Týmy hledají cestu cizím kódem, což prodlouží lead time a zvýší podíl nasazení s incidentem.
+Týmy hledají cestu cizím kódem. Lead time se prodlouží a podíl nasazení
+s incidentem stoupne.
 Kdo s tímto propadem nepočítá, vyloží po třech měsících čísla jako důkaz neúspěchu
 a reorganizaci vrátí zpět.
 
@@ -528,10 +529,10 @@ Rubrika níže je nástroj této knihy, ne nástroj z Team Topologies. Autoři p
 otázek neobsahuje. Rubrika stojí na téže myšlence: sbírá vnímání členů týmu, ne
 technická čísla.
 
-Použití je nenáročné: jednou za kvartál 30minutový workshop,
-kde každý člen ohodnotí na škále 1–5 pět oblastí: doménovou a technickou
-komplexitu (intrinsic), stabilitu platformy a kvalitu dokumentace (extraneous,
-inverzně) a prostor na učení (germane). Přesné znění otázek obsahuje rubrika níže.
+Použití je nenáročné: jednou za kvartál 30minutový workshop. Každý člen
+ohodnotí na škále 1–5 pět oblastí – doménovou a technickou komplexitu
+(intrinsic), stabilitu platformy a kvalitu dokumentace (extraneous, inverzně)
+a prostor na učení (germane). Přesné znění otázek obsahuje rubrika níže.
 
 Body 1+2 vysoké = tým má pod kontrolou intrinsic. Body 3+4 vysoké = Platform team funguje
 a extraneous load je nízký. Bod 5 vysoký = tým má kapacitu na germane.
@@ -685,8 +686,8 @@ každá netriviální změna jednoho týmu vyžaduje code review od ostatních (
 se ujistili, že to nic nerozbije“). Druhý tým má fakticky veto na změny prvního.
 
 **Řešení:** hranice modulů vynucené v CI, ne dohodou na retru. V PHP na to slouží Deptrac
-nebo PHPArkitect – pull request, který sáhne z modulu jednoho týmu do modulu druhého,
-spadne; konkrétní pravidla ukazuje kapitola o
+nebo PHPArkitect: pull request, který sáhne z modulu jednoho týmu do modulu druhého,
+spadne. Konkrétní pravidla ukazuje kapitola o
 [mikroservisech a DDD](/ddd-a-microservices#phparkitect-heading). K tomu explicitní
 vlastnictví v `CODEOWNERS`. Alternativou jsou separátní repa per BC. Nikdy ne princip
 „všichni do jednoho repa, nějak se domluvíme“.
@@ -738,8 +739,7 @@ pod 1 den. V nezdravé organizaci „ozkoušíme to za měsíc, jakmile bude mí
 
 Dva stream-aligned týmy oba commitují do stejného Bounded Contextu, protože „to dává smysl“.
 Conway's Law okamžitě reaguje. Vznikne neformální sub-hranice, čára „naše/vaše“ v kódu,
-ale bez formální Context Map. Tato čára se petrifikuje a po 6 měsících je z toho de facto
-Big Ball of Mud s dvěma vlastníky.
+ale bez formální Context Map. Ta čára ztvrdne a po půl roce je z ní Big Ball of Mud se dvěma vlastníky.
 
 **Řešení:** rozdělit BC na 2 menší BC se Shared Kernel (drahý, viz Context
 Mapping) nebo Customer/Supplier vztahem. Případně sloučit 2 týmy do 1 většího, pokud
@@ -841,8 +841,9 @@ Cíl: lead time pod 3 dny, deploy denně, change failure rate na třetinu souča
 Měření a re-evaluace po 6 měsících.*“
 
 Benchmark uvádějte vždy s ročníkem reportu, ze kterého ho máte. DORA metodiku mění.
-V roce 2025 opustila čtyřstupňové dělení Elite / High / Medium / Low a nahradila je
-týmovými profily, takže odkaz na „elite performers“ bez uvedení roku dnes nic neznamená.
+V roce 2025 opustila čtyřstupňové dělení Elite / High / Medium / Low a nahradila
+je týmovými profily. Odkaz na „elite performers“ bez uvedení roku tedy dnes
+nic neznamená.
 
 Tento pitch má 3 atributy: čísla, srovnání, časový plán s re-evaluací. To je jazyk
 CTO. Vlastní filozofie DDD a Team Topologies do pitche nepatří. Leží v technické
@@ -879,9 +880,9 @@ DDD tam, kde Vernon a Evans mlčí. Hlavní poznatky:
 - **Komunikace s managementem:** DORA metriky, ne DDD filozofie.
   Westrumova generative kultura je předpoklad, ne výstup.
 
-Pokud z této kapitoly odejdete s jednou větou, ať je to tato: **Bounded Context
-je závazek konkrétního týmu vyvíjet, nasazovat a v noci opravovat svou část
-domény.** Bez tohoto závazku zůstává jen složkou v repu.
+Jedna věta, která z kapitoly stojí za zapamatování: **Bounded Context je závazek
+konkrétního týmu vyvíjet, nasazovat a v noci opravovat svou část domény.**
+Bez toho závazku zůstává složkou v repu.
 
 Pro hlubší studium doporučujeme *Team Topologies* od Skeltona a Paise
 [[3]](https://teamtopologies.com/book)
