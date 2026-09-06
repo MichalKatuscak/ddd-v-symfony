@@ -7,7 +7,7 @@ meta_description: "Systém pro správu projektů v DDD krok za krokem: bounded c
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
@@ -188,9 +188,9 @@ Vztahy zachycené v kontextové mapě:
   a bez úkolu ztrácí smysl, takže kontrakt určuje TaskManagement. CommentManagement je downstream
   a přizpůsobuje se.
 - **Všechny kontexty → ActivityTracking** – doménové události na sdílené sběrnici.
-  Diagram tento vztah popisuje jako *Open Host Service / Published Language*, což sedí jen zčásti:
-  publikované události nesou `ProjectId`, `UserId` a `TaskStatus`, tedy interní typy vydávajícího
-  kontextu. Published Language je proti tomu samostatný výměnný formát, díky kterému konzument
+  Diagram tento vztah popisuje jako *Open Host Service / Published Language*. Sedí to jen
+  zčásti: publikované události nesou `ProjectId`, `UserId` a `TaskStatus`, tedy interní typy
+  vydávajícího kontextu. Published Language je proti tomu samostatný výměnný formát, díky kterému konzument
   závisí na *schématu* události, ne na třídách publishera. Dokud tenká integrační událost
   s primitivy nevznikne, jde o publikaci interního modelu ven
   ([Open Host Service](/context-mapping#ohs),
@@ -1209,9 +1209,9 @@ class TaskAssignmentService
 ## 24.06 Read modely a projekce {#read-model}
 
 `GetProjectsHandler` z [předchozí sekce](#implementation) načítá projekty přes doménový repozitář.
-Hydratuje agregáty, i když potřebuje jen tabulkový výpis. Pro malý dataset to funguje. Jakmile dataset
-naroste na tisíce projektů a desetitisíce úkolů a výpis se obohatí o jména členů a počty úkolů,
-každý dotaz znamená opakované `JOIN`y a hydrataci agregátů kvůli zobrazení.
+Hydratuje agregáty, i když potřebuje jen tabulkový výpis. Pro malý dataset to funguje. Jakmile dataset naroste na tisíce projektů a desetitisíce úkolů a výpis se obohatí
+o jména členů a počty úkolů, každý dotaz znamená opakované `JOIN`y a hydrataci agregátů
+kvůli zobrazení.
 
 V projektu proto postupně vznikl samostatný read model. Princip: doménové události aktualizují
 denormalizovanou tabulku, ze které čte *query handler*. Žádný `JOIN` mezi agregáty, žádná
@@ -1693,9 +1693,9 @@ může vzniknout úkol bez projektu. Foreign key constraint na `project_id` tomu
 infrastruktury.
 
 **Alternativa:** Pokud by aplikace vyžadovala invariant „projekt nesmí mít víc než 50 úkolů“,
-nabízejí se dvě cesty: přesunout pravidlo do doménové služby s explicitním kontraktem, nebo z `Task`
-udělat komponentu uvnitř `Project` agregátu (hůř škálovatelné, ale konzistentní s ohledem
-na invariant). Pravidla pro velikost agregátu a jeho transakční hranici rozebírá
+nabízejí se dvě cesty. Přesunout pravidlo do doménové služby s explicitním kontraktem, nebo
+z `Task` udělat komponentu uvnitř `Project` agregátu – hůř škálovatelné, ale konzistentní
+s tím invariantem. Pravidla pro velikost agregátu a jeho transakční hranici rozebírá
 [Návrh agregátů](/navrh-agregatu#aggregate-size), anti-vzory typu *God Aggregate* pak
 [Anti-vzory a typické chyby](/anti-vzory).
 
@@ -1752,7 +1752,7 @@ strategického a taktického designu, zbytek z práce s read modely a z vědomé
 - question: Jak spolu bounded contexty komunikují?
   answer: 'Primárním prostředkem integrace jsou doménové události: po dokončení operace agregát publikuje událost (např. <code>TaskCreated</code>), na kterou reagují jiné kontexty asynchronně přes Messenger. Synchronní dotazy mezi kontexty se řeší přes porty (rozhraní) s implementací v infrastruktuře cílového kontextu; volající kontext pak nezávisí na jejích detailech. Konkrétní ukázka v <a href="#implementation">sekci Implementace</a>.'
 - question: Jaký přínos měla vertikální slice architektura?
-  answer: 'Každá feature (CreateProject, AssignTask, AddComment) vznikla jako samostatný balíček s vlastním commandem, handlerem, kontrolerem a view modelem. Změna ve feature nezasahuje do ostatních slicí, což zkracuje cyklus vývoj–test–nasazení a usnadňuje onboarding. Šíření změn napříč vrstvami, typické pro horizontální členění, se v takovém uspořádání téměř nevyskytuje. Detailní srovnání v kapitole <a href="/architektonicke-styly#vertical-slice">Architektonické styly</a>.'
+  answer: 'Každá feature (CreateProject, AssignTask, AddComment) vznikla jako samostatný balíček s vlastním commandem, handlerem, kontrolerem a view modelem. Změna ve feature nezasahuje do ostatních slicí. Zkracuje to cyklus vývoj–test–nasazení a usnadňuje onboarding. Šíření změn napříč vrstvami, typické pro horizontální členění, se v takovém uspořádání téměř nevyskytuje. Detailní srovnání v kapitole <a href="/architektonicke-styly#vertical-slice">Architektonické styly</a>.'
 - question: Proč má smysl oddělit read model od doménového modelu?
   answer: 'Doménový model existuje pro vynucování invariantů a reprezentaci doménových pravidel; výpis projektů žádné invarianty nepotřebuje. Hydratace agregátu jen kvůli zobrazení názvu a počtu členů je drahá. Při růstu datasetu rozhoduje, jestli výpis znamená jeden dotaz nad jednou tabulkou, nebo několik <code>JOIN</code>ů a stovky sestavených objektů. Denormalizovaný read model aktualizovaný přes projekce umožní oddělit tempo zápisu a čtení a optimalizovat každou stranu zvlášť. Cenou je eventual consistency. Konkrétní implementace v <a href="#read-model">sekci Read modely a projekce</a>.'
 - question: Jaká jsou tři nejdůležitější ponaučení z projektu?

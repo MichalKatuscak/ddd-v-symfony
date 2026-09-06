@@ -100,9 +100,9 @@ skončí chybou o chybějícím argumentu metody, ne tichou změnou chování.
 
 ### Testování Value Objects
 
-Test value objektu ověřuje tři věci: že neplatný vstup vyhodí odpovídající výjimku, že dvě instance
-se stejnou hodnotou jsou si rovny přes `equals()`, a že objekt zůstává neměnný, takže jiná hodnota
-znamená novou instanci. Tím je hodnotový objekt pokrytý.
+Test value objektu ověřuje tři věci. Že neplatný vstup vyhodí odpovídající výjimku.
+Že dvě instance se stejnou hodnotou jsou si rovny přes `equals()`. A že objekt zůstává
+neměnný, takže jiná hodnota znamená novou instanci. Tím je hodnotový objekt pokrytý.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro Email value object (PHPUnit)
@@ -599,8 +599,8 @@ repozitář by událost při nejbližším uložení zapsal do streamu a histori
 
 ## 17.04 Test doubles a InMemory repozitáře {#test-doubles}
 
-Test double je obecný název pro náhradu reálné závislosti v testu. Taxonomii pěti typů (dummy, stub,
-spy, mock a fake) zavedl Gerard Meszaros v knize *xUnit Test Patterns: Refactoring Test Code*
+Test double je obecný název pro náhradu reálné závislosti v testu. Taxonomii pěti typů – dummy, stub,
+spy, mock a fake – zavedl Gerard Meszaros v knize *xUnit Test Patterns: Refactoring Test Code*
 (Addison-Wesley, 2007) [[6]](http://xunitpatterns.com/); do širšího povědomí ji dostal Fowler článkem
 *Mocks Aren't Stubs* [[7]](https://martinfowler.com/articles/mocksArentStubs.html). S PHPUnit se pracuje
 hlavně se čtyřmi z nich (stub, mock, fake, spy) a v DDD má každý jiný dopad: vede k jinému stylu testu
@@ -1672,7 +1672,7 @@ pokud všechny společně ověřují jeden konzistentní scénář.
 - **Sdílený stav mezi testy** – Každý test musí být nezávislý. Sdílené statické proměnné nebo globální stav způsobují nestabilní (flaky) testy, jejichž výsledek závisí na pořadí spouštění.
 - **Mockování value objects** – Value objekty jsou datové třídy bez závislostí. Není důvod je mockovat; test pracuje se skutečnou instancí.
 - **Ignorování doménových výjimek v testech** – Každá doménová výjimka (`InvalidEmailException`, `InvalidOrderStateTransitionException` apod.) musí mít test ověřující, že ji kód vyhodí za správných podmínek.
-- **Chybějící test pro releaseEvents() po operaci** – Pokud agregát vydává doménové události, každá veřejná operace, která má událost vydat, musí mít test ověřující typ, počet a obsah vydaných událostí.
+- **Chybějící test pro releaseEvents() po operaci** – Pokud agregát vydává doménové události, musí mít každá veřejná operace, která událost vydává, test na typ, počet a obsah vydaných událostí.
 :::
 
 ### Mutation testing
@@ -1805,11 +1805,11 @@ při dalším refaktoringu.
 - question: Jak testovat agregát – unit test s mock repozitářem, nebo integrační test?
   answer: 'Agregát se testuje primárně unit testem, protože je to čistý PHP bez závislostí na frameworku nebo databázi. Test instancuje agregát, volá jeho metody a ověřuje výsledný stav i vyvolané doménové události. Mock repozitáře přitom není potřeba, protože samotný agregát repozitář nevolá. Integrační test doplňuje pokrytí až na úrovni, kde vstupuje persistence, tedy při ukládání a načítání agregátu. Podrobný rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
 - question: K čemu slouží InMemory repozitář a kdy ho preferovat před mockem?
-  answer: 'InMemory repozitář je plnohodnotná implementace rozhraní repozitáře, která drží agregáty v poli v paměti. Oproti mocku simuluje reálné chování (najít, uložit, počítat), takže testy aplikačních služeb procházejí celý use case věrohodněji. Mock se hodí tam, kde je potřeba ověřit konkrétní interakci: kolikrát se metoda volala a s jakými argumenty. InMemory repozitář naopak slouží pro ověření výsledku, ne volání. Rozbor variant v <a href="#test-doubles">sekci Test doubles a InMemory repozitáře</a>.'
+  answer: 'InMemory repozitář je plnohodnotná implementace rozhraní repozitáře, která drží agregáty v poli v paměti. Oproti mocku simuluje reálné chování (najít, uložit, počítat), takže testy aplikačních služeb procházejí celý use case věrohodněji. Mock se hodí tam, kde jde o konkrétní interakci: kolikrát se metoda volala a s jakými argumenty. InMemory repozitář naopak slouží pro ověření výsledku, ne volání. Rozbor variant v <a href="#test-doubles">sekci Test doubles a InMemory repozitáře</a>.'
 - question: Jak ověřit, že agregát publikuje správné doménové události?
   answer: 'Po vykonání metody se z agregátu vyčte seznam zaznamenaných událostí (typicky přes <code>releaseEvents()</code>) a testem se ověří jejich typ, pořadí i obsah. Kontroluje se, že agregát vyvolal přesně ty události, které má, a nevyvolal žádné navíc. Pro funkční test lze stejné události zachytávat přes Messenger event bus a ověřit reakce dalších částí systému. Praktický příklad v <a href="#testovani-domain-events">sekci Testování doménových událostí</a>.'
 - question: Mají se testovat privátní invarianty agregátu, nebo jen veřejné rozhraní?
-  answer: 'Testuje se pouze veřejné rozhraní, tedy chování agregátu přes metody, které se reálně volají z aplikační vrstvy. Privátní invarianty jsou detailem implementace a jejich přímé testování sváže test s konkrétní strukturou kódu, což brání refaktoringu. Dobře navržený test ověřuje, že po sérii veřejných volání je agregát ve validním stavu, vyvolal očekávané události a při porušení pravidla vyhodil konkrétní doménovou výjimku. Detailní rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
+  answer: 'Testuje se pouze veřejné rozhraní, tedy chování agregátu přes metody, které se reálně volají z aplikační vrstvy. Privátní invarianty jsou detailem implementace. Jejich přímé testování sváže test s konkrétní strukturou kódu a brání refaktoringu. Dobře navržený test ověřuje, že po sérii veřejných volání je agregát ve validním stavu, vyvolal očekávané události a při porušení pravidla vyhodil konkrétní doménovou výjimku. Detailní rozbor v <a href="#unit-testy-domeny">sekci Unit testy doménové vrstvy</a>.'
 - question: Co jsou architektonické testy a co kontrolují?
   answer: 'Architektonické testy automaticky ověřují, že kód dodržuje zvolená pravidla struktury: například že doménová vrstva nezávisí na Doctrine, že agregáty nevolají repozitáře přímo, nebo že kontrolery nekomunikují s infrastrukturou. V Symfony se používá nástroj Deptrac (balíček <code>deptrac/deptrac</code>), který pravidla popisuje deklarativně v souboru <code>deptrac.php</code> a spouští se v CI jako samostatný krok vedle testovací sady. Porušení pravidla se projeví jako spadlý build, nikoli až při code review. Rozbor nástrojů a pravidel v <a href="#architektonicke-testy">sekci Architektonické testy</a>.'
 :::
