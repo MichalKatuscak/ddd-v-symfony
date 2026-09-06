@@ -734,15 +734,60 @@ interface OutboxRepository
 :::
 :::
 
-Doctrine adapter rozhraní je mechanický – konstruktor přijímá
-`EntityManagerInterface`, `store()` volá `persist()`
-(nikoli `flush()` – ten patří aplikačnímu transakčnímu wrapperu),
-`fetchPending()` sestaví DQL `SELECT m FROM OutboxMessage m WHERE
-m.status = 'pending' AND m.availableAt <= :now ORDER BY m.occurredAt ASC` a omezí výsledek voláním
-`$query->setMaxResults($limit)`; `markSent()`
-a `markFailed()` volají `$m->markSent()`,
-respektive `$m->markFailed()` a následně flushnou. Plný výpis vynecháváme
-– adapter je čistě průchozí.
+Doctrine adapter je krátký, ale dvě místa v něm se dají snadno minout: `store()`
+nesmí flushovat, protože transakci drží aplikační wrapper, a `fetchPending()`
+musí filtrovat i podle `availableAt`, jinak backoff z `markFailed()` nic neznamená.
+
+:::code{language="php" filename="src/Outbox/Infrastructure/DoctrineOutboxRepository.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Outbox\Infrastructure;
+
+use App\Outbox\Domain\OutboxMessage;
+use App\Outbox\Domain\OutboxRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Uid\Uuid;
+
+final readonly class DoctrineOutboxRepository implements OutboxRepository
+{
+    public function __construct(private EntityManagerInterface $em) {}
+
+    public function store(OutboxMessage $message): void
+    {
+        // Žádný flush. Zpráva musí odejít do DB ve stejné transakci
+        // jako změna agregátu – o commit se stará volající.
+        $this->em->persist($message);
+    }
+
+    public function fetchPending(int $limit = 100): array
+    {
+        return $this->em->createQuery(
+            "SELECT m FROM " . OutboxMessage::class . " m
+              WHERE m.status = 'pending' AND m.availableAt <= :now
+           ORDER BY m.occurredAt ASC"
+        )
+            ->setParameter('now', new \DateTimeImmutable())
+            ->setMaxResults($limit)
+            ->getResult();
+    }
+
+    public function markSent(Uuid $id): void
+    {
+        $this->em->find(OutboxMessage::class, $id)?->markSent();
+        $this->em->flush();
+    }
+
+    public function markFailed(Uuid $id, string $error): void
+    {
+        // Tady flush naopak patří: relay běží mimo doménovou transakci
+        // a výsledek pokusu musí být vidět, i když další zpráva spadne.
+        $this->em->find(OutboxMessage::class, $id)?->markFailed($error);
+        $this->em->flush();
+    }
+}
+:::
 
 ## 15.05 Relay process – dvě varianty {#relay}
 

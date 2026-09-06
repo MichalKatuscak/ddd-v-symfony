@@ -422,6 +422,7 @@ namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderShipped;
+use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
@@ -538,6 +539,32 @@ class Order extends AggregateRoot
         $this->record(new OrderShipped($this->id, $shipmentId, new \DateTimeImmutable()));
     }
 
+    public function cancel(string $reason): void
+    {
+        // Storno je hrana grafu jako každá jiná: odeslanou zásilku
+        // už zpátky nevrátí, tam nastupuje kompenzace v ságe.
+        if ($this->status === OrderStatus::Shipped) {
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Cancelled->value,
+            );
+        }
+
+        // Opakované storno není chyba volajícího, jen už není co dělat.
+        // Bez téhle větve by retry ságy shodil handler.
+        if ($this->status === OrderStatus::Cancelled) {
+            return;
+        }
+
+        $this->status = OrderStatus::Cancelled;
+        $this->record(new OrderCancelled(
+            $this->id,
+            $this->customerId,
+            $reason,
+            new \DateTimeImmutable(),
+        ));
+    }
+
     public function totalAmount(): Money
     {
         // Guard je nutný: kanonické place() prázdnou objednávku pustí.
@@ -564,7 +591,7 @@ už signatura – bez první položky objednávka nevznikne. Kanonické
 `place(OrderId, CustomerId)` z [Základních konceptů](/zakladni-koncepty#aggregates)
 tuhle záruku nedává, proto ji `totalAmount()` a `confirm()` kontrolují za běhu.
 `customerId` je hodnotový objekt, ne reference na entitu.
-Stavové přechody `markPaid()` a `ship()` jsou jediný způsob, jak změnit `status`;
+Stavové přechody `markPaid()`, `ship()` a `cancel()` jsou jediný způsob, jak změnit `status`;
 `OrderStatus` se nikdy nenastavuje setterem zvenčí. Volání `record()` ukládá
 událost do interní fronty bázové třídy `AggregateRoot`; vyzvednutí přes
 `releaseEvents()` po flushi popisuje
