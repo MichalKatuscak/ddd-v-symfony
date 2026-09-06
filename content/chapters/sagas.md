@@ -296,7 +296,7 @@ use App\Payment\Application\Command\ChargeCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'event.bus')]
 final readonly class InitiatePaymentOnOrderPlaced
 {
     public function __construct(
@@ -328,7 +328,7 @@ use App\Warehouse\Application\Command\ReserveStock;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'event.bus')]
 final readonly class ReserveStockOnPaymentSucceeded
 {
     public function __construct(
@@ -358,7 +358,7 @@ use App\Shipping\Application\Command\CreateShipment;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'event.bus')]
 final readonly class CreateShipmentOnStockReserved
 {
     public function __construct(
@@ -542,7 +542,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
  * Process Manager koordinující objednávkový proces napříč kontexty:
  * Ordering → Payment → Warehouse → Shipping → Ordering (potvrzení)
  */
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'event.bus')]
 final class OrderProcessManager
 {
     // Systémová identita procesu – viz „Autorizace v asynchronním kontextu“
@@ -941,7 +941,9 @@ final readonly class MarkOrderPaidHandler
         $this->em->flush();
 
         // Bez tohohle kroku by se doménová událost nikam nedostala
-        // a projekce by o změně stavu nevěděla.
+        // a projekce by o změně stavu nevěděla. Dispatch uvnitř transakce
+        // je tu v pořádku: event.bus je synchronní a nic neopouští proces.
+        // Kdyby událost mířila do brokera, patřila by do outboxu.
         foreach ($order->releaseEvents() as $event) {
             $this->eventBus->dispatch($event);
         }
@@ -1656,7 +1658,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class CheckSagaTimeoutHandler
 {
     // Táž systémová identita jako v OrderProcessManager – timeout ruší

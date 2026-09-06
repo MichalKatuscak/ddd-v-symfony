@@ -1675,11 +1675,13 @@ final class RegisterUserHandlerTest extends KernelTestCase
 
         $this->expectException(DuplicateEmailException::class);
 
-        // Velká písmena i mezery jdou pryč v Email::fromUserInput(),
-        // takže kolizi zachytí unique index, ne porovnání řetězců.
+        // Velikost písmen srovná Email::fromUserInput(), takže kolizi
+        // zachytí unique index, ne porovnání řetězců. Mezery kolem adresy
+        // sem nepatří: přes sběrnici by je dřív odmítl #[Assert\Email]
+        // a test by dokládal chování, které aplikace nemá.
         ($this->handler)(new RegisterUser(
             name: 'Jan Jiný',
-            email: '  JAN@example.com ',
+            email: 'JAN@example.com',
             password: 'jineheslo456',
         ));
     }
@@ -1737,7 +1739,9 @@ final class GetUserProfileHandlerTest extends TestCase
 
     public function testReturnsNullForNonExistingUser(): void
     {
-        $readRepository = $this->createMock(UserProfileReadRepository::class);
+        // Bez očekávání jde o stub, ne mock. createMock() by na PHPUnit 13
+        // hlásil „No expectations were configured for the mock object".
+        $readRepository = $this->createStub(UserProfileReadRepository::class);
         $readRepository->method('findById')->willReturn(null);
 
         $handler = new GetUserProfileHandler($readRepository);

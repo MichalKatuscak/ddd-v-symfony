@@ -543,9 +543,10 @@ class Order extends AggregateRoot
     // o autorizaci na něm staví storno lhůtu a testy potřebují zadat vlastní.
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {
-        // Storno je hrana grafu jako každá jiná: odeslanou zásilku
-        // už zpátky nevrátí, tam nastupuje kompenzace v ságe.
-        if ($this->status === OrderStatus::Shipped) {
+        // Storno je hrana grafu jako každá jiná: odeslanou ani doručenou
+        // zásilku zpátky nevrátí, tam nastupuje kompenzace v ságe.
+        // Výčet sedí s tabulkou přechodů OrderStatus z kapitoly 10.
+        if (in_array($this->status, [OrderStatus::Shipped, OrderStatus::Delivered], true)) {
             throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,
                 OrderStatus::Cancelled->value,
@@ -968,12 +969,12 @@ Náhradní `int` identita je vědomé rozhodnutí, ne nedbalost. `OrderItem` nem
 identitu – zvenčí agregátu se na položku nikdo neodkazuje, takže UUID by tu jen zabíralo
 místo. Kdyby se odkazoval, byl by to signál, že položka patří do vlastního agregátu.
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php" highlights="33,34,35,36,37,38,39"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php" highlights="33,34,35,36,37,38,39"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Infrastructure\Doctrine;
+namespace App\Ordering\Infrastructure\Repository;
 
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\OrderId;

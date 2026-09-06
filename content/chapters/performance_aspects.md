@@ -7,7 +7,7 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
@@ -157,7 +157,7 @@ agregát včetně asociovaných objektů v jediném SQL dotazu s LEFT JOIN nebo 
 :::callout{type="pattern"}
 ### Příklad: fetch join v DQL a Query Builderu
 
-:::code{language="php" filename="src/Order/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
 <?php
 
 declare(strict_types=1);
@@ -343,7 +343,7 @@ ne přesun pravidla mimo agregát. Podrobně rozebírá velikost agregátu sekce
 :::callout{type="pattern"}
 ### Příklad: specializované repozitářní metody pro různé kontexty
 
-:::code{language="php" filename="src/Order/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
 <?php
 
 declare(strict_types=1);

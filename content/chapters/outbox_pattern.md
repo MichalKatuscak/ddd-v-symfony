@@ -65,7 +65,7 @@ use App\Ordering\Domain\Repository\OrderRepository;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class PlaceOrderHandlerNaive
 {
     public function __construct(
@@ -598,7 +598,7 @@ use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use Symfony\Component\Uid\Uuid;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class PlaceOrderHandler
 {
     public function __construct(
@@ -666,8 +666,11 @@ Pozornost si zaslouží volání `$this->em->wrapInTransaction(...)`. Tato metod
 Doctrine EntityManageru otevře transakci, vykoná callback, na konci flushne a commitne;
 pokud kdekoliv uvnitř callbacku letí výjimka, transakci automaticky rollbackne. Stejně
 funguje i Symfony Messenger middleware `doctrine_transaction`, který zabalí
-celý handler do jedné transakce – pokud ho v `messenger.yaml` máte, můžete
-`wrapInTransaction` vynechat.
+celý handler do jedné transakce. Kanonický `messenger.yaml` z [kapitoly o CQRS](/cqrs#messenger-config-heading)
+ho na `command.bus` má, takže tam `wrapInTransaction` v handleru přebývá – zůstane
+z něj vnořený savepoint a nepřehledná odpověď na otázku, kde se vlastně commituje.
+Ukázka ho drží proto, že samotný vzor musí být čitelný i bez znalosti konfigurace
+sběrnic; ve svém projektu si vyberte jedno místo.
 
 :::callout{type="pattern"}
 ### PHP: DomainEventSerializer – neutrální převod na JSON {#serializer-heading}
@@ -1369,9 +1372,22 @@ final readonly class DbalReadModelStore implements ReadModelStore
 }
 :::
 
-Tabulka `reporting_orders` vzniká migrací a do `schema_filter` patří ze stejného
-důvodu jako `order_dashboard`. Podmínku na `updated_at` tenhle upsert nepotřebuje:
-řádek plní jediná událost, takže se nemá s čím předběhnout.
+Podmínku na `updated_at` tenhle upsert nepotřebuje: řádek plní jediná událost, takže
+se nemá s čím předběhnout. Tabulka vzniká migrací a do `schema_filter` patří ze stejného
+důvodu jako `order_dashboard`:
+
+:::code{language="sql" filename="migrations/Version20260906120000.php (výřez)"}
+CREATE TABLE reporting_orders (
+    order_id    CHAR(36)  NOT NULL,
+    customer_id CHAR(36)  NOT NULL,
+    items       JSON      NOT NULL,
+    placed_at   DATETIME  NOT NULL,
+    PRIMARY KEY (order_id)
+);
+
+-- Reporting se ptá po objednávkách zákazníka, ne po jedné objednávce.
+CREATE INDEX idx_reporting_customer ON reporting_orders (customer_id, placed_at);
+:::
 
 :::code{language="php" filename="src/Reporting/Application/Subscriber/OrderPlacedReadModelUpdater.php" highlights="27,28,29,30,44"}
 <?php
@@ -1386,7 +1402,7 @@ use App\Reporting\Application\ReadModelStore;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'event.bus')]
 final readonly class OrderPlacedReadModelUpdater
 {
     private const string CONSUMER = 'reporting.order_placed';
@@ -1891,7 +1907,14 @@ do DB, je dual-write přímo z učebnice. Bez middlewaru `doctrine_transaction`
 totiž kolem handleru žádná transakce nevzniká: platí běžný autocommit režim
 DBAL spojení, ve kterém si každý `flush()` obalí jen vlastní zápisy. Handler
 proto obalte explicitně do `wrapInTransaction` všude tam, kde middleware
-v `messenger.yaml` aktivní nemáte.
+v `messenger.yaml` aktivní nemáte. Obojí zároveň se nedělá: dvě vrstvy transakce
+nad sebou drží savepoint a maskují, kde se doopravdy commituje.
+
+Pravidlo se přitom týká jen zápisů, které opouštějí proces. Doménová událost poslaná
+na synchronní `event.bus` uvnitř téže transakce dual-write není – posluchač běží nad
+stejným spojením a spadne-li transakce, zmizí i jeho zápis. Rozhodující je cíl, ne
+okamžik: co jde do brokera nebo cizí služby, musí projít outboxem; co zůstává
+v procesu, sběrnici stačí.
 :::
 
 ## 15.09 Migrace existujícího projektu – krok za krokem {#migrace}

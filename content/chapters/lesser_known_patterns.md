@@ -639,12 +639,12 @@ final class EligibleForFreeShipping extends CompositeSpecification implements Qu
 Repozitář pak vystaví obecnou metodu `match()`. `Doctrine\ORM\EntityRepository` implementuje
 rozhraní `Selectable`, takže `Criteria` umí spustit přímo:
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Infrastructure\Doctrine;
+namespace App\Ordering\Infrastructure\Repository;
 
 use App\Ordering\Domain\Order;
 use App\Ordering\Domain\OrderRepository;
@@ -675,7 +675,7 @@ Tatáž `Criteria` funguje i nad `ArrayCollection` v paměti, protože rozhraní
 implementuje kolekce stejně jako repozitář. Když dotaz potřebuje join nebo řazení přes vazbu, výraz se vloží do `QueryBuilder`u
 přes `addCriteria()` a zbytek dotazu zůstane ruční:
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/DoctrineOrderRepository.php (fragment)"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php (fragment)"}
 /**
  * @param QuerySpecification<Order> $spec
  * @return list<Order>

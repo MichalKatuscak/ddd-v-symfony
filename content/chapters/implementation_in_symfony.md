@@ -1092,6 +1092,7 @@ namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderStatusChanged;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\OrderStatus;
@@ -1126,18 +1127,43 @@ final class Order extends AggregateRoot
     public function transitionTo(OrderStatus $newStatus): void
     {
         if (!$this->status->canTransitionTo($newStatus)) {
-            throw new \DomainException(sprintf(
-                'Nelze přejít ze stavu "%s" do stavu "%s".',
+            throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,
-                $newStatus->value
-            ));
+                $newStatus->value,
+            );
         }
 
         $oldStatus = $this->status;
         $this->status = $newStatus;
 
-        $this->record(new OrderStatusChanged($this->id, $oldStatus, $newStatus));
+        $this->record(new OrderStatusChanged(
+            $this->id,
+            $oldStatus,
+            $newStatus,
+            new \DateTimeImmutable(),
+        ));
     }
+}
+:::
+
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderStatusChanged.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Domain\Event;
+
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
+
+final readonly class OrderStatusChanged
+{
+    public function __construct(
+        public OrderId $orderId,
+        public OrderStatus $from,
+        public OrderStatus $to,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
 }
 :::
 :::
@@ -1287,7 +1313,7 @@ use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\PaymentMethod;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final class RecordPaymentHandler
 {
     public function __construct(
@@ -1620,7 +1646,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class RegisterUserHandler
 {
     public function __construct(
@@ -1749,7 +1775,7 @@ use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\UserId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'query.bus')]
 final readonly class GetUserProfileHandler
 {
     public function __construct(
@@ -1801,7 +1827,10 @@ V DDD existují dva druhy validace, každý na jiné vrstvě:
 
 **Pravidlo:** formát vynucuje hodnotový objekt vždy – je to jeho invariant.
 Symfony Validator tutéž kontrolu opakuje na hraně aplikace, aby neplatný vstup
-skončil srozumitelnou chybovou zprávou, ne doménovou výjimkou. Sémantická
+skončil srozumitelnou chybovou zprávou, ne doménovou výjimkou. Pořadí obou kontrol
+má viditelný důsledek: validátor běží nad surovým řetězcem z requestu, tedy **před**
+`Email::fromUserInput()`. Adresa s mezerami na krajích proto skončí na 422, ne na 409 –
+normalizace se k ní nedostane. Sémantická
 pravidla („uživatel s tímto e-mailem již existuje“) patří výhradně doménové vrstvě.
 
 Dvojí kontrola formátu není redundance zadarmo: obě strany musí být zajedno.

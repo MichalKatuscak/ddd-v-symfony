@@ -7,7 +7,7 @@ meta_description: "Kam soustředit modelovací úsilí: rozlišení Core, Suppor
 meta_keywords: "Core Domain, Supporting Subdomain, Generic Subdomain, strategický DDD, subdoména, Eric Evans, business strategy, build vs buy, Symfony"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Subdomény
 schema_type: TechArticle
 schema_headline: "Subdomény: Core, Supporting, Generic – kde investovat modelovací úsilí"
@@ -243,7 +243,7 @@ src/
 │   │   ├── Application/
 │   │   │   └── PlaceOrderHandler.php
 │   │   └── Infrastructure/
-│   │       └── Doctrine/DoctrineOrderRepository.php
+│   │       └── Repository/DoctrineOrderRepository.php
 │   ├── Inventory/
 │   └── Reporting/
 │

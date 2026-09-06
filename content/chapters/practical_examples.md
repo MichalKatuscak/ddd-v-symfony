@@ -47,8 +47,8 @@ a `property-access` neprojde outbox, bez `egulias/email-validator` shodí
 `Assert\Email` s `VALIDATION_MODE_STRICT` každý dispatch. A bez
 `migrations-bundle` nespustíte ani jednu migraci z kapitoly o Outboxu.
 
-Instalace tím ale nekončí a další dva kroky se přeskakují obzvlášť snadno, protože
-nic nespadne. Recept `doctrine/doctrine-bundle` vygeneruje mapování na `src/Entity`
+Instalace tím ale nekončí. Další dva kroky se přeskakují právě proto, že jejich
+vynechání nic neshodí. Recept `doctrine/doctrine-bundle` vygeneruje mapování na `src/Entity`
 s prefixem `App\Entity` – adresář, který ve vertikálním řezu neexistuje. Doctrine pak
 mlčky nevidí žádnou entitu:
 
