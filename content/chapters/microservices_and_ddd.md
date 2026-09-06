@@ -760,7 +760,7 @@ final readonly class OrderPlacedReceived
 
 Ten `event_type` musí ale někdo nastavit. Výchozí `messenger.transport.symfony_serializer`
 na straně vydavatele ho neposílá: do hlaviček dá `type` s plným jménem PHP třídy
-a doménovou událost serializuje tak, jak je — tedy `Money` jako vnořený objekt.
+a doménovou událost serializuje tak, jak je – tedy `Money` jako vnořený objekt.
 Konzument z téhle sekce čeká ploché `totalAmountCents` a hlavičku `event_type`,
 takže na výchozím serializeru dostane `Missing event_type header`. Vydavatel proto
 potřebuje vlastní serializer, který doménovou událost přeloží do dohodnutého tvaru:
