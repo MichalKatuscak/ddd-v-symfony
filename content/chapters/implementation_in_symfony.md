@@ -1094,7 +1094,7 @@ enum OrderStatus: string
 :::callout{type="pattern"}
 ### Příklad: Použití enum v doménové entitě {#enum-usage-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (alternativa: transitionTo)"}
 <?php
 
 declare(strict_types=1);
@@ -1267,7 +1267,7 @@ Co se tu pokazilo:
 :::callout{type="pattern"}
 ### Správně: invariant uvnitř agregátu, factory metoda na výsledek {#payment-aggregate-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (alternativa: recordPayment)"}
 <?php
 
 declare(strict_types=1);
@@ -1806,7 +1806,7 @@ final readonly class UserProfile
 }
 :::
 
-:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php"}
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php (verze nad agregátem)"}
 <?php
 
 declare(strict_types=1);

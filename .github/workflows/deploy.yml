@@ -39,6 +39,9 @@ jobs:
       - name: Check Messenger routing classes exist
         run: php scripts/check_messenger_routing.php
 
+      - name: Check for ambiguous duplicate listings
+        run: php scripts/check_duplicate_listings.php
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

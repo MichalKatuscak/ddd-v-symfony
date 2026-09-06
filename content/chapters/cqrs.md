@@ -381,7 +381,7 @@ odpovídají doménovým událostem, které tým našel při [Event Stormingu](/
 :::callout{type="pattern"}
 ### PHP: Implementace příkazu v Symfony 8 {#command-example-heading}
 
-:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUser.php"}
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUser.php (týž soubor jako v kap. 10)"}
 <?php
 
 declare(strict_types=1);
@@ -529,7 +529,7 @@ Command handler a query handler mají odlišnou odpovědnost:
 :::callout{type="pattern"}
 ### PHP: Command handler – RegisterUserHandler {#command-handler-heading}
 
-:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php"}
+:::code{language="php" filename="src/UserManagement/Registration/Command/RegisterUserHandler.php (týž soubor jako v kap. 10)"}
 <?php
 
 declare(strict_types=1);
@@ -600,7 +600,7 @@ se vejde druhý požadavek. Vynucuje ji unique constraint, viz
 :::callout{type="pattern"}
 ### PHP: Query handler – GetUserProfileHandler {#query-handler-example-heading}
 
-:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php"}
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php (verze nad read modelem)"}
 <?php
 
 declare(strict_types=1);

@@ -56,7 +56,7 @@ Evans v *DDD Reference* mluví o objektech, jež drží nit kontinuity a identit
 celým životním cyklem [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 Jméno, adresa i e-mail se přitom mohou měnit – identita zůstává.
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (bez perzistence)"}
 <?php
 
 declare(strict_types=1);
@@ -147,7 +147,7 @@ Identifikátory v této knize proto vznikají přes `Uuid::v7()` z balíčku `sy
 dokumentace tuto verzi doporučuje kvůli lepší entropii a chronologickému řazení
 [[6]](https://symfony.com/doc/current/components/uid.html).
 
-:::code{language="php" filename="src/UserManagement/Domain/ValueObject/UserId.php"}
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/UserId.php (základní podoba)"}
 <?php
 
 declare(strict_types=1);
@@ -259,7 +259,7 @@ Primitive Obsession
 [[7]](https://martinfowler.com/books/refactoring.html); ukázky před opravou a po ní má
 kapitola [Anti-vzory a typické chyby](/anti-vzory#primitive-obsession).
 
-:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php (základní podoba)"}
 <?php
 
 declare(strict_types=1);
@@ -433,7 +433,7 @@ agregát na transakci“ z toho odvozuje kapitola
 patří mezi nejčastější chyby v DDD; přerostlé „God Aggregates“ rozebírá kapitola
 [Anti-vzory a typické chyby](/anti-vzory).
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (bez perzistence)"}
 <?php
 
 declare(strict_types=1);
@@ -623,7 +623,7 @@ na objednávku, protože jinak by Doctrine neměla co zapsat do cizího klíče.
 Pro konečnou množinu stavů typu `OrderStatus` se obvykle volí nativní
 `enum` místo plnohodnotného hodnotového objektu:
 
-:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderStatus.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderStatus.php (základní podoba)"}
 <?php
 
 declare(strict_types=1);
@@ -848,7 +848,7 @@ událost *zaznamená* ve chvíli, kdy se změna stane – uvnitř doménové met
 Aplikační vrstva ji *publikuje* až poté, co se změna uložila. Mezi oběma kroky
 drží události bázová třída kořene agregátu:
 
-:::code{language="php" filename="src/SharedKernel/Domain/AggregateRoot.php"}
+:::code{language="php" filename="src/SharedKernel/Domain/AggregateRoot.php (základní podoba)"}
 <?php
 
 declare(strict_types=1);
