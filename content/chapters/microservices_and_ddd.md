@@ -7,7 +7,7 @@ meta_description: "Kdy Bounded Context = microservice a kdy stačí modular mono
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-06"
+modified: 2026-09-06
 breadcrumb_name: DDD a microservices
 schema_type: TechArticle
 schema_headline: "DDD a microservices – Bounded Context jako service boundary"
@@ -29,7 +29,7 @@ V komunitě DDD a microservices koluje v různých variantách slogan: *„Each 
 
 Podstatné je rozlišit dvě úrovně, které slogan slévá do jedné. Bounded Context je **logická hranice modelu**: vymezuje území, kde platí jeden konzistentní výklad pojmů, jeden Ubiquitous Language a jedna sada invariantů. Microservice je naproti tomu **fyzická hranice deploymentu**: jeden sestavovaný artefakt, jeden běžící proces, jedna databáze, jeden odpovědný tým. Tyto dvě úrovně se mohou, ale nemusí překrývat.
 
-Sam Newman v knize *Building Microservices, 2nd ed.* (2021) tuto distinkci zdůrazňuje opakovaně. V kapitole 2 píše, že Bounded Context představuje silný kandidát pro service boundary. Rozhodnutí, zda kontext skutečně dostane vlastní nasazovací jednotku, závisí na faktorech jako velikost týmu, rozdílné potřeby škálování, různý release cyklus a operační kapacita organizace. Chris Richardson v knize *Microservices Patterns* (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
+Sam Newman v knize *Building Microservices, 2nd ed.* (2021) tuto distinkci zdůrazňuje opakovaně. V kapitole 2 píše, že Bounded Context je silným kandidátem na service boundary. Rozhodnutí, zda kontext skutečně dostane vlastní nasazovací jednotku, závisí na faktorech jako velikost týmu, rozdílné potřeby škálování, různý release cyklus a operační kapacita organizace. Chris Richardson v knize *Microservices Patterns* (2018) v kapitole 2 popisuje stejné rozhodnutí jako „decomposition by business capability“ a zdůrazňuje, že rozdělení musí mít doménový důvod, ne čistě technický.
 
 Eric Evans, autor pojmu Bounded Context, se na věc dívá z opačné strany. V přednášce *DDD & Microservices: At Last, Some Boundaries!* (QCon London 2016) tvrdí, že logické rozdělení uvnitř jednoho procesu v praxi neobstojí. Nic ho nevynucuje a hranice se postupně rozpouští. Samostatná nasazovací jednotka dodá hranici fyzickou vynutitelnost, kterou modul sám o sobě nemá. Vztah je tedy podle Evanse **umožnění, ne rovnost**: microservice je jeden ze způsobů, jak hranici kontextu ubránit, ne její definice. Tato kapitola s Evansovou diagnózou souhlasí a odpovídá na ni jinak. Hranice jde vynutit i uvnitř monolitu, [statickou kontrolou v CI](#phparkitect-heading).
 
@@ -87,7 +87,7 @@ Zopakujme podstatné slovo z předchozího odstavce: **obhajitelné**. Microserv
 
 ### Jak velká má být jedna service {#velikost-service-heading}
 
-Na otázku po velikosti dává použitelnou odpověď Zhamak Dehghani v článku *How to break a Monolith into Microservices* (2018) heslem **„macro first, then micro“**: začít u větších služeb postavených kolem jednoho doménového konceptu a dělit je dál teprve tehdy, až je na to tým provozně připravený. Pořadí je podstatné. Sloučit dvě předimenzované služby je refaktoring; rozpletení sítě dvaceti nano-services je projekt na čtvrtletí.
+Na otázku po velikosti dává použitelnou odpověď Zhamak Dehghani v článku *How to break a Monolith into Microservices* (2018) heslem **„macro first, then micro“**. Začít u větších služeb postavených kolem jednoho doménového konceptu. Dělit je dál teprve tehdy, až je na to tým provozně připravený. Pořadí je podstatné. Sloučit dvě předimenzované služby je refaktoring; rozpletení sítě dvaceti nano-services je projekt na čtvrtletí.
 
 Druhá polovina odpovědi je Newmanovo information hiding. Dobře zvolená hranice skrývá hodně a vystavuje málo. Poznáte ji podle toho, že běžná změna se odehraje uvnitř jedné služby a nikoho jiného se nedotkne. Počet řádků kódu o kvalitě hranice neříká nic.
 
@@ -105,7 +105,7 @@ Modular monolith je jeden nasazovaný celek (jedna Symfony aplikace, jedna datab
 
 Proč o něm mluvit v kapitole o microservices? Pro většinu týmů, které začínají s DDD, je to rozumný výchozí bod. Martin Fowler v článku *MonolithFirst* (2015) argumentuje, že microservices předčasně rozdělují systém, jehož hranice ještě nejsou ustálené. Tím vznikají technické dluhy, které se těžce rozplétají. Sam Newman v *Building Microservices, 2nd ed.* (kap. 3) tento postoj přejímá a explicitně jako výchozí strategii doporučuje monolith-first nebo modular monolith-first.
 
-Konsensus to ale není, a je poctivé to říct. Fowler sám u *MonolithFirst* přiznává, že pro pevný závěr nemá dost doložených případů. Šest dní po vydání textu publikoval na svém webu opačný názor Stefana Tilkova (*Don't start with a monolith*, 2015): rozdělit existující monolit je podle něj extrémně těžké, protože si jeho části mezitím vytvoří závislosti přes sdílené knihovny, databázi a doménové objekty. Kdo tedy ví, že cílí na microservices, měl by podle Tilkova začít rovnou u nich.
+Konsensus to ale není, a je poctivé to říct. Fowler sám u *MonolithFirst* přiznává, že pro pevný závěr nemá dost doložených případů. Šest dní po vydání textu publikoval Fowler na svém webu opačný názor Stefana Tilkova (*Don't start with a monolith*, 2015). Rozdělit existující monolit je podle Tilkova extrémně těžké: jeho části si mezitím vytvoří závislosti přes sdílené knihovny, databázi a doménové objekty. Kdo tedy ví, že cílí na microservices, měl by podle Tilkova začít rovnou u nich.
 
 Spor rozhoduje jedna proměnná: zda se hranice uvnitř monolitu vynucují, nebo jen doporučují. Tilkovova námitka popisuje monolit bez kontroly hranic a tam platí do puntíku. S pravidly v CI, která zabrání tomu, aby jeden kontext sáhl do vnitřností druhého, monolit tuto vlastnost neztrácí. Přesně proto na následujících stránkách stojí sekce o phparkitectu.
 
@@ -170,7 +170,7 @@ src/
     └── Application/
 :::
 
-Všimněte si dvou detailů. `SharedKernel` drží **malou sdílenou podmnožinu doménového modelu**, tedy hodnotové objekty jako `Money` a `Currency`, na jejichž výkladu se všechny kontexty shodly. Nepatří sem agregáty ani doménové eventy jednotlivých kontextů; jejich sdílení porušuje definici Bounded Contextu. Změna Shared Kernelu vyžaduje souhlas všech vlastníků, což je drahé, a proto musí zůstat malý. Celý vzor rozebírá [Context Mapping](/context-mapping#shared-kernel). Druhý detail: každý BC má vlastní `Application/IntegrationEvent/`, kam mapuje příchozí události z jiných kontextů. Stejný princip použijeme v sekci 19.08 i mezi separátními services.
+Všimněte si dvou detailů. `SharedKernel` drží **malou sdílenou podmnožinu doménového modelu**, tedy hodnotové objekty jako `Money` a `Currency`, na jejichž výkladu se všechny kontexty shodly. Nepatří sem agregáty ani doménové eventy jednotlivých kontextů; jejich sdílení porušuje definici Bounded Contextu. Změna Shared Kernelu vyžaduje souhlas všech vlastníků. To je drahé, a proto musí zůstat malý. Celý vzor rozebírá [Context Mapping](/context-mapping#shared-kernel). Druhý detail: každý BC má vlastní `Application/IntegrationEvent/`, kam mapuje příchozí události z jiných kontextů. Stejný princip použijeme v sekci 19.08 i mezi separátními services.
 
 ### Vynucení hranic přes phparkitect {#phparkitect-heading}
 
@@ -395,7 +395,7 @@ Postup de-microservicingu je opačný k extraction patternu z 19.09:
 ### Postup návratu z microservices do monolitu {#de-microservicing-postup-heading}
 
 1. **Audit BC hranic.** Které services reálně mají vlastní team/data/release/scaling?
-   Které byly rozděleny předčasně?
+   Které se rozdělily předčasně?
 2. **Strangler v opačném směru.** Místo extrakce z monolitu se konsoliduje *do*
    monolitu. Začínáte u nejvíce provázané services s nejnižším operačním přínosem.
 3. **Replikace doménového kódu.** Service A se stane modulem `App\Catalog\` v monolithu.
@@ -451,7 +451,7 @@ Jakmile máte dvě services, musíte se rozhodnout, jak spolu komunikují. Nabí
 - **Query (read), kde volající potřebuje odpověď během request flow.** Frontend potřebuje detail produktu pro vykreslení stránky; `catalog-svc` ho vrátí přes REST. Bez odpovědi nemůže pokračovat.
 - **Validace, která blokuje další krok.** Před uložením objednávky musí `ordering-svc` ověřit u `catalog-svc`, že produkt existuje a je dostupný. Volání musí být sync, jinak riskujete, že uložíte objednávku na neexistující produkt.
 - **Latence-sensitive operace.** Detekce podvodů v reálném čase, autorizace platby, rate limit check.
-- **Idempotentní lookup.** Neměnné nebo zřídka měnící se data, kde latence sítě je akceptovatelná a kde je možné použít cache.
+- **Idempotentní lookup.** Neměnné nebo zřídka měnící se data, kde latence sítě nevadí a kde pomůže cache.
 
 ### Asynchronní eventy – kdy {#async-kdy-heading}
 
@@ -519,7 +519,7 @@ Saga existuje ve dvou variantách:
 - **Choreografie** – každá service reaguje na eventy ostatních services. Žádný centrální orchestrátor; flow je implicitní v eventech. Vhodné pro jednoduché ságy s 2–3 kroky.
 - **Orchestrace** – centrální Process Manager (saga aggregate) drží stav celého procesu a posílá commands jednotlivým services. Vhodné pro komplexní ságy s mnoha kroky, podmínkami, timeouty a retry logikou.
 
-Detailní implementaci ság v Symfony 8 (kompenzace, idempotence, choreografie vs. orchestrace, timeouty, paralelní kroky) probírá samostatná [kapitola 14 – Ságy a Process Managery](/sagy-a-process-managery). Pro účely této kapitoly stačí rozumět, že saga je **v DDD kontextu doporučovaný mechanismus pro distribuované transakce v microservices** a že daní za to je eventual consistency a kompenzační logika.
+Detailní implementaci ság v Symfony 8 (kompenzace, idempotence, choreografie vs. orchestrace, timeouty, paralelní kroky) probírá samostatná [kapitola 14 – Ságy a Process Managery](/sagy-a-process-managery). Pro účely této kapitoly stačí vědět dvě věci. Saga je **v DDD kontextu doporučovaný mechanismus pro distribuované transakce v microservices**. Daní za to je eventual consistency a kompenzační logika.
 
 :::callout{type="note"}
 ### Saga vs. 2PC – shrnutí {#saga-vs-2pc-heading}
@@ -551,7 +551,7 @@ Implementačně bývá service mesh sidecar: každý pod má vedle aplikačního
 
 V monolithu stačila kombinace strukturovaných logů a metrik. V microservices přibývá třetí pilíř, distributed tracing. Centralizovaně se pak musí řešit všechny tři:
 
-- **Logs** – centralizované log aggregation (ELK / Loki / CloudWatch). Každý log line musí mít `trace_id` a `service_name`, jinak není možné poskládat časovou řadu událostí napříč services.
+- **Logs** – centralizované log aggregation (ELK / Loki / CloudWatch). Každý log line musí mít `trace_id` a `service_name`, jinak časovou řadu událostí napříč services nesložíte.
 - **Metrics** – Prometheus + Grafana, nebo cloudový ekvivalent (Datadog, NewRelic). Standardní metriky (RED – rate, errors, duration) per service a per endpoint.
 - **Traces** – OpenTelemetry + Jaeger / Tempo / Honeycomb. Jeden user request se trasuje napříč všemi services, každý skok má span. Bez toho je ladění nemožné. Pět services a dvacet logů v incidentu nedá dohromady jednu časovou řadu.
 
@@ -914,7 +914,7 @@ Dvě mitigace:
 - **Souběžné requesty přes `HttpClient`.** Symfony `HttpClient` streamuje odpovědi, takže tři volání lze poslat najednou a čekat na ně současně. Sériové `->getContent()` třikrát za sebou sčítá latence zbytečně.
 - **Worker módy.** FrankenPHP, RoadRunner nebo Swoole drží aplikaci v paměti mezi requesty. Bootstrap odpadá a cena synchronního volání klesá. Daň: služby s request-scoped stavem musí implementovat `Symfony\Contracts\Service\ResetInterface`, jinak stav prosákne do dalšího requestu.
 
-Opačným směrem působí to, že nasazovací jednotka je v PHP levná. Není co kompilovat, není warm-up JVM, image se sestaví za minuty. Technicky extrahovat službu je v PHP snazší než v Javě. Celý náklad tedy leží v provozu, což hlavní tezi této kapitoly spíš posiluje.
+Opačným směrem působí to, že nasazovací jednotka je v PHP levná. Není co kompilovat, není warm-up JVM, image se sestaví za minuty. Technicky extrahovat službu je v PHP snazší než v Javě. Celý náklad tedy leží v provozu. Hlavní tezi této kapitoly to spíš posiluje.
 
 A provoz má v Symfony konkrétní podobu. Každá služba, která konzumuje zprávy, potřebuje vlastní sadu workerů: `messenger:consume` pod Supervisorem nebo systemd, `--memory-limit` a `--time-limit` proti narůstající spotřebě paměti a `messenger:stop-workers` v každém deploy skriptu. Pět služeb znamená pět takových konfigurací a pět míst, kde se dá na restart workerů po deployi zapomenout. Messenger na provoz nabízí i dva novější přepínače: `--keepalive` brání předčasnému redelivery u dlouho běžících handlerů a `--fetch-size` snižuje počet dotazů do transportu při dávkovém zpracování.
 
@@ -1016,7 +1016,7 @@ Obecnější rozbor anti-vzorů v DDD (nejen microservices) najdete v [kapitole 
 
 ## 19.11 Shrnutí {#summary}
 
-Vztah mezi Bounded Contextem a microservice nelze redukovat na jednu rovnici. Bounded Context je **logická hranice modelu**, microservice je **fyzická hranice deploymentu**; mapování mezi nimi je 1:1, 1:N nebo N:1, a každá varianta má svůj kontext, ve kterém je správná. Slogan „BC = microservice“ je užitečný jako výchozí hypotéza, ne jako architektonický příkaz.
+Vztah mezi Bounded Contextem a microservice nelze redukovat na jednu rovnici. Bounded Context je **logická hranice modelu**, microservice je **fyzická hranice deploymentu**. Mapování mezi nimi je 1:1, 1:N nebo N:1 a každá varianta má kontext, ve kterém je správná. Slogan „BC = microservice“ je užitečný jako výchozí hypotéza, ne jako architektonický příkaz.
 
 Rozhodnutí, které tato kapitola nese, je jediné: kde vede hranice mezi procesy.
 Pro tým do třiceti lidí ji nejlevněji uhlídá modular monolith. Hranice mezi BC vynutí
