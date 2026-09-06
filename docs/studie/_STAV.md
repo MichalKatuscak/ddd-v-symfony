@@ -1738,6 +1738,58 @@ podmínky tiše nefungovaly. Vypadalo to, že kód běží.
 
 **Poučení: u kontroly, která nic nehlásí, musím ověřit, že hlásit umí.**
 
+## Kde revize skončila a proč (2026-09-06)
+
+Poslední tři kola měla stejný tvar: kolo najde drobnost, oprava ji odstraní a **přinese
+vlastní chybu**. Postupně:
+
+| kolo | co našlo | původ |
+|---|---|---|
+| 19. | `reason:` místo `failureReason:` — kompenzace se nespustila, tichá zpráva v DLQ | oprava z 18. kola |
+| 20. | `$event->shipmentId->value` na stringu — **spadl happy path**, objednávka natrvalo zamčená | oprava z 19. kola |
+
+Protizkouška z toho vyvodila závěr, který sedí i podle mých čísel:
+
+> „Poměr se obrátil: revize už do knihy nevnáší míň chyb, než jich odstraňuje. Doporučení
+> místo dalšího kola: opravit a **mechanicky ověřit, ne číst**."
+
+### Co s tím
+
+Ruční čtení tuhle třídu chyb míjí spolehlivě — `->value` na stringu minulo dvakrát,
+`php -l` ho chytit nemůže. Proto vzniklo šest strojových kontrol, které běží v CI:
+
+| kontrola | co hlídá | vznikla po chybě |
+|---|---|---|
+| `lint-php-snippets.php` | syntaxi všech ukázek | — |
+| `check_anchors.php` | kotvy a odkazy mezi kapitolami | — |
+| `check_messenger_routing.php` | třídy v `routing:` existují | vymyšlená třída shodila `cache:clear` (2×) |
+| `check_duplicate_listings.php` | dvě ukázky pod jedním jménem | `Cannot redeclare Order::$id` |
+| `check_named_arguments.php` | pojmenované argumenty proti konstruktorům | `reason:` vs. `failureReason:` |
+| `check_property_access.php` | `->value` na vlastnosti typu `string` | pád happy path |
+
+### Poučení, které stálo nejvíc
+
+**Kontrola, u které jsem neviděl selhat, není kontrola.** U `check_property_access.php`
+tiše nefungovaly tři verze po sobě: unijní typ lámaný přes víc řádků vázal jen poslední
+třídu; `array_unique` zachovává klíče, takže porovnání s `['string']` nikdy neprošlo;
+a vazba přes celý soubor pletla `$event` z Process Manageru s `$event` z outboxu.
+Každou verzi jsem považoval za hotovou. Od té doby u každé kontroly dočasně vrátím chybu
+a ověřím návratový kód 1.
+
+Totéž platilo pro `check_tonality.php`, který po dvou nových podmínkách přestal fungovat
+kvůli tomu, že `PREG_OFFSET_CAPTURE` vrací pozici **v bajtech**.
+
+### Stav
+
+Dvacet kol, dvacet jedna stavěných projektů. Nálezy se posunuly od „aplikace nejde
+postavit" přes „stavy se tiše rozejdou" k HTTP kódům na okrajových cestách. Poslední
+verdikt protizkoušky: *„kniha je průchozí, čtenář ji dokáže postavit do funkční aplikace
+a nic ho nezastaví."*
+
+**Další plošné kolo se nedoporučuje.** Ne proto, že by kniha byla bez vady, ale protože
+ruční revize v ní teď působí víc škody než užitku. Nástupcem je CI: šest kontrol, které
+tuhle třídu chyb chytí za vteřiny a nezanechají po sobě regresi.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
