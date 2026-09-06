@@ -1263,6 +1263,74 @@ storno objednávky ve stavu `paid` prošlo přes HTTP. 07.07 a 07.08 jdou složi
 souboru bez `Cannot redeclare`. `bus:` sedí — `debug:messenger` ukazuje každý aplikační
 handler právě na jedné sběrnici.
 
+## Čtrnácté kolo: jedenáctá ověřovací stavba (2026-09-06)
+
+27 testů zeleně, happy path i kompenzace doběhly, testy kapitol 12 a 14 se nerozbily.
+Ale hlavní nález je opakovaná chyba mé vlastní práce.
+
+### Oprava spadla do špatného bloku
+
+Kapitola 11 má **dvě třídy se stejným FQCN** – synchronní `CancelOrderHandler` (11.04,
+přes `AuthorizationCheckerInterface`) a asynchronní (11.05, přes `actorId`). Publikaci
+událostí jsem přidal do té první, která pro ni nemá závislosti (`$this->em`,
+`$this->eventBus` v konstruktoru nebyly), zatímco druhá dostala závislosti a smyčku ne.
+**Obě volby byly rozbité** a čtenář si musel jednu vybrat.
+
+**Poučení: než opravím blok, ověřím, že je v kapitole jediný svého jména. Dvě ukázky
+pod jedním FQCN jsou samy o sobě nález.**
+
+### Vlastní tvrzení, která protizkouška vyvrátila
+
+Dvě věci, které jsem do knihy napsal v předchozím kole, neplatí:
+
+- **CSRF.** Tvrdil jsem, že HTML formuláře bez frontendového buildu neprojdou.
+  `SameOriginCsrfTokenManager` v Symfony 8.1 je pustí – uzná `Origin` nebo
+  `Sec-Fetch-Site: same-origin`, což prohlížeč u běžného odeslání posílá. Ochrana
+  přitom funguje: cross-origin požadavek neprojde. Ověřeno obojí.
+- **Poddotaz s `LIMIT`.** Napsal jsem, že projde na MySQL, Postgresu i SQLite.
+  MySQL `LIMIT` uvnitř `IN (SELECT …)` odmítá.
+
+**Poučení: opravný text je tvrzení jako každé jiné a platí pro něj stejná laťka.**
+
+### HTML cesta knihou nešla projít
+
+Poprvé stavěné: registrace formulářem, detail objednávky, storno tlačítko. Nálezy:
+
+- `RegistrationFormType` měl `data_class` na command s promovanými readonly
+  vlastnostmi – `NoSuchPropertyException`, HTTP 500. A protiřečil si s vlastním
+  kontrolerem, který o pár řádků výš čte `getData()` jako pole.
+- `ProfileController` posílal do `GetUserProfile` e-mail z `getUserIdentifier()`,
+  ale query má `#[Assert\Uuid]` a read model se ptá po `customerId`.
+- `PlaceOrderController` importoval `PlaceOrder` a instancoval `PlaceOrderCommand`.
+- Šablona volala `order.isCancellable(now)`, ale kontroler, který `now` předá, v knize
+  nebyl. Chyběly routy `order_detail` i `order_refund`.
+- `security.yaml` zapínal firewall s `jwt: ~`, který bez balíčku konfiguraci shodí,
+  a odkazoval na routu `login` bez kontroleru.
+- Alias mířil na `StripePaymentGateway`, třídu, kterou kniha nedefinuje.
+
+### Kapitola 12 si protiřečila s vlastním testem
+
+`RegisterUserHandler` v 12.x stál nad `PasswordHasher` (třída v knize není) a předával
+`User::register()` string tam, kde 10.03 chce `UserName` a `HashedPassword`. Test
+o 1100 řádků dál přitom volal kanonickou variantu z 10.13. Callout u handleru přiznával,
+že jde o alternativu — ale test u ní nezůstal. Sjednoceno na kanonickou.
+
+### Policy testovala stav, který enum nemá
+
+`CancelOrderPolicy` porovnávala `subject.status.value == "placed"`; enum má
+`draft/confirmed/paid/shipped/delivered/cancelled`. Sahala i na `subject.tenantId`,
+který `Order` nemá. Navíc ExpressionLanguage nečte privátní stav — proto jsou
+`Order::$status` a `$placedAt` nově `public private(set)`, což kniha o pár odstavců
+dřív sama doporučuje jako správný zápis.
+
+### Co protizkouška potvrdila
+
+Namespace `Order` sjednocený (voter u vlastníka vrací `ACCESS_GRANTED`). `OrderFactory`
+staví agregát přes veřejné API **bez reflexe**, všechny tři testy z 11.10 prošly.
+`app:outbox:cleanup` na SQLite maže staré `sent` řádky. Testy z kapitol 11, 12 a 14 se
+načtou najednou. `#[IsGranted(subject:)]` s vlastním resolverem dá vlastníkovi 200
+a cizímu 403.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
