@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -28,7 +28,7 @@ jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 DDD nabízí strukturu pro modelování domény, ale s tou strukturou přicházejí specifická úskalí. Týmy začínající s DDD opakovaně narážejí na stejné chyby, i když teorii rozumějí. Anti-vzory je proto potřeba znát stejně dobře jako vzory samotné. Definice termínů použitých v této kapitole (entita, hodnotový objekt, agregát, bounded context) najdete v kapitole [Základní koncepty DDD](/zakladni-koncepty).
 
-Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon. Každá sekce níže proto nese rozpoznávací znak – větu, podle které zjistíte, jestli se problém týká vašeho kódu – a hranici, za kterou už kritizovaný postup chybou není.
+Anti-vzor je přístup, ke kterému vývojáři přirozeně sklouznou. Vypadá správně, ale narušuje principy DDD a dlouhodobě podkopává udržovatelnost, testovatelnost i výkon. Každá sekce níže proto nese dvě věci: rozpoznávací znak, tedy větu, podle které zjistíte, jestli se problém týká vašeho kódu, a hranici, za kterou už kritizovaný postup chybou není.
 
 Nejznámější anti-vzor DDD zde nenajdete. Big Ball of Mud, tedy oblast bez rozeznatelných hranic, patří ke Context Mappingu, protože se dá vědomě ohraničit a nechat být; rozebírá jej [sekce 03.12](/context-mapping#big-ball-of-mud).
 
@@ -1107,7 +1107,7 @@ Hranice vrstev se navíc dají vynutit nástrojem, ne jen dohodou v code review.
 
 Anti-vzorem zde není samotné DDD, ale jeho ceremonie bez komplexní domény. Agregáty, Value Objects a doménové události obalují prosté řádky v databázi, pro které stačí formulář a tabulka. Typické příznaky: tým tráví více času architekturou než obchodní hodnotou a triviální změna prochází desítkami souborů napříč vrstvami.
 
-Méně nákladná cesta začíná minimálním přístupem a přidává DDD prvky, až když se doménová složitost skutečně projeví. Celý rozhodovací rámec – sedm situací, kdy DDD vynechat, alternativy a rozhodovací strom – rozebírá kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
+Méně nákladná cesta začíná minimálním přístupem a přidává DDD prvky, až když se doménová složitost skutečně projeví. Celý rozhodovací rámec rozebírá kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd): sedm situací, kdy DDD vynechat, alternativy k němu a rozhodovací strom.
 
 **Hranice pravidla.** Ceremonie sama o sobě chyba není. V jádrové subdoméně je to investice, která se vrátí při každé změně pravidel. Chybou je stejná ceremonie v podpůrné subdoméně, kde se za rok nezmění nic než sazba DPH.
 
@@ -1252,7 +1252,7 @@ Anémickému doménovému modelu se obšírně věnuje Vaughn Vernon v *Implemen
 - question: Co je anémický doménový model a jak ho poznat?
   answer: 'Anémický model vypadá na první pohled jako DDD – obsahuje třídy s názvy agregátů, entit a hodnotových objektů. Veškerá logika je ale přesunutá do služeb. Typickým znakem jsou gettery a settery jako jediné metody a třídy bez jakéhokoli pravidla uvnitř. Doménová logika končí ve „Service“ třídách, které manipulují s daty zvenku. Výsledkem je procedurální kód balený do objektových fasád. Detailní rozbor v <a href="#anemicky-domenovy-model">sekci Anémický doménový model</a>.'
 - question: Je anémický model vždy chyba?
-  answer: 'Ne. Fowler sám v článku o anémickém modelu píše, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script. V doméně s několika málo pravidly je procedura na jeden případ užití čitelnější než vrstva tříd okolo ní. Anémický model je chyba tehdy, když platíte cenu doménového modelu – mapování, obalování hodnot, rozpad do vrstev – a nedostáváte za ni žádný přínos. Rozbor obou stran sporu v <a href="#anemicky-kdy-nevadi">sekci Kdy anémický model chyba není</a>.'
+  answer: 'Ne. Fowler sám v článku o anémickém modelu píše, že doménový model není vždy nejlepší nástroj, a odkazuje na Transaction Script. V doméně s několika málo pravidly je procedura na jeden případ užití čitelnější než vrstva tříd okolo ní. Anémický model je chyba tehdy, když platíte cenu doménového modelu (mapování, obalování hodnot, rozpad do vrstev) a nedostáváte za ni žádný přínos. Rozbor obou stran sporu v <a href="#anemicky-kdy-nevadi">sekci Kdy anémický model chyba není</a>.'
 - question: Proč je Primitive Obsession problém?
   answer: 'Primitive Obsession znamená používání primitivních typů (<code>string</code>, <code>int</code>, <code>float</code>) tam, kde patří doménový pojem. Místo typu <code>Email</code> se předává <code>string</code>, místo <code>Money</code> dvojice <code>float</code>. Důsledkem je, že validace a pravidla se opakují v každém místě volání, nebo se zapomínají. Hodnotový objekt s jedním místem validace tyto duplicity odstraňuje a typ dává kontext, co daná hodnota reprezentuje. Rozbor a příklady v <a href="#primitive-obsession">sekci Primitive Obsession</a>.'
 - question: Jak poznat, že je agregát příliš velký?
@@ -1260,5 +1260,5 @@ Anémickému doménovému modelu se obšírně věnuje Vaughn Vernon v *Implemen
 - question: Proč je sdílená databáze mezi Bounded Contexts problém?
   answer: 'Sdílená databáze formálně drží data pohromadě, ale fakticky ruší hranice mezi Bounded Contexts. Změna schématu v jednom kontextu může rozbít druhý, pojmy se mísí a model jednoho týmu začíná záviset na modelu druhého. Správné řešení je, aby každý Bounded Context vlastnil svá data a komunikace probíhala přes definované rozhraní (API, události), nikoli přes sdílenou tabulku. Podrobný rozbor v <a href="#sdilena-databaze">sekci Sdílená databáze napříč Bounded Contexts</a>.'
 - question: Musí být doménová událost neměnná?
-  answer: 'Ano. Doménová událost popisuje něco, co se již stalo – <code>OrderPlaced</code>, <code>PaymentReceived</code> – a minulost nelze měnit. Událost bez setterů, s neměnnými atributy a časovým razítkem vytvořeným při konstrukci je bezpečné sdílet mezi handlery, persistovat v event store a použít pro zpětnou rekonstrukci stavu. Mutovatelná událost vede k race condition, nedeterministickému zpracování a nekonzistentnímu auditu. Viz <a href="#mutovatelne-udalosti">sekci Mutovatelné doménové události</a>.'
+  answer: 'Ano. Doménová událost popisuje něco, co se už stalo: <code>OrderPlaced</code>, <code>PaymentReceived</code>. A minulost nelze měnit. Událost bez setterů, s neměnnými atributy a časovým razítkem vytvořeným při konstrukci je bezpečné sdílet mezi handlery, persistovat v event store a použít pro zpětnou rekonstrukci stavu. Mutovatelná událost vede k race condition, nedeterministickému zpracování a nekonzistentnímu auditu. Viz <a href="#mutovatelne-udalosti">sekci Mutovatelné doménové události</a>.'
 :::

@@ -7,7 +7,7 @@ meta_description: "Vztah DDD a AI nástrojů očima Erica Evanse, Martina Fowler
 meta_keywords: "DDD AI, domain-driven design umělá inteligence, DDD LLM, Eric Evans AI, Martin Fowler AI, Kent Beck AI, DDD bounded context AI, ubiquitous language LLM"
 og_type: article
 published: "2026-03-27"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: DDD a AI
 schema_type: TechArticle
 schema_headline: "DDD a umělá inteligence – co říkají autority"
@@ -27,8 +27,8 @@ kdy AI dokáže generovat kód z krátkého popisu?
 Kapitola mapuje, co o vztahu DDD a umělé inteligence říkají přední autority softwarového
 inženýrství – Eric Evans, Martin Fowler, Kent Beck, Vaughn Vernon, Nick Tune, Alberto Brandolini
 a DHH. Jde o přehled jejich pozic, argumentů a dat, nikoli obhajobu ani kritiku
-konkrétního přístupu. Druhý směr téhož vztahu – DDD jako metoda pro stavbu systému, jehož
-součástí je jazykový model – dostal vlastní sekci.
+konkrétního přístupu. Druhý směr téhož vztahu dostal vlastní sekci: DDD jako metoda pro stavbu systému, jehož
+součástí je jazykový model.
 
 U každého výroku je uveden rok, kdy zazněl. Stav je zmapován k září 2026 a pozice se v tomto
 tématu mění po měsících, ne po letech. Část následujícího textu zestárne dřív než zbytek knihy.
@@ -193,13 +193,12 @@ Zde leží hranice generování a zároveň důvod, proč agregát s explicitní
 lépe než anemický model – porušení je v něm vidět.
 
 Kontext pro DDD komunitu: TDD ani code review nejsou vzory DDD, ale jeho komunita je s nimi
-historicky propojena. Taktické vzory – agregáty s invarianty, doménové události jako
-kontrakty – se testují na úrovni domény bez zvláštní přípravy.
+historicky propojena. Taktické vzory se testují na úrovni domény bez zvláštní přípravy: agregát s invarianty,
+doménová událost jako kontrakt.
 Agregát definuje pravidlo; test verifikuje pravidlo; AI generuje implementaci; test
 signalizuje odchylku. Tento cyklus je odolnější než testování implementačních detailů.
-Konkrétní strategie testování DDD modelů – unit testy agregátů, integrační testy
-přes Messenger, contract testy mezi kontexty – popisuje kapitola
-[Testování DDD](/testovani-ddd).
+Konkrétní strategie testování DDD modelů popisuje kapitola [Testování DDD](/testovani-ddd):
+unit testy agregátů, integrační testy přes Messenger a contract testy mezi kontexty.
 
 ## ai.04 AI v doménové komplexitě vs. CRUD {#komplexita-vs-crud}
 
@@ -213,22 +212,20 @@ komplexní nebo citlivé, že musí rozhodovat člověk. Třetí, nová kategori
 jsou nízké. Konkrétní práh přesnosti Evans neuvádí; prakticky leží tam, kde zbytek chyb
 odchytí revize.
 
-Taxonomie má přímý dopad na to, kde AI dává smysl a kde ne. Ve vysoce komplexní
-doméně – pojišťovnictví, bankovnictví, zdravotnictví – převažují hard-coded decisions
-a chyba stojí hodně. Paradoxně to jsou domény, kde DDD přináší největší
-hodnotu, ale kde je AI nejnebezpečnější, pokud není správně ohraničena. LLM-supported
-decisions existují i zde – například kategorizace dokumentů nebo návrh odpovědi zákaznickému
-servisu – ale musí být jasně odděleny od hard-coded logiky.
+Taxonomie má přímý dopad na to, kde AI dává smysl a kde ne. V pojišťovnictví, bankovnictví nebo zdravotnictví převažují hard-coded decisions a chyba
+stojí hodně. Paradoxně to jsou domény, kde DDD přináší největší
+hodnotu, ale kde je AI nejnebezpečnější, pokud není správně ohraničena. LLM-supported decisions existují i tady, například kategorizace dokumentů nebo návrh
+odpovědi zákaznickému servisu. Musí ale zůstat jasně oddělené od hard-coded logiky.
 
 Vaughn Vernon přidává konkrétní technický vzor: LLM jako „fix suggester“
 (Explore DDD 2024, via InfoQ). Ve Vernonově vizi *self-healing software* reaguje
 nástroj typu ChatGPT na runtime výjimky a navrhne opravu ve formě pull requestu.
-Návrh projde revizí – lidskou nebo automatizovanou – a teprve pak se aplikuje.
+Návrh projde revizí, lidskou nebo automatizovanou, a teprve pak se aplikuje.
 DDD bounded context v tomto scénáři definuje pravidla verifikace: co smí LLM
 změnit a co musí zůstat neměnné.
 
-Referenční implementace Microsoftu – eShop, dříve eShopOnContainers – ilustruje toto rozlišení
-na praktickém příkladu. Modul `Ordering` používá plné taktické DDD:
+Referenční implementace Microsoftu eShop (dříve eShopOnContainers) to rozlišení ukazuje na
+praktickém příkladu. Modul `Ordering` používá plné taktické DDD:
 agregáty, doménové události, CQRS. Modul `Catalog` je prostý CRUD
 s Entity Framework. Rozdělení vzniklo záměrně, ne historickou nehodou: implementační
 komplexita patří tam, kde leží komplexita doménová. S příchodem AI se k této úvaze
@@ -334,9 +331,8 @@ engineering do Adopt. Tím se z ad hoc praxe stala pojmenovaná disciplína: ses
 právě ten kontext, který pro úlohu potřebuje. Sevřenější kontext znamená přesnější výstupy –
 a bounded context je jedna z odpovědí na otázku, kde ho oříznout.
 
-Druhá strana mince: ty samé nástroje fungují i bez DDD. Kód psaný podle jasných konvencí –
-convention over configuration v Rails stylu – bývá pro agenta stejně čitelný jako explicitně
-modelovaný bounded context. V projektu s ustáleným pojmenováním, slušnou testovou sadou
+Druhá strana mince: ty samé nástroje fungují i bez DDD. Kód psaný podle jasných konvencí, tedy v duchu convention over configuration, bývá pro
+agenta stejně čitelný jako explicitně modelovaný bounded context. V projektu s ustáleným pojmenováním, slušnou testovou sadou
 a čitelným rozčleněním do adresářů se agent zorientuje bez formálního DDD modelu.
 Disciplinovaná konvence plní podobnou roli jako explicitní model. Otevřená zůstává otázka,
 co se stane, až projekt vyroste za hranice, kde konvence stačí.
@@ -344,8 +340,7 @@ co se stane, až projekt vyroste za hranice, kde konvence stačí.
 ## ai.07 Otevřené otázky a limity {#otevrene-otazky}
 
 Martin Fowler opakovaně zdůrazňuje, že oblast AI a softwarové architektury je v roce 2026
-teprve na začátku. Nedeterminismus LLM – stejný prompt, jiný výstup – zatím nemá
-uspokojivou metriku. Jak měříme architektonickou konzistenci generovaného kódu?
+teprve na začátku. Nedeterminismus LLM, kdy tentýž prompt vrátí jiný výstup, zatím nemá uspokojivou metriku. Jak měříme architektonickou konzistenci generovaného kódu?
 Jak verifikujeme, že AI respektuje hranice bounded contextu, když každé volání
 API může vrátit jiný výsledek? Fowler hovoří o tom, že „stále se učíme“ –
 a to je poctivý popis stavu oboru.
@@ -363,8 +358,7 @@ mají vážit lo-fi, hands-on a AI postupy proti sobě a znát meze každého z 
 Vlastní vyjádření k tomu, nakolik EventStorming zůstává lidskou aktivitou, se nepodařilo
 dohledat – anotace workshopu je zatím jediný doklad jeho pozice.
 
-Sam Newman – autor Building Microservices – se k AI v kontextu DDD zatím jasně
-nevyjádřil. Jeho pozice k distribuovaným systémům je dlouhodobě konzervativní:
+Sam Newman, autor *Building Microservices*, se k AI v kontextu DDD zatím jasně nevyjádřil. Jeho pozice k distribuovaným systémům je dlouhodobě konzervativní:
 mikroservisy jako poslední možnost, nikoli jako výchozí architektura. Zda tato
 zdrženlivost platí i pro AI, je autorský odhad, nikoli referovaná pozice. Nasazení LLM
 do produkčního systému je nicméně distribuovaná závislost se všemi problémy

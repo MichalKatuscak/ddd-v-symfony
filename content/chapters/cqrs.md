@@ -343,9 +343,8 @@ Oddělení command a query busu stojí na rozdílném chování obou stran:
 
 Samotné oddělení busů ale záměnu zprávy nezastaví. Handler je ve výchozím stavu registrovaný
 na **všech** busech, takže dotaz odeslaný na command bus doputuje ke svému handleru i s
-transakcí kolem. Vazbu na jediný bus vynutí až parametr atributu –
-`#[AsMessageHandler(bus: 'command.bus')]` – nebo tag `messenger.message_handler`
-s klíčem `bus`.
+transakcí kolem. Vazbu na jediný bus vynutí až parametr atributu `#[AsMessageHandler(bus: 'command.bus')]`,
+případně tag `messenger.message_handler` s klíčem `bus`.
 :::
 
 :::callout{type="note"}
@@ -442,8 +441,7 @@ Dva běžné přístupy:
 
 ## 12.07 Implementace Queries {#queries}
 
-Query se od commandu liší směrem toku dat: nemění stav systému, jen čte. Implementace
-vypadá podobně – immutabilní DTO třída – s jedním rozdílem: query **vždy vrací
+Query se od commandu liší směrem toku dat: nemění stav systému, jen čte. Implementace vypadá podobně, tedy jako immutabilní DTO. Liší se v jednom: query **vždy vrací
 hodnotu**, kterou handler předá přes `HandledStamp`.
 
 :::callout{type="pattern"}
@@ -1353,8 +1351,8 @@ odešle formulář, dostane potvrzení o úspěchu, ale seznam na další strán
 nový záznam.
 
 Nejde o bug, ale o **vlastnost distribuované architektury**.
-Následující diagram zachycuje celý datový tok – od zápisu přes asynchronní propagaci
-až po čtení – a zvýrazňuje okno, ve kterém k eventual consistency dochází:
+Následující diagram zachycuje celý datový tok od zápisu přes asynchronní propagaci až po
+čtení a zvýrazňuje okno, ve kterém se projeví eventual consistency:
 
 :::diagram{fig="12.12-A" title="Eventual consistency v CQRS toku" src="images/diagrams/6_cqrs/eventual_consistency.svg"}
 :::
@@ -2082,13 +2080,12 @@ value objects a doménových služeb – najdete v kapitole
 
 Při použití CQRS s více [Bounded Contexts](/zakladni-koncepty#bounded-contexts)
 vzniká potřeba koordinovat dlouhotrvající procesy napříč kontexty.
-Vzor **Saga** – v orchestrované podobě označovaný **Process Manager** – naslouchá
-doménovým událostem a podle nich odesílá příkazy, čímž propojuje command a event stranu CQRS
-do ucelených doménových procesů.
+Vzor **Saga**, v orchestrované podobě označovaný **Process Manager**, naslouchá doménovým
+událostem a podle nich odesílá příkazy. Tím propojuje command a event stranu CQRS do
+ucelených doménových procesů.
 
-Podrobný výklad ság – včetně implementace v Symfony Messenger,
-kompenzačních strategií a testování – najdete v kapitole
-[Ságy a Process Managery](/sagy-a-process-managery).
+Podrobný výklad ság najdete v kapitole [Ságy a Process Managery](/sagy-a-process-managery),
+včetně implementace v Symfony Messenger, kompenzačních strategií a testování.
 
 :::faq{}
 - question: Co je CQRS?

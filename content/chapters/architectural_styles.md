@@ -7,7 +7,7 @@ meta_description: "Layered, Hexagonal, Onion nebo Clean Architecture? Kdy který
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Architektonické styly
 schema_type: TechArticle
 schema_headline: "Architektonické styly: Hexagonal, Onion, Clean – co si vybrat"
@@ -21,7 +21,7 @@ github_examples: null
 
 Když tým poprvé pronese „přejdeme na DDD“, pod tím slovem se schovávají dvě věci najednou: *budeme líp modelovat doménu* a zároveň *přerovnáme adresářovou strukturu*. Tato dvě rozhodnutí jsou ve skutečnosti **ortogonální**. Domain-Driven Design je modelovací technika; architektonický styl je rozhodnutí o uspořádání kódu a směru závislostí. DDD lze provozovat ve vrstvené architektuře, v Hexagonální, v Onion, v Clean i ve Vertical Slice. A naopak: Hexagonální architektura postavená nad anémickým CRUD modelem nemá s DDD nic společného.
 
-Následující sekce srovnávají čtyři vrstvové styly (Layered, Hexagonal, Onion, Clean) s pátým – feature-orientovaným Vertical Slice – a ukazují, jak konkrétně každý vypadá v Symfony 8 projektu. Žádný styl tu neprohlašujeme za vítěze – každý má svůj kontext, kde dává smysl. Smyslem srovnání je dát vám rozhodovací kritéria a varovat před nejčastějšími anti-vzory, které z dobré teorie udělají špatný kód.
+Následující sekce srovnávají čtyři vrstvové styly (Layered, Hexagonal, Onion, Clean) s pátým, feature-orientovaným Vertical Slice, a ukazují, jak konkrétně každý vypadá v Symfony 8 projektu. Žádný styl tu neprohlašujeme za vítěze – každý má svůj kontext, kde dává smysl. Smyslem srovnání je dát vám rozhodovací kritéria a varovat před nejčastějšími anti-vzory, které z dobré teorie udělají špatný kód.
 
 ## 09.01 Proč architektonický styl není totéž co DDD {#proc-styl}
 
@@ -48,7 +48,7 @@ Následuje katalog stylů v pořadí od nejjednoduššího k nejkomplexnějším
 
 ## 09.02 Layered (klasická vrstvená) {#layered}
 
-Vrstvená architektura je výchozí způsob, jak v podnikové aplikaci uspořádat kód. Martin Fowler v *Patterns of Enterprise Application Architecture* (2002) [[2]](https://martinfowler.com/eaaCatalog/) pracuje se třemi principiálními vrstvami: Presentation, Domain (doménová logika) a Data Source. Eric Evans v *Domain-Driven Design* (2003) schéma upravil na čtyři vrstvy – User Interface (Presentation), Application, Domain, Infrastructure – a přidal pravidlo, že **vrstva smí záviset jen na vrstvách pod sebou**, nikdy nahoru. Pozdější DDD literatura toto rozdělení převzala.
+Vrstvená architektura je výchozí způsob, jak v podnikové aplikaci uspořádat kód. Martin Fowler v *Patterns of Enterprise Application Architecture* (2002) [[2]](https://martinfowler.com/eaaCatalog/) pracuje se třemi principiálními vrstvami: Presentation, Domain (doménová logika) a Data Source. Eric Evans v *Domain-Driven Design* (2003) schéma upravil na čtyři vrstvy: User Interface (Presentation), Application, Domain a Infrastructure. Přidal k tomu pravidlo, že **vrstva smí záviset jen na vrstvách pod sebou**, nikdy nahoru. Pozdější DDD literatura toto rozdělení převzala.
 
 ### Čtyři standardní vrstvy {#layered-vrstvy-heading}
 
@@ -57,7 +57,7 @@ Vrstvená architektura je výchozí způsob, jak v podnikové aplikaci uspořád
 - **Domain Layer** – agregáty, entity, hodnotové objekty, doménové služby, repository *rozhraní*. Žádné framework závislosti. V Symfony obvykle `src/Entity/` + `src/Domain/`.
 - **Infrastructure Layer** – Doctrine repository implementace, e-mail brány, HTTP klienti, Messenger transporty. V Symfony `src/Repository/` + `src/Infrastructure/`.
 
-Struktury dál v kapitole pracují jen se třemi adresáři – `Domain/`, `Application/`, `Infrastructure/` – a controllery řadí do infrastruktury. Tak vrstvy pro PHP popsal Matthias Noback a konvence se ujala. Z Evansovy čtveřice tím splývá UI s infrastrukturou; pravidlo o směru závislostí zůstává beze změny.
+Struktury dál v kapitole pracují jen se třemi adresáři (`Domain/`, `Application/`, `Infrastructure/`) a controllery řadí do infrastruktury. Tak vrstvy pro PHP popsal Matthias Noback a konvence se ujala. Z Evansovy čtveřice tím splývá UI s infrastrukturou; pravidlo o směru závislostí zůstává beze změny.
 
 ### Typická Symfony struktura {#layered-symfony-heading}
 
@@ -365,8 +365,8 @@ interface PlaceOrder
 }
 :::
 
-Oba DTO jsou obyčejné neměnné struktury bez chování – port jimi vymezuje, co dovnitř vstupuje
-a co ven vystupuje:
+Oba DTO jsou obyčejné neměnné struktury bez chování. Port jimi vymezuje, co dovnitř
+vstupuje a co ven vystupuje:
 
 :::code{language="php" filename="src/Ordering/Application/Dto/PlaceOrderInput.php + PlaceOrderOutput.php"}
 <?php
@@ -392,7 +392,7 @@ final readonly class PlaceOrderOutput
 }
 :::
 
-HTTP adapter pak nezná konkrétní třídu handleru – zná jen rozhraní portu. Na implementaci ho naváže alias v konfiguraci kontejneru (viz [sekci o Service Containeru](#hexagonal-symfony-di-heading) níže). Tím získáte schopnost handler v testech vyměnit za fake bez celé aplikační vrstvy.
+HTTP adapter pak nezná konkrétní třídu handleru, jen rozhraní portu. Na implementaci ho naváže alias v konfiguraci kontejneru (viz [sekci o Service Containeru](#hexagonal-symfony-di-heading) níže). Tím získáte schopnost handler v testech vyměnit za fake bez celé aplikační vrstvy.
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php" highlights="13,14,15,16"}
 <?php
@@ -620,7 +620,7 @@ final class InMemoryEventPublisher implements EventPublisher
 ### Kdy se Hexagonal hodí {#hexagonal-kdy-heading}
 
 - **Doména s bohatým chováním** – kde se vyplatí investovat do testů domény bez databáze.
-- **Více vstupních kanálů** – HTTP API, CLI, Messenger consumer, GraphQL – všechny jsou jen jiné driving adaptéry nad stejným inbound portem.
+- **Více vstupních kanálů.** HTTP API, CLI, Messenger consumer i GraphQL jsou jen jiné driving adaptéry nad stejným inbound portem.
 - **Plánovaná výměna technologie** – migrace z Doctrine ORM na DBAL nebo na cloudovou databázi se omezí na nový adaptér.
 - **Aplikace s 50–500 endpointy** – kde overhead zavedení portů je amortizovaný počtem use casů.
 
@@ -653,7 +653,7 @@ V dílu *After Four Years* shrnul Palermo vzor do čtyř tezí [[6]](https://jef
 
 ### Rozdíl proti Hexagonal {#onion-vs-hexagonal-heading}
 
-Onion a Hexagonal mají stejnou základní myšlenku – izolovat doménu, závislosti dovnitř – a v běžné implementaci jsou v Symfony nerozlišitelné. Tři jemné odlišnosti:
+Onion a Hexagonal stojí na téže myšlence: izolovat doménu a obrátit závislosti dovnitř. V běžné implementaci jsou v Symfony nerozlišitelné. Tři jemné odlišnosti:
 
 - **Vrstvení uvnitř.** Onion explicitně rozlišuje Domain Services a Application Services jako dvě samostatné vrstvy. Hexagonal je topologicky střídmější – port + adaptér, žádné vnitřní vrstvení.
 - **Statický vs. dynamický pohled.** Onion popisuje vrstvy a kdo na koho závisí. Hexagonal se dívá dynamicky: porty, adaptéry a cesta dat skrz ně.
@@ -966,7 +966,7 @@ Cena mapování tím neklesá na nulu. Komponenta ušetří opisování polí, a
 ### Kdy se Clean hodí {#clean-kdy-heading}
 
 - **Aplikace s explicitním seznamem use casů** – kde má každá schopnost svoje jméno a kontrakt (např. ERP systémy, finanční aplikace).
-- **Více vstupních kanálů** – HTTP API, CLI, Messenger, GraphQL – všechny sdílejí stejné use casy.
+- **Více vstupních kanálů.** HTTP API, CLI, Messenger i GraphQL sdílejí stejné use casy.
 - **Tým s vyšší zkušeností** – kde dodatečné vrstvení a DTO ping-pong nezpomalí vývoj.
 - **Aplikace, kde je důležitý audit „co aplikace umí“** – Use Case třídy jsou tím seznamem.
 
@@ -1310,7 +1310,7 @@ Jeden vedlejší efekt stojí za pozor. Vyloučený adresář vypadne i z automa
 
 ### Symfony Messenger jako Command Bus {#symfony-messenger-heading}
 
-Pro všechny styly kromě Layered – kde se aplikační služba typicky volá přímo z controlleru – je Symfony Messenger vhodný nástroj pro implementaci Command Bus a Event Bus pattern. V Hexagonal a Clean Architecture každý use case dispatchujete jako Command, handler je váš inbound adaptér nebo přímo use case. Konfigurace per-bus:
+Pro všechny styly kromě Layered je Symfony Messenger vhodný nástroj na Command Bus a Event Bus. V Layered se aplikační služba typicky volá přímo z controlleru, takže sběrnici nepotřebuje. V Hexagonal a Clean Architecture každý use case dispatchujete jako Command, handler je váš inbound adaptér nebo přímo use case. Konfigurace per-bus:
 
 :::code{language="yaml" filename="config/packages/messenger.yaml"}
 # config/packages/messenger.yaml
@@ -1341,7 +1341,7 @@ Tři sběrnice (command, query, event) jsou doporučená praxe v CQRS-friendly D
 ## 09.11 Shrnutí {#summary}
 
 - **Architektonický styl ≠ DDD.** DDD je modelovací technika; architektonický styl je rozhodnutí o uspořádání kódu. Lze je kombinovat libovolně – DDD funguje v Layered, Hexagonal, Onion, Clean i Vertical Slice.
-- **Čtyři vrstvové styly mají stejnou základní myšlenku – izolaci domény – ale jiný slovník a jinou granularitu.** Hexagonal mluví o portech a adaptérech, Onion o koncentrických vrstvách, Clean o use casech jako prvotřídním konceptu. V praxi se často kombinují do jednoho hybridního stylu.
+- **Čtyři vrstvové styly stojí na téže myšlence, izolaci domény, ale liší se slovníkem i granularitou.** Hexagonal mluví o portech a adaptérech, Onion o koncentrických vrstvách, Clean o use casech jako prvotřídním konceptu. V praxi se často kombinují do jednoho hybridního stylu.
 - **Vertical Slice je ortogonální k vrstvovým stylům.** Popisuje, jak organizovat feature mezi sebou, ne jak strukturovat závislosti uvnitř feature. Hexagonal + Vertical Slice + CQRS je rozšířená výchozí volba v Symfony 8 projektech.
 - **Hybridní přístup (různé styly pro různé subdomény) je pragmatický a DDD literatura ho doporučuje.** Modelovací úsilí patří do Core Domain; Supporting a Generic si vystačí s jednodušší strukturou. Každá vrstva architektury se musí vrátit v projektu.
 
