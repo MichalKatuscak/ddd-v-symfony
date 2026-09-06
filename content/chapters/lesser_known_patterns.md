@@ -331,7 +331,12 @@ final class NotSpecification extends CompositeSpecification
 ### Doménová specifikace {#spec-domain}
 
 Na kostře postavíme tři konkrétní pravidla z Ordering kontextu. Každé nese mluvící doménové
-jméno a kombinátory `and`/`or`/`not` dědí automaticky:
+jméno a kombinátory `and`/`or`/`not` dědí automaticky.
+
+Specifikace čtou z agregátu `totalAmount()`, `customerId` a `shippingAddress`. První dvě
+má kanonický `Order` z [Návrhu agregátu](/navrh-agregatu#symfony-doctrine), třetí ne –
+příklady počítají s objednávkou rozšířenou o embeddable `ShippingAddress`
+(`public readonly ShippingAddress $shippingAddress`).
 
 :::code{language="php" filename="src/Ordering/Domain/Specification/EligibleForFreeShipping.php"}
 <?php
@@ -396,7 +401,7 @@ final class InEUCountry extends CompositeSpecification
         assert($candidate instanceof Order);
 
         return in_array(
-            $candidate->shippingAddress->country->code,
+            $candidate->shippingAddress->countryCode,
             self::EU_COUNTRIES,
             true,
         );
@@ -430,7 +435,7 @@ final class NotInBlacklist extends CompositeSpecification
         assert($candidate instanceof Order);
 
         foreach ($this->blacklist as $blocked) {
-            if ($blocked->equals($candidate->customerId())) {
+            if ($blocked->equals($candidate->customerId)) {
                 return false;
             }
         }
