@@ -27,6 +27,9 @@ const BUILDABLE = [
     'testing_ddd.md',
     'architectural_styles.md',
     'lesser_known_patterns.md',
+    'anti_patterns.md',
+    'migration_from_crud.md',
+    'case_study.md',
 ];
 
 /** Zástupné názvy, které neoznačují konkrétní soubor v projektu. */

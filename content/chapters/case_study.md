@@ -1464,7 +1464,7 @@ DBAL dotaz nad read tabulkou. Žádné agregáty, žádná doménová logika, je
 na `ProjectViewModel`. Stejný název třídy, stejný command, jiná implementace; volající
 ani Symfony Messenger o změně nevědí.
 
-:::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php"}
+:::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php (nad read modelem)"}
 <?php
 
 declare(strict_types=1);

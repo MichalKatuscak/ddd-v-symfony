@@ -310,6 +310,8 @@ use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\UserStatus;
+use App\UserManagement\Domain\ValueObject\VerificationToken;
+use App\UserManagement\Infrastructure\Legacy\Exception\UnmappableLegacyStatusException;
 use Symfony\Component\Uid\Uuid;
 
 final class LegacyUserTranslator
@@ -329,11 +331,18 @@ final class LegacyUserTranslator
         };
 
         // Rekonstituce, ne registrace: žádná doménová událost nevzniká.
+        // Čas registrace a token se přebírají z legacy řádku; kdyby si je
+        // agregát přidělil sám, migrovaní uživatelé by přišli o historii
+        // i o platný aktivační odkaz.
         return User::reconstitute(
             new UserId(Uuid::fromString((string) $row['uuid'])),
             new Email((string) $row['email']),
             HashedPassword::fromHash((string) $row['password']),
             $status,
+            new \DateTimeImmutable((string) $row['created_at']),
+            $row['verification_token'] !== null
+                ? VerificationToken::fromString((string) $row['verification_token'])
+                : null,
         );
     }
 }
@@ -568,7 +577,7 @@ class UserService
 }
 :::
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (cílový stav migrace)"}
 <?php
 
 declare(strict_types=1);
@@ -589,7 +598,10 @@ use Doctrine\ORM\Mapping as ORM;
 use App\UserManagement\Domain\Exception\InvalidVerificationTokenException;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'users')]
+// Nový kontext má vlastní tabulku. Mapovat ho na legacy `users` by
+// popřelo celou kapitolu: Strangler Fig i dual-write počítají s tím,
+// že obě strany existují vedle sebe.
+#[ORM\Table(name: 'um_users')]
 final class User extends AggregateRoot
 {
     #[ORM\Id]
@@ -615,14 +627,22 @@ final class User extends AggregateRoot
     #[ORM\Column(type: 'integer')]
     private int $version = 1;
 
-    private function __construct(UserId $id, Email $email, HashedPassword $password)
-    {
+    // Čas registrace a token přijímá konstruktor, protože `registeredAt`
+    // je readonly a podruhé se přiřadit nedá. Rekonstrukce z legacy dat
+    // proto musí obojí předat rovnou sem.
+    private function __construct(
+        UserId $id,
+        Email $email,
+        HashedPassword $password,
+        ?\DateTimeImmutable $registeredAt = null,
+        ?VerificationToken $verificationToken = null,
+    ) {
         $this->id = $id;
         $this->email = $email;
         $this->password = $password;
         $this->status = UserStatus::PendingVerification;
-        $this->registeredAt = new \DateTimeImmutable();
-        $this->verificationToken = VerificationToken::generate();
+        $this->registeredAt = $registeredAt ?? new \DateTimeImmutable();
+        $this->verificationToken = $verificationToken ?? VerificationToken::generate();
     }
 
     // Named constructor vyjadřuje záměr lépe než new User()
@@ -643,8 +663,13 @@ final class User extends AggregateRoot
         Email $email,
         HashedPassword $password,
         UserStatus $status,
+        \DateTimeImmutable $registeredAt,
+        ?VerificationToken $verificationToken,
     ): self {
-        $user = new self($id, $email, $password);
+        // Bez předání původních hodnot dostane každý migrovaný uživatel
+        // dnešní datum registrace a nový token - a aktivační odkaz,
+        // který mu systém poslal, přestane platit.
+        $user = new self($id, $email, $password, $registeredAt, $verificationToken);
         $user->status = $status;
 
         return $user;
@@ -667,6 +692,10 @@ final class User extends AggregateRoot
 
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
+
+    // Token potřebuje odesílatel aktivačního e-mailu i test; agregát
+    // ho vydává jen ke čtení, nastavit ho zvenčí nejde.
+    public function verificationToken(): ?VerificationToken { return $this->verificationToken; }
 }
 :::
 
@@ -683,7 +712,7 @@ primitiv objektem, který drží validaci i chování pohromadě.
 :::callout{type="pattern"}
 ### Příklad: Refaktorizace string emailu na Email Value Object {#email-vo-heading}
 
-:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php"}
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php (cílový stav migrace)"}
 <?php
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
@@ -717,17 +746,23 @@ final readonly class Email
             );
         }
 
-        // Zakázané domény (doménové pravidlo)
-        $domain = substr($value, strpos($value, '@') + 1);
-        if (in_array($domain, ['example.com', 'test.com'], true)) {
-            throw ForbiddenEmailDomainException::forDomain($domain);
-        }
+        // Zakázané domény patří do továrny pro uživatelský vstup, ne do
+        // konstruktoru. Konstruktorem prochází i rehydratace z databáze,
+        // takže by tohle pravidlo znemožnilo načíst legacy řádky, které
+        // takovou adresu už obsahují.
     }
 
-    // Normalizace vstupu (lowercase, trim) patří sem, ne do konstruktoru
+    // Normalizace vstupu (lowercase, trim) i zakázané domény patří sem,
+    // ne do konstruktoru.
     public static function fromUserInput(string $input): self
     {
-        return new self(mb_strtolower(trim($input)));
+        $email = new self(mb_strtolower(trim($input)));
+
+        if (in_array($email->domain(), ['example.com', 'test.com'], true)) {
+            throw ForbiddenEmailDomainException::forDomain($email->domain());
+        }
+
+        return $email;
     }
 
     public function domain(): string
@@ -765,7 +800,7 @@ Rozhraní repozitáře patří do doménové vrstvy a popisuje operace tak, jak 
 :::callout{type="pattern"}
 ### Příklad: Doménové rozhraní vs. Doctrine implementace {#repository-interface-heading}
 
-:::code{language="php" filename="src/UserManagement/Domain/Repository/UserRepository.php"}
+:::code{language="php" filename="src/UserManagement/Domain/Repository/UserRepository.php (cílový stav migrace)"}
 <?php
 
 declare(strict_types=1);
@@ -792,7 +827,7 @@ interface UserRepository
 }
 :::
 
-:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php"}
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php (cílový stav migrace)"}
 <?php
 
 declare(strict_types=1);
@@ -889,7 +924,7 @@ optimalizované SQL jako read model je v DDD systému legitimní trvalý stav, n
 :::callout{type="pattern"}
 ### Příklad: Extrakce RegisterUserCommand z UserController {#command-extraction-heading}
 
-:::code{language="php" filename="src/Controller/UserController.php"}
+:::code{language="php" filename="src/Controller/UserController.php (po migraci)"}
 <?php
 
 // PŘED: Logika přímo v kontroleru nebo service
@@ -898,6 +933,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 use App\Service\UserService;
 
 class UserController extends AbstractController
@@ -970,6 +1006,12 @@ final class RegisterUserHandler
         );
 
         $this->users->save($user);
+
+        // Repozitář jen persistuje, flush vlastní aplikační vrstva. Buď ho
+        // zavolá handler jako tady, nebo ho převezme doctrine_transaction
+        // middleware command busu - jedno z toho ale nastat musí. Bez
+        // flushe vrátí registrace 201 a v databázi nezůstane nic.
+        $this->em->flush();
 
         // Doménové události handler nepublikuje: po flushi je z agregátu
         // sebere infrastruktura (outbox listener) přes releaseEvents()
@@ -1163,7 +1205,7 @@ doménových událostí a architektonické testy.
 :::callout{type="pattern"}
 ### Příklad: Unit test doménové entity {#domain-unit-test-heading}
 
-:::code{language="php" filename="tests/UserManagement/Domain/Model/UserTest.php"}
+:::code{language="php" filename="tests/UserManagement/Domain/Model/UserTest.php (po migraci)"}
 <?php
 
 declare(strict_types=1);
@@ -1213,7 +1255,9 @@ final class UserTest extends TestCase
             new Email('jan@firma.cz'),
             HashedPassword::fromPlainText('SecurePass123')
         );
-        $token = VerificationToken::fromString('abc123');
+        // Token přiděluje agregát při registraci; podstrčený řetězec
+        // by neprošel kontrolou a test by spadl už na prvním activate().
+        $token = $user->verificationToken();
         $user->activate($token);
 
         $this->expectException(UserAlreadyActivatedException::class);

@@ -77,7 +77,7 @@ Entita `User` nese jen gettery a settery; veškerá doménová logika sedí v `U
 :::callout{type="anti"}
 ### Příklad: Anémická entita User (špatně)
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (anti-vzor)"}
 <?php
 
 declare(strict_types=1);
@@ -192,7 +192,7 @@ final class VerificationToken
 }
 :::
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php"}
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (správně)"}
 <?php
 
 declare(strict_types=1);
@@ -347,10 +347,16 @@ class Order
     }
 }
 
-// Typový systém PHP neodhalí tuto chybu:
-$orderId = 42;
-$userId = 17;
-processOrder($userId, $orderId); // Záměna parametrů - a PHP si nestěžuje!
+/*
+ * Typový systém PHP tu záměnu neodhalí:
+ *
+ * function processOrder(int $orderId, int $userId): void { … }
+ *
+ * $orderId = 42;
+ * $userId  = 17;
+ *
+ * processOrder($userId, $orderId); // projde, obě jsou int
+ */
 :::
 :::
 
@@ -449,12 +455,18 @@ final readonly class UserId
     public function __construct(public string $value) { /* stejná validace */ }
 }
 
-// Nyní typový systém PHP odhalí záměnu:
-function processOrder(OrderId $orderId, UserId $userId): void { /* ... */ }
-
-$orderId = new OrderId('018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03');
-$userId  = new UserId('02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746');
-processOrder($userId, $orderId); // PHP TypeError: Argument #1 must be of type OrderId
+/*
+ * Nyní typový systém PHP odhalí záměnu. Ukázka patří do volajícího kódu;
+ * na úrovni souboru by ji PHP vykonalo při autoloadu a položila by aplikaci.
+ *
+ * function processOrder(OrderId $orderId, UserId $userId): void { … }
+ *
+ * $orderId = new OrderId('018f4d2e-7a31-7c9e-b4d0-6f2a1c8e5b03');
+ * $userId  = new UserId('02b5e8c1-9d44-7f10-a8b7-3e5c9d21f746');
+ *
+ * processOrder($userId, $orderId);
+ * // PHP TypeError: Argument #1 ($orderId) must be of type OrderId, UserId given
+ */
 :::
 :::
 
@@ -477,7 +489,7 @@ Agregát navrhujeme kolem transakční konzistence, tedy kolem nejmenší skupin
 ### Problémy způsobené příliš velkým agregátem {#agregat-problemy-heading}
 
 - **Výkonnostní problémy** – načtení celého agregátu z databáze je pomalé, pokud obsahuje stovky nebo tisíce podřízených entit (např. všechny položky objednávky zákazníka za celý rok).
-- **Problémy s konkurencí (concurrency)** – každá změna zamkne agregát jako celek. Velký agregát znamená větší pravděpodobnost konfliktů při souběžném přístupu.
+- **Ztracené zápisy, ne konflikty** – zamykání funguje jinak, než se čeká. `#[ORM\Version]` na kořeni se zvedne jen při změně vlastností **kořene**; přidání potomka do `OneToMany` kolekce ho nechá být. Dvě souběžné transakce, které obě hlídají invariant „nejvýš tři objednávky", proto obě projdou a v databázi zůstane šest. Žádná výjimka, žádný záznam v logu. Velký agregát tedy nepřináší víc konfliktů – přináší invariant, který se tiše poruší. Ochranu vynutí až ruční zvednutí verze kořene nebo `LockMode::PESSIMISTIC_WRITE`.
 - **Těsné provázání (tight coupling)** – příliš mnoho entit uvnitř jednoho agregátu ztěžuje nezávislý vývoj a testování.
 
 A nakonec hranice. God agregát bývá příznakem špatně definovaných hranic kontextů. Do jednoho celku spadne víc, než kam sahá jeden Bounded Context.
@@ -561,12 +573,14 @@ use App\SharedKernel\Domain\AggregateRoot;
 // Agregát 1: Customer - pouze identita a kontaktní údaje
 final class Customer
 {
-    private readonly CustomerId $id;
-    private string $name;
-    private Email $email;
-
     // Zákazník obsahuje jen to, co je součástí jeho identity.
     // Adresa pro doručení je součástí objednávky, ne zákazníka.
+    public function __construct(
+        private readonly CustomerId $id,
+        private string $name,
+        private Email $email,
+    ) {
+    }
 
     public function changeEmail(Email $newEmail): void
     {
@@ -599,6 +613,15 @@ final class Order extends AggregateRoot
         $this->shippingAddress = $shippingAddress;
         $this->status = OrderStatus::Draft;
         $this->placedAt = new \DateTimeImmutable();
+    }
+
+    // Kanonická továrna knihy; bez ní je privátní konstruktor nedosažitelný.
+    public static function place(
+        OrderId $id,
+        CustomerId $customerId,
+        Address $shippingAddress,
+    ): self {
+        return new self($id, $customerId, $shippingAddress);
     }
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
@@ -687,7 +710,7 @@ Kontexty *Ordering* a *Billing* přímo přistupují ke stejné tabulce `users`.
 :::callout{type="anti"}
 ### Příklad: Sdílená databáze (špatně)
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php (anti-vzor: sdílená databáze)"}
 <?php
 
 declare(strict_types=1);
@@ -886,7 +909,7 @@ Správná doménová událost vznikne jednou, hodnoty dostane v konstruktoru a p
 :::callout{type="pattern"}
 ### Příklad: Immutable doménová událost (správně)
 
-:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php"}
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderPlaced.php (immutable varianta)"}
 <?php
 
 declare(strict_types=1);
@@ -940,7 +963,7 @@ Repozitář má agregáty pouze ukládat a načítat. Jakákoliv doménová logi
 :::callout{type="anti"}
 ### Příklad: Doménová logika v repozitáři a kontroleru (špatně)
 
-:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php"}
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php (anti-vzor)"}
 <?php
 
 declare(strict_types=1);
@@ -1017,7 +1040,7 @@ Kontroler a repozitář jsou tenké orchestrátory. Doménová logika žije v do
 :::callout{type="pattern"}
 ### Příklad: Správné vrstvení – logika v doméně (správně)
 
-:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php"}
+:::code{language="php" filename="src/UserManagement/Infrastructure/Repository/DoctrineUserRepository.php (správně)"}
 <?php
 
 declare(strict_types=1);
@@ -1196,10 +1219,13 @@ use App\Insurance\Domain\ValueObject\RiskProfile;
 // Třídy pojmenovány přesně podle doménového slovníku:
 class PolicyHolder
 {
-    private readonly PolicyHolderId $id;
-    private PersonName $fullName;
-    private BirthNumber $birthNumber; // Specifický pojišťovací identifikátor
-    private ContactDetails $contactDetails;
+    public function __construct(
+        private readonly PolicyHolderId $id,
+        private PersonName $fullName,
+        private BirthNumber $birthNumber, // Specifický pojišťovací identifikátor
+        private ContactDetails $contactDetails,
+    ) {
+    }
 
     public function fileClaimFor(InsuredEvent $event): Claim
     {
@@ -1210,6 +1236,13 @@ class PolicyHolder
 
 class InsurancePolicy
 {
+    public function __construct(
+        private readonly Money $basePremium,
+        private readonly \DateTimeImmutable $validFrom,
+        private readonly \DateTimeImmutable $validTo,
+    ) {
+    }
+
     public function calculatePremium(RiskProfile $riskProfile): Money
     {
         // Název metody je přímo z doménového slovníku pojišťovny
@@ -1263,7 +1296,7 @@ Anémickému doménovému modelu se obšírně věnuje Vaughn Vernon v *Implemen
 - question: Proč je Primitive Obsession problém?
   answer: 'Primitive Obsession znamená používání primitivních typů (<code>string</code>, <code>int</code>, <code>float</code>) tam, kde patří doménový pojem. Místo typu <code>Email</code> se předává <code>string</code>, místo <code>Money</code> dvojice <code>float</code>. Důsledkem je, že validace a pravidla se opakují v každém místě volání, nebo se zapomínají. Hodnotový objekt s jedním místem validace tyto duplicity odstraňuje a typ dává kontext, co daná hodnota reprezentuje. Rozbor a příklady v <a href="#primitive-obsession">sekci Primitive Obsession</a>.'
 - question: Jak poznat, že je agregát příliš velký?
-  answer: 'Typické příznaky God Aggregate jsou tři. Agregát obsahuje desítky vnitřních entit. Jeho načtení zabere stovky SQL dotazů. Nebo souběžné operace nad různými částmi narážejí na optimistické zamykání. Pokud dvě metody agregátu řeší vzájemně nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Praktický příklad refaktoringu v <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
+  answer: 'Typické příznaky God Aggregate jsou tři. Agregát obsahuje desítky vnitřních entit. Jeho načtení hydratuje tisíce řádků do paměti, i když je operace nepotřebuje. Nebo souběžné operace nad různými částmi vedou ke ztraceným zápisům, protože verze kořene změnu kolekce nezachytí. Pokud dvě metody agregátu řeší vzájemně nezávislá pravidla a nesdílejí invariant, pravděpodobně jde o dva samostatné agregáty. Hranice agregátu má kopírovat hranice transakční konzistence – nic víc. Praktický příklad refaktoringu v <a href="#prilis-velky-agregat">sekci Příliš velký agregát</a>.'
 - question: Proč je sdílená databáze mezi Bounded Contexts problém?
   answer: 'Sdílená databáze formálně drží data pohromadě, ale fakticky ruší hranice mezi Bounded Contexts. Změna schématu v jednom kontextu může rozbít druhý, pojmy se mísí a model jednoho týmu začíná záviset na modelu druhého. Správné řešení je, aby každý Bounded Context vlastnil svá data a komunikace probíhala přes definované rozhraní (API, události), nikoli přes sdílenou tabulku. Podrobný rozbor v <a href="#sdilena-databaze">sekci Sdílená databáze napříč Bounded Contexts</a>.'
 - question: Musí být doménová událost neměnná?
