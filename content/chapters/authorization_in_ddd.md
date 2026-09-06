@@ -1343,7 +1343,7 @@ agregátu na jednom místě. Vyplatí se, jakmile ho potřebuje víc než jeden 
 
 declare(strict_types=1);
 
-namespace Tests\Ordering\Domain;
+namespace App\Tests\Ordering\Domain;
 
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\CustomerId;
@@ -1404,7 +1404,7 @@ final class OrderFactory
 // tests/Ordering/Domain/OrderCancelTest.php
 declare(strict_types=1);
 
-namespace Tests\Ordering\Domain;
+namespace App\Tests\Ordering\Domain;
 
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
@@ -1453,11 +1453,13 @@ Voter dostává `TokenInterface`; v testu stačí jeho mock, reálný subject a 
 // tests/Ordering/Infrastructure/Security/OrderVoterTest.php
 declare(strict_types=1);
 
-namespace Tests\Ordering\Infrastructure\Security;
+namespace App\Tests\Ordering\Infrastructure\Security;
 
-use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Identity\Infrastructure\Security\SecurityUser;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Infrastructure\Security\OrderVoter;
+use App\Tests\Identity\SecurityUserFixture;
+use App\Tests\Ordering\Domain\OrderFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -1492,13 +1494,40 @@ final class OrderVoterTest extends TestCase
 
     private function voteCancel(object $order, string $actor): int
     {
-        $decisions = $this->createMock(AccessDecisionManagerInterface::class);
+        // Bez očekávání jde o stuby, ne mocky – createMock() by na PHPUnit 13
+        // hlásil „No expectations were configured" a ve 14 přestane fungovat.
+        $decisions = $this->createStub(AccessDecisionManagerInterface::class);
         $decisions->method('decide')->willReturn(false); // aktér nemá žádnou roli navíc
 
-        $token = $this->createMock(TokenInterface::class);
+        $token = $this->createStub(TokenInterface::class);
         $token->method('getUser')->willReturn(SecurityUserFixture::for($actor));
 
         return (new OrderVoter($decisions))->vote($token, $order, [OrderVoter::CANCEL]);
+    }
+}
+:::
+
+:::code{language="php" filename="tests/Identity/SecurityUserFixture.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Identity;
+
+use App\Identity\Infrastructure\Security\SecurityUser;
+
+final class SecurityUserFixture
+{
+    /** Aktér pro test Voteru. Zajímá ho jen customerId, zbytek je výplň. */
+    public static function for(string $customerId, string ...$roles): SecurityUser
+    {
+        return new SecurityUser(
+            email: 'test@example.com',
+            passwordHash: 'irrelevant',
+            roles: $roles ?: ['ROLE_USER'],
+            customerId: $customerId,
+            tenantId: 'tenant-test',
+        );
     }
 }
 :::
@@ -1515,7 +1544,7 @@ Přihlášení se v takovém testu neprochází formulářem. `KernelBrowser::lo
 // tests/Ordering/Http/CancelOrderE2eTest.php
 declare(strict_types=1);
 
-namespace Tests\Ordering\Http;
+namespace App\Tests\Ordering\Http;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -1559,7 +1588,7 @@ Pokud používáte [policy-based přístup](#policy-based), každé pravidlo v p
 // tests/Ordering/Authorization/CancelOrderPolicyTest.php
 declare(strict_types=1);
 
-namespace Tests\Ordering\Authorization;
+namespace App\Tests\Ordering\Authorization;
 
 use App\Ordering\Authorization\CancelOrderPolicy;
 use App\SharedKernel\Authorization\PolicyContext;

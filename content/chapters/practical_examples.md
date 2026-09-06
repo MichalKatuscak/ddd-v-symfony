@@ -94,6 +94,11 @@ do `.env.test.local`:
 DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
 :::
 
+Recept Symfony 8 zapíná bezstavovou ochranu proti CSRF (`csrf_protection.stateless_token_ids`),
+kde token doplňuje JavaScript. HTML formuláře z kapitol 12 a 23 tak bez frontendového
+buildu neprojdou – odmítne je hláška o neplatném tokenu. Kdo staví jen backend, ochranu
+vrátí do klasického režimu smazáním klíče `stateless_token_ids` z `config/packages/csrf.yaml`.
+
 Testovací databáze je jiný soubor, takže migrace potřebuje taky – jinak první kernel
 test spadne na `no such table: users`:
 

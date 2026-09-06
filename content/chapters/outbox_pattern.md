@@ -1573,12 +1573,19 @@ final class OutboxCleanupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $deleted = $this->connection->executeStatement(<<<'SQL'
-            DELETE FROM outbox
-            WHERE status = 'sent'
-              AND sent_at < NOW() - INTERVAL 30 DAY
-            LIMIT 10000
-        SQL);
+        // Poddotaz nad id je jediný tvar, který projde na MySQL, Postgresu
+        // i SQLite. Údržbový příkaz selže až po měsíci provozu, takže
+        // nepřenositelnou zkratku by nikdo neodhalil včas.
+        $threshold = new \DateTimeImmutable('-30 days');
+
+        $deleted = $this->connection->executeStatement(
+            'DELETE FROM outbox WHERE id IN (
+                 SELECT id FROM outbox
+                  WHERE status = \'sent\' AND sent_at < :threshold
+                  LIMIT 10000
+             )',
+            ['threshold' => $threshold->format('Y-m-d H:i:s')],
+        );
 
         $output->writeln(sprintf('[outbox-cleanup] deleted %d rows', $deleted));
 
@@ -1593,25 +1600,10 @@ outbox` jediným SQL příkazem. Velký delete drží zámky na celé tabulce, c
 blokuje produkční INSERT z handlerů. Cron ho spouští každých 5 minut – 10 000 řádků
 za běh stačí na realistické workloady (cca 3 mil. eventů/den).
 
-Dotaz ale přenositelný není a to je u údržbového příkazu snadné přehlédnout –
-selže až za třicet dní provozu. `DELETE … LIMIT` i `INTERVAL 30 DAY` jsou
-specifikum MySQL a MariaDB:
-
-:::code{language="sql" filename="varianty pro ostatní databáze"}
--- PostgreSQL: batch se vymezí poddotazem nad id, případně ctid
-DELETE FROM outbox WHERE id IN (
-    SELECT id FROM outbox
-     WHERE status = 'sent' AND sent_at < now() - interval '30 days'
-     LIMIT 10000
-);
-
--- SQLite: nezná ani INTERVAL, ani DELETE ... LIMIT
-DELETE FROM outbox WHERE id IN (
-    SELECT id FROM outbox
-     WHERE status = 'sent' AND sent_at < datetime('now', '-30 days')
-     LIMIT 10000
-);
-:::
+Nabízející se zápis `DELETE … WHERE sent_at < NOW() - INTERVAL 30 DAY LIMIT 10000`
+je kratší, ale je to specifikum MySQL a MariaDB. Postgres i SQLite ho odmítnou –
+a protože příkaz běží jednou za měsíc, chyba se ukáže dávno po nasazení. Hranice
+se proto počítá v PHP a batch se vymezuje poddotazem nad `id`.
 
 ### Dead-letter queue pro permanentní selhání {#dlq-heading}
 

@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -107,12 +107,12 @@ znamená novou instanci. Tím je hodnotový objekt pokrytý.
 :::callout{type="pattern"}
 ### Příklad: Test pro Email value object (PHPUnit)
 
-:::code{language="php" filename="Tests/UserManagement/Domain/ValueObject/EmailTest.php"}
+:::code{language="php" filename="tests/UserManagement/Domain/ValueObject/EmailTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Domain\ValueObject;
+namespace App\Tests\UserManagement\Domain\ValueObject;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -200,12 +200,12 @@ Přístup k privátním vlastnostem přes reflexi je signál, že test sleduje i
 :::callout{type="pattern"}
 ### Příklad: Test pro User entitu
 
-:::code{language="php" filename="Tests/UserManagement/Domain/Model/UserTest.php"}
+:::code{language="php" filename="tests/UserManagement/Domain/Model/UserTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Domain\Model;
+namespace App\Tests\UserManagement\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
 use App\UserManagement\Domain\Model\User;
@@ -289,12 +289,12 @@ operace vydala očekávané události ve správném pořadí.
 :::callout{type="pattern"}
 ### Příklad: Test pro Order agregát
 
-:::code{language="php" filename="Tests/Ordering/Domain/Model/OrderTest.php"}
+:::code{language="php" filename="tests/Ordering/Domain/Model/OrderTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\Ordering\Domain\Model;
+namespace App\Tests\Ordering\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
 use App\Ordering\Domain\Model\Order;
@@ -388,12 +388,12 @@ obsah vrácených událostí.
 :::callout{type="pattern"}
 ### Příklad: Trait pro testování doménových událostí
 
-:::code{language="php" filename="Tests/Shared/Domain/DomainEventAssertions.php + Tests/Ordering/Domain/Model/OrderEventsTest.php"}
+:::code{language="php" filename="tests/Shared/Domain/DomainEventAssertions.php + Tests/Ordering/Domain/Model/OrderEventsTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\Shared\Domain;
+namespace App\Tests\Shared\Domain;
 
 use App\SharedKernel\Domain\Event\DomainEvent;
 
@@ -458,7 +458,7 @@ trait DomainEventAssertions
 // --- Druhý soubor: příklad použití traitu v testu ---
 // PHPUnit hledá testy podle sufixu Test.php, proto v praxi vlastní soubor.
 
-namespace Tests\Ordering\Domain\Model;
+namespace App\Tests\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\OrderId;
@@ -468,7 +468,7 @@ use App\SharedKernel\Domain\Money;
 use App\SharedKernel\Domain\Currency;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\Event\OrderConfirmed;
-use Tests\Shared\Domain\DomainEventAssertions;
+use App\Tests\Shared\Domain\DomainEventAssertions;
 
 final class OrderEventsTest extends \PHPUnit\Framework\TestCase
 {
@@ -517,12 +517,12 @@ Assertion se tedy vztahuje výhradně k tomu, co přidala testovaná operace.
 :::callout{type="pattern"}
 ### Příklad: Given-when-then test event-sourced agregátu
 
-:::code{language="php" filename="Tests/Ordering/Domain/OrderEventSourcingTest.php"}
+:::code{language="php" filename="tests/Ordering/Domain/OrderEventSourcingTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\Ordering\Domain;
+namespace App\Tests\Ordering\Domain;
 
 use PHPUnit\Framework\TestCase;
 use App\Ordering\EventSourced\Order;
@@ -630,12 +630,12 @@ classical TDD, tedy reálné objekty všude, kde to jde, a doubles jen na hranic
 :::callout{type="pattern"}
 ### Příklad: InMemoryUserRepository implementace
 
-:::code{language="php" filename="Tests/UserManagement/Infrastructure/Repository/InMemoryUserRepository.php"}
+:::code{language="php" filename="tests/UserManagement/Infrastructure/Repository/InMemoryUserRepository.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Infrastructure\Repository;
+namespace App\Tests\UserManagement\Infrastructure\Repository;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
@@ -708,12 +708,12 @@ final class InMemoryUserRepository implements UserRepository
 :::callout{type="pattern"}
 ### Příklad: Test command handleru s InMemoryRepository
 
-:::code{language="php" filename="Tests/UserManagement/Application/Command/RegisterUserHandlerTest.php"}
+:::code{language="php" filename="tests/UserManagement/Application/Command/RegisterUserHandlerTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Application\Command;
+namespace App\Tests\UserManagement\Application\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
@@ -721,7 +721,7 @@ use App\UserManagement\Registration\Command\RegisterUser;
 use App\UserManagement\Registration\Command\RegisterUserHandler;
 use App\UserManagement\Domain\Exception\DuplicateEmailException;
 use App\UserManagement\Domain\ValueObject\Email;
-use Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
+use App\Tests\UserManagement\Infrastructure\Repository\InMemoryUserRepository;
 
 final class RegisterUserHandlerTest extends TestCase
 {
@@ -818,12 +818,12 @@ od změny struktury objektu – po přidání parametru se mění jediné místo
 :::callout{type="pattern"}
 ### Příklad: Test Data Builder pro Order agregát
 
-:::code{language="php" filename="Tests/Ordering/Domain/Builder/OrderBuilder.php"}
+:::code{language="php" filename="tests/Ordering/Domain/Builder/OrderBuilder.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\Ordering\Domain\Builder;
+namespace App\Tests\Ordering\Domain\Builder;
 
 use App\Ordering\Domain\Model\Order;
 use App\SharedKernel\Domain\Currency;
@@ -988,12 +988,12 @@ s DBAL 4, kde se nenastavuje.
 :::callout{type="pattern"}
 ### Příklad: Integrační test DoctrineUserRepository
 
-:::code{language="php" filename="Tests/UserManagement/Infrastructure/Repository/DoctrineUserRepositoryTest.php"}
+:::code{language="php" filename="tests/UserManagement/Infrastructure/Repository/DoctrineUserRepositoryTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Infrastructure\Repository;
+namespace App\Tests\UserManagement\Infrastructure\Repository;
 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use App\UserManagement\Domain\Model\User;
@@ -1104,12 +1104,12 @@ při selhání celou odpověď, takže se ladí bez dodatečného `dump()`.
 :::callout{type="pattern"}
 ### Příklad: Funkční test registračního endpointu
 
-:::code{language="php" filename="Tests/UserManagement/Registration/Controller/RegistrationControllerTest.php"}
+:::code{language="php" filename="tests/UserManagement/Registration/Controller/RegistrationControllerTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Registration\Controller;
+namespace App\Tests\UserManagement\Registration\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -1244,7 +1244,7 @@ Funkční test pak ověří, že endpoint zprávu skutečně odeslal – aniž b
 :::callout{type="pattern"}
 ### Příklad: Assertions nad odeslanými zprávami
 
-:::code{language="php" filename="Tests/UserManagement/Functional/RegisterUserDispatchTest.php"}
+:::code{language="php" filename="tests/UserManagement/Functional/RegisterUserDispatchTest.php"}
 public function testRegistrationDispatchesWelcomeEmail(): void
 {
     $client = static::createClient();
@@ -1295,7 +1295,7 @@ a assertions píše přes trait.
 :::callout{type="pattern"}
 ### Příklad: Test celého asynchronního toku se zenstruck/messenger-test
 
-:::code{language="php" filename="Tests/UserManagement/Functional/RegisterUserFlowTest.php"}
+:::code{language="php" filename="tests/UserManagement/Functional/RegisterUserFlowTest.php"}
 use Zenstruck\Messenger\Test\InteractsWithMessenger;
 
 final class RegisterUserFlowTest extends WebTestCase
@@ -1328,7 +1328,7 @@ zprávou a spočítat efekty.
 :::callout{type="pattern"}
 ### Příklad: Test idempotence handleru
 
-:::code{language="php" filename="Tests/UserManagement/Application/SendWelcomeEmailHandlerTest.php"}
+:::code{language="php" filename="tests/UserManagement/Application/SendWelcomeEmailHandlerTest.php"}
 public function testHandlesDuplicateDeliveryOnce(): void
 {
     $mailer  = new SpyMailer();
@@ -1354,7 +1354,7 @@ do transportu a označí jako zpracovanou. Obě varianty relay procesu rozebír�
 :::callout{type="pattern"}
 ### Příklad: Integrační testy outboxu (KernelTestCase)
 
-:::code{language="php" filename="Tests/Ordering/Infrastructure/OutboxFlowTest.php"}
+:::code{language="php" filename="tests/Ordering/Infrastructure/OutboxFlowTest.php"}
 public function testFlushWritesEventToOutbox(): void
 {
     ($this->placeOrderHandler)(new PlaceOrderCommand(/* ... */));

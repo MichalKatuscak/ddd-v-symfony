@@ -814,6 +814,8 @@ declare(strict_types=1);
 namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -1092,6 +1094,14 @@ doctrine:
                 type: attribute
                 dir: '%kernel.project_dir%/src/UserManagement/Domain'
                 prefix: 'App\UserManagement\Domain'
+                is_bundle: false
+            # SecurityUser z kapitoly o autorizaci sedí v infrastruktuře,
+            # ne v doméně – bez vlastního bloku by tabulka nevznikla
+            # a firewall by neměl kde brát uživatele.
+            Identity:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Identity/Infrastructure'
+                prefix: 'App\Identity\Infrastructure'
                 is_bundle: false
 :::
 

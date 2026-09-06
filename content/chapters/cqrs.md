@@ -807,7 +807,7 @@ final class RegistrationController extends AbstractController
 
                 $this->addFlash('success', 'Váš účet byl vytvořen. Nyní se můžete přihlásit.');
 
-                return $this->redirectToRoute('app_login');
+                return $this->redirectToRoute('login');
             } catch (HandlerFailedException $e) {
                 // getWrappedExceptions() umí filtrovat podle typu výjimky
                 $duplicates = $e->getWrappedExceptions(DuplicateEmailException::class);
@@ -826,6 +826,55 @@ final class RegistrationController extends AbstractController
     }
 }
 :::
+:::
+
+Kontroler stojí na dvou věcech, které vertikální řez potřebuje navíc. Šablony leží
+u feature, ne v centrálním `templates/`, takže Twig musí ten adresář znát pod jménem;
+a formulář je obyčejný `FormType` vedle nich:
+
+:::code{language="yaml" filename="config/packages/twig.yaml"}
+twig:
+    paths:
+        # Bez tohohle řádku Twig hlásí „There are no registered paths
+        # for namespace UserManagement" a šablona u feature se nenajde.
+        '%kernel.project_dir%/src/UserManagement': UserManagement
+:::
+
+:::code{language="php" filename="src/UserManagement/Registration/Form/RegistrationFormType.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Registration\Form;
+
+use App\UserManagement\Registration\Command\RegisterUser;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+final class RegistrationFormType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('name', TextType::class, ['label' => 'Jméno'])
+            ->add('email', EmailType::class, ['label' => 'E-mail'])
+            ->add('password', PasswordType::class, ['label' => 'Heslo']);
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        // Formulář plní rovnou command. Validační atributy na něm už jsou,
+        // takže se pravidla nepíšou podruhé.
+        $resolver->setDefaults([
+            'data_class' => RegisterUser::class,
+            'empty_data' => new RegisterUser(name: '', email: '', password: ''),
+        ]);
+    }
+}
 :::
 
 :::callout{type="warn"}

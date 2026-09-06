@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: "2026-09-05"
+modified: "2026-09-06"
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -1065,12 +1065,12 @@ přístupu přibližuje kapitola [DDD a umělá inteligence](/ddd-a-umela-inteli
 :::callout{type="pattern"}
 ### Příklad: Charakterizační test pro CRUD kontroler {#char-test-heading}
 
-:::code{language="php" filename="Tests/Characterization/UserRegistrationCharacterizationTest.php"}
+:::code{language="php" filename="tests/Characterization/UserRegistrationCharacterizationTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\Characterization;
+namespace App\Tests\Characterization;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -1147,12 +1147,12 @@ doménových událostí, architektonické testy – rozebírá kapitola
 :::callout{type="pattern"}
 ### Příklad: Unit test doménové entity {#domain-unit-test-heading}
 
-:::code{language="php" filename="Tests/UserManagement/Domain/Model/UserTest.php"}
+:::code{language="php" filename="tests/UserManagement/Domain/Model/UserTest.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace Tests\UserManagement\Domain\Model;
+namespace App\Tests\UserManagement\Domain\Model;
 
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
