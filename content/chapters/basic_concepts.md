@@ -474,7 +474,10 @@ class Order
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException('Cannot add items to a draft order only');
+            throw InvalidOrderStateTransitionException::notAllowedInState(
+                'přidání položky',
+                $this->status->value,
+            );
         }
 
         $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
@@ -600,6 +603,12 @@ zjednodušený na neměnný záznam bez odkazu zpět na objednávku; identitu mu
 agregátu stačí dát produkt. Plnou verzi s chováním – metodou
 `increaseQuantity()` pro invariant „jedna položka na produkt“ – ukazuje kapitola
 [Návrh agregátu](/navrh-agregatu#references-by-id).
+
+Tahle podoba `Order` je záměrně bez perzistence: položky drží obyčejné pole a po třídě
+není ani jedna Doctrine anotace. Model tak jde číst bez znalosti ORM. Verze, kterou
+opisujete do projektu, je ta z kapitoly [Návrh agregátu](/navrh-agregatu#references-by-id)
+– stejné metody, ale `Collection` místo pole, mapování a `OrderItem` s odkazem zpět
+na objednávku, protože jinak by Doctrine neměla co zapsat do cizího klíče.
 
 :::callout{type="note"}
 ### Enum pro stavové typy {#enum-poznamka-heading}

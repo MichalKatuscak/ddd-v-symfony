@@ -952,8 +952,12 @@ final readonly class MarkOrderPaidHandler
 // $order->ship(ShipmentId::fromString($command->shipmentId));
 :::
 
-Příkazy samotné jsou prosté DTO s primitivy – jdou přes asynchronní transport,
-takže hodnotové objekty do nich nepatří:
+Příkazy samotné jsou prosté DTO. Primitivy nesou proto, že putují přes asynchronní
+transport: co se serializuje do fronty, musí jít bez ztráty sestavit zpátky. Hodnotový
+objekt to zvládne, pokud má veřejný konstruktor a veřejné vlastnosti – `CancelOrderCommand`
+z kapitoly o autorizaci nese `OrderId` právě z tohoto důvodu. Řetězec je ale odolnější
+vůči změnám: přejmenované pole ve VO shodí každou zprávu, která ve frontě čekala z minulé
+verze aplikace.
 
 :::code{language="php" filename="src/Ordering/Application/Command/MarkOrderPaid.php + ShipOrder.php"}
 <?php
@@ -976,9 +980,39 @@ final readonly class ShipOrder
 }
 :::
 
+Příkazy pro cizí kontexty mají tentýž tvar a doplňují je kompenzace ze sekce 14.03:
+
+:::code{language="php" filename="src/Warehouse/Application/Command/ReserveStock.php + ReleaseStock.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Warehouse\Application\Command;
+
+final readonly class ReserveStock
+{
+    public function __construct(public string $orderId) {}
+}
+
+final readonly class ReleaseStock
+{
+    public function __construct(public string $orderId) {}
+}
+
+// V App\Shipping\Application\Command leží CreateShipment a CancelShipment
+// se stejnou hlavičkou.
+:::
+
 `ReserveStockHandler`, `CreateShipmentHandler` a `RefundCustomerHandler` sedí ve svých
 kontextech a mají tvar `ChargeCustomerHandler`: zavolají službu a vydají událost
-o výsledku. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá `cancel()`.
+o výsledku. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
+`cancel($command->reason)`. Porty `StockService` a `ShippingService` mají stejnou
+stavbu jako `PaymentGateway` – rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
+
+Adaptéry jsou jediné místo, kde na knize záleží nejmíň: za rozhraním může být HTTP klient
+cizí služby, tabulka v téže databázi nebo v testech pole v paměti. Právě proto rozhraní
+existuje. Pro rozběhnutí ukázek stačí adaptér, který vždy uspěje, a druhý, který vždy
+selže – kompenzační větve jinak nemá co spustit.
 
 Právě tady se pozná, jestli je proces domyšlený: chybí-li jediný handler, sága doběhne
 do `Completed` a objednávka zůstane rozpracovaná. Nikde nespadne, jen se stavy rozejdou.

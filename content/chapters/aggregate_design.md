@@ -672,15 +672,14 @@ use Symfony\Component\Uid\Uuid;
 
 final readonly class ShipmentId
 {
-    public string $value;
-
-    private function __construct(string $value)
-    {
+    // Konstruktor je veřejný stejně jako u OrderId. Serializer Messengeru
+    // hodnotový objekt jinak nesestaví a událost se z fronty nevrátí.
+    public function __construct(
+        public string $value,
+    ) {
         if (!Uuid::isValid($value)) {
             throw new \InvalidArgumentException("Neplatné ShipmentId: {$value}");
         }
-
-        $this->value = $value;
     }
 
     public static function generate(): self
