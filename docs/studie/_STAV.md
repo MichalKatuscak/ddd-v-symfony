@@ -1551,6 +1551,48 @@ závislostmi, `.env.test.local`, poznámka o SQLite migraci `order_dashboard`,
 `#[Assert\Email(STRICT)]` s `egulias`, i to, že `migrations:diff` vygeneruje
 `messenger_messages` navzdory `auto_setup=0`.
 
+## Osmnácté kolo: šestnáctá ověřovací stavba (2026-09-06)
+
+**Všech sedm oprav z minulého kola prošlo, žádná regrese.** Happy path, obě kompenzační
+větve i timeout skončily se správnými stavy a **prázdnou DLQ**. 21 testů zeleně,
+`schema:validate` čistý v dev i test, `migrations:diff` bez driftu.
+
+Ověřeno bod po bodu: nullable `findByCorrelationId` (protizkouška napočítala 12 volajících,
+všichni s guardem), `isCancellable()` se zámkem (detail zamčené objednávky tlačítko
+nenabídne), sjednocené `releaseSagaLock()` (0 výskytů starého jména), `cancel()` v kap. 11
+s guardem, migrace `order_audit_log`, poznámka u `App\Infrastructure\`, `scheduleTimeout()`
+jako doplněk.
+
+### Past, kterou jsem nastražil sám
+
+Když jsem z routingu 12.05 odstraňoval dvě neexistující třídy, dosadil jsem tam `PlaceOrder`.
+Tím jsem vyrobil přesně tu chybu, **před kterou kniha o dvě sekce dřív varuje**: kontroler
+z 12.12 si bere `OrderId` přes `HandledStamp`, ten z jiného procesu nedoputuje a `POST /orders`
+skončí na `Call to a member function getResult() on null`. Objednávka přitom vznikne — jen
+o ní uživatel neví.
+
+**Poučení: doplňuji-li do ukázky náhradní hodnotu, musím ověřit, že neporušuje pravidlo,
+které kniha vyslovuje jinde. Náhrada „ať to prochází" je změna chování.**
+
+### Ostatní opravené
+
+- `OrderPlacedIntegrationEvent` směrovaly dvě kapitoly na dva transporty a obě se
+  označovaly za výřez téže konfigurace. Slepením vznikne duplicitní klíč a ságu
+  neobslouží nikdo.
+- Výčet ságových handlerů vynechával kompenzační `ReleaseStock` a `CancelShipment`.
+  Chybějící handler se projeví až jako `No handler for message` v DLQ.
+- Šablona detailu odkazovala na routu `order_refund`, kterou kniha nedodává: pro běžného
+  uživatele skrytá, **pro roli s právem na refundaci okamžitých 500**.
+- Registrační šablona nevykreslovala flash ani `form_errors`, takže kolize e-mailu
+  skončila prázdným formulářem bez hlášky.
+- U poddotazu na `memberships` kniha říkala, co odstranit, ale ne co dát místo toho.
+
+### Stav po osmnácti kolech
+
+Kostra drží od patnáctého kola. Nálezy se posunuly od „nejde to postavit" k „HTML vrstva
+má díry v okrajových cestách" — a poslední tři kola nenašla jedinou chybu v jádru
+objednávkového procesu. Poměr regresí z mých oprav klesl z ~40 % na jednu na kolo.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
