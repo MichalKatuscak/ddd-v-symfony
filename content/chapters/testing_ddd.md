@@ -981,7 +981,7 @@ Bundle se nezapíná v konfiguraci Symfony, ale v konfiguraci PHPUnitu, jako boo
 :::callout{type="pattern"}
 ### Příklad: Registrace DAMA extension v phpunit.dist.xml
 
-:::code{language="xml" filename="phpunit.dist.xml"}
+:::code{language="xml" filename="phpunit.dist.xml (výřez: extensions)"}
 <extensions>
     <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension"/>
 </extensions>

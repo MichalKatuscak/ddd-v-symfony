@@ -23,6 +23,10 @@ const BUILDABLE = [
     'cqrs.md',
     'sagas.md',
     'authorization_in_ddd.md',
+    'event_sourcing.md',
+    'testing_ddd.md',
+    'architectural_styles.md',
+    'lesser_known_patterns.md',
 ];
 
 /** Zástupné názvy, které neoznačují konkrétní soubor v projektu. */

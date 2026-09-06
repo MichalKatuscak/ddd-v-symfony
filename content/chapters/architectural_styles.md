@@ -92,6 +92,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -108,6 +109,24 @@ class Order
 
     #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderLine::class, cascade: ['persist'])]
     private Collection $lines;
+
+    public function __construct(string $id)
+    {
+        $this->id = $id;
+        // Bez inicializace skončí první dotaz na kolekci hláškou
+        // "Typed property must not be accessed before initialization".
+        $this->lines = new ArrayCollection();
+    }
+
+    public function id(): string
+    {
+        return $this->id;
+    }
+
+    public function status(): string
+    {
+        return $this->status;
+    }
 
     public function confirm(): void
     {
@@ -319,10 +338,14 @@ final class DoctrineOrderRepository implements OrderRepository
         // Ukázka pokrývá insert. Reálná implementace při update nejprve
         // najde existující OrderOrmEntity přes find() a přepíše její pole –
         // persist() nové instance by skončil kolizí primárního klíče.
+        //
+        // Flush je tu proto, že kontroler volá port přímo. Jakmile příkazy
+        // půjdou přes command bus s doctrine_transaction middleware,
+        // transakci vlastní ten a flush odsud zmizí. Bez jednoho nebo
+        // druhého API vrátí 201 a v databázi nezůstane nic.
         $orm = $this->mapper->toOrm($order);
         $this->em->persist($orm);
-        // flush a commit řídí doctrine_transaction middleware command busu;
-        // repozitář transakci neotevírá ani nevlastní
+        $this->em->flush();
     }
 
     /**
@@ -388,6 +411,7 @@ final readonly class PlaceOrderOutput
 {
     public function __construct(
         public string $orderId,
+        public string $status,
     ) {}
 }
 :::
@@ -486,9 +510,13 @@ namespace App\Ordering\Application\UseCase;
 
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Port\OrderRepository;
+use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
 use App\Ordering\Application\Dto\PlaceOrderInput;
 use App\Ordering\Application\Dto\PlaceOrderOutput;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 
 final class PlaceOrderHandler implements PlaceOrder
 {
@@ -499,10 +527,24 @@ final class PlaceOrderHandler implements PlaceOrder
 
     public function handle(PlaceOrderInput $input): PlaceOrderOutput
     {
-        $order = Order::place(OrderId::generate(), $input->customerId);
+        // DTO nese primitivy z HTTP vrstvy; převod na hodnotové objekty
+        // patří sem, do aplikační vrstvy. Doména primitivy nepřijímá.
+        $order = Order::place(
+            OrderId::generate(),
+            CustomerId::fromString($input->customerId),
+        );
+
+        foreach ($input->items as $item) {
+            $order->addItem(
+                ProductId::fromString($item['productId']),
+                $item['quantity'],
+                new Money($item['unitPriceInCents'], Currency::CZK),
+            );
+        }
+
         $this->orders->save($order);
 
-        return new PlaceOrderOutput($order->id()->value);
+        return new PlaceOrderOutput($order->id->value, $order->status->value);
     }
 }
 :::
@@ -535,14 +577,15 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Port;
 
-use App\Ordering\Domain\Event\DomainEvent;
-
 interface EventPublisher
 {
-    public function publish(DomainEvent $event): void;
+    // Události se typují jako `object`. Kanonický AggregateRoot::record()
+    // v této knize žádnou bázovou třídu událostí nevyžaduje, takže vázat
+    // port na společného předka by sem nepustil ani OrderPlaced.
+    public function publish(object $event): void;
 
     /**
-     * @param iterable<DomainEvent> $events
+     * @param iterable<object> $events
      */
     public function publishAll(iterable $events): void;
 }
@@ -555,7 +598,6 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Messaging;
 
-use App\Ordering\Domain\Event\DomainEvent;
 use App\Ordering\Domain\Port\EventPublisher;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -566,7 +608,7 @@ final class MessengerEventPublisher implements EventPublisher
     ) {
     }
 
-    public function publish(DomainEvent $event): void
+    public function publish(object $event): void
     {
         $this->eventBus->dispatch($event);
     }
@@ -589,15 +631,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Ordering\Doubles;
 
-use App\Ordering\Domain\Event\DomainEvent;
 use App\Ordering\Domain\Port\EventPublisher;
 
 final class InMemoryEventPublisher implements EventPublisher
 {
-    /** @var list<DomainEvent> */
+    /** @var list<object> */
     private array $published = [];
 
-    public function publish(DomainEvent $event): void
+    public function publish(object $event): void
     {
         $this->published[] = $event;
     }
@@ -610,7 +651,7 @@ final class InMemoryEventPublisher implements EventPublisher
     }
 
     /**
-     * @return list<DomainEvent>
+     * @return list<object>
      */
     public function published(): array
     {
@@ -708,6 +749,8 @@ declare(strict_types=1);
 
 namespace App\Pricing\Application\Service;
 
+use App\Pricing\Domain\Exception\CartNotFoundException;
+use App\Pricing\Domain\Exception\CustomerNotFoundException;
 use App\Pricing\Domain\Port\CartRepository;
 use App\Pricing\Domain\Port\CustomerRepository;
 use App\Pricing\Domain\Port\DiscountPolicyRepository;
@@ -865,11 +908,15 @@ declare(strict_types=1);
 
 namespace App\Ordering\UseCase\PlaceOrder;
 
+use App\Ordering\Domain\Exception\CustomerNotFoundException;
 use App\Ordering\Domain\Model\Order;
-use App\Ordering\Domain\Model\OrderId;
 use App\Ordering\Domain\Port\CustomerRepository;
-use App\Ordering\Domain\Port\OrderRepository;
 use App\Ordering\Domain\Port\EventPublisher;
+use App\Ordering\Domain\Port\OrderRepository;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 
 final class PlaceOrderUseCase
 {
@@ -883,14 +930,22 @@ final class PlaceOrderUseCase
     public function execute(PlaceOrderRequest $request): PlaceOrderResponse
     {
         $customer = $this->customers->get($request->customerId)
-            ?? throw new CustomerNotFoundException($cart->customerId());
+            ?? throw new CustomerNotFoundException($request->customerId);
 
+        // Kanonický Order::place() bere jen identitu a vlastníka; položky
+        // se přidávají metodou, která u každé kontroluje invariant.
         $order = Order::place(
             OrderId::generate(),
-            $customer->id(), // reference na jiný agregát vede přes ID
-            $request->items,
-            $request->shippingAddress,
+            $customer->id, // reference na jiný agregát vede přes ID
         );
+
+        foreach ($request->items as $item) {
+            $order->addItem(
+                ProductId::fromString($item['productId']),
+                $item['quantity'],
+                new Money($item['unitPriceInCents'], Currency::CZK),
+            );
+        }
 
         $this->orders->save($order);
 
@@ -901,8 +956,8 @@ final class PlaceOrderUseCase
         }
 
         return new PlaceOrderResponse(
-            orderId: $order->id()->value,
-            status: $order->status(),
+            orderId: $order->id->value,
+            status: $order->status->value,
             totalAmount: $order->totalAmount()->amountInCents,
         );
     }
@@ -913,7 +968,11 @@ Use Case `PlaceOrderUseCase` je *jediný vstupní bod* pro tuto aplikační scho
 
 ### Adaptér: Symfony HTTP Controller jako Interface Adapter {#clean-controller-heading}
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php"}
+Kontroler níže je **varianta** toho z hexagonální sekce, ne druhý soubor. Má stejný
+namespace, stejné jméno třídy i stejnou routu `/api/orders`, takže v jednom projektu
+mohou existovat jen jeden, nebo druhý.
+
+:::code{language="php" filename="src/Ordering/Infrastructure/Http/PlaceOrderController.php (varianta Clean Architecture)"}
 <?php
 
 declare(strict_types=1);
@@ -1318,9 +1377,15 @@ Pro všechny styly kromě Layered je Symfony Messenger vhodný nástroj na Comma
 # config/packages/messenger.yaml
 framework:
     messenger:
+        # Při více sběrnicích je default_bus povinný, jinak kontejner
+        # odmítne konfiguraci celou.
+        default_bus: command.bus
+
         buses:
             command.bus:
                 middleware:
+                    # Vyžaduje symfony/validator, jinak kontejner spadne
+                    # na "The Validation middleware is only available…".
                     - validation
                     - doctrine_transaction
             query.bus: ~                          # výchozí middleware stačí
@@ -1332,7 +1397,7 @@ framework:
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
-            App\Ordering\Domain\Event\OrderConfirmed: async
+            App\Ordering\Domain\Event\OrderPlaced: async
             App\Ordering\Domain\Event\OrderCancelled: async
 :::
 

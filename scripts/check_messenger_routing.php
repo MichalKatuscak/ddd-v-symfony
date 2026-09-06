@@ -17,13 +17,40 @@ foreach ($chapters as $file) {
 
 $all = implode("\n", $sources);
 
-// Třídy, které kniha někde definuje.
-preg_match_all(
-    '/\b(?:final\s+|abstract\s+|readonly\s+)*(?:class|interface|enum)\s+([A-Z]\w+)/',
-    $all,
-    $m,
-);
-$defined = array_flip($m[1]);
+// Třídy, které kniha někde definuje - jako plná jména.
+// Krátké jméno nestačí: kniha ukazuje OrderConfirmed v namespace
+// App\Ordering\EventSourced\Event, ale routing jmenoval
+// App\Ordering\Domain\Event\OrderConfirmed. Na krátkém jménu to prošlo.
+$defined = [];
+
+foreach ($sources as $source) {
+    preg_match_all(
+        '/:::code\{language="php"[^}]*\}\n(.*?)\n:::/s',
+        $source,
+        $blocks,
+        PREG_SET_ORDER,
+    );
+
+    foreach ($blocks as $block) {
+        $segments = preg_split('/(?=^namespace\s+[\w\\\\]+;)/m', $block[1], -1, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($segments as $segment) {
+            if (!preg_match('/^namespace\s+([\w\\\\]+);/m', $segment, $ns)) {
+                continue;
+            }
+
+            preg_match_all(
+                '/^\s*(?:final\s+|abstract\s+|readonly\s+)*(?:class|interface|enum)\s+([A-Z]\w+)/m',
+                $segment,
+                $decls,
+            );
+
+            foreach ($decls[1] as $name) {
+                $defined[$ns[1] . '\\' . $name] = true;
+            }
+        }
+    }
+}
 
 $problems = [];
 
@@ -38,9 +65,8 @@ foreach ($sources as $file => $source) {
 
     foreach ($matches as $match) {
         $fqcn = $match[1];
-        $short = substr($fqcn, strrpos($fqcn, '\\') + 1);
 
-        if (!isset($defined[$short])) {
+        if (!isset($defined[$fqcn])) {
             $problems[] = sprintf('%s → %s', basename($file), $fqcn);
         }
     }

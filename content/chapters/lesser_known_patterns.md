@@ -63,7 +63,7 @@ podstatnou část deváté kapitoly – **Specification Pattern**.
 predikát nad doménovým objektem – typicky odpověď na otázku tvaru „splňuje tento agregát
 konkrétní pravidlo?“. Minimální rozhraní vypadá takto:
 
-:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php"}
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php (jádro vzoru)"}
 interface Specification
 {
     public function isSatisfiedBy(mixed $candidate): bool;
@@ -508,11 +508,27 @@ Metoda patří do rozhraní `Specification`, ne jen do kompozitu: `AndSpecificat
 ji volá na svých potomcích, které zná jen jako `Specification`. `CompositeSpecification`
 dodá výchozí tělo, takže listové specifikace nic dopisovat nemusí.
 
-:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php + CompositeSpecification.php (doplněk)"}
+:::code{language="php" filename="src/SharedKernel/Domain/Specification/Specification.php + CompositeSpecification.php (rozšíření o zbytkovou specifikaci)"}
+// Rozhraní si ponechává and/or/not ze sekce 08.02; přibývá jen pátá metoda.
 interface Specification
 {
     /** @param T $candidate */
     public function isSatisfiedBy(mixed $candidate): bool;
+
+    /**
+     * @param Specification<T> $other
+     * @return Specification<T>
+     */
+    public function and(self $other): self;
+
+    /**
+     * @param Specification<T> $other
+     * @return Specification<T>
+     */
+    public function or(self $other): self;
+
+    /** @return Specification<T> */
+    public function not(): self;
 
     /**
      * Vrátí specifikaci popisující, co kandidát ještě nesplnil,
@@ -637,7 +653,7 @@ final class EligibleForFreeShipping extends CompositeSpecification implements Qu
 Repozitář pak vystaví obecnou metodu `match()`. `Doctrine\ORM\EntityRepository` implementuje
 rozhraní `Selectable`, takže `Criteria` umí spustit přímo:
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php (výřez: match přes specifikaci)"}
 <?php
 
 declare(strict_types=1);
@@ -988,7 +1004,7 @@ V PHP 8.4 je preferovanou formou Factory statická pojmenovaná
 konstrukční metoda na samotném agregátu (named constructor). Konstruktor je privátní,
 publikujete pouze pojmenované entry pointy s doménovou sémantikou:
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (varianta s továrnami)"}
 <?php
 
 declare(strict_types=1);
@@ -1086,12 +1102,12 @@ final class Order extends AggregateRoot
         $customerId = $lookup->byEmail($row->customerEmail) ?? $lookup->guestId();
         $items = ImportedItems::map($row->items);
 
-        return self::place($customerId, $items, $placedAt);
+        return self::placeWithItems($customerId, $items, $placedAt);
     }
 }
 :::
 
-Signatura `place()` zde přebírá rovnou seznam položek, aby šlo ukázat invariant „objednávka
+Signatura `placeWithItems()` zde přebírá rovnou seznam položek, aby šlo ukázat invariant „objednávka
 bez položky nevznikne“ vynucený už při vzniku. Kanonický `Order` v této knize položky
 přidává metodou `addItem(ProductId $productId, int $quantity, Money $unitPrice)` a prázdnou
 objednávku dovolí; invariant pak hlídá `confirm()`. Obě varianty jsou obhajitelné a volba
@@ -1162,7 +1178,7 @@ final class OrderFromCartFactory
 }
 :::
 
-Všimněte si, že Factory class **uvnitř volá** `Order::place()` –
+Všimněte si, že Factory class **uvnitř volá** `Order::placeWithItems()` –
 nepřebírá zodpovědnost za invariant „aspoň 1 položka“, ten zůstává v named
 constructor agregátu. Factory řeší pouze *orchestraci vstupních dat*.
 
