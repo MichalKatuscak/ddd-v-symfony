@@ -1514,12 +1514,17 @@ framework:
             # přes TransportNamesStamp, a ten routing přebije. Prioritní
             # frontu má proto smysl nastavit až na straně relaye.
             #
-            # Řádek je ilustrativní a do projektu podle knihy nepatří:
-            # OrderPlacedIntegrationEvent už na async_events směruje
-            # konfigurace ságy. Jedna třída na dvou transportech znamená
-            # duplicitní klíč v jednom mapování – druhý tiše přebije první
-            # a ságu pak nikdo neobslouží.
-            App\Notification\Application\Event\InvoiceIssued: async_priority_high
+            #
+            # Řádek je schválně zakomentovaný. Prioritní frontu má smysl dát
+            # události, která se o ni pere s ostatními – v projektu podle
+            # knihy taková není. OrderPlacedIntegrationEvent to být nemůže:
+            # na async_events ji směruje konfigurace ságy a jedna třída na
+            # dvou transportech znamená duplicitní klíč v jednom mapování,
+            # kde druhý tiše přebije první.
+            #
+            # A pozor na jméno: Messenger třídy ověřuje při kompilaci
+            # kontejneru, takže vymyšlená třída tady shodí i cache:clear.
+            # App\Notification\Application\Event\InvoiceIssued: async_priority_high
 :::
 :::
 

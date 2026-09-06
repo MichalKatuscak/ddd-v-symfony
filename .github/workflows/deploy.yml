@@ -36,6 +36,9 @@ jobs:
       - name: Lint PHP code samples in chapters
         run: php scripts/lint-php-snippets.php
 
+      - name: Check Messenger routing classes exist
+        run: php scripts/check_messenger_routing.php
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

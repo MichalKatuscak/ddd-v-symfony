@@ -1175,7 +1175,7 @@ final readonly class ShipOrder
 
 Příkazy pro cizí kontexty mají tentýž tvar a doplňují je kompenzace ze sekce 14.03:
 
-:::code{language="php" filename="src/Warehouse/Application/Command/ReserveStock.php + ReleaseStock.php"}
+:::code{language="php" filename="src/Warehouse/Application/Command/ReserveStock.php + ReleaseStock.php, src/Shipping/Application/Command/CreateShipment.php + CancelShipment.php"}
 <?php
 
 declare(strict_types=1);
@@ -1192,8 +1192,17 @@ final readonly class ReleaseStock
     public function __construct(public string $orderId) {}
 }
 
-// V App\Shipping\Application\Command leží CreateShipment a CancelShipment
-// se stejnou hlavičkou.
+namespace App\Shipping\Application\Command;
+
+final readonly class CreateShipment
+{
+    public function __construct(public string $orderId) {}
+}
+
+final readonly class CancelShipment
+{
+    public function __construct(public string $orderId) {}
+}
 :::
 
 `ReserveStockHandler`, `CreateShipmentHandler` a `RefundCustomerHandler` sedí ve svých
