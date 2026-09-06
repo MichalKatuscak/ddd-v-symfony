@@ -62,6 +62,27 @@ Frontend assets go through Vite (`vite-plugin-symfony`, see `package.json`); `hi
 - Code targets PHP 8.4, Symfony 8, Doctrine ORM 3.
 - Citations: no page numbers; unverifiable direct quotes are paraphrased. Partnership and Big Ball of Mud are attributed to Evans's *DDD Reference* (2015); "Supporting Subdomain" to Vernon (2013). Fictional case studies are labeled "Ilustrativní scénář".
 
+## Živé ukázky kódu
+
+Frontmatter `github_examples` každé kapitoly odkazuje na adresář v repozitáři
+[ddd-symfony-examples](https://github.com/MichalKatuscak/ddd-symfony-examples).
+Pole má **každá** kapitola; `null` je záměrný stav, ne opomenutí.
+
+Ukázku dostává kapitola, která zavádí **vzor s vlastním kódem, jenž jde spustit
+a otestovat izolovaně**. Kapitoly bez ukázky jsou dvojího druhu:
+
+- **strategické a procesní** (`context_mapping`, `subdomains`, `team_topologies`,
+  `event_storming`, `when_not_to_use_ddd`, `ddd_ai`, `preface`) – jejich obsah jsou
+  rozhodnutí a diagramy, ne kód;
+- **srovnávací a průřezové** (`architectural_styles`, `anti_patterns`,
+  `microservices_and_ddd`, `performance_aspects`, `ddd_pain_points`, `case_study`,
+  `practical_examples`) – kódu mají hodně, ale je to buď vědomý anti-vzor, nebo
+  varianta téhož modelu, který už spustitelně ukazuje jiná kapitola. Samostatná
+  ukázka by duplikovala kanonický agregát a rozešla by se s ním.
+
+Ukázky sledují kanonické konvence z předchozí sekce. Kde se liší, musí to říct
+README příslušné kapitoly **a uvést důvod** – jinak to vypadá jako nedodělek.
+
 ## Templates & SEO
 
 `templates/base.html.twig` defines the master layout. Chapter SEO (JSON-LD, breadcrumbs, meta) is generated from frontmatter. Non-chapter templates must provide:
