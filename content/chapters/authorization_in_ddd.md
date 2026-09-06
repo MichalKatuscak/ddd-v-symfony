@@ -500,7 +500,7 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Command;
 
 use App\Ordering\Domain\ValueObject\CustomerId;
-use App\Ordering\Domain\OrderId;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 final readonly class CancelOrderCommand
 {

@@ -521,6 +521,8 @@ use App\Shipping\Application\Command\CreateShipment;
 use App\Ordering\Application\Command\MarkOrderPaid;
 use App\Ordering\Application\Command\ShipOrder;
 use App\Ordering\Application\Command\CancelOrderCommand;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -533,6 +535,11 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler]
 final class OrderProcessManager
 {
+    // Systémová identita procesu – viz „Autorizace v asynchronním kontextu"
+    // v kapitole o autorizaci. Fail-open podmínka „když aktér chybí, povol vše"
+    // je přesně to, čemu se tím vyhýbáme.
+    private const SYSTEM_ACTOR = '01920000-0000-7000-8000-000000000001';
+
     public function __construct(
         private readonly MessageBusInterface $commandBus,
         private readonly OrderSagaRepository $sagaRepository,
@@ -617,8 +624,11 @@ final class OrderProcessManager
         $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new CancelOrderCommand(
-            orderId: $event->orderId,
+            orderId: OrderId::fromString($event->orderId),
             reason: 'Platba selhala: ' . $event->failureReason,
+            // Sága není člověk. Podle pravidla z kapitoly o autorizaci
+            // dostává explicitní systémovou identitu, ne chybějícího aktéra.
+            actorId: CustomerId::fromString(self::SYSTEM_ACTOR),
         ));
     }
 
@@ -1534,8 +1544,9 @@ final readonly class CheckSagaTimeoutHandler
         $this->sagaRepository->save($state);
 
         $this->commandBus->dispatch(new CancelOrderCommand(
-            orderId: $state->correlationId(),
+            orderId: OrderId::fromString($state->correlationId()),
             reason: 'Payment timeout',
+            actorId: CustomerId::fromString(self::SYSTEM_ACTOR),
         ));
     }
 
@@ -1743,8 +1754,9 @@ private function onRefundSucceeded(RefundSucceeded $event): void
     $this->sagaRepository->save($state);
 
     $this->commandBus->dispatch(new CancelOrderCommand(
-        orderId: $event->orderId,
+        orderId: OrderId::fromString($event->orderId),
         reason: 'Zboží není skladem, platba vrácena',
+        actorId: CustomerId::fromString(self::SYSTEM_ACTOR),
     ));
 }
 

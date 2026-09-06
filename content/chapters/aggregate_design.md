@@ -518,8 +518,8 @@ class Order extends AggregateRoot
 
     public function totalAmount(): Money
     {
-        // place() prázdnou objednávku nepustí; guard kryje budoucí refaktoring,
-        // aby součet nikdy nevracel tichou nulu v natvrdo zvolené měně.
+        // Guard je nutný: kanonické place() prázdnou objednávku pustí.
+        // Bez něj by součet vracel tichou nulu v natvrdo zvolené měně.
         if ($this->items->isEmpty()) {
             throw new EmptyOrderException();
         }
@@ -536,11 +536,13 @@ class Order extends AggregateRoot
 }
 :::
 
-Konstruktor je `private`: vznik agregátu řídí
-statická factory metoda `place()`. Invariant „objednávka musí mít alespoň jednu položku“
-vymáhá už její signatura – bez první položky objednávka nevznikne a runtime kontrola
-je zbytečná. `customerId` je hodnotový objekt, ne reference na entitu.
-Stavový přechod `ship()` je jediný způsob, jak změnit `status`;
+Konstruktor je `private`: vznik agregátu řídí statické továrny. U
+`placeWithFirstItem()` vymáhá invariant „objednávka musí mít alespoň jednu položku“
+už signatura – bez první položky objednávka nevznikne. Kanonické
+`place(OrderId, CustomerId)` z [Základních konceptů](/zakladni-koncepty#aggregates)
+tuhle záruku nedává, proto ji `totalAmount()` a `confirm()` kontrolují za běhu.
+`customerId` je hodnotový objekt, ne reference na entitu.
+Stavové přechody `markPaid()` a `ship()` jsou jediný způsob, jak změnit `status`;
 `OrderStatus` se nikdy nenastavuje setterem zvenčí. Volání `record()` ukládá
 událost do interní fronty bázové třídy `AggregateRoot`; vyzvednutí přes
 `releaseEvents()` po flushi popisuje
