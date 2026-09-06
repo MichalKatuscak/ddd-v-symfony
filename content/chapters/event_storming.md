@@ -238,7 +238,9 @@ Workshop: `Customer → PlaceOrder → Order Aggregate → OrderPlaced`
 
 Symfony / PHP draft (toto je první draft, ne finální kód):
 
-:::code{language="php" filename="Symfony / PHP draft Ordering BC"}
+:::code{language="php" filename="Symfony / PHP draft Ordering BC (tři soubory)"}
+<?php
+
 // Application/Command/PlaceOrderCommand.php
 namespace App\Ordering\Application\Command;
 

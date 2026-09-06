@@ -34,6 +34,8 @@ Tři vzory níže spojuje jedna příčina: chybí rozhodovací rámec, kam kter
 Nejčastější vzor. Controller přijme HTTP požadavek, načte entitu z repository a inline porovná atributy uživatele s atributy entity:
 
 :::code{language="php" filename="src/Controller/OrderController.php (anti-vzor)" highlights="13,14,15,16,17,18"}
+<?php
+
 // src/Controller/OrderController.php (anti-vzor)
 namespace App\Controller;
 
@@ -72,6 +74,8 @@ Co je špatně: stejný use case se volá i z konzolového commandu (cron, batch
 Druhý extrém. Tým objeví Symfony Voter a přesune do něj *všechna* pravidla, včetně doménových invariantů. Aggregate má veřejné API `setStatus()`, `setTotal()`, `setCustomerId()` a Voter „natáhne“ autorizaci přes ně:
 
 :::code{language="php" filename="src/Security/OrderVoter.php (anti-vzor)" highlights="13,14,15,16,17"}
+<?php
+
 // src/Security/OrderVoter.php (anti-vzor)
 namespace App\Security;
 
@@ -267,6 +271,8 @@ očekává `form_login` autentikátor a přejmenovat je znamená přenastavit fi
 Doprovodná třída `SecurityUser` drží most mezi Symfony a doménou. Kromě `UserInterface` vystavuje doménové identifikátory, které si z ní vezme aplikační vrstva:
 
 :::code{language="php" filename="src/Identity/Infrastructure/Security/SecurityUser.php"}
+<?php
+
 // src/Identity/Infrastructure/Security/SecurityUser.php
 declare(strict_types=1);
 
@@ -427,6 +433,8 @@ Use case vrstva odpovídá na otázku **„smí *tento* uživatel vykonat *tento
 Voter zná dvě věci: **identitu uživatele** (přes `TokenInterface`) a **cílový subjekt** (typicky aggregate root). Co Voter *nesmí* dělat: načítat subjekt, o kterém rozhoduje, a znát doménové invarianty (to je práce aggregate). Pravidla typu „cancellation window“ Voter nesmí natáhnout zvenku; patří ke stavu agregátu.
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Security/OrderVoter.php" highlights="18,19,20,28,29,30,31,33,34,35,36,50,58,59"}
+<?php
+
 // src/Ordering/Infrastructure/Security/OrderVoter.php
 declare(strict_types=1);
 
@@ -539,6 +547,8 @@ Volba `allow_if_all_abstain: false` je výchozí, ale patří do konfigurace exp
 Kontrola v handleru je autoritativní, na hranici HTTP se ale vyplatí odmítnout požadavek dřív, než se vůbec sestaví command. K tomu slouží atribut `Symfony\Component\Security\Http\Attribute\IsGranted`. Funguje na metodě i na celé třídě controlleru a druhým argumentem odkazuje na argument akce, který se má stát subjektem:
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Http/OrderController.php"}
+<?php
+
 // src/Ordering/Infrastructure/Http/OrderController.php
 declare(strict_types=1);
 
@@ -646,6 +656,8 @@ Starší materiály nabízejí jako řešení per-objektových oprávnění komp
 Voter sám o sobě nestačí – někdo ho musí zavolat. Idiomatické místo je **Application Service / Command Handler**, kde se autorizace ověří *před* doménovou operací. Handler injektuje `AuthorizationCheckerInterface`, tedy rozhraní Security komponenty. V aplikační vrstvě je taková závislost v pořádku. Doménová vrstva by tu závislost mít nesměla.
 
 :::code{language="php" filename="src/Ordering/Application/Handler/CancelOrderHandler.php" highlights="18,19,25,26,27,28,29"}
+<?php
+
 // src/Ordering/Application/Handler/CancelOrderHandler.php
 declare(strict_types=1);
 
@@ -776,6 +788,8 @@ Jakmile command putuje přes asynchronní transport, kontrola přes `Authorizati
 Řešení: **command nese identitu aktéra**. V místě vzniku, typicky v controlleru, token ještě existuje – tam se do commandu zapíše `actorId` jako doménový identifikátor uživatele, ne Symfony `UserInterface`. Handler pak autorizuje proti této identitě bez ohledu na to, kde a kdy běží.
 
 :::code{language="php" filename="src/Ordering/Application/Command/CancelOrderCommand.php" highlights="14"}
+<?php
+
 // src/Ordering/Application/Command/CancelOrderCommand.php
 declare(strict_types=1);
 
@@ -795,6 +809,8 @@ final readonly class CancelOrderCommand
 :::
 
 :::code{language="php" filename="src/Ordering/Application/Handler/CancelOrderHandler.php (async varianta)" highlights="19,20,21,22,23,24"}
+<?php
+
 // src/Ordering/Application/Handler/CancelOrderHandler.php (async varianta)
 declare(strict_types=1);
 
@@ -862,6 +878,8 @@ Owner-based pravidlo vystačí s porovnáním `actorId` proti vlastníkovi agreg
 Ruční porovnání identit stačí na vlastnictví. Pravidla závislá na rolích (refund smí jen `ROLE_REFUND_AGENT`) by se tímto způsobem musela ve workeru napsat podruhé a jinak než ve Voteru. Tím vzniká přesně ta duplicita, kterou zakazuje [anti-vzor 3](#anti-duplication-heading). Symfony na to má `UserAuthorizationCheckerInterface` a metodu `isGrantedForUser()`, která spustí tytéž Votery proti předanému uživateli, aniž by potřebovala session nebo token v `TokenStorage`:
 
 :::code{language="php" filename="src/Ordering/Application/Handler/RefundOrderHandler.php" highlights="20,27,29"}
+<?php
+
 // src/Ordering/Application/Handler/RefundOrderHandler.php
 declare(strict_types=1);
 
@@ -945,6 +963,8 @@ Praktická heuristika:
 Prostřední bod je ten, na kterém se týmy nejčastěji rozejdou. „Zrušit smí jen vlastník“ zní jako typické use-case pravidlo, ve skutečnosti je to invariant vztahu mezi `Order` a `CustomerId`. Agregát na něj proto odpovídá metodou `isOwnedBy()` a Voter i asynchronní handler ji volají místo vlastního porovnání. Definice zůstane jedna, vynucení může být na obou místech.
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
+<?php
+
 // Výřez kanonického agregátu z kapitoly Návrh agregátu. Doplňuje jen to,
 // co přidává autorizace; konstruktor, továrny ani mapování se nemění.
 declare(strict_types=1);
@@ -1170,6 +1190,8 @@ Nejjednodušší, ale s *únikem dat*: data se z databáze načtou všechna, jen
 Citlivá pole se z databáze *vůbec nenačtou*. Read model vrací různé DTO podle role. Bez data leaku, ale za cenu duplicity (dvě query, dvě DTO struktury). Vhodné pro PII, finanční data, audit logy.
 
 :::code{language="php" filename="src/Ordering/Application/ReadModel/OrderDetailReadModel.php" highlights="16,17,18,19,20,21,22"}
+<?php
+
 // src/Ordering/Application/ReadModel/OrderDetailReadModel.php
 declare(strict_types=1);
 
@@ -1308,6 +1330,8 @@ Dvě věci se rozbijí naráz. Stránkování přestane sedět: dotaz vrátí 20
 Odpověď je přesunout autorizaci do dotazu. Read model dostane identitu aktéra a promítne ji do `WHERE`:
 
 :::code{language="php" filename="src/Ordering/Application/ReadModel/OrderListReadModel.php" highlights="19,20,21,22,23"}
+<?php
+
 // src/Ordering/Application/ReadModel/OrderListReadModel.php
 declare(strict_types=1);
 
@@ -1352,6 +1376,8 @@ NIST SP 800-162 dává pro tuto vrstvu slovník, který se vyplatí znát, proto
 Následující ukázka staví ABAC model explicitně: `Policy` jako kolekce `Rule` objektů, které se vyhodnotí proti trojici subject/user/context. Slouží k tomu, aby byl model vidět. Zda se takto psát vyplatí, řeší [závěr sekce](#abac-vlastni-vs-voter); ve většině Symfony projektů odpověď zní „ne“.
 
 :::code{language="php" filename="src/SharedKernel/Authorization/Policy.php + Rule.php + PolicyContext.php"}
+<?php
+
 // src/SharedKernel/Authorization/Policy.php
 declare(strict_types=1);
 
@@ -1385,6 +1411,8 @@ final readonly class PolicyContext
 :::
 
 :::code{language="php" filename="src/Ordering/Authorization/CancelOrderPolicy.php" highlights="19,20,21,22,23,24,25,26,27,28,29,30,31,32,33"}
+<?php
+
 // src/Ordering/Authorization/CancelOrderPolicy.php
 declare(strict_types=1);
 
@@ -1430,6 +1458,8 @@ Poznámka: pravidla `subject.status.value == "placed"` a časové okno 24 h jsou
 Jednoduchý `PolicyEvaluator` používá Symfony ExpressionLanguage komponentu a vyhodnocuje pravidla v daném kontextu. Balíček v základní instalaci není, takže `composer require symfony/expression-language` je první krok:
 
 :::code{language="php" filename="src/SharedKernel/Authorization/PolicyEvaluator.php"}
+<?php
+
 // src/SharedKernel/Authorization/PolicyEvaluator.php
 declare(strict_types=1);
 
@@ -1477,7 +1507,7 @@ Poslední dva řádky jsou skrytá cena, kterou tabulky výhod obvykle zamlčuj�
 
 Hlavní argument pro vlastní `PolicyEvaluator` býval jediný: chceme vědět, *které* pravidlo selhalo, ne jen že přístup nebyl povolen. Od Symfony 7.3 to umí Security komponenta sama. Voter přijímá volitelný parametr `?Vote $vote` a může do něj zapsat důvod, aplikační vrstva pak čte celé rozhodnutí přes `Security::getAccessDecision()`:
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Security/OrderVoter.php (s důvody)" highlights="10,15,20"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Security/OrderVoter.php (výřez: voteOnAttribute s důvody)" highlights="10,15,20"}
 // src/Ordering/Infrastructure/Security/OrderVoter.php (s důvody)
 protected function voteOnAttribute(
     string $attribute,
@@ -1507,7 +1537,7 @@ protected function voteOnAttribute(
 
 Důvody se čtou z veřejné vlastnosti `$vote->reasons` (pole stringů); getter třída `Vote` nemá. Stejně je na tom `AccessDecision`, kde je výsledek vlastnost `$decision->isGranted`. Aplikační vrstva je vytáhne z `AccessDecision` a předá do chybové odpovědi:
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Http/ExplainedAccessDenied.php"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Http/ExplainedAccessDenied.php (výřez: tělo metody)"}
 // src/Ordering/Infrastructure/Http/ExplainedAccessDenied.php
 $decision = $this->security->getAccessDecision(OrderVoter::CANCEL, $order);
 
@@ -1557,6 +1587,8 @@ Volba mezi nimi jde ruku v ruce s velikostí instalace. Row-based u SaaS s velk�
 Namístě je vrátit se k [chybě 3](#tri-chyby-doctrine-heading), kde jsme filtrování v perzistentní vrstvě označili za anti-vzor. Rozpor je zdánlivý a rozdíl je v tom, na co filtr odpovídá. Tenant je **kontext dotazu**, ne autorizační rozhodnutí o akci: dimenze, kterou má nést každý dotaz v požadavku, stejně jako jazyk nebo časová zóna. Autorizační rozhodnutí „Petr smí zrušit objednávku #42“ do SQL nepatří, protože handler pak nerozezná neexistující záznam od cizího. Otázka „ke kterému tenantovi tento request patří“ do SQL náleží, protože odpověď je pro celý request jediná a neměnná.
 
 :::code{language="php" filename="src/SharedKernel/Infrastructure/Doctrine/TenantFilter.php" highlights="13,14,15,16,17,18,19,20,21,22"}
+<?php
+
 // src/SharedKernel/Infrastructure/Doctrine/TenantFilter.php
 declare(strict_types=1);
 
@@ -1623,6 +1655,8 @@ Měřeno na ORM 3.6 vrátí druhý konec vztahu i záznam cizího tenanta, přes
 tenanta i do doménové vrstvy, ne jen do filtru.
 
 :::code{language="php" filename="src/SharedKernel/Infrastructure/Http/TenantContextListener.php" highlights="13,22,23,24,25,26,27,28,29,30,31,32,33,34"}
+<?php
+
 // src/SharedKernel/Infrastructure/Http/TenantContextListener.php
 declare(strict_types=1);
 
@@ -1778,6 +1812,8 @@ final class OrderFactory
 :::
 
 :::code{language="php" filename="tests/Ordering/Domain/OrderCancelTest.php"}
+<?php
+
 // tests/Ordering/Domain/OrderCancelTest.php
 declare(strict_types=1);
 
@@ -1827,6 +1863,8 @@ final class OrderCancelTest extends TestCase
 Voter dostává `TokenInterface`; v testu stačí jeho mock, reálný subject a mock rozhodovacího manažeru pro role. Žádný Symfony Kernel:
 
 :::code{language="php" filename="tests/Ordering/Infrastructure/Security/OrderVoterTest.php"}
+<?php
+
 // tests/Ordering/Infrastructure/Security/OrderVoterTest.php
 declare(strict_types=1);
 
@@ -1920,6 +1958,8 @@ Pro pokrytí celé pipeline (firewall → controller → handler → voter → a
 Přihlášení v takovém testu neprobíhá přes formulář. `KernelBrowser::loginUser()` vloží uživatele rovnou do session a ušetří jeden request i závislost na podobě login stránky. Jednu vazbu ale neušetří: s `entity` providerem firewall při každém dalším requestu uživatele načítá znovu, takže fixture musí být v databázi. Jinak test skončí přesměrováním na `/login` a vypadá to jako chyba autorizace.
 
 :::code{language="php" filename="tests/Ordering/Http/CancelOrderE2eTest.php" highlights="12,13,14,17"}
+<?php
+
 // tests/Ordering/Http/CancelOrderE2eTest.php
 declare(strict_types=1);
 
@@ -1995,7 +2035,7 @@ final class CancelOrderE2eTest extends WebTestCase
 
 Anti-vzor 4 zakazuje závislost domény na `Symfony\Component\Security`. Pravidlo, které hlídá jen code review, se dřív nebo později poruší. Vynucovat ho má proto test. S PHPArkitect stačí jedno pravidlo:
 
-:::code{language="php" filename="tests/Architecture/DomainRules.php"}
+:::code{language="php" filename="tests/Architecture/DomainRules.php (výřez: jedno pravidlo)"}
 // tests/Architecture/DomainRules.php
 Rule::allClasses()
     ->that(new ResideInOneOfTheseNamespaces('App\*\Domain\*'))
@@ -2010,6 +2050,8 @@ Test běží v CI vedle unit testů a selže při prvním importu, ne až při r
 Pokud používáte [policy-based přístup](#policy-based), každé pravidlo v policy je jeden test case. Vyhodnocení výrazů stojí na balíčku `symfony/expression-language`, který v základní instalaci není. Tabulkový (data provider) test je nejlepší forma: jeden řádek = jeden scénář, čitelně i pro netechnického reviewera:
 
 :::code{language="php" filename="tests/Ordering/Authorization/CancelOrderPolicyTest.php"}
+<?php
+
 // tests/Ordering/Authorization/CancelOrderPolicyTest.php
 declare(strict_types=1);
 
@@ -2093,6 +2135,8 @@ Náprava: pravidlo patří do aggregate (je to doménový invariant). Voter **ne
 Symptom:
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (anti-vzor)" highlights="5,10,11,12"}
+<?php
+
 // src/Ordering/Domain/Model/Order.php (anti-vzor)
 namespace App\Ordering\Domain\Model;
 
