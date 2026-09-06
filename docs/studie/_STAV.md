@@ -1693,6 +1693,51 @@ nenašla chybu v jádru objednávkového procesu.
 ne spustitelný soubor (kniha ho tak podává); konceptuální kapitoly nemají živé ukázky
 záměrně a `CLAUDE.md` říká kritérium. Další plošné kolo by měnilo knihu kvůli revizi samé.
 
+## Jazyková redakce celé knihy (2026-09-06)
+
+Autor upozornil, že věty „znějí divně česky, napříč všema kapitolami". Ukázalo se, že
+to jde změřit — a že příčina byla jinde, než bych čekal.
+
+### Co se měřilo
+
+| jev | před | po |
+|---|---|---|
+| pomlčky uprostřed věty | 2171 | 1042 |
+| vsuvky mezi podmětem a přísudkem | 154 | 40 |
+| nálezy tonality | 14 | 0 |
+
+Klasické překladatelské neduhy — trpný rod, „dochází k", „prostřednictvím" — byly jen
+132 na celou knihu. **Problém nebyl ve slovníku, ale v rytmu:** věta se pořád sama
+přerušovala apozicí v pomlčkách místo toho, aby se dopověděla. Přes jednu pomlčku
+na odstavec.
+
+Nejhorší tvar byl vsuvka mezi podmětem a přísudkem — čtenář drží v hlavě podmět, dostane
+výčet, a teprve za druhou pomlčkou se dozví, co se s ním děje:
+
+> **před:** „Obrácená situace – jeden tým vlastnící více Bounded Contexts – je podle
+> Vernona přijatelná."
+> **po:** „Obrácená situace je podle Vernona přijatelná: jeden tým vlastní více
+> Bounded Contexts."
+
+### Bezpečnostní ověření
+
+Redakce běžela přes subagenty se zákazem sahat do kódu. **Ověřeno strojově: 450 kódových
+bloků porovnáno před/po, změněných nula.** Frontmatter, nadpisy, kotvy ani odkazy se
+nezměnily; `check_anchors`, `lint-php-snippets`, `check_messenger_routing`
+a `check_duplicate_listings` prošly.
+
+### Kontrola tonality byla tři roky slepá
+
+Jedenáct nálezů, které visely na dashboardu, byly z devíti falešné — a maskovaly tím
+budoucí skutečné. Kontrola nově přeskakuje slovo uvnitř českých uvozovek (kniha zakázané
+výrazy sama cituje a kritizuje) a zná „Klíčová doména" jako překlad Core Domain.
+
+Při té opravě se v ní našly tři vlastní chyby, z toho jedna zákeřná: `PREG_OFFSET_CAPTURE`
+vrací pozici **v bajtech**, takže se `mb_substr` s českou diakritikou netrefil a obě nové
+podmínky tiše nefungovaly. Vypadalo to, že kód běží.
+
+**Poučení: u kontroly, která nic nehlásí, musím ověřit, že hlásit umí.**
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
