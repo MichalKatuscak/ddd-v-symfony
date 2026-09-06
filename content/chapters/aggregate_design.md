@@ -461,6 +461,9 @@ class Order extends AggregateRoot
     ): self {
         $order = new self(OrderId::generate(), $customerId);
         $order->addItem($productId, $quantity, $unitPrice);
+        // Objednávka přišla kompletní, takže rovnou opouští Draft.
+        // Draft je stav rozpracovaného košíku, ne odeslané objednávky.
+        $order->confirm();
 
         // Kanonická OrderPlaced (06.08) nese identitu objednávky a zákazníka;
         // čas si doplní sama. Částka do doménové události nepatří – odvodí
@@ -489,6 +492,21 @@ class Order extends AggregateRoot
         // Položka dostane referenci na kořen – ta drží ManyToOne protistranu
         // kolekce. Vlastní doménové ID nemá, viz mapování níž.
         $this->items->add(new OrderItem($this, $productId, $quantity, $unitPrice));
+    }
+
+    public function confirm(): void
+    {
+        if ($this->status !== OrderStatus::Draft) {
+            throw new InvalidOrderStateTransitionException(
+                "only draft orders can be confirmed, current state: {$this->status->value}"
+            );
+        }
+
+        if ($this->items->isEmpty()) {
+            throw EmptyOrderException::cannotConfirm();
+        }
+
+        $this->status = OrderStatus::Confirmed;
     }
 
     // Bez tohohle přechodu je ship() nedosažitelná: do stavu Paid
@@ -521,7 +539,7 @@ class Order extends AggregateRoot
         // Guard je nutný: kanonické place() prázdnou objednávku pustí.
         // Bez něj by součet vracel tichou nulu v natvrdo zvolené měně.
         if ($this->items->isEmpty()) {
-            throw new EmptyOrderException();
+            throw EmptyOrderException::cannotBePlaced();
         }
 
         $items = $this->items->toArray();

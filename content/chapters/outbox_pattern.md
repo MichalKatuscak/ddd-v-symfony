@@ -488,6 +488,10 @@ final class Order extends AggregateRoot
             );
         }
 
+        // Objednávka přišla kompletní – opouští Draft hned, jinak by na ni
+        // sága nemohla zavolat markPaid() a uvázla by v prvním kroku.
+        $order->confirm();
+
         // Agregát nahrává doménovou událost s hodnotovými objekty.
         // Na integrační tvar ji přeloží až handler na hranici kontextu.
         $order->record(new OrderPlaced($order->id, $customerId));

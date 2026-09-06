@@ -672,8 +672,8 @@ final class OrderProcessManager
         ]);
         $this->sagaRepository->save($state);
 
-        // Zásilka existuje, takže objednávka přechází do Shipped. ConfirmOrder
-        // by ji vrátil o krok zpět – potvrzení proběhlo už při platbě.
+        // Zásilka existuje, takže objednávka přechází do Shipped.
+        // Potvrzení proběhlo už v továrně při vzniku objednávky.
         $this->commandBus->dispatch(new ShipOrder(
             orderId: $event->orderId,
             shipmentId: $event->shipmentId,
@@ -683,10 +683,14 @@ final class OrderProcessManager
 :::
 :::
 
-Objednávka projde během ságy čtyřmi stavy: `Draft` → `Confirmed` (potvrzení při
-zaplacení) → `Paid` (`MarkOrderPaid`) → `Shipped` (`ShipOrder`). Sága sama stav agregátu
-nemění – jen posílá příkazy a čeká na události. Kdyby některý příkaz chyběl, doběhne
-do `Completed` s objednávkou, která zůstala rozpracovaná.
+Objednávka projde třemi stavy: do `Confirmed` ji dostane už továrna
+(`placeWithItems()` dostává kompletní objednávku, takže `Draft` opouští hned),
+odtud `MarkOrderPaid` do `Paid` a `ShipOrder` do `Shipped`. Sága sama stav agregátu
+nemění – jen posílá příkazy a čeká na události.
+
+Právě tady se pozná, jestli je proces domyšlený: chybí-li jediný příkaz, sága doběhne
+do `Completed` a objednávka zůstane rozpracovaná. Nikde nespadne, jen se stavy rozejdou.
+Test procesu proto nesmí končit u stavu ságy – musí kontrolovat i stav agregátu.
 
 Orchestrace přináší oproti choreografii několik výhod: celý doménový proces
 je popsán na **jediném místě**, takže vývojář okamžitě vidí kompletní tok
@@ -1511,10 +1515,16 @@ use App\Ordering\Application\Saga\OrderSagaRepository;
 use App\Payment\Application\Command\RefundCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 
 #[AsMessageHandler]
 final readonly class CheckSagaTimeoutHandler
 {
+    // Táž systémová identita jako v OrderProcessManager – timeout ruší
+    // objednávku jménem procesu, ne jménem uživatele.
+    private const SYSTEM_ACTOR = '01920000-0000-7000-8000-000000000001';
+
     public function __construct(
         private OrderSagaRepository $sagaRepository,
         private MessageBusInterface $commandBus,
@@ -2026,9 +2036,16 @@ use App\Warehouse\Application\Command\ReserveStock;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
+use App\Ordering\Application\Command\MarkOrderPaid;
 
 final class OrderProcessManagerTest extends TestCase
 {
+    // Identifikátory jsou UUID – OrderId a CustomerId jinou hodnotu nepřijmou.
+    private const ORDER_ID    = '01a07424-28ff-7c31-9d40-6f2a1c8e5b03';
+    private const CUSTOMER_ID = '01a07424-28ff-7c31-9d40-6f2a1c8e5b04';
+
     private MessageBusInterface $commandBus;
     private OrderSagaRepository $repository;
     private OrderProcessManager $saga;
@@ -2068,8 +2085,8 @@ final class OrderProcessManagerTest extends TestCase
 
     /** Zkratka – integrační událost má pět polí, testy z nich mění dvě. */
     private function orderPlaced(
-        string $orderId = 'order-1',
-        string $customerId = 'cust-1',
+        string $orderId = self::ORDER_ID,
+        string $customerId = self::CUSTOMER_ID,
         int $totalAmountCents = 10000,
     ): OrderPlacedIntegrationEvent {
         return new OrderPlacedIntegrationEvent(
@@ -2085,16 +2102,16 @@ final class OrderProcessManagerTest extends TestCase
     public function testOrderPlacedInitiatesPayment(): void
     {
         ($this->saga)($this->orderPlaced(
-            orderId: 'order-1',
-            customerId: 'cust-1',
+            orderId: self::ORDER_ID,
+            customerId: self::CUSTOMER_ID,
             totalAmountCents: 10000,
         ));
 
         self::assertCount(1, $this->dispatchedCommands);
         self::assertInstanceOf(ChargeCustomer::class, $this->dispatchedCommands[0]);
-        self::assertSame('order-1', $this->dispatchedCommands[0]->orderId);
+        self::assertSame(self::ORDER_ID, $this->dispatchedCommands[0]->orderId);
 
-        $state = $this->repository->findByCorrelationId('order-1');
+        $state = $this->repository->findByCorrelationId(self::ORDER_ID);
         self::assertSame(OrderSagaStatus::AwaitingPayment, $state->status());
     }
 
@@ -2103,12 +2120,14 @@ final class OrderProcessManagerTest extends TestCase
         ($this->saga)($this->orderPlaced());
         $this->dispatchedCommands = [];
 
-        ($this->saga)(new PaymentSucceeded(orderId: 'order-1'));
+        ($this->saga)(new PaymentSucceeded(orderId: self::ORDER_ID));
 
-        self::assertCount(1, $this->dispatchedCommands);
-        self::assertInstanceOf(ReserveStock::class, $this->dispatchedCommands[0]);
+        // onPaymentSucceeded dispatchne dva příkazy: MarkOrderPaid a ReserveStock.
+        self::assertCount(2, $this->dispatchedCommands);
+        self::assertInstanceOf(MarkOrderPaid::class, $this->dispatchedCommands[0]);
+        self::assertInstanceOf(ReserveStock::class, $this->dispatchedCommands[1]);
 
-        $state = $this->repository->findByCorrelationId('order-1');
+        $state = $this->repository->findByCorrelationId(self::ORDER_ID);
         self::assertSame(OrderSagaStatus::AwaitingStockReservation, $state->status());
     }
 
@@ -2118,11 +2137,11 @@ final class OrderProcessManagerTest extends TestCase
         $this->dispatchedCommands = [];
 
         ($this->saga)(new PaymentFailed(
-            orderId: 'order-1',
+            orderId: self::ORDER_ID,
             failureReason: 'Insufficient funds',
         ));
 
-        $state = $this->repository->findByCorrelationId('order-1');
+        $state = $this->repository->findByCorrelationId(self::ORDER_ID);
         self::assertSame(OrderSagaStatus::Failed, $state->status());
     }
 }

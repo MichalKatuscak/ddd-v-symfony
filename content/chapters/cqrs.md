@@ -1739,6 +1739,9 @@ use App\Ordering\Domain\Event\OrderShipped;
 use App\Ordering\Infrastructure\Projection\OrderDashboardProjector;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\Shipping\Domain\ValueObject\ShipmentId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use Symfony\Component\Uid\Uuid;
 
 final class OrderDashboardProjectorTest extends KernelTestCase
 {
@@ -1761,8 +1764,8 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         // Given: objednávka byla vytvořena
         ($this->projector)(new OrderPlacedIntegrationEvent(
             eventId: Uuid::v7(),
-            orderId: 'order-1',
-            customerId: 'customer-1',
+            orderId: self::ORDER_ID,
+            customerId: self::CUSTOMER_ID,
             items: [],
             totalAmountCents: 1500,
             occurredAt: new \DateTimeImmutable('2026-03-01 10:00:00'),
@@ -1770,7 +1773,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
 
         // When: objednávka byla odeslána
         ($this->projector)(new OrderShipped(
-            orderId: 'order-1',
+            orderId: OrderId::fromString(self::ORDER_ID),
             shipmentId: $shipmentId,
             occurredAt: new \DateTimeImmutable('2026-03-02 08:30:00'),
         ));
@@ -1778,7 +1781,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         // Then: read model obsahuje aktuální stav
         $row = $this->connection->fetchAssociative(
             'SELECT * FROM order_dashboard WHERE order_id = :id',
-            ['id' => 'order-1'],
+            ['id' => self::ORDER_ID],
         );
 
         $this->assertSame('shipped', $row['status']);
@@ -1788,10 +1791,12 @@ final class OrderDashboardProjectorTest extends KernelTestCase
 
     public function testIdempotentProjection(): void
     {
-        $event = new OrderPlaced(
-            orderId: 'order-2',
-            customerName: 'Eva Černá',
-            totalAmount: 800,
+        $event = new OrderPlacedIntegrationEvent(
+            eventId: Uuid::v7(),
+            orderId: self::OTHER_ORDER_ID,
+            customerId: self::CUSTOMER_ID,
+            items: [],
+            totalAmountCents: 800,
             occurredAt: new \DateTimeImmutable('2026-03-01 12:00:00'),
         );
 
@@ -1802,7 +1807,7 @@ final class OrderDashboardProjectorTest extends KernelTestCase
         // Read model obsahuje záznam pouze jednou
         $count = $this->connection->fetchOne(
             'SELECT COUNT(*) FROM order_dashboard WHERE order_id = :id',
-            ['id' => 'order-2'],
+            ['id' => self::OTHER_ORDER_ID],
         );
 
         $this->assertSame(1, (int) $count);
