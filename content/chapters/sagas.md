@@ -94,7 +94,7 @@ a timeouty. Kompenzace v jeho pojetí skoro nefigurují; ty jsou Richardsonova l
 
 Výsledkem jsou tři neslučitelné definice, které dnes koexistují. Tým Microsoft
 patterns & practices termín „sága“ v průvodci *CQRS Journey* záměrně opustil a mluví
-jen o Process Manageru, a to s odkazem na starší a odlišný význam slova. Navrhuje přitom dělicí
+jen o Process Manageru. Odkazuje přitom na starší a odlišný význam toho slova. Navrhuje přitom dělicí
 čáru, kterou praxe nepřevzala: process manager routuje zprávy uvnitř jednoho Bounded
 Contextu, sága řídí proces přes hranice kontextů. Richardson naopak ságou nazývá
 obojí a orchestraci bere jako implementační detail. Třetí čára vede podle způsobu
@@ -1758,9 +1758,9 @@ není atomická: dva workery mohou projít guardem současně, protože každý 
 svou kopií načtenou před zápisem. Duplicitní zápis zachytí až optimistický zámek
 a jeden z workerů dostane `OptimisticLockException`. Guard tedy odfiltruje běžné
 redelivery, souběh řeší až verze řádku. Druhé omezení je růst: `processedEventIds`
-se nikdy nezmenšuje. U ságy s desítkami kroků to nevadí, u dlouhoběžících procesů
-s tisíci událostí sloupec bobtná a je potřeba ho po dokončení ságy vyprázdnit nebo
-držet jen posledních N identifikátorů.
+se nikdy nezmenšuje. U ságy s desítkami kroků to nevadí. U dlouhoběžících procesů
+s tisíci událostí ale sloupec bobtná: po dokončení ságy ho vyprázdněte, nebo
+si držte jen posledních N identifikátorů.
 
 ### Distributed deadlock mezi ságami {#distributed-deadlock-heading}
 
@@ -2671,10 +2671,9 @@ final class CheckStaleSagasCommand extends Command
 :::callout{type="note"}
 ### Integrace s alertingem {#alerting-heading}
 
-V produkčním prostředí se detekce zaseklých ság napojuje na alertingový systém:
-**Prometheus** pro metriky (počet aktivních ság, průměrná doba dokončení),
-**Grafana** pro dashboardy a **PagerDuty** nebo obdobný nástroj
-pro eskalaci kritických situací. Příkaz `app:saga:check-stale` může běžet jako
+V produkci se detekce zaseklých ság napojuje na alerting. **Prometheus** sbírá
+metriky (počet aktivních ság, průměrná doba dokončení), **Grafana** kreslí
+dashboardy a **PagerDuty** nebo obdobný nástroj eskaluje kritické situace. Příkaz `app:saga:check-stale` může běžet jako
 Kubernetes CronJob nebo Symfony Scheduler task.
 :::
 
