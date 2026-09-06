@@ -1820,6 +1820,31 @@ který kniha označuje za alternativu nebo neúplný (choreografické handlery, 
 
 **Tím revize končí.** Nástupcem je šest kontrol v CI.
 
+## Zadání určuje, co se najde (2026-09-06)
+
+Dvacet kol jsem posílal stavby s předepsaným seznamem: „ověř těchhle pět oprav". Nálezy
+postupně klesaly a já z toho vyvodil, že revize konverguje. **Byl to artefakt zadání.**
+
+Dvaadvacátá stavba dostala poprvé úkol bez seznamu — jen „postav aplikaci a řekni, jestli
+tě něco zastaví nebo tiše nechá postavit rozbitou aplikaci". Našla **čtyři věci, které
+žádné z předchozích dvaceti kol nenašlo**:
+
+| nález | proč ho předchozí kola minula |
+|---|---|
+| `migrations:migrate` skončí na „there are no registered migrations" | ptal jsem se na opravy, ne na instalaci od nuly |
+| bez relaye a workeru aplikace tiše nedělá nic | happy path jsem vždy ověřoval **se** spuštěnými workery |
+| `Assert\Uuid` propouští prázdný řetězec → 500 místo 422 | testoval jsem „nesmyslné productId", ne prázdné |
+| idempotenci ságy nešlo zapnout, události nenesly `eventId` | guard jsem nikdy nezadal k ověření |
+
+Druhý nález je z nich nejzávažnější a nejlíp ukazuje ten mechanismus: **objednávka projde,
+vrátí úspěch, detail se vykreslí — a pak se nestane nic.** Zůstane zamčená procesem, který
+nikdy nezačal, nepůjde zrušit a v žádném read modelu se neobjeví. Nikde nespadne výjimka.
+Dvacet kol to nevidělo, protože jsem workery vždycky spustil dřív, než jsem se zeptal.
+
+**Poučení: klesající počet nálezů neznamená, že chyby došly. Může znamenat, že se ptám
+pořád na totéž.** Ověřovací stavby proto nadále zadávat **bez seznamu, co potvrdit** —
+maximálně s vymezením rozsahu (které kapitoly, které cesty), nikdy s výčtem oprav.
+
 ## Jak zadat studii (šablona promptu pro agenta)
 
 Model: opus. Jeden agent = jedna kapitola. Paralelně max 4–5, jinak hrozí session limit.
