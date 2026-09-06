@@ -342,7 +342,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Specification;
 
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\SharedKernel\Domain\Money;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 
@@ -375,7 +375,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Specification;
 
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 
 /**
@@ -413,7 +413,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Specification;
 
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 
@@ -463,7 +463,7 @@ namespace App\Ordering\Application\Service;
 // BlacklistRegistry je port vracející CustomerId zákazníků na blacklistu;
 // implementaci dodává Infrastructure vrstva.
 use App\Ordering\Application\BlacklistRegistry;
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Specification\EligibleForFreeShipping;
 use App\Ordering\Domain\Specification\InEUCountry;
 use App\Ordering\Domain\Specification\NotInBlacklist;
@@ -601,7 +601,7 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Specification;
 
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\SharedKernel\Domain\Money;
 use App\SharedKernel\Domain\Specification\CompositeSpecification;
 use App\SharedKernel\Domain\Specification\QuerySpecification;
@@ -646,8 +646,8 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Repository;
 
-use App\Ordering\Domain\Order;
-use App\Ordering\Domain\OrderRepository;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
 use App\SharedKernel\Domain\Specification\QuerySpecification;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
@@ -990,7 +990,7 @@ V PHP 8.4 je preferovanou formou Factory statická pojmenovaná
 konstrukční metoda na samotném agregátu (named constructor). Konstruktor je privátní,
 publikujete pouze pojmenované entry pointy s doménovou sémantikou:
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);
@@ -1126,7 +1126,7 @@ namespace App\Ordering\Domain\Factory;
 
 use App\Ordering\Domain\Cart\CartId;
 use App\Ordering\Domain\Cart\CartRepository;
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Pricing\PricingService;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use Psr\Clock\ClockInterface;

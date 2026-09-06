@@ -441,7 +441,7 @@ transakci*, ve které ukládá samotný agregát.
 :::callout{type="pattern"}
 ### PHP: Agregát Order produkuje doménové události {#order-aggregate-heading}
 
-:::code{language="php" filename="src/Ordering/Domain/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php"}
 <?php
 
 declare(strict_types=1);

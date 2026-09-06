@@ -967,7 +967,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering;
 
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\EventSerializer;
 
@@ -1610,7 +1610,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ordering;
 
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\Snapshot;
 use App\Infrastructure\EventSourcing\SnapshotStore;

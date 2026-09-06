@@ -262,7 +262,7 @@ declare(strict_types=1);
 namespace App\Ordering\Infrastructure\Security;
 
 use App\Identity\Infrastructure\Security\SecurityUser;
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
@@ -372,7 +372,7 @@ declare(strict_types=1);
 namespace App\Ordering\Infrastructure\Http;
 
 use App\Ordering\Application\Command\CancelOrderCommand;
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -389,19 +389,68 @@ final class OrderController extends AbstractController
     {
         // Voter už rozhodl; controller jen přeloží vstup na command
         $bus->dispatch(new CancelOrderCommand(
-            orderId: $order->id(),
+            orderId: $order->id,
             reason:  (string) $request->request->get('reason', ''),
             actorId: $this->getUser()->customerId(),
         ));
 
-        return $this->redirectToRoute('order_detail', ['id' => (string) $order->id()->value]);
+        return $this->redirectToRoute('order_detail', ['id' => $order->id->value]);
     }
 }
 :::
 
 Parametr `statusCode: 404` mění odpověď z 403 na 404. Rozdíl není kosmetický: 403 potvrdí útočníkovi, že objednávka s daným ID existuje, a umožní enumerovat cizí identifikátory. Ke stejnému tématu se vrací [callout o 403 vs. 409](#aggregate-403-vs-409-heading).
 
-Dvě omezení, která je dobré znát předem. Atribut potřebuje subjekt už jako objekt, takže se neobejde bez `#[MapEntity]` nebo obdobného převodu – a tím se dotaz do databáze přesouvá do controlleru. A jakmile controller command jen odešle na asynchronní bus, `#[IsGranted]` chrání pouze vstup do fronty; zpracování ve workeru běží bez tokenu a řeší ho [následující sekce](#async-authorization). Atribut proto kontrolu v handleru nenahrazuje, jen ji doplňuje na hranici.
+Dvě omezení, která je dobré znát předem. Atribut potřebuje subjekt už jako objekt, takže se neobejde bez převodu z parametru routy – a tím se dotaz do databáze přesouvá do controlleru. `#[MapEntity]` na to samo nestačí: `EntityValueResolver` předá `find()` řetězec z URL, jenže identita je namapovaná vlastním typem, který řetězec odmítne. Resolver výjimku spolkne a vrátí 404, takže se hledá špatným směrem:
+
+```
+Could not convert PHP value '01a074c3-…' to type OrderIdType.
+Expected one of the following types: null, OrderId.
+```
+
+Řešení je vlastní resolver, který řetězec převede na hodnotový objekt dřív, než se sáhne do repozitáře:
+
+:::code{language="php" filename="src/Ordering/Infrastructure/Http/OrderValueResolver.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Infrastructure\Http;
+
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\ValueObject\OrderId;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
+use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Uid\Uuid;
+
+// Vyšší priorita než EntityValueResolver, jinak se k slovu nedostane.
+#[AutoconfigureTag('controller.argument_value_resolver', ['priority' => 150])]
+final readonly class OrderValueResolver implements ValueResolverInterface
+{
+    public function __construct(private OrderRepository $orders) {}
+
+    public function resolve(Request $request, ArgumentMetadata $argument): iterable
+    {
+        if ($argument->getType() !== Order::class) {
+            return [];
+        }
+
+        $id = $request->attributes->get('id');
+
+        if (!is_string($id) || !Uuid::isValid($id)) {
+            throw new NotFoundHttpException('Neplatné ID objednávky.');
+        }
+
+        yield $this->orders->get(OrderId::fromString($id));
+    }
+}
+:::
+
+A jakmile controller command jen odešle na asynchronní bus, `#[IsGranted]` chrání pouze vstup do fronty; zpracování ve workeru běží bez tokenu a řeší ho [následující sekce](#async-authorization). Atribut proto kontrolu v handleru nenahrazuje, jen ji doplňuje na hranici.
 
 ### Proč ne Symfony ACL {#no-symfony-acl}
 
@@ -419,7 +468,7 @@ namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\CancelOrderCommand;
 use App\Ordering\Application\Exception\AccessDeniedDomainException;
-use App\Ordering\Domain\OrderRepository;
+use App\Ordering\Domain\Repository\OrderRepository;
 use App\Ordering\Infrastructure\Security\OrderVoter;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -444,6 +493,51 @@ final readonly class CancelOrderHandler
 
         $order->cancel(reason: $command->reason, when: new \DateTimeImmutable());
         $this->orders->save($order);
+        $this->em->flush();
+
+        // Bez tohohle kroku agregát skončí v cancelled, ale dashboard
+        // zůstane na placed. Nic nespadne – stavy se jen rozejdou.
+        foreach ($order->releaseEvents() as $event) {
+            $this->eventBus->dispatch($event);
+        }
+    }
+}
+:::
+
+Obě výjimky, které v kapitole padají, jsou obyčejné doménové třídy. Dělí je vrstva:
+autorizační patří aplikaci, časové okno doméně, a aplikační vrstva každou překládá
+na jiný HTTP status.
+
+:::code{language="php" filename="src/Ordering/Application/Exception/AccessDeniedDomainException.php + src/Ordering/Domain/Exception/CancellationWindowExpiredException.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\Application\Exception;
+
+/** Aktér na operaci nemá právo. Aplikační vrstva to překládá na 403. */
+final class AccessDeniedDomainException extends \DomainException
+{
+}
+
+namespace App\Ordering\Domain\Exception;
+
+use App\Ordering\Domain\ValueObject\OrderId;
+
+/** Právo je v pořádku, jen uplynula lhůta. Odtud 409, ne 403. */
+final class CancellationWindowExpiredException extends \DomainException
+{
+    public function __construct(
+        public readonly OrderId $orderId,
+        public readonly \DateTimeImmutable $placedAt,
+        public readonly \DateTimeImmutable $attemptedAt,
+    ) {
+        parent::__construct(sprintf(
+            'Objednávku „%s“ potvrzenou %s už nelze stornovat (pokus %s).',
+            $orderId->value,
+            $placedAt->format('Y-m-d H:i'),
+            $attemptedAt->format('Y-m-d H:i'),
+        ));
     }
 }
 :::
@@ -452,23 +546,25 @@ Po této kontrole zavolá handler doménovou operaci `$order->cancel(...)`, kter
 
 ### Voter v Twig template {#voter-twig-heading}
 
-Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Cancel order“ pro ne-vlastníka). V Twigu funkce `is_granted()` volá tentýž `AuthorizationCheckerInterface`. Proměnnou `now` (`\DateTimeImmutable`) předává do šablony controller – doménová metoda `isCancellable()` si aktuální čas nezískává sama:
+Stejný Voter pokrývá i view-level rozhodnutí (skrýt tlačítko „Zrušit objednávku“ pro ne-vlastníka). V Twigu funkce `is_granted()` volá tentýž `AuthorizationCheckerInterface`. Proměnnou `now` (`\DateTimeImmutable`) předává do šablony controller – doménová metoda `isCancellable()` si aktuální čas nezískává sama. Šablona přitom čte agregát přímo, což u detailu jedné objednávky stačí; jakmile obrazovka potřebuje jméno zákazníka nebo data z jiného kontextu, patří jí read model, ne getter navíc na agregátu:
 
 :::code{language="twig" filename="templates/order/detail.html.twig" highlights="4,12,18"}
 {# templates/order/detail.html.twig #}
-<h1>Order #{{ order.id }}</h1>
+{# Šablona sahá jen na to, co agregát opravdu má: identitu zákazníka,
+   ne objekt Customer, a hodnotu enumu, ne vymyšlený label. #}
+<h1>Objednávka {{ order.id.value }}</h1>
 
 {% if is_granted('order.view', order) %}
     <dl>
-        <dt>Customer</dt><dd>{{ order.customer.name }}</dd>
-        <dt>Total</dt>   <dd>{{ order.total|format_currency('CZK') }}</dd>
-        <dt>Status</dt>  <dd>{{ order.status.label }}</dd>
+        <dt>Zákazník</dt><dd>{{ order.customerId.value }}</dd>
+        <dt>Celkem</dt>  <dd>{{ (order.totalAmount.amountInCents / 100)|number_format(2, ',', ' ') }} Kč</dd>
+        <dt>Stav</dt>    <dd>{{ order.status.value }}</dd>
     </dl>
 {% endif %}
 
 {% if is_granted('order.cancel', order) and order.isCancellable(now) %}
-    <form method="post" action="{{ path('order_cancel', {id: order.id}) }}">
-        <button type="submit">Cancel order</button>
+    <form method="post" action="{{ path('order_cancel', {id: order.id.value}) }}">
+        <button type="submit">Zrušit objednávku</button>
     </form>
 {% endif %}
 
@@ -520,14 +616,22 @@ namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\CancelOrderCommand;
 use App\Ordering\Application\Exception\AccessDeniedDomainException;
-use App\Ordering\Domain\OrderRepository;
+use App\Ordering\Domain\Repository\OrderRepository;
 use App\SharedKernel\Domain\SystemActor;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler(bus: 'command.bus')]
 final readonly class CancelOrderHandler
 {
-    public function __construct(private OrderRepository $orders) {}
+    public function __construct(
+        private OrderRepository $orders,
+        private EntityManagerInterface $em,
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
+    ) {}
 
     public function __invoke(CancelOrderCommand $command): void
     {
@@ -565,7 +669,7 @@ namespace App\Ordering\Application\Handler;
 use App\Identity\Infrastructure\Security\SecurityUserProvider;
 use App\Ordering\Application\Command\RefundOrderCommand;
 use App\Ordering\Application\Exception\AccessDeniedDomainException;
-use App\Ordering\Domain\OrderRepository;
+use App\Ordering\Domain\Repository\OrderRepository;
 use App\Ordering\Infrastructure\Security\OrderVoter;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Security\Core\Authorization\UserAuthorizationCheckerInterface;
@@ -756,10 +860,12 @@ Nejjednodušší, ale s *únikem dat*: data se z databáze načtou všechna, jen
 
 :::code{language="twig" filename="templates/order/detail.html.twig" highlights="7,8,9,10,11,12,13,14,15,16"}
 {# templates/order/detail.html.twig #}
+{# Tady už jde o read model, ne o agregát: obrazovka potřebuje jméno
+   zákazníka a audit log, což jsou data z jiných kontextů. #}
 <dl>
-    <dt>Customer</dt> <dd>{{ order.customer.name }}</dd>
-    <dt>Total</dt>    <dd>{{ order.total|format_currency('CZK') }}</dd>
-    <dt>Status</dt>   <dd>{{ order.status.label }}</dd>
+    <dt>Zákazník</dt> <dd>{{ order.customerName }}</dd>
+    <dt>Celkem</dt>   <dd>{{ order.totalFormatted }}</dd>
+    <dt>Stav</dt>     <dd>{{ order.status }}</dd>
 
     {% if is_granted('order.audit_log', order) %}
         <dt>Audit log</dt>
@@ -838,7 +944,7 @@ Naivní řešení načte stránku výsledků a přefiltruje ji v PHP:
 {# templates/order/list.html.twig (anti-vzor) #}
 {% for order in orders %}
     {% if is_granted('order.view', order) %}
-        <tr><td>{{ order.id }}</td><td>{{ order.status.label }}</td></tr>
+        <tr><td>{{ order.id.value }}</td><td>{{ order.status.value }}</td></tr>
     {% endif %}
 {% endfor %}
 :::
@@ -1241,34 +1347,55 @@ namespace Tests\Ordering\Domain;
 
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\CustomerId;
-use App\Ordering\Domain\ValueObject\OrderId;
-use App\Ordering\Domain\ValueObject\OrderStatus;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\Shipping\Domain\ValueObject\ShipmentId;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
 
 final class OrderFactory
 {
-    public static function placed(string $at = '2026-04-29 10:00:00'): Order
+    private const AT = '2026-04-29 10:00:00';
+
+    public static function placed(string $at = self::AT): Order
     {
-        return self::inState(OrderStatus::Confirmed, CustomerId::generate(), $at);
+        return self::build(CustomerId::generate(), $at);
     }
 
     public static function placedFor(CustomerId $customerId): Order
     {
-        return self::inState(OrderStatus::Confirmed, $customerId, '2026-04-29 10:00:00');
+        return self::build($customerId, self::AT);
     }
 
     public static function shipped(): Order
     {
-        return self::inState(OrderStatus::Shipped, CustomerId::generate(), '2026-04-29 10:00:00');
+        $order = self::build(CustomerId::generate(), self::AT);
+        $order->markPaid();
+        $order->ship(ShipmentId::generate());
+
+        return $order;
     }
 
-    private static function inState(OrderStatus $status, CustomerId $customerId, string $at): Order
+    /**
+     * Builder jde přes veřejné API agregátu, ne přes reflexi. Konstruktor
+     * je privátní a stav se mění jen přechody – kdyby si test sahal dovnitř,
+     * přestal by hlídat právě ta pravidla, kvůli kterým existuje.
+     */
+    private static function build(CustomerId $customerId, string $at): Order
     {
-        return new Order(
-            OrderId::generate(),
+        // Poslední parametr je čas potvrzení. Bez něj by se scénář
+        // „potvrzeno v 10:00, stornováno ve 12:00" nedal postavit jinak
+        // než reflexí – a test by přestal hlídat pravidla agregátu.
+        $order = Order::placeWithFirstItem(
             $customerId,
-            $status,
+            ProductId::generate(),
+            1,
+            new Money(10_000, Currency::CZK),
             new \DateTimeImmutable($at),
         );
+
+        $order->releaseEvents(); // fronta událostí patří testu, ne továrně
+
+        return $order;
     }
 }
 :::
@@ -1282,7 +1409,7 @@ namespace Tests\Ordering\Domain;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Exception\CancellationWindowExpiredException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
-use App\Ordering\Domain\Order;
+use App\Ordering\Domain\Model\Order;
 use PHPUnit\Framework\TestCase;
 
 final class OrderCancelTest extends TestCase

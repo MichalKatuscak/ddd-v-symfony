@@ -465,12 +465,13 @@ class Order extends AggregateRoot
         ProductId $productId,
         int $quantity,
         Money $unitPrice,
+        ?\DateTimeImmutable $at = null,
     ): self {
         $order = new self(OrderId::generate(), $customerId);
         $order->addItem($productId, $quantity, $unitPrice);
         // Objednávka přišla kompletní, takže rovnou opouští Draft.
         // Draft je stav rozpracovaného košíku, ne odeslané objednávky.
-        $order->confirm();
+        $order->confirm($at);
 
         // Kanonická OrderPlaced (06.08) nese identitu objednávky a zákazníka;
         // čas si doplní sama. Částka do doménové události nepatří – odvodí
@@ -502,7 +503,10 @@ class Order extends AggregateRoot
         $this->items->add(new OrderItem($this, $productId, $quantity, $unitPrice));
     }
 
-    public function confirm(): void
+    // Čas jde vložit zvenku ze stejného důvodu jako u cancel(): jinak
+    // se scénář „potvrzeno v 10:00, stornováno ve 12:00" nedá otestovat
+    // jinak než reflexí.
+    public function confirm(?\DateTimeImmutable $at = null): void
     {
         if ($this->status !== OrderStatus::Draft) {
             throw InvalidOrderStateTransitionException::cannotTransition(
@@ -516,7 +520,7 @@ class Order extends AggregateRoot
         }
 
         $this->status = OrderStatus::Confirmed;
-        $this->placedAt = new \DateTimeImmutable();
+        $this->placedAt = $at ?? new \DateTimeImmutable();
     }
 
     public function placedAt(): ?\DateTimeImmutable
