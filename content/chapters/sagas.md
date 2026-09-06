@@ -185,9 +185,15 @@ final readonly class ChargeCustomer implements CompensatableCommand
 
     public function compensation(): RefundCustomer
     {
+        // Tady je vidět mez vzoru: příkaz identifikátor transakce nezná,
+        // protože ho teprve vytvoří. Sebekompenzující příkaz proto vystačí
+        // jen tam, kde kompenzace nepotřebuje výsledek původního kroku.
+        // Objednávkový proces v téhle knize ji z toho důvodu řídí
+        // z Process Manageru, který si transactionId uloží do kontextu.
         return new RefundCustomer(
             orderId: $this->orderId,
             customerId: $this->customerId,
+            transactionId: '',
             amountCents: $this->amountCents,
             reason: 'Saga compensation',
         );
@@ -210,6 +216,10 @@ final readonly class RefundCustomer
     public function __construct(
         public string $orderId,
         public string $customerId,
+        // Bez identifikátoru transakce nemá brána co vrátit. Sága si ho
+        // proto z PaymentSucceeded ukládá do kontextu – je to jediné
+        // místo, kde ho v tu chvíli má kdo znát.
+        public string $transactionId,
         public int $amountCents,
         public string $reason,
     ) {}
@@ -631,6 +641,7 @@ final class OrderProcessManager
         }
 
         $state->transitionTo(OrderSagaStatus::AwaitingStockReservation);
+        $state->updateContext('transactionId', $event->transactionId);
         $state->updateContext('completedSteps', [
             ...$state->context()['completedSteps'],
             'payment_charged',
@@ -711,6 +722,7 @@ final class OrderProcessManager
         $this->commandBus->dispatch(new RefundCustomer(
             orderId: $event->orderId,
             customerId: $state->context()['customerId'],
+            transactionId: $state->context()['transactionId'],
             amountCents: $state->context()['amountCents'],
             reason: 'Zboží není skladem',
         ));
@@ -743,6 +755,7 @@ final class OrderProcessManager
                 'payment_charged' => $this->commandBus->dispatch(new RefundCustomer(
                     orderId: $event->orderId->value,
                     customerId: $state->context()['customerId'],
+                    transactionId: $state->context()['transactionId'],
                     amountCents: $state->context()['amountCents'],
                     reason: 'Objednávku zrušil zákazník',
                 )),
@@ -1205,12 +1218,70 @@ final readonly class CancelShipment
 }
 :::
 
-`ReserveStockHandler`, `CreateShipmentHandler` a `RefundCustomerHandler` sedí ve svých
-kontextech a mají tvar `ChargeCustomerHandler`: zavolají službu a vydají událost
-o výsledku. Kompenzační dvojice `ReleaseStockHandler` a `CancelShipmentHandler` je ještě
-kratší – zavolá port a nevydá nic, protože na uvolnění rezervace nikdo nečeká. Vynechat
-je ale nejde: sága je dispatchuje, a chybějící handler se projeví až jako
-`No handler for message` v dead-letter frontě, zatímco proces poběží dál. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
+Zbylých pět handlerů sedí ve svých kontextech a od `ChargeCustomerHandler` se liší jen
+tím, co volají. Vypisuji je celé, protože chybějící handler se projeví až jako
+`No handler for message` v dead-letter frontě, zatímco proces poběží dál – a to je
+druh chyby, kterou nikdo nehledá, dokud se stavy nerozejdou.
+
+:::code{language="php" filename="src/Warehouse/Application/Handler/ReserveStockHandler.php + ReleaseStockHandler.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Warehouse\Application\Handler;
+
+use App\Warehouse\Application\Command\ReleaseStock;
+use App\Warehouse\Application\Command\ReserveStock;
+use App\Warehouse\Domain\Event\StockReservationFailed;
+use App\Warehouse\Domain\Event\StockReserved;
+use App\Warehouse\Domain\StockService;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+
+#[AsMessageHandler(bus: 'command.bus')]
+final readonly class ReserveStockHandler
+{
+    public function __construct(
+        private StockService $stock,
+        #[Target('event.bus')]
+        private MessageBusInterface $eventBus,
+    ) {}
+
+    public function __invoke(ReserveStock $command): void
+    {
+        try {
+            $this->stock->reserve($command->orderId);
+        } catch (\RuntimeException $e) {
+            $this->eventBus->dispatch(new StockReservationFailed(
+                orderId: $command->orderId,
+                reason: $e->getMessage(),
+            ));
+
+            return;
+        }
+
+        $this->eventBus->dispatch(new StockReserved(orderId: $command->orderId));
+    }
+}
+
+#[AsMessageHandler(bus: 'command.bus')]
+final readonly class ReleaseStockHandler
+{
+    public function __construct(private StockService $stock) {}
+
+    public function __invoke(ReleaseStock $command): void
+    {
+        // Kompenzace nevydává událost: na uvolnění rezervace nikdo nečeká.
+        $this->stock->release($command->orderId);
+    }
+}
+:::
+
+`CreateShipmentHandler` a `CancelShipmentHandler` v kontextu `Shipping` vypadají stejně,
+jen volají `ShippingService` a úspěch hlásí událostí `ShipmentCreated` se `ShipmentId`
+z brány. `RefundCustomerHandler` je protějšek `ChargeCustomerHandler`: zavolá
+`PaymentGateway::refund()` a podle výsledku vydá `RefundSucceeded`, nebo `RefundFailed`. `CancelOrderHandler` je jako `MarkOrderPaidHandler`, jen volá
 `cancel($command->reason, new \DateTimeImmutable())`. Porty `StockService` a `ShippingService` mají stejnou
 stavbu jako `PaymentGateway` – rezervovat, uvolnit, vytvořit zásilku, zrušit ji.
 
@@ -2017,6 +2088,7 @@ final readonly class CheckSagaTimeoutHandler
         $this->commandBus->dispatch(new RefundCustomer(
             orderId: $state->correlationId(),
             customerId: $state->context()['customerId'],
+            transactionId: $state->context()['transactionId'],
             amountCents: $state->context()['amountCents'],
             reason: 'Timeout: stock reservation not received',
         ));
@@ -2172,6 +2244,7 @@ private function compensate(OrderSaga $state): void
                 new RefundCustomer(
                     orderId: $state->correlationId(),
                     customerId: $state->context()['customerId'],
+                    transactionId: $state->context()['transactionId'],
                     amountCents: $state->context()['amountCents'],
                     reason: 'Order saga compensation',
                 ),

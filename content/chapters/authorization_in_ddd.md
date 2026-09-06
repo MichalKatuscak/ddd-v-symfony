@@ -182,7 +182,9 @@ security:
                 # kterou kniha nikde nedefinuje – první proklik po loginu
                 # by skončil na 404.
                 default_target_path: app_profile
-            logout: ~
+            # Bez `target` platí totéž co u přihlášení: odhlášení
+            # přesměruje na `/` a skončí na 404.
+            logout: { target: login }
 
     access_control:
         # Veřejné endpointy

@@ -586,8 +586,10 @@ final readonly class PlaceOrder
         public string $customerId,
 
         // Bez těchhle pravidel dojde na kontrolu až v hodnotovém objektu
-        // uvnitř agregátu – tedy jako 500 místo 422. Validace na hranici
-        // odmítne nesmysl dřív, než se vůbec sestaví doménový model.
+        // uvnitř agregátu. Samotné atributy ale HTTP status neurčují:
+        // ValidationFailedException z Messengeru žádný nenese, takže ji
+        // musí odchytit kontroler (viz 12.12) a přeložit na 422. Jinak
+        // vybublá jako 500, jen z jiného místa.
         #[Assert\Count(min: 1)]
         #[Assert\All([
             new Assert\Collection([

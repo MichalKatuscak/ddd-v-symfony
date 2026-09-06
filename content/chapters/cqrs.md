@@ -1398,6 +1398,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\Exception\ValidationFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 use Symfony\Component\Routing\Attribute\Route;
@@ -1412,12 +1413,14 @@ final class PlaceOrderController extends AbstractController
     public function __invoke(Request $request, #[CurrentUser] SecurityUser $user): Response
     {
         // Form-encoded POST nese všechno jako řetězec, agregát chce int.
-        // Bez přetypování spadne Money::__construct() na typu.
+        // Bez přetypování spadne Money::__construct() na typu. Klíče se
+        // doplňují prázdnou hodnotou schválně: chybějící pole má odmítnout
+        // validátor commandu se srozumitelnou hláškou, ne PHP warningem.
         $items = array_map(
             static fn (array $row): array => [
-                'productId'        => (string) $row['productId'],
-                'quantity'         => (int) $row['quantity'],
-                'unitPriceInCents' => (int) $row['unitPriceInCents'],
+                'productId'        => (string) ($row['productId'] ?? ''),
+                'quantity'         => (int) ($row['quantity'] ?? 0),
+                'unitPriceInCents' => (int) ($row['unitPriceInCents'] ?? -1),
             ],
             $request->request->all('items'),
         );
@@ -1428,12 +1431,19 @@ final class PlaceOrderController extends AbstractController
             return new Response('Objednávka musí mít alespoň jednu položku.', 422);
         }
 
-        // PlaceOrderHandler vrací OrderId – identitu generuje agregát,
-        // ne kontroler. Kdyby ji určoval klient, obešel by tím továrnu.
-        $envelope = $this->commandBus->dispatch(new PlaceOrder(
-            customerId: $user->customerId()->value,
-            items: $items,
-        ));
+        try {
+            // PlaceOrderHandler vrací OrderId – identitu generuje agregát,
+            // ne kontroler. Kdyby ji určoval klient, obešel by tím továrnu.
+            $envelope = $this->commandBus->dispatch(new PlaceOrder(
+                customerId: $user->customerId()->value,
+                items: $items,
+            ));
+        } catch (ValidationFailedException $e) {
+            // Middleware validuje PŘED handlerem, takže výjimka nepřijde
+            // zabalená v HandlerFailedException a potřebuje vlastní větev.
+            // Bez ní vybublá jako 500, přestože jde o chybu vstupu.
+            return new Response((string) $e->getViolations(), 422);
+        }
 
         /** @var OrderId $orderId */
         $orderId = $envelope->last(HandledStamp::class)->getResult();
