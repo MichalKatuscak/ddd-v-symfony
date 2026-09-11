@@ -7,7 +7,7 @@ meta_description: "Kde má v DDD aplikaci sedět autorizace: edge, use case, agr
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
@@ -705,6 +705,8 @@ na jiný HTTP status.
 :::code{language="php" filename="src/Ordering/Application/Exception/AccessDeniedDomainException.php + src/Ordering/Domain/Exception/CancellationWindowExpiredException.php"}
 <?php
 
+// --- src/Ordering/Application/Exception/AccessDeniedDomainException.php ---
+
 declare(strict_types=1);
 
 namespace App\Ordering\Application\Exception;
@@ -713,6 +715,8 @@ namespace App\Ordering\Application\Exception;
 final class AccessDeniedDomainException extends \DomainException
 {
 }
+
+// --- src/Ordering/Domain/Exception/CancellationWindowExpiredException.php ---
 
 namespace App\Ordering\Domain\Exception;
 
@@ -1164,12 +1168,12 @@ Existují dva přístupy s odlišnými kompromisy:
 Nejjednodušší, ale s *únikem dat*: data se z databáze načtou všechna, jen se ve view zahodí. Pro většinu UI to stačí; na citlivá data nepatří: unikají přes HTML komentáře, JSON serializaci v JS aplikaci nebo ETag hashing.
 
 :::code{language="twig" filename="templates/order/detail.html.twig (varianta nad read modelem)" highlights="7,8,9,10,11,12,13,14,15,16"}
-{# Jiná varianta téže šablony než v 11.04. Tam čte agregát, tady read
-   model – obrazovka potřebuje jméno zákazníka a audit log, což jsou data
-   z jiných kontextů. Do projektu jde jedna z nich, ne obě. #}
+{# Jiná varianta téže šablony než v 11.04. Tam čte agregát, tady
+   OrderDetailDto z read modelu níže – obrazovka potřebuje audit log,
+   který agregát nenese. Do projektu jde jedna z nich, ne obě. #}
 <dl>
-    <dt>Zákazník</dt> <dd>{{ order.customerName }}</dd>
-    <dt>Celkem</dt>   <dd>{{ order.totalFormatted }}</dd>
+    <dt>Zákazník</dt> <dd>{{ order.customerId }}</dd>
+    <dt>Celkem</dt>   <dd>{{ (order.totalAmount / 100)|number_format(2, ',', ' ') }} Kč</dd>
     <dt>Stav</dt>     <dd>{{ order.status }}</dd>
 
     {% if is_granted('order.audit_log', order) %}
@@ -1245,9 +1249,9 @@ patří ze stejného důvodu jako ostatní projekce; jinak ji `migrations:diff` 
 
 :::code{language="sql" filename="migrations/Version20260906130000.php (výřez)"}
 CREATE TABLE order_audit_log (
-    id       INTEGER  PRIMARY KEY AUTOINCREMENT,
-    order_id CHAR(36) NOT NULL,
-    at       DATETIME NOT NULL,
+    id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    order_id UUID         NOT NULL,
+    at       TIMESTAMP(0) NOT NULL,
     action   VARCHAR(64)  NOT NULL,
     actor    VARCHAR(255) NOT NULL
 );

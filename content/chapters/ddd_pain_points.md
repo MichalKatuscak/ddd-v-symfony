@@ -7,7 +7,7 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
@@ -98,7 +98,7 @@ final class ConfirmTransferService
             $reservation = $this->reservations->get($command->reservationId);
 
             $order->markAsTransferred();
-            $reservation->confirmFor($order->id());
+            $reservation->confirmFor($order->id);
 
             $this->orders->save($order);
             $this->reservations->save($reservation);
@@ -289,8 +289,9 @@ generuje UUID sám, agregát ho jen přijme. Doctrine se nakonfiguruje bez gener
 ID mu předáváte hotové. Tři kapitoly k němu přidávají druhou továrnu na téže třídě, protože bez ní
 by nešlo ukázat jejich téma. [Návrh agregátu](/navrh-agregatu) má
 `placeWithFirstItem()`, kde invariant „objednávka má aspoň jednu položku“ vymáhá už
-signatura. [Outbox](/outbox-pattern) a [Doplňující vzory](/mene-zname-vzory) mají
-`placeWithItems()`, protože seznam položek potřebují v payloadu události. Vždycky jde
+signatura. [Outbox](/outbox-pattern) má `placeWithItems()`, protože seznam položek
+potřebuje v payloadu události. [Doplňující vzory](/mene-zname-vzory) mají `placePhysical()`
+se stejným principem, jen pod jménem, které říká, jaký druh objednávky továrna vyrábí. Vždycky jde
 o jiné jméno, ne o jinou verzi `place()`. Dvě neslučitelné signatury jedné metody
 by v reálném projektu vedle sebe neobstály. Základ zůstává stejný: identita
 a vlastník vznikají mimo agregát a vstupují do továrny.
@@ -343,8 +344,8 @@ use App\SharedKernel\Domain\AggregateRoot;
 final class Order extends AggregateRoot
 {
     private function __construct(
-        private readonly OrderId $id,
-        private readonly CustomerId $customerId,
+        public readonly OrderId $id,
+        public readonly CustomerId $customerId,
     ) {}
 
     public static function place(OrderId $id, CustomerId $customerId): self

@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -208,12 +208,12 @@ declare(strict_types=1);
 namespace App\Tests\UserManagement\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
+use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
 use App\UserManagement\Domain\ValueObject\UserName;
-use App\UserManagement\Domain\Exception\UserAlreadyActiveException;
 
 final class UserTest extends TestCase
 {
@@ -226,29 +226,46 @@ final class UserTest extends TestCase
         $this->email  = new Email('jan@example.com');
     }
 
-    public function testCreatesInactiveUserByDefault(): void
+    public function testRegistrationRecordsExactlyOneUserRegistered(): void
     {
         $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
 
-        $this->assertFalse($user->isActive());
+        $events = $user->releaseEvents();
+
+        $this->assertCount(1, $events);
+        $this->assertInstanceOf(UserRegistered::class, $events[0]);
+        $this->assertSame($this->userId->value, $events[0]->userId); // událost nese primitivy
+        $this->assertSame('jan@example.com', $events[0]->email);
     }
 
-    public function testActivatesUser(): void
+    public function testRegistrationExposesGivenValues(): void
     {
         $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
-        $user->activate();
 
-        $this->assertTrue($user->isActive());
+        $this->assertTrue($this->userId->equals($user->id));
+        $this->assertTrue($this->email->equals($user->email()));
+        $this->assertSame('Jan Novák', (string) $user->name());
     }
 
-    public function testThrowsExceptionWhenActivatingAlreadyActiveUser(): void
+    public function testRenamesUser(): void
     {
         $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
-        $user->activate();
 
-        $this->expectException(UserAlreadyActiveException::class);
+        $user->rename(new UserName('Jan Nový'));
 
-        $user->activate();
+        $this->assertSame('Jan Nový', (string) $user->name());
+    }
+
+    public function testRenameWithSameNameChangesNothing(): void
+    {
+        $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
+        $user->releaseEvents(); // vyprázdní buffer – registrace nahrála UserRegistered
+
+        $user->rename(new UserName('Jan Novák'));
+
+        // Idempotence: stejné jméno agregát ignoruje a nic nenahrává
+        $this->assertSame('Jan Novák', (string) $user->name());
+        $this->assertCount(0, $user->releaseEvents());
     }
 
     public function testChangesEmailAddress(): void
@@ -264,11 +281,12 @@ final class UserTest extends TestCase
     public function testEmailRemainsUnchangedWhenSameValueProvided(): void
     {
         $user = User::register($this->userId, new UserName('Jan Novák'), $this->email, HashedPassword::fromPlainText('SilneHeslo123'));
-        $user->releaseEvents(); // vyprázdní buffer - registrace vydala UserRegistered
+        $user->releaseEvents(); // vyprázdní buffer – registrace nahrála UserRegistered
 
         $user->changeEmail(new Email('jan@example.com'));
 
-        // Žádná událost by neměla být vydána, email je stále stejný
+        // Žádná událost by neměla být vydána, e-mail je stále stejný
+        $this->assertTrue($this->email->equals($user->email()));
         $this->assertCount(0, $user->releaseEvents());
     }
 }
@@ -276,9 +294,11 @@ final class UserTest extends TestCase
 :::
 
 :::callout{type="note"}
-**Pozn.:** V tomto zjednodušeném příkladu metoda `activate()` nepřijímá token.
-Plnou implementaci s `VerificationToken` naleznete v kapitole
-[Anti-vzory](/anti-vzory).
+**Pozn.:** Test míří na kanonický `User` z kapitoly
+[Implementace v Symfony](/implementace-v-symfony), který aktivaci účtu nemá.
+Rozšířený model s `VerificationToken`, metodou `activate()` a výjimkou
+`UserAlreadyActivatedException` zavádí kapitola [Migrace z CRUD](/migrace-z-crud)
+a tam je i jeho test.
 :::
 
 ### Testování agregátů
@@ -319,8 +339,12 @@ final class OrderTest extends TestCase
 
         $order->addItem(ProductId::generate(), 2, new Money(49900, Currency::CZK));
 
-        $this->assertSame(1, $order->itemCount());          // 1 řádek objednávky
-        $this->assertEquals(new Money(99800, Currency::CZK), $order->totalAmount()); // 49 900 × 2
+        $events = $order->releaseEvents();
+
+        $this->assertSame(99800, $order->totalAmount()->amountInCents); // 49 900 × 2
+        $this->assertSame(Currency::CZK, $order->totalAmount()->currency);
+        $this->assertInstanceOf(OrderItemAdded::class, $events[1]);     // [0] je OrderPlaced
+        $this->assertSame(2, $events[1]->quantity);
     }
 
     public function testThrowsExceptionWhenConfirmingEmptyOrder(): void
@@ -693,7 +717,7 @@ final class InMemoryUserRepository implements UserRepository
 
     public function remove(User $user): void
     {
-        unset($this->storage[(string) $user->id()]);
+        unset($this->storage[(string) $user->id]);
     }
 
     /** Pomocná metoda pro assertiony v testech. */
@@ -723,6 +747,8 @@ namespace App\Tests\UserManagement\Application\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 use App\UserManagement\Registration\Command\RegisterUser;
 use App\UserManagement\Registration\Command\RegisterUserHandler;
 use App\UserManagement\Domain\Exception\DuplicateEmailException;
@@ -745,9 +771,18 @@ final class RegisterUserHandlerTest extends TestCase
         // UniqueConstraintViolationException a handler ji teprve překládá.
         // Test tedy ověřuje reakci handleru na výjimku, ne ten překlad.
         // Na překlad je potřeba integrační test proti skutečné databázi.
-        $this->handler        = new RegisterUserHandler(
+        //
+        // Event bus je také stub. dispatch() má návratový typ Envelope a ta je
+        // final, takže ji PHPUnit neumí podvrhnout automaticky – bez willReturn()
+        // by stub vrátil null a volání spadlo na TypeError. Co handler odešle,
+        // tento test neověřuje; na to je messenger-test níže v kapitole.
+        $eventBus = $this->createStub(MessageBusInterface::class);
+        $eventBus->method('dispatch')->willReturn(new Envelope(new \stdClass()));
+
+        $this->handler = new RegisterUserHandler(
             $this->userRepository,
             $this->createStub(EntityManagerInterface::class),
+            $eventBus,
         );
     }
 
@@ -765,7 +800,18 @@ final class RegisterUserHandlerTest extends TestCase
 
         $user = $this->userRepository->findByEmail(new Email('jan@example.com'));
         $this->assertNotNull($user);
-        $this->assertFalse($user->isActive()); // nový uživatel je neaktivní
+        $this->assertSame('jan@example.com', $user->email()->value);
+        $this->assertSame('Jan Novák', (string) $user->name());
+    }
+
+    public function testNormalizesEmailBeforeRegistration(): void
+    {
+        $command = new RegisterUser(name: 'Jan Novák', email: 'Jan@Example.com', password: 'SilneHeslo123');
+
+        ($this->handler)($command);
+
+        // Handler prošel vstup přes Email::fromUserInput(), uložený e-mail je malými písmeny
+        $this->assertNotNull($this->userRepository->findByEmail(new Email('jan@example.com')));
     }
 
     public function testThrowsExceptionWhenEmailAlreadyTaken(): void
@@ -813,7 +859,7 @@ místo jen tam, kde se ověřují vedlejší efekty (odeslání e-mailu, volán�
 ### Testovací data: builder místo opakovaného konstruktoru
 
 Testy v předchozích ukázkách opakují v každé metodě totéž volání
-`User::register($id, 'Jan Novák', $email, HashedPassword::fromPlainText('SilneHeslo123'))`. Pro test
+`User::register($id, new UserName('Jan Novák'), $email, HashedPassword::fromPlainText('SilneHeslo123'))`. Pro test
 je z něj podstatný jeden argument, zbytek je tam proto, že ho vyžaduje konstruktor. Až přibude pátý
 parametr, mění se všechny testy naráz.
 
@@ -1017,6 +1063,7 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\UserId;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Infrastructure\Repository\DoctrineUserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -1046,7 +1093,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     {
         $userId = UserId::generate();
         $email  = new Email('integrace@example.com');
-        $user   = User::register($userId, 'Test Uživatel', $email, HashedPassword::fromPlainText('SilneHeslo123'));
+        $user   = User::register($userId, new UserName('Test Uživatel'), $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->repository->save($user);
         // save() jen persistuje; zápis do DB spouští až flush(). Vlastníkem
@@ -1057,7 +1104,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $retrieved = $this->repository->findById($userId);
 
         $this->assertNotNull($retrieved);
-        $this->assertTrue($userId->equals($retrieved->id()));
+        $this->assertTrue($userId->equals($retrieved->id));
         $this->assertTrue($email->equals($retrieved->email()));
     }
 
@@ -1069,7 +1116,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     public function testFindsByEmailAddress(): void
     {
         $email = new Email('hledat@example.com');
-        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('SilneHeslo123'));
+        $user  = User::register(UserId::generate(), new UserName('Test Uživatel'), $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->repository->save($user);
         $this->entityManager->flush();
@@ -1084,7 +1131,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
     public function testExistsByEmail(): void
     {
         $email = new Email('exists@example.com');
-        $user  = User::register(UserId::generate(), 'Test Uživatel', $email, HashedPassword::fromPlainText('SilneHeslo123'));
+        $user  = User::register(UserId::generate(), new UserName('Test Uživatel'), $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
         $this->assertFalse($this->repository->existsByEmail($email));
 

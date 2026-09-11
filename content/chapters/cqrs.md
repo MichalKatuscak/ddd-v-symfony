@@ -7,7 +7,7 @@ meta_description: "CQRS v Symfony 8: oddělení command a query strany přes Mes
 meta_keywords: "CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 8, read model, eventual consistency, ViewModel, projekce, dead letter queue"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: CQRS
 schema_type: TechArticle
 schema_headline: "CQRS v Symfony 8"
@@ -263,11 +263,10 @@ framework:
             # bere OrderId přes HandledStamp, a ten z jiného procesu
             # nedoputuje – požadavek by skončil na
             # „Call to a member function getResult() on null“.
-            # Třída vzniká až v kapitole 15 (Outbox). Kdo čte popořadě,
-            # přidá si tenhle řádek s ní – Messenger routing ověřuje při
-            # kompilaci kontejneru a jinak spadne na
-            # „class or interface … not found“.
-            App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_events
+            # Třída vzniká až v kapitole 15 (Outbox). Odkomentujte řádek
+            # s kapitolou 15 – dřív by Messenger při kompilaci kontejneru
+            # spadl na „class or interface … not found“.
+            # App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_events
 
             # Dotazy jsou zpracovány synchronně (výchozí, není třeba uvádět)
             # App\UserManagement\Profile\Query\GetUserProfile: sync
@@ -911,7 +910,9 @@ Kontroler stojí na dvou věcech, které vertikální řez potřebuje navíc. Š
 u feature, ne v centrálním `templates/`, takže Twig musí ten adresář znát pod jménem;
 a formulář je obyčejný `FormType` vedle nich:
 
-:::code{language="yaml" filename="config/packages/twig.yaml"}
+:::code{language="yaml" filename="config/packages/twig.yaml (doplněk k receptu)"}
+# Do souboru z receptu symfony/twig-bundle se doplňuje jen klíč `paths`.
+# Zbytek (default_path, file_name_pattern…) zůstává, jak ho recept založil.
 twig:
     paths:
         # Bez tohohle řádku Twig hlásí „There are no registered paths
@@ -1147,24 +1148,26 @@ final class Version20260906090000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // DDL pro MySQL/MariaDB. Read model není entita, takže ho
+        // DDL pro PostgreSQL. Read model není entita, takže ho
         // `migrations:diff` nevygeneruje – tahle migrace se píše ručně
-        // a pro jinou platformu se ručně i přepisuje: na SQLite vypustit
-        // ENGINE a CHARSET, na PostgreSQLu nahradit CHAR(36) typem UUID.
+        // a pro jinou platformu se ručně i přepisuje: MySQL chce
+        // CHAR(36) místo UUID, DATETIME(6) místo TIMESTAMP(6) a upsert
+        // v projektoru níže zapisuje přes ON DUPLICATE KEY UPDATE.
         $this->addSql(<<<'SQL'
             CREATE TABLE order_dashboard (
-                order_id        CHAR(36)      NOT NULL,
-                customer_id     CHAR(36)      NOT NULL,
+                order_id        UUID          NOT NULL,
+                customer_id     UUID          NOT NULL,
                 total_amount    INT           NOT NULL,
                 status          VARCHAR(32)   NOT NULL,
-                shipment_id     CHAR(36)      DEFAULT NULL,
-                placed_at       DATETIME      NOT NULL,
+                shipment_id     UUID          DEFAULT NULL,
+                placed_at       TIMESTAMP(0)  NOT NULL,
                 -- Mikrosekundy nejsou kosmetika: na porovnání updated_at
                 -- stojí ochrana proti opožděné události a dvě události
                 -- jednoho agregátu běžně spadnou do téže vteřiny.
-                updated_at      DATETIME(6)   NOT NULL,
+                updated_at      TIMESTAMP(6)  NOT NULL,
+                -- ON CONFLICT (order_id) v projektoru se opírá právě o tento klíč.
                 PRIMARY KEY (order_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            )
         SQL);
 
         // Dashboard se řadí podle data a filtruje podle stavu.
@@ -1298,7 +1301,7 @@ událost novější než to, co v řádku už je. Porovnává se řetězec, tak�
 `Y-m-d H:i:s` se sekundovou přesností podmínku obrátí proti vám. Dvě události téhož
 agregátu spadnou do jedné vteřiny běžně a `<` je pak nepravdivé i pro legitimní přechod: objednávka se odešle,
 ale dashboard mlčky zůstane na `placed`. Proto `.u` ve formátu
-a `DATETIME(6)` ve sloupci.
+a `TIMESTAMP(6)` ve sloupci.
 
 Jedna výhrada k tomu patří. Událost, která projde outboxem, se serializuje přes
 `DateTimeNormalizer`, a ten ve výchozím nastavení píše RFC 3339 **bez** zlomků sekundy.

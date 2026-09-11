@@ -7,7 +7,7 @@ meta_description: "Jak připravit, vést a vyhodnotit workshop Event Storming a 
 meta_keywords: "Event Storming, Domain Storytelling, Alberto Brandolini, Stefan Hofer, Henning Schwentner, Domain Discovery, DDD workshop, Big Picture, Process Level, Design Level, Pivotal Event, Hot Spot, Bounded Context"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
@@ -702,6 +702,23 @@ Order Aggregate
 Přímý překlad do testů:
 
 :::code{language="php" filename="tests/Ordering/OrderTest.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Ordering;
+
+use App\Ordering\Domain\Exception\EmptyOrderException;
+use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+
 final class OrderTest extends TestCase
 {
     // Inv-1 (workshop 2026-04-29)
@@ -735,6 +752,14 @@ final class OrderTest extends TestCase
 
         self::assertSame(250, $order->totalAmount()->amountInCents);
     }
+
+    private function orderWithOneItem(): Order
+    {
+        $order = Order::place(OrderId::generate(), CustomerId::generate());
+        $order->addItem(ProductId::generate(), 1, new Money(100, Currency::CZK));
+
+        return $order;
+    }
 }
 :::
 
@@ -745,6 +770,24 @@ Komentáře `Inv-1 (workshop 2026-04-29)` nejsou kosmetika – ukazují na půvo
 Z Process Modellingu máte sekvenci `Command → Event → Policy → Command`. Tato sekvence je acceptance test:
 
 :::code{language="php" filename="tests/Ordering/PlaceOrderHandlerTest.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Ordering;
+
+use App\Ordering\Application\Command\OrderItemDto;
+use App\Ordering\Application\Command\PlaceOrderCommand;
+use App\Ordering\Domain\Event\OrderPlaced;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use App\Payment\Application\Command\ChargeCardCommand;
+use App\SharedKernel\Domain\Currency;
+use App\SharedKernel\Domain\Money;
+use PHPUnit\Framework\Attributes\Test;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Messenger\MessageBusInterface;
+
 final class PlaceOrderHandlerTest extends KernelTestCase
 {
     // Workshop scenario "Customer places an order" (2026-04-29)

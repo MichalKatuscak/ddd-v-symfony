@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -313,7 +313,6 @@ use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
 use App\UserManagement\Infrastructure\Legacy\Exception\UnmappableLegacyStatusException;
-use Symfony\Component\Uid\Uuid;
 
 final class LegacyUserTranslator
 {
@@ -336,7 +335,7 @@ final class LegacyUserTranslator
         // agregát přidělil sám, migrovaní uživatelé by přišli o historii
         // i o platný aktivační odkaz.
         return User::reconstitute(
-            new UserId(Uuid::fromString((string) $row['uuid'])),
+            UserId::fromString((string) $row['uuid']),
             new UserName((string) $row['name']),
             new Email((string) $row['email']),
             HashedPassword::fromHash((string) $row['password']),
@@ -590,6 +589,7 @@ namespace App\UserManagement\Domain\Model;
 use App\SharedKernel\Domain\AggregateRoot;
 use App\UserManagement\Domain\Event\UserActivated;
 use App\UserManagement\Domain\Event\UserRegistered;
+use App\UserManagement\Domain\Exception\InvalidVerificationTokenException;
 use App\UserManagement\Domain\Exception\UserAlreadyActivatedException;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
@@ -598,7 +598,6 @@ use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\ValueObject\UserStatus;
 use App\UserManagement\Domain\ValueObject\VerificationToken;
 use Doctrine\ORM\Mapping as ORM;
-use App\UserManagement\Domain\Exception\InvalidVerificationTokenException;
 
 #[ORM\Entity]
 // Nový kontext má vlastní tabulku. Mapovat ho na legacy `users` by
@@ -613,8 +612,10 @@ final class User extends AggregateRoot
 
     // Legacy tabulka sloupec `name` má a RegisterUser ho nese. Bez něj
     // by migrace jméno tiše zahodila - a zpětný dual-write by ho neměl
-    // odkud vzít.
-    #[ORM\Column(type: 'string', length: 255)]
+    // odkud vzít. Mapování je Embedded jako v kapitole Implementace
+    // v Symfony: sloupcový typ 'string' by hydratoval holý řetězec do
+    // typované vlastnosti a skončil TypeError.
+    #[ORM\Embedded(class: UserName::class)]
     private UserName $name;
 
     #[ORM\Column(type: 'email_vo', unique: true)]
@@ -703,9 +704,10 @@ final class User extends AggregateRoot
         }
         $this->status = UserStatus::Active;
         $this->verificationToken = null;
-        $this->record(new UserActivated($this->id));
+        $this->record(new UserActivated($this->id, new \DateTimeImmutable()));
     }
 
+    public function name(): UserName { return $this->name; }
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
 
@@ -718,6 +720,141 @@ final class User extends AggregateRoot
 Doménová entita `User` nyní sama vynucuje svá pravidla: výchozí stav, přechod stavu
 při aktivaci a vydání Domain Eventu při registraci. Kontroler ani service nemůže tyto invarianty
 obejít.
+
+Cílový model rozšiřuje kanonického `User` z kapitoly
+[Implementace v Symfony](/implementace-v-symfony#entity-example-heading) o aktivaci.
+Typy, které k tomu potřebuje, definuje následující blok. Výjimky
+`UserAlreadyActivatedException` a `InvalidVerificationTokenException` s továrnou
+`forUser(UserId)` už zavedla [sekce o doménových výjimkách](/implementace-v-symfony#custom-exception-heading);
+zde se jen používají.
+
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/UserStatus.php + VerificationToken.php + Event/UserActivated.php + Infrastructure/Doctrine/Type/VerificationTokenType.php + Infrastructure/Legacy/Exception/UnmappableLegacyStatusException.php"}
+<?php
+
+declare(strict_types=1);
+
+// --- src/UserManagement/Domain/ValueObject/UserStatus.php ---
+namespace App\UserManagement\Domain\ValueObject;
+
+enum UserStatus: string
+{
+    case PendingVerification = 'pending_verification';
+    case Active = 'active';
+    // Inactive si zvolí uživatel sám, Blocked je zásah provozovatele.
+    // Sem translator mapuje legacy hodnoty „banned“ i „deleted“.
+    case Inactive = 'inactive';
+    case Blocked = 'blocked';
+
+    public function isPendingVerification(): bool
+    {
+        return $this === self::PendingVerification;
+    }
+
+    public function isActive(): bool
+    {
+        return $this === self::Active;
+    }
+}
+
+// --- src/UserManagement/Domain/ValueObject/VerificationToken.php ---
+namespace App\UserManagement\Domain\ValueObject;
+
+final readonly class VerificationToken
+{
+    private function __construct(public string $value)
+    {
+        if ($value === '') {
+            throw new \InvalidArgumentException('Ověřovací token nesmí být prázdný.');
+        }
+    }
+
+    public static function generate(): self
+    {
+        return new self(bin2hex(random_bytes(32)));
+    }
+
+    // Přijímá i tokeny vydané legacy systémem; formát proto nevynucuje.
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public function equals(self $other): bool
+    {
+        // Token je tajemství: porovnání v konstantním čase brání timing útoku.
+        return hash_equals($this->value, $other->value);
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
+    }
+}
+
+// --- src/UserManagement/Domain/Event/UserActivated.php ---
+namespace App\UserManagement\Domain\Event;
+
+use App\UserManagement\Domain\ValueObject\UserId;
+
+final readonly class UserActivated
+{
+    public function __construct(
+        public UserId $userId,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
+}
+
+// --- src/UserManagement/Infrastructure/Doctrine/Type/VerificationTokenType.php ---
+namespace App\UserManagement\Infrastructure\Doctrine\Type;
+
+use App\UserManagement\Domain\ValueObject\VerificationToken;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\StringType;
+
+// Stejná stavba jako EmailType; v doctrine.dbal.types se registruje
+// pod jménem 'verification_token'.
+final class VerificationTokenType extends StringType
+{
+    public const NAME = 'verification_token';
+
+    public function convertToPHPValue(mixed $value, AbstractPlatform $platform): ?VerificationToken
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return VerificationToken::fromString((string) $value);
+    }
+
+    public function convertToDatabaseValue(mixed $value, AbstractPlatform $platform): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return $value instanceof VerificationToken ? $value->value : (string) $value;
+    }
+
+    /** @param array<string, mixed> $column */
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
+    {
+        return $platform->getStringTypeDeclarationSQL(['length' => 64]);
+    }
+}
+
+// --- src/UserManagement/Infrastructure/Legacy/Exception/UnmappableLegacyStatusException.php ---
+namespace App\UserManagement\Infrastructure\Legacy\Exception;
+
+// Chyba hranice, ne domény: legacy řádek nese stav, který model nezná.
+// Proto dědí z \RuntimeException a žije v infrastruktuře vedle translatoru.
+final class UnmappableLegacyStatusException extends \RuntimeException
+{
+    public function __construct(string $legacyStatus)
+    {
+        parent::__construct(sprintf('Legacy stav "%s" nemá v doméně protějšek.', $legacyStatus));
+    }
+}
+:::
 :::
 
 ### Zavedení Value Objects místo primitive types
@@ -974,10 +1111,12 @@ class UserController extends AbstractController
 }
 :::
 
-:::code{language="php" filename="src/UserManagement/Application/Command/RegisterUser.php"}
+:::code{language="php" filename="src/UserManagement/Application/Command/RegisterUser.php + RegisterUserHandler.php + src/Controller/UserController.php"}
 <?php
 
-// --- Soubor: RegisterUser.php ---
+declare(strict_types=1);
+
+// --- src/UserManagement/Application/Command/RegisterUser.php ---
 // PO: Command objekt jako explicitní kontrakt
 namespace App\UserManagement\Application\Command;
 
@@ -990,7 +1129,7 @@ final readonly class RegisterUser
     ) {}
 }
 
-// --- Soubor: RegisterUserHandler.php ---
+// --- src/UserManagement/Application/Command/RegisterUserHandler.php ---
 // Handler zapouzdřuje aplikační logiku jednoho use case
 namespace App\UserManagement\Application\Command;
 
@@ -1000,6 +1139,7 @@ use App\UserManagement\Domain\ValueObject\UserName;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\HashedPassword;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -1008,6 +1148,7 @@ final class RegisterUserHandler
     public function __construct(
         private UserRepository $users,
         private UserRegistrationPolicy $policy,
+        private EntityManagerInterface $em,
     ) {}
 
     public function __invoke(RegisterUser $command): void
@@ -1020,8 +1161,9 @@ final class RegisterUserHandler
 
         $user = User::register(
             $this->users->nextIdentity(),
+            new UserName($command->name),
             $email,
-            $password
+            $password,
         );
 
         $this->users->save($user);
@@ -1038,15 +1180,16 @@ final class RegisterUserHandler
     }
 }
 
-// --- Soubor: UserController.php ---
+// --- src/Controller/UserController.php ---
 // Kontroler je nyní tenký – pouze HTTP adaptér
 namespace App\Controller;
 
 use App\UserManagement\Application\Command\RegisterUser;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Attribute\Route;
 
 class UserController extends AbstractController
 {
@@ -1248,8 +1391,9 @@ final class UserTest extends TestCase
     {
         $user = User::register(
             UserId::generate(),
+            new UserName('Jan Novák'),
             new Email('jan@firma.cz'),
-            HashedPassword::fromPlainText('SecurePass123')
+            HashedPassword::fromPlainText('SecurePass123'),
         );
 
         self::assertSame(UserStatus::PendingVerification, $user->status());
@@ -1259,8 +1403,9 @@ final class UserTest extends TestCase
     {
         $user = User::register(
             UserId::generate(),
+            new UserName('Jan Novák'),
             new Email('jan@firma.cz'),
-            HashedPassword::fromPlainText('SecurePass123')
+            HashedPassword::fromPlainText('SecurePass123'),
         );
 
         $events = $user->releaseEvents();
@@ -1272,8 +1417,9 @@ final class UserTest extends TestCase
     {
         $user = User::register(
             UserId::generate(),
+            new UserName('Jan Novák'),
             new Email('jan@firma.cz'),
-            HashedPassword::fromPlainText('SecurePass123')
+            HashedPassword::fromPlainText('SecurePass123'),
         );
         // Token přiděluje agregát při registraci; podstrčený řetězec
         // by neprošel kontrolou a test by spadl už na prvním activate().

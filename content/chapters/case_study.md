@@ -7,7 +7,7 @@ meta_description: "Systém pro správu projektů v DDD krok za krokem: bounded c
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
@@ -391,8 +391,11 @@ Sekce prochází jádro systému: od slovníku přes agregáty a doménové udá
 :::callout{type="note"}
 ### Co kapitola ukazuje a co ne {#co-neukazuje-heading}
 
-Studie ukazuje **rozhodnutí**, ne kompletní repozitář k opsání. Kdo si ji chce
-postavit, dopíše zhruba stejný objem kódu, jaký tu vidí. Konkrétně:
+Studie ukazuje **rozhodnutí**, ne kompletní repozitář k opsání. Jde o samostatný
+projekt (správa projektů a úkolů), ne o další kontext e-shopu z předchozích kapitol.
+Agregáty `Project` a `Task` s kanonickým `Order` ani `User` nesdílejí kód, jen
+konvence. Kdo si studii chce postavit, dopíše zhruba stejný objem kódu, jaký tu vidí.
+Konkrétně:
 
 - **Doctrine custom typy** pro identifikátory (`project_id`, `user_id`, `task_id`)
   a pro seznam členů (`user_id_list`). Mapování je používá, ukázku jednoho typu

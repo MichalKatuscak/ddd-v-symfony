@@ -7,7 +7,7 @@ meta_description: "Event Sourcing v DDD a Symfony 8: Event Store, projekce, snap
 meta_keywords: "Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Outbox pattern, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild, dual-write problem"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Event Sourcing
 schema_type: TechArticle
 schema_headline: "Event Sourcing v DDD a Symfony"
@@ -642,7 +642,7 @@ services:
     App\Infrastructure\EventSourcing\Versioning\UpcasterChain:
         arguments:
             $upcasters:
-                - '@App\Infrastructure\EventSourcing\Versioning\UserRegisteredV1ToV2Upcaster'
+                - '@App\Infrastructure\Identity\Versioning\UserRegisteredV1ToV2Upcaster'
 
     App\Infrastructure\EventSourcing\EventSerializer:
         arguments:

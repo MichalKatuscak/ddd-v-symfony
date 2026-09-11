@@ -7,7 +7,7 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
@@ -81,7 +81,10 @@ nad tabulkou `order_item`, jeden pro každou objednávku.
 $orders = $this->orderRepository->findAll();
 
 foreach ($orders as $order) {
-    // Každá iterace způsobí 1 SELECT z order_item - celkem N dalších dotazů
+    // Každá iterace způsobí 1 SELECT z order_item - celkem N dalších dotazů.
+    // Getter items() přidává kapitola Outbox Pattern
+    // (/outbox-pattern#order-aggregate-heading); kanonický Order z návrhu
+    // agregátu ho nemá.
     foreach ($order->items() as $item) {
         echo $item->productId->value . ': ' . $item->quantity;
     }
@@ -200,22 +203,26 @@ final class OrderQueryRepository
     }
 
     /**
-     * Alternativa přes Query Builder s addSelect()
+     * Alternativa přes Query Builder s addSelect().
+     *
+     * Dál než na položky fetch join nejde: OrderItem nese jen ProductId
+     * (hodnotový objekt přes vlastní typ product_id), ne asociaci
+     * na Product. Agregáty se odkazují přes ID, takže název produktu
+     * DQL nedotáhne; patří do read modelu (viz 16.04).
      *
      * @return Order[]
      */
-    public function findRecentWithItemsAndProduct(): array
+    public function findRecentWithItems(): array
     {
         return $this->em->createQueryBuilder()
             ->select('o')
             ->addSelect('i')          // eager load položek
-            ->addSelect('p')          // eager load produktů přes položky
             ->from(Order::class, 'o')
             ->leftJoin('o.items', 'i')
-            ->leftJoin('i.product', 'p')
-            ->where('o.createdAt > :since')
+            // placedAt vyplňuje až confirm(); Draft má NULL a z výběru vypadne.
+            ->where('o.placedAt > :since')
             ->setParameter('since', new \DateTimeImmutable('-30 days'))
-            ->orderBy('o.createdAt', 'DESC')
+            ->orderBy('o.placedAt', 'DESC')
             ->getQuery()
             ->getResult();
     }
@@ -319,19 +326,20 @@ rozsáhlý objektový graf, i když potřebujete jen malou část dat.
 
 :::code{language="php" filename="snippet.php"}
 <?php
-// find() sám o sobě položky nenačte - kolekce je lazy a zůstane
+// get() volá Doctrine find() a ten sám o sobě položky nenačte - kolekce je lazy a zůstane
 // neinicializovaná. Cena přijde až ve chvíli, kdy na ni kdokoli sáhne:
 // jeden SELECT s 1000 řádky a skokový nárůst paměti. U hlavičky
 // objednávky je to zbytečná práce, kterou snadno vyvolá i šablona.
 
 $order = $this->orders->get($orderId);
 
-echo $order->orderNumber;
-echo $order->createdAt->format('d.m.Y');
+echo $order->id->value;
+echo $order->placedAt?->format('d.m.Y'); // Draft ještě placedAt nemá
 echo $order->customerId->value; // agregáty se odkazují přes ID, ne přes objekt
 
-// Tohle je ten drahý řádek, ne find() výše:
-echo $order->itemCount();
+// Tohle je ten drahý řádek, ne get() výše: totalAmount() sčítá
+// položky, takže Doctrine kolekci načte právě teď.
+echo $order->totalAmount()->amountInCents;
 :::
 :::
 
@@ -445,9 +453,10 @@ declare(strict_types=1);
 
 namespace App\Ordering\Application\Query;
 
-use Doctrine\ORM\EntityManagerInterface;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\OrderStatus;
-use App\SharedKernel\Domain\Currency;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 // DTO a handler v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
@@ -455,18 +464,23 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class OrderSummaryDTO
 {
     public function __construct(
-        public readonly string $orderId,
-        public readonly string $orderNumber,
-        public readonly string $customerId,
-        // Stav i měna jsou v kanonickém modelu enumy, ne řetězce. DQL NEW
-        // předá to, co je namapované, takže `string` by tu skončilo na
-        // TypeError - a kdo si je namapuje jako prostý string, rozejde si
-        // čtecí stranu s hodnotovými objekty ze Základních konceptů.
+        // DQL NEW předá to, co je namapované: id a customerId přes vlastní
+        // typy order_id a customer_id dorazí jako hodnotové objekty, status
+        // jako enum. `string` by tu skončil na TypeError - a kdo si je
+        // namapuje jako prostý string, rozejde si čtecí stranu
+        // s hodnotovými objekty ze Základních konceptů.
+        public readonly OrderId $id,
+        public readonly CustomerId $customerId,
         public readonly OrderStatus $status,
-        public readonly int    $itemCount,
-        public readonly int    $totalAmountInCents,
-        public readonly Currency $currency,
-        public readonly \DateTimeImmutable $createdAt,
+        public readonly int $itemCount,
+        // Součet položek z dotazu. Agregát mapované pole totalAmount nemá,
+        // totalAmount() je metoda - a ta by pro každý řádek načetla kolekci.
+        // Měnu DTO nenese: Money leží na položkách a z agregační funkce by
+        // dorazila jako string, který enum Currency odmítne. Obchod
+        // v tomto průvodci účtuje v jedné měně, doplní ji prezentační vrstva.
+        public readonly int $totalAmountInCents,
+        // placedAt vyplňuje až confirm(); pro Draft dorazí NULL.
+        public readonly ?\DateTimeImmutable $placedAt,
     ) {}
 }
 
@@ -487,20 +501,17 @@ final class GetOrderSummaryListHandler
         $dtos = $this->em->createQuery(
             'SELECT NEW App\Ordering\Application\Query\OrderSummaryDTO(
                 o.id,
-                o.orderNumber,
                 o.customerId,
                 o.status,
                 COUNT(i.id),
-                o.totalAmount.amountInCents,
-                o.totalAmount.currency,
-                o.createdAt
+                COALESCE(SUM(i.unitPrice.amountInCents * i.quantity), 0),
+                o.placedAt
              )
              FROM App\Ordering\Domain\Model\Order o
              LEFT JOIN o.items i
              WHERE o.status IN (:statuses)
-             GROUP BY o.id, o.orderNumber, o.customerId, o.status,
-                      o.totalAmount.amountInCents, o.totalAmount.currency, o.createdAt
-             ORDER BY o.createdAt DESC'
+             GROUP BY o.id, o.customerId, o.status, o.placedAt
+             ORDER BY o.placedAt DESC'
         )
             ->setParameter('statuses', $query->statuses)
             ->setMaxResults($query->limit)
@@ -563,20 +574,20 @@ final class SalesReportQueryService
             SELECT
                 c.id                                          AS customer_id,
                 CONCAT(c.first_name, ' ', c.last_name)        AS customer_name,
-                TO_CHAR(o.created_at, 'YYYY-MM')              AS month,
-                SUM(oi.unit_price_amount * oi.quantity)::text AS revenue
+                TO_CHAR(o.placed_at, 'YYYY-MM')              AS month,
+                SUM(oi.unit_price_amount_in_cents * oi.quantity)::text AS revenue
             FROM \"order\" o
             JOIN customer c  ON c.id = o.customer_id
             JOIN order_item oi ON oi.order_id = o.id
             WHERE o.status = 'delivered'
               -- Polouzavřený interval. BETWEEN nad timestamp sloupcem s datem
               -- bez času by uřízl celý poslední den.
-              AND o.created_at >= :from
-              AND o.created_at <  :to
-            GROUP BY c.id, c.first_name, c.last_name, TO_CHAR(o.created_at, 'YYYY-MM')
+              AND o.placed_at >= :from
+              AND o.placed_at <  :to
+            GROUP BY c.id, c.first_name, c.last_name, TO_CHAR(o.placed_at, 'YYYY-MM')
             -- Řadí se podle výrazu, ne podle aliasu: ten je ::text,
             -- takže by se '999' seřadilo za '10000'.
-            ORDER BY month DESC, SUM(oi.unit_price_amount * oi.quantity) DESC
+            ORDER BY month DESC, SUM(oi.unit_price_amount_in_cents * oi.quantity) DESC
         ";
 
         return $this->em
@@ -622,72 +633,39 @@ Tento průvodce používá UUID v7; ULID je alternativa s kratším Crockford ba
 :::callout{type="pattern"}
 ### Příklad: Použití symfony/uid (UUID v7)
 
-:::code{language="php" filename="src/SharedKernel/Domain/ValueObject/OrderId.php"}
+:::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php (táž třída jako v Základních konceptech)"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\SharedKernel\Domain\ValueObject;
+namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
-// Dvě třídy v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
-
-/**
- * Hodnotový objekt pro identitu objednávky - používá UUID v7 pro výkon.
- * UUID v7 je časově řazené a monotónně rostoucí - přátelské k B-tree indexům.
- */
+// Kanonický OrderId ze Základních konceptů, tady kvůli generate(): UUID v7
+// je časově řazené a monotónně rostoucí, takže se do B-tree indexu vkládá
+// na konec. Stejnou strategii mají CustomerId, ProductId, ShipmentId
+// i UserId - každý ve svém kontextu, žádný ve sdíleném jádru.
 final readonly class OrderId
 {
-    public function __construct(
-        public string $value,
-    ) {
+    public function __construct(public string $value)
+    {
         if (!Uuid::isValid($value)) {
-            throw new \InvalidArgumentException(
-                sprintf('"%s" is not a valid UUID.', $value)
-            );
+            throw new \InvalidArgumentException('OrderId must be a valid UUID');
         }
     }
 
     public static function generate(): self
     {
+        // UUID v7 - time-based, RFC 9562
         return new self((string) Uuid::v7());
     }
 
-    public static function fromString(string $value): self
-    {
-        return new self($value);
-    }
+    public static function fromString(string $value): self { return new self($value); }
 
-    public function equals(self $other): bool
-    {
-        return $this->value === $other->value;
-    }
-}
+    public function equals(self $other): bool { return $this->value === $other->value; }
 
-// Stejná strategie pro identitu uživatele
-final readonly class UserId
-{
-    public function __construct(
-        public string $value,
-    ) {
-        if (!Uuid::isValid($value)) {
-            throw new \InvalidArgumentException(
-                sprintf('"%s" is not a valid UUID.', $value)
-            );
-        }
-    }
-
-    public static function generate(): self
-    {
-        // UUID v7 - time-based, monotónně rostoucí, RFC 9562 kompatibilní
-        return new self((string) Uuid::v7());
-    }
-
-    public static function fromString(string $value): self
-    {
-        return new self($value);
-    }
+    public function __toString(): string { return $this->value; }
 }
 :::
 :::
@@ -695,23 +673,26 @@ final readonly class UserId
 :::callout{type="pattern"}
 ### Doctrine mapování pro UUID
 
-*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatný persistence model a mapper. Ukázka níže je jiná varianta mapování `Order` než v [sekci N+1](#n-plus-1-problem): ID zde má nativní typ `Uuid`, nikoli `string`.*
+*Atributy `#[ORM\Entity]` přímo na agregátu jsou v tomto průvodci výchozí volba (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)). Pro čistou DDD variantu existuje [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatný persistence model a mapper. Agregát `Order` mapuje `OrderId` přes vlastní Doctrine typ `order_id` (viz [mapování agregátu](/navrh-agregatu#symfony-doctrine)). Ukázka níže je read model, ne agregát: ID má nativní typ `Uuid` ze Symfony bridge a číslo objednávky je pole projekce.*
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (mapování pro čtecí stranu)"}
+:::code{language="php" filename="src/Ordering/Infrastructure/ReadModel/OrderSummaryRow.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\Domain\Model;
+namespace App\Ordering\Infrastructure\ReadModel;
 
-use App\SharedKernel\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
+// Řádek projekce pro přehled objednávek. Plní ho projektor z událostí
+// (viz kapitola CQRS), čte query handler. Adresář ReadModel mapuje
+// druhý entity manager v sekci o read replikách (#replicy-pooling-heading).
 #[ORM\Entity]
-#[ORM\Table(name: '`order`')]
-final class Order
+#[ORM\Table(name: 'order_summary')]
+final class OrderSummaryRow
 {
     #[ORM\Id]
     // Symfony Bridge registruje 'uuid' typ - ukládá jako BINARY(16) nebo nativní uuid v PostgreSQL.
@@ -719,6 +700,8 @@ final class Order
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private readonly Uuid $id;
 
+    // Lidsky čitelné číslo objednávky patří projekci. Agregát ho nemá:
+    // identitu mu dává OrderId, číslo pro zákazníka vzniká až na čtecí straně.
     #[ORM\Column(type: 'string', length: 50)]
     private readonly string $orderNumber;
 
@@ -731,6 +714,11 @@ final class Order
     public function id(): OrderId
     {
         return OrderId::fromString((string) $this->id);
+    }
+
+    public function orderNumber(): string
+    {
+        return $this->orderNumber;
     }
 }
 :::
@@ -1070,7 +1058,7 @@ final class BulkUpdateOrderStatusHandler
             'UPDATE App\Ordering\Domain\Model\Order o
              SET o.status = :newStatus
              WHERE o.status = :oldStatus
-               AND o.createdAt < :before'
+               AND o.placedAt < :before'
         )
             ->setParameter('newStatus', $command->newStatus)
             ->setParameter('oldStatus', $command->oldStatus)
@@ -1301,6 +1289,9 @@ doctrine:
             read:
                 connection: read
                 mappings:
+                    # Adresář vzniká s read modelem OrderSummaryRow ze sekce
+                    # o UUID (#uuid-vs-integer). Bez něj Doctrine hlásí
+                    # neexistující mapping source a kontejner se nesestaví.
                     ReadModel:
                         type: attribute
                         dir: '%kernel.project_dir%/src/Ordering/Infrastructure/ReadModel'

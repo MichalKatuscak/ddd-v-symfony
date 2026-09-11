@@ -7,7 +7,7 @@ meta_description: "Kdy Bounded Context = microservice a kdy stačí modular mono
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: DDD a microservices
 schema_type: TechArticle
 schema_headline: "DDD a microservices – Bounded Context jako service boundary"
@@ -643,8 +643,10 @@ framework:
                         type: 'topic'
                         # Fallback pro zprávy bez explicitního klíče. Relay nastavuje
                         # skutečný routing key per zpráva přes AmqpStamp
-                        # (např. new AmqpStamp('ordering.cancelled')).
-                        default_publish_routing_key: 'ordering.placed'
+                        # (např. new AmqpStamp('ordering.order_cancelled')).
+                        # Routing key je týž slug jako hlavička event_type,
+                        # kterou plní serializer níže: jeden slovník, ne dva.
+                        default_publish_routing_key: 'ordering.order_placed'
 
         buses:
             command.bus:
@@ -692,8 +694,8 @@ framework:
                     queues:
                         billing_ordering_events:
                             binding_keys:
-                                - 'ordering.placed'
-                                - 'ordering.cancelled'
+                                - 'ordering.order_placed'
+                                - 'ordering.order_cancelled'
                 serializer: 'App\Billing\Infrastructure\Messaging\IntegrationEventSerializer'
                 # Serializer výše je decode-only. Retry na tomto transportu by
                 # envelope odeslal znovu přes týž sender, tedy přes encode(),
@@ -850,8 +852,8 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
      * znovu - nekonečná smyčka nad jedinou vadnou zprávou.
      */
     private const TYPE_MAP = [
-        'ordering.placed' => OrderPlacedReceived::class,
-        'ordering.cancelled' => OrderCancelledReceived::class,
+        'ordering.order_placed'    => OrderPlacedReceived::class,
+        'ordering.order_cancelled' => OrderCancelledReceived::class,
     ];
 
     public function decode(array $encodedEnvelope): Envelope

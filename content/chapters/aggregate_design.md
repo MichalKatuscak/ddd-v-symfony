@@ -7,7 +7,7 @@ meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. P
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"
@@ -413,7 +413,7 @@ final readonly class OrderId
 }
 :::
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php" highlights="22,29,30,34,35,36,59,60,61,62,63,64,65"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php" highlights="25,32,33,37,38,39,62,63,64,65,66,67,68"}
 <?php
 
 declare(strict_types=1);
@@ -425,6 +425,9 @@ use App\Ordering\Domain\Event\OrderShipped;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\Event\OrderConfirmed;
 use App\Ordering\Domain\Event\OrderItemAdded;
+use App\Ordering\Domain\Event\OrderPaid;
+// Výjimky vypisují pozdější kapitoly: první dvě Implementace v Symfony 8
+// (10.12), OrderLockedBySagaException kapitola o ságách (14.06).
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\Ordering\Domain\Exception\OrderLockedBySagaException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
@@ -559,6 +562,7 @@ class Order extends AggregateRoot
         }
 
         $this->status = OrderStatus::Paid;
+        $this->record(new OrderPaid($this->id, new \DateTimeImmutable()));
     }
 
     public function ship(ShipmentId $shipmentId): void
@@ -694,7 +698,7 @@ Události, které přechody nahrávají, mají jednotný tvar: identita agregát
 objekt a čas vzniku. Na `occurredAt` staví projekce i outbox, takže pole nese každá z nich
 a jmenuje se všude stejně.
 
-:::code{language="php" filename="src/Ordering/Domain/Event/OrderItemAdded.php + OrderConfirmed.php + OrderShipped.php + OrderCancelled.php"}
+:::code{language="php" filename="src/Ordering/Domain/Event/OrderItemAdded.php + OrderConfirmed.php + OrderPaid.php + OrderShipped.php + OrderCancelled.php"}
 <?php
 
 declare(strict_types=1);
@@ -724,6 +728,14 @@ final readonly class OrderConfirmed
     ) {}
 }
 
+final readonly class OrderPaid
+{
+    public function __construct(
+        public OrderId $orderId,
+        public \DateTimeImmutable $occurredAt,
+    ) {}
+}
+
 final readonly class OrderShipped
 {
     public function __construct(
@@ -744,9 +756,18 @@ final readonly class OrderCancelled
 }
 :::
 
-Události vydává i `addItem()` a `confirm()`. Bez nich by projekce a ságy o dvou
-z pěti přechodů agregátu nevěděly – a testy v kapitole
-[Testování DDD](/testovani-ddd#unit-testy-domeny) je očekávají.
+Událost vydává každá hrana grafu: `addItem()`, `confirm()`, `markPaid()`, `ship()`
+i `cancel()`. Kdyby některá mlčela, projekce a ságy by o tom přechodu nevěděly – a testy
+v kapitole [Testování DDD](/testovani-ddd#unit-testy-domeny) události očekávají.
+`OrderPaid` nese jen identitu a čas. Kdo a čím platil, ví sága z události platebního
+kontextu; agregát `Order` to nezajímá.
+
+Tři výjimky, které agregát hází, kniha vypisuje později. `InvalidOrderStateTransitionException`
+a `EmptyOrderException` definuje kapitola
+[Implementace v Symfony 8](/implementace-v-symfony#custom-exception-heading),
+`OrderLockedBySagaException` kapitola
+[Ságy a Process Managery](/sagy-a-process-managery#semantic-lock-heading). Všechny dědí
+z `\DomainException` a mají pojmenované továrny, které výpis výše volá.
 
 `ShipmentId` bydlí v kontextu `Shipping` a má stejnou stavbu jako `OrderId`:
 
@@ -827,6 +848,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Exception\InvalidType;
 use Doctrine\DBAL\Types\Type;
 
+// CustomerIdType a ProductIdType vypadají stejně, jen s jiným VO a názvem typu.
 final class OrderIdType extends Type
 {
     public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
@@ -853,11 +875,6 @@ final class OrderIdType extends Type
 }
 :::
 
-`Order` v této kapitole nese navíc doručovací adresu, kterou verze ze
-[Základních konceptů](/zakladni-koncepty#aggregates) nemá. Kapitola potřebuje agregát
-s bohatším stavem, aby šlo ukázat, kde vede hranice. Zbytek knihy pracuje s tou jednodušší
-podobou a s dvouparametrovým `place()`.
-
 Třída záměrně nemá metodu `getName()`, protože ji DBAL 4 odstranil. Jméno typu
 (`order_id`) určuje výhradně klíč v konfiguraci `doctrine.dbal.types` níže
 a pod stejným jménem na typ odkazuje atribut `#[ORM\Column(type: 'order_id')]`.
@@ -868,6 +885,10 @@ PHP typ, a `CHAR(36)` z `OrderIdType` odpovídá introspektovanému sloupci. Pr�
 migrace z toho nevznikají. Cenu za zmizelý komentář zaplatíte jinde: dva vlastní
 typy nad stejnou SQL deklarací už od sebe schema diff nerozezná, takže záměnu
 `order_id` za `customer_id` v mapování migrace neodhalí.
+
+`CustomerIdType` a `ProductIdType`, které registruje `doctrine.yaml` níže, mají
+stejnou stavbu. Liší se jen názvem typu a hodnotovým objektem, který převádějí;
+kniha je proto nevypisuje.
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (mapování)" highlights="22,32,33,34,35,36,37,38,39,41,42,43,44,45"}
 <?php
@@ -950,10 +971,15 @@ Omezení tedy padlo a `final` u entity projde. Kdo udržuje projekt na starším
 Symfony, počítá s ním dál.
 :::
 
-Mapování výše odkazuje na tři třídy, které bez vlastních atributů nefungují.
-`Money` a `ShippingAddress` jsou embeddable hodnotové objekty; `OrderItem` je
-plnohodnotná entita uvnitř hranice agregátu a potřebuje vlastní identitu i zpětnou
-referenci, jinak `mappedBy: 'order'` nemá protistranu a mapování skončí chybou:
+Mapování výše odkazuje na dvě třídy, které bez vlastních atributů nefungují.
+`Money` je embeddable hodnotový objekt; `OrderItem` je plnohodnotná entita uvnitř
+hranice agregátu a potřebuje vlastní identitu i zpětnou referenci, jinak
+`mappedBy: 'order'` nemá protistranu a mapování skončí chybou. Třetí třída ve výpisu,
+`ShippingAddress`, ukazuje embeddable s více poli a vlastní validací. Kanonický `Order`
+ji jako vlastnost nenese – stejně jako verze ze
+[Základních konceptů](/zakladni-koncepty#aggregates) a zbytek knihy s dvouparametrovým
+`place()`. S objednávkou rozšířenou o `shippingAddress` pracují až specifikace
+v kapitole [Méně známé vzory](/mene-zname-vzory#spec-domain):
 
 :::code{language="php" filename="src/SharedKernel/Domain/Money.php + Ordering/Domain/ValueObject/ShippingAddress.php + Model/OrderItem.php"}
 <?php
@@ -1065,7 +1091,7 @@ Náhradní `int` identita je vědomé rozhodnutí, ne nedbalost. `OrderItem` nem
 identitu, protože se na položku zvenčí agregátu nikdo neodkazuje. UUID by tu jen zabíralo
 místo. Kdyby se odkazoval, byl by to signál, že položka patří do vlastního agregátu.
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php" highlights="33,34,35,36,37,38,39"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php" highlights="34,35,36,37,38,39,40"}
 <?php
 
 declare(strict_types=1);
@@ -1074,6 +1100,7 @@ namespace App\Ordering\Infrastructure\Repository;
 
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\OrderId;
+// Definici výjimky vypisuje Implementace v Symfony 8 (10.12).
 use App\Ordering\Domain\Exception\OrderNotFoundException;
 use App\Ordering\Domain\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;

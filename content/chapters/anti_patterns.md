@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -145,105 +145,78 @@ Správný přístup přesouvá doménovou logiku přímo do entity. Entita sama 
 :::callout{type="pattern"}
 ### Příklad: Bohatá entita User (správně)
 
-:::code{language="php" filename="src/UserManagement/Domain/ValueObject/UserStatus.php"}
+Enum `UserStatus`, hodnotový objekt `VerificationToken` a událost `UserActivated`
+jsou definované v kapitole [Migrace z CRUD](/migrace-z-crud#before-after-heading);
+zde se používají beze změny.
+
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (výřez cílového modelu z kapitoly Migrace z CRUD)"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\UserManagement\Domain\ValueObject;
-
-enum UserStatus: string
-{
-    case Pending = 'pending';
-    case Active = 'active';
-    case Inactive = 'inactive';
-
-    public function isPending(): bool
-    {
-        return $this === self::Pending;
-    }
-
-    public function isActive(): bool
-    {
-        return $this === self::Active;
-    }
-}
-
-final class VerificationToken
-{
-    private function __construct(
-        public readonly string $value,
-    ) {}
-
-    public static function generate(): self
-    {
-        return new self(bin2hex(random_bytes(32)));
-    }
-
-    public static function fromString(string $value): self
-    {
-        return new self($value);
-    }
-
-    public function equals(self $other): bool
-    {
-        return hash_equals($this->value, $other->value);
-    }
-}
-:::
-
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (správně)"}
-<?php
-
-declare(strict_types=1);
-
-// SPRÁVNĚ: Entita obsahuje doménovou logiku
+// SPRÁVNĚ: Entita obsahuje doménovou logiku. Jde o cílový model
+// z kapitoly Migrace z CRUD bez mapování Doctrine a bez reconstitute(),
+// ne o náhradu kanonického User z kapitoly Implementace v Symfony.
+// UserDeactivated(UserId, \DateTimeImmutable) a UserNotActiveException::forUser(UserId)
+// mají stejnou stavbu jako UserActivated a UserAlreadyActivatedException;
+// kniha je nevypisuje.
 
 namespace App\UserManagement\Domain\Model;
 
-use App\UserManagement\Domain\ValueObject\Email;
-use App\UserManagement\Domain\ValueObject\UserId;
-use App\UserManagement\Domain\ValueObject\UserStatus;
-use App\UserManagement\Domain\ValueObject\VerificationToken;
-use App\UserManagement\Domain\Event\UserRegistered;
+use App\SharedKernel\Domain\AggregateRoot;
 use App\UserManagement\Domain\Event\UserActivated;
 use App\UserManagement\Domain\Event\UserDeactivated;
+use App\UserManagement\Domain\Event\UserRegistered;
 use App\UserManagement\Domain\Exception\InvalidVerificationTokenException;
 use App\UserManagement\Domain\Exception\UserAlreadyActivatedException;
 use App\UserManagement\Domain\Exception\UserNotActiveException;
-use App\SharedKernel\Domain\AggregateRoot;
+use App\UserManagement\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\HashedPassword;
+use App\UserManagement\Domain\ValueObject\UserId;
+use App\UserManagement\Domain\ValueObject\UserName;
+use App\UserManagement\Domain\ValueObject\UserStatus;
+use App\UserManagement\Domain\ValueObject\VerificationToken;
 
 final class User extends AggregateRoot
 {
-    private readonly UserId $id;
-    private readonly Email $email;
+    public readonly UserId $id;
+    private UserName $name;
+    private Email $email;
+    private HashedPassword $password;
     private UserStatus $status;
     private ?VerificationToken $verificationToken;
-    private readonly \DateTimeImmutable $createdAt;
+    public readonly \DateTimeImmutable $registeredAt;
 
     private function __construct(
         UserId $id,
+        UserName $name,
         Email $email,
-        VerificationToken $verificationToken
+        HashedPassword $password,
     ) {
         $this->id = $id;
+        $this->name = $name;
         $this->email = $email;
-        $this->status = UserStatus::Pending;
-        $this->verificationToken = $verificationToken;
-        $this->createdAt = new \DateTimeImmutable();
+        $this->password = $password;
+        $this->status = UserStatus::PendingVerification;
+        $this->verificationToken = VerificationToken::generate();
+        $this->registeredAt = new \DateTimeImmutable();
     }
 
-    public static function register(UserId $id, Email $email): self
-    {
-        $token = VerificationToken::generate();
-        $user = new self($id, $email, $token);
-        $user->record(new UserRegistered($id, $email));
+    public static function register(
+        UserId $id,
+        UserName $name,
+        Email $email,
+        HashedPassword $password,
+    ): self {
+        $user = new self($id, $name, $email, $password);
+        $user->record(new UserRegistered($id, $email, $user->registeredAt));
+
         return $user;
     }
 
     public function activate(VerificationToken $token): void
     {
-        if (!$this->status->isPending()) {
+        if (!$this->status->isPendingVerification()) {
             throw UserAlreadyActivatedException::forUser($this->id);
         }
         if (!$this->verificationToken->equals($token)) {
@@ -251,7 +224,7 @@ final class User extends AggregateRoot
         }
         $this->status = UserStatus::Active;
         $this->verificationToken = null;
-        $this->record(new UserActivated($this->id));
+        $this->record(new UserActivated($this->id, new \DateTimeImmutable()));
     }
 
     public function deactivate(): void
@@ -260,12 +233,13 @@ final class User extends AggregateRoot
             throw UserNotActiveException::forUser($this->id);
         }
         $this->status = UserStatus::Inactive;
-        $this->record(new UserDeactivated($this->id));
+        $this->record(new UserDeactivated($this->id, new \DateTimeImmutable()));
     }
 
-    public function id(): UserId { return $this->id; }
+    public function name(): UserName { return $this->name; }
     public function email(): Email { return $this->email; }
     public function status(): UserStatus { return $this->status; }
+    public function verificationToken(): ?VerificationToken { return $this->verificationToken; }
 }
 :::
 :::
@@ -369,16 +343,15 @@ Hodnotové objekty zapouzdřují validaci, zabraňují záměně ID různých en
 :::callout{type="pattern"}
 ### Příklad: Value Objects (správně)
 
-:::code{language="php" filename="src/Ordering/Domain/ValueObject/Email.php"}
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php + Ordering/Domain/ValueObject/OrderId.php + UserManagement/Domain/ValueObject/UserId.php"}
 <?php
 
 declare(strict_types=1);
 
 // SPRÁVNĚ: Hodnotové objekty s validací a sémantikou
 
-namespace App\Ordering\Domain\ValueObject;
-
-use Symfony\Component\Uid\Uuid;
+// --- src/UserManagement/Domain/ValueObject/Email.php ---
+namespace App\UserManagement\Domain\ValueObject;
 
 final readonly class Email
 {
@@ -401,39 +374,14 @@ final readonly class Email
     public function __toString(): string { return $this->value; }
 }
 
-enum Currency: string
-{
-    case CZK = 'CZK';
-    case EUR = 'EUR';
-    case USD = 'USD';
-}
+// Peněžní částka je App\SharedKernel\Domain\Money s výčtem Currency
+// z kapitoly Základní koncepty: celé číslo v haléřích místo float, měna
+// jako enum místo libovolného řetězce. Podruhé se zde nedefinuje.
 
-// Kanonická podoba Money i s metodou zero() je v kapitole Základní koncepty.
-// Zde slouží jen jako protipól k float + string výše.
-final readonly class Money
-{
-    public function __construct(
-        public int $amountInCents, // Celé číslo - žádná plovoucí desetinná čárka
-        public Currency $currency,
-    ) {
-        if ($amountInCents < 0) {
-            throw new \InvalidArgumentException(
-                'Money cannot be negative; direction belongs to the operation.'
-            );
-        }
-    }
+// --- src/Ordering/Domain/ValueObject/OrderId.php ---
+namespace App\Ordering\Domain\ValueObject;
 
-    public function add(self $other): self
-    {
-        if ($this->currency !== $other->currency) {
-            throw new \DomainException(
-                "Cannot add {$this->currency->value} and {$other->currency->value}"
-            );
-        }
-
-        return new self($this->amountInCents + $other->amountInCents, $this->currency);
-    }
-}
+use Symfony\Component\Uid\Uuid;
 
 // Silně typované identifikátory - záměna je odhalena typovým systémem
 final readonly class OrderId
@@ -449,6 +397,9 @@ final readonly class OrderId
     }
     public function equals(self $other): bool { return $this->value === $other->value; }
 }
+
+// --- src/UserManagement/Domain/ValueObject/UserId.php ---
+namespace App\UserManagement\Domain\ValueObject;
 
 final readonly class UserId
 {
@@ -560,10 +511,9 @@ namespace App\Ordering\Domain\Model;
 use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\ProductId;
-use App\Ordering\Domain\ValueObject\Address;
 use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\SharedKernel\Domain\Money;
-use App\Ordering\Domain\ValueObject\Email;
+use App\UserManagement\Domain\ValueObject\Email;
 use App\Ordering\Domain\ValueObject\WishlistId;
 use App\Ordering\Domain\Event\OrderConfirmed;
 use App\Ordering\Domain\Exception\EmptyOrderException;
@@ -574,7 +524,7 @@ use App\SharedKernel\Domain\AggregateRoot;
 final class Customer
 {
     // Zákazník obsahuje jen to, co je součástí jeho identity.
-    // Adresa pro doručení je součástí objednávky, ne zákazníka.
+    // Doručovací adresa k ní nepatří; nese ji zásilka v kontextu Shipping.
     public function __construct(
         private readonly CustomerId $id,
         private string $name,
@@ -596,7 +546,6 @@ final class Order extends AggregateRoot
 {
     private readonly OrderId $id;
     private readonly CustomerId $customerId; // Pouze reference - ne celý Customer objekt!
-    private Address $shippingAddress;
     private OrderStatus $status;
 
     /** @var OrderItem[] */
@@ -606,46 +555,35 @@ final class Order extends AggregateRoot
     private function __construct(
         OrderId $id,
         CustomerId $customerId,
-        Address $shippingAddress
     ) {
         $this->id = $id;
         $this->customerId = $customerId;
-        $this->shippingAddress = $shippingAddress;
         $this->status = OrderStatus::Draft;
         $this->placedAt = new \DateTimeImmutable();
     }
 
-    // Kanonická továrna knihy; bez ní je privátní konstruktor nedosažitelný.
-    public static function place(
-        OrderId $id,
-        CustomerId $customerId,
-        Address $shippingAddress,
-    ): self {
-        return new self($id, $customerId, $shippingAddress);
+    // Stejná továrna jako u kanonického Order z kapitoly Návrh agregátu;
+    // bez ní je privátní konstruktor nedosažitelný.
+    public static function place(OrderId $id, CustomerId $customerId): self
+    {
+        return new self($id, $customerId);
     }
 
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException(
-                'Položky lze přidat pouze k objednávce ve stavu Draft.'
-            );
+            throw InvalidOrderStateTransitionException::notAllowedInState('addItem', $this->status->value);
         }
-        $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
+        $this->items[] = new OrderItem($this, $productId, $quantity, $unitPrice);
     }
 
     public function confirm(): void
     {
         if ($this->items === []) {
-            throw new EmptyOrderException();
+            throw EmptyOrderException::cannotConfirm();
         }
         $this->status = OrderStatus::Confirmed;
-        $this->record(new OrderConfirmed(
-            $this->id,
-            $this->customerId,
-            $this->totalAmount(),
-            count($this->items),
-        ));
+        $this->record(new OrderConfirmed($this->id, $this->customerId, new \DateTimeImmutable()));
     }
 
     public function totalAmount(): Money
@@ -655,7 +593,7 @@ final class Order extends AggregateRoot
         $rest = $this->items;
         $first = array_shift($rest);
         if ($first === null) {
-            throw new EmptyOrderException();
+            throw EmptyOrderException::cannotConfirm();
         }
 
         return array_reduce(

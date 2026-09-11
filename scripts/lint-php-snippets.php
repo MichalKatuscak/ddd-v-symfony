@@ -6,7 +6,9 @@
  *
  * Vytáhne bloky :::code{language="php" ...} z content/chapters/*.md a každý
  * zvlášť protáhne `php -l`. Fragmenty bez otevírací značky <?php ji dostanou
- * automaticky. Selhání vypíše jako "kapitola.md:řádek (filename): chyba".
+ * automaticky. Blok, který ale obsahuje `namespace` nebo `declare(strict_types=1)`
+ * a přitom <?php nemá, je celý soubor s chybějící hlavičkou – hlásí se jako
+ * "MISSING <?php". Selhání vypíše jako "kapitola.md:řádek (filename): chyba".
  *
  * Použití:
  *   php scripts/lint-php-snippets.php              # celá kniha
@@ -75,7 +77,22 @@ foreach ($files as $file) {
             }
 
             $raw = implode('', $snippet);
-            $code = str_contains($raw, '<?php') ? $raw : "<?php\n" . $raw;
+            $hasOpenTag = str_contains($raw, '<?php');
+
+            // Celý soubor (namespace / declare) bez otevírací značky: automatické
+            // doplnění by chybu zamaskovalo, takže ji hlásíme zvlášť.
+            if (!$hasOpenTag) {
+                foreach ($snippet as $j => $snippetLine) {
+                    if (preg_match('/^(namespace\s|declare\(strict_types=1\))/', $snippetLine)) {
+                        $failed++;
+                        echo "FAIL  " . basename($file) . ":$startLine$label\n"
+                            . "      MISSING <?php → " . basename($file) . ':' . ($startLine + $j) . "\n";
+                        continue 2;
+                    }
+                }
+            }
+
+            $code = $hasOpenTag ? $raw : "<?php\n" . $raw;
 
             file_put_contents($tmp, $code);
             exec('php -l ' . escapeshellarg($tmp) . ' 2>&1', $out, $rc);

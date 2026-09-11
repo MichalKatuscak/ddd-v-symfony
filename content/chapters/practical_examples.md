@@ -7,7 +7,7 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
@@ -187,12 +187,12 @@ src/
 │   ├── AddItem/{Command, Controller}/  # Feature slice
 │   ├── GetCart/{Query, ViewModel}/     # Feature slice
 │   └── Checkout/Controller/             # Feature slice
-├── Order/                     # Bounded Context: Objednávky
+├── Ordering/                  # Bounded Context: Objednávky
 │   ├── Domain/Model/Order.php          # Aggregate Root
-│   ├── Domain/ValueObject/OrderId.php, CustomerId.php
+│   ├── Domain/ValueObject/OrderId.php, CustomerId.php, ProductId.php
 │   ├── Domain/Event/OrderPlaced.php
 │   └── PlaceOrder/{Command, Controller, Listener}/
-└── Shared/Domain/{Money.php, Exception/DomainException.php}
+└── SharedKernel/Domain/{Money.php, Exception/DomainException.php}
 :::
 
 ### Agregát Cart {#cart-aggregate}
@@ -297,6 +297,15 @@ zaznamená událost a tím pro něj práce končí. Payload události nese kopii
 košíku – kontexty se znají jen přes identifikátory a hodnoty.
 
 :::code{language="php" filename="src/Cart/Domain/Event/CartCheckedOut.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Cart\Domain\Event;
+
+use App\Cart\Domain\ValueObject\CartId;
+use App\Cart\Domain\ValueObject\UserId;
+
 final readonly class CartCheckedOut
 {
     /** @param list<CheckedOutItem> $items */
@@ -313,6 +322,20 @@ Na druhé straně hranice stojí handler kontextu Order. Ten si cizí slovník p
 `UserId` z košíku se stává `CustomerId` objednávky.
 
 :::code{language="php" filename="src/Ordering/PlaceOrder/Listener/PlaceOrderOnCartCheckedOut.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\Ordering\PlaceOrder\Listener;
+
+use App\Cart\Domain\Event\CartCheckedOut;
+use App\Ordering\Domain\Model\Order;
+use App\Ordering\Domain\Repository\OrderRepository;
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\ProductId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
 #[AsMessageHandler(bus: 'event.bus')]
 final readonly class PlaceOrderOnCartCheckedOut
 {
@@ -320,11 +343,12 @@ final readonly class PlaceOrderOnCartCheckedOut
 
     public function __invoke(CartCheckedOut $event): void
     {
-        // Překlad mezi kontexty na hranici: UserId košíku → CustomerId objednávky.
+        // Překlad mezi kontexty na hranici: UserId košíku → CustomerId objednávky,
+        // ProductId košíku → ProductId kontextu Ordering. Money je ze SharedKernel.
         $order = Order::place(OrderId::generate(), new CustomerId($event->userId->value));
 
         foreach ($event->items as $item) {
-            $order->addItem($item->productId, $item->quantity, $item->unitPrice);
+            $order->addItem(new ProductId($item->productId->value), $item->quantity, $item->unitPrice);
         }
 
         $this->orders->save($order);
@@ -479,38 +503,39 @@ src/
 Agregát `User` implementuje Symfony `UserInterface` pro Security komponentu. Hodnotový
 objekt `Email` validuje formát v konstruktoru, `HashedPassword` zapouzdřuje hash logiku.
 
-:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (skeleton)"}
+:::code{language="php" filename="src/UserManagement/Domain/Model/User.php (skeleton, varianta s UserInterface)"}
 final class User extends AggregateRoot implements UserInterface, PasswordAuthenticatedUserInterface
 {
     private function __construct(
         public readonly UserId $id,
-        private string $name,
+        private UserName $name,
         private Email $email,
-        private HashedPassword $password,
+        private HashedPassword $hashedPassword,
         public readonly \DateTimeImmutable $createdAt,
     ) {
     }
 
-    public static function register(UserId $id, string $name, Email $email, HashedPassword $password): self
+    public static function register(UserId $id, UserName $name, Email $email, HashedPassword $hashedPassword): self
     {
-        $user = new self($id, $name, $email, $password, new \DateTimeImmutable());
+        $user = new self($id, $name, $email, $hashedPassword, new \DateTimeImmutable());
         $user->record(new UserRegistered($id, $email, $user->createdAt));
 
         return $user;
     }
 
     public function changeEmail(Email $newEmail): void { /* invariant: nový != starý */ }
-    public function changeName(string $newName): void { /* ... */ }
+    public function rename(UserName $newName): void { /* ... */ }
 
     // UserInterface – eraseCredentials() Symfony 8 z rozhraní odstranilo
     public function getRoles(): array { return ['ROLE_USER']; }
     public function getUserIdentifier(): string { return $this->email->value; }
-    public function getPassword(): ?string { return $this->password->hash; }
+    public function getPassword(): ?string { return $this->hashedPassword->value; }
 }
 :::
 
 Jde o zjednodušenou variantu referenční implementace z kapitoly
-[Implementace v Symfony 8](/implementace-v-symfony#entities) – událost `UserRegistered`
+[Implementace v Symfony 8](/implementace-v-symfony#entities) – signatura `register()`
+i hodnotové objekty `UserName`, `Email` a `HashedPassword` jsou stejné, událost `UserRegistered`
 se nahrává ve factory `register()`, nikdy v konstruktoru. Dva kompromisy malého
 příkladu: `UserInterface` implementuje přímo agregát, zatímco v plné architektuře
 patří na security adapter v infrastrukturní vrstvě (viz
@@ -539,7 +564,7 @@ final readonly class RegisterUserHandler
 
         $user = User::register(
             UserId::generate(),
-            $command->name,
+            new UserName($command->name),
             $email,
             HashedPassword::fromPlainText($command->password),
         );

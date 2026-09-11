@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -326,26 +326,32 @@ final class OrderAggregate  // ← jen přejmenovaná Entity, ne skutečný agre
 }
 :::
 
-:::code{language="php" filename="src/Order.php"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
 <?php
 // ✅ Správné DDD - agregát chrání invarianty
+// Výřez kanonického Order z kapitoly Návrh agregátu: konstruktor a storno.
 
 final class Order extends AggregateRoot
 {
-    private OrderId $id;
-    private OrderStatus $status;
+    public private(set) OrderStatus $status;
 
-    public function cancel(Clock $clock): void
+    private function __construct(
+        public readonly OrderId $id,
+        public readonly CustomerId $customerId,
+    ) {}
+
+    public function cancel(string $reason, \DateTimeImmutable $when): void
     {
-        if ($this->status->isShipped()) {
-            throw new OrderAlreadyShipped($this->id);
-        }
-        if ($this->status->isCancelled()) {
-            throw new OrderAlreadyCancelled($this->id);
+        // Odeslanou ani doručenou zásilku storno zpátky nevrátí.
+        if (in_array($this->status, [OrderStatus::Shipped, OrderStatus::Delivered], true)) {
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Cancelled->value,
+            );
         }
 
         $this->status = OrderStatus::Cancelled;
-        $this->record(new OrderCancelled($this->id, $clock->now()));
+        $this->record(new OrderCancelled($this->id, $this->customerId, $reason, $when));
     }
     // Žádné settery - stav se mění jen přes explicitní doménové operace
 }

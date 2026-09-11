@@ -7,7 +7,7 @@ meta_description: "Mapování DDD konceptů na Symfony 8: adresářová struktur
 meta_keywords: "DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
@@ -1592,9 +1592,42 @@ final class OrderNotFoundException extends \DomainException
 }
 :::
 
-`UserManagement` má vlastní rodinu se stejnou stavbou: `DuplicateEmailException`,
-`UserAlreadyActivatedException` a `InvalidVerificationTokenException`, každá
-s továrnou `forEmail()`, respektive `forUser(UserId $id)`.
+`UserManagement` má vlastní rodinu se stejnou stavbou. `DuplicateEmailException`
+s továrnou `with(Email $email)` je definovaná
+[u handleru registrace](#duplicate-email-exception-heading). Zbylé dvě chrání
+aktivaci účtu a mají společnou továrnu `forUser(UserId $id)`:
+
+:::code{language="php" filename="src/UserManagement/Domain/Exception/UserAlreadyActivatedException.php + InvalidVerificationTokenException.php"}
+<?php
+
+declare(strict_types=1);
+
+namespace App\UserManagement\Domain\Exception;
+
+use App\UserManagement\Domain\ValueObject\UserId;
+
+final class UserAlreadyActivatedException extends \DomainException
+{
+    public static function forUser(UserId $id): self
+    {
+        return new self(sprintf('Uživatel „%s“ už je aktivovaný.', $id->value));
+    }
+}
+
+// --- src/UserManagement/Domain/Exception/InvalidVerificationTokenException.php ---
+
+final class InvalidVerificationTokenException extends \DomainException
+{
+    public static function forUser(UserId $id): self
+    {
+        return new self(sprintf('Ověřovací token uživatele „%s“ neodpovídá.', $id->value));
+    }
+}
+:::
+
+Kanonický `User` z této kapitoly aktivaci nemá. Obě výjimky použije až rozšířený
+aktivační model s `VerificationToken` v kapitolách
+[Migrace z CRUD](/migrace-z-crud) a [Anti-vzory](/anti-vzory).
 :::
 
 :::callout{type="warn"}

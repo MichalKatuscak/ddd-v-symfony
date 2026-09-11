@@ -7,7 +7,7 @@ meta_description: "Základní stavební kameny taktického DDD: entity, hodnotov
 meta_keywords: "DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-07
+modified: 2026-09-11
 breadcrumb_name: Základní koncepty
 schema_type: TechArticle
 schema_headline: "Základní koncepty Domain-Driven Design"
@@ -458,6 +458,8 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
+// Obě výjimky vypisuje kapitola Implementace v Symfony 8 (10.12);
+// zde stačí jejich jména a pojmenované továrny.
 use App\Ordering\Domain\Exception\EmptyOrderException;
 use App\Ordering\Domain\Exception\InvalidOrderStateTransitionException;
 use App\Ordering\Domain\ValueObject\CustomerId;
@@ -505,7 +507,10 @@ class Order
     public function removeItem(ProductId $productId): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException('Cannot remove items from a draft order only');
+            throw InvalidOrderStateTransitionException::notAllowedInState(
+                'odebrání položky',
+                $this->status->value,
+            );
         }
 
         $this->items = array_values(array_filter(
@@ -517,7 +522,10 @@ class Order
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException('Cannot confirm a non-created order');
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Confirmed->value,
+            );
         }
 
         if ($this->items === []) {
@@ -530,7 +538,10 @@ class Order
     public function cancel(): void
     {
         if ($this->status !== OrderStatus::Draft && $this->status !== OrderStatus::Confirmed) {
-            throw new InvalidOrderStateTransitionException('Cannot cancel a shipped or cancelled order');
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Cancelled->value,
+            );
         }
 
         $this->status = OrderStatus::Cancelled;
@@ -611,7 +622,10 @@ objednávku bez zákazníka a bez počátečního stavu. Vnější volání jdou
 metody na `Order`, vlastní `OrderItem` zvenku nikdo neinstancuje ani nemění.
 Každé porušené pravidlo hlásí pojmenovaná výjimka – `InvalidOrderStateTransitionException`
 pro nepovolený přechod stavu, `EmptyOrderException` pro prázdnou objednávku. Volající se
-tak může rozhodnout podle typu, ne podle textu zprávy. Výpočet `totalAmount()`
+tak může rozhodnout podle typu, ne podle textu zprávy. Obě třídy, spolu
+s `OrderNotFoundException` z repozitáře níže, vypisuje kapitola
+[Implementace v Symfony 8](/implementace-v-symfony#custom-exception-heading); dědí
+z `\DomainException` a chybovou hlášku nese pojmenovaná továrna. Výpočet `totalAmount()`
 přebírá měnu z položek. Sčítání začíná u první z nich a `Money::add()` při
 nesouladu vyhodí výjimku. Objednávka kombinující dvě měny tak neprojde tiše.
 Události agregát zatím nezaznamenává. Předka `AggregateRoot` a volání `record()`
@@ -718,7 +732,7 @@ Koordinují více objektů nebo zachycují proces, který nemá vlastníka. Tako
 logiku přebírá doménová služba. Nedrží stav, nemá životní cyklus, jen pracuje
 s entitami a hodnotovými objekty.
 
-:::code{language="php" filename="src/Ordering/Domain/Service/ShippingFeeService.php"}
+:::code{language="php" filename="src/Ordering/Domain/Service/ShippingFeeService.php + Model/Customer.php"}
 <?php
 
 declare(strict_types=1);
@@ -743,6 +757,26 @@ final class ShippingFeeService
         return $freeShipping
             ? Money::zero(Currency::CZK)
             : new Money(self::FLAT_FEE_CENTS, Currency::CZK);
+    }
+}
+
+// --- src/Ordering/Domain/Model/Customer.php ---
+namespace App\Ordering\Domain\Model;
+
+use App\Ordering\Domain\ValueObject\CustomerId;
+
+// Ilustrační výřez: agregát Customer kniha dál nerozvádí, službě stačí
+// věrnostní status. Skutečný model by ho odvozoval z historie nákupů.
+final class Customer
+{
+    public function __construct(
+        public readonly CustomerId $id,
+        private bool $vip = false,
+    ) {}
+
+    public function isVip(): bool
+    {
+        return $this->vip;
     }
 }
 :::
@@ -912,7 +946,10 @@ class Order extends AggregateRoot
     public function confirm(): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException('Cannot confirm a non-created order');
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Confirmed->value,
+            );
         }
 
         if ($this->items === []) {

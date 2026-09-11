@@ -7,7 +7,7 @@ meta_description: "Čtyři doplňkové taktické vzory DDD: Specification pro ko
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
 schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
@@ -334,9 +334,10 @@ Na kostře postavíme tři konkrétní pravidla z Ordering kontextu. Každé nes
 jméno a kombinátory `and`/`or`/`not` dědí automaticky.
 
 Specifikace čtou z agregátu `totalAmount()`, `customerId` a `shippingAddress`. První dvě
-má kanonický `Order` z [Návrhu agregátu](/navrh-agregatu#symfony-doctrine), třetí ne –
-příklady počítají s objednávkou rozšířenou o embeddable `ShippingAddress`
-(`public readonly ShippingAddress $shippingAddress`).
+má kanonický `Order` z [Návrhu agregátu](/navrh-agregatu#symfony-doctrine), třetí ne.
+Tamní kapitola ukazuje `ShippingAddress` jen jako embeddable hodnotový objekt a agregát
+ji nenese. Příklady zde počítají s objednávkou rozšířenou o vlastnost
+`public readonly ShippingAddress $shippingAddress`.
 
 :::code{language="php" filename="src/Ordering/Domain/Specification/EligibleForFreeShipping.php"}
 <?php
@@ -456,15 +457,13 @@ Marketingová akce *„doprava zdarma pro nákupy nad 1000 Kč v EU, kromě zák
 na blacklistu“* je trojice atomických specifikací spojená kombinátorem `and`. Vznikne
 jedna čitelná řádka místo trojnásobně vnořeného `if`-u:
 
-:::code{language="php" filename="src/Ordering/Application/Service/FreeShippingPolicy.php"}
+:::code{language="php" filename="src/Ordering/Application/Service/FreeShippingPolicy.php + Application/BlacklistRegistry.php"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\Ordering\Application\Service;
 
-// BlacklistRegistry je port vracející CustomerId zákazníků na blacklistu;
-// implementaci dodává Infrastructure vrstva.
 use App\Ordering\Application\BlacklistRegistry;
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\Specification\EligibleForFreeShipping;
@@ -477,23 +476,41 @@ final class FreeShippingPolicy
 {
     public function __construct(private readonly BlacklistRegistry $blacklist) {}
 
-    public function applyTo(Order $order): void
+    // Politika odpovídá, nemění stav. Co s nárokem udělat (nulové dopravné,
+    // slevový řádek), rozhoduje handler checkoutu, který ji volá.
+    public function isEligible(Order $order): bool
     {
         // 1000 Kč v haléřích – Money drží částku jako celé číslo.
         $promo = (new EligibleForFreeShipping(new Money(100_000, Currency::CZK)))
             ->and(new InEUCountry())
             ->and(new NotInBlacklist($this->blacklist->all()));
 
-        if ($promo->isSatisfiedBy($order)) {
-            $order->markEligibleForFreeShipping();
-        }
+        return $promo->isSatisfiedBy($order);
     }
+}
+
+// --- src/Ordering/Application/BlacklistRegistry.php ---
+namespace App\Ordering\Application;
+
+use App\Ordering\Domain\ValueObject\CustomerId;
+
+// Port: seznam zákazníků na blacklistu dodává Infrastructure vrstva
+// (fraud detection, ručně vedený seznam). Specifikace dostává hotový list.
+interface BlacklistRegistry
+{
+    /** @return list<CustomerId> */
+    public function all(): array;
 }
 :::
 
 Pravidlo lze v testu rozložit na atomy a ověřit každý zvlášť. Když produktový tým
 rozhodne, že na blacklist se nově dívat nemá, smažete jeden řádek z kompozice – bez
 nutnosti pročítat sevřený `if` uvnitř komplexní service vrstvy.
+
+Politika vrací `bool` a agregát nechává na pokoji. Výsledek spotřebuje handler
+checkoutu: nulové dopravné dosadí do výpočtu ceny, nebo ho zapíše jako slevový řádek.
+Kanonický `Order` tak nepotřebuje žádnou metodu navíc a specifikace zůstává čistým
+dotazem nad stavem.
 
 ### Dva vzory z papíru, které se neujaly {#spec-subsumption}
 
@@ -1041,13 +1058,14 @@ final class Order extends AggregateRoot
     }
 
     /**
-     * Standardní vznik objednávky se zbožím.
+     * Vznik objednávky s fyzickým zbožím – protějšek placeDigital() níže.
      *
      * @param list<OrderItem> $items
      */
-    // Druhá továrna vedle kanonického Order::place(OrderId, CustomerId).
-    // Přebírá rovnou seznam položek, protože ho potřebuje v payloadu události.
-    public static function placeWithItems(
+    // Továrna vedle kanonického Order::place(OrderId, CustomerId). Přebírá
+    // rovnou seznam položek, aby invariant platil už při vzniku. Kanonická
+    // placeWithItems() s primitivními řádky je v kapitole o outboxu.
+    public static function placePhysical(
         CustomerId $customerId,
         array $items,
         \DateTimeImmutable $placedAt,
@@ -1063,7 +1081,7 @@ final class Order extends AggregateRoot
             type: OrderType::Physical,
             placedAt: $placedAt,
         );
-        $order->record(new OrderPlaced($order->id, $customerId, $placedAt));
+        $order->record(new OrderPlaced($order->id, $customerId));
 
         return $order;
     }
@@ -1090,7 +1108,7 @@ final class Order extends AggregateRoot
             type: OrderType::Digital,
             placedAt: $placedAt,
         );
-        $order->record(new OrderPlaced($order->id, $customerId, $placedAt));
+        $order->record(new OrderPlaced($order->id, $customerId));
 
         return $order;
     }
@@ -1107,15 +1125,18 @@ final class Order extends AggregateRoot
         $customerId = $lookup->byEmail($row->customerEmail) ?? $lookup->guestId();
         $items = ImportedItems::map($row->items);
 
-        return self::placeWithItems($customerId, $items, $placedAt);
+        return self::placePhysical($customerId, $items, $placedAt);
     }
 }
 :::
 
-Signatura `placeWithItems()` zde přebírá rovnou seznam položek, aby šlo ukázat invariant „objednávka
+Signatura `placePhysical()` zde přebírá rovnou seznam položek, aby šlo ukázat invariant „objednávka
 bez položky nevznikne“ vynucený už při vzniku. Kanonický `Order` v této knize položky
 přidává metodou `addItem(ProductId $productId, int $quantity, Money $unitPrice)` a prázdnou
-objednávku dovolí; invariant pak hlídá `confirm()`. Obě varianty jsou obhajitelné a volba
+objednávku dovolí; invariant pak hlídá `confirm()`. Stejnou cestou jde i kanonická továrna
+`placeWithItems(CustomerId $customerId, array $items)` s primitivními řádky, kterou zavádí
+kapitola [Outbox Pattern](/outbox-pattern#order-aggregate-heading): položky přidá přes
+`addItem()` a objednávku hned potvrdí. Obě varianty jsou obhajitelné a volba
 mezi nimi je rozhodnutí o tom, kde smí agregát existovat v rozpracovaném stavu.
 
 Tři výhody static method factory oproti samostatné Factory class:
@@ -1174,7 +1195,7 @@ final class OrderFromCartFactory
 
         $pricedItems = $this->pricing->priceItems($cart->items(), $customer);
 
-        return Order::placeWithItems(
+        return Order::placePhysical(
             customerId: $customer,
             items: $pricedItems,
             placedAt: $this->clock->now(),
@@ -1183,7 +1204,7 @@ final class OrderFromCartFactory
 }
 :::
 
-Všimněte si, že Factory class **uvnitř volá** `Order::placeWithItems()` –
+Všimněte si, že Factory class **uvnitř volá** `Order::placePhysical()` –
 nepřebírá zodpovědnost za invariant „aspoň 1 položka“, ten zůstává v named
 constructor agregátu. Factory řeší pouze *orchestraci vstupních dat*.
 

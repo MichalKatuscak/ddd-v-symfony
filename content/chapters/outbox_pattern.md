@@ -7,7 +7,7 @@ meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrin
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
@@ -461,10 +461,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
-// Výřez, ne celá třída: přibývá jen továrna placeWithItems() a getter
-// items(). Deklarace vlastností, konstruktor i ostatní metody zůstávají
-// z kapitoly o návrhu agregátu – vložení celého bloku by skončilo
-// na „Cannot redeclare Order::__construct()“.
+// Výřez, ne celá třída: nové jsou jen továrna placeWithItems() a getter
+// items(). Vlastnost $items a konstruktor tu stojí pro kontext, ať je
+// vidět, odkud se položky berou; do třídy z kapitoly o návrhu agregátu
+// se nekopírují, jinak to skončí na „Cannot redeclare Order::__construct()“.
+//
+// placeWithItems() je druhá kanonická továrna knihy vedle Order::place().
+// Kapitola o méně známých vzorech ukazuje na Factory vlastní variantu
+// placePhysical(); ta do kanonického modelu nepatří.
 class Order extends AggregateRoot
 {
     /** @var Collection<int, OrderItem> */
@@ -609,7 +613,7 @@ final readonly class PlaceOrder
 :::
 
 
-:::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandler.php" highlights="29,30,36,37,38,39,40,41,42,43,44,45"}
+:::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandler.php" highlights="29,30,36,37,38,39,40,41,42,43,44,45,56,79,80,81"}
 <?php
 
 declare(strict_types=1);
@@ -626,6 +630,8 @@ use App\Outbox\Domain\OutboxMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use App\Ordering\Domain\Model\OrderItem;
+use App\Ordering\Domain\Event\OrderConfirmed;
+use App\Ordering\Domain\Event\OrderItemAdded;
 use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
 use App\Ordering\Domain\ValueObject\CustomerId;
@@ -657,7 +663,15 @@ final readonly class PlaceOrderHandler
             // objekty, které by se serializovaly jako {"value":"01a0…"}.
             // Na hranici kontextu se překládá na integrační tvar.
             foreach ($order->releaseEvents() as $event) {
+                // placeWithItems() nahraje víc událostí: addItem() OrderItemAdded,
+                // confirm() OrderConfirmed a nakonec OrderPlaced. Integrační
+                // tvar má jen OrderPlaced – nese celou objednávku včetně
+                // položek, takže odběratelům v jiných kontextech stačí sama.
+                // Dílčí události zůstávají uvnitř kontextu Ordering; neznámá
+                // událost je chyba v překladu, ne něco k tichému přeskočení.
                 $integrationEvent = match (true) {
+                    $event instanceof OrderItemAdded,
+                    $event instanceof OrderConfirmed => null,
                     $event instanceof OrderPlaced => new OrderPlacedIntegrationEvent(
                         eventId: Uuid::v7(),
                         orderId: $event->orderId->value,
@@ -677,6 +691,10 @@ final readonly class PlaceOrderHandler
                         'Chybí překlad pro ' . $event::class,
                     ),
                 };
+
+                if ($integrationEvent === null) {
+                    continue;
+                }
 
                 $this->outbox->store(
                     OutboxMessage::fromIntegrationEvent(
@@ -1411,11 +1429,12 @@ se nemá s čím předběhnout. Tabulka vzniká migrací a do `schema_filter` pa
 důvodu jako `order_dashboard`:
 
 :::code{language="sql" filename="migrations/Version20260906120000.php (výřez)"}
+-- PostgreSQL. Primární klíč je zároveň cíl ON CONFLICT (order_id) v upsertu výše.
 CREATE TABLE reporting_orders (
-    order_id    CHAR(36)  NOT NULL,
-    customer_id CHAR(36)  NOT NULL,
-    items       JSON      NOT NULL,
-    placed_at   DATETIME  NOT NULL,
+    order_id    UUID         NOT NULL,
+    customer_id UUID         NOT NULL,
+    items       JSONB        NOT NULL,
+    placed_at   TIMESTAMP(0) NOT NULL,
     PRIMARY KEY (order_id)
 );
 

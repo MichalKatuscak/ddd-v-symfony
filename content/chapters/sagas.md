@@ -7,7 +7,7 @@ meta_description: "Ságy a Process Managery v DDD a Symfony Messenger: kompenzac
 meta_keywords: "saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-06
+modified: 2026-09-11
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
@@ -397,7 +397,10 @@ framework:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
-            'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async_events
+            # Třída vzniká až v kapitole Outbox Pattern. Do té doby řádek
+            # nechte zakomentovaný: Messenger při sestavení kontejneru
+            # ověřuje, že routovaná třída existuje.
+            # 'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async_events
             'App\Payment\Domain\Event\PaymentSucceeded': async_events
             'App\Warehouse\Domain\Event\StockReserved': async_events
 :::
@@ -765,6 +768,44 @@ final class OrderProcessManager
         }
     }
 
+    private function onRefundSucceeded(RefundSucceeded $event): void
+    {
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+        if ($state === null || $state->status()->isTerminal()) {
+            return;
+        }
+
+        $state->transitionTo(OrderSagaStatus::Failed); // teprve teď je sága uzavřená
+        $this->sagaRepository->save($state);
+
+        // Zámek uvolní CancelOrderHandler: příkaz přichází pod systémovou
+        // identitou. Order::cancel() je idempotentní, takže nevadí, když
+        // objednávku zrušil už zákazník a refund byl jen kompenzací.
+        $this->commandBus->dispatch(new CancelOrderCommand(
+            orderId: OrderId::fromString($event->orderId),
+            reason: 'Proces objednávky selhal, platba vrácena',
+            actorId: CustomerId::fromString(SystemActor::ID),
+        ));
+    }
+
+    private function onRefundFailed(RefundFailed $event): void
+    {
+        // Sem se řízení dostane až poté, co Messenger vyčerpal
+        // retry strategii s backoffem (viz sekci 14.07).
+        $state = $this->sagaRepository->findByCorrelationId($event->orderId);
+
+        if ($state === null || $state->status()->isTerminal()) {
+            return;
+        }
+
+        $state->updateContext('manualInterventionReason', $event->failureReason);
+        $this->sagaRepository->save($state);
+
+        // Alert (PagerDuty, Slack) + zařazení do fronty ručních zásahů.
+        // Sága zůstává v Compensating, dokud ji operátor neuzavře.
+    }
+
     /** Zámek na objednávce uvolňuje sága, ať skončí jakkoli. */
     private function finish(OrderSaga $state, OrderSagaStatus $status): void
     {
@@ -822,7 +863,8 @@ final class OrderProcessManager
 :::
 
 Objednávka projde třemi stavy: do `Confirmed` ji dostane už továrna
-(`placeWithItems()` dostává kompletní objednávku, takže `Draft` opouští hned),
+(`placeWithItems()` z kapitoly [Outbox Pattern](/outbox-pattern#order-aggregate-heading)
+dostává kompletní objednávku, takže `Draft` opouští hned),
 odtud `MarkOrderPaid` do `Paid` a `ShipOrder` do `Shipped`. Sága sama stav agregátu
 nemění. Jen posílá příkazy a čeká na události.
 
@@ -860,6 +902,7 @@ mezi kontexty, takže hodnotové objekty by se přes serializaci nepřenesly:
 
 declare(strict_types=1);
 
+// --- src/Payment/Domain/Event/ ---
 namespace App\Payment\Domain\Event;
 
 use Symfony\Component\Uid\Uuid;
@@ -1071,11 +1114,12 @@ final readonly class InMemoryPaymentGateway implements PaymentGateway
 `StockService` a `ShippingService` mají stejnou stavbu. Uvádím je, protože bez nich se
 sága zastaví po první platbě a kompenzační větev `STOCK_FAILS=1` nejde vůbec spustit:
 
-:::code{language="php" filename="src/Warehouse/Domain/StockService.php + src/Shipping/Domain/ShippingService.php (+ adaptéry)"}
+:::code{language="php" filename="src/Warehouse/Domain/StockService.php + src/Shipping/Domain/ShippingService.php + src/Warehouse/Infrastructure/InMemoryStockService.php + src/Shipping/Infrastructure/InMemoryShippingService.php"}
 <?php
 
 declare(strict_types=1);
 
+// --- src/Warehouse/Domain/StockService.php ---
 namespace App\Warehouse\Domain;
 
 interface StockService
@@ -1086,6 +1130,7 @@ interface StockService
     public function release(string $orderId): void;
 }
 
+// --- src/Shipping/Domain/ShippingService.php ---
 namespace App\Shipping\Domain;
 
 interface ShippingService
@@ -1096,6 +1141,7 @@ interface ShippingService
     public function cancel(string $shipmentId): void;
 }
 
+// --- src/Warehouse/Infrastructure/InMemoryStockService.php ---
 namespace App\Warehouse\Infrastructure;
 
 use App\Warehouse\Domain\StockService;
@@ -1117,14 +1163,40 @@ final readonly class InMemoryStockService implements StockService
     }
 }
 
-// InMemoryShippingService vypadá stejně: create() vrací Uuid::v7(),
-// cancel() nedělá nic.
+// --- src/Shipping/Infrastructure/InMemoryShippingService.php ---
+namespace App\Shipping\Infrastructure;
+
+use App\Shipping\Domain\ShippingService;
+use Symfony\Component\Uid\Uuid;
+
+final readonly class InMemoryShippingService implements ShippingService
+{
+    public function create(string $orderId): string
+    {
+        // Rozhraní vrací řetězec, ne hodnotový objekt: identifikátor
+        // putuje v události přes hranici kontextu. ShipmentId z něj
+        // sestaví až ShipOrderHandler v Orderingu.
+        return (string) Uuid::v7();
+    }
+
+    public function cancel(string $shipmentId): void
+    {
+    }
+}
 :::
 
 Zapojení do kontejneru patří do `services.yaml`; bez něj mají přepínače výchozí `false`
 a kompenzační větev se nespustí, ať do prostředí napíšete cokoli:
 
 :::code{language="yaml" filename="config/services.yaml (výřez)"}
+parameters:
+    # Výchozí hodnoty pro případ, že .env proměnné nezná – do souboru je
+    # zapisuje až kapitola Praktické příklady. Bez nich kontejner spadne
+    # na „Environment variable not found“.
+    env(PAYMENT_FAILS): '0'
+    env(STOCK_FAILS): '0'
+
+services:
     App\Payment\Infrastructure\InMemoryPaymentGateway:
         arguments: { $alwaysFails: '%env(bool:PAYMENT_FAILS)%' }
 
@@ -1169,9 +1241,10 @@ final readonly class MarkOrderPaidHandler
         $order->markPaid();
         $this->em->flush();
 
-        // Bez tohohle kroku by se doménová událost nikam nedostala
-        // a projekce by o změně stavu nevěděla. Dispatch uvnitř transakce
-        // je tu v pořádku: event.bus je synchronní a nic neopouští proces.
+        // markPaid() nahrává OrderPaid. Bez tohohle kroku by událost
+        // zůstala v agregátu a projekce by o změně stavu nevěděla.
+        // Dispatch uvnitř transakce je tu v pořádku: event.bus je
+        // synchronní a nic neopouští proces.
         // Kdyby událost mířila do brokera, patřila by do outboxu.
         foreach ($order->releaseEvents() as $event) {
             $this->eventBus->dispatch($event);
@@ -1213,11 +1286,12 @@ final readonly class ShipOrder
 
 Příkazy pro cizí kontexty mají tentýž tvar a doplňují je kompenzace ze sekce 14.03:
 
-:::code{language="php" filename="src/Warehouse/Application/Command/ReserveStock.php + ReleaseStock.php, src/Shipping/Application/Command/CreateShipment.php + CancelShipment.php"}
+:::code{language="php" filename="src/Warehouse/Application/Command/ReserveStock.php + ReleaseStock.php + src/Shipping/Application/Command/CreateShipment.php + CancelShipment.php"}
 <?php
 
 declare(strict_types=1);
 
+// --- src/Warehouse/Application/Command/ReserveStock.php + ReleaseStock.php ---
 namespace App\Warehouse\Application\Command;
 
 final readonly class ReserveStock
@@ -1230,6 +1304,7 @@ final readonly class ReleaseStock
     public function __construct(public string $orderId) {}
 }
 
+// --- src/Shipping/Application/Command/CreateShipment.php + CancelShipment.php ---
 namespace App\Shipping\Application\Command;
 
 final readonly class CreateShipment
@@ -1737,6 +1812,7 @@ public function markPaid(): void
     }
 
     $this->status = OrderStatus::Paid;
+    $this->record(new OrderPaid($this->id, new \DateTimeImmutable()));
 }
 
 // ship() má tutéž větev pro OrderStatus::Shipped.
@@ -1875,6 +1951,7 @@ Chybějící díly jsou dva prosté typy:
 
 declare(strict_types=1);
 
+// --- src/Ordering/Application/Command/ReleaseOrderLock.php ---
 namespace App\Ordering\Application\Command;
 
 final readonly class ReleaseOrderLock
@@ -1882,6 +1959,7 @@ final readonly class ReleaseOrderLock
     public function __construct(public string $orderId) {}
 }
 
+// --- src/Ordering/Domain/Exception/OrderLockedBySagaException.php ---
 namespace App\Ordering\Domain\Exception;
 
 use App\Ordering\Domain\ValueObject\OrderId;
@@ -1988,7 +2066,7 @@ a příkazy a **retry strategie**, bez kterých dlouhotrvající procesy
 ztrácejí zprávy při běžných výpadcích.
 
 :::callout{type="pattern"}
-### YAML: Kompletní konfigurace Messenger {#messenger-yaml-heading}
+### YAML: Konfigurace Messenger pro ságu (výřez) {#messenger-yaml-heading}
 
 :::code{language="yaml" filename="config/packages/messenger.yaml (výřez – plná konfigurace v kapitole o CQRS)"}
 # config/packages/messenger.yaml
@@ -2020,7 +2098,10 @@ framework:
                     multiplier: 2
 
         routing:
-            'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async_events
+            # Odkomentujte s kapitolou Outbox Pattern, kde třída vzniká.
+            # Messenger při sestavení kontejneru ověřuje, že routovaná
+            # třída existuje; do té doby by řádek kontejner shodil.
+            # 'App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent': async_events
             'App\Payment\Domain\Event\PaymentSucceeded': async_events
             'App\Payment\Domain\Event\PaymentFailed': async_events
             'App\Warehouse\Domain\Event\StockReserved': async_events
@@ -2052,7 +2133,7 @@ Konzumuje proto **integrační** událost z [Outboxu](/outbox-pattern#domain-eve
 ne doménovou `OrderPlaced` ze [Základních konceptů](/zakladni-koncepty#domain-events).
 Ta nese hodnotové objekty a zůstává uvnitř kontextu; přes hranici jdou primitivy:
 
-:::code{language="php" filename="src/Ordering/Application/IntegrationEvent/OrderPlacedIntegrationEvent.php (výřez)"}
+:::code{language="php" filename="src/Ordering/Application/IntegrationEvent/OrderPlacedIntegrationEvent.php (výřez – celý soubor vzniká v kapitole Outbox Pattern)"}
 final readonly class OrderPlacedIntegrationEvent
 {
     public function __construct(
@@ -2409,23 +2490,26 @@ se označuje jako *compensation pending*.
 :::callout{type="pattern"}
 ### PHP: Potvrzení kompenzace v OrderProcessManager {#refund-confirmation-heading}
 
-:::code{language="php" filename="snippet.php"}
-// Doplnění do OrderProcessManager. Union typ v __invoke i routing
-// událostí už obě třídy znají – viz sekce 14.05.
+:::code{language="php" filename="src/Ordering/Application/Saga/OrderProcessManager.php (připomenutí – obě metody jsou součástí úplného výpisu v 14.05)"}
+// Připomenutí, ne doplněk: obě metody už úplný výpis OrderProcessManager
+// v sekci 14.05 obsahuje, včetně větví v __invoke a routingu událostí.
 private function onRefundSucceeded(RefundSucceeded $event): void
 {
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-    if ($state === null) {
+    if ($state === null || $state->status()->isTerminal()) {
         return;
     }
 
     $state->transitionTo(OrderSagaStatus::Failed); // teprve teď je sága uzavřená
     $this->sagaRepository->save($state);
 
+    // Zámek uvolní CancelOrderHandler: příkaz přichází pod systémovou
+    // identitou. Order::cancel() je idempotentní, takže nevadí, když
+    // objednávku zrušil už zákazník a refund byl jen kompenzací.
     $this->commandBus->dispatch(new CancelOrderCommand(
         orderId: OrderId::fromString($event->orderId),
-        reason: 'Zboží není skladem, platba vrácena',
+        reason: 'Proces objednávky selhal, platba vrácena',
         actorId: CustomerId::fromString(SystemActor::ID),
     ));
 }
@@ -2433,10 +2517,10 @@ private function onRefundSucceeded(RefundSucceeded $event): void
 private function onRefundFailed(RefundFailed $event): void
 {
     // Sem se řízení dostane až poté, co Messenger vyčerpal
-    // retry strategii s backoffem (viz sekci 7).
+    // retry strategii s backoffem (viz sekci 14.07).
     $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-    if ($state === null) {
+    if ($state === null || $state->status()->isTerminal()) {
         return;
     }
 
