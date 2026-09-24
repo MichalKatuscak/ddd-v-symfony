@@ -7,7 +7,7 @@ meta_description: "Čtyři doplňkové taktické vzory DDD: Specification pro ko
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-23
+modified: 2026-09-24
 breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
 schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
@@ -328,7 +328,9 @@ Specifikace čtou z agregátu `totalAmount()`, `customerId` a `shippingAddress`.
 má kanonický `Order` z [Návrhu agregátu](/navrh-agregatu#symfony-doctrine), třetí ne.
 Tamní kapitola ukazuje `ShippingAddress` jen jako embeddable hodnotový objekt a agregát
 ji nenese. Příklady zde počítají s objednávkou rozšířenou o vlastnost
-`public readonly ShippingAddress $shippingAddress`.
+`public readonly ShippingAddress $shippingAddress`. Varianta s továrnami
+v [sekci 08.04](#factories) adresu nenese – každá ukázka rozšiřuje kanonický `Order` jen o to,
+co její vzor potřebuje.
 
 :::code{language="php" filename="src/Ordering/Domain/Specification/EligibleForFreeShipping.php"}
 <?php
@@ -884,6 +886,7 @@ final class MoneyTransferService
         }
 
         if ($from->currency() !== $to->currency()) {
+            // Holá \DomainException je zkratka; v projektu pojmenovaná výjimka.
             throw new \DomainException(
                 'Currency mismatch – use FxTransferService for cross-currency transfers.',
             );
@@ -1190,6 +1193,7 @@ final class OrderFromCartFactory
         $cart = $this->carts->getById($cartId);
 
         if ($cart->isEmpty()) {
+            // Zkratka: v projektu pojmenovaná výjimka, např. EmptyCartException.
             throw new \DomainException('Cannot place order from empty cart.');
         }
 
@@ -1338,11 +1342,11 @@ src/
         EmptyOrderException.php
     Application/
       Command/
-        PlaceOrderCommand.php
+        PlaceOrder.php
       CommandHandler/
         PlaceOrderHandler.php
       Query/
-        ListOrdersQuery.php
+        ListOrders.php
       QueryHandler/
         ListOrdersHandler.php
     Infrastructure/

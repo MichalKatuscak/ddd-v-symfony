@@ -7,7 +7,7 @@ meta_description: "Základní stavební kameny taktického DDD: entity, hodnotov
 meta_keywords: "DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-23
+modified: 2026-09-24
 breadcrumb_name: Základní koncepty
 schema_type: TechArticle
 schema_headline: "Základní koncepty Domain-Driven Design"
@@ -749,13 +749,14 @@ use App\SharedKernel\Domain\Money;
 
 final class ShippingFeeService
 {
-    private const int FREE_SHIPPING_FROM_ITEMS = 5;
+    // Počítají se řádky objednávky, ne kusy zboží.
+    private const int FREE_SHIPPING_FROM_LINES = 5;
     private const int FLAT_FEE_CENTS = 99_00;
 
     public function feeFor(Order $order, Customer $customer): Money
     {
         $freeShipping = $customer->isVip()
-            || count($order->items()) >= self::FREE_SHIPPING_FROM_ITEMS;
+            || count($order->items()) >= self::FREE_SHIPPING_FROM_LINES;
 
         return $freeShipping
             ? Money::zero(Currency::CZK)

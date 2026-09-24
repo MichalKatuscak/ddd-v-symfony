@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-23
+modified: 2026-09-24
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -325,6 +325,7 @@ final class LegacyUserTranslator
             'pending_verification' => UserStatus::PendingVerification,
             'active'               => UserStatus::Active,
             'banned', 'deleted'    => UserStatus::Blocked,
+            // Inactive legacy nezná, ten stav vzniká až v novém modelu.
             default => throw new UnmappableLegacyStatusException((string) $row['status']),
         };
 
@@ -864,7 +865,7 @@ primitiv objektem, který drží validaci i chování pohromadě.
 :::callout{type="pattern"}
 ### Příklad: Refaktorizace string emailu na Email Value Object {#email-vo-heading}
 
-:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php (cílový stav migrace)"}
+:::code{language="php" filename="src/UserManagement/Domain/ValueObject/Email.php + Domain/Exception/ForbiddenEmailDomainException.php (cílový stav migrace)"}
 <?php
 
 // PŘED: Email jako string – validace je rozptýlena v celé aplikaci
@@ -930,6 +931,18 @@ final readonly class Email
     public function __toString(): string
     {
         return $this->value;
+    }
+}
+
+// --- Soubor: ForbiddenEmailDomainException.php ---
+
+namespace App\UserManagement\Domain\Exception;
+
+final class ForbiddenEmailDomainException extends \DomainException
+{
+    public static function forDomain(string $domain): self
+    {
+        return new self(sprintf('Registrace z domény „%s“ není povolená.', $domain));
     }
 }
 :::

@@ -662,9 +662,9 @@ final class DoctrineUserRepository implements UserRepository
     public function save(User $user): void
     {
         // Jen persist. Flush a commit vlastní doctrine_transaction middleware
-        // command busu – repozitář transakci neřídí. Publikaci doménových
-        // událostí (releaseEvents()) zajišťuje aplikační vrstva až po commitu;
-        // spolehlivý mechanismus je Outbox Pattern (viz callouty níže).
+        // command busu – repozitář transakci neřídí. Doménové události
+        // (releaseEvents()) vyzvedne aplikační vrstva po flush(); co opouští
+        // proces, jde přes Outbox Pattern (viz callouty níže).
         $this->em->persist($user);
     }
 

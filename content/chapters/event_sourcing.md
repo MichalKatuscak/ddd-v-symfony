@@ -384,7 +384,7 @@ rozebírá sekce [GDPR a immutable Event Store](#gdpr-event-store-heading).
 :::
 
 Pro `eventType()` se osvědčil formát `<bounded_context>.<podstatné_jméno>_<sloveso_v_minulém_čase>`,
-například `ordering.order_placed` nebo `payment.payment_received`. Usnadňuje routing
+například `ordering.order_placed` nebo `payment.payment_succeeded`. Usnadňuje routing
 událostí v Symfony Messenger i jejich filtrování v Event Store.
 
 ### Interní a publikované události {#interni-a-publikovane-udalosti}
@@ -1362,6 +1362,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Ordering;
 
 use App\Ordering\EventSourced\Order;
+use App\Ordering\Domain\Exception\OrderNotFoundException;
+use App\Ordering\Domain\ValueObject\OrderId;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\EventSerializer;
 
@@ -1379,7 +1381,7 @@ final class EventSourcedOrderRepository
         $envelopes = $this->eventStore->loadStream($orderId);
 
         if (empty($envelopes)) {
-            throw new \DomainException("Order {$orderId} not found.");
+            throw OrderNotFoundException::withId(OrderId::fromString($orderId));
         }
 
         $events = array_map(
@@ -2162,6 +2164,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Ordering;
 
 use App\Ordering\EventSourced\Order;
+use App\Ordering\Domain\Exception\OrderNotFoundException;
+use App\Ordering\Domain\ValueObject\OrderId;
 use App\Infrastructure\EventSourcing\EventStore;
 use App\Infrastructure\EventSourcing\Snapshot;
 use App\Infrastructure\EventSourcing\SnapshotStore;
@@ -2196,7 +2200,7 @@ final class SnapshottingOrderRepository
         $envelopes = $this->eventStore->loadStream($orderId, $fromVersion);
 
         if (empty($envelopes) && $aggregate === null) {
-            throw new \DomainException("Order {$orderId} not found.");
+            throw OrderNotFoundException::withId(OrderId::fromString($orderId));
         }
 
         if (!empty($envelopes)) {

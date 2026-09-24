@@ -740,13 +740,11 @@ final class OrderProcessManager
         $this->sagaRepository->save($state);
 
         // Vrací se jen to, co už proběhlo. Seznam hotových kroků je přesně
-        // ten důvod, proč si sága vede stav.
+        // ten důvod, proč si sága vede stav. Krok shipment_created v něm
+        // být nemůže: vytvořením zásilky sága končí v Completed. Zásilku,
+        // která vznikne až během kompenzace, ruší onShipmentCreated().
         foreach (array_reverse($state->context()['completedSteps']) as $step) {
             match ($step) {
-                'shipment_created' => $this->commandBus->dispatch(new CancelShipment(
-                    orderId: $event->orderId->value,
-                    shipmentId: $state->context()['shipmentId'],
-                )),
                 'stock_reserved' => $this->commandBus->dispatch(
                     new ReleaseStock(orderId: $event->orderId->value),
                 ),
@@ -2414,14 +2412,9 @@ private function compensate(OrderSaga $state): void
 {
     $completedSteps = $state->context()['completedSteps'] ?? [];
 
+    // shipment_created v seznamu není: po vytvoření zásilky už sága skončila.
     foreach (array_reverse($completedSteps) as $step) {
         match ($step) {
-            'shipment_created' => $this->commandBus->dispatch(
-                new \App\Shipping\Application\Command\CancelShipment(
-                    orderId: $state->correlationId(),
-                    shipmentId: $state->context()['shipmentId'],
-                ),
-            ),
             'stock_reserved' => $this->commandBus->dispatch(
                 new ReleaseStock(orderId: $state->correlationId()),
             ),
@@ -2524,7 +2517,9 @@ Richardson (Microservices Patterns, 2018, kap. 4) dělí kroky ságy do tří sk
 
 Klasifikace popisuje selhání kroku uvnitř ságy. Storno objednávky zvenčí je jiný
 scénář, a proto `CancelShipment` v tabulce kompenzací ze [sekce 14.02](#kompenzacni-transakce)
-figuruje. Sága storno obslouží jako nový požadavek a zásilku zruší, dokud nebyla odeslána.
+figuruje. Dorazí-li storno dřív, než Shipping ohlásí zásilku, je sága už ve stavu
+`Compensating` a vzniklou zásilku zruší `onShipmentCreated()`. Po vytvoření zásilky sága
+končí v `Completed` a zrušení odeslané objednávky už je reklamace, ne kompenzace.
 
 Kompenzace samy patří do třetí kategorie. `RefundCustomer` nemá legitimní
 doménový důvod selhat – peníze, které systém strhl, musí umět vrátit. Selhání

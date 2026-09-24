@@ -1071,8 +1071,9 @@ Pomocná metoda `isCancellable()` je dotaz bez vedlejších efektů. UI podle n�
 
 Otázku „smí Petr“ zde agregát **neřeší**; tu zodpověděl Voter v [sekci 11.04](#use-case-voter). Agregát odpovídá na *„dá se to teď vůbec udělat?“*, a jeho „ne“ platí i tehdy, když Voter řekl „ano“: Petr je vlastník, ale objednávka už odešla. Obě bariéry jsou nezávislé a obě nutné.
 
-`cancel()` a `isCancellable()` výše **nahrazují** verze z Návrhu agregátu celé, ne po
-částech: nesou tytéž stavové podmínky i zámek a přidávají k nim lhůtu. Storno lhůta je
+`cancel()` výše **nahrazuje** verzi z Návrhu agregátu celou, ne po částech: nese tytéž
+stavové podmínky i zámek a přidává k nim lhůtu. `isCancellable()` je nová metoda, kterou
+Návrh agregátu nemá. Storno lhůta je
 jediné, co tahle kapitola k agregátu přidává; konstruktor, továrny i `markPaid()` zůstávají tak, jak je zavádí [Návrh agregátu](/navrh-agregatu#references-by-id). Stavová podmínka je proto stejná jako tam: blokuje odeslanou a doručenou objednávku, ne všechno kromě `Confirmed`. Zúžení na `Confirmed` by vypadalo přísněji, ale rozbilo by kompenzaci: sága ruší objednávku **zaplacenou**, handler by jí storno odmítl a objednávka by zůstala viset.
 
 ### End-to-end trace: cancellation request {#aggregate-trace-heading}
@@ -1515,7 +1516,7 @@ Poslední dva řádky jsou skrytá cena, kterou tabulky výhod obvykle zamlčuj�
 Pro vlastní `PolicyEvaluator` býval jediný silný argument: vědět, *které* pravidlo selhalo, ne jen že přístup nebyl povolen. Od Symfony 7.3 to umí Security komponenta sama. Voter přijímá volitelný parametr `?Vote $vote` a může do něj zapsat důvod. Aplikační vrstva pak čte celé rozhodnutí přes `Security::getAccessDecision()`, které přibylo ve verzi 7.4:
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Security/OrderVoter.php (výřez: voteOnAttribute s důvody)" highlights="10,15,20"}
-// src/Ordering/Infrastructure/Security/OrderVoter.php (s důvody)
+// src/Ordering/Infrastructure/Security/OrderVoter.php (s důvody, jen větev CANCEL)
 protected function voteOnAttribute(
     string $attribute,
     mixed $subject,
