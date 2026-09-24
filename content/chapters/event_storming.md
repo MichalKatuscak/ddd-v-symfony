@@ -7,57 +7,57 @@ meta_description: "Jak připravit, vést a vyhodnotit workshop Event Storming a 
 meta_keywords: "Event Storming, Domain Storytelling, Alberto Brandolini, Stefan Hofer, Henning Schwentner, Domain Discovery, DDD workshop, Big Picture, Process Level, Design Level, Pivotal Event, Hot Spot, Bounded Context"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-11
+modified: 2026-09-24
 breadcrumb_name: Event Storming
 schema_type: TechArticle
 schema_headline: "Event Storming a Domain Storytelling – workshop pro objevení domény"
 chapter_number: "04"
 category: Základy
 deck: "Před první řádkou kódu byste měli odejít od počítače. Event Storming Alberta Brandoliniho a Domain Storytelling Hofera & Schwentnera jsou dvě prověřené workshopové techniky, jak v jedné místnosti dostat do shody vývojáře s doménovými experty. Průvodce, který v Symfony projektu funguje."
-reading_time: 27
+reading_time: 39
 difficulty: 2
 github_examples: null
 ---
 
-DDD nezačíná u kódu. Začíná v místnosti, ve které proti sobě sedí lidé, kteří kód píší, a lidé, kteří doménu reálně provozují. Tato kapitola popisuje dvě konkrétní techniky, jak takovou místnost zařídit. Cílem je strávit v ní dvě až čtyři hodiny smysluplně a odejít s něčím, co se dá zítra otevřít v IDE. Půjde o **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2021). Obě techniky řeší stejný problém, totiž extrakci tacitních doménových znalostí. Liší se cestou. Po této kapitole budete vědět, kterou kdy zvolit a jak ji prakticky uřídit.
+DDD nezačíná u kódu. Začíná v místnosti, kde proti sobě sedí lidé, kteří kód píší, a lidé, kteří doménu reálně provozují. Kapitola popisuje dvě konkrétní techniky, jak takovou místnost zařídit: strávit v ní dvě až čtyři hodiny a odejít s něčím, co se dá zítra otevřít v IDE. Jde o **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2021). Obě techniky vytahují na světlo tacitní doménové znalosti, každá jinou cestou. Kapitola ukazuje, kdy kterou zvolit a jak ji uřídit.
 
 ## 04.01 Proč workshop, proč ne čtení dokumentace {#proc-workshop}
 
-Standardní reakce vývojářského týmu, který má zahájit nový projekt nebo přepsat existující, je *„dejte nám specifikaci a my to naprogramujeme“*. Specifikace ale typicky neexistuje ve formě, která by stačila. Existují wiki stránky staré tři roky, e-mailová vlákna, ticketovací systém s 1 800 issues a čtyři lidé, kteří „to vědí“. Žádný z těchto zdrojů není autoritativní. Každý zachycuje doménu z jiného úhlu, v jiné době a často si protiřečí.
+Vývojářský tým, který má zahájit nový projekt nebo přepsat existující, obvykle reaguje *„dejte nám specifikaci a my to naprogramujeme“*. Specifikace ale typicky neexistuje v použitelné podobě. Jsou tu wiki stránky staré tři roky, e-mailová vlákna, ticketovací systém s 1 800 issues a čtyři lidé, kteří „to vědí“. Žádný z těch zdrojů není autoritativní. Každý zachycuje doménu z jiného úhlu, v jiné době a často si navzájem protiřečí.
 
-To je v pořádku. Doména žije v hlavách doménových expertů jako *znalostní síť*; přečíst ji jako knihu nelze. Když se obchodní ředitel a šéf logistiky rozcházejí v tom, co znamená „odeslaná objednávka“, je to signál. Existují dva pohledy, a tedy pravděpodobně i dva [Bounded Contexty](/zakladni-koncepty#bounded-contexts). Workshop je formát, ve kterém tyto kontradikce **vidíte v reálném čase** a řešíte je společně. Wiki vám je nikdy neukáže; vždy zachytí pohled toho, kdo ji psal.
+To je v pořádku. Doména žije v hlavách doménových expertů jako *znalostní síť* a jako knihu ji přečíst nejde. Když se obchodní ředitel a šéf logistiky rozcházejí v tom, co znamená „odeslaná objednávka“, je to signál: existují dva pohledy, a tedy pravděpodobně i dva [Bounded Contexty](/zakladni-koncepty#bounded-contexts). Na workshopu se takové rozpory **ukážou v reálném čase** a řeší se společně. Wiki je nikdy neukáže, protože vždy zachytí pohled toho, kdo ji psal.
 
-Eric Evans v *Domain-Driven Design* (2003) píše, že [Ubiquitous Language](/co-je-ddd#ubiquitous-language-v-praxi) nelze odvodit z dokumentů; vzniká pouze v dialogu. Brandolini, Hofer a Schwentner přidávají k tomuto pozorování praktickou metodologii: konkrétní notaci, konkrétní harmonogram, konkrétní role v místnosti.
+Eric Evans v *Domain-Driven Design* (2003) staví [Ubiquitous Language](/co-je-ddd#ubiquitous-language-v-praxi) na mluvené řeči: model se tříbí tím, že o něm tým mluví nahlas, a dokumenty řeč a kód jen doplňují. Brandolini, Hofer a Schwentner k tomu přidávají praktickou metodu: konkrétní notaci, harmonogram a role v místnosti.
 
 :::callout{type="note"}
 ### Co dostanete z workshopu, co z dokumentace nikdy {#why-workshop-heading}
 
-- **Kontradikce v reálném čase.** Když dva experti řeknou totéž jinak, vidíte to a řešíte hned.
+- **Rozpory v reálném čase.** Když dva experti řeknou totéž jinak, je to vidět a řeší se hned.
 - **Slovník, který si lidé sami vytvořili.** Kód pak může používat přesně ty výrazy.
-- **Sdílená paměť události.** Tým si pamatuje „když jsme řešili Stripe, padlo, že refundy jsou async“. Wiki se zapomene.
-- **Hot Spots.** Místa, která doména nemá vyřešená. Z dokumentace byste je neodhalili, protože ta je vždy psaná jako „hotová“.
+- **Sdílená paměť události.** Tým si pamatuje „když jsme řešili Stripe, padlo, že refundy jsou async“. Na wiki se zapomene.
+- **Hot Spots.** Místa, která doména nemá vyřešená. Dokumentace je neodhalí, protože je vždy psaná jako „hotová“.
 :::
 
 ## 04.02 Event Storming – co to je a co umí {#event-storming-co}
 
-**Event Storming** zavedl italský konzultant Alberto Brandolini v roce 2013. Princip je přímočarý: účastníci v reálném čase pokládají na dlouhou stěnu (nebo Miro/Mural board) **oranžové sticky notes s doménovými událostmi vyjádřenými v minulém čase**. Postupně z nich vzniká časová osa toho, co se v doméně děje. Jak osa roste, přidávají se další barvy: modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots. Obraz domény se postupně vyjasňuje.
+**Event Storming** zavedl italský konzultant Alberto Brandolini v roce 2013. Účastníci lepí na dlouhou stěnu (nebo Miro/Mural board) **oranžové sticky notes s doménovými událostmi v minulém čase**. Postupně z nich vzniká časová osa toho, co se v doméně děje. S rostoucí osou přibývají další barvy: modrá pro Commands, žlutá pro Actors, růžová pro Hot Spots.
 
-Vznik techniky byl pragmatický. V roce 2012 ji Brandolini předvedl na Italian Agile Day jako *event-based modelling workshop*, tedy jako zkratku místo kreslení přesného UML diagramu. Jméno *EventStorming* jí dal až v létě 2013 po experimentech v Belgii a Polsku; v listopadu téhož roku vyšel první blogový post. Původní účel byl taktický: rychle najít hranice agregátů a kontextů. Strategické použití přišlo později. V přednášce *50.000 Orange Stickies Later* (2017) autor tu trajektorii shrnuje sám: z náhrady za diagram se stala učební pomůcka a nakonec platforma pro kolaborativní modelování od byznysu po implementaci.
+Technika vznikla z praktické potřeby. V roce 2012 ji Brandolini předvedl na Italian Agile Day jako *event-based modelling workshop*, tedy jako zkratku místo kreslení přesného UML diagramu. Jméno *EventStorming* jí dal až v létě 2013 po experimentech v Belgii a Polsku; v listopadu téhož roku vyšel první blogový post. Původní účel byl taktický: rychle najít hranice agregátů a kontextů. Strategické použití přišlo později. V přednášce *50.000 Orange Stickies Later* (2017) autor tu cestu shrnuje sám: z náhrady za diagram se stala učební pomůcka a nakonec platforma pro kolaborativní modelování od byznysu po implementaci.
 
 Dnes technika existuje ve třech formátech. Kanonické názvy uvádí web eventstorming.com i Brandoliniho firma Avanscoperta; pro druhý a třetí se v komunitě vžily kratší zkratky *Process Level* a *Design Level*.
 
-1. **Big Picture EventStorming** – strategická úroveň. Otázka: *„Co se v naší doméně vůbec děje?“* Cílem je objevit Bounded Contexty a hlavní procesy. Brandolini s ním počítá jako s **celodenním** formátem pro 20–30 lidí; 2–4 hodiny je zkrácená varianta této knihy pro menší doménu.
-2. **Process Modelling EventStorming** (komunitně *Process Level*) – operační úroveň. Otázka: *„Jak konkrétně běží jeden zvolený proces?“* Cílem je popsat jeden Bounded Context detailněji, včetně Commands, Actors, Policies a externích systémů. Zavádí přísnější gramatiku notace, do návrhu softwaru ale nevstupuje. Trvání 4–8 h.
-3. **Software Design EventStorming** (komunitně *Design Level*) – taktická úroveň. Otázka: *„Jak se tato část modelu přeloží do tříd?“* Cílem jsou kandidáti na [agregáty](/zakladni-koncepty#aggregates), invariantní pravidla a první draft API. Trvání 2–6 h, typicky per BC.
+1. **Big Picture Event Storming** – strategická úroveň. Otázka: *„Co se v naší doméně vůbec děje?“* Cílem je objevit Bounded Contexty a hlavní procesy. Brandolini s ním počítá jako s **celodenním** formátem pro 15–30 lidí, typicky 25–30; 2–4 hodiny je zkrácená varianta této knihy pro menší doménu.
+2. **Process Modelling Event Storming** (komunitně *Process Level*) – operační úroveň. Otázka: *„Jak konkrétně běží jeden zvolený proces?“* Cílem je popsat jeden Bounded Context detailněji, včetně Commands, Actors, Policies a externích systémů. Zavádí přísnější gramatiku notace, do návrhu softwaru ale nevstupuje. Trvání 4–8 h.
+3. **Software Design Event Storming** (komunitně *Design Level*) – taktická úroveň. Otázka: *„Jak se tato část modelu přeloží do tříd?“* Cílem jsou kandidáti na [agregáty](/zakladni-koncepty#aggregates), invariantní pravidla a první draft API. Trvání 2–6 h, typicky per BC.
 
-Vaughn Vernon v *Domain-Driven Design Distilled* (Addison-Wesley, 2016, kap. 7) řadí Event Storming mezi nástroje, které urychlují učení a cestu k pracovnímu modelu domény. V *DDD Distilled* mu patří poslední kapitola, tedy až za agregáty a doménovými událostmi; jako první technika ho doporučuje tahle kniha, ne Vernon.
+Vaughn Vernon v *Domain-Driven Design Distilled* (Addison-Wesley, 2016, kap. 7) řadí Event Storming mezi nástroje, které urychlují učení a cestu k pracovnímu modelu domény. Věnuje mu až poslední kapitolu, za agregáty a doménovými událostmi. Na začátek práce ho staví tato kniha, ne Vernon.
 
 :::diagram{fig="04.2-A" title="Tři úrovně Event Stormingu – od strategického přehledu k taktickému návrhu" src="images/diagrams/17_event_storming/big_picture_levels.svg"}
 :::
 
 ## 04.03 Notace – barvy a tvary {#notace}
 
-Paletu barev popisuje Brandolini v knize *Introducing EventStorming*. Ta vychází na Leanpubu průběžně od roku 2013 a hotová dodnes není: k datu psaní uvádí Leanpub 70 % obsahu a poslední aktualizaci ze srpna 2021. Nejúplnější veřejně dostupnou legendu proto udržuje ddd-crew v *EventStorming Glossary & Cheat Sheet*. Každá barva má jeden význam a tým by se ho měl držet – jakmile začnete improvizovat, ztrácíte schopnost rychle „číst“ cizí mapu.
+Paletu barev popisuje Brandolini v knize *Introducing EventStorming*. Ta vychází na Leanpubu průběžně od roku 2013 a hotová dodnes není: k datu psaní uvádí Leanpub 70 % obsahu a poslední aktualizaci ze srpna 2021. Nejúplnější veřejně dostupnou legendu proto udržuje ddd-crew v *EventStorming Glossary & Cheat Sheet*. Každá barva má jeden význam. Kdo začne improvizovat, ztratí schopnost rychle „číst“ cizí mapu.
 
 | Barva a tvar | Prvek | Formát | Příklad | Význam |
 |---|---|---|---|---|
@@ -74,61 +74,61 @@ Paletu barev popisuje Brandolini v knize *Introducing EventStorming*. Ta vycház
 | **Fialová** sticky / čára | Bounded Context | Big Picture | „Ordering BC“ | Hranice mezi modely. Kanonicky se kreslí páskou nebo čarou, ne lepí. |
 
 Barevné konvence se mezi facilitátory liší. Brandolini ve své knize značí hot spoty fialovou;
-tabulka výše používá růžovou a fialovou vyhrazuje pro hranice kontextů. Před workshopem se proto
-vyplatí legendu vyvěsit na stěnu, ať se skupina nedohaduje o významu barvy místo o doméně.
+tabulka výše používá růžovou a fialovou vyhrazuje pro hranice kontextů. Legenda proto patří
+před workshopem na stěnu, ať se skupina nedohaduje o významu barvy místo o doméně.
 
-Dvě položky v tabulce potřebují komentář. Zelená nese ve dvou formátech dva různé významy, Opportunity
-v Big Picture a Query Model v Process Modellingu; v jednom workshopu se oba prvky nepotkají, takže
-záměna nehrozí. A velká žlutá lepka se v glosáři ddd-crew jmenuje **Constraint**, ne Aggregate. Posun
-je jazykový, protože slovo *agregát* doménovému expertovi nic neříká. Tato kniha u pojmu agregát
+Dvě položky tabulky potřebují komentář. Zelená má ve dvou formátech dva různé významy, Opportunity
+v Big Picture a Query Model v Process Modellingu. V jednom workshopu se oba prvky nepotkají, takže
+záměna nehrozí. Velká žlutá lepka se v glosáři ddd-crew jmenuje **Constraint**, ne Aggregate. Důvod
+je jazykový: slovo *agregát* doménovému expertovi nic neříká. Tato kniha u pojmu agregát
 zůstává, protože ho čtenář potřebuje pro kód; na cizí mapě se tentýž prvek jmenuje Constraint.
 
 :::callout{type="pattern"}
 ### Pravidlo minulého času {#past-tense-rule-heading}
 
-Hlavní jazykové pravidlo Event Stormingu: **doménové eventy se píšou v minulém čase**. Píšete `OrderPlaced`, ne `PlaceOrder`. `PaymentReceived`, ne `ReceivePayment`. `ShipmentDispatched`, ne `DispatchShipment`.
+Hlavní jazykové pravidlo Event Stormingu: **doménové události se píšou v minulém čase**. Píšete `OrderPlaced`, ne `PlaceOrder`. `PaymentSucceeded`, ne `ChargeCard`. `ShipmentDispatched`, ne `DispatchShipment`.
 
-Důvod není kosmetický. Minulý čas vás *jazykově nutí* mluvit o tom, co už nastalo (a tedy o doménové realitě), místo toho, co bychom rádi (záměru či featuře). Tento posun perspektivy rozhoduje. Zabraňuje workshopu sklouznout do diskuse o tom, co bude umět formulář, a drží ho u toho, jak doména opravdu funguje. Brandolini tomu věnuje v knize samostatnou sekci o notaci: každá barva i slovesný čas má pevně daný význam.
+Důvod není kosmetický. Minulý čas *jazykově nutí* mluvit o tom, co už nastalo (tedy o doménové realitě), a ne o tom, co by tým rád (o záměru či featuře). Workshop tak nesklouzne do diskuse o tom, co bude umět formulář, a zůstane u toho, jak doména opravdu funguje. Brandolini tomu v knize věnuje samostatnou sekci o notaci: každá barva i slovesný čas má pevný význam.
 
-Když si nejste jistí, zda je sticky event, command, nebo policy: zkuste si ji přečíst nahlas. Zní v minulém čase? Event. V imperativu? Command. „Když se stane X, dělej Y“? Policy.
+Když si nejste jistí, zda je sticky event, command, nebo policy, přečtěte ji nahlas. Minulý čas znamená event, imperativ command, „když se stane X, udělej Y“ policy.
 :::
 
 Pro online workshopy má Brandolini na Miroverse dvě vlastní šablony, [Process Modelling](https://miro.com/templates/eventstorming-process-modelling/) a [Software Design](https://miro.com/miroverse/eventstorming-software-design-template/). Komunitních šablon je v Miru víc, barvy v nich ale nemusí odpovídat legendě výše. Pro offline workshop odpovídají stejné barvy balení Post-It 3M (oranžová má kód *Vital Orange*, růžová *Power Pink*). Workshop spotřebuje stovky sticky notes, zásoba proto musí být velká.
 
 ## 04.04 Big Picture workshop – návod krok za krokem {#big-picture}
 
-Big Picture je první workshop, který tým s novou doménou (nebo s migrací z existujícího CRUD systému, viz [kapitola o migraci](/migrace-z-crud)) udělá. Cílem není dokonalý model, ale **společná mapa** toho, co se v doméně děje, a identifikace 3–7 Bounded Contextů.
+Big Picture je první workshop, který tým s novou doménou udělá (stejně tak při migraci z existujícího CRUD systému, viz [kapitola o migraci](/migrace-z-crud)). Cílem není dokonalý model, ale **společná mapa** toho, co se v doméně děje, a 3–7 identifikovaných Bounded Contextů.
 
 ### 04.04.1 Příprava (-1 týden) {#bp-priprava}
 
-Přípravu nelze obejít:
+Bez přípravy workshop nefunguje:
 
 - **Místnost a stěna.** 6–8 m dlouhá rovná stěna bez dveří a nábytku v cestě. Brandolini požaduje *Unlimited Modelling Space*, souvislou plochu, kterou workshop nesmí vyčerpat. Místnost naopak potřebuje otevíratelné okno; skupina dvaceti lidí vydýchá vzduch dřív, než se čeká. Online varianta stojí na *frame* 12 000 × 4 000 px v Miro nebo Mural.
-- **Účastníci.** Primární zdroje uvádějí pro Big Picture 15–30 lidí, typicky 25–30; ddd-crew mluví o 10 až 30 a více u jednoho papírového rolu. Velká skupina se neřeší redukcí lidí, ale tím, že se u stěny sama rozpadne na hloučky, které pracují paralelně. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany 3–5 vývojářů včetně tech leada, plus jeden facilitátor (viz níže). Sestava kolem deseti lidí se uřídí snadněji, je to ale vědomý kompromis: část pohledů na doménu v místnosti chybí.
+- **Účastníci.** Primární zdroje uvádějí pro Big Picture 15–30 lidí, typicky 25–30; ddd-crew mluví o 10 až 30 a více u jednoho papírového rolu. Velká skupina se neřeší ubíráním lidí; u stěny se sama rozpadne na hloučky, které pracují paralelně. Musí tam být **alespoň 2 doménoví experti** (lidé, kteří doménu reálně provozují, ne PM-ové). Z vývojářské strany 3–5 vývojářů včetně tech leada, plus jeden facilitátor (viz níže). Sestava kolem deseti lidí se uřídí snadněji, je to ale vědomý kompromis: část pohledů na doménu v místnosti chybí.
 - **Materiál.** 5–10 balíčků oranžových stickies (3M Post-It, 76×76 mm), 2 balíčky růžových, 2 modrých, 1 malý žlutý, 1 velký žlutý (Constraint), 1 šedý, 1 zelený, 1 lila (světle fialový), 1 tmavě fialový. Černé fixy Sharpie pro každého (žádná kuličková pera, text nebude čitelný z 2 m).
-- **Catering.** Káva, voda, ovoce, oběd. Workshop unaví – bez cateringu padá energie po 90 minutách.
+- **Catering.** Káva, voda, ovoce, oběd. Workshop unavuje a bez jídla energie padá po 90 minutách.
 - **Pozvánka.** Účastníci dostanou předem jednostránkovou agendu. Doménoví experti se z ní dozvědí, že *nebudou prezentovat slidy*, ale budou „vyprávět příběh“.
 
 ### 04.04.2 Postup workshopu (zkrácená varianta, 2–4 hodiny) {#bp-postup}
 
 1. **(10 min) Brief a startovací event.** Facilitátor v 5 minutách vysvětlí pravidla: oranžová = co se stalo, minulý čas, lepit kamkoliv. Pak workshop odstartuje tím, že napíše první event, o kterém ví, že nastává v doméně, a nalepí ho doprostřed stěny, například `OrderPlaced`.
-2. **(20–30 min) Chaotic exploration.** Všichni dostanou stejně oranžových stickies (~15 každý) a píší události, které je napadnou. **Lepí kamkoliv** bez pořadí. Jde o záměrný chaos – chcete, aby si lidé vzpomněli na vše, ne aby okamžitě strukturovali. Facilitátor sbírá poznámky a tlačí lidi: „a co se stane potom? a předtím?“.
+2. **(20–30 min) Chaotic exploration.** Všichni dostanou stejně oranžových stickies (~15 každý) a píší události, které je napadnou. **Lepí kamkoliv** bez pořadí. Chaos je záměrný: lidé si mají vzpomenout na všechno, ne hned strukturovat. Facilitátor sbírá poznámky a tlačí lidi: „a co se stane potom? a předtím?“.
 3. **(30 min) Enforcing the timeline.** Facilitátor začne přesouvat eventy doleva (dříve) a doprava (později). Vznikne časová osa. Účastníci do toho mluví: „ne, refund je až po reklamaci, posuň to“. Duplicitní eventy se slučují, ale jen se souhlasem účastníků.
-4. **(30–45 min) Pivotal Events.** Facilitátor identifikuje *zlomové body*, tedy eventy, kolem kterých se přirozeně sdružuje skupina ostatních. V e-shopu typicky: `CustomerRegistered`, `OrderPlaced`, `PaymentSettled`, `ShipmentDispatched`, `OrderClosed`. Značí se svislou čarou napříč celou časovou osou, která ji rozdělí na úseky. Typicky 3–7 pivotal events.
-5. **(30–45 min) Hot Spots.** Kdykoliv během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?“), **nediskutuje se**. Místo toho se napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla. Po 45 minutách máte typicky 8–15 hot spotů. To je *nejcennější výstup* Big Picture.
+4. **(30–45 min) Pivotal Events.** Facilitátor identifikuje *zlomové body*, tedy eventy, kolem kterých se přirozeně sdružuje skupina ostatních. V e-shopu typicky: `CustomerRegistered`, `OrderPlaced`, `PaymentSucceeded`, `ShipmentDispatched`, `OrderClosed`. Značí se svislou čarou napříč celou časovou osou, která ji rozdělí na úseky. Typicky 3–7 pivotal events.
+5. **(30–45 min) Hot Spots.** Kdykoliv během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět („Co když zákazník zaplatí dvakrát?“), **nediskutuje se**. Místo toho se napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla. Po 45 minutách jich bývá 8–15. Jsou *nejcennějším výstupem* Big Picture.
 6. **(20–30 min) Bounded Context boundaries.** Facilitátor s týmem hledá místa, kde se mění slovník: kde *tentýž* pojem znamená něco jiného, kde končí jeden příběh a začíná jiný. Označí je fialovými stickies nebo silnými fialovými čarami. Typicky 3–7 BC.
 7. **(15 min) Foto a transkripce.** Širokoúhlé foto stěny v originálu, pak detailní fotky po sekcích. Vše uložit do `docs/discovery/<datum>/` v repu. Online workshop: Miro export jako PNG i jako board (link).
 
 ### 04.04.3 Jak poznat hranici kontextu {#jak-poznat-hranici}
 
-Krok 6 stojí a padá na tom, zda hranici poznáte, když na ni narazíte. Čtyři heuristiky, které na stěně fungují nejspolehlivěji:
+Krok 6 závisí na tom, zda hranici poznáte, když na ni narazíte. Na stěně nejspolehlivěji fungují čtyři heuristiky:
 
 - **Lingvistické švy.** Stejné slovo, jiný význam. „Objednávka“ pro prodejce znamená košík se slevami, pro sklad seznam položek k vychystání a pro účtárnu podklad faktury. Jakmile jedno slovo nese tři definice, máte před sebou tři kontexty, ne jeden.
 - **Pivotní eventy (pivotal events).** Zlomová událost mění význam entity. Před `OrderPlaced` je objednávka editovatelným návrhem; po něm je závazkem vůči zákazníkovi. Entita, která událostí mění povahu, typicky překračuje hranici: z jednoho kontextu vstupuje do druhého.
-- **Hranice oddělení.** Levný první odhad. Tam, kde si firma předává práci (prodej → sklad → účtárna), se obvykle mění slovník i pravidla. Slepě se ale přebírat nedají; org chart bývá historický, ne doménový.
-- **Vlastnictví dat.** Otázka „kdo smí tohle pole změnit?“ má uvnitř jednoho kontextu jedinou odpověď. Pokud cenu produktu mění dva týmy podle dvou různých pravidel, nejde o jedno pole se dvěma editory, ale o dva koncepty ve dvou kontextech.
+- **Hranice oddělení.** Levný první odhad. Kde si firma předává práci (prodej → sklad → účtárna), mění se obvykle slovník i pravidla. Slepě je ale přebírat nejde; org chart bývá historický, ne doménový.
+- **Vlastnictví dat.** Otázka „kdo smí tohle pole změnit?“ má uvnitř jednoho kontextu jedinou odpověď. Mění-li cenu produktu dva týmy podle dvou různých pravidel, nejde o jedno pole se dvěma editory, ale o dva koncepty ve dvou kontextech.
 
-Žádná z heuristik není sama o sobě rozhodující. Hledáte místa, kde se jich protne víc najednou – lingvistický šev na hranici oddělení s vlastním vlastnictvím dat je téměř jistá hranice BC. Vazbu mezi pivotními událostmi a hranicemi kontextů rozebírá Brandolini v eseji *Discovering Bounded Contexts with EventStorming* ve sborníku *Domain-Driven Design: The First 15 Years* (Leanpub, 2019). Pojmenované vztahy mezi nalezenými kontexty pak popisuje kapitola [Context Mapping](/context-mapping).
+Žádná z heuristik sama nerozhoduje. Hledají se místa, kde se jich protne víc najednou – lingvistický šev na hranici oddělení s vlastním vlastnictvím dat je téměř jistá hranice BC. Vazbu mezi pivotními událostmi a hranicemi kontextů rozebírá Brandolini v eseji *Discovering Bounded Contexts with EventStorming* ve sborníku *Domain-Driven Design: The First 15 Years* (Leanpub, 2019). Pojmenované vztahy mezi nalezenými kontexty pak popisuje kapitola [Context Mapping](/context-mapping).
 
 ### 04.04.4 Co máte na konci Big Picture {#bp-vystup}
 
@@ -138,15 +138,15 @@ Krok 6 stojí a padá na tom, zda hranici poznáte, když na ni narazíte. Čty�
 - 8–15 hot spotů jako budoucí tickety.
 - Foto / Miro export.
 
-Co **nemáte** a ani by nemělo být cílem: kompletní model, schéma databáze, finální seznam tříd. Big Picture je strategický nástroj – taktiku řeší až Software Design.
+Co na konci **není** a být nemá: kompletní model, schéma databáze, finální seznam tříd. Big Picture je strategický nástroj, taktiku řeší až Software Design.
 
 ### 04.04.5 Online varianta – nastavení Miro/Mural {#bp-online}
 
-Kolik se online ztratí, záleží na tom, který ze tří formátů děláte. Brandolini to rozepsal v textu *Remote EventStorming* (březen 2020). Software Design online snese nejvíc: malý rozsah, 90 minut, technické publikum. Process Modelling jde podmínečně: půlden, 5–15 lidí, tým už formát zná z prezenční verze a každá třetí session je naživo. K Big Picture má jedinou větu: *„Don't even try.“* Vlastní pokus označil za dysfunkční i s expertními účastníky, protože online mizí paralelní konverzace u části stěny, řeč těla i celodenní ponoření. Doporučuje také remote sezení vůbec nenazývat EventStormingem, aby si tým se jménem techniky nespojil špatnou zkušenost.
+Kolik se online ztratí, záleží na formátu. Brandolini to rozepsal v textu *Remote EventStorming* (březen 2020). Software Design online snese nejvíc: malý rozsah, 90 minut, technické publikum. Process Modelling jde podmínečně: půlden, 5–15 lidí, tým formát zná z prezenční verze a každá třetí session je naživo. K Big Picture má jedinou větu: *„Don't even try.“* Vlastní pokus označil za dysfunkční i s expertními účastníky, protože online mizí paralelní konverzace u části stěny, řeč těla i celodenní ponoření. Radí také remote sezení vůbec nenazývat EventStormingem, aby si tým se jménem techniky nespojil špatnou zkušenost.
 
-Přesto se online Big Picture dělá, protože doménoví experti sedí ve třech městech a alternativou nebývá offline workshop, ale žádný workshop. Následující postup je vědomý kompromis se známou cenou. Co se dodržet dá:
+Online Big Picture se přesto dělá, protože doménoví experti sedí ve třech městech a alternativou není offline workshop, ale žádný. Následující postup je vědomý kompromis se známou cenou. Dodržet se dá tohle:
 
-1. **Frame 12 000 × 4 000 px.** Týmy často podcení velikost plátna. Big Picture na 50+ eventů potřebuje hodně horizontálního prostoru, jinak se účastníci začnou navzájem překrývat. V Miro založte nový board a první frame udělejte explicitně s těmito rozměry, parametr *Frame size*.
+1. **Frame 12 000 × 4 000 px.** Týmy velikost plátna často podcení. Big Picture na 50+ eventů potřebuje hodně horizontálního prostoru, jinak se účastníci začnou navzájem překrývat. V Miro založte nový board a první frame udělejte explicitně s těmito rozměry, parametr *Frame size*.
 2. **Předpřipravená paleta.** Vlevo na boardu položte 7–9 zdrojových stickies (jednu od každé barvy) a kolem nich rámeček s popiskem „*Kopírujte odsud (Ctrl+D duplikuje)*“. Účastníci si stickies kopírují, místo aby pracně otevírali sticky picker.
 3. **Voice-only, kamery vypnuté.** Kamery odvádějí pozornost od boardu; všichni se musí dívat na stejné plátno. Výjimka: úvodních 5 minut představení a pak při hot-spot diskusích.
 4. **Breakout místnosti pro dvě fáze.** Při Pivotal Events fázi rozdělte skupinu do 2–3 breakout místností po 4 lidech. Každá skupina si v Miru pracuje na jednom segmentu časové osy. Po 20 minutách se vše vrátí zpět do hlavní místnosti a synchronizuje. Bez breakoutů online workshop kolabuje na jednoho aktivního a pět pasivních pozorovatelů.
@@ -156,7 +156,7 @@ Přesto se online Big Picture dělá, protože doménoví experti sedí ve třec
 ### 04.04.6 Kdy Big Picture *nedělat* {#bp-when-again}
 
 - **Zralý produkt s ustáleným modelem.** Když tým pracuje v jedné doméně tři roky a má aktuální Context Map, nový Big Picture typicky neodhalí nic nového. Víc přinese Process Modelling nad konkrétním bolavým BC.
-- **Tým není ochotný diskutovat.** Big Picture stojí na otevřené debatě. Pokud je v týmu strach z konfrontace nebo silně hierarchická kultura, musí nejdřív padnout tato bariéra. Jinak workshop produkuje falešný konsenzus.
+- **Tým není ochotný diskutovat.** Big Picture stojí na otevřené debatě. Má-li tým strach z konfrontace nebo silně hierarchickou kulturu, musí tahle bariéra padnout nejdřív. Jinak workshop vyrobí falešný konsenzus.
 - **Doménoví experti jsou v různých časových pásmech bez přesahu.** Big Picture musí proběhnout najednou. Když se nenajde 3–4hodinové okno, kdy jsou všichni hlavní hráči online, náhradou je série Domain Storytelling sezení 1:1 se sloučenými výstupy.
 
 :::callout{type="warn"}
@@ -167,7 +167,7 @@ Facilitátor drží proces, ne obsah. Jakmile má na výsledném modelu vlastní
 
 ## 04.05 Process Modelling – jeden BC, hlubší detail {#process-level}
 
-Po Big Picture máte 3–7 Bounded Contextů. Process Modelling si vždy bere **jeden BC najednou** a zhušťuje ho. Cílem je dostat se ke struktuře, která se v Symfony reálně přeloží do `Command` tříd, `Handler`ů a `Event`ů na message busu (podrobně v kapitole [CQRS](/cqrs)).
+Po Big Picture máte 3–7 Bounded Contextů. Process Modelling bere vždy **jeden BC** a zhušťuje ho do struktury, která se v Symfony přeloží na `Command` třídy, `Handler`y a `Event`y na message busu (podrobně v kapitole [CQRS](/cqrs)).
 
 ### 04.05.1 Co Process Modelling přidává oproti Big Picture {#pl-co-pridava}
 
@@ -197,10 +197,10 @@ Customer (actor)
             → "Initiate payment" (policy)
                 → ChargeCard (command, jiný BC: Payment)
                     → Stripe (external system)
-                    → PaymentReceived (event)
+                    → PaymentSucceeded (event)
 :::
 
-Sekvence ještě není kód, slouží jako mapa pro implementaci. Ale je z ní **okamžitě vidět**, že budete potřebovat:
+Sekvence ještě není kód, je to mapa pro implementaci. Už z ní ale **je vidět**, co bude potřeba:
 
 - Application Service `PlaceOrderHandler` v Ordering BC.
 - Process Manager, který koordinuje `OrderPlaced → ReserveStock → ChargeCard` přes BC hranice (podrobně v kapitole [Ságy a process managery](/sagy-a-process-managery)).
@@ -217,7 +217,7 @@ Sekvence ještě není kód, slouží jako mapa pro implementaci. Ale je z ní *
 
 ## 04.06 Software Design – pro každý BC zvlášť {#design-level}
 
-Software Design je nejtaktičtější formát Event Stormingu a první, který se přibližuje kódu. Cílem je pro každý Bounded Context identifikovat **agregáty**, jejich **invariantní pravidla** a způsob, jakým commands modifikují stav agregátu.
+Software Design je nejtaktičtější formát Event Stormingu a první, který se blíží kódu. Pro každý Bounded Context hledá **agregáty**, jejich **invariantní pravidla** a způsob, jakým commands mění stav agregátu.
 
 ### 04.06.1 Co Software Design přidává {#dl-co-pridava}
 
@@ -255,7 +255,7 @@ final readonly class PlaceOrderCommand
     ) {}
 }
 
-// Domain/Order.php
+// Domain/Model/Order.php
 namespace App\Ordering\Domain\Model;
 
 use App\Ordering\Domain\Event\OrderCancelled;
@@ -292,7 +292,10 @@ final class Order extends AggregateRoot
     public function addItem(ProductId $productId, int $quantity, Money $unitPrice): void
     {
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException('Cannot add items to a non-draft order');
+            throw InvalidOrderStateTransitionException::notAllowedInState(
+                'přidání položky',
+                $this->status->value,
+            );
         }
 
         $this->items[] = new OrderItem($productId, $quantity, $unitPrice);
@@ -302,7 +305,10 @@ final class Order extends AggregateRoot
     {
         // Invariant z workshopu: confirm jen ze stavu Draft
         if ($this->status !== OrderStatus::Draft) {
-            throw new InvalidOrderStateTransitionException('Cannot confirm a non-draft order');
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Confirmed->value,
+            );
         }
 
         // Invariant z workshopu: objednávka musí mít aspoň jednu položku
@@ -314,15 +320,19 @@ final class Order extends AggregateRoot
         $this->record(new OrderConfirmed($this->id, $this->customerId, new \DateTimeImmutable()));
     }
 
-    public function cancel(string $reason): void
+    // Náčrt z workshopu bez zámku ságy; kanonický přechod viz Návrh agregátu.
+    public function cancel(string $reason, \DateTimeImmutable $when): void
     {
-        // Invariant z workshopu: zrušit lze draft i potvrzenou objednávku
-        if ($this->status !== OrderStatus::Draft && $this->status !== OrderStatus::Confirmed) {
-            throw new InvalidOrderStateTransitionException('Cannot cancel a shipped order');
+        // Invariant z workshopu: odeslanou ani doručenou objednávku zrušit nejde
+        if (in_array($this->status, [OrderStatus::Shipped, OrderStatus::Delivered], true)) {
+            throw InvalidOrderStateTransitionException::cannotTransition(
+                $this->status->value,
+                OrderStatus::Cancelled->value,
+            );
         }
 
         $this->status = OrderStatus::Cancelled;
-        $this->record(new OrderCancelled($this->id, $this->customerId, $reason, new \DateTimeImmutable()));
+        $this->record(new OrderCancelled($this->id, $this->customerId, $reason, $when));
     }
 
     public function totalAmount(): Money
@@ -350,7 +360,7 @@ use App\Ordering\Domain\Repository\OrderRepository;
 use App\Ordering\Domain\ValueObject\OrderId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final readonly class PlaceOrderHandler
 {
     public function __construct(
@@ -375,32 +385,32 @@ final readonly class PlaceOrderHandler
 
 **Každý prvek z workshopu má v kódu protějšek.** Command sticky → `PlaceOrderCommand`. Constraint (agregát) → třída `Order`. Invariant z bullet pointu → `throw` v doménové metodě. Event sticky → `OrderPlaced` zaznamenaný přes `record()`.
 
-Překlad ale není mechanický. Tři rozhodnutí padají mimo místnost a na stěně pro ně není barva:
+Překlad ale není mechanický. Tři rozhodnutí padají mimo místnost a na stěně pro ně barva není:
 
-- **Kdy se eventy publikují.** Ukázka je jen zaznamenává do agregátu. Kdo je pošle na sběrnici a jak se to sladí s commitem databázové transakce, řeší [Outbox Pattern](/outbox-pattern). Dispatch hned za `save()` je dual-write a rozbije se při první výjimce mezi zápisem a odesláním.
+- **Kdy se události publikují.** Ukázka je jen zaznamenává do agregátu. Synchronní dispatch na `event.bus` uvnitř transakce command busu je v pořádku, rollback vrátí i zápisy posluchačů. Co opouští proces (broker, e-mail, cizí služba), jde přes [Outbox Pattern](/outbox-pattern). Přímé odeslání ven hned za `save()` je dual-write a rozbije se při první výjimce mezi zápisem a odesláním.
 - **Jestli command něco vrací.** `__invoke()` zde vrací `OrderId`. Volající tu hodnotu dostane jen přes `HandledStamp` nebo `HandleTrait` a pouze u synchronně zpracovaných zpráv; na asynchronním transportu běží handler ve worker procesu a návratová hodnota se k odesílateli nedostane.
-- **Na jakou sběrnici to jde.** Symfony má `MessageBusInterface`. Oddělená command a event sběrnice je až věc konfigurace `framework.messenger.buses` a aliasů, podrobně v kapitole [CQRS](/cqrs).
+- **Na jakou sběrnici to jde.** Symfony má `MessageBusInterface`. Oddělená command a event sběrnice je věc konfigurace `framework.messenger.buses` a aliasů, podrobně v kapitole [CQRS](/cqrs).
 
 :::callout{type="pattern"}
 ### Komentář v kódu = pojítko s workshopem {#design-level-comment-heading}
 
-Když píšete invariantní check v doménové třídě, dejte k němu komentář s odkazem na workshop:
+Ke kontrole invariantu v doménové třídě připište komentář s odkazem na workshop:
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (fragment)"}
-// Invariant Order-3 (workshop 2026-04-29):
-// "Order nemůže být confirmed bez aspoň jedné položky."
+// Invariant Inv-1 (workshop 2026-04-29):
+// „Order nemůže být confirmed bez aspoň jedné položky.“
 // Hot spot Order-7 (otevřený): co když je položka backorder?
 if ($this->items === []) {
-    throw new EmptyOrderException();
+    throw EmptyOrderException::cannotConfirm();
 }
 :::
 
-Tato vazba má praktický dopad. Za půl roku nový vývojář ví, odkud pravidlo pochází, a může si ho ověřit u doménového experta. Nesmaže ho v dobré víře jako „divnou validaci“.
+Za půl roku pak nový vývojář ví, odkud pravidlo pochází, a může si ho ověřit u doménového experta. Nesmaže ho v dobré víře jako „divnou validaci“.
 :::
 
 ## 04.07 Domain Storytelling – alternativa pro malé týmy {#domain-storytelling}
 
-**Domain Storytelling** představili Stefan Hofer a Henning Schwentner v knize stejného jména (Addison-Wesley, 2021). Stejně jako Event Storming řeší extrakci doménových znalostí, ale jinou cestou: místo časové osy událostí kreslíte **příběh** o práci doménového experta ve standardizované piktogramové notaci.
+**Domain Storytelling** představili Stefan Hofer a Henning Schwentner v knize stejného jména (Addison-Wesley, 2021). Doménové znalosti získává jinou cestou než Event Storming: místo časové osy událostí se kreslí **příběh** o práci doménového experta ve standardizované piktogramové notaci.
 
 ### 04.07.1 Notace {#ds-notace}
 
@@ -414,7 +424,7 @@ Věta příběhu má pevnou gramatiku: **kdo** (actor) dělá **co** (activity) 
 
 ### 04.07.2 Scope – jaký příběh vlastně kreslíte {#ds-scope}
 
-Domain story bez určeného scope dopadne tak, že si polovina místnosti myslí, že popisuje dnešek, a druhá polovina, že návrh. Hofer se Schwentnerem proto každý příběh zařazují ve třech osách:
+U domain story bez určeného scope si polovina místnosti myslí, že popisuje dnešek, a druhá polovina, že návrh. Hofer se Schwentnerem proto každý příběh zařazují ve třech osách:
 
 1. **Granularita.** Hrubý příběh (coarse-grained) dává přehled o celém procesu. Jemný (fine-grained) rozepisuje jeden úsek do detailu, ve kterém se dá programovat.
 2. **Čas.** AS-IS zachycuje, jak práce probíhá dnes. TO-BE, jak má probíhat po změně.
@@ -434,7 +444,7 @@ Story *„Customer places an order“* v Domain Storytelling notaci, čtená v p
 6. **Order System** →(6) *sends* → **Confirmation Email** → **Customer**
 7. **Order System** →(7) *creates* → **Shipment Order** → **Warehouse**
 
-Sedm vět, sedm čísel. Krok 3 se kreslí dvěma šipkami (od actora k work objectu a od work objectu k druhému actorovi), pořadové číslo ale nese celá aktivita, ne šipka. Kresba je úmyslně jednoduchá – ručně nakreslené piktogramy nebo nástroj [egon.io](https://egon.io/) (open source, v prohlížeči). Příběh je čitelný shora dolů ve sledu čísel a každá aktivita má slovesné jméno.
+Sedm vět, sedm čísel. Krok 3 se kreslí dvěma šipkami (od actora k work objectu a od work objectu k druhému actorovi), pořadové číslo ale nese celá aktivita, ne šipka. Kresba je úmyslně jednoduchá: ručně nakreslené piktogramy nebo nástroj [egon.io](https://egon.io/) (open source, v prohlížeči). Příběh se čte shora dolů podle čísel a každá aktivita má slovesné jméno.
 
 ### 04.07.4 Domain Storytelling vs. Event Storming – kdy zvolit co {#ds-vs-es}
 
@@ -449,7 +459,7 @@ Sedm vět, sedm čísel. Krok 3 se kreslí dvěma šipkami (od actora k work obj
 | Doporučený nástroj | Stěna + Post-It nebo Miro | egon.io, papír, Miro |
 | Kdy zvolit | Nový BC, migrace, strategický přehled | Hluboká diskuse o jednom procesu, malý tým, omezený čas |
 
-Hofer a Schwentner v knize zdůrazňují, že obě techniky se **nekonkurují**, ale doplňují. Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv). Domain Storytelling v každém z nich pak odkryje detail (teleobjektiv). Doporučují kombinovat: Big Picture pro strategický přehled, Domain Storytelling pro jednotlivé hlavní procesy a Process Modelling se Software Designem pro implementaci.
+Hofer a Schwentner v knize zdůrazňují, že se obě techniky **doplňují**. Event Storming ukáže, jaké procesy v doméně existují (širokoúhlý objektiv), Domain Storytelling v každém z nich odkryje detail (teleobjektiv). Autoři doporučují kombinaci: Big Picture pro strategický přehled, Domain Storytelling pro jednotlivé hlavní procesy a Process Modelling se Software Designem pro implementaci.
 
 :::callout{type="note"}
 ### Nástroje pro Domain Storytelling {#ds-tooling-heading}
@@ -463,33 +473,33 @@ Knihu *Domain Storytelling* doplňuje volně přístupný web [domainstorytellin
 
 ### 04.07.5 Praktický egon.io walkthrough {#ds-egon-walkthrough}
 
-[egon.io](https://egon.io/) je open-source webová aplikace (Angular nad diagram-js), která Domain Storytelling notaci plně implementuje. Pro tým, který nechce kupovat Miro licence nebo tahat papír, je to vhodný nástroj. Postup pro první sezení:
+[egon.io](https://egon.io/) je open-source webová aplikace (Angular nad diagram-js), která implementuje celou notaci Domain Storytellingu. Hodí se týmu, který nechce kupovat licence Miro ani tahat papír. Postup pro první sezení:
 
 1. **Otevřete egon.io v prohlížeči** – nevyžaduje registraci. Vlevo nahoře je toolbar s ikonkami: actor (panáček), work object (obdélník), activity (šipka).
 2. **Začněte s actorem.** Přetáhněte ikonu „person“ na plátno a pojmenujte ji rolí, ne osobou: `Customer`, ne `Petr Novák`. Jméno se v exportu objeví u každé aktivity, takže na jeho volbě záleží.
 3. **Přidejte work object.** Druhý nejčastější tvar – věc, se kterou actor pracuje. V e-shopu typicky `Cart`, `Order`, `Invoice`, `ShipmentLabel`.
 4. **Spojte je activity.** Klik na actora, drag na work object; egon.io vytvoří očíslovanou šipku. Slovesné jméno (*browses*, *submits*, *confirms*) se píše do labelu šipky.
-5. **Buďte struční.** Jeden Domain Storytelling diagram by měl mít **jeden lineární příběh** s 5–15 aktivitami. Když jich máte 30, rozdělte ho na dva diagramy.
-6. **Export do SVG.** Menu vpravo nahoře → Download → SVG. Soubor pojmenujte `<datum>-<story-name>.svg` a uložte do `docs/discovery/<datum>/storytelling/`. SVG je textový formát, ve kterém git přehledně zobrazuje rozdíly a v PR review vidíte změny.
+5. **Buďte struční.** Jeden diagram má nést **jeden lineární příběh** s 5–15 aktivitami. Když jich máte 30, rozdělte ho na dva.
+6. **Export do SVG.** Menu vpravo nahoře → Download → SVG. Soubor pojmenujte `<datum>-<story-name>.svg` a uložte do `docs/discovery/<datum>/storytelling/`. SVG je textový formát, takže git ukáže rozdíly a změny jsou vidět v PR review.
 
-Egon.io ukládá příběh ve vlastním textovém formátu `.egn` (vedle exportu `.egn.svg`). Soubor patří do repa vedle SVG. Příběh tak lze verzovat, po změně znovu otevřít v egon.io a SVG přegenerovat.
+Egon.io ukládá příběh ve vlastním textovém formátu `.egn` (vedle exportu `.egn.svg`). Soubor patří do repa vedle SVG. Příběh tak jde verzovat, po změně znovu otevřít v egon.io a SVG přegenerovat.
 
 ## 04.08 Anti-vzory workshopů {#anti-vzory}
 
-Workshop bez přípravy a pevného vedení je horší než žádný. Vytvoří zdání shody, která neexistuje, a tým podle něj implementuje chybný model. Brandolini vede na eventstorming.com katalog sedmnácti pojmenovaných patternů a anti-patternů; kde se s ním následující vzory kryjí, je kanonické jméno uvedeno v závorce. Zde je seznam nejčastějších a jejich řešení.
+Workshop bez přípravy a pevného vedení je horší než žádný. Vytvoří zdání shody, která neexistuje, a tým podle něj implementuje chybný model. Brandolini vede na eventstorming.com katalog sedmnácti pojmenovaných patternů a anti-patternů; kde se s ním následující vzory kryjí, je kanonické jméno uvedeno v závorce. Následují nejčastější anti-vzory a jejich řešení.
 
 :::callout{type="warn"}
 ### „Doménoví experti nemají čas, uděláme to bez nich.“ {#anti-no-experts-heading}
 
-**Bez doménových expertů jde jen o brainstorming vývojářů**, kteří si vymýšlejí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný – chybí mu validní kontradikce a hot spoty.
+**Bez doménových expertů jde jen o brainstorming vývojářů**, kteří si vymýšlejí, jak doména funguje. Výstup vypadá podobně, ale je nepoužitelný: chybí mu skutečné rozpory a hot spoty.
 
-**Řešení:** místo čtyř hodin stačí *90 minut Big Picture*. Téměř vždy se to dá v kalendáři vyargumentovat. A pokud opravdu nikdo z expertů nemůže, workshop se odkládá – rezervovaná místnost není důvod ho konat.
+**Řešení:** místo čtyř hodin stačí *90 minut Big Picture*, což se v kalendáři obhájit dá skoro vždy. Když opravdu nikdo z expertů nemůže, workshop se odkládá. Rezervovaná místnost není důvod ho konat.
 :::
 
 :::callout{type="warn"}
 ### „Začneme rovnou u Software Designu, na Big Picture nemáme čas.“ {#anti-skip-bp-heading}
 
-Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém Bounded Contextu leží. (Pozor na záměnu: *Rush to the goal* je na eventstorming.com **doporučený** vzor, tedy dojít rychle k základní kostře a odbočky odložit jako hot spoty. Přeskočení celého formátu to neospravedlňuje.) Výsledek: *God Aggregate* typu `Order`, který obsahuje payment status, shipping data, fakturační adresu a kupóny, protože nikdo neoznačil, že tyto pojmy patří do různých BC.
+Bez Big Picture se agregáty modelují, aniž by bylo jasné, ve kterém Bounded Contextu leží. (Pozor na záměnu: *Rush to the goal* je na eventstorming.com **doporučený** vzor, tedy dojít rychle k základní kostře a odbočky odložit jako hot spoty. Přeskočení celého formátu to neospravedlňuje.) Výsledek: *God Aggregate* typu `Order`, který obsahuje payment status, shipping data, fakturační adresu a kupóny, protože nikdo neoznačil, že tyto pojmy patří do různých BC.
 
 **Řešení:** Big Picture proběhne, i kdyby mělo trvat jen 90 minut. Bez něj vede Software Design skoro vždy k nesprávnému rozdělení agregátů.
 :::
@@ -497,7 +507,7 @@ Když přeskočíte Big Picture, modelujete agregáty bez znalosti, ve kterém B
 :::callout{type="warn"}
 ### „Workshop facilituje senior dev / tech lead.“ {#anti-tech-lead-heading}
 
-Senior vývojář při facilitaci podsouvá technický pohled. Eventy strukturuje podle toho, co se dá hezky implementovat, ne podle toho, jak doména reálně funguje. Doménoví experti to vycítí a začnou potlačovat svůj jazyk ve prospěch toho „technicky čistého“.
+Senior vývojář při facilitaci podsouvá technický pohled. Eventy řadí podle toho, co se dá hezky implementovat, ne podle toho, jak doména reálně funguje. Doménoví experti to vycítí a vlastní jazyk začnou potlačovat ve prospěch „technicky čistého“.
 
 **Řešení:** rozhodující není role, ale neutralita. Nejsnáz ji udrží PM, agile coach, designer nebo externí konzultant. Externista se silným názorem na architekturu ale škodí stejně jako tech lead. Když jinou možnost nemáte, domluvte se předem, že facilitátor obsah nenavrhuje a promluví, jen když se ho někdo přímo zeptá. Brandolini k tomu přidává pattern *Time-boxed Leadership*: styl vedení se během workshopu mění, obsah ale zůstává skupině.
 :::
@@ -505,7 +515,7 @@ Senior vývojář při facilitaci podsouvá technický pohled. Eventy strukturuj
 :::callout{type="warn"}
 ### „Zápis = Word dokument.“ {#anti-word-heading}
 
-Když převedete vizuální workshop do lineárního textu, ztratíte 80 % informace – rozložení v prostoru, vztahy, blízkost hot spotů k eventům. Wordový dokument o osmi stranách nikdo nepřečte; foto a Miro export se otevřou na 5 sekund a všichni si vzpomenou, co kde stálo.
+Převod vizuálního workshopu do lineárního textu ztratí většinu informace: rozložení v prostoru, vztahy, blízkost hot spotů k eventům. Wordový dokument o osmi stranách nikdo nepřečte. Foto nebo Miro export stačí otevřít na pět sekund a všichni si vzpomenou, co kde stálo.
 
 **Řešení:** širokoúhlé foto stěny v originálu (4K), detailní fotky po sekcích, Miro link s read-only přístupem pro celý tým. Vše do `docs/discovery/<datum>/` v repu, vedle čistého `events.md` s prostým seznamem objevených eventů (řádek na event).
 :::
@@ -513,7 +523,7 @@ Když převedete vizuální workshop do lineárního textu, ztratíte 80 % infor
 :::callout{type="warn"}
 ### „Po workshopu se to nezapíše do kódu.“ {#anti-no-followup-heading}
 
-Workshop, který skončí slávou, fotkou stěny a sdílením ve Slacku, ale jehož výstup se nepromítne do kódu, je za 3 měsíce zapomenutý. Slovník, který v místnosti vznikl, se v kódu nepoužije, a Ubiquitous Language opět degeneruje.
+Workshop, který skončí fotkou stěny a sdílením ve Slacku, ale do kódu se nepromítne, je za tři měsíce zapomenutý. Slovník z místnosti se v kódu neobjeví a Ubiquitous Language se znovu rozpadne.
 
 **Řešení:** první PR po workshopu pojmenuje třídy přesně podle workshopu (`OrderPlaced`, ne `OrderSavedEvent`) a doplní komentáře s odkazem na hot spoty. Jeden hot spot z workshopu = jeden ticket v issue trackeru.
 :::
@@ -521,30 +531,30 @@ Workshop, který skončí slávou, fotkou stěny a sdílením ve Slacku, ale jeh
 :::callout{type="warn"}
 ### „Big Picture musíme dotáhnout k dokonalosti.“ {#anti-perfectionism-heading}
 
-Big Picture nemá být dokonalý; je to první mapa neznámého území. Brandoliniho *Deliverable Obsession* míří na příbuznou věc z druhé strany: na tlak sponzora, aby z discovery workshopu vypadl hmatatelný artefakt, ačkoli hlavním výstupem je společné porozumění. Pokud na něm strávíte 8 hodin a budete debatovat o tom, zda `OrderShipped` je `ShipmentDispatched` nebo `OrderDispatched`, ztrácíte čas. Rozhodnutí padne až v Process Modellingu, kde uvidíte kontext.
+Big Picture nemá být dokonalý; je to první mapa neznámého území. Brandoliniho *Deliverable Obsession* míří na příbuznou věc z druhé strany: na tlak sponzora, aby z discovery workshopu vypadl hmatatelný artefakt, ačkoli hlavním výstupem je společné porozumění. Osm hodin debaty o tom, zda `OrderShipped` je `ShipmentDispatched`, nebo `OrderDispatched`, je ztracený čas. Rozhodne se až v Process Modellingu, kde bude vidět kontext.
 
-**Řešení:** držte timebox, ať už je celodenní podle Brandoliniho, nebo čtyřhodinový podle zkrácené varianty výše. Pak workshop končí, i kdyby polovina hot spotů byla nevyřešená – to je v pořádku. Hot spoty *mají* zůstat otevřené.
+**Řešení:** držte timebox, ať celodenní podle Brandoliniho, nebo čtyřhodinový podle zkrácené varianty výše. Pak workshop končí, i když polovina hot spotů zůstane nevyřešená. Hot spoty *mají* zůstat otevřené.
 :::
 
 ## 04.09 Co Event Storming neumí {#co-neumi}
 
-Předchozí sekce je o tom, jak workshop pokazí lidé. Následuje seznam toho, co technika neumí ani ve chvíli, kdy ji vedete správně.
+Předchozí sekce popisuje, jak workshop pokazí lidé. Tato se věnuje tomu, co technika neumí, ani když ji vedete správně.
 
 **Happy path vytlačí zbytek.** Časová osa se staví jako příběh a příběhy se vyprávějí od začátku do úspěšného konce. Storna, částečné refundy, ruční zásahy podpory a timeouty externích systémů se na stěnu dostanou jen tehdy, když se na ně někdo cíleně zeptá. Obrana stojí jednu otázku, položenou po dokončení osy u každé pivotní události: „co se stane, když tohle selže?“.
 
-**Nefunkční požadavky nemají kam sednout.** Latence, dostupnost, retenční lhůty, GDPR, objem dat, cena provozu. Žádná barva pro ně v notaci není a workshop je systematicky přehlíží. Pokud na nich stojí architektura, patří do samostatného sezení; Event Storming je nenahradí.
+**Nefunkční požadavky nemají kam sednout.** Latence, dostupnost, retenční lhůty, GDPR, objem dat, cena provozu. Notace pro ně nemá barvu a workshop je systematicky přehlíží. Stojí-li na nich architektura, patří do samostatného sezení; Event Storming je nenahradí.
 
-**Mapa žije jen tak dlouho, dokud ji někdo udržuje.** Stěna je artefakt jednoho dne. Bez převodu do repa a do kódu z ní za tři měsíce zbude fotka, na kterou se nikdo nedívá. Sekce 04.10 proto není administrativní příloha workshopu, ale podmínka toho, aby po něm něco zbylo.
+**Mapa žije, jen dokud ji někdo udržuje.** Stěna je artefakt jednoho dne. Bez převodu do repa a do kódu z ní za tři měsíce zbude fotka, na kterou se nikdo nedívá. Sekce 04.10 proto není administrativní příloha workshopu, ale podmínka toho, aby po něm něco zbylo.
 
-**Výsledek závisí na facilitátorovi víc, než je zdrávo.** Tatáž skupina se stejnou doménou vyprodukuje se dvěma facilitátory dvě různé mapy. Technika sama žádnou korekci neobsahuje, a proto se doporučuje mapu po pár týdnech znovu otevřít s odstupem, nejlépe s někým, kdo u prvního workshopu nebyl.
+**Výsledek závisí na facilitátorovi víc, než je zdrávo.** Tatáž skupina nad stejnou doménou vytvoří se dvěma facilitátory dvě různé mapy. Technika sama žádnou korekci nemá. Mapu je proto dobré po pár týdnech otevřít znovu, nejlépe s někým, kdo u prvního workshopu nebyl.
 
-Poslední limit je nejtišší. Konsenzus dvaceti lidí, ze kterých patnáct sedí v jednom oddělení, popisuje pohled toho oddělení, ne doménu. Hot spoty tu díru odhalí jen zčásti: ptají se na to, co skupina *ví*, že neví.
+Poslední limit je nejméně nápadný. Konsenzus dvaceti lidí, z nichž patnáct sedí v jednom oddělení, popisuje pohled toho oddělení, ne doménu. Hot spoty tu díru odhalí jen zčásti: ptají se na to, o čem skupina *ví*, že to neví.
 
-Nic z toho není důvod workshop nedělat. Je to důvod nečekat, že z něj vypadne hotová specifikace.
+Nic z toho není důvod workshop nedělat. Je to důvod nečekat od něj hotovou specifikaci.
 
 ## 04.10 Po workshopu – co s výstupem {#po-workshopu}
 
-Workshop bez follow-upu je promarněná investice. Zde je seznam **4 konkrétních artefaktů**, které musí jít do repa do 24 hodin po skončení workshopu.
+Workshop bez follow-upu je promarněná investice. Do 24 hodin po jeho skončení musí do repa jít **čtyři konkrétní artefakty**.
 
 ### 04.10.1 Foto / Miro link {#post-1-foto}
 
@@ -568,7 +578,7 @@ Z fialových BC stickies aktualizujte [Context Map](/context-mapping) v `docs/co
 
 ### 04.10.3 Seznam doménových eventů {#post-3-events}
 
-Plain-text soubor s jedním eventem na řádek. Slouží jako reference pro budoucí PR. Když vývojář přidává nový event, ověří v něm, zda už nějaký podobný neexistuje.
+Textový soubor s jedním eventem na řádek slouží jako reference pro budoucí PR. Vývojář, který přidává nový event, v něm ověří, zda už podobný neexistuje.
 
 :::code{language="plaintext" filename="docs/discovery/2026-04-29-big-picture/events.md"}
 # docs/discovery/2026-04-29-big-picture/events.md
@@ -582,7 +592,7 @@ Plain-text soubor s jedním eventem na řádek. Slouží jako reference pro budo
 
 ## Payment BC
 - PaymentRequested
-- PaymentReceived
+- PaymentSucceeded
 - PaymentFailed
 - PaymentRefunded
 
@@ -604,12 +614,12 @@ Assignee: @business-expert-name
 Description:
 Hot spot z Big Picture workshopu 2026-04-29 (foto: docs/discovery/2026-04-29-big-picture/02-payment-area.jpg).
 Tým si není jist, zda se zásilka vrací zpět, nebo se účet zákazníka jen označí jako neuhrazený.
-Potřebujeme jednoznačné rozhodnutí před implementací Process Manager v Ordering BC.
+Potřebujeme jednoznačné rozhodnutí před implementací Process Manageru v Ordering BC.
 :::
 
 ### 04.10.5 Doporučená struktura repa po prvním workshopu {#post-5-repo}
 
-Aby výstup workshopu nezapadl ve Slacku, založte v Symfony projektu rovnou tuto adresářovou strukturu. Každý soubor má jasný účel a nikdo nemusí hádat, kam co patří:
+Aby výstup workshopu nezapadl ve Slacku, založte v Symfony projektu rovnou tuto adresářovou strukturu. Každý soubor má jasný účel a nikdo nehádá, kam co patří:
 
 :::code{language="plaintext" filename="Doporučená struktura repa"}
 my-symfony-app/
@@ -636,18 +646,18 @@ my-symfony-app/
 
 Adresář `docs/discovery/` je **append-only**: staré workshopy nemažete, jen přidáváte nové s novým datem. Tým tak má historii, jak se mapa domény vyvíjela. Re-storming, tedy opakovaný workshop nad toutéž doménou (sekce 04.11), pak porovná `docs/discovery/2026-04-29-big-picture/events.md` s `docs/discovery/2026-10-15-re-storming/events.md`.
 
-Adresáře `src/Ordering`, `src/Payment`, `src/Shipment` zrcadlí tři z pěti fialových stickies z workshopu, ty Bounded Contexty, které dostaly vlastní kód; jejich vnitřní členění podle vrstev popisuje [struktura podle subdomén](/subdomeny#symfony-implications). Když nový vývojář otevře projekt, vidí strukturu odpovídající tomu, co viděl na fotce ze workshopu. Tato vazba mezi *artefaktem v repu* a *artefaktem ze stěny* chrání jazyk workshopu před tím, aby se po půl roce vytratil z kódu.
+Adresáře `src/Ordering`, `src/Payment`, `src/Shipment` zrcadlí tři z pěti fialových stickies z workshopu, ty Bounded Contexty, které dostaly vlastní kód; jejich vnitřní členění podle vrstev popisuje [struktura podle subdomén](/subdomeny#symfony-implications). Nový vývojář po otevření projektu vidí strukturu, která odpovídá fotce ze workshopu. Vazba mezi *artefaktem v repu* a *artefaktem ze stěny* brání tomu, aby se jazyk workshopu po půl roce z kódu vytratil.
 
 ### 04.10.6 První PR po workshopu {#post-6-prvni-pr}
 
-První pull request po workshopu by měl být **malý a explicitně značený** jako follow-up, ne velký commit s implementací první feature. Doporučená velikost:
+První pull request po workshopu má být **malý a výslovně označený** jako follow-up, ne velký commit s implementací první feature. Obsahuje:
 
 - Vytvoření `docs/discovery/<datum>/` se všemi výstupy workshopu.
 - Aktualizace `docs/context-map.md` a `docs/ubiquitous-language.md`.
 - Založení prázdných namespace adresářů (`src/<BC>/Domain/`) s krátkým `README.md` v každém: kdy vznikl, z jakého workshopu, co obsahuje.
 - Tickety pro hot spoty (případně přes script, který je vytvoří hromadně).
 
-Žádný kód doménové logiky. Tento PR má jediný úkol: **uložit společnou paměť workshopu do repa, než ji všichni zapomenou.** Implementace prvního agregátu přijde v dalším PR, který už staví na Software Designu.
+Žádný kód doménové logiky. PR má jediný úkol: **uložit společnou paměť workshopu do repa, než ji všichni zapomenou.** První agregát přijde v dalším PR, který už staví na Software Designu.
 
 :::callout{type="pattern"}
 ### Workshop commit message konvence {#commit-disclaimer-heading}
@@ -669,23 +679,23 @@ Za rok, když si potřebujete dohledat „kdy jsme rozhodli, že refunds patří
 
 ## 04.11 Pravidelné re-stormingy {#re-storming}
 
-Doména se vyvíjí. Pivotní událost, která dnes platí (`OrderPlaced`), může za rok ztratit význam, protože podnikání přešlo na model *subscription* a ústředním eventem se stane `SubscriptionRenewed`. Když tým neudělá nový workshop, kód a doména se rozejdou – a nikdo si toho hned nevšimne, protože jednotlivé PR vypadají rozumně.
+Doména se vyvíjí. Pivotní událost, která dnes platí (`OrderPlaced`), může za rok ztratit význam, protože firma přešla na předplatné a ústředním eventem se stal `SubscriptionRenewed`. Bez nového workshopu se kód a doména rozejdou – a nikdo si toho hned nevšimne, protože jednotlivé PR vypadají rozumně.
 
 ### 04.11.1 Doporučená frekvence {#re-cadence}
 
 - **Pravidelně**: 1× za 6 měsíců nebo 1× za rok velký Big Picture re-storming pro celý systém. Rozhoduje stáří produktu: startup může re-stormovat čtvrtletně, zralý produkt jednou ročně.
 - **Po velkém produktovém rozhodnutí**: nový tržní segment, nový obchodní model, akvizice. Re-storming proběhne *před* implementací, ne po ní.
-- **Při akutních problémech**: tým má pocit, že kód „nedává smysl“ nebo že feature requesty se opakovaně modelují špatně. Pak je čas znovu vytáhnout stickies.
+- **Při akutních problémech**: tým má pocit, že kód „nedává smysl“ nebo že se feature requesty opakovaně modelují špatně. Pak je čas znovu vytáhnout stickies.
 
 ### 04.11.2 Diff jako priorita refaktoringu {#re-diff}
 
-Po re-stormingu porovnejte novou mapu se starou, uloženou v `docs/discovery/<starý-datum>/`. Místa, kde se mapa změnila **nejvíc**, jsou **kandidáti na refaktoring**. Tam doména kódu reálně „utekla“ dopředu. Naopak místa, kde se mapa změnila málo, jsou stabilní a kód v nich je pravděpodobně v pořádku.
+Po re-stormingu porovnejte novou mapu se starou, uloženou v `docs/discovery/<starý-datum>/`. Místa, kde se mapa změnila **nejvíc**, jsou **kandidáti na refaktoring**: tam doména kódu reálně „utekla“ dopředu. Kde se mapa změnila málo, je doména stabilní a kód pravděpodobně v pořádku.
 
-Re-storming typicky dělá menší skupina (3–5 lidí z původního workshopu) a trvá kratší dobu, protože hodně mapy se zachová.
+Re-storming typicky dělá menší skupina (3–5 lidí z původního workshopu) a trvá kratší dobu, protože velká část mapy zůstává.
 
 ## 04.12 Most z workshopu do testů {#workshop-to-tdd}
 
-Software Design EventStorming přirozeně ústí v test-driven development. Každý invariant napsaný na sticky agregátu je **jeden test case**. Totéž platí pro hot spot, který se během workshopu vyřešil. Tým, který z workshopu odejde a nezačne psát testy podle invariantů, ztrácí polovinu jeho hodnoty.
+Software Design Event Storming přirozeně ústí v test-driven development. Každý invariant na sticky agregátu je **jeden test case**, stejně jako každý hot spot, který se během workshopu vyřešil. Tým, který po workshopu nezačne psát testy podle invariantů, přichází o polovinu jeho hodnoty.
 
 ### 04.12.1 Mapping invariantů na PHPUnit testy {#tdd-mapping}
 
@@ -736,7 +746,7 @@ final class OrderTest extends TestCase
     public function cannot_confirm_after_cancellation(): void
     {
         $order = $this->orderWithOneItem();
-        $order->cancel('customer request');
+        $order->cancel('customer request', new \DateTimeImmutable());
 
         $this->expectException(InvalidOrderStateTransitionException::class);
         $order->confirm();
@@ -763,11 +773,11 @@ final class OrderTest extends TestCase
 }
 :::
 
-Komentáře `Inv-1 (workshop 2026-04-29)` nejsou kosmetika – ukazují na původ pravidla. Když test selže za půl roku a nový vývojář chce zjistit, proč pravidlo existuje, doloví ho přes git blame nebo podle data workshopu.
+Komentáře `Inv-1 (workshop 2026-04-29)` nejsou kosmetika – ukazují na původ pravidla. Když test za půl roku selže, nový vývojář dohledá důvod pravidla přes git blame nebo podle data workshopu.
 
-### 04.12.2 Doménové eventy jako testy {#tdd-events}
+### 04.12.2 Doménové události jako testy {#tdd-events}
 
-Z Process Modellingu máte sekvenci `Command → Event → Policy → Command`. Tato sekvence je acceptance test:
+Sekvence `Command → Event → Policy → Command` z Process Modellingu je rovnou akceptační test:
 
 :::code{language="php" filename="tests/Ordering/PlaceOrderHandlerTest.php"}
 <?php
@@ -795,6 +805,8 @@ final class PlaceOrderHandlerTest extends KernelTestCase
     public function place_order_emits_OrderPlaced_and_triggers_payment(): void
     {
         $bus = self::getContainer()->get(MessageBusInterface::class);
+        // collectEvents(): testovací spy nad sběrnicí, který zaznamenává
+        // odeslané eventy a commandy; jeho implementace je zde vynechána.
         $events = $this->collectEvents();
 
         $bus->dispatch(new PlaceOrderCommand(
@@ -809,16 +821,16 @@ final class PlaceOrderHandlerTest extends KernelTestCase
 }
 :::
 
-Toto má dva přínosy. První: testy jsou *čitelné pro doménové experty*. Pojmenování přesně odpovídá workshopu, takže nevývojář si test může přečíst a potvrdit, že vyjadřuje to, co měl na mysli. Druhý: testy jsou **ochrana před regresí**. Když někdo za rok refaktoruje a omylem porušuje invariant z workshopu, test ho chytí.
+Přínosy jsou dva. Testy jsou *čitelné pro doménové experty*: pojmenování odpovídá workshopu, takže i nevývojář si test přečte a potvrdí, že vyjadřuje to, co měl na mysli. A testy **chrání před regresí**. Kdo za rok při refaktoringu omylem poruší invariant z workshopu, na test narazí.
 
-Podrobně viz kapitolu [Testování v DDD](/testovani-ddd): testovací strategie, doménové testy, integrační testy se Symfony Messenger.
+Testovací strategii, doménové testy a integrační testy se Symfony Messenger rozebírá kapitola [Testování v DDD](/testovani-ddd).
 
 ## 04.13 Shrnutí {#summary}
 
-Event Storming a Domain Storytelling jsou dvě konkrétní, prověřené techniky, jak před první řádkou kódu dostat doménu na společný papír. Obě stojí na stejném předpokladu: doménové znalosti nelze přečíst – musí se v dialogu objevit.
+Event Storming a Domain Storytelling jsou dvě prověřené techniky, jak před první řádkou kódu dostat doménu na společný papír. Obě vycházejí ze stejného předpokladu: doménové znalosti nejde přečíst, musí se objevit v dialogu.
 
 - **Event Storming** ve třech formátech (Big Picture / Process Modelling / Software Design) je nástroj pro *širokoúhlé* mapování domény. Big Picture objevuje Bounded Contexty a pivotní události. Process Modelling zhušťuje jeden BC do sekvencí Command-Event-Policy. Software Design z nich dodá agregáty s invarianty.
-- **Domain Storytelling** je *úzkoúhlý teleobjektiv* pro hloubkovou diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity se čte bez zaškolení a hodí se pro kontexty, kde Event Storming je „příliš velký“.
+- **Domain Storytelling** je *teleobjektiv* pro hloubkovou diskusi nad jedním procesem v malé skupině. Notace actor-work object-activity se čte bez zaškolení a hodí se tam, kde je Event Storming „příliš velký“.
 - **Workshop začíná u doménového experta, ne u datového modelu.** Eventy se píšou v minulém čase, agregáty se objevují až nakonec.
 - **Workshop bez follow-upu je promarněný.** Foto, eventy, hot spoty a Context Map musí jít do repa do 24 hodin a do kódu do 1–2 sprintů.
 - **Re-storming je pravidelná činnost.** Doména se vyvíjí; mapa zastará. 1× za 6–12 měsíců nebo po každém velkém produktovém rozhodnutí.
@@ -831,7 +843,7 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 - question: Dá se Event Storming dělat online?
   answer: 'Záleží na formátu a autor techniky je v tom vyhraněný. Brandolini v textu <em>Remote EventStorming</em> (2020) považuje Software Design online za dobře proveditelný, Process Modelling za podmínečně proveditelný (půlden, 5–15 lidí, každá třetí session naživo) a k Big Picture píše doslova „Don&#39;t even try“. Online mizí paralelní konverzace u části stěny, řeč těla i celodenní ponoření. Když jinou možnost nemáte, dělejte online Big Picture jako vědomý kompromis: breakout místnosti pro paralelní diskuse, kratší bloky, přestávky každou hodinu. Postup je v <a href="#bp-online">sekci 04.04.5</a>.'
 - question: Jak vést hot spoty během workshopu?
-  answer: 'Pravidlo zní: <strong>nediskutuje se, jen se zaznamenává</strong>. Když během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět, facilitátor ji okamžitě napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla, a workshop pokračuje dál. Pokus o vyřešení hot spotu hned vždy konzumuje 15–30 minut a typicky se nedořeší, protože odpověď leží mimo místnost. Po workshopu se každý hot spot stane ticketem přiřazeným doménovému expertovi, ne vývojáři.'
+  answer: 'Pravidlo zní: <strong>nediskutuje se, jen se zaznamenává</strong>. Když během workshopu zazní otázka, kterou nikdo neumí hned zodpovědět, facilitátor ji okamžitě napíše na růžovou sticky a nalepí přesně tam, kde otázka vznikla, a workshop pokračuje dál. Pokus vyřešit hot spot na místě vždy zabere 15–30 minut a obvykle skončí bez výsledku, protože odpověď leží mimo místnost. Po workshopu se každý hot spot stane ticketem přiřazeným doménovému expertovi, ne vývojáři.'
 - question: 'Kdo platí workshop: produkt, nebo vývoj?'
   answer: 'Nejlépe oba společně. Workshop je investice do společné Ubiquitous Language a slovníku, který používají obě strany. Pokud ho zaplatí jen jedna, druhá strana ho nevezme vážně. Pokud přesto platí jen jeden, pak vývoj: bez workshopu vyrobí špatný model a bude ho refaktorovat tři sprinty. To stojí mnohonásobně víc než 4 hodiny doménových expertů.'
 - question: Co když doménoví experti používají hovorovou češtinu a slang („chronický neplatič nás zase odbil“)?
@@ -852,6 +864,6 @@ Po prvním Event Stormingu typicky následuje implementace prvního Bounded Cont
 - [Alberto Brandolini – *Remote EventStorming*](https://blog.avanscoperta.it/2020/03/26/remote-eventstorming/) – stanovisko autora k online workshopům, odstupňované podle formátu.
 - [Vlad Khononov – *Learning Domain-Driven Design* (O'Reilly, 2021)](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/), kapitola 12 shrnuje Event Storming v deseti krocích z pohledu praktika, který techniku nasazuje u zákazníků.
 - [Evelyn van Kelle, Gien Verschatse, Kenny Baas-Schwegler – *Collaborative Software Design* (Manning, 2024)](https://www.manning.com/books/collaborative-software-design). O facilitační vrstvě, kterou Event Storming předpokládá, ale neučí: ranking v místnosti, kognitivní zkreslení, práce s odporem.
-- [Nick Tune, Jean-Georges Perrin – *Architecture Modernization* (Manning, 2024)](https://www.manning.com/books/architecture-modernization) – Big Picture EventStorming jako jeden ze čtyř nástrojů modernizace, vedle Wardley Mappingu a Team Topologies.
-- [Event Modeling](https://eventmodeling.org/) – sesterská technika Adama Dymitruka (2018) s pouze dopřednou časovou osou a UI vrstvou. Pro návrh event-sourced systému bližší nástroj než Software Design EventStorming, viz kapitola [Event Sourcing](/event-sourcing).
+- [Nick Tune, Jean-Georges Perrin – *Architecture Modernization* (Manning, 2024)](https://www.manning.com/books/architecture-modernization) – Big Picture Event Storming jako jeden ze čtyř nástrojů modernizace, vedle Wardley Mappingu a Team Topologies.
+- [Event Modeling](https://eventmodeling.org/) – sesterská technika Adama Dymitruka (2018) s pouze dopřednou časovou osou a UI vrstvou. Pro návrh event-sourced systému bližší nástroj než Software Design Event Storming, viz kapitola [Event Sourcing](/event-sourcing).
 - Oficiální Miro šablony Brandoliniho na Miroverse: [Process Modelling](https://miro.com/templates/eventstorming-process-modelling/) a [Software Design](https://miro.com/miroverse/eventstorming-software-design-template/).

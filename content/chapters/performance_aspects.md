@@ -7,14 +7,14 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-11
+modified: 2026-09-23
 breadcrumb_name: Výkonnostní aspekty
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
 chapter_number: "16"
 category: Vzory
 deck: "Read modely, projekce a výkon v Domain-Driven Design se Symfony a Doctrine ORM – řešení N+1 problému, hranice agregátů, budování projekcí přes CQRS, snapshoty a cache read modelů."
-reading_time: 36
+reading_time: 38
 difficulty: 4
 github_examples: null
 ---
@@ -23,7 +23,7 @@ github_examples: null
 
 Pověst pomalého DDD se opírá o anekdoty místo měření. Výkonnostní problémy
 přicházejí ze špatné implementace: příliš velkých agregátů, nevhodného lazy loadingu,
-absence read modelu. Doménový model rychlou aplikaci nevylučuje.
+chybějícího read modelu. Doménový model rychlou aplikaci nevylučuje.
 
 :::callout{type="note"}
 ### DDD vs. výkon: mýty a realita
@@ -41,8 +41,8 @@ frekvencí čtení. Poslední skupina navíc potřebuje odezvu v desítkách mil
 ### Zlaté pravidlo optimalizace
 
 **Nikdy neoptimalizujte naslepo.** Každá optimalizace musí být podložena měřením.
-Předčasná optimalizace (premature optimization) vede k zbytečně složitému kódu, který řeší neexistující
-problémy. Nejprve profilujte, identifikujte skutečné úzké místo a teprve potom optimalizujte.
+Předčasná optimalizace (premature optimization) vede ke zbytečně složitému kódu, který řeší neexistující
+problémy. Nejprve profilujte, najděte skutečné úzké místo a teprve potom optimalizujte.
 Donald Knuth to vyjádřil takto: *„We should forget about small efficiencies, say about 97% of
 the time: premature optimization is the root of all evil. Yet we should not pass up our
 opportunities in that critical 3%.“* Zkracuje se obvykle na prostřední větu, čímž se ztratí
@@ -50,17 +50,17 @@ obojí: podmínka i pointa. Knuth optimalizaci nezakazuje, vymezuje, kde má smy
 [[1]](https://dl.acm.org/doi/10.1145/356635.356640)
 :::
 
-Kapitola má dvě poloviny a zaměnit je se nevyplácí. Sekce 16.02, 16.03, 16.06 a 16.08 mluví
+Kapitola má dvě poloviny, které se nesmějí plést. Sekce 16.02, 16.03, 16.06 a 16.08 mluví
 o **write straně**: o agregátu, Unit of Work a dávkovém zápisu. Limitem je tam konzistence,
 takže žádná optimalizace nesmí porušit invariant. Sekce 16.04, 16.07 a část 16.09 patří
-**read straně**: dotazu, projekci, cache a replice. Invariant tam nikdo nedrží, a data se proto
+**read straně**: dotazu, projekci, cache a replice. Invariant tam nikdo nedrží, proto se data
 smějí denormalizovat, duplikovat i vracet zastaralá. Rada platná na jedné straně na druhé často škodí.
 
 ## 16.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
 
 N+1 je typický anti-vzor, který produkuje každý ORM bez explicitní fetch strategie. Aplikace provede
-jeden dotaz pro seznam entit a poté pro každou z nich načte asociovaná data zvlášť.
-Celkem tedy N+1 SQL příkazů místo jednoho či dvou.
+jeden dotaz pro seznam entit a poté pro každou z nich načte asociovaná data zvlášť –
+celkem N+1 SQL příkazů místo jednoho či dvou.
 
 :::callout{type="note"}
 ### Přesná definice N+1 problému
@@ -153,7 +153,7 @@ final class Order
 
 ### Řešení 2: Fetch join v DQL pro eager loading
 
-Pokud víme předem, že budeme iterovat přes kolekce, je efektivnější fetch join v DQL:
+Když je předem jasné, že se bude iterovat přes kolekce, je efektivnější fetch join v DQL:
 alias joinované asociace se přidá do klauzule SELECT (`SELECT o, i`). Doctrine pak načte
 agregát včetně asociovaných objektů v jediném SQL dotazu s LEFT JOIN nebo INNER JOIN.
 
@@ -230,7 +230,7 @@ final class OrderQueryRepository
 :::
 :::
 
-Při použití fetch joinu s paginací (`setMaxResults()`, `setFirstResult()`)
+Při kombinaci fetch joinu s paginací (`setMaxResults()`, `setFirstResult()`)
 Doctrine žádné varování nevypíše. LIMIT se aplikuje na řádky SQL výsledku, ve kterých se
 kořenová entita kvůli joinu opakuje. Hydratace pak tiše vrátí méně entit nebo oříznuté kolekce.
 Řešením je `Doctrine\ORM\Tools\Pagination\Paginator`, který nejdřív vybere identifikátory
@@ -252,7 +252,7 @@ který obslouží několik kořenových entit najednou. Velikost dávky má výc
 a nastavuje ji `Configuration::setEagerFetchBatchSize(int $batchSize = 100)`. Z N+1 dotazů
 se tak stane `N/100 + 1` a mechanismus běží i bez explicitní konfigurace.
 
-Háček je v tom, že `EAGER` v mapování platí globálně, i pro dotazy, které asociaci vůbec
+Háček: `EAGER` v mapování platí globálně, i pro dotazy, které asociaci vůbec
 nepotřebují. Dokumentace ORM proto doporučuje řešit N+1 primárně fetch joinem v DQL.
 Eager mapování zůstává poslední volbou pro asociace, které se načítají prakticky vždy.
 
@@ -271,28 +271,29 @@ na hranici stránky ztratí záznamy se shodným časem.
 ### Příklad: keyset paging nad tabulkou read modelu
 
 :::code{language="sql" filename="doc/keyset-paging.sql"}
+-- Tabulka order_dashboard z kapitoly CQRS
 -- První stránka
-SELECT id, created_at, total_amount_in_cents
-FROM order_summary
-ORDER BY created_at DESC, id DESC
+SELECT order_id, placed_at, total_amount
+FROM order_dashboard
+ORDER BY placed_at DESC, order_id DESC
 LIMIT 20;
 
 -- Další stránka: klíč poslední položky předchozí stránky
-SELECT id, created_at, total_amount_in_cents
-FROM order_summary
-WHERE (created_at, id) < (:lastCreatedAt, :lastId)
-ORDER BY created_at DESC, id DESC
+SELECT order_id, placed_at, total_amount
+FROM order_dashboard
+WHERE (placed_at, order_id) < (:lastPlacedAt, :lastOrderId)
+ORDER BY placed_at DESC, order_id DESC
 LIMIT 20;
 
 -- Index musí pokrýt celý ORDER BY, jinak databáze řadí v paměti
-CREATE INDEX idx_order_summary_feed
-    ON order_summary (created_at DESC, id DESC);
+CREATE INDEX idx_dashboard_feed
+    ON order_dashboard (placed_at DESC, order_id DESC);
 :::
 :::
 
 Read model má vlastní tabulku, takže index se navrhuje přímo k dotazu, který ji čte, ne ke
-schématu domény. To je praktický rozdíl oproti write straně, kde indexy slouží hlavně
-vyhledání agregátu podle identity. Cenou keyset pagingu je ztráta skoku na libovolnou stránku:
+schématu domény. Na write straně naopak indexy slouží hlavně vyhledání agregátu
+podle identity. Cenou keyset pagingu je ztráta skoku na libovolnou stránku:
 seek metoda umí „další“ a „předchozí“, nikoli „stránka 137“.
 
 :::callout{type="note"}
@@ -309,11 +310,11 @@ jde o způsob, jakým vzniká instance, ne o strategii načítání kolekce.
 ## 16.03 Agregát a výkon: správné určení hranic {#agregat-hranice}
 
 Agregát drží konzistenční hranici: invarianty platí uvnitř jednoho agregátu.
-Pokud hranici nakreslíte příliš široce, agregát při každém načtení tahá z databáze
-rozsáhlý objektový graf, i když potřebujete jen malou část dat.
+Příliš široce nakreslená hranice znamená, že agregát tahá z databáze rozsáhlý
+objektový graf, i když operace potřebuje jen malou část dat.
 
 :::callout{type="note"}
-### Příznak příliš velkého agregátu
+### Příznaky příliš velkého agregátu
 
 - Načtení agregátu trvá neúměrně dlouho, i když používáme jen jeho kořen.
 - Kolekce asociovaných entit obsahují stovky nebo tisíce záznamů.
@@ -345,15 +346,15 @@ echo $order->totalAmount()->amountInCents;
 
 ### Řešení: rozdělení agregátu a specializované repozitářní metody
 
-Prvním krokem je kriticky přezkoumat, zda `OrderItem` skutečně musí být součástí
+Nejdřív je třeba přezkoumat, zda `OrderItem` skutečně musí být součástí
 agregátu `Order`, nebo zda jde o samostatný agregát s odkazem na `OrderId`.
 Rozhoduje invariant. Pokud objednávka nedrží žádné pravidlo přes celou kolekci
 (limit počtu položek, minimální hodnota košíku), kolekce v agregátu nemá co dělat.
 Její vyčlenění je pak oprava návrhu, ne výkonnostní trik.
 
-Rozdíl je v roli, kterou výkon hraje. Jako **signál** špatně vedené hranice je legitimním
-podnětem: pomalé načítání ukazuje na kolekci, která nikdy součástí invariantu nebyla.
-Jako **důvod** rozbít invariant legitimní není. Odpovědí tam zůstává read model,
+Výkon může v úvaze vystupovat dvojím způsobem. Jako **signál** špatně vedené hranice je
+legitimním podnětem: pomalé načítání ukazuje na kolekci, která nikdy součástí invariantu
+nebyla. Jako **důvod** rozbít invariant legitimní není. Odpovědí tam zůstává read model,
 ne přesun pravidla mimo agregát. Podrobně rozebírá velikost agregátu sekce
 [Velikost agregátu a její dopady](/navrh-agregatu#aggregate-size).
 
@@ -405,9 +406,9 @@ final class DoctrineOrderRepository
 :::
 :::
 
-Pravidlo zní: **hranice agregátu vede přes doménové invarianty**, výkonnostní
-požadavky se řeší jinde. Evans i Vernon vedou hranici stejně, tedy přes pravidlo, které musí
-platit v jedné transakci. Když výkon tlačí proti doménovému modelu, odpovědí je read model
+**Hranice agregátu vede přes doménové invarianty**, výkonnostní požadavky se řeší
+jinde. Evans i Vernon ji vedou stejně, tedy přes pravidlo, které musí platit
+v jedné transakci. Když výkon tlačí proti doménovému modelu, odpovědí je read model
 (viz následující sekci), ne porušení doménové integrity.
 
 ## 16.04 Optimalizace read modelu (CQRS) {#read-model-optimalizace}
@@ -418,7 +419,7 @@ strukturu dat pro UI nebo API klienta.
 
 Zároveň je to páka s nejvyšší cenou. Martin Fowler o CQRS píše, že *„for most systems CQRS
 adds risky complexity“*. Případy, které viděl, popisuje spíš jako zdroj potíží než
-jako záchranu. Nasazovat jej doporučuje na jednotlivý bounded context, nikdy plošně
+jako záchranu. Nasazovat ho doporučuje na jednotlivý Bounded Context, nikdy plošně
 [[2]](https://martinfowler.com/bliki/CQRS.html). Kompletní seznam kompromisů drží sekce
 [Výzvy a omezení CQRS](/cqrs#challenges). Než tedy dotaz skončí v samostatném read modelu,
 vyplatí se projít levnější stupně.
@@ -438,7 +439,7 @@ vyplatí se projít levnější stupně.
 ### Zásady read modelu v CQRS
 
 - Query handlery **nepoužívají doménové repozitáře**. Přistupují přímo k databázi přes DQL nebo nativní SQL.
-- Výsledkem je **DTO (Data Transfer Object)** nebo plain PHP array, nikdy doménový objekt.
+- Výsledkem je **DTO (Data Transfer Object)** nebo prosté PHP pole, nikdy doménový objekt.
 - Read model může být **denormalizovaný**, s daty už předpřipravenými pro konkrétní view.
 - Read side lze **nezávisle cachovat** bez ohrožení doménové konzistence.
 :::
@@ -484,7 +485,7 @@ final class OrderSummaryDTO
     ) {}
 }
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'query.bus')]
 final class GetOrderSummaryListHandler
 {
     public function __construct(
@@ -525,15 +526,15 @@ final class GetOrderSummaryListHandler
 :::
 
 Dotaz se drží jednoho agregátu a zákazníka nese jen jako `customerId`. Jméno zákazníka leží
-v jiném agregátu, a DQL by pro něj potřebovala mapovanou asociaci `Order` → `Customer`, kterou
+v jiném agregátu a DQL by pro něj potřebovala mapovanou asociaci `Order` → `Customer`, kterou
 kniha na write straně zakazuje (viz [Reference přes identitu](/navrh-agregatu#references-by-id)).
 Na read straně je spojení obou tabulek v pořádku. Dělá se ale o patro níž, v SQL nad
-tabulkami, ne přes namapovaný objektový graf. Následující ukázka to předvádí.
+tabulkami, ne přes namapovaný objektový graf, jak ukazuje následující příklad.
 
 ### Doctrine NativeQuery pro komplexní reportovací dotazy
 
-DQL pokrývá většinu dotazů, ale pro složité reportovací dotazy (agregace, window funkce, CTE)
-nestačí. Doctrine umožňuje spouštět nativní SQL dotazy s vlastním mapováním
+DQL pokrývá většinu dotazů, na složité reportovací dotazy (agregace, window funkce, CTE)
+ale nestačí. Pro ně Doctrine spouští nativní SQL s vlastním mapováním
 výsledků přes `ResultSetMapping`.
 
 :::callout{type="pattern"}
@@ -564,7 +565,7 @@ final class SalesReportQueryService
     public function getMonthlySalesByCustomer(\DateTimeImmutable $from, \DateTimeImmutable $to): array
     {
         $rsm = new ResultSetMappingBuilder($this->em);
-        // Mapujeme scalar výsledky (ne entity) - žádný overhead doménových objektů
+        // Skalární výsledky, ne entity – bez režie doménových objektů
         $rsm->addScalarResult('customer_id',   'customer_id',   'string');
         $rsm->addScalarResult('customer_name', 'customer_name', 'string');
         $rsm->addScalarResult('month',         'month',         'string');
@@ -586,7 +587,7 @@ final class SalesReportQueryService
               AND o.placed_at <  :to
             GROUP BY c.id, c.first_name, c.last_name, TO_CHAR(o.placed_at, 'YYYY-MM')
             -- Řadí se podle výrazu, ne podle aliasu: ten je ::text,
-            -- takže by se '999' seřadilo za '10000'.
+            -- takže by se sestupně '999' seřadilo před '10000'.
             ORDER BY month DESC, SUM(oi.unit_price_amount_in_cents * oi.quantity) DESC
         ";
 
@@ -621,12 +622,13 @@ systémy, event sourcing a paralelní vytváření agregátů to není volba, al
 - **Problém s cizími klíči:** Každý FK odkazující na UUID agregát nese 16 bajtů místo 4.
 :::
 
-### ULID jako kompromis
+### Časově řazené identifikátory: UUID v7 a ULID
 
 ULID (Universally Unique Lexicographically Sortable Identifier) a UUID verze 6/7 (ordered UUID)
-řeší problém fragmentace indexů tím, že jsou **monotónně rostoucí**. Nové hodnoty
-jsou vždy větší než předchozí a vkládají se na konec B-tree indexu. Chování je stejné
-jako u auto-increment integeru, ale se zachováním globální unikátnosti bez centrálního generátoru.
+řeší fragmentaci indexů tím, že jsou **časově řazené**. Nové hodnoty jsou až na drobné
+odchylky mezi generátory větší než předchozí a vkládají se na konec B-tree indexu.
+Chování se blíží auto-increment integeru, ale globální unikátnost zůstává a centrální
+generátor není potřeba.
 Tento průvodce používá UUID v7; ULID je alternativa s kratším Crockford base32 zápisem
 (26 znaků vs. 36).
 
@@ -642,7 +644,7 @@ namespace App\Ordering\Domain\ValueObject;
 
 use Symfony\Component\Uid\Uuid;
 
-// Kanonický OrderId ze Základních konceptů, tady kvůli generate(): UUID v7
+// Kanonický OrderId ze Základních konceptů, zde kvůli generate(): UUID v7
 // je časově řazené a monotónně rostoucí, takže se do B-tree indexu vkládá
 // na konec. Stejnou strategii mají CustomerId, ProductId, ShipmentId
 // i UserId - každý ve svém kontextu, žádný ve sdíleném jádru.
@@ -687,11 +689,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
-// Řádek projekce pro přehled objednávek. Plní ho projektor z událostí
-// (viz kapitola CQRS), čte query handler. Adresář ReadModel mapuje
+// Řádek projekce s čísly objednávek. Plní ho projektor z událostí
+// v duchu kapitoly CQRS, čte query handler. Adresář ReadModel mapuje
 // druhý entity manager v sekci o read replikách (#replicy-pooling-heading).
 #[ORM\Entity]
-#[ORM\Table(name: 'order_summary')]
+#[ORM\Table(name: 'order_feed')]
 final class OrderSummaryRow
 {
     #[ORM\Id]
@@ -745,8 +747,8 @@ vrátí existující instanci z Identity Map, nikoli novou kopii.
 
 Identity Map počítá s typickým web requestem: jednotky až desítky agregátů.
 Hromadné zpracování (import, migrace, reporty) sype do Identity Map tisíce objektů,
-které tam zůstávají po celou dobu běhu. Spotřeba paměti roste (*memory leak*)
-a dirty checking se zpomaluje, protože Doctrine musí procházet stále větší množinu
+které tam zůstávají po celou dobu běhu. Spotřeba paměti roste, jako by aplikace
+měla *memory leak*, a dirty checking se zpomaluje, protože Doctrine musí procházet stále větší množinu
 spravovaných objektů.
 
 :::callout{type="pattern"}
@@ -766,7 +768,7 @@ use App\SharedKernel\Domain\Money;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final class ImportProductsHandler
 {
     private const BATCH_SIZE = 100;
@@ -824,7 +826,7 @@ změny na odpojených objektech `flush()` mlčky ignoruje a odpojená entita nal
 v asociaci nově persistovaného objektu shodí flush s `ORMInvalidArgumentException`.
 Ujistěte se, že po `clear()` nepracujete s referencemi na dříve spravované objekty.
 
-ORM 3 tuhle past zúžilo: `clear()` už nepřijímá argument, takže selektivní vyčištění jedné
+ORM 3 volbu zúžilo: `clear()` už nepřijímá argument, takže selektivní vyčištění jedné
 třídy skončilo a volání vždy odpojí celou Identity Map. Zmizely i `EntityManager::merge()`
 a `UnitOfWork::merge()`, kterými se dřív odpojená entita vracela do správy. Odpojený objekt
 se tedy znovu načítá přes `find()`, nikoli slučuje.
@@ -833,25 +835,25 @@ se tedy znovu načítá přes `find()`, nikoli slučuje.
 ### Read-only entity a rozsah dirty checkingu {#read-only-entity-heading}
 
 Dirty checking při každém `flush()` porovnává aktuální stav spravovaných objektů s jejich
-snímkem z okamžiku načtení. U referenčních dat je to čistá ztráta. Číselníky, katalog ani
-sazebník se během jednoho běhu nemění. Doctrine na to má dvě páky:
-`#[ORM\Entity(readOnly: true)]` označí celou třídu a `UnitOfWork::markReadOnly()` jednu
+snímkem z okamžiku načtení. U referenčních dat je to čistá ztráta: číselníky, katalog ani
+sazebník se během jednoho běhu nemění. První pákou jsou read-only entity.
+`#[ORM\Entity(readOnly: true)]` označí celou třídu, `UnitOfWork::markReadOnly()` jednu
 instanci pro daný běh. Změny takového objektu `flush()` do databáze nezapíše.
 
 Druhou pákou je strategie sledování změn. Výchozí `DEFERRED_IMPLICIT` prochází při `flush()`
-všechny spravované objekty; alternativní strategie rozsah zužují za cenu explicitnějšího kódu
-v entitách. Pro běžný web request je výchozí nastavení v pořádku, v dávkovém běhu stojí za zvážení.
+všechny spravované objekty. Alternativa `DEFERRED_EXPLICIT` kontroluje jen objekty, které kód
+explicitně předá `persist()`; ušetří práci, ale zapomenuté `persist()` znamená tiše neuloženou
+změnu. Pro běžný web request je výchozí nastavení v pořádku, v dávkovém běhu stojí za zvážení.
 
 ## 16.07 Caching v DDD architektuře {#cachovani}
 
-Caching v DDD má jednu vstupní otázku: **co cachovat**? Pravidlo: cache patří na výsledky,
-které jsou výpočetně nebo I/O nákladné a v čase se nemění (nebo se mění předvídatelně).
-Doménová logika do cache klíče nepatří. Cache slouží infrastruktuře, ne doménovým rozhodnutím.
+Cache patří na výsledky, které jsou výpočetně nebo I/O nákladné a v čase se nemění
+(nebo se mění předvídatelně). Slouží infrastruktuře, ne doménovým rozhodnutím.
 
 :::callout{type="note"}
 ### Co cachovat a co ne
 
-Do cache patří výsledky read modelu (DTO), reportovací dotazy, odpovědi externích API a výpočetně náročné projekce. Nepatří tam aktuální stav agregátů, které se právě mění (způsobí dirty reads), ani výsledky, jejichž neaktuálnost by vyvolala doménové nekonzistence. Výsledek doménové logiky nepatří nikdy ani do cache klíče. Sleva se například při sestavování klíče nevypočítává.
+Do cache patří výsledky read modelu (DTO), reportovací dotazy, odpovědi externích API a výpočetně náročné projekce. Nepatří tam aktuální stav agregátů, které se právě mění (četl by se zastaralý stav), ani výsledky, jejichž neaktuálnost by vyvolala doménové nekonzistence. Výsledek doménové logiky nepatří nikdy ani do cache klíče. Sleva se například při sestavování klíče nevypočítává.
 :::
 
 ### Query cache a result cache v Doctrine
@@ -875,18 +877,17 @@ srozumitelněji a bez vazby na životní cyklus entit.
 :::callout{type="pattern"}
 ### Příklad: cache read modelu v query handleru
 
-:::code{language="php" filename="src/UserManagement/Application/Query/GetUserProfileHandler.php"}
+:::code{language="php" filename="src/UserManagement/Profile/Query/GetUserProfileHandler.php (verze s cache)"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\UserManagement\Application\Query;
+namespace App\UserManagement\Profile\Query;
 
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
-use App\UserManagement\Profile\Query\GetUserProfile;
 
 // View a handler v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
 
@@ -904,7 +905,7 @@ final readonly class UserProfileView
     ) {}
 }
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'query.bus')]
 final class GetUserProfileHandler
 {
     private const TTL = 300; // 5 minut
@@ -957,8 +958,8 @@ přestanou fungovat a obejde se Identity Map. DTO se skalárními hodnotami tyto
 přesně podle zásady z calloutu výše: do cache patří výsledky read modelu, ne stav agregátů.
 
 Ukázka používá Cache Contracts (`Symfony\Contracts\Cache\CacheInterface`), ne holé PSR-6.
-Rozdíl není jen v délce kódu. Contracts drží po dobu výpočtu zámek, takže při vypršení
-záznamu přepočítá hodnotu jen jeden proces a ostatní počkají. Parametr `$beta` k tomu přidá
+Kromě kratšího kódu drží Contracts po dobu výpočtu zámek, takže při vypršení záznamu
+přepočítá hodnotu jen jeden proces a ostatní na témže serveru počkají. Parametr `$beta` k tomu přidá
 pravděpodobnostní předčasnou expiraci: čím blíž je záznam konci platnosti, tím větší šance,
 že ho jeden náhodně vybraný požadavek přepočítá dřív, než vyprší. Obojí brání cache stampede,
 kdy po expiraci horkého klíče spustí tentýž dotaz stovky souběžných požadavků najednou.
@@ -967,11 +968,16 @@ Holé PSR-6 přes `CacheItemPoolInterface` zůstává pro interoperabilitu s kni
 ### Cache invalidace při doménových událostech
 
 Cache se v DDD nejlépe invaliduje nasloucháním doménovým událostem. Když agregát
-změní stav (publikuje doménovou událost), Event Listener invaliduje příslušné cache záznamy.
-Cache invalidace se tím stává součástí doménového toku, nikoli ad-hoc voláním rozptýleným po kódu.
+změní stav a nahraje doménovou událost, listener zneplatní příslušné záznamy.
+Invalidace tak navazuje na doménový tok místo ad-hoc volání rozptýlených po kódu.
+
+Ukázka počítá s událostí `UserEmailChanged`. Kanonický `User` z kapitoly
+[Implementace v Symfony](/implementace-v-symfony#entity-example-heading) ji nemá,
+jeho `changeEmail()` žádnou událost nenahrává. Zde jde o rozšíření: metoda by po změně
+adresy zavolala `$this->record(new UserEmailChanged($this->id, $newEmail))`.
 
 :::callout{type="pattern"}
-### Cache invalidace přes Symfony EventDispatcher
+### Cache invalidace přes event bus
 
 :::code{language="php" filename="src/UserManagement/Infrastructure/EventListener/InvalidateUserCacheOnEmailChanged.php"}
 <?php
@@ -981,10 +987,12 @@ declare(strict_types=1);
 namespace App\UserManagement\Infrastructure\EventListener;
 
 use App\UserManagement\Domain\Event\UserEmailChanged;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-#[AsEventListener(event: UserEmailChanged::class)]
+// Doménové události jdou v knize přes Messenger, ne přes EventDispatcher.
+// Listener s #[AsEventListener] by událost z event.bus nikdy nedostal.
+#[AsMessageHandler(bus: 'event.bus')]
 final class InvalidateUserCacheOnEmailChanged
 {
     public function __construct(
@@ -1009,18 +1017,18 @@ zneplatnit i z konzole příkazem `cache:pool:invalidate-tags`.
 
 ## 16.08 Bulk operace a hromadné zpracování {#bulk-operace}
 
-Standardní DDD postup funguje pro jednotlivé agregáty: načíst agregát, aplikovat doménovou
+Standardní DDD postup počítá s jednotlivými agregáty: načíst agregát, aplikovat doménovou
 logiku, zavolat `flush()`. Pro hromadné operace (import tisíců záznamů,
-hromadná aktualizace stavů, migrace dat) je tento přístup neefektivní. Každý cyklus přidá
+hromadná aktualizace stavů, migrace dat) je neefektivní. Každý cyklus přidá
 agregát do Identity Map a dirty checking při `flush()` prochází všechny spravované objekty.
 Bez průběžného `clear()` proto roste spotřeba paměti i doba jednoho `flush()`: každý další
 zápis porovnává větší množinu objektů než ten předchozí.
 
 ### DQL bulk UPDATE a DELETE – bypass Identity Map
 
-Pro hromadné aktualizace, kde není potřeba procházet doménovou logiku, nabízí Doctrine možnost
-provést `UPDATE` nebo `DELETE` přímo přes DQL. Tyto operace obcházejí
-Identity Map a Unit of Work, protože jde o přímé SQL příkazy přeložené z DQL. **Nevýhoda:**
+Hromadné aktualizace, které nemusí procházet doménovou logikou, zvládne Doctrine
+přímo jako DQL `UPDATE` nebo `DELETE`. Ty obcházejí Identity Map i Unit of Work,
+protože jde o přímé SQL příkazy přeložené z DQL. **Nevýhoda:**
 po DQL bulk operaci jsou spravované entity v Identity Map nekonzistentní se stavem v databázi.
 
 Obvyklá rada zní zavolat `clear()`. V ORM 3 ale `clear()` argument nepřijímá, takže odpojí
@@ -1041,7 +1049,7 @@ namespace App\Ordering\Infrastructure\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(bus: 'command.bus')]
 final class BulkUpdateOrderStatusHandler
 {
     public function __construct(
@@ -1087,7 +1095,7 @@ do pole, takže milion řádků skončí v paměti PHP naráz. `AbstractQuery::t
 `Traversable` a hydratuje po jednom řádku; metoda `iterate()`, kterou znají uživatelé ORM 2,
 v ORM 3 zanikla. Platí u ní dvě omezení:
 
-- `toIterable()` **nelze kombinovat s fetch joinem kolekce**. Jeden agregát se v SQL výsledku roztáhne do několika řádků a hydratace po řádcích je nedokáže složit dohromady. Naráží to přímo na doporučení ze [sekce o N+1](#n-plus-1-problem). V dávce se fetch join kolekcí nepoužívá.
+- `toIterable()` **nelze kombinovat s fetch joinem kolekce**. Jeden agregát se v SQL výsledku roztáhne do několika řádků a hydratace po řádcích je nedokáže složit dohromady. Jde to proti doporučení ze [sekce o N+1](#n-plus-1-problem): v dávce se fetch join kolekcí nepoužívá.
 - Objekty vydané iterací zůstávají spravované. Bez průběžného `clear()` se ušetří jen paměť za pole výsledků, ne za Identity Map.
 
 Když stačí data, ne agregáty, je přímočařejší DBAL: `Connection::iterateAssociative()`
@@ -1098,10 +1106,10 @@ nemusí ukázat; spolehlivější je sledovat spotřebu celého procesu.
 
 ### Symfony Messenger pro asynchronní hromadné zpracování
 
-Tisíce záznamů se v jednom PHP procesu synchronně nezpracovávají. Práci je vhodné rozdělit
-na menší úlohy zasílané přes Symfony Messenger na asynchronní transport
-(RabbitMQ, Redis Streams, Amazon SQS). Každá zpráva zpracuje jeden nebo malý batch agregátů.
-Paměťové nároky a doba zpracování jedné zprávy jsou pak předvídatelné.
+Velký import nemusí běžet v jediném synchronním procesu, kde jedna chyba ukončí celou
+dávku. Práci lze rozdělit na menší úlohy zasílané přes Symfony Messenger na asynchronní
+transport (RabbitMQ, Redis Streams, Amazon SQS). Každá zpráva zpracuje jeden agregát nebo
+malý batch a paměťové nároky i doba zpracování jedné zprávy jsou pak předvídatelné.
 
 :::callout{type="pattern"}
 ### Rozložení bulk importu přes Symfony Messenger
@@ -1146,9 +1154,9 @@ připojení. Souvislost s poolingem rozebírá sekce [Read replicy a connection 
 
 ## 16.09 Provozní výkonové vzory {#provozni-vzory}
 
-Předchozí sekce řeší výkon na úrovni jednoho dotazu nebo jednoho agregátu. Jakmile
-aplikace běží 24/7 s reálnou zátěží, narážíte na třídu problémů, které lokální profiling
-neukáže: souběžnost více klientů, omezení databáze jako sdíleného zdroje a operační
+Předchozí sekce řeší výkon na úrovni jednoho dotazu nebo jednoho agregátu. Aplikace
+v nepřetržitém provozu s reálnou zátěží naráží na problémy, které lokální profiling
+neukáže: souběžnost více klientů, databázi jako sdílený zdroj a provozní
 omezení Doctrine ve více procesech.
 
 ### Hot aggregates a optimistic lock thrash {#hot-aggregates-heading}
@@ -1165,7 +1173,7 @@ S `#[ORM\Version]` (optimistický zámek) vede souběžná modifikace k výjimk�
 `OptimisticLockException`. Dokud jsou konflikty výjimečné, je retry levný: druhý pokus
 projde. Jakmile konfliktů přibude, roste podíl práce, která končí zahozením. Systém
 **degraduje na sériový provoz** a smyčka load → modify → save → conflict → retry spotřebuje
-víc kapacity než samotné zpracování. Throughput klesá, latence stoupá.
+víc kapacity než samotné zpracování. Propustnost klesá, latence stoupá.
 
 Kdy zlom nastane, žádné univerzální číslo neurčuje. Rozhoduje délka transakce, počet klientů
 a to, jak často míří na tentýž agregát. Změřit to ale jde: podíl `OptimisticLockException`
@@ -1174,22 +1182,22 @@ na počtu pokusů o zápis daného agregátu je metrika, kterou má smysl sledov
 Strategie řešení rozebírá sekce [Hot aggregate](/navrh-agregatu#hot-aggregate);
 z pohledu provozu jsou podstatné tři, v tomto pořadí:
 
-- **Re-design hranic agregátu.** Pokud je `Inventory` hot, není to často
-  jeden agregát, ale **N samostatných agregátů per warehouse + sklad pool**.
-  Jeden agregát na region/sku/sklad. Konflikty pak nejsou „mezi všemi klienty“,
-  ale „mezi klienty stejné lokace“.
-- **Eventual consistency místo strong.** Místo „strhni 1 ks z `Inventory` synchronně“
+- **Nový návrh hranic agregátu.** Horký `Inventory` často ve skutečnosti není
+  jeden agregát, ale **N samostatných agregátů**, například jeden na sklad,
+  region nebo SKU. Konflikty pak nevznikají mezi všemi klienty, jen mezi
+  klienty téže lokace.
+- **Eventual consistency místo silné konzistence.** Místo „strhni 1 ks z `Inventory` synchronně“
   se publikuje event `ItemReserved(productId, qty)` a agregát ho zpracuje
-  asynchronně přes ságu. Konflikty řeší sága přes kompenzaci, ne optimistic lock.
-- **CRDT / counter-only agregáty.** Pokud doménová operace je čistý increment
-  (`view_count`, `like_count`), nepotřebujete celý agregát, stačí
-  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. Není to typické DDD,
-  ale u skutečně komutativních operací je to legitimní řešení.
+  asynchronně přes ságu. Konflikty řeší sága kompenzací, ne optimistický zámek.
+- **CRDT / čistě čítačové agregáty.** Když je doménová operace čistý increment
+  (`view_count`, `like_count`), celý agregát není potřeba, stačí
+  Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. Typické DDD to není,
+  ale u skutečně komutativních operací jde o legitimní řešení.
 
 :::callout{type="warn"}
 ### Anti-vzor: pessimistic lock místo redesignu {#anti-pessimistic-lock-heading}
 
-Když optimistic lock generuje konflikty, lákavé řešení je runtime zámek
+Když optimistický zámek generuje konflikty, láká runtime zámek
 `$em->find(Order::class, $id, LockMode::PESSIMISTIC_WRITE)`. Databáze drží zámek
 `SELECT FOR UPDATE` a další klient čeká. Konflikty zmizí, ale výsledek je horší: klienti se
 serializují na úrovni databáze místo aplikace, zámky drží přes celou transakci
@@ -1206,15 +1214,17 @@ paměť serveru a kde se aktivně mění jen poslední část (typicky podle `cr
 - **`orders` dělená po měsících** – aktivní partition drží jen poslední měsíc,
   takže se i s indexy vejde do cache. Staré partitions (read-only) mohou
   být na pomalejším disku nebo v archivu.
-- **`audit_log` dělená po dnech** – `DROP PARTITION` po retention period
-  je atomický a nezamyká aktivní tabulku.
+- **`audit_log` dělená po dnech** – po uplynutí retence se stará partition
+  odpojí (`DETACH PARTITION`, od PostgreSQL 14 i `CONCURRENTLY`) a smaže.
+  Dlouhý `DELETE` nad aktivními daty odpadá.
 - **`projection_*` tabulky** s vysokým write rate.
 
-Pro DDD má partitioning jeden důsledek navíc: **agregátní reference přes ID
-musí být kompozitní** (id + partition key, např. `created_at`). Pokud doména
-zná jen `OrderId`, partition lookup vyžaduje plný scan napříč partitions
-(pomalé). Standardní řešení: zahrnout `created_at` (nebo derivovaný měsíc)
-do hodnotového objektu `OrderId`, aby ho repozitář uměl použít pro partition pruning.
+Pro DDD má partitioning jeden důsledek navíc. Když je tabulka dělená podle
+`created_at` a doména zná jen `OrderId`, musí dotaz podle ID projít všechny
+partitions. Řešení jsou dvě. Repozitář dostane partition key: `created_at`
+(nebo odvozený měsíc) se přidá do hodnotového objektu `OrderId` a použije pro
+partition pruning. Druhou cestou je dělit tabulku rovnou podle ID: UUID v7 nese
+v nejvyšších bitech časovou složku, takže rozsahy ID odpovídají časovým obdobím.
 
 :::callout{type="note"}
 ### Kdy partition použít {#partitioning-kdy-heading}
@@ -1233,7 +1243,7 @@ uvádět: rozhoduje poměr velikosti aktivní části k dostupné paměti, ne ab
 
 V CQRS architektuře jsou read modely vhodný kandidát pro **read replicy**:
 samostatnou databázi (nebo Postgres streaming replicu), na kterou jdou všechny
-queries. Write model zůstává na primary. Důsledky pro DDD kód:
+dotazy. Write model zůstává na primary. Důsledky pro DDD kód:
 
 :::diagram{fig="16.9-B" title="Routing: write na primary, read na replicu, replikační lag" src="images/diagrams/17_performance/read_replica_routing.svg"}
 :::
@@ -1244,8 +1254,8 @@ queries. Write model zůstává na primary. Důsledky pro DDD kód:
 - **Replikační lag** znamená, že dotaz na repliku nemusí hned po `save()` na primary
   vidět změnu. Je to stejný „read your writes“ problém jako u eventual consistency. Vzor řešení viz
   [CQRS – eventual consistency v UI](/cqrs#eventual-consistency). Velikost lagu je vlastnost
-  konkrétního nasazení, ne konstanta; Postgres ji vydá jako `pg_last_xact_replay_timestamp()`
-  a patří do monitoringu vedle latence dotazů.
+  konkrétního nasazení, ne konstanta. Na replice Postgresu ji dá rozdíl
+  `now() - pg_last_xact_replay_timestamp()` a patří do monitoringu vedle latence dotazů.
 
 Nejlevnější obranou proti „read your writes“ je routing, ne kód domény: po zápisu se relace
 na krátkou dobu přilepí na primary a čte odtud. Sticky routing řeší přesně tu chvíli, kdy
@@ -1306,20 +1316,20 @@ doctrine:
 Asociace mezi entitami různých managerů Doctrine nepodporuje. Pro read model je to spíš
 výhoda: donutí to psát dotazy nad tabulkami, ne nad objektovým grafem přes hranice agregátů.
 
-Connection pooling je ortogonální problém. PHP-FPM model „1 worker = 1 PHP proces
+Connection pooling je nezávislý problém. PHP-FPM model „1 worker = 1 PHP proces
 = 1 DB connection“ se nasčítá: 4 aplikační pody × 100 PHP-FPM workerů
 = 400 spojení na primary, tedy čtyřnásobek výchozího `max_connections = 100`
 v Postgresu.
-Standardní řešení: **PgBouncer / RDS Proxy** mezi aplikací a DB, transaction
-pooling mode. Pozor: transaction pooling sám o sobě prepared statements nepodporuje,
+Standardní řešení je **PgBouncer / RDS Proxy** mezi aplikací a DB v režimu transaction
+pooling. Pozor: transaction pooling sám o sobě prepared statements nepodporuje,
 a Doctrine je používá. Řešením je buď session pooling (méně efektivní), nebo PgBouncer
-od verze 1.21 s `max_prepared_statements` > 0. Volbu zavedla právě 1.21 s výchozí
-hodnotou 0, tedy vypnuto; zapnutá ve výchozím stavu (200) je až od 1.24. Na starším
-PgBounceru je proto nutné ji nastavit explicitně. Ten si prepare
-od klienta zachytí, přidělí mu interní jméno a na backendu ho v případě potřeby připraví
-znovu. Podmínka: musí jít o prepared statements vedené protokolem databáze, tedy
-`PQprepare`/`PQexecPrepared` v libpq. Statementy emulované na straně klienta se do LRU cache
-nedostanou. Konfigurační volba `prepared_statements = true` neexistuje.
+od verze 1.21 s `max_prepared_statements` > 0. PgBouncer pak prepare od klienta zachytí,
+přidělí mu interní jméno a na backendu ho v případě potřeby připraví znovu. Volbu
+zavedla právě verze 1.21 s výchozí hodnotou 0, tedy vypnuto; ve výchozím stavu zapnutá
+(200) je až od 1.24, na starší verzi se proto nastavuje explicitně. Podmínka: musí jít
+o prepared statements na úrovni protokolu databáze, tedy `PQprepare`/`PQexecPrepared`
+v libpq. SQL příkazy `PREPARE`/`EXECUTE` PgBouncer nesleduje. Konfigurační volba
+`prepared_statements = true` neexistuje.
 
 ### Projekce v provozu: zpoždění a rebuild {#projekce-provoz-heading}
 
@@ -1333,7 +1343,7 @@ dvojím způsobem: počtem nezpracovaných událostí a stářím té nejstarš�
 říká, kolik práce zbývá, druhé, co uvidí uživatel. Do monitoringu patří obojí, protože
 projekce zaseknutá na jedné chybné události má lag v událostech malý a ve vteřinách rostoucí.
 
-Rebuild je druhá provozní situace, kterou je lepší naplánovat dřív, než nastane. Přehrání
+Rebuild je druhá provozní situace, kterou je lepší naplánovat předem. Přehrání
 celého streamu do prázdné tabulky trvá tím déle, čím delší stream je, a po celou dobu není
 projekce použitelná. Osvědčený postup:
 
@@ -1353,22 +1363,22 @@ bez užitku. Tabulka, kterou nikdo nečte, ale kterou udržuje projektor, je či
 
 ### Snapshotting v Event Sourcingu (přehled) {#snapshotting-prehled-heading}
 
-Při Event Sourcingu (kapitola [Event Sourcing](/event-sourcing)) je rebuild stavu
-agregátu lineární s počtem eventů. Pro agregát s 100 eventy je to okamžité; pro
-1000 eventů to začíná být znát; pro 100k+ eventů (long-lived agregát jako
-`UserAccount` po letech provozu) je hydration nepoužitelná.
+Při Event Sourcingu (kapitola [Event Sourcing](/event-sourcing)) roste doba rekonstrukce
+stavu agregátu lineárně s počtem eventů. Pro agregát se 100 eventy je okamžitá, u
+1000 eventů začíná být znát a u 100k+ eventů (dlouho žijící agregát jako
+`UserAccount` po letech provozu) je hydratace nepoužitelná.
 
 **Snapshot** je zhuštěný stav agregátu uložený periodicky:
 
-- Po každých N eventech se uloží `Snapshot{aggregateId, version, state}`. Hodnoty kolem 50 až 100 jsou rozšířená pracovní heuristika, ne naměřené optimum. To závisí na velikosti stavu a poměru čtení k zápisu.
-- Při hydration se načte poslední snapshot + jen eventy *novější* než snapshot version.
-- Tradeoff: rychlejší read, ale snapshot tabulka roste a její struktura je vázaná
-  na konkrétní verzi agregátu (schema evolution problém, viz
+- Po každých N eventech se uloží `Snapshot{aggregateId, version, state}`. Snapshot se zavádí, až když replay měřitelně zpomalí; to bývá u stovek až tisíců událostí. Interval (v ukázce kapitoly Event Sourcing 50) je laditelný parametr, ne doporučení. Závisí na velikosti stavu a poměru čtení k zápisu.
+- Při hydrataci se načte poslední snapshot a jen eventy *novější* než jeho verze.
+- Cena: rychlejší čtení, ale snapshot tabulka roste a její struktura je vázaná
+  na konkrétní verzi agregátu (problém evoluce schématu, viz
   [Event Sourcing – verzování](/event-sourcing#verzovani-udalosti)).
 
 Detailní implementace včetně Symfony kódu je v sekci
-[Event Sourcing – Snapshotting](/event-sourcing#snapshotting). V kontextu výkonu
-si pamatujte: **snapshot není výchozí volba, ale úniková páka pro dlouho žijící
+[Event Sourcing – Snapshotting](/event-sourcing#snapshotting). Z pohledu výkonu
+platí: **snapshot není výchozí volba, ale úniková páka pro dlouho žijící
 agregáty**. Většina DDD agregátů má desítky eventů za celý životní cyklus a snapshotting
 nepotřebuje.
 
@@ -1387,14 +1397,16 @@ Ve vývojovém prostředí odhaluje N+1 a pomalé dotazy nejdřív Symfony Profi
 - Celkový počet SQL dotazů za request. Nadměrné číslo signalizuje N+1 problém.
 - Dobu trvání každého dotazu; pomalé dotazy vyžadují index nebo přepis.
 - Kompletní SQL s parametry, takže dotaz jde rovnou vyzkoušet v databázovém klientovi.
-- Stack trace pro každý dotaz, který ukáže, která část kódu dotaz vydala.
+- Stack trace ke každému dotazu, který ukáže, která část kódu dotaz vydala. Sbírá se až
+  po zapnutí volby `profiling_collect_backtrace` u DBAL spojení.
 
 ### Doctrine query logging
 
-V dev prostředí pokrývá počítání dotazů panel Doctrine v Profileru; zapíná ho
-`doctrine.dbal.logging: true`. Vlastní middleware má smysl jinde. V integračním testu, kde na počet dotazů míří
-aserce („načtení seznamu objednávek nesmí vydat víc než dva dotazy“). Nebo při
-ladění dávky, která v Profileru vůbec neskončí.
+V dev prostředí pokrývá počítání dotazů panel Doctrine v Profileru. Ten zapíná volba
+`doctrine.dbal.profiling`, ve výchozím stavu aktivní v debug režimu; `logging` řídí
+jen zápis dotazů do loggeru. Vlastní middleware má smysl jinde: v integračním testu,
+kde na počet dotazů míří aserce („načtení seznamu objednávek nesmí vydat víc než dva
+dotazy“), nebo při ladění dávky, která v Profileru vůbec neskončí.
 
 :::callout{type="pattern"}
 ### Kostra middleware pro počítání dotazů
@@ -1512,18 +1524,18 @@ regresi typu „někdo odstranil fetch join“ dřív než produkční monitorin
 
 ### Blackfire.io pro produkční profiling
 
-Pro profiling v produkčním nebo stagingovém prostředí se v PHP používá Blackfire.io.
-Blackfire zachytí kompletní call graph každého requestu nebo CLI příkazu, včetně přesného
-měření doby trvání, počtu volání a paměťové stopy pro každou funkci. Umožňuje psát *výkonnostní testy*
-(Blackfire Builds) jako součást CI/CD pipeline a tím předcházet výkonnostním regresím.
+Pro profiling v produkčním nebo stagingovém prostředí se v PHP běžně používá Blackfire.io.
+Zachytí kompletní call graph profilovaného requestu nebo CLI příkazu včetně doby trvání,
+počtu volání a paměťové stopy každé funkce. Nad profily lze psát *výkonnostní testy*
+(Blackfire Builds), které v CI/CD pipeline zachytí výkonnostní regrese.
 
 :::callout{type="pattern"}
 ### Interpretace SQL dotazů v Symfony Profileru – praktický postup
 
 1. Otevřete Symfony Profiler panel **Doctrine** a seřaďte dotazy podle doby trvání.
 2. Vezměte dvě čísla, ne jedno: nejpomalejší dotaz a součet času stráveného v databázi za celý request. Sto rychlých dotazů po dvou milisekundách bolí stejně jako jeden dvousetmilisekundový, ale řeší se jinak – první je N+1, druhý chybějící index.
-3. U podezřelého dotazu zkopírujte SQL a spusťte `EXPLAIN ANALYZE` v databázi. Práh 100 ms je pracovní konvence, ne hranice daná měřením.
-4. Hledejte `Seq Scan` (PostgreSQL) nebo `Full Table Scan` (MySQL/MariaDB), které signalizují chybějící index.
+3. U podezřelého dotazu (pracovní konvence je nad 100 ms, ne hranice daná měřením) zkopírujte SQL a spusťte `EXPLAIN ANALYZE` v databázi.
+4. Hledejte `Seq Scan` (PostgreSQL), resp. `Table scan` nebo `type: ALL` v `EXPLAIN` (MySQL/MariaDB). Průchod celou tabulkou obvykle znamená chybějící index.
 5. Zkontrolujte, zda se opakují strukturálně stejné dotazy lišící se pouze parametrem – typický příznak N+1 problému.
 6. Pro N+1 přidejte fetch join (alias asociace v SELECT) do příslušného repozitáře nebo přepište dotaz na read model (DTO).
 :::
@@ -1546,8 +1558,7 @@ Jinak měření vypovídá o čemkoli jiném než o doménovém modelu.
 :::callout{type="warn"}
 ### Co měřit, než začnete optimalizovat
 
-Optimalizujte pouze podle naměřených dat. Čtyři čísla, která tato kapitola používá
-a která mají smysl sledovat trvale:
+Čtyři čísla, se kterými kapitola pracuje a která má smysl sledovat trvale:
 
 - **Počet SQL dotazů na request** – skokový nárůst znamená N+1, ne pomalou databázi.
 - **Celkový čas strávený v databázi na request** – doplňuje předchozí číslo a odděluje „hodně dotazů“ od „jeden pomalý“.
@@ -1558,20 +1569,21 @@ Každá optimalizace zvyšuje složitost kódu. Pokud profiler ukazuje, že dan�
 nezpůsobuje, ponechte jej v čitelné, doménově srozumitelné podobě.
 :::
 
-Tři páky výkonu v DDD: hranice agregátů, read model a profiling. Pořadí, ve kterém je řešit,
-je opačné – nejdřív měřit, pak oddělit read od write přes CQRS, pak doladit hranice agregátů
-a eliminovat N+1. Pokračováním je kapitola
+Tři páky výkonu v DDD jsou hranice agregátů, read model a profiling. Práce začíná vždy
+měřením. Následují levné zásahy (N+1, indexy, dotaz mimo ORM) a teprve potom read model
+podle [žebříčku eskalace](#eskalace-heading). Hranice agregátu se přesouvá jen tehdy,
+když měření odhalí kolekci, která k invariantu nepatří. Pokračováním je kapitola
 [Testování DDD](/testovani-ddd).
 
 :::faq{}
 - question: Zpomaluje DDD aplikaci oproti CRUD?
-  answer: 'Samotné DDD výkon nesnižuje. Doménové třídy jsou čistý PHP bez runtime režie. Zpomalení nastává, když je špatně navržený agregát (načte víc dat, než je třeba). Další příčinou je chybějící read model v CQRS nebo nesprávné použití Doctrine lazy loadingu, které vede k N+1 dotazům. Explicitní hranice naopak optimalizaci usnadňují: je zřejmé, co se načítá kvůli invariantu a co jen kvůli zobrazení. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
+  answer: 'Samotné DDD výkon nesnižuje. Doménové třídy jsou čisté PHP bez běhové režie. Zpomalení nastává, když je špatně navržený agregát (načte víc dat, než je třeba). Další příčinou je chybějící read model v CQRS nebo nesprávné použití Doctrine lazy loadingu, které vede k N+1 dotazům. Explicitní hranice naopak optimalizaci usnadňují: je zřejmé, co se načítá kvůli invariantu a co jen kvůli zobrazení. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
 - question: Jak v DDD řešit N+1 problém s agregáty?
-  answer: 'N+1 vzniká, když se pro načtený rodičovský objekt doplňkově dotazuje na každý vnitřní prvek. První volbou je fetch join v DQL (<code>SELECT o, i FROM Order o JOIN o.items i</code>) v metodě repozitáře. Pro čtení dat do UI bývá ještě přímočařejší denormalizovaný read model, který ORM lazy loading vynechá úplně. Až poslední volbou je <code>fetch: ''EAGER''</code> v mapování: u kolekcí nevydá JOIN, ale druhý dotaz po dávkách (výchozí velikost 100), a platí globálně i pro dotazy, které asociaci nepotřebují. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
+  answer: 'N+1 vzniká, když aplikace ke každému načtenému objektu dotahuje jeho vnitřní prvky samostatným dotazem. První volbou je fetch join v DQL (<code>SELECT o, i FROM Order o LEFT JOIN o.items i</code>) v metodě repozitáře. Pro čtení dat do UI bývá ještě přímočařejší denormalizovaný read model, který ORM lazy loading vynechá úplně. Až poslední volbou je <code>fetch: ''EAGER''</code> v mapování: u kolekcí nevydá JOIN, ale druhý dotaz po dávkách (výchozí velikost 100), a platí globálně i pro dotazy, které asociaci nepotřebují. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
-  answer: 'Ano, zásadně. Příliš velký agregát načítá při každé operaci desítky vnitřních entit a vede k častým konfliktům optimistického zamykání. Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty. Rozdělení zvýší paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
+  answer: 'Ano, zásadně. Příliš velký agregát tahá z databáze víc dat, než operace potřebuje. Pokud každá změna zvedá verzi kořene, vede navíc k častým konfliktům optimistického zamykání. Doctrine ji ale při změně potomka sám nezvedne, takže bez ručního zvednutí verze se místo konfliktu invariant tiše poruší (viz <a href="/anti-vzory#agregat-problemy-heading">Anti-vzory</a>). Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty. Rozdělení zvýší paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?
-  answer: 'Read model se navrhuje přímo pro daný dotaz. Denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Read model lze rebuildnout z událostí, takže změna schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
+  answer: 'Read model se navrhuje přímo pro daný dotaz. Denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Když jsou události uložené, lze read model přestavět z nich a změna jeho schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
 - question: Je lepší UUID, nebo integer primární klíč z pohledu výkonu?
   answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, a přesně to DDD vyžaduje: agregát dostane ID před persistencí. Výkonový rozdíl závisí na databázovém stroji, šířce indexu a poměru zápisů ke čtení, takže obecné číslo neexistuje. U UUID v7 ale odpadá hlavní nevýhoda náhodných UUID, tedy fragmentace B-tree indexu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
 :::

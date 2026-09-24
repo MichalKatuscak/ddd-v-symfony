@@ -7,14 +7,14 @@ meta_description: "Mapování DDD konceptů na Symfony 8: adresářová struktur
 meta_keywords: "DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-11
+modified: 2026-09-24
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
 chapter_number: "10"
 category: Architektura
 deck: 'Praktický překlad DDD konceptů do Symfony 8: jak strukturovat projekt podle Bounded Contextů, jak persistovat agregáty přes Doctrine, jak konfigurovat Messenger a kdy sáhnout po Doctrine custom types pro hodnotové objekty.'
-reading_time: 35
+reading_time: 41
 difficulty: 3
 github_examples: Chapter04_Implementation
 ---
@@ -22,7 +22,7 @@ github_examples: Chapter04_Implementation
 :::callout{type="pattern"}
 ### Evoluce příkladů napříč průvodcem
 
-Kódové příklady v tomto průvodci záměrně přibývají na komplexitě. Kapitola
+Kódové příklady v tomto průvodci záměrně nabývají na složitosti. Kapitola
 [Základní koncepty](/zakladni-koncepty) zjednodušuje příklady
 na minimum, aby ilustrovala čistý koncept. Tato kapitola přidává reálné aspekty
 implementace v Symfony: Doctrine atributy s custom typy pro hodnotové objekty,
@@ -50,19 +50,20 @@ kterou rozebírá sekce [Persisted Object Pattern](#persisted-object-pattern).
 
 ## 10.01 Kde končí DDD a kde začíná Symfony {#ddd-vs-symfony-boundary}
 
-Následující diagram ukazuje hranici mezi čistým DDD kódem (zelená oblast) a Symfony infrastrukturou
-(oranžová oblast). Vše v zelené oblasti je čistý PHP bez závislosti na frameworku, testovatelný
-v izolaci a přenositelný mezi projekty. Symfony vrstva implementuje kontrakty
+Diagram ukazuje hranici mezi čistým DDD kódem (zelená oblast) a Symfony infrastrukturou
+(oranžová oblast). Vše v zelené oblasti je čisté PHP bez závislosti na frameworku, testovatelné
+v izolaci a přenositelné mezi projekty. Symfony vrstva implementuje kontrakty
 definované doménou (repository interface, event dispatch) a zajišťuje HTTP, persistenci a messaging.
 
 :::diagram{fig="10.1-A" title="Hranice mezi DDD a Symfony" src="images/diagrams/3_implementation_in_symfony/boundary.svg"}
 :::
 
-Směr závislostí je určující: Symfony závisí na DDD (implementuje jeho rozhraní), nikdy naopak.
-Doménová vrstva neimportuje žádný Symfony namespace. Díky tomu lze Doctrine nahradit
-jiným ORM nebo Messenger jiným bus systémem, aniž by se dotklo doménové logiky.
-Tento směr závislostí formalizuje hexagonální, onion i clean architektura. Jejich
-srovnání rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
+Směr závislostí je jednoznačný: Symfony závisí na doméně (implementuje její rozhraní), nikdy naopak.
+Doménová vrstva neimportuje žádný Symfony namespace. Jedinou stopou infrastruktury v ní
+jsou mapovací atributy Doctrine (viz [volba mappingu](#mapping-volba-heading)). Doctrine
+proto jde nahradit jiným ORM a Messenger jiným bus systémem bez zásahu do doménové
+logiky; přepíšou se jen metadata. Tento směr závislostí formalizuje hexagonální, onion
+i clean architektura. Jejich srovnání rozvádí [kapitola o architektonických stylech](/architektonicke-styly).
 
 ## 10.02 Struktura projektu {#project-structure}
 
@@ -115,36 +116,30 @@ src/
 │   │   │   └── OrderItem.php
 │   │   ├── ValueObject/       # Hodnotové objekty
 │   │   │   ├── OrderId.php
-│   │   │   └── Money.php
+│   │   │   └── OrderStatus.php
 │   │   ├── Event/             # Doménové události
 │   │   │   └── OrderPlaced.php
 │   │   └── Repository/        # Repozitáře (rozhraní)
 │   │       └── OrderRepository.php
-│   ├── Infrastructure/        # Infrastruktura pro Ordering
-│   │   └── Repository/        # Implementace repozitářů
-│   │       └── DoctrineOrderRepository.php
-│   ├── Checkout/              # Feature: Pokladna
+│   ├── Application/           # Aplikační vrstva pro Ordering
 │   │   ├── Command/           # Commands
-│   │   │   ├── CreateOrder.php
-│   │   │   └── CreateOrderHandler.php
-│   │   ├── Controller/        # Controllers
-│   │   │   └── CheckoutController.php
-│   │   ├── Form/              # Forms
-│   │   │   └── CheckoutFormType.php
-│   │   └── View/              # Views
-│   │       └── checkout.html.twig
-│   └── OrderHistory/          # Feature: Historie objednávek
-│       ├── Query/             # Queries
-│       │   ├── GetOrderHistory.php
-│       │   └── GetOrderHistoryHandler.php
-│       ├── Controller/        # Controllers
-│       │   └── OrderHistoryController.php
-│       └── View/              # Views
-│           └── order_history.html.twig
+│   │   │   └── PlaceOrder.php
+│   │   ├── Handler/           # Command handlery
+│   │   │   └── PlaceOrderHandler.php
+│   │   └── Query/             # Queries
+│   │       ├── GetOrderHistory.php
+│   │       └── GetOrderHistoryHandler.php
+│   └── Infrastructure/        # Infrastruktura pro Ordering
+│       ├── Repository/        # Implementace repozitářů
+│       │   └── DoctrineOrderRepository.php
+│       └── Http/              # Controllers
+│           ├── CheckoutController.php
+│           └── OrderHistoryController.php
 └── SharedKernel/              # Skutečně sdílené komponenty
     ├── Domain/                # Sdílená doménová logika
-    │   └── ValueObject/       # Sdílené hodnotové objekty
-    │       └── Id.php         # Abstraktní ID
+    │   ├── AggregateRoot.php  # record() / releaseEvents()
+    │   ├── Money.php          # Sdílený hodnotový objekt
+    │   └── Currency.php       # Backed enum měn
     └── Infrastructure/        # Sdílená infrastruktura
         └── Persistence/       # Sdílené komponenty pro persistenci
             └── Doctrine/
@@ -152,6 +147,8 @@ src/
                     └── MappingTrait.php
 :::
 :::
+
+Strom ukazuje obě organizace, které kniha používá. `UserManagement` řadí aplikační kód do feature složek, `Ordering` drží klasické vrstvy `Domain/Application/Infrastructure`. Kdy se vyplatí která, rozebírá [Vertical Slice Architecture](/architektonicke-styly#vertical-slice). Identifikátory nemají sdíleného předka: každý kontext má vlastní `UserId` nebo `OrderId` (důvod v [Základních konceptech](/zakladni-koncepty#entity-identity)).
 
 Závislosti mezi kontexty procházejí přes Application vrstvu nebo události, nikdy přes přímý import doménových tříd cizího kontextu.
 
@@ -180,10 +177,10 @@ Strom stojí na čtyřech pravidlech. Každý kontext má vlastní model, který
 
 ## 10.03 Implementace entit {#entities}
 
-Vstupní bod do agregátu je **kořen agregátu**. Třída dědí z bázové `AggregateRoot`,
+Do agregátu se vstupuje přes **kořen agregátu**. Třída dědí z bázové `AggregateRoot`,
 konstruktor je `private` a vznik probíhá přes pojmenovanou factory metodu
-(`User::register()`, `Order::place()`). To zaručuje, že nelze vytvořit
-agregát v nekonzistentním stavu. Definice entity je v kapitole
+(`User::register()`, `Order::place()`). Agregát tak nejde vytvořit
+v nekonzistentním stavu. Definice entity je v kapitole
 [Základní koncepty](/zakladni-koncepty); tato sekce řeší její podobu v Symfony.
 
 :::callout{type="pattern"}
@@ -327,7 +324,7 @@ Detaily implementace:
   pracují nad původní třídou a žádnou podtřídu nevytvářejí
   [[2]](https://www.php.net/manual/en/language.oop5.lazy-objects.php), a DoctrineBundle 3
   je už neumožňuje vypnout (rozbor v kapitole [Návrh agregátu](/navrh-agregatu)).
-- **Privátní konstruktor + factory `register()`.** Jediná legální cesta vytvoření.
+- **Privátní konstruktor + factory `register()`.** Jediná legální cesta, jak agregát vytvořit.
   Kdyby přibyla další kategorie (importovaný uživatel z LDAP), přidá se další
   factory, ne přepínač uvnitř konstruktoru. Událost `UserRegistered` se nahrává
   ve factory, ne v konstruktoru. Konstruktorem prochází i rekonstituce
@@ -343,15 +340,14 @@ Detaily implementace:
 :::callout{type="note"}
 ### Proč VO ukládáme přímo, ne jako primitivy {#doctrine-hydration-heading}
 
-V dřívějších verzích tohoto průvodce se v entitě VO ukládaly jako string a getter
-vracel `new UserId($this->id)`. Důvod byl Doctrine hydration: Doctrine při čtení
-z DB nastavuje vlastnosti přímo, bez konstruktoru, takže `UserId` jako typ vlastnosti
-by skončilo na TypeError.
+Nabízí se ukládat VO v entitě jako string a v getteru vracet `new UserId($this->id)`.
+Důvodem bývá hydratace: Doctrine při čtení z DB nastavuje vlastnosti přímo, bez
+konstruktoru, takže vlastnost typu `UserId` by bez další konfigurace skončila na TypeError.
 
-Doctrine ORM 3 to ale řeší přes **custom DBAL types** (`UserIdType`, `EmailType`)
-a `#[ORM\Embedded]`. Při načítání Doctrine sám zavolá custom type, který
-vyrobí instanci VO, a vlastnost dostane správný objektový typ. Kód agregátu pak
-pracuje výhradně s typovými hodnotami, bez re-konstrukce při každém volání getteru.
+Řešením jsou **custom DBAL typy** (`UserIdType`, `EmailType`) a `#[ORM\Embedded]`.
+Při načítání Doctrine sám zavolá custom typ, který vyrobí instanci VO, a vlastnost
+dostane správný objektový typ. Kód agregátu pak pracuje výhradně s typovými hodnotami
+a getter nic znovu nesestavuje.
 
 Detaily a registrace v sekci [Doctrine custom types](#doctrine-custom-types).
 :::
@@ -387,8 +383,8 @@ final readonly class Email
     public static function fromUserInput(string $raw): self
     {
         // Vstupy z formulářů normalizujeme zde (lowercase, trim).
-        // Konstruktor se nedotýká – chrání invariant „dvě instance se stejnou
-        // hodnotou jsou rovnocenné".
+        // Konstruktor hodnotu jen validuje a nemění – chrání invariant
+        // „dvě instance se stejnou hodnotou jsou rovnocenné“.
         return new self(mb_strtolower(trim($raw)));
     }
 
@@ -454,7 +450,8 @@ v otevřené podobě a nic by se nestalo. Dvě pojmenované továrny ten omyl vy
 :::callout{type="warn"}
 ### Limity `FILTER_VALIDATE_EMAIL` {#email-validate-limits-heading}
 
-PHP `FILTER_VALIDATE_EMAIL` ověřuje syntaxi podle zjednodušeného RFC 5322.
+PHP `FILTER_VALIDATE_EMAIL` ověřuje syntaxi `addr-spec` podle RFC 822, bez komentářů
+a zalamování bílých znaků.
 Drobnosti, které je dobré znát:
 
 - **Odmítá i některé technicky platné adresy** – `a@b` (doména bez tečky,
@@ -468,7 +465,7 @@ e-mail s ověřovacím odkazem (out-of-band proces), který v doméně modeluje
 agregát `EmailVerification` nebo událost `EmailVerificationRequested`.
 Pro pokročilejší syntaktickou validaci existuje knihovna
 [`egulias/email-validator`](https://github.com/egulias/EmailValidator),
-kterou používá i Symfony Validator pod kapotou.
+o kterou se opírá omezení `Assert\Email` Symfony Validatoru v režimu `strict`.
 :::
 
 :::callout{type="pattern"}
@@ -484,13 +481,13 @@ namespace App\UserManagement\Domain\ValueObject;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Embeddable]
-final class UserName
+final readonly class UserName
 {
     public const MIN_LENGTH = 2;
     public const MAX_LENGTH = 100;
 
     #[ORM\Column(type: 'string', length: self::MAX_LENGTH)]
-    public readonly string $value;
+    public string $value;
 
     public function __construct(string $value)
     {
@@ -525,8 +522,8 @@ final class UserName
 `UserName` ukazuje, co hodnotový objekt přináší: invariant „jméno není prázdné
 a má rozumnou délku“ vynucuje typ. Volající kód nemá šanci vložit prázdný
 string. Pokud by to zkusil, dostane výjimku v konstruktoru, ne až v repozitáři.
-`#[ORM\Embeddable]` říká Doctrine, že VO se ukládá jako sloupec ve stejné tabulce
-jako vlastník (žádná samostatná tabulka pro VO).
+`#[ORM\Embeddable]` říká Doctrine, že VO se ukládá do sloupců tabulky vlastníka
+(žádná samostatná tabulka pro VO).
 
 Třetí typ hodnotového objektu je identita agregátu. Generuje se v aplikaci,
 ne v databázi, takže handler zná ID ještě před uložením:
@@ -593,13 +590,15 @@ Symfony 8 vyžaduje PHP 8.4, takže hodnotový objekt lze zapsat i jinak než p�
 Asymetrická viditelnost (`public private(set) string $value`) nahrazuje dvojici
 privátní vlastnost plus getter. Hodí se objektům s wither metodami, které si
 uvnitř třídy potřebují hodnotu po `clone` přepsat. Pro hodnotový objekt je
-`readonly` přísnější: zakazuje zápis i zevnitř třídy, takže neměnnost nestojí
-na disciplíně autora. Proto VO v celém průvodci zůstávají `final readonly`.
+`readonly` přísnější: po inicializaci zakazuje jakýkoli zápis, i zevnitř třídy,
+takže neměnnost nestojí na disciplíně autora. Proto VO v celém průvodci zůstávají `final readonly`.
 
 Property hooks svádějí přesunout validaci z konstruktoru do `set` hooku.
-V doménovém modelu je to past. Hook se spustí při každém zápisu včetně hydratace
-z databáze, kdežto konstruktor Doctrine obchází. Validace by se tedy spouštěla
-právě tam, kde je zbytečná, a mlčela tam, kde na ní záleží.
+U hodnotového objektu se to nevyplatí. Hook nejde kombinovat s `readonly` (PHP
+ohlásí „Hooked properties cannot be readonly“), takže by VO přišel o neměnnost.
+Při hydrataci Doctrine zapisuje surovou hodnotu přes `ReflectionProperty::setRawValue()`
+a hook obchází stejně jako konstruktor. Validace v hooku tedy nechrání nic, co by
+nechránil konstruktor.
 
 :::callout{type="warn"}
 ### Property hooks a Doctrine ORM {#property-hooks-orm-heading}
@@ -689,16 +688,18 @@ final class DoctrineUserRepository implements UserRepository
 `DoctrineUserRepository` implementuje doménové rozhraní `UserRepository` přes Doctrine ORM.
 `save()` jen zařadí agregát k uložení přes `persist()`; flush a commit provede
 transakční middleware na command busu, takže jeden use case odpovídá jedné transakci.
-Doménové události publikuje aplikační vrstva samostatným krokem, až po
-commitu, aby příjemci viděli uložený stav.
+Doménové události publikuje aplikační vrstva samostatným krokem až po `flush()`,
+aby posluchači viděli zapsaný stav.
 
 :::callout{type="warn"}
 ### Limit naivní publikace událostí {#event-dispatch-heading}
 
 Nabízí se vypustit události hned po uložení agregátu: `releaseEvents()` a synchronní
-`dispatch()` v handleru. Mezi commitem a dispatchem ale může proces spadnout: OOM kill,
-deploy restart, výpadek brokera. Agregát pak v databázi je, ale událost se nikdy
-nedoručí. Z pohledu ostatních kontextů se registrace neudála. Pro vývoj a méně
+`dispatch()` v handleru. Posluchačům ve stejném procesu to stačí, běží uvnitř téže
+transakce. Potíž nastane, jakmile událost opouští proces. Dispatch před commitem ohlásí
+okolí registraci, kterou rollback ještě může zrušit. Dispatch až po commitu zase událost
+ztratí, když mezi oběma kroky proces spadne: OOM kill, deploy restart, výpadek brokera.
+Agregát pak v databázi je, ale z pohledu ostatních kontextů se registrace neudála. Pro vývoj a méně
 důležité události je to přijatelné. Jakmile na události závisí jiný Bounded Context
 nebo platební tok, produkčním řešením je Outbox Pattern. Událost se zapíše do stejné
 DB transakce jako agregát a samostatný worker ji doručí s retry. Detail v kapitole
@@ -719,16 +720,16 @@ a commitne. Repozitář pak jen volá `persist()`, transakci ani flush neřídí
 
 S middlewarem se mění i okamžik commitu: `flush()` zapíše SQL, commit provede
 až middleware po doběhnutí handleru. Synchronní dispatch v handleru tedy běží
-uvnitř otevřené transakce. Když se pak transakce vrátí zpět (rollback), listenery už
-reagovaly na událost, která se nikdy nestala. Spolehlivé řešení je opět
-[Outbox Pattern](/outbox-pattern): událost se commituje spolu s agregátem.
+uvnitř otevřené transakce. Posluchačům v témže procesu to nevadí, rollback vrátí
+i jejich zápisy. Vedlejší efekty mimo proces (e-mail, broker) by ale reagovaly na
+událost, která se nikdy nestala. Ty patří do [Outboxu](/outbox-pattern), kde se
+událost commituje spolu s agregátem.
 :::
 
 ## 10.06 Persisted Object Pattern – oddělený persistence model {#persisted-object-pattern}
 
 Doménová vrstva bez jediného kusu metadat o persistenci vyžaduje druhý objektový
-model.
-Doménová třída zůstane POPO bez atributů, vedle ní v infrastrukturní vrstvě žije
+model. Doménová třída zůstane POPO bez atributů, vedle ní v infrastrukturní vrstvě žije
 samostatná persistence třída se všemi Doctrine atributy a dva jednosměrné mappery
 překládají mezi nimi. Průvodce pro tuto konstrukci používá název **Persisted
 Object Pattern**; v literatuře se pro ni vžilo označení *persistence model*
@@ -870,7 +871,7 @@ final class UserMapper
 :::
 
 :::callout{type="note"}
-### Cena pure varianty {#persisted-object-tradeoffs-heading}
+### Cena čisté varianty {#persisted-object-tradeoffs-heading}
 
 Persisted Object Pattern drží doménu úplně mimo ORM. Žádný atribut, žádný `use
 Doctrine\…`, žádná stopa po infrastruktuře. Cena:
@@ -888,8 +889,8 @@ Doctrine\…`, žádná stopa po infrastruktuře. Cena:
   existující `UserPersistenceModel` a přepsat její pole; nová instance by
   kolidovala s primárním klíčem a vynulovala optimistický zámek.
 
-Doporučení: použít Persisted Object **jen v kontextech, kde je oddělení
-opravdu důležité** (Core Domain s vysokou hodnotou, dlouhodobá údržba, plán
+Persisted Object se vyplatí **jen v kontextech, kde na oddělení skutečně
+záleží** (Core Domain s vysokou hodnotou, dlouhodobá údržba, plán
 na výměnu persistence). Pro většinu Bounded Contextů jsou atributy přijatelný kompromis.
 :::
 
@@ -1020,15 +1021,15 @@ private Email $email;
 :::
 
 Třída záměrně nemá metodu `getName()`, protože ji DBAL 4 odstranil. Jméno typu určuje
-výhradně klíč v `doctrine.dbal.types`; konstanta `NAME` slouží jen jako
-pojmenovaná reference pro atributy `#[ORM\Column]`. Bez `getSQLDeclaration()` by
+výhradně klíč v `doctrine.dbal.types`; konstanta `NAME` je jen pojmenovaná reference,
+kterou lze v atributu `#[ORM\Column]` použít místo řetězce. Bez `getSQLDeclaration()` by
 délku sloupce diktoval rodičovský `StringType`.
 
 XML mapping (`User.orm.xml`) dokáže totéž bez atributů ve třídě, doménu od ORM
 ale neoddělí, jen přesune metadata do jiného formátu. Po odstranění annotation
-a YAML driveru v ORM 3 je navíc jedinou neatributovou variantou
-[[8]](https://github.com/doctrine/orm/blob/3.7.x/UPGRADE.md) a nástroje kolem
-Doctrine ji obsluhují hůř než atributy. Kdo chce striktní oddělení, najde řešení
+a YAML driveru v ORM 3 zbývá vedle atributů jen XML a málo používané PHP mapování
+[[8]](https://github.com/doctrine/orm/blob/3.7.x/UPGRADE.md). Nástroje kolem
+Doctrine obě varianty obsluhují hůř než atributy. Kdo chce striktní oddělení, najde řešení
 v sekci [Persisted Object Pattern](#persisted-object-pattern).
 
 :::callout{type="note"}
@@ -1075,8 +1076,8 @@ enum OrderStatus: string
             self::Draft => [self::Confirmed, self::Cancelled],
             self::Confirmed => [self::Paid, self::Cancelled],
             self::Paid => [self::Shipped, self::Cancelled],
-            // Odeslanou zásilku storno nevrátí; od tohohle bodu
-            // se rovná kompenzací v ságe, ne přechodem agregátu.
+            // Odeslanou zásilku storno nevrátí; od tohoto bodu se situace
+            // řeší kompenzací v sáze, ne přechodem agregátu.
             self::Shipped => [self::Delivered],
             self::Delivered => [],
             self::Cancelled => [],
@@ -1130,6 +1131,8 @@ final class Order extends AggregateRoot
         return $order;
     }
 
+    // Getter drží výřez krátký; kanonický Order čte stav přes
+    // public private(set), viz kapitola Návrh agregátu.
     public function status(): OrderStatus
     {
         return $this->status;
@@ -1179,18 +1182,19 @@ final readonly class OrderStatusChanged
 :::
 :::
 
-Ukázka stojí za jednu poznámku, aby se nedala opsat špatně. `transitionTo()` je
+Ukázka potřebuje jednu poznámku, aby ji nikdo neopsal špatně. `transitionTo()` je
 **alternativa** k pojmenovaným přechodům, ne jejich doplněk. Kanonický agregát
 z [Návrhu agregátu](/navrh-agregatu#references-by-id) používá `markPaid()`, `ship()`
 a `cancel()`, protože každá operace nese vlastní invariant a vlastní událost.
 `OrderPaid` říká víc než `OrderStatusChanged(Confirmed, Paid)`. Kdo si nechá obojí,
-dostane dvě cesty do téhož stavu, které se liší v tom, co zaznamenají: `markPaid()`
-nevydá nic, `transitionTo()` vydá `OrderStatusChanged`. Projekce pak podle toho,
-kudy se šlo, jednou vidí změnu a jednou ne.
+dostane dvě cesty do téhož stavu, které zaznamenají různé události: `markPaid()`
+vydá `OrderPaid`, `transitionTo()` vydá `OrderStatusChanged`. Projekce, která
+poslouchá jen jednu z nich, pak podle toho, kudy se šlo, změnu jednou vidí a jednou ne.
 
 Obecný přechod se vyplatí tam, kde je stavů hodně, přechody jsou jednotvárné
 a odlišné události by nic nepřinesly: workflow tiketu, stavy dokumentu ve schvalování.
 Objednávka mezi takové případy nepatří.
+
 :::callout{type="note"}
 ### Kdy použít enum a kdy plnohodnotný hodnotový objekt?
 
@@ -1229,7 +1233,7 @@ ani hodnotovému objektu**. Typicky jde o operaci nad dvěma a více agregáty
 vstupem: kurzovní převod, kalkulace daně podle jurisdikce.
 
 **Před sáhnutím po doménové službě stojí vždy jedna otázka: nepatří to do agregátu?**
-Pravidlo „lze platit jen confirmed objednávku“ je čistý invariant agregátu `Order`.
+Pravidlo „lze platit jen potvrzenou objednávku“ je čistý invariant agregátu `Order`.
 Jen `Order` zná svůj stav a jen on ho smí měnit. Doménová služba na tomtéž místě
 je anti-vzor: oslabuje agregát a vede k anemickému modelu.
 
@@ -1239,7 +1243,7 @@ je anti-vzor: oslabuje agregát a vede k anemickému modelu.
 :::code{language="php" filename="src/Ordering/Domain/Service/PaymentService.php (ANTI-VZOR)"}
 <?php
 
-// ANTI-VZOR: pravidlo „lze platit jen confirmed objednávku“ je invariant
+// ANTI-VZOR: pravidlo „lze platit jen potvrzenou objednávku“ je invariant
 // agregátu Order, ne odpovědnost externí služby.
 final class PaymentService
 {
@@ -1249,7 +1253,7 @@ final class PaymentService
             throw new \DomainException('Cannot process payment for a non-confirmed order');
         }
 
-        return new Payment(PaymentId::generate(), $order->id(), $amount, $pm);
+        return new Payment(PaymentId::generate(), $order->id, $amount, $pm);
     }
 }
 :::
@@ -1318,10 +1322,9 @@ Ukázka je ilustrativní varianta k `markPaid()` z [Návrhu agregátu](/navrh-ag
 a stojí na čtyřech třídách, které kniha dál nerozvádí: `Payment`, `PaymentId`,
 `PaymentMethod` a `PaymentRecorded`. Kanonický model platbu jako samostatný agregát
 nemodeluje; má ji v kontextu `Payment` za hranicí, kam se posílá příkaz. Do projektu
-podle knihy proto patří `markPaid()`, tenhle výpis ukazuje jen alternativu, kde platba
-vzniká uvnitř objednávky.
-Invariant „platit lze jen confirmed objednávku“ tedy vynucuje typový systém,
-ne naděje, že někdo zavolá správnou službu. Aplikační handler pak má jen
+podle knihy proto patří `markPaid()`; tento výpis ukazuje jen alternativu, kde platba
+vzniká uvnitř objednávky. Invariant „platit lze jen potvrzenou objednávku“ tak vynucuje
+agregát sám, ne naděje, že někdo zavolá správnou službu. Aplikační handler pak má jen
 koordinační roli. Pojmy command a handler vysvětluje
 [sekce o aplikačních službách](#application-services), podrobně kapitola [CQRS](/cqrs):
 
@@ -1367,11 +1370,14 @@ final class RecordPaymentHandler
 :::
 :::
 
-Handler zapisuje dva agregáty v jedné transakci. Je to odchylka od pravidla
-[jeden agregát na transakci](/navrh-agregatu#transactional-consistency). Držíme ji
-vědomě: přechod `Order` do stavu `Paid` a vznik odpovídajícího `Payment` tvoří
-jediný invariant a rozpad na dvě transakce by připustil zaplacenou objednávku
-bez platby. Alternativou je eventual consistency: `Order` publikuje
+Handler zapisuje dva agregáty v jedné transakci. Je to odchylka od vodítka
+[jeden agregát na transakci](/navrh-agregatu#transactional-consistency) a žádná
+z Vernonových [výjimek](/navrh-agregatu#breaking-the-rule) ji nekryje. Rozpad na dvě
+transakce by sice připustil zaplacenou objednávku bez platby, jenže invariant sdílený
+dvěma agregáty je podle Khononova signál, že hranice mezi `Order` a `Payment` stojí
+jinde. Ukázka odchylku drží kvůli jednoduchosti; kanonický model proto platbu nechává
+v kontextu `Payment` a objednávce posílá jen `markPaid()`. Alternativou uvnitř
+jednoho kontextu je eventual consistency: `Order` publikuje
 `PaymentRecorded` a `Payment` vzniká až v reakci na událost. Cena je okno, kdy
 platba ještě neexistuje, a nutnost kompenzace při selhání.
 
@@ -1382,8 +1388,10 @@ Doménová služba je správná volba ve třech přesně vymezených případech
 
 - **Operace nad 2+ agregáty.** Klasický `MoneyTransferService::transfer($from, $to, $amount)`.
   Pravidlo „součet zůstatků je konstantní“ se týká dvou účtů a nepatří jednomu
-  ani druhému. (Pozor: ukládá se pořád v jedné transakci na jeden agregát,
-  viz [agregát = transakční hranice](/navrh-agregatu#transactional-consistency).)
+  ani druhému. Služba mění oba účty. Uložit je jednou transakcí je vědomé porušení
+  vodítka [jeden agregát na transakci](/navrh-agregatu#transactional-consistency);
+  bez [výjimky](/navrh-agregatu#breaking-the-rule) převod rozloží sága (viz
+  [Doplňující taktické vzory](/mene-zname-vzory#ds-priklad)).
 - **Bezstavový výpočet s externí znalostí.** Daňová sazba podle jurisdikce a typu
   zboží, převod měn podle aktuálního kurzu. Logika je čistě doménová, ale
   vstupy přicházejí zvenčí.
@@ -1398,7 +1406,7 @@ specifikace ([Specification Pattern](#specification-pattern)).
 ## 10.10 Specification Pattern {#specification-pattern}
 
 Specification Pattern (Eric Evans, *DDD*, kap. 9) zapouzdřuje doménové pravidlo
-do samostatného objektu s jedinou metodou `isSatisfiedBy()`. Pravidlo „objednávka
+do samostatného objektu s metodou `isSatisfiedBy()`. Pravidlo „objednávka
 je způsobilá k expedici“ pak existuje na jednom místě. Táž specifikace slouží
 validaci v agregátu, filtrování kolekcí i výběru v repozitáři. Malá pravidla se
 skládají kombinátory `and()`, `or()` a `not()` do složitějších, bez kopírování
@@ -1410,7 +1418,7 @@ na Doctrine najdete v kapitole
 
 ## 10.11 Implementace doménových událostí {#domain-events}
 
-Doménová událost je fakt minulého času: registrace proběhla, platba byla zaznamenána. Kód ji v Symfony 8 modeluje jako neměnnou PHP třídu, kterou agregát publikuje při změně stavu:
+Doménová událost je fakt minulého času: registrace proběhla, platba byla zaznamenána. Kód ji v Symfony 8 modeluje jako neměnnou PHP třídu, kterou agregát zaznamená při změně stavu:
 
 :::callout{type="pattern"}
 ### Příklad: Implementace doménové události v Symfony 8 {#domain-event-example-heading}
@@ -1444,6 +1452,10 @@ final readonly class UserRegistered
 :::
 
 `UserRegistered` nese minimum potřebné pro obnovu kontextu: ID uživatele, e-mail a čas registrace.
+Na rozdíl od událostí objednávky, které nesou hodnotové objekty (viz
+[Návrh agregátu](/navrh-agregatu#references-by-id)), jsou to primitivy. Událost odebírá
+i kontext Identity ([Autorizace v DDD](/autorizace-v-ddd)), a proto má tvar
+integrační události.
 Listenery i externí konzumenti z těchto tří hodnot poskládají reakci, aniž by sahali zpět do `UserRepository`.
 Konstruktor odpovídá volání `record(new UserRegistered(...))` ve factory
 `User::register()` v sekci [Implementace entit](#entities).
@@ -1475,8 +1487,8 @@ Symfony nabízí dva mechanismy pro „něco se stalo“:
   zajišťuje v produkci [Outbox Pattern](/outbox-pattern).
 
 **Anti-vzor:** používat Messenger jako náhradu za EventDispatcher uvnitř téhož
-kontextu, protože „je to flexibilnější“. Cena: každá zpráva projde JSON serializací,
-ztráta typů, ztráta transakční koheze, nutnost správy transportů. O mechanismu rozhoduje hranice,
+kontextu, protože „je to flexibilnější“. Cena u asynchronního transportu: serializace
+každé zprávy, ztráta typů a transakční soudržnosti, správa transportů navíc. O mechanismu rozhoduje hranice,
 kterou událost překračuje, ne hypotetická budoucí potřeba.
 :::
 
@@ -1511,11 +1523,10 @@ má jiné odpovědnosti a jiný typ chyb:
 - **Doménové výjimky** – porušení doménových pravidel a invariantů.
   Vyhazuje je doménový model (entity, agregáty, value objects).
   Příklady: `InvalidOrderStateTransitionException`,
-  `InsufficientFundsException`, `InvalidEmailException`.
+  `InsufficientFundsException`, `DuplicateEmailException`.
 - **Aplikační výjimky** – chyby na úrovni use case.
   Vyhazují je command/query handlery.
-  Příklady: `UserNotFoundException`,
-  `DuplicateEmailException`.
+  Příklad: `UserNotFoundException`.
 - **Infrastrukturní výjimky** – technické chyby (databáze, síť, souborový systém).
   Vznikají v infrastrukturní vrstvě a zachytává je aplikační vrstva.
   Příklady: `ConnectionException`, `TimeoutException`.
@@ -1627,7 +1638,7 @@ final class InvalidVerificationTokenException extends \DomainException
 
 Kanonický `User` z této kapitoly aktivaci nemá. Obě výjimky použije až rozšířený
 aktivační model s `VerificationToken` v kapitolách
-[Migrace z CRUD](/migrace-z-crud) a [Anti-vzory](/anti-vzory).
+[Migrace z CRUD na DDD](/migrace-z-crud) a [Anti-vzory](/anti-vzory).
 :::
 
 :::callout{type="warn"}
@@ -1651,7 +1662,7 @@ doménovou metodu, uloží výsledek.
 ze Symfony Messenger) a ten najde příslušný handler podle typu zprávy. Mezi
 dispatch a handler se navíc vkládají middleware: `validation` spustí Symfony
 Validator nad commandem, `doctrine_transaction` obalí handler databázovou
-transakcí (podrobně v kapitole [CQRS](/cqrs)).
+transakcí.
 
 Průvodce používá bus už zde, protože je to idiomatická Symfony cesta: kontroler
 nezná handler, jen popis záměru. Stejný command lze později zpracovat asynchronně
@@ -1738,10 +1749,10 @@ final readonly class RegisterUserHandler
 
         try {
             $this->userRepository->save($user);
-            // Výjimečně explicitní flush. Middleware doctrine_transaction
-            // flushuje až po návratu handleru – porušení unique constraintu
-            // by tak vybublalo mimo tento try/catch. Překlad na doménovou
-            // výjimku ale musí proběhnout zde, proto flush voláme ručně.
+            // Explicitní flush kvůli unique constraintu: middleware
+            // doctrine_transaction flushuje až po návratu handleru a porušení
+            // constraintu by vybublalo mimo tento try/catch. Commit dál
+            // řídí middleware.
             $this->em->flush();
         } catch (UniqueConstraintViolationException $e) {
             // Spoléháme na DB unique constraint na sloupci `email`. Aplikační check
@@ -1750,7 +1761,7 @@ final readonly class RegisterUserHandler
             throw DuplicateEmailException::with($email, $e);
         }
 
-        // Bez tohohle kroku zůstane UserRegistered ležet v agregátu a nikdo
+        // Bez tohoto kroku zůstane UserRegistered ležet v agregátu a nikdo
         // se o registraci nedozví – ani posluchač, který zakládá přihlašovací
         // záznam. Uživatel se pak nemůže přihlásit a nic přitom nespadne.
         foreach ($user->releaseEvents() as $event) {
@@ -1764,22 +1775,20 @@ final readonly class RegisterUserHandler
 :::callout{type="warn"}
 ### Race condition v naivní variantě s `findByEmail()` {#register-race-heading}
 
-V dřívějších verzích tohoto průvodce handler zjišťoval unikátnost přes
-`findByEmail()` před `save()`. To je **TOCTOU race**: dvě paralelní
-registrace se stejným e-mailem obě projdou checkem (databáze ještě neviděla zápis
+Naivní handler zjišťuje unikátnost přes `findByEmail()` před `save()`.
+To je **TOCTOU race**: dvě paralelní registrace se stejným e-mailem obě projdou kontrolou (databáze ještě neviděla zápis
 té druhé) a obě se úspěšně uloží. Výsledek: dva uživatelé se stejným e-mailem.
 
 Bezpečné řešení má dvě vrstvy:
 
 - **DB unique constraint** na sloupci `email`. Druhý INSERT
-  vyhodí `UniqueConstraintViolationException`. Toto je jediná
-  garance napříč souběžnými requesty.
+  vyhodí `UniqueConstraintViolationException`. Jako jediná vrstva
+  garantuje unikátnost i při souběžných requestech.
 - **Překlad na doménovou výjimku** v command handleru (nebo lépe v repozitáři),
   aby aplikační vrstva nemusela znát infrastrukturní typy.
 
-Explicitní `flush()` v handleru je záměrná odchylka od pravidla „flush vlastní
-middleware“ (viz [dvojí transakce](#double-transaction-heading)). Databázový
-constraint se vyhodnotí až při flushi. Má-li se infrastrukturní výjimka přeložit
+Explicitní `flush()` v handleru má konkrétní důvod: databázový constraint se
+vyhodnotí až při flushi (viz [dvojí transakce](#double-transaction-heading)). Má-li se infrastrukturní výjimka přeložit
 na doménovou ještě v handleru, musí flush proběhnout uvnitř jeho `try` bloku.
 Middleware pak při commitu už jen potvrdí zapsané SQL.
 
@@ -1883,7 +1892,7 @@ final readonly class GetUserProfileHandler
 `RegisterUserHandler` a `GetUserProfileHandler` jsou aplikační služby (command a query handlery).
 Koordinují use case a delegují doménovou logiku na entitu nebo doménovou službu.
 
-Čtení tady vede přes repozitář agregátu, tedy přes write model. Pro čtyři pole to stačí
+Čtení zde vede přes repozitář agregátu, tedy přes write model. Pro čtyři pole to stačí
 a zbytečnou vrstvu to nepřidává. Jakmile profil začne zobrazovat počet objednávek nebo
 úroveň členství, přestane to vycházet: data leží v jiných kontextech a agregát je nemá
 odkud vzít. Tou hranicí se zabývá [kapitola o CQRS](/cqrs#query-handler-example-heading),
@@ -1928,7 +1937,7 @@ první variantu.
 
 ## 10.14 Implementace kontrolerů {#controllers}
 
-Kontroler je adapter mezi HTTP a aplikační vrstvou. Smí: validovat formát vstupu,
+Kontroler je adaptér mezi HTTP a aplikační vrstvou. Smí: validovat formát vstupu,
 transformovat ho na command/query, dispatchovat, přeložit doménovou výjimku
 na HTTP odpověď. Nesmí: nést doménová pravidla, volat repozitáře přímo,
 manipulovat s agregáty.
@@ -2020,12 +2029,14 @@ na command (DTO), nikdy na doménovou entitu. Form komponenta totiž nastavuje
 vlastnosti napřímo a obchází factory metody i invarianty agregátu. Rozepsaný
 formulář by držel `User` v nekonzistentním stavu. Tok je stejný jako u JSON
 API: Form naplní `RegisterUser`, kontroler ho dispatchne, handler teprve
-vytvoří agregát. U readonly commandu s konstruktorem naráží `data_class`
-na promované `readonly` vlastnosti: PropertyAccess do nich zapsat neumí a formulář
-skončí na `NoSuchPropertyException`. Formulář proto vrací pole a command z něj skládá
+vytvoří agregát. U readonly commandu s povinnými parametry konstruktoru
+`data_class` nefunguje. Bez předaných dat se Form pokusí zavolat `new RegisterUser()`
+bez argumentů a skončí na `ArgumentCountError`. S předvyplněnou instancí zase
+PropertyAccess do promovaných `readonly` vlastností nezapíše a vyhodí
+`NoSuchPropertyException`. Formulář proto vrací pole a command z něj skládá
 kontroler.
 
-Má to jeden důsledek, přes který se dá lehce přenést: **bez `data_class` formulář constrainty
+Má to jeden důsledek, který se často přehlédne: **bez `data_class` formulář constrainty
 commandu nepřebírá.** Validace běží až na sběrnici, tedy po sestavení commandu. Prázdné
 pole, které `TextType` mapuje na `null`, tak shodí konstruktor dřív, než se k validaci
 dojde. V prohlížeči to zamaskuje HTML5 `required`, ale klient bez klientské validace
@@ -2052,13 +2063,13 @@ final class DoctrineUserRepository implements UserRepository
 }
 :::
 
-DI Container automaticky zaregistruje `DoctrineUserRepository` jako alias na
-rozhraní `UserRepository`. `services.yaml` zůstane čistý, závislosti zůstanou
+DI Container automaticky zaregistruje rozhraní `UserRepository` jako alias
+na `DoctrineUserRepository`. `services.yaml` zůstane čistý, závislosti zůstanou
 v jednom souboru s implementací. Pro většinu projektů je to preferovaná cesta.
 :::
 
 Kontroler je tenký, takže těžiště testů leží pod ním. Agregáty se testují jako
-čistý PHP bez kernelu. Aplikační handlery, které se opírají o repozitář,
+čisté PHP bez kernelu. Aplikační handlery, které se opírají o repozitář,
 pokrývá kernel test s testovací databází. Jen reálná DB ověří unique
 constraint a transakční chování, in-memory mock je negarantuje. Konkrétní
 testy po vrstvách rozebírá kapitola [Testování DDD](/testovani-ddd).
@@ -2120,14 +2131,15 @@ services:
 :::callout{type="warn"}
 ### Pozor: alias `@...` vs. nová služba `class: ...` {#alias-vs-class-heading}
 
-Drobný rozdíl v syntaxi `services.yaml`, dramatický rozdíl v chování:
+Malý rozdíl v syntaxi `services.yaml`, velký rozdíl v chování:
 
 - `App\…\UserRepository: '@App\…\DoctrineUserRepository'` – **alias**.
   Kontejner použije existující službu pod druhým jménem. Jedna instance, dvě jména.
 - `App\…\UserRepository: { class: App\…\DoctrineUserRepository }` – **nová služba**
-  pod klíčem rozhraní. Vznikne *druhá* instance `DoctrineUserRepository`: dva
-  EntityManagery, dvě sady listenerů, dva separátní stavy. Při autowiringu
-  může vznikat zmatek, kterou instanci kontejner injektuje do závislých služeb.
+  pod klíčem rozhraní. Vznikne *druhá* instance `DoctrineUserRepository`. Obě dostanou
+  týž EntityManager, ale stav, který si repozitář drží, existuje dvakrát, a dekorátor
+  nebo tag nastavený na jednu instanci se druhé netýká. Při autowiringu pak není
+  na první pohled jasné, kterou instanci kontejner do závislých služeb injektuje.
 
 Idiomatičtější forma je atribut `#[AsAlias]` přímo na implementaci, viz
 [Symfony idiomy: `#[AsAlias]`](#symfony-idiomy-asalias). Konfigurace v YAML
@@ -2197,7 +2209,7 @@ services:
     # ──────────────────────────────────────────────────
     # Kontexty z kapitol o Outboxu a ságách
     #
-    # POZOR: tyhle adresáře vzniknou až v kapitolách 11, 14 a 15. Kdo čte
+    # POZOR: tyto adresáře vzniknou až v kapitolách 11, 14 a 15. Kdo čte
     # popořadě, přidá si každý řádek s jeho kapitolou – jinak kompilace
     # kontejneru spadne na „The file ../src/Reporting/ does not exist“.
     # ──────────────────────────────────────────────────
@@ -2224,15 +2236,16 @@ services:
 :::
 :::
 
-Poslední čtyři řádky jsou aliasy rozhraní na implementaci. Symfony je neuhodne: v jednom
-jmenném prostoru leží rozhraní, v druhém třída, která ho plní. Chybějící alias se přitom
-neprojeví při kompilaci kontejneru, ale až za běhu na `handler not found`. Proto každý
-kontext, který má port a adaptér, potřebuje svůj řádek.
+Posledních osm řádků jsou aliasy rozhraní na implementaci. Většinu z nich by autowiring
+vytvořil sám, protože rozhraní i jeho jediná implementace leží ve stejném bloku `resource`
+(viz [kapitola o architektonických stylech](/architektonicke-styly#hexagonal-symfony-di-heading)).
+Explicitní řádek ale dokumentuje volbu výchozího adaptéru a vydrží i ve chvíli, kdy vedle
+`InMemoryPaymentGateway` přibude skutečná platební brána a automatický alias zanikne.
 
 :::callout{type="note"}
 ### Výhody odděleného autowiringu pro Bounded Contexts
 
-Každý kontext má vlastní blok konfigurace, takže hranice jsou čitelné i na úrovni infrastruktury. Exclude pravidla se dají nastavit pro každý kontext zvlášť: jeden má doménové služby, jiný ne. Při přesunu kontextu do samostatného balíčku nebo microservice stačí odebrat příslušný blok z `services.yaml`, a nechtěný import třídy z cizího kontextu se pozná přímo v konfiguraci.
+Každý kontext má vlastní blok konfigurace, takže hranice jsou čitelné i na úrovni infrastruktury. Exclude pravidla se dají nastavit pro každý kontext zvlášť: jeden má doménové služby, jiný ne. Při přesunu kontextu do samostatného balíčku nebo microservice stačí odebrat příslušný blok z `services.yaml`.
 :::
 
 :::callout{type="note"}

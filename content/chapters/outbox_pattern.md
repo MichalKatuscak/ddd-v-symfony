@@ -1,30 +1,30 @@
 ---
 route: outbox_pattern
 path: /outbox-pattern
-title: 'Outbox Pattern – spolehlivé publikování doménových eventů'
+title: 'Outbox Pattern – spolehlivé publikování událostí'
 page_title: "Outbox Pattern: spolehlivé doručení eventů | DDD Symfony"
-meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrine: spolehlivé doručení doménových eventů a konec dual-write problému. Podle Pata Hellanda."
+meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrine: spolehlivé doručení událostí a konec dual-write problému. Podle Pata Hellanda."
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-11
+modified: 2026-09-24
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
-schema_headline: "Outbox Pattern – spolehlivé publikování doménových eventů"
+schema_headline: "Outbox Pattern – spolehlivé publikování událostí"
 chapter_number: "15"
 category: Vzory
 deck: 'Typická chyba: zapíšete <code>Order</code> do databáze, vzápětí se rozbije RabbitMQ, ale order tam zůstane bez události <code>OrderPlaced</code>. Subscribeři se o objednávce nedozvědí. Outbox Pattern řeší tento <em>dual-write problem</em> na úrovni jedné DB transakce; jeho dvojče Inbox Pattern řeší deduplikaci na straně subscriberů. V Symfony 8 je to jeden Doctrine entity manager, jeden Messenger transport a zhruba 80 řádků kódu.'
-reading_time: 28
+reading_time: 46
 difficulty: 4
 github_examples: Chapter11_OutboxPattern
 ---
 
 V kapitolách o [CQRS](/cqrs), [Event Sourcingu](/event-sourcing)
-a [ságách](/sagy-a-process-managery) jsme opakovaně narazili na stejný předpoklad:
-když agregát po commitu publikuje doménovou událost, **spolehlivě dorazí
-do message brokeru** a odtud k subscriberům. Jenže ten předpoklad neplatí. Mezi
+a [ságách](/sagy-a-process-managery) se opakovaně objevil stejný předpoklad:
+když agregát po commitu publikuje událost ven z kontextu, **spolehlivě dorazí
+do message brokeru** a odtud k subscriberům. Ten předpoklad neplatí. Mezi
 zápisem do databáze a dispatchem do Messenger transportu stojí síťový skok a dva
-nezávislé systémy. Každý z nich může selhat samostatně. Důsledkem je *dual-write
+nezávislé systémy, z nichž každý může selhat samostatně. Důsledkem je *dual-write
 problem*, jeden z nejčastějších zdrojů tichých nekonzistencí v event-driven
 architekturách.
 
@@ -36,18 +36,17 @@ straně subscriberů se v katalozích jmenuje **Idempotent Consumer**, starším
 názvem *Idempotent Receiver*; tato kapitola pro něj používá pracovní jméno
 **Idempotent Inbox**, protože stojí symetricky proti outboxu.
 
-Dál projdeme schéma outbox tabulky s povinným indexem a implementaci s Doctrine
-ORM a Symfony Messenger. Pak dvě kanonické varianty relay procesu, Polling
-Publisher a Transaction Log Tailing, a nakonec provozní stránku věci: outbox lag,
-kompakci a dead-letter queue. Závěr patří migračnímu postupu pro existující projekt a srovnání
+Kapitola ukazuje schéma outbox tabulky s povinným indexem, implementaci s Doctrine
+ORM a Symfony Messenger a dvě kanonické varianty relay procesu: Polling
+Publisher a Transaction Log Tailing. Následuje provoz (outbox lag, kompakce,
+dead-letter queue), migrační postup pro existující projekt a srovnání
 s alternativami.
 
 ## 15.01 Dual-write problem {#dual-write}
 
-Nejjednodušší implementace publikování doménové události vypadá nevinně: po dokončení
-doménové operace zapíšeme stav do databáze a pak rovnou dispatchneme událost na message
-bus. Takový kód projde code review bez poznámek. Do chvíle, než se v produkci začnou
-hromadit ztracené události a stížnosti subscriberů typu „*vidím v API objednávku
+Nejjednodušší implementace publikování vypadá nevinně: po doménové operaci se stav
+zapíše do databáze a událost se rovnou dispatchne na message bus. Takový kód projde
+code review bez poznámek – dokud se v produkci nezačnou hromadit ztracené události a stížnosti subscriberů typu „*vidím v API objednávku
 12345, ale event `OrderPlaced` mi nikdy nedorazil*“.
 
 :::callout{type="warn"}
@@ -82,7 +81,8 @@ final readonly class PlaceOrderHandlerNaive
                 $command->items,
             );
 
-        // 1) Zápis do DB (commit Doctrine).
+        // 1) Zápis do DB – pod doctrine_transaction se commitne
+        //    až po návratu handleru, tedy po kroku 2.
         $this->orders->save($order);
 
         // 2) Publish do brokeru (samostatný systém, samostatná chyba).
@@ -94,29 +94,29 @@ final readonly class PlaceOrderHandlerNaive
 :::
 :::
 
-Problém je v tom, že **krok 1 a krok 2 jsou dvě nezávislé transakce ve dvou
-různých systémech**. Stačí mezi nimi jakákoliv chyba: síťový timeout, pád workeru,
-restart aplikace, výpadek brokera, OOM kill PHP procesu. Skončíme v jednom ze dvou
+**Krok 1 a krok 2 jsou dvě nezávislé transakce ve dvou různých systémech.**
+Stačí mezi nimi jakákoliv chyba: síťový timeout, pád workeru, restart aplikace,
+výpadek brokera, OOM kill PHP procesu. Systém pak skončí v jednom ze dvou
 nesymetrických nekonzistentních stavů:
 
-- **DB write succeeded, broker dispatch failed.** Order existuje v databázi,
+- **Zápis do DB prošel, dispatch do brokera ne.** Order existuje v databázi,
   ale event `OrderPlaced` se nikdy neodeslal. Subscriber kontext (Payment,
   Warehouse, Notifications) o objednávce *neví*. Zákazník ji vidí v API,
-  ale platba se nestrhne, sklad nezarezervuje, e-mail nepřijde. Tichá ztráta
-  doménové události. Nejhorší scénář, protože v logu nezůstane žádná stopa
-  „chybějící“ události.
-- **Broker dispatch succeeded, DB write failed.** Vyskytne se, pokud někdo
-  otočí pořadí (publish před commit) nebo pokud commit selže *po* dispatchi
-  kvůli optimistickému locku. Subscribery dostanou event o objednávce, která fakticky
+  ale platba se nestrhne, sklad nezarezervuje, e-mail nepřijde. Jde o nejhorší
+  scénář: doménová událost se ztratí a v logu po ní nezůstane žádná stopa.
+- **Dispatch do brokera prošel, zápis do DB ne.** Pod middlewarem
+  `doctrine_transaction` je publish před commitem výchozí pořadí, ne chyba
+  někoho, kdo kód přehází: middleware commitne až po návratu handleru. Commit
+  pak může selhat *po* dispatchi, třeba kvůli optimistickému zámku. Subscribery dostanou event o objednávce, která fakticky
   neexistuje. Read model si přidá řádek, Payment se pokusí strhnout peníze za
-  neexistující order, Notifications odešle e-mail s odkazem na 404. „Phantom event“,
-  který se ve zdrojové DB *nestal*.
+  neexistující order, Notifications odešle e-mail s odkazem na 404. Vznikne „phantom
+  event“ – událost, která se ve zdrojové DB *nestala*.
 
-Oba scénáře jsou klasická porušení atomicity napříč dvěma systémy a v event-driven
-architekturách jsou pravidlem, ne výjimkou. Pat Helland v práci
-*Life Beyond Distributed Transactions: An Apostate's Opinion* (2007) tento
-problém pojmenoval. Jakmile transakce přesahuje hranici jednoho úložiště,
-atomicita je iluze; obnovit ji musí aplikační logika. Slovo *outbox* ale v paperu
+Oba scénáře porušují atomicitu napříč dvěma systémy a v event-driven architekturách
+nejsou vzácné. Pat Helland problém pojmenoval v práci
+*Life Beyond Distributed Transactions: An Apostate's Opinion* (2007). Jakmile
+transakce přesahuje hranici jednoho úložiště, databáze atomicitu nezaručí
+a musí ji obnovit aplikační logika. Slovo *outbox* ale v paperu
 nepadne. Tabulku a relay proces popsal až Chris Richardson v knize
 *Microservices Patterns* (2018, kapitola 3) a v katalogu microservices.io.
 Jeho formulace řešení zní: odesílatel nejdřív uloží zprávu do databáze ve stejné
@@ -130,31 +130,30 @@ Distribuované databáze a některé brokery nabízejí protokol
 **Two-Phase Commit** (2PC), implementovaný typicky přes XA. V první fázi
 (*prepare*) se všichni účastníci ptají, zda mohou commitnout; ve druhé fázi
 (*commit*) koordinátor rozhodne o globálním commitu nebo rollbacku. Teoreticky
-bychom mohli RabbitMQ a PostgreSQL zapojit do jedné XA transakce a problém by zmizel.
-Praxe je ale jiná:
+by šlo RabbitMQ a PostgreSQL zapojit do jedné XA transakce a problém by zmizel.
+Praxe je jiná:
 
 - **Běžné brokery XA nepodporují.** RabbitMQ distribuované XA transakce
-  neimplementuje. Kafka má od verze 0.11 vlastní transakce. Platí ale jen uvnitř
-  Kafky, jako XA resource manager pro cizí koordinátor nevystupuje. Redis Streams
-  o něčem takovém neuvažují. U cloudových služeb (AWS SNS/SQS, Google Pub/Sub)
-  je XA definitivně mimo hru. Závazek na XA-only infrastrukturu vážně omezuje
+  neimplementuje. Kafka má od verze 0.11 vlastní transakce, ty ale platí jen uvnitř
+  Kafky; jako XA resource manager pro cizí koordinátor nevystupuje. Redis Streams
+  nic takového nenabízejí. U cloudových služeb (AWS SNS/SQS, Google Pub/Sub)
+  XA nepřipadá v úvahu. Závazek na XA-only infrastrukturu vážně omezuje
   volbu technologií.
-- **XA je drahé.** Účastníci drží zámky po celou dobu obou fází,
-  propustnost klesá řádově. Helland v citovaném paperu odmítá 2PC především kvůli
+- **XA je drahé.** Účastníci drží zámky po celou dobu obou fází a propustnost
+  výrazně klesá. Helland v citovaném paperu odmítá 2PC především kvůli
   dostupnosti: protokol blokuje, jakmile je některý uzel nedostupný, a jeho
   křehkost vytváří nepřijatelný tlak na dostupnost celku.
 - **Single point of failure.** Koordinátor 2PC je kritické místo;
   jeho selhání mezi fázemi prepare a commit zanechá účastníky v *in-doubt*
-  stavu, kdy ani nelze rollbacknout, ani commitnout. Pomůže jen manuální zásah –
-  ve tři hodiny ráno.
+  stavu, kdy nejde rollbacknout ani commitnout. Pomůže jen manuální zásah.
 - **Těsné provázání porušuje autonomii Bounded Contexts.** XA vyžaduje,
-  aby všichni účastníci sdíleli koordinátora. To přímo odporuje principu
-  samostatně nasaditelných kontextů, který je jádrem
+  aby všichni účastníci sdíleli koordinátora. To odporuje samostatné
+  nasaditelnosti kontextů, se kterou počítá
   [DDD](/zakladni-koncepty#bounded-contexts)
-  i [mikroslužeb](/ddd-a-microservices).
+  i [architektura mikroslužeb](/ddd-a-microservices).
 
-Outbox Pattern obchází tato omezení tím, že **nepotřebuje globálního koordinátora ani
-XA transport**: vystačí si s jednou ACID transakcí v DB, kterou už máte
+Outbox Pattern tato omezení obchází: **nepotřebuje globálního koordinátora ani
+XA transport**. Vystačí si s jednou ACID transakcí v DB, kterou aplikace už má
 pro persistenci agregátu.
 :::
 
@@ -166,22 +165,22 @@ kapitola 3 – Transactional messaging; Microservices.io –
 
 ## 15.02 Transactional Outbox – princip {#princip}
 
-Místo dispatchu do brokera **zapíšeme událost do tabulky `outbox`** ve stejné databázi,
-kde žije doménový stav. Zápis proběhne *uvnitř stejné DB transakce* jako úprava agregátu.
-Buď se tedy zapíše obojí (order i jeho event), nebo se nezapíše nic (rollback
-celé transakce). Atomicitu tím získáváme zpátky: oba zápisy leží v jediném ACID
-kontextu jedné databáze, ne ve dvou různých systémech.
+Místo dispatchu do brokera se **událost zapíše do tabulky `outbox`** ve stejné databázi,
+kde žije doménový stav, a to *uvnitř stejné DB transakce* jako úprava agregátu.
+Buď se zapíše obojí (order i jeho event), nebo nic (rollback celé transakce).
+Atomicita je zpátky: oba zápisy leží v jediné ACID transakci jedné databáze,
+ne ve dvou různých systémech.
 
 Samostatný proces (**relay worker**, někdy nazývaný *publisher*
 nebo *dispatcher*) tabulku asynchronně polluje. Vybírá řádky se stavem
-`pending` a publikuje je do skutečného message brokeru. Po úspěšném publishi
-řádek označí jako `sent`. Tok má čtyři jasně oddělené fáze:
+`pending`, publikuje je do skutečného message brokeru a po úspěšném publishi
+je označí jako `sent`. Tok má čtyři fáze:
 
 :::diagram{fig="15.2-A" title="Transactional Outbox – čtyři fáze publikování" src="images/diagrams/14_outbox/outbox_flow.svg"}
 :::
 
 1. **Fáze 1 – doménová transakce.** Application handler v jedné Doctrine
-   transakci uloží agregát i odpovídající outbox řádky. Buď oboje, nebo nic.
+   transakci uloží agregát i odpovídající outbox řádky.
 2. **Fáze 2 – polling outboxu.** Relay worker periodicky (např. každých
    100 ms) selectuje pending řádky z outboxu, seřazené podle `occurred_at`.
    Výsledkem je best-effort FIFO, ne garantované pořadí. Proč, rozebírá
@@ -199,28 +198,28 @@ nebo *dispatcher*) tabulku asynchronně polluje. Vybírá řádky se stavem
 ### Garance Outbox Pattern: at-least-once delivery {#at-least-once-heading}
 
 Outbox samotný garantuje **at-least-once delivery**: každá doménová
-událost se k subscriberům dostane *alespoň jednou*, ale může se stát, že
-i víckrát. Konkrétní scénář duplikace: relay úspěšně publikuje event do brokera
-(broker poslal ACK, event je trvale uložen). Relay ale spadne *před* tím,
+událost se k subscriberům dostane *alespoň jednou*, případně i víckrát.
+Konkrétní scénář duplikace: relay úspěšně publikuje event do brokera
+(broker poslal ACK, event je trvale uložen), ale spadne dřív,
 než stihne zapsat `UPDATE outbox SET status='sent'`. Po restartu vidí
 řádek pořád jako `pending` a publikuje ho znovu. Subscriber tak dostane
 stejný event dvakrát.
 
-Toto je *záměrná* volba: přijímáme možnost duplikace výměnou za to, že žádný
-event neztratíme. **Exactly-once delivery v distribuovaných systémech
+Je to *záměrná* volba: možná duplikace je cena za to, že se žádný
+event neztratí. **Exactly-once delivery v distribuovaných systémech
 obecně neexistuje**: příjemce a odesílatel se nad ztrátovým kanálem nikdy
 neshodnou na tom, že zpráva dorazila právě jednou.
-V praxi lze dosáhnout *exactly-once efektu* na straně subscribera.
-O ten se postará [Idempotent Inbox](#inbox).
+Dosažitelný je *exactly-once efekt* na straně subscribera,
+o který se stará [Idempotent Inbox](#inbox).
 :::
 
 ## 15.03 Schéma `outbox` tabulky a Doctrine mapping {#schema}
 
-Outbox tabulka má deset sloupců; každý řeší konkrétní provozní problém, který se
+Outbox tabulka má jedenáct sloupců. Každý řeší konkrétní provozní problém, který se
 bez něj projeví až pod produkční zátěží.
 
-Entita níže nese Doctrine atributy a sedí v namespace `App\Outbox\Domain`. Je to
-pragmatická zkratka. Outbox je infrastrukturní vzor; kdo drží přísné vrstvení
+Entita níže nese Doctrine atributy a sedí v namespace `App\Outbox\Domain`. Jde
+o pragmatickou zkratku. Outbox je infrastrukturní vzor; kdo drží přísné vrstvení
 podle kapitoly [Architektonické styly](/architektonicke-styly#hexagonal),
 umístí tabulkovou entitu do `Infrastructure`.
 
@@ -340,11 +339,11 @@ class OutboxMessage
 :::callout{type="warn"}
 ### Povinný index `(status, occurred_at)` {#index-status-time-heading}
 
-Detail, na který se v reálných implementacích zapomíná: bez kompozitního
+V reálných implementacích se na něj často zapomíná. Bez kompozitního
 indexu `(status, occurred_at)` dělá relay **full table scan**
 při každém polling cyklu. Při outboxu s milionem historických `sent`
-řádků a 100 `pending` se každých 100 ms scanuje milion
-řádků. DB CPU vystřelí k 100 % a polling lag exploduje.
+řádků a 100 `pending` se každých 100 ms prochází milion
+řádků. CPU databáze vyskočí k 100 % a polling lag prudce roste.
 
 Index je **kompozitní** přesně v tomto pořadí: nejdřív
 `status` (vysoká selektivita: `pending` řádky jsou typicky
@@ -356,7 +355,7 @@ bez sortu). Plánovač dotazů Postgresu pak relay query odbavuje jako
 :::callout{type="pattern"}
 ### SQL: Doctrine migrace pro outbox tabulku {#migration-heading}
 
-:::code{language="php" filename="migrations/Version20260429120000.php" highlights="35,36,37"}
+:::code{language="php" filename="migrations/Version20260429120000.php" highlights="52,53"}
 <?php
 
 declare(strict_types=1);
@@ -380,6 +379,14 @@ final class Version20260429120000 extends AbstractMigration
     // vygenerovat přes `doctrine:migrations:diff` z namapované entity.
     // Výchozí hodnoty (status, attempts) drží entita, ne DEFAULT klauzule;
     // jinak se schéma a mapování rozejdou a schema:validate hlásí rozpor.
+    //
+    // Pozor na přesnost časových sloupců: typ datetime_immutable v DBAL 4
+    // vytvoří DATETIME bez (6) a čas zapíše bez mikrosekund. Ručně psané
+    // DATETIME(6) by nepomohlo, zlomky sekundy by do něj nikdy nedorazily.
+    // Relay tedy řadí s přesností na sekundy. Subsekundové řazení potřebuje
+    // vlastní DBAL typ s formátem 'Y-m-d H:i:s.u' a sloupcem DATETIME(6).
+    // Komentář stojí zde, ne uvnitř CREATE TABLE – SQL komentáře v DDL
+    // rozhodí introspekci schématu.
     public function up(Schema $schema): void
     {
         $this->addSql(<<<'SQL'
@@ -390,13 +397,10 @@ final class Version20260429120000 extends AbstractMigration
                 aggregate_id      VARCHAR(64)   NOT NULL,
                 payload           JSON          NOT NULL,
                 status            VARCHAR(16)   NOT NULL,
-                occurred_at       DATETIME(6)   NOT NULL,
+                occurred_at       DATETIME      NOT NULL,
                 attempts          INT           NOT NULL,
-                available_at      DATETIME(6)   NOT NULL,
-                -- Pozor: migrations:diff vygeneruje z entity DATETIME bez (6).
-                -- Na MySQL by se tím z outboxu ztratilo subsekundové řazení,
-                -- takže přesnost patří do mapování: options: ['precision' => 6].
-                sent_at           DATETIME(6)   DEFAULT NULL,
+                available_at      DATETIME      NOT NULL,
+                sent_at           DATETIME      DEFAULT NULL,
                 last_error        TEXT          DEFAULT NULL,
                 PRIMARY KEY (id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -417,26 +421,25 @@ final class Version20260429120000 extends AbstractMigration
 :::
 
 Migrace cílí na MySQL/MariaDB. PostgreSQL varianta nahradí `BINARY(16)`
-typem `UUID`, `DATETIME(6)` typem `TIMESTAMPTZ` a `JSON` typem `JSONB`;
-klauzule `ENGINE` a `CHARSET` odpadají. Na SQLite jde `BINARY(16)` na `BLOB`
-a `JSON` na `CLOB`. Ruční přepisování je přesně ten druh práce, kterou
-`doctrine:migrations:diff` udělá spolehlivěji. Ukázka slouží k pochopení
-struktury, ne ke kopírování napříč platformami. Pozor také na SQL komentáře
-uvnitř `CREATE TABLE`: introspekci SQLite rozhodí a schéma se pak hlásí
-jako rozejité.
+typem `UUID`, `DATETIME` typem `TIMESTAMPTZ` a `JSON` typem `JSONB`;
+klauzule `ENGINE` a `CHARSET` odpadají. Na SQLite se `BINARY(16)` mapuje na `BLOB`
+a `JSON` na `CLOB`. Takové ruční přepisování udělá `doctrine:migrations:diff`
+spolehlivěji. Ukázka slouží k pochopení struktury, ne ke kopírování napříč
+platformami. Pozor také na SQL komentáře uvnitř `CREATE TABLE`: introspekci
+SQLite rozhodí a schéma se pak hlásí jako rozejité.
 
 Po migraci spusťte `php bin/console doctrine:migrations:migrate` a ověřte,
 že index existuje:
 `SHOW INDEXES FROM outbox WHERE Key_name = 'idx_outbox_status_time'`
 (MySQL) nebo
 `SELECT * FROM pg_indexes WHERE indexname = 'idx_outbox_status_time'`
-(PostgreSQL). V CI doporučujeme přidat regresní test, který tento index kontroluje.
-Při refaktoringu schématu se totiž často ztratí.
+(PostgreSQL). Index se při refaktoringu schématu často ztratí, proto se vyplatí
+regresní test v CI, který jeho existenci kontroluje.
 
 ## 15.04 Aggregate publikuje, handler ukládá do outboxu {#aggregate-publishes}
 
-Agregát v DDD **nezná infrastrukturu**: neví nic o Doctrine, RabbitMQ ani outbox
-tabulce. Vydává jen seznam doménových událostí, které z právě provedené operace
+Agregát **nezná infrastrukturu**: o RabbitMQ ani outbox tabulce neví nic.
+Vydává jen seznam doménových událostí, které z právě provedené operace
 plynou. Application handler ten seznam vezme a zařadí do outbox tabulky *v téže
 transakci*, ve které ukládá samotný agregát.
 
@@ -450,9 +453,9 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
-use App\Ordering\Domain\Event\OrderPlaced;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
+use App\Ordering\Domain\ValueObject\OrderStatus;
 use App\Ordering\Domain\ValueObject\ProductId;
 use App\SharedKernel\Domain\AggregateRoot;
 use App\SharedKernel\Domain\Currency;
@@ -462,7 +465,7 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Uid\Uuid;
 
 // Výřez, ne celá třída: nové jsou jen továrna placeWithItems() a getter
-// items(). Vlastnost $items a konstruktor tu stojí pro kontext, ať je
+// items(). Vlastnosti $items, $status a konstruktor tu stojí pro kontext, ať je
 // vidět, odkud se položky berou; do třídy z kapitoly o návrhu agregátu
 // se nekopírují, jinak to skončí na „Cannot redeclare Order::__construct()“.
 //
@@ -474,25 +477,31 @@ class Order extends AggregateRoot
     /** @var Collection<int, OrderItem> */
     private Collection $items;
 
+    public private(set) OrderStatus $status;
+
     // Stejný konstruktor jako ve zbytku knihy; položky přibývají metodou.
     private function __construct(
         public readonly OrderId $id,
         public readonly CustomerId $customerId,
     ) {
+        $this->status = OrderStatus::Draft;
         $this->items = new ArrayCollection();
     }
 
     /**
+     * Druhá továrna vedle kanonického Order::place(OrderId, CustomerId);
+     * seznam položek potřebuje integrační událost.
+     *
      * Přebírá primitivní řádky z commandu, ne hotové OrderItem: ty vzniknout
      * zvenčí nemohou, protože jejich konstruktor vyžaduje už existující Order.
      *
      * @param list<array{productId: string, quantity: int, unitPriceInCents: int}> $items
      */
-    // Druhá továrna vedle kanonického Order::place(OrderId, CustomerId).
-    // Seznam položek potřebuje integrační událost.
     public static function placeWithItems(CustomerId $customerId, array $items): self
     {
-        $order = new self(OrderId::generate(), $customerId);
+        // place() nahraje OrderPlaced jako první událost, stejně jako
+        // placeWithFirstItem() v kapitole o návrhu agregátu.
+        $order = self::place(OrderId::generate(), $customerId);
 
         foreach ($items as $item) {
             $order->addItem(
@@ -509,10 +518,6 @@ class Order extends AggregateRoot
         // Od tohohle okamžiku nad objednávkou běží proces. Zámek uvolní
         // až sága, ať skončí úspěchem nebo kompenzací.
         $order->lockForSaga();
-
-        // Agregát nahrává doménovou událost s hodnotovými objekty.
-        // Na integrační tvar ji přeloží až handler na hranici kontextu.
-        $order->record(new OrderPlaced($order->id, $customerId));
 
         return $order;
     }
@@ -532,10 +537,10 @@ class Order extends AggregateRoot
 :::callout{type="pattern"}
 ### PHP: Integrační událost OrderPlacedIntegrationEvent {#domain-event-heading}
 
-Není to táž třída jako doménová `OrderPlaced` ze [Základních konceptů](/zakladni-koncepty#domain-events).
+Nejde o tutéž třídu jako doménová `OrderPlaced` ze [Základních konceptů](/zakladni-koncepty#domain-events).
 Ta nese hodnotové objekty a zůstává uvnitř kontextu. Do outboxu jde **integrační** událost:
 samé primitivy, aby přežila serializaci, plus `eventId` pro deduplikaci na straně příjemce.
-Sdílet pro obojí jednu třídu nejde. Doménový tvar se bez převodních typů serializovat
+Jedna třída pro obojí nestačí. Doménový tvar se bez převodních typů serializovat
 nedá a integrační tvar by do domény zatáhl `array` místo `OrderItem`.
 
 :::code{language="php" filename="src/Ordering/Application/IntegrationEvent/OrderPlacedIntegrationEvent.php"}
@@ -663,8 +668,8 @@ final readonly class PlaceOrderHandler
             // objekty, které by se serializovaly jako {"value":"01a0…"}.
             // Na hranici kontextu se překládá na integrační tvar.
             foreach ($order->releaseEvents() as $event) {
-                // placeWithItems() nahraje víc událostí: addItem() OrderItemAdded,
-                // confirm() OrderConfirmed a nakonec OrderPlaced. Integrační
+                // placeWithItems() nahraje víc událostí: place() OrderPlaced,
+                // addItem() OrderItemAdded a confirm() OrderConfirmed. Integrační
                 // tvar má jen OrderPlaced – nese celou objednávku včetně
                 // položek, takže odběratelům v jiných kontextech stačí sama.
                 // Dílčí události zůstávají uvnitř kontextu Ordering; neznámá
@@ -713,15 +718,14 @@ final readonly class PlaceOrderHandler
 :::
 :::
 
-Pozornost si zaslouží volání `$this->em->wrapInTransaction(...)`. Tato metoda
-Doctrine EntityManageru otevře transakci, vykoná callback, na konci flushne a commitne;
-pokud kdekoliv uvnitř callbacku letí výjimka, transakci automaticky rollbackne. Stejně
-funguje i Symfony Messenger middleware `doctrine_transaction`, který zabalí
+`$this->em->wrapInTransaction(...)` otevře transakci, vykoná callback, na konci
+flushne a commitne. Když uvnitř callbacku vyletí výjimka, transakci rollbackne. Stejně
+funguje Messenger middleware `doctrine_transaction`, který zabalí
 celý handler do jedné transakce. Kanonický `messenger.yaml` z [kapitoly o CQRS](/cqrs#messenger-config-heading)
 ho na `command.bus` má, takže tam `wrapInTransaction` v handleru přebývá. Zůstane
-z něj vnořený savepoint a nepřehledná odpověď na otázku, kde se vlastně commituje.
-Ukázka ho drží proto, že samotný vzor musí být čitelný i bez znalosti konfigurace
-sběrnic; ve svém projektu si vyberte jedno místo.
+z něj vnořený savepoint a nejasno, kde se vlastně commituje.
+Ukázka ho drží, aby byl vzor čitelný i bez znalosti konfigurace
+sběrnic; ve vlastním projektu si vyberte jedno místo.
 
 :::callout{type="pattern"}
 ### PHP: DomainEventSerializer – neutrální převod na JSON {#serializer-heading}
@@ -835,7 +839,7 @@ final readonly class DoctrineOutboxRepository implements OutboxRepository
 
     public function markFailed(Uuid $id, string $error): void
     {
-        // Tady flush naopak patří: relay běží mimo doménovou transakci
+        // Zde flush naopak patří: relay běží mimo doménovou transakci
         // a výsledek pokusu musí být vidět, i když další zpráva spadne.
         $this->em->find(OutboxMessage::class, $id)?->markFailed($error);
         $this->em->flush();
@@ -845,12 +849,12 @@ final readonly class DoctrineOutboxRepository implements OutboxRepository
 
 ## 15.05 Relay process – dvě varianty {#relay}
 
-Outbox tabulka sama o sobě nic nepublikuje. Potřebuje relay proces, který v určité
+Outbox tabulka sama nic nepublikuje. Potřebuje relay proces, který v určité
 kadenci vybírá pending řádky a posílá je do brokera. Katalog microservices.io pro to
 zná dva pojmenované vzory. **Polling Publisher** čte outbox tabulku dotazem
 a jeho jediná, zato podstatná přednost zní: funguje nad libovolnou SQL databází.
 **Transaction Log Tailing** místo dotazu čte transakční log databáze, tedy Postgres WAL
-nebo MySQL binlog. První se realizuje jako Symfony Console command, druhý jako
+nebo MySQL binlog. První vzor se realizuje jako Symfony Console command, druhý jako
 Debezium konektor nad Kafkou.
 
 ### Varianta A: Polling Publisher (Symfony Console command) {#relay-polling-heading}
@@ -858,8 +862,8 @@ Debezium konektor nad Kafkou.
 Polling worker je obyčejný Symfony Console command, který ve vnitřní smyčce volá
 `fetchPending()`, publikuje řádky a označí je jako `sent`.
 Spouští se ze `supervisord`, `systemd` nebo Kubernetes
-Deploymentu jako trvale běžící proces. Smyčka má časový limit. Po jeho
-doběhnutí se proces čistě ukončí a process manager ho nastartuje znovu.
+Deploymentu jako trvale běžící proces. Smyčka má časový limit; po jeho
+vypršení se proces čistě ukončí a process manager ho nastartuje znovu.
 Stejný vzor používá `messenger:consume --time-limit`; periodický restart
 drží pod kontrolou paměť dlouho běžícího PHP procesu.
 
@@ -930,14 +934,13 @@ final class OutboxDispatchCommand extends Command
                 try {
                     $message = $this->factory->reconstitute($row);
 
-                    // event_id pro Inbox dedup cestuje v payloadu události
-                    // (OrderPlaced::$eventId) – žádný stamp není potřeba.
+                    // eventId pro deduplikaci v Inboxu cestuje v payloadu
+                    // (OrderPlacedIntegrationEvent::$eventId) – stamp není potřeba.
                     $this->bus->dispatch(
                         $message,
-                        // Jméno transportu musí odpovídat messenger.yaml.
-                        // Jméno musí existovat v messenger.yaml; neplatné skončí
-                        // hláškou „sender is not in the senders locator“
-                        // a řádek se označí failed až po vyčerpání pokusů.
+                        // Jméno transportu musí existovat v messenger.yaml;
+                        // neplatné skončí hláškou „sender is not in the senders
+                        // locator“ a řádek se označí failed až po vyčerpání pokusů.
                         [new TransportNamesStamp(['async_events'])],
                     );
 
@@ -962,9 +965,9 @@ final class OutboxDispatchCommand extends Command
 :::
 :::
 
-Zpětný převod obstará `OutboxMessageFactory`. Není to čistě mechanický opak
+Zpětný převod obstará `OutboxMessageFactory`. Nejde o čistě mechanický opak
 serializeru: denormalizace potřebuje znát cílovou třídu, a proto se opírá o whitelist.
-Ten je zároveň bezpečnostní opatření. Bez něj by o tom, jakou třídu aplikace vytvoří,
+Ten slouží i jako bezpečnostní opatření. Bez něj by o tom, jakou třídu aplikace vytvoří,
 rozhodoval `message_type` z databáze:
 
 :::code{language="php" filename="src/Outbox/Application/OutboxMessageFactory.php"}
@@ -982,7 +985,7 @@ final readonly class OutboxMessageFactory
 {
     /**
      * Whitelist typů, které smí relay vytvořit. Nový integrační event
-     * znamená nový řádek tady – jinak skončí v dead-letter, ne v aplikaci.
+     * znamená nový řádek zde – jinak skončí v dead-letter, ne v aplikaci.
      *
      * @var array<string, class-string>
      */
@@ -1012,8 +1015,8 @@ final readonly class OutboxMessageFactory
 Integrační událost se denormalizuje bez potíží právě proto, že nese samé primitivy.
 Doménová událost s hodnotovými objekty by tu skončila hláškou
 *„Cannot create an instance of `OrderId` from serialized data because its constructor
-requires the following parameters to be present: `$value`“*. To je další důvod, proč se
-přes hranici posílá integrační tvar.
+requires the following parameters to be present: `$value`“*. I proto se přes hranici
+posílá integrační tvar.
 
 :::callout{type="warn"}
 ### Po Doctrine výjimce je EntityManager zavřený {#closed-em-heading}
@@ -1022,10 +1025,10 @@ Výpis výše má jednu past, kterou odhalí až produkce. `catch (\Throwable $e
 volá `markFailed()` nad týmž EntityManagerem. Pokud výjimku vyhodila Doctrine,
 je EM po rollbacku zavřený a `markFailed()` skončí na
 `EntityManagerClosedException`. Worker spadne v prvním cyklu, ve kterém
-selže databáze – přitom kód vypadá, že chyby ošetřuje.
+selže databáze, přestože kód vypadá, že chyby ošetřuje.
 
-Dokumentace ORM k tomu říká jasně: další unit of work po výjimce patří novému
-EntityManageru. Znamená to v `catch` bloku nejdřív zavolat
+Dokumentace ORM je v tom jednoznačná: další unit of work po výjimce patří novému
+EntityManageru. V `catch` bloku je proto potřeba nejdřív zavolat
 `$this->registry->resetManager()` a teprve pak zapsat stav řádku, nebo si
 pro stavové updaty držet oddělené DBAL spojení mimo ORM.
 :::
@@ -1039,7 +1042,7 @@ pro stavové updaty držet oddělené DBAL spojení mimo ORM.
 command=php /var/www/app/bin/console app:outbox:dispatch --time-limit=3600
 autostart=true
 autorestart=true
-startsecs=2                 ; proces běží hodinu, start je tedy vždy "úspěšný"
+startsecs=2                 ; proces běží hodinu, start je tedy vždy „úspěšný“
 stopwaitsecs=10
 stdout_logfile=/var/log/outbox-dispatch.log
 stderr_logfile=/var/log/outbox-dispatch.err
@@ -1060,15 +1063,15 @@ Polling worker spouštějte vždy jako **singleton** (`numprocs=1`
 v supervisoru, `replicas: 1` v Kubernetes Deploymentu, případně leader
 election přes Redis lock). Dva paralelní workery, kteří selectují stejnou outbox tabulku,
 způsobí **double publish**. Každý event se odešle dvakrát ve stejnou chvíli,
-zátěž brokera roste lineárně s počtem replik a Inbox musí vybalancovat víc duplicit.
+zátěž brokera roste lineárně s počtem replik a Inbox musí odfiltrovat víc duplicit.
 
 Jakmile jeden worker přestane stačit, sáhněte po
 `SELECT ... FOR UPDATE SKIP LOCKED` v Postgresu nebo MySQL 8. Každý
-worker si pak zarezervuje vlastní batch řádků. Jeden PHP proces zvládne řádově jednotky tisíc zpráv za sekundu.
+worker si pak zarezervuje vlastní batch řádků. Jeden PHP proces zvládne řádově stovky až nízké tisíce zpráv za sekundu.
 Na každou dělá deserializaci, publish s čekáním na ACK a UPDATE řádku,
 takže výsledek určuje latence brokera a databáze, ne PHP.
-Konkrétní číslo změřte na vlastní konfiguraci, žádná univerzální hodnota
-neexistuje.
+Univerzální hodnota neexistuje; konkrétní číslo je potřeba změřit na vlastní
+konfiguraci.
 :::
 
 ### Varianta B: CDC / Debezium {#relay-cdc-heading}
@@ -1079,7 +1082,7 @@ a streamuje každý `INSERT` do outbox tabulky přímo do Kafky. Standardním n�
 je [Debezium](https://debezium.io), plugin pro Kafka Connect, který
 funguje jako logický replikační odběratel databáze.
 
-Tok je následující: aplikace zapíše řádek do `outbox`, Debezium ten `INSERT` uvidí
+Aplikace zapíše řádek do `outbox`, Debezium ten `INSERT` uvidí
 v transakčním logu, vytvoří Kafka record a pošle ho do odpovídajícího topicu.
 Řádek se pak už nemění, tabulka funguje jako append-only log.
 
@@ -1088,20 +1091,20 @@ v transakčním logu, vytvoří Kafka record a pošle ho do odpovídajícího to
 | Latence | 50–500 ms (polling interval) | jednotky až desítky ms (push z WAL) |
 | Operační složitost | 1× console command + supervisor | Kafka + Kafka Connect + Debezium konektor + monitoring 4 procesů |
 | Volba brokera | Libovolný (RabbitMQ, SQS, Redis, Doctrine async) | Pouze Kafka (resp. Pulsar, Kinesis přes adaptér) |
-| Scale-out | jednotky tisíc zpráv/s na worker, lineárně s replikami přes SKIP LOCKED | dáno Kafkou, o dva řády výš |
+| Scale-out | stovky až nízké tisíce zpráv/s na worker, lineárně s replikami přes SKIP LOCKED | dáno Kafkou, o dva řády výš |
 | Garance pořadí | Best-effort podle `occurred_at` | Per-partition podle `aggregate_id` |
 | Provozní riziko | Zaseknutý worker = rostoucí lag | Zaseknutý konektor drží replikační slot a WAL se hromadí na disku primární databáze |
 | Doporučeno pro | Běžný Symfony projekt | Multi-tenant SaaS, finanční systémy, IoT |
 
-V této knize budeme dál pracovat s variantou A. Pro typický Symfony projekt
-vyváží spolehlivost a operační režii v poměru, který nepřidává Kafka stack
-jen kvůli outboxu. Debezium se vyplatí teprve tehdy, když máte už *pět produkčních
-Kafka konzumentů* a outbox lag začíná být úzkým hrdlem.
+Kniha dál pracuje s variantou A. Typickému Symfony projektu dá dostatečnou
+spolehlivost bez Kafka stacku, který by jinak přibyl jen kvůli outboxu.
+Debezium se vyplatí teprve tehdy, když už v produkci běží zhruba pět Kafka
+konzumentů a outbox lag začíná být úzkým hrdlem.
 
 Konfiguračně jde o Kafka Connect konektor (REST API, nebo deklarativně přes
 Strimzi operator). Jádrem je transformace **Outbox Event Router**
 (`io.debezium.transforms.outbox.EventRouter`). Ta má vlastní představu
-o schématu tabulky a stojí za to ji znát dřív, než konektor nasadíte:
+o schématu tabulky, kterou je dobré znát dřív, než se konektor nasadí:
 
 - Routuje podle sloupce `aggregatetype`, ne podle typu události. Výchozí topic
   je `outbox.event.<hodnota aggregatetype>`, pro hodnotu `Order` tedy
@@ -1114,16 +1117,16 @@ o schématu tabulky a stojí za to ji znát dřív, než konektor nasadíte:
   nefiguruje.
 
 Tvrzení „na aplikační straně se nic nemění“ tedy neplatí. Schéma z [15.03](#schema)
-má sloupce `aggregate_type` a `aggregate_id` s podtržítkem a navíc stavový model,
-takže přechod na variantu B znamená buď přejmenovat sloupce podle výchozího
+má sloupce `aggregate_type` a `aggregate_id` s podtržítkem a navíc stavový model.
+Přechod na variantu B proto znamená buď přejmenovat sloupce podle výchozího
 očekávání SMT, nebo přemapovat volby `route.by.field` a `table.field.event.*`.
-Rozhodnout se musíte i u stavu: buď `status` ponecháte kvůli auditní stopě
-a smíříte se s tím, že ho konektor ignoruje, nebo přejdete na insert-and-delete
+Rozhodnutí čeká i stavový sloupec: buď `status` zůstane kvůli auditní stopě
+a konektor ho bude ignorovat, nebo tabulka přejde na insert-and-delete
 model, který nepotřebuje kompakci.
 
-Pro Postgres se k tomu přidá logická replikace. Výchozí `plugin.name` konektoru
+Pro Postgres k tomu přibude logická replikace. Výchozí `plugin.name` konektoru
 je `decoderbufs`, který vyžaduje serverové rozšíření; `pgoutput` je v Postgresu
-od verze 10 nativní, a proto v praxi častější volba. Vyžaduje `wal_level = logical`
+od verze 10 nativní, a proto v praxi častější. Logická replikace vyžaduje `wal_level = logical`
 a pro uživatele konektoru privilegium `CREATE` kvůli vytvoření publikace.
 
 *Citace: Debezium dokumentace –
@@ -1132,15 +1135,16 @@ a pro uživatele konektoru privilegium `CREATE` kvůli vytvoření publikace.
 
 ### Doctrine transport jako outbox bez vlastní tabulky {#doctrine-transport-outbox-heading}
 
-Symfony Messenger nabízí třetí cestu, která nevyžaduje vlastní outbox tabulku
-ani relay command. Transport `doctrine://default` ukládá zprávy do tabulky
+Symfony Messenger nabízí třetí cestu bez vlastní outbox tabulky
+i bez relay commandu. Transport `doctrine://default` ukládá zprávy do tabulky
 `messenger_messages` ve **stejné databázi**, kde žije doménový stav. Atomicitu
 zajišťuje middleware `doctrine_transaction` na **command busu**: transakce,
 kterou middleware otevře kolem command handleru, obalí uložení agregátu
 i dispatch eventu na doctrine transport. Podmínkou je, že transport používá
 totéž DB spojení jako doménový stav, tedy `default` entity manager. Dual-write
 problém tím mizí: buď se commitne order i zpráva, nebo nic. Worker
-`messenger:consume async_events` pak zprávu vyzvedne a zpracuje, případně přepošle dál.
+`messenger:consume async_events` pak zprávu vyzvedne a zpracuje. Do externího brokera
+ji sám nepřepošle; na to je potřeba vlastní handler nebo relay z předchozích sekcí.
 
 :::callout{type="pattern"}
 ### YAML: Routing eventu na Doctrine transport {#doctrine-transport-routing-heading}
@@ -1158,9 +1162,17 @@ framework:
                 dsn: 'doctrine://default'    # totéž spojení jako doménový stav (default EM)
 
         routing:
-            # Relay posílá integrační tvar, ne doménovou událost.
+            # Handler dispatchne integrační tvar, ne doménovou událost.
             App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent: async_events
 :::
+:::
+
+V této variantě `PlaceOrderHandler` integrační událost do outboxu neukládá. Rovnou ji
+dispatchne a routing ji pošle na doctrine transport:
+
+:::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandler.php (výřez – varianta s doctrine transportem)"}
+// Místo $this->outbox->store(OutboxMessage::fromIntegrationEvent(...)):
+$this->eventBus->dispatch($integrationEvent);
 :::
 
 Symfony dokumentace tuhle konfiguraci nikde nenazývá outboxem; slovo v ní nepadne.
@@ -1172,9 +1184,9 @@ transakci neotevírá. Zápis zprávy i flush agregátu proto commitnou společn
 :::callout{type="warn"}
 ### Dvě konfigurace, které atomicitu tiše ruší {#doctrine-transport-traps-heading}
 
-**`DispatchAfterCurrentBusStamp`.** Docblock `DispatchAfterCurrentBusMiddleware`
-říká přímo, že registrovat ho před `doctrine_transaction` znamená, že
-sub-dispatchnuté zprávy s tímto stampem se odbaví až po commitu Doctrine transakce.
+**`DispatchAfterCurrentBusStamp`.** Podle docblocku `DispatchAfterCurrentBusMiddleware`
+platí: je-li middleware registrovaný před `doctrine_transaction`, odbaví se
+sub-dispatchnuté zprávy s tímto stampem až po commitu Doctrine transakce.
 Dokumentace přitom `dispatch_after_current_bus` doporučuje registrovat právě
 před `doctrine_transaction`. Kdo tuhle radu zkombinuje s doctrine transportem
 v roli outboxu, vrátí si dual-write: zpráva odchází mimo transakci, která
@@ -1190,8 +1202,8 @@ Daň za pohodlí je trojí. Formát uložené zprávy je svázaný s Messengerem
 serializuje envelope i se stampy, takže ho mimo Symfony nikdo rozumně nepřečte.
 Auditovatelnost a retence jsou horší než u vlastní outbox tabulky: zpracované
 řádky worker maže, žádný stav `sent`, žádné `last_error`, žádná historie pro
-rozbor incidentu. A nad schématem tabulky nemáte kontrolu. Definuje ho
-Messenger, ne vaše migrace.
+rozbor incidentu. A schéma tabulky určuje Messenger; migrace ho jen
+přebírá.
 
 Pro menší systémy je to přesto nejjednodušší správná volba: dual-write je
 vyřešený, kód se omezí na konfiguraci a jeden worker. Vlastní outbox tabulka
@@ -1204,28 +1216,29 @@ do brokera mimo Messenger.
 u Polling Publisheru uvádí drawback „tricky to publish events in order“ a v této
 implementaci se sejdou hned tři důvody. Hodnota `occurred_at` vzniká v PHP procesu,
 takže napříč instancemi podléhá odchylce hodin. Při shodné hodnotě není pořadí
-definované vůbec. A relay publikuje řádek po řádku, takže selhání uprostřed batche
-pustí pozdější událost před dřívější.
+definované vůbec. Se sekundovou přesností sloupce (viz komentář
+v [migraci](#migration-heading)) přitom shody nejsou výjimkou. A relay publikuje
+řádek po řádku, takže selhání uprostřed batche pustí pozdější událost před dřívější.
 
 Spolehlivé pořadí lze držet jen per agregát a jen tehdy, když ho nese klíč zprávy.
 Proto je ve schématu `aggregate_id`. V Kafce z něj plyne partition, uvnitř které
-je pořadí garantované. Napříč agregáty žádné globální pořadí nečekejte a nestavte
-na něm doménovou logiku.
+je pořadí garantované. Globální pořadí napříč agregáty neexistuje a doménová
+logika na něm stavět nesmí.
 
 Filtru `status = 'pending'` se naopak netýká *gap problém*, který popisuje kapitola
 [Event Sourcing](/event-sourcing#auto-increment-gap-heading). Ten trápí relay,
 který si drží checkpoint na auto-increment ID: transakce s nižším ID může commitnout
 později a relay ji za posunutým checkpointem už nepřečte. Outbox tabulka se stavovým
 sloupcem checkpoint nemá. Řádek je viditelný teprve po commitu a zůstane `pending`,
-dokud ho relay nepublikuje. Opožděný commit se prostě objeví v některém dalším cyklu.
+dokud ho relay nepublikuje. Opožděný commit se objeví v některém dalším cyklu.
 
 ## 15.06 Idempotent Inbox – strana subscribera {#inbox}
 
 Outbox dává at-least-once delivery, takže subscriber **musí** počítat s tím,
-že stejný event dostane víckrát. Pokud je vedlejší efekt handleru ne-idempotentní (typicky
+že stejný event dostane víckrát. Když je vedlejší efekt handleru neidempotentní (typicky
 `UPDATE counter SET value = value + 1`), duplicita se okamžitě projeví jako
 chybný stav read modelu. Zákazník vidí 200 Kč na účtu místo 100 Kč, počet
-objednávek je dvojnásobný, e-mail dorazí 2×.
+objednávek je dvojnásobný, e-mail dorazí dvakrát.
 
 Řešení má v katalozích dvě jména. microservices.io vede vzor jako **Idempotent
 Consumer** a doporučuje tabulku zpracovaných zpráv s kompozitním klíčem
@@ -1234,12 +1247,12 @@ Integration Patterns* (Hohpe & Woolf, 2003): příjemce navržený tak, aby tut�
 zprávu snesl vícekrát. Dál v kapitole používáme pracovní jméno **Idempotent Inbox**,
 protože stojí symetricky proti outboxu.
 
-Realizace je doplněk k outboxu: tabulka `inbox` v databázi subscribera
+Realizace je zrcadlem outboxu: tabulka `inbox` v databázi subscribera
 s kompozitním UNIQUE constraintem na dvojici `(event_id, consumer)`. Před
 zpracováním eventu handler zkontroluje, zda je daná dvojice už v inboxu. Pokud ano,
-ackne brokerovi a skončí. Pokud ne, zpracuje doménovou logiku a v *téže transakci*
-vloží nový řádek do inboxu.
-UNIQUE constraint je pojistka proti race condition.
+ackne brokerovi a skončí. Pokud ne, provede svou logiku a v *téže transakci*
+vloží nový řádek do inboxu. UNIQUE constraint slouží jako pojistka proti
+race condition.
 
 :::diagram{fig="15.6-A" title="Idempotent Inbox – deduplikace na straně subscribera" src="images/diagrams/14_outbox/inbox_idempotency.svg"}
 :::
@@ -1306,8 +1319,9 @@ interface InboxRepository
 }
 :::
 
-Implementace je záměrně na DBAL, ne na ORM. Inbox není doménová entita a jeho jediný
-úkol je atomický zápis dvojice `(eventId, consumer)` s unikátním indexem:
+Entita `InboxMessage` slouží k mapování schématu, zápis ale jde záměrně přes DBAL,
+ne přes ORM. Jediným úkolem inboxu je zapsat dvojici `(eventId, consumer)`
+pod unikátním indexem a na to Unit of Work není potřeba:
 
 :::code{language="php" filename="src/Inbox/Infrastructure/DbalInboxRepository.php"}
 <?php
@@ -1318,7 +1332,6 @@ namespace App\Inbox\Infrastructure;
 
 use App\Inbox\Application\InboxRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class DbalInboxRepository implements InboxRepository
@@ -1337,19 +1350,19 @@ final readonly class DbalInboxRepository implements InboxRepository
 
     public function markProcessed(Uuid $eventId, string $consumer): void
     {
-        try {
-            $this->connection->insert('inbox', [
-                // InboxMessage má vlastní PK bez #[ORM\GeneratedValue],
-                // takže ho musí dodat zapisující strana.
-                'id'           => (string) Uuid::v7(),
-                'event_id'     => (string) $eventId,
-                'consumer'     => $consumer,
-                'processed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
-            ]);
-        } catch (UniqueConstraintViolationException) {
-            // Souběh: jiný worker byl rychlejší. Výsledek je stejný,
-            // jaký jsme chtěli, takže se nic neděje.
-        }
+        // UniqueConstraintViolationException se zde záměrně nechytá.
+        // Při souběhu musí shodit celou transakci subscribera i s vedlejším
+        // efektem; Messenger zprávu zopakuje a podruhé ji zastaví
+        // isProcessed(). Spolknutá výjimka by na MySQL nechala commitnout
+        // i duplicitní efekt a UNIQUE by přestal být pojistkou.
+        $this->connection->insert('inbox', [
+            // InboxMessage má vlastní PK bez #[ORM\GeneratedValue],
+            // takže ho musí dodat zapisující strana.
+            'id'           => (string) Uuid::v7(),
+            'event_id'     => (string) $eventId,
+            'consumer'     => $consumer,
+            'processed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+        ]);
     }
 }
 :::
@@ -1383,8 +1396,8 @@ interface ReadModelStore
 }
 :::
 
-Implementace portu je jedna DBAL věta. Stojí za povšimnutí, že tenhle read model
-patří `Reportingu` a je jiný než `order_dashboard` z kapitoly o CQRS: dashboard sleduje
+Implementace portu je jediný DBAL příkaz. Tenhle read model patří `Reportingu`
+a liší se od `order_dashboard` z kapitoly o CQRS: dashboard sleduje
 stav objednávky, reporting drží její položky. Oba odebírají `OrderPlacedIntegrationEvent`
 a to je v pořádku. Jedna událost běžně živí několik projekcí, každou v jejím kontextu.
 
@@ -1442,7 +1455,7 @@ CREATE TABLE reporting_orders (
 CREATE INDEX idx_reporting_customer ON reporting_orders (customer_id, placed_at);
 :::
 
-:::code{language="php" filename="src/Reporting/Application/Subscriber/OrderPlacedReadModelUpdater.php" highlights="27,28,29,30,44"}
+:::code{language="php" filename="src/Reporting/Application/Subscriber/OrderPlacedReadModelUpdater.php" highlights="28,29,30,31,48"}
 <?php
 
 declare(strict_types=1);
@@ -1471,12 +1484,12 @@ final readonly class OrderPlacedReadModelUpdater
     public function __invoke(OrderPlacedIntegrationEvent $event): void
     {
         $this->em->wrapInTransaction(function () use ($event): void {
-            // 1) Idempotency check – duplikát ackneme bez side-effectu.
+            // 1) Kontrola idempotence – duplikát se ackne bez vedlejšího efektu.
             if ($this->inbox->isProcessed($event->eventId, self::CONSUMER)) {
                 return;
             }
 
-            // 2) Aplikace doménové logiky – typicky upsert read modelu.
+            // 2) Vlastní logika subscribera – typicky upsert read modelu.
             $this->readModel->upsertOrderRow(
                 orderId: $event->orderId,
                 customerId: $event->customerId,
@@ -1484,11 +1497,12 @@ final readonly class OrderPlacedReadModelUpdater
                 placedAt: $event->occurredAt,
             );
 
-            // 3) Mark processed v téže transakci.
+            // 3) Záznam do inboxu v téže transakci.
             // UNIQUE constraint je pojistka proti race condition:
-            // pokud dva workery dostanou stejný event paralelně,
-            // druhý dostane UniqueConstraintViolationException
-            // a Messenger retry-uje – podruhé už narazí na branch isProcessed=true.
+            // když dva workery dostanou stejný event paralelně,
+            // druhý dostane UniqueConstraintViolationException, transakce
+            // se vrátí a Messenger zprávu zopakuje – podruhé už zastaví
+            // isProcessed() v kroku 1.
             $this->inbox->markProcessed($event->eventId, self::CONSUMER);
         });
     }
@@ -1496,23 +1510,27 @@ final readonly class OrderPlacedReadModelUpdater
 :::
 :::
 
-Sloupec `consumer` v inbox tabulce má svůj důvod. Jeden a tentýž event_id mohou
-zpracovávat různí subscribery (Reporting, Notifications, Search index) a každý
-si potřebuje vést *vlastní* stav „už jsem to zpracoval“. Bez sloupce
-consumer by druhý subscriber narazil na UNIQUE constraint prvního a nikdy by event
-nezpracoval. UNIQUE proto definujeme jako kompozitní `(event_id, consumer)`,
+Sloupec `consumer` má v inbox tabulce svůj důvod. Tentýž `event_id`
+zpracovává víc subscriberů (Reporting, Notifications, Search index) a každý
+si potřebuje vést *vlastní* stav „už zpracováno“. Bez sloupce
+`consumer` by druhý subscriber narazil na UNIQUE constraint prvního a event by
+nikdy nezpracoval. UNIQUE je proto kompozitní `(event_id, consumer)`,
 ne jen `event_id`.
 
 :::callout{type="note"}
 ### Exactly-once efekt vs. exactly-once delivery {#exactly-once-effect-heading}
 
-Marketingové materiály brokerů občas slibují „exactly-once delivery“. **Tato
-garance neexistuje v žádném distribuovaném systému.** Doručení přes nespolehlivý
+Marketingové materiály brokerů občas slibují „exactly-once delivery“. Taková
+garance **v distribuovaném systému neexistuje**. Doručení přes nespolehlivý
 kanál potvrzuje příjemce zprávou, která se sama může ztratit, takže odesílatel
-nikdy neví, zda posílat znovu. Co Outbox+Inbox dohromady
-poskytují, je *exactly-once efekt na straně subscribera*. Zpráva může do
-brokera dorazit a opustit ho víckrát, ale vedlejší efekt (úprava read modelu, odeslání
-e-mailu, strhnutí platby) proběhne *právě jednou*.
+nikdy neví, zda posílat znovu. Outbox s Inboxem poskytují
+*exactly-once efekt na straně subscribera*. Zpráva může do
+brokera dorazit a opustit ho víckrát, ale vedlejší efekt v téže databázi (úprava read
+modelu) proběhne *právě jednou*. Záznam v inboxu a efekt se totiž commitnou jednou
+transakcí. U externích efektů (e-mail, platba) Inbox duplicitu jen zmenší. Když proces
+spadne po odeslání a před commitem, efekt se zopakuje. Právě jednou ho zajistí až
+idempotence příjemce, typicky `Idempotency-Key` u platební brány
+(viz [Idempotence na hranici HTTP API](#idempotency-api)).
 
 Helland v paperu z roku 2007 tutéž myšlenku shrnuje stručně: svět doručuje
 at-least-once a teprve aplikace vytváří dojem exactly-once.
@@ -1533,9 +1551,9 @@ Deduplikaci na úrovni Messenger handlerů rozebírá kapitola
 
 ### Retence inbox tabulky {#inbox-retention-heading}
 
-Inbox roste stejně jako outbox, jen o něm nikdo nemluví. Každá zpracovaná zpráva
-v něm nechá řádek a nic ho nemaže. Po roce provozu je z pojistky proti duplicitám
-největší tabulka v databázi subscribera.
+Inbox roste stejně jako outbox, jen se na to snáz zapomene. Každá zpracovaná zpráva
+v něm nechá řádek a nic ho nemaže. Po roce provozu se z pojistky proti duplicitám
+může stát největší tabulka v databázi subscribera.
 
 Horní hranici retence určuje doba, po kterou může broker zprávu ještě doručit:
 maximální TTL zprávy plus nejdelší retry okno relay procesu. Řádek starší než
@@ -1546,14 +1564,14 @@ projde jako nová.
 
 ## 15.07 Provozní aspekty {#provoz}
 
-Outbox ve *vývojovém* prostředí funguje, jak má. V produkci ale narazíte na čtyři
-operační otázky: jak měřit lag, jak držet tabulku malou, co s permanentně failovanými
+Ve vývojovém prostředí outbox funguje bez údržby. Produkce přinese čtyři
+provozní otázky: jak měřit lag, jak držet tabulku malou, co s trvale selhávajícími
 řádky a jak monitorovat, že se na něco nezapomnělo.
 
 ### Outbox lag {#outbox-lag-heading}
 
-**Outbox lag** je čas, který stráví průměrný event ve stavu
-`pending`, než ho relay pošle do brokera.
+**Outbox lag** je doba, kterou event stráví ve stavu `pending`, než ho relay
+pošle do brokera. Jako alarmová metrika slouží stáří nejstaršího pending řádku.
 
 :::callout{type="pattern"}
 ### SQL: Měření outbox lagu {#lag-query-heading}
@@ -1581,19 +1599,18 @@ ORDER BY bucket;
 :::
 :::
 
-Tyto metriky exportujte do Prometheu (`outbox_pending_seconds`,
-`outbox_pending_count`) a v Grafaně postavte alert: **kritický
-práh typicky 30 sekund**. Pokud lag překročí tuto hranici, něco se zaseklo:
+Tyto metriky exportujte do Promethea (`outbox_pending_seconds`,
+`outbox_pending_count`) a v Grafaně nad nimi postavte alert. **Kritický
+práh bývá 30 sekund.** Když ho lag překročí, něco se zaseklo:
 relay worker padl, broker je nedostupný, DB má 100% CPU. Při normálním provozu
 je medián lagu pod 1 sekundou.
 
 ### Kompakce outbox tabulky {#kompakce-heading}
 
-Outbox tabulka roste lineárně s počtem doménových eventů. Bez kompakce po roce
+Outbox tabulka roste lineárně s počtem publikovaných událostí. Bez kompakce po roce
 provozu obsahuje miliony historických řádků. Ty zpomalují i indexované dotazy
-a zbytečně okupují disk. Standardní strategie: **mažeme řádky, které jsou
-ve stavu `sent` a starší než N dní**, kde N je obvykle 7 až 30
-podle compliance požadavků.
+a zbytečně zabírají disk. Standardní strategie **maže řádky ve stavu `sent`
+starší než N dní**, kde N je obvykle 7 až 30 podle compliance požadavků.
 
 :::callout{type="pattern"}
 ### PHP: Kompakce outbox tabulky – MySQL (Symfony command) {#cleanup-command-heading}
@@ -1625,17 +1642,20 @@ final class OutboxCleanupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Údržbový příkaz selže až po měsíci provozu, takže na přenositelnosti
-        // záleží víc než jinde. Postgres i SQLite tenhle tvar berou; MySQL
-        // odmítá LIMIT uvnitř IN (SELECT …), tam se batch omezí odvozenou
-        // tabulkou: IN (SELECT id FROM (SELECT id FROM outbox … LIMIT 10000) t).
+        // Údržbový příkaz běží z cronu potichu, takže chyba se neohlásí
+        // hláškou, ale až nabobtnalou tabulkou. Proto tvar, který projde
+        // na MySQL, PostgreSQL i SQLite. Odvozená tabulka t obchází dvě
+        // omezení MySQL: LIMIT přímo v IN (SELECT …) odmítá a mazanou
+        // tabulku nedovolí číst v poddotazu.
         $threshold = new \DateTimeImmutable('-30 days');
 
         $deleted = $this->connection->executeStatement(
             'DELETE FROM outbox WHERE id IN (
-                 SELECT id FROM outbox
-                  WHERE status = \'sent\' AND sent_at < :threshold
-                  LIMIT 10000
+                 SELECT id FROM (
+                     SELECT id FROM outbox
+                      WHERE status = \'sent\' AND sent_at < :threshold
+                      LIMIT 10000
+                 ) t
              )',
             ['threshold' => $threshold->format('Y-m-d H:i:s')],
         );
@@ -1648,29 +1668,30 @@ final class OutboxCleanupCommand extends Command
 :::
 :::
 
-`LIMIT 10000` je tam záměrně: chceme batch delete, ne `DELETE FROM
-outbox` jediným SQL příkazem. Velký delete drží zámky na celé tabulce a blokuje
-produkční INSERT z handlerů. Cron ho spouští každých 5 minut a 10 000 řádků
-za běh stačí na realistické workloady (cca 3 mil. eventů/den).
+`LIMIT 10000` je tam záměrně: mazání jde po dávkách, ne jediným `DELETE FROM
+outbox`. Velký delete běží jako jedna dlouhá transakce, drží zámky na obrovském
+počtu řádků a může blokovat produkční INSERTy z handlerů. Cron ho spouští každých
+5 minut a 10 000 řádků za běh stačí na realistické workloady (cca 3 mil. eventů/den).
 
 Nabízející se zápis `DELETE … WHERE sent_at < NOW() - INTERVAL 30 DAY LIMIT 10000`
-je kratší, ale je to specifikum MySQL a MariaDB. Postgres i SQLite ho odmítnou.
-A protože příkaz běží jednou za měsíc, chyba se ukáže dávno po nasazení. Hranice
+je kratší, ale funguje jen v MySQL a MariaDB. Postgres i SQLite ho odmítnou,
+a protože cron běží potichu, chyba se projeví až rostoucí tabulkou. Hranice
 se proto počítá v PHP a batch se vymezuje poddotazem nad `id`.
 
 ### Dead-letter queue pro permanentní selhání {#dlq-heading}
 
-Některé eventy se nikdy nepublikují: schema změna v subscriberu, kterou nikdo
-nevyřešil, broken payload (NaN v JSON), poison message, který shodí libovolného
-consumera. Po N attempts (typicky 5) je `OutboxMessage::markFailed()`
-přepne do stavu `failed`. Tyto řádky chceme:
+Některé eventy se nepublikují nikdy. Třída integrační události se změnila a starý
+payload už nejde denormalizovat, `message_type` chybí ve whitelistu
+`OutboxMessageFactory` nebo je payload poškozený. Po N pokusech (typicky 5)
+je `OutboxMessage::markFailed()` přepne do stavu `failed`. S takovými řádky se
+zachází takto:
 
 - **Vyčlenit z hot pathy** – relay je už nezkouší publikovat.
 - **Hlasitě upozornit** – alert `outbox_failed_total > 0`.
 - **Mít na ně CLI nástroj** – `app:outbox:retry-failed` nebo
-  ruční SQL update statusu zpět na `pending` po opravě subscribera.
-- **Nikdy nemazat automaticky** – failed řádek je důkaz nedoručeného
-  doménového eventu a chcete ho mít evidovaný i po týdnu.
+  ruční SQL update statusu zpět na `pending` po opravě příčiny.
+- **Nikdy nemazat automaticky.** Failed řádek dokládá nedoručený doménový
+  event a má zůstat evidovaný i po týdnech.
 
 :::callout{type="note"}
 ### Monitorovací checklist (Prometheus + Grafana) {#monitoring-heading}
@@ -1688,17 +1709,19 @@ přepne do stavu `failed`. Tyto řádky chceme:
 ### Vacuum a index bloat (PostgreSQL) {#vacuum-heading}
 
 Outbox má specifický I/O profil: vysoký INSERT rate, krátký životní cyklus (řádek vznikne →
-během sekund se UPDATE na `sent` → po N dnech DELETE), nikdy se nečte historie.
-Standardní autovacuum tuning PostgreSQL na takový profil **není dimenzovaný**
-a po několika dnech provozu narážíte na index bloat:
+během sekund se UPDATE na `sent` → po N dnech DELETE), historie se nikdy nečte.
+Výchozí nastavení autovacuum v PostgreSQL na takový profil **není dimenzované**
+a po několika dnech provozu se objeví index bloat:
 
-- INSERT vytváří mrtvé řádky v tabulce i v indexech (kvůli MVCC).
-- UPDATE statusu vytváří další verze řádku.
-- Standardní autovacuum threshold (`autovacuum_vacuum_scale_factor = 0.2`)
+- UPDATE statusu vytvoří novou verzi řádku a stará zůstane jako mrtvá (MVCC).
+  Mění se indexovaný sloupec `status`, takže HOT update nepřipadá v úvahu
+  a nová verze dostane i nové položky v indexech.
+- DELETE při kompakci přidá další mrtvé řádky.
+- Výchozí práh autovacuum (`autovacuum_vacuum_scale_factor = 0.2`)
   čeká, než se nasbírá 20 % mrtvých řádků. Při tisících zápisů za sekundu
-  je to řád minut.
-- Mezitím index `(status, occurred_at)` nabobtná na 10× původní velikost,
-  selecty pomalují, lag stoupá.
+  to trvá minuty.
+- Mezitím index `(status, occurred_at)` nabobtná na násobky původní velikosti,
+  selecty se zpomalují a lag stoupá.
 
 Standardní opatření: **per-table vacuum tuning**.
 
@@ -1713,14 +1736,16 @@ ALTER TABLE outbox SET (
     autovacuum_vacuum_cost_limit = 2000       -- vyšší rozpočet → rychleji dokončí
 );
 
--- Pravidelně sledujte index bloat:
+-- Pravidelně sledujte index bloat. pg_stat_user_indexes má sloupce
+-- relname a indexrelname (tablename/indexname patří pohledu pg_indexes).
 SELECT
-    schemaname, tablename, indexname,
+    schemaname,
+    relname      AS tablename,
+    indexrelname AS indexname,
     pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
     idx_scan, idx_tup_read, idx_tup_fetch
 FROM pg_stat_user_indexes
-JOIN pg_class ON pg_class.oid = indexrelid
-WHERE schemaname = 'public' AND tablename = 'outbox';
+WHERE schemaname = 'public' AND relname = 'outbox';
 
 -- REINDEX CONCURRENTLY když index naroste přes 2× očekávané velikosti:
 REINDEX INDEX CONCURRENTLY idx_outbox_status_time;
@@ -1731,14 +1756,16 @@ REINDEX INDEX CONCURRENTLY idx_outbox_status_time;
 
 Při trvale vysokém objemu, tedy v řádu tisíců událostí za sekundu, se single-table
 outbox stává provozním úzkým hrdlem. PostgreSQL declarative partitioning podle
-`occurred_at` umožňuje:
+`occurred_at` přináší:
 
-- **Rychlé mazání starých dat** přes `DROP PARTITION` místo `DELETE` –
-  nemá zámky na celé tabulce, runtime O(1) místo O(n).
-- **Cílené vacuum** – autovacuum operuje per-partition, takže staré (read-only)
-  partice se nevakuují vůbec.
-- **Index lokalita** – aktivní partition obsahuje jen poslední hodiny eventů,
-  index je malý a vlézá do RAM.
+- **Rychlé mazání starých dat** přes `DETACH PARTITION` a `DROP TABLE` místo
+  `DELETE`. Odpadá dlouhá mazací transakce a doba nezávisí na počtu řádků
+  (O(1) místo O(n)). Běžný `DETACH` potřebuje exkluzivní zámek rodičovské
+  tabulky; `DETACH PARTITION … CONCURRENTLY` (od PostgreSQL 14) vystačí se slabším.
+- **Cílené vacuum** – autovacuum pracuje per-partition, takže staré partice,
+  do kterých se už nezapisuje, ho téměř nezaměstnávají.
+- **Lokalitu indexu** – aktivní partition obsahuje jen poslední hodiny eventů,
+  index je malý a vejde se do RAM.
 
 :::callout{type="pattern"}
 ### SQL: Outbox jako daily-partitioned tabulka {#partitioning-sql-heading}
@@ -1746,15 +1773,17 @@ outbox stává provozním úzkým hrdlem. PostgreSQL declarative partitioning po
 :::code{language="sql" filename="snippet.sql"}
 -- Hlavní tabulka jako partitioned parent.
 CREATE TABLE outbox (
-    id           UUID NOT NULL,
-    message_type VARCHAR(255) NOT NULL,
-    payload      JSONB NOT NULL,
-    status       VARCHAR(20) NOT NULL DEFAULT 'pending',
-    occurred_at  TIMESTAMPTZ NOT NULL,
-    sent_at      TIMESTAMPTZ,
-    attempts     INT NOT NULL DEFAULT 0,
-    available_at TIMESTAMPTZ NOT NULL,
-    last_error   TEXT,
+    id             UUID NOT NULL,
+    message_type   VARCHAR(255) NOT NULL,
+    aggregate_type VARCHAR(255) NOT NULL,
+    aggregate_id   VARCHAR(64) NOT NULL,
+    payload        JSONB NOT NULL,
+    status         VARCHAR(16) NOT NULL,
+    occurred_at    TIMESTAMPTZ NOT NULL,
+    attempts       INT NOT NULL,
+    available_at   TIMESTAMPTZ NOT NULL,
+    sent_at        TIMESTAMPTZ,
+    last_error     TEXT,
     PRIMARY KEY (id, occurred_at)
 ) PARTITION BY RANGE (occurred_at);
 
@@ -1771,6 +1800,10 @@ CREATE INDEX outbox_2026_05_03_pending_idx
 ALTER TABLE outbox DETACH PARTITION outbox_2026_04_01;
 DROP TABLE outbox_2026_04_01;
 :::
+
+Sloupce odpovídají schématu z [15.03](#schema), včetně chybějících DEFAULT klauzulí.
+Liší se jen primární klíč: PostgreSQL u partitioned tabulky vyžaduje, aby obsahoval
+sloupec, podle kterého se dělí.
 :::
 
 Provozní automatizace: rozšíření [pg_partman](https://github.com/pgpartman/pg_partman)
@@ -1782,15 +1815,16 @@ správa je manuální.
 
 Singleton polling worker (`replicas: 1` v Kubernetes) je nejjednodušší
 konfigurace. Má ale dvě slabiny. První je **single point of failure**: worker
-spadne a lag roste, dokud ho `livenessProbe` nerestartuje. Druhá je **omezená
-propustnost**, protože jeden PHP proces odbaví řádově jednotky tisíc zpráv
-za sekundu.
+spadne nebo zamrzne a lag roste, dokud ho Kubernetes nerestartuje. Druhá je
+**omezená propustnost**, protože jeden PHP proces odbaví řádově stovky až nízké
+tisíce zpráv za sekundu.
 
-Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízí dvě cesty:
+Pro produkci s vyšším objemem nebo vyšším HA požadavkem se nabízejí dvě cesty:
 
-**Cesta 1 – leader election přes Redis/etcd.** Více workerů běží, ale jen jeden
-je „leader“ a publikuje. Když leader spadne, do 5 s ho nahradí jiný. Důsledek:
-HA bez double publish, ale pořád jen jeden worker dispatchuje (nezvyšuje propustnost).
+**Cesta 1 – leader election přes Redis/etcd.** Běží víc workerů, ale publikuje
+jen jeden, „leader“. Když leader spadne, převezme jeho roli jiný nejpozději
+po vypršení lease (v ukázce 10 s). Výsledkem je HA bez double publish,
+propustnost se ale nezvýší – dispatchuje pořád jen jeden worker.
 
 :::callout{type="pattern"}
 ### PHP: Leader election přes Redis SET NX EX {#leader-election-heading}
@@ -1829,7 +1863,7 @@ final class LeaderElection
             return true; // získán nový lease
         }
 
-        // Lease drží někdo. Jsme to my? Pokud ano, prodlouž TTL.
+        // Lease už někdo drží. Pokud tato instance, prodlouží se TTL.
         $current = $this->redis->get(self::LEASE_KEY);
         if ($current === $this->instanceId) {
             $this->redis->expire(self::LEASE_KEY, self::LEASE_TTL_SECONDS);
@@ -1842,16 +1876,15 @@ final class LeaderElection
 :::
 :::
 
-Worker volá `acquireOrRenew()` každé 3 sekundy (TTL 10 s dává buffer pro síťové
-zpoždění). Když vrátí `false`, worker stojí. Když ji při následujícím tiku vrátí `true`,
-začne dispatchovat – nový leader. Pozor: processing batch musí **doběhnout dřív,
-než TTL lease vyprší**, nebo si worker musí lease během batche průběžně obnovovat.
-Jinak lease převezme nový leader a začne dispatchovat řádky, které starý worker
-ještě publikuje → double publish.
+Worker volá `acquireOrRenew()` každé 3 sekundy (TTL 10 s dává rezervu pro síťové
+zpoždění). Dokud metoda vrací `false`, worker stojí. Jakmile při některém tiku
+vrátí `true`, stal se leaderem a začne dispatchovat. Pozor: zpracování batche musí
+**doběhnout dřív, než lease vyprší**, nebo si ho worker musí během batche průběžně
+obnovovat. Jinak lease převezme nový leader, začne dispatchovat řádky, které starý
+worker ještě publikuje, a vznikne double publish.
 
-**Cesta 2 – `SELECT … FOR UPDATE SKIP LOCKED`.** Více workerů paralelně, každý
-si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure,
-škáluje se lineárně s počtem worker replik.
+**Cesta 2 – `SELECT … FOR UPDATE SKIP LOCKED`.** Více workerů běží paralelně a každý
+si zarezervuje vlastní batch řádků. Žádný leader, žádný single point of failure.
 
 :::diagram{fig="15.7-A" title="Distributed relay – 4 workery paralelně přes SKIP LOCKED" src="images/diagrams/14_outbox/distributed_relay.svg"}
 :::
@@ -1881,76 +1914,82 @@ COMMIT;
 :::
 
 Propustnost pak roste zhruba lineárně s počtem workerů a **at-least-once** garance
-zůstává zachovaná. PostgreSQL od verze 9.5 (`SKIP LOCKED`) i MySQL 8
-to podporují. Cena: nutnost koordinace pořadí (eventy ze stejného agregátu
-se mohou publikovat out-of-order, pokud workery zpracovávají různé batche).
-Pokud subscriber pořadí potřebuje, partition outbox na `aggregate_id` a každý
-worker řízeně zpracovává jen vlastní partition.
+zůstává zachovaná. `SKIP LOCKED` podporuje PostgreSQL od verze 9.5 i MySQL 8.
+Cenou je pořadí: eventy téhož agregátu mohou vyjít mimo pořadí, když je
+zpracovávají různé workery v různých batchích. Pokud na pořadí subscriberovi záleží,
+rozdělí se outbox podle `aggregate_id` (například hash modulo počet workerů)
+a každý worker zpracovává jen svou část.
 
 ### Backpressure – co když broker nestíhá {#backpressure-heading}
 
-Když Kafka/RabbitMQ nestíhá přijímat (síťová chyba, broker disk full, partition
-leader election), relay worker dostává timeout/error na publish. Outbox řádky
-zůstávají `pending`, kupí se. **Nezasahujte do produkčních INSERTů**: jakmile
-začnete blokovat aplikační vrstvu, šíříte výpadek brokera do core domény.
+Když Kafka nebo RabbitMQ nestíhá přijímat (síťová chyba, plný disk brokera, volba
+partition leadera), relay dostává na publish timeout nebo chybu. Outbox řádky
+zůstávají `pending` a kupí se. Produkční INSERTy se přitom nebrzdí: kdo začne
+blokovat aplikační vrstvu, šíří výpadek brokera do core domény.
 
-Standardní vzor má čtyři složky. Worker po failed publish přechází na
+Výpadek brokera je jiný druh chyby než nepublikovatelná zpráva ze sekce
+o [dead-letter queue](#dlq-heading). `markFailed()` z [15.03](#schema) by při půlhodinovém
+výpadku vyčerpal pět pokusů zhruba za minutu a přesunul do `failed` i zdravé
+řádky. Chybu spojení s brokerem proto relay do `attempts` nezapočítává: přeruší
+cyklus a čeká s backoffem na úrovni celého workeru.
+
+Standardní vzor má čtyři složky. Worker po neúspěšném publishi přechází na
 exponential backoff a čeká 1 s, 2 s, 4 s, maximálně 30 s. Mezitím loguje
 `outbox_publish_errors_total`. Alert hlídá rychlost růstu pending:
-`delta(outbox_pending_count[5m]) > 10000` signalizuje, že produce převyšuje
-consume a broker nestíhá. Kapacitně musí databáze absorbovat 30 minut
-brokerového výpadku; při 1k events/s to je 1,8 mil. řádků navíc, tedy rozpočet
-na disk a vacuum. A u low-priority eventů (audit, metrics), které jsou
-tolerantní ke ztrátě, lze při sustained backpressure zvážit řízený sampling.
-Doménové eventy (`OrderPlaced`) ale zahodit nelze, ty musí dorazit.
+`delta(outbox_pending_count[5m]) > 10000` signalizuje, že zápis převyšuje
+odběr a broker nestíhá. Kapacitně musí databáze absorbovat 30 minut
+výpadku brokera; při 1k events/s to je 1,8 mil. řádků navíc, tedy rozpočet
+na disk a vacuum. A u eventů s nízkou prioritou (audit, metriky), které
+ztrátu snesou, lze při dlouhodobém backpressure zvážit řízený sampling.
+Doménové eventy (`OrderPlaced`) ale zahodit nelze.
 
 ## 15.08 Anti-vzory {#antivzory}
 
-Outbox má jednoduché schéma, a právě proto kolem něj v code review padají stále
-stejné chyby, které ruší jeho garance a vrací systém k dual-write problému. Níže
-jsou ty nejčastější.
+Outbox má jednoduché schéma, přesto se v code review opakují stále tytéž chyby.
+Ruší jeho garance a vracejí systém k dual-write problému.
 
 :::callout{type="warn"}
 ### Publish napřímo z metody agregátu {#anti-direct-publish-heading}
 
 Některé framework wrappery (Laravel events, Symfony EventDispatcher nad DB
 entitami) lákají k „*fire-and-forget*“ stylu přímo z metody agregátu.
-Jakmile event letí do brokera ještě před commitem doménové transakce, máme
+Jakmile event letí do brokera ještě před commitem doménové transakce, je
 dual-write zpět. Příčinou bývá sync transport, pořadí middleware nebo explicitní
-`$bus->dispatch()`. Smysl outboxu je v tom, že event jde
+`$bus->dispatch()`. Smyslem outboxu je, že event jde
 **do téže DB transakce** jako doménový stav.
 :::
 
 :::callout{type="warn"}
 ### Outbox bez UNIQUE constraintu na `id` / inbox bez UNIQUE na `(event_id, consumer)` {#anti-no-unique-heading}
 
-Řádek bez UNIQUE může být v race condition zapsán dvakrát (relay padá uprostřed
-INSERTu, retry přijde s týmž UUID). Bez UNIQUE constraintu DB to dovolí
-a relay pak publikuje *dvojí* verzi téže události. UNIQUE má roli technického
-invariantu, ne dekorativního detailu.
+U outboxu drží unikátnost `id` primární klíč. Duplicitu z opakovaného handleru
+ale nezachytí, protože každý pokus vygeneruje nové UUID; tu odfiltruje až `eventId`
+v inboxu. Tam musí unikátnost vynutit kompozitní UNIQUE `(event_id, consumer)`.
+Bez něj projdou dva souběžné workery kontrolou `isProcessed()` současně, oba zapíšou
+řádek a vedlejší efekt proběhne dvakrát. Kontrola v aplikaci souběh nezachytí,
+zachytí ho jen constraint v databázi. UNIQUE je technický invariant, ne dekorace.
 :::
 
 :::callout{type="warn"}
 ### Inbox check a vedlejší efekt ne v jedné transakci {#anti-inbox-no-tx-heading}
 
-Klasická chyba: `if ($inbox->isProcessed($id)) return;` se provede
-v autocommit režimu, vedlejší efekt na read modelu se provede také v autocommit režimu
-a teprve *potom* se vloží řádek do inboxu. Mezi check a insert ale může
-prolézt druhý paralelní worker, který stejný check provede jako „nový“ a zduplikuje
-update. Řešením je **celý handler obalit do `wrapInTransaction`**
-a UNIQUE constraint na inboxu jako pojistka.
+Klasická chyba: `if ($inbox->isProcessed($id)) return;` běží v autocommit
+režimu, vedlejší efekt na read modelu také a teprve *potom* se vloží řádek do inboxu.
+Mezi kontrolu a insert ale může proklouznout druhý paralelní worker, pro kterého
+je zpráva pořád „nová“, a update zduplikuje. Řešením je **celý handler obalit
+do `wrapInTransaction`** a UNIQUE constraint na inboxu nechat jako pojistku.
 :::
 
 :::callout{type="warn"}
 ### Read model bez idempotentní logiky {#anti-no-idempotent-side-effect-heading}
 
-I se správným inboxem se může stát, že vedlejší efekt uvnitř transakce nebyl dotažen
-do idempotentního stavu. Klasický příklad: `UPDATE counter SET value = value + 1`
-pro každý `OrderPlaced`. Pokud kdy v budoucnu vypneme inbox check
-(např. při reinicializaci), counter naskočí o víc. Doporučení: pokud možno preferovat
-`UPSERT` / `INSERT ... ON CONFLICT DO UPDATE` nad inkrementálními
-patterny, a counter dopočítávat z agregace v report queries, ne držet jako materializovaný
-stav.
+I se správným inboxem nemusí být vedlejší efekt uvnitř transakce sám o sobě
+idempotentní. Klasický příklad: `UPDATE counter SET value = value + 1`
+pro každý `OrderPlaced`. Když se inbox check někdy vypne
+(např. při reinicializaci), counter naskočí o víc. Bezpečnější je
+`UPSERT` / `INSERT ... ON CONFLICT DO UPDATE` místo inkrementace
+a counter dopočítávat agregací v reportovacích dotazech, ne držet jako
+materializovaný stav.
 :::
 
 :::callout{type="warn"}
@@ -1958,8 +1997,8 @@ stav.
 
 Spustit `app:outbox:dispatch` ve dvou containerech najednou bez
 `SELECT ... FOR UPDATE SKIP LOCKED` nebo bez leader electionu znamená,
-že obě repliky vidí stejné `pending` řádky a publishnou je dvojmo.
-Inbox to dokáže odchytit, ale generuje to zbytečnou zátěž na broker i na DB.
+že obě repliky vidí stejné `pending` řádky a publikují je dvakrát.
+Inbox duplicity odchytí, ale broker i databáze nesou zbytečnou zátěž.
 Pravidlo: *jeden relay singleton, nebo SKIP LOCKED.*
 :::
 
@@ -1983,85 +2022,90 @@ v procesu, sběrnici stačí.
 
 ## 15.09 Migrace existujícího projektu – krok za krokem {#migrace}
 
-Jak na Outbox, když máte 18 měsíců starý Symfony projekt, sto handlerů a publish-after-flush
-už běží někde v útrobách? Postup je inkrementální, ne big-bang refaktor.
-Outbox přidáváte handler po handleru, vedle stávajícího chování, a starý kód odstraňujete
-teprve když nový jistě funguje.
+Osmnáct měsíců starý Symfony projekt se stovkou handlerů a publishem po flushi
+se na outbox nepřevádí big-bang refaktorem. Outbox přibývá handler po handleru,
+vedle stávajícího chování, a starý kód mizí teprve tehdy, když nový prokazatelně
+funguje.
 
 ### Krok 1: Přidat outbox tabulku a entitu {#migrace-krok-1-heading}
 
 Vytvořte migraci podle sekce [15.03](#schema), spusťte
-`doctrine:migrations:migrate`, nasaďte do produkce. **Tabulka zatím
-nikdo nepoužívá** – žádné riziko regresí. Důležité: ověřte, že migrace skutečně
-vytvořila kompozitní index `idx_outbox_status_time`, ne jen single-column.
+`doctrine:migrations:migrate`, nasaďte do produkce. **Tabulku zatím
+nikdo nepoužívá**, riziko regrese je nulové. Ověřte, že migrace skutečně
+vytvořila kompozitní index `idx_outbox_status_time`, ne jen jednosloupcový.
 
 ### Krok 2: Refactor jednoho handleru {#migrace-krok-2-heading}
 
 Vyberte jeden hlavní handler – typicky `PlaceOrderHandler` nebo cokoli,
 kde dual-write nejvíc bolí. Přidejte do něj `wrapInTransaction` a místo
-`$bus->dispatch($event)` volejte `$outbox->store(OutboxMessage::fromIntegrationEvent($integrationEvent))`.
-*Nemažte* ještě staré `$bus->dispatch()` – pokud máte legacy subscribery,
-kteří poslouchají na sync transportu, ti by přestali fungovat.
+`$bus->dispatch($event)` volejte `$outbox->store(OutboxMessage::fromIntegrationEvent(...))`
+s integračním tvarem události (viz [15.04](#aggregate-publishes)).
+Staré `$bus->dispatch()` *zatím nemažte* – legacy subscribeři, kteří
+poslouchají na sync transportu, by přestali fungovat.
 
-### Krok 3: Nasadit relay command {#migrace-krok-3-heading}
-
-Implementujte `OutboxDispatchCommand` ze sekce [15.05](#relay)
-a nasaďte pod supervisorem. V tomto bodě může worker už publikovat eventy
-z outboxu – pokud máte legacy publish dál aktivní, broker dostane *obě* verze.
-Subscribery ale ještě nemají Inbox, takže duplicitu nikdo neodchytí.
-
-### Krok 4: Přidat inbox subscriberům jeden po druhém {#migrace-krok-4-heading}
+### Krok 3: Přidat inbox subscriberům jeden po druhém {#migrace-krok-3-heading}
 
 Pro každý subscriber kontextu vytvořte `inbox` tabulku, refaktorujte handler
-podle sekce [15.06](#inbox). Toto je nejdelší krok migrace (typicky týdny),
+podle sekce [15.06](#inbox). Jde o nejdelší krok migrace (typicky týdny),
 ale paralelizovatelný napříč týmy – každý kontext si Inbox přidává nezávisle.
+Inbox musí stát dřív než relay. Jinak by subscribeři mezi nasazením relaye
+a vlastního Inboxu dostávali každou událost dvakrát a dvakrát ji zpracovali.
+
+### Krok 4: Nasadit relay command {#migrace-krok-4-heading}
+
+Až mají Inbox všichni subscribeři událostí z refaktorovaného handleru,
+implementujte `OutboxDispatchCommand` ze sekce [15.05](#relay) a nasaďte ho
+pod supervisorem. Dokud je aktivní i legacy publish, dostane broker *obě* verze
+každé události a Inbox druhou kopii zahodí. Podmínkou je, že legacy dispatch
+z kroku 2 nese stejné `eventId` jako řádek v outboxu. Jinak Inbox obě kopie
+nespáruje.
 
 ### Krok 5: Vypnout legacy publish {#migrace-krok-5-heading}
 
-Až mají všichni subscribery inbox, smažete v handleru původní `$bus->dispatch()`
-a doručení doménových eventů zůstává jen na outboxu. **Jde o riskantní krok** – během
-prvních dnů sledujte outbox lag a inbox dedupy. Pokud něco selhává, revert pull requestu
-vrátí změnu během pěti minut.
+Až relay běží stabilně, smažte v handleru původní `$bus->dispatch()`;
+doručení událostí pak zůstává jen na outboxu. **Jde o riskantní krok** – během
+prvních dnů sledujte outbox lag a počet duplicit zachycených inboxem. Když něco selhává,
+revert pull requestu vrátí změnu během pěti minut.
 
 ### Krok 6: Měřit a tunit {#migrace-krok-6-heading}
 
 Po měsíci provozu projděte metriky: jaký je medián lagu, jakým tempem roste tabulka,
-kolik řádků skončilo ve `failed`, kolik duplicit Inbox odchytil. Z těchto
-čísel se dá vyladit polling interval relay procesu, batch limit, cleanup retention
-a alert prahy. Outbox není „set-and-forget“ – vyžaduje občasnou provozní údržbu.
+kolik řádků skončilo ve `failed`, kolik duplicit Inbox odchytil. Podle těchto
+čísel se ladí polling interval relay procesu, batch limit, retence cleanupu
+a prahy alertů. Outbox není „set-and-forget“ – vyžaduje občasnou provozní údržbu.
 
 :::callout{type="warn"}
 ### Před produkčním nasazením {#migrace-warning-heading}
 
 Migrace na Outbox je **data-changing** operace. Před produkcí ji
-otestujte ve *staging* prostředí, které má reálnou velikost dat (kopie
-produkčního DB), a ověřte:
+otestujte ve *staging* prostředí s reálnou velikostí dat (kopie
+produkční DB) a ověřte, že:
 
 - relay worker vydrží 24 h bez restartu;
 - v lagu nejsou „špičky“, které by signalizovaly contention na DB;
 - cleanup command netrvá déle než pollingový interval (jinak blokuje DB);
-- vypnutí legacy publishu při zachované konzistenci subscriberů
-  (proveďte na staging a porovnejte read model před a po).
+- vypnutí legacy publishu nerozbije konzistenci subscriberů
+  (porovnejte na stagingu read model před a po).
 :::
 
 ## 15.10 Shrnutí {#summary}
 
 Outbox Pattern stojí na tabulce navíc, jednom Symfony commandu a úpravě jednoho
-application handleru. Výměnou vyřadí celou třídu chyb (ztracené eventy, fantom eventy),
-které byste jinak ladili reaktivně ve tři ráno z logů. Garance, kterou tím získáte,
-je at-least-once delivery doménových událostí napříč libovolným message brokerem –
-bez závislosti na XA, bez 2PC, bez speciální cloud služby.
+application handleru. Výměnou vyřadí celou třídu chyb (ztracené eventy, phantom eventy),
+které by se jinak dohledávaly v logech až po incidentu. Výsledná garance
+je at-least-once delivery událostí přes libovolný message broker,
+bez XA/2PC a bez speciální cloudové služby.
 
 Idempotent Inbox je nutný protějšek na straně subscribera. Bez něj se duplikace
-z outboxu propíše do read modelů a side-effectů, čímž ztratíme to, co jsme outboxem
-získali. Kombinace Outbox + Inbox dohromady poskytuje *exactly-once efekt* –
-každý event se v read modelu projeví právě jednou, i když broker dodá zprávu vícekrát.
+z outboxu propíše do read modelů a vedlejších efektů a zisk z outboxu se ztratí.
+Outbox s Inboxem dávají *exactly-once efekt*: každý event se v read modelu
+projeví právě jednou, i když broker dodá zprávu vícekrát.
 
 ### Srovnání s alternativami {#alternativy-heading}
 
 Outbox není jediná odpověď na dual-write. Ostatní cesty mají užší záběr nebo vyšší cenu.
 
-| Řešení | Jak řeší dual-write | Kdy dává smysl |
+| Řešení | Jak řeší dual-write | Kdy se hodí |
 |---|---|---|
 | Transactional Outbox | Zápis události do téže DB transakce, publikuje relay | Výchozí volba všude, kde agregát žije v ACID databázi |
 | Event Sourcing | Událost *je* stav, druhý zápis neexistuje | Když se pro doménu vyplatí i zbytek modelu, ne jen kvůli doručení |
@@ -2074,25 +2118,25 @@ protože event store ji zastane, ale Inbox na straně konzumenta potřebuje poř
 
 Hlavní body pro praxi:
 
-- Outbox je **tabulka v téže DB jako doménový stav** – jinak nedává smysl.
+- Outbox je **tabulka v téže DB jako doménový stav** – jinak ztrácí smysl.
 - Doctrine entita potřebuje `#[ORM\Index(columns: ['status', 'occurred_at'])]`,
   bez něj relay dělá full table scan při každém pollingu.
-- `$em->wrapInTransaction(...)` v handleru garantuje atomicitu order +
-  outbox řádky.
+- Atomicitu orderu a outbox řádků garantuje jedna transakce: middleware
+  `doctrine_transaction`, nebo `$em->wrapInTransaction(...)` v handleru.
 - Polling Publisher pod supervisorem stačí pro téměř každý Symfony projekt;
   Transaction Log Tailing přes Debezium pouze pro Kafka-native systémy
   s vysokým objemem, a i tam za cenu jiného schématu tabulky.
 - Inbox tabulka má UNIQUE `(event_id, consumer)` – sloupec consumer je
   klíč pro multi-subscriber scénáře.
-- Monitoring outbox lagu, dispatched/failed counters a inbox duplicit je nezbytné.
+- Monitoring outbox lagu, počtu odeslaných a selhaných zpráv a inbox duplicit je nezbytný.
 - Migrace existujícího projektu je inkrementální – handler po handleru, kontext
   po kontextu, nikdy big-bang.
 
-Outbox Pattern přirozeně navazuje na vzory z předchozích kapitol. V
-[CQRS](/cqrs) řeší spolehlivost publishu eventů z command
-side do read side. V [Event Sourcingu](/event-sourcing) je
-jeho rozšíření čisté – event store funguje jako outbox, projekce čte jako relay.
-V [ságách](/sagy-a-process-managery) garantuje doručení doménových eventů
+Outbox Pattern navazuje na vzory z předchozích kapitol. V
+[CQRS](/cqrs) zajišťuje spolehlivé doručení eventů z command
+side do read side. V [Event Sourcingu](/event-sourcing) roli outboxu přebírá
+event store a relay nahrazují projekce, které ho čtou.
+V [ságách](/sagy-a-process-managery) garantuje doručení událostí
 i příkazů mezi kontexty, takže sága se nikdy „nezasekne“ kvůli ztracené zprávě.
 
 *Doporučená literatura k prohloubení:
@@ -2105,16 +2149,16 @@ kap. 11 (Stream Processing);
 
 :::faq{}
 - question: 'Outbox vs. CDC / Debezium – co kdy?'
-  answer: 'Pro běžný Symfony projekt zvolte Polling Publisher (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte multinásobnou operační složitost za marginální benefit. Detail v <a href="#relay">sekci 15.05</a>.'
+  answer: 'Pro běžný Symfony projekt zvolte Polling Publisher (varianta A). Operační režie je minimální (jeden Symfony command pod supervisorem) a latence pod 1 sekundou je dostatečná pro typické obchodní scénáře (objednávky, platby, notifikace). Debezium / CDC se vyplatí, až když máte (a) Kafkovou infrastrukturu už nasazenou, (b) latenční požadavek pod 50 ms, (c) objem nad 10 000 events/s, (d) tým, který má zkušenost s Kafka Connect. Jinak zaplatíte několikanásobnou provozní složitost za malý přínos. Detail v <a href="#relay">sekci 15.05</a>.'
 - question: 'Co když používáme NoSQL databázi (MongoDB, Cassandra, DynamoDB)?'
-  answer: 'Pokud váš agregát žije v NoSQL bez ACID transakcí napříč více dokumenty (Cassandra, raná verze MongoDB), klasický Outbox Pattern nefunguje – atomicita zápisu order + event mezi dvěma collections není garantovaná. Možnosti: (1) MongoDB 4.0+ má multi-document transakce, takže Outbox lze, (2) DynamoDB nabízí TransactWriteItems, takže Outbox jde, (3) Cassandra nemá multi-row atomicitu – používá se Change Data Capture nebo jednodokumentové event sourcing s eventy embedded v agregátu. Volba úložiště pro doménový stav rozhoduje, zda lze Outbox vůbec implementovat.'
+  answer: 'Pokud váš agregát žije v NoSQL bez ACID transakcí napříč více dokumenty (Cassandra, raná verze MongoDB), klasický Outbox Pattern nefunguje – atomicita zápisu order + event mezi dvěma collections není garantovaná. Možnosti: (1) MongoDB 4.0+ má multi-document transakce, takže Outbox lze, (2) DynamoDB nabízí TransactWriteItems, takže Outbox jde, (3) Cassandra ACID transakce nemá (logged batch zaručí jen, že se nakonec provedou všechny zápisy, bez izolace) – používá se Change Data Capture nebo event sourcing s eventy uloženými přímo v dokumentu agregátu. Volba úložiště pro doménový stav rozhoduje, zda lze Outbox vůbec implementovat.'
 - question: 'Jak velký dělat batch v relayi?'
-  answer: 'Standardně 100 řádků za polling cyklus s intervalem 100 ms. Sama kadence tedy dovolí 1 000 zpráv za sekundu na jeden worker; skutečné číslo určí latence brokera a databáze. Pokud lag stoupá nad 5 sekund a CPU brokera má rezervu, zvyšte limit na 500 nebo zkraťte interval na 50 ms. U batch nad 1 000 narazíte na DB serializaci updateů – místo jednoho velkého batche pak rozdělte na víc workerů s SELECT ... FOR UPDATE SKIP LOCKED. Hlavní pravidlo: měřte před tunováním, ne tunujte „na cit“.'
+  answer: 'Standardně 100 řádků za polling cyklus. Interval 100 ms platí jen pro prázdný outbox: dokud jsou pending řádky, relay jede bez pauzy a propustnost určí latence brokera a databáze. Pokud lag stoupá nad 5 sekund a CPU brokera má rezervu, zvyšte limit na 500. U batche nad 1 000 narazíte na DB serializaci updateů – místo jednoho velkého batche práci rozdělte na víc workerů se SELECT ... FOR UPDATE SKIP LOCKED. Hlavní pravidlo: nejdřív měřit, pak ladit, ne „na cit“.'
 - question: 'Vyplatí se Outbox v monolitu?'
-  answer: 'Ano, vyplatí – protože dual-write problem nevzniká až mezi mikroservisami, ale mezi <em>libovolnými dvěma transakčními systémy</em>. Monolitická aplikace publikující eventy do RabbitMQ/Redis Streams má přesně stejný problém jako mikroservis: DB ACID je oddělený od ACK message brokera. Pokud váš monolit už má event-driven kontexty (Symfony Messenger s async transportem, Spatie Laravel events, ...), Outbox se vyplatí stejně jako v mikroservisách. Jediný případ, kdy ho nepotřebujete, je <em>striktně synchronní</em> monolit, kde publish neexistuje a všechno teče v jedné HTTP transakci.'
+  answer: 'Ano, vyplatí – protože dual-write problem nevzniká až mezi mikroservisami, ale mezi <em>libovolnými dvěma transakčními systémy</em>. Monolitická aplikace publikující eventy do RabbitMQ/Redis Streams má přesně stejný problém jako mikroservis: transakce databáze je oddělená od potvrzení brokera. Pokud váš monolit už má event-driven kontexty (Symfony Messenger s async transportem, Spatie Laravel events, ...), Outbox se vyplatí stejně jako v mikroservisách. Jediný případ, kdy ho nepotřebujete, je <em>striktně synchronní</em> monolit, kde publish neexistuje a všechno teče v jedné HTTP transakci.'
 - question: 'Co dělat při dlouhodobém výpadku brokera?'
-  answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, počet vzroste, lag exploduje – ale aplikační handlery dál zapisují doménové eventy (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu, subscribery dohrabou stav. Co je třeba: (a) alert na lag &gt; 30 s aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém, řádky jsou
-    malé), (c) kompakce nesmí mazat <code>pending</code> řádky, mazat lze jen <code>sent</code> starší než N dní. Pokud broker chybí déle než N dní, máte dost času škálovat dispatch capacity nebo migrovat na alternativní broker.'
+  answer: 'Outbox jako celek je <strong>self-healing</strong>: když broker leží 30 minut, relay worker dostává timeout/connection refused, řádky zůstávají ve stavu pending, jejich počet i lag rostou – ale aplikační handlery dál zapisují události (jen do DB). Po obnovení brokera relay během několika minut vyšle backlog, lag se vrátí k normálu a subscribeři dorovnají stav. Potřeba je: (a) alert na lag &gt; 30 s, aby tým o výpadku věděl, (b) dostatek místa v DB na nahromaděné pending řádky (typicky není problém, řádky jsou
+    malé), (c) kompakce, která nemaže <code>pending</code> řádky, jen <code>sent</code> starší než N dní, (d) relay, který chybu spojení s brokerem nezapočítává do pokusů řádku – jinak by výpadek přesunul zdravé zprávy do <code>failed</code> (viz <a href="#backpressure-heading">Backpressure</a>).'
 - question: 'Musím použít UUID/ULID, nebo stačí AUTO_INCREMENT?'
-  answer: 'Použijte UUID v7 (případně ULID), ne AUTO_INCREMENT. Důvody: (1) UUID v7 je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) Nese časový komponent, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) Klient ho může vygenerovat předem a poslat jako event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region nastavení. Symfony Uid komponenta poskytuje pohodlné API: <code>Uuid::v7()</code> v entitě stačí.'
+  answer: 'Použijte UUID v7 (případně ULID), ne AUTO_INCREMENT. Důvody: (1) UUID v7 je globálně unikátní napříč instancemi DB – nehrozí kolize při replikaci, restore z backupu nebo migraci. (2) Nese časovou složku, takže ID koreluje s pořadím vytvoření – užitečné pro debugging a pro indexové scany. (3) Klient ho může vygenerovat předem a poslat jako event_id v Idempotency-Key headeru. (4) AUTO_INCREMENT komplikuje sharding a multi-region nastavení. Symfony Uid komponenta poskytuje pohodlné API: <code>Uuid::v7()</code> v entitě stačí.'
 :::

@@ -1,15 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}DDD Cheat Sheet – pattern decision tree, Symfony↔DDD mapping | DDD Symfony{% endblock %}
+{% block title %}DDD Cheat Sheet – rozhodovací strom a mapování Symfony ↔ DDD | DDD Symfony{% endblock %}
 
-{% block meta_description %}Jednostránková reference: kdy který DDD vzor, jak se Symfony konstrukty mapují na DDD pojmy a slovní pasti, kterým se vyhnout. Hyperlinky na všechny detailní kapitoly.{% endblock %}
+{% block meta_description %}Jednostránková reference: kdy který vzor DDD použít, jak se konstrukty Symfony mapují na pojmy DDD a které slovní pasti hrozí. S odkazy na všechny detailní kapitoly.{% endblock %}
 
-{% block meta_keywords %}DDD cheat sheet, decision tree, Symfony DDD mapping, false friends, taktické vzory, strategické vzory, reading paths, must-read DDD{% endblock %}
+{% block meta_keywords %}DDD cheat sheet, rozhodovací strom DDD, mapování Symfony DDD, false friends, taktické vzory, strategické vzory, průchody knihou, doporučená literatura DDD{% endblock %}
 
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2026-04-29{% endblock %}
-{% block article_modified_time %}2026-05-03{% endblock %}
+{% block article_modified_time %}2026-09-24{% endblock %}
 
 {% block breadcrumb_name %}Cheat Sheet{% endblock %}
 
@@ -19,7 +19,7 @@
           "@context": "https://schema.org",
           "@type": "WebPage",
           "name": "DDD Cheat Sheet",
-          "headline": "DDD Cheat Sheet – pattern decision tree, Symfony↔DDD mapping",
+          "headline": "DDD Cheat Sheet – rozhodovací strom a mapování Symfony ↔ DDD",
           "description": "{{ block('meta_description')|escape('js') }}",
           "keywords": "{{ block('meta_keywords')|escape('js') }}",
           "author": {
@@ -47,11 +47,14 @@
 {% endblock %}
 
 {% block body %}
+{# Čísla, názvy a doby čtení kapitol se berou z katalogu (src/Catalog/Chapters.php), aby se nerozešly s obsahem. #}
+{% set _ch = {} %}
+{% for c in ddd_chapters() %}{% set _ch = _ch|merge({(c.route): c}) %}{% endfor %}
 <article class="article">
     {% include '_partials/article_head.html.twig' with {
         category: 'Reference',
         title: 'DDD Cheat Sheet',
-        deck: 'Jednostránková navigace celou knihou. Když si pamatujete jen pojem, najděte ho zde – je tu hyperlink na detail. Když si nejste jisti, který vzor použít, projděte rozhodovací strom. Stránka je bez příkladů – všechno najdete v odkazovaných kapitolách.',
+        deck: 'Jednostránková navigace celou knihou. Kdo si pamatuje jen pojem, najde zde odkaz na detail. Kdo neví, který vzor použít, projde rozhodovací strom. Příklady stránka nemá, ty jsou v odkazovaných kapitolách.',
         published: block('article_published_time'),
         last_updated: block('article_modified_time'),
         author: 'M. Katuščák'
@@ -61,95 +64,95 @@
 
     <div class="art-body">
         <p>
-            Cheat sheet je doplněk k <a href="{{ path('glossary') }}">glosáři</a> a <a href="{{ path('hub_reference') }}">referenčnímu rozcestníku</a>.
-            Cílem je, abyste z jediné stránky našli odkaz na tu část knihy, kterou aktuálně potřebujete – bez nutnosti pamatovat si strukturu obsahu.
+            Cheat sheet doplňuje <a href="{{ path('glossary') }}">glosář</a> a <a href="{{ path('hub_reference') }}">referenční rozcestník</a>.
+            Z jediné stránky vede odkaz na tu část knihy, kterou právě potřebujete, a strukturu obsahu si není třeba pamatovat.
         </p>
 
         <section id="decision-tree" aria-labelledby="decision-tree-heading">
-            <h2 id="decision-tree-heading" class="h-section"><span class="h-num">cs.01</span> Rozhodovací strom – co použít, kdy?</h2>
+            <h2 id="decision-tree-heading" class="h-section"><span class="h-num">cs.01</span> Rozhodovací strom – co použít a kdy</h2>
             <p>
-                Tabulka mapuje <strong>typický symptom nebo požadavek</strong> na <strong>doporučený vzor</strong>
-                a vede vás přímo na detailní kapitolu. Není to vyčerpávající rozhodovací strom – jen 14 nejčastějších
-                situací, na které DDD odpovídá konkrétním vzorem.
+                Tabulka přiřazuje <strong>typickému symptomu nebo požadavku</strong> <strong>vzor</strong>
+                a odkazuje na kapitolu s detailem. Vyčerpávající není. Pokrývá 14 nejčastějších situací,
+                na které DDD odpovídá konkrétním vzorem.
             </p>
 
             <div class="table-responsive">
             <table class="glossary-table">
                 <thead>
                     <tr>
-                        <th>Mám problém / situaci</th>
-                        <th>Použij</th>
+                        <th>Situace</th>
+                        <th>Vzor</th>
                         <th>Detail</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Komplexní doménu, která tvoří jádro byznysu</td>
-                        <td>Plný DDD – taktický + strategický</td>
+                        <td>Složitá doména, která tvoří jádro byznysu</td>
+                        <td>Plné DDD – strategické i taktické</td>
                         <td><a href="{{ path('what_is_ddd') }}">Co je DDD</a> · <a href="{{ path('subdomains') }}">Subdomény</a></td>
                     </tr>
                     <tr>
-                        <td>2+ Bounded Contexts, které spolu komunikují</td>
+                        <td>Dva a více Bounded Contextů, které spolu komunikují</td>
                         <td>Context Map</td>
-                        <td><a href="{{ path('context_mapping') }}">Context Mapping</a></td>
+                        <td><a href="{{ path('context_mapping') }}">Bounded Context a Context Mapping</a></td>
                     </tr>
                     <tr>
-                        <td>Legacy systém, který musím konzumovat</td>
+                        <td>Legacy systém, ze kterého je třeba přebírat data</td>
                         <td>Anti-Corruption Layer (ACL)</td>
                         <td><a href="{{ path('context_mapping') }}#acl">Context Mapping – ACL</a></td>
                     </tr>
                     <tr>
-                        <td>Long-running proces s kompenzacemi</td>
-                        <td>Saga / Process Manager</td>
-                        <td><a href="{{ path('sagas') }}">Sagy a Process Manager</a></td>
+                        <td>Dlouhotrvající proces s kompenzacemi</td>
+                        <td>Sága / Process Manager</td>
+                        <td><a href="{{ path('sagas') }}">Ságy a Process Managery</a></td>
                     </tr>
                     <tr>
-                        <td>Stav je sekvence událostí</td>
+                        <td>Stav je posloupnost událostí</td>
                         <td>Event Sourcing</td>
                         <td><a href="{{ path('event_sourcing') }}">Event Sourcing</a></td>
                     </tr>
                     <tr>
                         <td>Oddělené čtení a zápis</td>
                         <td>CQRS</td>
-                        <td><a href="{{ path('cqrs') }}">CQRS v Symfony</a></td>
+                        <td><a href="{{ path('cqrs') }}">CQRS v Symfony 8</a></td>
                     </tr>
                     <tr>
-                        <td>Zápis state + publish event atomicky</td>
+                        <td>Zápis stavu a publikace události v jedné transakci</td>
                         <td>Outbox Pattern</td>
                         <td><a href="{{ path('outbox_pattern') }}">Outbox Pattern</a></td>
                     </tr>
                     <tr>
                         <td>Skládatelné doménové pravidlo</td>
-                        <td>Specification Pattern</td>
-                        <td><a href="{{ path('lesser_known_patterns') }}#specification">Specifications</a></td>
+                        <td>Specification</td>
+                        <td><a href="{{ path('lesser_known_patterns') }}#specification">Specification Pattern</a></td>
                     </tr>
                     <tr>
                         <td>Logika, která nepatří do entity</td>
-                        <td>Domain Service</td>
+                        <td>Domain Service (doménová služba)</td>
                         <td><a href="{{ path('lesser_known_patterns') }}#domain-services">Domain Services</a></td>
                     </tr>
                     <tr>
-                        <td>Komplexní vznik aggregátu</td>
+                        <td>Složitý vznik agregátu</td>
                         <td>Factory</td>
                         <td><a href="{{ path('lesser_known_patterns') }}#factories">Factories</a></td>
                     </tr>
                     <tr>
                         <td>Workshop pro objevení domény</td>
                         <td>Event Storming</td>
-                        <td><a href="{{ path('event_storming') }}">Event Storming</a></td>
+                        <td><a href="{{ path('event_storming') }}">Event Storming a Domain Storytelling</a></td>
                     </tr>
                     <tr>
-                        <td>Reorganizace týmů kolem BC</td>
+                        <td>Reorganizace týmů kolem Bounded Contextů</td>
                         <td>Team Topologies</td>
                         <td><a href="{{ path('team_topologies') }}">Conway's Law a Team Topologies</a></td>
                     </tr>
                     <tr>
-                        <td>Autorizace na úrovni use case</td>
+                        <td>Autorizace na úrovni use casu</td>
                         <td>Symfony Voter</td>
                         <td><a href="{{ path('authorization_in_ddd') }}#use-case-voter">Autorizace – Voter</a></td>
                     </tr>
                     <tr>
-                        <td>Migrace z CRUD postupně</td>
+                        <td>Postupná migrace z CRUD</td>
                         <td>Strangler Fig Pattern</td>
                         <td><a href="{{ path('migration_from_crud') }}">Migrace z CRUD na DDD</a></td>
                     </tr>
@@ -159,9 +162,9 @@
 
             {% set _decision_note %}
                 <p>
-                    Tabulka záměrně neobsahuje <em>všechny</em> situace – jen ty, na které lidé v reálných projektech
-                    nejčastěji narážejí. Pokud váš případ neodpovídá ani jednomu řádku, začněte
-                    <a href="{{ path('basic_concepts') }}">Základními koncepty DDD</a> a pokračujte podle reading paths níže.
+                    Tabulka záměrně nepokrývá všechny situace, jen ty, na které projekty narážejí nejčastěji.
+                    Pokud váš případ neodpovídá žádnému řádku, začněte
+                    <a href="{{ path('basic_concepts') }}">Základními koncepty DDD</a> a pokračujte podle průchodů knihou níže.
                 </p>
             {% endset %}
             {% include '_partials/callout.html.twig' with {
@@ -171,76 +174,76 @@
         </section>
 
         <section id="symfony-mapping" aria-labelledby="symfony-mapping-heading">
-            <h2 id="symfony-mapping-heading" class="h-section"><span class="h-num">cs.02</span> Symfony ↔ DDD mapping (rychlá tabulka)</h2>
+            <h2 id="symfony-mapping-heading" class="h-section"><span class="h-num">cs.02</span> Mapování Symfony ↔ DDD (rychlá tabulka)</h2>
             <p>
                 Krátká verze tabulky pro rychlou orientaci. <strong>Plná verze</strong> s odkazy na anti-vzory a kapitoly
-                je v <a href="{{ path('glossary') }}#symfony-ddd-mapping">glosáři, sekce „Symfony ↔ DDD mapping (rozšířená tabulka)“</a>.
+                je v <a href="{{ path('glossary') }}#symfony-ddd-mapping">glosáři, sekce „Mapování Symfony ↔ DDD (rozšířená tabulka)“</a>.
             </p>
 
             <div class="table-responsive">
             <table class="glossary-table">
                 <thead>
                     <tr>
-                        <th>Symfony konstrukt</th>
-                        <th>DDD pojem</th>
+                        <th>Konstrukt Symfony</th>
+                        <th>Pojem DDD</th>
                         <th>Poznámka</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><code>Controller</code></td>
-                        <td>Adapter (HTTP boundary)</td>
-                        <td>Nepatří tam doménová logika</td>
+                        <td>Driving adaptér (HTTP)</td>
+                        <td>Doménová logika do něj nepatří</td>
                     </tr>
                     <tr>
-                        <td><code>MessageHandler</code></td>
-                        <td>Application Service / Use Case</td>
-                        <td>Jeden command = jeden handler</td>
+                        <td><code>#[AsMessageHandler]</code> handler</td>
+                        <td>Aplikační služba (use case)</td>
+                        <td>Jeden command = jeden handler; doménovou logiku deleguje na agregát</td>
                     </tr>
                     <tr>
                         <td><code>EventSubscriber</code> (Doctrine/Kernel)</td>
-                        <td>Infrastructure</td>
-                        <td>Nikoli Domain Event Handler</td>
+                        <td>Infrastruktura</td>
+                        <td>Nejde o handler doménové události</td>
                     </tr>
                     <tr>
-                        <td>Domain Event Handler (custom)</td>
-                        <td>Domain Service nebo Application Service</td>
-                        <td>Reaguje na doménový event</td>
+                        <td>Handler doménové události</td>
+                        <td>Aplikační služba</td>
+                        <td>Reaguje na doménovou událost, rozhodnutí nechává agregátu nebo doménové službě</td>
                     </tr>
                     <tr>
                         <td><code>Entity</code> (s ORM)</td>
-                        <td>Aggregate Root nebo Entity (DDD)</td>
-                        <td>Atributy default; pro pure DDD <a href="{{ path('implementation_in_symfony') }}#persisted-object-pattern">Persisted Object</a></td>
+                        <td>Kořen agregátu nebo entita</td>
+                        <td>Výchozí je mapování atributy; oddělený persistence model popisuje <a href="{{ path('implementation_in_symfony') }}#persisted-object-pattern">Persisted Object</a></td>
                     </tr>
                     <tr>
-                        <td><code>Repository</code> (Symfony)</td>
-                        <td>Repository (DDD)</td>
-                        <td>Interface v doméně, implementace v infra</td>
+                        <td><code>Repository</code> (Doctrine)</td>
+                        <td>Repozitář</td>
+                        <td>Rozhraní v doméně, implementace v infrastruktuře</td>
                     </tr>
                     <tr>
                         <td><code>Voter</code></td>
-                        <td>Use case authorization</td>
-                        <td>Ne doménové invarianty</td>
+                        <td>Autorizace use casu</td>
+                        <td>Doménové invarianty hlídá agregát, ne Voter</td>
                     </tr>
                     <tr>
                         <td><code>Service</code> (autowire)</td>
-                        <td>Application / Domain / Infra Service</td>
-                        <td>Vždy rozlišuj typ!</td>
+                        <td>Aplikační, doménová nebo infrastrukturní služba</td>
+                        <td>Typ služby musí být z kódu poznat</td>
                     </tr>
                     <tr>
                         <td><code>Form</code></td>
-                        <td>Input mapping</td>
-                        <td>Nevolat aggregate metody přímo</td>
+                        <td>Mapování vstupu</td>
+                        <td>Plní command DTO, metody agregátu nevolá</td>
                     </tr>
                     <tr>
-                        <td>Symfony Messenger transport (sync)</td>
-                        <td>In-process command/event bus</td>
-                        <td>Monolith</td>
+                        <td>Messenger transport (sync)</td>
+                        <td>Command a event bus uvnitř procesu</td>
+                        <td>Monolit</td>
                     </tr>
                     <tr>
-                        <td>Symfony Messenger transport (async)</td>
-                        <td>Integration channel (cross-BC)</td>
-                        <td>AMQP/Kafka – pro cross-context komunikaci</td>
+                        <td>Messenger transport (async)</td>
+                        <td>Asynchronní zpracování</td>
+                        <td>Přes hranici kontextu jen integrační události přes <a href="{{ path('outbox_pattern') }}">Outbox</a> (AMQP, Kafka)</td>
                     </tr>
                 </tbody>
             </table>
@@ -250,8 +253,8 @@
         <section id="false-friends" aria-labelledby="false-friends-heading">
             <h2 id="false-friends-heading" class="h-section"><span class="h-num">cs.03</span> False friends – slovní pasti</h2>
             <p>
-                Stejné slovo má v DDD a v Symfony/PHP/SQL světě různý význam. Tabulka shrnuje 7 nejčastějších záměn.
-                <strong>Plný slovník</strong> s 9 entries a podrobným rozborem najdete v
+                Stejné slovo znamená v DDD něco jiného než v Symfony, PHP nebo SQL. Tabulka shrnuje 7 nejčastějších záměn.
+                <strong>Úplný přehled</strong> s 9 hesly a podrobnějším rozborem je v
                 <a href="{{ path('glossary') }}#false-friends">glosáři, sekce „Slovní pasti – false friends“</a>.
             </p>
 
@@ -262,7 +265,7 @@
                         <th>Pojem</th>
                         <th>V DDD</th>
                         <th>V Symfony / obecně</th>
-                        <th>Tip</th>
+                        <th>Jak je rozlišit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -274,39 +277,39 @@
                     </tr>
                     <tr>
                         <td><strong>Repository</strong></td>
-                        <td>Doménová kolekce agregátů (collection-like)</td>
-                        <td>Doctrine <code>EntityRepository</code> třída</td>
-                        <td>DDD Repository je interface, Doctrine implementace</td>
+                        <td>Doménová kolekce agregátů</td>
+                        <td>Třída Doctrine <code>EntityRepository</code></td>
+                        <td>Repozitář v DDD je rozhraní, třída Doctrine jeho implementace</td>
                     </tr>
                     <tr>
                         <td><strong>Service</strong></td>
-                        <td>Stateless objekt (Domain / Application / Infra)</td>
-                        <td>Symfony service (= cokoli v DI)</td>
-                        <td>Vždy kvalifikuj typ</td>
+                        <td>Bezstavový objekt (doménová, aplikační nebo infrastrukturní služba)</td>
+                        <td>Služba Symfony (cokoli v DI kontejneru)</td>
+                        <td>Typ služby patří do názvu nebo namespace</td>
                     </tr>
                     <tr>
                         <td><strong>Event</strong></td>
                         <td>Doménová událost (<code>OrderPlaced</code>)</td>
-                        <td>Symfony EventDispatcher event</td>
-                        <td>Symfony event ≠ Domain event</td>
+                        <td>Událost Symfony EventDispatcheru</td>
+                        <td>Událost Symfony ≠ doménová událost</td>
                     </tr>
                     <tr>
                         <td><strong>Entity</strong></td>
                         <td>Objekt s identitou v doméně</td>
-                        <td>Doctrine Entity (ORM mapped)</td>
-                        <td>DDD Entity může být uvnitř Aggregátu</td>
+                        <td>Entita Doctrine (mapovaná přes ORM)</td>
+                        <td>Entita v DDD může ležet i uvnitř agregátu</td>
                     </tr>
                     <tr>
                         <td><strong>Aggregate</strong></td>
-                        <td>Konzistentní cluster objektů</td>
-                        <td>SQL agregační funkce (<code>SUM</code>, <code>COUNT</code>)</td>
-                        <td>Pojmy se neprolínají; pro juniora to bývá matoucí</td>
+                        <td>Konzistentní shluk objektů</td>
+                        <td>Agregační funkce SQL (<code>SUM</code>, <code>COUNT</code>)</td>
+                        <td>Významy se nepřekrývají, začátečníky ale matou</td>
                     </tr>
                     <tr>
                         <td><strong>Domain</strong></td>
                         <td>Oblast podnikání</td>
-                        <td>Twig translation domain (<code>messages</code>)</td>
-                        <td>Obvykle myšleno DDD</td>
+                        <td>Translation domain v Twigu (<code>messages</code>)</td>
+                        <td>Obvykle se myslí DDD</td>
                     </tr>
                 </tbody>
             </table>
@@ -314,86 +317,89 @@
         </section>
 
         <section id="reading-paths" aria-labelledby="reading-paths-heading">
-            <h2 id="reading-paths-heading" class="h-section"><span class="h-num">cs.04</span> Reading paths – kdo si má co přečíst</h2>
+            <h2 id="reading-paths-heading" class="h-section"><span class="h-num">cs.04</span> Průchody knihou – co číst podle role</h2>
             <p>
-                Kniha má přes 25 kapitol; nikdo nemusí číst všechny. Níže jsou 4 doporučené průchody pro typické
-                role a situace. Každý průchod respektuje doporučenou závislost mezi kapitolami – od základů
-                k pokročilému.
+                Kniha má {{ _ch|length }} kapitol a nikdo nemusí číst všechny. Následují čtyři průchody pro typické
+                role a situace. Každý respektuje závislosti mezi kapitolami a vede od základů k pokročilým tématům.
+                Doba čtení vychází z odhadů v obsahu knihy.
             </p>
 
-            <h3 id="path-junior-heading">Junior PHP developer, první kontakt s DDD</h3>
+            {% set _path = ['what_is_ddd', 'basic_concepts', 'architectural_styles', 'performance_aspects'] %}
+            {% set _minutes = 0 %}{% for r in _path %}{% set _minutes = _minutes + _ch[r].time %}{% endfor %}
+            <h3 id="path-junior-heading">Junior PHP vývojář, první kontakt s DDD</h3>
             <p>
-                Pokud jste nikdy s DDD nepracovali a chcete pochopit, o co jde, dříve než začnete refaktorovat
+                Pokud jste s DDD nikdy nepracovali a chcete pochopit, o co jde, dřív než začnete refaktorovat
                 produkční kód:
             </p>
             <ol>
-                <li><a href="{{ path('what_is_ddd') }}">01 – Co je DDD</a></li>
-                <li><a href="{{ path('basic_concepts') }}">06 – Základní koncepty</a></li>
-                <li><a href="{{ path('architectural_styles') }}">09 – Architektonické styly</a></li>
-                <li><a href="{{ path('performance_aspects') }}">17 – Read modely, projekce a výkon</a></li>
+                {% for r in _path %}
+                <li><a href="{{ path(r) }}">{{ _ch[r].n }} – {{ _ch[r].t }}</a></li>
+                {% endfor %}
             </ol>
             <p>
-                <strong>Doba čtení:</strong> ~2 hodiny. <strong>Cíl:</strong> rozumět slovníku a vědět, co znamená
-                „aggregate“ / „bounded context“ v code review.
+                <strong>Doba čtení:</strong> zhruba {{ _minutes }} minut. <strong>Cíl:</strong> rozumět slovníku a vědět,
+                co v code review znamená „agregát“ nebo „Bounded Context“.
             </p>
 
+            {% set _path = ['subdomains', 'context_mapping', 'event_storming', 'team_topologies', 'architectural_styles', 'microservices_and_ddd'] %}
+            {% set _minutes = 0 %}{% for r in _path %}{% set _minutes = _minutes + _ch[r].time %}{% endfor %}
             <h3 id="path-architekt-heading">Architekt na novém projektu</h3>
             <p>
-                Stavíte greenfield projekt a chcete od začátku rozvrhnout strategický design – bounded contexts,
-                topologii týmů, integrační vzory:
+                Stavíte nový projekt na zelené louce a chcete od začátku rozvrhnout strategický design: Bounded Contexty,
+                topologii týmů a integrační vzory:
             </p>
             <ol>
-                <li><a href="{{ path('subdomains') }}">02 – Subdomény</a></li>
-                <li><a href="{{ path('context_mapping') }}">03 – Bounded Context a Context Mapping</a></li>
-                <li><a href="{{ path('event_storming') }}">04 – Event Storming + Domain Storytelling</a></li>
-                <li><a href="{{ path('team_topologies') }}">05 – Conway's Law a Team Topologies</a></li>
-                <li><a href="{{ path('architectural_styles') }}">09 – Architektonické styly: Hexagonal, Onion, Clean</a></li>
-                <li><a href="{{ path('microservices_and_ddd') }}">20 – DDD a microservices</a></li>
+                {% for r in _path %}
+                <li><a href="{{ path(r) }}">{{ _ch[r].n }} – {{ _ch[r].t }}</a></li>
+                {% endfor %}
             </ol>
             <p>
-                <strong>Doba čtení:</strong> ~4 hodiny. <strong>Cíl:</strong> mít ucelený obraz pro architekturní
-                review a roadmapu.
+                <strong>Doba čtení:</strong> zhruba {{ _minutes }} minut. <strong>Cíl:</strong> mít ucelený obraz pro review
+                architektury a roadmapu.
             </p>
 
-            <h3 id="path-migrace-heading">Migrace existujícího Symfony projektu</h3>
+            {% set _path = ['what_is_ddd', 'event_storming', 'basic_concepts', 'aggregate_design', 'migration_from_crud', 'anti_patterns'] %}
+            {% set _minutes = 0 %}{% for r in _path %}{% set _minutes = _minutes + _ch[r].time %}{% endfor %}
+            <h3 id="path-migrace-heading">Migrace existujícího projektu v Symfony</h3>
             <p>
-                Máte produkční CRUD/Symfony aplikaci a chcete ji postupně přesunout k DDD bez big-bang přepisu:
+                Máte produkční CRUD aplikaci v Symfony a chcete ji postupně převést na DDD bez přepisu naráz:
             </p>
             <ol>
-                <li><a href="{{ path('what_is_ddd') }}">01 – Co je DDD</a></li>
-                <li><a href="{{ path('event_storming') }}">04 – Event Storming</a> (objevení implicitní domény)</li>
-                <li><a href="{{ path('basic_concepts') }}">06 – Základní koncepty</a></li>
-                <li><a href="{{ path('aggregate_design') }}">07 – Návrh agregátu</a></li>
-                <li><a href="{{ path('migration_from_crud') }}">19 – Migrace z CRUD na DDD</a> (vč. <a href="{{ path('migration_from_crud') }}#refactoring-kucharka">Refactoring kuchařky</a>)</li>
-                <li><a href="{{ path('anti_patterns') }}">22 – Anti-vzory</a></li>
+                <li><a href="{{ path('what_is_ddd') }}">{{ _ch.what_is_ddd.n }} – {{ _ch.what_is_ddd.t }}</a></li>
+                <li><a href="{{ path('event_storming') }}">{{ _ch.event_storming.n }} – {{ _ch.event_storming.t }}</a> (objevení implicitní domény)</li>
+                <li><a href="{{ path('basic_concepts') }}">{{ _ch.basic_concepts.n }} – {{ _ch.basic_concepts.t }}</a></li>
+                <li><a href="{{ path('aggregate_design') }}">{{ _ch.aggregate_design.n }} – {{ _ch.aggregate_design.t }}</a></li>
+                <li><a href="{{ path('migration_from_crud') }}">{{ _ch.migration_from_crud.n }} – {{ _ch.migration_from_crud.t }}</a> (včetně <a href="{{ path('migration_from_crud') }}#refactoring-kucharka">refaktoringové kuchařky</a>)</li>
+                <li><a href="{{ path('anti_patterns') }}">{{ _ch.anti_patterns.n }} – {{ _ch.anti_patterns.t }}</a></li>
             </ol>
             <p>
-                <strong>Doba čtení:</strong> ~3 hodiny + týdny refaktoringu. <strong>Cíl:</strong> mít konkrétní
-                plán prvních 5 PRs migrace.
+                <strong>Doba čtení:</strong> zhruba {{ _minutes }} minut a pak týdny refaktoringu. <strong>Cíl:</strong> mít
+                konkrétní plán prvních pěti pull requestů migrace.
             </p>
 
-            <h3 id="path-techlead-heading">Tech lead před release</h3>
+            {% set _path = ['cqrs', 'event_sourcing', 'sagas', 'outbox_pattern', 'testing_ddd'] %}
+            {% set _minutes = 0 %}{% for r in _path %}{% set _minutes = _minutes + _ch[r].time %}{% endfor %}
+            <h3 id="path-techlead-heading">Tech lead před releasem</h3>
             <p>
-                Před produkčním release chcete mít jistotu, že stěžejní infrastrukturní vzory (CQRS, ES, Sagas, Outbox)
-                jsou správně postavené a otestované:
+                Před produkčním releasem chcete mít jistotu, že infrastrukturní vzory (CQRS, Event Sourcing, ságy,
+                Outbox) jsou správně postavené a otestované:
             </p>
             <ol>
-                <li><a href="{{ path('cqrs') }}">13 – CQRS v Symfony</a></li>
-                <li><a href="{{ path('event_sourcing') }}">14 – Event Sourcing</a></li>
-                <li><a href="{{ path('sagas') }}">15 – Sagy a Process Manager</a></li>
-                <li><a href="{{ path('outbox_pattern') }}">16 – Outbox Pattern</a></li>
-                <li><a href="{{ path('testing_ddd') }}">18 – Testování v DDD</a></li>
+                {% for r in _path %}
+                <li><a href="{{ path(r) }}">{{ _ch[r].n }} – {{ _ch[r].t }}</a></li>
+                {% endfor %}
             </ol>
             <p>
-                <strong>Doba čtení:</strong> ~3 hodiny. <strong>Cíl:</strong> mít checklist pro release review.
+                <strong>Doba čtení:</strong> zhruba {{ _minutes }} minut. <strong>Cíl:</strong> mít checklist pro review
+                před releasem.
             </p>
         </section>
 
         <section id="must-read" aria-labelledby="must-read-heading">
-            <h2 id="must-read-heading" class="h-section"><span class="h-num">cs.05</span> Externí zdroje – must-read</h2>
+            <h2 id="must-read-heading" class="h-section"><span class="h-num">cs.05</span> Externí zdroje, které stojí za přečtení</h2>
             <p>
-                Pět knih a tři přednášky, které by měl znát každý, kdo chce DDD používat seriózně.
-                <strong>Plnou bibliografii</strong> (články, repozitáře, kurzy, komunity, oficiální dokumentace)
+                Pět knih a tři přednášky pro každého, kdo chce DDD používat vážně.
+                <strong>Úplnou bibliografii</strong> (články, repozitáře, kurzy, komunity, oficiální dokumentace)
                 najdete na samostatné stránce <a href="{{ path('resources') }}">Zdroje a další četba</a>.
             </p>
 
@@ -404,7 +410,7 @@
                     <tr>
                         <th>Autor</th>
                         <th>Titul</th>
-                        <th>Proč</th>
+                        <th>Proč číst</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -416,22 +422,22 @@
                     <tr>
                         <td>Vaughn Vernon (2013)</td>
                         <td><em>Implementing Domain-Driven Design</em></td>
-                        <td>Praktický druhý díl k Evansovi – implementační vzory a CQRS.</td>
+                        <td>Praktické pokračování Evanse: implementační vzory a CQRS.</td>
                     </tr>
                     <tr>
                         <td>Vaughn Vernon (2016)</td>
                         <td><em>Domain-Driven Design Distilled</em></td>
-                        <td>Stručná destilace pro ty, kdo váhají investovat čas do plné Implementing DDD.</td>
+                        <td>Stručný výtah pro ty, kdo váhají investovat čas do celé <em>Implementing DDD</em>.</td>
                     </tr>
                     <tr>
                         <td>Vlad Khononov (2021)</td>
                         <td><em>Learning Domain-Driven Design</em></td>
-                        <td>Aktualizovaný druhý pohled po 18 letech praxe. Větší důraz na strategický design a rozhodování, kde DDD dává smysl.</td>
+                        <td>Pohled s odstupem 18 let od Evanse. Víc prostoru dostává strategický design a rozhodnutí, kde DDD dává smysl.</td>
                     </tr>
                     <tr>
                         <td>Greg Young (2010)</td>
                         <td><em>CQRS Documents</em> (PDF zdarma)</td>
-                        <td>Původní texty od autora pojmu CQRS. Hutné, definující.</td>
+                        <td>Původní texty autora, který CQRS popsal. Hutné a přesné.</td>
                     </tr>
                 </tbody>
             </table>
@@ -441,35 +447,23 @@
             <ol>
                 <li>
                     <a href="https://www.youtube.com/watch?v=dnUFEg68ESM" target="_blank" rel="noopener noreferrer">Eric Evans – Tackling Complexity in the Heart of Software</a>
-                    (keynote, ~60 min). Stručnější verze stejnojmenné knihy. Pokud nemáte čas na knihu, projděte alespoň přednášku.
+                    (keynote, ~60 min). Kratší výklad myšlenek ze stejnojmenné knihy. Pokud nemáte čas na knihu, projděte aspoň přednášku.
                 </li>
                 <li>
                     <a href="https://www.youtube.com/watch?v=JHGkaShoyNs" target="_blank" rel="noopener noreferrer">Greg Young – CQRS and Event Sourcing</a>
-                    (konference, ~75 min). Greg Young v ostře praktickém režimu – kdy má smysl rozlišovat command/query a kdy jít až k event-sourced uložišti.
+                    (konference, ~75 min). Young na praktických případech ukazuje, kdy má smysl oddělit commandy od queries a kdy jít až k úložišti založenému na událostech.
                 </li>
                 <li>
                     <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" rel="noopener noreferrer">Jimmy Bogard – Vertical Slice Architecture</a>
-                    (konference, ~45 min). Argument pro vertikální slicing místo horizontálních vrstev – podstatné pro organizaci kódu uvnitř Bounded Contextu.
+                    (konference, ~45 min). Argument pro vertikální řezy místo horizontálních vrstev. Týká se organizace kódu uvnitř Bounded Contextu.
                 </li>
             </ol>
-
-            {% set _resources_note %}
-                <p>
-                    Plný kurátorský seznam (knihy, články, videa, GitHub repozitáře, online kurzy, komunity, oficiální
-                    dokumentace) najdete na stránce <a href="{{ path('resources') }}">Zdroje a další četba</a>.
-                </p>
-            {% endset %}
-            {% include '_partials/callout.html.twig' with {
-                type: 'note',
-                body: _resources_note
-            } %}
         </section>
 
         <p>
-            Pokud potřebujete konkrétní implementační příklady, projděte
-            <a href="{{ path('practical_examples') }}">Praktické příklady</a> nebo
-            <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony</a>.
-            Pro hlubší slovník pojmů viz <a href="{{ path('glossary') }}">Glosář</a>.
+            Konkrétní implementační příklady najdete v <a href="{{ path('practical_examples') }}">Praktických příkladech</a>
+            a v kapitole <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony 8</a>.
+            Podrobnější slovník pojmů nabízí <a href="{{ path('glossary') }}">Glosář</a>.
         </p>
     </div>
 </article>
