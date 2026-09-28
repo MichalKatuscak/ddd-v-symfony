@@ -7,15 +7,15 @@ meta_description: "Vztah DDD a AI nástrojů očima Erica Evanse, Martina Fowler
 meta_keywords: "DDD AI, domain-driven design umělá inteligence, DDD LLM, Eric Evans AI, Martin Fowler AI, Kent Beck AI, DDD bounded context AI, ubiquitous language LLM"
 og_type: article
 published: "2026-03-27"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: DDD a AI
 schema_type: TechArticle
 schema_headline: "DDD a umělá inteligence – co říkají autority"
 chapter_number: "ai"
 category: Reference
 ebook: false
-deck: "Přehled názorů předních autorit softwarového inženýrství na vztah Domain-Driven Designu a umělé inteligence – Eric Evans, Martin Fowler, Kent Beck, DHH a další. Jejich pozice, argumenty a data."
-reading_time: 23
+deck: "Co o vztahu DDD a umělé inteligence říkají Eric Evans, Martin Fowler, Kent Beck, DHH a další: jejich postoje, argumenty a data."
+reading_time: 24
 difficulty: 1
 github_examples: null
 ---
@@ -25,17 +25,17 @@ přidává komplexitu v době, kdy AI generuje kód z krátkého popisu.
 
 Kapitola mapuje, co o vztahu DDD a umělé inteligence říkají přední autority softwarového
 inženýrství: Eric Evans, Martin Fowler, Kent Beck, Vaughn Vernon, Nick Tune, Alberto Brandolini
-a DHH. Jde o přehled jejich pozic, argumentů a dat, nikoli obhajobu ani kritiku
-konkrétního přístupu. Druhý směr téhož vztahu dostal vlastní sekci: DDD jako metoda pro stavbu systému, jehož
-součástí je jazykový model.
+a DHH. Jde o přehled jejich pozic, argumentů a dat, ne o obhajobu ani kritiku
+konkrétního přístupu. Opačný směr téhož vztahu, DDD jako metoda pro stavbu systému
+s jazykovým modelem uvnitř, má vlastní sekci.
 
-U každého výroku je uveden rok, kdy zazněl. Stav je zmapován k září 2026 a pozice se v tomto
-tématu mění po měsících, ne po letech. Část následujícího textu zestárne dřív než zbytek knihy.
+U každého výroku je uveden rok, kdy zazněl, a stav odpovídá září 2026. Pozice se v tomto
+tématu mění po měsících, takže část textu zestárne dřív než zbytek knihy.
 
-## ai.01 Ubiquitous language jako rozhraní pro LLM {#ubiquitous-language}
+## ai.01 Ubiquitous Language jako rozhraní pro LLM {#ubiquitous-language}
 
 Jeden z nejkonkrétnějších návrhů pochází od Erica Evanse. Na konferenci
-Explore DDD 2024 navrhl doladit (fine-tuning) model na ubiquitous language jednoho
+Explore DDD 2024 navrhl doladit (fine-tuning) model na Ubiquitous Language jednoho
 Bounded Contextu, tedy na terminologii, pravidla a výrazy, které tým denně používá
 v diskusích s doménovými experty. Doladěný model je podle něj sám o sobě Bounded Context a několik takových modelů
 vedle sebe znamená silné oddělení zodpovědností. Fine-tuning navíc dělá levný model levnějším
@@ -64,7 +64,7 @@ Joshiho. Obecný jazyk nabízí spoustu způsobů, jak vyjádřit tentýž zám�
 variabilitu odřízne. Modelu pak stačí pár příkladů a syntaxi generuje spolehlivě. Pevný
 jazyk na vstupu znamená méně entropie na výstupu.
 
-Opačný pól drží David Heinemeier Hansson (DHH). V rozhovoru pro Lex Fridman Podcast (2025)
+Opačný pól drží David Heinemeier Hansson (DHH). V Lex Fridman Podcastu (2025)
 argumentoval, že Ruby má vyšší přenosovou kapacitu než jiné jazyky, protože na jeden znak
 unese víc významu. Při spolupráci s AI je to podle něj výhoda: člověk i model potřebují
 kódu rozumět rychle. DHH tedy nesází na formální doménový jazyk, ale na hustotu
@@ -74,19 +74,19 @@ K tomu sedí i Rails 8.1 s nativním renderingem Markdownu; release notes ho
 zdůvodňují tím, že se Markdown stal lingua franca AI nástrojů.
 
 Velké jazykové modely pracují s přirozeným jazykem jako svým primárním médiem.
-Ubiquitous language v DDD je precizní podmnožina přirozeného jazyka, tedy terminologie
+Ubiquitous Language v DDD je precizní podmnožina přirozeného jazyka, tedy terminologie
 domény zbavená nejednoznačností a obohacená o doménová pravidla. Funguje proto jako most mezi
 doménovými experty a LLM: pojmy srozumitelné lidem jsou srozumitelné i modelu. Otázka zní,
-zda náklady na vybudování a udržení ubiquitous language odpovídají získaným výhodám.
-Odpověď se liší projekt od projektu. Definici a roli ubiquitous language v DDD popisuje
+zda náklady na vybudování a udržení Ubiquitous Language odpovídají získaným výhodám.
+Odpověď se liší projekt od projektu. Definici a roli Ubiquitous Language v DDD popisuje
 kapitola [Základní koncepty DDD](/zakladni-koncepty#ubiquitous-language).
 
-## ai.02 Bounded contexts a kvalita generovaného kódu {#bounded-contexts}
+## ai.02 Bounded Contexts a kvalita generovaného kódu {#bounded-contexts}
 
 Tvrdá data k tomu, jak hranice Bounded Contextu ovlivňují kód generovaný LLM, zatím nejsou.
 Kontrolovaná studie s definovanou metodologií a vzorkem chybí. K dispozici jsou zkušenosti
 praktiků, měření kvality kódu, která o DDD nemluví, a jeden preprint, který srovnání nedělá.
-Tomu odpovídá i jistota závěrů, které z toho v této sekci plynou.
+Tomu odpovídá i jistota závěrů této sekce.
 
 Jediná konkrétní čísla, která se k tématu dají dohledat, pocházejí z blogpostu Jamese
 Phoenixe. Přesnost kolem 55 % bez explicitních hranic proti 88 % s nimi. Porušení
@@ -95,7 +95,7 @@ takže kapitola na nich nic nestaví. Zůstávají jako ilustrace toho, co prakt
 
 Nick Tune je jedním z nejaktivnějších praktiků na průsečíku DDD a AI. V článku pro O'Reilly
 Radar (únor 2026) popisuje, jak použil Claude Code k reverznímu inženýrství softwarové
-architektury. Tedy k automatickému mapování end-to-end toků, závislostí a hranic
+architektury, tedy k automatickému mapování end-to-end toků, závislostí a hranic
 v existující kódové bázi. V návazném článku ukazuje, jak lze pomocí knihovny ts-morph deterministicky
 extrahovat architektonické vzory, které slouží jako vstup pro AI agenty. K výsledku sám
 připojuje varování: v generovaném popisu architektury byly podstatné nepřesnosti, které
@@ -106,11 +106,11 @@ potřebuje znát méně, a čím míň musí uhodnout, tím míň chyb udělá.
 
 Nástroje se mezitím posunuly podobným směrem. Cursor, GitHub Copilot i Claude Code
 čtou soubory s pravidly, terminologií a omezeními pro konkrétní část kódu, tedy něco,
-co se Bounded Contextu s ubiquitous language podobá. Formáty rozebírá
+co se Bounded Contextu s Ubiquitous Language podobá. Formáty rozebírá
 [sekce ai.06](#nastroje).
 
 Podobnost má ale mez a Tune na ni upozorňuje z vlastní zkušenosti: generovaný kód se
-architektonickými pravidly zapsanými v markdown souborech prostě neřídí. Jeho závěr je
+architektonickými pravidly zapsanými v markdown souborech spolehlivě neřídí. Jeho závěr je
 proto opačný, než by analogie svedla čekat – architekturu je potřeba vynucovat
 deterministicky, ne ji popsat a doufat.
 
@@ -119,23 +119,24 @@ do dvou týdnů od vytvoření; jeho zdvojnásobení firma v lednu 2024 ohlásil
 Pozdější reporty už stojí na naměřených hodnotách. Podíl řádků spojených s refaktoringem klesl
 ze čtvrtiny v roce 2021 pod desetinu v roce 2024. Klonované řádky vzrostly z 8,3 %
 na 12,3 % a kopírovaný kód poprvé překonal přesouvaný. Report za rok 2026 na vzorku 623 milionů změn
-ukazuje duplicitu bloků o 81 % vyšší než v roce 2023. Ani jedno měření o DDD nemluví a příčinu
-neprokazuje – ukazuje jen, kterým směrem se kvalita kódu za éry asistentů posunula.
+ukazuje duplicitu bloků o 81 % vyšší než v roce 2023. Žádné z těch měření o DDD nemluví
+ani neprokazuje příčinu; ukazují jen, kterým směrem se kvalita kódu za éry asistentů posunula.
 
 Každý soubor nebo funkce přitom může být syntakticky správná a pro svůj bezprostřední účel
 funkční. Drhnou až větší celky: hranice mezi moduly, zachování invariantů, konzistentní
-pojmenování napříč kódovou bází. Bounded contexts na tenhle typ problému míří. Otevřená
+pojmenování v celé kódové bázi. Bounded Contexts na tenhle typ problému míří. Otevřená
 zůstává otázka, zda samotná existence Bounded Contextu stačí, nebo zda AI agent potřebuje
-explicitní instruktáž o každém pravidle uvnitř kontextu.
+výslovnou instruktáž o každém pravidle uvnitř kontextu.
 
 ## ai.03 Testování jako kontrolní mechanismus pro AI {#testovani}
 
 Kent Beck, autor TDD a Extreme Programming, se otázce, jak AI mění způsob programování,
-věnuje veřejně od roku 2025. Podle shrnutí v The Pragmatic Engineer (červen 2025)
+věnuje veřejně od roku 2023, kdy po prvním vyzkoušení ChatGPT napsal, že hodnota 90 % jeho
+dovedností klesla na nulu. Podle shrnutí v The Pragmatic Engineer (červen 2025)
 je TDD při práci s AI agenty obzvlášť cenné. Beck rozlišuje dva režimy.
-*Augmented coding* znamená, že vývojář používá AI jako asistenta a zachovává zodpovědnost
-za rozhodnutí. *Vibe coding* znamená, že vývojář přijímá vše, co AI vygeneruje,
-bez porozumění a bez verifikace.
+Při *augmented coding* vývojář používá AI jako asistenta a odpovědnost za rozhodnutí
+si ponechává. Při *vibe coding* naopak přijímá vše, co AI vygeneruje, bez porozumění
+a bez ověření.
 
 > „In vibe coding you don't care about the code, just the behavior of the system. […]
 > In augmented coding you care about the code, its complexity, the tests,
@@ -143,8 +144,8 @@ bez porozumění a bez verifikace.
 >
 > – Kent Beck, Augmented Coding: Beyond the Vibes (Substack, 2025)
 
-Testy tu slouží jako objektivní signál. Existuje-li sada testů popisující doménová pravidla,
-ne implementační detaily, pak selhání testu ukazuje, že se model odchýlil od záměru. TDD ve
+Testy tu slouží jako objektivní signál. Když sada testů popisuje doménová pravidla,
+ne implementační detaily, selhání testu ukazuje, že se model odchýlil od záměru. TDD ve
 spolupráci s AI tak přebírá část role code review.
 
 Spoléhat na testy jako na nefalšovatelnou pojistku ale nelze. Beck sám mezi varovné signály
@@ -161,10 +162,9 @@ ke spolupracovníkovi, jehož výstup se musí pečlivě revidovat, ne slepě p�
 >
 > – Martin Fowler, The New Stack, 2025
 
-Fowler zdůrazňuje, že nedeterminismus LLM od základu mění způsob, jakým přemýšlíme
-o testování. Stejná otázka, jiný výsledek. Tradiční testování předpokládá deterministický
-systém: stejný vstup, stejný výstup, vždy. Pro AI komponenty to neplatí. Fowler volá
-po nových metrikách a nových přístupech, ale přiznává, že komunita je teprve na začátku
+Podle Fowlera nedeterminismus LLM mění samotné uvažování o testování. Tradiční testování
+předpokládá, že stejný vstup dá vždy stejný výstup, a u AI komponent to neplatí. Fowler
+volá po nových metrikách a přístupech, ale přiznává, že komunita je teprve na začátku
 tohoto hledání.
 
 Třetí hlas patří DHH a jeho vyjádření jsou záměrně provokativní. V rozhovoru s Lexem
@@ -179,8 +179,9 @@ nejcitovanější věta k tématu:
 DHH varuje, že vývojář přestane rozumět kódu, který provozuje, a z inženýra se stane
 správce AI. Sám přitom AI používá celý den, jen jinak. Vadí mu nekritické přijímání
 výstupu, protože otupuje schopnost rozpoznat chybu.
-Bez porozumění doméně testy nestačí. Vývojář, který nechápe doménu, nepíše správné
-testy, a AI pak ty testy plní falešně pozitivním kódem.
+
+Bez porozumění doméně nestačí ani testy. Vývojář, který doménu nechápe, napíše špatné
+testy a AI pak dodá kód, který jimi projde, a přesto je chybný.
 
 Riziko má konkrétní mechanismus. Jazykový model predikuje
 pravděpodobné pokračování textu. Nemá v sobě nic, co by odlišilo kód správný od kódu, který
@@ -188,7 +189,7 @@ se v trénovacích datech vyskytoval nejčastěji. Doménový invariant je přit
 povahy: říká, co je nepřípustné, i když by to bylo běžné a na první pohled rozumné.
 Objednávka se po expedici needituje, i když v devíti z deseti podobných tříd setter je.
 Zde leží hranice generování a zároveň důvod, proč agregát s explicitním invariantem obstojí
-lépe než anemický model – porušení je v něm vidět.
+lépe než anémický model – porušení je v něm vidět.
 
 TDD ani code review nejsou vzory DDD, komunita kolem DDD je s nimi ale historicky
 propojená. Taktické vzory se testují na úrovni domény bez zvláštní přípravy: agregát s invarianty,
@@ -200,13 +201,12 @@ unit testy agregátů, integrační testy přes Messenger a contract testy mezi 
 ## ai.04 AI v doménové komplexitě vs. CRUD {#komplexita-vs-crud}
 
 V přednášce na Explore DDD 2024 navrhl Evans taxonomii softwarových rozhodnutí o třech
-kategoriích; třetí z nich přidává AI. První kategorie jsou
+kategoriích; třetí z nich přidává AI. První kategorií jsou
 **hard-coded decisions**: pravidla absolutní, neměnná a se závažnými důsledky při porušení.
-Příkladem je požadavek, že záporný stav účtu musí projít explicitním
-schválením. Druhá kategorie jsou **human-handled decisions**: situace tak
-komplexní nebo citlivé, že musí rozhodovat člověk. Třetí, nová kategorie jsou
-**LLM-supported decisions**: situace, kde rozhodnutí lze revidovat a kde náklady na chybu
-jsou nízké. Konkrétní práh přesnosti Evans neuvádí; prakticky leží tam, kde zbytek chyb
+Příkladem je požadavek, že záporný stav účtu musí projít výslovným
+schválením. Druhou tvoří **human-handled decisions**: situace tak
+komplexní nebo citlivé, že musí rozhodovat člověk. Třetí, novou kategorií jsou
+**LLM-supported decisions**: situace, kde rozhodnutí lze revidovat a chyba stojí málo. Konkrétní práh přesnosti Evans neuvádí; prakticky leží tam, kde zbytek chyb
 odchytí revize.
 
 Z taxonomie plyne, kam AI patří a kam ne. V pojišťovnictví, bankovnictví nebo zdravotnictví převažují hard-coded decisions a chyba
@@ -216,10 +216,10 @@ odpovědi zákaznickému servisu. Musí ale zůstat jasně oddělené od hard-co
 
 Vaughn Vernon přidává konkrétní technický vzor: LLM jako „fix suggester“
 (Explore DDD 2024, via InfoQ). Ve Vernonově vizi *self-healing software* reaguje
-nástroj typu ChatGPT na runtime výjimky a navrhne opravu ve formě pull requestu.
+nástroj typu ChatGPT na výjimky za běhu a navrhne opravu ve formě pull requestu.
 Návrh projde revizí, lidskou nebo automatizovanou, a teprve pak se aplikuje.
-DDD Bounded Context v tomto scénáři definuje pravidla verifikace: co smí LLM
-změnit a co musí zůstat neměnné.
+Bounded Context v tomto scénáři určuje pravidla ověření: co smí LLM
+změnit a co musí zůstat beze změny.
 
 Referenční implementace Microsoftu eShop (dříve eShopOnContainers) to rozlišení ukazuje na
 praktickém příkladu. Modul `Ordering` používá plné taktické DDD:
@@ -238,14 +238,14 @@ DHH nabízí radikální protiváhu:
 >
 > – DHH, Lex Fridman Podcast
 
-DHH otevřeně říká, že většina vývojářské práce je „CRUD monkeying“, tedy psaní
-aplikací, které přijímají data, ukládají je a zobrazují. Pro tuto kategorii
-aplikací je DDD přeceňované – a AI, která generuje CRUD kód z jednoduchého popisu,
-je přirozeným řešením bez potřeby doménového modelu. Hlavní otázka, na kterou
-DHH odpovídá jinak než Evans, zní: jak velký podíl softwarového průmyslu tvoří
-skutečně komplexní domény versus CRUD monkeying? A mění AI tuto hranici? Buď tím,
-že CRUD kód zlevní natolik, že na náročnou doménu zbude čas. Nebo tím, že se
-složité doménové problémy smrsknou na LLM-supported decisions.
+DHH otevřeně říká, že velká část vývojářské práce je „CRUD monkeying“, tedy psaní
+aplikací, které přijímají data, ukládají je a zobrazují. Složitá architektura je pro ně
+podle něj zbytečná komplikace. Z toho se nabízí závěr, který DHH sám nevyslovuje,
+protože psaní kódu asistentovi nepřenechává: takový kód vygeneruje AI z krátkého popisu
+a doménový model k tomu potřeba není. Evans a DHH se rozcházejí hlavně v odhadu, jak
+velký podíl softwarového průmyslu tvoří skutečně komplexní domény. Otevřené zůstává,
+jestli AI tuto hranici posune: buď CRUD kód zlevní natolik, že na náročnou doménu zbude
+čas, nebo se složité doménové problémy smrsknou na LLM-supported decisions.
 Kdy DDD nasadit a kdy ne, rozebírá kapitola
 [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
@@ -258,19 +258,19 @@ učí jinde.
 
 V článku *AI Components for a Deterministic System* (srpen 2025) Evans popisuje aplikaci,
 která pomocí LLM klasifikuje domény v cizí kódové bázi. Jméno *Domain Navigator*
-jí dává až navazující text z ledna 2026. Za převzetí stojí rozlišení, které z ní
+jí dává až navazující text z ledna 2026. Užitečné je rozlišení, které z ní
 plyne: klasifikační úloha není modelovací úloha.
 Klasifikace je opakovatelná, má správnou odpověď a model v ní vyniká. Modelování opakovatelné
 není a správnou odpověď nemá. Smíchané do jednoho promptu vracejí výstupy, které nejde mezi
 běhy porovnat. Evansovo řešení: nejdřív ustavit kanonickou taxonomii, teprve pak podle ní
 klasifikovat.
 
-Druhý článek, *Context Mapping with an AI-based Component* (leden 2026), kreslí context mapu
+Druhý článek, *Context Mapping with an AI-based Component* (leden 2026), kreslí Context Mapu
 systému, jehož komponentou je LLM. Jeho závěry jsou pro návrh přímo použitelné:
 
 - **LLM je Bounded Context.** Má vlastní jazyk, vlastní model konzistence a vlastní kontrakty.
-  Nakreslit ho na context mapě jako samostatný kontext je přesnější než chápat ho jako knihovnu.
-- **Anticorruption layer není volitelný.** Překlad mezi deterministickou aplikací
+  Nakreslit ho na Context Mapě jako samostatný kontext je přesnější než chápat ho jako knihovnu.
+- **Anti-Corruption Layer není volitelný.** Překlad mezi deterministickou aplikací
   a probabilistickou komponentou znamená víc než rozparsovat JSON. Odpověď se validuje proti
   povolené taxonomii a teprve pak mapuje na doménový typ. Vzor popisuje kapitola
   [Context Mapping](/context-mapping#acl).
@@ -279,8 +279,8 @@ systému, jehož komponentou je LLM. Jeho závěry jsou pro návrh přímo použ
   mezi aplikací a modelem hraje stejnou roli jako
   [Published Language](/context-mapping#published-language) mezi dvěma týmy.
 
-Evans zároveň přiznává, že hranice mezi anticorruption layer a Conformistem je v reálném
-systému šedá. Kdo přijme výstupní formát modelu beze změny, dělá Conformist – a nese důsledky, až se
+Evans zároveň přiznává, že hranice mezi Anti-Corruption Layer a Conformistem je v reálném
+systému šedá. Kdo přijme výstupní formát modelu beze změny, je Conformist – a nese důsledky, až se
 formát změní.
 
 V Symfony má vzor konkrétní podobu. Doménové rozhraní patří do `Domain/`, adaptér volající
@@ -288,7 +288,7 @@ poskytovatele přes `symfony/http-client` do `Infrastructure/`, validace odpově
 na hodnotový objekt do téhož adaptéru. Volání modelu je I/O s latencí, selháním a nestabilním
 výstupem, takže patří do Messenger handleru s retry strategií, ne do synchronního průchodu
 controllerem. Rozvrstvení popisují kapitoly [Architektonické styly](/architektonicke-styly)
-a [Implementace DDD v Symfony 8](/implementace-v-symfony).
+a [Implementace v Symfony 8](/implementace-v-symfony).
 
 Stav PHP ekosystému k září 2026: balíček `php-llm/llm-chain` je na Packagistu označen jako
 abandoned s náhradou `symfony/ai-agent`. Symfony AI existuje jako sada komponent
@@ -304,14 +304,14 @@ konkrétní část projektu. GitHub Copilot čte `.github/copilot-instructions.m
 instrukce pro všechny konverzace v repozitáři. Claude Code používá `CLAUDE.md` na úrovni
 projektu i jednotlivých adresářů – vlastní `CLAUDE.md` má v kořeni repozitáře i tento web.
 Nástrojově neutrální `AGENTS.md` čte většina agentů včetně Cursoru, Copilotu a OpenAI Codexu;
-formát dnes zastřešuje Linux Foundation.
+od prosince 2025 formát spravuje Agentic AI Foundation pod Linux Foundation.
 
-Žádný z těch formátů se na DDD neodvolává a žádná autorita je jako Bounded Context dokumenty
-nedoporučuje. Podobnost je věcí pozorování, ne doktríny – a Tuneova zkušenost citovaná
+Žádný z těch formátů se na DDD neodvolává a žádná z citovaných autorit je nedoporučuje
+jako dokumenty Bounded Contextu. Podobnost je věcí pozorování, ne doktríny – a Tuneova zkušenost citovaná
 v [sekci ai.02](#bounded-contexts) ukazuje, kde končí: pravidlo zapsané v markdownu není
 pravidlo vynucené.
 
-Akademický výzkum tuto praxi teprve začíná zkoumat. Preprint Wieganda a kol., publikovaný
+Akademických prací k tématu je k září 2026 málo. Preprint Wieganda a kol., publikovaný
 na arXiv v lednu 2026 jako součást sborníku Upper-Rhine AI Symposium 2024, zkoumá,
 jestli doménové metamodely dokáže vytvořit generativní AI. Model Code Llama doladěný
 na datech z reálných DDD projektů generuje doménově specifické JSON objekty a autoři
@@ -330,35 +330,37 @@ engineering do Adopt. Tím se z ad hoc praxe stala pojmenovaná disciplína: ses
 právě ten kontext, který pro úlohu potřebuje. Sevřenější kontext znamená přesnější výstupy –
 a Bounded Context je jedna z odpovědí na otázku, kde ho oříznout.
 
-Tytéž nástroje ale fungují i bez DDD. Kód psaný podle jasných konvencí, v duchu convention over configuration, bývá pro
-agenta stejně čitelný jako explicitně modelovaný Bounded Context. V projektu s ustáleným pojmenováním, slušnou testovou sadou
-a čitelným rozčleněním do adresářů se agent zorientuje bez formálního DDD modelu.
+Tytéž nástroje ale fungují i bez DDD. Kód psaný podle jasných konvencí (convention over
+configuration) bývá pro agenta stejně čitelný jako explicitně modelovaný Bounded Context:
+s ustáleným pojmenováním, slušnou testovou sadou a čitelným členěním adresářů se agent
+zorientuje i bez formálního doménového modelu.
 Otevřená zůstává otázka, co se stane, až projekt přeroste hranici, do které konvence stačí.
 
 ## ai.07 Otevřené otázky a limity {#otevrene-otazky}
 
-Martin Fowler opakovaně připomíná, že spojení AI a softwarové architektury je teprve
-na začátku. Nedeterminismus LLM, kdy tentýž prompt vrátí jiný výstup, zatím nemá uspokojivou metriku. Jak měřit architektonickou konzistenci generovaného kódu?
-Jak ověřit, že AI respektuje hranice Bounded Contextu, když každé volání
-API může vrátit jiný výsledek? Podle Fowlera se to obor teprve učí, a to je poctivý
-popis jeho stavu.
+Martin Fowler opakovaně připomíná (například v prosinci 2025), že spojení AI a softwarové
+architektury je teprve na začátku. Nedeterminismus LLM, kdy tentýž prompt vrátí jiný výstup,
+nemá uspokojivou metriku. Neví se, jak měřit architektonickou konzistenci generovaného kódu
+ani jak ověřit, že AI respektuje hranice Bounded Contextu, když každé volání API může vrátit
+jiný výsledek. Podle Fowlera se to obor teprve učí.
 
 Chybí i odpověď na otázku, kde přesně generovaný kód uvnitř dobře vymezeného kontextu
-selhává. V okrajových případech? V porušení invariantů? V pojmenování, které se rozchází
-s modelem? Bez toho nelze říct, jestli je hranice kontextu dostatečnou zárukou, nebo jen
+selhává: v okrajových případech, v porušení invariantů, nebo v pojmenování, které se
+rozchází s modelem. Bez toho nelze říct, jestli je hranice kontextu dostatečnou zárukou, nebo jen
 zmenšuje prostor pro chybu. Dodatečnou vrstvu verifikace mohou tvořit architektonické testy
 (deptrac, ArchUnit) nebo explicitní registr kontextů.
 
-Alberto Brandolini, autor EventStormingu, stojí na straně kombinace. Jeho workshop
+Alberto Brandolini, autor Event Stormingu, stojí na straně kombinace. Jeho workshop
 *AI-Powered Domain-Driven Design* v Avanscopertě slibuje nasadit AI nástroje tam,
 kde mají největší dopad, a přitom zachovat učení praktickými cvičeními. Účastníci
 mají vážit lo-fi, hands-on a AI postupy proti sobě a znát meze každého z nich.
-Vlastní vyjádření k tomu, nakolik EventStorming zůstává lidskou aktivitou, se nepodařilo
-dohledat – anotace workshopu je zatím jediný doklad jeho pozice.
+Vlastní vyjádření k tomu, nakolik Event Storming zůstává lidskou aktivitou, se nepodařilo
+dohledat – anotace workshopu je k září 2026 jediný doklad jeho pozice.
 
-Sam Newman, autor *Building Microservices*, se k AI v kontextu DDD zatím jasně nevyjádřil. Jeho pozice k distribuovaným systémům je dlouhodobě konzervativní:
-mikroservisy jako poslední možnost, nikoli jako výchozí architektura. Zda tato
-zdrženlivost platí i pro AI, je autorský odhad, nikoli referovaná pozice. LLM nasazené
+Sam Newman, autor *Building Microservices*, se k AI v kontextu DDD do září 2026 jasně
+nevyjádřil. Jeho pozice k distribuovaným systémům je dlouhodobě konzervativní:
+microservices jako poslední možnost, nikoli jako výchozí architektura. Přenést tuto
+zdrženlivost na AI je úvaha této knihy, ne Newmanova pozice. LLM nasazené
 do produkčního systému je ovšem distribuovaná závislost se všemi problémy
 distribuovaných systémů: s latencí, spolehlivostí, verzováním a monitoringem.
 
@@ -367,9 +369,9 @@ Otevřené otázky, na které obor zatím nemá odpověď:
 - **Mění AI hranici, kde DDD dává smysl?** Pokud AI zlevní generování CRUD kódu
   natolik, že vývojářům zbude víc kapacity na složitou logiku, může se DDD
   vyplatit i tam, kde se dnes nevyplatí.
-- **Stane se ubiquitous language standardem pro AI kontexty?**
-  Cursor rules a CLAUDE.md jsou ad hoc řešení. Mohla by DDD komunita přispět
-  formálnější strukturou pro definici AI kontextů?
+- **Stane se Ubiquitous Language standardem pro AI kontexty?**
+  Cursor rules, CLAUDE.md i AGENTS.md sjednocují formát souboru, ne jeho obsah. Mohla by
+  DDD komunita přispět formálnější strukturou pro definici AI kontextů?
 - **Jaká bude role architekta v AI-augmentovaném týmu?** Pokud AI
   generuje implementaci, architekt se stává hlavně autorem kontextů, pravidel
   a verifikačních mechanismů. To má blíž k DDD modelování než k psaní kódu.
@@ -395,7 +397,7 @@ Otevřené otázky, na které obor zatím nemá odpověď:
         <tr>
             <td><strong>Eric Evans</strong></td>
             <td>Silně pro DDD + AI</td>
-            <td>Navrhuje fine-tuning na ubiquitous language; LLM je Bounded Context, ACL nad ním nutnost</td>
+            <td>Navrhuje fine-tuning na Ubiquitous Language; LLM je Bounded Context, ACL nad ním nutnost</td>
         </tr>
         <tr>
             <td><strong>Nick Tune</strong></td>
@@ -443,7 +445,7 @@ je stále CRUD, že jednoduchost má svou hodnotu a že AI dovede být účinná
 formálního doménového modelování. Jeho pozice DDD neodporuje. Ukazuje jen, že DDD
 nemá odpověď na každou otázku.
 
-Zůstává jediná věc, na které se shodnou skoro všichni: struktura pomáhá. Explicitní, sdílený
+Zůstává jediná věc, na které se shodnou skoro všichni: struktura pomáhá. Výslovně popsaný, sdílený
 kontext zlepšuje výsledky AI a DDD nabízí vyzkoušený slovník pro jeho popis. Tuneova
 zkušenost k tomu přidává omezení, které se při čtení nadšených textů přehlíží:
 popsaná struktura není vynucená struktura. Konvence, testy a deterministické kontroly
@@ -455,13 +457,13 @@ v toolchainu o něm nerozhoduje.
 
 :::faq{}
 - question: Proč AI nástroje generují lepší kód v projektech s Ubiquitous Language?
-  answer: 'Kontrolovaná měření k tomu zatím chybějí, mechanismus je ale zřejmý. Ubiquitous Language poskytuje LLM jednoznačný slovník, který se objevuje napříč dokumentací, testy i kódem. Model při generování dostává konzistentní pojmy z kontextu a produkuje výstup, který zapadá do existujícího modelu bez překladu. Bez Ubiquitous Language AI často zavádí vlastní pojmenování, které se rozchází s doménou, a tým pak tráví čas jeho přepisováním. Evans na tom v roce 2024 postavil návrh doladit LLM přímo na slovníku jednoho Bounded Contextu. Podrobný rozbor v <a href="#ubiquitous-language">sekci Ubiquitous language jako rozhraní pro LLM</a>.'
+  answer: 'Kontrolovaná měření k tomu zatím chybějí, mechanismus je ale zřejmý. Ubiquitous Language poskytuje LLM jednoznačný slovník, který se objevuje v dokumentaci, testech i kódu. Model při generování dostává konzistentní pojmy z kontextu a produkuje výstup, který zapadá do existujícího modelu bez překladu. Bez Ubiquitous Language AI často zavádí vlastní pojmenování, které se rozchází s doménou, a tým pak tráví čas jeho přepisováním. Evans na tom v roce 2024 postavil návrh doladit LLM přímo na slovníku jednoho Bounded Contextu. Podrobný rozbor v <a href="#ubiquitous-language">sekci Ubiquitous Language jako rozhraní pro LLM</a>.'
 - question: Jak Bounded Contexts ovlivňují kvalitu kódu generovaného AI?
-  answer: 'Bounded Context vymezuje srozumitelný rozsah, ve kterém se AI pohybuje. Místo „celé aplikace“ pracuje s jedním modelem, jednou sadou pravidel a jedním slovníkem. Menší, dobře ohraničený kontext znamená méně protichůdných informací v promptu a menší prostor pro halucinace. Podobný perimetr vymezují i konfigurační soubory agentů (Cursor rules, CLAUDE.md), praxe ale ukazuje, že popsané pravidlo agent dodrží hůř než pravidlo vynucené nástrojem. Rozbor v <a href="#bounded-contexts">sekci Bounded contexts a kvalita generovaného kódu</a>.'
+  answer: 'Bounded Context vymezuje srozumitelný rozsah, ve kterém se AI pohybuje. Místo „celé aplikace“ pracuje s jedním modelem, jednou sadou pravidel a jedním slovníkem. Menší, dobře ohraničený kontext znamená méně protichůdných informací v promptu a menší prostor pro halucinace. Podobný perimetr vymezují i konfigurační soubory agentů (Cursor rules, CLAUDE.md), praxe ale ukazuje, že popsané pravidlo agent dodrží hůř než pravidlo vynucené nástrojem. Rozbor v <a href="#bounded-contexts">sekci Bounded Contexts a kvalita generovaného kódu</a>.'
 - question: Jakou roli hrají testy při práci s AI?
   answer: 'Testy fungují jako kontrolní mechanismus, který zachytává rozdíl mezi tím, co AI vygenerovala, a tím, co doména skutečně požaduje. Kent Beck hovoří o konceptu augmented coding: AI píše kód, testy potvrzují chování, a teprve když oba stojí spolu, jde změna do kódové báze. Bez testů se riziko nevyřešených chyb z AI výstupu kumuluje, protože LLM kód působí syntakticky správně, i když na úrovni chování selhává. Pojistka má ale mez: Beck sám mezi varovné signály řadí agenta, který testy vypíná nebo maže. Praktický rozbor v <a href="#testovani">sekci Testování jako kontrolní mechanismus pro AI</a>.'
 - question: Kde jsou limity AI v doménově komplexním kódu?
-  answer: 'AI zatím dobře zvládá rutinní úlohy (boilerplate, CRUD, jednoduché transformace), ale naráží u kódu, který odráží nekonzistentní doménovou realitu nebo vyžaduje modelování nových pravidel se stakeholdery. Martin Fowler popisuje AI jako „dodgy collaborator“, jejíž výstup se musí pečlivě verifikovat, zejména u operací s vysokými náklady chyby. Otevřené otázky se týkají metrik kvality doménového modelu, role člověka v EventStormingu a dlouhodobého dopadu AI na kompetence vývojářů. Viz <a href="#otevrene-otazky">sekci Otevřené otázky a limity</a>.'
+  answer: 'AI zatím dobře zvládá rutinní úlohy (boilerplate, CRUD, jednoduché transformace), ale naráží u kódu, který odráží nekonzistentní doménovou realitu nebo vyžaduje modelování nových pravidel se stakeholdery. Martin Fowler popisuje AI jako „dodgy collaborator“, jehož výstup se musí pečlivě verifikovat, zejména u operací s vysokými náklady chyby. Otevřené otázky se týkají metrik kvality doménového modelu, role člověka v Event Stormingu a dlouhodobého dopadu AI na kompetence vývojářů. Viz <a href="#otevrene-otazky">sekci Otevřené otázky a limity</a>.'
 :::
 
 ## ai.09 Zdroje a další čtení {#zdroje}
@@ -475,11 +477,11 @@ v toolchainu o něm nerozhoduje.
   úlohy.
 - **Evans, E. – Domain Language, leden 2026:**
   <a href="https://www.domainlanguage.com/articles/context-mapping-an-ai-based-component/" target="_blank" rel="noopener noreferrer">Context Mapping with an AI-based Component</a>.
-  Context mapa systému s LLM komponentou: LLM jako Bounded Context, anticorruption layer,
+  Context mapa systému s LLM komponentou: LLM jako Bounded Context, Anti-Corruption Layer,
   Published Language, hranice vůči Conformistu.
 - **Evans, E. – Explore DDD 2024 (InfoQ):**
   <a href="https://www.infoq.com/news/2024/03/Evans-ddd-experiment-llm/" target="_blank" rel="noopener noreferrer">DDD and Experiment With LLM – InfoQ, 2024</a>.
-  Novinový referát keynote, ve které Evans navrhuje fine-tuning LLM na ubiquitous language
+  Novinový referát keynote, ve které Evans navrhuje fine-tuning LLM na Ubiquitous Language
   a taxonomii hard-coded / human-handled / LLM-supported decisions. Zachycuje i reakce
   dalších praktiků včetně Vernonova konceptu „fix suggester“. Evans v ní sám upozorňuje,
   že jeho závěry platí ke dni 14. 3. 2024.
@@ -491,6 +493,9 @@ v toolchainu o něm nerozhoduje.
   <a href="https://martinfowler.com/articles/llm-and-dsls.html" target="_blank" rel="noopener noreferrer">DSLs Enable Reliable Use of LLMs</a>.
   Rozpracovaný argument o DSL jako způsobu, jak omezit variabilitu vstupu. Autorem je
   Unmesh Joshi, článek vychází na Fowlerově webu jako hostovaný.
+- **Beck, K. – Substack (Tidy First), duben 2023:**
+  <a href="https://newsletter.kentbeck.com/p/90-of-my-skills-are-now-worth-0" target="_blank" rel="noopener noreferrer">90% of My Skills Are Now Worth $0</a>.
+  Beckova první reakce na ChatGPT a úvaha, které dovednosti ztrácejí hodnotu.
 - **Beck, K. – Substack (Tidy First), červen 2025:**
   <a href="https://tidyfirst.substack.com/p/augmented-coding-beyond-the-vibes" target="_blank" rel="noopener noreferrer">Augmented Coding: Beyond the Vibes</a>.
   Definice augmented coding vs. vibe coding. Beck zde popisuje i varovné signály, mezi něž

@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2025-04-24{% endblock %}
-{% block article_modified_time %}2026-09-24{% endblock %}
+{% block article_modified_time %}2026-09-28{% endblock %}
 
 {% block breadcrumb_name %}Glosář{% endblock %}
 
@@ -272,7 +272,9 @@
                             (<code>Money</code>, <code>Currency</code>). Každou změnu musí odsouhlasit všichni
                             vlastníci a projít testy všech kontextů. Těsná vazba má svou cenu, proto se kernel
                             vyplatí jen tam, kde přínos sdílení převáží náklady koordinace. Sdílená technická
-                            knihovna (logger, HTTP klient) Shared Kernel není.
+                            knihovna (logger, HTTP klient) Shared Kernel není. Namespace <code>App\SharedKernel</code>
+                            v ukázkách knihy nese i technické bázové typy (rozhraní busů, abstraktní třídy).
+                            Shared Kernel v Evansově smyslu tvoří jen jeho doménová část.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14</p>
                         <p class="term-related">Viz také: <a href="{{ path('context_mapping') }}#shared-kernel">kapitola Bounded Context a Context Mapping</a>, <a href="#term-mapa-kontextu">Context Map</a>, <a href="#term-partnership">Partnership</a>, <a href="#term-zakaznik-dodavatel">Customer/Supplier</a></p>
@@ -309,9 +311,10 @@
                             a přebírá upstream model 1:1, bez překladu. Volí se tam, kde upstream tým nemá
                             důvod vycházet downstreamu vstříc a jeho model je pro downstream dost dobrý.
                             Conformist ušetří překladovou vrstvu, platí za to závislostí na cizím modelu.
-                            Opačnou volbou downstreamu je Anti-Corruption Layer. Typické použití je integrace
-                            s externím SaaS (Stripe, Auth0), s regulatorním formátem nebo reportingový kontext,
-                            který data jen zobrazuje.
+                            Opačnou volbou downstreamu je Anti-Corruption Layer. Conformist sedí reportingovému
+                            nebo průchozímu kontextu, který data jen zobrazuje či přeposílá, a oborovým nebo
+                            regulatorním formátům. Jakmile na převzatých datech stojí vlastní doménová pravidla,
+                            patří na hranici ACL. Proto kniha platby (Stripe) i identitu (Auth0) napojuje přes ACL.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 14</p>
                         <p class="term-related">Viz také: <a href="{{ path('context_mapping') }}#conformist">kapitola Bounded Context a Context Mapping</a>, <a href="#term-anti-korupcni-vrstva">Anti-Corruption Layer</a>, <a href="#term-zakaznik-dodavatel">Customer/Supplier</a></p>
@@ -382,7 +385,7 @@
                     <dd>
                         <p>
                             Strategické rozhodnutí, že dva Bounded Contexty nebudou integrované vůbec. Každý
-                            tým řeší problém sám a přijímá duplicitu dat nebo paralelní procesy. Dává smysl
+                            tým řeší problém sám a přijímá duplicitu dat nebo paralelní procesy. Hodí se
                             tam, kde by integrace stála víc, než přinese: sdílená funkce není pro žádný
                             kontext kritická nebo komunikace mezi týmy vázne. Separate Ways je vědomá volba,
                             ne selhání návrhu. Duplicita tu vychází levněji než koordinace.
@@ -437,12 +440,12 @@
                     </dt>
                     <dd>
                         <p>
-                            Doménový objekt s jedinečnou, přetrvávající identitou, která ho odlišuje i v případě,
-                            že se změní všechny jeho atributy. Příklad: uživatel identifikovaný hodnotou
-                            <code>UserId</code> – i když změní jméno, e-mail i adresu, zůstává stejnou entitou.
+                            Doménový objekt s jedinečnou, přetrvávající identitou, která ho odlišuje, i když
+                            se změní všechny jeho atributy. Příklad: uživatel identifikovaný hodnotou
+                            <code>UserId</code> zůstává stejnou entitou, přestože změní jméno, e-mail i adresu.
                             Dvě entity se stejnými daty, ale odlišnými identifikátory, jsou různé entity.
                             Rovnost entit určuje identita, ne stav. Na rozdíl od hodnotového objektu
-                            potřebuje entita explicitní identifikátor. Kniha ho modeluje jako silně typovaný
+                            potřebuje entita vlastní identifikátor. Kniha ho modeluje jako silně typovaný
                             hodnotový objekt generovaný přes <code>Uuid::v7()</code>.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003), kap. 5</p>
@@ -558,7 +561,7 @@
                     <dd>
                         <p>
                             Bezstavová služba s doménovou operací, která nepatří žádné konkrétní entitě
-                            ani hodnotovému objektu. Příklady: převod měn, výpočet ceny se slevami ze dvou
+                            ani hodnotovému objektu. Příklady: přepočet měn, výpočet ceny se slevami ze dvou
                             různých agregátů, převod peněz mezi účty. Patří do doménové vrstvy a mluví
                             Ubiquitous Language. S aplikační službou se často plete, rozdíl je v obsahu:
                             aplikační služba orchestruje use case, doménová vyjadřuje doménové pravidlo.
@@ -640,12 +643,12 @@
                             predikátu, který určuje, zda doménový objekt splňuje dané kritérium. Specifikace
                             se skládají logickými operátory AND, OR a NOT, takže složitou podmínku jde
                             poskládat z jednodušších. Pravidlo tím dostane jméno v Ubiquitous Language
-                            (<em>„zákazník je premium“</em>). Vzor formálně popsali Evans a Fowler v papíru
+                            (<em>„zákazník je premium“</em>). Vzor formálně popsali Evans a Fowler v článku
                             <em>Specifications</em> (1997), Evans ho pak zařadil do knihy
                             <em>Domain-Driven Design</em> (2003).
                         </p>
                         <p>
-                            Původní papír uvádí tři použití. <strong>Validace</strong> ověřuje, že objekt
+                            Původní článek uvádí tři použití. <strong>Validace</strong> ověřuje, že objekt
                             pravidlo splňuje (má objednávka nárok na dopravu zdarma?). <strong>Selekce</strong>
                             vybírá z kolekce objekty podle kritéria, například zákazníky pro věrnostní program.
                             <strong>Konstrukce na zakázku</strong> popisuje, jak má nový objekt vypadat, aniž
@@ -690,8 +693,10 @@
                             <code>EmptyOrderException</code>. Kód se díky nim lépe čte a chyby se snáz
                             diagnostikují. Volající navíc může na konkrétní selhání reagovat zvlášť, třeba
                             jiným HTTP statusem. Když by operace porušila invariant, agregát ji odmítne
-                            právě doménovou výjimkou. Holý <code>\DomainException</code> je v knize jen
-                            přiznaná zkratka.
+                            právě doménovou výjimkou. Výjimku tvoří porušení formátu v konstruktoru hodnotového
+                            objektu (neplatný e-mail, záporná částka): to kniha hlásí jako
+                            <code>\InvalidArgumentException</code>. Holý <code>\DomainException</code> je v knize
+                            jen přiznaná zkratka.
                         </p>
                         <p class="term-source">Zdroj: Eric Evans, <em>Domain-Driven Design</em> (2003); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013)</p>
                         <p class="term-related">Viz také: <a href="#term-agregat">Agregát</a>, <a href="#term-invariant">Invariant</a>, <a href="#term-vsudypritomny-jazyk">Ubiquitous Language</a></p>
@@ -768,9 +773,9 @@
                         <p>
                             V hexagonální architektuře rozhraní, přes které aplikace komunikuje s vnějším světem.
                             Driving porty určují, jak aplikaci volají vnější aktéři (například
-                            <code>MessageBusInterface</code> nebo rozhraní use casu jako <code>PlaceOrderUseCase</code>).
+                            <code>MessageBusInterface</code> nebo vlastní rozhraní use casu).
                             Driven porty popisují, co aplikace potřebuje od infrastruktury (například
-                            <code>UserRepositoryInterface</code>, <code>EmailSenderInterface</code>). Porty patří
+                            <code>UserRepository</code>, <code>EmailSender</code>). Porty patří
                             do aplikačního jádra, tedy do doménové nebo aplikační vrstvy, nikdy do infrastruktury.
                         </p>
                         <p class="term-source">Zdroj: Alistair Cockburn, <em>Hexagonal Architecture</em> (2005)</p>
@@ -787,8 +792,8 @@
                         <p>
                             V hexagonální architektuře konkrétní implementace portu. Adaptér překládá mezi
                             protokolem vnějšího světa a rozhraním aplikačního jádra. Příklady:
-                            <code>DoctrineUserRepository</code> implementuje port <code>UserRepositoryInterface</code>;
-                            <code>SymfonyMailerEmailSender</code> implementuje port <code>EmailSenderInterface</code>;
+                            <code>DoctrineUserRepository</code> implementuje port <code>UserRepository</code>;
+                            <code>SymfonyMailerEmailSender</code> implementuje port <code>EmailSender</code>;
                             HTTP controller je driving adaptér, který volá aplikaci přes driving port (například
                             <code>MessageBusInterface</code>). Adaptéry patří do infrastrukturní vrstvy a jdou
                             vyměnit, aniž by se změnil doménový model.
@@ -833,7 +838,7 @@
                             je na přímé zobrazení v UI příliš bohatý. Každou stranu pak jde optimalizovat zvlášť.
                         </p>
                         <p class="term-source">Zdroj: Greg Young, <em>CQRS Documents</em> (2010); Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4</p>
-                        <p class="term-related">Viz také: <a href="{{ path('cqrs') }}#what-is-cqrs">kapitola CQRS v Symfony 8</a>, <a href="#term-cqs">CQS</a>, <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-projekce">Projekce</a>, <a href="#term-aplikacni-sluzba">Aplikační služba</a></p>
+                        <p class="term-related">Viz také: <a href="{{ path('cqrs') }}#what-is-cqrs">kapitola CQRS</a>, <a href="#term-cqs">CQS</a>, <a href="#term-event-sourcing">Event Sourcing</a>, <a href="#term-projekce">Projekce</a>, <a href="#term-aplikacni-sluzba">Aplikační služba</a></p>
                     </dd>
                 </div>
 
@@ -852,7 +857,7 @@
                             zavést i bez jeho důsledného dodržení na úrovni metod.
                         </p>
                         <p class="term-source">Zdroj: Bertrand Meyer, <em>Object-Oriented Software Construction</em>, 2. vydání (1997), kap. 23; princip poprvé v 1. vydání (1988)</p>
-                        <p class="term-related">Viz také: <a href="{{ path('cqrs') }}#cqs-vs-cqrs">kapitola CQRS v Symfony 8</a>, <a href="#term-cqrs">CQRS</a></p>
+                        <p class="term-related">Viz také: <a href="{{ path('cqrs') }}#cqs-vs-cqrs">kapitola CQRS</a>, <a href="#term-cqrs">CQRS</a></p>
                     </dd>
                 </div>
 
@@ -862,8 +867,8 @@
                     </dt>
                     <dd>
                         <p>
-                            Vzor persistence, který ukládá stav jako append-only sekvenci doménových událostí
-                            místo aktuálního stavu. Aktuální stav agregátu vznikne přehráním streamu událostí
+                            Vzor persistence, který místo aktuálního stavu ukládá append-only sekvenci
+                            doménových událostí. Stav agregátu vznikne přehráním streamu událostí
                             od začátku, případně od posledního snapshotu. Stream zároveň slouží jako auditní
                             log: každá změna zůstane zaznamenaná. Stav jde zrekonstruovat k libovolnému okamžiku
                             v minulosti. S CQRS se doplňují: write model generuje události a projektory z nich
@@ -949,9 +954,10 @@
                             Ságu jde koordinovat dvojím způsobem. Při <strong>choreografii</strong> žádný centrální
                             koordinátor není: každý účastník reaguje na události ostatních a publikuje vlastní.
                             Při <strong>orchestraci</strong> řídí průběh Process Manager, který přijímá události,
-                            rozhoduje o dalším kroku a vydává příkazy. Choreografie stačí na krátké procesy,
-                            orchestrace se vyplatí u procesů s mnoha kroky a podmínkami. Terminologie se mezi
-                            autory liší, kapitola Ságy a Process Managery rozebírá, kterou konvenci kniha drží.
+                            rozhoduje o dalším kroku a vydává příkazy. Mezi nimi nerozhoduje počet kroků, ale
+                            tvar procesu. Lineární posloupnost známou předem zvládne choreografie, Process Manager
+                            se vyplatí tam, kde se další krok určuje až za běhu nebo kroky neběží za sebou.
+                            Terminologie se mezi autory liší, kapitola Ságy a Process Managery rozebírá, kterou konvenci kniha drží.
                         </p>
                         <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 4; Hohpe &amp; Woolf, <em>Enterprise Integration Patterns</em> (2003); Garcia-Molina &amp; Salem, <em>Sagas</em> (1987)</p>
                         <p class="term-related">Viz také: <a href="{{ path('sagas') }}#terminologicka-konvence">kapitola Ságy a Process Managery</a>, <a href="#term-kompenzace">Kompenzace</a>, <a href="#term-domenova-udalost">Doménová událost</a>, <a href="#term-eventual-consistency">Eventual Consistency</a>, <a href="#term-ohraniceny-kontext">Bounded Context</a></p>
@@ -1004,7 +1010,7 @@
                     <dd>
                         <p>
                             Řízení souběžnosti bez zámků, založené na čísle verze. Při zápisu se kontroluje,
-                            zda verze v databázi odpovídá verzi načtené při čtení. Pokud mezitím agregát změnil
+                            zda verze v databázi odpovídá verzi načtené při čtení. Když mezitím agregát změnil
                             jiný proces, vznikne konflikt a operace selže. Klient pak načte nový stav a operaci
                             zopakuje. V Event Sourcingu se verze odvozuje z pozice ve streamu. Hodí se tam, kde
                             ke konfliktům dochází zřídka. Pozor na Doctrine: <code>#[ORM\Version]</code> na
@@ -1026,8 +1032,8 @@
                             <code>SELECT … FOR UPDATE</code> nebo <code>LOCK TABLES</code>) na celou dobu transakce.
                             Souběžné operace nad stejným záznamem se zablokují a čekají ve frontě. Hodí se při
                             častých konfliktech, krátkých transakcích a tam, kde opakování operace stojí víc
-                            než čekání. Cenou je nižší propustnost a riziko uváznutí (deadlocku). To snižuje
-                            jednotné pořadí zamykání a krátké držení zámků. V Event Sourcingu se obvykle
+                            než čekání. Cenou je nižší propustnost a riziko uváznutí (deadlocku), které
+                            se snižuje jednotným pořadím zamykání a krátkým držením zámků. V Event Sourcingu se obvykle
                             nepoužívá, protože události ve streamu jsou seřazené a kontrola verze stačí.
                         </p>
                         <p class="term-source">Zdroj: Martin Fowler, <em>Patterns of Enterprise Application Architecture</em> (2002); Bernstein &amp; Newcomer, <em>Principles of Transaction Processing</em> (2009), kap. 6</p>
@@ -1043,11 +1049,12 @@
                     <dd>
                         <p>
                             Datová struktura optimalizovaná pro čtení, oddělená od write modelu (doménového
-                            modelu). Vzniká s CQRS. Write strana drží invarianty v agregátech a pracuje přes
+                            modelu). Pojem pochází z CQRS. Write strana drží invarianty v agregátech a pracuje přes
                             repozitáře, read strana plní obrazovky a reporty předpočítanými, denormalizovanými
-                            daty. Read model jde udržovat synchronně (v téže transakci jako zápis), nebo
-                            asynchronně přes <a href="#term-projekce">projekce</a>, které naslouchají doménovým
-                            událostem. Často spojuje data více agregátů, jejichž společný dotaz by na write
+                            daty. Read model jde udržovat synchronně v téže transakci jako zápis, nebo
+                            asynchronně s krátkým zpožděním. V obou případech ho obvykle plní
+                            <a href="#term-projekce">projekce</a>, které naslouchají doménovým událostem.
+                            Často spojuje data více agregátů, jejichž společný dotaz by na write
                             straně narušil jejich izolaci. Každý use case může mít vlastní read model a jeden
                             agregát tak přispívá do několika z nich.
                         </p>
@@ -1064,8 +1071,8 @@
                     <dd>
                         <p>
                             Operace, která sémanticky vrací efekt dříve provedeného kroku ságy bez ACID
-                            rollbacku. Příklad: <code>CancelPayment</code> kompenzuje <code>AuthorizePayment</code>,
-                            <code>RestoreInventory</code> kompenzuje <code>ReserveInventory</code>. Kompenzační
+                            rollbacku. Příklad: <code>RefundCustomer</code> kompenzuje <code>ChargeCustomer</code>,
+                            <code>ReleaseStock</code> kompenzuje <code>ReserveStock</code>. Kompenzační
                             krok musí být <strong>idempotentní</strong> (opakované volání má stejný efekt jako
                             jediné) a <strong>tolerantní k absenci kompenzovaného kroku</strong> (například když
                             proces selhal ještě před rezervací). Kompenzace se spouštějí v <strong>opačném
@@ -1125,12 +1132,14 @@
                     </dt>
                     <dd>
                         <p>
-                            Jedinečný identifikátor připojený k požadavku nebo příkazu, který putuje všemi
-                            souvisejícími událostmi, příkazy a záznamy v logu. Umožňuje distribuované trasování,
-                            tedy propojení všech operací, které spustila jedna uživatelská akce. V systému
-                            s asynchronní komunikací nebo s microservices se bez něj diagnostika neobejde.
-                            Obvykle se přenáší v HTTP hlavičce (například <code>X-Correlation-ID</code>)
-                            a vkládá do každé vydané události.
+                            Jedinečný identifikátor, který vznikne jednou pro HTTP požadavek nebo pro zprávu,
+                            jež proces spustila. Odvozené příkazy a události ho přebírají, vlastní korelační ID
+                            negenerují. Umožňuje distribuované trasování, tedy propojení všech operací, které
+                            spustila jedna uživatelská akce. V systému s asynchronní komunikací nebo
+                            s microservices se bez něj diagnostika neobejde. Mezi službami putuje v HTTP hlavičce
+                            (například <code>X-Correlation-ID</code>), v Messengeru ve stampu na envelope.
+                            Od něj se liší byznysový korelační klíč ságy (typicky <code>orderId</code>), podle
+                            kterého sága pozná, ke které instanci zpráva patří.
                         </p>
                         <p class="term-source">Zdroj: Vaughn Vernon, <em>Implementing Domain-Driven Design</em> (2013), kap. 8; Gregor Hohpe &amp; Bobby Woolf, <em>Enterprise Integration Patterns</em> (2003)</p>
                         <p class="term-related">Viz také: <a href="{{ path('sagas') }}">kapitola Ságy a Process Managery</a>, <a href="#term-causation-id">Causation ID</a>, <a href="#term-domenova-udalost">Doménová událost</a></p>
@@ -1183,13 +1192,13 @@
                     <dd>
                         <p>
                             Obecný termín pro jakýkoli objekt, který v testu nahrazuje skutečnou závislost.
-                            Název pochází z filmu, kde „stunt double“ zastupuje herce v nebezpečných scénách.
+                            Název pochází z filmového prostředí, kde „stunt double“ zastupuje herce v nebezpečných scénách.
                             Gerard Meszaros (<em>xUnit Test Patterns</em>, 2007) rozlišuje pět typů: Dummy,
                             Stub, Fake, Mock a Spy. Každý slouží k něčemu jinému a špatná volba dělá testy
                             křehkými.
                         </p>
                         <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11</p>
-                        <p class="term-related">Viz také: <a href="{{ path('testing_ddd') }}#test-doubles">kapitola Testování DDD kódu</a>, <a href="#term-stub">Stub</a>, <a href="#term-mock">Mock</a>, <a href="#term-fake">Fake</a></p>
+                        <p class="term-related">Viz také: <a href="{{ path('testing_ddd') }}#test-doubles">kapitola Testování DDD</a>, <a href="#term-stub">Stub</a>, <a href="#term-mock">Mock</a>, <a href="#term-fake">Fake</a></p>
                     </dd>
                 </div>
 
@@ -1222,7 +1231,7 @@
                             s konkrétními argumenty. Když volání chybí nebo proběhne jinak, test selže. Hrozí
                             přespecifikace, kdy test kontroluje implementační detaily místo chování a láme se
                             při každém refaktoringu. V DDD se mock hodí na volání externích portů, ne na
-                            vnitřní volání uvnitř agregátu.
+                            volání uvnitř agregátu.
                         </p>
                         <p class="term-source">Zdroj: Gerard Meszaros, <em>xUnit Test Patterns</em> (2007), kap. 11; Martin Fowler, <em>Mocks Aren't Stubs</em> (2004)</p>
                         <p class="term-related">Viz také: <a href="#term-testovaci-dvojnik">Test double</a>, <a href="#term-stub">Stub</a>, <a href="#term-fake">Fake</a></p>
@@ -1263,7 +1272,7 @@
                             které popisují zamýšlené chování.
                         </p>
                         <p class="term-source">Zdroj: Michael Feathers, <em>Working Effectively with Legacy Code</em> (2004), kap. 13</p>
-                        <p class="term-related">Viz také: <a href="{{ path('migration_from_crud') }}#testovani-pri-migraci">kapitola Migrace z CRUD architektury na DDD</a>, <a href="#term-architektonicky-test">Architektonický test</a></p>
+                        <p class="term-related">Viz také: <a href="{{ path('migration_from_crud') }}#testovani-pri-migraci">kapitola Migrace z CRUD na DDD</a>, <a href="#term-architektonicky-test">Architektonický test</a></p>
                     </dd>
                 </div>
 
@@ -1281,8 +1290,8 @@
                             Brání erozi architektury, tedy postupnému porušování pravidel, které bez
                             automatické kontroly přijde samo. Nástroje pro PHP: Deptrac a PHPArkitect.
                         </p>
-                        <p class="term-source">Zdroj: <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener noreferrer">Deptrac (github.com/deptrac/deptrac)</a>, <a href="https://github.com/phparkitect/arkitect" target="_blank" rel="noopener noreferrer">PHPArkitect (github.com/phparkitect/arkitect)</a>; širší kontext: Mark Richards &amp; Neal Ford, <em>Fundamentals of Software Architecture</em> (2020), kap. „Architecture Decision Records and Fitness Functions“.</p>
-                        <p class="term-related">Viz také: <a href="{{ path('testing_ddd') }}#architektonicke-testy">kapitola Testování DDD kódu</a>, <a href="#term-vrstvena-architektura">Vrstvená architektura</a>, <a href="#term-hexagonalni-architektura">Hexagonální architektura</a>, <a href="#term-charakterizacni-test">Charakterizační test</a></p>
+                        <p class="term-source">Zdroj: <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener noreferrer">Deptrac (github.com/deptrac/deptrac)</a>, <a href="https://github.com/phparkitect/arkitect" target="_blank" rel="noopener noreferrer">PHPArkitect (github.com/phparkitect/arkitect)</a>; širší kontext: Mark Richards &amp; Neal Ford, <em>Fundamentals of Software Architecture</em> (2020), kap. 6 „Measuring and Governing Architecture Characteristics“ (fitness functions).</p>
+                        <p class="term-related">Viz také: <a href="{{ path('testing_ddd') }}#architektonicke-testy">kapitola Testování DDD</a>, <a href="#term-vrstvena-architektura">Vrstvená architektura</a>, <a href="#term-hexagonalni-architektura">Hexagonální architektura</a>, <a href="#term-charakterizacni-test">Charakterizační test</a></p>
                     </dd>
                 </div>
 
@@ -1296,7 +1305,7 @@
             <div class="note" role="note" aria-labelledby="false-friends-intro-heading">
                 <h3 id="false-friends-intro-heading">Proč to vzniká</h3>
                 <p>
-                    Termíny DDD se překrývají s pojmy ze Symfony, jeho bezpečnostní komponenty, z Doctrine i ze světa Springu a Javy. Stejné slovo tak znamená v různých kontextech různé věci a běžné code review rozpor často přehlédne. Sekce rozplétá pasti, které se v DDD projektech opakují napříč týmy i frameworky.
+                    Termíny DDD se překrývají s pojmy ze Symfony, jeho bezpečnostní komponenty, z Doctrine i ze světa Springu a Javy. Stejné slovo tak znamená v různých kontextech různé věci a běžné code review rozpor často přehlédne. Následující hesla rozplétají záměny, které se v DDD projektech opakují bez ohledu na tým a framework.
                 </p>
             </div>
 
@@ -1346,7 +1355,7 @@
                 <div class="glossary-entry" id="ff-controller">
                     <dt><dfn>Controller</dfn></dt>
                     <dd>
-                        <p><strong>V Symfony:</strong> třída, která obsluhuje HTTP požadavek. <strong>V DDD:</strong> driving adaptér, který patří do <code>App\&lt;BC&gt;\Infrastructure\Http\</code>. Ne do Application a už vůbec ne do Domain.</p>
+                        <p><strong>V Symfony:</strong> třída, která obsluhuje HTTP požadavek. <strong>V DDD:</strong> driving adaptér, který patří do <code>App\&lt;BC&gt;\Infrastructure\Http\</code>, nikoli do Application, natož do Domain.</p>
                     </dd>
                 </div>
 
@@ -1380,7 +1389,7 @@
                     <tr>
                         <th>Symfony konstrukt</th>
                         <th>DDD pojem</th>
-                        <th>Kde to v projektu sedí</th>
+                        <th>Umístění v projektu</th>
                         <th>Detail / anti-vzor</th>
                     </tr>
                 </thead>
@@ -1395,7 +1404,7 @@
                         <td><code>#[AsMessageHandler]</code> handler</td>
                         <td>Aplikační služba (use case)</td>
                         <td><code>App\&lt;BC&gt;\Application\Handler\</code></td>
-                        <td><a href="{{ path('cqrs') }}">CQRS v Symfony 8</a> · doménovou logiku deleguje na agregát</td>
+                        <td><a href="{{ path('cqrs') }}">CQRS</a> · doménovou logiku deleguje na agregát</td>
                     </tr>
                     <tr>
                         <td><code>EntityRepository</code> (Doctrine)</td>

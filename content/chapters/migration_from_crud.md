@@ -7,14 +7,14 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
 chapter_number: "18"
 category: Praxe
-deck: "Podrobný průvodce migrací z CRUD architektury na Domain-Driven Design v Symfony. Strangler Fig Pattern, extrakce doménové vrstvy, zavedení repozitářů a postupné zavedení CQRS s praktickými PHP příklady."
-reading_time: 33
+deck: "Přechod z CRUD aplikace na DDD v Symfony bez přepisování od nuly: Strangler Fig Pattern, vytažení doménové vrstvy, zavedení repozitářů a postupné CQRS. S příklady v PHP."
+reading_time: 34
 difficulty: 3
 github_examples: Chapter09_Migration
 ---
@@ -30,9 +30,9 @@ logika se začne usazovat na nevhodných místech.
 ### Příznaky, že CRUD architektura nestačí {#priznaky-heading}
 
 - **God Services (Boží služby)** – Třídy jako `UserService` nebo `OrderService` mají stovky řádků a soustřeďují celou doménovou logiku. Každá nová funkce vede do stejné třídy a riziko regresí roste.
-- **Fat Controllers (Tlusté kontrolery)** – Symfony kontrolery přestaly být tenkou vrstvou pro HTTP adaptaci. Místo toho přímo implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler má delegovat na doménový model, nikoli ho suplovat.
-- **Doménová logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Tato logika patří do doménového modelu, nikoli do databázové vrstvy.
-- **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, service nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
+- **Fat Controllers (Tlusté kontrolery)** – Kontrolery přestaly být tenkou HTTP vrstvou a samy implementují doménová pravidla: validaci, výpočty, přechody stavů. Kontroler má delegovat na doménový model, nikoli ho suplovat.
+- **Doménová logika v repozitářích** – Doctrine repozitáře obsahují komplexní podmínky, které vyjadřují doménová pravidla (např. „objednávky, které je možné zrušit“). Taková logika patří do doménového modelu, ne do databázové vrstvy.
+- **Překrývání zodpovědností** – Není jasné, zda konkrétní pravidlo patří do kontroleru, služby, nebo repozitáře. Tým nemá sdílené chápání, kde co hledat.
 - **Nízká testovatelnost** – Doménová logika je srostlá s HTTP vrstvou nebo databází. Unit test doménového pravidla vyžaduje rozsáhlé mockování.
 - Vývojáři a doménoví experti používají jiný slovník: **komunikační propast**. Kód neodráží doménový jazyk; pojmy jako „aktivace účtu“ nebo „storno objednávky“ nejsou viditelné v názvech tříd a metod.
 :::
@@ -41,7 +41,7 @@ logika se začne usazovat na nevhodných místech.
 
 Rozhodnutí o migraci stojí na analýze komplexity domény, ne na trendech.
 Martin Fowler v katalogu vzorů podnikových aplikací ukazuje, že Transaction Script
-a CRUD jsou legitimní volbou pro aplikace s jednoduchými doménovými pravidly
+a CRUD jsou rozumnou volbou pro aplikace s jednoduchými doménovými pravidly
 [[1]](https://martinfowler.com/eaaCatalog/transactionScript.html).
 
 :::callout{type="note"}
@@ -57,7 +57,7 @@ a CRUD jsou legitimní volbou pro aplikace s jednoduchými doménovými pravidly
 
 - Aplikace zůstává CRUD nad databázovými tabulkami bez doménové logiky.
 - Doménová pravidla jsou triviální a stabilní.
-- Tým je malý a čas na migraci není dostupný.
+- Tým je malý a na migraci nemá čas.
 - Aplikace je krátkodobá nebo se bude v blízké budoucnosti kompletně přepisovat.
 :::
 
@@ -68,16 +68,16 @@ sama o sobě nic nepřinese. Užitek přijde, až tým začne přidávat funkce 
 
 Inkrementální migrace středně velké CRUD aplikace (50–100 tabulek, 3–5 let vývoje) zabere
 zpravidla 12 až 24 měsíců. To číslo je zkušenostní řádový odhad, ne měření. Počítá s tím,
-že migrace běží souběžně s vývojem nových funkcí a nemá dedikovaný tým na plný úvazek.
+že migrace běží souběžně s vývojem nových funkcí a nemá vlastní tým na plný úvazek.
 Dobu prodlužuje špatná testovatelnost stávajícího kódu, slabá znalost domény v týmu
 a nedostupnost doménových expertů.
 
 Rozhodovací kritérium přitom není technické. Investice se vrátí, jen když přínos za
 zbývající životnost systému převýší cenu migrace s rezervou. Nákladový model i situace, kdy
-se investice nikdy nedoběhne, rozebírá sekce
+se investice nikdy nevrátí, rozebírá sekce
 [Migration cost paradox](/kdy-nepouzivat-ddd#migration-paradox-heading).
-Management přijme migraci snáz, když probíhá inkrementálně souběžně s vývojem nových funkcí,
-ne jako izolovaný refaktoringový projekt.
+Management přijme migraci snáz jako průběžnou práci vedle nových funkcí než jako izolovaný
+refaktoringový projekt.
 
 ### Kdy migraci nezačínat a kdy je přepis levnější {#kdy-nezacinat}
 
@@ -91,13 +91,13 @@ Tři situace mluví proti migraci vůbec:
   CRUD, ne doménový model. Tuto past popisuje kapitola
   [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd#pseudo-ddd-cargo-cult-heading).
 
-Opačný pól je stejně reálný. Přepis od nuly vyjde levněji tam, kde je systém menší než
+Přepis od nuly naopak vyjde levněji tam, kde je systém menší než
 náklad na zavedení švů a charakterizačních testů, nebo kde ještě nejsou produkční uživatelé
 a data. Martin Fowler pro to má jméno Sacrificial Architecture
 [[6]](https://martinfowler.com/bliki/SacrificialArchitecture.html): architektura navržená
-s tím, že se za pár let zahodí, je legitimní volba. Podstatná je podmínka, která k tomu patří.
-Rozhodnout o zahození má tým, který systém napsal – ne někdo, kdo přichází zvenčí se slibem,
-že to udělá lépe.
+s tím, že se za pár let zahodí, je rozumná volba. Patří k ní ale podmínka: o zahození
+rozhoduje tým, který systém napsal – ne nový tým, který přijde zvenčí a starý kód chce
+přepsat, protože se mu nelíbí.
 
 ## 18.02 Strangler Fig Pattern – vzor postupné náhrady {#strangler-fig}
 
@@ -108,8 +108,8 @@ od tropického fíkovníku, který roste kolem hostitelského stromu a postupně
 
 Původní zápis vyšel 29. června 2004 pod názvem *Strangler Application*. Dne 29. dubna 2019
 Fowler vzor přejmenoval na *Strangler Fig Application*: zkrácené „strangler“ se odtrhlo od
-botanické metafory a začalo vyznívat násilně. Starší název proto potkáte v článcích
-i v názvech knihoven dodnes.
+botanické metafory a začalo vyznívat násilně. Starší název se v článcích i v názvech
+knihoven drží dodnes.
 
 :::diagram{fig="18.2-A" title="Strangler Fig: čtyři fáze migrace CRUD → DDD" src="images/diagrams/19_migration_from_crud/strangler_fig.svg"}
 :::
@@ -119,7 +119,7 @@ i v názvech knihoven dodnes.
 
 1. **Nová funkcionalita** vzniká vždy v DDD stylu: nové Bounded Contexts, doménové objekty, repozitáře.
 2. **Stará funkcionalita** zůstává v CRUD podobě a nahrazuje se postupně při refaktoringu nebo při úpravách stávajících funkcí.
-3. **Koexistence** – obě části systému fungují paralelně, propojuje je Anti-Corruption Layer nebo sdílená databáze.
+3. **Koexistence** – obě části systému fungují paralelně a propojuje je Anti-Corruption Layer. Sdílená databáze je jen přechodný stav, dokud nový kontext nemá vlastní data (viz [Datová migrace při Strangler Fig](#datova-migrace-strangler-heading)).
 4. **Postupná eliminace** – s každou iterací se CRUD část zmenšuje a DDD část roste, dokud starý kód nevymizí.
 :::
 
@@ -162,7 +162,7 @@ src/
 :::
 :::
 
-### Výhody oproti přímé refaktorizaci (Big Bang Rewrite)
+### Výhody oproti přepisu najednou (big bang rewrite)
 
 Přepsat celý systém najednou („big bang rewrite“) patří k největším rizikům
 softwarového vývoje. Joel Spolsky v článku „Things You Should Never Do“
@@ -170,19 +170,19 @@ softwarového vývoje. Joel Spolsky v článku „Things You Should Never Do“
 popisuje, proč firmy ztratily konkurenční výhodu tím, že kompletně přepsaly fungující systémy.
 Strangler Fig Pattern oproti tomu:
 
-- Umožňuje kontinuální dodávku nové hodnoty zákazníkovi i během migrace.
+- Zákazník dostává nové funkce i během migrace.
 - Snižuje riziko: systém nikdy není kompletně „rozbitý“.
-- Poskytuje možnost rollbacku: pokud nová implementace selhává, stará stále funguje.
+- Dovoluje návrat: když nová implementace selže, stará dál funguje.
 - Tým se učí DDD postupně, na reálném produkčním kódu.
 - Refaktoring lze zastavit kdykoli, systém zůstává v konzistentním, funkčním stavu.
 
 ### Co vzor neřeší
 
-Ve verzi textu z roku 2024 Fowler popis rozšířil ze čtyř kroků v kódu na čtyři aktivity:
-ujasnit cílové výsledky, najít v systému švy a rozdělit problém na části, dodávat náhrady
-inkrementálně a měnit organizační praktiky. Poslední bod týmy vynechávají nejčastěji.
-Bez něj vznikne systém stejně křehký jako ten nahrazený, jen postavený na novějším
-frameworku [[2]](https://martinfowler.com/bliki/StranglerFigApplication.html).
+Původní zápis byl krátká úvaha nad metaforou. V roce 2024 ho Fowler přepsal a převzal
+od Iana Cartwrighta, Roba Horna a Jamese Lewise čtyři aktivity: ujasnit cílové výsledky,
+rozdělit problém na menší části, dodávat je postupně a měnit organizaci. Poslední bod týmy
+vynechávají nejčastěji. Bez změny organizace skončí nový systém stejně křehký jako ten
+nahrazený, jen na novějším frameworku [[2]](https://martinfowler.com/bliki/StranglerFigApplication.html).
 
 Vzor komplexitu neodstraňuje, rozprostírá ji v čase. Platí se za to přechodovou
 architekturou: routovací vrstvou, dvojím zápisem, překladovými adaptéry. Ian Cartwright,
@@ -274,7 +274,7 @@ Slabým místem koexistence dvou architektur jsou data. Nový model si sáhne pr
 uživatele do legacy tabulky, převezme její sloupce jeden ku jedné a za měsíc vypadá stejně
 jako to, co měl nahradit. Anti-Corruption Layer je vrstva, která tomu brání: překládá cizí
 model na doménový a zpět, a nic jiného nedělá. Plný výklad vzoru včetně jeho místa na Context
-Mapě je v kapitole [Context Mapping](/context-mapping#acl), zde jde o jeho migrační podobu.
+Mapě je v kapitole [Bounded Context a Context Mapping](/context-mapping#acl), zde jde o jeho migrační podobu.
 
 Cartwright, Horn a Lewis popisují tutéž věc pod jménem Legacy Mimic
 [[10]](https://martinfowler.com/articles/patterns-legacy-displacement/legacy-mimic.html):
@@ -288,8 +288,7 @@ Tři pravidla drží ACL na uzdě:
    kód o existenci legacy tabulky neví.
 2. Překlad je explicitní kontrakt. Co legacy model neumí vyjádřit, se doplní výchozí
    hodnotou nebo hlasitě selže. Doménový model se kvůli tomu neohýbá.
-3. ACL má datum expirace. Až legacy zápisy skončí, vrstva se maže. Přechodová architektura,
-   kterou nikdo nezahodil, je jen další legacy.
+3. ACL má datum expirace. Až legacy zápisy skončí, vrstva se maže.
 
 :::callout{type="pattern"}
 ### Příklad: Translator z legacy řádku na doménový agregát {#acl-translator-heading}
@@ -393,7 +392,7 @@ Kerievsky už v roce 2006. Týká se změny jednoho rozhraní, ne celého systé
 - **Contract** – stará varianta se odstraní. Odchod se ohlásí atributem `#[\Deprecated]`
   (PHP 8.4) nebo `trigger_error(..., E_USER_DEPRECATED)`.
 
-Kód je nasaditelný v každé ze tří fází, a v tom je hodnota vzoru. Stejná trojice platí i pro
+Hodnota vzoru je v tom, že kód jde nasadit v každé ze tří fází. Stejná trojice platí i pro
 databázové schéma; popisuje ji čtyřfázová migrace dat v sekci
 [Strangler Fig Pattern](#strangler-fig).
 
@@ -405,7 +404,7 @@ cílová změna se provede rovnou a nechá se selhat. Z chybových hlášek a pa
 odvodí prerekvizity, změna se zahodí (`git checkout .`) a řeší se nejdřív listy vzniklého
 grafu. Graf tak vzniká z reality kompilátoru a testů, ne z odhadu u tabule.
 
-K metodě patří pravidlo, které migraci drží při životě: refaktoring musí jít kdykoli
+Noback k ní přidává pravidlo: refaktoring musí jít kdykoli
 zastavit a projekt musí být v tu chvíli v lepším stavu než na začátku
 [[14]](https://matthiasnoback.nl/2021/02/refactoring-prepare-to-stop/). Migrace, která
 je použitelná až po dokončení, je big bang rozložený do sprintů.
@@ -428,10 +427,10 @@ Bounded Contexts se v existující CRUD aplikaci poznají podle přirozených hr
 
 Event Storming vymyslel Alberto Brandolini
 [[4]](https://www.eventstorming.com/). Workshopová technika modeluje doménu
-přes doménové události a zapojuje do návrhu i lidi mimo vývojový tým. Při migraci z CRUD odkrývá
-logiku skrytou v kontrolerech a service třídách. Pojmenuje také přechody stavů entit z pohledu
-domény, ne databáze, ukáže přirozené hranice Bounded Contexts a přivede k návrhu doménové experty. Notaci, průběh
-workshopu a jeho tři úrovně rozebírá kapitola [Event Storming](/event-storming#big-picture).
+přes doménové události a přivádí k návrhu i lidi mimo vývojový tým, hlavně doménové experty.
+Při migraci z CRUD odhalí logiku ukrytou v kontrolerech a service třídách, pojmenuje přechody
+stavů z pohledu domény, ne databáze, a ukáže přirozené hranice Bounded Contexts. Notaci, průběh
+workshopu a jeho tři úrovně rozebírá kapitola [Event Storming a Domain Storytelling](/event-storming#big-picture).
 
 ### Co nemigrovat
 
@@ -478,12 +477,14 @@ class UserController extends AbstractController
         $email = $request->request->get('email');
         $password = $request->request->get('password');
 
-        // Doménová logika č. 1: validace emailu (patří do Value Object)
+        // Doménová logika č. 1: validace e-mailu (patří do Value Objectu)
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->json(['error' => 'Neplatný e-mail'], 422);
         }
 
-        // Doménová logika č. 2: kontrola unikátnosti (patří do doménové služby)
+        // Doménová logika č. 2: unikátnost e-mailu. Dotaz před zápisem je
+        // TOCTOU race – dva souběžné požadavky projdou oba. Cílový stav ji
+        // svěří unique constraintu v databázi (viz krok 4).
         $existing = $this->em->getRepository(User::class)
             ->findOneBy(['email' => $email]);
         if ($existing) {
@@ -521,7 +522,7 @@ výchozí stav uživatele a vedlejší efekt registrace (uvítací e-mail jako D
 ## 18.06 Krok 2: Extrakce doménové vrstvy {#extrakce-domainove-vrstvy}
 
 Extrakce přesouvá doménová pravidla z kontrolerů a service tříd do objektů, kterým patří.
-Tyto objekty si invarianty hlídají samy a zvenčí je nikdo neobejde.
+Ty si invarianty hlídají samy a zvenčí je nikdo neobejde.
 
 ### Přesunutí doménových pravidel do doménových objektů
 
@@ -539,6 +540,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mailer\MailerInterface;
 
 class UserService
 {
@@ -550,15 +552,15 @@ class UserService
     public function register(string $email, string $password): User
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException('Neplatný e-mail');
+            throw new \InvalidArgumentException('Invalid e-mail');
         }
         if (strlen($password) < 8) {
-            throw new \InvalidArgumentException('Heslo příliš krátké');
+            throw new \InvalidArgumentException('Password too short');
         }
         $existing = $this->em->getRepository(User::class)
             ->findOneBy(['email' => $email]);
         if ($existing) {
-            throw new \RuntimeException('E-mail již existuje');
+            throw new \RuntimeException('E-mail already exists');
         }
 
         $user = new User();
@@ -720,7 +722,7 @@ Entita `User` teď sama vynucuje výchozí stav, přechod stavu při aktivaci a 
 Domain Eventu při registraci. Kontroler ani service tato pravidla neobejde.
 
 Cílový model rozšiřuje kanonického `User` z kapitoly
-[Implementace v Symfony](/implementace-v-symfony#entity-example-heading) o aktivaci.
+[Implementace v Symfony 8](/implementace-v-symfony#entity-example-heading) o aktivaci.
 Vlastnosti `createdAt` a `hashedPassword` i getter `hashedPassword()` zůstávají beze změny,
 přibývá stav a ověřovací token.
 Typy, které k tomu potřebuje, definuje následující blok. Výjimky
@@ -764,7 +766,7 @@ final readonly class VerificationToken
     private function __construct(public string $value)
     {
         if ($value === '') {
-            throw new \InvalidArgumentException('Ověřovací token nesmí být prázdný.');
+            throw new \InvalidArgumentException('Verification token must not be empty.');
         }
     }
 
@@ -851,16 +853,16 @@ final class UnmappableLegacyStatusException extends \RuntimeException
 {
     public function __construct(string $legacyStatus)
     {
-        parent::__construct(sprintf('Legacy stav "%s" nemá v doméně protějšek.', $legacyStatus));
+        parent::__construct(sprintf('Legacy status "%s" has no domain counterpart.', $legacyStatus));
     }
 }
 :::
 :::
 
-### Zavedení Value Objects místo primitive types
+### Value Objects místo primitivních typů
 
-Doménový koncept skrytý v `string` nebo `int` se nazývá Primitive Obsession. Value Object nahradí
-primitiv objektem, který drží validaci i chování pohromadě.
+Doménový koncept schovaný do `string` nebo `int` je příznak zvaný Primitive Obsession. Value Object
+nahradí primitiv objektem, který drží validaci i chování pohromadě.
 
 :::callout{type="pattern"}
 ### Příklad: Refaktorizace string emailu na Email Value Object {#email-vo-heading}
@@ -895,13 +897,13 @@ final readonly class Email
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException(
-                sprintf('"%s" není platná e-mailová adresa.', $value)
+                sprintf('"%s" is not a valid e-mail address.', $value)
             );
         }
 
         // Zakázané domény patří do továrny pro uživatelský vstup, ne do
         // konstruktoru. Konstruktorem prochází i rehydratace z databáze,
-        // takže by tohle pravidlo znemožnilo načíst legacy řádky, které
+        // takže by toto pravidlo znemožnilo načíst legacy řádky, které
         // takovou adresu už obsahují.
     }
 
@@ -942,7 +944,7 @@ final class ForbiddenEmailDomainException extends \DomainException
 {
     public static function forDomain(string $domain): self
     {
-        return new self(sprintf('Registrace z domény „%s“ není povolená.', $domain));
+        return new self(sprintf('Registration from domain "%s" is not allowed.', $domain));
     }
 }
 :::
@@ -976,7 +978,6 @@ namespace App\UserManagement\Domain\Repository;
 use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
-use App\UserManagement\Domain\ValueObject\UserName;
 
 interface UserRepository
 {
@@ -985,9 +986,6 @@ interface UserRepository
     public function findById(UserId $id): ?User;
 
     public function findByEmail(Email $email): ?User;
-
-    /** @return User[] */
-    public function findActiveUsers(): array;
 }
 :::
 
@@ -1003,8 +1001,6 @@ use App\UserManagement\Domain\Model\User;
 use App\UserManagement\Domain\Repository\UserRepository;
 use App\UserManagement\Domain\ValueObject\Email;
 use App\UserManagement\Domain\ValueObject\UserId;
-use App\UserManagement\Domain\ValueObject\UserName;
-use App\UserManagement\Domain\ValueObject\UserStatus;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class DoctrineUserRepository implements UserRepository
@@ -1016,8 +1012,8 @@ final class DoctrineUserRepository implements UserRepository
     public function save(User $user): void
     {
         $this->em->persist($user);
-        // Flush je záměrně ponechán na aplikační vrstvě (Command Handler)
-        // aby byla možná transakční konzistence přes více agregátů
+        // Jen persist. Flush patří handleru, commit middlewaru
+        // doctrine_transaction – repozitář transakci neřídí.
     }
 
     public function findById(UserId $id): ?User
@@ -1032,23 +1028,12 @@ final class DoctrineUserRepository implements UserRepository
         return $this->em->getRepository(User::class)
             ->findOneBy(['email' => $email]);
     }
-
-    public function findActiveUsers(): array
-    {
-        return $this->em->createQueryBuilder()
-            ->select('u')
-            ->from(User::class, 'u')
-            ->where('u.status = :status')
-            ->setParameter('status', UserStatus::Active)
-            ->getQuery()
-            ->getResult();
-    }
 }
 :::
 
 Doménová vrstva závisí jen na rozhraní `UserRepository`, konkrétní `DoctrineUserRepository`
-do služeb injektuje Symfony DI container. Implementaci repozitáře tak lze vyměnit
-v konfiguraci bez změny doménového kódu.
+do služeb injektuje Symfony DI container. Seznamové dotazy, například aktivní uživatelé pro
+administraci, do rozhraní nepatří. Obsluhuje je read model z [kroku 4](#cqrs-postupne).
 Pole `email` je mapované custom Doctrine typem `email_vo`, proto `findOneBy` dostává přímo
 Value Object. Převod na databázovou hodnotu zajistí typ, žádná cesta `email.value` neexistuje.
 Totéž platí pro identifikátor: `find()` dostane `UserId`, ne primitiv. Doctrine ale u ID
@@ -1079,7 +1064,7 @@ kde je neviditelná a hůř se testuje.
 
 Na write side, u operací měnících stav systému, už doménový model existuje a Command jen
 pojmenuje záměr. Čtení může zpočátku zůstat na přímých Doctrine dotazech;
-optimalizované SQL jako read model je v DDD systému legitimní trvalý stav, ne provizorium.
+optimalizované SQL jako read model je v DDD systému plnohodnotný trvalý stav, ne provizorium.
 
 :::callout{type="pattern"}
 ### Příklad: Extrakce commandu RegisterUser z UserController {#command-extraction-heading}
@@ -1235,18 +1220,18 @@ která pro něj vznikne, je později připravená konzumovat doménové událost
 Konkrétně: dotaz z `OrderRepository::findAllForListing()` se přesune do `OrderListQuery`
 s vlastním handlerem a read DTO, samotné SQL zůstane beze změny. Až se write model překlopí,
 mění se jen tělo handleru; kontroler ani šablona o tom nevědí. Read modely, jejich projekce
-a eventual consistency rozebírá kapitola [CQRS v Symfony](/cqrs).
+a eventual consistency rozebírá kapitola [CQRS](/cqrs).
 
 ## 18.09 Testování při migraci {#testovani-pri-migraci}
 
 O úspěchu migrace rozhodují testy. Bez nich refaktoring zavleče regrese, které se ukážou
-až v produkci. Migrace z CRUD na DDD potřebuje dvě techniky: charakterizační testy pro zachycení
-stávajícího chování a unit testy pro nově vznikající doménovou vrstvu.
+až v produkci. Migrace z CRUD na DDD potřebuje dvě techniky: charakterizační testy, které zachytí
+stávající chování, a unit testy nové doménové vrstvy.
 
 ### Charakterizační testy (Characterization Tests)
 
-Pojem „charakterizační testy“ pochází z knihy Michaela Featherse „Working Effectively with Legacy
-Code“
+Pojem „charakterizační testy“ pochází z knihy Michaela Featherse *Working Effectively with Legacy
+Code*
 [[5]](https://www.oreilly.com/library/view/working-effectively-with/0131177052/).
 Charakterizační test nepopisuje, jak by se systém *měl* chovat, ale jak se *aktuálně chová*.
 Při refaktoringu zachytí nechtěné změny chování. Feathers zároveň definuje legacy code
@@ -1263,8 +1248,8 @@ stojí značné úsilí. Je to investice, ne vedlejší produkt refaktoringu.
 V Symfony CRUD kódu se opakují tři:
 
 - **Konstruktorová injekce místo `new`.** Řádek `$mailer = new SmtpMailer();` uvnitř metody
-  šev nemá. Přesun závislosti do konstruktoru z něj šev udělá a enabling point se přesune
-  do konfigurace služeb.
+  šev nemá. Závislost předaná konstruktorem ho vytvoří a enabling point tím skončí
+  v konfiguraci služeb.
 - **Interface místo konkrétní třídy.** Type hint na `UserRepository` místo na
   `DoctrineUserRepository` posune enabling point do `services.yaml`, kde ho test přepíše.
 - **Event listener místo inline kódu.** Vedlejší efekt vytažený z metody do listeneru jde
@@ -1276,7 +1261,7 @@ Plné pokrytí legacy systému charakterizačními testy nikdo nenapíše a kdo 
 nezačne. Matthias Noback argumentuje, že strukturální transformace zachovávající chování
 jsou bezpečné i bez testů, pokud je jistí statická analýza a párové programování
 [[17]](https://matthiasnoback.nl/2022/10/refactoring-without-tests-should-be-fine/).
-Použitelná gradace vypadá takto:
+Použitelná gradace:
 
 1. Automatizovaný refaktoring z IDE (rename, extract method, move class) proběhne bez testu.
 2. Ruční strukturální změna pod PHPStan na úrovni 8 a s jedním vysokoúrovňovým smoke testem.
@@ -1360,14 +1345,19 @@ class UserRegistrationCharacterizationTest extends WebTestCase
 Charakterizační test vzniká *před* refaktoringem části, které se týká, a prochází po celou
 dobu migrace. Když selže, refaktoring změnil pozorovatelné chování systému – záměrně,
 nebo omylem.
+
+Jedna záměrná změna čeká už u registrace. Legacy kód přijme heslo od 8 znaků, cílový
+`HashedPassword::fromPlainText()` až od 12. Heslo o 8 až 11 znacích, které starý systém bral,
+nový odmítne. Charakterizační test na tuto hranici se proto přepisuje vědomě a změnu schvaluje
+produkt, ne refaktoring.
 :::
 
 ### Unit testy doménové vrstvy
 
 Doménový objekt, který nezná databázi ani HTTP, se testuje bez nich. Test běží
-v milisekundách, nemá závislost na okolí a čte se jako zápis doménového pravidla.
+v milisekundách, na okolí nezávisí a čte se jako zápis doménového pravidla.
 Techniky, které tuto vrstvu pokrývají do hloubky, rozebírá kapitola
-[Testování DDD aplikací](/testovani-ddd#unit-testy-domeny): InMemory repozitáře, testování
+[Testování DDD](/testovani-ddd#unit-testy-domeny): InMemory repozitáře, testování
 doménových událostí a architektonické testy.
 
 :::callout{type="pattern"}
@@ -1445,7 +1435,7 @@ final class UserTest extends TestCase
 
 - **Anémický doménový model** – Nejčastější past. Třídy dostanou názvy jako v DDD (`User`, `Order`), obsahují ale jen gettery a settery a logika zůstane v service třídách. Vznikne DDD terminologie s CRUD implementací.
 - **Přílišná granularita Bounded Contexts** – Příliš mnoho malých kontextů vede k distribuované komplexitě, protože každá integrace mezi nimi něco stojí. Bezpečnější start jsou větší kontexty; dělí se, až když je důvod jasný.
-- **ORM diktující tvar modelu** – Anti-vzorem není atributové mapování samo o sobě; [sekce 18.06](#extrakce-domainove-vrstvy) i Recept 2 ho přijímají jako pragmatickou volbu. Problém začíná, když ORM určuje tvar modelu: public settery kvůli hydrataci, anemická entita, `flush()` volaný z kontroleru. Projekty, které potřebují striktní oddělení domény od persistence, řeší tutéž potřebu přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern).
+- **ORM diktující tvar modelu** – Anti-vzorem není atributové mapování samo o sobě; [sekce 18.06](#extrakce-domainove-vrstvy) i Recept 2 ho přijímají jako pragmatickou volbu. Problém začíná, když ORM určuje tvar modelu: public settery kvůli hydrataci, anémická entita, `flush()` volaný z kontroleru. Projekty, které potřebují striktní oddělení domény od persistence, řeší tutéž potřebu přes [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern).
 - **CQRS bez doménového modelu** – Zavedení CommandBusu a QueryBusu bez refaktorovaného doménového modelu přidá vrstvy komplexity bez přínosu. CQRS je amplifikátor: zesílí jak výhody, tak problémy stávající architektury.
 - **Chybějící Anti-Corruption Layer** – Integrace nové DDD vrstvy se starým CRUD kódem potřebuje překladovou vrstvu. Bez ní pronikají pojmy starého modelu do nového.
 
@@ -1492,17 +1482,17 @@ dostává nové funkce a nový za ním nestíhá. Výsledkem je buď zrušení p
 nedokončeného systému se závažnými chybami.
 
 Alternativou je **inkrementální migrace pomocí Strangler Fig Patternu**:
-funkční systém zůstává v produkci, DDD vrstva přibývá po vrstvě a CRUD kód mizí
-postupně při každém sprintu.
+funkční systém zůstává v produkci, DDD část přibývá po kouscích a CRUD kód mizí
+sprint po sprintu.
 :::
 
 DDD koncepty a jejich implementaci v Symfony rozebírají navazující kapitoly
-[Implementace DDD v Symfony](/implementace-v-symfony)
-a [CQRS v Symfony](/cqrs). Konkrétní třecí plochy, na které migrace naráží v produkci,
-shrnuje kapitola [DDD v praxi: kde to bolí](/ddd-v-praxi-kde-to-boli): Doctrine,
+[Implementace v Symfony 8](/implementace-v-symfony)
+a [CQRS](/cqrs). Konkrétní třecí plochy, na které migrace naráží v produkci,
+shrnuje kapitola [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli): Doctrine,
 asynchronní infrastruktura a tým.
 
-## 18.11 Refaktoring kuchařka – krátké recepty {#refactoring-kucharka}
+## 18.11 Refaktoringová kuchařka – krátké recepty {#refactoring-kucharka}
 
 Strangler Fig je strategický pohled na celou migraci. V denní praxi se opakují drobné situace;
 kuchařka jich shrnuje devět nejčastějších, každou ve formátu *„symptomy → krok 1, 2, 3“*.
@@ -1515,7 +1505,7 @@ Recepty jsou záměrně krátké, důkladnější rozbor nesou odkazované kapit
 1. Identifikujte invarianty entity (co se nesmí porušit).
 2. Pro každý invariant najděte metodu v `*Service`, která ho dnes drží.
 3. Přesuňte metodu do entity, getter/setter zúžte na `private` nebo zrušte.
-4. Service se stane tenkým koordinátorem (Application Service): jen volá entitu, transakce, eventy.
+4. Service se zúží na tenký koordinátor (Application Service): načte entitu, zavolá její metodu a předá události.
 5. Souvisí: [Anti-vzor: Anemic Domain Model](/anti-vzory) · [Domain Services vs. Application Services](/mene-zname-vzory#domain-services).
 
 ### Recept 2: Doctrine atributy v doménové třídě – kdy je to problém {#recept-doctrine-anotace-heading}
@@ -1524,7 +1514,7 @@ Recepty jsou záměrně krátké, důkladnější rozbor nesou odkazované kapit
 
 Pragmatická výchozí volba v tomto průvodci atributy přijímá: jsou to metadata, ne chování,
 a Symfony ekosystém s nimi pracuje idiomaticky (viz [rozhodnutí o mappingu](/implementace-v-symfony#mapping-volba-heading)).
-Pokud váš projekt skutečně potřebuje striktní oddělení (Hexagonal, dlouhodobá výměna ORM,
+Když projekt striktní oddělení opravdu potřebuje (Hexagonal, dlouhodobá výměna ORM,
 core doména s vysokou hodnotou), postup je:
 
 1. Zaveďte [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern):
@@ -1533,8 +1523,8 @@ core doména s vysokou hodnotou), postup je:
 2. Mapper hydratujte z perzistence přes rekonstituční továrnu (jako `User::reconstitute()`
    v [sekci 18.06](#extrakce-domainove-vrstvy)), která neemituje doménové události.
 3. Hlídejte hranici staticky: `composer require --dev phparkitect/phparkitect` + pravidlo
-   `App\<BC>\Domain\* nesmí závisět na Doctrine\*` (kniha používá phparkitect napříč
-   kapitolami, alternativou je `deptrac`).
+   `App\<BC>\Domain\* nesmí závisět na Doctrine\*` (kniha používá phparkitect ve více
+   kapitolách, alternativou je `deptrac`).
 
 ### Recept 3: Primitivní ID jako `string` / `int` {#recept-id-string-heading}
 
@@ -1542,40 +1532,40 @@ core doména s vysokou hodnotou), postup je:
 
 1. Zaveďte VO `OrderId` (`final readonly class OrderId { public function __construct(public string $value) {} }`, generování přes `Uuid::v7()`).
 2. Doctrine custom type pro `OrderId` (mapping z DB string ↔ VO). VO musí implementovat `__toString()`; `UnitOfWork` předpokládá, že identifikátor je převeditelný na řetězec, a bez toho mapování nefunguje.
-3. Postupně refaktorujte signature napříč handlery. PHPStan na úrovni 8 odhalí každý zapomenutý `string`.
+3. Postupně upravte signatury v handlerech. PHPStan na úrovni 8 odhalí každý zapomenutý `string`.
 
-### Recept 4: Doctrine tabulka sdílená napříč BC {#recept-shared-tabulka-heading}
+### Recept 4: Doctrine tabulka sdílená více BC {#recept-shared-tabulka-heading}
 
 **Symptomy:** tabulka `users` se používá v Ordering BC i Billing BC; oba do ní zapisují.
 
-1. Identifikujte vlastnícího BC (typicky Identity).
-2. Ostatní BC do ní nesmí zapisovat – jen číst. Čtení přesuňte do read-modelů (každý BC má vlastní projekci).
+1. Určete BC, kterému tabulka patří (typicky Identity).
+2. Ostatní BC do ní nesmí zapisovat – jen číst. Čtení přesuňte do read modelů (každý BC má vlastní projekci).
 3. Zápisy nahraďte voláním Identity API (sync HTTP nebo async event publishing s outboxem).
 4. Souvisí: [Outbox Pattern](/outbox-pattern).
 
-### Recept 5: Doménová logika v controlleru {#recept-business-logika-controlleru-heading}
+### Recept 5: Doménová logika v kontroleru {#recept-business-logika-controlleru-heading}
 
-**Symptomy:** 200řádkový controller s if-else stromem doménových rozhodnutí.
+**Symptomy:** 200řádkový kontroler s if-else stromem doménových rozhodnutí.
 
 1. Vytvořte `Command` DTO + `CommandHandler` v Application vrstvě.
-2. Controller se zúží na tři kroky: validace vstupu → dispatch commandu → odpověď.
+2. Kontroler se zúží na tři kroky: validace vstupu → dispatch commandu → odpověď.
 3. Autorizaci přesuňte do Voteru (souvisí [Autorizace](/autorizace-v-ddd)).
 
-### Recept 6: Aggregate bobtná (1000+ řádků) {#recept-aggregate-bobtna-heading}
+### Recept 6: Agregát bobtná (1000+ řádků) {#recept-aggregate-bobtna-heading}
 
 **Symptomy:** `Order` má 30 metod a 15 polí.
 
 1. Najděte pole, která se mění nezávisle (různé invarianty, různé use cases).
-2. Zvažte rozdělení na 2 agregáty (např. `Order` + `OrderShipment`). Spojí je sdílené `OrderId`, žádná silná reference.
+2. Zvažte rozdělení na dva agregáty (např. `Order` + `OrderShipment`). Spojí je sdílené `OrderId`, žádná silná reference.
 3. Specifikační logiku vyextrahujte do `Specification` tříd (souvisí [Specifications](/mene-zname-vzory#specification)).
 
 ### Recept 7: `eventDispatcher->dispatch()` uvnitř doménové metody {#recept-event-publish-uvnitr-heading}
 
-**Symptomy:** Aggregate volá Symfony `EventDispatcher` přímo.
+**Symptomy:** Agregát volá Symfony `EventDispatcher` přímo.
 
-1. Aggregate dědí z `AggregateRoot` a eventy zaznamenává voláním `record($event)`.
+1. Agregát dědí z `AggregateRoot` a eventy zaznamenává voláním `record($event)`.
 2. Aplikační handler po `repository->save()` volá `$order->releaseEvents()` a události zapíše do outboxu ve stejné transakci.
-3. Doména ztratí závislost na Symfony EventDispatcheru. Test je čistý.
+3. Doména ztratí závislost na Symfony EventDispatcheru a test se obejde bez frameworku.
 4. Souvisí: [Outbox – Aggregate publikuje](/outbox-pattern#aggregate-publishes).
 
 ### Recept 8: Stav je sloupec `string $status` {#recept-fields-jako-stav-heading}
@@ -1601,9 +1591,9 @@ core doména s vysokou hodnotou), postup je:
 - question: Co je Strangler Fig Pattern?
   answer: 'Strangler Fig (fíkovník škrtič) je migrační vzor popsaný Martinem Fowlerem, při kterém nová architektura postupně „obroste“ starý systém a nahradí ho po částech. Nová funkcionalita vzniká od začátku v DDD stylu, zatímco stará CRUD část zůstává v provozu a s každou iterací ubývá. Obě části existují paralelně a propojují se přes Anti-Corruption Layer. Podrobný rozbor v <a href="#strangler-fig">sekci Strangler Fig Pattern</a>.'
 - question: Jak začít s analýzou existující domény?
-  answer: 'Začíná se Event Stormingem nebo obdobnou kolaborativní technikou s doménovými experty: zmapují se hlavní události, commands a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language. Paralelně se v existujícím kódu hledají implicitní hranice modelu: moduly, tabulky nebo funkční celky, které jsou málo propojené. Cílem první iterace je hrubá mapa, ne úplný model. Praktický postup v <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
+  answer: 'Začíná se Event Stormingem nebo obdobnou kolaborativní technikou s doménovými experty: zmapují se hlavní události, příkazy a aktéři. Z této mapy vyplývá návrh Bounded Contexts a Ubiquitous Language. Paralelně se v existujícím kódu hledají implicitní hranice modelu: moduly, tabulky nebo funkční celky, které jsou málo propojené. Cílem první iterace je hrubá mapa, ne úplný model. Praktický postup v <a href="#analyza-domeny">sekci Analýza existující domény</a>.'
 - question: Jak extrahovat doménovou vrstvu z existujícího CRUD kódu?
   answer: 'Migrace začíná u jednoho vybraného Bounded Contextu, pro který vzniká nová doménová vrstva oddělená od Doctrine entit. Doménová logika ze service tříd a kontrolerů se přesouvá do metod agregátu, zatímco původní CRUD kód zůstává jako adaptér pro API a persistenci. Nejprve se zavede Anti-Corruption Layer, pak se refaktorují jednotlivé use casy. Charakterizační testy proti původnímu chování minimalizují regrese. Detailní rozbor v <a href="#extrakce-domainove-vrstvy">sekci Extrakce doménové vrstvy</a>.'
 - question: Jaká jsou hlavní rizika migrace z CRUD na DDD a jak je zmírnit?
-  answer: 'Nejčastější pastí je anémický model: nové třídy mají DDD názvy, ale logika zůstává v servisech. Dále hrozí nadměrná granularita Bounded Contexts, ORM diktující tvar modelu (veřejné settery kvůli hydrataci, flush z kontroleru) a zavádění CQRS bez přepracovaného modelu. Největším rizikem je Big Bang Rewrite, který se zřídka dotáhne do konce. Migrace má probíhat inkrementálně přes Strangler Fig, u středně velké aplikace s realistickým odhadem 12–24 měsíců. Rozbor rizik a zmírňujících opatření v <a href="#rizika-a-doporuceni">sekci Rizika a doporučení</a>.'
+  answer: 'Nejčastější pastí je anémický model: nové třídy mají DDD názvy, ale logika zůstává v service třídách. Dále hrozí nadměrná granularita Bounded Contexts, ORM diktující tvar modelu (veřejné settery kvůli hydrataci, flush z kontroleru) a zavádění CQRS bez přepracovaného modelu. Největším rizikem je Big Bang Rewrite, který se zřídka dotáhne do konce. Migrace má probíhat inkrementálně přes Strangler Fig, u středně velké aplikace s realistickým odhadem 12–24 měsíců. Rozbor rizik a zmírňujících opatření v <a href="#rizika-a-doporuceni">sekci Rizika a doporučení</a>.'
 :::

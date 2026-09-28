@@ -31,7 +31,7 @@
         hub_eyebrow: 'PŘÍRUČKA · ROZCESTNÍK · POKROČILÉ VZORY',
         hub_h_main: 'Pokročilé vzory,',
         hub_h_em: 'kde se DDD potkává s frameworkem.',
-        hub_deck: 'Vrstva, ve které model ovlivňuje infrastrukturu. <strong>CQRS</strong> dělí čtení a zápis přes Messenger. <strong>Event Sourcing</strong> ukládá stav jako sekvenci doménových událostí. <strong>Ságy</strong> řídí dlouhotrvající procesy s kompenzacemi. <strong>Outbox Pattern</strong> publikuje eventy bez dual-write rizika. <strong>Read modely a projekce</strong> rozhodují, zda architektura v provozu obstojí.',
+        hub_deck: 'Vrstva, ve které model ovlivňuje infrastrukturu. <strong>CQRS</strong> dělí čtení a zápis přes Messenger. <strong>Event Sourcing</strong> ukládá stav jako sekvenci doménových událostí. <strong>Ságy</strong> řídí dlouhotrvající procesy s kompenzacemi. <strong>Outbox Pattern</strong> publikuje události bez rizika dual-write. <strong>Read modely a projekce</strong> rozhodují, zda architektura v provozu obstojí.',
         hub_meta: [
             { k: 'Kapitol', v: hub_chapters|length },
             { k: 'Čtení', v: '~' ~ total_time ~ ' min' },
@@ -39,7 +39,7 @@
             { k: 'Aktualizace', v: updated }
         ],
         hub_part: 'PART IV',
-        hub_part_title: 'CQRS · ES · Sagy · Outbox · projekce',
+        hub_part_title: 'CQRS · ES · Ságy · Outbox · projekce',
         hub_part_sub: 'pokročilé vzory v Symfony 8',
         hub_chapters: hub_chapters
     } only %}

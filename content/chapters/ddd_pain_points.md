@@ -7,14 +7,14 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
 chapter_number: "20"
 category: Praxe
-deck: "Katalog 20 reálných bolestivých míst při implementaci DDD v PHP a Symfony: transakce přes agregáty, Doctrine mapping, Outbox pattern, debugging Messengeru, validace, Anti-Corruption Layer, přesvědčení managementu a další."
-reading_time: 27
+deck: "Dvacet míst, kde DDD v PHP a Symfony bolí: transakce přes více agregátů, Doctrine mapping, Outbox, ladění Messengeru, validace, Anti-Corruption Layer, přesvědčování managementu a další. U každého problém a řešení."
+reading_time: 28
 difficulty: 4
 github_examples: null
 ---
@@ -28,14 +28,14 @@ Implementace DDD naráží na problémy, které učebnice zpravidla nechávají 
 architektonické principy se střetávají s realitou frameworku, databáze,
 asynchronní infrastruktury i týmové dynamiky.
 
-Kapitola je **katalog 20 reálných provozních problémů**, se kterými se setkávají týmy
-implementující DDD v PHP a Symfony. Zaměřuje se na třenice s konkrétní technologií: Doctrine
-Unit of Work, Symfony Messenger, Outbox pattern, autorizace, race conditions. U většiny problémů
-najdete popis situace, příčinu a doporučené řešení, kde to pomůže, i s ukázkou kódu.
+Následuje katalog 20 problémů, na které narážejí týmy zavádějící DDD v PHP a Symfony.
+Většinou jde o třenice s konkrétní technologií: Doctrine Unit of Work, Symfony Messenger,
+Outbox pattern, autorizace, race conditions. U většiny problémů najdete popis situace,
+příčinu a doporučené řešení, kde to pomůže, i s ukázkou kódu.
 
-Pro úhel **kódových a modelovacích anti-vzorů** (anémický model, Primitive Obsession, God
-Aggregate, sdílená databáze napříč BC) viz [Anti-vzory](/anti-vzory). Pro **rozhodovací rámec**,
-jestli DDD vůbec použít, viz [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
+Kódové a modelovací anti-vzory (anémický model, Primitive Obsession, God Aggregate, sdílená
+databáze mezi kontexty) rozebírá kapitola [Anti-vzory a typické chyby](/anti-vzory), rozhodovací rámec,
+jestli DDD vůbec použít, kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 ## 20.01 A – Doctrine vs. doménový model {#doctrine}
 
@@ -46,27 +46,29 @@ na šesti místech.
 ### A1. Transakce přes agregáty a Doctrine Unit of Work {#a1-transakce}
 
 **Problém:** Vernonovo vodítko říká, že jedna transakce mění nejvýše jeden agregát.
-Praxe ale přináší situace, kdy je potřeba atomicky uložit změny ve dvou agregátech
-naráz. Například uzavřít skladový převod (stav *Transferred*) a zároveň
+Praxe ale přináší situace, kdy je potřeba atomicky uložit změny dvou agregátů. Například uzavřít skladový převod (stav *Transferred*) a zároveň
 potvrdit rezervaci zboží, kterou převod naplňuje. Doctrine sdílí jeden `EntityManager`
-(a tím jeden Unit of Work) přes celou aplikaci; jeden `flush()` commituje
+(a tím jeden Unit of Work) v celé aplikaci; jeden `flush()` zapíše
 vše, co EM sleduje.
 
 **Příčina:** Doctrine Unit of Work žije po celý request (nebo zpracování jedné zprávy). Drží
 identity map všech načtených entit a při `flush()` uloží všechny změny
 najednou v jediné databázové transakci. Pro CRUD je to pohodlné. V DDD to znamená,
-že neúmyslně změněná entita z jiného agregátu se commitne spolu s vaší
+že neúmyslně změněná entita z jiného agregátu se zapíše spolu s vaší
 záměrnou změnou.
 
-**Řešení:** Application Service funguje jako explicitní transakční hranice.
-Pokud use case vyžaduje atomickou změnu dvou agregátů a nelze použít
-[Outbox Pattern](/outbox-pattern) + [ságu](/sagy-a-process-managery), obalte obě změny
-jednou transakcí. Doctrine k tomu nabízí `wrapInTransaction()`, které dokumentace
+**Řešení:** Potřeba změnit dva agregáty atomicky je nejdřív diagnóza. Obvykle ukazuje
+na špatně vedenou hranici agregátu. Náprava pak hranici posune, nebo druhou změnu
+provede ve vlastní transakci přes doménovou událost, případně [ságu](/sagy-a-process-managery).
+Společný Bounded Context a společná databáze jsou jen technický předpoklad jedné
+transakce, ne její ospravedlnění. Obhajitelná je jen některá z výjimek, které rozebírá
+sekce [Kdy se vodítko poruší](/navrh-agregatu#breaking-the-rule) v kapitole
+[Návrh agregátu](/navrh-agregatu).
+
+Když tým takovou výjimku vědomě přijme, funguje Application Service jako explicitní
+transakční hranice. Doctrine k tomu nabízí `wrapInTransaction()`, které dokumentace
 doporučuje před ručním `beginTransaction()` / `commit()` právě proto, aby vývojář
-nezapomněl na rollback. Jde o **přijatelnou výjimku z pravidla jeden agregát =
-jedna transakce**, pokud oba agregáty leží ve stejném Bounded Contextu
-a ve stejné databázi. Kdy je taková výjimka obhajitelná a kdy jde o špatně vedenou hranici
-agregátu, rozebírá kapitola [Návrh agregátů](/navrh-agregatu).
+nezapomněl na rollback.
 
 :::callout{type="pattern"}
 #### PHP: Application Service jako transakční hranice {#a1-code-heading}
@@ -90,11 +92,12 @@ final class ConfirmTransferService
         private readonly EntityManagerInterface $em,
     ) {}
 
-    public function execute(ConfirmTransferCommand $command): void
+    public function execute(ConfirmTransfer $command): void
     {
         // wrapInTransaction() drží rollback i commit; vlastní try/catch není potřeba
         $this->em->wrapInTransaction(function () use ($command): void {
-            // Oba agregáty patří do kontextu Warehouse a sdílejí databázi.
+            // Vědomá výjimka z vodítka jeden agregát = jedna transakce.
+            // Společná databáze ji jen umožňuje, neospravedlňuje.
             $transfer    = $this->transfers->get($command->transferOrderId);
             $reservation = $this->reservations->get($command->reservationId);
 
@@ -115,27 +118,26 @@ a `EntityManager` uzavře; jakákoli další práce s ním skončí výjimkou. O
 výjimky o úroveň výš problém neřeší: volající drží nepoužitelný objekt.
 Dokumentace je v tomto jednoznačná: další unit of work po výjimce vyžaduje nový
 `EntityManager`. V Symfony ho vrátí `ManagerRegistry::resetManager()`. Prakticky to
-znamená, že request, ve kterém `flush()` selhal, už nemá co zachraňovat. Logujte
-a nechte ho spadnout.
+znamená, že request, ve kterém `flush()` selhal, už nemá co zachraňovat. Zbývá chybu
+zalogovat a request nechat spadnout.
 :::
 
 :::callout{type="note"}
-Pokud oba agregáty nesdílejí databázi (nebo jsou v různých Bounded Contexts),
-použijte místo transakce
-[Outbox Pattern](/outbox-pattern) nebo ságu.
-Atomická cross-context transakce je architektonický zápach.
+Když agregáty nesdílejí databázi nebo leží v různých Bounded Contexts, nastupuje
+místo transakce [Outbox Pattern](/outbox-pattern) nebo sága.
+Atomická transakce přes hranici kontextu je architektonický zápach.
 :::
 
 ### A2. „Špinavý“ EntityManager a nechtěné změny {#a2-spinavy-em}
 
-**Problém:** V read-heavy akcích (příprava dat pro API response, sestavení
-read modelu) načtete entitu z databáze, spočítáte nad ní hodnotu, ale *neuložíte nic*.
+**Problém:** V akcích, které převážně čtou (příprava dat pro odpověď API, sestavení
+read modelu), načtete entitu z databáze, spočítáte nad ní hodnotu, ale *neuložíte nic*.
 Přesto první `flush()` kdekoli v requestu (třeba v jiné části aplikace)
 zapíše změny do databáze. Entitu, kterou Doctrine stále sleduje, jste totiž nenápadně
 změnili.
 
 **Příčina:** Doctrine Identity Map si pamatuje každý načtený objekt
-a při `flush()` porovnává aktuální stav se snapshoty uloženými při
+a Unit of Work při `flush()` porovnává aktuální stav se snapshoty uloženými při
 načtení (*change tracking*). Getter, který interně mění stav (například uloží
 dopočítanou hodnotu do mapované vlastnosti), Doctrine vyhodnotí jako změnu.
 
@@ -150,17 +152,17 @@ dopočítanou hodnotu do mapované vlastnosti), Doctrine vyhodnotí jako změnu.
 ORM 3 přitom zrušil obvyklý únikový manévr. Argumenty `flush($entity)` a `clear($entityName)`
 jsou pryč a obě metody je tiše ignorují, protože přebytečný argument uživatelské metody
 PHP nehlásí. To je horší než chyba: `clear('Order')` vypadá jako cílené odpojení, ale odpojí
-celou Identity Map. „Uložím jen tenhle agregát“ dnes vyjádřit nelze, `flush()` vždy
-commituje celý Unit of Work, a každá nechtěně sledovaná entita tím zdražuje.
+celou Identity Map. „Uložím jen tenhle agregát“ vyjádřit nelze: `flush()` vždy zapíše celý
+Unit of Work, včetně každé nechtěně sledované entity.
 
 ### A3. Mapping složitých Value Objects {#a3-value-objects}
 
 **Problém:** Doctrine `#[Embedded]` funguje dobře pro jednoduché
 VO (jméno + příjmení → dva sloupce). Na limity narazí polymorfní VO (různé typy cen),
-nullable VO v kolekcích, VO s vlastní serializační logikou (Money = integer + string)
+nullable VO v kolekcích, VO s vlastní serializační logikou
 a VO mapované na jiný datový typ než výchozí (enum, JSONB, custom SQL type).
 
-**Řešení:** Custom Doctrine Type. Implementujte `Type`
+**Řešení:** Custom Doctrine Type. Odvoďte třídu od abstraktní `Type`
 z `Doctrine\DBAL\Types`; typ definuje, jak se PHP objekt převede
 na SQL hodnotu a zpět.
 
@@ -227,8 +229,9 @@ private ?Money $price = null;
 :::callout{type="warn"}
 Ukázka slévá dvě dimenze do jednoho sloupce a tím obětuje dotazovatelnost: nad
 `"12345_CZK"` neuděláte `SUM()`, `ORDER BY` ani index podle částky. Pro `Money` samotné
-je proto obvykle lepší `#[Embedded]` se dvěma sloupci, nebo custom typ zapisující do dvou
-sloupců. Jednosloupcová serializace dává smysl až u hodnot, které se do skalárních sloupců
+je proto lepší `#[Embedded]` se dvěma sloupci; tak ho mapuje i
+[Návrh agregátu](/navrh-agregatu#symfony-doctrine). Custom typ DBAL mapuje vždy jediný
+sloupec a ukázka na něm používá `Money` jen proto, že ho čtenář zná. Jednosloupcová serializace se hodí až pro hodnoty, které se do skalárních sloupců
 rozložit nedají a v SQL se nad nimi stejně nefiltruje.
 :::
 
@@ -270,7 +273,7 @@ Pořadí řádků v tabulce není náhodné. Fetch join v DQL je první volba, p
 pro konkrétní dotaz. `fetch: 'EAGER'` v mapování působí globálně a u to-many asociací
 nedělá to, co většina lidí čeká. JOIN vydává jen u to-one asociací, a i tam si Doctrine
 vyhrazuje volbu mezi LEFT JOIN a druhým dotazem. Podrobněji k volbě strategie viz
-[Výkonnostní aspekty](/vykonnostni-aspekty).
+[Read modely, projekce a výkon](/vykonnostni-aspekty).
 
 ### A5. Identity generation – kdy a kde {#a5-identity}
 
@@ -283,18 +286,19 @@ mít identitu od okamžiku vzniku.
 vznik identity na infrastrukturu. Doménový model by neměl vědět o databázi; identita
 patří do domény.
 
-**Řešení:** Identitu vyrobte dřív, než agregát vznikne, a předejte ji do továrny.
-Kniha používá tvar `Order::place(OrderId $id, CustomerId $customerId)`: `OrderId` si
-generuje UUID sám, agregát ho jen přijme. Doctrine se nakonfiguruje bez generátoru,
+**Řešení:** Identitu vyrobte v PHP kódu, ne v databázi, a to dřív, než se agregát uloží.
+Kanonická továrna má tvar `Order::place(OrderId $id, CustomerId $customerId)`: identitu
+vyrobí volající přes `OrderId::generate()` a agregát ji jen přijme. Doctrine se nakonfiguruje bez generátoru,
 ID mu předáváte hotové. Tři kapitoly přidávají na téže třídě další továrnu, protože bez ní
 by nešlo ukázat jejich téma. [Návrh agregátu](/navrh-agregatu) má
 `placeWithFirstItem()`, kde invariant „objednávka má aspoň jednu položku“ vymáhá už
-signatura. [Outbox](/outbox-pattern) má `placeWithItems()`, protože seznam položek
-potřebuje v payloadu události. [Doplňující vzory](/mene-zname-vzory) mají `placePhysical()` a `placeDigital()`
+signatura. [Outbox Pattern](/outbox-pattern) má `placeWithItems()`, protože seznam položek
+potřebuje v payloadu události. [Doplňující taktické vzory](/mene-zname-vzory) mají `placePhysical()` a `placeDigital()`
 se stejným principem, jen pod jmény, která říkají, jaký druh objednávky továrna vyrábí. Vždycky jde
 o jiné jméno, ne o jinou verzi `place()`. Dvě neslučitelné signatury jedné metody
-by v reálném projektu vedle sebe neobstály. Základ zůstává stejný: identita
-a vlastník vznikají mimo agregát a vstupují do továrny.
+by v reálném projektu vedle sebe neobstály. Odvozené továrny identitu nepřijímají,
+ale vyrobí si ji samy přes `OrderId::generate()`. Pravidlo platí
+pro obě cesty: identita vzniká v PHP kódu před uložením, nikdy v databázi.
 
 :::callout{type="pattern"}
 #### PHP: identita předaná do továrny (PHP 8.4 + Symfony Uid) {#a5-code-heading}
@@ -319,7 +323,7 @@ final readonly class OrderId
 
     public static function generate(): self
     {
-        return new self((string) Uuid::v7()); // UUIDv7 - time-sortable
+        return new self((string) Uuid::v7()); // UUIDv7 - řaditelné podle času
     }
 
     public static function fromString(string $value): self
@@ -330,6 +334,12 @@ final readonly class OrderId
     public function equals(self $other): bool
     {
         return $this->value === $other->value;
+    }
+
+    // Doctrine a Messenger převádějí ID na řetězec; bez __toString() spadne uložení.
+    public function __toString(): string
+    {
+        return $this->value;
     }
 }
 
@@ -369,9 +379,9 @@ final class Order extends AggregateRoot
 :::
 
 Konstruktor zůstává čistý, protože ho volá i rekonstituce z databáze. Událost vzniká
-v továrně, viz [životní cyklus Aggregate Root](/zakladni-koncepty#aggregate-root-lifecycle).
+v továrně, viz [životní cyklus kořene agregátu](/zakladni-koncepty#aggregate-root-lifecycle).
 
-Doctrine mapping pro UUID ID. Ukázka mapuje primitivní string; hodnotový objekt
+Mapování identifikátoru v Doctrine. Ukázka mapuje primitivní string; hodnotový objekt
 `OrderId` se na sloupec převádí custom Doctrine typem, viz
 [sekci A3](#a3-value-objects):
 
@@ -411,7 +421,7 @@ znamená migraci databáze, ne jen novou třídu.
 | **Flat table + Custom Type** | Varianty mají odlišné chování | JSON sloupec pro detaily ztrácí typovou bezpečnost |
 | **Discriminator map (Doctrine default)** | Málo variant, stabilní hierarchie | Migrace schématu při každé variantě, nullable sloupce |
 
-Pro většinu DDD scénářů se osvědčuje **Value Object s type fieldem**:
+Ve většině DDD scénářů se osvědčuje **Value Object s typovým polem**:
 jeden enum sloupec pro typ, jeden JSON sloupec pro specifická data varianty.
 Logika se přesouvá do doménových metod, které přijímají VO jako parametr,
 ne do dědičnosti.
@@ -427,22 +437,29 @@ Symfony Messenger a asynchronní fronty přinášejí distribuovanou komunikaci
 a s ní distribuované problémy: zprávy se ztrácejí, doručují dvakrát, přicházejí
 v nesprávném pořadí. Následují čtyři nejčastější bolesti.
 
-### B1. Outbox pattern – zaručené doručení doménových událostí {#b1-outbox}
+### B1. Outbox pattern – zaručené doručení integračních událostí {#b1-outbox}
 
-**Problém:** Uložíte agregát (`flush()` proběhne úspěšně),
-ale před tím, než stihnete odeslat doménovou událost do Messengeru, server spadne.
-Událost se ztratí. Databáze je konzistentní, ale žádný subscriber ji nikdy
-nezpracuje. Platba proběhla, ale sklad nebyl upozorněn.
+**Problém:** Handler uloží agregát a v téže metodě odešle integrační událost do brokeru.
+Pod kanonickým middlewarem `doctrine_transaction` je `flush()` jen zápis SQL, commit
+přijde až po návratu handleru. Událost tedy odejde dřív, než je jisté, že změna
+v databázi zůstane. Když commit selže, dostanou subscribeři *phantom event*: Payment
+strhne peníze za objednávku, která neexistuje. Bez middlewaru hrozí opak. `flush()`
+commitne sám, server spadne před odesláním a událost se ztratí. Platba proběhla
+a sklad se o ní nedozví.
 
-**Příčina:** `flush()` a `$bus->dispatch()` jsou dvě separátní operace bez atomické
-záruky. Zabalit je do jedné transakce nelze, databáze a message broker jsou různé systémy.
+**Příčina:** Commit v databázi a `$bus->dispatch()` do brokeru jsou dvě samostatné
+operace bez atomické záruky. Do jedné transakce je zabalit nelze, protože databáze
+a message broker jsou různé systémy. Oba scénáře podrobně rozebírá
+[naivní implementace publikování](/outbox-pattern#naive-publish-heading).
 
 **Řešení:** událost uložit do `outbox` tabulky ve stejné transakci jako agregát
 a odeslání nechat na odděleném procesu. Atomicitu pak drží databázová transakce.
+Doménové události pro posluchače uvnitř kontextu outbox nepotřebují: synchronní
+`event.bus` je doručí v téže transakci.
 
 Schéma tabulky, dvě varianty relay procesu, idempotentní inbox na straně příjemce,
 provozní metriky i postup migrace existujícího projektu rozebírá samostatná kapitola
-[Outbox pattern](/outbox-pattern).
+[Outbox Pattern](/outbox-pattern).
 
 :::callout{type="note"}
 Vlastní implementaci často nahradí **Doctrine Transport** v Symfony Messengeru.
@@ -454,8 +471,8 @@ nepřeposílá, na to je potřeba relay z kapitoly Outbox Pattern.
 
 ### B2. Debugging ztracené zprávy v Messengeru {#b2-debugging}
 
-**Problém:** Zpráva odešla do async fronty. Worker běží.
-Handler se ale nikdy nezavolal. Jak zjistit, kde zpráva skončila?
+**Problém:** Zpráva odešla do asynchronní fronty a worker běží, handler se ale
+nezavolal. Kde zpráva skončila, ukáže následující postup.
 
 **Postup debuggingu:**
 
@@ -472,12 +489,14 @@ php bin/console messenger:failed:retry
 :::
 
 **2. Zapněte verbose logging:** V `config/packages/monolog.yaml`
-přidejte handler pro `messenger` channel na úroveň `debug`.
-Každý dispatch, receive a zpracování se zaloguje.
+přidejte handler pro kanál `messenger` na úrovni `debug`.
+Každé odeslání, přijetí i zpracování se pak zaloguje.
 
 **3. Correlation ID middleware:** Přidejte vlastní middleware, který
-přiřadí každé zprávě UUID a loguje ho při dispatch i při receive. Pak hledáte
-v logu podle ID.
+spouštěcí zprávě přiřadí UUID a zaloguje ho při odeslání i při přijetí. Zprávy odeslané
+během jejího zpracování (odvozené události, další příkazy) ID zdědí, takže v logu
+najdete celý tok podle jednoho ID. Causation ID, tedy bezprostřední příčina konkrétní
+zprávy, je jiný údaj a middleware ho neřeší.
 
 :::callout{type="pattern"}
 #### PHP: Middleware pro Correlation ID logging {#b2-code-heading}
@@ -503,34 +522,57 @@ final class CorrelationIdStamp implements \Symfony\Component\Messenger\Stamp\Sta
 
 final class CorrelationIdMiddleware implements MiddlewareInterface
 {
+    // ID toku, který se právě zpracovává. Zpráva odeslaná uvnitř handleru
+    // ho zdědí. Middleware je jedna sdílená služba pro všechny sběrnice.
+    private ?string $current = null;
+
     public function __construct(private readonly LoggerInterface $logger) {}
 
     public function handle(Envelope $envelope, StackInterface $stack): Envelope
     {
-        $stamp = $envelope->last(CorrelationIdStamp::class)
-            ?? new CorrelationIdStamp((string) Uuid::v7());
+        $stamp = $envelope->last(CorrelationIdStamp::class);
+
+        if ($stamp === null) {
+            // Spouštěcí zpráva dostane nové ID, odvozená zdědí ID toku.
+            $stamp = new CorrelationIdStamp($this->current ?? (string) Uuid::v7());
+            $envelope = $envelope->with($stamp);
+        }
 
         $this->logger->info('Messenger: processing message', [
             'correlation_id'  => $stamp->correlationId,
             'message_class'   => $envelope->getMessage()::class,
         ]);
 
-        return $stack->next()->handle(
-            $envelope->with($stamp),
-            $stack,
-        );
+        $previous = $this->current;
+        $this->current = $stamp->correlationId;
+
+        try {
+            return $stack->next()->handle($envelope, $stack);
+        } finally {
+            $this->current = $previous; // worker běží dlouho, stav nesmí přetéct
+        }
     }
 }
 :::
 :::
 
-Zaregistrujte middleware v `config/packages/messenger.yaml`:
+Zaregistrujte middleware v `config/packages/messenger.yaml` na všech sběrnicích, kterými
+tok prochází. Klíč `middleware` přepíše seznam z [konfigurace Messengeru](/cqrs#messenger-config-heading),
+proto výřez opakuje i `validation` a `doctrine_transaction`:
 
 :::code{language="yaml" filename="config/packages/messenger.yaml (výřez: correlation ID)"}
 framework:
     messenger:
         buses:
             command.bus:
+                middleware:
+                    - App\SharedKernel\Infrastructure\Messenger\CorrelationIdMiddleware
+                    - validation
+                    - doctrine_transaction
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
                 middleware:
                     - App\SharedKernel\Infrastructure\Messenger\CorrelationIdMiddleware
 :::
@@ -540,18 +582,23 @@ framework:
 **Problém:** Messenger garantuje doručení *at-least-once*,
 nikoli exactly-once. Pokud worker zprávu zpracuje, ale před potvrzením (ack)
 spadne, broker zprávu znovu doručí. Handler ji zpracuje podruhé. Výsledkem může
-být dvojitá platba, duplicitní objednávka nebo zdvojený email.
+být dvojitá platba, duplicitní objednávka nebo zdvojený e-mail.
 
 **Řešení:** Idempotency Middleware s deduplikační tabulkou.
-Každá zpráva nese `IdempotencyStamp` s klíčem odvozeným z byznys události, například
+Každý příkaz nese `IdempotencyStamp` s klíčem odvozeným z byznys operace, například
 `payment.capture:{orderId}`. Middleware před zpracováním zkontroluje
 databázovou tabulku. Když klíč existuje, zprávu přeskočí.
 
+Middleware sedí na sběrnici, ne u handleru, a hodí se proto jen pro příkazy s jediným
+handlerem. U události s více posluchači by zapsaný klíč přeskočil všechny, i ty, které
+ji ještě nezpracovaly. Události deduplikuje inbox s klíčem `(event_id, consumer)`
+z kapitoly [Outbox Pattern](/outbox-pattern#inbox).
+
 Na slově „odvozeným“ celý mechanismus stojí. UUID vygenerované při odeslání se jako
-idempotency klíč nehodí: dvojí odeslání téže logické události vyrobí dva různé klíče
-a obě zpracování proběhnou. Klíč musí zůstat
-stabilní napříč všemi odesláními téhož logického příkazu. Rozdíl je praktický. Náhodné UUID
-ošetří duplicitu z retry brokeru, ale ne dvojklik uživatele. A ten přijde častěji.
+idempotency klíč nehodí: dvojí odeslání téhož logického příkazu vyrobí dva různé klíče
+a obě zpracování proběhnou. Klíč musí být
+stejný při každém odeslání téhož logického příkazu. Rozdíl je praktický: náhodné UUID
+ošetří duplicitu z retry brokeru, ne ale dvojklik uživatele, který přijde častěji.
 
 :::callout{type="pattern"}
 #### PHP: IdempotencyMiddleware {#b3-code-heading}
@@ -624,7 +671,7 @@ Odesílatel stamp připojí z dat, která má v ruce:
 
 :::code{language="php" filename="snippet.php"}
 $this->commandBus->dispatch(
-    new CapturePaymentCommand($orderId),
+    new CapturePayment($orderId),
     [IdempotencyStamp::forOperation('payment.capture', $orderId->value)],
 );
 :::
@@ -688,7 +735,7 @@ stavu).
 | Přístup | Kdy použít | Kompromis |
 |---|---|---|
 | **Optimistický retry** | Závislost je krátkodobá (ms) | Handler hodí `RecoverableMessageHandlingException` s `retryDelay` → Messenger zprávu odloží |
-| **Jeden worker na agregát** | Pořadí je kritické | Nižší throughput, ale garantované pořadí per-aggregate |
+| **Jeden worker na agregát** | Pořadí je kritické | Nižší propustnost, ale zaručené pořadí pro každý agregát |
 | **Inbox buffer** | Komplexní závislosti | Handler uloží zprávu do „inbox“ tabulky a zpracuje ji až po splnění podmínek |
 
 `RecoverableMessageHandlingException` přijímá parametr `retryDelay` a přebije tím
@@ -705,8 +752,8 @@ nemá co rozbít.
 :::callout{type="note"}
 **Pozor:** Na problémy s pořadím se *nehodí*
 `UnrecoverableMessageHandlingException`. Ta
-**obchází retry strategii** a zprávu okamžitě přesune do failed transportu.
-Zpráva, která přišla brzy, přitom není nezpracovatelná. Patří sem **standardní výjimka**
+obchází retry strategii a zprávu okamžitě přesune do failed transportu.
+Zpráva, která přišla brzy, přitom není nezpracovatelná. Patří sem standardní výjimka
 nebo `RecoverableMessageHandlingException`; po nich Messenger zprávu odloží do retry fronty.
 Ve failed transportu skončí až po vyčerpání všech pokusů; tam ji lze prozkoumat
 a znovu odeslat.
@@ -715,49 +762,49 @@ a znovu odeslat.
 Zpoždění se nezastaví na hranici workeru. Uživatel, který právě odeslal objednávku
 a hned nato vidí přehled bez ní, čte důsledek téhož mechanismu. Co s tím v rozhraní,
 rozebírá [Eventual Consistency v praxi](/cqrs#eventual-consistency): potvrzení akce
-místo čtení z read modelu, optimistické vykreslení a explicitní stav „zpracovává se“
+místo čtení z read modelu, optimistické vykreslení a viditelný stav „zpracovává se“
 jsou tři obvyklé odpovědi. Rozhodnutí patří do návrhu obrazovky, ne do handleru.
 
 ## 20.03 C – Modelování {#modelovani}
 
 Modelovací rozhodnutí se zdají triviální, dokud nezpůsobí problém v produkci.
-Čtyři pasti, které se vracejí nejčastěji.
+Následují čtyři pasti, které se vracejí nejčastěji.
 
 ### C1. Kde žije validace {#c1-validace}
 
-**Problém:** Validace je rozeseta na třech místech: Symfony Validator
+**Problém:** Validace je rozesetá na třech místech: Symfony Validator
 (atributy na DTO), Application Service (doménové podmínky) a doménový konstruktor
 (invarianty). Výsledkem je buď duplicita (stejná pravidla na dvou místech),
 nebo díry (pravidlo chybí na jednom místě).
 
 | Typ validace | Kde patří | Příklad |
 |---|---|---|
-| **Formátová validace** | API / formulářová vrstva (Symfony Validator) | Email musí být validní formát, číslo musí být kladné |
-| **Doménový invariant** | Konstruktor / metoda agregátu nebo VO | Množství nesmí být nulové, cena nesmí být záporná |
-| **Doménová politika** | Domain Service nebo Application Service | Zákazník nesmí mít více než 5 otevřených objednávek |
-| **Databázová unikátnost** | Databázový unique constraint + Application Service check | Email zákazníka musí být unikátní v systému |
+| **Formát hodnoty** | Konstruktor hodnotového objektu; Symfony Validator na vstupu kontrolu opakuje kvůli čitelné hlášce | E-mail má platný formát, cena nesmí být záporná |
+| **Doménový invariant** | Metoda agregátu | Množství nesmí být nulové, potvrdit jde jen objednávku s položkami |
+| **Doménová politika** | Agregát nebo doménová služba; aplikační služba jen dodá vstupní data | Zákazník nesmí mít více než 5 otevřených objednávek |
+| **Databázová unikátnost** | Databázový unique constraint + kontrola v Application Service | E-mail zákazníka je v systému unikátní |
 
-**Hlavní pravidlo:** Doménový invariant se vynucuje vždy v doméně;
-validace ve vyšší vrstvě ho nenahradí. Doménový objekt vzniká i jinde:
+**Hlavní pravidlo:** Formát i doménový invariant se vynucují vždy v doméně;
+validace ve vyšší vrstvě je nenahradí. Doménový objekt vzniká i jinde:
 v CLI příkazu, v testu, při importu. Symfony Validator je
-*první linie obrany* pro uživatelský vstup, nikoli náhrada doménové validace.
+*první linie obrany* pro uživatelský vstup, viz
+[Kde validovat](/implementace-v-symfony#validace-kde-heading).
 
 ### C2. Stavový automat bez anémického modelu {#c2-stavy}
 
 Objednávka prochází stavy *Draft → Confirmed → Paid → Shipped → Delivered*, s možností
 zrušení do určitého bodu.
-Anémický přístup `$order->setStatus('shipped')` přepíše hodnotu bez guard conditions
-a bez kontroly, jestli přechod dává smysl. Doména ztrácí pravidla, která ji definují.
+Anémický přístup `$order->setStatus('shipped')` přepíše hodnotu bez ochranných podmínek
+a bez kontroly, jestli je přechod povolený. Pravidla, která doménu definují, se tím ztratí.
 
-Explicitní metoda pro každý přechod ověří, jestli je přechod
-platný, změní stav a zaznamená doménovou událost. Tři kroky v jedné
-metodě, žádný setter navenek. Holý setter je typickým projevem anémického modelu;
+Každý přechod má vlastní metodu, která ověří jeho platnost, změní stav a zaznamená
+doménovou událost; setter navenek nezbude. Holý setter je typickým projevem anémického modelu;
 obecný rozbor najdete v [Anti-vzorech](/anti-vzory#anemicky-domenovy-model).
 
 :::code{language="php" filename="snippet.php"}
 // Zkrácená podoba Order z kapitoly Návrh agregátu: továrnu place(),
 // položky a idempotentní větve výřez vynechává.
-class Order extends AggregateRoot
+final class Order extends AggregateRoot
 {
     private OrderStatus $status = OrderStatus::Draft;
 
@@ -806,8 +853,8 @@ návod na Workflow v DDD správci v roce 2019 odmítli s tím, že dokumentace D
 ### C3. Anti-Corruption Layer k externím API {#c3-acl}
 
 **Problém:** Stripe vrací `\Stripe\PaymentIntent`, ARES vrací
-JSON, Fakturoid vlastní DTO. Pokud tato data z externích systémů
-prosakují přímo do doménového kódu, změna externího API = změna doménového modelu.
+JSON, Fakturoid vlastní DTO. Když data externích systémů prosakují přímo
+do doménového kódu, každá změna externího API mění i doménový model.
 Vzor jako takový, včetně jeho místa na Context Mapě, rozebírá
 [Anti-Corruption Layer](/context-mapping#acl); zde jde o jeho podobu v PHP.
 
@@ -854,7 +901,7 @@ final class StripePaymentGateway implements PaymentGateway
         }
 
         if ($intent->status !== 'succeeded') {
-            throw new PaymentFailedException(sprintf('Platba skončila ve stavu „%s“.', $intent->status));
+            throw new PaymentFailedException(sprintf('Payment ended in status "%s".', $intent->status));
         }
 
         return PaymentId::fromString($intent->id);
@@ -872,6 +919,8 @@ final class StripePaymentGateway implements PaymentGateway
 :::
 
 Doménový kód pracuje jen s rozhraním `PaymentGateway` a o Stripe neví nic.
+Kapitola o ságách ukazuje port stejného jména s primitivními parametry; jde o jiný,
+zjednodušený výřez.
 Výměna platební brány (Stripe → Adyen) si vyžádá jen nový Adapter.
 Adapter volá Payment Intents API. Starší Charges API se `source` tokenem Stripe
 pro nové integrace nepovoluje. Ověření 3D Secure, které si banka může vyžádat,
@@ -900,31 +949,33 @@ zapsaný artefakt. Bez aktivní správy kód zaostává za aktuálním chápán�
    `Contract` nahradil `Order`.
 
 3. **Event Storming jako pravidelná aktivita** – ne jednorázový workshop
-   na začátku projektu, ale čtvrtletní revize s doménovými experty.
+   na začátku projektu, ale revize s doménovými experty jednou za šest měsíců
+   až za rok, v rychle se měnícím produktu častěji. Kadenci rozebírá sekce
+   [Doporučená frekvence](/event-storming#re-cadence).
 
-4. **Živá dokumentace přes testy** – BDD-style popis v testech
+4. **Živá dokumentace přes testy** – popis chování v názvech testů ve stylu BDD
    (`it_places_an_order_when_items_are_in_stock()`) tvoří čitelnou dokumentaci
    aktuálního chování.
 
 ## 20.04 D – Symfony-specifické třenice {#symfony}
 
-Symfony konvence cílí převážně na CRUD. Následují tři místa, kde framework-first přístup
-koliduje s doménovým modelem nejviditelněji.
+Konvence Symfony cílí převážně na CRUD. S doménovým modelem se nejviditelněji
+střetávají na třech místech.
 
 ### D1. Symfony Form vs. Command {#d1-form}
 
-**Problém:** Výchozí chování `FormType` je hydratace existujícího objektu přes settery
-nebo veřejné property. Application Command má být readonly DTO s povinnými argumenty
-konstruktoru. Tvrzení „Symfony Form immutable objekty neumí“ je ale dnes nepřesné:
+**Problém:** `FormType` ve výchozím nastavení plní existující objekt přes settery
+nebo veřejné vlastnosti. Application Command má být readonly DTO s povinnými argumenty
+konstruktoru. Tvrzení „Symfony Form immutable objekty neumí“ je ale nepřesné:
 dokumentace popisuje volbu `empty_data` jako closure, která objekt vyrobí a předá mu
 odeslané hodnoty do konstruktoru. Command tedy jde naplnit přímo z formuláře.
 
-Zbývá otázka, kde má vzniknout. Když Command plní formulář, začne tvar
+Zbývá otázka, kde má vzniknout. Když Command vzniká přímo ve formuláři, začne tvar
 aplikačního příkazu kopírovat tvar obrazovky. S druhým vstupním kanálem
 (API, CLI, import) se to projeví.
 
-**Řešení:** Form mapuje na **plain mutable DTO**
-(formulářový objekt), controller pak z validovaných dat sestaví immutable Command.
+**Řešení:** Formulář plní obyčejné měnitelné DTO
+(formulářový objekt), controller pak z validovaných dat sestaví neměnný Command.
 Formulář o Commandu neví a Command o formuláři také ne. Cesta přes `empty_data` se hodí
 tam, kde je formulář jediný vstup a mezikrok by byl jen opisem.
 
@@ -945,7 +996,7 @@ if ($form->isSubmitted() && $form->isValid()) {
     $data = $form->getData();
 
     // 3. Controller sestaví Command - immutable, doménově typovaný
-    $command = new PlaceOrderCommand(
+    $command = new PlaceOrder(
         // Identitu přiděluje aplikace, ne databáze - viz sekce A5.
         orderId: OrderId::generate(),
         customerId: CustomerId::fromString($data->customerId),
@@ -959,15 +1010,15 @@ if ($form->isSubmitted() && $form->isValid()) {
 }
 :::
 
-`PlaceOrderCommand` je readonly PHP třída. Doménový kód s ní pracuje
+`PlaceOrder` je readonly PHP třída. Handler s ní pracuje
 bez jakékoli závislosti na komponentě Symfony Form.
 
 ### D2. API Platform vs. doménové agregáty {#d2-api-platform}
 
 **Problém:** API Platform ve výchozím nastavení očekává přímý přístup
 k Doctrine entitám: čte je a zapisuje vestavěnými providery a processory.
-Agregáty ale nechceme serializovat přímo (interní stav by pronikl do API)
-ani nechat API Platform je modifikovat bez Application Service.
+Agregát se ale nemá serializovat přímo (interní stav by pronikl do API)
+a API Platform ho nemá měnit mimo Application Service.
 
 **Řešení:** Vystavte API Platform **API Resource DTO**
 (ne agregát) a implementujte vlastní `StateProvider`
@@ -976,7 +1027,7 @@ a `StateProcessor`, které fungují jako adaptéry k Application Services.
 :::callout{type="pattern"}
 #### PHP: StateProcessor jako adapter k Application Service {#d2-code-heading}
 
-:::code{language="php" filename="src/Ordering/Application/Command/PlaceOrderCommand.php (varianta s vlastním orderId)"}
+:::code{language="php" filename="src/Ordering/Application/Command/PlaceOrder.php (varianta s vlastním orderId)"}
 <?php
 
 declare(strict_types=1);
@@ -987,11 +1038,11 @@ use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
 
 /**
- * Proti kanonickému PlaceOrder z kapitoly o Outboxu nese navíc orderId:
- * identitu tu určuje volající ještě před dispatchem, protože dispatch()
- * vrací Envelope, ne doménový objekt.
+ * Varianta kanonického PlaceOrder z kapitoly o Outboxu, která nese navíc
+ * orderId: identitu tu určuje volající ještě před dispatchem, protože
+ * dispatch() vrací Envelope, ne doménový objekt.
  */
-final readonly class PlaceOrderCommand
+final readonly class PlaceOrder
 {
     public function __construct(
         public OrderId $orderId,
@@ -1012,7 +1063,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
-use App\Ordering\Application\Command\PlaceOrderCommand;
+use App\Ordering\Application\Command\PlaceOrder;
 use App\Ordering\Application\Dto\OrderResponse;
 use App\Ordering\Domain\ValueObject\CustomerId;
 use App\Ordering\Domain\ValueObject\OrderId;
@@ -1041,7 +1092,7 @@ final class PlaceOrderProcessor implements ProcessorInterface
         // Příkaz nese i orderId, protože identitu tu určuje volající;
         // kanonický PlaceOrder z kapitoly o Outboxu ji naopak generuje
         // v agregátu a vrací přes HandledStamp.
-        $command = new PlaceOrderCommand(
+        $command = new PlaceOrder(
             orderId: $orderId,
             customerId: CustomerId::fromString($data->customerId),
             items: $data->items,
@@ -1057,9 +1108,9 @@ final class PlaceOrderProcessor implements ProcessorInterface
 
 ### D3. Security Voter vs. doménová oprávnění {#d3-voter}
 
-**Problém:** Business pravidla přístupu jsou součástí domény.
+**Problém:** Pravidla přístupu, která určuje byznys, jsou součástí domény.
 Příklad: „objednávku může zrušit zákazník, ale pouze do 24 hodin
-od vytvoření a pouze pokud ještě nebyla expedována“. Symfony Security Voter
+od potvrzení a pouze pokud ještě nebyla expedována“. Symfony Security Voter
 žije v infrastrukturní vrstvě a závisí na frameworku. Pokud logiku napíšete
 přímo do Voteru, její test potřebuje bezpečnostní token a další objekty frameworku.
 
@@ -1075,26 +1126,26 @@ a co patří přímo do agregátu.
 Projekty, které DDD opustí, málokdy ztroskotají na technice. Evans to v *DDD Reference*
 shrnuje bez příkras: řada projektů modeluje, a přesto z toho nakonec nic nemá. Důvody,
 které tomu obvykle předcházejí, jsou organizační: tým vzor nepochopí, management k němu
-nedá mandát, znalost zůstane v hlavě jednoho seniora. Následující tři sekce jsou psané
-jako zkušenost, ne jako měření; citovatelná data o opuštění DDD neexistují.
+nedá mandát, znalost zůstane v hlavě jednoho seniora. Následující tři sekce vycházejí
+ze zkušenosti, ne z měření; citovatelná data o opuštění DDD neexistují.
 
 ### E1. Business case pro DDD refaktoring {#e1-management}
 
 **Problém:** Management vidí náklady refaktoringu (čas, riziko),
-ale ne benefity. „Přepsat to do DDD“ zní jako technická čistota bez obchodní hodnoty.
-Vývojáři neumí výhody přeložit do jazyka, který rozhodující osoby slyší.
+ale ne přínosy. „Přepsat to do DDD“ zní jako technická čistota bez obchodní hodnoty.
+Vývojáři přínosy často neumějí přeložit do jazyka, kterému rozhodující lidé rozumějí.
 
-**Jak argumentovat:** měřitelnými metrikami.
+**Jak argumentovat:** metrikami.
 
 | Metrika | Jak měřit | Proč ji sledovat |
 |---|---|---|
-| **Change lead time** | Doba od commitu po nasazení do produkce (definice DORA) | Srovnatelná napříč týmy, management ji zná |
+| **Change lead time** | Doba od commitu po nasazení do produkce (definice DORA) | Srovnatelná mezi týmy, management ji zná |
 | **Change fail rate** | % nasazení, která si vyžádají hotfix nebo rollback | Ukazuje, jestli změny v modulu drží |
-| **Regression rate** | % ticketů označených jako regression | Nejblíž bolesti „opravíme jedno, rozbije se druhé“ |
+| **Regression rate** | % ticketů označených jako regrese | Nejblíž bolesti „opravíme jedno, rozbije se druhé“ |
 | **Onboarding time** | Čas, než nový vývojář dělá první commit do modulu | Měří srozumitelnost modelu, ne jeho čistotu |
 
 Dvě z těch metrik (change lead time a change fail rate) pocházejí ze sady DORA, která
-má dnes pět položek a slouží jako sdílený slovník pro dodávku softwaru. Měřte je před refaktoringem a po něm, ale zdržte
+se z původních čtyř metrik rozrostla na pět a slouží jako sdílený slovník pro dodávku softwaru. Měřte je před refaktoringem a po něm, ale zdržte
 se slibu, že klesnou kvůli DDD. Žádná studie souvislost mezi architektonickým stylem
 a chybovostí nedoložila a metrika „bugů na tisíc řádků“ je u refaktoringu zavádějící
 sama o sobě: mění se jí jmenovatel. Čísla tedy nesou váhu jako společný jazyk s byznysem,
@@ -1102,18 +1153,18 @@ ne jako důkaz.
 
 **Taktika:** Nezačínejte argumentem „náš kód je špatný“,
 ale konkrétní obchodní bolestí. *Ilustrativní scénář:* „Přidání nového způsobu platby
-trvá tři týdny a pokaždé způsobí regression v objednávkovém modulu.“ Následuje příčina
+trvá tři týdny a pokaždé způsobí regresi v objednávkovém modulu.“ Následuje příčina
 a návrh řešení. Čísla si dosaďte vlastní; půjčené odhady rozhodovatel prohlédne.
 
-### E2. Postupné zavedení – strangler fig pattern {#e2-strangler}
+### E2. Postupné zavedení – Strangler Fig Pattern {#e2-strangler}
 
 **Problém:** Přepis celé aplikace do DDD najednou zpravidla selže:
 trvá déle, než se odhadovalo, tým ztrácí motivaci a byznys se nedočká nových funkcí.
 Původní aplikace přitom musí dál žít. Proč big-bang rewrite končí špatně, rozebírá
 [varování v kapitole Migrace z CRUD na DDD](/migrace-z-crud#big-bang-warning-heading).
 
-**Řešení:** strangler fig pattern. Vyberte jeden modul s nejvyšší změnovou
-frekvencí (highest-churn), nejčastějšími bugy nebo největší obchodní hodnotou
+**Řešení:** Strangler Fig Pattern. Vyberte jeden modul, který se mění
+nejčastěji (highest-churn), má nejvíc chyb nebo největší obchodní hodnotu
 a implementujte v DDD právě ten. Zbytek aplikace zůstává beze změny. S novým kódem
 komunikuje přes fasádu (ACL vzor) a feature flag umožňuje okamžitý rollback na legacy.
 Po stabilizaci se postup opakuje s dalším modulem, dokud legacy nevyschne.
@@ -1143,13 +1194,13 @@ dokumentace přes testy (viz [Ubiquitous Language drift](#c4-language)).
 
 :::faq{}
 - question: Proč tradiční Doctrine mapování komplikuje čistý doménový model?
-  answer: 'Doctrine hydratuje objekty reflexí a změny sleduje přes Unit of Work, zatímco DDD agregát chrání invarianty v konstruktoru a doménových metodách a hodnotové objekty jsou neměnné. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého“ EntityManageru při dlouhých transakcích a omezení typů pro hodnotové objekty. Pragmatická výchozí volba je nechat atributy přímo na agregátu (jsou to metadata, ne chování) a používat Doctrine custom typy pro hodnotové objekty. Pokud chcete striktně oddělenou doménu, jděte cestou <a href="/implementace-v-symfony#persisted-object-pattern">Persisted Object Pattern</a>: samostatný persistence model a mapper. Detail v <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
-- question: Jak řešit Outbox Pattern pro spolehlivé doručení doménových událostí?
-  answer: 'Outbox ukládá doménové události do lokální tabulky ve stejné transakci jako změnu agregátu, čímž se zabrání ztrátě událostí při pádu mezi commitem a publikací. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Shrnutí v <a href="#b1-outbox">sekci Outbox pattern</a>, plný výklad v kapitole <a href="/outbox-pattern">Outbox Pattern</a>.'
+  answer: 'Doctrine hydratuje objekty reflexí a změny sleduje přes Unit of Work, zatímco DDD agregát chrání invarianty v konstruktoru a doménových metodách a hodnotové objekty jsou neměnné. Konflikt zahrnuje identifikaci přes generované ID (Doctrine) oproti identitě v doméně (DDD), problém „špinavého“ EntityManageru během requestu a omezení typů pro hodnotové objekty. Pragmatická výchozí volba je nechat atributy přímo na agregátu (jsou to metadata, ne chování) a používat Doctrine custom typy pro hodnotové objekty. Striktně oddělenou doménu nabízí <a href="/implementace-v-symfony#persisted-object-pattern">Persisted Object Pattern</a>: samostatný persistence model a mapper. Detail v <a href="#doctrine">sekci Doctrine vs. doménový model</a>.'
+- question: Jak řešit Outbox Pattern pro spolehlivé doručení integračních událostí?
+  answer: 'Outbox ukládá integrační události do lokální tabulky ve stejné transakci jako změnu agregátu. Událost se tak neztratí při pádu mezi commitem a publikací a neodejde ani ven dřív, než transakce skutečně projde. Samostatný proces (relay) pak outbox tabulku čte a publikuje události do message busu nebo externího systému. Kombinace s idempotentními konzumenty zajišťuje at-least-once doručení bez duplicit na straně zpracování. Shrnutí v <a href="#b1-outbox">sekci Outbox pattern</a>, plný výklad v kapitole <a href="/outbox-pattern">Outbox Pattern</a>.'
 - question: Jak vysvětlit přínos DDD managementu, když první iterace zpomaluje?
-  answer: 'Doporučený postup je přiznat krátkodobý náklad a explicitně vyčíslit dlouhodobý přínos: nižší počet regresních chyb, rychlejší onboarding, menší náklady na přidávání nových funkcí po překročení zlomu. Hodí se kombinovat s měřitelnými cíli (lead time, change failure rate) a s pilotním Bounded Contextem. Kdy přijdou první výsledky, závisí na velikosti kontextu a zkušenosti týmu; řádově jde o měsíce, ne o týdny, a slibovat konkrétní číslo dopředu se nevyplácí. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Business case pro DDD refaktoring</a>.'
+  answer: 'Doporučený postup je přiznat krátkodobý náklad a přínos opřít o konkrétní obchodní bolest, třeba o to, kolik týdnů trvá přidat nový způsob platby. Metriky (change lead time, change fail rate, podíl regresí, doba onboardingu) se měří před refaktoringem a po něm jako společný jazyk s byznysem, ne jako slib, že je DDD zlepší. Hodí se začít pilotním Bounded Contextem. Kdy přijdou první výsledky, závisí na velikosti kontextu a zkušenosti týmu; řádově jde o měsíce, ne o týdny, a slibovat konkrétní číslo dopředu se nevyplácí. Bez sponzorství na úrovni managementu investice do DDD zpravidla neprojde. Rozbor strategie komunikace v <a href="#e1-management">sekci Business case pro DDD refaktoring</a>.'
 - question: Jak udržet Ubiquitous Language, aby časem neutrpěl drift?
   answer: 'Ubiquitous Language zaniká, když se kód a řeč doménových expertů začnou rozcházet: v kódu je „Invoice“, zákazník říká „faktura“. Prevence vyžaduje pravidelnou revizi kódu proti slovníku, ADR při jeho změně a glosář v repozitáři jako živý dokument. Drift se projeví, jakmile nová funkce zavádí pojem, který doménový expert nezná. Tehdy je namístě buď ustoupit, nebo jazyk společně upravit. Detailní rozbor v <a href="#c4-language">sekci Ubiquitous Language drift</a>.'
 - question: Jak přežít paralelní existenci staré CRUD části a nové DDD vrstvy?
-  answer: 'Strangler Fig pattern umožňuje oba stavy držet v jedné aplikaci: staré CRUD moduly zůstávají v provozu, nové funkce vznikají v DDD stylu a propojení řeší Anti-Corruption Layer. Výzvou je sdílená databáze, autentizace a uživatelský stav. Pragmatické řešení: migrovat postupně po jednotlivých Bounded Contextech a explicitně přijmout, že smíšený stav vydrží dlouho. U netriviálního systému jde řádově o roky, ne o jedno kvartální plánování. Viz <a href="#e2-strangler">sekci Postupné zavedení</a>.'
+  answer: 'Strangler Fig Pattern umožňuje oba stavy držet v jedné aplikaci: staré CRUD moduly zůstávají v provozu, nové funkce vznikají v DDD stylu a propojení řeší Anti-Corruption Layer. Výzvou jsou sdílená databáze, autentizace a uživatelský stav. Pragmatické řešení: migrovat postupně po jednotlivých Bounded Contextech a explicitně přijmout, že smíšený stav vydrží dlouho. U netriviálního systému jde řádově o roky, ne o jedno kvartální plánování. Viz <a href="#e2-strangler">sekci Postupné zavedení</a>.'
 :::

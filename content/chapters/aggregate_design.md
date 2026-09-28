@@ -7,14 +7,14 @@ meta_description: "Kde vést hranici agregátu, aby projekt obstál v provozu. P
 meta_keywords: "aggregate design, návrh agregátu, hranice agregátu, transakční konzistence, eventual consistency, optimistický zámek, invarianty, Vaughn Vernon, Doctrine, Symfony 8, hot aggregate, large collection, snapshot, Domain-Driven Design"
 og_type: article
 published: "2026-04-30"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Návrh agregátu
 schema_type: TechArticle
 schema_headline: "Návrh agregátu v DDD: hranice, invarianty, transakce"
 chapter_number: "07"
 category: Taktika
-deck: "Hranice agregátu rozhoduje o transakční konzistenci, velikosti zámků a o tom, zda projekt obstojí v provozu. Tato kapitola shrnuje pravidla z Vernonovy trilogie <em>Effective Aggregate Design</em>, ukazuje konkrétní mapování v Doctrine ORM a věnuje se obtížným tématům: large-collection problem, hot aggregates, snapshoty v Event Sourcingu, partitioning a strategie referencování napříč agregáty."
-reading_time: 37
+deck: "Hranice agregátu určuje, co se mění v jedné transakci, co se zamyká a jestli systém vydrží souběžný provoz. Kapitola vychází z Vernonovy trilogie <em>Effective Aggregate Design</em>, ukazuje mapování v Doctrine ORM a řeší těžší případy: velké kolekce, hot agregáty, snapshoty v Event Sourcingu, partitioning a odkazy mezi agregáty."
+reading_time: 38
 difficulty: 4
 github_examples: Chapter02_AggregateDesign
 ---
@@ -27,7 +27,7 @@ a celou desátou kapitolu *Implementing Domain-Driven Design* (2013)
 [[3]](https://www.informit.com/store/implementing-domain-driven-design-9780321834577).
 Vlad Khononov v knize *Learning Domain-Driven Design* (2021) shrnuje praktická vodítka
 z dalšího desetiletí provozu [[4]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/).
-Tato kapitola navazuje na [Základní koncepty](/zakladni-koncepty) a předchází
+Kapitola navazuje na [Základní koncepty](/zakladni-koncepty) a připravuje půdu pro
 [CQRS](/cqrs), [Event Sourcing](/event-sourcing)
 a [Ságy](/sagy-a-process-managery).
 
@@ -37,7 +37,7 @@ Agregát je skupina doménových objektů, která je pro vnější svět neděli
 konzistence. Eric Evans ho zavedl jako odpověď na dvě otázky, které objektově orientovaný
 model neřeší sám od sebe. První: *kdo je zodpovědný za vymáhání invariantů*.
 Druhá: *co se uloží v jedné transakci*. Vstupním bodem do agregátu je **kořen agregátu**
-(aggregate root); ostatní objekty uvnitř hranice nesmí být pro zbytek aplikace přímo dostupné.
+(Aggregate Root); ostatní objekty uvnitř hranice nesmí být pro zbytek aplikace přímo dostupné.
 
 Bez explicitní hranice se doménový model kazí dvěma směry. Buď objektový graf přeroste
 do jediného transakčního kontextu přes celou doménu (typicky přes obousměrné OneToMany
@@ -48,8 +48,8 @@ mezi oběma extrémy volí kompromis: malá konzistentní jednotka plus jasné p
 Hranice ale neurčuje jen transakci. Evans ji v *DDD Reference* (2015)
 [[8]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf)
 spojuje i s rozmístěním: agregát má zůstat pohromadě na jednom serveru, zatímco různé
-agregáty smí být rozprostřené mezi uzly. Kde vede hranice agregátu, tam později vede
-i hranice shardu nebo služby.
+agregáty smí být rozprostřené mezi uzly. Hranice agregátu tak předurčuje i pozdější
+hranici shardu nebo služby.
 
 :::callout{type="note"}
 Agregát definuje hranici jedné transakce. Co je uvnitř, mění se společně a okamžitě
@@ -68,9 +68,9 @@ doménovou interpretaci.
 Vaughn Vernon shrnul nejčastější pasti návrhu agregátu do série tří esejů
 *Effective Aggregate Design* z roku 2011 [[2]](https://www.dddcommunity.org/library/vernon_2011/).
 Doporučení vycházejí z reálných projektů, kde příliš velké agregáty brzdily výkon
-a příliš malé porušovaly invarianty. Vernon je nenazývá pravidly, ale *rules of thumb*,
-tedy vodítky. Rozdíl má váhu: ke každému sám uvádí situace, kdy se poruší. Vodítka
-doporučuje aplikovat v tomto pořadí:
+a příliš malé porušovaly invarianty. Vernon jim v textu říká pravidla, zároveň je ale
+označuje za *rules of thumb*, tedy vodítka. Rozdíl má váhu: ve druhém dílu vyjmenovává situace,
+kdy se vědomě poruší. Ve třetím dílu je shrnuje do čtyř bodů:
 
 1. **Modelujte skutečné invarianty uvnitř konzistenční hranice.** Pokud pravidlo
    musí platit v každý okamžik (například „součet položek faktury se rovná celkové ceně“),
@@ -85,15 +85,18 @@ doporučuje aplikovat v tomto pořadí:
 3. **Reference mezi agregáty pouze přes identitu.** Místo objektové reference
    se drží `OrderId`, `CustomerId`. Doctrine asociace mezi agregáty
    je signál, že někde chybí hranice nebo že eventual consistency čeká na zavedení.
-4. **Eventual consistency mimo hranici – po otázce, čí je to práce.** Změna napříč
-   agregáty se řeší doménovou událostí a samostatnou transakcí. „Když se X stane v agregátu A,
-   sága upraví agregát B.“ Dovětek o čí práci Vernon do formulace pravidla přidal ve třetím
-   dílu série a rozebírá ho sekce [Invarianty](#invariants).
+4. **Eventual consistency mimo hranici – po otázce, čí je to práce.** Změna ve více
+   agregátech se řeší doménovou událostí a samostatnou transakcí. „Když se X stane v agregátu A,
+   sága upraví agregát B.“ Otázku „čí je to práce“ Vernon rozebírá už ve druhém dílu,
+   do formulace pravidla ji připsal až ve třetím. Podrobněji ji probírá sekce
+   [Invarianty](#invariants).
 
-Khononov v *Learning DDD* (2021) dodává páté vodítko, které z Vernonových implicitně
-plyne: **jedna databázová transakce mění právě jeden agregát.** Potřeba commitnout změny
-ve více agregátech je podle něj signálem špatně vedené hranice. Objeví-li se v jednom
-command handleru dvě volání `save()` na různé repozitáře, prověřte hranici. Buď mají
+Pátou zásadu formuluje Vernon už v prvním dílu přímo, jen ji nečísluje: dobře navržený
+Bounded Context mění v jedné transakci vždy jen jednu instanci agregátu. Khononov
+v *Learning DDD* (2021) z ní dělá samostatné pravidlo – **jedna databázová transakce
+mění právě jeden agregát** – a potřebu commitnout změny ve více agregátech čte jako
+signál špatně vedené hranice. Objeví-li se v jednom command handleru dvě volání `save()`
+na různé repozitáře, prověřte hranici. Buď mají
 vzniknout dva commandy, nebo jde o ságu – vícekrokový proces s vlastní transakcí pro
 každý krok.
 
@@ -123,7 +126,7 @@ agregátu jde o konzistenci transakční. Typické zdroje:
 
 Pro každý invariant rozhoduje jedna otázka: *musí být porušení nemožné v každý okamžik,
 nebo se stačí dorovnat se zpožděním?* První kategorie definuje hranici
-agregátu. Druhá patří mimo ni a řeší ji sága nebo process manager (kapitola
+agregátu. Druhá patří mimo ni a řeší ji sága nebo Process Manager (kapitola
 [Ságy a Process Managery](/sagy-a-process-managery)).
 
 Dokud se otázka klade technicky, odpověď se hledá špatně. Vernon proto přebírá od Evanse
@@ -156,7 +159,7 @@ V praxi platí opak, a to ze tří důvodů:
 
 - **Konkurence.** Optimistický zámek hlídá verzi kořene. Doctrine ji při změně potomka
   sám nezvedne (viz [Co Doctrine nevymůže](#doctrine-limits)), a proto se doménová metoda
-  při každé změně potomka dotkne i pole na kořeni. S takto vedenou verzí znamená větší
+  musí při každé změně potomka dotknout i pole na kořeni. S takto vedenou verzí znamená větší
   agregát víc konfliktů. Pokud `Project` drží všechny `Task`y, dvě paralelní úpravy
   nesouvisejících úkolů zvednou tutéž verzi a jedna skončí `OptimisticLockException`.
   Bez vědomého zvedání verze konflikt nevznikne vůbec – invariant se pak poruší tiše
@@ -172,8 +175,8 @@ V praxi platí opak, a to ze tří důvodů:
   nesouvisejí. Každá změna musí projít validací všech naráz a režie roste
   s počtem chráněných invariantů.
 
-Praktická heuristika: pokud nemáte konkrétní invariant, který by si *vynutil* vzájemnou
-přítomnost dvou entit v jedné transakci, jsou to dva agregáty. „Pohodlí“ Doctrine asociace
+Praktická heuristika: bez konkrétního invariantu, který by si *vynutil* vzájemnou
+přítomnost dvou entit v jedné transakci, jde o dva agregáty. „Pohodlí“ Doctrine asociace
 není doménový důvod.
 
 :::callout{type="anti"}
@@ -195,7 +198,7 @@ se často porušuje. Stojí na těchto důvodech:
 
 - Transakční hranice je kontrakt. Pokud spolu dva agregáty mění stav v jedné transakci,
   prakticky se z nich stává jeden agregát, jen rozdělený do dvou tříd.
-- Atomická úprava napříč agregáty ztěžuje pozdější rozdělení do microservices nebo
+- Atomická úprava více agregátů ztěžuje pozdější rozdělení do microservices nebo
   do jiného Bounded Contextu. Hranice agregátu je hranice škálování.
 - Optimistický zámek (`#[ORM\Version]` v Doctrine) hlídá jednu instanci agregátu, a to
   jen v rozsahu změn, které se dotknou pole na kořeni (viz sekce
@@ -211,7 +214,7 @@ V Symfony 8 to znamená: `EntityManager::flush()` uvnitř command handleru by m�
 ukládat změny *jednoho* agregátu. Změna v dalším agregátu patří do separátního
 handleru, spuštěného přes Messenger po publikaci doménové události.
 
-:::code{language="php" filename="src/Banking/Application/TransferMoneyHandler.php (ANTI-VZOR)" highlights="22,23,24,25,26"}
+:::code{language="php" filename="src/Banking/Application/TransferMoneyHandler.php (ANTI-VZOR)" highlights="20,21,22,24,25"}
 <?php
 
 declare(strict_types=1);
@@ -238,7 +241,7 @@ final class TransferMoneyHandler
             $source->withdraw($cmd->amount);  // změna agregátu A
             $target->deposit($cmd->amount);   // změna agregátu B
 
-            // Doctrine flush() commitne obojí atomicky.
+            // wrapInTransaction() provede flush a commitne obojí atomicky.
             // Vypadá to bezpečně, ale ve skutečnosti:
             //   1) zámek napříč dvěma agregáty brzdí škálování,
             //   2) deadlock při souběžných transferech (A→B vs. B→A),
@@ -249,7 +252,7 @@ final class TransferMoneyHandler
 }
 :::
 
-:::code{language="php" filename="src/Banking/Application/InitiateTransferHandler.php" highlights="21,22,23,24,25"}
+:::code{language="php" filename="src/Banking/Application/InitiateTransferHandler.php" highlights="21,22,23,24,26"}
 <?php
 
 declare(strict_types=1);
@@ -288,8 +291,9 @@ final class InitiateTransferHandler
 
 ### Kdy se vodítko poruší {#breaking-the-rule}
 
-Vernon k pravidlu připojil sekci *Reasons To Break the Rules* se čtyřmi situacemi,
-ve kterých zkušený tým commitne víc agregátů najednou – vždy s vědomím, co za to platí.
+Vernon k vodítkům připojil sekci *Reasons To Break the Rules* se čtyřmi situacemi,
+ve kterých zkušený tým vodítko vědomě poruší – vždy s vědomím, co za to platí. První tři
+se týkají commitu více agregátů najednou, čtvrtá reference přes identitu.
 
 1. **Pohodlí uživatelského rozhraní.** Formulář zakládá dávku instancí naráz.
    Pokud je vytvoření dávky sémanticky totéž jako opakované vytvoření po jedné,
@@ -306,21 +310,21 @@ na tutéž množinu instancí ve stejný okamžik. Pracuje-li na nich jediný u�
 konfliktu je nízké a porušení levné. Sdílí-li je celý tým, roste cena každého takového
 ústupku.
 
-Khononovova diagnostika z [07.02](#vernon-rules) přitom platí dál: hranici prověřte dřív,
-než rozhodnete, zda jde opravdu o jednu ze čtyř výjimek. Vernon druhý díl série uzavírá poznámkou, že se pro
-porušení vodítek nehledají výmluvy.
+Khononovova diagnostika z [07.02](#vernon-rules) přitom platí dál: hranice se prověřuje
+dřív, než padne rozhodnutí, že jde opravdu o jednu z výjimek. Vernon druhý díl série
+uzavírá poznámkou, že se pro porušení vodítek nehledají výmluvy.
 
 ## 07.06 Eventual consistency mezi agregáty {#eventual-consistency}
 
 Eventual consistency vyvolává obavy v týmech, které přicházejí z monolitické CRUD aplikace.
-Transakci napříč agregáty nahrazují čtyři explicitní kroky:
+Transakci přes více agregátů nahrazují čtyři kroky:
 
 1. Kořen agregátu A vykoná operaci a publikuje doménovou událost (např. `OrderPlaced`).
 2. Outbox Pattern (kapitola [Outbox](/outbox-pattern)) zajistí, že
-   událost se spolehlivě dostane do message brokera, i když selže jiná komponenta.
+   se událost spolehlivě dostane do message brokera, i když selže jiná komponenta.
 3. Handler nebo sága přijme událost a v *separátní* transakci modifikuje agregát B.
-4. Pokud krok 3 selže, sága vykoná kompenzaci nebo retry; doména je explicitně připravena
-   na chvilkovou nekonzistenci.
+4. Když krok 3 selže, sága provede kompenzaci nebo retry; doména s chvilkovou
+   nekonzistencí počítá.
 
 Rozhoduje, *jak dlouho smí nekonzistence trvat*. Odpověď nepatří vývojáři,
 ale doménovému expertovi, a bývá velkorysejší, než se čeká. Vernon k tomu píše, že experti
@@ -332,8 +336,8 @@ u kterých expert žádné zpoždění nepřipustí, jsou kandidáty na *jeden* 
 **Pozor na uživatelskou zkušenost**
 
 Eventual consistency má v back-endu jasná řešení (outbox, sága), v UI ale vyžaduje
-pozornost. Pokud uživatel zadá objednávku a čeká stránku „Objednávka přijata“, nesmí ji vidět
-dříve, než ji vidí read model.
+pozornost. Uživatel, který odešle objednávku, čeká stránku „Objednávka přijata“. Ta se
+nesmí vykreslit z read modelu, do kterého objednávka ještě nedorazila.
 
 Tři osvědčené přístupy:
 
@@ -347,8 +351,8 @@ Tři osvědčené přístupy:
 :::
 
 Typickým příkladem je e-commerce checkout. Místo „v jedné transakci uložit objednávku,
-srazit zásoby a poslat e-mail“ se proces rozdělí na tři kroky. Agregát `Order` uloží
-objednávku a publikuje `OrderPlaced` event. Sága `InventoryReservationSaga` ve své
+srazit zásoby a poslat e-mail“ se proces rozdělí na tři kroky. Handler uloží
+objednávku a publikuje `OrderPlaced`, kterou nahrál agregát `Order`. Sága `InventoryReservationSaga` ve své
 transakci sníží zásoby v agregátu `InventoryItem`. Potvrzovací e-mail pak odešle
 `OrderConfirmationEmailSaga`, opět v samostatné transakci. Pokud rezervace zásob selže
 (zboží mezitím vyprodáno), událost `OrderCancelledDueToOutOfStock` spustí kompenzaci
@@ -361,21 +365,23 @@ typu `OrderId`, `CustomerId`), ne přes objektovou referenci. Důvody:
 
 - Objektová reference svádí k řetězené úpravě „`$order->getCustomer()->changeAddress(...)`“.
   V jediné transakci se tak mění dva agregáty a programátor o tom často ani neví.
-- Lazy loading u Doctrine sice teoreticky odděluje načtení, prakticky ale skrývá, že druhý
-  agregát musí být v paměti, aby se dotaz vykonal. Vzniká skrytá vazba: co se přes proxy
-  změní, uloží nejbližší `flush()` spolu s vlastním agregátem.
+- Lazy loading u Doctrine sice teoreticky odděluje načtení, prakticky ale skrývá, že se
+  druhý agregát načítá do paměti. Vzniká skrytá vazba: co se přes proxy změní, uloží
+  nejbližší `flush()` spolu s vlastním agregátem.
 - Identifikátorová reference funguje stejně na monolitu, modulárním monolitu i na microservices.
   Migrace mezi těmito tvary nasazení nevyžaduje refaktoring doménového modelu, jen výměnu
   `CustomerRepository::get()` za HTTP volání.
 - Identifikátor je serializovatelný. Doménová událost, která ho nese, se přenáší přes message
   broker beze ztráty informace.
 
-Výjimku připouští i sám Vernon. Ve třetím dílu série jeho tým kvůli režii dotazů zvolí přímou
-lazy-loaded referenci na cizí agregát a mapování k ní přizpůsobí. Hranici mezi výjimkou
-a chybou drží jediná podmínka: taková reference slouží ke čtení. Jakmile se přes ni volá
-doménová metoda cizího agregátu, transakce se rozlezla přes hranici a výhoda je pryč.
-Evans ve stejném duchu připouští předání reference na vnitřní člen agregátu ven, ale jen
-pro jedinou operaci, tedy bez uchování a bez zápisu.
+Výjimku připouští i sám Vernon. Ve druhém dílu série řadí přímou referenci na cizí
+agregát mezi důvody k porušení vodítek, pokud zlevní dotazy. Ve třetím dílu pak tým
+zvažuje objemný text příběhu vyčlenit do samostatného agregátu a odkázat na něj přímou,
+líně načítanou referencí, aby se nenačítal při každé práci s položkou backlogu. Hranici mezi výjimkou a chybou drží jediná podmínka:
+taková reference slouží ke čtení. Jakmile se přes ni volá doménová metoda cizího agregátu,
+transakce se rozlezla přes hranici a výhoda je pryč. Evans ve stejném duchu připouští
+předání reference na vnitřní člen agregátu ven, ale jen přechodně, pro jedinou operaci;
+volající si ji nesmí ponechat.
 
 :::code{language="php" filename="src/Ordering/Domain/ValueObject/OrderId.php"}
 <?php
@@ -418,7 +424,7 @@ final readonly class OrderId
 }
 :::
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php" highlights="30,32,33,37,58,59,60,61,62,63,64"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php" highlights="30,32,33,37,48,50,58,59,60,61,62,63,64,69"}
 <?php
 
 declare(strict_types=1);
@@ -448,7 +454,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use App\SharedKernel\Domain\Money;
 
-class Order extends AggregateRoot
+final class Order extends AggregateRoot
 {
     /** @var Collection<int, OrderItem> */
     private Collection $items;
@@ -507,7 +513,7 @@ class Order extends AggregateRoot
     {
         if ($this->status !== OrderStatus::Draft) {
             throw InvalidOrderStateTransitionException::notAllowedInState(
-                'přidání položky',
+                'addItem',
                 $this->status->value,
             );
         }
@@ -610,7 +616,7 @@ class Order extends AggregateRoot
 
         // Storno je hrana grafu jako každá jiná: odeslanou ani doručenou
         // zásilku zpátky nevrátí, tam nastupuje kompenzace v ságe.
-        // Výčet sedí s tabulkou přechodů OrderStatus z kapitoly 10.
+        // Výčet sedí s tabulkou přechodů OrderStatus z kapitoly Implementace v Symfony 8.
         if (in_array($this->status, [OrderStatus::Shipped, OrderStatus::Delivered], true)) {
             throw InvalidOrderStateTransitionException::cannotTransition(
                 $this->status->value,
@@ -667,7 +673,11 @@ už signatura. Bez první položky objednávka nevznikne. Kanonické
 tuhle záruku nedává, proto ji `totalAmount()` a `confirm()` kontrolují za běhu.
 `customerId` je hodnotový objekt, ne reference na entitu.
 Stavové přechody `confirm()`, `markPaid()`, `ship()` a `cancel()` jsou jediný způsob, jak
-změnit `status`; setter zvenčí neexistuje. Volání `record()` ukládá
+změnit `status`; setter zvenčí neexistuje. Z pravidla o verzi kořene ze sekce
+[07.04](#aggregate-size) ukázka vědomě slevuje: `addItem()` pole na kořeni nemění, takže
+verzi nezvedne. Obhajobou je user-aggregate affinity – položky se mění jen ve stavu
+Draft, kdy s objednávkou pracuje jediný zákazník. Kde položky upravuje víc lidí
+současně, musí se doménová metoda dotknout i kořene (viz [Co Doctrine nevymůže](#doctrine-limits)). Volání `record()` ukládá
 událost do interní fronty bázové třídy `AggregateRoot`; vyzvednutí přes
 `releaseEvents()` po flushi popisuje
 [lifecycle sekce v Základních konceptech](/zakladni-koncepty#aggregate-root-lifecycle).
@@ -675,7 +685,7 @@ událost do interní fronty bázové třídy `AggregateRoot`; vyzvednutí přes
 Od PHP 8.4 zapouzdření stavu podporuje i jazyk, a to asymetrickou viditelností:
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
-class Order extends AggregateRoot
+final class Order extends AggregateRoot
 {
     public private(set) OrderStatus $status;
 
@@ -797,7 +807,7 @@ final readonly class ShipmentId
         public string $value,
     ) {
         if (!Uuid::isValid($value)) {
-            throw new \InvalidArgumentException("Neplatné ShipmentId: {$value}");
+            throw new \InvalidArgumentException('ShipmentId must be a valid UUID');
         }
     }
 
@@ -821,15 +831,14 @@ final readonly class ShipmentId
 ## 07.08 Mapování v Symfony 8 a Doctrine ORM 3 {#symfony-doctrine}
 
 Doctrine ORM je v Symfony projektech výchozí volba a právě jeho konfigurace často
-rozhodne, jestli agregátní model zůstane čistý, nebo se přizpůsobí databázi. Vernon v IDDD probírá agregát
-v kapitole 10 a jeho perzistenci v kapitole 12 „Repositories“. Šest pravidel pro Doctrine
+rozhodne, jestli agregátní model zůstane čistý, nebo se přizpůsobí databázi. Vernon
+probírá agregát v kap. 10 knihy IDDD a jeho perzistenci v kap. 12 „Repositories“. Šest pravidel pro Doctrine
 ORM 3, na která pak navazuje výčet toho, co za vás Doctrine nevymůže:
 
-- **Asociace pouze uvnitř agregátu.** `OneToMany` a `ManyToOne`
-  používejte jen mezi entitami v hranici stejného agregátu. Reference na cizí agregát
+- **Asociace pouze uvnitř agregátu.** `OneToMany` a `ManyToOne` vedou jen mezi
+  entitami v hranici stejného agregátu. Reference na cizí agregát
   je vlastnost typu `CustomerId`, namapovaná jako custom Doctrine type.
-- **Repository per agregát.** Jeden repozitář na jeden agregát. Repozitář vrací
-  pouze kořen, nikdy vnitřní entity. `get()`, `save()`, případně
+- **Repository per agregát.** Repozitář vrací pouze kořen, nikdy vnitřní entity. `get()`, `save()`, případně
   několik specializovaných metod, ne obecné `findBy` z `EntityRepository`.
 - **Optimistický zámek na kořeni.** `#[ORM\Version]` sloupec na kořeni
   agregátu. Souběžná změna kořene skončí výjimkou `OptimisticLockException`, kterou
@@ -841,7 +850,7 @@ ORM 3, na která pak navazuje výčet toho, co za vás Doctrine nevymůže:
 - **Bez kaskádování přes hranici.** `cascade: ['persist', 'remove']`
   mezi agregáty je skrytá transakce. Kaskáda je v pořádku jen uvnitř agregátu pro vlastní entity.
 - **Embedded value objects.** Hodnotové objekty s více poli (Money, Address)
-  mapujte přes `#[ORM\Embedded]`. Žádné samostatné tabulky pro VO.
+  se mapují přes `#[ORM\Embedded]`, ne do samostatných tabulek.
 
 :::code{language="php" filename="src/Ordering/Infrastructure/Doctrine/Type/OrderIdType.php"}
 <?php
@@ -899,7 +908,7 @@ typy nad stejnou SQL deklarací už od sebe schema diff nerozezná, takže zám�
 stejnou stavbu. Liší se jen názvem typu a hodnotovým objektem, který převádějí;
 kniha je proto nevypisuje.
 
-:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (mapování)" highlights="32,33,34,35,36,37,38,40,41,43,44,45"}
+:::code{language="php" filename="src/Ordering/Domain/Model/Order.php (mapování)" highlights="31,32,33,34,35,36,37,39,40,42,43,44,51,52"}
 <?php
 
 declare(strict_types=1);
@@ -916,7 +925,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'orders')]
-class Order extends AggregateRoot
+final class Order extends AggregateRoot
 {
     #[ORM\Column(enumType: OrderStatus::class)]
     public private(set) OrderStatus $status;
@@ -1021,6 +1030,8 @@ final readonly class Money
 // --- src/Ordering/Domain/ValueObject/ShippingAddress.php ---
 namespace App\Ordering\Domain\ValueObject;
 
+use Doctrine\ORM\Mapping as ORM;
+
 #[ORM\Embeddable]
 final readonly class ShippingAddress
 {
@@ -1100,7 +1111,7 @@ Náhradní `int` identita je vědomé rozhodnutí, ne nedbalost. `OrderItem` nem
 identitu, protože se na položku zvenčí agregátu nikdo neodkazuje. UUID by tu jen zabíralo
 místo. Kdyby se odkazoval, byl by to signál, že položka patří do vlastního agregátu.
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php" highlights="34,35,36,37,38,39,40"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php" highlights="33,34,35,36,37,40,41"}
 <?php
 
 declare(strict_types=1);
@@ -1141,7 +1152,7 @@ final class DoctrineOrderRepository implements OrderRepository
     }
 
     // ŽÁDNÉ findAll(), findBy(), žádné metody pro čtení vnitřních entit.
-    // Read modely jsou samostatné (CQRS, kapitola 12).
+    // Read modely jsou samostatné (viz kapitola CQRS).
 }
 :::
 
@@ -1154,6 +1165,10 @@ doctrine:
             order_id:    App\Ordering\Infrastructure\Doctrine\Type\OrderIdType
             customer_id: App\Ordering\Infrastructure\Doctrine\Type\CustomerIdType
             product_id:  App\Ordering\Infrastructure\Doctrine\Type\ProductIdType
+            # Typy pro User (UserId, Email) přidává kapitola Implementace
+            # v Symfony 8; bez nich jeho mapování spadne.
+            email_vo:    App\UserManagement\Infrastructure\Doctrine\Type\EmailType
+            user_id:     App\UserManagement\Infrastructure\Doctrine\Type\UserIdType
             # Money se sem nepřidává – mapuje se přes #[ORM\Embedded] podle
             # pravidla výše. Jednosloupcový custom typ by znemožnil SUM() i ORDER BY.
 
@@ -1229,13 +1244,14 @@ z nichž každý upraví jinou položku téže objednávky, projdou oba a invari
 se rovná celkové ceně“ se poruší, aniž kdokoli dostane `OptimisticLockException`.
 Doctrine na to nemá ekvivalent JPA konstanty `OPTIMISTIC_FORCE_INCREMENT`; požadavek na ni
 je otevřený od roku 2013 [[10]](https://github.com/doctrine/orm/issues/3620). Obejít to lze
-třemi způsoby. Doménová metoda kořene se při každé změně potomka dotkne vlastního pole
-(přepočtená `totalAmount` nebo `updatedAt`); taková změna mívá i doménový význam.
-Druhá cesta je explicitní `$em->lock($order, LockMode::OPTIMISTIC, $expectedVersion)`
-s verzí, kterou drží klient. Třetí je pesimistický zámek, tedy `LockMode::PESSIMISTIC_WRITE`,
-za cenu propustnosti.
+dvěma způsoby. Doménová metoda kořene se při každé změně potomka dotkne vlastního pole
+(přepočtená `totalAmount` nebo `updatedAt`); taková změna mívá i doménový význam a verzi
+zvedne. Druhou cestou je pesimistický zámek `LockMode::PESSIMISTIC_WRITE` za cenu
+propustnosti. Volání `$em->lock($order, LockMode::OPTIMISTIC, $expectedVersion)` s verzí,
+kterou drží klient, samo nestačí: odhalí zastaralý formulář, ale verzi nezvedá, takže dva
+souběžné požadavky nad stejnou verzí projdou oba.
 
-Druhá trhlina je hranice transakce. `EntityManager::flush()` commitne **všechny** špinavé
+Druhá trhlina je hranice transakce. `EntityManager::flush()` zapíše **všechny** změněné
 entity ve své Unit of Work, ne jen agregát, který handler načetl. Repozitář z ukázky výše
 tedy pravidlo „jeden agregát na transakci“ nevynucuje. Pokud handler cestou sáhne na cizí
 agregát a jen mu změní vlastnost, Doctrine ho uloží zároveň – bez varování. Vynutí to jen
@@ -1252,8 +1268,8 @@ Cenou je vrstva navíc, výhodou to, že Doctrine přestane ovlivňovat tvar agr
 
 Typický anti-vzor: agregát `Project` drží `OneToMany` kolekci úkolů.
 S desítkami úkolů to funguje, s tisíci ne. Každé načtení agregátu hydratuje
-celou kolekci a každé přidání položky způsobí flush všech úkolů. Nabízejí se tři východiska,
-seřazená od nejčistšího po nejvíc kompromisní:
+celou kolekci a každý flush pak prochází změny u všech načtených úkolů. Nabízejí se tři
+východiska, seřazená od nejčistšího po nejvíc kompromisní:
 
 - **Rozdělit agregát.** `Project` a `Task` se stanou samostatnými agregáty
   a `Task` nese jen `ProjectId` jako referenci. Invariant „úkol patří
@@ -1350,15 +1366,15 @@ Pro nové Symfony projekty je výchozí volbou UUID v7. Je časově řazené, st
 ho podporuje v základu balíčku `symfony/uid` (`Uuid::v7()`). ULID zůstává alternativou,
 když je žádoucí kratší Crockford base32 zápis (26 znaků vs. 36); měření dopadu obou
 formátů na index rozebírá kapitola
-[Výkonnostní aspekty](/vykonnostni-aspekty#uuid-vs-integer).
+[Read modely, projekce a výkon](/vykonnostni-aspekty#uuid-vs-integer).
 Komplikované referenční schéma typu „tenantId + naturalId“ zaveďte teprve
 tehdy, když máte konkrétní multi-tenancy požadavek.
 :::
 
 ## 07.11 Postup návrhu krok za krokem {#workflow}
 
-Návrh agregátu je disciplinovaný proces, ne kreslení tříd v IDE. Následující sedmikrokový
-postup je autorský; kroky 4 a 5 přebírají Vernonovu metodu odhadu, zbytek vychází
+Návrh agregátu je disciplinovaný proces, ne kreslení tříd v IDE. Sedmikrokový postup
+níže sestavila kniha; kroky 4 a 5 přebírají Vernonovu metodu odhadu, zbytek vychází
 z praxe na Symfony projektech:
 
 1. **Sepište invarianty.** Z Event Stormingu, doménových workshopů nebo
@@ -1416,11 +1432,11 @@ a policy sticky se z něj přenášejí, hot spoty se stávají kandidáty na in
 - Doménová logika v read modelu. Invarianty patří do write modelu, projekce jen reaguje.
 - Domain Event jako notifikace mezi vrstvami, tedy mechanismus pro „když se agregát
   změní, smaž cache“. Eventy jsou doménová fakta, ne infrastrukturní signály.
-  Cache invalidaci řešte v projekci, která event konzumuje.
+  Invalidace cache patří do projekce, která event konzumuje.
 
 Několik dalších chyb má společného jmenovatele: obcházení kořene.
 `$order->getItems()->add(...)` mění kolekci mimo agregát. Zvenčí má kolekce zůstat
-immutable a položka se přidává výhradně metodou na kořeni. Totéž porušení hranice
+neměnná a položka se přidává výhradně metodou na kořeni. Totéž porušení hranice
 předvádí `OrderItemRepository::get(itemId)`: vnitřní entita se ven nepředává k uchování
 ani k modifikaci (výjimku pro jedinou operaci popisuje [07.07](#references-by-id))
 a její „samostatná“ identita patří do read modelu, ne do write modelu. Příbuzným
@@ -1434,7 +1450,7 @@ která zasahuje do dvou agregátů, je skrytá transakce. Jakmile služba sama v
 
 ## 07.13 Checklist návrhu agregátu {#checklist}
 
-1. Sepsal jsem invarianty v ubiquitous language (slova z domény, ne z kódu).
+1. Sepsal jsem invarianty v Ubiquitous Language (slova z domény, ne z kódu).
 2. U každého invariantu vím, zda musí platit okamžitě, nebo eventuálně.
 3. Hranice agregátu obklopuje invarianty kategorie „okamžitě“.
 4. Na kořeni je optimistický zámek (`#[ORM\Version]` nebo ekvivalent) a každá
@@ -1443,7 +1459,7 @@ která zasahuje do dvou agregátů, je skrytá transakce. Jakmile služba sama v
 6. Žádná Doctrine asociace nepřekračuje hranici agregátu.
 7. Repozitář vrací jen kořen; vnitřní entita se ven nepředává k uchování ani
    k modifikaci.
-8. Změny napříč agregáty řeší sága nebo process manager, ne sdílená transakce –
+8. Změny napříč agregáty řeší sága nebo Process Manager, ne sdílená transakce –
    a pokud přesto sdílená transakce zůstává, je pojmenovaný důvod proč.
 9. UI počítá s eventual consistency tam, kde ji doména používá.
 10. Kaskádové operace existují jen uvnitř agregátu.
@@ -1470,7 +1486,7 @@ která zasahuje do dvou agregátů, je skrytá transakce. Jakmile služba sama v
 - question: Jak velký má být agregát?
   answer: 'Tak velký, aby obsahoval všechny invarianty, které musí platit okamžitě, a ne větší. Výchozí volba je agregát s jedním kořenovým objektem a několika hodnotovými objekty plus volitelně několika vnitřními entitami. Větší agregát potřebuje konkrétní obhajobu invariantem, ne pohodlí ORM. Vernon cituje projekt Niclase Hedhmana, kde zhruba 70 % agregátů tvořil jen kořen s hodnotovými objekty a 30 % mělo dvě až tři entity. Velikost se odhaduje tužkou na papíře: kolik potomků instance nasbírá za dobu svého života. Kolekce, jejíž růst nic neomezuje, patří ven z agregátu, nebo alespoň na <code>EXTRA_LAZY</code> s filtrováním v repozitáři. Detail v <a href="#aggregate-size">sekci Velikost agregátu</a>.'
 - question: Proč nelze měnit dva agregáty v jedné transakci?
-  answer: 'Technicky to lze a výchozí odpověď zní „nedělejte to“. Hranice agregátu je zároveň hranice konzistence a hranice škálování: zámek napříč agregáty snižuje propustnost, souběžné transakce plodí deadlocky a kód se později nedá rozdělit. Potřeba commitnout dva agregáty najednou je hlavně diagnóza. Nejspíš je špatně vedená hranice. Vernon ale jmenuje čtyři situace, kdy je porušení legitimní (dávkové zakládání z UI, chybějící messaging, vynucené globální transakce, výkon dotazů); rozebírá je <a href="#breaking-the-rule">sekce Kdy se vodítko poruší</a>. Detail v <a href="#transactional-consistency">sekci Transakční konzistence</a>, alternativní řešení v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
+  answer: 'Technicky to lze a výchozí odpověď zní „nedělejte to“. Hranice agregátu je zároveň hranice konzistence a hranice škálování: zámek napříč agregáty snižuje propustnost, souběžné transakce plodí deadlocky a kód se později nedá rozdělit. Potřeba commitnout dva agregáty najednou je hlavně diagnóza. Nejspíš je špatně vedená hranice. Vernon ale jmenuje tři situace, kdy je takové porušení obhajitelné (dávkové zakládání z UI, chybějící messaging, vynucené globální transakce), a čtvrtou, výkon dotazů, u referencí přes identitu; rozebírá je <a href="#breaking-the-rule">sekce Kdy se vodítko poruší</a>. Detail v <a href="#transactional-consistency">sekci Transakční konzistence</a>, alternativní řešení v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
 - question: Co je eventual consistency a kdy ji použít?
   answer: 'Eventual consistency znamená, že stav dvou agregátů je konzistentní se zpožděním, ne okamžitě. Jak dlouhé zpoždění je přijatelné, určí doménový expert. Vernon připomíná, že experti běžně připustí sekundy, minuty, hodiny i dny. Hodí se všude, kde invariant nemusí platit v každý okamžik, například „po vystavení objednávky se zákazníkovi pošle e-mail“ nebo „při změně adresy v Customer agregátu se upraví doručovací adresa v rozpracovaných objednávkách“. Implementačně: agregát A publikuje doménovou událost, sága ji přijme a v separátní transakci změní agregát B. Pravidla, která musí platit okamžitě (například „bilance debetů a kreditů je nulová“), patří do jednoho agregátu. Detail v <a href="#eventual-consistency">sekci Eventual consistency</a>.'
 - question: Jak v Doctrine ORM 3 namapovat referenci na jiný agregát?
@@ -1480,7 +1496,7 @@ která zasahuje do dvou agregátů, je skrytá transakce. Jakmile služba sama v
 - question: Jak hot aggregate vyřešit?
   answer: 'Čtyři strategie podle povahy domény. <strong>Rozdělení na menší</strong> – místo <code>Stadium</code> s tisícem sedaček vznikne <code>Section</code> s desítkami; souběžné transakce se rozprostřou. <strong>Event Sourcing</strong> – zápis je append-only a souběh hlídá verze streamu (kapitola <a href="/event-sourcing">Event Sourcing</a>). <strong>Single-writer pattern</strong> – agregát existuje v paměti jediného procesu, v Symfony přes Messenger se směrováním konzistentním hashem. <strong>Eventual consistency uvnitř</strong> – pro nekritické hodnoty (<em>like count</em>) stačí periodická replikace. Volba závisí na povaze invariantu; vodítko v <a href="#hot-aggregate">sekci Hot aggregate</a>.'
 - question: Jaký identifikátor zvolit pro nový agregát?
-  answer: 'Pro nové Symfony projekty doporučujeme UUID v7 (<code>Uuid::v7()</code>, balíček <code>symfony/uid</code>). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru a formát je standardizovaný v RFC 9562. ULID (<code>Symfony\\Component\\Uid\\Ulid</code>) je alternativa se srovnatelnými vlastnostmi a kratším zápisem (26 znaků vs. 36). Sekvenční integer má smysl jen se specifickým důvodem (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) <strong>nedoporučujeme</strong>. Domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
+  answer: 'Pro nové Symfony projekty kniha doporučuje UUID v7 (<code>Uuid::v7()</code>, balíček <code>symfony/uid</code>). Časově řazená generace zlepšuje I/O pattern v MySQL/InnoDB oproti UUID v4, distribuované vytváření odstraňuje potřebu centrálního generátoru a formát je standardizovaný v RFC 9562. ULID (<code>Symfony\\Component\\Uid\\Ulid</code>) je alternativa se srovnatelnými vlastnostmi a kratším zápisem (26 znaků vs. 36). Sekvenční integer má smysl jen se specifickým důvodem (lidsky čitelné číslo objednávky). Přirozené klíče (e-mail, IČO) kniha <strong>nedoporučuje</strong>. Domény mění své „přirozené klíče“ častěji, než se zdá. Srovnání všech pěti strategií v <a href="#reference-strategies">sekci Strategie referencování</a>.'
 - question: Jak rychle ověřit, že hranice agregátu je správně?
   answer: 'Tři rychlé kontroly. (1) <strong>Test invariantu</strong>: existuje pravidlo, které by se porušilo, kdybyste agregát rozdělili na dva? (2) <strong>Test velikosti</strong>: umíte spočítat horní mez počtu potomků, které instance za svůj život nasbírá? (3) <strong>Test reference</strong>: ven z agregátu se odkazujete jen přes ID, ne přes objektovou referenci? Pokud na všechny tři odpovídáte „ano“, hranice je nejspíš správná. Plný checklist s 12 body v <a href="#checklist">sekci Checklist</a>, sedmikrokový postup návrhu v <a href="#workflow">sekci Postup návrhu</a>.'
 :::

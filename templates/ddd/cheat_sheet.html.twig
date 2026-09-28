@@ -9,7 +9,7 @@
 {% block og_type %}article{% endblock %}
 
 {% block article_published_time %}2026-04-29{% endblock %}
-{% block article_modified_time %}2026-09-24{% endblock %}
+{% block article_modified_time %}2026-09-28{% endblock %}
 
 {% block breadcrumb_name %}Cheat Sheet{% endblock %}
 
@@ -89,10 +89,10 @@
                     <tr>
                         <td>Složitá doména, která tvoří jádro byznysu</td>
                         <td>Plné DDD – strategické i taktické</td>
-                        <td><a href="{{ path('what_is_ddd') }}">Co je DDD</a> · <a href="{{ path('subdomains') }}">Subdomény</a></td>
+                        <td><a href="{{ path('what_is_ddd') }}">Co je Domain-Driven Design</a> · <a href="{{ path('subdomains') }}">Subdomény: Core, Supporting, Generic</a></td>
                     </tr>
                     <tr>
-                        <td>Dva a více Bounded Contextů, které spolu komunikují</td>
+                        <td>Dva nebo více Bounded Contextů, které spolu komunikují</td>
                         <td>Context Map</td>
                         <td><a href="{{ path('context_mapping') }}">Bounded Context a Context Mapping</a></td>
                     </tr>
@@ -114,7 +114,7 @@
                     <tr>
                         <td>Oddělené čtení a zápis</td>
                         <td>CQRS</td>
-                        <td><a href="{{ path('cqrs') }}">CQRS v Symfony 8</a></td>
+                        <td><a href="{{ path('cqrs') }}">CQRS</a></td>
                     </tr>
                     <tr>
                         <td>Zápis stavu a publikace události v jedné transakci</td>
@@ -162,8 +162,7 @@
 
             {% set _decision_note %}
                 <p>
-                    Tabulka záměrně nepokrývá všechny situace, jen ty, na které projekty narážejí nejčastěji.
-                    Pokud váš případ neodpovídá žádnému řádku, začněte
+                    Když váš případ neodpovídá žádnému řádku, začněte
                     <a href="{{ path('basic_concepts') }}">Základními koncepty DDD</a> a pokračujte podle průchodů knihou níže.
                 </p>
             {% endset %}
@@ -324,7 +323,7 @@
                 Doba čtení vychází z odhadů v obsahu knihy.
             </p>
 
-            {% set _path = ['what_is_ddd', 'basic_concepts', 'architectural_styles', 'performance_aspects'] %}
+            {% set _path = ['what_is_ddd', 'basic_concepts', 'aggregate_design', 'implementation_in_symfony', 'testing_ddd'] %}
             {% set _minutes = 0 %}{% for r in _path %}{% set _minutes = _minutes + _ch[r].time %}{% endfor %}
             <h3 id="path-junior-heading">Junior PHP vývojář, první kontakt s DDD</h3>
             <p>
@@ -432,7 +431,7 @@
                     <tr>
                         <td>Vlad Khononov (2021)</td>
                         <td><em>Learning Domain-Driven Design</em></td>
-                        <td>Pohled s odstupem 18 let od Evanse. Víc prostoru dostává strategický design a rozhodnutí, kde DDD dává smysl.</td>
+                        <td>Pohled s odstupem 18 let od Evanse. Víc prostoru dostává strategický design a rozhodnutí, kde se DDD vyplatí.</td>
                     </tr>
                     <tr>
                         <td>Greg Young (2010)</td>
@@ -447,22 +446,22 @@
             <ol>
                 <li>
                     <a href="https://www.youtube.com/watch?v=dnUFEg68ESM" target="_blank" rel="noopener noreferrer">Eric Evans – Tackling Complexity in the Heart of Software</a>
-                    (keynote, ~60 min). Kratší výklad myšlenek ze stejnojmenné knihy. Pokud nemáte čas na knihu, projděte aspoň přednášku.
+                    (keynote DDD Europe, ~55 min). Kratší výklad myšlenek ze stejnojmenné knihy. Pokud nemáte čas na knihu, projděte aspoň přednášku.
                 </li>
                 <li>
                     <a href="https://www.youtube.com/watch?v=JHGkaShoyNs" target="_blank" rel="noopener noreferrer">Greg Young – CQRS and Event Sourcing</a>
-                    (konference, ~75 min). Young na praktických případech ukazuje, kdy má smysl oddělit commandy od queries a kdy jít až k úložišti založenému na událostech.
+                    (Code on the Beach 2014, ~65 min). Young na praktických případech ukazuje, kdy má smysl oddělit commandy od queries a kdy jít až k úložišti založenému na událostech.
                 </li>
                 <li>
                     <a href="https://www.youtube.com/watch?v=SUiWfhAhgQw" target="_blank" rel="noopener noreferrer">Jimmy Bogard – Vertical Slice Architecture</a>
-                    (konference, ~45 min). Argument pro vertikální řezy místo horizontálních vrstev. Týká se organizace kódu uvnitř Bounded Contextu.
+                    (NDC, ~60 min). Argument pro vertikální řezy místo horizontálních vrstev. Týká se organizace kódu uvnitř Bounded Contextu.
                 </li>
             </ol>
         </section>
 
         <p>
             Konkrétní implementační příklady najdete v <a href="{{ path('practical_examples') }}">Praktických příkladech</a>
-            a v kapitole <a href="{{ path('implementation_in_symfony') }}">Implementace DDD v Symfony 8</a>.
+            a v kapitole <a href="{{ path('implementation_in_symfony') }}">Implementace v Symfony 8</a>.
             Podrobnější slovník pojmů nabízí <a href="{{ path('glossary') }}">Glosář</a>.
         </p>
     </div>

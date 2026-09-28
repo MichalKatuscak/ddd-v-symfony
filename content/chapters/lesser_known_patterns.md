@@ -7,23 +7,23 @@ meta_description: "Čtyři doplňkové taktické vzory DDD: Specification pro ko
 meta_keywords: "specification pattern, domain service, factory, module, DDD, taktický design, Eric Evans, Vernon, PoEAA, phparkitect, Symfony 8, PHP 8.4, Doctrine criteria, double dispatch, ubiquitous language, anémický model"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Doplňující taktické vzory
 schema_type: TechArticle
 schema_headline: "Doplňující taktické vzory: Specifications, Domain Services, Factories, Modules"
 chapter_number: "08"
 category: Taktika
-deck: 'Vedle entit, value objektů a agregátů obsahuje Evansova kniha čtyři další taktické vzory, které programátoři často přeskočí: <strong>Specifications</strong> jako prvotřídní booleovská logika, <strong>Domain Services</strong> pro chování bez přirozeného vlastníka, <strong>Factories</strong> pro komplexní vznik agregátů a <strong>Modules</strong> jako vědomá organizace kódu. Tato kapitola je jejich detailní průvodce v Symfony 8 a PHP 8.4 – s ukázkami kódu, anti-vzory a srovnávacími tabulkami.'
-reading_time: 37
+deck: "Evansova kniha má vedle entit, value objektů a agregátů další čtyři taktické vzory, které se v praxi často přeskakují: <strong>Specification</strong> pro pravidla vyjádřená jako samostatný predikát, <strong>Domain Service</strong> pro chování, které nepatří žádné entitě, <strong>Factory</strong> pro složitý vznik agregátu a <strong>Module</strong> pro organizaci kódu. Ke každému ukázky v PHP 8.4, anti-vzory a srovnání."
+reading_time: 38
 difficulty: 3
 github_examples: Chapter12_LesserPatterns
 ---
 
 Kapitola [Základní koncepty DDD](/zakladni-koncepty) probrala **entity**, **hodnotové
 objekty**, **agregáty** a jen stručně **doménové služby** a **factories**. Evans přitom
-službám, factories, specifikacím a modulům věnuje v částech II a III desítky stran. Průvodci je přeskakují nebo je
-zaměňují s jinými vzory. Tato kapitola ukazuje, kdy jsou užitečné, jak je zapsat v PHP 8.4
-a co stojí jejich špatné použití.
+službám, factories, specifikacím a modulům věnuje v částech II a III desítky stran.
+Průvodci je přeskakují nebo je zaměňují s jinými vzory. Zde se ukáže, kdy jsou užitečné,
+jak je zapsat v PHP 8.4 a co stojí jejich špatné použití.
 
 Všechny čtyři vzory pocházejí přímo z Evansovy knihy. **Specification** (kap. 9) dělá
 z doménových predikátů skládatelné objekty. **Domain Service** (kap. 5) zachytává logiku
@@ -49,8 +49,7 @@ sekce [08.06](#vztahy).
 
 Každý vzor prochází stejnými čtyřmi otázkami: co přesně je podle Evanse a Vernona,
 kdy se použije, kdy ne (anti-vzory a over-engineering) a jak vypadá v Symfony 8
-a PHP 8.4. U Domain Service přibývá srovnávací tabulka s Application a Infrastructure
-Service. Závěr kapitoly shrnuje anti-vzory a odkazuje na související kapitoly.
+a PHP 8.4. U Domain Service přibývá srovnání s Application a Infrastructure Service.
 :::
 
 ## 08.02 Specification Pattern {#specification}
@@ -73,7 +72,7 @@ vlastní třídu s mluvícím jménem: *„zákazník je premium“*, *„objedn
 zdarma“*, *„faktura je po splatnosti“*. Pravidlo přestává být kombinací `if`-ů v service
 vrstvě a stává se **pojmenovaným prvkem Ubiquitous Language**.
 
-Vzor formálně popsali Evans a Fowler v pracovním papíru *Specifications*
+Vzor formálně popsali Evans a Fowler ve společném článku *Specifications*
 [[martinfowler.com]](https://martinfowler.com/apsupp/spec.pdf) z roku 1997; Evans ho později
 zařadil do *Domain-Driven Design* (2003), kapitoly 9 *Making Implicit Concepts Explicit*.
 Východisko je v obou textech stejné: pravidlo, které se v doméně opakuje, si zaslouží
@@ -86,7 +85,7 @@ vypadl i z autorova vlastního souhrnu.
 
 ### Kdy použít {#spec-kdy}
 
-Původní papír pojmenovává tři použití vzoru. **Selection** vybírá podmnožinu objektů podle
+Původní článek pojmenovává tři použití vzoru. **Selection** vybírá podmnožinu objektů podle
 kritéria a umí výběr kdykoliv obnovit. **Validation** ověřuje, že objekt je pro daný účel
 vhodný. **Construction-to-order** popisuje, jak má objekt vypadat, aniž řeší, jak takový
 objekt vyrobit; z popisu se dá kandidát sestavit na zakázku. V Symfony projektu se tato
@@ -99,8 +98,8 @@ použití objevují ve čtyřech typických situacích:
    konzistentní.
 2. **Pravidla použitelná v doméně i v repozitáři.** Tatáž specifikace
    odpoví na „*splňuje tento konkrétní objekt pravidlo?*“ (in-memory predikát)
-   a zároveň vrátí z databáze všechny objekty, které pravidlo splňují (query). Obě podoby pravidla (PHP i SQL/Doctrine
-   DQL) drží pohromadě v jedné třídě; **double-dispatch** přijde ke slovu
+   a zároveň vrátí z databáze všechny objekty, které pravidlo splňují (query). Obě podoby
+   pravidla (PHP i dotaz přes Doctrine) drží pohromadě v jedné třídě; **double-dispatch** přijde ke slovu
    při předání specifikace repozitáři (viz
    [Double-dispatch do Doctrine](#spec-doctrine)).
 3. **Pravidla, která se skládají za běhu.** Promo kód má v admin UI
@@ -110,8 +109,9 @@ použití objevují ve čtyřech typických situacích:
 4. **Pravidlo validace agregátu.** Agregát nekontroluje všechno sám v setterech,
    ale deleguje na specifikaci, kterou jde číst i testovat samostatně.
 
-Papír k tomu přidává tři implementační strategie, které se liší cenou. *Hard Coded Specification* je jedna třída na jedno pravidlo, bez parametrů –
-levná, ale roste s počtem pravidel. *Parameterized Specification* skládá pravidlo za běhu
+Článek k tomu přidává tři implementační strategie, které se liší cenou. *Hard Coded
+Specification* je jedna třída na jedno pravidlo, bez parametrů – levná, ale roste
+s počtem pravidel. *Parameterized Specification* skládá pravidlo za běhu
 z hodnot; přesně to dělá bod 3 s promo kódem čteným z databáze. *Composite Specification*
 přidává uzly `and`, `or`, `not` a čte pravidlo jako výraz. Evans s Fowlerem u ní uvádějí
 i cenu: kompozit je pružný bez spousty specializovaných tříd, ale vyžaduje investici
@@ -130,7 +130,7 @@ a nový test. Nehodí se pro:
 - Konfigurační a technické příznaky – Specification má reprezentovat
   *doménové* pravidlo, ne podmínku *„má feature flag enabled“*.
 
-Papír Evanse a Fowlera má vlastní sekci *When Not to Use Specification* a její kritérium je
+Článek Evanse a Fowlera má vlastní sekci *When Not to Use Specification* a její kritérium je
 ostřejší než výčet výše. Jestliže objekt reprezentuje skutečnou entitu domény místo toho,
 aby kladl podmínky na jinou, případně jen hypotetickou entitu, vzor tam nepatří. Autoři to
 ilustrují dvojicí *Route* a *Route Specification*: trasa je věc, kterou doména zná a která
@@ -147,14 +147,14 @@ obecné predikáty a doména se z kódu přestane dát vyčíst.
 
 Rozdíl je v rovině, ve které třída stojí. Doménové jméno má nést *výsledná* specifikace –
 ta, kterou předáváte dál a která odpovídá na celou otázku. Generické parametrizované listy
-uvnitř kompozitu legitimní jsou; Evans s Fowlerem u *Composite Specification* přesně takové
+uvnitř kompozitu jsou v pořádku; Evans s Fowlerem u *Composite Specification* přesně takové
 uzly předpokládají a jejich vlastní ukázkou je `MaximumTemperatureSpecification`. Problém
 nastane, až generický predikát vyleze ven a stane se rozhraním, kterým se doména ptá.
 :::
 
 ### Skladba pomocí kombinátorů {#spec-diagram}
 
-Síla vzoru je ve **skládání** přes booleovské kombinátory `and`, `or` a `not`.
+Hodnotu vzoru přináší **skládání** přes booleovské kombinátory `and`, `or` a `not`.
 Místo klubka `if`-ů a `else`-ů vznikne algebraický výraz nad pojmenovanými atomy.
 Hierarchie tříd:
 
@@ -505,9 +505,9 @@ checkoutu: nulové dopravné dosadí do výpočtu ceny, nebo ho zapíše jako sl
 Kanonický `Order` tak nepotřebuje žádnou metodu navíc a specifikace zůstává čistým
 dotazem nad stavem.
 
-### Dva vzory z papíru, které se neujaly {#spec-subsumption}
+### Dva vzory z článku, které se neujaly {#spec-subsumption}
 
-Papír *Specifications* obsahuje dva navazující vzory, které se do knih ani do PHP praxe
+Článek *Specifications* obsahuje dva navazující vzory, které se do knih ani do PHP praxe
 nedostaly. Oba přitom řeší otázku, na kterou `isSatisfiedBy()` odpovědět neumí.
 
 **Subsumption** srovnává specifikace mezi sebou místo specifikace s kandidátem. Metoda
@@ -756,7 +756,7 @@ public function toExpression(): Expression
         || !$this->right instanceof QuerySpecification
     ) {
         throw new \LogicException(
-            'Do dotazu lze přeložit jen kompozici QuerySpecification.',
+            'Only a composition of QuerySpecification can be translated into a query.',
         );
     }
 
@@ -790,8 +790,8 @@ Ukázky výše vysvětlují, co balíček dělá uvnitř. V projektu, kde specif
 předmětem výuky, je balíček levnější volbou.
 
 Pro hluboký teoretický základ vzoru: Evans, E., *Domain-Driven Design* (2003),
-kapitola 9 *Making Implicit Concepts Explicit*; Evans & Fowler, pracovní
-papír *Specifications* (1997), dostupný na martinfowler.com.
+kapitola 9 *Making Implicit Concepts Explicit*; Evans & Fowler, článek
+*Specifications* (1997), dostupný na martinfowler.com.
 Praktická aplikace na agregátech: Vernon, V., *Implementing Domain-Driven Design*
 (2013). K Doctrine části: Gomez, K., *On Taming Repository Classes in Doctrine… Among
 other things* (2015) a dokumentace `doctrine/collections` k `Criteria` a `Selectable`.
@@ -800,7 +800,7 @@ other things* (2015) a dokumentace `doctrine/collections` k `Criteria` a `Select
 
 Doménovou službu zavádějí [Základní koncepty](/zakladni-koncepty#domain-services)
 a [Implementace v Symfony](/implementace-v-symfony) ukazuje, jak ji zaregistrovat
-v containeru. Tato sekce řeší rozhodovací kritéria: kdy má služba vzniknout, kdy jde jen
+v containeru. Zde jde o rozhodovací kritéria: kdy má služba vzniknout, kdy jde jen
 o logiku vytrženou z entity a kudy vede hranice vůči Application vrstvě.
 
 ### Co to je {#ds-definice}
@@ -811,8 +811,8 @@ vlastníka** mezi entitami a hodnotovými objekty modelu. Eric Evans v kapitole 
 konceptu, ale (1) nepatří do žádné entity ani hodnotového objektu jako jejich přirozená
 metoda, (2) její rozhraní tvoří jiné prvky doménového modelu a (3) nemá vlastní stav.
 
-Signálem je operace, kterou by žádná entita nemohla vlastnit, aniž by musela příliš
-vědět o té druhé.
+Signálem je operace, kterou by si žádná entita nemohla vzít na starost, aniž by musela
+příliš vědět o té druhé.
 
 ### Kdy použít {#ds-kdy}
 
@@ -956,7 +956,7 @@ rolí plní. Tabulka shrnuje rozdíly, na které se vyplatí ptát v code review
 | Volá perzistenci? | Ne | Ano (přes repozitář) | Ano (sama je perzistencí) |
 | Vyhazuje výjimky | Doménové (`InsufficientFunds`) | Aplikační (`UnauthorizedException`, validation) | Infrastrukturní (`ConnectionException`) |
 | Příklad jména | `MoneyTransferService`, `PricingService` | `PlaceOrderHandler`, `RegisterUserHandler` | `SymfonyMailer`, `StripePaymentGateway` |
-| Test | Pure unit, bez Symfony kernel | Unit s mockovanými repozitáři | Integrační (kontrakt s reálným systémem) |
+| Test | Pure unit, bez Symfony kernel | Unit s InMemory fake repozitáři | Integrační (kontrakt s reálným systémem) |
 | Sufix v PHP | `*Service` (volitelně) | `*Handler`, `*UseCase` | `*Gateway`, `*Adapter`, `*Client` |
 
 Jednotný sufix `*Service` smaže rozdíl mezi třemi rolemi z tabulky. V Application vrstvě
@@ -970,7 +970,7 @@ bez sufixu (`FundsTransfer`, `PricingEngine`).
 Když nejde jednoznačně rozhodnout, zda je třída Domain, nebo Application Service,
 obvykle **míchá obě role**. Rozdělte ji: doménovou
 logiku do Domain Service v `Domain/Service/`, koordinaci do command
-handleru v `Application/CommandHandler/`. Test pro Domain Service
+handleru v `Application/Handler/`. Test pro Domain Service
 ať proběhne bez Symfony kernelu – pokud nemůže, zbyl tam infrastrukturní leak.
 :::
 
@@ -984,7 +984,7 @@ Design* (2013), kapitola 7.
 ## 08.04 Factories {#factories}
 
 Named constructor a rekonstituce se objevují už v [Základních konceptech](/zakladni-koncepty#aggregates)
-jako součást výkladu agregátu. Tato sekce je bere jako samostatný vzor: kdy stačí
+jako součást výkladu agregátu. Zde se berou jako samostatný vzor: kdy stačí
 statická metoda, kdy je potřeba zvláštní třída a kam taková třída patří ve struktuře modulu.
 
 ### Co to je {#fac-definice}
@@ -1009,14 +1009,13 @@ Většině agregátů konstruktor stačí. Factory se hodí, když:
 
 ### Kdy NE {#fac-kdy-ne}
 
-Většinu objektů jde přímočaře vytvořit konstruktorem. Factory má smysl teprve tehdy, když
-konstruktor začne být nepřehledný:
+Factory se nevyplatí tam, kde konstruktor zůstává přehledný:
 
 - **Triviální vznik** – `OrderFactory::create($cust, $items)`,
   která interně volá `new Order(...)` a jinak nic. To není Factory,
   to je redundantní vrstva.
 - **Service Locator pattern** – `$factory->create('Order', [...])`
-  s magickým rozhodováním podle stringu. Ztrácíte typovou bezpečnost.
+  s rozhodováním podle řetězce. Typová bezpečnost se tím ztrácí.
 - **Factory pro každý objekt v doméně** – over-engineering. Factory vzniká
   podle potřeby, ne plošně.
 
@@ -1190,7 +1189,7 @@ final class OrderFromCartFactory
 
     public function fromCart(CartId $cartId, CustomerId $customer): Order
     {
-        $cart = $this->carts->getById($cartId);
+        $cart = $this->carts->get($cartId);
 
         if ($cart->isEmpty()) {
             // Zkratka: v projektu pojmenovaná výjimka, např. EmptyCartException.
@@ -1213,7 +1212,7 @@ nepřebírá, ten zůstává v named constructoru agregátu. Factory řeší jen
 vstupních dat*.
 
 Trojice `CartRepository`, `PricingService` a `ClockInterface` v konstruktoru vypadá jako
-rozpor se sekcí 08.03, kde repozitář posouval třídu blíž k Application vrstvě. Rozřešení
+rozpor se sekcí 08.03, kde repozitář v konstruktoru služby vyžadoval zdůvodnění. Rozřešení
 dává *DDD Reference*: factory sama nemusí mít v modelu žádnou odpovědnost, a přesto je
 součástí doménového návrhu. Nemodeluje doménový pojem, jen sestavuje agregát podle
 doménových pravidel. Proto smí sáhnout po repozitáři a zůstat přitom v `Domain/Factory/`.
@@ -1225,7 +1224,7 @@ událost, je z ní command handler.
 
 Vaughn Vernon věnuje factories kapitolu 11 *Implementing Domain-Driven Design* (2013)
 a člení ji na *Factories in the Domain Model*, *Factory Method on Aggregate Root*
-a *Factory on Service*. Už pořadí je doporučení: factory metoda na agregátním kořeni
+a *Factory on Service*. Už pořadí je doporučení: factory metoda na kořeni agregátu
 stojí v popředí, samostatná factory na úrovni service přichází až jako druhá možnost.
 O to se opírá konvence knihy: `Order::place()` místo zvláštní třídy `OrderFactory`,
 dokud si ji nevynutí spolupráce více agregátů.
@@ -1272,15 +1271,14 @@ public static function reconstitute(
 :::
 
 Proto také `OrderPlaced` zaznamenávají factory metody (`::place()`, `::placePhysical()`),
-ne konstruktor.
-Rekonstituce nesmí mít vedlejší efekty: obnovuje stav, žádná doménová událost se
+ne konstruktor. Rekonstituce nesmí mít vedlejší efekty: obnovuje stav, žádná doménová událost se
 nestala. Kdyby event zaznamenával konstruktor, každé načtení agregátu z databáze
 by znovu vyprodukovalo `OrderPlaced` a odběratelé by tutéž objednávku „umístili“
 při každém čtení.
 
 Pojmenování `::reconstitute()` a PHPDoc `@internal` signalizují, že tato cesta vzniku
-je vyhrazena infrastruktuře. Doménový handler,
-který by ji volal místo `::place()`, by porušil invariant agregátu.
+je vyhrazena infrastruktuře. Command handler, který by ji volal místo `::place()`,
+by obešel invarianty agregátu.
 
 Pro detail: Evans, E., *Domain-Driven Design* (2003), kapitola 6
 *The Life Cycle of a Domain Object*; Vernon, V., *Implementing Domain-Driven
@@ -1343,11 +1341,10 @@ src/
     Application/
       Command/
         PlaceOrder.php
-      CommandHandler/
+      Handler/
         PlaceOrderHandler.php
       Query/
         ListOrders.php
-      QueryHandler/
         ListOrdersHandler.php
     Infrastructure/
       Repository/
@@ -1476,7 +1473,7 @@ ručně – rozebírá to [kapitola o architektonických stylech](/architektonic
 Evansův Module z roku 2003 stojí na kohezi pojmů a nízké provázanosti mezi moduly.
 Dnešní praxe pod hlavičkou *modulárního monolitu* přidává třetí požadavek.
 Kamil Grzybek popisuje modul jako vertikální řez byznysem se třemi vlastnostmi:
-nezávislost a zaměnitelnost, úplnost (obsahuje vše potřebné k dodání funkce)
+nezávislost a zaměnitelnost, úplnost (obsahuje vše, co funkce potřebuje)
 a dobře definované rozhraní, přes které se do modulu vstupuje.
 
 Třetí vlastnost je posun oproti roku 2003. Nestačí zakázat cizí import; modul má
@@ -1500,14 +1497,16 @@ Pro modulový projekt z této kapitoly jde typicky o tři pravidla:
 
 1. `App\Ordering` nesmí záviset na `App\Billing`, `App\Inventory` ani
    `App\Shipping` – integrace mezi BC probíhá výhradně přes integrační události
-   ([Outbox](/outbox-pattern)).
+   ([Outbox](/outbox-pattern)). Výjimku tvoří identifikátory cizích kontextů
+   (`App\*\Domain\ValueObject\*Id`): agregát na cizí agregát odkazuje právě
+   přes ID ([Návrh agregátu](/navrh-agregatu#references-by-id)).
 2. `App\Ordering\Domain` nesmí importovat nic ze `Symfony`, z běhové části
    Doctrine ORM (`EntityManager`, `QueryBuilder`) ani z vlastní Application
-   a Infrastructure vrstvy. Vědomé výjimky jsou dvě: mapovací atributy
-   `Doctrine\ORM\Mapping`, které kniha dává přímo na doménové třídy (viz
-   [volba mappingu](/implementace-v-symfony#mapping-volba-heading)), a knihovna
-   `doctrine/collections`, na které stojí kolekce agregátu i `Criteria`
-   ve specifikacích.
+   a Infrastructure vrstvy. Vědomé výjimky jsou tři. Komponenta
+   `Symfony\Component\Uid` generuje identifikátory (`Uuid::v7()`). Mapovací atributy
+   `Doctrine\ORM\Mapping` kniha dává přímo na doménové třídy (viz
+   [volba mappingu](/implementace-v-symfony#mapping-volba-heading)). Na knihovně
+   `doctrine/collections` stojí kolekce agregátu i `Criteria` ve specifikacích.
 3. `App\Ordering\Application` nesmí znát `App\Ordering\Infrastructure` –
    orchestrace závisí na rozhraní z Domain, ne na adaptéru.
 
@@ -1562,7 +1561,7 @@ událostí a Bounded Contextem:
 | Vzor | Vztah k Aggregate | Vztah k Domain Event | Vztah k Bounded Context |
 |---|---|---|---|
 | Specification | Validuje invariant agregátu nebo filtruje seznam agregátů | Pravidlo, které spustí event (např. *OrderEligibleForFreeShipping*) | Pravidlo žije uvnitř BC; sdílí se jen kostra vzoru v SharedKernelu |
-| Domain Service | Koordinuje 2+ agregáty bez toho, aby je propojila závislostí | Volá agregáty, které pak emitují events | Žije uvnitř BC; cross-BC koordinace patří do Application Service / Saga |
+| Domain Service | Koordinuje 2+ agregáty bez toho, aby je propojila závislostí | Volá agregáty, které pak emitují events | Žije uvnitř BC; cross-BC koordinace patří do Application Service / ságy |
 | Factory | Tvoří agregát s validovaným počátečním stavem | Při vzniku obvykle nahraje první event (*OrderPlaced*) | Žije uvnitř BC; Factory pro cross-BC objekty neexistuje |
 | Module | Seskupuje všechny agregáty BC do jednoho balíčku | Definuje hranici, přes kterou putují events (Outbox) | 1 modul = 1 BC (preferovaná aplikace) |
 
@@ -1589,11 +1588,10 @@ Rychlá reference pro code review. Nápravu každého anti-vzoru rozebírá př�
 | Veřejný konstruktor agregátu | Vně agregátu lze volat `new Order(...)` a obejít validaci | Privátní konstruktor + `::place()` / `::reconstitute()` |
 | Type packaging (`src/Entity/`, `src/Service/`) | Adresářová struktura ukazuje technologii, ne doménu | Přejděte na 1 modul = 1 BC; vynuťte phparkitect |
 | Modules bez architektonických testů | Konvence existují, ale nikdo je nekontroluje – eroze při prvním hot-fix tlaku | Nasaďte phparkitect/deptrac do CI od prvního commitu |
-| Cross-BC import bez ACL | `App\Billing\Invoice` přímo importuje `App\Ordering\Order` | Integrace přes domain events (Outbox); v cílovém BC mapper na lokální typ |
+| Cross-BC import bez ACL | `App\Billing\Invoice` přímo importuje `App\Ordering\Order` | Integrace přes integrační události (Outbox); v cílovém BC mapper na lokální typ |
 
-Detailní rozbor doménových anti-vzorů – anémický model, transaction script, „Big
-Ball of Mud“ – najdete v kapitole
-[Anti-vzory v DDD](/anti-vzory).
+Doménové anti-vzory – anémický model, transaction script, „Big Ball of Mud“ – podrobně
+rozebírá kapitola [Anti-vzory a typické chyby](/anti-vzory).
 
 ## 08.08 Shrnutí {#summary}
 
@@ -1617,7 +1615,7 @@ doménový model chudne a struktura projektu zakrývá doménu.
   Skutečnou cenu má až publikované rozhraní modulu a vynucení hranic v CI
   přes phparkitect nebo deptrac.
 
-Přeskočená vrstva tím nekončí. Evansova kapitola *Supple Design* obsahuje dalších
+Výčet přeskakovaných vzorů tím nekončí. Evansova kapitola *Supple Design* obsahuje dalších
 osm vzorů: Intention-Revealing Interfaces, Side-Effect-Free Functions, Assertions,
 Standalone Classes, Closure of Operations, Declarative Design, Drawing on Established
 Formalisms a Conceptual Contours. Kniha je systematicky nepokrývá, protože jde o vzory
@@ -1633,20 +1631,20 @@ kdy se objeví druhá nebo třetí kombinace téhož pravidla.
 Jak se agregáty chovají při tisících transakcí za sekundu, kde má DDD overhead
 a jak ho minimalizovat, ukazuje kapitola
 [Read modely, projekce a výkon](/vykonnostni-aspekty). Kapitola
-[Anti-vzory v DDD](/anti-vzory) doplňuje detail
+[Anti-vzory a typické chyby](/anti-vzory) doplňuje detail
 u anémického modelu, který v sekci 08.03 padl jen krátce.
 
 :::faq{}
 - question: 'Kdy přesně se vyplatí Specification Pattern?'
   answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho uplatňujete v doméně i v repozitáři přes double-dispatch. Pravidlo použité jednou a o jednom řádku kódu nepotřebuje samostatnou třídu, patří inline. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification tomu jménu dá kód. Třída pojmenovaná <code>OrderTotalGreaterThanSpec</code> je jen operátor a patří zpět do inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
 - question: 'Má Domain Service mít stav?'
-  answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables měnící se mezi voláními, žádný interní cache, žádný čítač. Se stavem se ztrácí idempotence a bezpečnost při souběhu. Závislosti jsou ale jiné téma než stav a odpověď na ně kategorická není: <code>Mailer</code> nebo HTTP klient službu skutečně posouvají do Application či Infrastructure vrstvy, u repozitáře se zdroje rozcházejí. Khorikov připouští <em>impure</em> doménovou službu, Noback umísťuje rozhraní repozitáře přímo do Domain vrstvy. Vodítko: nejdřív zvažte, jestli data nemá dodat volající; když je jinak nezískáte, závislost na doménovém rozhraní je přijatelná. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
+  answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables měnící se mezi voláními, žádná interní cache, žádný čítač. Se stavem se ztrácí idempotence a bezpečnost při souběhu. Závislosti jsou ale jiné téma než stav a odpověď na ně kategorická není: <code>Mailer</code> nebo HTTP klient službu skutečně posouvají do Application či Infrastructure vrstvy, u repozitáře se zdroje rozcházejí. Khorikov připouští <em>impure</em> doménovou službu, Noback umísťuje rozhraní repozitáře přímo do Domain vrstvy. Vodítko: nejdřív zvažte, jestli data nemá dodat volající; když je jinak nezískáte, závislost na doménovém rozhraní je přijatelná. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
 - question: 'Factory metoda nebo Factory class – jak se rozhodnout?'
-  answer: 'Výchozí volbou je <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) staví v kapitole 11 <em>Factories</em> do popředí factory metodu na agregátním kořeni a samostatnou factory řeší až jako druhou možnost na úrovni service. PHP podobu s privátním konstruktorem popsal Mathias Verraes v textu <em>Named Constructors in PHP</em> (2014). Samostatná Factory class přichází na řadu, když vznik agregátu vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Jednu službu jde statické metodě předat parametrem, s několika závislostmi by je ale musel shánět každý volající. Factory class bez jediné DI závislosti, která jen volá <code>new Order(...)</code>, je redundantní vrstva a patří smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
+  answer: 'Výchozí volbou je <strong>named constructor</strong> (statická metoda na agregátu). Vernon (2013) staví v kapitole 11 <em>Factories</em> do popředí factory metodu na kořeni agregátu a samostatnou factory řeší až jako druhou možnost na úrovni service. PHP podobu s privátním konstruktorem popsal Mathias Verraes v textu <em>Named Constructors in PHP</em> (2014). Samostatná Factory class přichází na řadu, když vznik agregátu vyžaduje DI závislosti – typicky <code>CartRepository</code>, <code>PricingService</code>, <code>ClockInterface</code>, externí lookup. Jednu službu jde statické metodě předat parametrem, s několika závislostmi by je ale musel shánět každý volající. Factory class bez jediné DI závislosti, která jen volá <code>new Order(...)</code>, je redundantní vrstva a patří smazat. Detail v <a href="#fac-class">sekci Factory class</a>.'
 - question: 'Jak vynutit hranice mezi Moduly v PHP projektu?'
   answer: 'Samotná konvence nevydrží – vývojář pod tlakem „udělej rychle“ přidá cross-BC import za pět minut. Spolehlivé vynucení vyžaduje <strong>nástroj v CI</strong>: <a href="https://github.com/phparkitect/arkitect" target="_blank" rel="noopener">phparkitect</a> nebo <a href="https://github.com/deptrac/deptrac" target="_blank" rel="noopener">deptrac</a>. Pravidla typu „App\\Ordering nesmí závisět na App\\Billing“ nebo „App\\Ordering\\Domain nesmí volat EntityManager“ při porušení shodí CI build. Stojí to jeden konfigurační soubor a modulární organizace přežije i pátého nového vývojáře. Detail v <a href="#mod-phparkitect">sekci Architecture testing</a>.'
 - question: 'Jak má vypadat namespace třídy, která sedí na hranici dvou Bounded Contextů?'
-  answer: 'V čistém DDD <strong>žádná třída na hranici dvou BC nesedí</strong>. Takový případ signalizuje, že hranice je špatně nakreslená nebo že potřebujete <a href="/context-mapping">Anti-Corruption Layer</a> (ACL). Konkrétní řešení: v každém BC žije <em>vlastní</em> typ s vlastním namespace. <code>App\\Ordering\\Domain\\ValueObject\\CustomerId</code> v Ordering kontextu, <code>App\\Billing\\Domain\\ValueObject\\CustomerId</code> v Billing kontextu, případně mapování přes events. Pokud opravdu existuje univerzální koncept (<code>Money</code>, <code>Currency</code>, <code>Country</code>), patří do <strong>SharedKernel</strong> – ale tento balíček musí být explicitně malý, stabilní a s dohodou všech týmů. Souvisí <a href="#mod-bc">Modul jako Bounded Context</a>.'
-- question: 'Můžu Specification a Domain Service kombinovat?'
+  answer: 'V čistém DDD <strong>žádná třída na hranici dvou BC nesedí</strong>. Takový případ signalizuje, že hranice je špatně nakreslená nebo že potřebujete <a href="/context-mapping">Anti-Corruption Layer</a> (ACL). Konkrétní řešení: v každém BC žije <em>vlastní</em> typ s vlastním namespace. <code>App\\Ordering\\Domain\\ValueObject\\CustomerId</code> v Ordering kontextu, <code>App\\Billing\\Domain\\ValueObject\\CustomerId</code> v Billing kontextu, případně mapování přes events. Pokud opravdu existuje univerzální koncept (<code>Money</code>, <code>Currency</code>, <code>Country</code>), patří do <strong>SharedKernel</strong> – ale tento balíček musí být záměrně malý, stabilní a s dohodou všech týmů. Souvisí <a href="#mod-bc">Modul jako Bounded Context</a>.'
+- question: 'Lze Specification a Domain Service kombinovat?'
   answer: 'Ano, v praxi se kombinují často. Domain Service obvykle koordinuje 2+ agregáty a jedno z rozhodnutí přitom nese Specification – typicky „může tato objednávka projít k expedici?“ = kompozice <code>HasBeenPaid AND ItemsInStock AND NotInBlacklist</code>. Domain Service tu specifikaci instancuje a volá <code>isSatisfiedBy()</code>, podle výsledku zavolá metodu na agregátu. Vzory se vzájemně doplňují: Specification je <em>pravidlo</em>, Domain Service je <em>akce</em>, která pravidlo aplikuje na 2+ agregáty. Detail v <a href="#vztahy">sekci 08.06 Vztah těchto vzorů</a>.'
 :::

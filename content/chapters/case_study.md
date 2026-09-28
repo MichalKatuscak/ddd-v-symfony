@@ -7,27 +7,27 @@ meta_description: "Systém pro správu projektů v DDD krok za krokem: Bounded C
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
 chapter_number: "24"
 category: Syntéza
-deck: 'Detailní případová studie implementace Domain-Driven Design v Symfony 8 na kompletním projektu – celý proces od analýzy domény, identifikace Bounded Contexts a strategického i taktického designu až po implementaci s využitím DDD principů a CQRS.'
-reading_time: 36
+deck: "Jeden projekt od začátku do konce: systém pro správu projektů v Symfony 8. Analýza domény, hledání Bounded Contextů, strategický a taktický design a implementace s CQRS."
+reading_time: 37
 difficulty: 4
 github_examples: null
 ---
 
 ## 24.01 Úvod {#introduction}
 
-Ilustrativní scénář: tým, čísla i rozhodnutí v této kapitole jsou smyšlené. Slouží jako souvislá ukázka, jak DDD a CQRS drží pohromadě napříč jedním projektem.
+Ilustrativní scénář: tým, čísla i rozhodnutí v této kapitole jsou smyšlené. Slouží jako souvislá ukázka DDD a CQRS v jednom projektu.
 
 Tým dostal zadání postavit systém pro správu projektů. Uživatelé zakládají projekty, přidávají úkoly, přiřazují
-je členům týmu, mění jejich stav a komentují je. Triviální zadání. První instinkt vývojáře je tabulka `projects`,
+je členům týmu, mění jejich stav a komentují je. Zadání vypadá triviálně a první instinkt vývojáře je tabulka `projects`,
 tabulka `tasks` s cizím klíčem, tabulka `comments` a `TaskService`, který vše obslouží. Za tři měsíce má `TaskService`
 osm set řádků a každá změna v přiřazování úkolů rozbije reportování. Studie ukazuje druhou cestu:
-strategický a taktický DDD s CQRS v Symfony 8, od prvního workshopu po projekce s reconciliation.
+strategický a taktický design podle DDD s CQRS v Symfony 8, od prvního workshopu po projekce s reconciliation.
 
 ## 24.02 Požadavky {#requirements}
 
@@ -47,7 +47,7 @@ Systém pro správu projektů má následující požadavky:
 Architektura začíná rozhovorem s doménovými experty, ne kódem. Než přijde rozhodnutí o tabulkách
 a třídách, musí tým vědět, co se v doméně děje a kde leží hranice. Pět Bounded Contexts z následující
 [sekce Architektura](#architecture) nevypadlo z hlavy architekta. Vyplynulo ze tří kroků
-*event stormingu*: sběru doménových událostí, jejich seskupení do subdomén a vykreslení
+*Event Stormingu*: sběru doménových událostí, jejich seskupení do subdomén a vykreslení
 kontextových hranic. Formát pochází od Alberta Brandoliniho; notaci, průběh workshopu i jeho
 anti-vzory rozebírá kapitola [Event Storming](/event-storming).
 
@@ -72,11 +72,11 @@ ne implementaci.
 - Autor komentáře komentář upravil.
 - Systém zaznamenal aktivitu pro audit.
 
-Slovník událostí odhalil několik rozhodnutí ještě před prvním řádkem kódu. Slovo „uživatel“ má
+Slovník událostí přinesl důležité zjištění dřív, než vznikl jakýkoli kód. Slovo „uživatel“ má
 v každém kontextu jiný význam: v **UserManagement** je to identita s e-mailem a heslem,
 v **ProjectManagement** je to vlastník nebo člen, v **TaskManagement** přiřazený
-řešitel a v **CommentManagement** autor textu. Stejné slovo, jiná odpovědnost. Z tohoto
-zjištění vyrostlo rozdělení do Bounded Contexts.
+řešitel a v **CommentManagement** autor textu. Z tohoto zjištění vyrostlo rozdělení
+do Bounded Contexts.
 
 ### Krok 2: Seskupení událostí do subdomén {#discovery-grouping-heading}
 
@@ -98,9 +98,9 @@ Skupina, které rozumí jediný expert, je kandidát na subdoménu. Výsledkem b
 | **ActivityTracking** | ActivityRecorded | Compliance / interní audit |
 
 Sloupec *Doménový expert* pomáhá ověřit, že se hranice kontextů kryjí
-s organizační realitou. Pokud by jeden kontext potřeboval čtyři různé experty, je to signál, že jde
-o agregaci nesouvisejících odpovědností. Pokud naopak dva kontexty řídí stejný expert, mohou být kandidáty
-na sloučení, případně signálem, že expert pokrývá víc rolí, než je zdravé.
+s organizační realitou. Kontext, který potřebuje čtyři různé experty, nejspíš slepuje nesouvisející
+odpovědnosti. Řídí-li naopak dva kontexty tentýž expert, jsou kandidáty na sloučení – nebo expert
+pokrývá víc rolí, než je zdravé.
 
 ### Klasifikace subdomén {#discovery-subdomain-types-heading}
 
@@ -138,9 +138,10 @@ invarianty a kód jednu modulovou hranici. Kritéria pro hranici byla tři:
    v **TaskManagement** opakovaně vynucuje úpravu v **CommentManagement**, je hranice
    mezi nimi špatně vedená.
 
-Převod dopadl 1:1, z každé subdomény vznikl právě jeden kontext. Pravidlo to není. Core subdoména
-se běžně rozpadá do několika kontextů a několik Supporting subdomén se naopak vejde do jednoho
-([Subdomény](/subdomeny#subdomeny-na-bc)).
+Převod dopadl 1:1, z každé subdomény vznikl právě jeden kontext. To je výchozí cíl, ne automatický
+výsledek. Rozdělit subdoménu do víc kontextů se vyplatí jen z provozních důvodů, třeba kvůli
+odděleným vývojovým cyklům. Častější je opačný případ: několik drobných Supporting a Generic
+subdomén se vejde do jednoho kontextu ([Subdomény](/subdomeny#subdomeny-na-bc)).
 
 V tomto projektu ukazovala všechna tři kritéria stejným směrem. Kompletní mapa vztahů mezi kontexty
 (Partnership, Customer/Supplier, Open Host Service) je v [sekci Architektura](#architecture).
@@ -149,7 +150,7 @@ Hlubší teoretický základ pro identifikaci kontextů poskytují kapitoly
 [Základní koncepty DDD](/zakladni-koncepty).
 
 :::callout{type="note"}
-Event storming není jednorázový workshop. Po prvním nasazení se ukazují události, se kterými tým nepočítal
+Event Storming není jednorázový workshop. Po prvním nasazení se ukazují události, se kterými tým nepočítal
 (`InvitationExpired`, `TaskBlocked`), i události, které se v praxi nepoužívají.
 Doménový model je *živý dokument*. Při každém větším přírůstku se vyplatí ověřit, že slovník
 v kódu odpovídá slovníku v týmu.
@@ -159,14 +160,13 @@ v kódu odpovídá slovníku v týmu.
 
 Strategická úroveň drží pět Bounded Contexts a Context Mapu jejich vztahů; typy vztahů, které
 mapa používá, zavádí kapitola [Bounded Context a Context Mapping](/context-mapping). Na taktické úrovni žijí
-agregáty, hodnotové objekty, doménové události a doménové služby. Kód je organizovaný do vertikálních sliců:
+agregáty, hodnotové objekty, doménové události a doménové služby. Kód je organizovaný do vertikálních řezů (vertical slices):
 každá feature obsahuje vše od příkazu po view model. Změna v přiřazování úkolů se neprojeví v reportování,
 protože obě věci žijí v různých slicích a komunikují přes explicitní kontrakty.
 
 ### Strategický design: Bounded Contexts a Context Map
 
-Identifikace Bounded Contexts vychází z doménové analýzy v [sekci 24.03](#discovery).
-Systém je rozdělen do následujících kontextů:
+Z doménové analýzy v [sekci 24.03](#discovery) vyšlo pět kontextů:
 
 - **UserManagement** – identita, registrace, autentizace; vlastník přístupových práv uživatelů.
 - **ProjectManagement** – životní cyklus projektů a členství uživatelů v projektu.
@@ -179,14 +179,16 @@ Systém je rozdělen do následujících kontextů:
 
 Vztahy zachycené v Context Mapě:
 
-- **UserManagement ⟷ ProjectManagement** – *Partnership*. Oba kontexty
-  ovlivňují společný model členství v projektu. Změna kontraktu vyžaduje koordinaci obou týmů.
+- **UserManagement ⟷ ProjectManagement** – *Partnership*. Modely zůstávají oddělené:
+  UserManagement drží identitu, ProjectManagement členství v projektu. Pozvání a přijetí člena
+  ale potřebuje oba kontexty, proto se jejich vývoj plánuje a vydává společně.
 - **ProjectManagement → TaskManagement** – *Customer/Supplier*.
-  ProjectManagement určuje, jaký kontrakt o existenci a členství projektu TaskManagement potřebuje;
-  TaskManagement se přizpůsobuje upstreamu.
+  TaskManagement formuluje, jaký kontrakt o existenci a členství projektu potřebuje.
+  Kdy a v jakém tvaru ho dodá, rozhoduje ProjectManagement jako upstream.
 - **TaskManagement → CommentManagement** – *Customer/Supplier*. Komentář drží `TaskId`
-  a bez úkolu ztrácí smysl, takže kontrakt určuje TaskManagement. CommentManagement je downstream
-  a přizpůsobuje se.
+  a bez úkolu ztrácí smysl, takže kontrakt dodává TaskManagement. CommentManagement své potřeby
+  jako downstream vznáší, o jejich dodání ale rozhoduje upstream. Bez tohoto hlasu by šlo
+  o Conformist.
 - **Všechny kontexty → ActivityTracking** – doménové události na sdílené sběrnici.
   Diagram tento vztah popisuje jako *Open Host Service / Published Language*. Sedí to jen
   zčásti: publikované události nesou `ProjectId`, `UserId` a `TaskStatus`, tedy interní typy
@@ -201,6 +203,12 @@ Vztahy zachycené v Context Mapě:
   každou změnu; zde ho drží jediná okolnost: tým je jeden. Cena a alternativa jsou
   v [sekci 24.07.2](#trade-off-shared-kernel-heading).
 
+Partnership i Customer/Supplier popisují spolupráci týmů. Studii přitom vyvíjí jediný tým
+a pět kontextů je víc, než kolik jich jeden tým podle
+[pravidla kognitivní zátěže](/team-topologies#cognitive-load-rule) dlouhodobě unese.
+Studie ukazuje hranice modelu, ne týmovou topologii. Mapa říká, jak budou kontexty
+spolupracovat, až je převezmou samostatné týmy.
+
 **Hranici mezi TaskManagement a ProjectManagement drží port, ne Anti-Corruption Layer.** Oba
 kontexty pracují s týmiž třídami `ProjectId` a `UserId` importovanými z vlastnických kontextů,
 takže se nic nepřekládá. Zbývá obrácení závislosti: port `ProjectChecker` je definovaný v doméně
@@ -208,8 +216,8 @@ TaskManagement a jeho infrastrukturní implementace je adaptér do ProjectManage
 [Anti-Corruption Layer](/context-mapping#acl) v Evansově smyslu z něj bude ve chvíli, kdy do
 adaptéru přibude překlad mezi dvěma modely, například až ProjectManagement odejde do vlastní
 služby s vlastním tvarem odpovědi. Popisek „ACL“ v diagramu tedy pojmenovává cílový stav, ne
-dnešní. Synchronní vs. asynchronní volba je popsaná
-v [sekci 24.07.3](#trade-off-sync-acl-heading).
+dnešní. Volbu mezi synchronní a asynchronní integrací rozebírá
+[sekce 24.07.3](#trade-off-sync-acl-heading).
 
 Pro asynchronní integraci mezi kontexty slouží doménové události publikované přes Symfony Messenger.
 Konkrétní ukázka projekce, která naslouchá událostem ze tří kontextů, je v
@@ -401,8 +409,8 @@ Konkrétně:
 - **Repozitáře** obou agregátů. Jejich rozhraní jde odvodit z volajícího kódu:
   `save()`, `findById()`, `findByMemberId()`, `all()`.
 - **Doménové výjimky** včetně pojmenovaných továren, na které se handlery odkazují.
-- **Controllery**. Strom je jmenuje, kapitola je neukazuje; návratovou hodnotu
-  handleru si controller vytáhne z `HandledStamp`.
+- **Kontrolery**. Strom je jmenuje, kapitola je neukazuje; návratovou hodnotu
+  handleru si kontroler vytáhne z `HandledStamp`.
 - **Slice `CreateTask`** a konfiguraci Messengeru s routingem událostí na transport.
 
 Bázová třída `AggregateRoot` a hodnotové objekty `UserId` i `TaskId` následují
@@ -411,12 +419,12 @@ konvence ze [Základních konceptů](/zakladni-koncepty#aggregate-root-lifecycle
 
 ### Ubiquitous Language {#ubiquitous-language-heading}
 
-Slovník vznikl s doménovými experty ještě před prvním řádkem kódu. Tytéž pojmy se objevují ve třídách, v rozhovoru
+Slovník vznikl s doménovými experty na workshopu. Tytéž pojmy se objevují ve třídách, v rozhovoru
 s produktovým manažerem i v ticketech:
 
 - **Project** – Organizační jednotka, která sdružuje související úkoly a členy týmu.
-- **Task** – Jednotka práce, která má být dokončena v projektu.
-- **Assignee** – Člen týmu, kterému je přiřazen úkol.
+- **Task** – Jednotka práce v projektu, kterou je třeba dokončit.
+- **Assignee** – Člen týmu, kterému je úkol přiřazen.
 - **Status** – Stav úkolu (To Do, In Progress, Done).
 - **Comment** – Textová zpětná vazba k úkolu.
 - **Activity** – Záznam o akci provedené v systému.
@@ -424,13 +432,13 @@ s produktovým manažerem i v ticketech:
 ### Doménový model: Projekt (kořen agregátu) {#project-model-heading}
 
 Agregát nese Doctrine atributy přímo na doménové třídě, což je pragmatická výchozí volba
-podle [kapitoly 10](/implementace-v-symfony#mapping-volba-heading). Třída dědí
+podle kapitoly [Implementace v Symfony](/implementace-v-symfony#mapping-volba-heading). Třída dědí
 z `AggregateRoot` (sdílené chování pro `record` a `releaseEvents`, viz
 [lifecycle agregátu](/zakladni-koncepty#aggregate-root-lifecycle)) a je `final`,
-protože dědit z agregátu nechceme. Konstruktor je `private`
-a vznik agregátu probíhá přes statickou factory metodu `create()`.
+protože z agregátu se dědit nemá. Konstruktor je `private`
+a agregát vzniká přes statickou tovární metodu `create()`.
 
-`final` třída na Doctrine entitě potřebuje nativní lazy objekty. Zapíná je
+`final` u Doctrine entity potřebuje nativní lazy objekty. Zapíná je
 `$config->enableNativeLazyObjects(true)` na PHP 8.4; metoda přibyla v ORM 3.4.0
 a od 3.5 je starý režim generovaných proxy vedený jako zastaralý. Bez nich potřebuje
 Doctrine proxy odvozenou z entity a `final` neprojde.
@@ -587,8 +595,8 @@ final class Project extends AggregateRoot
 :::
 
 Výjimky nesou jméno pravidla, které se porušilo. `ProjectOwnerCannotBeRemovedException` dědí
-z `\DomainException` a nabízí statickou factory metodu; tvar ukazuje
-[kapitola 10](/implementace-v-symfony#custom-exception-heading).
+z `\DomainException` a nabízí statickou tovární metodu; tvar ukazuje kapitola
+[Implementace v Symfony](/implementace-v-symfony#custom-exception-heading).
 
 Sloupec `version` s `#[ORM\Version]` zapíná optimistické zamykání. Ukázkové handlery ale verzi
 nikam nepředávají, takže konflikt odhalí až Doctrine při `flush()`. Kontrola očekávané verze
@@ -596,12 +604,12 @@ v handleru (`find($id, LockMode::OPTIMISTIC, $expectedVersion)`) je krok, který
 
 `rename()` a `changeDescription()` žádnou událost neemitují. Projekce ze
 [sekce 24.06](#read-model) se o změně nedozví a read model zůstává zastaralý až do běhu
-reconcileru. Drift jména patří přesně k rozdílům, které tento proces dorovnává.
+reconcileru. Rozdíl ve jménu patří přesně k odchylkám, které reconciler dorovnává.
 
 :::callout{type="note"}
 `UserId` žije ve vlastnickém kontextu UserManagement; ostatní kontexty
-třídu importují. Cena této volby a alternativa (samostatný primitiv v každém kontextu)
-jsou rozebrány v [sekci 24.07.2](#trade-off-shared-kernel-heading). V kontextech, kde
+třídu importují. Cenu této volby a alternativu (samostatný primitiv v každém kontextu)
+rozebírá [sekce 24.07.2](#trade-off-shared-kernel-heading). V kontextech, kde
 by se model musel rozejít (jiná validace, jiná sériová reprezentace), by sdílená
 třída nestačila a kontext by si držel vlastní kopii.
 :::
@@ -760,7 +768,7 @@ final class Task extends AggregateRoot
 
 ### Doménové události {#domain-events-heading}
 
-Agregáty publikují skutečnosti, které mají pro doménu význam. Událost je neměnný záznam minulého
+Agregáty zaznamenávají skutečnosti, které mají pro doménu význam. Událost je neměnný záznam minulého
 děje, proto jsou všechny třídy `final readonly` s veřejnými promovanými parametry. Vlastnost
 `occurredAt` nese okamžik vzniku. Výchozí `new \DateTimeImmutable()` ovšem přebírá časovou zónu
 serveru; UTC zaručí až explicitně předaná hodnota. Payload obsahuje minimální množinu identifikátorů
@@ -785,7 +793,7 @@ final readonly class ProjectCreated
         public string $name,
         // Popis patří do payloadu, i když ho žádný invariant nehlídá.
         // Read model ho má ve sloupci, a co událost nenese, projekce
-        // nemá kde vzít - a nikdo si toho nevšimne, protože nic nespadne.
+        // nemá kde vzít – a nikdo si toho nevšimne, protože nic nespadne.
         public ?string $description,
         public UserId $ownerId,
         public \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
@@ -875,15 +883,15 @@ Doménová událost zde nese pouze identifikátory a hodnoty, ne celý agregát.
 zbytek dat podle potřeby dohledá přes repozitář nebo lokální projekci. Vložit do události
 referenci na živý agregát je anti-vzor: při opakovaném zpracování vede k nekonzistentnímu
 stavu, pokud se agregát mezitím změnil. Tlustá událost s kopií hodnot (Event-Carried State
-Transfer) je jiná věc a legitimní volba.
+Transfer) je jiná věc a má své místo.
 :::
 
 ### Hodnotové objekty: identifikátory a stav úkolu {#value-objects-heading}
 
 Identifikátory `ProjectId`, `TaskId` a `UserId` mají stejnou stavbu: konstruktor předaný
-string jen ověří, nové UUID vydává statická metoda `generate()`. Property `$value` nese surový
-string pro persistenci, `equals()` srovnává podle hodnoty. `TaskStatus` je výčtový typ
-s explicitním doménovým jazykem. Plný rozbor hodnotových objektů obsahuje kapitola
+string jen ověří, nové UUID vydává statická metoda `generate()`. Vlastnost `$value` nese surový
+string pro persistenci, `equals()` srovnává podle hodnoty. `TaskStatus` je výčtový typ,
+jehož případy pojmenovávají stavy doménovým jazykem. Plný rozbor hodnotových objektů obsahuje kapitola
 [Základní koncepty DDD](/zakladni-koncepty#value-objects).
 
 :::code{language="php" filename="src/ProjectManagement/Domain/ValueObject/ProjectId.php"}
@@ -902,7 +910,7 @@ final readonly class ProjectId
     ) {
         if (!Uuid::isValid($value)) {
             throw new \InvalidArgumentException(
-                sprintf('Neplatné ProjectId: "%s".', $value),
+                sprintf('Invalid ProjectId: "%s".', $value),
             );
         }
     }
@@ -1114,7 +1122,6 @@ namespace App\TaskManagement\AssignTask\Command;
 
 use App\TaskManagement\Domain\Exception\AssigneeNotProjectMemberException;
 use App\TaskManagement\Domain\Exception\ProjectNotFoundException;
-use App\TaskManagement\Domain\Exception\TaskNotFoundException;
 use App\TaskManagement\Domain\Port\ProjectChecker;
 use App\TaskManagement\Domain\Repository\TaskRepository;
 use App\TaskManagement\Domain\Service\TaskAssignmentService;
@@ -1139,15 +1146,12 @@ final class AssignTaskHandler
     public function __invoke(AssignTask $command): void
     {
         $taskId = new TaskId($command->taskId);
-        $task = $this->taskRepository->findById($taskId);
-
-        if ($task === null) {
-            throw TaskNotFoundException::withId($taskId->value);
-        }
+        // get() chybějící úkol nevrací jako null, hodí TaskNotFoundException.
+        $task = $this->taskRepository->get($taskId);
 
         $assigneeId = new UserId($command->assigneeId);
 
-        // Ověření přes port - bez přímé závislosti na ProjectManagement
+        // Ověření přes port – bez přímé závislosti na ProjectManagement
         if (!$this->projectChecker->exists($task->projectId())) {
             throw ProjectNotFoundException::withId($task->projectId()->value);
         }
@@ -1195,7 +1199,7 @@ class GetProjects
 }
 :::
 
-### Query Handler: Zpracování získání projektů uživatele (Read Model) {#get-projects-handler-heading}
+### Query Handler: Zpracování získání projektů uživatele (read model) {#get-projects-handler-heading}
 
 :::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php"}
 <?php
@@ -1274,7 +1278,7 @@ kvůli zobrazení.
 V projektu proto postupně vznikl samostatný read model. Princip: doménové události aktualizují
 denormalizovanou tabulku, ze které čte *query handler*. Žádný `JOIN` mezi agregáty, žádná
 hydratace doménových objektů. Hlubší teoretický základ je v kapitolách
-[CQRS](/cqrs) a [Výkonnostní aspekty](/vykonnostni-aspekty).
+[CQRS](/cqrs) a [Read modely, projekce a výkon](/vykonnostni-aspekty).
 
 ### Schéma read modelu {#read-model-schema-heading}
 
@@ -1282,8 +1286,8 @@ Tabulka `project_list_view` drží tvar potřebný pro výpis projektů uživate
 `member_ids` jako JSON. Zdrojem pravdy není; lze ji kdykoli znovu sestavit z primárních tabulek.
 Dotaz operátorem `@>` i GIN index předpokládají PostgreSQL sloupec typu `jsonb`. `Types::JSON`
 vytvoří sloupec `json`, nad kterým `@>` ani GIN index nefungují; od DBAL 4.3 na to existuje typ
-`Types::JSONB`. Na DBAL 3.x zbývá option `['jsonb' => true]`, kterou tatáž verze 4.3 označila
-za zastaralou.
+`Types::JSONB`. Starší verze (DBAL 3.x až 4.2) mají jen option `['jsonb' => true]`, kterou tatáž
+verze 4.3 označila za zastaralou.
 
 Entita read modelu nenese `readOnly: true`. Příznak vypíná sledování změn, takže by z projekce
 prošel jen `persist()` a každý `UPDATE` by tiše zmizel; právě to ale projekce dělá nejčastěji.
@@ -1316,8 +1320,8 @@ class ProjectListView
     #[ORM\Column(type: Types::GUID)]
     public string $ownerId;
 
-    // PostgreSQL: jsonb, ne json - nad json operátor @> ani GIN index nefungují.
-    // Types::JSONB vyžaduje DBAL 4.3+; na DBAL 3.x: Types::JSON s options ['jsonb' => true].
+    // PostgreSQL: jsonb, ne json – nad json operátor @> ani GIN index nefungují.
+    // Types::JSONB vyžaduje DBAL 4.3+; starší verze: Types::JSON s options ['jsonb' => true].
     #[ORM\Column(type: Types::JSONB)]
     public array $memberIds = [];
 
@@ -1346,7 +1350,7 @@ CREATE INDEX idx_members ON project_list_view USING gin (member_ids);
 ### Projection: aktualizace read modelu z událostí {#read-model-projection-heading}
 
 Projekce naslouchá doménovým událostem ze všech kontextů, které mají vliv na podobu výpisu projektů.
-Běží jako asynchronní message handler mimo originální transakci, takže ji nemůže shodit.
+Běží jako asynchronní message handler mimo původní transakci, takže ji nemůže shodit.
 Každou událost obsluhuje samostatná metoda s atributem `#[AsMessageHandler(bus: 'event.bus')]`; Messenger
 routuje podle type-hintu parametru, obecný type-hint `object` proto použít nelze.
 
@@ -1419,8 +1423,8 @@ class ProjectListProjection
     {
         $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
-            // Out-of-order delivery: MemberAdded přišlo dřív než ProjectCreated.
-            // Reconciler (sekce 24.06.4) dohledá zaostalou view a obnoví ji
+            // Doručení mimo pořadí: MemberAdded přišlo dřív než ProjectCreated.
+            // Reconciler (sekce 24.06.4) dohledá chybějící řádek a obnoví ho
             // ze zdrojových agregátů.
             return;
         }
@@ -1468,9 +1472,9 @@ class ProjectListProjection
 
 Naivní verze ze [sekce 24.05](#get-projects-handler-heading) hydratovala doménové agregáty
 jen kvůli zobrazení. Po zavedení projekce se třída `GetProjectsHandler` přepsala na čistý
-DBAL dotaz nad read tabulkou. Žádné agregáty, žádná doménová logika, jen výběr sloupců a mapování
-na `ProjectViewModel`. Stejný název třídy, stejný command, jiná implementace; volající
-ani Symfony Messenger o změně nevědí.
+DBAL dotaz nad read tabulkou: žádné agregáty ani doménová logika, jen výběr sloupců a mapování
+na `ProjectViewModel`. Název třídy i dotaz `GetProjects` zůstaly, změnila se jen implementace;
+volající ani Symfony Messenger o změně nevědí.
 
 :::code{language="php" filename="src/ProjectManagement/GetProjects/Query/GetProjectsHandler.php (nad read modelem)"}
 <?php
@@ -1525,14 +1529,14 @@ zprávy mezi více workerů, může `MemberAdded` dorazit dřív než `ProjectCr
 téhož projektu. Projekce proto potřebuje dvě vlastnosti.
 
 **Idempotence.** Opakované zpracování téže události nesmí změnit výsledek. V ukázce výše to
-zajišťují tři detaily. `onProjectCreated` nejdřív hledá existující view a při druhém doručení
+zajišťují tři detaily. `onProjectCreated` nejdřív hledá existující řádek a při druhém doručení
 skončí bez zápisu; samotné `find()` ale nestačí, protože mezi ním a `flush()` může řádek
 vložit jiný worker, a proto kód odchytává i porušení primárního klíče. `onMemberAdded` nepřidá
 uživatele dvakrát díky kontrole `in_array(..., strict: true)`. `onMemberRemoved` přepočítává
 `memberCount` z aktuální délky pole, ne inkrementem.
 
 Slabé místo zbývá u `onTaskCreated`. Inkrement `taskCount` při opakovaném doručení přičte
-jedničku navíc. Odsunout problém na retry strategii Messengeru (výchozí tři pokusy) a odtud
+jedničku navíc. Odsunout problém na retry strategii Messengeru (výchozí tři opakování) a odtud
 na failure transport není idempotence, jen odklizené selhání. Řešení vede přes identitu
 události: každá ponese vlastní `eventId` a projekce si zpracovaná ID zapamatuje. Dnešní
 třídy nesou jen `occurredAt`, takže jde o změnu payloadu. `DeduplicateMiddleware` se stampem
@@ -1631,7 +1635,7 @@ nedoručila. V provozu se vyplatí alert nad počtem dorovnaných záznamů: vys
 systémový problém s transportem, ne drobné přeházení pořadí zpráv.
 
 Co tato podoba nedorovnává: `task_count` (dopočítal by se z `TaskRepository`), `ownerId`
-a `createdAt` u již existující view a sirotčí řádky po smazaných projektech. Neřeší ani objem: `$this->projects->all()` hydratuje všechny agregáty najednou. Na tisících projektů patří do smyčky
+a `createdAt` u již existujícího řádku a sirotčí řádky po smazaných projektech. Neřeší ani objem: `$this->projects->all()` hydratuje všechny agregáty najednou. Na tisících projektů patří do smyčky
 dávkování po několika stovkách kusů, `EntityManager::clear()` po každé dávce a přepínače `--limit`
 a `--dry-run`.
 
@@ -1664,7 +1668,7 @@ o projektu, který neexistuje. Vzor i jeho implementaci v Symfony rozebírá kap
 
 ## 24.07 Výzvy a rozhodnutí {#trade-offs}
 
-Pět rozhodnutí níže ukazuje místa, kde tým váhal mezi dvěma legitimními možnostmi. Místo
+Pět rozhodnutí níže ukazuje místa, kde tým váhal mezi dvěma obhajitelnými možnostmi. Místo
 „správné“ odpovědi existuje kontext, který volbu určil, a cena, kterou za ni tým platí.
 V jiném projektu by stejná otázka mohla dopadnout jinak. Závěrečná podsekce shrnuje,
 co by tým dnes udělal jinak.
@@ -1692,9 +1696,9 @@ vlastní reprezentaci jako primitivní string?
 
 **Volba:** jedna třída ve vlastnickém kontextu, importovaná ostatními. `UserId` žije
 v UserManagement, `ProjectId` v ProjectManagement, `TaskId` v TaskManagement; downstream
-kontexty tyto value objecty používají přímo. Vzor má jméno:
+kontexty tyto hodnotové objekty používají přímo. Vzor má jméno:
 [Shared Kernel](/context-mapping#shared-kernel), malá společně vlastněná část modelu, kterou žádný
-z kontextů nemůže změnit sám. Tým je jeden, deploy je jeden, riziko, že se UUID formát mezi kontexty
+z kontextů nemůže změnit sám. Tým i deploy jsou jen jeden a riziko, že se formát UUID mezi kontexty
 rozejde, je zanedbatelné. Sdílená třída navíc drží validaci na jednom místě.
 
 **Cena:** závislost na doménové vrstvě cizího kontextu. Když vlastnický kontext rozšíří `UserId` o novou
@@ -1702,7 +1706,7 @@ validaci, dotkne se to všech ostatních. Refaktor takto sdílené třídy je v 
 
 **Alternativa:** Pokud by se tým štěpil nebo se kontexty oddělovaly do samostatných služeb,
 primitivní string by byl bezpečnější (každý kontext si validuje sám) za cenu duplikace. Pro monolit
-s jedním deploy pipeline je sdílená třída pragmatičtější.
+s jedinou nasazovací pipeline je sdílená třída pragmatičtější.
 
 ### 3. Synchronní ACL přes port vs. asynchronní reakce na event {#trade-off-sync-acl-heading}
 
@@ -1718,9 +1722,9 @@ Pokud druhý kontext není dostupný, přiřazení selže. V monolitu je tato z�
 přidá síťový skok a riziko kaskádových selhání.
 
 **Alternativa pro distribuovaný systém:** **TaskManagement** by si držel lokální
-projekci „project members“ aktualizovanou přes eventy z **ProjectManagement**. Validace by běžela
+projekci „project members“ aktualizovanou událostmi z **ProjectManagement**. Validace by běžela
 nad lokální tabulkou, bez síťového volání. Pro monolit jde o předčasnou optimalizaci, ale jakmile by se kontexty
-oddělily, je to první refaktor, který by měl proběhnout. Kdy takové oddělení dává smysl a co stojí,
+oddělily, je to první refaktor, který by měl proběhnout. Kdy se takové oddělení vyplatí a co stojí,
 rozebírá kapitola [DDD a microservices](/ddd-a-microservices). Pokud by validace selhala až po dokončení přiřazení,
 stav vrací kompenzační scénář, vzor popsaný v kapitole
 [Ságy a Process Managery](/sagy-a-process-managery).
@@ -1732,18 +1736,18 @@ stav vrací kompenzační scénář, vzor popsaný v kapitole
 
 **Volba:** zachovat ji jako *místo pro rozšíření*. Přiřazení úkolu je doménový koncept, který
 v budoucnu zřejmě poroste: notifikace přiřazenému, kontrola pracovní zátěže, validace deadline, integrace
-s kalendářem. Vystavená abstrakce dovolí přidat tato pravidla, aniž by se musel měnit handler, controller
+s kalendářem. Existující abstrakce dovolí přidat tato pravidla, aniž by se musel měnit handler, kontroler
 nebo samotný agregát.
 
-**Cena:** aktuálně prázdná abstrakce, která může čtenáři kódu připadat nadbytečná. Kapitola 10
+**Cena:** aktuálně prázdná abstrakce, která může čtenáři kódu připadat nadbytečná. Kapitola Implementace v Symfony
 označuje doménovou službu, která jen obalí volání jediného agregátu, za
 [anti-vzor](/implementace-v-symfony#anti-payment-service-heading): oslabuje agregát a vede
-k anemickému modelu. Zdejší výjimka stojí a padá s tím, jestli pravidla kolem přiřazení opravdu
+k anémickému modelu. Zdejší výjimka stojí a padá s tím, jestli pravidla kolem přiřazení opravdu
 přibudou. Pokud nepřibudou, platí anti-vzor a služba má zmizet.
 
 **Alternativa:** inline volání v handleru a refaktor ve chvíli, kdy vznikne první důvod pro
-doménovou službu. YAGNI v praxi. Volba mezi těmito dvěma cestami je věcí týmové dohody. Obě jsou v DDD
-legitimní.
+doménovou službu, tedy YAGNI v praxi. Obě cesty jsou v DDD obhajitelné a volba mezi nimi je věcí
+týmové dohody.
 
 ### 5. Velikost agregátu Project {#trade-off-aggregate-size-heading}
 
@@ -1764,15 +1768,14 @@ ale není uvnitř `Project`.
 - Transakce úkolu mění jen úkol. Velikost projektu na ni nemá vliv.
 
 **Cena:** invariant „úkol patří do existujícího projektu“ se vynucuje na úrovni handleru
-(přes `ProjectChecker`), ne v doménovém modelu. Při přímém zápisu do databáze (např. data import)
-může vzniknout úkol bez projektu. Foreign key constraint na `project_id` tomu zabrání na úrovni
-infrastruktury.
+(přes `ProjectChecker`), ne v doménovém modelu. Při přímém zápisu do databáze (např. importu dat)
+může vzniknout úkol bez projektu. Cizí klíč na `project_id` tomu zabrání na úrovni databáze.
 
 **Alternativa:** Pokud by aplikace vyžadovala invariant „projekt nesmí mít víc než 50 úkolů“,
 nabízejí se dvě cesty. Přesunout pravidlo do doménové služby s explicitním kontraktem, nebo
 z `Task` udělat komponentu uvnitř `Project` agregátu – hůř škálovatelné, ale konzistentní
 s tím invariantem. Pravidla pro velikost agregátu a jeho transakční hranici rozebírá
-[Návrh agregátů](/navrh-agregatu#aggregate-size), anti-vzory typu *God Aggregate* pak
+[Návrh agregátu](/navrh-agregatu#aggregate-size), anti-vzory typu *God Aggregate* pak
 [Anti-vzory a typické chyby](/anti-vzory).
 
 ### Co by dnes proběhlo jinak {#trade-off-retro-heading}
@@ -1790,8 +1793,8 @@ v podobě, ve které se zrovna nachází.
 takže podle [rozhodnutí 4](#trade-off-domain-service-heading) platí anti-vzor a služba má zmizet.
 
 Katalog podobných třecích ploch vede kapitola
-[DDD v praxi: kde to bolí](/ddd-v-praxi-kde-to-boli): od Doctrine přes ordering zpráv
-po jazykový drift.
+[DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli): od Doctrine přes pořadí zpráv
+po drift Ubiquitous Language.
 
 ## 24.08 Ponaučení {#lessons}
 
@@ -1799,21 +1802,21 @@ Z návrhu popsaného výše plyne deset bodů, které platí i mimo tuto studii.
 
 1. **Strategický design rozhoduje o výsledku** – Identifikace pěti Bounded Contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel“ znamená v každém kontextu něco jiného. Bez Context Mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
 2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produktový manažer mluví o `TaskAssigned`, ne každý o něčem jiném.
-3. **Agregáty a hranice transakcí** – Vymezené agregáty udržely data konzistentní. Každý agregát si hlídal vnitřní konzistenci a měnil se v jedné transakci.
+3. **Agregáty a hranice transakcí** – Malé, jasně vymezené agregáty udržely data konzistentní: každý si hlídal vlastní invarianty a měnil se v jedné transakci.
 4. **Doménové události pro integraci** – Doménové události odvázaly Bounded Contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval agregát událost `TaskCreated`; ActivityTracking i ProjectListProjection na ni reagovaly samostatně, aniž by o sobě věděly.
 5. **CQRS pro oddělení zodpovědností** – Příkazy mění stav, dotazy čtou bez vedlejších efektů. Každá strana má vlastní handler, vlastní model a vlastní testy. Roli message busu obstaral Symfony Messenger.
-6. **Vertikální slice architektura pro modularitu** – Organizace kódu podle feature místo technických vrstev znamenala, že změna v jedné feature se zpravidla nedotýká ostatních. Každá feature nese vlastní command, handler, kontroler i view model. Nová feature obvykle vznikne přidáním adresáře, ne úpravou existujících tříd.
-7. **Testování doménového modelu** – Doménové objekty bez závislostí na frameworku lze testovat čistým PHPUnit bez bootstrappingu kernelu.
+6. **Vertikální slice architektura pro modularitu** – Členění kódu podle funkcí místo technických vrstev znamenalo, že změna v jedné feature se zpravidla nedotýká ostatních. Každá feature nese vlastní command, handler, kontroler i view model. Nová feature obvykle vznikne přidáním adresáře, ne úpravou existujících tříd.
+7. **Testování doménového modelu** – Doménové objekty bez závislostí na frameworku lze testovat čistým PHPUnit bez spouštění kernelu.
    Unit testy ověřovaly chování agregátů a doménových služeb, integrační testy spolupráci mezi částmi systému.
    Podrobná strategie pro DDD projekty je v kapitole
-   [Testování DDD aplikací](/testovani-ddd).
+   [Testování DDD](/testovani-ddd).
 8. **Read modely jako samostatný artefakt** – Oddělení write a read strany přes projekce ukázalo svou hodnotu, jakmile dataset překročil několik tisíc projektů. Hydratace agregátů pro účely výpisu je drahá; denormalizovaný read model ji z výpisu odstranil úplně a místo několika `JOIN`ů a stovek objektů zbyl jeden dotaz nad jednou tabulkou. Cenou byla eventual consistency, kterou tým ošetřil optimistickou aktualizací UI v kombinaci s read-your-writes pro kritické scénáře.
-9. **Doménová analýza předchází kódu** – Tři kroky event stormingu (sběr událostí, seskupení do subdomén, definice hranic) zafungovaly jako filtr proti předčasné technické dekompozici. Bez tohoto kroku by hranice kontextů kopírovaly databázové tabulky nebo obrazovkový tok, ne sémantické bloky domény. Dva dny u tabule stojí zlomek toho, co později stojí posun špatně vedené hranice.
-10. **Kompromisy zapisovat** – Ne každé rozhodnutí má jednu správnou odpověď. Sdílené třídy identifikátorů napříč kontexty, eventual consistency u auditu, synchronní ACL přes port – každá z těchto voleb má cenu, kterou tým přijal s vědomím alternativy. Záznam těchto rozhodnutí v dokumentaci (ADR) zachoval kontext pro pozdější refaktor; bez něj by se diskuse za půl roku opakovala.
+9. **Doménová analýza předchází kódu** – Tři kroky Event Stormingu (sběr událostí, seskupení do subdomén, definice hranic) zafungovaly jako filtr proti předčasné technické dekompozici. Bez tohoto kroku by hranice kontextů kopírovaly databázové tabulky nebo obrazovkový tok, ne sémantické bloky domény. Dva dny u tabule jsou zlomek ceny, kterou má pozdější posun špatně vedené hranice.
+10. **Kompromisy zapisovat** – Ne každé rozhodnutí má jednu správnou odpověď. Sdílené třídy identifikátorů mezi kontexty, eventual consistency u auditu, synchronní ACL přes port – každá z těchto voleb má cenu, kterou tým přijal s vědomím alternativy. Záznam těchto rozhodnutí v dokumentaci (ADR) zachoval kontext pro pozdější refaktor; bez něj by se diskuse za půl roku opakovala.
 
 ## 24.09 Další četba {#further-reading}
 
-- Eric Evans, *Domain-Driven Design* (Addison-Wesley, 2003) – jediná průběžná doména lodní přepravy napříč celou knihou; open-source implementace [citerus/dddsample-core](https://github.com/citerus/dddsample-core).
+- Eric Evans, *Domain-Driven Design* (Addison-Wesley, 2003) – jediná průběžná doména lodní přepravy, která provází celou knihu; open-source implementace [citerus/dddsample-core](https://github.com/citerus/dddsample-core).
 - Vaughn Vernon, *Implementing Domain-Driven Design* (Addison-Wesley, 2013) a ukázky [VaughnVernon/IDDD_Samples](https://github.com/VaughnVernon/IDDD_Samples). Kontext `iddd_agilepm` řeší prakticky totožnou doménu jako tato studie, identitu ale drží jako samostatný kontext, se kterým ostatní pracují přes překlad.
 - Vlad Khononov, *Learning Domain-Driven Design* (O'Reilly, 2021) – help-desk SaaS jako průběžný příklad, včetně klasifikace subdomén.
 - DDD Crew, [*DDD Starter Modelling Process*](https://github.com/ddd-crew/ddd-starter-modelling-process) – osm kroků od pochopení byznysu ke kódu. Tato kapitola prochází kroky Discover, Decompose, Strategize, Connect, Define a Code; Understand a Organise nechává stranou.
@@ -1824,15 +1827,15 @@ Z návrhu popsaného výše plyne deset bodů, které platí i mimo tuto studii.
 - question: Jakou doménu případová studie popisuje?
   answer: 'Systém pro správu projektů a úkolů: uživatelé vytvářejí projekty, přidávají úkoly, přiřazují je členům týmu, mění jejich stav a komentují je. Scénář je ilustrativní: tým, čísla i rozhodnutí jsou smyšlené a slouží jako souvislá ukázka návrhu. Doména je dostatečně bohatá, aby obsáhla strategické (context map) i taktické (agregát, doménová služba) vzory DDD, a přitom uchopitelná v rozsahu jedné kapitoly. Konkrétní požadavky v <a href="#requirements">sekci Požadavky</a>.'
 - question: Proč je systém rozdělen do pěti Bounded Contexts místo jednoho modelu?
-  answer: 'Každý kontext má jinou sémantiku: UserManagement řeší identitu, ProjectManagement životní cyklus projektu, TaskManagement stavové přechody úkolů, CommentManagement komunikaci a ActivityTracking audit. Rozdělení odráží reálné doménové hranice a umožňuje vyvíjet každý kontext samostatně, s vlastním jazykem a vlastními invarianty. Sdílení jediného modelu by vedlo ke god aggregate a ke kompromisům napříč sémanticky odlišnými oblastmi. Rozbor v <a href="#architecture">sekci Architektura</a>.'
+  answer: 'Každý kontext má jinou sémantiku: UserManagement řeší identitu, ProjectManagement životní cyklus projektu, TaskManagement stavové přechody úkolů, CommentManagement komunikaci a ActivityTracking audit. Rozdělení odráží reálné doménové hranice a umožňuje vyvíjet každý kontext samostatně, s vlastním jazykem a vlastními invarianty. Sdílení jediného modelu by vedlo k přerostlému agregátu (God Aggregate) a ke kompromisům mezi sémanticky odlišnými oblastmi. Rozbor v <a href="#architecture">sekci Architektura</a>.'
 - question: Jak spolu Bounded Contexty komunikují?
-  answer: 'Primárním prostředkem integrace jsou doménové události: po dokončení operace agregát publikuje událost (např. <code>TaskCreated</code>), na kterou reagují jiné kontexty asynchronně přes Messenger. Synchronní dotazy mezi kontexty se řeší přes porty (rozhraní) s implementací v infrastruktuře cílového kontextu; volající kontext pak nezávisí na jejích detailech. Konkrétní ukázka v <a href="#implementation">sekci Implementace</a>.'
+  answer: 'Primárním prostředkem integrace jsou doménové události: po dokončení operace agregát publikuje událost (např. <code>TaskCreated</code>), na kterou reagují jiné kontexty asynchronně přes Messenger. Synchronní dotazy mezi kontexty se řeší přes porty: rozhraní leží v doméně volajícího kontextu, adaptér do druhého kontextu v jeho infrastruktuře. Doména volajícího kontextu tak na detailech druhého nezávisí. Konkrétní ukázka v <a href="#implementation">sekci Implementace</a>.'
 - question: Jaký přínos měla vertikální slice architektura?
   answer: 'Každá feature (CreateProject, AssignTask, AddComment) vznikla jako samostatný balíček s vlastním commandem, handlerem, kontrolerem a view modelem. Změna ve feature nezasahuje do ostatních slices. Šíření změn napříč vrstvami, typické pro horizontální členění, se v takovém uspořádání téměř nevyskytuje. Detailní srovnání v kapitole <a href="/architektonicke-styly#vertical-slice">Architektonické styly</a>.'
 - question: Proč má smysl oddělit read model od doménového modelu?
   answer: 'Doménový model existuje pro vynucování invariantů a reprezentaci doménových pravidel; výpis projektů žádné invarianty nepotřebuje. Hydratace agregátu jen kvůli zobrazení názvu a počtu členů je drahá. Při růstu datasetu rozhoduje, jestli výpis znamená jeden dotaz nad jednou tabulkou, nebo několik <code>JOIN</code>ů a stovky sestavených objektů. Denormalizovaný read model aktualizovaný přes projekce umožní oddělit tempo zápisu a čtení a optimalizovat každou stranu zvlášť. Cenou je eventual consistency. Konkrétní implementace v <a href="#read-model">sekci Read modely a projekce</a>.'
 - question: Jaká jsou tři nejdůležitější ponaučení z projektu?
-  answer: 'Zaprvé, Context Map nakreslená před kódem oddělí významy, které jedno slovo nese v různých částech systému; bez ní se rozdíl objeví až ve sporech nad pull requesty. Zadruhé, ubiquitous language budovaný s doménovými experty drží stejné pojmy v kódu, v ticketu i v rozhovoru. Zatřetí, malé agregáty s jasnou transakční hranicí udrží model konzistentní bez distribuovaných transakcí. Úplný seznam včetně ponaučení o read modelech a vědomých trade-offech v <a href="#lessons">sekci Ponaučení</a>.'
+  answer: 'Zaprvé, Context Map nakreslená před kódem oddělí významy, které jedno slovo nese v různých částech systému; bez ní se rozdíl objeví až ve sporech nad pull requesty. Zadruhé, Ubiquitous Language budovaný s doménovými experty drží stejné pojmy v kódu, v ticketu i v rozhovoru. Zatřetí, malé agregáty s jasnou transakční hranicí udrží model konzistentní bez distribuovaných transakcí. Úplný seznam včetně ponaučení o read modelech a vědomých kompromisech v <a href="#lessons">sekci Ponaučení</a>.'
 - question: Co bylo nejtěžším rozhodnutím projektu?
   answer: 'Volba mezi synchronním ověřením členství v projektu (přes port <code>ProjectChecker</code>) a asynchronní reakcí přes lokální projekci. Synchronní cesta v monolitu znamená méně pohyblivých částí, ale vytváří časovou závislost mezi kontexty. Studie volí synchronní variantu jako pragmatický kompromis pro fázi monolitu, s vědomím, že při štěpení do služeb přijde refaktor na lokální projekci. Plný kontext rozhodnutí včetně dalších čtyř kompromisů v <a href="#trade-offs">sekci Výzvy a rozhodnutí</a>.'
 :::

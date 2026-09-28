@@ -7,26 +7,26 @@ meta_description: "Ságy a Process Managery v DDD a Symfony Messenger: kompenzac
 meta_keywords: "saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
 chapter_number: "14"
 category: Vzory
-deck: 'Ságy a Process Managery v DDD a Symfony 8 – implementace kompenzačních transakcí, choreografie i orchestrace dlouhotrvajících procesů pomocí Symfony Messenger. Včetně timeoutů, paralelních kroků a monitorování distribuovaných procesů.'
+deck: "Ságy a Process Managery v Symfony 8: kompenzační transakce, choreografie a orchestrace dlouho běžících procesů přes Messenger. Včetně timeoutů, paralelních kroků a monitorování."
 reading_time: 48
 difficulty: 4
 github_examples: Chapter07_Sagas
 ---
 
 [Event Sourcing](/event-sourcing) z předchozí kapitoly řeší persistenci uvnitř
-jednoho agregátu. Ságy koordinují procesy **napříč více agregáty a Bounded Contexts**,
+jednoho agregátu. Ságy koordinují procesy přes **více agregátů a Bounded Contexts**,
 které spolu komunikují doménovými událostmi.
 
 ## 14.01 Proč potřebujeme ságy? {#proc-sagy}
 
-Jako ilustrativní příklad slouží typický e-shop: zákazník odešle objednávku a systém musí provést čtyři kroky
-napříč odlišnými [Bounded Contexts](/zakladni-koncepty#bounded-contexts):
+Ilustrativní příklad je typický e-shop: zákazník odešle objednávku a systém musí provést
+čtyři kroky ve čtyřech různých [Bounded Contexts](/zakladni-koncepty#bounded-contexts):
 
 1. **Ordering** – vytvoření objednávky (agregát `Order`),
 2. **Payment** – stržení platby zákazníkovi (agregát `Payment`),
@@ -35,7 +35,7 @@ napříč odlišnými [Bounded Contexts](/zakladni-koncepty#bounded-contexts):
 
 Každý z těchto kontextů má vlastní agregát, vlastní databázi (nebo alespoň vlastní tabulky
 se striktně oddělenou odpovědností) a vlastní invarianty, které musí chránit. Agregáty
-v různých Bounded Contexts nelze měnit v jedné databázové transakci. Porušilo by to
+z různých Bounded Contexts se v jedné databázové transakci nemění, protože by to porušilo
 autonomii kontextů. Jeden kontext nesahá do databáze jiného; komunikuje výhradně
 zprávami (událostmi a příkazy).
 
@@ -46,10 +46,10 @@ Komunikují asynchronně přes frontu zpráv. Atomická transakce přes ně neex
 :::callout{type="note"}
 ### Proč ne Two-Phase Commit (2PC)? {#2pc-heading}
 
-Protokol **Two-Phase Commit** (2PC) koordinuje commit napříč více databázemi,
+Protokol **Two-Phase Commit** (2PC) koordinuje commit ve více databázích,
 ale za cenu zámků držených po obě fáze a koordinátora jako single point of failure.
-Pro autonomní Bounded Contexts se nehodí. Všichni účastníci musí být dostupní
-současně a sdílet transakční protokol. Podrobný rozbor obsahuje kapitola
+Pro autonomní Bounded Contexts se nehodí: všichni účastníci musí být dostupní
+současně a sdílet transakční protokol. Podrobný rozbor je v kapitole
 [Outbox Pattern](/outbox-pattern#2pc-heading).
 :::
 
@@ -65,7 +65,7 @@ systém provede kompenzace všech předchozích úspěšných kroků – v opač
 
 ### Co sága znamenala v roce 1987 {#saga-1987}
 
-Původní motivace byla jiná než ta dnešní. Autoři neřešili distribuci, ale zámky:
+Původní motivace byla jiná než dnešní. Autoři neřešili distribuci, ale zámky:
 dlouhá transakce drží zdroje a krátké transakce za ní stojí frontu. Prostředím je
 jediná centralizovaná databáze a dílčí transakce jsou obyčejné ACID transakce nad
 týmž systémem. Koordinaci obstarává komponenta Saga Execution Component, která čte
@@ -87,13 +87,13 @@ a timeouty. Kompenzace v jeho pojetí skoro nefigurují; ty jsou Richardsonova l
 
 ### Kterou konvenci kniha používá {#terminologicka-konvence}
 
-Výsledkem jsou tři neslučitelné definice, které dnes koexistují. Tým Microsoft
+Výsledkem jsou tři neslučitelné definice, které dnes žijí vedle sebe. Tým Microsoft
 patterns & practices termín „sága“ v průvodci *CQRS Journey* záměrně opustil a mluví
 jen o Process Manageru s odkazem na starší a odlišný význam toho slova. Navrhuje také
-dělicí čáru, kterou praxe nepřevzala: process manager routuje zprávy uvnitř jednoho Bounded
+dělicí čáru, kterou praxe nepřevzala: Process Manager routuje zprávy uvnitř jednoho Bounded
 Contextu, sága řídí proces přes hranice kontextů. Richardson naopak ságou nazývá
 obojí a orchestraci bere jako implementační detail. Třetí čára vede podle způsobu
-koordinace: sága jede na událostech a kompenzacích, process manager překládá události
+koordinace: sága jede na událostech a kompenzacích, Process Manager překládá události
 na příkazy.
 
 Kniha se drží Richardsonova pojetí s jedním upřesněním. „Sága“ je zastřešující pojem
@@ -146,7 +146,7 @@ declare(strict_types=1);
 namespace App\SharedKernel\Application\Command;
 
 /**
- * Command, který lze kompenzovat - definuje svůj "undo" příkaz.
+ * Příkaz, který lze kompenzovat – definuje svůj „undo“ příkaz.
  */
 interface CompensatableCommand
 {
@@ -183,7 +183,7 @@ final readonly class ChargeCustomer implements CompensatableCommand
         // Zde je vidět mez vzoru: příkaz identifikátor transakce nezná,
         // protože ho teprve vytvoří. Sebekompenzující příkaz proto vystačí
         // jen tam, kde kompenzace nepotřebuje výsledek původního kroku.
-        // Objednávkový proces v téhle knize ji z toho důvodu řídí
+        // Objednávkový proces v této knize ji z toho důvodu řídí
         // z Process Manageru, který si transactionId uloží do kontextu.
         return new RefundCustomer(
             orderId: $this->orderId,
@@ -225,9 +225,9 @@ final readonly class RefundCustomer
 :::callout{type="warn"}
 ### Kompenzace musí být idempotentní {#idempotence-warning-heading}
 
-V distribuovaném systému se může stát, že kompenzační příkaz bude doručen více než
-jednou, například kvůli retry mechanismu Symfony Messenger, výpadku workeru nebo
-duplikaci zprávy ve frontě. Proto musí být každá kompenzace **idempotentní**:
+V distribuovaném systému může kompenzační příkaz dorazit víckrát, například kvůli
+retry mechanismu Symfony Messengeru, výpadku workeru nebo duplikaci zprávy ve frontě.
+Proto musí být každá kompenzace **idempotentní**:
 opakované provedení téhož kompenzačního příkazu nesmí mít žádný další efekt.
 Kompenzace toho dosáhne tak, že si nejdřív ověří aktuální stav
 (např. `RefundCustomer` zkontroluje, zda platba již nebyla vrácena).
@@ -244,8 +244,8 @@ nesedí a nikdo si ho nesmí přečíst, ani na vteřinu.
 Rozdíl mezi „neúplným“ a „nečitelným“ mezistavem je použitelné návrhové kritérium.
 Objednávka se strženou platbou a nerezervovaným zbožím je neúplná: doména pro ten
 stav má jméno a operátor s ním umí pracovat. Peníze, které nejsou na žádném účtu,
-jméno nemají. Nedá-li se pro mezistav ságy napsat srozumitelný stav ve
-[všudypřítomném jazyce](/zakladni-koncepty#ubiquitous-language), vzor nesedí
+jméno nemají. Nedá-li se pro mezistav ságy napsat srozumitelný stav v
+[Ubiquitous Language](/zakladni-koncepty#ubiquitous-language), vzor nesedí
 a kroky patří do jedné transakce nad jedním agregátem.
 
 :::callout{type="warn"}
@@ -255,8 +255,8 @@ Odeslaný e-mail, data předaná třetí straně, vytištěný a odeslaný dokla
 cizí účet. Kompenzace zde neruší původní akci, jen k ní přidává druhou: omluvný
 e-mail, opravný doklad, žádost o storno u protistrany. Článek z roku 1987 to ukazuje
 na dopisu, který se kompenzuje druhým dopisem, a na šeku, který se kompenzuje
-příkazem k zastavení platby. Kompenzaci přitom bere jako poslední možnost, ne jako
-výchozí návrhový styl. Sahá se po ní tehdy, když je cena jedné dlouhé transakce
+příkazem k zastavení platby. Kompenzaci takových akcí přitom bere jako poslední možnost,
+ne jako výchozí návrhový styl. Sahá se po ní tehdy, když je cena jedné dlouhé transakce
 příliš vysoká.
 
 Praktický důsledek: nevratné kroky patří v sáze co nejpozději, ideálně až za pivot
@@ -268,8 +268,8 @@ zpět, se pak nikdy nekompenzuje, protože za pivotem už sága jen běží dop�
 
 Při choreografii **neexistuje centrální koordinátor**. Každý Bounded Context
 reaguje na události publikované jinými kontexty a podle nich provádí
-svůj krok procesu. Žádná služba neví o celém
-toku. Každá zná pouze svou část a ví, na které události má reagovat.
+svůj krok procesu. O celém toku neví žádná služba: každá zná jen svou část
+a události, na které má reagovat.
 
 :::diagram{fig="14.3-A" title="Choreografie vs. orchestrace – kdo koordinuje ságu" src="images/diagrams/8_sagas/choreography_vs_orchestration.svg"}
 :::
@@ -296,7 +296,6 @@ declare(strict_types=1);
 namespace App\Payment\Application\Handler;
 
 use App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use App\Payment\Application\Command\ChargeCustomer;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -396,6 +395,8 @@ framework:
         transports:
             async_events:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                # Bez queue_name by nad doctrine:// sdílel frontu s příkazy.
+                options: { queue_name: events }
 
         routing:
             # Třída vzniká až v kapitole Outbox Pattern. Do té doby řádek
@@ -421,11 +422,10 @@ U procesů s pěti a více kontexty nebo s podmíněným větvením narazí chor
 
 ### 1. Neviditelný tok procesu {#neviditelny-tok-heading}
 
-Při choreografii neexistuje žádné jedno místo, kde by byl celý doménový proces popsán.
+Při choreografii není celý doménový proces popsaný na žádném jednom místě.
 Tok je rozdrobený do desítek handlerů v různých kontextech. Nikdo nemá přehled o tom,
 které kroky po sobě následují, kde se proces větví a jaké jsou alternativní cesty při
-selhání. Výsledku se říká **„distribuované špagety“** (*distributed spaghetti*):
-špagetový kód rozložený do celého systému.
+selhání. Výsledku se říká **„distribuované špagety“** (*distributed spaghetti*).
 
 ### 2. Porušení Open-Closed Principle {#ocp-heading}
 
@@ -442,14 +442,14 @@ celkový stav procesu nezná nikdo. Operátor musí ručně procházet logy vše
 kontextů, korelovat události podle `orderId` a rekonstruovat, kde přesně
 proces selhal. Neexistuje centrální dashboard, který by zobrazil:
 „Objednávka #42 – platba OK, sklad SELHÁNÍ, zásilka NESPUŠTĚNA.“
-V produkčním prostředí s tisíci objednávkami denně je tento přístup neúnosný.
+Při tisících objednávek denně je takové pátrání neúnosné.
 
 ### 4. Chybějící timeout management {#timeout-heading}
 
 Kontext Payment strhne platbu, ale Warehouse nikdy nezareaguje: handler spadl, zpráva
-se ztratila ve frontě. Že proces stojí, nezjistí nikdo. Žádný z kontextů nemá přehled
-o časových limitech celého procesu a choreografie pro globální timeout nemá přirozené
-místo. Nikdo nehlídá, že proces od `OrderPlaced` po `ShipmentCreated` smí trvat
+se ztratila ve frontě. Že proces stojí, nezjistí nikdo. Časové limity celého procesu
+nezná žádný z kontextů a choreografie pro globální timeout nemá přirozené místo –
+například pro pravidlo, že proces od `OrderPlaced` po `ShipmentCreated` smí trvat
 nejvýše 30 minut.
 
 Komplexní proces proto potřebuje **centrální místo**, které zná celý tok, řídí kroky,
@@ -475,7 +475,7 @@ jako stavový automat s definovanými stavy a přechody. V e-shopu tuto roli pln
 a podle nich rozhoduje, jaký příkaz vydat jako další krok. Kompletní tok od `OrderPlaced`
 po `ShipOrder` je vidět na jednom místě.
 
-Následující diagram zobrazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
+Diagram ukazuje stavový automat procesu objednávky. Zelené šipky značí úspěšné
 přechody, červené selhání a oranžová cesta vede přes kompenzaci:
 
 :::diagram{fig="14.5-A" title="Stavový automat OrderProcessManager" src="images/diagrams/8_sagas/saga_state_machine.svg"}
@@ -502,7 +502,7 @@ enum OrderSagaStatus: string
 
     /**
      * Z terminálního stavu už sága nikam nepokračuje. Opožděná událost
-     * ji nesmí vzkřísit – proto se na tuhle otázku ptá každý handler
+     * ji nesmí vzkřísit – proto se na tuto otázku ptá každý handler
      * hned na začátku.
      */
     public function isTerminal(): bool
@@ -539,7 +539,7 @@ use App\Shipping\Application\Command\CreateShipment;
 use App\Shipping\Application\Command\CancelShipment;
 use App\Ordering\Application\Command\MarkOrderPaid;
 use App\Ordering\Application\Command\ShipOrder;
-use App\Ordering\Application\Command\CancelOrderCommand;
+use App\Ordering\Application\Command\CancelOrder;
 use App\Ordering\Application\Command\ReleaseOrderLock;
 use App\Ordering\Domain\Event\OrderCancelled;
 use App\Ordering\Domain\ValueObject\CustomerId;
@@ -576,15 +576,15 @@ final class OrderProcessManager
             $event instanceof StockReserved => $this->onStockReserved($event),
             $event instanceof StockReservationFailed => $this->onStockReservationFailed($event),
             $event instanceof ShipmentCreated => $this->onShipmentCreated($event),
-            // Bez těchhle dvou větví uvázne sága navždy ve stavu Compensating:
+            // Bez těchto dvou větví uvázne sága navždy ve stavu Compensating:
             // event.bus má allow_no_handlers, takže se událost tiše ackne
             // a v logu po ní nezůstane ani řádek.
             $event instanceof RefundSucceeded => $this->onRefundSucceeded($event),
             $event instanceof RefundFailed => $this->onRefundFailed($event),
-            // Objednávku může zrušit i člověk, ne jen kompenzace. Bez téhle
+            // Objednávku může zrušit i člověk, ne jen kompenzace. Bez této
             // větve sága poběží dál, strhne platbu a vytvoří zásilku
             // k objednávce, která už neexistuje – a příkazy pak jeden po
-            // druhém umřou v DLQ, aniž by kdokoli spadl.
+            // druhém skončí v DLQ, aniž by si toho kdokoli všiml.
             $event instanceof OrderCancelled => $this->onOrderCancelled($event),
         };
     }
@@ -629,10 +629,10 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-        // Opožděná událost nesmí vzkřísit ukončenou ságu. Bez téhle
+        // Opožděná událost nesmí vzkřísit ukončenou ságu. Bez této
         // podmínky by PaymentSucceeded doručený po timeoutu poslal
         // MarkOrderPaid na už zrušenou objednávku. Chybějící sága
-        // znamená, že událost patří objednávce mimo tenhle proces.
+        // znamená, že událost patří objednávce mimo tento proces.
         if ($state === null || $state->status()->isTerminal()) {
             return;
         }
@@ -646,7 +646,7 @@ final class OrderProcessManager
         $this->sagaRepository->save($state);
 
         // Stav agregátu mění příkaz, ne sága. Bez MarkOrderPaid by objednávka
-        // zůstala v Draft a Order::ship() by nešlo nikdy zavolat.
+        // zůstala v Confirmed a Order::ship() by nešlo nikdy zavolat.
         $this->commandBus->dispatch(new MarkOrderPaid(orderId: $event->orderId));
         $this->commandBus->dispatch(new ReserveStock(orderId: $event->orderId));
     }
@@ -655,7 +655,7 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // Bez ságy není co řídit – událost patří objednávce, kterou tento
         // proces nezaložil.
         if ($state === null || $state->status()->isTerminal()) {
             return;
@@ -663,7 +663,7 @@ final class OrderProcessManager
 
         $this->finish($state, OrderSagaStatus::Failed);
 
-        $this->commandBus->dispatch(new CancelOrderCommand(
+        $this->commandBus->dispatch(new CancelOrder(
             orderId: OrderId::fromString($event->orderId),
             reason: 'Platba selhala: ' . $event->failureReason,
             // Sága není člověk. Podle pravidla z kapitoly o autorizaci
@@ -676,7 +676,7 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // Bez ságy není co řídit – událost patří objednávce, kterou tento
         // proces nezaložil.
         if ($state === null || $state->status()->isTerminal()) {
             return;
@@ -704,7 +704,7 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // Bez ságy není co řídit – událost patří objednávce, kterou tento
         // proces nezaložil.
         if ($state === null || $state->status()->isTerminal()) {
             return;
@@ -713,7 +713,7 @@ final class OrderProcessManager
         $state->transitionTo(OrderSagaStatus::Compensating);
         $this->sagaRepository->save($state);
 
-        // Kompenzace: vrátit platbu. RefundCustomer je asynchronní příkaz -
+        // Kompenzace: vrátit platbu. RefundCustomer je asynchronní příkaz –
         // sága zůstává ve stavu Compensating a do Failed přejde až po
         // potvrzení RefundSucceeded (viz sekci 14.09, Když selže kompenzace).
         $this->commandBus->dispatch(new RefundCustomer(
@@ -729,7 +729,7 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId->value);
 
-        // Vlastní kompenzace ságu takhle nevzkřísí: ta už je v Compensating
+        // Vlastní kompenzace ságu takto nevzkřísí: ta už je v Compensating
         // nebo terminálním stavu.
         if ($state === null || $state->status()->isTerminal()
             || $state->status() === OrderSagaStatus::Compensating) {
@@ -774,7 +774,7 @@ final class OrderProcessManager
         // Zámek uvolní CancelOrderHandler: příkaz přichází pod systémovou
         // identitou. Order::cancel() je idempotentní, takže nevadí, když
         // objednávku zrušil už zákazník a refund byl jen kompenzací.
-        $this->commandBus->dispatch(new CancelOrderCommand(
+        $this->commandBus->dispatch(new CancelOrder(
             orderId: OrderId::fromString($event->orderId),
             reason: 'Proces objednávky selhal, platba vrácena',
             actorId: CustomerId::fromString(SystemActor::ID),
@@ -804,7 +804,7 @@ final class OrderProcessManager
         $state->transitionTo($status);
         $this->sagaRepository->save($state);
 
-        // Bez tohohle kroku zůstane objednávka zamčená navždy a zákazník
+        // Bez tohoto kroku zůstane objednávka zamčená navždy a zákazník
         // ji nezruší ani po doručení. Ve větvích, které končí stornem,
         // zámek uvolní rovnou CancelOrderHandler – přichází pod systémovou
         // identitou, takže na pořadí zpráv ve frontě nezáleží.
@@ -817,15 +817,15 @@ final class OrderProcessManager
     {
         $state = $this->sagaRepository->findByCorrelationId($event->orderId);
 
-        // Bez ságy není co řídit – událost patří objednávce, kterou tenhle
+        // Bez ságy není co řídit – událost patří objednávce, kterou tento
         // proces nezaložil.
         if ($state === null || $state->status()->isTerminal()) {
             return;
         }
 
         // Zásilka mohla vzniknout dřív, než dorazilo storno. Guard na
-        // terminální stav tenhle případ nechytí – Compensating terminální
-        // není – a bez téhle větve by sága kompenzaci přeskočila a přešla
+        // terminální stav tento případ nechytí – Compensating terminální
+        // není – a bez této větve by sága kompenzaci přeskočila a přešla
         // do Completed s objednávkou, kterou už někdo zrušil.
         if ($state->status() === OrderSagaStatus::Compensating) {
             $this->commandBus->dispatch(new CancelShipment(
@@ -858,11 +858,11 @@ Objednávka projde třemi stavy: do `Confirmed` ji dostane už továrna
 (`placeWithItems()` z kapitoly [Outbox Pattern](/outbox-pattern#order-aggregate-heading)
 dostává kompletní objednávku, takže `Draft` opouští hned),
 odtud `MarkOrderPaid` do `Paid` a `ShipOrder` do `Shipped`. Sága sama stav agregátu
-nemění. Jen posílá příkazy a čeká na události.
+nemění, jen posílá příkazy a čeká na události.
 
-Právě tady se pozná, jestli je proces domyšlený: chybí-li jediný příkaz, sága doběhne
-do `Completed` a objednávka zůstane rozpracovaná. Nikde nespadne, jen se stavy rozejdou.
-Test procesu proto nesmí končit u stavu ságy. Kontrolovat musí i stav agregátu.
+Právě zde se pozná, jestli je proces domyšlený: chybí-li jediný příkaz, sága doběhne
+do `Completed` a objednávka zůstane rozpracovaná. Nikde nic nespadne, jen se stavy rozejdou.
+Test procesu proto kontroluje i stav agregátu, nejen stav ságy.
 
 Na rozdíl od choreografie popisuje celý doménový proces **jediné místo**, takže vývojář
 vidí kompletní tok od objednávky po expedici. Při debugování stačí zkontrolovat stav
@@ -876,17 +876,15 @@ v jediné třídě. Kontexty Warehouse ani Payment se neupravují.
 ### Každá metoda = jeden krok stavového automatu {#step-method-heading}
 
 Každá privátní metoda v `OrderProcessManager` reprezentuje jeden krok
-stavového automatu. Vložení kroku doprostřed procesu znamená přidat metodu pro
-novou událost a upravit metodu předchozího kroku, která nyní vydává jiný příkaz.
-Úprava ale zůstává lokální, uvnitř jediné třídy. Bounded Contexts kolem ságy
-se nemění; v tom spočívá rozdíl oproti choreografii, kde stejné rozšíření
-vyžaduje zásah do cizího kontextu.
+stavového automatu. Nový krok uprostřed procesu tedy znamená novou metodu a jiný
+příkaz v metodě předchozího kroku. Bounded Contexts kolem ságy zůstávají beze změny;
+v choreografii by stejné rozšíření vyžadovalo zásah do cizího kontextu.
 :::
 
 ### Události kroků {#step-events-heading}
 
-Každý krok ohlásí výsledek událostí. Jsou to neměnné záznamy s primitivy. Cestují
-mezi kontexty, takže hodnotové objekty by se přes serializaci nepřenesly:
+Každý krok ohlásí výsledek neměnnou událostí. Ta nese kromě `eventId` jen primitivy,
+protože cestuje mezi kontexty a příjemce nemá znát hodnotové objekty cizího kontextu.
 
 :::code{language="php" filename="src/Payment/Domain/Event/ + Warehouse/ + Shipping/ (obdobně)"}
 <?php
@@ -981,7 +979,7 @@ najde svou ságu. Bez něj by událost nešlo přiřadit k běžícímu procesu.
 ### Handlery kroků žijí v cizích kontextech {#step-handlers-heading}
 
 Process Manager příkazy jen rozesílá. Vykonává je vždy handler v tom kontextu, kterému
-krok patří – a ten o existenci ságy nic neví. Ukazujeme jeden; `ReserveStockHandler`
+krok patří – a ten o existenci ságy nic neví. Výpis ukazuje jeden z nich; `ReserveStockHandler`
 i `CreateShipmentHandler` mají stejný tvar, jen jiný agregát a jinou výslednou událost:
 
 :::code{language="php" filename="src/Payment/Application/Handler/ChargeCustomerHandler.php"}
@@ -1065,7 +1063,9 @@ interface PaymentGateway
 
 Na konkrétním adaptéru ukázky nestojí: za rozhraním může být HTTP klient platební
 brány, v testech a při rozbíhání ukázek pár řádků v paměti. Právě proto rozhraní
-existuje. Pro kompenzační větve stačí adaptér s přepínačem, který nechá krok vždy selhat.
+existuje. Jde o zjednodušený výřez s primitivy, který stačí sáze. Port s doménovými
+typy (`Money`, `PaymentToken`, `PaymentId`) ukazuje kapitola
+[DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli#c3-code-heading). Pro kompenzační větve stačí adaptér s přepínačem, který nechá krok vždy selhat.
 
 :::code{language="php" filename="src/Payment/Infrastructure/InMemoryPaymentGateway.php"}
 <?php
@@ -1088,7 +1088,7 @@ final readonly class InMemoryPaymentGateway implements PaymentGateway
     public function charge(string $customerId, int $amountCents): string
     {
         if ($this->alwaysFails) {
-            throw new \RuntimeException('Platba zamítnuta.');
+            throw new \RuntimeException('Payment declined.');
         }
 
         return (string) Uuid::v7();
@@ -1145,7 +1145,7 @@ final readonly class InMemoryStockService implements StockService
     public function reserve(string $orderId): void
     {
         if ($this->alwaysFails) {
-            throw new \RuntimeException('Zboží není skladem.');
+            throw new \RuntimeException('Out of stock.');
         }
     }
 
@@ -1232,9 +1232,9 @@ final readonly class MarkOrderPaidHandler
         $order->markPaid();
         $this->em->flush();
 
-        // markPaid() nahrává OrderPaid. Bez tohohle kroku by událost
+        // markPaid() nahrává OrderPaid. Bez tohoto kroku by událost
         // zůstala v agregátu a projekce by o změně stavu nevěděla.
-        // Dispatch uvnitř transakce je tu v pořádku: event.bus je
+        // Dispatch uvnitř transakce je zde v pořádku: event.bus je
         // synchronní a nic neopouští proces.
         // Kdyby událost mířila do brokera, patřila by do outboxu.
         foreach ($order->releaseEvents() as $event) {
@@ -1249,7 +1249,7 @@ final readonly class MarkOrderPaidHandler
 
 Příkazy samotné jsou prosté DTO. Primitivy nesou proto, že putují přes asynchronní
 transport: co se serializuje do fronty, musí jít bez ztráty sestavit zpátky. Hodnotový
-objekt to zvládne, pokud má veřejný konstruktor a veřejné vlastnosti. `CancelOrderCommand`
+objekt to zvládne, pokud má veřejný konstruktor a veřejné vlastnosti. `CancelOrder`
 z kapitoly o autorizaci nese `OrderId` právě z tohoto důvodu. Řetězec je ale odolnější
 vůči změnám: přejmenované pole ve VO shodí každou zprávu, která ve frontě čekala z minulé
 verze aplikace.
@@ -1398,7 +1398,7 @@ a objednávka zůstane zaplacená, nezrušená a zamčená navždy. Verze „jak
 
 ### Kolik logiky smí Process Manager mít {#logika-v-process-manageru}
 
-*CQRS Journey* odpovídá striktně: process manager zprávy jen routuje a překládá mezi
+*CQRS Journey* odpovídá striktně: Process Manager zprávy jen routuje a překládá mezi
 typy, doménová logika patří do agregátů. `OrderProcessManager` z ukázky tuto hranici
 překračuje. Rozhoduje, kdy se kompenzuje, jakým příkazem a jak dlouho se čeká na
 odpověď.
@@ -1420,10 +1420,11 @@ Bez perzistence by pád workeru mezi kroky `OrderPlaced` a
 Sága by navždy „visela“ a nikdo by ji nedokončil ani nezkompenzoval. Stav ságy se proto
 ukládá do databáze jako Doctrine entita.
 
-Entita leží v Application vrstvě, přestože Doctrine mapování jinak patří do
-Infrastructure ([Hexagonal Architecture](/architektonicke-styly#hexagonal)). Stav
-procesu je aplikační starost a mapování přímo na entitu šetří jednu vrstvu; kdo
-trvá na přísném vrstvení, přesune Doctrine část do Infrastructure.
+Entita leží v Application vrstvě: stav procesu je aplikační starost, ne součást
+doménového modelu. Doctrine atributy nese přímo, stejně jako doménové entity v celém
+průvodci ([Mapping volba](/implementace-v-symfony#mapping-volba-heading)). Kdo trvá
+na přísném vrstvení ([Hexagonal Architecture](/architektonicke-styly#hexagonal)),
+přesune mapování do Infrastructure.
 
 :::callout{type="pattern"}
 ### PHP: OrderSaga – Doctrine entita {#saga-state-entity-heading}
@@ -1571,7 +1572,7 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Saga;
 
 /**
- * Rozhraní repozitáře stavu ságy - umožňuje záměnu
+ * Rozhraní repozitáře stavu ságy – umožňuje záměnu
  * implementace (Doctrine v produkci, in-memory v testech).
  */
 interface OrderSagaRepository
@@ -1639,9 +1640,9 @@ final readonly class DoctrineOrderSagaRepository implements OrderSagaRepository
 :::
 :::
 
-Perzistence stavu je předpokladem obnovy po selhání. Worker spadne uprostřed
-zpracování zprávy `PaymentSucceeded`, dřív než ji stihne potvrdit. Po restartu
-Messenger tutéž zprávu doručí znovu a Process Manager si stav ságy načte z databáze.
+Perzistence stavu je předpokladem obnovy po selhání. Když worker spadne uprostřed
+zpracování zprávy `PaymentSucceeded` a nestihne ji potvrdit, Messenger po restartu
+tutéž zprávu doručí znovu a Process Manager si stav ságy načte z databáze.
 Ví tedy, že proces čekal na platbu (`AwaitingPayment`), a neztratil kontext.
 
 Samo o sobě to ale nestačí. Ukázaná metoda `onPaymentSucceeded()` nemá guard proti
@@ -1664,28 +1665,27 @@ zprávu automaticky zopakuje.
 
 ### Multi-worker Process Manager – co se rozpadne {#multi-worker-heading}
 
-Optimistic lock řeší konflikt na *jedné* instanci ságy. V produkci se stane
-něco složitějšího: stejná zpráva (např. `PaymentSucceeded` z téže objednávky)
-dorazí do více worker instancí současně (supervisor s `numprocs > 1`),
-nebo *různé* eventy z téže ságy dorazí ve špatném pořadí (Kafka partition
+Optimistický zámek řeší konflikt na *jedné* instanci ságy. V produkci nastávají
+složitější situace: stejná zpráva (např. `PaymentSucceeded` z téže objednávky)
+dorazí do více instancí workeru současně (supervisor s `numprocs > 1`),
+nebo *různé* události téže ságy dorazí ve špatném pořadí (Kafka partition
 balancing, RabbitMQ multiple consumers). Důsledky:
 
 - **Race na vznik ságy.** První `OrderPlaced` pro stejné `orderId`
   dorazí do dvou workerů současně. Oba vidí, že sága ještě neexistuje, a oba
   zavolají `OrderSaga::start`. UNIQUE constraint na
-  `(saga_type, correlation_id)` jednoho z nich zabije, druhý zůstane. Bez constraintu
+  `(saga_type, correlation_id)` jeden zápis odmítne, druhý zůstane. Bez constraintu
   vzniknou dvě paralelní ságy téže objednávky a soupeří o stav.
-- **Out-of-order events.** `PaymentSucceeded` dorazí dřív než
+- **Události mimo pořadí.** `PaymentSucceeded` dorazí dřív než
   `OrderPlaced`, sága ještě není ve stavu `AwaitingPayment`. Process Manager
-  netuší, co s ní. Buď event zahodí (bug v doméně), nebo ho zařadí do
-  *pending* fronty pro pozdější zpracování (komplexní stavový automat).
-- **Kompenzační závody.** Sága rozhodne `Compensate`, vyšle `RefundCustomer`,
-  a *zároveň* dorazí pomalá `PaymentSucceeded` z jiného workeru. Druhá
-  zpráva může resetovat stav ságy z `Compensating` zpět na `AwaitingShipment`,
-  ale `RefundCustomer` už běží – zákazník dostane refund, a přesto proces
-  pokračuje k expedici.
+  ji buď zahodí (chyba v doméně), nebo odloží do fronty *pending* ke zpracování
+  později (za cenu složitějšího stavového automatu).
+- **Kompenzační závody.** Sága přejde do `Compensating`, vyšle `RefundCustomer`,
+  a *zároveň* z jiného workeru dorazí opožděná `StockReserved`. Ta může přepnout
+  stav ságy z `Compensating` zpět na `AwaitingShipment`, ale `RefundCustomer` už
+  běží – zákazník dostane refund, a přesto proces pokračuje k expedici.
 
-Standardní obrana proti všem třem:
+Obrana proti všem třem:
 
 :::callout{type="pattern"}
 ### Vzor: idempotentní state transitions + UNIQUE constraint {#idempotent-saga-transitions-heading}
@@ -1700,15 +1700,14 @@ na konkrétní transport a přidělená až při odeslání či příjmu. Po red
 při průchodu jiným transportem se změní, takže by táž událost prošla dvakrát –
 přesně to, čemu má idempotence zabránit.
 
-Krokové události z [14.05](#process-manager-heading) proto nesou `eventId`. Bez něj se
-guard nemá čeho chytit. Metoda patří do entity `OrderSaga` a Process Manager ji volá
-místo přímého `transitionTo()`:
+Krokové události z [14.05](#process-manager-heading) proto nesou `eventId`; bez něj se
+guard nemá čeho chytit. Process Manager metodu volá místo přímého `transitionTo()`:
 
 :::code{language="php" filename="src/Ordering/Application/Saga/OrderSaga.php (výřez)"}
 /** @return bool zda se přechod opravdu odehrál */
 public function applyPaymentSucceeded(string $eventId): bool
 {
-    // 1) Idempotence: stejný event už zpracován? Skip.
+    // 1) Idempotence: byla táž událost už zpracována? Přeskočit.
     if ($this->hasProcessed($eventId)) {
         return false;
     }
@@ -1727,7 +1726,7 @@ public function applyPaymentSucceeded(string $eventId): bool
 }
 :::
 
-Volání z Process Manageru pak vypadá takhle. Návratová hodnota říká, jestli se přechod
+Návratová hodnota říká Process Manageru, jestli se přechod
 opravdu odehrál, takže se příkazy neodešlou podruhé. Výpis **nahrazuje celou metodu**
 z [14.05](#process-manager-heading), včetně zápisu do `completedSteps`:
 
@@ -1749,7 +1748,7 @@ private function onPaymentSucceeded(PaymentSucceeded $event): void
 
     $state->updateContext('transactionId', $event->transactionId);
 
-    // Bez tohohle řádku nemá pozdější kompenzace podle čeho poznat, že
+    // Bez tohoto řádku nemá pozdější kompenzace podle čeho poznat, že
     // platba proběhla, a RefundCustomer se nikdy neodešle. Objednávka
     // skončí zrušená se strženými penězi a sága uvázne v Compensating.
     $state->updateContext('completedSteps', [
@@ -1773,7 +1772,7 @@ skončí `shipped` a dead-letter fronta zůstane prázdná – nikde se to nepoz
 Druhá polovina obrany patří do agregátu. `cancel()`, `markPaid()` i `ship()`
 v kanonické verzi z [Návrhu agregátu](/navrh-agregatu#references-by-id) při opakovaném
 doručení tiše končí. Bez té větve by opakované `MarkOrderPaid` skončilo po třech
-pokusech v DLQ s hláškou „Nelze přejít ze stavu paid do stavu paid“. Data by se
+opakováních v DLQ s `InvalidOrderStateTransitionException` (přechod z `paid` do `paid`). Data by se
 nerozbila, ale nikdo by se o tom nedozvěděl. Pro připomenutí výřez:
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
@@ -1804,13 +1803,13 @@ Tři stavební prvky, které zde fungují společně:
 - **UNIQUE constraint na `(saga_type, correlation_id)`** zabrání duplicitnímu
   vzniku ságy. Druhý INSERT vyhodí `UniqueConstraintViolationException`, handler
   ji zachytí, resetuje EntityManager a skončí bez odeslání druhého příkazu.
-- **`processedEventIds` v entitě** drží seznam již zpracovaných event ID.
-  Stejný event přijde dvakrát → druhé volání skončí na guardu. To je „inbox
-  per saga“, paralela [Idempotent Inbox z Outbox kapitoly](/outbox-pattern#inbox).
-- **State machine guard** odmítne out-of-order event. Buď ho zahodí
-  (idempotentně), nebo ho zařadí do *pending events* sloupce pro pozdější aplikaci.
+- **`processedEventIds` v entitě** drží identifikátory již zpracovaných událostí.
+  Když táž událost přijde podruhé, volání skončí na guardu. Jde o „inbox
+  per saga“, obdobu [Idempotent Inboxu z kapitoly Outbox](/outbox-pattern#inbox).
+- **Guard stavového automatu** odmítne událost, která dorazila mimo pořadí. Buď ji
+  zahodí, nebo ji odloží do sloupce *pending events* ke zpracování později.
 
-Dvě omezení tohoto řešení stojí za vyslovení. Kontrola `in_array` nad JSON sloupcem
+Řešení má dvě omezení. Kontrola `in_array` nad JSON sloupcem
 není atomická: dva workery mohou projít guardem současně, protože každý pracuje nad
 svou kopií načtenou před zápisem. Duplicitní zápis zachytí až optimistický zámek
 a jeden z workerů dostane `OptimisticLockException`. Guard tedy odfiltruje běžné
@@ -1821,41 +1820,40 @@ nebo držet jen posledních N identifikátorů.
 
 ### Distributed deadlock mezi ságami {#distributed-deadlock-heading}
 
-Klasický dvouagregátový deadlock přes Doctrine pessimistic lock: sága A drží
-lock na `Order#1` a žádá o `Inventory#42`; sága B drží lock na `Inventory#42`
-a žádá o `Order#1`. Postgres deadlock detector po cca 1 s jednu z transakcí
-zabije, ale do té doby čeká celý connection pool a workery stojí.
+Klasický deadlock dvou agregátů přes pesimistický zámek Doctrine: sága A drží
+zámek na `Order#1` a žádá o `Inventory#42`; sága B drží zámek na `Inventory#42`
+a žádá o `Order#1`. Detektor deadlocků v PostgreSQL jednu z transakcí po zhruba
+1 s ukončí (výchozí `deadlock_timeout`), do té doby ale oba workery stojí.
 
 S **eventual consistency** (Vernonovo „eventual consistency mimo hranici agregátu“,
-viz [Návrh agregátu](/navrh-agregatu#transactional-consistency)) deadlock
-**nemůže nastat na úrovni databáze**. Každý krok ságy je samostatná transakce
-na jeden agregát. Jiný typ deadlocku ale možný je: **logický cycle deadlock**
-v sáze samotné.
+viz [Návrh agregátu](/navrh-agregatu#transactional-consistency)) databázový deadlock
+**nastat nemůže**: každý krok ságy je samostatná transakce nad jedním agregátem.
+Možný je ale jiný typ: **logický cyklický deadlock** v sáze samotné.
 
 Příklad: sága `OrderProcess` čeká na `PaymentSucceeded`. Sága `RefundProcess` (pro
-storno) čeká na `OrderCancelled`. Pokud kompenzace způsobí storno objednávky
-a zároveň zrušení refundu, obě ságy čekají na sebe a žádná nedokončí.
+storno) čeká na `OrderCancelled`. Když kompenzace vyvolá storno objednávky
+a zároveň zrušení refundu, čekají ságy jedna na druhou a žádná nedoběhne.
 
 :::callout{type="warn"}
 ### Detekce logických deadlocků {#deadlock-detekce-heading}
 
-Optimistic lock to nezachytí. Obě ságy mají rozdílná ID a vlastní sloupce `version`. Detekce vyžaduje:
+Optimistický zámek to nezachytí, protože každá sága má vlastní ID i vlastní sloupec
+`version`. Detekci zajišťují tři mechanismy:
 
-- **Timeout management.** Každá sága má `maxDurationMinutes`. Sága,
-  která neúspěšně čeká déle než threshold, se eskaluje na manuální zásah
-  nebo automaticky kompenzuje. Implementace v sekci
-  [Timeouty a deadliny](#timeouty).
+- **Timeout management.** Každý čekající stav ságy má časový limit. Sága, která
+  čeká déle, se eskaluje na ruční zásah nebo se automaticky kompenzuje. Implementace
+  v sekci [Timeouty a deadliny](#timeouty).
 - **Topologický audit.** Při návrhu kompenzací pomáhá graf závislostí
-  ság: pokud obsahuje cyklus, existuje potenciální deadlock. V produkci ho
-  spustí konkrétní sekvence eventů.
-- **Distributed tracing** (OpenTelemetry, Jaeger). Saga ID se propaguje jako
-  `correlation_id` ve všech eventech a HTTP voláních. Zaseklé ságy
-  najdete jako trace bez `END` spanu po N minutách.
+  ság. Obsahuje-li cyklus, deadlock je možný a v provozu ho spustí konkrétní
+  posloupnost událostí.
+- **Distributed tracing** (OpenTelemetry, Jaeger). ID ságy se propaguje jako
+  `correlation_id` ve všech událostech a HTTP voláních. Zaseklá sága se projeví
+  jako trace, kterému ani po N minutách nepřibyl koncový span.
 :::
 
 ### Recovery z nekonzistentního stavu ságy {#saga-recovery-heading}
 
-Sága může skončit v nekonzistentním stavu z legitimních příčin: nasazení uprostřed
+Sága může skončit v nekonzistentním stavu i bez chyby ve svém kódu: nasazení uprostřed
 transakce, OOM kill v polovině kompenzačního kroku, migrace schématu, která změnila
 tvar uloženého JSONu. Operátor potřebuje tři nástroje.
 
@@ -1863,7 +1861,7 @@ Prvním je read-only inspekce. Příkaz `app:saga:show <id>` vypíše aktuální
 čekající události, zpracovaná ID událostí a počet pokusů, plus odkaz na ságu
 v Grafaně. Druhým je manuální přechod: `app:saga:force-transition <id> <to>`
 s povinným `--reason="..."` aktualizuje status, zapíše audit log a zneplatní čekající
-události. Patří výhradně operátorům a každé jeho použití signalizuje bug v sáze nebo
+události. Patří výhradně operátorům a každé jeho použití signalizuje chybu v sáze nebo
 neošetřený doménový scénář. Třetí nástroj je replay od checkpointu: u idempotentní
 ságy stačí smazat stav a přehrát všechny její události z outboxu nebo event store.
 Podmínkou je znát správnou počáteční událost (typicky ID události `OrderPlaced`).
@@ -1878,18 +1876,19 @@ i přepsat. Vznikají anomálie známé z databází: *lost update* (storno
 ságy přepíše změnu, kterou objednávková sága právě provádí) a *dirty read*
 (proces si přečte platbu, kterou kompenzace vzápětí vrátí).
 
-Richardson pro tyto anomálie popisuje sadu protiopatření (*countermeasures*).
-První dvě pracují s daty. *Semantic lock* je aplikační zámek: záznam, na kterém
+Richardson pro tyto anomálie popisuje šest protiopatření (*countermeasures*);
+kniha rozebírá čtyři. První dvě pracují s daty. *Semantic lock* je aplikační zámek: záznam, na kterém
 sága pracuje, nese stav s příznakem `*_PENDING` a ostatní procesy ho musí
 respektovat. *Commutative updates* jsou operace navržené tak, aby na pořadí
 nezáleželo – připsání a odepsání částky komutuje, nastavení absolutního
 zůstatku ne.
 
-Zbylá dvě pracují s průběhem ságy. *Pessimistic view* přeuspořádává kroky:
+Další dvě pracují s průběhem ságy. *Pessimistic view* přeuspořádává kroky:
 změna, jejíž dirty read napáchá největší škodu (třeba připsání kreditu), se
 přesune za pivot transakci (viz [Když selže kompenzace](#selhani-kompenzace)).
 Při *reread value* si krok před zápisem hodnotu znovu načte a ověří, že se od
-prvního čtení nezměnila; jinak ságu zastaví nebo opakuje.
+prvního čtení nezměnila; jinak ságu zastaví nebo opakuje. Zbývající *version file*
+a *by value* zde rozebírané nejsou.
 
 Semantic lock je z nich nejčastější:
 
@@ -1950,7 +1949,7 @@ final class OrderLockedBySagaException extends \DomainException
     public function __construct(public readonly OrderId $orderId)
     {
         parent::__construct(sprintf(
-            'Objednávku „%s“ právě zpracovává jiný proces.',
+            'Order "%s" is locked by a running process.',
             $orderId->value,
         ));
     }
@@ -1993,7 +1992,7 @@ final readonly class ReleaseOrderLockHandler
 }
 :::
 
-Zámek má cenu jen tehdy, když ho někdo uvolní i při selhání. Jinak zůstane objednávka
+Zámek má cenu jen tehdy, když ho někdo uvolní i při selhání, jinak zůstane objednávka
 zablokovaná navždy. Uvolnění proto patří do každé terminální větve ságy, ne jen
 do té úspěšné. V ukázkách knihy to dělá metoda `finish()` v Process Manageru a u větví
 končících stornem sám `CancelOrderHandler`, protože příkaz přichází pod systémovou
@@ -2005,21 +2004,21 @@ téhož problému:
 
 - **Zámek** brání stornu v okně, kdy proces běží. Bez něj by uživatel zrušil objednávku
   uprostřed ságy, ta by dál strhla platbu a vytvořila zásilku – a příkazy `MarkOrderPaid`
-  a `ShipOrder` by pak jeden po druhém umřely v DLQ, aniž by kdokoli spadl.
+  a `ShipOrder` by pak jeden po druhém skončily v DLQ, aniž by si toho kdokoli všiml.
 - **Reakce na `OrderCancelled`** pokrývá storna mimo to okno a případ, kdy objednávku
   zruší jiný proces.
 - **Guard na `Compensating`** v `onStockReserved()` a `onShipmentCreated()` ošetřuje
   opožděný úspěch: rezervace nebo zásilka dorazí až po zahájení kompenzace, takže se
-  rovnou zase uvolní. Kontrola na terminální stav sama nestačí. `Compensating`
+  rovnou zase uvolní. Kontrola na terminální stav sama nestačí, protože `Compensating`
   terminální není.
 
 Že jsou potřeba všechny tři, je vidět až za běhu. Sága bez nich doběhne do `Completed`
 nad zrušenou objednávkou a rozdíl se pozná jedině čtením dead-letter fronty.
 
 Volba mezi zámkem a plnou reakcí je doménová: **smí zákazník zrušit objednávku, u které
-už běží platba?** Odpověď „ne, ať to zkusí za chvíli“ je legitimní a levnější.
+už běží platba?** Odpověď „ne, ať to zkusí za chvíli“ je přípustná a levnější.
 
-Má to ale důsledek, který stojí za vyslovení. Složíte-li kapitoly téhle knihy dohromady,
+Tato volba má ale důsledek. Když se kapitoly této knihy složí dohromady,
 vzniká každá objednávka rovnou uzamčená (`placeWithItems()` volá `lockForSaga()`) a zámek
 uvolní až sága ve chvíli, kdy je objednávka `shipped` nebo `cancelled`. Zákazník se tak
 k vlastnímu stornu **nedostane nikdy**: dokud proces běží, tlačítko se nenabídne, a až
@@ -2056,6 +2055,7 @@ framework:
         buses:
             command.bus:
                 middleware:
+                    - validation
                     - doctrine_transaction
             event.bus:
                 default_middleware:
@@ -2063,14 +2063,18 @@ framework:
                     allow_no_handlers: true
 
         transports:
+            # queue_name odděluje fronty nad jedním doctrine:// DSN;
+            # bez něj by události a příkazy skončily v jedné frontě.
             async_events:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options: { queue_name: events }
                 retry_strategy:
                     max_retries: 3
                     delay: 1000
                     multiplier: 2
             async_commands:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options: { queue_name: commands }
                 retry_strategy:
                     max_retries: 3
                     delay: 1000
@@ -2096,7 +2100,7 @@ framework:
             'App\Shipping\Application\Command\CancelShipment': async_commands
             'App\Ordering\Application\Command\MarkOrderPaid': async_commands
             'App\Ordering\Application\Command\ShipOrder': async_commands
-            'App\Ordering\Application\Command\CancelOrderCommand': async_commands
+            'App\Ordering\Application\Command\CancelOrder': async_commands
             'App\Ordering\Application\Command\ReleaseOrderLock': async_commands
             # Bez tohoto routingu by se CheckSagaTimeout zpracoval synchronně
             # a DelayStamp by neměl žádný efekt.
@@ -2150,19 +2154,22 @@ při pádu workeru uprostřed zpracování se zpráva doručí znovu.
 :::
 
 :::callout{type="warn"}
-### Pozor na ztrátu zpráv: Outbox pattern {#outbox-pattern-heading}
+### Pozor na ztrátu zpráv: Outbox Pattern {#outbox-pattern-heading}
 
-Výše uvedená konfigurace předpokládá, že se doménová událost spolehlivě dostane do
-message brokeru. Zaručené to ale není. Agregát uloží změny do databáze
-(Doctrine flush), ale dispatch události do fronty může selhat: síťový výpadek,
-pád workeru mezi flush a dispatch, restart aplikace. Výsledkem je „ztracená“ událost
-a sága, která se nikdy nespustí.
+Výše uvedená konfigurace předpokládá, že se událost spouštějící ságu spolehlivě
+dostane do message brokeru. Zaručené to ale není. Pod kanonickým middlewarem
+`doctrine_transaction` je `flush()` jen zápis SQL a commit přijde až po návratu
+handleru. Handler, který událost do brokeru pošle přímo, ji tedy odešle před
+commitem. Selže-li pak commit, třeba na optimistickém zámku, sága se rozběhne
+nad objednávkou, která neexistuje: vznikne phantom event. Bez middlewaru hrozí
+opak. Commit proběhne, proces spadne před odesláním a sága se nikdy nespustí.
+Oba scénáře rozebírá [dual-write problém](/outbox-pattern#dual-write).
 
-Řešením je **Outbox pattern**: událost se zapíše do speciální tabulky
+Řešením je **Outbox Pattern**: integrační událost se zapíše do tabulky
 `outbox` v téže databázové transakci jako doménová změna. Samostatný
 proces (relay/poller) pak události z outbox tabulky přenáší do message brokeru a po
-úspěšném odeslání je označí jako zpracované. Žádná událost se tak
-neztratí, ani při selhání mezi kroky. Podrobně vzor rozebírá kapitola
+úspěšném odeslání je označí jako zpracované. Událost tak odejde jen s potvrzenou
+změnou a neztratí se ani při pádu mezi kroky. Podrobně vzor rozebírá kapitola
 [Outbox Pattern](/outbox-pattern), včetně relay workeru, idempotentního
 inboxu a napojení na Symfony Messenger.
 :::
@@ -2178,7 +2185,7 @@ brána, ztracená zpráva ve frontě. V distribuovaném systému se s chybějíc
 vždy. Bez explicitního timeoutu zůstane sága navždy ve stavu `AwaitingPayment`
 a objednávka se nikdy nedokončí ani nezruší. Řešením je **timeout check**, odložený příkaz, který po uplynutí
 stanovené doby zkontroluje, zda se sága posunula dál. Pokud ne, ságu ukončí,
-nebo spustí kompenzaci – podle toho, zda už proběhl krok, který je co vracet.
+nebo spustí kompenzaci – podle toho, zda už proběhl krok, který je třeba vrátit.
 
 :::callout{type="pattern"}
 ### PHP: CheckSagaTimeout command {#check-saga-timeout-heading}
@@ -2211,7 +2218,7 @@ declare(strict_types=1);
 namespace App\Ordering\Application\Handler;
 
 use App\Ordering\Application\Command\CheckSagaTimeout;
-use App\Ordering\Application\Command\CancelOrderCommand;
+use App\Ordering\Application\Command\CancelOrder;
 use App\Ordering\Application\Saga\OrderSaga;
 use App\Ordering\Application\Saga\OrderSagaStatus;
 use App\Ordering\Application\Saga\OrderSagaRepository;
@@ -2234,7 +2241,7 @@ final readonly class CheckSagaTimeoutHandler
     {
         $state = $this->sagaRepository->findByCorrelationId($command->orderId);
 
-        // Sága se od posledního kroku posunula, nebo pro tuhle objednávku
+        // Sága se od posledního kroku posunula, nebo pro tuto objednávku
         // vůbec neběží – timeout v obou případech neplatí.
         if ($state === null || $state->status()->value !== $command->expectedStatus) {
             return;
@@ -2249,14 +2256,14 @@ final readonly class CheckSagaTimeoutHandler
 
     private function failWithoutCompensation(OrderSaga $state): void
     {
-        // Platba nikdy neproběhla - není co kompenzovat.
+        // Platba nikdy neproběhla – není co kompenzovat.
         // Sága přechází rovnou do terminálního Failed. Zámek na objednávce
-        // uvolní CancelOrderCommand níž, protože přichází pod systémovou
+        // uvolní CancelOrder níž, protože přichází pod systémovou
         // identitou.
         $state->transitionTo(OrderSagaStatus::Failed);
         $this->sagaRepository->save($state);
 
-        $this->commandBus->dispatch(new CancelOrderCommand(
+        $this->commandBus->dispatch(new CancelOrder(
             orderId: OrderId::fromString($state->correlationId()),
             reason: 'Payment timeout',
             actorId: CustomerId::fromString(SystemActor::ID),
@@ -2276,7 +2283,7 @@ final readonly class CheckSagaTimeoutHandler
             reason: 'Timeout: stock reservation not received',
         ));
 
-        // CancelOrder zde nedispatchujeme. Objednávku zruší
+        // CancelOrder se zde neodesílá. Objednávku zruší
         // onRefundSucceeded až po potvrzení refundu (viz sekci 14.09).
     }
 }
@@ -2312,7 +2319,7 @@ private function scheduleTimeout(string $orderId, OrderSagaStatus $status): void
     // DelayStamp funguje jen na asynchronním transportu. Chybí-li
     // CheckSagaTimeout v routingu messenger.yaml, zpracuje se hlídač
     // okamžitě a odklad se tiše zahodí – kontrola pak proběhne dřív,
-    // než na co čeká.
+    // než mohla odpověď vůbec dorazit.
     $this->commandBus->dispatch(
         new CheckSagaTimeout(
             orderId: $orderId,
@@ -2332,8 +2339,8 @@ private function onOrderPlaced(OrderPlacedIntegrationEvent $event): void
 :::
 
 Úplný výpis `OrderProcessManager` v [14.05](#process-manager-heading) tuto metodu nemá;
-jde o doplněk. Bez něj sága běží bez hlídačů. S ním sága rozesílá i `CheckSagaTimeout`,
-a proto ho unit test v 14.12 filtruje metodou `steps()`.
+jde o doplněk. Bez něj sága běží bez hlídačů; s ním rozesílá i `CheckSagaTimeout`,
+který proto unit test v 14.12 odfiltruje metodou `steps()`.
 
 Volání `scheduleTimeout()` patří do každé metody, která ságu převede do čekajícího
 stavu. Metoda `onPaymentSucceeded()` tak naplánuje kontrolu pro
@@ -2372,9 +2379,9 @@ který se zpráva po vypršení vrátí do cílové fronty. Plugin
 
 ## 14.09 Kompenzační strategie v praxi {#kompenzacni-strategie}
 
-Na selhání kroku ságy existují dvě základní strategie. Volba závisí
-na povaze chyby. Je přechodná (síťový výpadek, dočasná nedostupnost služby), nebo
-trvalá (nedostatek prostředků na účtu, zboží vyprodáno)?
+Na selhání kroku ságy existují dvě základní strategie. Volba závisí na tom, zda je
+chyba přechodná (síťový výpadek, dočasná nedostupnost služby), nebo trvalá
+(nedostatek prostředků na účtu, zboží vyprodáno).
 
 ### Forward recovery (retry) {#forward-recovery}
 
@@ -2384,17 +2391,15 @@ restart od save-pointu bez kompenzací, tedy něco jiného. Kniha termín použ�
 v dnešním, užším významu. Symfony Messenger nabízí vestavěnou retry strategii
 s exponenciálním backoffem, nastavenou v
 [sekci 14.07](#messenger-implementace). Worker automaticky opakuje selhané
-zprávy podle nastavení `max_retries`, `delay` a
-`multiplier`. Hodí se tam, kde je problém dočasný a opakování může uspět.
+zprávy podle nastavení `max_retries`, `delay` a `multiplier`.
 
 ### Backward recovery (kompenzace) {#backward-recovery}
 
 Při **trvalých chybách** (selhání s doménovou příčinou) nastupuje kompenzace:
 vrátit systém do konzistentního stavu kompenzačními akcemi v
 **opačném pořadí** dokončených kroků. Kompenzace je
-**sémantická**, nikoli technická. Neděláme
-`DELETE FROM payments`. Místo toho dispatchujeme nový doménový příkaz
-`RefundCustomer`, který vytvoří novou transakci (refund). Každá kompenzační
+**sémantická**, nikoli technická: místo `DELETE FROM payments` se odešle nový
+doménový příkaz `RefundCustomer`, který vytvoří novou transakci (refund). Každá kompenzační
 akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
 
 :::diagram{fig="14.9-A" title="Kompenzační flow – rollback ságy v opačném pořadí" src="images/diagrams/8_sagas/compensation_flow.svg"}
@@ -2405,7 +2410,7 @@ akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
 
 :::code{language="php" filename="snippet.php"}
 /**
- * Kompenzace: spouštěna při selhání libovolného kroku.
+ * Kompenzace: spouští se při selhání libovolného kroku.
  * Provádí kompenzační akce v opačném pořadí dokončených kroků.
  */
 private function compensate(OrderSaga $state): void
@@ -2443,17 +2448,16 @@ private function compensate(OrderSaga $state): void
 :::callout{type="note"}
 ### Idempotence kompenzačních handlerů {#idempotent-compensation-heading}
 
-Každý kompenzační handler **musí být idempotentní**. Zpráva může být
-doručena vícekrát (at-least-once delivery), a proto handler musí bezpečně zvládnout
-opakované volání. Například `RefundCustomerHandler` by měl před vytvořením
-refundu ověřit, zda refund pro danou objednávku již neexistuje.
+Pravidlo z [14.02](#idempotence-warning-heading) platí pro každý kompenzační handler:
+zpráva může dorazit víckrát (at-least-once delivery). `RefundCustomerHandler` proto
+před vytvořením refundu ověří, zda refund pro danou objednávku už neexistuje.
 :::
 
 ### Když selže kompenzace {#selhani-kompenzace}
 
 Metoda `onStockReservationFailed` ze [sekce 14.05](#orchestrace) dispatchuje
-`RefundCustomer` a převede ságu do stavu `Compensating`. Tam sága zůstává.
-Refund je asynchronní příkaz. Do terminálního `Failed` sága smí přejít až poté,
+`RefundCustomer` a převede ságu do stavu `Compensating`. Tam sága zůstává, protože
+refund je asynchronní příkaz: do terminálního `Failed` smí přejít až poté,
 co dorazí potvrzení `RefundSucceeded`. Přechod do `Failed` hned po dispatchi
 by ságu uzavřel dřív, než refund proběhl; při jeho selhání by se po penězích
 zákazníka nikdo nesháněl. Stav „kompenzace odeslána, čeká se na potvrzení“
@@ -2479,7 +2483,7 @@ private function onRefundSucceeded(RefundSucceeded $event): void
     // Zámek uvolní CancelOrderHandler: příkaz přichází pod systémovou
     // identitou. Order::cancel() je idempotentní, takže nevadí, když
     // objednávku zrušil už zákazník a refund byl jen kompenzací.
-    $this->commandBus->dispatch(new CancelOrderCommand(
+    $this->commandBus->dispatch(new CancelOrder(
         orderId: OrderId::fromString($event->orderId),
         reason: 'Proces objednávky selhal, platba vrácena',
         actorId: CustomerId::fromString(SystemActor::ID),
@@ -2510,7 +2514,7 @@ Richardson (Microservices Patterns, 2018, kap. 4) dělí kroky ságy do tří sk
 - **Compensatable transactions** – kroky před pivotem; každý má definovanou
   kompenzaci (`ChargeCustomer` ↔ `RefundCustomer`).
 - **Pivot transaction** – bod rozhodnutí. Jakmile commitne, sága už necouvá
-  a poběží dopředu až do konce. V našem procesu je pivotem rezervace skladu.
+  a poběží dopředu až do konce. V tomto procesu je pivotem rezervace skladu.
 - **Retriable transactions** – kroky po pivotu (`CreateShipment`,
   `ShipOrder`). Kompenzaci nemají, nesmí selhat z doménových důvodů
   a opakují se až do úspěchu.
@@ -2521,7 +2525,7 @@ figuruje. Dorazí-li storno dřív, než Shipping ohlásí zásilku, je sága u�
 `Compensating` a vzniklou zásilku zruší `onShipmentCreated()`. Po vytvoření zásilky sága
 končí v `Completed` a zrušení odeslané objednávky už je reklamace, ne kompenzace.
 
-Kompenzace samy patří do třetí kategorie. `RefundCustomer` nemá legitimní
+Kompenzace samy patří do třetí kategorie. `RefundCustomer` nemá žádný
 doménový důvod selhat – peníze, které systém strhl, musí umět vrátit. Selhání
 je vždy technické: nedostupná platební brána, timeout, chyba sítě. Odpovídá
 tomu strategie: retry s exponenciálním backoffem (`retry_strategy` ze
@@ -2530,24 +2534,22 @@ failure transportu, systém odešle alert a objednávka putuje do fronty ruční
 zásahů. Ságu visící v `Compensating` zachytí i detekce zaseklých ság ze
 [sekce 14.11](#monitoring).
 
-Podrobnější informace o Dead Letter Queue, retry strategiích a zpracování chyb v Messenger
+Podrobnější informace o Dead Letter Queue, retry strategiích a zpracování chyb v Messengeru
 najdete v kapitole [CQRS – zpracování chyb](/cqrs#error-handling).
 
 ## 14.10 Paralelní kroky {#paralelni-kroky}
 
-Dosud jsme kroky řadili sériově, jeden po druhém. Některé
-kroky na sobě nezávisí a mohou běžet **současně**. Například po úspěšné
-platbě chceme zároveň **rezervovat zboží na skladě** a
-**vygenerovat fakturu**. Výsledek jedné operace druhou neovlivňuje, takže paralelní
+Dosud běžely kroky sériově, jeden po druhém. Některé ale na sobě nezávisí a mohou
+běžet **současně**: po úspěšné platbě lze zároveň **rezervovat zboží na skladě**
+a **vygenerovat fakturu**. Výsledek jedné operace druhou neovlivňuje, takže paralelní
 zpracování zkrátí celkovou dobu trvání ságy.
 
-Princip: sága dispatchuje oba příkazy současně a přejde do stavu
-`AwaitingStockAndInvoice`. V kontextu si uchovává dva příznaky
-(`stockReserved` a `invoiceCreated`). Teprve když oba dorazí
-jako splněné, sága pokračuje dalším krokem, vytvořením zásilky. Tomuto vzoru se říká
+Sága odešle oba příkazy najednou a přejde do stavu `AwaitingStockAndInvoice`.
+V kontextu si uchovává dva příznaky (`stockReserved` a `invoiceCreated`). Teprve když
+jsou splněné oba, pokračuje dalším krokem, vytvořením zásilky. Tomuto vzoru se říká
 **synchronizační bariéra** (synchronization barrier). Stav `AwaitingStockAndInvoice`
-v enumu `OrderSagaStatus` ze [sekce 14.05](#orchestrace) zatím chybí. Paralelní varianta
-vyžaduje doplnit nový case.
+v enumu `OrderSagaStatus` ze [sekce 14.05](#orchestrace) zatím chybí; paralelní varianta
+ho do enumu doplní.
 
 :::callout{type="pattern"}
 ### PHP: Paralelní zpracování kroků se synchronizační bariérou {#parallel-steps-heading}
@@ -2623,8 +2625,8 @@ private function proceedIfParallelStepsCompleted(OrderSaga $state): void
 :::callout{type="warn"}
 ### Kompenzace paralelních kroků {#parallel-compensation-heading}
 
-Paralelní kroky zvyšují složitost kompenzace. Pokud rezervace skladu uspěje, ale
-generování faktury selže, musíte sklad uvolnit, přestože samotná rezervace proběhla
+Paralelní kroky zvyšují složitost kompenzace. Když rezervace skladu uspěje, ale
+generování faktury selže, je nutné sklad uvolnit, přestože samotná rezervace proběhla
 správně. Pole `completedSteps` z [předchozí sekce](#kompenzacni-strategie) zajistí,
 že se kompenzuje pouze to, co skutečně proběhlo.
 
@@ -2636,36 +2638,35 @@ s odkazem na starší literaturu nazývají cascading rollbacks. Pořadí kompen
 jejich mechanismus podle datových závislostí mezi větvemi neřídí.
 Bezpečnější postup: počkat, až obě větve dorazí do bariéry, a teprve pak rozhodnout
 o kompenzaci. Sága proto musí odlišit „krok selhal“ od „krok zatím neodpověděl“.
-Dva booleany v kontextu na to nestačí, potřebujete tři stavy na větev.
+Dva booleany v kontextu na to nestačí; každá větev potřebuje tři stavy.
 :::
 
 :::callout{type="note"}
 ### Optimistické zamykání {#optimistic-locking-parallel-heading}
 
-Při paralelních krocích mohou dvě události (`StockReserved` a
-`InvoiceCreated`) dorazit téměř současně a oba handlery se pokusí
-aktualizovat stejný `OrderSaga` záznam. Bez ochrany hrozí ztráta dat
-(lost update). Řešením je **optimistické zamykání**. Entita
-`OrderSaga` obsahuje sloupec `version` (viz
-[sekce 14.06](#perzistence-stavu)) a při uložení Doctrine ověří, že verze
-nebyla mezitím změněna. Pokud ano, vyhodí
-`OptimisticLockException` a Messenger zprávu automaticky zopakuje.
+Při paralelních krocích mohou `StockReserved` a `InvoiceCreated` dorazit téměř
+současně a oba handlery se pokusí aktualizovat týž záznam `OrderSaga`. Před ztrátou
+dat (lost update) chrání **optimistické zamykání**: sloupec `version` ze
+[sekce 14.06](#perzistence-stavu). Změnil-li verzi mezitím jiný zápis, Doctrine
+vyhodí `OptimisticLockException` a Messenger zprávu automaticky zopakuje.
 :::
 
 ## 14.11 Monitoring a observabilita {#monitoring}
 
 Bez monitoringu se zpráva ztratí ve frontě, stav ságy zamrzne a nikdo si ničeho
-nevšimne, dokud si zákazník nestěžuje. Produkční sága proto potřebuje vědět, které
-instance právě běží, které se zasekly a které selhaly. Dva nástroje, které tuto
-viditelnost zajišťují: korelační ID pro trasování a detekce zaseklých ság.
+nevšimne, dokud si zákazník nestěžuje. Provoz proto potřebuje vědět, které
+instance ságy právě běží, které se zasekly a které selhaly. Tuto viditelnost
+zajišťují dva nástroje: korelační ID pro trasování a detekce zaseklých ság.
 
 ### Korelační ID {#korelacni-id-heading}
 
-Každá zpráva v jedné sáze nese stejné **korelační ID**, typicky
-`orderId`. Díky němu můžete v logu vyfiltrovat všechny zprávy patřící
-ke konkrétní objednávce a sledovat celý průběh procesu od začátku do konce.
-Více o korelačních identifikátorech najdete v
-[glosáři](/glosar#term-korelacni-id).
+Každá zpráva v jedné sáze nese stejný **byznysový korelační klíč**, zde
+`orderId`. Podle něj jde v logu vyfiltrovat všechny zprávy konkrétní objednávky
+a sledovat celý průběh procesu od začátku do konce.
+Technické [korelační ID](/glosar#term-korelacni-id) má jiný rozsah. Vzniká
+s requestem nebo spouštěcí zprávou a přechází do zpráv z nich odvozených.
+Klíč `orderId` naproti tomu spojuje celou instanci ságy, i přes naplánované
+timeouty a ruční zásahy.
 
 Technicky se korelace řeší vlastním stampem (např. `CorrelationIdStamp`),
 který sága připojí na envelope při dispatchi a logovací middleware ho čte
@@ -2688,14 +2689,16 @@ declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Command;
 
+use App\Ordering\Application\Saga\OrderSaga;
 use App\Ordering\Application\Saga\OrderSagaRepository;
+use App\Ordering\Application\Saga\OrderSagaStatus;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(name: 'app:saga:check-stale', description: 'Najde ságy zaseklé déle než 30 minut')]
+#[AsCommand(name: 'app:saga:check-stale', description: 'Najde ságy, které v mezistavu stojí déle, než jejich stav dovoluje')]
 final class CheckStaleSagasCommand extends Command
 {
     public function __construct(
@@ -2707,8 +2710,15 @@ final class CheckStaleSagasCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $threshold = new \DateTimeImmutable('-30 minutes');
-        $staleSagas = $this->sagaRepository->findStale($threshold);
+        $now = new \DateTimeImmutable();
+
+        // Repozitář vrátí kandidáty podle nejkratšího prahu, přesný práh
+        // pak určí stav ságy.
+        $staleSagas = array_values(array_filter(
+            $this->sagaRepository->findStale($now->modify('-5 minutes')),
+            fn (OrderSaga $saga): bool => $saga->updatedAt()
+                < $now->modify('-' . $this->maxIdle($saga->status())),
+        ));
 
         if (count($staleSagas) === 0) {
             $io->success('Žádné zaseklé ságy.');
@@ -2729,6 +2739,22 @@ final class CheckStaleSagasCommand extends Command
 
         return Command::FAILURE;
     }
+
+    /**
+     * Práh = timeout kroku z 14.08 plus rezerva. Jeden práh pro všechny
+     * stavy nestačí: zásilka smí čekat na dopravce celý den, rezervace
+     * skladu jen sekundy. Sága zaseklá i po prahu znamená, že selhal
+     * i naplánovaný CheckSagaTimeout.
+     */
+    private function maxIdle(OrderSagaStatus $status): string
+    {
+        return match ($status) {
+            OrderSagaStatus::AwaitingStockReservation => '5 minutes',
+            OrderSagaStatus::AwaitingPayment => '15 minutes',
+            OrderSagaStatus::AwaitingShipment => '26 hours',
+            default => '30 minutes', // Compensating
+        };
+    }
 }
 :::
 :::
@@ -2742,7 +2768,7 @@ dashboardy a **PagerDuty** nebo obdobný nástroj eskaluje kritické situace. P�
 Kubernetes CronJob nebo Symfony Scheduler task.
 :::
 
-Podrobnosti o implementaci middleware v Symfony Messenger najdete v kapitole
+Podrobnosti o implementaci middlewaru v Symfony Messengeru najdete v kapitole
 [CQRS – sekce middleware](/cqrs#middleware).
 
 ## 14.12 Testování ság {#testovani}
@@ -2751,13 +2777,13 @@ Chyba v přechodové logice nebo v kompenzacích se projeví až v produkci:
 stržená platba bez doručeného zboží, duplikované zásilky a podobně. Těžiště testů
 ságy leží v unit testech stavového automatu; integrační testy s Doctrine a testování
 asynchronních toků přes Messenger rozebírá kapitola
-[Testování DDD aplikací](/testovani-ddd).
+[Testování DDD](/testovani-ddd).
 
 ### Unit testy stavového automatu {#unit-testy-heading}
 
-Nejdůležitější úroveň: testujeme samotný Process Manager izolovaně od infrastruktury.
-Místo skutečného message busu použijeme spy implementaci, která zaznamenává dispatchované
-příkazy, a místo databáze in-memory repozitář:
+Nejdůležitější úroveň: unit test ověřuje samotný Process Manager bez infrastruktury.
+Message bus nahrazuje spy, který zaznamenává odeslané příkazy, databázi in-memory
+repozitář:
 
 :::callout{type="pattern"}
 ### PHPUnit test ságy {#saga-unit-test-heading}
@@ -2919,7 +2945,7 @@ final class OrderProcessManagerTest extends TestCase
         ));
         $this->dispatchedCommands = [];
 
-        // Platba dorazí až po timeoutu, kdy je sága ve Failed. Bez guardu
+        // Platba dorazí až poté, co sága skončila ve Failed. Bez guardu
         // by ságu přepnula zpět a poslala MarkOrderPaid na zrušenou objednávku.
         ($this->saga)(new PaymentSucceeded(eventId: Uuid::v7(), orderId: self::ORDER_ID));
 
@@ -2935,7 +2961,7 @@ final class OrderProcessManagerTest extends TestCase
 :::callout{type="note"}
 ### InMemoryOrderSagaRepository {#in-memory-repo-heading}
 
-Testovací in-memory implementace repozitáře, kterou používáme místo Doctrine:
+Testovací in-memory implementace repozitáře, která v testech nahrazuje Doctrine:
 
 :::code{language="php" filename="tests/Ordering/Application/Saga/InMemoryOrderSagaRepository.php"}
 <?php
@@ -2975,7 +3001,7 @@ final class InMemoryOrderSagaRepository implements OrderSagaRepository
 :::
 
 Další vzory pro testování doménové logiky, agregátů a event handlerů najdete v kapitole
-[Testování DDD aplikací](/testovani-ddd).
+[Testování DDD](/testovani-ddd).
 
 :::faq{}
 - question: Jaký je rozdíl mezi Ságou a Process Managerem?
@@ -2983,10 +3009,10 @@ Další vzory pro testování doménové logiky, agregátů a event handlerů na
 - question: Choreografie, nebo orchestrace – kdy zvolit co?
   answer: 'Choreografie, kde služby reagují na události publikované ostatními, se hodí pro krátké procesy se známou lineární posloupností kroků, kde je spojení mezi službami volné a globální stav není kritický. Orchestrace přes Process Manager je vhodnější tam, kde posloupnost není známá dopředu, kde se proces větví nebo kde jsou potřeba časové limity a centrální přehled o stavu běhu. Běžně citovaná hranice „dvou až tří kroků“ je heuristika, ne pravidlo. Rozhodovací kritéria v <a href="#limity-choreografie">sekci Limity choreografie</a>.'
 - question: Jak implementovat kompenzační transakce v Symfony?
-  answer: 'Kompenzace je samostatná operace nebo command handler, který vrací systém do stavu před selhaným krokem – například <code>RefundCustomer</code> jako protějšek <code>ChargeCustomer</code>. V sáze nad Messengerem se kompenzace spouští, když příchozí událost signalizuje selhání některého z pozdějších kroků. Kompenzační příkazy musí být idempotentní a tolerantní k situaci, že kompenzovaný krok nikdy neproběhl. Ne každou operaci lze technicky vrátit, proto se někdy kompenzuje jiným způsobem. Praktický příklad v <a href="#kompenzacni-strategie">sekci Kompenzační strategie v praxi</a>.'
+  answer: 'Kompenzace je samostatná operace nebo command handler, který sémanticky vrací efekt dříve dokončeného kroku – například <code>RefundCustomer</code> jako protějšek <code>ChargeCustomer</code>. V sáze nad Messengerem se kompenzace spouští, když příchozí událost signalizuje selhání některého z pozdějších kroků. Kompenzační příkazy musí být idempotentní a tolerantní k situaci, že kompenzovaný krok nikdy neproběhl. Ne každou operaci lze technicky vrátit, proto se někdy kompenzuje jiným způsobem. Praktický příklad v <a href="#kompenzacni-strategie">sekci Kompenzační strategie v praxi</a>.'
 - question: Jak zajistit idempotenci ságy při opakovaném doručení událostí?
   answer: 'Messenger může stejnou zprávu doručit vícekrát, ať už při selhání workera, nebo při
     přebalení na retry queue. Handler proto musí opakované zpracování bezpečně ignorovat. Standardní řešení jsou dvě: identifikátor události (ne transportní ID zprávy) uložený mezi zpracovaná ID, nebo stavový automat ságy, který u každého kroku kontroluje, zda už není ve stavu „dokončeno“. Obě techniky brání duplicitnímu publikování příkazů i duplicitním kompenzacím. Podrobný rozbor v <a href="#idempotent-saga-transitions-heading">sekci Idempotentní state transitions</a>.'
 - question: Má se sága obsluhovat přes Command Bus, nebo Event Bus?
-  answer: 'Obojí, s jasně rozdělenou rolí. Události na Event Busu spouštějí reakce ságy – informují, že se něco stalo, a sága na ně navazuje. Příkazy na Command Busu sága sama vydává, aby řídila další kroky. Typická smyčka má tvar: příchozí event → Process Manager → odchozí command → handler → nový event. Nikdy se nezaměňuje: event nic nepřikazuje, command nic neoznamuje. Viz <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
+  answer: 'Obojí, s jasně rozdělenou rolí. Události na Event Busu spouštějí reakce ságy – informují, že se něco stalo, a sága na ně navazuje. Příkazy na Command Busu sága sama vydává, aby řídila další kroky. Typická smyčka má tvar: příchozí event → Process Manager → odchozí command → handler → nový event. Role se nezaměňují: událost nic nepřikazuje, příkaz nic neoznamuje. Viz <a href="#messenger-implementace">sekci Implementace v Symfony Messenger</a>.'
 :::

@@ -7,13 +7,13 @@ meta_description: "Základní stavební kameny taktického DDD: entity, hodnotov
 meta_keywords: "DDD koncepty, entity, hodnotové objekty, value objects, kořeny agregátů, aggregate roots, doménové služby, repozitáře, doménové události, Symfony implementace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Základní koncepty
 schema_type: TechArticle
 schema_headline: "Základní koncepty Domain-Driven Design"
 chapter_number: "06"
 category: Taktika
-deck: "Domain-Driven Design nabízí sadu stavebních bloků, které pomáhají převést znalosti o doméně do strukturovaného softwarového modelu. Každý z těchto konceptů řeší konkrétní problém – od vymezení hranic mezi částmi systému přes zachycení identity objektů až po komunikaci mezi komponentami."
+deck: "Entity, Value Objects, agregáty, repozitáře a doménové události. U každého stavebního bloku kapitola ukazuje, jaký problém řeší a jak vypadá v PHP 8.4 a Symfony 8."
 reading_time: 19
 difficulty: 2
 github_examples: Chapter03_BasicConcepts
@@ -52,9 +52,9 @@ jazyk končí a začíná druhý, určuje hranice kontextu z [Context Mappingu](
 
 Dva uživatele se stejným jménem a e-mailem odlišuje identita. Entita je doménový
 objekt, který nese vlastní identifikátor a zachovává si ho po celý život.
-Evans v *DDD Reference* mluví o objektech, jež drží nit kontinuity a identity napříč
-celým životním cyklem [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
-Jméno, adresa i e-mail se přitom mohou měnit – identita zůstává.
+Evans v *DDD Reference* píše, že takový objekt definuje nepřerušená kontinuita
+a identita, ne jeho atributy [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
+Jméno, adresa i e-mail se mohou měnit – identita zůstává.
 
 :::code{language="php" filename="src/UserManagement/Domain/Model/User.php (bez perzistence)"}
 <?php
@@ -108,17 +108,14 @@ class User
 }
 :::
 
-`User` je v ukázce entita, jejíž identitu určuje `UserId`. Uživatel může změnit jméno
-i e-mail, identifikátor zůstává stejný.
-
 ### Rovnost entit {#entity-equality}
 
 Dvě entity jsou totožné právě tehdy, když mají stejné ID. Proto `equals()`
 porovnává výhradně identifikátory. Operátor `==` se nehodí, protože srovnává všechny
 vlastnosti najednou. Tentýž uživatel načtený dvakrát z databáze sice projde, ale
 jakmile jedna z instancí změní e-mail, `==` ji označí za jinou entitu, přestože
-identita zůstala. Operátor `===` zase porovnává instance v paměti. Agregát načtený
-ve dvou různých kontextech (dva requesty, deserializace ze zprávy) existuje jako
+identita zůstala. Operátor `===` zase porovnává instance v paměti. Entita načtená
+dvakrát nezávisle na sobě (ve dvou requestech, deserializací ze zprávy) existuje jako
 dvě instance a `===` vrátí `false`, i když jde o tutéž doménovou entitu.
 
 ### Vznik identity {#entity-identity}
@@ -131,13 +128,13 @@ Generates Identity), nebo ji přiřadí jiný Bounded Context (Another Bounded C
 Assigns Identity) [[4]](https://www.informit.com/store/implementing-domain-driven-design-9780321834577).
 
 Kniha volí druhou z nich. Agregát, který identifikátor dostane až od databáze, ho při
-vzniku nemá. Nemůže tedy zaznamenat událost o svém vzniku a nikdo se na něj nemůže
-odkázat z jiné agregátní hranice. Matthias Noback dochází ke
-stejnému závěru a doporučuje ID vytvořit dřív, než objekt vznikne
+vzniku nemá. Nemůže tedy zaznamenat událost o svém vzniku a jiný agregát se na něj
+nemůže odkázat. Matthias Noback dochází ke stejnému závěru a doporučuje ID vytvořit
+dřív, než objekt vznikne
 [[5]](https://matthiasnoback.nl/2018/05/when-and-where-to-determine-the-id-of-an-entity/).
-Identifikátory v této knize proto vznikají přes `Uuid::v7()` z balíčku `symfony/uid`;
-dokumentace tuto verzi doporučuje kvůli lepší entropii a chronologickému řazení
-[[6]](https://symfony.com/doc/current/components/uid.html).
+Identifikátory v této knize proto vznikají přes `Uuid::v7()` z balíčku `symfony/uid`.
+Dokumentace tuto verzi doporučuje místo verzí 1 a 6 kvůli lepší entropii a přísnějšímu
+chronologickému řazení [[6]](https://symfony.com/doc/current/components/uid.html).
 
 :::code{language="php" filename="src/UserManagement/Domain/ValueObject/UserId.php (základní podoba)"}
 <?php
@@ -252,12 +249,13 @@ final readonly class ProductId
 }
 :::
 
-Opakování je záměrné. Sdílený předek by sice ušetřil řádky, ale zároveň by dovolil předat
-`ProductId` tam, kde se čeká `CustomerId` – a právě tomu mají typované identifikátory
-zabránit. `OrderId` v rozepsané podobě ukazuje i kapitola
-[Návrh agregátu](/navrh-agregatu#references-by-id).
+Opakování je záměrné. Sdílený předek by ušetřil řádky, ale oslabil by typovou kontrolu.
+Metoda `equals(self $other)` zděděná z předka přijme kteréhokoli potomka, takže porovnání
+`CustomerId` s `ProductId` projde bez chyby. Totéž platí pro každou signaturu, která
+přijímá předka. Právě tomu mají typované identifikátory zabránit. `OrderId` v rozepsané
+podobě ukazuje i kapitola [Návrh agregátu](/navrh-agregatu#references-by-id).
 
-Přirozený identifikátor je legitimní alternativa. Evans obě možnosti výslovně připouští:
+Přirozený identifikátor je také přípustný. Evans obě možnosti výslovně připouští:
 identita může přijít zvenčí, nebo jde o umělou hodnotu vytvořenou systémem pro systém
 [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
 Ani rodné číslo, ISBN nebo IČO ale nejsou tak stálé, jak vypadají: mění se, bývají
@@ -268,10 +266,11 @@ atribut s unikátním indexem.
 ## 06.04 Hodnotové objekty (Value Objects) {#value-objects}
 
 Dva e-maily se stejným textem nejsou „dvě adresy“, ale jedna hodnota.
-Hodnotový objekt je doménový pojem, který identifikuje sám sebe celou svou hodnotou,
-ne odděleným ID [[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
-Z toho plynou dvě vlastnosti: neměnnost (immutable) a rovnost po hodnotě, ne po referenci.
-Druhý důvod pro hodnotové objekty je praktický. Rozsypaná primitiva `string $email`,
+Hodnotový objekt nemá identitu, záleží jen na jeho atributech. Evans ho proto doporučuje
+držet neměnný (immutable)
+[[3]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf).
+Porovnává se po hodnotě, ne po referenci.
+Pro hodnotové objekty mluví i praktický důvod. Rozsypaná primitiva `string $email`,
 `int $priceInCents` a `string $currency` jsou code smell, který Fowler pojmenoval
 Primitive Obsession
 [[7]](https://martinfowler.com/books/refactoring.html); ukázky před opravou a po ní má
@@ -314,14 +313,15 @@ final readonly class Email
 
 `Email` drží jediný řetězec jako `public readonly` vlastnost; getter by jen přidával
 šum. Formát hlídá konstruktor, normalizaci vstupu z formulářů pojmenovaná factory
-`fromUserInput()`. Žádné ID, žádné settery: dva e-maily se shodují právě tehdy, když
+`fromUserInput()`. Třída nemá ID ani settery a dva e-maily se shodují právě tehdy, když
 mají stejnou hodnotu. Třída je `final readonly`, takže ji nikdo nezdědí ani po
 vytvoření nezmění.
 
 :::callout{type="note"}
 ### Co `readonly` stojí {#readonly-cost-heading}
 
-`readonly` vlastnost přijme hodnotu jen jednou a jen z rozsahu deklarující třídy.
+`readonly` vlastnost přijme hodnotu jen jednou a jen zevnitř třídy (od PHP 8.4
+i z potomka).
 U `Email` s jediným polem to nevadí. U objektu s pěti poli to znamená, že každá
 metoda typu `withCurrency()` musí vypsat `new self(...)` se všemi poli. PHP 8.3
 povolilo reinicializaci uvnitř `__clone()`
@@ -334,7 +334,7 @@ v hooku a `readonly` se tedy vylučují a kniha volí `readonly`.
 
 ### Money a Currency {#money}
 
-Druhý hodnotový objekt, se kterým kniha pracuje napříč kapitolami, skládá víc hodnot.
+Druhý hodnotový objekt, ke kterému se kniha opakovaně vrací, skládá víc hodnot.
 `Money` spojuje částku a měnu do pojmu, který nejde rozpojit.
 
 :::code{language="php" filename="src/SharedKernel/Domain/Money.php + Currency.php"}
@@ -372,6 +372,8 @@ final readonly class Money
     public function add(self $other): self
     {
         if ($this->currency !== $other->currency) {
+            // Vědomá zkratka: v Shared Kernelu by pojmenovaná výjimka znamenala
+            // další sdílený typ. Uvnitř kontextu patří pojmenovaná třída.
             throw new \DomainException(
                 "Cannot add {$this->currency->value} and {$other->currency->value}"
             );
@@ -383,6 +385,7 @@ final readonly class Money
     public function subtract(self $other): self
     {
         if ($this->currency !== $other->currency) {
+            // Stejná zkratka jako v add().
             throw new \DomainException(
                 "Cannot subtract {$other->currency->value} from {$this->currency->value}"
             );
@@ -411,14 +414,14 @@ final readonly class Money
 :::
 
 Částka je celé číslo v nejmenších jednotkách měny (haléřích, centech). `float` by do
-peněz vnesl chyby zaokrouhlení, které se projeví až na faktuře. Měnu drží string-backed enum, takže záměna `'czk'` za `'CZK'`
-nepřipadá v úvahu. Sčítání dvou různých měn skončí výjimkou. Je to doménové pravidlo,
+peněz vnesl chyby zaokrouhlení, které se projeví až na faktuře. Měnu drží string-backed
+enum, takže záměna `'czk'` za `'CZK'` nepřipadá v úvahu. Sčítání dvou různých měn skončí výjimkou. Je to doménové pravidlo,
 ne chyba volajícího. Jakmile tentýž pojem potřebuje víc kontextů, patří `Money` do
 Shared Kernelu (tuto variantu ukazuje [Context Mapping](/context-mapping#shared-kernel)).
 
 ### Validace: kde jaká výjimka {#vo-validation}
 
-Konvence této knihy rozlišuje dvě úrovně validace. Porušení *formátu* hodnoty
+Kniha rozlišuje dvě úrovně validace. Porušení *formátu* hodnoty
 (neplatný e-mail, záporná částka, řetězec, který není UUID) hlásí konstruktor
 hodnotového objektu výjimkou `\InvalidArgumentException`. Takové porušení je
 programátorská chyba nebo nevalidní vstup, který měla zachytit už vstupní vrstva.
@@ -467,7 +470,7 @@ use App\Ordering\Domain\ValueObject\OrderId;
 use App\Ordering\Domain\ValueObject\ProductId;
 use App\Ordering\Domain\ValueObject\OrderStatus;
 
-class Order
+final class Order
 {
     /** @var list<OrderItem> */
     private array $items = [];
@@ -495,7 +498,7 @@ class Order
     {
         if ($this->status !== OrderStatus::Draft) {
             throw InvalidOrderStateTransitionException::notAllowedInState(
-                'přidání položky',
+                'addItem',
                 $this->status->value,
             );
         }
@@ -507,7 +510,7 @@ class Order
     {
         if ($this->status !== OrderStatus::Draft) {
             throw InvalidOrderStateTransitionException::notAllowedInState(
-                'odebrání položky',
+                'removeItem',
                 $this->status->value,
             );
         }
@@ -614,7 +617,7 @@ class OrderItem
         public readonly Money $unitPrice,
     ) {
         if ($quantity <= 0) {
-            throw new \InvalidArgumentException('Množství musí být kladné.');
+            throw new \InvalidArgumentException('Quantity must be positive');
         }
     }
 }
@@ -639,11 +642,12 @@ uvnitř agregátu stačí dát produkt. Plnou verzi ukazuje kapitola
 [Návrh agregátu](/navrh-agregatu#references-by-id), včetně metody
 `increaseQuantity()` pro invariant „jedna položka na produkt“.
 
-Tato podoba `Order` je záměrně bez perzistence: položky drží obyčejné pole a na třídě
-není ani jeden Doctrine atribut. Model tak jde číst bez znalosti ORM. Verze, kterou
-opisujete do projektu, je ta z kapitoly [Návrh agregátu](/navrh-agregatu#references-by-id).
-Má stejné metody, ale `Collection` místo pole, mapování a `OrderItem` s odkazem zpět
-na objednávku; jinak by Doctrine neměla co zapsat do cizího klíče.
+Tato podoba `Order` nemá perzistenci: položky drží obyčejné pole a na třídě není ani
+jeden Doctrine atribut. Model tak jde číst bez znalosti ORM. Verze, kterou opisujete
+do projektu, je ta z kapitoly [Návrh agregátu](/navrh-agregatu#references-by-id).
+Přidává další stavové přechody (`markPaid()`, `ship()`), `Collection` místo pole,
+mapování a `OrderItem` s odkazem zpět na objednávku. Bez odkazu by Doctrine neměla co
+zapsat do cizího klíče.
 
 :::callout{type="note"}
 ### Enum pro stavové typy {#enum-poznamka-heading}
@@ -678,8 +682,8 @@ nebo kompozici více hodnot, jako jsou `Money`, `Email` a `DateRange`.
 
 Doménová vrstva by neměla vědět, jestli agregát žije v PostgreSQL, MongoDB,
 nebo v paměti. Tuto neznalost zajišťuje repozitář: pro doménu vypadá jako kolekce
-agregátů v paměti, skutečné uložení řeší implementace v infrastrukturní vrstvě. Vzor pochází z katalogu *Patterns of Enterprise Application
-Architecture*. Edward Hieatt a Rob Mee ho tam popsali jako prostředníka mezi doménou
+agregátů v paměti, skutečné uložení řeší implementace v infrastrukturní vrstvě.
+Vzor pochází z katalogu *Patterns of Enterprise Application Architecture*. Edward Hieatt a Rob Mee ho tam popsali jako prostředníka mezi doménou
 a mapováním dat, který se navenek tváří jako kolekce
 [[11]](https://martinfowler.com/eaaCatalog/repository.html).
 
@@ -703,13 +707,11 @@ interface OrderRepository
 }
 :::
 
-`OrderRepository` je záměrně úzký: uložit agregát a načíst ho podle identity. Dotazy typu
-„všechny objednávky zákazníka“ do něj nepatří. Obsluhuje je read model, jak rozvádí
-kapitola [CQRS](/cqrs). Chybějící objednávka je chyba volajícího, ne prázdný výsledek,
-proto `get()` vrací `Order` a hází výjimku místo `null`.
-Implementaci si volí infrastruktura – nejčastěji Doctrine ORM, ale stejně dobře
-in-memory varianta pro testy. Praktickou implementaci v Symfony 8 popisuje kapitola
-[Implementace v Symfony 8](/implementace-v-symfony).
+`OrderRepository` je záměrně úzký: uložit agregát a načíst ho podle identity.
+Chybějící objednávka je chyba volajícího, ne prázdný výsledek, proto `get()` vrací
+`Order` a hází výjimku místo `null`. Implementaci si volí infrastruktura – nejčastěji
+Doctrine ORM, ale stejně dobře in-memory varianta pro testy. Doctrine variantu rozepisuje
+kapitola [Implementace v Symfony 8](/implementace-v-symfony).
 
 Tři pravidla oddělují repozitář od obyčejné servisní třídy nad databází:
 
@@ -717,10 +719,11 @@ Tři pravidla oddělují repozitář od obyčejné servisní třídy nad databá
    repozitář nemá, načítá se a ukládá jako součást objednávky.
 2. Rozhraní vrací sestavené agregáty, ne řádky ani asociativní pole. Tím se repozitář
    liší od DAO, které mluví v pojmech tabulek a nabízí nad nimi CRUD.
-3. Dotazy pro obrazovky sem nepatří. Pro ně vede samostatná cesta, kterou rozebírá
-   [CQRS](/cqrs).
+3. Dotazy pro obrazovky, třeba „všechny objednávky zákazníka“, sem nepatří. Obsluhuje
+   je read model, který rozebírá kapitola [CQRS](/cqrs).
 
-Metoda `save()` je vědomá odchylka od původní formulace. Vernon rozlišuje dvě podoby.
+Metoda `save()` se vědomě odchyluje od původní představy repozitáře jako kolekce.
+Vernon rozlišuje dvě podoby.
 Collection-oriented repozitář se chová jako kolekce (`add()`, `remove()`) a spoléhá
 na to, že persistence sleduje změny sama. Persistence-oriented varianta s metodou
 `save()` se hodí tam, kde úložiště změny nesleduje
@@ -790,8 +793,9 @@ agregátů: `Customer` a `Order`. Nepatří ani jednomu z nich – `Customer` o 
 nic neví a `Order` nezná věrnostní status zákazníka. `ShippingFeeService` proto obě
 znalosti spojuje na jednom místě, bez stavu a bez závislosti na repozitáři či databázi.
 
-Evans mluví o službě jako o samostatném rozhraní. Ukázka žádné nezavádí, protože
-implementace je jediná a předčasná abstrakce by přidala jen soubor navíc.
+Evans popisuje službu jako operaci, kterou model nabízí samostatným rozhraním. Ukázka
+z něj nedělá PHP `interface`, protože implementace je jediná a předčasná abstrakce by
+přidala jen soubor navíc.
 Přibude-li druhý způsob výpočtu nebo potřeba službu v testu nahradit, lze rozhraní
 `ShippingFeeCalculator` doplnit kdykoli.
 
@@ -811,12 +815,13 @@ je vhodná tehdy, když logika:
 ### Časté zneužití: „PaymentService“ {#payment-service-anti-heading}
 
 Rozšířený omyl je doménová služba `PaymentService`, která zkontroluje stav
-objednávky a vytvoří `Payment`. Ani jedna z obou odpovědností službě nepatří. Kontrola „platit lze jen potvrzenou objednávku“ je invariant agregátu
+objednávky a vytvoří `Payment`. Ani jedna z těch odpovědností službě nepatří.
+Kontrola „platit lze jen potvrzenou objednávku“ je invariant agregátu
 `Order` (rozbor v kapitole
 [Implementace v Symfony 8](/implementace-v-symfony#domain-services)).
 A samotná tvorba `Payment` z dat objednávky je Factory – nejčastěji statická
 factory metoda. Přebírá identifikátor a částku, ne celý agregát `Order`.
-Mezi agregáty putují identifikátory a hodnotové objekty, nikdy reference.
+Mezi agregáty putují identifikátory a hodnotové objekty, nikdy reference na jiný agregát.
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Payment.php (výřez)"}
 public static function forOrder(OrderId $orderId, Money $amount, PaymentMethod $method): self
@@ -862,7 +867,7 @@ final readonly class OrderPlaced
 :::
 
 `OrderPlaced` nese tři údaje: které objednávky se týká, kterého zákazníka
-a kdy vznikla. Vlastnosti jsou veřejné a `readonly`, protože událost je neměnný
+a kdy k události došlo. Vlastnosti jsou veřejné a `readonly`, protože událost je neměnný
 záznam a příjemci ji jen čtou.
 
 Kolik dat do události patří, je rozhodnutí, ne pravidlo. Tenká událost nese
@@ -881,7 +886,7 @@ a mění se jen tak rychle, jak její příjemci snesou
 Poslat `OrderPlaced` ven proto znamená zveřejnit vnitřní model se vším, co z toho
 plyne. Překlad na stabilní kontrakt řeší
 [Published Language](/context-mapping#published-language). Spolehlivé doručení
-a idempotenci na straně příjemce řeší [Outbox Pattern](/outbox-pattern#inbox),
+a idempotenci na straně příjemce rozebírá [Outbox Pattern](/outbox-pattern#inbox),
 protože Messenger doručuje at-least-once.
 
 Domain Events tvoří základ pro dvě architektonické techniky: oddělení čtení a zápisu
@@ -927,7 +932,7 @@ Agregát `Order` ze [sekce o agregátech](#aggregates) z této třídy dědí. V
 jeho `place()`, `addItem()` a `confirm()` doplněné o volání `record()`:
 
 :::code{language="php" filename="src/Ordering/Domain/Model/Order.php (výřez)"}
-class Order extends AggregateRoot
+final class Order extends AggregateRoot
 {
     // ... vlastnosti a metody ze sekce 06.05 ...
 
@@ -965,8 +970,9 @@ class Order extends AggregateRoot
 }
 :::
 
-`OrderConfirmed` je obdoba `OrderPlaced` z předchozí sekce. Volání `record()` stojí
-v named constructoru a v doménových metodách, nikdy v `__construct`. Důvodem je
+`OrderItemAdded` a `OrderConfirmed` jsou obdoby `OrderPlaced` z předchozí sekce; jejich
+definice vypisuje [Návrh agregátu](/navrh-agregatu#references-by-id). Volání `record()`
+stojí v pojmenované factory a v doménových metodách, nikdy v `__construct`. Důvodem je
 reconstitution, tedy sestavení agregátu z uložených dat. Doctrine při
 hydrataci konstruktor obchází, ruční `Order::reconstitute()` ho ale volá – a kdyby
 v něm `record()` byl, každé načtení objednávky by znovu ohlásilo její vznik.
@@ -974,7 +980,7 @@ Reconstitution jako zvláštní typ factory rozebírají
 [Doplňující taktické vzory](/mene-zname-vzory#fac-reconstitute).
 
 Druhou polovinu životního cyklu obstará command handler. Uloží agregát
-a teprve potom vyzvedne nahrané události přes `releaseEvents()`:
+a teprve potom vyzvedne zaznamenané události přes `releaseEvents()`:
 
 :::code{language="php" filename="src/Ordering/Application/Handler/PlaceOrderHandler.php (výřez)"}
 $order = Order::place(OrderId::generate(), $customerId);
@@ -995,16 +1001,15 @@ zmizí i jejich zápisy. Co opouští proces (broker, e-mail, cizí služba), jd
 
 Pořadí „nejdřív uložit, pak publikovat“ je volba knihy, ne jediná možnost. Publikace
 před flushem by příjemcům oznámila změnu, kterou databáze mohla odmítnout. Bez
-middlewaru, kdy commit obstará sám `flush()`, hrozí opak: dispatch po flushi o událost
-přijde, když proces spadne mezi uložením a publikací.
-Zadarmo není ani jedna varianta.
+middlewaru, kdy commit obstará sám `flush()`, hrozí opak: když proces spadne mezi
+uložením a publikací, událost se ztratí. Zadarmo není ani jedna varianta.
 
 Dispatch uvnitř transakce hájí i Jimmy Bogard. Vedlejší efekty podle něj patří
 do téže logické transakce jako změna, která je vyvolala
 [[14]](https://lostechies.com/jimmybogard/2014/05/13/a-better-domain-events-pattern/).
 Kdo chce doručení naopak odložit, má v Symfony middleware `dispatch_after_current_bus` a stamp
-`DispatchAfterCurrentBusStamp`, který zprávu pustí až po skončení aktuálního handleru
-[[15]](https://symfony.com/doc/current/messenger/dispatch_after_current_bus.html).
+`DispatchAfterCurrentBusStamp`, který zprávu pustí až po úspěšném dokončení aktuálního
+handleru [[15]](https://symfony.com/doc/current/messenger/dispatch_after_current_bus.html).
 Riziko ztracené události odstraní až transakční outbox: událost i změna agregátu
 se zapíšou jednou transakcí. Plné zapojení do Symfony (repozitář, event bus přes
 Messenger) popisuje kapitola
@@ -1018,10 +1023,10 @@ Messenger) popisuje kapitola
   answer: 'Hodnotový objekt zapouzdřuje doménový koncept, který určují pouze jeho hodnoty, nikoli identita – například peněžní částka s měnou, rozsah kalendářních dní nebo e-mailová adresa. Umožňuje přesunout pravidla platnosti a doménové chování blízko dat, která popisují, a eliminuje tzv. Primitive Obsession (používání primitivních typů tam, kde patří doménový pojem). Neměnnost Value Objectu zjednodušuje uvažování o kódu i paralelním přístupu. Více v <a href="#value-objects">sekci o Hodnotových objektech</a>.'
 - question: Co je Agregát a proč je jeho hranice důležitá?
   answer: 'Agregát je skupina doménových objektů, které se mění jako jeden celek. Přístup k jeho vnitřním částem vede výhradně přes kořenovou entitu (Aggregate Root). Hranice agregátu bývá zároveň hranicí transakční konzistence: co je uvnitř, musí být po každé operaci ve validním stavu. Správně vymezený agregát brání porušení doménových invariantů a ulehčuje rozhodování o tom, co lze měnit souběžně. Podrobný rozbor v <a href="#aggregates">sekci o Agregátech</a>.'
-- question: Jakou roli má Repozitář v DDD?
-  answer: 'Repozitář poskytuje doménové vrstvě rozhraní podobné kolekci pro ukládání a načítání agregátů, aniž by doména musela znát konkrétní persistenční technologii. Pro kód v doménové vrstvě vypadá repozitář jako in-memory kolekce objektů; skutečné uložení do databáze probíhá v infrastrukturní vrstvě, která rozhraní implementuje. Díky tomu lze testovat doménu proti in-memory repozitáři a nahradit úložiště bez zásahu do doménových pravidel. Více v <a href="#repositories">sekci o Repozitářích</a>.'
+- question: K čemu slouží Repozitář v DDD?
+  answer: 'Repozitář poskytuje doménové vrstvě rozhraní podobné kolekci pro ukládání a načítání agregátů, aniž by doména musela znát konkrétní persistenční technologii. Skutečné uložení do databáze obstará infrastrukturní vrstva, která rozhraní implementuje. Díky tomu lze testovat doménu proti in-memory repozitáři a nahradit úložiště bez zásahu do doménových pravidel. Více v <a href="#repositories">sekci o Repozitářích</a>.'
 - question: Kdy použít Doménovou službu místo metody na Entitě?
-  answer: 'Doménová služba se hodí tam, kde operace přirozeně nepatří žádné Entitě ani Value Objectu. Koordinuje více agregátů, komunikuje s externím systémem nebo počítá nad kolekcí objektů. Pokud lze chování přirozeně umístit do metody Entity, má vždy přednost. Doménová služba není datový transfer objekt ani aplikační koordinátor; drží doménovou logiku bez stavu. Rozbor a typické případy užití v <a href="#domain-services">sekci o Doménových službách</a>.'
+  answer: 'Doménová služba se hodí tam, kde operace přirozeně nepatří žádné Entitě ani Value Objectu. Koordinuje více agregátů nebo počítá nad daty, která dostane. Vstup z externího systému jí dodá volající, případně doménové rozhraní implementované v infrastruktuře. Když chování přirozeně patří do metody entity, má metoda přednost. Doménová služba není aplikační koordinátor; drží doménovou logiku bez stavu. Rozbor a typické případy užití v <a href="#domain-services">sekci o Doménových službách</a>.'
 - question: Co je Doménová událost a k čemu slouží?
-  answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena“ nebo „platba byla přijata“. Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing a pro komunikaci mezi Bounded Contexty. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
+  answer: 'Doménová událost je neměnný záznam o tom, že se v doméně stalo něco podstatného – například „objednávka byla potvrzena“ nebo „platba byla přijata“. Události umožňují oddělit části systému, které reagují na změny, od částí, které změny vyvolávají: místo přímého volání se publikuje událost a zájemci ji zpracují. V DDD tvoří události také základ pro Event Sourcing. Mezi Bounded Contexty putují až po překladu na integrační události. Detailní rozbor v <a href="#domain-events">sekci o Doménových událostech</a>.'
 :::

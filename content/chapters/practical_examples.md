@@ -7,20 +7,20 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-23
+modified: 2026-09-28
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
 chapter_number: "23"
 category: Syntéza
-deck: "Praktické příklady implementace Domain-Driven Design v Symfony 8 na třech zjednodušených projektech – e-commerce, blog a správa uživatelů. Ukázka Bounded Contexts, doménových modelů a vertikální slice architektury."
+deck: "Tři malé projekty v Symfony 8: e-shop, blog a správa uživatelů. Na každém je vidět rozdělení na Bounded Contexty, doménový model a vertical slice architektura."
 reading_time: 13
 difficulty: 3
 github_examples: null
 ---
 
-Kapitola je průřezem předchozími kapitolami. Tři krátké příklady ukazují,
-jak vzory z taktického DDD, CQRS a Implementace v Symfony drží pohromadě jako funkční aplikace.
+Tři krátké příklady skládají vzory z taktického DDD, CQRS a Implementace v Symfony
+do funkční aplikace.
 Každý příklad obsahuje strukturu projektu a kostru hlavních tříd; plné tělo dostávají
 jen metody, které nesou doménový invariant. Detaily (Doctrine mapování, kontrolery, testy,
 okrajové případy) zůstávají v předchozích kapitolách.
@@ -29,7 +29,7 @@ Plný end-to-end příklad rozebírá krok za krokem navazující [Případová 
 od doménové analýzy přes Context Mapu po read modely.
 
 Výchozím bodem je prázdný projekt: `composer create-project symfony/skeleton`.
-Ukázky v knize cílí na PHP 8.4, Symfony 8 a Doctrine ORM 3 a potřebují tyhle balíčky:
+Ukázky v knize cílí na PHP 8.4, Symfony 8 a Doctrine ORM 3 a potřebují tyto balíčky:
 
 :::code{language="bash" filename="terminál"}
 composer require \
@@ -68,7 +68,7 @@ php bin/console doctrine:schema:update --dump-sql
 Hláška vypadá jako úspěch, znamená ale opak. Blok `mappings:` je proto potřeba přepsat
 podle [kapitoly o agregátech](/navrh-agregatu#symfony-doctrine) dřív, než vznikne první
 migrace. Druhý krok je `DATABASE_URL` v `.env`. Recept nastaví PostgreSQL, takže
-u SQLite nebo MySQL připojení do prázdna:
+u SQLite nebo MySQL připojení míří do prázdna:
 
 :::code{language="ini" filename=".env.local"}
 # SQLite stačí na všechny ukázky v knize a nepotřebuje běžící server
@@ -89,7 +89,7 @@ STOCK_FAILS=0
 # „getCreateDatabaseSQL is not supported by platform“ – soubor si
 # ovladač založí sám při prvním připojení.
 
-# Migrace nejdřív vzniknou z mapování. Bez tohohle kroku skončí migrate
+# Migrace nejdřív vzniknou z mapování. Bez tohoto kroku skončí migrate
 # hláškou „there are no registered migrations“.
 php bin/console doctrine:migrations:diff
 php bin/console doctrine:migrations:migrate
@@ -102,7 +102,8 @@ a `order_audit_log` proto napíšete ručně podle DDL v kapitolách
 [o autorizaci](/autorizace-v-ddd).
 
 Testy z kapitoly o CQRS běží proti skutečné databázi, takže potřebují víc přípravy.
-Ságový test z kapitoly 14 si vystačí s in-memory repozitářem, PHPUnit ale potřebuje taky.
+Test ságy z kapitoly [Ságy a Process Managery](/sagy-a-process-managery) si vystačí
+s in-memory repozitářem, PHPUnit ale potřebuje také.
 V seznamu výše záměrně chybí, protože ho nepotřebuje každý:
 
 :::code{language="bash" filename="terminál"}
@@ -134,9 +135,9 @@ php bin/console doctrine:migrations:migrate --no-interaction --env=test
 
 ## 23.00 Aplikace potřebuje dva běžící procesy {#workery}
 
-Na tomhle kroku se naletí nejčastěji, protože se neprojeví chybou. Po instalaci
+Tento krok se přehlédne nejsnáz, protože jeho absence nic neshodí. Po instalaci
 a spuštění webserveru objednávka projde: `POST /orders` vrátí přesměrování, hláška oznámí
-úspěch, detail se vykreslí. A pak se nestane nic.
+úspěch, detail se vykreslí. Dál se ale nic nestane.
 
 :::code{language="bash" filename="terminál"}
 # stav po odeslání objednávky, když neběží workery
@@ -164,11 +165,11 @@ Bez nich aplikace jen sbírá objednávky, které nikdo nezpracuje.
 
 ## 23.01 Příklad: E-commerce aplikace {#e-commerce}
 
-E-commerce výřez nad košíkem a objednávkami. Dva Bounded Contexts: **Cart** (rozpracovaný nákup)
+Výřez e-shopu nad košíkem a objednávkami má dva Bounded Contexts: **Cart** (rozpracovaný nákup)
 a **Ordering** (potvrzená transakce). Mezi nimi přechází doménová událost `CartCheckedOut`,
 na kterou kontext Ordering reaguje vytvořením agregátu `Order`.
 
-:::diagram{fig="23.1-A" title="E-shop: Bounded Contexts Cart a Order" src="images/diagrams/7_examples/eshop/diagram.svg"}
+:::diagram{fig="23.1-A" title="E-shop: Bounded Contexty Cart a Ordering" src="images/diagrams/7_examples/eshop/diagram.svg"}
 :::
 
 ### Struktura projektu {#e-commerce-structure}
@@ -187,13 +188,20 @@ src/
 │   ├── AddItem/{Command, Controller}/  # Feature slice
 │   ├── GetCart/{Query, ViewModel}/     # Feature slice
 │   └── Checkout/Controller/             # Feature slice
-├── Ordering/                  # Bounded Context: Objednávky
+├── Ordering/                  # Bounded Context: Objednávky (vrstvy)
 │   ├── Domain/Model/Order.php          # Aggregate Root
 │   ├── Domain/ValueObject/OrderId.php, CustomerId.php, ProductId.php
 │   ├── Domain/Event/OrderPlaced.php
-│   └── PlaceOrder/{Command, Controller, Listener}/
+│   ├── Application/Command/PlaceOrder.php
+│   ├── Application/Handler/PlaceOrderHandler.php
+│   ├── Application/Listener/PlaceOrderOnCartCheckedOut.php
+│   └── Infrastructure/Http/PlaceOrderController.php
 └── SharedKernel/Domain/{Money.php, Exception/DomainException.php}
 :::
+
+Cart je členěný do feature slices. Ordering drží vrstvy Domain, Application a Infrastructure
+jako ve zbytku knihy, takže command i handler jde převzít z kapitoly o Outboxu beze změny
+namespace.
 
 ### Agregát Cart {#cart-aggregate}
 
@@ -321,16 +329,16 @@ final readonly class CartCheckedOut
 Na druhé straně hranice stojí listener kontextu Ordering. Cizí slovník překládá na command
 vlastního kontextu: `UserId` z košíku se stává `customerId` objednávky.
 
-:::code{language="php" filename="src/Ordering/PlaceOrder/Listener/PlaceOrderOnCartCheckedOut.php"}
+:::code{language="php" filename="src/Ordering/Application/Listener/PlaceOrderOnCartCheckedOut.php"}
 <?php
 
 declare(strict_types=1);
 
-namespace App\Ordering\PlaceOrder\Listener;
+namespace App\Ordering\Application\Listener;
 
 use App\Cart\Domain\Event\CartCheckedOut;
 use App\Cart\Domain\Event\CheckedOutItem;
-use App\Ordering\PlaceOrder\Command\PlaceOrder;
+use App\Ordering\Application\Command\PlaceOrder;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -363,7 +371,9 @@ final readonly class PlaceOrderOnCartCheckedOut
 }
 :::
 
-Command `PlaceOrder` má stejný tvar jako v kapitole Outbox Pattern. Jeho
+Command `PlaceOrder` je týž jako v kapitole Outbox Pattern, včetně FQCN
+`App\Ordering\Application\Command\PlaceOrder`. Messenger hledá handler podle třídy, takže
+kopie v jiném namespace by skončila na `NoHandlerForMessageException`. Kanonický
 [handler](/outbox-pattern#place-order-handler-heading) objednávku založí přes `placeWithItems()`,
 potvrdí ji a integrační událost uloží do outboxu v téže transakci.
 
@@ -377,7 +387,7 @@ nezajistí sběrnice sama, ale [Outbox Pattern](/outbox-pattern).
 ## 23.02 Příklad: Blog {#blog}
 
 Blog tvoří jeden Bounded Context s jediným agregátem `Post` a slices pro vytvoření
-příspěvku, výpis a detail. `Comment` je entita uvnitř agregátu.
+příspěvku, přidání komentáře, výpis a detail. `Comment` je entita uvnitř agregátu.
 
 :::diagram{fig="23.2-A" title="Blog: doménový model a feature slices" src="images/diagrams/7_examples/blog/diagram.svg"}
 :::
@@ -450,7 +460,7 @@ final class Post extends AggregateRoot
 }
 :::
 
-`Comment` je entita uvnitř agregátu, ne samostatný Aggregate Root. Vzniká jen přes
+`Comment` je entita uvnitř agregátu, ne samostatný kořen agregátu. Vzniká jen přes
 `Post::addComment()`, takže invariant „uzavřená diskuse“ nelze obejít. Hranici agregátu
 a důsledky pro souběžné zápisy rozebírá [Návrh agregátu](/navrh-agregatu).
 
@@ -482,8 +492,8 @@ vygeneruje přes `PostId::generate()` ještě před dispatchem. Návrat ID z han
 nedostane; srovnání obou variant je v [CQRS](/cqrs#command-navratova-hodnota-heading).
 
 Read model pro výpis příspěvků patří mimo zápisový repozitář: paginace, řazení
-podle data, projekce z událostí. Rozebírá ho [CQRS – ViewModely a Read Modely](/cqrs#view-models)
-a [Výkonnostní aspekty](/vykonnostni-aspekty).
+podle data, projekce z událostí. Rozebírá ho [CQRS](/cqrs#view-models)
+a [Read modely, projekce a výkon](/vykonnostni-aspekty).
 
 ## 23.03 Příklad: Správa uživatelů {#user-management}
 
@@ -513,7 +523,7 @@ src/
 ### Agregát User {#user-aggregate}
 
 Agregát `User` implementuje Symfony `UserInterface` pro Security komponentu. Hodnotový
-objekt `Email` validuje formát v konstruktoru, `HashedPassword` zapouzdřuje hash logiku.
+objekt `Email` validuje formát v konstruktoru, `HashedPassword` zapouzdřuje logiku hashování.
 
 :::code{language="php" filename="src/UserManagement/Domain/Model/User.php (skeleton, varianta s UserInterface)"}
 final class User extends AggregateRoot implements UserInterface, PasswordAuthenticatedUserInterface
@@ -548,14 +558,15 @@ final class User extends AggregateRoot implements UserInterface, PasswordAuthent
 Jde o zjednodušenou variantu referenční implementace z kapitoly
 [Implementace v Symfony 8](/implementace-v-symfony#entities). Signatura `register()`
 i hodnotové objekty `UserName`, `Email` a `HashedPassword` jsou stejné a událost `UserRegistered`
-se nahrává ve factory `register()`, nikdy v konstruktoru. Malý příklad dělá dva kompromisy.
+se nahrává v tovární metodě `register()`, nikdy v konstruktoru. Malý příklad dělá jeden kompromis:
 `UserInterface` implementuje přímo agregát, zatímco v plné architektuře
-patří na security adapter v infrastrukturní vrstvě (viz
-[Autorizace v DDD](/autorizace-v-ddd)). A `final` u entit mapovaných Doctrine projde, protože nativní lazy objekty
-z entity nedědí.
+patří adaptéru v infrastrukturní vrstvě (viz
+[Autorizace v DDD](/autorizace-v-ddd)). `final` u entity mapované Doctrine přitom projde,
+protože se zapnutými nativními lazy objekty (PHP 8.4, ORM 3.4+) Doctrine z entity nedědí.
 
-Hash hesla nemá putovat do session. `PasswordAuthenticatedUserInterface` k tomu
-doporučuje `__serialize()` a `__unserialize()` na entitě, které citlivé pole vynechají.
+Hash hesla nemá putovat do session. Dokumentace `PasswordAuthenticatedUserInterface` k tomu
+nabízí `__serialize()` na entitě: hash lze ze serializace vynechat, nebo ho nahradit otiskem
+`crc32c`. Druhá varianta zachová, že změna hesla zneplatní přihlášené relace.
 
 ### Command Handler: RegisterUser {#register-user-handler}
 
@@ -610,24 +621,24 @@ varianta vyžaduje a kde její struktura narazí na strop:
 |---|---|---|---|
 | **Komplexita domény** | Střední: invarianty v košíku, přechod stavu checkout → objednávka | Nízká: validace titulku a obsahu, uzavírání diskuse pod příspěvkem | Nízká až střední: unikátní e-mail, hash hesla, integrace se Security |
 | **Počet Bounded Contexts** | 2 (Cart, Ordering) | 1 | 1 |
-| **Použité vzory** | Agregáty, hodnotové objekty, doménová událost mezi kontexty, CQRS, repository | Agregát s entitou uvnitř, named constructor, CQRS slices, repository | Agregát s `UserInterface`, hodnotové objekty `Email` a `HashedPassword`, repository |
+| **Použité vzory** | Agregáty, hodnotové objekty, doménová událost mezi kontexty, CQRS, repozitář | Agregát s entitou uvnitř, named constructor, CQRS slices, repozitář | Agregát s `UserInterface`, hodnotové objekty `Email` a `HashedPassword`, repozitář |
 | **Co se změní při růstu** | Přibudou kontexty Payment, Inventory, Shipping; checkout se stane procesem přes [ságu](/sagy-a-process-managery); publikace událostí dostane [outbox](/outbox-pattern) | Moderace a verzování obsahu si vyžádají oddělený Comment kontext a read model pro výpisy | Role, oprávnění a SSO oddělí Identity od Profile; autorizační pravidla se přesunou do [voterů](/autorizace-v-ddd) |
 | **Kdy struktura přestane stačit** | Když synchronní komunikace mezi kontexty začne vytvářet řetězy závislostí – pak nastupuje plně asynchronní integrace | Jakmile přibude workflow redakce a schvalování, přestane stačit jediný kontext s CRUD jádrem | Když počet pravidel „kdo smí co“ přeroste agregát – pravidla patří do samostatné autorizační vrstvy |
 
-Rozhodnutí o hloubce stacku se odvíjí od domény, ne od technologie. Plný strategický
-i taktický DDD (více kontextů, CQRS, doménové události, outbox) se vyplatí tam, kde
+Rozhodnutí o hloubce stacku se odvíjí od domény, ne od technologie. Strategický
+i taktický design v plné šíři (více kontextů, CQRS, doménové události, outbox) se vyplatí tam, kde
 doména nese netriviální invarianty, na systému pracuje více týmů a jednotlivé části
 se vyvíjejí různým tempem. E-shop z této kapitoly k tomu směřuje: dva kontexty
 a událost mezi nimi jsou první krok, zbytek přijde s růstem.
 
-Střední cesta pokrývá projekty typu blog nebo správa uživatelů: agregát s repository,
+Střední cesta pokrývá projekty typu blog nebo správa uživatelů: agregát s repozitářem,
 bez oddělených read modelů a bez více kontextů. Doménová pravidla existují
 a zaslouží si zapouzdření, čtení ale zůstává triviální a tým malý. Signál k dalšímu
 kroku je jeden: jakmile výpisy začnou hydratovat agregáty jen kvůli zobrazení,
 je čas na oddělený read model.
 
 Kde pravidla nejsou žádná a aplikace jen přesouvá data mezi formulářem a tabulkou,
-DDD nepřináší hodnotu a stojí čas. Symfony formuláře, Doctrine entity a generické
+DDD jen stojí čas. Symfony formuláře, Doctrine entity a generické
 CRUD kontrolery takový případ řeší levněji. Hranici mezi oběma světy rozebírá
 kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
@@ -641,17 +652,16 @@ handler, infrastrukturu drží repozitář.
 Ukázky zabírají střed toho řetězce. Kontrolery, Doctrine mapování a implementace repozitářů
 zůstávají v [Implementaci v Symfony](/implementace-v-symfony), kde mají prostor na detail.
 
-Projekt s plnou doménovou analýzou, Context Mapou, read modely, reconciliation a
-důsledky pro konzistenci rozebírá navazující [Případová studie](/pripadova-studie). Systém
-pro správu projektů v ní vzniká krok za krokem, od event stormingu po hotové read modely.
+Celý projekt od Event Stormingu přes Context Mapu po read modely s reconciliation
+rozebírá navazující [Případová studie](/pripadova-studie).
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
-  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Dohromady se doplňují: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Kombinace se v ukázkách opakuje záměrně; podobné členění podle případů užití s CQRS sběrnicí drží i veřejné referenční projekty, například <code>CodelyTV/php-ddd-example</code>.'
+  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Doplňují se: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Kombinace se v ukázkách opakuje záměrně. Výjimkou je kontext Ordering v e-shopu, který drží vrstvy, aby seděl s kanonickým kódem z kapitoly o Outboxu; podobné členění podle případů užití s CQRS sběrnicí drží i veřejné referenční projekty, například <code>CodelyTV/php-ddd-example</code>.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
-  answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, vertikální organizaci feature a CQRS sběrnici. Adresářová struktura slouží jako výchozí šablona; rozšiřuje se podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace DDD v Symfony 8</a>.'
+  answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, členění podle funkcí a CQRS sběrnici. Adresářová struktura slouží jako výchozí šablona; rozšiřuje se podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace v Symfony 8</a>.'
 - question: Kde najdu plnou implementaci agregátu se všemi metodami?
-  answer: 'V kapitolách <a href="/navrh-agregatu">Návrh agregátu</a> (kompletní agregát Order s invariantami, optimistickým zámkem, doménovými událostmi a Doctrine mappingem) a <a href="/implementace-v-symfony">Implementace v Symfony 8</a> (User agregát s Symfony Security, custom typy pro hodnotové objekty, repozitář s outbox patternem).'
-- question: Proč je v každém příkladu jen jeden Bounded Context kromě e-shopu?
-  answer: 'Pro shrnující kapitolu fungují srozumitelněji jednodušší případy s jedním kontextem. E-shop má dva kontexty (Cart a Ordering), aby ilustroval cross-context komunikaci přes doménovou událost <code>CartCheckedOut</code>. V reálném projektu by každý ze tří příkladů měl pravděpodobně více kontextů (Identity, Billing, Notifications), ale to už je doména <a href="/pripadova-studie">Případové studie</a>.'
+  answer: 'V kapitolách <a href="/navrh-agregatu">Návrh agregátu</a> (kompletní agregát Order s invariantami, optimistickým zámkem, doménovými událostmi a Doctrine mappingem) a <a href="/implementace-v-symfony">Implementace v Symfony 8</a> (agregát User se Symfony Security, custom typy pro hodnotové objekty, repozitář s outbox patternem).'
+- question: Proč mají blog a správa uživatelů jen jeden Bounded Context?
+  answer: 'Pro shrnující kapitolu fungují srozumitelněji jednodušší případy s jedním kontextem. E-shop má dva kontexty (Cart a Ordering), aby ilustroval komunikaci mezi kontexty přes doménovou událost <code>CartCheckedOut</code>. V reálném projektu by každý ze tří příkladů měl pravděpodobně více kontextů (Identity, Billing, Notifications), ale to už je látka <a href="/pripadova-studie">Případové studie</a>.'
 :::

@@ -7,7 +7,7 @@ meta_description: "Jak číst tuto knihu o Domain-Driven Design v Symfony 8 – 
 meta_keywords: "předmluva, DDD, Symfony, jak číst, doporučená cesta čtení"
 og_type: article
 published: "2026-05-04"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Předmluva
 schema_type: TechArticle
 schema_headline: "Předmluva: Domain-Driven Design v Symfony 8"
@@ -19,7 +19,7 @@ difficulty: 1
 github_examples: null
 ---
 
-Kniha vychází z opakované situace. Vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran bez jediného řádku PHP a zavře ji se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi textem z roku 2003 a PHP projektem v roce 2026 leží vrstva implementačních detailů, kterou Evans pokrýt nemohl. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) rozepsal na příkladech v Javě a C#.
+Kniha vychází z opakované situace. Vývojář otevře *Domain-Driven Design: Tackling Complexity in the Heart of Software* od Erica Evanse, přečte 560 stran bez jediného řádku PHP a zavře ji se dvěma otázkami. Kde začít? A jak to konkrétně udělat v Symfony? Mezi textem z roku 2003 a PHP projektem v roce 2026 leží vrstva implementačních detailů, kterou Evans pokrýt nemohl. Vaughn Vernon ji v *Implementing Domain-Driven Design* (2013) rozepsal na příkladech v Javě.
 
 PHP literatura k DDD existuje a tento text ji nenahrazuje. *Domain-Driven Design in PHP* (Buenosvinos, Soronellas, Akbary) vyšlo v roce 2017 a druhé vydání žije dál na Leanpubu. Matthias Noback pokrývá v *Advanced Web Application Architecture* (2020) architekturu aplikace jako celek. Oba tituly míří jinam. První je podrobný v taktických vzorech a hexagonální architektuře, strategickému designu ale dává málo prostoru a se Symfony 8 soustavně nepracuje. Noback řeší stavbu aplikace, ne DDD. Česky k tématu nevyšlo nic.
 
@@ -44,7 +44,7 @@ Každá role má vlastní doporučenou cestu čtení; popisuje je [P.03 Jak čí
 - **Ne úvod do PHP nebo Symfony.** Pokud Symfony vidíte poprvé, projděte nejprve [oficiální Symfony dokumentaci](https://symfony.com/doc/current/index.html).
 - **Ne kuchařka „kopíruj-vlož“.** Kód ilustruje vzory v kontextu, ne hotová řešení pro váš projekt. DDD vyžaduje úsudek nad doménou, ne mechanické dosazování šablon.
 - **Ne kompletní reference DDD.** Pro hlubší teoretický základ čtěte Evanse (2003), Vernona (2013) a Khononova (2021). Odkazy na konkrétní pasáže najdete přímo v textu kapitol a v [přehledu zdrojů](/zdroje).
-- **Ne záruka, že DDD u vedení prosadíte.** Měřitelné argumenty kniha dodává, [DORA metriky a komunikace s managementem](/team-topologies#dora-metriky) mají vlastní sekci. O výsledku jednání ale rozhoduje spíš organizace než kvalita argumentu.
+- **Ne záruka, že DDD u vedení prosadíte.** Měřitelné argumenty kniha dodává a [DORA metrikám a komunikaci s managementem](/team-topologies#dora-metriky) věnuje vlastní sekci. O výsledku jednání ale rozhoduje spíš organizace než kvalita argumentu.
 - **Ne referenční příručka Doctrine ani Messengeru.** Obě komponenty text používá jen v rozsahu, který DDD potřebuje. Detaily mapování, DQL nebo transportů hledejte v dokumentaci knihoven.
 
 ### Předpoklady {#predpoklady}
@@ -59,19 +59,19 @@ Výchozí znalosti:
 
 Ke stacku ještě poznámka pro zakládání projektu. Symfony vydává minor verze každých šest měsíců a udržuje je krátce; dlouhou podporu má vždy až poslední minor v major řadě. Aktuální LTS je v září 2026 **Symfony 7.4**. Vystačí si s PHP 8.2 a běží i s Doctrine ORM 2, jenže na takovém stacku část ukázek neběží: asymetrická viditelnost `public private(set)` vyžaduje PHP 8.4 a ORM 3 se v řadě míst chová jinak než dvojka.
 
-Kniha proto cílí na Symfony 8, jehož první LTS se čeká až koncem roku 2027. Do té doby jde podle knihy ten, kdo drží aktuální stabilní verzi a počítá s upgradem přibližně jednou za půl roku. Vzory samotné se mezi minor verzemi nemění; mění se API kolem nich.
+Kniha proto cílí na Symfony 8, jehož první LTS se čeká až koncem roku 2027. Do té doby knihu plně využije ten, kdo drží aktuální stabilní verzi a počítá s upgradem přibližně jednou za půl roku. Vzory samotné se mezi minor verzemi nemění; mění se API kolem nich.
 
-Pokud některý z bodů „nesedí“, knihu i tak přečtete, jen některé kapitoly budou chtít víc soustředění. Obtížnost uvádí hlavička každé kapitoly. Nejvyšší stupeň má osm z nich, mimo jiné Návrh agregátu, Event Sourcing, Ságy, DDD a microservices a závěrečná případová studie.
+Kdo některý z bodů nesplňuje, knihu přesto přečte, jen u některých kapitol bude potřebovat víc soustředění. Obtížnost uvádí hlavička každé kapitoly. Nejvyšší stupeň má osm z nich, mimo jiné Návrh agregátu, Event Sourcing, Ságy, DDD a microservices a závěrečná případová studie.
 
 ## P.02 Co kniha pokrývá {#co-pokryva}
 
-Kniha se dělí do osmi tematických částí a každá kapitola staví na předchozích. Webové rozcestníky seskupují tytéž kapitoly hruběji: Základy (kap. 1–5), Taktika (6–8), Architektura (9–11), Vzory (12–16), Praxe (17–22) a Syntéza (23–24). Hranice částí s nimi sedí, jen Praxe zahrnuje části 5 až 7.
+Kniha se dělí na osm tematických částí a každá kapitola staví na předchozích. Webové rozcestníky seskupují tytéž kapitoly hruběji: Základy (kap. 1–5), Taktika (6–8), Architektura (9–11), Vzory (12–16), Praxe (17–22) a Syntéza (23–24). Hranice částí s nimi sedí, jen Praxe zahrnuje části 5 až 7.
 
-Strategie stojí před taktikou záměrně. Evans na QCon London 2009 shrnul, co by ve své knize udělal jinak: stavební bloky přecenil, zatímco hranice kontextů a Core Domain měly přijít mnohem dřív. Uspořádání knihy z této revize vychází.
+Strategie stojí před taktikou záměrně. Evans na QCon London 2009 shrnul, co by ve své knize udělal jinak: stavební bloky přecenil, zatímco hranice kontextů a Core Domain měly přijít mnohem dřív. Uspořádání knihy z tohoto přehodnocení vychází.
 
 ### Část 1 – Strategický design (kap. 1–5) {#cast-1}
 
-Strategický design rozhoduje, *kde* DDD vůbec nasadit. Pokrývá [filozofii DDD](/co-je-ddd), Ubiquitous Language, [identifikaci subdomén](/subdomeny) (Core, Supporting, Generic), [Bounded Contexts a Context Mapping](/context-mapping). Doplňují ho dvě praktické techniky, bez kterých strategický design ve skutečné organizaci nefunguje: [Event Storming](/event-storming) Alberta Brandoliniho a [Team Topologies](/team-topologies) (Skelton & Pais, 2019).
+Strategický design rozhoduje, *kde* DDD vůbec nasadit. Pokrývá [filozofii DDD](/co-je-ddd), Ubiquitous Language, [identifikaci subdomén](/subdomeny) (Core, Supporting, Generic), [Bounded Context a Context Mapping](/context-mapping). Doplňují ho dvě praktické techniky, bez kterých strategický design ve skutečné organizaci nefunguje: [Event Storming](/event-storming) Alberta Brandoliniho a [Team Topologies](/team-topologies) (Skelton & Pais, 2019).
 
 Zde se rozhoduje, jestli pokračovat. První signál dají kapitoly 1 a 2: jestli má váš projekt dost složitou doménu a kde leží jeho Core. Úplný rámec s rozhodovacím stromem obsahuje kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd). Než kvůli signálu „ne“ odložíte zbytek knihy, ověřte ho právě tam.
 
@@ -91,7 +91,7 @@ Kapitola 11 řeší [autorizaci](/autorizace-v-ddd) ve čtyřech vrstvách: Edge
 
 [CQRS](/cqrs) (oddělení čtení a zápisu), [Event Sourcing](/event-sourcing) (stav jako sekvence událostí), [Ságy a Process Managery](/sagy-a-process-managery) (dlouho běžící procesy s kompenzací), [Outbox Pattern](/outbox-pattern) (spolehlivé doručení událostí mimo kontext). Část uzavírá kapitola [Read modely, projekce a výkon](/vykonnostni-aspekty) (N+1 problém, lazy loading, read modely, snapshoty, hot aggregates).
 
-Tyto vzory se nehodí do každého projektu, a kapitoly proto začínají rámcem „kdy ano a kdy ne“.
+Tyto vzory se nehodí do každého projektu, a kapitoly proto rozebírají i to, kdy se nevyplatí.
 
 ### Část 5 – Testování (kap. 17) {#cast-5}
 
@@ -103,7 +103,7 @@ Tyto vzory se nehodí do každého projektu, a kapitoly proto začínají rámce
 
 ### Část 7 – Provozní problémy a anti-vzory (kap. 20–22) {#cast-7}
 
-Tři kapitoly, každá z jiného úhlu, o tom, co se v DDD pokazí. **Kapitola 20** pokrývá konkrétní [provozní třenice](/ddd-v-praxi-kde-to-boli) s Doctrine, Messenger a Symfony Form. **Kapitola 21** je katalog [kódových anti-vzorů](/anti-vzory) (anémický model, Primitive Obsession, God Aggregate, sdílená databáze). **Kapitola 22** odpovídá na otázku, [kdy DDD vůbec nepoužívat](/kdy-nepouzivat-ddd).
+Tři kapitoly se z různých úhlů dívají na to, co se v DDD pokazí. Kapitola 20 pokrývá konkrétní [provozní třenice](/ddd-v-praxi-kde-to-boli) s Doctrine, Messengerem a Symfony Formem. Kapitola 21 je katalog [kódových anti-vzorů](/anti-vzory) (anémický model, Primitive Obsession, God Aggregate, sdílená databáze). Kapitola 22 odpovídá na otázku, [kdy DDD vůbec nepoužívat](/kdy-nepouzivat-ddd).
 
 ### Část 8 – Praktické příklady (kap. 23–24) {#cast-8}
 
@@ -129,7 +129,7 @@ Volitelně po měsíci praxe: [CQRS](/cqrs) a [Anti-vzory](/anti-vzory).
 
 ### Pro senior PHP developera {#cesta-senior}
 
-Rychleji než čtení od první kapitoly se vyplatí vstoupit podle problému, který vás sem přivedl.
+Místo čtení od první kapitoly se vyplatí vstoupit do knihy u problému, který vás sem přivedl.
 
 - Služba na 1500 řádků bez jasných hranic: [Návrh agregátu](/navrh-agregatu), pak [Doplňující taktické vzory](/mene-zname-vzory) a [Anti-vzory](/anti-vzory).
 - Regrese napříč featurami po každém releasu: [Subdomény](/subdomeny) a [Bounded Context a Context Mapping](/context-mapping), teprve pak taktika.
@@ -141,7 +141,7 @@ Souvislé čtení od kapitoly 1 do 24 se vyplatí, pokud DDD zavádíte poprvé 
 
 ### Pro architekta {#cesta-architekt}
 
-Strategie a velký obraz. Méně kódu, víc rozhodnutí.
+Cesta vede přes strategii a celkový obraz: méně kódu, víc rozhodnutí.
 
 - [Co je DDD](/co-je-ddd) – pro kontext.
 - [Subdomény: Core, Supporting, Generic](/subdomeny) – první strategický filtr.
@@ -155,7 +155,7 @@ Strategie a velký obraz. Méně kódu, víc rozhodnutí.
 
 ### Pro tech leada {#cesta-techlead}
 
-Organizační pohled a praktické problémy. Cesta začíná u kapitoly [Conway's Law a Team Topologies](/team-topologies), tedy u otázky, jak týmovou strukturou ovlivnit architekturu. Navazuje [Event Storming a Domain Storytelling](/event-storming) s workshopem, který zavedete do týmu, a [Migrace z CRUD na DDD](/migrace-z-crud) s postupným přechodem bez zastavení vývoje. Realistická očekávání dodá [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli). Zbývají dvě kapitoly: [Anti-vzory](/anti-vzory) jako přehled kódových signálů, které v code review hledat, a [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) pro chvíle, kdy je namístě říct ne.
+Organizační pohled a praktické problémy. Cesta začíná u kapitoly [Conway's Law a Team Topologies](/team-topologies), tedy u otázky, jak týmovou strukturou ovlivnit architekturu. Navazuje [Event Storming a Domain Storytelling](/event-storming) s workshopem, který zavedete do týmu, a [Migrace z CRUD na DDD](/migrace-z-crud) s postupným přechodem bez zastavení vývoje. Realistická očekávání dodá [DDD v praxi – kde to bolí](/ddd-v-praxi-kde-to-boli). Zbývají dvě kapitoly: [Anti-vzory](/anti-vzory) jako přehled kódových signálů, které hledat při code review, a [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd) pro chvíle, kdy je namístě říct ne.
 
 ### Pro vývojáře migrujícího z CRUD {#cesta-migrace}
 
@@ -173,7 +173,7 @@ Další kapitoly pak podle konkrétní bolesti vaší aplikace.
 
 ## P.04 Konvence v knize {#konvence}
 
-Konvence v této sekci platí napříč všemi kapitolami.
+Následující konvence platí ve všech kapitolách.
 
 ### Hlas a tón {#hlas-a-ton}
 
@@ -183,7 +183,7 @@ Kniha vyká. Věty jsou krátké a každá říká jednu věc. Místo „mocný 
 
 Kód cílí na PHP 8.4 a Symfony 8 s Doctrine ORM 3. Které rysy jazyka příklady předpokládají, shrnuje sekce [Předpoklady](#predpoklady). Na starší verzi princip platí dál, jen syntaxe je jiná.
 
-Atributy Doctrine (`#[ORM\Entity]`) stojí přímo na doménových třídách jako pragmatická výchozí volba. Striktní oddělení doménové vrstvy od ORM nabízí [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatná persistence třída plus mapper. Většina příkladů používá první variantu, protože je v Symfony projektech rozšířenější.
+Atributy Doctrine (`#[ORM\Entity]`) stojí přímo na doménových třídách jako pragmatická výchozí volba. Striktní oddělení doménové vrstvy od ORM nabízí [Persisted Object Pattern](/implementace-v-symfony#persisted-object-pattern), tedy samostatná persistenční třída a mapper. Většina příkladů používá první variantu, protože je v Symfony projektech rozšířenější.
 
 Ukázky navíc sdílejí jeden slovník, se kterým se poprvé potkáte v [Základních konceptech](/zakladni-koncepty):
 
@@ -192,16 +192,16 @@ Ukázky navíc sdílejí jeden slovník, se kterým se poprvé potkáte v [Zákl
 - Hodnotové objekty vystavují `public readonly` vlastnosti, čtou se jako `$email->value`.
 - Identifikátory vznikají přes `symfony/uid` a `Uuid::v7()`.
 - Agregáty se odkazují jen přes ID. Celá instance jednoho agregátu se nikdy nepředává do metody jiného.
-- Zprávy pro command bus nesou sufix `Command` (`PlaceOrderCommand`), jejich obsluha sufix `Handler`.
+- Příkazy pro command bus se jmenují slovesnou frází bez sufixu (`PlaceOrder`, `RegisterUser`), jejich obsluha nese sufix `Handler` (`PlaceOrderHandler`).
 - Peníze a další sdílené hodnotové objekty žijí v `App\SharedKernel\Domain`, stejně jako `AggregateRoot`.
 
-Průběžným příkladem je objednávka. Vzniká přes `Order::place()`, položky přijímá metodou `addItem()` a částky drží v hodnotovém objektu `Money`. Trojice `Order`, `Money`, `Email` se vrací napříč kapitolami, takže ke každému vzoru nepřibývá nová doména.
+Průběžným příkladem je objednávka. Vzniká přes `Order::place()`, položky přijímá metodou `addItem()` a částky drží v hodnotovém objektu `Money`. Trojice `Order`, `Money`, `Email` se vrací kapitolu za kapitolou, takže ke každému vzoru nepřibývá nová doména.
 
 Každý PHP blok v knize prochází kontrolou `php -l` v CI. Ukázky jsou tedy syntakticky platné, ale zůstávají ilustrací vzoru. Před nasazením je potřeba je přizpůsobit vlastní doméně.
 
 ### Prvky stránky {#prvky-stranky}
 
-Hlavička kapitoly uvádí odhadovanou dobu čtení a obtížnost na škále 1 až 4. Text končí blokem častých otázek, někde následuje ještě sekce se zdroji a další četbou. Napříč knihou pak vedou dvě navigační stránky: [Cheat Sheet](/cheat-sheet) a [Glosář](/glosar).
+Hlavička kapitoly uvádí odhadovanou dobu čtení a obtížnost na škále 1 až 4. Text končí blokem častých otázek, někde následuje ještě sekce se zdroji a další četbou. Celou knihou pak provázejí dvě navigační stránky: [Cheat Sheet](/cheat-sheet) a [Glosář](/glosar).
 
 ### Callouty {#callouty}
 
@@ -217,7 +217,7 @@ Vnitřní odkazy mezi kapitolami používají *cesty* (`/co-je-ddd`, `/zakladni-
 
 ### Citace {#citace}
 
-Knihy a referenční články cituje text přímo (např. „Vernon, *Implementing DDD*, kap. 8“), u řady kapitol pak souhrnně v závěrečné sekci s další četbou. Hlavní zdroje, na které kniha staví:
+Knihy a referenční články text cituje přímo v místě použití (např. „Vernon, *Implementing DDD*, kap. 8“), u řady kapitol pak souhrnně v závěrečné sekci s další četbou. Hlavní zdroje, na které kniha staví:
 
 - Eric Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software* (Addison-Wesley, 2003).
 - Vaughn Vernon, *Implementing Domain-Driven Design* (Addison-Wesley, 2013) a *Domain-Driven Design Distilled* (2016).
@@ -229,7 +229,7 @@ Knihy a referenční články cituje text přímo (např. „Vernon, *Implementi
 
 ## P.05 Co dál {#co-dal}
 
-Pokud jste tu poprvé, otevřete [kapitolu 1: Co je DDD](/co-je-ddd). Po ní byste měli mít jasno, jestli pokračovat. Rozhodovací rámec pro opačný závěr nabízí kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
+Pokud jste tu poprvé, otevřete kapitolu [Co je Domain-Driven Design](/co-je-ddd). Po ní byste měli mít jasno, jestli pokračovat. Rozhodovací rámec pro opačný závěr nabízí kapitola [Kdy DDD nepoužívat](/kdy-nepouzivat-ddd).
 
 Pokud DDD už znáte a hledáte konkrétní téma, projděte si [Cheat Sheet](/cheat-sheet), jednostránkový přehled vzorů s odkazy na příslušné kapitoly. Pro definice termínů slouží [Glosář](/glosar).
 
@@ -237,7 +237,7 @@ Kniha je živý dokument. Aktuální verzi textu najdete vždy na [ddd-v-symfony
 
 :::faq{}
 - question: Musím knihu číst lineárně od první kapitoly?
-  answer: 'Ne. Pořadí kapitol je stavěné tak, aby každá navazovala na předchozí, ale většina čtenářů přichází s konkrétním problémem. Sekce <a href="#jak-cist">Jak číst tuto knihu</a> nabízí pět cest podle role: junior/mid Symfony developer, senior PHP developer, architekt, tech lead a vývojář migrující z CRUD. Souvislé čtení od kapitoly 1 do 24 dává smysl hlavně tehdy, když DDD zavádíte poprvé na novém projektu.'
+  answer: 'Ne. Pořadí kapitol je stavěné tak, aby každá navazovala na předchozí, ale většina čtenářů přichází s konkrétním problémem. Sekce <a href="#jak-cist">Jak číst tuto knihu</a> nabízí pět cest podle role: junior/mid Symfony developer, senior PHP developer, architekt, tech lead a vývojář migrující z CRUD. Souvislé čtení od kapitoly 1 do 24 se vyplatí hlavně tehdy, když DDD zavádíte poprvé na novém projektu.'
 - question: Musím před touto knihou přečíst Evanse nebo Vernona?
   answer: 'Ne. Kniha nepředpokládá žádnou předchozí znalost DDD, jen zkušenost s PHP, Symfony a objektovým programováním. Evans (2003), Vernon (2013) a Khononov (2021) zůstávají zdrojem hlubšího teoretického základu a odkazy na konkrétní pasáže jsou přímo v textu kapitol. Přehled titulů shrnuje sekce <a href="#citace">Citace</a> a stránka <a href="/zdroje">Zdroje</a>.'
 - question: Spustím ukázky na Symfony 6 nebo 7?

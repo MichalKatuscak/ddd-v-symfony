@@ -7,13 +7,13 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-23
-breadcrumb_name: Výkonnostní aspekty
+modified: 2026-09-28
+breadcrumb_name: Read modely a výkon
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
 chapter_number: "16"
 category: Vzory
-deck: "Read modely, projekce a výkon v Domain-Driven Design se Symfony a Doctrine ORM – řešení N+1 problému, hranice agregátů, budování projekcí přes CQRS, snapshoty a cache read modelů."
+deck: "Read modely, projekce a výkon DDD aplikace nad Symfony a Doctrine ORM: N+1 dotazy, dopad hranic agregátů, stavba projekcí, snapshoty a cache read modelů."
 reading_time: 38
 difficulty: 4
 github_examples: null
@@ -40,9 +40,8 @@ frekvencí čtení. Poslední skupina navíc potřebuje odezvu v desítkách mil
 :::callout{type="warn"}
 ### Zlaté pravidlo optimalizace
 
-**Nikdy neoptimalizujte naslepo.** Každá optimalizace musí být podložena měřením.
-Předčasná optimalizace (premature optimization) vede ke zbytečně složitému kódu, který řeší neexistující
-problémy. Nejprve profilujte, najděte skutečné úzké místo a teprve potom optimalizujte.
+**Nikdy neoptimalizujte naslepo.** Předčasná optimalizace vede ke zbytečně složitému
+kódu, který řeší neexistující problémy. Nejprve profilujte, najděte skutečné úzké místo a teprve potom optimalizujte.
 Donald Knuth to vyjádřil takto: *„We should forget about small efficiencies, say about 97% of
 the time: premature optimization is the root of all evil. Yet we should not pass up our
 opportunities in that critical 3%.“* Zkracuje se obvykle na prostřední větu, čímž se ztratí
@@ -58,17 +57,17 @@ smějí denormalizovat, duplikovat i vracet zastaralá. Rada platná na jedné s
 
 ## 16.02 N+1 problém a lazy loading v Doctrine {#n-plus-1-problem}
 
-N+1 je typický anti-vzor, který produkuje každý ORM bez explicitní fetch strategie. Aplikace provede
+N+1 je typický anti-vzor každého ORM bez výslovně zvolené fetch strategie. Aplikace provede
 jeden dotaz pro seznam entit a poté pro každou z nich načte asociovaná data zvlášť –
 celkem N+1 SQL příkazů místo jednoho či dvou.
 
 :::callout{type="note"}
 ### Přesná definice N+1 problému
 
-Pokud načteme N agregátů `Order` a každý agregát obsahuje kolekci `OrderItem`
+Když aplikace načte N agregátů `Order` a každý obsahuje kolekci `OrderItem`
 mapovanou jako lazy asociace, Doctrine odloží načtení položek do okamžiku prvního přístupu.
 Iterace přes všechny objednávky a přístup k jejich položkám způsobí N samostatných SELECT dotazů
-nad tabulkou `order_item`, jeden pro každou objednávku.
+nad tabulkou `order_items`, jeden pro každou objednávku.
 :::
 
 :::callout{type="pattern"}
@@ -77,11 +76,11 @@ nad tabulkou `order_item`, jeden pro každou objednávku.
 :::code{language="php" filename="snippet.php"}
 <?php
 // Tento kód způsobí N+1 problém!
-// 1 dotaz: SELECT * FROM `order`
+// 1 dotaz: SELECT * FROM orders
 $orders = $this->orderRepository->findAll();
 
 foreach ($orders as $order) {
-    // Každá iterace způsobí 1 SELECT z order_item - celkem N dalších dotazů.
+    // Každá iterace způsobí 1 SELECT z order_items - celkem N dalších dotazů.
     // Getter items() přidává kapitola Outbox Pattern
     // (/outbox-pattern#order-aggregate-heading); kanonický Order z návrhu
     // agregátu ho nemá.
@@ -94,7 +93,7 @@ foreach ($orders as $order) {
 
 Pro kolekce (OneToMany, ManyToMany) Doctrine ve výchozím stavu používá **lazy loading**:
 kolekce zůstává neinicializovaná, dokud k ní kód poprvé nepřistoupí.
-V situacích, kdy kolekci vůbec nepoužijeme, je to výhoda. Při iteraci přes mnoho agregátů
+Když kód kolekci vůbec nepoužije, je to výhoda. Při iteraci přes mnoho agregátů
 to ale plodí výše popsaný N+1 problém.
 
 ### Řešení 1: EXTRA_LAZY kolekce
@@ -115,30 +114,37 @@ declare(strict_types=1);
 
 namespace App\Ordering\Domain\Model;
 
+use App\Ordering\Domain\ValueObject\CustomerId;
+use App\Ordering\Domain\ValueObject\OrderId;
+use App\SharedKernel\Domain\AggregateRoot;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+// Výřez kanonického Order z kapitoly Návrh agregátu (07.08); nové je jen
+// fetch: 'EXTRA_LAZY' a metoda countItems(). Stav, verze a továrny zůstávají.
 #[ORM\Entity]
-#[ORM\Table(name: '`order`')]
-final class Order
+#[ORM\Table(name: 'orders')]
+final class Order extends AggregateRoot
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 36, unique: true)]
-    private readonly string $id;
-
     /** @var Collection<int, OrderItem> */
     #[ORM\OneToMany(
-        targetEntity: OrderItem::class,
         mappedBy: 'order',
+        targetEntity: OrderItem::class,
         fetch: 'EXTRA_LAZY',
-        cascade: ['persist', 'remove']
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true,
     )]
     private Collection $items;
 
-    public function __construct(string $id)
-    {
-        $this->id = $id;
+    private function __construct(
+        #[ORM\Id]
+        #[ORM\Column(type: 'order_id')]
+        public readonly OrderId $id,
+
+        #[ORM\Column(type: 'customer_id')]
+        public readonly CustomerId $customerId,
+    ) {
         $this->items = new ArrayCollection();
     }
 
@@ -171,10 +177,12 @@ use App\Ordering\Domain\Model\Order;
 use Doctrine\ORM\EntityManagerInterface;
 
 /**
- * Čtecí strana. Rozhraní `OrderRepository` z kapitoly
+ * Dávkové čtení celých agregátů: export, hromadný přepočet, migrace dat.
+ * Rozhraní `OrderRepository` z kapitoly
  * [Základní koncepty](/zakladni-koncepty#repositories) tahle třída záměrně
- * neimplementuje: dotazy pro obrazovky do doménového rozhraní nepatří.
- * Agregát načítá a ukládá `DoctrineOrderRepository` z téže kapitoly.
+ * neimplementuje: doménový repozitář načítá agregát podle identity a dávkové
+ * výběry do něj nepatří. Obrazovky entity nehydratují vůbec, seznamy
+ * a detaily čtou DTO z read modelu (16.04).
  */
 final class OrderQueryRepository
 {
@@ -258,7 +266,7 @@ Eager mapování zůstává poslední volbou pro asociace, které se načítají
 
 ### Hluboké stránkování a keyset paging {#keyset-paging-heading}
 
-`OFFSET` databáze neumí přeskočit; musí projít a zahodit všechny předchozí řádky. Na první
+Řádky před `OFFSET` databáze nepřeskočí, musí je projít a zahodit. Na první
 stránce je to neměřitelné, na pětitisící stránce je stejný dotaz o řád pomalejší. Druhý
 problém je drift: mezi dvěma požadavky přibude záznam, seznam se posune a čtenář uvidí
 na další stránce položku, kterou už četl.
@@ -316,7 +324,7 @@ objektový graf, i když operace potřebuje jen malou část dat.
 :::callout{type="note"}
 ### Příznaky příliš velkého agregátu
 
-- Načtení agregátu trvá neúměrně dlouho, i když používáme jen jeho kořen.
+- Načtení agregátu trvá neúměrně dlouho, i když operace potřebuje jen jeho kořen.
 - Kolekce asociovaných entit obsahují stovky nebo tisíce záznamů.
 - ORM lazy loading způsobuje N+1 v jiných částech systému.
 - Různé use-case scénáře potřebují různé podmnožiny dat agregátu.
@@ -346,28 +354,29 @@ echo $order->totalAmount()->amountInCents;
 
 ### Řešení: rozdělení agregátu a specializované repozitářní metody
 
-Nejdřív je třeba přezkoumat, zda `OrderItem` skutečně musí být součástí
+Nejdřív se přezkoumá, zda `OrderItem` skutečně musí být součástí
 agregátu `Order`, nebo zda jde o samostatný agregát s odkazem na `OrderId`.
 Rozhoduje invariant. Pokud objednávka nedrží žádné pravidlo přes celou kolekci
 (limit počtu položek, minimální hodnota košíku), kolekce v agregátu nemá co dělat.
 Její vyčlenění je pak oprava návrhu, ne výkonnostní trik.
 
 Výkon může v úvaze vystupovat dvojím způsobem. Jako **signál** špatně vedené hranice je
-legitimním podnětem: pomalé načítání ukazuje na kolekci, která nikdy součástí invariantu
-nebyla. Jako **důvod** rozbít invariant legitimní není. Odpovědí tam zůstává read model,
+oprávněným podnětem: pomalé načítání ukazuje na kolekci, která nikdy součástí invariantu
+nebyla. Jako **důvod** rozbít invariant ale neobstojí. Odpovědí tam zůstává read model,
 ne přesun pravidla mimo agregát. Podrobně rozebírá velikost agregátu sekce
 [Velikost agregátu a její dopady](/navrh-agregatu#aggregate-size).
 
 :::callout{type="pattern"}
 ### Příklad: specializované repozitářní metody pro různé kontexty
 
-:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php (výřez: hlavička bez položek)"}
+:::code{language="php" filename="src/Ordering/Infrastructure/Repository/DoctrineOrderRepository.php (výřez: get() a getWithItems())"}
 <?php
 
 declare(strict_types=1);
 
 namespace App\Ordering\Infrastructure\Repository;
 
+use App\Ordering\Domain\Exception\OrderNotFoundException;
 use App\Ordering\Domain\Model\Order;
 use App\Ordering\Domain\ValueObject\OrderId;
 use Doctrine\ORM\EntityManagerInterface;
@@ -379,20 +388,23 @@ final class DoctrineOrderRepository
     ) {}
 
     /**
-     * Načte pouze hlavičku objednávky (bez položek) - pro seznam objednávek.
-     * Doctrine neinicializuje kolekci items díky lazy loadingu.
+     * Kanonické get(): položky nenačte, kolekce items zůstane lazy.
+     * Stačí příkazům, které se položek nedotknou. Seznam objednávek
+     * pro obrazovku sem nepatří, ten čte read model (16.04).
      */
-    public function findHeaderById(OrderId $id): ?Order
+    public function get(OrderId $id): Order
     {
-        // Tato metoda vrátí Order, jehož kolekce items zůstane neinicializovaná,
-        // dokud k ní explicitně nepřistoupíme.
-        return $this->em->find(Order::class, $id->value);
+        // find() dostává OrderId, ne řetězec: vlastní typ order_id
+        // převádí na SQL jen hodnotový objekt, řetězec odmítne.
+        return $this->em->find(Order::class, $id)
+            ?? throw OrderNotFoundException::withId($id);
     }
 
     /**
-     * Načte objednávku s položkami - pouze pro detailní zobrazení nebo zpracování.
+     * Objednávka i s položkami v jednom dotazu (fetch join) - pro příkazy,
+     * které pracují s celou kolekcí, třeba přidání položky.
      */
-    public function findWithItemsById(OrderId $id): ?Order
+    public function getWithItems(OrderId $id): Order
     {
         return $this->em->createQuery(
             'SELECT o, i FROM App\Ordering\Domain\Model\Order o
@@ -400,7 +412,8 @@ final class DoctrineOrderRepository
              WHERE o.id = :id'
         )
             ->setParameter('id', $id->value)
-            ->getOneOrNullResult();
+            ->getOneOrNullResult()
+            ?? throw OrderNotFoundException::withId($id);
     }
 }
 :::
@@ -577,9 +590,9 @@ final class SalesReportQueryService
                 CONCAT(c.first_name, ' ', c.last_name)        AS customer_name,
                 TO_CHAR(o.placed_at, 'YYYY-MM')              AS month,
                 SUM(oi.unit_price_amount_in_cents * oi.quantity)::text AS revenue
-            FROM \"order\" o
+            FROM orders o
             JOIN customer c  ON c.id = o.customer_id
-            JOIN order_item oi ON oi.order_id = o.id
+            JOIN order_items oi ON oi.order_id = o.id
             WHERE o.status = 'delivered'
               -- Polouzavřený interval. BETWEEN nad timestamp sloupcem s datem
               -- bez času by uřízl celý poslední den.
@@ -603,7 +616,7 @@ final class SalesReportQueryService
 
 ## 16.05 UUID vs. integer primární klíče {#uuid-vs-integer}
 
-Agregát musí znát svoji identitu už před uložením do databáze. `AggregateId` se generuje
+Agregát musí znát svou identitu už před uložením do databáze. Identifikátor se generuje
 v doménovém kódu bez databázové sekvence nebo auto-increment hodnoty. Pro distribuované
 systémy, event sourcing a paralelní vytváření agregátů to není volba, ale podmínka.
 
@@ -761,8 +774,8 @@ declare(strict_types=1);
 
 namespace App\Import\Application\Command;
 
-use App\Product\Domain\Model\Product;
-use App\Product\Domain\ValueObject\ProductId;
+use App\Catalog\Domain\Model\Product;
+use App\Catalog\Domain\ValueObject\ProductId;
 use App\SharedKernel\Domain\Currency;
 use App\SharedKernel\Domain\Money;
 use Doctrine\ORM\EntityManagerInterface;
@@ -860,7 +873,7 @@ Do cache patří výsledky read modelu (DTO), reportovací dotazy, odpovědi ext
 
 Doctrine nabízí dvě úrovně cachování SQL dotazů:
 
-- **Query cache:** cachuje přeložený DQL → SQL. DQL parsing je relativně nákladný; query cache eliminuje opakované parsování pro identické DQL dotazy. Překlad DQL na SQL se v čase nemění, takže tuto cache není třeba invalidovat.
+- **Query cache:** cachuje překlad DQL → SQL. Parsování DQL je relativně drahé a query cache ho u opakovaných dotazů ušetří. Překlad DQL na SQL se v čase nemění, takže tuto cache není třeba invalidovat.
 - **Result cache:** cachuje výsledky SQL dotazu. Zapíná se na konkrétním dotazu metodou `enableResultCache(?int $lifetime, ?string $resultCacheId)`. Vhodná pro read-heavy dotazy s řízenou dobou platnosti.
 
 Result cache se neinvaliduje doménovou událostí, ale klíčem. Buď dotazu předáte vlastní
@@ -884,65 +897,36 @@ declare(strict_types=1);
 
 namespace App\UserManagement\Profile\Query;
 
-use Doctrine\DBAL\Connection;
+use App\UserManagement\Profile\ReadModel\UserProfileReadRepository;
+use App\UserManagement\Profile\ViewModel\UserProfileViewModel;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-// View a handler v jednom souboru jsou zhuštění pro ukázku - PSR-4 vyžaduje samostatné soubory.
-
-/**
- * Read model profilu - immutabilní DTO se skalárními hodnotami.
- * Bezpečně serializovatelný do cache.
- */
-final readonly class UserProfileView
-{
-    public function __construct(
-        public string $userId,
-        public string $name,
-        public string $email,
-        public int    $orderCount,
-    ) {}
-}
-
+// Tentýž handler jako v kapitole CQRS (12.08), jen s cache před read
+// repozitářem. Dotaz i ViewModel zůstávají beze změny.
 #[AsMessageHandler(bus: 'query.bus')]
 final class GetUserProfileHandler
 {
     private const TTL = 300; // 5 minut
 
     public function __construct(
-        private Connection             $connection,
-        private TagAwareCacheInterface $cache,
+        private UserProfileReadRepository $readRepository,
+        private TagAwareCacheInterface    $cache,
     ) {}
 
-    public function __invoke(GetUserProfile $query): ?UserProfileView
+    public function __invoke(GetUserProfile $query): ?UserProfileViewModel
     {
         // Cache Contracts: jedno volání místo isHit()/set()/save(),
         // callback se spustí jen při minutí cache
         return $this->cache->get(
             'user_profile_' . $query->userId,
-            function (ItemInterface $item) use ($query): ?UserProfileView {
+            function (ItemInterface $item) use ($query): ?UserProfileViewModel {
                 $item->expiresAfter(self::TTL);
                 // Tag pokrývá všechny pohledy odvozené od jednoho uživatele
                 $item->tag(['user_' . $query->userId]);
 
-                $row = $this->connection->fetchAssociative(
-                    'SELECT u.id, u.name, u.email, COUNT(o.id) AS order_count
-                       FROM users u
-                  LEFT JOIN orders o ON o.customer_id = u.id
-                      WHERE u.id = :id
-                   GROUP BY u.id',
-                    ['id' => $query->userId],
-                );
-
-                return $row
-                    ? new UserProfileView(
-                        userId: $row['id'],
-                        name: $row['name'],
-                        email: $row['email'],
-                        orderCount: (int) $row['order_count'],
-                    )
-                    : null;
+                return $this->readRepository->findById($query->userId);
             },
             // beta > 0 zapne pravděpodobnostní předčasné přepočítání
             beta: 1.0,
@@ -954,8 +938,8 @@ final class GetUserProfileHandler
 
 Cache drží hotový ViewModel, ne doménový agregát. Serializace agregátu je křehká:
 po deserializaci vznikne objekt odpojený od Unit of Work (detached), lazy proxy asociací
-přestanou fungovat a obejde se Identity Map. DTO se skalárními hodnotami tyto problémy nemá –
-přesně podle zásady z calloutu výše: do cache patří výsledky read modelu, ne stav agregátů.
+přestanou fungovat a obejde se Identity Map. ViewModel z prostých hodnot tyto problémy nemá.
+Odpovídá to zásadě z calloutu výše: do cache patří výsledky read modelu, ne stav agregátů.
 
 Ukázka používá Cache Contracts (`Symfony\Contracts\Cache\CacheInterface`), ne holé PSR-6.
 Kromě kratšího kódu drží Contracts po dobu výpočtu zámek, takže při vypršení záznamu
@@ -972,7 +956,7 @@ změní stav a nahraje doménovou událost, listener zneplatní příslušné z�
 Invalidace tak navazuje na doménový tok místo ad-hoc volání rozptýlených po kódu.
 
 Ukázka počítá s událostí `UserEmailChanged`. Kanonický `User` z kapitoly
-[Implementace v Symfony](/implementace-v-symfony#entity-example-heading) ji nemá,
+[Implementace v Symfony 8](/implementace-v-symfony#entity-example-heading) ji nemá,
 jeho `changeEmail()` žádnou událost nenahrává. Zde jde o rozšíření: metoda by po změně
 adresy zavolala `$this->record(new UserEmailChanged($this->id, $newEmail))`.
 
@@ -1121,9 +1105,11 @@ declare(strict_types=1);
 
 namespace App\Import\Application\Command;
 
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-// 1. Controller nebo CLI příkaz rozdělí vstupní data na chunky
+// Vstupní handler data jen rozdělí na chunky; import dělá handler ImportProductChunk
+#[AsMessageHandler(bus: 'command.bus')]
 final class StartProductImportHandler
 {
     private const CHUNK_SIZE = 100;
@@ -1138,8 +1124,8 @@ final class StartProductImportHandler
         foreach (array_chunk($command->rows, self::CHUNK_SIZE) as $chunk) {
             $this->commandBus->dispatch(new ImportProductChunk($chunk));
         }
-        // Messenger Worker zpracuje každou zprávu nezávisle
-        // - žádný memory leak, paralelizovatelné přes více workerů
+        // Worker zpracuje každou zprávu zvlášť: paměť jedné zprávy omezuje
+        // velikost chunku a zprávy lze rozdělit mezi více workerů
     }
 }
 :::
@@ -1147,7 +1133,10 @@ final class StartProductImportHandler
 
 Odesláním zpráv práce nekončí, jen se přesune k workerům. PHP proces, který běží hodiny,
 paměť postupně nasčítá, proto se worker spouští s limity a nechává se restartovat:
-`messenger:consume async --memory-limit=128M --time-limit=3600 --limit=1000`. Restart řídí
+`messenger:consume async_commands --memory-limit=128M --time-limit=3600 --limit=1000`.
+Transport `async_commands` je týž jako v [konfiguraci Messengeru](/cqrs#messenger-config-heading)
+a `ImportProductChunk` na něj musí mířit v `routing:`. Bez toho ho Messenger zpracuje
+synchronně a rozdělení na chunky nic nepřinese. Restart řídí
 supervisor nebo systemd, ne aplikace. Počet souběžných workerů má strop v databázi.
 Každý drží vlastní spojení, takže deset workerů nad primary znamená deset dalších
 připojení. Souvislost s poolingem rozebírá sekce [Read replicy a connection pooling](#replicy-pooling-heading).
@@ -1192,7 +1181,7 @@ z pohledu provozu jsou podstatné tři, v tomto pořadí:
 - **CRDT / čistě čítačové agregáty.** Když je doménová operace čistý increment
   (`view_count`, `like_count`), celý agregát není potřeba, stačí
   Postgres `UPDATE counters SET n = n + 1 WHERE id = ?`. Typické DDD to není,
-  ale u skutečně komutativních operací jde o legitimní řešení.
+  ale u skutečně komutativních operací jde o oprávněné řešení.
 
 :::callout{type="warn"}
 ### Anti-vzor: pessimistic lock místo redesignu {#anti-pessimistic-lock-heading}
@@ -1316,7 +1305,7 @@ doctrine:
 Asociace mezi entitami různých managerů Doctrine nepodporuje. Pro read model je to spíš
 výhoda: donutí to psát dotazy nad tabulkami, ne nad objektovým grafem přes hranice agregátů.
 
-Connection pooling je nezávislý problém. PHP-FPM model „1 worker = 1 PHP proces
+Connection pooling je samostatný problém. PHP-FPM model „1 worker = 1 PHP proces
 = 1 DB connection“ se nasčítá: 4 aplikační pody × 100 PHP-FPM workerů
 = 400 spojení na primary, tedy čtyřnásobek výchozího `max_connections = 100`
 v Postgresu.
@@ -1335,7 +1324,8 @@ v libpq. SQL příkazy `PREPARE`/`EXECUTE` PgBouncer nesleduje. Konfigurační v
 
 Jak projekci napsat, ukazují kapitoly [CQRS](/cqrs#read-model-optimalizace) a
 [Event Sourcing](/event-sourcing#projekce). Provozní půlka začíná až tam, kde ty končí:
-projekce běží asynchronně, takže mezi zápisem a jeho zobrazením je vždy nějaké zpoždění.
+u asynchronní projekce dělí zápis od jeho zobrazení vždy nějaké zpoždění. Synchronní
+projekce pod `doctrine_transaction` zpoždění nemá, platí za to delší transakcí zápisu.
 
 Měřit se dá přímo. Projektor si drží checkpoint, tedy pozici poslední zpracované události.
 Proti němu stojí hlava streamu. Rozdíl obou hodnot je **projection lag** a dá se vyjádřit
@@ -1581,9 +1571,9 @@ když měření odhalí kolekci, která k invariantu nepatří. Pokračováním 
 - question: Jak v DDD řešit N+1 problém s agregáty?
   answer: 'N+1 vzniká, když aplikace ke každému načtenému objektu dotahuje jeho vnitřní prvky samostatným dotazem. První volbou je fetch join v DQL (<code>SELECT o, i FROM Order o LEFT JOIN o.items i</code>) v metodě repozitáře. Pro čtení dat do UI bývá ještě přímočařejší denormalizovaný read model, který ORM lazy loading vynechá úplně. Až poslední volbou je <code>fetch: ''EAGER''</code> v mapování: u kolekcí nevydá JOIN, ale druhý dotaz po dávkách (výchozí velikost 100), a platí globálně i pro dotazy, které asociaci nepotřebují. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
-  answer: 'Ano, zásadně. Příliš velký agregát tahá z databáze víc dat, než operace potřebuje. Pokud každá změna zvedá verzi kořene, vede navíc k častým konfliktům optimistického zamykání. Doctrine ji ale při změně potomka sám nezvedne, takže bez ručního zvednutí verze se místo konfliktu invariant tiše poruší (viz <a href="/anti-vzory#agregat-problemy-heading">Anti-vzory</a>). Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty. Rozdělení zvýší paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
+  answer: 'Ano. Příliš velký agregát tahá z databáze víc dat, než operace potřebuje. Pokud každá změna zvedá verzi kořene, vede navíc k častým konfliktům optimistického zamykání. Doctrine ji ale při změně potomka sám nezvedne, takže bez ručního zvednutí verze se místo konfliktu invariant tiše poruší (viz <a href="/anti-vzory#agregat-problemy-heading">Anti-vzory</a>). Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty. Rozdělení zvýší paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?
-  answer: 'Read model se navrhuje přímo pro daný dotaz. Denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou dedikované indexy pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Když jsou události uložené, lze read model přestavět z nich a změna jeho schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
+  answer: 'Read model se navrhuje přímo pro daný dotaz. Denormalizované tabulky odpovídají tvaru UI, nikoli doménovému modelu. Typické optimalizace jsou indexy navržené pro konkrétní filtry, materializované projekce místo JOIN dotazů nad write modelem nebo replikace read modelu na jiný datový stroj (Elasticsearch, Redis). Když jsou události uložené, lze read model přestavět z nich a změna jeho schématu nevyžaduje klasickou migraci. Detailní rozbor v <a href="#read-model-optimalizace">sekci Optimalizace read modelu</a>.'
 - question: Je lepší UUID, nebo integer primární klíč z pohledu výkonu?
   answer: 'Integer klíč je rychlejší v indexech a zabírá méně místa, ale vyžaduje auto-increment generovaný databází. UUID umožňuje vygenerovat identitu v doméně bez round-tripu do DB, a přesně to DDD vyžaduje: agregát dostane ID před persistencí. Výkonový rozdíl závisí na databázovém stroji, šířce indexu a poměru zápisů ke čtení, takže obecné číslo neexistuje. U UUID v7 ale odpadá hlavní nevýhoda náhodných UUID, tedy fragmentace B-tree indexu. Pro DDD se UUID doporučuje. Srovnání obou variant v <a href="#uuid-vs-integer">sekci UUID vs. integer primární klíče</a>.'
 :::

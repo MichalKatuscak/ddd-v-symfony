@@ -55,7 +55,9 @@ Frontend assets go through Vite (`vite-plugin-symfony`, see `package.json`); `hi
 - Value objects expose `public readonly` properties (e.g. `$email->value`), not `value()` methods.
 - `Email` VO: the constructor only validates; input normalization (trim, lowercase) belongs to `Email::fromUserInput()`.
 - `Money` has `public readonly int $amountInCents` and `public readonly Currency $currency`; `Currency` is a string-backed enum (read via `->value`, never `->code`).
-- Canonical `Order` example: factory `Order::place()` (not `create()`), owner is `CustomerId`, items via `addItem(ProductId $productId, int $quantity, Money $unitPrice)`.
+- Canonical `Order` example: `final class Order extends AggregateRoot`, factory `Order::place()` (not `create()`), owner is `CustomerId`, items via `addItem(ProductId $productId, int $quantity, Money $unitPrice)`.
+- Command-bus messages have no suffix (`PlaceOrder`, `CancelOrder`, FQCN `App\Ordering\Application\Command\…`); handlers end in `Handler`. The `Command` suffix is reserved for Symfony console commands.
+- Exception messages in code are in English.
 - Aggregates reference each other by ID only — never pass a whole aggregate into another aggregate's method.
 - IDs are generated via `symfony/uid` `Uuid::v7()`. ULID may be mentioned only as an alternative, never as the default recommendation.
 - Domain rules throw named exceptions (`InvalidOrderStateTransitionException`, `DuplicateEmailException`); bare `\DomainException` only as an acknowledged shortcut.

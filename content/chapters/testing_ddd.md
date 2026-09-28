@@ -7,14 +7,14 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-24
+modified: 2026-09-28
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
 chapter_number: "17"
 category: Praxe
-deck: "Testování Domain-Driven Design kódu v Symfony v praxi. Unit testy doménové vrstvy, integrační testy s Doctrine, funkční testy API, InMemory repozitáře, testování doménových událostí a architektonické testy s Deptrac."
-reading_time: 30
+deck: "Testování DDD kódu v Symfony: unit testy doménové vrstvy, InMemory repozitáře, integrační testy s Doctrine, funkční testy API, testy doménových událostí a architektonické testy."
+reading_time: 31
 difficulty: 3
 github_examples: Chapter08_Testing
 ---
@@ -24,7 +24,7 @@ github_examples: Chapter08_Testing
 Doménová vrstva v DDD nezávisí na frameworku ani na databázi, takže ji lze testovat přímo z PHPUnitu bez
 bootstrappingu Symfony kernelu. To je hlavní praktický rozdíl proti tradičním vrstveným architekturám,
 kde unit testy potřebují kontejner a každý z nich zaplatí bootstrap. Bez kernelu je jeden test řádově
-rychlejší a celou doménovou sadu má smysl spouštět po každé změně, ne jen v CI. Stavební kameny doménové
+rychlejší a celou doménovou sadu se vyplatí spouštět po každé změně, ne jen v CI. Stavební kameny doménové
 vrstvy popisuje kapitola [Základní koncepty DDD](/zakladni-koncepty): entity, hodnotové objekty,
 agregáty a doménové události.
 
@@ -44,7 +44,7 @@ Testovací pyramida (koncept popularizovaný Mikem Cohnem v knize *Succeeding wi
 rozděluje testovací sadu do tří vrstev. Liší se rychlostí, mírou izolace a tím, kolik kódu jeden test pokryje:
 
 :::callout{type="note"}
-### Vrstvy testovací pyramidy:
+### Vrstvy testovací pyramidy
 
 - **Unit testy – doménová vrstva (základ pyramidy, nejvíce testů)**
   Testují izolované doménové objekty: value objects, entity, agregáty a doménové služby.
@@ -75,22 +75,21 @@ s bohatým modelem unese širokou základnu unit testů. Kontext, který jen př
 na dotazy do databáze, takovou základnu nemá a jeho záruku nesou integrační testy. Kent C. Dodds na téže
 úvaze staví alternativu **Testing Trophy** s největší investicí do integrační vrstvy
 [[4]](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications). Formulovaná je
-pro JavaScript, ale otázku klade dobře: kolik logiky vlastně testujete v izolaci?
+pro JavaScript, ale otázka, kolik logiky se vlastně testuje v izolaci, platí i v PHP.
 
 :::callout{type="note"}
-### Testovací strategie – co testovat na každé vrstvě:
+### Testovací strategie – co testovat na každé vrstvě
 
 - **Doménová vrstva:** Validační logika value objects, invarianty entit, transakční konzistence agregátů, vydávání doménových událostí, doménové výjimky.
-- **Aplikační vrstva:** Command handlery a query handlery s fake (InMemory) repozitáři; ověření, že handler volá správné metody repozitáře s očekávanými argumenty.
+- **Aplikační vrstva:** Command handlery a query handlery s fake (InMemory) repozitáři; test ověřuje stav repozitáře a odeslané události po vykonání use case. Překlad unique constraintu na doménovou výjimku patří do integračního testu proti databázi.
 - **Infrastrukturní vrstva:** Správné Doctrine mapování, dotazy repozitářů, transakce, volání externích API.
 - **Prezentační vrstva:** Správné HTTP status kódy, formát odpovědi, autentizace a autorizace.
 :::
 
 ## 17.02 Unit testy doménové vrstvy {#unit-testy-domeny}
 
-Unit testy doménové vrstvy pokrývají největší podíl kódu, běží v řádu milisekund a nepotřebují
-nic jiného než PHPUnit a samotné doménové třídy. Žádný bootstrap Symfony kernelu, žádná databáze,
-žádné fixtures.
+Unit testy doménové vrstvy pokrývají největší podíl kódu a běží v řádu milisekund. Stačí jim
+PHPUnit a samotné doménové třídy; kernel, databázi ani fixtures nepotřebují.
 
 Ukázky v této kapitole cílí na PHPUnit 13 a PHP 8.4. Na verzi tentokrát záleží víc než obvykle. PHPUnit 12
 odstranil podporu metadat v doc-komentářích, takže `@dataProvider`, `@covers`, `@test` ani `@group` už
@@ -102,9 +101,9 @@ se tiše přestane spouštět.
 
 ### Testování Value Objects
 
-Test value objektu ověřuje tři věci. Že neplatný vstup vyhodí odpovídající výjimku.
-Že dvě instance se stejnou hodnotou jsou si rovny přes `equals()`. A že objekt zůstává
-neměnný, takže jiná hodnota znamená novou instanci. Tím je hodnotový objekt pokrytý.
+Test value objektu ověřuje tři věci: neplatný vstup vyhodí odpovídající výjimku, dvě instance
+se stejnou hodnotou jsou si rovny přes `equals()` a objekt zůstává neměnný – jiná hodnota znamená
+novou instanci.
 
 :::callout{type="pattern"}
 ### Příklad: Test pro Email value object (PHPUnit)
@@ -177,7 +176,7 @@ final class EmailTest extends TestCase
     public function testImmutabilityViaNewInstance(): void
     {
         $original = new Email('jan@example.com');
-        // Hodnotové objekty jsou immutabilní - změna vyžaduje vytvoření nové instance
+        // Hodnotové objekty jsou neměnné – změna vyžaduje novou instanci
         $different = new Email('petr@example.com');
 
         $this->assertSame('jan@example.com', $original->value);
@@ -190,8 +189,8 @@ final class EmailTest extends TestCase
 
 Pojmenované klíče v data provideru se objeví ve výstupu PHPUnitu, takže spadlý případ je vidět
 bez čtení testu: `EmailTest::testThrowsExceptionForInvalidInput with data set „chybí doména“`.
-Pro jeden nebo dva vstupy se vyplatí atribut `#[TestWith([''])]` přímo nad metodou; samostatný
-provider dává smysl od tří případů výš.
+Pro jeden nebo dva vstupy stačí atribut `#[TestWith([''])]` přímo nad metodou; samostatný
+provider se vyplatí od tří případů výš.
 
 ### Testování entit
 
@@ -297,7 +296,7 @@ final class UserTest extends TestCase
 
 :::callout{type="note"}
 **Pozn.:** Test míří na kanonický `User` z kapitoly
-[Implementace v Symfony](/implementace-v-symfony), který aktivaci účtu nemá.
+[Implementace v Symfony 8](/implementace-v-symfony), který aktivaci účtu nemá.
 Rozšířený model s `VerificationToken`, metodou `activate()` a výjimkou
 `UserAlreadyActivatedException` zavádí kapitola [Migrace z CRUD na DDD](/migrace-z-crud)
 a tam je i jeho test.
@@ -405,7 +404,7 @@ které používají události jako zdroj pravdy, popisuje doplňující strategi
 a rebuildu projekcí kapitola [Event Sourcing](/event-sourcing).
 
 :::callout{type="note"}
-### Pattern „Record and Verify Events“:
+### Pattern „Record and Verify Events“
 
 Agregáty sbírají vydané události interně v privátním poli (viz bázová třída `AggregateRoot` nebo trait).
 Metoda `releaseEvents()` vrátí všechny nashromážděné události a pole vymaže. Unit test tak nepotřebuje
@@ -634,27 +633,27 @@ hlavně se čtyřmi z nich (stub, mock, fake, spy). Každý vede k jinému stylu
 vůči refaktoringu.
 
 :::callout{type="note"}
-### Typy test doubles a jejich použití v DDD:
+### Typy test doubles a jejich použití v DDD
 
 - **Stub** – Vrací předpřipravené odpovědi bez logiky. Hodí se, když má závislost vrátit konkrétní hodnotu, ale nezáleží na tom, zda a kolikrát se volala. Příklad: `$stub->method('findById')->willReturn($user)`.
 - **Mock** – Stub s ověřením volání. Ověřuje, že se konkrétní metoda zavolala s konkrétními argumenty přesně n-krát. Vhodný pro ověření vedlejších efektů (volání repozitáře, odeslání e-mailu). Příklad: `$mock->expects($this->once())->method('save')`.
-- **Fake** – Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nemá databázovou závislost, ale chová se jako skutečná implementace. **Doporučený přístup pro DDD repozitáře** – umožňuje psát čitelné testy bez konfigurování mocků.
+- **Fake** – Plnohodnotná, ale zjednodušená implementace rozhraní (typicky in-memory). Nezávisí na databázi, ale chová se jako skutečná implementace. Pro DDD repozitáře je to doporučená volba: testy zůstanou čitelné bez konfigurace mocků.
 - Méně častý je **spy**: podobá se mocku, ale ověřuje se až po akci (post-assertion style).
 :::
 
 :::callout{type="note"}
-### Proč preferovat Fake (InMemory) před Mockem pro repozitáře:
+### Proč pro repozitáře Fake (InMemory), ne Mock
 
 - Testy jsou čitelnější, protože nepotřebují konfiguraci `expects()->method()->with()->willReturn()`.
 - InMemory repozitář lze sdílet mezi command handlerem a query handlerem v jednom testu, takže test ověří reálný průchod dat.
-- Při změně signatury rozhraní IDE a statická analýza okamžitě upozorní, na rozdíl od string-based konfigurace mocků.
-- Mocky testují implementační detail (které metody jsou volány), Fake testuje chování (co se stane s daty).
+- Při změně signatury rozhraní IDE a statická analýza okamžitě upozorní, na rozdíl od mocků konfigurovaných přes řetězce.
+- Mock hlídá implementační detail (které metody se volají), fake chování (co se stane s daty).
 :::
 
 Za tímto doporučením stojí Fowlerovo rozlišení dvou způsobů ověření. *State verification* kontroluje
 stav systému po akci, *behavior verification* kontroluje, že proběhla očekávaná volání spolupracovníků.
 Z pěti typů doubles trvá na behavior verification jedině mock – ostatní obvykle vystačí s kontrolou stavu.
-Kdo volí fake repozitář, hlásí se ke stylu, kterému Fowler říká
+Fake repozitář patří ke stylu, kterému Fowler říká
 classical TDD: reálné objekty všude, kde to jde, a doubles jen na hranicích systému.
 
 :::callout{type="pattern"}
@@ -709,11 +708,6 @@ final class InMemoryUserRepository implements UserRepository
         }
 
         return null;
-    }
-
-    public function existsByEmail(Email $email): bool
-    {
-        return $this->findByEmail($email) !== null;
     }
 
     public function remove(User $user): void
@@ -849,9 +843,9 @@ kanonický handler překládá jeho porušení na tutéž výjimku
 Test ověřuje chování handleru, ne řešení souběhu, proto `EntityManager` stačí jako stub.
 
 :::callout{type="warn"}
-### Varování: Přílišné používání mocků
+### Přílišné používání mocků
 
-Mockování každé závislosti vede k tzv. *nadměrné specifikaci* testů.
+Mockování každé závislosti vede k *nadměrné specifikaci* testů.
 Takové testy ověřují implementační detaily, nikoli chování, a při každém refaktoringu přestanou procházet,
 i když se chování systému nezměnilo. Pro repozitáře se osvědčily InMemory Fake implementace; mocky mají
 místo jen tam, kde se ověřují vedlejší efekty (odeslání e-mailu, volání externího API).
@@ -870,9 +864,9 @@ Software, Guided by Tests* (Addison-Wesley, 2009)
 konstruktoru, inicializované bezpečnou hodnotou, řetězitelné metody pro přepsání těchto polí
 a metodu `build()`, která z nich složí cílový objekt. Volitelně přidá statickou tovární metodu,
 aby bylo v testu na první pohled zřejmé, co se staví; autoři ji ukazují právě na `OrderBuilder`
-s metodou `anOrder()`. Přínos shrnují do tří bodů. Builder obalí syntaktický šum kolem vytváření
-objektů a udrží výchozí případ jednoduchý, zvláštní případ jen o málo složitější. A odstíní testy
-od změny struktury objektu: po přidání parametru se mění jediné místo.
+s metodou `anOrder()`. Přínos shrnují do tří bodů: builder obalí syntaktický šum kolem vytváření
+objektů, výchozí případ udrží jednoduchý a zvláštní jen o málo složitější a odstíní testy od změny
+struktury objektu – po přidání parametru se mění jediné místo.
 
 :::callout{type="pattern"}
 ### Příklad: Test Data Builder pro Order agregát
@@ -903,7 +897,7 @@ final class OrderBuilder
 
     private function __construct()
     {
-        // Bezpečné výchozí hodnoty - test nastavuje jen to, na čem mu skutečně záleží
+        // Bezpečné výchozí hodnoty – test nastavuje jen to, na čem mu záleží
         $this->orderId    = OrderId::generate();
         $this->customerId = CustomerId::generate();
     }
@@ -960,7 +954,7 @@ final class OrderBuilder
 }
 
 /*
- * Použití v testu - patří dovnitř testovací metody. Kdyby ty řádky
+ * Použití v testu – patří dovnitř testovací metody. Kdyby ty řádky
  * zůstaly na úrovni souboru, PHP je vykoná při autoloadu třídy
  * a každý test s builderem by navíc postavil jednu objednávku bokem.
  *
@@ -1000,13 +994,15 @@ typovým systémem, chováním unikátních constraintů i transakční sémanti
 co má integrační test ověřit. Zůstává vědomou zkratkou pro rychlou zpětnou vazbu při lokálním vývoji,
 ne konfigurací, na které stojí CI.
 
-Obě implementace přitom plní tutéž smlouvu rozhraní: `findById(UserId $id): ?User` vrací při
-nenalezení `null`, stejně jako InMemory varianta ze [sekce o test doubles](#test-doubles).
-Druhou běžnou konvencí je metoda `getById()`, která místo `null` vyhazuje `UserNotFoundException`.
-Projekt si vybere jednu variantu a drží ji ve všech implementacích i testech.
+Doctrine i InMemory implementace přitom plní tutéž smlouvu rozhraní: `findById(UserId $id): ?User`
+vrací při nenalezení `null`, stejně jako InMemory varianta ze [sekce o test doubles](#test-doubles).
+Kniha drží obě konvence, každou pro jiný případ. Command handler, který agregát podle identity
+nutně potřebuje, volá `get()` a při nenalezení dostane doménovou výjimku
+(`OrderNotFoundException::withId()` z `Domain\Exception`). Návrat `null` zůstává metodám `find…()`
+tam, kde absence chybou není, například `findByEmail()` při registraci.
 
 :::callout{type="note"}
-### KernelTestCase vs WebTestCase:
+### KernelTestCase vs. WebTestCase
 
 - **KernelTestCase** – Bootstrapuje Symfony kernel bez HTTP vrstvy. Hodí se pro testování
   Doctrine repozitářů, služeb z DI kontejneru a dalších komponent infrastruktury. Rychlejší než WebTestCase.
@@ -1015,10 +1011,10 @@ Projekt si vybere jednu variantu a drží ji ve všech implementacích i testech
 :::
 
 :::callout{type="note"}
-### Transakce a rollback po každém testu:
+### Transakce a rollback po každém testu
 
 Integrační testy se nejpřímočařeji izolují tak, že se každý test zabalí do databázové transakce
-a po jeho dokončení se provede rollback. Toto chování dodá bundle
+a po jeho dokončení se vrátí zpět. Dodá to bundle
 `dama/doctrine-test-bundle` [[11]](https://github.com/dmaicher/doctrine-test-bundle): zaregistruje
 PHPUnit extension a obalí každý test transakcí pomocí dekorátoru nad `Connection`, bez zásahu
 do testovacího kódu. Bez transakční izolace by každý test zanechával data v databázi a testy by se
@@ -1074,9 +1070,10 @@ use Doctrine\ORM\EntityManagerInterface;
  * Vyžaduje běžící databázi (konfigurovanou přes DATABASE_URL v .env.test).
  * Transakční rollback zajišťuje dama/doctrine-test-bundle.
  *
- * Repozitář se tahá přímo z kontejneru, takže musí být v test prostředí
- * public - viz services_test.yaml pod ukázkou. Symfony jinak privátní
- * službu při kompilaci zahodí a get() skončí ServiceNotFoundException.
+ * Repozitář se bere přímo z kontejneru, takže musí být v test prostředí
+ * public – viz services_test.yaml pod ukázkou. Privátní službu, kterou
+ * kompilace odstraní, testovací kontejner nevydá a get() skončí
+ * ServiceNotFoundException.
  */
 final class DoctrineUserRepositoryTest extends KernelTestCase
 {
@@ -1101,7 +1098,7 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         // save() jen persistuje; zápis do DB spouští až flush(). Vlastníkem
         // flushe je v této knize handler, takže si ho test musí zavolat sám.
         $this->entityManager->flush();
-        $this->entityManager->clear(); // vyčistíme identity map - nutné pro skutečné čtení z DB
+        $this->entityManager->clear(); // vyčistí identity map – jinak by čtení nešlo do DB
 
         $retrieved = $this->repository->findById($userId);
 
@@ -1130,24 +1127,26 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         $this->assertTrue($email->equals($found->email()));
     }
 
-    public function testExistsByEmail(): void
+    public function testFindByEmailSeesUserOnlyAfterFlush(): void
     {
         $email = new Email('exists@example.com');
         $user  = User::register(UserId::generate(), new UserName('Test Uživatel'), $email, HashedPassword::fromPlainText('SilneHeslo123'));
 
-        $this->assertFalse($this->repository->existsByEmail($email));
-
+        // findOneBy() se ptá databáze; persistovaný, ale nezapsaný User v ní ještě není.
         $this->repository->save($user);
+        $this->assertNull($this->repository->findByEmail($email));
+
         $this->entityManager->flush();
 
-        $this->assertTrue($this->repository->existsByEmail($email));
+        $this->assertNotNull($this->repository->findByEmail($email));
     }
 }
 :::
 :::
 
-Privátní služby kontejner po kompilaci zahodí, takže `get()` na nich selže. Test, který
-sahá po konkrétní implementaci, si ji musí v test prostředí zveřejnit:
+Testovací kontejner (`static::getContainer()`) vydá i privátní služby, ale jen ty, které kompilace
+neodstranila. Služba, kterou žádná jiná přímo nepoužívá, v něm chybí a `get()` na ní selže. Test, který
+sahá po konkrétní implementaci, si ji proto v test prostředí zveřejní:
 
 :::code{language="yaml" filename="config/services_test.yaml"}
 services:
@@ -1167,10 +1166,10 @@ services:
 :::callout{type="warn"}
 ### Proč volat `$entityManager->clear()`?
 
-Doctrine udržuje tzv. *Identity Map* – interní cache, která pro stejné ID vrátí stejnou instanci
+Doctrine udržuje *Identity Map* – interní cache, která pro stejné ID vrátí stejnou instanci
 objektu bez dalšího dotazu do databáze. Bez `clear()` by integrační test mohl projít, i kdyby
 se data do databáze vůbec neuložila, protože Doctrine by je vrátil z paměti. `clear()` mezi
-zápisem a čtením proto zajistí, že test skutečně čte z databáze.
+zápisem a čtením tomu zabrání.
 :::
 
 ## 17.06 Funkční testy API a kontrolerů {#funkcni-testy}
@@ -1178,10 +1177,10 @@ zápisem a čtením proto zajistí, že test skutečně čte z databáze.
 Funkční test prochází celý zásobník: request přijde do kontroleru, projde aplikační vrstvou, dotkne se
 databáze a vrátí odpověď. Ověřuje se HTTP status kód, tělo (typicky JSON), hlavičky a chování při
 chybových vstupech. V DDD je to jediná vrstva testů, která ověří, že prezentační a aplikační vrstva
-spolu skutečně správně spolupracují.
+spolu opravdu fungují.
 
 :::callout{type="note"}
-### WebTestCase v Symfony:
+### WebTestCase v Symfony
 
 `Symfony\Bundle\FrameworkBundle\Test\WebTestCase` poskytuje metodu `createClient()`,
 která vrátí HTTP klienta simulujícího prohlížeč. Klient odesílá requesty GET, POST, PUT, PATCH a DELETE.
@@ -1219,7 +1218,7 @@ final class RegistrationControllerTest extends WebTestCase
 
         $client->request(
             method: 'POST',
-            uri: '/api/users/register',
+            uri: '/api/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
                 'name'     => 'Jan Novák',
@@ -1231,10 +1230,10 @@ final class RegistrationControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(201);
         $this->assertResponseHeaderSame('Content-Type', 'application/json');
 
+        // Command nic nevrací, takže kontroler potvrdí jen vytvoření.
         $responseData = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertArrayHasKey('userId', $responseData);
-        $this->assertSame('novy@example.com', $responseData['email']);
+        $this->assertSame(['status' => 'created'], $responseData);
     }
 
     public function testReturns422ForInvalidEmail(): void
@@ -1243,8 +1242,9 @@ final class RegistrationControllerTest extends WebTestCase
 
         $client->request(
             method: 'POST',
-            uri: '/api/users/register',
-            server: ['CONTENT_TYPE' => 'application/json'],
+            uri: '/api/register',
+            // Bez Accept by chybu 422 vykreslila HTML stránka, ne JSON.
+            server: ['CONTENT_TYPE' => 'application/json', 'HTTP_ACCEPT' => 'application/json'],
             content: json_encode([
                 'name'     => 'Jan Novák',
                 'email'    => 'not-valid-email',
@@ -1254,44 +1254,47 @@ final class RegistrationControllerTest extends WebTestCase
 
         $this->assertResponseIsUnprocessable();
 
+        // Tělo má strukturu Problem Details (RFC 7807), porušení nese klíč `violations`.
         $responseData = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertArrayHasKey('errors', $responseData);
-        $this->assertStringContainsString('email', strtolower($responseData['errors'][0]['field']));
+        $this->assertArrayHasKey('violations', $responseData);
+        $this->assertSame('email', $responseData['violations'][0]['propertyPath']);
     }
 
     public function testReturns409WhenEmailAlreadyRegistered(): void
     {
         $client = static::createClient();
 
-        $payload = json_encode(['name' => 'Jan Novák', 'email' => 'existujici@example.com', 'password' => 'Heslo123!']);
+        $payload = json_encode(['name' => 'Jan Novák', 'email' => 'existujici@example.com', 'password' => 'SilneHeslo123!']);
 
-        $client->request('POST', '/api/users/register',
+        $client->request('POST', '/api/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: $payload
         );
         $this->assertResponseStatusCodeSame(201);
 
         // druhý pokus se stejným emailem
-        $client->request('POST', '/api/users/register',
+        $client->request('POST', '/api/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: $payload
         );
         $this->assertResponseStatusCodeSame(409);
     }
 
-    public function testReturns400ForMissingRequiredFields(): void
+    public function testReturns422ForMissingRequiredFields(): void
     {
         $client = static::createClient();
 
         $client->request(
             method: 'POST',
-            uri: '/api/users/register',
+            uri: '/api/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([])
         );
 
-        $this->assertResponseStatusCodeSame(400);
+        // Chybějící argumenty konstruktoru serializer sesbírá jako porušení,
+        // takže odpověď je 422 stejně jako u neplatného formátu, ne 400.
+        $this->assertResponseIsUnprocessable();
     }
 }
 :::
@@ -1302,7 +1305,7 @@ final class RegistrationControllerTest extends WebTestCase
 
 Funkční testy jsou nejpomalejší a nejkřehčí, proto pokrývají jen hlavní scénář a nejdůležitější
 chybové cesty. Okrajové případy, validace a doménová pravidla patří do unit testů doménové vrstvy.
-Příliš mnoho funkčních testů prodlužuje CI/CD pipeline a vývojáři pak testy lokálně spouštějí nerad.
+Příliš mnoho funkčních testů prodlužuje CI/CD pipeline a vývojáři je pak lokálně spouštějí neradi.
 :::
 
 ## 17.07 Testování asynchronních toků {#testovani-asynchronnich-toku}
@@ -1324,14 +1327,19 @@ transportu pro prostředí `test`:
 framework:
     messenger:
         transports:
-            async: 'in-memory://'
+            async_commands: 'in-memory://'
+            async_events: 'in-memory://'
 :::
 :::
 
+Ukázky v této sekci počítají s posluchačem `UserRegistered`, který na `command.bus` odešle příkaz
+`SendWelcomeEmail`. Příkaz směruje řádek `App\UserManagement\Application\Message\SendWelcomeEmail: async_commands`
+doplněný do `framework.messenger.routing` z kapitoly [CQRS](/cqrs#messenger-config-heading).
+
 Transport vystavuje `getSent()`, `getAcknowledged()` a `reset()`. Úklid ale obstará framework:
 v testech dědících z `KernelTestCase` nebo `WebTestCase` se všechny in-memory transporty po každém
-testu resetují samy [[13]](https://symfony.com/doc/current/messenger.html). Volba `serialize: true`
-navíc zprávy protáhne serializační vrstvou, takže se otestuje i to, co se v produkci posílá po drátě.
+testu resetují samy [[13]](https://symfony.com/doc/current/messenger.html). Volba `serialize`
+(v DSN `in-memory://?serialize=true`) navíc zprávy protáhne serializační vrstvou, takže se otestuje i to, co se v produkci posílá po drátě.
 
 Funkční test pak ověří, že endpoint zprávu skutečně odeslal, aniž by čekal na workera:
 
@@ -1356,12 +1364,12 @@ final class RegisterUserDispatchTest extends WebTestCase
 
         $client->request(
             method: 'POST',
-            uri: '/api/users/register',
+            uri: '/api/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode(['name' => 'Jan Novák', 'email' => 'jan@example.com', 'password' => 'SilneHeslo123!'])
         );
 
-        $transport = self::getContainer()->get('messenger.transport.async');
+        $transport = self::getContainer()->get('messenger.transport.async_commands');
         $sent      = $transport->getSent();
 
         $this->assertCount(1, $sent);
@@ -1390,7 +1398,8 @@ framework:
         transports:
             # DSN test:// vyžaduje trait InteractsWithMessenger; volitelné parametry
             # se předávají v query stringu, například test://?catch_exceptions=false
-            async: 'test://'
+            async_commands: 'test://'
+            async_events: 'test://'
 :::
 :::
 
@@ -1422,7 +1431,7 @@ final class RegisterUserFlowTest extends WebTestCase
 
         $client->request(
             method: 'POST',
-            uri: '/api/users/register',
+            uri: '/api/register',
             server: ['CONTENT_TYPE' => 'application/json'],
             content: json_encode([
                 'name'     => 'Jan Novák',
@@ -1431,11 +1440,11 @@ final class RegisterUserFlowTest extends WebTestCase
             ], JSON_THROW_ON_ERROR),
         );
 
-        $this->transport('async')->queue()->assertCount(1);
-        $this->transport('async')->queue()->assertContains(SendWelcomeEmail::class);
+        $this->transport('async_commands')->queue()->assertCount(1);
+        $this->transport('async_commands')->queue()->assertContains(SendWelcomeEmail::class);
 
-        $this->transport('async')->process();      // zpracuje frontu v testu
-        $this->transport('async')->queue()->assertEmpty();
+        $this->transport('async_commands')->process();      // zpracuje frontu v testu
+        $this->transport('async_commands')->queue()->assertEmpty();
     }
 }
 :::
@@ -1464,6 +1473,7 @@ use App\Tests\Double\SpyMailer;
 use App\UserManagement\Application\Message\SendWelcomeEmail;
 use App\UserManagement\Application\MessageHandler\SendWelcomeEmailHandler;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Uid\Uuid;
 
 final class SendWelcomeEmailHandlerTest extends TestCase
 {
@@ -1472,7 +1482,10 @@ final class SendWelcomeEmailHandlerTest extends TestCase
         $mailer  = new SpyMailer();
         $handler = new SendWelcomeEmailHandler($mailer, new InMemoryInboxRepository());
 
-        $message = new SendWelcomeEmail(eventId: '0190a5c2-7b3e-7d4a-9c1e-5f2b8a6d4e10', email: 'jan@example.com');
+        $message = new SendWelcomeEmail(
+            eventId: Uuid::fromString('0190a5c2-7b3e-7d4a-9c1e-5f2b8a6d4e10'),
+            email: 'jan@example.com',
+        );
 
         ($handler)($message);
         ($handler)($message); // opakované doručení téže zprávy
@@ -1518,7 +1531,7 @@ public function testRelayPublishesPendingEvents(): void
     $tester->execute(['--time-limit' => 1]);
 
     // Relay posílá na transport async_events (TransportNamesStamp v 15.05);
-    // v prostředí test musí mít DSN in-memory:// jako async výše
+    // v prostředí test má DSN in-memory:// z konfigurace výše
     $transport = self::getContainer()->get('messenger.transport.async_events');
 
     $this->assertCount(1, $transport->getSent());
@@ -1543,7 +1556,7 @@ spadlý test, ne až v review.
 mezi nimi (ruleset), nástroj projde kód a vypíše porušení. V CI běží jako samostatný krok vedle
 statické analýzy.
 
-Historii balíčku je dobré znát, protože podle ní se hledá dokumentace. Projekt vznikl
+Na historii balíčku záleží, protože podle ní se hledá dokumentace. Projekt vznikl
 v sensiolabs-de, pokračoval pod hlavičkou QOSSMIC a dnes má vlastní organizaci. Balíček
 `qossmic/deptrac` je od listopadu 2024 na Packagistu označený jako abandoned a nahradil ho
 `deptrac/deptrac` [[15]](https://github.com/deptrac/deptrac). Řada 4.x drží konfiguraci ve výchozím
@@ -1607,8 +1620,9 @@ return static function (DeptracConfig $config): void {
             Ruleset::forLayer($application)->accesses($domain, $shared),
             // Infrastruktura implementuje doménová rozhraní
             Ruleset::forLayer($infrastructure)->accesses($domain, $application, $shared),
-            // Kontrolery mluví s aplikační vrstvou (commands, queries)
-            Ruleset::forLayer($presentation)->accesses($application, $shared),
+            // Kontrolery mluví s aplikační vrstvou (commands, queries). Na doménu
+            // smějí kvůli doménovým výjimkám, které překládají na HTTP status.
+            Ruleset::forLayer($presentation)->accesses($application, $domain, $shared),
             // Shared nezávisí na ničem projektovém - ruleset bez accesses()
             Ruleset::forLayer($shared),
         )
@@ -1652,7 +1666,7 @@ Pravidla závislostí umí vynutit i **phparkitect** (phparkitect/phparkitect)
 popisuje pravidla nad jednotlivými třídami, jejich namespace a názvy a zapisuje je do souboru
 `phparkitect.php`. Nástroj má vlastní CLI, nespouští se přes PHPUnit a v CI běží jako samostatný
 krok vedle testovací sady. Instalaci a přehled pravidel uvádí kapitola
-[Méně známé vzory](/mene-zname-vzory#mod-phparkitect); plnou konfiguraci pro modular monolith
+[Doplňující taktické vzory](/mene-zname-vzory#mod-phparkitect); plnou konfiguraci pro modulární monolit
 ukazuje kapitola [DDD a microservices](/ddd-a-microservices#phparkitect-rules-heading).
 Zde stačí zapojení do pipeline:
 
@@ -1685,7 +1699,7 @@ o kvalitě testů: 100% pokrytí lze dosáhnout testy, které jen volají metody
 je ale opačně: kde je pokrytí nízké, leží kód, který nikdo netestuje, a tam se vyplatí podívat.
 
 :::callout{type="note"}
-### Pokrytí po vrstvách – co kde testovat:
+### Pokrytí po vrstvách – co kde testovat
 
 - **Doménová vrstva (Domain)** – testuje se beze zbytku. Leží tu veškerá doménová logika a každý invariant, každá validace i každé pravidlo má mít vlastní test. Nepokrytý řádek v doméně je otázka, ne statistika.
 - **Aplikační vrstva (Application)** – unit testy handlerů s InMemory repozitáři. Nepokryté zůstávají hlavně technické větve: logování, mapování výjimek na HTTP kódy.
@@ -1698,7 +1712,7 @@ znamená, že do ní něco přibylo bez testu.
 :::
 
 :::callout{type="note"}
-### Naming conventions pro testy v DDD:
+### Pojmenování testů v DDD
 
 - Testovací třída odpovídá testované třídě: `Email` → `EmailTest`, `RegisterUserHandler` → `RegisterUserHandlerTest`.
 - Testovací metody popisují chování anglicky nebo česky: `testThrowsExceptionForInvalidEmail()`, `testRegistersNewUser()`.
@@ -1707,7 +1721,7 @@ znamená, že do ní něco přibylo bez testu.
 :::
 
 :::callout{type="note"}
-### Arrange-Act-Assert (AAA) pattern:
+### Arrange-Act-Assert (AAA)
 
 Každý test má tři oddělené fáze:
 
