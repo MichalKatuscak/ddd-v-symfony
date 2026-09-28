@@ -79,8 +79,8 @@ Východisko je v obou textech stejné: pravidlo, které se v doméně opakuje, s
 vlastní jméno a vlastní typ.
 
 Jedna poznámka ke zdrojům. V destilovaném *DDD Reference* (2015) už Specification není.
-Evans do něj z taktických stavebních bloků zařadil Entities, Value Objects, Domain Events,
-Services, Modules, Aggregates, Repositories a Factories. Vzor tedy nepřeskakuje jen praxe;
+Evans do části *Building Blocks of a Model-Driven Design* zařadil Layered Architecture, Entities,
+Value Objects, Domain Events, Services, Modules, Aggregates, Repositories a Factories. Vzor tedy nepřeskakuje jen praxe;
 vypadl i z autorova vlastního souhrnu.
 
 ### Kdy použít {#spec-kdy}
@@ -99,9 +99,9 @@ použití objevují ve čtyřech typických situacích:
 2. **Pravidla použitelná v doméně i v repozitáři.** Tatáž specifikace
    odpoví na „*splňuje tento konkrétní objekt pravidlo?*“ (in-memory predikát)
    a zároveň vrátí z databáze všechny objekty, které pravidlo splňují (query). Obě podoby
-   pravidla (PHP i dotaz přes Doctrine) drží pohromadě v jedné třídě; **double-dispatch** přijde ke slovu
-   při předání specifikace repozitáři (viz
-   [Double-dispatch do Doctrine](#spec-doctrine)).
+   pravidla (PHP i dotaz přes Doctrine) drží pohromadě v jedné třídě; repozitář specifikaci
+   dostane jako parametr dotazu (viz
+   [Specifikace jako dotaz do Doctrine](#spec-doctrine)).
 3. **Pravidla, která se skládají za běhu.** Promo kód má v admin UI
    podmínky *„platí pro nákupy > 1000 Kč v ČR a SK, kromě výprodejového zboží“*.
    V doméně se reprezentuje jako instance `AndSpecification` složená z N pod-pravidel
@@ -446,7 +446,7 @@ které kompozici hlídají staticky.
 
 ### Kompozice v aplikační vrstvě {#spec-compose}
 
-Marketingová akce *„doprava zdarma pro nákupy nad 1000 Kč v EU, kromě zákazníků
+Marketingová akce *„doprava zdarma pro nákupy od 1000 Kč v EU, kromě zákazníků
 na blacklistu“* je trojice atomických specifikací spojená kombinátorem `and`. Místo
 trojnásobně vnořeného `if`-u vznikne jeden čitelný výraz:
 
@@ -584,13 +584,18 @@ Metodu musí implementovat každý kombinátor a u `or` a `not` už odpověď ne
 jednoznačná. Přínos je stejně zřejmý: formulář nebo API vrátí důvod zamítnutí odvozený
 z pravidla, které rozhodlo, místo ručně psané hlášky, která se časem rozejde s logikou.
 
-### Double-dispatch do Doctrine {#spec-doctrine}
+### Specifikace jako dotaz do Doctrine {#spec-doctrine}
 
 Specifikace slouží i ve **druhé roli** – jako parametr dotazu do repozitáře. Místo
 metody `findEligibleForFreeShippingInEU(): array`, která by přibývala s každou novou
 kombinací pravidel, dostane repozitář *libovolnou* specifikaci, převede ji na dotaz
-a vrátí výsledek. Přístupu se říká **double-dispatch**: specifikace nese pravidlo,
-repozitář ví, jak ho přeložit do persistence.
+a vrátí výsledek. Specifikace nese pravidlo, repozitář ví, jak ho přeložit do persistence.
+
+Pro tuto spolupráci se často používá označení **double dispatch**, v přesném smyslu ale
+sedí jen na Evansovu variantu z kapitoly 9. Tam repozitář předá specifikaci sám sebe
+(`satisfyingElementsFrom($this)`) a ta si zpětně zavolá jeho specializovanou dotazovou
+metodu. Varianta v této sekci zpětné volání nemá: repozitář si od specifikace vyžádá
+výraz a sám ho spustí.
 
 Rozhoduje jediná věc: co specifikace vrací. Mutovat předaný `QueryBuilder` se nabízí,
 ale vede do slepé uličky: metoda s návratovým typem `void` nejde skládat, takže `or`
@@ -610,8 +615,8 @@ use Doctrine\Common\Collections\Expr\Expression;
 
 /**
  * Specifikace, která umí své pravidlo vyjádřit jako Doctrine výraz.
- * Implementuje double-dispatch: specifikace zná pravidlo,
- * repozitář ví, jak výraz spustit nad databází.
+ * Specifikace zná pravidlo, repozitář ví, jak výraz spustit
+ * nad databází.
  *
  * @template T
  * @extends Specification<T>
@@ -771,6 +776,11 @@ Kombinátor implementuje `QuerySpecification`, jeho operandy ale query specifika
 být nemusí. Typová kontrola na vstupu `match()` proto do listů nedosáhne a rozpor se ozve
 až běhovou výjimkou. Výměnou za to jde skládat i `or` a `not`, ne jen konjunkci.
 
+Statická analýza je naopak přísnější než běh. Metoda `and()` v `CompositeSpecification`
+deklaruje návratový typ `Specification`, takže PHPStan i Psalm složenou specifikaci
+na vstupu `match()` odmítnou, přestože za běhu projde. Volající typ zúží sám, například
+`assert($promo instanceof QuerySpecification)` před voláním `match()`.
+
 Zmizí i past s názvy parametrů: `Criteria` si placeholdery generuje sama, takže dvě
 pod-specifikace se stejnou hodnotou prahu se navzájem nepřepíšou.
 
@@ -859,7 +869,7 @@ declare(strict_types=1);
 namespace App\Banking\Domain\Service;
 
 use App\Banking\Domain\Account;
-use App\Banking\Domain\Exception\InsufficientFunds;
+use App\Banking\Domain\Exception\InsufficientFundsException;
 use App\Banking\Domain\TransferReference;
 use App\SharedKernel\Domain\Money;
 
@@ -882,7 +892,7 @@ final class MoneyTransferService
         \DateTimeImmutable $when,
     ): void {
         if (!$from->canWithdraw($amount, $when)) {
-            throw InsufficientFunds::onAccount($from->id(), $amount);
+            throw InsufficientFundsException::onAccount($from->id(), $amount);
         }
 
         if ($from->currency() !== $to->currency()) {
@@ -906,7 +916,7 @@ final class MoneyTransferService
    `$to->deposit()` mutují stav agregátů, ale ukládat je bude až
    Application Service nebo command handler. Domain Service nikdy nevolá
    `$em->flush()`.
-3. **Vyhazuje doménové výjimky** – `InsufficientFunds`,
+3. **Vyhazuje doménové výjimky** – `InsufficientFundsException`,
    `\DomainException` – ne `\RuntimeException` nebo HTTP
    status kódy.
 
@@ -953,8 +963,8 @@ rolí plní. Tabulka shrnuje rozdíly, na které se vyplatí ptát v code review
 | Vrstva | Domain | Application | Infrastructure |
 | Závislosti | Doménové typy a doménová rozhraní (Entity, VO, jiné Domain Services) | Repozitáře, Event Bus, Domain Services, Authorization | HTTP klienti, knihovny (Mailer, Stripe SDK), filesystem |
 | Stav | Stateless | Stateless (jednorázový handler) | Často stateless, ale může držet connection pool |
-| Volá perzistenci? | Ne | Ano (přes repozitář) | Ano (sama je perzistencí) |
-| Vyhazuje výjimky | Doménové (`InsufficientFunds`) | Aplikační (`UnauthorizedException`, validation) | Infrastrukturní (`ConnectionException`) |
+| Volá perzistenci? | Ne | Ano (přes repozitář) | Jen adaptér perzistence (Doctrine repozitář); Mailer ani platební brána ne |
+| Vyhazuje výjimky | Doménové (`InsufficientFundsException`) | Aplikační (`UnauthorizedException`, validation) | Infrastrukturní (`ConnectionException`) |
 | Příklad jména | `MoneyTransferService`, `PricingService` | `PlaceOrderHandler`, `RegisterUserHandler` | `SymfonyMailer`, `StripePaymentGateway` |
 | Test | Pure unit, bez Symfony kernel | Unit s InMemory fake repozitáři | Integrační (kontrakt s reálným systémem) |
 | Sufix v PHP | `*Service` (volitelně) | `*Handler`, `*UseCase` | `*Gateway`, `*Adapter`, `*Client` |
@@ -1602,8 +1612,8 @@ doménový model chudne a struktura projektu zakrývá doménu.
 
 - **Specification Pattern** proměňuje booleovská doménová pravidla
   v prvotřídní objekty s mluvícími jmény. Kombinátory `and`,
-  `or`, `not` skládají pravidla bez vnořených `if`-ů,
-  double-dispatch drží PHP i dotazovou podobu pravidla (Doctrine `Criteria`) v jedné třídě.
+  `or`, `not` skládají pravidla bez vnořených `if`-ů a rozhraní `QuerySpecification`
+  drží PHP i dotazovou podobu pravidla (Doctrine `Criteria`) v jedné třídě.
 - **Domain Services** zachytávají doménovou logiku, která nepatří
   do žádné entity ani hodnotového objektu. Jsou bezstavové, žijí v Domain vrstvě
   a nevolají perzistenci. Když se zamění s Application nebo Infrastructure Service,
@@ -1637,7 +1647,7 @@ u anémického modelu, který v sekci 08.03 padl jen krátce.
 
 :::faq{}
 - question: 'Kdy přesně se vyplatí Specification Pattern?'
-  answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho uplatňujete v doméně i v repozitáři přes double-dispatch. Pravidlo použité jednou a o jednom řádku kódu nepotřebuje samostatnou třídu, patří inline. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification tomu jménu dá kód. Třída pojmenovaná <code>OrderTotalGreaterThanSpec</code> je jen operátor a patří zpět do inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
+  answer: 'Vyplatí se, když stejné nebo příbuzné pravidlo potřebujete na nejméně dvou místech, případně ho uplatňujete v doméně i v repozitáři přes <code>QuerySpecification</code>. Pravidlo použité jednou a o jednom řádku kódu nepotřebuje samostatnou třídu, patří inline. Hlavní test: má pravidlo doménové jméno, které tým používá v debatách (<em>premium customer</em>, <em>eligible for free shipping</em>)? Pokud ano, Specification tomu jménu dá kód. Třída pojmenovaná <code>OrderTotalGreaterThanSpec</code> je jen operátor a patří zpět do inline ifu. Detail v <a href="#spec-kdy">sekci Specification – Kdy použít</a>.'
 - question: 'Má Domain Service mít stav?'
   answer: 'Ne. Domain Service je z definice <strong>stateless</strong> – žádné instance variables měnící se mezi voláními, žádná interní cache, žádný čítač. Se stavem se ztrácí idempotence a bezpečnost při souběhu. Závislosti jsou ale jiné téma než stav a odpověď na ně kategorická není: <code>Mailer</code> nebo HTTP klient službu skutečně posouvají do Application či Infrastructure vrstvy, u repozitáře se zdroje rozcházejí. Khorikov připouští <em>impure</em> doménovou službu, Noback umísťuje rozhraní repozitáře přímo do Domain vrstvy. Vodítko: nejdřív zvažte, jestli data nemá dodat volající; když je jinak nezískáte, závislost na doménovém rozhraní je přijatelná. Detail v <a href="#ds-priklad">sekci MoneyTransferService</a> a <a href="#ds-srovnani">srovnávací tabulce</a>.'
 - question: 'Factory metoda nebo Factory class – jak se rozhodnout?'

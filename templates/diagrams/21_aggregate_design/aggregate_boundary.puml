@@ -8,43 +8,39 @@ package "Aggregate: Order" as OrderAgg {
     +OrderId id
     +CustomerId customerId
     +OrderStatus status
-    +int version
+    -int version
     --
-    +place(items)
-    +pay()
-    +ship()
-    +cancel()
+    +{static} place(id, customerId)
+    +addItem(productId, quantity, unitPrice)
+    +confirm()
+    +markPaid()
+    +ship(shipmentId)
+    +cancel(reason, when)
+    +totalAmount(): Money
   }
 
   class "<<entity>>\nOrderItem" as OrderItem {
-    +OrderItemId id
+    -?int id (jen DB klíč)
     +ProductId productId
     +int quantity
     +Money unitPrice
+    --
+    +subtotal(): Money
   }
 
   class "<<value object>>\nMoney" as Money {
-    +int amount
+    +int amountInCents
     +Currency currency
   }
 
-  class "<<value object>>\nShippingAddress" as ShippingAddress {
-    +string street
-    +string city
-    +string zip
-    +CountryCode country
-  }
-
-  OrderRoot *-- OrderItem : obsahuje 1..n
-  OrderRoot *-- ShippingAddress : má
+  OrderRoot *-- OrderItem : obsahuje 0..n\n(od Confirmed 1..n)
   OrderItem *-- Money : má
 }
 
 package "Aggregate: Customer" as CustomerAgg {
   class "<<root>>\nCustomer" as CustomerRoot {
     +CustomerId id
-    +EmailAddress email
-    +int version
+    +Email email
   }
 }
 
@@ -53,8 +49,9 @@ OrderRoot ..> CustomerRoot : odkaz pouze\npřes CustomerId\n(NE objektová refer
 note right of OrderAgg
   Transakční hranice =
   hranice agregátu.
-  Doctrine flush()
-  ukládá pouze tento agregát.
+  Handler ukládá jen
+  tento agregát; flush()
+  to sám nevynutí.
 end note
 
 note bottom of CustomerAgg

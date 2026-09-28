@@ -1413,7 +1413,7 @@ validaci v agregátu, filtrování kolekcí i výběru v repozitáři. Malá pra
 skládají kombinátory `and()`, `or()` a `not()` do složitějších, bez kopírování
 podmínek po kódu.
 
-Plný výklad včetně implementace v PHP, kombinátorů a double-dispatch napojení
+Plný výklad včetně implementace v PHP, kombinátorů a napojení na Doctrine
 na Doctrine najdete v kapitole
 [Specification Pattern](/mene-zname-vzory#specification).
 

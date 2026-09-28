@@ -3,43 +3,44 @@
 
 title Životní cyklus agregátu Order – stavové přechody
 
-[*] --> Draft : place(items)
-Draft --> Paid : pay(payment)
-Draft --> Cancelled : cancel(reason)
-
+[*] --> Draft : place(id, customerId)
+Draft --> Confirmed : confirm()
+Confirmed --> Paid : markPaid()
 Paid --> Shipped : ship(shipmentId)
-Paid --> Refunded : refund(reason)
+Shipped --> Delivered : doručení zásilky
 
-Shipped --> Delivered : confirmDelivery()
-Shipped --> Returned : returnRequest()
-
-Returned --> Refunded : approveRefund()
+Draft --> Cancelled : cancel(reason, when)
+Confirmed --> Cancelled : cancel(reason, when)
+Paid --> Cancelled : cancel(reason, when)
 
 Delivered --> [*]
 Cancelled --> [*]
-Refunded --> [*]
 
 note right of Draft
+  Rozpracovaný košík:
+  addItem() jen v Draft.
+  placeWithFirstItem()
+  projde rovnou do Confirmed.
+end note
+
+note right of Confirmed
   Invariant: alespoň
-  jedna položka.
+  jedna položka
+  (jinak EmptyOrderException).
 end note
 
 note right of Paid
-  Invariant: payment.amount
-  == sum(items).
+  markPaid() i ship()
+  jsou idempotentní:
+  opakované doručení
+  příkazu nic nezmění.
 end note
 
 note bottom of Cancelled
-  Cancel jen z Draft.
-  Po Paid je nutný refund,
-  ne cancel.
-end note
-
-note bottom of Shipped
-  Po Shipped není
-  cesta zpět do Paid.
-  Vrácení = oddělený
-  stav Returned.
+  Storno z Draft, Confirmed i Paid.
+  Po Shipped a Delivered hrana
+  chybí: nastupuje kompenzace v sáze.
+  Běžící sága storno blokuje.
 end note
 
 @enduml

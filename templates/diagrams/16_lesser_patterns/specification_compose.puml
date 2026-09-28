@@ -40,12 +40,12 @@ class "EligibleForFreeShipping" as ps {
 }
 
 class "InEUCountry" as ineu {
-  -country: Country
+  -{static} EU_COUNTRIES: list<string>
   +isSatisfiedBy(Order): bool
 }
 
 class "NotInBlacklist" as nib {
-  -customerId: CustomerId
+  -blacklist: list<CustomerId>
   +isSatisfiedBy(Order): bool
 }
 

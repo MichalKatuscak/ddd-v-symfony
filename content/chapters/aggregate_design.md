@@ -79,9 +79,9 @@ kdy se vědomě poruší. Ve třetím dílu je shrnuje do čtyř bodů:
 2. **Navrhujte malé agregáty.** Výchozí volba je agregát s jediným kořenovým
    objektem a několika hodnotovými objekty. Větší agregát potřebuje konkrétní obhajobu
    invariantem, ne pohodlí ORM nebo mentální setrvačnost vrstveného CRUD. Vernon to
-   podkládá zkušeností Niclase Hedhmana z projektu pro finanční deriváty: zhruba 70 %
-   agregátů tvořil samotný kořen s několika hodnotovými objekty, zbývajících 30 % mělo
-   dvě až tři entity celkem. Za univerzální poměr to Vernon výslovně nepovažuje.
+   už v prvním dílu podkládá zkušeností Niclase Hedhmana z projektu pro finanční
+   deriváty: zhruba 70 % agregátů tvořil samotný kořen s několika hodnotovými objekty,
+   zbývajících 30 % mělo dvě až tři entity celkem. Za univerzální poměr to Vernon výslovně nepovažuje.
 3. **Reference mezi agregáty pouze přes identitu.** Místo objektové reference
    se drží `OrderId`, `CustomerId`. Doctrine asociace mezi agregáty
    je signál, že někde chybí hranice nebo že eventual consistency čeká na zavedení.
@@ -1239,13 +1239,15 @@ a agregátem [[12]](https://matthiasnoback.nl/2018/06/doctrine-orm-and-ddd-aggre
 Dvě z pravidel se v provozu lámou tiše.
 
 První je verzování. `#[ORM\Version]` zvýší verzi jen tehdy, když se změnilo pole na kořeni.
-Změna vnitřní entity, typicky `OrderItem`, se do verze `Order`u nepromítne. Dva požadavky,
-z nichž každý upraví jinou položku téže objednávky, projdou oba a invariant „součet položek
-se rovná celkové ceně“ se poruší, aniž kdokoli dostane `OptimisticLockException`.
+Změna vnitřní entity, typicky `OrderItem`, se do verze `Order`u nepromítne. Ukazuje to
+Evansův příklad z *DDD* (2003), který Vernon cituje v prvním dílu eseje: objednávka má
+schválený limit a součet položek ho nesmí překročit. Dva požadavky zvýší množství každý
+u jiné položky téže objednávky. Každý ověří limit jen nad svým snímkem a oba projdou.
+Součet pak strop překročí, aniž kdokoli dostane `OptimisticLockException`.
 Doctrine na to nemá ekvivalent JPA konstanty `OPTIMISTIC_FORCE_INCREMENT`; požadavek na ni
 je otevřený od roku 2013 [[10]](https://github.com/doctrine/orm/issues/3620). Obejít to lze
 dvěma způsoby. Doménová metoda kořene se při každé změně potomka dotkne vlastního pole
-(přepočtená `totalAmount` nebo `updatedAt`); taková změna mívá i doménový význam a verzi
+(uložená přepočtená celková cena nebo `updatedAt`); taková změna mívá i doménový význam a verzi
 zvedne. Druhou cestou je pesimistický zámek `LockMode::PESSIMISTIC_WRITE` za cenu
 propustnosti. Volání `$em->lock($order, LockMode::OPTIMISTIC, $expectedVersion)` s verzí,
 kterou drží klient, samo nestačí: odhalí zastaralý formulář, ale verzi nezvedá, takže dva
