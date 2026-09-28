@@ -271,6 +271,9 @@ framework:
                     queues:
                         ordering.from_catalog:
                             binding_keys: ['product.price_changed', 'product.discontinued']
+                # Služba implementující Messenger SerializerInterface,
+                # překládá JSON od Catalogu na lokální třídy Orderingu
+                serializer: 'App\Ordering\Infrastructure\Messaging\CatalogEventSerializer'
                 # Vlastní serializer konzumenta bývá decode-only. Retry ale
                 # posílá zprávu zpět přes sender téhož transportu, tedy přes
                 # encode() - a ten skončí výjimkou, která shodí workera.
@@ -285,7 +288,7 @@ framework:
 :::
 
 :::callout{type="note"}
-**Konzument sekci `routing` nepotřebuje.** Ta říká, na který transport Messenger zprávu pošle při dispatchi; konzumaci cizích zpráv neřídí. Aby worker dokázal event z fronty `ordering.from_catalog` přečíst, potřebuje transport vlastní serializer (volba `serializer` v konfiguraci transportu), který JSON payload od Catalogu namapuje na lokální třídu `ProductPriceChanged`. Výchozí serializer Messengeru totiž očekává zprávy, které odeslal sám. Implementaci konzumní strany včetně serializeru a deduplikace rozebírá kapitola [Outbox Pattern](/outbox-pattern).
+**Konzument sekci `routing` nepotřebuje.** Ta říká, na který transport Messenger zprávu pošle při dispatchi; konzumaci cizích zpráv neřídí. Aby worker dokázal event z fronty `ordering.from_catalog` přečíst, potřebuje transport vlastní serializer (volba `serializer` v konfiguraci transportu), který JSON payload od Catalogu namapuje na lokální třídu `ProductPriceChanged`. Výchozí serializer Messengeru totiž očekává zprávy, které odeslal sám. Implementaci takového serializeru ukazuje kapitola [DDD a microservices](/ddd-a-microservices#symfony), deduplikaci na straně konzumenta [Outbox Pattern](/outbox-pattern#inbox).
 
 Symfony 8.1 k tomu přidalo dva nástroje. Atribut `#[AsMessage(serializedTypeName: 'catalog.product.price_changed')]` nahradí PHP FQCN v hlavičce `type` vlastní hodnotou. Jméno zprávy se tím stává součástí publikovaného kontraktu, ne interním detailem namespace producenta. A selhání dekódování už tiše nemizí: receiver zprávu při chybě dekódování nesmaže, pošle ji běžnou retry/failure cestou a nečitelný payload skončí ve failure transportu. Platí to ale jen pro `MessageDecodingFailedException`. Jiná výjimka ze serializeru shodí worker a zpráva se po restartu vrátí znovu.
 :::
@@ -440,7 +443,7 @@ Conformist bývá přijatelný *dočasně*, třeba když projekt potřebuje rych
 
 ## 03.07 Anti-Corruption Layer (ACL) {#acl}
 
-**Anti-Corruption Layer** (ACL) je izolační vrstva mezi downstream doménovým modelem a cizím (legacy, externím, nevstřícným) protějškem. Překládá oběma směry, validuje vstupní data a *filtruje neplatné stavy* dřív, než dorazí do domény. Ze všech rolí se používá nejčastěji – a nejčastěji se implementuje špatně.
+**Anti-Corruption Layer** (ACL) je izolační vrstva mezi downstream doménovým modelem a cizím (legacy, externím, nevstřícným) protějškem. Překládá oběma směry, validuje vstupní data a *filtruje neplatné stavy* dřív, než dorazí do domény. Sahá se po něm tam, kde downstream nemá vliv na upstream, ale vlastní model chránit chce. Chyby v jeho implementaci bývají nenápadné, protože cizí pojmy prosakují do domény postupně.
 
 Evans (2003) rozlišuje dvě situace. Mezi dobře navrženými kontexty se spolupracujícími týmy může být překladová vrstva prostá. Když ale chybí kontrola nebo komunikace potřebná pro Shared Kernel, Partnership či Customer/Supplier, překlad se stává obranou. Downstream klient si pak vytvoří izolační vrstvu, která mu funkčnost upstream systému zpřístupní v pojmech jeho vlastního doménového modelu.
 
@@ -1044,7 +1047,7 @@ Foote a Yoder upozorňují, že Big Ball of Mud je v praxi nejrozšířenější
 
 ### Cesta ven
 
-Evansova první rada zní překvapivě pasivně: obtáhnout kolem celého nepořádku hranici a prohlásit ji za big ball of mud. Uvnitř se nepokoušet o sofistikované modelování a hlídat sklon takových systémů rozlévat se do sousedních kontextů. Je to obranné opatření, ne rezignace. Nepojmenovaný nepořádek roste dál; pojmenovaný má aspoň hranici, za kterou se čistý model brání.
+Evansova rada v *DDD Reference* (2015) zní překvapivě pasivně: obtáhnout kolem celého nepořádku hranici a prohlásit ji za big ball of mud. Uvnitř se nepokoušet o sofistikované modelování a hlídat sklon takových systémů rozlévat se do sousedních kontextů. Je to obranné opatření, ne rezignace. Nepojmenovaný nepořádek roste dál; pojmenovaný má aspoň hranici, za kterou se čistý model brání.
 
 Zevnitř ven nejčastěji funguje **Strangler Fig**: postupně vyčleňovat čisté BC, každý obklopit ACL a přesouvat funkčnost ze staré spaghetti vrstvy do nového modelu. Detail viz [Migrace z CRUD na DDD](/migrace-z-crud).
 
@@ -1067,7 +1070,7 @@ Customer/Supplier a Separate Ways; roli jednoho konce toho vztahu pak Open Host 
 a Published Language nahoře, Conformist a Anti-Corruption Layer dole. Vybírá se tedy
 vztah a k němu role na obou koncích.
 
-Z rolí je v praxi nejčastěji potřeba ACL. Vyžádá si ho skoro každá netriviální
+Z rolí si nejvíc pozornosti zaslouží ACL. Vyžádá si ho skoro každá netriviální
 integrace s legacy nebo externím systémem a nese tři odpovědnosti: schema mapping,
 concept translation a vlastní anti-corruption. Na upstream straně stojí dvojice OHS a Published
 Language, kde OHS je kanál a PL formát. Bez politiky verzování ale z publikovaného kontraktu

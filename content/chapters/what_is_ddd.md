@@ -65,17 +65,17 @@ Vazba jazyka na hranici se z definice ztrácí jako první. Martin Fowler ji for
 Hlavní milníky ve vývoji DDD [[4]](https://dddcommunity.org/):
 
 - **2003** – Eric Evans vydává knihu *Domain-Driven Design: Tackling Complexity in the Heart of Software*, která zavádí základní pojmy: Ubiquitous Language, Bounded Context, Aggregate a strategický design.
-- **2009** – Na QCon London Evans shrnuje, co by po pěti letech napsal jinak [[5]](https://www.dddcommunity.org/library/evans_2009_1/). Stavební bloky označuje za přeceněné: entity, hodnotové objekty, továrny i repozitáře. Do centra staví Ubiquitous Language, Context Mapping a Core Domain.
+- **2009** – Na QCon London Evans shrnuje, co by po pěti letech napsal jinak [[5]](https://www.dddcommunity.org/library/evans_2009_1/). Stavební bloky označuje za přeceněné: entity, hodnotové objekty, továrny i repozitáře [[6]](https://qconlondon.com/london-2009/qconlondon.com/dl/qcon-london-2009/slides/EricEvans_WhatIveLearnedAboutDDDSinceTheBook.pdf). Do centra staví Ubiquitous Language, Context Mapping a Core Domain.
 - **2013** – Vaughn Vernon vydává *Implementing Domain-Driven Design*, která přináší praktické příklady a propaguje vzory jako Aggregate design, Domain Events a CQRS v kontextu DDD.
 - **2013** – Alberto Brandolini přichází s *Event Stormingem*, workshopovou technikou pro kolaborativní modelování domény s doménovými experty.
 - **2015** – Evans vydává *Domain-Driven Design Reference* pod licencí CC-BY: shrnutí všech vzorů zdarma. Bounded Context v něm stojí na prvním místě vzorového jazyka, zatímco v knize z roku 2003 přišel na řadu až ve čtrnácté kapitole.
 - **2016** – Vernon vydává *Domain-Driven Design Distilled*. Pořadí výkladu je obrácené: nejdřív Bounded Contexts, subdomény a Context Mapping, teprve pak agregáty a doménové události. Ve stejném roce se v Bruselu koná první ročník konference DDD Europe.
-- **Po roce 2015** – Vlna microservices dělá z Bounded Contextu nejcitovanější vodítko pro určení hranic služeb [[6]](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/). Rovnici „microservice = Bounded Context“ ale sám Evans v roce 2019 označil za zjednodušení a rozlišil několik odlišných situací [[7]](https://www.infoq.com/news/2019/06/bounded-context-eric-evans).
+- **Po roce 2015** – Vlna microservices dělá z Bounded Contextu nejcitovanější vodítko pro určení hranic služeb [[7]](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/). Rovnici „microservice = Bounded Context“ ale sám Evans v roce 2019 označil za zjednodušení a rozlišil několik odlišných situací [[8]](https://www.infoq.com/news/2019/06/bounded-context-eric-evans).
 - **2021** – Vlad Khononov vydává *Learning Domain-Driven Design* s podtitulem *Aligning Software Architecture and Business Strategy*. Těžiště se posouvá od kódu k obchodní strategii.
 
 ## 01.03 Ubiquitous Language v praxi {#ubiquitous-language-v-praxi}
 
-Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací na plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“ [[8]](https://martinfowler.com/bliki/UbiquitousLanguage.html). Dokument je až záznam této konverzace. Kdo začne dokumentem, dostane slovník, kterým nikdo nemluví.
+Ubiquitous Language nevzniká sepsáním dokumentu. Vzniká konverzací na plánovací schůzce, při Event Stormingu, v diskuzi nad bugem, kde doménový expert opraví vývojáře: „to není storno, to je propadnutí rezervace“ [[9]](https://martinfowler.com/bliki/UbiquitousLanguage.html). Dokument je až záznam této konverzace. Kdo začne dokumentem, dostane slovník, kterým nikdo nemluví.
 
 Evans k tomu přidává pravidlo, které se v praxi přehlíží: změna jazyka je změnou modelu. Vazba platí oběma směry. Nový termín od experta si vynutí úpravu kódu. A když se při modelování ukáže, že dva stavy jsou ve skutečnosti tři, patří to nové rozlišení zpátky do konverzace s expertem, ne jen do enumu.
 
@@ -126,7 +126,7 @@ Glosář nemá ambici být úplný. Zachycuje termíny, u kterých hrozí zámě
 
 Strategický design rozhoduje, jak rozdělit systém na samostatné části a jak spolu tyto části komunikují.
 
-Pořadí sekcí v této kapitole je záměrné. Evans v roce 2009 označil taktické stavební bloky za přeceněné a do centra postavil jazyk, mapování kontextů a Core Domain [[5]](https://www.dddcommunity.org/library/evans_2009_1/). Vernon o sedm let později obrátil pořadí výkladu ve své knize. Fowler považuje strategickou část za Evansův hlavní přínos: problém, jak rozdělit velkou doménu do propojených Bounded Contextů, před ním nikdo přesvědčivě nevyřešil [[9]](https://martinfowler.com/bliki/DomainDrivenDesign.html). Kdo si z DDD odnese jen entity a agregáty, dostane objektový návrh s doménovým slovníkem. Strategickou částí se zabývají kapitoly 2 až 5.
+Pořadí sekcí v této kapitole je záměrné. Evans v roce 2009 označil taktické stavební bloky za přeceněné [[6]](https://qconlondon.com/london-2009/qconlondon.com/dl/qcon-london-2009/slides/EricEvans_WhatIveLearnedAboutDDDSinceTheBook.pdf) a do centra postavil jazyk, mapování kontextů a Core Domain [[5]](https://www.dddcommunity.org/library/evans_2009_1/). Vernon o sedm let později obrátil pořadí výkladu ve své knize. Fowler považuje strategickou část za Evansův hlavní přínos: problém, jak rozdělit velkou doménu do propojených Bounded Contextů, před ním nikdo přesvědčivě nevyřešil [[10]](https://martinfowler.com/bliki/DomainDrivenDesign.html). Kdo si z DDD odnese jen entity a agregáty, dostane objektový návrh s doménovým slovníkem. Strategickou částí se zabývají kapitoly 2 až 5.
 
 Hlavní koncepty:
 
@@ -186,7 +186,7 @@ Zavedení DDD má typicky osm kroků. První čtyři patří strategickému desi
 7. **Testování** – Doménový model pokrývají unit testy, napojení na databázi a další infrastrukturu testy integrační.
 8. **Iterace** – Model se průběžně upravuje, jak roste pochopení domény. DDD není jednorázová investice.
 
-Podobný postup udržuje skupina ddd-crew. Její DDD Starter Modelling Process rozepisuje totéž do osmi kroků, od porozumění doméně po kód, a je dostupný pod licencí CC BY-SA [[10]](https://github.com/ddd-crew/ddd-starter-modelling-process).
+Podobný postup udržuje skupina ddd-crew. Její DDD Starter Modelling Process rozepisuje totéž do osmi kroků, od porozumění doméně po kód, a je dostupný pod licencí CC BY-SA [[11]](https://github.com/ddd-crew/ddd-starter-modelling-process).
 
 ## 01.07 Výhody používání DDD {#benefits}
 
@@ -234,7 +234,7 @@ Nejběžnější selhání není, že tým DDD nezavede. Zavede jeho polovinu. S
 
 ### Kritika a stav evidence {#kritika}
 
-Námitky přicházejí i zvenčí komunity. Stefan Tilkov se ohrazuje proti reflexu volat DDD experty pokaždé, když padne otázka hranic služeb; DDD je podle něj užitečný prostředek, ne cíl [[11]](https://www.innoq.com/en/blog/2021/03/is-domain-driven-design-overrated/). Systematický přehled 36 recenzovaných studií z roku 2023 se dívá na data střízlivěji. Zkoumané systémy se po nasazení DDD zlepšily, zejména v kombinaci s microservices. Části studií ale chybí empirická validace a hlavní bariérou adopce zůstávají nároky na expertízu a onboarding [[12]](https://arxiv.org/abs/2310.01905). Přínosy z předchozí sekce jsou tedy zkušenostní, ne změřené. Tak s nimi zachází i tato kniha.
+Námitky přicházejí i zvenčí komunity. Stefan Tilkov se ohrazuje proti reflexu volat DDD experty pokaždé, když padne otázka hranic služeb; DDD je podle něj užitečný prostředek, ne cíl [[12]](https://www.innoq.com/en/blog/2021/03/is-domain-driven-design-overrated/). Systematický přehled 36 recenzovaných studií z roku 2023 se dívá na data střízlivěji. Zkoumané systémy se po nasazení DDD zlepšily, zejména v kombinaci s microservices. Části studií ale chybí empirická validace a hlavní bariérou adopce zůstávají nároky na expertízu a onboarding [[13]](https://arxiv.org/abs/2310.01905). Přínosy z předchozí sekce jsou tedy zkušenostní, ne změřené. Tak s nimi zachází i tato kniha.
 
 :::callout{type="warn"}
 ### Ilustrativní scénář: DDD bez doménového experta {#priklad-selhani-heading}

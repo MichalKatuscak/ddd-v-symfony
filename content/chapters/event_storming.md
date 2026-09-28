@@ -19,7 +19,7 @@ difficulty: 2
 github_examples: null
 ---
 
-DDD nezačíná u kódu, ale v místnosti, kde proti sobě sedí lidé, kteří píší kód, a lidé, kteří doménu provozují. **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2021) jsou dvě techniky, jak v takové místnosti strávit dvě až čtyři hodiny a odejít s něčím, co se dá zítra otevřít v IDE. Obě vytahují na světlo nevyslovené doménové znalosti, každá jinou cestou, a liší se tím, kdy se hodí a jak se vedou.
+DDD nezačíná u kódu, ale v místnosti, kde proti sobě sedí lidé, kteří píší kód, a lidé, kteří doménu provozují. **Event Storming** Alberta Brandoliniho (2013) a **Domain Storytelling** Stefana Hofera a Henninga Schwentnera (2016) jsou dvě techniky, jak v takové místnosti strávit několik hodin až celý den a odejít s něčím, co se dá zítra otevřít v IDE. Obě vytahují na světlo nevyslovené doménové znalosti, každá jinou cestou, a liší se tím, kdy se hodí a jak se vedou.
 
 ## 04.01 Proč workshop, proč ne čtení dokumentace {#proc-workshop}
 
@@ -123,7 +123,7 @@ Bez přípravy workshop nefunguje:
 
 Krok 6 závisí na tom, zda hranici poznáte, když na ni narazíte. Na stěně nejspolehlivěji fungují čtyři heuristiky:
 
-- **Lingvistické švy.** Stejné slovo, jiný význam. „Objednávka“ pro prodejce znamená košík se slevami, pro sklad seznam položek k vychystání a pro účtárnu podklad faktury. Jakmile jedno slovo nese tři definice, máte před sebou tři kontexty, ne jeden.
+- **Lingvistické švy.** Stejné slovo, jiný význam. „Objednávka“ pro prodejce znamená košík se slevami, pro sklad seznam položek k vychystání a pro účtárnu podklad faktury. Tři definice jednoho slova jsou silné vodítko, že na stěně leží tři kontexty, ne jeden.
 - **Pivotní eventy (pivotal events).** Zlomová událost mění význam entity. Před `OrderPlaced` je objednávka editovatelným návrhem; po něm je závazkem vůči zákazníkovi. Entita, která událostí mění povahu, typicky překračuje hranici: z jednoho kontextu vstupuje do druhého.
 - **Hranice oddělení.** Levný první odhad. Kde si firma předává práci (prodej → sklad → účtárna), mění se obvykle slovník i pravidla. Slepě je ale přebírat nejde; organizační schéma bývá historické, ne doménové.
 - **Vlastnictví dat.** Otázka „kdo smí tohle pole změnit?“ má uvnitř jednoho kontextu jedinou odpověď. Mění-li cenu produktu dva týmy podle dvou různých pravidel, nejde o jedno pole se dvěma editory, ale o dva koncepty ve dvou kontextech.
@@ -410,7 +410,7 @@ Za půl roku pak nový vývojář ví, odkud pravidlo pochází, a může si ho 
 
 ## 04.07 Domain Storytelling – alternativa pro malé týmy {#domain-storytelling}
 
-**Domain Storytelling** představili Stefan Hofer a Henning Schwentner v knize stejného jména (Addison-Wesley, 2021). Doménové znalosti získává jinou cestou než Event Storming: místo časové osy událostí se kreslí **příběh** o práci doménového experta ve standardizované piktogramové notaci.
+**Domain Storytelling** popsali Stefan Hofer a Henning Schwentner v knize stejného jména (Addison-Wesley, 2021). Technika je starší. Tímto jménem ji autoři označují od roku 2016, kořeny ale sahají do 90. let na Univerzitu Hamburk, kde se jí říkalo *Kooperationsbild* a později *exemplarische Geschäftsprozessmodellierung*. Doménové znalosti získává jinou cestou než Event Storming: místo časové osy událostí se kreslí **příběh** o práci doménového experta ve standardizované piktogramové notaci.
 
 ### 04.07.1 Notace {#ds-notace}
 
@@ -420,7 +420,7 @@ Za půl roku pak nový vývojář ví, odkud pravidlo pochází, a může si ho 
 - **Annotation** – textová bublina s poznámkou: varianta, volitelný krok, možná chyba, doménový pojem.
 - **Group** – rámeček kolem skupiny aktivit. Ohraničuje opakovaný úsek, lokalitu, organizační hranici nebo subdoménu.
 
-Věta příběhu má pevnou gramatiku: **kdo** (actor) dělá **co** (activity) **s čím** (work object) **s kým** (jiný actor). Jeden příběh se drží v rozmezí pěti až patnácti kroků. Delší se dělí na dva.
+Věta příběhu má pevnou gramatiku: **kdo** (actor) dělá **co** (activity) **s čím** (work object) **s kým** (jiný actor). Jako praktické vodítko se jeden příběh drží v rozmezí pěti až patnácti kroků. Delší se dělí na dva.
 
 ### 04.07.2 Rozsah – jaký příběh vlastně kreslíte {#ds-scope}
 

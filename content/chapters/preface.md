@@ -67,7 +67,7 @@ Kdo některý z bodů nesplňuje, knihu přesto přečte, jen u některých kapi
 
 Kniha se dělí na osm tematických částí a každá kapitola staví na předchozích. Webové rozcestníky seskupují tytéž kapitoly hruběji: Základy (kap. 1–5), Taktika (6–8), Architektura (9–11), Vzory (12–16), Praxe (17–22) a Syntéza (23–24). Hranice částí s nimi sedí, jen Praxe zahrnuje části 5 až 7.
 
-Strategie stojí před taktikou záměrně. Evans na QCon London 2009 shrnul, co by ve své knize udělal jinak: stavební bloky přecenil, zatímco hranice kontextů a Core Domain měly přijít mnohem dřív. Uspořádání knihy z tohoto přehodnocení vychází.
+Strategie stojí před taktikou záměrně. Evans na [QCon London 2009](https://qconlondon.com/london-2009/qconlondon.com/dl/qcon-london-2009/slides/EricEvans_WhatIveLearnedAboutDDDSinceTheBook.pdf) shrnul, co by ve své knize udělal jinak: stavební bloky přecenil, zatímco hranice kontextů a Core Domain měly přijít mnohem dřív. Uspořádání knihy z tohoto přehodnocení vychází.
 
 ### Část 1 – Strategický design (kap. 1–5) {#cast-1}
 

@@ -407,9 +407,10 @@ Komunikaci s managementem rozebírá sekce 05.09.
 ### Kdy Inverse Conway nefunguje {#inverse-conway-limity}
 
 Manévr funguje jako změna směru, ne jako jednorázový zásah. Martin Fowler
-[[6]](https://martinfowler.com/bliki/ConwaysLaw.html) k němu dodává výhradu: reorganizace
-neopraví zabetonovanou architekturu, přesune jen lidi kolem ní. Nastane období, kdy nové
-týmy vlastní kód, který nepsaly. Fowler proto doporučuje malé inkrementální kroky s vyhodnocením po každém z nich.
+[[6]](https://martinfowler.com/bliki/ConwaysLaw.html) k němu dodává výhradu: u existujícího
+systému se zabetonovanou architekturou nepřinese reorganizace okamžitou nápravu.
+Spíš vznikne nesoulad mezi vývojáři a kódem, který další úpravy brzdí. Fowler proto
+doporučuje postupovat malými kroky a bedlivě sledovat zpětnou vazbu.
 Podle něj musí vývoj architektury a reorganizace lidí jít ruku v ruce
 po celou dobu života firmy.
 
@@ -507,7 +508,7 @@ není. Počítá kontexty místo domén a přidává druhý rozměr, velikost t�
 |---|---|---|
 | 5 lidí | 1 BC, nebo 2–3 malé | Každý má přehled o všem a zná každou část kódu. |
 | 6–9 lidí | 1–2 BC (výjimečně 3) | Běžná velikost stream-aligned týmu; každý ještě zná každého. |
-| 10+ lidí | Tým je už příliš velký – rozdělit | Dunbar number (familiarity ≈ 15). Komunikační režie roste kvadraticky s počtem lidí. |
+| 10+ lidí | Tým je už příliš velký – rozdělit | Dunbarova hranice hluboké důvěry ≈ 15. Komunikační režie roste kvadraticky s počtem lidí. |
 | Tým s 5+ BC | – | Signál pro rozdělení. BC nemají soudržného vlastníka. |
 
 ### Jak změřit cognitive load (jednoduchá rubrika) {#cognitive-load-rubric}
