@@ -114,9 +114,11 @@ Dvě entity jsou totožné právě tehdy, když mají stejné ID. Proto `equals(
 porovnává výhradně identifikátory. Operátor `==` se nehodí, protože srovnává všechny
 vlastnosti najednou. Tentýž uživatel načtený dvakrát z databáze sice projde, ale
 jakmile jedna z instancí změní e-mail, `==` ji označí za jinou entitu, přestože
-identita zůstala. Operátor `===` zase porovnává instance v paměti. Entita načtená
-dvakrát nezávisle na sobě (ve dvou requestech, deserializací ze zprávy) existuje jako
-dvě instance a `===` vrátí `false`, i když jde o tutéž doménovou entitu.
+identita zůstala. Operátor `===` zase porovnává instance v paměti. V jednom
+EntityManageru vrací Doctrine pro stejné ID díky Identity Map tutéž instanci. Entita
+získaná dvakrát nezávisle na sobě (jednou deserializací ze zprávy, podruhé z databáze,
+nebo znovu načtená po `$em->clear()`) ale existuje jako dvě instance a `===` vrátí
+`false`, i když jde o tutéž doménovou entitu.
 
 ### Vznik identity {#entity-identity}
 

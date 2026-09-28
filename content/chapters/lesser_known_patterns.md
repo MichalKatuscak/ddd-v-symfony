@@ -1272,9 +1272,10 @@ public static function reconstitute(
 
 Proto také `OrderPlaced` zaznamenávají factory metody (`::place()`, `::placePhysical()`),
 ne konstruktor. Rekonstituce nesmí mít vedlejší efekty: obnovuje stav, žádná doménová událost se
-nestala. Kdyby event zaznamenával konstruktor, každé načtení agregátu z databáze
-by znovu vyprodukovalo `OrderPlaced` a odběratelé by tutéž objednávku „umístili“
-při každém čtení.
+nestala. Doctrine při hydrataci konstruktor obchází, `::reconstitute()` výše ho ale
+volá. Kdyby event zaznamenával konstruktor, každé načtení agregátu přes vlastní mapper
+nebo z event streamu by znovu vyprodukovalo `OrderPlaced` a odběratelé by tutéž
+objednávku „umístili“ při každém čtení.
 
 Pojmenování `::reconstitute()` a PHPDoc `@internal` signalizují, že tato cesta vzniku
 je vyhrazena infrastruktuře. Command handler, který by ji volal místo `::place()`,
