@@ -579,7 +579,7 @@ final readonly class EventSerializer
     {
         $class = $this->typeMap[$envelope->eventType]
             ?? throw new \RuntimeException(
-                "Unknown event type {$envelope->eventType}. Chybí záznam v typeMap."
+                "Unknown event type {$envelope->eventType}. Missing entry in typeMap."
             );
 
         $payload = $this->upcasters->upcast(
@@ -1895,7 +1895,7 @@ final class RebuildProjectionCommand extends Command
             $this->projectors[$name] = [
                 'projector' => $projector,
                 'table'     => $projectionTables[$name] ?? throw new \InvalidArgumentException(
-                    "Projekce '{$name}' nemá definovanou tabulku v \$projectionTables.",
+                    "Projection '{$name}' has no table defined in \$projectionTables.",
                 ),
             ];
         }

@@ -360,7 +360,7 @@ final readonly class Email
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException(
-                sprintf('"%s" není platná e-mailová adresa.', $value)
+                sprintf('"%s" is not a valid email address.', $value)
             );
         }
     }
@@ -393,7 +393,7 @@ final readonly class OrderId
         // identifikátory v této knize vznikají přes Uuid::v7(), kterou
         // by regex omezený na verzi 4 odmítl.
         if (!Uuid::isValid($value)) {
-            throw new \InvalidArgumentException('Neplatný formát UUID pro OrderId.');
+            throw new \InvalidArgumentException('Invalid UUID format for OrderId.');
         }
     }
     public function equals(self $other): bool { return $this->value === $other->value; }
