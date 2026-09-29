@@ -3,18 +3,18 @@
 
 title Kde končí DDD a kde začíná Symfony
 
-package "DDD – čistý PHP, žádné závislosti na frameworku" as DDD {
+package "DDD – čisté PHP, z knihoven jen symfony/uid a mapování Doctrine" as DDD {
   rectangle "**Entity**\nUser, Order" as entity
   rectangle "**Value Object**\nEmail, Money, OrderId" as vo
   rectangle "**Aggregate Root**\ninvarianty, doménová pravidla" as agg
   rectangle "**Domain Event**\nUserRegistered, OrderPlaced" as event
-  rectangle "**Repository interface**\nUserRepositoryInterface" as repo_if
-  rectangle "**Domain Service**\nPaymentService" as dsvc
+  rectangle "**Repository interface**\nUserRepository" as repo_if
+  rectangle "**Domain Service**\nMoneyTransferService" as dsvc
   rectangle "**Specification**\nActiveUserSpecification" as spec
 }
 
 package "Symfony – frameworková infrastruktura" as SYM {
-  rectangle "**Doctrine Repository**\nDoctrineUserRepository\nimplementuje UserRepositoryInterface" as repo_impl
+  rectangle "**Doctrine Repository**\nDoctrineUserRepository\nimplementuje UserRepository" as repo_impl
   rectangle "**Doctrine ORM Mapping**\nXML / atributy" as mapping
   rectangle "**Messenger**\nCommandBus, QueryBus\nHandleři" as messenger
   rectangle "**Controller**\nHTTP vstupní bod\nForm, Request, Response" as ctrl
@@ -48,7 +48,7 @@ note bottom of SYM
   **Vyměnitelné**
   Doctrine lze nahradit jiným ORM,
   Messenger jiným bus systémem –
-  doménová vrstva se nezmění.
+  doménová logika se nezmění.
 end note
 
 @enduml

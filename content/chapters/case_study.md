@@ -7,7 +7,7 @@ meta_description: "Systém pro správu projektů v DDD krok za krokem: Bounded C
 meta_keywords: "případová studie DDD, Symfony projekt, bounded contexts, strategický design, taktický design, agregáty, doménové události, CQRS, kompletní implementace, analýza domény, návrh, vývoj, testování, reálný projekt, DDD v praxi"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Případová studie
 schema_type: TechArticle
 schema_headline: "Případová studie: Implementace DDD v Symfony"
@@ -143,7 +143,10 @@ výsledek. Rozdělit subdoménu do víc kontextů se vyplatí jen z provozních 
 odděleným vývojovým cyklům. Častější je opačný případ: několik drobných Supporting a Generic
 subdomén se vejde do jednoho kontextu ([Subdomény](/subdomeny#subdomeny-na-bc)).
 
-V tomto projektu ukazovala všechna tři kritéria stejným směrem. Kompletní mapa vztahů mezi kontexty
+V tomto projektu ukazovala všechna tři kritéria stejným směrem. Opačný signál přinesl jen
+krok 2: **TaskManagement** a **CommentManagement** řídí tentýž týmový vedoucí, takže byly
+kandidáty na sloučení. Tým je ponechal oddělené kvůli sémantické koherenci: „uživatel“ je
+v jednom kontextu přiřazený řešitel, ve druhém autor textu. Kompletní mapa vztahů mezi kontexty
 (Partnership, Customer/Supplier, Open Host Service) je v [sekci Architektura](#architecture).
 Hlubší teoretický základ pro identifikaci kontextů poskytují kapitoly
 [Co je Domain-Driven Design](/co-je-ddd) a
@@ -1424,7 +1427,7 @@ class ProjectListProjection
         $view = $this->em->find(ProjectListView::class, $event->projectId->value);
         if ($view === null) {
             // Doručení mimo pořadí: MemberAdded přišlo dřív než ProjectCreated.
-            // Reconciler (sekce 24.06.4) dohledá chybějící řádek a obnoví ho
+            // Reconciler (viz Idempotence projekce a reconciliation) dohledá chybějící řádek a obnoví ho
             // ze zdrojových agregátů.
             return;
         }
@@ -1602,9 +1605,15 @@ final class ReconcileProjectListView
                 continue;
             }
 
+            // Členství je množina: jiné pořadí po doručení mimo pořadí opravu nevyžaduje.
+            $viewMembers = $view->memberIds;
+            $sortedExpected = $expectedMembers;
+            sort($viewMembers);
+            sort($sortedExpected);
+
             $needsRepair = $view->name !== $project->name()
                 || $view->description !== $project->description()
-                || $view->memberIds !== $expectedMembers
+                || $viewMembers !== $sortedExpected
                 || $view->memberCount !== count($expectedMembers);
 
             if (!$needsRepair) {
@@ -1803,7 +1812,7 @@ Z návrhu popsaného výše plyne deset bodů, které platí i mimo tuto studii.
 1. **Strategický design rozhoduje o výsledku** – Identifikace pěti Bounded Contexts a jejich vztahů na začátku projektu odhalila, že slovo „uživatel“ znamená v každém kontextu něco jiného. Bez Context Mapy by se tato sémantická rozdílnost objevila až ve sporech nad pull requesty.
 2. **Ubiquitous Language zpřesní model** – Společný jazyk s doménovými experty odstranil nejednoznačnosti v požadavcích a zrcadlil se přímo v názvech tříd a metod. Tester, vývojář i produktový manažer mluví o `TaskAssigned`, ne každý o něčem jiném.
 3. **Agregáty a hranice transakcí** – Malé, jasně vymezené agregáty udržely data konzistentní: každý si hlídal vlastní invarianty a měnil se v jedné transakci.
-4. **Doménové události pro integraci** – Doménové události odvázaly Bounded Contexts od vzájemných synchronních volání. Po vytvoření úkolu publikoval agregát událost `TaskCreated`; ActivityTracking i ProjectListProjection na ni reagovaly samostatně, aniž by o sobě věděly.
+4. **Doménové události pro integraci** – Kde reakce snese zpoždění, odvázaly doménové události Bounded Contexts od synchronních volání. Po vytvoření úkolu publikoval agregát událost `TaskCreated`; ActivityTracking i ProjectListProjection na ni reagovaly samostatně, aniž by o sobě věděly. Ověření členství při přiřazení úkolu zůstalo synchronní, protože musí selhat hned ([rozhodnutí 3](#trade-off-sync-acl-heading)).
 5. **CQRS pro oddělení zodpovědností** – Příkazy mění stav, dotazy čtou bez vedlejších efektů. Každá strana má vlastní handler, vlastní model a vlastní testy. Roli message busu obstaral Symfony Messenger.
 6. **Vertikální slice architektura pro modularitu** – Členění kódu podle funkcí místo technických vrstev znamenalo, že změna v jedné feature se zpravidla nedotýká ostatních. Každá feature nese vlastní command, handler, kontroler i view model. Nová feature obvykle vznikne přidáním adresáře, ne úpravou existujících tříd.
 7. **Testování doménového modelu** – Doménové objekty bez závislostí na frameworku lze testovat čistým PHPUnit bez spouštění kernelu.

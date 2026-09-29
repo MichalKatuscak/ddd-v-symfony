@@ -7,7 +7,7 @@ meta_description: "Nejčastější anti-vzory v Domain-Driven Designu a jak se j
 meta_keywords: "DDD anti-vzory, anémický doménový model, anemic domain model, Primitive Obsession, God Aggregate, sdílená databáze, Bounded Context, doménové události, immutable events, over-engineering, Ubiquitous Language, DDD chyby, Symfony DDD"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Anti-vzory
 schema_type: TechArticle
 schema_headline: "Anti-vzory a typické chyby v DDD"
@@ -616,10 +616,14 @@ final class Order extends AggregateRoot
 // Agregát 3: Wishlist - zcela oddělená doménová odpovědnost
 final class Wishlist
 {
-    private readonly WishlistId $id;
-    private readonly CustomerId $customerId;
     /** @var WishlistItem[] */
     private array $items = [];
+
+    public function __construct(
+        public readonly WishlistId $id,
+        public readonly CustomerId $customerId, // Opět jen reference přes ID
+    ) {
+    }
 
     public function add(ProductId $productId): void
     {
@@ -893,7 +897,7 @@ final readonly class OrderPlaced
 
 Neměnnost instance přitom neřeší verzování schématu. Jakmile událost přežije nasazení, které jí přidá pole, potřebujete upcasting nebo verzovaný název typu; obojí rozebírá kapitola [Event Sourcing](/event-sourcing).
 
-**Příbuzný anti-vzor: událost jako aplikační hook.** Názvy `CacheShouldBeInvalidated` nebo `EmailNeedsToBeSent` nepopisují fakt, ale příkaz převlečený do minulého času. Verraes třídí zprávy na příkazy, dotazy a informace [[8]](https://verraes.net/2015/01/messaging-flavours/); takový název plete první kategorii se třetí. Doménová událost říká, co se v doméně stalo, a nezajímá se, kdo na ni zareaguje. Jakmile její jméno obsahuje instrukci pro infrastrukturu, jde o příkaz, ne o událost.
+**Příbuzný anti-vzor: událost jako aplikační hook.** Názvy `CacheShouldBeInvalidated` nebo `EmailNeedsToBeSent` nepopisují fakt, ale příkaz převlečený za událost. Verraes třídí zprávy na příkazy, dotazy a informace [[8]](https://verraes.net/2015/01/messaging-flavours/); takový název plete první kategorii se třetí. Doménová událost říká, co se v doméně stalo, a nezajímá se, kdo na ni zareaguje. Jakmile její jméno obsahuje instrukci pro infrastrukturu, jde o příkaz, ne o událost.
 
 ## 21.07 Anti-vzor: Doménová logika v infrastrukturní vrstvě {#logika-v-infrastrukture}
 
@@ -1121,7 +1125,7 @@ class User { /* ... */ }         // Proč User? Systém je pro pojišťovnu!
 class Customer { /* ... */ }     // Jiný název ve stejném projektu
 class Account { /* ... */ }      // Třetí název v jiném modulu
 
-// API endpoint: GET /api/clients/{id}
+// API endpoint: GET /api/customers/{id}
 
 // Doctrine entita:
 #[ORM\Entity]

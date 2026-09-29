@@ -7,7 +7,7 @@ meta_description: "Testování DDD kódu v Symfony: unit testy agregátů, integ
 meta_keywords: "testování DDD, PHPUnit, unit testy, integrační testy, funkční testy, InMemory repozitář, test doubles, doménové události, Deptrac, phparkitect, KernelTestCase, WebTestCase, Symfony testy, testovací pyramida, coverage, messenger-test, async testování"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Testování DDD
 schema_type: TechArticle
 schema_headline: "Testování DDD kódu v Symfony"
@@ -188,7 +188,7 @@ final class EmailTest extends TestCase
 :::
 
 Pojmenované klíče v data provideru se objeví ve výstupu PHPUnitu, takže spadlý případ je vidět
-bez čtení testu: `EmailTest::testThrowsExceptionForInvalidInput with data set „chybí doména“`.
+bez čtení testu: `EmailTest::testThrowsExceptionForInvalidInput@chybí doména with data ('jan@')`.
 Pro jeden nebo dva vstupy stačí atribut `#[TestWith([''])]` přímo nad metodou; samostatný
 provider se vyplatí od tří případů výš.
 
@@ -1558,7 +1558,7 @@ statické analýzy.
 
 Na historii balíčku záleží, protože podle ní se hledá dokumentace. Projekt vznikl
 v sensiolabs-de, pokračoval pod hlavičkou QOSSMIC a dnes má vlastní organizaci. Balíček
-`qossmic/deptrac` je od listopadu 2024 na Packagistu označený jako abandoned a nahradil ho
+`qossmic/deptrac` je na Packagistu označený jako abandoned a nahradil ho
 `deptrac/deptrac` [[15]](https://github.com/deptrac/deptrac). Řada 4.x drží konfiguraci ve výchozím
 souboru `deptrac.php` s typovaným API; YAML zůstává podporovaný, ale `vendor/bin/deptrac init`
 generuje PHP.

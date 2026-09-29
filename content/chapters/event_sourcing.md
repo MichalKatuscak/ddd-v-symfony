@@ -7,7 +7,7 @@ meta_description: "Event Sourcing v DDD a Symfony 8: Event Store, projekce, snap
 meta_keywords: "Event Sourcing, DDD, Domain-Driven Design, Symfony, Event Store, Aggregate, Projection, Outbox pattern, Snapshot, CQRS, doménové události, PHP, immutabilita, event stream, Symfony Messenger, idempotence, eventual consistency, upcasting, event versioning, projection rebuild, dual-write problem"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Event Sourcing
 schema_type: TechArticle
 schema_headline: "Event Sourcing v DDD a Symfony"
@@ -120,7 +120,7 @@ převáží náklady na implementaci a provoz.
 - **Auditní log jako doménový požadavek** – Finanční systémy, zdravotnické záznamy nebo jakákoli doména, kde je zákonná povinnost uchovávat kompletní historii změn. Auditní log v ES vychází přímo z formátu úložiště a nepotřebuje samostatnou implementaci.
 - **Komplexní doménová logika s bohatými stavovými přechody** – Agregáty procházejí mnoha stavy, každý přechod má svou sémantiku a musí být rekonstruovatelný. Typicky: objednávkové systémy, workflow enginy, bankovní transakce.
 - **Temporální dotazy** – Potřeba „přehrát“ stav systému k libovolnému bodu v minulosti (debugging, analýza, „what-if“ scénáře). U ES stačí replay eventů do daného timestampu.
-- **Event-driven integrace** – Systém produkuje události, které konzumují jiné Bounded Contexts nebo externí systémy. ES zajišťuje, že se žádná událost neztratí. Ven se ale publikuje jen vybraná podmnožina událostí, ne interní stream agregátu; viz [Interní a publikované události](#interni-a-publikovane-udalosti).
+- **Event-driven integrace** – Systém produkuje události, které konzumují jiné Bounded Contexts nebo externí systémy. Událost je v ES zároveň zápisem stavu, takže se z úložiště neztratí. Doručení konzumentům ale zajišťuje až relay, viz [Event Store jako outbox](#outbox). Ven se navíc publikuje jen vybraná podmnožina událostí, ne interní stream agregátu; viz [Interní a publikované události](#interni-a-publikovane-udalosti).
 - **CQRS s vysokou čtecí zátěží** – ES umožňuje vybudovat libovolný počet optimalizovaných read modelů z jednoho event streamu, aniž by bylo nutné měnit write model.
 
 ### Nevhodné případy užití
@@ -149,12 +149,13 @@ contexts**, kde se investice vrátí – typicky na Core Domain s komplexní dom
 ### Broker není Event Store {#broker-neni-event-store}
 
 Kafka, RabbitMQ ani Redis Streams roli Event Store nezastanou, i když se v nich události
-také objevují v pořadí. Dudycz uvádí tři technické důvody
+také objevují v pořadí. Dudycz uvádí dva technické důvody
 [[4]](https://event-driven.io/en/event_streaming_is_not_event_sourcing/). Brokery neumí
 optimistic concurrency na úrovni streamu, takže nemají čím ochránit invariant agregátu
-proti souběžnému zápisu. Přečíst jeden stream a poskládat z něj agregát je v nich
-buď nespolehlivé, nebo drahé. A retenční model je stavěný na průtok, ne na trvalé uložení:
-data po nastavené době mizí, a to je u zdroje pravdy nepřijatelné.
+proti souběžnému zápisu. Stream v nich jde odebírat, ne přečíst. Poskládat z něj
+agregát je proto buď nespolehlivé, nebo drahé. Brokery jsou podle něj stavěné na přepravu
+událostí, ne na trvalé uložení. Ukazuje to i retence: data po nastavené době mizí,
+a to je u zdroje pravdy nepřijatelné.
 
 Rozdělení rolí je tedy jednoznačné: Event Store drží historii a vynucuje nad ní pravidla,
 broker ji rozváží konzumentům. Zbytek kapitoly proto používá Symfony Messenger a RabbitMQ
@@ -361,18 +362,23 @@ takže by jinak deserializace na serveru s odlišnou default timezone časy posu
 :::callout{type="note"}
 ### Jeden čas nestačí {#cas-udalosti-heading}
 
-`occurredAt` v bázové třídě je čas zápisu do systému. Doménový fakt ale mohl nastat jindy.
-Fowler oba časy pojmenovává *record time* a *actual time*
-[[5]](https://martinfowler.com/eaaDev/timeNarrative.html), Verraes totéž rozvádí pod
+`occurredAt` říká, kdy se fakt v doméně stal. Evans čas zadání do systému vede jako
+samostatné razítko [[12]](https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf),
+Fowler oba časy pojmenovává *actual time* a *record time*
+[[5]](https://martinfowler.com/eaaDev/timeNarrative.html) a Verraes totéž rozvádí pod
 názvem multi-temporal events [[6]](https://verraes.net/2022/03/multi-temporal-events/).
+Bázová třída přitom `occurredAt` plní v `create()` aktuálním časem, tedy okamžikem zápisu.
 Dokud událost vzniká přímo z uživatelské akce, oba časy splývají a rozdíl nikoho netrápí.
 
 Rozejdou se ve chvíli, kdy fakt nastal jinde a k vám dorazil později: noční import
 bankovních transakcí z předchozího dne, zpětné zadání havárie, integrace s pomalým
-externím systémem. Doménový čas pak patří do payloadu pod vlastním jménem
-(`depositedAt`, `crashedAt`, `placedAt`) a z `occurredAt` zbývá infrastrukturní údaj.
+externím systémem. Doménový čas pak nesmí vzniknout z hodin serveru. Dodá ho producent
+události a čas zápisu se nese zvlášť jako `recordedAt`, stejně jako v kapitole
+[Anti-vzory](/anti-vzory#mutovatelne-udalosti). Verraes navíc doporučuje doménový čas
+pojmenovat podle jeho významu (`depositedAt`, `crashedAt`).
 Projekce v sekci [Projekce](#projekce) plní sloupce `placed_at` a `shipped_at` z `occurredAt`.
-U objednávek zadaných online to sedí, u importovaných dat by šlo o chybu.
+U objednávek zadaných online to sedí, u importovaných dat vytvořených přes `create()`
+by šlo o chybu.
 :::
 
 :::callout{type="warn"}
@@ -1332,6 +1338,9 @@ na jednom místě.
 Identifikátory jsou zde primitivní řetězce, ne hodnotové objekty jako ve zbytku knihy.
 Je to druhá záměrná odchylka této kapitoly: událost se serializuje do Event Store
 a zpět, takže primitivní tvar drží ukázku čitelnou bez vrstvy převodních typů.
+Ze stejného důvodu nese `OrderItem` cenu jako `int` v haléřích místo `Money`
+a `addItem()` přijímá celou položku, ne trojici `ProductId`, množství a `Money`
+jako kanonický agregát.
 V produkci hodnotové objekty zůstávají, převod obstará serializer.
 
 ### Načítání agregátu z event streamu (replay)
@@ -2601,8 +2610,8 @@ t3:  OrderPlaced v2  ──▶ konzumenti A, B, C
 
 Cena: po dobu přechodu dvojnásobný objem zápisů a riziko, že se obě verze rozejdou.
 Zápis obou variant proto patří do jednoho místa – do mapperu z interní události na
-publikovanou, ne do doménového kódu. Strategii popisuje Young v samostatné kapitole
-knihy o verzování [[8]](https://leanpub.com/esversioning).
+publikovanou, ne do doménového kódu. Strategii popisuje Young v knize o verzování jako součást kapitoly
+o základním verzování podle typu [[8]](https://leanpub.com/esversioning).
 :::
 
 :::callout{type="note"}

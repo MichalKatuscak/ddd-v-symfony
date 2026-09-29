@@ -7,7 +7,7 @@ meta_description: "CQRS v Symfony 8: oddělení command a query strany přes Mes
 meta_keywords: "CQRS, Command Query Responsibility Segregation, Symfony Messenger, bounded contexts, doménové modely, příkazy, dotazy, command handlers, query handlers, asynchronní zpracování, Event Sourcing, DDD, Symfony 8, read model, eventual consistency, ViewModel, projekce, dead letter queue"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: CQRS
 schema_type: TechArticle
 schema_headline: "CQRS v Symfony 8"
@@ -300,8 +300,10 @@ final readonly class OrderPlacedProjector { /* … */ }
 :::
 
 Na Outboxu je vidět, proč na tom záleží. Relay, který odešle doménovou událost
-na `command.bus`, narazí na chybějící handler, vyčerpá retry a událost zahodí –
-přesně to, čemu má Outbox bránit. Dostupné aliasy vypíše `debug:autowiring MessageBus`.
+na `command.bus`, narazí na chybějící handler a vyčerpá retry. K posluchačům se událost
+nedostane: bez `failure_transport` ji Messenger zahodí, s ním skončí v dead letter queue
+z [12.14](#error-handling) a čeká na ruční zásah. Přesně tomu má Outbox bránit.
+Dostupné aliasy vypíše `debug:autowiring MessageBus`.
 
 :::callout{type="warn"}
 ### `doctrine_transaction` middleware vs. „jeden agregát = jedna transakce“ {#doctrine-transaction-konflikt-heading}
@@ -1292,6 +1294,12 @@ formátu záleží: `Y-m-d H:i:s` se sekundovou přesností podmínku obrátí p
 téhož agregátu běžně spadnou do jedné vteřiny a `<` je pak nepravdivé i pro platný přechod:
 objednávka se odešle, ale dashboard mlčky zůstane na `placed`. Proto `.u` ve formátu
 a `TIMESTAMP(6)` ve sloupci.
+
+Podmínka chrání jen řádek, který už existuje. Když `OrderShipped` dorazí dřív než
+`OrderPlaced` (například proto, že zpracování `OrderPlaced` čeká na retry), `UPDATE`
+netrefí nic a pozdější upsert založí řádek ve stavu `placed`. Dashboard na něm zůstane.
+Obranu proti prohozenému pořadí rozebírá callout
+[Out-of-order doručení](/event-sourcing#out-of-order-heading).
 
 Jedna výhrada: událost, která projde outboxem, se serializuje přes `DateTimeNormalizer`
 a ten ve výchozím nastavení píše RFC 3339 **bez** zlomků sekundy. Mikrosekundy se cestou

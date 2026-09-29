@@ -7,7 +7,7 @@ meta_description: "Sedm situací, kdy DDD nepoužívat – s alternativami, uká
 meta_keywords: "kdy nepoužívat DDD, DDD nevhodné projekty, DDD alternativy, DDD limity, DDD CRUD, DDD startup, DDD malý tým, rozhodovací strom DDD"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Kdy DDD nepoužívat
 schema_type: TechArticle
 schema_headline: "Kdy DDD nepoužívat – upřímně"
@@ -182,7 +182,7 @@ final class Order {                                 // Aggregate Root
     /** @var OrderLine[] */
     private array $lines;                           // ← za 2 týdny: neexistuje
 
-    public function place(): void { /* domain events, invariants... */ }
+    public static function place(OrderId $id, CustomerId $customerId): self { /* domain events, invariants... */ }
 }
 
 // + OrderPlaced event, OrderRepository interface, PlaceOrderHandler...
@@ -337,7 +337,9 @@ final class Order extends AggregateRoot
     private function __construct(
         public readonly OrderId $id,
         public readonly CustomerId $customerId,
-    ) {}
+    ) {
+        $this->status = OrderStatus::Draft;
+    }
 
     public function cancel(string $reason, \DateTimeImmutable $when): void
     {

@@ -7,7 +7,7 @@ meta_description: "Ságy a Process Managery v DDD a Symfony Messenger: kompenzac
 meta_keywords: "saga, process manager, kompenzační transakce, choreografie, orchestrace, CQRS, DDD, Symfony 8, Messenger, distribuované transakce"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Ságy a Process Managery
 schema_type: TechArticle
 schema_headline: "Ságy a Process Managery"
@@ -106,7 +106,8 @@ U cizího zdroje se vyplatí ověřit, kterou z konvencí používá.
 Hohpe, G. & Woolf, B., **Enterprise Integration Patterns** (2003);
 Dahan, U., **No more workflow for nServiceBus – please welcome the Saga** (2007);
 Microsoft patterns & practices, **CQRS Journey** (2012), Reference 6: A Saga on Sagas;
-Vernon, V., **Implementing Domain-Driven Design** (2013), kap. 4 a 13.*
+Vernon, V., **Implementing Domain-Driven Design** (2013), kap. 4 a 13;
+Richardson, C., **Microservices Patterns** (2018), kap. 4.*
 
 Ságu lze koordinovat dvěma způsoby: [choreografií](#choreografie) a
 [orchestrací](#orchestrace). Implementace v Symfony 8 stojí na
@@ -237,16 +238,24 @@ Kompenzace toho dosáhne tak, že si nejdřív ověří aktuální stav
 
 Ne každý vícekrokový proces snese rozdělení na kompenzovatelné kroky. Garcia-Molina
 se Salemem uvádějí protipříklad, který funguje dodnes jako test: převod peněz mezi
-dvěma účty. První krok částku odepíše, druhý ji připíše. V mezidobí není nikde.
-Takový mezistav není neúplný, ale pro doménu nečitelný: účetnictví v něm
-nesedí a nikdo si ho nesmí přečíst, ani na vteřinu.
+účty. První krok částku odepíše a podrží ji v lokální proměnné, poslední ji připíše.
+V mezidobí peníze v databázi nejsou nikde. Takový mezistav není neúplný, ale pro
+doménu nečitelný: audit spuštěný mezi kroky nenajde všechny prostředky.
 
 Rozdíl mezi „neúplným“ a „nečitelným“ mezistavem je použitelné návrhové kritérium.
 Objednávka se strženou platbou a nerezervovaným zbožím je neúplná: doména pro ten
-stav má jméno a operátor s ním umí pracovat. Peníze, které nejsou na žádném účtu,
-jméno nemají. Nedá-li se pro mezistav ságy napsat srozumitelný stav v
-[Ubiquitous Language](/zakladni-koncepty#ubiquitous-language), vzor nesedí
-a kroky patří do jedné transakce nad jedním agregátem.
+stav má jméno a operátor s ním umí pracovat. Peníze, které nejsou na žádném účtu
+ani v žádné evidenci, jméno nemají. Nedá-li se pro mezistav ságy napsat srozumitelný
+stav v [Ubiquitous Language](/zakladni-koncepty#ubiquitous-language), vzor v této
+podobě nesedí.
+
+Tentýž článek nabízí i východisko. Uloží-li se odepsaná částka do databáze jako
+„peníze na cestě“ (*funds in transit*), mezistav dostane jméno a převod ságou být
+může. Transakce, které potřebují vidět všechny peníze, pak musí s touto evidencí
+počítat, a proto ji autoři doporučují navrhnout od začátku, ne dolepit dodatečně.
+Tak převod řeší [kapitola o návrhu agregátu](/navrh-agregatu#transactional-consistency).
+Když takový stav doména pojmenovat nechce, kroky patří do jedné transakce nad
+jedním agregátem.
 
 :::callout{type="warn"}
 ### Akce, které vrátit nelze {#nevratne-akce-heading}
@@ -870,7 +879,7 @@ ságy v databázi a je jasné, ve kterém kroku proces stojí. Rozšíření o n
 krok (například Fraud Detection mezi platbu a sklad) znamená nový stav v enumu,
 novou metodu pro `FraudCheckPassed` a úpravu `onPaymentSucceeded`, která místo
 rezervace skladu nově vydá příkaz pro kontrolu podvodů. Celá změna zůstává
-v jediné třídě. Kontexty Warehouse ani Payment se neupravují.
+v Process Manageru a jeho enumu stavů. Kontexty Warehouse ani Payment se neupravují.
 
 :::callout{type="note"}
 ### Každá metoda = jeden krok stavového automatu {#step-method-heading}
@@ -1696,9 +1705,11 @@ Metoda doplněná do entity `OrderSaga` z předchozí ukázky. Využívá sloupc
 
 Transportní identifikátory se k tomu nehodí. `TransportMessageIdStamp` je podle
 vlastní dokumentace *„id of this message in that transport“*, tedy hodnota vázaná
-na konkrétní transport a přidělená až při odeslání či příjmu. Po redelivery nebo
-při průchodu jiným transportem se změní, takže by táž událost prošla dvakrát –
-přesně to, čemu má idempotence zabránit.
+na konkrétní transport a přidělená až při odeslání či příjmu. Retry zprávu odešle
+do transportu znovu a Doctrine transport jí přidělí nové id řádku. Totéž platí pro
+průchod jiným transportem. Táž událost by tak prošla dvakrát – přesně to, čemu má
+idempotence zabránit. Duplicitu od odesílatele, třeba relay outboxu, který událost
+publikuje dvakrát, transportní id nepozná vůbec: jde o dvě různé zprávy.
 
 Krokové události z [14.05](#process-manager-heading) proto nesou `eventId`; bez něj se
 guard nemá čeho chytit. Process Manager metodu volá místo přímého `transitionTo()`:
@@ -1765,9 +1776,10 @@ private function onPaymentSucceeded(PaymentSucceeded $event): void
 
 Guard patří **do každého kroku**, ne jen do platby. `OrderSaga` proto dostane obdobné
 `applyStockReserved()` a `applyShipmentCreated()`; liší se jen očekávaným stavem a cílem
-přechodu. Bez nich vyrobí opakovaně doručená `StockReserved` druhou i třetí zásilku,
-v kontextu přežije jen ta poslední a kompenzace zruší jednu ze tří. Objednávka přitom
-skončí `shipped` a dead-letter fronta zůstane prázdná – nikde se to nepozná.
+přechodu. Bez nich vyrobí opakovaně doručená `StockReserved` druhou i třetí zásilku.
+Sága si zapamatuje jen tu, jejíž `ShipmentCreated` dorazí první, a přejde do `Completed`.
+Zbylé dvě události skončí na guardu terminálního stavu a jejich zásilky nikdo nezruší.
+Objednávka přitom skončí `shipped` a dead-letter fronta zůstane prázdná – nikde se to nepozná.
 
 Druhá polovina obrany patří do agregátu. `cancel()`, `markPaid()` i `ship()`
 v kanonické verzi z [Návrhu agregátu](/navrh-agregatu#references-by-id) při opakovaném
@@ -1817,6 +1829,13 @@ redelivery, souběh řeší až verze řádku. Druhé omezení je růst: `proces
 se nikdy nezmenšuje. U ságy s desítkami kroků to nevadí. U dlouhoběžících procesů
 s tisíci událostí ale sloupec bobtná. Řešením je vyprázdnit ho po dokončení ságy,
 nebo držet jen posledních N identifikátorů.
+
+Guard navíc otevírá vlastní okno. `save()` zapíše stav i zpracované `eventId` dřív,
+než odejdou příkazy. Spadne-li worker mezi zápisem a dispatchem, redelivery skončí
+na guardu a `MarkOrderPaid` ani `ReserveStock` už neodejdou. Sága pak stojí
+v `AwaitingStockReservation` a zachytí ji až [detekce zaseklých ság](#detekce-zaseklych-heading).
+Okno zavře jen zápis stavu ságy a odchozích příkazů v jedné transakci, například
+přes [Outbox](/outbox-pattern).
 
 ### Distributed deadlock mezi ságami {#distributed-deadlock-heading}
 
@@ -2410,8 +2429,10 @@ akce je plnohodnotná doménová operace s vlastními pravidly a událostmi.
 
 :::code{language="php" filename="snippet.php"}
 /**
- * Kompenzace: spouští se při selhání libovolného kroku.
- * Provádí kompenzační akce v opačném pořadí dokončených kroků.
+ * Kompenzace: vrací dokončené kroky v opačném pořadí.
+ * Úplný výpis v 14.05 obsahuje obdobnou smyčku přímo v onOrderCancelled().
+ * Větev stock_reserved slouží jen stornu zvenčí: za pivotem (rezervací
+ * skladu) selhání kroku kompenzaci nespouští, jen retry.
  */
 private function compensate(OrderSaga $state): void
 {

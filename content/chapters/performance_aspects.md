@@ -7,7 +7,7 @@ meta_description: "Read modely, projekce a výkon v DDD se Symfony a Doctrine: N
 meta_keywords: "DDD výkon, Doctrine ORM optimalizace, N+1 problém, lazy loading, JOIN FETCH, DQL, CQRS read model, UUID ULID, Doctrine Identity Map, Unit of Work, batch zpracování, Symfony Cache, Blackfire profiling, agregát hranice"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Read modely a výkon
 schema_type: TechArticle
 schema_headline: "Read modely, projekce a výkon"
@@ -255,10 +255,12 @@ pro dotaz se `SUM()` nebo `COUNT()` je lepší napsat vlastní počítací dotaz
 
 ### Řešení 3: eager fetch po dávkách {#eager-fetch-batch-heading}
 
-U kolekce mapované jako `fetch: 'EAGER'` Doctrine nevydá JOIN. Kolekce načte druhým dotazem,
-který obslouží několik kořenových entit najednou. Velikost dávky má výchozí hodnotu 100
+U kolekce mapované jako `fetch: 'EAGER'` Doctrine nevydá JOIN. OneToMany kolekci načte druhým
+dotazem, který obslouží několik kořenových entit najednou. Velikost dávky má výchozí hodnotu 100
 a nastavuje ji `Configuration::setEagerFetchBatchSize(int $batchSize = 100)`. Z N+1 dotazů
 se tak stane `N/100 + 1` a mechanismus běží i bez explicitní konfigurace.
+Dávkování se netýká ManyToMany: eager ManyToMany kolekce stojí jeden dotaz na každého rodiče,
+takže N+1 zůstává. Totéž platí pro OneToMany s `indexBy` nebo se složeným cizím klíčem.
 
 Háček: `EAGER` v mapování platí globálně, i pro dotazy, které asociaci vůbec
 nepotřebují. Dokumentace ORM proto doporučuje řešit N+1 primárně fetch joinem v DQL.
@@ -825,8 +827,9 @@ final class ImportProductsHandler
 :::
 :::
 
-Velikost dávky je empirická hodnota, ne konstanta z dokumentace. Doctrine doporučuje začít
-u malých čísel (řádově desítky) a měřit; optimum závisí na šířce řádku, počtu indexů
+Velikost dávky je empirická hodnota, ne konstanta z dokumentace. Dokumentace Doctrine radí
+s ní experimentovat: větší dávka ušetří režii, ale prodlouží jeden `flush()`. Její vlastní
+příklady pracují s dávkou 20. Optimum závisí na šířce řádku, počtu indexů
 a nastavení databáze. Sto řádků v ukázce je výchozí bod, ne cíl.
 
 :::callout{type="warn"}
@@ -928,7 +931,8 @@ final class GetUserProfileHandler
 
                 return $this->readRepository->findById($query->userId);
             },
-            // beta > 0 zapne pravděpodobnostní předčasné přepočítání
+            // 1.0 je výchozí hodnota, uvedená jen pro názornost;
+            // 0 předčasné přepočítání vypne, vyšší hodnota ho uspíší
             beta: 1.0,
         );
     }
@@ -943,8 +947,8 @@ Odpovídá to zásadě z calloutu výše: do cache patří výsledky read modelu
 
 Ukázka používá Cache Contracts (`Symfony\Contracts\Cache\CacheInterface`), ne holé PSR-6.
 Kromě kratšího kódu drží Contracts po dobu výpočtu zámek, takže při vypršení záznamu
-přepočítá hodnotu jen jeden proces a ostatní na témže serveru počkají. Parametr `$beta` k tomu přidá
-pravděpodobnostní předčasnou expiraci: čím blíž je záznam konci platnosti, tím větší šance,
+přepočítá hodnotu jen jeden proces a ostatní na témže serveru počkají. K tomu Contracts ve výchozím
+stavu (`$beta = 1.0`) používají pravděpodobnostní předčasnou expiraci: čím blíž je záznam konci platnosti, tím větší šance,
 že ho jeden náhodně vybraný požadavek přepočítá dřív, než vyprší. Obojí brání cache stampede,
 kdy po expiraci horkého klíče spustí tentýž dotaz stovky souběžných požadavků najednou.
 Holé PSR-6 přes `CacheItemPoolInterface` zůstává pro interoperabilitu s knihovnami třetích stran.
@@ -1014,6 +1018,9 @@ Hromadné aktualizace, které nemusí procházet doménovou logikou, zvládne Do
 přímo jako DQL `UPDATE` nebo `DELETE`. Ty obcházejí Identity Map i Unit of Work,
 protože jde o přímé SQL příkazy přeložené z DQL. **Nevýhoda:**
 po DQL bulk operaci jsou spravované entity v Identity Map nekonzistentní se stavem v databázi.
+DQL `UPDATE` navíc změní jen vyjmenované sloupce, takže verzi z `#[ORM\Version]` nezvýší.
+Souběžný zápis přes agregát, který si řádek načetl dřív, pak konflikt nepozná a hromadnou
+změnu přepíše. U verzované entity proto patří do `SET` i `o.version = o.version + 1`.
 
 Obvyklá rada zní zavolat `clear()`. V ORM 3 ale `clear()` argument nepřijímá, takže odpojí
 úplně všechno, včetně rozdělané práce volajícího. Bezpečnější pořadí je pustit bulk operaci
@@ -1569,7 +1576,7 @@ když měření odhalí kolekci, která k invariantu nepatří. Pokračováním 
 - question: Zpomaluje DDD aplikaci oproti CRUD?
   answer: 'Samotné DDD výkon nesnižuje. Doménové třídy jsou čisté PHP bez běhové režie. Zpomalení nastává, když je špatně navržený agregát (načte víc dat, než je třeba). Další příčinou je chybějící read model v CQRS nebo nesprávné použití Doctrine lazy loadingu, které vede k N+1 dotazům. Explicitní hranice naopak optimalizaci usnadňují: je zřejmé, co se načítá kvůli invariantu a co jen kvůli zobrazení. Viz <a href="#uvodem">sekci Výkon v kontextu DDD</a>.'
 - question: Jak v DDD řešit N+1 problém s agregáty?
-  answer: 'N+1 vzniká, když aplikace ke každému načtenému objektu dotahuje jeho vnitřní prvky samostatným dotazem. První volbou je fetch join v DQL (<code>SELECT o, i FROM Order o LEFT JOIN o.items i</code>) v metodě repozitáře. Pro čtení dat do UI bývá ještě přímočařejší denormalizovaný read model, který ORM lazy loading vynechá úplně. Až poslední volbou je <code>fetch: ''EAGER''</code> v mapování: u kolekcí nevydá JOIN, ale druhý dotaz po dávkách (výchozí velikost 100), a platí globálně i pro dotazy, které asociaci nepotřebují. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
+  answer: 'N+1 vzniká, když aplikace ke každému načtenému objektu dotahuje jeho vnitřní prvky samostatným dotazem. První volbou je fetch join v DQL (<code>SELECT o, i FROM Order o LEFT JOIN o.items i</code>) v metodě repozitáře. Pro čtení dat do UI bývá ještě přímočařejší denormalizovaný read model, který ORM lazy loading vynechá úplně. Až poslední volbou je <code>fetch: ''EAGER''</code> v mapování: u OneToMany kolekcí nevydá JOIN, ale druhý dotaz po dávkách (výchozí velikost 100; ManyToMany dávkování nemá), a platí globálně i pro dotazy, které asociaci nepotřebují. Rozbor řešení v <a href="#n-plus-1-problem">sekci N+1 problém</a>.'
 - question: Má velikost agregátu vliv na výkon?
   answer: 'Ano. Příliš velký agregát tahá z databáze víc dat, než operace potřebuje. Pokud každá změna zvedá verzi kořene, vede navíc k častým konfliktům optimistického zamykání. Doctrine ji ale při změně potomka sám nezvedne, takže bez ručního zvednutí verze se místo konfliktu invariant tiše poruší (viz <a href="/anti-vzory#agregat-problemy-heading">Anti-vzory</a>). Správně zvolený agregát drží jen to, co musí být konzistentní v jedné transakci. Když dvě části agregátu nesdílejí invariant, jde zpravidla o dva samostatné agregáty. Rozdělení zvýší paralelismus i rychlost operací. Podrobný rozbor v <a href="#agregat-hranice">sekci Agregát a výkon</a>.'
 - question: Jak optimalizovat read model v CQRS?

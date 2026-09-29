@@ -7,7 +7,7 @@ meta_description: "Postupná migrace z CRUD na DDD v Symfony 8: Strangler Fig Pa
 meta_keywords: "migrace CRUD DDD, Strangler Fig Pattern, refaktorizace na DDD, extrakce doménové vrstvy, value objects, repozitáře DDD, CQRS migrace, charakterizační testy, Symfony DDD migrace"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Migrace z CRUD
 schema_type: TechArticle
 schema_headline: "Migrace z CRUD architektury na DDD v Symfony"
@@ -40,9 +40,10 @@ logika se začne usazovat na nevhodných místech.
 ### Kdy DDD přináší hodnotu a kdy je CRUD dostačující
 
 Rozhodnutí o migraci stojí na analýze komplexity domény, ne na trendech.
-Martin Fowler v katalogu vzorů podnikových aplikací ukazuje, že Transaction Script
-a CRUD jsou rozumnou volbou pro aplikace s jednoduchými doménovými pravidly
-[[1]](https://martinfowler.com/eaaCatalog/transactionScript.html).
+Martin Fowler v knize *Patterns of Enterprise Application Architecture* označuje
+Transaction Script za přirozenou volbu pro aplikace s malým množstvím logiky. Se složitějšími
+pravidly se podle něj takový kód udržuje čím dál hůř a výhodu získává Domain Model
+[[1]](https://www.informit.com/articles/article.aspx?p=1398617).
 
 :::callout{type="note"}
 ### Kdy DDD přináší hodnotu {#kdy-ddd-heading}
@@ -180,9 +181,10 @@ Strangler Fig Pattern oproti tomu:
 
 Původní zápis byl krátká úvaha nad metaforou. V roce 2024 ho Fowler přepsal a převzal
 od Iana Cartwrighta, Roba Horna a Jamese Lewise čtyři aktivity: ujasnit cílové výsledky,
-rozdělit problém na menší části, dodávat je postupně a měnit organizaci. Poslední bod týmy
-vynechávají nejčastěji. Bez změny organizace skončí nový systém stejně křehký jako ten
-nahrazený, jen na novějším frameworku [[2]](https://martinfowler.com/bliki/StranglerFigApplication.html).
+rozdělit problém na menší části, dodávat je postupně a měnit organizaci. Pořadí podle
+Fowlera neznamená posloupnost. Změna organizace prostupuje všemi ostatními aktivitami:
+bez ní skončí nový systém stejně křehký jako ten nahrazený, jen na novější technologii
+[[2]](https://martinfowler.com/bliki/StranglerFigApplication.html).
 
 Vzor komplexitu neodstraňuje, rozprostírá ji v čase. Platí se za to přechodovou
 architekturou: routovací vrstvou, dvojím zápisem, překladovými adaptéry. Ian Cartwright,
@@ -1093,8 +1095,7 @@ class UserController extends AbstractController
         // Kontroler musí vědět, jaké parametry service očekává
         $this->userService->register(
             $request->request->get('email'),
-            $request->request->get('password'),
-            $request->request->get('name')
+            $request->request->get('password')
         );
         return $this->json(['status' => 'ok'], 201);
     }
@@ -1261,7 +1262,7 @@ Plné pokrytí legacy systému charakterizačními testy nikdo nenapíše a kdo 
 nezačne. Matthias Noback argumentuje, že strukturální transformace zachovávající chování
 jsou bezpečné i bez testů, pokud je jistí statická analýza a párové programování
 [[17]](https://matthiasnoback.nl/2022/10/refactoring-without-tests-should-be-fine/).
-Použitelná gradace:
+Na jeho úvahu navazuje gradace, kterou Noback v článku takto nerozepisuje:
 
 1. Automatizovaný refaktoring z IDE (rename, extract method, move class) proběhne bez testu.
 2. Ruční strukturální změna pod PHPStan na úrovni 8 a s jedním vysokoúrovňovým smoke testem.

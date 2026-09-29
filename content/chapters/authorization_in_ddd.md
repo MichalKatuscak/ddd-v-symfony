@@ -7,7 +7,7 @@ meta_description: "Kde má v DDD aplikaci sedět autorizace: edge, use case, agr
 meta_keywords: "Autorizace, Authorization, Symfony Voter, RBAC, ABAC, Policy-based, ACL, Aggregate permissions, DDD Symfony 8, Security, Doctrine, Owner-based, Multi-tenancy, TenantFilter"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Autorizace v DDD
 schema_type: TechArticle
 schema_headline: "Autorizace v DDD na Symfony – 4 vrstvy, Voters a policy-based přístup"
@@ -107,7 +107,7 @@ final class OrderVoter extends Voter
 }
 :::
 
-Co je špatně: setter `Order::setStatus(OrderStatus::Cancelled)` dál existuje a je veřejný. Stačí, aby ho kdokoli (test, fixture, migrační skript, jiný vývojář) zavolal mimo Voter, a invariant „storno do 24 h“ přestane platit. Voter je jen *volitelný* filtr před vstupem, doména žádnou pojistku nemá. Storno lhůta je doménové pravidlo, ne pravidlo use case.
+Co je špatně: setter `Order::setStatus('cancelled')` dál existuje a je veřejný. Stačí, aby ho kdokoli (test, fixture, migrační skript, jiný vývojář) zavolal mimo Voter, a invariant „storno do 24 h“ přestane platit. Voter je jen *volitelný* filtr před vstupem, doména žádnou pojistku nemá. Storno lhůta je doménové pravidlo, ne pravidlo use case.
 
 ### Chyba 3: Autorizace na úrovni databázových řádků {#tri-chyby-doctrine-heading}
 
@@ -517,7 +517,7 @@ Pět implementačních detailů:
 - **Konstanty atributů s prefixem entity** (`order.cancel`, ne jen `CANCEL`). Nekolidují s atributy jiných Voterů (`invoice.cancel`, `shipment.cancel`) a z audit logu je hned vidět, kterého subjektu se rozhodnutí týkalo.
 - **Match expression** místo stromu if-else. Bez default větve PHPStan ohlásí nepokrytý případ; `default => false` volí tiché zamítnutí (fail-closed) a tuto kontrolu obětuje.
 - **Privátní metody `canView`, `canCancel`**. Každý use case má vlastní metodu a test ověří výsledek každého z nich zvlášť. Bez extrakce by Voter přerostl v nečitelný switch-case.
-- **Role se uvnitř Voteru kontrolují přes `AccessDecisionManagerInterface::decide()`**, ne dotazem na uživatelskou třídu. Volání `$user->hasRole('ROLE_ADMIN')` obejde hierarchii rolí ze `security.yaml`: uživatel s `ROLE_SUPER_ADMIN` by `ROLE_ADMIN` nedostal, přestože ho hierarchie zahrnuje. Doporučuje to i dokumentace k Voterům [[7]](https://symfony.com/doc/current/security/voters.html).
+- **Role se uvnitř Voteru kontrolují přes `AccessDecisionManagerInterface::decide()`**, ne dotazem na uživatelskou třídu. Dotaz `in_array('ROLE_ADMIN', $user->getRoles(), true)` obejde hierarchii rolí ze `security.yaml`: uživatel s `ROLE_SUPER_ADMIN` by `ROLE_ADMIN` nedostal, přestože ho hierarchie zahrnuje. Před ručním `getRoles()` varuje dokumentace Security [[1]](https://symfony.com/doc/current/security.html#hierarchical-roles), `decide()` ve Voteru doporučuje dokumentace k Voterům [[7]](https://symfony.com/doc/current/security/voters.html).
 - **`supportsAttribute()` a `supportsType()`** pocházejí z `CacheableVoterInterface`, které abstraktní `Voter` implementuje. Obě ve výchozím stavu vracejí `true`, takže bez override nic neušetří. Seznam s 200 řádky a pěti Votery znamená tisíc zbytečných volání `supports()`; s override jich většina odpadne už v rozhodovacím manažeru.
 
 ### Rozhodovací strategie a `AccessDecisionManager` {#access-decision}
@@ -1322,7 +1322,7 @@ Volba mezi přístupy:
 | Testování | Twig integrační test | Unit + integrační test read modelu |
 | Soulad s OWASP A01:2021 | Nedostatečný – viz [[8]](https://owasp.org/Top10/A01_2021-Broken_Access_Control/) | Ano (vynucení na serveru) |
 
-Pro necitlivá data Twig if stačí a šetří čas, pro citlivá data vždy query filter. OWASP Top 10 v kategorii „A01 Broken Access Control“ výslovně varuje před kontrolou jen v UI jako jedinou bariérou.
+Pro necitlivá data Twig if stačí a šetří čas, pro citlivá data vždy query filter. Hodnocení v posledním řádku je výklad, ne citace. OWASP v kategorii „A01 Broken Access Control“ uznává jen kontrolu v důvěryhodném serverovém kódu a mezi slabinami uvádí obejití kontroly úpravou HTML stránky nebo požadavku na API. Twig if sice běží na serveru, data ale už načetl. Kdo k nim přijde jinou cestou (API, export), podmínku v šabloně obejde.
 
 ### Seznamy: Voter na otázku „které objekty smí?“ neodpoví {#field-list-filtering}
 

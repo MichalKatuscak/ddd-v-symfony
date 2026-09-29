@@ -10,38 +10,40 @@ participant "Aggregate" as agg
 
 == Hydration s plným replay (pomalé) ==
 note over repo, agg
-  Long-lived agregát s 10 000 eventy:
-  bez snapshotu trvá hydration sekundy.
+  Long-lived agregát s 10 040 eventy:
+  bez snapshotu se při každém načtení
+  čte a přehrává celý stream.
 end note
 
-repo -> es : SELECT * FROM events\nWHERE aggregate_id = $id (10 000 řádků)
+repo -> es : SELECT * FROM event_store\nWHERE aggregate_id = $id (10 040 řádků)
 es --> repo : všechny eventy
-loop 10 000×
+loop 10 040×
   repo -> agg : apply(event)
 end
 
 == Hydration se snapshotem (rychlé) ==
-repo -> ss : SELECT * FROM snapshots\nWHERE aggregate_id = $id\nORDER BY version DESC LIMIT 1
-ss --> repo : snapshot @ version 9 800
-repo -> agg : restore(snapshot.state)
+repo -> ss : SELECT * FROM aggregate_snapshot\nWHERE aggregate_id = $id\nORDER BY version DESC LIMIT 1
+ss --> repo : snapshot @ version 10 000
+repo -> agg : reconstituteFromSnapshot(state, version)
 
-repo -> es : SELECT * FROM events\nWHERE aggregate_id = $id\nAND version > 9 800
-es --> repo : 200 eventů (od snapshotu)
+repo -> es : SELECT * FROM event_store\nWHERE aggregate_id = $id\nAND version > 10 000
+es --> repo : 40 eventů (od snapshotu)
 
-loop 200×
+loop 40×
   repo -> agg : apply(event)
 end
 
 repo --> agg : current state
 
-== Periodic snapshot creation ==
+== Snapshot při uložení ==
 note over repo, ss
-  Po každých N eventech (typicky 100):
-  zachycení agregátního stavu jako snapshot.
+  save() překročí násobek N
+  (v ukázce N = 50, laditelný parametr):
+  zachycení stavu agregátu jako snapshot.
 end note
 
-repo -> agg : extractSnapshot()
-agg --> repo : SnapshotData(version, state)
-repo -> ss : INSERT INTO snapshots\n(aggregate_id, version, state)
+repo -> agg : toSnapshot()
+agg --> repo : state
+repo -> ss : INSERT INTO aggregate_snapshot\n(aggregate_id, aggregate_type, version, state, taken_at)
 
 @enduml

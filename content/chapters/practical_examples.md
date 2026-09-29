@@ -7,7 +7,7 @@ meta_description: "Praktické příklady DDD v Symfony 8: e-commerce, blog a spr
 meta_keywords: "DDD příklady, Symfony ukázky, bounded contexts, doménové modely, agregáty, e-commerce DDD, blog DDD, vertikální slice architektura, praktické implementace, ukázky kódu, reálné projekty"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Praktické příklady
 schema_type: TechArticle
 schema_headline: "Praktické příklady Domain-Driven Design v Symfony"
@@ -402,7 +402,8 @@ src/
     │   ├── Model/Comment.php
     │   ├── ValueObject/PostId.php, CommentId.php, AuthorId.php
     │   ├── Event/PostCreated.php, CommentAdded.php
-    │   ├── Exception/CommentsClosedException.php
+    │   ├── Exception/CommentsClosedException.php, InvalidPostTitleException.php,
+    │   │   EmptyPostContentException.php
     │   └── Repository/PostRepository.php
     ├── Infrastructure/Repository/DoctrinePostRepository.php
     ├── CreatePost/{Command, Controller}/
@@ -436,7 +437,15 @@ final class Post extends AggregateRoot
 
     public static function create(PostId $id, string $title, string $content, AuthorId $authorId): self
     {
-        // Invarianty: title 3–255 znaků, content nesmí být prázdný
+        // INVARIANT: titulek má 3–255 znaků a obsah není prázdný.
+        $titleLength = mb_strlen($title);
+        if ($titleLength < 3 || $titleLength > 255) {
+            throw InvalidPostTitleException::lengthOutOfRange($titleLength);
+        }
+        if (trim($content) === '') {
+            throw EmptyPostContentException::forPost($id);
+        }
+
         $post = new self($id, $title, $content, $authorId, new \DateTimeImmutable());
         $post->record(new PostCreated($id, $title, $authorId));
 
@@ -657,7 +666,7 @@ rozebírá navazující [Případová studie](/pripadova-studie).
 
 :::faq{}
 - question: Proč všechny tři příklady kombinují vertikální slice a CQRS?
-  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Doplňují se: každá feature má vlastní command nebo query handler, vlastní model zápisu (agregát) a vlastní read model pro odpověď. Kombinace se v ukázkách opakuje záměrně. Výjimkou je kontext Ordering v e-shopu, který drží vrstvy, aby seděl s kanonickým kódem z kapitoly o Outboxu; podobné členění podle případů užití s CQRS sběrnicí drží i veřejné referenční projekty, například <code>CodelyTV/php-ddd-example</code>.'
+  answer: 'Vertikální slice určuje, jak kód organizovat (podle feature); CQRS odděluje čtení od zápisu. Doplňují se: každá feature má vlastní command nebo query handler. Command pracuje s agregátem, query vrací ViewModel pro odpověď. Kombinace se v ukázkách opakuje záměrně. Výjimkou je kontext Ordering v e-shopu, který drží vrstvy, aby seděl s kanonickým kódem z kapitoly o Outboxu; podobné členění podle případů užití s CQRS sběrnicí drží i veřejné referenční projekty, například <code>CodelyTV/php-ddd-example</code>.'
 - question: Lze strukturu z těchto příkladů přímo převzít do produkčního projektu?
   answer: 'Ukázky jsou záměrně zjednodušené – chybí jim autentizace, autorizace, transakční koordinace mezi agregáty, retry logika a komplexnější doménová pravidla. Převzít lze principy: oddělení doménové a infrastrukturní vrstvy, členění podle funkcí a CQRS sběrnici. Adresářová struktura slouží jako výchozí šablona; rozšiřuje se podle reálných potřeb projektu. Doporučená dlouhodobá architektura v kapitole <a href="/implementace-v-symfony">Implementace v Symfony 8</a>.'
 - question: Kde najdu plnou implementaci agregátu se všemi metodami?

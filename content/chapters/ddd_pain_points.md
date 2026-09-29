@@ -7,7 +7,7 @@ meta_description: "Dvacet reálných bolestivých míst v DDD: transakce přes a
 meta_keywords: "DDD problémy, Doctrine transakce agregáty, Outbox pattern Symfony, Messenger debugging, idempotence handler, validace DDD, Anti-Corruption Layer PHP, strangler fig pattern, Symfony Form Command, API Platform agregát"
 og_type: article
 published: "2026-03-26"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: DDD v praxi – kde to bolí
 schema_type: TechArticle
 schema_headline: "DDD v praxi – kde to bolí"
@@ -147,7 +147,7 @@ dopočítanou hodnotu do mapované vlastnosti), Doctrine vyhodnotí jako změnu.
 |---|---|
 | Read model v jednom requestu | `$em->detach($entity)` po načtení – EM přestane entitu sledovat (dostupné v ORM 2.x i 3.x; pozn.: `merge()` bylo naopak v ORM 3.x odstraněno) |
 | Komplexní read queries | Použijte `HYDRATE_ARRAY` nebo raw SQL přes `$em->getConnection()` – EM nehydratuje objekty |
-| Celý controller je read-only | Dotazy s hintem `Query::HINT_READ_ONLY`, případně entity mapované jako `#[ORM\Entity(readOnly: true)]` – UnitOfWork je při `flush()` nekontroluje. Read-only EntityManager Doctrine nemá |
+| Celý controller je read-only | Dotazy s hintem `Query::HINT_READ_ONLY` – takto načtené entity UnitOfWork při `flush()` nekontroluje. Mapování `#[ORM\Entity(readOnly: true)]` dělá totéž, ale pro třídu v celé aplikaci: hodí se jen pro entitu, kterou nic nemění. Read-only EntityManager Doctrine nemá |
 
 ORM 3 přitom zrušil obvyklý únikový manévr. Argumenty `flush($entity)` a `clear($entityName)`
 jsou pryč a obě metody je tiše ignorují, protože přebytečný argument uživatelské metody
@@ -245,7 +245,7 @@ Odpadne tak discriminator map, která je pro VO těžkopádná.
 ### A4. Lazy loading a doménové metody {#a4-lazy-loading}
 
 Doctrine ve výchozím nastavení načítá asociace lazy: do property vloží proxy, která se
-inicializuje až při prvním přístupu. Doménová metoda jako `totalPrice()`
+inicializuje až při prvním přístupu. Doménová metoda jako `totalAmount()`
 nebo `items()` o tom nic neví a implicitně spoléhá na aktivní databázové připojení.
 Když záznam, na který proxy ukazuje, mezitím z databáze zmizel, inicializace selže
 s `EntityNotFoundException`. Odpojení entity samo chybu nevyvolá. Inicializátor proxy
@@ -266,7 +266,7 @@ konkrétní query.
 | Situace | Řešení |
 |---|---|
 | Kolekce potřebná jen někdy | Repozitář nabídne dvě metody: `get()` (lazy) a `getWithItems()` s fetch joinem v DQL – ten JOIN skutečně vydá |
-| Kolekce vždy potřebná s agregátem | `fetch: 'EAGER'` na asociaci – druhý dotaz pro kolekce všech rodičů najednou, ne N+1, ale ani JOIN |
+| Kolekce vždy potřebná s agregátem | `fetch: 'EAGER'` na asociaci – u OneToMany druhý dotaz po dávkách (výchozí dávka 100 rodičů), ne JOIN. ManyToMany a OneToMany s `indexBy` dávky nedostanou a N+1 zůstává |
 | Serializace / JSON response | Nikdy neserializujte agregát přímo – sestavte DTO z načtených dat uvnitř transakce |
 
 Pořadí řádků v tabulce není náhodné. Fetch join v DQL je první volba, protože platí jen
@@ -279,7 +279,7 @@ vyhrazuje volbu mezi LEFT JOIN a druhým dotazem. Podrobněji k volbě strategie
 
 **Problém:** Doctrine standardně generuje ID v databázi
 (`SEQUENCE`, `AUTO_INCREMENT`). Nově vytvořený agregát nemá ID, dokud ho Doctrine
-nepersistuje a neflushne. Tím padá doménový invariant: každý agregát musí
+nepersistuje (`SEQUENCE`), případně neflushne (`AUTO_INCREMENT`). Tím padá doménový invariant: každý agregát musí
 mít identitu od okamžiku vzniku.
 
 **Příčina:** Databázové generování ID je pohodlné, ale váže
@@ -378,8 +378,8 @@ final class Order extends AggregateRoot
 :::
 :::
 
-Konstruktor zůstává čistý, protože ho volá i rekonstituce z databáze. Událost vzniká
-v továrně, viz [životní cyklus kořene agregátu](/zakladni-koncepty#aggregate-root-lifecycle).
+Konstruktor zůstává čistý kvůli rekonstituci. Doctrine ho při hydrataci obchází, vlastní
+mapper nebo event stream ho ale volat může. Událost proto vzniká v továrně, viz [životní cyklus kořene agregátu](/zakladni-koncepty#aggregate-root-lifecycle).
 
 Mapování identifikátoru v Doctrine. Ukázka mapuje primitivní string; hodnotový objekt
 `OrderId` se na sloupec převádí custom Doctrine typem, viz
@@ -406,9 +406,11 @@ protože nevyžaduje injektovat repozitář tam, kde stačí `OrderId::generate(
 **Problém:** Potřebujete modelovat hierarchii, například různé typy
 doručení (`HomeDelivery`, `PickupPoint`, `LockerDelivery`).
 Doctrine nabízí `InheritanceType::SINGLE_TABLE` nebo
-`JOINED` s discriminator map. Cena za to je konkrétní, ne principiální. Mapa musí být
-zapsaná na kořenové entitě, takže nový subtyp znamená zásah do třídy, která o něm nemá
-důvod vědět. U SINGLE_TABLE navíc každý sloupec specifický pro jednu variantu musí být
+`JOINED` s discriminator map. Cena za to je konkrétní, ne principiální. Explicitní mapa
+se zapisuje na kořenovou entitu, takže nový subtyp znamená zásah do třídy, která o něm nemá
+důvod vědět. Bez mapy ji Doctrine vygeneruje sama z krátkých názvů tříd; přejmenování
+třídy pak změní očekávanou hodnotu ve sloupci diskriminátoru.
+U SINGLE_TABLE navíc každý sloupec specifický pro jednu variantu musí být
 nullable pro všechny ostatní, u JOINED platíte JOIN při každém čtení. Na jeho dopad na výkon
 dokumentace výslovně upozorňuje. A protože jde o schéma, každý přírůstek hierarchie
 znamená migraci databáze, ne jen novou třídu.
@@ -417,8 +419,8 @@ znamená migraci databáze, ne jen novou třídu.
 
 | Přístup | Kdy použít | Nevýhoda |
 |---|---|---|
-| **Value Object místo dědičnosti** | Varianty se liší jen daty, ne chováním | Složitý switch pro chování |
-| **Flat table + Custom Type** | Varianty mají odlišné chování | JSON sloupec pro detaily ztrácí typovou bezpečnost |
+| **Value Object s typovým polem** | Varianty se liší hlavně daty, chování je málo | Každé chování závislé na typu znamená switch nad enumem |
+| **Flat table + Custom Type** | Varianty mají odlišné chování | Custom Type musí z JSON sestavit třídu správné varianty; JSON sloupec ztrácí typovou bezpečnost |
 | **Discriminator map (Doctrine default)** | Málo variant, stabilní hierarchie | Migrace schématu při každé variantě, nullable sloupce |
 
 Ve většině DDD scénářů se osvědčuje **Value Object s typovým polem**:
@@ -614,6 +616,7 @@ use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
+use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
 // Vlastní Stamp nesoucí idempotency klíč
@@ -637,8 +640,11 @@ final class IdempotencyMiddleware implements MiddlewareInterface
     {
         $stamp = $envelope->last(IdempotencyStamp::class);
 
-        if ($stamp === null) {
-            return $stack->next()->handle($envelope, $stack); // zpráva bez klíče: vždy zpracuj
+        // Zpráva bez klíče se zpracuje vždy. Zpráva bez ReceivedStamp se právě
+        // odesílá: SendMessageMiddleware ji předá transportu a handler zatím
+        // neběží. Zápis klíče v tu chvíli by worker vzal za duplikát.
+        if ($stamp === null || $envelope->last(ReceivedStamp::class) === null) {
+            return $stack->next()->handle($envelope, $stack);
         }
 
         $alreadyProcessed = (bool) $this->connection->fetchOne(
@@ -647,10 +653,9 @@ final class IdempotencyMiddleware implements MiddlewareInterface
         );
 
         if ($alreadyProcessed) {
-            // Duplikát se přeskočí. Obálka se vrací bez HandledStamp,
-            // takže volající na synchronní sběrnici, který si výsledek
-            // vytahuje přes HandledStamp, dostane null. Middleware míří
-            // na asynchronní příkazy, kde návratovou hodnotu nikdo nečte.
+            // Duplikát se přeskočí a worker zprávu potvrdí. Obálka se vrací
+            // bez HandledStamp; u asynchronního příkazu návratovou hodnotu
+            // nikdo nečte.
             return $envelope;
         }
 
@@ -666,6 +671,13 @@ final class IdempotencyMiddleware implements MiddlewareInterface
 }
 :::
 :::
+
+Podmínka na `ReceivedStamp` nese celou ukázku. Asynchronní příkaz projde middlewarem
+dvakrát: při dispatchi, kdy ho `SendMessageMiddleware` jen odešle do transportu, a znovu
+ve workeru, který obálku před zpracováním označí `ReceivedStamp`. Bez podmínky by se klíč
+zapsal už při odeslání. Worker by pak vlastní zprávu přeskočil jako duplikát a handler
+by neproběhl nikdy. Na synchronní sběrnici bez transportu `ReceivedStamp` nevznikne,
+takže tam middleware nededuplikuje; míří na asynchronní příkazy.
 
 Odesílatel stamp připojí z dat, která má v ruce:
 
@@ -695,6 +707,8 @@ Bezpečné řešení: proveďte zpracování a INSERT do deduplikační tabulky
 selže celá (klíč se nevloží) a Messenger zprávu zopakuje:
 
 :::code{language="php" filename="snippet.php"}
+// Navazuje na úvodní podmínku z ukázky výše: sem dojde jen přijatá
+// zpráva (ReceivedStamp) s IdempotencyStamp.
 $this->connection->beginTransaction();
 
 // Catch kryje POUZE insert. Kdyby obepínal i handler, unique violation
@@ -734,14 +748,20 @@ stavu).
 
 | Přístup | Kdy použít | Kompromis |
 |---|---|---|
-| **Optimistický retry** | Závislost je krátkodobá (ms) | Handler hodí `RecoverableMessageHandlingException` s `retryDelay` → Messenger zprávu odloží |
+| **Optimistický retry** | Závislost je krátkodobá (ms) | Handler hodí `RecoverableMessageHandlingException` s `retryDelay` → Messenger zprávu odloží; `max_retries` se na ni nevztahuje |
 | **Jeden worker na agregát** | Pořadí je kritické | Nižší propustnost, ale zaručené pořadí pro každý agregát |
 | **Inbox buffer** | Komplexní závislosti | Handler uloží zprávu do „inbox“ tabulky a zpracuje ji až po splnění podmínek |
 
-`RecoverableMessageHandlingException` přijímá parametr `retryDelay` a přebije tím
-nakonfigurovanou strategii. Pro chybějící závislost je to přesnější nástroj než obecná
-výjimka: čekáte řádově stovky milisekund, ne exponenciální backoff počítaný pro výpadek
-externí služby.
+`RecoverableMessageHandlingException` přijímá parametr `retryDelay` (v milisekundách)
+a přebije tím prodlevu z nakonfigurované strategie. Pro chybějící závislost je to přesnější
+nástroj než obecná výjimka: čekáte řádově stovky milisekund, ne exponenciální backoff
+počítaný pro výpadek externí služby.
+
+Výjimka ale obchází i `max_retries`. Podle dokumentace Symfony se taková zpráva opakuje
+donekonečna a do failed transportu sama nedojde. Když předpoklad nedorazí nikdy (`OrderPlaced`
+skončil ve failed transportu), worker bude `OrderShipped` zkoušet bez konce. Strop proto
+hlídá handler sám, třeba podle stáří zprávy: po jeho překročení hodí běžnou výjimku,
+na kterou už se `max_retries` vztahuje.
 
 Garance pořadí ale nakonec drží transport, ne kód handleru. FIFO nabízí jen některé
 brokery a zpravidla za cenu propustnosti nebo omezení na jednu skupinu zpráv. Ověřte,
@@ -755,8 +775,8 @@ nemá co rozbít.
 obchází retry strategii a zprávu okamžitě přesune do failed transportu.
 Zpráva, která přišla brzy, přitom není nezpracovatelná. Patří sem standardní výjimka
 nebo `RecoverableMessageHandlingException`; po nich Messenger zprávu odloží do retry fronty.
-Ve failed transportu skončí až po vyčerpání všech pokusů; tam ji lze prozkoumat
-a znovu odeslat.
+Po standardní výjimce skončí ve failed transportu až po vyčerpání `max_retries`; tam ji lze
+prozkoumat a znovu odeslat. `RecoverableMessageHandlingException` se opakuje bez limitu.
 :::
 
 Zpoždění se nezastaví na hranici workeru. Uživatel, který právě odeslal objednávku

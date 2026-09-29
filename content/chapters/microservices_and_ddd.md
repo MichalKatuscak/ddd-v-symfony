@@ -7,7 +7,7 @@ meta_description: "Kdy Bounded Context = microservice a kdy stačí modular mono
 meta_keywords: "DDD, microservices, Bounded Context, modular monolith, distributed monolith, Symfony 8, Symfony Messenger, integration event, service boundary, Sam Newman, Chris Richardson, strangler fig, service mesh, saga"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: DDD a microservices
 schema_type: TechArticle
 schema_headline: "DDD a microservices – Bounded Context jako service boundary"
@@ -59,7 +59,7 @@ Tabulka shrnuje, čím se Bounded Context a microservice liší a v jaké rovin�
 
 ## 19.02 Kdy 1 BC = 1 service (cílový stav) {#bc-jedna-service}
 
-Mapování 1:1 mezi Bounded Contextem a microservice se v komunitě podává jako výchozí cíl. Automatické pravidlo to ale není: platí jen tam, kde tým splní konkrétní organizační a technické předpoklady. Sam Newman je v knize *Building Microservices, 2nd ed.* shrnuje pod hlavičkami „information hiding“ a „autonomy“. Service má smysl, když ji lze měnit, nasazovat a škálovat nezávisle na zbytku systému. Pojem *information hiding*, převzatý od Davida Parnase, vysvětluje už v kapitole 1: skrýt uvnitř komponenty co nejvíc, vystavit navenek co nejméně. Na hledání hranic ho aplikuje v kapitole 2.
+Mapování 1:1 mezi Bounded Contextem a microservice se v komunitě podává jako výchozí cíl. Automatické pravidlo to ale není: platí jen tam, kde tým splní konkrétní organizační a technické předpoklady. Sam Newman je v knize *Building Microservices, 2nd ed.* shrnuje pod pojmy „information hiding“ a „independent deployability“. Service má smysl, když ji lze měnit, nasazovat a škálovat nezávisle na zbytku systému. Pojem *information hiding*, převzatý od Davida Parnase, vysvětluje už v kapitole 1: skrýt uvnitř komponenty co nejvíc, vystavit navenek co nejméně. Na hledání hranic ho aplikuje v kapitole 2.
 
 ### Kdy rozdělit BC do vlastní service {#kdy-rozdelit-heading}
 
@@ -103,7 +103,7 @@ Při **třech a méně** zůstaňte v [modulárním monolitu](#modular-monolith)
 
 Modulární monolit je jeden nasazovaný celek (jedna Symfony aplikace, jedna databáze, jeden proces), uvnitř něhož žije **více Bounded Contextů jako modulů** s vynucenými hranicemi. Zvenku vypadá jako klasický monolit, uvnitř drží disciplínu, kterou by jinak vynucovala hranice služby.
 
-Do kapitoly o microservices patří proto, že je pro většinu týmů začínajících s DDD rozumným výchozím bodem. Podle Martina Fowlera (*MonolithFirst*, 2015) microservices na začátku projektu rozdělí systém dřív, než se ustálí jeho hranice, a vzniklý dluh se těžko rozplétá. Sam Newman v *Building Microservices, 2nd ed.* (kap. 3) tento postoj přejímá a jako výchozí strategii výslovně doporučuje monolith-first nebo modular monolith-first.
+Do kapitoly o microservices patří proto, že je pro většinu týmů začínajících s DDD rozumným výchozím bodem. Podle Martina Fowlera (*MonolithFirst*, 2015) microservices na začátku projektu rozdělí systém dřív, než se ustálí jeho hranice, a vzniklý dluh se těžko rozplétá. Sam Newman v *Building Microservices, 2nd ed.* (kap. 1) označuje monolit za rozumnou výchozí architekturu. Pro nové produkty a startupy, jejichž doména se teprve hledá, považuje microservices často za špatnou volbu. Kapitola 3 o rozdělování monolitu na tento závěr odkazuje.
 
 Konsensus to ale není. Fowler sám u *MonolithFirst* přiznává, že pro pevný závěr nemá dost doložených případů. Šest dní nato vyšel na jeho webu opačný názor Stefana Tilkova (*Don't start with a monolith*, 2015). Rozdělit existující monolit je podle Tilkova extrémně těžké: jeho části si mezitím vytvoří závislosti přes sdílené knihovny, databázi a doménové objekty. Kdo tedy ví, že cílí na microservices, měl by podle Tilkova začít rovnou u nich.
 
@@ -300,7 +300,7 @@ Vzniká dvěma cestami. **První cesta**: tým rozdělil monolit do services dř
 
 Platí-li dva a více z těchto bodů, jde o distributed monolith:
 
-1. **Databázové schéma sdílené více services.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Newman je v tomto bodě z celé knihy nejostřejší: sdílení databází je podle něj to nejhorší, co pro nezávislou nasazovatelnost můžete udělat. Sdílená *instance* přitom není totéž co sdílené *schéma*. Jeden databázový server s oddělenými schématy a jediným vlastníkem u každého z nich je přijatelný a levný mezikrok; jedno schéma se dvěma zapisovateli není. Kanonický rozbor anti-vzoru včetně opravy přes Anti-Corruption Layer je v [Anti-vzorech](/anti-vzory#sdilena-databaze).
+1. **Databázové schéma sdílené více services.** Service A i service B čtou (nebo dokonce zapisují) do stejných tabulek. Změna schématu jednoho zlomí druhý. Newman je v tomto bodě z celé knihy nejostřejší: sdílení databází je podle něj jedna z nejhorších věcí, které pro nezávislou nasazovatelnost můžete udělat. Sdílená *instance* přitom není totéž co sdílené *schéma*. Jeden databázový server s oddělenými schématy a jediným vlastníkem u každého z nich je přijatelný a levný mezikrok; jedno schéma se dvěma zapisovateli není. Kanonický rozbor anti-vzoru včetně opravy přes Anti-Corruption Layer je v [Anti-vzorech](/anti-vzory#sdilena-databaze).
 2. **Synchronní HTTP/gRPC volání mezi services v každém request flow.** Vyřízení jednoho user requestu vyžaduje 5–10 vnořených volání. Latence je součtem všech volání, dostupnost součinem dostupností všech volaných služeb a výpadek jedné shodí celý řetězec.
 3. **Coupled deployment.** Změnu API service A nelze nasadit, dokud současně nenasadíte service B, která konzumuje to API. „Release je atomický“, „máme deployment train“ – to jsou eufemismy pro coupled deploy. Sam Newman: pokud nelze service nasadit samostatně, není to microservice.
 4. **End-to-end test vyžaduje všechny services.** Test jednoho uživatelského toku nejde spustit bez běžících všech N services (lokálně přes docker-compose, v CI v testovacím prostředí). Žádná service není testovatelná v izolaci.
@@ -386,8 +386,8 @@ jen zčásti:
   microservices obecně.
 
 Použitelný závěr z případu vyvodil Werner Vogels v článku *Monoliths are not
-dinosaurs* (2023): jedno řešení pro všechno neexistuje a architekturu je třeba
-revidovat pokaždé, když se změní zátěžový profil. Prime Video u sebe provozuje
+dinosaurs* (2023): jedno řešení pro všechno neexistuje a architekturu je podle něj
+třeba revidovat s každým řádovým růstem. Prime Video u sebe provozuje
 obojí: live sports streaming jako distribuovaný workflow a monitoring jako jeden
 proces. To je něco jiného než „microservices selhaly“.
 
@@ -765,11 +765,13 @@ final readonly class OrderPlacedReceived
 :::
 :::
 
-Ten `event_type` musí ale někdo nastavit. Výchozí `messenger.transport.symfony_serializer`
-na straně vydavatele ho neposílá: do hlaviček dá `type` s plným jménem PHP třídy
+Ten `event_type` musí ale někdo nastavit. Vestavěné serializery Messengeru ho neposílají.
+Výchozí `messenger.transport.native_php_serializer` pošle celou obálku jako serializovaný
+PHP objekt bez hlaviček; přečte ho jen PHP konzument se stejnou třídou. Alternativní
+`messenger.transport.symfony_serializer` dá do hlaviček `type` s plným jménem PHP třídy
 a tělo odvodí z jejích vlastností, takže každé přejmenování vlastnosti mění kontrakt.
 Konzument z této sekce čeká hlavičku `event_type` a pole včetně měny,
-takže na výchozím serializeru dostane `Missing event_type header`. Vydavatel proto
+takže s kterýmkoli z nich dostane `Missing event_type header`. Vydavatel proto
 potřebuje vlastní serializer, který událost přeloží do dohodnutého tvaru:
 
 :::code{language="php" filename="ordering-svc/src/Infrastructure/Messaging/OutboundEventSerializer.php"}
@@ -879,26 +881,39 @@ final readonly class IntegrationEventSerializer implements SerializerInterface
         } catch (\JsonException $e) {
             throw new MessageDecodingFailedException('Body is not valid JSON', 0, $e);
         }
+        if (!is_array($payload)) {
+            throw new MessageDecodingFailedException('Body is not a JSON object');
+        }
 
         // Mapping payloadu z publishera na náš subscriber-side DTO.
         // Každý typ eventu nese jiná pole, proto se tu větví. Defenzivní –
         // žádná pole z payloadu, která bychom nepoužívali.
-        $message = match ($targetClass) {
-            OrderPlacedReceived::class => new OrderPlacedReceived(
-                eventId: $payload['eventId'],
-                occurredAt: $payload['occurredAt'],
-                orderId: $payload['orderId'],
-                customerId: $payload['customerId'],
-                totalAmountCents: $payload['totalAmountCents'],
-                currency: $payload['currency'] ?? 'CZK',
-            ),
-            OrderCancelledReceived::class => new OrderCancelledReceived(
-                eventId: $payload['eventId'],
-                occurredAt: $payload['occurredAt'],
-                orderId: $payload['orderId'],
-                reason: $payload['reason'] ?? null,
-            ),
-        };
+        try {
+            $message = match ($targetClass) {
+                OrderPlacedReceived::class => new OrderPlacedReceived(
+                    eventId: $payload['eventId'],
+                    occurredAt: $payload['occurredAt'],
+                    orderId: $payload['orderId'],
+                    customerId: $payload['customerId'],
+                    totalAmountCents: $payload['totalAmountCents'],
+                    currency: $payload['currency'] ?? 'CZK',
+                ),
+                OrderCancelledReceived::class => new OrderCancelledReceived(
+                    eventId: $payload['eventId'],
+                    occurredAt: $payload['occurredAt'],
+                    orderId: $payload['orderId'],
+                    reason: $payload['reason'] ?? null,
+                ),
+            };
+        } catch (\TypeError|\ErrorException $e) {
+            // Chybějící pole dorazí jako null, pole jiného typu neprojde
+            // strict_types – obojí shodí konstruktor DTO TypeErrorem.
+            // ErrorException přidává ErrorHandler Symfony v debug režimu
+            // z varování „Undefined array key“. Vadná zpráva, ne pád workeru.
+            throw new MessageDecodingFailedException(
+                sprintf('Invalid payload for event_type %s', $eventType), 0, $e,
+            );
+        }
 
         return new Envelope($message);
     }
@@ -1134,7 +1149,7 @@ discovery a CI/CD per service, je odpovědí na otázku po hranici stejně modul
 
 ## 19.12 Další četba {#further-reading}
 
-- [Sam Newman – *Building Microservices, 2nd ed.* (O'Reilly, 2021)](https://samnewman.io/books/building_microservices_2nd_edition/). Kanonická kniha o microservices. Kapitoly 1–2 pro hranice services, kapitola 3 pro monolith-first strategii i pro migraci, kapitoly 4–6 pro integraci.
+- [Sam Newman – *Building Microservices, 2nd ed.* (O'Reilly, 2021)](https://samnewman.io/books/building_microservices_2nd_edition/). Kanonická kniha o microservices. Kapitola 1 pro monolit jako výchozí volbu, kapitoly 1–2 pro hranice services, kapitola 3 pro migraci, kapitoly 4–6 pro integraci.
 - [Chris Richardson – *Microservices Patterns* (Manning, 2018)](https://microservices.io/book). Praktická kniha plná konkrétních vzorů. Kapitola 2 (dekompozice podle business capabilities a subdomén), kapitola 3 (interprocess communication), kapitola 4 (sagas), kapitola 13 (refaktoring monolitu).
 - [Vaughn Vernon – *Implementing Domain-Driven Design* (Addison-Wesley, 2013)](https://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577). Kapitola 2 pro Bounded Context jako jazykovou hranici, kapitola 3 pro Context Maps, kapitola 8 pro Domain Events napříč BC.
 - [James Lewis & Martin Fowler – *Microservices* (2014)](https://martinfowler.com/articles/microservices.html). Text, který pojem ustavil. Devět charakteristik architektury a formulace o „přirozené korelaci“ mezi hranicí služby a hranicí kontextu, ze které vznikl slogan rozebíraný v sekci 19.01.
@@ -1142,7 +1157,7 @@ discovery a CI/CD per service, je odpovědí na otázku po hranici stejně modul
 - [Stefan Tilkov – *Don't start with a monolith* (2015)](https://martinfowler.com/articles/dont-start-monolith.html). Protipozice publikovaná na Fowlerově vlastním webu šest dní po *MonolithFirst*. Čtěte obojí, ne jen jedno.
 - [Zhamak Dehghani – *How to break a Monolith into Microservices* (2018)](https://martinfowler.com/articles/break-monolith-into-microservices.html). Heslo „macro first, then micro“ a nejčastější chyba migrace: postavit novou službu a nezrušit původní cestu v monolitu.
 - [Martin Fowler – *What do you mean by „Event-Driven“?* (2017)](https://martinfowler.com/articles/201701-event-driven.html). Event notification, event-carried state transfer, event sourcing a CQRS jako čtyři různé věci pod jedním názvem.
-- [Werner Vogels – *Monoliths are not dinosaurs* (2023)](https://www.allthingsdistributed.com/2023/05/monoliths-are-not-dinosaurs.html). Rámec k případu Prime Video: architektura se reviduje, když se změní zátěžový profil.
+- [Werner Vogels – *Monoliths are not dinosaurs* (2023)](https://www.allthingsdistributed.com/2023/05/monoliths-are-not-dinosaurs.html). Rámec k případu Prime Video: architektura se reviduje s každým řádovým růstem.
 - [Martin Fowler – *Strangler Fig Application* (2004, přejmenováno 2019)](https://martinfowler.com/bliki/StranglerFigApplication.html). Originální popis migrační strategie použitelný pro každý legacy systém. Současná verze textu přidává *transitional architecture*, tedy dočasné lešení, které se po migraci bourá.
 - [Matthew Skelton & Manuel Pais – *Team Topologies* (IT Revolution, 2019)](https://www.amazon.com/Team-Topologies-Organizing-Business-Technology/dp/1942788819). Stream-aligned teams, enabling teams, complicated subsystem teams, platform teams. Klíč k tomu, aby microservices měly smysl organizačně.
 - [Martin Fowler – *Microservice Trade-Offs* (2015)](https://martinfowler.com/articles/microservice-trade-offs.html). Co získáte a co ztrácíte.

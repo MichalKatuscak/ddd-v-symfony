@@ -7,7 +7,7 @@ meta_description: "Layered, Hexagonal, Onion nebo Clean Architecture? Kdy který
 meta_keywords: "Hexagonal Architecture, Ports and Adapters, Onion Architecture, Clean Architecture, Layered Architecture, Vertical Slice, DDD, Symfony, Cockburn, Palermo, Martin, Dependency Rule"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Architektonické styly
 schema_type: TechArticle
 schema_headline: "Architektonické styly: Hexagonal, Onion, Clean – co si vybrat"
@@ -679,7 +679,7 @@ Onion Architecture představil Jeffrey Palermo v blogové sérii [[5]](https://j
 ### Čtyři koncentrické vrstvy Onion {#onion-vrstvy-heading}
 
 1. **Domain Model (jádro)** – entity, hodnotové objekty, agregáty, doménové události. Nezávisí na ničem, tedy ani na frameworku a persistenci.
-2. **Domain Services** – bezstavové třídy s doménovou logikou, která nepatří do žádné konkrétní entity. Závisí jen na Domain Model.
+2. **Domain Services** – bezstavové třídy s doménovou logikou, která nepatří do žádné konkrétní entity. Závisí jen na Domain Model. Palermo do prvního prstenu kolem modelu v textu řadí hlavně rozhraní repozitářů; název vrstvy nese jeho diagram [[5]](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/).
 3. **Application Services** – orchestrace use casů, transakce, mapování DTO. Závisí na Domain Services a Domain Model.
 4. **UI / Infrastructure** – controllery, repository implementace, externí brány. Vnější vrstva závisí na Application Services.
 
@@ -735,7 +735,7 @@ final class PriceCalculator
 }
 :::
 
-:::code{language="php" filename="src/Pricing/Application/Service/CalculateCartPrice.php" highlights="21,22,23,32,33,35,37"}
+:::code{language="php" filename="src/Pricing/Application/Service/CalculateCartPrice.php" highlights="22,23,24,33,34,36,38"}
 <?php
 
 declare(strict_types=1);
@@ -746,6 +746,7 @@ use App\Pricing\Domain\Port\CartRepository;
 use App\Pricing\Domain\Port\CustomerRepository;
 use App\Pricing\Domain\Port\DiscountPolicyRepository;
 use App\Pricing\Domain\Service\PriceCalculator;
+use App\Pricing\Domain\ValueObject\CartId;
 use App\SharedKernel\Domain\Money;
 
 /**
@@ -767,7 +768,7 @@ final class CalculateCartPrice
     {
         // get() hází CartNotFoundException / CustomerNotFoundException
         // z Domain\Exception, když agregát neexistuje.
-        $cart = $this->carts->get($cartId);
+        $cart = $this->carts->get(CartId::fromString($cartId));
         $customer = $this->customers->get($cart->customerId());
 
         $policy = $this->policies->forCustomer($customer);
@@ -789,6 +790,8 @@ src/
 │   │   │   ├── Cart.php
 │   │   │   ├── Customer.php
 │   │   │   └── DiscountPolicy.php
+│   │   ├── ValueObject/
+│   │   │   └── CartId.php
 │   │   ├── Port/                       # Repository interfaces
 │   │   │   ├── CartRepository.php
 │   │   │   ├── CustomerRepository.php
@@ -823,7 +826,7 @@ Doména s hrstkou doménových služeb dvě vrstvy služeb neuživí; Hexagonal 
 
 ## 09.05 Clean Architecture (Robert C. Martin 2012) {#clean}
 
-Robert C. Martin („Uncle Bob“) shrnul společné rysy Hexagonal, Onion, DCI a BCE (Boundary-Control-Entity od Ivara Jacobsona) do jednoho modelu. Výsledkem byl blogový post *Clean Architecture* z roku 2012 [[7]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). O pět let později ho rozvedl do knihy *Clean Architecture: A Craftsman's Guide to Software Structure and Design* (Prentice Hall, 2017). Ta vzor doplňuje o kapitoly k hranicím komponent a k organizaci balíčků.
+Robert C. Martin („Uncle Bob“) shrnul společné rysy Hexagonal, Onion, vlastní Screaming Architecture, DCI a BCE (Boundary-Control-Entity od Ivara Jacobsona) do jednoho modelu. Výsledkem byl blogový post *Clean Architecture* z roku 2012 [[7]](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). O pět let později ho rozvedl do knihy *Clean Architecture: A Craftsman's Guide to Software Structure and Design* (Prentice Hall, 2017). Ta vzor doplňuje o kapitoly k hranicím komponent a k organizaci balíčků.
 
 ### Čtyři prsteny Clean Architecture {#clean-prsteny-heading}
 
@@ -1109,7 +1112,7 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 
 - **Adresářová struktura** – místo `Controller/, Service/, Domain/, Infrastructure/` máte `Ordering/PlaceOrder/, Ordering/CancelOrder/, Ordering/GetOrderHistory/`.
 - Závislosti mezi feature klesají na minimum. Každá feature je téměř samostatná; sdílí se jen agregáty, hodnotové objekty a sběrnice (event bus, command bus).
-- Diff jedné feature sedí v jednom adresáři, takže recenzent vidí při code review celý use case na jednom místě.
+- Diff jedné feature sedí většinou v jednom adresáři, takže recenzent vidí při code review celý use case na jednom místě. Mimo slice sahá, jen když mění sdílený doménový model.
 - Akceptační test pokryje celý slice najednou (HTTP request → response) bez mockování jednotlivých vrstev.
 
 ### Srovnání horizontálního a vertikálního dělení {#srovnani-deleni}
@@ -1118,7 +1121,7 @@ Většina příkladů v knize používá vertikální slice s těmito konvencemi
 |---|---|---|
 | **Organizace kódu** | Podle technických vrstev | Podle funkcí (features) |
 | **Vazby** | Silné mezi vrstvami | Silné uvnitř funkce, slabé mezi funkcemi |
-| **Změna jednoho use casu** | Úpravy v 5–7 souborech napříč vrstvami | Úpravy v jednom adresáři |
+| **Změna jednoho use casu** | Úpravy v 5–7 souborech napříč vrstvami | Úpravy v adresáři slice, při změně pravidla i ve sdíleném `Domain/` |
 | **Testovatelnost** | Vyžaduje více mocků (vrstvy mezi sebou) | Méně mocků, závislosti jsou lokální |
 | **Škálovatelnost na microservices** | Vyžaduje přeorganizování všech vrstev | Feature lze přesunout jako celek |
 | **Pochopení na začátku** | Jednodušší (tradičnější) | Vyžaduje pochopení slice jako jednotky |
@@ -1169,7 +1172,7 @@ Volba stylu závisí na velikosti aplikace, zkušenosti týmu, plánovaném hori
 | **Boilerplate (DTO, mappery)** | nízký | střední | střední | vysoký | nízký |
 | **Doporučená velikost projektu** | < 50 endpointů | 50–500 | 100+ | enterprise (200+) | 50–500 |
 | **Soulad s CQRS** | vyžaduje úpravy | vysoká (port = command bus) | střední | vysoká (use case = handler) | velmi vysoká |
-| **Změna jedné feature** | 5–7 souborů | 4–6 souborů | 5–7 souborů | 6–8 souborů | 1 adresář |
+| **Změna jedné feature** | 5–7 souborů | 4–6 souborů | 5–7 souborů | 6–8 souborů | 1 adresář (+ `Domain/` při změně pravidla) |
 
 ### Doporučená výchozí volba pro Symfony 8 {#srovnani-vyber-heading}
 
@@ -1180,7 +1183,7 @@ Pro středně velký projekt vychází jako výchozí volba:
 Konkrétně: Bounded Context má vlastní adresář (`src/Ordering/`). Uvnitř `Domain/` leží agregáty, hodnotové objekty a repository *interfaces* (porty); `Infrastructure/` obsahuje Doctrine adaptéry. Každá feature má svůj slice (`PlaceOrder/`, `CancelOrder/`) s Command/Query, Handler (= Clean Use Case) a HTTP Controller. Tato kombinace nabízí:
 
 - **Doménové testy bez databáze** – agregáty jsou čisté PHP, mockují se jen porty.
-- **Jednoduché code review** – diff jedné feature je v jednom adresáři.
+- **Jednoduché code review** – diff jedné feature je většinou v jednom adresáři.
 - **CLI/HTTP/Messenger paritu** – Symfony Messenger Bus dispatchuje stejný Command z libovolného adaptéru.
 - **Symfony idiomatičnost** – Messenger je prvotřídní komponenta, vlastní bus psát nemusíte.
 
@@ -1235,15 +1238,15 @@ src/
 │       └── Http/
 │           └── CartPriceController.php
 │
-├── Customer/                           # SUPPORTING – Layered DDD
+├── Ordering/                           # SUPPORTING – Layered DDD
 │   ├── Controller/                     # Symfony skeleton struktura
-│   │   └── CustomerController.php
+│   │   └── OrderController.php
 │   ├── Service/
-│   │   └── CustomerService.php
+│   │   └── OrderService.php
 │   ├── Entity/                         # Doctrine entity přímo
-│   │   └── Customer.php
+│   │   └── Order.php
 │   └── Repository/
-│       └── CustomerRepository.php
+│       └── OrderRepository.php
 │
 ├── Notifications/                      # GENERIC – tenký adapter na SaaS
 │   ├── Service/

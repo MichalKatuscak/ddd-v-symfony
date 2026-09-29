@@ -7,7 +7,7 @@ meta_description: "Mapování DDD konceptů na Symfony 8: adresářová struktur
 meta_keywords: "DDD v Symfony, implementace DDD, Symfony 8, bounded contexts, vertikální slice architektura, entity v Symfony, hodnotové objekty v PHP, agregáty, repozitáře Doctrine, doménové služby, PHP 8.4"
 og_type: article
 published: "2025-04-24"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Implementace v Symfony
 schema_type: TechArticle
 schema_headline: "Implementace Domain-Driven Design v Symfony 8"
@@ -60,7 +60,7 @@ definované doménou (repository interface, event dispatch) a zajišťuje HTTP, 
 :::
 
 Směr závislostí je jednoznačný: Symfony závisí na doméně (implementuje její rozhraní), nikdy naopak.
-Doménová vrstva neimportuje žádný Symfony namespace. Jedinou stopou infrastruktury v ní
+Doménová vrstva ze Symfony importuje jen `Symfony\Component\Uid`. Jedinou stopou infrastruktury v ní
 jsou mapovací atributy Doctrine (viz [volba mappingu](#mapping-volba-heading)). Doctrine
 proto jde nahradit jiným ORM a Messenger jiným bus systémem bez zásahu do doménové
 logiky; přepíšou se jen metadata. Tento směr závislostí formalizuje hexagonální, onion
@@ -328,8 +328,9 @@ Detaily implementace:
 - **Privátní konstruktor + factory `register()`.** Jediná povolená cesta, jak agregát vytvořit.
   Kdyby přibyla další kategorie (importovaný uživatel z LDAP), přidá se další
   factory, ne přepínač uvnitř konstruktoru. Událost `UserRegistered` se nahrává
-  ve factory, ne v konstruktoru. Konstruktorem prochází i rekonstituce
-  uloženého agregátu a ta žádnou událost vyvolat nesmí.
+  ve factory, ne v konstruktoru. Rekonstituce uloženého agregátu žádnou událost
+  vyvolat nesmí. Doctrine při hydrataci konstruktor obchází, vlastní mapper
+  ([Persisted Object Pattern](#persisted-object-pattern)) ho ale přes `reconstitute()` volá.
 - **VO uloženy přímo, ne jako primitivy.** `UserId`, `Email`, `UserName`
   a `HashedPassword` jsou typy vlastností. Doctrine je hydratuje přes custom typy
   (`user_id`, `email_vo`) nebo `#[ORM\Embedded]`. Žádné re-validace v getterech.
@@ -431,7 +432,7 @@ final readonly class HashedPassword
         return new self(password_hash($plain, PASSWORD_DEFAULT));
     }
 
-    /** Rekonstituce z databáze – hash se znovu nehashuje. */
+    /** Obnova z uloženého hashe (např. v mapperu) – hash se znovu nehashuje. */
     public static function fromHash(string $hash): self
     {
         return new self($hash);
@@ -725,6 +726,11 @@ uvnitř otevřené transakce. Posluchačům v témže procesu to nevadí, rollba
 i jejich zápisy. Vedlejší efekty mimo proces (e-mail, broker) by ale reagovaly na
 událost, která se nikdy nestala. Ty patří do [Outboxu](/outbox-pattern), kde se
 událost commituje spolu s agregátem.
+
+Doručení za commit posune stamp `DispatchAfterCurrentBusStamp`, pokud middleware
+`dispatch_after_current_bus` stojí před `doctrine_transaction`
+([rozbor](/zakladni-koncepty#aggregate-root-lifecycle)). Riziko ztráty události
+při pádu procesu tím ale nezmizí.
 :::
 
 ## 10.06 Persisted Object Pattern – oddělený persistence model {#persisted-object-pattern}
@@ -747,7 +753,8 @@ decoupling“ a doporučuje místo nich ORM entitu obohacenou o doménové metod
 invarianty a vlastní výjimky
 [[6]](https://matthiasnoback.nl/2022/04/ddd-entities-and-orm-entities/). Jediný
 scénář, který uznává, je vývoj návrhu agregátů nezávisle na schématu databáze.
-V projektech, které sám viděl, ale taková potřeba nebyla.
+Sám s ním podle svých slov zkušenost nemá a projekty s oddělenými entitami, o kterých
+slyšel, takovou potřebu neměly.
 
 Sekce v průvodci zůstává proto, že ukazuje, co taková separace stojí. Ukázka je
 úplná, ať si tu cenu můžete spočítat sami.
@@ -1792,8 +1799,11 @@ Bezpečné řešení má dvě vrstvy:
 - **DB unique constraint** na sloupci `email`. Druhý INSERT
   vyhodí `UniqueConstraintViolationException`. Jako jediná vrstva
   garantuje unikátnost i při souběžných requestech.
-- **Překlad na doménovou výjimku** v command handleru (nebo lépe v repozitáři),
-  aby aplikační vrstva nemusela znát infrastrukturní typy.
+- **Překlad na doménovou výjimku** v command handleru, aby kontroler infrastrukturní
+  typy znát nemusel. Repozitář to v této podobě nezvládne, protože jeho `save()`
+  jen volá `persist()`. Handler proto vědomě importuje `EntityManagerInterface`
+  i výjimku z DBAL. Je to pragmatický ústupek od
+  [Dependency Rule](/architektonicke-styly#clean), který si vynutil explicitní flush.
 
 Explicitní `flush()` v handleru má konkrétní důvod: databázový constraint se
 vyhodnotí až při flushi (viz [dvojí transakce](#double-transaction-heading)). Má-li se infrastrukturní výjimka přeložit

@@ -7,7 +7,7 @@ meta_description: "Transactional Outbox a Idempotent Inbox v Symfony 8 a Doctrin
 meta_keywords: "Outbox Pattern, Transactional Outbox, Inbox Pattern, Idempotency, Dual-write problem, Pat Helland, Chris Richardson, Symfony Messenger, Doctrine, at-least-once, exactly-once, RabbitMQ, eventy, CDC, Debezium"
 og_type: article
 published: "2026-04-29"
-modified: 2026-09-28
+modified: 2026-09-29
 breadcrumb_name: Outbox Pattern
 schema_type: TechArticle
 schema_headline: "Outbox Pattern – spolehlivé publikování událostí"
@@ -110,11 +110,13 @@ nesymetrických nekonzistentních stavů:
   event“ – událost, která se ve zdrojové DB *nestala*.
 
 Oba scénáře porušují atomicitu zápisu do dvou systémů a v event-driven architekturách
-nejsou vzácné. Pat Helland problém pojmenoval v práci
-*Life Beyond Distributed Transactions: An Apostate's Opinion* (2007). Jakmile
-transakce přesahuje hranici jednoho úložiště, databáze atomicitu nezaručí
-a musí ji obnovit aplikační logika. Slovo *outbox* ale v článku
-nepadne. Tabulku a relay proces popsal až Chris Richardson v knize
+nejsou vzácné. Pat Helland problém popsal v práci
+*Life Beyond Distributed Transactions: An Apostate's Opinion* (2007), termín
+*dual-write* ale nepoužívá. Zpráva odeslaná z transakce, která pak abortuje, podle
+něj způsobí efekt, na který systém nemá žádnou vzpomínku; transakční zařazení zpráv
+do fronty je proto nutnost. Jakmile transakce přesahuje hranici jednoho úložiště,
+databáze atomicitu nezaručí a musí ji obnovit aplikační logika. Ani slovo *outbox*
+v článku nepadne. Tabulku a relay proces popsal až Chris Richardson v knize
 *Microservices Patterns* (2018, kapitola 3) a v katalogu microservices.io.
 Jeho formulace řešení zní: odesílatel nejdřív uloží zprávu do databáze ve stejné
 transakci, která mění doménové entity, a samostatný proces ji teprve pak posílá
@@ -321,17 +323,17 @@ class OutboxMessage
 
 | Sloupec | Typ | Účel |
 |---|---|---|
-| `id` | UUID v7 (16 B) | Primární klíč a pořadí řádků pro polling. Deduplikaci nenese – tu zajišťuje `eventId` v payloadu události (viz Inbox). |
+| `id` | UUID v7 (16 B) | Primární klíč; UUID v7 roste s časem vzniku, relay ale řadí podle `occurred_at`. Deduplikaci nenese – tu zajišťuje `eventId` v payloadu události (viz Inbox). |
 | `message_type` | VARCHAR(255) | FQCN integrační události (např. `App\Ordering\Application\IntegrationEvent\OrderPlacedIntegrationEvent`). Relay podle něj namapuje payload zpět na PHP třídu. |
 | `aggregate_type` | VARCHAR(255) | Typ agregátu, který událost vydal (`Order`, `Invoice`). Debezium podle tohoto sloupce routuje do Kafka topiců, viz [15.05](#relay-cdc-heading). |
 | `aggregate_id` | VARCHAR(64) | ID konkrétní instance agregátu. Slouží jako klíč zprávy: události jednoho agregátu skončí ve stejné partition, a tím ve správném pořadí. |
 | `payload` | JSON / JSONB | Serializovaný stav události. JSONB v Postgresu je preferovaný – umožňuje indexovat jednotlivá pole pro debugging. |
 | `status` | VARCHAR(16) | Stavový enum: `pending` (čeká na publish), `sent` (úspěšně publikováno), `failed` (po N pokusech vzdáno, vyžaduje ruční řešení). |
-| `occurred_at` | TIMESTAMPTZ | Čas vzniku události v doménové transakci. Slouží pro řazení v relayi (best-effort FIFO) a pro výpočet outbox lagu. |
+| `occurred_at` | DATETIME | Čas vzniku události v doménové transakci. Slouží pro řazení v relayi (best-effort FIFO) a pro výpočet outbox lagu. |
 | `attempts` | INT | Počet neúspěšných pokusů o publish. Po dosažení prahu (typicky 5) řádek přechází do `failed` a opouští hot path. |
-| `sent_at` | TIMESTAMPTZ NULL | Vyplněno při přechodu do `sent`. Používá se pro kompakci (mazání starších `sent` řádků). |
+| `sent_at` | DATETIME NULL | Vyplněno při přechodu do `sent`. Používá se pro kompakci (mazání starších `sent` řádků). |
 | `last_error` | TEXT NULL | Poslední chyba publishe – důležité pro rozbor incidentu. |
-| `available_at` | TIMESTAMPTZ | Čas, odkdy relay smí řádek znovu vzít. `markFailed()` ho posouvá exponenciálně, takže trvale selhávající zpráva nepálí pokusy v každém cyklu. |
+| `available_at` | DATETIME | Čas, odkdy relay smí řádek znovu vzít. `markFailed()` ho posouvá exponenciálně, takže trvale selhávající zpráva nepálí pokusy v každém cyklu. |
 
 :::callout{type="warn"}
 ### Povinný index `(status, occurred_at)` {#index-status-time-heading}
@@ -418,8 +420,9 @@ final class Version20260429120000 extends AbstractMigration
 :::
 
 Migrace cílí na MySQL/MariaDB. PostgreSQL varianta nahradí `BINARY(16)`
-typem `UUID`, `DATETIME` typem `TIMESTAMPTZ` a `JSON` typem `JSONB`;
-klauzule `ENGINE` a `CHARSET` odpadají. Na SQLite se `BINARY(16)` mapuje na `BLOB`
+typem `UUID` a `DATETIME` typem `TIMESTAMP(0) WITHOUT TIME ZONE`; klauzule `ENGINE`
+a `CHARSET` odpadají. `TIMESTAMPTZ` a `JSONB` by vyžadovaly jiné typy v mapování
+(`datetimetz_immutable`, `jsonb`), jinak `schema:validate` hlásí rozpor. Na SQLite se `BINARY(16)` mapuje na `BLOB`
 a `JSON` na `CLOB`. Takové ruční přepisování udělá `doctrine:migrations:diff`
 spolehlivěji. Ukázka slouží k pochopení struktury, ne ke kopírování napříč
 platformami. Pozor také na SQL komentáře uvnitř `CREATE TABLE`: introspekci
@@ -885,6 +888,7 @@ namespace App\Outbox\Infrastructure\Console;
 
 use App\Outbox\Application\OutboxRepository;
 use App\Outbox\Application\OutboxMessageFactory;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -909,6 +913,7 @@ final class OutboxDispatchCommand extends Command
         #[Target('event.bus')]
         private readonly MessageBusInterface $bus,
         private readonly OutboxMessageFactory $factory,
+        private readonly EntityManagerInterface $em,
     ) {
         parent::__construct();
     }
@@ -978,6 +983,10 @@ final class OutboxDispatchCommand extends Command
                     ));
                 }
             }
+
+            // Zpracované řádky by jinak zůstaly v Identity Map až do konce
+            // procesu: paměť roste a každý flush() prochází všechny entity.
+            $this->em->clear();
 
             $backoff = 1;
             $output->writeln(sprintf('[outbox] dispatched %d messages', count($batch)));
@@ -1053,7 +1062,8 @@ selže databáze, přestože kód vypadá, že chyby ošetřuje.
 
 Dokumentace ORM je v tom jednoznačná: další unit of work po výjimce patří novému
 EntityManageru. V `catch` bloku je proto potřeba nejdřív zavolat
-`$this->registry->resetManager()` a teprve pak zapsat stav řádku, nebo si
+`resetManager()` na `ManagerRegistry`, který výpis zatím nevstřikuje, a teprve
+pak zapsat stav řádku, nebo si
 pro stavové updaty držet oddělené DBAL spojení mimo ORM.
 :::
 
@@ -1206,7 +1216,7 @@ doctrine transportu je prostý `INSERT` nad týmž spojením a vlastní izolovan
 transakci neotevírá. Zápis zprávy i flush agregátu proto commitnou společně.
 
 :::callout{type="warn"}
-### Dvě konfigurace, které atomicitu tiše ruší {#doctrine-transport-traps-heading}
+### Dvě konfigurační pasti doctrine transportu v roli outboxu {#doctrine-transport-traps-heading}
 
 **`DispatchAfterCurrentBusStamp`.** Podle docblocku `DispatchAfterCurrentBusMiddleware`
 platí: je-li middleware registrovaný před `doctrine_transaction`, odbaví se
@@ -1960,7 +1970,7 @@ blokovat aplikační vrstvu, šíří výpadek brokera do core domény.
 
 Výpadek brokera je jiný druh chyby než nepublikovatelná zpráva ze sekce
 o [dead-letter queue](#dlq-heading). `markFailed()` z [15.03](#schema) by při půlhodinovém
-výpadku vyčerpal pět pokusů zhruba za minutu a přesunul do `failed` i zdravé
+výpadku vyčerpal pět pokusů zhruba za půl minuty a přesunul do `failed` i zdravé
 řádky. Chybu spojení s brokerem (`TransportException`) proto
 [relay](#dispatch-command-heading) do `attempts` nezapočítává: přeruší
 cyklus a čeká s backoffem na úrovni celého workeru.
@@ -2069,11 +2079,14 @@ vytvořila kompozitní index `idx_outbox_status_time`, ne jen jednosloupcový.
 ### Krok 2: Refactor jednoho handleru {#migrace-krok-2-heading}
 
 Vyberte jeden hlavní handler – typicky `PlaceOrderHandler` nebo cokoli,
-kde dual-write nejvíc bolí. Přidejte do něj `wrapInTransaction` a místo
-`$bus->dispatch($event)` volejte `$outbox->store(OutboxMessage::fromIntegrationEvent(...))`
+kde dual-write nejvíc bolí. Přidejte do něj `wrapInTransaction` a vedle
+`$bus->dispatch()` volejte `$outbox->store(OutboxMessage::fromIntegrationEvent(...))`
 s integračním tvarem události (viz [15.04](#aggregate-publishes)).
-Staré `$bus->dispatch()` *zatím nemažte* – legacy subscribeři, kteří
-poslouchají na sync transportu, by přestali fungovat.
+Staré `$bus->dispatch()` *zatím nemažte* – legacy subscribeři by přestali fungovat.
+Posílejte jím ale tutéž instanci integrační události, kterou handler ukládá do
+outboxu. Shodné `eventId` obou kopií potřebuje Inbox v kroku 4. Subscribery, kteří
+dosud poslouchali doménovou událost, je proto potřeba ve stejném kroku přepnout
+na integrační tvar.
 
 ### Krok 3: Přidat inbox subscriberům jeden po druhém {#migrace-krok-3-heading}
 
@@ -2087,7 +2100,7 @@ a vlastního Inboxu dostávali každou událost dvakrát a dvakrát ji zpracoval
 
 Až mají Inbox všichni subscribeři událostí z refaktorovaného handleru,
 implementujte `OutboxDispatchCommand` ze sekce [15.05](#relay) a nasaďte ho
-pod supervisorem. Dokud je aktivní i legacy publish, dostane broker *obě* verze
+pod supervisorem. Dokud je aktivní i legacy publish, dostanou subscribeři *obě* verze
 každé události a Inbox druhou kopii zahodí. Podmínkou je, že legacy dispatch
 z kroku 2 posílá integrační událost se stejným `eventId` jako řádek v outboxu.
 Doménová událost `eventId` nemá a Inbox by obě kopie nespároval.
