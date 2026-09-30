@@ -1,0 +1,32 @@
+{# schema.org VideoObject dílu videokurzu (včetně Clip = kapitoly videa).
+   args: e (vydaný díl), page_url (URL stránky, kde je video vložené) #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": {{ (e.ep ~ ' · ' ~ e.title)|json_encode|raw }},
+  "description": {{ (e.lead ?? e.title)|json_encode|raw }},
+  "thumbnailUrl": "{{ app.request.schemeAndHttpHost }}{{ asset('images/videokurz/' ~ e.ep ~ '.jpg') }}",
+  "uploadDate": "{{ e.published }}T12:00:00+02:00",
+  {% if e.isoDuration %}"duration": "{{ e.isoDuration }}",{% endif %}
+  "embedUrl": "https://www.youtube-nocookie.com/embed/{{ e.youtube }}",
+  "url": "https://www.youtube.com/watch?v={{ e.youtube }}",
+  "inLanguage": "cs-CZ",
+  "isAccessibleForFree": true,
+  "author": { "@type": "Person", "name": "Michal Katuščák", "url": "https://www.katuscak.cz/" },
+  "isPartOf": { "@type": "CreativeWorkSeries", "name": "Videokurz Domain-Driven Design v Symfony", "url": "{{ url('video_course') }}" }
+  {%- if e.moments|length > 1 -%},
+  "hasPart": [
+    {%- for m in e.moments -%}
+    {
+      "@type": "Clip",
+      "name": {{ m.title|json_encode|raw }},
+      "startOffset": {{ m.t }},
+      {% set _end = loop.last ? (e.duration ?? m.t) : e.moments[loop.index].t %}"endOffset": {{ _end }},
+      "url": "https://www.youtube.com/watch?v={{ e.youtube }}&t={{ m.t }}s"
+    }{% if not loop.last %},{% endif %}
+    {%- endfor -%}
+  ]
+  {%- endif %}
+}
+</script>

@@ -18,7 +18,7 @@
     <meta name="description" content="{% block meta_description %}Podrobný průvodce Domain-Driven Design v Symfony 8. Naučte se implementovat DDD architekturu ve svých Symfony projektech.{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}Domain-Driven Design, DDD, Symfony, PHP, architektura, vývoj, CQRS, Event Sourcing{% endblock %}">
     <meta name="author" content="Michal Katuščák">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
     {# content přepisuje theme-toggle.js podle aktivního tématu #}
     <meta name="theme-color" content="#0B0D10">
     <meta name="generator" content="Symfony 8">
@@ -70,6 +70,7 @@
     {%- set _practice_routes = ['hub_practice', 'testing_ddd', 'migration_from_crud', 'microservices_and_ddd', 'ddd_pain_points', 'anti_patterns', 'when_not_to_use_ddd'] -%}
     {%- set _synthesis_routes = ['hub_synthesis', 'practical_examples', 'case_study'] -%}
     {%- set _reference_routes = ['hub_reference', 'ddd_ai', 'glossary', 'resources', 'cheat_sheet'] -%}
+    {%- set _video_routes = ['video_course', 'video_episode'] -%}
 
     <a href="#content" class="skip-link">Přejít na obsah</a>
 
@@ -98,6 +99,7 @@
                 <a class="navlink {% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a>
                 <a class="navlink {% if _route in _synthesis_routes %}active{% endif %}" href="{{ path('hub_synthesis') }}"{% if _route == 'hub_synthesis' %} aria-current="page"{% elseif _route in _synthesis_routes %} aria-current="true"{% endif %}>Syntéza</a>
                 <a class="navlink {% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a>
+                <a class="navlink navlink-video {% if _route in _video_routes %}active{% endif %}" href="{{ path('video_course') }}"{% if _route == 'video_course' %} aria-current="page"{% elseif _route in _video_routes %} aria-current="true"{% endif %}><svg class="navlink-video-mark" viewBox="0 0 8 8" aria-hidden="true"><path d="M1.5 0.5v7l6-3.5z"/></svg>Videokurz</a>
             </div>
             <div class="topnav-right">
                 <button class="nav-search" type="button" data-search-open aria-label="Hledat v knize" aria-keyshortcuts="Control+K">
@@ -146,6 +148,7 @@
             <li><a class="{% if _route in _practice_routes %}active{% endif %}" href="{{ path('hub_practice') }}"{% if _route == 'hub_practice' %} aria-current="page"{% elseif _route in _practice_routes %} aria-current="true"{% endif %}>Praxe</a></li>
             <li><a class="{% if _route in _synthesis_routes %}active{% endif %}" href="{{ path('hub_synthesis') }}"{% if _route == 'hub_synthesis' %} aria-current="page"{% elseif _route in _synthesis_routes %} aria-current="true"{% endif %}>Syntéza</a></li>
             <li><a class="{% if _route in _reference_routes %}active{% endif %}" href="{{ path('hub_reference') }}"{% if _route == 'hub_reference' %} aria-current="page"{% elseif _route in _reference_routes %} aria-current="true"{% endif %}>Reference</a></li>
+            <li><a class="{% if _route in _video_routes %}active{% endif %}" href="{{ path('video_course') }}"{% if _route == 'video_course' %} aria-current="page"{% elseif _route in _video_routes %} aria-current="true"{% endif %}>Videokurz</a></li>
             <li><a href="{{ path('about') }}"{% if _route == 'about' %} aria-current="page"{% endif %}>O autorovi</a></li>
         </ul>
     </aside>
@@ -259,6 +262,7 @@
                         {% for e in _foot_extras %}
                             <li><a href="{{ path(e.route) }}"><span class="foot-a-num">–</span><span>{{ e.t }}</span></a></li>
                         {% endfor %}
+                        <li><a href="{{ path('video_course') }}"><span class="foot-a-num">▶</span><span>Videokurz</span></a></li>
                         <li><a href="{{ path('about') }}"><span class="foot-a-num">–</span><span>O autorovi</span></a></li>
                     </ul>
                 </div>

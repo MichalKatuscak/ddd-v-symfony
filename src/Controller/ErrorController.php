@@ -25,11 +25,20 @@ class ErrorController extends AbstractController
      */
     public function __invoke(Request $request): Response
     {
-        // Získáme poslední část URL, která by měla být kód chyby (např. 404, 500)
-        $path = $request->getPathInfo();
-        $errorCode = intval(basename($path)) ?: 404; // Výchozí hodnota 404, pokud není kód v URL
+        // Skutečná výjimka z požadavku (ErrorListener ji předává v atributu). Kód
+        // z konce URL jen pro přímé volání /…/404 – dřív se bral vždy, takže
+        // neexistující /videokurz/02a skončil stavem „2“ a chybou 500.
+        $original = $request->attributes->get('exception');
+        if ($original instanceof FlattenException) {
+            return $this->show($request, $original);
+        }
+        if ($original instanceof \Throwable) {
+            return $this->show($request, FlattenException::createFromThrowable($original));
+        }
 
-        // Vytvoříme FlattenException s daným kódem
+        $code = (int) basename($request->getPathInfo());
+        $errorCode = $code >= 400 && $code <= 599 ? $code : 404;
+
         $exception = FlattenException::create(
             new \Exception('Page not found'),
             $errorCode

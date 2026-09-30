@@ -12,7 +12,12 @@
 {% block article_modified_time %}{{ fm.modified }}{% endblock %}
 {% block breadcrumb_name %}{{ fm.breadcrumbName|raw }}{% endblock %}
 
+{% set chapter_videos = ddd_chapter_videos(fm.route) %}
+
 {% block structured_data %}
+    {% for v in chapter_videos|filter(v => v.released) %}
+        {% include '_partials/video_jsonld.html.twig' with { e: v } %}
+    {% endfor %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -61,6 +66,10 @@
     {% include '_partials/article_toc.html.twig' %}
 
     <div class="art-body"{% if fm.chapterNumber %} data-chapter-number="{{ fm.chapterNumber }}"{% endif %}>
+        {% if chapter_videos is not empty %}
+            {% include '_partials/chapter_videos.html.twig' with { videos: chapter_videos } only %}
+        {% endif %}
+
         {% if fm.githubExamples %}
             {% include '_partials/github_examples.html.twig' with { path: fm.githubExamples } %}
         {% endif %}

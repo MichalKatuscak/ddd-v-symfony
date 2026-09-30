@@ -35,6 +35,9 @@
                             <div class="hub-a-card-d">{{ c.d }}</div>
                         </div>
                         <div class="hub-a-card-meta">
+                            {% if ddd_chapter_videos(c.route)|filter(v => v.released) is not empty %}
+                                <span class="has-video-mark" title="Kapitola má díl ve videokurzu"><svg viewBox="0 0 8 8" aria-hidden="true"><path d="M1.5 0.5v7l6-3.5z"/></svg><span class="visually-hidden">(má video)</span></span>
+                            {% endif %}
                             <span class="hub-a-card-time">{{ c.time }} min</span>
                             <span class="hub-a-card-bar" aria-hidden="true">
                                 {% for i in 1..4 %}<i class="{{ i <= c.lvl ? 'on' : '' }}"></i>{% endfor %}

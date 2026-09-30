@@ -83,6 +83,10 @@ final class SitemapBuilder
             }
         }
 
+        // Videokurz: jen přehled. Stránky dílů jsou noindex – téma ve vyhledávání
+        // zastupuje kapitola knihy, kde je video vložené (viz video/episode.html.twig).
+        $urls[] = $this->url('/videokurz', null, 'weekly', '0.8');
+
         $urls[] = $this->url('/glosar', $latestOverall, 'monthly', '0.6');
         $urls[] = $this->url('/cheat-sheet', $latestOverall, 'monthly', '0.6');
         $urls[] = $this->url('/zdroje', $latestOverall, 'monthly', '0.6');

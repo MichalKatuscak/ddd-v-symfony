@@ -11,6 +11,7 @@ import './styles/chrome.css';
 import './styles/article.css';
 import './styles/landing.css';
 import './styles/hub.css';
+import './styles/video.css';
 import './styles/print.css'; // @media print — poslední, ať přebíjí v tiskovém kontextu
 
 // Zvýraznění syntaxe probíhá na serveru (App\Content\CodeHighlighter) —
@@ -28,3 +29,4 @@ import './scripts/glossary-filter.js';
 import './scripts/print.js';
 import './scripts/diagram-viewer.js';
 import './scripts/reading-progress.js';
+import './scripts/video-player.js';

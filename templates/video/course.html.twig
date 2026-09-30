@@ -1,0 +1,161 @@
+{% extends 'base.html.twig' %}
+
+{% set released = course.released %}
+{% set released_minutes = (course.releasedDuration / 60)|round %}
+{% set total = course.all|length %}
+
+{% block title %}Videokurz Domain-Driven Design v Symfony – zdarma na YouTube{% endblock %}
+{% block meta_description %}Videokurz podle knihy DDD v Symfony: {{ total }} dílů od Ubiquitous Language a Bounded Contextu přes agregáty a doménové události po CQRS, Event Sourcing a migraci z CRUD. Česky, zdarma, s animovaným kódem v PHP 8.4 a Symfony 8.{% endblock %}
+{% block meta_keywords %}videokurz DDD, Domain-Driven Design video, Symfony videokurz, DDD PHP kurz, CQRS video, Event Sourcing video, česky{% endblock %}
+{% block og_title %}Videokurz Domain-Driven Design v Symfony{% endblock %}
+{% block og_image %}{{ app.request.schemeAndHttpHost }}{{ asset('images/videokurz/00.jpg') }}{% endblock %}
+{% block breadcrumb_name %}Videokurz{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "@id": "{{ url('video_course') }}",
+  "url": "{{ url('video_course') }}",
+  "name": "Videokurz Domain-Driven Design v Symfony",
+  "description": {{ block('meta_description')|json_encode|raw }},
+  "inLanguage": "cs-CZ",
+  "isAccessibleForFree": true,
+  "educationalLevel": "Pokročilý",
+  "teaches": "Domain-Driven Design v PHP 8.4 a Symfony 8: strategický design, taktické vzory, CQRS, Event Sourcing, testování a migrace z CRUD",
+  "provider": { "@type": "Person", "name": "Michal Katuščák", "url": "https://www.katuscak.cz/" },
+  "author": { "@type": "Person", "name": "Michal Katuščák", "url": "https://www.katuscak.cz/" },
+  "image": "{{ app.request.schemeAndHttpHost }}{{ asset('images/videokurz/00.jpg') }}",
+  "isBasedOn": { "@type": "Book", "name": "Domain-Driven Design v Symfony 8", "url": "{{ url('homepage') }}" },
+  "offers": { "@type": "Offer", "price": 0, "priceCurrency": "CZK", "category": "Free" },
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "Online",
+    "courseWorkload": "PT{{ (total * 10 / 60)|round }}H",
+    "url": "{{ course.playlistUrl }}"
+  }
+}
+</script>
+{% for e in released %}
+    {% include '_partials/video_jsonld.html.twig' with { e: e } %}
+{% endfor %}
+{% endblock %}
+
+{% block body %}
+<div class="vc">
+    <div class="vc-shell">
+        <header class="vc-hero">
+            <div class="vc-hero-text">
+                <div class="vc-eyebrow">
+                    <span>VIDEOKURZ</span>
+                    <span class="vc-eyebrow-rule" aria-hidden="true"></span>
+                    <span class="vc-eyebrow-meta">ČESKY · ZDARMA · NA YOUTUBE</span>
+                </div>
+                <h1 class="vc-h">Domain-Driven Design v Symfony <em>jako videokurz.</em></h1>
+                <p class="vc-deck">
+                    Ke každé kapitole knihy jeden nebo dva díly o 7–13 minutách. Kód se v nich skládá
+                    po řádcích, diagramy vznikají před očima a každý díl končí otázkou na rozmyšlenou
+                    a krátkým opakováním. Číslo dílu odpovídá kapitole, takže video a text jdou číst
+                    i sledovat střídavě.
+                </p>
+                <div class="vc-cta">
+                    <a class="btn btn-primary" href="{{ course.playlistUrl }}" target="_blank" rel="noopener noreferrer">
+                        Playlist na YouTube <span class="btn-arrow" aria-hidden="true">↗</span><span class="visually-hidden"> (nové okno)</span>
+                    </a>
+                    <a class="btn btn-ghost" href="{{ course.channelUrl }}?sub_confirmation=1" target="_blank" rel="noopener noreferrer">
+                        Odebírat kanál<span class="visually-hidden"> (nové okno)</span>
+                    </a>
+                </div>
+                <dl class="vc-meta">
+                    <div><dt>Dílů</dt><dd>{{ total }} <span class="vc-meta-sub">· vyšlo {{ released|length }}</span></dd></div>
+                    <div><dt>Délka dílu</dt><dd>7–13 min</dd></div>
+                    <div><dt>Stack</dt><dd>PHP 8.4 · Symfony 8 · Doctrine ORM 3</dd></div>
+                    <div><dt>Nové díly</dt><dd>postupně, v pořadí kapitol</dd></div>
+                </dl>
+            </div>
+
+            {% if trailer and trailer.released %}
+                <figure class="vc-hero-player">
+                    {% include '_partials/video_player.html.twig' with {
+                        e: trailer, id: 'vplayer-trailer', eager: true,
+                        sizes: '(max-width: 900px) 100vw, 640px'
+                    } only %}
+                    <figcaption class="vc-hero-cap">
+                        <span class="vc-hero-cap-n">00</span>
+                        <span>{{ trailer.title }}</span>
+                        <span class="vc-hero-cap-d">{{ trailer.durationLabel }}</span>
+                    </figcaption>
+                </figure>
+            {% endif %}
+        </header>
+
+        <nav class="vc-parts" aria-label="Části kurzu">
+            {% for part in syllabus|filter(p => p.key != 'preface') %}
+                <a href="#{{ part.key }}" class="vc-parts-link">
+                    <span class="vc-parts-n">{{ '%02d'|format(loop.index) }}</span>{{ part.title }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        {# Úvodní díl 00 (trailer) je nahoře v hero – osnova začíná první částí knihy. #}
+        {% for part in syllabus|filter(p => p.key != 'preface') %}
+            {% set _out = part.episodes|filter(e => e.released)|length %}
+            <section class="vc-part" id="{{ part.key }}" aria-labelledby="{{ part.key }}-h">
+                <header class="vc-part-head">
+                    <span class="vc-part-num">ČÁST {{ '%02d'|format(loop.index) }}</span>
+                    <h2 class="vc-part-title" id="{{ part.key }}-h">{{ part.title }}</h2>
+                    <span class="vc-part-sub">
+                        {{ part.episodes|length }} {{ part.episodes|length == 1 ? 'díl' : (part.episodes|length < 5 ? 'díly' : 'dílů') }}
+                        {%- if _out > 0 %} · vyšlo {{ _out }}{% endif %}
+                        {%- if part.hub %} · <a href="{{ path(part.hub) }}">kapitoly v knize</a>{% endif %}
+                    </span>
+                </header>
+
+                <ol class="vc-grid">
+                    {% for e in part.episodes %}
+                        <li class="vc-card{{ e.released ? '' : ' is-soon' }}">
+                            <div class="vc-card-thumb">
+                                <img src="{{ asset('images/videokurz/' ~ e.ep ~ '-480.webp') }}"
+                                     srcset="{{ asset('images/videokurz/' ~ e.ep ~ '-480.webp') }} 480w, {{ asset('images/videokurz/' ~ e.ep ~ '-960.webp') }} 960w"
+                                     sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 400px"
+                                     width="480" height="270" alt="" loading="lazy" decoding="async">
+                                {% if e.released %}
+                                    <span class="vc-card-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                                    {% if e.durationLabel %}<span class="vc-card-dur">{{ e.durationLabel }}</span>{% endif %}
+                                {% else %}
+                                    <span class="vc-card-soon">Připravuje se</span>
+                                {% endif %}
+                            </div>
+                            <div class="vc-card-body">
+                                <div class="vc-card-ep">
+                                    Díl {{ e.ep }}
+                                    {% if e.chapterN %}<span class="vc-card-ch">· kapitola {{ e.chapterN }}</span>{% endif %}
+                                </div>
+                                <h3 class="vc-card-t">
+                                    {% if e.released %}
+                                        <a class="vc-card-link" href="{{ path('video_episode', { ep: e.ep }) }}">{{ e.title }}</a>
+                                    {% else %}
+                                        {{ e.title }}
+                                    {% endif %}
+                                </h3>
+                                {% if e.lead %}<p class="vc-card-d">{{ e.lead }}</p>{% endif %}
+                                <a class="vc-card-book" href="{{ path(e.chapter) }}">Kapitola v knize<span class="visually-hidden">: {{ e.chapterTitle }}</span> →</a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </section>
+        {% endfor %}
+
+        <aside class="vc-foot">
+            <div>
+                <div class="vc-eyebrow"><span>KNIHA</span></div>
+                <p class="vc-foot-t">Video vysvětlí princip, kniha jde do hloubky.</p>
+                <p class="vc-foot-d">Celý text, ukázky kódu, diagramy a zdroje najdete v kapitolách knihy – zdarma a bez registrace.</p>
+            </div>
+            <a class="btn btn-primary" href="{{ path('preface') }}">Otevřít knihu <span class="btn-arrow" aria-hidden="true">→</span></a>
+        </aside>
+    </div>
+</div>
+{% endblock %}

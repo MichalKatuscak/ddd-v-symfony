@@ -21,6 +21,7 @@ final class PagesTest extends WebTestCase
             '/',
             '/zaklady', '/takticke-vzory', '/architektura', '/vzory', '/praxe', '/synteza', '/reference',
             '/glosar', '/cheat-sheet', '/zdroje', '/o-autorovi', '/security-policy',
+            '/videokurz', '/videokurz/00', '/videokurz/01',
         ];
         foreach ($paths as $path) {
             yield $path => [$path];
@@ -52,6 +53,37 @@ final class PagesTest extends WebTestCase
         $client->request('GET', '/tahle-stranka-neexistuje');
 
         self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testUnreleasedEpisodeReturns404(): void
+    {
+        $client = self::createClient();
+        // 02a má YouTube ID, ale bez data zveřejnění (soukromé video) – stránka neexistuje.
+        foreach (['/videokurz/02a', '/videokurz/99'] as $path) {
+            $client->request('GET', $path);
+            self::assertResponseStatusCodeSame(404, $path);
+        }
+    }
+
+    public function testChapterWithReleasedEpisodeEmbedsFacadeOnly(): void
+    {
+        $client = self::createClient();
+        $crawler = $client->request('GET', '/co-je-ddd');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('[data-vchap] [data-vplayer][data-yt]');
+        // Bez kliknutí žádný iframe YouTube (fasáda kvůli soukromí a CSP).
+        self::assertCount(0, $crawler->filter('iframe'));
+        self::assertStringContainsString('"@type": "VideoObject"', (string) $client->getResponse()->getContent());
+    }
+
+    public function testEpisodePageIsNoindex(): void
+    {
+        $client = self::createClient();
+        $crawler = $client->request('GET', '/videokurz/01');
+
+        self::assertResponseIsSuccessful();
+        self::assertSame('noindex, follow', $crawler->filter('meta[name="robots"]')->attr('content'));
     }
 
     public function testLegacyUrlsRedirectPermanently(): void

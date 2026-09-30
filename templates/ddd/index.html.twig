@@ -107,6 +107,22 @@
                 </a>
             </div>
 
+            {% set _vc = ddd_video_course() %}
+            {% set _trailer = _vc.find('00') %}
+            {% if _trailer and _trailer.released %}
+                <a class="land-video" href="{{ path('video_course') }}">
+                    <span class="land-video-thumb">
+                        <img src="{{ asset('images/videokurz/00-480.webp') }}" width="480" height="270" alt="" loading="lazy" decoding="async">
+                        <span class="land-video-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                    </span>
+                    <span class="land-video-text">
+                        <span class="land-video-k">Nově · videokurz</span>
+                        <span class="land-video-t">Kniha i jako video</span>
+                        <span class="land-video-d">{{ _vc.all|length }} dílů s animovaným kódem, ke každé kapitole · vyšlo {{ _vc.released|length }}</span>
+                    </span>
+                    <span class="land-video-arr" aria-hidden="true">→</span>
+                </a>
+            {% endif %}
         </div>
 
         <div class="land-right">
@@ -125,6 +141,9 @@
                             <span class="land-toc-desc">{{ c.d }}</span>
                         </div>
                         <div class="land-toc-side">
+                            {% if ddd_chapter_videos(c.route)|filter(v => v.released) is not empty %}
+                                <span class="has-video-mark" title="Kapitola má díl ve videokurzu"><svg viewBox="0 0 8 8" aria-hidden="true"><path d="M1.5 0.5v7l6-3.5z"/></svg><span class="visually-hidden">(má video)</span></span>
+                            {% endif %}
                             <span class="land-toc-tag">{{ c.tag }}</span>
                             <span class="land-toc-time">{{ c.time }}′</span>
                             <span class="land-toc-bar">

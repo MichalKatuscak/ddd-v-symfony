@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (tocLists.length === 0 || !body) return;
   if (tocLists[0].children.length > 0) return;
 
-  const headings = Array.from(body.querySelectorAll('h2'));
+  const headings = Array.from(body.querySelectorAll('h2:not([data-toc-skip])'));
   if (headings.length < 2) {
     document.querySelectorAll('[data-toc-target], [data-toc-mobile], [data-toc-fab]').forEach(function (el) {
       el.style.display = 'none';

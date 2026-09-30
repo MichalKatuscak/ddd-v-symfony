@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{# Stránka dílu slouží lidem (kapitoly videa, přepis). Ve vyhledávání zastupuje
+   téma kapitola knihy, kde je video také vložené – proto noindex a mimo sitemapu,
+   aby díl nekonkuroval článku se stejným tématem. #}
+{% block robots %}noindex, follow{% endblock %}
+{% block title %}{{ e.title }} – díl {{ e.ep }} videokurzu | DDD Symfony{% endblock %}
+{% block meta_description %}{{ e.lead ?? e.title }}{% endblock %}
+{% block og_type %}video.other{% endblock %}
+{% block og_title %}{{ e.title }} · videokurz DDD v Symfony #{{ e.ep }}{% endblock %}
+{% block og_image %}{{ app.request.schemeAndHttpHost }}{{ asset('images/videokurz/' ~ e.ep ~ '.jpg') }}{% endblock %}
+
+{% block structured_data %}
+    {% include '_partials/video_jsonld.html.twig' with { e: e } %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Úvod", "item": "{{ url('homepage') }}" },
+        { "@type": "ListItem", "position": 2, "name": "Videokurz", "item": "{{ url('video_course') }}" },
+        { "@type": "ListItem", "position": 3, "name": {{ ('Díl ' ~ e.ep)|json_encode|raw }}, "item": "{{ url('video_episode', { ep: e.ep }) }}" }
+      ]
+    }
+    </script>
+{% endblock %}
+
+{% block body %}
+<article class="ve">
+    <div class="ve-shell">
+        <nav class="ve-crumbs" aria-label="Drobečková navigace">
+            <ol>
+                <li><a href="{{ path('homepage') }}">Úvod</a></li>
+                <li><a href="{{ path('video_course') }}">Videokurz</a></li>
+                <li aria-current="page">Díl {{ e.ep }}</li>
+            </ol>
+        </nav>
+
+        <header class="ve-head">
+            <div class="ve-eyebrow">
+                <span>DÍL {{ e.ep }}</span>
+                <span class="ve-eyebrow-rule" aria-hidden="true"></span>
+                <span class="ve-eyebrow-meta">
+                    {% if e.chapterN %}KAPITOLA {{ e.chapterN }}{% endif %}{% if e.sections %} · SEKCE {{ e.sections|upper }}{% endif %}
+                </span>
+            </div>
+            <h1 class="ve-h">{{ e.title }}</h1>
+            {% if e.lead %}<p class="ve-deck">{{ e.lead }}</p>{% endif %}
+        </header>
+
+        <div class="ve-layout">
+            <div class="ve-main">
+                {% include '_partials/video_player.html.twig' with {
+                    e: e, id: 'vplayer-ep', eager: true,
+                    sizes: '(max-width: 1080px) 100vw, 760px'
+                } only %}
+
+                {% if transcript is not empty %}
+                    <details class="ve-transcript">
+                        <summary>
+                            <span class="ve-transcript-k">Přepis dílu</span>
+                            <span class="ve-transcript-hint">komentář tak, jak zazní ve videu</span>
+                        </summary>
+                        <div class="ve-transcript-body">
+                            {% for s in transcript %}
+                                <section class="ve-tsec">
+                                    <h2 class="ve-tsec-h">
+                                        <button type="button" class="ve-time" data-vplayer-seek="{{ s.t }}" aria-controls="vplayer-ep">
+                                            {{ s.label }}<span class="visually-hidden"> – přehrát od tohoto místa</span>
+                                        </button>
+                                        {{ s.title }}
+                                    </h2>
+                                    {% for p in s.paragraphs %}<p>{{ p }}</p>{% endfor %}
+                                </section>
+                            {% endfor %}
+                        </div>
+                    </details>
+                {% endif %}
+            </div>
+
+            <aside class="ve-side" aria-label="O dílu">
+                <dl class="ve-meta">
+                    {% if e.durationLabel %}<div><dt>Délka</dt><dd>{{ e.durationLabel }}</dd></div>{% endif %}
+                    <div><dt>Vyšlo</dt><dd>{{ e.published|date('j. n. Y') }}</dd></div>
+                    <div><dt>Kapitola</dt><dd><a href="{{ path(e.chapter) }}">{% if e.chapterN %}{{ e.chapterN }} · {% endif %}{{ e.chapterTitle }}</a></dd></div>
+                </dl>
+
+                {% if e.moments|length > 1 %}
+                    <h2 class="ve-side-h">Kapitoly videa</h2>
+                    <ol class="ve-moments">
+                        {% for m in e.moments %}
+                            <li>
+                                <button type="button" class="ve-moment" data-vplayer-seek="{{ m.t }}" aria-controls="vplayer-ep">
+                                    <span class="ve-time-label">{{ m.label }}</span>
+                                    <span class="ve-moment-t">{{ m.title }}</span>
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% endif %}
+
+                <div class="ve-actions">
+                    <a class="btn btn-primary" href="{{ path(e.chapter) }}">Číst kapitolu <span class="btn-arrow" aria-hidden="true">→</span></a>
+                    <a class="btn btn-ghost" href="https://www.youtube.com/watch?v={{ e.youtube }}&list={{ course.playlistUrl|split('list=')|last }}" target="_blank" rel="noopener noreferrer">
+                        Na YouTube <span aria-hidden="true">↗</span><span class="visually-hidden"> (nové okno)</span>
+                    </a>
+                </div>
+            </aside>
+        </div>
+
+        {% if neighbors.prev or neighbors.next %}
+            <nav class="ve-nav" aria-label="Další díly">
+                {% if neighbors.prev %}
+                    <a class="ve-nav-link is-prev" href="{{ path('video_episode', { ep: neighbors.prev.ep }) }}">
+                        <span class="ve-nav-k">← Předchozí díl {{ neighbors.prev.ep }}</span>
+                        <span class="ve-nav-t">{{ neighbors.prev.title }}</span>
+                    </a>
+                {% else %}<span></span>{% endif %}
+                {% if neighbors.next %}
+                    <a class="ve-nav-link is-next" href="{{ path('video_episode', { ep: neighbors.next.ep }) }}">
+                        <span class="ve-nav-k">Další díl {{ neighbors.next.ep }} →</span>
+                        <span class="ve-nav-t">{{ neighbors.next.title }}</span>
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+        <p class="ve-back"><a href="{{ path('video_course') }}">← Všechny díly videokurzu</a></p>
+    </div>
+</article>
+{% endblock %}

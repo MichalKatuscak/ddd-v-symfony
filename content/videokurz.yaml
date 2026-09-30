@@ -1,0 +1,500 @@
+# Videokurz DDD v Symfony – katalog dílů pro web knihy.
+# Generuje video/scripts/web-katalog.mjs (ze scénářů a hotových renderů).
+# Ručně se doplňuje jen po zveřejnění dílu na YouTube:
+#   youtube   – ID videa (část URL za watch?v=)
+#   published – datum zveřejnění (YYYY-MM-DD); dokud je null, web díl
+#               ukazuje jen jako „připravuje se“ (i když má ID – soukromé video).
+playlist: "PLXUtExCJdfGk"
+channel: "https://www.youtube.com/@michal.katuscak"
+episodes:
+  - ep: "00"
+    chapter: "preface"
+    title: "Domain-Driven Design v Symfony 8: o čem je kurz"
+    lead: "Videokurz podle knihy DDD v Symfony: od hranic kontextů a Event Stormingu přes agregáty a události až po CQRS, Event Sourcing, testy a migraci z CRUD. Pro koho je, na čem stojí a kde začít."
+    sections: null
+    duration: 128
+    youtube: "7uDeVVAYfyc"
+    published: "2026-09-30"
+    chapters:
+      - { t: 0, title: "Úvod" }
+      - { t: 16, title: "Co se v kurzu naučíte" }
+      - { t: 71, title: "Pro koho kurz je" }
+      - { t: 93, title: "Struktura kurzu" }
+  - ep: "01"
+    chapter: "what_is_ddd"
+    title: "Co je Domain-Driven Design?"
+    lead: "Proč DDD začíná jazykem a hranicemi: Ubiquitous Language, Bounded Context, strategický a taktický design a kdy se DDD nevyplatí."
+    sections: null
+    duration: 467
+    youtube: "1wsYmym_xVk"
+    published: "2026-09-30"
+    chapters:
+      - { t: 0, title: "Tři týdny na jednu platební metodu" }
+      - { t: 27, title: "Když doména přeroste model" }
+      - { t: 114, title: "Definice a Ubiquitous Language" }
+      - { t: 235, title: "Bounded Context" }
+      - { t: 299, title: "Strategický a taktický design, cena DDD" }
+      - { t: 404, title: "Otázka a shrnutí" }
+  - ep: "02a"
+    chapter: "subdomains"
+    title: "Core Domain a subdomény: kam investovat"
+    lead: "Core, Supporting a Generic subdomény: kde se vyplatí plné DDD, kde stačí CRUD a co koupit. Pětibodový test Core Domain a anti-vzor „všechno je Core“."
+    sections: "02.01–02.04"
+    duration: 540
+    youtube: "tJL6JcmeE1o"
+    published: null
+    chapters:
+      - { t: 0, title: "Vlastní autentizace za šest člověkoroků" }
+      - { t: 32, title: "Proč subdomény předcházejí všemu" }
+      - { t: 160, title: "Tři kategorie subdomén" }
+      - { t: 268, title: "Jak rozpoznat Core Domain" }
+      - { t: 381, title: "Anti-vzor: všechno je Core" }
+      - { t: 462, title: "Otázka a shrnutí" }
+  - ep: "02b"
+    chapter: "subdomains"
+    title: "Subdomény v Symfony: kód, sourcing, audit"
+    lead: "Jak se Core, Supporting a Generic propíšou do Bounded Contextů, do struktury projektu v Symfony a do rozhodnutí build, nebo buy. A proč klasifikace stárne."
+    sections: "02.05–02.09"
+    duration: 498
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Tentýž Order, jiný kód" }
+      - { t: 28, title: "Mapování subdomén na Bounded Contexty" }
+      - { t: 98, title: "Subdomény v Symfony: struktura a kód" }
+      - { t: 218, title: "Sourcing: stavět, nebo koupit" }
+      - { t: 300, title: "Klasifikace stárne: audit a Domain Vision Statement" }
+      - { t: 415, title: "Otázka a shrnutí" }
+  - ep: "03a"
+    chapter: "context_mapping"
+    title: "Context Mapping: vztahy mezi Bounded Contexty"
+    lead: "Context Map a vztahy mezi kontexty: Partnership, Shared Kernel, Customer/Supplier a Separate Ways. Kdo komu dodává model, kdo rozhoduje a co to znamená v Symfony."
+    sections: "03.01–03.05"
+    duration: 524
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Kdo vlastní kontrakt mezi kontexty?" }
+      - { t: 32, title: "Co je Context Map a proč ji nakreslit" }
+      - { t: 119, title: "Osm vztahů a rolí – přehled" }
+      - { t: 175, title: "Partnership a Shared Kernel" }
+      - { t: 283, title: "Customer/Supplier" }
+      - { t: 380, title: "Separate Ways" }
+      - { t: 446, title: "Otázky a shrnutí" }
+  - ep: "03b"
+    chapter: "context_mapping"
+    title: "Anti-Corruption Layer, OHS a Published Language"
+    lead: "Role na hranici mezi kontexty: Conformist, Anti-Corruption Layer, Open Host Service a Published Language v Symfony 8. Plus jak nakreslit Context Map za 90 minut a co s Big Ball of Mud."
+    sections: "03.06–03.09, 03.11–03.12"
+    duration: 544
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Cizí model prosakuje do domény" }
+      - { t: 31, title: "Conformist" }
+      - { t: 113, title: "Anti-Corruption Layer" }
+      - { t: 246, title: "Open Host Service a Published Language" }
+      - { t: 343, title: "Context Map za 90 minut a Big Ball of Mud" }
+      - { t: 443, title: "Otázky a shrnutí" }
+  - ep: "04a"
+    chapter: "event_storming"
+    title: "Event Storming: workshop od stěny k agregátu"
+    lead: "Event Storming prakticky: notace, Big Picture krok za krokem, Process Modelling a Software Design. A jak se lepicí papírky promítnou do tříd a testů v Symfony."
+    sections: "04.01–04.06"
+    duration: 435
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Specifikace, která neexistuje" }
+      - { t: 34, title: "Proč workshop a jak číst stěnu" }
+      - { t: 116, title: "Big Picture krok za krokem" }
+      - { t: 218, title: "Process Modelling" }
+      - { t: 280, title: "Software Design: ze stěny do kódu a testů" }
+      - { t: 354, title: "Otázky a shrnutí" }
+  - ep: "04b"
+    chapter: "event_storming"
+    title: "Domain Storytelling a výstup z Event Stormingu"
+    lead: "Domain Storytelling jako doplněk Event Stormingu, anti-vzory workshopů a co musí po workshopu jít do repozitáře, aby se slovník z místnosti neztratil."
+    sections: "04.07–04.11"
+    duration: 418
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Workshop, který skončil ve Slacku" }
+      - { t: 32, title: "Domain Storytelling" }
+      - { t: 150, title: "Anti-vzory workshopů a limity techniky" }
+      - { t: 245, title: "Po workshopu a re-storming" }
+      - { t: 339, title: "Otázky a shrnutí" }
+  - ep: "05a"
+    chapter: "team_topologies"
+    title: "Conway's Law a Team Topologies: týmy kolem kontextů"
+    lead: "Proč architektura kopíruje komunikaci týmů, proč má Bounded Context jednoho vlastníka a jak ho navrhnout podle Team Topologies: čtyři typy týmů a tři interakční módy."
+    sections: "05.01–05.04"
+    duration: 459
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Tři týmy, tři sprinty, jeden požadavek" }
+      - { t: 31, title: "Conway's Law" }
+      - { t: 107, title: "Bounded Context = týmová hranice" }
+      - { t: 176, title: "Čtyři typy týmů" }
+      - { t: 284, title: "Tři interakční módy" }
+      - { t: 366, title: "Otázky a shrnutí" }
+  - ep: "05b"
+    chapter: "team_topologies"
+    title: "Inverse Conway Maneuver a kognitivní zátěž týmů"
+    lead: "Jak strukturu týmů vědomě změnit: Inverse Conway Maneuver ve čtyřech krocích, kognitivní zátěž jako limit počtu kontextů na tým, nejčastější organizační anti-vzory a jak reorganizaci obhájit metrikami DORA."
+    sections: "05.05–05.09"
+    duration: 583
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Propad po reorganizaci" }
+      - { t: 32, title: "Inverse Conway Maneuver" }
+      - { t: 186, title: "Kognitivní zátěž" }
+      - { t: 299, title: "Scénáře a anti-vzory" }
+      - { t: 398, title: "Komunikace s managementem" }
+      - { t: 493, title: "Otázky a shrnutí" }
+  - ep: "06a"
+    chapter: "basic_concepts"
+    title: "Entity a Value Objects v PHP 8.4: identita a hodnota"
+    lead: "Entita a hodnotový objekt v PHP 8.4 a Symfony 8: proč se entity porovnávají přes ID, odkud se ID bere, proč má každé vlastní třídu a jak vypadají Email a Money, které jsou platné už od konstruktoru."
+    sections: "06.01–06.04"
+    duration: 611
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Tentýž uživatel, dvě instance" }
+      - { t: 33, title: "Entita a rovnost entit" }
+      - { t: 138, title: "Vznik identity a typovaná ID" }
+      - { t: 271, title: "Hodnotové objekty: Email" }
+      - { t: 376, title: "Money, Currency a validace" }
+      - { t: 509, title: "Otázky a shrnutí" }
+  - ep: "06b"
+    chapter: "basic_concepts"
+    title: "Agregát, repozitář a doménové události v Symfony"
+    lead: "Agregát s kořenem a pojmenovanou továrnou, úzký repozitář, doménová služba bez stavu a doménové události: kde je zaznamenat, kdy je publikovat a proč nikdy v konstruktoru."
+    sections: "06.05–06.09"
+    duration: 766
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Objednávka, která vzniká pořád znovu" }
+      - { t: 31, title: "Agregát a kořen agregátu" }
+      - { t: 187, title: "Repozitář" }
+      - { t: 317, title: "Doménová služba" }
+      - { t: 440, title: "Doménová událost" }
+      - { t: 522, title: "Lifecycle: record, save, releaseEvents" }
+      - { t: 676, title: "Otázky a shrnutí" }
+  - ep: "07a"
+    chapter: "aggregate_design"
+    title: "Aggregate design: hranice, invarianty, transakce"
+    lead: "Kde vést hranici agregátu: invarianty jako východisko, malé agregáty podle Vernonových vodítek, jeden agregát na transakci, eventual consistency přes ságu a odkazy mezi agregáty jen přes ID."
+    sections: "07.01–07.07"
+    duration: 746
+    youtube: null
+    published: null
+    chapters:
+      - { t: 0, title: "Dva úkoly, jedna verze" }
+      - { t: 40, title: "Invarianty jako východisko návrhu" }
+      - { t: 193, title: "Malé agregáty: Vernonova vodítka" }
+      - { t: 362, title: "Jeden agregát na transakci" }
+      - { t: 506, title: "Eventual consistency a reference přes ID" }
+      - { t: 672, title: "Otázky a shrnutí" }
+  - ep: "07b"
+    chapter: "aggregate_design"
+    title: "Agregát v Doctrine ORM 3: verze, mapování, zátěž"
+    lead: "Jak agregát namapovat v Doctrine ORM 3, aby hranice zůstala hranicí: vlastní typy místo asociací mezi agregáty, verze na kořeni a proč sama nestačí, velké kolekce, hot aggregate, volba identifikátoru a postup návrhu."
+    sections: "07.08–07.13"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "08a"
+    chapter: "lesser_known_patterns"
+    title: "Specification Pattern: pravidla bez vnořených if"
+    lead: "Specification Pattern v PHP 8.4 a Symfony 8: doménové pravidlo jako pojmenovaný objekt, skládání přes and, or a not místo vnořených ifů, kdy se vzor nevyplatí a jak tutéž specifikaci přeložit do dotazu přes Doctrine Criteria."
+    sections: "08.01–08.02"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "08b"
+    chapter: "lesser_known_patterns"
+    title: "Domain Service, Factory a Module v Symfony"
+    lead: "Kdy má doménová služba vzniknout a kdy je to handler v přestrojení, kdy nestačí named constructor a přichází Factory class, proč reconstitute nekontroluje invarianty a jak moduly podle Bounded Contextů uhlídat v CI."
+    sections: "08.03–08.05"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "09a"
+    chapter: "architectural_styles"
+    title: "Hexagonal vs. Onion Architecture v Symfony: kdy co"
+    lead: "Proč architektonický styl není totéž co DDD, co umí a neumí vrstvy, jak v Symfony zapojit porty a adaptéry (driving, driven, autowiring, #[AsAlias]) a čím se Onion liší od Hexagonal."
+    sections: "09.01–09.04"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "09b"
+    chapter: "architectural_styles"
+    title: "Clean Architecture a Vertical Slice v Symfony 8"
+    lead: "Co Clean Architecture přidává k Hexagonal a Onion a proč je její use case v Symfony s Messengerem prostě command handler. Jak Vertical Slice přeskládá src/ podle feature, proč doménový model zůstává sdílený, jak styl vybrat podle subdomény a šest anti-vzorů napříč styly."
+    sections: "09.05–09.09"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "10a"
+    chapter: "implementation_in_symfony"
+    title: "Doctrine a Value Objects: agregát bez stringů"
+    lead: "Agregát User v Symfony 8 a Doctrine ORM 3: co smí doména importovat, struktura projektu podle Bounded Contextů, privátní konstruktor s továrnou, hodnotové objekty přímo v entitě díky custom typům a embeddables. A dvě volby, které vypadají čistěji, než jsou: oddělený persistence model a obecné transitionTo()."
+    sections: "10.01–10.04, 10.06–10.08"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "10b"
+    chapter: "implementation_in_symfony"
+    title: "Command Handler v Symfony 8: registrace bez race condition"
+    lead: "Registrace uživatele v Symfony 8 od HTTP požadavku po doménovou událost: command, handler a command bus, proč unikátnost e-mailu hlídá jen databáze, kdo řídí transakci, kudy posílat doménové události, proč catch kolem dispatch() nic nechytí a jak v kontejneru propojit repozitář s rozhraním."
+    sections: "10.05, 10.11–10.15"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "11a"
+    chapter: "authorization_in_ddd"
+    title: "Symfony Voter a DDD: kam patří autorizace"
+    lead: "Kam v DDD aplikaci na Symfony 8 patří které autorizační pravidlo: tři časté chyby, čtyři vrstvy (Edge, Use Case, Aggregate, Field), access_control a past roles + allow_if, Voter a rozhodovací strategie unanimous, #[IsGranted] se statusCode 404, autorizace v Messenger workeru přes actorId a proč agregát vrací 409, ne 403."
+    sections: "11.01–11.06"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "11b"
+    chapter: "authorization_in_ddd"
+    title: "Multi-tenancy a ABAC v Symfony: autorizace dat"
+    lead: "Co smí uživatel v DDD aplikaci na Symfony 8 vidět: citlivá pole v read modelu místo Twig if, seznamy filtrované v dotazu místo Voteru nad každým řádkem, ABAC a kdy z Voterů odejít (Vote::addReason, OPA, Cerbos), multi-tenancy přes Doctrine SQLFilter nastavený fail-closed, PostgreSQL Row-Level Security a testy autorizace po vrstvách."
+    sections: "11.07–11.11"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "12a"
+    chapter: "cqrs"
+    title: "CQRS v Symfony Messengeru: dva modely bez druhé DB"
+    lead: "CQRS v Symfony 8 bez mýtů: čím se liší od CQS, proč nepotřebuje Event Sourcing, druhou databázi ani frontu, kdy se vyplatí a kdy ne (Dahan, Fowler). Command, query a event bus v Messengeru s různým middlewarem, #[AsMessageHandler(bus: …)], doctrine_transaction vs. jeden agregát na transakci, command se záměrem, query handler nad read repozitářem, ViewModel a HandleTrait."
+    sections: "12.01–12.10"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "12b"
+    chapter: "cqrs"
+    title: "Read model a eventual consistency v CQRS"
+    lead: "Read model v CQRS na Symfony 8: denormalizovaná tabulka mimo ORM (migrace, schema_filter), projektor na event busu a proč samotný upsert není idempotentní (last-write-wins, updated_at s mikrosekundami, DeduplicateMiddleware). Kdo událost odešle: synchronní projekce, fantomová a ztracená událost, DispatchAfterCurrentBusStamp. Okno zastaralosti v UI a HTTP (PRG, polling, read-your-writes, 202 s Retry-After), co musí rozhodovat write strana. Retry s jitterem, failure transport, monitoring a provoz workerů."
+    sections: "12.11–12.17"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "13a"
+    chapter: "event_sourcing"
+    title: "Event Sourcing v PHP: Event Store a agregát"
+    lead: "Event Sourcing v Symfony 8: stav jako historie událostí a replay, Fowlerova a Verraesova definice, vztah k CQRS (dotaz na „všechny Gregy“). Kdy se ES vyplatí a proč Kafka ani RabbitMQ nejsou Event Store. Událost s create() a fromPayload(), čas zápisu proti doménovému času, tabulka event_store a optimistic locking přes UNIQUE (aggregate_id, version). Agregát s recordEvent() a apply*(), replay bez vedlejších efektů a repozitář s expectedVersion."
+    sections: "13.01–13.06"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "13b"
+    chapter: "event_sourcing"
+    title: "Event Sourcing: projekce, snapshoty a upcasting"
+    lead: "Event Sourcing v provozu: projekce jako pozice ve streamu (checkpoint, restart, rebuild, lag), event_store jako outbox a gap problem s auto-incrementem. Idempotentní projektor s tracking tabulkou v jedné transakci, UPDATE bez řádku při doručení mimo pořadí, rebuild a blue/green přepnutí. Snapshoty jako zahoditelná zkratka (Rolling Snapshot), restoreVersion a past s modulo. Verzování událostí: upcaster fullName → firstName + lastName, co upcasting nevyřeší, čtyři strategie, migrační události a GDPR (forgettable payloads vs. crypto-shredding)."
+    sections: "13.07–13.11"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "14a"
+    chapter: "sagas"
+    title: "Saga Pattern: kompenzace místo transakce"
+    lead: "Ságy v Symfony: proč jedna transakce přes čtyři Bounded Contexty neexistuje a proč ji nenahradí two-phase commit. Kompenzace jako doménová operace, ne rollback, neúplný vs. nečitelný mezistav a nevratné akce. Choreografie a její čtyři limity, orchestrace přes OrderProcessManager jako stavový automat a hranice logiky v Process Manageru."
+    sections: "14.01–14.05"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "14b"
+    chapter: "sagas"
+    title: "Saga v produkci: idempotence a timeouty"
+    lead: "Ságy v Symfony v provozu: stav Process Manageru jako Doctrine entita, idempotentní přechody přes eventId, guard stavového automatu a unikátní index na korelaci, optimistický zámek. Chybějící izolace ságy a semantic lock na objednávce. Timeout check přes DelayStamp v Symfony Messengeru, forward a backward recovery, pivot transakce a kompenzace, které se jen opakují."
+    sections: "14.06–14.09"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "15a"
+    chapter: "outbox_pattern"
+    title: "Outbox Pattern: konec ztracených událostí"
+    lead: "Dual-write problem v Symfony: zápis do databáze a odeslání do RabbitMQ jsou dvě transakce ve dvou systémech, takže se události ztrácejí, nebo vznikají phantom eventy. Proč ne two-phase commit a XA. Transactional Outbox: událost v téže Doctrine transakci jako agregát, relay a doručení at-least-once. Schéma outbox tabulky, povinný index (status, occurred_at) a PlaceOrderHandler, který překládá doménovou událost na integrační."
+    sections: "15.01–15.04"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "15b"
+    chapter: "outbox_pattern"
+    title: "Idempotent Inbox: události bez duplicit"
+    lead: "Outbox v provozu: relay jako Polling Publisher v Symfony Console commandu, singleton, nebo FOR UPDATE SKIP LOCKED, past zavřeného EntityManageru. Debezium a Outbox Event Router, Doctrine transport jako outbox bez vlastní tabulky a proč pořadí platí jen per agregát. Idempotent Inbox s UNIQUE (event_id, consumer) v téže transakci a hranice exactly-once efektu. Outbox lag, kompakce, failed řádky, výpadek brokeru a migrace existujícího projektu krok za krokem."
+    sections: "15.05–15.09"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "16a"
+    chapter: "performance_aspects"
+    title: "N+1 a read model v Doctrine: rychlé čtení v DDD"
+    lead: "Výkon DDD aplikace na straně čtení: tři mýty o pomalém DDD a celá Knuthova věta o předčasné optimalizaci. N+1 dotazy z lazy kolekce v Doctrine ORM 3, EXTRA_LAZY, fetch join v DQL, past setMaxResults s fetch joinem a Paginator, eager fetch po dávkách a keyset paging místo OFFSETu. Žebříček eskalace od indexu po asynchronní projekci, DQL NEW do DTO, cache read modelu přes Symfony Cache Contracts s tagy a invalidací z doménové události a dvě čísla ze Symfony Profileru."
+    sections: "16.01, 16.02, 16.04, 16.07, část 16.10"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "16b"
+    chapter: "performance_aspects"
+    title: "Unit of Work a hot aggregate: DDD pod zátěží"
+    lead: "Výkon DDD aplikace na straně zápisu: kdy velký agregát opravdu zabolí a proč hranici určuje invariant, ne výkon. Identity Map, Unit of Work a dirty checking v Doctrine ORM 3, dávkový import s flush() a clear(), odpojené entity, read-only entity a DEFERRED_EXPLICIT. Hromadný DQL UPDATE, toIterable() a import rozdělený přes Symfony Messenger. V provozu hot aggregate a jeho metrika, pesimistický zámek jako anti-vzor, replikační lag, projection lag ve dvou číslech a čtyři čísla, která se vyplatí sledovat trvale."
+    sections: "16.03, 16.05, 16.06, 16.08, 16.09, zbytek 16.10"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "17a"
+    chapter: "testing_ddd"
+    title: "Unit testy agregátů a InMemory repozitář v PHP"
+    lead: "Testování doménové vrstvy bez Symfony kernelu: testovací pyramida, ice-cream cone a proč poměr vrstev kopíruje tloušťku doménové logiky. PHPUnit 13 s atributy místo anotací, test hodnotového objektu, entity a agregátu. Doménové události přes releaseEvents(), trait s asercemi a given-when-then nad event-sourced agregátem. Test doubles podle Meszarose a Fowlera, InMemory repozitář místo mocku a Test Data Builder pro testovací data."
+    sections: "17.01–17.04"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "17b"
+    chapter: "testing_ddd"
+    title: "Integrační testy Doctrine, Messenger a Deptrac"
+    lead: "Testy tam, kde vstupuje infrastruktura. Integrační test repozitáře proti skutečné databázi, flush() a clear() kvůli Identity Map, transakční rollback přes dama/doctrine-test-bundle a jeho limity. Funkční test přes WebTestCase, asynchronní tok s in-memory transportem a zenstruck/messenger-test, test idempotence handleru a dvě garance outboxu. Architektonické testy s Deptracem a PHPArkitectem, code coverage a mutation testing s Infection."
+    sections: "17.05–17.09"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "18a"
+    chapter: "migration_from_crud"
+    title: "Strangler Fig: migrace z CRUD na DDD bez přepisu"
+    lead: "Kdy se migrace z CRUD na DDD vyplatí a kdy ji nezačínat. Strangler Fig místo přepisu najednou, Sacrificial Architecture a přechodová architektura, která má datum expirace. Datová migrace ve čtyřech fázích: dual-write, backfill, shadow reads a cutover přes feature flag. Anti-Corruption Layer s vyjmenovaným mapováním legacy stavů a techniky Branch by Abstraction, Parallel Change a Mikado."
+    sections: "18.01–18.04, hook z 18.10 „Proč migrace selhávají“, pátý důvod"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "18b"
+    chapter: "migration_from_crud"
+    title: "Legacy CRUD na DDD: od kontroleru k agregátu"
+    lead: "Jak dostat doménová pravidla z tlustého CRUD kontroleru do agregátu krok za krokem. Analýza domény a seznam toho, co nemigrovat. Hodnotové objekty a agregát User s pojmenovanou továrnou, repozitář a tenký kontroler s commandem. Charakterizační testy podle Michaela Featherse, švy v Symfony a záměrná změna chování, kterou schvaluje produkt."
+    sections: "18.05–18.09, recepty 5, 7 a 8 z 18.11"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "19a"
+    chapter: "microservices_and_ddd"
+    title: "Microservices a Bounded Context: kdy stačí monolit"
+    lead: "Bounded Context je logická hranice modelu, microservice fyzická hranice nasazení. Tři varianty mapování, šest podmínek pro vlastní službu, modulární monolit s hranicemi hlídanými PHPArkitectem a pět příznaků distributed monolithu."
+    sections: "19.01–19.04"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "19b"
+    chapter: "microservices_and_ddd"
+    title: "Microservices v Symfony Messengeru: kontrakt bez sdílení"
+    lead: "Když Bounded Context dostane vlastní službu, hranice vede přes síť. Kdy volat synchronně a kdy publikovat událost, kolik dat událost nese, komu patří data, jak v Symfony Messengeru postavit kontrakt bez sdílené PHP třídy a co musí umět provoz."
+    sections: "19.05–19.10"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "20a"
+    chapter: "ddd_pain_points"
+    title: "Doctrine a DDD agregát: Unit of Work, VO, identita"
+    lead: "Kde Doctrine ORM 3 naráží na doménový model: transakce přes dva agregáty a zavřený EntityManager, getter, který nechtěně mění stav, flush($entity) a clear($entityName), které ORM 3 tiše ignoruje, mapování hodnotových objektů a dědičnosti a identita vytvořená v PHP ještě před uložením."
+    sections: "20.01, A1–A6"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "20b"
+    chapter: "ddd_pain_points"
+    title: "Symfony Messenger: idempotence a pořadí zpráv v DDD"
+    lead: "Provozní pasti Symfony Messengeru: jak dohledat ztracenou zprávu podle correlation ID, proč idempotency klíč z náhodného UUID nezastaví dvojklik, jak zapsat klíč bez závodu i bez ztracené zprávy, co dělat se zprávou, která přišla dřív než její předpoklad, a kde má vzniknout Command, když vstup přichází ze Symfony Form nebo z API Platform."
+    sections: "20.02 B2–B4, 20.04 D1–D2"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "21a"
+    chapter: "anti_patterns"
+    title: "Anemic Domain Model a God Aggregate: chyby v modelu"
+    lead: "Tři anti-vzory doménového modelu a jak je najít ve vlastním kódu: anémický model jako účet bez protihodnoty, Vernonův test dvou otázek a proč getter v PHP 8.4 už není spolehlivý příznak. Kdy anémie chybou není (Transaction Script), kdy se hodnotový objekt vyplatí a kdy je jen ceremonie, a proč God Aggregate nic nechrání – i to, že agregát jde zmenšit příliš."
+    sections: "21.01–21.04"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "21b"
+    chapter: "anti_patterns"
+    title: "DDD anti-patterns: sdílená databáze a měnitelné události"
+    lead: "Anti-vzory na hranicích a jak je najít ve vlastním kódu: sdílená databáze mezi Bounded Contexty a tři cesty ven s jejich cenou, měnitelné události a proč potřebují dvě časová razítka, doménová pravidla v Doctrine repozitáři a jedno pravidlo pro Deptrac, over-engineering a drift Ubiquitous Language. Na konci přehled všech osmi anti-vzorů kapitoly s rozpoznávacími znaky."
+    sections: "21.05–21.10"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "22"
+    chapter: "when_not_to_use_ddd"
+    title: "When not to use DDD: kdy stačí CRUD a jak se rozhodnout"
+    lead: "Kdy Domain-Driven Design nepoužívat a co místo něj: rozhodovací strom po subdoménách, sedm situací od CRUD adminu přes startup a ETL po tým bez expertů, pseudo-DDD a Bubble Context, Khononovova heuristika pro volbu vzoru byznys logiky a pět podmínek, kdy se plné DDD naopak vyplatí."
+    sections: "22.01–22.10"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "23"
+    chapter: "practical_examples"
+    title: "DDD příklady v Symfony: e-shop, blog, uživatelé"
+    lead: "Tři malé projekty v Symfony 8 na jedné kostře kontroler → command bus → handler → agregát → repozitář → událost. Proč objednávka tiše stojí bez relaye a workeru, tiché pasti instalace (Doctrine mapování, .env.local v testech), přechod z košíku do objednávky přes událost a překlad na hranici, kde leží pravidlo u blogu a u správy uživatelů a co se změní, až projekty porostou."
+    sections: "úvod, 23.00–23.05"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "24a"
+    chapter: "case_study"
+    title: "DDD případová studie: od workshopu ke kódu"
+    lead: "Ilustrativní případová studie: správa projektů v Symfony 8 od Event Stormingu k agregátům. Jedno slovo „uživatel“ se čtyřmi významy, experti jako kontrola hranic, Context Map čtená kriticky (port není ACL, interní typy nejsou Published Language), agregáty Project a Task, přechodová tabulka stavů, past public readonly identifikátoru v Doctrine a handlery CreateProject a AssignTask."
+    sections: "24.01, 24.03–24.05"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []
+  - ep: "24b"
+    chapter: "case_study"
+    title: "CQRS read model a projekce: případová studie"
+    lead: "Závěrečný díl kurzu a druhá půlka ilustrativní případové studie: výpis projektů z denormalizované tabulky project_list_view místo hydratace agregátů (jsonb, GIN index ruční migrací, proč ne readOnly), projekce se čtyřmi handlery a jedním, který idempotentní není, reconciler z cronu pro přeházené zprávy, okno eventual consistency a pět rozhodnutí modelového týmu i s cenou. Na konci ohlédnutí za celým kurzem."
+    sections: "24.06–24.08"
+    duration: null
+    youtube: null
+    published: null
+    chapters: []

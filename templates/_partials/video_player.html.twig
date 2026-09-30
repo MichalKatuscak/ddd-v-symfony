@@ -1,0 +1,25 @@
+{# Přehrávač dílu videokurzu – „fasáda“: dokud čtenář neklikne, je to jen náhled
+   z našeho serveru. YouTube (youtube-nocookie.com) se načte až po kliknutí
+   (assets/scripts/video-player.js), takže stránka nestahuje cizí skripty ani cookies.
+   args: e (díl z VideoCourse), id (unikátní id přehrávače), sizes (atribut sizes),
+         eager (bool – náhled nad ohybem stránky), caption (bool – poznámka pod přehrávačem) #}
+{% set _sizes = sizes ?? '(max-width: 760px) 100vw, 700px' %}
+<div class="vplayer" id="{{ id }}" data-vplayer data-yt="{{ e.youtube }}" data-title="{{ e.ep }} · {{ e.title }}">
+    <button type="button" class="vplayer-poster" data-vplayer-play
+            aria-label="Přehrát díl {{ e.ep }}: {{ e.title }}{% if e.durationLabel %} ({{ e.durationLabel }}){% endif %}">
+        <img class="vplayer-img"
+             src="{{ asset('images/videokurz/' ~ e.ep ~ '-960.webp') }}"
+             srcset="{{ asset('images/videokurz/' ~ e.ep ~ '-480.webp') }} 480w, {{ asset('images/videokurz/' ~ e.ep ~ '-960.webp') }} 960w"
+             sizes="{{ _sizes }}"
+             width="960" height="540" alt=""
+             loading="{{ eager ?? false ? 'eager' : 'lazy' }}" decoding="async"
+             {% if eager ?? false %}fetchpriority="high"{% endif %}>
+        <span class="vplayer-play" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>
+        </span>
+        {% if e.durationLabel %}<span class="vplayer-dur" aria-hidden="true">{{ e.durationLabel }}</span>{% endif %}
+    </button>
+</div>
+{% if caption ?? true %}
+    <p class="vplayer-caption">Přehrávač YouTube se načte až po kliknutí · <a href="https://www.youtube.com/watch?v={{ e.youtube }}" class="ext-link" target="_blank" rel="noopener noreferrer">otevřít na YouTube<span class="visually-hidden"> (nové okno)</span> ↗</a></p>
+{% endif %}

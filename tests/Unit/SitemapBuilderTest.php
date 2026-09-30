@@ -21,11 +21,14 @@ final class SitemapBuilderTest extends TestCase
         self::assertContains('/predmluva', $locs);
         self::assertContains('/ddd-a-umela-inteligence', $locs);
         self::assertContains('/security-policy', $locs);
+        self::assertContains('/videokurz', $locs);
+        // Stránky dílů videokurzu jsou noindex – do sitemapy nepatří.
+        self::assertSame([], array_values(preg_grep('#^/videokurz/#', $locs)));
         self::assertSame(count($locs), count(array_unique($locs)));
 
         $chapterCount = count(glob(dirname(__DIR__, 2) . '/content/chapters/*.md') ?: []);
-        // homepage + 7 hubů + kapitoly + 5 meta stránek
-        self::assertCount(1 + 7 + $chapterCount + 5, $urls);
+        // homepage + 7 hubů + kapitoly + videokurz + 5 meta stránek
+        self::assertCount(1 + 7 + $chapterCount + 1 + 5, $urls);
 
         foreach ($urls as $url) {
             self::assertMatchesRegularExpression('/^0\.\d$|^1\.0$/', $url['priority']);

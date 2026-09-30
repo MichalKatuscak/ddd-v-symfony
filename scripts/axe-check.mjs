@@ -11,7 +11,7 @@ import { chromium } from 'playwright';
 import { AxeBuilder } from '@axe-core/playwright';
 
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:8765';
-const PATHS = ['/', '/cqrs', '/glosar', '/zaklady'];
+const PATHS = ['/', '/cqrs', '/glosar', '/zaklady', '/videokurz', '/videokurz/01', '/co-je-ddd'];
 const THEMES = ['dark', 'light'];
 
 const browser = await chromium.launch();

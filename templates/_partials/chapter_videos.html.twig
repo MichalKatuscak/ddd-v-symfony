@@ -1,0 +1,59 @@
+{# Díly videokurzu ke kapitole. Kompaktní seznam – přehrávač se rozbalí až
+   po výběru dílu, aby blok neodsouval text kapitoly.
+   args: videos (ddd_chapter_videos(route) – aspoň jeden díl je vydaný) #}
+{% set _released = videos|filter(v => v.released) %}
+<section class="vchap" aria-labelledby="vchap-title" data-vchap>
+    <header class="vchap-head">
+        <span class="vchap-rail" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><path d="M5 3.5v9l7.5-4.5z"/></svg>
+        </span>
+        <h2 class="vchap-title" id="vchap-title" data-toc-skip>
+            {%- if videos|first.ep == '00' %}Videokurz ke knize
+            {%- elseif _released|length > 1 %}Kapitola ve videokurzu
+            {%- else %}Kapitola ve videu{% endif -%}
+        </h2>
+        <a class="vchap-all" href="{{ path('video_course') }}">Celý videokurz <span aria-hidden="true">→</span></a>
+    </header>
+
+    <div class="vchap-stage" data-vchap-stage hidden>
+        {% for v in _released %}
+            <div class="vchap-slot" data-vchap-slot="{{ v.ep }}" hidden>
+                {% include '_partials/video_player.html.twig' with { e: v, id: 'vplayer-' ~ v.ep, caption: false } only %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <ol class="vchap-list">
+        {% for v in videos %}
+            <li class="vchap-item{{ v.released ? '' : ' is-soon' }}">
+                {% if v.released %}
+                    <button type="button" class="vchap-pick" data-vchap-pick="{{ v.ep }}" aria-controls="vplayer-{{ v.ep }}" aria-expanded="false">
+                        <span class="vchap-thumb">
+                            <img src="{{ asset('images/videokurz/' ~ v.ep ~ '-480.webp') }}" width="480" height="270" alt="" loading="lazy" decoding="async">
+                            <span class="vchap-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                        </span>
+                        <span class="vchap-text">
+                            <span class="vchap-ep">Díl {{ v.ep }}{% if v.durationLabel %} · {{ v.durationLabel }}{% endif %}</span>
+                            <span class="vchap-t">{{ v.title }}</span>
+                            {% if v.sections %}<span class="vchap-sec">Sekce {{ v.sections }}</span>{% endif %}
+                        </span>
+                        <span class="vchap-cta" aria-hidden="true">Přehrát</span>
+                    </button>
+                    <a class="vchap-page" href="{{ path('video_episode', { ep: v.ep }) }}">Kapitoly videa a přepis<span class="visually-hidden"> dílu {{ v.ep }}</span> →</a>
+                {% else %}
+                    <div class="vchap-pick" aria-disabled="true">
+                        <span class="vchap-thumb">
+                            <img src="{{ asset('images/videokurz/' ~ v.ep ~ '-480.webp') }}" width="480" height="270" alt="" loading="lazy" decoding="async">
+                        </span>
+                        <span class="vchap-text">
+                            <span class="vchap-ep">Díl {{ v.ep }} · připravuje se</span>
+                            <span class="vchap-t">{{ v.title }}</span>
+                            {% if v.sections %}<span class="vchap-sec">Sekce {{ v.sections }}</span>{% endif %}
+                        </span>
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+    <p class="vchap-note">Přehrávač YouTube se načte až po kliknutí.</p>
+</section>
