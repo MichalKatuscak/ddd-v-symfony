@@ -88,8 +88,8 @@ episodes:
     lead: "Role na hranici mezi kontexty: Conformist, Anti-Corruption Layer, Open Host Service a Published Language v Symfony 8. Plus jak nakreslit Context Map za 90 minut a co s Big Ball of Mud."
     sections: "03.06–03.09, 03.11–03.12"
     duration: 544
-    youtube: null
-    published: null
+    youtube: "QFXSI5jNqEk"
+    published: "2026-10-06T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Cizí model prosakuje do domény" }
       - { t: 31, title: "Conformist" }
