@@ -103,8 +103,8 @@ episodes:
     lead: "Event Storming prakticky: notace, Big Picture krok za krokem, Process Modelling a Software Design. A jak se lepicí papírky promítnou do tříd a testů v Symfony."
     sections: "04.01–04.06"
     duration: 435
-    youtube: null
-    published: null
+    youtube: "YdVx3O1nLaw"
+    published: "2026-10-07T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Specifikace, která neexistuje" }
       - { t: 34, title: "Proč workshop a jak číst stěnu" }
