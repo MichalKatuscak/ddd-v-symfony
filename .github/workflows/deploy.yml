@@ -113,6 +113,11 @@ jobs:
       - name: Install npm dependencies and build assets
         run: npm ci && npx vite build
 
+      # HTML stránek drží Cloudflare v cache i několik dní; stará HTML odkazují
+      # na assety předchozích buildů, které by FTP sync jinak smazal.
+      - name: Keep previous build assets
+        run: cp -n assets/legacy-build/app-* public/build/assets/
+
       - name: Set asset version from git commit
         run: echo "APP_VERSION=$(git rev-parse --short HEAD)" > .env.prod
 
