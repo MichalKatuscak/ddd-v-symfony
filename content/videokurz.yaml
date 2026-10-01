@@ -56,7 +56,7 @@ episodes:
     lead: "Jak se Core, Supporting a Generic propíšou do Bounded Contextů, do struktury projektu v Symfony a do rozhodnutí build, nebo buy. A proč klasifikace stárne."
     sections: "02.05–02.09"
     duration: 498
-    youtube: null
+    youtube: "hF9LSJXmjhw"
     published: null
     chapters:
       - { t: 0, title: "Tentýž Order, jiný kód" }
