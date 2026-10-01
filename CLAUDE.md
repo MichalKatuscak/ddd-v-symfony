@@ -90,7 +90,7 @@ README příslušné kapitoly **a uvést důvod** – jinak to vypadá jako nedo
 Videokurz ke knize (YouTube, playlist `PLXUtExCJdfGk`) se na webu ukazuje ve třech místech: `/videokurz` (osnova, `templates/video/course.html.twig`), blok nad textem kapitoly (`_partials/chapter_videos.html.twig`) a stránka dílu `/videokurz/{ep}` s kapitolami videa a přepisem (`templates/video/episode.html.twig`).
 
 - Zdroj pravdy je `content/videokurz.yaml` (načítá `App\Catalog\VideoCourse`), přepisy dílů jsou v `content/videokurz/prepisy/<díl>.md`, náhledy v `public/images/videokurz/<díl>-480.webp`, `-960.webp` a `.jpg`. Katalog a přepisy generuje `video/scripts/web-katalog.mjs` ze scénářů a renderů; ručně vyplněná pole `youtube` a `published` opakované spuštění zachová.
-- **Zveřejnění dílu:** do `content/videokurz.yaml` doplnit `youtube` (ID videa) a `published` (datum). Dokud `published` chybí, díl je jen „připravuje se“ a jeho stránka vrací 404 (soukromé video by se v přehrávači nespustilo).
+- **Zveřejnění dílu:** do `content/videokurz.yaml` doplnit `youtube` (ID videa) a `published` (datum, u dílu naplánovaného na YouTube i s časem: `2026-10-02T07:00:00+02:00`). Dokud ten okamžik nenastane, díl je jen „připravuje se“ a jeho stránka vrací 404 (soukromé video by se v přehrávači nespustilo); pak se ukáže sám, bez deploye. Pozor: HTML stránek drží Cloudflare v cache i několik dní.
 - Přehrávač je fasáda: YouTube (`youtube-nocookie.com`) se načte až po kliknutí (`assets/scripts/video-player.js`). CSP v `public/.htaccess` proto povoluje jen tenhle `frame-src`.
 - Stránky dílů mají `noindex, follow` a nejsou v sitemapě – téma ve vyhledávání zastupuje kapitola, kde je video vložené i se strukturovanými daty `VideoObject`. Nekonkurují tak článku se stejným tématem.
 

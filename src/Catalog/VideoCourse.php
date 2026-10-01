@@ -19,7 +19,7 @@ use Symfony\Component\Yaml\Yaml;
  * @phpstan-type Episode array{
  *     ep:string, chapter:string, title:string, lead:?string, sections:?string,
  *     duration:?int, durationLabel:?string, isoDuration:?string,
- *     youtube:?string, published:?string, released:bool,
+ *     youtube:?string, published:?string, publishedIso:?string, released:bool,
  *     moments:list<Moment>, chapterN:?string, chapterTitle:?string, group:string
  * }
  */
@@ -168,6 +168,36 @@ final class VideoCourse
         return $sections;
     }
 
+    /**
+     * Je okamžik zveřejnění už za námi? `published` je datum (YYYY-MM-DD, půlnoc
+     * pražského času) nebo datum s časem (2026-10-02T07:00:00+02:00) – díl
+     * naplánovaný na YouTube se na webu ukáže sám ve stejnou chvíli.
+     */
+    public static function isPast(mixed $published): bool
+    {
+        if ($published === null || $published === '') {
+            return false;
+        }
+        if (is_int($published)) { // YAML převádí neuvozovkované datum na timestamp
+            return $published <= time();
+        }
+        $at = date_create_immutable((string) $published, new \DateTimeZone('Europe/Prague'));
+
+        return $at !== false && $at <= new \DateTimeImmutable('now');
+    }
+
+    /** ISO 8601 okamžik zveřejnění pro schema.org (datum bez času = poledne). */
+    public static function isoPublished(?string $published): ?string
+    {
+        if ($published === null || $published === '') {
+            return null;
+        }
+        $hasTime = str_contains($published, 'T');
+        $at = date_create_immutable($hasTime ? $published : $published . ' 12:00', new \DateTimeZone('Europe/Prague'));
+
+        return $at !== false ? $at->format(\DATE_ATOM) : null;
+    }
+
     /** „7:47“ z počtu sekund. */
     public static function clock(int $seconds): string
     {
@@ -207,8 +237,9 @@ final class VideoCourse
                 'durationLabel' => $duration !== null ? self::clock($duration) : null,
                 'isoDuration'   => $duration !== null ? self::isoDuration($duration) : null,
                 'youtube'       => $e['youtube'] ?? null,
-                'published'     => $e['published'] ?? null,
-                'released'      => !empty($e['youtube']) && !empty($e['published']),
+                'published'     => isset($e['published']) ? (string) $e['published'] : null,
+                'publishedIso'  => self::isoPublished(isset($e['published']) ? (string) $e['published'] : null),
+                'released'      => !empty($e['youtube']) && self::isPast($e['published'] ?? null),
                 'moments'       => array_map(
                     static fn(array $m): array => ['t' => (int) $m['t'], 'label' => self::clock((int) $m['t']), 'title' => (string) $m['title']],
                     $e['chapters'] ?? [],

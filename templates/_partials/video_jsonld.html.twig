@@ -7,7 +7,7 @@
   "name": {{ (e.ep ~ ' · ' ~ e.title)|json_encode|raw }},
   "description": {{ (e.lead ?? e.title)|json_encode|raw }},
   "thumbnailUrl": "{{ app.request.schemeAndHttpHost }}{{ asset('images/videokurz/' ~ e.ep ~ '.jpg') }}",
-  "uploadDate": "{{ e.published }}T12:00:00+02:00",
+  "uploadDate": "{{ e.publishedIso }}",
   {% if e.isoDuration %}"duration": "{{ e.isoDuration }}",{% endif %}
   "embedUrl": "https://www.youtube-nocookie.com/embed/{{ e.youtube }}",
   "url": "https://www.youtube.com/watch?v={{ e.youtube }}",

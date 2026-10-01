@@ -2,8 +2,9 @@
 # Generuje video/scripts/web-katalog.mjs (ze scénářů a hotových renderů).
 # Ručně se doplňuje jen po zveřejnění dílu na YouTube:
 #   youtube   – ID videa (část URL za watch?v=)
-#   published – datum zveřejnění (YYYY-MM-DD); dokud je null, web díl
-#               ukazuje jen jako „připravuje se“ (i když má ID – soukromé video).
+#   published – datum zveřejnění (YYYY-MM-DD), u naplánovaného dílu i s časem
+#               (2026-10-02T07:00:00+02:00). Do té doby (a dokud je null) web díl
+#               ukazuje jen jako „připravuje se“ – soukromé video by se nespustilo.
 playlist: "PLXUtExCJdfGk"
 channel: "https://www.youtube.com/@michal.katuscak"
 episodes:
@@ -57,7 +58,7 @@ episodes:
     sections: "02.05–02.09"
     duration: 498
     youtube: "hF9LSJXmjhw"
-    published: null
+    published: "2026-10-02T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Tentýž Order, jiný kód" }
       - { t: 28, title: "Mapování subdomén na Bounded Contexty" }
