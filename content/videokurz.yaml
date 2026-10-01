@@ -42,7 +42,7 @@ episodes:
     sections: "02.01–02.04"
     duration: 540
     youtube: "tJL6JcmeE1o"
-    published: null
+    published: "2026-10-01"
     chapters:
       - { t: 0, title: "Vlastní autentizace za šest člověkoroků" }
       - { t: 32, title: "Proč subdomény předcházejí všemu" }

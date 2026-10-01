@@ -21,7 +21,7 @@ final class PagesTest extends WebTestCase
             '/',
             '/zaklady', '/takticke-vzory', '/architektura', '/vzory', '/praxe', '/synteza', '/reference',
             '/glosar', '/cheat-sheet', '/zdroje', '/o-autorovi', '/security-policy',
-            '/videokurz', '/videokurz/00', '/videokurz/01',
+            '/videokurz', '/videokurz/00', '/videokurz/01', '/videokurz/02a',
         ];
         foreach ($paths as $path) {
             yield $path => [$path];
@@ -58,8 +58,8 @@ final class PagesTest extends WebTestCase
     public function testUnreleasedEpisodeReturns404(): void
     {
         $client = self::createClient();
-        // 02a má YouTube ID, ale bez data zveřejnění (soukromé video) – stránka neexistuje.
-        foreach (['/videokurz/02a', '/videokurz/99'] as $path) {
+        // 02b zatím není na YouTube, 99 neexistuje – stránky dílů vracejí 404.
+        foreach (['/videokurz/02b', '/videokurz/99'] as $path) {
             $client->request('GET', $path);
             self::assertResponseStatusCodeSame(404, $path);
         }
