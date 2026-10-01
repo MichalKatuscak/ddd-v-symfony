@@ -29,3 +29,6 @@ screenshots/
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+# Videokurz má vlastní soukromý repozitář (MichalKatuscak/ddd-v-symfony-video)
+/video/
