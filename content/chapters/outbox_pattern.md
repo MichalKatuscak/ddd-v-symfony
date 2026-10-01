@@ -1057,7 +1057,7 @@ posílá integrační tvar.
 Výpis výše má jednu past, kterou odhalí až produkce. `catch (\Throwable $e)`
 volá `markFailed()` nad týmž EntityManagerem. Pokud výjimku vyhodila Doctrine,
 je EM po rollbacku zavřený a `markFailed()` skončí na
-`EntityManagerClosedException`. Worker spadne v prvním cyklu, ve kterém
+`EntityManagerClosed`. Worker spadne v prvním cyklu, ve kterém
 selže databáze, přestože kód vypadá, že chyby ošetřuje.
 
 Dokumentace ORM je v tom jednoznačná: další unit of work po výjimce patří novému
