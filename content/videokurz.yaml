@@ -72,8 +72,8 @@ episodes:
     lead: "Context Map a vztahy mezi kontexty: Partnership, Shared Kernel, Customer/Supplier a Separate Ways. Kdo komu dodává model, kdo rozhoduje a co to znamená v Symfony."
     sections: "03.01–03.05"
     duration: 524
-    youtube: null
-    published: null
+    youtube: "v6L1nOEFK34"
+    published: "2026-10-05T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Kdo vlastní kontrakt mezi kontexty?" }
       - { t: 32, title: "Co je Context Map a proč ji nakreslit" }
