@@ -147,8 +147,8 @@ episodes:
     lead: "Jak strukturu týmů vědomě změnit: Inverse Conway Maneuver ve čtyřech krocích, kognitivní zátěž jako limit počtu kontextů na tým, nejčastější organizační anti-vzory a jak reorganizaci obhájit metrikami DORA."
     sections: "05.05–05.09"
     duration: 583
-    youtube: null
-    published: null
+    youtube: "TsJgXF-_yzQ"
+    published: "2026-10-12T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Propad po reorganizaci" }
       - { t: 32, title: "Inverse Conway Maneuver" }
