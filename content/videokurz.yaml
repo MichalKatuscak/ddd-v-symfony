@@ -162,8 +162,8 @@ episodes:
     lead: "Entita a hodnotový objekt v PHP 8.4 a Symfony 8: proč se entity porovnávají přes ID, odkud se ID bere, proč má každé vlastní třídu a jak vypadají Email a Money, které jsou platné už od konstruktoru."
     sections: "06.01–06.04"
     duration: 611
-    youtube: null
-    published: null
+    youtube: "imBveH1I2mo"
+    published: "2026-10-13T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Tentýž uživatel, dvě instance" }
       - { t: 33, title: "Entita a rovnost entit" }
