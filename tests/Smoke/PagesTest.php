@@ -58,8 +58,11 @@ final class PagesTest extends WebTestCase
     public function testUnreleasedEpisodeReturns404(): void
     {
         $client = self::createClient();
-        // 02b zatím není na YouTube, 99 neexistuje – stránky dílů vracejí 404.
-        foreach (['/videokurz/02b', '/videokurz/99'] as $path) {
+        // Nezveřejněný díl (bere se z katalogu, napevno zvolený díl časem vyjde) a neexistující 99 vracejí 404.
+        $course = self::getContainer()->get(\App\Catalog\VideoCourse::class);
+        $unreleased = array_values(array_filter($course->all(), static fn(array $e): bool => !$e['released']));
+        self::assertNotEmpty($unreleased, 'Všechny díly jsou zveřejněné – test nemá co ověřit.');
+        foreach (['/videokurz/' . $unreleased[0]['ep'], '/videokurz/99'] as $path) {
             $client->request('GET', $path);
             self::assertResponseStatusCodeSame(404, $path);
         }
