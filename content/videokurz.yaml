@@ -132,8 +132,8 @@ episodes:
     lead: "Proč architektura kopíruje komunikaci týmů, proč má Bounded Context jednoho vlastníka a jak ho navrhnout podle Team Topologies: čtyři typy týmů a tři interakční módy."
     sections: "05.01–05.04"
     duration: 459
-    youtube: null
-    published: null
+    youtube: "d-rjOWWj4vs"
+    published: "2026-10-09T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Tři týmy, tři sprinty, jeden požadavek" }
       - { t: 31, title: "Conway's Law" }
