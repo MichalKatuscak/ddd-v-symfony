@@ -177,8 +177,8 @@ episodes:
     lead: "Agregát s kořenem a pojmenovanou továrnou, úzký repozitář, doménová služba bez stavu a doménové události: kde je zaznamenat, kdy je publikovat a proč nikdy v konstruktoru."
     sections: "06.05–06.09"
     duration: 766
-    youtube: null
-    published: null
+    youtube: "E7mBpB-L3uw"
+    published: "2026-10-14T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Objednávka, která vzniká pořád znovu" }
       - { t: 31, title: "Agregát a kořen agregátu" }
