@@ -162,7 +162,7 @@ episodes:
     lead: "Entita a hodnotový objekt v PHP 8.4 a Symfony 8: proč se entity porovnávají přes ID, odkud se ID bere, proč má každé vlastní třídu a jak vypadají Email a Money, které jsou platné už od konstruktoru."
     sections: "06.01–06.04"
     duration: 611
-    youtube: "imBveH1I2mo"
+    youtube: "OJuRAIIr3Wo"
     published: "2026-10-13T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Tentýž uživatel, dvě instance" }
@@ -193,8 +193,8 @@ episodes:
     lead: "Kde vést hranici agregátu: invarianty jako východisko, malé agregáty podle Vernonových vodítek, jeden agregát na transakci, eventual consistency přes ságu a odkazy mezi agregáty jen přes ID."
     sections: "07.01–07.07"
     duration: 746
-    youtube: null
-    published: null
+    youtube: "X2PfCl0G680"
+    published: "2026-10-15T07:00:00+02:00"
     chapters:
       - { t: 0, title: "Dva úkoly, jedna verze" }
       - { t: 40, title: "Invarianty jako východisko návrhu" }
