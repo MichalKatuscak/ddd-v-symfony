@@ -207,10 +207,16 @@ episodes:
     title: "Agregát v Doctrine ORM 3: verze, mapování, zátěž"
     lead: "Jak agregát namapovat v Doctrine ORM 3, aby hranice zůstala hranicí: vlastní typy místo asociací mezi agregáty, verze na kořeni a proč sama nestačí, velké kolekce, hot aggregate, volba identifikátoru a postup návrhu."
     sections: "07.08–07.13"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 798
+    youtube: "zugThCqQ4-4"
+    published: "2026-10-16T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Dva požadavky, žádná výjimka" }
+      - { t: 31, title: "Mapování v Doctrine ORM 3" }
+      - { t: 231, title: "Co Doctrine nevymůže: verze a flush()" }
+      - { t: 382, title: "Large collection a hot aggregate" }
+      - { t: 551, title: "Identifikátory, postup návrhu a checklist" }
+      - { t: 710, title: "Otázky a shrnutí" }
   - ep: "08a"
     chapter: "lesser_known_patterns"
     title: "Specification Pattern: pravidla bez vnořených if"
