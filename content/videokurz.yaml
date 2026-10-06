@@ -222,10 +222,16 @@ episodes:
     title: "Specification Pattern: pravidla bez vnořených if"
     lead: "Specification Pattern v PHP 8.4 a Symfony 8: doménové pravidlo jako pojmenovaný objekt, skládání přes and, or a not místo vnořených ifů, kdy se vzor nevyplatí a jak tutéž specifikaci přeložit do dotazu přes Doctrine Criteria."
     sections: "08.01–08.02"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 650
+    youtube: "g7o0tujTUU4"
+    published: "2026-10-19T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Doprava zdarma ve třech vnořených ifech" }
+      - { t: 43, title: "Co je Specification" }
+      - { t: 141, title: "Kdy Specification použít a kdy ne" }
+      - { t: 266, title: "Kombinátory and, or, not" }
+      - { t: 415, title: "Specifikace jako dotaz do Doctrine" }
+      - { t: 560, title: "Otázky a shrnutí" }
   - ep: "08b"
     chapter: "lesser_known_patterns"
     title: "Domain Service, Factory a Module v Symfony"
