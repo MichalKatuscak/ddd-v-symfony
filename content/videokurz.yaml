@@ -252,10 +252,16 @@ episodes:
     title: "Hexagonal vs. Onion Architecture v Symfony: kdy co"
     lead: "Proč architektonický styl není totéž co DDD, co umí a neumí vrstvy, jak v Symfony zapojit porty a adaptéry (driving, driven, autowiring, #[AsAlias]) a čím se Onion liší od Hexagonal."
     sections: "09.01–09.04"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 754
+    youtube: "Idn5Si3puI8"
+    published: "2026-10-21T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Hexagonální struktura kolem prázdné domény" }
+      - { t: 38, title: "Architektonický styl není totéž co DDD" }
+      - { t: 128, title: "Layered architektura a Anemic Domain Model" }
+      - { t: 256, title: "Hexagonal Architecture (Ports & Adapters) v Symfony" }
+      - { t: 502, title: "Onion Architecture a rozdíl proti Hexagonal" }
+      - { t: 663, title: "Otázky a shrnutí" }
   - ep: "09b"
     chapter: "architectural_styles"
     title: "Clean Architecture a Vertical Slice v Symfony 8"
