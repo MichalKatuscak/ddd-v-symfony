@@ -237,10 +237,16 @@ episodes:
     title: "Domain Service, Factory a Module v Symfony"
     lead: "Kdy má doménová služba vzniknout a kdy je to handler v přestrojení, kdy nestačí named constructor a přichází Factory class, proč reconstitute nekontroluje invarianty a jak moduly podle Bounded Contextů uhlídat v CI."
     sections: "08.03–08.05"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 766
+    youtube: "gQqstxg_kSE"
+    published: "2026-10-20T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Doménová služba, která doménová není" }
+      - { t: 36, title: "Domain Service: kdy ano a kdy ne" }
+      - { t: 156, title: "MoneyTransferService a tři druhy služeb" }
+      - { t: 304, title: "Factory: named constructor a Factory class" }
+      - { t: 512, title: "Module: struktura, services.yaml, hranice v CI" }
+      - { t: 660, title: "Otázky a shrnutí" }
   - ep: "09a"
     chapter: "architectural_styles"
     title: "Hexagonal vs. Onion Architecture v Symfony: kdy co"
