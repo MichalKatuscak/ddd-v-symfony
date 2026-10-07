@@ -265,12 +265,18 @@ episodes:
   - ep: "09b"
     chapter: "architectural_styles"
     title: "Clean Architecture a Vertical Slice v Symfony 8"
-    lead: "Co Clean Architecture přidává k Hexagonal a Onion a proč je její use case v Symfony s Messengerem prostě command handler. Jak Vertical Slice přeskládá src/ podle feature, proč doménový model zůstává sdílený, jak styl vybrat podle subdomény a šest anti-vzorů napříč styly."
+    lead: "Co Clean Architecture přidává k Hexagonal a Onion a proč je její use case v Symfony s Messengerem prostě command handler. Jak Vertical Slice přeskládá src/ podle funkcí, proč doménový model zůstává sdílený, jak styl vybrat podle subdomény a šest anti-vzorů napříč styly."
     sections: "09.05–09.09"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 732
+    youtube: "heS8qE2yXo8"
+    published: "2026-10-22T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Šest souborů jedné změny" }
+      - { t: 36, title: "Clean Architecture" }
+      - { t: 221, title: "Vertical Slice Architecture" }
+      - { t: 344, title: "Volba stylu a hybridní přístup" }
+      - { t: 495, title: "Anti-vzory napříč styly" }
+      - { t: 630, title: "Otázky a shrnutí" }
   - ep: "10a"
     chapter: "implementation_in_symfony"
     title: "Doctrine a Value Objects: agregát bez stringů"
