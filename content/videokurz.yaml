@@ -282,10 +282,16 @@ episodes:
     title: "Doctrine a Value Objects: agregát bez stringů"
     lead: "Agregát User v Symfony 8 a Doctrine ORM 3: co smí doména importovat, struktura projektu podle Bounded Contextů, privátní konstruktor s továrnou, hodnotové objekty přímo v entitě díky custom typům a embeddables. A dvě volby, které vypadají čistěji, než jsou: oddělený persistence model a obecné transitionTo()."
     sections: "10.01–10.04, 10.06–10.08"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 754
+    youtube: "O5KHNt7OnGo"
+    published: "2026-10-23T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "String v entitě a TypeError" }
+      - { t: 45, title: "Hranice a struktura projektu" }
+      - { t: 191, title: "Kořen agregátu User" }
+      - { t: 288, title: "Hodnotové objekty a custom typy" }
+      - { t: 442, title: "Persisted Object a obecné transitionTo()" }
+      - { t: 644, title: "Otázky a shrnutí" }
   - ep: "10b"
     chapter: "implementation_in_symfony"
     title: "Command Handler v Symfony 8: registrace bez race condition"
