@@ -329,28 +329,46 @@ episodes:
     title: "Multi-tenancy a ABAC v Symfony: autorizace dat"
     lead: "Co smí uživatel v DDD aplikaci na Symfony 8 vidět: citlivá pole v read modelu místo Twig if, seznamy filtrované v dotazu místo Voteru nad každým řádkem, ABAC a kdy z Voterů odejít (Vote::addReason, OPA, Cerbos), multi-tenancy přes Doctrine SQLFilter nastavený fail-closed, PostgreSQL Row-Level Security a testy autorizace po vrstvách."
     sections: "11.07–11.11"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 759
+    youtube: "H_frbtSNaXA"
+    published: "2026-10-28T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Stránka o třinácti řádcích" }
+      - { t: 47, title: "Pole a seznamy v read modelu" }
+      - { t: 172, title: "ABAC a kdy z Voterů odejít" }
+      - { t: 357, title: "Multi-tenancy" }
+      - { t: 554, title: "Testy po vrstvách a anti-vzory" }
+      - { t: 651, title: "Otázky a shrnutí" }
   - ep: "12a"
     chapter: "cqrs"
     title: "CQRS v Symfony Messengeru: dva modely bez druhé DB"
     lead: "CQRS v Symfony 8 bez mýtů: čím se liší od CQS, proč nepotřebuje Event Sourcing, druhou databázi ani frontu, kdy se vyplatí a kdy ne (Dahan, Fowler). Command, query a event bus v Messengeru s různým middlewarem, #[AsMessageHandler(bus: …)], doctrine_transaction vs. jeden agregát na transakci, command se záměrem, query handler nad read repozitářem, ViewModel a HandleTrait."
     sections: "12.01–12.10"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 778
+    youtube: "iOTR4r-CiN8"
+    published: "2026-10-29T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Profil přes doménový model" }
+      - { t: 44, title: "Co je CQRS a kde končí CQS" }
+      - { t: 198, title: "Kdy se CQRS vyplatí a kdy ne" }
+      - { t: 311, title: "Symfony Messenger jako základ CQRS" }
+      - { t: 472, title: "Command, query, handler, ViewModel" }
+      - { t: 677, title: "Otázky a shrnutí" }
   - ep: "12b"
     chapter: "cqrs"
     title: "Read model a eventual consistency v CQRS"
     lead: "Read model v CQRS na Symfony 8: denormalizovaná tabulka mimo ORM (migrace, schema_filter), projektor na event busu a proč samotný upsert není idempotentní (last-write-wins, updated_at s mikrosekundami, DeduplicateMiddleware). Kdo událost odešle: synchronní projekce, fantomová a ztracená událost, DispatchAfterCurrentBusStamp. Okno zastaralosti v UI a HTTP (PRG, polling, read-your-writes, 202 s Retry-After), co musí rozhodovat write strana. Retry s jitterem, failure transport, monitoring a provoz workerů."
     sections: "12.11–12.17"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 738
+    youtube: "ixGDmQBiORQ"
+    published: "2026-10-30T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "404 po úspěšné objednávce" }
+      - { t: 43, title: "Denormalizovaná tabulka a projektor" }
+      - { t: 235, title: "Kdo událost odešle" }
+      - { t: 360, title: "Eventual consistency v praxi" }
+      - { t: 504, title: "Fronty, retry a dead letter queue" }
+      - { t: 629, title: "Otázky a shrnutí" }
   - ep: "13a"
     chapter: "event_sourcing"
     title: "Event Sourcing v PHP: Event Store a agregát"
