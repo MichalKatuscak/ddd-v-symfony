@@ -297,19 +297,33 @@ episodes:
     title: "Command Handler v Symfony 8: registrace bez race condition"
     lead: "Registrace uživatele v Symfony 8 od HTTP požadavku po doménovou událost: command, handler a command bus, proč unikátnost e-mailu hlídá jen databáze, kdo řídí transakci, kudy posílat doménové události, proč catch kolem dispatch() nic nechytí a jak v kontejneru propojit repozitář s rozhraním."
     sections: "10.05, 10.11–10.15"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 720
+    youtube: "w54Gvz2bpLU"
+    published: "2026-10-26T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Dva uživatelé se stejným e-mailem" }
+      - { t: 46, title: "Command, handler a bus" }
+      - { t: 161, title: "Repozitář a jedna transakce" }
+      - { t: 241, title: "Doménové události: kdy a kudy" }
+      - { t: 384, title: "Výjimky a tenký kontroler" }
+      - { t: 532, title: "DI a autowiring po kontextech" }
+      - { t: 609, title: "Otázky a shrnutí" }
   - ep: "11a"
     chapter: "authorization_in_ddd"
     title: "Symfony Voter a DDD: kam patří autorizace"
     lead: "Kam v DDD aplikaci na Symfony 8 patří které autorizační pravidlo: tři časté chyby, čtyři vrstvy (Edge, Use Case, Aggregate, Field), access_control a past roles + allow_if, Voter a rozhodovací strategie unanimous, #[IsGranted] se statusCode 404, autorizace v Messenger workeru přes actorId a proč agregát vrací 409, ne 403."
     sections: "11.01–11.06"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 752
+    youtube: "Ln0OGrrv6ps"
+    published: "2026-10-27T07:00:00+02:00"
+    chapters:
+      - { t: 0, title: "Kontrola, na kterou jeden vstup zapomene" }
+      - { t: 46, title: "Tři chyby s autorizací" }
+      - { t: 133, title: "Čtyři vrstvy a Edge" }
+      - { t: 263, title: "Voter a rozhodovací strategie" }
+      - { t: 419, title: "Autorizace ve workeru" }
+      - { t: 519, title: "Agregát, průchod a 403 vs. 409" }
+      - { t: 645, title: "Otázky a shrnutí" }
   - ep: "11b"
     chapter: "authorization_in_ddd"
     title: "Multi-tenancy a ABAC v Symfony: autorizace dat"
