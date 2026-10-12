@@ -374,10 +374,16 @@ episodes:
     title: "Event Sourcing v PHP: Event Store a agregát"
     lead: "Event Sourcing v Symfony 8: stav jako historie událostí a replay, Fowlerova a Verraesova definice, vztah k CQRS (dotaz na „všechny Gregy“). Kdy se ES vyplatí a proč Kafka ani RabbitMQ nejsou Event Store. Událost s create() a fromPayload(), čas zápisu proti doménovému času, tabulka event_store a optimistic locking přes UNIQUE (aggregate_id, version). Agregát s recordEvent() a apply*(), replay bez vedlejších efektů a repozitář s expectedVersion."
     sections: "13.01–13.06"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 802
+    youtube: "fOEXcWjAE9U"
+    published: "2026-11-02T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Stav, který zapomíná" }
+      - { t: 40, title: "Co je Event Sourcing a vztah k CQRS" }
+      - { t: 181, title: "Kdy použít Event Sourcing a proč broker nestačí" }
+      - { t: 322, title: "Událost a tabulka event_store" }
+      - { t: 522, title: "Agregát s Event Sourcingem" }
+      - { t: 698, title: "Otázky a shrnutí" }
   - ep: "13b"
     chapter: "event_sourcing"
     title: "Event Sourcing: projekce, snapshoty a upcasting"
