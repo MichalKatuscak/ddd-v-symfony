@@ -389,19 +389,31 @@ episodes:
     title: "Event Sourcing: projekce, snapshoty a upcasting"
     lead: "Event Sourcing v provozu: projekce jako pozice ve streamu (checkpoint, restart, rebuild, lag), event_store jako outbox a gap problem s auto-incrementem. Idempotentní projektor s tracking tabulkou v jedné transakci, UPDATE bez řádku při doručení mimo pořadí, rebuild a blue/green přepnutí. Snapshoty jako zahoditelná zkratka (Rolling Snapshot), restoreVersion a past s modulo. Verzování událostí: upcaster fullName → firstName + lastName, co upcasting nevyřeší, čtyři strategie, migrační události a GDPR (forgettable payloads vs. crypto-shredding)."
     sections: "13.07–13.11"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 786
+    youtube: "cb3K61tqXfk"
+    published: "2026-11-03T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Projekce, která mlčí" }
+      - { t: 41, title: "Projekce a Event Store jako outbox" }
+      - { t: 220, title: "Idempotence, pořadí a rebuild projekcí" }
+      - { t: 356, title: "Snapshotting" }
+      - { t: 494, title: "Verzování událostí a GDPR" }
+      - { t: 686, title: "Otázky a shrnutí" }
   - ep: "14a"
     chapter: "sagas"
     title: "Saga Pattern: kompenzace místo transakce"
     lead: "Ságy v Symfony: proč jedna transakce přes čtyři Bounded Contexty neexistuje a proč ji nenahradí two-phase commit. Kompenzace jako doménová operace, ne rollback, neúplný vs. nečitelný mezistav a nevratné akce. Choreografie a její čtyři limity, orchestrace přes OrderProcessManager jako stavový automat a hranice logiky v Process Manageru."
     sections: "14.01–14.05"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 780
+    youtube: "IDutl8T6gMk"
+    published: "2026-11-04T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Platba prošla, sklad ne" }
+      - { t: 40, title: "Proč potřebujeme ságy" }
+      - { t: 194, title: "Kompenzační transakce" }
+      - { t: 358, title: "Choreografie a její limity" }
+      - { t: 516, title: "Orchestrace – Process Manager" }
+      - { t: 673, title: "Otázky a shrnutí" }
   - ep: "14b"
     chapter: "sagas"
     title: "Saga v produkci: idempotence a timeouty"
