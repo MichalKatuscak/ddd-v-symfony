@@ -419,28 +419,47 @@ episodes:
     title: "Saga v produkci: idempotence a timeouty"
     lead: "Ságy v Symfony v provozu: stav Process Manageru jako Doctrine entita, idempotentní přechody přes eventId, guard stavového automatu a unikátní index na korelaci, optimistický zámek. Chybějící izolace ságy a semantic lock na objednávce. Timeout check přes DelayStamp v Symfony Messengeru, forward a backward recovery, pivot transakce a kompenzace, které se jen opakují."
     sections: "14.06–14.09"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 805
+    youtube: "yV47IMCMWUQ"
+    published: "2026-11-05T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Tři zásilky místo jedné" }
+      - { t: 37, title: "Stav ságy a idempotentní přechody" }
+      - { t: 250, title: "Izolace ság: ACD bez I" }
+      - { t: 411, title: "Messenger, timeouty a deadliny" }
+      - { t: 559, title: "Kompenzační strategie a pivot" }
+      - { t: 698, title: "Otázky a shrnutí" }
   - ep: "15a"
     chapter: "outbox_pattern"
     title: "Outbox Pattern: konec ztracených událostí"
     lead: "Dual-write problem v Symfony: zápis do databáze a odeslání do RabbitMQ jsou dvě transakce ve dvou systémech, takže se události ztrácejí, nebo vznikají phantom eventy. Proč ne two-phase commit a XA. Transactional Outbox: událost v téže Doctrine transakci jako agregát, relay a doručení at-least-once. Schéma outbox tabulky, povinný index (status, occurred_at) a PlaceOrderHandler, který překládá doménovou událost na integrační."
     sections: "15.01–15.04"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 706
+    youtube: "wENeD7tjG7w"
+    published: "2026-11-06T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Uloženo, ale neodesláno" }
+      - { t: 38, title: "Dual-write problem" }
+      - { t: 202, title: "Transactional Outbox – princip" }
+      - { t: 310, title: "Schéma outbox tabulky" }
+      - { t: 422, title: "Agregát publikuje, handler ukládá do outboxu" }
+      - { t: 604, title: "Otázky a shrnutí" }
   - ep: "15b"
     chapter: "outbox_pattern"
     title: "Idempotent Inbox: události bez duplicit"
     lead: "Outbox v provozu: relay jako Polling Publisher v Symfony Console commandu, singleton, nebo FOR UPDATE SKIP LOCKED, past zavřeného EntityManageru. Debezium a Outbox Event Router, Doctrine transport jako outbox bez vlastní tabulky a proč pořadí platí jen per agregát. Idempotent Inbox s UNIQUE (event_id, consumer) v téže transakci a hranice exactly-once efektu. Outbox lag, kompakce, failed řádky, výpadek brokeru a migrace existujícího projektu krok za krokem."
     sections: "15.05–15.09"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 795
+    youtube: "UY5hL7R66cE"
+    published: "2026-11-09T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "200 Kč místo 100" }
+      - { t: 41, title: "Relay process – polling" }
+      - { t: 208, title: "Debezium, Doctrine transport a pořadí" }
+      - { t: 338, title: "Idempotent Inbox" }
+      - { t: 484, title: "Provozní aspekty a anti-vzory" }
+      - { t: 587, title: "Migrace existujícího projektu" }
+      - { t: 676, title: "Otázky a shrnutí" }
   - ep: "16a"
     chapter: "performance_aspects"
     title: "N+1 a read model v Doctrine: rychlé čtení v DDD"
