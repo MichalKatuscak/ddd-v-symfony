@@ -465,37 +465,62 @@ episodes:
     title: "N+1 a read model v Doctrine: rychlé čtení v DDD"
     lead: "Výkon DDD aplikace na straně čtení: tři mýty o pomalém DDD a celá Knuthova věta o předčasné optimalizaci. N+1 dotazy z lazy kolekce v Doctrine ORM 3, EXTRA_LAZY, fetch join v DQL, past setMaxResults s fetch joinem a Paginator, eager fetch po dávkách a keyset paging místo OFFSETu. Žebříček eskalace od indexu po asynchronní projekci, DQL NEW do DTO, cache read modelu přes Symfony Cache Contracts s tagy a invalidací z doménové události a dvě čísla ze Symfony Profileru."
     sections: "16.01, 16.02, 16.04, 16.07, část 16.10"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 770
+    youtube: "JF3h0xsrvA4"
+    published: "2026-11-10T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Dvacet objednávek, dvacet jedna dotazů" }
+      - { t: 41, title: "Výkon v kontextu DDD" }
+      - { t: 164, title: "N+1 problém a lazy loading v Doctrine" }
+      - { t: 369, title: "Optimalizace read modelu a žebříček eskalace" }
+      - { t: 507, title: "Caching read modelu a profiling" }
+      - { t: 668, title: "Otázky a shrnutí" }
   - ep: "16b"
     chapter: "performance_aspects"
     title: "Unit of Work a hot aggregate: DDD pod zátěží"
     lead: "Výkon DDD aplikace na straně zápisu: kdy velký agregát opravdu zabolí a proč hranici určuje invariant, ne výkon. Identity Map, Unit of Work a dirty checking v Doctrine ORM 3, dávkový import s flush() a clear(), odpojené entity, read-only entity a DEFERRED_EXPLICIT. Hromadný DQL UPDATE, toIterable() a import rozdělený přes Symfony Messenger. V provozu hot aggregate a jeho metrika, pesimistický zámek jako anti-vzor, replikační lag, projection lag ve dvou číslech a čtyři čísla, která se vyplatí sledovat trvale."
     sections: "16.03, 16.05, 16.06, 16.08, 16.09, zbytek 16.10"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 759
+    youtube: "4SZvZx1VjSs"
+    published: "2026-11-11T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Každý flush pomalejší" }
+      - { t: 36, title: "Agregát a výkon: správné určení hranic" }
+      - { t: 154, title: "Identity Map a Unit of Work" }
+      - { t: 315, title: "Bulk operace a hromadné zpracování" }
+      - { t: 430, title: "Provozní výkonové vzory a co měřit" }
+      - { t: 648, title: "Otázky a shrnutí" }
   - ep: "17a"
     chapter: "testing_ddd"
     title: "Unit testy agregátů a InMemory repozitář v PHP"
-    lead: "Testování doménové vrstvy bez Symfony kernelu: testovací pyramida, ice-cream cone a proč poměr vrstev kopíruje tloušťku doménové logiky. PHPUnit 13 s atributy místo anotací, test hodnotového objektu, entity a agregátu. Doménové události přes releaseEvents(), trait s asercemi a given-when-then nad event-sourced agregátem. Test doubles podle Meszarose a Fowlera, InMemory repozitář místo mocku a Test Data Builder pro testovací data."
+    lead: "Testování doménové vrstvy bez Symfony kernelu: testovací pyramida, ice-cream cone a proč poměr vrstev odpovídá množství doménové logiky. PHPUnit 13 s atributy místo anotací, test hodnotového objektu, entity a agregátu. Doménové události přes releaseEvents(), trait s asercemi a given-when-then nad event-sourced agregátem. Test doubles podle Meszarose a Fowlera, InMemory repozitář místo mocku a Test Data Builder pro testovací data."
     sections: "17.01–17.04"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 742
+    youtube: "6-1eMb9Fq9A"
+    published: "2026-11-12T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Testy, které hlídají implementaci" }
+      - { t: 37, title: "Filozofie testování v DDD" }
+      - { t: 170, title: "Unit testy doménové vrstvy" }
+      - { t: 326, title: "Testování doménových událostí" }
+      - { t: 467, title: "Test doubles a InMemory repozitáře" }
+      - { t: 646, title: "Otázky a shrnutí" }
   - ep: "17b"
     chapter: "testing_ddd"
     title: "Integrační testy Doctrine, Messenger a Deptrac"
-    lead: "Testy tam, kde vstupuje infrastruktura. Integrační test repozitáře proti skutečné databázi, flush() a clear() kvůli Identity Map, transakční rollback přes dama/doctrine-test-bundle a jeho limity. Funkční test přes WebTestCase, asynchronní tok s in-memory transportem a zenstruck/messenger-test, test idempotence handleru a dvě garance outboxu. Architektonické testy s Deptracem a PHPArkitectem, code coverage a mutation testing s Infection."
+    lead: "Testy tam, kde vstupuje infrastruktura. Integrační test repozitáře proti skutečné databázi, flush() a clear() kvůli Identity Map, transakční rollback přes dama/doctrine-test-bundle a jeho limity. Funkční test přes WebTestCase, asynchronní tok s in-memory transportem a zenstruck/messenger-test, test idempotence handleru a dvě záruky outboxu. Architektonické testy s Deptracem a PHPArkitectem, code coverage a mutation testing s Infection."
     sections: "17.05–17.09"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 788
+    youtube: "wrNm1eD7PXo"
+    published: "2026-11-13T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Zelený test, prázdná databáze" }
+      - { t: 31, title: "Integrační testy s Doctrine" }
+      - { t: 199, title: "Funkční testy a asynchronní zprávy" }
+      - { t: 317, title: "Idempotence handleru a test outboxu" }
+      - { t: 415, title: "Architektonické testy" }
+      - { t: 563, title: "Code coverage a mutation testing" }
+      - { t: 681, title: "Otázky a shrnutí" }
   - ep: "18a"
     chapter: "migration_from_crud"
     title: "Strangler Fig: migrace z CRUD na DDD bez přepisu"
