@@ -526,37 +526,64 @@ episodes:
     title: "Strangler Fig: migrace z CRUD na DDD bez přepisu"
     lead: "Kdy se migrace z CRUD na DDD vyplatí a kdy ji nezačínat. Strangler Fig místo přepisu najednou, Sacrificial Architecture a přechodová architektura, která má datum expirace. Datová migrace ve čtyřech fázích: dual-write, backfill, shadow reads a cutover přes feature flag. Anti-Corruption Layer s vyjmenovaným mapováním legacy stavů a techniky Branch by Abstraction, Parallel Change a Mikado."
     sections: "18.01–18.04, hook z 18.10 „Proč migrace selhávají“, pátý důvod"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 775
+    youtube: "br2_r1Awxuc"
+    published: "2026-11-16T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Třetí architektura" }
+      - { t: 31, title: "Kdy a proč migrovat z CRUD na DDD" }
+      - { t: 141, title: "Strangler Fig Pattern" }
+      - { t: 310, title: "Datová migrace při Strangler Fig" }
+      - { t: 479, title: "Anti-Corruption Layer mezi legacy a novým modelem" }
+      - { t: 597, title: "Techniky bezpečné postupné změny" }
+      - { t: 702, title: "Otázka a shrnutí" }
   - ep: "18b"
     chapter: "migration_from_crud"
     title: "Legacy CRUD na DDD: od kontroleru k agregátu"
-    lead: "Jak dostat doménová pravidla z tlustého CRUD kontroleru do agregátu krok za krokem. Analýza domény a seznam toho, co nemigrovat. Hodnotové objekty a agregát User s pojmenovanou továrnou, repozitář a tenký kontroler s commandem. Charakterizační testy podle Michaela Featherse, švy v Symfony a záměrná změna chování, kterou schvaluje produkt."
+    lead: "Jak dostat doménová pravidla z tlustého CRUD kontroleru do agregátu krok za krokem. Analýza domény a seznam toho, co nemigrovat. Hodnotové objekty a agregát User s pojmenovanou továrnou, repozitář a tenký kontroler s commandem. Charakterizační testy podle Michaela Featherse, švy v Symfony a záměrná změna chování, kterou schvaluje produkťák."
     sections: "18.05–18.09, recepty 5, 7 a 8 z 18.11"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 756
+    youtube: "sfqpmfw5kXU"
+    published: "2026-11-17T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Pět pravidel v kontroleru" }
+      - { t: 33, title: "Krok 1: Analýza existující domény" }
+      - { t: 161, title: "Krok 2: Extrakce doménové vrstvy" }
+      - { t: 317, title: "Repozitáře a postupné CQRS" }
+      - { t: 438, title: "Testování při migraci" }
+      - { t: 612, title: "Refaktoringová kuchařka" }
+      - { t: 653, title: "Otázka a shrnutí" }
   - ep: "19a"
     chapter: "microservices_and_ddd"
     title: "Microservices a Bounded Context: kdy stačí monolit"
     lead: "Bounded Context je logická hranice modelu, microservice fyzická hranice nasazení. Tři varianty mapování, šest podmínek pro vlastní službu, modulární monolit s hranicemi hlídanými PHPArkitectem a pět příznaků distributed monolithu."
     sections: "19.01–19.04"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 767
+    youtube: "cPnQEltK0Nk"
+    published: "2026-11-18T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Deset služeb, jedno nasazení" }
+      - { t: 39, title: "Mýtus: microservice = Bounded Context" }
+      - { t: 188, title: "Kdy dát kontextu vlastní službu" }
+      - { t: 318, title: "Modulární monolit a PHPArkitect" }
+      - { t: 490, title: "Distributed monolith – anti-vzor" }
+      - { t: 651, title: "Otázka a shrnutí" }
   - ep: "19b"
     chapter: "microservices_and_ddd"
     title: "Microservices v Symfony Messengeru: kontrakt bez sdílení"
     lead: "Když Bounded Context dostane vlastní službu, hranice vede přes síť. Kdy volat synchronně a kdy publikovat událost, kolik dat událost nese, komu patří data, jak v Symfony Messengeru postavit kontrakt bez sdílené PHP třídy a co musí umět provoz."
     sections: "19.05–19.10"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 797
+    youtube: "lqGj5JiAlbM"
+    published: "2026-11-19T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Přejmenovaná vlastnost" }
+      - { t: 36, title: "Sync, nebo async" }
+      - { t: 164, title: "Co nese událost a čí jsou data" }
+      - { t: 315, title: "Publisher: dohodnutý formát" }
+      - { t: 405, title: "Subscriber: vlastní DTO a serializer" }
+      - { t: 556, title: "Provoz, migrace a nano-služby" }
+      - { t: 686, title: "Otázka a shrnutí" }
   - ep: "20a"
     chapter: "ddd_pain_points"
     title: "Doctrine a DDD agregát: Unit of Work, VO, identita"
