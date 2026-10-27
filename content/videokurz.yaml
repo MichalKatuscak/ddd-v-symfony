@@ -589,37 +589,62 @@ episodes:
     title: "Doctrine a DDD agregát: Unit of Work, VO, identita"
     lead: "Kde Doctrine ORM 3 naráží na doménový model: transakce přes dva agregáty a zavřený EntityManager, getter, který nechtěně mění stav, flush($entity) a clear($entityName), které ORM 3 tiše ignoruje, mapování hodnotových objektů a dědičnosti a identita vytvořená v PHP ještě před uložením."
     sections: "20.01, A1–A6"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 725
+    youtube: "yGGVLHcx4aY"
+    published: "2026-11-20T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "UPDATE, o který nikdo nežádal" }
+      - { t: 34, title: "Transakce přes dva agregáty" }
+      - { t: 188, title: "Špinavý EntityManager" }
+      - { t: 326, title: "Hodnotové objekty a dědičnost v mapování" }
+      - { t: 490, title: "Identita před uložením" }
+      - { t: 610, title: "Otázka a shrnutí" }
   - ep: "20b"
     chapter: "ddd_pain_points"
     title: "Symfony Messenger: idempotence a pořadí zpráv v DDD"
     lead: "Provozní pasti Symfony Messengeru: jak dohledat ztracenou zprávu podle correlation ID, proč idempotency klíč z náhodného UUID nezastaví dvojklik, jak zapsat klíč bez závodu i bez ztracené zprávy, co dělat se zprávou, která přišla dřív než její předpoklad, a kde má vzniknout Command, když vstup přichází ze Symfony Form nebo z API Platform."
     sections: "20.02 B2–B4, 20.04 D1–D2"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 744
+    youtube: "hbWpotZCM1I"
+    published: "2026-11-23T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Dvakrát zaplaceno" }
+      - { t: 43, title: "Debugging ztracené zprávy" }
+      - { t: 178, title: "Idempotence handlerů" }
+      - { t: 383, title: "Pořadí zpráv" }
+      - { t: 514, title: "Symfony Form a API Platform" }
+      - { t: 634, title: "Otázka a shrnutí" }
   - ep: "21a"
     chapter: "anti_patterns"
     title: "Anemic Domain Model a God Aggregate: chyby v modelu"
     lead: "Tři anti-vzory doménového modelu a jak je najít ve vlastním kódu: anémický model jako účet bez protihodnoty, Vernonův test dvou otázek a proč getter v PHP 8.4 už není spolehlivý příznak. Kdy anémie chybou není (Transaction Script), kdy se hodnotový objekt vyplatí a kdy je jen ceremonie, a proč God Aggregate nic nechrání – i to, že agregát jde zmenšit příliš."
     sections: "21.01–21.04"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 744
+    youtube: "AQ5vF4fMIRo"
+    published: "2026-11-24T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Entita bez setteru, a přesto anémická" }
+      - { t: 40, title: "Anémický model: cena a test dvou otázek" }
+      - { t: 257, title: "Kdy anémický model chyba není" }
+      - { t: 342, title: "Primitive Obsession: znak a cena" }
+      - { t: 444, title: "God Aggregate: znak a obě selhání" }
+      - { t: 631, title: "Otázky a shrnutí" }
   - ep: "21b"
     chapter: "anti_patterns"
     title: "DDD anti-patterns: sdílená databáze a měnitelné události"
     lead: "Anti-vzory na hranicích a jak je najít ve vlastním kódu: sdílená databáze mezi Bounded Contexty a tři cesty ven s jejich cenou, měnitelné události a proč potřebují dvě časová razítka, doménová pravidla v Doctrine repozitáři a jedno pravidlo pro Deptrac, over-engineering a drift Ubiquitous Language. Na konci přehled všech osmi anti-vzorů kapitoly s rozpoznávacími znaky."
     sections: "21.05–21.10"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 731
+    youtube: "r4r_4c8MM8I"
+    published: "2026-11-25T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Dva týmy, jedna tabulka" }
+      - { t: 37, title: "Sdílená databáze napříč Bounded Contexts" }
+      - { t: 227, title: "Mutovatelné doménové události" }
+      - { t: 375, title: "Doménová logika v infrastrukturní vrstvě" }
+      - { t: 493, title: "Over-engineering a ignorování Ubiquitous Language" }
+      - { t: 601, title: "Osm anti-vzorů a jejich znaky" }
+      - { t: 631, title: "Otázky a shrnutí" }
   - ep: "22"
     chapter: "when_not_to_use_ddd"
     title: "When not to use DDD: kdy stačí CRUD a jak se rozhodnout"
