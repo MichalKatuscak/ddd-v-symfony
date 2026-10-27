@@ -650,34 +650,59 @@ episodes:
     title: "When not to use DDD: kdy stačí CRUD a jak se rozhodnout"
     lead: "Kdy Domain-Driven Design nepoužívat a co místo něj: rozhodovací strom po subdoménách, sedm situací od CRUD adminu přes startup a ETL po tým bez expertů, pseudo-DDD a Bubble Context, Khononovova heuristika pro volbu vzoru byznys logiky a pět podmínek, kdy se plné DDD naopak vyplatí."
     sections: "22.01–22.10"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 815
+    youtube: "qT7zDGd9DNc"
+    published: "2026-11-26T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Pivot za dva týdny" }
+      - { t: 38, title: "Rozhodovací strom: kolik DDD dát které části systému" }
+      - { t: 202, title: "Když chybí doména nebo čas" }
+      - { t: 363, title: "Když chybí lidé nebo znalosti" }
+      - { t: 507, title: "Hybrid podle typu subdomény" }
+      - { t: 653, title: "Kdy DDD naopak smysl má" }
+      - { t: 717, title: "Otázky a shrnutí" }
   - ep: "23"
     chapter: "practical_examples"
     title: "DDD příklady v Symfony: e-shop, blog, uživatelé"
     lead: "Tři malé projekty v Symfony 8 na jedné kostře kontroler → command bus → handler → agregát → repozitář → událost. Proč objednávka tiše stojí bez relaye a workeru, tiché pasti instalace (Doctrine mapování, .env.local v testech), přechod z košíku do objednávky přes událost a překlad na hranici, kde leží pravidlo u blogu a u správy uživatelů a co se změní, až projekty porostou."
     sections: "úvod, 23.00–23.05"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 722
+    youtube: "-objtIx9wRo"
+    published: "2026-11-27T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Objednávka, která tiše stojí" }
+      - { t: 37, title: "Aplikace potřebuje dva běžící procesy" }
+      - { t: 190, title: "Příklad: E-commerce aplikace" }
+      - { t: 372, title: "Blog a správa uživatelů" }
+      - { t: 503, title: "Tři projekty vedle sebe" }
+      - { t: 610, title: "Otázky a shrnutí" }
   - ep: "24a"
     chapter: "case_study"
     title: "DDD případová studie: od workshopu ke kódu"
     lead: "Ilustrativní případová studie: správa projektů v Symfony 8 od Event Stormingu k agregátům. Jedno slovo „uživatel“ se čtyřmi významy, experti jako kontrola hranic, Context Map čtená kriticky (port není ACL, interní typy nejsou Published Language), agregáty Project a Task, přechodová tabulka stavů, past public readonly identifikátoru v Doctrine a handlery CreateProject a AssignTask."
     sections: "24.01, 24.03–24.05"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 771
+    youtube: "bPeDrXl5dHs"
+    published: "2026-11-30T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Modelový tým a TaskService na 800 řádků" }
+      - { t: 39, title: "Doménová analýza" }
+      - { t: 231, title: "Architektura: Context Map" }
+      - { t: 390, title: "Agregáty Project a Task" }
+      - { t: 551, title: "Handlery CreateProject a AssignTask" }
+      - { t: 666, title: "Otázky a shrnutí" }
   - ep: "24b"
     chapter: "case_study"
     title: "CQRS read model a projekce: případová studie"
     lead: "Závěrečný díl kurzu a druhá půlka ilustrativní případové studie: výpis projektů z denormalizované tabulky project_list_view místo hydratace agregátů (jsonb, GIN index ruční migrací, proč ne readOnly), projekce se čtyřmi handlery a jedním, který idempotentní není, reconciler z cronu pro přeházené zprávy, okno eventual consistency a pět rozhodnutí modelového týmu i s cenou. Na konci ohlédnutí za celým kurzem."
     sections: "24.06–24.08"
-    duration: null
-    youtube: null
-    published: null
-    chapters: []
+    duration: 745
+    youtube: "i1S-Kx9DZ9w"
+    published: "2026-12-01T07:00:00+01:00"
+    chapters:
+      - { t: 0, title: "Výpis projektů, který hydratuje agregáty" }
+      - { t: 35, title: "Read model a schéma" }
+      - { t: 158, title: "Projekce a idempotence" }
+      - { t: 302, title: "Reconciler a konzistence" }
+      - { t: 442, title: "Výzvy, rozhodnutí a ponaučení" }
+      - { t: 614, title: "Otázky a shrnutí" }
