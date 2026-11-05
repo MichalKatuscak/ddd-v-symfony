@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Twig;
 
 use App\Catalog\Chapters;
+use App\Catalog\VideoCourse;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -19,7 +20,10 @@ final class ChaptersExtension extends AbstractExtension
     /** Memoizace v rámci requestu – skenuje se jen jednou. */
     private ?string $lastModified = null;
 
-    public function __construct(private readonly string $projectDir) {}
+    public function __construct(
+        private readonly string $projectDir,
+        private readonly VideoCourse $videoCourse,
+    ) {}
 
     public function getFunctions(): array
     {
@@ -50,7 +54,9 @@ final class ChaptersExtension extends AbstractExtension
 
     /**
      * Nejnovější `modified` napříč kapitolami, formátováno jako „měsíc rok"
-     * (např. „červen 2026"). Zdrojem je frontmatter .md souborů.
+     * (např. „červen 2026"). Zdrojem je frontmatter .md souborů a datum
+     * zveřejnění nejnovějšího už zveřejněného dílu videokurzu. Díly se
+     * zveřejňují samy časem, proto se počítá za běhu (ne při kompilaci).
      */
     private function lastModified(): string
     {
@@ -69,6 +75,19 @@ final class ChaptersExtension extends AbstractExtension
                 if ($latest === null || $date > $latest) {
                     $latest = $date;
                 }
+            }
+        }
+
+        foreach ($this->videoCourse->released() as $episode) {
+            $iso = $episode['publishedIso'] ?? null;
+            if ($iso === null) {
+                continue;
+            }
+            $date = (new \DateTimeImmutable($iso))
+                ->setTimezone(new \DateTimeZone('Europe/Prague'))
+                ->format('Ymd');
+            if ($latest === null || $date > $latest) {
+                $latest = $date;
             }
         }
 
